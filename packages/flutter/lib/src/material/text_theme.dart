@@ -137,75 +137,78 @@ class TextTheme with Diagnosticable {
        labelLarge = labelLarge ?? button,
        labelSmall = labelSmall ?? overline;
 
-  /// Large size of the display styles.
+  /// Largest of the display styles.
   ///
-  /// These styles are reserved for short, important text or numerals.
+  /// As the largest text on the screen, display styles are reserved for short,
+  /// important text or numerals. They work best on large screens.
   final TextStyle? displayLarge;
 
-  /// Medium size of the display styles.
+  /// Middle size of the display styles.
   ///
-  /// These styles are reserved for short, important text or numerals.
+  /// As the largest text on the screen, display styles are reserved for short,
+  /// important text or numerals. They work best on large screens.
   final TextStyle? displayMedium;
 
-  /// Small size of the display styles.
+  /// Smallest of the display styles.
   ///
-  /// These styles are reserved for short, important text or numerals.
+  /// As the largest text on the screen, display styles are reserved for short,
+  /// important text or numerals. They work best on large screens.
   final TextStyle? displaySmall;
 
-  /// Large size of the headline styles.
+  /// Largest of the headline styles.
   ///
   /// Headline styles are smaller than display styles. They're best-suited for
   /// short, high-emphasis text on smaller screens.
   final TextStyle? headlineLarge;
 
-  /// Medium size of the headline styles.
+  /// Middle size of the headline styles.
   ///
   /// Headline styles are smaller than display styles. They're best-suited for
   /// short, high-emphasis text on smaller screens.
   final TextStyle? headlineMedium;
 
-  /// Small size of the headline styles.
+  /// Smallest of the headline styles.
   ///
   /// Headline styles are smaller than display styles. They're best-suited for
   /// short, high-emphasis text on smaller screens.
   final TextStyle? headlineSmall;
 
-  /// Large size of the title styles.
+  /// Largest of the title styles.
   ///
   /// Titles are smaller than headline styles and should be used for shorter,
   /// medium-emphasis text.
   final TextStyle? titleLarge;
 
-  /// Medium size of the title styles.
+  /// Middle size of the title styles.
   ///
   /// Titles are smaller than headline styles and should be used for shorter,
   /// medium-emphasis text.
   final TextStyle? titleMedium;
 
-  /// Small size of the title styles.
+  /// Smallest of the title styles.
   ///
   /// Titles are smaller than headline styles and should be used for shorter,
   /// medium-emphasis text.
   final TextStyle? titleSmall;
 
-  /// Large size of the body styles.
+  /// Largest of the body styles.
   ///
   /// Body styles are used for longer passages of text.
   final TextStyle? bodyLarge;
 
-  /// Medium size of the body styles.
+  /// Middle size of the body styles.
   ///
   /// Body styles are used for longer passages of text.
   ///
   /// The default text style for [Material].
   final TextStyle? bodyMedium;
 
-  /// Small size of the body styles.
+  /// Smallest of the body styles.
   ///
   /// Body styles are used for longer passages of text.
   final TextStyle? bodySmall;
 
-  /// Large size of the label styles.
+  /// Largest of the label styles.
   ///
   /// Label styles are smaller, utilitarian styles, used for areas of the UI
   /// such as text inside of components or very small supporting text in the
@@ -214,14 +217,14 @@ class TextTheme with Diagnosticable {
   /// Used for text on [ElevatedButton], [TextButton] and [OutlinedButton].
   final TextStyle? labelLarge;
 
-  /// Medium size of the label styles.
+  /// Middle size of the label styles.
   ///
   /// Label styles are smaller, utilitarian styles, used for areas of the UI
   /// such as text inside of components or very small supporting text in the
   /// content body, like captions.
   final TextStyle? labelMedium;
 
-  /// Small size of the label styles.
+  /// Smallest of the label styles.
   ///
   /// Label styles are smaller, utilitarian styles, used for areas of the UI
   /// such as text inside of components or very small supporting text in the
@@ -344,13 +347,13 @@ class TextTheme with Diagnosticable {
     TextStyle? overline,
   }) {
     assert(
-    (displayLarge == null && displayMedium == null && displaySmall == null && headlineMedium == null &&
-        headlineSmall == null && titleLarge == null && titleMedium == null && titleSmall == null &&
-        bodyLarge == null && bodyMedium == null && bodySmall == null && labelLarge == null && labelSmall == null) ||
-        (headline1 == null && headline2 == null && headline3 == null && headline4 == null &&
-            headline5 == null && headline6 == null && subtitle1 == null && subtitle2 == null &&
-            bodyText1 == null && bodyText2 == null && caption == null && button == null && overline == null),
-    'Cannot mix 2018 and 2021 terms in call to TextTheme() constructor.'
+      (displayLarge == null && displayMedium == null && displaySmall == null && headlineMedium == null &&
+          headlineSmall == null && titleLarge == null && titleMedium == null && titleSmall == null &&
+          bodyLarge == null && bodyMedium == null && bodySmall == null && labelLarge == null && labelSmall == null) ||
+      (headline1 == null && headline2 == null && headline3 == null && headline4 == null &&
+          headline5 == null && headline6 == null && subtitle1 == null && subtitle2 == null &&
+          bodyText1 == null && bodyText2 == null && caption == null && button == null && overline == null),
+      'Cannot mix 2018 and 2021 terms in call to TextTheme() constructor.'
     );
     return TextTheme(
       displayLarge: displayLarge ?? headline1 ?? this.displayLarge,
