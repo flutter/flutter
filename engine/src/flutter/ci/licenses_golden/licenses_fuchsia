@@ -1,4 +1,4 @@
-Signature: 5765665b6d55169aff88415130a37d19
+Signature: 2f42dd39af880df7306e5b613bec83ab
 
 UNUSED LICENSES:
 
@@ -2266,6 +2266,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.feedback/data_provider_controller.
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/codec_connect.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/dai_connect.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/health.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/signal_processing.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.goldfish/goldfish_sync.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.network/port.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.radar/radar.fidl
