@@ -33,12 +33,6 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
         help: 'Run in watch mode so the tests re-run whenever a change is '
             'made.',
       )
-      ..addFlag(
-        'unit-tests-only',
-        defaultsTo: false,
-        help: 'felt test command runs the unit tests and the integration tests '
-            'at the same time. If this flag is set, only run the unit tests.',
-      )
       ..addFlag('use-system-flutter',
           defaultsTo: false,
           help:
