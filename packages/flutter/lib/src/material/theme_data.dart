@@ -911,8 +911,10 @@ class ThemeData with Diagnosticable {
       bottomAppBarColor: colorScheme.surface,
       cardColor: colorScheme.surface,
       dividerColor: colorScheme.onSurface.withOpacity(0.12),
+      backgroundColor: colorScheme.background,
       dialogBackgroundColor: colorScheme.background,
       indicatorColor: onPrimarySurfaceColor,
+      errorColor: colorScheme.error,
       textTheme: textTheme,
       applyElevationOverlayColor: isDark,
     );
