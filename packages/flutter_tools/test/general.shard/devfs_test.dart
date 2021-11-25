@@ -667,12 +667,12 @@ class AnsweringFakeProcessManager implements ProcessManager {
   }
 
   @override
-  Future<ProcessResult> run(List<Object> command, {String workingDirectory, Map<String, String> environment, bool includeParentEnvironment = true, bool runInShell = false, Encoding? stdoutEncoding = systemEncoding, Encoding? stderrEncoding = systemEncoding}) async {
+  Future<ProcessResult> run(List<Object> command, {String workingDirectory, Map<String, String> environment, bool includeParentEnvironment = true, bool runInShell = false, Encoding stdoutEncoding = systemEncoding, Encoding stderrEncoding = systemEncoding}) async {
     throw UnimplementedError();
   }
 
   @override
-  ProcessResult runSync(List<Object> command, {String workingDirectory, Map<String, String> environment, bool includeParentEnvironment = true, bool runInShell = false, Encoding? stdoutEncoding = systemEncoding, Encoding? stderrEncoding = systemEncoding}) {
+  ProcessResult runSync(List<Object> command, {String workingDirectory, Map<String, String> environment, bool includeParentEnvironment = true, bool runInShell = false, Encoding stdoutEncoding = systemEncoding, Encoding stderrEncoding = systemEncoding}) {
     throw UnimplementedError();
   }
 
