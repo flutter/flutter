@@ -12,12 +12,9 @@ const String gsutilBinary = 'gsutil.py';
 const String kFrameworkDefaultBranch = 'master';
 const String kForceFlag = 'force';
 
-const List<String> kReleaseChannels = <String>[
-  'stable',
-  'beta',
-  'dev',
-  FrameworkRepository.defaultBranch,
-];
+const List<String> kBaseReleaseChannels = <String>['stable', 'beta', 'dev'];
+
+List<String> kReleaseChannels = List<String>.from(kBaseReleaseChannels)..add(FrameworkRepository.defaultBranch);
 
 const String kReleaseDocumentationUrl = 'https://github.com/flutter/flutter/wiki/Flutter-Cherrypick-Process';
 

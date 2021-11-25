@@ -48,7 +48,7 @@ class StartCommand extends Command<void> {
     argParser.addOption(
       kReleaseOption,
       help: 'The target release channel for the release.',
-      allowed: <String>['stable', 'beta', 'dev'],
+      allowed: kBaseReleaseChannels,
     );
     argParser.addOption(
       kFrameworkUpstreamOption,
