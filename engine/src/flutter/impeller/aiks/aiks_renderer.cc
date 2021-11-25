@@ -33,16 +33,10 @@ bool AiksRenderer::Render(const Picture& picture, RenderPass& parent_pass) {
     return false;
   }
 
-  for (const auto& entry : picture.entries) {
-    if (!entry.pass.has_value()) {
-      continue;
-      ;
-    }
-
-    if (!entry.pass->Render(*content_renderer_, parent_pass)) {
-      return false;
-    }
+  if (picture.pass) {
+    return picture.pass->Render(*content_renderer_, parent_pass);
   }
+
   return true;
 }
 
