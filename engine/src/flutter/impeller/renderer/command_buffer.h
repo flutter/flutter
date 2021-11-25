@@ -51,6 +51,8 @@ class CommandBuffer {
   ///
   virtual void SubmitCommands(CompletionCallback callback) = 0;
 
+  void SubmitCommands();
+
   //----------------------------------------------------------------------------
   /// @brief      Create a render pass to record render commands into.
   ///

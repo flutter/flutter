@@ -5,6 +5,10 @@
 #include "impeller/aiks/canvas_pass.h"
 
 #include "impeller/entity/content_renderer.h"
+#include "impeller/geometry/path_builder.h"
+#include "impeller/renderer/command_buffer.h"
+#include "impeller/renderer/render_pass.h"
+#include "impeller/renderer/render_target.h"
 
 namespace impeller {
 
@@ -80,10 +84,59 @@ bool CanvasPass::Render(ContentRenderer& renderer,
     }
   }
   for (const auto& subpass : subpasses_) {
-    if (!subpass->Render(renderer, parent_pass)) {
+    const auto subpass_coverage = subpass->GetCoverageRect();
+
+    if (subpass_coverage.IsEmpty()) {
+      // It is not an error to have an empty subpass. But subpasses that can't
+      // create their intermediates must trip errors.
+      continue;
+    }
+
+    auto context = renderer.GetContext();
+
+    auto subpass_target = RenderTarget::CreateOffscreen(
+        *context, ISize::Ceil(subpass_coverage.size));
+
+    auto sub_command_buffer = context->CreateRenderCommandBuffer();
+
+    if (!sub_command_buffer) {
+      return false;
+    }
+
+    auto sub_renderpass = sub_command_buffer->CreateRenderPass(subpass_target);
+
+    if (!sub_renderpass) {
+      return false;
+    }
+
+    if (!subpass) {
+      return false;
+    }
+
+    if (!subpass->Render(renderer, *sub_renderpass)) {
+      return false;
+    }
+
+    if (!sub_renderpass->EncodeCommands(*context->GetTransientsAllocator())) {
+      return false;
+    }
+
+    sub_command_buffer->SubmitCommands();
+
+    auto offscreen_texture_contents = std::make_shared<TextureContents>();
+    offscreen_texture_contents->SetTexture(
+        subpass_target.GetRenderTargetTexture());
+    offscreen_texture_contents->SetSourceRect(
+        IRect::MakeSize(subpass_target.GetRenderTargetTexture()->GetSize()));
+
+    Entity entity;
+    entity.SetPath(PathBuilder{}.AddRect(subpass_coverage).CreatePath());
+    entity.SetContents(std::move(offscreen_texture_contents));
+    if (!entity.Render(renderer, parent_pass)) {
       return false;
     }
   }
+
   return true;
 }
 

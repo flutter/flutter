@@ -69,8 +69,8 @@ static MTLRenderPassDescriptor* ToMTLRenderPassDescriptor(
   for (const auto& color : colors) {
     if (!ConfigureColorAttachment(color.second,
                                   result.colorAttachments[color.first])) {
-      FML_LOG(ERROR) << "Could not configure color attachment at index "
-                     << color.first;
+      FML_DLOG(ERROR) << "Could not configure color attachment at index "
+                      << color.first;
       return nil;
     }
   }
@@ -79,6 +79,7 @@ static MTLRenderPassDescriptor* ToMTLRenderPassDescriptor(
 
   if (depth.has_value() &&
       !ConfigureDepthAttachment(depth.value(), result.depthAttachment)) {
+    FML_DLOG(ERROR) << "Could not configure depth attachment.";
     return nil;
   }
 
@@ -86,6 +87,7 @@ static MTLRenderPassDescriptor* ToMTLRenderPassDescriptor(
 
   if (stencil.has_value() &&
       !ConfigureStencilAttachment(stencil.value(), result.stencilAttachment)) {
+    FML_DLOG(ERROR) << "Could not configure stencil attachment.";
     return nil;
   }
 

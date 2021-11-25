@@ -10,4 +10,8 @@ CommandBuffer::CommandBuffer() = default;
 
 CommandBuffer::~CommandBuffer() = default;
 
+void CommandBuffer::SubmitCommands() {
+  SubmitCommands(nullptr);
+}
+
 }  // namespace impeller
