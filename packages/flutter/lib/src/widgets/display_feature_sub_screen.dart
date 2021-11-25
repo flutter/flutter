@@ -10,111 +10,194 @@ import 'package:flutter/rendering.dart';
 import 'basic.dart';
 import 'framework.dart';
 import 'media_query.dart';
-import 'overlay.dart';
 
 /// Positions [child] such that it avoids overlapping any [DisplayFeature] that
 /// splits the screen into sub-screens.
 ///
 /// A [DisplayFeature] splits the screen into sub-screens if it is at least as
-/// tall, producing a left and right sub-screen, or at least as wide, producing
-/// a top and bottom sub-screen. This applies to sub-screens as well.
+/// tall as the screen, producing a left and right sub-screen, or at least as
+/// wide as the screen, producing a top and bottom sub-screen.
 ///
 /// After determining the sub-screens, the closest one to [anchorPoint] is used
 /// to render the [child].
 ///
 /// If no [anchorPoint] is provided, then [Directionality] is used:
-///  * for [TextDirection.ltr], [anchorPoint] is `Offset.zero`, leading the
-///  sub-screen in the top-left to be used.
+///  * for [TextDirection.ltr], [anchorPoint] is `Offset.zero`, which will cause
+///  the [child] to appear in the top-left sub-screen.
 ///  * for [TextDirection.rtl], [anchorPoint] is `Offset(double.maxFinite, 0)`,
-///  leading the subscreen in the top-right to be used.
+///  which will cause the [child] to appear in the top-right sub-screen.
 ///
 /// If no [anchorPoint] is provided, and there is no [Directionality] ancestor
-/// widget is in the tree, then the widget throws during build.
-///
-/// In order to determine how the child intersects with
-/// [MediaQueryData.displayFeatures] this widget also needs to know its own
-/// size and position relative to the screen edge. The [padding] can be used to
-/// directly specify this information. If it is not provided, the first
-/// [Overlay] is used to determine this information. If no [Overlay] parent
-/// exists, [DisplayFeatureSubScreen] assumes it is positioned at [Offset.zero]
-/// with the size [MediaQueryData.size].
+/// widget in the tree, then the widget throws during build.
 ///
 /// See also:
 ///
 ///  * [showDialog], which is a way to display a DialogRoute.
 ///  * [showCupertinoDialog], which displays an iOS-style dialog.
-class DisplayFeatureSubScreen extends StatelessWidget {
+class DisplayFeatureSubScreen extends SingleChildRenderObjectWidget {
   /// Creates a widget that positions its child so that it avoids display
   /// features.
   const DisplayFeatureSubScreen({
     Key? key,
-    required this.child,
     this.anchorPoint,
-    this.padding,
-  }) : super(key: key);
+    Widget? child,
+  }) : super(key: key, child: child);
 
-  /// The child that will avoid the display features.
-  final Widget child;
-
-  /// The anchor point used to pick the closest area that has no display
-  /// features.
+  /// The anchor point used to pick the closest sub-screen.
   ///
-  /// If the anchor point sits inside one of these areas, then that area is
-  /// picked. If not, then the area with the closest edge to the point is used.
+  /// If the anchor point sits inside one of these sub-screens, then that
+  /// sub-screen is picked. If not, then the sub-screen with the closest edge to
+  /// the point is used.
   ///
   /// `Offset(0,0)` is the top-left corner of the available screen space. For
   /// a dual-screen device, this is the top-left corner of the left screen.
   final Offset? anchorPoint;
 
-  /// The distance from the edge of the screen, used to determine how
-  /// [DisplayFeatureSubScreen] intersects [MediaQueryData.displayFeatures].
-  ///
-  /// When [DisplayFeatureSubScreen] is not the root layout and the distance
-  /// from the screen edge increases due to padding added by parent layout, the
-  /// [padding] needs to be updated.
-  ///
-  /// When [padding] is not provided, [DisplayFeatureSubScreen] assumes it is
-  /// a direct child inside [Overlay] and uses the position and size of the
-  /// [Overlay] as the distance to the edge of the screen.
-  ///
-  /// If no [padding] is provided and no [Overlay] parent exists in the tree,
-  /// [DisplayFeatureSubScreen] assumes there is no distance to the edge of the
-  /// screen and that the available space for layout is [MediaQueryData.size].
-  final EdgeInsets? padding;
-
-  @override
-  Widget build(BuildContext context) {
-    final Rect availableSpace = _availableSpace(context);
-    final Iterable<Rect> safeAreas = _safeAreasInBounds(context, availableSpace);
-    final Rect safeArea = anchorPoint == null
-        ? _firstSafeArea(safeAreas, context)
-        : _closestToAnchorPoint(safeAreas, _finiteOffset(anchorPoint!));
-
-    return Align(
-      alignment: Alignment.topLeft,
-      child: Padding(
-        padding: EdgeInsets.only(left: safeArea.left, top: safeArea.top),
-        child: SizedBox(
-          width: safeArea.width,
-          height: safeArea.height,
-          child: child,
-        ),
-      ),
-    );
-  }
-
-  static Rect _firstSafeArea(Iterable<Rect> safeAreas, BuildContext context) {
+  static Offset _fallbackAnchorPoint(BuildContext context) {
     final TextDirection textDirection = Directionality.of(context);
     switch (textDirection) {
       case TextDirection.rtl:
-        return _closestToAnchorPoint(safeAreas, const Offset(double.maxFinite, 0));
+        return const Offset(double.maxFinite, 0);
       case TextDirection.ltr:
-        return _closestToAnchorPoint(safeAreas, Offset.zero);
+        return Offset.zero;
     }
   }
 
-  static Rect _closestToAnchorPoint(Iterable<Rect> safeAreas, Offset anchorPoint) {
-    return safeAreas.fold(safeAreas.first, (Rect previousValue, Rect element) {
+  @override
+  RenderDisplayFeatureSubScreen createRenderObject(BuildContext context) {
+    return RenderDisplayFeatureSubScreen(
+      anchorPoint: anchorPoint ?? _fallbackAnchorPoint(context),
+      avoidBounds: MediaQuery.of(context).displayFeatures
+          .map((DisplayFeature e) => e.bounds)
+    );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, RenderDisplayFeatureSubScreen renderObject) {
+    renderObject.anchorPoint = anchorPoint ?? _fallbackAnchorPoint(context);
+    renderObject.avoidBounds = MediaQuery.of(context).displayFeatures
+        .map((DisplayFeature e) => e.bounds);
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Offset>('anchorPoint', anchorPoint));
+    //TODO: Add other relevant properties
+  }
+}
+
+/// Positions and sizes its child to fill a sub-screen.
+///
+/// This occupies the maximum space it is allowed and then positions its child
+/// using global information. Both [anchorPoint] and [avoidBounds] are expressed
+/// in global coordinates. An [anchorPoint] with value `Offset.zero` means the
+/// top-left corner of the available screen space. [avoidBouds] are all the
+/// bounds of the [MediaQueryData.displayFeatures].
+///
+/// See also:
+///
+///  * [DisplayFeatureSubScreen] to understand how sub-screens are defined
+class RenderDisplayFeatureSubScreen extends RenderShiftedBox {
+  /// Creates a render object that positions and sizes its child.
+  RenderDisplayFeatureSubScreen({
+    required Iterable<Rect> avoidBounds,
+    required Offset anchorPoint,
+    RenderBox? child,
+  }) : assert(anchorPoint != null),
+        assert(avoidBounds != null),
+        _anchorPoint = anchorPoint,
+        _avoidBounds = avoidBounds,
+        super(child);
+
+  /// The anchor point used to pick the closest sub-screen.
+  Offset get anchorPoint => _anchorPoint;
+  Offset _anchorPoint;
+  set anchorPoint(Offset value) {
+    assert(value != null);
+    if (_anchorPoint == value)
+      return;
+    _anchorPoint = value;
+    markNeedsLayout();
+  }
+
+  /// Areas of the screen that this render object uses to determine where the
+  /// sub-screens are positioned.
+  Iterable<Rect> get avoidBounds => _avoidBounds;
+  Iterable<Rect> _avoidBounds;
+  set avoidBounds(Iterable<Rect> value) {
+    assert(value != null);
+    if (_iterableEquals<Rect>(_avoidBounds, value))
+      return;
+    _avoidBounds = value;
+    markNeedsLayout();
+  }
+
+  /// This render object needs to know its own size and position on the screen
+  /// in order to properly position its child. The global offset is not
+  /// available during layout, since ancestors of this render object are not yet
+  /// done positioning their children. This is why we cache the position
+  /// obtained during the paint phase. When the global offset changes during
+  /// paint, this render object marks itself as needing layout.
+  Offset _lastOffset = Offset.zero;
+
+  @override
+  bool get sizedByParent => true;
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    return constraints.biggest;
+  }
+
+  @override
+  void performLayout() {
+    if (child == null)
+      return;
+    if (avoidBounds.isEmpty) {
+      child!.layout(BoxConstraints.tight(size));
+      final BoxParentData childParentData = child!.parentData! as BoxParentData;
+      childParentData.offset = Offset.zero;
+    } else {
+      final Rect wantedBounds = _lastOffset & size;
+      final Iterable<Rect> subScreens = _subScreensInBounds(wantedBounds, avoidBounds);
+      final Rect closestSubScreen = _closestToAnchorPoint(subScreens, _finiteOffset(anchorPoint));
+
+      child!.layout(BoxConstraints.tight(closestSubScreen.size));
+      final BoxParentData childParentData = child!.parentData! as BoxParentData;
+      childParentData.offset = closestSubScreen.topLeft - _lastOffset;
+    }
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (offset != _lastOffset) {
+      _lastOffset = offset;
+      RendererBinding.instance!.addPostFrameCallback((Duration value) {
+        markNeedsLayout();
+      });
+    }
+    super.paint(context, offset);
+  }
+
+  @override
+  void debugPaintSize(PaintingContext context, Offset offset) {
+    super.debugPaintSize(context, offset);
+    assert(() {
+      //TODO: Show the display features and the anchorPoint
+      return true;
+    }());
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Offset>('anchorPoint', anchorPoint));
+    properties.add(IterableProperty<Rect>('avoidBounds', avoidBounds));
+  }
+
+  /// Returns the closest sub-screen to the [anchorPoint]
+  static Rect _closestToAnchorPoint(Iterable<Rect> subScreens, Offset anchorPoint) {
+    return subScreens.fold(subScreens.first, (Rect previousValue, Rect element) {
       final double previousDistance = _distanceFromPointToRect(anchorPoint, previousValue);
       final double elementDistance = _distanceFromPointToRect(anchorPoint, element);
       if (previousDistance < elementDistance)
@@ -165,61 +248,38 @@ class DisplayFeatureSubScreen extends StatelessWidget {
     }
   }
 
-  Rect _availableSpace(BuildContext context){
-    if (padding != null) {
-      return padding!.deflateRect(Offset.zero & MediaQuery.of(context).size);
-    } else {
-      final RenderObject? renderObject = Overlay.of(context)?.context.findRenderObject();
-      if (renderObject != null) {
-        final RenderBox box = renderObject as RenderBox;
-        if (box.hasSize && box.size.isFinite) {
-          return MatrixUtils.transformRect(
-            box.getTransformTo(null),
-            Offset.zero & box.size,
-          );
-        }
-      }
-    }
-    return Offset.zero & MediaQuery.of(context).size;
-  }
-
-  static Iterable<Rect> _safeAreasInBounds(BuildContext context, Rect bounds) {
-    final Iterable<Rect> avoidBounds = MediaQuery.of(context).displayFeatures
-        .where((DisplayFeature displayFeature) => displayFeature.bounds.overlaps(bounds))
-        .map((DisplayFeature displayFeature) => displayFeature.bounds.shift(-bounds.topLeft));
-    return _safeAreas(Rect.fromLTWH(0, 0, bounds.width, bounds.height), avoidBounds);
-  }
-
-  static Iterable<Rect> _safeAreas(Rect screen, Iterable<Rect> avoidBounds) {
-    Iterable<Rect> areas = <Rect>[screen];
+  /// Returns sub-screens resulted by dividing [wantedBounds] along items of
+  /// [avoidBounds] that are at least as high or as wide.
+  static Iterable<Rect> _subScreensInBounds(Rect wantedBounds, Iterable<Rect> avoidBounds) {
+    Iterable<Rect> subScreens = <Rect>[wantedBounds];
     for (final Rect bounds in avoidBounds) {
-      areas = areas.expand((Rect area) sync* {
-        if (area.top >= bounds.top && area.bottom <= bounds.bottom) {
-          // Display feature splits the area vertically
-          if (area.left < bounds.left) {
-            // There is a smaller area, left of the display feature
-            yield Rect.fromLTWH(area.left, area.top, bounds.left - area.left, area.height);
+      subScreens = subScreens.expand((Rect screen) sync* {
+        if (screen.top >= bounds.top && screen.bottom <= bounds.bottom) {
+          // Display feature splits the screen vertically
+          if (screen.left < bounds.left) {
+            // There is a smaller sub-screen, left of the display feature
+            yield Rect.fromLTWH(screen.left, screen.top, bounds.left - screen.left, screen.height);
           }
-          if (area.right > bounds.right) {
-            // There is a smaller area, right of the display feature
-            yield Rect.fromLTWH(bounds.right, area.top, area.right - bounds.right, area.height);
+          if (screen.right > bounds.right) {
+            // There is a smaller sub-screen, right of the display feature
+            yield Rect.fromLTWH(bounds.right, screen.top, screen.right - bounds.right, screen.height);
           }
-        } else if (area.left >= bounds.left && area.right <= bounds.right) {
-          // Display feature splits the area horizontally
-          if (area.top < bounds.top) {
-            // There is a smaller area, above the display feature
-            yield Rect.fromLTWH(area.left, area.top, area.width, bounds.top - area.top);
+        } else if (screen.left >= bounds.left && screen.right <= bounds.right) {
+          // Display feature splits the sub-screen horizontally
+          if (screen.top < bounds.top) {
+            // There is a smaller sub-screen, above the display feature
+            yield Rect.fromLTWH(screen.left, screen.top, screen.width, bounds.top - screen.top);
           }
-          if (area.bottom > bounds.bottom) {
-            // There is a smaller area, below the display feature
-            yield Rect.fromLTWH(area.left, bounds.bottom, area.width, area.bottom - bounds.bottom);
+          if (screen.bottom > bounds.bottom) {
+            // There is a smaller sub-screen, below the display feature
+            yield Rect.fromLTWH(screen.left, bounds.bottom, screen.width, screen.bottom - bounds.bottom);
           }
         } else {
-          yield area;
+          yield screen;
         }
       });
     }
-    return areas;
+    return subScreens;
   }
 
   static Offset _finiteOffset(Offset offset){
@@ -235,5 +295,25 @@ class DisplayFeatureSubScreen extends StatelessWidget {
       return nr;
     }
     return nr.isNegative ? -double.maxFinite : double.maxFinite;
+  }
+
+  static bool _iterableEquals<T>(Iterable<T> a, Iterable<T> b){
+    if (identical(a,b)) {
+      return true;
+    }
+    final Iterator<T> aIterator = a.iterator;
+    final Iterator<T> bIterator = b.iterator;
+    while (true) {
+      final bool hasNext = aIterator.moveNext();
+      if (hasNext != bIterator.moveNext()) {
+        return false;
+      }
+      if (!hasNext) {
+        return true;
+      }
+      if (aIterator.current != bIterator.current) {
+        return false;
+      }
+    }
   }
 }

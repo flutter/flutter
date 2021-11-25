@@ -219,52 +219,6 @@ void main() {
       expect(renderBox.localToGlobal(Offset.zero), equals(Offset.zero));
     });
 
-    testWidgets('with padding', (WidgetTester tester) async {
-      const Key childKey = Key('childKey');
-      final MediaQueryData mediaQuery = MediaQueryData.fromWindow(WidgetsBinding.instance!.window).copyWith(
-          displayFeatures: <DisplayFeature>[
-            // Top notch
-            const DisplayFeature(
-              bounds: Rect.fromLTRB(100, 0, 700, 100),
-              type: DisplayFeatureType.cutout,
-              state: DisplayFeatureState.unknown,
-            ),
-            // Bottom notch
-            const DisplayFeature(
-              bounds: Rect.fromLTRB(100, 500, 700, 600),
-              type: DisplayFeatureType.cutout,
-              state: DisplayFeatureState.unknown,
-            ),
-          ]
-      );
-
-      await tester.pumpWidget(
-        MediaQuery(
-          data: mediaQuery,
-          child: const Padding(
-            padding: EdgeInsets.all(100),
-            child: Directionality(
-              textDirection: TextDirection.ltr,
-              child: DisplayFeatureSubScreen(
-                padding: EdgeInsets.all(100),
-                child: SizedBox(
-                  key: childKey,
-                  width: double.infinity,
-                  height: double.infinity,
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-
-      // The display features provided are not wide enough to produce sub-screens
-      final RenderBox renderBox = tester.renderObject(find.byKey(childKey));
-      expect(renderBox.size.width, equals(600.0));
-      expect(renderBox.size.height, equals(400.0));
-      expect(renderBox.localToGlobal(Offset.zero), equals(const Offset(100, 100)));
-    });
-
     testWidgets('with Overlay at [100,100]', (WidgetTester tester) async {
       const Key childKey = Key('childKey');
       final GlobalKey<NavigatorState> navigatorKey = GlobalKey();
