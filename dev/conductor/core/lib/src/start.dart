@@ -93,7 +93,7 @@ class StartCommand extends Command<void> {
       kIncrementOption,
       help: 'Specifies which part of the x.y.z version number to increment. Required.',
       valueHelp: 'level',
-      allowed: <String>['y', 'z', 'm', 'n'],
+      allowed: KReleaseIncrements,
       allowedHelp: <String, String>{
         'y': 'Indicates the first dev release after a beta release.',
         'z': 'Indicates a hotfix to a stable release.',

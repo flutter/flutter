@@ -16,6 +16,8 @@ const List<String> kBaseReleaseChannels = <String>['stable', 'beta', 'dev'];
 
 List<String> kReleaseChannels = List<String>.from(kBaseReleaseChannels)..add(FrameworkRepository.defaultBranch);
 
+const List<String> KReleaseIncrements = <String>['y', 'z', 'm', 'n'];
+
 const String kReleaseDocumentationUrl = 'https://github.com/flutter/flutter/wiki/Flutter-Cherrypick-Process';
 
 const String kLuciPackagingConsoleLink = 'https://ci.chromium.org/p/flutter/g/packaging/console';
@@ -77,9 +79,8 @@ String? getValueFromEnvOrArgs(
   if (allowNull) {
     return null;
   }
-  throw ConductorException(
-    'Expected either the CLI arg --$name or the environment variable $envName '
-    'to be provided!');
+  throw ConductorException('Expected either the CLI arg --$name or the environment variable $envName '
+      'to be provided!');
 }
 
 bool getBoolFromEnvOrArgs(
@@ -117,9 +118,8 @@ List<String> getValuesFromEnvOrArgs(
     return argValues;
   }
 
-  throw ConductorException(
-    'Expected either the CLI arg --$name or the environment variable $envName '
-    'to be provided!');
+  throw ConductorException('Expected either the CLI arg --$name or the environment variable $envName '
+      'to be provided!');
 }
 
 /// Translate CLI arg names to env variable names.
