@@ -75,6 +75,12 @@ struct TSize {
 
   constexpr bool IsEmpty() const { return !IsPositive(); }
 
+  template <class U>
+  static constexpr TSize Ceil(const TSize<U>& other) {
+    return TSize{static_cast<Type>(std::ceil(other.width)),
+                 static_cast<Type>(std::ceil(other.height))};
+  }
+
   constexpr size_t MipCount() const {
     if (!IsPositive()) {
       return 1u;
