@@ -36,6 +36,14 @@ ISize RenderTarget::GetRenderTargetSize() const {
   return size.has_value() ? size.value() : ISize{};
 }
 
+std::shared_ptr<Texture> RenderTarget::GetRenderTargetTexture() const {
+  auto found = colors_.find(0u);
+  if (found == colors_.end()) {
+    return nullptr;
+  }
+  return found->second.texture;
+}
+
 RenderTarget& RenderTarget::SetColorAttachment(ColorAttachment attachment,
                                                size_t index) {
   if (attachment) {
@@ -75,10 +83,15 @@ const std::optional<StencilAttachment>& RenderTarget::GetStencilAttachment()
 RenderTarget RenderTarget::CreateOffscreen(const Context& context,
                                            ISize size,
                                            std::string label) {
+  if (size.IsEmpty()) {
+    return {};
+  }
+
   TextureDescriptor color_tex0;
   color_tex0.format = PixelFormat::kB8G8R8A8UNormInt;
   color_tex0.size = size;
-  color_tex0.usage = static_cast<uint64_t>(TextureUsage::kRenderTarget);
+  color_tex0.usage = static_cast<uint64_t>(TextureUsage::kRenderTarget) |
+                     static_cast<uint64_t>(TextureUsage::kShaderRead);
 
   TextureDescriptor stencil_tex0;
   stencil_tex0.format = PixelFormat::kD32FloatS8UNormInt;
