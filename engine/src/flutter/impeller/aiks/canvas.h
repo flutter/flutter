@@ -64,12 +64,18 @@ class Canvas {
 
   void DrawShadow(Path path, Color color, Scalar elevation);
 
-  void DrawPicture(const Picture& picture);
+  void DrawPicture(Picture picture);
 
   Picture EndRecordingAsPicture();
 
  private:
+  std::unique_ptr<CanvasPass> base_pass_;
+  CanvasPass* current_pass_ = nullptr;
   std::deque<CanvasStackEntry> xformation_stack_;
+
+  void Initialize();
+
+  void Reset();
 
   CanvasPass& GetCurrentPass();
 

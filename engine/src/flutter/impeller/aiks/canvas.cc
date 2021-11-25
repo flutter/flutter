@@ -12,10 +12,24 @@
 namespace impeller {
 
 Canvas::Canvas() {
-  Save(true);
+  Initialize();
 }
 
 Canvas::~Canvas() = default;
+
+void Canvas::Initialize() {
+  base_pass_ = std::make_unique<CanvasPass>();
+  current_pass_ = base_pass_.get();
+  xformation_stack_.emplace_back(CanvasStackEntry{});
+  FML_DCHECK(GetSaveCount() == 1u);
+  FML_DCHECK(base_pass_->GetDepth() == 1u);
+}
+
+void Canvas::Reset() {
+  base_pass_ = nullptr;
+  current_pass_ = nullptr;
+  xformation_stack_ = {};
+}
 
 void Canvas::Save() {
   Save(false);
@@ -25,6 +39,10 @@ bool Canvas::Restore() {
   FML_DCHECK(xformation_stack_.size() > 0);
   if (xformation_stack_.size() == 1) {
     return false;
+  }
+  if (xformation_stack_.back().is_subpass) {
+    current_pass_ = GetCurrentPass().GetSuperpass();
+    FML_DCHECK(current_pass_);
   }
   xformation_stack_.pop_back();
   return true;
@@ -69,11 +87,11 @@ void Canvas::DrawPath(Path path, Paint paint) {
   entity.SetStencilDepth(GetStencilDepth());
   entity.SetContents(paint.CreateContentsForEntity());
 
-  GetCurrentPass().PushEntity(std::move(entity));
+  GetCurrentPass().AddEntity(std::move(entity));
 }
 
 void Canvas::SaveLayer(const Paint& paint, std::optional<Rect> bounds) {
-  Save();
+  Save(true);
 }
 
 void Canvas::ClipPath(Path path) {
@@ -85,23 +103,24 @@ void Canvas::ClipPath(Path path) {
   entity.SetContents(std::make_shared<ClipContents>());
   entity.SetStencilDepth(GetStencilDepth());
 
-  GetCurrentPass().PushEntity(std::move(entity));
+  GetCurrentPass().AddEntity(std::move(entity));
 }
 
 void Canvas::DrawShadow(Path path, Color color, Scalar elevation) {}
 
-void Canvas::DrawPicture(const Picture& picture) {
-  for (const auto& stack_entry : picture.entries) {
-    auto new_stack_entry = stack_entry;
-    if (auto pass = new_stack_entry.pass) {
-      for (auto entity : pass->GetEntities()) {
-        entity.IncrementStencilDepth(GetStencilDepth());
-        entity.SetTransformation(GetCurrentTransformation() *
-                                 entity.GetTransformation());
-      }
-    }
-    xformation_stack_.emplace_back(std::move(new_stack_entry));
+void Canvas::DrawPicture(Picture picture) {
+  if (!picture.pass) {
+    return;
   }
+  // Clone the base pass and account for the CTM updates.
+  auto pass = picture.pass->Clone();
+  pass->IterateAllEntities([&](auto& entity) -> bool {
+    entity.IncrementStencilDepth(GetStencilDepth());
+    entity.SetTransformation(GetCurrentTransformation() *
+                             entity.GetTransformation());
+    return true;
+  });
+  return;
 }
 
 void Canvas::DrawImage(std::shared_ptr<Image> image,
@@ -140,23 +159,23 @@ void Canvas::DrawImageRect(std::shared_ptr<Image> image,
   entity.SetPath(PathBuilder{}.AddRect(dest).CreatePath());
   entity.SetContents(contents);
   entity.SetTransformation(GetCurrentTransformation());
-  GetCurrentPass().PushEntity(std::move(entity));
+
+  GetCurrentPass().AddEntity(std::move(entity));
 }
 
 Picture Canvas::EndRecordingAsPicture() {
   Picture picture;
-  picture.entries = std::move(xformation_stack_);
+  picture.pass = std::move(base_pass_);
+
+  Reset();
+  Initialize();
+
   return picture;
 }
 
 CanvasPass& Canvas::GetCurrentPass() {
-  for (auto i = xformation_stack_.rbegin(), end = xformation_stack_.rend();
-       i < end; i++) {
-    if (i->pass.has_value()) {
-      return i->pass.value();
-    }
-  }
-  FML_UNREACHABLE();
+  FML_DCHECK(current_pass_ != nullptr);
+  return *current_pass_;
 }
 
 void Canvas::IncrementStencilDepth() {
@@ -172,21 +191,15 @@ void Canvas::DrawRect(Rect rect, Paint paint) {
 }
 
 void Canvas::Save(bool create_subpass) {
-  // Check if called from the ctor.
-  if (xformation_stack_.empty()) {
-    FML_DCHECK(create_subpass) << "Base entries must have a pass.";
-    CanvasStackEntry entry;
-    entry.pass = CanvasPass{};
-    xformation_stack_.emplace_back(std::move(entry));
-  }
-
   auto entry = CanvasStackEntry{};
-
   entry.xformation = xformation_stack_.back().xformation;
   entry.stencil_depth = xformation_stack_.back().stencil_depth;
+  entry.is_subpass = create_subpass;
+
   if (create_subpass) {
-    entry.pass = CanvasPass{};
+    current_pass_ = GetCurrentPass().AddSubpass(std::make_unique<CanvasPass>());
   }
+
   xformation_stack_.emplace_back(std::move(entry));
 }
 

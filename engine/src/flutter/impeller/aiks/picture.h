@@ -14,7 +14,7 @@
 namespace impeller {
 
 struct Picture {
-  std::deque<CanvasStackEntry> entries;
+  std::unique_ptr<CanvasPass> pass;
 };
 
 }  // namespace impeller

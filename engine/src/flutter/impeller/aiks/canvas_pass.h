@@ -18,33 +18,47 @@ class ContentRenderer;
 
 class CanvasPass {
  public:
-  using Subpasses = std::vector<CanvasPass>;
+  using Entities = std::vector<Entity>;
+  using Subpasses = std::vector<std::unique_ptr<CanvasPass>>;
 
   CanvasPass();
 
   ~CanvasPass();
 
-  void PushEntity(Entity entity);
+  size_t GetDepth() const;
+
+  std::unique_ptr<CanvasPass> Clone() const;
 
   Rect GetCoverageRect() const;
+
+  void AddEntity(Entity entity);
+
+  void SetEntities(Entities entities);
 
   const std::vector<Entity>& GetEntities() const;
 
   const Subpasses& GetSubpasses() const;
 
-  bool AddSubpass(CanvasPass pass);
+  CanvasPass* AddSubpass(std::unique_ptr<CanvasPass> pass);
+
+  CanvasPass* GetSuperpass() const;
 
   bool Render(ContentRenderer& renderer, RenderPass& parent_pass) const;
 
+  void IterateAllEntities(std::function<bool(Entity&)> iterator);
+
  private:
-  std::vector<Entity> entities_;
+  Entities entities_;
   Subpasses subpasses_;
+  CanvasPass* superpass_ = nullptr;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(CanvasPass);
 };
 
 struct CanvasStackEntry {
   Matrix xformation;
   size_t stencil_depth = 0u;
-  std::optional<CanvasPass> pass;
+  bool is_subpass = false;
 };
 
 }  // namespace impeller
