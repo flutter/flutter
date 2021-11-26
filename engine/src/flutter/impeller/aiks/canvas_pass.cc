@@ -28,10 +28,11 @@ void CanvasPass::SetEntities(Entities entities) {
   entities_ = std::move(entities);
 }
 
-size_t CanvasPass::GetDepth() const {
+size_t CanvasPass::GetSubpassesDepth() const {
   size_t max_subpass_depth = 0u;
   for (const auto& subpass : subpasses_) {
-    max_subpass_depth = std::max(max_subpass_depth, subpass->GetDepth());
+    max_subpass_depth =
+        std::max(max_subpass_depth, subpass->GetSubpassesDepth());
   }
   return max_subpass_depth + 1u;
 }
@@ -84,6 +85,10 @@ bool CanvasPass::Render(ContentRenderer& renderer,
     }
   }
   for (const auto& subpass : subpasses_) {
+    if (!subpass) {
+      return false;
+    }
+
     const auto subpass_coverage = subpass->GetCoverageRect();
 
     if (subpass_coverage.IsEmpty()) {
@@ -109,9 +114,7 @@ bool CanvasPass::Render(ContentRenderer& renderer,
       return false;
     }
 
-    if (!subpass) {
-      return false;
-    }
+    sub_renderpass->SetLabel("OffscreenPass");
 
     if (!subpass->Render(renderer, *sub_renderpass)) {
       return false;
@@ -132,6 +135,8 @@ bool CanvasPass::Render(ContentRenderer& renderer,
     Entity entity;
     entity.SetPath(PathBuilder{}.AddRect(subpass_coverage).CreatePath());
     entity.SetContents(std::move(offscreen_texture_contents));
+    entity.SetStencilDepth(stencil_depth_);
+    entity.SetTransformation(xformation_);
     if (!entity.Render(renderer, parent_pass)) {
       return false;
     }
@@ -163,6 +168,14 @@ std::unique_ptr<CanvasPass> CanvasPass::Clone() const {
     pass->AddSubpass(subpass->Clone());
   }
   return pass;
+}
+
+void CanvasPass::SetTransformation(Matrix xformation) {
+  xformation_ = std::move(xformation);
+}
+
+void CanvasPass::SetStencilDepth(size_t stencil_depth) {
+  stencil_depth_ = stencil_depth;
 }
 
 }  // namespace impeller

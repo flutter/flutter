@@ -22,7 +22,7 @@ void Canvas::Initialize() {
   current_pass_ = base_pass_.get();
   xformation_stack_.emplace_back(CanvasStackEntry{});
   FML_DCHECK(GetSaveCount() == 1u);
-  FML_DCHECK(base_pass_->GetDepth() == 1u);
+  FML_DCHECK(base_pass_->GetSubpassesDepth() == 1u);
 }
 
 void Canvas::Reset() {
@@ -192,14 +192,15 @@ void Canvas::DrawRect(Rect rect, Paint paint) {
 
 void Canvas::Save(bool create_subpass) {
   auto entry = CanvasStackEntry{};
-  entry.xformation = xformation_stack_.back().xformation;
-  entry.stencil_depth = xformation_stack_.back().stencil_depth;
-  entry.is_subpass = create_subpass;
-
   if (create_subpass) {
+    entry.is_subpass = true;
     current_pass_ = GetCurrentPass().AddSubpass(std::make_unique<CanvasPass>());
+    current_pass_->SetTransformation(xformation_stack_.back().xformation);
+    current_pass_->SetStencilDepth(xformation_stack_.back().stencil_depth);
+  } else {
+    entry.xformation = xformation_stack_.back().xformation;
+    entry.stencil_depth = xformation_stack_.back().stencil_depth;
   }
-
   xformation_stack_.emplace_back(std::move(entry));
 }
 
