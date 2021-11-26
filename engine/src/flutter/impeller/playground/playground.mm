@@ -154,7 +154,7 @@ bool Playground::OpenPlaygroundHere(Renderer::RenderCallback render_callback) {
     ColorAttachment color0;
     color0.texture =
         std::make_shared<TextureMTL>(color0_tex, current_drawable.texture);
-    color0.clear_color = Color::SkyBlue();
+    color0.clear_color = Color::DarkSlateGray();
     color0.load_action = LoadAction::kClear;
     color0.store_action = StoreAction::kStore;
 

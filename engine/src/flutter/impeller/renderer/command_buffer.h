@@ -53,6 +53,8 @@ class CommandBuffer {
 
   void SubmitCommands();
 
+  virtual void ReserveSpotInQueue() = 0;
+
   //----------------------------------------------------------------------------
   /// @brief      Create a render pass to record render commands into.
   ///

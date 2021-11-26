@@ -35,21 +35,26 @@ static CommandBuffer::Status ToCommitResult(MTLCommandBufferStatus status) {
 }
 
 void CommandBufferMTL::SubmitCommands(CompletionCallback callback) {
-  if (!callback) {
-    callback = [](auto) {};
-  }
-
   if (!buffer_) {
     // Already committed. This is caller error.
-    callback(Status::kError);
+    if (callback) {
+      callback(Status::kError);
+    }
     return;
   }
 
-  [buffer_ addCompletedHandler:^(id<MTLCommandBuffer> buffer) {
-    callback(ToCommitResult(buffer.status));
-  }];
+  if (callback) {
+    [buffer_ addCompletedHandler:^(id<MTLCommandBuffer> buffer) {
+      callback(ToCommitResult(buffer.status));
+    }];
+  }
+
   [buffer_ commit];
   buffer_ = nil;
+}
+
+void CommandBufferMTL::ReserveSpotInQueue() {
+  [buffer_ enqueue];
 }
 
 std::shared_ptr<RenderPass> CommandBufferMTL::CreateRenderPass(

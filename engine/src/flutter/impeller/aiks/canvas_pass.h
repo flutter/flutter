@@ -25,7 +25,7 @@ class CanvasPass {
 
   ~CanvasPass();
 
-  size_t GetDepth() const;
+  size_t GetSubpassesDepth() const;
 
   std::unique_ptr<CanvasPass> Clone() const;
 
@@ -47,10 +47,16 @@ class CanvasPass {
 
   void IterateAllEntities(std::function<bool(Entity&)> iterator);
 
+  void SetTransformation(Matrix xformation);
+
+  void SetStencilDepth(size_t stencil_depth);
+
  private:
   Entities entities_;
   Subpasses subpasses_;
   CanvasPass* superpass_ = nullptr;
+  Matrix xformation_;
+  size_t stencil_depth_ = 0u;
 
   FML_DISALLOW_COPY_AND_ASSIGN(CanvasPass);
 };

@@ -33,6 +33,9 @@ class CommandBufferMTL final : public CommandBuffer {
   void SubmitCommands(CompletionCallback callback) override;
 
   // |CommandBuffer|
+  void ReserveSpotInQueue() override;
+
+  // |CommandBuffer|
   std::shared_ptr<RenderPass> CreateRenderPass(
       RenderTarget target) const override;
 

@@ -127,21 +127,23 @@ bool RenderPassMTL::EncodeCommands(Allocator& transients_allocator) const {
   if (!IsValid()) {
     return false;
   }
-  auto pass = [buffer_ renderCommandEncoderWithDescriptor:desc_];
+  auto render_command_encoder =
+      [buffer_ renderCommandEncoderWithDescriptor:desc_];
 
-  if (!pass) {
+  if (!render_command_encoder) {
     return false;
   }
 
   if (!label_.empty()) {
-    [pass setLabel:@(label_.c_str())];
+    [render_command_encoder setLabel:@(label_.c_str())];
   }
 
   // Success or failure, the pass must end. The buffer can only process one pass
   // at a time.
-  fml::ScopedCleanupClosure auto_end([pass]() { [pass endEncoding]; });
+  fml::ScopedCleanupClosure auto_end(
+      [render_command_encoder]() { [render_command_encoder endEncoding]; });
 
-  return EncodeCommands(transients_allocator, pass);
+  return EncodeCommands(transients_allocator, render_command_encoder);
 }
 
 //-----------------------------------------------------------------------------
@@ -154,7 +156,7 @@ bool RenderPassMTL::EncodeCommands(Allocator& transients_allocator) const {
 ///             absent.
 ///
 struct PassBindingsCache {
-  PassBindingsCache(id<MTLRenderCommandEncoder> pass) : pass_(pass) {}
+  PassBindingsCache(id<MTLRenderCommandEncoder> encoder) : encoder_(encoder) {}
 
   PassBindingsCache(const PassBindingsCache&) = delete;
 
@@ -165,7 +167,7 @@ struct PassBindingsCache {
       return;
     }
     pipeline_ = pipeline;
-    [pass_ setRenderPipelineState:pipeline_];
+    [encoder_ setRenderPipelineState:pipeline_];
   }
 
   void SetDepthStencilState(id<MTLDepthStencilState> depth_stencil) {
@@ -173,7 +175,7 @@ struct PassBindingsCache {
       return;
     }
     depth_stencil_ = depth_stencil;
-    [pass_ setDepthStencilState:depth_stencil_];
+    [encoder_ setDepthStencilState:depth_stencil_];
   }
 
   bool SetBuffer(ShaderStage stage,
@@ -194,10 +196,10 @@ struct PassBindingsCache {
 
       switch (stage) {
         case ShaderStage::kVertex:
-          [pass_ setVertexBufferOffset:offset atIndex:index];
+          [encoder_ setVertexBufferOffset:offset atIndex:index];
           return true;
         case ShaderStage::kFragment:
-          [pass_ setFragmentBufferOffset:offset atIndex:index];
+          [encoder_ setFragmentBufferOffset:offset atIndex:index];
           return true;
         default:
           FML_DCHECK(false)
@@ -209,10 +211,10 @@ struct PassBindingsCache {
     buffers_map[index] = {buffer, offset};
     switch (stage) {
       case ShaderStage::kVertex:
-        [pass_ setVertexBuffer:buffer offset:offset atIndex:index];
+        [encoder_ setVertexBuffer:buffer offset:offset atIndex:index];
         return true;
       case ShaderStage::kFragment:
-        [pass_ setFragmentBuffer:buffer offset:offset atIndex:index];
+        [encoder_ setFragmentBuffer:buffer offset:offset atIndex:index];
         return true;
       default:
         FML_DCHECK(false) << "Cannot bind buffer to unknown shader stage.";
@@ -231,10 +233,10 @@ struct PassBindingsCache {
     texture_map[index] = texture;
     switch (stage) {
       case ShaderStage::kVertex:
-        [pass_ setVertexTexture:texture atIndex:index];
+        [encoder_ setVertexTexture:texture atIndex:index];
         return true;
       case ShaderStage::kFragment:
-        [pass_ setFragmentTexture:texture atIndex:index];
+        [encoder_ setFragmentTexture:texture atIndex:index];
         return true;
       default:
         FML_DCHECK(false) << "Cannot bind buffer to unknown shader stage.";
@@ -255,10 +257,10 @@ struct PassBindingsCache {
     sampler_map[index] = sampler;
     switch (stage) {
       case ShaderStage::kVertex:
-        [pass_ setVertexSamplerState:sampler atIndex:index];
+        [encoder_ setVertexSamplerState:sampler atIndex:index];
         return true;
       case ShaderStage::kFragment:
-        [pass_ setFragmentSamplerState:sampler atIndex:index];
+        [encoder_ setFragmentSamplerState:sampler atIndex:index];
         return true;
       default:
         FML_DCHECK(false) << "Cannot bind buffer to unknown shader stage.";
@@ -276,7 +278,7 @@ struct PassBindingsCache {
   using TextureMap = std::map<uint64_t, id<MTLTexture>>;
   using SamplerMap = std::map<uint64_t, id<MTLSamplerState>>;
 
-  const id<MTLRenderCommandEncoder> pass_;
+  const id<MTLRenderCommandEncoder> encoder_;
   id<MTLRenderPipelineState> pipeline_ = nullptr;
   id<MTLDepthStencilState> depth_stencil_ = nullptr;
   std::map<ShaderStage, BufferMap> buffers_;
@@ -332,8 +334,8 @@ static bool Bind(PassBindingsCache& pass,
 }
 
 bool RenderPassMTL::EncodeCommands(Allocator& allocator,
-                                   id<MTLRenderCommandEncoder> pass) const {
-  PassBindingsCache pass_bindings(pass);
+                                   id<MTLRenderCommandEncoder> encoder) const {
+  PassBindingsCache pass_bindings(encoder);
   auto bind_stage_resources = [&allocator, &pass_bindings](
                                   const Bindings& bindings,
                                   ShaderStage stage) -> bool {
@@ -355,7 +357,7 @@ bool RenderPassMTL::EncodeCommands(Allocator& allocator,
     return true;
   };
 
-  fml::closure pop_debug_marker = [pass]() { [pass popDebugGroup]; };
+  fml::closure pop_debug_marker = [encoder]() { [encoder popDebugGroup]; };
   for (const auto& command : commands_) {
     if (command.index_count == 0u) {
       FML_DLOG(ERROR) << "Zero index count in render pass command.";
@@ -364,7 +366,7 @@ bool RenderPassMTL::EncodeCommands(Allocator& allocator,
 
     fml::ScopedCleanupClosure auto_pop_debug_marker(pop_debug_marker);
     if (!command.label.empty()) {
-      [pass pushDebugGroup:@(command.label.c_str())];
+      [encoder pushDebugGroup:@(command.label.c_str())];
     } else {
       auto_pop_debug_marker.Release();
     }
@@ -372,11 +374,11 @@ bool RenderPassMTL::EncodeCommands(Allocator& allocator,
         PipelineMTL::Cast(*command.pipeline).GetMTLRenderPipelineState());
     pass_bindings.SetDepthStencilState(
         PipelineMTL::Cast(*command.pipeline).GetMTLDepthStencilState());
-    [pass setFrontFacingWinding:command.winding == WindingOrder::kClockwise
-                                    ? MTLWindingClockwise
-                                    : MTLWindingCounterClockwise];
-    [pass setCullMode:MTLCullModeNone];
-    [pass setStencilReferenceValue:command.stencil_reference];
+    [encoder setFrontFacingWinding:command.winding == WindingOrder::kClockwise
+                                       ? MTLWindingClockwise
+                                       : MTLWindingCounterClockwise];
+    [encoder setCullMode:MTLCullModeNone];
+    [encoder setStencilReferenceValue:command.stencil_reference];
     if (!bind_stage_resources(command.vertex_bindings, ShaderStage::kVertex)) {
       return false;
     }
@@ -400,14 +402,14 @@ bool RenderPassMTL::EncodeCommands(Allocator& allocator,
     FML_DCHECK(command.index_count * sizeof(uint32_t) ==
                command.index_buffer.range.length);
     // Returns void. All error checking must be done by this point.
-    [pass drawIndexedPrimitives:ToMTLPrimitiveType(command.primitive_type)
-                     indexCount:command.index_count
-                      indexType:MTLIndexTypeUInt32
-                    indexBuffer:mtl_index_buffer
-              indexBufferOffset:command.index_buffer.range.offset
-                  instanceCount:1u
-                     baseVertex:0u
-                   baseInstance:0u];
+    [encoder drawIndexedPrimitives:ToMTLPrimitiveType(command.primitive_type)
+                        indexCount:command.index_count
+                         indexType:MTLIndexTypeUInt32
+                       indexBuffer:mtl_index_buffer
+                 indexBufferOffset:command.index_buffer.range.offset
+                     instanceCount:1u
+                        baseVertex:0u
+                      baseInstance:0u];
   }
   return true;
 }

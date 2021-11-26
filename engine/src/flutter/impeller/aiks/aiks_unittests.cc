@@ -121,9 +121,9 @@ TEST_F(AiksTest, CanRenderGroupOpacity) {
 
   canvas.SaveLayer(alpha);
 
-  canvas.DrawRect({100, 100, 100, 100}, red);
-  canvas.DrawRect({120, 120, 100, 100}, green);
-  canvas.DrawRect({140, 140, 100, 100}, blue);
+  canvas.DrawRect({000, 000, 100, 100}, red);
+  // canvas.DrawRect({020, 020, 100, 100}, green);
+  // canvas.DrawRect({040, 040, 100, 100}, blue);
 
   canvas.Restore();
 
