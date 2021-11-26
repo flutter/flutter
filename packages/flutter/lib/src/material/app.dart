@@ -201,6 +201,9 @@ class MaterialApp extends StatefulWidget {
     this.restorationScopeId,
     this.scrollBehavior,
     this.useInheritedMediaQuery = false,
+    this.themeAnimationDuration = kThemeAnimationDuration,
+    this.themeAnimationCurve = Curves.linear,
+    this.themeAnimationOnEnd
   }) : assert(routes != null),
        assert(navigatorObservers != null),
        assert(title != null),
@@ -249,6 +252,9 @@ class MaterialApp extends StatefulWidget {
     this.restorationScopeId,
     this.scrollBehavior,
     this.useInheritedMediaQuery = false,
+    this.themeAnimationDuration = kThemeAnimationDuration,
+    this.themeAnimationCurve = Curves.linear,
+    this.themeAnimationOnEnd
   }) : assert(routeInformationParser != null),
        assert(routerDelegate != null),
        assert(title != null),
@@ -670,6 +676,15 @@ class MaterialApp extends StatefulWidget {
   /// {@macro flutter.widgets.widgetsApp.useInheritedMediaQuery}
   final bool useInheritedMediaQuery;
 
+  /// The [Duration] for the theme animation.
+  final Duration themeAnimationDuration;
+
+  /// The [Curve] for the theme animation.
+  final Curve themeAnimationCurve;
+
+  /// The method called after the end of the theme animation.
+  final void Function()? themeAnimationOnEnd;
+
   @override
   State<MaterialApp> createState() => _MaterialAppState();
 
@@ -834,6 +849,9 @@ class _MaterialAppState extends State<MaterialApp> {
       key: widget.scaffoldMessengerKey,
       child: AnimatedTheme(
         data: theme,
+        curve: widget.themeAnimationCurve,
+        onEnd: widget.themeAnimationOnEnd,
+        duration: widget.themeAnimationDuration,
         child: widget.builder != null
           ? Builder(
               builder: (BuildContext context) {
