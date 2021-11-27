@@ -338,8 +338,8 @@ class InkResponse extends StatelessWidget {
   /// Called when the user taps down this part of the material.
   final GestureTapDownCallback? onTapDown;
 
-  /// Called when the user taps this part of the material and releases the tap,
-  /// invoked before [onTap].
+  /// Called when the user releases a tap that was started on this part of the 
+  /// material. [onTap] is called immediately after.
   final GestureTapUpCallback? onTapUp;
 
   /// Called when the user cancels a tap that was started on this part of the
