@@ -4378,7 +4378,7 @@ void main() {
     expect(tester.widget<InkWell>(find.byType(InkWell)).splashFactory, splashFactory);
     expect(tester.widget<InkWell>(find.byType(InkWell)).overlayColor, overlayColor);
   });
-  testWidgets("TabBar accepts splashBorderRadius that gives borderRadius to InkWell", (WidgetTester tester) async {
+  testWidgets("TabBar accepts 'splashBorderRadius' that gives 'borderRadius' to InkWell", (WidgetTester tester) async {
     const Color _hoverColor = Color(0xfff44336);
     const double _radius = 20;
     await tester.pumpWidget(boilerplate(
@@ -4394,9 +4394,9 @@ void main() {
                   },
                 ),
                 splashBorderRadius: BorderRadius.circular(_radius),
-                tabs: const [
+                tabs: const <Widget>[
                   Tab(
-                    child: Text(""),
+                    child: Text(''),
                   )
                 ]))));
     await tester.pumpAndSettle();
