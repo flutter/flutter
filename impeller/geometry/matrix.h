@@ -6,6 +6,7 @@
 
 #include <cmath>
 #include <optional>
+#include <ostream>
 #include <utility>
 
 #include "impeller/geometry/matrix_decomposition.h"
@@ -257,8 +258,8 @@ struct Matrix {
   static constexpr Matrix MakeOrthographic(TSize<T> size) {
     // Per assumptions about NDC documented above.
     const auto scale =
-        MakeScale({1.0f / static_cast<Scalar>(size.width),
-                   -1.0f / static_cast<Scalar>(size.height), 1.0});
+        MakeScale({2.0f / static_cast<Scalar>(size.width),
+                   -2.0f / static_cast<Scalar>(size.height), 1.0});
     const auto translate = MakeTranslation({-1.0, 1.0, 0.5});
     return translate * scale;
   }
@@ -275,3 +276,19 @@ inline Vector4 operator*(const Vector4& v, const Matrix& m) {
 }
 
 }  // namespace impeller
+
+namespace std {
+
+inline std::ostream& operator<<(std::ostream& out, const impeller::Matrix& m) {
+  out << "(";
+  for (size_t i = 0; i < 4u; i++) {
+    for (size_t j = 0; j < 4u; j++) {
+      out << m.e[i][j] << ",";
+    }
+    out << std::endl;
+  }
+  out << ")";
+  return out;
+}
+
+}  // namespace std

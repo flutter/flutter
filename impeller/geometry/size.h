@@ -6,6 +6,7 @@
 
 #include <cmath>
 #include <limits>
+#include <ostream>
 #include <string>
 
 #include "impeller/geometry/scalar.h"
@@ -100,3 +101,14 @@ using ISize = TSize<int64_t>;
 static_assert(sizeof(Size) == 2 * sizeof(Scalar));
 
 }  // namespace impeller
+
+namespace std {
+
+template <class T>
+inline std::ostream& operator<<(std::ostream& out,
+                                const impeller::TSize<T>& s) {
+  out << "(" << s.width << ", " << s.height << ")";
+  return out;
+}
+
+}  // namespace std
