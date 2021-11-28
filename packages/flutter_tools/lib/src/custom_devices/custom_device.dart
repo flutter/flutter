@@ -53,7 +53,7 @@ class CustomDeviceLogReader extends DeviceLogReader {
   /// The name of the device this log reader is associated with.
   @override
   final String name;
-  
+
   @visibleForTesting
   final StreamController<String> logLinesController = StreamController<String>.broadcast();
 

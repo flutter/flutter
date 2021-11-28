@@ -626,7 +626,7 @@ void main() {
 
 class MyFakeStreamSubscription<T> extends Fake implements StreamSubscription<T> {
   MyFakeStreamSubscription(this.parent);
-  
+
   StreamSubscription<T> parent;
   bool canceled = false;
 
