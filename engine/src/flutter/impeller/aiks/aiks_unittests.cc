@@ -56,7 +56,7 @@ TEST_F(AiksTest, CanRenderImage) {
   auto image = std::make_shared<Image>(CreateTextureForFixture("kalimba.jpg"));
   paint.color = Color::Red();
   canvas.DrawImage(image, Point::MakeXY(100.0, 100.0), paint);
-  // ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
 TEST_F(AiksTest, DISABLED_CanRenderImageRect) {
@@ -122,8 +122,8 @@ TEST_F(AiksTest, CanRenderGroupOpacity) {
   canvas.SaveLayer(alpha);
 
   canvas.DrawRect({000, 000, 100, 100}, red);
-  // canvas.DrawRect({020, 020, 100, 100}, green);
-  // canvas.DrawRect({040, 040, 100, 100}, blue);
+  canvas.DrawRect({020, 020, 100, 100}, green);
+  canvas.DrawRect({040, 040, 100, 100}, blue);
 
   canvas.Restore();
 

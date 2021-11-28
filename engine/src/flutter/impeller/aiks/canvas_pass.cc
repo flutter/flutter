@@ -104,6 +104,8 @@ bool CanvasPass::Render(ContentRenderer& renderer,
 
     auto sub_command_buffer = context->CreateRenderCommandBuffer();
 
+    sub_command_buffer->SetLabel("Offscreen Command Buffer");
+
     if (!sub_command_buffer) {
       return false;
     }
@@ -124,7 +126,9 @@ bool CanvasPass::Render(ContentRenderer& renderer,
       return false;
     }
 
-    sub_command_buffer->SubmitCommands();
+    if (!sub_command_buffer->SubmitCommands()) {
+      return false;
+    }
 
     auto offscreen_texture_contents = std::make_shared<TextureContents>();
     offscreen_texture_contents->SetTexture(

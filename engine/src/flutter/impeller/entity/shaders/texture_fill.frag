@@ -9,5 +9,6 @@ in vec2 v_texture_coords;
 out vec4 frag_color;
 
 void main() {
-  frag_color = texture(texture_sampler, v_texture_coords);
+  vec4 sampled = texture(texture_sampler, v_texture_coords);
+  frag_color = sampled;
 }

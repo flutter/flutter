@@ -41,6 +41,8 @@ class CommandBuffer {
 
   virtual bool IsValid() const = 0;
 
+  virtual void SetLabel(const std::string& label) const = 0;
+
   //----------------------------------------------------------------------------
   /// @brief      Schedule the command encoded by render passes within this
   ///             command buffer on the GPU.
@@ -49,9 +51,9 @@ class CommandBuffer {
   ///
   /// @param[in]  callback  The completion callback.
   ///
-  virtual void SubmitCommands(CompletionCallback callback) = 0;
+  [[nodiscard]] virtual bool SubmitCommands(CompletionCallback callback) = 0;
 
-  void SubmitCommands();
+  [[nodiscard]] bool SubmitCommands();
 
   virtual void ReserveSpotInQueue() = 0;
 

@@ -33,8 +33,13 @@ struct TSize {
                  std::numeric_limits<Type>::max()};
   }
 
-  constexpr TSize operator*(Type scale) const {
+  constexpr TSize operator*(Scalar scale) const {
     return {width * scale, height * scale};
+  }
+
+  constexpr TSize operator/(Scalar scale) const {
+    return {static_cast<Scalar>(width) / scale,
+            static_cast<Scalar>(height) / scale};
   }
 
   constexpr bool operator==(const TSize& s) const {
