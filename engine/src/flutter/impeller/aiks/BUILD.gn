@@ -12,6 +12,8 @@ impeller_component("aiks") {
     "canvas.h",
     "canvas_pass.cc",
     "canvas_pass.h",
+    "canvas_pass_delegate.cc",
+    "canvas_pass_delegate.h",
     "image.cc",
     "image.h",
     "paint.cc",
