@@ -8,11 +8,15 @@
 #include "impeller/geometry/path_builder.h"
 #include "impeller/renderer/command_buffer.h"
 #include "impeller/renderer/render_pass.h"
-#include "impeller/renderer/render_target.h"
 
 namespace impeller {
 
-CanvasPass::CanvasPass() = default;
+CanvasPass::CanvasPass(std::unique_ptr<CanvasPassDelegate> delegate)
+    : delegate_(std::move(delegate)) {
+  if (!delegate_) {
+    delegate_ = CanvasPassDelegate::MakeDefault();
+  }
+}
 
 CanvasPass::~CanvasPass() = default;
 
@@ -85,8 +89,12 @@ bool CanvasPass::Render(ContentRenderer& renderer,
     }
   }
   for (const auto& subpass : subpasses_) {
-    if (!subpass) {
-      return false;
+    if (delegate_->CanCollapseIntoParentPass()) {
+      // Directly render into the parent pass and move on.
+      if (!subpass->Render(renderer, parent_pass)) {
+        return false;
+      }
+      continue;
     }
 
     const auto subpass_coverage = subpass->GetCoverageRect();
@@ -101,6 +109,27 @@ bool CanvasPass::Render(ContentRenderer& renderer,
 
     auto subpass_target = RenderTarget::CreateOffscreen(
         *context, ISize::Ceil(subpass_coverage.size));
+
+    auto subpass_texture = subpass_target.GetRenderTargetTexture();
+
+    if (!subpass_texture) {
+      return false;
+    }
+
+    auto offscreen_texture_contents =
+        delegate_->CreateContentsForSubpassTarget(*subpass_texture);
+
+    if (!offscreen_texture_contents) {
+      // This is an error because the subpass delegate said the pass couldn't be
+      // collapsed into its parent. Yet, when asked how it want's to postprocess
+      // the offscreen texture, it couldn't give us an answer.
+      //
+      // Theoretically, we could collapse the pass now. But that would be
+      // wasteful as we already have the offscreen texture and we don't want to
+      // discard it without ever using it. Just make the delegate do the right
+      // thing.
+      return false;
+    }
 
     auto sub_command_buffer = context->CreateRenderCommandBuffer();
 
@@ -129,12 +158,6 @@ bool CanvasPass::Render(ContentRenderer& renderer,
     if (!sub_command_buffer->SubmitCommands()) {
       return false;
     }
-
-    auto offscreen_texture_contents = std::make_shared<TextureContents>();
-    offscreen_texture_contents->SetTexture(
-        subpass_target.GetRenderTargetTexture());
-    offscreen_texture_contents->SetSourceRect(
-        IRect::MakeSize(subpass_target.GetRenderTargetTexture()->GetSize()));
 
     Entity entity;
     entity.SetPath(PathBuilder{}.AddRect(subpass_coverage).CreatePath());
