@@ -2,19 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "impeller/aiks/canvas_pass_delegate.h"
+#include "impeller/entity/entity_pass_delegate.h"
 
 namespace impeller {
 
-CanvasPassDelegate::CanvasPassDelegate() = default;
+EntityPassDelegate::EntityPassDelegate() = default;
 
-CanvasPassDelegate::~CanvasPassDelegate() = default;
+EntityPassDelegate::~EntityPassDelegate() = default;
 
-class DefaultCanvasPassDelegate final : public CanvasPassDelegate {
+class DefaultEntityPassDelegate final : public EntityPassDelegate {
  public:
-  DefaultCanvasPassDelegate() = default;
+  DefaultEntityPassDelegate() = default;
 
-  ~DefaultCanvasPassDelegate() override = default;
+  ~DefaultEntityPassDelegate() override = default;
 
   bool CanCollapseIntoParentPass() override { return true; }
 
@@ -25,11 +25,11 @@ class DefaultCanvasPassDelegate final : public CanvasPassDelegate {
   }
 
  private:
-  FML_DISALLOW_COPY_AND_ASSIGN(DefaultCanvasPassDelegate);
+  FML_DISALLOW_COPY_AND_ASSIGN(DefaultEntityPassDelegate);
 };
 
-std::unique_ptr<CanvasPassDelegate> CanvasPassDelegate::MakeDefault() {
-  return std::make_unique<DefaultCanvasPassDelegate>();
+std::unique_ptr<EntityPassDelegate> EntityPassDelegate::MakeDefault() {
+  return std::make_unique<DefaultEntityPassDelegate>();
 }
 
 }  // namespace impeller

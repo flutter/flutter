@@ -27,6 +27,10 @@ impeller_component("entity") {
     "contents.h",
     "entity.cc",
     "entity.h",
+    "entity_pass.cc",
+    "entity_pass.h",
+    "entity_pass_delegate.cc",
+    "entity_pass_delegate.h",
   ]
 
   deps = [ ":entity_shaders" ]

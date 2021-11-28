@@ -9,30 +9,32 @@
 #include <vector>
 
 #include "flutter/fml/macros.h"
-#include "impeller/aiks/canvas_pass_delegate.h"
 #include "impeller/entity/contents.h"
 #include "impeller/entity/entity.h"
+#include "impeller/entity/entity_pass_delegate.h"
 #include "impeller/renderer/render_target.h"
 
 namespace impeller {
 
 class ContentRenderer;
 
-class CanvasPass {
+class EntityPass {
  public:
   using Entities = std::vector<Entity>;
-  using Subpasses = std::vector<std::unique_ptr<CanvasPass>>;
+  using Subpasses = std::vector<std::unique_ptr<EntityPass>>;
 
-  CanvasPass(std::unique_ptr<CanvasPassDelegate> delegate = nullptr);
+  EntityPass(std::unique_ptr<EntityPassDelegate> delegate = nullptr);
 
-  ~CanvasPass();
+  ~EntityPass();
 
   size_t GetSubpassesDepth() const;
 
-  std::unique_ptr<CanvasPass> Clone() const;
+  std::unique_ptr<EntityPass> Clone() const;
 
   Rect GetCoverageRect() const;
 
+  // TODO(csg): This prevents an optimization where the coverage can be
+  // calculated once in SetEntities an memoized.
   void AddEntity(Entity entity);
 
   void SetEntities(Entities entities);
@@ -41,9 +43,9 @@ class CanvasPass {
 
   const Subpasses& GetSubpasses() const;
 
-  CanvasPass* AddSubpass(std::unique_ptr<CanvasPass> pass);
+  EntityPass* AddSubpass(std::unique_ptr<EntityPass> pass);
 
-  CanvasPass* GetSuperpass() const;
+  EntityPass* GetSuperpass() const;
 
   bool Render(ContentRenderer& renderer, RenderPass& parent_pass) const;
 
@@ -56,12 +58,12 @@ class CanvasPass {
  private:
   Entities entities_;
   Subpasses subpasses_;
-  CanvasPass* superpass_ = nullptr;
+  EntityPass* superpass_ = nullptr;
   Matrix xformation_;
   size_t stencil_depth_ = 0u;
-  std::unique_ptr<CanvasPassDelegate> delegate_;
+  std::unique_ptr<EntityPassDelegate> delegate_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(CanvasPass);
+  FML_DISALLOW_COPY_AND_ASSIGN(EntityPass);
 };
 
 struct CanvasStackEntry {

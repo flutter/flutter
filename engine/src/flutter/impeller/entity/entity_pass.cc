@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "impeller/aiks/canvas_pass.h"
+#include "impeller/entity/entity_pass.h"
 
 #include "impeller/entity/content_renderer.h"
 #include "impeller/geometry/path_builder.h"
@@ -11,28 +11,28 @@
 
 namespace impeller {
 
-CanvasPass::CanvasPass(std::unique_ptr<CanvasPassDelegate> delegate)
+EntityPass::EntityPass(std::unique_ptr<EntityPassDelegate> delegate)
     : delegate_(std::move(delegate)) {
   if (!delegate_) {
-    delegate_ = CanvasPassDelegate::MakeDefault();
+    delegate_ = EntityPassDelegate::MakeDefault();
   }
 }
 
-CanvasPass::~CanvasPass() = default;
+EntityPass::~EntityPass() = default;
 
-void CanvasPass::AddEntity(Entity entity) {
+void EntityPass::AddEntity(Entity entity) {
   entities_.emplace_back(std::move(entity));
 }
 
-const std::vector<Entity>& CanvasPass::GetEntities() const {
+const std::vector<Entity>& EntityPass::GetEntities() const {
   return entities_;
 }
 
-void CanvasPass::SetEntities(Entities entities) {
+void EntityPass::SetEntities(Entities entities) {
   entities_ = std::move(entities);
 }
 
-size_t CanvasPass::GetSubpassesDepth() const {
+size_t EntityPass::GetSubpassesDepth() const {
   size_t max_subpass_depth = 0u;
   for (const auto& subpass : subpasses_) {
     max_subpass_depth =
@@ -41,7 +41,7 @@ size_t CanvasPass::GetSubpassesDepth() const {
   return max_subpass_depth + 1u;
 }
 
-Rect CanvasPass::GetCoverageRect() const {
+Rect EntityPass::GetCoverageRect() const {
   std::optional<Point> min, max;
   for (const auto& entity : entities_) {
     auto coverage = entity.GetPath().GetMinMaxCoveragePoints();
@@ -64,15 +64,15 @@ Rect CanvasPass::GetCoverageRect() const {
   return {min->x, min->y, diff.x, diff.y};
 }
 
-CanvasPass* CanvasPass::GetSuperpass() const {
+EntityPass* EntityPass::GetSuperpass() const {
   return superpass_;
 }
 
-const CanvasPass::Subpasses& CanvasPass::GetSubpasses() const {
+const EntityPass::Subpasses& EntityPass::GetSubpasses() const {
   return subpasses_;
 }
 
-CanvasPass* CanvasPass::AddSubpass(std::unique_ptr<CanvasPass> pass) {
+EntityPass* EntityPass::AddSubpass(std::unique_ptr<EntityPass> pass) {
   if (!pass) {
     return nullptr;
   }
@@ -81,7 +81,7 @@ CanvasPass* CanvasPass::AddSubpass(std::unique_ptr<CanvasPass> pass) {
   return subpasses_.emplace_back(std::move(pass)).get();
 }
 
-bool CanvasPass::Render(ContentRenderer& renderer,
+bool EntityPass::Render(ContentRenderer& renderer,
                         RenderPass& parent_pass) const {
   for (const auto& entity : entities_) {
     if (!entity.Render(renderer, parent_pass)) {
@@ -172,7 +172,7 @@ bool CanvasPass::Render(ContentRenderer& renderer,
   return true;
 }
 
-void CanvasPass::IterateAllEntities(std::function<bool(Entity&)> iterator) {
+void EntityPass::IterateAllEntities(std::function<bool(Entity&)> iterator) {
   if (!iterator) {
     return;
   }
@@ -188,8 +188,8 @@ void CanvasPass::IterateAllEntities(std::function<bool(Entity&)> iterator) {
   }
 }
 
-std::unique_ptr<CanvasPass> CanvasPass::Clone() const {
-  auto pass = std::make_unique<CanvasPass>();
+std::unique_ptr<EntityPass> EntityPass::Clone() const {
+  auto pass = std::make_unique<EntityPass>();
   pass->SetEntities(entities_);
   for (const auto& subpass : subpasses_) {
     pass->AddSubpass(subpass->Clone());
@@ -197,11 +197,11 @@ std::unique_ptr<CanvasPass> CanvasPass::Clone() const {
   return pass;
 }
 
-void CanvasPass::SetTransformation(Matrix xformation) {
+void EntityPass::SetTransformation(Matrix xformation) {
   xformation_ = std::move(xformation);
 }
 
-void CanvasPass::SetStencilDepth(size_t stencil_depth) {
+void EntityPass::SetStencilDepth(size_t stencil_depth) {
   stencil_depth_ = stencil_depth;
 }
 

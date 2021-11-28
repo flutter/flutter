@@ -8,13 +8,13 @@
 #include <memory>
 
 #include "flutter/fml/macros.h"
-#include "impeller/aiks/canvas_pass.h"
 #include "impeller/entity/entity.h"
+#include "impeller/entity/entity_pass.h"
 
 namespace impeller {
 
 struct Picture {
-  std::unique_ptr<CanvasPass> pass;
+  std::unique_ptr<EntityPass> pass;
 };
 
 }  // namespace impeller
