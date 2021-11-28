@@ -4,7 +4,9 @@
 
 #pragma once
 
-#include "vector.h"
+#include <ostream>
+
+#include "impeller/geometry/vector.h"
 
 namespace impeller {
 
@@ -73,8 +75,16 @@ struct Quaternion {
   bool operator!=(const Quaternion& o) const {
     return x != o.x || y != o.y || z != o.z || w != o.w;
   }
-
-  std::string ToString() const;
 };
 
 }  // namespace impeller
+
+namespace std {
+
+inline std::ostream& operator<<(std::ostream& out,
+                                const impeller::Quaternion& q) {
+  out << "(" << q.x << ", " << q.y << ", " << q.z << ", " << q.w << ")";
+  return out;
+}
+
+}  // namespace std
