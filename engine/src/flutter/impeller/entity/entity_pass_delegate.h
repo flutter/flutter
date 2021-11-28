@@ -12,13 +12,13 @@
 
 namespace impeller {
 
-class CanvasPassDelegate {
+class EntityPassDelegate {
  public:
-  static std::unique_ptr<CanvasPassDelegate> MakeDefault();
+  static std::unique_ptr<EntityPassDelegate> MakeDefault();
 
-  CanvasPassDelegate();
+  EntityPassDelegate();
 
-  virtual ~CanvasPassDelegate();
+  virtual ~EntityPassDelegate();
 
   virtual bool CanCollapseIntoParentPass() = 0;
 
@@ -26,7 +26,7 @@ class CanvasPassDelegate {
       const Texture& target) = 0;
 
  private:
-  FML_DISALLOW_COPY_AND_ASSIGN(CanvasPassDelegate);
+  FML_DISALLOW_COPY_AND_ASSIGN(EntityPassDelegate);
 };
 
 }  // namespace impeller
