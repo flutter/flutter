@@ -20,6 +20,8 @@ class EntityPassDelegate {
 
   virtual ~EntityPassDelegate();
 
+  virtual bool CanElide() = 0;
+
   virtual bool CanCollapseIntoParentPass() = 0;
 
   virtual std::shared_ptr<Contents> CreateContentsForSubpassTarget(

@@ -91,6 +91,10 @@ bool EntityPass::Render(ContentRenderer& renderer,
     }
   }
   for (const auto& subpass : subpasses_) {
+    if (delegate_->CanElide()) {
+      continue;
+    }
+
     if (delegate_->CanCollapseIntoParentPass()) {
       // Directly render into the parent pass and move on.
       if (!subpass->Render(renderer, parent_pass)) {

@@ -14,12 +14,13 @@ PaintPassDelegate::PaintPassDelegate(Paint paint) : paint_(std::move(paint)) {}
 PaintPassDelegate::~PaintPassDelegate() = default;
 
 // |EntityPassDelgate|
-bool PaintPassDelegate::CanCollapseIntoParentPass() {
-  if (paint_.color.IsOpaque()) {
-    return true;
-  }
+bool PaintPassDelegate::CanElide() {
+  return paint_.color.IsTransparent();
+}
 
-  return false;
+// |EntityPassDelgate|
+bool PaintPassDelegate::CanCollapseIntoParentPass() {
+  return paint_.color.IsOpaque();
 }
 
 // |EntityPassDelgate|

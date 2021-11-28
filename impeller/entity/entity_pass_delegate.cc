@@ -16,6 +16,8 @@ class DefaultEntityPassDelegate final : public EntityPassDelegate {
 
   ~DefaultEntityPassDelegate() override = default;
 
+  bool CanElide() override { return false; }
+
   bool CanCollapseIntoParentPass() override { return true; }
 
   std::shared_ptr<Contents> CreateContentsForSubpassTarget(
