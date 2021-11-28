@@ -9,8 +9,10 @@
 #include <vector>
 
 #include "flutter/fml/macros.h"
+#include "impeller/aiks/canvas_pass_delegate.h"
 #include "impeller/entity/contents.h"
 #include "impeller/entity/entity.h"
+#include "impeller/renderer/render_target.h"
 
 namespace impeller {
 
@@ -21,7 +23,7 @@ class CanvasPass {
   using Entities = std::vector<Entity>;
   using Subpasses = std::vector<std::unique_ptr<CanvasPass>>;
 
-  CanvasPass();
+  CanvasPass(std::unique_ptr<CanvasPassDelegate> delegate = nullptr);
 
   ~CanvasPass();
 
@@ -57,6 +59,7 @@ class CanvasPass {
   CanvasPass* superpass_ = nullptr;
   Matrix xformation_;
   size_t stencil_depth_ = 0u;
+  std::unique_ptr<CanvasPassDelegate> delegate_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(CanvasPass);
 };
