@@ -45,6 +45,8 @@ bool Renderer::Render(const Surface& surface,
     return false;
   }
 
+  command_buffer->SetLabel("Onscreen Command Buffer");
+
   auto render_pass =
       command_buffer->CreateRenderPass(surface.GetTargetRenderPassDescriptor());
   if (!render_pass) {
@@ -63,15 +65,13 @@ bool Renderer::Render(const Surface& surface,
     return false;
   }
 
-  command_buffer->SubmitCommands(
+  return command_buffer->SubmitCommands(
       [sema = frames_in_flight_sema_](CommandBuffer::Status result) {
         sema->Signal();
         if (result != CommandBuffer::Status::kCompleted) {
           FML_LOG(ERROR) << "Could not commit command buffer.";
         }
       });
-
-  return true;
 }
 
 std::shared_ptr<Context> Renderer::GetContext() const {

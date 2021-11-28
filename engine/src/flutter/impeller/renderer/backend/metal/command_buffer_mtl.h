@@ -27,10 +27,13 @@ class CommandBufferMTL final : public CommandBuffer {
   CommandBufferMTL(id<MTLCommandQueue> queue);
 
   // |CommandBuffer|
+  void SetLabel(const std::string& label) const override;
+
+  // |CommandBuffer|
   bool IsValid() const override;
 
   // |CommandBuffer|
-  void SubmitCommands(CompletionCallback callback) override;
+  bool SubmitCommands(CompletionCallback callback) override;
 
   // |CommandBuffer|
   void ReserveSpotInQueue() override;

@@ -138,7 +138,7 @@ enum class ColorWriteMask : uint64_t {
   kGreen = 1 << 1,
   kBlue = 1 << 2,
   kAlpha = 1 << 3,
-  kAll = kRed | kGreen | kBlue,
+  kAll = kRed | kGreen | kBlue | kAlpha,
 };
 
 constexpr size_t BytesPerPixelForPixelFormat(PixelFormat format) {
@@ -163,7 +163,7 @@ constexpr size_t BytesPerPixelForPixelFormat(PixelFormat format) {
 /// @brief      Describe the color attachment that will be used with this
 ///             pipeline.
 ///
-/// Blending at specific color attachments follows the pseudocode:
+/// Blending at specific color attachments follows the pseudo-code:
 /// ```
 /// if (blending_enabled) {
 ///   final_color.rgb = (src_color_blend_factor * new_color.rgb)
@@ -248,7 +248,7 @@ enum class StencilOperation {
   kDecrementClamp,
   /// Perform a logical bitwise invert on the current stencil value.
   kInvert,
-  /// Increment the current stencil value by 1. If at maxium, set to zero.
+  /// Increment the current stencil value by 1. If at maximum, set to zero.
   kIncrementWrap,
   /// Decrement the current stencil value by 1. If at zero, set to maximum.
   kDecrementWrap,
