@@ -87,8 +87,8 @@ bool LinearGradientContents::Render(const ContentRenderer& renderer,
   cmd.label = "LinearGradientFill";
   cmd.pipeline = renderer.GetGradientFillPipeline();
   cmd.stencil_reference = entity.GetStencilDepth();
-  cmd.BindVertices(vertices_builder.CreateVertexBuffer(
-      *renderer.GetContext()->GetPermanentsAllocator()));
+  cmd.BindVertices(
+      vertices_builder.CreateVertexBuffer(pass.GetTransientsBuffer()));
   cmd.primitive_type = PrimitiveType::kTriangle;
   FS::BindGradientInfo(
       cmd, pass.GetTransientsBuffer().EmplaceUniform(gradient_info));

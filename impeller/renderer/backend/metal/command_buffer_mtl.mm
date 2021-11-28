@@ -22,6 +22,14 @@ bool CommandBufferMTL::IsValid() const {
   return is_valid_;
 }
 
+void CommandBufferMTL::SetLabel(const std::string& label) const {
+  if (label.empty()) {
+    return;
+  }
+
+  [buffer_ setLabel:@(label.data())];
+}
+
 static CommandBuffer::Status ToCommitResult(MTLCommandBufferStatus status) {
   switch (status) {
     case MTLCommandBufferStatusCompleted:
@@ -34,13 +42,13 @@ static CommandBuffer::Status ToCommitResult(MTLCommandBufferStatus status) {
   return CommandBufferMTL::Status::kError;
 }
 
-void CommandBufferMTL::SubmitCommands(CompletionCallback callback) {
+bool CommandBufferMTL::SubmitCommands(CompletionCallback callback) {
   if (!buffer_) {
     // Already committed. This is caller error.
     if (callback) {
       callback(Status::kError);
     }
-    return;
+    return false;
   }
 
   if (callback) {
@@ -51,6 +59,7 @@ void CommandBufferMTL::SubmitCommands(CompletionCallback callback) {
 
   [buffer_ commit];
   buffer_ = nil;
+  return true;
 }
 
 void CommandBufferMTL::ReserveSpotInQueue() {

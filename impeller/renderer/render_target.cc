@@ -4,6 +4,7 @@
 
 #include "impeller/renderer/render_target.h"
 
+#include "impeller/base/strings.h"
 #include "impeller/renderer/allocator.h"
 #include "impeller/renderer/context.h"
 #include "impeller/renderer/texture.h"
@@ -110,7 +111,7 @@ RenderTarget RenderTarget::CreateOffscreen(const Context& context,
     return {};
   }
 
-  color0.texture->SetLabel(label);
+  color0.texture->SetLabel(SPrintF("%sColorTexture", label.c_str()));
 
   StencilAttachment stencil0;
   stencil0.load_action = LoadAction::kClear;
@@ -123,7 +124,7 @@ RenderTarget RenderTarget::CreateOffscreen(const Context& context,
     return {};
   }
 
-  stencil0.texture->SetLabel(label);
+  stencil0.texture->SetLabel(SPrintF("%sStencilTexture", label.c_str()));
 
   RenderTarget target;
   target.SetColorAttachment(std::move(color0), 0u);
