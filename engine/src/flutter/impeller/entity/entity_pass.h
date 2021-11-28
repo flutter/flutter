@@ -23,9 +23,11 @@ class EntityPass {
   using Entities = std::vector<Entity>;
   using Subpasses = std::vector<std::unique_ptr<EntityPass>>;
 
-  EntityPass(std::unique_ptr<EntityPassDelegate> delegate = nullptr);
+  EntityPass();
 
   ~EntityPass();
+
+  void SetDelegate(std::unique_ptr<EntityPassDelegate> delgate);
 
   size_t GetSubpassesDepth() const;
 
@@ -61,7 +63,8 @@ class EntityPass {
   EntityPass* superpass_ = nullptr;
   Matrix xformation_;
   size_t stencil_depth_ = 0u;
-  std::unique_ptr<EntityPassDelegate> delegate_;
+  std::unique_ptr<EntityPassDelegate> delegate_ =
+      EntityPassDelegate::MakeDefault();
 
   FML_DISALLOW_COPY_AND_ASSIGN(EntityPass);
 };

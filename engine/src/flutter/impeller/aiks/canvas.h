@@ -31,7 +31,7 @@ class Canvas {
 
   void Save();
 
-  void SaveLayer(const Paint& paint, std::optional<Rect> bounds = std::nullopt);
+  void SaveLayer(Paint paint, std::optional<Rect> bounds = std::nullopt);
 
   bool Restore();
 

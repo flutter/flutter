@@ -94,6 +94,8 @@ class TextureContents final : public Contents {
 
   void SetSourceRect(const IRect& source_rect);
 
+  void SetOpacity(Scalar opacity);
+
   const IRect& GetSourceRect() const;
 
   // |Contents|
@@ -104,6 +106,7 @@ class TextureContents final : public Contents {
  public:
   std::shared_ptr<Texture> texture_;
   IRect source_rect_;
+  Scalar opacity_ = 1.0f;
 
   FML_DISALLOW_COPY_AND_ASSIGN(TextureContents);
 };

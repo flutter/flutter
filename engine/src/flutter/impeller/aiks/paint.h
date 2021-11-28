@@ -18,7 +18,7 @@ struct Paint {
     kStroke,
   };
 
-  Color color;
+  Color color = Color::Black();
   Scalar stroke_width = 0.0;
   Style style = Style::kFill;
 

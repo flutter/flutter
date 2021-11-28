@@ -644,6 +644,8 @@ struct Color {
   }
 
   constexpr bool IsTransparent() const { return alpha == 0.0; }
+
+  constexpr bool IsOpaque() const { return alpha == 1.0; }
 };
 
 /**

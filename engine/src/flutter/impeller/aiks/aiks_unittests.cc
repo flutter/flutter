@@ -112,7 +112,7 @@ TEST_F(AiksTest, CanRenderGroupOpacity) {
   Paint red;
   red.color = Color::Red();
   Paint green;
-  green.color = Color::Green();
+  green.color = Color::Green().WithAlpha(0.5);
   Paint blue;
   blue.color = Color::Blue();
 
