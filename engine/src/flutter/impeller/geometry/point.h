@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <ostream>
 #include <string>
 
 #include "impeller/geometry/scalar.h"
@@ -113,3 +114,14 @@ using Point = TPoint<Scalar>;
 using IPoint = TPoint<int64_t>;
 
 }  // namespace impeller
+
+namespace std {
+
+template <class T>
+inline std::ostream& operator<<(std::ostream& out,
+                                const impeller::TPoint<T>& p) {
+  out << "(" << p.x << ", " << p.y << ")";
+  return out;
+}
+
+}  // namespace std

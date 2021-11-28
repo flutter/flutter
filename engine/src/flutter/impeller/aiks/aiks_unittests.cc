@@ -119,7 +119,7 @@ TEST_F(AiksTest, CanRenderGroupOpacity) {
   Paint alpha;
   alpha.color = Color::Red().WithAlpha(0.5);
 
-  canvas.SaveLayer(alpha);
+  // canvas.SaveLayer(alpha);
 
   canvas.DrawRect({000, 000, 100, 100}, red);
   canvas.DrawRect({020, 020, 100, 100}, green);

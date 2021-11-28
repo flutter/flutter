@@ -27,11 +27,4 @@ Quaternion Quaternion::Slerp(const Quaternion& to, double time) const {
   }
 }
 
-std::string Quaternion::ToString() const {
-  std::stringstream stream;
-  stream << "{" << x << ", "
-         << ", " << y << ", " << z << ", " << w << "}";
-  return stream.str();
-}
-
 }  // namespace impeller

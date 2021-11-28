@@ -11,49 +11,6 @@
 #include "impeller/geometry/size.h"
 #include "impeller/geometry/vector.h"
 
-namespace std {
-
-inline std::ostream& operator<<(std::ostream& out, const impeller::Matrix& m) {
-  out << "(";
-  for (size_t i = 0; i < 4u; i++) {
-    for (size_t j = 0; j < 4u; j++) {
-      out << m.e[i][j] << ",";
-    }
-    out << std::endl;
-  }
-  out << ")";
-  return out;
-}
-
-inline std::ostream& operator<<(std::ostream& out,
-                                const impeller::Quaternion& q) {
-  out << "(" << q.x << ", " << q.y << ", " << q.z << ", " << q.w << ")";
-  return out;
-}
-
-template <class T>
-inline std::ostream& operator<<(std::ostream& out,
-                                const impeller::TSize<T>& s) {
-  out << "(" << s.width << ", " << s.height << ")";
-  return out;
-}
-
-template <class T>
-inline std::ostream& operator<<(std::ostream& out,
-                                const impeller::TPoint<T>& p) {
-  out << "(" << p.x << ", " << p.y << ")";
-  return out;
-}
-
-template <class T>
-inline std::ostream& operator<<(std::ostream& out,
-                                const impeller::TRect<T>& r) {
-  out << "(" << r.origin << ", " << r.size << ")";
-  return out;
-}
-
-}  // namespace std
-
 inline bool NumberNear(double a, double b) {
   static const double epsilon = 1e-3;
   return (a > (b - epsilon)) && (a < (b + epsilon));

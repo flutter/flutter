@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <ostream>
 #include <vector>
 
 #include "impeller/geometry/point.h"
@@ -122,3 +123,14 @@ using Rect = TRect<Scalar>;
 using IRect = TRect<int64_t>;
 
 }  // namespace impeller
+
+namespace std {
+
+template <class T>
+inline std::ostream& operator<<(std::ostream& out,
+                                const impeller::TRect<T>& r) {
+  out << "(" << r.origin << ", " << r.size << ")";
+  return out;
+}
+
+}  // namespace std
