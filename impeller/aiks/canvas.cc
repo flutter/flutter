@@ -18,7 +18,7 @@ Canvas::Canvas() {
 Canvas::~Canvas() = default;
 
 void Canvas::Initialize() {
-  base_pass_ = std::make_unique<CanvasPass>();
+  base_pass_ = std::make_unique<EntityPass>();
   current_pass_ = base_pass_.get();
   xformation_stack_.emplace_back(CanvasStackEntry{});
   FML_DCHECK(GetSaveCount() == 1u);
@@ -173,7 +173,7 @@ Picture Canvas::EndRecordingAsPicture() {
   return picture;
 }
 
-CanvasPass& Canvas::GetCurrentPass() {
+EntityPass& Canvas::GetCurrentPass() {
   FML_DCHECK(current_pass_ != nullptr);
   return *current_pass_;
 }
@@ -194,7 +194,7 @@ void Canvas::Save(bool create_subpass) {
   auto entry = CanvasStackEntry{};
   if (create_subpass) {
     entry.is_subpass = true;
-    current_pass_ = GetCurrentPass().AddSubpass(std::make_unique<CanvasPass>());
+    current_pass_ = GetCurrentPass().AddSubpass(std::make_unique<EntityPass>());
     current_pass_->SetTransformation(xformation_stack_.back().xformation);
     current_pass_->SetStencilDepth(xformation_stack_.back().stencil_depth);
   } else {

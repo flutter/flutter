@@ -10,10 +10,10 @@
 #include <vector>
 
 #include "flutter/fml/macros.h"
-#include "impeller/aiks/canvas_pass.h"
 #include "impeller/aiks/image.h"
 #include "impeller/aiks/paint.h"
 #include "impeller/aiks/picture.h"
+#include "impeller/entity/entity_pass.h"
 #include "impeller/geometry/matrix.h"
 #include "impeller/geometry/path.h"
 #include "impeller/geometry/point.h"
@@ -69,15 +69,15 @@ class Canvas {
   Picture EndRecordingAsPicture();
 
  private:
-  std::unique_ptr<CanvasPass> base_pass_;
-  CanvasPass* current_pass_ = nullptr;
+  std::unique_ptr<EntityPass> base_pass_;
+  EntityPass* current_pass_ = nullptr;
   std::deque<CanvasStackEntry> xformation_stack_;
 
   void Initialize();
 
   void Reset();
 
-  CanvasPass& GetCurrentPass();
+  EntityPass& GetCurrentPass();
 
   void IncrementStencilDepth();
 
