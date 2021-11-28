@@ -11,14 +11,16 @@
 
 namespace impeller {
 
-EntityPass::EntityPass(std::unique_ptr<EntityPassDelegate> delegate)
-    : delegate_(std::move(delegate)) {
-  if (!delegate_) {
-    delegate_ = EntityPassDelegate::MakeDefault();
-  }
-}
+EntityPass::EntityPass() = default;
 
 EntityPass::~EntityPass() = default;
+
+void EntityPass::SetDelegate(std::unique_ptr<EntityPassDelegate> delegate) {
+  if (!delegate) {
+    return;
+  }
+  delegate_ = std::move(delegate);
+}
 
 void EntityPass::AddEntity(Entity entity) {
   entities_.emplace_back(std::move(entity));
@@ -117,7 +119,7 @@ bool EntityPass::Render(ContentRenderer& renderer,
     }
 
     auto offscreen_texture_contents =
-        delegate_->CreateContentsForSubpassTarget(*subpass_texture);
+        delegate_->CreateContentsForSubpassTarget(subpass_texture);
 
     if (!offscreen_texture_contents) {
       // This is an error because the subpass delegate said the pass couldn't be

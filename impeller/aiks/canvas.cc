@@ -7,6 +7,7 @@
 #include <algorithm>
 
 #include "flutter/fml/logging.h"
+#include "impeller/aiks/paint_pass_delegate.h"
 #include "impeller/geometry/path_builder.h"
 
 namespace impeller {
@@ -90,7 +91,9 @@ void Canvas::DrawPath(Path path, Paint paint) {
   GetCurrentPass().AddEntity(std::move(entity));
 }
 
-void Canvas::SaveLayer(const Paint& paint, std::optional<Rect> bounds) {
+void Canvas::SaveLayer(Paint paint, std::optional<Rect> bounds) {
+  GetCurrentPass().SetDelegate(
+      std::make_unique<PaintPassDelegate>(std::move(paint)));
   Save(true);
 }
 

@@ -184,6 +184,10 @@ std::shared_ptr<Texture> TextureContents::GetTexture() const {
   return texture_;
 }
 
+void TextureContents::SetOpacity(Scalar opacity) {
+  opacity_ = opacity;
+}
+
 bool TextureContents::Render(const ContentRenderer& renderer,
                              const Entity& entity,
                              RenderPass& pass) const {
@@ -233,6 +237,7 @@ bool TextureContents::Render(const ContentRenderer& renderer,
   VS::FrameInfo frame_info;
   frame_info.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
                    entity.GetTransformation();
+  frame_info.alpha = opacity_;
 
   Command cmd;
   cmd.label = "TextureFill";
