@@ -14,6 +14,8 @@ impeller_component("aiks") {
     "image.h",
     "paint.cc",
     "paint.h",
+    "paint_pass_delegate.cc",
+    "paint_pass_delegate.h",
     "picture.cc",
     "picture.h",
     "picture_recorder.cc",
