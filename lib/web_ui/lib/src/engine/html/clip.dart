@@ -361,7 +361,7 @@ class PersistedPhysicalShape extends PersistedContainerSurface
     _clipElement?.remove();
     _svgElement?.remove();
     _clipElement = svgClipPath;
-    domRenderer.append(rootElement!, _clipElement!);
+    rootElement!.append(_clipElement!);
     if (elevation == 0.0) {
       DomRenderer.setClipPath(rootElement!, createSvgClipUrl());
       final html.CssStyleDeclaration rootElementStyle = rootElement!.style;
@@ -444,7 +444,7 @@ class PersistedPhysicalShape extends PersistedContainerSurface
       // Reuse clipElement from prior surface.
       _clipElement = oldSurface._clipElement;
       if (_clipElement != null) {
-        domRenderer.append(rootElement!, _clipElement!);
+        rootElement!.append(_clipElement!);
       }
       oldSurface._clipElement = null;
       _svgElement = oldSurface._svgElement;
@@ -486,7 +486,7 @@ class PersistedClipPath extends PersistedContainerSurface
   void apply() {
     _clipElement?.remove();
     _clipElement = createSvgClipDef(childContainer! as html.HtmlElement, clipPath);
-    domRenderer.append(childContainer!, _clipElement!);
+    childContainer!.append(_clipElement!);
   }
 
   @override
