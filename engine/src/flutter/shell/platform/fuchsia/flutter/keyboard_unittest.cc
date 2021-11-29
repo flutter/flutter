@@ -60,11 +60,39 @@ class KeyboardTest : public testing::Test {
   }
 
   // Converts a pressed key to usage value.
-  uint32_t ToUsage(Key key) { return static_cast<uint64_t>(key) & 0xFFFF; }
+  uint32_t ToUsage(Key key) { return static_cast<uint64_t>(key) & 0xFFFFFFFF; }
 
  private:
   zx_time_t timestamp_ = 0;
 };
+
+// Checks whether the HID usage, page and ID values are reported correctly.
+TEST_F(KeyboardTest, UsageValues) {
+  std::vector<KeyEvent> keys;
+  keys.emplace_back(NewKeyEvent(KeyEventType::SYNC, Key::CAPS_LOCK));
+  Keyboard keyboard;
+  ConsumeEvents(&keyboard, keys);
+
+  // Values for Caps Lock.
+  // See spec at:
+  // https://cs.opensource.google/fuchsia/fuchsia/+/main:sdk/fidl/fuchsia.input/keys.fidl;l=177;drc=e3b39f2b57e720770773b857feca4f770ee0619e
+  EXPECT_EQ(0x07u, keyboard.LastHIDUsagePage());
+  EXPECT_EQ(0x39u, keyboard.LastHIDUsageID());
+  EXPECT_EQ(0x70039u, keyboard.LastHIDUsage());
+
+  // Try also an usage that is not on page 7. This one is on page 0x0C.
+  // See spec at:
+  // https://cs.opensource.google/fuchsia/fuchsia/+/main:sdk/fidl/fuchsia.input/keys.fidl;l=339;drc=e3b39f2b57e720770773b857feca4f770ee0619e
+  // Note that Fuchsia does not define constants for every key you may think of,
+  // rather only those that we had the need for.  However it is not an issue
+  // to add more keys if needed.
+  keys.clear();
+  keys.emplace_back(NewKeyEvent(KeyEventType::SYNC, Key::MEDIA_MUTE));
+  ConsumeEvents(&keyboard, keys);
+  EXPECT_EQ(0x0Cu, keyboard.LastHIDUsagePage());
+  EXPECT_EQ(0xE2u, keyboard.LastHIDUsageID());
+  EXPECT_EQ(0xC00E2u, keyboard.LastHIDUsage());
+}
 
 // This test checks that if a caps lock has been pressed when we didn't have
 // focus, the effect of caps lock remains.  Only this first test case is

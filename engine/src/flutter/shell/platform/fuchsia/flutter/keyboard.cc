@@ -285,7 +285,7 @@ bool Keyboard::IsShift() {
 }
 
 bool Keyboard::IsKeys() {
-  return (static_cast<uint64_t>(last_event_.key()) & 0xFFFF0000) == 0x00070000;
+  return LastHIDUsagePage() == 0x7;
 }
 
 uint32_t Keyboard::Modifiers() {
@@ -298,12 +298,16 @@ uint32_t Keyboard::Modifiers() {
 }
 
 uint32_t Keyboard::LastCodePoint() {
+  // TODO(https://github.com/flutter/flutter/issues/93891):
+  // `KeyEvent::key_meaning` should be used here to do key mapping before US
+  // QWERTY is applied. The US QWERTY should be applied only if `key_meaning`
+  // is not available.
   static const int qwerty_map_size =
       sizeof(QWERTY_TO_CODE_POINTS) / sizeof(QWERTY_TO_CODE_POINTS[0]);
   if (!IsKeys()) {
     return 0;
   }
-  const auto usage = LastHIDUsage();
+  const auto usage = LastHIDUsageID();
   if (usage < qwerty_map_size) {
     return QWERTY_TO_CODE_POINTS[usage][IsShift() & 1];
   }
@@ -311,8 +315,22 @@ uint32_t Keyboard::LastCodePoint() {
   return 0;
 }
 
+uint32_t Keyboard::GetLastKey() {
+  // TODO(https://github.com/flutter/flutter/issues/93898): key is not always
+  // set. Figure out what to do then.
+  return static_cast<uint32_t>(last_event_.key());
+}
+
 uint32_t Keyboard::LastHIDUsage() {
-  return static_cast<uint64_t>(last_event_.key()) & 0xFFFF;
+  return GetLastKey() & 0xFFFFFFFF;
+}
+
+uint16_t Keyboard::LastHIDUsageID() {
+  return GetLastKey() & 0xFFFF;
+}
+
+uint16_t Keyboard::LastHIDUsagePage() {
+  return (GetLastKey() >> 16) & 0xFFFF;
 }
 
 }  // namespace flutter_runner
