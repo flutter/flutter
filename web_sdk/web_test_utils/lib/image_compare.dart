@@ -32,6 +32,7 @@ Future<String> compareImage(
   PixelComparison pixelComparison,
   double maxDiffRateFailure,
   SkiaGoldClient? skiaClient, {
+  required bool isCanvaskitTest,
   // TODO(mdebbar): Remove these args with goldens repo.
   String goldensDirectory = '',
   String filenameSuffix = '',
@@ -43,7 +44,7 @@ Future<String> compareImage(
     // comparison.
 
     // TODO(mdebbar): Use Skia Gold for comparison, not only for uploading.
-    await _uploadToSkiaGold(skiaClient, screenshot, filename);
+    await _uploadToSkiaGold(skiaClient, screenshot, filename, isCanvaskitTest);
   }
 
   filename = filename.replaceAll('.png', '$filenameSuffix.png');
@@ -163,6 +164,7 @@ Future<void> _uploadToSkiaGold(
   SkiaGoldClient skiaClient,
   Image screenshot,
   String filename,
+  bool isCanvaskitTest,
 ) async {
   // Can't upload to Gold Skia unless running in LUCI.
   assert(_isLuci);
@@ -172,11 +174,13 @@ Future<void> _uploadToSkiaGold(
   final File goldenFile = File(p.join(environment.webUiSkiaGoldDirectory.path, filename));
   await goldenFile.writeAsBytes(encodePng(screenshot), flush: true);
 
+  final int screenshotSize = screenshot.width * screenshot.height;
+
   if (_isPreSubmit) {
-    return _uploadInPreSubmit(skiaClient, filename, goldenFile);
+    return _uploadInPreSubmit(skiaClient, filename, goldenFile, screenshotSize, isCanvaskitTest);
   }
   if (_isPostSubmit) {
-    return _uploadInPostSubmit(skiaClient, filename, goldenFile);
+    return _uploadInPostSubmit(skiaClient, filename, goldenFile, screenshotSize, isCanvaskitTest);
   }
 }
 
@@ -184,16 +188,20 @@ Future<void> _uploadInPreSubmit(
   SkiaGoldClient skiaClient,
   String filename,
   File goldenFile,
+  int screenshotSize,
+  bool isCanvaskitTest,
 ) {
   assert(_isPreSubmit);
-  return skiaClient.tryjobAdd(filename, goldenFile);
+  return skiaClient.tryjobAdd(filename, goldenFile, screenshotSize, isCanvaskitTest);
 }
 
 Future<void> _uploadInPostSubmit(
   SkiaGoldClient skiaClient,
   String filename,
   File goldenFile,
+  int screenshotSize,
+  bool isCanvaskitTest,
 ) {
   assert(_isPostSubmit);
-  return skiaClient.imgtestAdd(filename, goldenFile);
+  return skiaClient.imgtestAdd(filename, goldenFile, screenshotSize, isCanvaskitTest);
 }
