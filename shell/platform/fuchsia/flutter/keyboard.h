@@ -28,8 +28,25 @@ class Keyboard final {
   // the state of the modifier keys.
   uint32_t LastCodePoint();
 
-  // Gets the last encountered HID usage.
+  // Gets the last encountered HID usage.  This is a 32-bit number, with the
+  // upper 16 bits equal to `LastHidUsagePage()`, and the lower 16 bits equal
+  // to `LastHIDUsageID()`.
+  //
+  // The key corresponding to A will have the usage 0x7004. This function will
+  // return 0x7004 in that case.
   uint32_t LastHIDUsage();
+
+  // Gets the last encountered HID usage page.
+  //
+  // The key corresponding to A will have the usage 0x7004. This function will
+  // return 0x7 in that case.
+  uint16_t LastHIDUsagePage();
+
+  // Gets the last encountered HID usage ID.
+  //
+  // The key corresponding to A will have the usage 0x7004. This function will
+  // return 0x4 in that case.
+  uint16_t LastHIDUsageID();
 
  private:
   // Return true if any level shift is active.
@@ -38,6 +55,9 @@ class Keyboard final {
   // Returns true if the last key event was about a key that may have a code
   // point associated.
   bool IsKeys();
+
+  // Returns the value of the last key as a uint32_t.
+  uint32_t GetLastKey();
 
   // Set to false until any event is received.
   bool any_events_received_ : 1;
