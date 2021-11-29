@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "flutter/shell/platform/windows/flutter_windows_view.h"
+
+#include <comdef.h>
+#include <comutil.h>
+#include <oleacc.h>
+
 #include <iostream>
 #include <vector>
 
@@ -9,7 +15,6 @@
 #include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
 #include "flutter/shell/platform/windows/flutter_windows_engine.h"
 #include "flutter/shell/platform/windows/flutter_windows_texture_registrar.h"
-#include "flutter/shell/platform/windows/flutter_windows_view.h"
 #include "flutter/shell/platform/windows/testing/engine_modifier.h"
 #include "flutter/shell/platform/windows/testing/mock_window_binding_handler.h"
 #include "flutter/shell/platform/windows/testing/test_keyboard.h"
@@ -146,6 +151,69 @@ TEST(FlutterWindowsViewTest, EnableSemantics) {
 
   view.OnUpdateSemanticsEnabled(true);
   EXPECT_TRUE(semantics_enabled);
+}
+
+TEST(FlutterWindowsEngine, AddSemanticsNodeUpdate) {
+  std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
+  EngineModifier modifier(engine.get());
+  modifier.embedder_api().UpdateSemanticsEnabled =
+      [](FLUTTER_API_SYMBOL(FlutterEngine) engine, bool enabled) {
+        return kSuccess;
+      };
+
+  auto window_binding_handler =
+      std::make_unique<::testing::NiceMock<MockWindowBindingHandler>>();
+  FlutterWindowsView view(std::move(window_binding_handler));
+  view.SetEngine(std::move(engine));
+
+  // Enable semantics to instantiate accessibility bridge.
+  view.OnUpdateSemanticsEnabled(true);
+
+  auto bridge = view.GetEngine()->accessibility_bridge().lock();
+  ASSERT_TRUE(bridge);
+
+  // Add root node.
+  FlutterSemanticsNode node{sizeof(FlutterSemanticsNode), 0};
+  node.label = "name";
+  node.value = "value";
+  node.platform_view_id = -1;
+  bridge->AddFlutterSemanticsNodeUpdate(&node);
+  bridge->CommitUpdates();
+
+  // Look up the root windows node delegate.
+  auto node_delegate = bridge
+                           ->GetFlutterPlatformNodeDelegateFromID(
+                               AccessibilityBridge::kRootNodeId)
+                           .lock();
+  ASSERT_TRUE(node_delegate);
+  EXPECT_EQ(node_delegate->GetChildCount(), 0);
+
+  // Get the native IAccessible object.
+  IAccessible* native_view = node_delegate->GetNativeViewAccessible();
+  ASSERT_TRUE(native_view != nullptr);
+
+  // Property lookups will be made against this node itself.
+  VARIANT varchild{};
+  varchild.vt = VT_I4;
+  varchild.lVal = CHILDID_SELF;
+
+  // Verify node name matches our label.
+  BSTR bname = nullptr;
+  ASSERT_EQ(native_view->get_accName(varchild, &bname), S_OK);
+  std::string name(_com_util::ConvertBSTRToString(bname));
+  EXPECT_EQ(name, "name");
+
+  // Verify node value matches.
+  BSTR bvalue = nullptr;
+  ASSERT_EQ(native_view->get_accValue(varchild, &bvalue), S_OK);
+  std::string value(_com_util::ConvertBSTRToString(bvalue));
+  EXPECT_EQ(value, "value");
+
+  // Verify node type is a group.
+  VARIANT varrole{};
+  varrole.vt = VT_I4;
+  ASSERT_EQ(native_view->get_accRole(varchild, &varrole), S_OK);
+  EXPECT_EQ(varrole.lVal, ROLE_SYSTEM_STATICTEXT);
 }
 
 }  // namespace testing

@@ -101,6 +101,9 @@ class FlutterWindowWin32 : public WindowWin32, public WindowBindingHandler {
                 FlutterPointerDeviceKind device_kind,
                 int32_t device_id) override;
 
+  // |WindowWin32|
+  gfx::NativeViewAccessible GetNativeViewAccessible() override;
+
   // |FlutterWindowBindingHandler|
   void SetView(WindowBindingHandlerDelegate* view) override;
 

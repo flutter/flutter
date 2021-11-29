@@ -6,6 +6,7 @@
 
 #include <chrono>
 
+#include "flutter/shell/platform/common/accessibility_bridge.h"
 #include "flutter/shell/platform/windows/keyboard_key_channel_handler.h"
 #include "flutter/shell/platform/windows/keyboard_key_embedder_handler.h"
 #include "flutter/shell/platform/windows/text_input_plugin.h"
@@ -250,6 +251,10 @@ void FlutterWindowsView::OnPlatformBrightnessChanged() {
 
 void FlutterWindowsView::OnUpdateSemanticsEnabled(bool enabled) {
   engine_->UpdateSemanticsEnabled(enabled);
+}
+
+gfx::NativeViewAccessible FlutterWindowsView::GetNativeViewAccessible() {
+  return engine_->GetNativeAccessibleFromId(AccessibilityBridge::kRootNodeId);
 }
 
 void FlutterWindowsView::OnCursorRectUpdated(const Rect& rect) {
