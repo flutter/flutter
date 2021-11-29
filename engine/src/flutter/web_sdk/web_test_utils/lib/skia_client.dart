@@ -16,6 +16,13 @@ const String _kGoldctlKey = 'GOLDCTL';
 const String _skiaGoldHost = 'https://flutter-engine-gold.skia.org';
 const String _instance = 'flutter-engine';
 
+/// The percentage of accepted pixels to be wrong.
+///
+/// This should be a double between 0.0 and 1.0. A value of 0.0 means we don't
+/// accept any pixel to be different. A value of 1.0 means we accept 100% of
+/// pixels to be different.
+const double kMaxDifferentPixelsRate = 0.1;
+
 /// A client for uploading image tests and making baseline requests to the
 /// Flutter Gold Dashboard.
 class SkiaGoldClient {
@@ -162,7 +169,12 @@ class SkiaGoldClient {
   ///
   /// The [testName] and [goldenFile] parameters reference the current
   /// comparison being evaluated.
-  Future<bool> imgtestAdd(String testName, File goldenFile) async {
+  Future<bool> imgtestAdd(
+    String testName,
+    File goldenFile,
+    int screenshotSize,
+    bool isCanvaskitTest,
+  ) async {
     await _imgtestInit();
 
     final List<String> imgtestCommand = <String>[
@@ -171,6 +183,7 @@ class SkiaGoldClient {
       '--work-dir', _tempPath,
       '--test-name', cleanTestName(testName),
       '--png-file', goldenFile.path,
+      ..._getMatchingArguments(testName, screenshotSize, isCanvaskitTest),
     ];
 
     final ProcessResult result = await process.run(imgtestCommand);
@@ -250,7 +263,12 @@ class SkiaGoldClient {
   ///
   /// The [testName] and [goldenFile] parameters reference the current
   /// comparison being evaluated.
-  Future<void> tryjobAdd(String testName, File goldenFile) async {
+  Future<void> tryjobAdd(
+    String testName,
+    File goldenFile,
+    int screenshotSize,
+    bool isCanvaskitTest,
+  ) async {
     await _tryjobInit();
 
     final List<String> imgtestCommand = <String>[
@@ -259,6 +277,7 @@ class SkiaGoldClient {
       '--work-dir', _tempPath,
       '--test-name', cleanTestName(testName),
       '--png-file', goldenFile.path,
+      ..._getMatchingArguments(testName, screenshotSize, isCanvaskitTest),
     ];
 
     final ProcessResult result = await process.run(imgtestCommand);
@@ -277,6 +296,44 @@ class SkiaGoldClient {
         ..writeln();
       throw Exception(buf.toString());
     }
+  }
+
+  List<String> _getMatchingArguments(
+    String testName,
+    int screenshotSize,
+    bool isCanvaskitTest,
+  ) {
+    // The algorithm to be used when matching images. The available options are:
+    // - "fuzzy": Allows for customizing the thresholds of pixel differences.
+    // - "sobel": Same as "fuzzy" but performs edge detection before performing
+    //            a fuzzy match.
+    const String algorithm = 'fuzzy';
+
+    // The number of pixels in this image that are allowed to differ from the
+    // baseline. It's okay for this to be a slightly high number like 10% of the
+    // image size because those wrong pixels are constrained by
+    // `pixelDeltaThreshold` below.
+    final int maxDifferentPixels = (screenshotSize * kMaxDifferentPixelsRate).toInt();
+
+    // The maximum acceptable difference in RGB channels of each pixel.
+    //
+    // ```
+    // abs(r(image) - r(golden)) + abs(g(image) - g(golden)) + abs(b(image) - b(golden)) <= pixelDeltaThreshold
+    // ```
+    final String pixelDeltaThreshold;
+    if (isCanvaskitTest) {
+      pixelDeltaThreshold = '21';
+    } else if (browserName == 'ios-safari') {
+      pixelDeltaThreshold = '15';
+    } else {
+      pixelDeltaThreshold = '3';
+    }
+
+    return <String>[
+      '--add-test-optional-key', 'image_matching_algorithm:$algorithm',
+      '--add-test-optional-key', 'fuzzy_max_different_pixels:$maxDifferentPixels',
+      '--add-test-optional-key', 'fuzzy_pixel_delta_threshold:$pixelDeltaThreshold',
+    ];
   }
 
   /// Returns the latest positive digest for the given test known to Skia Gold
@@ -356,9 +413,9 @@ class SkiaGoldClient {
   /// browser the image was rendered on.
   Map<String, dynamic> _getKeys() {
     return <String, dynamic>{
+      'Browser': browserName,
       'CI': 'luci',
       'Platform': Platform.operatingSystem,
-      'Browser': browserName,
     };
   }
 

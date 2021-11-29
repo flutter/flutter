@@ -339,17 +339,20 @@ class BrowserPlatform extends PlatformPlugin {
         requestData['region'] as Map<String, dynamic>;
     final PixelComparison pixelComparison = PixelComparison.values.firstWhere(
         (PixelComparison value) => value.toString() == requestData['pixelComparison']);
+    final bool isCanvaskitTest = requestData['isCanvaskitTest'] as bool;
     final String result = await _diffScreenshot(
-        filename, write, maxDiffRate, region, pixelComparison);
+        filename, write, maxDiffRate, region, pixelComparison, isCanvaskitTest);
     return shelf.Response.ok(json.encode(result));
   }
 
   Future<String> _diffScreenshot(
-      String filename,
-      bool write,
-      double maxDiffRateFailure,
-      Map<String, dynamic> region,
-      PixelComparison pixelComparison) async {
+    String filename,
+    bool write,
+    double maxDiffRateFailure,
+    Map<String, dynamic> region,
+    PixelComparison pixelComparison,
+    bool isCanvaskitTest,
+  ) async {
     if (doUpdateScreenshotGoldens) {
       write = true;
     }
@@ -387,6 +390,7 @@ class BrowserPlatform extends PlatformPlugin {
       pixelComparison,
       maxDiffRateFailure,
       skiaClient,
+      isCanvaskitTest: isCanvaskitTest,
       goldensDirectory: goldensDirectory,
       filenameSuffix: _screenshotManager!.filenameSuffix,
       write: write,
