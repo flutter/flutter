@@ -14,8 +14,6 @@ Future<void> main() async {
   await task(() async {
     section('Copy test Flutter App with watchOS Companion');
 
-    String? watchDeviceID;
-    String? phoneDeviceID;
     final Directory tempDir = Directory.systemTemp
         .createTempSync('flutter_ios_app_with_extensions_test.');
     final Directory projectDir =
@@ -30,6 +28,12 @@ Future<void> main() async {
 
       section('Create release build');
 
+      // This only builds the iOS app, not the companion watchOS app. The watchOS app
+      // has been removed as a build dependency and is not embedded in the app to avoid
+      // requiring the watchOS being available in CI.
+      // Instead, validate the tool detects that there is a watch companion, and omits
+      // the "-sdk iphoneos" option, which fails to build the watchOS app.
+      // See https://github.com/flutter/flutter/pull/94190.
       await inDirectory(projectDir, () async {
         final String buildOutput = await evalFlutter(
           'build',
@@ -79,35 +83,6 @@ Future<void> main() async {
       return TaskResult.failure(e.toString());
     } finally {
       rmTree(tempDir);
-      // Delete simulator devices
-      if (watchDeviceID != null && watchDeviceID != '') {
-        await eval(
-          'xcrun',
-          <String>['simctl', 'shutdown', watchDeviceID],
-          canFail: true,
-          workingDirectory: flutterDirectory.path,
-        );
-        await eval(
-          'xcrun',
-          <String>['simctl', 'delete', watchDeviceID],
-          canFail: true,
-          workingDirectory: flutterDirectory.path,
-        );
-      }
-      if (phoneDeviceID != null && phoneDeviceID != '') {
-        await eval(
-          'xcrun',
-          <String>['simctl', 'shutdown', phoneDeviceID],
-          canFail: true,
-          workingDirectory: flutterDirectory.path,
-        );
-        await eval(
-          'xcrun',
-          <String>['simctl', 'delete', phoneDeviceID],
-          canFail: true,
-          workingDirectory: flutterDirectory.path,
-        );
-      }
     }
   });
 }
