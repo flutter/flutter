@@ -35,7 +35,6 @@ struct TestResponseHandle {
 };
 
 static bool test_response = false;
-static bool semantics_enabled = false;
 
 constexpr uint64_t kKeyEventFromChannel = 0x11;
 constexpr uint64_t kKeyEventFromEmbedder = 0x22;
@@ -130,11 +129,15 @@ TEST(FlutterWindowsViewTest, RestartClearsKeyboardState) {
 TEST(FlutterWindowsViewTest, EnableSemantics) {
   std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
   EngineModifier modifier(engine.get());
-  modifier.embedder_api().UpdateSemanticsEnabled =
-      [](FLUTTER_API_SYMBOL(FlutterEngine) engine, bool enabled) {
+
+  bool semantics_enabled = false;
+  modifier.embedder_api().UpdateSemanticsEnabled = MOCK_ENGINE_PROC(
+      UpdateSemanticsEnabled,
+      [&semantics_enabled](FLUTTER_API_SYMBOL(FlutterEngine) engine,
+                           bool enabled) {
         semantics_enabled = enabled;
         return kSuccess;
-      };
+      });
 
   auto window_binding_handler =
       std::make_unique<::testing::NiceMock<MockWindowBindingHandler>>();
