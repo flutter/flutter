@@ -130,7 +130,7 @@ platform_properties:
           {"dependency": "gems"},
           {"dependency": "ios_signing"}
         ]
-      os: Mac-10.15
+      os: Mac-12.0
       device_os: iOS-9.3.6
       xcode: 12c33
   windows:
