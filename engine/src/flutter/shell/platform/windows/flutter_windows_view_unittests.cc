@@ -209,11 +209,215 @@ TEST(FlutterWindowsEngine, AddSemanticsNodeUpdate) {
   std::string value(_com_util::ConvertBSTRToString(bvalue));
   EXPECT_EQ(value, "value");
 
-  // Verify node type is a group.
+  // Verify node type is static text.
   VARIANT varrole{};
   varrole.vt = VT_I4;
   ASSERT_EQ(native_view->get_accRole(varchild, &varrole), S_OK);
   EXPECT_EQ(varrole.lVal, ROLE_SYSTEM_STATICTEXT);
+}
+
+// Verify the native IAccessible COM object tree is an accurate reflection of
+// the platform-agnostic tree. Verify both a root node with children as well as
+// a non-root node with children, since the AX tree includes special handling
+// for the root.
+//
+//        node0
+//        /   \
+//    node1    node2
+//               |
+//             node3
+//
+// node0 and node2 are grouping nodes. node1 and node2 are static text nodes.
+TEST(FlutterWindowsEngine, AddSemanticsNodeUpdateWithChildren) {
+  std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
+  EngineModifier modifier(engine.get());
+  modifier.embedder_api().UpdateSemanticsEnabled =
+      [](FLUTTER_API_SYMBOL(FlutterEngine) engine, bool enabled) {
+        return kSuccess;
+      };
+
+  auto window_binding_handler =
+      std::make_unique<::testing::NiceMock<MockWindowBindingHandler>>();
+  FlutterWindowsView view(std::move(window_binding_handler));
+  view.SetEngine(std::move(engine));
+
+  // Enable semantics to instantiate accessibility bridge.
+  view.OnUpdateSemanticsEnabled(true);
+
+  auto bridge = view.GetEngine()->accessibility_bridge().lock();
+  ASSERT_TRUE(bridge);
+
+  // Add root node.
+  FlutterSemanticsNode node0{sizeof(FlutterSemanticsNode), 0};
+  std::vector<int32_t> node0_children{1, 2};
+  node0.child_count = node0_children.size();
+  node0.children_in_traversal_order = node0_children.data();
+  node0.children_in_hit_test_order = node0_children.data();
+
+  FlutterSemanticsNode node1{sizeof(FlutterSemanticsNode), 1};
+  node1.label = "prefecture";
+  node1.value = "Kyoto";
+  FlutterSemanticsNode node2{sizeof(FlutterSemanticsNode), 2};
+  std::vector<int32_t> node2_children{3};
+  node2.child_count = node2_children.size();
+  node2.children_in_traversal_order = node2_children.data();
+  node2.children_in_hit_test_order = node2_children.data();
+  FlutterSemanticsNode node3{sizeof(FlutterSemanticsNode), 3};
+  node3.label = "city";
+  node3.value = "Uji";
+
+  bridge->AddFlutterSemanticsNodeUpdate(&node0);
+  bridge->AddFlutterSemanticsNodeUpdate(&node1);
+  bridge->AddFlutterSemanticsNodeUpdate(&node2);
+  bridge->AddFlutterSemanticsNodeUpdate(&node3);
+  bridge->CommitUpdates();
+
+  // Look up the root windows node delegate.
+  auto node_delegate = bridge
+                           ->GetFlutterPlatformNodeDelegateFromID(
+                               AccessibilityBridge::kRootNodeId)
+                           .lock();
+  ASSERT_TRUE(node_delegate);
+  EXPECT_EQ(node_delegate->GetChildCount(), 2);
+
+  // Get the native IAccessible object.
+  IAccessible* node0_accessible = node_delegate->GetNativeViewAccessible();
+  ASSERT_TRUE(node0_accessible != nullptr);
+
+  // Property lookups will be made against this node itself.
+  VARIANT varchild{};
+  varchild.vt = VT_I4;
+  varchild.lVal = CHILDID_SELF;
+
+  // Verify node type is a group.
+  VARIANT varrole{};
+  varrole.vt = VT_I4;
+  ASSERT_EQ(node0_accessible->get_accRole(varchild, &varrole), S_OK);
+  EXPECT_EQ(varrole.lVal, ROLE_SYSTEM_GROUPING);
+
+  // Verify child count.
+  long node0_child_count = 0;
+  ASSERT_EQ(node0_accessible->get_accChildCount(&node0_child_count), S_OK);
+  EXPECT_EQ(node0_child_count, 2);
+
+  {
+    // Look up first child of node0 (node1), a static text node.
+    varchild.lVal = 1;
+    IDispatch* node1_dispatch = nullptr;
+    ASSERT_EQ(node0_accessible->get_accChild(varchild, &node1_dispatch), S_OK);
+    ASSERT_TRUE(node1_dispatch != nullptr);
+    IAccessible* node1_accessible = nullptr;
+    ASSERT_EQ(node1_dispatch->QueryInterface(
+                  IID_IAccessible, reinterpret_cast<void**>(&node1_accessible)),
+              S_OK);
+    ASSERT_TRUE(node1_accessible != nullptr);
+
+    // Verify node name matches our label.
+    varchild.lVal = CHILDID_SELF;
+    BSTR bname = nullptr;
+    ASSERT_EQ(node1_accessible->get_accName(varchild, &bname), S_OK);
+    std::string name(_com_util::ConvertBSTRToString(bname));
+    EXPECT_EQ(name, "prefecture");
+
+    // Verify node value matches.
+    BSTR bvalue = nullptr;
+    ASSERT_EQ(node1_accessible->get_accValue(varchild, &bvalue), S_OK);
+    std::string value(_com_util::ConvertBSTRToString(bvalue));
+    EXPECT_EQ(value, "Kyoto");
+
+    // Verify node type is static text.
+    VARIANT varrole{};
+    varrole.vt = VT_I4;
+    ASSERT_EQ(node1_accessible->get_accRole(varchild, &varrole), S_OK);
+    EXPECT_EQ(varrole.lVal, ROLE_SYSTEM_STATICTEXT);
+
+    // Verify the parent node is the root.
+    IDispatch* parent_dispatch;
+    node1_accessible->get_accParent(&parent_dispatch);
+    IAccessible* parent_accessible;
+    ASSERT_EQ(
+        parent_dispatch->QueryInterface(
+            IID_IAccessible, reinterpret_cast<void**>(&parent_accessible)),
+        S_OK);
+    EXPECT_EQ(parent_accessible, node0_accessible);
+  }
+
+  // Look up second child of node0 (node2), a parent group for node3.
+  varchild.lVal = 2;
+  IDispatch* node2_dispatch = nullptr;
+  ASSERT_EQ(node0_accessible->get_accChild(varchild, &node2_dispatch), S_OK);
+  ASSERT_TRUE(node2_dispatch != nullptr);
+  IAccessible* node2_accessible = nullptr;
+  ASSERT_EQ(node2_dispatch->QueryInterface(
+                IID_IAccessible, reinterpret_cast<void**>(&node2_accessible)),
+            S_OK);
+  ASSERT_TRUE(node2_accessible != nullptr);
+
+  {
+    // Verify child count.
+    long node2_child_count = 0;
+    ASSERT_EQ(node2_accessible->get_accChildCount(&node2_child_count), S_OK);
+    EXPECT_EQ(node2_child_count, 1);
+
+    // Verify node type is static text.
+    varchild.lVal = CHILDID_SELF;
+    VARIANT varrole{};
+    varrole.vt = VT_I4;
+    ASSERT_EQ(node2_accessible->get_accRole(varchild, &varrole), S_OK);
+    EXPECT_EQ(varrole.lVal, ROLE_SYSTEM_GROUPING);
+
+    // Verify the parent node is the root.
+    IDispatch* parent_dispatch;
+    node2_accessible->get_accParent(&parent_dispatch);
+    IAccessible* parent_accessible;
+    ASSERT_EQ(
+        parent_dispatch->QueryInterface(
+            IID_IAccessible, reinterpret_cast<void**>(&parent_accessible)),
+        S_OK);
+    EXPECT_EQ(parent_accessible, node0_accessible);
+  }
+
+  {
+    // Look up only child of node2 (node3), a static text node.
+    varchild.lVal = 1;
+    IDispatch* node3_dispatch = nullptr;
+    ASSERT_EQ(node2_accessible->get_accChild(varchild, &node3_dispatch), S_OK);
+    ASSERT_TRUE(node3_dispatch != nullptr);
+    IAccessible* node3_accessible = nullptr;
+    ASSERT_EQ(node3_dispatch->QueryInterface(
+                  IID_IAccessible, reinterpret_cast<void**>(&node3_accessible)),
+              S_OK);
+    ASSERT_TRUE(node3_accessible != nullptr);
+
+    // Verify node name matches our label.
+    varchild.lVal = CHILDID_SELF;
+    BSTR bname = nullptr;
+    ASSERT_EQ(node3_accessible->get_accName(varchild, &bname), S_OK);
+    std::string name(_com_util::ConvertBSTRToString(bname));
+    EXPECT_EQ(name, "city");
+
+    // Verify node value matches.
+    BSTR bvalue = nullptr;
+    ASSERT_EQ(node3_accessible->get_accValue(varchild, &bvalue), S_OK);
+    std::string value(_com_util::ConvertBSTRToString(bvalue));
+    EXPECT_EQ(value, "Uji");
+
+    // Verify node type is static text.
+    VARIANT varrole{};
+    varrole.vt = VT_I4;
+    ASSERT_EQ(node3_accessible->get_accRole(varchild, &varrole), S_OK);
+    EXPECT_EQ(varrole.lVal, ROLE_SYSTEM_STATICTEXT);
+
+    // Verify the parent node is node2.
+    IDispatch* parent_dispatch;
+    node3_accessible->get_accParent(&parent_dispatch);
+    IAccessible* parent_accessible;
+    ASSERT_EQ(
+        parent_dispatch->QueryInterface(
+            IID_IAccessible, reinterpret_cast<void**>(&parent_accessible)),
+        S_OK);
+    EXPECT_EQ(parent_accessible, node2_accessible);
+  }
 }
 
 }  // namespace testing
