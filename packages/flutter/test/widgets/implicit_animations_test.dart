@@ -85,7 +85,7 @@ void main() {
     expect(mockOnEndFunction.called, 0);
     await tester.pump(additionalDelay);
     expect(mockOnEndFunction.called, 1);
-    
+
     await tapTest2and3(tester, widgetFinder, mockOnEndFunction);
   });
 
@@ -627,7 +627,7 @@ void main() {
   });
 }
 
-Future<void> tapTest2and3(WidgetTester tester, Finder widgetFinder, 
+Future<void> tapTest2and3(WidgetTester tester, Finder widgetFinder,
     MockOnEndFunction mockOnEndFunction) async {
   await tester.tap(widgetFinder);
 
