@@ -10,6 +10,7 @@
 #include <optional>
 #include <vector>
 
+#include "flutter/shell/platform/common/accessibility_bridge.h"
 #include "flutter/shell/platform/common/client_wrapper/binary_messenger_impl.h"
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/basic_message_channel.h"
 #include "flutter/shell/platform/common/incoming_message_dispatcher.h"
@@ -93,6 +94,10 @@ class FlutterWindowsEngine {
   // rendering using software instead of OpenGL.
   AngleSurfaceManager* surface_manager() { return surface_manager_.get(); }
 
+  std::weak_ptr<AccessibilityBridge> accessibility_bridge() {
+    return accessibility_bridge_;
+  }
+
 #ifndef WINUWP
   WindowProcDelegateManagerWin32* window_proc_delegate_manager() {
     return window_proc_delegate_manager_.get();
@@ -155,6 +160,9 @@ class FlutterWindowsEngine {
   // Returns true if the semantics tree is enabled.
   bool semantics_enabled() const { return semantics_enabled_; }
 
+  // Returns the native accessibility node with the given id.
+  gfx::NativeViewAccessible GetNativeAccessibleFromId(AccessibilityNodeId id);
+
  private:
   // Allows swapping out embedder_api_ calls in tests.
   friend class EngineModifier;
@@ -213,6 +221,8 @@ class FlutterWindowsEngine {
       plugin_registrar_destruction_callback_ = nullptr;
 
   bool semantics_enabled_ = false;
+
+  std::shared_ptr<AccessibilityBridge> accessibility_bridge_;
 
 #ifndef WINUWP
   // The manager for WindowProc delegate registration and callbacks.

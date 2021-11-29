@@ -7,6 +7,7 @@
 
 #include "flutter/shell/platform/common/geometry.h"
 #include "flutter/shell/platform/embedder/embedder.h"
+#include "flutter/third_party/accessibility/gfx/native_widget_types.h"
 
 namespace flutter {
 
@@ -102,6 +103,9 @@ class WindowBindingHandlerDelegate {
   // Notifies delegate that the Flutter semantics tree should be enabled or
   // disabled.
   virtual void OnUpdateSemanticsEnabled(bool enabled) = 0;
+
+  // Returns the root view accessibility node, or nullptr if none.
+  virtual gfx::NativeViewAccessible GetNativeViewAccessible() = 0;
 };
 
 }  // namespace flutter

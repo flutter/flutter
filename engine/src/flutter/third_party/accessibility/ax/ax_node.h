@@ -20,6 +20,11 @@
 #include "gfx/geometry/rect.h"
 #include "gfx/transform.h"
 
+#ifdef _WIN32
+// windowx.h defines GetNextSibling as a macro.
+#undef GetNextSibling
+#endif
+
 namespace ui {
 
 class AXTableInfo;
