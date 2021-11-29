@@ -12,7 +12,6 @@ import '../browser_detection.dart';
 import '../canvas_pool.dart';
 import '../canvaskit/color_filter.dart';
 import '../color_filter.dart';
-import '../dom_renderer.dart';
 import '../engine_canvas.dart';
 import '../frame_reference.dart';
 import '../html_image_codec.dart';
@@ -1354,7 +1353,7 @@ List<html.Element> _clipContent(List<SaveClipEntry> clipStack,
     if (root == null) {
       root = newElement;
     } else {
-      domRenderer.append(curElement!, newElement);
+      curElement!.append(newElement);
     }
     curElement = newElement;
     final ui.Rect? rect = entry.rect;
@@ -1434,7 +1433,7 @@ List<html.Element> _clipContent(List<SaveClipEntry> clipStack,
   }
 
   root!.style.position = 'absolute';
-  domRenderer.append(curElement!, content);
+  curElement!.append(content);
   setElementTransform(
     content,
     transformWithOffset(currentTransform, offset).storage,

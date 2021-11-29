@@ -29,46 +29,6 @@ void testMain() {
     expect(element, isNotNull);
   });
 
-  test('can append children to parents', () {
-    final DomRenderer renderer = DomRenderer();
-    final html.Element parent = renderer.createElement('div');
-    final html.Element child = renderer.createElement('div');
-    renderer.append(parent, child);
-    expect(parent.children, hasLength(1));
-  });
-
-  test('can set text on elements', () {
-    final DomRenderer renderer = DomRenderer();
-    final html.Element element = renderer.createElement('div');
-    renderer.setText(element, 'Hello World');
-    expect(element.text, 'Hello World');
-  });
-
-  test('can set attributes on elements', () {
-    final DomRenderer renderer = DomRenderer();
-    final html.Element element = renderer.createElement('div');
-    renderer.setElementAttribute(element, 'id', 'foo');
-    expect(element.id, 'foo');
-  });
-
-  test('can add classes to elements', () {
-    final DomRenderer renderer = DomRenderer();
-    final html.Element element = renderer.createElement('div');
-    renderer.addElementClass(element, 'foo');
-    renderer.addElementClass(element, 'bar');
-    expect(element.classes, <String>['foo', 'bar']);
-  });
-
-  test('can remove classes from elements', () {
-    final DomRenderer renderer = DomRenderer();
-    final html.Element element = renderer.createElement('div');
-    renderer.addElementClass(element, 'foo');
-    renderer.addElementClass(element, 'bar');
-    expect(element.classes, <String>['foo', 'bar']);
-    renderer.removeElementClass(element, 'foo');
-    expect(element.classes, <String>['bar']);
-  });
-
   test('can set style properties on elements', () {
     final DomRenderer renderer = DomRenderer();
     final html.Element element = renderer.createElement('div');
@@ -90,14 +50,6 @@ void testMain() {
     final html.Element element = renderer.createElement('div');
     renderer.createElement('div', parent: element);
     expect(element.children, hasLength(1));
-  });
-
-  test('can detach elements', () {
-    final DomRenderer renderer = DomRenderer();
-    final html.Element element = renderer.createElement('div');
-    final html.Element child = renderer.createElement('div', parent: element);
-    renderer.detachElement(child);
-    expect(element.children, isEmpty);
   });
 
   test('innerHeight/innerWidth are equal to visualViewport height and width',
@@ -176,17 +128,17 @@ void testMain() {
     regularTextField.placeholder = 'Now you see me';
     renderer.addResource(regularTextField);
 
-    renderer.focus(regularTextField);
+    regularTextField.focus();
     html.CssStyleDeclaration? style = renderer.glassPaneShadow?.querySelector('input')?.getComputedStyle('::placeholder');
     expect(style, isNotNull);
     expect(style?.opacity, isNot('0'));
 
     final html.InputElement textField = html.InputElement();
     textField.placeholder = 'Now you dont';
-    renderer.addElementClass(textField, 'flt-text-editing');
+    textField.classes.add('flt-text-editing');
     renderer.addResource(textField);
 
-    renderer.focus(textField);
+    textField.focus();
     style = renderer.glassPaneShadow?.querySelector('input.flt-text-editing')?.getComputedStyle('::placeholder');
     expect(style, isNotNull);
     expect(style?.opacity, '0');
