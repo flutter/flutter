@@ -6,15 +6,12 @@
 
 #include <algorithm>
 #include <ctime>
-#include <functional>
 #include <future>
 #include <memory>
 #include <vector>
 
 #include "assets/directory_asset_bundle.h"
 #include "common/graphics/persistent_cache.h"
-#include "flutter/common/graphics/persistent_cache.h"
-#include "flutter/flow/layers/layer_tree.h"
 #include "flutter/flow/layers/picture_layer.h"
 #include "flutter/flow/layers/transform_layer.h"
 #include "flutter/fml/command_line.h"
@@ -2863,13 +2860,13 @@ TEST_F(ShellTest, SpawnWithDartEntrypointArgs) {
 
   auto configuration = RunConfiguration::InferFromSettings(settings);
   ASSERT_TRUE(configuration.IsValid());
-  configuration.SetEntrypoint("canRecieveArgumentsWhenEngineRun");
+  configuration.SetEntrypoint("canReceiveArgumentsWhenEngineRun");
   const std::vector<std::string> entrypoint_args{"foo", "bar"};
   configuration.SetEntrypointArgs(entrypoint_args);
 
   auto second_configuration = RunConfiguration::InferFromSettings(settings);
   ASSERT_TRUE(second_configuration.IsValid());
-  second_configuration.SetEntrypoint("canRecieveArgumentsWhenEngineSpawn");
+  second_configuration.SetEntrypoint("canReceiveArgumentsWhenEngineSpawn");
   const std::vector<std::string> second_entrypoint_args{"arg1", "arg2"};
   second_configuration.SetEntrypointArgs(second_entrypoint_args);
 
@@ -2902,7 +2899,7 @@ TEST_F(ShellTest, SpawnWithDartEntrypointArgs) {
   main_latch.Wait();
   ASSERT_TRUE(DartVMRef::IsInstanceRunning());
   // Check first Shell ran the first entrypoint.
-  ASSERT_EQ("canRecieveArgumentsWhenEngineRun", last_entry_point);
+  ASSERT_EQ("canReceiveArgumentsWhenEngineRun", last_entry_point);
 
   PostSync(
       shell->GetTaskRunners().GetPlatformTaskRunner(),
@@ -2926,7 +2923,7 @@ TEST_F(ShellTest, SpawnWithDartEntrypointArgs) {
         PostSync(spawner->GetTaskRunners().GetUITaskRunner(),
                  [&spawn, &spawner, initial_route] {
                    // Check second shell ran the second entrypoint.
-                   ASSERT_EQ("canRecieveArgumentsWhenEngineSpawn",
+                   ASSERT_EQ("canReceiveArgumentsWhenEngineSpawn",
                              spawn->GetEngine()->GetLastEntrypoint());
                    ASSERT_EQ(initial_route, spawn->GetEngine()->InitialRoute());
 

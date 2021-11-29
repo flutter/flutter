@@ -253,11 +253,11 @@ void notifyNativeWhenEngineRun(bool success) native 'NotifyNativeWhenEngineRun';
 void notifyNativeWhenEngineSpawn(bool success) native 'NotifyNativeWhenEngineSpawn';
 
 @pragma('vm:entry-point')
-void canRecieveArgumentsWhenEngineRun(List<String> args) {
+void canReceiveArgumentsWhenEngineRun(List<String> args) {
   notifyNativeWhenEngineRun(args.length == 2 && args[0] == 'foo' && args[1] == 'bar');
 }
 
 @pragma('vm:entry-point')
-void canRecieveArgumentsWhenEngineSpawn(List<String> args) {
+void canReceiveArgumentsWhenEngineSpawn(List<String> args) {
   notifyNativeWhenEngineSpawn(args.length == 2 && args[0] == 'arg1' && args[1] == 'arg2');
 }

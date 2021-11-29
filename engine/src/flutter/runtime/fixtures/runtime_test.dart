@@ -65,7 +65,7 @@ void testCanLaunchSecondaryIsolate() {
 }
 
 @pragma('vm:entry-point')
-void testCanRecieveArguments(List<String> args) {
+void testCanReceiveArguments(List<String> args) {
   notifyResult(args.length == 1 && args[0] == 'arg1');
 }
 
