@@ -53,7 +53,7 @@ class PersistedOpacity extends PersistedContainerSurface
   void apply() {
     final html.Element element = rootElement!;
     DomRenderer.setElementStyle(element, 'opacity', '${alpha / 255}');
-    DomRenderer.setElementTransform(element, 'translate(${offset.dx}px, ${offset.dy}px)');
+    element.style.transform = 'translate(${offset.dx}px, ${offset.dy}px)';
   }
 
   @override

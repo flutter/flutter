@@ -32,8 +32,7 @@ class DomCanvas extends EngineCanvas with SaveElementStackTracking {
   @override
   void clear() {
     super.clear();
-    // TODO(yjbanov): we should measure if reusing old elements is beneficial.
-    domRenderer.clearDom(rootElement);
+    domRenderer.removeAllChildren(rootElement);
   }
 
   @override

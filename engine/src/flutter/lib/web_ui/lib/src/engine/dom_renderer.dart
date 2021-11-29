@@ -152,7 +152,7 @@ class DomRenderer {
     if (sceneElement != _sceneElement) {
       _sceneElement?.remove();
       _sceneElement = sceneElement;
-      append(_sceneHostElement!, sceneElement!);
+      _sceneHostElement!.append(sceneElement!);
     }
     assert(() {
       _clearOnHotRestart();
@@ -175,38 +175,14 @@ class DomRenderer {
 
   final html.Element rootElement = html.document.body!;
 
-  void addElementClass(html.Element element, String className) {
-    element.classes.add(className);
-  }
-
   html.Element createElement(String tagName, {html.Element? parent}) {
     final html.Element element = html.document.createElement(tagName);
     parent?.append(element);
     return element;
   }
 
-  void append(html.Element parent, html.Element child) {
-    parent.append(child);
-  }
-
   void appendText(html.Element parent, String text) {
     parent.appendText(text);
-  }
-
-  void detachElement(html.Element element) {
-    element.remove();
-  }
-
-  void removeElementClass(html.Element element, String className) {
-    element.classes.remove(className);
-  }
-
-  void setElementAttribute(html.Element element, String name, String value) {
-    element.setAttribute(name, value);
-  }
-
-  void setElementProperty(html.Element element, String name, Object value) {
-    js_util.setProperty(element, name, value);
   }
 
   static void setElementStyle(
@@ -231,29 +207,6 @@ class DomRenderer {
     } else {
       element.style.setProperty('clip-path', value);
     }
-  }
-
-  static void setElementTransform(html.Element element, String transformValue) {
-    js_util.setProperty(
-      // ignore: implicit_dynamic_function
-      js_util.getProperty(element, 'style') as Object,
-      'transform',
-      transformValue,
-    );
-  }
-
-  void setText(html.Element element, String text) {
-    element.text = text;
-  }
-
-  void removeAllChildren(html.Element element) {
-    element.children.clear();
-  }
-
-  html.Element? getParent(html.Element element) => element.parent;
-
-  void setTitle(String title) {
-    html.document.title = title;
   }
 
   void setThemeColor(ui.Color color) {
@@ -292,12 +245,11 @@ class DomRenderer {
 
     final html.BodyElement bodyElement = html.document.body!;
 
-    setElementAttribute(
-      bodyElement,
+    bodyElement.setAttribute(
       'flt-renderer',
       '${useCanvasKit ? 'canvaskit' : 'html'} (${FlutterConfiguration.flutterWebAutoDetect ? 'auto-selected' : 'requested explicitly'})',
     );
-    setElementAttribute(bodyElement, 'flt-build-mode', buildMode);
+    bodyElement.setAttribute('flt-build-mode', buildMode);
 
     setElementStyle(bodyElement, 'position', 'fixed');
     setElementStyle(bodyElement, 'top', '0');
@@ -412,7 +364,7 @@ class DomRenderer {
     // Hide the DOM nodes used to render the scene from accessibility, because
     // the accessibility tree is built from the SemanticsNode tree as a parallel
     // DOM tree.
-    setElementAttribute(_sceneHostElement!, 'aria-hidden', 'true');
+    _sceneHostElement!.setAttribute('aria-hidden', 'true');
 
     if (html.window.visualViewport == null && isWebKit) {
       // Older Safari versions sometimes give us bogus innerWidth/innerHeight
@@ -504,12 +456,8 @@ class DomRenderer {
     }
   }
 
-  void focus(html.Element element) {
-    element.focus();
-  }
-
   /// Removes all children of a DOM node.
-  void clearDom(html.Node node) {
+  void removeAllChildren(html.Node node) {
     while (node.lastChild != null) {
       node.lastChild!.remove();
     }

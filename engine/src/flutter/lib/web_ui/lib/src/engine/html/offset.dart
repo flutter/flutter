@@ -49,7 +49,7 @@ class PersistedOffset extends PersistedContainerSurface
 
   @override
   void apply() {
-    DomRenderer.setElementTransform(rootElement!, 'translate(${dx}px, ${dy}px)');
+    rootElement!.style.transform = 'translate(${dx}px, ${dy}px)';
   }
 
   @override

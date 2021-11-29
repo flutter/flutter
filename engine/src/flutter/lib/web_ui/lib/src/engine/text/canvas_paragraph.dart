@@ -181,7 +181,7 @@ class CanvasParagraph implements EngineParagraph {
     for (int i = 0; i < lines.length; i++) {
       // Insert a <BR> element before each line except the first line.
       if (i > 0) {
-        domRenderer.append(element, domRenderer.createElement('br'));
+        element.append(domRenderer.createElement('br'));
       }
 
       final EngineLineMetrics line = lines[i];
@@ -209,15 +209,14 @@ class CanvasParagraph implements EngineParagraph {
             style: box.span.style,
             isSpan: true,
           );
-          domRenderer.append(rootElement, element);
+          rootElement.append(element);
           buffer.write(box.toText());
         } else if (box is PlaceholderBox) {
           span = null;
           // If there's a line-end after this placeholder, we want the <BR> to
           // be inserted in the root paragraph element.
           element = rootElement;
-          domRenderer.append(
-            rootElement,
+          rootElement.append(
             createPlaceholderElement(placeholder: box.placeholder),
           );
         } else {
