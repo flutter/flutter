@@ -1796,6 +1796,7 @@ targets:
     scheduler: luci
 
   - name: Linux_android platform_views_scroll_perf__timeline_summary
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/94347
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
