@@ -7,7 +7,6 @@
 #include "flutter/fml/mapping.h"
 #include "flutter/fml/synchronization/count_down_latch.h"
 #include "flutter/fml/synchronization/waitable_event.h"
-#include "flutter/fml/thread.h"
 #include "flutter/runtime/dart_vm.h"
 #include "flutter/runtime/dart_vm_lifecycle.h"
 #include "flutter/runtime/isolate_configuration.h"
@@ -336,7 +335,7 @@ TEST_F(DartSecondaryIsolateTest, CanLaunchSecondaryIsolates) {
   // root isolate will be auto-shutdown
 }
 
-TEST_F(DartIsolateTest, CanRecieveArguments) {
+TEST_F(DartIsolateTest, CanReceiveArguments) {
   AddNativeCallback("NotifyNative",
                     CREATE_NATIVE_ENTRY(([this](Dart_NativeArguments args) {
                       ASSERT_TRUE(tonic::DartConverter<bool>::FromDart(
@@ -354,7 +353,7 @@ TEST_F(DartIsolateTest, CanRecieveArguments) {
                            thread                 //
   );
   auto isolate = RunDartCodeInIsolate(vm_ref, settings, task_runners,
-                                      "testCanRecieveArguments", {"arg1"},
+                                      "testCanReceiveArguments", {"arg1"},
                                       GetDefaultKernelFilePath());
   ASSERT_TRUE(isolate);
   ASSERT_EQ(isolate->get()->GetPhase(), DartIsolate::Phase::Running);

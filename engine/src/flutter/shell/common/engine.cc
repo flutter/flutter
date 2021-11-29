@@ -11,12 +11,8 @@
 #include <vector>
 
 #include "flutter/common/settings.h"
-#include "flutter/fml/eintr_wrapper.h"
-#include "flutter/fml/file.h"
 #include "flutter/fml/make_copyable.h"
-#include "flutter/fml/paths.h"
 #include "flutter/fml/trace_event.h"
-#include "flutter/fml/unique_fd.h"
 #include "flutter/lib/snapshot/snapshot.h"
 #include "flutter/lib/ui/text/font_collection.h"
 #include "flutter/shell/common/animator.h"
@@ -24,8 +20,6 @@
 #include "flutter/shell/common/shell.h"
 #include "rapidjson/document.h"
 #include "third_party/dart/runtime/include/dart_tools_api.h"
-#include "third_party/skia/include/core/SkCanvas.h"
-#include "third_party/skia/include/core/SkPictureRecorder.h"
 
 namespace flutter {
 

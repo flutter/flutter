@@ -7,7 +7,6 @@
 #include <cstdlib>
 #include <tuple>
 
-#include "flutter/fml/paths.h"
 #include "flutter/fml/posix_wrappers.h"
 #include "flutter/fml/trace_event.h"
 #include "flutter/lib/io/dart_io.h"
