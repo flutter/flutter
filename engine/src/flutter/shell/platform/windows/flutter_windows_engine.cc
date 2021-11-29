@@ -18,6 +18,12 @@
 #include "flutter/shell/platform/windows/task_runner.h"
 #include "third_party/rapidjson/include/rapidjson/document.h"
 
+#if defined(WINUWP)
+#include "flutter/shell/platform/windows/accessibility_bridge_delegate_winuwp.h"
+#else
+#include "flutter/shell/platform/windows/accessibility_bridge_delegate_win32.h"
+#endif  // defined(WINUWP)
+
 namespace flutter {
 
 namespace {
@@ -260,6 +266,25 @@ bool FlutterWindowsEngine::RunWithEntrypoint(const char* entrypoint) {
     auto host = static_cast<FlutterWindowsEngine*>(user_data);
     host->view()->OnPreEngineRestart();
   };
+  args.update_semantics_node_callback = [](const FlutterSemanticsNode* node,
+                                           void* user_data) {
+    auto host = static_cast<FlutterWindowsEngine*>(user_data);
+    if (!node || node->id == kFlutterSemanticsNodeIdBatchEnd) {
+      host->accessibility_bridge_->CommitUpdates();
+      return;
+    }
+    host->accessibility_bridge_->AddFlutterSemanticsNodeUpdate(node);
+  };
+  args.update_semantics_custom_action_callback =
+      [](const FlutterSemanticsCustomAction* action, void* user_data) {
+        auto host = static_cast<FlutterWindowsEngine*>(user_data);
+        if (!action || action->id == kFlutterSemanticsNodeIdBatchEnd) {
+          host->accessibility_bridge_->CommitUpdates();
+          return;
+        }
+        host->accessibility_bridge_->AddFlutterSemanticsCustomActionUpdate(
+            action);
+      };
 
   args.custom_task_runners = &custom_task_runners;
 
@@ -452,10 +477,36 @@ bool FlutterWindowsEngine::DispatchSemanticsAction(
 }
 
 void FlutterWindowsEngine::UpdateSemanticsEnabled(bool enabled) {
+#if defined(WINUWP)
+  using AccessibilityBridgeDelegateWindows = AccessibilityBridgeDelegateWinUWP;
+#else
+  using AccessibilityBridgeDelegateWindows = AccessibilityBridgeDelegateWin32;
+#endif  // defined(WINUWP)
+
   if (engine_ && semantics_enabled_ != enabled) {
     semantics_enabled_ = enabled;
     embedder_api_.UpdateSemanticsEnabled(engine_, enabled);
+
+    if (!semantics_enabled_ && accessibility_bridge_) {
+      accessibility_bridge_.reset();
+    } else if (semantics_enabled_ && !accessibility_bridge_) {
+      accessibility_bridge_ = std::make_shared<AccessibilityBridge>(
+          std::make_unique<AccessibilityBridgeDelegateWindows>(this));
+    }
   }
+}
+
+gfx::NativeViewAccessible FlutterWindowsEngine::GetNativeAccessibleFromId(
+    AccessibilityNodeId id) {
+  if (!accessibility_bridge_) {
+    return nullptr;
+  }
+  std::shared_ptr<FlutterPlatformNodeDelegate> node_delegate =
+      accessibility_bridge_->GetFlutterPlatformNodeDelegateFromID(id).lock();
+  if (!node_delegate) {
+    return nullptr;
+  }
+  return node_delegate->GetNativeViewAccessible();
 }
 
 }  // namespace flutter

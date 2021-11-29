@@ -258,4 +258,8 @@ bool FlutterWindowWin32::OnBitmapSurfaceUpdated(const void* allocation,
   return ret != 0;
 }
 
+gfx::NativeViewAccessible FlutterWindowWin32::GetNativeViewAccessible() {
+  return binding_handler_delegate_->GetNativeViewAccessible();
+}
+
 }  // namespace flutter

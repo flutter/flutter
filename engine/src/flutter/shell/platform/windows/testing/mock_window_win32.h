@@ -46,6 +46,7 @@ class MockWin32Window : public WindowWin32, public MockMessageQueue {
   MOCK_METHOD1(OnText, void(const std::u16string&));
   MOCK_METHOD6(OnKey, bool(int, int, int, char32_t, bool, bool));
   MOCK_METHOD1(OnUpdateSemanticsEnabled, void(bool));
+  MOCK_METHOD0(GetNativeViewAccessible, gfx::NativeViewAccessible());
   MOCK_METHOD4(OnScroll,
                void(double, double, FlutterPointerDeviceKind, int32_t));
   MOCK_METHOD0(OnComposeBegin, void());

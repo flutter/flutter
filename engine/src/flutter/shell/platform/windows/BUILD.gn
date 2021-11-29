@@ -89,8 +89,12 @@ source_set("flutter_windows_source") {
   # Target-specific sources.
   if (target_os == "winuwp") {
     sources += [
+      "accessibility_bridge_delegate_winuwp.cc",
+      "accessibility_bridge_delegate_winuwp.h",
       "display_helper_winuwp.cc",
       "display_helper_winuwp.h",
+      "flutter_platform_node_delegate_winuwp.cc",
+      "flutter_platform_node_delegate_winuwp.h",
       "flutter_window_winuwp.cc",
       "flutter_window_winuwp.h",
       "flutter_windows_winuwp.cc",
@@ -106,8 +110,12 @@ source_set("flutter_windows_source") {
     ]
   } else {
     sources += [
+      "accessibility_bridge_delegate_win32.cc",
+      "accessibility_bridge_delegate_win32.h",
       "dpi_utils_win32.cc",
       "dpi_utils_win32.h",
+      "flutter_platform_node_delegate_win32.cc",
+      "flutter_platform_node_delegate_win32.h",
       "flutter_window_win32.cc",
       "flutter_window_win32.h",
       "flutter_windows_win32.cc",
@@ -153,7 +161,10 @@ source_set("flutter_windows_source") {
     defines = [ "FLUTTER_ENGINE_NO_PROTOTYPES" ]
   }
 
-  public_deps = [ ":string_conversion" ]
+  public_deps = [
+    ":string_conversion",
+    "//flutter/shell/platform/common:common_cpp_accessibility",
+  ]
 
   deps = [
     ":flutter_windows_headers",
@@ -163,7 +174,6 @@ source_set("flutter_windows_source") {
     "//flutter/shell/platform/common/client_wrapper:client_wrapper",
     "//flutter/shell/platform/embedder:embedder_as_internal_library",
     "//flutter/shell/platform/windows/client_wrapper:client_wrapper_windows",
-    "//flutter/third_party/accessibility",
     "//third_party/angle:libEGL_static",  # the order of libEGL_static and
                                           # libGLESv2_static is important.. if
                                           # reversed, will cause a linker error
