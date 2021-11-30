@@ -1603,6 +1603,7 @@ targets:
     scheduler: luci
 
   - name: Linux_android flutter_gallery__back_button_memory
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/94036
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -1724,6 +1725,7 @@ targets:
     scheduler: luci
 
   - name: Linux_android image_list_reported_duration
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/94034
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -1834,6 +1836,7 @@ targets:
     scheduler: luci
 
   - name: Linux android views
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/94032
     recipe: flutter/android_views
     presubmit: true
     properties:
@@ -1849,7 +1852,6 @@ targets:
 
   - name: Linux deferred components
     recipe: flutter/deferred_components
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/90071
     properties:
       dependencies: >-
         [
@@ -2559,7 +2561,6 @@ targets:
       - .ci.yaml
 
   - name: Mac_android android_semantics_integration_test
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/93253
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2944,7 +2945,6 @@ targets:
     scheduler: luci
 
   - name: Mac_android run_release_test
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/91625
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60

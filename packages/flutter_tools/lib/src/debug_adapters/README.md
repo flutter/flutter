@@ -66,4 +66,19 @@ Some custom requests are available for clients to call. Below are the Flutter-sp
 
 ## Custom Events
 
-The debug adapter may emit several custom events that are useful to clients. There are not currently any custom Flutter events, but the standard Dart DAP custom requests are [documented here](https://github.com/dart-lang/sdk/blob/main/pkg/dds/tool/dap/README.md#custom-events).
+The debug adapter may emit several custom events that are useful to clients. Below are the Flutter-specific custom events, and the standard Dart DAP custom events are [documented here](https://github.com/dart-lang/sdk/blob/main/pkg/dds/tool/dap/README.md#custom-events).
+
+### `flutter.serviceExtensionStateChanged`
+
+When the value of a Flutter service extension changes, this event is emitted and includes the new value. Values are always encoded as strings, even if numeric/boolean.
+
+```
+{
+	"type": "event",
+	"event": "flutter.serviceExtensionStateChanged",
+	"body": {
+		"extension": "ext.flutter.debugPaint",
+		"value": "true",
+	}
+}
+```
