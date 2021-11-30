@@ -4,6 +4,7 @@
 
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterPluginAppLifeCycleDelegate.h"
 
+#import <objc/runtime.h>
 #include "flutter/fml/logging.h"
 #include "flutter/fml/paths.h"
 #include "flutter/lib/ui/plugins/callback_cache.h"
@@ -11,9 +12,17 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterCallbackCache_Internal.h"
 
 static const char* kCallbackCacheSubDir = "Library/Caches/";
+static NSString* const kApplicationDidReceiveRemoteNotificationFetchCompletionHandler =
+    @"application:didReceiveRemoteNotification:fetchCompletionHandler:";
+static NSString* const kApplicationDidRegisterForRemoteNotificationsWithDeviceToken =
+    @"application:didRegisterForRemoteNotificationsWithDeviceToken:";
+static NSString* const kApplicationDidFailToRegisterForRemoteNotificationsWithError =
+    @"application:didFailToRegisterForRemoteNotificationsWithError:";
 
 static const SEL selectorsHandledByPlugins[] = {
-    @selector(application:didReceiveRemoteNotification:fetchCompletionHandler:),
+    NSSelectorFromString(kApplicationDidReceiveRemoteNotificationFetchCompletionHandler),
+    NSSelectorFromString(kApplicationDidRegisterForRemoteNotificationsWithDeviceToken),
+    NSSelectorFromString(kApplicationDidFailToRegisterForRemoteNotificationsWithError),
     @selector(application:performFetchWithCompletionHandler:)};
 
 @interface FlutterPluginAppLifeCycleDelegate ()
@@ -30,6 +39,35 @@ static const SEL selectorsHandledByPlugins[] = {
 
   // Weak references to registered plugins.
   NSPointerArray* _delegates;
+}
+
+static void RemapMethod(Class thisClass, SEL originalSelector, SEL addedSelector) {
+  Method originalMethod = class_getInstanceMethod(thisClass, originalSelector);
+  IMP originalImp = method_getImplementation(originalMethod);
+  class_addMethod(thisClass, addedSelector, originalImp, method_getTypeEncoding(originalMethod));
+}
+
++ (void)load {
+  // Swap out
+  // `performApplication:didReceiveRemoteNotification:fetchCompletionHandler:`
+  // for `application:didReceiveRemoteNotification:fetchCompletionHandler:`.
+  // This has to be done to avoid a potential false positive "Missing Push
+  // Notification Entitlement" validation failure when uploading apps to the App
+  // Store.  Linked NSPlugin implementations that have
+  // `application:didReceiveRemoteNotification:fetchCompletionHandler:` defined
+  // will cause the failure to happen correctly if the entitlements are missing.
+  static dispatch_once_t onceToken;
+  dispatch_once(&onceToken, ^{
+    RemapMethod(
+        self, @selector(performApplication:didReceiveRemoteNotification:fetchCompletionHandler:),
+        NSSelectorFromString(kApplicationDidReceiveRemoteNotificationFetchCompletionHandler));
+    RemapMethod(self,
+                @selector(performApplication:didRegisterForRemoteNotificationsWithDeviceToken:),
+                NSSelectorFromString(kApplicationDidRegisterForRemoteNotificationsWithDeviceToken));
+    RemapMethod(self,
+                @selector(performApplication:didFailToRegisterForRemoteNotificationsWithError:),
+                NSSelectorFromString(kApplicationDidFailToRegisterForRemoteNotificationsWithError));
+  });
 }
 
 - (void)addObserverFor:(NSString*)name selector:(SEL)selector {
@@ -235,7 +273,7 @@ static BOOL IsPowerOfTwo(NSUInteger x) {
 }
 #pragma GCC diagnostic pop
 
-- (void)application:(UIApplication*)application
+- (void)performApplication:(UIApplication*)application
     didRegisterForRemoteNotificationsWithDeviceToken:(NSData*)deviceToken {
   for (NSObject<FlutterApplicationLifeCycleDelegate>* delegate in _delegates) {
     if (!delegate) {
@@ -248,7 +286,7 @@ static BOOL IsPowerOfTwo(NSUInteger x) {
   }
 }
 
-- (void)application:(UIApplication*)application
+- (void)performApplication:(UIApplication*)application
     didFailToRegisterForRemoteNotificationsWithError:(NSError*)error {
   for (NSObject<FlutterApplicationLifeCycleDelegate>* delegate in _delegates) {
     if (!delegate) {
@@ -260,7 +298,9 @@ static BOOL IsPowerOfTwo(NSUInteger x) {
   }
 }
 
-- (void)application:(UIApplication*)application
+// This will get swapped into `application:didReceiveRemoteNotification:fetchCompletionHandler:`
+// in +[FlutterPluginAppLifeCycleDelegate load].
+- (void)performApplication:(UIApplication*)application
     didReceiveRemoteNotification:(NSDictionary*)userInfo
           fetchCompletionHandler:(void (^)(UIBackgroundFetchResult result))completionHandler {
   for (NSObject<FlutterApplicationLifeCycleDelegate>* delegate in _delegates) {
