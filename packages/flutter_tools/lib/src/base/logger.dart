@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:math';
 
 import 'package:meta/meta.dart';
 
@@ -163,6 +164,20 @@ abstract class Logger {
     bool? wrap,
   });
 
+  /// Display the [message] inside a box.
+  /// For example, this is the generated output:
+  ///
+  ///   ┌─ [title] ─┐
+  ///   │ [message] │
+  ///   └───────────┘
+  ///
+  /// If a terminal is attached, the lines in [message] are automatically wrapped based on
+  /// the available columns.
+  void printBox(
+    String message, {
+    String? title,
+  });
+
   /// Use this for verbose tracing output. Users can turn this output on in order
   /// to help diagnose issues with the toolchain or with their setup.
   void printTrace(String message);
@@ -310,6 +325,13 @@ class DelegatingLogger implements Logger {
       hangingIndent: hangingIndent,
       wrap: wrap,
     );
+  }
+
+  @override
+  void printBox(String message, {
+    String? title,
+  }) {
+    _delegate.printBox(message, title: title);
   }
 
   @override
@@ -479,6 +501,62 @@ class StdoutLogger extends Logger {
     _status?.resume();
   }
 
+  @override
+  void printBox(String message, {
+    String? title,
+  }) {
+    const int paddingLeftRight = 1;
+    const int edges = 2;
+
+    final int maxTextWidthPerLine = _outputPreferences.wrapColumn - edges - paddingLeftRight * 2;
+    final List<String> lines = wrapText(message, shouldWrap: true, columnWidth: maxTextWidthPerLine).split('\n');
+    final List<int> lineWidth = lines.map((String line) => _getColumnSize(line)).toList();
+    final int maxColumnSize = lineWidth.reduce((int currLen, int maxLen) => max(currLen, maxLen));
+    final int textWidth = min(maxColumnSize, maxTextWidthPerLine);
+    final int textWithPaddingWidth = textWidth + paddingLeftRight * 2;
+
+    _status?.pause();
+    writeToStdOut('\n');
+
+    // Write `┌─ [title] ─┐`.
+    writeToStdOut('┌');
+    writeToStdOut('─');
+    if (title == null) {
+      writeToStdOut('─' * textWithPaddingWidth);
+    } else {
+      writeToStdOut(' ${terminal.bolden(title)} ');
+      writeToStdOut('─' * (textWithPaddingWidth - title.length - 3));
+    }
+    writeToStdOut('┐');
+    writeToStdOut('\n');
+    writeToStdOut('│');
+    writeToStdOut(' ' * textWithPaddingWidth);
+    writeToStdOut('│');
+    writeToStdOut('\n');
+
+    // Write `│ [message] │`.
+    for (int lineIdx = 0; lineIdx < lines.length; lineIdx++) {
+      writeToStdOut('│');
+      writeToStdOut(' ' * paddingLeftRight);
+      writeToStdOut(lines[lineIdx]);
+      writeToStdOut(' ' * (textWidth - lineWidth[lineIdx]));
+      writeToStdOut(' ' * paddingLeftRight);
+      writeToStdOut('│');
+      writeToStdOut('\n');
+    }
+
+    // Write `└───────────┘`.
+    writeToStdOut('│');
+    writeToStdOut(' ' * textWithPaddingWidth);
+    writeToStdOut('│');
+    writeToStdOut('\n');
+    writeToStdOut('└');
+    writeToStdOut('─' * textWithPaddingWidth);
+    writeToStdOut('┘');
+    writeToStdOut('\n');
+    _status?.resume();
+  }
+
   @protected
   void writeToStdOut(String message) => _stdio.stdoutWrite(message);
 
@@ -556,6 +634,12 @@ class StdoutLogger extends Logger {
     writeToStdOut('${terminal.clearScreen()}\n');
     _status?.resume();
   }
+}
+
+final RegExp _ansiEscapePattern = RegExp(r'(\u001B|\u001b)\[[0-9]+[a-zA-Z]+');
+int _getColumnSize(String line) {
+  // Remove ANSI escape characters from the string.
+  return line.replaceAll(_ansiEscapePattern, '').length;
 }
 
 /// A [StdoutLogger] which replaces Unicode characters that cannot be printed to
@@ -707,6 +791,17 @@ class BufferLogger extends Logger {
         columnWidth: _outputPreferences.wrapColumn,
       ));
     }
+  }
+
+  @override
+  void printBox(String message, {
+    String? title,
+  }) {
+    if (title != null) {
+      _status.write(title);
+      _status.write('\n');
+    }
+    _status.write(message);
   }
 
   @override
