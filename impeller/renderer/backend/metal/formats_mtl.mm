@@ -78,8 +78,13 @@ MTLDepthStencilDescriptor* ToMTLDepthStencilDescriptor(
 }
 
 MTLTextureDescriptor* ToMTLTextureDescriptor(const TextureDescriptor& desc) {
+  if (!desc.IsValid()) {
+    return nil;
+  }
   auto mtl_desc = [[MTLTextureDescriptor alloc] init];
+  mtl_desc.textureType = ToMTLTextureType(desc.type);
   mtl_desc.pixelFormat = ToMTLPixelFormat(desc.format);
+  mtl_desc.sampleCount = static_cast<NSUInteger>(desc.sample_count);
   mtl_desc.width = desc.size.width;
   mtl_desc.height = desc.size.height;
   mtl_desc.mipmapLevelCount = desc.mip_count;

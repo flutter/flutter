@@ -53,6 +53,8 @@ static MTLRenderPipelineDescriptor* GetMTLRenderPipelineDescriptor(
   descriptor.stencilAttachmentPixelFormat =
       ToMTLPixelFormat(desc.GetStencilPixelFormat());
 
+  descriptor.sampleCount = 4u;
+
   return descriptor;
 }
 

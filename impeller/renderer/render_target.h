@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <functional>
 #include <map>
 #include <optional>
 
@@ -24,6 +25,8 @@ class RenderTarget {
   RenderTarget();
 
   ~RenderTarget();
+
+  bool IsValid() const;
 
   bool HasColorAttachment(size_t index) const;
 
@@ -49,6 +52,9 @@ class RenderTarget {
   std::map<size_t, ColorAttachment> colors_;
   std::optional<DepthAttachment> depth_;
   std::optional<StencilAttachment> stencil_;
+
+  void IterateAllAttachments(
+      std::function<bool(const Attachment& attachment)> iterator) const;
 };
 
 }  // namespace impeller

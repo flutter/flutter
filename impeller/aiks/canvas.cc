@@ -91,6 +91,15 @@ void Canvas::DrawPath(Path path, Paint paint) {
   GetCurrentPass().AddEntity(std::move(entity));
 }
 
+void Canvas::DrawRect(Rect rect, Paint paint) {
+  DrawPath(PathBuilder{}.AddRect(rect).CreatePath(), std::move(paint));
+}
+
+void Canvas::DrawCircle(Point center, Scalar radius, Paint paint) {
+  DrawPath(PathBuilder{}.AddCircle(center, radius).CreatePath(),
+           std::move(paint));
+}
+
 void Canvas::SaveLayer(Paint paint, std::optional<Rect> bounds) {
   GetCurrentPass().SetDelegate(
       std::make_unique<PaintPassDelegate>(std::move(paint)));
@@ -187,10 +196,6 @@ void Canvas::IncrementStencilDepth() {
 
 size_t Canvas::GetStencilDepth() const {
   return xformation_stack_.back().stencil_depth;
-}
-
-void Canvas::DrawRect(Rect rect, Paint paint) {
-  DrawPath(PathBuilder{}.AddRect(rect).CreatePath(), std::move(paint));
 }
 
 void Canvas::Save(bool create_subpass) {
