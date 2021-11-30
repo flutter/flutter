@@ -122,8 +122,8 @@ final List<Object> _testsProjectExpectedOutput = <Object>[
   '✓ Flutter tests can pass',
   // Second test
   '══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════',
-  'The following TestFailure object was thrown running a test:',
-  '  Expected: false',
+  'The following TestFailure was thrown running a test:',
+  'Expected: false',
   '  Actual: <true>',
   '',
   'The test description was: can fail',

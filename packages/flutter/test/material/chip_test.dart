@@ -270,80 +270,6 @@ Finder findTooltipContainer(String tooltipText) {
 }
 
 void main() {
-  testWidgets('Chip defaults', (WidgetTester tester) async {
-    Widget buildFrame(Brightness brightness) {
-      return MaterialApp(
-        theme: ThemeData(brightness: brightness),
-        home: Scaffold(
-          body: Center(
-            child: Chip(
-              avatar: const CircleAvatar(child: Text('A')),
-              label: const Text('Chip A'),
-              onDeleted: () { },
-            ),
-          ),
-        ),
-      );
-    }
-
-    await tester.pumpWidget(buildFrame(Brightness.light));
-    expect(getMaterialBox(tester), paints..path(color: const Color(0x1f000000)));
-    expect(tester.getSize(find.byType(Chip)), const Size(156.0, 48.0));
-    expect(getMaterial(tester).color, null);
-    expect(getMaterial(tester).elevation, 0);
-    expect(getMaterial(tester).shape, const StadiumBorder());
-    expect(getIconData(tester).color?.value, 0xffffffff);
-    expect(getIconData(tester).opacity, null);
-    expect(getIconData(tester).size, null);
-    expect(getLabelStyle(tester).style.color?.value, 0xde000000);
-
-    await tester.pumpWidget(buildFrame(Brightness.dark));
-    await tester.pumpAndSettle(); // Theme transition animation
-    expect(getMaterialBox(tester), paints..path(color: const Color(0x1fffffff)));
-    expect(tester.getSize(find.byType(Chip)), const Size(156.0, 48.0));
-    expect(getMaterial(tester).color, null);
-    expect(getMaterial(tester).elevation, 0);
-    expect(getMaterial(tester).shape, const StadiumBorder());
-    expect(getIconData(tester).color?.value, 0xffffffff);
-    expect(getIconData(tester).opacity, null);
-    expect(getIconData(tester).size, null);
-    expect(getLabelStyle(tester).style.color?.value, 0xffffffff);
-  });
-
-  testWidgets('ChoiceChip defaults', (WidgetTester tester) async {
-    Widget buildFrame(Brightness brightness) {
-      return MaterialApp(
-        theme: ThemeData(brightness: brightness),
-        home: const Scaffold(
-          body: Center(
-            child: ChoiceChip(
-              label: Text('Chip A'),
-              selected: true,
-            ),
-          ),
-        ),
-      );
-    }
-
-    await tester.pumpWidget(buildFrame(Brightness.light));
-    expect(getMaterialBox(tester), paints..path(color: const Color(0x3d000000)));
-    expect(tester.getSize(find.byType(ChoiceChip)), const Size(108.0, 48.0));
-    expect(getMaterial(tester).color, null);
-    expect(getMaterial(tester).elevation, 0);
-    expect(getMaterial(tester).shape, const StadiumBorder());
-    expect(getLabelStyle(tester).style.color?.value, 0xde000000);
-
-    await tester.pumpWidget(buildFrame(Brightness.dark));
-    await tester.pumpAndSettle(); // Theme transition animation
-    expect(getMaterialBox(tester), paints..path(color: const Color(0x3dffffff)));
-    expect(tester.getSize(find.byType(ChoiceChip)), const Size(108.0, 48.0));
-    expect(getMaterial(tester).color, null);
-    expect(getMaterial(tester).elevation, 0);
-    expect(getMaterial(tester).shape, const StadiumBorder());
-    expect(getLabelStyle(tester).style.color?.value, 0xdeffffff);
-  });
-
-
   testWidgets('Chip control test', (WidgetTester tester) async {
     final FeedbackTester feedback = FeedbackTester();
     final List<String> deletedChipLabels = <String>[];
@@ -1771,11 +1697,7 @@ void main() {
       platform: TargetPlatform.android,
       primarySwatch: Colors.blue,
     );
-    final ChipThemeData defaultChipTheme = ChipThemeData.fromDefaults(
-      brightness: themeData.brightness,
-      secondaryColor: Colors.blue,
-      labelStyle: themeData.textTheme.bodyText1!,
-    );
+    final ChipThemeData defaultChipTheme = themeData.chipTheme;
     bool value = false;
     Widget buildApp({
       ChipThemeData? chipTheme,
