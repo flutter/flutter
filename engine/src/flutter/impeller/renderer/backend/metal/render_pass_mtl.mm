@@ -17,6 +17,33 @@
 
 namespace impeller {
 
+static bool ConfigureResolveTextureAttachment(
+    const Attachment& desc,
+    MTLRenderPassAttachmentDescriptor* attachment) {
+  if (desc.store_action == StoreAction::kMultisampleResolve &&
+      !desc.resolve_texture) {
+    VALIDATION_LOG << "Resolve store action specified on attachment but no "
+                      "resolve texture was specified.";
+    return false;
+  }
+
+  if (desc.resolve_texture &&
+      desc.store_action != StoreAction::kMultisampleResolve) {
+    VALIDATION_LOG << "Resolve store action specified but there was no "
+                      "resolve attachment.";
+    return false;
+  }
+
+  if (!desc.resolve_texture) {
+    return true;
+  }
+
+  attachment.resolveTexture =
+      TextureMTL::Cast(*desc.resolve_texture).GetMTLTexture();
+
+  return true;
+}
+
 static bool ConfigureAttachment(const Attachment& desc,
                                 MTLRenderPassAttachmentDescriptor* attachment) {
   if (!desc.texture) {
@@ -26,6 +53,11 @@ static bool ConfigureAttachment(const Attachment& desc,
   attachment.texture = TextureMTL::Cast(*desc.texture).GetMTLTexture();
   attachment.loadAction = ToMTLLoadAction(desc.load_action);
   attachment.storeAction = ToMTLStoreAction(desc.store_action);
+
+  if (!ConfigureResolveTextureAttachment(desc, attachment)) {
+    return false;
+  }
+
   return true;
 }
 
@@ -69,8 +101,8 @@ static MTLRenderPassDescriptor* ToMTLRenderPassDescriptor(
   for (const auto& color : colors) {
     if (!ConfigureColorAttachment(color.second,
                                   result.colorAttachments[color.first])) {
-      FML_DLOG(ERROR) << "Could not configure color attachment at index "
-                      << color.first;
+      VALIDATION_LOG << "Could not configure color attachment at index "
+                     << color.first;
       return nil;
     }
   }
@@ -79,7 +111,7 @@ static MTLRenderPassDescriptor* ToMTLRenderPassDescriptor(
 
   if (depth.has_value() &&
       !ConfigureDepthAttachment(depth.value(), result.depthAttachment)) {
-    FML_DLOG(ERROR) << "Could not configure depth attachment.";
+    VALIDATION_LOG << "Could not configure depth attachment.";
     return nil;
   }
 
@@ -87,7 +119,7 @@ static MTLRenderPassDescriptor* ToMTLRenderPassDescriptor(
 
   if (stencil.has_value() &&
       !ConfigureStencilAttachment(stencil.value(), result.stencilAttachment)) {
-    FML_DLOG(ERROR) << "Could not configure stencil attachment.";
+    VALIDATION_LOG << "Could not configure stencil attachment.";
     return nil;
   }
 
@@ -99,7 +131,7 @@ RenderPassMTL::RenderPassMTL(id<MTLCommandBuffer> buffer, RenderTarget target)
       buffer_(buffer),
       desc_(ToMTLRenderPassDescriptor(GetRenderTarget())),
       transients_buffer_(HostBuffer::Create()) {
-  if (!buffer_ || !desc_) {
+  if (!buffer_ || !desc_ || !render_target_.IsValid()) {
     return;
   }
   is_valid_ = true;
@@ -202,8 +234,7 @@ struct PassBindingsCache {
           [encoder_ setFragmentBufferOffset:offset atIndex:index];
           return true;
         default:
-          FML_DCHECK(false)
-              << "Cannot update buffer offset of an unknown stage.";
+          VALIDATION_LOG << "Cannot update buffer offset of an unknown stage.";
           return false;
       }
       return true;
@@ -217,7 +248,7 @@ struct PassBindingsCache {
         [encoder_ setFragmentBuffer:buffer offset:offset atIndex:index];
         return true;
       default:
-        FML_DCHECK(false) << "Cannot bind buffer to unknown shader stage.";
+        VALIDATION_LOG << "Cannot bind buffer to unknown shader stage.";
         return false;
     }
     return false;
@@ -239,7 +270,7 @@ struct PassBindingsCache {
         [encoder_ setFragmentTexture:texture atIndex:index];
         return true;
       default:
-        FML_DCHECK(false) << "Cannot bind buffer to unknown shader stage.";
+        VALIDATION_LOG << "Cannot bind buffer to unknown shader stage.";
         return false;
     }
     return false;
@@ -263,7 +294,7 @@ struct PassBindingsCache {
         [encoder_ setFragmentSamplerState:sampler atIndex:index];
         return true;
       default:
-        FML_DCHECK(false) << "Cannot bind buffer to unknown shader stage.";
+        VALIDATION_LOG << "Cannot bind buffer to unknown shader stage.";
         return false;
     }
     return false;
@@ -360,7 +391,7 @@ bool RenderPassMTL::EncodeCommands(Allocator& allocator,
   fml::closure pop_debug_marker = [encoder]() { [encoder popDebugGroup]; };
   for (const auto& command : commands_) {
     if (command.index_count == 0u) {
-      FML_DLOG(ERROR) << "Zero index count in render pass command.";
+      VALIDATION_LOG << "Zero index count in render pass command.";
       continue;
     }
 

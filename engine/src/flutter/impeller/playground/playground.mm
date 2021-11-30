@@ -144,23 +144,44 @@ bool Playground::OpenPlaygroundHere(Renderer::RenderCallback render_callback) {
       return false;
     }
 
-    TextureDescriptor color0_tex;
-    color0_tex.format = PixelFormat::kB8G8R8A8UNormInt;
-    color0_tex.size = {
+    TextureDescriptor msaa_tex_desc;
+    msaa_tex_desc.type = TextureType::k2DMultisample;
+    msaa_tex_desc.sample_count = SampleCount::kCount4;
+    msaa_tex_desc.format = PixelFormat::kB8G8R8A8UNormInt;
+    msaa_tex_desc.size = {
         static_cast<ISize::Type>(current_drawable.texture.width),
         static_cast<ISize::Type>(current_drawable.texture.height)};
-    color0_tex.usage = static_cast<uint64_t>(TextureUsage::kRenderTarget);
+    msaa_tex_desc.usage = static_cast<uint64_t>(TextureUsage::kRenderTarget);
+
+    auto msaa_tex =
+        renderer_.GetContext()->GetPermanentsAllocator()->CreateTexture(
+            StorageMode::kDeviceTransient, msaa_tex_desc);
+    if (!msaa_tex) {
+      FML_LOG(ERROR) << "Could not allocate MSAA resolve texture.";
+      return false;
+    }
+
+    msaa_tex->SetLabel("PlaygroundMainColor4xMSAA");
+
+    TextureDescriptor onscreen_tex_desc;
+    onscreen_tex_desc.format = PixelFormat::kB8G8R8A8UNormInt;
+    onscreen_tex_desc.size = msaa_tex_desc.size;
+    onscreen_tex_desc.usage =
+        static_cast<uint64_t>(TextureUsage::kRenderTarget);
 
     ColorAttachment color0;
-    color0.texture =
-        std::make_shared<TextureMTL>(color0_tex, current_drawable.texture);
+    color0.texture = msaa_tex;
     color0.clear_color = Color::DarkSlateGray();
     color0.load_action = LoadAction::kClear;
-    color0.store_action = StoreAction::kStore;
+    color0.store_action = StoreAction::kMultisampleResolve;
+    color0.resolve_texture = std::make_shared<TextureMTL>(
+        onscreen_tex_desc, current_drawable.texture);
 
     TextureDescriptor stencil0_tex;
+    stencil0_tex.type = TextureType::k2DMultisample;
+    stencil0_tex.sample_count = SampleCount::kCount4;
     stencil0_tex.format = PixelFormat::kD32FloatS8UNormInt;
-    stencil0_tex.size = color0_tex.size;
+    stencil0_tex.size = msaa_tex_desc.size;
     stencil0_tex.usage =
         static_cast<TextureUsageMask>(TextureUsage::kRenderTarget);
     auto stencil_texture =

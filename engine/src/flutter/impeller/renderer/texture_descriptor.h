@@ -13,11 +13,13 @@
 namespace impeller {
 
 struct TextureDescriptor {
+  TextureType type = TextureType::k2D;
   PixelFormat format = PixelFormat::kUnknown;
   ISize size;
   size_t mip_count = 1u;  // Size::MipCount is usually appropriate.
   TextureUsageMask usage =
       static_cast<TextureUsageMask>(TextureUsage::kShaderRead);
+  SampleCount sample_count = SampleCount::kCount1;
 
   constexpr size_t GetSizeOfBaseMipLevel() const {
     if (!IsValid()) {
@@ -33,11 +35,16 @@ struct TextureDescriptor {
     return size.width * BytesPerPixelForPixelFormat(format);
   }
 
-  bool IsValid() const {
+  constexpr bool SamplingOptionsAreValid() const {
+    const auto count = static_cast<uint64_t>(sample_count);
+    return IsMultisampleCapable(type) ? count > 1 : count == 1;
+  }
+
+  constexpr bool IsValid() const {
     return format != PixelFormat::kUnknown &&  //
            size.IsPositive() &&                //
-           mip_count >= 1u                     //
-        ;
+           mip_count >= 1u &&                  //
+           SamplingOptionsAreValid();
   }
 };
 
