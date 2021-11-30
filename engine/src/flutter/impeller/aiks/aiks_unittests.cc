@@ -127,6 +127,17 @@ TEST_F(AiksTest, CanRenderGroupOpacity) {
 
   canvas.Restore();
 
+  // ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
+TEST_F(AiksTest, CanPerformFullScreenMSAA) {
+  Canvas canvas;
+
+  Paint red;
+  red.color = Color::Red();
+
+  canvas.DrawCircle({250, 250}, 125, red);
+
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 

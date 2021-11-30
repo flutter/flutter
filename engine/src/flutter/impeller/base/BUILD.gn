@@ -12,6 +12,8 @@ impeller_component("base") {
     "config.h",
     "strings.cc",
     "strings.h",
+    "validation.cc",
+    "validation.h",
   ]
 }
 

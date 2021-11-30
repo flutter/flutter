@@ -89,6 +89,27 @@ enum class LoadAction {
 enum class StoreAction {
   kDontCare,
   kStore,
+  kMultisampleResolve,
+};
+
+enum class TextureType {
+  k2D,
+  k2DMultisample,
+};
+
+constexpr bool IsMultisampleCapable(TextureType type) {
+  switch (type) {
+    case TextureType::k2D:
+      return false;
+    case TextureType::k2DMultisample:
+      return true;
+  }
+  return false;
+}
+
+enum class SampleCount {
+  kCount1 = 1,
+  kCount4 = 4,
 };
 
 using TextureUsageMask = uint64_t;
@@ -320,7 +341,8 @@ struct StencilAttachmentDescriptor {
 };
 
 struct Attachment {
-  std::shared_ptr<Texture> texture = nullptr;
+  std::shared_ptr<Texture> texture;
+  std::shared_ptr<Texture> resolve_texture;
   LoadAction load_action = LoadAction::kDontCare;
   StoreAction store_action = StoreAction::kStore;
 

@@ -206,6 +206,8 @@ constexpr MTLStoreAction ToMTLStoreAction(StoreAction action) {
       return MTLStoreActionDontCare;
     case StoreAction::kStore:
       return MTLStoreActionStore;
+    case StoreAction::kMultisampleResolve:
+      return MTLStoreActionMultisampleResolve;
   }
   return MTLStoreActionDontCare;
 }
@@ -216,6 +218,8 @@ constexpr StoreAction FromMTLStoreAction(MTLStoreAction action) {
       return StoreAction::kDontCare;
     case MTLStoreActionStore:
       return StoreAction::kStore;
+    case MTLStoreActionMultisampleResolve:
+      return StoreAction::kMultisampleResolve;
     default:
       break;
   }
@@ -247,6 +251,16 @@ constexpr MTLSamplerAddressMode ToMTLSamplerAddressMode(
 
 constexpr MTLClearColor ToMTLClearColor(const Color& color) {
   return MTLClearColorMake(color.red, color.green, color.blue, color.alpha);
+}
+
+constexpr MTLTextureType ToMTLTextureType(TextureType type) {
+  switch (type) {
+    case TextureType::k2D:
+      return MTLTextureType2D;
+    case TextureType::k2DMultisample:
+      return MTLTextureType2DMultisample;
+  }
+  return MTLTextureType2D;
 }
 
 MTLRenderPipelineColorAttachmentDescriptor*

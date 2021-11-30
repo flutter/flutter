@@ -59,11 +59,11 @@ class RenderPass {
   virtual bool EncodeCommands(Allocator& transients_allocator) const = 0;
 
  protected:
+  const RenderTarget render_target_;
+
   RenderPass(RenderTarget target);
 
  private:
-  const RenderTarget render_target_;
-
   FML_DISALLOW_COPY_AND_ASSIGN(RenderPass);
 };
 

@@ -111,6 +111,12 @@ std::shared_ptr<Texture> AllocatorMTL::CreateTexture(
   }
 
   auto mtl_texture_desc = ToMTLTextureDescriptor(desc);
+
+  if (!mtl_texture_desc) {
+    FML_DLOG(ERROR) << "Texture descriptor was invalid.";
+    return nullptr;
+  }
+
   mtl_texture_desc.storageMode = ToMTLStorageMode(mode);
   auto texture = [device_ newTextureWithDescriptor:mtl_texture_desc];
   if (!texture) {
