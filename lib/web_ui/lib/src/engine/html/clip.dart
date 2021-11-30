@@ -7,7 +7,6 @@ import 'dart:svg' as svg;
 
 import 'package:ui/ui.dart' as ui;
 
-import '../dom_renderer.dart';
 import '../shadow.dart';
 import '../util.dart';
 import 'dom_canvas.dart';
@@ -363,7 +362,7 @@ class PersistedPhysicalShape extends PersistedContainerSurface
     _clipElement = svgClipPath;
     rootElement!.append(_clipElement!);
     if (elevation == 0.0) {
-      DomRenderer.setClipPath(rootElement!, createSvgClipUrl());
+      setClipPath(rootElement!, createSvgClipUrl());
       final html.CssStyleDeclaration rootElementStyle = rootElement!.style;
       rootElementStyle
         ..overflow = ''
@@ -378,7 +377,7 @@ class PersistedPhysicalShape extends PersistedContainerSurface
       return;
     }
 
-    DomRenderer.setClipPath(childContainer!, createSvgClipUrl());
+    setClipPath(childContainer!, createSvgClipUrl());
     final html.CssStyleDeclaration rootElementStyle = rootElement!.style;
     rootElementStyle
       ..overflow = ''
@@ -438,7 +437,7 @@ class PersistedPhysicalShape extends PersistedContainerSurface
       _svgElement = null;
       // Reset style on prior element since we may have switched between
       // rect/rrect and arbitrary path.
-      DomRenderer.setClipPath(rootElement!, '');
+      setClipPath(rootElement!, '');
       _applyShape();
     } else {
       // Reuse clipElement from prior surface.
@@ -518,7 +517,7 @@ svg.SvgSvgElement createSvgClipDef(html.HtmlElement element, ui.Path clipPath) {
   final ui.Rect pathBounds = clipPath.getBounds();
   final svg.SvgSvgElement svgClipPath = pathToSvgClipPath(clipPath,
       scaleX: 1.0 / pathBounds.right, scaleY: 1.0 / pathBounds.bottom);
-  DomRenderer.setClipPath(element, createSvgClipUrl());
+  setClipPath(element, createSvgClipUrl());
   // We need to set width and height for the clipElement to cover the
   // bounds of the path since browsers such as Safari and Edge
   // seem to incorrectly intersect the element bounding rect with

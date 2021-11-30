@@ -7,7 +7,7 @@ import 'dart:html' as html;
 import 'package:ui/ui.dart' as ui;
 
 import '../browser_detection.dart';
-import '../dom_renderer.dart';
+import '../embedder.dart';
 import 'bitmap_canvas.dart';
 import 'color_filter.dart';
 import 'shaders/shader.dart';
@@ -57,7 +57,7 @@ class PersistedShaderMask extends PersistedContainerSurface
   @override
   void discard() {
     super.discard();
-    domRenderer.removeResource(_shaderElement);
+    flutterViewEmbedder.removeResource(_shaderElement);
     // Do not detach the child container from the root. It is permanently
     // attached. The elements are reused together and are detached from the DOM
     // together.
@@ -83,7 +83,7 @@ class PersistedShaderMask extends PersistedContainerSurface
 
   @override
   void apply() {
-    domRenderer.removeResource(_shaderElement);
+    flutterViewEmbedder.removeResource(_shaderElement);
     _shaderElement = null;
     if (shader is ui.Gradient) {
       rootElement!.style
@@ -162,7 +162,7 @@ class PersistedShaderMask extends PersistedContainerSurface
       } else {
         rootElement!.style.filter = 'url(#${svgFilter.id})';
       }
-      domRenderer.addResource(_shaderElement!);
+      flutterViewEmbedder.addResource(_shaderElement!);
     }
   }
 

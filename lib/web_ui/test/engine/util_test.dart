@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:html' as html;
 import 'dart:typed_data';
 
 import 'package:test/bootstrap/browser.dart';
@@ -100,5 +101,19 @@ void testMain() {
     expect(parseFloat('text108'), isNull);
     expect(parseFloat('text 108'), isNull);
     expect(parseFloat('another text 108'), isNull);
+  });
+
+  test('can set style properties on elements', () {
+    final html.Element element = html.document.createElement('div');
+    setElementStyle(element, 'color', 'red');
+    expect(element.style.color, 'red');
+  });
+
+  test('can remove style properties from elements', () {
+    final html.Element element = html.document.createElement('div');
+    setElementStyle(element, 'color', 'blue');
+    expect(element.style.color, 'blue');
+    setElementStyle(element, 'color', null);
+    expect(element.style.color, '');
   });
 }

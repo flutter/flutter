@@ -326,7 +326,7 @@ void testMain() {
       localeChangedCount += 1;
     };
 
-    ensureDomRendererInitialized();
+    ensureFlutterViewEmbedderInitialized();
 
     // We populate the initial list of locales automatically (only test that we
     // got some locales; some contributors may be in different locales, so we

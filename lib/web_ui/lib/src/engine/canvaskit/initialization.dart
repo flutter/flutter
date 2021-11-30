@@ -13,7 +13,7 @@ import 'package:js/js.dart';
 import '../../engine.dart' show kProfileMode;
 import '../browser_detection.dart';
 import '../configuration.dart';
-import '../dom_renderer.dart';
+import '../embedder.dart';
 import 'canvaskit_api.dart';
 import 'fonts.dart';
 
@@ -78,7 +78,7 @@ Future<void> initializeCanvasKit({String? canvasKitBase}) {
 
   /// Add a Skia scene host.
   skiaSceneHost = html.Element.tag('flt-scene');
-  domRenderer.renderScene(skiaSceneHost);
+  flutterViewEmbedder.renderScene(skiaSceneHost);
   return canvasKitCompleter.future;
 }
 

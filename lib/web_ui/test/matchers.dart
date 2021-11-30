@@ -454,7 +454,7 @@ void expectPageHtml(String expectedHtml,
 
 /// Currently rendered HTML DOM as an HTML string.
 String get currentHtml {
-  return domRenderer.sceneElement?.outerHtml ?? '';
+  return flutterViewEmbedder.sceneElement?.outerHtml ?? '';
 }
 
 class SceneTester {
