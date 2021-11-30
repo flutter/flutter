@@ -1626,14 +1626,16 @@ enum TextLeadingDistribution {
 /// {@template dart.ui.textHeightBehavior}
 /// Defines how to apply [TextStyle.height] over and under text.
 ///
-/// [applyHeightToFirstAscent] and [applyHeightToLastDescent] represent whether
-/// the [TextStyle.height] modifier will be applied to the corresponding metric.
-/// By default both properties are true, and [TextStyle.height] is applied as
+/// [TextHeightBehavior.applyHeightToFirstAscent] and
+/// [TextHeightBehavior.applyHeightToLastDescent] represent whether the
+/// [TextStyle.height] modifier will be applied to the corresponding metric. By
+/// default both properties are true, and [TextStyle.height] is applied as
 /// normal. When set to false, the font's default ascent will be used.
 ///
-/// [leadingDistribution] determines how the [leading] is distributed over and
-/// under text. This property applies before [applyHeightToFirstAscent] and
-/// [applyHeightToLastDescent].
+/// [TextHeightBehavior.leadingDistribution] determines how the
+/// leading is distributed over and under text. This
+/// property applies before [TextHeightBehavior.applyHeightToFirstAscent] and
+/// [TextHeightBehavior.applyHeightToLastDescent].
 ///
 /// {@endtemplate}
 class TextHeightBehavior {
@@ -1646,7 +1648,7 @@ class TextHeightBehavior {
   ///  * applyHeightToLastDescent: When true, the [TextStyle.height] modifier
   ///    will be applied to the descent of the last line. When false, the font's
   ///    default descent will be used.
-  ///  * leadingDistribution: How the [leading] is distributed over and under
+  ///  * leadingDistribution: How the leading is distributed over and under
   ///    text.
   ///
   /// All properties default to true (height modifications applied as normal).
