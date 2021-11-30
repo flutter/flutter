@@ -39,8 +39,8 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final Color oddItemColor = colorScheme.primary.withOpacity(0.05);
-    final Color evenItemColor = colorScheme.primaryVariant.withOpacity(0.15);
+    final Color oddItemColor = colorScheme.secondary.withOpacity(0.05);
+    final Color evenItemColor = colorScheme.secondary.withOpacity(0.15);
     final Color draggableItemColor = colorScheme.secondary;
 
     Widget _proxyDecorator(Widget child, int index, Animation<double> animation) {

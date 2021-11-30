@@ -473,4 +473,22 @@ void main() {
 
   AppBarTheme appBarTheme = AppBarTheme();
   appBarTheme.backgroundColor;
+
+  // Changes made in https://github.com/flutter/flutter/pull/93396
+  ThemeData themeData = ThemeData();
+  themeData = ThemeData();
+  themeData = ThemeData.raw();
+  themeData = themeData.copyWith();
+  themeData.primaryColorBrightness; // Removing field reference not supported.
+
+  // Changes made in https://github.com/flutter/flutter/pull/93427
+  ColorScheme colorScheme = ColorScheme();
+  colorScheme = ColorScheme();
+  colorScheme = ColorScheme.light();
+  colorScheme = ColorScheme.dark();
+  colorScheme = ColorScheme.highContrastLight();
+  colorScheme = ColorScheme.highContrastDark();
+  colorScheme = colorScheme.copyWith();
+  colorScheme.primaryContainer;
+  colorScheme.secondaryContainer;
 }

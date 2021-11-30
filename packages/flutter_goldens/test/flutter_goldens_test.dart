@@ -2,12 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(gspencergoog): Remove this tag once this test's state leaks/test
-// dependencies have been fixed.
-// https://github.com/flutter/flutter/issues/85160
-// Fails with "flutter test --test-randomize-ordering-seed=123"
-@Tags(<String>['no-shuffle'])
-
 // See also dev/automated_tests/flutter_test/flutter_gold_test.dart
 
 import 'dart:async';
@@ -34,13 +28,6 @@ const List<int> _kTestPngBytes =
   1, 0, 0, 0, 1, 8, 6, 0, 0, 0, 31, 21, 196, 137, 0, 0, 0, 11, 73, 68, 65, 84,
   120, 1, 99, 97, 0, 2, 0, 0, 25, 0, 5, 144, 240, 54, 245, 0, 0, 0, 0, 73, 69,
   78, 68, 174, 66, 96, 130];
-
-// 1x1 colored pixel
-const List<int> _kFailPngBytes =
-<int>[137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0,
-  1, 0, 0, 0, 1, 8, 6, 0, 0, 0, 31, 21, 196, 137, 0, 0, 0, 13, 73, 68, 65, 84,
-  120, 1, 99, 249, 207, 240, 255, 63, 0, 7, 18, 3, 2, 164, 147, 160, 197, 0,
-  0, 0, 0, 73, 69, 78, 68, 174, 66, 96, 130];
 
 void main() {
   late MemoryFileSystem fs;
@@ -162,6 +149,45 @@ void main() {
 
       expect(
         skiaClient.imgtestInit(),
+        throwsException,
+      );
+    });
+
+    test('throws for error state from imgtestAdd', () {
+      final File goldenFile = fs.file('/workDirectory/temp/golden_file_test.png')
+        ..createSync(recursive: true);
+      platform = FakePlatform(
+          environment: <String, String>{
+            'FLUTTER_ROOT': _kFlutterRoot,
+            'GOLDCTL' : 'goldctl',
+          },
+          operatingSystem: 'macos'
+      );
+
+      skiaClient = SkiaGoldClient(
+        workDirectory,
+        fs: fs,
+        process: process,
+        platform: platform,
+        httpClient: fakeHttpClient,
+      );
+
+      process.fallbackProcessResult = ProcessResult(123, 1, 'fail', 'fail');
+      const RunInvocation goldctlInvocation = RunInvocation(
+        <String>[
+          'goldctl',
+          'imgtest', 'add',
+          '--work-dir', '/workDirectory/temp',
+          '--test-name', 'golden_file_test',
+          '--png-file', '/workDirectory/temp/golden_file_test.png',
+          '--passfail',
+        ],
+        null,
+      );
+      process.processResults[goldctlInvocation] = ProcessResult(123, 1, 'fail', 'fail');
+
+      expect(
+        skiaClient.imgtestAdd('golden_file_test', goldenFile),
         throwsException,
       );
     });
@@ -573,22 +599,6 @@ void main() {
         );
       });
 
-      test('compare properly awaits validation & output before failing.', () async {
-        final Completer<bool> completer = Completer<bool>();
-        final Future<bool> result = comparator.compare(
-          Uint8List.fromList(_kFailPngBytes),
-          Uri.parse('flutter.golden_test.1.png'),
-        );
-        bool shouldThrow = true;
-        result.then((_) {
-          if (shouldThrow)
-            fail('Compare completed before validation completed!');
-        });
-        await Future<void>.value();
-        shouldThrow = false;
-        completer.complete(Future<bool>.value(false));
-      });
-
       test('returns FlutterSkippingGoldenFileComparator when network connection is unavailable', () async {
         final FakeDirectory fakeDirectory = FakeDirectory();
         fakeDirectory.existsSyncValue = true;
@@ -611,6 +621,8 @@ void main() {
           baseDirectory: fakeDirectory,
         );
         expect(comparator.runtimeType, FlutterSkippingFileComparator);
+        // reset property or it will carry on to other tests
+        fakeSkiaClient.getExpectationForTestThrowable = null;
       });
     });
   });

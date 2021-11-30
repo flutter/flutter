@@ -607,6 +607,8 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     return _paintScrollbar(canvas, size, thumbExtent, _lastAxisDirection!);
   }
 
+  bool get _lastMetricsAreScrollable => _lastMetrics!.minScrollExtent != _lastMetrics!.maxScrollExtent;
+
   /// Same as hitTest, but includes some padding when the [PointerEvent] is
   /// caused by [PointerDeviceKind.touch] to make sure that the region
   /// isn't too small to be interacted with by the user.
@@ -617,12 +619,16 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   /// based on proximity. When `forHover` is true, the larger hit test area will
   /// be used.
   bool hitTestInteractive(Offset position, PointerDeviceKind kind, { bool forHover = false }) {
-    if (_thumbRect == null) {
+    if (_trackRect == null) {
       // We have not computed the scrollbar position yet.
       return false;
     }
 
-    final Rect interactiveRect = _trackRect ?? _thumbRect!;
+    if (!_lastMetricsAreScrollable) {
+      return false;
+    }
+
+    final Rect interactiveRect = _trackRect!;
     final Rect paddedRect = interactiveRect.expandToInclude(
       Rect.fromCircle(center: _thumbRect!.center, radius: _kMinInteractiveSize / 2),
     );
@@ -658,6 +664,10 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
       return false;
     }
 
+    if (!_lastMetricsAreScrollable) {
+      return false;
+    }
+
     switch (kind) {
       case PointerDeviceKind.touch:
         final Rect touchThumbRect = _thumbRect!.expandToInclude(
@@ -682,6 +692,11 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     if (fadeoutOpacityAnimation.value == 0.0) {
       return false;
     }
+
+    if (!_lastMetricsAreScrollable) {
+      return false;
+    }
+
     return _thumbRect!.contains(position!);
   }
 
@@ -1347,6 +1362,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   void _updateScrollPosition(Offset updatedOffset) {
     assert(_currentController != null);
     assert(_dragScrollbarAxisOffset != null);
+
     final ScrollPosition position = _currentController!.position;
     late double primaryDelta;
     switch (position.axisDirection) {

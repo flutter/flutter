@@ -231,6 +231,7 @@ class ThemeData with Diagnosticable {
     ScrollbarThemeData? scrollbarTheme,
     InteractiveInkFeatureFactory? splashFactory,
     VisualDensity? visualDensity,
+    bool? useMaterial3,
     // COLOR
     // [colorScheme] is the preferred way to configure colors. The other color
     // properties (as well as brightness, primaryColorBrightness, and primarySwatch)
@@ -239,7 +240,6 @@ class ThemeData with Diagnosticable {
     Brightness? brightness,
     MaterialColor? primarySwatch,
     Color? primaryColor,
-    Brightness? primaryColorBrightness,
     Color? primaryColorLight,
     Color? primaryColorDark,
     Color? focusColor,
@@ -361,71 +361,17 @@ class ThemeData with Diagnosticable {
       'This feature was deprecated after v2.5.0-1.0.pre.',
     )
     bool? fixTextFieldOutlineLabel,
+    @Deprecated(
+      'No longer used by the framework, please remove any reference to it. '
+      'This feature was deprecated after v2.6.0-11.0.pre.',
+    )
+    Brightness? primaryColorBrightness,
   }) {
-    assert(colorScheme?.brightness == null || brightness == null || colorScheme!.brightness == brightness);
-    final Brightness _brightness = brightness ?? colorScheme?.brightness ?? Brightness.light;
-    final bool isDark = _brightness == Brightness.dark;
-    visualDensity ??= VisualDensity.adaptivePlatformDensity;
-    primarySwatch ??= Colors.blue;
-    primaryColor ??= isDark ? Colors.grey[900]! : primarySwatch;
-    primaryColorBrightness ??= estimateBrightnessForColor(primaryColor);
-    primaryColorLight ??= isDark ? Colors.grey[500]! : primarySwatch[100]!;
-    primaryColorDark ??= isDark ? Colors.black : primarySwatch[700]!;
-    final bool primaryIsDark = primaryColorBrightness == Brightness.dark;
-    toggleableActiveColor ??= isDark ? Colors.tealAccent[200]! : (accentColor ?? primarySwatch[600]!);
-    accentColor ??= isDark ? Colors.tealAccent[200]! : primarySwatch[500]!;
-    accentColorBrightness ??= estimateBrightnessForColor(accentColor);
-    final bool accentIsDark = accentColorBrightness == Brightness.dark;
-    canvasColor ??= isDark ? Colors.grey[850]! : Colors.grey[50]!;
-    shadowColor ??= Colors.black;
-    scaffoldBackgroundColor ??= canvasColor;
-    bottomAppBarColor ??= isDark ? Colors.grey[800]! : Colors.white;
-    cardColor ??= isDark ? Colors.grey[800]! : Colors.white;
-    dividerColor ??= isDark ? const Color(0x1FFFFFFF) : const Color(0x1F000000);
-
-    // Create a ColorScheme that is backwards compatible as possible
-    // with the existing default ThemeData color values.
-    colorScheme ??= ColorScheme.fromSwatch(
-      primarySwatch: primarySwatch,
-      primaryColorDark: primaryColorDark,
-      accentColor: accentColor,
-      cardColor: cardColor,
-      backgroundColor: backgroundColor,
-      errorColor: errorColor,
-      brightness: _brightness,
-    );
-
-    splashFactory ??= InkSplash.splashFactory;
-    selectedRowColor ??= Colors.grey[100]!;
-    unselectedWidgetColor ??= isDark ? Colors.white70 : Colors.black54;
-    // Spec doesn't specify a dark theme secondaryHeaderColor, this is a guess.
-    secondaryHeaderColor ??= isDark ? Colors.grey[700]! : primarySwatch[50]!;
-    textSelectionColor ??= isDark ? accentColor : primarySwatch[200]!;
-    cursorColor = cursorColor ?? const Color.fromRGBO(66, 133, 244, 1.0);
-    textSelectionHandleColor ??= isDark ? Colors.tealAccent[400]! : primarySwatch[300]!;
-    backgroundColor ??= isDark ? Colors.grey[700]! : primarySwatch[200]!;
-    dialogBackgroundColor ??= isDark ? Colors.grey[800]! : Colors.white;
-    indicatorColor ??= accentColor == primaryColor ? Colors.white : accentColor;
-    hintColor ??= isDark ? Colors.white60 : Colors.black.withOpacity(0.6);
-    errorColor ??= Colors.red[700]!;
+    // GENERAL CONFIGURATION
+    applyElevationOverlayColor ??= false;
+    cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
     inputDecorationTheme ??= const InputDecorationTheme();
-    pageTransitionsTheme ??= const PageTransitionsTheme();
-    primaryIconTheme ??= primaryIsDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black);
-    accentIconTheme ??= accentIsDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black);
-    iconTheme ??= isDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black87);
     platform ??= defaultTargetPlatform;
-    typography ??= Typography.material2014(platform: platform);
-    TextTheme defaultTextTheme = isDark ? typography.white : typography.black;
-    TextTheme defaultPrimaryTextTheme = primaryIsDark ? typography.white : typography.black;
-    TextTheme defaultAccentTextTheme = accentIsDark ? typography.white : typography.black;
-    if (fontFamily != null) {
-      defaultTextTheme = defaultTextTheme.apply(fontFamily: fontFamily);
-      defaultPrimaryTextTheme = defaultPrimaryTextTheme.apply(fontFamily: fontFamily);
-      defaultAccentTextTheme = defaultAccentTextTheme.apply(fontFamily: fontFamily);
-    }
-    textTheme = defaultTextTheme.merge(textTheme);
-    primaryTextTheme = defaultPrimaryTextTheme.merge(primaryTextTheme);
-    accentTextTheme = defaultAccentTextTheme.merge(accentTextTheme);
     switch (platform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
@@ -438,16 +384,60 @@ class ThemeData with Diagnosticable {
          materialTapTargetSize ??= MaterialTapTargetSize.shrinkWrap;
         break;
     }
-    applyElevationOverlayColor ??= false;
+    pageTransitionsTheme ??= const PageTransitionsTheme();
+    scrollbarTheme ??= const ScrollbarThemeData();
+    splashFactory ??= InkSplash.splashFactory;
+    visualDensity ??= VisualDensity.adaptivePlatformDensity;
+    useMaterial3 ??= false;
 
-    // Used as the default color (fill color) for RaisedButtons. Computing the
-    // default for ButtonThemeData for the sake of backwards compatibility.
-    buttonColor ??= isDark ? primarySwatch[600]! : Colors.grey[300]!;
+    // COLOR
+    assert(colorScheme?.brightness == null || brightness == null || colorScheme!.brightness == brightness);
+    final Brightness _brightness = brightness ?? colorScheme?.brightness ?? Brightness.light;
+    final bool isDark = _brightness == Brightness.dark;
+    primarySwatch ??= Colors.blue;
+    primaryColor ??= isDark ? Colors.grey[900]! : primarySwatch;
+    final Brightness _primaryColorBrightness = estimateBrightnessForColor(primaryColor);
+    primaryColorLight ??= isDark ? Colors.grey[500]! : primarySwatch[100]!;
+    primaryColorDark ??= isDark ? Colors.black : primarySwatch[700]!;
+    final bool primaryIsDark = _primaryColorBrightness == Brightness.dark;
+    toggleableActiveColor ??= isDark ? Colors.tealAccent[200]! : (accentColor ?? primarySwatch[600]!);
+    accentColor ??= isDark ? Colors.tealAccent[200]! : primarySwatch[500]!;
+    accentColorBrightness ??= estimateBrightnessForColor(accentColor);
+    final bool accentIsDark = accentColorBrightness == Brightness.dark;
     focusColor ??= isDark ? Colors.white.withOpacity(0.12) : Colors.black.withOpacity(0.12);
     hoverColor ??= isDark ? Colors.white.withOpacity(0.04) : Colors.black.withOpacity(0.04);
+    shadowColor ??= Colors.black;
+    canvasColor ??= isDark ? Colors.grey[850]! : Colors.grey[50]!;
+    scaffoldBackgroundColor ??= canvasColor;
+    bottomAppBarColor ??= isDark ? Colors.grey[800]! : Colors.white;
+    cardColor ??= isDark ? Colors.grey[800]! : Colors.white;
+    dividerColor ??= isDark ? const Color(0x1FFFFFFF) : const Color(0x1F000000);
+    // Create a ColorScheme that is backwards compatible as possible
+    // with the existing default ThemeData color values.
+    colorScheme ??= ColorScheme.fromSwatch(
+      primarySwatch: primarySwatch,
+      primaryColorDark: primaryColorDark,
+      accentColor: accentColor,
+      cardColor: cardColor,
+      backgroundColor: backgroundColor,
+      errorColor: errorColor,
+      brightness: _brightness,
+    );
+    selectedRowColor ??= Colors.grey[100]!;
+    unselectedWidgetColor ??= isDark ? Colors.white70 : Colors.black54;
+    // Spec doesn't specify a dark theme secondaryHeaderColor, this is a guess.
+    secondaryHeaderColor ??= isDark ? Colors.grey[700]! : primarySwatch[50]!;
+    backgroundColor ??= isDark ? Colors.grey[700]! : primarySwatch[200]!;
+    dialogBackgroundColor ??= isDark ? Colors.grey[800]! : Colors.white;
+    indicatorColor ??= accentColor == primaryColor ? Colors.white : accentColor;
+    hintColor ??= isDark ? Colors.white60 : Colors.black.withOpacity(0.6);
+    errorColor ??= Colors.red[700]!;
+    // The default [buttonTheme] is here because it doesn't use the defaults for
+    // [disabledColor], [highlightColor], and [splashColor].
     buttonTheme ??= ButtonThemeData(
       colorScheme: colorScheme,
-      buttonColor: buttonColor,
+      // Defaults to the fill color for RaisedButtons for backwards compatibility.
+      buttonColor: buttonColor ?? (isDark ? primarySwatch[600]! : Colors.grey[300]!),
       disabledColor: disabledColor,
       focusColor: focusColor,
       hoverColor: hoverColor,
@@ -455,50 +445,72 @@ class ThemeData with Diagnosticable {
       splashColor: splashColor,
       materialTapTargetSize: materialTapTargetSize,
     );
-    toggleButtonsTheme ??= const ToggleButtonsThemeData();
     disabledColor ??= isDark ? Colors.white38 : Colors.black38;
     highlightColor ??= isDark ? _kDarkThemeHighlightColor : _kLightThemeHighlightColor;
     splashColor ??= isDark ? _kDarkThemeSplashColor : _kLightThemeSplashColor;
 
-    sliderTheme ??= const SliderThemeData();
-    tabBarTheme ??= const TabBarTheme();
-    tooltipTheme ??= const TooltipThemeData();
+    // TYPOGRAPHY & ICONOGRAPHY
+    typography ??= Typography.material2014(platform: platform);
+    TextTheme defaultTextTheme = isDark ? typography.white : typography.black;
+    TextTheme defaultPrimaryTextTheme = primaryIsDark ? typography.white : typography.black;
+    TextTheme defaultAccentTextTheme = accentIsDark ? typography.white : typography.black;
+    if (fontFamily != null) {
+      defaultTextTheme = defaultTextTheme.apply(fontFamily: fontFamily);
+      defaultPrimaryTextTheme = defaultPrimaryTextTheme.apply(fontFamily: fontFamily);
+      defaultAccentTextTheme = defaultAccentTextTheme.apply(fontFamily: fontFamily);
+    }
+    textTheme = defaultTextTheme.merge(textTheme);
+    primaryTextTheme = defaultPrimaryTextTheme.merge(primaryTextTheme);
+    iconTheme ??= isDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black87);
+    primaryIconTheme ??= primaryIsDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black);
+
+    // COMPONENT THEMES
     appBarTheme ??= const AppBarTheme();
-    scrollbarTheme ??= const ScrollbarThemeData();
+    bannerTheme ??= const MaterialBannerThemeData();
     bottomAppBarTheme ??= const BottomAppBarTheme();
+    bottomNavigationBarTheme ??= const BottomNavigationBarThemeData();
+    bottomSheetTheme ??= const BottomSheetThemeData();
+    buttonBarTheme ??= const ButtonBarThemeData();
     cardTheme ??= const CardTheme();
     chipTheme ??= ChipThemeData.fromDefaults(
       secondaryColor: isDark ? Colors.tealAccent[200]! : primaryColor,
       brightness: colorScheme.brightness,
       labelStyle: textTheme.bodyText1!,
     );
+    checkboxTheme ??= const CheckboxThemeData();
+    dataTableTheme ??= const DataTableThemeData();
     dialogTheme ??= const DialogTheme();
+    dividerTheme ??= const DividerThemeData();
+    drawerTheme ??= const DrawerThemeData();
+    elevatedButtonTheme ??= const ElevatedButtonThemeData();
     floatingActionButtonTheme ??= const FloatingActionButtonThemeData();
+    listTileTheme ??= const ListTileThemeData();
     navigationBarTheme ??= const NavigationBarThemeData();
     navigationRailTheme ??= const NavigationRailThemeData();
-    cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
-    snackBarTheme ??= const SnackBarThemeData();
-    bottomSheetTheme ??= const BottomSheetThemeData();
-    popupMenuTheme ??= const PopupMenuThemeData();
-    bannerTheme ??= const MaterialBannerThemeData();
-    dividerTheme ??= const DividerThemeData();
-    buttonBarTheme ??= const ButtonBarThemeData();
-    bottomNavigationBarTheme ??= const BottomNavigationBarThemeData();
-    timePickerTheme ??= const TimePickerThemeData();
-    textButtonTheme ??= const TextButtonThemeData();
-    elevatedButtonTheme ??= const ElevatedButtonThemeData();
     outlinedButtonTheme ??= const OutlinedButtonThemeData();
-    textSelectionTheme ??= const TextSelectionThemeData();
-    dataTableTheme ??= const DataTableThemeData();
-    checkboxTheme ??= const CheckboxThemeData();
-    radioTheme ??= const RadioThemeData();
-    switchTheme ??= const SwitchThemeData();
+    popupMenuTheme ??= const PopupMenuThemeData();
     progressIndicatorTheme ??= const ProgressIndicatorThemeData();
-    drawerTheme ??= const DrawerThemeData();
-    listTileTheme ??= const ListTileThemeData();
+    radioTheme ??= const RadioThemeData();
+    sliderTheme ??= const SliderThemeData();
+    snackBarTheme ??= const SnackBarThemeData();
+    switchTheme ??= const SwitchThemeData();
+    tabBarTheme ??= const TabBarTheme();
+    textButtonTheme ??= const TextButtonThemeData();
+    textSelectionTheme ??= const TextSelectionThemeData();
+    timePickerTheme ??= const TimePickerThemeData();
+    toggleButtonsTheme ??= const ToggleButtonsThemeData();
+    tooltipTheme ??= const TooltipThemeData();
 
-    fixTextFieldOutlineLabel ??= true;
+     // DEPRECATED (newest deprecations at the bottom)
     useTextSelectionTheme ??= true;
+    textSelectionColor ??= isDark ? accentColor : primarySwatch[200]!;
+    cursorColor = cursorColor ?? const Color.fromRGBO(66, 133, 244, 1.0);
+    textSelectionHandleColor ??= isDark ? Colors.tealAccent[400]! : primarySwatch[300]!;
+    accentTextTheme = defaultAccentTextTheme.merge(accentTextTheme);
+    accentIconTheme ??= accentIsDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black);
+    buttonColor ??= isDark ? primarySwatch[600]! : Colors.grey[300]!;
+    fixTextFieldOutlineLabel ??= true;
+    primaryColorBrightness = _primaryColorBrightness;
 
     return ThemeData.raw(
       // GENERAL CONFIGURATION
@@ -512,10 +524,10 @@ class ThemeData with Diagnosticable {
       scrollbarTheme: scrollbarTheme,
       splashFactory: splashFactory,
       visualDensity: visualDensity,
+      useMaterial3: useMaterial3,
       // COLOR
       colorScheme: colorScheme,
       primaryColor: primaryColor,
-      primaryColorBrightness: primaryColorBrightness,
       primaryColorLight: primaryColorLight,
       primaryColorDark: primaryColorDark,
       focusColor: focusColor,
@@ -588,6 +600,7 @@ class ThemeData with Diagnosticable {
       accentIconTheme: accentIconTheme,
       buttonColor: buttonColor,
       fixTextFieldOutlineLabel: fixTextFieldOutlineLabel,
+      primaryColorBrightness: primaryColorBrightness,
     );
   }
 
@@ -613,13 +626,13 @@ class ThemeData with Diagnosticable {
     required this.scrollbarTheme,
     required this.splashFactory,
     required this.visualDensity,
+    required this.useMaterial3,
     // COLOR
     // [colorScheme] is the preferred way to configure colors. The other color
     // properties will gradually be phased out, see
     // https://github.com/flutter/flutter/issues/91772.
     required this.colorScheme,
     required this.primaryColor,
-    required this.primaryColorBrightness,
     required this.primaryColorLight,
     required this.primaryColorDark,
     required this.focusColor,
@@ -740,6 +753,11 @@ class ThemeData with Diagnosticable {
       'This feature was deprecated after v2.5.0-1.0.pre.',
     )
     required this.fixTextFieldOutlineLabel,
+    @Deprecated(
+      'No longer used by the framework, please remove any reference to it. '
+      'This feature was deprecated after v2.6.0-11.0.pre.',
+    )
+    required this.primaryColorBrightness,
   }) : // GENERAL CONFIGURATION
        assert(applyElevationOverlayColor != null),
        assert(inputDecorationTheme != null),
@@ -749,10 +767,10 @@ class ThemeData with Diagnosticable {
        assert(scrollbarTheme != null),
        assert(splashFactory != null),
        assert(visualDensity != null),
+       assert(useMaterial3 != null),
         // COLOR
        assert(colorScheme != null),
        assert(primaryColor != null),
-       assert(primaryColorBrightness != null),
        assert(primaryColorLight != null),
        assert(primaryColorDark != null),
        assert(focusColor != null),
@@ -824,7 +842,8 @@ class ThemeData with Diagnosticable {
        assert(accentTextTheme != null),
        assert(accentIconTheme != null),
        assert(buttonColor != null),
-       assert(fixTextFieldOutlineLabel != null);
+       assert(fixTextFieldOutlineLabel != null),
+       assert(primaryColorBrightness != null);
 
   /// Create a [ThemeData] based on the colors in the given [colorScheme] and
   /// text styles of the optional [textTheme].
@@ -1068,6 +1087,31 @@ class ThemeData with Diagnosticable {
   /// {@endtemplate}
   final VisualDensity visualDensity;
 
+  /// A temporary flag used to opt-in to new Material 3 features.
+  ///
+  /// If true, then components that have been migrated to Material 3 will
+  /// start using new colors, typography and other features of Material 3.
+  /// If false, they will use the Material 2 look and feel.
+  ///
+  /// Currently no components have been migrated to support Material 3.
+  /// As they are updated to include Material 3 support this documentation
+  /// will be modified to indicate exactly what widgets this flag will affect.
+  ///
+  /// During the migration to Material 3, turning this on may yield
+  /// inconsistent look and feel in your app. Some components will be migrated
+  /// before others and typography changes will be coming in stages.
+  ///
+  /// [useMaterial3] defaults to false. After all the migrated components
+  /// have landed on stable, we will change this to be true by default. After
+  /// that change has landed on stable, we will deprecate this flag and remove
+  /// all uses of it. Everything will use the Material 3 look and feel at
+  /// that point.
+  ///
+  /// See also:
+  ///
+  ///   * [Material Design 3](https://m3.material.io/).
+  final bool useMaterial3;
+
   // COLOR
 
   /// A set of twelve colors that can be used to configure the
@@ -1087,10 +1131,6 @@ class ThemeData with Diagnosticable {
   /// [ColorScheme.onPrimary]. It might be simpler to just configure an app's
   /// visuals in terms of the theme's [colorScheme].
   final Color primaryColor;
-
-  /// The brightness of the [primaryColor]. Used to determine the color of text and
-  /// icons placed on top of the primary color (e.g. toolbar text).
-  final Brightness primaryColorBrightness;
 
   /// A lighter version of the [primaryColor].
   final Color primaryColorLight;
@@ -1450,6 +1490,21 @@ class ThemeData with Diagnosticable {
   )
   final bool fixTextFieldOutlineLabel;
 
+  /// Obsolete property that was originally used to determine the color
+  /// of text and icons placed on top of the primary color (e.g. toolbar text).
+  ///
+  /// The material library no longer uses this property. The [appBarTheme] can
+  /// be used to configure the appearance of [AppBar]s. The appearance of
+  /// Keyboards for [TextField]s now uses the overall theme's
+  /// [ThemeData.brightness] and can also be customized with
+  /// [TextField.keyboardAppearance]. The brightness of any color can be found
+  /// with [ThemeData.estimateBrightnessForColor].
+  @Deprecated(
+    'No longer used by the framework, please remove any reference to it. '
+    'This feature was deprecated after v2.6.0-11.0.pre.',
+  )
+  final Brightness primaryColorBrightness;
+
   /// Creates a copy of this theme but with the given fields replaced with the new values.
   ///
   /// The [brightness] value is applied to the [colorScheme].
@@ -1465,6 +1520,7 @@ class ThemeData with Diagnosticable {
     ScrollbarThemeData? scrollbarTheme,
     InteractiveInkFeatureFactory? splashFactory,
     VisualDensity? visualDensity,
+    bool? useMaterial3,
     // COLOR
     // [colorScheme] is the preferred way to configure colors. The other color
     // properties will gradually be phased out, see
@@ -1472,7 +1528,6 @@ class ThemeData with Diagnosticable {
     ColorScheme? colorScheme,
     Brightness? brightness,
     Color? primaryColor,
-    Brightness? primaryColorBrightness,
     Color? primaryColorLight,
     Color? primaryColorDark,
     Color? focusColor,
@@ -1593,6 +1648,11 @@ class ThemeData with Diagnosticable {
       'This feature was deprecated after v2.5.0-1.0.pre.',
     )
     bool? fixTextFieldOutlineLabel,
+    @Deprecated(
+      'No longer used by the framework, please remove any reference to it. '
+      'This feature was deprecated after v2.6.0-11.0.pre.',
+    )
+    Brightness? primaryColorBrightness,
   }) {
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
     return ThemeData.raw(
@@ -1607,10 +1667,10 @@ class ThemeData with Diagnosticable {
       scrollbarTheme: scrollbarTheme ?? this.scrollbarTheme,
       splashFactory: splashFactory ?? this.splashFactory,
       visualDensity: visualDensity ?? this.visualDensity,
+      useMaterial3: useMaterial3 ?? this.useMaterial3,
       // COLOR
       colorScheme: (colorScheme ?? this.colorScheme).copyWith(brightness: brightness),
       primaryColor: primaryColor ?? this.primaryColor,
-      primaryColorBrightness: primaryColorBrightness ?? this.primaryColorBrightness,
       primaryColorLight: primaryColorLight ?? this.primaryColorLight,
       primaryColorDark: primaryColorDark ?? this.primaryColorDark,
       focusColor: focusColor ?? this.focusColor,
@@ -1683,6 +1743,7 @@ class ThemeData with Diagnosticable {
       accentIconTheme: accentIconTheme ?? this.accentIconTheme,
       buttonColor: buttonColor ?? this.buttonColor,
       fixTextFieldOutlineLabel: fixTextFieldOutlineLabel ?? this.fixTextFieldOutlineLabel,
+      primaryColorBrightness: primaryColorBrightness ?? this.primaryColorBrightness,
     );
   }
 
@@ -1775,10 +1836,10 @@ class ThemeData with Diagnosticable {
       scrollbarTheme: ScrollbarThemeData.lerp(a.scrollbarTheme, b.scrollbarTheme, t),
       splashFactory: t < 0.5 ? a.splashFactory : b.splashFactory,
       visualDensity: VisualDensity.lerp(a.visualDensity, b.visualDensity, t),
+      useMaterial3: t < 0.5 ? a.useMaterial3 : b.useMaterial3,
       // COLOR
       colorScheme: ColorScheme.lerp(a.colorScheme, b.colorScheme, t),
       primaryColor: Color.lerp(a.primaryColor, b.primaryColor, t)!,
-      primaryColorBrightness: t < 0.5 ? a.primaryColorBrightness : b.primaryColorBrightness,
       primaryColorLight: Color.lerp(a.primaryColorLight, b.primaryColorLight, t)!,
       primaryColorDark: Color.lerp(a.primaryColorDark, b.primaryColorDark, t)!,
       focusColor: Color.lerp(a.focusColor, b.focusColor, t)!,
@@ -1851,6 +1912,7 @@ class ThemeData with Diagnosticable {
       accentIconTheme: IconThemeData.lerp(a.accentIconTheme, b.accentIconTheme, t),
       buttonColor: Color.lerp(a.buttonColor, b.buttonColor, t)!,
       fixTextFieldOutlineLabel: t < 0.5 ? a.fixTextFieldOutlineLabel : b.fixTextFieldOutlineLabel,
+      primaryColorBrightness: t < 0.5 ? a.primaryColorBrightness : b.primaryColorBrightness,
     );
   }
 
@@ -1873,10 +1935,10 @@ class ThemeData with Diagnosticable {
         other.scrollbarTheme == scrollbarTheme &&
         other.splashFactory == splashFactory &&
         other.visualDensity == visualDensity &&
+        other.useMaterial3 == useMaterial3 &&
         // COLOR
         other.colorScheme == colorScheme &&
         other.primaryColor == primaryColor &&
-        other.primaryColorBrightness == primaryColorBrightness &&
         other.primaryColorLight == primaryColorLight &&
         other.primaryColorDark == primaryColorDark &&
         other.focusColor == focusColor &&
@@ -1948,7 +2010,8 @@ class ThemeData with Diagnosticable {
         other.accentTextTheme == accentTextTheme &&
         other.accentIconTheme == accentIconTheme &&
         other.buttonColor == buttonColor &&
-        other.fixTextFieldOutlineLabel == fixTextFieldOutlineLabel;
+        other.fixTextFieldOutlineLabel == fixTextFieldOutlineLabel &&
+        other.primaryColorBrightness == primaryColorBrightness;
   }
 
   @override
@@ -1968,10 +2031,10 @@ class ThemeData with Diagnosticable {
       scrollbarTheme,
       splashFactory,
       visualDensity,
+      useMaterial3,
       // COLOR
       colorScheme,
       primaryColor,
-      primaryColorBrightness,
       primaryColorLight,
       primaryColorDark,
       focusColor,
@@ -2044,6 +2107,7 @@ class ThemeData with Diagnosticable {
       accentIconTheme,
       buttonColor,
       fixTextFieldOutlineLabel,
+      primaryColorBrightness,
     ];
     return hashList(values);
   }
@@ -2063,10 +2127,10 @@ class ThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<ScrollbarThemeData>('scrollbarTheme', scrollbarTheme, defaultValue: defaultData.scrollbarTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<InteractiveInkFeatureFactory>('splashFactory', splashFactory, defaultValue: defaultData.splashFactory, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<VisualDensity>('visualDensity', visualDensity, defaultValue: defaultData.visualDensity, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<bool>('useMaterial3', useMaterial3, defaultValue: defaultData.useMaterial3, level: DiagnosticLevel.debug));
     // COLORS
     properties.add(DiagnosticsProperty<ColorScheme>('colorScheme', colorScheme, defaultValue: defaultData.colorScheme, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('primaryColor', primaryColor, defaultValue: defaultData.primaryColor, level: DiagnosticLevel.debug));
-    properties.add(EnumProperty<Brightness>('primaryColorBrightness', primaryColorBrightness, defaultValue: defaultData.primaryColorBrightness, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('primaryColorLight', primaryColorLight, defaultValue: defaultData.primaryColorLight, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('primaryColorDark', primaryColorDark, defaultValue: defaultData.primaryColorDark, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('focusColor', focusColor, defaultValue: defaultData.focusColor, level: DiagnosticLevel.debug));
@@ -2139,6 +2203,7 @@ class ThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<IconThemeData>('accentIconTheme', accentIconTheme, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('buttonColor', buttonColor, defaultValue: defaultData.buttonColor, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<bool>('fixTextFieldOutlineLabel', fixTextFieldOutlineLabel, level: DiagnosticLevel.debug));
+    properties.add(EnumProperty<Brightness>('primaryColorBrightness', primaryColorBrightness, defaultValue: defaultData.primaryColorBrightness, level: DiagnosticLevel.debug));
   }
 }
 

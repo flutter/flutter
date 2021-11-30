@@ -87,7 +87,7 @@ List<String> generateMethodParameters(Message message) {
   assert(message.placeholders.isNotEmpty);
   final Placeholder? countPlaceholder = message.isPlural ? message.getCountPlaceholder() : null;
   return message.placeholders.map((Placeholder placeholder) {
-    final String? type = placeholder == countPlaceholder ? 'int' : placeholder.type;
+    final String? type = placeholder == countPlaceholder ? 'num' : placeholder.type;
     return '$type ${placeholder.name}';
   }).toList();
 }
@@ -177,6 +177,59 @@ String generateNumberFormattingLogic(Message message) {
   return formatStatements.isEmpty ? '@(none)' : formatStatements.join();
 }
 
+/// To make it easier to parse plurals or select messages, temporarily replace
+/// each "{placeholder}" parameter with "#placeholder#" for example.
+String _replacePlaceholdersBraces(
+  String translationForMessage,
+  Iterable<Placeholder> placeholders,
+  String replacementBraces,
+) {
+  assert(replacementBraces.length == 2);
+  String easyMessage = translationForMessage;
+  for (final Placeholder placeholder in placeholders) {
+    easyMessage = easyMessage.replaceAll(
+      '{${placeholder.name}}',
+      '${replacementBraces[0]}${placeholder.name}${replacementBraces[1]}',
+    );
+  }
+  return easyMessage;
+}
+
+/// Replaces message with the interpolated variable name of the given placeholders
+/// with the ability to change braces to something other than {...}.
+///
+/// Examples:
+///
+/// * Replacing `{userName}`.
+/// ```dart
+/// final message = 'Hello my name is {userName}';
+/// final transformed = _replacePlaceholdersWithVariables(message, placeholders);
+/// // transformed == 'Hello my name is $userName'
+/// ```
+/// * Replacing `#choice#`.
+/// ```dart
+/// final message = 'I would like to have some #choice#';
+/// final transformed = _replacePlaceholdersWithVariables(message, placeholders, '##');
+/// transformed == 'I would like to have some $choice'
+/// ```
+String _replacePlaceholdersWithVariables(String message, Iterable<Placeholder> placeholders, [String braces = '{}']) {
+  assert(braces.length == 2);
+  String messageWithValues = message;
+  for (final Placeholder placeholder in placeholders) {
+    String variable = placeholder.name;
+    if (placeholder.requiresFormatting) {
+      variable += 'String';
+    }
+    messageWithValues = messageWithValues.replaceAll(
+      '${braces[0]}${placeholder.name}${braces[1]}',
+      _needsCurlyBracketStringInterpolation(messageWithValues, placeholder.name)
+        ? '\${$variable}'
+        : '\$$variable'
+    );
+  }
+  return messageWithValues;
+}
+
 String _generatePluralMethod(Message message, String translationForMessage) {
   if (message.placeholders.isEmpty) {
     throw L10nException(
@@ -186,12 +239,7 @@ String _generatePluralMethod(Message message, String translationForMessage) {
     );
   }
 
-  // To make it easier to parse the plurals message, temporarily replace each
-  // "{placeholder}" parameter with "#placeholder#".
-  String easyMessage = translationForMessage;
-  for (final Placeholder placeholder in message.placeholders) {
-    easyMessage = easyMessage.replaceAll('{${placeholder.name}}', '#${placeholder.name}#');
-  }
+  final String easyMessage = _replacePlaceholdersBraces(translationForMessage, message.placeholders, '##');
 
   final Placeholder countPlaceholder = message.getCountPlaceholder();
   const Map<String, String> pluralIds = <String, String>{
@@ -208,25 +256,13 @@ String _generatePluralMethod(Message message, String translationForMessage) {
     final RegExp expRE = RegExp('($pluralKey)\\s*{([^}]+)}');
     final RegExpMatch? match = expRE.firstMatch(easyMessage);
     if (match != null && match.groupCount == 2) {
-      String argValue = generateString(match.group(2)!);
-      for (final Placeholder placeholder in message.placeholders) {
-        String variable = placeholder.name;
-        if (placeholder.requiresFormatting) {
-          variable += 'String';
-        }
-        argValue = argValue.replaceAll(
-          '#${placeholder.name}#',
-          _needsCurlyBracketStringInterpolation(argValue, placeholder.name)
-            ? '\${$variable}'
-            : '\$$variable'
-        );
-      }
+      final String argValue = _replacePlaceholdersWithVariables(generateString(match.group(2)!), message.placeholders, '##');
       pluralLogicArgs.add('      ${pluralIds[pluralKey]}: $argValue');
     }
   }
 
   final List<String> parameters = message.placeholders.map((Placeholder placeholder) {
-    final String? placeholderType = placeholder == countPlaceholder ? 'int' : placeholder.type;
+    final String? placeholderType = placeholder == countPlaceholder ? 'num' : placeholder.type;
     return '$placeholderType ${placeholder.name}';
   }).toList();
 
@@ -281,10 +317,11 @@ String _generateSelectMethod(Message message, String translationForMessage) {
     );
   }
 
+  final String easyMessage = _replacePlaceholdersBraces(translationForMessage, message.placeholders, '##');
+
   final List<String> cases = <String>[];
 
-  final RegExpMatch? selectMatch =
-    LocalizationsGenerator._selectRE.firstMatch(translationForMessage);
+  final RegExpMatch? selectMatch = LocalizationsGenerator._selectRE.firstMatch(easyMessage);
   String? choice;
   if (selectMatch != null && selectMatch.groupCount == 2) {
     choice = selectMatch.group(1);
@@ -292,9 +329,10 @@ String _generateSelectMethod(Message message, String translationForMessage) {
     final RegExp patternRE = RegExp(r'\s*([\w\d]+)\s*\{(.*?)\}');
     for (final RegExpMatch patternMatch in patternRE.allMatches(pattern)) {
       if (patternMatch.groupCount == 2) {
-        final String value = patternMatch.group(2)!
+        String value = patternMatch.group(2)!
           .replaceAll("'", r"\'")
           .replaceAll('"', r'\"');
+        value = _replacePlaceholdersWithVariables(value, message.placeholders, '##');
         cases.add(
           "        '${patternMatch.group(1)}': '$value'",
         );
@@ -374,21 +412,7 @@ bool _needsCurlyBracketStringInterpolation(String messageString, String placehol
 
 String _generateMethod(Message message, String translationForMessage) {
   String generateMessage() {
-    String messageValue = generateString(translationForMessage);
-    for (final Placeholder placeholder in message.placeholders) {
-      String variable = placeholder.name;
-      if (placeholder.requiresFormatting) {
-        variable += 'String';
-      }
-      messageValue = messageValue.replaceAll(
-        '{${placeholder.name}}',
-        _needsCurlyBracketStringInterpolation(messageValue, placeholder.name)
-          ? '\${$variable}'
-          : '\$$variable'
-      );
-    }
-
-    return messageValue;
+    return _replacePlaceholdersWithVariables(generateString(translationForMessage), message.placeholders);
   }
 
   if (message.isPlural) {
@@ -1167,6 +1191,12 @@ class LocalizationsGenerator {
 
     final String directory = _fs.path.basename(outputDirectory.path);
     final String outputFileName = _fs.path.basename(baseOutputFile.path);
+    if (!outputFileName.endsWith('.dart')) {
+      throw L10nException(
+        "The 'output-localization-file', $outputFileName, is invalid.\n"
+        'The file name must have a .dart extension.'
+      );
+    }
 
     final Iterable<String> supportedLocalesCode = supportedLocales.map((LocaleInfo locale) {
       final String languageCode = locale.languageCode;
@@ -1189,10 +1219,18 @@ class LocalizationsGenerator {
     );
 
     final List<LocaleInfo> allLocales = _allBundles.locales.toList()..sort();
-    final String fileName = outputFileName.split('.')[0];
+    final int extensionIndex = outputFileName.indexOf('.');
+    if (extensionIndex <= 0) {
+      throw L10nException(
+        "The 'output-localization-file', $outputFileName, is invalid.\n"
+        'The base name cannot be empty.'
+      );
+    }
+    final String fileName = outputFileName.substring(0, extensionIndex);
+    final String fileExtension = outputFileName.substring(extensionIndex + 1);
     for (final LocaleInfo locale in allLocales) {
       if (isBaseClassLocale(locale, locale.languageCode)) {
-        final File languageMessageFile = outputDirectory.childFile('${fileName}_$locale.dart');
+        final File languageMessageFile = outputDirectory.childFile('${fileName}_$locale.$fileExtension');
 
         // Generate the template for the base class file. Further string
         // interpolation will be done to determine if there are
@@ -1229,9 +1267,9 @@ class LocalizationsGenerator {
       .map((LocaleInfo locale) {
         final String library = '${fileName}_${locale.toString()}';
         if (useDeferredLoading) {
-          return "import '$library.dart' deferred as $library;";
+          return "import '$library.$fileExtension' deferred as $library;";
         } else {
-          return "import '$library.dart';";
+          return "import '$library.$fileExtension';";
         }
       })
       .toList()
@@ -1277,7 +1315,9 @@ class LocalizationsGenerator {
     // A pubspec.yaml file is required when using a synthetic package. If it does not
     // exist, create a blank one.
     if (useSyntheticPackage) {
-      final Directory syntheticPackageDirectory = _fs.directory(_defaultSyntheticPackagePath(_fs));
+      final Directory syntheticPackageDirectory = projectDirectory != null
+          ? projectDirectory!.childDirectory(_defaultSyntheticPackagePath(_fs))
+          : _fs.directory(_defaultSyntheticPackagePath(_fs));
       syntheticPackageDirectory.createSync(recursive: true);
       final File flutterGenPubspec = syntheticPackageDirectory.childFile('pubspec.yaml');
       if (!flutterGenPubspec.existsSync()) {

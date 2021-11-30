@@ -132,6 +132,7 @@ const Map<String, List<String>> kWebTestFileKnownFailures = <String, List<String
     'test/widgets/html_element_view_test.dart',
     'test/cupertino/scaffold_test.dart',
     'test/rendering/platform_view_test.dart',
+    'test/cupertino/context_menu_action_test.dart',
   ],
 };
 
@@ -169,6 +170,7 @@ Future<void> main(List<String> args) async {
   try {
     flutterTestArgs.addAll(args);
     final Set<String> removeArgs = <String>{};
+    bool runSmokeTests = true;
     for (final String arg in args) {
       if (arg.startsWith('--local-engine=')) {
         localEngineEnv['FLUTTER_LOCAL_ENGINE'] = arg.substring('--local-engine='.length);
@@ -180,12 +182,18 @@ Future<void> main(List<String> args) async {
         _shuffleSeed = arg.substring('--test-randomize-ordering-seed='.length);
         removeArgs.add(arg);
       }
+      if (arg == '--no-smoke-tests') {
+        runSmokeTests = false;
+        removeArgs.add(arg);
+      }
     }
     flutterTestArgs.removeWhere((String arg) => removeArgs.contains(arg));
     if (Platform.environment.containsKey(CIRRUS_TASK_NAME))
       print('Running task: ${Platform.environment[CIRRUS_TASK_NAME]}');
     print('═' * 80);
-    await _runSmokeTests();
+    if (runSmokeTests) {
+      await _runSmokeTests();
+    }
     print('═' * 80);
     await selectShard(<String, ShardRunner>{
       'add_to_app_life_cycle_tests': _runAddToAppLifeCycleTests,
@@ -212,17 +220,19 @@ Future<void> main(List<String> args) async {
   print('$clock ${bold}Test successful.$reset');
 }
 
+final String _luciBotId = Platform.environment['SWARMING_BOT_ID'] ?? '';
+final bool _runningInDartHHHBot = _luciBotId.startsWith('luci-dart-');
+
 /// Verify the Flutter Engine is the revision in
 /// bin/cache/internal/engine.version.
 Future<void> _validateEngineHash() async {
-  final String luciBotId = Platform.environment['SWARMING_BOT_ID'] ?? '';
-  if (luciBotId.startsWith('luci-dart-')) {
+  if (_runningInDartHHHBot) {
     // The Dart HHH bots intentionally modify the local artifact cache
     // and then use this script to run Flutter's test suites.
     // Because the artifacts have been changed, this particular test will return
     // a false positive and should be skipped.
     print('${yellow}Skipping Flutter Engine Version Validation for swarming '
-          'bot $luciBotId.');
+          'bot $_luciBotId.');
     return;
   }
   final String expectedVersion = File(engineVersionFile).readAsStringSync().trim();
@@ -473,7 +483,7 @@ Future<void> _runBuildTests() async {
 Future<void> _runExampleProjectBuildTests(Directory exampleDirectory, [File? mainFile]) async {
   // Only verify caching with flutter gallery.
   final bool verifyCaching = exampleDirectory.path.contains('flutter_gallery');
-  final String examplePath = exampleDirectory.path;
+  final String examplePath = path.relative(exampleDirectory.path, from: Directory.current.path);
   final bool hasNullSafety = File(path.join(examplePath, 'null_safety')).existsSync();
   final List<String> additionalArgs = <String>[
     if (hasNullSafety) '--no-sound-null-safety',
@@ -785,7 +795,8 @@ Future<void> _runFrameworkTests() async {
     await _pubRunTest(path.join(flutterRoot, 'dev', 'bots'));
     await _pubRunTest(path.join(flutterRoot, 'dev', 'devicelab'), ensurePrecompiledTool: false); // See https://github.com/flutter/flutter/issues/86209
     await _pubRunTest(path.join(flutterRoot, 'dev', 'conductor', 'core'), forceSingleCore: true);
-    await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'android_semantics_testing'));
+    // TODO(gspencergoog): Remove the exception for fatalWarnings once https://github.com/flutter/flutter/pull/91127 has landed.
+    await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'android_semantics_testing'), fatalWarnings: false);
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'manual_tests'));
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'vitool'));
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'gen_keycodes'));
@@ -1497,6 +1508,7 @@ Future<void> _runFlutterWebTest(String webRenderer, String workingDirectory, Lis
       '-v',
       '--platform=chrome',
       '--web-renderer=$webRenderer',
+      '--dart-define=DART_HHH_BOT=$_runningInDartHHHBot',
       '--sound-null-safety',
       ...flutterTestArgs,
       ...tests,
@@ -1620,6 +1632,7 @@ Future<void> _runFlutterTest(String workingDirectory, {
   Map<String, String>? environment,
   List<String> tests = const <String>[],
   bool shuffleTests = true,
+  bool fatalWarnings = true,
 }) async {
   assert(!printOutput || outputChecker == null, 'Output either can be printed or checked but not both');
 
@@ -1633,6 +1646,7 @@ Future<void> _runFlutterTest(String workingDirectory, {
   final List<String> args = <String>[
     'test',
     if (shuffleTests) '--test-randomize-ordering-seed=$shuffleSeed',
+    if (fatalWarnings) '--fatal-warnings',
     ...options,
     ...tags,
     ...flutterTestArgs,

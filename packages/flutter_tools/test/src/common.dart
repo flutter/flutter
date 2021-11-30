@@ -162,6 +162,7 @@ void test(String description, FutureOr<void> Function() body, {
       addTearDown(() async {
         await globals.localFileSystem.dispose();
       });
+
       return body();
     },
     skip: skip,
