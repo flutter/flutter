@@ -116,7 +116,7 @@ class _CombiningGestureArenaMember extends GestureArenaMember {
 /// vertical scrolls to a native Android view, [TapGestureRecognizer]s and
 /// [VerticalDragGestureRecognizer] are added to a team with a captain (the
 /// captain is set to be a gesture recognizer that never explicitly claims the
-/// gesture).
+/// gesture).  
 /// The captain allows [AndroidView] to know when any gestures in the team has
 /// been recognized (or all other arena members are out), once the captain wins
 /// the gesture is forwarded to the Android view.
