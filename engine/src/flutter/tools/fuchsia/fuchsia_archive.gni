@@ -151,6 +151,8 @@ template("_fuchsia_archive") {
       rebase_path(manifest_json_file, root_build_dir),
     ]
 
+    assert(fuchsia_target_api_level != -1,
+           "Must set a target api level when creating an archive")
     if (fuchsia_target_api_level != -1) {
       args += [
         "--api-level",

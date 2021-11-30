@@ -406,6 +406,10 @@ def to_gn_args(args):
 
     if args.fuchsia_target_api_level is not None:
       gn_args['fuchsia_target_api_level'] = args.fuchsia_target_api_level
+    elif args.target_os == 'fuchsia':
+      # Read the default target api level from a file so we can update it with a roller
+      with open(os.path.join(os.path.dirname(__file__), 'fuchsia/target_api_level')) as f:
+        gn_args['fuchsia_target_api_level'] = int(f.read().strip())
 
     return gn_args
 
