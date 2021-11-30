@@ -91,18 +91,6 @@ class WeakPtr {
     return *this ? ptr_ : nullptr;
   }
 
-  // TODO(gw280): Remove all remaining usages of getUnsafe().
-  // No new usages of getUnsafe() are allowed.
-  //
-  // https://github.com/flutter/flutter/issues/42949
-  T* getUnsafe() const {
-    // This is an unsafe method to get access to the raw pointer.
-    // We still check the flag_ to determine if the pointer is valid
-    // but callees should note that this WeakPtr could have been
-    // invalidated on another thread.
-    return flag_ && flag_->is_valid() ? ptr_ : nullptr;
-  }
-
   T& operator*() const {
     CheckThreadSafety();
     FML_DCHECK(*this);
