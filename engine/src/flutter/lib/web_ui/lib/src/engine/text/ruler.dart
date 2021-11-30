@@ -7,7 +7,7 @@ import 'dart:html' as html;
 import 'package:ui/ui.dart' as ui;
 
 import '../browser_detection.dart';
-import '../dom_renderer.dart';
+import '../embedder.dart';
 import '../util.dart';
 import 'measurement.dart';
 import 'paragraph.dart';
@@ -24,7 +24,7 @@ String buildCssFontString({
   if (fontStyle != null) {
     result.write(fontStyle == ui.FontStyle.normal ? 'normal' : 'italic');
   } else {
-    result.write(DomRenderer.defaultFontStyle);
+    result.write(FlutterViewEmbedder.defaultFontStyle);
   }
   result.write(' ');
 
@@ -32,14 +32,14 @@ String buildCssFontString({
   if (fontWeight != null) {
     result.write(fontWeightToCss(fontWeight));
   } else {
-    result.write(DomRenderer.defaultFontWeight);
+    result.write(FlutterViewEmbedder.defaultFontWeight);
   }
   result.write(' ');
 
   if (fontSize != null) {
     result.write(fontSize.floor());
   } else {
-    result.write(DomRenderer.defaultFontSize);
+    result.write(FlutterViewEmbedder.defaultFontSize);
   }
   result.write('px ');
   result.write(canonicalizeFontFamily(fontFamily));
@@ -98,7 +98,7 @@ class ParagraphGeometricStyle {
     }
     final String? localFontFamily = fontFamily;
     if (localFontFamily == null || localFontFamily.isEmpty) {
-      return DomRenderer.defaultFontFamily;
+      return FlutterViewEmbedder.defaultFontFamily;
     }
     return localFontFamily;
   }
@@ -124,7 +124,7 @@ class ParagraphGeometricStyle {
     if (style == null) {
       style = TextHeightStyle(
         fontFamily: effectiveFontFamily,
-        fontSize: fontSize ?? DomRenderer.defaultFontSize,
+        fontSize: fontSize ?? FlutterViewEmbedder.defaultFontSize,
         height: lineHeight,
         // TODO(mdebbar): Pass the actual value when font features become supported
         //                https://github.com/flutter/flutter/issues/64595

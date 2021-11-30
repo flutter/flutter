@@ -10,7 +10,6 @@ import 'dart:typed_data';
 import 'package:ui/ui.dart' as ui;
 
 import '../browser_detection.dart';
-import '../dom_renderer.dart';
 import '../engine_canvas.dart';
 import '../html_image_codec.dart';
 import '../text/paragraph.dart';
@@ -32,7 +31,7 @@ class DomCanvas extends EngineCanvas with SaveElementStackTracking {
   @override
   void clear() {
     super.clear();
-    domRenderer.removeAllChildren(rootElement);
+    removeAllChildren(rootElement);
   }
 
   @override
@@ -165,7 +164,7 @@ html.HtmlElement buildDrawRectElement(
     ui.Rect rect, SurfacePaintData paint, String tagName, Matrix4 transform) {
   assert(paint.shader == null);
   final html.HtmlElement rectangle =
-      domRenderer.createElement(tagName) as html.HtmlElement;
+      html.document.createElement(tagName) as html.HtmlElement;
   assert(() {
     rectangle.setAttribute('flt-rect', '$rect');
     rectangle.setAttribute('flt-paint', '$paint');

@@ -8,7 +8,6 @@ import 'dart:typed_data';
 
 import 'package:ui/ui.dart' as ui;
 
-import '../dom_renderer.dart';
 import '../engine_canvas.dart';
 import '../frame_reference.dart';
 import '../picture.dart';
@@ -350,7 +349,7 @@ class PersistedPicture extends PersistedLeafSurface {
         oldSurface._canvas = null;
       }
       if (rootElement != null) {
-        domRenderer.removeAllChildren(rootElement!);
+        removeAllChildren(rootElement!);
       }
       if (_canvas != null && _canvas != oldCanvas) {
         _recycleCanvas(_canvas);
@@ -432,7 +431,7 @@ class PersistedPicture extends PersistedLeafSurface {
     _recycleCanvas(_canvas);
     final DomCanvas domCanvas = DomCanvas(rootElement!);
     _canvas = domCanvas;
-    domRenderer.removeAllChildren(rootElement!);
+    removeAllChildren(rootElement!);
     picture.recordingCanvas!.apply(domCanvas, _optimalLocalCullRect!);
   }
 
@@ -473,7 +472,7 @@ class PersistedPicture extends PersistedLeafSurface {
             surfaceStatsFor(this).paintPixelCount +=
                 bitmapCanvas.bitmapPixelCount;
           }
-          domRenderer.removeAllChildren(rootElement!);
+          removeAllChildren(rootElement!);
           rootElement!.append(bitmapCanvas.rootElement);
           bitmapCanvas.clear();
           picture.recordingCanvas!.apply(bitmapCanvas, _optimalLocalCullRect!);

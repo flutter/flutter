@@ -42,9 +42,9 @@ void testMain() {
       // as a child of the glassPane, and the slot lives in the glassPane
       // shadow root. The slot is the one that has pointer events auto.
       final html.Element contents =
-          domRenderer.glassPaneElement!.querySelector('#view-0')!;
+          flutterViewEmbedder.glassPaneElement!.querySelector('#view-0')!;
       final html.Element slot =
-          domRenderer.sceneElement!.querySelector('slot')!;
+          flutterViewEmbedder.sceneElement!.querySelector('slot')!;
       final html.Element contentsHost = contents.parent!;
       final html.Element slotHost = slot.parent!;
 
@@ -77,11 +77,11 @@ void testMain() {
       dispatcher.rasterizer!.draw(sb.build().layerTree);
 
       expect(
-        domRenderer.sceneElement!.querySelectorAll('#sk_path_defs').single,
+        flutterViewEmbedder.sceneElement!.querySelectorAll('#sk_path_defs').single,
         isNotNull,
       );
       expect(
-        domRenderer.sceneElement!
+        flutterViewEmbedder.sceneElement!
             .querySelectorAll('#sk_path_defs')
             .single
             .querySelectorAll('clipPath')
@@ -89,7 +89,7 @@ void testMain() {
         isNotNull,
       );
       expect(
-        domRenderer.sceneElement!
+        flutterViewEmbedder.sceneElement!
             .querySelectorAll('flt-clip')
             .single
             .style
@@ -119,7 +119,7 @@ void testMain() {
 
       // Transformations happen on the slot element.
       final html.Element slotHost =
-          domRenderer.sceneElement!.querySelector('flt-platform-view-slot')!;
+          flutterViewEmbedder.sceneElement!.querySelector('flt-platform-view-slot')!;
 
       expect(
         slotHost.style.transform,
@@ -161,7 +161,7 @@ void testMain() {
 
       // Transformations happen on the slot element.
       final html.Element slotHost =
-          domRenderer.sceneElement!.querySelector('flt-platform-view-slot')!;
+          flutterViewEmbedder.sceneElement!.querySelector('flt-platform-view-slot')!;
 
       expect(
         getTransformChain(slotHost),
@@ -190,7 +190,7 @@ void testMain() {
 
       // Transformations happen on the slot element.
       final html.Element slotHost =
-          domRenderer.sceneElement!.querySelector('flt-platform-view-slot')!;
+          flutterViewEmbedder.sceneElement!.querySelector('flt-platform-view-slot')!;
 
       expect(
         getTransformChain(slotHost),
@@ -234,7 +234,7 @@ void testMain() {
       }
 
       int countCanvases() {
-        return domRenderer.sceneElement!.querySelectorAll('canvas').length;
+        return flutterViewEmbedder.sceneElement!.querySelectorAll('canvas').length;
       }
 
       // Frame 1:
@@ -337,7 +337,7 @@ void testMain() {
       }
 
       int countCanvases() {
-        return domRenderer.sceneElement!.querySelectorAll('canvas').length;
+        return flutterViewEmbedder.sceneElement!.querySelectorAll('canvas').length;
       }
 
       // Frame 1:
@@ -379,11 +379,11 @@ void testMain() {
       dispatcher.rasterizer!.draw(sb.build().layerTree);
 
       expect(
-        domRenderer.sceneElement!.querySelector('flt-platform-view-slot'),
+        flutterViewEmbedder.sceneElement!.querySelector('flt-platform-view-slot'),
         isNotNull,
       );
       expect(
-        domRenderer.glassPaneElement!.querySelector('flt-platform-view'),
+        flutterViewEmbedder.glassPaneElement!.querySelector('flt-platform-view'),
         isNotNull,
       );
 
@@ -394,11 +394,11 @@ void testMain() {
       dispatcher.rasterizer!.draw(sb.build().layerTree);
 
       expect(
-        domRenderer.sceneElement!.querySelector('flt-platform-view-slot'),
+        flutterViewEmbedder.sceneElement!.querySelector('flt-platform-view-slot'),
         isNull,
       );
       expect(
-        domRenderer.glassPaneElement!.querySelector('flt-platform-view'),
+        flutterViewEmbedder.glassPaneElement!.querySelector('flt-platform-view'),
         isNull,
       );
     });
@@ -419,11 +419,11 @@ void testMain() {
       dispatcher.rasterizer!.draw(sb.build().layerTree);
 
       expect(
-        domRenderer.sceneElement!.querySelector('flt-platform-view-slot'),
+        flutterViewEmbedder.sceneElement!.querySelector('flt-platform-view-slot'),
         isNotNull,
       );
       expect(
-        domRenderer.glassPaneElement!.querySelector('flt-platform-view'),
+        flutterViewEmbedder.glassPaneElement!.querySelector('flt-platform-view'),
         isNotNull,
       );
 
@@ -435,10 +435,10 @@ void testMain() {
       dispatcher.rasterizer!.draw(sb.build().layerTree);
 
       expect(
-          domRenderer.sceneElement!.querySelectorAll('flt-platform-view-slot'),
+          flutterViewEmbedder.sceneElement!.querySelectorAll('flt-platform-view-slot'),
           hasLength(1));
       expect(
-          domRenderer.glassPaneElement!.querySelectorAll('flt-platform-view'),
+          flutterViewEmbedder.glassPaneElement!.querySelectorAll('flt-platform-view'),
           hasLength(2));
 
       // Render a frame without a platform view, but also without disposing of
@@ -448,13 +448,13 @@ void testMain() {
       dispatcher.rasterizer!.draw(sb.build().layerTree);
 
       expect(
-        domRenderer.sceneElement!.querySelector('flt-platform-view-slot'),
+        flutterViewEmbedder.sceneElement!.querySelector('flt-platform-view-slot'),
         isNull,
       );
       // The actual contents of the platform view are kept in the dom, until
       // it's actually disposed of!
       expect(
-        domRenderer.glassPaneElement!.querySelector('flt-platform-view'),
+        flutterViewEmbedder.glassPaneElement!.querySelector('flt-platform-view'),
         isNotNull,
       );
     });
@@ -481,7 +481,7 @@ void testMain() {
       }
 
       final html.Node skPathDefs =
-          domRenderer.sceneElement!.querySelector('#sk_path_defs')!;
+          flutterViewEmbedder.sceneElement!.querySelector('#sk_path_defs')!;
 
       expect(skPathDefs.childNodes, hasLength(0));
 
@@ -572,7 +572,7 @@ void testMain() {
       // The below line should not throw an error.
       dispatcher.rasterizer!.draw(sb.build().layerTree);
       expect(
-          domRenderer.glassPaneShadow!
+          flutterViewEmbedder.glassPaneShadow!
               .querySelectorAll('flt-platform-view-slot'),
           isEmpty);
     });
@@ -595,7 +595,7 @@ void testMain() {
       // The below line should not throw an error.
       dispatcher.rasterizer!.draw(sb.build().layerTree);
       expect(
-          domRenderer.glassPaneShadow!
+          flutterViewEmbedder.glassPaneShadow!
               .querySelectorAll('flt-platform-view-slot'),
           hasLength(1));
       HtmlViewEmbedder.debugDisableOverlays = false;
@@ -624,7 +624,7 @@ void testMain() {
       dispatcher.rasterizer!.draw(sb.build().layerTree);
 
       expect(
-          domRenderer.glassPaneShadow!
+          flutterViewEmbedder.glassPaneShadow!
               .querySelectorAll('flt-platform-view-slot'),
           hasLength(2));
 
@@ -635,7 +635,7 @@ void testMain() {
       // The below line should not throw an error.
       dispatcher.rasterizer!.draw(sb.build().layerTree);
       expect(
-          domRenderer.glassPaneShadow!
+          flutterViewEmbedder.glassPaneShadow!
               .querySelectorAll('flt-platform-view-slot'),
           hasLength(1));
 

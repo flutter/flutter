@@ -11,7 +11,6 @@ import 'package:meta/meta.dart';
 import 'package:ui/ui.dart' as ui;
 
 import 'browser_detection.dart';
-import 'dom_renderer.dart';
 import 'engine_canvas.dart';
 import 'html/bitmap_canvas.dart';
 import 'html/painting.dart';
@@ -751,7 +750,7 @@ class CanvasPool extends _SaveStackTracking {
         rect.center.dx - shaderBounds.left;
     final double cy = shaderBounds == null ? rect.center.dy :
         rect.center.dy - shaderBounds.top;
-    DomRenderer.ellipse(context, cx, cy, rect.width / 2,
+    drawEllipse(context, cx, cy, rect.width / 2,
         rect.height / 2, 0, 0, 2.0 * math.pi, false);
     contextHandle.paint(style);
   }
@@ -762,7 +761,7 @@ class CanvasPool extends _SaveStackTracking {
     final ui.Rect? shaderBounds = contextHandle._shaderBounds;
     final double cx = shaderBounds == null ? c.dx : c.dx - shaderBounds.left;
     final double cy = shaderBounds == null ? c.dy : c.dy - shaderBounds.top;
-    DomRenderer.ellipse(context, cx, cy, radius, radius, 0, 0, 2.0 * math.pi, false);
+    drawEllipse(context, cx, cy, radius, radius, 0, 0, 2.0 * math.pi, false);
     contextHandle.paint(style);
   }
 

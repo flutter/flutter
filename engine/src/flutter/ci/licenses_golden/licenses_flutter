@@ -515,7 +515,7 @@ FILE: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/viewport_metrics.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/clipboard.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/color_filter.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/configuration.dart
-FILE: ../../../flutter/lib/web_ui/lib/src/engine/dom_renderer.dart
+FILE: ../../../flutter/lib/web_ui/lib/src/engine/embedder.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/engine_canvas.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/font_change_util.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/frame_reference.dart
@@ -638,7 +638,6 @@ FILE: ../../../flutter/lib/web_ui/lib/src/ui/path_metrics.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/ui/platform_dispatcher.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/ui/pointer.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/ui/semantics.dart
-FILE: ../../../flutter/lib/web_ui/lib/src/ui/test_embedding.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/ui/text.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/ui/tile_mode.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/ui/window.dart

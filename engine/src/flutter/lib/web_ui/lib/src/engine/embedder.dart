@@ -21,25 +21,28 @@ import 'text_editing/text_editing.dart';
 import 'util.dart';
 import 'window.dart';
 
-class DomRenderer {
-  DomRenderer() {
-    if (assertionsEnabled) {
-      _debugFrameStatistics = DebugDomRendererFrameStatistics();
-    }
-
+/// Controls the placement and lifecycle of a Flutter view on the web page.
+///
+/// Manages several top-level elements that host Flutter-generated content,
+/// including:
+///
+/// - [glassPaneElement], the root element of a Flutter view.
+/// - [glassPaneShadow], the shadow root used to isolate Flutter-rendered
+///   content from the surrounding page content, including from the platform
+///   views.
+/// - [sceneElement], the element that hosts Flutter layers and pictures, and
+///   projects platform views.
+/// - [sceneHostElement], the anchor that provides a stable location in the DOM
+///   tree for the [sceneElement].
+/// - [semanticsHostElement], hosts the ARIA-annotated semantics tree.
+class FlutterViewEmbedder {
+  FlutterViewEmbedder() {
     reset();
-
     assert(() {
       _setupHotRestart();
       return true;
     }());
   }
-
-  static const int vibrateLongPress = 50;
-  static const int vibrateLightImpact = 10;
-  static const int vibrateMediumImpact = 20;
-  static const int vibrateHeavyImpact = 30;
-  static const int vibrateSelectionClick = 10;
 
   // The tag name for the root view of the flutter app (glass-pane)
   static const String _glassPaneTagName = 'flt-glass-pane';
@@ -175,52 +178,6 @@ class DomRenderer {
 
   final html.Element rootElement = html.document.body!;
 
-  html.Element createElement(String tagName, {html.Element? parent}) {
-    final html.Element element = html.document.createElement(tagName);
-    parent?.append(element);
-    return element;
-  }
-
-  void appendText(html.Element parent, String text) {
-    parent.appendText(text);
-  }
-
-  static void setElementStyle(
-      html.Element element, String name, String? value) {
-    if (value == null) {
-      element.style.removeProperty(name);
-    } else {
-      element.style.setProperty(name, value);
-    }
-  }
-
-  static void setClipPath(html.Element element, String? value) {
-    if (browserEngine == BrowserEngine.webkit) {
-      if (value == null) {
-        element.style.removeProperty('-webkit-clip-path');
-      } else {
-        element.style.setProperty('-webkit-clip-path', value);
-      }
-    }
-    if (value == null) {
-      element.style.removeProperty('clip-path');
-    } else {
-      element.style.setProperty('clip-path', value);
-    }
-  }
-
-  void setThemeColor(ui.Color color) {
-    html.MetaElement? theme =
-        html.document.querySelector('#flutterweb-theme') as html.MetaElement?;
-    if (theme == null) {
-      theme = html.MetaElement()
-        ..id = 'flutterweb-theme'
-        ..name = 'theme-color';
-      html.document.head!.append(theme);
-    }
-    theme.content = colorToCssString(color)!;
-  }
-
   static const String defaultFontStyle = 'normal';
   static const String defaultFontWeight = 'normal';
   static const double defaultFontSize = 14;
@@ -313,7 +270,7 @@ class DomRenderer {
     // IMPORTANT: the glass pane element must come after the scene element in the DOM node list so
     //            it can intercept input events.
     _glassPaneElement?.remove();
-    final html.Element glassPaneElement = createElement(_glassPaneTagName);
+    final html.Element glassPaneElement = html.document.createElement(_glassPaneTagName);
     _glassPaneElement = glassPaneElement;
     glassPaneElement.style
       ..position = 'absolute'
@@ -331,11 +288,11 @@ class DomRenderer {
     _glassPaneShadow = glassPaneElementHostNode;
 
     // Don't allow the scene to receive pointer events.
-    _sceneHostElement = createElement('flt-scene-host')
+    _sceneHostElement = html.document.createElement('flt-scene-host')
       ..style.pointerEvents = 'none';
 
     final html.Element semanticsHostElement =
-        createElement('flt-semantics-host');
+        html.document.createElement('flt-semantics-host');
     semanticsHostElement.style
       ..position = 'absolute'
       ..transformOrigin = '0 0 0';
@@ -456,41 +413,6 @@ class DomRenderer {
     }
   }
 
-  /// Removes all children of a DOM node.
-  void removeAllChildren(html.Node node) {
-    while (node.lastChild != null) {
-      node.lastChild!.remove();
-    }
-  }
-
-  static bool? _ellipseFeatureDetected;
-
-  /// Draws CanvasElement ellipse with fallback.
-  static void ellipse(
-      html.CanvasRenderingContext2D context,
-      double centerX,
-      double centerY,
-      double radiusX,
-      double radiusY,
-      double rotation,
-      double startAngle,
-      double endAngle,
-      bool antiClockwise) {
-    // ignore: implicit_dynamic_function
-    _ellipseFeatureDetected ??= js_util.getProperty(context, 'ellipse') != null;
-    if (_ellipseFeatureDetected!) {
-      context.ellipse(centerX, centerY, radiusX, radiusY, rotation, startAngle,
-          endAngle, antiClockwise);
-    } else {
-      context.save();
-      context.translate(centerX, centerY);
-      context.rotate(rotation);
-      context.scale(radiusX, radiusY);
-      context.arc(0, 0, 1, startAngle, endAngle, antiClockwise);
-      context.restore();
-    }
-  }
-
   static const String orientationLockTypeAny = 'any';
   static const String orientationLockTypeNatural = 'natural';
   static const String orientationLockTypeLandscape = 'landscape';
@@ -596,36 +518,14 @@ class DomRenderer {
 
   /// Removes a global resource element.
   void removeResource(html.Element? element) {
-    element?.remove();
-  }
-
-  /// Provides haptic feedback.
-  void vibrate(int durationMs) {
-    final html.Navigator navigator = html.window.navigator;
-    if (js_util.hasProperty(navigator, 'vibrate')) {
-      // ignore: implicit_dynamic_function
-      js_util.callMethod(navigator, 'vibrate', <num>[durationMs]);
+    if (element == null) {
+      return;
     }
+    assert(element.parent == _resourcesHost);
+    element.remove();
   }
 
   String get currentHtml => _rootApplicationElement?.outerHtml ?? '';
-
-  DebugDomRendererFrameStatistics? _debugFrameStatistics;
-
-  DebugDomRendererFrameStatistics? debugFlushFrameStatistics() {
-    if (!assertionsEnabled) {
-      throw Exception('This code should not be reachable in production.');
-    }
-    final DebugDomRendererFrameStatistics? current = _debugFrameStatistics;
-    _debugFrameStatistics = DebugDomRendererFrameStatistics();
-    return current;
-  }
-
-  void debugRulerCacheHit() => _debugFrameStatistics!.paragraphRulerCacheHits++;
-  void debugRulerCacheMiss() =>
-      _debugFrameStatistics!.paragraphRulerCacheMisses++;
-  void debugRichTextLayout() => _debugFrameStatistics!.richTextLayouts++;
-  void debugPlainTextLayout() => _debugFrameStatistics!.plainTextLayouts++;
 }
 
 // Applies the required global CSS to an incoming [html.CssStyleSheet] `sheet`.
@@ -633,7 +533,7 @@ void applyGlobalCssRulesToSheet(
   html.CssStyleSheet sheet, {
   required BrowserEngine browserEngine,
   required bool hasAutofillOverlay,
-  String glassPaneTagName = DomRenderer._glassPaneTagName,
+  String glassPaneTagName = FlutterViewEmbedder._glassPaneTagName,
 }) {
   final bool isWebKit = browserEngine == BrowserEngine.webkit;
   final bool isFirefox = browserEngine == BrowserEngine.firefox;
@@ -752,48 +652,9 @@ void applyGlobalCssRulesToSheet(
   }
 }
 
-/// Miscellaneous statistics collecting during a single frame's execution.
-///
-/// This is useful when profiling the app. This class should only be used when
-/// assertions are enabled and therefore is not suitable for collecting any
-/// time measurements. It is mostly useful for counting certain events.
-class DebugDomRendererFrameStatistics {
-  /// The number of times we reused a previously initialized paragraph ruler to
-  /// measure a paragraph of text.
-  int paragraphRulerCacheHits = 0;
+/// The embedder singleton.
+FlutterViewEmbedder get flutterViewEmbedder => ensureFlutterViewEmbedderInitialized();
 
-  /// The number of times we had to create a new paragraph ruler to measure a
-  /// paragraph of text.
-  int paragraphRulerCacheMisses = 0;
-
-  /// The number of times we used a paragraph ruler to measure a paragraph of
-  /// text.
-  int get totalParagraphRulerAccesses =>
-      paragraphRulerCacheHits + paragraphRulerCacheMisses;
-
-  /// The number of times a paragraph of rich text was laid out this frame.
-  int richTextLayouts = 0;
-
-  /// The number of times a paragraph of plain text was laid out this frame.
-  int plainTextLayouts = 0;
-
-  @override
-  String toString() {
-    return '''
-Frame statistics:
-  Paragraph ruler cache hits: $paragraphRulerCacheHits
-  Paragraph ruler cache misses: $paragraphRulerCacheMisses
-  Paragraph ruler accesses: $totalParagraphRulerAccesses
-  Rich text layouts: $richTextLayouts
-  Plain text layouts: $plainTextLayouts
-'''
-        .trim();
-  }
-}
-
-/// Singleton DOM renderer.
-DomRenderer get domRenderer => ensureDomRendererInitialized();
-
-/// Initializes the [DomRenderer], if it's not already initialized.
-DomRenderer ensureDomRendererInitialized() => _domRenderer ??= DomRenderer();
-DomRenderer? _domRenderer;
+/// Initializes the [FlutterViewEmbedder], if it's not already initialized.
+FlutterViewEmbedder ensureFlutterViewEmbedderInitialized() => _flutterViewEmbedder ??= FlutterViewEmbedder();
+FlutterViewEmbedder? _flutterViewEmbedder;
