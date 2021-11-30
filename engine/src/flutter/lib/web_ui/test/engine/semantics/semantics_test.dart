@@ -12,7 +12,7 @@ import 'package:quiver/testing/async.dart';
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 
-import 'package:ui/src/engine.dart' show domRenderer;
+import 'package:ui/src/engine.dart' show flutterViewEmbedder;
 import 'package:ui/src/engine/browser_detection.dart';
 import 'package:ui/src/engine/semantics.dart';
 import 'package:ui/src/engine/vector_math.dart';
@@ -85,7 +85,7 @@ void _testEngineSemanticsOwner() {
   });
 
   test('placeholder enables semantics', () async {
-    domRenderer.reset(); // triggers `autoEnableOnTap` to be called
+    flutterViewEmbedder.reset(); // triggers `autoEnableOnTap` to be called
     expect(semantics().semanticsEnabled, isFalse);
 
     // Synthesize a click on the placeholder.
@@ -112,7 +112,7 @@ void _testEngineSemanticsOwner() {
   });
 
   test('auto-enables semantics', () async {
-    domRenderer.reset(); // triggers `autoEnableOnTap` to be called
+    flutterViewEmbedder.reset(); // triggers `autoEnableOnTap` to be called
     expect(semantics().semanticsEnabled, isFalse);
 
     final html.Element placeholder =

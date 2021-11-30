@@ -7,7 +7,6 @@ import 'dart:html' as html;
 import 'package:ui/ui.dart' as ui;
 
 import '../browser_detection.dart';
-import '../dom_renderer.dart';
 import '../util.dart';
 import '../vector_math.dart';
 import 'shaders/shader.dart';
@@ -122,10 +121,10 @@ class PersistedBackdropFilter extends PersistedContainerSurface
       // Gaussian blur with standard deviation (normal distribution),
       // the blur will fall within 2 * sigma pixels.
       if (browserEngine == BrowserEngine.webkit) {
-        DomRenderer.setElementStyle(_filterElement!, '-webkit-backdrop-filter',
+        setElementStyle(_filterElement!, '-webkit-backdrop-filter',
             filter.filterAttribute);
       }
-      DomRenderer.setElementStyle(_filterElement!, 'backdrop-filter', filter.filterAttribute);
+      setElementStyle(_filterElement!, 'backdrop-filter', filter.filterAttribute);
     }
   }
 

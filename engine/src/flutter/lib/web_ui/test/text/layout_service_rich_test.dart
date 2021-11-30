@@ -27,7 +27,7 @@ void main() {
 }
 
 Future<void> testMain() async {
-  await ui.webOnlyInitializeTestDomRenderer();
+  await initializeTestFlutterViewEmbedder();
 
   test('does not crash on empty spans', () {
     final CanvasParagraph paragraph = rich(ahemStyle, (CanvasParagraphBuilder builder) {

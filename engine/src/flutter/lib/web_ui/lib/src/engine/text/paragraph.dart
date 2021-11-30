@@ -8,7 +8,7 @@ import 'dart:math' as math;
 import 'package:ui/ui.dart' as ui;
 
 import '../browser_detection.dart';
-import '../dom_renderer.dart';
+import '../embedder.dart';
 import '../html/bitmap_canvas.dart';
 import '../util.dart';
 import 'layout_service.dart';
@@ -429,7 +429,7 @@ class EngineTextStyle implements ui.TextStyle {
       }
     }
     if (fontFamily.isEmpty) {
-      return DomRenderer.defaultFontFamily;
+      return FlutterViewEmbedder.defaultFontFamily;
     }
     return fontFamily;
   }
@@ -453,7 +453,7 @@ class EngineTextStyle implements ui.TextStyle {
   TextHeightStyle _createHeightStyle() {
     return TextHeightStyle(
       fontFamily: effectiveFontFamily,
-      fontSize: fontSize ?? DomRenderer.defaultFontSize,
+      fontSize: fontSize ?? FlutterViewEmbedder.defaultFontSize,
       height: height,
       // TODO(mdebbar): Pass the actual value when font features become supported
       //                https://github.com/flutter/flutter/issues/64595
@@ -744,7 +744,7 @@ void applyTextStyleToElement({
           _textDecorationToCssString(style.decoration, style.decorationStyle);
       if (textDecoration != null) {
         if (browserEngine == BrowserEngine.webkit) {
-          DomRenderer.setElementStyle(
+          setElementStyle(
               element, '-webkit-text-decoration', textDecoration);
         } else {
           cssStyle.textDecoration = textDecoration;
@@ -766,7 +766,7 @@ void applyTextStyleToElement({
 html.Element createPlaceholderElement({
   required ParagraphPlaceholder placeholder,
 }) {
-  final html.Element element = domRenderer.createElement('span');
+  final html.Element element = html.document.createElement('span');
   final html.CssStyleDeclaration style = element.style;
   style
     ..display = 'inline-block'

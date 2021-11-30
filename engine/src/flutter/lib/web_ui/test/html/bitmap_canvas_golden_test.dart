@@ -26,13 +26,13 @@ Future<void> testMain() async {
     // Create a <flt-scene> element to make sure our CSS reset applies correctly.
     final html.Element testScene = html.Element.tag('flt-scene');
     testScene.append(canvas.rootElement);
-    domRenderer.glassPaneShadow!.querySelector('flt-scene-host')!.append(testScene);
+    flutterViewEmbedder.glassPaneShadow!.querySelector('flt-scene-host')!.append(testScene);
   }
 
   setUpStableTestFonts();
 
   tearDown(() {
-    domRenderer.glassPaneShadow?.querySelector('flt-scene')?.remove();
+    flutterViewEmbedder.glassPaneShadow?.querySelector('flt-scene')?.remove();
   });
 
   /// Draws several lines, some aligned precisely with the pixel grid, and some
@@ -248,7 +248,7 @@ Future<void> testMain() async {
     final html.Element sceneElement = scene.webOnlyRootElement!;
 
     sceneElement.querySelector('flt-clip')!.append(canvas.rootElement);
-    domRenderer.glassPaneShadow!.querySelector('flt-scene-host')!.append(sceneElement);
+    flutterViewEmbedder.glassPaneShadow!.querySelector('flt-scene-host')!.append(sceneElement);
 
     await matchGoldenFile(
       'bitmap_canvas_draws_text_on_top_of_canvas.png',

@@ -6,7 +6,7 @@ import 'dart:html' as html;
 
 import 'package:ui/ui.dart' as ui;
 
-import '../dom_renderer.dart';
+import '../util.dart';
 import '../vector_math.dart';
 import 'surface.dart';
 
@@ -43,16 +43,16 @@ class PersistedOpacity extends PersistedContainerSurface
 
   @override
   html.Element createElement() {
-    final html.Element element = domRenderer.createElement('flt-opacity');
-    DomRenderer.setElementStyle(element, 'position', 'absolute');
-    DomRenderer.setElementStyle(element, 'transform-origin', '0 0 0');
+    final html.Element element = html.document.createElement('flt-opacity');
+    setElementStyle(element, 'position', 'absolute');
+    setElementStyle(element, 'transform-origin', '0 0 0');
     return element;
   }
 
   @override
   void apply() {
     final html.Element element = rootElement!;
-    DomRenderer.setElementStyle(element, 'opacity', '${alpha / 255}');
+    setElementStyle(element, 'opacity', '${alpha / 255}');
     element.style.transform = 'translate(${offset.dx}px, ${offset.dy}px)';
   }
 

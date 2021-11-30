@@ -7,7 +7,7 @@ import 'dart:math' as math;
 
 import 'package:ui/ui.dart' as ui;
 
-import 'dom_renderer.dart';
+import 'util.dart';
 
 /// Renders an RRect using path primitives.
 abstract class RRectRenderer {
@@ -203,7 +203,7 @@ class RRectToCanvasRenderer extends RRectRenderer {
   @override
   void ellipse(double centerX, double centerY, double radiusX, double radiusY,
       double rotation, double startAngle, double endAngle, bool antiClockwise) {
-    DomRenderer.ellipse(context, centerX, centerY, radiusX, radiusY, rotation, startAngle,
+    drawEllipse(context, centerX, centerY, radiusX, radiusY, rotation, startAngle,
         endAngle, antiClockwise);
   }
 }

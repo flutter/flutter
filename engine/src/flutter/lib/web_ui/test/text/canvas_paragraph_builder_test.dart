@@ -33,7 +33,7 @@ void main() {
 }
 
 Future<void> testMain() async {
-  await webOnlyInitializeTestDomRenderer();
+  await initializeTestFlutterViewEmbedder();
 
   setUpAll(() {
     WebExperiments.ensureInitialized();
@@ -408,8 +408,8 @@ Future<void> testMain() async {
 
 TextStyle styleWithDefaults({
   Color color = const Color(0xFFFF0000),
-  String fontFamily = DomRenderer.defaultFontFamily,
-  double fontSize = DomRenderer.defaultFontSize,
+  String fontFamily = FlutterViewEmbedder.defaultFontFamily,
+  double fontSize = FlutterViewEmbedder.defaultFontSize,
   FontWeight? fontWeight,
   FontStyle? fontStyle,
   double? height,

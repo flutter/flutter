@@ -21,7 +21,7 @@ void testMain() {
         () async {
       expect(windowFlutterCanvasKit, isNull);
 
-      DomRenderer();
+      FlutterViewEmbedder();
       await ui.webOnlyInitializePlatform(
           assetManager: WebOnlyMockAssetManager());
       expect(windowFlutterCanvasKit, isNotNull);
@@ -29,7 +29,7 @@ void testMain() {
       final CanvasKit? firstCanvasKitInstance = windowFlutterCanvasKit;
 
       // Triggers a reset of the CanvasKit script element.
-      DomRenderer();
+      FlutterViewEmbedder();
       await ui.webOnlyInitializePlatform(
           assetManager: WebOnlyMockAssetManager());
       // The instance is the same.

@@ -121,7 +121,7 @@ void testMain() {
       );
 
       final TextField textField = textFieldSemantics.debugRoleManagerFor(Role.textField)! as TextField;
-      expect(html.document.activeElement, domRenderer.glassPaneElement);
+      expect(html.document.activeElement, flutterViewEmbedder.glassPaneElement);
       expect(appHostNode.activeElement, strategy.domElement);
       expect(textField.editableElement, strategy.domElement);
       expect((textField.editableElement as dynamic).value, 'hello');
@@ -174,7 +174,7 @@ void testMain() {
 
       final TextField textField = textFieldSemantics.debugRoleManagerFor(Role.textField)! as TextField;
       expect(textField.editableElement, strategy.domElement);
-      expect(html.document.activeElement, domRenderer.glassPaneElement);
+      expect(html.document.activeElement, flutterViewEmbedder.glassPaneElement);
       expect(appHostNode.activeElement, strategy.domElement);
 
       // The input should not refocus after blur.
@@ -205,7 +205,7 @@ void testMain() {
         isFocused: true,
       );
       expect(strategy.domElement, isNotNull);
-      expect(html.document.activeElement, domRenderer.glassPaneElement);
+      expect(html.document.activeElement, flutterViewEmbedder.glassPaneElement);
       expect(appHostNode.activeElement, strategy.domElement);
 
       strategy.disable();
@@ -237,7 +237,7 @@ void testMain() {
         isFocused: true,
       );
       expect(strategy.domElement, isNotNull);
-      expect(html.document.activeElement, domRenderer.glassPaneElement);
+      expect(html.document.activeElement, flutterViewEmbedder.glassPaneElement);
       expect(appHostNode.activeElement, strategy.domElement);
 
       // Blur the element without telling the framework.
@@ -261,7 +261,7 @@ void testMain() {
         value: 'hello',
         isFocused: true,
       );
-      expect(html.document.activeElement, domRenderer.glassPaneElement);
+      expect(html.document.activeElement, flutterViewEmbedder.glassPaneElement);
       expect(appHostNode.activeElement, strategy.domElement);
 
       strategy.disable();
@@ -286,7 +286,7 @@ void testMain() {
 
       final html.TextAreaElement textArea = strategy.domElement! as html.TextAreaElement;
 
-      expect(html.document.activeElement, domRenderer.glassPaneElement);
+      expect(html.document.activeElement, flutterViewEmbedder.glassPaneElement);
       expect(appHostNode.activeElement, strategy.domElement);
 
       strategy.enable(
@@ -392,7 +392,7 @@ void testMain() {
         createTwoFieldSemantics(tester, focusFieldId: 1);
         expect(tester.apply().length, 3);
 
-        expect(html.document.activeElement, domRenderer.glassPaneElement);
+        expect(html.document.activeElement, flutterViewEmbedder.glassPaneElement);
         expect(appHostNode.activeElement, tester.getTextField(1).editableElement);
         expect(strategy.domElement, tester.getTextField(1).editableElement);
 

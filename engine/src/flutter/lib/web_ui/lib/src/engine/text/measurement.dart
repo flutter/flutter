@@ -5,7 +5,7 @@
 import 'dart:html' as html;
 
 import '../../engine.dart' show registerHotRestartListener;
-import '../dom_renderer.dart';
+import '../embedder.dart';
 
 // TODO(yjbanov): this is a hack we use to compute ideographic baseline; this
 //                number is the ratio ideographic/alphabetic for font Ahem,
@@ -17,7 +17,7 @@ const double baselineRatioHack = 1.1662499904632568;
 
 /// Hosts ruler DOM elements in a hidden container under a `root` [html.Node].
 ///
-/// The `root` [html.Node] is optional. Defaults to [domRenderer.glassPaneShadow].
+/// The `root` [html.Node] is optional. Defaults to [flutterViewEmbedder.glassPaneShadow].
 class RulerHost {
   RulerHost({html.Node? root}) {
     _rulerHost.style
@@ -29,7 +29,7 @@ class RulerHost {
       ..width = '0'
       ..height = '0';
 
-    (root ?? domRenderer.glassPaneShadow!.node).append(_rulerHost);
+    (root ?? flutterViewEmbedder.glassPaneShadow!.node).append(_rulerHost);
     registerHotRestartListener(dispose);
   }
 

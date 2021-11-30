@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:html' as html;
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
@@ -91,7 +92,7 @@ Future<void> testMain() async {
 
   test('basic bidi starting with ltr (DOM)', () {
     const Rect bounds = Rect.fromLTWH(0, 0, 340, 600);
-    final DomCanvas canvas = DomCanvas(domRenderer.createElement('flt-picture'));
+    final DomCanvas canvas = DomCanvas(html.document.createElement('flt-picture'));
 
     const double height = 40;
 
@@ -195,7 +196,7 @@ Future<void> testMain() async {
 
   test('basic bidi starting with rtl (DOM)', () {
     const Rect bounds = Rect.fromLTWH(0, 0, 340, 600);
-    final DomCanvas canvas = DomCanvas(domRenderer.createElement('flt-picture'));
+    final DomCanvas canvas = DomCanvas(html.document.createElement('flt-picture'));
 
     const double height = 40;
 
@@ -303,7 +304,7 @@ Future<void> testMain() async {
 
   test('multiline bidi (DOM)', () {
     const Rect bounds = Rect.fromLTWH(0, 0, 400, 500);
-    final DomCanvas canvas = DomCanvas(domRenderer.createElement('flt-picture'));
+    final DomCanvas canvas = DomCanvas(html.document.createElement('flt-picture'));
 
     const double height = 95;
 
@@ -417,7 +418,7 @@ Future<void> testMain() async {
 
   test('multi span bidi (DOM)', () {
     const Rect bounds = Rect.fromLTWH(0, 0, 400, 900);
-    final DomCanvas canvas = DomCanvas(domRenderer.createElement('flt-picture'));
+    final DomCanvas canvas = DomCanvas(html.document.createElement('flt-picture'));
 
     const double height = 95;
 
@@ -536,7 +537,7 @@ Future<void> testMain() async {
 
   test('bidi with selection (DOM)', () {
     const Rect bounds = Rect.fromLTWH(0, 0, 400, 500);
-    final DomCanvas canvas = DomCanvas(domRenderer.createElement('flt-picture'));
+    final DomCanvas canvas = DomCanvas(html.document.createElement('flt-picture'));
 
     const double height = 95;
 

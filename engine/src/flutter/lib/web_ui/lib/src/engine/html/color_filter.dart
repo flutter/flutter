@@ -10,7 +10,7 @@ import 'package:ui/ui.dart' as ui;
 import '../browser_detection.dart';
 import '../canvaskit/color_filter.dart';
 import '../color_filter.dart';
-import '../dom_renderer.dart';
+import '../embedder.dart';
 import '../util.dart';
 import 'bitmap_canvas.dart';
 import 'path_to_svg_clip.dart';
@@ -53,7 +53,7 @@ class PersistedColorFilter extends PersistedContainerSurface
   @override
   void discard() {
     super.discard();
-    domRenderer.removeResource(_filterElement);
+    flutterViewEmbedder.removeResource(_filterElement);
     // Do not detach the child container from the root. It is permanently
     // attached. The elements are reused together and are detached from the DOM
     // together.
@@ -72,7 +72,7 @@ class PersistedColorFilter extends PersistedContainerSurface
 
   @override
   void apply() {
-    domRenderer.removeResource(_filterElement);
+    flutterViewEmbedder.removeResource(_filterElement);
     _filterElement = null;
     final EngineColorFilter? engineValue = filter as EngineColorFilter?;
     if (engineValue == null) {
@@ -138,7 +138,7 @@ class PersistedColorFilter extends PersistedContainerSurface
     // Use SVG filter for blend mode.
     final SvgFilter svgFilter = svgFilterFromBlendMode(filterColor, colorFilterBlendMode);
     _filterElement = svgFilter.element;
-    domRenderer.addResource(_filterElement!);
+    flutterViewEmbedder.addResource(_filterElement!);
     style.filter = 'url(#${svgFilter.id})';
     if (colorFilterBlendMode == ui.BlendMode.saturation ||
         colorFilterBlendMode == ui.BlendMode.multiply ||
@@ -150,7 +150,7 @@ class PersistedColorFilter extends PersistedContainerSurface
   void _applyMatrixColorFilter(CkMatrixColorFilter colorFilter) {
     final SvgFilter svgFilter = svgFilterFromColorMatrix(colorFilter.matrix);
     _filterElement = svgFilter.element;
-    domRenderer.addResource(_filterElement!);
+    flutterViewEmbedder.addResource(_filterElement!);
     childContainer!.style.filter = 'url(#${svgFilter.id})';
   }
 

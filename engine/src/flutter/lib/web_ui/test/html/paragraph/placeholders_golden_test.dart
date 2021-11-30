@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:html' as html;
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
@@ -92,7 +93,7 @@ Future<void> testMain() async {
   });
 
   test('draws paragraphs with placeholders and text align in DOM mode', () {
-    final DomCanvas canvas = DomCanvas(domRenderer.createElement('flt-picture'));
+    final DomCanvas canvas = DomCanvas(html.document.createElement('flt-picture'));
 
     const List<TextAlign> aligns = <TextAlign>[
       TextAlign.left,

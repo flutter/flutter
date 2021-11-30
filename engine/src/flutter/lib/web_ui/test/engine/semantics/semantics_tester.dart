@@ -7,7 +7,7 @@ import 'dart:html' as html;
 import 'dart:typed_data';
 
 import 'package:test/test.dart';
-import 'package:ui/src/engine.dart' show domRenderer, toMatrix32;
+import 'package:ui/src/engine.dart' show flutterViewEmbedder, toMatrix32;
 import 'package:ui/src/engine/browser_detection.dart';
 import 'package:ui/src/engine/host_node.dart';
 import 'package:ui/src/engine/semantics.dart';
@@ -23,7 +23,7 @@ import '../../matchers.dart';
 /// so we don't have to hardcode html.document across the test. (The host of a
 /// normal flutter app used to be html.document, but now that the app is wrapped
 /// in a Shadow DOM, that's not the case anymore.)
-HostNode get appHostNode => domRenderer.glassPaneShadow!;
+HostNode get appHostNode => flutterViewEmbedder.glassPaneShadow!;
 
 /// CSS style applied to the root of the semantics tree.
 // TODO(yjbanov): this should be handled internally by [expectSemanticsTree].

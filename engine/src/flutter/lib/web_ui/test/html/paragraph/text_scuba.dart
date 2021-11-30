@@ -98,7 +98,7 @@ void testEachCanvas(String description, CanvasTest body,
     return body(BitmapCanvas(bounds, RenderStrategy()));
   });
   test('$description (dom)', () {
-    return body(DomCanvas(domRenderer.createElement('flt-picture')));
+    return body(DomCanvas(html.document.createElement('flt-picture')));
   });
 }
 

@@ -20,7 +20,7 @@ void main() {
 Future<void> testMain() async {
   const double baselineRatio = 1.1662499904632568;
 
-  await webOnlyInitializeTestDomRenderer();
+  await initializeTestFlutterViewEmbedder();
 
   late String fallback;
   setUp(() {

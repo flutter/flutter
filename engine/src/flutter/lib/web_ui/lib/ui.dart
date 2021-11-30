@@ -32,7 +32,6 @@ part 'src/ui/path_metrics.dart';
 part 'src/ui/platform_dispatcher.dart';
 part 'src/ui/pointer.dart';
 part 'src/ui/semantics.dart';
-part 'src/ui/test_embedding.dart';
 part 'src/ui/text.dart';
 part 'src/ui/tile_mode.dart';
 part 'src/ui/window.dart';

@@ -5,7 +5,7 @@
 import 'dart:html' as html;
 
 import 'browser_detection.dart';
-import 'dom_renderer.dart';
+import 'embedder.dart';
 import 'text_editing/text_editing.dart';
 
 /// The interface required to host a flutter app in the DOM, and its tests.

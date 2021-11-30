@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
@@ -39,7 +38,7 @@ void main() {
 }
 
 Future<void> testMain() async {
-  await ui.webOnlyInitializeTestDomRenderer();
+  await initializeTestFlutterViewEmbedder();
 
   test('no text', () {
     final CanvasParagraph paragraph = CanvasParagraphBuilder(ahemStyle).build();

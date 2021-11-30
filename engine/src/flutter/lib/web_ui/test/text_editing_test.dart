@@ -10,7 +10,7 @@ import 'dart:typed_data';
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 
-import 'package:ui/src/engine.dart' show domRenderer;
+import 'package:ui/src/engine.dart' show flutterViewEmbedder;
 import 'package:ui/src/engine/browser_detection.dart';
 import 'package:ui/src/engine/services.dart';
 import 'package:ui/src/engine/text_editing/autofill_hint.dart';
@@ -76,7 +76,7 @@ void testMain() {
       testTextEditing.debugTextEditingStrategyOverride = editingStrategy;
       testTextEditing.configuration = singlelineConfig;
       // Ensure the glass-pane and its shadow root exist.
-      domRenderer.reset();
+      flutterViewEmbedder.reset();
     });
 
     test('Creates element when enabled and removes it when disabled', () {
@@ -101,7 +101,7 @@ void testMain() {
       final Element input = defaultTextEditingRoot.querySelector('input')!;
       // Now the editing element should have focus.
 
-      expect(document.activeElement, domRenderer.glassPaneElement);
+      expect(document.activeElement, flutterViewEmbedder.glassPaneElement);
       expect(defaultTextEditingRoot.activeElement, input);
 
       expect(editingStrategy!.domElement, input);

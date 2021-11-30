@@ -19,7 +19,7 @@ void testMain() {
     setUpCanvasKitTest();
 
     test('populates flt-renderer and flt-build-mode', () {
-      DomRenderer();
+      FlutterViewEmbedder();
       expect(html.document.body!.attributes['flt-renderer'],
           'canvaskit (requested explicitly)');
       expect(html.document.body!.attributes['flt-build-mode'], 'debug');

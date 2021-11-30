@@ -12,7 +12,7 @@ import '../../engine.dart'  show registerHotRestartListener;
 import '../alarm_clock.dart';
 import '../browser_detection.dart';
 import '../configuration.dart';
-import '../dom_renderer.dart';
+import '../embedder.dart';
 import '../platform_dispatcher.dart';
 import '../util.dart';
 import '../vector_math.dart';
@@ -1594,7 +1594,7 @@ class EngineSemanticsOwner {
     if (_rootSemanticsElement == null) {
       final SemanticsObject root = _semanticsTree[0]!;
       _rootSemanticsElement = root.element;
-      domRenderer.semanticsHostElement!.append(root.element);
+      flutterViewEmbedder.semanticsHostElement!.append(root.element);
     }
 
     _finalizeTree();
