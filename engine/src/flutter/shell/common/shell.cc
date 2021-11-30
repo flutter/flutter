@@ -223,24 +223,21 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
   auto unref_queue_future = unref_queue_promise.get_future();
   auto io_task_runner = shell->GetTaskRunners().GetIOTaskRunner();
 
-  // TODO(gw280): The WeakPtr here asserts that we are derefing it on the
-  // same thread as it was created on. We are currently on the IO thread
-  // inside this lambda but we need to deref the PlatformView, which was
-  // constructed on the platform thread.
-  //
-  // https://github.com/flutter/flutter/issues/42948
+  // The platform_view will be stored into shell's platform_view_ in
+  // shell->Setup(std::move(platform_view), ...) at the end.
+  PlatformView* platform_view_ptr = platform_view.get();
   fml::TaskRunner::RunNowOrPostTask(
       io_task_runner,
       [&io_manager_promise,                                               //
        &weak_io_manager_promise,                                          //
        &unref_queue_promise,                                              //
-       platform_view = platform_view->GetWeakPtr(),                       //
+       platform_view_ptr,                                                 //
        io_task_runner,                                                    //
        is_backgrounded_sync_switch = shell->GetIsGpuDisabledSyncSwitch()  //
   ]() {
         TRACE_EVENT0("flutter", "ShellSetupIOSubsystem");
         auto io_manager = std::make_unique<ShellIOManager>(
-            platform_view.getUnsafe()->CreateResourceContext(),
+            platform_view_ptr->CreateResourceContext(),
             is_backgrounded_sync_switch, io_task_runner);
         weak_io_manager_promise.set_value(io_manager->GetWeakPtr());
         unref_queue_promise.set_value(io_manager->GetSkiaUnrefQueue());
