@@ -33,6 +33,7 @@ using fuchsia::ui::input::kModifierRightControl;
 using fuchsia::ui::input::kModifierRightShift;
 using fuchsia::ui::input3::KeyEvent;
 using fuchsia::ui::input3::KeyEventType;
+using fuchsia::ui::input3::KeyMeaning;
 
 class KeyboardTest : public testing::Test {
  protected:
@@ -48,15 +49,29 @@ class KeyboardTest : public testing::Test {
     return event;
   }
 
+  KeyEvent NewKeyEventWithMeaning(KeyEventType event_type,
+                                  KeyMeaning key_meaning) {
+    KeyEvent event;
+    // Assume events are delivered with correct timing.
+    event.set_timestamp(++timestamp_);
+    event.set_type(event_type);
+    event.set_key_meaning(std::move(key_meaning));
+    return event;
+  }
+
   // Makes the keyboard consume all the provided `events`.  The end state of
   // the keyboard is as if all of the specified events happened between the
-  // start state of the keyboard and its end state.
-  void ConsumeEvents(Keyboard* keyboard, const std::vector<KeyEvent>& events) {
+  // start state of the keyboard and its end state.  Returns false if any of
+  // the event was not consumed.
+  bool ConsumeEvents(Keyboard* keyboard, const std::vector<KeyEvent>& events) {
     for (const auto& event : events) {
       KeyEvent e;
       event.Clone(&e);
-      keyboard->ConsumeEvent(std::move(e));
+      if (keyboard->ConsumeEvent(std::move(e)) == false) {
+        return false;
+      }
     }
+    return true;
   }
 
   // Converts a pressed key to usage value.
@@ -71,7 +86,7 @@ TEST_F(KeyboardTest, UsageValues) {
   std::vector<KeyEvent> keys;
   keys.emplace_back(NewKeyEvent(KeyEventType::SYNC, Key::CAPS_LOCK));
   Keyboard keyboard;
-  ConsumeEvents(&keyboard, keys);
+  ASSERT_TRUE(ConsumeEvents(&keyboard, keys));
 
   // Values for Caps Lock.
   // See spec at:
@@ -88,10 +103,31 @@ TEST_F(KeyboardTest, UsageValues) {
   // to add more keys if needed.
   keys.clear();
   keys.emplace_back(NewKeyEvent(KeyEventType::SYNC, Key::MEDIA_MUTE));
-  ConsumeEvents(&keyboard, keys);
+  ASSERT_TRUE(ConsumeEvents(&keyboard, keys));
   EXPECT_EQ(0x0Cu, keyboard.LastHIDUsagePage());
   EXPECT_EQ(0xE2u, keyboard.LastHIDUsageID());
   EXPECT_EQ(0xC00E2u, keyboard.LastHIDUsage());
+
+  // Don't crash when a key with only a meaning comes in.
+  keys.clear();
+  keys.emplace_back(NewKeyEventWithMeaning(KeyEventType::SYNC,
+                                           KeyMeaning::WithCodepoint(32)));
+  ASSERT_TRUE(ConsumeEvents(&keyboard, keys));
+  EXPECT_EQ(0x0u, keyboard.LastHIDUsagePage());
+  EXPECT_EQ(0x0u, keyboard.LastHIDUsageID());
+  EXPECT_EQ(0x0u, keyboard.LastHIDUsage());
+  EXPECT_EQ(0x20u, keyboard.LastCodePoint());
+
+  keys.clear();
+  auto key =
+      NewKeyEventWithMeaning(KeyEventType::SYNC, KeyMeaning::WithCodepoint(65));
+  key.set_key(Key::A);
+  keys.emplace_back(std::move(key));
+  ASSERT_TRUE(ConsumeEvents(&keyboard, keys));
+  EXPECT_EQ(0x07u, keyboard.LastHIDUsagePage());
+  EXPECT_EQ(0x04u, keyboard.LastHIDUsageID());
+  EXPECT_EQ(0x70004u, keyboard.LastHIDUsage());
+  EXPECT_EQ(65u, keyboard.LastCodePoint());
 }
 
 // This test checks that if a caps lock has been pressed when we didn't have
@@ -104,7 +140,7 @@ TEST_F(KeyboardTest, CapsLockSync) {
 
   // Replay them on the keyboard.
   Keyboard keyboard;
-  ConsumeEvents(&keyboard, keys);
+  ASSERT_TRUE(ConsumeEvents(&keyboard, keys));
 
   // Verify the state of the keyboard's public API:
   // - check that the key sync had no code point (it was a caps lock press).
@@ -121,7 +157,7 @@ TEST_F(KeyboardTest, CapsLockPress) {
   keys.emplace_back(NewKeyEvent(KeyEventType::PRESSED, Key::CAPS_LOCK));
 
   Keyboard keyboard;
-  ConsumeEvents(&keyboard, keys);
+  ASSERT_TRUE(ConsumeEvents(&keyboard, keys));
 
   EXPECT_EQ(0u, keyboard.LastCodePoint());
   EXPECT_EQ(ToUsage(Key::CAPS_LOCK), keyboard.LastHIDUsage());
@@ -134,7 +170,7 @@ TEST_F(KeyboardTest, CapsLockPressRelease) {
   keys.emplace_back(NewKeyEvent(KeyEventType::RELEASED, Key::CAPS_LOCK));
 
   Keyboard keyboard;
-  ConsumeEvents(&keyboard, keys);
+  ASSERT_TRUE(ConsumeEvents(&keyboard, keys));
 
   EXPECT_EQ(0u, keyboard.LastCodePoint());
   EXPECT_EQ(ToUsage(Key::CAPS_LOCK), keyboard.LastHIDUsage());
@@ -147,7 +183,7 @@ TEST_F(KeyboardTest, ShiftA) {
   keys.emplace_back(NewKeyEvent(KeyEventType::PRESSED, Key::A));
 
   Keyboard keyboard;
-  ConsumeEvents(&keyboard, keys);
+  ASSERT_TRUE(ConsumeEvents(&keyboard, keys));
 
   EXPECT_EQ(static_cast<uint32_t>('A'), keyboard.LastCodePoint());
   EXPECT_EQ(ToUsage(Key::A), keyboard.LastHIDUsage());
@@ -161,7 +197,7 @@ TEST_F(KeyboardTest, ShiftAWithRelease) {
   keys.emplace_back(NewKeyEvent(KeyEventType::RELEASED, Key::A));
 
   Keyboard keyboard;
-  ConsumeEvents(&keyboard, keys);
+  ASSERT_TRUE(ConsumeEvents(&keyboard, keys));
 
   EXPECT_EQ(static_cast<uint32_t>('A'), keyboard.LastCodePoint());
   EXPECT_EQ(ToUsage(Key::A), keyboard.LastHIDUsage());
@@ -176,7 +212,7 @@ TEST_F(KeyboardTest, ShiftAWithReleaseShift) {
   keys.emplace_back(NewKeyEvent(KeyEventType::RELEASED, Key::A));
 
   Keyboard keyboard;
-  ConsumeEvents(&keyboard, keys);
+  ASSERT_TRUE(ConsumeEvents(&keyboard, keys));
 
   EXPECT_EQ(static_cast<uint32_t>('a'), keyboard.LastCodePoint());
   EXPECT_EQ(ToUsage(Key::A), keyboard.LastHIDUsage());
@@ -189,7 +225,7 @@ TEST_F(KeyboardTest, LowcaseA) {
   keys.emplace_back(NewKeyEvent(KeyEventType::RELEASED, Key::A));
 
   Keyboard keyboard;
-  ConsumeEvents(&keyboard, keys);
+  ASSERT_TRUE(ConsumeEvents(&keyboard, keys));
 
   EXPECT_EQ(static_cast<uint32_t>('a'), keyboard.LastCodePoint());
   EXPECT_EQ(ToUsage(Key::A), keyboard.LastHIDUsage());

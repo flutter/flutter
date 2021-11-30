@@ -57,6 +57,8 @@ class Keyboard final {
   bool IsKeys();
 
   // Returns the value of the last key as a uint32_t.
+  // If there isn't such a value (as in the case of on-screen keyboards), this
+  // will return a 0;
   uint32_t GetLastKey();
 
   // Set to false until any event is received.

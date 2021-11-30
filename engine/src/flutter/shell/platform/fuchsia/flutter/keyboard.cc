@@ -175,13 +175,20 @@ bool Keyboard::ConsumeEvent(KeyEvent event) {
   if (!event.has_type()) {
     return false;
   }
-  if (!event.has_key()) {
+  if (!event.has_key() && !event.has_key_meaning()) {
     return false;
   }
   // Check if the time sequence of the events is correct.
-
   last_event_ = std::move(event);
   any_events_received_ = true;
+
+  if (!event.has_key()) {
+    // The key only has key meaning.  Key meaning currently can not
+    // update the modifier state, so we just short-circuit the table
+    // below.
+    return true;
+  }
+
   const Key& key = last_event_.key();
   const KeyEventType& event_type = last_event_.type();
   switch (event_type) {
@@ -277,7 +284,7 @@ bool Keyboard::ConsumeEvent(KeyEvent event) {
       // No-op
       break;
   }
-  return false;
+  return true;
 }
 
 bool Keyboard::IsShift() {
@@ -298,10 +305,14 @@ uint32_t Keyboard::Modifiers() {
 }
 
 uint32_t Keyboard::LastCodePoint() {
-  // TODO(https://github.com/flutter/flutter/issues/93891):
-  // `KeyEvent::key_meaning` should be used here to do key mapping before US
-  // QWERTY is applied. The US QWERTY should be applied only if `key_meaning`
-  // is not available.
+  // If the key has a meaning, and if the meaning is a code point, always have
+  // that code point take precedence over any other keymap.
+  if (last_event_.has_key_meaning()) {
+    const auto& key_meaning = last_event_.key_meaning();
+    if (key_meaning.is_codepoint()) {
+      return key_meaning.codepoint();
+    }
+  }
   static const int qwerty_map_size =
       sizeof(QWERTY_TO_CODE_POINTS) / sizeof(QWERTY_TO_CODE_POINTS[0]);
   if (!IsKeys()) {
@@ -316,8 +327,14 @@ uint32_t Keyboard::LastCodePoint() {
 }
 
 uint32_t Keyboard::GetLastKey() {
-  // TODO(https://github.com/flutter/flutter/issues/93898): key is not always
-  // set. Figure out what to do then.
+  // For logical key determination, the physical key does not matter as long
+  // as code point is set.
+  // https://github.com/flutter/flutter/blob/570e39d38b799e91abe4f73f120ce494049c4ff0/packages/flutter/lib/src/services/raw_keyboard_fuchsia.dart#L71
+  // It is not quite clear what happens to the physical key, though:
+  // https://github.com/flutter/flutter/blob/570e39d38b799e91abe4f73f120ce494049c4ff0/packages/flutter/lib/src/services/raw_keyboard_fuchsia.dart#L88
+  if (!last_event_.has_key()) {
+    return 0;
+  }
   return static_cast<uint32_t>(last_event_.key());
 }
 
