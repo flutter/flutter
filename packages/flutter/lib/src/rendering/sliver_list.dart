@@ -45,6 +45,21 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
   @override
   void performLayout() {
     final SliverConstraints constraints = this.constraints;
+    if ((constraints.remainingCacheExtent + constraints.remainingPaintExtent) <= 0.01 && childManager.estimateChildHeight != null) {
+      childManager.didStartLayout();
+      childManager.setDidUnderflow(false);
+      geometry = SliverGeometry(
+        maxPaintExtent: childManager.estimateMaxScrollOffset(
+          this.constraints,
+          firstIndex: 0,
+          lastIndex: 0,
+          trailingScrollOffset: childManager.estimateChildHeight,
+          leadingScrollOffset: 0,
+        ),
+      );
+      childManager.didFinishLayout();
+      return;
+    }
     childManager.didStartLayout();
     childManager.setDidUnderflow(false);
 

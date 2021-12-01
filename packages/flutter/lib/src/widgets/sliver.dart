@@ -146,6 +146,12 @@ abstract class SliverChildDelegate {
   /// used to implement [RenderSliverBoxChildManager.childCount].
   int? get estimatedChildCount => null;
 
+  /// Returns an estimate of the height extent for single child
+  /// 
+  /// The default implementation returns null, not use estimateChildHeight for 
+  /// their max scroll extent.
+  double? get estimateChildHeight => null;
+
   /// Returns an estimate of the max scroll extent for all the children.
   ///
   /// Subclasses should override this function if they have additional
@@ -347,11 +353,13 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
     this.addSemanticIndexes = true,
     this.semanticIndexCallback = _kDefaultSemanticIndexCallback,
     this.semanticIndexOffset = 0,
+    double? estimateChildHeight,
   }) : assert(builder != null),
        assert(addAutomaticKeepAlives != null),
        assert(addRepaintBoundaries != null),
        assert(addSemanticIndexes != null),
-       assert(semanticIndexCallback != null);
+       assert(semanticIndexCallback != null),
+       _estimateChildHeight = estimateChildHeight;
 
   /// Called to build children for the sliver.
   ///
@@ -370,6 +378,12 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
   /// If null, the number of children is determined by the least index for which
   /// [builder] returns null.
   final int? childCount;
+
+  /// The estimate height of child.
+  final double? _estimateChildHeight;
+
+  @override
+  double? get estimateChildHeight => _estimateChildHeight;
 
   /// Whether to wrap each child in an [AutomaticKeepAlive].
   ///
@@ -1329,6 +1343,10 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
   ///
   ///  * [SliverChildDelegate.estimatedChildCount], to which this getter defers.
   int? get estimatedChildCount => widget.delegate.estimatedChildCount;
+
+  /// use [estimateChildHeight] if sliver not in paint offset for child height .
+  @override
+  double? get estimateChildHeight => widget.delegate.estimateChildHeight;
 
   @override
   int get childCount {

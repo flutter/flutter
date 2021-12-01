@@ -79,6 +79,9 @@ abstract class RenderSliverBoxChildManager {
   /// list).
   int get childCount;
 
+  /// Called to a estimate hight of the child.
+  double? get estimateChildHeight => null;
+  
   /// Called during [RenderSliverMultiBoxAdaptor.adoptChild] or
   /// [RenderSliverMultiBoxAdaptor.move].
   ///

@@ -333,6 +333,33 @@ void main() {
     expect(find.byKey(const Key('key0')), findsOneWidget);
     expect(find.byKey(const Key('key1')), findsOneWidget);
   });
+
+  testWidgets('SliverList should start to perform layout from the estimateChildHeight when paint offset is zero', (WidgetTester tester) async {
+    final List<int> items = List<int>.generate(20, (int i) => i);
+    const double itemHeight = 300.0;
+    const double viewportHeight = 500.0;
+
+    final ScrollController controller = ScrollController();
+    bool haveBuild = false;
+    await tester.pumpWidget(_buildSliverLists(
+      items: items,
+      controller: controller,
+      itemHeight: itemHeight,
+      viewportHeight: viewportHeight,
+      buildCallback: () {
+        haveBuild = true;
+      },
+      estimateChildHeight: 300
+    ));
+
+    await tester.pumpAndSettle();
+    expect(find.text('Tile 0'), findsOneWidget);
+    expect(haveBuild, isFalse);
+
+    controller.jumpTo(300.0 * 20);
+    await tester.pumpAndSettle();
+    expect(haveBuild, isTrue);
+  });
 }
 
 Widget _buildSliverListRenderWidgetChild(List<String> items) {
@@ -392,6 +419,67 @@ Widget _buildSliverList({
                   return index == -1 ? null : index;
                 },
                 childCount: items.length,
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+  
+}
+
+
+Widget _buildSliverLists({
+  List<int> items = const <int>[],
+  ScrollController? controller,
+  double itemHeight = 500.0,
+  double viewportHeight = 300.0,
+  double? estimateChildHeight,
+  VoidCallback? buildCallback,
+}) {
+  return Directionality(
+    textDirection: TextDirection.ltr,
+    child: Center(
+      child: SizedBox(
+        height: viewportHeight,
+        child: CustomScrollView(
+          controller: controller,
+          slivers: <Widget>[
+            SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (BuildContext context, int i) {
+                  return SizedBox(
+                    key: ValueKey<int>(items[i]),
+                    height: itemHeight,
+                    child: Text('Tile ${items[i]}'),
+                  );
+                },
+                findChildIndexCallback: (Key key) {
+                  final ValueKey<int> valueKey = key as ValueKey<int>;
+                  final int index = items.indexOf(valueKey.value);
+                  return index == -1 ? null : index;
+                },
+                childCount: items.length,
+              ),
+            ),
+            SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (BuildContext context, int i) {
+                  buildCallback?.call();
+                  return SizedBox(
+                    key: ValueKey<int>(items[i]),
+                    height: itemHeight,
+                    child: Text('Section 1 - Tile ${items[i]}'),
+                  );
+                },
+                findChildIndexCallback: (Key key) {
+                  final ValueKey<int> valueKey = key as ValueKey<int>;
+                  final int index = items.indexOf(valueKey.value);
+                  return index == -1 ? null : index;
+                },
+                childCount: items.length,
+                estimateChildHeight: estimateChildHeight
               ),
             ),
           ],
