@@ -287,7 +287,6 @@ class _Slot {
   String toString() => describeIdentity(this);
 }
 
-
 class _RenderTest extends RenderBox with SlottedContainerRenderObjectMixin<_Slot> {
   String publicNameForSlot(_Slot slot) => debugNameForSlot(slot);
 }

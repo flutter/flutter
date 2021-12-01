@@ -5,16 +5,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
-/// Slots used for the children of [_Diagonal] and [_RenderDiagonal].
-enum _DiagonalSlot {
+/// Slots used for the children of [Diagonal] and [RenderDiagonal].
+enum DiagonalSlot {
   topLeft,
   bottomRight,
 }
 
 /// A widget that demonstrates the usage of [SlottedMultiChildRenderObjectWidgetMixin]
 /// by providing slots for two children that will be arranged diagonally.
-class _Diagonal extends RenderObjectWidget with SlottedMultiChildRenderObjectWidgetMixin<_DiagonalSlot> {
-  const _Diagonal({
+class Diagonal extends RenderObjectWidget with SlottedMultiChildRenderObjectWidgetMixin<DiagonalSlot> {
+  const Diagonal({
     Key? key,
     this.topLeft,
     this.bottomRight,
@@ -26,23 +26,30 @@ class _Diagonal extends RenderObjectWidget with SlottedMultiChildRenderObjectWid
   final Color? backgroundColor;
 
   @override
-  Iterable<_DiagonalSlot> get slots => _DiagonalSlot.values;
+  Iterable<DiagonalSlot> get slots => DiagonalSlot.values;
 
   @override
-  Widget? childForSlot(_DiagonalSlot slot) {
+  Widget? childForSlot(DiagonalSlot slot) {
     switch (slot) {
-      case _DiagonalSlot.topLeft:
+      case DiagonalSlot.topLeft:
         return topLeft;
-      case _DiagonalSlot.bottomRight:
+      case DiagonalSlot.bottomRight:
         return bottomRight;
     }
   }
 
+  // The [createRenderObject] and [updateRenderObject] methods configure the
+  // [RenderObject] backing this widget with the configuration of the widget.
+  // They do not need to do anything with the children of the widget, though.
+  // The children of the widget are automatically configured on the
+  // [RenderObject] by [SlottedRenderObjectElement.mount] and
+  // [SlottedRenderObjectElement.update].
+
   @override
-  SlottedContainerRenderObjectMixin<_DiagonalSlot> createRenderObject(
+  SlottedContainerRenderObjectMixin<DiagonalSlot> createRenderObject(
     BuildContext context,
   ) {
-    return _RenderDiagonal(
+    return RenderDiagonal(
       backgroundColor: backgroundColor,
     );
   }
@@ -50,17 +57,21 @@ class _Diagonal extends RenderObjectWidget with SlottedMultiChildRenderObjectWid
   @override
   void updateRenderObject(
     BuildContext context,
-    SlottedContainerRenderObjectMixin<_DiagonalSlot> renderObject,
+    SlottedContainerRenderObjectMixin<DiagonalSlot> renderObject,
   ) {
-    (renderObject as _RenderDiagonal).backgroundColor = backgroundColor;
+    (renderObject as RenderDiagonal).backgroundColor = backgroundColor;
   }
 }
 
 /// A render object that demonstrates the usage of [SlottedContainerRenderObjectMixin]
 /// by providing slots for two children that will be arranged diagonally.
-class _RenderDiagonal extends RenderBox with SlottedContainerRenderObjectMixin<_DiagonalSlot>, DebugOverflowIndicatorMixin {
-  _RenderDiagonal({Color? backgroundColor}) : _backgroundColor = backgroundColor;
+class RenderDiagonal extends RenderBox with SlottedContainerRenderObjectMixin<DiagonalSlot>, DebugOverflowIndicatorMixin {
+  RenderDiagonal({Color? backgroundColor}) : _backgroundColor = backgroundColor;
 
+  // Getters and setters to configure the [RenderObject] with the configuration
+  // of the [Widget]. These mostly contain boilerplate code, but depending on
+  // where the configuration value is used, the setter has to call
+  // [markNeedsLayout], [markNeedsPaint], or [markNeedsSemanticsUpdate].
   Color? get backgroundColor => _backgroundColor;
   Color? _backgroundColor;
   set backgroundColor(Color? value) {
@@ -73,11 +84,12 @@ class _RenderDiagonal extends RenderBox with SlottedContainerRenderObjectMixin<_
   }
 
   // Getters to simplify accessing the slotted children.
-  RenderBox? get _topLeft => childForSlot(_DiagonalSlot.topLeft);
-  RenderBox? get _bottomRight => childForSlot(_DiagonalSlot.bottomRight);
+  RenderBox? get _topLeft => childForSlot(DiagonalSlot.topLeft);
+  RenderBox? get _bottomRight => childForSlot(DiagonalSlot.bottomRight);
 
   // The size this render object would have if the incoming constraints were
-  // unconstrained; calculated during performLayout.
+  // unconstrained; calculated during performLayout used during paint for an
+  // assertion that checks for unintended overflow.
   late Size _childrenSize;
 
   // Returns children in hit test order.
@@ -100,25 +112,27 @@ class _RenderDiagonal extends RenderBox with SlottedContainerRenderObjectMixin<_
 
     // Lay out the top left child and position it at offset zero.
     Size topLeftSize = Size.zero;
-    if (_topLeft != null) {
-      _topLeft!.layout(childConstraints, parentUsesSize: true);
-      _positionChild(_topLeft!, Offset.zero);
-      topLeftSize = _topLeft!.size;
+    final RenderBox? topLeft = _topLeft;
+    if (topLeft != null) {
+      topLeft.layout(childConstraints, parentUsesSize: true);
+      _positionChild(topLeft, Offset.zero);
+      topLeftSize = topLeft.size;
     }
 
     // Lay out the bottom right child and position it at the bottom right corner
     // of the top left child.
     Size bottomRightSize = Size.zero;
-    if (_bottomRight != null) {
-      _bottomRight!.layout(childConstraints, parentUsesSize: true);
+    final RenderBox? bottomRight = _bottomRight;
+    if (bottomRight != null) {
+      bottomRight.layout(childConstraints, parentUsesSize: true);
       _positionChild(
-        _bottomRight!,
+        bottomRight,
         Offset(topLeftSize.width, topLeftSize.height),
       );
-      bottomRightSize = _bottomRight!.size;
+      bottomRightSize = bottomRight.size;
     }
 
-    // Calculate the overall size and constrains it to the given constraints.
+    // Calculate the overall size and constrain it to the given constraints.
     // Any overflow is marked (in debug mode) during paint.
     _childrenSize = Size(
       topLeftSize.width + bottomRightSize.width,
@@ -144,12 +158,19 @@ class _RenderDiagonal extends RenderBox with SlottedContainerRenderObjectMixin<_
       );
     }
 
-    // Paint the children at the offset calculated during layout.
-    if (_topLeft != null) {
-      _paintChild(_topLeft!, context, offset);
+    void paintChild(RenderBox child, PaintingContext context, Offset offset) {
+      final BoxParentData childParentData = child.parentData! as BoxParentData;
+      context.paintChild(child, childParentData.offset + offset);
     }
-    if (_bottomRight != null) {
-      _paintChild(_bottomRight!, context, offset);
+
+    // Paint the children at the offset calculated during layout.
+    final RenderBox? topLeft = _topLeft;
+    if (topLeft != null) {
+      paintChild(topLeft, context, offset);
+    }
+    final RenderBox? bottomRight = _bottomRight;
+    if (bottomRight != null) {
+      paintChild(bottomRight, context, offset);
     }
 
     // Paint an overflow indicator in debug mode if the children want to be
@@ -165,15 +186,7 @@ class _RenderDiagonal extends RenderBox with SlottedContainerRenderObjectMixin<_
     }());
   }
 
-  void _paintChild(RenderBox child, PaintingContext context, Offset offset) {
-    final BoxParentData childParentData = child.parentData! as BoxParentData;
-    context.paintChild(child, childParentData.offset + offset);
-  }
-
   // HIT TEST
-
-  @override
-  bool hitTestSelf(Offset position) => true;
 
   @override
   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
@@ -246,7 +259,7 @@ class ExampleWidget extends StatelessWidget {
       home: Scaffold(
         appBar: AppBar(title: const Text('Slotted RenderObject Example')),
         body: Center(
-          child: _Diagonal(
+          child: Diagonal(
             topLeft: Container(
               color: Colors.green,
               height: 100,

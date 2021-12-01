@@ -10,7 +10,7 @@ import 'framework.dart';
 /// A mixin for a [RenderObjectWidget] that configures a [RenderObject]
 /// subclass, which organizes its children in different slots.
 ///
-/// Implementors of this mixin have to provide the list of available slots by
+/// Implementers of this mixin have to provide the list of available slots by
 /// overriding [slots]. The list of slots must never change for a given class
 /// implementing this mixin. In the common case, [Enum] values are used as slots
 /// and [slots] is typically implemented to return the value of the enum's
@@ -48,7 +48,7 @@ mixin SlottedMultiChildRenderObjectWidgetMixin<S> on RenderObjectWidget {
   /// implementing this mixin.
   ///
   /// Typically, an [Enum] is used to identify the different slots. In that case
-  /// this getter can be implemented by returning what the `value` getter
+  /// this getter can be implemented by returning what the `values` getter
   /// of the enum used returns.
   @protected
   Iterable<S> get slots;
@@ -76,7 +76,7 @@ mixin SlottedMultiChildRenderObjectWidgetMixin<S> on RenderObjectWidget {
 /// The [RenderBox] child currently occupying a given slot can be obtained by
 /// calling [childForSlot].
 ///
-/// Implementors may consider overriding [children] to return the children
+/// Implementers may consider overriding [children] to return the children
 /// of this render object in a consistent order (e.g. hit test order).
 ///
 /// The type parameter `S` is the type for the slots to be used by this
