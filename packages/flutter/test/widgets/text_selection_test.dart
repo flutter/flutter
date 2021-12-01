@@ -667,6 +667,8 @@ void main() {
     );
     final FakeRenderEditable renderEditable = tester.renderObject(find.byType(FakeEditable));
 
+    expect(focusNode.hasFocus, isTrue);
+
     final TestGesture gesture = await tester.startGesture(
       const Offset(200.0, 200.0),
       kind: PointerDeviceKind.mouse,
@@ -677,6 +679,7 @@ void main() {
 
     await gesture.moveTo(const Offset(300.0, 200.0));
     await tester.pumpAndSettle();
+    expect(focusNode.hasFocus, isTrue);
     expect(renderEditable.selectPositionAtCalled, isTrue);
     expect(renderEditable.selectPositionAtFrom, const Offset(200.0, 200.0));
     expect(renderEditable.selectPositionAtTo, const Offset(300.0, 200.0));
@@ -691,11 +694,11 @@ void main() {
     await gesture.up();
     await tester.pumpAndSettle();
 
-    // This part of the gesture wasn't received because the field wasn't
-    // focused.
-    expect(renderEditable.selectPositionAtCalled, isFalse);
+    // Focus is false, but the field continues to receive the drag.
+    expect(focusNode.hasFocus, isFalse);
+    expect(renderEditable.selectPositionAtCalled, isTrue);
     expect(renderEditable.selectPositionAtFrom, const Offset(200.0, 200.0));
-    expect(renderEditable.selectPositionAtTo, const Offset(300.0, 200.0));
+    expect(renderEditable.selectPositionAtTo, const Offset(300.0, 400.0));
   });
 
   testWidgets('test TextSelectionGestureDetectorBuilder forcePress disabled', (WidgetTester tester) async {
