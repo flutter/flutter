@@ -6,6 +6,7 @@ import 'package:args/command_runner.dart';
 import 'package:file/file.dart' show File;
 
 import 'context.dart';
+import 'git.dart';
 import 'globals.dart';
 import 'proto/conductor_state.pb.dart' as pb;
 import 'proto/conductor_state.pbenum.dart';
@@ -152,13 +153,7 @@ class NextContext extends Context {
           }
         }
 
-        await engine.pushRef(
-            fromRef: 'HEAD',
-            // Explicitly create new branch
-            toRef: 'refs/heads/${state.engine.workingBranch}',
-            remote: state.engine.mirror.name,
-        );
-
+        await _pushWorkingBranch(engine, state.engine);
         break;
       case pb.ReleasePhase.CODESIGN_ENGINE_BINARIES:
         stdio.printStatus(<String>[
@@ -285,12 +280,7 @@ class NextContext extends Context {
           }
         }
 
-        await framework.pushRef(
-          fromRef: 'HEAD',
-          // Explicitly create new branch
-          toRef: 'refs/heads/${state.framework.workingBranch}',
-          remote: state.framework.mirror.name,
-        );
+        await _pushWorkingBranch(framework, state.framework);
         break;
       case pb.ReleasePhase.PUBLISH_VERSION:
         stdio.printStatus('Please ensure that you have merged your framework PR and that');
@@ -380,5 +370,37 @@ class NextContext extends Context {
     stdio.printStatus(state_import.phaseInstructions(state));
 
     updateState(state, stdio.logs);
+  }
+
+  /// Push the working branch to the user's mirror.
+  ///
+  /// [repository] represents the actual Git repository on disk, and is used to
+  /// call `git push`, while [pbRepository] represents the user-specified
+  /// configuration for the repository, and is used to read the name of the
+  /// working branch and the mirror's remote name.
+  ///
+  /// May throw either a [ConductorException] if the user already has a branch
+  /// of the same name on their mirror, or a [GitException] for any other
+  /// failures from the underlying git process call.
+  Future<void> _pushWorkingBranch(Repository repository, pb.Repository pbRepository) async {
+    try {
+      await repository.pushRef(
+          fromRef: 'HEAD',
+          // Explicitly create new branch
+          toRef: 'refs/heads/${pbRepository.workingBranch}',
+          remote: pbRepository.mirror.name,
+          force: force,
+      );
+    } on GitException catch (exception) {
+      if (exception.type == GitExceptionType.PushRejected && force == false) {
+        throw ConductorException(
+          'Push failed because the working branch named '
+          '${pbRepository.workingBranch} already exists on your mirror. '
+          'Re-run this command with --force to overwrite the remote branch.\n'
+          '${exception.message}',
+        );
+      }
+      rethrow;
+    }
   }
 }
