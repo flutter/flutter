@@ -491,7 +491,6 @@ void main() {
     Widget buildTable({String title = 'Name1'}) {
       return DataTable(
         sortColumnIndex: 0,
-        sortAscending: true,
         columns: <DataColumn>[
           DataColumn(
             label: Text(title),
