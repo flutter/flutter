@@ -30,7 +30,7 @@ void main() {
     );
 
     expect(
-      tester.getSize(find.byWidgetPredicate((Widget w) => w.runtimeType.toString() == '_Diagonal')),
+      tester.getSize(find.byType(example.Diagonal)),
       const Size(200 + 30, 100 + 60),
     );
   });
