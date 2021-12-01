@@ -1863,6 +1863,56 @@ targets:
     timeout: 60
     scheduler: luci
 
+  - name: Linux_android opacity_peephole_one_rect_perf__e2e_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux"]
+      task_name: opacity_peephole_one_rect_perf__e2e_summary
+    scheduler: luci
+
+  - name: Linux_android opacity_peephole_col_of_rows_perf__e2e_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux"]
+      task_name: opacity_peephole_col_of_rows_perf__e2e_summary
+    scheduler: luci
+
+  - name: Linux_android opacity_peephole_opacity_of_grid_perf__e2e_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux"]
+      task_name: opacity_peephole_opacity_of_grid_perf__e2e_summary
+    scheduler: luci
+
+  - name: Linux_android opacity_peephole_grid_of_opacity_perf__e2e_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux"]
+      task_name: opacity_peephole_grid_of_opacity_perf__e2e_summary
+    scheduler: luci
+
+  - name: Linux_android opacity_peephole_fade_transition_text_perf__e2e_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux"]
+      task_name: opacity_peephole_fade_transition_text_perf__e2e_summary
+    scheduler: luci
+
   - name: Mac build_aar_module_test
     recipe: devicelab/devicelab_drone
     timeout: 60
