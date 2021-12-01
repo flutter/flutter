@@ -455,7 +455,7 @@ public class FlutterView extends FrameLayout implements MouseCursorPlugin.MouseC
     try {
       return new WindowInfoRepositoryCallbackAdapterWrapper(
           new WindowInfoTrackerCallbackAdapter(
-              WindowInfoTracker.getOrCreate((Activity) getContext())));
+              WindowInfoTracker.Companion.getOrCreate((Activity) getContext())));
     } catch (NoClassDefFoundError noClassDefFoundError) {
       // Testing environment uses gn/javac, which does not work with aar files. This is why aar
       // are converted to jar files, losing resources and other android-specific files.
