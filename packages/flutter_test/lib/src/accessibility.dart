@@ -95,6 +95,9 @@ class MinimumTapTargetGuideline extends AccessibilityGuideline {
         && !data.hasAction(ui.SemanticsAction.tap))
         || data.hasFlag(ui.SemanticsFlag.isHidden))
         return result;
+      // Skip links https://www.w3.org/WAI/WCAG21/Understanding/target-size.html
+      if (data.hasFlag(ui.SemanticsFlag.isLink))
+        return result;
       Rect paintBounds = node.rect;
       SemanticsNode? current = node;
       while (current != null) {

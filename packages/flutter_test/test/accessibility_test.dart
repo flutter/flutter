@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -516,6 +517,35 @@ void main() {
 
       final Evaluation overlappingRightResult = await androidTapTargetGuideline.evaluate(tester);
       expect(overlappingRightResult.passed, true);
+      handle.dispose();
+    });
+
+    testWidgets('Does not fail on links', (WidgetTester tester) async {
+      Widget textWithLink() {
+        return Builder(
+          builder: (BuildContext context) {
+            return RichText(
+              text: TextSpan(
+                children: <InlineSpan>[
+                  const TextSpan(
+                    text: 'See examples at ',
+                  ),
+                  TextSpan(
+                    text: 'flutter repo',
+                    recognizer: TapGestureRecognizer()
+                      ..onTap = () { },
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      }
+
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(_boilerplate(textWithLink()));
+
+      await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
       handle.dispose();
     });
   });
