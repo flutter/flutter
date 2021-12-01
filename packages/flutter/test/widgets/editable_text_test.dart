@@ -5054,7 +5054,7 @@ void main() {
   testWidgets(
     'keyboard shortcuts respect read-only',
     (WidgetTester tester) async {
-      final String platform = describeEnum(defaultTargetPlatform).toLowerCase();
+      final String platform = defaultTargetPlatform.name.toLowerCase();
       final TextEditingController controller = TextEditingController(text: testText);
       controller.selection = const TextSelection(
         baseOffset: 0,
