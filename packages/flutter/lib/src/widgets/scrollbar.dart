@@ -1130,7 +1130,8 @@ class RawScrollbar extends StatefulWidget {
   /// match native behavior. On Android, the scrollbar is not interactive by
   /// default.
   ///
-  /// When false, the scrollbar will not respond to gesture or hover events.
+  /// When false, the scrollbar will not respond to gesture or hover events,
+  /// and will allow to click through it.
   ///
   /// Defaults to true when null, unless on Android, which will default to false
   /// when null.
@@ -1201,6 +1202,9 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
 
   /// Overridable getter to indicate is gestures should be enabled on the
   /// scrollbar.
+  ///
+  /// When false, the scrollbar will not respond to gesture or hover events,
+  /// and will allow to click through it.
   ///
   /// Subclasses can override this getter to make its value depend on an inherited
   /// theme.
