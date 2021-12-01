@@ -14,7 +14,7 @@ const String kForceFlag = 'force';
 
 const List<String> kBaseReleaseChannels = <String>['stable', 'beta', 'dev'];
 
-List<String> kReleaseChannels = List<String>.from(kBaseReleaseChannels)..add(FrameworkRepository.defaultBranch);
+const List<String> kReleaseChannels = <String>[...kBaseReleaseChannels, FrameworkRepository.defaultBranch];
 
 const List<String> KReleaseIncrements = <String>['y', 'z', 'm', 'n'];
 
