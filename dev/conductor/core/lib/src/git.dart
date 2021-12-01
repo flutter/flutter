@@ -100,6 +100,10 @@ enum GitExceptionType {
   PushRejected,
 }
 
+/// An exception created because a git subprocess failed.
+///
+/// Known git failures will be assigned a [GitExceptionType] in the [type]
+/// field. If this field is null it means and unknown git failure.
 class GitException implements Exception {
   GitException(this.message, this.args) {
     if (_pushRejectedPattern.hasMatch(message)) {
