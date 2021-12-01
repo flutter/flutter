@@ -29,7 +29,7 @@ class CupertinoIconThemeData extends IconThemeData with Diagnosticable {
   /// Creates a copy of this icon theme but with the given fields replaced with
   /// the new values.
   @override
-  CupertinoIconThemeData copyWith({ Color? color, double? opacity, double? size }) {
+  CupertinoIconThemeData copyWith({ Color? color, double? opacity, double? size, double? splashRadius }) {
     return CupertinoIconThemeData(
       color: color ?? this.color,
       opacity: opacity ?? this.opacity,
