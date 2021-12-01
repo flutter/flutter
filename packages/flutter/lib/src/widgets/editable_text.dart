@@ -2340,6 +2340,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
     widget.controller.selection = selection;
 
+    if (!_hasFocus) {
+      widget.focusNode.requestFocus();
+    }
     if (widget.selectionControls == null) {
       _selectionOverlay?.dispose();
       _selectionOverlay = null;
