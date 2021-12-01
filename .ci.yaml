@@ -1865,7 +1865,7 @@ targets:
 
   - name: Linux_android opacity_peephole_one_rect_perf__e2e_summary
     recipe: devicelab/devicelab_drone
-    presubmit: true
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -1875,7 +1875,7 @@ targets:
 
   - name: Linux_android opacity_peephole_col_of_rows_perf__e2e_summary
     recipe: devicelab/devicelab_drone
-    presubmit: true
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -1885,7 +1885,7 @@ targets:
 
   - name: Linux_android opacity_peephole_opacity_of_grid_perf__e2e_summary
     recipe: devicelab/devicelab_drone
-    presubmit: true
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -1895,7 +1895,7 @@ targets:
 
   - name: Linux_android opacity_peephole_grid_of_opacity_perf__e2e_summary
     recipe: devicelab/devicelab_drone
-    presubmit: true
+    presubmit: false
     timeout: 60
     properties:
       tags: >
