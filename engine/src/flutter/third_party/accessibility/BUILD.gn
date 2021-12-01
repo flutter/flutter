@@ -81,6 +81,7 @@ if (enable_unittests) {
           "ax/platform/ax_platform_node_win_unittest.cc",
           "base/win/dispatch_stub.cc",
           "base/win/dispatch_stub.h",
+          "base/win/display_unittest.cc",
           "base/win/scoped_bstr_unittest.cc",
           "base/win/scoped_safearray_unittest.cc",
           "base/win/scoped_variant_unittest.cc",

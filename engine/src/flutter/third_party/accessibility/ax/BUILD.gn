@@ -99,6 +99,7 @@ source_set("ax") {
     ]
     libs = [
       "oleacc.lib",
+      "shcore.lib",
       "uiautomationcore.lib",
     ]
   }

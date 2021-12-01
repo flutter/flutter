@@ -2390,6 +2390,9 @@ ORIGIN: ../../../flutter/third_party/accessibility/base/win/atl_module.h + ../..
 TYPE: LicenseType.bsd
 FILE: ../../../flutter/third_party/accessibility/base/auto_reset.h
 FILE: ../../../flutter/third_party/accessibility/base/win/atl_module.h
+FILE: ../../../flutter/third_party/accessibility/base/win/display.cc
+FILE: ../../../flutter/third_party/accessibility/base/win/display.h
+FILE: ../../../flutter/third_party/accessibility/base/win/display_unittest.cc
 FILE: ../../../flutter/third_party/accessibility/base/win/enum_variant.cc
 FILE: ../../../flutter/third_party/accessibility/base/win/enum_variant.h
 FILE: ../../../flutter/third_party/accessibility/base/win/enum_variant_unittest.cc
