@@ -1366,7 +1366,7 @@ void main() {
     ProcessManager: () => fakeProcessManager,
   });
 
-  testUsingContext('display name is Title Case for objc iOS project.', () async {
+  testUsingContext('Correct info.plist key-value pairs for objc iOS project.', () async {
     Cache.flutterRoot = '../..';
 
     final CreateCommand command = CreateCommand();
@@ -1377,11 +1377,13 @@ void main() {
     final String plistPath = globals.fs.path.join('ios', 'Runner', 'Info.plist');
     final File plistFile = globals.fs.file(globals.fs.path.join(projectDir.path, plistPath));
     expect(plistFile, exists);
+    final bool disabled = _getBooleanValueFromPlist(plistFile: plistFile, key: 'CADisableMinimumFrameDurationOnPhone');
+    expect(disabled, isTrue);
     final String displayName = _getStringValueFromPlist(plistFile: plistFile, key: 'CFBundleDisplayName');
     expect(displayName, 'My Project');
   });
 
-  testUsingContext('display name is Title Case for swift iOS project.', () async {
+  testUsingContext('Correct info.plist key-value pairs for objc swift project.', () async {
     Cache.flutterRoot = '../..';
 
     final CreateCommand command = CreateCommand();
@@ -1392,11 +1394,13 @@ void main() {
     final String plistPath = globals.fs.path.join('ios', 'Runner', 'Info.plist');
     final File plistFile = globals.fs.file(globals.fs.path.join(projectDir.path, plistPath));
     expect(plistFile, exists);
+    final bool disabled = _getBooleanValueFromPlist(plistFile: plistFile, key: 'CADisableMinimumFrameDurationOnPhone');
+    expect(disabled, isTrue);
     final String displayName = _getStringValueFromPlist(plistFile: plistFile, key: 'CFBundleDisplayName');
     expect(displayName, 'My Project');
   });
 
-  testUsingContext('display name is Title Case for objc iOS module.', () async {
+  testUsingContext('Correct info.plist key-value pairs for objc iOS module.', () async {
     Cache.flutterRoot = '../..';
 
     final CreateCommand command = CreateCommand();
@@ -1407,6 +1411,8 @@ void main() {
     final String plistPath = globals.fs.path.join('.ios', 'Runner', 'Info.plist');
     final File plistFile = globals.fs.file(globals.fs.path.join(projectDir.path, plistPath));
     expect(plistFile, exists);
+    final bool disabled = _getBooleanValueFromPlist(plistFile: plistFile, key: 'CADisableMinimumFrameDurationOnPhone');
+    expect(disabled, isTrue);
     final String displayName = _getStringValueFromPlist(plistFile: plistFile, key: 'CFBundleDisplayName');
     expect(displayName, 'My Project');
   }, overrides: <Type, Generator>{
@@ -1420,7 +1426,7 @@ void main() {
     ),
   });
 
-  testUsingContext('display name is Title Case for swift iOS module.', () async {
+  testUsingContext('Correct info.plist key-value pairs for swift iOS module.', () async {
     Cache.flutterRoot = '../..';
 
     final CreateCommand command = CreateCommand();
@@ -1431,6 +1437,8 @@ void main() {
     final String plistPath = globals.fs.path.join('.ios', 'Runner', 'Info.plist');
     final File plistFile = globals.fs.file(globals.fs.path.join(projectDir.path, plistPath));
     expect(plistFile, exists);
+    final bool disabled = _getBooleanValueFromPlist(plistFile: plistFile, key: 'CADisableMinimumFrameDurationOnPhone');
+    expect(disabled, isTrue);
     final String displayName = _getStringValueFromPlist(plistFile: plistFile, key: 'CFBundleDisplayName');
     expect(displayName, 'My Project');
   }, overrides: <Type, Generator>{
@@ -1444,7 +1452,7 @@ void main() {
     ),
   });
 
-  testUsingContext('display name is Title Case for swift iOS plugin.', () async {
+  testUsingContext('Correct info.plist key-value pairs for swift iOS plugin.', () async {
     Cache.flutterRoot = '../..';
 
     final CreateCommand command = CreateCommand();
@@ -1455,11 +1463,13 @@ void main() {
     final String plistPath = globals.fs.path.join('example', 'ios', 'Runner', 'Info.plist');
     final File plistFile = globals.fs.file(globals.fs.path.join(projectDir.path, plistPath));
     expect(plistFile, exists);
+    final bool disabled = _getBooleanValueFromPlist(plistFile: plistFile, key: 'CADisableMinimumFrameDurationOnPhone');
+    expect(disabled, isTrue);
     final String displayName = _getStringValueFromPlist(plistFile: plistFile, key: 'CFBundleDisplayName');
     expect(displayName, 'My Project');
   });
 
-  testUsingContext('display name is Title Case for objc iOS plugin.', () async {
+  testUsingContext('Correct info.plist key-value pairs for objc iOS plugin.', () async {
     Cache.flutterRoot = '../..';
 
     final CreateCommand command = CreateCommand();
@@ -1470,9 +1480,12 @@ void main() {
     final String plistPath = globals.fs.path.join('example', 'ios', 'Runner', 'Info.plist');
     final File plistFile = globals.fs.file(globals.fs.path.join(projectDir.path, plistPath));
     expect(plistFile, exists);
+    final bool disabled = _getBooleanValueFromPlist(plistFile: plistFile, key: 'CADisableMinimumFrameDurationOnPhone');
+    expect(disabled, isTrue);
     final String displayName = _getStringValueFromPlist(plistFile: plistFile, key: 'CFBundleDisplayName');
     expect(displayName, 'My Project');
   });
+
 
   testUsingContext('has correct content and formatting with macOS app template', () async {
     Cache.flutterRoot = '../..';
@@ -3095,4 +3108,11 @@ String _getStringValueFromPlist({File plistFile, String key}) {
   final int keyIndex = plist.indexOf('<key>$key</key>');
   assert(keyIndex > 0);
   return plist[keyIndex+1].replaceAll('<string>', '').replaceAll('</string>', '');
+}
+
+bool _getBooleanValueFromPlist({File plistFile, String key}) {
+  final List<String> plist = plistFile.readAsLinesSync().map((String line) => line.trim()).toList();
+  final int keyIndex = plist.indexOf('<key>$key</key>');
+  assert(keyIndex > 0);
+  return plist[keyIndex+1].replaceAll('<', '').replaceAll('/>', '') == 'true';
 }
