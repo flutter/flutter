@@ -586,11 +586,7 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
   }
 
   @override
-  bool get wantKeepAlive {
-    // When the SelectableText has a selection, it will be kept alive to avoid
-    // losing the selection.
-    return _lastSeenTextSelection != null;
-  }
+  bool get wantKeepAlive => _effectiveFocusNode.hasFocus;
 
   @override
   Widget build(BuildContext context) {

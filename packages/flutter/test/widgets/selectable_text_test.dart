@@ -4870,7 +4870,7 @@ void main() {
     );
   });
 
-  testWidgets('keeps alive when has selection', (WidgetTester tester) async {
+  testWidgets('keeps alive when has focus', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: DefaultTabController(
