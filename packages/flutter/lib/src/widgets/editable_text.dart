@@ -2207,16 +2207,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _textInputConnection = _needsAutofill && currentAutofillScope != null
         ? currentAutofillScope!.attach(this, _effectiveAutofillClient.textInputConfiguration)
         : TextInput.attach(this, _effectiveAutofillClient.textInputConfiguration);
-      _textInputConnection!.show();
       _updateSizeAndTransform();
       _updateComposingRectIfNeeded();
       _updateCaretRectIfNeeded();
-      if (_needsAutofill) {
-        // Request autofill AFTER the size and the transform have been sent to
-        // the platform text input plugin.
-        _textInputConnection!.requestAutofill();
-      }
-
       final TextStyle style = widget.style;
       _textInputConnection!
         ..setStyle(
@@ -2226,8 +2219,14 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           textDirection: _textDirection,
           textAlign: widget.textAlign,
         )
-        ..setEditingState(localValue);
-        _lastKnownRemoteTextEditingValue = localValue;
+        ..setEditingState(localValue)
+        ..show();
+      if (_needsAutofill) {
+        // Request autofill AFTER the size and the transform have been sent to
+        // the platform text input plugin.
+        _textInputConnection!.requestAutofill();
+      }
+      _lastKnownRemoteTextEditingValue = localValue;
     } else {
       _textInputConnection!.show();
     }
@@ -3639,6 +3638,7 @@ class _UpdateTextSelectionAction<T extends DirectionalCaretMovementIntent> exten
         UpdateSelectionIntent(state._value, _collapse(textBoundarySelection), SelectionChangedCause.keyboard),
       );
     }
+
     final TextPosition extent = textBoundarySelection.extent;
     final TextPosition newExtent = intent.forward
       ? textBoundary.getTrailingTextBoundaryAt(extent)
@@ -3647,6 +3647,20 @@ class _UpdateTextSelectionAction<T extends DirectionalCaretMovementIntent> exten
     final TextSelection newSelection = collapseSelection
       ? TextSelection.fromPosition(newExtent)
       : textBoundarySelection.extendTo(newExtent);
+
+    // If collapseAtReversal is true and would have an effect, collapse it.
+    if (!selection.isCollapsed && intent.collapseAtReversal
+        && (selection.baseOffset < selection.extentOffset !=
+        newSelection.baseOffset < newSelection.extentOffset)) {
+      return Actions.invoke(
+        context!,
+        UpdateSelectionIntent(
+          state._value,
+          TextSelection.fromPosition(selection.base),
+          SelectionChangedCause.keyboard,
+        ),
+      );
+    }
 
     return Actions.invoke(
       context!,

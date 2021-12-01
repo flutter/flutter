@@ -53,8 +53,7 @@ class StartCommand extends Command<void> {
     argParser.addOption(
       kFrameworkUpstreamOption,
       defaultsTo: FrameworkRepository.defaultUpstream,
-      help:
-          'Configurable Framework repo upstream remote. Primarily for testing.',
+      help: 'Configurable Framework repo upstream remote. Primarily for testing.',
       hide: true,
     );
     argParser.addOption(
@@ -233,12 +232,34 @@ class StartContext extends Context {
     required Checkouts checkouts,
     required File stateFile,
     this.force = false,
-  }) :
-    git = Git(processManager),
-    super(
-      checkouts: checkouts,
-      stateFile: stateFile,
-    );
+  }) : git = Git(processManager),
+  engine = EngineRepository(
+    checkouts,
+    initialRef: candidateBranch,
+    upstreamRemote: Remote(
+      name: RemoteName.upstream,
+      url: engineUpstream,
+    ),
+    mirrorRemote: Remote(
+      name: RemoteName.mirror,
+      url: engineMirror,
+    ),
+  ), framework = FrameworkRepository(
+    checkouts,
+    initialRef: candidateBranch,
+    upstreamRemote: Remote(
+      name: RemoteName.upstream,
+      url: frameworkUpstream,
+    ),
+    mirrorRemote: Remote(
+      name: RemoteName.mirror,
+      url: frameworkMirror,
+    ),
+  ),
+  super(
+    checkouts: checkouts,
+    stateFile: stateFile,
+  );
 
   final String candidateBranch;
   final String? dartRevision;
@@ -257,10 +278,12 @@ class StartContext extends Context {
   /// If validations should be overridden.
   final bool force;
 
+  final EngineRepository engine;
+  final FrameworkRepository framework;
+
   Future<void> run() async {
     if (stateFile.existsSync()) {
-      throw ConductorException(
-          'Error! A persistent state file already found at ${stateFile.path}.\n\n'
+      throw ConductorException('Error! A persistent state file already found at ${stateFile.path}.\n\n'
           'Run `conductor clean` to cancel a previous release.');
     }
     if (!releaseCandidateBranchRegex.hasMatch(candidateBranch)) {
@@ -277,19 +300,6 @@ class StartContext extends Context {
     state.createdDate = unixDate;
     state.lastUpdatedDate = unixDate;
     state.incrementLevel = incrementLetter;
-
-    final EngineRepository engine = EngineRepository(
-      checkouts,
-      initialRef: candidateBranch,
-      upstreamRemote: Remote(
-        name: RemoteName.upstream,
-        url: engineUpstream,
-      ),
-      mirrorRemote: Remote(
-        name: RemoteName.mirror,
-        url: engineMirror,
-      ),
-    );
 
     // Create a new branch so that we don't accidentally push to upstream
     // candidateBranch.
@@ -335,18 +345,7 @@ class StartContext extends Context {
       upstream: pb.Remote(name: 'upstream', url: engine.upstreamRemote.url),
       mirror: pb.Remote(name: 'mirror', url: engine.mirrorRemote!.url),
     );
-    final FrameworkRepository framework = FrameworkRepository(
-      checkouts,
-      initialRef: candidateBranch,
-      upstreamRemote: Remote(
-        name: RemoteName.upstream,
-        url: frameworkUpstream,
-      ),
-      mirrorRemote: Remote(
-        name: RemoteName.mirror,
-        url: frameworkMirror,
-      ),
-    );
+
     await framework.newBranch(workingBranchName);
     final List<pb.Cherrypick> frameworkCherrypicks = (await _sortCherrypicks(
       repository: framework,
@@ -374,8 +373,9 @@ class StartContext extends Context {
 
     // Get framework version
     final Version lastVersion = Version.fromString(await framework.getFullTag(
-        framework.upstreamRemote.name, candidateBranch,
-        exact: false,
+      framework.upstreamRemote.name,
+      candidateBranch,
+      exact: false,
     ));
     // [force] means we know this would fail but need to publish anyway
     if (!force) {
@@ -421,10 +421,10 @@ class StartContext extends Context {
       }
       // This is the first stable release, so hardcode the z as 0
       return Version(
-          x: lastVersion.x,
-          y: lastVersion.y,
-          z: 0,
-          type: VersionType.stable,
+        x: lastVersion.x,
+        y: lastVersion.y,
+        z: 0,
+        type: VersionType.stable,
       );
     }
     return Version.increment(lastVersion, incrementLetter);
@@ -447,7 +447,7 @@ class StartContext extends Context {
       candidateBranch,
       FrameworkRepository.defaultBranch,
     );
-    final bool response = prompt(
+    final bool response = await prompt(
       'About to tag the release candidate branch branchpoint of $branchPoint '
       'as $requestedVersion and push it to ${framework.upstreamRemote.url}. '
       'Is this correct?',

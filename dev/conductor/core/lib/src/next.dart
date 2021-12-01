@@ -141,7 +141,7 @@ class NextContext extends Context {
               '${state.engine.checkoutPath} before proceeding.\n');
         }
         if (autoAccept == false) {
-          final bool response = prompt(
+          final bool response = await prompt(
             'Are you ready to push your engine branch to the repository '
             '${state.engine.mirror.url}?',
           );
@@ -167,7 +167,7 @@ class NextContext extends Context {
         ].join('\n'));
         if (autoAccept == false) {
           // TODO(fujino): actually test if binaries have been codesigned on macOS
-          final bool response = prompt(
+          final bool response = await prompt(
             'Has CI passed for the engine PR and binaries been codesigned?',
           );
           if (!response) {
@@ -274,7 +274,7 @@ class NextContext extends Context {
         }
 
         if (autoAccept == false) {
-          final bool response = prompt(
+          final bool response = await prompt(
             'Are you ready to push your framework branch to the repository '
             '${state.framework.mirror.url}?',
           );
@@ -308,7 +308,7 @@ class NextContext extends Context {
         );
         final String headRevision = await framework.reverseParse('HEAD');
         if (autoAccept == false) {
-          final bool response = prompt(
+          final bool response = await prompt(
             'Are you ready to tag commit $headRevision as ${state.releaseVersion}\n'
             'and push to remote ${state.framework.upstream.url}?',
           );
@@ -343,7 +343,7 @@ class NextContext extends Context {
               dryRun: true,
           );
 
-          final bool response = prompt('Are you ready to publish this release?');
+          final bool response = await prompt('Are you ready to publish this release?');
           if (!response) {
             stdio.printError('Aborting command.');
             updateState(state, stdio.logs);
@@ -363,7 +363,7 @@ class NextContext extends Context {
             '\t$kLuciPackagingConsoleLink',
         );
         if (autoAccept == false) {
-          final bool response = prompt('Have all packaging builds finished successfully?');
+          final bool response = await prompt('Have all packaging builds finished successfully?');
           if (!response) {
             stdio.printError('Aborting command.');
             updateState(state, stdio.logs);

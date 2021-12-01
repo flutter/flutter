@@ -62,8 +62,12 @@ class DeleteToLineBreakIntent extends DirectionalTextEditingIntent {
 /// new location.
 abstract class DirectionalCaretMovementIntent extends DirectionalTextEditingIntent {
   /// Creates a [DirectionalCaretMovementIntent].
-  const DirectionalCaretMovementIntent(bool forward, this.collapseSelection)
-    : super(forward);
+  const DirectionalCaretMovementIntent(
+    bool forward,
+    this.collapseSelection,
+    [this.collapseAtReversal = false]
+  ) : assert(!collapseSelection || !collapseAtReversal),
+      super(forward);
 
   /// Whether this [Intent] should make the selection collapsed (so it becomes a
   /// caret), after the movement.
@@ -76,6 +80,16 @@ abstract class DirectionalCaretMovementIntent extends DirectionalTextEditingInte
   /// both the [TextSelection.base] and the [TextSelection.extent] to the new
   /// location.
   final bool collapseSelection;
+
+  /// Whether to collapse the selection when it would otherwise reverse order.
+  ///
+  /// For example, consider when forward is true and the extent is before the
+  /// base. If collapseAtReversal is true, then this will cause the selection to
+  /// collapse at the base. If it's false, then the extent will be placed at the
+  /// linebreak, reversing the order of base and offset.
+  ///
+  /// Cannot be true when collapseSelection is true.
+  final bool collapseAtReversal;
 }
 
 /// Expands, or moves the current selection from the current
@@ -126,7 +140,9 @@ class ExtendSelectionToLineBreakIntent extends DirectionalCaretMovementIntent {
   const ExtendSelectionToLineBreakIntent({
     required bool forward,
     required bool collapseSelection,
-  }) : super(forward, collapseSelection);
+    bool collapseAtReversal = false,
+  }) : assert(!collapseSelection || !collapseAtReversal),
+       super(forward, collapseSelection, collapseAtReversal);
 }
 
 /// Expands, or moves the current selection from the current
