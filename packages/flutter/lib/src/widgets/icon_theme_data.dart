@@ -87,7 +87,7 @@ class IconThemeData with Diagnosticable {
   double? get opacity => _opacity?.clamp(0.0, 1.0);
   final double? _opacity;
 
-  /// The default size for icons.
+  /// The default splash radius for [IconButton]s.
   final double? size;
 
   /// The default splash radius for icons.
