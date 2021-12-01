@@ -16,12 +16,11 @@ PipelineLibraryMTL::PipelineLibraryMTL(id<MTLDevice> device)
 
 PipelineLibraryMTL::~PipelineLibraryMTL() = default;
 
-// TODO(csg): Make PipelineDescriptor a struct and move this to formats_mtl.
 static MTLRenderPipelineDescriptor* GetMTLRenderPipelineDescriptor(
     const PipelineDescriptor& desc) {
   auto descriptor = [[MTLRenderPipelineDescriptor alloc] init];
   descriptor.label = @(desc.GetLabel().c_str());
-  descriptor.sampleCount = desc.GetSampleCount();
+  descriptor.sampleCount = static_cast<NSUInteger>(desc.GetSampleCount());
 
   for (const auto& entry : desc.GetStageEntrypoints()) {
     if (entry.first == ShaderStage::kVertex) {
@@ -52,8 +51,6 @@ static MTLRenderPipelineDescriptor* GetMTLRenderPipelineDescriptor(
       ToMTLPixelFormat(desc.GetDepthPixelFormat());
   descriptor.stencilAttachmentPixelFormat =
       ToMTLPixelFormat(desc.GetStencilPixelFormat());
-
-  descriptor.sampleCount = 4u;
 
   return descriptor;
 }

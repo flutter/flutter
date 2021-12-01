@@ -32,9 +32,9 @@ class PipelineDescriptor final : public Comparable<PipelineDescriptor> {
 
   const std::string& GetLabel() const;
 
-  PipelineDescriptor& SetSampleCount(size_t samples);
+  PipelineDescriptor& SetSampleCount(SampleCount samples);
 
-  size_t GetSampleCount() const { return sample_count_; }
+  SampleCount GetSampleCount() const { return sample_count_; }
 
   PipelineDescriptor& AddStageEntrypoint(
       std::shared_ptr<const ShaderFunction> function);
@@ -97,7 +97,7 @@ class PipelineDescriptor final : public Comparable<PipelineDescriptor> {
 
  private:
   std::string label_;
-  size_t sample_count_ = 1;
+  SampleCount sample_count_ = SampleCount::kCount1;
   std::map<ShaderStage, std::shared_ptr<const ShaderFunction>> entrypoints_;
   std::map<size_t /* index */, ColorAttachmentDescriptor>
       color_attachment_descriptors_;
