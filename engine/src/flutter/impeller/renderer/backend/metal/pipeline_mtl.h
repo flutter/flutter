@@ -30,7 +30,8 @@ class PipelineMTL final : public Pipeline,
   id<MTLDepthStencilState> depth_stencil_state_;
   bool is_valid_ = false;
 
-  PipelineMTL(PipelineDescriptor desc,
+  PipelineMTL(std::weak_ptr<PipelineLibrary> library,
+              PipelineDescriptor desc,
               id<MTLRenderPipelineState> state,
               id<MTLDepthStencilState> depth_stencil_state);
 

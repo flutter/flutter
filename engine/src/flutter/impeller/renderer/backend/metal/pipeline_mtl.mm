@@ -6,10 +6,11 @@
 
 namespace impeller {
 
-PipelineMTL::PipelineMTL(PipelineDescriptor desc,
+PipelineMTL::PipelineMTL(std::weak_ptr<PipelineLibrary> library,
+                         PipelineDescriptor desc,
                          id<MTLRenderPipelineState> state,
                          id<MTLDepthStencilState> depth_stencil_state)
-    : Pipeline(std::move(desc)),
+    : Pipeline(std::move(library), std::move(desc)),
       pipeline_state_(state),
       depth_stencil_state_(depth_stencil_state) {
   if (!pipeline_state_) {
