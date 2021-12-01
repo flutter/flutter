@@ -61,7 +61,7 @@ PipelineDescriptor& PipelineDescriptor::SetLabel(std::string label) {
   return *this;
 }
 
-PipelineDescriptor& PipelineDescriptor::SetSampleCount(size_t samples) {
+PipelineDescriptor& PipelineDescriptor::SetSampleCount(SampleCount samples) {
   sample_count_ = samples;
   return *this;
 }

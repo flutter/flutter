@@ -101,6 +101,13 @@ void RenderTarget::IterateAllAttachments(
   }
 }
 
+SampleCount RenderTarget::GetSampleCount() const {
+  if (auto found = colors_.find(0u); found != colors_.end()) {
+    return found->second.texture->GetTextureDescriptor().sample_count;
+  }
+  return SampleCount::kCount1;
+}
+
 bool RenderTarget::HasColorAttachment(size_t index) const {
   if (auto found = colors_.find(index); found != colors_.end()) {
     return true;
