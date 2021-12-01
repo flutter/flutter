@@ -3600,6 +3600,12 @@ class PhysicalKeyboardKey extends KeyboardKey {
   /// See the function [RawKeyEvent.physicalKey] for more information.
   static const PhysicalKeyboardKey privacyScreenToggle = PhysicalKeyboardKey(0x00000017);
 
+  /// Represents the location of the "Microphone Mute Toggle" key on a
+  /// generalized keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey microphoneMuteToggle = PhysicalKeyboardKey(0x00000018);
+
   /// Represents the location of the "Sleep" key on a generalized keyboard.
   ///
   /// See the function [RawKeyEvent.physicalKey] for more information.
@@ -5031,6 +5037,7 @@ class PhysicalKeyboardKey extends KeyboardKey {
     0x00000015: resume,
     0x00000016: turbo,
     0x00000017: privacyScreenToggle,
+    0x00000018: microphoneMuteToggle,
     0x00010082: sleep,
     0x00010083: wakeUp,
     0x000100b5: displayToggleIntExt,
@@ -5304,6 +5311,7 @@ class PhysicalKeyboardKey extends KeyboardKey {
       0x00000015: 'Resume',
       0x00000016: 'Turbo',
       0x00000017: 'Privacy Screen Toggle',
+      0x00000018: 'Microphone Mute Toggle',
       0x00010082: 'Sleep',
       0x00010083: 'Wake Up',
       0x000100b5: 'Display Toggle Int Ext',
