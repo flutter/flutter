@@ -486,6 +486,55 @@ void main() {
     );
   });
 
+  testWidgets('DataTable sort indicator orientation - does not change on state update', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/43724
+    Widget buildTable({String title = 'Name1'}) {
+      return DataTable(
+        sortColumnIndex: 0,
+        sortAscending: true,
+        columns: <DataColumn>[
+          DataColumn(
+            label: Text(title),
+            tooltip: 'Name',
+            onSort: (int columnIndex, bool ascending) {},
+          ),
+        ],
+        rows: kDesserts.map<DataRow>((Dessert dessert) {
+          return DataRow(
+            cells: <DataCell>[
+              DataCell(
+                Text(dessert.name),
+              ),
+            ],
+          );
+        }).toList(),
+      );
+    }
+
+    // Check for ascending list
+    await tester.pumpWidget(MaterialApp(
+      home: Material(child: buildTable()),
+    ));
+    // The `tester.widget` ensures that there is exactly one upward arrow.
+    Transform transformOfArrow = tester.widget<Transform>(find.widgetWithIcon(Transform, Icons.arrow_upward));
+    expect(
+      transformOfArrow.transform.getRotation(),
+      equals(Matrix3.identity()),
+    );
+
+    // Cause a rebuild by updating the widget
+    await tester.pumpWidget(MaterialApp(
+      home: Material(child: buildTable(title: 'Name2')),
+    ));
+    await tester.pumpAndSettle();
+    // The `tester.widget` ensures that there is exactly one upward arrow.
+    transformOfArrow = tester.widget<Transform>(find.widgetWithIcon(Transform, Icons.arrow_upward));
+    expect(
+      transformOfArrow.transform.getRotation(),
+      equals(Matrix3.identity()), // Should not have changed
+    );
+  });
+
   testWidgets('DataTable row onSelectChanged test', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(

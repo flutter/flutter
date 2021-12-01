@@ -1194,7 +1194,7 @@ class _SortArrowState extends State<_SortArrow> with TickerProviderStateMixin {
         _opacityController.reverse();
       }
     }
-    if ((_up != newUp) && !skipArrow) {
+    if ((_up != null) && (_up != newUp) && !skipArrow) {
       if (_orientationController.status == AnimationStatus.dismissed) {
         _orientationController.forward();
       } else {
