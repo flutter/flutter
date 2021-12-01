@@ -414,7 +414,7 @@ class SelectableText extends StatefulWidget {
   /// {@macro flutter.widgets.Text.semanticsLabel}
   final String? semanticsLabel;
 
-  /// {@macro flutter.dart:ui.textHeightBehavior}
+  /// {@macro dart.ui.textHeightBehavior}
   final TextHeightBehavior? textHeightBehavior;
 
   /// {@macro flutter.painting.textPainter.textWidthBasis}

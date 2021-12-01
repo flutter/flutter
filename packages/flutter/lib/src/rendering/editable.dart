@@ -547,7 +547,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// The default value of this property is false.
   bool ignorePointer;
 
-  /// {@macro flutter.dart:ui.textHeightBehavior}
+  /// {@macro dart.ui.textHeightBehavior}
   TextHeightBehavior? get textHeightBehavior => _textPainter.textHeightBehavior;
   set textHeightBehavior(TextHeightBehavior? value) {
     if (_textPainter.textHeightBehavior == value)
