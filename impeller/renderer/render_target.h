@@ -22,11 +22,17 @@ class RenderTarget {
                                       ISize size,
                                       std::string label = "Offscreen");
 
+  static RenderTarget CreateMSAA(const Context& context,
+                                 std::shared_ptr<Texture> resolve_texture,
+                                 std::string label = "Offscreen");
+
   RenderTarget();
 
   ~RenderTarget();
 
   bool IsValid() const;
+
+  SampleCount GetSampleCount() const;
 
   bool HasColorAttachment(size_t index) const;
 

@@ -388,6 +388,8 @@ bool RenderPassMTL::EncodeCommands(Allocator& allocator,
     return true;
   };
 
+  const auto target_sample_count = render_target_.GetSampleCount();
+
   fml::closure pop_debug_marker = [encoder]() { [encoder popDebugGroup]; };
   for (const auto& command : commands_) {
     if (command.index_count == 0u) {
@@ -401,6 +403,14 @@ bool RenderPassMTL::EncodeCommands(Allocator& allocator,
     } else {
       auto_pop_debug_marker.Release();
     }
+
+    if (target_sample_count !=
+        command.pipeline->GetDescriptor().GetSampleCount()) {
+      VALIDATION_LOG << "Pipeline for command and the render target disagree "
+                        "on sample counts.";
+      return false;
+    }
+
     pass_bindings.SetRenderPipelineState(
         PipelineMTL::Cast(*command.pipeline).GetMTLRenderPipelineState());
     pass_bindings.SetDepthStencilState(
@@ -447,6 +457,7 @@ bool RenderPassMTL::EncodeCommands(Allocator& allocator,
 
 bool RenderPassMTL::AddCommand(Command command) {
   if (!command) {
+    VALIDATION_LOG << "Attempted to add an invalid command to the render pass.";
     return false;
   }
 
