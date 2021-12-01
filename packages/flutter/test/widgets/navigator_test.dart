@@ -2969,6 +2969,32 @@ void main() {
       expect(primaryAnimationOfRouteOne.status, AnimationStatus.dismissed);
     });
 
+    testWidgets('Pop no animation page does not crash', (WidgetTester tester) async {
+      // Regression Test for https://github.com/flutter/flutter/issues/86604.
+      Widget buildNavigator(bool secondPage) {
+        return Directionality(
+          textDirection: TextDirection.ltr,
+          child: Navigator(
+            pages: <Page<void>>[
+              const ZeroDurationPage(
+                child: Text('page1'),
+              ),
+              if (secondPage)
+                const ZeroDurationPage(
+                  child: Text('page2'),
+                ),
+            ],
+            onPopPage: (Route<dynamic> route, dynamic result) => false,
+          ),
+        );
+      }
+      await tester.pumpWidget(buildNavigator(true));
+      expect(find.text('page2'), findsOneWidget);
+
+      await tester.pumpWidget(buildNavigator(false));
+      expect(find.text('page1'), findsOneWidget);
+    });
+
     testWidgets('can work with pageless route', (WidgetTester tester) async {
       final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
       List<TestPage> myPages = <TestPage>[
@@ -3899,6 +3925,9 @@ class NavigatorObservation {
   final String? previous;
   final String? current;
   final String operation;
+
+  @override
+  String toString() => 'NavigatorObservation($operation, $current, $previous)';
 }
 
 class BuilderPage extends Page<void> {
@@ -3913,4 +3942,44 @@ class BuilderPage extends Page<void> {
       pageBuilder: pageBuilder,
     );
   }
+}
+
+class ZeroDurationPage extends Page<void> {
+  const ZeroDurationPage({required this.child});
+
+  final Widget child;
+
+  @override
+  Route<void> createRoute(BuildContext context) {
+    return ZeroDurationPageRoute(page: this);
+  }
+}
+
+class ZeroDurationPageRoute extends PageRoute<void> {
+  ZeroDurationPageRoute({required ZeroDurationPage page})
+      : super(settings: page);
+
+  @override
+  Duration get transitionDuration => Duration.zero;
+
+  ZeroDurationPage get _page => settings as ZeroDurationPage;
+
+  @override
+  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+    return _page.child;
+  }
+
+  @override
+  Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+    return child;
+  }
+
+  @override
+  bool get maintainState => false;
+
+  @override
+  Color? get barrierColor => null;
+
+  @override
+  String? get barrierLabel => null;
 }
