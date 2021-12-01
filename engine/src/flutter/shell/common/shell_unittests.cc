@@ -2960,6 +2960,107 @@ TEST_F(ShellTest, SpawnWithDartEntrypointArgs) {
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
 }
 
+TEST_F(ShellTest, IOManagerIsSharedBetweenParentAndSpawnedShell) {
+  auto settings = CreateSettingsForFixture();
+  auto shell = CreateShell(settings);
+  ASSERT_TRUE(ValidateShell(shell.get()));
+
+  PostSync(shell->GetTaskRunners().GetPlatformTaskRunner(), [this,
+                                                             &spawner = shell,
+                                                             &settings] {
+    auto second_configuration = RunConfiguration::InferFromSettings(settings);
+    ASSERT_TRUE(second_configuration.IsValid());
+    second_configuration.SetEntrypoint("emptyMain");
+    const std::string initial_route("/foo");
+    MockPlatformViewDelegate platform_view_delegate;
+    auto spawn = spawner->Spawn(
+        std::move(second_configuration), initial_route,
+        [&platform_view_delegate](Shell& shell) {
+          auto result = std::make_unique<MockPlatformView>(
+              platform_view_delegate, shell.GetTaskRunners());
+          ON_CALL(*result, CreateRenderingSurface())
+              .WillByDefault(::testing::Invoke(
+                  [] { return std::make_unique<MockSurface>(); }));
+          return result;
+        },
+        [](Shell& shell) { return std::make_unique<Rasterizer>(shell); });
+    ASSERT_TRUE(ValidateShell(spawn.get()));
+
+    PostSync(spawner->GetTaskRunners().GetIOTaskRunner(), [&spawner, &spawn] {
+      ASSERT_NE(spawner->GetIOManager().get(), nullptr);
+      ASSERT_EQ(spawner->GetIOManager().get(), spawn->GetIOManager().get());
+    });
+
+    // Destroy the child shell.
+    DestroyShell(std::move(spawn));
+  });
+  // Destroy the parent shell.
+  DestroyShell(std::move(shell));
+}
+
+TEST_F(ShellTest, IOManagerInSpawnedShellIsNotNullAfterParentShellDestroyed) {
+  auto settings = CreateSettingsForFixture();
+  auto shell = CreateShell(settings);
+  ASSERT_TRUE(ValidateShell(shell.get()));
+
+  PostSync(shell->GetTaskRunners().GetUITaskRunner(), [&shell] {
+    // We must get engine on UI thread.
+    auto runtime_controller = shell->GetEngine()->GetRuntimeController();
+    PostSync(shell->GetTaskRunners().GetIOTaskRunner(),
+             [&shell, &runtime_controller] {
+               // We must get io_manager on IO thread.
+               auto io_manager = runtime_controller->GetIOManager();
+               // Check io_manager existence.
+               ASSERT_NE(io_manager.get(), nullptr);
+               ASSERT_NE(io_manager->GetSkiaUnrefQueue().get(), nullptr);
+               // Get io_manager directly from shell and check its existence.
+               ASSERT_NE(shell->GetIOManager().get(), nullptr);
+             });
+  });
+
+  std::unique_ptr<Shell> spawn;
+
+  PostSync(shell->GetTaskRunners().GetPlatformTaskRunner(), [&shell, &settings,
+                                                             &spawn] {
+    auto second_configuration = RunConfiguration::InferFromSettings(settings);
+    ASSERT_TRUE(second_configuration.IsValid());
+    second_configuration.SetEntrypoint("emptyMain");
+    const std::string initial_route("/foo");
+    MockPlatformViewDelegate platform_view_delegate;
+    auto child = shell->Spawn(
+        std::move(second_configuration), initial_route,
+        [&platform_view_delegate](Shell& shell) {
+          auto result = std::make_unique<MockPlatformView>(
+              platform_view_delegate, shell.GetTaskRunners());
+          ON_CALL(*result, CreateRenderingSurface())
+              .WillByDefault(::testing::Invoke(
+                  [] { return std::make_unique<MockSurface>(); }));
+          return result;
+        },
+        [](Shell& shell) { return std::make_unique<Rasterizer>(shell); });
+    spawn = std::move(child);
+  });
+  // Destroy the parent shell.
+  DestroyShell(std::move(shell));
+
+  PostSync(spawn->GetTaskRunners().GetUITaskRunner(), [&spawn] {
+    // We must get engine on UI thread.
+    auto runtime_controller = spawn->GetEngine()->GetRuntimeController();
+    PostSync(spawn->GetTaskRunners().GetIOTaskRunner(),
+             [&spawn, &runtime_controller] {
+               // We must get io_manager on IO thread.
+               auto io_manager = runtime_controller->GetIOManager();
+               // Check io_manager existence here.
+               ASSERT_NE(io_manager.get(), nullptr);
+               ASSERT_NE(io_manager->GetSkiaUnrefQueue().get(), nullptr);
+               // Get io_manager directly from shell and check its existence.
+               ASSERT_NE(spawn->GetIOManager().get(), nullptr);
+             });
+  });
+  // Destroy the child shell.
+  DestroyShell(std::move(spawn));
+}
+
 TEST_F(ShellTest, UpdateAssetResolverByTypeReplaces) {
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
   Settings settings = CreateSettingsForFixture();

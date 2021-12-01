@@ -376,7 +376,8 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
       const PointerDataDispatcherMaker& dispatcher_maker,
       Settings settings,
       std::unique_ptr<Animator> animator,
-      const std::string& initial_route) const;
+      const std::string& initial_route,
+      fml::WeakPtr<IOManager> io_manager) const;
 
   //----------------------------------------------------------------------------
   /// @brief      Destroys the engine engine. Called by the shell on the UI task
@@ -790,6 +791,9 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
 
   // Return the asset manager associated with the current engine, or nullptr.
   std::shared_ptr<AssetManager> GetAssetManager();
+
+  // Return the weak_ptr of ImageDecoder.
+  fml::WeakPtr<ImageDecoder> GetImageDecoderWeakPtr();
 
   //----------------------------------------------------------------------------
   /// @brief      Get the `ImageGeneratorRegistry` associated with the current
