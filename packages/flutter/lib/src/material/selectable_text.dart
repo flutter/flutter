@@ -123,6 +123,12 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
 /// behavior is useful, for example, to make the text bold while using the
 /// default font family and size.
 ///
+/// When the widget has some selection, it will keep itself from disposing via
+/// [AutomaticKeepAliveClientMixin.wantKeepAlive] in order to avoid losing the
+/// selection. This may have implications for performance and for preventing
+/// parent widgets from disposing, such as [Scrollable]s that may expect to be
+/// able to release the [PrimaryScrollController] by disposing.
+///
 /// {@tool snippet}
 ///
 /// ```dart
@@ -580,7 +586,11 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
   }
 
   @override
-  bool get wantKeepAlive => true;
+  bool get wantKeepAlive {
+    // When the SelectableText has a selection, it will be kept alive to avoid
+    // losing the selection.
+    return _lastSeenTextSelection != null;
+  }
 
   @override
   Widget build(BuildContext context) {
