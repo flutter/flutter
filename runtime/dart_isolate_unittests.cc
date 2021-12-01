@@ -335,7 +335,54 @@ TEST_F(DartSecondaryIsolateTest, CanLaunchSecondaryIsolates) {
   // root isolate will be auto-shutdown
 }
 
-TEST_F(DartIsolateTest, CanReceiveArguments) {
+static thread_local bool is_engine_worker = false;
+
+TEST_F(DartSecondaryIsolateTest, VMTasksRunOnEngineThreads) {
+  AddNativeCallback("NotifyNative",
+                    CREATE_NATIVE_ENTRY(([this](Dart_NativeArguments args) {
+                      LatchCountDown();
+                    })));
+  AddNativeCallback("PassMessage",
+                    CREATE_NATIVE_ENTRY(([this](Dart_NativeArguments args) {
+                      // Child isolate is running on concurrent message loop
+                      // worker.
+                      ASSERT_TRUE(is_engine_worker);
+                      LatchCountDown();
+                    })));
+  auto settings = CreateSettingsForFixture();
+  settings.root_isolate_shutdown_callback = [this]() {
+    RootIsolateShutdownSignal();
+  };
+  settings.isolate_shutdown_callback = [this]() { ChildShutdownSignal(); };
+  auto vm_ref = DartVMRef::Create(settings);
+
+  auto loop = vm_ref->GetConcurrentMessageLoop();
+  fml::CountDownLatch latch(loop->GetWorkerCount());
+  vm_ref->GetConcurrentMessageLoop()->PostTaskToAllWorkers([&] {
+    is_engine_worker = true;
+    latch.CountDown();
+  });
+  latch.Wait();
+
+  auto thread = CreateNewThread();
+  TaskRunners task_runners(GetCurrentTestName(),  //
+                           thread,                //
+                           thread,                //
+                           thread,                //
+                           thread                 //
+  );
+  auto isolate = RunDartCodeInIsolate(vm_ref, settings, task_runners,
+                                      "testCanLaunchSecondaryIsolate", {},
+                                      GetDefaultKernelFilePath());
+  ASSERT_TRUE(isolate);
+  ASSERT_EQ(isolate->get()->GetPhase(), DartIsolate::Phase::Running);
+  ChildShutdownWait();  // wait for child isolate to shutdown first
+  ASSERT_FALSE(RootIsolateIsSignaled());
+  LatchWait();  // wait for last NotifyNative called by main isolate
+  // root isolate will be auto-shutdown
+}
+
+TEST_F(DartIsolateTest, CanRecieveArguments) {
   AddNativeCallback("NotifyNative",
                     CREATE_NATIVE_ENTRY(([this](Dart_NativeArguments args) {
                       ASSERT_TRUE(tonic::DartConverter<bool>::FromDart(
