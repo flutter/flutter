@@ -33,7 +33,8 @@ class OpacityPeepholePage extends StatelessWidget {
   }
 }
 
-typedef TestBuilder = Widget Function(double v);
+typedef ValueBuilder = Widget Function(double v);
+typedef AnimationBuilder = Widget Function(Animation<double> animation);
 
 double _opacity(double v) => v * 0.5 + 0.25;
 int _red(double v) => (v * 255).round();
@@ -41,33 +42,46 @@ int _green(double v) => _red(1 - v);
 int _blue(double v) => 0;
 
 class OpacityPeepholeCase {
-  OpacityPeepholeCase({required this.route, required this.name, required this.builder});
+  OpacityPeepholeCase.forValue({required String route, required String name, required ValueBuilder builder})
+      : this.forAnimation(
+    route: route,
+    name: name,
+    builder: (Animation<double> animation) => AnimatedBuilder(
+      animation: animation,
+      builder: (BuildContext context, Widget? child) => builder(animation.value),
+    ),
+  );
+
+  OpacityPeepholeCase.forAnimation({required this.route, required this.name, required AnimationBuilder builder})
+      : animationBuilder = builder;
 
   final String route;
   final String name;
-  final TestBuilder builder;
+  final AnimationBuilder animationBuilder;
 
-  Widget build(BuildContext context) {
+  Widget buildPage(BuildContext context) {
     return VariantPage(variant: this);
   }
 }
 
 List<OpacityPeepholeCase> allOpacityPeepholeCases = <OpacityPeepholeCase>[
   // Tests that Opacity can hand down value to a simple child
-  OpacityPeepholeCase(
+  OpacityPeepholeCase.forValue(
     route: kOpacityPeepholeOneRectRouteName,
     name: 'One Big Rectangle',
-    builder: (double v) => Opacity(
-      opacity: _opacity(v),
-      child: Container(
-        width: 300,
-        height: 400,
-        color: Color.fromARGB(255, _red(v), _green(v), _blue(v)),
-      ),
-    ),
+    builder: (double v) {
+      return Opacity(
+        opacity: _opacity(v),
+        child: Container(
+          width: 300,
+          height: 400,
+          color: Color.fromARGB(255, _red(v), _green(v), _blue(v)),
+        ),
+      );
+    }
   ),
   // Tests that a column of Opacity widgets can individually hand their values down to simple children
-  OpacityPeepholeCase(
+  OpacityPeepholeCase.forValue(
     route: kOpacityPeepholeColumnOfOpacityRouteName,
     name: 'Column of Opacity',
     builder: (double v) {
@@ -91,7 +105,7 @@ List<OpacityPeepholeCase> allOpacityPeepholeCases = <OpacityPeepholeCase>[
     },
   ),
   // Tests that an Opacity can hand value down to a cached child
-  OpacityPeepholeCase(
+  OpacityPeepholeCase.forValue(
       route: kOpacityPeepholeOpacityOfCachedChildRouteName,
       name: 'Opacity of Cached Child',
       builder: (double v) {
@@ -120,7 +134,7 @@ List<OpacityPeepholeCase> allOpacityPeepholeCases = <OpacityPeepholeCase>[
       }
   ),
   // Tests that an Opacity can hand a value down to a Column of simple non-overlapping children
-  OpacityPeepholeCase(
+  OpacityPeepholeCase.forValue(
     route: kOpacityPeepholeOpacityOfColumnRouteName,
     name: 'Opacity of Column',
     builder: (double v) {
@@ -147,12 +161,12 @@ List<OpacityPeepholeCase> allOpacityPeepholeCases = <OpacityPeepholeCase>[
     },
   ),
   // Tests that an entire grid of Opacity objects can hand their values down to their simple children
-  OpacityPeepholeCase(
+  OpacityPeepholeCase.forValue(
     route: kOpacityPeepholeGridOfOpacityRouteName,
     name: 'Grid of Opacity',
     builder: (double v) {
       double rowV = v;
-      double colV = v;
+      double colV = rowV;
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
@@ -180,12 +194,12 @@ List<OpacityPeepholeCase> allOpacityPeepholeCases = <OpacityPeepholeCase>[
   ),
   // tests if an Opacity can hand its value down to a 2D grid of simple non-overlapping children.
   // The success of this case would depend on the sophistication of the non-overlapping tests.
-  OpacityPeepholeCase(
+  OpacityPeepholeCase.forValue(
     route: kOpacityPeepholeOpacityOfGridRouteName,
     name: 'Opacity of Grid',
     builder: (double v) {
       double rowV = v;
-      double colV = v;
+      double colV = rowV;
       return Opacity(
         opacity: _opacity(v),
         child: SizedBox(
@@ -212,7 +226,7 @@ List<OpacityPeepholeCase> allOpacityPeepholeCases = <OpacityPeepholeCase>[
   ),
   // tests if an Opacity can hand its value down to a Column of non-overlapping rows of non-overlapping simple children.
   // This test only requires linear non-overlapping tests to succeed.
-  OpacityPeepholeCase(
+  OpacityPeepholeCase.forValue(
     route: kOpacityPeepholeOpacityOfColOfRowsRouteName,
     name: 'Opacity of Column of Rows',
     builder: (double v) {
@@ -252,11 +266,29 @@ List<OpacityPeepholeCase> allOpacityPeepholeCases = <OpacityPeepholeCase>[
       );
     },
   ),
+  OpacityPeepholeCase.forAnimation(
+    route: kOpacityPeepholeFadeTransitionTextRouteName,
+    name: 'FadeTransition text',
+    builder: (Animation<double> animation) {
+      return FadeTransition(
+        opacity: Tween<double>(begin: 0.25, end: 0.75).animate(animation),
+        child: const SizedBox(
+          width: 300,
+          height: 400,
+          child: Center(
+            child: Text('Hello, World',
+              style: TextStyle(fontSize: 48),
+            ),
+          ),
+        ),
+      );
+    },
+  ),
 ];
 
 Map<String, WidgetBuilder> opacityPeepholeRoutes = <String, WidgetBuilder>{
   for (OpacityPeepholeCase variant in allOpacityPeepholeCases)
-    variant.route: variant.build,
+    variant.route: variant.buildPage,
 };
 
 class VariantPage extends StatefulWidget {
@@ -293,10 +325,7 @@ class VariantPageState extends State<VariantPage> with SingleTickerProviderState
         title: Text(widget.variant.name),
       ),
       body: Center(
-        child: AnimatedBuilder(
-          animation: _controller,
-          builder: (BuildContext context, Widget? child) => widget.variant.builder(_controller.value),
-        ),
+        child: widget.variant.animationBuilder(_controller),
       ),
     );
   }
