@@ -150,6 +150,7 @@ std::unique_ptr<Shell> Shell::Create(
   return CreateWithSnapshot(std::move(platform_data),            //
                             std::move(task_runners),             //
                             /*parent_merger=*/nullptr,           //
+                            /*parent_io_manager=*/nullptr,       //
                             std::move(settings),                 //
                             std::move(vm),                       //
                             std::move(isolate_snapshot),         //
@@ -161,6 +162,7 @@ std::unique_ptr<Shell> Shell::Create(
 std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
     DartVMRef vm,
     fml::RefPtr<fml::RasterThreadMerger> parent_merger,
+    std::shared_ptr<ShellIOManager> parent_io_manager,
     TaskRunners task_runners,
     const PlatformData& platform_data,
     Settings settings,
@@ -215,7 +217,7 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
   // first because it has state that the other subsystems depend on. It must
   // first be booted and the necessary references obtained to initialize the
   // other subsystems.
-  std::promise<std::unique_ptr<ShellIOManager>> io_manager_promise;
+  std::promise<std::shared_ptr<ShellIOManager>> io_manager_promise;
   auto io_manager_future = io_manager_promise.get_future();
   std::promise<fml::WeakPtr<ShellIOManager>> weak_io_manager_promise;
   auto weak_io_manager_future = weak_io_manager_promise.get_future();
@@ -230,18 +232,24 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
       io_task_runner,
       [&io_manager_promise,                                               //
        &weak_io_manager_promise,                                          //
+       &parent_io_manager,                                                //
        &unref_queue_promise,                                              //
        platform_view_ptr,                                                 //
        io_task_runner,                                                    //
        is_backgrounded_sync_switch = shell->GetIsGpuDisabledSyncSwitch()  //
   ]() {
         TRACE_EVENT0("flutter", "ShellSetupIOSubsystem");
-        auto io_manager = std::make_unique<ShellIOManager>(
-            platform_view_ptr->CreateResourceContext(),
-            is_backgrounded_sync_switch, io_task_runner);
+        std::shared_ptr<ShellIOManager> io_manager;
+        if (parent_io_manager) {
+          io_manager = parent_io_manager;
+        } else {
+          io_manager = std::make_shared<ShellIOManager>(
+              platform_view_ptr->CreateResourceContext(),
+              is_backgrounded_sync_switch, io_task_runner);
+        }
         weak_io_manager_promise.set_value(io_manager->GetWeakPtr());
         unref_queue_promise.set_value(io_manager->GetSkiaUnrefQueue());
-        io_manager_promise.set_value(std::move(io_manager));
+        io_manager_promise.set_value(io_manager);
       });
 
   // Send dispatcher_maker to the engine constructor because shell won't have
@@ -301,6 +309,7 @@ std::unique_ptr<Shell> Shell::CreateWithSnapshot(
     const PlatformData& platform_data,
     TaskRunners task_runners,
     fml::RefPtr<fml::RasterThreadMerger> parent_thread_merger,
+    std::shared_ptr<ShellIOManager> parent_io_manager,
     Settings settings,
     DartVMRef vm,
     fml::RefPtr<const DartSnapshot> isolate_snapshot,
@@ -327,6 +336,7 @@ std::unique_ptr<Shell> Shell::CreateWithSnapshot(
           [&latch,                                                        //
            &shell,                                                        //
            parent_thread_merger,                                          //
+           parent_io_manager,                                             //
            task_runners = std::move(task_runners),                        //
            platform_data = std::move(platform_data),                      //
            settings = std::move(settings),                                //
@@ -339,6 +349,7 @@ std::unique_ptr<Shell> Shell::CreateWithSnapshot(
             shell = CreateShellOnPlatformThread(
                 std::move(vm),                       //
                 parent_thread_merger,                //
+                parent_io_manager,                   //
                 std::move(task_runners),             //
                 std::move(platform_data),            //
                 std::move(settings),                 //
@@ -486,9 +497,9 @@ std::unique_ptr<Shell> Shell::Spawn(
       fml::SyncSwitch::Handlers()
           .SetIfFalse([&is_gpu_disabled] { is_gpu_disabled = false; })
           .SetIfTrue([&is_gpu_disabled] { is_gpu_disabled = true; }));
-  std::unique_ptr<Shell> result = (CreateWithSnapshot(
+  std::unique_ptr<Shell> result = CreateWithSnapshot(
       PlatformData{}, task_runners_, rasterizer_->GetRasterThreadMerger(),
-      GetSettings(), vm_, vm_->GetVMData()->GetIsolateSnapshot(),
+      io_manager_, GetSettings(), vm_, vm_->GetVMData()->GetIsolateSnapshot(),
       on_create_platform_view, on_create_rasterizer,
       [engine = this->engine_.get(), initial_route](
           Engine::Delegate& delegate,
@@ -504,9 +515,10 @@ std::unique_ptr<Shell> Shell::Spawn(
                              /*dispatcher_maker=*/dispatcher_maker,
                              /*settings=*/settings,
                              /*animator=*/std::move(animator),
-                             /*initial_route=*/initial_route);
+                             /*initial_route=*/initial_route,
+                             /*io_manager=*/std::move(io_manager));
       },
-      is_gpu_disabled));
+      is_gpu_disabled);
   result->shared_resource_context_ = io_manager_->GetSharedResourceContext();
   result->RunEngine(std::move(run_configuration));
   return result;
@@ -609,7 +621,7 @@ bool Shell::IsSetup() const {
 bool Shell::Setup(std::unique_ptr<PlatformView> platform_view,
                   std::unique_ptr<Engine> engine,
                   std::unique_ptr<Rasterizer> rasterizer,
-                  std::unique_ptr<ShellIOManager> io_manager) {
+                  std::shared_ptr<ShellIOManager> io_manager) {
   if (is_setup_) {
     return false;
   }
@@ -622,7 +634,7 @@ bool Shell::Setup(std::unique_ptr<PlatformView> platform_view,
   platform_message_handler_ = platform_view_->GetPlatformMessageHandler();
   engine_ = std::move(engine);
   rasterizer_ = std::move(rasterizer);
-  io_manager_ = std::move(io_manager);
+  io_manager_ = io_manager;
 
   // Set the external view embedder for the rasterizer.
   auto view_embedder = platform_view_->CreateExternalViewEmbedder();
