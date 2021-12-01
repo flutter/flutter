@@ -10,6 +10,8 @@ impeller_component("base") {
     "allocation.h",
     "base.h",
     "config.h",
+    "promise.cc",
+    "promise.h",
     "strings.cc",
     "strings.h",
     "validation.cc",

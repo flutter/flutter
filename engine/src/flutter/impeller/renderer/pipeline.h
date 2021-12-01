@@ -44,10 +44,14 @@ class Pipeline {
 
   const PipelineDescriptor& GetDescriptor() const;
 
+  PipelineFuture CreateVariant(
+      std::function<void(PipelineDescriptor& desc)> descriptor_callback) const;
+
  protected:
-  Pipeline(PipelineDescriptor desc);
+  Pipeline(std::weak_ptr<PipelineLibrary> library, PipelineDescriptor desc);
 
  private:
+  const std::weak_ptr<PipelineLibrary> library_;
   const PipelineDescriptor desc_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(Pipeline);
