@@ -81,24 +81,33 @@ std::future<std::shared_ptr<Pipeline>> PipelineLibraryMTL::GetRenderPipeline(
   // created till the first instance of the creation invokes its completion
   // callback.
 
-  auto thiz = shared_from_this();
+  auto weak_this = weak_from_this();
 
   auto completion_handler =
       ^(id<MTLRenderPipelineState> _Nullable render_pipeline_state,
         NSError* _Nullable error) {
         if (error != nil) {
-          FML_LOG(ERROR) << "Could not create render pipeline: "
+          VALIDATION_LOG << "Could not create render pipeline: "
                          << error.localizedDescription.UTF8String;
           promise->set_value(nullptr);
-        } else {
-          auto new_pipeline = std::shared_ptr<PipelineMTL>(new PipelineMTL(
-              descriptor,                                        //
-              render_pipeline_state,                             //
-              CreateDepthStencilDescriptor(descriptor, device_)  //
-              ));
-          promise->set_value(new_pipeline);
-          this->SavePipeline(descriptor, new_pipeline);
+          return;
         }
+
+        auto strong_this = weak_this.lock();
+        if (!strong_this) {
+          VALIDATION_LOG << "Library was collected before a pending pipeline "
+                            "creation could finish.";
+          promise->set_value(nullptr);
+          return;
+        }
+        auto new_pipeline = std::shared_ptr<PipelineMTL>(new PipelineMTL(
+            weak_this,
+            descriptor,                                        //
+            render_pipeline_state,                             //
+            CreateDepthStencilDescriptor(descriptor, device_)  //
+            ));
+        promise->set_value(new_pipeline);
+        this->SavePipeline(descriptor, new_pipeline);
       };
   [device_ newRenderPipelineStateWithDescriptor:GetMTLRenderPipelineDescriptor(
                                                     descriptor)
