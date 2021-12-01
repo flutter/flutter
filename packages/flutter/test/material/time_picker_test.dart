@@ -1023,6 +1023,21 @@ void _testsInput() {
     expect(result, equals(const TimeOfDay(hour: 9, minute: 12)));
   });
 
+    testWidgets('Does lose focus when pressing "done" in the input mode', (WidgetTester tester) async {
+    await startPicker(tester, (TimeOfDay? time) {}, entryMode: TimePickerEntryMode.input);
+    await tester.enterText(find.byType(TextField).first, '9');
+    await tester.enterText(find.byType(TextField).last, '12');
+    expect(tester.testTextInput.isVisible, true);
+    await finishPicker(tester);
+
+    await startPicker(tester, (TimeOfDay? time) {}, entryMode: TimePickerEntryMode.input);
+    await tester.enterText(find.byType(TextField).first, '9');
+    await tester.enterText(find.byType(TextField).last, '12');
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    expect(tester.testTextInput.isVisible, false);
+    await finishPicker(tester);
+  });
+
   testWidgets('Toggle to dial mode keeps selected time', (WidgetTester tester) async {
     late TimeOfDay result;
     await startPicker(tester, (TimeOfDay? time) { result = time!; }, entryMode: TimePickerEntryMode.input);
