@@ -31,10 +31,12 @@
 #include "ax_fragment_root_win.h"
 #include "ax_platform_node_delegate.h"
 #include "ax_platform_node_delegate_utils_win.h"
+#include "shellscalingapi.h"
 #include "uia_registrar_win.h"
 
 #include "base/logging.h"
 #include "base/win/atl_module.h"
+#include "base/win/display.h"
 #include "gfx/geometry/rect_conversions.h"
 
 // From ax.constants.mojom
@@ -476,9 +478,7 @@ gfx::Vector2d AXPlatformNodeWin::CalculateUIAScrollPoint(
 
   const HWND hwnd = GetDelegate()->GetTargetForNativeAccessibilityEvent();
   BASE_DCHECK(hwnd);
-  // TODO(gw280): https://github.com/flutter/flutter/issues/78798
-  // Support scale factors
-  const float scale_factor = 1.0f;
+  const float scale_factor = base::win::GetScaleFactorForHWND(hwnd);
   const int small_change =
       base::ClampRound(kSmallScrollIncrement * scale_factor);
 
