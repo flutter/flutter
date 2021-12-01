@@ -9,6 +9,7 @@
 #include <iostream>
 
 #include "flutter/shell/platform/common/json_message_codec.h"
+#include "flutter/shell/platform/windows/keyboard_win32_common.h"
 
 namespace flutter {
 
@@ -20,7 +21,7 @@ static constexpr int kMaxPendingEvents = 1000;
 
 // Returns if a character sent by Win32 is a dead key.
 bool _IsDeadKey(uint32_t ch) {
-  return (ch & 0x80000000) != 0;
+  return (ch & kDeadKeyCharMask) != 0;
 }
 
 // Returns true if this key is a key down event of ShiftRight.

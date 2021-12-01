@@ -72,6 +72,7 @@ source_set("flutter_windows_source") {
     "keyboard_key_embedder_handler.h",
     "keyboard_key_handler.cc",
     "keyboard_key_handler.h",
+    "keyboard_win32_common.h",
     "platform_handler.cc",
     "platform_handler.h",
     "sequential_id_generator.cc",

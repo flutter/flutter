@@ -12,6 +12,7 @@
 #include <iostream>
 #include <string>
 
+#include "flutter/shell/platform/windows/keyboard_win32_common.h"
 #include "flutter/shell/platform/windows/string_conversion.h"
 
 namespace flutter {
@@ -27,17 +28,6 @@ constexpr SHORT kStateMaskToggled = 0x01;
 constexpr SHORT kStateMaskPressed = 0x80;
 
 const char* empty_character = "";
-
-// Revert the "character" for a dead key to its normal value, or the argument
-// unchanged otherwise.
-//
-// When a dead key is pressed, the WM_KEYDOWN's lParam is mapped to a special
-// value: the "normal character" | 0x80000000.  For example, when pressing
-// "dead key caret" (one that makes the following e into ê), its mapped
-// character is 0x8000005E. "Reverting" it gives 0x5E, which is character '^'.
-uint32_t _UndeadChar(uint32_t ch) {
-  return ch & ~0x80000000;
-}
 
 // Get some bits of the char, from the start'th bit from the right (excluded)
 // to the end'th bit from the right (included).
@@ -185,7 +175,7 @@ void KeyboardKeyEmbedderHandler::KeyboardHookImpl(
   uint64_t eventual_logical_record;
   char character_bytes[kCharacterCacheSize];
 
-  character = _UndeadChar(character);
+  character = UndeadChar(character);
 
   if (is_physical_down) {
     if (had_record) {

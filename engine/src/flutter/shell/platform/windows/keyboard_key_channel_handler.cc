@@ -14,6 +14,7 @@
 #include <iostream>
 
 #include "flutter/shell/platform/common/json_message_codec.h"
+#include "flutter/shell/platform/windows/keyboard_win32_common.h"
 
 namespace flutter {
 
@@ -146,17 +147,6 @@ int GetModsForKeyState() {
 #endif
 }
 
-// Revert the "character" for a dead key to its normal value, or the argument
-// unchanged otherwise.
-//
-// When a dead key is pressed, the WM_KEYDOWN's lParam is mapped to a special
-// value: the "normal character" | 0x80000000.  For example, when pressing
-// "dead key caret" (one that makes the following e into ê), its mapped
-// character is 0x8000005E. "Reverting" it gives 0x5E, which is character '^'.
-uint32_t _UndeadChar(uint32_t ch) {
-  return ch & ~0x80000000;
-}
-
 }  // namespace
 
 KeyboardKeyChannelHandler::KeyboardKeyChannelHandler(
@@ -184,7 +174,7 @@ void KeyboardKeyChannelHandler::KeyboardHook(
   event.AddMember(kKeyCodeKey, key, allocator);
   event.AddMember(kScanCodeKey, scancode | (extended ? kScancodeExtended : 0),
                   allocator);
-  event.AddMember(kCharacterCodePointKey, _UndeadChar(character), allocator);
+  event.AddMember(kCharacterCodePointKey, UndeadChar(character), allocator);
   event.AddMember(kKeyMapKey, kWindowsKeyMap, allocator);
   event.AddMember(kModifiersKey, GetModsForKeyState(), allocator);
 
