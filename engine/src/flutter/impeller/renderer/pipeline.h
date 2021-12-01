@@ -15,6 +15,12 @@ namespace impeller {
 class PipelineLibrary;
 class Pipeline;
 
+// TODO(csg): Using a simple future is sub-optimal since callers that want to
+// eagerly create and cache pipeline variants will have to await on the future
+// to get its pipeline descriptor (unless they have explicitly cached it). This
+// would be a concurrency pessimization.
+//
+// Use a struct that stores the future and the descriptor separately.
 using PipelineFuture = std::future<std::shared_ptr<Pipeline>>;
 
 //------------------------------------------------------------------------------
@@ -75,6 +81,9 @@ class PipelineT {
   explicit PipelineT(const Context& context,
                      std::optional<PipelineDescriptor> desc)
       : pipeline_future_(CreatePipelineFuture(context, desc)) {}
+
+  explicit PipelineT(PipelineFuture future)
+      : pipeline_future_(std::move(future)) {}
 
   std::shared_ptr<Pipeline> WaitAndGet() {
     if (did_wait_) {
