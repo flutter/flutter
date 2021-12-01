@@ -102,7 +102,9 @@ class RuntimeController : public PlatformConfigurationClient {
       const std::function<void(int64_t)>& idle_notification_callback,
       const fml::closure& isolate_create_callback,
       const fml::closure& isolate_shutdown_callback,
-      std::shared_ptr<const fml::Mapping> persistent_isolate_data) const;
+      std::shared_ptr<const fml::Mapping> persistent_isolate_data,
+      fml::WeakPtr<IOManager> io_manager,
+      fml::WeakPtr<ImageDecoder> image_decoder) const;
 
   // |PlatformConfigurationClient|
   ~RuntimeController() override;
