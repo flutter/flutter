@@ -349,6 +349,7 @@ constexpr uint64_t kScanCodeKeyE = 0x12;
 constexpr uint64_t kScanCodeKeyQ = 0x10;
 constexpr uint64_t kScanCodeKeyW = 0x11;
 constexpr uint64_t kScanCodeDigit1 = 0x02;
+constexpr uint64_t kScanCodeDigit6 = 0x07;
 // constexpr uint64_t kScanCodeNumpad1 = 0x4f;
 // constexpr uint64_t kScanCodeNumLock = 0x45;
 constexpr uint64_t kScanCodeControl = 0x1d;
@@ -860,8 +861,112 @@ TEST(KeyboardTest, DeadKeyThatCombines) {
   EXPECT_EQ(key_calls.size(), 0);
 }
 
+// This tests dead key ^ then E on a US INTL keyboard, which should be combined
+// into ê.
+//
+// It is different from French AZERTY because the character that the ^ key is
+// mapped to does not contain the dead key character somehow.
+TEST(KeyboardTest, DeadKeyWithoutDeadMaskThatCombines) {
+  KeyboardTester tester;
+  tester.Responding(false);
+
+  // Press ShiftLeft
+  tester.SetKeyState(VK_LSHIFT, true, true);
+  tester.InjectMessages(
+      1,
+      WmKeyDownInfo{VK_SHIFT, kScanCodeShiftLeft, kNotExtended, kWasUp}.Build(
+          kWmResultZero));
+
+  EXPECT_EQ(key_calls.size(), 1);
+  EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeDown,
+                       kPhysicalShiftLeft, kLogicalShiftLeft, "",
+                       kNotSynthesized);
+  clear_key_calls();
+
+  tester.InjectPendingEvents();
+  EXPECT_EQ(key_calls.size(), 0);
+  clear_key_calls();
+
+  // Press 6^
+  tester.InjectMessages(
+      2,
+      WmKeyDownInfo{'6', kScanCodeDigit6, kNotExtended, kWasUp}.Build(
+          kWmResultZero),
+      WmDeadCharInfo{'^', kScanCodeDigit6, kNotExtended, kWasUp}.Build(
+          kWmResultZero));
+
+  EXPECT_EQ(key_calls.size(), 1);
+  EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeDown, kPhysicalDigit6,
+                       kLogicalDigit6, "6", kNotSynthesized);
+  clear_key_calls();
+
+  EXPECT_EQ(tester.InjectPendingEvents(), 0);
+  EXPECT_EQ(key_calls.size(), 0);
+  clear_key_calls();
+
+  // Release 6^
+  tester.InjectMessages(
+      1, WmKeyUpInfo{'6', kScanCodeDigit6, kNotExtended}.Build(kWmResultZero));
+
+  EXPECT_EQ(key_calls.size(), 1);
+  EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeUp, kPhysicalDigit6,
+                       kLogicalDigit6, "", kNotSynthesized);
+  clear_key_calls();
+
+  tester.InjectPendingEvents();
+  EXPECT_EQ(key_calls.size(), 0);
+  clear_key_calls();
+
+  // Release ShiftLeft
+  tester.SetKeyState(VK_LSHIFT, false, true);
+  tester.InjectMessages(
+      1, WmKeyUpInfo{VK_SHIFT, kScanCodeShiftLeft, kNotExtended}.Build(
+             kWmResultZero));
+
+  EXPECT_EQ(key_calls.size(), 1);
+  EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeUp, kPhysicalShiftLeft,
+                       kLogicalShiftLeft, "", kNotSynthesized);
+  clear_key_calls();
+
+  tester.InjectPendingEvents();
+  EXPECT_EQ(key_calls.size(), 0);
+  clear_key_calls();
+
+  // Press E
+  tester.InjectMessages(
+      2,
+      WmKeyDownInfo{kVirtualKeyE, kScanCodeKeyE, kNotExtended, kWasUp}.Build(
+          kWmResultZero),
+      WmCharInfo{0xEA, kScanCodeKeyE, kNotExtended, kWasUp}.Build(
+          kWmResultZero));
+
+  EXPECT_EQ(key_calls.size(), 1);
+  EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeDown, kPhysicalKeyE,
+                       kLogicalKeyE, "ê", kNotSynthesized);
+  clear_key_calls();
+
+  tester.InjectPendingEvents(
+      0xEA);  // The redispatched event uses unmodified 'e'
+  EXPECT_EQ(key_calls.size(), 1);
+  EXPECT_CALL_IS_TEXT(key_calls[0], u"ê");
+  clear_key_calls();
+
+  // Release E
+  tester.InjectMessages(
+      1, WmKeyUpInfo{kVirtualKeyE, kScanCodeKeyE, kNotExtended}.Build(
+             kWmResultZero));
+
+  EXPECT_EQ(key_calls.size(), 1);
+  EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeUp, kPhysicalKeyE,
+                       kLogicalKeyE, "", kNotSynthesized);
+  clear_key_calls();
+
+  tester.InjectPendingEvents();
+  EXPECT_EQ(key_calls.size(), 0);
+}
+
 // This tests dead key ^ then & (US: 1) on a French keyboard, which do not
-// combine and should output "^$".
+// combine and should output "^&".
 TEST(KeyboardTest, DeadKeyThatDoesNotCombine) {
   KeyboardTester tester;
   tester.Responding(false);

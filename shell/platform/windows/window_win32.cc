@@ -15,6 +15,7 @@
 #include <cstring>
 
 #include "dpi_utils_win32.h"
+#include "keyboard_win32_common.h"
 
 namespace flutter {
 
@@ -514,14 +515,18 @@ WindowWin32::HandleMessage(UINT const message,
         const bool extended = ((lparam >> 24) & 0x01) == 0x01;
         const bool was_down = lparam & 0x40000000;
         // Certain key combinations yield control characters as WM_CHAR's
-        // lParam. For example, 0x01 for Ctrl-A. Filter these characters.
-        // See
+        // lParam. For example, 0x01 for Ctrl-A. Filter these characters. See
         // https://docs.microsoft.com/en-us/windows/win32/learnwin32/accelerator-tables
-        const char32_t event_character =
-            (message == WM_DEADCHAR || message == WM_SYSDEADCHAR)
-                ? Win32MapVkToChar(keycode_for_char_message_)
-            : IsPrintable(code_point) ? code_point
-                                      : 0;
+        char32_t event_character;
+        if (message == WM_DEADCHAR || message == WM_SYSDEADCHAR) {
+          // Mask the resulting char with kDeadKeyCharMask anyway, because in
+          // rare cases the bit is *not* set (US INTL Shift-6 circumflex, see
+          // https://github.com/flutter/flutter/issues/92654 .)
+          event_character =
+              Win32MapVkToChar(keycode_for_char_message_) | kDeadKeyCharMask;
+        } else {
+          event_character = IsPrintable(code_point) ? code_point : 0;
+        }
         bool handled = OnKey(keycode_for_char_message_, scancode,
                              message == WM_SYSCHAR ? WM_SYSKEYDOWN : WM_KEYDOWN,
                              event_character, extended, was_down);
