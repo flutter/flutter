@@ -665,7 +665,7 @@ void testMain() {
           ui.window.platformDispatcher as EnginePlatformDispatcher;
 
       int countCanvases() {
-        return domRenderer.sceneElement!.querySelectorAll('canvas').length;
+        return flutterViewEmbedder.sceneElement!.querySelectorAll('canvas').length;
       }
 
       expect(platformViewManager.isInvisible(0), isFalse);
