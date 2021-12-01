@@ -336,7 +336,8 @@ void main() {
   });
 
   testWidgets('Cursor animation restarts when it is moved using keys on desktop', (WidgetTester tester) async {
-    debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
+    // macOS keybindins are handled by the system by default.
+    debugDefaultTargetPlatformOverride = TargetPlatform.linux;
 
     const String testText = 'Some text long enough to move the cursor around';
     final TextEditingController controller = TextEditingController(text: testText);

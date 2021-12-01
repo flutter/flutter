@@ -1320,10 +1320,8 @@ abstract class TextInputConnection {
 ///    between the system's text input and a [TextInputClient].
 ///  * [EditableText], a [TextInputClient] that connects to and interacts with
 ///    the system's text input using a [TextInputConnection].
-class IntentTextInputConnection extends TextInputConnection {
-  IntentTextInputConnection(this._dispatcher) : super._();
-
-  final Future<dynamic> Function(Iterable<Intent>) _dispatcher;
+abstract class IntentTextInputConnection extends TextInputConnection {
+  IntentTextInputConnection() : super._();
 
   Iterable<Intent> _methodCallToIntent(MethodCall methodCall) sync* {
     final String method = methodCall.method;
@@ -1448,7 +1446,10 @@ class IntentTextInputConnection extends TextInputConnection {
 
   /// Handles the incoming commands sent from the embedder's text input plugin.
   @override
-  Future<dynamic> _handleMethodCallInvocation(MethodCall methodCall) => _dispatcher(_methodCallToIntent(methodCall));
+  Future<dynamic> _handleMethodCallInvocation(MethodCall methodCall) => dispatchTextInputIntent(_methodCallToIntent(methodCall));
+
+
+  Future<dynamic> dispatchTextInputIntent(Iterable<Intent> intents);
 }
 
 class _TextInputConnection extends TextInputConnection {

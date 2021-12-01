@@ -433,7 +433,7 @@ class DefaultTextEditingShortcuts extends Shortcuts {
       case TargetPlatform.linux:
         return _linuxShortcuts;
       case TargetPlatform.macOS:
-        return _macShortcuts;
+        return _webShortcuts;
       case TargetPlatform.windows:
         return _windowsShortcuts;
     }

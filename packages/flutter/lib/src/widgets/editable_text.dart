@@ -1927,23 +1927,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
-  Future<dynamic> _dispatchPlatformIntents(Iterable<Intent> intents) {
-    assert(widget.focusNode.hasFocus);
-    final BuildContext? currentFocus = primaryFocus?.context;
-    if (currentFocus == null) {
-      return Future<dynamic>.value();
-    }
-
-    for (final Intent intent in intents) {
-      // TODO
-      final Action<Intent>? action = Actions.maybeFind(currentFocus, intent: intent);
-      if (action != null) {
-        return Future<dynamic>.value(Actions.invoke(currentFocus, intent));
-      }
-    }
-    return Future<dynamic>.value();
-  }
-
   @override
   void performPrivateCommand(String action, Map<String, dynamic> data) {
     widget.onAppPrivateCommand!(action, data);
@@ -2224,7 +2207,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       final TextInputConfiguration configuration = currentAutofillScope?.createAutofillConfiguration(_effectiveAutofillClient.textInputConfiguration)
         ?? _effectiveAutofillClient.textInputConfiguration;
       final TextInputConnection newConnection = TextInput.attachConnection(
-        IntentTextInputConnection(_dispatchPlatformIntents),
+        _EditableTextInputConnection(),
         configuration,
       );
       _textInputConnection = newConnection;
@@ -2297,7 +2280,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     final TextInputConfiguration configuration = currentAutofillScope?.createAutofillConfiguration(_effectiveAutofillClient.textInputConfiguration)
     ?? _effectiveAutofillClient.textInputConfiguration;
     final TextInputConnection newConnection = TextInput.attachConnection(
-      IntentTextInputConnection(_dispatchPlatformIntents),
+      _EditableTextInputConnection(),
       configuration,
     );
     _textInputConnection = newConnection;
@@ -2316,7 +2299,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
 
-  @override
   void connectionClosed() {
     if (_hasInputConnection) {
       _textInputConnection!.connectionClosedReceived();
@@ -3882,4 +3864,25 @@ class _CopySelectionAction extends ContextAction<CopySelectionTextIntent> {
 
   @override
   bool get isActionEnabled => state._value.selection.isValid && !state._value.selection.isCollapsed;
+}
+
+/// An [IntentTextInputConnection] that dispatches the text input intents from
+/// the engine text input plugin using the Intent-Action system via the current
+/// [primaryFocus].
+class _EditableTextInputConnection extends IntentTextInputConnection {
+  @override
+  Future<dynamic> dispatchTextInputIntent(Iterable<Intent> intents) async {
+    final BuildContext? currentFocus = primaryFocus?.context;
+    if (currentFocus == null) {
+      return;
+    }
+
+    for (final Intent intent in intents) {
+      // TODO
+      final Action<Intent>? action = Actions.maybeFind(currentFocus, intent: intent);
+      if (action != null) {
+        return Actions.invoke(currentFocus, intent);
+      }
+    }
+  }
 }

@@ -64,3 +64,12 @@ class FakeTextChannel implements MethodChannel {
     }
   }
 }
+
+class FakeIntentTextInputConnection extends IntentTextInputConnection {
+  List<Intent>? intentSink;
+
+  @override
+  Future<dynamic> dispatchTextInputIntent(Iterable<Intent> intents) async {
+    intentSink = intents.toList(growable: false);
+  }
+}

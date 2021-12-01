@@ -147,7 +147,7 @@ void main() {
     });
   });
 
-  group('TextInput message channels', () {
+  group('TextInput message channels - with client', () {
     late FakeTextChannel fakeTextChannel;
 
     setUp(() {
@@ -177,6 +177,73 @@ void main() {
         MethodCall('TextInput.setClient', <dynamic>[1, client.configuration.toJson()]),
         MethodCall('TextInput.setEditingState', client.currentTextEditingValue.toJSON()),
       ]);
+    });
+
+    test('text input client handler responds to reattach with setClient (null TextEditingValue)', () async {
+      final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
+      TextInput.attach(client, client.configuration);
+      fakeTextChannel.validateOutgoingMethodCalls(<MethodCall>[
+        MethodCall('TextInput.setClient', <dynamic>[1, client.configuration.toJson()]),
+      ]);
+
+      fakeTextChannel.incoming!(const MethodCall('TextInputClient.requestExistingInputState'));
+
+      expect(fakeTextChannel.outgoingCalls.length, 3);
+      fakeTextChannel.validateOutgoingMethodCalls(<MethodCall>[
+        // From original attach
+        MethodCall('TextInput.setClient', <dynamic>[1, client.configuration.toJson()]),
+        // From original attach
+        MethodCall('TextInput.setClient', <dynamic>[1, client.configuration.toJson()]),
+        // From requestExistingInputState
+        const MethodCall(
+          'TextInput.setEditingState',
+          <String, dynamic>{
+            'text': '',
+            'selectionBase': -1,
+            'selectionExtent': -1,
+            'selectionAffinity': 'TextAffinity.downstream',
+            'selectionIsDirectional': false,
+            'composingBase': -1,
+            'composingExtent': -1,
+          },
+        ),
+      ]);
+    });
+  });
+
+  group('TextInput message channels - with intent connection', () {
+    late FakeTextChannel fakeTextChannel;
+    late FakeIntentTextInputConnection fakeConnection;
+
+    setUp(() {
+      fakeTextChannel = FakeTextChannel((MethodCall call) async {});
+      TextInput.setChannel(fakeTextChannel);
+      fakeConnection = FakeIntentTextInputConnection();
+      TextInput.attachConnection(fakeConnection, const TextInputConfiguration());
+    });
+
+    tearDown(() {
+      TextInputConnection.debugResetId();
+      TextInput.setChannel(SystemChannels.textInput);
+    });
+
+    test('text input client handler responds to reattach with setClient', () async {
+      const TextInputConfiguration dummyConfiugration = TextInputConfiguration();
+      fakeTextChannel.validateOutgoingMethodCalls(<MethodCall>[
+        MethodCall('TextInput.setClient', <dynamic>[1, dummyConfiugration.toJson()]),
+      ]);
+
+      fakeTextChannel.incoming!(const MethodCall('TextInputClient.requestExistingInputState'));
+      expect(fakeConnection.intentSink, <Intent>[TextInputConnectionControlIntent.reconnect]);
+
+      //expect(fakeTextChannel.outgoingCalls.length, 3);
+      //fakeTextChannel.validateOutgoingMethodCalls(<MethodCall>[
+      //  // From original attach
+      //  MethodCall('TextInput.setClient', <dynamic>[1, dummyConfiugration.toJson()]),
+      //  // From requestExistingInputState
+      //  MethodCall('TextInput.setClient', <dynamic>[1, dummyConfiugration.toJson()]),
+      //  MethodCall('TextInput.setEditingState', client.currentTextEditingValue.toJSON()),
+      //]);
     });
 
     test('text input client handler responds to reattach with setClient (null TextEditingValue)', () async {

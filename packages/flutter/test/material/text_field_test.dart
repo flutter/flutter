@@ -35,6 +35,7 @@ const bool isContextMenuProvidedByPlatform = isBrowser;
 
 // On web, key events in text fields are handled by the browser.
 const bool areKeyEventsHandledByPlatform = isBrowser;
+final TargetPlatformVariant allExceptMacOS = TargetPlatformVariant(TargetPlatform.values.toSet()..remove(TargetPlatform.macOS));
 
 class MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocalizations> {
   @override
@@ -7932,8 +7933,8 @@ void main() {
 
     // The first character is now offscreen to the left.
     expect(textOffsetToPosition(tester, 0).dx, moreOrLessEquals(-257.0, epsilon: 1));
-  }, variant: TargetPlatformVariant.all(),
-     skip: isBrowser, // [intended] Browser handles arrow keys differently.
+  }, variant: allExceptMacOS,
+     skip: isBrowser, // [intended] Browser and macOS handles arrow keys differently.
   );
 
   testWidgets('long press drag can edge scroll vertically', (WidgetTester tester) async {
@@ -8083,8 +8084,8 @@ void main() {
       textOffsetToPosition(tester, 0).dy,
       moreOrLessEquals(firstCharY - lineHeight, epsilon: 1),
     );
-  }, variant: TargetPlatformVariant.all(),
-     skip: isBrowser, // [intended] Browser handles arrow keys differently.
+  }, variant: allExceptMacOS,
+     skip: isBrowser, // [intended] Browser and macOS handles arrow keys differently.
   );
 
   testWidgets('mouse click and drag can edge scroll vertically', (WidgetTester tester) async {
