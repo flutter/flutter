@@ -835,7 +835,7 @@ class _AppBarState extends State<AppBar> {
         ?? theme.primaryIconTheme
       : widget.iconTheme
         ?? appBarTheme.iconTheme
-        ?? theme.iconTheme.copyWith(color: foregroundColor, splashRadius: 18);
+        ?? theme.iconTheme.copyWith(color: foregroundColor);
 
     IconThemeData actionsIconTheme = widget.actionsIconTheme
       ?? appBarTheme.actionsIconTheme
