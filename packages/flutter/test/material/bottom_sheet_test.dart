@@ -88,6 +88,150 @@ void main() {
     await tester.pumpWidget(Container());
   });
 
+
+  testWidgets('Swiping down a BottomSheet should dismiss it by default', (WidgetTester tester) async {
+
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    bool showBottomSheetThenCalled = false;
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        key: scaffoldKey,
+        body: const Center(child: Text('body')),
+      ),
+    ));
+
+    await tester.pump();
+    expect(showBottomSheetThenCalled, isFalse);
+    expect(find.text('BottomSheet'), findsNothing);
+
+    scaffoldKey.currentState!.showBottomSheet<void>((BuildContext context) {
+      return const SizedBox(
+        height: 200.0,
+        child:  Text('BottomSheet'),
+      );
+    }).closed.whenComplete(() {
+      showBottomSheetThenCalled = true;
+    });
+
+    await tester.pumpAndSettle();
+    expect(showBottomSheetThenCalled, isFalse);
+    expect(find.text('BottomSheet'), findsOneWidget);
+
+    // Swipe the bottom sheet to dismiss it.
+    await tester.drag(find.text('BottomSheet'), const Offset(0.0, 150.0));
+    await tester.pumpAndSettle(); // Bottom sheet dismiss animation.
+    expect(showBottomSheetThenCalled, isTrue);
+    expect(find.text('BottomSheet'), findsNothing);
+  });
+
+  testWidgets('Swiping down a BottomSheet should not dismiss it when enableDrag is false', (WidgetTester tester) async {
+
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    bool showBottomSheetThenCalled = false;
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        key: scaffoldKey,
+        body: const Center(child: Text('body')),
+      ),
+    ));
+
+    await tester.pump();
+    expect(showBottomSheetThenCalled, isFalse);
+    expect(find.text('BottomSheet'), findsNothing);
+
+    scaffoldKey.currentState!.showBottomSheet<void>((BuildContext context) {
+      return const SizedBox(
+        height: 200.0,
+        child: Text('BottomSheet'),
+      );
+    },
+    enableDrag: false
+    ).closed.whenComplete(() {
+      showBottomSheetThenCalled = true;
+    });
+
+    await tester.pumpAndSettle();
+    expect(showBottomSheetThenCalled, isFalse);
+    expect(find.text('BottomSheet'), findsOneWidget);
+
+    // Swipe the bottom sheet, attempting to dismiss it.
+    await tester.drag(find.text('BottomSheet'), const Offset(0.0, 150.0));
+    await tester.pumpAndSettle(); // Bottom sheet should not dismiss.
+    expect(showBottomSheetThenCalled, isFalse);
+    expect(find.text('BottomSheet'), findsOneWidget);
+  });
+
+  testWidgets('Swiping down a BottomSheet should dismiss it when enableDrag is true', (WidgetTester tester) async {
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    bool showBottomSheetThenCalled = false;
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        key: scaffoldKey,
+        body: const Center(child: Text('body')),
+      ),
+    ));
+
+    await tester.pump();
+    expect(showBottomSheetThenCalled, isFalse);
+    expect(find.text('BottomSheet'), findsNothing);
+
+    scaffoldKey.currentState!.showBottomSheet<void>((BuildContext context) {
+      return const SizedBox(
+        height: 200.0,
+        child: Text('BottomSheet'),
+      );
+    },
+     enableDrag: true
+    ).closed.whenComplete(() {
+      showBottomSheetThenCalled = true;
+    });
+
+    await tester.pumpAndSettle();
+    expect(showBottomSheetThenCalled, isFalse);
+    expect(find.text('BottomSheet'), findsOneWidget);
+
+    // Swipe the bottom sheet to dismiss it.
+    await tester.drag(find.text('BottomSheet'), const Offset(0.0, 150.0));
+    await tester.pumpAndSettle(); // Bottom sheet dismiss animation.
+    expect(showBottomSheetThenCalled, isTrue);
+    expect(find.text('BottomSheet'), findsNothing);
+  });
+
+  testWidgets('Modal BottomSheet builder should only be called once', (WidgetTester tester) async {
+    late BuildContext savedContext;
+
+    await tester.pumpWidget(MaterialApp(
+      home: Builder(
+        builder: (BuildContext context) {
+          savedContext = context;
+          return Container();
+        },
+      ),
+    ));
+
+    int numBuilderCalls = 0;
+    showModalBottomSheet<void>(
+      context: savedContext,
+      isDismissible: false,
+      enableDrag: true,
+      builder: (BuildContext context) {
+        numBuilderCalls++;
+        return const Text('BottomSheet');
+      },
+    );
+
+    await tester.pumpAndSettle();
+    expect(numBuilderCalls, 1);
+
+    // Swipe the bottom sheet to dismiss it.
+    await tester.drag(find.text('BottomSheet'), const Offset(0.0, 150.0));
+    await tester.pumpAndSettle(); // Bottom sheet dismiss animation.
+    expect(numBuilderCalls, 1);
+  });
+
   testWidgets('Tapping on a modal BottomSheet should not dismiss it', (WidgetTester tester) async {
     late BuildContext savedContext;
 

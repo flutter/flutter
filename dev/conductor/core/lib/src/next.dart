@@ -4,13 +4,13 @@
 
 import 'package:args/command_runner.dart';
 import 'package:file/file.dart' show File;
-import 'package:meta/meta.dart' show visibleForTesting, visibleForOverriding;
-import './globals.dart';
-import './proto/conductor_state.pb.dart' as pb;
-import './proto/conductor_state.pbenum.dart';
-import './repository.dart';
-import './state.dart' as state_import;
-import './stdio.dart';
+
+import 'context.dart';
+import 'globals.dart';
+import 'proto/conductor_state.pb.dart' as pb;
+import 'proto/conductor_state.pbenum.dart';
+import 'repository.dart';
+import 'state.dart' as state_import;
 
 const String kStateOption = 'state-file';
 const String kYesFlag = 'yes';
@@ -68,21 +68,21 @@ class NextCommand extends Command<void> {
 ///
 /// Any calls to functions that cause side effects are wrapped in methods to
 /// allow overriding in unit tests.
-class NextContext {
-  NextContext({
+class NextContext extends Context {
+  const NextContext({
     required this.autoAccept,
     required this.force,
-    required this.checkouts,
-    required this.stateFile,
-  });
+    required Checkouts checkouts,
+    required File stateFile,
+  }) : super(
+    checkouts: checkouts,
+    stateFile: stateFile,
+  );
 
   final bool autoAccept;
   final bool force;
-  final Checkouts checkouts;
-  final File stateFile;
 
   Future<void> run(pb.ConductorState state) async {
-    final Stdio stdio = checkouts.stdio;
     const List<CherrypickState> finishedStates = <CherrypickState>[
       CherrypickState.COMPLETED,
       CherrypickState.ABANDONED,
@@ -141,10 +141,9 @@ class NextContext {
               '${state.engine.checkoutPath} before proceeding.\n');
         }
         if (autoAccept == false) {
-          final bool response = prompt(
-              'Are you ready to push your engine branch to the repository '
-              '${state.engine.mirror.url}?',
-              stdio,
+          final bool response = await prompt(
+            'Are you ready to push your engine branch to the repository '
+            '${state.engine.mirror.url}?',
           );
           if (!response) {
             stdio.printError('Aborting command.');
@@ -168,9 +167,8 @@ class NextContext {
         ].join('\n'));
         if (autoAccept == false) {
           // TODO(fujino): actually test if binaries have been codesigned on macOS
-          final bool response = prompt(
-              'Has CI passed for the engine PR and binaries been codesigned?',
-              stdio,
+          final bool response = await prompt(
+            'Has CI passed for the engine PR and binaries been codesigned?',
           );
           if (!response) {
             stdio.printError('Aborting command.');
@@ -209,14 +207,14 @@ class NextContext {
         final String engineRevision = await engine.reverseParse('HEAD');
 
         final Remote upstream = Remote(
-            name: RemoteName.upstream,
-            url: state.framework.upstream.url,
+          name: RemoteName.upstream,
+          url: state.framework.upstream.url,
         );
         final FrameworkRepository framework = FrameworkRepository(
-            checkouts,
-            initialRef: state.framework.workingBranch,
-            upstreamRemote: upstream,
-            previousCheckoutLocation: state.framework.checkoutPath,
+          checkouts,
+          initialRef: state.framework.workingBranch,
+          upstreamRemote: upstream,
+          previousCheckoutLocation: state.framework.checkoutPath,
         );
 
         // Check if the current candidate branch is enabled
@@ -276,10 +274,9 @@ class NextContext {
         }
 
         if (autoAccept == false) {
-          final bool response = prompt(
-              'Are you ready to push your framework branch to the repository '
-              '${state.framework.mirror.url}?',
-              stdio,
+          final bool response = await prompt(
+            'Are you ready to push your framework branch to the repository '
+            '${state.framework.mirror.url}?',
           );
           if (!response) {
             stdio.printError('Aborting command.');
@@ -289,10 +286,10 @@ class NextContext {
         }
 
         await framework.pushRef(
-            fromRef: 'HEAD',
-            // Explicitly create new branch
-            toRef: 'refs/heads/${state.framework.workingBranch}',
-            remote: state.framework.mirror.name,
+          fromRef: 'HEAD',
+          // Explicitly create new branch
+          toRef: 'refs/heads/${state.framework.workingBranch}',
+          remote: state.framework.mirror.name,
         );
         break;
       case pb.ReleasePhase.PUBLISH_VERSION:
@@ -311,10 +308,9 @@ class NextContext {
         );
         final String headRevision = await framework.reverseParse('HEAD');
         if (autoAccept == false) {
-          final bool response = prompt(
-              'Are you ready to tag commit $headRevision as ${state.releaseVersion}\n'
-              'and push to remote ${state.framework.upstream.url}?',
-              stdio,
+          final bool response = await prompt(
+            'Are you ready to tag commit $headRevision as ${state.releaseVersion}\n'
+            'and push to remote ${state.framework.upstream.url}?',
           );
           if (!response) {
             stdio.printError('Aborting command.');
@@ -347,10 +343,7 @@ class NextContext {
               dryRun: true,
           );
 
-          final bool response = prompt(
-              'Are you ready to publish this release?',
-              stdio,
-          );
+          final bool response = await prompt('Are you ready to publish this release?');
           if (!response) {
             stdio.printError('Aborting command.');
             updateState(state, stdio.logs);
@@ -370,10 +363,7 @@ class NextContext {
             '\t$kLuciPackagingConsoleLink',
         );
         if (autoAccept == false) {
-          final bool response = prompt(
-              'Have all packaging builds finished successfully?',
-              stdio,
-          );
+          final bool response = await prompt('Have all packaging builds finished successfully?');
           if (!response) {
             stdio.printError('Aborting command.');
             updateState(state, stdio.logs);
@@ -390,31 +380,5 @@ class NextContext {
     stdio.printStatus(state_import.phaseInstructions(state));
 
     updateState(state, stdio.logs);
-  }
-
-  /// Save the release's [state].
-  ///
-  /// This can be overridden by frontends that may not persist the state to
-  /// disk, and/or may need to call additional update hooks each time the state
-  /// is updated.
-  @visibleForOverriding
-  void updateState(pb.ConductorState state, [List<String> logs = const <String>[]]) {
-    state_import.writeStateToFile(stateFile, state, logs);
-  }
-
-  @visibleForTesting
-  bool prompt(String message, Stdio stdio) {
-    stdio.write('${message.trim()} (y/n) ');
-    final String response = stdio.readLineSync().trim();
-    final String firstChar = response[0].toUpperCase();
-    if (firstChar == 'Y') {
-      return true;
-    }
-    if (firstChar == 'N') {
-      return false;
-    }
-    throw ConductorException(
-      'Unknown user input (expected "y" or "n"): $response',
-    );
   }
 }

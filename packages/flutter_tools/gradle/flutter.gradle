@@ -137,14 +137,16 @@ class FlutterPlugin implements Plugin<Project> {
         this.project = project
 
         def rootProject = project.rootProject
-        rootProject.tasks.register('generateLockfiles') {
-            rootProject.subprojects.each { subproject ->
-                def gradlew = (OperatingSystem.current().isWindows()) ?
-                    "${rootProject.projectDir}/gradlew.bat" : "${rootProject.projectDir}/gradlew"
-                rootProject.exec {
-                    workingDir rootProject.projectDir
-                    executable gradlew
-                    args ":${subproject.name}:dependencies", "--write-locks"
+        if (isFlutterAppProject()) {
+            rootProject.tasks.register('generateLockfiles') {
+                rootProject.subprojects.each { subproject ->
+                    def gradlew = (OperatingSystem.current().isWindows()) ?
+                        "${rootProject.projectDir}/gradlew.bat" : "${rootProject.projectDir}/gradlew"
+                    rootProject.exec {
+                        workingDir rootProject.projectDir
+                        executable gradlew
+                        args ":${subproject.name}:dependencies", "--write-locks"
+                    }
                 }
             }
         }

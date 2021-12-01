@@ -145,6 +145,21 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
     terminatePids(ProcessSignal.sigkill);
   }
 
+  @override
+  Future<void> handleExtensionEvent(vm.Event event) async {
+    await super.handleExtensionEvent(event);
+
+    switch (event.kind) {
+      case vm.EventKind.kExtension:
+        switch (event.extensionKind) {
+          case 'Flutter.ServiceExtensionStateChanged':
+            _sendServiceExtensionStateChanged(event.extensionData);
+            break;
+        }
+        break;
+    }
+  }
+
   /// Called by [launchRequest] to request that we actually start the app to be run/debugged.
   ///
   /// For debugging, this should start paused, connect to the VM Service, set
@@ -443,6 +458,16 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
     } on DebugAdapterException catch (error) {
       final String action = fullRestart ? 'Hot Restart' : 'Hot Reload';
       sendOutput('console', 'Failed to $action: $error');
+    }
+  }
+
+  void _sendServiceExtensionStateChanged(vm.ExtensionData? extensionData) {
+    final Map<String, dynamic>? data = extensionData?.data;
+    if (data != null) {
+      sendEvent(
+        RawEventBody(data),
+        eventType: 'flutter.serviceExtensionStateChanged',
+      );
     }
   }
 }
