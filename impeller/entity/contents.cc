@@ -19,6 +19,12 @@
 
 namespace impeller {
 
+static ContentRenderer::Options OptionsFromPass(const RenderPass& pass) {
+  ContentRenderer::Options opts;
+  opts.sample_count = pass.GetRenderTarget().GetSampleCount();
+  return opts;
+}
+
 /*******************************************************************************
  ******* Contents
  ******************************************************************************/
@@ -85,7 +91,7 @@ bool LinearGradientContents::Render(const ContentRenderer& renderer,
 
   Command cmd;
   cmd.label = "LinearGradientFill";
-  cmd.pipeline = renderer.GetGradientFillPipeline();
+  cmd.pipeline = renderer.GetGradientFillPipeline(OptionsFromPass(pass));
   cmd.stencil_reference = entity.GetStencilDepth();
   cmd.BindVertices(
       vertices_builder.CreateVertexBuffer(pass.GetTransientsBuffer()));
@@ -142,7 +148,7 @@ bool SolidColorContents::Render(const ContentRenderer& renderer,
 
   Command cmd;
   cmd.label = "SolidFill";
-  cmd.pipeline = renderer.GetSolidFillPipeline();
+  cmd.pipeline = renderer.GetSolidFillPipeline(OptionsFromPass(pass));
   cmd.stencil_reference = entity.GetStencilDepth();
   cmd.BindVertices(
       CreateSolidFillVertices(entity.GetPath(), pass.GetTransientsBuffer()));
@@ -241,7 +247,7 @@ bool TextureContents::Render(const ContentRenderer& renderer,
 
   Command cmd;
   cmd.label = "TextureFill";
-  cmd.pipeline = renderer.GetTexturePipeline();
+  cmd.pipeline = renderer.GetTexturePipeline(OptionsFromPass(pass));
   cmd.stencil_reference = entity.GetStencilDepth();
   cmd.BindVertices(vertex_builder.CreateVertexBuffer(host_buffer));
   VS::BindFrameInfo(cmd, host_buffer.EmplaceUniform(frame_info));
@@ -336,7 +342,7 @@ bool SolidStrokeContents::Render(const ContentRenderer& renderer,
   Command cmd;
   cmd.primitive_type = PrimitiveType::kTriangleStrip;
   cmd.label = "SolidStroke";
-  cmd.pipeline = renderer.GetSolidStrokePipeline();
+  cmd.pipeline = renderer.GetSolidStrokePipeline(OptionsFromPass(pass));
   cmd.stencil_reference = entity.GetStencilDepth();
   cmd.BindVertices(
       CreateSolidStrokeVertices(entity.GetPath(), pass.GetTransientsBuffer()));
@@ -372,7 +378,7 @@ bool ClipContents::Render(const ContentRenderer& renderer,
 
   Command cmd;
   cmd.label = "Clip";
-  cmd.pipeline = renderer.GetClipPipeline();
+  cmd.pipeline = renderer.GetClipPipeline(OptionsFromPass(pass));
   cmd.stencil_reference = entity.GetStencilDepth() + 1u;
   cmd.BindVertices(
       CreateSolidFillVertices(entity.GetPath(), pass.GetTransientsBuffer()));

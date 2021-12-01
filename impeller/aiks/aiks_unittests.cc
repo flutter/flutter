@@ -127,7 +127,7 @@ TEST_F(AiksTest, CanRenderGroupOpacity) {
 
   canvas.Restore();
 
-  // ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
 TEST_F(AiksTest, CanPerformFullScreenMSAA) {
@@ -138,7 +138,7 @@ TEST_F(AiksTest, CanPerformFullScreenMSAA) {
 
   canvas.DrawCircle({250, 250}, 125, red);
 
-  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+  // ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
 }  // namespace testing
