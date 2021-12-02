@@ -5,13 +5,9 @@
 #ifndef FLUTTER_SHELL_PLATFORM_WINDOWS_KEYBOARD_HOOK_HANDLER_H_
 #define FLUTTER_SHELL_PLATFORM_WINDOWS_KEYBOARD_HOOK_HANDLER_H_
 
-#include "flutter/shell/platform/windows/public/flutter_windows.h"
-
 #include <string>
 
 namespace flutter {
-
-class FlutterWindowsView;
 
 // Interface for classes that handles keyboard input events.
 //
@@ -27,8 +23,7 @@ class KeyboardHandlerBase {
   //
   // Returns true if the key event has been handled, to indicate that other
   // handlers should not be called for this event.
-  virtual bool KeyboardHook(FlutterWindowsView* view,
-                            int key,
+  virtual bool KeyboardHook(int key,
                             int scancode,
                             int action,
                             char32_t character,
@@ -36,8 +31,7 @@ class KeyboardHandlerBase {
                             bool was_down) = 0;
 
   // A function for hooking into Unicode text input.
-  virtual void TextHook(FlutterWindowsView* view,
-                        const std::u16string& text) = 0;
+  virtual void TextHook(const std::u16string& text) = 0;
 
   // Handler for IME compose begin events.
   //

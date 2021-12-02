@@ -382,7 +382,7 @@ void FlutterWindowsView::SendPointerLeave(PointerState* state) {
 
 void FlutterWindowsView::SendText(const std::u16string& text) {
   for (const auto& handler : keyboard_handlers_) {
-    handler->TextHook(this, text);
+    handler->TextHook(text);
   }
 }
 
@@ -393,7 +393,7 @@ bool FlutterWindowsView::SendKey(int key,
                                  bool extended,
                                  bool was_down) {
   for (const auto& handler : keyboard_handlers_) {
-    if (handler->KeyboardHook(this, key, scancode, action, character, extended,
+    if (handler->KeyboardHook(key, scancode, action, character, extended,
                               was_down)) {
       // key event was handled, so don't send to other handlers.
       return true;

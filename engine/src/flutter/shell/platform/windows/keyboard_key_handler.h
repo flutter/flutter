@@ -5,19 +5,16 @@
 #ifndef FLUTTER_SHELL_PLATFORM_WINDOWS_KEYBOARD_KEY_HANDLER_H_
 #define FLUTTER_SHELL_PLATFORM_WINDOWS_KEYBOARD_KEY_HANDLER_H_
 
+#include <windows.h>
 #include <deque>
 #include <memory>
 #include <string>
 
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/basic_message_channel.h"
-#include "flutter/shell/platform/common/client_wrapper/include/flutter/binary_messenger.h"
 #include "flutter/shell/platform/windows/keyboard_handler_base.h"
-#include "flutter/shell/platform/windows/public/flutter_windows.h"
 #include "rapidjson/document.h"
 
 namespace flutter {
-
-class FlutterWindowsView;
 
 // Handles key events.
 //
@@ -92,8 +89,7 @@ class KeyboardKeyHandler : public KeyboardHandlerBase {
   // after which the channel delegate should be removed.
   //
   // Inherited from |KeyboardHandlerBase|.
-  bool KeyboardHook(FlutterWindowsView* window,
-                    int key,
+  bool KeyboardHook(int key,
                     int scancode,
                     int action,
                     char32_t character,
@@ -101,8 +97,7 @@ class KeyboardKeyHandler : public KeyboardHandlerBase {
                     bool was_down) override;
 
   // |KeyboardHandlerBase|
-  void TextHook(FlutterWindowsView* window,
-                const std::u16string& text) override;
+  void TextHook(const std::u16string& text) override;
 
   // |KeyboardHandlerBase|
   void ComposeBeginHook() override;
