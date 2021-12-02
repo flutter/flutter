@@ -128,6 +128,16 @@ class FakeSurfaceProducer : public SurfaceProducer {
       : flatland_allocator_(flatland_allocator.Bind()) {}
   ~FakeSurfaceProducer() override = default;
 
+  // |SurfaceProducer|
+  GrDirectContext* gr_context() const override { return nullptr; }
+
+  // |SurfaceProducer|
+  std::unique_ptr<SurfaceProducerSurface> ProduceOffscreenSurface(
+      const SkISize& size) override {
+    return nullptr;
+  }
+
+  // |SurfaceProducer|
   std::unique_ptr<SurfaceProducerSurface> ProduceSurface(
       const SkISize& size) override {
     auto [buffer_export_token, buffer_import_token] =
@@ -156,6 +166,7 @@ class FakeSurfaceProducer : public SurfaceProducer {
         std::move(sysmem_token_request), std::move(buffer_import_token), size);
   }
 
+  // |SurfaceProducer|
   void SubmitSurfaces(
       std::vector<std::unique_ptr<SurfaceProducerSurface>> surfaces) override {}
 
@@ -305,19 +316,22 @@ class FlatlandExternalViewEmbedderTest : public ::testing::Test {
  protected:
   FlatlandExternalViewEmbedderTest()
       : session_subloop_(loop_.StartNewLoop()),
-        fake_surface_producer_(CreateFlatlandAllocator()),
-        flatland_connection_(CreateFlatlandConnection()) {}
+        flatland_connection_(CreateFlatlandConnection()),
+        fake_surface_producer_(
+            std::make_shared<FakeSurfaceProducer>(CreateFlatlandAllocator())) {}
   ~FlatlandExternalViewEmbedderTest() override = default;
 
   async::TestLoop& loop() { return loop_; }
 
-  FakeSurfaceProducer& fake_surface_producer() {
+  std::shared_ptr<FakeSurfaceProducer> fake_surface_producer() {
     return fake_surface_producer_;
   }
 
   FakeFlatland& fake_flatland() { return fake_flatland_; }
 
-  FlatlandConnection& flatland_connection() { return flatland_connection_; }
+  std::shared_ptr<FlatlandConnection> flatland_connection() {
+    return flatland_connection_;
+  }
 
  private:
   fuchsia::ui::composition::AllocatorHandle CreateFlatlandAllocator() {
@@ -328,14 +342,14 @@ class FlatlandExternalViewEmbedderTest : public ::testing::Test {
     return flatland_allocator;
   }
 
-  FlatlandConnection CreateFlatlandConnection() {
+  std::shared_ptr<FlatlandConnection> CreateFlatlandConnection() {
     FML_CHECK(!fake_flatland_.is_flatland_connected());
     fuchsia::ui::composition::FlatlandHandle flatland =
         fake_flatland_.ConnectFlatland(session_subloop_->dispatcher());
 
     auto test_name =
         ::testing::UnitTest::GetInstance()->current_test_info()->name();
-    return FlatlandConnection(
+    return std::make_shared<FlatlandConnection>(
         std::move(test_name), std::move(flatland), []() { FAIL(); },
         [](auto...) {}, 1, fml::TimeDelta::Zero());
   }
@@ -349,9 +363,9 @@ class FlatlandExternalViewEmbedderTest : public ::testing::Test {
   std::unique_ptr<async::LoopInterface> session_subloop_;
 
   FakeFlatland fake_flatland_;
-  FakeSurfaceProducer fake_surface_producer_;
 
-  FlatlandConnection flatland_connection_;
+  std::shared_ptr<FlatlandConnection> flatland_connection_;
+  std::shared_ptr<FakeSurfaceProducer> fake_surface_producer_;
 };
 
 TEST_F(FlatlandExternalViewEmbedderTest, RootScene) {
@@ -382,7 +396,7 @@ TEST_F(FlatlandExternalViewEmbedderTest, RootScene) {
   EXPECT_THAT(fake_flatland().graph(), IsEmptyGraph());
 
   // Pump the loop; the contents of the initial `Present` should be processed.
-  flatland_connection().Present();
+  flatland_connection()->Present();
   loop().RunUntilIdle();
   EXPECT_THAT(fake_flatland().graph(),
               IsFlutterGraph(parent_viewport_watcher, viewport_creation_token,
@@ -411,7 +425,7 @@ TEST_F(FlatlandExternalViewEmbedderTest, SimpleScene) {
       fuchsia::ui::composition::ViewBoundProtocols{},
       parent_viewport_watcher.NewRequest(), flatland_connection(),
       fake_surface_producer());
-  flatland_connection().Present();
+  flatland_connection()->Present();
   loop().RunUntilIdle();
   fake_flatland().FireOnNextFrameBeginEvent(WithPresentCredits(1u));
   loop().RunUntilIdle();
@@ -471,7 +485,7 @@ TEST_F(FlatlandExternalViewEmbedderTest, SceneWithOneView) {
       fuchsia::ui::composition::ViewBoundProtocols{},
       parent_viewport_watcher.NewRequest(), flatland_connection(),
       fake_surface_producer());
-  flatland_connection().Present();
+  flatland_connection()->Present();
   loop().RunUntilIdle();
   fake_flatland().FireOnNextFrameBeginEvent(WithPresentCredits(1u));
   loop().RunUntilIdle();

@@ -31,8 +31,10 @@
 #include "focus_delegate.h"
 #include "fuchsia_intl.h"
 #include "gfx_platform_view.h"
+#include "software_surface_producer.h"
 #include "surface.h"
 #include "vsync_waiter.h"
+#include "vulkan_surface_producer.h"
 
 namespace flutter_runner {
 namespace {
@@ -252,13 +254,22 @@ void Engine::Initialize(
        request = parent_viewport_watcher.NewRequest(),
        view_ref_pair = std::move(view_ref_pair),
        max_frames_in_flight = product_config.get_max_frames_in_flight(),
-       vsync_offset = product_config.get_vsync_offset()]() mutable {
+       vsync_offset = product_config.get_vsync_offset(),
+       software_rendering = product_config.software_rendering()]() mutable {
         if (use_flatland) {
+          if (software_rendering) {
+            surface_producer_ = std::make_shared<SoftwareSurfaceProducer>(
+                /*scenic_session=*/nullptr);
+          } else {
+            surface_producer_ = std::make_shared<VulkanSurfaceProducer>(
+                /*scenic_session=*/nullptr);
+          }
+
           flatland_connection_ = std::make_shared<FlatlandConnection>(
               thread_label_, std::move(flatland),
               std::move(session_error_callback), [](auto) {},
               max_frames_in_flight, vsync_offset);
-          surface_producer_.emplace(/*scenic_session=*/nullptr);
+
           fuchsia::ui::views::ViewIdentityOnCreation view_identity = {
               .view_ref = std::move(view_ref_pair.view_ref),
               .view_ref_control = std::move(view_ref_pair.control_ref)};
@@ -266,18 +277,25 @@ void Engine::Initialize(
               std::make_shared<FlatlandExternalViewEmbedder>(
                   std::move(view_creation_token), std::move(view_identity),
                   std::move(flatland_view_protocols), std::move(request),
-                  *flatland_connection_.get(), surface_producer_.value(),
+                  flatland_connection_, surface_producer_,
                   intercept_all_input_);
         } else {
           session_connection_ = std::make_shared<GfxSessionConnection>(
               thread_label_, std::move(session_inspect_node),
               std::move(session), std::move(session_error_callback),
               [](auto) {}, max_frames_in_flight, vsync_offset);
-          surface_producer_.emplace(session_connection_->get());
+
+          if (software_rendering) {
+            surface_producer_ = std::make_shared<SoftwareSurfaceProducer>(
+                session_connection_->get());
+          } else {
+            surface_producer_ = std::make_shared<VulkanSurfaceProducer>(
+                session_connection_->get());
+          }
+
           external_view_embedder_ = std::make_shared<GfxExternalViewEmbedder>(
               thread_label_, std::move(view_token), std::move(view_ref_pair),
-              *session_connection_.get(), surface_producer_.value(),
-              intercept_all_input_);
+              session_connection_, surface_producer_, intercept_all_input_);
         }
         view_embedder_latch.Signal();
       }));
@@ -432,7 +450,7 @@ void Engine::Initialize(
                               ->GetTaskRunner()
                               .get(),
                           shell.GetTaskRunners().GetRasterTaskRunner().get(),
-                          surface_producer_.value(), width, height,
+                          surface_producer_, SkISize::Make(width, height),
                           flutter::PersistentCache::GetCacheForProcess()
                               ->asset_manager(),
                           skp_names, completion_callback);
@@ -443,7 +461,7 @@ void Engine::Initialize(
                                ->GetTaskRunner()
                                .get(),
                            shell.GetTaskRunners().GetRasterTaskRunner().get(),
-                           surface_producer_.value(), 1024, 600,
+                           surface_producer_, SkISize::Make(1024, 600),
                            flutter::PersistentCache::GetCacheForProcess()
                                ->asset_manager(),
                            std::nullopt, std::nullopt);
@@ -658,12 +676,15 @@ Engine::~Engine() {
   fml::AutoResetWaitableEvent view_embedder_latch;
   thread_host_.raster_thread->GetTaskRunner()->PostTask(
       fml::MakeCopyable([this, &view_embedder_latch]() mutable {
-        flatland_view_embedder_.reset();
-        external_view_embedder_.reset();
-        surface_producer_.reset();
-        flatland_connection_.reset();
-        session_connection_.reset();
-
+        if (flatland_view_embedder_ != nullptr) {
+          flatland_view_embedder_.reset();
+          flatland_connection_.reset();
+          surface_producer_.reset();
+        } else {
+          external_view_embedder_.reset();
+          surface_producer_.reset();
+          session_connection_.reset();
+        }
         view_embedder_latch.Signal();
       }));
   view_embedder_latch.Wait();
@@ -835,19 +856,16 @@ void Engine::WriteProfileToTrace() const {
 void Engine::WarmupSkps(
     fml::BasicTaskRunner* concurrent_task_runner,
     fml::BasicTaskRunner* raster_task_runner,
-    VulkanSurfaceProducer& surface_producer,
-    uint64_t width,
-    uint64_t height,
+    std::shared_ptr<SurfaceProducer> surface_producer,
+    SkISize size,
     std::shared_ptr<flutter::AssetManager> asset_manager,
     std::optional<const std::vector<std::string>> skp_names,
     std::optional<std::function<void(uint32_t)>> completion_callback) {
-  SkISize size = SkISize::Make(width, height);
-
   // We use a raw pointer here because we want to keep this alive until all gpu
   // work is done and the callbacks skia takes for this are function pointers
   // so we are unable to use a lambda that captures the smart pointer.
   SurfaceProducerSurface* skp_warmup_surface =
-      surface_producer.ProduceOffscreenSurface(size).release();
+      surface_producer->ProduceOffscreenSurface(size).release();
   if (!skp_warmup_surface) {
     FML_LOG(ERROR) << "Failed to create offscreen warmup surface";
     // Tell client that zero shaders were warmed up because warmup failed.
@@ -860,7 +878,7 @@ void Engine::WarmupSkps(
   // tell concurrent task runner to deserialize all skps available from
   // the asset manager
   concurrent_task_runner->PostTask([raster_task_runner, skp_warmup_surface,
-                                    &surface_producer, asset_manager, skp_names,
+                                    surface_producer, asset_manager, skp_names,
                                     completion_callback]() {
     TRACE_DURATION("flutter", "DeserializeSkps");
     std::vector<std::unique_ptr<fml::Mapping>> skp_mappings;
@@ -903,32 +921,40 @@ void Engine::WarmupSkps(
       // Tell raster task runner to warmup have the compositor
       // context warm up the newly deserialized picture
       raster_task_runner->PostTask([skp_warmup_surface, picture,
-                                    &surface_producer, completion_callback, i,
+                                    surface_producer, completion_callback, i,
                                     count = skp_mappings.size()] {
         TRACE_DURATION("flutter", "WarmupSkp");
         skp_warmup_surface->GetSkiaSurface()->getCanvas()->drawPicture(picture);
 
-        if (i < count - 1) {
-          // For all but the last skp we fire and forget
-          surface_producer.gr_context()->flushAndSubmit();
-        } else {
-          // For the last skp we provide a callback that frees the warmup
-          // surface and calls the completion callback
-          struct GrFlushInfo flush_info;
-          flush_info.fFinishedContext = skp_warmup_surface;
-          flush_info.fFinishedProc = [](void* skp_warmup_surface) {
-            delete static_cast<SurfaceProducerSurface*>(skp_warmup_surface);
-          };
-
-          surface_producer.gr_context()->flush(flush_info);
-          surface_producer.gr_context()->submit();
-
-          // We call this here instead of inside fFinishedProc above because
+        if (i == count - 1) {
+          // We call this here instead of inside fFinishedProc below because
           // we want to unblock the dart animation code as soon as the raster
           // thread is free to enque work, rather than waiting for the GPU work
           // itself to finish.
           if (completion_callback.has_value() && completion_callback.value()) {
             completion_callback.value()(count);
+          }
+        }
+
+        if (surface_producer->gr_context()) {
+          if (i < count - 1) {
+            // For all but the last skp we fire and forget
+            surface_producer->gr_context()->flushAndSubmit();
+          } else {
+            // For the last skp we provide a callback that frees the warmup
+            // surface and calls the completion callback
+            struct GrFlushInfo flush_info;
+            flush_info.fFinishedContext = skp_warmup_surface;
+            flush_info.fFinishedProc = [](void* skp_warmup_surface) {
+              delete static_cast<SurfaceProducerSurface*>(skp_warmup_surface);
+            };
+
+            surface_producer->gr_context()->flush(flush_info);
+            surface_producer->gr_context()->submit();
+          }
+        } else {
+          if (i == count - 1) {
+            delete skp_warmup_surface;
           }
         }
       });
