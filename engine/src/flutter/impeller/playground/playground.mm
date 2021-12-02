@@ -6,6 +6,7 @@
 
 #include "flutter/fml/paths.h"
 #include "flutter/testing/testing.h"
+#include "impeller/base/validation.h"
 #include "impeller/image/compressed_image.h"
 #include "impeller/playground/playground.h"
 #include "impeller/renderer/allocator.h"
@@ -140,7 +141,7 @@ bool Playground::OpenPlaygroundHere(Renderer::RenderCallback render_callback) {
     auto current_drawable = [layer nextDrawable];
 
     if (!current_drawable) {
-      FML_LOG(ERROR) << "Could not acquire current drawable.";
+      VALIDATION_LOG << "Could not acquire current drawable.";
       return false;
     }
 
@@ -207,7 +208,7 @@ bool Playground::OpenPlaygroundHere(Renderer::RenderCallback render_callback) {
     };
 
     if (!renderer_.Render(surface, wrapped_callback)) {
-      FML_LOG(ERROR) << "Could not render into the surface.";
+      VALIDATION_LOG << "Could not render into the surface.";
       return false;
     }
 
@@ -228,7 +229,7 @@ std::shared_ptr<Texture> Playground::CreateTextureForFixture(
   // simplicity.
   auto image = compressed_image.Decode().ConvertToRGBA();
   if (!image.IsValid()) {
-    FML_LOG(ERROR) << "Could not find fixture named " << fixture_name;
+    VALIDATION_LOG << "Could not find fixture named " << fixture_name;
     return nullptr;
   }
 
@@ -241,7 +242,7 @@ std::shared_ptr<Texture> Playground::CreateTextureForFixture(
       renderer_.GetContext()->GetPermanentsAllocator()->CreateTexture(
           StorageMode::kHostVisible, texture_descriptor);
   if (!texture) {
-    FML_LOG(ERROR) << "Could not allocate texture for fixture " << fixture_name;
+    VALIDATION_LOG << "Could not allocate texture for fixture " << fixture_name;
     return nullptr;
   }
   texture->SetLabel(fixture_name);
@@ -249,7 +250,7 @@ std::shared_ptr<Texture> Playground::CreateTextureForFixture(
   auto uploaded = texture->SetContents(image.GetAllocation()->GetMapping(),
                                        image.GetAllocation()->GetSize());
   if (!uploaded) {
-    FML_LOG(ERROR) << "Could not upload texture to device memory for fixture "
+    VALIDATION_LOG << "Could not upload texture to device memory for fixture "
                    << fixture_name;
     return nullptr;
   }

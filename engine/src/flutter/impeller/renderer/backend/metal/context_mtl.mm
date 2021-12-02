@@ -20,7 +20,7 @@ static NSArray<id<MTLLibrary>>* ShaderLibrariesFromFiles(
   NSMutableArray<id<MTLLibrary>>* found_libraries = [NSMutableArray array];
   for (const auto& library_path : libraries_paths) {
     if (!fml::IsFile(library_path)) {
-      FML_LOG(ERROR) << "Shader library does not exist at path '"
+      VALIDATION_LOG << "Shader library does not exist at path '"
                      << library_path << "'";
       continue;
     }
@@ -61,7 +61,7 @@ ContextMTL::ContextMTL(const std::vector<std::string>& libraries_paths)
     auto library = std::shared_ptr<ShaderLibraryMTL>(new ShaderLibraryMTL(
         ShaderLibrariesFromFiles(device_, libraries_paths)));
     if (!library->IsValid()) {
-      FML_DLOG(ERROR) << "Could not create valid Metal shader library.";
+      VALIDATION_LOG << "Could not create valid Metal shader library.";
       return;
     }
     shader_library_ = std::move(library);

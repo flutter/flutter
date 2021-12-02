@@ -38,8 +38,6 @@ class ContentRenderer {
   struct Options {
     SampleCount sample_count = SampleCount::kCount1;
 
-    Options() {}
-
     struct Hash {
       constexpr std::size_t operator()(const Options& o) const {
         return fml::HashCombine(o.sample_count);

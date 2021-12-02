@@ -6,6 +6,7 @@
 
 #include "flutter/fml/build_config.h"
 #include "flutter/fml/logging.h"
+#include "impeller/base/validation.h"
 #include "impeller/renderer/backend/metal/device_buffer_mtl.h"
 #include "impeller/renderer/backend/metal/formats_mtl.h"
 #include "impeller/renderer/backend/metal/texture_mtl.h"
@@ -113,7 +114,7 @@ std::shared_ptr<Texture> AllocatorMTL::CreateTexture(
   auto mtl_texture_desc = ToMTLTextureDescriptor(desc);
 
   if (!mtl_texture_desc) {
-    FML_DLOG(ERROR) << "Texture descriptor was invalid.";
+    VALIDATION_LOG << "Texture descriptor was invalid.";
     return nullptr;
   }
 

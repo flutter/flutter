@@ -6,6 +6,8 @@
 
 #include <stb_image.h>
 
+#include "impeller/base/validation.h"
+
 namespace impeller {
 
 CompressedImage::CompressedImage(
@@ -32,7 +34,7 @@ DecompressedImage CompressedImage::Decode() const {
                               STBI_default);
 
   if (decoded == nullptr) {
-    FML_LOG(ERROR) << "Could not decode image from host memory.";
+    VALIDATION_LOG << "Could not decode image from host memory.";
     return {};
   }
 
@@ -68,7 +70,7 @@ DecompressedImage CompressedImage::Decode() const {
   }
 
   if (components == DecompressedImage::Format::kInvalid) {
-    FML_LOG(ERROR) << "Could not detect image components when decoding.";
+    VALIDATION_LOG << "Could not detect image components when decoding.";
     return {};
   }
 

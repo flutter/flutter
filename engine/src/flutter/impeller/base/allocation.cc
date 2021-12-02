@@ -7,6 +7,7 @@
 #include <algorithm>
 
 #include "flutter/fml/logging.h"
+#include "impeller/base/validation.h"
 
 namespace impeller {
 
@@ -69,7 +70,7 @@ bool Allocation::Reserve(size_t reserved) {
     // If new length is zero, a minimum non-zero sized allocation is returned.
     // So this check will not trip and this routine will indicate success as
     // expected.
-    FML_LOG(ERROR) << "Allocation failed. Out of host memory.";
+    VALIDATION_LOG << "Allocation failed. Out of host memory.";
     return false;
   }
 
