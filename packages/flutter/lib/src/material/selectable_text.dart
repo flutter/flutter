@@ -123,11 +123,9 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
 /// behavior is useful, for example, to make the text bold while using the
 /// default font family and size.
 ///
-/// When the widget has some selection, it will keep itself from disposing via
+/// When the widget has focus, it will prevent itself from disposing via
 /// [AutomaticKeepAliveClientMixin.wantKeepAlive] in order to avoid losing the
-/// selection. This may have implications for performance and for preventing
-/// parent widgets from disposing, such as [Scrollable]s that may expect to be
-/// able to release the [PrimaryScrollController] by disposing.
+/// selection. Removing the focus will allow it to be disposed.
 ///
 /// {@tool snippet}
 ///
