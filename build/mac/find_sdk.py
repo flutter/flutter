@@ -65,8 +65,8 @@ def main():
   best_sdk = None
   sdk_output = None
   for properties in list(sdk_json):
-    # Filter out macOS DriverKit, watchOS, and other SDKs.
-    if properties.get('productName') != 'macOS':
+    # Filter out macOS DriverKit, watchOS, AppleTV, and other SDKs.
+    if properties.get('platform') != 'macosx' or 'driver' in properties.get('canonicalName'):
       continue
     sdk_version = properties['sdkVersion']
     parsed_version = parse_version(sdk_version)
