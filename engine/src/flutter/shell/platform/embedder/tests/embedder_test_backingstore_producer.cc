@@ -197,7 +197,7 @@ bool EmbedderTestBackingStoreProducer::CreateMTLTexture(
   // own MTLTexture and wrapping it.
   auto surface_size = SkISize::Make(config->size.width, config->size.height);
   auto texture_info = test_metal_context_->CreateMetalTexture(surface_size);
-  sk_cf_obj<FlutterMetalTextureHandle> texture;
+  sk_cfp<FlutterMetalTextureHandle> texture;
   texture.retain(texture_info.texture);
 
   GrMtlTextureInfo skia_texture_info;

@@ -589,7 +589,7 @@ static sk_sp<SkSurface> MakeSkSurfaceFromBackingStore(
     FML_LOG(ERROR) << "Embedder supplied null Metal texture.";
     return nullptr;
   }
-  sk_cf_obj<FlutterMetalTextureHandle> mtl_texture;
+  sk_cfp<FlutterMetalTextureHandle> mtl_texture;
   mtl_texture.retain(metal->texture.texture);
   texture_info.fTexture = mtl_texture;
   GrBackendTexture backend_texture(config.size.width,   //
