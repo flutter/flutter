@@ -31,7 +31,7 @@
 #include "gfx_external_view_embedder.h"
 #include "gfx_session_connection.h"
 #include "isolate_configurator.h"
-#include "vulkan_surface_producer.h"
+#include "surface_producer.h"
 
 namespace flutter_runner {
 
@@ -104,9 +104,8 @@ class Engine final : public fuchsia::memorypressure::Watcher {
   static void WarmupSkps(
       fml::BasicTaskRunner* concurrent_task_runner,
       fml::BasicTaskRunner* raster_task_runner,
-      VulkanSurfaceProducer& surface_producer,
-      uint64_t width,
-      uint64_t height,
+      std::shared_ptr<SurfaceProducer> surface_producer,
+      SkISize size,
       std::shared_ptr<flutter::AssetManager> asset_manager,
       std::optional<const std::vector<std::string>> skp_names,
       std::optional<std::function<void(uint32_t)>> completion_callback);
@@ -157,7 +156,7 @@ class Engine final : public fuchsia::memorypressure::Watcher {
       session_connection_;  // Must come before surface_producer_
   std::shared_ptr<FlatlandConnection>
       flatland_connection_;  // Must come before surface_producer_
-  std::optional<VulkanSurfaceProducer> surface_producer_;
+  std::shared_ptr<SurfaceProducer> surface_producer_;
   std::shared_ptr<GfxExternalViewEmbedder> external_view_embedder_;
   std::shared_ptr<FlatlandExternalViewEmbedder> flatland_view_embedder_;
 

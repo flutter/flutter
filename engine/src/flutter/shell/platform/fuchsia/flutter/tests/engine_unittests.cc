@@ -6,22 +6,23 @@
 #include <lib/async-loop/default.h>
 #include <lib/sys/cpp/component_context.h>
 
-#include "assets/directory_asset_bundle.h"
+#include "flutter/assets/directory_asset_bundle.h"
 #include "flutter/common/graphics/persistent_cache.h"
 #include "flutter/fml/memory/ref_ptr.h"
 #include "flutter/fml/message_loop_impl.h"
 #include "flutter/fml/task_runner.h"
 #include "flutter/shell/common/serialization_callbacks.h"
 #include "flutter/shell/common/thread_host.h"
-#include "flutter/shell/platform/fuchsia/flutter/gfx_session_connection.h"
+#include "third_party/skia/include/core/SkPicture.h"
+#include "third_party/skia/include/core/SkPictureRecorder.h"
+#include "third_party/skia/include/core/SkSerialProcs.h"
+
 #include "flutter/shell/platform/fuchsia/flutter/logging.h"
 #include "flutter/shell/platform/fuchsia/flutter/runner.h"
-#include "gtest/gtest.h"
-#include "include/core/SkPicture.h"
-#include "include/core/SkPictureRecorder.h"
-#include "include/core/SkSerialProcs.h"
+#include "flutter/shell/platform/fuchsia/flutter/vulkan_surface_producer.h"
 
-using namespace flutter_runner;
+#include "gtest/gtest.h"
+
 using namespace flutter;
 
 namespace flutter_runner {
@@ -74,17 +75,17 @@ class EngineTest : public ::testing::Test {
     scenic_ = context_->svc()->Connect<fuchsia::ui::scenic::Scenic>();
     session_.emplace(scenic_.get());
     surface_producer_ =
-        std::make_unique<VulkanSurfaceProducer>(&session_.value());
+        std::make_shared<VulkanSurfaceProducer>(&session_.value());
 
     Engine::WarmupSkps(&concurrent_task_runner_, &raster_task_runner_,
-                       *surface_producer_, width, height, asset_manager,
-                       std::nullopt, std::nullopt);
+                       surface_producer_, SkISize::Make(width, height),
+                       asset_manager, std::nullopt, std::nullopt);
   }
 
  protected:
   MockTaskRunner concurrent_task_runner_;
   MockTaskRunner raster_task_runner_;
-  std::unique_ptr<VulkanSurfaceProducer> surface_producer_;
+  std::shared_ptr<VulkanSurfaceProducer> surface_producer_;
 
   std::unique_ptr<sys::ComponentContext> context_;
   fuchsia::ui::scenic::ScenicPtr scenic_;

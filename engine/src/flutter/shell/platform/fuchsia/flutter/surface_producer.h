@@ -14,6 +14,7 @@
 
 #include "third_party/skia/include/core/SkSize.h"
 #include "third_party/skia/include/core/SkSurface.h"
+#include "third_party/skia/include/gpu/GrDirectContext.h"
 
 namespace flutter_runner {
 
@@ -66,6 +67,10 @@ class SurfaceProducer {
  public:
   virtual ~SurfaceProducer() = default;
 
+  virtual GrDirectContext* gr_context() const = 0;
+
+  virtual std::unique_ptr<SurfaceProducerSurface> ProduceOffscreenSurface(
+      const SkISize& size) = 0;
   virtual std::unique_ptr<SurfaceProducerSurface> ProduceSurface(
       const SkISize& size) = 0;
 

@@ -52,8 +52,8 @@ class FlatlandExternalViewEmbedder final
       fuchsia::ui::composition::ViewBoundProtocols endpoints,
       fidl::InterfaceRequest<fuchsia::ui::composition::ParentViewportWatcher>
           parent_viewport_watcher_request,
-      FlatlandConnection& flatland,
-      SurfaceProducer& surface_producer,
+      std::shared_ptr<FlatlandConnection> flatland,
+      std::shared_ptr<SurfaceProducer> surface_producer,
       bool intercept_all_input = false);
   ~FlatlandExternalViewEmbedder();
 
@@ -168,8 +168,9 @@ class FlatlandExternalViewEmbedder final
     fuchsia::ui::composition::TransformId transform_id;
   };
 
-  FlatlandConnection& flatland_;
-  SurfaceProducer& surface_producer_;
+  std::shared_ptr<FlatlandConnection> flatland_;
+  std::shared_ptr<SurfaceProducer> surface_producer_;
+
   fuchsia::ui::composition::ParentViewportWatcherPtr parent_viewport_watcher_;
 
   fuchsia::ui::composition::TransformId root_transform_id_;

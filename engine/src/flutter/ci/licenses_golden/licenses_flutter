@@ -1504,6 +1504,10 @@ FILE: ../../../flutter/shell/platform/fuchsia/flutter/runner.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/runner.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/runner_tzdata_unittest.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/runner_unittest.cc
+FILE: ../../../flutter/shell/platform/fuchsia/flutter/software_surface.cc
+FILE: ../../../flutter/shell/platform/fuchsia/flutter/software_surface.h
+FILE: ../../../flutter/shell/platform/fuchsia/flutter/software_surface_producer.cc
+FILE: ../../../flutter/shell/platform/fuchsia/flutter/software_surface_producer.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/surface.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/surface.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/surface_producer.h

@@ -103,18 +103,18 @@ GfxExternalViewEmbedder::GfxExternalViewEmbedder(
     std::string debug_label,
     fuchsia::ui::views::ViewToken view_token,
     scenic::ViewRefPair view_ref_pair,
-    GfxSessionConnection& session,
-    SurfaceProducer& surface_producer,
+    std::shared_ptr<GfxSessionConnection> session,
+    std::shared_ptr<SurfaceProducer> surface_producer,
     bool intercept_all_input)
     : session_(session),
       surface_producer_(surface_producer),
-      root_view_(session_.get(),
+      root_view_(session_->get(),
                  std::move(view_token),
                  std::move(view_ref_pair.control_ref),
                  std::move(view_ref_pair.view_ref),
                  debug_label),
-      metrics_node_(session_.get()),
-      layer_tree_node_(session_.get()) {
+      metrics_node_(session_->get()),
+      layer_tree_node_(session_->get()) {
   layer_tree_node_.SetLabel("Flutter::LayerTree");
   metrics_node_.SetLabel("Flutter::MetricsWatcher");
   metrics_node_.SetEventMask(fuchsia::ui::gfx::kMetricsEventMask);
@@ -125,7 +125,7 @@ GfxExternalViewEmbedder::GfxExternalViewEmbedder(
   // will capture all input, and any unwanted input will be reinjected into
   // embedded views.
   if (intercept_all_input) {
-    input_interceptor_node_.emplace(session_.get());
+    input_interceptor_node_.emplace(session_->get());
     input_interceptor_node_->SetLabel("Flutter::InputInterceptor");
     input_interceptor_node_->SetHitTestBehavior(
         fuchsia::ui::gfx::HitTestBehavior::kDefault);
@@ -134,7 +134,7 @@ GfxExternalViewEmbedder::GfxExternalViewEmbedder(
     metrics_node_.AddChild(input_interceptor_node_.value());
   }
 
-  session_.Present();
+  session_->Present();
 }
 
 GfxExternalViewEmbedder::~GfxExternalViewEmbedder() = default;
@@ -215,7 +215,7 @@ void GfxExternalViewEmbedder::BeginFrame(
     if (found_rect == scenic_interceptor_rects_.end()) {
       auto [emplaced_rect, success] =
           scenic_interceptor_rects_.emplace(std::make_pair(
-              rect_hash, scenic::Rectangle(session_.get(), frame_size_.width(),
+              rect_hash, scenic::Rectangle(session_->get(), frame_size_.width(),
                                            frame_size_.height())));
       FML_CHECK(success);
 
@@ -253,7 +253,7 @@ void GfxExternalViewEmbedder::SubmitFrame(
       }
 
       auto surface =
-          surface_producer_.ProduceSurface(layer.second.surface_size);
+          surface_producer_->ProduceSurface(layer.second.surface_size);
       if (!surface) {
         const std::string layer_id_str =
             layer.first.has_value() ? std::to_string(layer.first.value())
@@ -313,7 +313,7 @@ void GfxExternalViewEmbedder::SubmitFrame(
           // Expand the clip_nodes array to fit any new nodes.
           while (view_holder.clip_nodes.size() < view_mutators.clips.size()) {
             view_holder.clip_nodes.emplace_back(
-                scenic::EntityNode(session_.get()));
+                scenic::EntityNode(session_->get()));
           }
           FML_CHECK(view_holder.clip_nodes.size() >=
                     view_mutators.clips.size());
@@ -437,8 +437,8 @@ void GfxExternalViewEmbedder::SubmitFrame(
         FML_CHECK(scenic_layer_index <= scenic_layers_.size());
         if (scenic_layer_index == scenic_layers_.size()) {
           ScenicLayer new_layer{
-              .shape_node = scenic::ShapeNode(session_.get()),
-              .material = scenic::Material(session_.get()),
+              .shape_node = scenic::ShapeNode(session_->get()),
+              .material = scenic::Material(session_->get()),
           };
           new_layer.shape_node.SetMaterial(new_layer.material);
           scenic_layers_.emplace_back(std::move(new_layer));
@@ -469,7 +469,7 @@ void GfxExternalViewEmbedder::SubmitFrame(
         FML_CHECK(rect_index <= found_rects->second.size());
         if (rect_index == found_rects->second.size()) {
           found_rects->second.emplace_back(scenic::Rectangle(
-              session_.get(), layer->second.surface_size.width(),
+              session_->get(), layer->second.surface_size.width(),
               layer->second.surface_size.height()));
         }
 
@@ -524,7 +524,7 @@ void GfxExternalViewEmbedder::SubmitFrame(
   {
     TRACE_EVENT0("flutter", "SessionPresent");
 
-    session_.Present();
+    session_->Present();
   }
 
   // Render the recorded SkPictures into the surfaces.
@@ -563,7 +563,7 @@ void GfxExternalViewEmbedder::SubmitFrame(
   {
     TRACE_EVENT0("flutter", "PresentSurfaces");
 
-    surface_producer_.SubmitSurfaces(std::move(frame_surfaces));
+    surface_producer_->SubmitSurfaces(std::move(frame_surfaces));
   }
 
   // Submit the underlying render-backend-specific frame for processing.
@@ -571,9 +571,9 @@ void GfxExternalViewEmbedder::SubmitFrame(
 }
 
 void GfxExternalViewEmbedder::EnableWireframe(bool enable) {
-  session_.get()->Enqueue(
+  session_->get()->Enqueue(
       scenic::NewSetEnableDebugViewBoundsCmd(root_view_.id(), enable));
-  session_.Present();
+  session_->Present();
 }
 
 void GfxExternalViewEmbedder::CreateView(int64_t view_id,
@@ -582,10 +582,10 @@ void GfxExternalViewEmbedder::CreateView(int64_t view_id,
   FML_CHECK(scenic_views_.find(view_id) == scenic_views_.end());
 
   ScenicView new_view = {
-      .opacity_node = scenic::OpacityNodeHACK(session_.get()),
-      .transform_node = scenic::EntityNode(session_.get()),
+      .opacity_node = scenic::OpacityNodeHACK(session_->get()),
+      .transform_node = scenic::EntityNode(session_->get()),
       .view_holder = scenic::ViewHolder(
-          session_.get(),
+          session_->get(),
           scenic::ToViewHolderToken(zx::eventpair((zx_handle_t)view_id)),
           "Flutter::PlatformView"),
   };
