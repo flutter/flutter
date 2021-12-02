@@ -27,4 +27,4 @@ dev_dependencies:
     git:
       url: https://github.com/flutter/web_installers.git
       path: packages/simulators/
-      ref: 4a7b0a2c84b8993bf4d19030218de38c18838c26
+      ref: 9afed28b771da1c4e82a3382c4a2b31344c04522
