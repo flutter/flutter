@@ -69,7 +69,7 @@ const Map<String, String> identifierPrefixRewrites = <String, String>{
   '24': 'twenty_four_',
   '30': 'thirty_',
   '60': 'sixty_',
-  '123': 'onetwothree_',
+  '123': 'onetwothree',
   '360': 'threesixty',
   '2d': 'twod',
   '3d': 'threed',
