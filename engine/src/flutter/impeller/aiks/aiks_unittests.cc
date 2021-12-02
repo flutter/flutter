@@ -141,5 +141,17 @@ TEST_F(AiksTest, CanPerformFullScreenMSAA) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
+TEST_F(AiksTest, CanPerformSkew) {
+  Canvas canvas;
+
+  Paint red;
+  red.color = Color::Red();
+
+  canvas.Skew(10, 125);
+  canvas.DrawRect(Rect::MakeXYWH(0, 0, 100, 100), red);
+
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
 }  // namespace testing
 }  // namespace impeller

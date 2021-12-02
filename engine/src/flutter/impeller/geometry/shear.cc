@@ -7,10 +7,6 @@
 
 namespace impeller {
 
-std::string Shear::ToString() const {
-  std::stringstream stream;
-  stream << "{" << xy << ", " << xz << ", " << yz << "}";
-  return stream.str();
-}
+//
 
 }  // namespace impeller

@@ -65,6 +65,10 @@ void Canvas::Scale(const Vector3& scale) {
   Concat(Matrix::MakeScale(scale));
 }
 
+void Canvas::Skew(Scalar sx, Scalar sy) {
+  Concat(Matrix::MakeSkew(sx, sy));
+}
+
 void Canvas::Rotate(Radians radians) {
   Concat(Matrix::MakeRotationZ(radians));
 }
