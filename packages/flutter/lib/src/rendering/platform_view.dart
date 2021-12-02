@@ -383,6 +383,9 @@ class RenderUiKitView extends RenderBox {
     if (event is! PointerDownEvent) {
       return;
     }
+    if (!hasSize) {
+      return;
+    }
     if (!(Offset.zero & size).contains(globalToLocal(event.position))) {
       return;
     }

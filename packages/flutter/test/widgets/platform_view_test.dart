@@ -1963,6 +1963,49 @@ void main() {
       },
     );
 
+    // Reggression Test for https://github.com/flutter/flutter/issues/94528
+    testWidgets(
+      'UiKitView ignores gestures if it has no size',
+      (WidgetTester tester) async {
+
+        final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+        final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
+        viewsController.registerViewType('webview');
+
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr ,
+            child: Navigator(
+              pages:  <Page<dynamic>>[
+                const TestPage<dynamic>(
+                  child: UiKitView(viewType: 'webview'),
+                ),
+                TestPage<dynamic>(
+                  child: Center(
+                    child: GestureDetector(
+                      onTap: () {},
+                      child: const SizedBox(
+                        child: Text('Push me'),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+              onPopPage: (Route<dynamic> route, dynamic result) => route.didPop(true),
+            ),
+          ),
+        );
+
+        // First frame is before the platform view was created so the render object
+        // is not yet in the tree.
+        await tester.pump();
+
+        await tester.tap(find.text('Push me'));
+
+        expect(viewsController.gesturesAccepted[currentViewId + 1], 0);
+      },
+    );
+
     testWidgets('AndroidView rebuilt with same gestureRecognizers', (WidgetTester tester) async {
       final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
       viewsController.registerViewType('webview');
@@ -2759,4 +2802,24 @@ void main() {
     expect(controller.dispatchedPointerEvents, hasLength(1));
     expect(controller.dispatchedPointerEvents[0], isA<PointerHoverEvent>());
   });
+}
+
+class TestPage<T> extends Page<T> {
+  const TestPage({required this.child});
+
+  final Widget child;
+
+  @override
+  Route<T> createRoute(BuildContext context) {
+    return PageRouteBuilder<T>(
+      pageBuilder: (
+        BuildContext context,
+        Animation<double> animation,
+        Animation<double> secondaryAnimation,
+      ) {
+        return child;
+      },
+      settings: this,
+    );
+  }
 }
