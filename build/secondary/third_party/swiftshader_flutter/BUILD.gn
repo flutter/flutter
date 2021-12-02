@@ -270,8 +270,15 @@ source_set("pipeline") {
     "$source_root/src/Pipeline/SetupRoutine.cpp",
     "$source_root/src/Pipeline/ShaderCore.cpp",
     "$source_root/src/Pipeline/SpirvShader.cpp",
+    "$source_root/src/Pipeline/SpirvShaderArithmetic.cpp",
+    "$source_root/src/Pipeline/SpirvShaderControlFlow.cpp",
+    "$source_root/src/Pipeline/SpirvShaderEnumNames.cpp",
+    "$source_root/src/Pipeline/SpirvShaderGLSLstd450.cpp",
+    "$source_root/src/Pipeline/SpirvShaderGroup.cpp",
+    "$source_root/src/Pipeline/SpirvShaderImage.cpp",
+    "$source_root/src/Pipeline/SpirvShaderMemory.cpp",
     "$source_root/src/Pipeline/SpirvShaderSampling.cpp",
-    "$source_root/src/Pipeline/SpirvShader_dbg.cpp",
+    "$source_root/src/Pipeline/SpirvShaderSpec.cpp",
     "$source_root/src/Pipeline/VertexProgram.cpp",
     "$source_root/src/Pipeline/VertexRoutine.cpp",
   ]
@@ -340,6 +347,7 @@ source_set("reactor") {
 
   sources = [
     "$source_root/src/Reactor/Debug.cpp",
+    "$source_root/src/Reactor/EmulatedReactor.cpp",
     "$source_root/src/Reactor/ExecutableMemory.cpp",
     "$source_root/src/Reactor/Reactor.cpp",
   ]
@@ -829,13 +837,9 @@ config("swiftshader_libvulkan_private_config") {
       "VK_USE_PLATFORM_XCB_KHR",
     ]
   } else if (is_fuchsia) {
-    defines = [
-      "VK_USE_PLATFORM_FUCHSIA=1",
-    ]
+    defines = [ "VK_USE_PLATFORM_FUCHSIA=1" ]
   } else if (is_win) {
-    defines = [
-      "VK_USE_PLATFORM_WIN32_KHR=1",
-    ]
+    defines = [ "VK_USE_PLATFORM_WIN32_KHR=1" ]
   } else if (is_mac) {
     defines = [
       "VK_USE_PLATFORM_MACOS_MVK=1",
@@ -913,6 +917,7 @@ shared_library("vulkan") {
     "$source_root/src/Vulkan/VkSampler.cpp",
     "$source_root/src/Vulkan/VkSemaphore.cpp",
     "$source_root/src/Vulkan/VkShaderModule.cpp",
+    "$source_root/src/Vulkan/VkStringify.cpp",
     "$source_root/src/Vulkan/Vulkan.rc",
     "$source_root/src/Vulkan/libVulkan.cpp",
     "$source_root/src/Vulkan/main.cpp",
@@ -1161,7 +1166,7 @@ action("spvtools_generators_inc") {
 action("spvtools_build_version") {
   script = "$spirv_tools/utils/update_build_version.py"
 
-  src_dir = "."
+  src_dir = "$spirv_tools"
   inc_file = "${target_gen_dir}/build-version.inc"
 
   outputs = [ inc_file ]
@@ -1226,6 +1231,7 @@ config("spvtools_internal_config") {
 
 source_set("spvtools") {
   deps = [
+    ":spvtools_build_version",
     ":spvtools_core_tables_unified1",
     ":spvtools_generators_inc",
     ":spvtools_glsl_tables_glsl1-0",
@@ -1241,16 +1247,22 @@ source_set("spvtools") {
     "$spirv_tools/source/assembly_grammar.h",
     "$spirv_tools/source/binary.cpp",
     "$spirv_tools/source/binary.h",
+    "$spirv_tools/source/cfa.h",
     "$spirv_tools/source/diagnostic.cpp",
     "$spirv_tools/source/diagnostic.h",
     "$spirv_tools/source/disassemble.cpp",
+    "$spirv_tools/source/disassemble.h",
     "$spirv_tools/source/enum_set.h",
     "$spirv_tools/source/enum_string_mapping.cpp",
+    "$spirv_tools/source/enum_string_mapping.h",
     "$spirv_tools/source/ext_inst.cpp",
     "$spirv_tools/source/ext_inst.h",
     "$spirv_tools/source/extensions.cpp",
     "$spirv_tools/source/extensions.h",
     "$spirv_tools/source/instruction.h",
+    "$spirv_tools/source/latest_version_glsl_std_450_header.h",
+    "$spirv_tools/source/latest_version_opencl_std_header.h",
+    "$spirv_tools/source/latest_version_spirv_header.h",
     "$spirv_tools/source/libspirv.cpp",
     "$spirv_tools/source/macro.h",
     "$spirv_tools/source/name_mapper.cpp",
@@ -1263,12 +1275,17 @@ source_set("spvtools") {
     "$spirv_tools/source/parsed_operand.h",
     "$spirv_tools/source/print.cpp",
     "$spirv_tools/source/print.h",
+    "$spirv_tools/source/software_version.cpp",
     "$spirv_tools/source/spirv_constant.h",
     "$spirv_tools/source/spirv_definition.h",
     "$spirv_tools/source/spirv_endian.cpp",
     "$spirv_tools/source/spirv_endian.h",
+    "$spirv_tools/source/spirv_fuzzer_options.cpp",
+    "$spirv_tools/source/spirv_fuzzer_options.h",
     "$spirv_tools/source/spirv_optimizer_options.cpp",
     "$spirv_tools/source/spirv_optimizer_options.h",
+    "$spirv_tools/source/spirv_reducer_options.cpp",
+    "$spirv_tools/source/spirv_reducer_options.h",
     "$spirv_tools/source/spirv_target_env.cpp",
     "$spirv_tools/source/spirv_target_env.h",
     "$spirv_tools/source/spirv_validator_options.cpp",
@@ -1283,15 +1300,12 @@ source_set("spvtools") {
     "$spirv_tools/source/util/bit_vector.h",
     "$spirv_tools/source/util/bitutils.h",
     "$spirv_tools/source/util/hex_float.h",
-    "$spirv_tools/source/util/ilist.h",
-    "$spirv_tools/source/util/ilist_node.h",
     "$spirv_tools/source/util/make_unique.h",
     "$spirv_tools/source/util/parse_number.cpp",
     "$spirv_tools/source/util/parse_number.h",
     "$spirv_tools/source/util/small_vector.h",
     "$spirv_tools/source/util/string_utils.cpp",
     "$spirv_tools/source/util/string_utils.h",
-    "$spirv_tools/source/util/timer.cpp",
     "$spirv_tools/source/util/timer.h",
   ]
 
@@ -1304,6 +1318,7 @@ source_set("spvtools_val") {
   sources = [
     "$spirv_tools/source/val/basic_block.cpp",
     "$spirv_tools/source/val/construct.cpp",
+    "$spirv_tools/source/val/decoration.h",
     "$spirv_tools/source/val/function.cpp",
     "$spirv_tools/source/val/instruction.cpp",
     "$spirv_tools/source/val/validate.cpp",
@@ -1320,7 +1335,6 @@ source_set("spvtools_val") {
     "$spirv_tools/source/val/validate_composites.cpp",
     "$spirv_tools/source/val/validate_constants.cpp",
     "$spirv_tools/source/val/validate_conversion.cpp",
-    "$spirv_tools/source/val/validate_datarules.cpp",
     "$spirv_tools/source/val/validate_debug.cpp",
     "$spirv_tools/source/val/validate_decorations.cpp",
     "$spirv_tools/source/val/validate_derivatives.cpp",
@@ -1382,6 +1396,8 @@ source_set("spvtools_opt") {
     "$spirv_tools/source/opt/const_folding_rules.h",
     "$spirv_tools/source/opt/constants.cpp",
     "$spirv_tools/source/opt/constants.h",
+    "$spirv_tools/source/opt/convert_to_half_pass.cpp",
+    "$spirv_tools/source/opt/convert_to_half_pass.h",
     "$spirv_tools/source/opt/copy_prop_arrays.cpp",
     "$spirv_tools/source/opt/copy_prop_arrays.h",
     "$spirv_tools/source/opt/dead_branch_elim_pass.cpp",
@@ -1453,9 +1469,7 @@ source_set("spvtools_opt") {
     "$spirv_tools/source/opt/ir_context.h",
     "$spirv_tools/source/opt/ir_loader.cpp",
     "$spirv_tools/source/opt/ir_loader.h",
-    "$spirv_tools/source/opt/iterator.h",
     "$spirv_tools/source/opt/legalize_vector_shuffle_pass.cpp",
-    "$spirv_tools/source/opt/legalize_vector_shuffle_pass.h",
     "$spirv_tools/source/opt/licm_pass.cpp",
     "$spirv_tools/source/opt/licm_pass.h",
     "$spirv_tools/source/opt/local_access_chain_convert_pass.cpp",
@@ -1466,8 +1480,6 @@ source_set("spvtools_opt") {
     "$spirv_tools/source/opt/local_single_block_elim_pass.h",
     "$spirv_tools/source/opt/local_single_store_elim_pass.cpp",
     "$spirv_tools/source/opt/local_single_store_elim_pass.h",
-    "$spirv_tools/source/opt/local_ssa_elim_pass.cpp",
-    "$spirv_tools/source/opt/local_ssa_elim_pass.h",
     "$spirv_tools/source/opt/log.h",
     "$spirv_tools/source/opt/loop_dependence.cpp",
     "$spirv_tools/source/opt/loop_dependence.h",
@@ -1514,6 +1526,8 @@ source_set("spvtools_opt") {
     "$spirv_tools/source/opt/reflect.h",
     "$spirv_tools/source/opt/register_pressure.cpp",
     "$spirv_tools/source/opt/register_pressure.h",
+    "$spirv_tools/source/opt/relax_float_ops_pass.cpp",
+    "$spirv_tools/source/opt/relax_float_ops_pass.h",
     "$spirv_tools/source/opt/remove_duplicates_pass.cpp",
     "$spirv_tools/source/opt/remove_duplicates_pass.h",
     "$spirv_tools/source/opt/replace_invalid_opc.cpp",
@@ -1603,6 +1617,7 @@ source_set("spvtools_reduce") {
     "$spirv_tools/source/reduce/reducer.h",
     "$spirv_tools/source/reduce/reduction_opportunity.cpp",
     "$spirv_tools/source/reduce/reduction_opportunity.h",
+    "$spirv_tools/source/reduce/reduction_opportunity_finder.h",
     "$spirv_tools/source/reduce/reduction_pass.cpp",
     "$spirv_tools/source/reduce/reduction_pass.h",
     "$spirv_tools/source/reduce/reduction_util.cpp",
@@ -1617,10 +1632,6 @@ source_set("spvtools_reduce") {
     "$spirv_tools/source/reduce/remove_function_reduction_opportunity_finder.h",
     "$spirv_tools/source/reduce/remove_instruction_reduction_opportunity.cpp",
     "$spirv_tools/source/reduce/remove_instruction_reduction_opportunity.h",
-    "$spirv_tools/source/reduce/remove_opname_instruction_reduction_opportunity_finder.cpp",
-    "$spirv_tools/source/reduce/remove_opname_instruction_reduction_opportunity_finder.h",
-    "$spirv_tools/source/reduce/remove_relaxed_precision_decoration_opportunity_finder.cpp",
-    "$spirv_tools/source/reduce/remove_relaxed_precision_decoration_opportunity_finder.h",
     "$spirv_tools/source/reduce/remove_selection_reduction_opportunity.cpp",
     "$spirv_tools/source/reduce/remove_selection_reduction_opportunity.h",
     "$spirv_tools/source/reduce/remove_selection_reduction_opportunity_finder.cpp",
@@ -1635,8 +1646,6 @@ source_set("spvtools_reduce") {
     "$spirv_tools/source/reduce/structured_loop_to_selection_reduction_opportunity.h",
     "$spirv_tools/source/reduce/structured_loop_to_selection_reduction_opportunity_finder.cpp",
     "$spirv_tools/source/reduce/structured_loop_to_selection_reduction_opportunity_finder.h",
-    "$spirv_tools/source/spirv_reducer_options.cpp",
-    "$spirv_tools/source/spirv_reducer_options.h",
   ]
   deps = [
     ":spvtools",
