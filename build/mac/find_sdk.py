@@ -76,9 +76,11 @@ def main():
       sdk_output = properties['sdkPath']
 
   if not best_sdk:
+    print(sdk_json_output)
     raise Exception('No %s+ SDK found' % min_sdk_version)
 
   if options.verify and best_sdk != min_sdk_version and not options.sdk_path:
+    print(sdk_json_output)
     sys.stderr.writelines([
       '',
       '                                           vvvvvvv',
