@@ -29,6 +29,11 @@ void main() {
       return AndroidSemanticsNode.deserialize(data);
     }
 
+    Future<void> sendSemanticsFocus(SerializableFinder finder) async {
+      final int id = await driver.getSemanticsId(finder);
+      await driver.requestData('sendSemanticsFocus#$id');
+    }
+
     // The version of TalkBack running on the device.
     Version talkbackVersion;
 
@@ -148,6 +153,10 @@ void main() {
           matching: find.byType('Semantics'),
           firstMatchOnly: true,
         );
+        // Make sure the focus is on the back button.
+        await sendSemanticsFocus(find.byValueKey(backButtonKeyValue));
+        await Future<void>.delayed(const Duration(milliseconds: 500));
+
         expect(
           await getSemantics(normalTextField),
           hasAndroidSemantics(
@@ -157,8 +166,7 @@ void main() {
             isFocused: false,
             isPassword: false,
             actions: <AndroidSemanticsAction>[
-              if (talkbackVersion < fixedTalkback) AndroidSemanticsAction.accessibilityFocus,
-              if (talkbackVersion >= fixedTalkback) AndroidSemanticsAction.clearAccessibilityFocus,
+              AndroidSemanticsAction.accessibilityFocus,
               AndroidSemanticsAction.click,
             ],
           ),

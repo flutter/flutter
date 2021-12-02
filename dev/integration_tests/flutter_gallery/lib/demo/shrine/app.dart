@@ -112,9 +112,7 @@ TextTheme _buildShrineTextTheme(TextTheme base) {
 
 const ColorScheme kShrineColorScheme = ColorScheme(
   primary: kShrinePink100,
-  primaryVariant: kShrineBrown900,
   secondary: kShrinePink50,
-  secondaryVariant: kShrineBrown900,
   surface: kShrineSurfaceWhite,
   background: kShrineBackgroundWhite,
   error: kShrineErrorRed,

@@ -62,7 +62,7 @@ void main() {
         validateFlutterVersion(client1),
         validateFlutterVersion(client2)]
       );
-    }, skip: true); // DDS failure: https://github.com/dart-lang/sdk/issues/46696
+    });
   });
 
   group('Clients of flutter run on web with DDS disabled', () {
