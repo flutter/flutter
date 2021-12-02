@@ -190,7 +190,7 @@ class PageController extends ScrollController {
   ///
   /// The `duration` and `curve` arguments must not be null.
   ///
-  /// The `callPageChangeAtEnd` sets a condition if the [PageView] onPageChanged 
+  /// The `callPageChangeAtEnd` sets a condition if the [PageView] onPageChanged
   /// should be called only when scrolling reaches the end.
   ///
   /// Default value is false.
