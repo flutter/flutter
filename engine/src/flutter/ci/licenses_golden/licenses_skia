@@ -1,4 +1,4 @@
-Signature: 70800fa1d8d4916b3208b9178968c665
+Signature: 68f40261e4124d67e7c34c8ccff8060d
 
 UNUSED LICENSES:
 
@@ -2447,6 +2447,8 @@ FILE: ../../../third_party/skia/experimental/bazel_test/hello_world.go
 FILE: ../../../third_party/skia/experimental/graphite/include/BackendTexture.h
 FILE: ../../../third_party/skia/experimental/graphite/include/Context.h
 FILE: ../../../third_party/skia/experimental/graphite/include/GraphiteTypes.h
+FILE: ../../../third_party/skia/experimental/graphite/include/Recorder.h
+FILE: ../../../third_party/skia/experimental/graphite/include/Recording.h
 FILE: ../../../third_party/skia/experimental/graphite/include/SkStuff.h
 FILE: ../../../third_party/skia/experimental/graphite/include/TextureInfo.h
 FILE: ../../../third_party/skia/experimental/graphite/include/mtl/MtlBackendContext.h
@@ -2488,9 +2490,7 @@ FILE: ../../../third_party/skia/experimental/graphite/src/Image_Graphite.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/Image_Graphite.h
 FILE: ../../../third_party/skia/experimental/graphite/src/ProgramCache.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/Recorder.cpp
-FILE: ../../../third_party/skia/experimental/graphite/src/Recorder.h
 FILE: ../../../third_party/skia/experimental/graphite/src/Recording.cpp
-FILE: ../../../third_party/skia/experimental/graphite/src/Recording.h
 FILE: ../../../third_party/skia/experimental/graphite/src/RenderPassTask.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/RenderPassTask.h
 FILE: ../../../third_party/skia/experimental/graphite/src/Renderer.h
