@@ -19,6 +19,7 @@ const Set<PointerDeviceKind> _kTouchLikeDeviceTypes = <PointerDeviceKind>{
   PointerDeviceKind.touch,
   PointerDeviceKind.stylus,
   PointerDeviceKind.invertedStylus,
+  PointerDeviceKind.unknown,
 };
 
 /// The default overscroll indicator applied on [TargetPlatform.android].
