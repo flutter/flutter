@@ -212,7 +212,10 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
 
     Future<Evaluation> evaluateNode(SemanticsNode node) async {
       Evaluation result = const Evaluation.pass();
-      if (node.isInvisible || node.isMergedIntoParent || node.hasFlag(ui.SemanticsFlag.isHidden))
+      if (node.isInvisible ||
+          node.isMergedIntoParent ||
+          node.hasFlag(ui.SemanticsFlag.isHidden) ||
+          (node.hasFlag(ui.SemanticsFlag.hasEnabledState) && !node.hasFlag(ui.SemanticsFlag.isEnabled)))
         return result;
       final SemanticsData data = node.getSemanticsData();
       final List<SemanticsNode> children = <SemanticsNode>[];

@@ -177,6 +177,29 @@ void main() {
       expect(result.passed, true);
       handle.dispose();
     });
+
+    testWidgets('Disabled button is excluded from text contrast guideline', (WidgetTester tester) async {
+      // Regression test https://github.com/flutter/flutter/issues/94428
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        _boilerplate(
+          ElevatedButton(
+            onPressed: null,
+            child: Container(
+              width: 200.0,
+              height: 200.0,
+              color: Colors.yellow,
+              child: const Text(
+                'this is a test',
+                style: TextStyle(fontSize: 14.0, color: Colors.yellowAccent),
+              ),
+            ),
+          ),
+        )
+      );
+      await expectLater(tester, meetsGuideline(textContrastGuideline));
+      handle.dispose();
+    });
   });
 
   group('custom minimum contrast guideline', () {
