@@ -47,6 +47,8 @@ class Canvas {
 
   void Scale(const Vector3& scale);
 
+  void Skew(Scalar sx, Scalar sy);
+
   void Rotate(Radians radians);
 
   void DrawPath(Path path, Paint paint);

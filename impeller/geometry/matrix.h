@@ -80,6 +80,15 @@ struct Matrix {
     // clang-format on
   }
 
+  static constexpr Matrix MakeSkew(Scalar sx, Scalar sy) {
+    // clang-format off
+    return Matrix(1.0, sy , 0.0, 0.0,
+                  sx , 1.0, 0.0, 0.0,
+                  0.0, 0.0, 1.0, 0.0,
+                  0.0, 0.0, 0.0, 1.0);
+    // clang-format on
+  }
+
   static Matrix MakeRotation(Scalar radians, const Vector4& r) {
     const Vector4 v = r.Normalize();
 
@@ -112,8 +121,8 @@ struct Matrix {
   }
 
   static Matrix MakeRotationX(Radians r) {
-    Scalar cosine = cos(r.radians);
-    Scalar sine = sin(r.radians);
+    const Scalar cosine = cos(r.radians);
+    const Scalar sine = sin(r.radians);
     // clang-format off
     return Matrix(
       1.0,  0.0,    0.0,    0.0,
@@ -125,8 +134,8 @@ struct Matrix {
   }
 
   static Matrix MakeRotationY(Radians r) {
-    Scalar cosine = cos(r.radians);
-    Scalar sine = sin(r.radians);
+    const Scalar cosine = cos(r.radians);
+    const Scalar sine = sin(r.radians);
 
     // clang-format off
     return Matrix(
@@ -139,8 +148,8 @@ struct Matrix {
   }
 
   static Matrix MakeRotationZ(Radians r) {
-    Scalar cosine = cos(r.radians);
-    Scalar sine = sin(r.radians);
+    const Scalar cosine = cos(r.radians);
+    const Scalar sine = sin(r.radians);
 
     // clang-format off
     return Matrix (
@@ -196,12 +205,14 @@ struct Matrix {
   }
 
   constexpr Matrix Transpose() const {
+    // clang-format off
     return {
-        m[0], m[4], m[8],  m[12],  //
-        m[1], m[5], m[9],  m[13],  //
-        m[2], m[6], m[10], m[14],  //
-        m[3], m[7], m[11], m[15],  //
+        m[0], m[4], m[8],  m[12],
+        m[1], m[5], m[9],  m[13],
+        m[2], m[6], m[10], m[14],
+        m[3], m[7], m[11], m[15],
     };
+    // clang-format on
   }
 
   Matrix Invert() const;
