@@ -2,12 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
-import 'text_editing.dart';
+import 'intents.dart';
 
-/// An [Intent] to send the event straight to the engine.
+/// An [Intent] to send the inpput event straight to the engine.
+///
+/// Text input widgets should typically use this [Intent] instead of
+/// [DoNothingIntent], to indicate the text-input-related event that triggered
+/// the [Intent] should be handled by the engine instead of the Flutter
+/// framework.
 ///
 /// See also:
 ///
@@ -17,9 +22,23 @@ class DoNothingAndStopPropagationTextIntent extends Intent {
   const DoNothingAndStopPropagationTextIntent();
 }
 
-class PrivateTextInputCommand extends Intent {
-  const PrivateTextInputCommand(this.methodCall);
+/// An [Intent] that represent a command that isn't recognized by the Flutter
+/// framework.
+///
+/// {@template flutter.services.textEditingIntents.privateCommands}
+/// Some input method editors may define "private" commands to implement
+/// domain-specific features that are only known between certain input methods
+/// and their clients.
+///
+/// For instance, on Android there is `InputConnection.performPrivateCommand`,
+/// and on macOS there is `-[NSTextInputClient doCommandBySelector:]`.
+/// {@endtemplate}
+class PerformPrivateTextInputCommandIntent extends Intent {
+  /// Creates a [PerformPrivateTextInputCommandIntent], using the unrecognized
+  /// [TextInput] [MethodCall].
+  const PerformPrivateTextInputCommandIntent(this.methodCall);
 
+  /// The [methodCall] that isn't recognized by [IntentTextInputConnection].
   final MethodCall methodCall;
 }
 
@@ -262,28 +281,21 @@ class PerformIMEActionIntent extends Intent {
 }
 
 class UpdateTextEditingValueIntent extends Intent {
-  const UpdateTextEditingValueIntent.apply(this.modify, {
+  UpdateTextEditingValueIntent(this.newValue, {
     this.cause = SelectionChangedCause.keyboard,
   });
 
-  UpdateTextEditingValueIntent.withNewValue(TextEditingValue newTextEditingValue, {
-    SelectionChangedCause cause = SelectionChangedCause.keyboard,
-  }) : this.apply(_constValue(newTextEditingValue), cause: cause);
-
-  UpdateTextEditingValueIntent.withDeltas(Iterable<TextEditingDelta> deltas, {
-    SelectionChangedCause cause = SelectionChangedCause.keyboard,
-  }) : this.apply(_withDeltas(deltas), cause: cause);
-
-  final TextEditingValue Function(TextEditingValue) modify;
+  final TextEditingValue newValue;
   final SelectionChangedCause cause;
+}
 
-  static TextEditingValue Function(TextEditingValue) _constValue(TextEditingValue newTextEditingValue) {
-    return (TextEditingValue oldValue) => newTextEditingValue;
-  }
+class UpdateTextEditingValueWtihDeltasIntent extends Intent {
+  UpdateTextEditingValueWtihDeltasIntent(this. deltas, {
+    this.cause = SelectionChangedCause.keyboard
+  });
 
-  static TextEditingValue Function(TextEditingValue) _withDeltas(Iterable<TextEditingDelta> deltas) {
-    return (TextEditingValue oldValue) => deltas.fold(oldValue, (TextEditingValue value, TextEditingDelta delta) => delta.apply(value));
-  }
+  final Iterable<TextEditingDelta> deltas;
+  final SelectionChangedCause cause;
 }
 
 class TextInputConnectionControlIntent extends Intent {

@@ -1950,7 +1950,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   // on, we need this offset to correctly render and move the cursor.
   Offset get _floatingCursorOffset => Offset(0, renderEditable.preferredLineHeight / 2);
 
-  @override
   void updateFloatingCursor(RawFloatingCursorPoint point) {
     _floatingCursorResetController ??= AnimationController(
       vsync: this,
@@ -2833,7 +2832,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   // null if no promptRect should be shown.
   TextRange? _currentPromptRectRange;
 
-  @override
   void showAutocorrectionPromptRect(int start, int end) {
     setState(() {
       _currentPromptRectRange = TextRange(start: start, end: end);
@@ -2927,13 +2925,50 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   void _updateText(UpdateTextEditingValueIntent intent) {
     if (intent.cause == SelectionChangedCause.keyboard) {
-      updateEditingValue(intent.modify(_value));
+      updateEditingValue(intent.newValue);
     } else {
-      userUpdateTextEditingValue(
-        intent.modify(_value),
-        intent.cause,
-      );
+      userUpdateTextEditingValue(intent.newValue, intent.cause);
     }
+  }
+
+  void _updateTextWithDeltas(UpdateTextEditingValueWtihDeltasIntent intent) {
+    final TextEditingValue newValue = intent.deltas.fold(_value, (TextEditingValue value, TextEditingDelta delta) => delta.apply(value));
+    if (intent.cause == SelectionChangedCause.keyboard) {
+      updateEditingValue(newValue);
+    } else {
+      userUpdateTextEditingValue(newValue, intent.cause);
+    }
+  }
+
+  void _performAutofill(PerformAutofillIntent intent) {
+    final TextEditingValue? autofillValue = intent.autofillValue[_effectiveAutofillClient.autofillId];
+    if (autofillValue == null) {
+      return;
+    }
+    autofill(autofillValue);
+  }
+
+  void _performPrivateCommand(PerformPrivateTextInputCommandIntent intent) {
+    if (intent.methodCall.method != 'TextInputClient.performPrivateCommand') {
+      return;
+    }
+
+    final List<dynamic> args = intent.methodCall.arguments as List<dynamic>;
+    final Map<String, dynamic> firstArg = args[1] as Map<String, dynamic>;
+    widget.onAppPrivateCommand?.call(
+      firstArg['action'] as String,
+      firstArg['data'] as Map<String, dynamic>,
+    );
+  }
+
+  void _handleFloatingCursorUpdate(UpdateFloatingCursorIntent intent) {
+    updateFloatingCursor(intent.floatingCursorPoint);
+  }
+
+  void _highlightAutocorrectText(HighlightAutocorrectTextRangeIntent intent) {
+    setState(() {
+      _currentPromptRectRange = intent.highlightRange;
+    });
   }
 
   void _controlConnection(TextInputConnectionControlIntent intent) {
@@ -3000,7 +3035,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     )),
 
     UpdateTextEditingValueIntent: _makeOverridable(CallbackAction<UpdateTextEditingValueIntent>(onInvoke: _updateText)),
+    UpdateTextEditingValueWtihDeltasIntent: _makeOverridable(CallbackAction<UpdateTextEditingValueWtihDeltasIntent>(onInvoke: _updateTextWithDeltas)),
     TextInputConnectionControlIntent: _makeOverridable(CallbackAction<TextInputConnectionControlIntent>(onInvoke: _controlConnection)),
+
+    PerformAutofillIntent: _makeOverridable(CallbackAction<PerformAutofillIntent>(onInvoke: _performAutofill)),
+    PerformPrivateTextInputCommandIntent: _makeOverridable(CallbackAction<PerformPrivateTextInputCommandIntent>(onInvoke: _performPrivateCommand)),
+    UpdateFloatingCursorIntent: _makeOverridable(CallbackAction<UpdateFloatingCursorIntent>(onInvoke: _handleFloatingCursorUpdate)),
+    HighlightAutocorrectTextRangeIntent: _makeOverridable(CallbackAction<HighlightAutocorrectTextRangeIntent>(onInvoke: _highlightAutocorrectText)),
   };
 
   @override

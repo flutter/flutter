@@ -7,31 +7,18 @@ import 'dart:convert' show jsonDecode;
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'text_input_utils.dart';
-
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   group('DeltaTextInputClient', () {
-    late FakeTextChannel fakeTextChannel;
-
-    setUp(() {
-      fakeTextChannel = FakeTextChannel((MethodCall call) async {});
-      TextInput.setChannel(fakeTextChannel);
-    });
-
-    tearDown(() {
-      TextInputConnection.debugResetId();
-      TextInput.setChannel(SystemChannels.textInput);
-    });
-
     test(
       'DeltaTextInputClient send the correct configuration to the platform and responds to updateEditingValueWithDeltas method correctly',
       () async {
         // Assemble a TextInputConnection so we can verify its change in state.
         final FakeDeltaTextInputClient client = FakeDeltaTextInputClient(TextEditingValue.empty);
         const TextInputConfiguration configuration = TextInputConfiguration(enableDeltaModel: true);
-        TextInput.attach(client, configuration);
+        final TextInputConnection connection = TextInput.attach(client, configuration);
+        assert(connection.attached, isTrue);
         expect(client.configuration.enableDeltaModel, true);
 
         expect(client.latestMethodCall, isEmpty);
@@ -49,17 +36,14 @@ void main() {
             ' "composingExtent": -1}';
 
         // Send updateEditingValueWithDeltas message.
-        final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
-          'args': <dynamic>[
-            1,
-            jsonDecode('{"deltas": [$jsonDelta]}'),
-          ],
-          'method': 'TextInputClient.updateEditingStateWithDeltas',
-        });
+        final ByteData messageBytes = SystemChannels.textInput.codec.encodeMethodCall(
+          MethodCall(
+            'TextInputClient.updateEditingStateWithDeltas',
+            <dynamic>[ -1, jsonDecode('{"deltas": [$jsonDelta]}') ],
+          ),
+        );
         await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
-          'flutter/textinput',
-          messageBytes,
-              (ByteData? _) {},
+          SystemChannels.textInput.name, messageBytes, (ByteData? _) {},
         );
 
         expect(client.latestMethodCall, 'updateEditingValueWithDeltas');

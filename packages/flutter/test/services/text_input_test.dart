@@ -211,7 +211,7 @@ void main() {
     });
   });
 
-  group('TextInput message channels - with intent connection', () {
+  group('TextInput commands are translated to the right intent(s)', () {
     late FakeTextChannel fakeTextChannel;
     late FakeIntentTextInputConnection fakeConnection;
 
@@ -227,54 +227,216 @@ void main() {
       TextInput.setChannel(SystemChannels.textInput);
     });
 
-    test('text input client handler responds to reattach with setClient', () async {
+    void ensureConnected() {
+      assert(fakeConnection.attached);
       const TextInputConfiguration dummyConfiugration = TextInputConfiguration();
       fakeTextChannel.validateOutgoingMethodCalls(<MethodCall>[
         MethodCall('TextInput.setClient', <dynamic>[1, dummyConfiugration.toJson()]),
       ]);
+    }
 
+    test('reconnect', () async {
+      ensureConnected();
       fakeTextChannel.incoming!(const MethodCall('TextInputClient.requestExistingInputState'));
-      expect(fakeConnection.intentSink, <Intent>[TextInputConnectionControlIntent.reconnect]);
-
-      //expect(fakeTextChannel.outgoingCalls.length, 3);
-      //fakeTextChannel.validateOutgoingMethodCalls(<MethodCall>[
-      //  // From original attach
-      //  MethodCall('TextInput.setClient', <dynamic>[1, dummyConfiugration.toJson()]),
-      //  // From requestExistingInputState
-      //  MethodCall('TextInput.setClient', <dynamic>[1, dummyConfiugration.toJson()]),
-      //  MethodCall('TextInput.setEditingState', client.currentTextEditingValue.toJSON()),
-      //]);
+      expect(fakeConnection.intentSink, equals(<Intent>[TextInputConnectionControlIntent.reconnect]));
     });
 
-    test('text input client handler responds to reattach with setClient (null TextEditingValue)', () async {
-      final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
-      TextInput.attach(client, client.configuration);
-      fakeTextChannel.validateOutgoingMethodCalls(<MethodCall>[
-        MethodCall('TextInput.setClient', <dynamic>[1, client.configuration.toJson()]),
-      ]);
+    test('autofill', () async {
+      ensureConnected();
+      const TextEditingValue editingValue = TextEditingValue(text: 'it is just a flesh wound');
+      fakeTextChannel.incoming!(MethodCall(
+        'TextInputClient.updateEditingStateWithTag',
+        <dynamic>[<String, dynamic>{ 'id': editingValue.toJSON() }],
+      ));
+      expect(fakeConnection.intentSink?.length, 1);
+      final PerformAutofillIntent? receivedIntent = fakeConnection.intentSink?.first as PerformAutofillIntent?;
 
-      fakeTextChannel.incoming!(const MethodCall('TextInputClient.requestExistingInputState'));
+      expect(receivedIntent?.autofillValue, <String, dynamic> { 'id': editingValue });
+    });
 
-      expect(fakeTextChannel.outgoingCalls.length, 3);
-      fakeTextChannel.validateOutgoingMethodCalls(<MethodCall>[
-        // From original attach
-        MethodCall('TextInput.setClient', <dynamic>[1, client.configuration.toJson()]),
-        // From original attach
-        MethodCall('TextInput.setClient', <dynamic>[1, client.configuration.toJson()]),
-        // From requestExistingInputState
-        const MethodCall(
-          'TextInput.setEditingState',
-          <String, dynamic>{
-            'text': '',
-            'selectionBase': -1,
-            'selectionExtent': -1,
-            'selectionAffinity': 'TextAffinity.downstream',
-            'selectionIsDirectional': false,
-            'composingBase': -1,
-            'composingExtent': -1,
-          },
-        ),
-      ]);
+    test('close connection', () async {
+      ensureConnected();
+      fakeTextChannel.incoming!(const MethodCall('TextInputClient.onConnectionClosed', <dynamic>[1]));
+      expect(fakeConnection.intentSink, equals(<Intent>[TextInputConnectionControlIntent.close]));
+    });
+
+    test('performAction', () async {
+      ensureConnected();
+      const MethodCall methodCall = MethodCall(
+          'TextInputClient.performAction',
+          <dynamic>[1,  'TextInputAction.emergencyCall'],
+      );
+      fakeTextChannel.incoming!(methodCall);
+      expect(fakeConnection.intentSink?.length, 1);
+      final PerformIMEActionIntent? receivedIntent = fakeConnection.intentSink?.first as PerformIMEActionIntent?;
+      expect(receivedIntent?.textInputAction, TextInputAction.emergencyCall);
+    });
+
+    test('performPrivateCommand', () async {
+      ensureConnected();
+      final MethodCall methodCall = MethodCall(
+          'TextInputClient.performPrivateCommand',
+          <dynamic>[1, jsonDecode('{"action": "actionCommand", "data": {"input_context" : "abcdefg"}}')],
+      );
+      fakeTextChannel.incoming!(methodCall);
+      expect(fakeConnection.intentSink?.length, 1);
+      final PerformPrivateTextInputCommandIntent? receivedIntent = fakeConnection.intentSink?.first as PerformPrivateTextInputCommandIntent?;
+      expect(receivedIntent?.methodCall, methodCall);
+    });
+
+    test('show ios autocorrection highlight', () async {
+      ensureConnected();
+      fakeTextChannel.incoming!(const MethodCall('TextInputClient.showAutocorrectionPromptRect', <dynamic>[1, 0, 1]));
+      expect(fakeConnection.intentSink?.length, 1);
+      final HighlightAutocorrectTextRangeIntent? receivedIntent = fakeConnection.intentSink?.first as HighlightAutocorrectTextRangeIntent?;
+      expect(receivedIntent?.highlightRange, const TextRange(start: 0, end: 1));
+    });
+
+    test('update ios floating cursor', () async {
+      ensureConnected();
+      fakeTextChannel.incoming!(const MethodCall(
+        'TextInputClient.updateFloatingCursor',
+        <dynamic>[1,  'FloatingCursorDragState.update', <String, dynamic>{ 'X': 123.0, 'Y': 321.0,},],
+      ));
+      expect(fakeConnection.intentSink?.length, 1);
+      final UpdateFloatingCursorIntent? receivedIntent = fakeConnection.intentSink?.first as UpdateFloatingCursorIntent?;
+      expect(receivedIntent?.floatingCursorPoint.state, FloatingCursorDragState.Update);
+      expect(receivedIntent?.floatingCursorPoint.offset, const Offset(123, 321));
+    });
+
+    test('update EditingValue', () async {
+      ensureConnected();
+      const TextEditingValue editingValue = TextEditingValue(text: 'it is just a flesh wound');
+      fakeTextChannel.incoming!(MethodCall(
+        'TextInputClient.updateEditingState',
+        <dynamic>[1,  editingValue.toJSON()],
+      ));
+      expect(fakeConnection.intentSink?.length, 1);
+      final UpdateTextEditingValueIntent? receivedIntent = fakeConnection.intentSink?.first as UpdateTextEditingValueIntent?;
+      expect(receivedIntent?.cause, SelectionChangedCause.keyboard);
+      expect(receivedIntent?.newValue, editingValue);
+    });
+
+    test('update EditingValue with deltas', () async {
+      ensureConnected();
+      const Map<String, dynamic> jsonDelta = <String, dynamic>{
+        'oldText': '',
+        'deltaText': 'let there be text',
+        'deltaStart': 0,
+        'deltaEnd': 0,
+        'selectionBase': 17,
+        'selectionExtent': 17,
+        'selectionAffinity' : 'TextAffinity.downstream',
+        'selectionIsDirectional': false,
+        'composingBase': -1,
+        'composingExtent': -1,
+      };
+
+      fakeTextChannel.incoming!(const MethodCall(
+        'TextInputClient.updateEditingStateWithDeltas',
+        <dynamic>[1,  <String, dynamic>{ 'deltas': <Map<String, dynamic>>[jsonDelta] }],
+      ));
+      expect(fakeConnection.intentSink?.length, 1);
+      final UpdateTextEditingValueWtihDeltasIntent? receivedIntent = fakeConnection.intentSink?.first as UpdateTextEditingValueWtihDeltasIntent?;
+      expect(receivedIntent?.cause, SelectionChangedCause.keyboard);
+      expect(receivedIntent?.deltas.length, 1);
+      expect(receivedIntent?.deltas.first, isA<TextEditingDeltaInsertion>());
+    });
+
+    test('delete', () async {
+      ensureConnected();
+      const List<bool> trueFalse = <bool>[true, false];
+
+      // Delete character.
+      for (final bool value in trueFalse) {
+        fakeTextChannel.incoming!(MethodCall('TextInputClient.DeleteCharacterIntent', <dynamic>[1,  value]));
+        expect(fakeConnection.intentSink?.length, 1);
+        final DeleteCharacterIntent? receivedIntent = fakeConnection.intentSink?.first as DeleteCharacterIntent?;
+        expect(receivedIntent?.forward, value);
+      }
+
+      // Delete word.
+      for (final bool value in trueFalse) {
+        fakeTextChannel.incoming!(MethodCall('TextInputClient.DeleteToNextWordBoundaryIntent', <dynamic>[1,  value]));
+        expect(fakeConnection.intentSink?.length, 1);
+        final DeleteToNextWordBoundaryIntent? receivedIntent = fakeConnection.intentSink?.first as DeleteToNextWordBoundaryIntent?;
+        expect(receivedIntent?.forward, value);
+      }
+      // Delete line.
+      for (final bool value in trueFalse) {
+        fakeTextChannel.incoming!(MethodCall('TextInputClient.DeleteToLineBreakIntent', <dynamic>[1,  value]));
+        expect(fakeConnection.intentSink?.length, 1);
+        final DeleteToLineBreakIntent? receivedIntent = fakeConnection.intentSink?.first as DeleteToLineBreakIntent?;
+        expect(receivedIntent?.forward, value);
+      }
+    });
+
+    test('change selection', () async {
+      ensureConnected();
+      const List<bool> trueFalse = <bool>[true, false];
+
+      // Extend by character.
+      for (final bool forward in trueFalse) {
+        for (final bool collapseSelection in trueFalse) {
+          fakeTextChannel.incoming!(MethodCall('TextInputClient.ExtendSelectionByCharacterIntent', <dynamic>[1,  forward, collapseSelection]));
+          expect(fakeConnection.intentSink?.length, 1);
+          final ExtendSelectionByCharacterIntent? receivedIntent = fakeConnection.intentSink?.first as ExtendSelectionByCharacterIntent?;
+          expect(receivedIntent?.forward, forward);
+          expect(receivedIntent?.collapseSelection, collapseSelection);
+        }
+      }
+
+      // Extend by word.
+      for (final bool forward in trueFalse) {
+        for (final bool collapseSelection in trueFalse) {
+          fakeTextChannel.incoming!(MethodCall('TextInputClient.ExtendSelectionToNextWordBoundaryIntent', <dynamic>[1,  forward, collapseSelection]));
+          expect(fakeConnection.intentSink?.length, 1);
+          final ExtendSelectionToNextWordBoundaryIntent? receivedIntent = fakeConnection.intentSink?.first as ExtendSelectionToNextWordBoundaryIntent?;
+          expect(receivedIntent?.forward, forward);
+          expect(receivedIntent?.collapseSelection, collapseSelection);
+        }
+      }
+
+      // Extend by word.
+      for (final bool forward in trueFalse) {
+        fakeTextChannel.incoming!(MethodCall('TextInputClient.ExtendSelectionToNextWordBoundaryOrCaretLocationIntent', <dynamic>[1,  forward]));
+        expect(fakeConnection.intentSink?.length, 1);
+        final ExtendSelectionToNextWordBoundaryOrCaretLocationIntent? receivedIntent = fakeConnection.intentSink?.first as ExtendSelectionToNextWordBoundaryOrCaretLocationIntent?;
+        expect(receivedIntent?.forward, forward);
+      }
+
+     // Extend to line boundary.
+     for (final bool forward in trueFalse) {
+        for (final bool collapseSelection in trueFalse) {
+          fakeTextChannel.incoming!(MethodCall('TextInputClient.ExtendSelectionToLineBreakIntent', <dynamic>[1,  forward, collapseSelection]));
+          expect(fakeConnection.intentSink?.length, 1);
+          final ExtendSelectionToLineBreakIntent? receivedIntent = fakeConnection.intentSink?.first as ExtendSelectionToLineBreakIntent?;
+          expect(receivedIntent?.forward, forward);
+          expect(receivedIntent?.collapseSelection, collapseSelection);
+        }
+      }
+
+     // Extend vertically.
+     for (final bool forward in trueFalse) {
+        for (final bool collapseSelection in trueFalse) {
+          fakeTextChannel.incoming!(MethodCall('TextInputClient.ExtendSelectionVerticallyToAdjacentLineIntent', <dynamic>[1,  forward, collapseSelection]));
+          expect(fakeConnection.intentSink?.length, 1);
+          final ExtendSelectionVerticallyToAdjacentLineIntent? receivedIntent = fakeConnection.intentSink?.first as ExtendSelectionVerticallyToAdjacentLineIntent?;
+          expect(receivedIntent?.forward, forward);
+          expect(receivedIntent?.collapseSelection, collapseSelection);
+        }
+      }
+
+     // Extend to document boundary.
+     for (final bool forward in trueFalse) {
+        for (final bool collapseSelection in trueFalse) {
+          fakeTextChannel.incoming!(MethodCall('TextInputClient.ExtendSelectionToDocumentBoundaryIntent', <dynamic>[1,  forward, collapseSelection]));
+          expect(fakeConnection.intentSink?.length, 1);
+          final ExtendSelectionToDocumentBoundaryIntent? receivedIntent = fakeConnection.intentSink?.first as ExtendSelectionToDocumentBoundaryIntent?;
+          expect(receivedIntent?.forward, forward);
+          expect(receivedIntent?.collapseSelection, collapseSelection);
+        }
+      }
     });
   });
 

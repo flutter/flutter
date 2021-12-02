@@ -14,11 +14,11 @@ import 'dart:ui' show
   hashValues;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
 import 'autofill.dart';
 import 'clipboard.dart' show Clipboard;
+import 'intents.dart';
 import 'message_codec.dart';
 import 'platform_channel.dart';
 import 'system_channels.dart';
@@ -1106,38 +1106,79 @@ abstract class TextInputClient {
   void connectionClosed();
 }
 
+/// An interface to receive granular information from [TextInput].
+///
+/// See also:
+///
+///  * [TextInput.attach]
+///  * [TextInputConfiguration], to opt-in to receive [TextEditingDelta]'s from
+///    the platforms [TextInput] you must set [TextInputConfiguration.enableDeltaModel]
+///    to true.
+abstract class DeltaTextInputClient extends TextInputClient {
+  /// Requests that this client update its editing state by applying the deltas
+  /// received from the engine.
+  ///
+  /// The list of [TextEditingDelta]'s are treated as changes that will be applied
+  /// to the client's editing state. A change is any mutation to the raw text
+  /// value, or any updates to the selection and/or composing region.
+  ///
+  /// Here is an example of what implementation of this method could look like:
+  /// {@tool snippet}
+  /// @override
+  /// void updateEditingValueWithDeltas(List<TextEditingDelta> textEditingDeltas) {
+  ///   TextEditingValue newValue = _previousValue;
+  ///   for (final TextEditingDelta delta in textEditingDeltas) {
+  ///     newValue = delta.apply(newValue);
+  ///   }
+  ///   _localValue = newValue;
+  /// }
+  /// {@end-tool}
+  void updateEditingValueWithDeltas(List<TextEditingDelta> textEditingDeltas);
+}
+
 /// A bidirectional communication channel between the current active text input
-/// field and the system's text input control.
+/// field and the system's text input control (for example, onscreen keyboards
+/// on mobile devices, and input method editors).
 ///
 /// Once established, a connection can be used to send messages to, and receive
-/// commands from the platform's text input plugin. The [TextInputConnection]
+/// commands from the system's text input control. The [TextInputConnection]
 /// class provides concrete implementations for sending messages to the text
 /// input plugin (the host platform's text input system) via the
-/// [SystemChannels.textInput] method channel. Subclasses must implement
-/// [_handleMethodCallInvocation] to handle commands sent by the
-/// system's text input control. Some systems can send "dynamic" commands to an
-/// input field. For instance, on Android there is
-/// `InputConnection.performPrivateCommand`, and on macOS there is
-/// `-[NSTextInputClient doCommandBySelector:]`.
+/// [SystemChannels.textInput] method channel. Subclasses must handle commands
+/// sent by the system's text input control. See the [IntentTextInputConnection]
+/// class for more information.
 ///
 /// ## Lifecycle
 ///
-/// An input connection is typically initiated by a Flutter text input field
-/// when it gains focus. In some rare occasions the platform will request a
-/// "restart" from the Flutter framework when it loses track of the current
-/// input state, and the framework should typically drop the current connection,
-/// if any, and establish a new input connection to the platform's text input.
+/// **Creation**: a [TextInputConnection] is typically created and owned by a
+/// Flutter text input field. The Flutter text input widget is also responsible
+/// for initiating the connection. It must attach the input connection to the
+/// [TextInput] singleton before it can interact with the text input plugin,
+/// which can be done by either calling [TextInput.attachConnection], or
+/// [TextInput.attach] if the text input field is a [TextInputClient].
 ///
 /// There can be at most one attached input connection at any given time per
 /// application.
 ///
-/// The connection can be terminated by either the Flutter framework, when the
-/// input field decides it should stop receiving input (for example, when it
-/// loses focus), or the platform (for example, the user switches to a different
-/// tab on the web).
+/// **Reconnect**: In rare occasions the platform will request a "restart"
+/// from the Flutter framework when it loses track of the current input state,
+/// and the framework should typically re-connect by calling
+/// [TextInput.attachConnection] using the existing [TextInputConnection]
+/// object, then call [TextInputConnection.setEditingState] to send the current
+/// [TextEditingValue] of the connected text field to the platform.
 ///
-/// This class is extended by the [IntentTextInputConnection] class in the
-/// flutter framework.
+/// **Termination**: The connection can be terminated by either the Flutter
+/// framework, when the input field decides it should stop receiving input (for
+/// example, when it loses focus), or the platform (for example, the user
+/// switches to a different tab on the web), in which case the connected text
+/// field will receive a notification via the [TextInputConnection].
+///
+/// See also:
+///
+///  * [IntentTextInputConnection], a subclass that translates incoming text
+///    input commands into [Intent]s.
+///  * [TextInput.attach], a method used to establish a [TextInputConnection]
+///    between the system's text input and a [TextInputClient].
 abstract class TextInputConnection {
   TextInputConnection._() : _id = _nextId++;
 
@@ -1312,37 +1353,40 @@ abstract class TextInputConnection {
   Future<dynamic> _handleMethodCallInvocation(MethodCall methodCall);
 }
 
-/// An interface for interacting with a text input control.
+/// An abstract [TextInputConnection] that use [Intent]s to represent text input
+/// commands sent from the platfrom's text input plugin.
+///
+/// Subclasses must implement the [dispatchTextInputIntent] method to dispatch
+/// the translated [Intent]s to the connected text input field (typically also
+/// the input field that currently has the primary focus).
 ///
 /// See also:
 ///
-///  * [TextInput.attach], a method used to establish a [TextInputConnection]
-///    between the system's text input and a [TextInputClient].
-///  * [EditableText], a [TextInputClient] that connects to and interacts with
-///    the system's text input using a [TextInputConnection].
+///  * [EditableText], a text input widget that receives text input commands
+///   from
 abstract class IntentTextInputConnection extends TextInputConnection {
+  /// Creates an [IntentTextInputConnection].
   IntentTextInputConnection() : super._();
 
   Iterable<Intent> _methodCallToIntent(MethodCall methodCall) sync* {
     final String method = methodCall.method;
-    final List<dynamic> args = methodCall.arguments as List<dynamic>;
 
     switch (method) {
       case 'TextInputClient.requestExistingInputState':
        yield TextInputConnectionControlIntent.reconnect;
        return;
       case 'TextInputClient.updateEditingStateWithTag':
-        final Map<String, dynamic> editingValue = args[1] as Map<String, dynamic>;
+        final List<dynamic> args = methodCall.arguments as List<dynamic>;
+        final Map<String, dynamic> editingValue = args[0] as Map<String, dynamic>;
         final Map<String, TextEditingValue> autofillValue = <String, TextEditingValue>{};
-        for (final String tag in editingValue.keys) {
-          autofillValue[tag] = TextEditingValue.fromJSON(
-            editingValue[tag] as Map<String, dynamic>,
-          );
+        for (final MapEntry<String, dynamic> entry in editingValue.entries) {
+          autofillValue[entry.key] = TextEditingValue.fromJSON(entry.value as Map<String, dynamic>);
         }
         yield PerformAutofillIntent(autofillValue);
         return;
     }
 
+    final List<dynamic> args = methodCall.arguments as List<dynamic>;
     final int connectionId = args[0] as int;
     if (connectionId != _id) {
       // If the client IDs don't match, the incoming message was for a different
@@ -1363,24 +1407,20 @@ abstract class IntentTextInputConnection extends TextInputConnection {
     switch (method) {
       case 'TextInputClient.updateEditingState':
         final TextEditingValue newEditingValue = TextEditingValue.fromJSON(args[1] as Map<String, dynamic>);
-        yield UpdateTextEditingValueIntent.withNewValue(newEditingValue);
+        yield UpdateTextEditingValueIntent(newEditingValue);
         return;
       case 'TextInputClient.updateEditingStateWithDeltas':
         final List<TextEditingDelta> deltas = <TextEditingDelta>[];
 
         final Map<String, dynamic> encoded = args[1] as Map<String, dynamic>;
-
         for (final dynamic encodedDelta in encoded['deltas']) {
           final TextEditingDelta delta = TextEditingDelta.fromJSON(encodedDelta as Map<String, dynamic>);
           deltas.add(delta);
         }
-        yield UpdateTextEditingValueIntent.withDeltas(deltas);
+        yield UpdateTextEditingValueWtihDeltasIntent(deltas);
         return;
       case 'TextInputClient.performAction':
         yield PerformIMEActionIntent(_toTextInputAction(args[1] as String));
-        return;
-      case 'TextInputClient.performPrivateCommand':
-        yield PrivateTextInputCommand(methodCall);
         return;
       case 'TextInputClient.updateFloatingCursor':
         final RawFloatingCursorPoint floatingCursorPoint = _toTextPoint(
@@ -1442,13 +1482,20 @@ abstract class IntentTextInputConnection extends TextInputConnection {
         );
         return;
     }
+    yield PerformPrivateTextInputCommandIntent(methodCall);
   }
 
   /// Handles the incoming commands sent from the embedder's text input plugin.
   @override
   Future<dynamic> _handleMethodCallInvocation(MethodCall methodCall) => dispatchTextInputIntent(_methodCallToIntent(methodCall));
 
-
+  /// Sends text input commands received from the platform's text input control
+  /// to the connected text input field.
+  ///
+  /// Some systems can send "private" commands that can only be recognized by the
+  /// input field implementer. For instance, on Android there is
+  /// `InputConnection.performPrivateCommand`, and on macOS there
+  /// is `-[NSTextInputClient doCommandBySelector:]`.
   Future<dynamic> dispatchTextInputIntent(Iterable<Intent> intents);
 }
 
@@ -1464,7 +1511,7 @@ class _TextInputConnection extends TextInputConnection {
   final TextInputConfiguration _configuration;
 
   @override
-  Future<dynamic> _handleMethodCallInvocation(MethodCall methodCall) {
+  Future<dynamic> _handleMethodCallInvocation(MethodCall methodCall) async {
     final String method = methodCall.method;
 
     // The requestExistingInputState request needs to be handled regardless of
@@ -1475,7 +1522,7 @@ class _TextInputConnection extends TextInputConnection {
       if (editingValue != null) {
         TextInput._instance._setEditingState(editingValue);
       }
-      return Future<dynamic>.value();
+      return;
     }
 
     final List<dynamic> args = methodCall.arguments as List<dynamic>;
@@ -1495,7 +1542,7 @@ class _TextInputConnection extends TextInputConnection {
         }
       }
 
-      return Future<dynamic>.value();
+      return;
     }
 
     final int client = args[0] as int;
@@ -1512,12 +1559,25 @@ class _TextInputConnection extends TextInputConnection {
         return true;
       }());
       if (!debugAllowAnyway)
-        return Future<dynamic>.value();
+        return;
     }
 
     switch (method) {
       case 'TextInputClient.updateEditingState':
         _client.updateEditingValue(TextEditingValue.fromJSON(args[1] as Map<String, dynamic>));
+        break;
+      case 'TextInputClient.updateEditingStateWithDeltas':
+        assert(_client is DeltaTextInputClient, 'You must be using a DeltaTextInputClient if TextInputConfiguration.enableDeltaModel is set to true');
+        final List<TextEditingDelta> deltas = <TextEditingDelta>[];
+
+        final Map<String, dynamic> encoded = args[1] as Map<String, dynamic>;
+
+        for (final dynamic encodedDelta in encoded['deltas']) {
+          final TextEditingDelta delta = TextEditingDelta.fromJSON(encodedDelta as Map<String, dynamic>);
+          deltas.add(delta);
+        }
+
+        (_client as DeltaTextInputClient).updateEditingValueWithDeltas(deltas);
         break;
       case 'TextInputClient.performAction':
         _client.performAction(_toTextInputAction(args[1] as String));
@@ -1544,7 +1604,7 @@ class _TextInputConnection extends TextInputConnection {
       default:
         throw MissingPluginException();
     }
-    return Future<dynamic>.value();
+    return;
   }
 }
 
@@ -1612,9 +1672,9 @@ RawFloatingCursorPoint _toTextPoint(FloatingCursorDragState state, Map<String, d
 /// the [TextInputClient] is asynchronous.
 ///
 /// The platform text input plugin (which represents the system's text input)
-/// and the [TextInputClient] usually maintain their own text editing states
-/// ([TextEditingValue]) separately. They must be kept in sync as long as the
-/// [TextInputClient] is connected. The following methods can be used to send
+/// and the connected Flutter text field usually maintain their own text editing
+/// states ([TextEditingValue]) separately. They must be kept in sync as long as
+/// the [TextInputClient] is connected. The following methods can be used to send
 /// [TextEditingValue] to update the other party, when either party's text
 /// editing states change:
 ///
@@ -1712,11 +1772,20 @@ class TextInput {
   /// [TextInputConnection].
   static TextInputConnection attach(TextInputClient client, TextInputConfiguration configuration) {
     assert(configuration != null);
-    final TextInputConnection connection = _TextInputConnection._(client, configuration);
-    TextInput._instance._attach(connection, configuration);
-    return connection;
+    return attachConnection(_TextInputConnection._(client, configuration), configuration);
   }
 
+  /// Establishes a connection to the system's text input control using the give
+  /// [connection].
+  ///
+  /// A text input field must create a [TextInputConnection], and call this
+  /// method to connect to the system's text input control, before it can start
+  /// interacting with the text input control. This method helps multiple text
+  /// input fields coordinate about which one is currently interacting with the
+  /// text input control.
+  ///
+  /// For convenience, this method returns the supplied [connection] object
+  /// as-is.
   static TextInputConnection attachConnection(TextInputConnection connection, TextInputConfiguration configuration) {
     assert(configuration != null);
     TextInput._instance._attach(connection, configuration);
