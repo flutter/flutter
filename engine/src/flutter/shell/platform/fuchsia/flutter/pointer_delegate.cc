@@ -356,7 +356,7 @@ void PointerDelegate::WatchLoop(
           InsertIntoBuffer(std::move(events), &to_client);
         }
         // For this simple client, always claim we want the gesture.
-        response.set_response_type(fup_TouchResponseType::YES_PRIORITIZE);
+        response.set_response_type(fup_TouchResponseType::YES);
       }
       if (event.has_interaction_result()) {
         const auto& result = event.interaction_result();

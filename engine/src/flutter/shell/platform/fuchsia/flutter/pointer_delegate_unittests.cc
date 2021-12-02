@@ -343,14 +343,11 @@ TEST_F(PointerDelegateTest, Protocol_ResponseMatchesEarlierEvents) {
   EXPECT_FALSE(responses.value()[0].has_response_type());
   // Events 1-3 had a sample, must have a response.
   EXPECT_TRUE(responses.value()[1].has_response_type());
-  EXPECT_EQ(responses.value()[1].response_type(),
-            fup_TouchResponseType::YES_PRIORITIZE);
+  EXPECT_EQ(responses.value()[1].response_type(), fup_TouchResponseType::YES);
   EXPECT_TRUE(responses.value()[2].has_response_type());
-  EXPECT_EQ(responses.value()[2].response_type(),
-            fup_TouchResponseType::YES_PRIORITIZE);
+  EXPECT_EQ(responses.value()[2].response_type(), fup_TouchResponseType::YES);
   EXPECT_TRUE(responses.value()[3].has_response_type());
-  EXPECT_EQ(responses.value()[3].response_type(),
-            fup_TouchResponseType::YES_PRIORITIZE);
+  EXPECT_EQ(responses.value()[3].response_type(), fup_TouchResponseType::YES);
 }
 
 TEST_F(PointerDelegateTest, Protocol_LateGrant) {
