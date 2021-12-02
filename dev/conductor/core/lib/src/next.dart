@@ -4,6 +4,7 @@
 
 import 'package:args/command_runner.dart';
 import 'package:file/file.dart' show File;
+import 'package:meta/meta.dart' show visibleForTesting;
 
 import 'context.dart';
 import 'git.dart';
@@ -153,7 +154,7 @@ class NextContext extends Context {
           }
         }
 
-        await _pushWorkingBranch(engine, state.engine);
+        await pushWorkingBranch(engine, state.engine);
         break;
       case pb.ReleasePhase.CODESIGN_ENGINE_BINARIES:
         stdio.printStatus(<String>[
@@ -280,7 +281,7 @@ class NextContext extends Context {
           }
         }
 
-        await _pushWorkingBranch(framework, state.framework);
+        await pushWorkingBranch(framework, state.framework);
         break;
       case pb.ReleasePhase.PUBLISH_VERSION:
         stdio.printStatus('Please ensure that you have merged your framework PR and that');
@@ -382,7 +383,8 @@ class NextContext extends Context {
   /// May throw either a [ConductorException] if the user already has a branch
   /// of the same name on their mirror, or a [GitException] for any other
   /// failures from the underlying git process call.
-  Future<void> _pushWorkingBranch(Repository repository, pb.Repository pbRepository) async {
+  @visibleForTesting
+  Future<void> pushWorkingBranch(Repository repository, pb.Repository pbRepository) async {
     try {
       await repository.pushRef(
           fromRef: 'HEAD',

@@ -88,7 +88,7 @@ enum GitExceptionType {
   /// Example output:
   ///
   /// ```
-  /// To github.com:godofredoc/engine.git
+  /// To github.com:user/engine.git
   ///
   ///  ! [rejected]            HEAD -> cherrypicks-flutter-2.8-candidate.3 (non-fast-forward)
   /// error: failed to push some refs to 'github.com:user/engine.git'
@@ -104,6 +104,10 @@ class GitException implements Exception {
   GitException(this.message, this.args) {
     if (_pushRejectedPattern.hasMatch(message)) {
       type = GitExceptionType.PushRejected;
+    } else {
+      // because type is late final, it must be explicitly set before it is
+      // accessed.
+      type = null;
     }
   }
 
