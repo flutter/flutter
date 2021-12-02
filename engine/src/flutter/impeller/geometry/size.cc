@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 #include "size.h"
-#include <sstream>
 
 namespace impeller {
 

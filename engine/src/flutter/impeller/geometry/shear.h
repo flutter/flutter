@@ -27,8 +27,6 @@ struct Shear {
   }
 
   bool operator!=(const Shear& o) const { return !(*this == o); }
-
-  std::string ToString() const;
 };
 
 }  // namespace impeller
