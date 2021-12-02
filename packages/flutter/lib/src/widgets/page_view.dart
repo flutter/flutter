@@ -150,11 +150,7 @@ class PageController extends ScrollController {
   /// direction.
   final double viewportFraction;
 
-  /// This sets a condition if the [PageView] onPageChanged should be called only
-  /// when scrolling reaches the end.
-  ///
-  /// Default vakue is false.
-  bool callPageChangeAtEnd = false;
+  bool _callPageChangeAtEnd = false;
 
   /// The current page displayed in the controlled [PageView].
   ///
@@ -193,6 +189,11 @@ class PageController extends ScrollController {
   /// The returned [Future] resolves when the animation completes.
   ///
   /// The `duration` and `curve` arguments must not be null.
+  ///
+  /// The `callPageChangeAtEnd` sets a condition if the [PageView] onPageChanged 
+  /// should be called only when scrolling reaches the end.
+  ///
+  /// Default value is false.
   Future<void> animateToPage(
     int page, {
     required Duration duration,
@@ -205,7 +206,7 @@ class PageController extends ScrollController {
       return Future<void>.value();
     }
 
-    this.callPageChangeAtEnd = callPageChangeAtEnd;
+    _callPageChangeAtEnd = callPageChangeAtEnd;
 
     return position.animateTo(
       position.getPixelsFromPage(page.toDouble()),
@@ -948,10 +949,10 @@ class _PageViewState extends State<PageView> {
           final PageMetrics metrics = notification.metrics as PageMetrics;
           final int currentPage = metrics.page!.round();
           if (currentPage != _lastReportedPage) {
-            if (!widget.controller.callPageChangeAtEnd  && notification is ScrollUpdateNotification) {
+            if (!widget.controller._callPageChangeAtEnd  && notification is ScrollUpdateNotification) {
               _lastReportedPage = currentPage;
               widget.onPageChanged!(currentPage);
-            } else if (widget.controller.callPageChangeAtEnd  && notification is ScrollEndNotification) {
+            } else if (widget.controller._callPageChangeAtEnd  && notification is ScrollEndNotification) {
               _lastReportedPage = currentPage;
               widget.onPageChanged!(currentPage);
             }
