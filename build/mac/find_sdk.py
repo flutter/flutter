@@ -11,6 +11,7 @@ Usage:
   python find_sdk.py 10.6  # Ignores SDKs < 10.6
 """
 
+import json
 import os
 import re
 import subprocess
@@ -54,20 +55,28 @@ def main():
     raise Exception(('Error %d running xcode-select, you might have to run '
       '|sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer| '
       'if you are using Xcode 4.') % job.returncode)
-  # The Developer folder moved in Xcode 4.3.
-  xcode43_sdk_path = os.path.join(
-      out.rstrip(), 'Platforms/MacOSX.platform/Developer/SDKs')
-  if os.path.isdir(xcode43_sdk_path):
-    sdk_dir = xcode43_sdk_path
-  else:
-    sdk_dir = os.path.join(out.rstrip(), 'SDKs')
-  sdks = [re.findall('^MacOSX(1[0-2]\.\d+)\.sdk$', s) for s in os.listdir(sdk_dir)]
-  sdks = [s[0] for s in sdks if s]  # [['10.5'], ['10.6']] => ['10.5', '10.6']
-  sdks = [s for s in sdks  # ['10.5', '10.6'] => ['10.6']
-          if parse_version(s) >= parse_version(min_sdk_version)]
-  if not sdks:
+
+  sdk_command = ['xcodebuild',
+    '-showsdks',
+    '-json']
+  sdk_json_output = subprocess.check_output(sdk_command)
+  sdk_json = json.loads(sdk_json_output)
+
+  best_sdk = None
+  sdk_output = None
+  for properties in list(sdk_json):
+    # Filter out macOS DriverKit, watchOS, and other SDKs.
+    if properties.get('productName') != 'macOS':
+      continue
+    sdk_version = properties['sdkVersion']
+    parsed_version = parse_version(sdk_version)
+    if (parsed_version >= parse_version(min_sdk_version) and
+          (not best_sdk or parsed_version < parse_version(best_sdk))):
+      best_sdk = sdk_version
+      sdk_output = properties['sdkPath']
+
+  if not best_sdk:
     raise Exception('No %s+ SDK found' % min_sdk_version)
-  best_sdk = sorted(sdks, key=parse_version)[0]
 
   if options.verify and best_sdk != min_sdk_version and not options.sdk_path:
     sys.stderr.writelines([
@@ -83,8 +92,6 @@ def main():
     return min_sdk_version
 
   if options.symlink or options.print_sdk_path:
-    sdk_output = subprocess.check_output(['xcodebuild', '-version', '-sdk',
-                                          'macosx' + best_sdk, 'Path']).decode('utf-8').strip()
     if options.symlink:
       symlink_target = os.path.join(options.symlink, 'SDKs', os.path.basename(sdk_output))
       symlink(sdk_output, symlink_target)
