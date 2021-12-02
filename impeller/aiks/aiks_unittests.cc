@@ -89,11 +89,11 @@ TEST_F(AiksTest, CanRenderStrokes) {
 TEST_F(AiksTest, CanRenderCurvedStrokes) {
   Canvas canvas;
   Paint paint;
-  paint.color = Color::Blue();
+  paint.color = Color::Red();
   paint.stroke_width = 25.0;
   paint.style = Paint::Style::kStroke;
   canvas.DrawPath(PathBuilder{}.AddCircle({500, 500}, 250).CreatePath(), paint);
-  // ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
 TEST_F(AiksTest, CanRenderClips) {
@@ -103,7 +103,7 @@ TEST_F(AiksTest, CanRenderClips) {
   canvas.ClipPath(
       PathBuilder{}.AddRect(Rect::MakeXYWH(0, 0, 500, 500)).CreatePath());
   canvas.DrawPath(PathBuilder{}.AddCircle({500, 500}, 250).CreatePath(), paint);
-  // ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
 TEST_F(AiksTest, CanRenderGroupOpacity) {
@@ -138,7 +138,7 @@ TEST_F(AiksTest, CanPerformFullScreenMSAA) {
 
   canvas.DrawCircle({250, 250}, 125, red);
 
-  // ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
 }  // namespace testing

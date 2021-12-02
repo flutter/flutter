@@ -5,6 +5,7 @@
 #include "impeller/renderer/backend/metal/vertex_descriptor_mtl.h"
 
 #include "flutter/fml/logging.h"
+#include "impeller/base/validation.h"
 
 namespace impeller {
 
@@ -176,7 +177,7 @@ bool VertexDescriptorMTL::SetStageInputs(
     const auto& input = inputs[i];
     auto vertex_format = ReadStageInputFormat(input);
     if (vertex_format == MTLVertexFormatInvalid) {
-      FML_LOG(ERROR) << "Format for input " << input.name << " not supported.";
+      VALIDATION_LOG << "Format for input " << input.name << " not supported.";
       return false;
     }
 

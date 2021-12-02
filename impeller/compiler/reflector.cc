@@ -16,6 +16,7 @@
 #include "flutter/impeller/geometry/matrix.h"
 #include "flutter/impeller/geometry/scalar.h"
 #include "impeller/base/strings.h"
+#include "impeller/base/validation.h"
 
 namespace impeller {
 namespace compiler {
@@ -150,7 +151,7 @@ std::optional<nlohmann::json> Reflector::GenerateTemplateArguments() const {
 
   const auto& entrypoints = compiler_->get_entry_points_and_stages();
   if (entrypoints.size() != 1) {
-    FML_LOG(ERROR) << "Incorrect number of entrypoints in the shader. Found "
+    VALIDATION_LOG << "Incorrect number of entrypoints in the shader. Found "
                    << entrypoints.size() << " but expected 1.";
     return std::nullopt;
   }

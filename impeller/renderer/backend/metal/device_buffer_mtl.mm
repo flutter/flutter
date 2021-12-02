@@ -5,6 +5,7 @@
 #include "impeller/renderer/backend/metal/device_buffer_mtl.h"
 
 #include "flutter/fml/logging.h"
+#include "impeller/base/validation.h"
 #include "impeller/renderer/backend/metal/formats_mtl.h"
 #include "impeller/renderer/backend/metal/texture_mtl.h"
 
@@ -29,7 +30,7 @@ std::shared_ptr<Texture> DeviceBufferMTL::MakeTexture(TextureDescriptor desc,
 
   // Avoid overruns.
   if (offset + desc.GetSizeOfBaseMipLevel() > size_) {
-    FML_DLOG(ERROR) << "Avoiding buffer overrun when creating texture.";
+    VALIDATION_LOG << "Avoiding buffer overrun when creating texture.";
     return nullptr;
   }
 
