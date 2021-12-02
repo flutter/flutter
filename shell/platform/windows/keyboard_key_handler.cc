@@ -109,8 +109,7 @@ KeyboardKeyHandler::KeyboardKeyHandler(EventDispatcher dispatch_event)
 
 KeyboardKeyHandler::~KeyboardKeyHandler() = default;
 
-void KeyboardKeyHandler::TextHook(FlutterWindowsView* view,
-                                  const std::u16string& code_point) {}
+void KeyboardKeyHandler::TextHook(const std::u16string& code_point) {}
 
 void KeyboardKeyHandler::AddDelegate(
     std::unique_ptr<KeyboardKeyHandlerDelegate> delegate) {
@@ -169,8 +168,7 @@ void KeyboardKeyHandler::RedispatchEvent(std::unique_ptr<PendingEvent> event) {
 #endif
 }
 
-bool KeyboardKeyHandler::KeyboardHook(FlutterWindowsView* view,
-                                      int key,
+bool KeyboardKeyHandler::KeyboardHook(int key,
                                       int scancode,
                                       int action,
                                       char32_t character,
