@@ -4,6 +4,8 @@
 
 #include "impeller/renderer/backend/metal/texture_mtl.h"
 
+#include "impeller/base/validation.h"
+
 namespace impeller {
 
 TextureMTL::TextureMTL(TextureDescriptor p_desc, id<MTLTexture> texture)
@@ -15,8 +17,7 @@ TextureMTL::TextureMTL(TextureDescriptor p_desc, id<MTLTexture> texture)
   }
 
   if (desc.size != GetSize()) {
-    FML_DLOG(ERROR)
-        << "The texture and its descriptor disagree about its size.";
+    VALIDATION_LOG << "The texture and its descriptor disagree about its size.";
     return;
   }
 

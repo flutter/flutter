@@ -5,6 +5,7 @@
 #include "impeller/renderer/renderer.h"
 
 #include "flutter/fml/logging.h"
+#include "impeller/base/validation.h"
 #include "impeller/renderer/command_buffer.h"
 #include "impeller/renderer/surface.h"
 
@@ -69,7 +70,7 @@ bool Renderer::Render(const Surface& surface,
       [sema = frames_in_flight_sema_](CommandBuffer::Status result) {
         sema->Signal();
         if (result != CommandBuffer::Status::kCompleted) {
-          FML_LOG(ERROR) << "Could not commit command buffer.";
+          VALIDATION_LOG << "Could not commit command buffer.";
         }
       });
 }

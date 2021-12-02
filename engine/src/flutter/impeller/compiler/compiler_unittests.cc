@@ -5,6 +5,7 @@
 #include "flutter/impeller/compiler/compiler.h"
 #include "flutter/testing/testing.h"
 #include "gtest/gtest.h"
+#include "impeller/base/validation.h"
 
 namespace impeller {
 namespace compiler {
@@ -25,7 +26,7 @@ class CompilerTest : public ::testing::Test {
   bool CanCompileFixture(const char* fixture_name) const {
     auto fixture = flutter::testing::OpenFixtureAsMapping(fixture_name);
     if (!fixture->GetMapping()) {
-      FML_LOG(ERROR) << "Could not find shader in fixtures: " << fixture_name;
+      VALIDATION_LOG << "Could not find shader in fixtures: " << fixture_name;
       return false;
     }
     Compiler::SourceOptions compiler_options(fixture_name);
@@ -34,7 +35,7 @@ class CompilerTest : public ::testing::Test {
     Reflector::Options reflector_options;
     Compiler compiler(*fixture.get(), compiler_options, reflector_options);
     if (!compiler.IsValid()) {
-      FML_LOG(ERROR) << "Compilation failed: " << compiler.GetErrorMessages();
+      VALIDATION_LOG << "Compilation failed: " << compiler.GetErrorMessages();
       return false;
     }
     return true;

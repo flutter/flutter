@@ -74,13 +74,13 @@ class PipelineT {
   using Builder = PipelineBuilder<VertexShader, FragmentShader>;
 
   explicit PipelineT(const Context& context)
-      : pipeline_future_(CreatePipelineFuture(
+      : PipelineT(CreatePipelineFuture(
             context,
             Builder::MakeDefaultPipelineDescriptor(context))) {}
 
   explicit PipelineT(const Context& context,
                      std::optional<PipelineDescriptor> desc)
-      : pipeline_future_(CreatePipelineFuture(context, desc)) {}
+      : PipelineT(CreatePipelineFuture(context, desc)) {}
 
   explicit PipelineT(PipelineFuture future)
       : pipeline_future_(std::move(future)) {}
