@@ -82,8 +82,8 @@ TestMetalContext::TextureInfo TestMetalContext::CreateMetalTexture(const SkISize
   }
 
   id<MTLDevice> device = (__bridge id<MTLDevice>)GetMetalDevice();
-  sk_cf_obj<void*> texture =
-      sk_cf_obj<void*>{[[device newTextureWithDescriptor:texture_descriptor.get()] retain]};
+  sk_cfp<void*> texture =
+      sk_cfp<void*>{[[device newTextureWithDescriptor:texture_descriptor.get()] retain]};
 
   if (!texture) {
     FML_CHECK(false) << "Could not create texture from texture descriptor.";
