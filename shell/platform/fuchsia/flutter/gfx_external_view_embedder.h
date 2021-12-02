@@ -75,8 +75,8 @@ class GfxExternalViewEmbedder final : public flutter::ExternalViewEmbedder {
   GfxExternalViewEmbedder(std::string debug_label,
                           fuchsia::ui::views::ViewToken view_token,
                           scenic::ViewRefPair view_ref_pair,
-                          GfxSessionConnection& session,
-                          SurfaceProducer& surface_producer,
+                          std::shared_ptr<GfxSessionConnection> session,
+                          std::shared_ptr<SurfaceProducer> surface_producer,
                           bool intercept_all_input = false);
   ~GfxExternalViewEmbedder();
 
@@ -177,8 +177,8 @@ class GfxExternalViewEmbedder final : public flutter::ExternalViewEmbedder {
     scenic::Material material;
   };
 
-  GfxSessionConnection& session_;
-  SurfaceProducer& surface_producer_;
+  std::shared_ptr<GfxSessionConnection> session_;
+  std::shared_ptr<SurfaceProducer> surface_producer_;
 
   scenic::View root_view_;
   scenic::EntityNode metrics_node_;

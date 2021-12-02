@@ -57,25 +57,26 @@ namespace {
 
 class FakeSurfaceProducerSurface : public SurfaceProducerSurface {
  public:
-  explicit FakeSurfaceProducerSurface(scenic::Session& session,
+  explicit FakeSurfaceProducerSurface(scenic::Session* session,
                                       const SkISize& size,
                                       uint32_t buffer_id)
       : session_(session),
         surface_(SkSurface::MakeNull(size.width(), size.height())),
-        image_id_(session_.AllocResourceId()),
         buffer_id_(buffer_id) {
+    FML_CHECK(session_);
     FML_CHECK(buffer_id_ != 0);
 
     fuchsia::sysmem::BufferCollectionTokenSyncPtr token;
     buffer_binding_ = token.NewRequest();
 
-    session_.RegisterBufferCollection(buffer_id_, std::move(token));
-    session_.Enqueue(scenic::NewCreateImage2Cmd(
+    image_id_ = session_->AllocResourceId();
+    session_->RegisterBufferCollection(buffer_id_, std::move(token));
+    session_->Enqueue(scenic::NewCreateImage2Cmd(
         image_id_, surface_->width(), surface_->height(), buffer_id_, 0));
   }
   ~FakeSurfaceProducerSurface() override {
-    session_.DeregisterBufferCollection(buffer_id_);
-    session_.Enqueue(scenic::NewReleaseResourceCmd(image_id_));
+    session_->DeregisterBufferCollection(buffer_id_);
+    session_->Enqueue(scenic::NewReleaseResourceCmd(image_id_));
   }
 
   bool IsValid() const override { return true; }
@@ -107,7 +108,7 @@ class FakeSurfaceProducerSurface : public SurfaceProducerSurface {
       const std::function<void(void)>& on_writes_committed) override {}
 
  private:
-  scenic::Session& session_;
+  scenic::Session* session_;
 
   sk_sp<SkSurface> surface_;
 
@@ -119,20 +120,31 @@ class FakeSurfaceProducerSurface : public SurfaceProducerSurface {
 
 class FakeSurfaceProducer : public SurfaceProducer {
  public:
-  explicit FakeSurfaceProducer(scenic::Session& session) : session_(session) {}
+  explicit FakeSurfaceProducer(scenic::Session* session) : session_(session) {}
   ~FakeSurfaceProducer() override = default;
 
+  // |SurfaceProducer|
+  GrDirectContext* gr_context() const override { return nullptr; }
+
+  // |SurfaceProducer|
+  std::unique_ptr<SurfaceProducerSurface> ProduceOffscreenSurface(
+      const SkISize& size) override {
+    return nullptr;
+  }
+
+  // |SurfaceProducer|
   std::unique_ptr<SurfaceProducerSurface> ProduceSurface(
       const SkISize& size) override {
     return std::make_unique<FakeSurfaceProducerSurface>(session_, size,
                                                         buffer_id_++);
   }
 
+  // |SurfaceProducer|
   void SubmitSurfaces(
       std::vector<std::unique_ptr<SurfaceProducerSurface>> surfaces) override {}
 
  private:
-  scenic::Session& session_;
+  scenic::Session* session_;
 
   uint32_t buffer_id_{1};
 };
@@ -458,21 +470,25 @@ class GfxExternalViewEmbedderTest
       public fuchsia::ui::scenic::SessionListener {
  protected:
   GfxExternalViewEmbedderTest()
-      : session_listener_(this),
-        session_subloop_(loop_.StartNewLoop()),
+      : session_subloop_(loop_.StartNewLoop()),
+        session_listener_(this),
         session_connection_(CreateSessionConnection()),
-        fake_surface_producer_(*session_connection_.get()) {}
+        fake_surface_producer_(
+            std::make_shared<FakeSurfaceProducer>(session_connection_->get())) {
+  }
   ~GfxExternalViewEmbedderTest() override = default;
 
   async::TestLoop& loop() { return loop_; }
 
   FakeSession& fake_session() { return fake_session_; }
 
-  FakeSurfaceProducer& fake_surface_producer() {
+  std::shared_ptr<FakeSurfaceProducer> fake_surface_producer() {
     return fake_surface_producer_;
   }
 
-  GfxSessionConnection& session_connection() { return session_connection_; }
+  std::shared_ptr<GfxSessionConnection> session_connection() {
+    return session_connection_;
+  }
 
  private:
   // |fuchsia::ui::scenic::SessionListener|
@@ -483,7 +499,7 @@ class GfxExternalViewEmbedderTest
     FAIL();
   }
 
-  GfxSessionConnection CreateSessionConnection() {
+  std::shared_ptr<GfxSessionConnection> CreateSessionConnection() {
     FML_CHECK(!fake_session_.is_bound());
     FML_CHECK(!session_listener_.is_bound());
 
@@ -494,22 +510,22 @@ class GfxExternalViewEmbedderTest
         fake_session_.Bind(session_subloop_->dispatcher());
     session_listener_.Bind(std::move(session_listener));
 
-    return GfxSessionConnection(
+    return std::make_shared<GfxSessionConnection>(
         GetCurrentTestName(), std::move(inspect_node), std::move(session),
         []() { FAIL(); }, [](auto...) {}, 1, fml::TimeDelta::Zero());
   }
 
   async::TestLoop loop_;  // Must come before FIDL bindings.
-
-  inspect::Inspector inspector_;
+  std::unique_ptr<async::LoopInterface> session_subloop_;
 
   fidl::Binding<fuchsia::ui::scenic::SessionListener> session_listener_;
 
-  std::unique_ptr<async::LoopInterface> session_subloop_;
-  FakeSession fake_session_;
-  GfxSessionConnection session_connection_;
+  inspect::Inspector inspector_;
 
-  FakeSurfaceProducer fake_surface_producer_;
+  FakeSession fake_session_;
+
+  std::shared_ptr<GfxSessionConnection> session_connection_;
+  std::shared_ptr<FakeSurfaceProducer> fake_surface_producer_;
 };
 
 TEST_F(GfxExternalViewEmbedderTest, RootScene) {
