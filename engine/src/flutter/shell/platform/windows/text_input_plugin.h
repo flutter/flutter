@@ -15,12 +15,9 @@
 #include "flutter/shell/platform/common/json_method_codec.h"
 #include "flutter/shell/platform/common/text_input_model.h"
 #include "flutter/shell/platform/windows/keyboard_handler_base.h"
-#include "flutter/shell/platform/windows/public/flutter_windows.h"
 #include "flutter/shell/platform/windows/text_input_plugin_delegate.h"
 
 namespace flutter {
-
-class FlutterWindowsView;
 
 // Implements a text input plugin.
 //
@@ -33,8 +30,7 @@ class TextInputPlugin : public KeyboardHandlerBase {
   virtual ~TextInputPlugin();
 
   // |KeyboardHandlerBase|
-  bool KeyboardHook(FlutterWindowsView* view,
-                    int key,
+  bool KeyboardHook(int key,
                     int scancode,
                     int action,
                     char32_t character,
@@ -42,7 +38,7 @@ class TextInputPlugin : public KeyboardHandlerBase {
                     bool was_down) override;
 
   // |KeyboardHandlerBase|
-  void TextHook(FlutterWindowsView* view, const std::u16string& text) override;
+  void TextHook(const std::u16string& text) override;
 
   // |KeyboardHandlerBase|
   void ComposeBeginHook() override;

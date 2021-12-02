@@ -9,7 +9,6 @@
 #include <cstdint>
 
 #include "flutter/shell/platform/common/json_method_codec.h"
-#include "flutter/shell/platform/windows/flutter_windows_view.h"
 
 static constexpr char kSetEditingStateMethod[] = "TextInput.setEditingState";
 static constexpr char kClearClientMethod[] = "TextInput.clearClient";
@@ -51,8 +50,7 @@ static constexpr char kInternalConsistencyError[] =
 
 namespace flutter {
 
-void TextInputPlugin::TextHook(FlutterWindowsView* view,
-                               const std::u16string& text) {
+void TextInputPlugin::TextHook(const std::u16string& text) {
   if (active_model_ == nullptr) {
     return;
   }
@@ -60,8 +58,7 @@ void TextInputPlugin::TextHook(FlutterWindowsView* view,
   SendStateUpdate(*active_model_);
 }
 
-bool TextInputPlugin::KeyboardHook(FlutterWindowsView* view,
-                                   int key,
+bool TextInputPlugin::KeyboardHook(int key,
                                    int scancode,
                                    int action,
                                    char32_t character,
