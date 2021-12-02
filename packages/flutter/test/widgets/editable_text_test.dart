@@ -6534,7 +6534,6 @@ void main() {
       'TextInput.setEditingState',
       'TextInput.show',
       'TextInput.setEditingState',
-      'TextInput.show',
       'TextInput.setCaretRect',
     ];
     expect(
@@ -6639,9 +6638,7 @@ void main() {
       'TextInput.setEditingState',
       'TextInput.show',
       'TextInput.setEditingState',
-      'TextInput.show',
       'TextInput.setCaretRect',
-      'TextInput.show',
     ];
     expect(tester.testTextInput.log.length, logOrder.length);
     int index = 0;
@@ -6689,7 +6686,6 @@ void main() {
       'TextInput.setEditingState',
       'TextInput.show',
       'TextInput.setEditingState',
-      'TextInput.show',
       'TextInput.setCaretRect',
       'TextInput.setEditingState',
     ];
