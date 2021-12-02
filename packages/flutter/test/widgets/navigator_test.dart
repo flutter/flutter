@@ -544,6 +544,44 @@ void main() {
     await tester.pumpAndSettle();
   });
 
+  testWidgets('Page-based route pop before push finishes', (WidgetTester tester) async {
+    List<Page<void>> pages = <Page<void>>[const MaterialPage<void>(child: Text('Page 1'))];
+    final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
+    Widget buildNavigator() {
+      return Navigator(
+        key: navigator,
+        pages: pages,
+        onPopPage: (Route<dynamic> route, dynamic result) {
+          pages.removeLast();
+          return route.didPop(result);
+        },
+      );
+    }
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: buildNavigator(),
+      ),
+    );
+    expect(find.text('Page 1'), findsOneWidget);
+    pages = pages.toList();
+    pages.add(const MaterialPage<void>(child: Text('Page 2')));
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: buildNavigator(),
+      ),
+    );
+    // This test should finish without crashing.
+    await tester.pump();
+    await tester.pump();
+
+    navigator.currentState!.pop();
+    await tester.pumpAndSettle();
+    expect(find.text('Page 1'), findsOneWidget);
+  });
+
   testWidgets('Pages update does update overlay correctly', (WidgetTester tester) async {
     // Regression Test for https://github.com/flutter/flutter/issues/64941.
     List<Page<void>> pages = const <Page<void>>[
