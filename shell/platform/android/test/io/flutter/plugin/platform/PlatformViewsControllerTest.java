@@ -699,7 +699,9 @@ public class PlatformViewsControllerTest {
         overlaySurface.getId(), /* x=*/ 0, /* y=*/ 0, /* width=*/ 10, /* height=*/ 10);
 
     platformViewsController.detachFromView();
+
     platformViewsController.destroyOverlaySurfaces();
+    verify(overlayImageView, times(1)).closeImageReader();
   }
 
   @Test
