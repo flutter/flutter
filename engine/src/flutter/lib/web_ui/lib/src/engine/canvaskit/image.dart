@@ -9,6 +9,7 @@ import 'dart:typed_data';
 import 'package:ui/ui.dart' as ui;
 
 import '../html_image_codec.dart';
+import '../safe_browser_api.dart';
 import '../util.dart';
 import 'canvaskit_api.dart';
 import 'image_wasm_codecs.dart';
