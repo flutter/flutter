@@ -3,18 +3,16 @@
 // found in the LICENSE file.
 
 import 'dart:html' as html;
-import 'dart:js_util' as js_util;
 import 'dart:typed_data';
 
 import 'package:ui/ui.dart' as ui;
 
 import '../../browser_detection.dart';
 import '../../html_image_codec.dart';
+import '../../safe_browser_api.dart';
 import '../../vector_math.dart';
-import '../offscreen_canvas.dart';
 import '../render_vertices.dart';
 import 'vertex_shaders.dart';
-import 'webgl_context.dart';
 
 class EngineImageShader implements ui.ImageShader {
   EngineImageShader(ui.Image image, this.tileModeX, this.tileModeY,
@@ -95,19 +93,17 @@ class EngineImageShader implements ui.ImageShader {
         /// To draw image flipped we set translate and scale and pass
         /// negative width/height to drawImage.
         if (flipX != 1 || flipY != 1) {
-          // ignore: implicit_dynamic_function
-          js_util.callMethod(renderContext, 'scale', <dynamic>[flipX, flipY]);
+          scaleCanvas2D(renderContext, flipX, flipY);
         }
-        // ignore: implicit_dynamic_function
-        js_util.callMethod(renderContext, 'drawImage', <dynamic>[
+        drawImageCanvas2D(
+          renderContext,
           image.imgElement,
-          if (x == 0) 0 else -2 * imageWidth,
-          if (y == 0) 0 else -2 * imageHeight,
-        ]);
+          x == 0 ? 0 : -2 * imageWidth,
+          y == 0 ? 0 : -2 * imageHeight,
+        );
         if (flipX != 1 || flipY != 1) {
           /// Restore transform. This is faster than save/restore on context.
-          // ignore: implicit_dynamic_function
-          js_util.callMethod(renderContext, 'scale', <dynamic>[flipX, flipY]);
+          scaleCanvas2D(renderContext, flipX, flipY);
         }
       }
     }
@@ -208,15 +204,15 @@ class EngineImageShader implements ui.ImageShader {
     bufferVertexData(gl, vertices, ui.window.devicePixelRatio);
 
     /// Setup data format for attribute.
-    // ignore: implicit_dynamic_function
-    js_util.callMethod(gl.glContext, 'vertexAttribPointer', <dynamic>[
+    vertexAttribPointerGlContext(
+      gl.glContext,
       positionAttributeLocation,
       2,
       gl.kFloat,
       false,
       0,
       0,
-    ]);
+    );
 
     /// Copy image to the texture.
     final Object? texture = gl.createTexture();

@@ -35,10 +35,6 @@ void main() {
 Future<void> testMain() async {
   await initializeTestFlutterViewEmbedder();
 
-  setUpAll(() {
-    WebExperiments.ensureInitialized();
-  });
-
   test('Builds a text-only canvas paragraph', () {
     final EngineParagraphStyle style = EngineParagraphStyle(fontSize: 13.0);
     final CanvasParagraphBuilder builder = CanvasParagraphBuilder(style);
