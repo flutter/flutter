@@ -16,6 +16,7 @@ import '../image_data.dart';
 void runTests() {
   tearDown(() {
     debugRestoreHttpRequestFactory();
+    PaintingBinding.instance!.imageCache!.clear();
   });
 
   testWidgets('loads an image from the network with headers',
