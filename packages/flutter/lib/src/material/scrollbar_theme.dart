@@ -33,6 +33,7 @@ class ScrollbarThemeData with Diagnosticable {
   const ScrollbarThemeData({
     this.thickness,
     this.trackVisibility,
+    this.buttonVisibility,
     this.showTrackOnHover,
     this.isAlwaysShown,
     this.radius,
@@ -55,6 +56,10 @@ class ScrollbarThemeData with Diagnosticable {
   /// Overrides the default value of [Scrollbar.trackVisibility] in all
   /// descendant [Scrollbar] widgets.
   final MaterialStateProperty<bool?>? trackVisibility;
+
+  /// Overrides the default value of [Scrollbar.buttonVisibility] in all
+  /// descendant [Scrollbar] widgets.
+  final MaterialStateProperty<bool?>? buttonVisibility;
 
   /// Overrides the default value of [Scrollbar.showTrackOnHover] in all
   /// descendant [Scrollbar] widgets.
@@ -128,6 +133,7 @@ class ScrollbarThemeData with Diagnosticable {
   ScrollbarThemeData copyWith({
     MaterialStateProperty<double?>? thickness,
     MaterialStateProperty<bool?>? trackVisibility,
+    MaterialStateProperty<bool?>? buttonVisibility,
     bool? showTrackOnHover,
     bool? isAlwaysShown,
     bool? interactive,
@@ -142,6 +148,7 @@ class ScrollbarThemeData with Diagnosticable {
     return ScrollbarThemeData(
       thickness: thickness ?? this.thickness,
       trackVisibility: trackVisibility ?? this.trackVisibility,
+      buttonVisibility: buttonVisibility ?? this.buttonVisibility,
       showTrackOnHover: showTrackOnHover ?? this.showTrackOnHover,
       isAlwaysShown: isAlwaysShown ?? this.isAlwaysShown,
       interactive: interactive ?? this.interactive,
@@ -165,6 +172,7 @@ class ScrollbarThemeData with Diagnosticable {
     return ScrollbarThemeData(
       thickness: _lerpProperties<double?>(a?.thickness, b?.thickness, t, lerpDouble),
       trackVisibility: _lerpProperties<bool?>(a?.trackVisibility, b?.trackVisibility, t, _lerpBool),
+      buttonVisibility: _lerpProperties<bool?>(a?.buttonVisibility, b?.buttonVisibility, t, _lerpBool),
       showTrackOnHover: _lerpBool(a?.showTrackOnHover, b?.showTrackOnHover, t),
       isAlwaysShown: _lerpBool(a?.isAlwaysShown, b?.isAlwaysShown, t),
       interactive: _lerpBool(a?.interactive, b?.interactive, t),
@@ -183,6 +191,7 @@ class ScrollbarThemeData with Diagnosticable {
     return hashValues(
       thickness,
       trackVisibility,
+      buttonVisibility,
       showTrackOnHover,
       isAlwaysShown,
       interactive,
@@ -205,6 +214,7 @@ class ScrollbarThemeData with Diagnosticable {
     return other is ScrollbarThemeData
       && other.thickness == thickness
       && other.trackVisibility == trackVisibility
+      && other.buttonVisibility == buttonVisibility
       && other.showTrackOnHover == showTrackOnHover
       && other.isAlwaysShown == isAlwaysShown
       && other.interactive == interactive
@@ -222,6 +232,7 @@ class ScrollbarThemeData with Diagnosticable {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<MaterialStateProperty<double?>>('thickness', thickness, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<bool?>>('trackVisibility', trackVisibility, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<bool?>>('buttonVisibility', buttonVisibility, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('showTrackOnHover', showTrackOnHover, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('isAlwaysShown', isAlwaysShown, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('interactive', interactive, defaultValue: null));
@@ -305,4 +316,46 @@ class ScrollbarTheme extends InheritedWidget {
 
   @override
   bool updateShouldNotify(ScrollbarTheme oldWidget) => data != oldWidget.data;
+}
+
+/// A scrollbar button style that use [ScrollbarButtonStateColors].
+class ScrollbarButtonStateStyles extends ScrollbarButtonStyles {
+  const ScrollbarButtonStateStyles({
+    ScrollbarButtonLocation location = ScrollbarButtonLocation.split,
+    double extent = 18.0,
+    double indicatorWidth = 8.0,
+    PaintingStyle indicatorPaintingStyle = PaintingStyle.stroke,
+    ScrollbarButtonStateColors leadingButtonColors = const ScrollbarButtonStateColors(),
+    ScrollbarButtonStateColors trailingButtonColors = const ScrollbarButtonStateColors(),
+  }) : super(
+    location: location,
+    extent: extent,
+    indicatorWidth: indicatorWidth,
+    indicatorPaintingStyle: indicatorPaintingStyle,
+    leadingButtonColors: leadingButtonColors,
+    trailingButtonColors: trailingButtonColors,
+  );
+}
+
+/// A scrollbar button colors style that supports customized colors with
+/// different states.
+///
+/// Only the [ScrollBar] widget responds to this.
+///
+/// The default value follows the Windows platform style.
+class ScrollbarButtonStateColors extends ScrollbarButtonColors {
+  const ScrollbarButtonStateColors({
+    Color? backgroundColor,
+    this.hoveredBackgroundColor = const Color(0xFFD2D2D2),
+    this.pressedBackgroundColor = const Color(0xFF787878),
+    Color indicatorColor = const Color(0xFF505050),
+    this.inactiveIndicatorColor = const Color(0xFFA3A3A3),
+  }) : super(
+    backgroundColor: backgroundColor,
+    indicatorColor: indicatorColor,
+  );
+
+  final Color? hoveredBackgroundColor;
+  final Color? pressedBackgroundColor;
+  final Color? inactiveIndicatorColor;
 }

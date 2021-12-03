@@ -91,6 +91,8 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     double? minOverscrollLength,
     ScrollbarOrientation? scrollbarOrientation,
     bool ignorePointer = false,
+    bool buttonVisibility = false,
+    ScrollbarButtonStyles? buttonStyles,
   }) : assert(color != null),
        assert(radius == null || shape == null),
        assert(thickness != null),
@@ -106,6 +108,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
        assert(trackColor != null),
        assert(trackBorderColor != null),
        assert(ignorePointer != null),
+       assert(!buttonVisibility || buttonStyles != null),
        _color = color,
        _textDirection = textDirection,
        _thickness = thickness,
@@ -119,7 +122,9 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
        _trackBorderColor = trackBorderColor,
        _scrollbarOrientation = scrollbarOrientation,
        _minOverscrollLength = minOverscrollLength ?? minLength,
-       _ignorePointer = ignorePointer {
+       _ignorePointer = ignorePointer,
+       _buttonVisibility = buttonVisibility,
+       _buttonStyles = buttonStyles {
     fadeoutOpacityAnimation.addListener(notifyListeners);
   }
 
@@ -357,6 +362,28 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     notifyListeners();
   }
 
+  /// Whether paint the buttons.
+  bool get buttonVisibility => _buttonVisibility;
+  bool _buttonVisibility;
+  set buttonVisibility(bool value) {
+    if (buttonVisibility == value)
+      return;
+
+    _buttonVisibility = value;
+    notifyListeners();
+  }
+
+  /// todo
+  ScrollbarButtonStyles? get buttonStyles => _buttonStyles;
+  ScrollbarButtonStyles? _buttonStyles;
+  set buttonStyles(ScrollbarButtonStyles? value) {
+    if (buttonStyles == value)
+      return;
+
+    _buttonStyles = value;
+    notifyListeners();
+  }
+
   void _debugAssertIsValidOrientation(ScrollbarOrientation orientation) {
     assert(
     (_isVertical && _isVerticalOrientation(orientation)) || (!_isVertical && !_isVerticalOrientation(orientation)),
@@ -373,6 +400,8 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   AxisDirection? _lastAxisDirection;
   Rect? _thumbRect;
   Rect? _trackRect;
+  late Rect _leadingButtonRect;
+  late Rect _trailingButtonRect;
   late double _thumbOffset;
 
   /// Update with new [ScrollMetrics]. If the metrics change, the scrollbar will
@@ -444,8 +473,8 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     }
 
     final double x, y;
-    final Size thumbSize, trackSize;
-    final Offset trackOffset, borderStart, borderEnd;
+    final Size thumbSize, trackSize, buttonSize;
+    final Offset trackOffset, borderStart, borderEnd, leadingButtonOffset, trailingButtonOffset;
 
     _debugAssertIsValidOrientation(resolvedOrientation);
 
@@ -453,38 +482,94 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
       case ScrollbarOrientation.left:
         thumbSize = Size(thickness, thumbExtent);
         trackSize = Size(thickness + 2 * crossAxisMargin, _trackExtent);
+        buttonSize = Size(trackSize.width, _buttonExtent);
         x = crossAxisMargin + padding.left;
         y = _thumbOffset;
-        trackOffset = Offset(x - crossAxisMargin, mainAxisMargin);
-        borderStart = trackOffset + Offset(trackSize.width, 0.0);
-        borderEnd = Offset(trackOffset.dx + trackSize.width, trackOffset.dy + _trackExtent);
+        if (!_buttonVisibility || buttonStyles!.location == ScrollbarButtonLocation.split) {
+          leadingButtonOffset = Offset(x - crossAxisMargin, mainAxisMargin + padding.top);
+          trackOffset = leadingButtonOffset + Offset(0.0, _buttonExtent);
+          trailingButtonOffset = trackOffset + Offset(0.0, _trackExtent);
+        } else if (buttonStyles!.location == ScrollbarButtonLocation.groupedLeading) {
+          leadingButtonOffset = Offset(x - crossAxisMargin, mainAxisMargin + padding.top);
+          trailingButtonOffset = leadingButtonOffset + Offset(0.0, _buttonExtent);
+          trackOffset = trailingButtonOffset + Offset(0.0, _buttonExtent);
+        } else {
+          assert(buttonStyles!.location == ScrollbarButtonLocation.groupedTrailing);
+          trackOffset = Offset(x - crossAxisMargin, padding.top + mainAxisMargin);
+          leadingButtonOffset = trackOffset + Offset(0.0, _trackExtent);
+          trailingButtonOffset = leadingButtonOffset + Offset(0.0, _buttonExtent);
+        }
+        borderStart = leadingButtonOffset + Offset(trackSize.width, 0.0);
+        borderEnd = Offset(leadingButtonOffset.dx + trackSize.width, leadingButtonOffset.dy + _trackExtent + _buttonExtent * 2.0);
         break;
       case ScrollbarOrientation.right:
         thumbSize = Size(thickness, thumbExtent);
         trackSize = Size(thickness + 2 * crossAxisMargin, _trackExtent);
+        buttonSize = Size(trackSize.width, _buttonExtent);
         x = size.width - thickness - crossAxisMargin - padding.right;
         y = _thumbOffset;
-        trackOffset = Offset(x - crossAxisMargin, mainAxisMargin);
-        borderStart = trackOffset;
-        borderEnd = Offset(trackOffset.dx, trackOffset.dy + _trackExtent);
+        if (!_buttonVisibility || buttonStyles!.location == ScrollbarButtonLocation.split) {
+          leadingButtonOffset = Offset(x - crossAxisMargin, mainAxisMargin + padding.top);
+          trackOffset = leadingButtonOffset + Offset(0.0, _buttonExtent);
+          trailingButtonOffset = trackOffset + Offset(0.0, _trackExtent);
+        } else if (buttonStyles!.location == ScrollbarButtonLocation.groupedLeading) {
+          leadingButtonOffset = Offset(x - crossAxisMargin, mainAxisMargin + padding.top);
+          trailingButtonOffset = leadingButtonOffset + Offset(0.0, _buttonExtent);
+          trackOffset = trailingButtonOffset + Offset(0.0, _trackExtent);
+        } else {
+          assert(buttonStyles!.location == ScrollbarButtonLocation.groupedTrailing);
+          trackOffset = Offset(x - crossAxisMargin, padding.top + mainAxisMargin);
+          leadingButtonOffset = trackOffset + Offset(0.0, _trackExtent);
+          trailingButtonOffset = leadingButtonOffset + Offset(0.0, _buttonExtent);
+        }
+        borderStart = leadingButtonOffset;
+        borderEnd = Offset(leadingButtonOffset.dx, leadingButtonOffset.dy + _trackExtent + _buttonExtent * 2.0);
         break;
       case ScrollbarOrientation.top:
         thumbSize = Size(thumbExtent, thickness);
         trackSize = Size(_trackExtent, thickness + 2 * crossAxisMargin);
+        buttonSize = Size(_buttonExtent, trackSize.height);
         x = _thumbOffset;
         y = crossAxisMargin + padding.top;
-        trackOffset = Offset(mainAxisMargin, y - crossAxisMargin);
-        borderStart = trackOffset + Offset(0.0, trackSize.height);
-        borderEnd = Offset(trackOffset.dx + _trackExtent, trackOffset.dy + trackSize.height);
+        if (!_buttonVisibility || buttonStyles!.location == ScrollbarButtonLocation.split) {
+          leadingButtonOffset = Offset(mainAxisMargin + padding.left, y - crossAxisMargin);
+          trackOffset = leadingButtonOffset + Offset(_buttonExtent, 0.0);
+          trailingButtonOffset = trackOffset + Offset(_trackExtent, 0.0);
+        } else if (buttonStyles!.location == ScrollbarButtonLocation.groupedLeading) {
+          leadingButtonOffset = Offset(mainAxisMargin + padding.left, y - crossAxisMargin);
+          trailingButtonOffset = leadingButtonOffset + Offset(_buttonExtent, 0.0);
+          trackOffset = trailingButtonOffset + Offset(_buttonExtent, 0.0);
+        } else {
+          assert(buttonStyles!.location == ScrollbarButtonLocation.groupedTrailing);
+          trackOffset = Offset(mainAxisMargin + padding.left, y - crossAxisMargin);
+          leadingButtonOffset = trackOffset + Offset(_trackExtent, 0.0);
+          trailingButtonOffset = leadingButtonOffset + Offset(_buttonExtent, 0.0);
+        }
+        borderStart = leadingButtonOffset + Offset(0.0, trackSize.height);
+        borderEnd = Offset(leadingButtonOffset.dx + _trackExtent + _buttonExtent * 2.0, leadingButtonOffset.dy + trackSize.height);
         break;
       case ScrollbarOrientation.bottom:
         thumbSize = Size(thumbExtent, thickness);
         trackSize = Size(_trackExtent, thickness + 2 * crossAxisMargin);
+        buttonSize = Size(_buttonExtent, trackSize.height);
         x = _thumbOffset;
         y = size.height - thickness - crossAxisMargin - padding.bottom;
-        trackOffset = Offset(mainAxisMargin, y - crossAxisMargin);
-        borderStart = trackOffset;
-        borderEnd = Offset(trackOffset.dx + _trackExtent, trackOffset.dy);
+        if (!_buttonVisibility || buttonStyles!.location == ScrollbarButtonLocation.split) {
+          leadingButtonOffset = Offset(mainAxisMargin + padding.left, y - crossAxisMargin);
+          trackOffset = leadingButtonOffset + Offset(_buttonExtent, 0.0);
+          trailingButtonOffset = trackOffset + Offset(_trackExtent, 0.0);
+        } else if (buttonStyles!.location == ScrollbarButtonLocation.groupedLeading) {
+          leadingButtonOffset = Offset(mainAxisMargin + padding.left, y - crossAxisMargin);
+          trailingButtonOffset = leadingButtonOffset + Offset(_buttonExtent, 0.0);
+          trackOffset = trailingButtonOffset + Offset(_buttonExtent, 0.0);
+        } else {
+          assert(buttonStyles!.location == ScrollbarButtonLocation.groupedTrailing);
+          trackOffset = Offset(mainAxisMargin + padding.left, y - crossAxisMargin);
+          leadingButtonOffset = trackOffset + Offset(_trackExtent, 0.0);
+          trailingButtonOffset = leadingButtonOffset + Offset(_buttonExtent, 0.0);
+        }
+        borderStart = leadingButtonOffset;
+        borderEnd = Offset(leadingButtonOffset.dx + _trackExtent + _buttonExtent * 2.0, leadingButtonOffset.dy);
         break;
     }
 
@@ -492,9 +577,15 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     // when the scrollbar is transparent.
     _trackRect = trackOffset & trackSize;
     _thumbRect = Offset(x, y) & thumbSize;
+    _leadingButtonRect = leadingButtonOffset & buttonSize;
+    _trailingButtonRect = trailingButtonOffset & buttonSize;
 
     // Paint if the opacity dictates visibility
     if (fadeoutOpacityAnimation.value != 0.0) {
+      if (_buttonVisibility) {
+        // Buttons
+        _paintButtons(canvas, resolvedOrientation);
+      }
       // Track
       canvas.drawRect(_trackRect!, _paintTrack());
       // Track Border
@@ -514,6 +605,38 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
       canvas.drawPath(outerPath, _paintThumb);
       shape!.paint(canvas, _thumbRect!);
     }
+  }
+
+  void _paintButtons(Canvas canvas, ScrollbarOrientation orientation) {
+    // Paint the leading button.
+    // background
+    canvas.drawRect(
+      _leadingButtonRect,
+      Paint()..color = buttonStyles!.leadingButtonColors.backgroundColor ?? const Color(0x00000000)
+    );
+    // indicator
+    canvas.drawPath(
+      buttonStyles!.getIndicatorPath(buttonRect: _leadingButtonRect, isLeading: true, orientation: orientation),
+      Paint()
+        ..color = buttonStyles!.leadingButtonColors.indicatorColor
+        ..style = buttonStyles!.indicatorPaintingStyle
+        ..strokeWidth = 2.0
+    );
+
+    // Paint the trailing button.
+    // background
+    canvas.drawRect(
+      _trailingButtonRect,
+      Paint()..color = buttonStyles!.trailingButtonColors.backgroundColor ?? const Color(0x00000000)
+    );
+    // indicator
+    canvas.drawPath(
+        buttonStyles!.getIndicatorPath(buttonRect: _trailingButtonRect, isLeading: false, orientation: orientation),
+        Paint()
+          ..color = buttonStyles!.trailingButtonColors.indicatorColor
+          ..style = buttonStyles!.indicatorPaintingStyle
+          ..strokeWidth = 2.0
+    );
   }
 
   double _thumbExtent() {
@@ -565,7 +688,17 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   // Padding of the thumb track.
   double get _mainAxisPadding => _isVertical ? padding.vertical : padding.horizontal;
   // The size of the thumb track.
-  double get _trackExtent => _lastMetrics!.viewportDimension - 2 * mainAxisMargin - _mainAxisPadding;
+  double get _trackExtent => math.max(_lastMetrics!.viewportDimension - 2 * mainAxisMargin - _mainAxisPadding - 2 * _buttonExtent, 0.0);
+  double get _buttonExtent {
+    if (_buttonVisibility) {
+      return math.min(
+        buttonStyles!.extent,
+        math.max((_lastMetrics!.viewportDimension - 2 * mainAxisMargin - _mainAxisPadding) / 2.0, 0.0)
+      );
+    } else {
+      return 0.0;
+    }
+  }
 
   // The total size of the scrollable content.
   double get _totalContentExtent {
@@ -606,14 +739,22 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
       return;
 
     // Skip painting if there's not enough space.
-    if (_lastMetrics!.viewportDimension <= _mainAxisPadding || _trackExtent <= 0) {
+    if (_lastMetrics!.viewportDimension <= _mainAxisPadding || (_trackExtent == 0.0 && _buttonExtent == 0.0)) {
       return;
     }
 
     final double beforePadding = _isVertical ? padding.top : padding.left;
     final double thumbExtent = _thumbExtent();
     final double thumbOffsetLocal = _getScrollToTrack(_lastMetrics!, thumbExtent);
-    _thumbOffset = thumbOffsetLocal + mainAxisMargin + beforePadding;
+
+    if (!_buttonVisibility || buttonStyles!.location == ScrollbarButtonLocation.split) {
+      _thumbOffset = thumbOffsetLocal + mainAxisMargin + beforePadding + _buttonExtent;
+    } else if (buttonStyles!.location == ScrollbarButtonLocation.groupedLeading) {
+      _thumbOffset = thumbOffsetLocal + mainAxisMargin + beforePadding + _buttonExtent * 2.0;
+    } else {
+      assert(buttonStyles!.location == ScrollbarButtonLocation.groupedTrailing);
+      _thumbOffset = thumbOffsetLocal + mainAxisMargin + beforePadding;
+    }
 
     // Do not paint a scrollbar if the scroll view is infinitely long.
     // TODO(Piinks): Special handling for infinite scroll views, https://github.com/flutter/flutter/issues/41434
@@ -647,7 +788,10 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
       return false;
     }
 
-    final Rect interactiveRect = _trackRect!;
+    Rect interactiveRect = _trackRect!;
+    if (forHover && _buttonVisibility) {
+      interactiveRect = interactiveRect.expandToInclude(_leadingButtonRect).expandToInclude(_trailingButtonRect);
+    }
     final Rect paddedRect = interactiveRect.expandToInclude(
       Rect.fromCircle(center: _thumbRect!.center, radius: _kMinInteractiveSize / 2),
     );
@@ -670,6 +814,25 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
       case PointerDeviceKind.unknown:
         return interactiveRect.contains(position);
     }
+  }
+
+  /// Used to evaluate interactions with only the leading or trailing
+  /// scrollbar's button.
+  bool hitTestButtonsInteractive(
+    Offset position,
+    PointerDeviceKind kind, {
+      required bool isLeadingButton,
+    }
+  ) {
+    if (_buttonVisibility == false || !_lastMetricsAreScrollable) {
+      return false;
+    }
+    // The buttons is not able to be hit when transparent.
+    if (fadeoutOpacityAnimation.value == 0.0) {
+      return false;
+    }
+
+    return isLeadingButton ? _leadingButtonRect.contains(position) : _trailingButtonRect.contains(position);
   }
 
   /// Same as hitTestInteractive, but excludes the track portion of the scrollbar.
@@ -867,6 +1030,8 @@ class RawScrollbar extends StatefulWidget {
     this.shape,
     this.radius,
     this.thickness,
+    this.buttonVisibility = false,
+    this.buttonStyles,
     this.thumbColor,
     this.minThumbLength = _kMinThumbExtent,
     this.minOverscrollLength,
@@ -889,6 +1054,7 @@ class RawScrollbar extends StatefulWidget {
        assert(pressDuration != null),
        assert(mainAxisMargin != null),
        assert(crossAxisMargin != null),
+       assert(buttonVisibility == null || !buttonVisibility || buttonStyles != null),
        super(key: key);
 
   /// {@template flutter.widgets.Scrollbar.child}
@@ -1063,6 +1229,12 @@ class RawScrollbar extends StatefulWidget {
   /// If null, will default to 6.0 pixels.
   final double? thickness;
 
+  /// todo
+  final bool? buttonVisibility;
+
+  /// todo
+  final ScrollbarButtonStyles? buttonStyles;
+
   /// The color of the scrollbar thumb.
   ///
   /// If null, defaults to Color(0x66BCBCBC).
@@ -1177,7 +1349,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   late Animation<double> _fadeoutOpacityAnimation;
   final GlobalKey  _scrollbarPainterKey = GlobalKey();
   bool _hoverIsActive = false;
-
+  Timer? _keepScrollingTimer;
+  ScrollMetrics? _lastMetrics;
 
   /// Used to paint the scrollbar.
   ///
@@ -1374,7 +1547,9 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       ..crossAxisMargin = widget.crossAxisMargin
       ..minLength = widget.minThumbLength
       ..minOverscrollLength = widget.minOverscrollLength ?? widget.minThumbLength
-      ..ignorePointer = !enableGestures;
+      ..ignorePointer = !enableGestures
+      ..buttonVisibility = widget.buttonVisibility ?? false
+      ..buttonStyles = widget.buttonStyles;
   }
 
   @override
@@ -1520,6 +1695,113 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     _currentController = null;
   }
 
+  /// Handler called when a long press gesture has started on the leading
+  /// or trailing scrollbar's buttons.
+  @protected
+  @mustCallSuper
+  void handleButtonsPressDown(
+    Offset localPosition, {
+      required bool isLeadingButton,
+      Duration duration = const Duration(milliseconds: 100),
+    }
+  ) {
+    assert(_debugCheckHasValidScrollPosition());
+    _currentController = widget.controller ?? PrimaryScrollController.of(context);
+
+    double scrollIncrement;
+    // Is an increment calculator available?
+    final ScrollIncrementCalculator? calculator = Scrollable.of(
+      _currentController!.position.context.notificationContext!,
+    )?.widget.incrementCalculator;
+
+    if (calculator != null) {
+      scrollIncrement = calculator(
+        ScrollIncrementDetails(
+          type: ScrollIncrementType.line,
+          metrics: _currentController!.position,
+        ),
+      );
+    } else {
+      // Default line increment
+      scrollIncrement = 50.0;
+    }
+    if (isLeadingButton) {
+      // Adjust scrollIncrement for direction
+      switch (_currentController!.position.axisDirection) {
+        case AxisDirection.right:
+        case AxisDirection.down:
+          scrollIncrement = math.min(scrollIncrement, _currentController!.position.extentBefore);
+          scrollIncrement = -scrollIncrement;
+          break;
+        case AxisDirection.up:
+        case AxisDirection.left:
+          scrollIncrement = math.min(scrollIncrement, _currentController!.position.extentAfter);
+          break;
+      }
+    } else {
+      // Adjust scrollIncrement for direction
+      switch (_currentController!.position.axisDirection) {
+        case AxisDirection.right:
+        case AxisDirection.down:
+          scrollIncrement = math.min(scrollIncrement, _currentController!.position.extentAfter);
+          break;
+        case AxisDirection.up:
+        case AxisDirection.left:
+          scrollIncrement = math.min(scrollIncrement, _currentController!.position.extentBefore);
+          scrollIncrement = -scrollIncrement;
+          break;
+      }
+    }
+
+    if (scrollIncrement == 0.0) {
+      return;
+    }
+    _currentController!.position.moveTo(
+      _currentController!.position.pixels + scrollIncrement,
+      duration: duration,
+      curve: Curves.linear,
+    );
+  }
+
+  /// Handler called when the pointer stops contacting the buttons.
+  @protected
+  @mustCallSuper
+  void handleButtonsPressUp({ required bool isLeadingButton }) {
+    // if (isLeadingButton) {
+    //   setState(() { _leadingButtonPressed = false; });
+    // } else {
+    //   setState(() { _trailingButtonPressed = false; });
+    // }
+  }
+
+  /// Handler called when a press on the leading or trailing scrollbar's buttons
+  /// has been recognized.
+  @protected
+  @mustCallSuper
+  void handleButtonsLongPress({ required bool isLeadingButton }) {
+    assert(_debugCheckHasValidScrollPosition());
+    if (getScrollbarDirection() == null) {
+      return;
+    }
+
+    _keepScrollingTimer = Timer.periodic(const Duration(milliseconds: 40), (Timer timer){
+      handleButtonsPressDown(Offset.zero, isLeadingButton: isLeadingButton, duration: const Duration(milliseconds: 40));
+    });
+  }
+
+  /// Handler called when a long press has ended on the buttons.
+  @protected
+  @mustCallSuper
+  void handleButtonsPressEnd({ required bool isLeadingButton }) {
+    assert(_debugCheckHasValidScrollPosition());
+    final Axis? direction = getScrollbarDirection();
+    if (direction == null) {
+      return;
+    }
+    _keepScrollingTimer?.cancel();
+    _keepScrollingTimer = null;
+  }
+
   void _handleTrackTapDown(TapDownDetails details) {
     // The Scrollbar should page towards the position of the tap on the track.
     assert(_debugCheckHasValidScrollPosition());
@@ -1610,6 +1892,10 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     final ScrollMetrics metrics = notification.metrics;
     if (_shouldUpdatePainter(metrics.axis)) {
       scrollbarPainter.update(metrics, metrics.axisDirection);
+      _lastMetrics = metrics;
+      if (_lastMetrics!.atEdge) {
+        updateScrollbarPainter();
+      }
     }
     return false;
   }
@@ -1627,6 +1913,10 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
 
       if (_shouldUpdatePainter(metrics.axis)) {
         scrollbarPainter.update(metrics, metrics.axisDirection);
+        _lastMetrics = metrics;
+        if (_lastMetrics!.atEdge) {
+          updateScrollbarPainter();
+        }
       }
       return false;
     }
@@ -1642,6 +1932,10 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
 
       if (_shouldUpdatePainter(metrics.axis)) {
         scrollbarPainter.update(metrics, metrics.axisDirection);
+        _lastMetrics = metrics;
+        if (_lastMetrics!.atEdge) {
+          updateScrollbarPainter();
+        }
       }
     } else if (notification is ScrollEndNotification) {
       if (_dragScrollbarAxisOffset == null)
@@ -1682,8 +1976,41 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
         },
       );
 
+    gestures[_LeadingButtonPressGestureRecognizer] =
+      GestureRecognizerFactoryWithHandlers<_LeadingButtonPressGestureRecognizer>(
+        () => _LeadingButtonPressGestureRecognizer(
+          debugOwner: this,
+          customPaintKey: _scrollbarPainterKey,
+          pressDuration: const Duration(milliseconds: 150),
+        ),
+        (_LeadingButtonPressGestureRecognizer instance) {
+          instance.onLongPressDown = (LongPressDownDetails details) => handleButtonsPressDown(details.localPosition, isLeadingButton: true);
+          instance.onLongPressUp = () => handleButtonsPressUp(isLeadingButton: true);
+          instance.onLongPressCancel = () => handleButtonsPressUp(isLeadingButton: true);
+          instance.onLongPress = () => handleButtonsLongPress(isLeadingButton: true);
+          instance.onLongPressEnd = (LongPressEndDetails details) => handleButtonsPressEnd(isLeadingButton: true);
+        },
+      );
+
+    gestures[_TrailingButtonPressGestureRecognizer] =
+      GestureRecognizerFactoryWithHandlers<_TrailingButtonPressGestureRecognizer>(
+        () => _TrailingButtonPressGestureRecognizer(
+          debugOwner: this,
+          customPaintKey: _scrollbarPainterKey,
+          pressDuration: const Duration(milliseconds: 150),
+        ),
+        (_TrailingButtonPressGestureRecognizer instance) {
+          instance.onLongPressDown = (LongPressDownDetails details) => handleButtonsPressDown(details.localPosition, isLeadingButton: false);
+          instance.onLongPressUp = () => handleButtonsPressUp(isLeadingButton: false);
+          instance.onLongPressCancel = () => handleButtonsPressUp(isLeadingButton: false);
+          instance.onLongPress = () => handleButtonsLongPress(isLeadingButton: false);
+          instance.onLongPressEnd = (LongPressEndDetails details) => handleButtonsPressEnd(isLeadingButton: false);
+        },
+      );
+
     return gestures;
   }
+
   /// Returns true if the provided [Offset] is located over the track of the
   /// [RawScrollbar].
   ///
@@ -1697,6 +2024,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     return scrollbarPainter.hitTestInteractive(localOffset, kind)
       && !scrollbarPainter.hitTestOnlyThumbInteractive(localOffset, kind);
   }
+
   /// Returns true if the provided [Offset] is located over the thumb of the
   /// [RawScrollbar].
   @protected
@@ -1707,6 +2035,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     final Offset localOffset = _getLocalOffset(_scrollbarPainterKey, position);
     return scrollbarPainter.hitTestOnlyThumbInteractive(localOffset, kind);
   }
+
   /// Returns true if the provided [Offset] is located over the track or thumb
   /// of the [RawScrollbar].
   ///
@@ -1721,6 +2050,22 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     }
     final Offset localOffset = _getLocalOffset(_scrollbarPainterKey, position);
     return scrollbarPainter.hitTestInteractive(localOffset, kind, forHover: true);
+  }
+
+  /// Returns true if the provided [Offset] is located over the leading or
+  /// trailing buttons.
+  @protected
+  bool isPointerOverButtons(
+    Offset position,
+    PointerDeviceKind kind, {
+      required bool isLeadingButton,
+    }
+  ) {
+    if (_scrollbarPainterKey.currentContext == null) {
+      return false;
+    }
+    final Offset localOffset = _getLocalOffset(_scrollbarPainterKey, position);
+    return scrollbarPainter.hitTestButtonsInteractive(localOffset, kind, isLeadingButton: isLeadingButton);
   }
 
   /// Cancels the fade out animation so the scrollbar will remain visible for
@@ -1756,6 +2101,32 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   void handleHoverExit(PointerExitEvent event) {
     _hoverIsActive = false;
     _maybeStartFadeoutTimer();
+  }
+
+  /// Whether the scrollbar at the leading or trailing edge.
+  bool atEdge({ required bool isLeading}) {
+    if (_lastMetrics == null) {
+      return false;
+    }
+    if (isLeading) {
+      switch(_lastMetrics!.axisDirection) {
+        case AxisDirection.down:
+        case AxisDirection.right:
+          return _lastMetrics!.extentBefore == 0.0;
+        case AxisDirection.up:
+        case AxisDirection.left:
+          return _lastMetrics!.extentAfter == 0.0;
+      }
+    } else {
+      switch(_lastMetrics!.axisDirection) {
+        case AxisDirection.down:
+        case AxisDirection.right:
+          return _lastMetrics!.extentAfter == 0.0;
+        case AxisDirection.up:
+        case AxisDirection.left:
+          return _lastMetrics!.extentBefore == 0.0;
+      }
+    }
   }
 
   @override
@@ -1886,7 +2257,175 @@ class _TrackTapGestureRecognizer extends TapGestureRecognizer {
   }
 }
 
+class _ButtonPressGestureRecognizer extends LongPressGestureRecognizer {
+  _ButtonPressGestureRecognizer({
+    required bool isLeadingButton,
+    double? postAcceptSlopTolerance,
+    Set<PointerDeviceKind>? supportedDevices,
+    required Object debugOwner,
+    required GlobalKey customPaintKey,
+    required Duration pressDuration,
+  }) : _customPaintKey = customPaintKey,
+    _isLeadingButton = isLeadingButton,
+    super(
+      postAcceptSlopTolerance: postAcceptSlopTolerance,
+      supportedDevices: supportedDevices,
+      debugOwner: debugOwner,
+      duration: pressDuration,
+    );
+
+  final GlobalKey _customPaintKey;
+  final bool _isLeadingButton;
+
+  @override
+  bool isPointerAllowed(PointerDownEvent event) {
+    if (!_hitTestInteractive(_customPaintKey, event.position, event.kind)) {
+      return false;
+    }
+    return super.isPointerAllowed(event);
+  }
+
+  bool _hitTestInteractive(GlobalKey customPaintKey, Offset offset, PointerDeviceKind kind) {
+    if (customPaintKey.currentContext == null) {
+      return false;
+    }
+    final CustomPaint customPaint = customPaintKey.currentContext!.widget as CustomPaint;
+    final ScrollbarPainter painter = customPaint.foregroundPainter! as ScrollbarPainter;
+    final Offset localOffset = _getLocalOffset(customPaintKey, offset);
+    return painter.hitTestButtonsInteractive(localOffset, kind, isLeadingButton: _isLeadingButton);
+  }
+}
+
+// A long press gesture detector that responds to events on the leading scrollbar's button.
+class _LeadingButtonPressGestureRecognizer extends _ButtonPressGestureRecognizer {
+  _LeadingButtonPressGestureRecognizer({
+    double? postAcceptSlopTolerance,
+    Set<PointerDeviceKind>? supportedDevices,
+    required Object debugOwner,
+    required GlobalKey customPaintKey,
+    required Duration pressDuration,
+  }) : super(
+    isLeadingButton: true,
+    postAcceptSlopTolerance: postAcceptSlopTolerance,
+    supportedDevices: supportedDevices,
+    debugOwner: debugOwner,
+    customPaintKey: customPaintKey,
+    pressDuration: pressDuration,
+  );
+}
+
+// A long press gesture detector that responds to events on the trailing scrollbar's button.
+class _TrailingButtonPressGestureRecognizer extends _ButtonPressGestureRecognizer {
+  _TrailingButtonPressGestureRecognizer({
+    double? postAcceptSlopTolerance,
+    Set<PointerDeviceKind>? supportedDevices,
+    required Object debugOwner,
+    required GlobalKey customPaintKey,
+    required Duration pressDuration,
+  }) : super(
+    isLeadingButton: false,
+    postAcceptSlopTolerance: postAcceptSlopTolerance,
+    supportedDevices: supportedDevices,
+    debugOwner: debugOwner,
+    customPaintKey: customPaintKey,
+    pressDuration: pressDuration,
+  );
+}
+
 Offset _getLocalOffset(GlobalKey scrollbarPainterKey, Offset position) {
   final RenderBox renderBox = scrollbarPainterKey.currentContext!.findRenderObject()! as RenderBox;
   return renderBox.globalToLocal(position);
+}
+
+class ScrollbarButtonStyles {
+  const ScrollbarButtonStyles({
+    this.location = ScrollbarButtonLocation.split,
+    this.extent = 48.0,
+    this.indicatorWidth = 8.0,
+    this.indicatorPaintingStyle = PaintingStyle.stroke,
+    this.leadingButtonColors = const ScrollbarButtonColors(),
+    this.trailingButtonColors = const ScrollbarButtonColors(),
+  });
+
+  final ScrollbarButtonLocation location;
+  final double extent;
+  final double indicatorWidth;
+  final PaintingStyle indicatorPaintingStyle;
+  final ScrollbarButtonColors leadingButtonColors;
+  final ScrollbarButtonColors trailingButtonColors;
+
+  Path getIndicatorPath({
+    required Rect buttonRect,
+    required bool isLeading,
+    required ScrollbarOrientation orientation,
+  }) {
+    final Rect indicatorRect;
+    switch(orientation) {
+      case ScrollbarOrientation.left:
+      case ScrollbarOrientation.right:
+        indicatorRect = Rect.fromCenter(
+          center: buttonRect.center,
+          width: indicatorWidth,
+          height: indicatorWidth / 2.0,
+        ).intersect(buttonRect);
+        if (isLeading) {
+          return Path()
+            ..moveTo(indicatorRect.bottomLeft.dx, indicatorRect.bottomLeft.dy)
+            ..lineTo(indicatorRect.topCenter.dx, indicatorRect.topCenter.dy)
+            ..lineTo(indicatorRect.bottomRight.dx, indicatorRect.bottomRight.dy);
+        } else {
+          return Path()
+            ..moveTo(indicatorRect.topLeft.dx, indicatorRect.topLeft.dy)
+            ..lineTo(indicatorRect.bottomCenter.dx, indicatorRect.bottomCenter.dy)
+            ..lineTo(indicatorRect.topRight.dx, indicatorRect.topRight.dy);
+        }
+        break;
+      case ScrollbarOrientation.top:
+      case ScrollbarOrientation.bottom:
+        indicatorRect = Rect.fromCenter(
+          center: buttonRect.center,
+          width: indicatorWidth / 2.0,
+          height: indicatorWidth,
+        ).intersect(buttonRect);
+        if (isLeading) {
+          return Path()
+            ..moveTo(indicatorRect.topRight.dx, indicatorRect.topRight.dy)
+            ..lineTo(indicatorRect.centerLeft.dx, indicatorRect.centerLeft.dy)
+            ..lineTo(indicatorRect.bottomRight.dx, indicatorRect.bottomRight.dy);
+        } else {
+          return Path()
+            ..moveTo(indicatorRect.topLeft.dx, indicatorRect.topLeft.dy)
+            ..lineTo(indicatorRect.centerRight.dx, indicatorRect.centerRight.dy)
+            ..lineTo(indicatorRect.bottomLeft.dx, indicatorRect.bottomLeft.dy);
+        }
+        break;
+    }
+  }
+}
+
+class ScrollbarButtonColors {
+  const ScrollbarButtonColors({
+    this.backgroundColor,
+    this.indicatorColor = const Color(0xFF505050),
+  });
+
+  /// The color of the button background.
+  /// 
+  /// If this is null, the track color used.
+  final Color? backgroundColor;
+  
+  /// todo
+  final Color indicatorColor;
+}
+
+/// The location of the scrollbar button.
+enum ScrollbarButtonLocation {
+  /// Two buttons are displayed split at both ends of the track.
+  split,
+
+  /// Two buttons are displayed together on the leading of the track.
+  groupedLeading,
+
+  /// Two buttons are displayed together on the trailing of the track.
+  groupedTrailing,
 }

@@ -78,6 +78,8 @@ class Scrollbar extends StatelessWidget {
     this.controller,
     this.isAlwaysShown,
     this.trackVisibility,
+    this.buttonVisibility,
+    this.buttonStyles,
     this.showTrackOnHover,
     this.hoverThickness,
     this.thickness,
@@ -108,6 +110,12 @@ class Scrollbar extends StatelessWidget {
   ///
   /// [showTrackOnHover] can be replaced by this and will be deprecated.
   final bool? trackVisibility;
+
+  /// todo
+  final bool? buttonVisibility;
+
+  /// todo
+  final ScrollbarButtonStyles? buttonStyles;
 
   /// Controls if the track will show on hover and remain, including during drag.
   ///
@@ -170,6 +178,8 @@ class Scrollbar extends StatelessWidget {
       controller: controller,
       isAlwaysShown: isAlwaysShown,
       trackVisibility: trackVisibility,
+      buttonVisibility: buttonVisibility,
+      buttonStyles: buttonStyles,
       showTrackOnHover: showTrackOnHover,
       hoverThickness: hoverThickness,
       thickness: thickness,
@@ -189,6 +199,8 @@ class _MaterialScrollbar extends RawScrollbar {
     ScrollController? controller,
     bool? isAlwaysShown,
     this.trackVisibility,
+    this.buttonVisibility,
+    this.buttonStyles,
     this.showTrackOnHover,
     this.hoverThickness,
     double? thickness,
@@ -212,6 +224,8 @@ class _MaterialScrollbar extends RawScrollbar {
        );
 
   final bool? trackVisibility;
+  final bool? buttonVisibility;
+  final ScrollbarButtonStyles? buttonStyles;
   final bool? showTrackOnHover;
   final double? hoverThickness;
 
@@ -223,6 +237,10 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
   late AnimationController _hoverAnimationController;
   bool _dragIsActive = false;
   bool _hoverIsActive = false;
+  bool _leadingButtonHovered = false;
+  bool _trailingButtonHovered = false;
+  bool _leadingButtonPressed = false;
+  bool _trailingButtonPressed = false;
   late ColorScheme _colorScheme;
   late ScrollbarThemeData _scrollbarTheme;
   // On Android, scrollbars should match native appearance.
@@ -242,6 +260,59 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
     }
     return widget.trackVisibility ?? _scrollbarTheme.trackVisibility?.resolve(states) ?? false;
   });
+
+  MaterialStateProperty<bool> get _buttonVisibility => MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+    return widget.buttonVisibility ?? _scrollbarTheme.buttonVisibility?.resolve(states) ?? false;
+  });
+
+  ScrollbarButtonStyles get _buttonStyles {
+    final ScrollbarButtonStyles styles = widget.buttonStyles ?? const ScrollbarButtonStateStyles();
+    ScrollbarButtonColors leadingButtonColors = styles.leadingButtonColors;
+    ScrollbarButtonColors trailingButtonColors = styles.trailingButtonColors;
+
+    Color leadingIndicatorColor = leadingButtonColors.indicatorColor;
+    Color leadingBackgroundColor = leadingButtonColors.backgroundColor ?? _trackColor.resolve(_states);
+    if (leadingButtonColors is ScrollbarButtonStateColors) {
+      if (atEdge(isLeading: true)) {
+        leadingIndicatorColor = leadingButtonColors.inactiveIndicatorColor ?? leadingIndicatorColor;
+      } else {
+        if (_leadingButtonPressed) {
+          leadingBackgroundColor = leadingButtonColors.pressedBackgroundColor ?? leadingBackgroundColor;
+        } else if (_leadingButtonHovered) {
+          leadingBackgroundColor = leadingButtonColors.hoveredBackgroundColor ?? leadingBackgroundColor;
+        }
+      }
+    }
+
+    Color trailingIndicatorColor = trailingButtonColors.indicatorColor;
+    Color trailingBackgroundColor = trailingButtonColors.backgroundColor ?? _trackColor.resolve(_states);
+    if (trailingButtonColors is ScrollbarButtonStateColors) {
+      if (atEdge(isLeading: false)) {
+        trailingIndicatorColor = trailingButtonColors.inactiveIndicatorColor ?? trailingIndicatorColor;
+      } else {
+        if (_trailingButtonPressed) {
+          trailingBackgroundColor = trailingButtonColors.pressedBackgroundColor ?? trailingBackgroundColor;
+        } else if (_trailingButtonHovered) {
+          trailingBackgroundColor = trailingButtonColors.hoveredBackgroundColor ?? trailingBackgroundColor;
+        }
+      }
+    }
+
+    return ScrollbarButtonStyles(
+      location: styles.location,
+      extent: styles.extent,
+      indicatorWidth: styles.indicatorWidth,
+      indicatorPaintingStyle: styles.indicatorPaintingStyle,
+      leadingButtonColors: ScrollbarButtonColors(
+        backgroundColor: leadingBackgroundColor,
+        indicatorColor: leadingIndicatorColor,
+      ),
+      trailingButtonColors: ScrollbarButtonColors(
+        backgroundColor: trailingBackgroundColor,
+        indicatorColor: trailingIndicatorColor,
+      ),
+    );
+  }
 
   Set<MaterialState> get _states => <MaterialState>{
     if (_dragIsActive) MaterialState.dragged,
@@ -375,7 +446,9 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
       ..minLength = _scrollbarTheme.minThumbLength ?? _kScrollbarMinLength
       ..padding = MediaQuery.of(context).padding
       ..scrollbarOrientation = widget.scrollbarOrientation
-      ..ignorePointer = !enableGestures;
+      ..ignorePointer = !enableGestures
+      ..buttonVisibility = _buttonVisibility.resolve(_states)
+      ..buttonStyles = _buttonStyles;
   }
 
   @override
@@ -391,6 +464,31 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
   }
 
   @override
+  void handleButtonsPressDown(
+    Offset localPosition, {
+      required bool isLeadingButton,
+      Duration duration = const Duration(milliseconds: 100),
+    }
+  ) {
+    super.handleButtonsPressDown(localPosition, isLeadingButton: isLeadingButton, duration: duration);
+    if (isLeadingButton) {
+      setState(() { _leadingButtonPressed = true; });
+    } else {
+      setState(() { _trailingButtonPressed = true; });
+    }
+  }
+
+  @override
+  void handleButtonsPressUp({ required bool isLeadingButton }) {
+    super.handleButtonsPressUp(isLeadingButton: isLeadingButton);
+    if (isLeadingButton) {
+      setState(() { _leadingButtonPressed = false; });
+    } else {
+      setState(() { _trailingButtonPressed = false; });
+    }
+  }
+
+  @override
   void handleHover(PointerHoverEvent event) {
     super.handleHover(event);
     // Check if the position of the pointer falls over the painted scrollbar
@@ -403,12 +501,32 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
       setState(() { _hoverIsActive = false; });
       _hoverAnimationController.reverse();
     }
+
+    if (isPointerOverButtons(event.position, event.kind, isLeadingButton: true)) {
+      setState(() { _leadingButtonHovered = true; });
+    } else {
+      setState(() { _leadingButtonHovered = false; });
+    }
+
+    if (isPointerOverButtons(event.position, event.kind, isLeadingButton: false)) {
+      setState(() { _trailingButtonHovered = true; });
+    } else {
+      setState(() { _trailingButtonHovered = false; });
+    }
   }
 
   @override
   void handleHoverExit(PointerExitEvent event) {
     super.handleHoverExit(event);
-    setState(() { _hoverIsActive = false; });
+    setState(() {
+      _hoverIsActive = false;
+      _leadingButtonHovered = false;
+      _trailingButtonHovered = false;
+      // If move out the mouse cursor quickly, it may not receive the pointer up event.
+      // We should remove the buttons states when hover exit.
+      _leadingButtonPressed = false;
+      _trailingButtonPressed = false;
+    });
     _hoverAnimationController.reverse();
   }
 
