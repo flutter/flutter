@@ -1968,7 +1968,7 @@ void main() {
       () => Image.file(file),
       throwsA(predicate((AssertionError e) => e.message == expectedError)),
     );
-  }, skip: !kIsWeb);
+  }, skip: !kIsWeb); // https://github.com/flutter/flutter/issues/88772 (Improve the error message when calling Image.file on web)
 }
 
 @immutable
