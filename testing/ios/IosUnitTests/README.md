@@ -15,9 +15,9 @@ After the `ios_test_flutter` target is built you can also run the tests inside
 of Xcode with `testing/ios/IosUnitTests/IosUnitTests.xcodeproj`.
 
 When you load the test project [IosUnitTests.xcodeproj](IosUnitTests.xcodeproj)
-into XCode after running `run_tests.py`, only a few basic tests will appear
-initially. You have to run the test suite once in XCode for the rest to appear.
-Select "iPhone 8" as the device, and press `command-u` to start all the tests
+into Xcode after running `run_tests.py`, only a few basic tests will appear
+initially. You have to run the test suite once in Xcode for the rest to appear.
+Select "iPhone 11" as the device, and press `command-u` to start all the tests
 running. Once the tests are done running, the tests that ran will appear in the
 sidebar, and you can pick the specific one you want to debug/run.
 
