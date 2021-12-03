@@ -1677,13 +1677,6 @@ abstract class InheritedWidget extends ProxyWidget {
 /// RenderObjectWidgets provide the configuration for [RenderObjectElement]s,
 /// which wrap [RenderObject]s, which provide the actual rendering of the
 /// application.
-///
-/// See also:
-///
-///  * [MultiChildRenderObjectWidget], which configures a [RenderObject] with
-///    a single list of children.
-///  * [SlottedMultiChildRenderObjectWidgetMixin], which configures a
-///    [RenderObject] that organizes its children in different named slots.
 abstract class RenderObjectWidget extends Widget {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -1774,11 +1767,7 @@ abstract class SingleChildRenderObjectWidget extends RenderObjectWidget {
 /// See also:
 ///
 ///  * [Stack], which uses [MultiChildRenderObjectWidget].
-///  * [RenderStack], for an example implementation of the associated render
-///    object.
-///  * [SlottedMultiChildRenderObjectWidgetMixin], which configures a
-///    [RenderObject] that instead of having a single list of children organizes
-///    its children in named slots.
+///  * [RenderStack], for an example implementation of the associated render object.
 abstract class MultiChildRenderObjectWidget extends RenderObjectWidget {
   /// Initializes fields for subclasses.
   ///

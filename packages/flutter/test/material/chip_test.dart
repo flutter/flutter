@@ -15,7 +15,7 @@ import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
 
 Finder findRenderChipElement() {
-  return find.byElementPredicate((Element e) => '${e.renderObject.runtimeType}' == '_RenderChip');
+  return find.byElementPredicate((Element e) => '${e.runtimeType}' == '_RenderChipElement');
 }
 
 RenderBox getMaterialBox(WidgetTester tester) {
