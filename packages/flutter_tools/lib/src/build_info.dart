@@ -199,7 +199,7 @@ class BuildInfo {
 
   /// the flavor name in the output bundle files has the first character lower-cased,
   /// so the uncapitalized flavor name is used to compute the output file name
-  String? get uncapitalizedFlavor => flavor?.uncapitalize();
+  String? get uncapitalizedFlavor => _uncapitalize(flavor);
 
   /// Convert to a structured string encoded structure appropriate for usage
   /// in build system [Environment.defines].
@@ -1013,6 +1013,9 @@ String getNameForHostPlatformArch(HostPlatform platform) {
   }
 }
 
-extension on String {
-  String uncapitalize() => isEmpty ? this : substring(0, 1).toLowerCase() + substring(1);
+String? _uncapitalize(String? s) {
+  if (s == null || s.isEmpty) {
+    return s;
+  }
+  return s.substring(0, 1).toLowerCase() + s.substring(1);
 }
