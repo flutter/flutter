@@ -570,6 +570,12 @@ void AXEventGenerator::OnTreeDataChanged(AXTree* tree,
   }
   if (new_tree_data.title != old_tree_data.title)
     AddEvent(tree->root(), Event::DOCUMENT_TITLE_CHANGED);
+  if (new_tree_data.focus_id != old_tree_data.focus_id) {
+    AXNode* focus_node = tree->GetFromId(new_tree_data.focus_id);
+    if (focus_node) {
+      AddEvent(focus_node, Event::FOCUS_CHANGED);
+    }
+  }
 }
 
 void AXEventGenerator::OnNodeWillBeDeleted(AXTree* tree, AXNode* node) {

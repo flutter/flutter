@@ -164,6 +164,48 @@ TEST(AXEventGeneratorTest, DocumentTitleChanged) {
                        AXEventGenerator::Event::DOCUMENT_TITLE_CHANGED, 1));
 }
 
+// Do not emit a FOCUS_CHANGED event if focus_id is unchanged.
+TEST(AXEventGeneratorTest, FocusIdUnchanged) {
+  AXTreeUpdate initial_state;
+  initial_state.root_id = 1;
+  initial_state.nodes.resize(2);
+  initial_state.nodes[0].id = 1;
+  initial_state.nodes[0].child_ids.push_back(2);
+  initial_state.nodes[1].id = 2;
+  initial_state.has_tree_data = true;
+  initial_state.tree_data.focus_id = 1;
+  AXTree tree(initial_state);
+
+  AXEventGenerator event_generator(&tree);
+  AXTreeUpdate update = initial_state;
+  update.tree_data.focus_id = 1;
+
+  ASSERT_TRUE(tree.Unserialize(update));
+  EXPECT_FALSE(
+      HasEvent(event_generator, AXEventGenerator::Event::FOCUS_CHANGED, 1));
+}
+
+// Emit a FOCUS_CHANGED event if focus_id changes.
+TEST(AXEventGeneratorTest, FocusIdChanged) {
+  AXTreeUpdate initial_state;
+  initial_state.root_id = 1;
+  initial_state.nodes.resize(2);
+  initial_state.nodes[0].id = 1;
+  initial_state.nodes[0].child_ids.push_back(2);
+  initial_state.nodes[1].id = 2;
+  initial_state.has_tree_data = true;
+  initial_state.tree_data.focus_id = 1;
+  AXTree tree(initial_state);
+
+  AXEventGenerator event_generator(&tree);
+  AXTreeUpdate update = initial_state;
+  update.tree_data.focus_id = 2;
+
+  ASSERT_TRUE(tree.Unserialize(update));
+  EXPECT_TRUE(
+      HasEvent(event_generator, AXEventGenerator::Event::FOCUS_CHANGED, 2));
+}
+
 TEST(AXEventGeneratorTest, ExpandedAndRowCount) {
   AXTreeUpdate initial_state;
   initial_state.root_id = 1;
