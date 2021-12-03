@@ -344,6 +344,10 @@ class ToolbarOptions {
 /// [onSubmitted] can be used to manually move focus to another input widget
 /// when a user finishes with the currently focused input widget.
 ///
+/// When the widget has focus, it will prevent itself from disposing via
+/// [AutomaticKeepAliveClientMixin.wantKeepAlive] in order to avoid losing the
+/// selection. Removing the focus will allow it to be disposed.
+///
 /// Rather than using this widget directly, consider using [TextField], which
 /// is a full-featured, material-design text input field with placeholder text,
 /// labels, and [Form] integration.
