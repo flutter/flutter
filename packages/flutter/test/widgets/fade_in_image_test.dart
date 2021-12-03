@@ -156,7 +156,66 @@ Future<void> main() async {
       expect(findFadeInImage(tester).target.opacity, 1);
     });
 
-    testWidgets('shows a cached image immediately when skipFadeOnSynchronousLoad=true', (WidgetTester tester) async {
+    testWidgets('re-animates updated uncached image', (WidgetTester tester) async {
+      final TestImageProvider placeholderProvider = TestImageProvider(placeholderImage);
+      final TestImageProvider imageProvider = TestImageProvider(targetImage);
+      final TestImageProvider secondImageProvider = TestImageProvider(replacementImage);
+
+      await tester.pumpWidget(FadeInImage(
+        placeholder: placeholderProvider,
+        image: imageProvider,
+        fadeOutDuration: animationDuration,
+        fadeInDuration: animationDuration,
+        fadeOutCurve: Curves.linear,
+        fadeInCurve: Curves.linear,
+        excludeFromSemantics: true,
+      ));
+
+      imageProvider.complete();
+      placeholderProvider.complete();
+      await tester.pump();
+      await tester.pump(animationDuration * 2);
+
+      await tester.pumpWidget(FadeInImage(
+        placeholder: placeholderProvider,
+        image: secondImageProvider,
+        fadeOutDuration: animationDuration,
+        fadeInDuration: animationDuration,
+        fadeOutCurve: Curves.linear,
+        fadeInCurve: Curves.linear,
+        excludeFromSemantics: true,
+      ));
+
+      secondImageProvider.complete();
+      await tester.pump();
+
+      for (int i = 0; i < 5; i += 1) {
+        final FadeInImageParts parts = findFadeInImage(tester);
+        expect(parts.placeholder!.rawImage.image!.isCloneOf(placeholderImage), true);
+        expect(parts.target.rawImage.image!.isCloneOf(replacementImage), true);
+        expect(parts.placeholder!.opacity, moreOrLessEquals(1 - i / 5));
+        expect(parts.target.opacity, 0);
+        await tester.pump(const Duration(milliseconds: 10));
+      }
+
+      for (int i = 0; i < 5; i += 1) {
+        final FadeInImageParts parts = findFadeInImage(tester);
+        expect(parts.placeholder!.rawImage.image!.isCloneOf(placeholderImage), true);
+        expect(parts.target.rawImage.image!.isCloneOf(replacementImage), true);
+        expect(parts.placeholder!.opacity, 0);
+        expect(parts.target.opacity, moreOrLessEquals(i / 5));
+        await tester.pump(const Duration(milliseconds: 10));
+      }
+
+      await tester.pumpWidget(FadeInImage(
+        placeholder: placeholderProvider,
+        image: secondImageProvider,
+      ));
+      expect(findFadeInImage(tester).target.rawImage.image!.isCloneOf(replacementImage), true);
+      expect(findFadeInImage(tester).target.opacity, 1);
+    });
+
+    testWidgets('shows a cached image immediately', (WidgetTester tester) async {
       final TestImageProvider placeholderProvider = TestImageProvider(placeholderImage);
       final TestImageProvider imageProvider = TestImageProvider(targetImage);
       imageProvider.resolve(ImageConfiguration.empty);
@@ -168,6 +227,30 @@ Future<void> main() async {
       ));
 
       expect(findFadeInImage(tester).target.rawImage.image!.isCloneOf(targetImage), true);
+      expect(findFadeInImage(tester).placeholder, isNull);
+      expect(findFadeInImage(tester).target.opacity, 1);
+    });
+
+    testWidgets('shows second cached image immediately', (WidgetTester tester) async {
+      final TestImageProvider placeholderProvider = TestImageProvider(placeholderImage);
+      final TestImageProvider imageProvider = TestImageProvider(targetImage);
+      final TestImageProvider secondImageProvider = TestImageProvider(replacementImage);
+      imageProvider.resolve(ImageConfiguration.empty);
+      secondImageProvider.resolve(ImageConfiguration.empty);
+      imageProvider.complete();
+      secondImageProvider.complete();
+
+      await tester.pumpWidget(FadeInImage(
+        placeholder: placeholderProvider,
+        image: imageProvider,
+      ));
+
+      await tester.pumpWidget(FadeInImage(
+        placeholder: placeholderProvider,
+        image: secondImageProvider,
+      ));
+
+      expect(findFadeInImage(tester).target.rawImage.image!.isCloneOf(replacementImage), true);
       expect(findFadeInImage(tester).placeholder, isNull);
       expect(findFadeInImage(tester).target.opacity, 1);
     });
