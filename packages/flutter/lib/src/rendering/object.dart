@@ -3167,11 +3167,6 @@ mixin ContainerParentDataMixin<ChildType extends RenderObject> on ParentData {
 /// parent data.
 ///
 /// Moreover, this is a required mixin for render objects returned to [MultiChildRenderObjectWidget].
-///
-/// See also:
-///
-///  * [SlottedContainerRenderObjectMixin], which organizes its children
-///    in different named slots.
 mixin ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType extends ContainerParentDataMixin<ChildType>> on RenderObject {
   bool _debugUltimatePreviousSiblingOf(ChildType child, { ChildType? equals }) {
     ParentDataType childParentData = child.parentData! as ParentDataType;
