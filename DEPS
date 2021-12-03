@@ -719,6 +719,8 @@ hooks = [
     'action': [
       'python3',
       'src/flutter/tools/download_dart_sdk.py',
+      '--fail-loudly',
+      '--verbose',
     ]
   },
   {
