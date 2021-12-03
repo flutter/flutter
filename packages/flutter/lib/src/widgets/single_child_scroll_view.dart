@@ -34,7 +34,7 @@ import 'scrollable.dart';
 /// When you have a list of children and do not require cross-axis
 /// shrink-wrapping behavior, for example a scrolling list that is always the
 /// width of the screen, consider [ListView], which is vastly more efficient
-/// that a [SingleChildScrollView] containing a [ListBody] or [Column] with
+/// than a [SingleChildScrollView] containing a [ListBody] or [Column] with
 /// many children.
 ///
 /// ## Sample code: Using [SingleChildScrollView] with a [Column]
