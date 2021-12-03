@@ -3136,6 +3136,7 @@ void main() {
       },
     );
   });
+
   testWidgets('Skipping tabs with global key does not crash', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/24660
     final List<String> tabs = <String>[
@@ -3300,52 +3301,6 @@ void main() {
     expect(await tester.pumpAndSettle(), 1); // no more frames are scheduled.
   });
 
-  // Regression test for https://github.com/flutter/flutter/issues/20292.
-  testWidgets('Number of tabs can be updated dynamically', (WidgetTester tester) async {
-    final List<String> threeTabs = <String>['A', 'B', 'C'];
-    final List<String> twoTabs = <String>['A', 'B'];
-    final List<String> oneTab = <String>['A'];
-    final Key key = UniqueKey();
-    Widget buildTabs(List<String> tabs) {
-      return boilerplate(
-        child: DefaultTabController(
-          key: key,
-          length: tabs.length,
-          child: TabBar(
-            tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
-          ),
-        ),
-      );
-    }
-    TabController getController() => DefaultTabController.of(tester.element(find.text('A')))!;
-
-    await tester.pumpWidget(buildTabs(threeTabs));
-    await tester.tap(find.text('B'));
-    await tester.pump();
-    TabController controller = getController();
-    expect(controller.previousIndex, 0);
-    expect(controller.index, 1);
-    expect(controller.length, 3);
-
-    await tester.pumpWidget(buildTabs(twoTabs));
-    controller = getController();
-    expect(controller.previousIndex, 0);
-    expect(controller.index, 1);
-    expect(controller.length, 2);
-
-    await tester.pumpWidget(buildTabs(oneTab));
-    controller = getController();
-    expect(controller.previousIndex, 1);
-    expect(controller.index, 0);
-    expect(controller.length, 1);
-
-    await tester.pumpWidget(buildTabs(twoTabs));
-    controller = getController();
-    expect(controller.previousIndex, 1);
-    expect(controller.index, 0);
-    expect(controller.length, 2);
-  });
-
   // Regression test for https://github.com/flutter/flutter/issues/15008.
   testWidgets('TabBar with one tab has correct color', (WidgetTester tester) async {
     const Tab tab = Tab(text: 'A');
@@ -3418,56 +3373,52 @@ void main() {
     expect(find.text('Tab2'), findsOneWidget);
   });
 
-  testWidgets('DefaultTabController should allow for a length of zero', (WidgetTester tester) async {
+  testWidgets('DefaultTabController should allow dynamic length of tabs', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/20292.
-    List<String> tabTextContent = <String>[];
+    // Regression test for https://github.com/flutter/flutter/issues/94504.
+    final List<String> tabTitles = <String>[];
+
+    void _onTabAdd(StateSetter setState) {
+      setState(() {
+        tabTitles.add('Tab ${tabTitles.length + 1}');
+      });
+    }
+
+    void _onTabRemove(StateSetter setState) {
+      setState(() {
+        tabTitles.removeLast();
+      });
+    }
 
     await tester.pumpWidget(
       MaterialApp(
         home: StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             return DefaultTabController(
-              length: tabTextContent.length,
+              length: tabTitles.length,
               child: Scaffold(
                 appBar: AppBar(
-                  title: const Text('Default TabBar Preview'),
-                  bottom: tabTextContent.isNotEmpty
-                    ? TabBar(
-                       isScrollable: true,
-                       tabs: tabTextContent.map((String textContent) => Tab(text: textContent)).toList(),
-                     )
-                    : null,
-                ),
-                body: tabTextContent.isNotEmpty
-                  ? TabBarView(
-                      children: tabTextContent.map((String textContent) => Tab(text: "$textContent's view")).toList(),
-                    )
-                  : const Center(child: Text('No tabs')),
-                bottomNavigationBar: BottomAppBar(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      IconButton(
-                        key: const Key('Add tab'),
-                        icon: const Icon(Icons.add),
-                        onPressed: () {
-                          setState(() {
-                            tabTextContent = List<String>.from(tabTextContent)
-                              ..add('Tab ${tabTextContent.length + 1}');
-                          });
-                        },
+                  actions: <Widget>[
+                    TextButton(
+                      key: const Key('Add tab'),
+                      child: const Text('Add tab'),
+                      onPressed: () => _onTabAdd(setState),
+                    ),
+                    TextButton(
+                      key: const Key('Remove tab'),
+                      child: const Text('Remove tab'),
+                      onPressed: () => _onTabRemove(setState),
+                    ),
+                  ],
+                  bottom: PreferredSize(
+                    preferredSize: const Size.fromHeight(40.0),
+                    child: Expanded(
+                      child: TabBar(
+                        tabs: tabTitles
+                            .map((String title) => Tab(text: title))
+                            .toList(),
                       ),
-                      IconButton(
-                        key: const Key('Delete tab'),
-                        icon: const Icon(Icons.delete),
-                        onPressed: () {
-                          setState(() {
-                            tabTextContent = List<String>.from(tabTextContent)
-                              ..removeLast();
-                          });
-                        },
-                      ),
-                    ],
+                    ),
                   ),
                 ),
               ),
@@ -3477,44 +3428,42 @@ void main() {
       ),
     );
 
-    // Initializes with zero tabs properly
-    expect(find.text('No tabs'), findsOneWidget);
-    await tester.tap(find.byKey(const Key('Add tab')));
+    expect(find.text('Tab 1'), findsNothing);
+    expect(find.text('Tab 2'), findsNothing);
+
+    await tester.tap(find.byKey(const Key('Add tab'))); // +1
     await tester.pumpAndSettle();
     expect(find.text('Tab 1'), findsOneWidget);
-    expect(find.text("Tab 1's view"), findsOneWidget);
+    expect(find.text('Tab 2'), findsNothing);
 
-    // Dynamically updates to zero tabs properly
-    await tester.tap(find.byKey(const Key('Delete tab')));
+    await tester.tap(find.byKey(const Key('Add tab'))); // +2
     await tester.pumpAndSettle();
-    expect(find.text('No tabs'), findsOneWidget);
+    expect(find.text('Tab 1'), findsOneWidget);
+    expect(find.text('Tab 2'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('Remove tab'))); // -2
+    await tester.tap(find.byKey(const Key('Remove tab'))); // -1
+    await tester.pumpAndSettle();
+    expect(find.text('Tab 1'), findsNothing);
+    expect(find.text('Tab 2'), findsNothing);
   });
 
   testWidgets('TabBar - updating to and from zero tabs', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/68962.
     final List<String> tabTitles = <String>[];
-    final List<Widget> tabContents = <Widget>[];
-    TabController _tabController = TabController(length: tabContents.length, vsync: const TestVSync());
+    TabController _tabController = TabController(length: tabTitles.length, vsync: const TestVSync());
 
     void _onTabAdd(StateSetter setState) {
       setState(() {
         tabTitles.add('Tab ${tabTitles.length + 1}');
-        tabContents.add(
-          Container(
-            color: Colors.red,
-            height: 200,
-            width: 200,
-          ),
-        );
-        _tabController = TabController(length: tabContents.length, vsync: const TestVSync());
+        _tabController = TabController(length: tabTitles.length, vsync: const TestVSync());
       });
     }
 
     void _onTabRemove(StateSetter setState) {
       setState(() {
         tabTitles.removeLast();
-        tabContents.removeLast();
-        _tabController = TabController(length: tabContents.length, vsync: const TestVSync());
+        _tabController = TabController(length: tabTitles.length, vsync: const TestVSync());
       });
     }
 
