@@ -401,7 +401,7 @@ def to_gn_args(args):
     gn_args['bssl_use_clang_integrated_as'] = True
 
     # Enable pointer compression on 64-bit mobile targets.
-    if args.target_os in ['android' , 'ios'] and gn_args['target_cpu'] in ['x64' , 'arm64']:
+    if args.target_os in ['android'] and gn_args['target_cpu'] in ['x64' , 'arm64']:
       gn_args['dart_use_compressed_pointers'] = True
 
     if args.fuchsia_target_api_level is not None:
