@@ -46,12 +46,12 @@ IconThemeData getIconData(WidgetTester tester) {
   return iconTheme.data;
 }
 
-DefaultTextStyle getLabelStyle(WidgetTester tester) {
+DefaultTextStyle getLabelStyle(WidgetTester tester, String labelText) {
   return tester.widget(
-    find.descendant(
-      of: find.byType(RawChip),
+    find.ancestor(
+      of: find.text(labelText),
       matching: find.byType(DefaultTextStyle),
-    ).last,
+    ).first,
   );
 }
 
@@ -295,7 +295,7 @@ void main() {
     expect(getIconData(tester).color?.value, 0xffffffff);
     expect(getIconData(tester).opacity, null);
     expect(getIconData(tester).size, null);
-    expect(getLabelStyle(tester).style.color?.value, 0xde000000);
+    expect(getLabelStyle(tester, 'Chip A').style.color?.value, 0xde000000);
 
     await tester.pumpWidget(buildFrame(Brightness.dark));
     await tester.pumpAndSettle(); // Theme transition animation
@@ -307,7 +307,7 @@ void main() {
     expect(getIconData(tester).color?.value, 0xffffffff);
     expect(getIconData(tester).opacity, null);
     expect(getIconData(tester).size, null);
-    expect(getLabelStyle(tester).style.color?.value, 0xffffffff);
+    expect(getLabelStyle(tester, 'Chip A').style.color?.value, 0xdeffffff);
   });
 
   testWidgets('ChoiceChip defaults', (WidgetTester tester) async {
@@ -331,7 +331,7 @@ void main() {
     expect(getMaterial(tester).color, null);
     expect(getMaterial(tester).elevation, 0);
     expect(getMaterial(tester).shape, const StadiumBorder());
-    expect(getLabelStyle(tester).style.color?.value, 0xde000000);
+    expect(getLabelStyle(tester, 'Chip A').style.color?.value, 0xde000000);
 
     await tester.pumpWidget(buildFrame(Brightness.dark));
     await tester.pumpAndSettle(); // Theme transition animation
@@ -340,7 +340,7 @@ void main() {
     expect(getMaterial(tester).color, null);
     expect(getMaterial(tester).elevation, 0);
     expect(getMaterial(tester).shape, const StadiumBorder());
-    expect(getLabelStyle(tester).style.color?.value, 0xdeffffff);
+    expect(getLabelStyle(tester, 'Chip A').style.color?.value, 0xdeffffff);
   });
 
 
@@ -1725,7 +1725,7 @@ void main() {
 
     await tester.pumpWidget(buildChip());
 
-    final TextStyle labelStyle = getLabelStyle(tester).style;
+    final TextStyle labelStyle = getLabelStyle(tester, 'Label').style;
     expect(labelStyle.fontFamily, 'MyFont');
     expect(labelStyle.fontWeight, FontWeight.w200);
   });
@@ -1827,7 +1827,7 @@ void main() {
 
     RenderBox materialBox = getMaterialBox(tester);
     IconThemeData iconData = getIconData(tester);
-    DefaultTextStyle labelStyle = getLabelStyle(tester);
+    DefaultTextStyle labelStyle = getLabelStyle(tester, 'false');
 
     // Check default theme for enabled widget.
     expect(materialBox, paints..path(color: defaultChipTheme.backgroundColor));
@@ -1844,7 +1844,7 @@ void main() {
     await tester.pumpWidget(buildApp(isSelectable: false));
     await tester.pumpAndSettle();
     materialBox = getMaterialBox(tester);
-    labelStyle = getLabelStyle(tester);
+    labelStyle = getLabelStyle(tester, 'false');
     expect(materialBox, paints..path(color: defaultChipTheme.disabledColor));
     expect(labelStyle.style.color, equals(Colors.black.withAlpha(0xde)));
 
@@ -1864,7 +1864,7 @@ void main() {
     await tester.pumpAndSettle();
     materialBox = getMaterialBox(tester);
     iconData = getIconData(tester);
-    labelStyle = getLabelStyle(tester);
+    labelStyle = getLabelStyle(tester, 'false');
 
     // Check custom theme for enabled widget.
     expect(materialBox, paints..path(color: customTheme.backgroundColor));
@@ -1884,7 +1884,7 @@ void main() {
     ));
     await tester.pumpAndSettle();
     materialBox = getMaterialBox(tester);
-    labelStyle = getLabelStyle(tester);
+    labelStyle = getLabelStyle(tester, 'false');
     expect(materialBox, paints..path(color: customTheme.disabledColor));
     expect(labelStyle.style.color, equals(Colors.black.withAlpha(0xde)));
   });
