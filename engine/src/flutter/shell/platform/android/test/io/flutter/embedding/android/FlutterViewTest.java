@@ -136,6 +136,32 @@ public class FlutterViewTest {
   }
 
   @Test
+  public void detachFromFlutterEngine_closesImageView() {
+    FlutterEngine flutterEngine =
+        spy(new FlutterEngine(RuntimeEnvironment.application, mockFlutterLoader, mockFlutterJni));
+
+    FlutterRenderer flutterRenderer = spy(new FlutterRenderer(mockFlutterJni));
+    when(flutterEngine.getRenderer()).thenReturn(flutterRenderer);
+
+    FlutterImageView imageViewMock = mock(FlutterImageView.class);
+    when(imageViewMock.getAttachedRenderer()).thenReturn(flutterRenderer);
+
+    FlutterView flutterView = spy(new FlutterView(RuntimeEnvironment.application));
+    when(flutterView.createImageView()).thenReturn(imageViewMock);
+
+    flutterView.attachToFlutterEngine(flutterEngine);
+
+    assertFalse(flutterView.renderSurface == imageViewMock);
+
+    flutterView.convertToImageView();
+    assertTrue(flutterView.renderSurface == imageViewMock);
+
+    flutterView.detachFromFlutterEngine();
+    assertFalse(flutterView.renderSurface == imageViewMock);
+    verify(imageViewMock, times(1)).closeImageReader();
+  }
+
+  @Test
   public void onConfigurationChanged_fizzlesWhenNullEngine() {
     FlutterView flutterView = new FlutterView(Robolectric.setupActivity(Activity.class));
     FlutterEngine flutterEngine =
@@ -835,6 +861,22 @@ public class FlutterViewTest {
     imageView.resizeIfNeeded(incorrectWidth, incorrectHeight);
     assertEquals(1, imageView.getImageReader().getWidth());
     assertEquals(1, imageView.getImageReader().getHeight());
+  }
+
+  @Test
+  public void flutterImageView_closesReader() {
+    final ImageReader mockReader = mock(ImageReader.class);
+    when(mockReader.getMaxImages()).thenReturn(1);
+
+    final FlutterImageView imageView =
+        spy(
+            new FlutterImageView(
+                RuntimeEnvironment.application,
+                mockReader,
+                FlutterImageView.SurfaceKind.background));
+
+    imageView.closeImageReader();
+    verify(mockReader, times(1)).close();
   }
 
   @Test
