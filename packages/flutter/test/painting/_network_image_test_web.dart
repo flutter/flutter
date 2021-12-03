@@ -16,7 +16,6 @@ import '../image_data.dart';
 void runTests() {
   tearDown(() {
     debugRestoreHttpRequestFactory();
-    PaintingBinding.instance!.imageCache!.clear();
   });
 
   testWidgets('loads an image from the network with headers',
@@ -65,7 +64,7 @@ void runTests() {
     };
 
     final Image image = Image.network(
-      'https://www.example.com/images/frame.png',
+      'https://www.example.com/images/frame2.png',
       headers: headers,
     );
 
@@ -92,13 +91,13 @@ void runTests() {
     };
 
     final Image image = Image.network(
-      'https://www.example.com/images/frame.png',
+      'https://www.example.com/images/frame3.png',
       headers: headers,
     );
 
     await tester.pumpWidget(image);
     expect(tester.takeException().toString(),
-        'HTTP request failed, statusCode: 200, https://www.example.com/images/frame.png');
+        'HTTP request failed, statusCode: 200, https://www.example.com/images/frame3.png');
   });
 }
 
