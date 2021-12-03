@@ -357,9 +357,10 @@ typedef enum UIAccessibilityContrast : NSInteger {
                                                                                 nibName:nil
                                                                                  bundle:nil];
   mockEngine.viewController = viewController;
-  [viewController updateViewportMetrics];
   flutter::ViewportMetrics viewportMetrics;
-  OCMVerify([mockEngine updateViewportMetrics:viewportMetrics]);
+  OCMExpect([mockEngine updateViewportMetrics:viewportMetrics]).ignoringNonObjectArgs();
+  [viewController updateViewportMetrics];
+  OCMVerifyAll(mockEngine);
 }
 
 - (void)testViewDidLoadDoesntInvokeEngineWhenNotTheViewController {

@@ -387,7 +387,7 @@ def RunObjcTests(ios_variant='ios_debug_sim_unopt', test_filter=None):
     'xcodebuild '
     '-sdk iphonesimulator '
     '-scheme IosUnitTests '
-    "-destination platform='iOS Simulator,name=iPhone 8' "
+    "-destination platform='iOS Simulator,name=iPhone 11' "
     'test '
     'FLUTTER_ENGINE=' + ios_variant
   ]
