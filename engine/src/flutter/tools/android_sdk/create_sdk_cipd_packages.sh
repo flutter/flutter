@@ -80,13 +80,15 @@ for platform in "${platforms[@]}"; do
   echo "Creating temporary working directory for $platform: $sdk_root"
   mkdir $sdk_root
   mkdir $upload_dir
+  export REPO_OS_OVERRIDE=$platform
 
   # Download all the packages with sdkmanager.
   for package in $(cat $package_file_name); do
     echo $package
     split=(${package//:/ })
     echo "Installing ${split[0]}"
-    REPO_OS_OVERRIDE=$platform yes "y" | $sdkmanager_path --sdk_root=$sdk_root ${split[0]}
+    yes "y" | $sdkmanager_path --sdk_root=$sdk_root ${split[0]}
+
     # We copy only the relevant directories to a temporary dir
     # for upload. sdkmanager creates extra files that we don't need.
     array_length=${#split[@]}
