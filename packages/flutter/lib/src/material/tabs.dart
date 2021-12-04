@@ -724,7 +724,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   ///
   /// See also:
   /// 
-  ///   * [splashBorderRadius] to define clipping radius of the splash if borderRadius of BoxDecoration is defined.
+  ///   * [splashBorderRadius] to define the clipping radius of the splash if borderRadius of BoxDecoration is defined.
   final Decoration? indicator;
 
   /// Whether this tab bar should automatically adjust the [indicatorColor].
@@ -859,7 +859,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// For example, to match the `borderRadius` of [BoxDecoration] provided as
   /// `indicator` to this [TabBar].
   ///
-  /// If this property is null [BorderRadius.zero] is used.
+  /// If this property is null, then [BorderRadius.zero] is used.
   final BorderRadius? splashBorderRadius;
 
   /// A size whose height depends on if the tabs have both icons and text.
