@@ -11,6 +11,7 @@ def moduleProjectRoot = project(':flutter').projectDir.parentFile.parentFile
 
 // Note: if this logic is changed, also change the logic in app_plugin_loader.gradle.
 def pluginsFile = new File(moduleProjectRoot, '.flutter-plugins-dependencies')
+List<String> pluginsNames = new ArrayList<>()
 if (pluginsFile.exists()) {
     def object = new JsonSlurper().parseText(pluginsFile.text)
     assert object instanceof Map
@@ -20,6 +21,7 @@ if (pluginsFile.exists()) {
     object.plugins.android.each { androidPlugin ->
         assert androidPlugin.name instanceof String
         assert androidPlugin.path instanceof String
+        pluginsNames.add(androidPlugin.name)
         // Skip plugins that have no native build (such as a Dart-only
         // implementation of a federated plugin).
         def needsBuild = androidPlugin.containsKey('native_build') ? androidPlugin['native_build'] : true
@@ -33,8 +35,20 @@ if (pluginsFile.exists()) {
     }
 }
 
+String flutterModulePath = project(':flutter').projectDir.parentFile.getAbsolutePath()
 gradle.getGradle().projectsLoaded { g ->
     g.rootProject.beforeEvaluate { p ->
+        //let the plugin's output generated in flutter/.android/plugins_build_output/${androidPlugin.name}.
+        p.subprojects { sp ->
+            if (pluginsNames.contains(sp.name.replace(":", ""))){
+                File androidPluginBuildOutputDir = new File(flutterModulePath + File.separator + File.separator + "plugins_build_output" + File.separator + sp.name.replace(":", ""));
+                if (!androidPluginBuildOutputDir.exists()){
+                    //make dir if not exist.
+                    androidPluginBuildOutputDir.mkdirs()
+                }
+                sp.buildDir = androidPluginBuildOutputDir
+            }
+        }
         def _mainModuleName = binding.variables['mainModuleName']
         if (_mainModuleName != null && !_mainModuleName.empty) {
             p.ext.mainModuleName = _mainModuleName
