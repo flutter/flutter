@@ -41,6 +41,8 @@ class Canvas {
 
   const Matrix& GetCurrentTransformation() const;
 
+  void Transform(const Matrix& xformation);
+
   void Concat(const Matrix& xformation);
 
   void Translate(const Vector3& offset);
