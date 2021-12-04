@@ -723,7 +723,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// the tab widget itself.
   ///
   /// See also:
-  /// 
+  ///
   ///   * [splashBorderRadius] to define the clipping radius of the splash if borderRadius of BoxDecoration is defined.
   final Decoration? indicator;
 
