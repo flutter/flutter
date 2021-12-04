@@ -637,6 +637,21 @@ void main() {
     expect(builder.addedPicture, true);
     expect(layer.engineLayer, isA<FakeOpacityEngineLayer>());
   });
+
+  test('OpacityLayer dispose its engineLayer if there are no children', () {
+    final OpacityLayer layer = OpacityLayer(alpha: 128);
+    final FakeSceneBuilder builder = FakeSceneBuilder();
+    layer.addToScene(builder);
+    expect(layer.engineLayer, null);
+
+    layer.append(PictureLayer(Rect.largest)..picture = FakePicture());
+    layer.addToScene(builder);
+    expect(layer.engineLayer, isA<FakeOpacityEngineLayer>());
+
+    layer.removeAllChildren();
+    layer.addToScene(builder);
+    expect(layer.engineLayer, null);
+  });
 }
 
 class FakeEngineLayer extends Fake implements EngineLayer {
