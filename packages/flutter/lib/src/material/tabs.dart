@@ -1348,15 +1348,18 @@ class _TabBarViewState extends State<TabBarView> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _updateTabController();
-    _currentIndex = _controller?.index;
-    _pageController = PageController(initialPage: _currentIndex ?? 0);
+    _currentIndex = _controller!.index;
+    _pageController = PageController(initialPage: _currentIndex!);
   }
 
   @override
   void didUpdateWidget(TabBarView oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.controller != oldWidget.controller)
+    if (widget.controller != oldWidget.controller) {
       _updateTabController();
+      _currentIndex = _controller!.index;
+      _pageController.jumpToPage(_currentIndex!);
+    }
     if (widget.children != oldWidget.children && _warpUnderwayCount == 0)
       _updateChildren();
   }
