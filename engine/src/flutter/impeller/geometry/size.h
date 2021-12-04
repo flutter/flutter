@@ -79,11 +79,13 @@ struct TSize {
 
   constexpr Type Area() const { return width * height; }
 
-  constexpr bool IsZero() const { return width * height == 0.0; }
+  constexpr bool IsPositive() const { return width > 0 && height > 0; }
 
-  constexpr bool IsPositive() const { return width * height > 0.0; }
+  constexpr bool IsNegative() const { return width < 0 || height < 0; }
 
-  constexpr bool IsEmpty() const { return !IsPositive(); }
+  constexpr bool IsZero() const { return width == 0 || height == 0; }
+
+  constexpr bool IsEmpty() const { return IsNegative() || IsZero(); }
 
   template <class U>
   static constexpr TSize Ceil(const TSize<U>& other) {
