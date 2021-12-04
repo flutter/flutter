@@ -132,6 +132,7 @@ void Canvas::ClipPath(Path path) {
   entity.SetPath(std::move(path));
   entity.SetContents(std::make_shared<ClipContents>());
   entity.SetStencilDepth(GetStencilDepth());
+  entity.SetAddsToCoverage(false);
 
   GetCurrentPass().AddEntity(std::move(entity));
 }

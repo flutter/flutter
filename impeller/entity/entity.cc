@@ -29,6 +29,22 @@ void Entity::SetPath(Path path) {
   path_ = std::move(path);
 }
 
+void Entity::SetAddsToCoverage(bool adds) {
+  adds_to_coverage_ = adds;
+}
+
+bool Entity::AddsToCoverage() const {
+  return adds_to_coverage_;
+}
+
+std::optional<Rect> Entity::GetCoverage() const {
+  if (!adds_to_coverage_) {
+    return std::nullopt;
+  }
+
+  return path_.GetBoundingBox();
+}
+
 void Entity::SetContents(std::shared_ptr<Contents> contents) {
   contents_ = std::move(contents);
 }

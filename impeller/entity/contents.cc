@@ -205,7 +205,12 @@ bool TextureContents::Render(const ContentRenderer& renderer,
   using FS = TextureFillFragmentShader;
 
   const auto coverage_rect = entity.GetPath().GetBoundingBox();
-  if (coverage_rect.size.IsEmpty()) {
+
+  if (!coverage_rect.has_value()) {
+    return true;
+  }
+
+  if (coverage_rect->size.IsEmpty()) {
     return true;
   }
 
@@ -226,7 +231,7 @@ bool TextureContents::Render(const ContentRenderer& renderer,
           VS::PerVertexData data;
           data.vertices = vtx;
           data.texture_coords =
-              ((vtx - coverage_rect.origin) / coverage_rect.size);
+              ((vtx - coverage_rect->origin) / coverage_rect->size);
           vertex_builder.AppendVertex(data);
         });
     if (!tess_result) {
