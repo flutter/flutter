@@ -53,6 +53,10 @@ void Canvas::Concat(const Matrix& xformation) {
   xformation_stack_.back().xformation = xformation * GetCurrentTransformation();
 }
 
+void Canvas::Transform(const Matrix& xformation) {
+  Concat(xformation);
+}
+
 const Matrix& Canvas::GetCurrentTransformation() const {
   return xformation_stack_.back().xformation;
 }
