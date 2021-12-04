@@ -30,6 +30,12 @@ class Entity {
 
   void SetPath(Path path);
 
+  void SetAddsToCoverage(bool adds);
+
+  bool AddsToCoverage() const;
+
+  std::optional<Rect> GetCoverage() const;
+
   void SetContents(std::shared_ptr<Contents> contents);
 
   const std::shared_ptr<Contents>& GetContents() const;
@@ -47,6 +53,7 @@ class Entity {
   std::shared_ptr<Contents> contents_;
   Path path_;
   uint32_t stencil_depth_ = 0u;
+  bool adds_to_coverage_ = true;
 };
 
 }  // namespace impeller

@@ -43,27 +43,41 @@ size_t EntityPass::GetSubpassesDepth() const {
   return max_subpass_depth + 1u;
 }
 
-Rect EntityPass::GetCoverageRect() const {
-  std::optional<Point> min, max;
+std::optional<Rect> EntityPass::GetEntitiesCoverage() const {
+  std::optional<Rect> result;
   for (const auto& entity : entities_) {
-    auto coverage = entity.GetPath().GetMinMaxCoveragePoints();
+    auto coverage = entity.GetCoverage();
+    if (!result.has_value() && coverage.has_value()) {
+      result = coverage;
+      continue;
+    }
     if (!coverage.has_value()) {
       continue;
     }
-    if (!min.has_value()) {
-      min = coverage->first;
-    }
-    if (!max.has_value()) {
-      max = coverage->second;
-    }
-    min = min->Min(coverage->first);
-    max = max->Max(coverage->second);
+    result = result->Union(coverage.value());
   }
-  if (!min.has_value() || !max.has_value()) {
-    return {};
+  return result;
+}
+
+std::optional<Rect> EntityPass::GetSubpassCoverage(
+    const EntityPass& subpass) const {
+  auto entities_coverage = subpass.GetEntitiesCoverage();
+  // The entities don't cover anything. There is nothing to do.
+  if (!entities_coverage.has_value()) {
+    return std::nullopt;
   }
-  const auto diff = *max - *min;
-  return {min->x, min->y, diff.x, diff.y};
+
+  // The delegates don't have an opinion on what the entity coverage has to be.
+  // Just use that as-is.
+  auto delegate_coverage = delegate_->GetCoverageRect();
+  if (!delegate_coverage.has_value()) {
+    return entities_coverage;
+  }
+
+  // If the delete tells us the coverage is smaller than it needs to be, then
+  // great. OTOH, if the delegate is being wasteful, limit coverage to what is
+  // actually needed.
+  return entities_coverage->Intersection(delegate_coverage.value());
 }
 
 EntityPass* EntityPass::GetSuperpass() const {
@@ -72,18 +86,6 @@ EntityPass* EntityPass::GetSuperpass() const {
 
 const EntityPass::Subpasses& EntityPass::GetSubpasses() const {
   return subpasses_;
-}
-
-Rect EntityPass::GetSubpassCoverage(const EntityPass& subpass) const {
-  auto subpass_coverage = subpass.GetCoverageRect();
-  auto delegate_coverage =
-      delegate_->GetCoverageRect().value_or(subpass_coverage);
-  Rect coverage;
-  coverage.origin = subpass_coverage.origin;
-  // TODO(csg): This must still be restricted to the max texture size. Or,
-  // decide if this must be done by the allocator.
-  coverage.size = subpass_coverage.size.Min(delegate_coverage.size);
-  return coverage;
 }
 
 EntityPass* EntityPass::AddSubpass(std::unique_ptr<EntityPass> pass) {
@@ -117,7 +119,11 @@ bool EntityPass::Render(ContentRenderer& renderer,
 
     const auto subpass_coverage = GetSubpassCoverage(*subpass);
 
-    if (subpass_coverage.IsEmpty()) {
+    if (!subpass_coverage.has_value()) {
+      continue;
+    }
+
+    if (subpass_coverage->size.IsEmpty()) {
       // It is not an error to have an empty subpass. But subpasses that can't
       // create their intermediates must trip errors.
       continue;
@@ -126,7 +132,7 @@ bool EntityPass::Render(ContentRenderer& renderer,
     auto context = renderer.GetContext();
 
     auto subpass_target = RenderTarget::CreateOffscreen(
-        *context, ISize::Ceil(subpass_coverage.size));
+        *context, ISize::Ceil(subpass_coverage->size));
 
     auto subpass_texture = subpass_target.GetRenderTargetTexture();
 
@@ -178,7 +184,8 @@ bool EntityPass::Render(ContentRenderer& renderer,
     }
 
     Entity entity;
-    entity.SetPath(PathBuilder{}.AddRect(subpass_coverage).CreatePath());
+    entity.SetPath(
+        PathBuilder{}.AddRect(subpass_coverage.value()).CreatePath());
     entity.SetContents(std::move(offscreen_texture_contents));
     entity.SetStencilDepth(stencil_depth_);
     entity.SetTransformation(xformation_);

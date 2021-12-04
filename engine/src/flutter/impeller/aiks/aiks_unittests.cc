@@ -197,9 +197,8 @@ TEST_F(AiksTest, CanPerformSaveLayerWithBounds) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
-TEST_F(
-    AiksTest,
-    DISABLED_CanPerformSaveLayerWithBoundsAndLargerIntermediateIsNotAllocated) {
+TEST_F(AiksTest,
+       CanPerformSaveLayerWithBoundsAndLargerIntermediateIsNotAllocated) {
   Canvas canvas;
 
   Paint red;

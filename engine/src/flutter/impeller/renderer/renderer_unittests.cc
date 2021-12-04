@@ -266,7 +266,7 @@ TEST_F(RendererTest, CanRenderToTexture) {
 
 TEST_F(RendererTest, CanRenderPath) {
   auto path = PathBuilder{}.AddCircle({550, 550}, 500).CreatePath();
-  ASSERT_FALSE(path.GetBoundingBox().IsZero());
+  ASSERT_FALSE(path.GetBoundingBox().has_value());
 
   using BoxPipeline = PipelineT<BoxFadeVertexShader, BoxFadeFragmentShader>;
   using VS = BoxFadeVertexShader;

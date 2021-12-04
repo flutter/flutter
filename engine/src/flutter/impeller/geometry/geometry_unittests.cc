@@ -185,7 +185,8 @@ TEST(GeometryTest, BoundingBoxCubic) {
   path.AddCubicComponent({120, 160}, {25, 200}, {220, 260}, {220, 40});
   auto box = path.GetBoundingBox();
   Rect expected(93.9101, 40, 126.09, 158.862);
-  ASSERT_RECT_NEAR(box, expected);
+  ASSERT_TRUE(box.has_value());
+  ASSERT_RECT_NEAR(box.value(), expected);
 }
 
 TEST(GeometryTest, BoundingBoxOfCompositePathIsCorrect) {
@@ -194,7 +195,8 @@ TEST(GeometryTest, BoundingBoxOfCompositePathIsCorrect) {
   auto path = builder.CreatePath();
   auto actual = path.GetBoundingBox();
   Rect expected(10, 10, 300, 300);
-  ASSERT_RECT_NEAR(actual, expected);
+  ASSERT_TRUE(actual.has_value());
+  ASSERT_RECT_NEAR(actual.value(), expected);
 }
 
 TEST(GeometryTest, CanGenerateMipCounts) {
