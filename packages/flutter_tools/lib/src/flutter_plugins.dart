@@ -348,7 +348,7 @@ List<Map<String, Object?>> _extractPlatformMaps(List<Plugin> plugins, String typ
 /// [project] is using.
 AndroidEmbeddingVersion _getAndroidEmbeddingVersion(FlutterProject project) {
   assert(project.android != null);
-  return project.android.getEmbeddingVersion().version;
+  return project.android.getEmbeddingVersion();
 }
 
 Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {

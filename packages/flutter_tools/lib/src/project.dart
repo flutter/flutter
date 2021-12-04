@@ -546,7 +546,7 @@ class AndroidProject extends FlutterProjectPlatform {
   }
 
   void checkForDeprecation({DeprecationBehavior deprecationBehavior = DeprecationBehavior.none}) {
-    final AndroidEmbeddingVersionResult result = getEmbeddingVersion();
+    final AndroidEmbeddingVersionResult result = computeEmbeddingVersion();
     if (result.version == AndroidEmbeddingVersion.v1) {
       globals.printStatus(
 '''
@@ -585,7 +585,11 @@ The detected reason was:
     }
   }
 
-  AndroidEmbeddingVersionResult getEmbeddingVersion() {
+  AndroidEmbeddingVersion getEmbeddingVersion() {
+    computeEmbeddingVersion().version;
+  }
+
+  AndroidEmbeddingVersionResult computeEmbeddingVersion() {
     if (isModule) {
       // A module type's Android project is used in add-to-app scenarios and
       // only supports the V2 embedding.
@@ -615,14 +619,14 @@ The detected reason was:
       if (name == 'flutterEmbedding') {
         final String? embeddingVersionString = metaData.getAttribute('android:value');
         if (embeddingVersionString == '1') {
-          return AndroidEmbeddingVersionResult(AndroidEmbeddingVersion.v1, 'AndroidManifest.xml `flutterEmbedding` metadata has value 1');
+          return AndroidEmbeddingVersionResult(AndroidEmbeddingVersion.v1, 'AndroidManifest.xml `<meta-data android:name="flutterEmbedding"` has value 1');
         }
         if (embeddingVersionString == '2') {
-          return AndroidEmbeddingVersionResult(AndroidEmbeddingVersion.v2, 'AndroidManifest.xml `flutterEmbedding` metadata has value 2');
+          return AndroidEmbeddingVersionResult(AndroidEmbeddingVersion.v2, 'AndroidManifest.xml `<meta-data android:name="flutterEmbedding"` has value 2');
         }
       }
     }
-    return AndroidEmbeddingVersionResult(AndroidEmbeddingVersion.v1, 'No metadata with name `flutterEmbedding` and value 2 in AndroidManifest.xml');
+    return AndroidEmbeddingVersionResult(AndroidEmbeddingVersion.v1, 'No `<meta-data android:name="flutterEmbedding" android:value="2"/>` in AndroidManifest.xml');
   }
 }
 
