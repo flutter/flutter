@@ -502,4 +502,42 @@ Future<void> testMain() async {
     testBackgroundStyle(canvas);
     return takeScreenshot(canvas, bounds, 'canvas_paragraph_background_style_dom');
   });
+
+  void testForegroundStyle(EngineCanvas canvas) {
+    final CanvasParagraph paragraph = rich(
+      EngineParagraphStyle(fontFamily: 'Roboto', fontSize: 40.0),
+      (CanvasParagraphBuilder builder) {
+        builder.pushStyle(EngineTextStyle.only(color: blue));
+        builder.addText('Lorem');
+        builder.pop();
+        builder.pushStyle(EngineTextStyle.only(foreground: Paint()..color = red..style = PaintingStyle.stroke));
+        builder.addText('ipsum\n');
+        builder.pop();
+        builder.pushStyle(EngineTextStyle.only(foreground: Paint()..color = blue..style = PaintingStyle.stroke..strokeWidth = 0.0));
+        builder.addText('dolor');
+        builder.pop();
+        builder.pushStyle(EngineTextStyle.only(foreground: Paint()..color = green..style = PaintingStyle.stroke..strokeWidth = 2.0));
+        builder.addText('sit\n');
+        builder.pop();
+        builder.pushStyle(EngineTextStyle.only(foreground: Paint()..color = yellow..style = PaintingStyle.stroke..strokeWidth = 4.0));
+        builder.addText('amet');
+      },
+    );
+    paragraph.layout(constrain(double.infinity));
+    canvas.drawParagraph(paragraph, Offset.zero);
+  }
+
+  test('foreground style', () {
+    const Rect bounds = Rect.fromLTWH(0, 0, 300, 200);
+    final BitmapCanvas canvas = BitmapCanvas(bounds, RenderStrategy());
+    testForegroundStyle(canvas);
+    return takeScreenshot(canvas, bounds, 'canvas_paragraph_foreground_style');
+  });
+
+  test('foreground style (DOM)', () {
+    const Rect bounds = Rect.fromLTWH(0, 0, 300, 200);
+    final DomCanvas canvas = DomCanvas(domRenderer.createElement('flt-picture'));
+    testForegroundStyle(canvas);
+    return takeScreenshot(canvas, bounds, 'canvas_paragraph_foreground_style_dom');
+  });
 }
