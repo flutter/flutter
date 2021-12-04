@@ -1626,27 +1626,6 @@ void main() {
     }
   });
 
-  testWidgets('BottomNavigationBar item label should not be nullable', (WidgetTester tester) async {
-    expect(() {
-      MaterialApp(
-        home: Scaffold(
-          bottomNavigationBar: BottomNavigationBar(
-            type: BottomNavigationBarType.shifting,
-            items: const <BottomNavigationBarItem>[
-              BottomNavigationBarItem(
-                icon: Icon(Icons.ac_unit),
-                label: 'AC',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.access_alarm),
-              ),
-            ],
-          ),
-        ),
-      );
-    }, throwsAssertionError);
-  });
-
   testWidgets(
     'BottomNavigationBar [showSelectedLabels]=false and [showUnselectedLabels]=false '
     'for shifting navbar, expect that there is no rendered text',
