@@ -546,7 +546,7 @@ class AndroidProject extends FlutterProjectPlatform {
   }
 
   void checkForDeprecation({DeprecationBehavior deprecationBehavior = DeprecationBehavior.none}) {
-    AndroidEmbeddingVersionResult result = getEmbeddingVersion();
+    final AndroidEmbeddingVersionResult result = getEmbeddingVersion();
     if (result.version == AndroidEmbeddingVersion.v1) {
       globals.printStatus(
 '''

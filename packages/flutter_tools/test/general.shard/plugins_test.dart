@@ -1629,8 +1629,8 @@ class FakeAndroidProject extends Fake implements AndroidProject {
   bool existsSync() => exists;
 
   @override
-  AndroidEmbeddingVersion getEmbeddingVersion() {
-    return embeddingVersion;
+  AndroidEmbeddingVersionResult getEmbeddingVersion() {
+    return AndroidEmbeddingVersionResult(embeddingVersion, 'reasons for version');
   }
 }
 
