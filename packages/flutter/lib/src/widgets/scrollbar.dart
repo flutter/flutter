@@ -90,6 +90,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     double minLength = _kMinThumbExtent,
     double? minOverscrollLength,
     ScrollbarOrientation? scrollbarOrientation,
+    bool ignorePointer = false,
   }) : assert(color != null),
        assert(radius == null || shape == null),
        assert(thickness != null),
@@ -102,6 +103,9 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
        assert(minOverscrollLength == null || minOverscrollLength >= 0),
        assert(padding != null),
        assert(padding.isNonNegative),
+       assert(trackColor != null),
+       assert(trackBorderColor != null),
+       assert(ignorePointer != null),
        _color = color,
        _textDirection = textDirection,
        _thickness = thickness,
@@ -114,7 +118,8 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
        _trackColor = trackColor,
        _trackBorderColor = trackBorderColor,
        _scrollbarOrientation = scrollbarOrientation,
-       _minOverscrollLength = minOverscrollLength ?? minLength {
+       _minOverscrollLength = minOverscrollLength ?? minLength,
+       _ignorePointer = ignorePointer {
     fadeoutOpacityAnimation.addListener(notifyListeners);
   }
 
@@ -338,6 +343,17 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
       return;
 
     _scrollbarOrientation = value;
+    notifyListeners();
+  }
+
+  /// Whether the painter will be ignored during hit testing.
+  bool get ignorePointer => _ignorePointer;
+  bool _ignorePointer;
+  set ignorePointer(bool value) {
+    if (ignorePointer == value)
+      return;
+
+    _ignorePointer = value;
     notifyListeners();
   }
 
@@ -623,6 +639,9 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
       // We have not computed the scrollbar position yet.
       return false;
     }
+    if (ignorePointer) {
+      return false;
+    }
 
     if (!_lastMetricsAreScrollable) {
       return false;
@@ -659,6 +678,9 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     if (_thumbRect == null) {
       return false;
     }
+    if (ignorePointer) {
+      return false;
+    }
     // The thumb is not able to be hit when transparent.
     if (fadeoutOpacityAnimation.value == 0.0) {
       return false;
@@ -688,6 +710,9 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     if (_thumbRect == null) {
       return null;
     }
+    if (ignorePointer) {
+      return false;
+    }
     // The thumb is not able to be hit when transparent.
     if (fadeoutOpacityAnimation.value == 0.0) {
       return false;
@@ -716,7 +741,8 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
         || padding != oldDelegate.padding
         || minLength != oldDelegate.minLength
         || minOverscrollLength != oldDelegate.minOverscrollLength
-        || scrollbarOrientation != oldDelegate.scrollbarOrientation;
+        || scrollbarOrientation != oldDelegate.scrollbarOrientation
+        || ignorePointer != oldDelegate.ignorePointer;
   }
 
   @override
@@ -1104,7 +1130,8 @@ class RawScrollbar extends StatefulWidget {
   /// match native behavior. On Android, the scrollbar is not interactive by
   /// default.
   ///
-  /// When false, the scrollbar will not respond to gesture or hover events.
+  /// When false, the scrollbar will not respond to gesture or hover events,
+  /// and will allow to click through it.
   ///
   /// Defaults to true when null, unless on Android, which will default to false
   /// when null.
@@ -1176,6 +1203,9 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   /// Overridable getter to indicate is gestures should be enabled on the
   /// scrollbar.
   ///
+  /// When false, the scrollbar will not respond to gesture or hover events,
+  /// and will allow to click through it.
+  ///
   /// Subclasses can override this getter to make its value depend on an inherited
   /// theme.
   ///
@@ -1200,14 +1230,15 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     );
     scrollbarPainter = ScrollbarPainter(
       color: widget.thumbColor ?? const Color(0x66BCBCBC),
-      minLength: widget.minThumbLength,
-      minOverscrollLength: widget.minOverscrollLength ?? widget.minThumbLength,
-      thickness: widget.thickness ?? _kScrollbarThickness,
       fadeoutOpacityAnimation: _fadeoutOpacityAnimation,
+      thickness: widget.thickness ?? _kScrollbarThickness,
+      radius: widget.radius,
       scrollbarOrientation: widget.scrollbarOrientation,
       mainAxisMargin: widget.mainAxisMargin,
       shape: widget.shape,
-      crossAxisMargin: widget.crossAxisMargin
+      crossAxisMargin: widget.crossAxisMargin,
+      minLength: widget.minThumbLength,
+      minOverscrollLength: widget.minOverscrollLength ?? widget.minThumbLength,
     );
   }
 
@@ -1342,7 +1373,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       ..shape = widget.shape
       ..crossAxisMargin = widget.crossAxisMargin
       ..minLength = widget.minThumbLength
-      ..minOverscrollLength = widget.minOverscrollLength ?? widget.minThumbLength;
+      ..minOverscrollLength = widget.minOverscrollLength ?? widget.minThumbLength
+      ..ignorePointer = !enableGestures;
   }
 
   @override

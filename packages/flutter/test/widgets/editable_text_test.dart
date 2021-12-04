@@ -5556,6 +5556,271 @@ void main() {
     variant: TargetPlatformVariant.all(),
   );
 
+  testWidgets('shift + home/end keys (Windows only)', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(text: testText);
+    controller.selection = const TextSelection(
+      baseOffset: 0,
+      extentOffset: 0,
+      affinity: TextAffinity.upstream,
+    );
+    await tester.pumpWidget(MaterialApp(
+      home: Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          width: 400,
+          child: EditableText(
+            maxLines: 10,
+            controller: controller,
+            showSelectionHandles: true,
+            autofocus: true,
+            focusNode: FocusNode(),
+            style: Typography.material2018().black.subtitle1!,
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+            selectionControls: materialTextSelectionControls,
+            keyboardType: TextInputType.text,
+            textAlign: TextAlign.right,
+          ),
+        ),
+      ),
+    ));
+
+    await tester.pump();
+
+    // Move the selection away from the start so it can invert.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowRight,
+        LogicalKeyboardKey.arrowRight,
+        LogicalKeyboardKey.arrowRight,
+        LogicalKeyboardKey.arrowRight,
+      ],
+      targetPlatform: defaultTargetPlatform,
+    );
+    await tester.pump();
+    expect(
+      controller.selection,
+      equals(const TextSelection.collapsed(
+        offset: 4,
+      )),
+    );
+
+    // Press shift + end and extend the selection to the end of the line.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.end,
+      ],
+      shift: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+    await tester.pump();
+    expect(
+      controller.selection,
+      equals(const TextSelection(
+        baseOffset: 4,
+        extentOffset: 19,
+        affinity: TextAffinity.upstream,
+      )),
+    );
+
+    // Press shift + home and the selection inverts and extends to the start, it
+    // does not collapse and stop at the inversion.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.home,
+      ],
+      shift: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+    await tester.pump();
+    expect(
+      controller.selection,
+      equals(const TextSelection(
+        baseOffset: 4,
+        extentOffset: 0,
+      )),
+    );
+
+    // Press shift + end again and the selection inverts and extends to the end,
+    // again it does not stop at the inversion.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.end,
+      ],
+      shift: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+    await tester.pump();
+    expect(
+      controller.selection,
+      equals(const TextSelection(
+        baseOffset: 4,
+        extentOffset: 19,
+      )),
+    );
+  },
+    skip: kIsWeb, // [intended] on web these keys are handled by the browser.
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.windows })
+  );
+
+  testWidgets('control + home/end keys (Windows only)', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(text: testText);
+    controller.selection = const TextSelection(
+      baseOffset: 0,
+      extentOffset: 0,
+      affinity: TextAffinity.upstream,
+    );
+    await tester.pumpWidget(MaterialApp(
+      home: Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          width: 400,
+          child: EditableText(
+            maxLines: 10,
+            controller: controller,
+            showSelectionHandles: true,
+            autofocus: true,
+            focusNode: FocusNode(),
+            style: Typography.material2018().black.subtitle1!,
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+            selectionControls: materialTextSelectionControls,
+            keyboardType: TextInputType.text,
+            textAlign: TextAlign.right,
+          ),
+        ),
+      ),
+    ));
+
+    await tester.pump();
+
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.end,
+      ],
+      shortcutModifier: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+    await tester.pump();
+    expect(
+      controller.selection,
+      equals(const TextSelection.collapsed(
+        offset: testText.length,
+        affinity: TextAffinity.upstream,
+      )),
+    );
+
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.home,
+      ],
+      shortcutModifier: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+    await tester.pump();
+    expect(
+      controller.selection,
+      equals(const TextSelection.collapsed(offset: 0)),
+    );
+  },
+    skip: kIsWeb, // [intended] on web these keys are handled by the browser.
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.windows })
+  );
+
+  testWidgets('control + shift + home/end keys (Windows only)', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(text: testText);
+    controller.selection = const TextSelection(
+      baseOffset: 0,
+      extentOffset: 0,
+      affinity: TextAffinity.upstream,
+    );
+    await tester.pumpWidget(MaterialApp(
+      home: Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          width: 400,
+          child: EditableText(
+            maxLines: 10,
+            controller: controller,
+            showSelectionHandles: true,
+            autofocus: true,
+            focusNode: FocusNode(),
+            style: Typography.material2018().black.subtitle1!,
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+            selectionControls: materialTextSelectionControls,
+            keyboardType: TextInputType.text,
+            textAlign: TextAlign.right,
+          ),
+        ),
+      ),
+    ));
+
+    await tester.pump();
+
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.end,
+      ],
+      shortcutModifier: true,
+      shift: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+    await tester.pump();
+    expect(
+      controller.selection,
+      equals(const TextSelection(
+        baseOffset: 0,
+        extentOffset: testText.length,
+      )),
+    );
+
+    // Collapse the selection at the end.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowRight,
+      ],
+      targetPlatform: defaultTargetPlatform,
+    );
+    await tester.pump();
+    expect(
+      controller.selection,
+      equals(const TextSelection.collapsed(
+        offset: testText.length,
+        affinity: TextAffinity.upstream,
+      )),
+    );
+
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.home,
+      ],
+      shortcutModifier: true,
+      shift: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+    await tester.pump();
+    expect(
+      controller.selection,
+      equals(const TextSelection(
+        baseOffset: testText.length,
+        extentOffset: 0,
+      )),
+    );
+  },
+    skip: kIsWeb, // [intended] on web these keys are handled by the browser.
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.windows })
+  );
+
   // Regression test for https://github.com/flutter/flutter/issues/31287
   testWidgets('text selection handle visibility', (WidgetTester tester) async {
     // Text with two separate words to select.
@@ -5812,109 +6077,10 @@ void main() {
     state.bringIntoView(TextPosition(offset: controller.text.length));
 
     await tester.pumpAndSettle();
-    // The SingleChildScrollView is scrolled instead of the EditableText to reveal the caret.
+    // The SingleChildScrollView is scrolled instead of the EditableText to
+    // reveal the caret.
     expect(outerController.offset, outerController.position.maxScrollExtent);
     expect(editableScrollController.offset, 0);
-  });
-
-  testWidgets('bringIntoView centers the viewport on caret when the caret is wider than the viewport', (WidgetTester tester) async {
-    const String text = 'to coz ze ze Szwecji';
-    final TextEditingController controller = TextEditingController(text: text);
-
-    await tester.pumpWidget(MaterialApp(
-      home: Align(
-        alignment: Alignment.topLeft,
-        child: SizedBox(
-          width: 32.0,
-          height: 100.0,
-          child: EditableText(
-            showSelectionHandles: true,
-            controller: controller,
-            focusNode: FocusNode(),
-            style: const TextStyle(fontFamily: 'Ahem', fontSize: 48.0, height: 1.0),
-            cursorColor: Colors.blue,
-            cursorWidth: 48.0,
-            backgroundCursorColor: Colors.grey,
-            selectionControls: materialTextSelectionControls,
-            keyboardType: TextInputType.text,
-          ),
-        ),
-      ),
-    ));
-
-    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
-    final RenderEditable renderEditable = state.renderEditable;
-    final Scrollable scrollable = tester.widget<Scrollable>(find.byType(Scrollable));
-
-    expect(scrollable.controller!.position.viewportDimension, equals(32.0));
-    expect(scrollable.controller!.offset, 0.0);
-    expect(renderEditable.maxScrollExtent, equals(977.0));
-
-    state.bringIntoView(const TextPosition(offset: 2));
-    await tester.pumpAndSettle();
-    expect(scrollable.controller!.offset, 2 * 48.0 + 48.0 / 2 - 32.0 / 2);
-
-    state.bringIntoView(const TextPosition(offset: 5));
-    await tester.pumpAndSettle();
-    expect(scrollable.controller!.offset, 5 * 48.0 + 48.0 / 2 - 32.0 / 2);
-
-    state.bringIntoView(const TextPosition(offset: 7));
-    await tester.pumpAndSettle();
-    expect(scrollable.controller!.offset, 7 * 48.0 + 48.0 / 2 - 32.0 / 2);
-
-    state.bringIntoView(const TextPosition(offset: 9));
-    await tester.pumpAndSettle();
-    expect(scrollable.controller!.offset, 9 * 48.0 + 48.0 / 2 - 32.0 / 2);
-  });
-
-  testWidgets('bringIntoView centers the viewport on caret when the caret is taller than the viewport', (WidgetTester tester) async {
-    const String text = 'to\ncoz\nze\nze\nSzwecji';
-    final TextEditingController controller = TextEditingController(text: text);
-
-    await tester.pumpWidget(MaterialApp(
-      home: Align(
-        alignment: Alignment.topLeft,
-        child: SizedBox(
-          width: 500.0,
-          height: 32.0,
-          child: EditableText(
-            showSelectionHandles: true,
-            maxLines: null,
-            controller: controller,
-            focusNode: FocusNode(),
-            style: const TextStyle(fontFamily: 'Ahem', fontSize: 48.0, height: 1.0),
-            cursorColor: Colors.blue,
-            backgroundCursorColor: Colors.grey,
-            selectionControls: materialTextSelectionControls,
-            keyboardType: TextInputType.text,
-          ),
-        ),
-      ),
-    ));
-
-    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
-    final RenderEditable renderEditable = state.renderEditable;
-    final Scrollable scrollable = tester.widget<Scrollable>(find.byType(Scrollable));
-
-    expect(scrollable.controller!.position.viewportDimension, equals(32.0));
-    expect(scrollable.controller!.offset, 0.0);
-    expect(renderEditable.maxScrollExtent, equals(208.0));
-
-    state.bringIntoView(const TextPosition(offset: 3));
-    await tester.pumpAndSettle();
-    expect(scrollable.controller!.offset, 48.0 + 48.0 / 2 - 32.0 / 2);
-
-    state.bringIntoView(const TextPosition(offset: 7));
-    await tester.pumpAndSettle();
-    expect(scrollable.controller!.offset, 2 * 48.0 + 48.0 / 2 - 32.0 / 2);
-
-    state.bringIntoView(const TextPosition(offset: 10));
-    await tester.pumpAndSettle();
-    expect(scrollable.controller!.offset, 3 * 48.0 + 48.0 / 2 - 32.0 / 2);
-
-    state.bringIntoView(const TextPosition(offset: 13));
-    await tester.pumpAndSettle();
-    expect(scrollable.controller!.offset, 4 * 48.0 + 48.0 / 2 - 32.0 / 2);
   });
 
   testWidgets('bringIntoView does nothing if the physics prohibits implicit scrolling', (WidgetTester tester) async {
@@ -5942,6 +6108,7 @@ void main() {
         ),
       ));
     }
+
 
     await buildWithPhysics();
     expect(scrollController.offset, 0);
@@ -6354,14 +6521,18 @@ void main() {
     ));
 
     await tester.showKeyboard(find.byType(EditableText));
-    // TextInput.show should be before TextInput.setEditingState
+    // TextInput.show should be after TextInput.setEditingState.
+    // On Android setEditingState triggers an IME restart which may prevent
+    // the keyboard from showing if the show keyboard request comes before the
+    // restart.
+    // See: https://github.com/flutter/flutter/issues/68571.
     final List<String> logOrder = <String>[
       'TextInput.setClient',
-      'TextInput.show',
       'TextInput.setEditableSizeAndTransform',
       'TextInput.setMarkedTextRect',
       'TextInput.setStyle',
       'TextInput.setEditingState',
+      'TextInput.show',
       'TextInput.setEditingState',
       'TextInput.show',
       'TextInput.setCaretRect',
@@ -6370,6 +6541,67 @@ void main() {
       tester.testTextInput.log.map((MethodCall m) => m.method),
       logOrder,
     );
+  });
+
+  testWidgets(
+    'keyboard is requested after setEditingState after switching to a new text field',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/68571.
+      final EditableText editableText1 = EditableText(
+        showSelectionHandles: true,
+        maxLines: 2,
+        controller: TextEditingController(),
+        focusNode: FocusNode(),
+        cursorColor: Colors.red,
+        backgroundCursorColor: Colors.blue,
+        style: Typography.material2018().black.subtitle1!.copyWith(fontFamily: 'Roboto'),
+        keyboardType: TextInputType.text,
+      );
+
+      final EditableText editableText2 = EditableText(
+        showSelectionHandles: true,
+        maxLines: 2,
+        controller: TextEditingController(),
+        focusNode: FocusNode(),
+        cursorColor: Colors.red,
+        backgroundCursorColor: Colors.blue,
+        style: Typography.material2018().black.subtitle1!.copyWith(fontFamily: 'Roboto'),
+        keyboardType: TextInputType.text,
+      );
+
+      await tester.pumpWidget(MaterialApp(
+        home: Center(
+          child: Column(
+            children: <Widget>[editableText1, editableText2],
+          ),
+        ),
+      ));
+
+      await tester.tap(find.byWidget(editableText1));
+      await tester.pumpAndSettle();
+
+      tester.testTextInput.log.clear();
+      await tester.tap(find.byWidget(editableText2));
+      await tester.pumpAndSettle();
+
+      // Send TextInput.show after TextInput.setEditingState. Otherwise
+      // some Android keyboards ignore the "show keyboard" request, as the
+      // Android text input plugin restarts the input method when setEditingState
+      // is sent by the framework.
+      final List<String> logOrder = <String>[
+        'TextInput.clearClient',
+        'TextInput.setClient',
+        'TextInput.setEditableSizeAndTransform',
+        'TextInput.setMarkedTextRect',
+        'TextInput.setStyle',
+        'TextInput.setEditingState',
+        'TextInput.show',
+        'TextInput.setCaretRect',
+      ];
+      expect(
+        tester.testTextInput.log.map((MethodCall m) => m.method),
+        logOrder,
+      );
   });
 
   testWidgets('setEditingState is not called when text changes', (WidgetTester tester) async {
@@ -6401,11 +6633,11 @@ void main() {
 
     final List<String> logOrder = <String>[
       'TextInput.setClient',
-      'TextInput.show',
       'TextInput.setEditableSizeAndTransform',
       'TextInput.setMarkedTextRect',
       'TextInput.setStyle',
       'TextInput.setEditingState',
+      'TextInput.show',
       'TextInput.setEditingState',
       'TextInput.show',
       'TextInput.setCaretRect',
@@ -6451,11 +6683,11 @@ void main() {
 
     final List<String> logOrder = <String>[
       'TextInput.setClient',
-      'TextInput.show',
       'TextInput.setEditableSizeAndTransform',
       'TextInput.setMarkedTextRect',
       'TextInput.setStyle',
       'TextInput.setEditingState',
+      'TextInput.show',
       'TextInput.setEditingState',
       'TextInput.show',
       'TextInput.setCaretRect',

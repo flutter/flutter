@@ -2,10 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
 import 'dart:io';
 
-import 'package:flutter_devicelab/common.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/ios.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
@@ -16,8 +14,6 @@ Future<void> main() async {
   await task(() async {
     section('Copy test Flutter App with watchOS Companion');
 
-    String? watchDeviceID;
-    String? phoneDeviceID;
     final Directory tempDir = Directory.systemTemp
         .createTempSync('flutter_ios_app_with_extensions_test.');
     final Directory projectDir =
@@ -32,11 +28,23 @@ Future<void> main() async {
 
       section('Create release build');
 
+      // This only builds the iOS app, not the companion watchOS app. The watchOS app
+      // has been removed as a build dependency and is not embedded in the app to avoid
+      // requiring the watchOS being available in CI.
+      // Instead, validate the tool detects that there is a watch companion, and omits
+      // the "-sdk iphoneos" option, which fails to build the watchOS app.
+      // See https://github.com/flutter/flutter/pull/94190.
       await inDirectory(projectDir, () async {
-        await flutter(
+        final String buildOutput = await evalFlutter(
           'build',
           options: <String>['ios', '--no-codesign', '--release', '--verbose'],
         );
+        if (!buildOutput.contains('Watch companion app found')) {
+          throw TaskResult.failure('Did not detect watch companion');
+        }
+        if (buildOutput.contains('-sdk iphoneos -destination')) {
+          throw TaskResult.failure('-sdk must be omitted for app with watch companion');
+        }
       });
 
       final String appBundle = Directory(path.join(
@@ -64,228 +72,17 @@ Future<void> main() async {
       await _checkFlutterFrameworkArchs(appFrameworkPath);
       await _checkFlutterFrameworkArchs(flutterFrameworkPath);
 
-      // Check the watch extension framework added in the Podfile
-      // is in place with the expected watch archs.
-      final String watchExtensionFrameworkPath = path.join(
-        appBundle,
-        'Watch',
-        'watch.app',
-        'PlugIns',
-        'watch Extension.appex',
-        'Frameworks',
-        'EFQRCode.framework',
-        'EFQRCode',
-      );
-      unawaited(_checkWatchExtensionFrameworkArchs(watchExtensionFrameworkPath));
-
       section('Clean build');
 
       await inDirectory(projectDir, () async {
         await flutter('clean');
       });
-
-      section('Create debug build');
-
-      await inDirectory(projectDir, () async {
-        await flutter(
-          'build',
-          options: <String>['ios', '--debug', '--no-codesign', '--verbose'],
-        );
-      });
-
-      checkDirectoryExists(appBundle);
-      await _checkFlutterFrameworkArchs(appFrameworkPath);
-      await _checkFlutterFrameworkArchs(flutterFrameworkPath);
-      unawaited(_checkWatchExtensionFrameworkArchs(watchExtensionFrameworkPath));
-
-      section('Clean build');
-
-      await inDirectory(projectDir, () async {
-        await flutter('clean');
-      });
-
-      section('Run app on simulator device');
-
-      // Xcode 11.4 simctl create makes the runtime argument optional, and defaults to latest.
-      // TODO(jmagman): Remove runtime parsing when devicelab upgrades to Xcode 11.4 https://github.com/flutter/flutter/issues/54889
-      final String availableRuntimes = await eval(
-        'xcrun',
-        <String>[
-          'simctl',
-          'list',
-          'runtimes',
-        ],
-        workingDirectory: flutterDirectory.path,
-      );
-
-      // Example simctl list:
-      //    == Runtimes ==
-      //    iOS 10.3 (10.3.1 - 14E8301) - com.apple.CoreSimulator.SimRuntime.iOS-10-3
-      //    iOS 13.4 (13.4 - 17E255) - com.apple.CoreSimulator.SimRuntime.iOS-13-4
-      //    tvOS 13.4 (13.4 - 17L255) - com.apple.CoreSimulator.SimRuntime.tvOS-13-4
-      //    watchOS 6.2 (6.2 - 17T256) - com.apple.CoreSimulator.SimRuntime.watchOS-6-2
-      String? iOSSimRuntime;
-      String? watchSimRuntime;
-
-      final RegExp iOSRuntimePattern = RegExp(r'iOS .*\) - (.*)');
-      final RegExp watchOSRuntimePattern = RegExp(r'watchOS .*\) - (.*)');
-
-      for (final String runtime in LineSplitter.split(availableRuntimes)) {
-        // These seem to be in order, so allow matching multiple lines so it grabs
-        // the last (hopefully latest) one.
-        final RegExpMatch? iOSRuntimeMatch = iOSRuntimePattern.firstMatch(runtime);
-        if (iOSRuntimeMatch != null) {
-          iOSSimRuntime = iOSRuntimeMatch.group(1)!.trim();
-          continue;
-        }
-        final RegExpMatch? watchOSRuntimeMatch = watchOSRuntimePattern.firstMatch(runtime);
-        if (watchOSRuntimeMatch != null) {
-          watchSimRuntime = watchOSRuntimeMatch.group(1)!.trim();
-        }
-      }
-      if (iOSSimRuntime == null || watchSimRuntime == null) {
-        String message;
-        if (iOSSimRuntime != null) {
-          message = 'Found "$iOSSimRuntime", but no watchOS simulator runtime found.';
-        } else if (watchSimRuntime != null) {
-          message = 'Found "$watchSimRuntime", but no iOS simulator runtime found.';
-        } else {
-          message = 'watchOS and iOS simulator runtimes not found.';
-        }
-        return TaskResult.failure('$message Available runtimes:\n$availableRuntimes');
-      }
-
-      // Create iOS simulator.
-      phoneDeviceID = await eval(
-        'xcrun',
-        <String>[
-          'simctl',
-          'create',
-          'TestFlutteriPhoneWithWatch',
-          'com.apple.CoreSimulator.SimDeviceType.iPhone-11',
-          iOSSimRuntime,
-        ],
-        workingDirectory: flutterDirectory.path,
-      );
-
-      // Create watchOS simulator.
-      watchDeviceID = await eval(
-        'xcrun',
-        <String>[
-          'simctl',
-          'create',
-          'TestFlutterWatch',
-          'com.apple.CoreSimulator.SimDeviceType.Apple-Watch-Series-5-44mm',
-          watchSimRuntime,
-        ],
-        workingDirectory: flutterDirectory.path,
-      );
-
-      // Pair watch with phone.
-      await eval(
-        'xcrun',
-        <String>['simctl', 'pair', watchDeviceID, phoneDeviceID],
-        workingDirectory: flutterDirectory.path,
-      );
-
-      // Boot simulator devices.
-      await eval(
-        'xcrun',
-        <String>['simctl', 'bootstatus', phoneDeviceID, '-b'],
-        workingDirectory: flutterDirectory.path,
-      );
-      await eval(
-        'xcrun',
-        <String>['simctl', 'bootstatus', watchDeviceID, '-b'],
-        workingDirectory: flutterDirectory.path,
-      );
-
-      // Start app on simulated device.
-      final Process process = await startProcess(
-          path.join(flutterDirectory.path, 'bin', 'flutter'),
-          <String>['run', '-d', phoneDeviceID],
-          workingDirectory: projectDir.path);
-
-      process.stdout
-          .transform<String>(utf8.decoder)
-          .transform<String>(const LineSplitter())
-          .listen((String line) {
-        print('stdout: $line');
-        // Wait for app startup to complete and quit immediately afterwards.
-        if (line.startsWith('An Observatory debugger')) {
-          process.stdin.write('q');
-        }
-      });
-      process.stderr
-          .transform<String>(utf8.decoder)
-          .transform<String>(const LineSplitter())
-          .listen((String line) {
-        print('stderr: $line');
-      });
-
-      final int exitCode = await process.exitCode;
-
-      if (exitCode != 0) {
-        return TaskResult.failure(
-            'Failed to start flutter iOS app with WatchOS companion on simulated device.');
-      }
-
-      final String simulatorAppBundle = Directory(path.join(
-        projectDir.path,
-        'build',
-        'ios',
-        'iphonesimulator',
-        'Runner.app',
-      )).path;
-
-      checkDirectoryExists(simulatorAppBundle);
-      checkFileExists(path.join(
-        simulatorAppBundle,
-        'Frameworks',
-        'App.framework',
-        'App',
-      ));
-      checkFileExists(path.join(
-        simulatorAppBundle,
-        'Frameworks',
-        'Flutter.framework',
-        'Flutter',
-      ));
 
       return TaskResult.success(null);
     } catch (e) {
       return TaskResult.failure(e.toString());
     } finally {
       rmTree(tempDir);
-      // Delete simulator devices
-      if (watchDeviceID != null && watchDeviceID != '') {
-        await eval(
-          'xcrun',
-          <String>['simctl', 'shutdown', watchDeviceID],
-          canFail: true,
-          workingDirectory: flutterDirectory.path,
-        );
-        await eval(
-          'xcrun',
-          <String>['simctl', 'delete', watchDeviceID],
-          canFail: true,
-          workingDirectory: flutterDirectory.path,
-        );
-      }
-      if (phoneDeviceID != null && phoneDeviceID != '') {
-        await eval(
-          'xcrun',
-          <String>['simctl', 'shutdown', phoneDeviceID],
-          canFail: true,
-          workingDirectory: flutterDirectory.path,
-        );
-        await eval(
-          'xcrun',
-          <String>['simctl', 'delete', phoneDeviceID],
-          canFail: true,
-          workingDirectory: flutterDirectory.path,
-        );
-      }
     }
   });
 }
@@ -300,17 +97,5 @@ Future<void> _checkFlutterFrameworkArchs(String frameworkPath) async {
 
   if (archs.contains('x86_64')) {
     throw TaskResult.failure('$frameworkPath x86_64 architecture unexpectedly present');
-  }
-}
-
-Future<void> _checkWatchExtensionFrameworkArchs(String frameworkPath) async {
-  checkFileExists(frameworkPath);
-  final String archs = await fileType(frameworkPath);
-  if (!archs.contains('armv7k')) {
-    throw TaskResult.failure('$frameworkPath armv7k architecture missing');
-  }
-
-  if (!archs.contains('arm64_32')) {
-    throw TaskResult.failure('$frameworkPath arm64_32 architecture missing');
   }
 }

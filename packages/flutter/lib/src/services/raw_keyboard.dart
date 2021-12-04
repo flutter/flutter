@@ -284,7 +284,7 @@ abstract class RawKeyEvent with Diagnosticable {
 
   /// Creates a concrete [RawKeyEvent] class from a message in the form received
   /// on the [SystemChannels.keyEvent] channel.
-  factory RawKeyEvent.fromMessage(Map<String, dynamic> message) {
+  factory RawKeyEvent.fromMessage(Map<String, Object?> message) {
     String? character;
     RawKeyEventData _dataFromWeb() {
       final String? key = message['key'] as String?;
@@ -303,7 +303,7 @@ abstract class RawKeyEvent with Diagnosticable {
     if (kIsWeb) {
       data = _dataFromWeb();
     } else {
-      final String keymap = message['keymap'] as String;
+      final String keymap = message['keymap']! as String;
       switch (keymap) {
         case 'android':
           data = RawKeyEventDataAndroid(
@@ -388,7 +388,7 @@ abstract class RawKeyEvent with Diagnosticable {
           throw FlutterError('Unknown keymap for key events: $keymap');
       }
     }
-    final String type = message['type'] as String;
+    final String type = message['type']! as String;
     switch (type) {
       case 'keydown':
         return RawKeyDownEvent(data: data, character: character);
