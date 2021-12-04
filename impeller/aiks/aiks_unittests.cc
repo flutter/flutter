@@ -106,6 +106,24 @@ TEST_F(AiksTest, CanRenderClips) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
+TEST_F(AiksTest, CanSaveLayerStandalone) {
+  Canvas canvas;
+
+  Paint red;
+  red.color = Color::Red();
+
+  Paint alpha;
+  alpha.color = Color::Red().WithAlpha(0.5);
+
+  canvas.SaveLayer(alpha);
+
+  canvas.DrawCircle({125, 125}, 125, red);
+
+  canvas.Restore();
+
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
 TEST_F(AiksTest, CanRenderGroupOpacity) {
   Canvas canvas;
 

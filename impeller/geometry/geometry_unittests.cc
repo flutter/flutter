@@ -141,38 +141,6 @@ TEST(GeometryTest, QuaternionLerp) {
   ASSERT_QUATERNION_NEAR(q3, expected);
 }
 
-TEST(GeometryTest, RectWithPoint) {
-  auto rect = Rect{};
-
-  auto expected = Rect{};
-
-  ASSERT_RECT_NEAR(rect, expected);
-
-  rect = rect.WithPoint({100, 100});
-  expected = Rect{0, 0, 100, 100};
-  ASSERT_RECT_NEAR(rect, expected);
-
-  rect = rect.WithPoint({-11, -12});
-  expected = Rect{-11, -12, 111, 112};
-  ASSERT_RECT_NEAR(rect, expected);
-
-  rect = rect.WithPoint({55, 65});
-  expected = Rect{-11, -12, 111, 112};
-  ASSERT_RECT_NEAR(rect, expected);
-
-  rect = rect.WithPoint({-25, 0});
-  expected = Rect{-25, -12, 125, 112};
-  ASSERT_RECT_NEAR(rect, expected);
-
-  rect = rect.WithPoint({0, -25});
-  expected = Rect{-25, -25, 125, 125};
-  ASSERT_RECT_NEAR(rect, expected);
-
-  rect = rect.WithPoint({125, 135});
-  expected = Rect{-25, -25, 150, 160};
-  ASSERT_RECT_NEAR(rect, expected);
-}
-
 TEST(GeometryTest, SimplePath) {
   Path path;
 
@@ -216,7 +184,7 @@ TEST(GeometryTest, BoundingBoxCubic) {
   Path path;
   path.AddCubicComponent({120, 160}, {25, 200}, {220, 260}, {220, 40});
   auto box = path.GetBoundingBox();
-  Rect expected(0, 0, 220, 198.862);
+  Rect expected(93.9101, 40, 126.09, 158.862);
   ASSERT_RECT_NEAR(box, expected);
 }
 
@@ -225,7 +193,7 @@ TEST(GeometryTest, BoundingBoxOfCompositePathIsCorrect) {
   builder.AddRoundedRect({{10, 10}, {300, 300}}, {50, 50, 50, 50});
   auto path = builder.CreatePath();
   auto actual = path.GetBoundingBox();
-  Rect expected(0, 0, 310, 310);
+  Rect expected(10, 10, 300, 300);
   ASSERT_RECT_NEAR(actual, expected);
 }
 
@@ -270,6 +238,73 @@ TEST(GeometryTest, CanConvertBetweenDegressAndRadians) {
     auto deg = Degrees{90.0};
     Radians rad = deg;
     ASSERT_FLOAT_EQ(rad.radians, kPiOver2);
+  }
+}
+
+TEST(GeometryTest, RectUnion) {
+  {
+    Rect a(100, 100, 100, 100);
+    Rect b(0, 0, 0, 0);
+    auto u = a.Union(b);
+    auto expected = Rect(0, 0, 200, 200);
+    ASSERT_RECT_NEAR(u, expected);
+  }
+
+  {
+    Rect a(100, 100, 100, 100);
+    Rect b(10, 10, 0, 0);
+    auto u = a.Union(b);
+    auto expected = Rect(10, 10, 190, 190);
+    ASSERT_RECT_NEAR(u, expected);
+  }
+
+  {
+    Rect a(0, 0, 100, 100);
+    Rect b(10, 10, 100, 100);
+    auto u = a.Union(b);
+    auto expected = Rect(0, 0, 110, 110);
+    ASSERT_RECT_NEAR(u, expected);
+  }
+
+  {
+    Rect a(0, 0, 100, 100);
+    Rect b(100, 100, 100, 100);
+    auto u = a.Union(b);
+    auto expected = Rect(0, 0, 200, 200);
+    ASSERT_RECT_NEAR(u, expected);
+  }
+}
+
+TEST(GeometryTest, RectIntersection) {
+  {
+    Rect a(100, 100, 100, 100);
+    Rect b(0, 0, 0, 0);
+
+    auto u = a.Intersection(b);
+    ASSERT_FALSE(u.has_value());
+  }
+
+  {
+    Rect a(100, 100, 100, 100);
+    Rect b(10, 10, 0, 0);
+    auto u = a.Intersection(b);
+    ASSERT_FALSE(u.has_value());
+  }
+
+  {
+    Rect a(0, 0, 100, 100);
+    Rect b(10, 10, 100, 100);
+    auto u = a.Intersection(b);
+    ASSERT_TRUE(u.has_value());
+    auto expected = Rect(10, 10, 90, 90);
+    ASSERT_RECT_NEAR(u.value(), expected);
+  }
+
+  {
+    Rect a(0, 0, 100, 100);
+    Rect b(100, 100, 100, 100);
+    auto u = a.Intersection(b);
+    ASSERT_FALSE(u.has_value());
   }
 }
 
