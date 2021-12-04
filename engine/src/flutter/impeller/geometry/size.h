@@ -59,21 +59,17 @@ struct TSize {
     return {width - s.width, height - s.height};
   }
 
-  constexpr TSize Min(const TSize& s) const { return Intersection(s); }
-
-  constexpr TSize Max(const TSize& s) const { return Union(s); }
-
-  constexpr TSize Union(const TSize& o) const {
-    return {
-        std::max(width, o.width),
-        std::max(height, o.height),
-    };
-  }
-
-  constexpr TSize Intersection(const TSize& o) const {
+  constexpr TSize Min(const TSize& o) const {
     return {
         std::min(width, o.width),
         std::min(height, o.height),
+    };
+  }
+
+  constexpr TSize Max(const TSize& o) const {
+    return {
+        std::max(width, o.width),
+        std::max(height, o.height),
     };
   }
 
