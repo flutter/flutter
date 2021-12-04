@@ -605,7 +605,7 @@ class MediaQueryData {
       'disableAnimations: $disableAnimations',
       'invertColors: $invertColors',
       'boldText: $boldText',
-      'navigationMode: ${describeEnum(navigationMode)}',
+      'navigationMode: ${navigationMode.name}',
       'gestureSettings: $gestureSettings',
     ];
     return '${objectRuntimeType(this, 'MediaQueryData')}(${properties.join(', ')})';
