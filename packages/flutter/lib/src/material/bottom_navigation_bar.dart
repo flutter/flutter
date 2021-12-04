@@ -184,10 +184,6 @@ class BottomNavigationBar extends StatefulWidget {
     this.landscapeLayout,
   }) : assert(items != null),
        assert(items.length >= 2),
-       assert(
-        items.every((BottomNavigationBarItem item) => item.label != null),
-        'Every item must have a non-null label',
-       ),
        assert(0 <= currentIndex && currentIndex < items.length),
        assert(elevation == null || elevation >= 0.0),
        assert(iconSize != null && iconSize >= 0.0),

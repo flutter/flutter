@@ -24,7 +24,7 @@ class BottomNavigationBarItem {
   /// The argument [icon] should not be null and the argument [label] should not be null when used in a Material Design's [BottomNavigationBar].
   const BottomNavigationBarItem({
     required this.icon,
-    this.label,
+    required this.label,
     Widget? activeIcon,
     this.backgroundColor,
     this.tooltip,
