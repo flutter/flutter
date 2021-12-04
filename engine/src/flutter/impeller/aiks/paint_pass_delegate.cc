@@ -8,10 +8,16 @@
 
 namespace impeller {
 
-PaintPassDelegate::PaintPassDelegate(Paint paint) : paint_(std::move(paint)) {}
+PaintPassDelegate::PaintPassDelegate(Paint paint, std::optional<Rect> coverage)
+    : paint_(std::move(paint)), coverage_(std::move(coverage)) {}
 
 // |EntityPassDelgate|
 PaintPassDelegate::~PaintPassDelegate() = default;
+
+// |EntityPassDelgate|
+std::optional<Rect> PaintPassDelegate::GetCoverageRect() {
+  return coverage_;
+}
 
 // |EntityPassDelgate|
 bool PaintPassDelegate::CanElide() {
