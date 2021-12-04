@@ -186,7 +186,7 @@ typedef DecoderCallback = Future<ui.Codec> Function(Uint8List bytes, {int? cache
 /// The type argument does not have to be specified when using the type as an
 /// argument (where any image provider is acceptable).
 ///
-/// The following image formats are supported: {@macro flutter.dart:ui.imageFormats}
+/// The following image formats are supported: {@macro dart.ui.imageFormats}
 ///
 /// ## Lifecycle of resolving an image
 ///
@@ -938,7 +938,7 @@ class MemoryImage extends ImageProvider<MemoryImage> {
   /// The bytes to decode into an image.
   ///
   /// The bytes represent encoded image bytes and can be encoded in any of the
-  /// following supported image formats: {@macro flutter.dart:ui.imageFormats}
+  /// following supported image formats: {@macro dart.ui.imageFormats}
   ///
   /// See also:
   ///

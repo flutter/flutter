@@ -73,13 +73,16 @@ class OutOfProcessDapTestServer extends DapTestServer {
     Logger? logger,
   ) {
     // Treat anything written to stderr as the DAP crashing and fail the test
-    // unless it's "Waiting for another flutter command to release the startup lock".
+    // unless it's "Waiting for another flutter command to release the startup
+    // lock" or we're tearing down.
     _process.stderr
         .transform(utf8.decoder)
         .where((String error) => !error.contains('Waiting for another flutter command to release the startup lock'))
         .listen((String error) {
       logger?.call(error);
-      throw error;
+      if (!_isShuttingDown) {
+        throw error;
+      }
     });
     unawaited(_process.exitCode.then((int code) {
       final String message = 'Out-of-process DAP server terminated with code $code';

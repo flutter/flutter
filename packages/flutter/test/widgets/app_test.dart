@@ -461,6 +461,30 @@ void main() {
     );
   });
 
+  testWidgets("WidgetsApp reports an exception if the selected locale isn't supported", (WidgetTester tester) async {
+    late final List<Locale>? localesArg;
+    late final Iterable<Locale> supportedLocalesArg;
+    await tester.pumpWidget(
+      MaterialApp( // This uses a MaterialApp because it introduces some actual localizations.
+        localeListResolutionCallback: (List<Locale>? locales, Iterable<Locale> supportedLocales) {
+          localesArg = locales;
+          supportedLocalesArg = supportedLocales;
+          return const Locale('C_UTF-8');
+        },
+        builder: (BuildContext context, Widget? child) => const Placeholder(),
+        color: const Color(0xFF000000),
+      ),
+    );
+    if (!kIsWeb) {
+      // On web, `flutter test` does not guarantee a particular locale, but
+      // when using `flutter_tester`, we guarantee that it's en-US, zh-CN.
+      // https://github.com/flutter/flutter/issues/93290
+      expect(localesArg, const <Locale>[Locale('en', 'US'), Locale('zh', 'CN')]);
+    }
+    expect(supportedLocalesArg, const <Locale>[Locale('en', 'US')]);
+    expect(tester.takeException(), "Warning: This application's locale, C_UTF-8, is not supported by all of its localization delegates.");
+  });
+
   testWidgets('WidgetsApp creates a MediaQuery if `useInheritedMediaQuery` is set to false', (WidgetTester tester) async {
     late BuildContext capturedContext;
     await tester.pumpWidget(

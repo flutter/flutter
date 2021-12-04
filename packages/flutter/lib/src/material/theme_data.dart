@@ -200,12 +200,29 @@ enum MaterialTapTargetSize {
 class ThemeData with Diagnosticable {
   /// Create a [ThemeData] that's used to configure a [Theme].
   ///
-  /// Typically, only the [brightness], [primaryColor], or [primarySwatch] are
-  /// specified. That pair of values are used to construct the [colorScheme].
-  ///
   /// The [colorScheme] and [textTheme] are used by the Material components to
   /// compute default values for visual properties. The API documentation for
   /// each component widget explains exactly how the defaults are computed.
+  ///
+  /// When providing a [ColorScheme], apps can either provide one directly
+  /// with the [colorScheme] parameter, or have one generated for them by
+  /// using the [colorSchemeSeed] and [brightness] parameters. A generated
+  /// color scheme will be based on the tones of [colorSchemeSeed] and all of
+  /// its contrasting color will meet accessibility guidelines for readability.
+  /// (See [ColorScheme.fromSeed] for more details.)
+  ///
+  /// If the app wants to customize a generated color scheme, it can use
+  /// [ColorScheme.fromSeed] directly and then [ColorScheme.copyWith] on the
+  /// result to override any colors that need to be replaced. The result of
+  /// this can be used as the [colorScheme] directly.
+  ///
+  /// For historical reasons, instead of using a [colorSchemeSeed] or
+  /// [colorScheme], you can provide either a [primaryColor] or [primarySwatch]
+  /// to construct the [colorScheme], but the results will not be as complete
+  /// as when using generation from a seed color.
+  ///
+  /// If [colorSchemeSeed] is non-null then [colorScheme], [primaryColor] and
+  /// [primarySwatch] must all be null.
   ///
   /// The [textTheme] [TextStyle] colors are black if the color scheme's
   /// brightness is [Brightness.light], and white for [Brightness.dark].
@@ -219,6 +236,7 @@ class ThemeData with Diagnosticable {
   ///  * [ThemeData.from], which creates a ThemeData from a [ColorScheme].
   ///  * [ThemeData.light], which creates a light blue theme.
   ///  * [ThemeData.dark], which creates dark theme with a teal secondary [ColorScheme] color.
+  ///  * [ColorScheme.fromSeed], which is used to create a [ColorScheme] from a seed color.
   factory ThemeData({
     // GENERAL CONFIGURATION
     AndroidOverscrollIndicator? androidOverscrollIndicator,
@@ -231,11 +249,13 @@ class ThemeData with Diagnosticable {
     ScrollbarThemeData? scrollbarTheme,
     InteractiveInkFeatureFactory? splashFactory,
     VisualDensity? visualDensity,
+    bool? useMaterial3,
     // COLOR
     // [colorScheme] is the preferred way to configure colors. The other color
-    // properties (as well as brightness, primaryColorBrightness, and primarySwatch)
+    // properties (as well as primaryColorBrightness, and primarySwatch)
     // will gradually be phased out, see https://github.com/flutter/flutter/issues/91772.
     ColorScheme? colorScheme,
+    Color? colorSchemeSeed,
     Brightness? brightness,
     MaterialColor? primarySwatch,
     Color? primaryColor,
@@ -367,7 +387,6 @@ class ThemeData with Diagnosticable {
     Brightness? primaryColorBrightness,
   }) {
     // GENERAL CONFIGURATION
-    applyElevationOverlayColor ??= false;
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
     inputDecorationTheme ??= const InputDecorationTheme();
     platform ??= defaultTargetPlatform;
@@ -387,11 +406,39 @@ class ThemeData with Diagnosticable {
     scrollbarTheme ??= const ScrollbarThemeData();
     splashFactory ??= InkSplash.splashFactory;
     visualDensity ??= VisualDensity.adaptivePlatformDensity;
+    useMaterial3 ??= false;
 
     // COLOR
     assert(colorScheme?.brightness == null || brightness == null || colorScheme!.brightness == brightness);
+    assert(colorSchemeSeed == null || colorScheme == null);
+    assert(colorSchemeSeed == null || primarySwatch == null);
+    assert(colorSchemeSeed == null || primaryColor == null);
     final Brightness _brightness = brightness ?? colorScheme?.brightness ?? Brightness.light;
     final bool isDark = _brightness == Brightness.dark;
+    if (colorSchemeSeed != null) {
+      colorScheme = ColorScheme.fromSeed(seedColor: colorSchemeSeed, brightness: _brightness);
+
+      // For surfaces that use primary color in light themes and surface color in dark
+      final Color primarySurfaceColor = isDark ? colorScheme.surface : colorScheme.primary;
+      final Color onPrimarySurfaceColor = isDark ? colorScheme.onSurface : colorScheme.onPrimary;
+
+      // Default some of the color settings to values from the color scheme
+      primaryColor = primarySurfaceColor;
+      primaryColorBrightness = ThemeData.estimateBrightnessForColor(primarySurfaceColor);
+      canvasColor ??= colorScheme.background;
+      accentColor ??= colorScheme.secondary;
+      accentColorBrightness ??= ThemeData.estimateBrightnessForColor(colorScheme.secondary);
+      scaffoldBackgroundColor ??= colorScheme.background;
+      bottomAppBarColor ??= colorScheme.surface;
+      cardColor ??= colorScheme.surface;
+      dividerColor ??= colorScheme.outline;
+      backgroundColor ??= colorScheme.background;
+      dialogBackgroundColor ??= colorScheme.background;
+      indicatorColor ??= onPrimarySurfaceColor;
+      errorColor ??= colorScheme.error;
+      applyElevationOverlayColor ??= isDark;
+    }
+    applyElevationOverlayColor ??= false;
     primarySwatch ??= Colors.blue;
     primaryColor ??= isDark ? Colors.grey[900]! : primarySwatch;
     final Brightness _primaryColorBrightness = estimateBrightnessForColor(primaryColor);
@@ -518,6 +565,7 @@ class ThemeData with Diagnosticable {
       scrollbarTheme: scrollbarTheme,
       splashFactory: splashFactory,
       visualDensity: visualDensity,
+      useMaterial3: useMaterial3,
       // COLOR
       colorScheme: colorScheme,
       primaryColor: primaryColor,
@@ -619,6 +667,7 @@ class ThemeData with Diagnosticable {
     required this.scrollbarTheme,
     required this.splashFactory,
     required this.visualDensity,
+    required this.useMaterial3,
     // COLOR
     // [colorScheme] is the preferred way to configure colors. The other color
     // properties will gradually be phased out, see
@@ -759,6 +808,7 @@ class ThemeData with Diagnosticable {
        assert(scrollbarTheme != null),
        assert(splashFactory != null),
        assert(visualDensity != null),
+       assert(useMaterial3 != null),
         // COLOR
        assert(colorScheme != null),
        assert(primaryColor != null),
@@ -1077,6 +1127,31 @@ class ThemeData with Diagnosticable {
   /// smaller value translates to a spacing decrease (more dense).
   /// {@endtemplate}
   final VisualDensity visualDensity;
+
+  /// A temporary flag used to opt-in to new Material 3 features.
+  ///
+  /// If true, then components that have been migrated to Material 3 will
+  /// start using new colors, typography and other features of Material 3.
+  /// If false, they will use the Material 2 look and feel.
+  ///
+  /// Currently no components have been migrated to support Material 3.
+  /// As they are updated to include Material 3 support this documentation
+  /// will be modified to indicate exactly what widgets this flag will affect.
+  ///
+  /// During the migration to Material 3, turning this on may yield
+  /// inconsistent look and feel in your app. Some components will be migrated
+  /// before others and typography changes will be coming in stages.
+  ///
+  /// [useMaterial3] defaults to false. After all the migrated components
+  /// have landed on stable, we will change this to be true by default. After
+  /// that change has landed on stable, we will deprecate this flag and remove
+  /// all uses of it. Everything will use the Material 3 look and feel at
+  /// that point.
+  ///
+  /// See also:
+  ///
+  ///   * [Material Design 3](https://m3.material.io/).
+  final bool useMaterial3;
 
   // COLOR
 
@@ -1486,6 +1561,7 @@ class ThemeData with Diagnosticable {
     ScrollbarThemeData? scrollbarTheme,
     InteractiveInkFeatureFactory? splashFactory,
     VisualDensity? visualDensity,
+    bool? useMaterial3,
     // COLOR
     // [colorScheme] is the preferred way to configure colors. The other color
     // properties will gradually be phased out, see
@@ -1632,6 +1708,7 @@ class ThemeData with Diagnosticable {
       scrollbarTheme: scrollbarTheme ?? this.scrollbarTheme,
       splashFactory: splashFactory ?? this.splashFactory,
       visualDensity: visualDensity ?? this.visualDensity,
+      useMaterial3: useMaterial3 ?? this.useMaterial3,
       // COLOR
       colorScheme: (colorScheme ?? this.colorScheme).copyWith(brightness: brightness),
       primaryColor: primaryColor ?? this.primaryColor,
@@ -1800,6 +1877,7 @@ class ThemeData with Diagnosticable {
       scrollbarTheme: ScrollbarThemeData.lerp(a.scrollbarTheme, b.scrollbarTheme, t),
       splashFactory: t < 0.5 ? a.splashFactory : b.splashFactory,
       visualDensity: VisualDensity.lerp(a.visualDensity, b.visualDensity, t),
+      useMaterial3: t < 0.5 ? a.useMaterial3 : b.useMaterial3,
       // COLOR
       colorScheme: ColorScheme.lerp(a.colorScheme, b.colorScheme, t),
       primaryColor: Color.lerp(a.primaryColor, b.primaryColor, t)!,
@@ -1898,6 +1976,7 @@ class ThemeData with Diagnosticable {
         other.scrollbarTheme == scrollbarTheme &&
         other.splashFactory == splashFactory &&
         other.visualDensity == visualDensity &&
+        other.useMaterial3 == useMaterial3 &&
         // COLOR
         other.colorScheme == colorScheme &&
         other.primaryColor == primaryColor &&
@@ -1993,6 +2072,7 @@ class ThemeData with Diagnosticable {
       scrollbarTheme,
       splashFactory,
       visualDensity,
+      useMaterial3,
       // COLOR
       colorScheme,
       primaryColor,
@@ -2088,6 +2168,7 @@ class ThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<ScrollbarThemeData>('scrollbarTheme', scrollbarTheme, defaultValue: defaultData.scrollbarTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<InteractiveInkFeatureFactory>('splashFactory', splashFactory, defaultValue: defaultData.splashFactory, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<VisualDensity>('visualDensity', visualDensity, defaultValue: defaultData.visualDensity, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<bool>('useMaterial3', useMaterial3, defaultValue: defaultData.useMaterial3, level: DiagnosticLevel.debug));
     // COLORS
     properties.add(DiagnosticsProperty<ColorScheme>('colorScheme', colorScheme, defaultValue: defaultData.colorScheme, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('primaryColor', primaryColor, defaultValue: defaultData.primaryColor, level: DiagnosticLevel.debug));
