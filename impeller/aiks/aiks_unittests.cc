@@ -153,5 +153,59 @@ TEST_F(AiksTest, CanPerformSkew) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
+TEST_F(AiksTest, CanPerformSaveLayerWithBounds) {
+  Canvas canvas;
+
+  Paint red;
+  red.color = Color::Red();
+
+  Paint green;
+  green.color = Color::Green();
+
+  Paint blue;
+  blue.color = Color::Blue();
+
+  Paint save;
+  save.color = Color::Black();
+
+  canvas.SaveLayer(save, Rect{0, 0, 50, 50});
+
+  canvas.DrawRect({0, 0, 100, 100}, red);
+  canvas.DrawRect({10, 10, 100, 100}, green);
+  canvas.DrawRect({20, 20, 100, 100}, blue);
+
+  canvas.Restore();
+
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
+TEST_F(
+    AiksTest,
+    DISABLED_CanPerformSaveLayerWithBoundsAndLargerIntermediateIsNotAllocated) {
+  Canvas canvas;
+
+  Paint red;
+  red.color = Color::Red();
+
+  Paint green;
+  green.color = Color::Green();
+
+  Paint blue;
+  blue.color = Color::Blue();
+
+  Paint save;
+  save.color = Color::Black().WithAlpha(0.5);
+
+  canvas.SaveLayer(save, Rect{0, 0, 100000, 100000});
+
+  canvas.DrawRect({0, 0, 100, 100}, red);
+  canvas.DrawRect({10, 10, 100, 100}, green);
+  canvas.DrawRect({20, 20, 100, 100}, blue);
+
+  canvas.Restore();
+
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
 }  // namespace testing
 }  // namespace impeller

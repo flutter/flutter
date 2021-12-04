@@ -14,12 +14,19 @@ class DefaultEntityPassDelegate final : public EntityPassDelegate {
  public:
   DefaultEntityPassDelegate() = default;
 
+  // |EntityPassDelegate|
   ~DefaultEntityPassDelegate() override = default;
 
+  // |EntityPassDelegate|
+  std::optional<Rect> GetCoverageRect() override { return std::nullopt; }
+
+  // |EntityPassDelegate|
   bool CanElide() override { return false; }
 
+  // |EntityPassDelegate|
   bool CanCollapseIntoParentPass() override { return true; }
 
+  // |EntityPassDelegate|
   std::shared_ptr<Contents> CreateContentsForSubpassTarget(
       std::shared_ptr<Texture> target) override {
     // Not possible since this pass always collapses into its parent.

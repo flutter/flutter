@@ -106,8 +106,18 @@ void Canvas::DrawCircle(Point center, Scalar radius, Paint paint) {
 
 void Canvas::SaveLayer(Paint paint, std::optional<Rect> bounds) {
   GetCurrentPass().SetDelegate(
-      std::make_unique<PaintPassDelegate>(std::move(paint)));
+      std::make_unique<PaintPassDelegate>(std::move(paint), bounds));
+
   Save(true);
+
+  if (bounds.has_value()) {
+    // Render target switches due to a save layer can be elided. In such cases
+    // where passes are collapsed into their parent, the clipping effect to
+    // the size of the render target that would have been allocated will be
+    // absent. Explicitly add back a clip to reproduce that behavior. Since
+    // clips never require a render target switch, this is a cheap operation.
+    ClipPath(PathBuilder{}.AddRect(bounds.value()).CreatePath());
+  }
 }
 
 void Canvas::ClipPath(Path path) {
