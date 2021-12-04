@@ -487,44 +487,41 @@ class _AnimatedFadeOutFadeIn extends StatefulWidget {
 }
 
 class _AnimatedFadeOutFadeInState extends State<_AnimatedFadeOutFadeIn> with SingleTickerProviderStateMixin<_AnimatedFadeOutFadeIn> {
-  late final AnimationController controller = AnimationController(
-    duration: duration,
+  late final AnimationController _controller = AnimationController(
+    duration: widget.fadeInDuration + widget.fadeOutDuration,
     debugLabel: kDebugMode ? widget.toStringShort() : null,
     vsync: this,
   );
-  late final Animation<double> animation = CurvedAnimation(parent: controller, curve: Curves.linear);
+  late final CurvedAnimation _animation = CurvedAnimation(parent: _controller, curve: Curves.linear);
   final Tween<double> _targetOpacity = Tween<double>(begin: 0.0, end: 1.0);
   final Tween<double> _placeholderOpacity = Tween<double>(begin: 1.0, end: 0.0);
   Animation<double>? _targetOpacityAnimation;
   Animation<double>? _placeholderOpacityAnimation;
-  late Duration duration = widget.fadeOutDuration + widget.fadeInDuration;
   late bool isTargetLoaded = widget.isTargetLoaded;
 
   @override
   void initState() {
     super.initState();
-    didUpdateTweens();
+    _didUpdateTweens();
   }
 
   @override
   void didUpdateWidget(_AnimatedFadeOutFadeIn oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if(oldWidget.fadeInDuration + oldWidget.fadeOutDuration != duration) {
-      duration = widget.fadeInDuration + widget.fadeOutDuration;
-      controller.duration = duration;
-    }
-    didUpdateTweens();
+    if (_controller.duration != widget.fadeInDuration + widget.fadeOutDuration)
+      _controller.duration = widget.fadeInDuration + widget.fadeOutDuration;
+    _didUpdateTweens();
   }
 
   @override
   void dispose() {
-    (animation as CurvedAnimation).dispose();
-    controller.dispose();
+    _animation.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
-  void didUpdateTweens() {
-    _placeholderOpacityAnimation = animation.drive(TweenSequence<double>(<TweenSequenceItem<double>>[
+  void _didUpdateTweens() {
+    _placeholderOpacityAnimation = _animation.drive(TweenSequence<double>(<TweenSequenceItem<double>>[
       TweenSequenceItem<double>(
         tween: _placeholderOpacity.chain(CurveTween(curve: widget.fadeOutCurve)),
         weight: widget.fadeOutDuration.inMilliseconds.toDouble(),
@@ -540,7 +537,7 @@ class _AnimatedFadeOutFadeInState extends State<_AnimatedFadeOutFadeIn> with Sin
       }
     });
 
-    _targetOpacityAnimation = animation.drive(TweenSequence<double>(<TweenSequenceItem<double>>[
+    _targetOpacityAnimation = _animation.drive(TweenSequence<double>(<TweenSequenceItem<double>>[
       TweenSequenceItem<double>(
         tween: ConstantTween<double>(0),
         weight: widget.fadeOutDuration.inMilliseconds.toDouble(),
@@ -552,10 +549,11 @@ class _AnimatedFadeOutFadeInState extends State<_AnimatedFadeOutFadeIn> with Sin
     ]));
 
     if (!widget.isTargetLoaded && isTargetLoaded)
-      controller.reset();
+      _controller.reset();
 
-    if(widget.isTargetLoaded)
-      controller.forward();
+    // Doesn't interrupt in-progress animation when animation values are updated.
+    if (widget.isTargetLoaded && !_controller.isAnimating)
+      _controller.forward();
 
     isTargetLoaded = widget.isTargetLoaded;
     widget.targetProxyAnimation.parent = _targetOpacityAnimation;
