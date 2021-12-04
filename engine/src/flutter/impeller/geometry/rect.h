@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <optional>
 #include <ostream>
 #include <vector>
 
@@ -87,35 +88,41 @@ struct TRect {
 
   constexpr bool IsEmpty() const { return size.IsEmpty(); }
 
-  constexpr TRect WithPoint(const TPoint<Type>& p) const {
-    TRect copy = *this;
-    if (p.x < origin.x) {
-      copy.origin.x = p.x;
-      copy.size.width += (origin.x - p.x);
-    }
-
-    if (p.y < origin.y) {
-      copy.origin.y = p.y;
-      copy.size.height += (origin.y - p.y);
-    }
-
-    if (p.x > (size.width + origin.x)) {
-      copy.size.width += p.x - (size.width + origin.x);
-    }
-
-    if (p.y > (size.height + origin.y)) {
-      copy.size.height += p.y - (size.height + origin.y);
-    }
-
-    return copy;
+  constexpr std::array<T, 4> GetLTRB() const {
+    const auto left = std::min(origin.x, origin.x + size.width);
+    const auto top = std::min(origin.y, origin.y + size.height);
+    const auto right = std::max(origin.x, origin.x + size.width);
+    const auto bottom = std::max(origin.y, origin.y + size.height);
+    return {left, top, right, bottom};
   }
 
-  constexpr TRect WithPoints(const std::vector<TPoint<Type>>& points) const {
-    TRect box = *this;
-    for (const auto& point : points) {
-      box = box.WithPoint(point);
+  constexpr TRect Union(const TRect& o) const {
+    auto this_ltrb = GetLTRB();
+    auto other_ltrb = o.GetLTRB();
+    return TRect::MakeLTRB(std::min(this_ltrb[0], other_ltrb[0]),  //
+                           std::min(this_ltrb[1], other_ltrb[1]),  //
+                           std::max(this_ltrb[2], other_ltrb[2]),  //
+                           std::max(this_ltrb[3], other_ltrb[3])   //
+    );
+  }
+
+  constexpr std::optional<TRect<T>> Intersection(const TRect& o) const {
+    auto this_ltrb = GetLTRB();
+    auto other_ltrb = o.GetLTRB();
+    auto intersection =
+        TRect::MakeLTRB(std::max(this_ltrb[0], other_ltrb[0]),  //
+                        std::max(this_ltrb[1], other_ltrb[1]),  //
+                        std::min(this_ltrb[2], other_ltrb[2]),  //
+                        std::min(this_ltrb[3], other_ltrb[3])   //
+        );
+    if (intersection.size.IsEmpty()) {
+      return std::nullopt;
     }
-    return box;
+    return intersection;
+  }
+
+  constexpr bool IntersectsWithRect(const TRect& o) const {
+    return Interesection(o).has_value();
   }
 };
 
