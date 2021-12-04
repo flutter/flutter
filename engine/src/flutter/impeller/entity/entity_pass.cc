@@ -74,6 +74,18 @@ const EntityPass::Subpasses& EntityPass::GetSubpasses() const {
   return subpasses_;
 }
 
+Rect EntityPass::GetSubpassCoverage(const EntityPass& subpass) const {
+  auto subpass_coverage = subpass.GetCoverageRect();
+  auto delegate_coverage =
+      delegate_->GetCoverageRect().value_or(subpass_coverage);
+  Rect coverage;
+  coverage.origin = subpass_coverage.origin;
+  // TODO(csg): This must still be restricted to the max texture size. Or,
+  // decide if this must be done by the allocator.
+  coverage.size = subpass_coverage.size.Min(delegate_coverage.size);
+  return coverage;
+}
+
 EntityPass* EntityPass::AddSubpass(std::unique_ptr<EntityPass> pass) {
   if (!pass) {
     return nullptr;
@@ -103,7 +115,7 @@ bool EntityPass::Render(ContentRenderer& renderer,
       continue;
     }
 
-    const auto subpass_coverage = subpass->GetCoverageRect();
+    const auto subpass_coverage = GetSubpassCoverage(*subpass);
 
     if (subpass_coverage.IsEmpty()) {
       // It is not an error to have an empty subpass. But subpasses that can't

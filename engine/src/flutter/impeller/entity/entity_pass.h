@@ -66,6 +66,8 @@ class EntityPass {
   std::unique_ptr<EntityPassDelegate> delegate_ =
       EntityPassDelegate::MakeDefault();
 
+  Rect GetSubpassCoverage(const EntityPass& subpass) const;
+
   FML_DISALLOW_COPY_AND_ASSIGN(EntityPass);
 };
 

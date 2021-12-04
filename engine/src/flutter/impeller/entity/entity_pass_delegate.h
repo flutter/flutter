@@ -18,6 +18,8 @@ class EntityPassDelegate {
 
   EntityPassDelegate();
 
+  virtual std::optional<Rect> GetCoverageRect() = 0;
+
   virtual ~EntityPassDelegate();
 
   virtual bool CanElide() = 0;

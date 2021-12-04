@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <optional>
+
 #include "flutter/fml/macros.h"
 #include "impeller/aiks/paint.h"
 #include "impeller/entity/entity_pass_delegate.h"
@@ -12,10 +14,13 @@ namespace impeller {
 
 class PaintPassDelegate final : public EntityPassDelegate {
  public:
-  PaintPassDelegate(Paint paint);
+  PaintPassDelegate(Paint paint, std::optional<Rect> coverage);
 
   // |EntityPassDelgate|
   ~PaintPassDelegate() override;
+
+  // |EntityPassDelegate|
+  std::optional<Rect> GetCoverageRect() override;
 
   // |EntityPassDelgate|
   bool CanElide() override;
@@ -29,6 +34,7 @@ class PaintPassDelegate final : public EntityPassDelegate {
 
  private:
   const Paint paint_;
+  const std::optional<Rect> coverage_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(PaintPassDelegate);
 };
