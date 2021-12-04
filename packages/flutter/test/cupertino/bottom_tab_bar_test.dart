@@ -429,43 +429,6 @@ Future<void> main() async {
     semantics.dispose();
   });
 
-  testWidgets('Label of items should be nullable', (WidgetTester tester) async {
-    final MemoryImage iconProvider = MemoryImage(Uint8List.fromList(kTransparentImage));
-    final List<int> itemsTapped = <int>[];
-
-    await pumpWidgetWithBoilerplate(
-      tester,
-      MediaQuery(
-        data: const MediaQueryData(),
-        child: CupertinoTabBar(
-          items: <BottomNavigationBarItem>[
-            BottomNavigationBarItem(
-              icon: ImageIcon(
-                MemoryImage(Uint8List.fromList(kTransparentImage)),
-              ),
-              label: 'Tab 1',
-            ),
-            BottomNavigationBarItem(
-              icon: ImageIcon(
-                iconProvider,
-              ),
-            ),
-          ],
-          onTap: (int index) => itemsTapped.add(index),
-        ),
-      ),
-    );
-
-    expect(find.text('Tab 1'), findsOneWidget);
-
-    final Finder finder = find.byWidgetPredicate(
-      (Widget widget) => widget is Image && widget.image == iconProvider,
-    );
-
-    await tester.tap(finder);
-    expect(itemsTapped, <int>[1]);
-  });
-
   testWidgets('Hide border hides the top border of the tabBar', (WidgetTester tester) async {
     await pumpWidgetWithBoilerplate(
       tester,

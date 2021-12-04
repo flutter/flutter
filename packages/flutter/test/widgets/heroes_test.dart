@@ -2117,8 +2117,8 @@ Future<void> main() async {
         home: CupertinoTabScaffold(
           tabBar: CupertinoTabBar(
             items: const <BottomNavigationBarItem>[
-              BottomNavigationBarItem(icon: Icon(Icons.home)),
-              BottomNavigationBarItem(icon: Icon(Icons.favorite)),
+              BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+              BottomNavigationBarItem(icon: Icon(Icons.favorite), label: 'Favorite'),
             ],
           ),
           tabBuilder: (BuildContext context, int index) {
