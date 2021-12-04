@@ -67,7 +67,7 @@ class Path {
   std::vector<Point> CreatePolyline(
       const SmoothingApproximation& approximation = {}) const;
 
-  Rect GetBoundingBox() const;
+  std::optional<Rect> GetBoundingBox() const;
 
   std::optional<std::pair<Point, Point>> GetMinMaxCoveragePoints() const;
 

@@ -173,15 +173,15 @@ std::vector<Point> Path::CreatePolyline(
   return points;
 }
 
-Rect Path::GetBoundingBox() const {
+std::optional<Rect> Path::GetBoundingBox() const {
   auto min_max = GetMinMaxCoveragePoints();
   if (!min_max.has_value()) {
-    return {};
+    return std::nullopt;
   }
   auto min = min_max->first;
   auto max = min_max->second;
   const auto difference = max - min;
-  return {min.x, min.y, difference.x, difference.y};
+  return Rect{min.x, min.y, difference.x, difference.y};
 }
 
 std::optional<std::pair<Point, Point>> Path::GetMinMaxCoveragePoints() const {

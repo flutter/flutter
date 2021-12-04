@@ -33,10 +33,6 @@ class EntityPass {
 
   std::unique_ptr<EntityPass> Clone() const;
 
-  Rect GetCoverageRect() const;
-
-  // TODO(csg): This prevents an optimization where the coverage can be
-  // calculated once in SetEntities an memoized.
   void AddEntity(Entity entity);
 
   void SetEntities(Entities entities);
@@ -66,7 +62,9 @@ class EntityPass {
   std::unique_ptr<EntityPassDelegate> delegate_ =
       EntityPassDelegate::MakeDefault();
 
-  Rect GetSubpassCoverage(const EntityPass& subpass) const;
+  std::optional<Rect> GetSubpassCoverage(const EntityPass& subpass) const;
+
+  std::optional<Rect> GetEntitiesCoverage() const;
 
   FML_DISALLOW_COPY_AND_ASSIGN(EntityPass);
 };
