@@ -721,6 +721,10 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// occupied by the tab in the tab bar. If [indicatorSize] is
   /// [TabBarIndicatorSize.label], then the tab's bounds are only as wide as
   /// the tab widget itself.
+  ///
+  /// See also:
+  /// 
+  ///   * [splashBorderRadius] to define clipping radius of the splash if borderRadius of BoxDecoration is defined.
   final Decoration? indicator;
 
   /// Whether this tab bar should automatically adjust the [indicatorColor].
@@ -850,7 +854,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// ```
   final InteractiveInkFeatureFactory? splashFactory;
   
-  /// Defines the [InkWell]'s `borderRadius` property.
+  /// Defines the clipping radius of splashes that extend outside the bounds of the tab.
   ///
   /// For example, to match the `borderRadius` of [BoxDecoration] provided as
   /// `indicator` to this [TabBar].
