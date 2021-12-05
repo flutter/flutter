@@ -147,7 +147,15 @@ void Rasterizer::DrawLastLayerTree(
   if (!last_layer_tree_ || !surface_) {
     return;
   }
-  DrawToSurface(*frame_timings_recorder, *last_layer_tree_);
+  RasterStatus raster_status =
+      DrawToSurface(*frame_timings_recorder, *last_layer_tree_);
+
+  // EndFrame should perform cleanups for the external_view_embedder.
+  if (external_view_embedder_) {
+    bool should_resubmit_frame = ShouldResubmitFrame(raster_status);
+    external_view_embedder_->EndFrame(should_resubmit_frame,
+                                      raster_thread_merger_);
+  }
 }
 
 RasterStatus Rasterizer::Draw(
@@ -184,8 +192,7 @@ RasterStatus Rasterizer::Draw(
   // if the raster status is to resubmit the frame, we push the frame to the
   // front of the queue and also change the consume status to more available.
 
-  auto should_resubmit_frame = raster_status == RasterStatus::kResubmit ||
-                               raster_status == RasterStatus::kSkipAndRetry;
+  bool should_resubmit_frame = ShouldResubmitFrame(raster_status);
   if (should_resubmit_frame) {
     auto front_continuation = pipeline->ProduceIfEmpty();
     bool result =
@@ -224,6 +231,11 @@ RasterStatus Rasterizer::Draw(
   }
 
   return raster_status;
+}
+
+bool Rasterizer::ShouldResubmitFrame(const RasterStatus& raster_status) {
+  return raster_status == RasterStatus::kResubmit ||
+         raster_status == RasterStatus::kSkipAndRetry;
 }
 
 namespace {
@@ -387,8 +399,7 @@ RasterStatus Rasterizer::DoDraw(
       DrawToSurface(*frame_timings_recorder, *layer_tree);
   if (raster_status == RasterStatus::kSuccess) {
     last_layer_tree_ = std::move(layer_tree);
-  } else if (raster_status == RasterStatus::kResubmit ||
-             raster_status == RasterStatus::kSkipAndRetry) {
+  } else if (ShouldResubmitFrame(raster_status)) {
     resubmitted_layer_tree_ = std::move(layer_tree);
     return raster_status;
   } else if (raster_status == RasterStatus::kDiscarded) {
