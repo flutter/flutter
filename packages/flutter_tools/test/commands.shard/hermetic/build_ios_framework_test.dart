@@ -55,7 +55,7 @@ void main() {
           platform: fakePlatform,
           fileSystem: memoryFileSystem,
           processManager: FakeProcessManager.any(),
-        ); 
+        );
 
         rootOverride.childDirectory('bin').childDirectory('internal').childFile('engine.version')
           ..createSync(recursive: true)
@@ -142,7 +142,7 @@ void main() {
 
         setUp(() {
           // cache.getLicenseFile() relies on the flutter root being set.
-          Cache.flutterRoot ??= getFlutterRoot(); 
+          Cache.flutterRoot ??= getFlutterRoot();
           cache.getLicenseFile()
             ..createSync(recursive: true)
             ..writeAsStringSync(licenseText);
