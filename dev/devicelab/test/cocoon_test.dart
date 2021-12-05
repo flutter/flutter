@@ -314,7 +314,7 @@ void main() {
     });
 
     test('does not upload results on non-supported branches', () async {
-      // Any network failure would cause the upoad to fail
+      // Any network failure would cause the upload to fail
       mockClient = MockClient((Request request) async => Response('', 500));
 
       cocoon = Cocoon(
@@ -339,7 +339,7 @@ void main() {
     });
 
     test('does not update for staging test', () async {
-      // Any network failure would cause the upoad to fail
+      // Any network failure would cause the upload to fail
       mockClient = MockClient((Request request) async => Response('', 500));
 
       cocoon = Cocoon(

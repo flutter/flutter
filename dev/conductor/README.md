@@ -1,6 +1,8 @@
 # Flutter Conductor
 
-Command-line tool for managing a release of the Flutter SDK.
+Command-line tool for managing a release of the Flutter SDK. Also see
+https://github.com/flutter/flutter/wiki/Release-process for more information on
+the release process.
 
 ## Requirements
 
@@ -33,7 +35,8 @@ conductor start \
   --engine-mirror=git@github.com:username/engine.git \
   --engine-cherrypicks=72114dafe28c8700f1d5d629c6ae9d34172ba395 \
   --framework-cherrypicks=a3e66b396746f6581b2b7efd1b0d0f0074215128,d8d853436206e86f416236b930e97779b143a100 \
-  --dart-revision=4511eb2a779a612d9d6b2012123575013e0aef12
+  --dart-revision=4511eb2a779a612d9d6b2012123575013e0aef12 \
+  --increment=m
 ```
 
 For more details on these command line arguments, see `conductor help start`.
@@ -96,9 +99,11 @@ to the upstream repository.
 
 ### Publish Channel
 
-This step will update the upstream release branch.
+This step will push the Framework candidate branch to the upstream release
+branch.
 
 ### Verify Release
 
 For the final step, the user must manually verify that packaging builds have
-finished successfully.
+finished successfully. The conductor will produce links to the dashboards for
+monitoring CI builds.

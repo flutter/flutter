@@ -36,7 +36,7 @@ void main() {
           child: InputDatePickerFormField(
             key: key,
             initialDate: initialDate ?? DateTime(2016, DateTime.january, 15),
-            firstDate: firstDate ?? DateTime(2001, DateTime.january, 1),
+            firstDate: firstDate ?? DateTime(2001),
             lastDate: lastDate ?? DateTime(2031, DateTime.december, 31),
             onDateSubmitted: onDateSubmitted,
             onDateSaved: onDateSaved,
@@ -271,7 +271,6 @@ void main() {
       await tester.pumpWidget(_inputDatePickerField(
         theme: ThemeData.from(colorScheme: const ColorScheme.light()).copyWith(
           inputDecorationTheme: const InputDecorationTheme(
-            filled: false,
             border: border,
           ),
         ),

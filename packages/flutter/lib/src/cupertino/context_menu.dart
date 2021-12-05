@@ -73,7 +73,7 @@ enum _ContextMenuLocation {
 /// child's corners and allowing its aspect ratio to expand, similar to the
 /// Photos app on iOS.
 ///
-/// {@tool dartpad --template=stateless_widget_material}
+/// {@tool dartpad}
 /// This sample shows a very simple CupertinoContextMenu for an empty red
 /// 100x100 Container. Simply long press on it to open.
 ///
@@ -287,7 +287,8 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
         });
         break;
 
-      default:
+      case AnimationStatus.forward:
+      case AnimationStatus.reverse:
         return;
     }
   }
@@ -344,7 +345,6 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
     // it expands. This may be solvable by adding a widget to Scaffold that's
     // underneath the AppBar.
     _lastOverlayEntry = OverlayEntry(
-      opaque: false,
       builder: (BuildContext context) {
         return _DecoyChild(
           beginRect: childRect,
@@ -354,7 +354,7 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
         );
       },
     );
-    Overlay.of(context)!.insert(_lastOverlayEntry!);
+    Overlay.of(context, rootOverlay: true)!.insert(_lastOverlayEntry!);
     _openController.forward();
   }
 
@@ -758,8 +758,8 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
             children: <Widget>[
               Positioned.fromRect(
                 rect: sheetRect,
-                child: Opacity(
-                  opacity: _sheetOpacity.value,
+                child: FadeTransition(
+                  opacity: _sheetOpacity,
                   child: Transform.scale(
                     alignment: getSheetAlignment(_contextMenuLocation),
                     scale: sheetScale,
@@ -1028,8 +1028,8 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
     return Transform.scale(
       alignment: _ContextMenuRoute.getSheetAlignment(widget.contextMenuLocation),
       scale: _sheetScaleAnimation.value,
-      child: Opacity(
-        opacity: _sheetOpacityAnimation.value,
+      child: FadeTransition(
+        opacity: _sheetOpacityAnimation,
         child: child,
       ),
     );
@@ -1157,7 +1157,7 @@ class _ContextMenuSheet extends StatelessWidget {
       flex: 2,
       child: IntrinsicHeight(
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(13.0),
+          borderRadius: const BorderRadius.all(Radius.circular(13.0)),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: actions,
@@ -1170,33 +1170,23 @@ class _ContextMenuSheet extends StatelessWidget {
       case _ContextMenuLocation.center:
         return _orientation == Orientation.portrait
           ? <Widget>[
-            const Spacer(
-              flex: 1,
-            ),
+            const Spacer(),
             menu,
-            const Spacer(
-              flex: 1,
-            ),
+            const Spacer(),
           ]
         : <Widget>[
             menu,
-            const Spacer(
-              flex: 1,
-            ),
+            const Spacer(),
           ];
       case _ContextMenuLocation.right:
         return <Widget>[
-          const Spacer(
-            flex: 1,
-          ),
+          const Spacer(),
           menu,
         ];
       case _ContextMenuLocation.left:
         return <Widget>[
           menu,
-          const Spacer(
-            flex: 1,
-          ),
+          const Spacer(),
         ];
     }
   }

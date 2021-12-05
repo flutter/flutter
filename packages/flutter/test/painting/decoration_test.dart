@@ -37,7 +37,7 @@ class SynchronousTestImageProvider extends ImageProvider<int> {
   @override
   ImageStreamCompleter load(int key, DecoderCallback decode) {
     return OneFrameImageStreamCompleter(
-      SynchronousFuture<ImageInfo>(TestImageInfo(key, image: image, scale: 1.0)),
+      SynchronousFuture<ImageInfo>(TestImageInfo(key, image: image)),
     );
   }
 }
@@ -336,13 +336,11 @@ void main() {
       image: SynchronousTestImageProvider(image),
       colorFilter: colorFilter,
       fit: BoxFit.contain,
-      alignment: Alignment.center,
       centerSlice: const Rect.fromLTWH(10.0, 20.0, 30.0, 40.0),
       repeat: ImageRepeat.repeatY,
       matchTextDirection: true,
       scale: 0.5,
       opacity: 0.5,
-      filterQuality: FilterQuality.low,
       invertColors: true,
       isAntiAlias: true,
     );
@@ -355,7 +353,6 @@ void main() {
     try {
       boxPainter.paint(canvas, Offset.zero, const ImageConfiguration(
         size: Size(100.0, 100.0),
-        textDirection: null,
       ));
     } on FlutterError catch (e) {
       error = e;
@@ -407,31 +404,31 @@ void main() {
     // (Use a ShapeDecoration and ShapeBorder if you want to lerp the shapes...)
     expect(
       BoxDecoration.lerp(
-        const BoxDecoration(shape: BoxShape.rectangle),
+        const BoxDecoration(),
         const BoxDecoration(shape: BoxShape.circle),
         -1.0,
       ),
-      const BoxDecoration(shape: BoxShape.rectangle),
+      const BoxDecoration(),
     );
     expect(
       BoxDecoration.lerp(
-        const BoxDecoration(shape: BoxShape.rectangle),
+        const BoxDecoration(),
         const BoxDecoration(shape: BoxShape.circle),
         0.0,
       ),
-      const BoxDecoration(shape: BoxShape.rectangle),
+      const BoxDecoration(),
     );
     expect(
       BoxDecoration.lerp(
-        const BoxDecoration(shape: BoxShape.rectangle),
+        const BoxDecoration(),
         const BoxDecoration(shape: BoxShape.circle),
         0.25,
       ),
-      const BoxDecoration(shape: BoxShape.rectangle),
+      const BoxDecoration(),
     );
     expect(
       BoxDecoration.lerp(
-        const BoxDecoration(shape: BoxShape.rectangle),
+        const BoxDecoration(),
         const BoxDecoration(shape: BoxShape.circle),
         0.75,
       ),
@@ -439,7 +436,7 @@ void main() {
     );
     expect(
       BoxDecoration.lerp(
-        const BoxDecoration(shape: BoxShape.rectangle),
+        const BoxDecoration(),
         const BoxDecoration(shape: BoxShape.circle),
         1.0,
       ),
@@ -447,7 +444,7 @@ void main() {
     );
     expect(
       BoxDecoration.lerp(
-        const BoxDecoration(shape: BoxShape.rectangle),
+        const BoxDecoration(),
         const BoxDecoration(shape: BoxShape.circle),
         2.0,
       ),
@@ -528,8 +525,6 @@ void main() {
         scale: scale,
         alignment: Alignment.bottomRight,
         fit: BoxFit.none,
-        repeat: ImageRepeat.noRepeat,
-        flipHorizontally: false,
       );
 
       const Size imageSize = Size(100.0, 100.0);
@@ -572,8 +567,6 @@ void main() {
         scale: scale,
         alignment: Alignment.bottomRight,
         fit: BoxFit.scaleDown,
-        repeat: ImageRepeat.noRepeat,
-        flipHorizontally: false,
       );
 
       const Size imageSize = Size(100.0, 100.0);
@@ -615,8 +608,6 @@ void main() {
       scale: 2.0,
       alignment: Alignment.bottomRight,
       fit: BoxFit.scaleDown,
-      repeat: ImageRepeat.noRepeat,
-      flipHorizontally: false,
     );
 
     const Size imageSize = Size(100.0, 100.0);
@@ -665,10 +656,7 @@ void main() {
         rect: outputRect,
         image: image,
         scale: 3.0,
-        alignment: Alignment.center,
         fit: boxFit,
-        repeat: ImageRepeat.noRepeat,
-        flipHorizontally: false,
       );
 
       final Invocation call = canvas.invocations.firstWhere((Invocation call) => call.memberName == #drawImageRect);

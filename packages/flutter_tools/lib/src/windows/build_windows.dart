@@ -279,7 +279,7 @@ Future<void> _runBuild(
         '--build',
         buildDir.path,
         '--config',
-        toTitleCase(buildModeName),
+        sentenceCase(buildModeName),
         if (install)
           ...<String>['--target', 'INSTALL'],
         if (globals.logger.isVerbose)

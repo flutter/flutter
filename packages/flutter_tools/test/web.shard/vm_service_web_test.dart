@@ -25,7 +25,7 @@ void main() {
     setUp(() async {
       tempDir = createResolvedTempDirectorySync('run_test.');
       await project.setUpIn(tempDir);
-      flutter = FlutterRunTestDriver(tempDir, spawnDdsInstance: true);
+      flutter = FlutterRunTestDriver(tempDir);
     });
 
     tearDown(() async {

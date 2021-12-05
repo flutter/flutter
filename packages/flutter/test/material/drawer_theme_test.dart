@@ -26,11 +26,11 @@ void main() {
 
   testWidgets('Custom debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
-    DrawerThemeData(
-      backgroundColor: const Color(0x00000099),
-      scrimColor: const Color(0x00000098),
+    const DrawerThemeData(
+      backgroundColor: Color(0x00000099),
+      scrimColor: Color(0x00000098),
       elevation: 5.0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2.0)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2.0))),
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties

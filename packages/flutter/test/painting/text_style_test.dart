@@ -94,7 +94,7 @@ void main() {
       equals('TextStyle(inherit: false, <no style specified>)'),
     );
     expect(
-      const TextStyle(inherit: true).toString(),
+      const TextStyle().toString(),
       equals('TextStyle(<all styles inherited>)'),
     );
 
@@ -465,7 +465,7 @@ void main() {
     final ui.ParagraphStyle paragraphStyle0 = style0.getParagraphStyle(textScaleFactor: 2.5);
 
     const TextStyle style1 = TextStyle(fontSize: 25);
-    final ui.ParagraphStyle paragraphStyle1 = style1.getParagraphStyle(textScaleFactor: 1);
+    final ui.ParagraphStyle paragraphStyle1 = style1.getParagraphStyle();
 
     expect(paragraphStyle0 == paragraphStyle1, true);
   });
@@ -494,5 +494,18 @@ void main() {
       style.apply(leadingDistribution: TextLeadingDistribution.proportional).leadingDistribution,
       TextLeadingDistribution.proportional,
     );
+  });
+
+  test('TextStyle fontFamily and package', () {
+    expect(const TextStyle(fontFamily: 'fontFamily', package: 'foo') != const TextStyle(fontFamily: 'fontFamily', package: 'bar'), true);
+    expect(const TextStyle(fontFamily: 'fontFamily', package: 'foo').hashCode != const TextStyle(package: 'bar', fontFamily: 'fontFamily').hashCode, true);
+    expect(const TextStyle(fontFamily: 'fontFamily').fontFamily, 'fontFamily');
+    expect(const TextStyle(fontFamily: 'fontFamily').fontFamily, 'fontFamily');
+    expect(const TextStyle(fontFamily: 'fontFamily').copyWith(package: 'bar').fontFamily, 'packages/bar/fontFamily');
+    expect(const TextStyle(fontFamily: 'fontFamily', package: 'foo').fontFamily, 'packages/foo/fontFamily');
+    expect(const TextStyle(fontFamily: 'fontFamily', package: 'foo').copyWith(package: 'bar').fontFamily, 'packages/bar/fontFamily');
+    expect(const TextStyle().merge(const TextStyle(fontFamily: 'fontFamily', package: 'bar')).fontFamily, 'packages/bar/fontFamily');
+    expect(const TextStyle().apply(fontFamily: 'fontFamily', package: 'foo').fontFamily, 'packages/foo/fontFamily');
+    expect(const TextStyle(fontFamily: 'fontFamily', package: 'foo').apply(fontFamily: 'fontFamily', package: 'bar').fontFamily, 'packages/bar/fontFamily');
   });
 }

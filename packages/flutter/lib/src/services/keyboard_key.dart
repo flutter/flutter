@@ -46,7 +46,7 @@ abstract class KeyboardKey with Diagnosticable {
 /// look at the physical key to make sure that regardless of the character the
 /// key produces, you got the key that is in that location on the keyboard.
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold}
+/// {@tool dartpad}
 /// This example shows how to detect if the user has selected the logical "Q"
 /// key.
 ///
@@ -254,9 +254,9 @@ class LogicalKeyboardKey extends KeyboardKey {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(StringProperty('keyId', '0x${keyId.toRadixString(16).padLeft(8, '0')}', showName: true));
-    properties.add(StringProperty('keyLabel', keyLabel, showName: true));
-    properties.add(StringProperty('debugName', debugName, showName: true, defaultValue: null));
+    properties.add(StringProperty('keyId', '0x${keyId.toRadixString(16).padLeft(8, '0')}'));
+    properties.add(StringProperty('keyLabel', keyLabel));
+    properties.add(StringProperty('debugName', debugName, defaultValue: null));
   }
 
   /// Mask for the 32-bit value portion of the key code.
@@ -3492,7 +3492,7 @@ class LogicalKeyboardKey extends KeyboardKey {
 /// looking for "the key next to the TAB key", since on a French keyboard,
 /// the key next to the TAB key has an "A" on it.
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold}
+/// {@tool dartpad}
 /// This example shows how to detect if the user has selected the physical key
 /// to the right of the CAPS LOCK key.
 ///
@@ -3552,8 +3552,8 @@ class PhysicalKeyboardKey extends KeyboardKey {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(StringProperty('usbHidUsage', '0x${usbHidUsage.toRadixString(16).padLeft(8, '0')}', showName: true));
-    properties.add(StringProperty('debugName', debugName, showName: true, defaultValue: null));
+    properties.add(StringProperty('usbHidUsage', '0x${usbHidUsage.toRadixString(16).padLeft(8, '0')}'));
+    properties.add(StringProperty('debugName', debugName, defaultValue: null));
   }
 
   // Key constants for all keyboard keys in the USB HID specification at the

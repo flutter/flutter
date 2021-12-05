@@ -50,7 +50,7 @@ void main() {
           child: Container(
             margin: const EdgeInsets.all(150.0),
             decoration: ShapeDecoration(
-              shape: BeveledRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
+              shape: const BeveledRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20.0))),
               shadows: kElevationToShadow[elevation],
             ),
             height: 100.0,
@@ -114,9 +114,9 @@ void main() {
             color: Colors.yellow[200],
             child: PhysicalShape(
               color: Colors.green[900]!,
-              clipper: ShapeBorderClipper(
+              clipper: const ShapeBorderClipper(
                 shape: BeveledRectangleBorder(
-                  borderRadius: BorderRadius.circular(20.0),
+                  borderRadius: BorderRadius.all(Radius.circular(20.0)),
                 ),
               ),
               elevation: elevation,

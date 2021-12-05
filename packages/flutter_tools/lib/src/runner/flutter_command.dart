@@ -26,7 +26,7 @@ import '../dart/package_map.dart';
 import '../dart/pub.dart';
 import '../device.dart';
 import '../features.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
 import 'flutter_command_runner.dart';
@@ -91,10 +91,8 @@ class FlutterCommandResult {
         return 'fail';
       case ExitStatus.killed:
         return 'killed';
-      default:
-        assert(false);
-        return null;
     }
+    return null; // dead code, remove with null safety migration
   }
 }
 
@@ -120,6 +118,13 @@ class FlutterOptions {
   static const String kDeferredComponents = 'deferred-components';
   static const String kAndroidProjectArgs = 'android-project-arg';
   static const String kInitializeFromDill = 'initialize-from-dill';
+}
+
+/// flutter command categories for usage.
+class FlutterCommandCategory {
+  static const String sdk = 'Flutter SDK';
+  static const String project = 'Project';
+  static const String tools = 'Tools & Devices';
 }
 
 abstract class FlutterCommand extends Command<void> {
@@ -187,8 +192,6 @@ abstract class FlutterCommand extends Command<void> {
 
   bool _excludeDebug = false;
   bool _excludeRelease = false;
-
-  BuildMode _defaultBuildMode;
 
   void requiresPubspecYaml() {
     _requiresPubspecYaml = true;
@@ -759,7 +762,7 @@ abstract class FlutterCommand extends Command<void> {
       FlutterOptions.kEnableExperiment,
       help:
         'The name of an experimental Dart feature to enable. For more information see: '
-        'https://github.com/dart-lang/sdk/blob/master/docs/process/experimental-flags.md',
+        'https://github.com/dart-lang/sdk/blob/main/docs/process/experimental-flags.md',
       hide: hide,
     );
   }
@@ -815,6 +818,16 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
+  void addMultidexOption({ bool hide = false }) {
+    argParser.addFlag('multidex',
+      negatable: true,
+      defaultsTo: true,
+      help: 'When enabled, indicates that the app should be built with multidex support. This '
+            'flag adds the dependencies for multidex when the minimum android sdk is 20 or '
+            'below. For android sdk versions 21 and above, multidex support is native.',
+    );
+  }
+
   /// Adds build options common to all of the desktop build commands.
   void addCommonDesktopBuildOptions({ @required bool verboseHelp }) {
     addBuildModeFlags(verboseHelp: verboseHelp);
@@ -833,9 +846,11 @@ abstract class FlutterCommand extends Command<void> {
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
   }
 
-  set defaultBuildMode(BuildMode value) {
-    _defaultBuildMode = value;
-  }
+  /// The build mode that this command will use if no build mode is
+  /// explicitly specified.
+  ///
+  /// Use [getBuildMode] to obtain the actual effective build mode.
+  BuildMode defaultBuildMode;
 
   BuildMode getBuildMode() {
     // No debug when _excludeDebug is true.
@@ -865,7 +880,7 @@ abstract class FlutterCommand extends Command<void> {
     if (jitReleaseResult) {
       return BuildMode.jitRelease;
     }
-    return _defaultBuildMode;
+    return defaultBuildMode;
   }
 
   void usesFlavorOption() {
@@ -1219,6 +1234,7 @@ abstract class FlutterCommand extends Command<void> {
   /// rather than calling [runCommand] directly.
   @mustCallSuper
   Future<FlutterCommandResult> verifyThenRunCommand(String commandPath) async {
+    globals.preRunValidator.validate();
     // Populate the cache. We call this before pub get below so that the
     // sky_engine package is available in the flutter cache for pub to find.
     if (shouldUpdateCache) {

@@ -2,36 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Template: dev/snippets/config/templates/freeform.tmpl
-//
-// Comment lines marked with "▼▼▼" and "▲▲▲" are used for authoring
-// of samples, and may be ignored if you are just exploring the sample.
-
 // Flutter code sample for ScaffoldMessenger.of
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
-
-// Sometimes [SnackBar]s are produced by code that doesn't have ready access
-// to a valid [BuildContext]. One such example of this is when you show a
-// SnackBar from a method outside of the `build` function. In these
-// cases, you can assign a [GlobalKey] to the [ScaffoldMessenger]. This
-// example shows a key being used to obtain the [ScaffoldMessengerState]
-// provided by the [MaterialApp].
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
-
-//****************************************************************************
-//* ▼▼▼▼▼▼▼▼ code-imports ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
 import 'package:flutter/material.dart';
-
-//* ▲▲▲▲▲▲▲▲ code-imports ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//****************************************************************************
-
-//********************************************************************
-//* ▼▼▼▼▼▼▼▼ code ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
 void main() => runApp(const MyApp());
 
@@ -87,6 +60,3 @@ class _MyAppState extends State<MyApp> {
     );
   }
 }
-
-//* ▲▲▲▲▲▲▲▲ code ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//********************************************************************

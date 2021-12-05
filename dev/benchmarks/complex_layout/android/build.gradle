@@ -7,7 +7,7 @@
 // See dev/tools/bin/generate_gradle_lockfiles.dart.
 
 buildscript {
-    ext.kotlin_version = '1.4.32'
+    ext.kotlin_version = '1.5.31'
     repositories {
         google()
         mavenCentral()
@@ -34,8 +34,9 @@ rootProject.buildDir = '../build'
 
 subprojects {
     project.buildDir = "${rootProject.buildDir}/${project.name}"
+}
+subprojects {
     project.evaluationDependsOn(':app')
-
     dependencyLocking {
         ignoredDependencies.add('io.flutter:*')
         lockFile = file("${rootProject.projectDir}/project-${project.name}.lockfile")

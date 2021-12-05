@@ -27,6 +27,9 @@ void tryToDelete(Directory directory) {
       directory.deleteSync(recursive: true);
     }
   } on FileSystemException catch (error) {
+    // We print this so that it's visible in the logs, to get an idea of how
+    // common this problem is, and if any patterns are ever noticed by anyone.
+    // ignore: avoid_print
     print('Failed to delete ${directory.path}: $error');
   }
 }
@@ -148,7 +151,6 @@ Matcher containsIgnoringWhitespace(String toSearch) {
 @isTest
 void test(String description, FutureOr<void> Function() body, {
   String? testOn,
-  Timeout? timeout,
   dynamic skip,
   List<String>? tags,
   Map<String, dynamic>? onPlatform,
@@ -160,14 +162,17 @@ void test(String description, FutureOr<void> Function() body, {
       addTearDown(() async {
         await globals.localFileSystem.dispose();
       });
+
       return body();
     },
-    timeout: timeout,
     skip: skip,
     tags: tags,
     onPlatform: onPlatform,
     retry: retry,
     testOn: testOn,
+    // We don't support "timeout"; see ../../dart_test.yaml which
+    // configures all tests to have a 15 minute timeout which should
+    // definitely be enough.
   );
 }
 
@@ -182,24 +187,25 @@ void test(String description, FutureOr<void> Function() body, {
 @isTest
 void testWithoutContext(String description, FutureOr<void> Function() body, {
   String? testOn,
-  Timeout? timeout,
   dynamic skip,
   List<String>? tags,
   Map<String, dynamic>? onPlatform,
   int? retry,
-  }) {
+}) {
   return test(
     description, () async {
       return runZoned(body, zoneValues: <Object, Object>{
         contextKey: const _NoContext(),
       });
     },
-    timeout: timeout,
     skip: skip,
     tags: tags,
     onPlatform: onPlatform,
     retry: retry,
     testOn: testOn,
+    // We don't support "timeout"; see ../../dart_test.yaml which
+    // configures all tests to have a 15 minute timeout which should
+    // definitely be enough.
   );
 }
 

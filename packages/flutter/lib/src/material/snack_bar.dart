@@ -157,14 +157,14 @@ class _SnackBarActionState extends State<SnackBarAction> {
 /// A SnackBar with an action will not time out when TalkBack or VoiceOver are
 /// enabled. This is controlled by [AccessibilityFeatures.accessibleNavigation].
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold_center}
+/// {@tool dartpad}
 /// Here is an example of a [SnackBar] with an [action] button implemented using
 /// [SnackBarAction].
 ///
 /// ** See code in examples/api/lib/material/snack_bar/snack_bar.0.dart **
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold_center}
+/// {@tool dartpad}
 /// Here is an example of a customized [SnackBar]. It utilizes
 /// [behavior], [shape], [padding], [width], and [duration] to customize the
 /// location, appearance, and the duration for which the [SnackBar] is visible.
@@ -421,7 +421,7 @@ class _SnackBarState extends State<SnackBar> {
     final ColorScheme colorScheme = theme.colorScheme;
     final SnackBarThemeData snackBarTheme = theme.snackBarTheme;
     final bool isThemeDark = theme.brightness == Brightness.dark;
-    final Color buttonColor = isThemeDark ? colorScheme.primaryVariant : colorScheme.secondary;
+    final Color buttonColor = isThemeDark ? colorScheme.primary : colorScheme.secondary;
 
     // SnackBar uses a theme that is the opposite brightness from
     // the surrounding theme.
@@ -433,8 +433,6 @@ class _SnackBarState extends State<SnackBar> {
       colorScheme: ColorScheme(
         primary: colorScheme.onPrimary,
         primaryVariant: colorScheme.onPrimary,
-        // For the button color, the spec says it should be primaryVariant, but for
-        // backward compatibility on light themes we are leaving it as secondary.
         secondary: buttonColor,
         secondaryVariant: colorScheme.onSecondary,
         surface: colorScheme.onSurface,
@@ -489,7 +487,6 @@ class _SnackBarState extends State<SnackBar> {
     Widget snackBar = Padding(
       padding: padding,
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           Expanded(
             child: Container(
@@ -528,7 +525,7 @@ class _SnackBarState extends State<SnackBar> {
     final Color backgroundColor = widget.backgroundColor ?? snackBarTheme.backgroundColor ?? inverseTheme.colorScheme.background;
     final ShapeBorder? shape = widget.shape
       ?? snackBarTheme.shape
-      ?? (isFloatingSnackBar ? RoundedRectangleBorder(borderRadius: BorderRadius.circular(4.0)) : null);
+      ?? (isFloatingSnackBar ? const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0))) : null);
 
     snackBar = Material(
       shape: shape,

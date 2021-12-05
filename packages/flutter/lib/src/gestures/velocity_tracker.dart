@@ -163,7 +163,7 @@ class VelocityTracker {
   final PointerDeviceKind kind;
 
   // Circular buffer; current sample at _index.
-  final List<_PointAtTime?> _samples = List<_PointAtTime?>.filled(_historySize, null, growable: false);
+  final List<_PointAtTime?> _samples = List<_PointAtTime?>.filled(_historySize, null);
   int _index = 0;
 
   /// Adds a position as the given time to the tracker.
@@ -292,7 +292,7 @@ class IOSScrollViewFlingVelocityTracker extends VelocityTracker {
   /// `VerticalDragGestureRecognizer.isFlingGesture`.
   static const int _sampleSize = 20;
 
-  final List<_PointAtTime?> _touchSamples = List<_PointAtTime?>.filled(_sampleSize, null, growable: false);
+  final List<_PointAtTime?> _touchSamples = List<_PointAtTime?>.filled(_sampleSize, null);
 
   @override
   void addPosition(Duration time, Offset position) {

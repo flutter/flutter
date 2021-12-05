@@ -202,6 +202,8 @@ void main() {
       '     _FocusMarker\n'
       '     Focus\n'
       '     Shortcuts\n'
+      '     _SharedAppModel\n'
+      '     SharedAppData\n'
       '     UnmanagedRestorationScope\n'
       '     RestorationScope\n'
       '     UnmanagedRestorationScope\n'

@@ -32,9 +32,9 @@ void main() {
   });
 
   test('BeveledRectangleBorder scale and lerp', () {
-    final BeveledRectangleBorder c10 = BeveledRectangleBorder(side: const BorderSide(width: 10.0), borderRadius: BorderRadius.circular(100.0));
-    final BeveledRectangleBorder c15 = BeveledRectangleBorder(side: const BorderSide(width: 15.0), borderRadius: BorderRadius.circular(150.0));
-    final BeveledRectangleBorder c20 = BeveledRectangleBorder(side: const BorderSide(width: 20.0), borderRadius: BorderRadius.circular(200.0));
+    const BeveledRectangleBorder c10 = BeveledRectangleBorder(side: BorderSide(width: 10.0), borderRadius: BorderRadius.all(Radius.circular(100.0)));
+    const BeveledRectangleBorder c15 = BeveledRectangleBorder(side: BorderSide(width: 15.0), borderRadius: BorderRadius.all(Radius.circular(150.0)));
+    const BeveledRectangleBorder c20 = BeveledRectangleBorder(side: BorderSide(width: 20.0), borderRadius: BorderRadius.all(Radius.circular(200.0)));
     expect(c10.dimensions, const EdgeInsets.all(10.0));
     expect(c10.scale(2.0), c20);
     expect(c20.scale(0.5), c10);

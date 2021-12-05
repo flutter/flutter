@@ -228,7 +228,7 @@ abstract class _ErrorDiagnostic extends DiagnosticsProperty<List<Object>> {
 
   @override
   String valueToString({ TextTreeConfiguration? parentConfiguration }) {
-    return value.join('');
+    return value.join();
   }
 }
 
@@ -867,7 +867,9 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
   /// The default behavior is to call [presentError].
   ///
   /// You can set this to your own function to override this default behavior.
-  /// For example, you could report all errors to your server.
+  /// For example, you could report all errors to your server. Consider calling
+  /// [presentError] from your custom error handler in order to see the logs in
+  /// the console as well.
   ///
   /// If the error handler throws an exception, it will not be caught by the
   /// Flutter framework.
@@ -877,6 +879,11 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
   ///
   /// Do not call [onError] directly, instead, call [reportError], which
   /// forwards to [onError] if it is not null.
+  ///
+  /// See also:
+  ///
+  ///  * <https://flutter.dev/docs/testing/errors>, more information about error
+  ///    handling in Flutter.
   static FlutterExceptionHandler? onError = presentError;
 
   /// Called by the Flutter framework before attempting to parse a [StackTrace].
@@ -962,7 +969,6 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
       if (isInDebugMode) {
         debugPrint(
           TextTreeRenderer(
-            wrapWidth: wrapWidth,
             wrapWidthProperties: wrapWidth,
             maxDescendentsTruncatableNode: 5,
           ).render(details.toDiagnosticsNode(style: DiagnosticsTreeStyle.error)).trimRight(),
@@ -1035,7 +1041,7 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
         index -= 1;
       }
     }
-    final List<String?> reasons = List<String?>.filled(parsedFrames.length, null, growable: false);
+    final List<String?> reasons = List<String?>.filled(parsedFrames.length, null);
     for (final StackFilter filter in _stackFilters) {
       filter.filter(parsedFrames, reasons);
     }

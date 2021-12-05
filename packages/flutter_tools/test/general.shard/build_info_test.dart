@@ -187,7 +187,7 @@ void main() {
     ]);
   });
 
-  testWithoutContext('encodeDartDefines encodes define values with base64 encoded compnents', () {
+  testWithoutContext('encodeDartDefines encodes define values with base64 encoded components', () {
     expect(encodeDartDefines(<String>['"hello"']), 'ImhlbGxvIg==');
     expect(encodeDartDefines(<String>['https://www.google.com']), 'aHR0cHM6Ly93d3cuZ29vZ2xlLmNvbQ==');
     expect(encodeDartDefines(<String>['2,3,4', '5']), 'MiwzLDQ=,NQ==');

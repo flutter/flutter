@@ -63,7 +63,7 @@ class BuildableWindowsApp extends WindowsApp {
     return globals.fs.path.join(
         getWindowsBuildDirectory(),
         'runner',
-        toTitleCase(getNameForBuildMode(buildMode)),
+        sentenceCase(getNameForBuildMode(buildMode)),
         '$binaryName.exe',
     );
   }

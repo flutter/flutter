@@ -84,7 +84,7 @@ import 'constants.dart';
 /// ```
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateless_widget_material}
+/// {@tool dartpad}
 /// This example shows how to listen to page updates in [TabBar] and [TabBarView]
 /// when using [DefaultTabController].
 ///

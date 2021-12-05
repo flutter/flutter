@@ -2,33 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Template: dev/snippets/config/templates/stateful_widget_material.tmpl
-//
-// Comment lines marked with "▼▼▼" and "▲▲▲" are used for authoring
-// of samples, and may be ignored if you are just exploring the sample.
-
 // Flutter code sample for CustomScrollView
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
-
-// By default, if items are inserted at the "top" of a scrolling container like
-// [ListView] or [CustomScrollView], the top item and all of the items below it
-// are scrolled downwards. In some applications, it's preferable to have the
-// top of the list just grow upwards, without changing the scroll position.
-// This example demonstrates how to do that with a [CustomScrollView] with
-// two [SliverList] children, and the [CustomScrollView.center] set to the key
-// of the bottom SliverList. The top one SliverList will grow upwards, and the
-// bottom SliverList will grow downwards.
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
 
 import 'package:flutter/material.dart';
 
 void main() => runApp(const MyApp());
 
-/// This is the main application widget.
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
@@ -43,7 +22,6 @@ class MyApp extends StatelessWidget {
   }
 }
 
-/// This is the stateful widget that the main application instantiates.
 class MyStatefulWidget extends StatefulWidget {
   const MyStatefulWidget({Key? key}) : super(key: key);
 
@@ -51,11 +29,7 @@ class MyStatefulWidget extends StatefulWidget {
   State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
 }
 
-/// This is the private State class that goes with MyStatefulWidget.
 class _MyStatefulWidgetState extends State<MyStatefulWidget> {
-//********************************************************************
-//* ▼▼▼▼▼▼▼▼ code ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
-
   List<int> top = <int>[];
   List<int> bottom = <int>[0];
 
@@ -109,8 +83,4 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
       ),
     );
   }
-
-//* ▲▲▲▲▲▲▲▲ code ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//********************************************************************
-
 }

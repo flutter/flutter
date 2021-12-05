@@ -227,7 +227,7 @@ class Dialog extends StatelessWidget {
 /// ```
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold_center}
+/// {@tool dartpad}
 /// This demo shows a [TextButton] which when pressed, calls [showDialog]. When called, this method
 /// displays a Material dialog above the current contents of the app and returns
 /// a [Future] that completes when the dialog is dismissed.
@@ -499,7 +499,9 @@ class AlertDialog extends StatelessWidget {
         child: DefaultTextStyle(
           style: titleTextStyle ?? dialogTheme.titleTextStyle ?? theme.textTheme.headline6!,
           child: Semantics(
-            namesRoute: label == null,
+            // For iOS platform, the focus always lands on the title.
+            // Set nameRoute to false to avoid title being announce twice.
+            namesRoute: label == null && theme.platform != TargetPlatform.iOS,
             container: true,
             child: title,
           ),
@@ -843,17 +845,15 @@ class SimpleDialog extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
 
     String? label = semanticLabel;
-    if (title == null) {
-      switch (theme.platform) {
-        case TargetPlatform.macOS:
-        case TargetPlatform.iOS:
-          break;
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-        case TargetPlatform.linux:
-        case TargetPlatform.windows:
-          label = semanticLabel ?? MaterialLocalizations.of(context).dialogLabel;
-      }
+    switch (theme.platform) {
+      case TargetPlatform.macOS:
+      case TargetPlatform.iOS:
+        break;
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        label ??= MaterialLocalizations.of(context).dialogLabel;
     }
 
     // The paddingScaleFactor is used to adjust the padding of Dialog
@@ -874,7 +874,9 @@ class SimpleDialog extends StatelessWidget {
         child: DefaultTextStyle(
           style: titleTextStyle ?? DialogTheme.of(context).titleTextStyle ?? theme.textTheme.headline6!,
           child: Semantics(
-            namesRoute: label == null,
+            // For iOS platform, the focus always lands on the title.
+            // Set nameRoute to false to avoid title being announce twice.
+            namesRoute: label == null && theme.platform != TargetPlatform.iOS,
             container: true,
             child: title,
           ),
@@ -993,7 +995,7 @@ Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> a
 ///
 /// For more information about state restoration, see [RestorationManager].
 ///
-/// {@tool sample --template=stateless_widget_restoration_material}
+/// {@tool sample}
 /// This sample demonstrates how to create a restorable Material dialog. This is
 /// accomplished by enabling state restoration by specifying
 /// [MaterialApp.restorationScopeId] and using [Navigator.restorablePush] to

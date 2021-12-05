@@ -69,8 +69,8 @@ void main() {
       final ValidationResult result = await validator.validate();
       expect(result.type, ValidationType.partial);
       expect(result.messages.last.type, ValidationMessageType.hint);
-      expect(result.messages.last.message, contains('Flutter recommends a minimum Xcode version of 12.0.2'));
-    }, skip: true); // [intended] Unskip and update when minimum and required check versions diverge.
+      expect(result.messages.last.message, contains('Flutter recommends a minimum Xcode version of 13.0.0'));
+    });
 
     testWithoutContext('Emits partial status when Xcode EULA not signed', () async {
       final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[

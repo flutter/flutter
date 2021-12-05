@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.10)
 project(runner LANGUAGES CXX)
 
-set(BINARY_NAME "dartpad_curve2_d_0")
-set(APPLICATION_ID "dev.flutter.dartpad_curve2_d_0")
+set(BINARY_NAME "flutter_api_samples")
+set(APPLICATION_ID "dev.flutter.flutter_api_samples")
 
 cmake_policy(SET CMP0063 NEW)
 

@@ -196,7 +196,7 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 /// callback. This callback is applied to the text field's current value when
 /// the user finishes editing.
 ///
-/// {@tool dartpad --template=stateful_widget_material}
+/// {@tool dartpad}
 /// This sample shows how to get a value from a TextField via the [onSubmitted]
 /// callback.
 ///
@@ -345,7 +345,8 @@ class TextField extends StatefulWidget {
     this.buildCounter,
     this.scrollController,
     this.scrollPhysics,
-    this.autofillHints,
+    this.autofillHints = const <String>[],
+    this.clipBehavior = Clip.hardEdge,
     this.restorationId,
     this.enableIMEPersonalizedLearning = true,
   }) : assert(textAlign != null),
@@ -387,6 +388,7 @@ class TextField extends StatefulWidget {
          !identical(keyboardType, TextInputType.text),
          'Use keyboardType TextInputType.multiline when using TextInputAction.newline on a multiline TextField.',
        ),
+       assert(clipBehavior != null),
        assert(enableIMEPersonalizedLearning != null),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
        toolbarOptions = toolbarOptions ?? (obscureText ?
@@ -761,6 +763,11 @@ class TextField extends StatefulWidget {
   /// {@macro flutter.services.AutofillConfiguration.autofillHints}
   final Iterable<String>? autofillHints;
 
+  /// {@macro flutter.material.Material.clipBehavior}
+  ///
+  /// Defaults to [Clip.hardEdge].
+  final Clip clipBehavior;
+
   /// {@template flutter.material.textfield.restorationId}
   /// Restoration ID to save and restore the state of the text field.
   ///
@@ -823,11 +830,12 @@ class TextField extends StatefulWidget {
     properties.add(DiagnosticsProperty<TextSelectionControls>('selectionControls', selectionControls, defaultValue: null));
     properties.add(DiagnosticsProperty<ScrollController>('scrollController', scrollController, defaultValue: null));
     properties.add(DiagnosticsProperty<ScrollPhysics>('scrollPhysics', scrollPhysics, defaultValue: null));
+    properties.add(DiagnosticsProperty<Clip>('clipBehavior', clipBehavior, defaultValue: Clip.hardEdge));
     properties.add(DiagnosticsProperty<bool>('enableIMEPersonalizedLearning', enableIMEPersonalizedLearning, defaultValue: true));
   }
 }
 
-class _TextFieldState extends State<TextField> with RestorationMixin implements TextSelectionGestureDetectorBuilderDelegate {
+class _TextFieldState extends State<TextField> with RestorationMixin implements TextSelectionGestureDetectorBuilderDelegate, AutofillClient {
   RestorableTextEditingController? _controller;
   TextEditingController get _effectiveController => widget.controller ?? _controller!.value;
 
@@ -1094,6 +1102,29 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     }
   }
 
+  // AutofillClient implementation start.
+  @override
+  String get autofillId => _editableText!.autofillId;
+
+  @override
+  void autofill(TextEditingValue newEditingValue) => _editableText!.autofill(newEditingValue);
+
+  @override
+  TextInputConfiguration get textInputConfiguration {
+    final List<String>? autofillHints = widget.autofillHints?.toList(growable: false);
+    final AutofillConfiguration autofillConfiguration = autofillHints != null
+      ? AutofillConfiguration(
+          uniqueIdentifier: autofillId,
+          autofillHints: autofillHints,
+          currentEditingValue: _effectiveController.value,
+          hintText: (widget.decoration ?? const InputDecoration()).hintText,
+        )
+      : AutofillConfiguration.disabled;
+
+    return _editableText!.textInputConfiguration.copyWith(autofillConfiguration: autofillConfiguration);
+  }
+  // AutofillClient implementation end.
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
@@ -1240,8 +1271,9 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
           dragStartBehavior: widget.dragStartBehavior,
           scrollController: widget.scrollController,
           scrollPhysics: widget.scrollPhysics,
-          autofillHints: widget.autofillHints,
+          autofillClient: this,
           autocorrectionTextRectColor: autocorrectionTextRectColor,
+          clipBehavior: widget.clipBehavior,
           restorationId: 'editable',
           enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
         ),

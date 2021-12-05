@@ -93,7 +93,7 @@ void main() {
     addTearDown(() => dispatchRemoveDevice());
 
     expect(events, _equalToEventsOnCriticalFields(<BaseEventMatcher>[
-      EventMatcher<PointerEnterEvent>(const PointerEnterEvent(position: Offset.zero)),
+      EventMatcher<PointerEnterEvent>(const PointerEnterEvent()),
     ]));
     expect(listenerLogs, <bool>[true]);
     events.clear();
@@ -145,7 +145,7 @@ void main() {
       _pointerData(PointerChange.hover, const Offset(0.0, 1.0)),
     ]));
     expect(events, _equalToEventsOnCriticalFields(<BaseEventMatcher>[
-      EventMatcher<PointerEnterEvent>(const PointerEnterEvent(position: Offset.zero)),
+      EventMatcher<PointerEnterEvent>(const PointerEnterEvent()),
       EventMatcher<PointerHoverEvent>(const PointerHoverEvent(position: Offset(0.0, 1.0))),
     ]));
     expect(_mouseTracker.mouseIsConnected, isTrue);

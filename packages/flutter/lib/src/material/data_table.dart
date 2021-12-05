@@ -94,6 +94,7 @@ class DataRow {
     this.key,
     this.selected = false,
     this.onSelectChanged,
+    this.onLongPress,
     this.color,
     required this.cells,
   }) : assert(cells != null);
@@ -106,6 +107,7 @@ class DataRow {
     int? index,
     this.selected = false,
     this.onSelectChanged,
+    this.onLongPress,
     this.color,
     required this.cells,
   }) : assert(cells != null),
@@ -137,6 +139,14 @@ class DataRow {
   /// that callback behavior overrides the gesture behavior of the row for
   /// that particular cell.
   final ValueChanged<bool?>? onSelectChanged;
+
+  /// Called if the row is long-pressed.
+  ///
+  /// If a [DataCell] in the row has its [DataCell.onTap], [DataCell.onDoubleTap],
+  /// [DataCell.onLongPress], [DataCell.onTapCancel] or [DataCell.onTapDown] callback defined,
+  /// that callback behavior overrides the gesture behavior of the row for
+  /// that particular cell.
+  final GestureLongPressCallback? onLongPress;
 
   /// Whether the row is selected.
   ///
@@ -304,7 +314,7 @@ class DataCell {
 /// [PaginatedDataTable] which automatically splits the data into
 /// multiple pages.
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold}
+/// {@tool dartpad}
 /// This sample shows how to display a [DataTable] with three columns: name, age, and
 /// role. The columns are defined by three [DataColumn] objects. The table
 /// contains three rows of data for three example users, the data for which
@@ -316,7 +326,7 @@ class DataCell {
 /// {@end-tool}
 ///
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold}
+/// {@tool dartpad}
 /// This sample shows how to display a [DataTable] with alternate colors per
 /// row, and a custom color for when the row is selected.
 ///
@@ -381,6 +391,7 @@ class DataTable extends StatelessWidget {
     this.dividerThickness,
     required this.rows,
     this.checkboxHorizontalMargin,
+    this.border,
   }) : assert(columns != null),
        assert(columns.isNotEmpty),
        assert(sortColumnIndex == null || (sortColumnIndex >= 0 && sortColumnIndex < columns.length)),
@@ -605,6 +616,9 @@ class DataTable extends StatelessWidget {
   /// and the content in the first data column. This value defaults to 24.0.
   final double? checkboxHorizontalMargin;
 
+  /// The style to use when painting the boundary and interior divisions of the table.
+  final TableBorder? border;
+
   // Set by the constructor to the index of the only Column that is
   // non-numeric, if there is exactly one, otherwise null.
   final int? _onlyTextColumn;
@@ -786,6 +800,7 @@ class DataTable extends StatelessWidget {
     required GestureTapDownCallback? onTapDown,
     required GestureTapCancelCallback? onTapCancel,
     required MaterialStateProperty<Color?>? overlayColor,
+    required GestureLongPressCallback? onRowLongPress,
   }) {
     final ThemeData themeData = Theme.of(context);
     if (showEditIcon) {
@@ -828,9 +843,10 @@ class DataTable extends StatelessWidget {
         overlayColor: overlayColor,
         child: label,
       );
-    } else if (onSelectChanged != null) {
+    } else if (onSelectChanged != null || onRowLongPress != null) {
       label = TableRowInkWell(
         onTap: onSelectChanged,
+        onLongPress: onRowLongPress,
         overlayColor: overlayColor,
         child: label,
       );
@@ -996,6 +1012,7 @@ class DataTable extends StatelessWidget {
           onTapDown: cell.onTapDown,
           onSelectChanged: row.onSelectChanged == null ? null : () => row.onSelectChanged?.call(!row.selected),
           overlayColor: row.color ?? effectiveDataRowColor,
+          onRowLongPress: row.onLongPress,
         );
         rowIndex += 1;
       }
@@ -1009,6 +1026,7 @@ class DataTable extends StatelessWidget {
         child: Table(
           columnWidths: tableColumns.asMap(),
           children: tableRows,
+          border: border,
         ),
       ),
     );
@@ -1198,8 +1216,8 @@ class _SortArrowState extends State<_SortArrow> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return Opacity(
-      opacity: _opacityAnimation.value,
+    return FadeTransition(
+      opacity: _opacityAnimation,
       child: Transform(
         transform: Matrix4.rotationZ(_orientationOffset + _orientationAnimation.value)
                              ..setTranslationRaw(0.0, _arrowIconBaselineOffset, 0.0),

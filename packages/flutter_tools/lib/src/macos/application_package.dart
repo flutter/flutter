@@ -154,7 +154,7 @@ class BuildableMacOSApp extends MacOSApp {
         getMacOSBuildDirectory(),
         'Build',
         'Products',
-        toTitleCase(getNameForBuildMode(buildMode)),
+        sentenceCase(getNameForBuildMode(buildMode)),
         appBundleNameFile.readAsStringSync().trim());
   }
 

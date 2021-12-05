@@ -2,25 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Template: dev/snippets/config/templates/freeform.tmpl
-//
-// Comment lines marked with "▼▼▼" and "▲▲▲" are used for authoring
-// of samples, and may be ignored if you are just exploring the sample.
-
 // Flutter code sample for Flow
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
-
-// This example uses the [Flow] widget to create a menu that opens and closes
-// as it is interacted with, shown above. The color of the button in the menu
-// changes to indicate which one has been selected.
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
-
-//*************************************************************************
-//* ▼▼▼▼▼▼▼▼ code-main ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
 import 'package:flutter/material.dart';
 
@@ -138,6 +120,3 @@ class FlowMenuDelegate extends FlowDelegate {
     }
   }
 }
-
-//* ▲▲▲▲▲▲▲▲ code-main ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//*************************************************************************

@@ -26,7 +26,7 @@ void main() {
   setUp(() {
     fileSystem = MemoryFileSystem.test();
     logger = BufferLogger.test();
-    platform = FakePlatform(operatingSystem: 'linux');
+    platform = FakePlatform();
   });
 
   setUpAll(() {
@@ -102,6 +102,9 @@ void main() {
   });
 }
 
+// Unfortunately Device, despite not being immutable, has an `operator ==`.
+// Until we fix that, we have to also ignore related lints here.
+// ignore: avoid_implementing_value_types
 class ScreenshotDevice extends Fake implements Device {
   @override
   Future<void> takeScreenshot(File outputFile) async {}
@@ -119,5 +122,6 @@ class FakePub extends Fake implements Pub {
     String flutterRootOverride,
     bool checkUpToDate = false,
     bool shouldSkipThirdPartyGenerator = true,
+    bool printProgress = true,
   }) async { }
 }
