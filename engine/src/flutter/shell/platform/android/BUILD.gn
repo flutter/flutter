@@ -535,16 +535,6 @@ zip_bundle("flutter_jar_zip") {
   ]
 
   deps = [ ":android_jar" ]
-
-  if (current_cpu == "x86" || current_cpu == "x64") {
-    files += [
-      {
-        source = "$root_build_dir/lib.stripped/libflutter.so"
-        destination = "libflutter.so"
-      },
-    ]
-    deps += [ ":flutter_shell_native" ]
-  }
 }
 
 action("gen_android_javadoc") {
