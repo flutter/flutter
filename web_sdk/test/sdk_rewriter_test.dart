@@ -7,43 +7,40 @@ import 'package:test/test.dart';
 import '../sdk_rewriter.dart';
 
 void main() {
-  test('handles exports correctly in the engine library file', () {
+  test('handles imports/exports correctly in the engine library file', () {
     const String source = '''
-// Comment 1
-
 library engine;
 
-// Comment 2
+import '../ui.dart' as ui;
+import 'package:ui/ui.dart' as ui;
 
+import 'package:some_package/some_package.dart';
+
+import 'engine/file1.dart';
 export 'engine/file1.dart';
+
+import'engine/file2.dart';
 export'engine/file2.dart';
+
+import      'engine/file3.dart';
 export      'engine/file3.dart';
 ''';
 
     const String expected = '''
-// Comment 1
-
-@JS()
 library dart._engine;
 
-import 'dart:async';
-import 'dart:collection';
-import 'dart:convert' hide Codec;
-import 'dart:developer' as developer;
-import 'dart:html' as html;
-import 'dart:js' as js;
-import 'dart:js_util' as js_util;
-import 'dart:_js_annotations';
-import 'dart:math' as math;
-import 'dart:svg' as svg;
-import 'dart:typed_data';
+import 'dart:ui' as ui;
 import 'dart:ui' as ui;
 
+import 'package:some_package/some_package.dart';
 
-// Comment 2
 
 part 'engine/file1.dart';
+
+
 part 'engine/file2.dart';
+
+
 part 'engine/file3.dart';
 ''';
 
@@ -55,36 +52,6 @@ part 'engine/file3.dart';
     );
     expect(result, expected);
   });
-
-  test('complains about non-compliant engine.dart file', () {
-    const String source = '''
-library engine;
-
-import 'dart:something';
-export 'engine/file1.dart';
-export 'engine/file3.dart';
-''';
-
-    Object? caught;
-    try {
-      rewriteFile(
-        source,
-        filePath: '/path/to/lib/web_ui/lib/src/engine.dart',
-        isUi: false,
-        isEngine: true,
-      );
-    } catch(error) {
-      caught = error;
-    }
-    expect(caught, isA<Exception>());
-    expect(
-      '$caught',
-      'Exception: on line 3: unexpected code in /path/to/lib/web_ui/lib/src/engine.dart. '
-      'This file may only contain comments and exports. Found:\n'
-      'import \'dart:something\';',
-    );
-  });
-
 
   test('removes imports/exports from engine files', () {
     const String source = '''

@@ -34,29 +34,29 @@ export 'dart:_engine'
 ];
 
 final List<Replacer> engineLibraryPatterns = <Replacer>[
-  AllReplacer(RegExp(r'library\s+engine;'), '''
-@JS()
-library dart._engine;
-
-import 'dart:async';
-import 'dart:collection';
-import 'dart:convert' hide Codec;
-import 'dart:developer' as developer;
-import 'dart:html' as html;
-import 'dart:js' as js;
-import 'dart:js_util' as js_util;
-import 'dart:_js_annotations';
-import 'dart:math' as math;
-import 'dart:svg' as svg;
-import 'dart:typed_data';
+  AllReplacer(RegExp(r'library\s+engine;'), 'library dart._engine;'),
+  AllReplacer(RegExp(r'''
+import\s*'../ui.dart' as ui;
+'''), r'''
 import 'dart:ui' as ui;
 '''),
+  AllReplacer(RegExp(r'''
+import\s*'package:ui/ui.dart' as ui;
+'''), r'''
+import 'dart:ui' as ui;
+'''),
+  // Remove imports of engine part files.
+  AllReplacer(RegExp(r"import\s*'engine/.*';"), ''),
   // Replace exports of engine files with "part" directives.
   MappedReplacer(RegExp(r'''
 export\s*'engine/(.*)';
 '''), (Match match) => '''
 part 'engine/${match.group(1)}';
 '''),
+  AllReplacer(
+    RegExp(r"import\s*'package:js/js.dart'"),
+    r"import 'dart:_js_annotations'",
+  ),
 ];
 
 final List<Replacer> enginePartsPatterns = <Replacer>[
@@ -111,7 +111,6 @@ String rewriteFile(String source, {required String filePath, required bool isUi,
     replacementPatterns.addAll(uiPatterns);
   } else if (isEngine) {
     if (filePath.endsWith('lib/src/engine.dart')) {
-      _validateEngineSource(filePath, source);
       replacementPatterns.addAll(engineLibraryPatterns);
     } else {
       source = _preprocessEnginePartFile(source);
@@ -122,49 +121,6 @@ String rewriteFile(String source, {required String filePath, required bool isUi,
     source = replacer.perform(source);
   }
   return source;
-}
-
-// Enforces a particular structure in engine.dart source code.
-//
-// Code in `engine.dart` must only be made of the library directive, exports,
-// and code comments. Imports are disallowed. Instead, the required imports are
-// added by this script during the rewrite.
-void _validateEngineSource(String engineDartPath, String engineDartCode) {
-  const List<String> expectedLines = <String>[
-    'library engine;',
-  ];
-
-  final List<String> lines = engineDartCode.split('\n');
-  for (int i = 0; i < lines.length; i += 1) {
-    final int lineNumber = i + 1;
-    final String line = lines[i].trim();
-
-    if (line.isEmpty) {
-      // Emply lines are OK
-      continue;
-    }
-
-    if (expectedLines.contains(line)) {
-      // Expected; let it pass.
-      continue;
-    }
-
-    if (line.startsWith('//')) {
-      // Comments are OK
-      continue;
-    }
-
-    if (line.startsWith('export')) {
-      // Exports are OK
-      continue;
-    }
-
-    throw Exception(
-      'on line $lineNumber: unexpected code in $engineDartPath. This file '
-      'may only contain comments and exports. Found:\n'
-      '$line'
-    );
-  }
 }
 
 String _preprocessEnginePartFile(String source) {

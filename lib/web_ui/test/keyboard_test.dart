@@ -658,7 +658,8 @@ html.KeyboardEvent dispatchKeyboardEvent(
   target ??= html.window;
 
   final Function jsKeyboardEvent =
-      js_util.getProperty<Function>(html.window, 'KeyboardEvent');
+      // ignore: implicit_dynamic_function
+      js_util.getProperty(html.window, 'KeyboardEvent') as Function;
   final List<dynamic> eventArgs = <dynamic>[
     type,
     <String, dynamic>{
@@ -674,10 +675,11 @@ html.KeyboardEvent dispatchKeyboardEvent(
       'cancelable': true,
     }
   ];
-  final html.KeyboardEvent event = js_util.callConstructor<html.KeyboardEvent>(
+  // ignore: implicit_dynamic_function
+  final html.KeyboardEvent event = js_util.callConstructor(
     jsKeyboardEvent,
     js_util.jsify(eventArgs) as List<Object?>,
-  );
+  ) as html.KeyboardEvent;
   target.dispatchEvent(event);
 
   return event;

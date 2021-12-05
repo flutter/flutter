@@ -60,8 +60,9 @@ void testMain() {
     test('responds correctly to flutter/platform Clipboard.getData failure',
         () async {
       // Patch browser so that clipboard api is not available.
-      final Object? originalClipboard =
-          js_util.getProperty<Object?>(html.window.navigator, 'clipboard');
+      final dynamic originalClipboard =
+          // ignore: implicit_dynamic_function
+          js_util.getProperty(html.window.navigator, 'clipboard');
       js_util.setProperty(html.window.navigator, 'clipboard', null);
       const MethodCodec codec = JSONMethodCodec();
       final Completer<ByteData?> completer = Completer<ByteData?>();
