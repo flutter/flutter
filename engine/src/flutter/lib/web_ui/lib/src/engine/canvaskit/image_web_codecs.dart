@@ -7,18 +7,35 @@
 /// See also:
 ///
 ///  * `image_wasm_codecs.dart`, which uses codecs supplied by the CanvasKit WASM bundle.
+@JS()
+library image_web_codecs;
 
 import 'dart:async';
 import 'dart:html' as html;
+import 'dart:js_util' as js_util;
 import 'dart:math' as math;
 import 'dart:typed_data';
 
+import 'package:js/js.dart';
 import 'package:ui/ui.dart' as ui;
 
-import '../safe_browser_api.dart';
+import '../browser_detection.dart';
 import '../util.dart';
 import 'canvaskit_api.dart';
 import 'image.dart';
+
+@JS('window.ImageDecoder')
+external Object? get _imageDecoderConstructor;
+
+/// Whether the current browser supports `ImageDecoder`.
+bool browserSupportsImageDecoder =
+    _imageDecoderConstructor != null && browserEngine == BrowserEngine.blink;
+
+/// Sets the value of [browserSupportsImageDecoder] to its default value.
+void debugResetBrowserSupportsImageDecoder() {
+  browserSupportsImageDecoder =
+      _imageDecoderConstructor != null;
+}
 
 /// Image decoder backed by the browser's `ImageDecoder`.
 class CkBrowserImageDecoder implements ui.Codec {
@@ -47,7 +64,7 @@ class CkBrowserImageDecoder implements ui.Codec {
     }
 
     try {
-      final ImageDecoder webDecoder = ImageDecoder(ImageDecoderOptions(
+      final _ImageDecoder webDecoder = _ImageDecoder(_ImageDecoderOptions(
         type: contentType,
         data: data,
 
@@ -65,13 +82,13 @@ class CkBrowserImageDecoder implements ui.Codec {
         preferAnimation: true,
       ));
 
-      await promiseToFuture<void>(webDecoder.tracks.ready);
+      await js_util.promiseToFuture<void>(webDecoder.tracks.ready);
 
       // Flutter doesn't have an API for progressive loading of images, so we
       // wait until the image is fully decoded.
       // package:js bindings don't work with getters that return a Promise, which
       // is why js_util is used instead.
-      await promiseToFuture<void>(getJsProperty(webDecoder, 'completed'));
+      await js_util.promiseToFuture<void>(js_util.getProperty(webDecoder, 'completed'));
       return CkBrowserImageDecoder._(webDecoder, debugSource);
     } catch (error) {
       if (error is html.DomException) {
@@ -92,7 +109,7 @@ class CkBrowserImageDecoder implements ui.Codec {
 
   CkBrowserImageDecoder._(this.webDecoder, this.debugSource);
 
-  final ImageDecoder webDecoder;
+  final _ImageDecoder webDecoder;
   final String debugSource;
 
   /// Whether this decoded has been disposed of.
@@ -128,10 +145,10 @@ class CkBrowserImageDecoder implements ui.Codec {
   @override
   Future<ui.FrameInfo> getNextFrame() async {
     _debugCheckNotDisposed();
-    final DecodeResult result = await promiseToFuture<DecodeResult>(
-      webDecoder.decode(DecodeOptions(frameIndex: _nextFrameIndex)),
+    final _DecodeResult result = await js_util.promiseToFuture<_DecodeResult>(
+      webDecoder.decode(_DecodeOptions(frameIndex: _nextFrameIndex)),
     );
-    final VideoFrame frame = result.image;
+    final _VideoFrame frame = result.image;
     _nextFrameIndex = (_nextFrameIndex + 1) % frameCount;
 
     final SkImage? skImage = canvasKit.MakeLazyImageFromTextureSource(
@@ -165,6 +182,99 @@ class CkBrowserImageDecoder implements ui.Codec {
     _debugCheckNotDisposed();
     return webDecoder.tracks.selectedTrack!.repetitionCount;
   }
+}
+
+/// Corresponds to JavaScript's `Promise`.
+///
+/// This type doesn't need any members. Instead, it should be first converted
+/// to Dart's [Future] using [promiseToFuture] then interacted with through the
+/// [Future] API.
+@JS()
+@anonymous
+class JsPromise {}
+
+/// Corresponds to the browser's `ImageDecoder` type.
+///
+/// See also:
+///
+///  * https://www.w3.org/TR/webcodecs/#imagedecoder-interface
+@JS('window.ImageDecoder')
+class _ImageDecoder {
+  external _ImageDecoder(_ImageDecoderOptions options);
+  external _ImageTrackList get tracks;
+  external bool get complete;
+  external JsPromise decode(_DecodeOptions options);
+  external void close();
+}
+
+/// The result of [_ImageDecoder.decode].
+///
+/// See also:
+///
+///  * https://www.w3.org/TR/webcodecs/#imagedecoderesult-interface
+@JS()
+@anonymous
+class _DecodeResult {
+  external _VideoFrame get image;
+  external bool get complete;
+}
+
+/// Options passed to [_ImageDecoder.decode].
+///
+/// See also:
+///
+///  * https://www.w3.org/TR/webcodecs/#dictdef-imagedecodeoptions
+@JS()
+@anonymous
+class _DecodeOptions {
+  external factory _DecodeOptions({
+    required int frameIndex,
+  });
+}
+
+/// The only frame in a static image, or one of the frames in an animated one.
+///
+/// This class maps to the `VideoFrame` type provided by the browser.
+///
+/// See also:
+///
+///  * https://www.w3.org/TR/webcodecs/#videoframe-interface
+@JS()
+@anonymous
+class _VideoFrame {
+  external int allocationSize();
+  external JsPromise copyTo(Uint8List destination);
+  external String? get format;
+  external int get codedWidth;
+  external int get codedHeight;
+  external int get displayWidth;
+  external int get displayHeight;
+  external int? get duration;
+  external void close();
+}
+
+/// Corresponds to the browser's `ImageTrackList` type.
+///
+/// See also:
+///
+///  * https://www.w3.org/TR/webcodecs/#imagetracklist-interface
+@JS()
+@anonymous
+class _ImageTrackList {
+  external JsPromise get ready;
+  external _ImageTrack? get selectedTrack;
+}
+
+/// Corresponds to the browser's `ImageTrack` type.
+///
+/// See also:
+///
+///  * https://www.w3.org/TR/webcodecs/#imagetrack
+@JS()
+@anonymous
+class _ImageTrack {
+  external int get repetitionCount;
+  external int get frameCount;
 }
 
 /// Represents an image file format, such as PNG or JPEG.
@@ -301,4 +411,23 @@ bool isAvif(Uint8List data) {
     return true;
   }
   return false;
+}
+
+/// Options passed to the `ImageDecoder` constructor.
+///
+/// See also:
+///
+///  * https://www.w3.org/TR/webcodecs/#imagedecoderinit-interface
+@JS()
+@anonymous
+class _ImageDecoderOptions {
+  external factory _ImageDecoderOptions({
+    required String type,
+    required Uint8List data,
+    required String premultiplyAlpha,
+    required int? desiredWidth,
+    required int? desiredHeight,
+    required String colorSpaceConversion,
+    required bool preferAnimation,
+  });
 }

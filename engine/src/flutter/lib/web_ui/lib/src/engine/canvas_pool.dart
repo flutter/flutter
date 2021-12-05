@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:html' as html;
+import 'dart:js_util' as js_util;
 import 'dart:math' as math;
 import 'dart:typed_data';
 
@@ -22,7 +23,6 @@ import 'html/shaders/image_shader.dart';
 import 'html/shaders/shader.dart';
 import 'platform_dispatcher.dart';
 import 'rrect_renderer.dart';
-import 'safe_browser_api.dart';
 import 'shadow.dart';
 import 'util.dart';
 import 'vector_math.dart';
@@ -205,12 +205,25 @@ class CanvasPool extends _SaveStackTracking {
   }
 
   html.CanvasElement? _allocCanvas(int width, int height) {
-    // The dartdocs for `tryCreateCanvasElement` on why we don't use the
-    // `html.CanvasElement` constructor.
-    return tryCreateCanvasElement(
-      (width * _density).ceil(),
-      (height * _density).ceil(),
-    );
+    final dynamic canvas =
+      // ignore: implicit_dynamic_function
+      js_util.callMethod(html.document, 'createElement', <dynamic>['CANVAS']);
+    if (canvas != null) {
+      try {
+        canvas.width = (width * _density).ceil();
+        canvas.height = (height * _density).ceil();
+      } catch (e) {
+        return null;
+      }
+      return canvas as html.CanvasElement;
+    }
+    return null;
+    // !!! We don't use the code below since NNBD assumes it can never return
+    // null and optimizes out code.
+    // return canvas = html.CanvasElement(
+    //   width: _widthInBitmapPixels,
+    //   height: _heightInBitmapPixels,
+    // );
   }
 
   @override

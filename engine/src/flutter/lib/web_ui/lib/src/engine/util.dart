@@ -2,17 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+@JS()
 library util;
 
 import 'dart:async';
 import 'dart:html' as html;
+import 'dart:js_util' as js_util;
 import 'dart:math' as math;
 import 'dart:typed_data';
 
+import 'package:js/js.dart';
 import 'package:ui/ui.dart' as ui;
 
 import 'browser_detection.dart';
-import 'safe_browser_api.dart';
 import 'vector_math.dart';
 
 /// Generic callback signature, used by [_futurize].
@@ -393,7 +395,8 @@ String colorComponentsToCssString(int r, int g, int b, int a) {
 /// Firefox exception without interfering with others (potentially useful
 /// for the programmer).
 bool isNsErrorFailureException(Object e) {
-  return getJsProperty<dynamic>(e, 'name') == 'NS_ERROR_FAILURE';
+  // ignore: implicit_dynamic_function
+  return js_util.getProperty(e, 'name') == 'NS_ERROR_FAILURE';
 }
 
 /// From: https://developer.mozilla.org/en-US/docs/Web/CSS/font-family#Syntax
@@ -645,6 +648,28 @@ extension JsonExtensions on Map<dynamic, dynamic> {
   }
 }
 
+typedef JsParseFloat = num? Function(String source);
+
+@JS('parseFloat')
+external JsParseFloat get _jsParseFloat;
+
+/// Parses a string [source] into a double.
+///
+/// Uses the JavaScript `parseFloat` function instead of Dart's [double.parse]
+/// because the latter can't parse strings like "20px".
+///
+/// Returns null if it fails to parse.
+num? parseFloat(String source) {
+  // Using JavaScript's `parseFloat` here because it can parse values
+  // like "20px", while Dart's `double.tryParse` fails.
+  final num? result = _jsParseFloat(source);
+
+  if (result == null || result.isNaN) {
+    return null;
+  }
+  return result;
+}
+
 /// Prints a list of bytes in hex format.
 ///
 /// Bytes are separated by one space and are padded on the left to always show
@@ -711,7 +736,8 @@ void drawEllipse(
     double startAngle,
     double endAngle,
     bool antiClockwise) {
-  _ellipseFeatureDetected ??= getJsProperty<Object?>(context, 'ellipse') != null;
+  // ignore: implicit_dynamic_function
+  _ellipseFeatureDetected ??= js_util.getProperty(context, 'ellipse') != null;
   if (_ellipseFeatureDetected!) {
     context.ellipse(centerX, centerY, radiusX, radiusY, rotation, startAngle,
         endAngle, antiClockwise);

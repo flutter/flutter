@@ -3,13 +3,13 @@
 // found in the LICENSE file.
 
 import 'dart:html' as html;
+import 'dart:js_util' as js_util;
 import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:ui/ui.dart' as ui;
 
 import '../browser_detection.dart';
-import '../safe_browser_api.dart';
 import '../util.dart';
 import '../vector_math.dart';
 import 'painting.dart';
@@ -17,6 +17,7 @@ import 'shaders/image_shader.dart';
 import 'shaders/normalized_gradient.dart';
 import 'shaders/shader_builder.dart';
 import 'shaders/vertex_shaders.dart';
+import 'shaders/webgl_context.dart';
 
 GlRenderer? glRenderer;
 
@@ -203,15 +204,15 @@ class _WebGlRenderer implements GlRenderer {
     bufferVertexData(gl, positions, 1.0);
 
     // Setup data format for attribute.
-    vertexAttribPointerGlContext(
-      gl.glContext,
+    // ignore: implicit_dynamic_function
+    js_util.callMethod(gl.glContext, 'vertexAttribPointer', <dynamic>[
       positionAttributeLocation,
       2,
       gl.kFloat,
       false,
       0,
       0,
-    );
+    ]);
 
     final int vertexCount = positions.length ~/ 2;
     Object? texture;
@@ -233,15 +234,9 @@ class _WebGlRenderer implements GlRenderer {
         gl.bufferData(vertices.colors, gl.kStaticDraw);
       }
       final Object colorLoc = gl.getAttributeLocation(glProgram.program, 'color');
-      vertexAttribPointerGlContext(
-        gl.glContext,
-        colorLoc,
-        4,
-        gl.kUnsignedByte,
-        true,
-        0,
-        0,
-      );
+      // ignore: implicit_dynamic_function
+      js_util.callMethod(gl.glContext, 'vertexAttribPointer',
+          <dynamic>[colorLoc, 4, gl.kUnsignedByte, true, 0, 0]);
       gl.enableVertexAttribArray(colorLoc);
     } else {
       // Copy image it to the texture.
@@ -381,15 +376,9 @@ class _WebGlRenderer implements GlRenderer {
     gl.bindArrayBuffer(positionsBuffer);
     gl.bufferData(vertices, gl.kStaticDraw);
     // Point an attribute to the currently bound vertex buffer object.
-    vertexAttribPointerGlContext(
-      gl.glContext,
-      0,
-      2,
-      gl.kFloat,
-      false,
-      0,
-      0,
-    );
+    // ignore: implicit_dynamic_function
+    js_util.callMethod(gl.glContext, 'vertexAttribPointer',
+        <dynamic>[0, 2, gl.kFloat, false, 0, 0]);
     gl.enableVertexAttribArray(0);
 
     // Setup color buffer.
@@ -403,15 +392,9 @@ class _WebGlRenderer implements GlRenderer {
       0xFF00FFFF,
     ]);
     gl.bufferData(colors, gl.kStaticDraw);
-    vertexAttribPointerGlContext(
-      gl.glContext,
-      1,
-      4,
-      gl.kUnsignedByte,
-      true,
-      0,
-      0,
-    );
+    // ignore: implicit_dynamic_function
+    js_util.callMethod(gl.glContext, 'vertexAttribPointer',
+        <dynamic>[1, 4, gl.kUnsignedByte, true, 0, 0]);
     gl.enableVertexAttribArray(1);
 
     final Object? indexBuffer = gl.createBuffer();

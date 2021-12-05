@@ -77,11 +77,6 @@ echo ""
 echo ""
 
 # Check that dart libraries conform.
-echo "Checking the integrity of the Web SDK"
+echo "Checking web_ui api conformance..."
 (cd "$FLUTTER_DIR/web_sdk"; "$DART" pub get)
-WEB_SDK_TEST_FILES="$FLUTTER_DIR/web_sdk/test/*"
-for testFile in $WEB_SDK_TEST_FILES
-do
-  echo "Running $testFile"
-  (cd "$FLUTTER_DIR"; FLUTTER_DIR="$FLUTTER_DIR" "$DART" --enable-asserts $testFile)
-done
+(cd "$FLUTTER_DIR"; "$DART" "web_sdk/test/api_conform_test.dart")

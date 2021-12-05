@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:js_util' as js_util;
 import 'dart:math' as math;
 import 'dart:typed_data';
 
@@ -428,8 +429,10 @@ class PathRef {
     resetToSize(verbCount, pointCount, weightCount, additionalReserveVerbs,
         additionalReservePoints);
 
-    _fVerbs.setAll(0, ref._fVerbs);
-    fPoints.setAll(0, ref.fPoints);
+    // ignore: implicit_dynamic_function
+    js_util.callMethod(_fVerbs, 'set', <dynamic>[ref._fVerbs]);
+    // ignore: implicit_dynamic_function
+    js_util.callMethod(fPoints, 'set', <dynamic>[ref.fPoints]);
     if (ref._conicWeights == null) {
       _conicWeights = null;
     } else {
@@ -455,7 +458,8 @@ class PathRef {
     if (newLength > _fPointsCapacity) {
       _fPointsCapacity = newLength + 10;
       final Float32List newPoints = Float32List(_fPointsCapacity * 2);
-      newPoints.setAll(0, fPoints);
+      // ignore: implicit_dynamic_function
+      js_util.callMethod(newPoints, 'set', <dynamic>[fPoints]);
       fPoints = newPoints;
     }
     _fPointsLength = newLength;
@@ -465,7 +469,8 @@ class PathRef {
     if (newLength > _fVerbsCapacity) {
       _fVerbsCapacity = newLength + 8;
       final Uint8List newVerbs = Uint8List(_fVerbsCapacity);
-      newVerbs.setAll(0, _fVerbs);
+      // ignore: implicit_dynamic_function
+      js_util.callMethod(newVerbs, 'set', <dynamic>[_fVerbs]);
       _fVerbs = newVerbs;
     }
     _fVerbsLength = newLength;
@@ -476,7 +481,8 @@ class PathRef {
       _conicWeightsCapacity = newLength + 4;
       final Float32List newWeights = Float32List(_conicWeightsCapacity);
       if (_conicWeights != null) {
-        newWeights.setAll(0, _conicWeights!);
+        // ignore: implicit_dynamic_function
+        js_util.callMethod(newWeights, 'set', <dynamic>[_conicWeights]);
       }
       _conicWeights = newWeights;
     }

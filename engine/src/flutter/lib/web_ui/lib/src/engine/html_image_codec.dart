@@ -4,19 +4,21 @@
 
 import 'dart:async';
 import 'dart:html' as html;
+import 'dart:js_util' as js_util;
 import 'dart:typed_data';
 
 import 'package:ui/ui.dart' as ui;
 
 import 'browser_detection.dart';
-import 'safe_browser_api.dart';
 import 'util.dart';
 
-Object? get _jsImageDecodeFunction => getJsProperty<Object?>(
-  getJsProperty<Object>(
-    getJsProperty<Object>(html.window, 'Image'),
+Object? get _jsImageDecodeFunction => js_util.getProperty(
+  // ignore: implicit_dynamic_function
+  js_util.getProperty(
+    // ignore: implicit_dynamic_function
+    js_util.getProperty(html.window, 'Image') as Object,
     'prototype',
-  ),
+  ) as Object,
   'decode',
 );
 final bool _supportsDecode = _jsImageDecodeFunction != null;
@@ -46,7 +48,7 @@ class HtmlCodec implements ui.Codec {
     if (_supportsDecode) {
       final html.ImageElement imgElement = html.ImageElement();
       imgElement.src = src;
-      setJsProperty<String>(imgElement, 'decoding', 'async');
+      js_util.setProperty(imgElement, 'decoding', 'async');
       imgElement.decode().then((dynamic _) {
         chunkCallback?.call(100, 100);
         int naturalWidth = imgElement.naturalWidth;

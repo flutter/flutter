@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:html' as html;
+import 'dart:js_util' as js_util;
 
 import 'package:ui/ui.dart' as ui;
 
@@ -15,7 +16,6 @@ import 'host_node.dart';
 import 'keyboard_binding.dart';
 import 'platform_dispatcher.dart';
 import 'pointer_binding.dart';
-import 'safe_browser_api.dart';
 import 'semantics.dart';
 import 'text_editing/text_editing.dart';
 import 'util.dart';
@@ -104,12 +104,26 @@ class FlutterViewEmbedder {
   static const String _staleHotRestartStore = '__flutter_state';
   List<html.Element?>? _staleHotRestartState;
 
+  /// Used to decide if the browser tab still has the focus.
+  ///
+  /// This information is useful for deciding on the blur behavior.
+  /// See [DefaultTextEditingStrategy].
+  ///
+  /// This getter calls the `hasFocus` method of the `Document` interface.
+  /// See for more details:
+  /// https://developer.mozilla.org/en-US/docs/Web/API/Document/hasFocus
+  bool get windowHasFocus =>
+      // ignore: implicit_dynamic_function
+      js_util.callMethod(html.document, 'hasFocus', <dynamic>[]) as bool;
+
   void _setupHotRestart() {
     // This persists across hot restarts to clear stale DOM.
-    _staleHotRestartState = getJsProperty<List<html.Element?>?>(html.window, _staleHotRestartStore);
+    _staleHotRestartState =
+        // ignore: implicit_dynamic_function
+        js_util.getProperty(html.window, _staleHotRestartStore) as List<html.Element?>?;
     if (_staleHotRestartState == null) {
       _staleHotRestartState = <html.Element?>[];
-      setJsProperty(
+      js_util.setProperty(
           html.window, _staleHotRestartStore, _staleHotRestartState);
     }
 
@@ -352,7 +366,8 @@ class FlutterViewEmbedder {
 
   // Creates a [HostNode] into a `root` [html.Element].
   HostNode _createHostNode(html.Element root) {
-    if (getJsProperty<Object?>(root, 'attachShadow') != null) {
+    // ignore: implicit_dynamic_function
+    if (js_util.getProperty(root, 'attachShadow') != null) {
       return ShadowDomHostNode(root);
     } else {
       // attachShadow not available, fall back to ElementHostNode.

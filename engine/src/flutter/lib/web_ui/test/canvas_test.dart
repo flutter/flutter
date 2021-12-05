@@ -17,6 +17,10 @@ void main() {
 }
 
 void testMain() {
+  setUpAll(() {
+    WebExperiments.ensureInitialized();
+  });
+
   group('EngineCanvas', () {
     late MockEngineCanvas mockCanvas;
     late ui.Paragraph paragraph;
