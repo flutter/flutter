@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import './globals.dart' show releaseCandidateBranchRegex, ConductorException;
+import './globals.dart' show ConductorException, KReleaseIncrements, releaseCandidateBranchRegex;
 
 /// Possible string formats that `flutter --version` can return.
 enum VersionType {
@@ -262,7 +262,7 @@ class Version {
   /// Will throw a [ConductorException] if the version is not possible given the
   /// [candidateBranch] and [incrementLetter].
   void ensureValid(String candidateBranch, String incrementLetter) {
-    if (!const <String>{'y', 'z', 'm', 'n'}.contains(incrementLetter)) {
+    if (!KReleaseIncrements.contains(incrementLetter)) {
       throw ConductorException('Invalid incrementLetter: $incrementLetter');
     }
     final RegExpMatch? branchMatch = releaseCandidateBranchRegex.firstMatch(candidateBranch);
