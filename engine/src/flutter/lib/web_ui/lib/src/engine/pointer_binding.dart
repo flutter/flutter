@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:html' as html;
+import 'dart:js' as js;
+import 'dart:js_util' as js_util;
 import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
@@ -12,7 +14,6 @@ import '../engine.dart' show registerHotRestartListener;
 import 'browser_detection.dart';
 import 'platform_dispatcher.dart';
 import 'pointer_converter.dart';
-import 'safe_browser_api.dart';
 import 'semantics.dart';
 
 /// Set this flag to true to see all the fired events in the console.
@@ -142,9 +143,9 @@ class PointerBinding {
 class PointerSupportDetector {
   const PointerSupportDetector();
 
-  bool get hasPointerEvents => hasJsProperty(html.window, 'PointerEvent');
-  bool get hasTouchEvents => hasJsProperty(html.window, 'TouchEvent');
-  bool get hasMouseEvents => hasJsProperty(html.window, 'MouseEvent');
+  bool get hasPointerEvents => js_util.hasProperty(html.window, 'PointerEvent');
+  bool get hasTouchEvents => js_util.hasProperty(html.window, 'TouchEvent');
+  bool get hasMouseEvents => js_util.hasProperty(html.window, 'MouseEvent');
 
   @override
   String toString() =>
@@ -179,7 +180,14 @@ abstract class _BaseAdapter {
     // For native listener, we will need to remove it through native javascript
     // api.
     _nativeListeners.forEach((String eventName, html.EventListener listener) {
-      removeJsEventListener(glassPaneElement, 'wheel', listener);
+      // ignore: implicit_dynamic_function
+      js_util.callMethod(
+        glassPaneElement,
+        'removeEventListener', <dynamic>[
+          'wheel',
+          listener,
+        ]
+      );
     });
     _listeners.clear();
     _nativeListeners.clear();
@@ -286,12 +294,20 @@ mixin _WheelEventListenerMixin on _BaseAdapter {
   }
 
   void _addWheelEventListener(html.EventListener handler) {
-    final Object eventOptions = createPlainJsObject(<String, Object?>{
-      'passive': false,
-    });
-    final html.EventListener jsHandler = allowInterop((html.Event event) => handler(event));
+    // ignore: implicit_dynamic_function
+    final Object eventOptions = js_util.newObject() as Object;
+    final html.EventListener jsHandler = js.allowInterop((html.Event event) => handler(event));
     _BaseAdapter._nativeListeners['wheel'] = jsHandler;
-    addJsEventListener(glassPaneElement, 'wheel', jsHandler, eventOptions);
+    js_util.setProperty(eventOptions, 'passive', false);
+    // ignore: implicit_dynamic_function
+    js_util.callMethod(
+      glassPaneElement,
+      'addEventListener', <dynamic>[
+        'wheel',
+        jsHandler,
+        eventOptions
+      ]
+    );
   }
 
   void _handleWheelEvent(html.Event e) {
@@ -602,7 +618,7 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
   List<html.PointerEvent> _expandEvents(html.PointerEvent event) {
     // For browsers that don't support `getCoalescedEvents`, we fallback to
     // using the original event.
-    if (hasJsProperty(event, 'getCoalescedEvents')) {
+    if (js_util.hasProperty(event, 'getCoalescedEvents')) {
       final List<html.PointerEvent> coalescedEvents =
           event.getCoalescedEvents().cast<html.PointerEvent>();
       // Some events don't perform coalescing, so they return an empty list. In

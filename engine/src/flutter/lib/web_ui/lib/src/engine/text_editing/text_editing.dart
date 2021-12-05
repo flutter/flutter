@@ -14,7 +14,6 @@ import '../browser_detection.dart';
 import '../embedder.dart';
 import '../host_node.dart';
 import '../platform_dispatcher.dart';
-import '../safe_browser_api.dart';
 import '../semantics.dart';
 import '../services.dart';
 import '../text/paragraph.dart';
@@ -1181,7 +1180,7 @@ class IOSTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
     // On iOS, blur is trigerred in the following cases:
     //
     // 1. The browser app is sent to the background (or the tab is changed). In
-    //    this case, the window loses focus (see [windowHasFocus]),
+    //    this case, the window loses focus (see [flutterViewEmbedder.windowHasFocus]),
     //    so we close the input connection with the framework.
     // 2. The user taps on another focusable element. In this case, we refocus
     //    the input field and wait for the framework to manage the focus change.
@@ -1190,7 +1189,7 @@ class IOSTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
     //    okay because the virtual keyboard will hide, and as soon as the user
     //    taps the text field again, the virtual keyboard will come up.
     subscriptions.add(activeDomElement.onBlur.listen((_) {
-      if (windowHasFocus) {
+      if (flutterViewEmbedder.windowHasFocus) {
         activeDomElement.focus();
       } else {
         owner.sendTextConnectionClosedToFrameworkIfAny();
@@ -1302,11 +1301,11 @@ class AndroidTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
     subscriptions.add(html.document.onSelectionChange.listen(handleChange));
 
     subscriptions.add(activeDomElement.onBlur.listen((_) {
-      if (windowHasFocus) {
+      if (flutterViewEmbedder.windowHasFocus) {
         // Chrome on Android will hide the onscreen keyboard when you tap outside
         // the text box. Instead, we want the framework to tell us to hide the
         // keyboard via `TextInput.clearClient` or `TextInput.hide`. Therefore
-        // refocus as long as [windowHasFocus] is true.
+        // refocus as long as [flutterViewEmbedder.windowHasFocus] is true.
         activeDomElement.focus();
       } else {
         owner.sendTextConnectionClosedToFrameworkIfAny();
