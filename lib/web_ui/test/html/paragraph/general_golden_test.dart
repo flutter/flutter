@@ -536,7 +536,7 @@ Future<void> testMain() async {
 
   test('foreground style (DOM)', () {
     const Rect bounds = Rect.fromLTWH(0, 0, 300, 200);
-    final DomCanvas canvas = DomCanvas(domRenderer.createElement('flt-picture'));
+    final DomCanvas canvas = DomCanvas(html.document.createElement('flt-picture'));
     testForegroundStyle(canvas);
     return takeScreenshot(canvas, bounds, 'canvas_paragraph_foreground_style_dom');
   });
