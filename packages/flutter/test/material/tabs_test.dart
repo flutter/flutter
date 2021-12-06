@@ -4299,7 +4299,7 @@ void main() {
       )
     );
     gesture.removePointer();
-  }
+  });
 }
 
 class KeepAliveInk extends StatefulWidget {
