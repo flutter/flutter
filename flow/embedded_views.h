@@ -210,13 +210,6 @@ class EmbeddedViewParams {
     final_bounding_rect_ = path.getBounds();
   }
 
-  EmbeddedViewParams(const EmbeddedViewParams& other) {
-    size_points_ = other.size_points_;
-    mutators_stack_ = other.mutators_stack_;
-    matrix_ = other.matrix_;
-    final_bounding_rect_ = other.final_bounding_rect_;
-  };
-
   // The transformation Matrix corresponding to the sum of all the
   // transformations in the platform view's mutator stack.
   const SkMatrix& transformMatrix() const { return matrix_; };
