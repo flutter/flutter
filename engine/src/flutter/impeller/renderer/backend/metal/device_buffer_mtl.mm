@@ -34,14 +34,19 @@ std::shared_ptr<Texture> DeviceBufferMTL::MakeTexture(TextureDescriptor desc,
     return nullptr;
   }
 
-  auto texture = [buffer_ newTextureWithDescriptor:ToMTLTextureDescriptor(desc)
-                                            offset:offset
-                                       bytesPerRow:desc.GetBytesPerRow()];
-  if (!texture) {
+  if (@available(macOS 10.13, *)) {
+    auto texture =
+        [buffer_ newTextureWithDescriptor:ToMTLTextureDescriptor(desc)
+                                   offset:offset
+                              bytesPerRow:desc.GetBytesPerRow()];
+    if (!texture) {
+      return nullptr;
+    }
+
+    return std::make_shared<TextureMTL>(desc, texture);
+  } else {
     return nullptr;
   }
-
-  return std::make_shared<TextureMTL>(desc, texture);
 }
 
 [[nodiscard]] bool DeviceBufferMTL::CopyHostBuffer(const uint8_t* source,
