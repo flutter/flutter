@@ -34,6 +34,7 @@ class ScrollbarThemeData with Diagnosticable {
     this.thickness,
     this.trackVisibility,
     this.buttonVisibility,
+    this.buttonStyles,
     this.showTrackOnHover,
     this.isAlwaysShown,
     this.radius,
@@ -56,6 +57,13 @@ class ScrollbarThemeData with Diagnosticable {
   /// Overrides the default value of [Scrollbar.trackVisibility] in all
   /// descendant [Scrollbar] widgets.
   final MaterialStateProperty<bool?>? trackVisibility;
+
+  /// Overrides the default value of [Scrollbar.buttonStyles] in all
+  /// descendant [Scrollbar] widgets.
+  ///
+  /// [ScrollbarButtonStateStyles] is recommended, which can customize styles
+  /// with different states.
+  final ScrollbarButtonStyles? buttonStyles;
 
   /// Overrides the default value of [Scrollbar.buttonVisibility] in all
   /// descendant [Scrollbar] widgets.
@@ -134,6 +142,7 @@ class ScrollbarThemeData with Diagnosticable {
     MaterialStateProperty<double?>? thickness,
     MaterialStateProperty<bool?>? trackVisibility,
     MaterialStateProperty<bool?>? buttonVisibility,
+    ScrollbarButtonStyles? buttonStyles,
     bool? showTrackOnHover,
     bool? isAlwaysShown,
     bool? interactive,
@@ -149,6 +158,7 @@ class ScrollbarThemeData with Diagnosticable {
       thickness: thickness ?? this.thickness,
       trackVisibility: trackVisibility ?? this.trackVisibility,
       buttonVisibility: buttonVisibility ?? this.buttonVisibility,
+      buttonStyles: buttonStyles ?? this.buttonStyles,
       showTrackOnHover: showTrackOnHover ?? this.showTrackOnHover,
       isAlwaysShown: isAlwaysShown ?? this.isAlwaysShown,
       interactive: interactive ?? this.interactive,
@@ -173,6 +183,7 @@ class ScrollbarThemeData with Diagnosticable {
       thickness: _lerpProperties<double?>(a?.thickness, b?.thickness, t, lerpDouble),
       trackVisibility: _lerpProperties<bool?>(a?.trackVisibility, b?.trackVisibility, t, _lerpBool),
       buttonVisibility: _lerpProperties<bool?>(a?.buttonVisibility, b?.buttonVisibility, t, _lerpBool),
+      buttonStyles: t < 0.5 ? a?.buttonStyles : b?.buttonStyles ,
       showTrackOnHover: _lerpBool(a?.showTrackOnHover, b?.showTrackOnHover, t),
       isAlwaysShown: _lerpBool(a?.isAlwaysShown, b?.isAlwaysShown, t),
       interactive: _lerpBool(a?.interactive, b?.interactive, t),
@@ -192,6 +203,7 @@ class ScrollbarThemeData with Diagnosticable {
       thickness,
       trackVisibility,
       buttonVisibility,
+      buttonStyles,
       showTrackOnHover,
       isAlwaysShown,
       interactive,
@@ -215,6 +227,7 @@ class ScrollbarThemeData with Diagnosticable {
       && other.thickness == thickness
       && other.trackVisibility == trackVisibility
       && other.buttonVisibility == buttonVisibility
+      && other.buttonStyles == buttonStyles
       && other.showTrackOnHover == showTrackOnHover
       && other.isAlwaysShown == isAlwaysShown
       && other.interactive == interactive
@@ -233,6 +246,7 @@ class ScrollbarThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<MaterialStateProperty<double?>>('thickness', thickness, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<bool?>>('trackVisibility', trackVisibility, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<bool?>>('buttonVisibility', buttonVisibility, defaultValue: null));
+    properties.add(DiagnosticsProperty<ScrollbarButtonStyles?>('buttonStyles', buttonStyles, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('showTrackOnHover', showTrackOnHover, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('isAlwaysShown', isAlwaysShown, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('interactive', interactive, defaultValue: null));
@@ -319,6 +333,8 @@ class ScrollbarTheme extends InheritedWidget {
 }
 
 /// A scrollbar button style that use [ScrollbarButtonStateColors].
+///
+/// The default value follows the Windows platform style.
 class ScrollbarButtonStateStyles extends ScrollbarButtonStyles {
   const ScrollbarButtonStateStyles({
     ScrollbarButtonLocation location = ScrollbarButtonLocation.split,

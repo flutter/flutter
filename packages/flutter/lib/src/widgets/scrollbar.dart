@@ -1030,7 +1030,7 @@ class RawScrollbar extends StatefulWidget {
     this.shape,
     this.radius,
     this.thickness,
-    this.buttonVisibility = false,
+    this.buttonVisibility,
     this.buttonStyles,
     this.thumbColor,
     this.minThumbLength = _kMinThumbExtent,
@@ -1054,7 +1054,6 @@ class RawScrollbar extends StatefulWidget {
        assert(pressDuration != null),
        assert(mainAxisMargin != null),
        assert(crossAxisMargin != null),
-       assert(buttonVisibility == null || !buttonVisibility || buttonStyles != null),
        super(key: key);
 
   /// {@template flutter.widgets.Scrollbar.child}
@@ -1229,10 +1228,16 @@ class RawScrollbar extends StatefulWidget {
   /// If null, will default to 6.0 pixels.
   final double? thickness;
 
-  /// todo
+  /// Controls the button visibility.
+  ///
+  /// If null, will default to false.
   final bool? buttonVisibility;
 
-  /// todo
+  /// Controls the presentation style of the scrollbar button.
+  ///
+  /// If null, the default value is [ScrollbarButtonStyles].
+  ///
+  /// [RawScrollbar]'s button does not respond to the change of button state.
   final ScrollbarButtonStyles? buttonStyles;
 
   /// The color of the scrollbar thumb.
@@ -1549,7 +1554,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       ..minOverscrollLength = widget.minOverscrollLength ?? widget.minThumbLength
       ..ignorePointer = !enableGestures
       ..buttonVisibility = widget.buttonVisibility ?? false
-      ..buttonStyles = widget.buttonStyles;
+      ..buttonStyles = widget.buttonStyles ?? const ScrollbarButtonStyles();
   }
 
   @override
@@ -2103,7 +2108,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     _maybeStartFadeoutTimer();
   }
 
-  /// Whether the scrollbar at the leading or trailing edge.
+  /// Whether the scrollbar thumb arrive at the leading or trailing edge
+  /// of the track.
   bool atEdge({ required bool isLeading}) {
     if (_lastMetrics == null) {
       return false;
@@ -2337,6 +2343,9 @@ Offset _getLocalOffset(GlobalKey scrollbarPainterKey, Offset position) {
   return renderBox.globalToLocal(position);
 }
 
+/// Define the presentation style of the scrollbar button.
+///
+/// The default value follows the Windows platform style.
 class ScrollbarButtonStyles {
   const ScrollbarButtonStyles({
     this.location = ScrollbarButtonLocation.split,
@@ -2347,13 +2356,25 @@ class ScrollbarButtonStyles {
     this.trailingButtonColors = const ScrollbarButtonColors(),
   });
 
+  /// The location of the scrollbar button.
   final ScrollbarButtonLocation location;
+
+  /// The extent of the scrollbar button.
   final double extent;
+
+  /// The width of the button indicator paint area.
   final double indicatorWidth;
+
+  /// The painting style of the button indicator
   final PaintingStyle indicatorPaintingStyle;
+
+  /// The color style of the leading button.
   final ScrollbarButtonColors leadingButtonColors;
+
+  /// The color style of the trailing button.
   final ScrollbarButtonColors trailingButtonColors;
 
+  /// Get the leading or trailing button indicator's path.
   Path getIndicatorPath({
     required Rect buttonRect,
     required bool isLeading,
@@ -2403,6 +2424,7 @@ class ScrollbarButtonStyles {
   }
 }
 
+/// The color styles of the button.
 class ScrollbarButtonColors {
   const ScrollbarButtonColors({
     this.backgroundColor,
@@ -2413,8 +2435,10 @@ class ScrollbarButtonColors {
   /// 
   /// If this is null, the track color used.
   final Color? backgroundColor;
-  
-  /// todo
+
+  /// The color of the button indicator.
+  ///
+  /// Defaults to Color(0xFF505050).
   final Color indicatorColor;
 }
 

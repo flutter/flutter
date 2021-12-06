@@ -111,10 +111,24 @@ class Scrollbar extends StatelessWidget {
   /// [showTrackOnHover] can be replaced by this and will be deprecated.
   final bool? trackVisibility;
 
-  /// todo
+  /// Controls the button visibility.
+  ///
+  /// If this property is null, then [ScrollbarThemeData.buttonVisibility] of
+  /// [ThemeData.scrollbarTheme] is used. If that is also null, the default value
+  /// is false.
   final bool? buttonVisibility;
 
-  /// todo
+  /// Controls the presentation style of the scrollbar button.
+  ///
+  /// If this property is null, then [ScrollbarThemeData.buttonStyles] of
+  /// [ThemeData.scrollbarTheme] is used. If that is also null, the default value
+  /// is [ScrollbarButtonStateStyles].
+  ///
+  /// See also:
+  ///
+  ///  * [ScrollbarButtonStateStyles], a scrollbar button style that use
+  ///  [ScrollbarButtonStateColors] which the default value follows the
+  ///  Windows platform style.
   final ScrollbarButtonStyles? buttonStyles;
 
   /// Controls if the track will show on hover and remain, including during drag.
@@ -266,7 +280,8 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
   });
 
   ScrollbarButtonStyles get _buttonStyles {
-    final ScrollbarButtonStyles styles = widget.buttonStyles ?? const ScrollbarButtonStateStyles();
+    final ScrollbarButtonStyles styles =
+        widget.buttonStyles ?? _scrollbarTheme.buttonStyles ?? const ScrollbarButtonStateStyles();
     ScrollbarButtonColors leadingButtonColors = styles.leadingButtonColors;
     ScrollbarButtonColors trailingButtonColors = styles.trailingButtonColors;
 
