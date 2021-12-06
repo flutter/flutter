@@ -1228,9 +1228,11 @@ class LocalizationsGenerator {
     }
     final String fileName = outputFileName.substring(0, extensionIndex);
     final String fileExtension = outputFileName.substring(extensionIndex + 1);
+    final List<LocaleInfo> localesWithBaseClass = <LocaleInfo>[];
     for (final LocaleInfo locale in allLocales) {
       if (isBaseClassLocale(locale, locale.languageCode)) {
         final File languageMessageFile = outputDirectory.childFile('${fileName}_$locale.$fileExtension');
+        localesWithBaseClass.add(locale);
 
         // Generate the template for the base class file. Further string
         // interpolation will be done to determine if there are
@@ -1246,6 +1248,7 @@ class LocalizationsGenerator {
 
         // Every locale for the language except the base class.
         final List<LocaleInfo> localesForLanguage = getLocalesForLanguage(locale.languageCode);
+        localesWithBaseClass.addAll(localesForLanguage);
 
         // Generate every subclass that is needed for the particular language
         final Iterable<String> subclasses = localesForLanguage.map<String>((LocaleInfo locale) {
@@ -1260,6 +1263,28 @@ class LocalizationsGenerator {
           return languageBaseClassFile.replaceAll('@(subclasses)', subclasses.join());
         });
       }
+    }
+
+    final List<LocaleInfo> localesWithoutBaseClass = allLocales.where((LocaleInfo locale) {
+      return !localesWithBaseClass.contains(locale);
+    }).toList();
+
+    for (final LocaleInfo locale in localesWithoutBaseClass) {
+        final File languageMessageFile = outputDirectory.childFile('${fileName}_$locale.$fileExtension');
+
+        // Generate the template for the base class file.
+        final String languageBaseClassFile = _generateBaseClassFile(
+          className,
+          outputFileName, 
+          header,
+          _allBundles.bundleFor(locale)!,
+          _allBundles.bundleFor(_templateArbLocale)!,
+          _allMessages,
+        );
+
+        _languageFileMap.putIfAbsent(languageMessageFile, () {
+          return languageBaseClassFile.replaceAll('@(subclasses)', '');
+        });
     }
 
     final List<String> sortedClassImports = supportedLocales
