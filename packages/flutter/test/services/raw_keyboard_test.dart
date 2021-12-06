@@ -34,12 +34,10 @@ void main() {
 
     testWidgets('The correct character is produced for upper characters', (WidgetTester tester) async {
       for (final String platform in <String>['linux', 'android', 'macos', 'fuchsia', 'windows']) {
-        String character = '';
         void handleKey(RawKeyEvent event) {
-          expect(event.character, equals(character), reason: 'on $platform');
+          expect(event.logicalKey, equals(LogicalKeyboardKey.keyA), reason: 'on $platform');
         }
         RawKeyboard.instance.addListener(handleKey);
-        character = 'a';
         await simulateKeyDownEvent(LogicalKeyboardKey('A'.codeUnitAt(0)), platform: platform);
         RawKeyboard.instance.removeListener(handleKey);
       }
