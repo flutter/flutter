@@ -121,11 +121,12 @@ template("compiled_action") {
     # Add the executable itself as an input.
     inputs += [ host_executable ]
 
-    deps = [
-      host_tool,
-    ]
+    deps = [ host_tool ]
     if (defined(invoker.deps)) {
       deps += invoker.deps
+    }
+    if (defined(invoker.depfile)) {
+      depfile = invoker.depfile
     }
 
     # The script takes as arguments the binary to run, and then the arguments
@@ -174,11 +175,12 @@ template("compiled_action_foreach") {
     # Add the executable itself as an input.
     inputs += [ host_executable ]
 
-    deps = [
-      host_tool,
-    ]
+    deps = [ host_tool ]
     if (defined(invoker.deps)) {
       deps += invoker.deps
+    }
+    if (defined(invoker.depfile)) {
+      depfile = invoker.depfile
     }
 
     # The script takes as arguments the binary to run, and then the arguments
