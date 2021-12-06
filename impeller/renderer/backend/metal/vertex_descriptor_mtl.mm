@@ -39,7 +39,11 @@ static MTLVertexFormat ReadStageInputFormat(const ShaderStageIOSlot& input) {
       if (input.bit_width == 8 * sizeof(float) / 2) {
         switch (input.vec_size) {
           case 1:
-            return MTLVertexFormatHalf;
+            if (@available(macOS 10.13, *)) {
+              return MTLVertexFormatHalf;
+            } else {
+              return MTLVertexFormatInvalid;
+            }
           case 2:
             return MTLVertexFormatHalf2;
           case 3:
@@ -56,7 +60,11 @@ static MTLVertexFormat ReadStageInputFormat(const ShaderStageIOSlot& input) {
     }
     case ShaderType::kBoolean: {
       if (input.bit_width == 8 * sizeof(bool) && input.vec_size == 1) {
-        return MTLVertexFormatChar;
+        if (@available(macOS 10.13, *)) {
+          return MTLVertexFormatChar;
+        } else {
+          return MTLVertexFormatInvalid;
+        }
       }
       return MTLVertexFormatInvalid;
     }
@@ -64,7 +72,11 @@ static MTLVertexFormat ReadStageInputFormat(const ShaderStageIOSlot& input) {
       if (input.bit_width == 8 * sizeof(char)) {
         switch (input.vec_size) {
           case 1:
-            return MTLVertexFormatChar;
+            if (@available(macOS 10.13, *)) {
+              return MTLVertexFormatChar;
+            } else {
+              return MTLVertexFormatInvalid;
+            }
           case 2:
             return MTLVertexFormatChar2;
           case 3:
@@ -79,7 +91,11 @@ static MTLVertexFormat ReadStageInputFormat(const ShaderStageIOSlot& input) {
       if (input.bit_width == 8 * sizeof(char)) {
         switch (input.vec_size) {
           case 1:
-            return MTLVertexFormatUChar;
+            if (@available(macOS 10.13, *)) {
+              return MTLVertexFormatUChar;
+            } else {
+              return MTLVertexFormatInvalid;
+            }
           case 2:
             return MTLVertexFormatUChar2;
           case 3:
@@ -94,7 +110,11 @@ static MTLVertexFormat ReadStageInputFormat(const ShaderStageIOSlot& input) {
       if (input.bit_width == 8 * sizeof(short)) {
         switch (input.vec_size) {
           case 1:
-            return MTLVertexFormatShort;
+            if (@available(macOS 10.13, *)) {
+              return MTLVertexFormatShort;
+            } else {
+              return MTLVertexFormatInvalid;
+            }
           case 2:
             return MTLVertexFormatShort2;
           case 3:
@@ -109,7 +129,11 @@ static MTLVertexFormat ReadStageInputFormat(const ShaderStageIOSlot& input) {
       if (input.bit_width == 8 * sizeof(ushort)) {
         switch (input.vec_size) {
           case 1:
-            return MTLVertexFormatUShort;
+            if (@available(macOS 10.13, *)) {
+              return MTLVertexFormatUShort;
+            } else {
+              return MTLVertexFormatInvalid;
+            }
           case 2:
             return MTLVertexFormatUShort2;
           case 3:
