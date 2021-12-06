@@ -32,17 +32,6 @@ void main() {
       }
     });
 
-    testWidgets('The correct character is produced for upper characters', (WidgetTester tester) async {
-      for (final String platform in <String>['macos', 'web']) {
-        void handleKey(RawKeyEvent event) {
-          expect(event.logicalKey, equals(LogicalKeyboardKey.keyA), reason: 'on $platform');
-        }
-        RawKeyboard.instance.addListener(handleKey);
-        await simulateKeyDownEvent(LogicalKeyboardKey('A'.codeUnitAt(0)), platform: platform);
-        RawKeyboard.instance.removeListener(handleKey);
-      }
-    });
-
     testWidgets('No character is produced for non-printables', (WidgetTester tester) async {
       for (final String platform in <String>['linux', 'android', 'macos', 'fuchsia', 'windows', 'web']) {
         void handleKey(RawKeyEvent event) {
@@ -1426,15 +1415,29 @@ void main() {
       }
     });
 
-    test('Printable keyboard keys are correctly translated', () {
-      const String unmodifiedCharacter = 'a';
+    test('Lower letter keys are correctly translated', () {
       final RawKeyEvent keyAEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
         'type': 'keydown',
         'keymap': 'macos',
         'keyCode': 0x00000000,
         'characters': 'a',
-        'charactersIgnoringModifiers': unmodifiedCharacter,
+        'charactersIgnoringModifiers': 'a',
         'modifiers': 0x0,
+      });
+      final RawKeyEventDataMacOs data = keyAEvent.data as RawKeyEventDataMacOs;
+      expect(data.physicalKey, equals(PhysicalKeyboardKey.keyA));
+      expect(data.logicalKey, equals(LogicalKeyboardKey.keyA));
+      expect(data.keyLabel, equals('a'));
+    });
+
+    test('Upper letter keys are correctly translated', () {
+      final RawKeyEvent keyAEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
+        'type': 'keydown',
+        'keymap': 'macos',
+        'keyCode': 0x00000000,
+        'characters': 'A',
+        'charactersIgnoringModifiers': 'A',
+        'modifiers': 0x20002,
       });
       final RawKeyEventDataMacOs data = keyAEvent.data as RawKeyEventDataMacOs;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.keyA));
