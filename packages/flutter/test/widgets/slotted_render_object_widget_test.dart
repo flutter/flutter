@@ -219,6 +219,7 @@ class _Diagonal extends RenderObjectWidget with SlottedMultiChildRenderObjectWid
       case _DiagonalSlot.bottomRight:
         return bottomRight;
     }
+    return null;
   }
 
   @override

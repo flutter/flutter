@@ -1733,6 +1733,7 @@ class LogInvocationAction extends Action<LogIntent> {
       callingAction.invoke(intent);
       intent.log.add('$actionName.invokeAsOverride-post-super');
     }
+    return null;
   }
 
   @override
@@ -1765,6 +1766,7 @@ class LogInvocationContextAction extends ContextAction<LogIntent> {
       callingAction.invoke(intent);
       intent.log.add('$actionName.invokeAsOverride-post-super');
     }
+    return null;
   }
 
   @override

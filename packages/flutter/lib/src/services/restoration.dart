@@ -312,6 +312,7 @@ class RestorationManager extends ChangeNotifier {
       default:
         throw UnimplementedError("${call.method} was invoked but isn't implemented by $runtimeType");
     }
+    return null;
   }
 
   Map<Object?, Object?>? _decodeRestorationData(Uint8List? data) {

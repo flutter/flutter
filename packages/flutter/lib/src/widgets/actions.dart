@@ -1493,6 +1493,7 @@ class PrioritizedAction extends Action<PrioritizedIntents> {
     assert(_selectedAction != null);
     assert(_selectedIntent != null);
     _selectedAction.invoke(_selectedIntent);
+    return null;
   }
 }
 

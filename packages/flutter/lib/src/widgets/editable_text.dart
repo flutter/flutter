@@ -3774,6 +3774,7 @@ class _UpdateTextSelectionToAdjacentLineAction<T extends DirectionalCaretMovemen
       _verticalMovementRun = currentRun;
       _runSelection = newSelection;
     }
+    return null;
   }
 
   @override
@@ -3813,6 +3814,7 @@ class _CopySelectionAction extends ContextAction<CopySelectionTextIntent> {
     } else {
       state.copySelection(intent.cause);
     }
+    return null;
   }
 
   @override
