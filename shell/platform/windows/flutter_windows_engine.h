@@ -152,7 +152,7 @@ class FlutterWindowsEngine {
   // Dispatches a semantics action to the specified semantics node.
   bool DispatchSemanticsAction(uint64_t id,
                                FlutterSemanticsAction action,
-                               const std::vector<uint8_t>& data);
+                               fml::MallocMapping data);
 
   // Informs the engine that the semantics enabled state has changed.
   void UpdateSemanticsEnabled(bool enabled);
