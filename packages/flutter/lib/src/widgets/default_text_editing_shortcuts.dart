@@ -256,6 +256,10 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     SingleActivator(LogicalKeyboardKey.end, shift: true): ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: false),
     // The following key combinations have no effect on text editing on this
     // platform:
+    //   * Control + end
+    //   * Control + home
+    //   * Control + shift + end
+    //   * Control + shift + home
     //   * Meta + X
     //   * Meta + C
     //   * Meta + V
@@ -301,8 +305,8 @@ class DefaultTextEditingShortcuts extends Shortcuts {
 
     SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true, alt: true): ExtendSelectionToNextWordBoundaryOrCaretLocationIntent(forward: false),
     SingleActivator(LogicalKeyboardKey.arrowRight, shift: true, alt: true): ExtendSelectionToNextWordBoundaryOrCaretLocationIntent(forward: true),
-    SingleActivator(LogicalKeyboardKey.arrowUp, shift: true, alt: true): ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: false),
-    SingleActivator(LogicalKeyboardKey.arrowDown, shift: true, alt: true): ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: false),
+    SingleActivator(LogicalKeyboardKey.arrowUp, shift: true, alt: true): ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: false, collapseAtReversal: true),
+    SingleActivator(LogicalKeyboardKey.arrowDown, shift: true, alt: true): ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: false, collapseAtReversal: true),
 
     SingleActivator(LogicalKeyboardKey.arrowLeft, meta: true): ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: true),
     SingleActivator(LogicalKeyboardKey.arrowRight, meta: true): ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: true),
@@ -321,6 +325,14 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     SingleActivator(LogicalKeyboardKey.keyC, meta: true): CopySelectionTextIntent.copy,
     SingleActivator(LogicalKeyboardKey.keyV, meta: true): PasteTextIntent(SelectionChangedCause.keyboard),
     SingleActivator(LogicalKeyboardKey.keyA, meta: true): SelectAllTextIntent(SelectionChangedCause.keyboard),
+    // The following key combinations have no effect on text editing on this
+    // platform:
+    //   * End
+    //   * Home
+    //   * Control + end
+    //   * Control + home
+    //   * Control + shift + end
+    //   * Control + shift + home
   };
 
   // The following key combinations have no effect on text editing on this
@@ -339,7 +351,17 @@ class DefaultTextEditingShortcuts extends Shortcuts {
   //   * Meta + shift + arrow up
   //   * Meta + delete
   //   * Meta + backspace
-  static const Map<ShortcutActivator, Intent> _windowsShortcuts = _linuxShortcuts;
+  static const Map<ShortcutActivator, Intent> _windowsShortcuts = <ShortcutActivator, Intent>{
+    ..._commonShortcuts,
+    SingleActivator(LogicalKeyboardKey.home): ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: true),
+    SingleActivator(LogicalKeyboardKey.end): ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: true),
+    SingleActivator(LogicalKeyboardKey.home, shift: true): ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: false),
+    SingleActivator(LogicalKeyboardKey.end, shift: true): ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: false),
+    SingleActivator(LogicalKeyboardKey.home, control: true): ExtendSelectionToDocumentBoundaryIntent(forward: false, collapseSelection: true),
+    SingleActivator(LogicalKeyboardKey.end, control: true): ExtendSelectionToDocumentBoundaryIntent(forward: true, collapseSelection: true),
+    SingleActivator(LogicalKeyboardKey.home, shift: true, control: true): ExtendSelectionToDocumentBoundaryIntent(forward: false, collapseSelection: false),
+    SingleActivator(LogicalKeyboardKey.end, shift: true, control: true): ExtendSelectionToDocumentBoundaryIntent(forward: true, collapseSelection: false),
+  };
 
   // Web handles its text selection natively and doesn't use any of these
   // shortcuts in Flutter.
@@ -384,6 +406,8 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     SingleActivator(LogicalKeyboardKey.arrowUp, shift: true): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.end, shift: true): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.home, shift: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.end, control: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.home, control: true): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.space): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.keyX, control: true): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.keyX, meta: true): DoNothingAndStopPropagationTextIntent(),

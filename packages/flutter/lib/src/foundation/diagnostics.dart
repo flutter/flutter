@@ -1568,13 +1568,13 @@ abstract class DiagnosticsNode {
         if (!showSeparator)
           'showSeparator': showSeparator,
         if (level != DiagnosticLevel.info)
-          'level': describeEnum(level),
+          'level': level.name,
         if (showName == false)
           'showName': showName,
         if (emptyBodyDescription != null)
           'emptyBodyDescription': emptyBodyDescription,
         if (style != DiagnosticsTreeStyle.sparse)
-          'style': describeEnum(style!),
+          'style': style!.name,
         if (allowTruncate)
           'allowTruncate': allowTruncate,
         if (hasChildren)
@@ -2303,6 +2303,12 @@ class IterableProperty<T> extends DiagnosticsProperty<Iterable<T>> {
 /// The enum value is displayed with the class name stripped. For example:
 /// [HitTestBehavior.deferToChild] is shown as `deferToChild`.
 ///
+/// This class can be used with classes that appear like enums but are not
+/// "real" enums, so long as their `toString` implementation, in debug mode,
+/// returns a string consisting of the class name followed by the value name. It
+/// can also be used with nullable properties; the null value is represented as
+/// `null`.
+///
 /// See also:
 ///
 ///  * [DiagnosticsProperty] which documents named parameters common to all
@@ -2702,7 +2708,7 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
     if (exception != null)
       json['exception'] = exception.toString();
     json['propertyType'] = propertyType.toString();
-    json['defaultLevel'] = describeEnum(_defaultLevel);
+    json['defaultLevel'] = _defaultLevel.name;
     if (value is Diagnosticable || value is DiagnosticsNode)
       json['isDiagnosticableValue'] = true;
     if (v is num)
@@ -3016,10 +3022,18 @@ String shortHash(Object? object) {
 ///  * [Object.runtimeType], the [Type] of an object.
 String describeIdentity(Object? object) => '${objectRuntimeType(object, '<optimized out>')}#${shortHash(object)}';
 
-// This method exists as a workaround for https://github.com/dart-lang/sdk/issues/30021
 /// Returns a short description of an enum value.
 ///
 /// Strips off the enum class name from the `enumEntry.toString()`.
+///
+/// For real enums, this is redundant with calling the `name` getter on the enum
+/// value (see [EnumName.name]), a feature that was added to Dart 2.15.
+///
+/// This function can also be used with classes whose `toString` return a value
+/// in the same form as an enum (the class name, a dot, then the value name).
+/// For example, it's used with [SemanticsAction], which is written to appear to
+/// be an enum but is actually a bespoke class so that the index values can be
+/// set as powers of two instead of as sequential integers.
 ///
 /// {@tool snippet}
 ///
@@ -3031,10 +3045,13 @@ String describeIdentity(Object? object) => '${objectRuntimeType(object, '<optimi
 /// void validateDescribeEnum() {
 ///   assert(Day.monday.toString() == 'Day.monday');
 ///   assert(describeEnum(Day.monday) == 'monday');
+///   assert(Day.monday.name == 'monday'); // preferred for real enums
 /// }
 /// ```
 /// {@end-tool}
 String describeEnum(Object enumEntry) {
+  if (enumEntry is Enum)
+    return enumEntry.name;
   final String description = enumEntry.toString();
   final int indexOfDot = description.indexOf('.');
   assert(

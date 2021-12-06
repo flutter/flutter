@@ -116,6 +116,7 @@ export 'src/widgets/sliver_fill.dart';
 export 'src/widgets/sliver_layout_builder.dart';
 export 'src/widgets/sliver_persistent_header.dart';
 export 'src/widgets/sliver_prototype_extent_list.dart';
+export 'src/widgets/slotted_render_object_widget.dart';
 export 'src/widgets/spacer.dart';
 export 'src/widgets/status_transitions.dart';
 export 'src/widgets/table.dart';

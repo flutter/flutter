@@ -1055,7 +1055,7 @@ void main() {
   });
 
   group('prompt', () {
-    test('can be overridden for different frontend implementations', () {
+    test('can be overridden for different frontend implementations', () async {
       final FileSystem fileSystem = MemoryFileSystem.test();
       final Stdio stdio = _UnimplementedStdio.instance;
       final Checkouts checkouts = Checkouts(
@@ -1070,7 +1070,7 @@ void main() {
         stateFile: fileSystem.file('/statefile.json'),
       );
 
-      final bool response = context.prompt(
+      final bool response = await context.prompt(
         'A prompt that will immediately be agreed to',
       );
       expect(response, true);
@@ -1149,9 +1149,9 @@ class _TestNextContext extends NextContext {
   );
 
   @override
-  bool prompt(String message) {
+  Future<bool> prompt(String message) {
     // always say yes
-    return true;
+    return Future<bool>.value(true);
   }
 }
 

@@ -662,8 +662,8 @@ class ErrorHandlingProcessManager extends ProcessManager {
     Map<String, String>? environment,
     bool includeParentEnvironment = true,
     bool runInShell = false,
-    Encoding stdoutEncoding = io.systemEncoding,
-    Encoding stderrEncoding = io.systemEncoding,
+    Encoding? stdoutEncoding = io.systemEncoding,
+    Encoding? stderrEncoding = io.systemEncoding,
   }) {
     return _run(() {
       return _delegate.run(
@@ -705,8 +705,8 @@ class ErrorHandlingProcessManager extends ProcessManager {
     Map<String, String>? environment,
     bool includeParentEnvironment = true,
     bool runInShell = false,
-    Encoding stdoutEncoding = io.systemEncoding,
-    Encoding stderrEncoding = io.systemEncoding,
+    Encoding? stdoutEncoding = io.systemEncoding,
+    Encoding? stderrEncoding = io.systemEncoding,
   }) {
     return _runSync(() {
       return _delegate.runSync(
