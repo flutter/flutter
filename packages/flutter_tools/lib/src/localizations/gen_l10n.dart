@@ -1275,7 +1275,7 @@ class LocalizationsGenerator {
         // Generate the template for the base class file.
         final String languageBaseClassFile = _generateBaseClassFile(
           className,
-          outputFileName, 
+          outputFileName,
           header,
           _allBundles.bundleFor(locale)!,
           _allBundles.bundleFor(_templateArbLocale)!,
