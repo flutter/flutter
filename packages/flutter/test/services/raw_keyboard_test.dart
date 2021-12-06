@@ -33,7 +33,7 @@ void main() {
     });
 
     testWidgets('The correct character is produced for upper characters', (WidgetTester tester) async {
-      for (final String platform in <String>['linux', 'android', 'macos', 'fuchsia', 'windows']) {
+      for (final String platform in <String>['macos', 'web']) {
         void handleKey(RawKeyEvent event) {
           expect(event.logicalKey, equals(LogicalKeyboardKey.keyA), reason: 'on $platform');
         }
