@@ -2432,7 +2432,7 @@ class ScrollbarButtonColors {
   });
 
   /// The color of the button background.
-  /// 
+  ///
   /// If this is null, the track color used.
   final Color? backgroundColor;
 
