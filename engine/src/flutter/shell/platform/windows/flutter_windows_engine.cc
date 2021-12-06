@@ -471,9 +471,10 @@ bool FlutterWindowsEngine::MarkExternalTextureFrameAvailable(
 bool FlutterWindowsEngine::DispatchSemanticsAction(
     uint64_t target,
     FlutterSemanticsAction action,
-    const std::vector<uint8_t>& data) {
-  return (embedder_api_.DispatchSemanticsAction(
-              engine_, target, action, data.data(), data.size()) == kSuccess);
+    fml::MallocMapping data) {
+  return (embedder_api_.DispatchSemanticsAction(engine_, target, action,
+                                                data.GetMapping(),
+                                                data.GetSize()) == kSuccess);
 }
 
 void FlutterWindowsEngine::UpdateSemanticsEnabled(bool enabled) {
