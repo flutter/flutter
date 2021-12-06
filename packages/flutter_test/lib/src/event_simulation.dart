@@ -119,6 +119,9 @@ class KeyEventSimulator {
       return -1;
     } else {
       late Map<int, LogicalKeyboardKey> map;
+      final bool isUnicode = LogicalKeyboardKey.planeMask & key.keyId == LogicalKeyboardKey.unicodePlane;
+      if (isUnicode)
+        return key.keyId;
       switch (platform) {
         case 'android':
           map = kAndroidToLogicalKey;

@@ -32,6 +32,19 @@ void main() {
       }
     });
 
+    testWidgets('The correct character is produced for upper characters', (WidgetTester tester) async {
+      for (final String platform in <String>['linux', 'android', 'macos', 'fuchsia', 'windows']) {
+        String character = '';
+        void handleKey(RawKeyEvent event) {
+          expect(event.character, equals(character), reason: 'on $platform');
+        }
+        RawKeyboard.instance.addListener(handleKey);
+        character = 'a';
+        await simulateKeyDownEvent(LogicalKeyboardKey('A'.codeUnitAt(0)), platform: platform);
+        RawKeyboard.instance.removeListener(handleKey);
+      }
+    });
+
     testWidgets('No character is produced for non-printables', (WidgetTester tester) async {
       for (final String platform in <String>['linux', 'android', 'macos', 'fuchsia', 'windows', 'web']) {
         void handleKey(RawKeyEvent event) {
