@@ -72,11 +72,8 @@ final Map<String, RecorderFactory> benchmarks = <String, RecorderFactory>{
 
   // HTML-only benchmarks
   if (!isCanvasKit) ...<String, RecorderFactory>{
-    BenchTextLayout.domBenchmarkName: () => BenchTextLayout.dom(),
     BenchTextLayout.canvasBenchmarkName: () => BenchTextLayout.canvas(),
-    BenchTextCachedLayout.domBenchmarkName: () => BenchTextCachedLayout.dom(),
     BenchTextCachedLayout.canvasBenchmarkName: () => BenchTextCachedLayout.canvas(),
-    BenchBuildColorsGrid.domBenchmarkName: () => BenchBuildColorsGrid.dom(),
     BenchBuildColorsGrid.canvasBenchmarkName: () => BenchBuildColorsGrid.canvas(),
   },
 };
