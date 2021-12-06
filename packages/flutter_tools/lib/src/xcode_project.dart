@@ -180,7 +180,7 @@ class IosProject extends XcodeBasedProject {
     // Try parsing the default, first.
     if (defaultInfoPlist.existsSync()) {
       try {
-        fromPlist = globals.plistParser.getValueFromFile(
+        fromPlist = globals.plistParser.getStringValueFromFile(
           defaultHostInfoPlist.path,
           PlistParser.kCFBundleIdentifierKey,
         );
@@ -332,7 +332,7 @@ class IosProject extends XcodeBasedProject {
       // The Info.plist file of a target contains the key WKCompanionAppBundleIdentifier,
       // if it is a watchOS companion app.
       if (infoFile.existsSync()) {
-        final String? fromPlist = globals.plistParser.getValueFromFile(infoFile.path, 'WKCompanionAppBundleIdentifier');
+        final String? fromPlist = globals.plistParser.getStringValueFromFile(infoFile.path, 'WKCompanionAppBundleIdentifier');
         if (bundleIdentifier == fromPlist) {
           return true;
         }
