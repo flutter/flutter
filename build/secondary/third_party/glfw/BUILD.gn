@@ -93,7 +93,15 @@ source_set("glfw") {
 
     defines = [ "_GLFW_COCOA" ]
 
-    cflags = [ "-Wno-deprecated-declarations" ]
+    cflags = [
+      "-Wno-deprecated-declarations",
+      "-Wno-objc-multiple-method-names",
+    ]
+
+    frameworks = [
+      "CoreVideo.framework",
+      "IOKit.framework",
+    ]
   }
 
   configs -= [ "//build/config/compiler:chromium_code" ]
