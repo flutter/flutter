@@ -168,7 +168,10 @@ static std::vector<std::string> ParseCommaDelimited(const std::string& input) {
 static bool IsAllowedDartVMFlag(const std::string& flag) {
   for (uint32_t i = 0; i < fml::size(gAllowedDartFlags); ++i) {
     const std::string& allowed = gAllowedDartFlags[i];
-    // Check that the prefix of the flag matches one of the allowed flags.
+    // Check that the prefix of the flag matches one of the allowed flags. This
+    // is to handle cases where flags take arguments, such as in
+    // "--max_profile_depth 1".
+    //
     // We don't need to worry about cases like "--safe --sneaky_dangerous" as
     // the VM will discard these as a single unrecognized flag.
     if (flag.length() >= allowed.length() &&
