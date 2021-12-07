@@ -213,8 +213,8 @@ class _MaterialScrollbar extends RawScrollbar {
     ScrollController? controller,
     bool? isAlwaysShown,
     this.trackVisibility,
-    this.buttonVisibility,
-    this.buttonStyles,
+    bool? buttonVisibility,
+    ScrollbarButtonStyles? buttonStyles,
     this.showTrackOnHover,
     this.hoverThickness,
     double? thickness,
@@ -222,24 +222,26 @@ class _MaterialScrollbar extends RawScrollbar {
     ScrollNotificationPredicate? notificationPredicate,
     bool? interactive,
     ScrollbarOrientation? scrollbarOrientation,
-  }) : super(
-         key: key,
-         child: child,
-         controller: controller,
-         isAlwaysShown: isAlwaysShown,
-         thickness: thickness,
-         radius: radius,
-         fadeDuration: _kScrollbarFadeDuration,
-         timeToFade: _kScrollbarTimeToFade,
-         pressDuration: Duration.zero,
-         notificationPredicate: notificationPredicate ?? defaultScrollNotificationPredicate,
-         interactive: interactive,
-         scrollbarOrientation: scrollbarOrientation,
-       );
+  }) : _buttonVisibility = buttonVisibility,
+    _buttonStyles = buttonStyles,
+    super(
+      key: key,
+      child: child,
+      controller: controller,
+      isAlwaysShown: isAlwaysShown,
+      thickness: thickness,
+      radius: radius,
+      fadeDuration: _kScrollbarFadeDuration,
+      timeToFade: _kScrollbarTimeToFade,
+      pressDuration: Duration.zero,
+      notificationPredicate: notificationPredicate ?? defaultScrollNotificationPredicate,
+      interactive: interactive,
+      scrollbarOrientation: scrollbarOrientation,
+    );
 
   final bool? trackVisibility;
-  final bool? buttonVisibility;
-  final ScrollbarButtonStyles? buttonStyles;
+  final bool? _buttonVisibility;
+  final ScrollbarButtonStyles? _buttonStyles;
   final bool? showTrackOnHover;
   final double? hoverThickness;
 
@@ -276,12 +278,12 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
   });
 
   MaterialStateProperty<bool> get _buttonVisibility => MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-    return widget.buttonVisibility ?? _scrollbarTheme.buttonVisibility?.resolve(states) ?? false;
+    return widget._buttonVisibility ?? _scrollbarTheme.buttonVisibility?.resolve(states) ?? false;
   });
 
   ScrollbarButtonStyles get _buttonStyles {
     final ScrollbarButtonStyles styles =
-        widget.buttonStyles ?? _scrollbarTheme.buttonStyles ?? const ScrollbarButtonStateStyles();
+        widget._buttonStyles ?? _scrollbarTheme.buttonStyles ?? const ScrollbarButtonStateStyles();
     final ScrollbarButtonColors leadingButtonColors = styles.leadingButtonColors;
     final ScrollbarButtonColors trailingButtonColors = styles.trailingButtonColors;
 

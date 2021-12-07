@@ -336,6 +336,8 @@ class ScrollbarTheme extends InheritedWidget {
 ///
 /// The default value follows the Windows platform style.
 class ScrollbarButtonStateStyles extends ScrollbarButtonStyles {
+  /// Creates a scrollbar button styles that can be used for
+  /// [ScrollbarThemeData.buttonStyles] or [Scrollbar.buttonStyles].
   const ScrollbarButtonStateStyles({
     ScrollbarButtonLocation location = ScrollbarButtonLocation.split,
     double extent = 18.0,
@@ -356,10 +358,12 @@ class ScrollbarButtonStateStyles extends ScrollbarButtonStyles {
 /// A scrollbar button colors style that supports customized colors with
 /// different states.
 ///
-/// Only the [ScrollBar] widget responds to this.
+/// Only the [Scrollbar] widget responds to this.
 ///
 /// The default value follows the Windows platform style.
 class ScrollbarButtonStateColors extends ScrollbarButtonColors {
+  /// Creates a scrollbar button color styles that can be used for
+  /// [ScrollbarButtonStateStyles].
   const ScrollbarButtonStateColors({
     Color? backgroundColor,
     this.hoveredBackgroundColor = const Color(0xFFD2D2D2),
@@ -377,6 +381,7 @@ class ScrollbarButtonStateColors extends ScrollbarButtonColors {
   /// The color of the button background when pressed.
   final Color? pressedBackgroundColor;
 
-  /// The color of the button indicator when the thumb reaches the corresponding edge.
+  /// The color of the button indicator when the thumb reaches the
+  /// corresponding edge.
   final Color? inactiveIndicatorColor;
 }

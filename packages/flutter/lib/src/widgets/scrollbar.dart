@@ -373,7 +373,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     notifyListeners();
   }
 
-  /// todo
+  /// The presentation style of the scrollbar button.
   ScrollbarButtonStyles? get buttonStyles => _buttonStyles;
   ScrollbarButtonStyles? _buttonStyles;
   set buttonStyles(ScrollbarButtonStyles? value) {
@@ -2347,9 +2347,9 @@ Offset _getLocalOffset(GlobalKey scrollbarPainterKey, Offset position) {
 }
 
 /// Define the presentation style of the scrollbar button.
-///
-/// The default value follows the Windows platform style.
 class ScrollbarButtonStyles {
+  /// Creates a scrollbar button styles that can be used for
+  /// [RawScrollbar.buttonStyles].
   const ScrollbarButtonStyles({
     this.location = ScrollbarButtonLocation.split,
     this.extent = 48.0,
@@ -2378,6 +2378,8 @@ class ScrollbarButtonStyles {
   final ScrollbarButtonColors trailingButtonColors;
 
   /// Get the leading or trailing button indicator's path.
+  ///
+  /// By default, a simple arrow path is returned.
   Path getIndicatorPath({
     required Rect buttonRect,
     required bool isLeading,
@@ -2427,6 +2429,8 @@ class ScrollbarButtonStyles {
 
 /// The color styles of the button.
 class ScrollbarButtonColors {
+  /// Creates a scrollbar button colors style that can be used for
+  /// [ScrollbarButtonStyles].
   const ScrollbarButtonColors({
     this.backgroundColor,
     this.indicatorColor = const Color(0xFF505050),
