@@ -417,6 +417,9 @@ class AndroidProject extends FlutterProjectPlatform {
   /// True if the parent Flutter project is a module.
   bool get isModule => parent.isModule;
 
+  /// True if the parent Flutter project is a plugin.
+  bool get isPlugin => parent.isPlugin;
+
   /// True if the Flutter project is using the AndroidX support library.
   bool get usesAndroidX => parent.usesAndroidX;
 
@@ -594,6 +597,13 @@ The detected reason was:
       // A module type's Android project is used in add-to-app scenarios and
       // only supports the V2 embedding.
       return AndroidEmbeddingVersionResult(AndroidEmbeddingVersion.v2, 'Is add-to-app module');
+    }
+    if (isPlugin) {
+      // Plugins do not use an appManifest, so we stop here.
+      //
+      // TODO(garyq): This method does not currently check for code references to
+      // the v1 embedding, we should check for this once removal is further along.
+      return AndroidEmbeddingVersionResult(AndroidEmbeddingVersion.v2, 'Is plugin');
     }
     if (appManifestFile == null || !appManifestFile.existsSync()) {
       return AndroidEmbeddingVersionResult(AndroidEmbeddingVersion.v1, 'No `${appManifestFile.absolute.path}` file');

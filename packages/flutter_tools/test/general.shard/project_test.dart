@@ -207,6 +207,13 @@ void main() {
         project.checkForDeprecation(deprecationBehavior: DeprecationBehavior.ignore);
         expect(testLogger.statusText, contains('https://flutter.dev/go/android-project-migration'));
       });
+      _testInMemory('Android plugin project does not throw v1 embedding deprecation warning', () async {
+        final FlutterProject project = await aPluginProject();
+
+        project.checkForDeprecation(deprecationBehavior: DeprecationBehavior.exit);
+        expect(testLogger.statusText, isNot(contains('https://flutter.dev/go/android-project-migration')));
+        expect(testLogger.statusText, isNot(contains('No `<meta-data android:name="flutterEmbedding" android:value="2"/>` in ')));
+      });
       _testInMemory('Android plugin without example app does not show a warning', () async {
         final FlutterProject project = await aPluginProject();
         project.example.directory.deleteSync();
