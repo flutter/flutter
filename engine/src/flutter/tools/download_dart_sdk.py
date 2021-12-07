@@ -143,16 +143,34 @@ class ZipFileWithPermissions(zipfile.ZipFile):
     return targetpath
 
 
+def OnErrorRmTree(func, path, exc_info):
+  """
+  Error handler for ``shutil.rmtree``.
+
+  If the error is due to an access error (read only file)
+  it attempts to add write permission and then retries.
+  If the error is for another reason it re-raises the error.
+
+  Usage : ``shutil.rmtree(path, onerror=onerror)``
+  """
+  import stat
+  # Is the error an access error?
+  if not os.access(path, os.W_OK):
+    os.chmod(path, stat.S_IWUSR)
+    func(path)
+  else:
+    raise
+
 # Extracts a Dart SDK in //fluter/prebuilts
 def ExtractDartSDK(archive, os_name, arch, verbose):
   os_arch = '{}-{}'.format(os_name, arch)
   dart_sdk = os.path.join(FLUTTER_PREBUILTS_DIR, os_arch, 'dart-sdk')
   if os.path.isdir(dart_sdk):
-    shutil.rmtree(dart_sdk)
+    shutil.rmtree(dart_sdk, onerror=OnErrorRmTree)
 
   extract_dest = os.path.join(FLUTTER_PREBUILTS_DIR, os_arch, 'temp')
   if os.path.isdir(extract_dest):
-    shutil.rmtree(extract_dest)
+    shutil.rmtree(extract_dest, onerror=OnErrorRmTree)
   os.makedirs(extract_dest, exist_ok=True)
 
   if verbose:
