@@ -304,7 +304,7 @@ class RestorationManager extends ChangeNotifier {
     );
   }
 
-  Future<Object?> _methodHandler(MethodCall call) async {
+  Future<void> _methodHandler(MethodCall call) async {
     switch (call.method) {
       case 'push':
         _parseAndHandleRestorationUpdateFromEngine(call.arguments as Map<Object?, Object?>);
@@ -312,7 +312,6 @@ class RestorationManager extends ChangeNotifier {
       default:
         throw UnimplementedError("${call.method} was invoked but isn't implemented by $runtimeType");
     }
-    return null;
   }
 
   Map<Object?, Object?>? _decodeRestorationData(Uint8List? data) {

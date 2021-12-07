@@ -1489,11 +1489,10 @@ class PrioritizedAction extends Action<PrioritizedIntents> {
   }
 
   @override
-  Object? invoke(PrioritizedIntents intent) {
+  void invoke(PrioritizedIntents intent) {
     assert(_selectedAction != null);
     assert(_selectedIntent != null);
     _selectedAction.invoke(_selectedIntent);
-    return null;
   }
 }
 

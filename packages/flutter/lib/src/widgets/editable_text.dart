@@ -3808,13 +3808,12 @@ class _CopySelectionAction extends ContextAction<CopySelectionTextIntent> {
   final EditableTextState state;
 
   @override
-  Object? invoke(CopySelectionTextIntent intent, [BuildContext? context]) {
+  void invoke(CopySelectionTextIntent intent, [BuildContext? context]) {
     if (intent.collapseSelection) {
       state.cutSelection(intent.cause);
     } else {
       state.copySelection(intent.cause);
     }
-    return null;
   }
 
   @override
