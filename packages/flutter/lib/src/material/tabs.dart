@@ -860,9 +860,9 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// If this property is null, it is interpreted as [BorderRadius.zero].
   ///
   /// For example, to match the `borderRadius` of [BoxDecoration] provided as
-  /// `indicator` to this [TabBar].
+  /// `indicator` to [TabBar].
   ///
-  /// If this property is null, then [BorderRadius.zero] is used.
+  /// If this property is null, it is interpreted as [BorderRadius.zero].
   final BorderRadius? splashBorderRadius;
 
   /// A size whose height depends on if the tabs have both icons and text.
