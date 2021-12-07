@@ -25,7 +25,7 @@ void AccessibilityBridgeDelegateWin32::DispatchAccessibilityAction(
     AccessibilityNodeId target,
     FlutterSemanticsAction action,
     fml::MallocMapping data) {
-  // TODO(cbracken): https://github.com/flutter/flutter/issues/77838
+  engine_->DispatchSemanticsAction(target, action, std::move(data));
 }
 
 std::shared_ptr<FlutterPlatformNodeDelegate>
