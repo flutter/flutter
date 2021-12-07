@@ -1774,13 +1774,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   /// Handler called when the pointer stops contacting the buttons.
   @protected
   @mustCallSuper
-  void handleButtonsPressUp({ required bool isLeadingButton }) {
-    // if (isLeadingButton) {
-    //   setState(() { _leadingButtonPressed = false; });
-    // } else {
-    //   setState(() { _trailingButtonPressed = false; });
-    // }
-  }
+  void handleButtonsPressUp({ required bool isLeadingButton }) {}
 
   /// Handler called when a press on the leading or trailing scrollbar's buttons
   /// has been recognized.
