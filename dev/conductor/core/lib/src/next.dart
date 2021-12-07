@@ -48,7 +48,7 @@ class NextCommand extends Command<void> {
   String get description => 'Proceed to the next release phase.';
 
   @override
-  Future<void> run() async {
+  Future<void> run() {
     final File stateFile = checkouts.fileSystem.file(argResults![kStateOption]);
     if (!stateFile.existsSync()) {
       throw ConductorException(
@@ -57,7 +57,7 @@ class NextCommand extends Command<void> {
     }
     final pb.ConductorState state = state_import.readStateFromFile(stateFile);
 
-    await NextContext(
+    return NextContext(
       autoAccept: argResults![kYesFlag] as bool,
       checkouts: checkouts,
       force: argResults![kForceFlag] as bool,
@@ -324,29 +324,37 @@ class NextContext extends Context {
             previousCheckoutLocation: state.framework.checkoutPath,
         );
         final String headRevision = await framework.reverseParse('HEAD');
-        if (autoAccept == false) {
-          // dryRun: true means print out git command
-          await framework.pushRef(
+        final List<String> releaseRefs = <String>[state.releaseChannel];
+        if (kSynchronizeDevWithBeta && state.releaseChannel == 'beta') {
+          releaseRefs.add('dev');
+        }
+        for (final String releaseRef in releaseRefs) {
+          if (autoAccept == false) {
+            // dryRun: true means print out git command
+            await framework.pushRef(
               fromRef: headRevision,
-              toRef: state.releaseChannel,
+              toRef: releaseRef,
               remote: state.framework.upstream.url,
               force: force,
               dryRun: true,
-          );
+            );
 
-          final bool response = await prompt('Are you ready to publish this release?');
-          if (!response) {
-            stdio.printError('Aborting command.');
-            updateState(state, stdio.logs);
-            return;
+            final bool response = await prompt(
+              'Are you ready to publish version ${state.releaseVersion} to $releaseRef?',
+            );
+            if (!response) {
+              stdio.printError('Aborting command.');
+              updateState(state, stdio.logs);
+              return;
+            }
           }
-        }
-        await framework.pushRef(
+          await framework.pushRef(
             fromRef: headRevision,
-            toRef: state.releaseChannel,
+            toRef: releaseRef,
             remote: state.framework.upstream.url,
             force: force,
-        );
+          );
+        }
         break;
       case pb.ReleasePhase.VERIFY_RELEASE:
         stdio.printStatus(
