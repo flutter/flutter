@@ -85,7 +85,7 @@ platform_properties:
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "open_jdk"}
         ]
-      os: Mac-10.15
+      os: Mac-12.0
       device_os: N
   mac_ios:
     properties:
