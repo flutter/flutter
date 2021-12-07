@@ -108,7 +108,6 @@ def DownloadDartSDK(channel, version, os_name, arch, verbose):
     url,
   ]
   if verbose:
-    curl_command.append('--verbose')
     print('Running: "%s"' % (' '.join(curl_command)))
   curl_result = subprocess.run(
     curl_command,
