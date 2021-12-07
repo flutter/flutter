@@ -207,12 +207,12 @@ void printStatus(
 
 /// Display the [message] inside a box.
 /// For example, this is the generated output:
-/// 
+///
 ///   ┌─ [title] ─┐
 ///   │ [message] │
 ///   └───────────┘
-/// 
-/// If a terminal is attached, the lines in [message] are automatically wrapped based on 
+///
+/// If a terminal is attached, the lines in [message] are automatically wrapped based on
 /// the available columns.
 void printBox(String message, {
   String? title,

@@ -505,55 +505,14 @@ class StdoutLogger extends Logger {
   void printBox(String message, {
     String? title,
   }) {
-    const int paddingLeftRight = 1;
-    const int edges = 2;
-
-    final int maxTextWidthPerLine = _outputPreferences.wrapColumn - edges - paddingLeftRight * 2;
-    final List<String> lines = wrapText(message, shouldWrap: true, columnWidth: maxTextWidthPerLine).split('\n');
-    final List<int> lineWidth = lines.map((String line) => _getColumnSize(line)).toList();
-    final int maxColumnSize = lineWidth.reduce((int currLen, int maxLen) => max(currLen, maxLen));
-    final int textWidth = min(maxColumnSize, maxTextWidthPerLine);
-    final int textWithPaddingWidth = textWidth + paddingLeftRight * 2;
-
     _status?.pause();
-    writeToStdOut('\n');
-
-    // Write `┌─ [title] ─┐`.
-    writeToStdOut('┌');
-    writeToStdOut('─');
-    if (title == null) {
-      writeToStdOut('─' * textWithPaddingWidth);
-    } else {
-      writeToStdOut(' ${terminal.bolden(title)} ');
-      writeToStdOut('─' * (textWithPaddingWidth - title.length - 3));
-    }
-    writeToStdOut('┐');
-    writeToStdOut('\n');
-    writeToStdOut('│');
-    writeToStdOut(' ' * textWithPaddingWidth);
-    writeToStdOut('│');
-    writeToStdOut('\n');
-
-    // Write `│ [message] │`.
-    for (int lineIdx = 0; lineIdx < lines.length; lineIdx++) {
-      writeToStdOut('│');
-      writeToStdOut(' ' * paddingLeftRight);
-      writeToStdOut(lines[lineIdx]);
-      writeToStdOut(' ' * (textWidth - lineWidth[lineIdx]));
-      writeToStdOut(' ' * paddingLeftRight);
-      writeToStdOut('│');
-      writeToStdOut('\n');
-    }
-
-    // Write `└───────────┘`.
-    writeToStdOut('│');
-    writeToStdOut(' ' * textWithPaddingWidth);
-    writeToStdOut('│');
-    writeToStdOut('\n');
-    writeToStdOut('└');
-    writeToStdOut('─' * textWithPaddingWidth);
-    writeToStdOut('┘');
-    writeToStdOut('\n');
+    generateBox(
+      title: title,
+      message: message,
+      wrapColumn: _outputPreferences.wrapColumn,
+      terminal: terminal,
+      write: writeToStdOut,
+    );
     _status?.resume();
   }
 
@@ -636,7 +595,67 @@ class StdoutLogger extends Logger {
   }
 }
 
+typedef _Writter = void Function(String message);
+
+void generateBox({
+  required String message,
+  required int wrapColumn,
+  required _Writter write,
+  required Terminal terminal,
+  String? title,
+}) {
+  const int kPaddingLeftRight = 1;
+  const int kEdges = 2;
+
+  final int maxTextWidthPerLine = wrapColumn - kEdges - kPaddingLeftRight * 2;
+  final List<String> lines = wrapText(message, shouldWrap: true, columnWidth: maxTextWidthPerLine).split('\n');
+  final List<int> lineWidth = lines.map((String line) => _getColumnSize(line)).toList();
+  final int maxColumnSize = lineWidth.reduce((int currLen, int maxLen) => max(currLen, maxLen));
+  final int textWidth = min(maxColumnSize, maxTextWidthPerLine);
+  final int textWithPaddingWidth = textWidth + kPaddingLeftRight * 2;
+
+  write('\n');
+
+  // Write `┌─ [title] ─┐`.
+  write('┌');
+  write('─');
+  if (title == null) {
+    write('─' * textWithPaddingWidth);
+  } else {
+    write(' ${terminal.bolden(title)} ');
+    write('─' * (textWithPaddingWidth - title.length - 3));
+  }
+  write('┐');
+  write('\n');
+  write('│');
+  write(' ' * textWithPaddingWidth);
+  write('│');
+  write('\n');
+
+  // Write `│ [message] │`.
+  for (int lineIdx = 0; lineIdx < lines.length; lineIdx++) {
+    write('│');
+    write(' ' * kPaddingLeftRight);
+    write(lines[lineIdx]);
+    final int remainingSpacesToEnd = textWidth - lineWidth[lineIdx];
+    write(' ' * (remainingSpacesToEnd + kPaddingLeftRight));
+    write('│');
+    write('\n');
+  }
+
+  // Write `└───────────┘`.
+  write('│');
+  write(' ' * textWithPaddingWidth);
+  write('│');
+  write('\n');
+  write('└');
+  write('─' * textWithPaddingWidth);
+  write('┘');
+  write('\n');
+}
+
 final RegExp _ansiEscapePattern = RegExp(r'(\u001B|\u001b)\[[0-9]+[a-zA-Z]+');
+
 int _getColumnSize(String line) {
   // Remove ANSI escape characters from the string.
   return line.replaceAll(_ansiEscapePattern, '').length;
@@ -797,11 +816,13 @@ class BufferLogger extends Logger {
   void printBox(String message, {
     String? title,
   }) {
-    if (title != null) {
-      _status.write(title);
-      _status.write('\n');
-    }
-    _status.write(message);
+    generateBox(
+      title: title,
+      message: message,
+      wrapColumn: _outputPreferences.wrapColumn,
+      terminal: terminal,
+      write: _status.write,
+    );
   }
 
   @override

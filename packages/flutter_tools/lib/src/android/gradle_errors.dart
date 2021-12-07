@@ -287,7 +287,7 @@ final GradleHandledError licenseNotAcceptedHandler = GradleHandledError(
     final Match? licenseMatch = licenseFailure.firstMatch(line);
     globals.printBox(
       '${globals.logger.terminal.warningMark} Unable to download needed Android SDK components, as the '
-      'following licenses have not been accepted:\n'
+      'following licenses have not been accepted: '
       '${licenseMatch?.group(1)}\n\n'
       'To resolve this, please run the following command in a Terminal:\n'
       'flutter doctor --android-licenses',
@@ -351,19 +351,19 @@ final GradleHandledError flavorUndefinedHandler = GradleHandledError(
       }
     }
     final String errorMessage = '${globals.logger.terminal.warningMark}  Gradle project does not define a task suitable for the requested build.';
-
+    final File buildGradle = project.directory.childDirectory('android').childDirectory('app').childFile('build.gradle');
     if (productFlavors.isEmpty) {
       globals.printBox(
-        '$errorMessage\n'
-        'The android/app/build.gradle file does not define '
+        '$errorMessage\n\n'
+        'The ${buildGradle.absolute.path} file does not define '
         'any custom product flavors. '
         'You cannot use the --flavor option.',
         title: _boxTitle,
       );
     } else {
       globals.printBox(
-        '$errorMessage\n'
-        'The android/app/build.gradle file defines product '
+        '$errorMessage\n\n'
+        'The ${buildGradle.absolute.path} file defines product '
         'flavors: ${productFlavors.join(', ')} '
         'You must specify a --flavor option to select one of them.',
         title: _boxTitle,
@@ -469,7 +469,7 @@ final GradleHandledError lockFileDepMissing = GradleHandledError(
         .childFile('build.gradle');
     final String textInBold = globals.logger.terminal.bolden(
       'To regenerate the lockfiles run: `./gradlew :generateLockfiles` in ${gradleFile.path}\n'
-      'To remove dependency locking, remove the `dependencyLocking` from ${gradleFile.path}\n'
+      'To remove dependency locking, remove the `dependencyLocking` from ${gradleFile.path}'
     );
     globals.printBox(
       'You need to update the lockfile, or disable Gradle dependency locking.\n'
