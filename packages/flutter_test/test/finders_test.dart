@@ -265,6 +265,43 @@ void main() {
 
     expect(text.data, '1');
   });
+
+  testWidgets('finds multiple subtypes', (WidgetTester tester) async {
+    await tester.pumpWidget(_boilerplate(Row(children: <Widget>[
+      Column(children: <Widget>[
+        Text('Hello'),
+        Text('World'),
+      ]),
+      Column(children: <Widget>[
+        Image(image: FileImage(File('test'))),
+      ]),
+      PopUpMenuButton<int>(
+          itemBuilder: (BuildContext context) => <PopupMenuItem<int>>[
+                const PopupMenuItem<int>(value: 1, child: Text('one')),
+              ]),
+      PopUpMenuButton<double>(
+          itemBuilder: (BuildContext context) => <PopupMenuItem<double>>[
+                const PopupMenuItem<double>(value: 3.14, child: Text('pi')),
+              ]),
+      PopUpMenuButton<String>(
+          itemBuilder: (BuildContext context) => <PopupMenuItem<String>>[
+                const PopupMenuItem<String>(value: '2', child: Text('two')),
+              ]),
+    ])));
+
+    expect(find.bySubtype<Row>(), findsOneWidget);
+    expect(find.bySubtype<Column>(), findsNWidgets(2));
+    // Finds both rows and columns.
+    expect(find.bySubtype<Flex>(), findsNWidgets(3));
+
+    // Finds only the requested generic subtypes.
+    expect(find.bySubtype<PopupMenuButton<int>>(), findsOneWidget);
+    expect(find.bySubtype<PopupMenuButton<num>>(), findsNWidgets(2));
+    expect(find.bySubtype<PopupMenuButton<Object>>(), findsNWidgets(3));
+
+    // Finds all widgets.
+    expect(find.bySubtype<Widget>(), findsNWidgets(12));
+  });
 }
 
 Widget _boilerplate(Widget child) {
