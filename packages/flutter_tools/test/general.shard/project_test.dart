@@ -209,9 +209,6 @@ void main() {
       });
       _testInMemory('Android plugin project does not throw v1 embedding deprecation warning', () async {
         final FlutterProject project = await aPluginProject();
-        // The default someProject with an empty <manifest> already indicates
-        // v1 embedding, as opposed to having <meta-data
-        // android:name="flutterEmbedding" android:value="2" />.
         expect(testLogger.statusText, isNot(contains('https://flutter.dev/go/android-project-migration')));
         expect(testLogger.statusText, isNot(contains('No `<meta-data android:name="flutterEmbedding" android:value="2"/>` in ')));
       });
