@@ -192,7 +192,7 @@ static int assertOneMessageAndGetSequenceNumber(NSMutableDictionary* messages, N
   XCTAssertNotEqual(lastHoverSequenceNumber, -1,
                     @"PointerChange.hover event did not occur for a hover");
   NSString* removeMessage = [NSString
-      stringWithFormat:@"%ld,PointerChange.remove,device=0,buttons=0", lastHoverSequenceNumber + 1];
+      stringWithFormat:@"%d,PointerChange.remove,device=0,buttons=0", lastHoverSequenceNumber + 1];
   XCTAssertTrue([app.textFields[removeMessage] waitForExistenceWithTimeout:1],
                 @"PointerChange.remove event did not occur for a hover");
 }
