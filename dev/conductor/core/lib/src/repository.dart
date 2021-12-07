@@ -556,7 +556,7 @@ class FrameworkRepository extends Repository {
   }
 
   @override
-  Future<Repository> cloneRepository(String? cloneName) async {
+  Future<FrameworkRepository> cloneRepository(String? cloneName) async {
     assert(localUpstream);
     cloneName ??= 'clone-of-$name';
     return FrameworkRepository(
