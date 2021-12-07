@@ -1511,7 +1511,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
     if (_listeners.isEmpty) {
       return;
     }
-    final List<ValueChanged<FocusHighlightMode>> localListeners = List<ValueChanged<FocusHighlightMode>>.from(_listeners);
+    final List<ValueChanged<FocusHighlightMode>> localListeners = List<ValueChanged<FocusHighlightMode>>.of(_listeners);
     for (final ValueChanged<FocusHighlightMode> listener in localListeners) {
       try {
         if (_listeners.contains(listener)) {
