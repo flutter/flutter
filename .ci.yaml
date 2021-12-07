@@ -1834,7 +1834,6 @@ targets:
 
   - name: Linux android views
     recipe: flutter/android_views
-    presubmit: true
     properties:
       dependencies: >-
         [
@@ -1848,7 +1847,6 @@ targets:
 
   - name: Linux deferred components
     recipe: flutter/deferred_components
-    presubmit: true
     properties:
       dependencies: >-
         [
