@@ -225,6 +225,8 @@ TEST_F(RendererTest, CanRenderToTexture) {
     TextureDescriptor stencil_texture_desc;
     stencil_texture_desc.size = texture_descriptor.size;
     stencil_texture_desc.format = PixelFormat::kD32FloatS8UNormInt;
+    stencil_texture_desc.usage =
+        static_cast<TextureUsageMask>(TextureUsage::kRenderTarget);
     stencil0.texture = context->GetPermanentsAllocator()->CreateTexture(
         StorageMode::kDeviceTransient, stencil_texture_desc);
 
@@ -262,75 +264,6 @@ TEST_F(RendererTest, CanRenderToTexture) {
       cmd, r2t_pass->GetTransientsBuffer().EmplaceUniform(uniforms));
   ASSERT_TRUE(r2t_pass->AddCommand(std::move(cmd)));
   ASSERT_TRUE(r2t_pass->EncodeCommands(*context->GetTransientsAllocator()));
-}
-
-TEST_F(RendererTest, CanRenderPath) {
-  auto path = PathBuilder{}.AddCircle({550, 550}, 500).CreatePath();
-  ASSERT_FALSE(path.GetBoundingBox().has_value());
-
-  using BoxPipeline = PipelineT<BoxFadeVertexShader, BoxFadeFragmentShader>;
-  using VS = BoxFadeVertexShader;
-  using FS = BoxFadeFragmentShader;
-
-  BoxPipeline box_pipeline(*GetContext());
-
-  // Vertex buffer.
-  VertexBufferBuilder<VS::PerVertexData> vertex_builder;
-  vertex_builder.SetLabel("Box");
-
-  Tessellator tessellator;
-  ASSERT_TRUE(tessellator.Tessellate(
-      path.CreatePolyline({}), [&vertex_builder](Point point) {
-        VS::PerVertexData vtx;
-        vtx.vertex_position = {point.x, point.y, 0.0};
-        vtx.texture_coordinates = {0.5, 0.5};
-        vertex_builder.AppendVertex(vtx);
-      }));
-
-  auto context = GetContext();
-
-  auto vertex_buffer =
-      vertex_builder.CreateVertexBuffer(*context->GetPermanentsAllocator());
-  ASSERT_TRUE(vertex_buffer);
-
-  auto bridge = CreateTextureForFixture("bay_bridge.jpg");
-  auto boston = CreateTextureForFixture("boston.jpg");
-  ASSERT_TRUE(bridge && boston);
-  auto sampler = context->GetSamplerLibrary()->GetSampler({});
-  ASSERT_TRUE(sampler);
-
-  Renderer::RenderCallback callback = [&](RenderPass& pass) {
-    Command cmd;
-    cmd.label = "Box";
-    cmd.pipeline = box_pipeline.WaitAndGet();
-
-    cmd.BindVertices(vertex_buffer);
-
-    FS::FrameInfo frame_info;
-    frame_info.current_time = fml::TimePoint::Now().ToEpochDelta().ToSecondsF();
-    frame_info.cursor_position = GetCursorPosition();
-    frame_info.window_size.x = GetWindowSize().width;
-    frame_info.window_size.y = GetWindowSize().height;
-
-    FS::BindFrameInfo(cmd,
-                      pass.GetTransientsBuffer().EmplaceUniform(frame_info));
-    FS::BindContents1(cmd, boston, sampler);
-    FS::BindContents2(cmd, bridge, sampler);
-
-    cmd.primitive_type = PrimitiveType::kTriangle;
-    cmd.winding = tessellator.GetFrontFaceWinding();
-
-    VS::UniformBuffer uniforms;
-    uniforms.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize());
-    VS::BindUniformBuffer(cmd,
-                          pass.GetTransientsBuffer().EmplaceUniform(uniforms));
-    if (!pass.AddCommand(cmd)) {
-      return false;
-    }
-
-    return true;
-  };
-  // OpenPlaygroundHere(callback);
 }
 
 }  // namespace testing
