@@ -33,8 +33,14 @@ static const double kRmseThreshold = 0.5;
     os_log_error(OS_LOG_DEFAULT, "GOLDEN DIFF FAILED: image does not exists.");
     return NO;
   }
-  CGImageRef imageRefA = [self.image CGImage];
-  CGImageRef imageRefB = [image CGImage];
+
+  // The home bar at the bottom of the screen can be different shades of gray
+  // depending on how long ago it animated in. This differences causes golden flakes.
+  // Adjust the height by 25 to crop put the home bar. This value may need to be adjusted
+  // depending on SDK and device type captured in the goldens.
+  CGRect imageRect = {CGPointZero, CGSizeMake(image.size.width, image.size.height - 25)};
+  CGImageRef imageRefA = CGImageCreateWithImageInRect(self.image.CGImage, imageRect);
+  CGImageRef imageRefB = CGImageCreateWithImageInRect(image.CGImage, imageRect);
 
   NSUInteger widthA = CGImageGetWidth(imageRefA);
   NSUInteger heightA = CGImageGetHeight(imageRefA);
