@@ -1764,16 +1764,11 @@ class OpacityLayer extends OffsetLayer {
   @override
   void addToScene(ui.SceneBuilder builder) {
     assert(alpha != null);
-
-    // Don't add this layer if there's no child.
-    bool enabled = firstChild != null;
+    bool enabled = firstChild != null;  // don't add this layer if there's no child
     if (!enabled) {
-      // Ensure the engineLayer is disposed.
-      engineLayer = null;
       // TODO(dnfield): Remove this if/when we can fix https://github.com/flutter/flutter/issues/90004
       return;
     }
-
     assert(() {
       enabled = enabled && !debugDisableOpacityLayers;
       return true;
