@@ -109,6 +109,7 @@ source_set("subzero") {
     "$source_root/third_party/subzero",
     "$source_root/third_party/subzero/pnacl-llvm/include",
     "$source_root/third_party/llvm-subzero/include",
+    "$source_root/third_party/marl/include",
   ]
 
   if (is_win) {
@@ -272,6 +273,7 @@ source_set("pipeline") {
     "$source_root/src/Pipeline/SpirvShader.cpp",
     "$source_root/src/Pipeline/SpirvShaderArithmetic.cpp",
     "$source_root/src/Pipeline/SpirvShaderControlFlow.cpp",
+    "$source_root/src/Pipeline/SpirvShaderDebugger.cpp",
     "$source_root/src/Pipeline/SpirvShaderEnumNames.cpp",
     "$source_root/src/Pipeline/SpirvShaderGLSLstd450.cpp",
     "$source_root/src/Pipeline/SpirvShaderGroup.cpp",
@@ -287,6 +289,7 @@ source_set("pipeline") {
     "$source_root/src",
     "$source_root/include",
     "$source_root/third_party/SPIRV-Headers/include",
+    "$source_root/third_party/SPIRV-Tools/include",
     "$source_root/third_party/marl/include",
   ]
 }
@@ -640,20 +643,19 @@ source_set("device") {
   ]
 
   sources = [
+    "$source_root/src/Device/ASTC_Decoder.cpp",
+    "$source_root/src/Device/BC_Decoder.cpp",
     "$source_root/src/Device/Blitter.cpp",
     "$source_root/src/Device/Clipper.cpp",
     "$source_root/src/Device/Color.cpp",
     "$source_root/src/Device/Config.cpp",
     "$source_root/src/Device/Context.cpp",
     "$source_root/src/Device/ETC_Decoder.cpp",
-    "$source_root/src/Device/Matrix.cpp",
     "$source_root/src/Device/PixelProcessor.cpp",
     "$source_root/src/Device/Plane.cpp",
-    "$source_root/src/Device/Point.cpp",
     "$source_root/src/Device/QuadRasterizer.cpp",
     "$source_root/src/Device/Renderer.cpp",
     "$source_root/src/Device/SetupProcessor.cpp",
-    "$source_root/src/Device/Vector.cpp",
     "$source_root/src/Device/VertexProcessor.cpp",
   ]
 }
@@ -805,6 +807,7 @@ shared_library("gles") {
   ]
 
   deps = [
+    ":marl",
     ":opengl_common",
     ":opengl_compiler",
     ":reactor",
@@ -893,7 +896,6 @@ shared_library("vulkan") {
     "$source_root/src/Vulkan/VkBufferView.cpp",
     "$source_root/src/Vulkan/VkCommandBuffer.cpp",
     "$source_root/src/Vulkan/VkCommandPool.cpp",
-    "$source_root/src/Vulkan/VkDebug.cpp",
     "$source_root/src/Vulkan/VkDescriptorPool.cpp",
     "$source_root/src/Vulkan/VkDescriptorSetLayout.cpp",
     "$source_root/src/Vulkan/VkDescriptorUpdateTemplate.cpp",
@@ -987,6 +989,8 @@ template("spvtools_core_tables") {
     core_insts_file = "${target_gen_dir}/core.insts-$version.inc"
     operand_kinds_file = "${target_gen_dir}/operand.kinds-$version.inc"
     extinst_file = "$spirv_tools/source/extinst.debuginfo.grammar.json"
+    extinst_opencl_file =
+        "$spirv_tools/source/extinst.opencl.debuginfo.100.grammar.json"
 
     sources = [ core_json_file ]
     outputs = [
@@ -1002,6 +1006,8 @@ template("spvtools_core_tables") {
       rebase_path(extinst_file, root_build_dir),
       "--operand-kinds-output",
       rebase_path(operand_kinds_file, root_build_dir),
+      "--extinst-cldebuginfo100-grammar",
+      rebase_path(extinst_opencl_file, root_build_dir),
     ]
   }
 }
@@ -1019,6 +1025,8 @@ template("spvtools_core_enums") {
     debug_insts_file = "$spirv_tools/source/extinst.debuginfo.grammar.json"
     extension_enum_file = "${target_gen_dir}/extension_enum.inc"
     extension_map_file = "${target_gen_dir}/enum_string_mapping.inc"
+    extinst_opencl_file =
+        "$spirv_tools/source/extinst.opencl.debuginfo.100.grammar.json"
 
     args = [
       "--spirv-core-grammar",
@@ -1029,6 +1037,8 @@ template("spvtools_core_enums") {
       rebase_path(extension_enum_file, root_build_dir),
       "--enum-string-mapping-output",
       rebase_path(extension_map_file, root_build_dir),
+      "--extinst-cldebuginfo100-grammar",
+      rebase_path(extinst_opencl_file, root_build_dir),
     ]
     inputs = [ core_json_file ]
     outputs = [
@@ -1051,6 +1061,8 @@ template("spvtools_glsl_tables") {
     glsl_json_file = "${spirv_headers}/include/spirv/${version}/extinst.glsl.std.450.grammar.json"
     glsl_insts_file = "${target_gen_dir}/glsl.std.450.insts.inc"
     debug_insts_file = "$spirv_tools/source/extinst.debuginfo.grammar.json"
+    extinst_opencl_file =
+        "$spirv_tools/source/extinst.opencl.debuginfo.100.grammar.json"
 
     args = [
       "--spirv-core-grammar",
@@ -1061,6 +1073,8 @@ template("spvtools_glsl_tables") {
       rebase_path(glsl_insts_file, root_build_dir),
       "--extinst-debuginfo-grammar",
       rebase_path(debug_insts_file, root_build_dir),
+      "--extinst-cldebuginfo100-grammar",
+      rebase_path(extinst_opencl_file, root_build_dir),
     ]
     inputs = [
       core_json_file,
@@ -1083,6 +1097,8 @@ template("spvtools_opencl_tables") {
     opengl_json_file = "${spirv_headers}/include/spirv/${version}/extinst.opencl.std.100.grammar.json"
     opencl_insts_file = "${target_gen_dir}/opencl.std.insts.inc"
     debug_insts_file = "$spirv_tools/source/extinst.debuginfo.grammar.json"
+    extinst_opencl_file =
+        "$spirv_tools/source/extinst.opencl.debuginfo.100.grammar.json"
 
     args = [
       "--spirv-core-grammar",
@@ -1093,6 +1109,8 @@ template("spvtools_opencl_tables") {
       rebase_path(opencl_insts_file, root_build_dir),
       "--extinst-debuginfo-grammar",
       rebase_path(debug_insts_file, root_build_dir),
+      "--extinst-cldebuginfo100-grammar",
+      rebase_path(extinst_opencl_file, root_build_dir),
     ]
     inputs = [
       core_json_file,
@@ -1104,13 +1122,16 @@ template("spvtools_opencl_tables") {
 
 template("spvtools_language_header") {
   assert(defined(invoker.name), "Need name in $target_name generation.")
+  assert(defined(invoker.grammar_file),
+         "Need grammar_file in $target_name generation.")
 
   action("spvtools_language_header_" + target_name) {
     script = "$spirv_tools/utils/generate_language_headers.py"
 
     name = invoker.name
+    grammar_file = invoker.grammar_file
     extinst_output_base = "${target_gen_dir}/${name}"
-    debug_insts_file = "$spirv_tools/source/extinst.debuginfo.grammar.json"
+    debug_insts_file = "${grammar_file}"
 
     args = [
       "--extinst-name",
@@ -1140,6 +1161,8 @@ template("spvtools_vendor_table") {
       rebase_path(extinst_vendor_grammar, root_build_dir),
       "--vendor-insts-output",
       rebase_path(extinst_file, root_build_dir),
+      "--vendor-operand-kind-prefix",
+      invoker.operand_kind_prefix,
     ]
     inputs = [ extinst_vendor_grammar ]
     outputs = [ extinst_file ]
@@ -1190,19 +1213,44 @@ spvtools_opencl_tables("opencl1-0") {
 }
 spvtools_language_header("unified1") {
   name = "DebugInfo"
+  grammar_file = "$spirv_tools/source/extinst.debuginfo.grammar.json"
+}
+spvtools_language_header("unified1_opencl") {
+  name = "OpenCLDebugInfo100"
+  grammar_file = "$spirv_tools/source/extinst.opencl.debuginfo.100.grammar.json"
 }
 
 spvtools_vendor_tables = [
-  "spv-amd-shader-explicit-vertex-parameter",
-  "spv-amd-shader-trinary-minmax",
-  "spv-amd-gcn-shader",
-  "spv-amd-shader-ballot",
-  "debuginfo",
+  [
+    "spv-amd-shader-explicit-vertex-parameter",
+    "...nil...",
+  ],
+  [
+    "spv-amd-shader-trinary-minmax",
+    "...nil...",
+  ],
+  [
+    "spv-amd-gcn-shader",
+    "...nil...",
+  ],
+  [
+    "spv-amd-shader-ballot",
+    "...nil...",
+  ],
+  [
+    "debuginfo",
+    "...nil...",
+  ],
+  [
+    "opencl.debuginfo.100",
+    "CLDEBUG100_",
+  ],
 ]
 
-foreach(table, spvtools_vendor_tables) {
-  spvtools_vendor_table(table) {
-    name = table
+foreach(table_def, spvtools_vendor_tables) {
+  spvtools_vendor_table(table_def[0]) {
+    name = table_def[0]
+    operand_kind_prefix = table_def[1]
   }
 }
 
@@ -1215,6 +1263,7 @@ config("spvtools_internal_config") {
     "$spirv_tools",
     "$target_gen_dir",
     "${spirv_headers}/include",
+    "$target_gen_dir/third_party/spirv_tools_flutter",
   ]
 
   configs = [ ":spvtools_public_config" ]
@@ -1236,9 +1285,11 @@ source_set("spvtools") {
     ":spvtools_generators_inc",
     ":spvtools_glsl_tables_glsl1-0",
     ":spvtools_language_header_unified1",
+    ":spvtools_language_header_unified1_opencl",
     ":spvtools_opencl_tables_opencl1-0",
   ]
-  foreach(target_name, spvtools_vendor_tables) {
+  foreach(table_def, spvtools_vendor_tables) {
+    target_name = table_def[0]
     deps += [ ":spvtools_vendor_tables_$target_name" ]
   }
 
