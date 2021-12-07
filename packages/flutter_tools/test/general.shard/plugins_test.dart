@@ -1632,6 +1632,11 @@ class FakeAndroidProject extends Fake implements AndroidProject {
   AndroidEmbeddingVersion getEmbeddingVersion() {
     return embeddingVersion;
   }
+
+  @override
+  AndroidEmbeddingVersionResult computeEmbeddingVersion() {
+    return AndroidEmbeddingVersionResult(embeddingVersion, 'reasons for version');
+  }
 }
 
 class FakeWebProject extends Fake implements WebProject {

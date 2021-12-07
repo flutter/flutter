@@ -74,7 +74,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                         },
                         value: UnfocusDisposition.values[index],
                       ),
-                      Text(describeEnum(UnfocusDisposition.values[index])),
+                      Text(UnfocusDisposition.values[index].name),
                     ],
                   );
                 }),
