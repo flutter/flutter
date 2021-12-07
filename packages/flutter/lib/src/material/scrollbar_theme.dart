@@ -371,7 +371,12 @@ class ScrollbarButtonStateColors extends ScrollbarButtonColors {
     indicatorColor: indicatorColor,
   );
 
+  /// The color of the button background when hovered.
   final Color? hoveredBackgroundColor;
+
+  /// The color of the button background when pressed.
   final Color? pressedBackgroundColor;
+
+  /// The color of the button indicator when the thumb reaches the corresponding edge.
   final Color? inactiveIndicatorColor;
 }

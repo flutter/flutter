@@ -282,8 +282,8 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
   ScrollbarButtonStyles get _buttonStyles {
     final ScrollbarButtonStyles styles =
         widget.buttonStyles ?? _scrollbarTheme.buttonStyles ?? const ScrollbarButtonStateStyles();
-    ScrollbarButtonColors leadingButtonColors = styles.leadingButtonColors;
-    ScrollbarButtonColors trailingButtonColors = styles.trailingButtonColors;
+    final ScrollbarButtonColors leadingButtonColors = styles.leadingButtonColors;
+    final ScrollbarButtonColors trailingButtonColors = styles.trailingButtonColors;
 
     Color leadingIndicatorColor = leadingButtonColors.indicatorColor;
     Color leadingBackgroundColor = leadingButtonColors.backgroundColor ?? _trackColor.resolve(_states);

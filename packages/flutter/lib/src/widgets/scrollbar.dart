@@ -495,12 +495,12 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
           trackOffset = trailingButtonOffset + Offset(0.0, _buttonExtent);
         } else {
           assert(buttonStyles!.location == ScrollbarButtonLocation.groupedTrailing);
-          trackOffset = Offset(x - crossAxisMargin, padding.top + mainAxisMargin);
+          trackOffset = Offset(x - crossAxisMargin, mainAxisMargin + padding.top);
           leadingButtonOffset = trackOffset + Offset(0.0, _trackExtent);
           trailingButtonOffset = leadingButtonOffset + Offset(0.0, _buttonExtent);
         }
-        borderStart = leadingButtonOffset + Offset(trackSize.width, 0.0);
-        borderEnd = Offset(leadingButtonOffset.dx + trackSize.width, leadingButtonOffset.dy + _trackExtent + _buttonExtent * 2.0);
+        borderStart = Offset(x - crossAxisMargin, mainAxisMargin + padding.top) + Offset(trackSize.width, 0.0);
+        borderEnd = Offset(borderStart.dx, borderStart.dy + _trackExtent + _buttonExtent * 2.0);
         break;
       case ScrollbarOrientation.right:
         thumbSize = Size(thickness, thumbExtent);
@@ -515,15 +515,15 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
         } else if (buttonStyles!.location == ScrollbarButtonLocation.groupedLeading) {
           leadingButtonOffset = Offset(x - crossAxisMargin, mainAxisMargin + padding.top);
           trailingButtonOffset = leadingButtonOffset + Offset(0.0, _buttonExtent);
-          trackOffset = trailingButtonOffset + Offset(0.0, _trackExtent);
+          trackOffset = trailingButtonOffset + Offset(0.0, _buttonExtent);
         } else {
           assert(buttonStyles!.location == ScrollbarButtonLocation.groupedTrailing);
-          trackOffset = Offset(x - crossAxisMargin, padding.top + mainAxisMargin);
+          trackOffset = Offset(x - crossAxisMargin, mainAxisMargin + padding.top);
           leadingButtonOffset = trackOffset + Offset(0.0, _trackExtent);
           trailingButtonOffset = leadingButtonOffset + Offset(0.0, _buttonExtent);
         }
-        borderStart = leadingButtonOffset;
-        borderEnd = Offset(leadingButtonOffset.dx, leadingButtonOffset.dy + _trackExtent + _buttonExtent * 2.0);
+        borderStart = Offset(x - crossAxisMargin, mainAxisMargin + padding.top);
+        borderEnd = Offset(borderStart.dx, borderStart.dy + _trackExtent + _buttonExtent * 2.0);
         break;
       case ScrollbarOrientation.top:
         thumbSize = Size(thumbExtent, thickness);
@@ -545,8 +545,8 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
           leadingButtonOffset = trackOffset + Offset(_trackExtent, 0.0);
           trailingButtonOffset = leadingButtonOffset + Offset(_buttonExtent, 0.0);
         }
-        borderStart = leadingButtonOffset + Offset(0.0, trackSize.height);
-        borderEnd = Offset(leadingButtonOffset.dx + _trackExtent + _buttonExtent * 2.0, leadingButtonOffset.dy + trackSize.height);
+        borderStart = Offset(mainAxisMargin + padding.left, y - crossAxisMargin) + Offset(0.0, trackSize.height);
+        borderEnd = Offset(borderStart.dx + _trackExtent + _buttonExtent * 2.0, borderStart.dy);
         break;
       case ScrollbarOrientation.bottom:
         thumbSize = Size(thumbExtent, thickness);
@@ -568,8 +568,8 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
           leadingButtonOffset = trackOffset + Offset(_trackExtent, 0.0);
           trailingButtonOffset = leadingButtonOffset + Offset(_buttonExtent, 0.0);
         }
-        borderStart = leadingButtonOffset;
-        borderEnd = Offset(leadingButtonOffset.dx + _trackExtent + _buttonExtent * 2.0, leadingButtonOffset.dy);
+        borderStart = Offset(mainAxisMargin + padding.left, y - crossAxisMargin);
+        borderEnd = Offset(borderStart.dx + _trackExtent + _buttonExtent * 2.0, borderStart.dy);
         break;
     }
 
@@ -885,7 +885,10 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
       return false;
     }
 
-    return _thumbRect!.contains(position!);
+    return _thumbRect!.contains(position!)
+      || _trackRect!.contains(position)
+      || _leadingButtonRect.contains(position)
+      || _trailingButtonRect.contains(position);
   }
 
   @override
@@ -2400,7 +2403,6 @@ class ScrollbarButtonStyles {
             ..lineTo(indicatorRect.bottomCenter.dx, indicatorRect.bottomCenter.dy)
             ..lineTo(indicatorRect.topRight.dx, indicatorRect.topRight.dy);
         }
-        break;
       case ScrollbarOrientation.top:
       case ScrollbarOrientation.bottom:
         indicatorRect = Rect.fromCenter(
@@ -2419,7 +2421,6 @@ class ScrollbarButtonStyles {
             ..lineTo(indicatorRect.centerRight.dx, indicatorRect.centerRight.dy)
             ..lineTo(indicatorRect.bottomLeft.dx, indicatorRect.bottomLeft.dy);
         }
-        break;
     }
   }
 }
