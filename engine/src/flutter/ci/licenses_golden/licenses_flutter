@@ -1697,6 +1697,7 @@ FILE: ../../../flutter/shell/platform/linux/public/flutter_linux/fl_view.h
 FILE: ../../../flutter/shell/platform/linux/public/flutter_linux/flutter_linux.h
 FILE: ../../../flutter/shell/platform/windows/accessibility_bridge_delegate_win32.cc
 FILE: ../../../flutter/shell/platform/windows/accessibility_bridge_delegate_win32.h
+FILE: ../../../flutter/shell/platform/windows/accessibility_bridge_delegate_win32_unittests.cc
 FILE: ../../../flutter/shell/platform/windows/accessibility_bridge_delegate_winuwp.cc
 FILE: ../../../flutter/shell/platform/windows/accessibility_bridge_delegate_winuwp.h
 FILE: ../../../flutter/shell/platform/windows/angle_surface_manager.cc

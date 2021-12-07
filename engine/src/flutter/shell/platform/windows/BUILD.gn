@@ -251,6 +251,7 @@ executable("flutter_windows_unittests") {
   } else {
     sources += [
       # TODO move first two tests to common once above TODO's unblocked.
+      "accessibility_bridge_delegate_win32_unittests.cc",
       "dpi_utils_win32_unittests.cc",
       "flutter_project_bundle_unittests.cc",
       "flutter_window_win32_unittests.cc",
