@@ -196,6 +196,7 @@ void main() {
           contains('Build failed due to use of deprecated Android v1 embedding.')
         );
         expect(testLogger.statusText, contains('https://flutter.dev/go/android-project-migration'));
+        expect(testLogger.statusText, contains('No `<meta-data android:name="flutterEmbedding" android:value="2"/>` in '));
       });
       _testInMemory('Android project not on v2 embedding ignore continues', () async {
         final FlutterProject project = await someProject();

@@ -148,7 +148,7 @@ class ImageConfiguration {
     if (platform != null) {
       if (hasArguments)
         result.write(', ');
-      result.write('platform: ${describeEnum(platform!)}');
+      result.write('platform: ${platform!.name}');
       hasArguments = true;
     }
     result.write(')');
