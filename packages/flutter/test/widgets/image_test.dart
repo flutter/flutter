@@ -1966,9 +1966,13 @@ void main() {
     final File file = File.fromUri(uri);
     expect(
       () => Image.file(file),
-      throwsA(predicate((AssertionError e) => e.message == expectedError)),
+      kIsWeb
+        // Web does not support file access, expect AssertionError
+        ? throwsA(predicate((AssertionError e) => e.message == expectedError))
+        // AOT supports file access, expect constructor to succeed
+        : isNot(throwsA(anything)),
     );
-  }, skip: !kIsWeb); // https://github.com/flutter/flutter/issues/88772 (Improve the error message when calling Image.file on web)
+  });
 }
 
 @immutable
