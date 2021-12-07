@@ -35,18 +35,12 @@ if (pluginsFile.exists()) {
     }
 }
 
-String flutterModulePath = project(':flutter').projectDir.parentFile.getAbsolutePath()
 gradle.getGradle().projectsLoaded { g ->
     g.rootProject.beforeEvaluate { p ->
-        //let the plugin's output generated in flutter/.android/plugins_build_output/${androidPlugin.name}.
+        //let the plugin's output generated in "${rootProject.buildDir}/${androidPlugin.name}".
         p.subprojects { sp ->
             if (pluginsNames.contains(sp.name.replace(":", ""))){
-                File androidPluginBuildOutputDir = new File(flutterModulePath + File.separator + File.separator + "plugins_build_output" + File.separator + sp.name.replace(":", ""));
-                if (!androidPluginBuildOutputDir.exists()){
-                    //make dir if not exist.
-                    androidPluginBuildOutputDir.mkdirs()
-                }
-                sp.buildDir = androidPluginBuildOutputDir
+                sp.buildDir = "${rootProject.buildDir}/${sp.name.replace(":", "")}"
             }
         }
         def _mainModuleName = binding.variables['mainModuleName']
