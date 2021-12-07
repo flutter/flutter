@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'keyboard_key.dart';
 import 'keyboard_maps.dart';
 import 'raw_keyboard.dart';
+import 'raw_keyboard_common.dart';
 
 /// Platform-specific key event data for macOS.
 ///
@@ -99,7 +100,7 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
           // only tests BMP, it is fine to test keyLabel instead.
           !LogicalKeyboardKey.isControlCharacter(keyLabel) &&
           !_isUnprintableKey(keyLabel)) {
-        character = codePoints[0];
+        character = toLower(codePoints[0]);
       }
     }
     if (character != null) {

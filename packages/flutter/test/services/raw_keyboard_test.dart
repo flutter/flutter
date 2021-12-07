@@ -1442,7 +1442,7 @@ void main() {
       final RawKeyEventDataMacOs data = keyAEvent.data as RawKeyEventDataMacOs;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.keyA));
       expect(data.logicalKey, equals(LogicalKeyboardKey.keyA));
-      expect(data.keyLabel, equals('a'));
+      expect(data.keyLabel, equals('A'));
     });
 
     test('Control keyboard keys are correctly translated', () {
