@@ -145,9 +145,17 @@ class IconButton extends StatelessWidget {
     required this.icon,
   }) : assert(padding != null),
        assert(alignment != null),
-       assert(splashRadius == null || splashRadius > 0),
        assert(autofocus != null),
        assert(icon != null),
+       assert(style == null || visualDensity == null),
+       assert(style == null || splashRadius == null || splashRadius > 0),
+       assert(style == null || color == null),
+       assert(style == null || focusColor == null),
+       assert(style == null || hoverColor == null),
+       assert(style == null || highlightColor == null),
+       assert(style == null || splashColor == null),
+       assert(style == null || disabledColor == null),
+       assert(style == null || mouseCursor == null),
        super(key: key);
 
   /// The size of the icon inside the button.
@@ -363,11 +371,12 @@ class IconButton extends StatelessWidget {
     return Semantics(
       button: true,
       enabled: onPressed != null,
-      child: _ButtonStylButton(
+      child: _ButtonStyleButton(
         focusNode: focusNode,
         autofocus: autofocus,
         onPressed: onPressed,
         style: style,
+        mouseCursor: mouseCursor,
         child: result,
       ),
       // child: InkResponse(
@@ -408,14 +417,15 @@ class IconButton extends StatelessWidget {
   }
 }
 
-class _ButtonStylButton extends ButtonStyleButton {
-    const _ButtonStylButton({
+class _ButtonStyleButton extends ButtonStyleButton {
+  const _ButtonStyleButton({
     Key? key,
     required VoidCallback? onPressed,
     VoidCallback? onLongPress,
     ValueChanged<bool>? onHover,
     ValueChanged<bool>? onFocusChange,
     ButtonStyle? style,
+    this.mouseCursor,
     FocusNode? focusNode,
     bool autofocus = false,
     Clip clipBehavior = Clip.none,
@@ -433,6 +443,9 @@ class _ButtonStylButton extends ButtonStyleButton {
     child: child,
   );
 
+  final MouseCursor? mouseCursor;
+
+
   static ButtonStyle styleFrom({
     Color? primary,
     Color? onSurface,
@@ -444,8 +457,10 @@ class _ButtonStylButton extends ButtonStyleButton {
     Size? minimumSize,
     Size? fixedSize,
     Size? maximumSize,
+    Size? iconSize,
     BorderSide? side,
     CircleBorder? shape,
+    MouseCursor? mouseCursor,
     MouseCursor? enabledMouseCursor,
     MouseCursor? disabledMouseCursor,
     VisualDensity? visualDensity,
@@ -460,11 +475,10 @@ class _ButtonStylButton extends ButtonStyleButton {
       : _IconButtonDefaultForeground(primary, onSurface);
     final MaterialStateProperty<Color?>? overlayColor = (primary == null)
       ? null
-      : _IconButtonDefaultOverlay(primary);
-    final MaterialStateProperty<MouseCursor>? mouseCursor = (enabledMouseCursor == null && disabledMouseCursor == null)
-      ? null
+      : _IconButtonDefaultOverlay(primary: onSurface);
+    final MaterialStateProperty<MouseCursor> cursor = mouseCursor != null
+      ? _IconButtonDefaultMouseCursor(mouseCursor, mouseCursor)
       : _IconButtonDefaultMouseCursor(enabledMouseCursor!, disabledMouseCursor!);
-
 
     return ButtonStyle(
       textStyle: ButtonStyleButton.allOrNull<TextStyle>(textStyle),
@@ -479,7 +493,7 @@ class _ButtonStylButton extends ButtonStyleButton {
       maximumSize: ButtonStyleButton.allOrNull<Size>(maximumSize),
       side: ButtonStyleButton.allOrNull<BorderSide>(side),
       shape: ButtonStyleButton.allOrNull<CircleBorder>(shape),
-      mouseCursor: mouseCursor,
+      mouseCursor: cursor,
       visualDensity: visualDensity,
       tapTargetSize: tapTargetSize,
       animationDuration: animationDuration,
@@ -502,8 +516,8 @@ class _ButtonStylButton extends ButtonStyleButton {
     );
 
     return styleFrom(
-      primary: colorScheme.primary,
-      onSurface: colorScheme.onSurface,
+      primary: colorScheme.onSurface,
+      onSurface: colorScheme.onSurface, 
       backgroundColor: Colors.transparent,
       shadowColor: theme.shadowColor,
       elevation: 0,
@@ -512,6 +526,7 @@ class _ButtonStylButton extends ButtonStyleButton {
       minimumSize: const Size(55, 55),
       maximumSize: Size.infinite,
       shape: const CircleBorder(),
+      mouseCursor: mouseCursor,
       enabledMouseCursor: SystemMouseCursors.click,
       disabledMouseCursor: SystemMouseCursors.forbidden,
       visualDensity: theme.visualDensity,
@@ -550,22 +565,41 @@ class _IconButtonDefaultForeground extends MaterialStateProperty<Color?> {
 }
 @immutable
 class _IconButtonDefaultOverlay extends MaterialStateProperty<Color?> {
-  _IconButtonDefaultOverlay(this.primary);
+  _IconButtonDefaultOverlay({
+    this.primary,
+    this.focusColor,
+    this.hoverColor,
+    this.highlightColor,
+  });
 
-  final Color primary;
+  final Color? primary;
+  final Color? focusColor;
+  final Color? hoverColor;
+  final Color? highlightColor;
 
   @override
   Color? resolve(Set<MaterialState> states) {
-    if (states.contains(MaterialState.hovered))
-      return primary.withOpacity(0.04);
-    if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed))
-      return primary.withOpacity(0.12);
-    return null;
+    if (primary != null) {
+      if (states.contains(MaterialState.hovered))
+        return primary!.withOpacity(0.04);
+      if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed))
+        return primary!.withOpacity(0.12);
+      return null;
+    } else {
+      if (states.contains(MaterialState.hovered))
+        return hoverColor!.withOpacity(0.04);
+      if (states.contains(MaterialState.focused))
+        return focusColor!.withOpacity(0.12);
+      if (states.contains(MaterialState.pressed))
+        return highlightColor!.withOpacity(0.12);
+      return null;
+    }
   }
 
   @override
   String toString() {
-    return '{hovered: ${primary.withOpacity(0.04)}, focused,pressed: ${primary.withOpacity(0.12)}, otherwise: null}';
+    return '';
+    // return '{hovered: ${primary.withOpacity(0.04)}, focused,pressed: ${primary.withOpacity(0.12)}, otherwise: null}';
   }
 }
 
