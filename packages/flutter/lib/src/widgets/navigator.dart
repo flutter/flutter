@@ -5014,7 +5014,10 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     assert(() { wasDebugLocked = _debugLocked; _debugLocked = true; return true; }());
     assert(_history.where(_RouteEntry.isRoutePredicate(route)).length == 1);
     final _RouteEntry entry =  _history.firstWhere(_RouteEntry.isRoutePredicate(route));
-    assert(entry.currentState == _RouteLifecycle.popping);
+    // For page-based route, the didPop can be called on any life cycle above
+    // pop.
+    assert(entry.currentState == _RouteLifecycle.popping ||
+          (entry.hasPage && entry.currentState.index < _RouteLifecycle.pop.index));
     entry.finalize();
     // finalizeRoute can be called during _flushHistoryUpdates if a pop
     // finishes synchronously.
