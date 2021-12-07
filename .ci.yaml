@@ -106,12 +106,9 @@ platform_properties:
           {"dependency": "gems"},
           {"dependency": "ios_signing"}
         ]
-      # TODO (mohsinally@): Remove the multi-values in 
-      #  dimensions below once the fleet is all upgraded.
-      #  https://github.com/flutter/flutter/issues/94767
-      os: Mac-10.15 Mac-12.0
-      device_os: iOS-14.4.2 iOS-15.1
-      xcode: 12c33 13a233
+      os: Mac-12.0
+      device_os: iOS-15.1
+      xcode: 13a233
   mac_ios32:
     properties:
       caches: >-
