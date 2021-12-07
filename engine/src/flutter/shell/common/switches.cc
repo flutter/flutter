@@ -171,7 +171,8 @@ static bool IsAllowedDartVMFlag(const std::string& flag) {
     // Check that the prefix of the flag matches one of the allowed flags.
     // We don't need to worry about cases like "--safe --sneaky_dangerous" as
     // the VM will discard these as a single unrecognized flag.
-    if (std::equal(allowed.begin(), allowed.end(), flag.begin())) {
+    if (flag.length() >= allowed.length() &&
+        std::equal(allowed.begin(), allowed.end(), flag.begin())) {
       return true;
     }
   }
