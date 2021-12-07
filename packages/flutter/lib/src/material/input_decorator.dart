@@ -2617,8 +2617,8 @@ class InputDecoration {
   /// [InputDecoration.errorStyle] color or [ThemeData.errorColor].
   ///
   /// {@tool dartpad}
-  /// If it is not your intention to break the default behavior you can replicate
-  /// it by conditionally changing the color in this style.
+  /// It's possible to override the label style for just the error state, or
+  /// just the default state, or both.
   ///
   /// In this example the [labelStyle] is specified with a [MaterialStateProperty]
   /// which resolves to a text style whose color depends on the decorator's
@@ -2647,8 +2647,8 @@ class InputDecoration {
   /// [InputDecoration.errorStyle] color or [ThemeData.errorColor].
   ///
   /// {@tool dartpad}
-  /// If it is not your intention to break the default behavior you can replicate
-  /// it by conditionally changing the color in this style.
+  /// It's possible to override the label style for just the error state, or
+  /// just the default state, or both.
   ///
   /// In this example the [floatingLabelStyle] is specified with a
   /// [MaterialStateProperty] which resolves to a text style whose color depends
