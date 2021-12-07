@@ -41,6 +41,28 @@ Future<void> main() async {
   test('ShaderWarmUp is null by default', () {
     expect(PaintingBinding.shaderWarmUp, null);
   });
+
+  test('SystemFonts is a ChangeNotifier', () {
+    final TestPaintingBinding binding = TestPaintingBinding();
+    // ChangeNotifier has been optimized. It is measurably faster than using a
+    // Set<VoidCallback>. This may or may not stay true when
+    // https://github.com/dart-lang/sdk/issues/47873 is resolved.
+    expect(binding.systemFonts, isA<ChangeNotifier>());
+  });
+
+  test('SystemFonts calls back twice when adding the same closure', () async {
+    final TestPaintingBinding binding = TestPaintingBinding();
+    int callCount = 0;
+    void foo() {
+      callCount += 1;
+    }
+    binding.systemFonts.addListener(foo);
+    binding.systemFonts.addListener(foo);
+    await binding.handleSystemMessage(<String, dynamic>{
+      'type': 'fontsChange',
+    });
+    expect(callCount, 2);
+  });
 }
 
 class TestBindingBase implements BindingBase {

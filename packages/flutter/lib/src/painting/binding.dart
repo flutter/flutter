@@ -143,30 +143,15 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
     final String type = message['type'] as String;
     switch (type) {
       case 'fontsChange':
-        _systemFonts.notifyListeners();
+        _systemFonts._notify();
         break;
     }
     return;
   }
 }
 
-class _SystemFontsNotifier extends Listenable {
-  final Set<VoidCallback> _systemFontsCallbacks = <VoidCallback>{};
-
-  void notifyListeners () {
-    for (final VoidCallback callback in _systemFontsCallbacks) {
-      callback();
-    }
-  }
-
-  @override
-  void addListener(VoidCallback listener) {
-    _systemFontsCallbacks.add(listener);
-  }
-  @override
-  void removeListener(VoidCallback listener) {
-    _systemFontsCallbacks.remove(listener);
-  }
+class _SystemFontsNotifier extends ChangeNotifier {
+  void _notify() => super.notifyListeners();
 }
 
 /// The singleton that implements the Flutter framework's image cache.
