@@ -12,6 +12,20 @@ void main() {
     return Text(snapshot.toString(), textDirection: TextDirection.ltr);
   }
   group('AsyncSnapshot', () {
+    test('requiring data preserves the stackTrace', () {
+      final StackTrace originalStackTrace = StackTrace.current;
+
+      try {
+        AsyncSnapshot<String>.withError(
+          ConnectionState.done,
+          Error(),
+          originalStackTrace,
+        ).requireData;
+        fail('requireData did not throw');
+      } catch (error, stackTrace) {
+        expect(stackTrace, originalStackTrace);
+      }
+    });
     test('requiring data succeeds if data is present', () {
       expect(
         const AsyncSnapshot<String>.withData(ConnectionState.done, 'hello').requireData,
