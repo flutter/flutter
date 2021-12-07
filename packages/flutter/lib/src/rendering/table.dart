@@ -647,7 +647,7 @@ class RenderTable extends RenderBox {
     // update our internal values
     _columns = columns;
     _rows = cells.length ~/ columns;
-    _children = List<RenderBox?>.from(cells);
+    _children = List<RenderBox?>.of(cells);
     assert(_children.length == rows * columns);
     markNeedsLayout();
   }
