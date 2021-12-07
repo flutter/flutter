@@ -1,4 +1,4 @@
-Signature: de0dbe475d444001bace5063e42ddba0
+Signature: fc11b4b2fbec73a4349bb5962afe1d88
 
 UNUSED LICENSES:
 
@@ -837,6 +837,7 @@ FILE: ../../../third_party/skia/infra/bots/assets/android_ndk_windows/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/android_sdk_linux/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/armhf_sysroot/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/bazel/VERSION
+FILE: ../../../third_party/skia/infra/bots/assets/bazelisk/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/bloaty/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/cast_toolchain/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/ccache_linux/VERSION
@@ -1100,6 +1101,7 @@ FILE: ../../../third_party/skia/modules/canvaskit/htmlcanvas/canvas2dcontext.js
 FILE: ../../../third_party/skia/modules/canvaskit/htmlcanvas/color.js
 FILE: ../../../third_party/skia/modules/canvaskit/htmlcanvas/font.js
 FILE: ../../../third_party/skia/modules/canvaskit/htmlcanvas/htmlcanvas.js
+FILE: ../../../third_party/skia/modules/canvaskit/htmlcanvas/htmlimage.js
 FILE: ../../../third_party/skia/modules/canvaskit/htmlcanvas/imagedata.js
 FILE: ../../../third_party/skia/modules/canvaskit/htmlcanvas/lineargradient.js
 FILE: ../../../third_party/skia/modules/canvaskit/htmlcanvas/path2d.js
@@ -2622,8 +2624,8 @@ FILE: ../../../third_party/skia/src/sksl/analysis/SkSLIsConstantExpression.cpp
 FILE: ../../../third_party/skia/src/sksl/analysis/SkSLProgramUsage.cpp
 FILE: ../../../third_party/skia/src/sksl/analysis/SkSLProgramVisitor.h
 FILE: ../../../third_party/skia/src/sksl/analysis/SkSLSwitchCaseContainsExit.cpp
-FILE: ../../../third_party/skia/src/sksl/codegen/SkVMDebugInfo.cpp
-FILE: ../../../third_party/skia/src/sksl/codegen/SkVMDebugInfo.h
+FILE: ../../../third_party/skia/src/sksl/codegen/SkVMDebugTrace.cpp
+FILE: ../../../third_party/skia/src/sksl/codegen/SkVMDebugTrace.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLBinaryExpression.cpp
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLBlock.cpp
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLChildCall.cpp
@@ -6064,6 +6066,7 @@ FILE: ../../../third_party/skia/include/sksl/DSLLayout.h
 FILE: ../../../third_party/skia/include/sksl/DSLRuntimeEffects.h
 FILE: ../../../third_party/skia/include/sksl/DSLStatement.h
 FILE: ../../../third_party/skia/include/sksl/DSLWrapper.h
+FILE: ../../../third_party/skia/include/sksl/SkSLDebugTrace.h
 FILE: ../../../third_party/skia/include/sksl/SkSLErrorReporter.h
 FILE: ../../../third_party/skia/src/core/SkStringView.cpp
 FILE: ../../../third_party/skia/src/gpu/GrVertexChunkArray.cpp
