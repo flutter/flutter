@@ -1895,9 +1895,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     if (_shouldUpdatePainter(metrics.axis)) {
       scrollbarPainter.update(metrics, metrics.axisDirection);
       _lastMetrics = metrics;
-      if (_lastMetrics!.atEdge) {
-        updateScrollbarPainter();
-      }
+      updateScrollbarPainter();
     }
     return false;
   }
@@ -1916,9 +1914,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       if (_shouldUpdatePainter(metrics.axis)) {
         scrollbarPainter.update(metrics, metrics.axisDirection);
         _lastMetrics = metrics;
-        if (_lastMetrics!.atEdge) {
-          updateScrollbarPainter();
-        }
+        updateScrollbarPainter();
       }
       return false;
     }
@@ -1935,9 +1931,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       if (_shouldUpdatePainter(metrics.axis)) {
         scrollbarPainter.update(metrics, metrics.axisDirection);
         _lastMetrics = metrics;
-        if (_lastMetrics!.atEdge) {
-          updateScrollbarPainter();
-        }
+        updateScrollbarPainter();
       }
     } else if (notification is ScrollEndNotification) {
       if (_dragScrollbarAxisOffset == null)
