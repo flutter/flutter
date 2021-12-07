@@ -1,26 +1,18 @@
 // Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-@JS()
 library canvaskit_initialization;
 
 import 'dart:async';
 import 'dart:html' as html;
-import 'dart:js' as js;
-
-import 'package:js/js.dart';
 
 import '../../engine.dart' show kProfileMode;
 import '../browser_detection.dart';
 import '../configuration.dart';
 import '../embedder.dart';
+import '../safe_browser_api.dart';
 import 'canvaskit_api.dart';
 import 'fonts.dart';
-
-/// A JavaScript entrypoint that allows developer to set rendering backend
-/// at runtime before launching the application.
-@JS('window.flutterWebRenderer')
-external String? get requestedRendererType;
 
 /// Whether to use CanvasKit as the rendering backend.
 bool get useCanvasKit => FlutterConfiguration.flutterWebAutoDetect ? _detectRenderer() : FlutterConfiguration.useSkia;
@@ -65,10 +57,10 @@ Future<void> initializeCanvasKit({String? canvasKitBase}) {
     _canvasKitLoaded!.then((_) {
       final CanvasKitInitPromise canvasKitInitPromise =
           CanvasKitInit(CanvasKitInitOptions(
-        locateFile: js.allowInterop(
+        locateFile: allowInterop(
             (String file, String unusedBase) => canvasKitWasmModuleUrl(file)),
       ));
-      canvasKitInitPromise.then(js.allowInterop((CanvasKit ck) {
+      canvasKitInitPromise.then(allowInterop((CanvasKit ck) {
         canvasKit = ck;
         windowFlutterCanvasKit = canvasKit;
         canvasKitCompleter.complete();
@@ -104,66 +96,7 @@ void _startDownloadingCanvasKit(String? canvasKitBase) {
       canvasKitLoadCompleter.complete();
     });
 
-    // TODO(hterkelsen): Rather than this monkey-patch hack, we should
-    // build CanvasKit ourselves. See:
-    // https://github.com/flutter/flutter/issues/52588
-
-    // Monkey-patch the top-level `module`  and `exports` objects so that
-    // CanvasKit doesn't attempt to register itself as an anonymous module.
-    //
-    // The idea behind making these fake `exports` and `module` objects is
-    // that `canvaskit.js` contains the following lines of code:
-    //
-    //     if (typeof exports === 'object' && typeof module === 'object')
-    //       module.exports = CanvasKitInit;
-    //     else if (typeof define === 'function' && define['amd'])
-    //       define([], function() { return CanvasKitInit; });
-    //
-    // We need to avoid hitting the case where CanvasKit defines an anonymous
-    // module, since this breaks RequireJS, which DDC and some plugins use.
-    // Temporarily removing the `define` function won't work because RequireJS
-    // could load in between this code running and the CanvasKit code running.
-    // Also, we cannot monkey-patch the `define` function because it is
-    // non-configurable (it is a top-level 'var').
-
-    // First check if `exports` and `module` are already defined. If so, then
-    // CommonJS is being used, and we shouldn't have any problems.
-    final js.JsFunction objectConstructor = js.context['Object'] as js.JsFunction;
-    if (js.context['exports'] == null) {
-      final js.JsObject exportsAccessor = js.JsObject.jsify(<String, dynamic>{
-        'get': js.allowInterop(() {
-          if (html.document.currentScript == _canvasKitScript) {
-            return js.JsObject(objectConstructor);
-          } else {
-            return js.context['_flutterWebCachedExports'];
-          }
-        }),
-        'set': js.allowInterop((dynamic value) {
-          js.context['_flutterWebCachedExports'] = value;
-        }),
-        'configurable': true,
-      });
-      objectConstructor.callMethod(
-          'defineProperty', <dynamic>[js.context, 'exports', exportsAccessor]);
-    }
-    if (js.context['module'] == null) {
-      final js.JsObject moduleAccessor = js.JsObject.jsify(<String, dynamic>{
-        'get': js.allowInterop(() {
-          if (html.document.currentScript == _canvasKitScript) {
-            return js.JsObject(objectConstructor);
-          } else {
-            return js.context['_flutterWebCachedModule'];
-          }
-        }),
-        'set': js.allowInterop((dynamic value) {
-          js.context['_flutterWebCachedModule'] = value;
-        }),
-        'configurable': true,
-      });
-      objectConstructor.callMethod(
-          'defineProperty', <dynamic>[js.context, 'module', moduleAccessor]);
-    }
-    html.document.head!.append(_canvasKitScript!);
+    patchCanvasKitModule(_canvasKitScript!);
   }
 }
 

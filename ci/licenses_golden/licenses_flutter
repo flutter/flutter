@@ -528,7 +528,6 @@ FILE: ../../../flutter/lib/web_ui/lib/src/engine/html/color_filter.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/html/debug_canvas_reuse_overlay.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/html/dom_canvas.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/html/image_filter.dart
-FILE: ../../../flutter/lib/web_ui/lib/src/engine/html/offscreen_canvas.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/html/offset.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/html/opacity.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/html/painting.dart
@@ -555,11 +554,11 @@ FILE: ../../../flutter/lib/web_ui/lib/src/engine/html/shaders/normalized_gradien
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/html/shaders/shader.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/html/shaders/shader_builder.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/html/shaders/vertex_shaders.dart
-FILE: ../../../flutter/lib/web_ui/lib/src/engine/html/shaders/webgl_context.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/html/surface.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/html/surface_stats.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/html/transform.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/html_image_codec.dart
+FILE: ../../../flutter/lib/web_ui/lib/src/engine/initialization.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/key_map.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/keyboard.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/keyboard_binding.dart
@@ -580,6 +579,7 @@ FILE: ../../../flutter/lib/web_ui/lib/src/engine/pointer_binding.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/pointer_converter.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/profiler.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/rrect_renderer.dart
+FILE: ../../../flutter/lib/web_ui/lib/src/engine/safe_browser_api.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/semantics.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/semantics/accessibility.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/semantics/checkable.dart
@@ -620,7 +620,6 @@ FILE: ../../../flutter/lib/web_ui/lib/src/engine/ulps.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/util.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/validators.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/vector_math.dart
-FILE: ../../../flutter/lib/web_ui/lib/src/engine/web_experiments.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/window.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/ui/annotations.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/ui/canvas.dart
