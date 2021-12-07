@@ -40,6 +40,6 @@ defaults write com.apple.iphonesimulator RotateWindowWhenSignaledByGuest -int 1
 cd $SRC_DIR/out/$FLUTTER_ENGINE/scenario_app/Scenarios
 set -o pipefail && xcodebuild -sdk iphonesimulator \
   -scheme Scenarios \
-  -destination 'platform=iOS Simulator,OS=14.0,name=iPhone 11' \
+  -destination 'platform=iOS Simulator,OS=13.0,name=iPhone 8' \
   clean test \
   FLUTTER_ENGINE="$FLUTTER_ENGINE"
