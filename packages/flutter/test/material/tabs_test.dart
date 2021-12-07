@@ -4257,7 +4257,7 @@ void main() {
     expect(pageController.page, 2);
   });
 
-  testWidgets("TabBar accepts 'splashBorderRadius' that gives 'borderRadius' to InkWell", (WidgetTester tester) async {
+  testWidgets("splashBorderRadius is passed to InkWell.borderRadius", (WidgetTester tester) async {
     const Color _hoverColor = Color(0xfff44336);
     const double _radius = 20;
     await tester.pumpWidget(
@@ -4277,11 +4277,11 @@ void main() {
             tabs: const <Widget>[
               Tab(
                 child: Text(''),
-              )
-            ]
-          )
-        )
-      )
+              ),
+            ],
+          ),
+        ),
+      ),
     );
     await tester.pumpAndSettle();
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
@@ -4295,8 +4295,8 @@ void main() {
         rrect: RRect.fromRectAndRadius(
           tester.getRect(find.byType(InkWell)),
           const Radius.circular(_radius)
-        )
-      )
+        ),
+      ),
     );
     gesture.removePointer();
   });
