@@ -9,16 +9,15 @@ import 'dart:typed_data';
 import 'package:ui/ui.dart' as ui;
 
 import '../../browser_detection.dart';
+import '../../safe_browser_api.dart';
 import '../../util.dart';
 import '../../validators.dart';
 import '../../vector_math.dart';
-import '../offscreen_canvas.dart';
 import '../path/path_utils.dart';
 import '../render_vertices.dart';
 import 'normalized_gradient.dart';
 import 'shader_builder.dart';
 import 'vertex_shaders.dart';
-import 'webgl_context.dart';
 
 const double kFltEpsilon = 1.19209290E-07; // == 1 / (2 ^ 23)
 const double kFltEpsilonSquared = 1.19209290E-07 * 1.19209290E-07;

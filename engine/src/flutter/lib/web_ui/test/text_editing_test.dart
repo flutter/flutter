@@ -2147,8 +2147,7 @@ KeyboardEvent dispatchKeyboardEvent(
   String type, {
   required int keyCode,
 }) {
-  // ignore: implicit_dynamic_function
-  final Function jsKeyboardEvent = js_util.getProperty(window, 'KeyboardEvent') as Function;
+  final Function jsKeyboardEvent = js_util.getProperty<Function>(window, 'KeyboardEvent');
   final List<dynamic> eventArgs = <dynamic>[
     type,
     <String, dynamic>{
@@ -2156,9 +2155,10 @@ KeyboardEvent dispatchKeyboardEvent(
       'cancelable': true,
     }
   ];
-  final KeyboardEvent event =
-      // ignore: implicit_dynamic_function
-      js_util.callConstructor(jsKeyboardEvent, js_util.jsify(eventArgs) as List<Object?>?) as KeyboardEvent;
+  final KeyboardEvent event = js_util.callConstructor<KeyboardEvent>(
+    jsKeyboardEvent,
+    js_util.jsify(eventArgs) as List<Object?>?,
+  );
   target.dispatchEvent(event);
 
   return event;

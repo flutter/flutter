@@ -35,16 +35,17 @@ CompilationUnit _parseAndCheckDart(String path) {
 }
 
 void main() {
+  final String flutterDir = Platform.environment['FLUTTER_DIR']!;
   // These files just contain imports to the part files;
-  final CompilationUnit uiUnit = _parseAndCheckDart('lib/ui/ui.dart');
-  final CompilationUnit webUnit = _parseAndCheckDart('lib/web_ui/lib/ui.dart');
+  final CompilationUnit uiUnit = _parseAndCheckDart('$flutterDir/lib/ui/ui.dart');
+  final CompilationUnit webUnit = _parseAndCheckDart('$flutterDir/lib/web_ui/lib/ui.dart');
   final Map<String, ClassDeclaration> uiClasses = <String, ClassDeclaration>{};
   final Map<String, ClassDeclaration> webClasses = <String, ClassDeclaration>{};
 
   // Gather all public classes from each library. For now we are skipping
   // other top level members.
-  _collectPublicClasses(uiUnit, uiClasses, 'lib/ui/');
-  _collectPublicClasses(webUnit, webClasses, 'lib/web_ui/lib/');
+  _collectPublicClasses(uiUnit, uiClasses, '$flutterDir/lib/ui/');
+  _collectPublicClasses(webUnit, webClasses, '$flutterDir/lib/web_ui/lib/');
 
   if (uiClasses.isEmpty || webClasses.isEmpty) {
     print('Warning: did not resolve any classes.');

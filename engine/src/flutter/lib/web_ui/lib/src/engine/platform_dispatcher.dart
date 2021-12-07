@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:html' as html;
-import 'dart:js_util' as js_util;
 import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
@@ -22,6 +21,7 @@ import 'mouse_cursor.dart';
 import 'platform_views/message_handler.dart';
 import 'plugins.dart';
 import 'profiler.dart';
+import 'safe_browser_api.dart';
 import 'semantics.dart';
 import 'services.dart';
 import 'text_editing/text_editing.dart';
@@ -420,7 +420,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
             return;
           case 'HapticFeedback.vibrate':
             final String? type = decoded.arguments as String?;
-            _vibrate(_getHapticFeedbackDuration(type));
+            vibrate(_getHapticFeedbackDuration(type));
             replyToPlatformMessage(callback, codec.encodeSuccessEnvelope(true));
             return;
           case 'SystemChrome.setApplicationSwitcherDescription':
@@ -1091,44 +1091,6 @@ const double _defaultRootFontSize = 16.0;
 /// Finds the text scale factor of the browser by looking at the computed style
 /// of the browser's <html> element.
 double findBrowserTextScaleFactor() {
-  final num fontSize = _parseFontSize(html.document.documentElement!) ?? _defaultRootFontSize;
+  final num fontSize = parseFontSize(html.document.documentElement!) ?? _defaultRootFontSize;
   return fontSize / _defaultRootFontSize;
-}
-
-/// Parses the font size of [element] and returns the value without a unit.
-num? _parseFontSize(html.Element element) {
-  num? fontSize;
-
-  if (js_util.hasProperty(element, 'computedStyleMap')) {
-    // Use the newer `computedStyleMap` API available on some browsers.
-    final dynamic computedStyleMap =
-        // ignore: implicit_dynamic_function
-        js_util.callMethod(element, 'computedStyleMap', <Object?>[]);
-    if (computedStyleMap is Object) {
-      final dynamic fontSizeObject =
-          // ignore: implicit_dynamic_function
-          js_util.callMethod(computedStyleMap, 'get', <Object?>['font-size']);
-      if (fontSizeObject is Object) {
-        // ignore: implicit_dynamic_function
-        fontSize = js_util.getProperty(fontSizeObject, 'value') as num;
-      }
-    }
-  }
-
-  if (fontSize == null) {
-    // Fallback to `getComputedStyle`.
-    final String fontSizeString = element.getComputedStyle().fontSize;
-    fontSize = parseFloat(fontSizeString);
-  }
-
-  return fontSize;
-}
-
-/// Provides haptic feedback.
-void _vibrate(int durationMs) {
-  final html.Navigator navigator = html.window.navigator;
-  if (js_util.hasProperty(navigator, 'vibrate')) {
-    // ignore: implicit_dynamic_function
-    js_util.callMethod(navigator, 'vibrate', <num>[durationMs]);
-  }
 }
