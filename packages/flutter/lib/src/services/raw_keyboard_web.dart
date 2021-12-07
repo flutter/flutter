@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'keyboard_key.dart';
 import 'keyboard_maps.dart';
 import 'raw_keyboard.dart';
+import 'raw_keyboard_common.dart';
 
 String? _unicodeChar(String key) {
   if (key.length == 1) {
@@ -104,7 +105,7 @@ class RawKeyEventDataWeb extends RawKeyEventData {
 
     final bool isPrintable = key.length == 1;
     if (isPrintable)
-      return LogicalKeyboardKey(key.codeUnitAt(0));
+      return LogicalKeyboardKey(toLower(key.codeUnitAt(0)));
 
     // This is a non-printable key that we don't know about, so we mint a new
     // key from `code`. Don't mint with `key`, because the `key` will always be
