@@ -1253,7 +1253,7 @@ void main() {
     // This will throw an assertion if regressed
     await tester.tap(find.text('close 1'));
     await tester.pumpAndSettle();
-    expect(find.text('BottomSheet 1'), findsOneWidget);
+    expect(find.text('BottomSheet 2'), findsOneWidget);
   });
 
   group('constraints', () {
