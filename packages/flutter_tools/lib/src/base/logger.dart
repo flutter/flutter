@@ -599,7 +599,7 @@ typedef _Writter = void Function(String message);
 
 /// Wraps the message in a box, and writes the bytes by calling [write].
 ///
-///  For example:
+///  Example output:
 ///
 ///   ┌─ [title] ─┐
 ///   │ [message] │
