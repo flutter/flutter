@@ -25,7 +25,6 @@ impeller_component("compiler_lib") {
     "//flutter/fml",
     "//flutter/runtime:libdart",
     "//third_party/inja",
-    "//third_party/rapidjson",
     "//third_party/shaderc_flutter",
     "//third_party/spirv_cross_flutter",
   ]
