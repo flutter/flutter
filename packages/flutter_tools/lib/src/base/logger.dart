@@ -506,7 +506,7 @@ class StdoutLogger extends Logger {
     String? title,
   }) {
     _status?.pause();
-    generateBox(
+    _generateBox(
       title: title,
       message: message,
       wrapColumn: _outputPreferences.wrapColumn,
@@ -597,7 +597,20 @@ class StdoutLogger extends Logger {
 
 typedef _Writter = void Function(String message);
 
-void generateBox({
+/// Wraps the message in a box, and writes the bytes by calling [write].
+///
+///  For example:
+///
+///   ┌─ [title] ─┐
+///   │ [message] │
+///   └───────────┘
+///
+/// When [title] is provided, the box will have a title above it.
+///
+/// The box width never exceeds [wrapColumn].
+///
+/// If [wrapColumn] is not provided, the default value is 100.
+void _generateBox({
   required String message,
   required int wrapColumn,
   required _Writter write,
@@ -816,7 +829,7 @@ class BufferLogger extends Logger {
   void printBox(String message, {
     String? title,
   }) {
-    generateBox(
+    _generateBox(
       title: title,
       message: message,
       wrapColumn: _outputPreferences.wrapColumn,
