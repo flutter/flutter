@@ -78,7 +78,7 @@ final List<GradleHandledError> gradleErrors = <GradleHandledError>[
   incompatibleKotlinVersionHandler,
 ];
 
-final String _boxTitle = 'Flutter Fix';
+const String _boxTitle = 'Flutter Fix';
 
 // Multidex error message.
 @visibleForTesting
