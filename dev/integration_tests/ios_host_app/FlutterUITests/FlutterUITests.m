@@ -23,7 +23,7 @@ static const CGFloat kStandardTimeOut = 60.0;
 
 - (void)testFullScreenColdPop {
     XCUIApplication *app = self.app;
-    [self waitForAndTapElement:app.buttons[@"Full Screen (Cold)"]];
+    [self waitForAndTapElement:app.buttons[kFullScreenColdButton]];
     XCTAssertTrue([app.staticTexts[@"Button tapped 0 times."] waitForExistenceWithTimeout:kStandardTimeOut]);
 
     [self waitForAndTapElement:app.otherElements[@"Increment via Flutter"]];
