@@ -279,7 +279,7 @@ mixin SchedulerBinding on BindingBase {
   @pragma('vm:notify-debugger-on-exception')
   void _executeTimingsCallbacks(List<FrameTiming> timings) {
     final List<TimingsCallback> clonedCallbacks =
-        List<TimingsCallback>.from(_timingsCallbacks);
+        List<TimingsCallback>.of(_timingsCallbacks);
     for (final TimingsCallback callback in clonedCallbacks) {
       try {
         if (_timingsCallbacks.contains(callback)) {
@@ -562,7 +562,7 @@ mixin SchedulerBinding on BindingBase {
         // even if the information collector is called after
         // the problem has been resolved.
         final int count = transientCallbackCount;
-        final Map<int, _FrameCallbackEntry> callbacks = Map<int, _FrameCallbackEntry>.from(_transientCallbacks);
+        final Map<int, _FrameCallbackEntry> callbacks = Map<int, _FrameCallbackEntry>.of(_transientCallbacks);
         FlutterError.reportError(FlutterErrorDetails(
           exception: reason,
           library: 'scheduler library',
@@ -1084,7 +1084,7 @@ mixin SchedulerBinding on BindingBase {
       // POST-FRAME CALLBACKS
       _schedulerPhase = SchedulerPhase.postFrameCallbacks;
       final List<FrameCallback> localPostFrameCallbacks =
-          List<FrameCallback>.from(_postFrameCallbacks);
+          List<FrameCallback>.of(_postFrameCallbacks);
       _postFrameCallbacks.clear();
       for (final FrameCallback callback in localPostFrameCallbacks)
         _invokeFrameCallback(callback, _currentFrameTimeStamp!);

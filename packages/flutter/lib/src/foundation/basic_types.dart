@@ -179,7 +179,7 @@ class CachingIterable<E> extends IterableBase<E> {
   @override
   List<E> toList({ bool growable = true }) {
     _precacheEntireList();
-    return List<E>.from(_results, growable: growable);
+    return List<E>.of(_results, growable: growable);
   }
 
   void _precacheEntireList() {

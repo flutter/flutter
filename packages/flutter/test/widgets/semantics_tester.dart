@@ -823,7 +823,7 @@ class _IncludesNodeWith extends Matcher {
       if (label != null) 'label "$label"',
       if (value != null) 'value "$value"',
       if (hint != null) 'hint "$hint"',
-      if (textDirection != null) ' (${describeEnum(textDirection!)})',
+      if (textDirection != null) ' (${textDirection!.name})',
       if (actions != null) 'actions "${actions!.join(', ')}"',
       if (flags != null) 'flags "${flags!.join(', ')}"',
       if (scrollPosition != null) 'scrollPosition "$scrollPosition"',

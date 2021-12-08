@@ -4183,6 +4183,79 @@ void main() {
 
     semantics.dispose();
   });
+
+  testWidgets('Change the TabController should make both TabBar and TabBarView return to the initial index.', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/93237
+
+    Widget buildFrame(TabController controller, bool showLast) {
+      return boilerplate(
+        child: Column(
+          children: <Widget>[
+            TabBar(
+              controller: controller,
+              tabs: <Tab>[
+                const Tab(text: 'one'),
+                const Tab(text: 'two'),
+                if (showLast) const Tab(text: 'three'),
+              ],
+            ),
+            Flexible(
+              child: TabBarView(
+                controller: controller,
+                children: <Widget>[
+                  const Text('PAGE1'),
+                  const Text('PAGE2'),
+                  if (showLast) const Text('PAGE3'),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final TabController controller1 = TabController(
+      vsync: const TestVSync(),
+      length: 3,
+    );
+
+    final TabController controller2 = TabController(
+      vsync: const TestVSync(),
+      length: 2,
+    );
+
+    final TabController controller3 = TabController(
+      vsync: const TestVSync(),
+      length: 3,
+    );
+
+    await tester.pumpWidget(buildFrame(controller1, true));
+    final PageView pageView = tester.widget(find.byType(PageView));
+    final PageController pageController = pageView.controller;
+
+    await tester.tap(find.text('three'));
+    await tester.pumpAndSettle();
+    expect(controller1.index, 2);
+    expect(pageController.page, 2);
+
+    // Change TabController from 3 items to 2.
+    await tester.pumpWidget(buildFrame(controller2, false));
+    await tester.pumpAndSettle();
+    expect(controller2.index, 0);
+    expect(pageController.page, 0);
+
+    // Change TabController from 2 items to 3.
+    await tester.pumpWidget(buildFrame(controller3, true));
+    await tester.pumpAndSettle();
+    expect(controller3.index, 0);
+    expect(pageController.page, 0);
+
+    await tester.tap(find.text('three'));
+    await tester.pumpAndSettle();
+
+    expect(controller3.index, 2);
+    expect(pageController.page, 2);
+  });
 }
 
 class KeepAliveInk extends StatefulWidget {
