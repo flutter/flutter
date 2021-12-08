@@ -575,15 +575,19 @@ void FlutterPlatformViewsController::BringLayersIntoView(LayersMap layer_map) {
 
     if (platform_view_root.superview != flutter_view) {
       [flutter_view addSubview:platform_view_root];
-    } else {
-      platform_view_root.layer.zPosition = zIndex++;
     }
+    // Make sure the platform_view_root is higher than the last platform_view_root in
+    // composition_order_.
+    platform_view_root.layer.zPosition = zIndex++;
+
     for (const std::shared_ptr<FlutterPlatformViewLayer>& layer : layers) {
-      if ([layer->overlay_view_wrapper superview] != flutter_view) {
+      if ([layer->overlay_view_wrapper.get() superview] != flutter_view) {
         [flutter_view addSubview:layer->overlay_view_wrapper];
-      } else {
-        layer->overlay_view_wrapper.get().layer.zPosition = zIndex++;
       }
+      // Make sure all the overlays are higher than the platform view.
+      layer->overlay_view_wrapper.get().layer.zPosition = zIndex++;
+      FML_DCHECK(layer->overlay_view_wrapper.get().layer.zPosition >
+                 platform_view_root.layer.zPosition);
     }
     active_composition_order_.push_back(platform_view_id);
   }
