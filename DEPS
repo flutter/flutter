@@ -66,6 +66,9 @@ vars = {
   # Build bot tooling for iOS
   'ios_tools_revision': '69b7c1b160e7107a6a98d948363772dc9caea46f',
 
+  # Download a prebuilt Dart SDK by default
+  'download_dart_sdk': True,
+
   # Checkout Android dependencies only on platforms where we build for Android targets.
   'download_android_deps': 'host_cpu == "x64" and (host_os == "mac" or host_os == "linux")',
 
@@ -716,6 +719,7 @@ hooks = [
   {
     'name': 'Download prebuilt Dart SDK',
     'pattern': '.',
+    'condition': 'download_dart_sdk',
     'action': [
       'python3',
       'src/flutter/tools/download_dart_sdk.py',
