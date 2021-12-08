@@ -74,7 +74,7 @@ class KeySet<T extends KeyboardKey> {
       : assert(keys != null),
         assert(keys.isNotEmpty),
         assert(!keys.contains(null)),
-        _keys = HashSet<T>.from(keys);
+        _keys = HashSet<T>.of(keys);
 
   /// Returns a copy of the [KeyboardKey]s in this [KeySet].
   Set<T> get keys => _keys.toSet();

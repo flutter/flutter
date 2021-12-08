@@ -1854,7 +1854,7 @@ abstract class MultiChildRenderObjectWidget extends RenderObjectWidget {
   ///
   ///   Widget build(...) {
   ///     // Always create a new list of children as a Widget is immutable.
-  ///     return Row(children: List.from(_children));
+  ///     return Row(children: List.of(_children));
   ///   }
   /// }
   /// ```
@@ -5053,7 +5053,7 @@ class InheritedElement extends ProxyElement {
     assert(_lifecycleState == _ElementLifecycle.active);
     final Map<Type, InheritedElement>? incomingWidgets = _parent?._inheritedWidgets;
     if (incomingWidgets != null)
-      _inheritedWidgets = HashMap<Type, InheritedElement>.from(incomingWidgets);
+      _inheritedWidgets = HashMap<Type, InheritedElement>.of(incomingWidgets);
     else
       _inheritedWidgets = HashMap<Type, InheritedElement>();
     _inheritedWidgets![widget.runtimeType] = this;
