@@ -8,6 +8,7 @@
 #include "flutter/shell/platform/common/flutter_platform_node_delegate.h"
 #include "flutter/shell/platform/windows/flutter_windows_engine.h"
 #include "flutter/third_party/accessibility/ax/platform/ax_platform_node.h"
+#include "flutter/third_party/accessibility/ax/platform/ax_unique_id.h"
 
 namespace flutter {
 
@@ -37,9 +38,12 @@ class FlutterPlatformNodeDelegateWin32 : public FlutterPlatformNodeDelegate {
       const ui::AXClippingBehavior clipping_behavior,
       ui::AXOffscreenResult* offscreen_result) const override;
 
+  const ui::AXUniqueId& GetUniqueId() const override { return unique_id_; }
+
  private:
   ui::AXPlatformNode* ax_platform_node_;
   FlutterWindowsEngine* engine_;
+  ui::AXUniqueId unique_id_;
 };
 
 }  // namespace flutter
