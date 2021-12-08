@@ -3256,6 +3256,7 @@ void main() {
     final List<MethodCall> log = <MethodCall>[];
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) async {
       log.add(methodCall);
+      return null;
     });
 
     await tester.pumpWidget(
@@ -3279,6 +3280,7 @@ void main() {
     final List<MethodCall> log = <MethodCall>[];
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) async {
       log.add(methodCall);
+      return null;
     });
 
     await tester.pumpWidget(
@@ -4367,6 +4369,7 @@ void main() {
           actions: <Type, Action<Intent>>{
             ScrollIntent: CallbackAction<ScrollIntent>(onInvoke: (Intent intent) {
               scrollInvoked = true;
+              return null;
             }),
           },
           child: ListView(
