@@ -4379,7 +4379,7 @@ void main() {
     expect(tester.widget<InkWell>(find.byType(InkWell)).overlayColor, overlayColor);
   });
   
-  testWidgets("splashBorderRadius is passed to InkWell.borderRadius", (WidgetTester tester) async {
+  testWidgets('splashBorderRadius is passed to InkWell.borderRadius', (WidgetTester tester) async {
     const Color _hoverColor = Color(0xfff44336);
     const double _radius = 20;
     await tester.pumpWidget(
