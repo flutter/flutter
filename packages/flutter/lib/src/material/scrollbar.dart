@@ -76,16 +76,26 @@ class Scrollbar extends StatelessWidget {
     Key? key,
     required this.child,
     this.controller,
-    this.isAlwaysShown,
+    this.thumbVisibility,
     this.trackVisibility,
-    this.showTrackOnHover,
-    this.hoverThickness,
     this.thickness,
+    this.hoverThickness,
     this.radius,
     this.notificationPredicate,
     this.interactive,
     this.scrollbarOrientation,
-  }) : super(key: key);
+    @Deprecated(
+      'Use thumbVisibility instead. '
+      'This feature was deprecated after v2.6.0-12.0.pre.',
+    )
+    this.isAlwaysShown,
+    @Deprecated(
+      'Use ScrollbarThemeData.trackVisibility to resolve based on the current state instead. '
+      'This feature was deprecated after v2.6.0-12.0.pre.',
+    )
+    this.showTrackOnHover,
+  }) : assert(thumbVisibility == null || isAlwaysShown == null),
+       super(key: key);
 
   /// {@macro flutter.widgets.Scrollbar.child}
   final Widget child;
@@ -94,7 +104,24 @@ class Scrollbar extends StatelessWidget {
   final ScrollController? controller;
 
   /// {@macro flutter.widgets.Scrollbar.isAlwaysShown}
+  @Deprecated(
+    'Use thumbVisibility instead. '
+    'This feature was deprecated after v2.6.0-12.0.pre.',
+  )
   final bool? isAlwaysShown;
+
+  /// Controls the thumb visibility.
+  ///
+  /// If this property is null, then [ScrollbarThemeData.thumbVisibility] of
+  /// [ThemeData.scrollbarTheme] is used. If that is also null, the default value
+  /// is false.
+  ///
+  /// If the thumb visibility is related to the scrollbar's material state,
+  /// use the global [ScrollbarThemeData.thumbVisibility] or override the
+  /// sub-tree's theme data.
+  ///
+  /// Replaces deprecated [isAlwaysShown].
+  final bool? thumbVisibility;
 
   /// Controls the track visibility.
   ///
@@ -106,7 +133,7 @@ class Scrollbar extends StatelessWidget {
   /// use the global [ScrollbarThemeData.trackVisibility] or override the
   /// sub-tree's theme data.
   ///
-  /// [showTrackOnHover] can be replaced by this and will be deprecated.
+  /// Replaces deprecated [showTrackOnHover].
   final bool? trackVisibility;
 
   /// Controls if the track will show on hover and remain, including during drag.
@@ -115,7 +142,11 @@ class Scrollbar extends StatelessWidget {
   /// [ThemeData.scrollbarTheme] is used. If that is also null, the default value
   /// is false.
   ///
-  /// This will be deprecated, and [trackVisibility] is recommended.
+  /// This is deprecated, [trackVisibility] should be used instead.
+  @Deprecated(
+    'Use trackVisibility instead. '
+    'This feature was deprecated after v2.6.0-12.0.pre.',
+  )
   final bool? showTrackOnHover;
 
   /// The thickness of the scrollbar when a hover state is active and
@@ -124,6 +155,13 @@ class Scrollbar extends StatelessWidget {
   /// If this property is null, then [ScrollbarThemeData.thickness] of
   /// [ThemeData.scrollbarTheme] is used to resolve a thickness. If that is also
   /// null, the default value is 12.0 pixels.
+  ///
+  /// This is deprecated, use [ScrollbarThemeData.thickness] to resolve based on
+  /// the current state instead.
+  @Deprecated(
+    'Use ScrollbarThemeData.thickness to resolve based on the current state instead. '
+    'This feature was deprecated after v2.6.0-12.0.pre.',
+  )
   final double? hoverThickness;
 
   /// The thickness of the scrollbar in the cross axis of the scrollable.
@@ -155,7 +193,7 @@ class Scrollbar extends StatelessWidget {
   Widget build(BuildContext context) {
     if (Theme.of(context).platform == TargetPlatform.iOS) {
       return CupertinoScrollbar(
-        isAlwaysShown: isAlwaysShown ?? false,
+        thumbVisibility: isAlwaysShown ?? thumbVisibility ?? false,
         thickness: thickness ?? CupertinoScrollbar.defaultThickness,
         thicknessWhileDragging: thickness ?? CupertinoScrollbar.defaultThicknessWhileDragging,
         radius: radius ?? CupertinoScrollbar.defaultRadius,
@@ -168,7 +206,7 @@ class Scrollbar extends StatelessWidget {
     }
     return _MaterialScrollbar(
       controller: controller,
-      isAlwaysShown: isAlwaysShown,
+      thumbVisibility: isAlwaysShown ?? thumbVisibility,
       trackVisibility: trackVisibility,
       showTrackOnHover: showTrackOnHover,
       hoverThickness: hoverThickness,
@@ -187,11 +225,11 @@ class _MaterialScrollbar extends RawScrollbar {
     Key? key,
     required Widget child,
     ScrollController? controller,
-    bool? isAlwaysShown,
+    this.thumbVisibility,
     this.trackVisibility,
     this.showTrackOnHover,
-    this.hoverThickness,
     double? thickness,
+    this.hoverThickness,
     Radius? radius,
     ScrollNotificationPredicate? notificationPredicate,
     bool? interactive,
@@ -200,7 +238,6 @@ class _MaterialScrollbar extends RawScrollbar {
          key: key,
          child: child,
          controller: controller,
-         isAlwaysShown: isAlwaysShown,
          thickness: thickness,
          radius: radius,
          fadeDuration: _kScrollbarFadeDuration,
@@ -211,6 +248,7 @@ class _MaterialScrollbar extends RawScrollbar {
          scrollbarOrientation: scrollbarOrientation,
        );
 
+  final bool? thumbVisibility;
   final bool? trackVisibility;
   final bool? showTrackOnHover;
   final double? hoverThickness;
