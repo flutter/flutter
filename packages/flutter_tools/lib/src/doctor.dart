@@ -137,7 +137,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       HttpHostValidator(
         platform: globals.platform,
         featureFlags: featureFlags,
-        httpClient: HttpClient(),
+        httpClient: globals.httpClientFactory?.call() ?? HttpClient(),
       ),
     ];
     return _validators!;
