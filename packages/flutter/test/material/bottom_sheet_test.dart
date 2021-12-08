@@ -1204,23 +1204,18 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('Bottom sheet onRemove LocalHistoryEntry only added for current bottom sheet', (WidgetTester tester) async {
+  testWidgets('Calling PersistentBottomSheetController.close does not crash when it is not the current bottom sheet', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/93717
     PersistentBottomSheetController<void>? sheetController1;
-    PersistentBottomSheetController<void>? sheetController2;
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: Builder(builder: (BuildContext context) {
-          return Center(
+          return SafeArea(
             child: Column(
               children: <Widget>[
                 ElevatedButton(
                   child: const Text('show 1'),
                   onPressed: () {
-                    if (sheetController1 != null) {
-                      sheetController1!.close();
-                      sheetController1 = null;
-                    }
                     sheetController1 = Scaffold.of(context).showBottomSheet<void>(
                       (BuildContext context) => const Text('BottomSheet 1'),
                     );
@@ -1229,13 +1224,15 @@ void main() {
                 ElevatedButton(
                   child: const Text('show 2'),
                   onPressed: () {
-                    if (sheetController2 != null) {
-                      sheetController2!.close();
-                      sheetController2 = null;
-                    }
-                    sheetController2 = Scaffold.of(context).showBottomSheet<void>(
+                    Scaffold.of(context).showBottomSheet<void>(
                       (BuildContext context) => const Text('BottomSheet 2'),
                     );
+                  },
+                ),
+                ElevatedButton(
+                  child: const Text('close 1'),
+                  onPressed: (){
+                    sheetController1!.close();
                   },
                 ),
               ],
@@ -1249,13 +1246,12 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('BottomSheet 1'), findsOneWidget);
 
-
     await tester.tap(find.text('show 2'));
     await tester.pumpAndSettle();
     expect(find.text('BottomSheet 2'), findsOneWidget);
 
-    // This will throw an assertion due to multiple onRemove entries if regressed.
-    await tester.tap(find.text('show 1'));
+    // This will throw an assertion if regressed
+    await tester.tap(find.text('close 1'));
     await tester.pumpAndSettle();
     expect(find.text('BottomSheet 1'), findsOneWidget);
   });
