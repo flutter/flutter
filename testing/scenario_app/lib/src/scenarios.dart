@@ -43,6 +43,7 @@ Map<String, ScenarioFactory> _scenarios = <String, ScenarioFactory>{
   'platform_view_gesture_reject_eager': () => PlatformViewForTouchIOSScenario(PlatformDispatcher.instance, 'platform view touch', id: _viewId++, accept: false),
   'platform_view_gesture_accept': () => PlatformViewForTouchIOSScenario(PlatformDispatcher.instance, 'platform view touch', id: _viewId++, accept: true),
   'platform_view_gesture_reject_after_touches_ended': () => PlatformViewForTouchIOSScenario(PlatformDispatcher.instance, 'platform view touch', id: _viewId++, accept: false, rejectUntilTouchesEnded: true),
+  'platform_view_scrolling_under_widget':()=>PlatformViewScrollingUnderWidget(PlatformDispatcher.instance, firstPlatformViewId: _viewId++, lastPlatformViewId: _viewId+=16),
   'tap_status_bar': () => TouchesScenario(PlatformDispatcher.instance),
   'text_semantics_focus': () => SendTextFocusSemantics(PlatformDispatcher.instance),
   'initial_route_reply': () => InitialRouteReply(PlatformDispatcher.instance),
