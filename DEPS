@@ -159,7 +159,7 @@ deps = {
    Var('github_git') + '/google/benchmark' + '@' + '431abd149fd76a072f821913c0340137cc755f36',
 
   'src/third_party/googletest':
-   Var('github_git') + '/google/googletest' + '@' + 'f5e592d8ee5ffb1d9af5be7f715ce3576b8bf9c4',
+   Var('github_git') + '/google/googletest' + '@' + '054a986a8513149e8374fc669a5fe40117ca6b41',
 
   'src/third_party/boringssl':
    Var('github_git') + '/dart-lang/boringssl_gen.git' + '@' + Var('dart_boringssl_gen_rev'),
