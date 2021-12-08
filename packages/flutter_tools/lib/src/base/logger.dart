@@ -654,7 +654,7 @@ void generateBox({
   write('\n');
 }
 
-final RegExp _ansiEscapePattern = RegExp(r'(\u001B|\u001b)\[[0-9]+[a-zA-Z]+');
+final RegExp _ansiEscapePattern = RegExp(r'(\u001B|\u001b)\[([0-9][a-zA-Z]|[a-zA-Z])');
 
 int _getColumnSize(String line) {
   // Remove ANSI escape characters from the string.

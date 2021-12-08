@@ -1015,10 +1015,10 @@ void main() {
         contains(
           '\n'
           '┌─ Test title ┐\n'
-          '│           │\n'
+          '│             │\n'
           '│ ${bold}Hello world${clear} │\n'
-          '│           │\n'
-          '└───────────┘\n'
+          '│             │\n'
+          '└─────────────┘\n'
         ),
       );
     });
