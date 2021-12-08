@@ -11,6 +11,11 @@ import 'package:path/path.dart' as path;
 import 'package:pub_semver/pub_semver.dart';
 import 'package:test/test.dart' hide isInstanceOf;
 
+const List<AndroidSemanticsAction> ignoredAccessibilityFocusActions = <AndroidSemanticsAction>[
+  AndroidSemanticsAction.accessibilityFocus,
+  AndroidSemanticsAction.clearAccessibilityFocus,
+];
+
 String adbPath() {
   final String androidHome = io.Platform.environment['ANDROID_HOME'] ?? io.Platform.environment['ANDROID_SDK_ROOT'];
   if (androidHome == null) {
@@ -27,11 +32,6 @@ void main() {
       final int id = await driver.getSemanticsId(finder);
       final String data = await driver.requestData('getSemanticsNode#$id');
       return AndroidSemanticsNode.deserialize(data);
-    }
-
-    Future<void> sendSemanticsFocus(SerializableFinder finder) async {
-      final int id = await driver.getSemanticsId(finder);
-      await driver.requestData('sendSemanticsFocus#$id');
     }
 
     // The version of TalkBack running on the device.
@@ -153,10 +153,6 @@ void main() {
           matching: find.byType('Semantics'),
           firstMatchOnly: true,
         );
-        // Make sure the focus is on the back button.
-        await sendSemanticsFocus(find.byValueKey(backButtonKeyValue));
-        await Future<void>.delayed(const Duration(milliseconds: 500));
-
         expect(
           await getSemantics(normalTextField),
           hasAndroidSemantics(
@@ -166,9 +162,10 @@ void main() {
             isFocused: false,
             isPassword: false,
             actions: <AndroidSemanticsAction>[
-              AndroidSemanticsAction.accessibilityFocus,
               AndroidSemanticsAction.click,
             ],
+            // We can't predict the a11y focus when the screen changes.
+            ignoredActions: ignoredAccessibilityFocusActions
           ),
         );
 
@@ -689,11 +686,6 @@ void main() {
                   isCheckable: false,
                   isEnabled: true,
                   isFocusable: true,
-                  actions: <AndroidSemanticsAction>[
-                    if (talkbackVersion < fixedTalkback && item == 'Title') AndroidSemanticsAction.accessibilityFocus,
-                    if (talkbackVersion >= fixedTalkback && item == 'Title') AndroidSemanticsAction.clearAccessibilityFocus,
-                    if (item != 'Title') AndroidSemanticsAction.accessibilityFocus,
-                  ],
                 ),
                 reason: "Alert $item button doesn't have the right semantics");
           }
