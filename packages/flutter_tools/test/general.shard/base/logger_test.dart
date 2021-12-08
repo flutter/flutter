@@ -1016,12 +1016,109 @@ void main() {
           '\n'
           '┌─ Test title ┐\n'
           '│             │\n'
-          '│ ${bold}Hello world${clear} │\n'
+          '│ ${bold}Hello world$clear │\n'
           '│             │\n'
           '└─────────────┘\n'
         ),
       );
     });
+
+    testWithoutContext('Stdout printBox handles column limit', () {
+      const int columnLimit = 13;
+      final Logger logger = StdoutLogger(
+        terminal: AnsiTerminal(
+          stdio: fakeStdio,
+          platform: FakePlatform(),
+        ),
+        stdio: fakeStdio,
+        outputPreferences: OutputPreferences.test(showColor: true, wrapColumn: columnLimit),
+      );
+      logger.printBox('This line is longer than $columnLimit characters', title: 'Test');
+      final String stdout = fakeStdio.writtenToStdout.join('');
+      final List<String> stdoutLines = stdout.split('\n');
+
+      expect(stdoutLines.length, greaterThan(1));
+      expect(stdoutLines[1].length, equals(columnLimit));
+      expect(stdout,
+        contains(
+          '\n'
+          '┌─ Test ────┐\n'
+          '│           │\n'
+          '│ This line │\n'
+          '│ is longer │\n'
+          '│ than 13   │\n'
+          '│ characters│\n'
+          '│           │\n'
+          '└───────────┘\n'
+        ),
+      );
+    });
+
+    testWithoutContext('Stdout printBox handles column limit and respects new lines', () {
+      const int columnLimit = 13;
+      final Logger logger = StdoutLogger(
+        terminal: AnsiTerminal(
+          stdio: fakeStdio,
+          platform: FakePlatform(),
+        ),
+        stdio: fakeStdio,
+        outputPreferences: OutputPreferences.test(showColor: true, wrapColumn: columnLimit),
+      );
+      logger.printBox('This\nline is longer than\n\n$columnLimit characters', title: 'Test');
+      final String stdout = fakeStdio.writtenToStdout.join('');
+      final List<String> stdoutLines = stdout.split('\n');
+
+      expect(stdoutLines.length, greaterThan(1));
+      expect(stdoutLines[1].length, equals(columnLimit));
+      expect(stdout,
+        contains(
+          '\n'
+          '┌─ Test ────┐\n'
+          '│           │\n'
+          '│ This      │\n'
+          '│ line is   │\n'
+          '│ longer    │\n'
+          '│ than      │\n'
+          '│           │\n'
+          '│ 13        │\n'
+          '│ characters│\n'
+          '│           │\n'
+          '└───────────┘\n'
+        ),
+      );
+    });
+
+    testWithoutContext('Stdout printBox breaks long words that exceed the column limit', () {
+      const int columnLimit = 13;
+      final Logger logger = StdoutLogger(
+        terminal: AnsiTerminal(
+          stdio: fakeStdio,
+          platform: FakePlatform(),
+        ),
+        stdio: fakeStdio,
+        outputPreferences: OutputPreferences.test(showColor: true, wrapColumn: columnLimit),
+      );
+      logger.printBox('Thiswordislongerthan${columnLimit}characters', title: 'Test');
+      final String stdout = fakeStdio.writtenToStdout.join('');
+      final List<String> stdoutLines = stdout.split('\n');
+
+      expect(stdoutLines.length, greaterThan(1));
+      expect(stdoutLines[1].length, equals(columnLimit));
+      expect(stdout,
+        contains(
+          '\n'
+          '┌─ Test ────┐\n'
+          '│           │\n'
+          '│ Thiswordis│\n'
+          '│ longerthan│\n'
+          '│ 13characte│\n'
+          '│ rs        │\n'
+          '│           │\n'
+          '└───────────┘\n'
+        ),
+      );
+    });
+
 
     testWithoutContext('Stdout startProgress on non-color terminal', () async {
       final FakeStopwatch fakeStopwatch = FakeStopwatch();
