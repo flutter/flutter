@@ -1007,9 +1007,9 @@ void main() {
         stdio: fakeStdio,
         outputPreferences: OutputPreferences.test(showColor: true),
       );
-      final String bold = '\u001B[1m';
-      final String clear = '\u001B[2J\u001B[H';
-      logger.printBox('${bold}Hello world${clear}', title: 'Test title');
+      const String bold = '\u001B[1m';
+      const String clear = '\u001B[2J\u001B[H';
+      logger.printBox('${bold}Hello world$clear', title: 'Test title');
       final String stdout = fakeStdio.writtenToStdout.join('');
       expect(stdout,
         contains(
