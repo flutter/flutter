@@ -145,10 +145,10 @@ void main() {
     environment.buildDir.childFile('main.dart.js').createSync();
 
     await const WebReleaseBundle().build(environment);
-
+    final String mainHash = ResourcesHandler.getMainJsHash(environment);
     expect(environment.outputDir.childFile('foo.txt')
       .readAsStringSync(), 'A');
-    expect(environment.outputDir.childFile('main.dart.js')
+    expect(environment.outputDir.childFile('main.dart.$mainHash.js')
       .existsSync(), true);
     expect(environment.outputDir.childDirectory('assets')
       .childFile('AssetManifest.json').existsSync(), true);
@@ -162,7 +162,7 @@ void main() {
       .readAsStringSync(), 'B');
     // Appends number to requests for service worker only
     expect(environment.outputDir.childFile('index.html').readAsStringSync(), allOf(
-      contains('<script src="main.dart.js" type="application/javascript">'),
+      contains('<script src="main.dart.$mainHash.js" type="application/javascript">'),
       contains('flutter_service_worker.js?v='),
     ));
   }));
