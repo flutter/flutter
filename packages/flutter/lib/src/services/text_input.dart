@@ -640,7 +640,7 @@ class TextInputConfiguration {
       inputAction: inputAction ?? this.inputAction,
       textCapitalization: textCapitalization ?? this.textCapitalization,
       keyboardAppearance: keyboardAppearance ?? this.keyboardAppearance,
-      enableIMEPersonalizedLearning: enableIMEPersonalizedLearning?? this.enableIMEPersonalizedLearning,
+      enableIMEPersonalizedLearning: enableIMEPersonalizedLearning ?? this.enableIMEPersonalizedLearning,
       autofillConfiguration: autofillConfiguration ?? this.autofillConfiguration,
       enableDeltaModel: enableDeltaModel ?? this.enableDeltaModel,
     );
@@ -1173,6 +1173,42 @@ abstract class DeltaTextInputClient extends TextInputClient {
 /// switches to a different tab on the web), in which case the connected text
 /// field will receive a notification via the [TextInputConnection].
 ///
+/// ## Keep in sync with the system's text input control
+///
+/// Due to the asynchrous nature of [TextInput], the platform text input plugin
+/// (which represents the system's text input) and the connected Flutter text
+/// field usually maintain their own text editing states ([TextEditingValue])
+/// separately. They must be kept in sync as long as the connection is
+/// [attached].
+///
+/// * The currently active text field sends its [TextEditingValue] to the
+///   platform text input plugin by calling [TextInputConnection.setEditingState].
+///
+/// * The platform text input plugin sends its [TextEditingValue] to the
+///   connected [TextInputClient] via a "TextInput.setEditingState" message.
+///
+/// * When autofill happens on an input field that does not have an active
+///   [TextInputConnection], the platform text input plugin sends the
+///   [TextEditingValue] to the currently connected input field's [AutofillScope],
+///   and the [AutofillScope] will relay the value to the right input field if
+///   it's part of the [AutofillScope].
+///
+/// When synchronizing the [TextEditingValue]s, the communication may get stuck
+/// in an infinite when both parties are trying to send their own update. To
+/// mitigate the problem, only Flutter text fields are allowed to alter the
+/// received [TextEditingValue]s while platform text input plugins are to accept
+/// the received [TextEditingValue]s unmodified. More specifically:
+///
+/// * When a Flutter text field receives a new [TextEditingValue] from the
+///   platform text input plugin, it's allowed to modify the value (for example,
+///   apply [TextInputFormatter]s). If it decides to do so, it must send the
+///   updated [TextEditingValue] back to the platform text input plugin to keep
+///   the [TextEditingValue]s in sync.
+///
+/// * When the platform text input plugin receives a new value from the
+///   connected Flutter text field, it must accept the new value as-is, to avoid
+///   sending back an updated value.
+///
 /// See also:
 ///
 ///  * [IntentTextInputConnection], a subclass that translates incoming text
@@ -1360,10 +1396,15 @@ abstract class TextInputConnection {
 /// the translated [Intent]s to the connected text input field (typically also
 /// the input field that currently has the primary focus).
 ///
+/// If an incoming [MethodCall] is not recognized by the
+/// [IntentTextInputConnection] class, it is translated to a
+/// [PerformPrivateTextInputCommandIntent].
+///
 /// See also:
 ///
-///  * [EditableText], a text input widget that receives text input commands
-///   from
+///  * [EditableText], a text input widget establishes an
+///    [IntentTextInputConnection] when it gains focus, and destroy the
+///    connection upon losing focus.
 abstract class IntentTextInputConnection extends TextInputConnection {
   /// Creates an [IntentTextInputConnection].
   IntentTextInputConnection() : super._();
@@ -1433,7 +1474,7 @@ abstract class IntentTextInputConnection extends TextInputConnection {
         yield TextInputConnectionControlIntent.close;
         return;
       case 'TextInputClient.showAutocorrectionPromptRect':
-        yield HighlightAutocorrectTextRangeIntent(
+        yield HighlightiOSReplacementRangeIntent(
           TextRange(start: args[1] as int, end: args[2] as int),
         );
         return;
@@ -1601,6 +1642,19 @@ class _TextInputConnection extends TextInputConnection {
       case 'TextInputClient.showAutocorrectionPromptRect':
         _client.showAutocorrectionPromptRect(args[1] as int, args[2] as int);
         break;
+      // Currently these method calls are only handled by
+      // [IntentTextInputConnection]. Adding them as noops here to prevent the
+      // framework from throwing a `MissingPluginException`.
+      case 'TextInputClient.DeleteCharacterIntent':
+      case 'TextInputClient.DeleteToNextWordBoundaryIntent':
+      case 'TextInputClient.DeleteToLineBreakIntent':
+      case 'TextInputClient.ExtendSelectionByCharacterIntent':
+      case 'TextInputClient.ExtendSelectionToNextWordBoundaryIntent':
+      case 'TextInputClient.ExtendSelectionToNextWordBoundaryOrCaretLocationIntent':
+      case 'TextInputClient.ExtendSelectionToLineBreakIntent':
+      case 'TextInputClient.ExtendSelectionVerticallyToAdjacentLineIntent':
+      case 'TextInputClient.ExtendSelectionToDocumentBoundaryIntent':
+        return;
       default:
         throw MissingPluginException();
     }
@@ -1664,51 +1718,19 @@ RawFloatingCursorPoint _toTextPoint(FloatingCursorDragState state, Map<String, d
 
 /// An low-level interface to the system's text input control.
 ///
-/// To start interacting with the system's text input control, call [attach] to
-/// establish a [TextInputConnection] between the system's text input control
-/// and a [TextInputClient]. The majority of commands available for
-/// interacting with the text input control reside in the returned
-/// [TextInputConnection]. The communication between the system text input and
-/// the [TextInputClient] is asynchronous.
+/// A text field can acquire access to the system text input control by calling
+/// the [TextInput.attach] or the [TextInput.attachConnection] method to obtain
+/// an active [TextInputConnection]. There can be at most one active
+/// [TextInputConnection] ([TextInputConnection.attached]) at any given moment:
+/// the current [TextInputConnection] will be dropped if a different
+/// [TextInputConnection] tries to attach to [TextInput].
 ///
-/// The platform text input plugin (which represents the system's text input)
-/// and the connected Flutter text field usually maintain their own text editing
-/// states ([TextEditingValue]) separately. They must be kept in sync as long as
-/// the [TextInputClient] is connected. The following methods can be used to send
-/// [TextEditingValue] to update the other party, when either party's text
-/// editing states change:
-///
-/// * The [TextInput.attach] method allows a [TextInputClient] to establish a
-///   connection to the text input. An optional field in its `configuration`
-///   parameter can be used to specify an initial value for the platform text
-///   input plugin's [TextEditingValue].
-///
-/// * The [TextInputClient] sends its [TextEditingValue] to the platform text
-///   input plugin using [TextInputConnection.setEditingState].
-///
-/// * The platform text input plugin sends its [TextEditingValue] to the
-///   connected [TextInputClient] via a "TextInput.setEditingState" message.
-///
-/// * When autofill happens on a disconnected [TextInputClient], the platform
-///   text input plugin sends the [TextEditingValue] to the connected
-///   [TextInputClient]'s [AutofillScope], and the [AutofillScope] will further
-///   relay the value to the correct [TextInputClient].
-///
-/// When synchronizing the [TextEditingValue]s, the communication may get stuck
-/// in an infinite when both parties are trying to send their own update. To
-/// mitigate the problem, only [TextInputClient]s are allowed to alter the
-/// received [TextEditingValue]s while platform text input plugins are to accept
-/// the received [TextEditingValue]s unmodified. More specifically:
-///
-/// * When a [TextInputClient] receives a new [TextEditingValue] from the
-///   platform text input plugin, it's allowed to modify the value (for example,
-///   apply [TextInputFormatter]s). If it decides to do so, it must send the
-///   updated [TextEditingValue] back to the platform text input plugin to keep
-///   the [TextEditingValue]s in sync.
-///
-/// * When the platform text input plugin receives a new value from the
-///   connected [TextInputClient], it must accept the new value as-is, to avoid
-///   sending back an updated value.
+/// The communication channel [TextInput] establishes between the attached
+/// [TextInputConnection] and the system text input control is asynchronous, but
+/// guarantees FIFO ordering. That is, system text input control commands are
+/// received by [TextInputConnection] in the same order as they're sent, and
+/// framework updates are also received by the system text input control in the
+/// same order as they're sent.
 ///
 /// See also:
 ///
@@ -1775,8 +1797,7 @@ class TextInput {
     return attachConnection(_TextInputConnection._(client, configuration), configuration);
   }
 
-  /// Establishes a connection to the system's text input control using the give
-  /// [connection].
+  /// Connects the given [connection] to the system's text input control.
   ///
   /// A text input field must create a [TextInputConnection], and call this
   /// method to connect to the system's text input control, before it can start

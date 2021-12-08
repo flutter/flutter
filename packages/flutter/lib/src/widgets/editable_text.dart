@@ -1532,7 +1532,17 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   bool _didAutoFocus = false;
 
   AutofillGroupState? _currentAutofillScope;
-  @override
+
+  /// The [AutofillScope] this [EditableText] belongs to, if any.
+  ///
+  /// It returns null if this [EditableText] does not support autofill.
+  /// For an [EditableText] that supports autofill, returning null causes it to
+  /// participate in autofill alone.
+  ///
+  /// See also:
+  ///
+  ///  * [AutofillGroup], a widget that creates an [AutofillScope] for its
+  ///    descendent autofill-enabled text fields.
   AutofillScope? get currentAutofillScope => _currentAutofillScope;
 
   AutofillClient get _effectiveAutofillClient => widget.autofillClient ?? this;
@@ -1824,8 +1834,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     assert(_batchEditDepth <= 0, 'unfinished batch edits: $_batchEditDepth');
   }
 
-  // TextInputClient implementation:
-
   /// The last known [TextEditingValue] of the platform text input plugin.
   ///
   /// This value is updated when the platform text input plugin sends a new
@@ -1837,10 +1845,15 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// remote value is outdated and needs updating.
   TextEditingValue? _lastKnownRemoteTextEditingValue;
 
-  @override
+  /// The current state of the [TextEditingValue] held by this [EditableText] widget.
   TextEditingValue get currentTextEditingValue => _value;
 
-  @override
+  /// Updates the editing state of the [EditableText] to the given `value`.
+  ///
+  /// This method is different from directly updating
+  /// [TextEditingController.value] in that the new `value` is treated as user
+  /// input thus may subject to input formatting, and triggers the
+  /// [EditableText.onChanged] callback.
   void updateEditingValue(TextEditingValue value) {
     // This method handles text editing state updates from the platform text
     // input plugin. The [EditableText] may not have the focus or an open input
@@ -1896,7 +1909,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
-  @override
+  /// Performs the given [TextInputAction].
   void performAction(TextInputAction action) {
     switch (action) {
       case TextInputAction.newline:
@@ -1927,7 +1940,22 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
-  @override
+  /// Performs the private command `action` using the specified `data`.
+  ///
+  /// This method is typically called on Android, when the input method attempts
+  /// to send the input field a private command using the Android
+  /// `InputConnection#performPrivateCommand` API.
+  ///
+  /// This can be used to provide domain-specific features that are only known
+  /// between certain input methods and their clients.
+  ///
+  /// See also:
+  ///   * [performPrivateCommand](https://developer.android.com/reference/android/view/inputmethod/InputConnection#performPrivateCommand\(java.lang.String,%20android.os.Bundle\)),
+  ///     which is the Android documentation for performPrivateCommand, used to
+  ///     send a command from the input method.
+  ///   * [sendAppPrivateCommand](https://developer.android.com/reference/android/view/inputmethod/InputMethodManager#sendAppPrivateCommand),
+  ///     which is the Android documentation for sendAppPrivateCommand, used to
+  ///     send a command to the input method.
   void performPrivateCommand(String action, Map<String, dynamic> data) {
     widget.onAppPrivateCommand!(action, data);
   }
@@ -1950,6 +1978,14 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   // on, we need this offset to correctly render and move the cursor.
   Offset get _floatingCursorOffset => Offset(0, renderEditable.preferredLineHeight / 2);
 
+  /// Updates the state of the iOS floating cursor.
+  ///
+  /// When the user performs a two-finger pan gesture to pick up the cursor, UIKit
+  /// initiates a floating cursor session that allows the user to move the cursor
+  /// freely using the pan gesture.
+  ///
+  /// The implementation draws a floating cursor that has a similar appearance
+  /// and behavior as the `UITextField` cursor.
   void updateFloatingCursor(RawFloatingCursorPoint point) {
     _floatingCursorResetController ??= AnimationController(
       vsync: this,
@@ -2297,7 +2333,14 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _lastKnownRemoteTextEditingValue = _value;
   }
 
-
+  /// Cleans up the current [TextInputConnection] if any, and finalizes editing.
+  ///
+  /// This method is typically called on the web, when the [TextInputConnection]
+  /// is closed by the browser (for example, when the `blur` event fires).
+  ///
+  /// See also:
+  ///
+  ///  * Blur event: <https://developer.mozilla.org/en-US/docs/Web/API/Element/blur_event>
   void connectionClosed() {
     if (_hasInputConnection) {
       _textInputConnection!.connectionClosedReceived();
@@ -2832,6 +2875,15 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   // null if no promptRect should be shown.
   TextRange? _currentPromptRectRange;
 
+  /// Highlights the given text range to indicate the range of text that will be
+  /// changed by a pending autocorrection or text replacement.
+  ///
+  /// This is typically only called on iOS when the system detects misspelled
+  /// word or text replacement candidates in recently typed text.
+  ///
+  /// See also:
+  ///
+  ///  * [iOS text replacement and autocorrect](https://support.apple.com/en-us/HT207525).
   void showAutocorrectionPromptRect(int start, int end) {
     setState(() {
       _currentPromptRectRange = TextRange(start: start, end: end);
@@ -2965,7 +3017,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     updateFloatingCursor(intent.floatingCursorPoint);
   }
 
-  void _highlightAutocorrectText(HighlightAutocorrectTextRangeIntent intent) {
+  void _highlightAutocorrectText(HighlightiOSReplacementRangeIntent intent) {
     setState(() {
       _currentPromptRectRange = intent.highlightRange;
     });
@@ -3041,7 +3093,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     PerformAutofillIntent: _makeOverridable(CallbackAction<PerformAutofillIntent>(onInvoke: _performAutofill)),
     PerformPrivateTextInputCommandIntent: _makeOverridable(CallbackAction<PerformPrivateTextInputCommandIntent>(onInvoke: _performPrivateCommand)),
     UpdateFloatingCursorIntent: _makeOverridable(CallbackAction<UpdateFloatingCursorIntent>(onInvoke: _handleFloatingCursorUpdate)),
-    HighlightAutocorrectTextRangeIntent: _makeOverridable(CallbackAction<HighlightAutocorrectTextRangeIntent>(onInvoke: _highlightAutocorrectText)),
+    HighlightiOSReplacementRangeIntent: _makeOverridable(CallbackAction<HighlightiOSReplacementRangeIntent>(onInvoke: _highlightAutocorrectText)),
   };
 
   @override

@@ -135,10 +135,7 @@ void main() {
       );
       focusNode.requestFocus();
       await tester.idle();
-      final List<dynamic> args = tester.testTextInput.log
-        .lastWhere((MethodCall methodCall) => methodCall.method == 'TextInput.setClient')
-        .arguments as List<dynamic>;
-      final String autofillId = ((args[1] as Map<String, dynamic>)['autofill'] as Map<String, dynamic>)['uniqueIdentifier'] as String;
+      final String autofillId = tester.state<EditableTextState>(find.byWidget(editableText)).autofillId;
       tester.testTextInput.log.clear();
 
       const TextEditingValue newValue = TextEditingValue(text: 'new text', selection: TextSelection.collapsed(offset: 8));

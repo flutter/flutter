@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 final Matcher _matchesCommit = isMethodCall('TextInput.finishAutofillContext', arguments: true);
@@ -44,7 +46,7 @@ void main() {
     expect(innerState.autofillClients.toList(), <State<TextField>>[clientState2]);
   });
 
-  testWidgets('new clients can be added & removed to a scope', (WidgetTester tester) async {
+  testWidgets('new clients can be added to & removed from a scope', (WidgetTester tester) async {
     const Key scopeKey = Key('scope');
 
     const TextField client1 = TextField(autofillHints: <String>['1']);
@@ -149,6 +151,62 @@ void main() {
     expect(outerState.autofillClients, contains(clientState1));
     expect(outerState.autofillClients, contains(clientState3));
     expect(innerState.autofillClients, <State<TextField>>[clientState2]);
+  });
+
+  testWidgets('AutofillGroup autofilling multiple clients', (WidgetTester tester) async {
+    const Key outerKey = Key('outer');
+    const Key innerKey = Key('inner');
+
+    final FocusNode focusNode = FocusNode(debugLabel: 'text field 3');
+    final TextEditingController controller1 = TextEditingController();
+    final TextEditingController controller2 = TextEditingController();
+    final TextEditingController controller3 = TextEditingController();
+    final TextField client1 = TextField(controller: controller1, autofillHints: const <String>['1']);
+    final TextField client2 = TextField(controller: controller2, autofillHints: const <String>['2']);
+    final TextField client3 = TextField(controller: controller3, autofillHints: const <String>['3'], focusNode: focusNode,);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: AutofillGroup(
+            key: outerKey,
+            child: Column(children: <Widget>[
+              client1,
+              AutofillGroup(
+                key: innerKey,
+                child: Column(children: <Widget>[client2, client3]),
+              ),
+            ]),
+          ),
+        ),
+      ),
+    );
+
+    focusNode.requestFocus();
+    await tester.idle();
+
+    final AutofillGroupState innerState = tester.state<AutofillGroupState>(find.byKey(innerKey));
+
+    final Map<String, dynamic> autofillValues = <String, dynamic>{};
+    const TextEditingValue newValue = TextEditingValue(text: 'new text', selection: TextSelection.collapsed(offset: 8));
+    for (final String clientId in innerState.autofillClients.map((AutofillClient client) => client.autofillId)) {
+      autofillValues[clientId] = newValue.toJSON();
+    }
+
+    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+      SystemChannels.textInput.name,
+      SystemChannels.textInput.codec.encodeMethodCall(
+        MethodCall(
+          'TextInputClient.updateEditingStateWithTag',
+          <dynamic>[autofillValues],
+        ),
+      ),
+      (ByteData? data) { /* response from framework is discarded */ },
+    );
+
+    expect(controller1.value, TextEditingValue.empty);
+    expect(controller2.value, newValue);
+    expect(controller3.value, newValue);
   });
 
   testWidgets('disposing AutofillGroups', (WidgetTester tester) async {

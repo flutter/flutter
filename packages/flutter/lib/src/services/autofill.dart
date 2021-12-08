@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
 import 'package:flutter/foundation.dart';
 import 'text_input.dart';
 
@@ -751,13 +753,15 @@ class AutofillConfiguration {
 abstract class AutofillClient {
   /// The unique identifier of this [AutofillClient].
   ///
-  /// Must not be null and the identifier must not be changed.
+  /// Must not be null and the identifier must not change during its entire
+  /// lifespan.
   String get autofillId;
 
   /// The [TextInputConfiguration] that describes this [AutofillClient].
   ///
   /// In order to participate in autofill, its
-  /// [TextInputConfiguration.autofillConfiguration] must not be null.
+  /// [TextInputConfiguration.autofillConfiguration] must not be null and
+  /// the [AutofillConfiguration.enabled] parameter must be true.
   TextInputConfiguration get textInputConfiguration;
 
   /// Requests this [AutofillClient] update its [TextEditingValue] to the given
@@ -769,7 +773,7 @@ abstract class AutofillClient {
 ///
 /// {@template flutter.services.AutofillScope}
 /// [AutofillClient]s within the same [AutofillScope] are isolated from other
-/// input fields during autofill. That is, when an autofillable [TextInputClient]
+/// input fields during autofill. That is, when an autofill-enabled input field
 /// gains focus, only the [AutofillClient]s within the same [AutofillScope] will
 /// be visible to the autofill service, in the same order as they appear in
 /// [AutofillScope.autofillClients].
@@ -779,8 +783,8 @@ abstract class AutofillClient {
 /// [AutofillScope.getAutofillClient].
 ///
 /// An [AutofillClient] that's not tied to any [AutofillScope] will only
-/// participate in autofill if the autofill is directly triggered by its own
-/// [TextInputClient].
+/// participate in autofill if the autofill is directly triggered by the input
+/// field it represents.
 /// {@endtemplate}
 abstract class AutofillScope {
   /// Gets the [AutofillClient] associated with the given [autofillId], in
@@ -803,38 +807,110 @@ abstract class AutofillScope {
   /// [TextInputClient] wishes to participate in autofill.
   TextInputConnection attach(TextInputClient trigger, TextInputConfiguration configuration);
 
+  /// Creates a new [TextInputConfiguration] by adding autofill information to
+  /// the supplied [TextInputConfiguration].
+  ///
+  /// This method is typically called when the user triggers autofill in a
+  /// Flutter text field. It helps the platform autofill service collect the
+  /// autofill information on related text fields, to better understand the
+  /// expected content type of these text fields.
   TextInputConfiguration createAutofillConfiguration(TextInputConfiguration configuration);
 }
 
 @immutable
-class _AutofillScopeTextInputConfiguration extends TextInputConfiguration {
-  _AutofillScopeTextInputConfiguration({
+class _AutofillScopeTextInputConfiguration implements TextInputConfiguration {
+  const _AutofillScopeTextInputConfiguration({
     required this.allConfigurations,
-    required TextInputConfiguration currentClientConfiguration,
+    required this.currentClientConfiguration,
   }) : assert(allConfigurations != null),
-       assert(currentClientConfiguration != null),
-       super(inputType: currentClientConfiguration.inputType,
-         obscureText: currentClientConfiguration.obscureText,
-         autocorrect: currentClientConfiguration.autocorrect,
-         smartDashesType: currentClientConfiguration.smartDashesType,
-         smartQuotesType: currentClientConfiguration.smartQuotesType,
-         enableSuggestions: currentClientConfiguration.enableSuggestions,
-         inputAction: currentClientConfiguration.inputAction,
-         textCapitalization: currentClientConfiguration.textCapitalization,
-         keyboardAppearance: currentClientConfiguration.keyboardAppearance,
-         actionLabel: currentClientConfiguration.actionLabel,
-         autofillConfiguration: currentClientConfiguration.autofillConfiguration,
-       );
+       assert(currentClientConfiguration != null);
 
+  final TextInputConfiguration currentClientConfiguration;
   final Iterable<TextInputConfiguration> allConfigurations;
 
   @override
+  String? get actionLabel => currentClientConfiguration.actionLabel;
+  @override
+  bool get autocorrect => currentClientConfiguration.autocorrect;
+  @override
+  AutofillConfiguration get autofillConfiguration => currentClientConfiguration.autofillConfiguration;
+  @override
+  bool get enableDeltaModel => currentClientConfiguration.enableDeltaModel;
+
+  @override
+  bool get enableIMEPersonalizedLearning => currentClientConfiguration.enableIMEPersonalizedLearning;
+
+  @override
+  bool get enableSuggestions => currentClientConfiguration.enableSuggestions;
+
+  @override
+  TextInputAction get inputAction => currentClientConfiguration.inputAction;
+
+  @override
+  TextInputType get inputType => currentClientConfiguration.inputType;
+
+  @override
+  Brightness get keyboardAppearance => currentClientConfiguration.keyboardAppearance;
+
+  @override
+  bool get obscureText => currentClientConfiguration.obscureText;
+
+  @override
+  bool get readOnly => currentClientConfiguration.readOnly;
+
+  @override
+  SmartDashesType get smartDashesType => currentClientConfiguration.smartDashesType;
+
+  @override
+  SmartQuotesType get smartQuotesType => currentClientConfiguration.smartQuotesType;
+
+  @override
+  TextCapitalization get textCapitalization => currentClientConfiguration.textCapitalization;
+
+  @override
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> result = super.toJson();
+    final Map<String, dynamic> result = currentClientConfiguration.toJson();
     result['fields'] = allConfigurations
       .map((TextInputConfiguration configuration) => configuration.toJson())
       .toList(growable: false);
     return result;
+  }
+
+  @override
+  TextInputConfiguration copyWith({
+      TextInputType? inputType,
+      bool? readOnly,
+      bool? obscureText,
+      bool? autocorrect,
+      SmartDashesType? smartDashesType,
+      SmartQuotesType? smartQuotesType,
+      bool? enableSuggestions,
+      String? actionLabel,
+      TextInputAction? inputAction,
+      Brightness? keyboardAppearance,
+      TextCapitalization? textCapitalization,
+      bool? enableIMEPersonalizedLearning,
+      AutofillConfiguration? autofillConfiguration,
+      bool? enableDeltaModel,
+  }) {
+    return _AutofillScopeTextInputConfiguration(
+      allConfigurations: allConfigurations,
+      currentClientConfiguration: currentClientConfiguration.copyWith(
+        inputType: inputType,
+        readOnly: readOnly,
+        obscureText: obscureText,
+        autocorrect: autocorrect,
+        smartDashesType: smartDashesType,
+        smartQuotesType: smartQuotesType,
+        enableSuggestions: enableSuggestions,
+        inputAction: inputAction,
+        textCapitalization: textCapitalization,
+        keyboardAppearance: keyboardAppearance,
+        enableIMEPersonalizedLearning: enableIMEPersonalizedLearning,
+        autofillConfiguration: autofillConfiguration,
+        enableDeltaModel: enableDeltaModel,
+      ),
+    );
   }
 }
 

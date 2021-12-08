@@ -276,63 +276,11 @@ class DefaultTextEditingShortcuts extends Shortcuts {
   };
 
   // macOS document shortcuts: https://support.apple.com/en-us/HT201236.
-  // The macOS shortcuts uses different word/line modifiers than most other
-  // platforms.
-  static const Map<ShortcutActivator, Intent> _macShortcuts = <ShortcutActivator, Intent>{
-    SingleActivator(LogicalKeyboardKey.backspace): DeleteCharacterIntent(forward: false),
-    SingleActivator(LogicalKeyboardKey.backspace, alt: true): DeleteToNextWordBoundaryIntent(forward: false),
-    SingleActivator(LogicalKeyboardKey.backspace, meta: true): DeleteToLineBreakIntent(forward: false),
-    SingleActivator(LogicalKeyboardKey.delete): DeleteCharacterIntent(forward: true),
-    SingleActivator(LogicalKeyboardKey.delete, alt: true): DeleteToNextWordBoundaryIntent(forward: true),
-    SingleActivator(LogicalKeyboardKey.delete, meta: true): DeleteToLineBreakIntent(forward: true),
-
-    SingleActivator(LogicalKeyboardKey.arrowLeft): ExtendSelectionByCharacterIntent(forward: false, collapseSelection: true),
-    SingleActivator(LogicalKeyboardKey.arrowRight): ExtendSelectionByCharacterIntent(forward: true, collapseSelection: true),
-    SingleActivator(LogicalKeyboardKey.arrowUp): ExtendSelectionVerticallyToAdjacentLineIntent(forward: false, collapseSelection: true),
-    SingleActivator(LogicalKeyboardKey.arrowDown): ExtendSelectionVerticallyToAdjacentLineIntent(forward: true, collapseSelection: true),
-
-    // Shift + Arrow: Extend Selection.
-    SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true): ExtendSelectionByCharacterIntent(forward: false, collapseSelection: false),
-    SingleActivator(LogicalKeyboardKey.arrowRight, shift: true): ExtendSelectionByCharacterIntent(forward: true, collapseSelection: false),
-    SingleActivator(LogicalKeyboardKey.arrowUp, shift: true): ExtendSelectionVerticallyToAdjacentLineIntent(forward: false, collapseSelection: false),
-    SingleActivator(LogicalKeyboardKey.arrowDown, shift: true): ExtendSelectionVerticallyToAdjacentLineIntent(forward: true, collapseSelection: false),
-
-    SingleActivator(LogicalKeyboardKey.arrowLeft, alt: true): ExtendSelectionToNextWordBoundaryIntent(forward: false, collapseSelection: true),
-    SingleActivator(LogicalKeyboardKey.arrowRight, alt: true): ExtendSelectionToNextWordBoundaryIntent(forward: true, collapseSelection: true),
-    SingleActivator(LogicalKeyboardKey.arrowUp, alt: true): ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: true),
-    SingleActivator(LogicalKeyboardKey.arrowDown, alt: true): ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: true),
-
-    SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true, alt: true): ExtendSelectionToNextWordBoundaryOrCaretLocationIntent(forward: false),
-    SingleActivator(LogicalKeyboardKey.arrowRight, shift: true, alt: true): ExtendSelectionToNextWordBoundaryOrCaretLocationIntent(forward: true),
-    SingleActivator(LogicalKeyboardKey.arrowUp, shift: true, alt: true): ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: false, collapseAtReversal: true),
-    SingleActivator(LogicalKeyboardKey.arrowDown, shift: true, alt: true): ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: false, collapseAtReversal: true),
-
-    SingleActivator(LogicalKeyboardKey.arrowLeft, meta: true): ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: true),
-    SingleActivator(LogicalKeyboardKey.arrowRight, meta: true): ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: true),
-    SingleActivator(LogicalKeyboardKey.arrowUp, meta: true): ExtendSelectionToDocumentBoundaryIntent(forward: false, collapseSelection: true),
-    SingleActivator(LogicalKeyboardKey.arrowDown, meta: true): ExtendSelectionToDocumentBoundaryIntent(forward: true, collapseSelection: true),
-
-    SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true, meta: true): ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: false),
-    SingleActivator(LogicalKeyboardKey.arrowRight, shift: true, meta: true): ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: false),
-    SingleActivator(LogicalKeyboardKey.arrowUp, shift: true, meta: true): ExtendSelectionToDocumentBoundaryIntent(forward: false, collapseSelection: false),
-    SingleActivator(LogicalKeyboardKey.arrowDown, shift: true, meta: true): ExtendSelectionToDocumentBoundaryIntent(forward: true, collapseSelection: false),
-
-    SingleActivator(LogicalKeyboardKey.home, shift: true): ExtendSelectionToDocumentBoundaryIntent(forward: false, collapseSelection: false),
-    SingleActivator(LogicalKeyboardKey.end, shift: true): ExtendSelectionToDocumentBoundaryIntent(forward: true, collapseSelection: false),
-
-    SingleActivator(LogicalKeyboardKey.keyX, meta: true): CopySelectionTextIntent.cut(SelectionChangedCause.keyboard),
-    SingleActivator(LogicalKeyboardKey.keyC, meta: true): CopySelectionTextIntent.copy,
-    SingleActivator(LogicalKeyboardKey.keyV, meta: true): PasteTextIntent(SelectionChangedCause.keyboard),
-    SingleActivator(LogicalKeyboardKey.keyA, meta: true): SelectAllTextIntent(SelectionChangedCause.keyboard),
-    // The following key combinations have no effect on text editing on this
-    // platform:
-    //   * End
-    //   * Home
-    //   * Control + end
-    //   * Control + home
-    //   * Control + shift + end
-    //   * Control + shift + home
-  };
+  // However on macOS keybindings can be configured at system-level:
+  // https://support.apple.com/guide/mac-help/use-keyboard-shortcuts-mchlp2262/mac
+  // So there's no framework-defined "default" keybindings for macOS, and the
+  // key events should usually be sent straight back to the system.
+  static const Map<ShortcutActivator, Intent> _macShortcuts = _webShortcuts;
 
   // The following key combinations have no effect on text editing on this
   // platform:
@@ -433,7 +381,7 @@ class DefaultTextEditingShortcuts extends Shortcuts {
       case TargetPlatform.linux:
         return _linuxShortcuts;
       case TargetPlatform.macOS:
-        return _webShortcuts;
+        return _macShortcuts;
       case TargetPlatform.windows:
         return _windowsShortcuts;
     }

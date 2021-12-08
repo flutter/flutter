@@ -288,7 +288,7 @@ void main() {
       ensureConnected();
       fakeTextChannel.incoming!(const MethodCall('TextInputClient.showAutocorrectionPromptRect', <dynamic>[1, 0, 1]));
       expect(fakeConnection.intentSink?.length, 1);
-      final HighlightAutocorrectTextRangeIntent? receivedIntent = fakeConnection.intentSink?.first as HighlightAutocorrectTextRangeIntent?;
+      final HighlightiOSReplacementRangeIntent? receivedIntent = fakeConnection.intentSink?.first as HighlightiOSReplacementRangeIntent?;
       expect(receivedIntent?.highlightRange, const TextRange(start: 0, end: 1));
     });
 

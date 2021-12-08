@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/services.dart';
+import 'actions.dart';
 import 'framework.dart';
 
 export 'package:flutter/services.dart' show AutofillHints;
@@ -129,7 +130,12 @@ class AutofillGroupState extends State<AutofillGroup> with AutofillScopeMixin {
   bool _isTopmostAutofillGroup = false;
 
   @override
-  AutofillClient? getAutofillClient(String autofillId) => _clients[autofillId];
+  AutofillClient? getAutofillClient(String autofillId) {
+    final AutofillClient? client = _clients[autofillId];
+    return client != null && client.textInputConfiguration.autofillConfiguration.enabled
+      ? client
+      : null;
+  }
 
   @override
   Iterable<AutofillClient> get autofillClients {
@@ -176,11 +182,22 @@ class AutofillGroupState extends State<AutofillGroup> with AutofillScopeMixin {
     _isTopmostAutofillGroup = AutofillGroup.of(context) == null;
   }
 
+  void _performAutofill(PerformAutofillIntent intent) {
+    for (final MapEntry<String, TextEditingValue> value in intent.autofillValue.entries) {
+      getAutofillClient(value.key)?.autofill(value.value);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return _AutofillScope(
       autofillScopeState: this,
-      child: widget.child,
+      child: Actions(
+        actions: <Type, Action<Intent>>{
+          PerformAutofillIntent: CallbackAction<PerformAutofillIntent>(onInvoke: _performAutofill),
+        },
+        child: widget.child,
+      ),
     );
   }
 

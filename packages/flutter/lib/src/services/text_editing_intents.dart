@@ -7,12 +7,11 @@ import 'package:flutter/services.dart';
 
 import 'intents.dart';
 
-/// An [Intent] to send the inpput event straight to the engine.
+/// An [Intent] to send the input event straight to the engine.
 ///
-/// Text input widgets should typically use this [Intent] instead of
-/// [DoNothingIntent], to indicate the text-input-related event that triggered
-/// the [Intent] should be handled by the engine instead of the Flutter
-/// framework.
+/// This [Intent] is currently used by [DefaultTextEditingShortcuts] to indicate
+/// the key events that was bound to a particular shortcut should be handled
+/// by the platform's text input system, instead of the Flutter framework.
 ///
 /// See also:
 ///
@@ -22,16 +21,18 @@ class DoNothingAndStopPropagationTextIntent extends Intent {
   const DoNothingAndStopPropagationTextIntent();
 }
 
-/// An [Intent] that represent a command that isn't recognized by the Flutter
-/// framework.
+/// An [Intent] representing an unrecognized text input command sent by the
+/// platform's text input plugin.
 ///
 /// {@template flutter.services.textEditingIntents.privateCommands}
-/// Some input method editors may define "private" commands to implement
+/// Some input method editors (IMEs) may define "private" commands to implement
 /// domain-specific features that are only known between certain input methods
 /// and their clients.
 ///
-/// For instance, on Android there is `InputConnection.performPrivateCommand`,
-/// and on macOS there is `-[NSTextInputClient doCommandBySelector:]`.
+/// For instance, on Android, the IME can send app-private commands via
+/// [`InputConnection.performPrivateCommand`](https://developer.android.com/reference/android/view/inputmethod/InputConnection#performPrivateCommand(java.lang.String,%20android.os.Bundle)),
+/// and on macOS input fields receives "dynamic" commands in the form of selectors:
+/// [`-[NSTextInputClient doCommandBySelector:]`](https://developer.apple.com/documentation/appkit/nstextinputclient/1438256-docommand).
 /// {@endtemplate}
 class PerformPrivateTextInputCommandIntent extends Intent {
   /// Creates a [PerformPrivateTextInputCommandIntent], using the unrecognized
@@ -268,41 +269,104 @@ class UpdateSelectionIntent extends Intent {
   final SelectionChangedCause cause;
 }
 
+/// An [Intent] that represents an autofill attempt made by the system's
+/// autofill service.
+///
+/// On platforms where autofill is not distinguishable from regular user input,
+/// autofill may be interpreted as a [UpdateTextEditingValueIntent] instead
+/// of a [PerformAutofillIntent].
 class PerformAutofillIntent extends Intent {
+  /// Creates a [PerformAutofillIntent].
   const PerformAutofillIntent(this.autofillValue);
 
+  /// The [TextEditingValue]s to be autofilled.
+  ///
+  /// The map is keyed by [AutofillClient.autofillId] which is the unique
+  /// identifier of an autofill-enabled text input field.
   final Map<String, TextEditingValue> autofillValue;
 }
 
+/// An [Intent] that represents a [TextInputAction].
 class PerformIMEActionIntent extends Intent {
+  /// Creates a [PerformIMEActionIntent].
   const PerformIMEActionIntent(this.textInputAction);
 
+  /// The [TextInputAction] to be performed.
   final TextInputAction textInputAction;
 }
 
+/// An [Intent] that represents a user action that replaces the content of an
+/// editable text field with a different [TextEditingValue].
+///
+/// One example of such user actions is autofill, where the existing text in
+/// the text field gets erased and replaced with the autofilled value. For
+/// granular changes made to the text field, such as text deletion and text
+/// insertion, use [UpdateTextEditingValueWtihDeltasIntent] if possible.
+///
+/// See also:
+///
+///  * [UpdateTextEditingValueWtihDeltasIntent], which makes partial updates
+///    to the content of an editable text field.
 class UpdateTextEditingValueIntent extends Intent {
-  UpdateTextEditingValueIntent(this.newValue, {
+  /// Creates a [UpdateTextEditingValueIntent].
+  const UpdateTextEditingValueIntent(this.newValue, {
     this.cause = SelectionChangedCause.keyboard,
   });
 
+  /// The new [TextEditingValue] of the target text field.
   final TextEditingValue newValue;
+
+  /// {@macro flutter.widgets.TextEditingIntents.cause}
   final SelectionChangedCause cause;
 }
 
+/// An [Intent] that represents a user action, a sequence of user actions that
+/// cause granular changes to be made to the current [TextEditingValue] of an
+/// editable text field.
+///
+/// This [Intent] should typically be used over [UpdateTextEditingValueIntent]
+/// if the user action does not completely replaces the contexts of the text
+/// field in one go, such as inserting text at the caret location.
+///
+/// See also:
+///  * [UpdateTextEditingValueIntent] which represents a single action that
+///    replaces the entire text field with a new [TextEditingValue].
 class UpdateTextEditingValueWtihDeltasIntent extends Intent {
-  UpdateTextEditingValueWtihDeltasIntent(this. deltas, {
+  /// Creates an [UpdateTextEditingValueWtihDeltasIntent].
+  const UpdateTextEditingValueWtihDeltasIntent(this. deltas, {
     this.cause = SelectionChangedCause.keyboard
   });
 
+  /// The [TextEditingDelta] sequence that represents the user initiated text
+  /// changes.
   final Iterable<TextEditingDelta> deltas;
+
+  /// {@macro flutter.widgets.TextEditingIntents.cause}
   final SelectionChangedCause cause;
 }
 
+/// An [Intent] that represents the state of the [TextInputConnection] has
+/// changed on the platform's text input plugin side.
 class TextInputConnectionControlIntent extends Intent {
   const TextInputConnectionControlIntent._(this._controlCode);
   final int _controlCode;
 
+  /// The platform's text input plugin has closed the current
+  /// [TextInputConnection].
+  ///
+  /// The input field that initiated the [TextInputConnection] should properly
+  /// close the connection and finalize editing upon receiving this [Intent].
   static const TextInputConnectionControlIntent close = TextInputConnectionControlIntent._(0);
+
+  /// The platform's text input plugin has requested a reconnect for the current
+  /// [TextInputConnection].
+  ///
+  /// The platform's text input plugin sends this command when it loses its
+  /// state (for example when it had to restart). The input field should
+  /// typically call [TextInput.attachConnection] using the existing
+  /// [TextInputConnection] object, then call
+  /// [TextInputConnection.setEditingState] to send the current
+  /// [TextEditingValue] of the connected text field to the platform.
   static const TextInputConnectionControlIntent reconnect = TextInputConnectionControlIntent._(1);
 
   @override
@@ -315,13 +379,37 @@ class TextInputConnectionControlIntent extends Intent {
   }
 }
 
+/// An [Intent] triggered by user actions that initiate, update or end an iOS
+/// floating cursor session.
+///
+/// When the user performs a two-finger pan gesture to pick up the cursor, UIKit
+/// initiates a floating cursor session that allows the user to move the cursor
+/// freely using the pan gesture.
+///
+/// This [Intent] will be sent to the text field whenever the state of the
+/// floating cursor changes. Text field implementers should provide visual
+/// feedback in response to these changes, should they choose to support
+/// floating cursor on iOS.
 class UpdateFloatingCursorIntent extends Intent {
+  /// Creates a [UpdateFloatingCursorIntent].
   const UpdateFloatingCursorIntent(this.floatingCursorPoint);
+
+  /// The state of the current floating cursor session reported by the iOS text
+  /// input control.
   final RawFloatingCursorPoint floatingCursorPoint;
 }
 
-class HighlightAutocorrectTextRangeIntent extends Intent {
-  const HighlightAutocorrectTextRangeIntent(this.highlightRange);
+/// An [Intent] triggers when iOS detects misspelled words or text replacement
+/// candidates in recently typed text.
+///
+/// See also:
+///
+///  * [iOS text replacement and autocorrect](https://support.apple.com/en-us/HT207525).
+class HighlightiOSReplacementRangeIntent extends Intent {
+  /// Creates a [HighlightiOSReplacementRangeIntent].
+  const HighlightiOSReplacementRangeIntent(this.highlightRange);
 
+  /// The range of the text in the text field needs to be highlighted to
+  /// indicate of the range of autocorrect.
   final TextRange highlightRange;
 }
