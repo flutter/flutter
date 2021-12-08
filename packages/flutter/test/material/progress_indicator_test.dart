@@ -823,6 +823,34 @@ void main() {
   );
 
   testWidgets(
+    'Adaptive CircularProgressIndicator can use backgroundColor to change tick color for iOS',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: Material(
+              child: CircularProgressIndicator.adaptive(
+                backgroundColor: Color(0xFF5D3FD3),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        find.byType(CupertinoActivityIndicator),
+        paints
+          ..rrect(rrect: const RRect.fromLTRBXY(-1, -10 / 3, 1, -10, 1, 1),
+                color: const Color(0x935D3FD3)),
+      );
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform> {
+      TargetPlatform.iOS,
+      TargetPlatform.macOS,
+    }),
+  );
+
+  testWidgets(
     'Adaptive CircularProgressIndicator does not display CupertinoActivityIndicator in non-iOS',
     (WidgetTester tester) async {
       await tester.pumpWidget(

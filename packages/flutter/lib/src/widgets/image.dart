@@ -244,7 +244,7 @@ typedef ImageErrorWidgetBuilder = Widget Function(
 ///  * [new Image.file], for obtaining an image from a [File].
 ///  * [new Image.memory], for obtaining an image from a [Uint8List].
 ///
-/// The following image formats are supported: {@macro flutter.dart:ui.imageFormats}
+/// The following image formats are supported: {@macro dart.ui.imageFormats}
 ///
 /// To automatically perform pixel-density-aware asset resolution, specify the
 /// image using an [AssetImage] and make sure that a [MaterialApp], [WidgetsApp],
@@ -647,7 +647,7 @@ class Image extends StatefulWidget {
   ///
   /// The `bytes` argument specifies encoded image bytes, which can be encoded
   /// in any of the following supported image formats:
-  /// {@macro flutter.dart:ui.imageFormats}
+  /// {@macro dart.ui.imageFormats}
   ///
   /// The `scale` argument specifies the linear scale factor for drawing this
   /// image at its intended size and applies to both the width and the height.

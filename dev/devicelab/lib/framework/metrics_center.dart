@@ -63,31 +63,18 @@ List<MetricPoint> parse(Map<String, dynamic> resultsJson, Map<String, dynamic> b
       resultsJson['ResultData'] as Map<String, dynamic>? ?? const <String, dynamic>{};
   final String gitBranch = (resultsJson['CommitBranch'] as String).trim();
   final String gitSha = (resultsJson['CommitSha'] as String).trim();
-  final String builderName = (resultsJson['BuilderName'] as String).trim();
   final List<MetricPoint> metricPoints = <MetricPoint>[];
   for (final String scoreKey in scoreKeys) {
     Map<String, String> tags = <String, String>{
       kGithubRepoKey: kFlutterFrameworkRepo,
       kGitRevisionKey: gitSha,
       'branch': gitBranch,
-      kNameKey: builderName,
+      kNameKey: taskName,
       kSubResultKey: scoreKey,
     };
     // Append additional benchmark tags, which will surface in Skia Perf dashboards.
     tags = mergeMaps<String, String>(
         tags, benchmarkTags.map((String key, dynamic value) => MapEntry<String, String>(key, value.toString())));
-    metricPoints.add(
-      MetricPoint(
-        (resultData[scoreKey] as num).toDouble(),
-        tags,
-      ),
-    );
-
-    // Add an extra entry under test name. This way we have duplicate metrics
-    // under both builder name and test name. Once we have enough data and update
-    // existing alerts to point to test name, we can deprecate builder name ones.
-    // https://github.com/flutter/flutter/issues/74522#issuecomment-942575581
-    tags[kNameKey] = taskName;
     metricPoints.add(
       MetricPoint(
         (resultData[scoreKey] as num).toDouble(),

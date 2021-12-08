@@ -176,7 +176,7 @@ class CocoaPods {
     final CocoaPodsStatus installation = await evaluateCocoaPodsInstallation;
     switch (installation) {
       case CocoaPodsStatus.notInstalled:
-        _logger.printError(
+        _logger.printWarning(
           'Warning: CocoaPods not installed. Skipping pod install.\n'
           '$noCocoaPodsConsequence\n'
           'To install $cocoaPodsInstallInstructions\n',
@@ -184,7 +184,7 @@ class CocoaPods {
         );
         return false;
       case CocoaPodsStatus.brokenInstall:
-        _logger.printError(
+        _logger.printWarning(
           'Warning: CocoaPods is installed but broken. Skipping pod install.\n'
           '$brokenCocoaPodsConsequence\n'
           'To re-install $cocoaPodsInstallInstructions\n',
@@ -192,7 +192,7 @@ class CocoaPods {
         );
         return false;
       case CocoaPodsStatus.unknownVersion:
-        _logger.printError(
+        _logger.printWarning(
           'Warning: Unknown CocoaPods version installed.\n'
           '$unknownCocoaPodsConsequence\n'
           'To upgrade $cocoaPodsInstallInstructions\n',
@@ -200,7 +200,7 @@ class CocoaPods {
         );
         break;
       case CocoaPodsStatus.belowMinimumVersion:
-        _logger.printError(
+        _logger.printWarning(
           'Warning: CocoaPods minimum required version $cocoaPodsMinimumVersion or greater not installed. Skipping pod install.\n'
           '$noCocoaPodsConsequence\n'
           'To upgrade $cocoaPodsInstallInstructions\n',
@@ -208,7 +208,7 @@ class CocoaPods {
         );
         return false;
       case CocoaPodsStatus.belowRecommendedVersion:
-        _logger.printError(
+        _logger.printWarning(
           'Warning: CocoaPods recommended version $cocoaPodsRecommendedVersion or greater not installed.\n'
           'Pods handling may fail on some projects involving plugins.\n'
           'To upgrade $cocoaPodsInstallInstructions\n',
@@ -360,8 +360,7 @@ class CocoaPods {
         '  pod repo update\n',
         emphasis: true,
       );
-    } else if (stdout.contains('Init_ffi_c') &&
-        stdout.contains('symbol not found') &&
+    } else if (stdout.contains('ffi_c.bundle') && stdout.contains('LoadError') &&
         _operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm) {
       // https://github.com/flutter/flutter/issues/70796
       UsageEvent(
@@ -406,15 +405,15 @@ class CocoaPods {
     // plugin_pods = parse_KV_file('../.flutter-plugins')
     if (xcodeProject.podfile.existsSync() &&
       xcodeProject.podfile.readAsStringSync().contains(".flutter-plugins'")) {
-      const String error = 'Warning: Podfile is out of date\n'
+      const String warning = 'Warning: Podfile is out of date\n'
           '$outOfDatePluginsPodfileConsequence\n'
           'To regenerate the Podfile, run:\n';
       if (isIos) {
-        throwToolExit('$error\n$podfileIosMigrationInstructions\n');
+        throwToolExit('$warning\n$podfileIosMigrationInstructions\n');
       } else {
         // The old macOS Podfile will work until `.flutter-plugins` is removed.
         // Warn instead of exit.
-        _logger.printError('$error\n$podfileMacOSMigrationInstructions\n', emphasis: true);
+        _logger.printWarning('$warning\n$podfileMacOSMigrationInstructions\n', emphasis: true);
       }
     }
   }

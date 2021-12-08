@@ -168,7 +168,7 @@ Future<void> evaluateComplexReturningExpressions(FlutterTestDriver flutter) asyn
   // Ensure we got a reasonable approximation. The more accurate we try to
   // make this, the more likely it'll fail due to differences in the time
   // in the remote VM and the local VM at the time the code runs.
-  final InstanceRef res = await flutter.evaluate(resp.id, r'"$year-$month-$day"');
+  final ObjRef res = await flutter.evaluate(resp.id, r'"$year-$month-$day"');
   expectValue(res, '${now.year}-${now.month}-${now.day}');
 }
 

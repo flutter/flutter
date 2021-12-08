@@ -61,8 +61,9 @@ class MultidexProject extends Project {
   dependencies:
     flutter:
       sdk: flutter
-    cloud_firestore: ^2.5.3
-    firebase_core: ^1.6.0
+    # Pin to specific plugin versions to avoid out-of-band failures.
+    cloud_firestore: 2.5.3
+    firebase_core: 1.6.0
   ''';
 
   @override
@@ -179,7 +180,7 @@ class MultidexProject extends Project {
       defaultConfig {
           // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
           applicationId "com.example.multidextest2"
-          minSdkVersion 19
+          minSdkVersion 16
           targetSdkVersion 30
           versionCode flutterVersionCode.toInteger()
           versionName flutterVersionName

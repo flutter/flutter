@@ -83,6 +83,8 @@ void main() {
 }
 
 class FakeBuildSubCommand extends BuildSubCommand {
+  FakeBuildSubCommand() : super(verboseHelp: false);
+
   @override
   String get description => throw UnimplementedError();
 

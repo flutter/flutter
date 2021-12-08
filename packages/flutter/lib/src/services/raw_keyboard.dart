@@ -284,7 +284,7 @@ abstract class RawKeyEvent with Diagnosticable {
 
   /// Creates a concrete [RawKeyEvent] class from a message in the form received
   /// on the [SystemChannels.keyEvent] channel.
-  factory RawKeyEvent.fromMessage(Map<String, dynamic> message) {
+  factory RawKeyEvent.fromMessage(Map<String, Object?> message) {
     String? character;
     RawKeyEventData _dataFromWeb() {
       final String? key = message['key'] as String?;
@@ -303,7 +303,7 @@ abstract class RawKeyEvent with Diagnosticable {
     if (kIsWeb) {
       data = _dataFromWeb();
     } else {
-      final String keymap = message['keymap'] as String;
+      final String keymap = message['keymap']! as String;
       switch (keymap) {
         case 'android':
           data = RawKeyEventDataAndroid(
@@ -388,7 +388,7 @@ abstract class RawKeyEvent with Diagnosticable {
           throw FlutterError('Unknown keymap for key events: $keymap');
       }
     }
-    final String type = message['type'] as String;
+    final String type = message['type']! as String;
     switch (type) {
       case 'keydown':
         return RawKeyDownEvent(data: data, character: character);
@@ -672,7 +672,7 @@ class RawKeyboard {
       '${event.data}',
     );
     // Send the event to passive listeners.
-    for (final ValueChanged<RawKeyEvent> listener in List<ValueChanged<RawKeyEvent>>.from(_listeners)) {
+    for (final ValueChanged<RawKeyEvent> listener in List<ValueChanged<RawKeyEvent>>.of(_listeners)) {
       try {
         if (_listeners.contains(listener)) {
           listener(event);
@@ -772,15 +772,22 @@ class RawKeyboard {
       ..._keysPressed.keys,
       if (event is RawKeyDownEvent) event.physicalKey,
     };
-    for (final ModifierKey key in modifiersPressed.keys) {
+    ModifierKey? thisKeyModifier;
+    for (final ModifierKey key in ModifierKey.values) {
+      final Set<PhysicalKeyboardKey>? thisModifierKeys = _modifierKeyMap[_ModifierSidePair(key, KeyboardSide.all)];
+      if (thisModifierKeys == null)
+        continue;
+      if (thisModifierKeys.contains(event.physicalKey)) {
+        thisKeyModifier = key;
+      }
       if (modifiersPressed[key] == KeyboardSide.any) {
-        final Set<PhysicalKeyboardKey>? thisModifierKeys = _modifierKeyMap[_ModifierSidePair(key, KeyboardSide.all)];
-        anySideKeys.addAll(thisModifierKeys!);
+        anySideKeys.addAll(thisModifierKeys);
         if (thisModifierKeys.any(keysPressedAfterEvent.contains)) {
           continue;
         }
       }
-      final Set<PhysicalKeyboardKey>? mappedKeys = _modifierKeyMap[_ModifierSidePair(key, modifiersPressed[key])];
+      final Set<PhysicalKeyboardKey>? mappedKeys = modifiersPressed[key] == null ?
+        <PhysicalKeyboardKey>{} : _modifierKeyMap[_ModifierSidePair(key, modifiersPressed[key])];
       assert(() {
         if (mappedKeys == null) {
           debugPrint(
@@ -809,6 +816,20 @@ class RawKeyboard {
       _keysPressed.remove(PhysicalKeyboardKey.fn);
     }
     _keysPressed.addAll(modifierKeys);
+    // In rare cases, the event presses a modifier key but the key does not
+    // exist in the modifier list. Enforce the pressing state.
+    if (event is RawKeyDownEvent && thisKeyModifier != null
+        && !_keysPressed.containsKey(event.physicalKey)) {
+      // So far this inconsistancy is only found on Linux GTK for AltRight in a
+      // rare case. (See https://github.com/flutter/flutter/issues/93278 .) In
+      // other cases, this inconsistancy will be caught by an assertion later.
+      if (event.data is RawKeyEventDataLinux && event.physicalKey == PhysicalKeyboardKey.altRight) {
+        final LogicalKeyboardKey? logicalKey = _allModifiersExceptFn[event.physicalKey];
+        if (logicalKey != null) {
+          _keysPressed[event.physicalKey] = logicalKey;
+        }
+      }
+    }
   }
 
   final Map<PhysicalKeyboardKey, LogicalKeyboardKey> _keysPressed = <PhysicalKeyboardKey, LogicalKeyboardKey>{};

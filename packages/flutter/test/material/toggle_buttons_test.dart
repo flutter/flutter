@@ -1591,6 +1591,96 @@ void main() {
     },
   );
 
+  testWidgets('Tap target size is configurable by ThemeData.materialTapTargetSize', (WidgetTester tester) async {
+    Widget buildFrame(MaterialTapTargetSize tapTargetSize, Key key) {
+      return Theme(
+        data: ThemeData(materialTapTargetSize: tapTargetSize),
+        child: Material(
+          child: boilerplate(
+            child: ToggleButtons(
+              key: key,
+              constraints: const BoxConstraints(minWidth: 32.0, minHeight: 32.0),
+              isSelected: const <bool>[false, true, false],
+              onPressed: (int index) {},
+              children: const <Widget>[
+                Text('First'),
+                Text('Second'),
+                Text('Third'),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    final Key key1 = UniqueKey();
+    await tester.pumpWidget(buildFrame(MaterialTapTargetSize.padded, key1));
+    expect(tester.getSize(find.byKey(key1)), const Size(228.0, 48.0));
+
+    final Key key2 = UniqueKey();
+    await tester.pumpWidget(buildFrame(MaterialTapTargetSize.shrinkWrap, key2));
+    expect(tester.getSize(find.byKey(key2)), const Size(228.0, 34.0));
+  });
+
+  testWidgets('Tap target size is configurable', (WidgetTester tester) async {
+    Widget buildFrame(MaterialTapTargetSize tapTargetSize, Key key) {
+      return Material(
+        child: boilerplate(
+          child: ToggleButtons(
+            key: key,
+            tapTargetSize: tapTargetSize,
+            constraints: const BoxConstraints(minWidth: 32.0, minHeight: 32.0),
+            isSelected: const <bool>[false, true, false],
+            onPressed: (int index) {},
+            children: const <Widget>[
+              Text('First'),
+              Text('Second'),
+              Text('Third'),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final Key key1 = UniqueKey();
+    await tester.pumpWidget(buildFrame(MaterialTapTargetSize.padded, key1));
+    expect(tester.getSize(find.byKey(key1)), const Size(228.0, 48.0));
+
+    final Key key2 = UniqueKey();
+    await tester.pumpWidget(buildFrame(MaterialTapTargetSize.shrinkWrap, key2));
+    expect(tester.getSize(find.byKey(key2)), const Size(228.0, 34.0));
+  });
+
+  testWidgets('Tap target size is configurable for vertical axis', (WidgetTester tester) async {
+    Widget buildFrame(MaterialTapTargetSize tapTargetSize, Key key) {
+      return Material(
+        child: boilerplate(
+          child: ToggleButtons(
+            key: key,
+            tapTargetSize: tapTargetSize,
+            constraints: const BoxConstraints(minWidth: 32.0, minHeight: 32.0),
+            direction: Axis.vertical,
+            isSelected: const <bool>[false, true, false],
+            onPressed: (int index) {},
+            children: const <Widget>[
+              Text('1'),
+              Text('2'),
+              Text('3'),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final Key key1 = UniqueKey();
+    await tester.pumpWidget(buildFrame(MaterialTapTargetSize.padded, key1));
+    expect(tester.getSize(find.byKey(key1)), const Size(48.0, 100.0));
+
+    final Key key2 = UniqueKey();
+    await tester.pumpWidget(buildFrame(MaterialTapTargetSize.shrinkWrap, key2));
+    expect(tester.getSize(find.byKey(key2)), const Size(34.0, 100.0));
+  });
+
   // Regression test for https://github.com/flutter/flutter/issues/73725
   testWidgets('Border radius paint test when there is only one button', (WidgetTester tester) async {
     final ThemeData theme = ThemeData();

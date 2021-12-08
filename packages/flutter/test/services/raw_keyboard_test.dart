@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -347,6 +349,55 @@ void main() {
         ),
       );
     }, skip: isBrowser); // [intended] This is a GLFW-specific test.
+
+
+    // Regression test for https://github.com/flutter/flutter/issues/93278 .
+    //
+    // GTK has some weird behavior where the tested key event sequence will
+    // result in a AltRight down event without Alt bitmask.
+    testWidgets('keysPressed modifiers are synchronized with key events on Linux GTK (down events)', (WidgetTester tester) async {
+      expect(RawKeyboard.instance.keysPressed, isEmpty);
+      Future<void> simulate(bool keyDown, int scancode, int keycode, int modifiers) async {
+        final Map<String, dynamic> data = <String, dynamic>{
+            'type': keyDown ? 'keydown' : 'keyup',
+            'keymap': 'linux',
+            'toolkit': 'gtk',
+            'scanCode': scancode,
+            'keyCode': keycode,
+            'modifiers': modifiers,
+          };
+        // Dispatch an empty key data to disable HardwareKeyboard sanity check,
+        // since we're only testing if the raw keyboard can handle the message.
+        // In real application the embedder responder will send correct key data
+        // (which is tested in the engine.)
+        TestDefaultBinaryMessengerBinding.instance!.keyEventManager.handleKeyData(const ui.KeyData(
+          type: ui.KeyEventType.down,
+          timeStamp: Duration.zero,
+          logical: 0,
+          physical: 0,
+          character: null,
+          synthesized: false,
+        ));
+        await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+          SystemChannels.keyEvent.name,
+          SystemChannels.keyEvent.codec.encodeMessage(data),
+          (ByteData? data) {},
+        );
+      }
+
+      await simulate(true,  0x6c/*AltRight*/,  0xffea/*AltRight*/,  0x2000000);
+      await simulate(true,  0x32/*ShiftLeft*/, 0xfe08/*NextGroup*/, 0x2000008/*MOD3*/);
+      await simulate(false, 0x6c/*AltRight*/,  0xfe03/*AltRight*/,  0x2002008/*MOD3|Reserve14*/);
+      await simulate(true,  0x6c/*AltRight*/,  0xfe03/*AltRight*/,  0x2002000/*Reserve14*/);
+      expect(
+        RawKeyboard.instance.keysPressed,
+        equals(
+          <LogicalKeyboardKey>{
+            LogicalKeyboardKey.altRight,
+          },
+        ),
+      );
+    }, skip: isBrowser); // [intended] This is a GTK-specific test.
 
     testWidgets('keysPressed modifiers are synchronized with key events on web', (WidgetTester tester) async {
       expect(RawKeyboard.instance.keysPressed, isEmpty);
@@ -1035,15 +1086,15 @@ void main() {
         LogicalKeyboardKey.keyA,
         platform: 'android',
       );
-      Map<String, dynamic>? message;
+      Map<String, Object?>? message;
       await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data),
         (ByteData? data) {
-          message = SystemChannels.keyEvent.codec.decodeMessage(data) as Map<String, dynamic>;
+          message = SystemChannels.keyEvent.codec.decodeMessage(data) as Map<String, Object?>?;
         },
       );
-      expect(message, equals(<String, dynamic>{ 'handled': false }));
+      expect(message, equals(<String, Object?>{ 'handled': false }));
       message = null;
 
       // Set up a widget that will receive focused text events.
@@ -1064,15 +1115,15 @@ void main() {
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data),
         (ByteData? data) {
-          message = SystemChannels.keyEvent.codec.decodeMessage(data) as Map<String, dynamic>;
+          message = SystemChannels.keyEvent.codec.decodeMessage(data) as Map<String, Object?>?;
         },
       );
-      expect(message, equals(<String, dynamic>{ 'handled': true }));
+      expect(message, equals(<String, Object?>{ 'handled': true }));
       tester.binding.defaultBinaryMessenger.setMockMessageHandler(SystemChannels.keyEvent.name, null);
     });
 
     test('data.toString', () {
-      expect(RawKeyEvent.fromMessage(const <String, dynamic>{
+      expect(RawKeyEvent.fromMessage(const <String, Object?>{
         'type': 'keydown',
         'keymap': 'android',
         'keyCode': 29,
@@ -1090,7 +1141,7 @@ void main() {
     });
 
     test('data.equality', () {
-      expect(RawKeyEvent.fromMessage(const <String, dynamic>{
+      expect(RawKeyEvent.fromMessage(const <String, Object?>{
         'type': 'keydown',
         'keymap': 'android',
         'keyCode': 29,
@@ -1422,6 +1473,20 @@ void main() {
       final RawKeyEventDataMacOs data = leftArrowKey.data as RawKeyEventDataMacOs;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.arrowLeft));
       expect(data.logicalKey, equals(LogicalKeyboardKey.arrowLeft));
+    });
+
+    test('Multi-char keyboard keys are correctly translated', () {
+      final RawKeyEvent leftArrowKey = RawKeyEvent.fromMessage(const <String, dynamic>{
+        'type': 'keydown',
+        'keymap': 'macos',
+        'keyCode': 0x00000000,
+        'characters': 'án',
+        'charactersIgnoringModifiers': 'án',
+        'modifiers': 0,
+      });
+      final RawKeyEventDataMacOs data = leftArrowKey.data as RawKeyEventDataMacOs;
+      expect(data.physicalKey, equals(PhysicalKeyboardKey.keyA));
+      expect(data.logicalKey, equals(const LogicalKeyboardKey(0x1400000000)));
     });
 
     test('data.toString', () {
@@ -1782,7 +1847,7 @@ void main() {
     });
 
     test('Unprintable keyboard keys are correctly translated', () {
-      final RawKeyEvent leftArrowKey = RawKeyEvent.fromMessage(const <String, dynamic>{
+      final RawKeyEvent leftArrowKey = RawKeyEvent.fromMessage(const <String, Object?>{
         'type': 'keydown',
         'keymap': 'windows',
         'keyCode': 37, // keyCode for left arrow.
@@ -1803,7 +1868,7 @@ void main() {
       Future<void> simulateKeyEventMessage(String type, int keyCode, int scanCode) {
         return ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
           SystemChannels.keyEvent.name,
-          SystemChannels.keyEvent.codec.encodeMessage(<String, dynamic>{
+          SystemChannels.keyEvent.codec.encodeMessage(<String, Object?>{
             'type': type,
             'keymap': platform,
             'keyCode': keyCode,
@@ -1811,8 +1876,8 @@ void main() {
             'modifiers': 0,
           }),
           (ByteData? data) {
-            final Map<String, dynamic> decoded = SystemChannels.keyEvent.codec.decodeMessage(data) as Map<String, dynamic>;
-            lastHandled = decoded['handled'] as bool;
+            final Map<String, Object?> decoded = SystemChannels.keyEvent.codec.decodeMessage(data)! as Map<String, Object?>;
+            lastHandled = decoded['handled']! as bool;
           },
         );
       }
@@ -1828,7 +1893,7 @@ void main() {
     });
 
     test('data.toString', () {
-      expect(RawKeyEvent.fromMessage(const <String, dynamic>{
+      expect(RawKeyEvent.fromMessage(const <String, Object?>{
         'type': 'keydown',
         'keymap': 'windows',
         'keyCode': 0x00000010,
@@ -1840,7 +1905,7 @@ void main() {
     });
 
     test('data.equality', () {
-      expect(RawKeyEvent.fromMessage(const <String, dynamic>{
+      expect(RawKeyEvent.fromMessage(const <String, Object?>{
         'type': 'keydown',
         'keymap': 'windows',
         'keyCode': 0x00000010,
@@ -1854,7 +1919,7 @@ void main() {
         characterCodePoint: 10,
       ));
 
-      expect(RawKeyEvent.fromMessage(const <String, dynamic>{
+      expect(RawKeyEvent.fromMessage(const <String, Object?>{
         'type': 'keydown',
         'keymap': 'windows',
         'keyCode': 0x00000010,
@@ -1899,7 +1964,7 @@ void main() {
       for (final int modifier in modifierTests.keys) {
         for (final bool isDown in <bool>[true, false]) {
           for (final bool isLeft in <bool>[true, false]) {
-            final RawKeyEvent event = RawKeyEvent.fromMessage(<String, dynamic>{
+            final RawKeyEvent event = RawKeyEvent.fromMessage(<String, Object?>{
               'type': isDown ? 'keydown' : 'keyup',
               'keymap': 'linux',
               'toolkit': 'glfw',
@@ -1937,7 +2002,7 @@ void main() {
           // No need to combine CTRL key with itself.
           continue;
         }
-        final RawKeyEvent event = RawKeyEvent.fromMessage(<String, dynamic>{
+        final RawKeyEvent event = RawKeyEvent.fromMessage(<String, Object?>{
           'type': 'keydown',
           'keymap': 'linux',
           'toolkit': 'glfw',
@@ -1973,7 +2038,7 @@ void main() {
     });
 
     test('Printable keyboard keys are correctly translated', () {
-      final RawKeyEvent keyAEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
+      final RawKeyEvent keyAEvent = RawKeyEvent.fromMessage(const <String, Object?>{
         'type': 'keydown',
         'keymap': 'linux',
         'toolkit': 'glfw',
@@ -1989,7 +2054,7 @@ void main() {
     });
 
     test('Code points with two Unicode scalar values are allowed', () {
-      final RawKeyEvent keyAEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
+      final RawKeyEvent keyAEvent = RawKeyEvent.fromMessage(const <String, Object?>{
         'type': 'keydown',
         'keymap': 'linux',
         'toolkit': 'glfw',
@@ -2007,7 +2072,7 @@ void main() {
     test('Code points with more than three Unicode scalar values are not allowed', () {
       // |keyCode| and |scanCode| are arbitrary values. This test should fail due to an invalid |unicodeScalarValues|.
       void _createFailingKey() {
-        RawKeyEvent.fromMessage(const <String, dynamic>{
+        RawKeyEvent.fromMessage(const <String, Object?>{
           'type': 'keydown',
           'keymap': 'linux',
           'toolkit': 'glfw',
@@ -2022,7 +2087,7 @@ void main() {
     });
 
     test('Control keyboard keys are correctly translated', () {
-      final RawKeyEvent escapeKeyEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
+      final RawKeyEvent escapeKeyEvent = RawKeyEvent.fromMessage(const <String, Object?>{
         'type': 'keydown',
         'keymap': 'linux',
         'toolkit': 'glfw',
@@ -2038,7 +2103,7 @@ void main() {
     });
 
     test('Modifier keyboard keys are correctly translated', () {
-      final RawKeyEvent shiftLeftKeyEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
+      final RawKeyEvent shiftLeftKeyEvent = RawKeyEvent.fromMessage(const <String, Object?>{
         'type': 'keydown',
         'keymap': 'linux',
         'toolkit': 'glfw',
@@ -2053,7 +2118,7 @@ void main() {
     });
 
     test('data.toString', () {
-      expect(RawKeyEvent.fromMessage(const <String, dynamic>{
+      expect(RawKeyEvent.fromMessage(const <String, Object?>{
         'type': 'keydown',
         'keymap': 'linux',
         'toolkit': 'glfw',
@@ -2066,7 +2131,7 @@ void main() {
     });
 
     test('data.equality', () {
-      expect(RawKeyEvent.fromMessage(const <String, dynamic>{
+      expect(RawKeyEvent.fromMessage(const <String, Object?>{
         'type': 'keydown',
         'keymap': 'linux',
         'toolkit': 'glfw',
@@ -2083,7 +2148,7 @@ void main() {
         isDown: true,
       ));
 
-      expect(RawKeyEvent.fromMessage(const <String, dynamic>{
+      expect(RawKeyEvent.fromMessage(const <String, Object?>{
         'type': 'keydown',
         'keymap': 'linux',
         'toolkit': 'glfw',
@@ -2131,7 +2196,7 @@ void main() {
       for (final int modifier in modifierTests.keys) {
         for (final bool isDown in <bool>[true, false]) {
           for (final bool isLeft in <bool>[true, false]) {
-            final RawKeyEvent event = RawKeyEvent.fromMessage(<String, dynamic>{
+            final RawKeyEvent event = RawKeyEvent.fromMessage(<String, Object?>{
               'type': isDown ? 'keydown' : 'keyup',
               'keymap': 'linux',
               'toolkit': 'gtk',
@@ -2169,7 +2234,7 @@ void main() {
           // No need to combine CTRL key with itself.
           continue;
         }
-        final RawKeyEvent event = RawKeyEvent.fromMessage(<String, dynamic>{
+        final RawKeyEvent event = RawKeyEvent.fromMessage(<String, Object?>{
           'type': 'keydown',
           'keymap': 'linux',
           'toolkit': 'gtk',
@@ -2205,7 +2270,7 @@ void main() {
     });
 
     test('Printable keyboard keys are correctly translated', () {
-      final RawKeyEvent keyAEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
+      final RawKeyEvent keyAEvent = RawKeyEvent.fromMessage(const <String, Object?>{
         'type': 'keydown',
         'keymap': 'linux',
         'toolkit': 'gtk',
@@ -2221,7 +2286,7 @@ void main() {
     });
 
     test('Code points with two Unicode scalar values are allowed', () {
-      final RawKeyEvent keyAEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
+      final RawKeyEvent keyAEvent = RawKeyEvent.fromMessage(const <String, Object?>{
         'type': 'keydown',
         'keymap': 'linux',
         'toolkit': 'gtk',
@@ -2239,7 +2304,7 @@ void main() {
     test('Code points with more than three Unicode scalar values are not allowed', () {
       // |keyCode| and |scanCode| are arbitrary values. This test should fail due to an invalid |unicodeScalarValues|.
       void _createFailingKey() {
-        RawKeyEvent.fromMessage(const <String, dynamic>{
+        RawKeyEvent.fromMessage(const <String, Object?>{
           'type': 'keydown',
           'keymap': 'linux',
           'toolkit': 'gtk',
@@ -2254,7 +2319,7 @@ void main() {
     });
 
     test('Control keyboard keys are correctly translated', () {
-      final RawKeyEvent escapeKeyEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
+      final RawKeyEvent escapeKeyEvent = RawKeyEvent.fromMessage(const <String, Object?>{
         'type': 'keydown',
         'keymap': 'linux',
         'toolkit': 'gtk',
@@ -2270,7 +2335,7 @@ void main() {
     });
 
     test('Modifier keyboard keys are correctly translated', () {
-      final RawKeyEvent shiftLeftKeyEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
+      final RawKeyEvent shiftLeftKeyEvent = RawKeyEvent.fromMessage(const <String, Object?>{
         'type': 'keydown',
         'keymap': 'linux',
         'toolkit': 'gtk',
@@ -2285,7 +2350,7 @@ void main() {
     });
 
     test('data.toString', () {
-      expect(RawKeyEvent.fromMessage(const <String, dynamic>{
+      expect(RawKeyEvent.fromMessage(const <String, Object?>{
         'type': 'keydown',
         'keymap': 'linux',
         'toolkit': 'gtk',
@@ -2298,7 +2363,7 @@ void main() {
     });
 
     test('data.equality', () {
-      expect(RawKeyEvent.fromMessage(const <String, dynamic>{
+      expect(RawKeyEvent.fromMessage(const <String, Object?>{
         'type': 'keydown',
         'keymap': 'linux',
         'toolkit': 'gtk',
@@ -2315,7 +2380,7 @@ void main() {
         isDown: true,
       ));
 
-      expect(RawKeyEvent.fromMessage(const <String, dynamic>{
+      expect(RawKeyEvent.fromMessage(const <String, Object?>{
         'type': 'keydown',
         'keymap': 'linux',
         'toolkit': 'gtk',
@@ -2332,7 +2397,7 @@ void main() {
         isDown: true,
       ))));
 
-      expect(RawKeyEvent.fromMessage(const <String, dynamic>{
+      expect(RawKeyEvent.fromMessage(const <String, Object?>{
         'type': 'keydown',
         'keymap': 'linux',
         'toolkit': 'gtk',
@@ -2359,7 +2424,7 @@ void main() {
 
     test('modifier keys are recognized individually', () {
       for (final int modifier in modifierTests.keys) {
-        final RawKeyEvent event = RawKeyEvent.fromMessage(<String, dynamic>{
+        final RawKeyEvent event = RawKeyEvent.fromMessage(<String, Object?>{
           'type': 'keydown',
           'keymap': 'web',
           'code': 'RandomCode',
@@ -2390,7 +2455,7 @@ void main() {
           // No need to combine meta key with itself.
           continue;
         }
-        final RawKeyEvent event = RawKeyEvent.fromMessage(<String, dynamic>{
+        final RawKeyEvent event = RawKeyEvent.fromMessage(<String, Object?>{
           'type': 'keydown',
           'keymap': 'web',
           'code': 'RandomCode',
@@ -2418,7 +2483,7 @@ void main() {
     });
 
     test('Printable keyboard keys are correctly translated', () {
-      final RawKeyEvent keyAEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
+      final RawKeyEvent keyAEvent = RawKeyEvent.fromMessage(const <String, Object?>{
         'type': 'keydown',
         'keymap': 'web',
         'code': 'KeyA',
@@ -2433,7 +2498,7 @@ void main() {
     });
 
     test('Control keyboard keys are correctly translated', () {
-      final RawKeyEvent escapeKeyEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
+      final RawKeyEvent escapeKeyEvent = RawKeyEvent.fromMessage(const <String, Object?>{
         'type': 'keydown',
         'keymap': 'web',
         'code': 'Escape',
@@ -2448,7 +2513,7 @@ void main() {
     });
 
     test('Modifier keyboard keys are correctly translated', () {
-      final RawKeyEvent shiftKeyEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
+      final RawKeyEvent shiftKeyEvent = RawKeyEvent.fromMessage(const <String, Object?>{
         'type': 'keydown',
         'keymap': 'web',
         'code': 'ShiftLeft',
@@ -2463,7 +2528,7 @@ void main() {
     });
 
     test('Arrow keys from a keyboard give correct physical key mappings', () {
-      final RawKeyEvent arrowKeyDown = RawKeyEvent.fromMessage(const <String, dynamic>{
+      final RawKeyEvent arrowKeyDown = RawKeyEvent.fromMessage(const <String, Object?>{
         'type': 'keydown',
         'keymap': 'web',
         'code': 'ArrowDown',
@@ -2478,7 +2543,7 @@ void main() {
     });
 
     test('Unrecognized keys are mapped to Web plane', () {
-      final RawKeyEvent arrowKeyDown = RawKeyEvent.fromMessage(const <String, dynamic>{
+      final RawKeyEvent arrowKeyDown = RawKeyEvent.fromMessage(const <String, Object?>{
         'type': 'keydown',
         'keymap': 'web',
         'code': 'Unrecog1',
@@ -2497,7 +2562,7 @@ void main() {
     });
 
     test('data.toString', () {
-      expect(RawKeyEvent.fromMessage(const <String, dynamic>{
+      expect(RawKeyEvent.fromMessage(const <String, Object?>{
         'type': 'keydown',
         'keymap': 'web',
         'code': 'KeyA',
@@ -2508,7 +2573,7 @@ void main() {
         'RawKeyEventDataWeb#00000(code: KeyA, key: a, location: 2, metaState: 16)'));
 
       // Without location
-      expect(RawKeyEvent.fromMessage(const <String, dynamic>{
+      expect(RawKeyEvent.fromMessage(const <String, Object?>{
         'type': 'keydown',
         'keymap': 'web',
         'code': 'KeyA',
@@ -2519,7 +2584,7 @@ void main() {
     });
 
     test('data.equality', () {
-      expect(RawKeyEvent.fromMessage(const <String, dynamic>{
+      expect(RawKeyEvent.fromMessage(const <String, Object?>{
         'type': 'keydown',
         'keymap': 'web',
         'code': 'KeyA',
@@ -2533,7 +2598,7 @@ void main() {
         metaState: 0x10,
       ));
 
-      expect(RawKeyEvent.fromMessage(const <String, dynamic>{
+      expect(RawKeyEvent.fromMessage(const <String, Object?>{
         'type': 'keydown',
         'keymap': 'web',
         'code': 'KeyA',
@@ -2559,6 +2624,6 @@ Future<void> _runWhileOverridingOnError(AsyncCallback body, {required FlutterExc
 Map<String, DiagnosticsNode> _groupDiagnosticsByName(Iterable<DiagnosticsNode> infos) {
   return Map<String, DiagnosticsNode>.fromIterable(
     infos,
-    key: (dynamic node) => (node as DiagnosticsNode).name ?? '',
+    key: (Object? node) => (node! as DiagnosticsNode).name ?? '',
   );
 }

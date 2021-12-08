@@ -432,8 +432,8 @@ void main() {
         buildMode: BuildMode.debug,
       );
 
-      expect(logger.errorText, contains('Warning: Podfile is out of date'));
-      expect(logger.errorText, contains('rm macos/Podfile'));
+      expect(logger.warningText, contains('Warning: Podfile is out of date'));
+      expect(logger.warningText, contains('rm macos/Podfile'));
       expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
@@ -491,46 +491,52 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
       );
     });
 
-    testUsingContext('ffi failure on ARM macOS prompts gem install', () async {
-      final FlutterProject projectUnderTest = setupProjectUnderTest();
-      pretendPodIsInstalled();
-      pretendPodVersionIs('1.10.0');
-      fileSystem.file(fileSystem.path.join('project', 'ios', 'Podfile'))
-        ..createSync()
-        ..writeAsStringSync('Existing Podfile');
+    final Map<String, String> possibleErrors = <String, String>{
+      'symbol not found': 'LoadError - dlsym(0x7fbbeb6837d0, Init_ffi_c): symbol not found - /Library/Ruby/Gems/2.6.0/gems/ffi-1.13.1/lib/ffi_c.bundle',
+      'incompatible architecture': "LoadError - (mach-o file, but is an incompatible architecture (have 'arm64', need 'x86_64')), '/usr/lib/ffi_c.bundle' (no such file) - /Library/Ruby/Gems/2.6.0/gems/ffi-1.15.4/lib/ffi_c.bundle",
+    };
+    possibleErrors.forEach((String errorName, String cocoaPodsError) {
+      testUsingContext('ffi $errorName failure on ARM macOS prompts gem install', () async {
+        final FlutterProject projectUnderTest = setupProjectUnderTest();
+        pretendPodIsInstalled();
+        pretendPodVersionIs('1.10.0');
+        fileSystem.file(fileSystem.path.join('project', 'ios', 'Podfile'))
+          ..createSync()
+          ..writeAsStringSync('Existing Podfile');
 
-      fakeProcessManager.addCommands(<FakeCommand>[
-        const FakeCommand(
-          command: <String>['pod', 'install', '--verbose'],
-          workingDirectory: 'project/ios',
-          environment: <String, String>{
-            'COCOAPODS_DISABLE_STATS': 'true',
-            'LANG': 'en_US.UTF-8',
-          },
-          exitCode: 1,
-          stdout: 'LoadError - dlsym(0x7fbbeb6837d0, Init_ffi_c): symbol not found - /Library/Ruby/Gems/2.6.0/gems/ffi-1.13.1/lib/ffi_c.bundle',
-        ),
-        const FakeCommand(
-          command: <String>['which', 'sysctl'],
-        ),
-        const FakeCommand(
-          command: <String>['sysctl', 'hw.optional.arm64'],
-          stdout: 'hw.optional.arm64: 1',
-        ),
-      ]);
+        fakeProcessManager.addCommands(<FakeCommand>[
+          FakeCommand(
+            command: const <String>['pod', 'install', '--verbose'],
+            workingDirectory: 'project/ios',
+            environment: const <String, String>{
+              'COCOAPODS_DISABLE_STATS': 'true',
+              'LANG': 'en_US.UTF-8',
+            },
+            exitCode: 1,
+            stdout: cocoaPodsError,
+          ),
+          const FakeCommand(
+            command: <String>['which', 'sysctl'],
+          ),
+          const FakeCommand(
+            command: <String>['sysctl', 'hw.optional.arm64'],
+            stdout: 'hw.optional.arm64: 1',
+          ),
+        ]);
 
-      await expectToolExitLater(
-        cocoaPodsUnderTest.processPods(
-          xcodeProject: projectUnderTest.ios,
-          buildMode: BuildMode.debug,
-        ),
-        equals('Error running pod install'),
-      );
-      expect(
-        logger.errorText,
-        contains('set up CocoaPods for ARM macOS'),
-      );
-      expect(usage.events, contains(const TestUsageEvent('pod-install-failure', 'arm-ffi')));
+        await expectToolExitLater(
+          cocoaPodsUnderTest.processPods(
+            xcodeProject: projectUnderTest.ios,
+            buildMode: BuildMode.debug,
+          ),
+          equals('Error running pod install'),
+        );
+        expect(
+          logger.errorText,
+          contains('set up CocoaPods for ARM macOS'),
+        );
+        expect(usage.events, contains(const TestUsageEvent('pod-install-failure', 'arm-ffi')));
+      });
     });
 
     testUsingContext('ffi failure on x86 macOS does not prompt gem install', () async {
