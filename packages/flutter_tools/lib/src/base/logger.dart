@@ -620,7 +620,7 @@ void generateBox({
   write('┌');
   write('─');
   if (title == null) {
-    write('─' * textWithPaddingWidth);
+    write('─' * (textWithPaddingWidth - 1));
   } else {
     write(' ${terminal.bolden(title)} ');
     write('─' * (textWithPaddingWidth - title.length - 3));

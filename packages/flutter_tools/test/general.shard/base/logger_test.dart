@@ -928,6 +928,101 @@ void main() {
       expect(lines[0], equals(''));
     });
 
+    testWithoutContext('Stdout printBox puts content inside a box', () {
+      final Logger logger = StdoutLogger(
+        terminal: AnsiTerminal(
+          stdio: fakeStdio,
+          platform: FakePlatform(),
+        ),
+        stdio: fakeStdio,
+        outputPreferences: OutputPreferences.test(showColor: true),
+      );
+      logger.printBox('Hello world', title: 'Test title');
+      final String stdout = fakeStdio.writtenToStdout.join('');
+      expect(stdout,
+        contains(
+          '\n'
+          '┌─ Test title ┐\n'
+          '│             │\n'
+          '│ Hello world │\n'
+          '│             │\n'
+          '└─────────────┘\n'
+        ),
+      );
+    });
+
+    testWithoutContext('Stdout printBox does not require title', () {
+      final Logger logger = StdoutLogger(
+        terminal: AnsiTerminal(
+          stdio: fakeStdio,
+          platform: FakePlatform(),
+        ),
+        stdio: fakeStdio,
+        outputPreferences: OutputPreferences.test(showColor: true),
+      );
+      logger.printBox('Hello world');
+      final String stdout = fakeStdio.writtenToStdout.join('');
+      expect(stdout,
+        contains(
+          '\n'
+          '┌─────────────┐\n'
+          '│             │\n'
+          '│ Hello world │\n'
+          '│             │\n'
+          '└─────────────┘\n'
+        ),
+      );
+    });
+
+    testWithoutContext('Stdout printBox handles new lines', () {
+      final Logger logger = StdoutLogger(
+        terminal: AnsiTerminal(
+          stdio: fakeStdio,
+          platform: FakePlatform(),
+        ),
+        stdio: fakeStdio,
+        outputPreferences: OutputPreferences.test(showColor: true),
+      );
+      logger.printBox('Hello world\nThis is a new line', title: 'Test title');
+      final String stdout = fakeStdio.writtenToStdout.join('');
+      expect(stdout,
+        contains(
+          '\n'
+          '┌─ Test title ───────┐\n'
+          '│                    │\n'
+          '│ Hello world        │\n'
+          '│ This is a new line │\n'
+          '│                    │\n'
+          '└────────────────────┘\n'
+        ),
+      );
+    });
+
+    testWithoutContext('Stdout printBox handles content with ANSI escape characters', () {
+      final Logger logger = StdoutLogger(
+        terminal: AnsiTerminal(
+          stdio: fakeStdio,
+          platform: FakePlatform(),
+        ),
+        stdio: fakeStdio,
+        outputPreferences: OutputPreferences.test(showColor: true),
+      );
+      final String bold = '\u001B[1m';
+      final String clear = '\u001B[2J\u001B[H';
+      logger.printBox('${bold}Hello world${clear}', title: 'Test title');
+      final String stdout = fakeStdio.writtenToStdout.join('');
+      expect(stdout,
+        contains(
+          '\n'
+          '┌─ Test title ┐\n'
+          '│           │\n'
+          '│ ${bold}Hello world${clear} │\n'
+          '│           │\n'
+          '└───────────┘\n'
+        ),
+      );
+    });
+
     testWithoutContext('Stdout startProgress on non-color terminal', () async {
       final FakeStopwatch fakeStopwatch = FakeStopwatch();
       final Logger logger = StdoutLogger(
