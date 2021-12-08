@@ -48,8 +48,6 @@ class PathBuilder {
 
   PathBuilder& AddRect(Rect rect);
 
-  PathBuilder& AddRoundedRect(Rect rect, Scalar radius);
-
   PathBuilder& AddCircle(const Point& center, Scalar radius);
 
   PathBuilder& AddOval(const Rect& rect);
@@ -57,24 +55,33 @@ class PathBuilder {
   PathBuilder& AddLine(const Point& p1, const Point& p2);
 
   struct RoundingRadii {
-    Scalar topLeft = 0.0;
-    Scalar bottomLeft = 0.0;
-    Scalar topRight = 0.0;
-    Scalar bottomRight = 0.0;
+    Point top_left;
+    Point bottom_left;
+    Point top_right;
+    Point bottom_right;
 
-    RoundingRadii() {}
+    RoundingRadii() = default;
 
-    RoundingRadii(Scalar pTopLeft,
-                  Scalar pBottomLeft,
-                  Scalar pTopRight,
-                  Scalar pBottomRight)
-        : topLeft(pTopLeft),
-          bottomLeft(pBottomLeft),
-          topRight(pTopRight),
-          bottomRight(pBottomRight) {}
+    RoundingRadii(Scalar p_top_left,
+                  Scalar p_bottom_left,
+                  Scalar p_top_right,
+                  Scalar p_bottom_right)
+        : top_left(p_top_left, p_top_left),
+          bottom_left(p_bottom_left, p_bottom_left),
+          top_right(p_top_right, p_top_right),
+          bottom_right(p_bottom_right, p_bottom_right) {}
+
+    bool AreAllZero() const {
+      return top_left.IsZero() &&     //
+             bottom_left.IsZero() &&  //
+             top_right.IsZero() &&    //
+             bottom_right.IsZero();
+    }
   };
 
   PathBuilder& AddRoundedRect(Rect rect, RoundingRadii radii);
+
+  PathBuilder& AddRoundedRect(Rect rect, Scalar radius);
 
  private:
   Point subpath_start_;

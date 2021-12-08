@@ -57,7 +57,7 @@ struct TPoint {
     return {x - s.width, y - s.height};
   }
 
-  constexpr TPoint operator*(Type scale) const {
+  constexpr TPoint operator*(Scalar scale) const {
     return {x * scale, y * scale};
   }
 
@@ -69,7 +69,7 @@ struct TPoint {
     return {x * s.width, y * s.height};
   }
 
-  constexpr TPoint operator/(Type d) const { return {x / d, y / d}; }
+  constexpr TPoint operator/(Scalar d) const { return {x / d, y / d}; }
 
   constexpr TPoint operator/(const TPoint& p) const {
     return {x / p.x, y / p.y};
@@ -108,6 +108,8 @@ struct TPoint {
     }
     return {x / length, y / length};
   }
+
+  constexpr bool IsZero() const { return x == 0 && y == 0; }
 };
 
 using Point = TPoint<Scalar>;
