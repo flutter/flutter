@@ -12,8 +12,16 @@ PathBuilder::PathBuilder() = default;
 
 PathBuilder::~PathBuilder() = default;
 
-Path PathBuilder::CreatePath() const {
-  return prototype_;
+Path PathBuilder::CopyPath(FillType fill) const {
+  auto path = prototype_;
+  path.SetFillType(fill);
+  return path;
+}
+
+Path PathBuilder::TakePath(FillType fill) {
+  auto path = std::move(prototype_);
+  path.SetFillType(fill);
+  return path;
 }
 
 PathBuilder& PathBuilder::MoveTo(Point point, bool relative) {

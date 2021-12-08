@@ -184,8 +184,7 @@ bool EntityPass::Render(ContentRenderer& renderer,
     }
 
     Entity entity;
-    entity.SetPath(
-        PathBuilder{}.AddRect(subpass_coverage.value()).CreatePath());
+    entity.SetPath(PathBuilder{}.AddRect(subpass_coverage.value()).TakePath());
     entity.SetContents(std::move(offscreen_texture_contents));
     entity.SetStencilDepth(stencil_depth_);
     entity.SetTransformation(xformation_);
