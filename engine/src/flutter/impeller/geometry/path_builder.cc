@@ -163,92 +163,97 @@ PathBuilder& PathBuilder::AddCircle(const Point& c, Scalar r) {
 }
 
 PathBuilder& PathBuilder::AddRoundedRect(Rect rect, Scalar radius) {
-  return radius == 0.0 ? AddRect(rect)
+  return radius <= 0.0 ? AddRect(rect)
                        : AddRoundedRect(rect, {radius, radius, radius, radius});
 }
 
 PathBuilder& PathBuilder::AddRoundedRect(Rect rect, RoundingRadii radii) {
-  current_ = rect.origin + Point{radii.topLeft, 0.0};
+  if (radii.AreAllZero()) {
+    return AddRect(rect);
+  }
 
-  const Scalar magic_top_right = kArcApproximationMagic * radii.topRight;
-  const Scalar magic_bottom_right = kArcApproximationMagic * radii.bottomRight;
-  const Scalar magic_bottom_left = kArcApproximationMagic * radii.bottomLeft;
-  const Scalar magic_top_left = kArcApproximationMagic * radii.topLeft;
+  current_ = rect.origin + Point{radii.top_left.x, 0.0};
+
+  const auto magic_top_right = radii.top_right * kArcApproximationMagic;
+  const auto magic_bottom_right = radii.bottom_right * kArcApproximationMagic;
+  const auto magic_bottom_left = radii.bottom_left * kArcApproximationMagic;
+  const auto magic_top_left = radii.top_left * kArcApproximationMagic;
 
   //----------------------------------------------------------------------------
-  /// Top line.
-  ///
+  // Top line.
+  //
   prototype_.AddLinearComponent(
-      {rect.origin.x + radii.topLeft, rect.origin.y},
-      {rect.origin.x + rect.size.width - radii.topRight, rect.origin.y});
+      {rect.origin.x + radii.top_left.x, rect.origin.y},
+      {rect.origin.x + rect.size.width - radii.top_right.x, rect.origin.y});
 
   //----------------------------------------------------------------------------
-  /// Top right arc.
-  ///
+  // Top right arc.
+  //
   prototype_.AddCubicComponent(
-      {rect.origin.x + rect.size.width - radii.topRight, rect.origin.y},
-      {rect.origin.x + rect.size.width - radii.topRight + magic_top_right,
+      {rect.origin.x + rect.size.width - radii.top_right.x, rect.origin.y},
+      {rect.origin.x + rect.size.width - radii.top_right.x + magic_top_right.x,
        rect.origin.y},
       {rect.origin.x + rect.size.width,
-       rect.origin.y + radii.topRight - magic_top_right},
-      {rect.origin.x + rect.size.width, rect.origin.y + radii.topRight});
+       rect.origin.y + radii.top_right.y - magic_top_right.y},
+      {rect.origin.x + rect.size.width, rect.origin.y + radii.top_right.y});
 
   //----------------------------------------------------------------------------
-  /// Right line.
-  ///
+  // Right line.
+  //
   prototype_.AddLinearComponent(
-      {rect.origin.x + rect.size.width, rect.origin.y + radii.topRight},
+      {rect.origin.x + rect.size.width, rect.origin.y + radii.top_right.y},
       {rect.origin.x + rect.size.width,
-       rect.origin.y + rect.size.height - radii.bottomRight});
+       rect.origin.y + rect.size.height - radii.bottom_right.y});
 
   //----------------------------------------------------------------------------
-  /// Bottom right arc.
-  ///
+  // Bottom right arc.
+  //
   prototype_.AddCubicComponent(
       {rect.origin.x + rect.size.width,
-       rect.origin.y + rect.size.height - radii.bottomRight},
+       rect.origin.y + rect.size.height - radii.bottom_right.y},
       {rect.origin.x + rect.size.width, rect.origin.y + rect.size.height -
-                                            radii.bottomRight +
-                                            magic_bottom_right},
-      {rect.origin.x + rect.size.width - radii.bottomRight + magic_bottom_right,
+                                            radii.bottom_right.y +
+                                            magic_bottom_right.y},
+      {rect.origin.x + rect.size.width - radii.bottom_right.x +
+           magic_bottom_right.x,
        rect.origin.y + rect.size.height},
-      {rect.origin.x + rect.size.width - radii.bottomRight,
+      {rect.origin.x + rect.size.width - radii.bottom_right.x,
        rect.origin.y + rect.size.height});
 
   //----------------------------------------------------------------------------
-  /// Bottom line.
-  ///
+  // Bottom line.
+  //
   prototype_.AddLinearComponent(
-      {rect.origin.x + rect.size.width - radii.bottomRight,
+      {rect.origin.x + rect.size.width - radii.bottom_right.x,
        rect.origin.y + rect.size.height},
-      {rect.origin.x + radii.bottomLeft, rect.origin.y + rect.size.height});
+      {rect.origin.x + radii.bottom_left.x, rect.origin.y + rect.size.height});
 
   //----------------------------------------------------------------------------
-  /// Bottom left arc.
-  ///
+  // Bottom left arc.
+  //
   prototype_.AddCubicComponent(
-      {rect.origin.x + radii.bottomLeft, rect.origin.y + rect.size.height},
-      {rect.origin.x + radii.bottomLeft - magic_bottom_left,
+      {rect.origin.x + radii.bottom_left.x, rect.origin.y + rect.size.height},
+      {rect.origin.x + radii.bottom_left.x - magic_bottom_left.x,
        rect.origin.y + rect.size.height},
-      {rect.origin.x,
-       rect.origin.y + rect.size.height - radii.bottomLeft + magic_bottom_left},
-      {rect.origin.x, rect.origin.y + rect.size.height - radii.bottomLeft});
+      {rect.origin.x, rect.origin.y + rect.size.height - radii.bottom_left.y +
+                          magic_bottom_left.y},
+      {rect.origin.x, rect.origin.y + rect.size.height - radii.bottom_left.y});
 
   //----------------------------------------------------------------------------
-  /// Left line.
-  ///
+  // Left line.
+  //
   prototype_.AddLinearComponent(
-      {rect.origin.x, rect.origin.y + rect.size.height - radii.bottomLeft},
-      {rect.origin.x, rect.origin.y + radii.topLeft});
+      {rect.origin.x, rect.origin.y + rect.size.height - radii.bottom_left.y},
+      {rect.origin.x, rect.origin.y + radii.top_left.y});
 
   //----------------------------------------------------------------------------
-  /// Top left arc.
-  ///
+  // Top left arc.
+  //
   prototype_.AddCubicComponent(
-      {rect.origin.x, rect.origin.y + radii.topLeft},
-      {rect.origin.x, rect.origin.y + radii.topLeft - magic_top_left},
-      {rect.origin.x + radii.topLeft - magic_top_left, rect.origin.y},
-      {rect.origin.x + radii.topLeft, rect.origin.y});
+      {rect.origin.x, rect.origin.y + radii.top_left.y},
+      {rect.origin.x, rect.origin.y + radii.top_left.y - magic_top_left.y},
+      {rect.origin.x + radii.top_left.x - magic_top_left.x, rect.origin.y},
+      {rect.origin.x + radii.top_left.x, rect.origin.y});
 
   return *this;
 }
@@ -260,8 +265,8 @@ PathBuilder& PathBuilder::AddOval(const Rect& container) {
   const Point m = {kArcApproximationMagic * r.x, kArcApproximationMagic * r.y};
 
   //----------------------------------------------------------------------------
-  /// Top right arc.
-  ///
+  // Top right arc.
+  //
   prototype_.AddCubicComponent({c.x, c.y - r.y},        // p1
                                {c.x + m.x, c.y - r.y},  // cp1
                                {c.x + r.x, c.y - m.y},  // cp2
@@ -269,8 +274,8 @@ PathBuilder& PathBuilder::AddOval(const Rect& container) {
   );
 
   //----------------------------------------------------------------------------
-  /// Bottom right arc.
-  ///
+  // Bottom right arc.
+  //
   prototype_.AddCubicComponent({c.x + r.x, c.y},        // p1
                                {c.x + r.x, c.y + m.y},  // cp1
                                {c.x + m.x, c.y + r.y},  // cp2
@@ -278,8 +283,8 @@ PathBuilder& PathBuilder::AddOval(const Rect& container) {
   );
 
   //----------------------------------------------------------------------------
-  /// Bottom left arc.
-  ///
+  // Bottom left arc.
+  //
   prototype_.AddCubicComponent({c.x, c.y + r.y},        // p1
                                {c.x - m.x, c.y + r.y},  // cp1
                                {c.x - r.x, c.y + m.y},  // cp2
@@ -287,8 +292,8 @@ PathBuilder& PathBuilder::AddOval(const Rect& container) {
   );
 
   //----------------------------------------------------------------------------
-  /// Top left arc.
-  ///
+  // Top left arc.
+  //
   prototype_.AddCubicComponent({c.x - r.x, c.y},        // p1
                                {c.x - r.x, c.y - m.y},  // cp1
                                {c.x - m.x, c.y - r.y},  // cp2

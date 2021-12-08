@@ -224,5 +224,26 @@ TEST_F(AiksTest,
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
+TEST_F(AiksTest, CanRenderRoundedRectWithNonUniformRadii) {
+  Canvas canvas;
+
+  Paint paint;
+  paint.color = Color::Red();
+
+  PathBuilder::RoundingRadii radii;
+  radii.top_left = {50, 25};
+  radii.top_right = {25, 50};
+  radii.bottom_right = {50, 25};
+  radii.bottom_left = {25, 50};
+
+  auto path = PathBuilder{}
+                  .AddRoundedRect(Rect{100, 100, 500, 500}, radii)
+                  .CreatePath();
+
+  canvas.DrawPath(path, paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
 }  // namespace testing
 }  // namespace impeller
