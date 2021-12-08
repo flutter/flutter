@@ -98,6 +98,21 @@ void PopulateAXTree(std::shared_ptr<AccessibilityBridge> bridge) {
 
 }  // namespace
 
+TEST(AccessibilityBridgeDelegateWin32, NodeDelegateHasUniqueId) {
+  auto window_binding_handler =
+      std::make_unique<::testing::NiceMock<MockWindowBindingHandler>>();
+  FlutterWindowsView view(std::move(window_binding_handler));
+  view.SetEngine(GetTestEngine());
+  view.OnUpdateSemanticsEnabled(true);
+
+  auto bridge = view.GetEngine()->accessibility_bridge().lock();
+  PopulateAXTree(bridge);
+
+  auto node0_delegate = bridge->GetFlutterPlatformNodeDelegateFromID(0).lock();
+  auto node1_delegate = bridge->GetFlutterPlatformNodeDelegateFromID(1).lock();
+  EXPECT_TRUE(node0_delegate->GetUniqueId() != node1_delegate->GetUniqueId());
+}
+
 TEST(AccessibilityBridgeDelegateWin32, DispatchAccessibilityAction) {
   auto window_binding_handler =
       std::make_unique<::testing::NiceMock<MockWindowBindingHandler>>();
