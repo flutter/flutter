@@ -705,14 +705,14 @@ assembleFooTest
         testLogger.statusText,
         contains(
           '\n'
-          '┌─ Flutter Fix ────────────────────────────────────────────────────────────────────────────────────┐\n'
-          '│                                                                                                  │\n'
-          '│ [!]  Gradle project does not define a task suitable for the requested build.                     │\n'
-          '│                                                                                                  │\n'
-          '│ The /android/app/build.gradle file defines product flavors: flavor1, flavor_2 You must specify a │\n'
-          '│ --flavor option to select one of them.                                                           │\n'
-          '│                                                                                                  │\n'
-          '└──────────────────────────────────────────────────────────────────────────────────────────────────┘\n'
+          '┌─ Flutter Fix ───────────────────────────────────────────────────────────────────────────────────┐\n'
+          '│                                                                                                 │\n'
+          '│ [!]  Gradle project does not define a task suitable for the requested build.                    │\n'
+          '│                                                                                                 │\n'
+          '│ The /android/app/build.gradle file defines product flavors: flavor1, flavor_2. You must specify │\n'
+          '│ a --flavor option to select one of them.                                                        │\n'
+          '│                                                                                                 │\n'
+          '└─────────────────────────────────────────────────────────────────────────────────────────────────┘\n'
         )
       );
       expect(fakeProcessManager.hasRemainingExpectations, isFalse);

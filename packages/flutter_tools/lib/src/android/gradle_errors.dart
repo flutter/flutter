@@ -364,7 +364,7 @@ final GradleHandledError flavorUndefinedHandler = GradleHandledError(
       globals.printBox(
         '$errorMessage\n\n'
         'The ${buildGradle.absolute.path} file defines product '
-        'flavors: ${productFlavors.join(', ')} '
+        'flavors: ${productFlavors.join(', ')}. '
         'You must specify a --flavor option to select one of them.',
         title: _boxTitle,
       );
