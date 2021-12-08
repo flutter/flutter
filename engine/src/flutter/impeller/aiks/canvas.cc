@@ -100,11 +100,11 @@ void Canvas::DrawPath(Path path, Paint paint) {
 }
 
 void Canvas::DrawRect(Rect rect, Paint paint) {
-  DrawPath(PathBuilder{}.AddRect(rect).CreatePath(), std::move(paint));
+  DrawPath(PathBuilder{}.AddRect(rect).TakePath(), std::move(paint));
 }
 
 void Canvas::DrawCircle(Point center, Scalar radius, Paint paint) {
-  DrawPath(PathBuilder{}.AddCircle(center, radius).CreatePath(),
+  DrawPath(PathBuilder{}.AddCircle(center, radius).TakePath(),
            std::move(paint));
 }
 
@@ -120,7 +120,7 @@ void Canvas::SaveLayer(Paint paint, std::optional<Rect> bounds) {
     // the size of the render target that would have been allocated will be
     // absent. Explicitly add back a clip to reproduce that behavior. Since
     // clips never require a render target switch, this is a cheap operation.
-    ClipPath(PathBuilder{}.AddRect(bounds.value()).CreatePath());
+    ClipPath(PathBuilder{}.AddRect(bounds.value()).TakePath());
   }
 }
 
@@ -187,7 +187,7 @@ void Canvas::DrawImageRect(std::shared_ptr<Image> image,
   contents->SetSourceRect(source);
 
   Entity entity;
-  entity.SetPath(PathBuilder{}.AddRect(dest).CreatePath());
+  entity.SetPath(PathBuilder{}.AddRect(dest).TakePath());
   entity.SetContents(contents);
   entity.SetTransformation(GetCurrentTransformation());
 

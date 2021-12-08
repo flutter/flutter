@@ -192,7 +192,7 @@ TEST(GeometryTest, BoundingBoxCubic) {
 TEST(GeometryTest, BoundingBoxOfCompositePathIsCorrect) {
   PathBuilder builder;
   builder.AddRoundedRect({{10, 10}, {300, 300}}, {50, 50, 50, 50});
-  auto path = builder.CreatePath();
+  auto path = builder.TakePath();
   auto actual = path.GetBoundingBox();
   Rect expected(10, 10, 300, 300);
   ASSERT_TRUE(actual.has_value());

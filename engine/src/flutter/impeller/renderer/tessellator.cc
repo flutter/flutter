@@ -8,29 +8,21 @@
 
 namespace impeller {
 
-Tessellator::Tessellator() {}
+Tessellator::Tessellator(FillType type) : fill_type_(type) {}
 
-Tessellator::~Tessellator() {}
+Tessellator::~Tessellator() = default;
 
-void Tessellator::SetFillType(FillType winding) {
-  fill_type_ = winding;
-}
-
-Tessellator::FillType Tessellator::GetFillType() const {
-  return fill_type_;
-}
-
-static int ToTessWindingRule(Tessellator::FillType fill_type) {
+static int ToTessWindingRule(FillType fill_type) {
   switch (fill_type) {
-    case Tessellator::FillType::kOdd:
+    case FillType::kOdd:
       return TESS_WINDING_ODD;
-    case Tessellator::FillType::kNonZero:
+    case FillType::kNonZero:
       return TESS_WINDING_NONZERO;
-    case Tessellator::FillType::kPositive:
+    case FillType::kPositive:
       return TESS_WINDING_POSITIVE;
-    case Tessellator::FillType::kNegative:
+    case FillType::kNegative:
       return TESS_WINDING_NEGATIVE;
-    case Tessellator::FillType::kAbsGeqTwo:
+    case FillType::kAbsGeqTwo:
       return TESS_WINDING_ABS_GEQ_TWO;
   }
   return TESS_WINDING_ODD;

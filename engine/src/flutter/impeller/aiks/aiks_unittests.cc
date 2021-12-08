@@ -45,7 +45,7 @@ TEST_F(AiksTest, CanRenderColoredRect) {
   paint.color = Color::Red();
   canvas.DrawPath(PathBuilder{}
                       .AddRect(Rect::MakeXYWH(100.0, 100.0, 100.0, 100.0))
-                      .CreatePath(),
+                      .TakePath(),
                   paint);
   // ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
@@ -81,7 +81,7 @@ TEST_F(AiksTest, CanRenderStrokes) {
   paint.color = Color::Red();
   paint.stroke_width = 20.0;
   paint.style = Paint::Style::kStroke;
-  canvas.DrawPath(PathBuilder{}.AddLine({200, 100}, {800, 100}).CreatePath(),
+  canvas.DrawPath(PathBuilder{}.AddLine({200, 100}, {800, 100}).TakePath(),
                   paint);
   // ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
@@ -92,7 +92,7 @@ TEST_F(AiksTest, CanRenderCurvedStrokes) {
   paint.color = Color::Red();
   paint.stroke_width = 25.0;
   paint.style = Paint::Style::kStroke;
-  canvas.DrawPath(PathBuilder{}.AddCircle({500, 500}, 250).CreatePath(), paint);
+  canvas.DrawPath(PathBuilder{}.AddCircle({500, 500}, 250).TakePath(), paint);
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
@@ -101,8 +101,8 @@ TEST_F(AiksTest, CanRenderClips) {
   Paint paint;
   paint.color = Color::Fuchsia();
   canvas.ClipPath(
-      PathBuilder{}.AddRect(Rect::MakeXYWH(0, 0, 500, 500)).CreatePath());
-  canvas.DrawPath(PathBuilder{}.AddCircle({500, 500}, 250).CreatePath(), paint);
+      PathBuilder{}.AddRect(Rect::MakeXYWH(0, 0, 500, 500)).TakePath());
+  canvas.DrawPath(PathBuilder{}.AddCircle({500, 500}, 250).TakePath(), paint);
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
@@ -236,11 +236,36 @@ TEST_F(AiksTest, CanRenderRoundedRectWithNonUniformRadii) {
   radii.bottom_right = {50, 25};
   radii.bottom_left = {25, 50};
 
-  auto path = PathBuilder{}
-                  .AddRoundedRect(Rect{100, 100, 500, 500}, radii)
-                  .CreatePath();
+  auto path =
+      PathBuilder{}.AddRoundedRect(Rect{100, 100, 500, 500}, radii).TakePath();
 
   canvas.DrawPath(path, paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
+TEST_F(AiksTest, CanRenderDifferencePaths) {
+  Canvas canvas;
+
+  Paint paint;
+  paint.color = Color::Red();
+
+  PathBuilder builder;
+
+  PathBuilder::RoundingRadii radii;
+  radii.top_left = {50, 25};
+  radii.top_right = {25, 50};
+  radii.bottom_right = {50, 25};
+  radii.bottom_left = {25, 50};
+
+  builder.AddRoundedRect({100, 100, 200, 200}, radii);
+  builder.AddCircle({200, 200}, 50);
+  auto path = builder.TakePath(FillType::kOdd);
+
+  canvas.DrawImage(
+      std::make_shared<Image>(CreateTextureForFixture("boston.jpg")), {10, 10},
+      Paint{});
+  canvas.DrawPath(std::move(path), paint);
 
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }

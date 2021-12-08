@@ -16,6 +16,14 @@ size_t Path::GetComponentCount() const {
   return components_.size();
 }
 
+void Path::SetFillType(FillType fill) {
+  fill_ = fill;
+}
+
+FillType Path::GetFillType() const {
+  return fill_;
+}
+
 Path& Path::AddLinearComponent(Point p1, Point p2) {
   linears_.emplace_back(p1, p2);
   components_.emplace_back(ComponentType::kLinear, linears_.size() - 1);

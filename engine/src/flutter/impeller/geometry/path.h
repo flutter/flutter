@@ -12,6 +12,14 @@
 
 namespace impeller {
 
+enum class FillType {
+  kNonZero,  // The default winding order.
+  kOdd,
+  kPositive,
+  kNegative,
+  kAbsGeqTwo,
+};
+
 //------------------------------------------------------------------------------
 /// @brief      Paths are lightweight objects that describe a collection of
 ///             linear, quadratic, or cubic segments.
@@ -35,6 +43,10 @@ class Path {
   ~Path();
 
   size_t GetComponentCount() const;
+
+  void SetFillType(FillType fill);
+
+  FillType GetFillType() const;
 
   Path& AddLinearComponent(Point p1, Point p2);
 
@@ -82,6 +94,7 @@ class Path {
         : type(aType), index(aIndex) {}
   };
 
+  FillType fill_ = FillType::kNonZero;
   std::vector<ComponentIndexPair> components_;
   std::vector<LinearPathComponent> linears_;
   std::vector<QuadraticPathComponent> quads_;
