@@ -76,7 +76,8 @@ abstract class ChipAttributes {
 
   /// The style to be applied to the chip's label.
   ///
-  /// If null, the value of the [ChipTheme]'s [ChipThemeData.labelStyle] is used.
+  /// The default label style is [TextTheme.bodyText1] from the overall
+  /// theme's [ThemeData.textTheme].
   //
   /// This only has an effect on widgets that respect the [DefaultTextStyle],
   /// such as [Text].
@@ -1898,15 +1899,15 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
       ?? chipTheme.padding
       ?? theme.chipTheme.padding
       ?? chipDefaults.padding!;
-    final TextStyle? labelStyle = widget.labelStyle
-      ?? chipTheme.labelStyle
-      ?? theme.chipTheme.labelStyle;
+    final TextStyle labelStyle = chipTheme.labelStyle
+      ?? theme.chipTheme.labelStyle
+      ?? chipDefaults.labelStyle!;
     final EdgeInsetsGeometry labelPadding = widget.labelPadding
       ?? chipTheme.labelPadding
       ?? theme.chipTheme.labelPadding
       ?? _defaultLabelPadding;
 
-    final TextStyle effectiveLabelStyle = chipDefaults.labelStyle!.merge(labelStyle);
+    final TextStyle effectiveLabelStyle = labelStyle.merge(widget.labelStyle);
     final Color? resolvedLabelColor = MaterialStateProperty.resolveAs<Color?>(effectiveLabelStyle.color, materialStates);
     final TextStyle resolvedLabelStyle = effectiveLabelStyle.copyWith(color: resolvedLabelColor);
 
