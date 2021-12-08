@@ -1724,7 +1724,7 @@ class LogInvocationAction extends Action<LogIntent> {
   bool get isActionEnabled => enabled;
 
   @override
-  Object? invoke(LogIntent intent) {
+  void invoke(LogIntent intent) {
     final Action<LogIntent>? callingAction = this.callingAction;
     if (callingAction == null) {
       intent.log.add('$actionName.invoke');
@@ -1733,7 +1733,6 @@ class LogInvocationAction extends Action<LogIntent> {
       callingAction.invoke(intent);
       intent.log.add('$actionName.invokeAsOverride-post-super');
     }
-    return null;
   }
 
   @override
@@ -1756,7 +1755,7 @@ class LogInvocationContextAction extends ContextAction<LogIntent> {
   bool get isActionEnabled => enabled;
 
   @override
-  Object? invoke(LogIntent intent, [BuildContext? context]) {
+  void invoke(LogIntent intent, [BuildContext? context]) {
     invokeContext = context;
     final Action<LogIntent>? callingAction = this.callingAction;
     if (callingAction == null) {
@@ -1766,7 +1765,6 @@ class LogInvocationContextAction extends ContextAction<LogIntent> {
       callingAction.invoke(intent);
       intent.log.add('$actionName.invokeAsOverride-post-super');
     }
-    return null;
   }
 
   @override
