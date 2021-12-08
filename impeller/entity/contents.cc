@@ -68,12 +68,12 @@ bool LinearGradientContents::Render(const ContentRenderer& renderer,
 
   auto vertices_builder = VertexBufferBuilder<VS::PerVertexData>();
   {
-    auto result = Tessellator{}.Tessellate(entity.GetPath().CreatePolyline(),
-                                           [&vertices_builder](Point point) {
-                                             VS::PerVertexData vtx;
-                                             vtx.vertices = point;
-                                             vertices_builder.AppendVertex(vtx);
-                                           });
+    auto result = Tessellator{entity.GetPath().GetFillType()}.Tessellate(
+        entity.GetPath().CreatePolyline(), [&vertices_builder](Point point) {
+          VS::PerVertexData vtx;
+          vtx.vertices = point;
+          vertices_builder.AppendVertex(vtx);
+        });
     if (!result) {
       return false;
     }
@@ -124,7 +124,7 @@ static VertexBuffer CreateSolidFillVertices(const Path& path,
 
   VertexBufferBuilder<VS::PerVertexData> vtx_builder;
 
-  auto tesselation_result = Tessellator{}.Tessellate(
+  auto tesselation_result = Tessellator{path.GetFillType()}.Tessellate(
       path.CreatePolyline(), [&vtx_builder](auto point) {
         VS::PerVertexData vtx;
         vtx.vertices = point;
@@ -225,15 +225,16 @@ bool TextureContents::Render(const ContentRenderer& renderer,
 
   VertexBufferBuilder<VS::PerVertexData> vertex_builder;
   {
-    const auto tess_result = Tessellator{}.Tessellate(
-        entity.GetPath().CreatePolyline(),
-        [&vertex_builder, &coverage_rect](Point vtx) {
-          VS::PerVertexData data;
-          data.vertices = vtx;
-          data.texture_coords =
-              ((vtx - coverage_rect->origin) / coverage_rect->size);
-          vertex_builder.AppendVertex(data);
-        });
+    const auto tess_result =
+        Tessellator{entity.GetPath().GetFillType()}.Tessellate(
+            entity.GetPath().CreatePolyline(),
+            [&vertex_builder, &coverage_rect](Point vtx) {
+              VS::PerVertexData data;
+              data.vertices = vtx;
+              data.texture_coords =
+                  ((vtx - coverage_rect->origin) / coverage_rect->size);
+              vertex_builder.AppendVertex(data);
+            });
     if (!tess_result) {
       return false;
     }

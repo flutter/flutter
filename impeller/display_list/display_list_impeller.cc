@@ -213,7 +213,7 @@ static Rect ToRect(const SkRect& rect) {
 void DisplayListImpeller::clipRect(const SkRect& rect,
                                    SkClipOp clip_op,
                                    bool is_aa) {
-  auto path = PathBuilder{}.AddRect(ToRect(rect)).CreatePath();
+  auto path = PathBuilder{}.AddRect(ToRect(rect)).TakePath();
   canvas_.ClipPath(std::move(path));
 }
 
@@ -238,7 +238,7 @@ void DisplayListImpeller::clipRRect(const SkRRect& rrect,
   auto path =
       PathBuilder{}
           .AddRoundedRect(ToRect(rrect.getBounds()), ToRoundingRadii(rrect))
-          .CreatePath();
+          .TakePath();
   canvas_.ClipPath(std::move(path));
 }
 
@@ -266,25 +266,25 @@ void DisplayListImpeller::drawPaint() {
 
 // |flutter::Dispatcher|
 void DisplayListImpeller::drawLine(const SkPoint& p0, const SkPoint& p1) {
-  auto path = PathBuilder{}.AddLine(ToPoint(p0), ToPoint(p1)).CreatePath();
+  auto path = PathBuilder{}.AddLine(ToPoint(p0), ToPoint(p1)).TakePath();
   canvas_.DrawPath(std::move(path), paint_);
 }
 
 // |flutter::Dispatcher|
 void DisplayListImpeller::drawRect(const SkRect& rect) {
-  auto path = PathBuilder{}.AddRect(ToRect(rect)).CreatePath();
+  auto path = PathBuilder{}.AddRect(ToRect(rect)).TakePath();
   canvas_.DrawPath(std::move(path), paint_);
 }
 
 // |flutter::Dispatcher|
 void DisplayListImpeller::drawOval(const SkRect& bounds) {
-  auto path = PathBuilder{}.AddOval(ToRect(bounds)).CreatePath();
+  auto path = PathBuilder{}.AddOval(ToRect(bounds)).TakePath();
   canvas_.DrawPath(std::move(path), paint_);
 }
 
 // |flutter::Dispatcher|
 void DisplayListImpeller::drawCircle(const SkPoint& center, SkScalar radius) {
-  auto path = PathBuilder{}.AddCircle(ToPoint(center), radius).CreatePath();
+  auto path = PathBuilder{}.AddCircle(ToPoint(center), radius).TakePath();
   canvas_.DrawPath(std::move(path), paint_);
 }
 
@@ -293,7 +293,7 @@ void DisplayListImpeller::drawRRect(const SkRRect& rrect) {
   auto path =
       PathBuilder{}
           .AddRoundedRect(ToRect(rrect.getBounds()), ToRoundingRadii(rrect))
-          .CreatePath();
+          .TakePath();
   canvas_.DrawPath(std::move(path), paint_);
 }
 

@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "flutter/fml/macros.h"
+#include "impeller/geometry/path.h"
 #include "impeller/geometry/point.h"
 #include "impeller/renderer/formats.h"
 
@@ -21,21 +22,9 @@ namespace impeller {
 ///
 class Tessellator {
  public:
-  enum class FillType {
-    kNonZero,  // The default winding order.
-    kOdd,
-    kPositive,
-    kNegative,
-    kAbsGeqTwo,
-  };
-
-  Tessellator();
+  explicit Tessellator(FillType type);
 
   ~Tessellator();
-
-  void SetFillType(FillType winding);
-
-  FillType GetFillType() const;
 
   WindingOrder GetFrontFaceWinding() const;
 
@@ -53,7 +42,7 @@ class Tessellator {
                   VertexCallback callback) const;
 
  private:
-  FillType fill_type_ = FillType::kNonZero;
+  const FillType fill_type_ = FillType::kNonZero;
 
   FML_DISALLOW_COPY_AND_ASSIGN(Tessellator);
 };

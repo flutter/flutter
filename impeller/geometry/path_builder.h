@@ -17,7 +17,9 @@ class PathBuilder {
 
   ~PathBuilder();
 
-  Path CreatePath() const;
+  Path CopyPath(FillType fill = FillType::kNonZero) const;
+
+  Path TakePath(FillType fill = FillType::kNonZero);
 
   const Path& GetCurrentPath() const;
 
