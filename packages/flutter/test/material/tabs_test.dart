@@ -4257,7 +4257,7 @@ void main() {
     expect(pageController.page, 2);
   });
 
-  testWidgets("splashBorderRadius is passed to InkWell.borderRadius", (WidgetTester tester) async {
+  testWidgets('splashBorderRadius is passed to InkWell.borderRadius', (WidgetTester tester) async {
     const Color _hoverColor = Color(0xfff44336);
     const double _radius = 20;
     await tester.pumpWidget(
