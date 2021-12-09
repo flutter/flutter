@@ -724,8 +724,6 @@ abstract class ImageStreamCompleter with Diagnosticable {
   /// [ImageChunkEvent].
   @protected
   void reportImageChunkEvent(ImageChunkEvent event) {
-    print(event);
-    print(_disposed);
     _checkDisposed();
     if (hasListeners) {
       // Make a copy to allow for concurrent modification.
