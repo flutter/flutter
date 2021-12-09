@@ -320,4 +320,18 @@ const Path& PathBuilder::GetCurrentPath() const {
   return prototype_;
 }
 
+PathBuilder& PathBuilder::AddPath(const Path& path) {
+  auto linear = [&](size_t index, const LinearPathComponent& l) {
+    prototype_.AddLinearComponent(l.p1, l.p2);
+  };
+  auto quadratic = [&](size_t index, const QuadraticPathComponent& q) {
+    prototype_.AddQuadraticComponent(q.p1, q.cp, q.p2);
+  };
+  auto cubic = [&](size_t index, const CubicPathComponent& c) {
+    prototype_.AddCubicComponent(c.p1, c.cp1, c.cp2, c.p2);
+  };
+  path.EnumerateComponents(linear, quadratic, cubic);
+  return *this;
+}
+
 }  // namespace impeller
