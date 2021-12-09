@@ -1,4 +1,4 @@
-Signature: 5be52b0f34fe8fdcbdee674ac06cf0f9
+Signature: 7840318da4e65841a682367289313d93
 
 UNUSED LICENSES:
 
@@ -5529,6 +5529,7 @@ FILE: ../../../third_party/skia/gm/skbug_12212.cpp
 FILE: ../../../third_party/skia/gm/slug.cpp
 FILE: ../../../third_party/skia/include/private/GrMtlTypesPriv.h
 FILE: ../../../third_party/skia/include/utils/SkOrderedFontMgr.h
+FILE: ../../../third_party/skia/infra/bots/task_drivers/push_bazel_apps_from_wasm_image/push_bazel_apps_from_wasm_image.go
 FILE: ../../../third_party/skia/infra/bots/task_drivers/recreate_skps/recreate_skps.go
 FILE: ../../../third_party/skia/modules/androidkit/src/AndroidKit.cpp
 FILE: ../../../third_party/skia/modules/androidkit/src/Canvas.cpp
