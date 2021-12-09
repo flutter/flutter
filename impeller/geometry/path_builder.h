@@ -85,6 +85,8 @@ class PathBuilder {
 
   PathBuilder& AddRoundedRect(Rect rect, Scalar radius);
 
+  PathBuilder& AddPath(const Path& path);
+
  private:
   Point subpath_start_;
   Point current_;

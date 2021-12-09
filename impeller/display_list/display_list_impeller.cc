@@ -231,20 +231,22 @@ static PathBuilder::RoundingRadii ToRoundingRadii(const SkRRect& rrect) {
   return radii;
 }
 
+static Path ToPath(const SkPath& path) {
+  UNIMPLEMENTED;
+  return Path{};
+}
+
+static Path ToPath(const SkRRect& rrect) {
+  return PathBuilder{}
+      .AddRoundedRect(ToRect(rrect.getBounds()), ToRoundingRadii(rrect))
+      .TakePath();
+}
+
 // |flutter::Dispatcher|
 void DisplayListImpeller::clipRRect(const SkRRect& rrect,
                                     SkClipOp clip_op,
                                     bool is_aa) {
-  auto path =
-      PathBuilder{}
-          .AddRoundedRect(ToRect(rrect.getBounds()), ToRoundingRadii(rrect))
-          .TakePath();
-  canvas_.ClipPath(std::move(path));
-}
-
-static Path ToPath(const SkPath& path) {
-  UNIMPLEMENTED;
-  return Path{};
+  canvas_.ClipPath(ToPath(rrect));
 }
 
 // |flutter::Dispatcher|
@@ -290,17 +292,16 @@ void DisplayListImpeller::drawCircle(const SkPoint& center, SkScalar radius) {
 
 // |flutter::Dispatcher|
 void DisplayListImpeller::drawRRect(const SkRRect& rrect) {
-  auto path =
-      PathBuilder{}
-          .AddRoundedRect(ToRect(rrect.getBounds()), ToRoundingRadii(rrect))
-          .TakePath();
-  canvas_.DrawPath(std::move(path), paint_);
+  canvas_.DrawPath(ToPath(rrect), paint_);
 }
 
 // |flutter::Dispatcher|
 void DisplayListImpeller::drawDRRect(const SkRRect& outer,
                                      const SkRRect& inner) {
-  UNIMPLEMENTED;
+  PathBuilder builder;
+  builder.AddPath(ToPath(outer));
+  builder.AddPath(ToPath(inner));
+  canvas_.DrawPath(builder.TakePath(FillType::kOdd), paint_);
 }
 
 // |flutter::Dispatcher|

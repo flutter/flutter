@@ -155,26 +155,23 @@ bool Path::UpdateCubicComponentAtIndex(size_t index,
   return true;
 }
 
-static void AddPoints(std::vector<Point>& dest, const std::vector<Point>& src) {
-  dest.reserve(dest.size() + src.size());
-  dest.insert(dest.end(), src.begin(), src.end());
-}
-
 std::vector<Point> Path::CreatePolyline(
     const SmoothingApproximation& approximation) const {
   std::vector<Point> points;
+  auto collect_points = [&points](const std::vector<Point>& collection) {
+    points.reserve(points.size() + collection.size());
+    points.insert(points.end(), collection.begin(), collection.end());
+  };
   for (const auto& component : components_) {
     switch (component.type) {
       case ComponentType::kLinear:
-        AddPoints(points, linears_[component.index].CreatePolyline());
+        collect_points(linears_[component.index].CreatePolyline());
         break;
       case ComponentType::kQuadratic:
-        AddPoints(points,
-                  quads_[component.index].CreatePolyline(approximation));
+        collect_points(quads_[component.index].CreatePolyline(approximation));
         break;
       case ComponentType::kCubic:
-        AddPoints(points,
-                  cubics_[component.index].CreatePolyline(approximation));
+        collect_points(cubics_[component.index].CreatePolyline(approximation));
         break;
     }
   }
