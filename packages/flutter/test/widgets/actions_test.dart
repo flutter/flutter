@@ -1701,9 +1701,8 @@ class TestContextAction extends ContextAction<TestIntent> {
   List<BuildContext?> capturedContexts = <BuildContext?>[];
 
   @override
-  Object? invoke(covariant TestIntent intent, [BuildContext? context]) {
+  void invoke(covariant TestIntent intent, [BuildContext? context]) {
     capturedContexts.add(context);
-    return null;
   }
 }
 
@@ -1792,5 +1791,5 @@ class RedirectOutputAction extends LogInvocationAction {
   final List<String> newLog;
 
   @override
-  Object? invoke(LogIntent intent) => super.invoke(LogIntent(log: newLog));
+  void invoke(LogIntent intent) => super.invoke(LogIntent(log: newLog));
 }
