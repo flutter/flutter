@@ -80,6 +80,7 @@ import java.util.Arrays;
   private boolean isFlutterEngineFromHost;
   private boolean isFlutterUiDisplayed;
   private boolean isFirstFrameRendered;
+  private boolean isAttached;
 
   @NonNull
   private final FlutterUiDisplayListener flutterUiDisplayListener =
@@ -139,6 +140,14 @@ import java.util.Arrays;
   }
 
   /**
+   * Whether or not this {@code FlutterActivityAndFragmentDelegate} is attached to a {@code
+   * FlutterEngine}.
+   */
+  /* package */ boolean isAttached() {
+    return isAttached;
+  }
+
+  /**
    * Invoke this method from {@code Activity#onCreate(Bundle)} or {@code
    * Fragment#onAttach(Context)}.
    *
@@ -188,6 +197,7 @@ import java.util.Arrays;
     platformPlugin = host.providePlatformPlugin(host.getActivity(), flutterEngine);
 
     host.configureFlutterEngine(flutterEngine);
+    isAttached = true;
   }
 
   @Override
@@ -662,6 +672,8 @@ import java.util.Arrays;
 
       flutterEngine = null;
     }
+
+    isAttached = false;
   }
 
   /**

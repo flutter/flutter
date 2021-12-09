@@ -647,10 +647,10 @@ public class FlutterActivity extends Activity
    * <p>After calling, this activity should be disposed immediately and not be re-used.
    */
   private void release() {
-    delegate.onDestroyView();
-    delegate.onDetach();
-    delegate.release();
-    delegate = null;
+    if (delegate != null) {
+      delegate.release();
+      delegate = null;
+    }
   }
 
   @Override
@@ -662,15 +662,20 @@ public class FlutterActivity extends Activity
             + " connection to the engine "
             + getFlutterEngine()
             + " evicted by another attaching activity");
-    release();
+    if (delegate != null) {
+      delegate.onDestroyView();
+      delegate.onDetach();
+    }
   }
 
   @Override
   protected void onDestroy() {
     super.onDestroy();
     if (stillAttachedForEvent("onDestroy")) {
-      release();
+      delegate.onDestroyView();
+      delegate.onDetach();
     }
+    release();
     lifecycle.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY);
   }
 
@@ -1137,6 +1142,10 @@ public class FlutterActivity extends Activity
   private boolean stillAttachedForEvent(String event) {
     if (delegate == null) {
       Log.w(TAG, "FlutterActivity " + hashCode() + " " + event + " called after release.");
+      return false;
+    }
+    if (!delegate.isAttached()) {
+      Log.w(TAG, "FlutterActivity " + hashCode() + " " + event + " called after detach.");
       return false;
     }
     return true;
