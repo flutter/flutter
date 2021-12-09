@@ -192,7 +192,7 @@ class LabeledGlobalKey<T extends State<StatefulWidget>> extends GlobalKey<T> {
   // ignore: prefer_const_constructors_in_immutables , never use const for this class
   LabeledGlobalKey(this._debugLabel) : super.constructor();
 
-  final String? _debugLabel;
+  late final String? _debugLabel;
 
   @override
   String toString() {
@@ -887,7 +887,7 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   ///
   /// This field is used by the framework when asserts are enabled to verify
   /// that [State] objects move through their lifecycle in an orderly fashion.
-  _StateLifecycle _debugLifecycleState = _StateLifecycle.created;
+  late _StateLifecycle _debugLifecycleState = _StateLifecycle.created;
 
   /// Verifies that the [State] that was created is one that expects to be
   /// created for that particular [Widget].
@@ -2453,14 +2453,14 @@ class BuildOwner {
     }());
   }
 
-  int _debugStateLockLevel = 0;
+  late int _debugStateLockLevel = 0;
   bool get _debugStateLocked => _debugStateLockLevel > 0;
 
   /// Whether this widget tree is in the build phase.
   ///
   /// Only valid when asserts are enabled.
   bool get debugBuilding => _debugBuilding;
-  bool _debugBuilding = false;
+  late bool _debugBuilding = false;
   Element? _debugCurrentBuildTarget;
 
   /// Establishes a scope in which calls to [State.setState] are forbidden, and
@@ -2664,12 +2664,12 @@ class BuildOwner {
   }
 
   final Map<GlobalKey, Element> _globalKeyRegistry = <GlobalKey, Element>{};
-  final Set<Element> _debugIllFatedElements = HashSet<Element>();
+  late final Set<Element> _debugIllFatedElements = HashSet<Element>();
   // This map keeps track which child reserves the global key with the parent.
   // Parent, child -> global key.
   // This provides us a way to remove old reservation while parent rebuilds the
   // child in the same slot.
-  final Map<Element, Map<Element, GlobalKey>> _debugGlobalKeyReservations = <Element, Map<Element, GlobalKey>>{};
+  late final Map<Element, Map<Element, GlobalKey>> _debugGlobalKeyReservations = <Element, Map<Element, GlobalKey>>{};
 
   /// The number of [GlobalKey] instances that are currently associated with
   /// [Element]s that have been built by this build owner.
@@ -3019,7 +3019,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       _widget = widget;
 
   Element? _parent;
-  DebugReassembleConfig? _debugReassembleConfig;
+  late DebugReassembleConfig? _debugReassembleConfig;
 
   // Custom implementation of `operator ==` optimized for the ".of" pattern
   // used with `InheritedWidgets`.
@@ -3687,7 +3687,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
 
   // The children that have been forgotten by forgetChild. This will be used in
   // [update] to remove the global key reservations of forgotten children.
-  final Set<Element> _debugForgottenChildrenWithGlobalKey = HashSet<Element>();
+  late final Set<Element> _debugForgottenChildrenWithGlobalKey = HashSet<Element>();
 
   /// Remove the given child from the element's child list, in preparation for
   /// the child being reused elsewhere in the element tree.
@@ -4221,13 +4221,13 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   bool _inDirtyList = false;
 
   // Whether we've already built or not. Set in [rebuild].
-  bool _debugBuiltOnce = false;
+  late bool _debugBuiltOnce = false;
 
   // We let widget authors call setState from initState, didUpdateWidget, and
   // build even when state is locked because its convenient and a no-op anyway.
   // This flag ensures that this convenience is only allowed on the element
   // currently undergoing initState, didUpdateWidget, or build.
-  bool _debugAllowIgnoredCallsToMarkNeedsBuild = false;
+  late bool _debugAllowIgnoredCallsToMarkNeedsBuild = false;
   bool _debugSetAllowIgnoredCallsToMarkNeedsBuild(bool value) {
     assert(_debugAllowIgnoredCallsToMarkNeedsBuild == !value);
     _debugAllowIgnoredCallsToMarkNeedsBuild = value;
@@ -4560,7 +4560,7 @@ abstract class ComponentElement extends Element {
 
   Element? _child;
 
-  bool _debugDoingBuild = false;
+  late bool _debugDoingBuild = false;
   @override
   bool get debugDoingBuild => _debugDoingBuild;
 
@@ -5400,7 +5400,7 @@ abstract class RenderObjectElement extends Element {
   }
   RenderObject? _renderObject;
 
-  bool _debugDoingBuild = false;
+  late bool _debugDoingBuild = false;
   @override
   bool get debugDoingBuild => _debugDoingBuild;
 
