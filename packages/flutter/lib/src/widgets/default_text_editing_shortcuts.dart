@@ -161,12 +161,12 @@ class DefaultTextEditingShortcuts extends Shortcuts {
   // uses different modifier keys as the line/word modifer.
   static const Map<ShortcutActivator, Intent> _commonShortcuts = <ShortcutActivator, Intent>{
     // Delete Shortcuts.
-    SingleActivator(LogicalKeyboardKey.backspace): DeleteCharacterIntent(forward: false),
-    SingleActivator(LogicalKeyboardKey.backspace, control: true): DeleteToNextWordBoundaryIntent(forward: false),
-    SingleActivator(LogicalKeyboardKey.backspace, alt: true): DeleteToLineBreakIntent(forward: false),
-    SingleActivator(LogicalKeyboardKey.delete): DeleteCharacterIntent(forward: true),
-    SingleActivator(LogicalKeyboardKey.delete, control: true): DeleteToNextWordBoundaryIntent(forward: true),
-    SingleActivator(LogicalKeyboardKey.delete, alt: true): DeleteToLineBreakIntent(forward: true),
+    SingleActivator(LogicalKeyboardKey.backspace, shift: null): DeleteCharacterIntent(forward: false),
+    SingleActivator(LogicalKeyboardKey.backspace, control: true, shift: null): DeleteToNextWordBoundaryIntent(forward: false),
+    SingleActivator(LogicalKeyboardKey.backspace, alt: true, shift: null): DeleteToLineBreakIntent(forward: false),
+    SingleActivator(LogicalKeyboardKey.delete, shift: null): DeleteCharacterIntent(forward: true),
+    SingleActivator(LogicalKeyboardKey.delete, control: true, shift: null): DeleteToNextWordBoundaryIntent(forward: true),
+    SingleActivator(LogicalKeyboardKey.delete, alt: true, shift: null): DeleteToLineBreakIntent(forward: true),
 
     // Arrow: Move Selection.
     SingleActivator(LogicalKeyboardKey.arrowLeft): ExtendSelectionByCharacterIntent(forward: false, collapseSelection: true),
@@ -210,18 +210,14 @@ class DefaultTextEditingShortcuts extends Shortcuts {
   //   * Meta + C
   //   * Meta + V
   //   * Meta + A
-  //   * Meta + arrow down
-  //   * Meta + arrow left
-  //   * Meta + arrow right
-  //   * Meta + arrow up
-  //   * Meta + shift + arrow down
-  //   * Meta + shift + arrow left
-  //   * Meta + shift + arrow right
-  //   * Meta + shift + arrow up
+  //   * Meta + shift? + arrow down
+  //   * Meta + shift? + arrow left
+  //   * Meta + shift? + arrow right
+  //   * Meta + shift? + arrow up
   //   * Shift + end
   //   * Shift + home
-  //   * Meta + delete
-  //   * Meta + backspace
+  //   * Meta + shift? + delete
+  //   * Meta + shift? + backspace
   static const Map<ShortcutActivator, Intent> _androidShortcuts = _commonShortcuts;
 
   static const Map<ShortcutActivator, Intent> _fuchsiaShortcuts = _androidShortcuts;
@@ -234,18 +230,14 @@ class DefaultTextEditingShortcuts extends Shortcuts {
   //   * Meta + C
   //   * Meta + V
   //   * Meta + A
-  //   * Meta + arrow down
-  //   * Meta + arrow left
-  //   * Meta + arrow right
-  //   * Meta + arrow up
-  //   * Meta + shift + arrow down
-  //   * Meta + shift + arrow left
-  //   * Meta + shift + arrow right
-  //   * Meta + shift + arrow up
+  //   * Meta + shift? + arrow down
+  //   * Meta + shift? + arrow left
+  //   * Meta + shift? + arrow right
+  //   * Meta + shift? + arrow up
   //   * Shift + end
   //   * Shift + home
-  //   * Meta + delete
-  //   * Meta + backspace
+  //   * Meta + shift? + delete
+  //   * Meta + shift? + backspace
   static const Map<ShortcutActivator, Intent> _iOSShortcuts = _commonShortcuts;
 
   static const Map<ShortcutActivator, Intent> _linuxShortcuts = <ShortcutActivator, Intent>{
@@ -256,36 +248,30 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     SingleActivator(LogicalKeyboardKey.end, shift: true): ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: false),
     // The following key combinations have no effect on text editing on this
     // platform:
-    //   * Control + end
-    //   * Control + home
-    //   * Control + shift + end
-    //   * Control + shift + home
+    //   * Control + shift? + end
+    //   * Control + shift? + home
     //   * Meta + X
     //   * Meta + C
     //   * Meta + V
     //   * Meta + A
-    //   * Meta + arrow down
-    //   * Meta + arrow left
-    //   * Meta + arrow right
-    //   * Meta + arrow up
-    //   * Meta + shift + arrow down
-    //   * Meta + shift + arrow left
-    //   * Meta + shift + arrow right
-    //   * Meta + shift + arrow up
-    //   * Meta + delete
-    //   * Meta + backspace
+    //   * Meta + shift? + arrow down
+    //   * Meta + shift? + arrow left
+    //   * Meta + shift? + arrow right
+    //   * Meta + shift? + arrow up
+    //   * Meta + shift? + delete
+    //   * Meta + shift? + backspace
   };
 
   // macOS document shortcuts: https://support.apple.com/en-us/HT201236.
   // The macOS shortcuts uses different word/line modifiers than most other
   // platforms.
   static const Map<ShortcutActivator, Intent> _macShortcuts = <ShortcutActivator, Intent>{
-    SingleActivator(LogicalKeyboardKey.backspace): DeleteCharacterIntent(forward: false),
-    SingleActivator(LogicalKeyboardKey.backspace, alt: true): DeleteToNextWordBoundaryIntent(forward: false),
-    SingleActivator(LogicalKeyboardKey.backspace, meta: true): DeleteToLineBreakIntent(forward: false),
-    SingleActivator(LogicalKeyboardKey.delete): DeleteCharacterIntent(forward: true),
-    SingleActivator(LogicalKeyboardKey.delete, alt: true): DeleteToNextWordBoundaryIntent(forward: true),
-    SingleActivator(LogicalKeyboardKey.delete, meta: true): DeleteToLineBreakIntent(forward: true),
+    SingleActivator(LogicalKeyboardKey.backspace, shift: null): DeleteCharacterIntent(forward: false),
+    SingleActivator(LogicalKeyboardKey.backspace, alt: true, shift: null): DeleteToNextWordBoundaryIntent(forward: false),
+    SingleActivator(LogicalKeyboardKey.backspace, meta: true, shift: null): DeleteToLineBreakIntent(forward: false),
+    SingleActivator(LogicalKeyboardKey.delete, shift: null): DeleteCharacterIntent(forward: true),
+    SingleActivator(LogicalKeyboardKey.delete, alt: true, shift: null): DeleteToNextWordBoundaryIntent(forward: true),
+    SingleActivator(LogicalKeyboardKey.delete, meta: true, shift: null): DeleteToLineBreakIntent(forward: true),
 
     SingleActivator(LogicalKeyboardKey.arrowLeft): ExtendSelectionByCharacterIntent(forward: false, collapseSelection: true),
     SingleActivator(LogicalKeyboardKey.arrowRight): ExtendSelectionByCharacterIntent(forward: true, collapseSelection: true),
@@ -329,10 +315,8 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     // platform:
     //   * End
     //   * Home
-    //   * Control + end
-    //   * Control + home
-    //   * Control + shift + end
-    //   * Control + shift + home
+    //   * Control + shift? + end
+    //   * Control + shift? + home
   };
 
   // The following key combinations have no effect on text editing on this
@@ -341,14 +325,10 @@ class DefaultTextEditingShortcuts extends Shortcuts {
   //   * Meta + C
   //   * Meta + V
   //   * Meta + A
-  //   * Meta + arrow down
-  //   * Meta + arrow left
-  //   * Meta + arrow right
-  //   * Meta + arrow up
-  //   * Meta + shift + arrow down
-  //   * Meta + shift + arrow left
-  //   * Meta + shift + arrow right
-  //   * Meta + shift + arrow up
+  //   * Meta + shift? + arrow down
+  //   * Meta + shift? + arrow left
+  //   * Meta + shift? + arrow right
+  //   * Meta + shift? + arrow up
   //   * Meta + delete
   //   * Meta + backspace
   static const Map<ShortcutActivator, Intent> _windowsShortcuts = <ShortcutActivator, Intent>{
@@ -366,14 +346,14 @@ class DefaultTextEditingShortcuts extends Shortcuts {
   // Web handles its text selection natively and doesn't use any of these
   // shortcuts in Flutter.
   static const Map<ShortcutActivator, Intent> _webShortcuts = <ShortcutActivator, Intent>{
-    SingleActivator(LogicalKeyboardKey.backspace): DoNothingAndStopPropagationTextIntent(),
-    SingleActivator(LogicalKeyboardKey.delete): DoNothingAndStopPropagationTextIntent(),
-    SingleActivator(LogicalKeyboardKey.backspace, alt: true): DoNothingAndStopPropagationTextIntent(),
-    SingleActivator(LogicalKeyboardKey.delete, alt: true): DoNothingAndStopPropagationTextIntent(),
-    SingleActivator(LogicalKeyboardKey.backspace, control: true): DoNothingAndStopPropagationTextIntent(),
-    SingleActivator(LogicalKeyboardKey.delete, control: true): DoNothingAndStopPropagationTextIntent(),
-    SingleActivator(LogicalKeyboardKey.backspace, meta: true): DoNothingAndStopPropagationTextIntent(),
-    SingleActivator(LogicalKeyboardKey.delete, meta: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.backspace, shift: null): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.delete, shift: null): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.backspace, alt: true, shift: null): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.delete, alt: true, shift: null): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.backspace, control: true, shift: null): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.delete, control: true, shift: null): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.backspace, meta: true, shift: null): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.delete, meta: true, shift: null): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowDown, alt: true): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowLeft, alt: true): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowRight, alt: true): DoNothingAndStopPropagationTextIntent(),

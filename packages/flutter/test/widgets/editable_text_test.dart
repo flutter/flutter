@@ -5029,6 +5029,50 @@ void main() {
       reason: 'on $platform',
     );
     expect(controller.text, isEmpty, reason: 'on $platform');
+
+    controller.text = 'abc';
+    controller.selection = const TextSelection(baseOffset: 2, extentOffset: 2);
+
+    // Backspace
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.backspace,
+      ],
+      targetPlatform: defaultTargetPlatform,
+    );
+    expect(
+      selection,
+      equals(
+        const TextSelection(
+          baseOffset: 1,
+          extentOffset: 1,
+        ),
+      ),
+      reason: 'on $platform',
+    );
+    expect(controller.text, 'ac', reason: 'on $platform');
+
+    // Shift-backspace (same as backspace)
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.backspace,
+      ],
+      shift: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+    expect(
+      selection,
+      equals(
+        const TextSelection(
+          baseOffset: 0,
+          extentOffset: 0,
+        ),
+      ),
+      reason: 'on $platform',
+    );
+    expect(controller.text, 'c', reason: 'on $platform');
   }
 
   testWidgets('keyboard text selection works (RawKeyEvent)', (WidgetTester tester) async {
@@ -8244,7 +8288,7 @@ void main() {
       await sendKeys(
         tester,
         <LogicalKeyboardKey>[singleActivator.trigger],
-        shortcutModifier: singleActivator.control,
+        shortcutModifier: singleActivator.control != false,
         targetPlatform: defaultTargetPlatform,
       );
       expect(controller.selection.isCollapsed, isTrue);
