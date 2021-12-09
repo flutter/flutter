@@ -44,7 +44,7 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
   @NonNull private InputTarget inputTarget = new InputTarget(InputTarget.Type.NO_TARGET, 0);
   @Nullable private TextInputChannel.Configuration configuration;
   @Nullable private SparseArray<TextInputChannel.Configuration> mAutofillConfigurations;
-  @Nullable private ListenableEditingState mEditable;
+  @NonNull private ListenableEditingState mEditable;
   private boolean mRestartInputPending;
   @Nullable private InputConnection lastInputConnection;
   @NonNull private PlatformViewsController platformViewsController;
@@ -66,6 +66,8 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
       @NonNull TextInputChannel textInputChannel,
       @NonNull PlatformViewsController platformViewsController) {
     mView = view;
+    // Create a default object.
+    mEditable = new ListenableEditingState(null, mView);
     mImm = (InputMethodManager) view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
       afm = view.getContext().getSystemService(AutofillManager.class);
@@ -218,9 +220,7 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
     platformViewsController.detachTextInputPlugin();
     textInputChannel.setTextInputMethodHandler(null);
     notifyViewExited();
-    if (mEditable != null) {
-      mEditable.removeEditingStateListener(this);
-    }
+    mEditable.removeEditingStateListener(this);
     if (imeSyncCallback != null) {
       imeSyncCallback.remove();
     }
@@ -415,9 +415,7 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
       inputTarget = new InputTarget(InputTarget.Type.NO_TARGET, client);
     }
 
-    if (mEditable != null) {
-      mEditable.removeEditingStateListener(this);
-    }
+    mEditable.removeEditingStateListener(this);
     mEditable =
         new ListenableEditingState(
             configuration.autofill != null ? configuration.autofill.editState : null, mView);
