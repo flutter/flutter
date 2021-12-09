@@ -1,4 +1,4 @@
-Signature: ed0a749edc5ed03d1dc6ecf2c5df58f2
+Signature: 498c8f68b330828cb3efd1332df31f02
 
 UNUSED LICENSES:
 
@@ -3431,7 +3431,6 @@ FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_sync/include/lib/fidl/cpp/internal
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_sync/internal/message_sender.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/fit-promise/barrier.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/fit-promise/include/lib/fpromise/barrier.h
-FILE: ../../../fuchsia/sdk/linux/pkg/fit-promise/include/lib/fpromise/in_place_internal.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/constructors_internal.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/storage_internal.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/utility_internal.h
