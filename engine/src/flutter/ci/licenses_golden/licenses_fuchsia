@@ -1,4 +1,4 @@
-Signature: 498c8f68b330828cb3efd1332df31f02
+Signature: 62d184011610c4143f62ff6478d792f3
 
 UNUSED LICENSES:
 
@@ -2749,6 +2749,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.kernel/info-resource.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.kernel/ioport-resource.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.kernel/irq-resource.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.kernel/mmio-resource.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.kernel/power-resource.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.kernel/smc-resource.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.kernel/vmex-resource.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.legacymetrics/event.fidl
