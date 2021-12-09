@@ -179,11 +179,8 @@ LRESULT WindowWin32::OnGetObject(UINT const message,
 
   gfx::NativeViewAccessible root_view = GetNativeViewAccessible();
   if (is_uia_request && root_view) {
-    Microsoft::WRL::ComPtr<IRawElementProviderSimple> root;
-    root_view->QueryInterface(IID_PPV_ARGS(&root));
-    LRESULT lresult =
-        UiaReturnRawElementProvider(window_handle_, wparam, lparam, root.Get());
-    return lresult;
+    // TODO(cbracken): https://github.com/flutter/flutter/issues/94782
+    // Implement when we adopt UIA support.
   } else if (is_msaa_request && root_view) {
     // Return the IAccessible for the root view.
     Microsoft::WRL::ComPtr<IAccessible> root(root_view);

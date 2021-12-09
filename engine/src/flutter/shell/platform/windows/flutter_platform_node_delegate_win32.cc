@@ -77,4 +77,19 @@ gfx::Rect FlutterPlatformNodeDelegateWin32::GetBoundsRect(
                    extent.y - origin.y);
 }
 
+void FlutterPlatformNodeDelegateWin32::DispatchWinAccessibilityEvent(
+    DWORD event_type) {
+  FlutterWindowsView* view = engine_->view();
+  if (!view) {
+    return;
+  }
+  HWND hwnd = view->GetPlatformWindow();
+  if (!hwnd) {
+    return;
+  }
+  assert(ax_platform_node_);
+  ::NotifyWinEvent(event_type, hwnd, OBJID_CLIENT,
+                   -ax_platform_node_->GetUniqueId());
+}
+
 }  // namespace flutter

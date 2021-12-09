@@ -6,6 +6,8 @@
 #define FLUTTER_SHELL_PLATFORM_WINDOWS_ACCESSIBILITY_BRIDGE_DELEGATE_H_
 
 #include "flutter/shell/platform/common/accessibility_bridge.h"
+
+#include "flutter/shell/platform/windows/flutter_platform_node_delegate_win32.h"
 #include "flutter/shell/platform/windows/flutter_windows_engine.h"
 
 namespace flutter {
@@ -37,6 +39,12 @@ class AccessibilityBridgeDelegateWin32
   // |AccessibilityBridge::AccessibilityBridgeDelegate|
   std::shared_ptr<FlutterPlatformNodeDelegate>
   CreateFlutterPlatformNodeDelegate() override;
+
+  // Dispatches a Windows accessibility event of the specified type, generated
+  // by the accessibility node associated with the specified semantics node.
+  virtual void DispatchWinAccessibilityEvent(
+      std::shared_ptr<FlutterPlatformNodeDelegateWin32> node_delegate,
+      DWORD event_type);
 
  private:
   FlutterWindowsEngine* engine_;

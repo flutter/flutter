@@ -40,6 +40,11 @@ class FlutterPlatformNodeDelegateWin32 : public FlutterPlatformNodeDelegate {
 
   const ui::AXUniqueId& GetUniqueId() const override { return unique_id_; }
 
+  // Dispatches a Windows accessibility event of the specified type, generated
+  // by the accessibility node associated with this object. This is a
+  // convenience wrapper around |NotifyWinEvent|.
+  virtual void DispatchWinAccessibilityEvent(DWORD event_type);
+
  private:
   ui::AXPlatformNode* ax_platform_node_;
   FlutterWindowsEngine* engine_;
