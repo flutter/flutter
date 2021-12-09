@@ -232,8 +232,71 @@ static PathBuilder::RoundingRadii ToRoundingRadii(const SkRRect& rrect) {
 }
 
 static Path ToPath(const SkPath& path) {
-  UNIMPLEMENTED;
-  return Path{};
+  auto iterator = SkPath::Iter(path, false);
+
+  struct PathData {
+    union {
+      SkPoint points[4];
+    };
+  };
+
+  PathBuilder builder;
+  PathData data;
+  auto verb = SkPath::Verb::kDone_Verb;
+  do {
+    verb = iterator.next(data.points);
+    switch (verb) {
+      case SkPath::kMove_Verb:
+        builder.MoveTo(ToPoint(data.points[0]));
+        break;
+      case SkPath::kLine_Verb:
+        builder.AddLine(ToPoint(data.points[0]), ToPoint(data.points[1]));
+        break;
+      case SkPath::kQuad_Verb:
+        builder.AddQuadraticCurve(ToPoint(data.points[0]),  // p1
+                                  ToPoint(data.points[1]),  // cp
+                                  ToPoint(data.points[2])   // p2
+        );
+        break;
+      case SkPath::kConic_Verb: {
+        constexpr auto kPow2 = 1;  // Only works for sweeps up to 90 degrees.
+        constexpr auto kQuadCount = 1 + (2 * (1 << kPow2));
+        SkPoint points[kQuadCount];
+        const auto curve_count =
+            SkPath::ConvertConicToQuads(data.points[0],          //
+                                        data.points[1],          //
+                                        data.points[2],          //
+                                        iterator.conicWeight(),  //
+                                        points,                  //
+                                        kPow2                    //
+            );
+
+        for (int curve_index = 0, point_index = 0;  //
+             curve_index < curve_count;             //
+             curve_index++, point_index += 2        //
+        ) {
+          builder.AddQuadraticCurve(ToPoint(points[point_index + 0]),  // p1
+                                    ToPoint(points[point_index + 1]),  // cp
+                                    ToPoint(points[point_index + 2])   // p2
+          );
+        }
+      } break;
+      case SkPath::kCubic_Verb:
+        builder.AddCubicCurve(ToPoint(data.points[0]),  // p1
+                              ToPoint(data.points[1]),  // cp1
+                              ToPoint(data.points[2]),  // cp2
+                              ToPoint(data.points[3])   // p2
+        );
+        break;
+      case SkPath::kClose_Verb:
+        builder.Close();
+        break;
+      case SkPath::kDone_Verb:
+        break;
+    }
+  } while (verb != SkPath::Verb::kDone_Verb);
+  // TODO: Convert fill types.
+  return builder.TakePath();
 }
 
 static Path ToPath(const SkRRect& rrect) {
