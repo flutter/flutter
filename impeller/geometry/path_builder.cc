@@ -150,6 +150,19 @@ PathBuilder& PathBuilder::SmoothCubicCurveTo(Point point,
   return *this;
 }
 
+PathBuilder& PathBuilder::AddQuadraticCurve(Point p1, Point cp, Point p2) {
+  prototype_.AddQuadraticComponent(p1, cp, p2);
+  return *this;
+}
+
+PathBuilder& PathBuilder::AddCubicCurve(Point p1,
+                                        Point cp1,
+                                        Point cp2,
+                                        Point p2) {
+  prototype_.AddCubicComponent(p1, cp1, cp2, p2);
+  return *this;
+}
+
 PathBuilder& PathBuilder::AddRect(Rect rect) {
   current_ = rect.origin;
 
