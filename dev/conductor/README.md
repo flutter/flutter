@@ -104,15 +104,19 @@ $REVISION`) and resolve the merge conflict in their checkout.
 ### Publish Version
 
 This step will add a version git tag to the final Framework commit and push it
-to the upstream repository.
+to the upstream repository. The presence of a tag affects what the flutter CLI
+tool reports the current version is.
 
 ### Publish Channel
 
 This step will push the Framework candidate branch to the upstream release
-branch.
+branch (e.g. the `stable` branch). Once this push happens upstream, the release
+has officially been published, and the code will be available to existing
+Flutter users via `flutter upgrade`.
 
 ### Verify Release
 
 For the final step, the user must manually verify that packaging builds have
-finished successfully. The conductor will produce links to the dashboards for
-monitoring CI builds.
+finished successfully. The SDK compressed archives will not be available from
+the website until the packaging build has finished. The conductor will produce
+links to the dashboards for monitoring CI builds.
