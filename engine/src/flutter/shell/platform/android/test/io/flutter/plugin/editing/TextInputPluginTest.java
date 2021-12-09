@@ -184,6 +184,25 @@ public class TextInputPluginTest {
   }
 
   @Test
+  public void setTextInputEditingState_willNotThrowWithoutSetTextInputClient() {
+    // Initialize a general TextInputPlugin.
+    InputMethodSubtype inputMethodSubtype = mock(InputMethodSubtype.class);
+    TestImm testImm =
+        Shadow.extract(
+            RuntimeEnvironment.application.getSystemService(Context.INPUT_METHOD_SERVICE));
+    testImm.setCurrentInputMethodSubtype(inputMethodSubtype);
+    View testView = new View(RuntimeEnvironment.application);
+    TextInputChannel textInputChannel = spy(new TextInputChannel(mock(DartExecutor.class)));
+    TextInputPlugin textInputPlugin =
+        new TextInputPlugin(testView, textInputChannel, mock(PlatformViewsController.class));
+
+    // Here's no textInputPlugin.setTextInputClient()
+    textInputPlugin.setTextInputEditingState(
+        testView, new TextInputChannel.TextEditState("initial input from framework", 0, 0, -1, -1));
+    assertTrue(textInputPlugin.getEditable().toString().equals("initial input from framework"));
+  }
+
+  @Test
   public void setTextInputEditingState_doesNotInvokeUpdateEditingStateWithDeltas() {
     // Initialize a general TextInputPlugin.
     InputMethodSubtype inputMethodSubtype = mock(InputMethodSubtype.class);

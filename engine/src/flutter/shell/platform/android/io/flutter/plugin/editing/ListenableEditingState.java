@@ -9,6 +9,8 @@ import android.text.Selection;
 import android.text.SpannableStringBuilder;
 import android.view.View;
 import android.view.inputmethod.BaseInputConnection;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import io.flutter.Log;
 import io.flutter.embedding.engine.systemchannels.TextInputChannel;
 import java.util.ArrayList;
@@ -55,10 +57,11 @@ class ListenableEditingState extends SpannableStringBuilder {
 
   // The View is only used for creating a dummy BaseInputConnection for setComposingRegion. The View
   // needs to have a non-null Context.
-  public ListenableEditingState(TextInputChannel.TextEditState initalState, View view) {
+  public ListenableEditingState(
+      @Nullable TextInputChannel.TextEditState initialState, @NonNull View view) {
     super();
-    if (initalState != null) {
-      setEditingState(initalState);
+    if (initialState != null) {
+      setEditingState(initialState);
     }
 
     Editable self = this;
