@@ -3,3 +3,4 @@ cmdline-tools;latest:cmdline-tools
 build-tools;31.0.0:build-tools
 platform-tools:platform-tools
 tools:tools
+ndk-bundle:ndk-bundle

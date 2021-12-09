@@ -478,17 +478,6 @@ deps = {
     'dep_type': 'cipd'
   },
 
-  'src/third_party/android_tools/ndk': {
-     'packages': [
-       {
-        'package': 'flutter/android/ndk/${{platform}}',
-        'version': 'version:r22.0.7026061'
-       }
-     ],
-     'condition': 'download_android_deps',
-     'dep_type': 'cipd',
-   },
-
    'src/third_party/android_tools/google-java-format': {
      'packages': [
        {
@@ -503,27 +492,16 @@ deps = {
      'dep_type': 'cipd',
    },
 
-  'src/third_party/android_tools/sdk': {
+  'src/third_party/android_tools': {
      'packages': [
        {
         'package': 'flutter/android/sdk/all/${{platform}}',
-        'version': 'version:31v5'
+        'version': 'version:31v8'
        }
      ],
      'condition': 'download_android_deps',
      'dep_type': 'cipd',
    },
-
-  'src/third_party/android_tools/sdk/licenses': {
-     'packages': [
-       {
-        'package': 'flutter/android/sdk/licenses',
-        'version': 'latest',
-       }
-     ],
-    'condition': 'download_android_deps',
-    'dep_type': 'cipd',
-  },
 
   'src/third_party/android_embedding_dependencies': {
      'packages': [

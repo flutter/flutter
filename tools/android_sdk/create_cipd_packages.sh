@@ -3,7 +3,7 @@
 # This script requires depot_tools to be on path.
 
 print_usage () {
-  echo "Usage: create_sdk_cipd_united_package.sh <VERSION_TAG> [PATH_TO_SDK_DIR]"
+  echo "Usage: create_cipd_united_package.sh <VERSION_TAG> [PATH_TO_SDK_DIR]"
   echo "  where:"
   echo "    - VERSION_TAG is the tag of the cipd packages, e.g. 28r6 or 31v1"
   echo "    - PATH_TO_SDK_DIR is the path to the sdk folder. If omitted, this defaults to"
@@ -76,10 +76,11 @@ temp_dir=`mktemp -d -t android_sdk`
 
 for platform in "${platforms[@]}"; do
   sdk_root="$temp_dir/sdk_$platform"
-  upload_dir="$sdk_root/upload"
+  upload_dir="$temp_dir/upload_$platform"
   echo "Creating temporary working directory for $platform: $sdk_root"
   mkdir $sdk_root
   mkdir $upload_dir
+  mkdir $upload_dir/sdk
   export REPO_OS_OVERRIDE=$platform
 
   # Download all the packages with sdkmanager.
@@ -93,9 +94,17 @@ for platform in "${platforms[@]}"; do
     # for upload. sdkmanager creates extra files that we don't need.
     array_length=${#split[@]}
     for (( i=1; i<${array_length}; i++ )); do
-      cp -r "$sdk_root/${split[$i]}" "$upload_dir"
+      cp -r "$sdk_root/${split[$i]}" "$upload_dir/sdk"
     done
   done
+
+  # Special treatment for NDK to move to expected directory.
+  mv $upload_dir/sdk/ndk-bundle $upload_dir
+  mv $upload_dir/ndk-bundle $upload_dir/ndk
+
+  # Accept all licenses to ensure they are generated and uploaded.
+  yes "y" | $sdkmanager_path --licenses --sdk_root=$sdk_root
+  cp -r "$sdk_root/licenses" "$upload_dir/sdk"
 
   # Mac uses a different sdkmanager name than the platform name used in gn.
   cipd_name="$platform-amd64"
@@ -106,5 +115,6 @@ for platform in "${platforms[@]}"; do
   cipd create -in $upload_dir -name "flutter/android/sdk/all/$cipd_name" -install-mode copy -tag version:$version_tag
 
   rm -rf $sdk_root
+  rm -rf $upload_dir
 done
 rm -rf $temp_dir
