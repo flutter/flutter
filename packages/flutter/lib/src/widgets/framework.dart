@@ -3480,8 +3480,8 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     // never updates (the forgotten children are not removed from the tree
     // until the call to update happens)
     assert(() {
-      _debugForgottenChildrenWithGlobalKey.forEach(_debugRemoveGlobalKeyReservation);
-      _debugForgottenChildrenWithGlobalKey.clear();
+      _debugForgottenChildrenWithGlobalKey!.forEach(_debugRemoveGlobalKeyReservation);
+      _debugForgottenChildrenWithGlobalKey!.clear();
       return true;
     }());
     _widget = newWidget;
@@ -3687,7 +3687,8 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
 
   // The children that have been forgotten by forgetChild. This will be used in
   // [update] to remove the global key reservations of forgotten children.
-  final Set<Element> _debugForgottenChildrenWithGlobalKey = HashSet<Element>();
+  // Initialze to null in profile/release mode to avoid allocating unused sets
+  final Set<Element>? _debugForgottenChildrenWithGlobalKey = kDebugMode ? HashSet<Element>() : null;
 
   /// Remove the given child from the element's child list, in preparation for
   /// the child being reused elsewhere in the element tree.
@@ -3713,7 +3714,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     // key duplication that we need to catch.
     assert(() {
       if (child.widget.key is GlobalKey)
-        _debugForgottenChildrenWithGlobalKey.add(child);
+        _debugForgottenChildrenWithGlobalKey!.add(child);
       return true;
     }());
   }
