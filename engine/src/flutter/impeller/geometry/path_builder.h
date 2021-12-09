@@ -56,6 +56,10 @@ class PathBuilder {
 
   PathBuilder& AddLine(const Point& p1, const Point& p2);
 
+  PathBuilder& AddQuadraticCurve(Point p1, Point cp, Point p2);
+
+  PathBuilder& AddCubicCurve(Point p1, Point cp1, Point cp2, Point p2);
+
   struct RoundingRadii {
     Point top_left;
     Point bottom_left;
