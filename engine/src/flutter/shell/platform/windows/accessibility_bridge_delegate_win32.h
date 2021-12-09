@@ -46,6 +46,11 @@ class AccessibilityBridgeDelegateWin32
       std::shared_ptr<FlutterPlatformNodeDelegateWin32> node_delegate,
       DWORD event_type);
 
+  // Sets the accessibility focus to the accessibility node associated with the
+  // specified semantics node.
+  virtual void SetFocus(
+      std::shared_ptr<FlutterPlatformNodeDelegateWin32> node_delegate);
+
  private:
   FlutterWindowsEngine* engine_;
 };

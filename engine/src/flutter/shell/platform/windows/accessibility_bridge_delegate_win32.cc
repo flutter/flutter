@@ -39,6 +39,7 @@ void AccessibilityBridgeDelegateWin32::OnAccessibilityEvent(
       break;
     case ui::AXEventGenerator::Event::FOCUS_CHANGED:
       DispatchWinAccessibilityEvent(win_delegate, EVENT_OBJECT_FOCUS);
+      SetFocus(win_delegate);
       break;
     case ui::AXEventGenerator::Event::IGNORED_CHANGED:
       if (ax_node->IsIgnored()) {
@@ -150,6 +151,11 @@ void AccessibilityBridgeDelegateWin32::DispatchWinAccessibilityEvent(
     std::shared_ptr<FlutterPlatformNodeDelegateWin32> node_delegate,
     DWORD event_type) {
   node_delegate->DispatchWinAccessibilityEvent(event_type);
+}
+
+void AccessibilityBridgeDelegateWin32::SetFocus(
+    std::shared_ptr<FlutterPlatformNodeDelegateWin32> node_delegate) {
+  node_delegate->SetFocus();
 }
 
 }  // namespace flutter

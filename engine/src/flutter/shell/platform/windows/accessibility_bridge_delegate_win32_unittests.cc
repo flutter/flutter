@@ -45,13 +45,25 @@ class AccessibilityBridgeDelegateWin32Spy
     dispatched_events_.push_back({node_delegate, event_type});
   }
 
-  void Reset() { dispatched_events_.clear(); }
+  void SetFocus(std::shared_ptr<FlutterPlatformNodeDelegateWin32> node_delegate)
+      override {
+    focused_nodes_.push_back(node_delegate->GetAXNode()->id());
+  }
+
+  void Reset() {
+    dispatched_events_.clear();
+    focused_nodes_.clear();
+  }
+
   const std::vector<MsaaEvent>& dispatched_events() const {
     return dispatched_events_;
-  };
+  }
+
+  const std::vector<int32_t> focused_nodes() const { return focused_nodes_; }
 
  private:
   std::vector<MsaaEvent> dispatched_events_;
+  std::vector<int32_t> focused_nodes_;
 };
 
 // Returns an engine instance configured with dummy project path values, and
@@ -203,8 +215,25 @@ TEST(AccessibilityBridgeDelegateWin32, OnAccessibilityEventChildrenChanged) {
 }
 
 TEST(AccessibilityBridgeDelegateWin32, OnAccessibilityEventFocusChanged) {
-  ExpectWinEventFromAXEvent(1, ui::AXEventGenerator::Event::FOCUS_CHANGED,
-                            EVENT_OBJECT_FOCUS);
+  auto window_binding_handler =
+      std::make_unique<::testing::NiceMock<MockWindowBindingHandler>>();
+  FlutterWindowsView view(std::move(window_binding_handler));
+  view.SetEngine(GetTestEngine());
+  view.OnUpdateSemanticsEnabled(true);
+
+  auto bridge = view.GetEngine()->accessibility_bridge().lock();
+  PopulateAXTree(bridge);
+
+  AccessibilityBridgeDelegateWin32Spy spy(view.GetEngine());
+  spy.OnAccessibilityEvent({AXNodeFromID(bridge, 1),
+                            {ui::AXEventGenerator::Event::FOCUS_CHANGED,
+                             ax::mojom::EventFrom::kNone,
+                             {}}});
+  ASSERT_EQ(spy.dispatched_events().size(), 1);
+  EXPECT_EQ(spy.dispatched_events()[0].event_type, EVENT_OBJECT_FOCUS);
+
+  ASSERT_EQ(spy.focused_nodes().size(), 1);
+  EXPECT_EQ(spy.focused_nodes()[0], 1);
 }
 
 TEST(AccessibilityBridgeDelegateWin32, OnAccessibilityEventIgnoredChanged) {

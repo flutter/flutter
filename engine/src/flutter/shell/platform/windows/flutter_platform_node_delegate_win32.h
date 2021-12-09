@@ -45,6 +45,10 @@ class FlutterPlatformNodeDelegateWin32 : public FlutterPlatformNodeDelegate {
   // convenience wrapper around |NotifyWinEvent|.
   virtual void DispatchWinAccessibilityEvent(DWORD event_type);
 
+  // Sets the accessibility focus to the accessibility node associated with
+  // this object.
+  void SetFocus();
+
  private:
   ui::AXPlatformNode* ax_platform_node_;
   FlutterWindowsEngine* engine_;

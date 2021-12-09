@@ -92,4 +92,11 @@ void FlutterPlatformNodeDelegateWin32::DispatchWinAccessibilityEvent(
                    -ax_platform_node_->GetUniqueId());
 }
 
+void FlutterPlatformNodeDelegateWin32::SetFocus() {
+  VARIANT varchild{};
+  varchild.vt = VT_I4;
+  varchild.lVal = CHILDID_SELF;
+  GetNativeViewAccessible()->accSelect(SELFLAG_TAKEFOCUS, varchild);
+}
+
 }  // namespace flutter
