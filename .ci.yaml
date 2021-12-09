@@ -3215,6 +3215,7 @@ targets:
 
   - name: Mac_ios hot_mode_dev_cycle_macos_target__benchmark
     recipe: devicelab/devicelab_drone
+    presubmit: false # https://github.com/flutter/flutter/issues/94946
     timeout: 60
     properties:
       tags: >
