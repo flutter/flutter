@@ -1,4 +1,4 @@
-Signature: 333150dded0d57e5d7f3cf7ad26303bb
+Signature: 5be52b0f34fe8fdcbdee674ac06cf0f9
 
 UNUSED LICENSES:
 
@@ -4266,8 +4266,6 @@ FILE: ../../../third_party/skia/src/core/SkColorFilterPriv.h
 FILE: ../../../third_party/skia/src/core/SkCompressedDataUtils.cpp
 FILE: ../../../third_party/skia/src/core/SkCompressedDataUtils.h
 FILE: ../../../third_party/skia/src/core/SkM44.cpp
-FILE: ../../../third_party/skia/src/core/SkMarkerStack.cpp
-FILE: ../../../third_party/skia/src/core/SkMarkerStack.h
 FILE: ../../../third_party/skia/src/core/SkMipmapBuilder.h
 FILE: ../../../third_party/skia/src/core/SkOpts_erms.cpp
 FILE: ../../../third_party/skia/src/core/SkSamplingPriv.h
