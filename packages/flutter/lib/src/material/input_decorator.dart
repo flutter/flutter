@@ -2598,28 +2598,65 @@ class InputDecoration {
   /// Only one of [label] and [labelText] can be specified.
   final String? labelText;
 
-  /// The style to use for the [labelText] when the label is on top of the
-  /// input field.
+  /// {@template flutter.material.inputDecoration.labelStyle}
+  /// The style to use for [InputDecoration.labelText] when the label is on top
+  /// of the input field.
   ///
   /// If [labelStyle] is a [MaterialStateTextStyle], then the effective
   /// text style can depend on the [MaterialState.focused] state, i.e.
   /// if the [TextField] is focused or not.
   ///
-  /// When the [labelText] is above (i.e., vertically adjacent to) the input
-  /// field, the text uses the [floatingLabelStyle] instead.
+  /// When the [InputDecoration.labelText] is above (i.e., vertically adjacent to)
+  /// the input field, the text uses the [floatingLabelStyle] instead.
   ///
   /// If null, defaults to a value derived from the base [TextStyle] for the
   /// input field and the current [Theme].
+  ///
+  /// Note that if you specify this style it will override the default behavior
+  /// of [InputDecoration] that changes the color of the label to the
+  /// [InputDecoration.errorStyle] color or [ThemeData.errorColor].
+  ///
+  /// {@tool dartpad}
+  /// It's possible to override the label style for just the error state, or
+  /// just the default state, or both.
+  ///
+  /// In this example the [labelStyle] is specified with a [MaterialStateProperty]
+  /// which resolves to a text style whose color depends on the decorator's
+  /// error state.
+  ///
+  /// ** See code in examples/api/lib/material/input_decorator/input_decoration.label_style_error.0.dart **
+  /// {@end-tool}
+  /// {@endtemplate}
   final TextStyle? labelStyle;
 
-  /// The style to use for the [labelText] when the label is above (i.e.,
-  /// vertically adjacent to) the input field.
+  /// {@template flutter.material.inputDecoration.floatingLabelStyle}
+  /// The style to use for [InputDecoration.labelText] when the label is
+  /// above (i.e., vertically adjacent to) the input field.
+  ///
+  /// When the [InputDecoration.labelText] is on top of the input field, the
+  /// text uses the [labelStyle] instead.
   ///
   /// If [floatingLabelStyle] is a [MaterialStateTextStyle], then the effective
   /// text style can depend on the [MaterialState.focused] state, i.e.
   /// if the [TextField] is focused or not.
   ///
   /// If null, defaults to [labelStyle].
+  ///
+  /// Note that if you specify this style it will override the default behavior
+  /// of [InputDecoration] that changes the color of the label to the
+  /// [InputDecoration.errorStyle] color or [ThemeData.errorColor].
+  ///
+  /// {@tool dartpad}
+  /// It's possible to override the label style for just the error state, or
+  /// just the default state, or both.
+  ///
+  /// In this example the [floatingLabelStyle] is specified with a
+  /// [MaterialStateProperty] which resolves to a text style whose color depends
+  /// on the decorator's error state.
+  ///
+  /// ** See code in examples/api/lib/material/input_decorator/input_decoration.floating_label_style_error.0.dart **
+  /// {@end-tool}
+  /// {@endtemplate}
   final TextStyle? floatingLabelStyle;
 
   /// Text that provides context about the [InputDecorator.child]'s value, such
@@ -2696,10 +2733,18 @@ class InputDecoration {
   /// [TextFormField.validator], if that is not null.
   final String? errorText;
 
-  /// The style to use for the [errorText].
+  /// {@template flutter.material.inputDecoration.errorStyle}
+  /// The style to use for the [InputDecoration.errorText].
   ///
   /// If null, defaults of a value derived from the base [TextStyle] for the
   /// input field and the current [Theme].
+  ///
+  /// By default the color of style will be used by the label of
+  /// [InputDecoration] if [InputDecoration.errorText] is not null. See
+  /// [InputDecoration.labelStyle] or [InputDecoration.floatingLabelStyle] for
+  /// an example of how to replicate this behavior if you have specified either
+  /// style.
+  /// {@endtemplate}
   final TextStyle? errorStyle;
 
 
@@ -3680,31 +3725,10 @@ class InputDecorationTheme with Diagnosticable {
        assert(filled != null),
        assert(alignLabelWithHint != null);
 
-  /// The style to use for [InputDecoration.labelText] when the label is on top
-  /// of the input field.
-  ///
-  /// When the [InputDecoration.labelText] is floating above the input field,
-  /// the text uses the [floatingLabelStyle] instead.
-  ///
-  /// If [labelStyle] is a [MaterialStateTextStyle], then the effective
-  /// text style can depend on the [MaterialState.focused] state, i.e.
-  /// if the [TextField] is focused or not.
-  ///
-  /// If null, defaults to a value derived from the base [TextStyle] for the
-  /// input field and the current [Theme].
+  /// {@macro flutter.material.inputDecoration.labelStyle}
   final TextStyle? labelStyle;
 
-  /// The style to use for [InputDecoration.labelText] when the label is
-  /// above (i.e., vertically adjacent to) the input field.
-  ///
-  /// When the [InputDecoration.labelText] is on top of the input field, the
-  /// text uses the [labelStyle] instead.
-  ///
-  /// If [floatingLabelStyle] is a [MaterialStateTextStyle], then the effective
-  /// text style can depend on the [MaterialState.focused] state, i.e.
-  /// if the [TextField] is focused or not.
-  ///
-  /// If null, defaults to [labelStyle].
+  /// {@macro flutter.material.inputDecoration.floatingLabelStyle}
   final TextStyle? floatingLabelStyle;
 
   /// The style to use for [InputDecoration.helperText].
@@ -3742,10 +3766,7 @@ class InputDecorationTheme with Diagnosticable {
   /// input field and the current [Theme].
   final TextStyle? hintStyle;
 
-  /// The style to use for the [InputDecoration.errorText].
-  ///
-  /// If null, defaults of a value derived from the base [TextStyle] for the
-  /// input field and the current [Theme].
+  /// {@macro flutter.material.inputDecoration.errorStyle}
   final TextStyle? errorStyle;
 
   /// The maximum number of lines the [InputDecoration.errorText] can occupy.
