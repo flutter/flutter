@@ -71,9 +71,9 @@ const std::vector<std::pair<const char*, const char*>> GetInjectedServices() {
        "fuchsia-pkg://fuchsia.com/intl_property_manager#meta/"
        "intl_property_manager.cmx"},
       {"fuchsia.netstack.Netstack",
-       "fuchsia-pkg://fuchsia.com/netstack#meta/netstack.cmx"},
+       "fuchsia-pkg://fuchsia.com/network-legacy-deprecated#meta/netstack.cmx"},
       {"fuchsia.posix.socket.Provider",
-       "fuchsia-pkg://fuchsia.com/netstack#meta/netstack.cmx"},
+       "fuchsia-pkg://fuchsia.com/network-legacy-deprecated#meta/netstack.cmx"},
       {"fuchsia.tracing.provider.Registry",
        "fuchsia-pkg://fuchsia.com/trace_manager#meta/trace_manager.cmx"},
       {"fuchsia.ui.input.ImeService",
