@@ -1958,7 +1958,7 @@ void main() {
     );
   }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/74935 (broken assets not being reported on web)
 
-   testWidgets('Image.file throws a non-implemented error on web', (WidgetTester tester) async {
+  testWidgets('Image.file throws a non-implemented error on web', (WidgetTester tester) async {
     const String expectedError =
       'Image.file is not supported on Flutter Web. '
       'Consider using either Image.asset or Image.network instead.';

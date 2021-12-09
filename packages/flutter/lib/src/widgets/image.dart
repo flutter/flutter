@@ -467,9 +467,10 @@ class Image extends StatefulWidget {
   }) :
        // FileImage is not supported on Flutter Web therefore neither this method.
        assert(
-          !kIsWeb,
-          'Image.file is not supported on Flutter Web. '
-          'Consider using either Image.asset or Image.network instead.'),
+         !kIsWeb,
+         'Image.file is not supported on Flutter Web. '
+         'Consider using either Image.asset or Image.network instead.',
+        ),
        image = ResizeImage.resizeIfNeeded(cacheWidth, cacheHeight, FileImage(file, scale: scale)),
        loadingBuilder = null,
        assert(alignment != null),
