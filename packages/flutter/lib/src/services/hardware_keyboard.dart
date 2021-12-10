@@ -516,8 +516,10 @@ class HardwareKeyboard {
       } catch (exception, stack) {
         InformationCollector? collector;
         assert(() {
-          collector = () sync* {
-            yield DiagnosticsProperty<KeyEvent>('Event', event);
+          collector = () {
+            return <DiagnosticsNode>[
+              DiagnosticsProperty<KeyEvent>('Event', event),
+            ];
           };
           return true;
         }());
@@ -833,8 +835,10 @@ class KeyEventManager {
       } catch (exception, stack) {
         InformationCollector? collector;
         assert(() {
-          collector = () sync* {
-            yield DiagnosticsProperty<KeyMessage>('KeyMessage', message);
+          collector = () {
+            return <DiagnosticsNode>[
+              DiagnosticsProperty<KeyMessage>('KeyMessage', message),
+            ];
           };
           return true;
         }());

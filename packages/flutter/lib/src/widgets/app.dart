@@ -1472,10 +1472,12 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
   // of a particular LocalizationsDelegate.type is loaded so the
   // localizationsDelegate parameter can be used to override
   // WidgetsLocalizations.delegate.
-  Iterable<LocalizationsDelegate<dynamic>> get _localizationsDelegates sync* {
-    if (widget.localizationsDelegates != null)
-      yield* widget.localizationsDelegates!;
-    yield DefaultWidgetsLocalizations.delegate;
+  Iterable<LocalizationsDelegate<dynamic>> get _localizationsDelegates {
+    return <LocalizationsDelegate<dynamic>>[
+      if (widget.localizationsDelegates != null)
+        ...widget.localizationsDelegates!,
+      DefaultWidgetsLocalizations.delegate,
+    ];
   }
 
   // BUILDER
@@ -1496,32 +1498,34 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       FlutterError.reportError(FlutterErrorDetails(
         exception: "Warning: This application's locale, $appLocale, is not supported by all of its localization delegates.",
         library: 'widgets',
-        informationCollector: () sync* {
-          for (final Type unsupportedType in unsupportedTypes) {
-            yield ErrorDescription(
-              '• A $unsupportedType delegate that supports the $appLocale locale was not found.',
-            );
-          }
-          yield ErrorSpacer();
-          if (unsupportedTypes.length == 1 && unsupportedTypes.single.toString() == 'CupertinoLocalizations') {
-            // We previously explicitly avoided checking for this class so it's not uncommon for applications
-            // to have omitted importing the required delegate.
-            yield ErrorHint(
-              'If the application is built using GlobalMaterialLocalizations.delegate, consider using '
-              'GlobalMaterialLocalizations.delegates (plural) instead, as that will automatically declare '
-              'the appropriate Cupertino localizations.'
-            );
-            yield ErrorSpacer();
-          }
-          yield ErrorHint(
-            'The declared supported locales for this app are: ${widget.supportedLocales.join(", ")}'
-          );
-          yield ErrorSpacer();
-          yield ErrorDescription(
-            'See https://flutter.dev/tutorials/internationalization/ for more '
-            "information about configuring an app's locale, supportedLocales, "
-            'and localizationsDelegates parameters.',
-          );
+        informationCollector: () {
+          return <DiagnosticsNode>[
+            for (final Type unsupportedType in unsupportedTypes)
+              ErrorDescription(
+                '• A $unsupportedType delegate that supports the $appLocale locale was not found.',
+              ),
+            ErrorSpacer(),
+            if (unsupportedTypes.length == 1 && unsupportedTypes.single.toString() == 'CupertinoLocalizations')
+              // We previously explicitly avoided checking for this class so it's not uncommon for applications
+              // to have omitted importing the required delegate.
+              ...<DiagnosticsNode>[
+                ErrorHint(
+                  'If the application is built using GlobalMaterialLocalizations.delegate, consider using '
+                  'GlobalMaterialLocalizations.delegates (plural) instead, as that will automatically declare '
+                  'the appropriate Cupertino localizations.'
+                ),
+                ErrorSpacer(),
+              ],
+            ErrorHint(
+              'The declared supported locales for this app are: ${widget.supportedLocales.join(", ")}'
+            ),
+            ErrorSpacer(),
+            ErrorDescription(
+              'See https://flutter.dev/tutorials/internationalization/ for more '
+              "information about configuring an app's locale, supportedLocales, "
+              'and localizationsDelegates parameters.',
+            ),
+          ];
         },
       ));
       return true;

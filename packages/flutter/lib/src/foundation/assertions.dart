@@ -542,9 +542,11 @@ class FlutterErrorDetails with Diagnosticable {
   ///     FlutterError.reportError(FlutterErrorDetails(
   ///       exception: error,
   ///       stack: stack,
-  ///       informationCollector: () sync* {
-  ///         yield ErrorDescription('This happened while climbing the space elevator.');
-  ///         yield ErrorHint('The process ID is: $pid');
+  ///       informationCollector: () {
+  ///         return <DiagnosticsNode>[
+  ///           ErrorDescription('This happened while climbing the space elevator.'),
+  ///           ErrorHint('The process ID is: $pid'),
+  ///         ];
   ///       },
   ///     ));
   ///   }

@@ -141,12 +141,14 @@ mixin AnimationLocalListenersMixin {
     for (final VoidCallback listener in localListeners) {
       InformationCollector? collector;
       assert(() {
-        collector = () sync* {
-          yield DiagnosticsProperty<AnimationLocalListenersMixin>(
-            'The $runtimeType notifying listeners was',
-            this,
-            style: DiagnosticsTreeStyle.errorProperty,
-          );
+        collector = () {
+          return <DiagnosticsNode>[
+            DiagnosticsProperty<AnimationLocalListenersMixin>(
+              'The $runtimeType notifying listeners was',
+              this,
+              style: DiagnosticsTreeStyle.errorProperty,
+            ),
+          ];
         };
         return true;
       }());
@@ -234,12 +236,14 @@ mixin AnimationLocalStatusListenersMixin {
       } catch (exception, stack) {
         InformationCollector? collector;
         assert(() {
-          collector = () sync* {
-            yield DiagnosticsProperty<AnimationLocalStatusListenersMixin>(
-              'The $runtimeType notifying status listeners was',
-              this,
-              style: DiagnosticsTreeStyle.errorProperty,
-            );
+          collector = () {
+            return <DiagnosticsNode>[
+              DiagnosticsProperty<AnimationLocalStatusListenersMixin>(
+                'The $runtimeType notifying status listeners was',
+                this,
+                style: DiagnosticsTreeStyle.errorProperty,
+              ),
+            ];
           };
           return true;
         }());

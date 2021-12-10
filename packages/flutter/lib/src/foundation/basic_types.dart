@@ -112,19 +112,6 @@ class CachingIterable<E> extends IterableBase<E> {
   /// guaranteed that the underlying data set will only be walked
   /// once. If you have an [Iterable], you can pass its [iterator]
   /// field as the argument to this constructor.
-  ///
-  /// You can use a `sync*` function with this as follows:
-  ///
-  /// ```dart
-  /// Iterable<int> range(int start, int end) sync* {
-  ///   for (int index = start; index <= end; index += 1)
-  ///     yield index;
-  ///  }
-  ///
-  /// Iterable<int> i = CachingIterable<int>(range(1, 5).iterator);
-  /// print(i.length); // walks the list
-  /// print(i.length); // efficient
-  /// ```
   CachingIterable(this._prefillIterator);
 
   final Iterator<E> _prefillIterator;

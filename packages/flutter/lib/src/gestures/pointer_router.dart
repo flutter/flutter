@@ -95,10 +95,12 @@ class PointerRouter {
     } catch (exception, stack) {
       InformationCollector? collector;
       assert(() {
-        collector = () sync* {
-          yield DiagnosticsProperty<PointerRouter>('router', this, level: DiagnosticLevel.debug);
-          yield DiagnosticsProperty<PointerRoute>('route', route, level: DiagnosticLevel.debug);
-          yield DiagnosticsProperty<PointerEvent>('event', event, level: DiagnosticLevel.debug);
+        collector = () {
+          return <DiagnosticsNode>[
+            DiagnosticsProperty<PointerRouter>('router', this, level: DiagnosticLevel.debug),
+            DiagnosticsProperty<PointerRoute>('route', route, level: DiagnosticLevel.debug),
+            DiagnosticsProperty<PointerEvent>('event', event, level: DiagnosticLevel.debug),
+          ];
         };
         return true;
       }());

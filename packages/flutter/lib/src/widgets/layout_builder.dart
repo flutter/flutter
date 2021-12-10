@@ -127,8 +127,11 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
             ErrorDescription('building $widget'),
             e,
             stack,
-            informationCollector: () sync* {
-              yield DiagnosticsDebugCreator(DebugCreator(this));
+            informationCollector: () {
+              return <DiagnosticsNode>[
+                if (kDebugMode)
+                  DiagnosticsDebugCreator(DebugCreator(this)),
+              ];
             },
           ),
         );
@@ -142,8 +145,11 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
             ErrorDescription('building $widget'),
             e,
             stack,
-            informationCollector: () sync* {
-              yield DiagnosticsDebugCreator(DebugCreator(this));
+            informationCollector: () {
+              return <DiagnosticsNode>[
+                if (kDebugMode)
+                  DiagnosticsDebugCreator(DebugCreator(this)),
+              ];
             },
           ),
         );

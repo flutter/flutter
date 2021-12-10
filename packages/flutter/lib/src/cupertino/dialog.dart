@@ -2050,16 +2050,18 @@ class _RenderCupertinoDialogActions extends RenderBox
     markNeedsPaint();
   }
 
-  Iterable<RenderBox> get _pressedButtons sync* {
+  Iterable<RenderBox> get _pressedButtons {
+    final List<RenderBox> boxes = <RenderBox>[];
     RenderBox? currentChild = firstChild;
     while (currentChild != null) {
       assert(currentChild.parentData is _ActionButtonParentData);
       final _ActionButtonParentData parentData = currentChild.parentData! as _ActionButtonParentData;
       if (parentData.isPressed) {
-        yield currentChild;
+        boxes.add(currentChild);
       }
       currentChild = childAfter(currentChild);
     }
+    return boxes;
   }
 
   bool get _isButtonPressed {

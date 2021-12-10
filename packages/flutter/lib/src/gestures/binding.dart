@@ -407,8 +407,10 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
           library: 'gesture library',
           context: ErrorDescription('while dispatching a non-hit-tested pointer event'),
           event: event,
-          informationCollector: () sync* {
-            yield DiagnosticsProperty<PointerEvent>('Event', event, style: DiagnosticsTreeStyle.errorProperty);
+          informationCollector: () {
+            return <DiagnosticsNode>[
+              DiagnosticsProperty<PointerEvent>('Event', event, style: DiagnosticsTreeStyle.errorProperty),
+            ];
           },
         ));
       }
@@ -425,9 +427,11 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
           context: ErrorDescription('while dispatching a pointer event'),
           event: event,
           hitTestEntry: entry,
-          informationCollector: () sync* {
-            yield DiagnosticsProperty<PointerEvent>('Event', event, style: DiagnosticsTreeStyle.errorProperty);
-            yield DiagnosticsProperty<HitTestTarget>('Target', entry.target, style: DiagnosticsTreeStyle.errorProperty);
+          informationCollector: () {
+            return <DiagnosticsNode>[
+              DiagnosticsProperty<PointerEvent>('Event', event, style: DiagnosticsTreeStyle.errorProperty),
+              DiagnosticsProperty<HitTestTarget>('Target', entry.target, style: DiagnosticsTreeStyle.errorProperty),
+            ];
           },
         ));
       }

@@ -89,8 +89,10 @@ class PointerSignalResolver {
     } catch (exception, stack) {
       InformationCollector? collector;
       assert(() {
-        collector = () sync* {
-          yield DiagnosticsProperty<PointerSignalEvent>('Event', event, style: DiagnosticsTreeStyle.errorProperty);
+        collector = () {
+          return <DiagnosticsNode>[
+            DiagnosticsProperty<PointerSignalEvent>('Event', event, style: DiagnosticsTreeStyle.errorProperty),
+          ];
         };
         return true;
       }());

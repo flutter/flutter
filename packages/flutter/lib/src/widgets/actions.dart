@@ -345,12 +345,14 @@ abstract class Action<T extends Intent> with Diagnosticable {
     for (final ActionListenerCallback listener in localListeners) {
       InformationCollector? collector;
       assert(() {
-        collector = () sync* {
-          yield DiagnosticsProperty<Action<T>>(
-            'The $runtimeType sending notification was',
-            this,
-            style: DiagnosticsTreeStyle.errorProperty,
-          );
+        collector = () {
+          return <DiagnosticsNode>[
+            DiagnosticsProperty<Action<T>>(
+              'The $runtimeType sending notification was',
+              this,
+              style: DiagnosticsTreeStyle.errorProperty,
+            ),
+          ];
         };
         return true;
       }());

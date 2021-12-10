@@ -680,8 +680,10 @@ class RawKeyboard {
       } catch (exception, stack) {
         InformationCollector? collector;
         assert(() {
-          collector = () sync* {
-            yield DiagnosticsProperty<RawKeyEvent>('Event', event);
+          collector = () {
+            return <DiagnosticsNode>[
+              DiagnosticsProperty<RawKeyEvent>('Event', event),
+            ];
           };
           return true;
         }());

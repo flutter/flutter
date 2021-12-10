@@ -44,8 +44,10 @@ class PointerEventConverter {
   /// [dart:ui.FlutterView.devicePixelRatio]) is used to convert the incoming data
   /// from physical coordinates to logical pixels. See the discussion at
   /// [PointerEvent] for more details on the [PointerEvent] coordinate space.
-  static Iterable<PointerEvent> expand(Iterable<ui.PointerData> data, double devicePixelRatio) sync* {
-    for (final ui.PointerData datum in data) {
+  static Iterable<PointerEvent> expand(Iterable<ui.PointerData> data, double devicePixelRatio) {
+    return data
+        .where((ui.PointerData datum) => datum.signalKind != ui.PointerSignalKind.unknown)
+        .map((ui.PointerData datum) {
       final Offset position = Offset(datum.physicalX, datum.physicalY) / devicePixelRatio;
       assert(position != null);
       final Offset delta = Offset(datum.physicalDeltaX, datum.physicalDeltaY) / devicePixelRatio;
@@ -59,7 +61,7 @@ class PointerEventConverter {
       if (datum.signalKind == null || datum.signalKind == ui.PointerSignalKind.none) {
         switch (datum.change) {
           case ui.PointerChange.add:
-            yield PointerAddedEvent(
+            return PointerAddedEvent(
               timeStamp: timeStamp,
               kind: kind,
               device: datum.device,
@@ -75,9 +77,8 @@ class PointerEventConverter {
               tilt: datum.tilt,
               embedderId: datum.embedderId,
             );
-            break;
           case ui.PointerChange.hover:
-            yield PointerHoverEvent(
+            return PointerHoverEvent(
               timeStamp: timeStamp,
               kind: kind,
               device: datum.device,
@@ -99,9 +100,8 @@ class PointerEventConverter {
               synthesized: datum.synthesized,
               embedderId: datum.embedderId,
             );
-            break;
           case ui.PointerChange.down:
-            yield PointerDownEvent(
+            return PointerDownEvent(
               timeStamp: timeStamp,
               pointer: datum.pointerIdentifier,
               kind: kind,
@@ -122,9 +122,8 @@ class PointerEventConverter {
               tilt: datum.tilt,
               embedderId: datum.embedderId,
             );
-            break;
           case ui.PointerChange.move:
-            yield PointerMoveEvent(
+            return PointerMoveEvent(
               timeStamp: timeStamp,
               pointer: datum.pointerIdentifier,
               kind: kind,
@@ -148,9 +147,8 @@ class PointerEventConverter {
               synthesized: datum.synthesized,
               embedderId: datum.embedderId,
             );
-            break;
           case ui.PointerChange.up:
-            yield PointerUpEvent(
+            return PointerUpEvent(
               timeStamp: timeStamp,
               pointer: datum.pointerIdentifier,
               kind: kind,
@@ -172,9 +170,8 @@ class PointerEventConverter {
               tilt: datum.tilt,
               embedderId: datum.embedderId,
             );
-            break;
           case ui.PointerChange.cancel:
-            yield PointerCancelEvent(
+            return PointerCancelEvent(
               timeStamp: timeStamp,
               pointer: datum.pointerIdentifier,
               kind: kind,
@@ -195,9 +192,8 @@ class PointerEventConverter {
               tilt: datum.tilt,
               embedderId: datum.embedderId,
             );
-            break;
           case ui.PointerChange.remove:
-            yield PointerRemovedEvent(
+            return PointerRemovedEvent(
               timeStamp: timeStamp,
               kind: kind,
               device: datum.device,
@@ -210,31 +206,21 @@ class PointerEventConverter {
               radiusMax: radiusMax,
               embedderId: datum.embedderId,
             );
-            break;
-        }
-      } else {
-        switch (datum.signalKind!) {
-          case ui.PointerSignalKind.scroll:
-            final Offset scrollDelta =
-                Offset(datum.scrollDeltaX, datum.scrollDeltaY) / devicePixelRatio;
-            yield PointerScrollEvent(
-              timeStamp: timeStamp,
-              kind: kind,
-              device: datum.device,
-              position: position,
-              scrollDelta: scrollDelta,
-              embedderId: datum.embedderId,
-            );
-            break;
-          case ui.PointerSignalKind.none:
-            assert(false); // This branch should already have 'none' filtered out.
-            break;
-          case ui.PointerSignalKind.unknown:
-            // Ignore unknown signals.
-            break;
         }
       }
-    }
+      // This branch should already have 'none' and 'unknown' filtered out.
+      assert(datum.signalKind == ui.PointerSignalKind.scroll);
+      final Offset scrollDelta =
+          Offset(datum.scrollDeltaX, datum.scrollDeltaY) / devicePixelRatio;
+      return PointerScrollEvent(
+        timeStamp: timeStamp,
+        kind: kind,
+        device: datum.device,
+        position: position,
+        scrollDelta: scrollDelta,
+        embedderId: datum.embedderId,
+      );
+    });
   }
 
   static double _toLogicalPixels(double physicalPixels, double devicePixelRatio) => physicalPixels / devicePixelRatio;
