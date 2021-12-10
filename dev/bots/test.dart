@@ -432,7 +432,6 @@ Future<void> runForbiddenFromReleaseTests() async {
     '--forbidden-type', 'package:flutter/src/widgets/widget_inspector.dart::WidgetInspectorService',
     '--forbidden-type', 'package:flutter/src/widgets/framework.dart::DebugCreator',
     '--forbidden-type', 'package:flutter/src/foundation/print.dart::debugPrint',
-    '--forbidden-type', 'package:flutter/src/foundation/diagnostics.dart::_wordWrapLine',
   ];
   await runCommand(
     dart,

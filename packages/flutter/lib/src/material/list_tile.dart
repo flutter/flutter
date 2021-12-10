@@ -1044,6 +1044,11 @@ class ListTile extends StatelessWidget {
   static Iterable<Widget> divideTiles({ BuildContext? context, required Iterable<Widget> tiles, Color? color }) {
     assert(tiles != null);
     assert(color != null || context != null);
+    tiles = tiles.toList();
+
+    if (tiles.isEmpty || tiles.length == 1) {
+      return tiles;
+    }
 
     Widget wrapTile(Widget tile) {
       return DecoratedBox(
