@@ -2965,11 +2965,9 @@ Iterable<DiagnosticsNode> _parseDiagnosticsNode(
         exception: error,
         stack: stack,
         library: 'widget inspector',
-        informationCollector: () {
-          return <DiagnosticsNode>[
-            DiagnosticsNode.message('This exception was caught while trying to describe the user-relevant code of another error.'),
-          ];
-        }
+        informationCollector: () => <DiagnosticsNode>[
+          DiagnosticsNode.message('This exception was caught while trying to describe the user-relevant code of another error.'),
+        ],
       ));
     });
     return <DiagnosticsNode>[];

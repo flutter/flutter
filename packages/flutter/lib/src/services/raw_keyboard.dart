@@ -680,11 +680,9 @@ class RawKeyboard {
       } catch (exception, stack) {
         InformationCollector? collector;
         assert(() {
-          collector = () {
-            return <DiagnosticsNode>[
-              DiagnosticsProperty<RawKeyEvent>('Event', event),
-            ];
-          };
+          collector = () => <DiagnosticsNode>[
+            DiagnosticsProperty<RawKeyEvent>('Event', event),
+          ];
           return true;
         }());
         FlutterError.reportError(FlutterErrorDetails(

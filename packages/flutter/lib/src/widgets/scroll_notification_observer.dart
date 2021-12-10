@@ -139,15 +139,13 @@ class ScrollNotificationObserverState extends State<ScrollNotificationObserver> 
           stack: stack,
           library: 'widget library',
           context: ErrorDescription('while dispatching notifications for $runtimeType'),
-          informationCollector: () {
-            return <DiagnosticsNode>[
-              DiagnosticsProperty<ScrollNotificationObserverState>(
-                'The $runtimeType sending notification was',
-                this,
-                style: DiagnosticsTreeStyle.errorProperty,
-              ),
-            ];
-          },
+          informationCollector: () => <DiagnosticsNode>[
+            DiagnosticsProperty<ScrollNotificationObserverState>(
+              'The $runtimeType sending notification was',
+              this,
+              style: DiagnosticsTreeStyle.errorProperty,
+            ),
+          ],
         ));
       }
     }

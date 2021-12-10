@@ -1520,15 +1520,13 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
       } catch (exception, stack) {
         InformationCollector? collector;
         assert(() {
-          collector = () {
-            return <DiagnosticsNode>[
-              DiagnosticsProperty<FocusManager>(
-                'The $runtimeType sending notification was',
-                this,
-                style: DiagnosticsTreeStyle.errorProperty,
-              ),
-            ];
-          };
+          collector = () => <DiagnosticsNode>[
+            DiagnosticsProperty<FocusManager>(
+              'The $runtimeType sending notification was',
+              this,
+              style: DiagnosticsTreeStyle.errorProperty,
+            ),
+          ];
           return true;
         }());
         FlutterError.reportError(FlutterErrorDetails(

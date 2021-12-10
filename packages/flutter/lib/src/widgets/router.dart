@@ -809,15 +809,13 @@ class _CallbackHookProvider<T> {
         stack: stack,
         library: 'widget library',
         context: ErrorDescription('while invoking the callback for $runtimeType'),
-        informationCollector: () {
-          return <DiagnosticsNode>[
-            DiagnosticsProperty<_CallbackHookProvider<T>>(
-              'The $runtimeType that invoked the callback was',
-              this,
-              style: DiagnosticsTreeStyle.errorProperty,
-            ),
-          ];
-        },
+        informationCollector: () => <DiagnosticsNode>[
+          DiagnosticsProperty<_CallbackHookProvider<T>>(
+            'The $runtimeType that invoked the callback was',
+            this,
+            style: DiagnosticsTreeStyle.errorProperty,
+          ),
+        ],
       ));
       return defaultValue;
     }

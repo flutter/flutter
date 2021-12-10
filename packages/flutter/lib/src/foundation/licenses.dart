@@ -311,7 +311,7 @@ class LicenseRegistry {
   /// Generating the list of licenses is expensive.
   // TODO(dnfield): Refactor the license logic.
   // https://github.com/flutter/flutter/issues/95043
-  // ignore: no_sync_async_star
+  // flutter_ignore: no_sync_async_star
   static Stream<LicenseEntry> get licenses async* {
     if (_collectors == null)
       return;

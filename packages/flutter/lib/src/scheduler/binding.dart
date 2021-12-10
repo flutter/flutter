@@ -288,15 +288,13 @@ mixin SchedulerBinding on BindingBase {
       } catch (exception, stack) {
         InformationCollector? collector;
         assert(() {
-          collector = () {
-            return <DiagnosticsNode>[
-              DiagnosticsProperty<TimingsCallback>(
-                'The TimingsCallback that gets executed was',
-                callback,
-                style: DiagnosticsTreeStyle.errorProperty,
-              ),
-            ];
-          };
+          collector = () => <DiagnosticsNode>[
+            DiagnosticsProperty<TimingsCallback>(
+              'The TimingsCallback that gets executed was',
+              callback,
+              style: DiagnosticsTreeStyle.errorProperty,
+            ),
+          ];
           return true;
         }());
         FlutterError.reportError(FlutterErrorDetails(
@@ -570,23 +568,21 @@ mixin SchedulerBinding on BindingBase {
         FlutterError.reportError(FlutterErrorDetails(
           exception: reason,
           library: 'scheduler library',
-          informationCollector: () {
-            return <DiagnosticsNode>[
-              if (count == 1)
-                // TODO(jacobr): I have added an extra line break in this case.
-                ErrorDescription(
-                  'There was one transient callback left. '
-                  'The stack trace for when it was registered is as follows:',
-                )
-              else
-                ErrorDescription(
-                  'There were $count transient callbacks left. '
-                  'The stack traces for when they were registered are as follows:',
-                ),
-              for (final int id in callbacks.keys)
-                DiagnosticsStackTrace('── callback $id ──', callbacks[id]!.debugStack, showSeparator: false),
-            ];
-          },
+          informationCollector: () => <DiagnosticsNode>[
+            if (count == 1)
+              // TODO(jacobr): I have added an extra line break in this case.
+              ErrorDescription(
+                'There was one transient callback left. '
+                'The stack trace for when it was registered is as follows:',
+              )
+            else
+              ErrorDescription(
+                'There were $count transient callbacks left. '
+                'The stack traces for when they were registered are as follows:',
+              ),
+            for (final int id in callbacks.keys)
+              DiagnosticsStackTrace('── callback $id ──', callbacks[id]!.debugStack, showSeparator: false),
+          ],
         ));
       }
       return true;

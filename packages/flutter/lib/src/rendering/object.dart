@@ -1391,20 +1391,18 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       stack: stack,
       library: 'rendering library',
       context: ErrorDescription('during $method()'),
-      informationCollector: () {
-        return <DiagnosticsNode>[
-          // debugCreator should always be null outside of debugMode, but we want
-          // the tree shaker to notice this.
-          if (kDebugMode && debugCreator != null)
-            DiagnosticsDebugCreator(debugCreator!),
-          describeForError('The following RenderObject was being processed when the exception was fired'),
-          // TODO(jacobr): this error message has a code smell. Consider whether
-          // displaying the truncated children is really useful for command line
-          // users. Inspector users can see the full tree by clicking on the
-          // render object so this may not be that useful.
-          describeForError('RenderObject', style: DiagnosticsTreeStyle.truncateChildren),
-        ];
-      },
+      informationCollector: () => <DiagnosticsNode>[
+        // debugCreator should always be null outside of debugMode, but we want
+        // the tree shaker to notice this.
+        if (kDebugMode && debugCreator != null)
+          DiagnosticsDebugCreator(debugCreator!),
+        describeForError('The following RenderObject was being processed when the exception was fired'),
+        // TODO(jacobr): this error message has a code smell. Consider whether
+        // displaying the truncated children is really useful for command line
+        // users. Inspector users can see the full tree by clicking on the
+        // render object so this may not be that useful.
+        describeForError('RenderObject', style: DiagnosticsTreeStyle.truncateChildren),
+      ],
     ));
   }
 

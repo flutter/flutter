@@ -180,7 +180,7 @@ Future<void> verifyNoSyncAsyncStar(String workingDirectory, {int minimumMatches 
   }
   if (errors.isNotEmpty) {
     exitWithError(<String>[
-      '${bold}Do not use sync*/async* methods.$reset',
+      '${bold}Do not use sync*/async* methods. See https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#avoid-syncasync for details.$reset',
       ...errors,
     ]);
   }
