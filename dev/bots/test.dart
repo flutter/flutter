@@ -1127,8 +1127,8 @@ Future<void> _runWebTreeshakeTest() async {
   final Directory webDir = Directory(path.join(testAppDirectory, 'build', 'web'));
   final RegExp mainJSReg = RegExp(r'main.dart\.(.+)\.js$');
   String mainJsPath = '';
-  // filter the main.dart.[hash].js
-  webDir.listSync(recursive: true).forEach((FileSystemEntity file) { 
+  // filter out main.dart.[hash].js
+  webDir.listSync(recursive: true).forEach((FileSystemEntity file) {
     if (mainJSReg.hasMatch(file.path)) {
       mainJsPath = file.path;
     }

@@ -403,7 +403,7 @@ class WebReleaseBundle extends Target {
       resourceFile,
       environment.buildDir.childFile('web_resources.d'),
     );
-    // add js / images file with hash
+    // add js / images files with hash
     await ResourcesHandler().init(environment);
   }
 }
@@ -758,7 +758,7 @@ class ResourcesHandler {
     return _mainJsHash;
   }
 
-  /// to general images map, the key is image relative path and the value is image with hash path
+  /// to general images map, the key is the image relative path and the value is the image with hash path
   /// like a/b/c.png --> a/b/c.[hash].png
   Future<Map<String, String>> _getImagesMap(Environment environment) async {
     final Map<String, String> imagesMap = <String, String>{};
@@ -838,7 +838,6 @@ class ResourcesHandler {
     final String sourceMapName = '$jsName.map';
     final String sourceMapNameWithHash = '$jsNameWithMd5.map';
 
-    // final File jsFile = globals.fs.file(noMd5JsPath);
     final File? jsFile = _convertFullPathToFile(environment, noMd5JsPath);
     if (jsFile != null) {
       final String jsContent = jsFile.readAsStringSync();
@@ -851,7 +850,7 @@ class ResourcesHandler {
     }
   }
 
-  /// xxx.part.js add hash, like main.dart.js_1.part.js --> main.dart.js_1.part.[hash].js
+  /// xxx.part.js add hash, for example main.dart.js_1.part.js --> main.dart.js_1.part.[hash].js
   Future<String> jsAddHash(Environment environment) async{
     final List<String> list = resourcesMap['js'] ?? <String>[];
     final List<String> partJsPathArr = <String>[];
@@ -882,7 +881,7 @@ class ResourcesHandler {
 
     /// craete xxx.part.[hash].js and replace new name in main.dart.js
     /// 1. rename part.js with hash
-    /// 2. replace part.[hash].js in main.dart.js
+    /// 2. replace xxx.part.[hash].js in main.dart.js
     /// 3. modify sourcemap in part.js
     Future<void> _dealPartJs(String partJsPath) async {
       // final File partJsFile = globals.fs.file(partJsPath);
@@ -892,11 +891,11 @@ class ResourcesHandler {
         final String newPartJsPath = renameFileName(partJsPath, partHash);
         final String oldPartJsName = _getFileNameFromPath(partJsPath);
         final String newPartJsName = _getFileNameFromPath(newPartJsPath);
-        // modify sourcemap in part.js
+        // modify sourcemap in xxx.part.js
         _sourceMapAddHash(environment, partJsPath, newPartJsPath, partHash);
-        // rename part.js with hash
+        // rename xxx.part.js with hash
         await partJsFile.rename(newPartJsPath);
-        // replace part.[hash].js in main.dart.js
+        // replace xxx.part.[hash].js in main.dart.js
         mainJsContent = mainJsContent.replaceAll(oldPartJsName, newPartJsName);
       }
     }
