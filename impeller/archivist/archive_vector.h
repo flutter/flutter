@@ -9,22 +9,22 @@
 
 namespace impeller {
 
-class ArchiveVector : public ArchiveSerializable {
+class ArchiveVector : public Archivable {
  public:
   static const ArchiveDef ArchiveDefinition;
 
-  ArchiveName archiveName() const override;
+  ArchiveName GetArchiveName() const override;
 
   const std::vector<int64_t> keys() const;
 
-  bool serialize(ArchiveItem& item) const override;
+  bool Write(ArchiveLocation& item) const override;
 
-  bool deserialize(ArchiveItem& item) override;
+  bool Read(ArchiveLocation& item) override;
 
  private:
-  std::vector<int64_t> _keys;
+  std::vector<int64_t> keys_;
 
-  friend class ArchiveItem;
+  friend class ArchiveLocation;
 
   ArchiveVector();
 

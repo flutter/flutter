@@ -16,7 +16,7 @@
 
 namespace impeller {
 
-#define DB_HANDLE reinterpret_cast<sqlite3*>(_db)
+#define DB_HANDLE reinterpret_cast<sqlite3*>(database_)
 
 ArchiveDatabase::ArchiveDatabase(const std::string& filename, bool recreate) {
   if (recreate) {
@@ -30,45 +30,45 @@ ArchiveDatabase::ArchiveDatabase(const std::string& filename, bool recreate) {
 
   sqlite3* db = nullptr;
   auto res = ::sqlite3_open(filename.c_str(), &db);
-  _db = db;
+  database_ = db;
 
-  if (res != SQLITE_OK || _db == nullptr) {
+  if (res != SQLITE_OK || database_ == nullptr) {
     return;
   }
 
-  _beginTransaction = std::unique_ptr<ArchiveStatement>(
-      new ArchiveStatement(_db, "BEGIN TRANSACTION;"));
+  begin_transaction_stmt_ = std::unique_ptr<ArchiveStatement>(
+      new ArchiveStatement(database_, "BEGIN TRANSACTION;"));
 
-  if (!_beginTransaction->isReady()) {
+  if (!begin_transaction_stmt_->IsReady()) {
     return;
   }
 
-  _endTransaction = std::unique_ptr<ArchiveStatement>(
-      new ArchiveStatement(_db, "END TRANSACTION;"));
+  end_transaction_stmt_ = std::unique_ptr<ArchiveStatement>(
+      new ArchiveStatement(database_, "END TRANSACTION;"));
 
-  if (!_endTransaction->isReady()) {
+  if (!end_transaction_stmt_->IsReady()) {
     return;
   }
 
-  _rollbackTransaction = std::unique_ptr<ArchiveStatement>(
-      new ArchiveStatement(_db, "ROLLBACK TRANSACTION;"));
+  rollback_transaction_stmt_ = std::unique_ptr<ArchiveStatement>(
+      new ArchiveStatement(database_, "ROLLBACK TRANSACTION;"));
 
-  if (!_rollbackTransaction->isReady()) {
+  if (!rollback_transaction_stmt_->IsReady()) {
     return;
   }
 
-  _ready = true;
+  ready_ = true;
 }
 
 ArchiveDatabase::~ArchiveDatabase() {
   ::sqlite3_close(DB_HANDLE);
 }
 
-bool ArchiveDatabase::isReady() const {
-  return _ready;
+bool ArchiveDatabase::IsReady() const {
+  return ready_;
 }
 
-int64_t ArchiveDatabase::lastInsertRowID() {
+int64_t ArchiveDatabase::GetLastInsertRowID() {
   return ::sqlite3_last_insert_rowid(DB_HANDLE);
 }
 
@@ -77,13 +77,13 @@ static inline const ArchiveClassRegistration* RegistrationIfReady(
   if (registration == nullptr) {
     return nullptr;
   }
-  return registration->isReady() ? registration : nullptr;
+  return registration->IsReady() ? registration : nullptr;
 }
 
-const ArchiveClassRegistration* ArchiveDatabase::registrationForDefinition(
+const ArchiveClassRegistration* ArchiveDatabase::GetRegistrationForDefinition(
     const ArchiveDef& definition) {
-  auto found = _registrations.find(definition.className);
-  if (found != _registrations.end()) {
+  auto found = registrations_.find(definition.className);
+  if (found != registrations_.end()) {
     /*
      *  This class has already been registered.
      */
@@ -96,7 +96,7 @@ const ArchiveClassRegistration* ArchiveDatabase::registrationForDefinition(
   auto registration = std::unique_ptr<ArchiveClassRegistration>(
       new ArchiveClassRegistration(*this, definition));
   auto res =
-      _registrations.emplace(definition.className, std::move(registration));
+      registrations_.emplace(definition.className, std::move(registration));
 
   /*
    *  If the new class registation is ready, return it to the caller.
@@ -105,17 +105,17 @@ const ArchiveClassRegistration* ArchiveDatabase::registrationForDefinition(
                     : nullptr;
 }
 
-ArchiveStatement ArchiveDatabase::acquireStatement(
+ArchiveStatement ArchiveDatabase::CreateStatement(
     const std::string& statementString) const {
-  return ArchiveStatement{_db, statementString};
+  return ArchiveStatement{database_, statementString};
 }
 
-ArchiveTransaction ArchiveDatabase::acquireTransaction(
+ArchiveTransaction ArchiveDatabase::CreateTransaction(
     int64_t& transactionCount) {
-  return ArchiveTransaction{transactionCount,    //
-                            *_beginTransaction,  //
-                            *_endTransaction,    //
-                            *_rollbackTransaction};
+  return ArchiveTransaction{transactionCount,          //
+                            *begin_transaction_stmt_,  //
+                            *end_transaction_stmt_,    //
+                            *rollback_transaction_stmt_};
 }
 
 }  // namespace impeller

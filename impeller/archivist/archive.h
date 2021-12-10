@@ -10,36 +10,27 @@
 #include <vector>
 
 #include "flutter/fml/macros.h"
+#include "impeller/archivist/archivable.h"
 #include "impeller/base/allocation.h"
 
 namespace impeller {
 
-class ArchiveItem;
+class ArchiveLocation;
 class ArchiveClassRegistration;
 class ArchiveDatabase;
 class ArchiveStatement;
 
-class ArchiveSerializable {
- public:
+struct ArchiveDef {
   using Member = uint64_t;
   using Members = std::vector<Member>;
-  using ArchiveName = uint64_t;
 
-  virtual ArchiveName archiveName() const = 0;
-
-  virtual bool serialize(ArchiveItem& item) const = 0;
-
-  virtual bool deserialize(ArchiveItem& item) = 0;
-};
-
-struct ArchiveDef {
   const ArchiveDef* superClass;
   const std::string className;
   const bool autoAssignName;
-  const ArchiveSerializable::Members members;
+  const Members members;
 };
 
-static const ArchiveSerializable::ArchiveName ArchiveNameAuto = 0;
+static const Archivable::ArchiveName ArchiveNameAuto = 0;
 
 class Archive {
  public:
@@ -47,84 +38,79 @@ class Archive {
 
   ~Archive();
 
-  bool isReady() const;
+  bool IsReady() const;
 
-  template <
-      class T,
-      class = std::enable_if<std::is_base_of<ArchiveSerializable, T>::value>>
-  bool archive(const T& archivable) {
+  template <class T,
+            class = std::enable_if<std::is_base_of<Archivable, T>::value>>
+  bool Write(const T& archivable) {
     const ArchiveDef& def = T::ArchiveDefinition;
-    int64_t unusedLast = 0;
-    return archiveInstance(def, archivable, unusedLast);
+    int64_t unused_last = 0;
+    return ArchiveInstance(def, archivable, unused_last);
   }
 
-  template <
-      class T,
-      class = std::enable_if<std::is_base_of<ArchiveSerializable, T>::value>>
-  bool unarchive(ArchiveSerializable::ArchiveName name, T& archivable) {
+  template <class T,
+            class = std::enable_if<std::is_base_of<Archivable, T>::value>>
+  bool Read(Archivable::ArchiveName name, T& archivable) {
     const ArchiveDef& def = T::ArchiveDefinition;
-    return unarchiveInstance(def, name, archivable);
+    return UnarchiveInstance(def, name, archivable);
   }
 
-  using UnarchiveStep = std::function<bool /*continue*/ (ArchiveItem&)>;
+  using UnarchiveStep = std::function<bool /*continue*/ (ArchiveLocation&)>;
 
-  template <
-      class T,
-      class = std::enable_if<std::is_base_of<ArchiveSerializable, T>::value>>
-  size_t unarchive(UnarchiveStep stepper) {
+  template <class T,
+            class = std::enable_if<std::is_base_of<Archivable, T>::value>>
+  size_t Read(UnarchiveStep stepper) {
     const ArchiveDef& def = T::ArchiveDefinition;
-    return unarchiveInstances(def, stepper, ArchiveNameAuto);
+    return UnarchiveInstances(def, stepper, ArchiveNameAuto);
   }
 
  private:
-  std::unique_ptr<ArchiveDatabase> _db;
-  int64_t _transactionCount = 0;
+  std::unique_ptr<ArchiveDatabase> database_;
+  int64_t transaction_count_ = 0;
 
-  friend class ArchiveItem;
+  friend class ArchiveLocation;
 
-  bool archiveInstance(const ArchiveDef& definition,
-                       const ArchiveSerializable& archivable,
+  bool ArchiveInstance(const ArchiveDef& definition,
+                       const Archivable& archivable,
                        int64_t& lastInsertID);
-  bool unarchiveInstance(const ArchiveDef& definition,
-                         ArchiveSerializable::ArchiveName name,
-                         ArchiveSerializable& archivable);
-  size_t unarchiveInstances(const ArchiveDef& definition,
+  bool UnarchiveInstance(const ArchiveDef& definition,
+                         Archivable::ArchiveName name,
+                         Archivable& archivable);
+  size_t UnarchiveInstances(const ArchiveDef& definition,
                             UnarchiveStep stepper,
-                            ArchiveSerializable::ArchiveName optionalName);
+                            Archivable::ArchiveName optionalName);
 
   FML_DISALLOW_COPY_AND_ASSIGN(Archive);
 };
 
-class ArchiveItem {
+class ArchiveLocation {
  public:
   template <class T, class = std::enable_if<std::is_integral<T>::value>>
-  bool encode(ArchiveSerializable::Member member, T item) {
-    return encodeIntegral(member, static_cast<int64_t>(item));
+  bool Write(ArchiveDef::Member member, T item) {
+    return WriteIntegral(member, static_cast<int64_t>(item));
   }
 
-  bool encode(ArchiveSerializable::Member member, double item);
+  bool Write(ArchiveDef::Member member, double item);
 
-  bool encode(ArchiveSerializable::Member member, const std::string& item);
+  bool Write(ArchiveDef::Member member, const std::string& item);
 
-  bool encode(ArchiveSerializable::Member member, const Allocation& allocation);
+  bool Write(ArchiveDef::Member member, const Allocation& allocation);
 
-  template <
-      class T,
-      class = std::enable_if<std::is_base_of<ArchiveSerializable, T>::value>>
-  bool encodeArchivable(ArchiveSerializable::Member member, const T& other) {
+  template <class T,
+            class = std::enable_if<std::is_base_of<Archivable, T>::value>>
+  bool WriteArchivable(ArchiveDef::Member member, const T& other) {
     const ArchiveDef& otherDef = T::ArchiveDefinition;
-    return encode(member, otherDef, other);
+    return Write(member, otherDef, other);
   }
 
   template <class T, class = std::enable_if<std::is_enum<T>::value>>
-  bool encodeEnum(ArchiveSerializable::Member member, const T& item) {
-    return encodeIntegral(member, static_cast<int64_t>(item));
+  bool WriteEnum(ArchiveDef::Member member, const T& item) {
+    return WriteIntegral(member, static_cast<int64_t>(item));
   }
 
-  template <
-      class T,
-      class = std::enable_if<std::is_base_of<ArchiveSerializable, T>::value>>
-  bool encode(ArchiveSerializable::Member member, const std::vector<T>& items) {
+  template <class T,
+            class = std::enable_if<std::is_base_of<Archivable, T>::value>>
+  bool Write(ArchiveDef::Member member, const std::vector<T>& items) {
     /*
      *  All items in the vector are individually encoded and their keys noted
      */
@@ -134,7 +120,7 @@ class ArchiveItem {
     const ArchiveDef& itemDefinition = T::ArchiveDefinition;
     for (const auto& item : items) {
       int64_t added = 0;
-      bool result = _context.archiveInstance(itemDefinition, item, added);
+      bool result = context_.ArchiveInstance(itemDefinition, item, added);
       if (!result) {
         return false;
       }
@@ -144,69 +130,66 @@ class ArchiveItem {
     /*
      *  The keys are flattened into the vectors table. Write to that table
      */
-    auto vectorInsert = encodeVectorKeys(std::move(members));
+    auto vectorInsert = WriteVectorKeys(std::move(members));
 
     if (!vectorInsert.first) {
       return false;
     }
 
-    return encodeIntegral(member, vectorInsert.second);
+    return WriteIntegral(member, vectorInsert.second);
   }
 
   template <class Super,
             class Current,
-            class = std::enable_if<
-                std::is_base_of<ArchiveSerializable, Super>::value &&
-                std::is_base_of<ArchiveSerializable, Current>::value>>
-  bool encodeSuper(const Current& thiz) {
-    std::string oldClass = _currentClass;
-    _currentClass = Super::ArchiveDefinition.className;
+            class = std::enable_if<std::is_base_of<Archivable, Super>::value &&
+                                   std::is_base_of<Archivable, Current>::value>>
+  bool WriteSuper(const Current& thiz) {
+    std::string oldClass = current_class_;
+    current_class_ = Super::ArchiveDefinition.className;
     auto success = thiz.Super::serialize(*this);
-    _currentClass = oldClass;
+    current_class_ = oldClass;
     return success;
   }
 
   template <class T, class = std::enable_if<std::is_integral<T>::value>>
-  bool decode(ArchiveSerializable::Member member, T& item) {
+  bool Read(ArchiveDef::Member member, T& item) {
     int64_t decoded = 0;
-    auto result = decodeIntegral(member, decoded);
+    auto result = ReadIntegral(member, decoded);
     item = static_cast<T>(decoded);
     return result;
   }
 
-  bool decode(ArchiveSerializable::Member member, double& item);
+  bool Read(ArchiveDef::Member member, double& item);
 
-  bool decode(ArchiveSerializable::Member member, std::string& item);
+  bool Read(ArchiveDef::Member member, std::string& item);
 
-  bool decode(ArchiveSerializable::Member member, Allocation& allocation);
+  bool Read(ArchiveDef::Member member, Allocation& allocation);
 
-  template <
-      class T,
-      class = std::enable_if<std::is_base_of<ArchiveSerializable, T>::value>>
-  bool decodeArchivable(ArchiveSerializable::Member member, T& other) {
+  template <class T,
+            class = std::enable_if<std::is_base_of<Archivable, T>::value>>
+  bool ReadArchivable(ArchiveDef::Member member, T& other) {
     const ArchiveDef& otherDef = T::ArchiveDefinition;
     return decode(member, otherDef, other);
   }
 
   template <class T, class = std::enable_if<std::is_enum<T>::value>>
-  bool decodeEnum(ArchiveSerializable::Member member, T& item) {
+  bool ReadEnum(ArchiveDef::Member member, T& item) {
     int64_t desugared = 0;
-    if (decodeIntegral(member, desugared)) {
+    if (ReadIntegral(member, desugared)) {
       item = static_cast<T>(desugared);
       return true;
     }
     return false;
   }
 
-  template <
-      class T,
-      class = std::enable_if<std::is_base_of<ArchiveSerializable, T>::value>>
-  bool decode(ArchiveSerializable::Member member, std::vector<T>& items) {
+  template <class T,
+            class = std::enable_if<std::is_base_of<Archivable, T>::value>>
+  bool Read(ArchiveDef::Member member, std::vector<T>& items) {
     /*
      *  From the member, find the foreign key of the vector
      */
     int64_t vectorForeignKey = 0;
-    if (!decodeIntegral(member, vectorForeignKey)) {
+    if (!ReadIntegral(member, vectorForeignKey)) {
       return false;
     }
 
@@ -214,7 +197,7 @@ class ArchiveItem {
      *  Get vector keys
      */
     std::vector<int64_t> keys;
-    if (!decodeVectorKeys(vectorForeignKey, keys)) {
+    if (!ReadVectorKeys(vectorForeignKey, keys)) {
       return false;
     }
 
@@ -222,7 +205,7 @@ class ArchiveItem {
     for (const auto& key : keys) {
       items.emplace_back();
 
-      if (!_context.unarchiveInstance(otherDef, key, items.back())) {
+      if (!context_.UnarchiveInstance(otherDef, key, items.back())) {
         return false;
       }
     }
@@ -232,51 +215,50 @@ class ArchiveItem {
 
   template <class Super,
             class Current,
-            class = std::enable_if<
-                std::is_base_of<ArchiveSerializable, Super>::value &&
-                std::is_base_of<ArchiveSerializable, Current>::value>>
-  bool decodeSuper(Current& thiz) {
-    std::string oldClass = _currentClass;
-    _currentClass = Super::ArchiveDefinition.className;
+            class = std::enable_if<std::is_base_of<Archivable, Super>::value &&
+                                   std::is_base_of<Archivable, Current>::value>>
+  bool ReadSuper(Current& thiz) {
+    std::string oldClass = current_class_;
+    current_class_ = Super::ArchiveDefinition.className;
     auto success = thiz.Super::deserialize(*this);
-    _currentClass = oldClass;
+    current_class_ = oldClass;
     return success;
   }
 
-  ArchiveSerializable::ArchiveName name() const;
+  Archivable::ArchiveName Name() const;
 
  private:
-  Archive& _context;
-  ArchiveStatement& _statement;
-  const ArchiveClassRegistration& _registration;
-  ArchiveSerializable::ArchiveName _name;
-  std::string _currentClass;
+  Archive& context_;
+  ArchiveStatement& statement_;
+  const ArchiveClassRegistration& registration_;
+  Archivable::ArchiveName name_;
+  std::string current_class_;
 
   friend class Archive;
 
-  ArchiveItem(Archive& context,
-              ArchiveStatement& statement,
-              const ArchiveClassRegistration& registration,
-              ArchiveSerializable::ArchiveName name);
+  ArchiveLocation(Archive& context,
+                  ArchiveStatement& statement,
+                  const ArchiveClassRegistration& registration,
+                  Archivable::ArchiveName name);
 
-  bool encodeIntegral(ArchiveSerializable::Member member, int64_t item);
+  bool WriteIntegral(ArchiveDef::Member member, int64_t item);
 
-  bool decodeIntegral(ArchiveSerializable::Member member, int64_t& item);
+  bool ReadIntegral(ArchiveDef::Member member, int64_t& item);
 
-  std::pair<bool, int64_t> encodeVectorKeys(std::vector<int64_t>&& members);
+  std::pair<bool, int64_t> WriteVectorKeys(std::vector<int64_t>&& members);
 
-  bool decodeVectorKeys(ArchiveSerializable::ArchiveName name,
-                        std::vector<int64_t>& members);
+  bool ReadVectorKeys(Archivable::ArchiveName name,
+                      std::vector<int64_t>& members);
 
-  bool encode(ArchiveSerializable::Member member,
-              const ArchiveDef& otherDef,
-              const ArchiveSerializable& other);
+  bool Write(ArchiveDef::Member member,
+             const ArchiveDef& otherDef,
+             const Archivable& other);
 
-  bool decode(ArchiveSerializable::Member member,
-              const ArchiveDef& otherDef,
-              ArchiveSerializable& other);
+  bool Read(ArchiveDef::Member member,
+            const ArchiveDef& otherDef,
+            Archivable& other);
 
-  FML_DISALLOW_COPY_AND_ASSIGN(ArchiveItem);
+  FML_DISALLOW_COPY_AND_ASSIGN(ArchiveLocation);
 };
 
 }  // namespace impeller

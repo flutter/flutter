@@ -9,7 +9,7 @@
 namespace impeller {
 
 ArchiveVector::ArchiveVector(std::vector<int64_t>&& keys)
-    : _keys(std::move(keys)) {}
+    : keys_(std::move(keys)) {}
 
 ArchiveVector::ArchiveVector() {}
 
@@ -20,35 +20,35 @@ const ArchiveDef ArchiveVector::ArchiveDefinition = {
     /* .members = */ {0},
 };
 
-ArchiveSerializable::ArchiveName ArchiveVector::archiveName() const {
+Archivable::ArchiveName ArchiveVector::GetArchiveName() const {
   return ArchiveNameAuto;
 }
 
 const std::vector<int64_t> ArchiveVector::keys() const {
-  return _keys;
+  return keys_;
 }
 
-bool ArchiveVector::serialize(ArchiveItem& item) const {
+bool ArchiveVector::Write(ArchiveLocation& item) const {
   std::stringstream stream;
-  for (size_t i = 0, count = _keys.size(); i < count; i++) {
-    stream << _keys[i];
+  for (size_t i = 0, count = keys_.size(); i < count; i++) {
+    stream << keys_[i];
     if (i != count - 1) {
       stream << ",";
     }
   }
-  return item.encode(0, stream.str());
+  return item.Write(0, stream.str());
 }
 
-bool ArchiveVector::deserialize(ArchiveItem& item) {
+bool ArchiveVector::Read(ArchiveLocation& item) {
   std::string flattened;
-  if (!item.decode(0, flattened)) {
+  if (!item.Read(0, flattened)) {
     return false;
   }
 
   std::stringstream stream(flattened);
   int64_t single = 0;
   while (stream >> single) {
-    _keys.emplace_back(single);
+    keys_.emplace_back(single);
     stream.ignore();
   }
 
