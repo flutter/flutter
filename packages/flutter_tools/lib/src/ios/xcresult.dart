@@ -5,6 +5,7 @@
 import '../../src/base/process.dart';
 import '../../src/convert.dart' show json;
 import '../../src/macos/xcode.dart';
+import '../bundle.dart';
 import '../convert.dart';
 
 /// The generator of xcresults.
@@ -178,6 +179,8 @@ class XCResultIssue {
     required XCResultIssueType type,
     required Map<String, Object?> issueJson,
   }) {
+
+    // Parse type.
     final Object? issueSubTypeMap = issueJson['issueType'];
     String subType = '';
     if (issueSubTypeMap is Map<String, Object?>) {
@@ -187,6 +190,7 @@ class XCResultIssue {
       }
     }
 
+    // Parse message.
     String message = '';
     final Object? messageMap = issueJson['message'];
     if (messageMap is Map<String, Object?>) {
@@ -196,10 +200,24 @@ class XCResultIssue {
       }
     }
 
+    // Parse url and convert it to a location String.
+    String location = '';
+    final Object? documentLocationInCreatingWorkspaceMap = issueJson['documentLocationInCreatingWorkspace'];
+    if (documentLocationInCreatingWorkspaceMap is Map<String, Object?>) {
+      final Object? urlMap = documentLocationInCreatingWorkspaceMap['url'];
+      if (urlMap is Map<String, Object?>) {
+        final Object? urlValue = urlMap['_value'];
+        if (urlValue is String) {
+          location = _convertUrlToLocationString(urlValue);
+        }
+      }
+    }
+
     return XCResultIssue._(
       type: type,
       subType: subType,
       message: message,
+      location: location,
     );
   }
 
@@ -207,6 +225,7 @@ class XCResultIssue {
     required this.type,
     required this.subType,
     required this.message,
+    required this.location,
   });
 
   /// The type of the issue.
@@ -222,6 +241,12 @@ class XCResultIssue {
   ///
   /// This can be displayed to user for their information.
   final String message;
+
+  /// The location where the issue occurs.
+  ///
+  /// This is a re-formatted version of the "url" value in the json.
+  /// The format looks like <url>:StartingLineNumber:StartingColumnNumber.
+  final String location;
 }
 
 /// The type of an `XCResultIssue`.
@@ -235,4 +260,40 @@ enum XCResultIssueType {
   ///
   /// This is for all the issues under the `errorSummaries` key in the xcresult.
   error,
+}
+
+// A typical location url string looks like file:///foo.swift#CharacterRangeLen=0&EndingColumnNumber=82&EndingLineNumber=7&StartingColumnNumber=82&StartingLineNumber=7.
+//
+// This function converts it to something like: file:///foo.swift:<StartingLineNumber>:<StartingColumnNumber>.
+String _convertUrlToLocationString(String url){
+  if (url.isEmpty) {
+    return '';
+  }
+  final List<String> topComponents = url.split('#');
+  final String filePath = topComponents.first;
+  if (topComponents.length == 1) {
+    return filePath;
+  }
+  final String params = topComponents[1];
+  String startingLineNumber = '';
+  String startingColumnNumber = '';
+  for (final String paramString in params.split('&')) {
+    final List<String> kv = paramString.split('=');
+    if (kv.length != 2) {
+      // In this particular case, we only want <StartingColumnNumber> and <StartingLineNumber>.
+      // So we can ignore all the parameters that do not follow the same pattern.
+      continue;
+    }
+    switch (kv[0]) {
+      case 'StartingLineNumber':
+        startingLineNumber = kv[1];
+        break;
+      case 'StartingColumnNumber':
+        startingColumnNumber = kv[1];
+        break;
+      default:
+        break;
+    }
+  }
+  return '$filePath${startingLineNumber.isEmpty?'':':$startingLineNumber'}${startingColumnNumber.isEmpty?'':':$startingColumnNumber'}';
 }
