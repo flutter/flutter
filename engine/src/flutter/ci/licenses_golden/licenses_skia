@@ -1,4 +1,4 @@
-Signature: 5fdc47bddfda5b65d07c105ef00b40c8
+Signature: 98135a96c9877518d6eca9969b8ae7cb
 
 UNUSED LICENSES:
 
@@ -1208,6 +1208,7 @@ FILE: ../../../third_party/skia/site/docs/dev/design/conical/lemma1.svg
 FILE: ../../../third_party/skia/site/docs/dev/design/conical/lemma3.1.svg
 FILE: ../../../third_party/skia/site/docs/dev/design/conical/lemma3.2.svg
 FILE: ../../../third_party/skia/site/docs/dev/design/conical/lemma4.svg
+FILE: ../../../third_party/skia/site/docs/dev/tools/android_gdb.png
 FILE: ../../../third_party/skia/site/docs/dev/tools/buttons.png
 FILE: ../../../third_party/skia/site/docs/dev/tools/calendar.mskp
 FILE: ../../../third_party/skia/site/docs/dev/tools/crosshair.png
