@@ -22,7 +22,7 @@ class TestAccessibilityBridgeDelegate
   std::shared_ptr<FlutterPlatformNodeDelegate>
   CreateFlutterPlatformNodeDelegate() override;
 
-  std::vector<ui::AXEventGenerator::TargetedEvent> accessibilitiy_events;
+  std::vector<ui::AXEventGenerator::Event> accessibility_events;
   std::vector<FlutterSemanticsAction> performed_actions;
 };
 
