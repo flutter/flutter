@@ -1,0 +1,39 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("../tools/impeller.gni")
+
+impeller_component("archivist") {
+  # Only the umbrella header is public since all other TU's are implementation
+  # detail that will be compiled away in release modes.
+  # Because they are implementation details, they may expose dependency headers.
+  public = [ "archive.h" ]
+
+  sources = [
+    "archive.cc",
+    "archive_class_registration.cc",
+    "archive_class_registration.h",
+    "archive_database.cc",
+    "archive_database.h",
+    "archive_statement.cc",
+    "archive_statement.h",
+    "archive_transaction.cc",
+    "archive_transaction.h",
+    "archive_vector.cc",
+    "archive_vector.h",
+  ]
+
+  public_deps = [ "../base" ]
+
+  deps = [ "//third_party/sqlite" ]
+}
+
+impeller_component("archivist_unittests") {
+  testonly = true
+  sources = [ "archivist_unittests.cc" ]
+  deps = [
+    ":archivist",
+    "//flutter/testing",
+  ]
+}
