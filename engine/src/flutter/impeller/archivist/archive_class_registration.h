@@ -12,36 +12,36 @@ namespace impeller {
 class ArchiveClassRegistration {
  public:
   using ColumnResult = std::pair<size_t, bool>;
-  ColumnResult findColumn(const std::string& className,
-                          ArchiveSerializable::Member member) const;
+  ColumnResult FindColumn(const std::string& className,
+                          ArchiveDef::Member member) const;
 
-  const std::string& className() const;
+  const std::string& GetClassName() const;
 
-  size_t memberCount() const;
+  size_t GetMemberCount() const;
 
-  bool isReady() const;
+  bool IsReady() const;
 
-  ArchiveStatement insertStatement() const;
+  ArchiveStatement GetInsertStatement() const;
 
-  ArchiveStatement queryStatement(bool single) const;
+  ArchiveStatement GetQueryStatement(bool single) const;
 
   static const size_t NameIndex = 0;
 
  private:
-  using MemberColumnMap = std::map<ArchiveSerializable::Member, size_t>;
+  using MemberColumnMap = std::map<ArchiveDef::Member, size_t>;
   using ClassMap = std::map<std::string, MemberColumnMap>;
 
   friend class ArchiveDatabase;
 
   ArchiveClassRegistration(ArchiveDatabase& database, ArchiveDef definition);
 
-  bool createTable(bool autoIncrement);
+  bool CreateTable(bool autoIncrement);
 
-  ArchiveDatabase& _database;
-  ClassMap _classMap;
-  std::string _className;
-  size_t _memberCount;
-  bool _isReady;
+  ArchiveDatabase& database_;
+  ClassMap class_map_;
+  std::string class_name_;
+  size_t member_count_ = 0;
+  bool is_ready_ = false;
 
   FML_DISALLOW_COPY_AND_ASSIGN(ArchiveClassRegistration);
 };
