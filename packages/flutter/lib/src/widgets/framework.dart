@@ -192,7 +192,7 @@ class LabeledGlobalKey<T extends State<StatefulWidget>> extends GlobalKey<T> {
   // ignore: prefer_const_constructors_in_immutables , never use const for this class
   LabeledGlobalKey(this._debugLabel) : super.constructor();
 
-  late final String? _debugLabel;
+  final String? _debugLabel;
 
   @override
   String toString() {
