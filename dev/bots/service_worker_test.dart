@@ -21,6 +21,9 @@ final String _appBuildDirectory = path.join(_testAppDirectory, 'build', 'web');
 final String _target = path.join('lib', 'service_worker_test.dart');
 final String _targetPath = path.join(_testAppDirectory, _target);
 
+// the main.dart.[hash].js's hash value
+String? mainJsHash = '';
+
 // Run a web service worker test as a standalone Dart program.
 Future<void> main() async {
   await runWebServiceWorkerTest(headless: false);
@@ -111,6 +114,12 @@ Future<void> runWebServiceWorkerTest({
       additionalRequestHandlers: <Handler>[
         (Request request) {
           final String requestedPath = request.url.path;
+          final RegExp mainJSReg = RegExp(r'main.dart\.(.+)\.js');
+          if (mainJSReg.hasMatch(requestedPath)) {
+            // get the main.dart.[hash].js's hash value
+            // for example: main.dart.aeo98u.js --> hash = aeo98u
+            mainJsHash = mainJSReg.matchAsPrefix(requestedPath)?.group(1);
+          }
           requestedPathCounts.putIfAbsent(requestedPath, () => 0);
           requestedPathCounts[requestedPath] = requestedPathCounts[requestedPath]! + 1;
           if (requestedPath == 'CLOSE') {
@@ -140,7 +149,7 @@ Future<void> runWebServiceWorkerTest({
       // once by the initial page load, and once by the service worker.
       // Other resources are loaded once only by the service worker.
       'index.html': 2,
-      'main.dart.js': 1,
+      'main.dart.$mainJsHash.js': 1,
       'flutter_service_worker.js': 1,
       'assets/FontManifest.json': 1,
       'assets/NOTICES': 1,
@@ -183,7 +192,7 @@ Future<void> runWebServiceWorkerTest({
       'index.html': 2,
       'flutter_service_worker.js': 2,
       '': 1,
-      'main.dart.js': 1,
+      'main.dart.$mainJsHash.js': 1,
       'assets/NOTICES': 1,
       'assets/AssetManifest.json': 1,
       'assets/FontManifest.json': 1,
@@ -212,7 +221,7 @@ Future<void> runWebServiceWorkerTest({
       '': 1,
       'index.html': 2,
       // We still download some resources multiple times if the server is non-caching.
-      'main.dart.js': 2,
+      'main.dart.$mainJsHash.js': 2,
       'assets/FontManifest.json': 2,
       'flutter_service_worker.js': 1,
       'assets/NOTICES': 1,
@@ -262,7 +271,7 @@ Future<void> runWebServiceWorkerTest({
       '': 1,
       'index.html': 2,
       'flutter_service_worker.js': 2,
-      'main.dart.js': 2,
+      'main.dart.$mainJsHash.js': 2,
       'assets/NOTICES': 1,
       'assets/AssetManifest.json': 1,
       'assets/FontManifest.json': 2,
