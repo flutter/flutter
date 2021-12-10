@@ -9,6 +9,7 @@ config("impeller_public_config") {
 group("impeller") {
   public_deps = [
     "aiks",
+    "archivist",
     "base",
     "compiler",
     "display_list",
@@ -24,6 +25,7 @@ executable("impeller_unittests") {
 
   deps = [
     "aiks:aiks_unittests",
+    "archivist:archivist_unittests",
     "base:base_unittests",
     "compiler:compiler_unittests",
     "display_list:display_list_unittests",
