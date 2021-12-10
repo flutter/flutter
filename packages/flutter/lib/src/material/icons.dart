@@ -16972,7 +16972,7 @@ class Icons {
 
   /// <i class="material-icons-outlined md-36">pie_chart</i> &#x2014; material icon named "pie chart" (outlined).
   static const IconData pie_chart_outlined = IconData(0xf2a8, fontFamily: 'MaterialIcons');
-  
+
   /// <i class="material-icons md-36">pie_chart_outline</i> &#x2014; material icon named "pie chart outline".
   static const IconData pie_chart_outline = IconData(0xe4c5, fontFamily: 'MaterialIcons');
 
