@@ -278,3 +278,6 @@ FlutterProjectFactory get projectFactory {
 CustomDevicesConfig get customDevicesConfig => context.get<CustomDevicesConfig>()!;
 
 PreRunValidator get preRunValidator => context.get<PreRunValidator>() ?? const NoOpPreRunValidator();
+
+// TODO(fujino): Migrate to 'main' https://github.com/flutter/flutter/issues/95041
+const String kDefaultFrameworkChannel = 'master';

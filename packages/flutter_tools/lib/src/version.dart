@@ -18,6 +18,7 @@ const String _unknownFrameworkVersion = '0.0.0-unknown';
 
 /// The names of each channel/branch in order of increasing stability.
 enum Channel {
+  // TODO(fujino): update to main https://github.com/flutter/flutter/issues/95041
   master,
   dev,
   beta,
@@ -26,7 +27,7 @@ enum Channel {
 
 // Beware: Keep order in accordance with stability
 const Set<String> kOfficialChannels = <String>{
-  'master',
+  globals.kDefaultFrameworkChannel,
   'dev',
   'beta',
   'stable',
@@ -758,7 +759,6 @@ Future<void> checkVersionFreshness(FlutterVersion version, {
   }
 
   final Duration frameworkAge = clock.now().difference(localFrameworkCommitDate);
-  final bool installationSeemsOutdated = frameworkAge > versionAgeConsideredUpToDate(version.channel);
 
   // Get whether there's a newer version on the remote. This only goes
   // to the server if we haven't checked recently so won't happen on every
@@ -773,28 +773,54 @@ Future<void> checkVersionFreshness(FlutterVersion version, {
   final VersionCheckStamp stamp = await VersionCheckStamp.load(cache, logger);
   final DateTime lastTimeWarningWasPrinted = stamp.lastTimeWarningWasPrinted ?? clock.ago(maxTimeSinceLastWarning * 2);
   final bool beenAWhileSinceWarningWasPrinted = clock.now().difference(lastTimeWarningWasPrinted) > maxTimeSinceLastWarning;
+  if (!beenAWhileSinceWarningWasPrinted) {
+    return;
+  }
 
-  // We show a warning if either we know there is a new remote version, or we couldn't tell but the local
-  // version is outdated.
-  final bool canShowWarning =
-    remoteVersionStatus == VersionCheckResult.newVersionAvailable ||
-      (remoteVersionStatus == VersionCheckResult.unknown &&
-        installationSeemsOutdated);
+  final bool canShowWarningResult = canShowWarning(
+    remoteVersionStatus: remoteVersionStatus,
+    frameworkAge: frameworkAge,
+    channel: version.channel,
+  );
 
-  if (beenAWhileSinceWarningWasPrinted && canShowWarning) {
-    final String updateMessage =
+  if (!canShowWarningResult) {
+    return;
+  }
+
+  // By this point, we should show the update message
+  final String updateMessage =
       remoteVersionStatus == VersionCheckResult.newVersionAvailable
-        ? newVersionAvailableMessage()
-        : versionOutOfDateMessage(frameworkAge);
-    logger.printStatus(updateMessage, emphasis: true);
-    await Future.wait<void>(<Future<void>>[
-      stamp.store(
+      ? newVersionAvailableMessage()
+      : versionOutOfDateMessage(frameworkAge);
+  logger.printStatus(updateMessage, emphasis: true);
+  await Future.wait<void>(<Future<void>>[
+    stamp.store(
         newTimeWarningWasPrinted: clock.now(),
         cache: cache,
-      ),
-      Future<void>.delayed(pauseTime),
-    ]);
+    ),
+    Future<void>.delayed(pauseTime),
+  ]);
+}
+
+// We show a warning if either we know there is a new remote version, or we
+// couldn't tell but the local version is outdated.
+@visibleForTesting
+bool canShowWarning({
+  required VersionCheckResult remoteVersionStatus,
+  required Duration frameworkAge,
+  required String channel,
+}) {
+  final bool installationSeemsOutdated = frameworkAge > versionAgeConsideredUpToDate(channel);
+  //if (channel == globals.kDefaultFrameworkChannel) {
+  //  return false;
+  //}
+  if (remoteVersionStatus == VersionCheckResult.newVersionAvailable) {
+    return true;
   }
+  if (!installationSeemsOutdated) {
+    return false;
+  }
+  return remoteVersionStatus == VersionCheckResult.unknown;
 }
 
 /// The amount of time we wait before pinging the server to check for the
