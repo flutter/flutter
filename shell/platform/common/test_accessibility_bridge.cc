@@ -13,7 +13,7 @@ TestAccessibilityBridgeDelegate::CreateFlutterPlatformNodeDelegate() {
 
 void TestAccessibilityBridgeDelegate::OnAccessibilityEvent(
     ui::AXEventGenerator::TargetedEvent targeted_event) {
-  accessibilitiy_events.push_back(targeted_event);
+  accessibility_events.push_back(targeted_event.event_params.event);
 }
 
 void TestAccessibilityBridgeDelegate::DispatchAccessibilityAction(

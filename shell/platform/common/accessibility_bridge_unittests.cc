@@ -4,12 +4,15 @@
 
 #include "accessibility_bridge.h"
 
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
 #include "test_accessibility_bridge.h"
 
 namespace flutter {
 namespace testing {
+
+using ::testing::Contains;
 
 TEST(AccessibilityBridgeTest, basicTest) {
   std::shared_ptr<AccessibilityBridge> bridge =
@@ -115,7 +118,7 @@ TEST(AccessibilityBridgeTest, canFireChildrenChangedCorrectly) {
 
   EXPECT_EQ(child1_node->GetChildCount(), 0);
   EXPECT_EQ(child1_node->GetName(), "child 1");
-  delegate->accessibilitiy_events.clear();
+  delegate->accessibility_events.clear();
 
   // Add a child to root.
   root.child_count = 2;
@@ -145,14 +148,14 @@ TEST(AccessibilityBridgeTest, canFireChildrenChangedCorrectly) {
   EXPECT_EQ(root_node->GetChildCount(), 2);
   EXPECT_EQ(root_node->GetData().child_ids[0], 1);
   EXPECT_EQ(root_node->GetData().child_ids[1], 2);
-  EXPECT_EQ(delegate->accessibilitiy_events.size(), size_t{2});
-  std::set<ui::AXEventGenerator::Event> actual_event;
-  actual_event.insert(delegate->accessibilitiy_events[0].event_params.event);
-  actual_event.insert(delegate->accessibilitiy_events[1].event_params.event);
-  EXPECT_NE(actual_event.find(ui::AXEventGenerator::Event::CHILDREN_CHANGED),
-            actual_event.end());
-  EXPECT_NE(actual_event.find(ui::AXEventGenerator::Event::SUBTREE_CREATED),
-            actual_event.end());
+  EXPECT_EQ(delegate->accessibility_events.size(), size_t{2});
+  std::set<ui::AXEventGenerator::Event> actual_event{
+      delegate->accessibility_events.begin(),
+      delegate->accessibility_events.end()};
+  EXPECT_THAT(actual_event,
+              Contains(ui::AXEventGenerator::Event::CHILDREN_CHANGED));
+  EXPECT_THAT(actual_event,
+              Contains(ui::AXEventGenerator::Event::SUBTREE_CREATED));
 }
 
 TEST(AccessibilityBridgeTest, canUpdateDelegate) {
@@ -240,7 +243,7 @@ TEST(AccessibilityBridgeTest, canHandleSelectionChangeCorrectly) {
 
   const ui::AXTreeData& tree = bridge->GetAXTreeData();
   EXPECT_EQ(tree.sel_anchor_object_id, ui::AXNode::kInvalidAXID);
-  delegate->accessibilitiy_events.clear();
+  delegate->accessibility_events.clear();
 
   // Update the selection.
   root.text_selection_base = 0;
@@ -253,10 +256,10 @@ TEST(AccessibilityBridgeTest, canHandleSelectionChangeCorrectly) {
   EXPECT_EQ(tree.sel_anchor_offset, 0);
   EXPECT_EQ(tree.sel_focus_object_id, 0);
   EXPECT_EQ(tree.sel_focus_offset, 5);
-  EXPECT_EQ(delegate->accessibilitiy_events.size(), size_t{2});
-  EXPECT_EQ(delegate->accessibilitiy_events[0].event_params.event,
+  ASSERT_EQ(delegate->accessibility_events.size(), size_t{2});
+  EXPECT_EQ(delegate->accessibility_events[0],
             ui::AXEventGenerator::Event::DOCUMENT_SELECTION_CHANGED);
-  EXPECT_EQ(delegate->accessibilitiy_events[1].event_params.event,
+  EXPECT_EQ(delegate->accessibility_events[1],
             ui::AXEventGenerator::Event::OTHER_ATTRIBUTE_CHANGED);
 }
 
