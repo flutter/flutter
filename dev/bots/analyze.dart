@@ -161,6 +161,7 @@ Future<void> run(List<String> arguments) async {
 Future<void> verifyNoSyncAsyncStar(String workingDirectory, {int minimumMatches = 2000 }) async {
   final RegExp syncPattern = RegExp(r'\s*?a?sync\*\s*?{');
   const String ignorePattern = 'no_sync_async_star';
+  final RegExp commentPattern = RegExp(r'^\s*?///?');
   final List<String> errors = <String>[];
   await for (final File file in _allFiles(workingDirectory, 'dart', minimumMatches: minimumMatches)) {
     if (file.path.contains('test')) {
@@ -169,6 +170,9 @@ Future<void> verifyNoSyncAsyncStar(String workingDirectory, {int minimumMatches 
     final List<String> lines = file.readAsLinesSync();
     for (int index = 0; index < lines.length; index += 1) {
       final String line = lines[index];
+      if (line.startsWith(commentPattern)) {
+        continue;
+      }
       if (line.contains(syncPattern) && !line.contains(ignorePattern) && (index == 0 || !lines[index - 1].contains(ignorePattern))) {
         errors.add('${file.path}:$index: sync*/async* without an ignore (no_sync_async_star).');
       }

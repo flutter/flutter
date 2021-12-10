@@ -70,7 +70,6 @@ enum _LicenseEntryWithLineBreaksParserState {
 ///
 /// ```dart
 /// void initMyLibrary() {
-// ignore: no_sync_async_star
 ///   LicenseRegistry.addLicense(() async* {
 ///     yield const LicenseEntryWithLineBreaks(<String>['my_library'], '''
 /// Copyright 2016 The Sample Authors. All rights reserved.
