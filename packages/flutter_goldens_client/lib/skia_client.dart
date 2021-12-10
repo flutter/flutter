@@ -115,7 +115,7 @@ class SkiaGoldClient {
   /// Since Flutter framework tests are executed in parallel, and in random
   /// order, this will signal is this instance of the Gold client has been
   /// initialized.
-  bool initialized = false;
+  bool _initialized = false;
 
   /// Executes the `imgtest init` command in the goldctl tool.
   ///
@@ -124,7 +124,7 @@ class SkiaGoldClient {
   /// [FlutterPostSubmitFileComparator].
   Future<void> imgtestInit() async {
     // This client has already been intialized
-    if (initialized)
+    if (_initialized)
       return;
 
     final File keys = workDirectory.childFile('keys.json');
@@ -159,7 +159,7 @@ class SkiaGoldClient {
     final io.ProcessResult result = await process.run(imgtestInitCommand);
 
     if (result.exitCode != 0) {
-      initialized = false;
+      _initialized = false;
       final StringBuffer buf = StringBuffer()
         ..writeln('Skia Gold imgtest init failed.')
         ..writeln('An error occurred when initializing golden file test with ')
@@ -170,7 +170,7 @@ class SkiaGoldClient {
         ..writeln('stderr: ${result.stderr}');
       throw Exception(buf.toString());
     }
-    initialized = true;
+    _initialized = true;
   }
 
   /// Executes the `imgtest add` command in the goldctl tool.
@@ -224,7 +224,7 @@ class SkiaGoldClient {
   /// Since Flutter framework tests are executed in parallel, and in random
   /// order, this will signal is this instance of the Gold client has been
   /// initialized for tryjobs.
-  bool tryjobInitialized = false;
+  bool _tryjobInitialized = false;
 
   /// Executes the `imgtest init` command in the goldctl tool for tryjobs.
   ///
@@ -233,7 +233,7 @@ class SkiaGoldClient {
   /// [FlutterPreSubmitFileComparator].
   Future<void> tryjobInit() async {
     // This client has already been initialized
-    if (tryjobInitialized)
+    if (_tryjobInitialized)
       return;
 
     final File keys = workDirectory.childFile('keys.json');
@@ -271,7 +271,7 @@ class SkiaGoldClient {
     final io.ProcessResult result = await process.run(imgtestInitCommand);
 
     if (result.exitCode != 0) {
-      tryjobInitialized = false;
+      _tryjobInitialized = false;
       final StringBuffer buf = StringBuffer()
         ..writeln('Skia Gold tryjobInit failure.')
         ..writeln('An error occurred when initializing golden file tryjob with ')
@@ -282,7 +282,7 @@ class SkiaGoldClient {
         ..writeln('stderr: ${result.stderr}');
       throw Exception(buf.toString());
     }
-    tryjobInitialized = true;
+    _tryjobInitialized = true;
   }
 
   /// Executes the `imgtest add` command in the goldctl tool for tryjobs.
