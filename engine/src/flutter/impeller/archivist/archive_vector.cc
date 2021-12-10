@@ -24,7 +24,7 @@ Archivable::ArchiveName ArchiveVector::GetArchiveName() const {
   return ArchiveNameAuto;
 }
 
-const std::vector<int64_t> ArchiveVector::keys() const {
+const std::vector<int64_t> ArchiveVector::GetKeys() const {
   return keys_;
 }
 

@@ -15,7 +15,7 @@ class ArchiveVector : public Archivable {
 
   ArchiveName GetArchiveName() const override;
 
-  const std::vector<int64_t> keys() const;
+  const std::vector<int64_t> GetKeys() const;
 
   bool Write(ArchiveLocation& item) const override;
 

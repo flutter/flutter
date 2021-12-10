@@ -14,8 +14,8 @@
 
 namespace impeller {
 
-Archive::Archive(const std::string& path, bool recreate)
-    : database_(std::make_unique<ArchiveDatabase>(path, recreate)) {}
+Archive::Archive(const std::string& path)
+    : database_(std::make_unique<ArchiveDatabase>(path)) {}
 
 Archive::~Archive() {
   FML_DCHECK(transaction_count_ == 0)
@@ -64,7 +64,7 @@ bool Archive::ArchiveInstance(const ArchiveDef& definition,
   /*
    *  We need to bind the primary key only if the item does not provide its own
    */
-  if (!definition.autoAssignName &&
+  if (!definition.auto_key &&
       !statement.WriteValue(ArchiveClassRegistration::NameIndex, itemName)) {
     return false;
   }
@@ -79,8 +79,7 @@ bool Archive::ArchiveInstance(const ArchiveDef& definition,
 
   int64_t lastInsert = database_->GetLastInsertRowID();
 
-  if (!definition.autoAssignName &&
-      lastInsert != static_cast<int64_t>(itemName)) {
+  if (!definition.auto_key && lastInsert != static_cast<int64_t>(itemName)) {
     return false;
   }
 
@@ -256,7 +255,7 @@ bool ArchiveLocation::ReadVectorKeys(Archivable::ArchiveName name,
     return false;
   }
 
-  const auto& keys = vector.keys();
+  const auto& keys = vector.GetKeys();
 
   std::move(keys.begin(), keys.end(), std::back_inserter(members));
 

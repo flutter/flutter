@@ -18,11 +18,7 @@ namespace impeller {
 
 #define DB_HANDLE reinterpret_cast<sqlite3*>(database_)
 
-ArchiveDatabase::ArchiveDatabase(const std::string& filename, bool recreate) {
-  if (recreate) {
-    ::remove(filename.c_str());
-  }
-
+ArchiveDatabase::ArchiveDatabase(const std::string& filename) {
   if (::sqlite3_initialize() != SQLITE_OK) {
     VALIDATION_LOG << "Could not initialize sqlite.";
     return;
@@ -82,7 +78,7 @@ static inline const ArchiveClassRegistration* RegistrationIfReady(
 
 const ArchiveClassRegistration* ArchiveDatabase::GetRegistrationForDefinition(
     const ArchiveDef& definition) {
-  auto found = registrations_.find(definition.className);
+  auto found = registrations_.find(definition.table_name);
   if (found != registrations_.end()) {
     /*
      *  This class has already been registered.
@@ -96,7 +92,7 @@ const ArchiveClassRegistration* ArchiveDatabase::GetRegistrationForDefinition(
   auto registration = std::unique_ptr<ArchiveClassRegistration>(
       new ArchiveClassRegistration(*this, definition));
   auto res =
-      registrations_.emplace(definition.className, std::move(registration));
+      registrations_.emplace(definition.table_name, std::move(registration));
 
   /*
    *  If the new class registation is ready, return it to the caller.

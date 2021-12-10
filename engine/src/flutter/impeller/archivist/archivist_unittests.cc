@@ -8,6 +8,7 @@
 #include "flutter/fml/macros.h"
 #include "flutter/testing/testing.h"
 #include "impeller/archivist/archive.h"
+#include "impeller/archivist/archivist_fixture.h"
 
 namespace impeller {
 namespace testing {
@@ -44,114 +45,89 @@ class Sample : public Archivable {
 };
 
 const ArchiveDef Sample::ArchiveDefinition = {
-    .superClass = nullptr,
-    .className = "Sample",
-    .autoAssignName = false,
+    .isa = nullptr,
+    .table_name = "Sample",
+    .auto_key = false,
     .members = {999},
 };
 
-TEST(ArchiveTest, SimpleInitialization) {
-  auto name = "/tmp/sample.db";
-  {
-    Archive archive(name, true);
-    ASSERT_TRUE(archive.IsReady());
-  }
-  ASSERT_EQ(::remove(name), 0);
+using ArchiveTest = ArchivistFixture;
+
+TEST_F(ArchiveTest, SimpleInitialization) {
+  Archive archive(GetArchiveFileName().c_str());
+  ASSERT_TRUE(archive.IsReady());
 }
 
-TEST(ArchiveTest, AddStorageClass) {
-  auto name = "/tmp/sample2.db";
-  {
-    Archive archive(name, true);
-    ASSERT_TRUE(archive.IsReady());
-  }
-  ASSERT_EQ(::remove(name), 0);
+TEST_F(ArchiveTest, AddStorageClass) {
+  Archive archive(GetArchiveFileName().c_str());
+  ASSERT_TRUE(archive.IsReady());
 }
 
-TEST(ArchiveTest, AddData) {
-  auto name = "/tmp/sample3.db";
-  {
-    Archive archive(name, true);
-    ASSERT_TRUE(archive.IsReady());
-    Sample sample;
+TEST_F(ArchiveTest, AddData) {
+  Archive archive(GetArchiveFileName().c_str());
+  ASSERT_TRUE(archive.IsReady());
+  Sample sample;
+  ASSERT_TRUE(archive.Write(sample));
+}
+
+TEST_F(ArchiveTest, AddDataMultiple) {
+  Archive archive(GetArchiveFileName().c_str());
+  ASSERT_TRUE(archive.IsReady());
+
+  for (size_t i = 0; i < 100; i++) {
+    Sample sample(i + 1);
     ASSERT_TRUE(archive.Write(sample));
   }
-  ASSERT_EQ(::remove(name), 0);
 }
 
-TEST(ArchiveTest, AddDataMultiple) {
-  auto name = "/tmp/sample4.db";
-  {
-    Archive archive(name, true);
-    ASSERT_TRUE(archive.IsReady());
+TEST_F(ArchiveTest, ReadData) {
+  Archive archive(GetArchiveFileName().c_str());
+  ASSERT_TRUE(archive.IsReady());
 
-    for (size_t i = 0; i < 100; i++) {
-      Sample sample(i + 1);
-      ASSERT_TRUE(archive.Write(sample));
-    }
+  size_t count = 50;
+
+  std::vector<Archivable::ArchiveName> keys;
+  std::vector<uint64_t> values;
+
+  for (size_t i = 0; i < count; i++) {
+    Sample sample(i + 1);
+    keys.push_back(sample.GetArchiveName());
+    values.push_back(sample.GetSomeData());
+    ASSERT_TRUE(archive.Write(sample));
   }
-  ASSERT_EQ(::remove(name), 0);
+
+  for (size_t i = 0; i < count; i++) {
+    Sample sample;
+    ASSERT_TRUE(archive.Read(keys[i], sample));
+    ASSERT_EQ(values[i], sample.GetSomeData());
+  }
 }
 
-TEST(ArchiveTest, ReadData) {
-  auto name = "/tmp/sample5.db";
-  {
-    Archive archive(name, true);
-    ASSERT_TRUE(archive.IsReady());
+TEST_F(ArchiveTest, ReadDataWithNames) {
+  Archive archive(GetArchiveFileName().c_str());
+  ASSERT_TRUE(archive.IsReady());
 
-    size_t count = 50;
+  size_t count = 8;
 
-    std::vector<Archivable::ArchiveName> keys;
-    std::vector<uint64_t> values;
+  std::vector<Archivable::ArchiveName> keys;
+  std::vector<uint64_t> values;
 
-    for (size_t i = 0; i < count; i++) {
-      Sample sample(i + 1);
-      keys.push_back(sample.GetArchiveName());
-      values.push_back(sample.GetSomeData());
-      ASSERT_TRUE(archive.Write(sample));
-    }
+  keys.reserve(count);
+  values.reserve(count);
 
-    for (size_t i = 0; i < count; i++) {
-      Sample sample;
-      ASSERT_TRUE(archive.Read(keys[i], sample));
-      ASSERT_EQ(values[i], sample.GetSomeData());
-    }
+  for (size_t i = 0; i < count; i++) {
+    Sample sample(i + 1);
+    keys.push_back(sample.GetArchiveName());
+    values.push_back(sample.GetSomeData());
+    ASSERT_TRUE(archive.Write(sample));
   }
-  ASSERT_EQ(::remove(name), 0);
-}
 
-/*
- *  This shouldn't be slow. Need to cache compiled statements.
- */
-TEST(ArchiveTest, ReadDataWithNames) {
-  auto name = "/tmp/sample6.db";
-  {
-    Archive archive(name, true);
-    ASSERT_TRUE(archive.IsReady());
-
-    size_t count = 8;
-
-    std::vector<Archivable::ArchiveName> keys;
-    std::vector<uint64_t> values;
-
-    keys.reserve(count);
-    values.reserve(count);
-
-    for (size_t i = 0; i < count; i++) {
-      Sample sample(i + 1);
-      keys.push_back(sample.GetArchiveName());
-      values.push_back(sample.GetSomeData());
-      ASSERT_TRUE(archive.Write(sample));
-    }
-
-    for (size_t i = 0; i < count; i++) {
-      Sample sample;
-      ASSERT_TRUE(archive.Read(keys[i], sample));
-      ASSERT_EQ(values[i], sample.GetSomeData());
-      ASSERT_EQ(keys[i], sample.GetArchiveName());
-    }
+  for (size_t i = 0; i < count; i++) {
+    Sample sample;
+    ASSERT_TRUE(archive.Read(keys[i], sample));
+    ASSERT_EQ(values[i], sample.GetSomeData());
+    ASSERT_EQ(keys[i], sample.GetArchiveName());
   }
-  ASSERT_EQ(::remove(name), 0);
 }
 
 }  // namespace testing
