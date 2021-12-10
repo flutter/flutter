@@ -55,7 +55,7 @@ public class KeyEventChannelTest {
 
   @Before
   public void setUp() {
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
     keyEvent = new FakeKeyEvent(KeyEvent.ACTION_DOWN, 65);
     handled = new boolean[] {false};
     keyEventChannel = new KeyEventChannel(fakeMessenger);

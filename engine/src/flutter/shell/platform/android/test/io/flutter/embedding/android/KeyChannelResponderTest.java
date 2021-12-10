@@ -30,7 +30,7 @@ public class KeyChannelResponderTest {
 
   @Before
   public void setUp() {
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
     channelResponder = new KeyChannelResponder(keyEventChannel);
   }
 

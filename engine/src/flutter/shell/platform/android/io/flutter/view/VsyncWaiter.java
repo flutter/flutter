@@ -97,7 +97,7 @@ public class VsyncWaiter {
                       if (delay < 0) {
                         delay = 0;
                       }
-                      flutterJNI.nativeOnVsync(delay, refreshPeriodNanos, cookie);
+                      flutterJNI.onVsync(delay, refreshPeriodNanos, cookie);
                     }
                   });
         }

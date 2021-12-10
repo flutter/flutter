@@ -6,7 +6,7 @@ import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 import android.annotation.TargetApi;
 import io.flutter.plugin.common.MethodCall;
@@ -49,7 +49,7 @@ public class RestorationChannelTest {
 
     MethodChannel.Result result = mock(MethodChannel.Result.class);
     argumentCaptor.getValue().onMethodCall(new MethodCall("get", null), result);
-    verifyZeroInteractions(result);
+    verifyNoInteractions(result);
 
     restorationChannel.setRestorationData(data);
     verify(rawChannel, times(0)).invokeMethod(any(), any());

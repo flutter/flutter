@@ -19,23 +19,23 @@ class FlutterTextUtils {
   }
 
   public boolean isEmoji(int codePoint) {
-    return flutterJNI.nativeFlutterTextUtilsIsEmoji(codePoint);
+    return flutterJNI.isCodePointEmoji(codePoint);
   }
 
   public boolean isEmojiModifier(int codePoint) {
-    return flutterJNI.nativeFlutterTextUtilsIsEmojiModifier(codePoint);
+    return flutterJNI.isCodePointEmojiModifier(codePoint);
   }
 
   public boolean isEmojiModifierBase(int codePoint) {
-    return flutterJNI.nativeFlutterTextUtilsIsEmojiModifierBase(codePoint);
+    return flutterJNI.isCodePointEmojiModifierBase(codePoint);
   }
 
   public boolean isVariationSelector(int codePoint) {
-    return flutterJNI.nativeFlutterTextUtilsIsVariationSelector(codePoint);
+    return flutterJNI.isCodePointVariantSelector(codePoint);
   }
 
   public boolean isRegionalIndicatorSymbol(int codePoint) {
-    return flutterJNI.nativeFlutterTextUtilsIsRegionalIndicator(codePoint);
+    return flutterJNI.isCodePointRegionalIndicator(codePoint);
   }
 
   public boolean isTagSpecChar(int codePoint) {

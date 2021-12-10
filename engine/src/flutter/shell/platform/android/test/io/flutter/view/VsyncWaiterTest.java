@@ -4,10 +4,10 @@
 
 package io.flutter.view;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.isNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -47,7 +47,7 @@ public class VsyncWaiterTest {
     verify(mockFlutterJNI, times(1)).setAsyncWaitForVsyncDelegate(delegateCaptor.capture());
     delegateCaptor.getValue().asyncWaitForVsync(1);
     shadowOf(Looper.getMainLooper()).idle();
-    verify(mockFlutterJNI, times(1)).nativeOnVsync(anyLong(), eq(1000000000l / 10l), eq(1l));
+    verify(mockFlutterJNI, times(1)).onVsync(anyLong(), eq(1000000000l / 10l), eq(1l));
   }
 
   @TargetApi(17)
@@ -75,7 +75,7 @@ public class VsyncWaiterTest {
     verify(mockFlutterJNI, times(1)).setAsyncWaitForVsyncDelegate(delegateCaptor.capture());
     delegateCaptor.getValue().asyncWaitForVsync(1);
     shadowOf(Looper.getMainLooper()).idle();
-    verify(mockFlutterJNI, times(1)).nativeOnVsync(anyLong(), eq(1000000000l / 90l), eq(1l));
+    verify(mockFlutterJNI, times(1)).onVsync(anyLong(), eq(1000000000l / 90l), eq(1l));
 
     when(mockDisplay.getRefreshRate()).thenReturn(60.0f);
     displayListenerCaptor.getValue().onDisplayChanged(Display.DEFAULT_DISPLAY);
@@ -83,7 +83,7 @@ public class VsyncWaiterTest {
 
     delegateCaptor.getValue().asyncWaitForVsync(1);
     shadowOf(Looper.getMainLooper()).idle();
-    verify(mockFlutterJNI, times(1)).nativeOnVsync(anyLong(), eq(1000000000l / 60l), eq(1l));
+    verify(mockFlutterJNI, times(1)).onVsync(anyLong(), eq(1000000000l / 60l), eq(1l));
   }
 
   @TargetApi(17)

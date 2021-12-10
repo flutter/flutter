@@ -106,6 +106,24 @@ public class FlutterJNI {
   // platform thread and doesn't require locking.
   private ReentrantReadWriteLock shellHolderLock = new ReentrantReadWriteLock();
 
+  // Prefer using the FlutterJNI.Factory so it's easier to test.
+  public FlutterJNI() {
+    // We cache the main looper so that we can ensure calls are made on the main thread
+    // without consistently paying the synchronization cost of getMainLooper().
+    mainLooper = Looper.getMainLooper();
+  }
+
+  /**
+   * A factory for creating {@code FlutterJNI} instances. Useful for FlutterJNI injections during
+   * tests.
+   */
+  public static class Factory {
+    /** @return a {@link FlutterJNI} instance. */
+    public FlutterJNI provideFlutterJNI() {
+      return new FlutterJNI();
+    }
+  }
+
   // BEGIN Methods related to loading for FlutterLoader.
   /**
    * Loads the libflutter.so C++ library.
@@ -126,6 +144,8 @@ public class FlutterJNI {
 
   private static boolean loadLibraryCalled = false;
 
+  private static native void nativePrefetchDefaultFontManager();
+
   /**
    * Prefetch the default font manager provided by SkFontMgr::RefDefault() which is a process-wide
    * singleton owned by Skia. Note that, the first call to SkFontMgr::RefDefault() will take
@@ -142,9 +162,15 @@ public class FlutterJNI {
     FlutterJNI.prefetchDefaultFontManagerCalled = true;
   }
 
-  private static native void nativePrefetchDefaultFontManager();
-
   private static boolean prefetchDefaultFontManagerCalled = false;
+
+  private static native void nativeInit(
+      @NonNull Context context,
+      @NonNull String[] args,
+      @Nullable String bundlePath,
+      @NonNull String appStoragePath,
+      @NonNull String engineCachesPath,
+      long initTimeMillis);
 
   /**
    * Perform one time initialization of the Dart VM and Flutter engine.
@@ -174,14 +200,6 @@ public class FlutterJNI {
     FlutterJNI.initCalled = true;
   }
 
-  private static native void nativeInit(
-      @NonNull Context context,
-      @NonNull String[] args,
-      @Nullable String bundlePath,
-      @NonNull String appStoragePath,
-      @NonNull String engineCachesPath,
-      long initTimeMillis);
-
   private static boolean initCalled = false;
   // END methods related to FlutterLoader
 
@@ -201,23 +219,23 @@ public class FlutterJNI {
 
   private native boolean nativeGetIsSoftwareRenderingEnabled();
 
-  @UiThread
   /**
    * Checks launch settings for whether software rendering is requested.
    *
    * <p>The value is the same per program.
    */
+  @UiThread
   public boolean getIsSoftwareRenderingEnabled() {
     return nativeGetIsSoftwareRenderingEnabled();
   }
 
-  @Nullable
   /**
    * Observatory URI for the VM instance.
    *
    * <p>Its value is set by the native engine once {@link #init(Context, String[], String, String,
    * String, long)} is run.
    */
+  @Nullable
   public static String getObservatoryUri() {
     return observatoryUri;
   }
@@ -245,7 +263,7 @@ public class FlutterJNI {
    * The Android vsync waiter implementation in C++ needs to know when a vsync signal arrives, which
    * is obtained via Java API. The delegate set here is called on the C++ side when the engine is
    * ready to wait for the next vsync signal. The delegate is expected to add a postFrameCallback to
-   * the {@link android.view.Choreographer}, and call {@link nativeOnVsync} to notify the engine.
+   * the {@link android.view.Choreographer}, and call {@link onVsync} to notify the engine.
    *
    * @param delegate The delegate that will call the engine back on the next vsync signal.
    */
@@ -264,6 +282,8 @@ public class FlutterJNI {
     }
   }
 
+  private native void nativeOnVsync(long frameDelayNanos, long refreshPeriodNanos, long cookie);
+
   /**
    * Notifies the engine that the Choreographer has signaled a vsync.
    *
@@ -272,23 +292,44 @@ public class FlutterJNI {
    * @param refreshPeriodNanos The display refresh period in nanoseconds.
    * @param cookie An opaque handle to the C++ VSyncWaiter object.
    */
-  public native void nativeOnVsync(long frameDelayNanos, long refreshPeriodNanos, long cookie);
+  public void onVsync(long frameDelayNanos, long refreshPeriodNanos, long cookie) {
+    nativeOnVsync(frameDelayNanos, refreshPeriodNanos, cookie);
+  }
 
-  // TODO(mattcarroll): add javadocs
   @NonNull
+  @Deprecated
   public static native FlutterCallbackInformation nativeLookupCallbackInformation(long handle);
 
   // ----- Start FlutterTextUtils Methods ----
+  private native boolean nativeFlutterTextUtilsIsEmoji(int codePoint);
 
-  public native boolean nativeFlutterTextUtilsIsEmoji(int codePoint);
+  public boolean isCodePointEmoji(int codePoint) {
+    return nativeFlutterTextUtilsIsEmoji(codePoint);
+  }
 
-  public native boolean nativeFlutterTextUtilsIsEmojiModifier(int codePoint);
+  private native boolean nativeFlutterTextUtilsIsEmojiModifier(int codePoint);
 
-  public native boolean nativeFlutterTextUtilsIsEmojiModifierBase(int codePoint);
+  public boolean isCodePointEmojiModifier(int codePoint) {
+    return nativeFlutterTextUtilsIsEmojiModifier(codePoint);
+  }
 
-  public native boolean nativeFlutterTextUtilsIsVariationSelector(int codePoint);
+  private native boolean nativeFlutterTextUtilsIsEmojiModifierBase(int codePoint);
 
-  public native boolean nativeFlutterTextUtilsIsRegionalIndicator(int codePoint);
+  public boolean isCodePointEmojiModifierBase(int codePoint) {
+    return nativeFlutterTextUtilsIsEmojiModifierBase(codePoint);
+  }
+
+  private native boolean nativeFlutterTextUtilsIsVariationSelector(int codePoint);
+
+  public boolean isCodePointVariantSelector(int codePoint) {
+    return nativeFlutterTextUtilsIsVariationSelector(codePoint);
+  }
+
+  private native boolean nativeFlutterTextUtilsIsRegionalIndicator(int codePoint);
+
+  public boolean isCodePointRegionalIndicator(int codePoint) {
+    return nativeFlutterTextUtilsIsRegionalIndicator(codePoint);
+  }
 
   // ----- End Engine FlutterTextUtils Methods ----
 
@@ -311,13 +352,6 @@ public class FlutterJNI {
       new CopyOnWriteArraySet<>();
 
   @NonNull private final Looper mainLooper; // cached to avoid synchronization on repeat access.
-
-  // Prefer using the FlutterJNI.Factory so it's easier to test.
-  public FlutterJNI() {
-    // We cache the main looper so that we can ensure calls are made on the main thread
-    // without consistently paying the synchronization cost of getMainLooper().
-    mainLooper = Looper.getMainLooper();
-  }
 
   // ------ Start Native Attach/Detach Support ----
   /**
@@ -1401,16 +1435,5 @@ public class FlutterJNI {
 
   public interface AsyncWaitForVsyncDelegate {
     void asyncWaitForVsync(final long cookie);
-  }
-
-  /**
-   * A factory for creating {@code FlutterJNI} instances. Useful for FlutterJNI injections during
-   * tests.
-   */
-  public static class Factory {
-    /** @return a {@link FlutterJNI} instance. */
-    public FlutterJNI provideFlutterJNI() {
-      return new FlutterJNI();
-    }
   }
 }

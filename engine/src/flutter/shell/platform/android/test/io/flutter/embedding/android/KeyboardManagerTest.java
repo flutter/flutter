@@ -69,7 +69,7 @@ public class KeyboardManagerTest {
 
   @Before
   public void setUp() {
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
     when(mockFlutterJni.isAttached()).thenReturn(true);
     mockEngine = mockFlutterEngine();
     mockKeyEventChannel = mockEngine.getKeyEventChannel();

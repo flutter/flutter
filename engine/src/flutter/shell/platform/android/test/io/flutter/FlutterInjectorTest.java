@@ -37,7 +37,7 @@ public class FlutterInjectorTest {
   public void setUp() {
     // Since the intent is to have a convenient static class to use for production.
     FlutterInjector.reset();
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
   }
 
   @After
