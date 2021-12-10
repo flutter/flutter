@@ -244,7 +244,7 @@ class XCResultIssue {
   /// The location where the issue occurs.
   ///
   /// This is a re-formatted version of the "url" value in the json.
-  /// The format looks like <file location>:<StartingLineNumber>:<StartingColumnNumber>.
+  /// The format looks like <FileLocation>:<StartingLineNumber>:<StartingColumnNumber>.
   final String location;
 }
 
@@ -294,5 +294,13 @@ String _convertUrlToLocationString(String url){
         break;
     }
   }
-  return '$filePath${startingLineNumber.isEmpty?'':':$startingLineNumber'}${startingColumnNumber.isEmpty?'':':$startingColumnNumber'}';
+
+  if (startingLineNumber.isNotEmpty) {
+    startingLineNumber = ':$startingLineNumber';
+  }
+  if (startingColumnNumber.isNotEmpty) {
+    startingColumnNumber = ':$startingColumnNumber';
+  }
+
+  return '$filePath$startingLineNumber$startingColumnNumber';
 }
