@@ -85,25 +85,25 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
       return knownKey;
     }
 
-    // If this key is printable, generate the LogicalKeyboardKey from its
-    // Unicode value. Control keys such as ESC, CTRL, and SHIFT are not
-    // printable. HOME, DEL, arrow keys, and function keys are considered
-    // modifier function keys, which generate invalid Unicode scalar values.
-    if (keyLabel.isNotEmpty &&
-        !LogicalKeyboardKey.isControlCharacter(keyLabel) &&
-        !_isUnprintableKey(keyLabel)) {
-      // Given that charactersIgnoringModifiers can contain a String of
-      // arbitrary length, limit to a maximum of two Unicode scalar values. It
-      // is unlikely that a keyboard would produce a code point bigger than 32
-      // bits, but it is still worth defending against this case.
-      assert(charactersIgnoringModifiers.length <= 2);
-      int codeUnit = charactersIgnoringModifiers.codeUnitAt(0);
-      if (charactersIgnoringModifiers.length == 2) {
-        final int secondCode = charactersIgnoringModifiers.codeUnitAt(1);
-        codeUnit = (codeUnit << 16) | secondCode;
+    // If this key is a single printable character, generate the
+    // LogicalKeyboardKey from its Unicode value. Control keys such as ESC,
+    // CTRL, and SHIFT are not printable. HOME, DEL, arrow keys, and function
+    // keys are considered modifier function keys, which generate invalid
+    // Unicode scalar values. Multi-char characters are also discarded.
+    int? character;
+    if (keyLabel.isNotEmpty) {
+      final List<int> codePoints = keyLabel.runes.toList();
+      if (codePoints.length == 1 &&
+          // Ideally we should test whether `codePoints[0]` is in the range.
+          // Since LogicalKeyboardKey.isControlCharacter and _isUnprintableKey
+          // only tests BMP, it is fine to test keyLabel instead.
+          !LogicalKeyboardKey.isControlCharacter(keyLabel) &&
+          !_isUnprintableKey(keyLabel)) {
+        character = codePoints[0];
       }
-
-      final int keyId = LogicalKeyboardKey.unicodePlane | (codeUnit & LogicalKeyboardKey.valueMask);
+    }
+    if (character != null) {
+      final int keyId = LogicalKeyboardKey.unicodePlane | (character & LogicalKeyboardKey.valueMask);
       return LogicalKeyboardKey.findKeyByKeyId(keyId) ?? LogicalKeyboardKey(keyId);
     }
 

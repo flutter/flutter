@@ -137,7 +137,7 @@ mixin AnimationLocalListenersMixin {
   @protected
   @pragma('vm:notify-debugger-on-exception')
   void notifyListeners() {
-    final List<VoidCallback> localListeners = List<VoidCallback>.from(_listeners);
+    final List<VoidCallback> localListeners = List<VoidCallback>.of(_listeners);
     for (final VoidCallback listener in localListeners) {
       InformationCollector? collector;
       assert(() {
@@ -226,7 +226,7 @@ mixin AnimationLocalStatusListenersMixin {
   @protected
   @pragma('vm:notify-debugger-on-exception')
   void notifyStatusListeners(AnimationStatus status) {
-    final List<AnimationStatusListener> localListeners = List<AnimationStatusListener>.from(_statusListeners);
+    final List<AnimationStatusListener> localListeners = List<AnimationStatusListener>.of(_statusListeners);
     for (final AnimationStatusListener listener in localListeners) {
       try {
         if (_statusListeners.contains(listener))

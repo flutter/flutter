@@ -61,6 +61,11 @@
 /dev/devicelab/bin/tasks/routing_test.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/textfield_perf__e2e_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/web_size__compile_test.dart @yjbanov @flutter/web
+/dev/devicelab/bin/tasks/opacity_peephole_col_of_rows_perf__e2e_summary.dart @flar @flutter/engine
+/dev/devicelab/bin/tasks/opacity_peephole_grid_of_opacity_perf__e2e_summary.dart @flar @flutter/engine
+/dev/devicelab/bin/tasks/opacity_peephole_one_rect_perf__e2e_summary.dart @flar @flutter/engine
+/dev/devicelab/bin/tasks/opacity_peephole_opacity_of_grid_perf__e2e_summary.dart @flar @flutter/engine
+/dev/devicelab/bin/tasks/opacity_peephole_fade_transition_text_perf__e2e_summary.dart @flar @flutter/engine
 
 ## Windows Android DeviceLab tests
 /dev/devicelab/bin/tasks/basic_material_app_win__compile.dart @zanderso @flutter/tool

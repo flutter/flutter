@@ -314,7 +314,7 @@ void main() {
     );
   });
 
-  testWidgets('Activates the text field when receives semantics focus on Mac', (WidgetTester tester) async {
+  testWidgets('Activates the text field when receives semantics focus on Mac, Windows', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
     final FocusNode focusNode = FocusNode();
@@ -362,7 +362,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(focusNode.hasFocus, isTrue);
     semantics.dispose();
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS, TargetPlatform.windows }));
 
   testWidgets(
     'takes available space horizontally and takes intrinsic space vertically no-strut',
@@ -717,7 +717,7 @@ void main() {
     await expectLater(
       find.byKey(const ValueKey<int>(1)),
       matchesGoldenFile(
-        'text_field_cursor_test.cupertino_${describeEnum(debugDefaultTargetPlatformOverride!).toLowerCase()}.1.png',
+        'text_field_cursor_test.cupertino_${debugDefaultTargetPlatformOverride!.name.toLowerCase()}.1.png',
       ),
     );
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));

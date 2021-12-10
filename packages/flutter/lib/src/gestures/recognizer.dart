@@ -300,7 +300,7 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
   @protected
   @mustCallSuper
   void resolve(GestureDisposition disposition) {
-    final List<GestureArenaEntry> localEntries = List<GestureArenaEntry>.from(_entries.values);
+    final List<GestureArenaEntry> localEntries = List<GestureArenaEntry>.of(_entries.values);
     _entries.clear();
     for (final GestureArenaEntry entry in localEntries)
       entry.resolve(disposition);

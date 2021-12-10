@@ -2138,11 +2138,11 @@ void main() {
       expect(find.byType(Slider), findsOneWidget);
       expect(find.byType(CupertinoSlider), findsOneWidget);
 
-      expect(value, 0.5, reason: 'on ${describeEnum(platform)}');
+      expect(value, 0.5, reason: 'on ${platform.name}');
       final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(CupertinoSlider)));
       // Drag to the right end of the track.
       await gesture.moveBy(const Offset(600.0, 0.0));
-      expect(value, 1.0, reason: 'on ${describeEnum(platform)}');
+      expect(value, 1.0, reason: 'on ${platform.name}');
       await gesture.up();
     }
 
@@ -2153,11 +2153,11 @@ void main() {
       expect(find.byType(Slider), findsOneWidget);
       expect(find.byType(CupertinoSlider), findsNothing);
 
-      expect(value, 0.5, reason: 'on ${describeEnum(platform)}');
+      expect(value, 0.5, reason: 'on ${platform.name}');
       final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Slider)));
       // Drag to the right end of the track.
       await gesture.moveBy(const Offset(600.0, 0.0));
-      expect(value, 1.0, reason: 'on ${describeEnum(platform)}');
+      expect(value, 1.0, reason: 'on ${platform.name}');
       await gesture.up();
     }
   });
