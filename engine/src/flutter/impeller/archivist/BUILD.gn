@@ -34,7 +34,11 @@ impeller_component("archivist") {
 
 impeller_component("archivist_unittests") {
   testonly = true
-  sources = [ "archivist_unittests.cc" ]
+  sources = [
+    "archivist_fixture.cc",
+    "archivist_fixture.h",
+    "archivist_unittests.cc",
+  ]
   deps = [
     ":archivist",
     "//flutter/testing",

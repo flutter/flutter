@@ -18,7 +18,7 @@ struct ArchiveDef;
 
 class ArchiveDatabase {
  public:
-  ArchiveDatabase(const std::string& filename, bool recreate);
+  ArchiveDatabase(const std::string& filename);
 
   ~ArchiveDatabase();
 
