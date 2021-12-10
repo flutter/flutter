@@ -1208,7 +1208,23 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
         arguments.getBoolean(AccessibilityNodeInfo.ACTION_ARGUMENT_EXTEND_SELECTION_BOOLEAN);
     // The voice access expects the semantics node to update immediately. We update the semantics
     // node based on prediction. If the result is incorrect, it will be updated in the next frame.
+    final int previousTextSelectionBase = semanticsNode.textSelectionBase;
+    final int previousTextSelectionExtent = semanticsNode.textSelectionExtent;
     predictCursorMovement(semanticsNode, granularity, forward, extendSelection);
+
+    if (previousTextSelectionBase != semanticsNode.textSelectionBase
+        || previousTextSelectionExtent != semanticsNode.textSelectionExtent) {
+      final String value = semanticsNode.value != null ? semanticsNode.value : "";
+      final AccessibilityEvent selectionEvent =
+          obtainAccessibilityEvent(
+              semanticsNode.id, AccessibilityEvent.TYPE_VIEW_TEXT_SELECTION_CHANGED);
+      selectionEvent.getText().add(value);
+      selectionEvent.setFromIndex(semanticsNode.textSelectionBase);
+      selectionEvent.setToIndex(semanticsNode.textSelectionExtent);
+      selectionEvent.setItemCount(value.length());
+      sendAccessibilityEvent(selectionEvent);
+    }
+
     switch (granularity) {
       case AccessibilityNodeInfo.MOVEMENT_GRANULARITY_CHARACTER:
         {
