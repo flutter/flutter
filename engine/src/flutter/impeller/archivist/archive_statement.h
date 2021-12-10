@@ -17,53 +17,53 @@ class ArchiveStatement {
 
   ArchiveStatement(ArchiveStatement&& message);
 
-  bool isReady() const;
+  bool IsReady() const;
 
-  bool reset();
+  bool Reset();
 
-  bool bind(size_t index, const std::string& item);
-
-  template <class T, class = std::enable_if<std::is_integral<T>::value>>
-  bool bind(size_t index, T item) {
-    return bindIntegral(index, static_cast<int64_t>(item));
-  }
-
-  bool bind(size_t index, double item);
-
-  bool bind(size_t index, const Allocation& item);
+  bool WriteValue(size_t index, const std::string& item);
 
   template <class T, class = std::enable_if<std::is_integral<T>::value>>
-  bool column(size_t index, T& item) {
-    return columnIntegral(index, item);
+  bool WriteValue(size_t index, T item) {
+    return BindIntegral(index, static_cast<int64_t>(item));
   }
 
-  bool column(size_t index, double& item);
+  bool WriteValue(size_t index, double item);
 
-  bool column(size_t index, std::string& item);
+  bool WriteValue(size_t index, const Allocation& item);
 
-  bool column(size_t index, Allocation& item);
+  template <class T, class = std::enable_if<std::is_integral<T>::value>>
+  bool ReadValue(size_t index, T& item) {
+    return ColumnIntegral(index, item);
+  }
 
-  size_t columnCount();
+  bool ReadValue(size_t index, double& item);
+
+  bool ReadValue(size_t index, std::string& item);
+
+  bool ReadValue(size_t index, Allocation& item);
+
+  size_t GetColumnCount();
 
   enum class Result {
-    Done,
-    Row,
-    Failure,
+    kDone,
+    kRow,
+    kFailure,
   };
 
-  Result run();
+  [[nodiscard]] Result Run();
 
  private:
-  void* _statement = nullptr;
-  bool _ready = false;
+  void* statement_handle_ = nullptr;
+  bool ready_ = false;
 
   friend class ArchiveDatabase;
 
   ArchiveStatement(void* db, const std::string& statememt);
 
-  bool bindIntegral(size_t index, int64_t item);
+  bool BindIntegral(size_t index, int64_t item);
 
-  bool columnIntegral(size_t index, int64_t& item);
+  bool ColumnIntegral(size_t index, int64_t& item);
 
   FML_DISALLOW_COPY_AND_ASSIGN(ArchiveStatement);
 };

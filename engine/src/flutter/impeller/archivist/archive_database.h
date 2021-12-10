@@ -22,27 +22,27 @@ class ArchiveDatabase {
 
   ~ArchiveDatabase();
 
-  bool isReady() const;
+  bool IsReady() const;
 
-  int64_t lastInsertRowID();
+  int64_t GetLastInsertRowID();
 
-  const ArchiveClassRegistration* registrationForDefinition(
+  const ArchiveClassRegistration* GetRegistrationForDefinition(
       const ArchiveDef& definition);
 
-  ArchiveTransaction acquireTransaction(int64_t& transactionCount);
+  ArchiveTransaction CreateTransaction(int64_t& transactionCount);
 
  private:
-  void* _db = nullptr;
-  bool _ready = false;
+  void* database_ = nullptr;
+  bool ready_ = false;
   std::map<std::string, std::unique_ptr<ArchiveClassRegistration>>
-      _registrations;
-  std::unique_ptr<ArchiveStatement> _beginTransaction;
-  std::unique_ptr<ArchiveStatement> _endTransaction;
-  std::unique_ptr<ArchiveStatement> _rollbackTransaction;
+      registrations_;
+  std::unique_ptr<ArchiveStatement> begin_transaction_stmt_;
+  std::unique_ptr<ArchiveStatement> end_transaction_stmt_;
+  std::unique_ptr<ArchiveStatement> rollback_transaction_stmt_;
 
   friend class ArchiveClassRegistration;
 
-  ArchiveStatement acquireStatement(const std::string& statementString) const;
+  ArchiveStatement CreateStatement(const std::string& statementString) const;
 
   FML_DISALLOW_COPY_AND_ASSIGN(ArchiveDatabase);
 };

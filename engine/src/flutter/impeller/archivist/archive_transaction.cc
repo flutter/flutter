@@ -13,40 +13,40 @@ ArchiveTransaction::ArchiveTransaction(int64_t& transactionCount,
                                        ArchiveStatement& beginStatement,
                                        ArchiveStatement& endStatement,
                                        ArchiveStatement& rollbackStatement)
-    : _endStatement(endStatement),
-      _rollbackStatement(rollbackStatement),
-      _transactionCount(transactionCount) {
-  if (_transactionCount == 0) {
-    _cleanup = beginStatement.run() == ArchiveStatement::Result::Done;
+    : end_stmt_(endStatement),
+      rollback_stmt_(rollbackStatement),
+      transaction_count_(transactionCount) {
+  if (transaction_count_ == 0) {
+    cleanup_ = beginStatement.Run() == ArchiveStatement::Result::kDone;
   }
-  _transactionCount++;
+  transaction_count_++;
 }
 
 ArchiveTransaction::ArchiveTransaction(ArchiveTransaction&& other)
-    : _endStatement(other._endStatement),
-      _rollbackStatement(other._rollbackStatement),
-      _transactionCount(other._transactionCount),
-      _cleanup(other._cleanup),
-      _successful(other._successful) {
-  other._abandoned = true;
+    : end_stmt_(other.end_stmt_),
+      rollback_stmt_(other.rollback_stmt_),
+      transaction_count_(other.transaction_count_),
+      cleanup_(other.cleanup_),
+      successful_(other.successful_) {
+  other.abandoned_ = true;
 }
 
 ArchiveTransaction::~ArchiveTransaction() {
-  if (_abandoned) {
+  if (abandoned_) {
     return;
   }
 
-  FML_CHECK(_transactionCount != 0);
-  if (_transactionCount == 1 && _cleanup) {
-    auto res = _successful ? _endStatement.run() : _rollbackStatement.run();
-    FML_CHECK(res == ArchiveStatement::Result::Done)
+  FML_CHECK(transaction_count_ != 0);
+  if (transaction_count_ == 1 && cleanup_) {
+    auto res = successful_ ? end_stmt_.Run() : rollback_stmt_.Run();
+    FML_CHECK(res == ArchiveStatement::Result::kDone)
         << "Must be able to commit the nested transaction";
   }
-  _transactionCount--;
+  transaction_count_--;
 }
 
-void ArchiveTransaction::markWritesSuccessful() {
-  _successful = true;
+void ArchiveTransaction::MarkWritesAsReadyForCommit() {
+  successful_ = true;
 }
 
 }  // namespace impeller

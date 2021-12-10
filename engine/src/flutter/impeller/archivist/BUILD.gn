@@ -11,7 +11,10 @@ impeller_component("archivist") {
   public = [ "archive.h" ]
 
   sources = [
+    "archivable.cc",
+    "archivable.h",
     "archive.cc",
+    "archive.h",
     "archive_class_registration.cc",
     "archive_class_registration.h",
     "archive_database.cc",

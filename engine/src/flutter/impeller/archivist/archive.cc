@@ -15,41 +15,43 @@
 namespace impeller {
 
 Archive::Archive(const std::string& path, bool recreate)
-    : _db(std::make_unique<ArchiveDatabase>(path, recreate)) {}
+    : database_(std::make_unique<ArchiveDatabase>(path, recreate)) {}
 
 Archive::~Archive() {
-  FML_DCHECK(_transactionCount == 0) << "There must be no pending transactions";
+  FML_DCHECK(transaction_count_ == 0)
+      << "There must be no pending transactions";
 }
 
-bool Archive::isReady() const {
-  return _db->isReady();
+bool Archive::IsReady() const {
+  return database_->IsReady();
 }
 
-bool Archive::archiveInstance(const ArchiveDef& definition,
-                              const ArchiveSerializable& archivable,
+bool Archive::ArchiveInstance(const ArchiveDef& definition,
+                              const Archivable& archivable,
                               int64_t& lastInsertIDOut) {
-  if (!isReady()) {
+  if (!IsReady()) {
     return false;
   }
 
-  auto transaction = _db->acquireTransaction(_transactionCount);
+  auto transaction = database_->CreateTransaction(transaction_count_);
 
-  const auto* registration = _db->registrationForDefinition(definition);
+  const auto* registration =
+      database_->GetRegistrationForDefinition(definition);
 
   if (registration == nullptr) {
     return false;
   }
 
-  auto statement = registration->insertStatement();
+  auto statement = registration->GetInsertStatement();
 
-  if (!statement.isReady() || !statement.reset()) {
+  if (!statement.IsReady() || !statement.Reset()) {
     /*
      *  Must be able to reset the statement for a new write
      */
     return false;
   }
 
-  auto itemName = archivable.archiveName();
+  auto itemName = archivable.GetArchiveName();
 
   /*
    *  The lifecycle of the archive item is tied to this scope and there is no
@@ -57,25 +59,25 @@ bool Archive::archiveInstance(const ArchiveDef& definition,
    *  for its members to be references. It does not manage the lifetimes of
    *  anything.
    */
-  ArchiveItem item(*this, statement, *registration, itemName);
+  ArchiveLocation item(*this, statement, *registration, itemName);
 
   /*
    *  We need to bind the primary key only if the item does not provide its own
    */
   if (!definition.autoAssignName &&
-      !statement.bind(ArchiveClassRegistration::NameIndex, itemName)) {
+      !statement.WriteValue(ArchiveClassRegistration::NameIndex, itemName)) {
     return false;
   }
 
-  if (!archivable.serialize(item)) {
+  if (!archivable.Write(item)) {
     return false;
   }
 
-  if (statement.run() != ArchiveStatement::Result::Done) {
+  if (statement.Run() != ArchiveStatement::Result::kDone) {
     return false;
   }
 
-  int64_t lastInsert = _db->lastInsertRowID();
+  int64_t lastInsert = database_->GetLastInsertRowID();
 
   if (!definition.autoAssignName &&
       lastInsert != static_cast<int64_t>(itemName)) {
@@ -88,30 +90,31 @@ bool Archive::archiveInstance(const ArchiveDef& definition,
    *  If any of the nested calls fail, we would have already checked for the
    *  failure and returned.
    */
-  transaction.markWritesSuccessful();
+  transaction.MarkWritesAsReadyForCommit();
 
   return true;
 }
 
-bool Archive::unarchiveInstance(const ArchiveDef& definition,
-                                ArchiveSerializable::ArchiveName name,
-                                ArchiveSerializable& archivable) {
-  UnarchiveStep stepper = [&archivable](ArchiveItem& item) {
-    archivable.deserialize(item);
+bool Archive::UnarchiveInstance(const ArchiveDef& definition,
+                                Archivable::ArchiveName name,
+                                Archivable& archivable) {
+  UnarchiveStep stepper = [&archivable](ArchiveLocation& item) {
+    archivable.Read(item);
     return false /* no-more after single read */;
   };
 
-  return unarchiveInstances(definition, stepper, name) == 1;
+  return UnarchiveInstances(definition, stepper, name) == 1;
 }
 
-size_t Archive::unarchiveInstances(const ArchiveDef& definition,
+size_t Archive::UnarchiveInstances(const ArchiveDef& definition,
                                    Archive::UnarchiveStep stepper,
-                                   ArchiveSerializable::ArchiveName name) {
-  if (!isReady()) {
+                                   Archivable::ArchiveName name) {
+  if (!IsReady()) {
     return 0;
   }
 
-  const auto* registration = _db->registrationForDefinition(definition);
+  const auto* registration =
+      database_->GetRegistrationForDefinition(definition);
 
   if (registration == nullptr) {
     return 0;
@@ -119,9 +122,9 @@ size_t Archive::unarchiveInstances(const ArchiveDef& definition,
 
   const bool isQueryingSingle = name != ArchiveNameAuto;
 
-  auto statement = registration->queryStatement(isQueryingSingle);
+  auto statement = registration->GetQueryStatement(isQueryingSingle);
 
-  if (!statement.isReady() || !statement.reset()) {
+  if (!statement.IsReady() || !statement.Reset()) {
     return 0;
   }
 
@@ -130,13 +133,13 @@ size_t Archive::unarchiveInstances(const ArchiveDef& definition,
      *  If a single statement is being queried for, bind the name as a statement
      *  argument.
      */
-    if (!statement.bind(ArchiveClassRegistration::NameIndex, name)) {
+    if (!statement.WriteValue(ArchiveClassRegistration::NameIndex, name)) {
       return 0;
     }
   }
 
-  if (statement.columnCount() !=
-      registration->memberCount() + 1 /* primary key */) {
+  if (statement.GetColumnCount() !=
+      registration->GetMemberCount() + 1 /* primary key */) {
     return 0;
   }
 
@@ -144,17 +147,17 @@ size_t Archive::unarchiveInstances(const ArchiveDef& definition,
    *  Acquire a transaction but never mark it successful since we will never
    *  be committing any writes to the database during unarchiving.
    */
-  auto transaction = _db->acquireTransaction(_transactionCount);
+  auto transaction = database_->CreateTransaction(transaction_count_);
 
   size_t itemsRead = 0;
 
-  while (statement.run() == ArchiveStatement::Result::Row) {
+  while (statement.Run() == ArchiveStatement::Result::kRow) {
     itemsRead++;
 
     /*
      *  Prepare a fresh archive item for the given statement
      */
-    ArchiveItem item(*this, statement, *registration, name);
+    ArchiveLocation item(*this, statement, *registration, name);
 
     if (!stepper(item)) {
       break;
@@ -168,47 +171,45 @@ size_t Archive::unarchiveInstances(const ArchiveDef& definition,
   return itemsRead;
 }
 
-ArchiveItem::ArchiveItem(Archive& context,
-                         ArchiveStatement& statement,
-                         const ArchiveClassRegistration& registration,
-                         ArchiveSerializable::ArchiveName name)
-    : _context(context),
-      _statement(statement),
-      _registration(registration),
-      _name(name),
-      _currentClass(registration.className()) {}
+ArchiveLocation::ArchiveLocation(Archive& context,
+                                 ArchiveStatement& statement,
+                                 const ArchiveClassRegistration& registration,
+                                 Archivable::ArchiveName name)
+    : context_(context),
+      statement_(statement),
+      registration_(registration),
+      name_(name),
+      current_class_(registration.GetClassName()) {}
 
-ArchiveSerializable::ArchiveName ArchiveItem::name() const {
-  return _name;
+Archivable::ArchiveName ArchiveLocation::Name() const {
+  return name_;
 }
 
-bool ArchiveItem::encode(ArchiveSerializable::Member member,
-                         const std::string& item) {
-  auto found = _registration.findColumn(_currentClass, member);
-  return found.second ? _statement.bind(found.first, item) : false;
+bool ArchiveLocation::Write(ArchiveDef::Member member,
+                            const std::string& item) {
+  auto found = registration_.FindColumn(current_class_, member);
+  return found.second ? statement_.WriteValue(found.first, item) : false;
 }
 
-bool ArchiveItem::encodeIntegral(ArchiveSerializable::Member member,
-                                 int64_t item) {
-  auto found = _registration.findColumn(_currentClass, member);
-  return found.second ? _statement.bind(found.first, item) : false;
+bool ArchiveLocation::WriteIntegral(ArchiveDef::Member member, int64_t item) {
+  auto found = registration_.FindColumn(current_class_, member);
+  return found.second ? statement_.WriteValue(found.first, item) : false;
 }
 
-bool ArchiveItem::encode(ArchiveSerializable::Member member, double item) {
-  auto found = _registration.findColumn(_currentClass, member);
-  return found.second ? _statement.bind(found.first, item) : false;
+bool ArchiveLocation::Write(ArchiveDef::Member member, double item) {
+  auto found = registration_.FindColumn(current_class_, member);
+  return found.second ? statement_.WriteValue(found.first, item) : false;
 }
 
-bool ArchiveItem::encode(ArchiveSerializable::Member member,
-                         const Allocation& item) {
-  auto found = _registration.findColumn(_currentClass, member);
-  return found.second ? _statement.bind(found.first, item) : false;
+bool ArchiveLocation::Write(ArchiveDef::Member member, const Allocation& item) {
+  auto found = registration_.FindColumn(current_class_, member);
+  return found.second ? statement_.WriteValue(found.first, item) : false;
 }
 
-bool ArchiveItem::encode(ArchiveSerializable::Member member,
-                         const ArchiveDef& otherDef,
-                         const ArchiveSerializable& other) {
-  auto found = _registration.findColumn(_currentClass, member);
+bool ArchiveLocation::Write(ArchiveDef::Member member,
+                            const ArchiveDef& otherDef,
+                            const Archivable& other) {
+  auto found = registration_.FindColumn(current_class_, member);
 
   if (!found.second) {
     return false;
@@ -220,25 +221,25 @@ bool ArchiveItem::encode(ArchiveSerializable::Member member,
    *  archival (via `other.archiveName()`).
    */
   int64_t lastInsert = 0;
-  if (!_context.archiveInstance(otherDef, other, lastInsert)) {
+  if (!context_.ArchiveInstance(otherDef, other, lastInsert)) {
     return false;
   }
 
   /*
    *  Bind the name of the serialiable
    */
-  if (!_statement.bind(found.first, lastInsert)) {
+  if (!statement_.WriteValue(found.first, lastInsert)) {
     return false;
   }
 
   return true;
 }
 
-std::pair<bool, int64_t> ArchiveItem::encodeVectorKeys(
+std::pair<bool, int64_t> ArchiveLocation::WriteVectorKeys(
     std::vector<int64_t>&& members) {
   ArchiveVector vector(std::move(members));
   int64_t vectorID = 0;
-  if (!_context.archiveInstance(ArchiveVector::ArchiveDefinition,  //
+  if (!context_.ArchiveInstance(ArchiveVector::ArchiveDefinition,  //
                                 vector,                            //
                                 vectorID)) {
     return {false, 0};
@@ -246,11 +247,11 @@ std::pair<bool, int64_t> ArchiveItem::encodeVectorKeys(
   return {true, vectorID};
 }
 
-bool ArchiveItem::decodeVectorKeys(ArchiveSerializable::ArchiveName name,
-                                   std::vector<int64_t>& members) {
+bool ArchiveLocation::ReadVectorKeys(Archivable::ArchiveName name,
+                                     std::vector<int64_t>& members) {
   ArchiveVector vector;
 
-  if (!_context.unarchiveInstance(ArchiveVector::ArchiveDefinition, name,
+  if (!context_.UnarchiveInstance(ArchiveVector::ArchiveDefinition, name,
                                   vector)) {
     return false;
   }
@@ -262,32 +263,30 @@ bool ArchiveItem::decodeVectorKeys(ArchiveSerializable::ArchiveName name,
   return true;
 }
 
-bool ArchiveItem::decode(ArchiveSerializable::Member member,
-                         std::string& item) {
-  auto found = _registration.findColumn(_currentClass, member);
-  return found.second ? _statement.column(found.first, item) : false;
+bool ArchiveLocation::Read(ArchiveDef::Member member, std::string& item) {
+  auto found = registration_.FindColumn(current_class_, member);
+  return found.second ? statement_.ReadValue(found.first, item) : false;
 }
 
-bool ArchiveItem::decodeIntegral(ArchiveSerializable::Member member,
-                                 int64_t& item) {
-  auto found = _registration.findColumn(_currentClass, member);
-  return found.second ? _statement.column(found.first, item) : false;
+bool ArchiveLocation::ReadIntegral(ArchiveDef::Member member, int64_t& item) {
+  auto found = registration_.FindColumn(current_class_, member);
+  return found.second ? statement_.ReadValue(found.first, item) : false;
 }
 
-bool ArchiveItem::decode(ArchiveSerializable::Member member, double& item) {
-  auto found = _registration.findColumn(_currentClass, member);
-  return found.second ? _statement.column(found.first, item) : false;
+bool ArchiveLocation::Read(ArchiveDef::Member member, double& item) {
+  auto found = registration_.FindColumn(current_class_, member);
+  return found.second ? statement_.ReadValue(found.first, item) : false;
 }
 
-bool ArchiveItem::decode(ArchiveSerializable::Member member, Allocation& item) {
-  auto found = _registration.findColumn(_currentClass, member);
-  return found.second ? _statement.column(found.first, item) : false;
+bool ArchiveLocation::Read(ArchiveDef::Member member, Allocation& item) {
+  auto found = registration_.FindColumn(current_class_, member);
+  return found.second ? statement_.ReadValue(found.first, item) : false;
 }
 
-bool ArchiveItem::decode(ArchiveSerializable::Member member,
-                         const ArchiveDef& otherDef,
-                         ArchiveSerializable& other) {
-  auto found = _registration.findColumn(_currentClass, member);
+bool ArchiveLocation::Read(ArchiveDef::Member member,
+                           const ArchiveDef& otherDef,
+                           Archivable& other) {
+  auto found = registration_.FindColumn(current_class_, member);
 
   /*
    *  Make sure a member is present at that column
@@ -300,14 +299,14 @@ bool ArchiveItem::decode(ArchiveSerializable::Member member,
    *  Try to find the foreign key in the current items row
    */
   int64_t foreignKey = 0;
-  if (!_statement.column(found.first, foreignKey)) {
+  if (!statement_.ReadValue(found.first, foreignKey)) {
     return false;
   }
 
   /*
    *  Find the other item and unarchive by this foreign key
    */
-  if (!_context.unarchiveInstance(otherDef, foreignKey, other)) {
+  if (!context_.UnarchiveInstance(otherDef, foreignKey, other)) {
     return false;
   }
 

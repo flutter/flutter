@@ -11,21 +11,30 @@ namespace impeller {
 
 class ArchiveStatement;
 
+//------------------------------------------------------------------------------
+/// @brief      All writes made to the archive within a transaction that is not
+///             marked as ready for commit will be rolled back with the
+///             transaction ends.
+///
+///             All transactions are obtained from the `ArchiveDatabase`.
+///
+/// @see        `ArchiveDatabase`
+///
 class ArchiveTransaction {
  public:
   ArchiveTransaction(ArchiveTransaction&& transaction);
 
   ~ArchiveTransaction();
 
-  void markWritesSuccessful();
+  void MarkWritesAsReadyForCommit();
 
  private:
-  ArchiveStatement& _endStatement;
-  ArchiveStatement& _rollbackStatement;
-  int64_t& _transactionCount;
-  bool _cleanup = false;
-  bool _successful = false;
-  bool _abandoned = false;
+  ArchiveStatement& end_stmt_;
+  ArchiveStatement& rollback_stmt_;
+  int64_t& transaction_count_;
+  bool cleanup_ = false;
+  bool successful_ = false;
+  bool abandoned_ = false;
 
   friend class ArchiveDatabase;
 
