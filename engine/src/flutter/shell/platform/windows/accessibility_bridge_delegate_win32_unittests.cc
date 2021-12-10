@@ -163,6 +163,36 @@ void ExpectWinEventFromAXEvent(int32_t node_id,
 
 }  // namespace
 
+TEST(AccessibilityBridgeDelegateWin32, GetParent) {
+  auto window_binding_handler =
+      std::make_unique<::testing::NiceMock<MockWindowBindingHandler>>();
+  FlutterWindowsView view(std::move(window_binding_handler));
+  view.SetEngine(GetTestEngine());
+  view.OnUpdateSemanticsEnabled(true);
+
+  auto bridge = view.GetEngine()->accessibility_bridge().lock();
+  PopulateAXTree(bridge);
+
+  auto node0_delegate = bridge->GetFlutterPlatformNodeDelegateFromID(0).lock();
+  auto node1_delegate = bridge->GetFlutterPlatformNodeDelegateFromID(1).lock();
+  EXPECT_EQ(node0_delegate->GetNativeViewAccessible(),
+            node1_delegate->GetParent());
+}
+
+TEST(AccessibilityBridgeDelegateWin32, GetParentOnRootRetunsNullptr) {
+  auto window_binding_handler =
+      std::make_unique<::testing::NiceMock<MockWindowBindingHandler>>();
+  FlutterWindowsView view(std::move(window_binding_handler));
+  view.SetEngine(GetTestEngine());
+  view.OnUpdateSemanticsEnabled(true);
+
+  auto bridge = view.GetEngine()->accessibility_bridge().lock();
+  PopulateAXTree(bridge);
+
+  auto node0_delegate = bridge->GetFlutterPlatformNodeDelegateFromID(0).lock();
+  ASSERT_TRUE(node0_delegate->GetParent() == nullptr);
+}
+
 TEST(AccessibilityBridgeDelegateWin32, NodeDelegateHasUniqueId) {
   auto window_binding_handler =
       std::make_unique<::testing::NiceMock<MockWindowBindingHandler>>();
