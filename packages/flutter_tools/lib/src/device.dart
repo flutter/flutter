@@ -762,6 +762,7 @@ class DebuggingOptions {
     this.webRunHeadless = false,
     this.webBrowserDebugPort,
     this.webEnableExpressionEvaluation = false,
+    this.webLaunchUrl,
     this.vmserviceOutFile,
     this.fastStart = false,
     this.nullAssertions = false,
@@ -778,6 +779,7 @@ class DebuggingOptions {
       this.webUseSseForInjectedClient = true,
       this.webRunHeadless = false,
       this.webBrowserDebugPort,
+      this.webLaunchUrl,
       this.cacheSkSL = false,
       this.traceAllowlist,
     }) : debuggingEnabled = false,
@@ -850,6 +852,9 @@ class DebuggingOptions {
 
   /// Enable expression evaluation for web target.
   final bool webEnableExpressionEvaluation;
+
+  /// Allow developers to customize the browser's launch URL
+  final String? webLaunchUrl;
 
   /// A file where the VM Service URL should be written after the application is started.
   final String? vmserviceOutFile;

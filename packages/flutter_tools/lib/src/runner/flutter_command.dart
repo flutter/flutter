@@ -263,6 +263,12 @@ abstract class FlutterCommand extends Command<void> {
       help: 'Enables expression evaluation in the debugger.',
       hide: !verboseHelp,
     );
+    argParser.addOption('web-launch-url',
+      defaultsTo: null,
+      help: 'The launch URL the browser should use preferentially. If not provided, '
+          'the default depends on the web-hostname and web-port',
+      hide: !verboseHelp,
+    );
   }
 
   void usesTargetOption() {
