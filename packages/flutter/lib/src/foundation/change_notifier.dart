@@ -318,7 +318,7 @@ class ChangeNotifier implements Listenable {
               this,
               style: DiagnosticsTreeStyle.errorProperty,
             ),
-          ];
+          ],
         ));
       }
     }
