@@ -99,6 +99,9 @@ class FlutterPlatformNodeDelegate : public ui::AXPlatformNodeDelegateBase {
   virtual ~FlutterPlatformNodeDelegate() override;
 
   // |ui::AXPlatformNodeDelegateBase|
+  const ui::AXUniqueId& GetUniqueId() const override { return unique_id_; }
+
+  // |ui::AXPlatformNodeDelegateBase|
   const ui::AXNodeData& GetData() const override;
 
   // |ui::AXPlatformNodeDelegateBase|
@@ -144,6 +147,7 @@ class FlutterPlatformNodeDelegate : public ui::AXPlatformNodeDelegateBase {
  private:
   ui::AXNode* ax_node_;
   std::weak_ptr<OwnerBridge> bridge_;
+  ui::AXUniqueId unique_id_;
 };
 
 }  // namespace flutter
