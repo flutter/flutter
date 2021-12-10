@@ -11,13 +11,12 @@
 
 namespace impeller {
 
-static const char* const ArchiveColumnPrefix = "item";
-static const char* const ArchivePrimaryKeyColumnName = "name";
-static const char* const ArchiveTablePrefix = "RL_";
+static const char* const ArchiveColumnPrefix = "col_";
+static const char* const ArchivePrimaryKeyColumnName = "primary_key";
 
 ArchiveClassRegistration::ArchiveClassRegistration(ArchiveDatabase& database,
                                                    ArchiveDef definition)
-    : database_(database), class_name_(definition.className) {
+    : database_(database), class_name_(definition.table_name) {
   /*
    *  Each class in the archive class hierarchy is assigned an entry in the
    *  class map.
@@ -31,11 +30,11 @@ ArchiveClassRegistration::ArchiveClassRegistration(ArchiveDatabase& database,
     for (const auto& member : current->members) {
       map[member] = currentMember++;
     }
-    class_map_[current->className] = map;
-    current = current->superClass;
+    class_map_[current->table_name] = map;
+    current = current->isa;
   }
 
-  is_ready_ = CreateTable(definition.autoAssignName);
+  is_ready_ = CreateTable(definition.auto_key);
 }
 
 const std::string& ArchiveClassRegistration::GetClassName() const {
@@ -81,8 +80,8 @@ bool ArchiveClassRegistration::CreateTable(bool autoIncrement) {
    *  Table names cannot participate in parameter substitution, so we prepare
    *  a statement and check its validity before running.
    */
-  stream << "CREATE TABLE IF NOT EXISTS " << ArchiveTablePrefix
-         << class_name_.c_str() << " (" << ArchivePrimaryKeyColumnName;
+  stream << "CREATE TABLE IF NOT EXISTS " << class_name_.c_str() << " ("
+         << ArchivePrimaryKeyColumnName;
 
   if (autoIncrement) {
     stream << " INTEGER PRIMARY KEY AUTOINCREMENT, ";
@@ -120,7 +119,7 @@ ArchiveStatement ArchiveClassRegistration::GetQueryStatement(
       stream << ",";
     }
   }
-  stream << " FROM " << ArchiveTablePrefix << class_name_;
+  stream << " FROM " << class_name_;
 
   if (single) {
     stream << " WHERE " << ArchivePrimaryKeyColumnName << " = ?";
@@ -135,8 +134,7 @@ ArchiveStatement ArchiveClassRegistration::GetQueryStatement(
 
 ArchiveStatement ArchiveClassRegistration::GetInsertStatement() const {
   std::stringstream stream;
-  stream << "INSERT OR REPLACE INTO " << ArchiveTablePrefix << class_name_
-         << " VALUES ( ?, ";
+  stream << "INSERT OR REPLACE INTO " << class_name_ << " VALUES ( ?, ";
   for (size_t i = 0; i < member_count_; i++) {
     stream << "?";
     if (i != member_count_ - 1) {
