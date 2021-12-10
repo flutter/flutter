@@ -3015,14 +3015,14 @@ targets:
       task_name: service_extensions_test
     scheduler: luci
 
-  - name: Mac_android smoke_catalina_start_up
+  - name: Mac_android flutter_gallery_mac__start_up
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
     properties:
       tags: >
         ["devicelab","android","mac"]
-      task_name: smoke_catalina_start_up
+      task_name: flutter_gallery_mac__start_up
     scheduler: luci
 
   - name: Mac_android textfield_perf__timeline_summary
@@ -3449,14 +3449,14 @@ targets:
       task_name: simple_animation_perf_ios
     scheduler: luci
 
-  - name: Mac_ios smoke_catalina_hot_mode_dev_cycle_ios__benchmark
+  - name: Mac_ios hot_mode_dev_cycle_ios__benchmark
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
     properties:
       tags: >
         ["devicelab","ios","mac"]
-      task_name: smoke_catalina_hot_mode_dev_cycle_ios__benchmark
+      task_name: hot_mode_dev_cycle_ios__benchmark
     scheduler: luci
 
   - name: Mac_ios tiles_scroll_perf_ios__timeline_summary
