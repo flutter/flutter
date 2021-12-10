@@ -53,6 +53,5 @@ source_set("base") {
   public_deps = [
     "numerics",
     "//flutter/third_party/accessibility/ax_build",
-    "//third_party/dart/runtime/third_party/double-conversion/src:libdouble_conversion",
   ]
 }

@@ -4,14 +4,11 @@
 
 #include "string_utils.h"
 
-#include <array>
 #include <cctype>
 #include <codecvt>
 #include <locale>
 #include <regex>
 #include <sstream>
-
-#include "third_party/dart/runtime/third_party/double-conversion/src/double-conversion.h"
 
 #if defined(_WIN32)
 #include "base/win/string_conversion.h"
@@ -20,48 +17,6 @@
 #include "no_destructor.h"
 
 namespace base {
-
-using double_conversion::DoubleToStringConverter;
-using double_conversion::StringBuilder;
-
-namespace {
-constexpr char kExponentChar = 'e';
-constexpr char kInfinitySymbol[] = "Infinity";
-constexpr char kNaNSymbol[] = "NaN";
-
-// The number of digits after the decimal we allow before switching to
-// exponential representation.
-constexpr int kDecimalInShortestLow = -6;
-// The number of digits before the decimal we allow before switching to
-// exponential representation.
-constexpr int kDecimalInShortestHigh = 12;
-constexpr int kConversionFlags =
-    DoubleToStringConverter::EMIT_POSITIVE_EXPONENT_SIGN;
-
-const DoubleToStringConverter& GetDoubleToStringConverter() {
-  static DoubleToStringConverter converter(
-      kConversionFlags, kInfinitySymbol, kNaNSymbol, kExponentChar,
-      kDecimalInShortestLow, kDecimalInShortestHigh, 0, 0);
-  return converter;
-}
-
-std::string NumberToStringImpl(double number, bool is_single_precision) {
-  if (number == 0.0) {
-    return "0";
-  }
-
-  constexpr int kBufferSize = 128;
-  std::array<char, kBufferSize> char_buffer;
-  StringBuilder builder(char_buffer.data(), char_buffer.size());
-  if (is_single_precision) {
-    GetDoubleToStringConverter().ToShortestSingle(static_cast<float>(number),
-                                                  &builder);
-  } else {
-    GetDoubleToStringConverter().ToShortest(number, &builder);
-  }
-  return std::string(char_buffer.data(), builder.position());
-}
-}  // namespace
 
 std::u16string ASCIIToUTF16(std::string src) {
   return std::u16string(src.begin(), src.end());
@@ -118,11 +73,15 @@ std::string NumberToString(unsigned int number) {
 }
 
 std::string NumberToString(float number) {
-  return NumberToStringImpl(number, true);
+  // TODO(gw280): Format decimals to the shortest reasonable representation.
+  // See: https://github.com/flutter/flutter/issues/78460
+  return std::to_string(number);
 }
 
 std::string NumberToString(double number) {
-  return NumberToStringImpl(number, false);
+  // TODO(gw280): Format decimals to the shortest reasonable representation.
+  // See: https://github.com/flutter/flutter/issues/78460
+  return std::to_string(number);
 }
 
 std::string JoinString(std::vector<std::string> tokens, std::string delimiter) {
