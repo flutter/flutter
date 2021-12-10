@@ -327,7 +327,7 @@ void main() {
   });
 
   group('FlutterGoldenFileComparator', () {
-    late FlutterPostSubmitFileComparator comparator;
+    late FlutterGoldenFileComparator comparator;
 
     setUp(() {
       final Directory basedir = fs.directory('flutter/test/library/')
@@ -362,9 +362,10 @@ void main() {
     });
 
     group('Post-Submit', () {
-      final FakeSkiaGoldClient fakeSkiaClient = FakeSkiaGoldClient();
+      late FakeSkiaGoldClient fakeSkiaClient;
 
       setUp(() {
+        fakeSkiaClient = FakeSkiaGoldClient();
         final Directory basedir = fs.directory('flutter/test/library/')
           ..createSync(recursive: true);
         comparator = FlutterPostSubmitFileComparator(
@@ -373,6 +374,24 @@ void main() {
           fs: fs,
           platform: platform,
         );
+      });
+
+      test('calls init during compare', () {
+        expect(fakeSkiaClient.initCalls, 0);
+        comparator.compare(
+          Uint8List.fromList(_kTestPngBytes),
+          Uri.parse('flutter.golden_test.1.png'),
+        );
+        expect(fakeSkiaClient.initCalls, 1);
+      });
+
+      test('does not call init in during construction', () {
+        expect(fakeSkiaClient.initCalls, 0);
+        FlutterPostSubmitFileComparator.fromDefaultComparator(
+          platform,
+          goldens: fakeSkiaClient,
+        );
+        expect(fakeSkiaClient.initCalls, 0);
       });
 
       group('correctly determines testing environment', () {
@@ -441,6 +460,38 @@ void main() {
     });
 
     group('Pre-Submit', () {
+      late FakeSkiaGoldClient fakeSkiaClient;
+
+      setUp(() {
+        fakeSkiaClient = FakeSkiaGoldClient();
+        final Directory basedir = fs.directory('flutter/test/library/')
+          ..createSync(recursive: true);
+        comparator = FlutterPreSubmitFileComparator(
+          basedir.uri,
+          fakeSkiaClient,
+          fs: fs,
+          platform: platform,
+        );
+      });
+
+      test('calls init during compare', () {
+        expect(fakeSkiaClient.tryInitCalls, 0);
+        comparator.compare(
+          Uint8List.fromList(_kTestPngBytes),
+          Uri.parse('flutter.golden_test.1.png'),
+        );
+        expect(fakeSkiaClient.tryInitCalls, 1);
+      });
+
+      test('does not call init in during construction', () {
+        expect(fakeSkiaClient.tryInitCalls, 0);
+        FlutterPostSubmitFileComparator.fromDefaultComparator(
+          platform,
+          goldens: fakeSkiaClient,
+        );
+        expect(fakeSkiaClient.tryInitCalls, 0);
+      });
+
       group('correctly determines testing environment', () {
         test('returns true for Luci', () {
           platform = FakePlatform(
@@ -706,6 +757,21 @@ class FakeSkiaGoldClient extends Fake implements SkiaGoldClient {
     }
     return expectationForTestValues[testName] ?? '';
   }
+
+  @override
+  Future<void> auth() async {}
+
+  int initCalls = 0;
+  @override
+  Future<void> imgtestInit() async => initCalls += 1;
+  @override
+  Future<bool> imgtestAdd(String testName, File goldenFile) async => true;
+
+  int tryInitCalls = 0;
+  @override
+  Future<void> tryjobInit() async => tryInitCalls += 1;
+  @override
+  Future<bool> tryjobAdd(String testName, File goldenFile) async => true;
 
   Map<String, List<int>> imageBytesValues = <String, List<int>>{};
   @override

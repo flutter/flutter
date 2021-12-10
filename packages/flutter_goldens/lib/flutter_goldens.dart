@@ -227,12 +227,12 @@ class FlutterPostSubmitFileComparator extends FlutterGoldenFileComparator {
 
     goldens ??= SkiaGoldClient(baseDirectory);
     await goldens.auth();
-    await goldens.imgtestInit();
     return FlutterPostSubmitFileComparator(baseDirectory.uri, goldens);
   }
 
   @override
   Future<bool> compare(Uint8List imageBytes, Uri golden) async {
+    await skiaClient.imgtestInit();
     golden = _addPrefix(golden);
     await update(golden, imageBytes);
     final File goldenFile = getGoldenFile(golden);
@@ -309,16 +309,15 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
     goldens ??= SkiaGoldClient(baseDirectory);
 
     await goldens.auth();
-    await goldens.tryjobInit();
-      return FlutterPreSubmitFileComparator(
-        baseDirectory.uri,
-        goldens,
-        platform: platform,
-      );
-    }
+    return FlutterPreSubmitFileComparator(
+      baseDirectory.uri,
+      goldens, platform: platform,
+    );
+  }
 
   @override
   Future<bool> compare(Uint8List imageBytes, Uri golden) async {
+    await skiaClient.tryjobInit();
     golden = _addPrefix(golden);
     await update(golden, imageBytes);
     final File goldenFile = getGoldenFile(golden);
