@@ -398,7 +398,9 @@ targets:
           {"dependency": "goldctl"},
           {"dependency": "clang"},
           {"dependency": "cmake"},
-          {"dependency": "ninja"}
+          {"dependency": "ninja"},
+          {"dependency": "open_jdk"},
+          {"dependency": "android_sdk", "version": "version:29.0"}
         ]
       shard: framework_tests
       subshard: misc
@@ -2108,7 +2110,9 @@ targets:
         [
           {"dependency": "goldctl"},
           {"dependency": "xcode"},
-          {"dependency": "gems"}
+          {"dependency": "gems"},
+          {"dependency": "open_jdk"},
+          {"dependency": "android_sdk", "version": "version:29.0"}
         ]
       shard: framework_tests
       subshard: misc
@@ -3642,7 +3646,9 @@ targets:
       dependencies: >-
         [
           {"dependency": "goldctl"},
-          {"dependency": "vs_build", "version": "version:vs2019"}
+          {"dependency": "vs_build", "version": "version:vs2019"},
+          {"dependency": "open_jdk"},
+          {"dependency": "android_sdk", "version": "version:29.0"}
         ]
       shard: framework_tests
       subshard: misc

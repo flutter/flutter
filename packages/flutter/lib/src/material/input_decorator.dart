@@ -56,6 +56,9 @@ class _InputBorderGap extends ChangeNotifier {
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes, this class is not used in collection
   int get hashCode => hashValues(start, extent);
+
+  @override
+  String toString() => describeIdentity(this);
 }
 
 // Used to interpolate between two InputBorders.
@@ -124,6 +127,9 @@ class _InputBorderPainter extends CustomPainter {
         || gap != oldPainter.gap
         || textDirection != oldPainter.textDirection;
   }
+
+  @override
+  String toString() => describeIdentity(this);
 }
 
 // An analog of AnimatedContainer, which can animate its shaped border, for
