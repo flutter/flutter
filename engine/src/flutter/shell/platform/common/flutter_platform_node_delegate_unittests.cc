@@ -12,6 +12,34 @@
 namespace flutter {
 namespace testing {
 
+TEST(FlutterPlatformNodeDelegateTest, NodeDelegateHasUniqueId) {
+  TestAccessibilityBridgeDelegate* delegate =
+      new TestAccessibilityBridgeDelegate();
+  std::unique_ptr<TestAccessibilityBridgeDelegate> ptr(delegate);
+  std::shared_ptr<AccessibilityBridge> bridge =
+      std::make_shared<AccessibilityBridge>(std::move(ptr));
+
+  // Add node 0: root.
+  FlutterSemanticsNode node0{sizeof(FlutterSemanticsNode), 0};
+  std::vector<int32_t> node0_children{1};
+  node0.child_count = node0_children.size();
+  node0.children_in_traversal_order = node0_children.data();
+  node0.children_in_hit_test_order = node0_children.data();
+
+  // Add node 1: text child of node 0.
+  FlutterSemanticsNode node1{sizeof(FlutterSemanticsNode), 1};
+  node1.label = "prefecture";
+  node1.value = "Kyoto";
+
+  bridge->AddFlutterSemanticsNodeUpdate(&node0);
+  bridge->AddFlutterSemanticsNodeUpdate(&node1);
+  bridge->CommitUpdates();
+
+  auto node0_delegate = bridge->GetFlutterPlatformNodeDelegateFromID(0).lock();
+  auto node1_delegate = bridge->GetFlutterPlatformNodeDelegateFromID(1).lock();
+  EXPECT_TRUE(node0_delegate->GetUniqueId() != node1_delegate->GetUniqueId());
+}
+
 TEST(FlutterPlatformNodeDelegateTest, canPerfomActions) {
   TestAccessibilityBridgeDelegate* delegate =
       new TestAccessibilityBridgeDelegate();
