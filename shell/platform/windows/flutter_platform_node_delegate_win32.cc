@@ -38,31 +38,6 @@ FlutterPlatformNodeDelegateWin32::GetNativeViewAccessible() {
 }
 
 // |FlutterPlatformNodeDelegate|
-gfx::NativeViewAccessible FlutterPlatformNodeDelegateWin32::GetParent() {
-  gfx::NativeViewAccessible parent = FlutterPlatformNodeDelegate::GetParent();
-  if (parent) {
-    return parent;
-  }
-  assert(engine_);
-  FlutterWindowsView* view = engine_->view();
-  if (!view) {
-    return nullptr;
-  }
-  HWND hwnd = view->GetPlatformWindow();
-  if (!hwnd) {
-    return nullptr;
-  }
-
-  IAccessible* iaccessible_parent;
-  if (SUCCEEDED(::AccessibleObjectFromWindow(
-          hwnd, OBJID_WINDOW, IID_IAccessible,
-          reinterpret_cast<void**>(&iaccessible_parent)))) {
-    return iaccessible_parent;
-  }
-  return nullptr;
-}
-
-// |FlutterPlatformNodeDelegate|
 gfx::Rect FlutterPlatformNodeDelegateWin32::GetBoundsRect(
     const ui::AXCoordinateSystem coordinate_system,
     const ui::AXClippingBehavior clipping_behavior,

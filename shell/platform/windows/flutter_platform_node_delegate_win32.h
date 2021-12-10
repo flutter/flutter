@@ -30,9 +30,6 @@ class FlutterPlatformNodeDelegateWin32 : public FlutterPlatformNodeDelegate {
   gfx::NativeViewAccessible GetNativeViewAccessible() override;
 
   // |FlutterPlatformNodeDelegate|
-  gfx::NativeViewAccessible GetParent() override;
-
-  // |FlutterPlatformNodeDelegate|
   gfx::Rect GetBoundsRect(
       const ui::AXCoordinateSystem coordinate_system,
       const ui::AXClippingBehavior clipping_behavior,
