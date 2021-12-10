@@ -187,7 +187,7 @@ if (enable_unittests) {
     ]
 
     # The accessibility bridge only supports MacOS for now.
-    if (is_mac) {
+    if (is_mac || is_win) {
       sources += [
         "accessibility_bridge_unittests.cc",
         "flutter_platform_node_delegate_unittests.cc",
