@@ -5,7 +5,6 @@
 import '../../src/base/process.dart';
 import '../../src/convert.dart' show json;
 import '../../src/macos/xcode.dart';
-import '../bundle.dart';
 import '../convert.dart';
 
 /// The generator of xcresults.
@@ -245,7 +244,7 @@ class XCResultIssue {
   /// The location where the issue occurs.
   ///
   /// This is a re-formatted version of the "url" value in the json.
-  /// The format looks like <url>:StartingLineNumber:StartingColumnNumber.
+  /// The format looks like <file location>:<StartingLineNumber>:<StartingColumnNumber>.
   final String location;
 }
 
