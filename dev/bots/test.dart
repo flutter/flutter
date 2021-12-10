@@ -1124,8 +1124,16 @@ Future<void> _runWebTreeshakeTest() async {
       'FLUTTER_WEB': 'true',
     },
   );
-
-  final File mainDartJs = File(path.join(testAppDirectory, 'build', 'web', 'main.dart.js'));
+  final Directory webDir = Directory(path.join(testAppDirectory, 'build', 'web'));
+  final RegExp mainJSReg = RegExp(r'main.dart\.(.+)\.js$');
+  String mainJsPath = '';
+  // filter the main.dart.[hash].js
+  webDir.listSync(recursive: true).forEach((FileSystemEntity file) { 
+    if (mainJSReg.hasMatch(file.path)) {
+      mainJsPath = file.path;
+    }
+  });
+  final File mainDartJs = File(mainJsPath);
   final String javaScript = mainDartJs.readAsStringSync();
 
   // Check that we're not looking at minified JS. Otherwise this test would result in false positive.
