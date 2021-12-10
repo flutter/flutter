@@ -29,9 +29,9 @@ std::string UTF16ToUTF8(std::u16string src);
 std::u16string WideToUTF16(const std::wstring& src);
 std::wstring UTF16ToWide(const std::u16string& src);
 
+std::u16string NumberToString16(float number);
 std::u16string NumberToString16(unsigned int number);
 std::u16string NumberToString16(int32_t number);
-std::u16string NumberToString16(float number);
 std::u16string NumberToString16(double number);
 
 std::string NumberToString(unsigned int number);
