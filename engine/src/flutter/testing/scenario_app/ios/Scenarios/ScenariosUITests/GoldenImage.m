@@ -102,10 +102,11 @@ static const double kRmseThreshold = 0.5;
 }
 
 NS_INLINE NSString* _platformName() {
+  NSString* systemVersion = UIDevice.currentDevice.systemVersion;
   NSString* simulatorName =
       [[NSProcessInfo processInfo].environment objectForKey:@"SIMULATOR_DEVICE_NAME"];
   if (simulatorName) {
-    return [NSString stringWithFormat:@"%@_simulator", simulatorName];
+    return [NSString stringWithFormat:@"%@_%@_simulator", simulatorName, systemVersion];
   }
 
   size_t size;

@@ -2,37 +2,26 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#import "SpawnEngineTest.h"
-#import "GoldenImage.h"
+#import "GoldenPlatformViewTests.h"
+
+@interface SpawnEngineTest : XCTestCase
+@end
 
 @implementation SpawnEngineTest
 
-- (void)setUp {
-  [super setUp];
+- (void)testSpawnEngineWorks {
   self.continueAfterFailure = NO;
 
-  self.application = [[XCUIApplication alloc] init];
-  self.application.launchArguments = @[ @"--spawn-engine-works", @"--enable-software-rendering" ];
-  [self.application launch];
-}
+  XCUIApplication* application = [[XCUIApplication alloc] init];
+  application.launchArguments = @[ @"--spawn-engine-works", @"--enable-software-rendering" ];
+  [application launch];
 
-- (void)testSpawnEngineWorks {
-  NSString* prefix = @"golden_spawn_engine_works_";
-  GoldenImage* golden = [[GoldenImage alloc] initWithGoldenNamePrefix:prefix];
-  if (!golden.image) {
-    XCTFail(@"unable to find golden image for: %@", prefix);
-  }
-  XCUIScreenshot* screenshot = [[XCUIScreen mainScreen] screenshot];
-  if (![golden compareGoldenToImage:screenshot.image]) {
-    XCTAttachment* screenshotAttachment = [XCTAttachment attachmentWithImage:screenshot.image];
-    screenshotAttachment.name = [golden.goldenName stringByAppendingString:@"_actual"];
-    screenshotAttachment.lifetime = XCTAttachmentLifetimeKeepAlways;
-    [self addAttachment:screenshotAttachment];
+  XCUIElement* addTextField = application.textFields[@"ready"];
+  XCTAssertTrue([addTextField waitForExistenceWithTimeout:30]);
 
-    XCTFail(@"Goldens do not match. Follow the steps in the "
-            @"README to update golden named %@ if needed.",
-            golden.goldenName);
-  }
+  GoldenTestManager* manager =
+      [[GoldenTestManager alloc] initWithLaunchArg:@"--spawn-engine-works"];
+  [manager checkGoldenForTest:self];
 }
 
 @end
