@@ -744,6 +744,23 @@ enum VersionCheckResult {
   newVersionAvailable,
 }
 
+/// Determine whether or not the provided [version] is "fresh" and notify the user if appropriate.
+///
+/// We do not want to check with the upstream git remote for newer commits on
+/// every tool invocation, as this would significantly slow down running tool
+/// commands. Thus, the tool writes to the [VersionCheckStamp] every time that
+/// it actually has fetched commits from upstream, and this validator only
+/// checks again if it has been more than [checkAgeConsideredUpToDate] since the
+/// last fetch.
+///
+/// We do not want to notify users with "reasonably" fresh versions about new
+/// releases. The method [versionAgeConsideredUpToDate] defines a different
+/// duration of freshness for each channel. If [localFrameworkCommitDate] is
+/// newer than this duration, then we do not show the warning.
+///
+/// We do not want to annoy users who intentionally disregard the warning and
+/// choose not to upgrade. Thus, we only show the message if it has been more
+/// than [maxTimeSinceLastWarning] since the last time the user saw the warning.
 class VersionFreshnessValidator {
   VersionFreshnessValidator({
     required this.version,
@@ -868,6 +885,7 @@ class VersionFreshnessValidator {
     }
   }
 
+  /// Execute validations and print warning to [logger] if necessary.
   Future<void> run() async {
     // Don't perform update checks if we're not on an official channel.
     if (!kOfficialChannels.contains(version.channel)) {
