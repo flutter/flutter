@@ -125,8 +125,6 @@ void main() {
         httpClient: fakeHttpClient,
       );
 
-      process.fallbackProcessResult = ProcessResult(123, 1, 'Fallback failure', 'Fallback failure');
-
       const RunInvocation gitInvocation = RunInvocation(
         <String>['git', 'rev-parse', 'HEAD'],
         '/flutter',
@@ -146,6 +144,7 @@ void main() {
       );
       process.processResults[gitInvocation] = ProcessResult(12345678, 0, '12345678', '');
       process.processResults[goldctlInvocation] = ProcessResult(123, 1, 'Expected failure', 'Expected failure');
+      process.fallbackProcessResult = ProcessResult(123, 1, 'Fallback failure', 'Fallback failure');
 
       expect(
         skiaClient.imgtestInit(),
@@ -278,7 +277,6 @@ void main() {
         httpClient: fakeHttpClient,
       );
 
-      process.fallbackProcessResult = ProcessResult(123, 1, 'Fallback failure', 'Fallback failure');
       const RunInvocation goldctlInvocation = RunInvocation(
         <String>[
           'goldctl',
@@ -291,6 +289,7 @@ void main() {
         null,
       );
       process.processResults[goldctlInvocation] = ProcessResult(123, 1, 'Expected failure', 'Expected failure');
+      process.fallbackProcessResult = ProcessResult(123, 1, 'Fallback failure', 'Fallback failure');
 
       expect(
         skiaClient.imgtestAdd('golden_file_test', goldenFile),
