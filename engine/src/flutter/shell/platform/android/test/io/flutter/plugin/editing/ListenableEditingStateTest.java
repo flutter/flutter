@@ -39,7 +39,7 @@ public class ListenableEditingStateTest {
 
   @Before
   public void setUp() {
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
   }
 
   // -------- Start: Test BatchEditing   -------

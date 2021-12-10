@@ -14,7 +14,7 @@ import org.robolectric.annotation.Config;
 public class TextEditingDeltaTest {
   @Before
   public void setUp() {
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
   }
 
   @Test

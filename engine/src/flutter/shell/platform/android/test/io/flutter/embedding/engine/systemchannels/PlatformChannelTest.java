@@ -1,5 +1,6 @@
 package io.flutter.embedding.engine.systemchannels;
 
+import static org.mockito.ArgumentMatchers.refEq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -13,7 +14,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
@@ -40,6 +40,6 @@ public class PlatformChannelTest {
       expected.put("value", returnValue);
     } catch (JSONException e) {
     }
-    verify(mockResult).success(Matchers.refEq(expected));
+    verify(mockResult).success(refEq(expected));
   }
 }
