@@ -37,7 +37,7 @@ public class ShimPluginRegistryTest {
 
   @Before
   public void setup() {
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
     when(mockFlutterEngine.getPlugins()).thenReturn(mockPluginRegistry);
     when(mockFlutterPluginBinding.getApplicationContext()).thenReturn(mockApplicationContext);
     when(mockActivityPluginBinding.getActivity()).thenReturn(mockActivity);

@@ -5,10 +5,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.isNull;
-import static org.mockito.Matchers.notNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNotNull;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -230,7 +230,7 @@ public class FlutterActivityAndFragmentDelegateTest {
     delegate.onCreateView(null, null, null, 0, true);
 
     // Verify that the host was asked to configure a FlutterSurfaceView.
-    verify(mockHost, times(1)).onFlutterSurfaceViewCreated(notNull(FlutterSurfaceView.class));
+    verify(mockHost, times(1)).onFlutterSurfaceViewCreated(isNotNull());
   }
 
   @Test
@@ -259,7 +259,7 @@ public class FlutterActivityAndFragmentDelegateTest {
     delegate.onCreateView(null, null, null, 0, false);
 
     // Verify that the host was asked to configure a FlutterTextureView.
-    verify(customMockHost, times(1)).onFlutterTextureViewCreated(notNull(FlutterTextureView.class));
+    verify(customMockHost, times(1)).onFlutterTextureViewCreated(isNotNull());
   }
 
   @Test

@@ -51,7 +51,7 @@ public class FlutterEngineGroupComponentTest {
   public void setUp() {
     FlutterInjector.reset();
 
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
     jniAttached = false;
     when(mockflutterJNI.isAttached()).thenAnswer(invocation -> jniAttached);
     doAnswer(invocation -> jniAttached = true).when(mockflutterJNI).attachToNative();
@@ -165,7 +165,7 @@ public class FlutterEngineGroupComponentTest {
         .runBundleAndSnapshotFromLibrary(
             eq("some/path/to/flutter_assets"),
             eq("other entrypoint"),
-            isNull(String.class),
+            isNull(),
             any(AssetManager.class),
             nullable(List.class));
   }
@@ -215,7 +215,7 @@ public class FlutterEngineGroupComponentTest {
         .runBundleAndSnapshotFromLibrary(
             nullable(String.class),
             nullable(String.class),
-            isNull(String.class),
+            isNull(),
             any(AssetManager.class),
             eq(firstDartEntrypointArgs));
 
