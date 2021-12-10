@@ -526,11 +526,6 @@ class _GlowController extends ChangeNotifier {
     canvas.drawCircle(center, radius, paint);
     canvas.restore();
   }
-
-  @override
-  String toString() {
-    return '_GlowController(color: $color, axis: ${describeEnum(axis)})';
-  }
 }
 
 class _GlowingOverscrollIndicatorPainter extends CustomPainter {
@@ -599,11 +594,6 @@ class _GlowingOverscrollIndicatorPainter extends CustomPainter {
   bool shouldRepaint(_GlowingOverscrollIndicatorPainter oldDelegate) {
     return oldDelegate.leadingController != leadingController
         || oldDelegate.trailingController != trailingController;
-  }
-
-  @override
-  String toString() {
-    return '_GlowingOverscrollIndicatorPainter($leadingController, $trailingController)';
   }
 }
 
@@ -901,9 +891,6 @@ class _StretchController extends ChangeNotifier {
     _stretchController.dispose();
     super.dispose();
   }
-
-  @override
-  String toString() => '_StretchController()';
 }
 
 /// A notification that either a [GlowingOverscrollIndicator] or a
