@@ -1071,6 +1071,7 @@ class TextSelectionGestureDetectorBuilder {
   @protected
   void onSingleLongTapStart(LongPressStartDetails details) {
     if (delegate.selectionEnabled) {
+      editableText.widget.focusNode.requestFocus();
       renderEditable.selectPositionAt(
         from: details.globalPosition,
         cause: SelectionChangedCause.longPress,

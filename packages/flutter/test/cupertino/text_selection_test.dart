@@ -418,6 +418,7 @@ void main() {
 
     testWidgets('Handles very long locale strings', (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(text: 'abc def ghi');
+      final FocusNode focusNode = FocusNode();
       await tester.pumpWidget(CupertinoApp(
         locale: const Locale('en', 'us'),
         localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
@@ -432,6 +433,7 @@ void main() {
               child: Center(
                 child: CupertinoTextField(
                   controller: controller,
+                  focusNode: focusNode,
                 ),
               ),
             ),
@@ -450,6 +452,7 @@ void main() {
       // paste button visible.
       await tester.longPressAt(textOffsetToPosition(tester, 4));
       await tester.pumpAndSettle();
+      expect(focusNode.hasFocus, isTrue);
       expect(find.text(_longLocalizations.cutButtonLabel), findsNothing);
       expect(find.text(_longLocalizations.copyButtonLabel), findsNothing);
       expect(find.text(_longLocalizations.pasteButtonLabel), findsOneWidget);
