@@ -9,7 +9,7 @@ print_usage () {
   echo "    - PATH_TO_SDK_DIR is the path to the sdk folder. If omitted, this defaults to"
   echo "                      your ANDROID_SDK_ROOT environment variable."
   echo ""
-  echo "This script downloads the packages specified in android_sdk_packages.txt and uploads"
+  echo "This script downloads the packages specified in packages.txt and uploads"
   echo "them to CIPD for linux, mac, and windows."
   echo ""
   echo "Manage the packages to download in 'packages.txt'. You can use"
