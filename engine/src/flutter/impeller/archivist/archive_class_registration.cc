@@ -11,66 +11,41 @@
 
 namespace impeller {
 
-static const char* const ArchiveColumnPrefix = "col_";
-static const char* const ArchivePrimaryKeyColumnName = "primary_key";
+static constexpr const char* kArchivePrimaryKeyColumnName = "primary_key";
 
 ArchiveClassRegistration::ArchiveClassRegistration(ArchiveDatabase& database,
                                                    ArchiveDef definition)
-    : database_(database), class_name_(definition.table_name) {
-  /*
-   *  Each class in the archive class hierarchy is assigned an entry in the
-   *  class map.
-   */
-  const ArchiveDef* current = &definition;
-  size_t currentMember = 1;
-  while (current != nullptr) {
-    auto membersInCurrent = current->members.size();
-    member_count_ += membersInCurrent;
-    MemberColumnMap map;
-    for (const auto& member : current->members) {
-      map[member] = currentMember++;
-    }
-    class_map_[current->table_name] = map;
-    current = current->isa;
+    : database_(database), definition_(std::move(definition)) {
+  for (size_t i = 0; i < definition.members.size(); i++) {
+    // The first index entry is the primary key. So add one to the index.
+    column_map_[definition.members[i]] = i + 1;
   }
-
-  is_ready_ = CreateTable(definition.auto_key);
+  is_valid_ = CreateTable();
 }
 
 const std::string& ArchiveClassRegistration::GetClassName() const {
-  return class_name_;
+  return definition_.table_name;
 }
 
 size_t ArchiveClassRegistration::GetMemberCount() const {
-  return member_count_;
+  return column_map_.size();
 }
 
 bool ArchiveClassRegistration::IsValid() const {
-  return is_ready_;
+  return is_valid_;
 }
 
 std::optional<size_t> ArchiveClassRegistration::FindColumnIndex(
-    const std::string& className,
-    ArchiveDef::Member member) const {
-  auto found = class_map_.find(className);
-
-  if (found == class_map_.end()) {
+    const std::string& member) const {
+  auto found = column_map_.find(member);
+  if (found == column_map_.end()) {
     return std::nullopt;
   }
-
-  const auto& memberToColumns = found->second;
-
-  auto foundColumn = memberToColumns.find(member);
-
-  if (foundColumn == memberToColumns.end()) {
-    return std::nullopt;
-  }
-
-  return foundColumn->second;
+  return found->second;
 }
 
-bool ArchiveClassRegistration::CreateTable(bool autoIncrement) {
-  if (class_name_.size() == 0 || member_count_ == 0) {
+bool ArchiveClassRegistration::CreateTable() {
+  if (definition_.table_name.empty() || definition_.members.empty()) {
     return false;
   }
 
@@ -80,16 +55,17 @@ bool ArchiveClassRegistration::CreateTable(bool autoIncrement) {
    *  Table names cannot participate in parameter substitution, so we prepare
    *  a statement and check its validity before running.
    */
-  stream << "CREATE TABLE IF NOT EXISTS " << class_name_.c_str() << " ("
-         << ArchivePrimaryKeyColumnName;
+  stream << "CREATE TABLE IF NOT EXISTS " << definition_.table_name << " ("
+         << kArchivePrimaryKeyColumnName;
 
-  if (autoIncrement) {
+  if (definition_.auto_key) {
     stream << " INTEGER PRIMARY KEY AUTOINCREMENT, ";
   } else {
     stream << " INTEGER PRIMARY KEY, ";
   }
-  for (size_t i = 0, columns = member_count_; i < columns; i++) {
-    stream << ArchiveColumnPrefix << std::to_string(i + 1);
+
+  for (size_t i = 0, columns = definition_.members.size(); i < columns; i++) {
+    stream << definition_.members[i];
     if (i != columns - 1) {
       stream << ", ";
     }
@@ -112,19 +88,19 @@ bool ArchiveClassRegistration::CreateTable(bool autoIncrement) {
 ArchiveStatement ArchiveClassRegistration::CreateQueryStatement(
     bool single) const {
   std::stringstream stream;
-  stream << "SELECT " << ArchivePrimaryKeyColumnName << ", ";
-  for (size_t i = 0, members = member_count_; i < members; i++) {
-    stream << ArchiveColumnPrefix << std::to_string(i + 1);
-    if (i != members - 1) {
+  stream << "SELECT " << kArchivePrimaryKeyColumnName << ", ";
+  for (size_t i = 0, columns = definition_.members.size(); i < columns; i++) {
+    stream << definition_.members[i];
+    if (i != columns - 1) {
       stream << ",";
     }
   }
-  stream << " FROM " << class_name_;
+  stream << " FROM " << definition_.table_name;
 
   if (single) {
-    stream << " WHERE " << ArchivePrimaryKeyColumnName << " = ?";
+    stream << " WHERE " << kArchivePrimaryKeyColumnName << " = ?";
   } else {
-    stream << " ORDER BY  " << ArchivePrimaryKeyColumnName << " ASC";
+    stream << " ORDER BY  " << kArchivePrimaryKeyColumnName << " ASC";
   }
 
   stream << ";";
@@ -134,10 +110,11 @@ ArchiveStatement ArchiveClassRegistration::CreateQueryStatement(
 
 ArchiveStatement ArchiveClassRegistration::CreateInsertStatement() const {
   std::stringstream stream;
-  stream << "INSERT OR REPLACE INTO " << class_name_ << " VALUES ( ?, ";
-  for (size_t i = 0; i < member_count_; i++) {
+  stream << "INSERT OR REPLACE INTO " << definition_.table_name
+         << " VALUES ( ?, ";
+  for (size_t i = 0, columns = definition_.members.size(); i < columns; i++) {
     stream << "?";
-    if (i != member_count_ - 1) {
+    if (i != columns - 1) {
       stream << ", ";
     }
   }

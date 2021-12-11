@@ -11,7 +11,7 @@ namespace impeller {
 
 class ArchiveVector : public Archivable {
  public:
-  static const ArchiveDef ArchiveDefinition;
+  static ArchiveDef kArchiveDefinition;
 
   PrimaryKey GetPrimaryKey() const override;
 
@@ -28,7 +28,7 @@ class ArchiveVector : public Archivable {
 
   ArchiveVector();
 
-  ArchiveVector(std::vector<int64_t>&& keys);
+  ArchiveVector(std::vector<int64_t> keys);
 
   FML_DISALLOW_COPY_AND_ASSIGN(ArchiveVector);
 };

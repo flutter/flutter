@@ -10,16 +10,16 @@
 
 namespace impeller {
 
-ArchiveVector::ArchiveVector(std::vector<int64_t>&& keys)
+ArchiveVector::ArchiveVector(std::vector<int64_t> keys)
     : keys_(std::move(keys)) {}
 
 ArchiveVector::ArchiveVector() {}
 
-const ArchiveDef ArchiveVector::ArchiveDefinition = {
-    /* .superClass = */ nullptr,
-    /* .className = */ "_IPLR_meta_vector_items_",
-    /* .autoAssignName = */ true,
-    /* .members = */ {0},
+static constexpr const char* kVectorKeys = "keys";
+
+ArchiveDef ArchiveVector::kArchiveDefinition = {
+    .table_name = "IPLR_vectors",
+    .members = {kVectorKeys},
 };
 
 PrimaryKey ArchiveVector::GetPrimaryKey() const {
@@ -39,12 +39,12 @@ bool ArchiveVector::Write(ArchiveLocation& item) const {
       stream << ",";
     }
   }
-  return item.Write(0, stream.str());
+  return item.Write(kVectorKeys, stream.str());
 }
 
 bool ArchiveVector::Read(ArchiveLocation& item) {
   std::string flattened;
-  if (!item.Read(0, flattened)) {
+  if (!item.Read(kVectorKeys, flattened)) {
     return false;
   }
 
