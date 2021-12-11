@@ -27,6 +27,8 @@ void ArchivistFixture::SetUp() {
 }
 
 void ArchivistFixture::TearDown() {
+  // TODO: Tear this down. For now, I am inspecting the files for readability of
+  // schema.
   // DeleteArchiveFile();
 }
 

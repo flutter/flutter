@@ -35,21 +35,21 @@ ArchiveDatabase::ArchiveDatabase(const std::string& filename) {
   begin_transaction_stmt_ = std::unique_ptr<ArchiveStatement>(
       new ArchiveStatement(database_, "BEGIN TRANSACTION;"));
 
-  if (!begin_transaction_stmt_->IsReady()) {
+  if (!begin_transaction_stmt_->IsValid()) {
     return;
   }
 
   end_transaction_stmt_ = std::unique_ptr<ArchiveStatement>(
       new ArchiveStatement(database_, "END TRANSACTION;"));
 
-  if (!end_transaction_stmt_->IsReady()) {
+  if (!end_transaction_stmt_->IsValid()) {
     return;
   }
 
   rollback_transaction_stmt_ = std::unique_ptr<ArchiveStatement>(
       new ArchiveStatement(database_, "ROLLBACK TRANSACTION;"));
 
-  if (!rollback_transaction_stmt_->IsReady()) {
+  if (!rollback_transaction_stmt_->IsValid()) {
     return;
   }
 
@@ -60,7 +60,7 @@ ArchiveDatabase::~ArchiveDatabase() {
   ::sqlite3_close(DB_HANDLE);
 }
 
-bool ArchiveDatabase::IsReady() const {
+bool ArchiveDatabase::IsValid() const {
   return ready_;
 }
 
@@ -73,7 +73,7 @@ static inline const ArchiveClassRegistration* RegistrationIfReady(
   if (registration == nullptr) {
     return nullptr;
   }
-  return registration->IsReady() ? registration : nullptr;
+  return registration->IsValid() ? registration : nullptr;
 }
 
 const ArchiveClassRegistration* ArchiveDatabase::GetRegistrationForDefinition(
@@ -95,7 +95,7 @@ const ArchiveClassRegistration* ArchiveDatabase::GetRegistrationForDefinition(
       registrations_.emplace(definition.table_name, std::move(registration));
 
   /*
-   *  If the new class registation is ready, return it to the caller.
+   *  If the new class registration is ready, return it to the caller.
    */
   return res.second ? RegistrationIfReady((*(res.first)).second.get())
                     : nullptr;

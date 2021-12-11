@@ -11,14 +11,48 @@
 
 namespace impeller {
 
+//------------------------------------------------------------------------------
+/// @brief      Represents a read/write query to an archive database. Statements
+///             are expensive to create and must be cached for as long as
+///             possible.
+///
 class ArchiveStatement {
  public:
   ~ArchiveStatement();
 
   ArchiveStatement(ArchiveStatement&& message);
 
-  bool IsReady() const;
+  bool IsValid() const;
 
+  enum class Result {
+    //--------------------------------------------------------------------------
+    /// The statement is done executing.
+    ///
+    kDone,
+    //--------------------------------------------------------------------------
+    /// The statement found a row of information ready for reading.
+    ///
+    kRow,
+    //--------------------------------------------------------------------------
+    /// Statement execution was a failure.
+    ///
+    kFailure,
+  };
+
+  //----------------------------------------------------------------------------
+  /// @brief      Execute the given statement with the provided data.
+  ///
+  /// @return     Is the execution was succeessful.
+  ///
+  [[nodiscard]] Result Execute();
+
+  //----------------------------------------------------------------------------
+  /// @brief      All writes after the last successfull `Run` call are reset.
+  ///             Since statements are expensive to create, reset them for new
+  ///             writes instead of creating new statements.
+  ///
+  /// @return     If the statement writes were reset.
+  ///
   bool Reset();
 
   bool WriteValue(size_t index, const std::string& item);
@@ -45,21 +79,13 @@ class ArchiveStatement {
 
   size_t GetColumnCount();
 
-  enum class Result {
-    kDone,
-    kRow,
-    kFailure,
-  };
-
-  [[nodiscard]] Result Run();
-
  private:
   void* statement_handle_ = nullptr;
   bool ready_ = false;
 
   friend class ArchiveDatabase;
 
-  ArchiveStatement(void* db, const std::string& statememt);
+  ArchiveStatement(void* db, const std::string& statement);
 
   bool BindIntegral(size_t index, int64_t item);
 

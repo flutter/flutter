@@ -17,7 +17,7 @@ ArchiveTransaction::ArchiveTransaction(int64_t& transactionCount,
       rollback_stmt_(rollbackStatement),
       transaction_count_(transactionCount) {
   if (transaction_count_ == 0) {
-    cleanup_ = beginStatement.Run() == ArchiveStatement::Result::kDone;
+    cleanup_ = beginStatement.Execute() == ArchiveStatement::Result::kDone;
   }
   transaction_count_++;
 }
@@ -38,7 +38,7 @@ ArchiveTransaction::~ArchiveTransaction() {
 
   FML_CHECK(transaction_count_ != 0);
   if (transaction_count_ == 1 && cleanup_) {
-    auto res = successful_ ? end_stmt_.Run() : rollback_stmt_.Run();
+    auto res = successful_ ? end_stmt_.Execute() : rollback_stmt_.Execute();
     FML_CHECK(res == ArchiveStatement::Result::kDone)
         << "Must be able to commit the nested transaction";
   }

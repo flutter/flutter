@@ -45,7 +45,7 @@ size_t ArchiveClassRegistration::GetMemberCount() const {
   return member_count_;
 }
 
-bool ArchiveClassRegistration::IsReady() const {
+bool ArchiveClassRegistration::IsValid() const {
   return is_ready_;
 }
 
@@ -98,7 +98,7 @@ bool ArchiveClassRegistration::CreateTable(bool autoIncrement) {
 
   auto statement = database_.CreateStatement(stream.str());
 
-  if (!statement.IsReady()) {
+  if (!statement.IsValid()) {
     return false;
   }
 
@@ -106,7 +106,7 @@ bool ArchiveClassRegistration::CreateTable(bool autoIncrement) {
     return false;
   }
 
-  return statement.Run() == ArchiveStatement::Result::kDone;
+  return statement.Execute() == ArchiveStatement::Result::kDone;
 }
 
 ArchiveStatement ArchiveClassRegistration::GetQueryStatement(

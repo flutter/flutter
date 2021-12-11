@@ -16,13 +16,16 @@ class ArchiveStatement;
 class ArchiveClassRegistration;
 struct ArchiveDef;
 
+//------------------------------------------------------------------------------
+/// @brief      A handle to the underlying database connection for an archive.
+///
 class ArchiveDatabase {
  public:
   ArchiveDatabase(const std::string& filename);
 
   ~ArchiveDatabase();
 
-  bool IsReady() const;
+  bool IsValid() const;
 
   int64_t GetLastInsertRowID();
 
