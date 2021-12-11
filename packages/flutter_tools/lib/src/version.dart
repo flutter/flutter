@@ -821,7 +821,7 @@ class VersionFreshnessValidator {
   /// cadence for each channel, to give the user a grace period before they get
   /// notified.
   ///
-  /// For example, for the beta channel, this is set to five weeks because
+  /// For example, for the beta channel, this is set to eight weeks because
   /// beta releases happen approximately every month.
   @visibleForTesting
   static Duration versionAgeConsideredUpToDate(String channel) {
