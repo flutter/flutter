@@ -746,6 +746,8 @@ enum VersionCheckResult {
 
 /// Determine whether or not the provided [version] is "fresh" and notify the user if appropriate.
 ///
+/// To initiate the validation check, call [run].
+///
 /// We do not want to check with the upstream git remote for newer commits on
 /// every tool invocation, as this would significantly slow down running tool
 /// commands. Thus, the tool writes to the [VersionCheckStamp] every time that
@@ -768,7 +770,7 @@ class VersionFreshnessValidator {
     required this.clock,
     required this.cache,
     required this.logger,
-    this.latestFlutterCommitDate,
+    required this.latestFlutterCommitDate,
     this.pauseTime = Duration.zero,
   });
 
@@ -798,63 +800,13 @@ class VersionFreshnessValidator {
   @visibleForTesting
   static Duration timeToPauseToLetUserReadTheMessage = const Duration(seconds: 2);
 
-  /// Gets the release date of the latest available Flutter version.
-  ///
-  /// This method sends a server request if it's been more than
-  /// [checkAgeConsideredUpToDate] since the last version check.
-  ///
-  /// Returns null if the cached version is out-of-date or missing, and we are
-  /// unable to reach the server to get the latest version.
-  Future<DateTime?> getLatestFlutterCommitDate() async {
-    globals.cache.checkLockAcquired();
-    final VersionCheckStamp versionCheckStamp = await VersionCheckStamp.load(globals.cache, globals.logger);
-
-    if (versionCheckStamp.lastTimeVersionWasChecked != null) {
-      final Duration timeSinceLastCheck = clock.now().difference(
-        versionCheckStamp.lastTimeVersionWasChecked!,
-      );
-
-      // Don't ping the server too often. Return cached value if it's fresh.
-      if (timeSinceLastCheck < checkAgeConsideredUpToDate) {
-        return versionCheckStamp.lastKnownRemoteVersion;
-      }
-    }
-
-    // Cache is empty or it's been a while since the last server ping. Ping the server.
-    try {
-      final DateTime remoteFrameworkCommitDate = DateTime.parse(
-        await FlutterVersion.fetchRemoteFrameworkCommitDate(version.channel),
-      );
-      await versionCheckStamp.store(
-        newTimeVersionWasChecked: clock.now(),
-        newKnownRemoteVersion: remoteFrameworkCommitDate,
-      );
-      return remoteFrameworkCommitDate;
-    } on VersionCheckError catch (error) {
-      // This happens when any of the git commands fails, which can happen when
-      // there's no Internet connectivity. Remote version check is best effort
-      // only. We do not prevent the command from running when it fails.
-      globals.printTrace('Failed to check Flutter version in the remote repository: $error');
-      // Still update the timestamp to avoid us hitting the server on every single
-      // command if for some reason we cannot connect (eg. we may be offline).
-      await versionCheckStamp.store(
-        newTimeVersionWasChecked: clock.now(),
-      );
-      return null;
-    }
-  }
-
   // We show a warning if either we know there is a new remote version, or we
   // couldn't tell but the local version is outdated.
   @visibleForTesting
-  bool canShowWarning({
-    required VersionCheckResult remoteVersionStatus,
-    required Duration frameworkAge,
-  }) {
+  bool canShowWarning(VersionCheckResult remoteVersionStatus) {
+    final Duration frameworkAge = clock.now().difference(localFrameworkCommitDate);
+
     final bool installationSeemsOutdated = frameworkAge > versionAgeConsideredUpToDate(version.channel);
-    //if (channel == globals.kDefaultFrameworkChannel) {
-    //  return false;
-    //}
     if (remoteVersionStatus == VersionCheckResult.newVersionAvailable) {
       return true;
     }
@@ -892,8 +844,6 @@ class VersionFreshnessValidator {
       return;
     }
 
-    final Duration frameworkAge = clock.now().difference(localFrameworkCommitDate);
-
     // Get whether there's a newer version on the remote. This only goes
     // to the server if we haven't checked recently so won't happen on every
     // command.
@@ -917,10 +867,7 @@ class VersionFreshnessValidator {
       return;
     }
 
-    final bool canShowWarningResult = canShowWarning(
-      remoteVersionStatus: remoteVersionStatus,
-      frameworkAge: frameworkAge,
-    );
+    final bool canShowWarningResult = canShowWarning(remoteVersionStatus);
 
     if (!canShowWarningResult) {
       return;
