@@ -545,7 +545,7 @@ class FlutterErrorDetails with Diagnosticable {
   ///       informationCollector: () => <DiagnosticsNode>[
   ///         ErrorDescription('This happened while climbing the space elevator.'),
   ///         ErrorHint('The process ID is: $pid'),
-  ///       ];
+  ///       ],
   ///     ));
   ///   }
   /// }
