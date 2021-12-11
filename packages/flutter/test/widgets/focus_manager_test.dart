@@ -151,6 +151,39 @@ void main() {
       expect(scope.traversalDescendants.contains(child2), isFalse);
     });
 
+    testWidgets('descendantsAreTraversable disables traversal for descendants.', (WidgetTester tester) async {
+      final BuildContext context = await setupWidget(tester);
+      final FocusScopeNode scope = FocusScopeNode(debugLabel: 'Scope');
+      final FocusAttachment scopeAttachment = scope.attach(context);
+      final FocusNode parent1 = FocusNode(debugLabel: 'Parent 1');
+      final FocusAttachment parent1Attachment = parent1.attach(context);
+      final FocusNode parent2 = FocusNode(debugLabel: 'Parent 2');
+      final FocusAttachment parent2Attachment = parent2.attach(context);
+      final FocusNode child1 = FocusNode(debugLabel: 'Child 1');
+      final FocusAttachment child1Attachment = child1.attach(context);
+      final FocusNode child2 = FocusNode(debugLabel: 'Child 2');
+      final FocusAttachment child2Attachment = child2.attach(context);
+
+      scopeAttachment.reparent(parent: tester.binding.focusManager.rootScope);
+      parent1Attachment.reparent(parent: scope);
+      parent2Attachment.reparent(parent: scope);
+      child1Attachment.reparent(parent: parent1);
+      child2Attachment.reparent(parent: parent2);
+
+      expect(scope.traversalDescendants, equals(<FocusNode>[child1, parent1, child2, parent2]));
+
+      parent2.descendantsAreTraversable = false;
+      expect(scope.traversalDescendants, equals(<FocusNode>[child1, parent1, parent2]));
+
+      parent1.descendantsAreTraversable = false;
+      expect(scope.traversalDescendants, equals(<FocusNode>[parent1, parent2]));
+
+      parent1.descendantsAreTraversable = true;
+      parent2.descendantsAreTraversable = true;
+      scope.descendantsAreTraversable = false;
+      expect(scope.traversalDescendants, equals(<FocusNode>[]));
+    });
+
     testWidgets("canRequestFocus doesn't affect traversalChildren", (WidgetTester tester) async {
       final BuildContext context = await setupWidget(tester);
       final FocusScopeNode scope = FocusScopeNode(debugLabel: 'Scope');
@@ -191,6 +224,7 @@ void main() {
       expect(description, <String>[
         'context: null',
         'descendantsAreFocusable: true',
+        'descendantsAreTraversable: true',
         'canRequestFocus: true',
         'hasFocus: false',
         'hasPrimaryFocus: false',
@@ -1156,6 +1190,7 @@ void main() {
       expect(description, <String>[
         'context: null',
         'descendantsAreFocusable: true',
+        'descendantsAreTraversable: true',
         'canRequestFocus: true',
         'hasFocus: false',
         'hasPrimaryFocus: false',

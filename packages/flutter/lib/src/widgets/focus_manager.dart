@@ -409,12 +409,14 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     bool skipTraversal = false,
     bool canRequestFocus = true,
     bool descendantsAreFocusable = true,
+    bool descendantsAreTraversable = true,
   })  : assert(skipTraversal != null),
         assert(canRequestFocus != null),
         assert(descendantsAreFocusable != null),
         _skipTraversal = skipTraversal,
         _canRequestFocus = canRequestFocus,
-        _descendantsAreFocusable = descendantsAreFocusable {
+        _descendantsAreFocusable = descendantsAreFocusable,
+        _descendantsAreTraversable = descendantsAreTraversable {
     // Set it via the setter so that it does nothing on release builds.
     this.debugLabel = debugLabel;
   }
@@ -429,7 +431,17 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// This is different from [canRequestFocus] because it only implies that the
   /// node can't be reached via traversal, not that it can't be focused. It may
   /// still be focused explicitly.
-  bool get skipTraversal => _skipTraversal;
+  bool get skipTraversal {
+    if (_skipTraversal) {
+      return true;
+    }
+    for (final FocusNode ancestor in ancestors) {
+      if (!ancestor.descendantsAreTraversable) {
+        return true;
+      }
+    }
+    return false;
+  }
   bool _skipTraversal;
   set skipTraversal(bool value) {
     if (value != _skipTraversal) {
@@ -511,13 +523,17 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   ///
   /// See also:
   ///
-  ///  * [ExcludeFocus], a widget that uses this property to conditionally
-  ///    exclude focus for a subtree.
-  ///  * [Focus], a widget that exposes this setting as a parameter.
-  ///  * [FocusTraversalGroup], a widget used to group together and configure
-  ///    the focus traversal policy for a widget subtree that also has an
-  ///    `descendantsAreFocusable` parameter that prevents its children from
-  ///    being focused.
+  /// * [ExcludeFocus], a widget that uses this property to conditionally
+  ///   exclude focus for a subtree.
+  /// * [descendantsAreTraversable], which makes this widget's descendants
+  ///   untraversable.
+  /// * [ExcludeFocusTraversal], a widget that conditionally excludes focus
+  ///   traversal for a subtree.
+  /// * [Focus], a widget that exposes this setting as a parameter.
+  /// * [FocusTraversalGroup], a widget used to group together and configure
+  ///   the focus traversal policy for a widget subtree that also has an
+  ///   `descendantsAreFocusable` parameter that prevents its children from
+  ///   being focused.
   bool get descendantsAreFocusable => _descendantsAreFocusable;
   bool _descendantsAreFocusable;
   @mustCallSuper
@@ -532,6 +548,36 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
       unfocus(disposition: UnfocusDisposition.previouslyFocusedChild);
     }
     _manager?._markPropertiesChanged(this);
+  }
+
+  /// If false, tells the focus traversal policy to skip over for all of this
+  /// node's descendants for purposes of the traversal algorithm.
+  ///
+  /// Defaults to true. Does not affect the focus traversal of this node: for
+  /// that, use [skipTraversal].
+  ///
+  /// Does not affect the value of [FocusNode.skipTraversal] on the
+  /// descendants. Does not affect focusability of the descendants.
+  ///
+  /// See also:
+  ///
+  /// * [ExcludeFocusTraversal], a widget that uses this property to conditionally
+  ///   exclude focus traversal for a subtree.
+  /// * [descendantsAreFocusable], which makes this widget's descendants
+  ///   unfocusable.
+  /// * [ExcludeFocus], a widget that conditionally excludes focus for a subtree.
+  /// * [FocusTraversalGroup], a widget used to group together and configure
+  ///   the focus traversal policy for a widget subtree that also has an
+  ///   `descendantsAreFocusable` parameter that prevents its children from
+  ///   being focused.
+  bool get descendantsAreTraversable => _descendantsAreTraversable;
+  bool _descendantsAreTraversable;
+  @mustCallSuper
+  set descendantsAreTraversable(bool value) {
+    if (value != _descendantsAreTraversable) {
+      _descendantsAreTraversable = value;
+      _manager?._markPropertiesChanged(this);
+    }
   }
 
   /// The context that was supplied to [attach].
@@ -1105,6 +1151,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<BuildContext>('context', context, defaultValue: null));
     properties.add(FlagProperty('descendantsAreFocusable', value: descendantsAreFocusable, ifFalse: 'DESCENDANTS UNFOCUSABLE', defaultValue: true));
+    properties.add(FlagProperty('descendantsAreTraversable', value: descendantsAreTraversable, ifFalse: 'DESCENDANTS UNTRAVERSABLE', defaultValue: true));
     properties.add(FlagProperty('canRequestFocus', value: canRequestFocus, ifFalse: 'NOT FOCUSABLE', defaultValue: true));
     properties.add(FlagProperty('hasFocus', value: hasFocus && !hasPrimaryFocus, ifTrue: 'IN FOCUS PATH', defaultValue: false));
     properties.add(FlagProperty('hasPrimaryFocus', value: hasPrimaryFocus, ifTrue: 'PRIMARY FOCUS', defaultValue: false));
