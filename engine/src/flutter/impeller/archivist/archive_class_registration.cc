@@ -49,13 +49,13 @@ bool ArchiveClassRegistration::IsValid() const {
   return is_ready_;
 }
 
-ArchiveClassRegistration::ColumnResult ArchiveClassRegistration::FindColumn(
+std::optional<size_t> ArchiveClassRegistration::FindColumnIndex(
     const std::string& className,
     ArchiveDef::Member member) const {
   auto found = class_map_.find(className);
 
   if (found == class_map_.end()) {
-    return {0, false};
+    return std::nullopt;
   }
 
   const auto& memberToColumns = found->second;
@@ -63,10 +63,10 @@ ArchiveClassRegistration::ColumnResult ArchiveClassRegistration::FindColumn(
   auto foundColumn = memberToColumns.find(member);
 
   if (foundColumn == memberToColumns.end()) {
-    return {0, false};
+    return std::nullopt;
   }
 
-  return {foundColumn->second, true};
+  return foundColumn->second;
 }
 
 bool ArchiveClassRegistration::CreateTable(bool autoIncrement) {

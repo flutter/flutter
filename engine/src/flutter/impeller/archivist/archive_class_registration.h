@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include <map>
+#include <optional>
 
 #include "flutter/fml/macros.h"
 #include "impeller/archivist/archive.h"
@@ -16,9 +17,8 @@ class ArchiveClassRegistration {
 
   bool IsValid() const;
 
-  using ColumnResult = std::pair<size_t, bool>;
-  ColumnResult FindColumn(const std::string& className,
-                          ArchiveDef::Member member) const;
+  std::optional<size_t> FindColumnIndex(const std::string& className,
+                                        ArchiveDef::Member member) const;
 
   const std::string& GetClassName() const;
 

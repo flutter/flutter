@@ -5,6 +5,7 @@
 #pragma once
 
 #include <memory>
+#include <optional>
 #include <string>
 #include <type_traits>
 #include <vector>
@@ -16,8 +17,6 @@ namespace impeller {
 
 class ArchiveLocation;
 class ArchiveDatabase;
-
-static const Archivable::ArchiveName ArchiveNameAuto = 0;
 
 class Archive {
  public:
@@ -31,8 +30,7 @@ class Archive {
             class = std::enable_if<std::is_base_of<Archivable, T>::value>>
   bool Write(const T& archivable) {
     const ArchiveDef& def = T::ArchiveDefinition;
-    int64_t unused_last = 0;
-    return ArchiveInstance(def, archivable, unused_last);
+    return ArchiveInstance(def, archivable).has_value();
   }
 
   template <class T,
@@ -42,13 +40,13 @@ class Archive {
     return UnarchiveInstance(def, name, archivable);
   }
 
-  using UnarchiveStep = std::function<bool /*continue*/ (ArchiveLocation&)>;
+  using UnarchiveStep = std::function<bool(ArchiveLocation&)>;
 
   template <class T,
             class = std::enable_if<std::is_base_of<Archivable, T>::value>>
   size_t Read(UnarchiveStep stepper) {
     const ArchiveDef& def = T::ArchiveDefinition;
-    return UnarchiveInstances(def, stepper, ArchiveNameAuto);
+    return UnarchiveInstances(def, stepper);
   }
 
  private:
@@ -57,15 +55,17 @@ class Archive {
 
   friend class ArchiveLocation;
 
-  bool ArchiveInstance(const ArchiveDef& definition,
-                       const Archivable& archivable,
-                       int64_t& lastInsertID);
+  std::optional<int64_t /* row id */> ArchiveInstance(
+      const ArchiveDef& definition,
+      const Archivable& archivable);
+
   bool UnarchiveInstance(const ArchiveDef& definition,
                          Archivable::ArchiveName name,
                          Archivable& archivable);
+
   size_t UnarchiveInstances(const ArchiveDef& definition,
                             UnarchiveStep stepper,
-                            Archivable::ArchiveName optionalName);
+                            std::optional<int64_t> primary_key = std::nullopt);
 
   FML_DISALLOW_COPY_AND_ASSIGN(Archive);
 };
