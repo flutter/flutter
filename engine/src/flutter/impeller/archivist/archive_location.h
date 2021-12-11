@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <optional>
 #include <type_traits>
 
 #include "flutter/fml/macros.h"
@@ -19,6 +20,8 @@ class ArchiveStatement;
 
 class ArchiveLocation {
  public:
+  Archivable::ArchiveName GetPrimaryKey() const;
+
   template <class T, class = std::enable_if<std::is_integral<T>::value>>
   bool Write(ArchiveDef::Member member, T item) {
     return WriteIntegral(member, static_cast<int64_t>(item));
@@ -66,11 +69,11 @@ class ArchiveLocation {
      */
     auto vectorInsert = WriteVectorKeys(std::move(members));
 
-    if (!vectorInsert.first) {
+    if (!vectorInsert.has_value()) {
       return false;
     }
 
-    return WriteIntegral(member, vectorInsert.second);
+    return WriteIntegral(member, vectorInsert.value());
   }
 
   template <class Super,
@@ -159,13 +162,11 @@ class ArchiveLocation {
     return success;
   }
 
-  Archivable::ArchiveName GetPrimaryKey() const;
-
  private:
   Archive& context_;
   ArchiveStatement& statement_;
   const ArchiveClassRegistration& registration_;
-  Archivable::ArchiveName name_;
+  std::optional<int64_t> name_;
   std::string current_class_;
 
   friend class Archive;
@@ -173,13 +174,13 @@ class ArchiveLocation {
   ArchiveLocation(Archive& context,
                   ArchiveStatement& statement,
                   const ArchiveClassRegistration& registration,
-                  Archivable::ArchiveName name);
+                  std::optional<int64_t> name);
 
   bool WriteIntegral(ArchiveDef::Member member, int64_t item);
 
   bool ReadIntegral(ArchiveDef::Member member, int64_t& item);
 
-  std::pair<bool, int64_t> WriteVectorKeys(std::vector<int64_t>&& members);
+  std::optional<int64_t> WriteVectorKeys(std::vector<int64_t>&& members);
 
   bool ReadVectorKeys(Archivable::ArchiveName name,
                       std::vector<int64_t>& members);
