@@ -877,10 +877,14 @@ class VersionFreshnessValidator {
 
     // By this point, we should show the update message
     final String updateMessage;
-    if (remoteVersionStatus == VersionCheckResult.newVersionAvailable) {
-      updateMessage = newVersionAvailableMessage();
-    } else {
-      updateMessage = versionOutOfDateMessage(frameworkAge);
+    switch (remoteVersionStatus) {
+      case VersionCheckResult.newVersionAvailable:
+        updateMessage = newVersionAvailableMessage();
+        break;
+      case VersionCheckResult.versionIsCurrent:
+      case VersionCheckResult.unknown:
+        updateMessage = versionOutOfDateMessage(frameworkAge);
+        break;
     }
 
     logger.printStatus(updateMessage, emphasis: true);
