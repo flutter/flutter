@@ -1408,10 +1408,11 @@ class PubDependencyTree {
     String package, {
     @required Set<String> seen,
     @required Set<String> exclude,
-    List<String> result = const <String>[],
+    List<String>? result,
   }) {
     assert(seen != null);
     assert(exclude != null);
+    result ??= <String>[];
     if (!_dependencyTree.containsKey(package)) {
       // We have no transitive dependencies extracted for flutter_sdk packages
       // because they were omitted from pubspec.yaml used for 'pub upgrade' run.

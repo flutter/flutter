@@ -127,7 +127,7 @@ class CachingIterable<E> extends IterableBase<E> {
   /// ```
   ///
   /// Beware that this will eagerly evaluate the `range` iterable, and because
-  /// of that it would be better to just implementat `range` as something that
+  /// of that it would be better to just implement `range` as something that
   /// returns a `List` to begin with if possible.
   CachingIterable(this._prefillIterator);
 
