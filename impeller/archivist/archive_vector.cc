@@ -23,7 +23,7 @@ const ArchiveDef ArchiveVector::ArchiveDefinition = {
 };
 
 Archivable::ArchiveName ArchiveVector::GetArchivePrimaryKey() const {
-  return ArchiveNameAuto;
+  return 0;
 }
 
 const std::vector<int64_t> ArchiveVector::GetKeys() const {

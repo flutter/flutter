@@ -25,11 +25,11 @@ bool Archive::IsValid() const {
   return database_->IsValid();
 }
 
-bool Archive::ArchiveInstance(const ArchiveDef& definition,
-                              const Archivable& archivable,
-                              int64_t& lastInsertIDOut) {
+std::optional<int64_t /* row id */> Archive::ArchiveInstance(
+    const ArchiveDef& definition,
+    const Archivable& archivable) {
   if (!IsValid()) {
-    return false;
+    return std::nullopt;
   }
 
   auto transaction = database_->CreateTransaction(transaction_count_);
@@ -38,7 +38,7 @@ bool Archive::ArchiveInstance(const ArchiveDef& definition,
       database_->GetRegistrationForDefinition(definition);
 
   if (registration == nullptr) {
-    return false;
+    return std::nullopt;
   }
 
   auto statement = registration->CreateInsertStatement();
@@ -47,7 +47,7 @@ bool Archive::ArchiveInstance(const ArchiveDef& definition,
     /*
      *  Must be able to reset the statement for a new write
      */
-    return false;
+    return std::nullopt;
   }
 
   auto primary_key = archivable.GetArchivePrimaryKey();
@@ -66,24 +66,22 @@ bool Archive::ArchiveInstance(const ArchiveDef& definition,
   if (!definition.auto_key &&
       !statement.WriteValue(ArchiveClassRegistration::kPrimaryKeyIndex,
                             primary_key)) {
-    return false;
+    return std::nullopt;
   }
 
   if (!archivable.Write(item)) {
-    return false;
+    return std::nullopt;
   }
 
   if (statement.Execute() != ArchiveStatement::Result::kDone) {
-    return false;
+    return std::nullopt;
   }
 
   int64_t lastInsert = database_->GetLastInsertRowID();
 
   if (!definition.auto_key && lastInsert != static_cast<int64_t>(primary_key)) {
-    return false;
+    return std::nullopt;
   }
-
-  lastInsertIDOut = lastInsert;
 
   /*
    *  If any of the nested calls fail, we would have already checked for the
@@ -91,7 +89,7 @@ bool Archive::ArchiveInstance(const ArchiveDef& definition,
    */
   transaction.MarkWritesAsReadyForCommit();
 
-  return true;
+  return lastInsert;
 }
 
 bool Archive::UnarchiveInstance(const ArchiveDef& definition,
@@ -107,7 +105,7 @@ bool Archive::UnarchiveInstance(const ArchiveDef& definition,
 
 size_t Archive::UnarchiveInstances(const ArchiveDef& definition,
                                    Archive::UnarchiveStep stepper,
-                                   Archivable::ArchiveName name) {
+                                   std::optional<int64_t> primary_key) {
   if (!IsValid()) {
     return 0;
   }
@@ -119,7 +117,7 @@ size_t Archive::UnarchiveInstances(const ArchiveDef& definition,
     return 0;
   }
 
-  const bool isQueryingSingle = name != ArchiveNameAuto;
+  const bool isQueryingSingle = primary_key.has_value();
 
   auto statement = registration->CreateQueryStatement(isQueryingSingle);
 
@@ -129,11 +127,11 @@ size_t Archive::UnarchiveInstances(const ArchiveDef& definition,
 
   if (isQueryingSingle) {
     /*
-     *  If a single statement is being queried for, bind the name as a statement
-     *  argument.
+     *  If a single statement is being queried for, bind the primary key as a
+     * statement argument.
      */
     if (!statement.WriteValue(ArchiveClassRegistration::kPrimaryKeyIndex,
-                              name)) {
+                              primary_key.value())) {
       return 0;
     }
   }
@@ -157,7 +155,7 @@ size_t Archive::UnarchiveInstances(const ArchiveDef& definition,
     /*
      *  Prepare a fresh archive item for the given statement
      */
-    ArchiveLocation item(*this, statement, *registration, name);
+    ArchiveLocation item(*this, statement, *registration, primary_key);
 
     if (!stepper(item)) {
       break;
