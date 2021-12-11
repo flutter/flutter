@@ -12,15 +12,15 @@ namespace impeller {
 ArchiveLocation::ArchiveLocation(Archive& context,
                                  ArchiveStatement& statement,
                                  const ArchiveClassRegistration& registration,
-                                 std::optional<int64_t> name)
+                                 PrimaryKey name)
     : context_(context),
       statement_(statement),
       registration_(registration),
       name_(name),
       current_class_(registration.GetClassName()) {}
 
-Archivable::ArchiveName ArchiveLocation::GetPrimaryKey() const {
-  return name_.value_or(0u);
+PrimaryKey ArchiveLocation::GetPrimaryKey() const {
+  return name_;
 }
 
 bool ArchiveLocation::Write(ArchiveDef::Member member,
@@ -79,7 +79,7 @@ std::optional<int64_t> ArchiveLocation::WriteVectorKeys(
   return context_.ArchiveInstance(ArchiveVector::ArchiveDefinition, vector);
 }
 
-bool ArchiveLocation::ReadVectorKeys(Archivable::ArchiveName name,
+bool ArchiveLocation::ReadVectorKeys(PrimaryKey name,
                                      std::vector<int64_t>& members) {
   ArchiveVector vector;
   if (!context_.UnarchiveInstance(ArchiveVector::ArchiveDefinition, name,

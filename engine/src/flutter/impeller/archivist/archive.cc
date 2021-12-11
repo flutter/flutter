@@ -10,6 +10,7 @@
 #include "impeller/archivist/archive_class_registration.h"
 #include "impeller/archivist/archive_database.h"
 #include "impeller/archivist/archive_location.h"
+#include "impeller/base/validation.h"
 
 namespace impeller {
 
@@ -50,7 +51,13 @@ std::optional<int64_t /* row id */> Archive::ArchiveInstance(
     return std::nullopt;
   }
 
-  auto primary_key = archivable.GetArchivePrimaryKey();
+  auto primary_key = archivable.GetPrimaryKey();
+
+  if (!definition.auto_key && !primary_key.has_value()) {
+    VALIDATION_LOG << "Archive definition specified that primary keys will be "
+                      "explicitly specified but none was provided when asked.";
+    return std::nullopt;
+  }
 
   /*
    *  The lifecycle of the archive item is tied to this scope and there is no
@@ -65,7 +72,7 @@ std::optional<int64_t /* row id */> Archive::ArchiveInstance(
    */
   if (!definition.auto_key &&
       !statement.WriteValue(ArchiveClassRegistration::kPrimaryKeyIndex,
-                            primary_key)) {
+                            primary_key.value())) {
     return std::nullopt;
   }
 
@@ -79,7 +86,8 @@ std::optional<int64_t /* row id */> Archive::ArchiveInstance(
 
   int64_t lastInsert = database_->GetLastInsertRowID();
 
-  if (!definition.auto_key && lastInsert != static_cast<int64_t>(primary_key)) {
+  if (!definition.auto_key &&
+      lastInsert != static_cast<int64_t>(primary_key.value())) {
     return std::nullopt;
   }
 
@@ -93,7 +101,7 @@ std::optional<int64_t /* row id */> Archive::ArchiveInstance(
 }
 
 bool Archive::UnarchiveInstance(const ArchiveDef& definition,
-                                Archivable::ArchiveName name,
+                                PrimaryKey name,
                                 Archivable& archivable) {
   UnarchiveStep stepper = [&archivable](ArchiveLocation& item) {
     archivable.Read(item);
@@ -105,7 +113,7 @@ bool Archive::UnarchiveInstance(const ArchiveDef& definition,
 
 size_t Archive::UnarchiveInstances(const ArchiveDef& definition,
                                    Archive::UnarchiveStep stepper,
-                                   std::optional<int64_t> primary_key) {
+                                   PrimaryKey primary_key) {
   if (!IsValid()) {
     return 0;
   }
