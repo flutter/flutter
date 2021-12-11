@@ -2398,8 +2398,12 @@ class RenderTransform extends RenderProxyBox {
           layer = null;
         }
       } else {
+        final Matrix4 effectiveFilterTransform =
+            Matrix4.translationValues(offset.dx, offset.dy, 0.0)
+              ..multiply(transform)
+              ..translate(-offset.dx, -offset.dy);
         final ui.ImageFilter filter = ui.ImageFilter.matrix(
-          transform.storage,
+          effectiveFilterTransform.storage,
           filterQuality: filterQuality!,
         );
         if (layer is ImageFilterLayer) {
