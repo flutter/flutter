@@ -43,7 +43,7 @@ bool Archive::ArchiveInstance(const ArchiveDef& definition,
     return false;
   }
 
-  auto statement = registration->GetInsertStatement();
+  auto statement = registration->CreateInsertStatement();
 
   if (!statement.IsValid() || !statement.Reset()) {
     /*
@@ -52,7 +52,7 @@ bool Archive::ArchiveInstance(const ArchiveDef& definition,
     return false;
   }
 
-  auto itemName = archivable.GetArchiveName();
+  auto primary_key = archivable.GetArchivePrimaryKey();
 
   /*
    *  The lifecycle of the archive item is tied to this scope and there is no
@@ -60,13 +60,14 @@ bool Archive::ArchiveInstance(const ArchiveDef& definition,
    *  for its members to be references. It does not manage the lifetimes of
    *  anything.
    */
-  ArchiveLocation item(*this, statement, *registration, itemName);
+  ArchiveLocation item(*this, statement, *registration, primary_key);
 
   /*
    *  We need to bind the primary key only if the item does not provide its own
    */
   if (!definition.auto_key &&
-      !statement.WriteValue(ArchiveClassRegistration::NameIndex, itemName)) {
+      !statement.WriteValue(ArchiveClassRegistration::kPrimaryKeyIndex,
+                            primary_key)) {
     return false;
   }
 
@@ -80,7 +81,7 @@ bool Archive::ArchiveInstance(const ArchiveDef& definition,
 
   int64_t lastInsert = database_->GetLastInsertRowID();
 
-  if (!definition.auto_key && lastInsert != static_cast<int64_t>(itemName)) {
+  if (!definition.auto_key && lastInsert != static_cast<int64_t>(primary_key)) {
     return false;
   }
 
@@ -122,7 +123,7 @@ size_t Archive::UnarchiveInstances(const ArchiveDef& definition,
 
   const bool isQueryingSingle = name != ArchiveNameAuto;
 
-  auto statement = registration->GetQueryStatement(isQueryingSingle);
+  auto statement = registration->CreateQueryStatement(isQueryingSingle);
 
   if (!statement.IsValid() || !statement.Reset()) {
     return 0;
@@ -133,7 +134,8 @@ size_t Archive::UnarchiveInstances(const ArchiveDef& definition,
      *  If a single statement is being queried for, bind the name as a statement
      *  argument.
      */
-    if (!statement.WriteValue(ArchiveClassRegistration::NameIndex, name)) {
+    if (!statement.WriteValue(ArchiveClassRegistration::kPrimaryKeyIndex,
+                              name)) {
       return 0;
     }
   }
@@ -181,7 +183,7 @@ ArchiveLocation::ArchiveLocation(Archive& context,
       name_(name),
       current_class_(registration.GetClassName()) {}
 
-Archivable::ArchiveName ArchiveLocation::Name() const {
+Archivable::ArchiveName ArchiveLocation::GetPrimaryKey() const {
   return name_;
 }
 
@@ -226,7 +228,7 @@ bool ArchiveLocation::Write(ArchiveDef::Member member,
   }
 
   /*
-   *  Bind the name of the serialiable
+   *  Bind the name of the serializable
    */
   if (!statement_.WriteValue(found.first, lastInsert)) {
     return false;

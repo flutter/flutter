@@ -12,6 +12,10 @@ namespace impeller {
 
 class ArchiveClassRegistration {
  public:
+  static constexpr size_t kPrimaryKeyIndex = 0u;
+
+  bool IsValid() const;
+
   using ColumnResult = std::pair<size_t, bool>;
   ColumnResult FindColumn(const std::string& className,
                           ArchiveDef::Member member) const;
@@ -20,13 +24,9 @@ class ArchiveClassRegistration {
 
   size_t GetMemberCount() const;
 
-  bool IsValid() const;
+  ArchiveStatement CreateInsertStatement() const;
 
-  ArchiveStatement GetInsertStatement() const;
-
-  ArchiveStatement GetQueryStatement(bool single) const;
-
-  static const size_t NameIndex = 0;
+  ArchiveStatement CreateQueryStatement(bool single) const;
 
  private:
   using MemberColumnMap = std::map<ArchiveDef::Member, size_t>;
