@@ -5,6 +5,7 @@
 #pragma once
 
 #include <cstdint>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -22,15 +23,15 @@ struct ArchiveDef {
 
 class ArchiveLocation;
 
+using PrimaryKey = std::optional<int64_t>;
+
 //------------------------------------------------------------------------------
 /// @brief      Instances of `Archivable`s can be read from and written to a
 ///             persistent archive.
 ///
 class Archivable {
  public:
-  using ArchiveName = uint64_t;
-
-  virtual ArchiveName GetArchivePrimaryKey() const = 0;
+  virtual PrimaryKey GetPrimaryKey() const = 0;
 
   virtual bool Write(ArchiveLocation& item) const = 0;
 

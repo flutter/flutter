@@ -17,13 +17,14 @@ ArchiveVector::ArchiveVector() {}
 
 const ArchiveDef ArchiveVector::ArchiveDefinition = {
     /* .superClass = */ nullptr,
-    /* .className = */ "Meta_Vector",
+    /* .className = */ "_IPLR_meta_vector_items_",
     /* .autoAssignName = */ true,
     /* .members = */ {0},
 };
 
-Archivable::ArchiveName ArchiveVector::GetArchivePrimaryKey() const {
-  return 0;
+PrimaryKey ArchiveVector::GetPrimaryKey() const {
+  // Archive definition says the keys will be auto assigned.
+  return std::nullopt;
 }
 
 const std::vector<int64_t> ArchiveVector::GetKeys() const {

@@ -20,7 +20,7 @@ class ArchiveStatement;
 
 class ArchiveLocation {
  public:
-  Archivable::ArchiveName GetPrimaryKey() const;
+  PrimaryKey GetPrimaryKey() const;
 
   template <class T, class = std::enable_if<std::is_integral<T>::value>>
   bool Write(ArchiveDef::Member member, T item) {
@@ -166,7 +166,7 @@ class ArchiveLocation {
   Archive& context_;
   ArchiveStatement& statement_;
   const ArchiveClassRegistration& registration_;
-  std::optional<int64_t> name_;
+  PrimaryKey name_;
   std::string current_class_;
 
   friend class Archive;
@@ -174,7 +174,7 @@ class ArchiveLocation {
   ArchiveLocation(Archive& context,
                   ArchiveStatement& statement,
                   const ArchiveClassRegistration& registration,
-                  std::optional<int64_t> name);
+                  PrimaryKey name);
 
   bool WriteIntegral(ArchiveDef::Member member, int64_t item);
 
@@ -182,8 +182,7 @@ class ArchiveLocation {
 
   std::optional<int64_t> WriteVectorKeys(std::vector<int64_t>&& members);
 
-  bool ReadVectorKeys(Archivable::ArchiveName name,
-                      std::vector<int64_t>& members);
+  bool ReadVectorKeys(PrimaryKey name, std::vector<int64_t>& members);
 
   bool Write(ArchiveDef::Member member,
              const ArchiveDef& otherDef,
