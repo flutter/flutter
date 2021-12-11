@@ -35,7 +35,7 @@ class Archive {
 
   template <class T,
             class = std::enable_if<std::is_base_of<Archivable, T>::value>>
-  bool Read(Archivable::ArchiveName name, T& archivable) {
+  bool Read(PrimaryKey name, T& archivable) {
     const ArchiveDef& def = T::ArchiveDefinition;
     return UnarchiveInstance(def, name, archivable);
   }
@@ -60,12 +60,12 @@ class Archive {
       const Archivable& archivable);
 
   bool UnarchiveInstance(const ArchiveDef& definition,
-                         Archivable::ArchiveName name,
+                         PrimaryKey name,
                          Archivable& archivable);
 
   size_t UnarchiveInstances(const ArchiveDef& definition,
                             UnarchiveStep stepper,
-                            std::optional<int64_t> primary_key = std::nullopt);
+                            PrimaryKey primary_key = std::nullopt);
 
   FML_DISALLOW_COPY_AND_ASSIGN(Archive);
 };
