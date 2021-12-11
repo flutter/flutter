@@ -37,7 +37,7 @@ ArchiveStatement::~ArchiveStatement() {
   }
 }
 
-bool ArchiveStatement::IsReady() const {
+bool ArchiveStatement::IsValid() const {
   return ready_;
 }
 
@@ -62,7 +62,7 @@ static constexpr int ToParam(size_t index) {
 
 static constexpr int ToColumn(size_t index) {
   /*
-   *  sqlite columns begin from 1
+   *  sqlite columns begin from 0
    */
   return static_cast<int>(index);
 }
@@ -165,7 +165,7 @@ bool ArchiveStatement::ReadValue(size_t index, Allocation& item) {
   return true;
 }
 
-ArchiveStatement::Result ArchiveStatement::Run() {
+ArchiveStatement::Result ArchiveStatement::Execute() {
   switch (::sqlite3_step(STATEMENT_HANDLE)) {
     case SQLITE_DONE:
       return Result::kDone;

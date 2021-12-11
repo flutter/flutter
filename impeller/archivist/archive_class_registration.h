@@ -6,6 +6,7 @@
 
 #include "flutter/fml/macros.h"
 #include "impeller/archivist/archive.h"
+#include "impeller/archivist/archive_statement.h"
 
 namespace impeller {
 
@@ -19,7 +20,7 @@ class ArchiveClassRegistration {
 
   size_t GetMemberCount() const;
 
-  bool IsReady() const;
+  bool IsValid() const;
 
   ArchiveStatement GetInsertStatement() const;
 

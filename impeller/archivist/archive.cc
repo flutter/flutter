@@ -9,6 +9,7 @@
 #include "flutter/fml/logging.h"
 #include "impeller/archivist/archive_class_registration.h"
 #include "impeller/archivist/archive_database.h"
+#include "impeller/archivist/archive_location.h"
 #include "impeller/archivist/archive_statement.h"
 #include "impeller/archivist/archive_vector.h"
 
@@ -22,14 +23,14 @@ Archive::~Archive() {
       << "There must be no pending transactions";
 }
 
-bool Archive::IsReady() const {
-  return database_->IsReady();
+bool Archive::IsValid() const {
+  return database_->IsValid();
 }
 
 bool Archive::ArchiveInstance(const ArchiveDef& definition,
                               const Archivable& archivable,
                               int64_t& lastInsertIDOut) {
-  if (!IsReady()) {
+  if (!IsValid()) {
     return false;
   }
 
@@ -44,7 +45,7 @@ bool Archive::ArchiveInstance(const ArchiveDef& definition,
 
   auto statement = registration->GetInsertStatement();
 
-  if (!statement.IsReady() || !statement.Reset()) {
+  if (!statement.IsValid() || !statement.Reset()) {
     /*
      *  Must be able to reset the statement for a new write
      */
@@ -73,7 +74,7 @@ bool Archive::ArchiveInstance(const ArchiveDef& definition,
     return false;
   }
 
-  if (statement.Run() != ArchiveStatement::Result::kDone) {
+  if (statement.Execute() != ArchiveStatement::Result::kDone) {
     return false;
   }
 
@@ -108,7 +109,7 @@ bool Archive::UnarchiveInstance(const ArchiveDef& definition,
 size_t Archive::UnarchiveInstances(const ArchiveDef& definition,
                                    Archive::UnarchiveStep stepper,
                                    Archivable::ArchiveName name) {
-  if (!IsReady()) {
+  if (!IsValid()) {
     return 0;
   }
 
@@ -123,7 +124,7 @@ size_t Archive::UnarchiveInstances(const ArchiveDef& definition,
 
   auto statement = registration->GetQueryStatement(isQueryingSingle);
 
-  if (!statement.IsReady() || !statement.Reset()) {
+  if (!statement.IsValid() || !statement.Reset()) {
     return 0;
   }
 
@@ -150,7 +151,7 @@ size_t Archive::UnarchiveInstances(const ArchiveDef& definition,
 
   size_t itemsRead = 0;
 
-  while (statement.Run() == ArchiveStatement::Result::kRow) {
+  while (statement.Execute() == ArchiveStatement::Result::kRow) {
     itemsRead++;
 
     /*

@@ -6,6 +6,8 @@
 
 #include <sstream>
 
+#include "impeller/archivist/archive_location.h"
+
 namespace impeller {
 
 ArchiveVector::ArchiveVector(std::vector<int64_t>&& keys)
