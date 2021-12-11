@@ -22,7 +22,7 @@ const ArchiveDef ArchiveVector::ArchiveDefinition = {
     /* .members = */ {0},
 };
 
-Archivable::ArchiveName ArchiveVector::GetArchiveName() const {
+Archivable::ArchiveName ArchiveVector::GetArchivePrimaryKey() const {
   return ArchiveNameAuto;
 }
 

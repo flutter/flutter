@@ -30,7 +30,7 @@ class Archivable {
  public:
   using ArchiveName = uint64_t;
 
-  virtual ArchiveName GetArchiveName() const = 0;
+  virtual ArchiveName GetArchivePrimaryKey() const = 0;
 
   virtual bool Write(ArchiveLocation& item) const = 0;
 

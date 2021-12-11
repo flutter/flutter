@@ -13,7 +13,7 @@ class ArchiveVector : public Archivable {
  public:
   static const ArchiveDef ArchiveDefinition;
 
-  ArchiveName GetArchiveName() const override;
+  ArchiveName GetArchivePrimaryKey() const override;
 
   const std::vector<int64_t> GetKeys() const;
 

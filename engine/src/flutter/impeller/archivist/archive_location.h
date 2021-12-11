@@ -159,7 +159,7 @@ class ArchiveLocation {
     return success;
   }
 
-  Archivable::ArchiveName Name() const;
+  Archivable::ArchiveName GetPrimaryKey() const;
 
  private:
   Archive& context_;
