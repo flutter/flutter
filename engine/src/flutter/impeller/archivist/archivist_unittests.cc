@@ -8,6 +8,7 @@
 #include "flutter/fml/macros.h"
 #include "flutter/testing/testing.h"
 #include "impeller/archivist/archive.h"
+#include "impeller/archivist/archive_location.h"
 #include "impeller/archivist/archivist_fixture.h"
 
 namespace impeller {
@@ -55,24 +56,24 @@ using ArchiveTest = ArchivistFixture;
 
 TEST_F(ArchiveTest, SimpleInitialization) {
   Archive archive(GetArchiveFileName().c_str());
-  ASSERT_TRUE(archive.IsReady());
+  ASSERT_TRUE(archive.IsValid());
 }
 
 TEST_F(ArchiveTest, AddStorageClass) {
   Archive archive(GetArchiveFileName().c_str());
-  ASSERT_TRUE(archive.IsReady());
+  ASSERT_TRUE(archive.IsValid());
 }
 
 TEST_F(ArchiveTest, AddData) {
   Archive archive(GetArchiveFileName().c_str());
-  ASSERT_TRUE(archive.IsReady());
+  ASSERT_TRUE(archive.IsValid());
   Sample sample;
   ASSERT_TRUE(archive.Write(sample));
 }
 
 TEST_F(ArchiveTest, AddDataMultiple) {
   Archive archive(GetArchiveFileName().c_str());
-  ASSERT_TRUE(archive.IsReady());
+  ASSERT_TRUE(archive.IsValid());
 
   for (size_t i = 0; i < 100; i++) {
     Sample sample(i + 1);
@@ -82,7 +83,7 @@ TEST_F(ArchiveTest, AddDataMultiple) {
 
 TEST_F(ArchiveTest, ReadData) {
   Archive archive(GetArchiveFileName().c_str());
-  ASSERT_TRUE(archive.IsReady());
+  ASSERT_TRUE(archive.IsValid());
 
   size_t count = 50;
 
@@ -105,7 +106,7 @@ TEST_F(ArchiveTest, ReadData) {
 
 TEST_F(ArchiveTest, ReadDataWithNames) {
   Archive archive(GetArchiveFileName().c_str());
-  ASSERT_TRUE(archive.IsReady());
+  ASSERT_TRUE(archive.IsValid());
 
   size_t count = 8;
 

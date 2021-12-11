@@ -5,8 +5,20 @@
 #pragma once
 
 #include <cstdint>
+#include <string>
+#include <vector>
 
 namespace impeller {
+
+struct ArchiveDef {
+  using Member = uint64_t;
+  using Members = std::vector<Member>;
+
+  const ArchiveDef* isa = nullptr;
+  const std::string table_name;
+  const bool auto_key = true;
+  const Members members;
+};
 
 class ArchiveLocation;
 

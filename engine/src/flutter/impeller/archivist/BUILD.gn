@@ -19,6 +19,8 @@ impeller_component("archivist") {
     "archive_class_registration.h",
     "archive_database.cc",
     "archive_database.h",
+    "archive_location.cc",
+    "archive_location.h",
     "archive_statement.cc",
     "archive_statement.h",
     "archive_transaction.cc",
