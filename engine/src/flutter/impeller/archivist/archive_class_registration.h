@@ -17,8 +17,7 @@ class ArchiveClassRegistration {
 
   bool IsValid() const;
 
-  std::optional<size_t> FindColumnIndex(const std::string& className,
-                                        ArchiveDef::Member member) const;
+  std::optional<size_t> FindColumnIndex(const std::string& member) const;
 
   const std::string& GetClassName() const;
 
@@ -29,20 +28,18 @@ class ArchiveClassRegistration {
   ArchiveStatement CreateQueryStatement(bool single) const;
 
  private:
-  using MemberColumnMap = std::map<ArchiveDef::Member, size_t>;
-  using ClassMap = std::map<std::string, MemberColumnMap>;
+  using MemberColumnMap = std::map<std::string, size_t>;
 
   friend class ArchiveDatabase;
 
   ArchiveClassRegistration(ArchiveDatabase& database, ArchiveDef definition);
 
-  bool CreateTable(bool autoIncrement);
+  bool CreateTable();
 
   ArchiveDatabase& database_;
-  ClassMap class_map_;
-  std::string class_name_;
-  size_t member_count_ = 0;
-  bool is_ready_ = false;
+  const ArchiveDef definition_;
+  MemberColumnMap column_map_;
+  bool is_valid_ = false;
 
   FML_DISALLOW_COPY_AND_ASSIGN(ArchiveClassRegistration);
 };

@@ -27,25 +27,25 @@ class Archive {
   bool IsValid() const;
 
   template <class T,
-            class = std::enable_if<std::is_base_of<Archivable, T>::value>>
-  bool Write(const T& archivable) {
-    const ArchiveDef& def = T::ArchiveDefinition;
+            class = std::enable_if_t<std::is_base_of<Archivable, T>::value>>
+  [[nodiscard]] bool Write(const T& archivable) {
+    const ArchiveDef& def = T::kArchiveDefinition;
     return ArchiveInstance(def, archivable).has_value();
   }
 
   template <class T,
-            class = std::enable_if<std::is_base_of<Archivable, T>::value>>
-  bool Read(PrimaryKey name, T& archivable) {
-    const ArchiveDef& def = T::ArchiveDefinition;
+            class = std::enable_if_t<std::is_base_of<Archivable, T>::value>>
+  [[nodiscard]] bool Read(PrimaryKey name, T& archivable) {
+    const ArchiveDef& def = T::kArchiveDefinition;
     return UnarchiveInstance(def, name, archivable);
   }
 
   using UnarchiveStep = std::function<bool(ArchiveLocation&)>;
 
   template <class T,
-            class = std::enable_if<std::is_base_of<Archivable, T>::value>>
-  size_t Read(UnarchiveStep stepper) {
-    const ArchiveDef& def = T::ArchiveDefinition;
+            class = std::enable_if_t<std::is_base_of<Archivable, T>::value>>
+  [[nodiscard]] size_t Read(UnarchiveStep stepper) {
+    const ArchiveDef& def = T::kArchiveDefinition;
     return UnarchiveInstances(def, stepper);
   }
 

@@ -16,38 +16,37 @@ ArchiveLocation::ArchiveLocation(Archive& context,
     : context_(context),
       statement_(statement),
       registration_(registration),
-      primary_key_(name),
-      current_class_(registration.GetClassName()) {}
+      primary_key_(name) {}
 
 PrimaryKey ArchiveLocation::GetPrimaryKey() const {
   return primary_key_;
 }
 
-bool ArchiveLocation::Write(ArchiveDef::Member member,
+bool ArchiveLocation::Write(const std::string& member,
                             const std::string& item) {
-  auto index = registration_.FindColumnIndex(current_class_, member);
+  auto index = registration_.FindColumnIndex(member);
   return index.has_value() ? statement_.WriteValue(index.value(), item) : false;
 }
 
-bool ArchiveLocation::WriteIntegral(ArchiveDef::Member member, int64_t item) {
-  auto index = registration_.FindColumnIndex(current_class_, member);
+bool ArchiveLocation::WriteIntegral(const std::string& member, int64_t item) {
+  auto index = registration_.FindColumnIndex(member);
   return index.has_value() ? statement_.WriteValue(index.value(), item) : false;
 }
 
-bool ArchiveLocation::Write(ArchiveDef::Member member, double item) {
-  auto index = registration_.FindColumnIndex(current_class_, member);
+bool ArchiveLocation::Write(const std::string& member, double item) {
+  auto index = registration_.FindColumnIndex(member);
   return index.has_value() ? statement_.WriteValue(index.value(), item) : false;
 }
 
-bool ArchiveLocation::Write(ArchiveDef::Member member, const Allocation& item) {
-  auto index = registration_.FindColumnIndex(current_class_, member);
+bool ArchiveLocation::Write(const std::string& member, const Allocation& item) {
+  auto index = registration_.FindColumnIndex(member);
   return index.has_value() ? statement_.WriteValue(index.value(), item) : false;
 }
 
-bool ArchiveLocation::Write(ArchiveDef::Member member,
+bool ArchiveLocation::Write(const std::string& member,
                             const ArchiveDef& otherDef,
                             const Archivable& other) {
-  auto index = registration_.FindColumnIndex(current_class_, member);
+  auto index = registration_.FindColumnIndex(member);
 
   if (!index.has_value()) {
     return false;
@@ -76,13 +75,13 @@ bool ArchiveLocation::Write(ArchiveDef::Member member,
 std::optional<int64_t> ArchiveLocation::WriteVectorKeys(
     std::vector<int64_t>&& members) {
   ArchiveVector vector(std::move(members));
-  return context_.ArchiveInstance(ArchiveVector::ArchiveDefinition, vector);
+  return context_.ArchiveInstance(ArchiveVector::kArchiveDefinition, vector);
 }
 
 bool ArchiveLocation::ReadVectorKeys(PrimaryKey name,
                                      std::vector<int64_t>& members) {
   ArchiveVector vector;
-  if (!context_.UnarchiveInstance(ArchiveVector::ArchiveDefinition, name,
+  if (!context_.UnarchiveInstance(ArchiveVector::kArchiveDefinition, name,
                                   vector)) {
     return false;
   }
@@ -91,30 +90,30 @@ bool ArchiveLocation::ReadVectorKeys(PrimaryKey name,
   return true;
 }
 
-bool ArchiveLocation::Read(ArchiveDef::Member member, std::string& item) {
-  auto index = registration_.FindColumnIndex(current_class_, member);
+bool ArchiveLocation::Read(const std::string& member, std::string& item) {
+  auto index = registration_.FindColumnIndex(member);
   return index.has_value() ? statement_.ReadValue(index.value(), item) : false;
 }
 
-bool ArchiveLocation::ReadIntegral(ArchiveDef::Member member, int64_t& item) {
-  auto index = registration_.FindColumnIndex(current_class_, member);
+bool ArchiveLocation::ReadIntegral(const std::string& member, int64_t& item) {
+  auto index = registration_.FindColumnIndex(member);
   return index.has_value() ? statement_.ReadValue(index.value(), item) : false;
 }
 
-bool ArchiveLocation::Read(ArchiveDef::Member member, double& item) {
-  auto index = registration_.FindColumnIndex(current_class_, member);
+bool ArchiveLocation::Read(const std::string& member, double& item) {
+  auto index = registration_.FindColumnIndex(member);
   return index.has_value() ? statement_.ReadValue(index.value(), item) : false;
 }
 
-bool ArchiveLocation::Read(ArchiveDef::Member member, Allocation& item) {
-  auto index = registration_.FindColumnIndex(current_class_, member);
+bool ArchiveLocation::Read(const std::string& member, Allocation& item) {
+  auto index = registration_.FindColumnIndex(member);
   return index.has_value() ? statement_.ReadValue(index.value(), item) : false;
 }
 
-bool ArchiveLocation::Read(ArchiveDef::Member member,
+bool ArchiveLocation::Read(const std::string& member,
                            const ArchiveDef& otherDef,
                            Archivable& other) {
-  auto index = registration_.FindColumnIndex(current_class_, member);
+  auto index = registration_.FindColumnIndex(member);
 
   /*
    *  Make sure a member is present at that column

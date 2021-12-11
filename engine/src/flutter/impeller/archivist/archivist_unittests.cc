@@ -20,6 +20,8 @@ class Sample : public Archivable {
  public:
   Sample(uint64_t count = 42) : some_data_(count) {}
 
+  Sample(Sample&&) = default;
+
   uint64_t GetSomeData() const { return some_data_; }
 
   // |Archivable|
@@ -27,16 +29,16 @@ class Sample : public Archivable {
 
   // |Archivable|
   bool Write(ArchiveLocation& item) const override {
-    return item.Write(999, some_data_);
+    return item.Write("some_data", some_data_);
   };
 
   // |Archivable|
   bool Read(ArchiveLocation& item) override {
     name_ = item.GetPrimaryKey();
-    return item.Read(999, some_data_);
+    return item.Read("some_data", some_data_);
   };
 
-  static const ArchiveDef ArchiveDefinition;
+  static const ArchiveDef kArchiveDefinition;
 
  private:
   uint64_t some_data_;
@@ -45,11 +47,58 @@ class Sample : public Archivable {
   FML_DISALLOW_COPY_AND_ASSIGN(Sample);
 };
 
-const ArchiveDef Sample::ArchiveDefinition = {
-    .isa = nullptr,
+const ArchiveDef Sample::kArchiveDefinition = {
     .table_name = "Sample",
     .auto_key = false,
-    .members = {999},
+    .members = {"some_data"},
+};
+
+class SampleWithVector : public Archivable {
+ public:
+  SampleWithVector() = default;
+
+  // |Archivable|
+  PrimaryKey GetPrimaryKey() const override { return std::nullopt; }
+
+  // |Archivable|
+  bool Write(ArchiveLocation& item) const override {
+    std::vector<Sample> samples;
+    for (size_t i = 0; i < 50u; i++) {
+      samples.emplace_back(Sample{1988 + i});
+    }
+    return item.Write("hello", "world") && item.Write("samples", samples);
+  };
+
+  // |Archivable|
+  bool Read(ArchiveLocation& item) override {
+    std::string str;
+    auto str_result = item.Read("hello", str);
+    std::vector<Sample> samples;
+    auto vec_result = item.Read("samples", samples);
+
+    if (!str_result || str != "world" || !vec_result || samples.size() != 50) {
+      return false;
+    }
+
+    size_t current = 1988;
+    for (const auto& sample : samples) {
+      if (sample.GetSomeData() != current++) {
+        return false;
+      }
+    }
+    return true;
+  };
+
+  static const ArchiveDef kArchiveDefinition;
+
+ private:
+  std::vector<Sample> samples_;
+  FML_DISALLOW_COPY_AND_ASSIGN(SampleWithVector);
+};
+
+const ArchiveDef SampleWithVector::kArchiveDefinition = {
+    .table_name = "SampleWithVector",
+    .members = {"hello", "samples"},
 };
 
 using ArchiveTest = ArchivistFixture;
@@ -129,6 +178,23 @@ TEST_F(ArchiveTest, ReadDataWithNames) {
     ASSERT_EQ(values[i], sample.GetSomeData());
     ASSERT_EQ(keys[i], sample.GetPrimaryKey());
   }
+}
+
+TEST_F(ArchiveTest, CanReadWriteVectorOfArchivables) {
+  Archive archive(GetArchiveFileName().c_str());
+  ASSERT_TRUE(archive.IsValid());
+
+  SampleWithVector sample_with_vector;
+  ASSERT_TRUE(archive.Write(sample_with_vector));
+  bool read_success = false;
+  ASSERT_EQ(
+      archive.Read<SampleWithVector>([&](ArchiveLocation& location) -> bool {
+        SampleWithVector other_sample_with_vector;
+        read_success = other_sample_with_vector.Read(location);
+        return true;  // Always keep continuing but assert that we only get one.
+      }),
+      1u);
+  ASSERT_TRUE(read_success);
 }
 
 }  // namespace testing

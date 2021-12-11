@@ -12,13 +12,9 @@
 namespace impeller {
 
 struct ArchiveDef {
-  using Member = uint64_t;
-  using Members = std::vector<Member>;
-
-  const ArchiveDef* isa = nullptr;
   const std::string table_name;
   const bool auto_key = true;
-  const Members members;
+  const std::vector<std::string> members;
 };
 
 class ArchiveLocation;
@@ -31,6 +27,8 @@ using PrimaryKey = std::optional<int64_t>;
 ///
 class Archivable {
  public:
+  virtual ~Archivable() = default;
+
   virtual PrimaryKey GetPrimaryKey() const = 0;
 
   virtual bool Write(ArchiveLocation& item) const = 0;
