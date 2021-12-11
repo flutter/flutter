@@ -166,7 +166,7 @@ class ArchiveLocation {
   Archive& context_;
   ArchiveStatement& statement_;
   const ArchiveClassRegistration& registration_;
-  PrimaryKey name_;
+  PrimaryKey primary_key_;
   std::string current_class_;
 
   friend class Archive;
