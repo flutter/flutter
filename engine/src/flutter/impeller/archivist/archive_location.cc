@@ -16,11 +16,11 @@ ArchiveLocation::ArchiveLocation(Archive& context,
     : context_(context),
       statement_(statement),
       registration_(registration),
-      name_(name),
+      primary_key_(name),
       current_class_(registration.GetClassName()) {}
 
 PrimaryKey ArchiveLocation::GetPrimaryKey() const {
-  return name_;
+  return primary_key_;
 }
 
 bool ArchiveLocation::Write(ArchiveDef::Member member,
