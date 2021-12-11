@@ -1408,7 +1408,7 @@ class PubDependencyTree {
     String package, {
     @required Set<String> seen,
     @required Set<String> exclude,
-    List<String>? result,
+    List<String>/*?*/ result,
   }) {
     assert(seen != null);
     assert(exclude != null);
