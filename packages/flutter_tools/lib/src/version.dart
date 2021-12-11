@@ -362,8 +362,9 @@ class FlutterVersion {
     globals.cache.checkLockAcquired();
     final VersionCheckStamp versionCheckStamp = await VersionCheckStamp.load(globals.cache, globals.logger);
 
+    final DateTime now = _clock.now();
     if (versionCheckStamp.lastTimeVersionWasChecked != null) {
-      final Duration timeSinceLastCheck = _clock.now().difference(
+      final Duration timeSinceLastCheck = now.difference(
         versionCheckStamp.lastTimeVersionWasChecked!,
       );
 
@@ -379,7 +380,7 @@ class FlutterVersion {
         await FlutterVersion.fetchRemoteFrameworkCommitDate(channel),
       );
       await versionCheckStamp.store(
-        newTimeVersionWasChecked: _clock.now(),
+        newTimeVersionWasChecked: now,
         newKnownRemoteVersion: remoteFrameworkCommitDate,
       );
       return remoteFrameworkCommitDate;
@@ -391,7 +392,7 @@ class FlutterVersion {
       // Still update the timestamp to avoid us hitting the server on every single
       // command if for some reason we cannot connect (eg. we may be offline).
       await versionCheckStamp.store(
-        newTimeVersionWasChecked: _clock.now(),
+        newTimeVersionWasChecked: now,
       );
       return null;
     }
@@ -782,6 +783,9 @@ class VersionFreshnessValidator {
   final Duration pauseTime;
   final DateTime? latestFlutterCommitDate;
 
+  late final DateTime now = clock.now();
+  late final Duration frameworkAge = now.difference(localFrameworkCommitDate);
+
   /// The amount of time we wait before pinging the server to check for the
   /// availability of a newer version of Flutter.
   @visibleForTesting
@@ -804,8 +808,6 @@ class VersionFreshnessValidator {
   // couldn't tell but the local version is outdated.
   @visibleForTesting
   bool canShowWarning(VersionCheckResult remoteVersionStatus) {
-    final Duration frameworkAge = clock.now().difference(localFrameworkCommitDate);
-
     final bool installationSeemsOutdated = frameworkAge > versionAgeConsideredUpToDate(version.channel);
     if (remoteVersionStatus == VersionCheckResult.newVersionAvailable) {
       return true;
@@ -862,7 +864,7 @@ class VersionFreshnessValidator {
     // Do not load the stamp before the above server check as it may modify the stamp file.
     final VersionCheckStamp stamp = await VersionCheckStamp.load(cache, logger);
     final DateTime lastTimeWarningWasPrinted = stamp.lastTimeWarningWasPrinted ?? clock.ago(maxTimeSinceLastWarning * 2);
-    final bool beenAWhileSinceWarningWasPrinted = clock.now().difference(lastTimeWarningWasPrinted) > maxTimeSinceLastWarning;
+    final bool beenAWhileSinceWarningWasPrinted = now.difference(lastTimeWarningWasPrinted) > maxTimeSinceLastWarning;
     if (!beenAWhileSinceWarningWasPrinted) {
       return;
     }
@@ -884,7 +886,7 @@ class VersionFreshnessValidator {
     logger.printStatus(updateMessage, emphasis: true);
     await Future.wait<void>(<Future<void>>[
       stamp.store(
-        newTimeWarningWasPrinted: clock.now(),
+        newTimeWarningWasPrinted: now,
         cache: cache,
       ),
       Future<void>.delayed(pauseTime),
