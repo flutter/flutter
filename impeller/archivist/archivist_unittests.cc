@@ -23,7 +23,7 @@ class Sample : public Archivable {
   uint64_t GetSomeData() const { return some_data_; }
 
   // |Archivable|
-  ArchiveName GetArchiveName() const override { return name_; }
+  ArchiveName GetArchivePrimaryKey() const override { return name_; }
 
   // |Archivable|
   bool Write(ArchiveLocation& item) const override {
@@ -32,7 +32,7 @@ class Sample : public Archivable {
 
   // |Archivable|
   bool Read(ArchiveLocation& item) override {
-    name_ = item.Name();
+    name_ = item.GetPrimaryKey();
     return item.Read(999, some_data_);
   };
 
@@ -92,7 +92,7 @@ TEST_F(ArchiveTest, ReadData) {
 
   for (size_t i = 0; i < count; i++) {
     Sample sample(i + 1);
-    keys.push_back(sample.GetArchiveName());
+    keys.push_back(sample.GetArchivePrimaryKey());
     values.push_back(sample.GetSomeData());
     ASSERT_TRUE(archive.Write(sample));
   }
@@ -118,7 +118,7 @@ TEST_F(ArchiveTest, ReadDataWithNames) {
 
   for (size_t i = 0; i < count; i++) {
     Sample sample(i + 1);
-    keys.push_back(sample.GetArchiveName());
+    keys.push_back(sample.GetArchivePrimaryKey());
     values.push_back(sample.GetSomeData());
     ASSERT_TRUE(archive.Write(sample));
   }
@@ -127,7 +127,7 @@ TEST_F(ArchiveTest, ReadDataWithNames) {
     Sample sample;
     ASSERT_TRUE(archive.Read(keys[i], sample));
     ASSERT_EQ(values[i], sample.GetSomeData());
-    ASSERT_EQ(keys[i], sample.GetArchiveName());
+    ASSERT_EQ(keys[i], sample.GetArchivePrimaryKey());
   }
 }
 

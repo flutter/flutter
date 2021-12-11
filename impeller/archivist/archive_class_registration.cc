@@ -109,7 +109,7 @@ bool ArchiveClassRegistration::CreateTable(bool autoIncrement) {
   return statement.Execute() == ArchiveStatement::Result::kDone;
 }
 
-ArchiveStatement ArchiveClassRegistration::GetQueryStatement(
+ArchiveStatement ArchiveClassRegistration::CreateQueryStatement(
     bool single) const {
   std::stringstream stream;
   stream << "SELECT " << ArchivePrimaryKeyColumnName << ", ";
@@ -132,7 +132,7 @@ ArchiveStatement ArchiveClassRegistration::GetQueryStatement(
   return database_.CreateStatement(stream.str());
 }
 
-ArchiveStatement ArchiveClassRegistration::GetInsertStatement() const {
+ArchiveStatement ArchiveClassRegistration::CreateInsertStatement() const {
   std::stringstream stream;
   stream << "INSERT OR REPLACE INTO " << class_name_ << " VALUES ( ?, ";
   for (size_t i = 0; i < member_count_; i++) {
