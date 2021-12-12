@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'package:meta/meta.dart';
 import 'package:mime/mime.dart' as mime;
 import 'package:process/process.dart';
 
@@ -18,9 +15,9 @@ import '../../convert.dart';
 import '../../devfs.dart';
 import '../build_system.dart';
 
-List<Map<String, dynamic>> _getList(dynamic object, String errorMessage) {
-  if (object is List<dynamic>) {
-    return object.cast<Map<String, dynamic>>();
+List<Map<String, Object?>> _getList(Object? object, String errorMessage) {
+  if (object is List<Object?>) {
+    return object.cast<Map<String, Object?>>();
   }
   throw IconTreeShakerException._(errorMessage);
 }
@@ -39,11 +36,11 @@ class IconTreeShaker {
   /// font subsetting has been requested in a debug build mode.
   IconTreeShaker(
     this._environment,
-    DevFSStringContent fontManifest, {
-    @required ProcessManager processManager,
-    @required Logger logger,
-    @required FileSystem fileSystem,
-    @required Artifacts artifacts,
+    DevFSStringContent? fontManifest, {
+    required ProcessManager processManager,
+    required Logger logger,
+    required FileSystem fileSystem,
+    required Artifacts artifacts,
   }) : assert(_environment != null),
        assert(processManager != null),
        assert(logger != null),
@@ -81,9 +78,9 @@ class IconTreeShaker {
   ];
 
   final Environment _environment;
-  final String _fontManifest;
-  Future<void> _iconDataProcessing;
-  Map<String, _IconTreeShakerData> _iconData;
+  final String? _fontManifest;
+  Future<void>? _iconDataProcessing;
+  Map<String, _IconTreeShakerData>? _iconData;
 
   final ProcessManager _processManager;
   final Logger _logger;
@@ -120,7 +117,7 @@ class IconTreeShaker {
     final Set<String> familyKeys = iconData.keys.toSet();
 
     final Map<String, String> fonts = await _parseFontJson(
-      _fontManifest,
+      _fontManifest!, // Guarded by `enabled`.
       familyKeys,
     );
 
@@ -137,10 +134,14 @@ class IconTreeShaker {
 
     final Map<String, _IconTreeShakerData> result = <String, _IconTreeShakerData>{};
     for (final MapEntry<String, String> entry in fonts.entries) {
+      final List<int>? codePoints = iconData[entry.key];
+      if (codePoints == null) {
+        throw IconTreeShakerException._('Expected to font code points for ${entry.key}, but none were found.');
+      }
       result[entry.value] = _IconTreeShakerData(
         family: entry.key,
         relativePath: entry.value,
-        codePoints: iconData[entry.key],
+        codePoints: codePoints,
       );
     }
     _iconData = result;
@@ -156,9 +157,9 @@ class IconTreeShaker {
   /// If the font-subset subprocess fails, it will [throwToolExit].
   /// Otherwise, it will return true.
   Future<bool> subsetFont({
-    @required File input,
-    @required String outputPath,
-    @required String relativePath,
+    required File input,
+    required String outputPath,
+    required String relativePath,
   }) async {
     if (!enabled) {
       return false;
@@ -166,7 +167,7 @@ class IconTreeShaker {
     if (input.lengthSync() < 12) {
       return false;
     }
-    final String mimeType = mime.lookupMimeType(
+    final String? mimeType = mime.lookupMimeType(
       input.path,
       headerBytes: await input.openRead(0, 12).first,
     );
@@ -176,7 +177,7 @@ class IconTreeShaker {
     await (_iconDataProcessing ??= _getIconData(_environment));
     assert(_iconData != null);
 
-    final _IconTreeShakerData iconTreeShakerData = _iconData[relativePath];
+    final _IconTreeShakerData? iconTreeShakerData = _iconData![relativePath];
     if (iconTreeShakerData == null) {
       return false;
     }
@@ -220,22 +221,22 @@ class IconTreeShaker {
     Set<String> families,
   ) async {
     final Map<String, String> result = <String, String>{};
-    final List<Map<String, dynamic>> fontList = _getList(
+    final List<Map<String, Object?>> fontList = _getList(
       json.decode(fontManifestData),
       'FontManifest.json invalid: expected top level to be a list of objects.',
     );
 
-    for (final Map<String, dynamic> map in fontList) {
-      if (map['family'] is! String) {
+    for (final Map<String, Object?> map in fontList) {
+      final Object? familyKey = map['family'];
+      if (familyKey is! String) {
         throw IconTreeShakerException._(
           'FontManifest.json invalid: expected the family value to be a string, '
           'got: ${map['family']}.');
       }
-      final String familyKey = map['family'] as String;
       if (!families.contains(familyKey)) {
         continue;
       }
-      final List<Map<String, dynamic>> fonts = _getList(
+      final List<Map<String, Object?>> fonts = _getList(
         map['fonts'],
         'FontManifest.json invalid: expected "fonts" to be a list of objects.',
       );
@@ -244,12 +245,13 @@ class IconTreeShaker {
           'This tool cannot process icon fonts with multiple fonts in a '
           'single family.');
       }
-      if (fonts.first['asset'] is! String) {
+      final Object? asset = fonts.first['asset'];
+      if (asset is! String) {
         throw IconTreeShakerException._(
           'FontManifest.json invalid: expected "asset" value to be a string, '
           'got: ${map['assets']}.');
       }
-      result[familyKey] = fonts.first['asset'] as String;
+      result[familyKey] = asset;
     }
     return result;
   }
@@ -273,19 +275,18 @@ class IconTreeShaker {
     if (constFinderProcessResult.exitCode != 0) {
       throw IconTreeShakerException._('ConstFinder failure: ${constFinderProcessResult.stderr}');
     }
-    final dynamic jsonDecode = json.decode(constFinderProcessResult.stdout as String);
-    if (jsonDecode is! Map<String, dynamic>) {
+    final Object? constFinderMap = json.decode(constFinderProcessResult.stdout as String);
+    if (constFinderMap is! Map<String, Object?>) {
       throw IconTreeShakerException._(
         'Invalid ConstFinder output: expected a top level JSON object, '
-        'got $jsonDecode.');
+        'got $constFinderMap.');
     }
-    final Map<String, dynamic> constFinderMap = jsonDecode as Map<String, dynamic>;
     final _ConstFinderResult constFinderResult = _ConstFinderResult(constFinderMap);
     if (constFinderResult.hasNonConstantLocations) {
       _logger.printError('This application cannot tree shake icons fonts. '
                          'It has non-constant instances of IconData at the '
                          'following locations:', emphasis: true);
-      for (final Map<String, dynamic> location in constFinderResult.nonConstantLocations) {
+      for (final Map<String, Object?> location in constFinderResult.nonConstantLocations) {
         _logger.printError(
           '- ${location['file']}:${location['line']}:${location['column']}',
           indent: 2,
@@ -300,22 +301,24 @@ class IconTreeShaker {
 
   Map<String, List<int>> _parseConstFinderResult(_ConstFinderResult constants) {
     final Map<String, List<int>> result = <String, List<int>>{};
-    for (final Map<String, dynamic> iconDataMap in constants.constantInstances) {
-      if ((iconDataMap['fontPackage'] ?? '') is! String || // Null is ok here.
-           iconDataMap['fontFamily'] is! String ||
-           iconDataMap['codePoint'] is! num) {
+    for (final Map<String, Object?> iconDataMap in constants.constantInstances) {
+      final Object? package = iconDataMap['fontPackage'];
+      final Object? fontFamily = iconDataMap['fontFamily'];
+      final Object? codePoint = iconDataMap['codePoint'];
+      if ((package ?? '') is! String || // Null is ok here.
+          fontFamily is! String ||
+          codePoint is! num) {
         throw IconTreeShakerException._(
           'Invalid ConstFinder result. Expected "fontPackage" to be a String, '
           '"fontFamily" to be a String, and "codePoint" to be an int, '
           'got: $iconDataMap.');
       }
-      final String package = iconDataMap['fontPackage'] as String;
-      final String family = iconDataMap['fontFamily'] as String;
+      final String family = fontFamily;
       final String key = package == null
         ? family
         : 'packages/$package/$family';
       result[key] ??= <int>[];
-      result[key].add((iconDataMap['codePoint'] as num).round());
+      result[key]!.add(codePoint.round());
     }
     return result;
   }
@@ -324,25 +327,17 @@ class IconTreeShaker {
 class _ConstFinderResult {
   _ConstFinderResult(this.result);
 
-  final Map<String, dynamic> result;
+  final Map<String, Object?> result;
 
-  List<Map<String, dynamic>> _constantInstances;
-  List<Map<String, dynamic>> get constantInstances {
-    _constantInstances ??= _getList(
-      result['constantInstances'],
-      'Invalid ConstFinder output: Expected "constInstances" to be a list of objects.',
-    );
-    return _constantInstances;
-  }
+  late final List<Map<String, Object?>> constantInstances = _getList(
+    result['constantInstances'],
+    'Invalid ConstFinder output: Expected "constInstances" to be a list of objects.',
+  );
 
-  List<Map<String, dynamic>> _nonConstantLocations;
-  List<Map<String, dynamic>> get nonConstantLocations {
-    _nonConstantLocations ??= _getList(
-      result['nonConstantLocations'],
-      'Invalid ConstFinder output: Expected "nonConstLocations" to be a list of objects',
-    );
-    return _nonConstantLocations;
-  }
+  late final List<Map<String, Object?>> nonConstantLocations = _getList(
+    result['nonConstantLocations'],
+    'Invalid ConstFinder output: Expected "nonConstLocations" to be a list of objects',
+  );
 
   bool get hasNonConstantLocations => nonConstantLocations.isNotEmpty;
 }
@@ -352,9 +347,9 @@ class _ConstFinderResult {
 class _IconTreeShakerData {
   /// All parameters are required.
   const _IconTreeShakerData({
-    @required this.family,
-    @required this.relativePath,
-    @required this.codePoints,
+    required this.family,
+    required this.relativePath,
+    required this.codePoints,
   }) : assert(family != null),
        assert(relativePath != null),
        assert(codePoints != null);

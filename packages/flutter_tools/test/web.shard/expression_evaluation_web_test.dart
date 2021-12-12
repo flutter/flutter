@@ -104,6 +104,11 @@ void main() {
       await start(expressionEvaluation: true);
       await evaluateComplexExpressionsInLibrary(flutter);
     });
+
+    testWithoutContext('evaluated expression includes web library environment defines', () async {
+      await start(expressionEvaluation: true);
+      await evaluateWebLibraryBooleanFromEnvironmentInLibrary(flutter);
+    });
   });
 
   group('Flutter test for web', () {
@@ -168,6 +173,10 @@ void main() {
       await startPaused(expressionEvaluation: true);
       await evaluateComplexExpressionsInLibrary(flutter);
     });
+    testWithoutContext('evaluated expression includes web library environment defines', () async {
+      await startPaused(expressionEvaluation: true);
+      await evaluateWebLibraryBooleanFromEnvironmentInLibrary(flutter);
+    });
   });
 }
 
@@ -189,7 +198,7 @@ Future<void> checkStaticScope(FlutterTestDriver flutter) async {
 
 Future<void> evaluateErrorExpressions(FlutterTestDriver flutter) async {
   final ObjRef res = await flutter.evaluateInFrame('typo');
-  expectError(res, "CompilationError: Getter not found: 'typo'.\ntypo\n^^^^");
+  expectError(res, 'CompilationError:');
 }
 
 Future<void> evaluateTrivialExpressions(FlutterTestDriver flutter) async {
@@ -222,6 +231,12 @@ Future<void> evaluateComplexExpressionsInLibrary(FlutterTestDriver flutter) asyn
   expectInstance(res, InstanceKind.kDouble, DateTime.now().year.toString());
 }
 
+Future<void> evaluateWebLibraryBooleanFromEnvironmentInLibrary(FlutterTestDriver flutter) async {
+  final LibraryRef library = await getRootLibrary(flutter);
+  final ObjRef res = await flutter.evaluate(library.id, 'const bool.fromEnvironment("dart.library.html")');
+  expectInstance(res, InstanceKind.kBool, true.toString());
+}
+
 Future<LibraryRef> getRootLibrary(FlutterTestDriver flutter) async {
   // `isolate.rootLib` returns incorrect library, so find the
   // entrypoint manually here instead.
@@ -242,5 +257,5 @@ void expectInstance(ObjRef result, String kind, String message) {
 void expectError(ObjRef result, String message) {
   expect(result,
     const TypeMatcher<ErrorRef>()
-      .having((ErrorRef instance) => instance.message, 'message', message));
+      .having((ErrorRef instance) => instance.message, 'message', contains(message)));
 }

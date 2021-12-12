@@ -449,8 +449,7 @@ abstract class FloatingActionButtonLocation {
 /// You can create your own subclass of [StandardFabLocation]
 /// to implement a custom [FloatingActionButtonLocation].
 ///
-/// {@tool dartpad --template=stateless_widget_material}
-///
+/// {@tool dartpad}
 /// This is an example of a user-defined [FloatingActionButtonLocation].
 ///
 /// The example shows a [Scaffold] with an [AppBar], a [BottomAppBar], and a
@@ -463,33 +462,7 @@ abstract class FloatingActionButtonLocation {
 /// [FloatingActionButtonLocation] slightly different from
 /// [FloatingActionButtonLocation.endFloat].
 ///
-/// ```dart preamble
-/// class AlmostEndFloatFabLocation extends StandardFabLocation
-///     with FabEndOffsetX, FabFloatOffsetY {
-///   @override
-///   double getOffsetX (ScaffoldPrelayoutGeometry scaffoldGeometry, double adjustment) {
-///     final double directionalAdjustment =
-///       scaffoldGeometry.textDirection == TextDirection.ltr ? -50.0 : 50.0;
-///     return super.getOffsetX(scaffoldGeometry, adjustment) + directionalAdjustment;
-///   }
-/// }
-/// ```
-///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return Scaffold(
-///     appBar: AppBar(
-///       title: const Text('Home page'),
-///     ),
-///     floatingActionButton: FloatingActionButton(
-///       onPressed: () { print('FAB pressed.'); },
-///       tooltip: 'Increment',
-///       child: const Icon(Icons.add),
-///     ),
-///     floatingActionButtonLocation: AlmostEndFloatFabLocation(),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/material/floating_action_button_location/standard_fab_location.0.dart **
 /// {@end-tool}
 ///
 abstract class StandardFabLocation extends FloatingActionButtonLocation {

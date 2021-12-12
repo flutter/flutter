@@ -275,50 +275,20 @@ abstract class SliverGridDelegate {
 ///
 /// This delegate creates grids with equally sized and spaced tiles.
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold}
-///
+/// {@tool dartpad}
 /// Here is an example using the [childAspectRatio] property. On a device with a
 /// screen width of 800.0, it creates a GridView with each tile with a width of
 /// 200.0 and a height of 100.0.
 ///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return GridView(
-///     gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-///       crossAxisCount: 4,
-///       childAspectRatio: 0.5,
-///     ),
-///     children: List<Widget>.generate(20, (int i) {
-///       return Builder(builder: (BuildContext context) {
-///         return Text('$i');
-///       });
-///     }),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/rendering/sliver_grid/sliver_grid_delegate_with_fixed_cross_axis_count.0.dart **
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold}
-///
+/// {@tool dartpad}
 /// Here is an example using the [mainAxisExtent] property. On a device with a
 /// screen width of 800.0, it creates a GridView with each tile with a width of
 /// 200.0 and a height of 150.0.
 ///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return GridView(
-///     gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-///       crossAxisCount: 4,
-///       mainAxisExtent: 150.0,
-///     ),
-///     children: List<Widget>.generate(20, (int i) {
-///       return Builder(builder: (BuildContext context) {
-///         return Text('$i');
-///       });
-///     }),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/rendering/sliver_grid/sliver_grid_delegate_with_fixed_cross_axis_count.1.dart **
 /// {@end-tool}
 ///
 /// See also:

@@ -33,7 +33,6 @@ void main() {
         fileSystem: fileSystem,
         logger: logger,
         templateRenderer: const MustacheTemplateRenderer(),
-        templateManifest: null
     );
 
     final Map<String, Object> context = <String, Object>{

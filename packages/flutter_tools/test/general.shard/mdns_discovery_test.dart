@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -24,9 +22,9 @@ void main() {
     setUp(() {
       setNetworkInterfaceLister(
         ({
-          bool includeLoopback,
-          bool includeLinkLocal,
-          InternetAddressType type,
+          bool? includeLoopback,
+          bool? includeLinkLocal,
+          InternetAddressType? type,
         }) async => <NetworkInterface>[],
       );
     });
@@ -44,7 +42,7 @@ void main() {
         logger: BufferLogger.test(),
         flutterUsage: TestUsage(),
       );
-      final int port = (await portDiscovery.query())?.port;
+      final int? port = (await portDiscovery.query())?.port;
       expect(port, isNull);
     });
 
@@ -56,7 +54,7 @@ void main() {
         logger: logger,
         flutterUsage: TestUsage(),
       );
-      final Uri uri = await portDiscovery.getObservatoryUri(
+      final Uri? uri = await portDiscovery.getObservatoryUri(
         '',
         FakeIOSDevice(),
       );
@@ -81,7 +79,7 @@ void main() {
         logger: BufferLogger.test(),
         flutterUsage: TestUsage(),
       );
-      final int port = (await portDiscovery.query())?.port;
+      final int? port = (await portDiscovery.query())?.port;
       expect(port, 123);
     });
 
@@ -107,7 +105,7 @@ void main() {
         logger: BufferLogger.test(),
         flutterUsage: TestUsage(),
       );
-      final MDnsObservatoryDiscoveryResult result = await portDiscovery.query();
+      final MDnsObservatoryDiscoveryResult? result = await portDiscovery.query();
       expect(result?.port, 123);
       expect(result?.authCode, 'xyz/');
     });
@@ -157,7 +155,7 @@ void main() {
         logger: BufferLogger.test(),
         flutterUsage: TestUsage(),
       );
-      final int port = (await portDiscovery.query(applicationId: 'fiz'))?.port;
+      final int? port = (await portDiscovery.query(applicationId: 'fiz'))?.port;
       expect(port, 321);
     });
 
@@ -184,7 +182,7 @@ void main() {
         logger: BufferLogger.test(),
         flutterUsage: TestUsage(),
       );
-      final int port = (await portDiscovery.query(applicationId: 'bar'))?.port;
+      final int? port = (await portDiscovery.query(applicationId: 'bar'))?.port;
       expect(port, 1234);
     });
 
@@ -199,7 +197,7 @@ void main() {
         logger: BufferLogger.test(),
         flutterUsage: TestUsage(),
       );
-      final int port = (await portDiscovery.query(applicationId: 'bar'))?.port;
+      final int? port = (await portDiscovery.query(applicationId: 'bar'))?.port;
       expect(port, isNull);
     });
 
@@ -236,7 +234,7 @@ void main() {
         logger: BufferLogger.test(),
         flutterUsage: TestUsage(),
       );
-      final Uri uri = await portDiscovery.getObservatoryUri('bar', device, hostVmservicePort: 0);
+      final Uri? uri = await portDiscovery.getObservatoryUri('bar', device, hostVmservicePort: 0);
       expect(uri.toString(), 'http://127.0.0.1:123/');
     });
   });
@@ -255,13 +253,13 @@ class FakeMDnsClient extends Fake implements MDnsClient {
 
   @override
   Future<void> start({
-    InternetAddress listenAddress,
-    NetworkInterfacesFactory interfacesFactory,
+    InternetAddress? listenAddress,
+    NetworkInterfacesFactory? interfacesFactory,
     int mDnsPort = 5353,
-    InternetAddress mDnsAddress,
+    InternetAddress? mDnsAddress,
   }) async {
     if (osErrorOnStart) {
-      throw const OSError('Operation not suppoted on socket', 102);
+      throw const OSError('Operation not supported on socket', 102);
     }
   }
 
@@ -288,6 +286,9 @@ class FakeMDnsClient extends Fake implements MDnsClient {
   void stop() {}
 }
 
+// Unfortunately Device, despite not being immutable, has an `operator ==`.
+// Until we fix that, we have to also ignore related lints here.
+// ignore: avoid_implementing_value_types
 class FakeIOSDevice extends Fake implements IOSDevice {
   @override
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.ios;

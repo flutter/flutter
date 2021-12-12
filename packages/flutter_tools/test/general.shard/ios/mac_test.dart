@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
@@ -23,15 +21,15 @@ import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
 void main() {
-  BufferLogger logger;
+  late BufferLogger logger;
 
   setUp(() {
     logger = BufferLogger.test();
   });
 
   group('IMobileDevice', () {
-    Artifacts artifacts;
-    Cache cache;
+    late Artifacts artifacts;
+    late Cache cache;
 
     setUp(() {
       artifacts = Artifacts.test();
@@ -44,8 +42,8 @@ void main() {
     });
 
     group('screenshot', () {
-      FakeProcessManager fakeProcessManager;
-      File outputFile;
+      late FakeProcessManager fakeProcessManager;
+      late File outputFile;
 
       setUp(() {
         fakeProcessManager = FakeProcessManager.empty();
@@ -131,8 +129,8 @@ void main() {
   });
 
   group('Diagnose Xcode build failure', () {
-    Map<String, String> buildSettings;
-    TestUsage testUsage;
+    late Map<String, String> buildSettings;
+    late TestUsage testUsage;
 
     setUp(() {
       buildSettings = <String, String>{
@@ -445,7 +443,7 @@ Exited (sigterm)''',
   });
 
   group('remove Finder extended attributes', () {
-    Directory projectDirectory;
+    late Directory projectDirectory;
     setUp(() {
       final MemoryFileSystem fs = MemoryFileSystem.test();
       projectDirectory = fs.directory('flutter_project');
@@ -494,5 +492,5 @@ class FakeIosProject extends Fake implements IosProject {
   Future<String> hostAppBundleName(BuildInfo buildInfo) async => 'UnitTestRunner.app';
 
   @override
-  final Directory xcodeProject = null;
+  Directory get xcodeProject => xcodeProjectInfoFile.fileSystem.directory('Runner.xcodeproj');
 }

@@ -117,7 +117,7 @@ void checkBackgroundBoxHeight(WidgetTester tester, double height) {
 
 void checkOpacity(WidgetTester tester, Finder finder, double opacity) {
   expect(
-    tester.renderObject<RenderAnimatedOpacity>(
+    tester.firstRenderObject<RenderAnimatedOpacity>(
       find.ancestor(
         of: finder,
         matching: find.byType(FadeTransition),
@@ -169,6 +169,27 @@ void main() {
       tester.getTopLeft(flying(tester, find.text('Page 1')).last),
       const Offset(362.8046875, 13.5),
     );
+  });
+
+  testWidgets('Bottom middle never changes size during the animation', (WidgetTester tester) async {
+    await tester.binding.setSurfaceSize(const Size(1080.0 / 2.75, 600));
+    addTearDown(() async {
+      await tester.binding.setSurfaceSize(const Size(800.0, 600.0));
+    });
+
+    await startTransitionBetween(
+      tester,
+      fromTitle: 'Page 1',
+    );
+
+    final Size size = tester.getSize(find.text('Page 1'));
+
+    for (int i = 0; i < 150; i++) {
+      await tester.pump(const Duration(milliseconds: 1));
+      expect(flying(tester, find.text('Page 1')), findsNWidgets(2));
+      expect(tester.getSize(flying(tester, find.text('Page 1')).first), size);
+      expect(tester.getSize(flying(tester, find.text('Page 1')).last), size);
+    }
   });
 
   testWidgets('Bottom middle and top back label transitions their font', (WidgetTester tester) async {
@@ -976,6 +997,29 @@ void main() {
       tester.getTopLeft(flying(tester, find.text('Page 2'))),
       const Offset(439.7678077220917, 13.5),
     );
+  });
+
+  testWidgets('Top middle never changes size during the animation', (WidgetTester tester) async {
+    await tester.binding.setSurfaceSize(const Size(1080.0 / 2.75, 600));
+    addTearDown(() async {
+      await tester.binding.setSurfaceSize(const Size(800.0, 600.0));
+    });
+
+    await startTransitionBetween(
+      tester,
+      toTitle: 'Page 2',
+    );
+
+    Size? previousSize;
+
+    for (int i = 0; i < 150; i++) {
+      await tester.pump(const Duration(milliseconds: 1));
+      expect(flying(tester, find.text('Page 2')), findsOneWidget);
+      final Size size = tester.getSize(flying(tester, find.text('Page 2')));
+      if (previousSize != null)
+        expect(size, previousSize);
+      previousSize = size;
+    }
   });
 
   testWidgets('Top middle fades in and slides in from the left in RTL', (WidgetTester tester) async {

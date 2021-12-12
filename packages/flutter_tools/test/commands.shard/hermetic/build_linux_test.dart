@@ -28,7 +28,6 @@ import '../../src/test_flutter_command_runner.dart';
 const String _kTestFlutterRoot = '/flutter';
 
 final Platform linuxPlatform = FakePlatform(
-  operatingSystem: 'linux',
   environment: <String, String>{
     'FLUTTER_ROOT': _kTestFlutterRoot,
     'HOME': '/',
@@ -79,7 +78,7 @@ void main() {
         'cmake',
         '-G',
         'Ninja',
-        '-DCMAKE_BUILD_TYPE=${toTitleCase(buildMode)}',
+        '-DCMAKE_BUILD_TYPE=${sentenceCase(buildMode)}',
         '-DFLUTTER_TARGET_PLATFORM=linux-$target',
         '/linux',
       ],
@@ -149,7 +148,7 @@ void main() {
     Platform: () => linuxPlatform,
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
-    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: false),
+    FeatureFlags: () => TestFeatureFlags(),
   });
 
   testUsingContext('Linux build invokes CMake and ninja, and writes temporary files', () async {
@@ -228,6 +227,8 @@ void main() {
       const <String>['build', 'linux', '--debug', '--no-pub']
     );
     expect(testLogger.statusText, isNot(contains('STDOUT STUFF')));
+    expect(testLogger.warningText, isNot(contains('STDOUT STUFF')));
+    expect(testLogger.errorText, isNot(contains('STDOUT STUFF')));
     expect(testLogger.traceText, contains('STDOUT STUFF'));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -309,6 +310,8 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
     );
     expect(testLogger.statusText, contains('STDOUT STUFF'));
     expect(testLogger.traceText, isNot(contains('STDOUT STUFF')));
+    expect(testLogger.warningText, isNot(contains('STDOUT STUFF')));
+    expect(testLogger.errorText, isNot(contains('STDOUT STUFF')));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -493,13 +496,13 @@ set(BINARY_NAME "fizz_bar")
     expect(() => runner.run(<String>['build', 'linux', '--no-pub']),
       throwsToolExit());
   }, overrides: <Type, Generator>{
-    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: false),
+    FeatureFlags: () => TestFeatureFlags(),
   });
 
   testUsingContext('hidden when not enabled on Linux host', () {
     expect(BuildLinuxCommand(operatingSystemUtils: FakeOperatingSystemUtils()).hidden, true);
   }, overrides: <Type, Generator>{
-    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: false),
+    FeatureFlags: () => TestFeatureFlags(),
     Platform: () => notLinuxPlatform,
   });
 

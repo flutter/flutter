@@ -25,7 +25,7 @@ void main() {
     setUp(() async {
       tempDir = createResolvedTempDirectorySync('run_test.');
       await project.setUpIn(tempDir);
-      flutter = FlutterRunTestDriver(tempDir, spawnDdsInstance: true);
+      flutter = FlutterRunTestDriver(tempDir);
     });
 
     tearDown(() async {
@@ -62,7 +62,7 @@ void main() {
         validateFlutterVersion(client1),
         validateFlutterVersion(client2)]
       );
-    }, skip: true); // DDS failure: https://github.com/dart-lang/sdk/issues/46696
+    });
   });
 
   group('Clients of flutter run on web with DDS disabled', () {

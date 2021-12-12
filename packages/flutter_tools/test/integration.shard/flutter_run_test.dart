@@ -69,5 +69,5 @@ void main() {
       continuePollingValue: '',
       matches: isNotEmpty,
     );
-  }, timeout: const Timeout.factor(4));
+  });
 }

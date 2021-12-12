@@ -2,12 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(gspencergoog): Remove this tag once this test's state leaks/test
-// dependencies have been fixed.
-// https://github.com/flutter/flutter/issues/85160
-// Fails with "flutter test --test-randomize-ordering-seed=123"
-@Tags(<String>['no-shuffle'])
-
 import 'dart:ui' as ui show window;
 import 'dart:ui' show Size, Locale, WindowPadding, AccessibilityFeatures, Brightness;
 
@@ -193,11 +187,13 @@ void main() {
   });
 
   testWidgets('TestWindow sends fake locales when WidgetsBindingObserver notifiers are called', (WidgetTester tester) async {
+    final List<Locale> defaultLocales = WidgetsBinding.instance!.window.locales;
     final TestObserver observer = TestObserver();
     retrieveTestBinding(tester).addObserver(observer);
     final List<Locale> expectedValue = <Locale>[const Locale('fake_language_code')];
     retrieveTestBinding(tester).window.localesTestValue = expectedValue;
     expect(observer.locales, equals(expectedValue));
+    retrieveTestBinding(tester).window.localesTestValue = defaultLocales;
   });
 }
 
@@ -247,46 +243,6 @@ class FakeWindowPadding implements WindowPadding {
 
   @override
   final double bottom;
-}
-
-class FakeAccessibilityFeatures implements AccessibilityFeatures {
-  const FakeAccessibilityFeatures({
-    this.accessibleNavigation = false,
-    this.invertColors = false,
-    this.disableAnimations = false,
-    this.boldText = false,
-    this.reduceMotion = false,
-    this.highContrast = false,
-  });
-
-  @override
-  final bool accessibleNavigation;
-
-  @override
-  final bool invertColors;
-
-  @override
-  final bool disableAnimations;
-
-  @override
-  final bool boldText;
-
-  @override
-  final bool reduceMotion;
-
-  @override
-  final bool highContrast;
-
-  /// This gives us some grace time when the dart:ui side adds something to
-  /// [AccessibilityFeatures], and makes things easier when we do rolls to
-  /// give us time to catch up.
-  ///
-  /// If you would like to add to this class, changes must first be made in the
-  /// engine, followed by the framework.
-  @override
-  dynamic noSuchMethod(Invocation invocation) {
-    return null;
-  }
 }
 
 class TestObserver with WidgetsBindingObserver {

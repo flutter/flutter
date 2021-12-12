@@ -227,12 +227,12 @@ class FlutterPostSubmitFileComparator extends FlutterGoldenFileComparator {
 
     goldens ??= SkiaGoldClient(baseDirectory);
     await goldens.auth();
-    await goldens.imgtestInit();
     return FlutterPostSubmitFileComparator(baseDirectory.uri, goldens);
   }
 
   @override
   Future<bool> compare(Uint8List imageBytes, Uri golden) async {
+    await skiaClient.imgtestInit();
     golden = _addPrefix(golden);
     await update(golden, imageBytes);
     final File goldenFile = getGoldenFile(golden);
@@ -309,16 +309,15 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
     goldens ??= SkiaGoldClient(baseDirectory);
 
     await goldens.auth();
-    await goldens.tryjobInit();
-      return FlutterPreSubmitFileComparator(
-        baseDirectory.uri,
-        goldens,
-        platform: platform,
-      );
-    }
+    return FlutterPreSubmitFileComparator(
+      baseDirectory.uri,
+      goldens, platform: platform,
+    );
+  }
 
   @override
   Future<bool> compare(Uint8List imageBytes, Uri golden) async {
+    await skiaClient.tryjobInit();
     golden = _addPrefix(golden);
     await update(golden, imageBytes);
     final File goldenFile = getGoldenFile(golden);
@@ -385,9 +384,11 @@ class FlutterSkippingFileComparator extends FlutterGoldenFileComparator {
 
   @override
   Future<bool> compare(Uint8List imageBytes, Uri golden) async {
-    print(
-      'Skipping "$golden" test : $reason'
-    );
+    // Ideally we would use markTestSkipped here but in some situations,
+    // comparators are called outside of tests.
+    // See also: https://github.com/flutter/flutter/issues/91285
+    // ignore: avoid_print
+    print('Skipping "$golden" test: $reason');
     return true;
   }
 
@@ -502,8 +503,13 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
     testExpectation = await skiaClient.getExpectationForTest(testName);
 
     if (testExpectation == null || testExpectation.isEmpty) {
-      // There is no baseline for this test
-      print('No expectations provided by Skia Gold for test: $golden. '
+      // There is no baseline for this test.
+      // Ideally we would use markTestSkipped here but in some situations,
+      // comparators are called outside of tests.
+      // See also: https://github.com/flutter/flutter/issues/91285
+      // ignore: avoid_print
+      print(
+        'No expectations provided by Skia Gold for test: $golden. '
         'This may be a new test. If this is an unexpected result, check '
         'https://flutter-gold.skia.org.\n'
         'Validate image output found at $basedir'

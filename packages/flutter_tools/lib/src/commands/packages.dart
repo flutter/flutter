@@ -14,7 +14,7 @@ import '../cache.dart';
 import '../dart/generate_synthetic_packages.dart';
 import '../dart/pub.dart';
 import '../flutter_plugins.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../plugins.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
@@ -38,6 +38,7 @@ class PackagesCommand extends FlutterCommand {
     addSubcommand(PackagesForwardCommand('logout', 'Log out of pub.dev.'));
     addSubcommand(PackagesForwardCommand('global', 'Work with Pub global packages'));
     addSubcommand(PackagesForwardCommand('outdated', 'Analyze dependencies to find which ones can be upgraded', requiresPubspec: true));
+    addSubcommand(PackagesForwardCommand('token', 'Manage authentication tokens for hosted pub repositories.'));
     addSubcommand(PackagesPassthroughCommand());
   }
 
@@ -49,6 +50,9 @@ class PackagesCommand extends FlutterCommand {
 
   @override
   final String description = 'Commands for managing Flutter packages.';
+
+  @override
+  String get category => FlutterCommandCategory.project;
 
   @override
   Future<FlutterCommandResult> runCommand() async => null;
@@ -302,10 +306,11 @@ class PackagesInteractiveGetCommand extends FlutterCommand {
     List<String> rest = argResults.rest;
     final bool isHelp = rest.contains('-h') || rest.contains('--help');
     String target;
-    if (rest.length == 1 && (rest[0].contains('/') || rest[0].contains(r'\'))) {
-      // HACK: Supporting flutter specific behavior where you can pass a
-      //       folder to the command.
-      target = findProjectRoot(globals.fs, rest[0]);
+    if (rest.length == 1 && (rest.single.contains('/') || rest.single.contains(r'\'))) {
+      // For historical reasons, if there is one argument to the command and it contains
+      // a multiple-component path (i.e. contains a slash) then we use that to determine
+      // to which project we're applying the command.
+      target = findProjectRoot(globals.fs, rest.single);
       rest = <String>[];
     } else {
       target = findProjectRoot(globals.fs);

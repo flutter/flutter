@@ -132,7 +132,6 @@ Future<void> main(List<String> rawArguments) async {
   );
   argParser.addFlag(
     'collect',
-    defaultsTo: false,
     negatable: false,
     help: 'If this flag is set, then collect and parse header files from '
         'Chromium and Android instead of reading pre-parsed data from '
@@ -141,7 +140,6 @@ Future<void> main(List<String> rawArguments) async {
   );
   argParser.addFlag(
     'help',
-    defaultsTo: false,
     negatable: false,
     help: 'Print help for this command.',
   );

@@ -50,6 +50,9 @@ class DaemonCommand extends FlutterCommand {
   final String description = 'Run a persistent, JSON-RPC based server to communicate with devices.';
 
   @override
+  final String category = FlutterCommandCategory.tools;
+
+  @override
   final bool hidden;
 
   @override
@@ -304,8 +307,9 @@ class DaemonDomain extends Domain {
         if (message.level == 'status') {
           // We use `print()` here instead of `stdout.writeln()` in order to
           // capture the print output for testing.
+          // ignore: avoid_print
           print(message.message);
-        } else if (message.level == 'error') {
+        } else if (message.level == 'error' || message.level == 'warning') {
           globals.stdio.stderrWrite('${message.message}\n');
           if (message.stackTrace != null) {
             globals.stdio.stderrWrite(
@@ -458,7 +462,7 @@ class AppDomain extends Domain {
   }) async {
     if (!await device.supportsRuntimeMode(options.buildInfo.mode)) {
       throw Exception(
-        '${toTitleCase(options.buildInfo.friendlyModeName)} '
+        '${sentenceCase(options.buildInfo.friendlyModeName)} '
         'mode is not supported for ${device.name}.',
       );
     }
@@ -1008,6 +1012,18 @@ class NotifyingLogger extends DelegatingLogger {
   }
 
   @override
+  void printWarning(
+    String message, {
+    bool emphasis = false,
+    TerminalColor color,
+    int indent,
+    int hangingIndent,
+    bool wrap,
+  }) {
+    _sendMessage(LogMessage('warning', message));
+  }
+
+  @override
   void printStatus(
     String message, {
     bool emphasis = false,
@@ -1131,7 +1147,7 @@ class EmulatorDomain extends Domain {
   }
 
   Future<Map<String, dynamic>> create(Map<String, dynamic> args) async {
-    final String name = _getStringArg(args, 'name', required: false);
+    final String name = _getStringArg(args, 'name');
     final CreateEmulatorResult res = await emulators.createEmulator(name: name);
     return <String, dynamic>{
       'success': res.success,

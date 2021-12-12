@@ -13,7 +13,7 @@ void main() {
   late DateTime initialDate;
 
   setUp(() {
-    firstDate = DateTime(2001, DateTime.january, 1);
+    firstDate = DateTime(2001);
     lastDate = DateTime(2031, DateTime.december, 31);
     initialDate = DateTime(2016, DateTime.january, 15);
   });
@@ -140,9 +140,6 @@ void main() {
   testWidgets('textDirection parameter overrides ambient textDirection', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       locale: const Locale('en', 'US'),
-      supportedLocales: const <Locale>[
-        Locale('en', 'US'),
-      ],
       home: Material(
         child: Builder(
           builder: (BuildContext context) {

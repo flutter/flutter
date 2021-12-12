@@ -2,11 +2,29 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  group('image', () {
+    testWidgets('finds Image widgets', (WidgetTester tester) async {
+      await tester.pumpWidget(_boilerplate(
+          Image(image: FileImage(File('test')))
+      ));
+      expect(find.image(FileImage(File('test'))), findsOneWidget);
+    });
+
+    testWidgets('finds Button widgets with Image', (WidgetTester tester) async {
+      await tester.pumpWidget(_boilerplate(
+          ElevatedButton(onPressed: null, child: Image(image: FileImage(File('test'))),)
+      ));
+      expect(find.widgetWithImage(ElevatedButton, FileImage(File('test'))), findsOneWidget);
+    });
+  });
+
   group('text', () {
     testWidgets('finds Text widgets', (WidgetTester tester) async {
       await tester.pumpWidget(_boilerplate(
@@ -61,7 +79,7 @@ void main() {
           ),
         )));
 
-        expect(find.text('test', findRichText: false), findsNothing);
+        expect(find.text('test'), findsNothing);
       });
 
       testWidgets(
@@ -102,7 +120,7 @@ void main() {
           ),
         )));
 
-        expect(find.text('test3', findRichText: false), findsOneWidget);
+        expect(find.text('test3'), findsOneWidget);
       });
     });
   });
@@ -216,7 +234,7 @@ void main() {
         )),
       );
       expect(find.byType(GestureDetector), findsNWidgets(2));
-      final Finder hitTestable = find.byType(GestureDetector).hitTestable(at: Alignment.center);
+      final Finder hitTestable = find.byType(GestureDetector).hitTestable();
       expect(hitTestable, findsOneWidget);
       expect(tester.widget(hitTestable).key, const ValueKey<int>(0));
     });

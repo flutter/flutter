@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(gspencergoog): Remove this tag once this test's state leaks/test
+// dependencies have been fixed.
+// https://github.com/flutter/flutter/issues/85160
+// Fails with "flutter test --test-randomize-ordering-seed=20210826"
+@Tags(<String>['no-shuffle'])
+
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -211,7 +217,7 @@ void main() {
 
     test('can handle method call with expressive error result', () async {
       channel.setMethodCallHandler((MethodCall call) async {
-        throw PlatformException(code: 'bad', message: 'sayHello failed', details: null);
+        throw PlatformException(code: 'bad', message: 'sayHello failed');
       });
       final ByteData call = jsonMethod.encodeMethodCall(const MethodCall('sayHello', 'hello'));
       ByteData? envelope;
@@ -250,7 +256,7 @@ void main() {
     });
 
     test('can check the mock handler', () async {
-      Future<dynamic> handler(MethodCall call) => Future<dynamic>.value(null);
+      Future<dynamic> handler(MethodCall call) => Future<dynamic>.value();
 
       const MethodChannel channel = MethodChannel('test_handler');
       expect(TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.checkMockMessageHandler(channel.name, null), true);

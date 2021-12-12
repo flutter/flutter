@@ -4,13 +4,13 @@
 
 import 'package:flutter/material.dart';
 
-import 'package:flutter_gallery/demo/shrine/backdrop.dart';
-import 'package:flutter_gallery/demo/shrine/category_menu_page.dart';
-import 'package:flutter_gallery/demo/shrine/colors.dart';
-import 'package:flutter_gallery/demo/shrine/expanding_bottom_sheet.dart';
-import 'package:flutter_gallery/demo/shrine/home.dart';
-import 'package:flutter_gallery/demo/shrine/login.dart';
-import 'package:flutter_gallery/demo/shrine/supplemental/cut_corners_border.dart';
+import 'backdrop.dart';
+import 'category_menu_page.dart';
+import 'colors.dart';
+import 'expanding_bottom_sheet.dart';
+import 'home.dart';
+import 'login.dart';
+import 'supplemental/cut_corners_border.dart';
 
 class ShrineApp extends StatefulWidget {
   const ShrineApp({Key? key}) : super(key: key);
@@ -37,6 +37,11 @@ class _ShrineAppState extends State<ShrineApp> with SingleTickerProviderStateMix
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      // The automatically applied scrollbars on desktop can cause a crash for
+      // demos where many scrollables are all attached to the same
+      // PrimaryScrollController. The gallery needs to be migrated before
+      // enabling this. https://github.com/flutter/gallery/issues/523
+      scrollBehavior: const MaterialScrollBehavior().copyWith(scrollbars: false),
       title: 'Shrine',
       home: HomePage(
         backdrop: Backdrop(
@@ -107,9 +112,7 @@ TextTheme _buildShrineTextTheme(TextTheme base) {
 
 const ColorScheme kShrineColorScheme = ColorScheme(
   primary: kShrinePink100,
-  primaryVariant: kShrineBrown900,
   secondary: kShrinePink50,
-  secondaryVariant: kShrineBrown900,
   surface: kShrineSurfaceWhite,
   background: kShrineBackgroundWhite,
   error: kShrineErrorRed,

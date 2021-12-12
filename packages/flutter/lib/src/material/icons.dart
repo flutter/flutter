@@ -97,8 +97,7 @@ class PlatformAdaptiveIcons implements Icons {
 ///
 /// Use with the [Icon] class to show specific icons.
 ///
-/// Icons are identified by their name as listed below. **Do not use codepoints
-/// directly, as they are subject to change.**
+/// Icons are identified by their name as listed below, e.g. [Icons.airplanemode_on].
 ///
 /// To use this class, make sure you set `uses-material-design: true` in your
 /// project's `pubspec.yaml` file in the `flutter` section. This ensures that
@@ -116,7 +115,7 @@ class PlatformAdaptiveIcons implements Icons {
 /// sizes. The first [Icon] uses a [Icon.semanticLabel] to announce in accessibility
 /// modes like TalkBack and VoiceOver.
 ///
-/// ![A row of icons representing a pink heart, a green musical note, and a blue umbrella](https://flutter.github.io/assets-for-api-docs/assets/widgets/icon.png)
+/// ![The following code snippet would generate a row of icons consisting of a pink heart, a green musical note, and a blue umbrella, each progressively bigger than the last.](https://flutter.github.io/assets-for-api-docs/assets/widgets/icon.png)
 ///
 /// ```dart
 /// Row(
@@ -10287,7 +10286,7 @@ class Icons {
   /// <i class="material-icons-round md-36">insert_chart</i> &#x2014; material icon named "insert chart" (round).
   static const IconData insert_chart_rounded = IconData(0xf819, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">insert_chart_outlined</i> &#x2014; material icon named "insert chart outlined".
+  /// <i class="material-icons-outlined md-36">insert_chart</i> &#x2014; material icon named "insert chart" (outlined).
   static const IconData insert_chart_outlined = IconData(0xf12a, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">insert_chart_outlined</i> &#x2014; material icon named "insert chart outlined" (sharp).

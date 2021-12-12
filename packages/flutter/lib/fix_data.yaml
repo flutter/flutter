@@ -14,6 +14,138 @@
 
 version: 1
 transforms:
+  # Changes made in https://github.com/flutter/flutter/pull/93427
+  - title: "Remove 'primaryVariant' and 'secondaryVariant'"
+    date: 2021-11-19
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ColorScheme'
+    changes:
+      - kind: 'removeParameter'
+        name: 'primaryVariant'
+      - kind: 'removeParameter'
+        name: 'secondaryVariant'
+
+  # Changes made in https://github.com/flutter/flutter/pull/93427
+  - title: "Remove 'primaryVariant' and 'secondaryVariant'"
+    date: 2021-11-19
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'light'
+      inClass: 'ColorScheme'
+    changes:
+      - kind: 'removeParameter'
+        name: 'primaryVariant'
+      - kind: 'removeParameter'
+        name: 'secondaryVariant'
+
+  # Changes made in https://github.com/flutter/flutter/pull/93427
+  - title: "Remove 'primaryVariant' and 'secondaryVariant'"
+    date: 2021-11-19
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'dark'
+      inClass: 'ColorScheme'
+    changes:
+      - kind: 'removeParameter'
+        name: 'primaryVariant'
+      - kind: 'removeParameter'
+        name: 'secondaryVariant'
+
+  # Changes made in https://github.com/flutter/flutter/pull/93427
+  - title: "Remove 'primaryVariant' and 'secondaryVariant'"
+    date: 2021-11-19
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'highContrastLight'
+      inClass: 'ColorScheme'
+    changes:
+      - kind: 'removeParameter'
+        name: 'primaryVariant'
+      - kind: 'removeParameter'
+        name: 'secondaryVariant'
+
+  # Changes made in https://github.com/flutter/flutter/pull/93427
+  - title: "Remove 'primaryVariant' and 'secondaryVariant'"
+    date: 2021-11-19
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'highContrastDark'
+      inClass: 'ColorScheme'
+    changes:
+      - kind: 'removeParameter'
+        name: 'primaryVariant'
+      - kind: 'removeParameter'
+        name: 'secondaryVariant'
+
+  # Changes made in https://github.com/flutter/flutter/pull/93427
+  - title: "Remove 'primaryVariant' and 'secondaryVariant'"
+    date: 2021-11-19
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'ColorScheme'
+    changes:
+      - kind: 'removeParameter'
+        name: 'primaryVariant'
+      - kind: 'removeParameter'
+        name: 'secondaryVariant'
+
+  # Changes made in https://github.com/flutter/flutter/pull/93427
+  - title: "Migrate 'primaryVariant' to 'primaryContainer'"
+    date: 2021-11-19
+    element:
+      uris: [ 'material.dart' ]
+      getter: 'primaryVariant'
+      inClass: 'ColorScheme'
+    changes:
+      - kind: 'rename'
+        newName: 'primaryContainer'
+
+  # Changes made in https://github.com/flutter/flutter/pull/93427
+  - title: "Migrate 'secondaryVariant' to 'secondaryContainer'"
+    date: 2021-11-19
+    element:
+      uris: [ 'material.dart' ]
+      getter: 'secondaryVariant'
+      inClass: 'ColorScheme'
+    changes:
+      - kind: 'rename'
+        newName: 'secondaryContainer'
+
+  # Changes made in https://github.com/flutter/flutter/pull/93396
+  - title: "Remove 'primaryColorBrightness'"
+    date: 2021-11-11
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'primaryColorBrightness'
+
+  # Changes made in https://github.com/flutter/flutter/pull/93396
+  - title: "Remove 'primaryColorBrightness'"
+    date: 2021-11-11
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'raw'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'primaryColorBrightness'
+
+  # Changes made in https://github.com/flutter/flutter/pull/93396
+  - title: "Remove 'primaryColorBrightness'"
+    date: 2021-11-11
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'primaryColorBrightness'
 
   # Changes made in https://github.com/flutter/flutter/pull/86198
   - title: "Migrate to 'backgroundColor'"
@@ -2162,22 +2294,6 @@ transforms:
                   name: 'FloatingLabelBehavior'
           - kind: 'removeParameter'
             name: 'hasFloatingPlaceholder'
-      - if: "hasFloatingPlaceholder != 'true' && hasFloatingPlaceholder != 'false'"
-        changes:
-          - kind: 'addParameter'
-            index: 14
-            name: 'floatingLabelBehavior'
-            style: optional_named
-            argumentValue:
-              expression: '{% hasFloatingPlaceholder %} ? {% FloatingLabelBehavior %}.auto : {% FloatingLabelBehavior %}.never'
-              requiredIf: "hasFloatingPlaceholder != 'true' && hasFloatingPlaceholder != 'false'"
-              variables:
-                FloatingLabelBehavior:
-                  kind: 'import'
-                  uris: [ 'material.dart' ]
-                  name: 'FloatingLabelBehavior'
-          - kind: 'removeParameter'
-            name: 'hasFloatingPlaceholder'
     variables:
       hasFloatingPlaceholder:
         kind: 'fragment'
@@ -2216,22 +2332,6 @@ transforms:
             argumentValue:
               expression: '{% FloatingLabelBehavior %}.never'
               requiredIf: "hasFloatingPlaceholder == 'false'"
-              variables:
-                FloatingLabelBehavior:
-                  kind: 'import'
-                  uris: [ 'material.dart' ]
-                  name: 'FloatingLabelBehavior'
-          - kind: 'removeParameter'
-            name: 'hasFloatingPlaceholder'
-      - if: "hasFloatingPlaceholder != 'true' && hasFloatingPlaceholder != 'false'"
-        changes:
-          - kind: 'addParameter'
-            index: 14
-            name: 'floatingLabelBehavior'
-            style: optional_named
-            argumentValue:
-              expression: '{% hasFloatingPlaceholder %} ? {% FloatingLabelBehavior %}.auto : {% FloatingLabelBehavior %}.never'
-              requiredIf: "hasFloatingPlaceholder != 'true' && hasFloatingPlaceholder != 'false'"
               variables:
                 FloatingLabelBehavior:
                   kind: 'import'
@@ -2295,22 +2395,6 @@ transforms:
                   name: 'FloatingLabelBehavior'
           - kind: 'removeParameter'
             name: 'hasFloatingPlaceholder'
-      - if: "hasFloatingPlaceholder != 'true' && hasFloatingPlaceholder != 'false'"
-        changes:
-          - kind: 'addParameter'
-            index: 14
-            name: 'floatingLabelBehavior'
-            style: optional_named
-            argumentValue:
-              expression: '{% hasFloatingPlaceholder %} ? {% FloatingLabelBehavior %}.auto : {% FloatingLabelBehavior %}.never'
-              requiredIf: "hasFloatingPlaceholder != 'true' && hasFloatingPlaceholder != 'false'"
-              variables:
-                FloatingLabelBehavior:
-                  kind: 'import'
-                  uris: [ 'material.dart' ]
-                  name: 'FloatingLabelBehavior'
-          - kind: 'removeParameter'
-            name: 'hasFloatingPlaceholder'
     variables:
       hasFloatingPlaceholder:
         kind: 'fragment'
@@ -2349,22 +2433,6 @@ transforms:
             argumentValue:
               expression: '{% FloatingLabelBehavior %}.never'
               requiredIf: "hasFloatingPlaceholder == 'false'"
-              variables:
-                FloatingLabelBehavior:
-                  kind: 'import'
-                  uris: [ 'material.dart' ]
-                  name: 'FloatingLabelBehavior'
-          - kind: 'removeParameter'
-            name: 'hasFloatingPlaceholder'
-      - if: "hasFloatingPlaceholder != 'true' && hasFloatingPlaceholder != 'false'"
-        changes:
-          - kind: 'addParameter'
-            index: 14
-            name: 'floatingLabelBehavior'
-            style: optional_named
-            argumentValue:
-              expression: '{% hasFloatingPlaceholder %} ? {% FloatingLabelBehavior %}.auto : {% FloatingLabelBehavior %}.never'
-              requiredIf: "hasFloatingPlaceholder != 'true' && hasFloatingPlaceholder != 'false'"
               variables:
                 FloatingLabelBehavior:
                   kind: 'import'

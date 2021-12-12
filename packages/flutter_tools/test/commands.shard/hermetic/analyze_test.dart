@@ -4,15 +4,25 @@
 
 // @dart = 2.8
 
+import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/commands/analyze.dart';
 import 'package:flutter_tools/src/commands/analyze_base.dart';
 import 'package:flutter_tools/src/dart/analysis.dart';
 
 import '../../src/common.dart';
+import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
+import '../../src/test_flutter_command_runner.dart';
 
 const String _kFlutterRoot = '/data/flutter';
+const int SIGABRT = -6;
 
 void main() {
   testWithoutContext('analyze generate correct errors message', () async {
@@ -33,6 +43,80 @@ void main() {
       ),
       '3 issues found. (2 new) • analyzed 1 file (ran in 0.1s)',
     );
+  });
+
+  group('analyze command', () {
+    FileSystem fileSystem;
+    Platform platform;
+    BufferLogger logger;
+    FakeProcessManager processManager;
+    Terminal terminal;
+    AnalyzeCommand command;
+    CommandRunner<void> runner;
+
+    setUpAll(() {
+      Cache.disableLocking();
+    });
+
+    setUp(() {
+      fileSystem = MemoryFileSystem.test();
+      platform = FakePlatform();
+      logger = BufferLogger.test();
+      processManager = FakeProcessManager.empty();
+      terminal = Terminal.test();
+      command = AnalyzeCommand(
+        artifacts: Artifacts.test(),
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: platform,
+        processManager: processManager,
+        terminal: terminal,
+      );
+      runner = createTestCommandRunner(command);
+
+      // Setup repo roots
+      const String homePath = '/home/user/flutter';
+      Cache.flutterRoot = homePath;
+      for (final String dir in <String>['dev', 'examples', 'packages']) {
+        fileSystem.directory(homePath).childDirectory(dir).createSync(recursive: true);
+      }
+    });
+
+    testUsingContext('SIGABRT throws Exception', () async {
+      const String stderr = 'Something bad happened!';
+      processManager.addCommands(
+        <FakeCommand>[
+          const FakeCommand(
+            // artifact paths are from Artifacts.test() and stable
+            command: <String>[
+              'HostArtifact.engineDartSdkPath/bin/dart',
+              '--disable-dart-dev',
+              'HostArtifact.engineDartSdkPath/bin/snapshots/analysis_server.dart.snapshot',
+              '--disable-server-feature-completion',
+              '--disable-server-feature-search',
+              '--sdk',
+              'HostArtifact.engineDartSdkPath',
+            ],
+            exitCode: SIGABRT,
+            stderr: stderr,
+          ),
+        ],
+      );
+      await expectLater(
+        runner.run(<String>['analyze']),
+        throwsA(
+          isA<Exception>().having(
+            (Exception e) => e.toString(),
+            'description',
+            contains('analysis server exited with code $SIGABRT and output:\n[stderr] $stderr'),
+          ),
+        ),
+      );
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+    });
   });
 
   testWithoutContext('analyze inRepo', () {

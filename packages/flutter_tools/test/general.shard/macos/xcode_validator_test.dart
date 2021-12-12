@@ -56,21 +56,21 @@ void main() {
       final ValidationResult result = await validator.validate();
       expect(result.type, ValidationType.partial);
       expect(result.messages.last.type, ValidationMessageType.error);
-      expect(result.messages.last.message, contains('Flutter requires a minimum Xcode version of 12.0.1'));
+      expect(result.messages.last.message, contains('Flutter requires a minimum Xcode version of 12.3'));
     });
 
     testWithoutContext('Emits partial status when Xcode below recommended version', () async {
       final ProcessManager processManager = FakeProcessManager.any();
       final Xcode xcode = Xcode.test(
         processManager: processManager,
-        xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager, version: Version(12, 0, 1)),
+        xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager, version: Version(12, 4, null)),
       );
       final XcodeValidator validator = XcodeValidator(xcode: xcode, userMessages: UserMessages());
       final ValidationResult result = await validator.validate();
       expect(result.type, ValidationType.partial);
       expect(result.messages.last.type, ValidationMessageType.hint);
-      expect(result.messages.last.message, contains('Flutter recommends a minimum Xcode version of 12.0.2'));
-    }, skip: true); // [intended] Unskip and update when minimum and required check versions diverge.
+      expect(result.messages.last.message, contains('Flutter recommends a minimum Xcode version of 13'));
+    });
 
     testWithoutContext('Emits partial status when Xcode EULA not signed', () async {
       final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[

@@ -42,7 +42,6 @@ final Platform macosPlatform = FakePlatform(
   }
 );
 final Platform notMacosPlatform = FakePlatform(
-  operatingSystem: 'linux',
   environment: <String, String>{
     'FLUTTER_ROOT': '/',
   }
@@ -112,10 +111,15 @@ void main() {
         '-scheme', 'Runner',
         'BUILD_DIR=/build/ios',
         '-sdk',
-        if (simulator)
-          'iphonesimulator'
-        else
+        if (simulator) ...<String>[
+          'iphonesimulator',
+          '-destination',
+          'generic/platform=iOS Simulator',
+        ] else ...<String>[
           'iphoneos',
+          '-destination',
+          'generic/platform=iOS',
+        ],
         'FLUTTER_SUPPRESS_ANALYTICS=true',
         'COMPILER_INDEX_STORE_ENABLE=NO',
       ],

@@ -43,72 +43,92 @@ void main() {
   // Changes made in https://github.com/flutter/flutter/pull/61648
   const Form form = Form(autovalidate: true);
   const Form form = Form(autovalidate: false);
+  const Form form = Form(error: '');
   final autoMode = form.autovalidate;
 
   // Changes made in https://github.com/flutter/flutter/pull/61648
   const FormField formField = FormField(autovalidate: true);
   const FormField formField = FormField(autovalidate: false);
+  const FormField formField = FormField(error: '');
   final autoMode = formField.autovalidate;
 
   // Changes made in https://github.com/flutter/flutter/pull/66305
   const Stack stack = Stack(overflow: Overflow.visible);
   const Stack stack = Stack(overflow: Overflow.clip);
+  const Stack stack = Stack(error: '');
   final behavior = stack.overflow;
 
   // Changes made in https://github.com/flutter/flutter/pull/68736
   MediaQuery.of(context, nullOk: true);
   MediaQuery.of(context, nullOk: false);
+  MediaQuery.of(error: '');
 
   // Changes made in https://github.com/flutter/flutter/pull/70726
   Navigator.of(context, nullOk: true);
   Navigator.of(context, nullOk: false);
+  Navigator.of(error: '');
 
   // Changes made in https://github.com/flutter/flutter/pull/68910
   Router.of(context, nullOk: true);
   Router.of(context, nullOk: false);
+  Router.of(error: '');
 
   // Changes made in https://github.com/flutter/flutter/pull/68911
   Localizations.localeOf(context, nullOk: true);
   Localizations.localeOf(context, nullOk: false);
+  Localizations.localeOf(error: '');
 
   // Changes made in https://github.com/flutter/flutter/pull/68917
   FocusTraversalOrder.of(context, nullOk: true);
   FocusTraversalOrder.of(context, nullOk: false);
+  FocusTraversalOrder.of(error: '');
+  FocusTraversalGroup.of(error: '');
   FocusTraversalGroup.of(context, nullOk: true);
   FocusTraversalGroup.of(context, nullOk: false);
   Focus.of(context, nullOk: true);
   Focus.of(context, nullOk: false);
+  Focus.of(error: '');
 
   // Changes made in https://github.com/flutter/flutter/pull/68921
   Shortcuts.of(context, nullOk: true);
   Shortcuts.of(context, nullOk: false);
+  Shortcuts.of(error: '');
+  Actions.find(error: '');
   Actions.find(context, nullOk: true);
   Actions.find(context, nullOk: false);
   Actions.handler(context, nullOk: true);
   Actions.handler(context, nullOk: false);
+  Actions.handler(error: '');
+  Actions.invoke(error: '');
   Actions.invoke(context, nullOk: true);
   Actions.invoke(context, nullOk: false);
 
   // Changes made in https://github.com/flutter/flutter/pull/68925
   AnimatedList.of(context, nullOk: true);
   AnimatedList.of(context, nullOk: false);
+  AnimatedList.of(error: '');
+  SliverAnimatedList.of(error: '');
   SliverAnimatedList.of(context, nullOk: true);
   SliverAnimatedList.of(context, nullOk: false);
 
   // Changes made in https://github.com/flutter/flutter/pull/59127
   const BottomNavigationBarItem bottomNavigationBarItem = BottomNavigationBarItem(title: myTitle);
+  const BottomNavigationBarItem bottomNavigationBarItem = BottomNavigationBarItem();
+  const BottomNavigationBarItem bottomNavigationBarItem = BottomNavigationBarItem(error: '');
   bottomNavigationBarItem.title;
 
   // Changes made in https://github.com/flutter/flutter/pull/79160
   Draggable draggable = Draggable();
   draggable = Draggable(dragAnchor: DragAnchor.child);
   draggable = Draggable(dragAnchor: DragAnchor.pointer);
+  draggable = Draggable(error: '');
   draggable.dragAnchor;
 
   // Changes made in https://github.com/flutter/flutter/pull/79160
   LongPressDraggable longPressDraggable = LongPressDraggable();
   longPressDraggable = LongPressDraggable(dragAnchor: DragAnchor.child);
   longPressDraggable = LongPressDraggable(dragAnchor: DragAnchor.pointer);
+  longPressDraggable = LongPressDraggable(error: '');
   longPressDraggable.dragAnchor;
 
   // Changes made in https://github.com/flutter/flutter/pull/64254
@@ -141,16 +161,20 @@ void main() {
   ListWheelScrollView listWheelScrollView = ListWheelScrollView();
   listWheelScrollView = ListWheelScrollView(clipToSize: true);
   listWheelScrollView = ListWheelScrollView(clipToSize: false);
+  listWheelScrollView = ListWheelScrollView(error: '');
   listWheelScrollView = ListWheelScrollView.useDelegate();
   listWheelScrollView = ListWheelScrollView.useDelegate(clipToSize: true);
   listWheelScrollView = ListWheelScrollView.useDelegate(clipToSize: false);
+  listWheelScrollView = ListWheelScrollView.useDelegate(error: '');
   listWheelScrollView.clipToSize;
   ListWheelViewport listWheelViewport = ListWheelViewport();
   listWheelViewport = ListWheelViewport(clipToSize: true);
   listWheelViewport = ListWheelViewport(clipToSize: false);
+  listWheelViewport = ListWheelViewport(error: '');
   listWheelViewport.clipToSize;
 
   // Changes made in https://github.com/flutter/flutter/pull/87839
   final OverscrollIndicatorNotification notification = OverscrollIndicatorNotification(leading: true);
+  final OverscrollIndicatorNotification notification = OverscrollIndicatorNotification(error: '');
   notification.disallowGlow();
 }

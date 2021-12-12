@@ -35,7 +35,7 @@ import 'convert.dart';
 import 'devfs.dart';
 import 'device.dart';
 import 'features.dart';
-import 'globals_null_migrated.dart' as globals;
+import 'globals.dart' as globals;
 import 'project.dart';
 import 'resident_devtools_handler.dart';
 import 'run_cold.dart';
@@ -416,7 +416,9 @@ class FlutterDevice {
     }
     devFSWriter = device.createDevFSWriter(package, userIdentifier);
 
-    final Map<String, dynamic> platformArgs = <String, dynamic>{};
+    final Map<String, dynamic> platformArgs = <String, dynamic>{
+      'multidex': hotRunner.multidexEnabled,
+    };
 
     await startEchoingDeviceLog();
 
@@ -492,6 +494,7 @@ class FlutterDevice {
     if (coldRunner.traceStartup != null) {
       platformArgs['trace-startup'] = coldRunner.traceStartup;
     }
+    platformArgs['multidex'] = coldRunner.multidexEnabled;
 
     await startEchoingDeviceLog();
 
@@ -560,7 +563,7 @@ class FlutterDevice {
       );
     } on DevFSException {
       devFSStatus.cancel();
-      return UpdateFSReport(success: false);
+      return UpdateFSReport();
     }
     devFSStatus.stop();
     globals.printTrace('Synced ${getSizeAsMB(report.syncedBytes)}.');
@@ -1101,6 +1104,10 @@ abstract class ResidentRunner extends ResidentHandlers {
 
   bool get trackWidgetCreation => debuggingOptions.buildInfo.trackWidgetCreation;
 
+  /// True if the shared Dart plugin registry (which is different than the one
+  /// used for web) should be generated during source generation.
+  bool get generateDartPluginRegistry => true;
+
   // Returns the Uri of the first connected device for mobile,
   // and only connected device for web.
   //
@@ -1152,7 +1159,11 @@ abstract class ResidentRunner extends ResidentHandlers {
       processManager: globals.processManager,
       platform: globals.platform,
       projectDir: globals.fs.currentDirectory,
-      generateDartPluginRegistry: true,
+      generateDartPluginRegistry: generateDartPluginRegistry,
+      defines: <String, String>{
+        // Needed for Dart plugin registry generation.
+        kTargetFile: mainPath,
+      },
     );
 
     final CompositeTarget compositeTarget = CompositeTarget(<Target>[
@@ -1167,7 +1178,7 @@ abstract class ResidentRunner extends ResidentHandlers {
     );
     if (!_lastBuild.success) {
       for (final ExceptionMeasurement exceptionMeasurement in _lastBuild.exceptions.values) {
-        globals.logger.printError(
+        globals.printError(
           exceptionMeasurement.exception.toString(),
           stackTrace: globals.logger.isVerbose
             ? exceptionMeasurement.stackTrace
@@ -1175,7 +1186,7 @@ abstract class ResidentRunner extends ResidentHandlers {
         );
       }
     }
-    globals.logger.printTrace('complete');
+    globals.printTrace('complete');
   }
 
   @protected
@@ -1230,7 +1241,7 @@ abstract class ResidentRunner extends ResidentHandlers {
     if (_dillOutputPath != null) {
       return;
     }
-    globals.logger.printTrace('Caching compiled dill');
+    globals.printTrace('Caching compiled dill');
     final File outputDill = globals.fs.file(dillOutputPath);
     if (outputDill.existsSync()) {
       final String copyPath = getDefaultCachedKernelPath(
@@ -1463,9 +1474,19 @@ Future<String> getMissingPackageHintForPlatform(TargetPlatform platform) async {
       return 'Is your project missing an $manifestPath?\nConsider running "flutter create ." to create one.';
     case TargetPlatform.ios:
       return 'Is your project missing an ios/Runner/Info.plist?\nConsider running "flutter create ." to create one.';
-    default:
+    case TargetPlatform.android:
+    case TargetPlatform.darwin:
+    case TargetPlatform.fuchsia_arm64:
+    case TargetPlatform.fuchsia_x64:
+    case TargetPlatform.linux_arm64:
+    case TargetPlatform.linux_x64:
+    case TargetPlatform.tester:
+    case TargetPlatform.web_javascript:
+    case TargetPlatform.windows_uwp_x64:
+    case TargetPlatform.windows_x64:
       return null;
   }
+  return null; // dead code, remove after null safety migration
 }
 
 /// Redirects terminal commands to the correct resident runner methods.
@@ -1540,7 +1561,7 @@ class TerminalHandler {
         _logger.printTrace('Deleting pid file (${_actualPidFile.path}).');
         _actualPidFile.deleteSync();
       } on FileSystemException catch (error) {
-        _logger.printError('Failed to delete pid file (${_actualPidFile.path}): ${error.message}');
+        _logger.printWarning('Failed to delete pid file (${_actualPidFile.path}): ${error.message}');
       }
       _actualPidFile = null;
     }
@@ -1603,7 +1624,7 @@ class TerminalHandler {
         if (!residentRunner.canHotReload) {
           return false;
         }
-        final OperationResult result = await residentRunner.restart(fullRestart: false);
+        final OperationResult result = await residentRunner.restart();
         if (result.fatal) {
           throwToolExit(result.message);
         }

@@ -37,9 +37,26 @@ class FrameTimingSummarizer {
     final List<Duration> vsyncOverhead = List<Duration>.unmodifiable(
       data.map<Duration>((FrameTiming datum) => datum.vsyncOverhead),
     );
+    final List<int> layerCacheCounts = List<int>.unmodifiable(
+      data.map<int>((FrameTiming datum) => datum.layerCacheCount),
+    );
+    final List<int> layerCacheCountsSorted = List<int>.from(layerCacheCounts)..sort();
+    final List<int> layerCacheBytes = List<int>.unmodifiable(
+      data.map<int>((FrameTiming datum) => datum.layerCacheBytes),
+    );
+    final List<int> layerCacheBytesSorted = List<int>.from(layerCacheBytes)..sort();
+    final List<int> pictureCacheCounts = List<int>.unmodifiable(
+      data.map<int>((FrameTiming datum) => datum.pictureCacheCount),
+    );
+    final List<int> pictureCacheCountsSorted = List<int>.from(pictureCacheCounts)..sort();
+    final List<int> pictureCacheBytes = List<int>.unmodifiable(
+      data.map<int>((FrameTiming datum) => datum.pictureCacheBytes),
+    );
+    final List<int> pictureCacheBytesSorted = List<int>.from(pictureCacheBytes)..sort();
     final List<Duration> vsyncOverheadSorted =
         List<Duration>.from(vsyncOverhead)..sort();
     Duration add(Duration a, Duration b) => a + b;
+    int addInts(int a, int b) => a + b;
     return FrameTimingSummarizer._(
       frameBuildTime: frameBuildTime,
       frameRasterizerTime: frameRasterizerTime,
@@ -56,6 +73,22 @@ class FrameTimingSummarizer {
       p90FrameRasterizerTime: _findPercentile(frameRasterizerTimeSorted, 0.90),
       p99FrameRasterizerTime: _findPercentile(frameRasterizerTimeSorted, 0.99),
       worstFrameRasterizerTime: frameRasterizerTimeSorted.last,
+      averageLayerCacheCount: layerCacheCounts.reduce(addInts) / data.length,
+      p90LayerCacheCount: _findPercentile(layerCacheCountsSorted, 0.90),
+      p99LayerCacheCount: _findPercentile(layerCacheCountsSorted, 0.99),
+      worstLayerCacheCount: layerCacheCountsSorted.last,
+      averageLayerCacheBytes: layerCacheBytes.reduce(addInts) / data.length,
+      p90LayerCacheBytes: _findPercentile(layerCacheBytesSorted, 0.90),
+      p99LayerCacheBytes: _findPercentile(layerCacheBytesSorted, 0.99),
+      worstLayerCacheBytes: layerCacheBytesSorted.last,
+      averagePictureCacheCount: pictureCacheCounts.reduce(addInts) / data.length,
+      p90PictureCacheCount: _findPercentile(pictureCacheCountsSorted, 0.90),
+      p99PictureCacheCount: _findPercentile(pictureCacheCountsSorted, 0.99),
+      worstPictureCacheCount: pictureCacheCountsSorted.last,
+      averagePictureCacheBytes: pictureCacheBytes.reduce(addInts) / data.length,
+      p90PictureCacheBytes: _findPercentile(pictureCacheBytesSorted, 0.90),
+      p99PictureCacheBytes: _findPercentile(pictureCacheBytesSorted, 0.99),
+      worstPictureCacheBytes: pictureCacheBytesSorted.last,
       missedFrameRasterizerBudget:
           _countExceed(frameRasterizerTimeSorted, kBuildBudget),
       averageVsyncOverhead: vsyncOverhead.reduce(add) ~/ data.length,
@@ -79,6 +112,22 @@ class FrameTimingSummarizer {
     required this.p90FrameRasterizerTime,
     required this.p99FrameRasterizerTime,
     required this.worstFrameRasterizerTime,
+    required this.averageLayerCacheCount,
+    required this.p90LayerCacheCount,
+    required this.p99LayerCacheCount,
+    required this.worstLayerCacheCount,
+    required this.averageLayerCacheBytes,
+    required this.p90LayerCacheBytes,
+    required this.p99LayerCacheBytes,
+    required this.worstLayerCacheBytes,
+    required this.averagePictureCacheCount,
+    required this.p90PictureCacheCount,
+    required this.p99PictureCacheCount,
+    required this.worstPictureCacheCount,
+    required this.averagePictureCacheBytes,
+    required this.p90PictureCacheBytes,
+    required this.p99PictureCacheBytes,
+    required this.worstPictureCacheBytes,
     required this.missedFrameRasterizerBudget,
     required this.vsyncOverhead,
     required this.averageVsyncOverhead,
@@ -126,6 +175,54 @@ class FrameTimingSummarizer {
   /// The largest value of [frameRasterizerTime] in milliseconds.
   final Duration worstFrameRasterizerTime;
 
+  /// The average number of layers cached across all frames.
+  final double averageLayerCacheCount;
+
+  /// The 90-th percentile number of layers cached across all frames.
+  final int p90LayerCacheCount;
+
+  /// The 90-th percentile number of layers cached across all frames.
+  final int p99LayerCacheCount;
+
+  /// The most number of layers cached across all frames.
+  final int worstLayerCacheCount;
+
+  /// The average number of bytes consumed by cached layers across all frames.
+  final double averageLayerCacheBytes;
+
+  /// The 90-th percentile number of bytes consumed by cached layers across all frames.
+  final int p90LayerCacheBytes;
+
+  /// The 90-th percentile number of bytes consumed by cached layers across all frames.
+  final int p99LayerCacheBytes;
+
+  /// The highest number of bytes consumed by cached layers across all frames.
+  final int worstLayerCacheBytes;
+
+  /// The average number of pictures cached across all frames.
+  final double averagePictureCacheCount;
+
+  /// The 90-th percentile number of pictures cached across all frames.
+  final int p90PictureCacheCount;
+
+  /// The 90-th percentile number of pictures cached across all frames.
+  final int p99PictureCacheCount;
+
+  /// The most number of pictures cached across all frames.
+  final int worstPictureCacheCount;
+
+  /// The average number of bytes consumed by cached pictures across all frames.
+  final double averagePictureCacheBytes;
+
+  /// The 90-th percentile number of bytes consumed by cached pictures across all frames.
+  final int p90PictureCacheBytes;
+
+  /// The 90-th percentile number of bytes consumed by cached pictures across all frames.
+  final int p99PictureCacheBytes;
+
+  /// The highest number of bytes consumed by cached pictures across all frames.
+  final int worstPictureCacheBytes;
+
   /// Number of items in [frameRasterizerTime] that's greater than [kBuildBudget]
   final int missedFrameRasterizerBudget;
 
@@ -168,6 +265,22 @@ class FrameTimingSummarizer {
             p99FrameRasterizerTime.inMicroseconds / 1E3,
         'worst_frame_rasterizer_time_millis':
             worstFrameRasterizerTime.inMicroseconds / 1E3,
+        'average_layer_cache_count': averageLayerCacheCount,
+        '90th_percentile_layer_cache_count': p90LayerCacheCount,
+        '99th_percentile_layer_cache_count': p99LayerCacheCount,
+        'worst_layer_cache_count': worstLayerCacheCount,
+        'average_layer_cache_memory': averageLayerCacheBytes / 1024.0 / 1024.0,
+        '90th_percentile_layer_cache_memory': p90LayerCacheBytes / 1024.0 / 1024.0,
+        '99th_percentile_layer_cache_memory': p99LayerCacheBytes / 1024.0 / 1024.0,
+        'worst_layer_cache_memory': worstLayerCacheBytes / 1024.0 / 1024.0,
+        'average_picture_cache_count': averagePictureCacheCount,
+        '90th_percentile_picture_cache_count': p90PictureCacheCount,
+        '99th_percentile_picture_cache_count': p99PictureCacheCount,
+        'worst_picture_cache_count': worstPictureCacheCount,
+        'average_picture_cache_memory': averagePictureCacheBytes / 1024.0 / 1024.0,
+        '90th_percentile_picture_cache_memory': p90PictureCacheBytes / 1024.0 / 1024.0,
+        '99th_percentile_picture_cache_memory': p99PictureCacheBytes / 1024.0 / 1024.0,
+        'worst_picture_cache_memory': worstPictureCacheBytes / 1024.0 / 1024.0,
         'missed_frame_rasterizer_budget_count': missedFrameRasterizerBudget,
         'frame_count': frameBuildTime.length,
         'frame_build_times': frameBuildTime
@@ -181,16 +294,21 @@ class FrameTimingSummarizer {
       };
 }
 
-// The following helper functions require data sorted
-
-// return the 100*p-th percentile of the data
+/// Returns the 100*p-th percentile of [data].
+///
+/// [data] must be sorted in ascending order.
 T _findPercentile<T>(List<T> data, double p) {
   assert(p >= 0 && p <= 1);
   return data[((data.length - 1) * p).round()];
 }
 
-// return the number of items in data that > threshold
+/// Returns the number of elements in [data] that exceed [threshold].
+///
+/// [data] must be sorted in ascending order.
 int _countExceed<T extends Comparable<T>>(List<T> data, T threshold) {
-  return data.length -
-      data.indexWhere((T datum) => datum.compareTo(threshold) > 0);
+  final int exceedsThresholdIndex = data.indexWhere((T datum) => datum.compareTo(threshold) > 0);
+  if (exceedsThresholdIndex == -1) {
+    return 0;
+  }
+  return data.length - exceedsThresholdIndex;
 }

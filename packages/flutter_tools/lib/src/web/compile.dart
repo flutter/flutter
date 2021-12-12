@@ -13,7 +13,7 @@ import '../build_system/build_system.dart';
 import '../build_system/targets/web.dart';
 import '../cache.dart';
 import '../flutter_plugins.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../platform_plugins.dart';
 import '../plugins.dart';
 import '../project.dart';
@@ -37,7 +37,7 @@ Future<void> buildWeb(
   final Status status = globals.logger.startProgress('Compiling $target for the Web...');
   final Stopwatch sw = Stopwatch()..start();
   try {
-    final BuildResult result = await globals.buildSystem.build(const WebServiceWorker(), Environment(
+    final BuildResult result = await globals.buildSystem.build(WebServiceWorker(globals.fs, globals.cache), Environment(
       projectDir: globals.fs.currentDirectory,
       outputDir: outputDirectory,
       buildDir: flutterProject.directory

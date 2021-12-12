@@ -496,7 +496,6 @@ void main() {
 
     const PointerScrollEvent scroll = PointerScrollEvent(
       timeStamp: Duration(seconds: 2),
-      kind: PointerDeviceKind.mouse,
       device: 1,
       position: Offset(20, 30),
     );
