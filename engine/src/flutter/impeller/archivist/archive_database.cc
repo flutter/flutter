@@ -16,56 +16,80 @@
 
 namespace impeller {
 
-#define DB_HANDLE reinterpret_cast<sqlite3*>(database_)
+struct ArchiveDatabase::Handle {
+  Handle(const std::string& filename) {
+    if (::sqlite3_initialize() != SQLITE_OK) {
+      VALIDATION_LOG << "Could not initialize sqlite.";
+      return;
+    }
 
-ArchiveDatabase::ArchiveDatabase(const std::string& filename) {
-  if (::sqlite3_initialize() != SQLITE_OK) {
-    VALIDATION_LOG << "Could not initialize sqlite.";
-    return;
+    sqlite3* db = nullptr;
+    auto res = ::sqlite3_open(filename.c_str(), &db);
+
+    if (res != SQLITE_OK || db == nullptr) {
+      return;
+    }
+
+    handle_ = db;
   }
 
-  sqlite3* db = nullptr;
-  auto res = ::sqlite3_open(filename.c_str(), &db);
-  database_ = db;
+  ~Handle() {
+    if (handle_ == nullptr) {
+      return;
+    }
+    ::sqlite3_close(handle_);
+  }
 
-  if (res != SQLITE_OK || database_ == nullptr) {
+  ::sqlite3* Get() const { return handle_; }
+
+  bool IsValid() const { return handle_ != nullptr; }
+
+ private:
+  ::sqlite3* handle_ = nullptr;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(Handle);
+};
+
+ArchiveDatabase::ArchiveDatabase(const std::string& filename)
+    : handle_(std::make_unique<Handle>(filename)) {
+  if (!handle_->IsValid()) {
+    handle_.reset();
     return;
   }
 
   begin_transaction_stmt_ = std::unique_ptr<ArchiveStatement>(
-      new ArchiveStatement(database_, "BEGIN TRANSACTION;"));
+      new ArchiveStatement(handle_->Get(), "BEGIN TRANSACTION;"));
 
   if (!begin_transaction_stmt_->IsValid()) {
     return;
   }
 
   end_transaction_stmt_ = std::unique_ptr<ArchiveStatement>(
-      new ArchiveStatement(database_, "END TRANSACTION;"));
+      new ArchiveStatement(handle_->Get(), "END TRANSACTION;"));
 
   if (!end_transaction_stmt_->IsValid()) {
     return;
   }
 
   rollback_transaction_stmt_ = std::unique_ptr<ArchiveStatement>(
-      new ArchiveStatement(database_, "ROLLBACK TRANSACTION;"));
+      new ArchiveStatement(handle_->Get(), "ROLLBACK TRANSACTION;"));
 
   if (!rollback_transaction_stmt_->IsValid()) {
     return;
   }
-
-  ready_ = true;
 }
 
-ArchiveDatabase::~ArchiveDatabase() {
-  ::sqlite3_close(DB_HANDLE);
-}
+ArchiveDatabase::~ArchiveDatabase() = default;
 
 bool ArchiveDatabase::IsValid() const {
-  return ready_;
+  return handle_ != nullptr;
 }
 
 int64_t ArchiveDatabase::GetLastInsertRowID() {
-  return ::sqlite3_last_insert_rowid(DB_HANDLE);
+  if (!IsValid()) {
+    return 0u;
+  }
+  return ::sqlite3_last_insert_rowid(handle_->Get());
 }
 
 static inline const ArchiveClassRegistration* RegistrationIfReady(
@@ -103,7 +127,7 @@ const ArchiveClassRegistration* ArchiveDatabase::GetRegistrationForDefinition(
 
 ArchiveStatement ArchiveDatabase::CreateStatement(
     const std::string& statementString) const {
-  return ArchiveStatement{database_, statementString};
+  return ArchiveStatement{handle_ ? handle_->Get() : nullptr, statementString};
 }
 
 ArchiveTransaction ArchiveDatabase::CreateTransaction(
