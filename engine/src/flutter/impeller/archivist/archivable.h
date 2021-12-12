@@ -13,7 +13,6 @@ namespace impeller {
 
 struct ArchiveDef {
   const std::string table_name;
-  const bool auto_key = true;
   const std::vector<std::string> members;
 };
 

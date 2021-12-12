@@ -53,12 +53,6 @@ std::optional<int64_t /* row id */> Archive::ArchiveInstance(
 
   auto primary_key = archivable.GetPrimaryKey();
 
-  if (!definition.auto_key && !primary_key.has_value()) {
-    VALIDATION_LOG << "Archive definition specified that primary keys will be "
-                      "explicitly specified but none was provided when asked.";
-    return std::nullopt;
-  }
-
   /*
    *  The lifecycle of the archive item is tied to this scope and there is no
    *  way for the user to create an instance of an archive item. So its safe
@@ -68,9 +62,10 @@ std::optional<int64_t /* row id */> Archive::ArchiveInstance(
   ArchiveLocation item(*this, statement, *registration, primary_key);
 
   /*
-   *  We need to bind the primary key only if the item does not provide its own
+   *  If the item provides its own primary key, we need to bind it now.
+   * Otherwise, one will be automatically assigned to it.
    */
-  if (!definition.auto_key &&
+  if (primary_key.has_value() &&
       !statement.WriteValue(ArchiveClassRegistration::kPrimaryKeyIndex,
                             primary_key.value())) {
     return std::nullopt;
@@ -86,7 +81,7 @@ std::optional<int64_t /* row id */> Archive::ArchiveInstance(
 
   int64_t lastInsert = database_->GetLastInsertRowID();
 
-  if (!definition.auto_key &&
+  if (primary_key.has_value() &&
       lastInsert != static_cast<int64_t>(primary_key.value())) {
     return std::nullopt;
   }
