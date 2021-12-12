@@ -11,15 +11,15 @@ namespace testing {
 
 ArchivistFixture::ArchivistFixture() {
   std::stringstream stream;
-  stream << flutter::testing::GetCurrentTestName() << ".db";
-  archive_file_name_ = fml::paths::JoinPaths(
-      {flutter::testing::GetFixturesPath(), stream.str()});
+  stream << "Test" << flutter::testing::GetCurrentTestName() << ".db";
+  archive_file_name_ = stream.str();
 }
 
 ArchivistFixture::~ArchivistFixture() = default;
 
 const std::string ArchivistFixture::GetArchiveFileName() const {
-  return archive_file_name_;
+  return fml::paths::JoinPaths(
+      {flutter::testing::GetFixturesPath(), archive_file_name_});
 }
 
 void ArchivistFixture::SetUp() {
@@ -27,13 +27,14 @@ void ArchivistFixture::SetUp() {
 }
 
 void ArchivistFixture::TearDown() {
-  // TODO: Tear this down. For now, I am inspecting the files for readability of
-  // schema.
-  // DeleteArchiveFile();
+  DeleteArchiveFile();
 }
 
 void ArchivistFixture::DeleteArchiveFile() const {
-  fml::UnlinkFile(archive_file_name_.c_str());
+  auto fixtures = flutter::testing::OpenFixturesDirectory();
+  if (fml::FileExists(fixtures, archive_file_name_.c_str())) {
+    fml::UnlinkFile(fixtures, archive_file_name_.c_str());
+  }
 }
 
 }  // namespace testing
