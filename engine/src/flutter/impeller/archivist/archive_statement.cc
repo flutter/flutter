@@ -11,42 +11,55 @@
 
 namespace impeller {
 
-#define STATEMENT_HANDLE reinterpret_cast<::sqlite3_stmt*>(statement_handle_)
+struct ArchiveStatement::Handle {
+  Handle(void* db, const std::string& statememt) {
+    ::sqlite3_stmt* handle = nullptr;
+    if (::sqlite3_prepare_v2(reinterpret_cast<sqlite3*>(db),      //
+                             statememt.c_str(),                   //
+                             static_cast<int>(statememt.size()),  //
+                             &handle,                             //
+                             nullptr) == SQLITE_OK) {
+      handle_ = handle;
+    }
+  }
 
-ArchiveStatement::ArchiveStatement(void* db, const std::string& statememt) {
-  ::sqlite3_stmt* statementHandle = nullptr;
-  auto res = ::sqlite3_prepare_v2(reinterpret_cast<sqlite3*>(db),      //
-                                  statememt.c_str(),                   //
-                                  static_cast<int>(statememt.size()),  //
-                                  &statementHandle,                    //
-                                  nullptr);
-  statement_handle_ = statementHandle;
-  ready_ = res == SQLITE_OK && statement_handle_ != nullptr;
-}
-
-ArchiveStatement::ArchiveStatement(ArchiveStatement&& other)
-    : statement_handle_(other.statement_handle_), ready_(other.ready_) {
-  other.statement_handle_ = nullptr;
-  other.ready_ = false;
-}
-
-ArchiveStatement::~ArchiveStatement() {
-  if (statement_handle_ != nullptr) {
-    auto res = ::sqlite3_finalize(STATEMENT_HANDLE);
+  ~Handle() {
+    if (handle_ == nullptr) {
+      return;
+    }
+    auto res = ::sqlite3_finalize(handle_);
     FML_CHECK(res == SQLITE_OK) << "Unable to finalize the archive.";
+  }
+
+  bool IsValid() { return handle_ != nullptr; }
+
+  ::sqlite3_stmt* Get() const { return handle_; }
+
+ private:
+  ::sqlite3_stmt* handle_;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(Handle);
+};
+
+ArchiveStatement::ArchiveStatement(void* db, const std::string& statememt)
+    : statement_handle_(std::make_unique<Handle>(db, statememt)) {
+  if (!statement_handle_->IsValid()) {
+    statement_handle_.reset();
   }
 }
 
+ArchiveStatement::~ArchiveStatement() = default;
+
 bool ArchiveStatement::IsValid() const {
-  return ready_;
+  return statement_handle_ != nullptr;
 }
 
 bool ArchiveStatement::Reset() {
-  if (::sqlite3_reset(STATEMENT_HANDLE) != SQLITE_OK) {
+  if (::sqlite3_reset(statement_handle_->Get()) != SQLITE_OK) {
     return false;
   }
 
-  if (::sqlite3_clear_bindings(STATEMENT_HANDLE) != SQLITE_OK) {
+  if (::sqlite3_clear_bindings(statement_handle_->Get()) != SQLITE_OK) {
     return false;
   }
 
@@ -68,14 +81,14 @@ static constexpr int ToColumn(size_t index) {
 }
 
 size_t ArchiveStatement::GetColumnCount() {
-  return ::sqlite3_column_count(STATEMENT_HANDLE);
+  return ::sqlite3_column_count(statement_handle_->Get());
 }
 
 /*
  *  Bind Variants
  */
 bool ArchiveStatement::WriteValue(size_t index, const std::string& item) {
-  return ::sqlite3_bind_text(STATEMENT_HANDLE,               //
+  return ::sqlite3_bind_text(statement_handle_->Get(),       //
                              ToParam(index),                 //
                              item.data(),                    //
                              static_cast<int>(item.size()),  //
@@ -83,19 +96,19 @@ bool ArchiveStatement::WriteValue(size_t index, const std::string& item) {
 }
 
 bool ArchiveStatement::BindIntegral(size_t index, int64_t item) {
-  return ::sqlite3_bind_int64(STATEMENT_HANDLE,  //
-                              ToParam(index),    //
+  return ::sqlite3_bind_int64(statement_handle_->Get(),  //
+                              ToParam(index),            //
                               item) == SQLITE_OK;
 }
 
 bool ArchiveStatement::WriteValue(size_t index, double item) {
-  return ::sqlite3_bind_double(STATEMENT_HANDLE,  //
-                               ToParam(index),    //
+  return ::sqlite3_bind_double(statement_handle_->Get(),  //
+                               ToParam(index),            //
                                item) == SQLITE_OK;
 }
 
 bool ArchiveStatement::WriteValue(size_t index, const Allocation& item) {
-  return ::sqlite3_bind_blob(STATEMENT_HANDLE,                    //
+  return ::sqlite3_bind_blob(statement_handle_->Get(),            //
                              ToParam(index),                      //
                              item.GetBuffer(),                    //
                              static_cast<int>(item.GetLength()),  //
@@ -106,12 +119,12 @@ bool ArchiveStatement::WriteValue(size_t index, const Allocation& item) {
  *  Column Variants
  */
 bool ArchiveStatement::ColumnIntegral(size_t index, int64_t& item) {
-  item = ::sqlite3_column_int64(STATEMENT_HANDLE, ToColumn(index));
+  item = ::sqlite3_column_int64(statement_handle_->Get(), ToColumn(index));
   return true;
 }
 
 bool ArchiveStatement::ReadValue(size_t index, double& item) {
-  item = ::sqlite3_column_double(STATEMENT_HANDLE, ToColumn(index));
+  item = ::sqlite3_column_double(statement_handle_->Get(), ToColumn(index));
   return true;
 }
 
@@ -128,13 +141,13 @@ bool ArchiveStatement::ReadValue(size_t index, std::string& item) {
    *  Get the character data
    */
   auto chars = reinterpret_cast<const char*>(
-      ::sqlite3_column_text(STATEMENT_HANDLE, ToColumn(index)));
+      ::sqlite3_column_text(statement_handle_->Get(), ToColumn(index)));
 
   /*
    *  Get the length of the string (in bytes)
    */
   size_t textByteSize =
-      ::sqlite3_column_bytes(STATEMENT_HANDLE, ToColumn(index));
+      ::sqlite3_column_bytes(statement_handle_->Get(), ToColumn(index));
 
   std::string text(chars, textByteSize);
   item.swap(text);
@@ -147,12 +160,13 @@ bool ArchiveStatement::ReadValue(size_t index, Allocation& item) {
    *  Get a blob pointer
    */
   auto blob = reinterpret_cast<const uint8_t*>(
-      ::sqlite3_column_blob(STATEMENT_HANDLE, ToColumn(index)));
+      ::sqlite3_column_blob(statement_handle_->Get(), ToColumn(index)));
 
   /*
    *  Decode the number of bytes in the blob
    */
-  size_t byteSize = ::sqlite3_column_bytes(STATEMENT_HANDLE, ToColumn(index));
+  size_t byteSize =
+      ::sqlite3_column_bytes(statement_handle_->Get(), ToColumn(index));
 
   /*
    *  Reszie the host allocation and move the blob contents into it
@@ -166,7 +180,7 @@ bool ArchiveStatement::ReadValue(size_t index, Allocation& item) {
 }
 
 ArchiveStatement::Result ArchiveStatement::Execute() {
-  switch (::sqlite3_step(STATEMENT_HANDLE)) {
+  switch (::sqlite3_step(statement_handle_->Get())) {
     case SQLITE_DONE:
       return Result::kDone;
     case SQLITE_ROW:
