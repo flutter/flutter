@@ -49,7 +49,6 @@ class Sample : public Archivable {
 
 const ArchiveDef Sample::kArchiveDefinition = {
     .table_name = "Sample",
-    .auto_key = false,
     .members = {"some_data"},
 };
 

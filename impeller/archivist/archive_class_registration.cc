@@ -60,13 +60,7 @@ bool ArchiveClassRegistration::CreateTable() {
    *  a statement and check its validity before running.
    */
   stream << "CREATE TABLE IF NOT EXISTS " << definition_.table_name << " ("
-         << kArchivePrimaryKeyColumnName;
-
-  if (definition_.auto_key) {
-    stream << " INTEGER PRIMARY KEY AUTOINCREMENT, ";
-  } else {
-    stream << " INTEGER PRIMARY KEY, ";
-  }
+         << kArchivePrimaryKeyColumnName << " INTEGER PRIMARY KEY, ";
 
   for (size_t i = 0, columns = definition_.members.size(); i < columns; i++) {
     stream << definition_.members[i];
