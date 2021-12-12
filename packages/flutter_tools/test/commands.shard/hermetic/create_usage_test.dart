@@ -44,6 +44,7 @@ void main() {
           globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'app'),
           globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'app_shared'),
           globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'cocoapods'),
+          globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'empty'),
           globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'skeleton'),
           globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'module', 'common'),
           globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'package'),
@@ -90,6 +91,9 @@ void main() {
 
       await runner.run(<String>['create', '--no-pub', '--template=skeleton', 'testy']);
       expect((await command.usageValues).commandCreateProjectType, 'skeleton');
+
+      await runner.run(<String>['create', '--no-pub', '--template=empty', 'testy']);
+      expect((await command.usageValues).commandCreateProjectType, 'empty');
 
       await runner.run(<String>['create', '--no-pub', '--template=package', 'testy']);
       expect((await command.usageValues).commandCreateProjectType, 'package');

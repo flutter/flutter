@@ -142,6 +142,35 @@ void main() {
     ),
   });
 
+  // Verify that we create an empty project ('empty') that is
+  // well-formed.
+  testUsingContext('can create an empty project', () async {
+    await _createAndAnalyzeProject(
+      projectDir,
+      <String>['-i', 'objc', '-a', 'java'],
+      <String>[
+        'analysis_options.yaml',
+        'android/app/src/main/java/com/example/flutter_project/MainActivity.java',
+        'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
+        'flutter_project.iml',
+        'ios/Flutter/AppFrameworkInfo.plist',
+        'ios/Runner/AppDelegate.m',
+        'ios/Runner/GeneratedPluginRegistrant.h',
+        'lib/main.dart',
+      ],
+    );
+    return _runFlutterTest(projectDir);
+  }, overrides: <Type, Generator>{
+    Pub: () => Pub(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      processManager: globals.processManager,
+      usage: globals.flutterUsage,
+      botDetector: globals.botDetector,
+      platform: globals.platform,
+    ),
+  });
+
   testUsingContext('can create a skeleton (list/detail) app', () async {
     await _createAndAnalyzeProject(
       projectDir,

@@ -43,6 +43,7 @@ class CreateCommand extends CreateBase {
       valueHelp: 'type',
       allowedHelp: <String, String>{
         flutterProjectTypeToString(FlutterProjectType.app): '(default) Generate a Flutter application.',
+        flutterProjectTypeToString(FlutterProjectType.empty): 'Generate an empty, uncommented project.',
         flutterProjectTypeToString(FlutterProjectType.skeleton): 'Generate a List View / Detail View Flutter '
             'application that follows community best practices.',
         flutterProjectTypeToString(FlutterProjectType.package): 'Generate a shareable Flutter project containing modular '
@@ -291,6 +292,15 @@ class CreateCommand extends CreateBase {
       case FlutterProjectType.app:
         generatedFileCount += await generateApp(
           'app',
+          relativeDir,
+          templateContext,
+          overwrite: overwrite,
+          printStatusWhenWriting: !creatingNewProject,
+        );
+        break;
+      case FlutterProjectType.empty:
+        generatedFileCount += await generateApp(
+          'empty',
           relativeDir,
           templateContext,
           overwrite: overwrite,

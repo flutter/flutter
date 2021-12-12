@@ -8,6 +8,11 @@
         "templates/app/test/widget_test.dart.tmpl",
         "templates/app/winuwp.tmpl/.gitignore",
 
+        "templates/empty/lib/main.dart.tmpl",
+        "templates/empty/pubspec.yaml.tmpl",
+        "templates/empty/README.md.tmpl",
+        "templates/empty/winuwp.tmpl/.gitignore",
+
         "templates/app_shared/.gitignore.tmpl",
         "templates/app_shared/.idea/libraries/Dart_SDK.xml.tmpl",
         "templates/app_shared/.idea/libraries/KotlinJavaRuntime.xml.tmpl",
