@@ -1391,16 +1391,18 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       stack: stack,
       library: 'rendering library',
       context: ErrorDescription('during $method()'),
-      informationCollector: () sync* {
-        if (debugCreator != null)
-          yield DiagnosticsDebugCreator(debugCreator!);
-        yield describeForError('The following RenderObject was being processed when the exception was fired');
+      informationCollector: () => <DiagnosticsNode>[
+        // debugCreator should always be null outside of debugMode, but we want
+        // the tree shaker to notice this.
+        if (kDebugMode && debugCreator != null)
+          DiagnosticsDebugCreator(debugCreator!),
+        describeForError('The following RenderObject was being processed when the exception was fired'),
         // TODO(jacobr): this error message has a code smell. Consider whether
         // displaying the truncated children is really useful for command line
         // users. Inspector users can see the full tree by clicking on the
         // render object so this may not be that useful.
-        yield describeForError('RenderObject', style: DiagnosticsTreeStyle.truncateChildren);
-      },
+        describeForError('RenderObject', style: DiagnosticsTreeStyle.truncateChildren),
+      ],
     ));
   }
 
@@ -1781,7 +1783,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     assert(constraints != null);
     assert(constraints.debugAssertIsValid(
       isAppliedConstraint: true,
-      informationCollector: () sync* {
+      informationCollector: () {
         final List<String> stack = StackTrace.current.toString().split('\n');
         int? targetFrame;
         final Pattern layoutFramePattern = RegExp(r'^#[0-9]+ +RenderObject.layout \(');
@@ -1796,13 +1798,16 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
           final Match? targetFrameMatch = targetFramePattern.matchAsPrefix(stack[targetFrame]);
           final String? problemFunction = (targetFrameMatch != null && targetFrameMatch.groupCount > 0) ? targetFrameMatch.group(1) : stack[targetFrame].trim();
           // TODO(jacobr): this case is similar to displaying a single stack frame.
-          yield ErrorDescription(
-            "These invalid constraints were provided to $runtimeType's layout() "
-            'function by the following function, which probably computed the '
-            'invalid constraints in question:\n'
-            '  $problemFunction',
-          );
+          return <DiagnosticsNode>[
+            ErrorDescription(
+              "These invalid constraints were provided to $runtimeType's layout() "
+              'function by the following function, which probably computed the '
+              'invalid constraints in question:\n'
+              '  $problemFunction',
+            ),
+          ];
         }
+        return <DiagnosticsNode>[];
       },
     ));
     assert(!_debugDoingThisResize);

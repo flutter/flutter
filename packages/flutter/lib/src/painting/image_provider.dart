@@ -336,11 +336,11 @@ abstract class ImageProvider<T extends Object> {
         await null; // wait an event turn in case a listener has been added to the image stream.
         InformationCollector? collector;
         assert(() {
-          collector = () sync* {
-            yield DiagnosticsProperty<ImageProvider>('Image provider', this);
-            yield DiagnosticsProperty<ImageConfiguration>('Image configuration', configuration);
-            yield DiagnosticsProperty<T>('Image key', key, defaultValue: null);
-          };
+          collector = () => <DiagnosticsNode>[
+            DiagnosticsProperty<ImageProvider>('Image provider', this),
+            DiagnosticsProperty<ImageConfiguration>('Image configuration', configuration),
+            DiagnosticsProperty<T>('Image key', key, defaultValue: null),
+          ];
           return true;
         }());
         if (stream.completer == null) {
@@ -395,11 +395,11 @@ abstract class ImageProvider<T extends Object> {
         } else {
           InformationCollector? collector;
           assert(() {
-            collector = () sync* {
-              yield DiagnosticsProperty<ImageProvider>('Image provider', this);
-              yield DiagnosticsProperty<ImageConfiguration>('Image configuration', configuration);
-              yield DiagnosticsProperty<T>('Image key', key, defaultValue: null);
-            };
+            collector = () => <DiagnosticsNode>[
+              DiagnosticsProperty<ImageProvider>('Image provider', this),
+              DiagnosticsProperty<ImageConfiguration>('Image configuration', configuration),
+              DiagnosticsProperty<T>('Image key', key, defaultValue: null),
+            ];
             return true;
           }());
           FlutterError.reportError(FlutterErrorDetails(
@@ -648,10 +648,10 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
   ImageStreamCompleter load(AssetBundleImageKey key, DecoderCallback decode) {
     InformationCollector? collector;
     assert(() {
-      collector = () sync* {
-        yield DiagnosticsProperty<ImageProvider>('Image provider', this);
-        yield DiagnosticsProperty<AssetBundleImageKey>('Image key', key);
-      };
+      collector = () => <DiagnosticsNode>[
+        DiagnosticsProperty<ImageProvider>('Image provider', this),
+        DiagnosticsProperty<AssetBundleImageKey>('Image key', key),
+      ];
       return true;
     }());
     return MultiFrameImageStreamCompleter(
@@ -878,9 +878,9 @@ class FileImage extends ImageProvider<FileImage> {
       codec: _loadAsync(key, decode),
       scale: key.scale,
       debugLabel: key.file.path,
-      informationCollector: () sync* {
-        yield ErrorDescription('Path: ${file.path}');
-      },
+      informationCollector: () => <DiagnosticsNode>[
+        ErrorDescription('Path: ${file.path}'),
+      ],
     );
   }
 

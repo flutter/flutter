@@ -1455,35 +1455,34 @@ abstract class ParentDataWidget<T extends ParentData> extends ProxyWidget {
     required ParentData? parentData,
     RenderObjectWidget? parentDataCreator,
     DiagnosticsNode? ownershipChain,
-  }) sync* {
+  }) {
     assert(T != dynamic);
     assert(T != ParentData);
     assert(debugTypicalAncestorWidgetClass != null);
 
     final String description = 'The ParentDataWidget $this wants to apply ParentData of type $T to a RenderObject';
-    if (parentData == null) {
-      yield ErrorDescription(
-        '$description, which has not been set up to receive any ParentData.',
-      );
-    } else {
-      yield ErrorDescription(
-        '$description, which has been set up to accept ParentData of incompatible type ${parentData.runtimeType}.',
-      );
-    }
-    yield ErrorHint(
-      'Usually, this means that the $runtimeType widget has the wrong ancestor RenderObjectWidget. '
-      'Typically, $runtimeType widgets are placed directly inside $debugTypicalAncestorWidgetClass widgets.',
-    );
-    if (parentDataCreator != null) {
-      yield ErrorHint(
-        'The offending $runtimeType is currently placed inside a ${parentDataCreator.runtimeType} widget.',
-      );
-    }
-    if (ownershipChain != null) {
-      yield ErrorDescription(
-        'The ownership chain for the RenderObject that received the incompatible parent data was:\n  $ownershipChain',
-      );
-    }
+    return <DiagnosticsNode>[
+      if (parentData == null)
+        ErrorDescription(
+          '$description, which has not been set up to receive any ParentData.',
+        )
+      else
+        ErrorDescription(
+          '$description, which has been set up to accept ParentData of incompatible type ${parentData.runtimeType}.',
+        ),
+      ErrorHint(
+        'Usually, this means that the $runtimeType widget has the wrong ancestor RenderObjectWidget. '
+        'Typically, $runtimeType widgets are placed directly inside $debugTypicalAncestorWidgetClass widgets.',
+      ),
+      if (parentDataCreator != null)
+        ErrorHint(
+          'The offending $runtimeType is currently placed inside a ${parentDataCreator.runtimeType} widget.',
+        ),
+      if (ownershipChain != null)
+        ErrorDescription(
+          'The ownership chain for the RenderObject that received the incompatible parent data was:\n  $ownershipChain',
+        ),
+    ];
   }
 
   /// Write the data from this widget into the given render object's parent data.
@@ -2630,14 +2629,14 @@ class BuildOwner {
             ErrorDescription('while rebuilding dirty elements'),
             e,
             stack,
-            informationCollector: () sync* {
-              if (index < _dirtyElements.length) {
-                yield DiagnosticsDebugCreator(DebugCreator(element));
-                yield element.describeElement('The element being rebuilt at the time was index $index of $dirtyCount');
-              } else {
-                yield ErrorHint('The element being rebuilt at the time was index $index of $dirtyCount, but _dirtyElements only had ${_dirtyElements.length} entries. This suggests some confusion in the framework internals.');
-              }
-            },
+            informationCollector: () => <DiagnosticsNode>[
+              if (kDebugMode && index < _dirtyElements.length)
+                DiagnosticsDebugCreator(DebugCreator(element)),
+              if (index < _dirtyElements.length)
+                element.describeElement('The element being rebuilt at the time was index $index of $dirtyCount')
+              else
+                ErrorHint('The element being rebuilt at the time was index $index of $dirtyCount, but _dirtyElements only had ${_dirtyElements.length} entries. This suggests some confusion in the framework internals.'),
+            ],
           );
         }
         if (!kReleaseMode && debugProfileBuildsEnabled)
@@ -4721,9 +4720,10 @@ abstract class ComponentElement extends Element {
           ErrorDescription('building $this'),
           e,
           stack,
-          informationCollector: () sync* {
-            yield DiagnosticsDebugCreator(DebugCreator(this));
-          },
+          informationCollector: () => <DiagnosticsNode>[
+            if (kDebugMode)
+              DiagnosticsDebugCreator(DebugCreator(this)),
+          ],
         ),
       );
     } finally {
@@ -4741,9 +4741,10 @@ abstract class ComponentElement extends Element {
           ErrorDescription('building $this'),
           e,
           stack,
-          informationCollector: () sync* {
-            yield DiagnosticsDebugCreator(DebugCreator(this));
-          },
+          informationCollector: () => <DiagnosticsNode>[
+            if (kDebugMode)
+              DiagnosticsDebugCreator(DebugCreator(this)),
+          ],
         ),
       );
       _child = updateChild(null, built, slot);

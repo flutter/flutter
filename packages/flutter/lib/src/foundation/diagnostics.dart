@@ -870,12 +870,12 @@ class _PrefixedStringBuilder {
   ///
   /// This method wraps a sequence of text where only some spans of text can be
   /// used as wrap boundaries.
-  static Iterable<String> _wordWrapLine(String message, List<int> wrapRanges, int width, { int startOffset = 0, int otherLineOffset = 0}) sync* {
+  static Iterable<String> _wordWrapLine(String message, List<int> wrapRanges, int width, { int startOffset = 0, int otherLineOffset = 0}) {
     if (message.length + startOffset < width) {
       // Nothing to do. The line doesn't wrap.
-      yield message;
-      return;
+      return <String>[message];
     }
+    final List<String> wrappedLine = <String>[];
     int startForLengthCalculations = -startOffset;
     bool addPrefix = false;
     int index = 0;
@@ -920,10 +920,10 @@ class _PrefixedStringBuilder {
               lastWordEnd = index;
             }
             final String line = message.substring(start, lastWordEnd);
-            yield line;
+            wrappedLine.add(line);
             addPrefix = true;
             if (lastWordEnd >= message.length)
-              return;
+              return wrappedLine;
             // just yielded a line
             if (lastWordEnd == index) {
               // we broke at current position
@@ -2590,12 +2590,10 @@ class FlagsSummary<T> extends DiagnosticsProperty<Map<String, T?>> {
   //
   // For a null value, it is omitted unless `includeEmpty` is true and
   // [ifEntryNull] contains a corresponding description.
-  Iterable<String> _formattedValues() sync* {
-    for (final MapEntry<String, T?> entry in value.entries) {
-      if (entry.value != null) {
-        yield entry.key;
-      }
-    }
+  Iterable<String> _formattedValues() {
+    return value.entries
+        .where((MapEntry<String, T?> entry) => entry.value != null)
+        .map((MapEntry<String, T?> entry) => entry.key);
   }
 }
 

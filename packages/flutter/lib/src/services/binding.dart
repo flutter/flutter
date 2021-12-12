@@ -144,6 +144,9 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     LicenseRegistry.addLicense(_addLicenses);
   }
 
+  // TODO(dnfield): Refactor the license logic.
+  // https://github.com/flutter/flutter/issues/95043
+  // flutter_ignore: no_sync_async_star
   Stream<LicenseEntry> _addLicenses() async* {
     // Using _something_ here to break
     // this into two parts is important because isolates take a while to copy

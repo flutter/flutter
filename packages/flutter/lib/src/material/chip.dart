@@ -1076,9 +1076,9 @@ class ChoiceChip extends StatelessWidget
 ///   ];
 ///   final List<String> _filters = <String>[];
 ///
-///   Iterable<Widget> get actorWidgets sync* {
-///     for (final ActorFilterEntry actor in _cast) {
-///       yield Padding(
+///   Iterable<Widget> get actorWidgets {
+///     return _cast.map((ActorFilterEntry actor) {
+///       return Padding(
 ///         padding: const EdgeInsets.all(4.0),
 ///         child: FilterChip(
 ///           avatar: CircleAvatar(child: Text(actor.initials)),
@@ -1097,7 +1097,7 @@ class ChoiceChip extends StatelessWidget
 ///           },
 ///         ),
 ///       );
-///     }
+///     });
 ///   }
 ///
 ///   @override
@@ -2257,16 +2257,15 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
 
   // The returned list is ordered for hit testing.
   @override
-  Iterable<RenderBox> get children sync* {
-    if (avatar != null) {
-      yield avatar!;
-    }
-    if (label != null) {
-      yield label!;
-    }
-    if (deleteIcon != null) {
-      yield deleteIcon!;
-    }
+  Iterable<RenderBox> get children {
+    return <RenderBox>[
+      if (avatar != null)
+        avatar!,
+      if (label != null)
+        label!,
+      if (deleteIcon != null)
+        deleteIcon!,
+    ];
   }
 
   bool get isDrawingCheckmark => theme.showCheckmark && !checkmarkAnimation.isDismissed;
