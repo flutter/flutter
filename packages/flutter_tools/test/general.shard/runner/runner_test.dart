@@ -90,6 +90,7 @@ void main() {
     }, overrides: <Type, Generator>{
       Platform: () => FakePlatform(environment: <String, String>{
         'FLUTTER_ANALYTICS_LOG_FILE': 'test',
+        'FLUTTER_DOCTOR_HOST_TIMEOUT': '0',
         'FLUTTER_ROOT': '/',
       }),
       FileSystem: () => MemoryFileSystem.test(),
@@ -132,6 +133,7 @@ void main() {
     }, overrides: <Type, Generator>{
       Platform: () => FakePlatform(environment: <String, String>{
         'FLUTTER_ANALYTICS_LOG_FILE': 'test',
+        'FLUTTER_DOCTOR_HOST_TIMEOUT': '0',
         'FLUTTER_ROOT': '/',
       }),
       FileSystem: () => MemoryFileSystem.test(),
@@ -199,6 +201,7 @@ void main() {
       Platform: () => FakePlatform(
         environment: <String, String>{
           'FLUTTER_ANALYTICS_LOG_FILE': 'test',
+          'FLUTTER_DOCTOR_HOST_TIMEOUT': '0',
           'FLUTTER_ROOT': '/',
         }
       ),
