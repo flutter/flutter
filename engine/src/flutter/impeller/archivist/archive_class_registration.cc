@@ -8,6 +8,7 @@
 
 #include "impeller/archivist/archive_database.h"
 #include "impeller/archivist/archive_statement.h"
+#include "impeller/base/validation.h"
 
 namespace impeller {
 
@@ -39,6 +40,9 @@ std::optional<size_t> ArchiveClassRegistration::FindColumnIndex(
     const std::string& member) const {
   auto found = column_map_.find(member);
   if (found == column_map_.end()) {
+    VALIDATION_LOG << "No member named '" << member << "' in class '"
+                   << definition_.table_name
+                   << "'. Did you forget to register it?";
     return std::nullopt;
   }
   return found->second;
