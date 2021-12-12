@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <memory>
 #include <type_traits>
 
 #include "flutter/fml/macros.h"
@@ -19,8 +20,6 @@ namespace impeller {
 class ArchiveStatement {
  public:
   ~ArchiveStatement();
-
-  ArchiveStatement(ArchiveStatement&& message);
 
   bool IsValid() const;
 
@@ -80,8 +79,8 @@ class ArchiveStatement {
   size_t GetColumnCount();
 
  private:
-  void* statement_handle_ = nullptr;
-  bool ready_ = false;
+  struct Handle;
+  std::unique_ptr<Handle> statement_handle_;
 
   friend class ArchiveDatabase;
 
