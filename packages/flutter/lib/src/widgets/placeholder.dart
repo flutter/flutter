@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
+
 import 'basic.dart';
 import 'framework.dart';
 
@@ -94,5 +96,14 @@ class Placeholder extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(ColorProperty('color', color, defaultValue: const Color(0xFF455A64)));
+    properties.add(DoubleProperty('strokeWidth', strokeWidth, defaultValue: 2.0));
+    properties.add(DoubleProperty('fallbackWidth', fallbackWidth, defaultValue: 400.0));
+    properties.add(DoubleProperty('fallbackHeight', fallbackHeight, defaultValue: 400.0));
   }
 }
