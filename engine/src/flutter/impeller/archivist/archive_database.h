@@ -35,8 +35,8 @@ class ArchiveDatabase {
   ArchiveTransaction CreateTransaction(int64_t& transactionCount);
 
  private:
-  void* database_ = nullptr;
-  bool ready_ = false;
+  struct Handle;
+  std::unique_ptr<Handle> handle_;
   std::map<std::string, std::unique_ptr<ArchiveClassRegistration>>
       registrations_;
   std::unique_ptr<ArchiveStatement> begin_transaction_stmt_;
