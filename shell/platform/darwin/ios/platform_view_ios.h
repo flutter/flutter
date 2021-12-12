@@ -16,10 +16,10 @@
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterView.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/accessibility_bridge.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/platform_message_router.h"
 #import "flutter/shell/platform/darwin/ios/ios_context.h"
 #import "flutter/shell/platform/darwin/ios/ios_external_view_embedder.h"
 #import "flutter/shell/platform/darwin/ios/ios_surface.h"
-#import "flutter/shell/platform/darwin/ios/platform_message_handler_ios.h"
 #import "flutter/shell/platform/darwin/ios/rendering_api_selection.h"
 
 @class FlutterViewController;
@@ -52,6 +52,12 @@ class PlatformViewIOS final : public PlatformView {
       flutter::TaskRunners task_runners);
 
   ~PlatformViewIOS() override;
+
+  /**
+   * The `PlatformMessageRouter` is the iOS bridge connecting the shell's
+   * platform agnostic `PlatformMessage` to iOS's channel message handler.
+   */
+  PlatformMessageRouter& GetPlatformMessageRouter();
 
   /**
    * Returns the `FlutterViewController` currently attached to the `FlutterEngine` owning
@@ -89,14 +95,6 @@ class PlatformViewIOS final : public PlatformView {
 
   /** Accessor for the `IOSContext` associated with the platform view. */
   const std::shared_ptr<IOSContext>& GetIosContext() { return ios_context_; }
-
-  std::shared_ptr<PlatformMessageHandlerIos> GetPlatformMessageHandlerIos() const {
-    return platform_message_handler_;
-  }
-
-  std::shared_ptr<PlatformMessageHandler> GetPlatformMessageHandler() const override {
-    return platform_message_handler_;
-  }
 
  private:
   /// Smart pointer for use with objective-c observers.
@@ -138,12 +136,12 @@ class PlatformViewIOS final : public PlatformView {
   std::unique_ptr<IOSSurface> ios_surface_;
   std::shared_ptr<IOSContext> ios_context_;
   const std::shared_ptr<FlutterPlatformViewsController>& platform_views_controller_;
+  PlatformMessageRouter platform_message_router_;
   AccessibilityBridgePtr accessibility_bridge_;
   fml::scoped_nsprotocol<FlutterTextInputPlugin*> text_input_plugin_;
   fml::closure firstFrameCallback_;
   ScopedObserver dealloc_view_controller_observer_;
   std::vector<std::string> platform_resolved_locale_;
-  std::shared_ptr<PlatformMessageHandlerIos> platform_message_handler_;
 
   // |PlatformView|
   void HandlePlatformMessage(std::unique_ptr<flutter::PlatformMessage> message) override;

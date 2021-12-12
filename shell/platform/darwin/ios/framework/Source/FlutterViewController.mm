@@ -1608,24 +1608,12 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   [_engine.get().binaryMessenger sendOnChannel:channel message:message binaryReply:callback];
 }
 
-- (NSObject<FlutterTaskQueue>*)makeBackgroundTaskQueue {
-  return [_engine.get().binaryMessenger makeBackgroundTaskQueue];
-}
-
 - (FlutterBinaryMessengerConnection)setMessageHandlerOnChannel:(NSString*)channel
                                           binaryMessageHandler:
                                               (FlutterBinaryMessageHandler)handler {
-  return [self setMessageHandlerOnChannel:channel binaryMessageHandler:handler taskQueue:nil];
-}
-
-- (FlutterBinaryMessengerConnection)
-    setMessageHandlerOnChannel:(NSString*)channel
-          binaryMessageHandler:(FlutterBinaryMessageHandler _Nullable)handler
-                     taskQueue:(NSObject<FlutterTaskQueue>* _Nullable)taskQueue {
   NSAssert(channel, @"The channel must not be null");
   return [_engine.get().binaryMessenger setMessageHandlerOnChannel:channel
-                                              binaryMessageHandler:handler
-                                                         taskQueue:taskQueue];
+                                              binaryMessageHandler:handler];
 }
 
 - (void)cleanUpConnection:(FlutterBinaryMessengerConnection)connection {
