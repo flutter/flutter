@@ -130,7 +130,7 @@ platform_properties:
         ]
       os: Mac-12.0
       device_os: iOS-9.3.6
-      xcode: 12c33
+      xcode: 13a233
   windows:
     properties:
       caches: >-
