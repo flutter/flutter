@@ -2360,7 +2360,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     final LocalHistoryEntry? entry = isPersistent
       ? null
       : LocalHistoryEntry(onRemove: () {
-          if (!removedEntry) {
+          if (!removedEntry && _currentBottomSheet?._widget == bottomSheet) {
             _removeCurrentBottomSheet();
           }
         });

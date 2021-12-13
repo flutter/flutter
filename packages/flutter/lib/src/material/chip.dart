@@ -76,7 +76,8 @@ abstract class ChipAttributes {
 
   /// The style to be applied to the chip's label.
   ///
-  /// If null, the value of the [ChipTheme]'s [ChipThemeData.labelStyle] is used.
+  /// The default label style is [TextTheme.bodyText1] from the overall
+  /// theme's [ThemeData.textTheme].
   //
   /// This only has an effect on widgets that respect the [DefaultTextStyle],
   /// such as [Text].
@@ -1075,9 +1076,9 @@ class ChoiceChip extends StatelessWidget
 ///   ];
 ///   final List<String> _filters = <String>[];
 ///
-///   Iterable<Widget> get actorWidgets sync* {
-///     for (final ActorFilterEntry actor in _cast) {
-///       yield Padding(
+///   Iterable<Widget> get actorWidgets {
+///     return _cast.map((ActorFilterEntry actor) {
+///       return Padding(
 ///         padding: const EdgeInsets.all(4.0),
 ///         child: FilterChip(
 ///           avatar: CircleAvatar(child: Text(actor.initials)),
@@ -1096,7 +1097,7 @@ class ChoiceChip extends StatelessWidget
 ///           },
 ///         ),
 ///       );
-///     }
+///     });
 ///   }
 ///
 ///   @override
@@ -1898,15 +1899,15 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
       ?? chipTheme.padding
       ?? theme.chipTheme.padding
       ?? chipDefaults.padding!;
-    final TextStyle? labelStyle = widget.labelStyle
-      ?? chipTheme.labelStyle
-      ?? theme.chipTheme.labelStyle;
+    final TextStyle labelStyle = chipTheme.labelStyle
+      ?? theme.chipTheme.labelStyle
+      ?? chipDefaults.labelStyle!;
     final EdgeInsetsGeometry labelPadding = widget.labelPadding
       ?? chipTheme.labelPadding
       ?? theme.chipTheme.labelPadding
       ?? _defaultLabelPadding;
 
-    final TextStyle effectiveLabelStyle = chipDefaults.labelStyle!.merge(labelStyle);
+    final TextStyle effectiveLabelStyle = labelStyle.merge(widget.labelStyle);
     final Color? resolvedLabelColor = MaterialStateProperty.resolveAs<Color?>(effectiveLabelStyle.color, materialStates);
     final TextStyle resolvedLabelStyle = effectiveLabelStyle.copyWith(color: resolvedLabelColor);
 
@@ -2256,16 +2257,15 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
 
   // The returned list is ordered for hit testing.
   @override
-  Iterable<RenderBox> get children sync* {
-    if (avatar != null) {
-      yield avatar!;
-    }
-    if (label != null) {
-      yield label!;
-    }
-    if (deleteIcon != null) {
-      yield deleteIcon!;
-    }
+  Iterable<RenderBox> get children {
+    return <RenderBox>[
+      if (avatar != null)
+        avatar!,
+      if (label != null)
+        label!,
+      if (deleteIcon != null)
+        deleteIcon!,
+    ];
   }
 
   bool get isDrawingCheckmark => theme.showCheckmark && !checkmarkAnimation.isDismissed;

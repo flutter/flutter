@@ -280,7 +280,7 @@ class CustomDeviceAppSession {
   /// [debuggingOptions] and [route] can be null.
   ///
   /// For example, `_getEngineOptions(null, false, null)` will return
-  /// `['enable-dart-profiling=true', 'enable-background-compilation=true']`
+  /// `['enable-dart-profiling=true']`
   List<String> _getEngineOptions(DebuggingOptions debuggingOptions, bool traceStartup, String? route) {
     final List<String> options = <String>[];
 
@@ -289,7 +289,6 @@ class CustomDeviceAppSession {
     }
 
     addFlag('enable-dart-profiling=true');
-    addFlag('enable-background-compilation=true');
 
     if (traceStartup) {
       addFlag('trace-startup=true');
@@ -363,7 +362,7 @@ class CustomDeviceAppSession {
   /// [debuggingOptions] and [route] can be null.
   ///
   /// For example, `_getEngineOptionsForCmdline(null, false, null)` will return
-  /// `--enable-dart-profiling=true --enable-background-compilation=true`
+  /// `--enable-dart-profiling=true`
   String _getEngineOptionsForCmdline(DebuggingOptions debuggingOptions, bool traceStartup, String? route) {
     return _getEngineOptions(debuggingOptions, traceStartup, route).map((String e) => '--$e').join(' ');
   }

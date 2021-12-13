@@ -520,7 +520,7 @@ class DeviceValidator extends DoctorValidator {
     final List<Device> devices = await _deviceManager.getAllConnectedDevices();
     List<ValidationMessage> installedMessages = <ValidationMessage>[];
     if (devices.isNotEmpty) {
-      installedMessages = await Device.descriptions(devices)
+      installedMessages = (await Device.descriptions(devices))
           .map<ValidationMessage>((String msg) => ValidationMessage(msg)).toList();
     }
 

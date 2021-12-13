@@ -55,7 +55,7 @@ typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(BuildContex
 /// (those inside the [TabBarView], hooking them together so that they appear,
 /// to the user, as one coherent scroll view.
 ///
-/// {@tool sample}
+/// {@tool dartpad}
 /// This example shows a [NestedScrollView] whose header is the combination of a
 /// [TabBar] in a [SliverAppBar] and whose body is a [TabBarView]. It uses a
 /// [SliverOverlapAbsorber]/[SliverOverlapInjector] pair to make the inner lists
@@ -110,7 +110,7 @@ typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(BuildContex
 /// configuration, the flexible space of the app bar will open and collapse,
 /// while the primary portion of the app bar remains pinned.
 ///
-/// {@tool sample}
+/// {@tool dartpad}
 /// This simple example shows a [NestedScrollView] whose header contains a
 /// floating [SliverAppBar]. By using the [floatHeaderSlivers] property, the
 /// floating behavior is coordinated between the outer and inner [Scrollable]s,
@@ -140,7 +140,7 @@ typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(BuildContex
 /// for the nested "inner" scroll view below to end up under the [SliverAppBar]
 /// even when the inner scroll view thinks it has not been scrolled.
 ///
-/// {@tool sample}
+/// {@tool dartpad}
 /// This simple example shows a [NestedScrollView] whose header contains a
 /// snapping, floating [SliverAppBar]. _Without_ setting any additional flags,
 /// e.g [NestedScrollView.floatHeaderSlivers], the [SliverAppBar] will animate
@@ -1133,9 +1133,9 @@ class _NestedScrollController extends ScrollController {
     );
   }
 
-  Iterable<_NestedScrollPosition> get nestedPositions sync* {
+  Iterable<_NestedScrollPosition> get nestedPositions {
     // TODO(vegorov): use instance method version of castFrom when it is available.
-    yield* Iterable.castFrom<ScrollPosition, _NestedScrollPosition>(positions);
+    return Iterable.castFrom<ScrollPosition, _NestedScrollPosition>(positions);
   }
 }
 

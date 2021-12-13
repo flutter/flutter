@@ -59,12 +59,10 @@ class NetworkImage
   InformationCollector? _imageStreamInformationCollector(image_provider.NetworkImage key) {
     InformationCollector? collector;
     assert(() {
-      collector = () {
-        return <DiagnosticsNode>[
-          DiagnosticsProperty<image_provider.ImageProvider>('Image provider', this),
-          DiagnosticsProperty<NetworkImage>('Image key', key as NetworkImage),
-        ];
-      };
+      collector = () => <DiagnosticsNode>[
+        DiagnosticsProperty<image_provider.ImageProvider>('Image provider', this),
+        DiagnosticsProperty<NetworkImage>('Image key', key as NetworkImage),
+      ];
       return true;
     }());
     return collector;

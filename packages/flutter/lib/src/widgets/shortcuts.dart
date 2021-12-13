@@ -483,8 +483,8 @@ class SingleActivator with Diagnosticable implements ShortcutActivator {
   final bool meta;
 
   @override
-  Iterable<LogicalKeyboardKey> get triggers sync* {
-    yield trigger;
+  Iterable<LogicalKeyboardKey> get triggers {
+    return <LogicalKeyboardKey>[trigger];
   }
 
   @override
