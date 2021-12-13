@@ -156,10 +156,10 @@ void main() {
     expect(theme.colorScheme.errorContainer, const Color(0xffffdad4));
     expect(theme.colorScheme.onErrorContainer, const Color(0xff410001));
     expect(theme.colorScheme.outline, const Color(0xff73777f));
-    expect(theme.colorScheme.background, const Color(0xffe2e2e6));
+    expect(theme.colorScheme.background, const Color(0xfffdfcff));
     expect(theme.colorScheme.onBackground, const Color(0xff1b1b1b));
     expect(theme.colorScheme.surface, const Color(0xfffdfcff));
-    expect(theme.colorScheme.onSurface, const Color(0xff000000));
+    expect(theme.colorScheme.onSurface, const Color(0xff1b1b1b));
     expect(theme.colorScheme.surfaceVariant, const Color(0xffdfe2eb));
     expect(theme.colorScheme.onSurfaceVariant, const Color(0xff42474e));
     expect(theme.colorScheme.inverseSurface, const Color(0xff2f3033));
