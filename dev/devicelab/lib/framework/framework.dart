@@ -42,9 +42,8 @@ bool _isTaskRegistered = false;
 /// It is OK for a [task] to perform many things. However, only one task can be
 /// registered per Dart VM.
 Future<TaskResult> task(TaskFunction task) async {
-  if (_isTaskRegistered) {
+  if (_isTaskRegistered)
     throw StateError('A task is already registered');
-  }
 
   _isTaskRegistered = true;
 
@@ -61,19 +60,20 @@ Future<TaskResult> task(TaskFunction task) async {
 
 class _TaskRunner {
   _TaskRunner(this.task) {
-    registerExtension('ext.cocoonRunTask', (String method, Map<String, String> parameters) async {
+    registerExtension('ext.cocoonRunTask',
+        (String method, Map<String, String> parameters) async {
       final Duration? taskTimeout = parameters.containsKey('timeoutInMinutes')
-          ? Duration(minutes: int.parse(parameters['timeoutInMinutes']!))
-          : null;
+        ? Duration(minutes: int.parse(parameters['timeoutInMinutes']!))
+        : null;
       // This is only expected to be passed in unit test runs so they do not
       // kill the Dart process that is running them and waste time running config.
       final bool runFlutterConfig = parameters['runFlutterConfig'] != 'false';
       final bool runProcessCleanup = parameters['runProcessCleanup'] != 'false';
-      final TaskResult result =
-          await run(taskTimeout, runProcessCleanup: runProcessCleanup, runFlutterConfig: runFlutterConfig);
+      final TaskResult result = await run(taskTimeout, runProcessCleanup: runProcessCleanup, runFlutterConfig: runFlutterConfig);
       return ServiceExtensionResponse.result(json.encode(result.toJson()));
     });
-    registerExtension('ext.cocoonRunnerReady', (String method, Map<String, String> parameters) async {
+    registerExtension('ext.cocoonRunnerReady',
+        (String method, Map<String, String> parameters) async {
       return ServiceExtensionResponse.result('"ready"');
     });
   }
@@ -100,8 +100,7 @@ class _TaskRunner {
   /// Signals that this task runner finished running the task.
   Future<TaskResult> get whenDone => _completer.future;
 
-  Future<TaskResult> run(
-    Duration? taskTimeout, {
+  Future<TaskResult> run(Duration? taskTimeout, {
     bool runFlutterConfig = true,
     bool runProcessCleanup = true,
   }) async {
@@ -128,18 +127,15 @@ class _TaskRunner {
 
       if (runFlutterConfig) {
         print('enabling configs for macOS, Linux, Windows, and Web...');
-        final int configResult = await exec(
-            path.join(flutterDirectory.path, 'bin', 'flutter'),
-            <String>[
-              'config',
-              '-v',
-              '--enable-macos-desktop',
-              '--enable-windows-desktop',
-              '--enable-linux-desktop',
-              '--enable-web',
-              if (localEngine != null) ...<String>['--local-engine', localEngine!],
-            ],
-            canFail: true);
+        final int configResult = await exec(path.join(flutterDirectory.path, 'bin', 'flutter'), <String>[
+          'config',
+          '-v',
+          '--enable-macos-desktop',
+          '--enable-windows-desktop',
+          '--enable-linux-desktop',
+          '--enable-web',
+          if (localEngine != null) ...<String>['--local-engine', localEngine!],
+        ], canFail: true);
         if (configResult != 0) {
           print('Failed to enable configuration, tasks may not run.');
         }
@@ -148,8 +144,10 @@ class _TaskRunner {
       }
 
       final Device? device = await _getWorkingDeviceIfAvailable();
+      
       // Some tests assume the phone is in home
       await device?.home();
+
       late TaskResult result;
       IOSink? sink;
       try {
@@ -159,9 +157,8 @@ class _TaskRunner {
         }
 
         Future<TaskResult> futureResult = _performTask();
-        if (taskTimeout != null) {
+        if (taskTimeout != null)
           futureResult = futureResult.timeout(taskTimeout);
-        }
 
         result = await futureResult;
       } finally {
@@ -240,9 +237,8 @@ class _TaskRunner {
   /// Causes the Dart VM to stay alive until a request to run the task is
   /// received via the VM service protocol.
   void keepVmAliveUntilTaskRunRequested() {
-    if (_taskStarted) {
+    if (_taskStarted)
       throw StateError('Task already started.');
-    }
 
     // Merely creating this port object will cause the VM to stay alive and keep
     // the VM service server running until the port is disposed of.
@@ -280,9 +276,8 @@ class _TaskRunner {
       // are catching errors coming from arbitrary (and untrustworthy) task
       // code. Our goal is to convert the failure into a readable message.
       // Propagating it further is not useful.
-      if (!completer.isCompleted) {
+      if (!completer.isCompleted)
         completer.complete(TaskResult.failure(message));
-      }
     });
     return completer.future;
   }
