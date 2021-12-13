@@ -198,73 +198,45 @@ class ColorScheme with Diagnosticable {
     Color? inversePrimary,
     Color? shadow,
   }) {
+    final Scheme scheme;
     switch (brightness) {
       case Brightness.light:
-        final Scheme scheme = Scheme.light(seedColor.value);
-        return ColorScheme(
-          primary: primary ?? Color(scheme.primary),
-          onPrimary: onPrimary ?? Color(scheme.onPrimary),
-          primaryContainer: primaryContainer ?? Color(scheme.primaryContainer),
-          onPrimaryContainer: onPrimaryContainer ?? Color(scheme.onPrimaryContainer),
-          secondary: secondary ?? Color(scheme.secondary),
-          onSecondary: onSecondary ?? Color(scheme.onSecondary),
-          secondaryContainer: secondaryContainer ?? Color(scheme.secondaryContainer),
-          onSecondaryContainer: onSecondaryContainer ?? Color(scheme.onSecondaryContainer),
-          tertiary: tertiary ?? Color(scheme.tertiary),
-          onTertiary: onTertiary ?? Color(scheme.onTertiary),
-          tertiaryContainer: tertiaryContainer ?? Color(scheme.tertiaryContainer),
-          onTertiaryContainer: onTertiaryContainer ?? Color(scheme.onTertiaryContainer),
-          error: error ?? Color(scheme.error),
-          onError: onError ?? Color(scheme.onError),
-          errorContainer: errorContainer ?? Color(scheme.errorContainer),
-          onErrorContainer: onErrorContainer ?? Color(scheme.onErrorContainer),
-          outline: outline ?? Color(scheme.outline),
-          background: background ?? Color(scheme.background),
-          onBackground: onBackground ?? Color(scheme.onBackground),
-          surface: surface ?? Color(scheme.surface),
-          onSurface: onSurface ?? Color(scheme.onSurface),
-          surfaceVariant: surfaceVariant ?? Color(scheme.surfaceVariant),
-          onSurfaceVariant: onSurfaceVariant ?? Color(scheme.onSurfaceVariant),
-          inverseSurface: inverseSurface ?? Color(scheme.inverseSurface),
-          onInverseSurface: onInverseSurface ?? Color(scheme.inverseOnSurface),
-          inversePrimary: inversePrimary ?? Color(scheme.inversePrimary),
-          shadow: shadow ?? Color(scheme.shadow),
-          brightness: brightness,
-        );
-
+        scheme = Scheme.light(seedColor.value);
+        break;
       case Brightness.dark:
-        final Scheme scheme = Scheme.dark(seedColor.value);
-        return ColorScheme(
-          primary: primary ?? Color(scheme.primary),
-          onPrimary: onPrimary ?? Color(scheme.onPrimary),
-          primaryContainer: primaryContainer ?? Color(scheme.primaryContainer),
-          onPrimaryContainer: onPrimaryContainer ?? Color(scheme.onPrimaryContainer),
-          secondary: secondary ?? Color(scheme.secondary),
-          onSecondary: onSecondary ?? Color(scheme.onSecondary),
-          secondaryContainer: secondaryContainer ?? Color(scheme.secondaryContainer),
-          onSecondaryContainer: onSecondaryContainer ?? Color(scheme.onSecondaryContainer),
-          tertiary: tertiary ?? Color(scheme.tertiary),
-          onTertiary: onTertiary ?? Color(scheme.onTertiary),
-          tertiaryContainer: tertiaryContainer ?? Color(scheme.tertiaryContainer),
-          onTertiaryContainer: onTertiaryContainer ?? Color(scheme.onTertiaryContainer),
-          error: error ?? Color(scheme.error),
-          onError: onError ?? Color(scheme.onError),
-          errorContainer: errorContainer ?? Color(scheme.errorContainer),
-          onErrorContainer: onErrorContainer ?? Color(scheme.onErrorContainer),
-          outline: outline ?? Color(scheme.outline),
-          background: background ?? Color(scheme.background),
-          onBackground: onBackground ?? Color(scheme.onBackground),
-          surface: surface ?? Color(scheme.surface),
-          onSurface: onSurface ?? Color(scheme.onSurface),
-          surfaceVariant: surfaceVariant ?? Color(scheme.surfaceVariant),
-          onSurfaceVariant: onSurfaceVariant ?? Color(scheme.onSurfaceVariant),
-          inverseSurface: inverseSurface ?? Color(scheme.inverseSurface),
-          onInverseSurface: onInverseSurface ?? Color(scheme.inverseOnSurface),
-          inversePrimary: inversePrimary ?? Color(scheme.inversePrimary),
-          shadow: shadow ?? Color(scheme.shadow),
-          brightness: brightness,
-        );
+        scheme = Scheme.dark(seedColor.value);
+        break;
     }
+    return ColorScheme(
+      primary: primary ?? Color(scheme.primary),
+      onPrimary: onPrimary ?? Color(scheme.onPrimary),
+      primaryContainer: primaryContainer ?? Color(scheme.primaryContainer),
+      onPrimaryContainer: onPrimaryContainer ?? Color(scheme.onPrimaryContainer),
+      secondary: secondary ?? Color(scheme.secondary),
+      onSecondary: onSecondary ?? Color(scheme.onSecondary),
+      secondaryContainer: secondaryContainer ?? Color(scheme.secondaryContainer),
+      onSecondaryContainer: onSecondaryContainer ?? Color(scheme.onSecondaryContainer),
+      tertiary: tertiary ?? Color(scheme.tertiary),
+      onTertiary: onTertiary ?? Color(scheme.onTertiary),
+      tertiaryContainer: tertiaryContainer ?? Color(scheme.tertiaryContainer),
+      onTertiaryContainer: onTertiaryContainer ?? Color(scheme.onTertiaryContainer),
+      error: error ?? Color(scheme.error),
+      onError: onError ?? Color(scheme.onError),
+      errorContainer: errorContainer ?? Color(scheme.errorContainer),
+      onErrorContainer: onErrorContainer ?? Color(scheme.onErrorContainer),
+      outline: outline ?? Color(scheme.outline),
+      background: background ?? Color(scheme.background),
+      onBackground: onBackground ?? Color(scheme.onBackground),
+      surface: surface ?? Color(scheme.surface),
+      onSurface: onSurface ?? Color(scheme.onSurface),
+      surfaceVariant: surfaceVariant ?? Color(scheme.surfaceVariant),
+      onSurfaceVariant: onSurfaceVariant ?? Color(scheme.onSurfaceVariant),
+      inverseSurface: inverseSurface ?? Color(scheme.inverseSurface),
+      onInverseSurface: onInverseSurface ?? Color(scheme.inverseOnSurface),
+      inversePrimary: inversePrimary ?? Color(scheme.inversePrimary),
+      shadow: shadow ?? Color(scheme.shadow),
+      brightness: brightness,
+    );
   }
 
   /// Create a ColorScheme based on a purple primary color that matches the
