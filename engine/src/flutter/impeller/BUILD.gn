@@ -6,18 +6,23 @@ config("impeller_public_config") {
   include_dirs = [ ".." ]
 }
 
+is_host = is_mac || is_linux || is_win
+
 group("impeller") {
   public_deps = [
     "aiks",
     "archivist",
     "base",
-    "compiler",
     "display_list",
     "entity",
     "geometry",
     "image",
     "renderer",
   ]
+
+  if (is_host) {
+    public_deps += [ "compiler" ]
+  }
 }
 
 executable("impeller_unittests") {
