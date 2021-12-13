@@ -945,6 +945,35 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('Dropdown button text style can be merged with default subtitle text style', (WidgetTester tester) async {
+    const String value = 'foo';
+    final UniqueKey itemKey = UniqueKey();
+
+    await tester.pumpWidget(TestApp(
+      textDirection: TextDirection.ltr,
+      child: Material(
+        child: DropdownButton<String>(
+          value: value,
+          items: <DropdownMenuItem<String>>[
+            DropdownMenuItem<String>(              
+              key: itemKey,
+              value: 'foo',
+              child: const Text(value),
+            ),
+          ],
+          isDense: true,
+          onChanged: (_) { },
+          style: const TextStyle(fontSize: 14),
+        ),
+      ),
+    ));
+
+    await expectLater(
+      find.byType(Text),
+      matchesGoldenFile('dropdown_test.text_style.png'),
+    );
+  });
+  
   testWidgets('Dropdown menu scrolls to first item in long lists', (WidgetTester tester) async {
     // Open the dropdown menu
     final Key buttonKey = UniqueKey();
