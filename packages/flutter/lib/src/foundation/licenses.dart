@@ -72,11 +72,8 @@ enum _LicenseEntryWithLineBreaksParserState {
 ///
 /// ```dart
 /// void initMyLibrary() {
-///   LicenseRegistry.addLicense(() {
-///     late final StreamController<LicenseEntry> controller;
-///     controller = StreamController<LicenseEntry>(
-///       onListen: () {
-///         controller.add(const LicenseEntryWithLineBreaks(<String>['my_library'], '''
+///   LicenseRegistry.addLicense(() => Stream.value<LicenseEntry>(
+///     const LicenseEntryWithLineBreaks(<String>['my_library'], '''
 /// Copyright 2016 The Sample Authors. All rights reserved.
 ///
 /// Redistribution and use in source and binary forms, with or without
@@ -104,10 +101,7 @@ enum _LicenseEntryWithLineBreaksParserState {
 /// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 /// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 /// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.'''));
-///       },
-///     );
-///     return controller.stream;
-///   });
+///   ));
 /// }
 /// ```
 /// {@end-tool}
