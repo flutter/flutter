@@ -53,15 +53,26 @@ Future<void> main(List<String> arguments) async {
 /// Scans [arguments] for an argument of the form `--dart-sdk` or
 /// `--dart-sdk=...` and returns the configured SDK, if any.
 String? _getDartSdkFromArguments(List<String> arguments) {
-  for (int i = 0; i < arguments.length; i++) {
-    if (arguments[i] == '--dart-sdk' && i + 1 < arguments.length) {
-      return arguments[i + 1];
+  String? result;
+  for (int i = 0; i < arguments.length; i += 1) {
+    if (arguments[i] == '--dart-sdk') {
+      if (result != null) {
+        exitWithError(<String>['The --dart-sdk argument must not be used more than once.']);
+      }
+      if (i + 1 < arguments.length) {
+        result = arguments[i + 1];
+      } else {
+        exitWithError(<String>['--dart-sdk must be followed by a path.']);
+      }
     }
     if (arguments[i].startsWith('--dart-sdk=')) {
-      return arguments[i].substring('--dart-sdk='.length);
+      if (result != null) {
+        exitWithError(<String>['The --dart-sdk argument must not be used more than once.']);
+      }
+      result = arguments[i].substring('--dart-sdk='.length);
     }
   }
-  return null;
+  return result;
 }
 
 Future<void> run(List<String> arguments) async {
