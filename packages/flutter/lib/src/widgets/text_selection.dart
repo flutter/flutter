@@ -1005,6 +1005,15 @@ class TextSelectionGestureDetectorBuilder {
     );
   }
 
+  // Returns true iff either shift key is currently down.
+  bool get _isShiftPressed {
+    return HardwareKeyboard.instance.logicalKeysPressed
+      .any(<LogicalKeyboardKey>{
+        LogicalKeyboardKey.shiftLeft,
+        LogicalKeyboardKey.shiftRight,
+      }.contains);
+  }
+
   /// Whether to show the selection toolbar.
   ///
   /// It is based on the signal source when a [onTapDown] is called. This getter
@@ -1050,12 +1059,7 @@ class TextSelectionGestureDetectorBuilder {
       || kind == PointerDeviceKind.stylus;
 
     // Handle shift + click selection if needed.
-    final bool isShiftPressed = HardwareKeyboard.instance.logicalKeysPressed
-        .any(<LogicalKeyboardKey>{
-          LogicalKeyboardKey.shiftLeft,
-          LogicalKeyboardKey.shiftRight,
-        }.contains);
-    if (isShiftPressed && renderEditable.selection?.baseOffset != null) {
+    if (_isShiftPressed && renderEditable.selection?.baseOffset != null) {
       _isShiftTapping = true;
       switch (defaultTargetPlatform) {
         case TargetPlatform.iOS:
@@ -1290,10 +1294,14 @@ class TextSelectionGestureDetectorBuilder {
       || kind == PointerDeviceKind.touch
       || kind == PointerDeviceKind.stylus;
 
-    renderEditable.selectPositionAt(
-      from: details.globalPosition,
-      cause: SelectionChangedCause.drag,
-    );
+    if (_isShiftPressed && renderEditable.selection?.baseOffset != null) {
+      _isShiftTapping = true;
+    } else {
+      renderEditable.selectPositionAt(
+        from: details.globalPosition,
+        cause: SelectionChangedCause.drag,
+      );
+    }
 
     _dragStartViewportOffset = renderEditable.offset.pixels;
   }
@@ -1312,16 +1320,20 @@ class TextSelectionGestureDetectorBuilder {
     if (!delegate.selectionEnabled)
       return;
 
-    // Adjust the drag start offset for possible viewport offset changes.
-    final Offset startOffset = renderEditable.maxLines == 1
-        ? Offset(renderEditable.offset.pixels - _dragStartViewportOffset, 0.0)
-        : Offset(0.0, renderEditable.offset.pixels - _dragStartViewportOffset);
+    if (_isShiftTapping) {
+      _extendSelection(updateDetails.globalPosition, SelectionChangedCause.drag);
+    } else {
+      // Adjust the drag start offset for possible viewport offset changes.
+      final Offset startOffset = renderEditable.maxLines == 1
+          ? Offset(renderEditable.offset.pixels - _dragStartViewportOffset, 0.0)
+          : Offset(0.0, renderEditable.offset.pixels - _dragStartViewportOffset);
 
-    renderEditable.selectPositionAt(
-      from: startDetails.globalPosition - startOffset,
-      to: updateDetails.globalPosition,
-      cause: SelectionChangedCause.drag,
-    );
+      renderEditable.selectPositionAt(
+        from: startDetails.globalPosition - startOffset,
+        to: updateDetails.globalPosition,
+        cause: SelectionChangedCause.drag,
+      );
+    }
   }
 
   /// Handler for [TextSelectionGestureDetector.onDragSelectionEnd].
@@ -1333,7 +1345,11 @@ class TextSelectionGestureDetectorBuilder {
   ///  * [TextSelectionGestureDetector.onDragSelectionEnd], which triggers this
   ///    callback.
   @protected
-  void onDragSelectionEnd(DragEndDetails details) {/* Subclass should override this method if needed. */}
+  void onDragSelectionEnd(DragEndDetails details) {
+    if (_isShiftTapping) {
+      _isShiftTapping = false;
+    }
+  }
 
   /// Returns a [TextSelectionGestureDetector] configured with the handlers
   /// provided by this builder.
