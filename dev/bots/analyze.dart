@@ -25,8 +25,9 @@ final String flutterRoot = path.dirname(path.dirname(path.dirname(path.fromUri(P
 final String flutter = path.join(flutterRoot, 'bin', Platform.isWindows ? 'flutter.bat' : 'flutter');
 final String flutterPackages = path.join(flutterRoot, 'packages');
 final String flutterExamples = path.join(flutterRoot, 'examples');
-final String dart = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', Platform.isWindows ? 'dart.exe' : 'dart');
-final String pub = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', Platform.isWindows ? 'pub.bat' : 'pub');
+late final String dartSdk;
+final String dart = path.join(dartSdk, 'bin', Platform.isWindows ? 'dart.exe' : 'dart');
+final String pub = path.join(dartSdk, 'bin', Platform.isWindows ? 'pub.bat' : 'pub');
 final String pubCache = path.join(flutterRoot, '.pub-cache');
 
 /// When you call this, you can pass additional arguments to pass custom
@@ -36,6 +37,10 @@ final String pubCache = path.join(flutterRoot, '.pub-cache');
 /// For example:
 /// bin/cache/dart-sdk/bin/dart dev/bots/analyze.dart --dart-sdk=/tmp/dart-sdk
 Future<void> main(List<String> arguments) async {
+  dartSdk = path.join(
+    Directory.current.absolute.path,
+    _getDartSdkFromArguments(arguments) ?? path.join(flutterRoot, 'bin', 'cache', 'dart-sdk'),
+  );
   print('$clock STARTING ANALYSIS');
   try {
     await run(arguments);
@@ -43,6 +48,20 @@ Future<void> main(List<String> arguments) async {
     error.apply();
   }
   print('$clock ${bold}Analysis successful.$reset');
+}
+
+/// Scans [arguments] for an argument of the form `--dart-sdk` or
+/// `--dart-sdk=...` and returns the configured SDK, if any.
+String? _getDartSdkFromArguments(List<String> arguments) {
+  for (int i = 0; i < arguments.length; i++) {
+    if (arguments[i] == '--dart-sdk' && i + 1 < arguments.length) {
+      return arguments[i + 1];
+    }
+    if (arguments[i].startsWith('--dart-sdk=')) {
+      return arguments[i].substring('--dart-sdk='.length);
+    }
+  }
+  return null;
 }
 
 Future<void> run(List<String> arguments) async {
