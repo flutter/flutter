@@ -275,7 +275,6 @@ enum XCResultIssueType {
 // This function converts it to something like: /foo.swift:<StartingLineNumber>:<StartingColumnNumber>.
 String? _convertUrlToLocationString(String url) {
   final Uri? fragmentLocation = Uri.tryParse(url);
-  // Maybe log something here
   if (fragmentLocation == null) {
     return null;
   }
