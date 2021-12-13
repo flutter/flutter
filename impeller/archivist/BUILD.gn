@@ -5,10 +5,11 @@
 import("../tools/impeller.gni")
 
 impeller_component("archivist") {
-  # Only the umbrella header is public since all other TU's are implementation
-  # detail that will be compiled away in release modes.
-  # Because they are implementation details, they may expose dependency headers.
-  public = [ "archive.h" ]
+  public = [
+    "archivable.h",
+    "archive.h",
+    "archive_location.h",
+  ]
 
   sources = [
     "archivable.cc",
@@ -20,7 +21,6 @@ impeller_component("archivist") {
     "archive_database.cc",
     "archive_database.h",
     "archive_location.cc",
-    "archive_location.h",
     "archive_statement.cc",
     "archive_statement.h",
     "archive_transaction.cc",
