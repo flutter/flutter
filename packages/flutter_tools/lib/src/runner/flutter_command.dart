@@ -1372,7 +1372,7 @@ abstract class FlutterCommand extends Command<void> {
         final StringBuffer result = StringBuffer();
         result.writeln(userMessages.flutterFoundButUnsupportedDevices);
         result.writeAll(
-          await Device.descriptions(unsupportedDevices)
+          (await Device.descriptions(unsupportedDevices))
               .map((String desc) => desc)
               .toList(),
           '\n',

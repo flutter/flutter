@@ -344,6 +344,10 @@ class ToolbarOptions {
 /// [onSubmitted] can be used to manually move focus to another input widget
 /// when a user finishes with the currently focused input widget.
 ///
+/// When the widget has focus, it will prevent itself from disposing via
+/// [AutomaticKeepAliveClientMixin.wantKeepAlive] in order to avoid losing the
+/// selection. Removing the focus will allow it to be disposed.
+///
 /// Rather than using this widget directly, consider using [TextField], which
 /// is a full-featured, material-design text input field with placeholder text,
 /// labels, and [Form] integration.
@@ -595,7 +599,7 @@ class EditableText extends StatefulWidget {
   /// {@endtemplate}
   final bool obscureText;
 
-  /// {@macro flutter.dart:ui.textHeightBehavior}
+  /// {@macro dart.ui.textHeightBehavior}
   final TextHeightBehavior? textHeightBehavior;
 
   /// {@macro flutter.painting.textPainter.textWidthBasis}
@@ -2151,7 +2155,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (!_isMultiline) {
       additionalOffset = rect.width >= editableSize.width
         // Center `rect` if it's oversized.
-        ? rect.center.dx - editableSize.width / 2
+        ? editableSize.width / 2 - rect.center.dx
         // Valid additional offsets range from (rect.right - size.width)
         // to (rect.left). Pick the closest one if out of range.
         : 0.0.clamp(rect.right - editableSize.width, rect.left);
@@ -2167,7 +2171,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       );
 
       additionalOffset = expandedRect.height >= editableSize.height
-        ? expandedRect.center.dy - editableSize.height / 2
+        ? editableSize.height / 2 - expandedRect.center.dy
         : 0.0.clamp(expandedRect.bottom - editableSize.height, expandedRect.top);
       unitOffset = const Offset(0, 1);
     }

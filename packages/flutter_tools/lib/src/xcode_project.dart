@@ -132,11 +132,6 @@ class IosProject extends XcodeBasedProject {
 
   File get appFrameworkInfoPlist => _flutterLibRoot.childDirectory('Flutter').childFile('AppFrameworkInfo.plist');
 
-  File get xcodeMainStoryboard => _flutterLibRoot
-      .childDirectory('Runner')
-      .childDirectory('Base.lproj')
-      .childFile('Main.storyboard');
-
   Directory get symlinks => _flutterLibRoot.childDirectory('.symlinks');
 
   /// Do all plugins support arm64 simulators to run natively on an ARM Mac?

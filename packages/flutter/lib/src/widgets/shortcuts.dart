@@ -74,7 +74,7 @@ class KeySet<T extends KeyboardKey> {
       : assert(keys != null),
         assert(keys.isNotEmpty),
         assert(!keys.contains(null)),
-        _keys = HashSet<T>.from(keys);
+        _keys = HashSet<T>.of(keys);
 
   /// Returns a copy of the [KeyboardKey]s in this [KeySet].
   Set<T> get keys => _keys.toSet();
@@ -483,8 +483,8 @@ class SingleActivator with Diagnosticable implements ShortcutActivator {
   final bool meta;
 
   @override
-  Iterable<LogicalKeyboardKey> get triggers sync* {
-    yield trigger;
+  Iterable<LogicalKeyboardKey> get triggers {
+    return <LogicalKeyboardKey>[trigger];
   }
 
   @override
