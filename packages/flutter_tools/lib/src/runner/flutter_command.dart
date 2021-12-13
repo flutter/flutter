@@ -264,9 +264,8 @@ abstract class FlutterCommand extends Command<void> {
       hide: !verboseHelp,
     );
     argParser.addOption('web-launch-url',
-      defaultsTo: null,
       help: 'The launch URL the browser should use preferentially. If not provided, '
-          'the default depends on the web-hostname and web-port',
+          'the default launch URL depends on "--web-hostname" and "--web-port".',
       hide: !verboseHelp,
     );
   }
