@@ -168,7 +168,7 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
   @override
   void initState() {
     super.initState();
-    _children = List<MergeableMaterialItem>.from(widget.children);
+    _children = List<MergeableMaterialItem>.of(widget.children);
 
     for (int i = 0; i < _children.length; i += 1) {
       final MergeableMaterialItem child = _children[i];

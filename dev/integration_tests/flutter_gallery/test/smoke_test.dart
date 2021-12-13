@@ -118,7 +118,7 @@ Future<void> smokeOptionsPage(WidgetTester tester) async {
   // Switch back to system theme setting: first menu button, choose 'System Default'
   await tester.tap(find.byIcon(Icons.arrow_drop_down).first);
   await tester.pumpAndSettle();
-  await tester.tap(find.text('System Default').at(1));
+  await tester.tap(find.text('System Default').at(1), warnIfMissed: false); // https://github.com/flutter/flutter/issues/82908
   await tester.pumpAndSettle();
 
   // Switch text direction: first switch
