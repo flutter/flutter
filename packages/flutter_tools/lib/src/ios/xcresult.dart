@@ -178,10 +178,9 @@ class XCResultIssue {
     required XCResultIssueType type,
     required Map<String, Object?> issueJson,
   }) {
-
     // Parse type.
     final Object? issueSubTypeMap = issueJson['issueType'];
-    String subType = '';
+    String? subType;
     if (issueSubTypeMap is Map<String, Object?>) {
       final Object? subTypeValue = issueSubTypeMap['_value'];
       if (subTypeValue is String) {
@@ -190,7 +189,7 @@ class XCResultIssue {
     }
 
     // Parse message.
-    String message = '';
+    String? message;
     final Object? messageMap = issueJson['message'];
     if (messageMap is Map<String, Object?>) {
       final Object? messageValue = messageMap['_value'];
@@ -199,15 +198,20 @@ class XCResultIssue {
       }
     }
 
+    final List<String> warnings = <String>[];
     // Parse url and convert it to a location String.
-    String location = '';
-    final Object? documentLocationInCreatingWorkspaceMap = issueJson['documentLocationInCreatingWorkspace'];
+    String? location;
+    final Object? documentLocationInCreatingWorkspaceMap =
+        issueJson['documentLocationInCreatingWorkspace'];
     if (documentLocationInCreatingWorkspaceMap is Map<String, Object?>) {
       final Object? urlMap = documentLocationInCreatingWorkspaceMap['url'];
       if (urlMap is Map<String, Object?>) {
         final Object? urlValue = urlMap['_value'];
         if (urlValue is String) {
           location = _convertUrlToLocationString(urlValue);
+          if (location == null) {
+            warnings.add('(XCResult) The `url` exists but it was failed to be parsed. url: $urlValue');
+          }
         }
       }
     }
@@ -217,6 +221,7 @@ class XCResultIssue {
       subType: subType,
       message: message,
       location: location,
+      warnings: warnings,
     );
   }
 
@@ -225,6 +230,7 @@ class XCResultIssue {
     required this.subType,
     required this.message,
     required this.location,
+    required this.warnings,
   });
 
   /// The type of the issue.
@@ -234,18 +240,21 @@ class XCResultIssue {
   ///
   /// This is a more detailed category about the issue.
   /// The possible values are `Warning`, `Semantic Issue'` etc.
-  final String subType;
+  final String? subType;
 
   /// Human readable message for the issue.
   ///
   /// This can be displayed to user for their information.
-  final String message;
+  final String? message;
 
   /// The location where the issue occurs.
   ///
   /// This is a re-formatted version of the "url" value in the json.
   /// The format looks like <FileLocation>:<StartingLineNumber>:<StartingColumnNumber>.
-  final String location;
+  final String? location;
+
+  /// Warnings when constructing the issue object.
+  final List<String> warnings;
 }
 
 /// The type of an `XCResultIssue`.
@@ -263,44 +272,27 @@ enum XCResultIssueType {
 
 // A typical location url string looks like file:///foo.swift#CharacterRangeLen=0&EndingColumnNumber=82&EndingLineNumber=7&StartingColumnNumber=82&StartingLineNumber=7.
 //
-// This function converts it to something like: file:///foo.swift:<StartingLineNumber>:<StartingColumnNumber>.
-String _convertUrlToLocationString(String url){
-  if (url.isEmpty) {
-    return '';
+// This function converts it to something like: /foo.swift:<StartingLineNumber>:<StartingColumnNumber>.
+String? _convertUrlToLocationString(String url) {
+  final Uri? fragmentLocation = Uri.tryParse(url);
+  // Maybe log something here
+  if (fragmentLocation == null) {
+    return null;
   }
-  final List<String> topComponents = url.split('#');
-  final String filePath = topComponents.first;
-  if (topComponents.length == 1) {
-    return filePath;
-  }
-  final String params = topComponents[1];
-  String startingLineNumber = '';
-  String startingColumnNumber = '';
-  for (final String paramString in params.split('&')) {
-    final List<String> kv = paramString.split('=');
-    if (kv.length != 2) {
-      // In this particular case, we only want <StartingColumnNumber> and <StartingLineNumber>.
-      // So we can ignore all the parameters that do not follow the same pattern.
-      continue;
-    }
-    switch (kv[0]) {
-      case 'StartingLineNumber':
-        startingLineNumber = kv[1];
-        break;
-      case 'StartingColumnNumber':
-        startingColumnNumber = kv[1];
-        break;
-      default:
-        break;
-    }
-  }
-
+  // Parse the fragment as a query of key-values:
+  final Uri fileLocation = Uri(
+    path: fragmentLocation.path,
+    query: fragmentLocation.fragment,
+  );
+  String startingLineNumber =
+      fileLocation.queryParameters['StartingLineNumber'] ?? '';
   if (startingLineNumber.isNotEmpty) {
     startingLineNumber = ':$startingLineNumber';
   }
+  String startingColumnNumber =
+      fileLocation.queryParameters['StartingColumnNumber'] ?? '';
   if (startingColumnNumber.isNotEmpty) {
     startingColumnNumber = ':$startingColumnNumber';
   }
-
-  return '$filePath$startingLineNumber$startingColumnNumber';
+  return '${fileLocation.path}$startingLineNumber$startingColumnNumber';
 }
