@@ -72,9 +72,18 @@ std::shared_ptr<Texture> DeviceBufferMTL::MakeTexture(TextureDescriptor desc,
     ::memmove(dest + offset, source + source_range.offset, source_range.length);
   }
 
+// |RequiresExplicitHostSynchronization| always returns false on iOS. But the
+// compiler is mad that `didModifyRange:` appears in a TU meant for iOS. So,
+// just compile it away.
+//
+// Making this call is never necessary on iOS because there is no
+// MTLResourceStorageModeManaged mode. Only the MTLStorageModeShared mode is
+// available.
+#if !OS_IOS
   if (Allocator::RequiresExplicitHostSynchronization(mode_)) {
     [buffer_ didModifyRange:NSMakeRange(offset, source_range.length)];
   }
+#endif
 
   return true;
 }
@@ -97,7 +106,7 @@ bool DeviceBufferMTL::SetLabel(const std::string& label, Range range) {
   if (label.empty()) {
     return false;
   }
-  if (@available(macOS 10.12, *)) {
+  if (@available(macOS 10.12, iOS 10.0, *)) {
     [buffer_ addDebugMarker:@(label.c_str())
                       range:NSMakeRange(range.offset, range.length)];
   }
