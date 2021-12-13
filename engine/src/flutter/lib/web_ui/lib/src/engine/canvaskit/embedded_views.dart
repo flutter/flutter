@@ -651,7 +651,8 @@ class HtmlViewEmbedder {
         // them. Otherwise, we will need to release overlays from the unchanged
         // segment of view ids.
         if (diffResult.viewsToAdd.length > availableOverlays) {
-          int viewsToDispose = diffResult.viewsToAdd.length - availableOverlays;
+          int viewsToDispose = math.min(SurfaceFactory.instance.maximumOverlays,
+              diffResult.viewsToAdd.length - availableOverlays);
           // The first `maximumSurfaces` views in the previous composition order
           // had an overlay.
           int index = SurfaceFactory.instance.maximumOverlays -
