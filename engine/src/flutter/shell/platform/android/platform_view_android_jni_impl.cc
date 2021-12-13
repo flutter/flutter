@@ -1013,7 +1013,7 @@ bool PlatformViewAndroid::Register(JNIEnv* env) {
 
   g_mutators_stack_push_cliprrect_method = env->GetMethodID(
       g_mutators_stack_class->obj(), "pushClipRRect", "(IIII[F)V");
-  if (g_mutators_stack_push_cliprect_method == nullptr) {
+  if (g_mutators_stack_push_cliprrect_method == nullptr) {
     FML_LOG(ERROR)
         << "Could not locate FlutterMutatorsStack.pushClipRRect method";
     return false;
