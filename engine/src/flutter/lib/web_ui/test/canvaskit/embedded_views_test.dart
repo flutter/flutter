@@ -601,6 +601,53 @@ void testMain() {
       HtmlViewEmbedder.debugDisableOverlays = false;
     });
 
+    test('works correctly with max overlays == 2', () async {
+      debugSetConfiguration(FlutterConfiguration(
+          JsFlutterConfiguration()..canvasKitMaximumSurfaces = 2));
+      SurfaceFactory.instance.debugClear();
+
+      expect(SurfaceFactory.instance.maximumSurfaces, 2);
+      expect(SurfaceFactory.instance.maximumOverlays, 0);
+
+      ui.platformViewRegistry.registerViewFactory(
+        'test-platform-view',
+        (int viewId) => html.DivElement()..id = 'view-0',
+      );
+      await createPlatformView(0, 'test-platform-view');
+      await createPlatformView(1, 'test-platform-view');
+
+      final EnginePlatformDispatcher dispatcher =
+          ui.window.platformDispatcher as EnginePlatformDispatcher;
+
+      LayerSceneBuilder sb = LayerSceneBuilder();
+      sb.pushOffset(0, 0);
+      sb.addPlatformView(0, width: 10, height: 10);
+      sb.pop();
+      // The below line should not throw an error.
+      dispatcher.rasterizer!.draw(sb.build().layerTree);
+
+      expect(
+          flutterViewEmbedder.glassPaneShadow!
+              .querySelectorAll('flt-platform-view-slot'),
+          hasLength(1));
+
+      sb = LayerSceneBuilder();
+      sb.pushOffset(0, 0);
+      sb.addPlatformView(1, width: 10, height: 10);
+      sb.addPlatformView(0, width: 10, height: 10);
+      sb.pop();
+      // The below line should not throw an error.
+      dispatcher.rasterizer!.draw(sb.build().layerTree);
+
+      expect(
+          flutterViewEmbedder.glassPaneShadow!
+              .querySelectorAll('flt-platform-view-slot'),
+          hasLength(2));
+
+      // Reset configuration
+      debugSetConfiguration(FlutterConfiguration(null));
+    });
+
     test(
         'correctly renders when overlays are disabled and a subset '
         'of views is used', () async {
