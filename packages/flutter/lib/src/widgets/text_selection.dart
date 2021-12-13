@@ -1005,15 +1005,6 @@ class TextSelectionGestureDetectorBuilder {
     );
   }
 
-  // Returns true iff either shift key is currently down.
-  bool get _isShiftPressed {
-    return HardwareKeyboard.instance.logicalKeysPressed
-      .any(<LogicalKeyboardKey>{
-        LogicalKeyboardKey.shiftLeft,
-        LogicalKeyboardKey.shiftRight,
-      }.contains);
-  }
-
   /// Whether to show the selection toolbar.
   ///
   /// It is based on the signal source when a [onTapDown] is called. This getter
@@ -1035,8 +1026,22 @@ class TextSelectionGestureDetectorBuilder {
   // The viewport offset pixels of the [RenderEditable] at the last drag start.
   double _dragStartViewportOffset = 0.0;
 
+  // Returns true iff either shift key is currently down.
+  bool get _isShiftPressed {
+    return HardwareKeyboard.instance.logicalKeysPressed
+      .any(<LogicalKeyboardKey>{
+        LogicalKeyboardKey.shiftLeft,
+        LogicalKeyboardKey.shiftRight,
+      }.contains);
+  }
+
   // True iff a tap + shift has been detected but the tap has not yet come up.
   bool _isShiftTapping = false;
+
+  // For a shift + tap + drag gesture, the TextSelection at the point of the
+  // tap. Mac uses this value to reset to the original selection when an
+  // inversion of the base and offset happens.
+  TextSelection? _shiftTapDragSelection;
 
   /// Handler for [TextSelectionGestureDetector.onTapDown].
   ///
@@ -1296,6 +1301,19 @@ class TextSelectionGestureDetectorBuilder {
 
     if (_isShiftPressed && renderEditable.selection?.baseOffset != null) {
       _isShiftTapping = true;
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
+          _expandSelection(details.globalPosition, SelectionChangedCause.drag);
+          break;
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+          _extendSelection(details.globalPosition, SelectionChangedCause.drag);
+          break;
+      }
+      _shiftTapDragSelection = renderEditable.selection;
     } else {
       renderEditable.selectPositionAt(
         from: details.globalPosition,
@@ -1320,19 +1338,58 @@ class TextSelectionGestureDetectorBuilder {
     if (!delegate.selectionEnabled)
       return;
 
-    if (_isShiftTapping) {
-      _extendSelection(updateDetails.globalPosition, SelectionChangedCause.drag);
-    } else {
+    if (!_isShiftTapping) {
       // Adjust the drag start offset for possible viewport offset changes.
       final Offset startOffset = renderEditable.maxLines == 1
           ? Offset(renderEditable.offset.pixels - _dragStartViewportOffset, 0.0)
           : Offset(0.0, renderEditable.offset.pixels - _dragStartViewportOffset);
 
-      renderEditable.selectPositionAt(
+      return renderEditable.selectPositionAt(
         from: startDetails.globalPosition - startOffset,
         to: updateDetails.globalPosition,
         cause: SelectionChangedCause.drag,
       );
+    }
+
+    if (_shiftTapDragSelection!.isCollapsed
+        || (defaultTargetPlatform != TargetPlatform.iOS
+            && defaultTargetPlatform != TargetPlatform.macOS)) {
+      return _extendSelection(updateDetails.globalPosition, SelectionChangedCause.drag);
+    }
+
+    // If the drag inverts the selection, Mac and iOS revert to the initial
+    // selection.
+    final TextSelection selection = editableText.textEditingValue.selection;
+    final TextPosition nextExtent = renderEditable.getPositionForPoint(updateDetails.globalPosition);
+    final bool isShiftTapDragSelectionForward =
+        _shiftTapDragSelection!.baseOffset < _shiftTapDragSelection!.extentOffset;
+    final bool isInverted = isShiftTapDragSelectionForward
+        ? nextExtent.offset < _shiftTapDragSelection!.baseOffset
+        : nextExtent.offset > _shiftTapDragSelection!.baseOffset;
+    if (isInverted && selection.baseOffset == _shiftTapDragSelection!.baseOffset) {
+      editableText.userUpdateTextEditingValue(
+        editableText.textEditingValue.copyWith(
+          selection: TextSelection(
+            baseOffset: _shiftTapDragSelection!.extentOffset,
+            extentOffset: nextExtent.offset,
+          ),
+        ),
+        SelectionChangedCause.drag,
+      );
+    } else if (!isInverted
+        && nextExtent.offset != _shiftTapDragSelection!.baseOffset
+        && selection.baseOffset != _shiftTapDragSelection!.baseOffset) {
+      editableText.userUpdateTextEditingValue(
+        editableText.textEditingValue.copyWith(
+          selection: TextSelection(
+            baseOffset: _shiftTapDragSelection!.baseOffset,
+            extentOffset: nextExtent.offset,
+          ),
+        ),
+        SelectionChangedCause.drag,
+      );
+    } else {
+      _extendSelection(updateDetails.globalPosition, SelectionChangedCause.drag);
     }
   }
 
@@ -1348,6 +1405,7 @@ class TextSelectionGestureDetectorBuilder {
   void onDragSelectionEnd(DragEndDetails details) {
     if (_isShiftTapping) {
       _isShiftTapping = false;
+      _shiftTapDragSelection = null;
     }
   }
 
