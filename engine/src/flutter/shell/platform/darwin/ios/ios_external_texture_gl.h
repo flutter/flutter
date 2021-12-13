@@ -14,7 +14,9 @@ namespace flutter {
 
 class IOSExternalTextureGL final : public Texture {
  public:
-  IOSExternalTextureGL(int64_t textureId, NSObject<FlutterTexture>* externalTexture);
+  IOSExternalTextureGL(int64_t textureId,
+                       NSObject<FlutterTexture>* externalTexture,
+                       fml::scoped_nsobject<EAGLContext> context);
 
   // |Texture|
   ~IOSExternalTextureGL() override;
@@ -28,6 +30,7 @@ class IOSExternalTextureGL final : public Texture {
   OSType pixel_format_ = 0;
   fml::CFRef<CVOpenGLESTextureRef> y_texture_ref_;
   fml::CFRef<CVOpenGLESTextureRef> uv_texture_ref_;
+  fml::scoped_nsobject<EAGLContext> context_;
 
   // |Texture|
   void Paint(SkCanvas& canvas,

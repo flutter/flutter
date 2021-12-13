@@ -67,7 +67,7 @@ std::unique_ptr<GLContextResult> IOSContextGL::MakeCurrent() {
 std::unique_ptr<Texture> IOSContextGL::CreateExternalTexture(
     int64_t texture_id,
     fml::scoped_nsobject<NSObject<FlutterTexture>> texture) {
-  return std::make_unique<IOSExternalTextureGL>(texture_id, std::move(texture));
+  return std::make_unique<IOSExternalTextureGL>(texture_id, std::move(texture), context_);
 }
 
 }  // namespace flutter
