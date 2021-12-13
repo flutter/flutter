@@ -1,8 +1,0 @@
-#
-# Configuration file for using the XML library in GNOME applications
-#
-XML2_LIBDIR="@XML_LIBDIR@"
-XML2_LIBS="@XML_LIBS@"
-XML2_INCLUDEDIR="@XML_INCLUDEDIR@"
-MODULE_VERSION="xml2-@VERSION@"
-
