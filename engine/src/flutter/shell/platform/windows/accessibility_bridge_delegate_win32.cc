@@ -34,6 +34,9 @@ void AccessibilityBridgeDelegateWin32::OnAccessibilityEvent(
     case ui::AXEventGenerator::Event::ALERT:
       DispatchWinAccessibilityEvent(win_delegate, EVENT_SYSTEM_ALERT);
       break;
+    case ui::AXEventGenerator::Event::CHECKED_STATE_CHANGED:
+      DispatchWinAccessibilityEvent(win_delegate, EVENT_OBJECT_VALUECHANGE);
+      break;
     case ui::AXEventGenerator::Event::CHILDREN_CHANGED:
       DispatchWinAccessibilityEvent(win_delegate, EVENT_OBJECT_REORDER);
       break;
@@ -83,7 +86,6 @@ void AccessibilityBridgeDelegateWin32::OnAccessibilityEvent(
     case ui::AXEventGenerator::Event::ATOMIC_CHANGED:
     case ui::AXEventGenerator::Event::AUTO_COMPLETE_CHANGED:
     case ui::AXEventGenerator::Event::BUSY_CHANGED:
-    case ui::AXEventGenerator::Event::CHECKED_STATE_CHANGED:
     case ui::AXEventGenerator::Event::CLASS_NAME_CHANGED:
     case ui::AXEventGenerator::Event::COLLAPSED:
     case ui::AXEventGenerator::Event::CONTROLS_CHANGED:
