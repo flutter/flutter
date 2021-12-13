@@ -102,7 +102,7 @@ allowed_hosts = [
 ]
 
 deps = {
-  'src': 'https://github.com/flutter/buildroot.git' + '@' + '430b57c643883e6090b5af09faddd8048efee57c',
+  'src': 'https://github.com/flutter/buildroot.git' + '@' + 'd45d8382665c923bdc2f8ab4e49f0deef84dd173',
 
    # Fuchsia compatibility
    #
@@ -395,6 +395,15 @@ deps = {
 
   'src/third_party/fontconfig/src':
    Var('chromium_git') + '/external/fontconfig.git' + '@' + 'c336b8471877371f0190ba06f7547c54e2b890ba',
+
+  'src/third_party/fontconfig':
+   Var('flutter_git') + '/third_party/fontconfig' + '@' + '81c83d510ae3aa75589435ce32a5de05139aacb0',
+
+  'src/third_party/libxml':
+   Var('flutter_git') + '/third_party/libxml' + '@' + 'a143e452b5fc7d872813eeadc8db421694058098',
+
+  'src/third_party/zlib':
+   Var('flutter_git') + '/third_party/zlib' + '@' + '71a2f9f7769e7e5c6bc18a4afe5e79e42419f5fd',
 
   'src/third_party/pyyaml':
    Var('fuchsia_git') + '/third_party/pyyaml.git' + '@' + '25e97546488eee166b1abb229a27856cecd8b7ac',
