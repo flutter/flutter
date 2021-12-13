@@ -208,6 +208,7 @@ class Draggable<T extends Object> extends StatefulWidget {
     this.ignoringFeedbackSemantics = true,
     this.rootOverlay = false,
     this.hitTestBehavior = HitTestBehavior.deferToChild,
+    this.supportedDevices,
   }) : assert(child != null),
        assert(feedback != null),
        assert(ignoringFeedbackSemantics != null),
@@ -392,6 +393,11 @@ class Draggable<T extends Object> extends StatefulWidget {
   /// Defaults to [HitTestBehavior.deferToChild].
   final HitTestBehavior hitTestBehavior;
 
+  /// The set of [PointerDeviceKind]s that are allowed to drag.
+  ///
+  /// Defaults to null, allowing for any [PointerDeviceKind] to drag.
+  final Set<PointerDeviceKind>? supportedDevices;
+
   /// Creates a gesture recognizer that recognizes the start of the drag.
   ///
   /// Subclasses can override this function to customize when they start
@@ -400,11 +406,14 @@ class Draggable<T extends Object> extends StatefulWidget {
   MultiDragGestureRecognizer createRecognizer(GestureMultiDragStartCallback onStart) {
     switch (affinity) {
       case Axis.horizontal:
-        return HorizontalMultiDragGestureRecognizer()..onStart = onStart;
+        return HorizontalMultiDragGestureRecognizer(supportedDevices: supportedDevices)
+          ..onStart = onStart;
       case Axis.vertical:
-        return VerticalMultiDragGestureRecognizer()..onStart = onStart;
+        return VerticalMultiDragGestureRecognizer(supportedDevices: supportedDevices)
+          ..onStart = onStart;
       case null:
-        return ImmediateMultiDragGestureRecognizer()..onStart = onStart;
+        return ImmediateMultiDragGestureRecognizer(supportedDevices: supportedDevices)
+          ..onStart = onStart;
     }
   }
 
@@ -448,6 +457,7 @@ class LongPressDraggable<T extends Object> extends Draggable<T> {
     this.hapticFeedbackOnStart = true,
     bool ignoringFeedbackSemantics = true,
     this.delay = kLongPressTimeout,
+    Set<PointerDeviceKind>? supportedDevices,
   }) : super(
     key: key,
     child: child,
@@ -465,6 +475,7 @@ class LongPressDraggable<T extends Object> extends Draggable<T> {
     onDragEnd: onDragEnd,
     onDragCompleted: onDragCompleted,
     ignoringFeedbackSemantics: ignoringFeedbackSemantics,
+    supportedDevices: supportedDevices,
   );
 
   /// Whether haptic feedback should be triggered on drag start.
@@ -477,13 +488,15 @@ class LongPressDraggable<T extends Object> extends Draggable<T> {
 
   @override
   DelayedMultiDragGestureRecognizer createRecognizer(GestureMultiDragStartCallback onStart) {
-    return DelayedMultiDragGestureRecognizer(delay: delay)
-      ..onStart = (Offset position) {
-        final Drag? result = onStart(position);
-        if (result != null && hapticFeedbackOnStart)
-          HapticFeedback.selectionClick();
-        return result;
-      };
+    return DelayedMultiDragGestureRecognizer(
+        delay: delay,
+        supportedDevices: supportedDevices,
+    )..onStart = (Offset position) {
+      final Drag? result = onStart(position);
+      if (result != null && hapticFeedbackOnStart)
+        HapticFeedback.selectionClick();
+      return result;
+    };
   }
 }
 
