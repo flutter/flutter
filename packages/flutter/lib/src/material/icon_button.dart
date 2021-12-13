@@ -147,14 +147,12 @@ class IconButton extends StatelessWidget {
        assert(alignment != null),
        assert(autofocus != null),
        assert(icon != null),
-       assert(style == null || visualDensity == null),
        assert(style == null || splashRadius == null || splashRadius > 0),
        assert(style == null || color == null),
        assert(style == null || focusColor == null),
        assert(style == null || hoverColor == null),
        assert(style == null || highlightColor == null),
        assert(style == null || splashColor == null),
-       assert(style == null || disabledColor == null),
        assert(style == null || mouseCursor == null),
        super(key: key);
 
@@ -368,35 +366,28 @@ class IconButton extends StatelessWidget {
       );
     }
 
-    return Semantics(
-      button: true,
-      enabled: onPressed != null,
-      child: _ButtonStyleButton(
-        focusNode: focusNode,
-        autofocus: autofocus,
-        onPressed: onPressed,
-        style: style,
-        mouseCursor: mouseCursor,
-        child: result,
+    return Material(
+      type: MaterialType.transparency,
+      child: SizedBox.fromSize(
+        size: Size.fromRadius(splashRadius ?? math.max(
+            Material.defaultSplashRadius,
+            (effectiveIconSize + math.min(padding.horizontal, padding.vertical)) * 0.7,
+            // x 0.5 for diameter -> radius and + 40% overflow derived from other Material apps.
+          )),
+        child: _ButtonStyleButton(
+          focusNode: focusNode,
+          autofocus: autofocus,
+          onPressed: onPressed,
+          mouseCursor: mouseCursor,
+          focusColor: focusColor ?? theme.focusColor,
+          hoverColor: hoverColor ?? theme.hoverColor,
+          highlightColor: highlightColor ?? theme.highlightColor,
+          splashColor: splashColor ?? theme.splashColor,
+          style: style,
+          enableFeedback: enableFeedback,
+          child: result,
+        ),
       ),
-      // child: InkResponse(
-      //   focusNode: focusNode,
-      //   autofocus: autofocus,
-      //   canRequestFocus: onPressed != null,
-      //   onTap: onPressed,
-      //   mouseCursor: mouseCursor ?? (onPressed == null ? SystemMouseCursors.forbidden : SystemMouseCursors.click),
-      //   enableFeedback: enableFeedback,
-      //   focusColor: focusColor ?? theme.focusColor,
-      //   hoverColor: hoverColor ?? theme.hoverColor,
-      //   highlightColor: highlightColor ?? theme.highlightColor,
-      //   splashColor: splashColor ?? theme.splashColor,
-      //   radius: splashRadius ?? math.max(
-      //     Material.defaultSplashRadius,
-      //     (effectiveIconSize + math.min(padding.horizontal, padding.vertical)) * 0.7,
-      //     // x 0.5 for diameter -> radius and + 40% overflow derived from other Material apps.
-      //   ),
-      //   child: result,
-      // ),
     );
   }
 
@@ -426,6 +417,12 @@ class _ButtonStyleButton extends ButtonStyleButton {
     ValueChanged<bool>? onFocusChange,
     ButtonStyle? style,
     this.mouseCursor,
+    this.focusColor,
+    this.hoverColor,
+    this.highlightColor,
+    this.enableFeedback,
+    this.radius,
+    this.splashColor,
     FocusNode? focusNode,
     bool autofocus = false,
     Clip clipBehavior = Clip.none,
@@ -445,11 +442,23 @@ class _ButtonStyleButton extends ButtonStyleButton {
 
   final MouseCursor? mouseCursor;
 
+  final Color? focusColor;
 
-  static ButtonStyle styleFrom({
+  final Color? hoverColor;
+
+  final Color? highlightColor;
+
+  final bool? enableFeedback;
+
+  final double? radius;
+
+  final Color? splashColor;
+
+  ButtonStyle styleFrom({
     Color? primary,
     Color? onSurface,
     Color? backgroundColor,
+    Color? splashColor,
     Color? shadowColor,
     double? elevation,
     TextStyle? textStyle,
@@ -457,7 +466,6 @@ class _ButtonStyleButton extends ButtonStyleButton {
     Size? minimumSize,
     Size? fixedSize,
     Size? maximumSize,
-    Size? iconSize,
     BorderSide? side,
     CircleBorder? shape,
     MouseCursor? mouseCursor,
@@ -470,22 +478,18 @@ class _ButtonStyleButton extends ButtonStyleButton {
     AlignmentGeometry? alignment,
     InteractiveInkFeatureFactory? splashFactory,
   }) {
-    final MaterialStateProperty<Color?>? foregroundColor = (onSurface == null && primary == null)
-      ? null
-      : _IconButtonDefaultForeground(primary, onSurface);
-    final MaterialStateProperty<Color?>? overlayColor = (primary == null)
-      ? null
-      : _IconButtonDefaultOverlay(primary: onSurface);
+
+    final MaterialStateProperty<Color?> overlayColor = _IconButtonDefaultOverlay(
+      focusColor: focusColor,
+      hoverColor: hoverColor,
+      splashColor: splashColor,
+    );
     final MaterialStateProperty<MouseCursor> cursor = mouseCursor != null
       ? _IconButtonDefaultMouseCursor(mouseCursor, mouseCursor)
       : _IconButtonDefaultMouseCursor(enabledMouseCursor!, disabledMouseCursor!);
 
     return ButtonStyle(
-      textStyle: ButtonStyleButton.allOrNull<TextStyle>(textStyle),
-      backgroundColor: ButtonStyleButton.allOrNull<Color>(backgroundColor),
-      foregroundColor: foregroundColor,
       overlayColor: overlayColor,
-      shadowColor: ButtonStyleButton.allOrNull<Color>(shadowColor),
       elevation: ButtonStyleButton.allOrNull<double>(elevation),
       padding: ButtonStyleButton.allOrNull<EdgeInsetsGeometry>(padding),
       minimumSize: ButtonStyleButton.allOrNull<Size>(minimumSize),
@@ -508,22 +512,14 @@ class _ButtonStyleButton extends ButtonStyleButton {
     final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
 
-    final EdgeInsetsGeometry scaledPadding = ButtonStyleButton.scaledPadding(
-      const EdgeInsets.all(8),
-      const EdgeInsets.symmetric(horizontal: 8),
-      const EdgeInsets.symmetric(horizontal: 4),
-      MediaQuery.maybeOf(context)?.textScaleFactor ?? 1,
-    );
-
     return styleFrom(
       primary: colorScheme.onSurface,
-      onSurface: colorScheme.onSurface, 
+      onSurface: colorScheme.onSurface,
       backgroundColor: Colors.transparent,
-      shadowColor: theme.shadowColor,
+      splashColor: splashColor,
       elevation: 0,
-      textStyle: theme.textTheme.button,
-      padding: scaledPadding,
-      minimumSize: const Size(55, 55),
+      padding: EdgeInsets.zero,
+      minimumSize: const Size(_kMinButtonSize, _kMinButtonSize),
       maximumSize: Size.infinite,
       shape: const CircleBorder(),
       mouseCursor: mouseCursor,
@@ -532,7 +528,7 @@ class _ButtonStyleButton extends ButtonStyleButton {
       visualDensity: theme.visualDensity,
       tapTargetSize: theme.materialTapTargetSize,
       animationDuration: kThemeChangeDuration,
-      enableFeedback: true,
+      enableFeedback: enableFeedback,
       alignment: Alignment.center,
       splashFactory: InkRipple.splashFactory,
     );
@@ -545,55 +541,26 @@ class _ButtonStyleButton extends ButtonStyleButton {
 }
 
 @immutable
-class _IconButtonDefaultForeground extends MaterialStateProperty<Color?> {
-  _IconButtonDefaultForeground(this.primary, this.onSurface);
-
-  final Color? primary;
-  final Color? onSurface;
-
-  @override
-  Color? resolve(Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled))
-      return onSurface?.withOpacity(0.38);
-    return primary;
-  }
-
-  @override
-  String toString() {
-    return '{disabled: ${onSurface?.withOpacity(0.38)}, otherwise: $primary}';
-  }
-}
-@immutable
 class _IconButtonDefaultOverlay extends MaterialStateProperty<Color?> {
   _IconButtonDefaultOverlay({
-    this.primary,
     this.focusColor,
     this.hoverColor,
-    this.highlightColor,
+    this.splashColor,
   });
 
-  final Color? primary;
   final Color? focusColor;
   final Color? hoverColor;
-  final Color? highlightColor;
+  final Color? splashColor;
 
   @override
   Color? resolve(Set<MaterialState> states) {
-    if (primary != null) {
-      if (states.contains(MaterialState.hovered))
-        return primary!.withOpacity(0.04);
-      if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed))
-        return primary!.withOpacity(0.12);
-      return null;
-    } else {
-      if (states.contains(MaterialState.hovered))
-        return hoverColor!.withOpacity(0.04);
-      if (states.contains(MaterialState.focused))
-        return focusColor!.withOpacity(0.12);
-      if (states.contains(MaterialState.pressed))
-        return highlightColor!.withOpacity(0.12);
-      return null;
-    }
+    if (states.contains(MaterialState.hovered))
+      return hoverColor;
+    if (states.contains(MaterialState.focused))
+      return focusColor;
+    if (states.contains(MaterialState.pressed))
+      return splashColor!.withOpacity(0.12);
+    return null;
   }
 
   @override
