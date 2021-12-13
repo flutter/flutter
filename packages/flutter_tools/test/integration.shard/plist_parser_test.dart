@@ -137,16 +137,17 @@ void main() {
     expect(logger.errorText, isEmpty);
   }, skip: platform.isMacOS); // [intended] requires macos tool chain.
 
-  testWithoutContext('PlistParser.getValueFromFile can handle different datatypes', () async {
+  testWithoutContext('PlistParser.parseFile can handle different datatypes', () async {
     file.writeAsBytesSync(base64.decode(base64PlistXmlWithComplexDatatypes));
+    final Map<String, Object> values = parser.parseFile(file.path);
 
-    expect(parser.getValueFromFile(file.path, 'CFBundleIdentifier'), 'io.flutter.flutter.app');
-    expect(parser.getValueFromFile(file.absolute.path, 'CFBundleIdentifier'), 'io.flutter.flutter.app');
-    expect(parser.getValueFromFile(file.absolute.path, 'intValue'), 2);
-    expect(parser.getValueFromFile(file.absolute.path, 'doubleValue'), 1.5);
-    expect(parser.getValueFromFile(file.absolute.path, 'binaryValue'), base64.decode('YWJjZA=='));
-    expect(parser.getValueFromFile(file.absolute.path, 'arrayValue'), <dynamic>[true, false, 3]);
-    expect(parser.getValueFromFile(file.absolute.path, 'dateValue'), DateTime.utc(2021, 12, 1, 12, 34, 56));
+    expect(values['CFBundleIdentifier'], 'io.flutter.flutter.app');
+    expect(values['CFBundleIdentifier'], 'io.flutter.flutter.app');
+    expect(values['intValue'], 2);
+    expect(values['doubleValue'], 1.5);
+    expect(values['binaryValue'], base64.decode('YWJjZA=='));
+    expect(values['arrayValue'], <dynamic>[true, false, 3]);
+    expect(values['dateValue'], DateTime.utc(2021, 12, 1, 12, 34, 56));
     expect(logger.statusText, isEmpty);
     expect(logger.errorText, isEmpty);
   }, skip: !platform.isMacOS); // [intended] requires macos tool chain.

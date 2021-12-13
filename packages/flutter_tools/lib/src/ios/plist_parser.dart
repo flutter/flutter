@@ -62,39 +62,39 @@ class PlistParser {
   /// valid property list file, this will return an empty map.
   ///
   /// The [plistFilePath] argument must not be null.
-  Map<String, dynamic> parseFile(String plistFilePath) {
+  Map<String, Object> parseFile(String plistFilePath) {
     assert(plistFilePath != null);
     if (!_fileSystem.isFileSync(plistFilePath)) {
-      return const <String, dynamic>{};
+      return const <String, Object>{};
     }
 
     final String normalizedPlistPath = _fileSystem.path.absolute(plistFilePath);
 
     final String? xmlContent = plistXmlContent(normalizedPlistPath);
     if (xmlContent == null) {
-      return const <String, dynamic>{};
+      return const <String, Object>{};
     }
 
     return _parseXml(xmlContent);
   }
 
-  Map<String, dynamic> _parseXml(String xmlContent) {
+  Map<String, Object> _parseXml(String xmlContent) {
     final XmlDocument document = XmlDocument.parse(xmlContent);
     // First element child is <plist>. The first element child of plist is <dict>.
     final XmlElement dictObject = document.firstElementChild!.firstElementChild!;
     return _parseXmlDict(dictObject);
   }
 
-  Map<String, dynamic> _parseXmlDict(XmlElement node) {
+  Map<String, Object> _parseXmlDict(XmlElement node) {
     String? lastKey;
-    final Map<String, dynamic> result = <String, dynamic>{};
+    final Map<String, Object> result = <String, Object>{};
     for (final XmlNode child in node.children) {
       if (child is XmlElement) {
         if (child.name.local == 'key') {
           lastKey = child.text;
         } else {
           assert(lastKey != null);
-          result[lastKey!] = _parseXmlNode(child);
+          result[lastKey!] = _parseXmlNode(child)!;
           lastKey = null;
         }
       }
@@ -105,7 +105,7 @@ class PlistParser {
 
   static final RegExp _nonBase64Pattern = RegExp('[^a-zA-Z0-9+/=]+');
 
-  dynamic _parseXmlNode(XmlElement node) {
+  Object? _parseXmlNode(XmlElement node) {
     switch (node.name.local){
       case 'string':
         return node.text;
@@ -122,7 +122,7 @@ class PlistParser {
       case 'data':
         return base64.decode(node.text.replaceAll(_nonBase64Pattern, ''));
       case 'array':
-        return node.children.whereType<XmlElement>().map<dynamic>(_parseXmlNode).toList();
+        return node.children.whereType<XmlElement>().map<Object?>(_parseXmlNode).whereType<Object>().toList();
       case 'dict':
         return _parseXmlDict(node);
     }
@@ -139,21 +139,7 @@ class PlistParser {
   ///
   /// The [plistFilePath] and [key] arguments must not be null.
   String? getStringValueFromFile(String plistFilePath, String key) {
-    return getValueFromFile(plistFilePath, key) as String?;
-  }
-
-  /// Parses the Plist file located at [plistFilePath] and returns the value
-  /// that's associated with the specified [key] within the property list.
-  ///
-  /// If [plistFilePath] points to a non-existent file or a file that's not a
-  /// valid property list file, this will return null.
-  ///
-  /// If [key] is not found in the property list, this will return null.
-  ///
-  /// The [plistFilePath] and [key] arguments must not be null.
-  dynamic getValueFromFile(String plistFilePath, String key) {
-    assert(key != null);
     final Map<String, dynamic> parsed = parseFile(plistFilePath);
-    return parsed[key];
+    return parsed[key] as String?;
   }
 }
