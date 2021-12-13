@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-import 'package:flutter_gallery/demo/shrine/colors.dart';
+import 'colors.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -29,7 +29,6 @@ class _LoginPageState extends State<LoginPage> {
       appBar: AppBar(
         elevation: 0.0,
         backgroundColor: Colors.white,
-        brightness: Brightness.light,
         leading: IconButton(
           icon: const BackButtonIcon(),
           tooltip: MaterialLocalizations.of(context).backButtonTooltip,

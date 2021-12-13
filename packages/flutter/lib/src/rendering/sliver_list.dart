@@ -270,7 +270,6 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
         final double extent = childScrollOffset(lastChild!)! + paintExtentOf(lastChild!);
         geometry = SliverGeometry(
           scrollExtent: extent,
-          paintExtent: 0.0,
           maxPaintExtent: extent,
         );
         return;

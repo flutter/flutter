@@ -536,7 +536,7 @@ void main() {
 
     imageInfo.dispose();
     expect(testImage.debugGetOpenHandleStackTraces()!.length, 0);
-  }, skip: kIsWeb); // Web does not care about image handles.
+  }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/87442
 
   test('Image is obtained and disposed of properly for cache when listener is still active', () async {
     const int key = 1;
@@ -575,5 +575,5 @@ void main() {
     expect(testImage.debugGetOpenHandleStackTraces()!.length, 1);
     imageInfo.dispose();
     expect(testImage.debugGetOpenHandleStackTraces()!.length, 0);
-  }, skip: kIsWeb); // Web does not care about open image handles.
+  }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/87442
 }

@@ -2,14 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:io';
 
-import 'package:flutter_devicelab/framework/framework.dart';
-import 'package:flutter_devicelab/framework/task_result.dart';
-import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:path/path.dart' as path;
+
+import '../framework/framework.dart';
+import '../framework/task_result.dart';
+import '../framework/utils.dart';
 
 /// Combines several TaskFunctions with trivial success value into one.
 TaskFunction combine(List<TaskFunction> tasks) {
@@ -31,8 +30,8 @@ class PluginTest {
 
   final String buildTarget;
   final List<String> options;
-  final Map<String, String> pluginCreateEnvironment;
-  final Map<String, String> appCreateEnvironment;
+  final Map<String, String>? pluginCreateEnvironment;
+  final Map<String, String>? appCreateEnvironment;
 
   Future<TaskResult> call() async {
     final Directory tempDir =
@@ -77,7 +76,7 @@ class _FlutterProject {
 
   String get rootPath => path.join(parent.path, name);
 
-  Future<void> addPlugin(String plugin, {String pluginPath}) async {
+  Future<void> addPlugin(String plugin, {String? pluginPath}) async {
     final File pubspec = File(path.join(rootPath, 'pubspec.yaml'));
     String content = await pubspec.readAsString();
     final String dependency =
@@ -100,9 +99,9 @@ class _FlutterProject {
       List<String> options,
       String target,
       {
-        String name,
-        String template,
-        Map<String, String> environment,
+        required String name,
+        required String template,
+        Map<String, String>? environment,
       }) async {
     await inDirectory(directory, () async {
       await flutter(
@@ -133,7 +132,7 @@ class _FlutterProject {
       throw TaskResult.failure('podspec file missing at ${podspec.path}');
     }
     final String versionString = target == 'ios'
-        ? "s.platform = :ios, '8.0'"
+        ? "s.platform = :ios, '9.0'"
         : "s.platform = :osx, '10.11'";
     String podspecContent = podspec.readAsStringSync();
     if (!podspecContent.contains(versionString)) {
@@ -150,7 +149,12 @@ class _FlutterProject {
 
   Future<void> build(String target) async {
     await inDirectory(Directory(rootPath), () async {
-      final String buildOutput =  await evalFlutter('build', options: <String>[target, '-v']);
+      final String buildOutput =  await evalFlutter('build', options: <String>[
+        target,
+        '-v',
+        if (target == 'ios')
+          '--no-codesign',
+      ]);
 
       if (target == 'ios' || target == 'macos') {
         // This warning is confusing and shouldn't be emitted. Plugins often support lower versions than the
@@ -169,19 +173,22 @@ class _FlutterProject {
         }
 
         final String podsProjectContent = podsProject.readAsStringSync();
-        // This may be a bit brittle, IPHONEOS_DEPLOYMENT_TARGET appears in the
-        // Pods Xcode project file 6 times. If this number changes, make sure
-        // it's not a regression in the IPHONEOS_DEPLOYMENT_TARGET override logic.
-        // The plugintest target should not have IPHONEOS_DEPLOYMENT_TARGET set.
-        // See _reduceDarwinPluginMinimumVersion for details.
-        if (target == 'ios' && 'IPHONEOS_DEPLOYMENT_TARGET'.allMatches(podsProjectContent).length != 6) {
-          throw TaskResult.failure('plugintest may contain IPHONEOS_DEPLOYMENT_TARGET');
+        if (target == 'ios') {
+          // Plugins with versions lower than the app version should not have IPHONEOS_DEPLOYMENT_TARGET set.
+          // The plugintest plugin target should not have IPHONEOS_DEPLOYMENT_TARGET set since it has been lowered
+          // in _reduceDarwinPluginMinimumVersion to 7, which is below the target version of 9.
+          if (podsProjectContent.contains('IPHONEOS_DEPLOYMENT_TARGET = 7')) {
+            throw TaskResult.failure('Plugin build setting IPHONEOS_DEPLOYMENT_TARGET not removed');
+          }
+          if (!podsProjectContent.contains(r'"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = "$(inherited) i386";')) {
+            throw TaskResult.failure(r'EXCLUDED_ARCHS is not "$(inherited) i386"');
+          }
         }
 
-        // Same for macOS, but 12.
+        // Same for macOS deployment target, but 10.8.
         // The plugintest target should not have MACOSX_DEPLOYMENT_TARGET set.
-        if (target == 'macos' && 'MACOSX_DEPLOYMENT_TARGET'.allMatches(podsProjectContent).length != 12) {
-          throw TaskResult.failure('plugintest may contain MACOSX_DEPLOYMENT_TARGET');
+        if (target == 'macos' && podsProjectContent.contains('MACOSX_DEPLOYMENT_TARGET = 10.8')) {
+          throw TaskResult.failure('Plugin build setting MACOSX_DEPLOYMENT_TARGET not removed');
         }
       }
     });

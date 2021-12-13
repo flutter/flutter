@@ -51,6 +51,7 @@ typedef LoggingFunction = void Function(LogMessage log);
 ///
 /// Exits with status code 1 if the `log` is [LoggingLevel.severe].
 void defaultLoggingFunction(LogMessage log) {
+  // ignore: avoid_print
   print('[${log.levelName}]::${log.tag}--${log.time}: ${log.message}');
   if (log.level == LoggingLevel.severe) {
     exit(1);

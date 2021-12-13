@@ -45,14 +45,6 @@ void configureProject(Project project, String outputDir) {
         return
     }
 
-    if (project.hasProperty('localEngineOut')) {
-        // TODO(egarciad): Support local engine.
-        // This most likely requires refactoring `flutter.gradle`, so the logic can be reused.
-        throw new GradleException(
-            "Local engine isn't supported when building the plugins as AAR. " +
-            "See: https://github.com/flutter/flutter/issues/40866")
-    }
-
     String storageUrl = System.getenv('FLUTTER_STORAGE_BASE_URL') ?: "https://storage.googleapis.com"
     // This is a Flutter plugin project. Plugin projects don't apply the Flutter Gradle plugin,
     // as a result, add the dependency on the embedding.

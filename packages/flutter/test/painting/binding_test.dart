@@ -18,7 +18,6 @@ Future<void> main() async {
     imageCache!.putIfAbsent(1, () => OneFrameImageStreamCompleter(
       Future<ImageInfo>.value(ImageInfo(
         image: image,
-        scale: 1.0,
       )),
     ));
 
@@ -37,6 +36,10 @@ Future<void> main() async {
     binding.evict('/path/to/asset.png');
     expect(binding.imageCache.clearCount, 1);
     expect(binding.imageCache.liveClearCount, 1);
+  });
+
+  test('ShaderWarmUp is null by default', () {
+    expect(PaintingBinding.shaderWarmUp, null);
   });
 }
 

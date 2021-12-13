@@ -64,7 +64,7 @@ class _FilteredChildAnimationPageState extends State<FilteredChildAnimationPage>
       case FilterType.opacity: return 'Fading Child Animation';
       case FilterType.rotateTransform: return 'Transformed Child Animation';
       case FilterType.rotateFilter: return 'Matrix Filtered Child Animation';
-      default: return 'Static Child';
+      case null: return 'Static Child';
     }
   }
 
@@ -73,7 +73,6 @@ class _FilteredChildAnimationPageState extends State<FilteredChildAnimationPage>
       color: Colors.green,
       boxShadow: complex ? <BoxShadow>[
         const BoxShadow(
-          color: Colors.black,
           blurRadius: 10.0,
         ),
       ] : null,

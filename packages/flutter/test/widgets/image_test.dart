@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
+
 import 'dart:async';
 import 'dart:math' as math;
 import 'dart:typed_data';
@@ -206,13 +210,11 @@ void main() {
         key: mediaQueryKey1,
         data: const MediaQueryData(
           devicePixelRatio: 10.0,
-          padding: EdgeInsets.zero,
         ),
         child: MediaQuery(
           key: mediaQueryKey2,
           data: const MediaQueryData(
             devicePixelRatio: 5.0,
-            padding: EdgeInsets.zero,
           ),
           child: Image(
             excludeFromSemantics: true,
@@ -233,13 +235,11 @@ void main() {
         key: mediaQueryKey2,
         data: const MediaQueryData(
           devicePixelRatio: 5.0,
-          padding: EdgeInsets.zero,
         ),
         child: MediaQuery(
           key: mediaQueryKey1,
           data: const MediaQueryData(
             devicePixelRatio: 10.0,
-            padding: EdgeInsets.zero,
           ),
           child: Image(
             excludeFromSemantics: true,
@@ -271,7 +271,6 @@ void main() {
             key: mediaQueryKey2,
             data: const MediaQueryData(
               devicePixelRatio: 5.0,
-              padding: EdgeInsets.zero,
             ),
             child: Image(
               excludeFromSemantics: true,
@@ -283,7 +282,6 @@ void main() {
             key: mediaQueryKey1,
             data: const MediaQueryData(
               devicePixelRatio: 10.0,
-              padding: EdgeInsets.zero,
             ),
             child: Container(width: 100.0),
           ),
@@ -301,7 +299,6 @@ void main() {
             key: mediaQueryKey2,
             data: const MediaQueryData(
               devicePixelRatio: 5.0,
-              padding: EdgeInsets.zero,
             ),
             child: Container(width: 100.0),
           ),
@@ -309,7 +306,6 @@ void main() {
             key: mediaQueryKey1,
             data: const MediaQueryData(
               devicePixelRatio: 10.0,
-              padding: EdgeInsets.zero,
             ),
             child: Image(
               excludeFromSemantics: true,
@@ -339,13 +335,11 @@ void main() {
         key: mediaQueryKey1,
         data: const MediaQueryData(
           devicePixelRatio: 10.0,
-          padding: EdgeInsets.zero,
         ),
         child: MediaQuery(
           key: mediaQueryKey2,
           data: const MediaQueryData(
             devicePixelRatio: 5.0,
-            padding: EdgeInsets.zero,
           ),
           child: Image(
             excludeFromSemantics: true,
@@ -366,13 +360,11 @@ void main() {
         key: mediaQueryKey2,
         data: const MediaQueryData(
           devicePixelRatio: 5.0,
-          padding: EdgeInsets.zero,
         ),
         child: MediaQuery(
           key: mediaQueryKey1,
           data: const MediaQueryData(
             devicePixelRatio: 10.0,
-            padding: EdgeInsets.zero,
           ),
           child: Image(
             excludeFromSemantics: true,
@@ -404,7 +396,6 @@ void main() {
             key: mediaQueryKey2,
             data: const MediaQueryData(
               devicePixelRatio: 5.0,
-              padding: EdgeInsets.zero,
             ),
             child: Image(
               excludeFromSemantics: true,
@@ -416,7 +407,6 @@ void main() {
             key: mediaQueryKey1,
             data: const MediaQueryData(
               devicePixelRatio: 10.0,
-              padding: EdgeInsets.zero,
             ),
             child: Container(width: 100.0),
           ),
@@ -434,7 +424,6 @@ void main() {
             key: mediaQueryKey2,
             data: const MediaQueryData(
               devicePixelRatio: 5.0,
-              padding: EdgeInsets.zero,
             ),
             child: Container(width: 100.0),
           ),
@@ -442,7 +431,6 @@ void main() {
             key: mediaQueryKey1,
             data: const MediaQueryData(
               devicePixelRatio: 10.0,
-              padding: EdgeInsets.zero,
             ),
             child: Image(
               excludeFromSemantics: true,
@@ -1731,7 +1719,7 @@ void main() {
       await _testRotatedImage(tester, true);
       await _testRotatedImage(tester, false);
     },
-    skip: kIsWeb, // https://github.com/flutter/flutter/issues/54292.
+    skip: kIsWeb, // https://github.com/flutter/flutter/issues/87933.
   );
 
   testWidgets(
@@ -1741,7 +1729,6 @@ void main() {
       await tester.pumpWidget(RepaintBoundary(
         key: key,
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           textDirection: TextDirection.ltr,
           children: <Widget>[
@@ -1782,7 +1769,7 @@ void main() {
         matchesGoldenFile('transparent_image.png'),
       );
     },
-    skip: kIsWeb, // https://github.com/flutter/flutter/issues/54292.
+    skip: kIsWeb, // https://github.com/flutter/flutter/issues/87933.
   );
 
   testWidgets('Reports image size when painted', (WidgetTester tester) async {
@@ -1797,7 +1784,6 @@ void main() {
     final _TestImageStreamCompleter streamCompleter = _TestImageStreamCompleter(
       ImageInfo(
         image: image,
-        scale: 1.0,
         debugLabel: 'test.png',
       ),
     );
@@ -1819,7 +1805,7 @@ void main() {
       const ImageSizeInfo(
         source: 'test.png',
         imageSize: Size(100, 100),
-        displaySize: Size(50, 50),
+        displaySize: Size(150, 150),
       ),
     );
 
@@ -1827,7 +1813,7 @@ void main() {
   });
 
   testWidgets('Disposes image handle when disposed', (WidgetTester tester) async {
-    final ui.Image image = (await tester.runAsync(() => createTestImage(width: 1, height: 1, cache: false)))!;
+    final ui.Image image = (await tester.runAsync(() => createTestImage(cache: false)))!;
 
     expect(image.debugGetOpenHandleStackTraces()!.length, 1);
 
@@ -1836,7 +1822,6 @@ void main() {
         Future<ImageInfo>.value(
           ImageInfo(
             image: image,
-            scale: 1.0,
             debugLabel: '_TestImage',
           ),
         ),
@@ -1865,11 +1850,11 @@ void main() {
     // Image cache listener go away and Image stream listeners go away.
     // Image is now at zero.
     expect(image.debugGetOpenHandleStackTraces()!.length, 0);
-  }, skip: kIsWeb); // Web does not care about image handle/disposal.
+  }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/87442
 
   testWidgets('Keeps stream alive when ticker mode is disabled',  (WidgetTester tester) async {
     imageCache!.maximumSize = 0;
-    final ui.Image image = (await tester.runAsync(() => createTestImage(width: 1, height: 1, cache: false)))!;
+    final ui.Image image = (await tester.runAsync(() => createTestImage(cache: false)))!;
     final _TestImageProvider provider = _TestImageProvider();
     provider.complete(image);
 

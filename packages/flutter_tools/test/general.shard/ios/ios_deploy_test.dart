@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 import 'dart:convert';
 
@@ -14,17 +12,17 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/ios_deploy.dart';
+import 'package:flutter_tools/src/ios/iproxy.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
 void main () {
-  Artifacts artifacts;
-  String iosDeployPath;
-  FileSystem fileSystem;
+  late Artifacts artifacts;
+  late String iosDeployPath;
+  late FileSystem fileSystem;
 
   setUp(() {
     artifacts = Artifacts.test();
@@ -74,7 +72,7 @@ void main () {
         bundlePath: '/',
         appDeltaDirectory: appDeltaDirectory,
         launchArguments: <String>['--enable-dart-profiling'],
-        interfaceType: IOSDeviceInterface.network,
+        interfaceType: IOSDeviceConnectionInterface.network,
       );
 
       expect(await iosDeployDebugger.launchAndAttach(), isTrue);
@@ -86,7 +84,7 @@ void main () {
 
   group('IOSDeployDebugger', () {
     group('launch', () {
-      BufferLogger logger;
+      late BufferLogger logger;
 
       setUp(() {
         logger = BufferLogger.test();
@@ -322,7 +320,7 @@ void main () {
 }
 
 IOSDeploy setUpIOSDeploy(ProcessManager processManager, {
-    Artifacts artifacts,
+    Artifacts? artifacts,
   }) {
   final FakePlatform macPlatform = FakePlatform(
     operatingSystem: 'macos',

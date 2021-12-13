@@ -141,6 +141,16 @@ void main() {
     });
 
     testUsingContext('create local report', () async {
+      // Since crash reporting calls the doctor, which checks for the devtools
+      // version file in the cache, write a version file to the memory fs.
+      Cache.flutterRoot = '/path/to/flutter';
+      final Directory devtoolsDir = globals.fs.directory(
+        '${Cache.flutterRoot}/bin/cache/dart-sdk/bin/resources/devtools',
+      )..createSync(recursive: true);
+      devtoolsDir.childFile('version.json').writeAsStringSync(
+        '{"version": "1.2.3"}',
+      );
+
       final Completer<void> completer = Completer<void>();
       // runner.run() asynchronously calls the exit function set above, so we
       // catch it in a zone.
@@ -179,7 +189,6 @@ void main() {
       expect(logContents, contains('String: an exception % --'));
       expect(logContents, contains('CrashingFlutterCommand.runCommand'));
       expect(logContents, contains('[✓] Flutter'));
-      print(globals.crashReporter.runtimeType);
 
       final CrashDetails sentDetails = (globals.crashReporter as WaitingCrashReporter)._details;
       expect(sentDetails.command, 'flutter crash');
@@ -191,8 +200,7 @@ void main() {
         environment: <String, String>{
           'FLUTTER_ANALYTICS_LOG_FILE': 'test',
           'FLUTTER_ROOT': '/',
-        },
-        operatingSystem: 'linux'
+        }
       ),
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),

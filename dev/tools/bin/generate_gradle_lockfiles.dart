@@ -54,6 +54,11 @@ void main(List<String> arguments) {
       continue;
     }
 
+    if (androidDirectory.parent.childFile('pubspec.yaml').readAsStringSync().contains('deferred-components')) {
+      print('${rootBuildGradle.path} uses deferred components - skipping');
+      continue;
+    }
+
     if (!androidDirectory.parent
         .childDirectory('lib')
         .childFile('main.dart')
@@ -63,6 +68,12 @@ void main(List<String> arguments) {
     }
 
     print('Processing ${androidDirectory.path}');
+
+    try {
+      androidDirectory.childFile('buildscript-gradle.lockfile').deleteSync();
+    } on FileSystemException {
+      // noop
+    }
 
     rootBuildGradle.writeAsStringSync(rootGradleFileContent);
     settingsGradle.writeAsStringSync(settingGradleFile);
@@ -114,7 +125,7 @@ void exec(
   String? workingDirectory,
 }) {
   final ProcessResult result = Process.runSync(cmd, args, workingDirectory: workingDirectory);
-  if (result.exitCode != 0 || '${result.stderr}'.isNotEmpty)
+  if (result.exitCode != 0)
     throw ProcessException(
         cmd, args, '${result.stdout}${result.stderr}', result.exitCode);
 }
@@ -129,7 +140,7 @@ const String rootGradleFileContent = r'''
 // See dev/tools/bin/generate_gradle_lockfiles.dart.
 
 buildscript {
-    ext.kotlin_version = '1.4.32'
+    ext.kotlin_version = '1.5.31'
     repositories {
         google()
         mavenCentral()
@@ -156,8 +167,9 @@ rootProject.buildDir = '../build'
 
 subprojects {
     project.buildDir = "${rootProject.buildDir}/${project.name}"
+}
+subprojects {
     project.evaluationDependsOn(':app')
-
     dependencyLocking {
         ignoredDependencies.add('io.flutter:*')
         lockFile = file("${rootProject.projectDir}/project-${project.name}.lockfile")

@@ -17,7 +17,7 @@ void main() {
 
   test('Border.symmetric constructor', () {
     const BorderSide side1 = BorderSide(color: Color(0xFFFFFFFF));
-    const BorderSide side2 = BorderSide(color: Color(0xFF000000));
+    const BorderSide side2 = BorderSide();
     const Border border = Border.symmetric(vertical: side1, horizontal: side2);
     expect(border.left, same(side1));
     expect(border.top, same(side2));
@@ -168,7 +168,7 @@ void main() {
         left: BorderSide(style: BorderStyle.none),
         top: BorderSide(style: BorderStyle.none),
         right: BorderSide(style: BorderStyle.none),
-        bottom: BorderSide(style: BorderStyle.solid, width: 0.0),
+        bottom: BorderSide(width: 0.0),
       ).isUniform,
       false,
     );
@@ -177,7 +177,7 @@ void main() {
         left: BorderSide(style: BorderStyle.none),
         top: BorderSide(style: BorderStyle.none),
         right: BorderSide(style: BorderStyle.none),
-        bottom: BorderSide(style: BorderStyle.solid, width: 0.0),
+        bottom: BorderSide(width: 0.0),
       ).isUniform,
       false,
     );
@@ -186,17 +186,11 @@ void main() {
         left: BorderSide(style: BorderStyle.none),
         top: BorderSide(style: BorderStyle.none),
         right: BorderSide(style: BorderStyle.none),
-        bottom: BorderSide.none,
       ).isUniform,
       false,
     );
     expect(
-      const Border(
-        left: BorderSide.none,
-        top: BorderSide.none,
-        right: BorderSide.none,
-        bottom: BorderSide.none,
-      ).isUniform,
+      const Border().isUniform,
       true,
     );
     expect(

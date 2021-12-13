@@ -470,7 +470,6 @@ void main() {
     // optionsBuilder returns nothing for an empty field query.
     focusNode.requestFocus();
     textEditingController.value = const TextEditingValue(
-      text: '',
       selection: TextSelection(baseOffset: 0, extentOffset: 0),
     );
     await tester.pump();
@@ -645,6 +644,67 @@ void main() {
       },
       throwsAssertionError,
     );
+  });
+
+  testWidgets('support asynchronous options builder', (WidgetTester tester) async {
+    final GlobalKey fieldKey = GlobalKey();
+    final GlobalKey optionsKey = GlobalKey();
+    late FocusNode focusNode;
+    late TextEditingController textEditingController;
+    Iterable<String>? lastOptions;
+    Duration? delay;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: RawAutocomplete<String>(
+            optionsBuilder: (TextEditingValue textEditingValue) async {
+              final Iterable<String> options = kOptions.where((String option) {
+                return option.contains(textEditingValue.text.toLowerCase());
+              });
+              if (delay == null) {
+                return options;
+              }
+              return Future<Iterable<String>>.delayed(delay, () => options);
+            },
+            fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
+              focusNode = fieldFocusNode;
+              textEditingController = fieldTextEditingController;
+              return TextField(
+                key: fieldKey,
+                focusNode: focusNode,
+                controller: textEditingController,
+              );
+            },
+            optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
+              lastOptions = options;
+              return Container(key: optionsKey);
+            },
+          ),
+        ),
+      )
+    );
+
+    // Enter text to build the options with delay.
+    focusNode.requestFocus();
+    delay = const Duration(milliseconds: 500);
+    await tester.enterText(find.byKey(fieldKey), 'go');
+    await tester.pumpAndSettle();
+
+    // The options have not yet been built.
+    expect(find.byKey(optionsKey), findsNothing);
+    expect(lastOptions, isNull);
+
+    // Await asynchronous options builder.
+    await tester.pumpAndSettle(delay);
+    expect(find.byKey(optionsKey), findsOneWidget);
+    expect(lastOptions, <String>['dingo', 'flamingo', 'goose']);
+
+    // Enter text to rebuild the options without delay.
+    delay = null;
+    await tester.enterText(find.byKey(fieldKey), 'ngo');
+    await tester.pump();
+    expect(lastOptions, <String>['dingo', 'flamingo']);
   });
 
   testWidgets('can navigate options with the keyboard', (WidgetTester tester) async {

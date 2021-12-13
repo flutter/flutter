@@ -30,35 +30,21 @@ import 'theme.dart';
 ///
 ///  * [SliderThemeData], which describes the actual configuration of a slider
 ///    theme.
-/// {@template flutter.material.SliderTheme.sliderComponentShape}
 ///  * [SliderComponentShape], which can be used to create custom shapes for
 ///    the [Slider]'s thumb, overlay, and value indicator and the
 ///    [RangeSlider]'s overlay.
-/// {@endtemplate}
-/// {@template flutter.material.SliderTheme.sliderTrackShape}
 ///  * [SliderTrackShape], which can be used to create custom shapes for the
 ///    [Slider]'s track.
-/// {@endtemplate}
-/// {@template flutter.material.SliderTheme.sliderTickMarkShape}
 ///  * [SliderTickMarkShape], which can be used to create custom shapes for the
 ///    [Slider]'s tick marks.
-/// {@endtemplate}
-/// {@template flutter.material.SliderTheme.rangeSliderThumbShape}
 ///  * [RangeSliderThumbShape], which can be used to create custom shapes for
 ///    the [RangeSlider]'s thumb.
-/// {@endtemplate}
-/// {@template flutter.material.SliderTheme.rangeSliderValueIndicatorShape}
 ///  * [RangeSliderValueIndicatorShape], which can be used to create custom
 ///    shapes for the [RangeSlider]'s value indicator.
-/// {@endtemplate}
-/// {@template flutter.material.SliderTheme.rangeSliderTrackShape}
 ///  * [RangeSliderTrackShape], which can be used to create custom shapes for
 ///    the [RangeSlider]'s track.
-/// {@endtemplate}
-/// {@template flutter.material.SliderTheme.rangeSliderTickMarkShape}
 ///  * [RangeSliderTickMarkShape], which can be used to create custom shapes for
 ///    the [RangeSlider]'s tick marks.
-/// {@endtemplate}
 class SliderTheme extends InheritedTheme {
   /// Applies the given theme [data] to [child].
   ///
@@ -224,13 +210,21 @@ enum Thumb {
 ///  * [Theme] widget, which performs a similar function to [SliderTheme],
 ///    but for overall themes.
 ///  * [ThemeData], which has a default [SliderThemeData].
-/// {@macro flutter.material.SliderTheme.sliderComponentShape}
-/// {@macro flutter.material.SliderTheme.sliderTrackShape}
-/// {@macro flutter.material.SliderTheme.sliderTickMarkShape}
-/// {@macro flutter.material.SliderTheme.rangeSliderThumbShape}
-/// {@macro flutter.material.SliderTheme.rangeSliderValueIndicatorShape}
-/// {@macro flutter.material.SliderTheme.rangeSliderTrackShape}
-/// {@macro flutter.material.SliderTheme.rangeSliderTickMarkShape}
+///  * [SliderComponentShape], which can be used to create custom shapes for
+///    the [Slider]'s thumb, overlay, and value indicator and the
+///    [RangeSlider]'s overlay.
+///  * [SliderTrackShape], which can be used to create custom shapes for the
+///    [Slider]'s track.
+///  * [SliderTickMarkShape], which can be used to create custom shapes for the
+///    [Slider]'s tick marks.
+///  * [RangeSliderThumbShape], which can be used to create custom shapes for
+///    the [RangeSlider]'s thumb.
+///  * [RangeSliderValueIndicatorShape], which can be used to create custom
+///    shapes for the [RangeSlider]'s value indicator.
+///  * [RangeSliderTrackShape], which can be used to create custom shapes for
+///    the [RangeSlider]'s track.
+///  * [RangeSliderTickMarkShape], which can be used to create custom shapes for
+///    the [RangeSlider]'s tick marks.
 @immutable
 class SliderThemeData with Diagnosticable {
   /// Create a [SliderThemeData] given a set of exact values.
@@ -910,8 +904,11 @@ abstract class SliderComponentShape {
 ///
 ///  * [RoundSliderTickMarkShape], which is the default [Slider]'s tick mark
 ///    shape that paints a solid circle.
-/// {@macro flutter.material.SliderTheme.sliderTrackShape}
-/// {@macro flutter.material.SliderTheme.sliderComponentShape}
+///  * [SliderTrackShape], which can be used to create custom shapes for the
+///    [Slider]'s track.
+///  * [SliderComponentShape], which can be used to create custom shapes for
+///    the [Slider]'s thumb, overlay, and value indicator and the
+///    [RangeSlider]'s overlay.
 abstract class SliderTickMarkShape {
   /// This abstract const constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -986,8 +983,11 @@ abstract class SliderTickMarkShape {
 ///
 ///  * [RoundedRectSliderTrackShape] for the default [Slider]'s track shape that
 ///    paints a stadium-like track.
-/// {@macro flutter.material.SliderTheme.sliderTickMarkShape}
-/// {@macro flutter.material.SliderTheme.sliderComponentShape}
+///  * [SliderTickMarkShape], which can be used to create custom shapes for the
+///    [Slider]'s tick marks.
+///  * [SliderComponentShape], which can be used to create custom shapes for
+///    the [Slider]'s thumb, overlay, and value indicator and the
+///    [RangeSlider]'s overlay.
 abstract class SliderTrackShape {
   /// This abstract const constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -1068,10 +1068,15 @@ abstract class SliderTrackShape {
 ///
 ///  * [RoundRangeSliderThumbShape] for the default [RangeSlider]'s thumb shape
 ///    that paints a solid circle.
-/// {@macro flutter.material.SliderTheme.rangeSliderTickMarkShape}
-/// {@macro flutter.material.SliderTheme.rangeSliderTrackShape}
-/// {@macro flutter.material.SliderTheme.rangeSliderValueIndicatorShape}
-/// {@macro flutter.material.SliderTheme.sliderComponentShape}
+///  * [RangeSliderTickMarkShape], which can be used to create custom shapes for
+///    the [RangeSlider]'s tick marks.
+///  * [RangeSliderTrackShape], which can be used to create custom shapes for
+///    the [RangeSlider]'s track.
+///  * [RangeSliderValueIndicatorShape], which can be used to create custom
+///    shapes for the [RangeSlider]'s value indicator.
+///  * [SliderComponentShape], which can be used to create custom shapes for
+///    the [Slider]'s thumb, overlay, and value indicator and the
+///    [RangeSlider]'s overlay.
 abstract class RangeSliderThumbShape {
   /// This abstract const constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -1158,10 +1163,15 @@ abstract class RangeSliderThumbShape {
 ///
 ///  * [PaddleRangeSliderValueIndicatorShape] for the default [RangeSlider]'s
 ///    value indicator shape that paints a custom path with text in it.
-/// {@macro flutter.material.SliderTheme.rangeSliderTickMarkShape}
-/// {@macro flutter.material.SliderTheme.rangeSliderThumbShape}
-/// {@macro flutter.material.SliderTheme.rangeSliderTrackShape}
-/// {@macro flutter.material.SliderTheme.sliderComponentShape}
+///  * [RangeSliderTickMarkShape], which can be used to create custom shapes for
+///    the [RangeSlider]'s tick marks.
+///  * [RangeSliderThumbShape], which can be used to create custom shapes for
+///    the [RangeSlider]'s thumb.
+///  * [RangeSliderTrackShape], which can be used to create custom shapes for
+///    the [RangeSlider]'s track.
+///  * [SliderComponentShape], which can be used to create custom shapes for
+///    the [Slider]'s thumb, overlay, and value indicator and the
+///    [RangeSlider]'s overlay.
 abstract class RangeSliderValueIndicatorShape {
   /// This abstract const constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -1263,10 +1273,15 @@ abstract class RangeSliderValueIndicatorShape {
 ///
 ///  * [RoundRangeSliderTickMarkShape] for the default [RangeSlider]'s tick mark
 ///    shape that paints a solid circle.
-/// {@macro flutter.material.SliderTheme.rangeSliderThumbShape}
-/// {@macro flutter.material.SliderTheme.rangeSliderTrackShape}
-/// {@macro flutter.material.SliderTheme.rangeSliderValueIndicatorShape}
-/// {@macro flutter.material.SliderTheme.sliderComponentShape}
+///  * [RangeSliderThumbShape], which can be used to create custom shapes for
+///    the [RangeSlider]'s thumb.
+///  * [RangeSliderTrackShape], which can be used to create custom shapes for
+///    the [RangeSlider]'s track.
+///  * [RangeSliderValueIndicatorShape], which can be used to create custom
+///    shapes for the [RangeSlider]'s value indicator.
+///  * [SliderComponentShape], which can be used to create custom shapes for
+///    the [Slider]'s thumb, overlay, and value indicator and the
+///    [RangeSlider]'s overlay.
 abstract class RangeSliderTickMarkShape {
   /// This abstract const constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -1333,10 +1348,15 @@ abstract class RangeSliderTickMarkShape {
 ///
 ///  * [RoundedRectRangeSliderTrackShape] for the default [RangeSlider]'s track
 ///    shape that paints a stadium-like track.
-/// {@macro flutter.material.SliderTheme.rangeSliderTickMarkShape}
-/// {@macro flutter.material.SliderTheme.rangeSliderThumbShape}
-/// {@macro flutter.material.SliderTheme.rangeSliderValueIndicatorShape}
-/// {@macro flutter.material.SliderTheme.sliderComponentShape}
+///  * [RangeSliderTickMarkShape], which can be used to create custom shapes for
+///    the [RangeSlider]'s tick marks.
+///  * [RangeSliderThumbShape], which can be used to create custom shapes for
+///    the [RangeSlider]'s thumb.
+///  * [RangeSliderValueIndicatorShape], which can be used to create custom
+///    shapes for the [RangeSlider]'s value indicator.
+///  * [SliderComponentShape], which can be used to create custom shapes for
+///    the [Slider]'s thumb, overlay, and value indicator and the
+///    [RangeSlider]'s overlay.
 abstract class RangeSliderTrackShape {
   /// This abstract const constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -1486,7 +1506,8 @@ mixin BaseSliderTrackShape {
 ///  * [Slider], for the component that is meant to display this shape.
 ///  * [SliderThemeData], where an instance of this class is set to inform the
 ///    slider of the visual details of the its track.
-/// {@macro flutter.material.SliderTheme.sliderTrackShape}
+///  * [SliderTrackShape], which can be used to create custom shapes for the
+///    [Slider]'s track.
 ///  * [RoundedRectSliderTrackShape], for a similar track with rounded edges.
 class RectangularSliderTrackShape extends SliderTrackShape with BaseSliderTrackShape {
   /// Creates a slider track that draws 2 rectangles.
@@ -1602,7 +1623,8 @@ class RectangularSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
 ///  * [Slider], for the component that is meant to display this shape.
 ///  * [SliderThemeData], where an instance of this class is set to inform the
 ///    slider of the visual details of the its track.
-/// {@macro flutter.material.SliderTheme.sliderTrackShape}
+///  * [SliderTrackShape], which can be used to create custom shapes for the
+///    [Slider]'s track.
 ///  * [RectangularSliderTrackShape], for a similar track with sharp edges.
 class RoundedRectSliderTrackShape extends SliderTrackShape with BaseSliderTrackShape {
   /// Create a slider track that draws two rectangles with rounded outer edges.
@@ -1717,7 +1739,8 @@ class RoundedRectSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
 ///  * [RangeSlider], for the component that is meant to display this shape.
 ///  * [SliderThemeData], where an instance of this class is set to inform the
 ///    slider of the visual details of the its track.
-/// {@macro flutter.material.SliderTheme.rangeSliderTrackShape}
+///  * [RangeSliderTrackShape], which can be used to create custom shapes for
+///    the [RangeSlider]'s track.
 ///  * [RoundedRectRangeSliderTrackShape], for a similar track with rounded
 ///    edges.
 class RectangularRangeSliderTrackShape extends RangeSliderTrackShape {
@@ -1845,7 +1868,8 @@ class RectangularRangeSliderTrackShape extends RangeSliderTrackShape {
 ///  * [RangeSlider], for the component that is meant to display this shape.
 ///  * [SliderThemeData], where an instance of this class is set to inform the
 ///    slider of the visual details of the its track.
-/// {@macro flutter.material.SliderTheme.rangeSliderTrackShape}
+///  * [RangeSliderTrackShape], which can be used to create custom shapes for
+///    the [RangeSlider]'s track.
 ///  * [RectangularRangeSliderTrackShape], for a similar track with sharp edges.
 class RoundedRectRangeSliderTrackShape extends RangeSliderTrackShape {
   /// Create a slider track with rounded outer edges.

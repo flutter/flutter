@@ -16,6 +16,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/test.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/test/runner.dart';
 import 'package:flutter_tools/src/test/test_wrapper.dart';
 import 'package:flutter_tools/src/test/watcher.dart';
@@ -538,7 +539,7 @@ dev_dependencies:
       FileSystem: () => fs,
       ProcessManager: () => FakeProcessManager.any(),
       DeviceManager: () => _FakeDeviceManager(<Device>[
-        FakeDevice('ephemeral', 'ephemeral', ephemeral: true, isSupported: true, type: PlatformType.android),
+        FakeDevice('ephemeral', 'ephemeral', type: PlatformType.android),
       ]),
     });
   });
@@ -560,7 +561,7 @@ dev_dependencies:
     DeviceManager: () => _FakeDeviceManager(<Device>[]),
   });
 
-  // TODO(jiahaog): Remove this when web is supported. https://github.com/flutter/flutter/pull/74236
+  // TODO(jiahaog): Remove this when web is supported. https://github.com/flutter/flutter/issues/66264
   testUsingContext('Integration tests when only web devices are connected', () async {
     final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
 
@@ -576,7 +577,7 @@ dev_dependencies:
     FileSystem: () => fs,
     ProcessManager: () => FakeProcessManager.any(),
     DeviceManager: () => _FakeDeviceManager(<Device>[
-      FakeDevice('ephemeral', 'ephemeral', ephemeral: true, isSupported: true, type: PlatformType.web),
+      FakeDevice('ephemeral', 'ephemeral'),
     ]),
   });
 
@@ -600,7 +601,33 @@ dev_dependencies:
     FileSystem: () => fs,
     ProcessManager: () => FakeProcessManager.any(),
     DeviceManager: () => _FakeDeviceManager(<Device>[
-      FakeDevice('ephemeral', 'ephemeral', ephemeral: true, isSupported: true, type: PlatformType.android),
+      FakeDevice('ephemeral', 'ephemeral', type: PlatformType.android),
+    ]),
+  });
+
+  testUsingContext('Integration tests given flavor', () async {
+    final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
+
+    final TestCommand testCommand = TestCommand(testRunner: testRunner);
+    final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+    await commandRunner.run(const <String>[
+      'test',
+      '--no-pub',
+      '--flavor',
+      'dev',
+      'integration_test',
+    ]);
+
+    expect(
+      testRunner.lastDebuggingOptionsValue.buildInfo.flavor,
+      contains('dev'),
+    );
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fs,
+    ProcessManager: () => FakeProcessManager.any(),
+    DeviceManager: () => _FakeDeviceManager(<Device>[
+      FakeDevice('ephemeral', 'ephemeral', type: PlatformType.android),
     ]),
   });
 
@@ -643,6 +670,60 @@ dev_dependencies:
     FileSystem: () => fs,
     ProcessManager: () => FakeProcessManager.any(),
     DeviceManager: () => _FakeDeviceManager(<Device>[]),
+  });
+
+  group('Fatal Logs', () {
+    testUsingContext("doesn't fail when --fatal-warnings is set and no warning output", () async {
+      final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
+
+      final TestCommand testCommand = TestCommand(testRunner: testRunner);
+      final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+      try {
+        await commandRunner.run(const <String>[
+          'test',
+          '--no-pub',
+          '--${FlutterOptions.kFatalWarnings}',
+        ]);
+      } on Exception {
+        fail('Unexpected exception thrown');
+      }
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+    testUsingContext('fails if --fatal-warnings specified and warnings emitted', () async {
+      final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
+
+      final TestCommand testCommand = TestCommand(testRunner: testRunner);
+      final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+      testLogger.printWarning('Warning: Mild annoyance, Will Robinson!');
+      expect(commandRunner.run(const <String>[
+        'test',
+        '--no-pub',
+        '--${FlutterOptions.kFatalWarnings}',
+      ]), throwsToolExit(message: 'Logger received warning output during the run, and "--${FlutterOptions.kFatalWarnings}" is enabled.'));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+    testUsingContext('fails when --fatal-warnings is set and only errors emitted', () async {
+      final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
+
+      final TestCommand testCommand = TestCommand(testRunner: testRunner);
+      final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+      testLogger.printError('Error: Danger Will Robinson!');
+      expect(commandRunner.run(const <String>[
+        'test',
+        '--no-pub',
+        '--${FlutterOptions.kFatalWarnings}',
+      ]), throwsToolExit(message: 'Logger received error output during the run, and "--${FlutterOptions.kFatalWarnings}" is enabled.'));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
   });
 }
 

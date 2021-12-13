@@ -9,19 +9,11 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
+import 'package:web_e2e_tests/common.dart';
 import 'package:web_e2e_tests/text_editing_main.dart' as app;
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
-
-  /// Locate elements in the correct root of the application, whether it is
-  /// `document` or the new `shadowRoot` of `flt-class-pane`.
-  List<Node> findElements(String selector) {
-    final ShadowRoot? shadowRoot = document.querySelector('flt-glass-pane')?.shadowRoot;
-    return (shadowRoot != null) ?
-      shadowRoot.querySelectorAll(selector):
-      document.querySelectorAll(selector);
-  }
 
   testWidgets('Focused text field creates a native input element',
       (WidgetTester tester) async {
@@ -245,12 +237,14 @@ void main() {
 
 KeyboardEvent dispatchKeyboardEvent(
     EventTarget target, String type, Map<String, dynamic> args) {
+  // ignore: implicit_dynamic_function
   final Object jsKeyboardEvent = js_util.getProperty(window, 'KeyboardEvent') as Object;
   final List<dynamic> eventArgs = <dynamic>[
     type,
     args,
   ];
 
+  // ignore: implicit_dynamic_function
   final KeyboardEvent event = js_util.callConstructor(
           jsKeyboardEvent, js_util.jsify(eventArgs) as List<dynamic>)
       as KeyboardEvent;

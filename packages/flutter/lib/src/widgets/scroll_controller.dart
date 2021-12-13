@@ -88,7 +88,6 @@ class ScrollController extends ChangeNotifier {
   ///
   /// This should not be mutated directly. [ScrollPosition] objects can be added
   /// and removed using [attach] and [detach].
-  @protected
   Iterable<ScrollPosition> get positions => _positions;
   final List<ScrollPosition> _positions = <ScrollPosition>[];
 
@@ -169,7 +168,7 @@ class ScrollController extends ChangeNotifier {
   /// value was out of range.
   void jumpTo(double value) {
     assert(_positions.isNotEmpty, 'ScrollController not attached to any scroll views.');
-    for (final ScrollPosition position in List<ScrollPosition>.from(_positions))
+    for (final ScrollPosition position in List<ScrollPosition>.of(_positions))
       position.jumpTo(value);
   }
 

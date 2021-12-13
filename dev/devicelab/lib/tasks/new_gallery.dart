@@ -2,16 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:io';
-
-import 'package:flutter_devicelab/tasks/perf_tests.dart';
-
 
 import '../framework/task_result.dart';
 import '../framework/utils.dart';
 import '../versions/gallery.dart' show galleryVersion;
+import 'perf_tests.dart';
 
 class NewGalleryPerfTest extends PerfTest {
   NewGalleryPerfTest(

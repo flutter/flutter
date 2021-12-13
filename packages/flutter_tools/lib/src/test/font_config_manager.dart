@@ -5,20 +5,15 @@
 import 'dart:async';
 
 import '../base/file_system.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 
 /// Manages a Font configuration that can be shared across multiple tests.
 class FontConfigManager {
   Directory? _fontsDirectory;
-  File? _cachedFontConfig;
 
   /// Returns a Font configuration that limits font fallback to the artifact
   /// cache directory.
-  File get fontConfigFile {
-    if (_cachedFontConfig != null) {
-      return _cachedFontConfig!;
-    }
-
+  late final File fontConfigFile = (){
     final StringBuffer sb = StringBuffer();
     sb.writeln('<fontconfig>');
     sb.writeln('  <dir>${globals.cache.getCacheArtifacts().path}</dir>');
@@ -30,11 +25,11 @@ class FontConfigManager {
       globals.printTrace('Using this directory for fonts configuration: ${_fontsDirectory!.path}');
     }
 
-    _cachedFontConfig = globals.fs.file('${_fontsDirectory!.path}/fonts.conf');
-    _cachedFontConfig!.createSync();
-    _cachedFontConfig!.writeAsStringSync(sb.toString());
-    return _cachedFontConfig!;
-  }
+    final File cachedFontConfig = globals.fs.file('${_fontsDirectory!.path}/fonts.conf');
+    cachedFontConfig.createSync();
+    cachedFontConfig.writeAsStringSync(sb.toString());
+    return cachedFontConfig;
+  }();
 
   Future<void> dispose() async {
     if (_fontsDirectory != null) {

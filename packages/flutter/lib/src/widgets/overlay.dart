@@ -214,10 +214,10 @@ class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
   }
 }
 
-/// A [Stack] of entries that can be managed independently.
+/// A stack of entries that can be managed independently.
 ///
 /// Overlays let independent child widgets "float" visual elements on top of
-/// other widgets by inserting them into the overlay's [Stack]. The overlay lets
+/// other widgets by inserting them into the overlay's stack. The overlay lets
 /// each of these widgets manage their participation in the overlay using
 /// [OverlayEntry] objects.
 ///
@@ -225,12 +225,18 @@ class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
 /// overlay created by the [Navigator] in a [WidgetsApp] or a [MaterialApp]. The
 /// navigator uses its overlay to manage the visual appearance of its routes.
 ///
+/// The [Overlay] widget uses a custom stack implementation, which is very
+/// similar to the [Stack] widget. The main use case of [Overlay] is related to
+/// navigation and being able to insert widgets on top of the pages in an app.
+/// To simply display a stack of widgets, consider using [Stack] instead.
+///
 /// See also:
 ///
-///  * [OverlayEntry].
-///  * [OverlayState].
-///  * [WidgetsApp].
-///  * [MaterialApp].
+///  * [OverlayEntry], the class that is used for describing the overlay entries.
+///  * [OverlayState], which is used to insert the entries into the overlay.
+///  * [WidgetsApp], which inserts an [Overlay] widget indirectly via its [Navigator].
+///  * [MaterialApp], which inserts an [Overlay] widget indirectly via its [Navigator].
+///  * [Stack], which allows directly displaying a stack of widgets.
 class Overlay extends StatefulWidget {
   /// Creates an overlay.
   ///
@@ -431,7 +437,7 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
       return;
     if (listEquals(_entries, newEntriesList))
       return;
-    final LinkedHashSet<OverlayEntry> old = LinkedHashSet<OverlayEntry>.from(_entries);
+    final LinkedHashSet<OverlayEntry> old = LinkedHashSet<OverlayEntry>.of(_entries);
     for (final OverlayEntry entry in newEntriesList) {
       entry._overlay ??= this;
     }
@@ -762,9 +768,9 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
       final bool isHit = result.addWithPaintOffset(
         offset: childParentData.offset,
         position: position,
-        hitTest: (BoxHitTestResult result, Offset? transformed) {
+        hitTest: (BoxHitTestResult result, Offset transformed) {
           assert(transformed == position - childParentData.offset);
-          return child!.hitTest(result, position: transformed!);
+          return child!.hitTest(result, position: transformed);
         },
       );
       if (isHit)

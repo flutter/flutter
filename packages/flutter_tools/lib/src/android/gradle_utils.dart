@@ -14,7 +14,7 @@ import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
 import '../cache.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
 import 'android_sdk.dart';

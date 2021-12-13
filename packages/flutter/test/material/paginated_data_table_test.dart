@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(gspencergoog): Remove this tag once this test's state leaks/test
+// dependencies have been fixed.
+// https://github.com/flutter/flutter/issues/85160
+// Fails with "flutter test --test-randomize-ordering-seed=1000"
+@Tags(<String>['no-shuffle'])
+
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -296,7 +302,6 @@ void main() {
         header: header != null ? Text(header) : null,
         actions: actions,
         source: TestDataSource(allowSelection: true),
-        showCheckboxColumn: true,
         columns: const <DataColumn>[
           DataColumn(label: Text('Name')),
           DataColumn(label: Text('Calories'), numeric: true),
@@ -856,7 +861,6 @@ void main() {
         home: PaginatedDataTable(
           header: const Text('Test table'),
           source: TestDataSource(allowSelection: true),
-          showCheckboxColumn: true,
           columns: const <DataColumn>[
             DataColumn(label: Text('Name')),
             DataColumn(label: Text('Calories'), numeric: true),

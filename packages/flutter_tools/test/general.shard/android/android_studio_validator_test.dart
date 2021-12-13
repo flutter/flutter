@@ -12,7 +12,7 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/doctor_validator.dart';
-import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
+import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -20,7 +20,6 @@ import '../../src/context.dart';
 const String home = '/home/me';
 
 final Platform linuxPlatform = FakePlatform(
-  operatingSystem: 'linux',
   environment: <String, String>{'HOME': home}
 );
 

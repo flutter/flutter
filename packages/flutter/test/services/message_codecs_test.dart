@@ -80,7 +80,6 @@ void main() {
     test('should allow null error message,', () {
       final ByteData errorData = method.encodeErrorEnvelope(
         code: 'errorCode',
-        message: null,
         details: 'errorDetails',
       );
       expect(
@@ -214,6 +213,17 @@ void main() {
         null, // ensures the offset of the following list is unaligned.
         null, // ensures the offset of the following list is unaligned.
         Float64List.fromList(<double>[
+          double.negativeInfinity,
+          -double.maxFinite,
+          -double.minPositive,
+          -0.0,
+          0.0,
+          double.minPositive,
+          double.maxFinite,
+          double.infinity,
+          double.nan,
+        ]),
+        Float32List.fromList(<double>[
           double.negativeInfinity,
           -double.maxFinite,
           -double.minPositive,

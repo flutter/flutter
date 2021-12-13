@@ -98,6 +98,9 @@ class ImageInfo {
   /// the image.
   final ui.Image image;
 
+  /// The size of raw image pixels in bytes.
+  int get sizeBytes => image.height * image.width * 4;
+
   /// The linear scale factor for drawing this image at its intended size.
   ///
   /// The scale factor applies to the width and the height.
@@ -568,6 +571,8 @@ abstract class ImageStreamCompleter with Diagnosticable {
   }
 
   bool _disposed = false;
+
+  @mustCallSuper
   void _maybeDispose() {
     if (!_hadAtLeastOneListener || _disposed || _listeners.isNotEmpty || _keepAliveHandles != 0) {
       return;
@@ -624,7 +629,7 @@ abstract class ImageStreamCompleter with Diagnosticable {
       return;
     // Make a copy to allow for concurrent modification.
     final List<ImageStreamListener> localListeners =
-        List<ImageStreamListener>.from(_listeners);
+        List<ImageStreamListener>.of(_listeners);
     for (final ImageStreamListener listener in localListeners) {
       try {
         listener.onImage(image.clone(), false);
@@ -848,7 +853,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
       );
     });
     if (chunkEvents != null) {
-      chunkEvents.listen(reportImageChunkEvent,
+      _chunkSubscription = chunkEvents.listen(reportImageChunkEvent,
         onError: (Object error, StackTrace stack) {
           reportError(
             context: ErrorDescription('loading an image'),
@@ -862,6 +867,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
     }
   }
 
+  StreamSubscription<ImageChunkEvent>? _chunkSubscription;
   ui.Codec? _codec;
   final double _scale;
   final InformationCollector? _informationCollector;
@@ -985,6 +991,16 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
     if (!hasListeners) {
       _timer?.cancel();
       _timer = null;
+    }
+  }
+
+  @override
+  void _maybeDispose() {
+    super._maybeDispose();
+    if (_disposed) {
+      _chunkSubscription?.onData(null);
+      _chunkSubscription?.cancel();
+      _chunkSubscription = null;
     }
   }
 }

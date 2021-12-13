@@ -812,9 +812,7 @@ void main() {
     // Move navigator into restoration scope.
     await tester.pumpWidget(const RootRestorationScope(
       restorationId: 'root',
-      child: TestWidget(
-        restorationId: 'app',
-      ),
+      child: TestWidget(),
     ));
 
     expect(findRoute('Foo'), findsOneWidget);
@@ -1332,4 +1330,4 @@ class _RouteFinder extends MatchFinder {
   }
 }
 
-class FakeRoute extends Fake implements Route<void> {}
+class FakeRoute extends Fake implements Route<void> { }

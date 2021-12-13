@@ -21,7 +21,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/attach.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/device_port_forwarder.dart';
-import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/application_package.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/macos/macos_ipad_device.dart';
@@ -197,8 +197,8 @@ void main() {
         // output dill, filesystem scheme, and filesystem root.
         final FlutterDevice flutterDevice = hotRunnerFactory.devices.first;
 
-        expect(flutterDevice.fileSystemScheme, filesystemScheme);
-        expect(flutterDevice.fileSystemRoots, const <String>[filesystemRoot]);
+        expect(flutterDevice.buildInfo.fileSystemScheme, filesystemScheme);
+        expect(flutterDevice.buildInfo.fileSystemRoots, const <String>[filesystemRoot]);
       }, overrides: <Type, Generator>{
         FileSystem: () => testFileSystem,
         ProcessManager: () => FakeProcessManager.any(),
@@ -568,6 +568,20 @@ class StreamLogger extends Logger {
     int hangingIndent,
     bool wrap,
   }) {
+    hadErrorOutput = true;
+    _log('[stderr] $message');
+  }
+
+  @override
+  void printWarning(
+    String message, {
+    bool emphasis,
+    TerminalColor color,
+    int indent,
+    int hangingIndent,
+    bool wrap,
+  }) {
+    hadWarningOutput = true;
     _log('[stderr] $message');
   }
 
@@ -767,17 +781,20 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
 
   @override
   Future<void> startDartDevelopmentService(
-    Uri observatoryUri,
+    Uri observatoryUri, {
+    @required Logger logger,
     int hostPort,
     bool ipv6,
-    bool disableServiceAuthCodes, {
-    @required Logger logger,
+    bool disableServiceAuthCodes,
   }) async {}
 
   @override
   Uri get uri => Uri.parse('http://localhost:8181');
 }
 
+// Unfortunately Device, despite not being immutable, has an `operator ==`.
+// Until we fix that, we have to also ignore related lints here.
+// ignore: avoid_implementing_value_types
 class FakeAndroidDevice extends Fake implements AndroidDevice {
   FakeAndroidDevice({@required this.id});
 
@@ -837,6 +854,9 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   Category get category => Category.mobile;
 }
 
+// Unfortunately Device, despite not being immutable, has an `operator ==`.
+// Until we fix that, we have to also ignore related lints here.
+// ignore: avoid_implementing_value_types
 class FakeIOSDevice extends Fake implements IOSDevice {
   FakeIOSDevice({this.dds, this.portForwarder, this.logReader});
 

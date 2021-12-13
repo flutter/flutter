@@ -14,7 +14,7 @@ import '../base/process.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../convert.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../ios/application_package.dart';
 import '../ios/mac.dart';
 import '../runner/flutter_command.dart';
@@ -50,7 +50,7 @@ class BuildIOSCommand extends _BuildIOSSubCommand {
   final XcodeBuildAction xcodeBuildAction = XcodeBuildAction.build;
 
   @override
-  bool get forSimulator => boolArg('simulator');
+  EnvironmentType get environmentType => boolArg('simulator') ? EnvironmentType.simulator : EnvironmentType.physical;
 
   @override
   bool get configOnly => boolArg('config-only');
@@ -91,7 +91,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
   final XcodeBuildAction xcodeBuildAction = XcodeBuildAction.archive;
 
   @override
-  final bool forSimulator = false;
+  final EnvironmentType environmentType = EnvironmentType.physical;
 
   @override
   final bool configOnly = false;
@@ -129,7 +129,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
 
     // xcarchive failed or not at expected location.
     if (xcarchiveResult.exitStatus != ExitStatus.success) {
-      globals.logger.printStatus('Skipping IPA');
+      globals.printStatus('Skipping IPA');
       return xcarchiveResult;
     }
 
@@ -176,17 +176,19 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
       throwToolExit('Encountered error while building IPA:\n$errorMessage');
     }
 
-    globals.logger.printStatus('Built IPA to $outputPath.');
+    globals.printStatus('Built IPA to $outputPath.');
 
     return FlutterCommandResult.success();
   }
 }
 
 abstract class _BuildIOSSubCommand extends BuildSubCommand {
-  _BuildIOSSubCommand({ @required bool verboseHelp }) {
+  _BuildIOSSubCommand({
+    @required bool verboseHelp
+  }) : super(verboseHelp: verboseHelp) {
     addTreeShakeIconsFlag();
     addSplitDebugInfoOption();
-    addBuildModeFlags(verboseHelp: verboseHelp, defaultToRelease: true);
+    addBuildModeFlags(verboseHelp: verboseHelp);
     usesTargetOption();
     usesFlavorOption();
     usesPubOption();
@@ -208,7 +210,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
   };
 
   XcodeBuildAction get xcodeBuildAction;
-  bool get forSimulator;
+  EnvironmentType get environmentType;
   bool get configOnly;
   bool get shouldCodesign;
 
@@ -225,20 +227,23 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
   Directory _outputAppDirectory(String xcodeResultOutput);
 
   @override
+  bool get supported => globals.platform.isMacOS;
+
+  @override
   Future<FlutterCommandResult> runCommand() async {
-    defaultBuildMode = forSimulator ? BuildMode.debug : BuildMode.release;
+    defaultBuildMode = environmentType == EnvironmentType.simulator ? BuildMode.debug : BuildMode.release;
     final BuildInfo buildInfo = await getBuildInfo();
 
-    if (!globals.platform.isMacOS) {
+    if (!supported) {
       throwToolExit('Building for iOS is only supported on macOS.');
     }
-    if (forSimulator && !buildInfo.supportsSimulator) {
-      throwToolExit('${toTitleCase(buildInfo.friendlyModeName)} mode is not supported for simulators.');
+    if (environmentType == EnvironmentType.simulator && !buildInfo.supportsSimulator) {
+      throwToolExit('${sentenceCase(buildInfo.friendlyModeName)} mode is not supported for simulators.');
     }
     if (configOnly && buildInfo.codeSizeDirectory != null) {
       throwToolExit('Cannot analyze code size without performing a full build.');
     }
-    if (!forSimulator && !shouldCodesign) {
+    if (environmentType == EnvironmentType.physical && !shouldCodesign) {
       globals.printStatus(
         'Warning: Building for device with codesigning disabled. You will '
         'have to manually codesign before deploying to device.',
@@ -251,7 +256,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
       throwToolExit('Application not configured for iOS');
     }
 
-    final String logTarget = forSimulator ? 'simulator' : 'device';
+    final String logTarget = environmentType == EnvironmentType.simulator ? 'simulator' : 'device';
     final String typeName = globals.artifacts.getEngineType(TargetPlatform.ios, buildInfo.mode);
     if (xcodeBuildAction == XcodeBuildAction.build) {
       globals.printStatus('Building $app for $logTarget ($typeName)...');
@@ -262,7 +267,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
       app: app,
       buildInfo: buildInfo,
       targetOverride: targetFile,
-      buildForDevice: !forSimulator,
+      environmentType: environmentType,
       codesign: shouldCodesign,
       configOnly: configOnly,
       buildAction: xcodeBuildAction,

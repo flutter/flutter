@@ -635,7 +635,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   /// [SystemChannels.navigation].
   @protected
   Future<void> handlePopRoute() async {
-    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.from(_observers)) {
+    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
       if (await observer.didPopRoute())
         return;
     }
@@ -655,14 +655,14 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   @protected
   @mustCallSuper
   Future<void> handlePushRoute(String route) async {
-    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.from(_observers)) {
+    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
       if (await observer.didPushRoute(route))
         return;
     }
   }
 
   Future<void> _handlePushRouteInformation(Map<dynamic, dynamic> routeArguments) async {
-    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.from(_observers)) {
+    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
       if (
         await observer.didPushRouteInformation(
           RouteInformation(
@@ -859,6 +859,11 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
       firstFrameCallback = (List<FrameTiming> timings) {
         assert(sendFramesToEngine);
         if (!kReleaseMode) {
+          // Change the current user tag back to the default tag. At this point,
+          // the user tag should be set to "AppStartUp" (originally set in the
+          // engine), so we need to change it back to the default tag to mark
+          // the end of app start up for CPU profiles.
+          developer.UserTag.defaultTag.makeCurrent();
           developer.Timeline.instantSync('Rasterized first useful frame');
           developer.postEvent('Flutter.FirstFrame', <String, dynamic>{});
         }

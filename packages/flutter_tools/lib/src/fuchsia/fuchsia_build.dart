@@ -16,7 +16,7 @@ import '../build_info.dart';
 import '../bundle_builder.dart';
 import '../convert.dart';
 import '../devfs.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../project.dart';
 
 import 'fuchsia_pm.dart';
@@ -124,6 +124,10 @@ Future<void> _buildAssets(
     assetDirPath: assetDir,
   );
 
+  if (assets == null) {
+    throwToolExit('Unable to find assets.', exitCode: 1);
+  }
+
   final Map<String, DevFSContent> assetEntries =
       Map<String, DevFSContent>.of(assets.entries);
   await writeBundle(globals.fs.directory(assetDir), assetEntries);
@@ -173,7 +177,7 @@ void _rewriteCmx(BuildMode mode, String runnerPackageSource, File src, File dst)
   dst.writeAsStringSync(json.encode(cmx));
 }
 
-// TODO(zra): Allow supplying a signing key.
+// TODO(zanderso): Allow supplying a signing key.
 Future<void> _buildPackage(
   FuchsiaProject fuchsiaProject,
   String target, // lib/main.dart

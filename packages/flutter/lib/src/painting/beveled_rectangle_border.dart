@@ -82,7 +82,7 @@ class BeveledRectangleBorder extends OutlinedBorder {
   /// Returns a copy of this RoundedRectangleBorder with the given fields
   /// replaced with the new values.
   @override
-  BeveledRectangleBorder copyWith({ BorderSide? side, BorderRadius? borderRadius }) {
+  BeveledRectangleBorder copyWith({ BorderSide? side, BorderRadiusGeometry? borderRadius }) {
     return BeveledRectangleBorder(
       side: side ?? this.side,
       borderRadius: borderRadius ?? this.borderRadius,

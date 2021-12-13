@@ -19,7 +19,6 @@ void main() {
       MaterialApp(
         home: Scaffold(
           appBar: AppBar(
-            backwardsCompatibility: false,
             actions: <Widget>[
               IconButton(icon: const Icon(Icons.share), onPressed: () { }),
             ],
@@ -38,6 +37,7 @@ void main() {
     expect(widget.color, Colors.blue);
     expect(widget.elevation, 4.0);
     expect(widget.shadowColor, Colors.black);
+    expect(widget.shape, null);
     expect(iconTheme.data, const IconThemeData(color: Colors.white));
     expect(actionsIconTheme.data, const IconThemeData(color: Colors.white));
     expect(actionIconText.text.style!.color, Colors.white);
@@ -54,7 +54,6 @@ void main() {
         theme: ThemeData(appBarTheme: appBarTheme),
         home: Scaffold(
           appBar: AppBar(
-            backwardsCompatibility: false,
             title: const Text('App Bar Title'),
             actions: <Widget>[
               IconButton(icon: const Icon(Icons.share), onPressed: () { }),
@@ -74,6 +73,7 @@ void main() {
     expect(widget.color, appBarTheme.backgroundColor);
     expect(widget.elevation, appBarTheme.elevation);
     expect(widget.shadowColor, appBarTheme.shadowColor);
+    expect(widget.shape, const StadiumBorder());
     expect(iconTheme.data, appBarTheme.iconTheme);
     expect(actionsIconTheme.data, appBarTheme.actionsIconTheme);
     expect(actionIconText.text.style!.color, appBarTheme.actionsIconTheme!.color);
@@ -133,6 +133,7 @@ void main() {
     const Color color = Colors.orange;
     const double elevation = 3.0;
     const Color shadowColor = Colors.red;
+    const ShapeBorder shape = RoundedRectangleBorder();
     const IconThemeData iconThemeData = IconThemeData(color: Colors.green);
     const IconThemeData actionsIconThemeData = IconThemeData(color: Colors.lightBlue);
     const TextStyle toolbarTextStyle = TextStyle(color: Colors.pink);
@@ -140,15 +141,17 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.from(colorScheme: const ColorScheme.light()),
+        theme: ThemeData.from(colorScheme: const ColorScheme.light()).copyWith(
+          appBarTheme: _appBarTheme(),
+        ),
         home: Scaffold(
           appBar: AppBar(
-            backwardsCompatibility: false,
             backgroundColor: color,
             brightness: brightness,
             systemOverlayStyle: systemOverlayStyle,
             elevation: elevation,
             shadowColor: shadowColor,
+            shape: shape,
             iconTheme: iconThemeData,
             actionsIconTheme: actionsIconThemeData,
             toolbarTextStyle: toolbarTextStyle,
@@ -171,6 +174,7 @@ void main() {
     expect(widget.color, color);
     expect(widget.elevation, elevation);
     expect(widget.shadowColor, shadowColor);
+    expect(widget.shape, shape);
     expect(iconTheme.data, iconThemeData);
     expect(actionsIconTheme.data, actionsIconThemeData);
     expect(actionIconText.text.style!.color, actionsIconThemeData.color);
@@ -185,7 +189,6 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData.from(colorScheme: const ColorScheme.light()),
       home: Scaffold(appBar: AppBar(
-        backwardsCompatibility: false,
         iconTheme: iconThemeData,
         actionsIconTheme: actionsIconThemeData,
         actions: <Widget>[
@@ -207,7 +210,6 @@ void main() {
           .copyWith(appBarTheme: _appBarTheme()),
         home: Scaffold(
           appBar: AppBar(
-            backwardsCompatibility: false,
             actions: <Widget>[
               IconButton(icon: const Icon(Icons.share), onPressed: () { }),
             ],
@@ -244,7 +246,6 @@ void main() {
             theme = Theme.of(context);
             return Scaffold(
               appBar: AppBar(
-                backwardsCompatibility: false,
                 actions: <Widget>[
                   IconButton(icon: const Icon(Icons.share), onPressed: () { }),
                 ],
@@ -321,7 +322,6 @@ void main() {
             builder: (BuildContext context) {
               return Scaffold(
                 appBar: AppBar(
-                  backwardsCompatibility: false,
                   iconTheme: IconThemeData(color: appBarIconColor),
                   actions: <Widget>[
                     IconButton(icon: const Icon(Icons.share), onPressed: () { }),
@@ -343,7 +343,7 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(buildFrame(appIconColor: Colors.lime, appBarIconColor: null));
+    await tester.pumpWidget(buildFrame(appIconColor: Colors.lime));
     expect(getIconText().text.style!.color, Colors.lime);
 
     await tester.pumpWidget(buildFrame(appIconColor: Colors.lime, appBarIconColor: Colors.purple));
@@ -355,7 +355,6 @@ void main() {
       theme: ThemeData(appBarTheme: const AppBarTheme(centerTitle: true)),
       home: Scaffold(appBar: AppBar(
         title: const Text('Title'),
-        backwardsCompatibility: false,
       )),
     ));
 
@@ -368,7 +367,6 @@ void main() {
       theme: ThemeData(appBarTheme: const AppBarTheme(centerTitle: true)),
       home: Scaffold(
         appBar: AppBar(
-          backwardsCompatibility: false,
           title: const Text('Title'),
           centerTitle: false,
         ),
@@ -384,7 +382,6 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(platform: TargetPlatform.iOS),
       home: Scaffold(appBar: AppBar(
-        backwardsCompatibility: false,
         title: const Text('Title'),
       )),
     ));
@@ -400,7 +397,6 @@ void main() {
       theme: ThemeData(appBarTheme: const AppBarTheme(shadowColor: Colors.red)),
       home: Scaffold(
         appBar: AppBar(
-          backwardsCompatibility: false,
           title: const Text('Title'),
           shadowColor: Colors.yellow,
         ),
@@ -418,7 +414,6 @@ void main() {
       theme: ThemeData(appBarTheme: const AppBarTheme(titleSpacing: kTitleSpacing)),
       home: Scaffold(
         appBar: AppBar(
-          backwardsCompatibility: false,
           title: const Text('Title'),
         ),
       ),
@@ -434,7 +429,6 @@ void main() {
       theme: ThemeData(appBarTheme: const AppBarTheme(titleSpacing: kTitleSpacing)),
       home: Scaffold(
         appBar: AppBar(
-          backwardsCompatibility: false,
           title: const Text('Title'),
           titleSpacing: 40,
         ),
@@ -452,7 +446,6 @@ void main() {
       home: const CustomScrollView(
         slivers: <Widget>[
           SliverAppBar(
-            backwardsCompatibility: false,
             title: Text('Title'),
           ),
         ],
@@ -470,7 +463,6 @@ void main() {
       home: const CustomScrollView(
         slivers: <Widget>[
           SliverAppBar(
-            backwardsCompatibility: false,
             title: Text('Title'),
             titleSpacing: 40,
           ),
@@ -497,7 +489,6 @@ void main() {
   testWidgets('AppBarTheme implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const AppBarTheme(
-      backwardsCompatibility: false,
       brightness: Brightness.dark,
       backgroundColor: Color(0xff000001),
       elevation: 8.0,
@@ -518,7 +509,6 @@ void main() {
       'shadowColor: Color(0xff000002)',
       'centerTitle: true',
       'titleSpacing: 40.0',
-      'backwardsCompatibility: false',
     ]);
 
     // On the web, Dart doubles and ints are backed by the same kind of object because
@@ -526,7 +516,7 @@ void main() {
     // to "4", which results in the web evaluating to the value "4" regardless of which
     // one is used. This results in a difference for doubles in debugFillProperties between
     // the web and the rest of Flutter's target platforms.
-  }, skip: kIsWeb);
+  }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/87364
 }
 
 AppBarTheme _appBarTheme() {
@@ -542,6 +532,7 @@ AppBarTheme _appBarTheme() {
     backgroundColor: backgroundColor,
     elevation: elevation,
     shadowColor: shadowColor,
+    shape: StadiumBorder(),
     iconTheme: iconThemeData,
     toolbarHeight: 96,
     toolbarTextStyle: TextStyle(color: Colors.yellow),

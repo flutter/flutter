@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
+
 @TestOn('!chrome')
 import 'dart:ui';
 
@@ -421,14 +425,14 @@ void main() {
     expect(getRawMaterialButtonWidget().shape, const CircleBorder());
 
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Scaffold(
           floatingActionButton: FloatingActionButton.extended(
-            label: const SizedBox(
+            label: SizedBox(
               width: 100.0,
               child: Text('label'),
             ),
-            icon: const Icon(Icons.android),
+            icon: Icon(Icons.android),
             onPressed: null,
           ),
         ),
@@ -475,10 +479,10 @@ void main() {
     }
 
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Scaffold(
           floatingActionButton: FloatingActionButton.extended(
-            label: const SizedBox(
+            label: SizedBox(
               width: 100.0,
               child: Text('label'),
             ),
@@ -905,7 +909,7 @@ void main() {
         isFocusable: true,
       ),
     );
-  }, semanticsEnabled: true);
+  });
 
   testWidgets('Foreground color applies to icon on fab', (WidgetTester tester) async {
     const Color foregroundColor = Color(0xcafefeed);
@@ -963,6 +967,91 @@ void main() {
     // Verify that Icon is present and label is not.
     expect(find.byKey(iconKey), findsOneWidget);
     expect(find.byKey(labelKey), findsNothing);
+  });
+
+  testWidgets('FloatingActionButton.small configures correct size', (WidgetTester tester) async {
+    final Key key = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          floatingActionButton: FloatingActionButton.small(
+            key: key,
+            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            onPressed: null,
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byKey(key)), const Size(40.0, 40.0));
+  });
+
+  testWidgets('FloatingActionButton.large configures correct size', (WidgetTester tester) async {
+    final Key key = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          floatingActionButton: FloatingActionButton.large(
+            key: key,
+            onPressed: null,
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byKey(key)), const Size(96.0, 96.0));
+  });
+
+  testWidgets('FloatingActionButton.extended can customize spacing', (WidgetTester tester) async {
+    const Key iconKey = Key('icon');
+    const Key labelKey = Key('label');
+    const double spacing = 33.0;
+    const EdgeInsetsDirectional padding = EdgeInsetsDirectional.only(start: 5.0, end: 6.0);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          floatingActionButton: FloatingActionButton.extended(
+            label: const Text('', key: labelKey),
+            icon: const Icon(Icons.add, key: iconKey),
+            extendedIconLabelSpacing: spacing,
+            extendedPadding: padding,
+            onPressed: () {},
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getTopLeft(find.byKey(labelKey)).dx - tester.getTopRight(find.byKey(iconKey)).dx, spacing);
+    expect(tester.getTopLeft(find.byKey(iconKey)).dx - tester.getTopLeft(find.byType(FloatingActionButton)).dx, padding.start);
+    expect(tester.getTopRight(find.byType(FloatingActionButton)).dx - tester.getTopRight(find.byKey(labelKey)).dx, padding.end);
+  });
+
+  testWidgets('FloatingActionButton.extended can customize text style', (WidgetTester tester) async {
+    const Key labelKey = Key('label');
+    const TextStyle style = TextStyle(letterSpacing: 2.0);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          floatingActionButton: FloatingActionButton.extended(
+            label: const Text('', key: labelKey),
+            icon: const Icon(Icons.add),
+            extendedTextStyle: style,
+            onPressed: () {},
+          ),
+        ),
+      ),
+    );
+
+    final RawMaterialButton rawMaterialButton = tester.widget<RawMaterialButton>(
+      find.descendant(
+        of: find.byType(FloatingActionButton),
+        matching: find.byType(RawMaterialButton),
+      ),
+    );
+    // The color comes from the default color scheme's onSecondary value.
+    expect(rawMaterialButton.textStyle, style.copyWith(color: const Color(0xffffffff)));
   });
 
   group('feedback', () {

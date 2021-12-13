@@ -59,10 +59,10 @@ void validateNodeJsonSerializationHelper(Map<String, Object?> json, DiagnosticsN
   expect(json['name'], equals(node.name));
   expect(json['showSeparator'] ?? true, equals(node.showSeparator));
   expect(json['description'], equals(node.toDescription()));
-  expect(json['level'] ?? describeEnum(DiagnosticLevel.info), equals(describeEnum(node.level)));
+  expect(json['level'] ?? DiagnosticLevel.info.name, equals(node.level.name));
   expect(json['showName'] ?? true, equals(node.showName));
   expect(json['emptyBodyDescription'], equals(node.emptyBodyDescription));
-  expect(json['style'] ?? describeEnum(DiagnosticsTreeStyle.sparse), equals(describeEnum(node.style!)));
+  expect(json['style'] ?? DiagnosticsTreeStyle.sparse.name, equals(node.style!.name));
   expect(json['type'], equals(node.runtimeType.toString()));
   expect(json['hasChildren'] ?? false, equals(node.getChildren().isNotEmpty));
 }
@@ -491,7 +491,8 @@ void main() {
       ' │ │\n'
       ' │ └─child node B3: TestTree#00000\n'
       ' │     <leaf node>\n'
-      ' │     foo: 42\n'
+      ' │     foo:\n'
+      ' │       42\n'
       ' │\n'
       ' └─child node C: TestTree#00000\n'
       '     foo:\n'
@@ -958,7 +959,6 @@ void main() {
     final StringProperty quoted = StringProperty(
       'name',
       'value',
-      quoted: true,
     );
     expect(quoted.toString(), equals('name: "value"'));
     validateStringPropertyJsonSerialization(quoted);
@@ -973,7 +973,6 @@ void main() {
         'name',
         null,
         showName: false,
-        quoted: true,
       ).toString(),
       equals('null'),
     );
@@ -2279,5 +2278,23 @@ void main() {
     json = simulateJsonSerialization(stringProperty);
     expect(json['name'], 'string2');
     expect(json['value'], 'world');
+  });
+
+  test('IntProperty arguments passed to super', () {
+    final DiagnosticsProperty<num> property = IntProperty(
+      'Example',
+      0,
+      ifNull: 'is null',
+      showName: false,
+      defaultValue: 1,
+      style: DiagnosticsTreeStyle.none,
+      level: DiagnosticLevel.off,
+    );
+    expect(property.value, equals(0));
+    expect(property.ifNull, equals('is null'));
+    expect(property.showName, equals(false));
+    expect(property.defaultValue, equals(1));
+    expect(property.style, equals(DiagnosticsTreeStyle.none));
+    expect(property.level, equals(DiagnosticLevel.off));
   });
 }

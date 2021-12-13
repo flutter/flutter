@@ -28,8 +28,6 @@ abstract class ApplicationPackage {
 
   String? get displayName => name;
 
-  File? get packagesFile => null;
-
   @override
   String toString() => displayName ?? id;
 }

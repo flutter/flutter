@@ -23,7 +23,7 @@ void expectExitCode(ProcessResult result, int expectedExitCode) {
 
 void main() {
   group('verifyVersion()', () {
-    MemoryFileSystem fileSystem;
+    late MemoryFileSystem fileSystem;
 
     setUp(() {
       fileSystem = MemoryFileSystem.test();
@@ -97,7 +97,7 @@ void main() {
     const ProcessManager processManager = LocalProcessManager();
 
     Future<ProcessResult> runScript(
-        [Map<String, String> environment, List<String> otherArgs = const <String>[]]) async {
+        [Map<String, String>? environment, List<String> otherArgs = const <String>[]]) async {
       final String dart = path.absolute(
           path.join('..', '..', 'bin', 'cache', 'dart-sdk', 'bin', 'dart'));
       final ProcessResult scriptProcess = processManager.runSync(<String>[
@@ -109,19 +109,19 @@ void main() {
     }
 
     test('subshards tests correctly', () async {
+      // When updating this test, try to pick shard numbers that ensure we're checking
+      // that unequal test distributions don't miss tests.
       ProcessResult result = await runScript(
         <String, String>{'SHARD': 'smoke_tests', 'SUBSHARD': '1_3'},
       );
       expectExitCode(result, 0);
-      // There are currently 6 smoke tests. This shard should contain test 1 and 2.
-      expect(result.stdout, contains('Selecting subshard 1 of 3 (range 1-2 of 6)'));
+      expect(result.stdout, contains('Selecting subshard 1 of 3 (range 1-3 of 8)'));
 
       result = await runScript(
-        <String, String>{'SHARD': 'smoke_tests', 'SUBSHARD': '5_6'},
+        <String, String>{'SHARD': 'smoke_tests', 'SUBSHARD': '3_3'},
       );
       expectExitCode(result, 0);
-      // This shard should contain only test 5.
-      expect(result.stdout, contains('Selecting subshard 5 of 6 (range 5-5 of 6)'));
+      expect(result.stdout, contains('Selecting subshard 3 of 3 (range 7-8 of 8)'));
     });
 
     test('exits with code 1 when SUBSHARD index greater than total', () async {

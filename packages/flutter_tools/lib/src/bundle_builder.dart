@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:meta/meta.dart';
 import 'package:pool/pool.dart';
 
@@ -18,7 +16,7 @@ import 'build_system/targets/common.dart';
 import 'bundle.dart';
 import 'cache.dart';
 import 'devfs.dart';
-import 'globals_null_migrated.dart' as globals;
+import 'globals.dart' as globals;
 import 'project.dart';
 
 
@@ -29,15 +27,15 @@ class BundleBuilder {
   /// The default `mainPath` is `lib/main.dart`.
   /// The default  `manifestPath` is `pubspec.yaml`
   Future<void> build({
-    @required TargetPlatform platform,
-    @required BuildInfo buildInfo,
-    FlutterProject project,
-    String mainPath,
+    required TargetPlatform platform,
+    required BuildInfo buildInfo,
+    FlutterProject? project,
+    String? mainPath,
     String manifestPath = defaultManifestPath,
-    String applicationKernelFilePath,
-    String depfilePath,
-    String assetDirPath,
-    @visibleForTesting BuildSystem buildSystem
+    String? applicationKernelFilePath,
+    String? depfilePath,
+    String? assetDirPath,
+    @visibleForTesting BuildSystem? buildSystem,
   }) async {
     project ??= FlutterProject.current();
     mainPath ??= defaultMainPath;
@@ -52,7 +50,7 @@ class BundleBuilder {
       buildDir: project.dartTool.childDirectory('flutter_build'),
       cacheDir: globals.cache.getRoot(),
       flutterRootDir: globals.fs.directory(Cache.flutterRoot),
-      engineVersion: globals.artifacts.isLocalEngine
+      engineVersion: globals.artifacts!.isLocalEngine
           ? null
           : globals.flutterVersion.engineRevision,
       defines: <String, String>{
@@ -62,7 +60,7 @@ class BundleBuilder {
         kDeferredComponents: 'false',
         ...buildInfo.toBuildSystemEnvironment(),
       },
-      artifacts: globals.artifacts,
+      artifacts: globals.artifacts!,
       fileSystem: globals.fs,
       logger: globals.logger,
       processManager: globals.processManager,
@@ -72,7 +70,7 @@ class BundleBuilder {
     final Target target = buildInfo.mode == BuildMode.debug
         ? const CopyFlutterBundle()
         : const ReleaseCopyFlutterBundle();
-    final BuildResult result = await buildSystem.build(target, environment);
+    final BuildResult result = await buildSystem!.build(target, environment);
 
     if (!result.success) {
       for (final ExceptionMeasurement measurement in result.exceptions.values) {
@@ -108,14 +106,14 @@ class BundleBuilder {
   }
 }
 
-Future<AssetBundle> buildAssets({
-  String manifestPath,
-  String assetDirPath,
-  @required String packagesPath,
-  TargetPlatform targetPlatform,
+Future<AssetBundle?> buildAssets({
+  required String manifestPath,
+  String? assetDirPath,
+  String? packagesPath,
+  TargetPlatform? targetPlatform,
 }) async {
   assetDirPath ??= getAssetBuildDirectory();
-  packagesPath ??= globals.fs.path.absolute(packagesPath);
+  packagesPath ??= globals.fs.path.absolute('.packages');
 
   // Build the asset bundle.
   final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
@@ -135,14 +133,14 @@ Future<AssetBundle> buildAssets({
 Future<void> writeBundle(
   Directory bundleDir,
   Map<String, DevFSContent> assetEntries,
-  { Logger loggerOverride }
+  { Logger? loggerOverride }
 ) async {
   loggerOverride ??= globals.logger;
   if (bundleDir.existsSync()) {
     try {
       bundleDir.deleteSync(recursive: true);
     } on FileSystemException catch (err) {
-      loggerOverride.printError(
+      loggerOverride.printWarning(
         'Failed to clean up asset directory ${bundleDir.path}: $err\n'
         'To clean build artifacts, use the command "flutter clean".'
       );

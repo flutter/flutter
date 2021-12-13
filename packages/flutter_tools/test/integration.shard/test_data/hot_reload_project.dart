@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import '../test_utils.dart';
 import 'project.dart';
 
@@ -25,12 +23,21 @@ class HotReloadProject extends Project {
   import 'package:flutter/scheduler.dart';
   import 'package:flutter/services.dart';
   import 'package:flutter/widgets.dart';
+  import 'package:flutter/foundation.dart';
 
   void main() async {
     WidgetsFlutterBinding.ensureInitialized();
     final ByteData message = const StringCodec().encodeMessage('AppLifecycleState.resumed')!;
     await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
-    runApp(MyApp());
+    // See https://github.com/flutter/flutter/issues/86202
+    if (kIsWeb) {
+      while (true) {
+        runApp(MyApp());
+        await Future.delayed(const Duration(seconds: 1));
+      }
+    } else {
+     runApp(MyApp());
+    }
   }
 
   int count = 1;
@@ -86,6 +93,10 @@ class HotReloadProject extends Project {
       '// printHotReloadWorked();',
       'printHotReloadWorked();',
     );
-    writeFile(fileSystem.path.join(dir.path, 'lib', 'main.dart'), newMainContents);
+    writeFile(
+      fileSystem.path.join(dir.path, 'lib', 'main.dart'),
+      newMainContents,
+      writeFutureModifiedDate: true,
+    );
   }
 }

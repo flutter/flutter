@@ -194,6 +194,42 @@ void main() {
     expect(SchedulerBinding.instance!.transientCallbackCount, equals(0));
   });
 
+  testWidgets('Enabled button animates', (WidgetTester tester) async {
+    await tester.pumpWidget(boilerplate(child: CupertinoButton(
+      child: const Text('Tap me'),
+      onPressed: () { },
+    )));
+
+    await tester.tap(find.byType(CupertinoButton));
+    // Enter animation.
+    await tester.pump();
+    FadeTransition transition = tester.firstWidget(find.byType(FadeTransition));
+
+    await tester.pump(const Duration(milliseconds: 50));
+    transition = tester.firstWidget(find.byType(FadeTransition));
+    expect(transition.opacity.value, moreOrLessEquals(0.403, epsilon: 0.001));
+
+    await tester.pump(const Duration(milliseconds: 100));
+    transition = tester.firstWidget(find.byType(FadeTransition));
+    expect(transition.opacity.value, moreOrLessEquals(0.400, epsilon: 0.001));
+
+    await tester.pump(const Duration(milliseconds: 50));
+    transition = tester.firstWidget(find.byType(FadeTransition));
+    expect(transition.opacity.value, moreOrLessEquals(0.650, epsilon: 0.001));
+
+    await tester.pump(const Duration(milliseconds: 50));
+    transition = tester.firstWidget(find.byType(FadeTransition));
+    expect(transition.opacity.value, moreOrLessEquals(0.894, epsilon: 0.001));
+
+    await tester.pump(const Duration(milliseconds: 50));
+    transition = tester.firstWidget(find.byType(FadeTransition));
+    expect(transition.opacity.value, moreOrLessEquals(0.988, epsilon: 0.001));
+
+    await tester.pump(const Duration(milliseconds: 50));
+    transition = tester.firstWidget(find.byType(FadeTransition));
+    expect(transition.opacity.value, moreOrLessEquals(1.0, epsilon: 0.001));
+  });
+
   testWidgets('pressedOpacity defaults to 0.1', (WidgetTester tester) async {
     await tester.pumpWidget(boilerplate(child: CupertinoButton(
       child: const Text('Tap me'),
@@ -324,7 +360,7 @@ void main() {
 
     await tester.pumpWidget(
       MediaQuery(
-        data: const MediaQueryData(platformBrightness: Brightness.light),
+        data: const MediaQueryData(),
         child: boilerplate(child: const CupertinoButton(
           color: bgColor,
           disabledColor: inactive,

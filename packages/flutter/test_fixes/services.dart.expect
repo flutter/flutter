@@ -12,10 +12,23 @@ void main() {
       layoutDirection: TextDirection.ltr,
   );
   int viewId = surfaceController.viewId;
+  final SurfaceAndroidViewController surfaceController = SurfaceAndroidViewController(
+    error: '',
+  );
+  final TextureAndroidViewController textureController = TextureAndroidViewController(
+    error: '',
+  );
   final TextureAndroidViewController textureController = TextureAndroidViewController(
     viewId: 10,
     viewType: 'FixTester',
     layoutDirection: TextDirection.ltr,
   );
   viewId = textureController.viewId;
+
+  // Changes made in https://github.com/flutter/flutter/pull/81303
+  await SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: <SystemUiOverlay>[SystemUiOverlay.top]);
+  await SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: <SystemUiOverlay>[SystemUiOverlay.bottom]);
+  await SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: <SystemUiOverlay>[SystemUiOverlay.top, SystemUiOverlay.bottom]);
+  await SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: <SystemUiOverlay>[]);
+  await SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, error: '');
 }

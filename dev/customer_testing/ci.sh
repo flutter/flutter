@@ -8,15 +8,15 @@
 # This is called from .cirrus.yml and the LUCI recipes:
 # https://flutter.googlesource.com/recipes/+/refs/heads/master/recipe_modules/adhoc_validation/resources/customer_testing.sh
 
-set -e
+set -ex
 
 # This script does not assume that "flutter update-packages" has been
 # run, to allow CIs to save time by skipping that steps since it's
 # largely not needed to run the flutter/tests tests.
 #
 # However, we do need to update this directory and the tools directory.
-pub get
-(cd ../tools; pub get) # used for find_commit.dart below
+dart __deprecated_pub get
+(cd ../tools; dart __deprecated_pub get) # used for find_commit.dart below
 
 # Next we need to update the flutter/tests checkout.
 #

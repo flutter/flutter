@@ -310,6 +310,65 @@ void main() {
     expect(find.text('19'), findsOneWidget);
   });
 
+  testWidgets('ListView with shrink wrap in bounded context correctly uses cache extent', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: SizedBox(
+          height: 400,
+          child: ListView(
+            itemExtent: 100.0,
+            shrinkWrap: true,
+            children: List<Widget>.generate(20, (int i) {
+              return Text('Text $i');
+            }),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSemantics(find.text('Text 5')), matchesSemantics());
+    expect(tester.getSemantics(find.text('Text 6', skipOffstage: false)), matchesSemantics(isHidden: true));
+    expect(tester.getSemantics(find.text('Text 7', skipOffstage: false)), matchesSemantics(isHidden: true));
+    expect(tester.getSemantics(find.text('Text 8', skipOffstage: false)), matchesSemantics(isHidden: true));
+    handle.dispose();
+  });
+
+  testWidgets('ListView hidden items should stay hidden if their semantics are updated', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: SizedBox(
+          height: 400,
+          child: ListView(
+            itemExtent: 100.0,
+            shrinkWrap: true,
+            children: List<Widget>.generate(20, (int i) {
+              return Text('Text $i');
+            }),
+          ),
+        ),
+      ),
+    );
+    // Scrollable maybe be marked dirty after layout.
+    await tester.pumpAndSettle();
+    expect(tester.getSemantics(find.text('Text 5')), matchesSemantics());
+    expect(tester.getSemantics(find.text('Text 6', skipOffstage: false)), matchesSemantics(isHidden: true));
+    expect(tester.getSemantics(find.text('Text 7', skipOffstage: false)), matchesSemantics(isHidden: true));
+    expect(tester.getSemantics(find.text('Text 8', skipOffstage: false)), matchesSemantics(isHidden: true));
+
+    // Marks Text 6 semantics as dirty.
+    final RenderObject text6 = tester.renderObject(find.text('Text 6', skipOffstage: false));
+    text6.markNeedsSemanticsUpdate();
+
+    // Verify the semantics is still hidden.
+    await tester.pump();
+    expect(tester.getSemantics(find.text('Text 6', skipOffstage: false)), matchesSemantics(isHidden: true));
+
+    handle.dispose();
+  });
+
   testWidgets('didFinishLayout has correct indices', (WidgetTester tester) async {
     final TestSliverChildListDelegate delegate = TestSliverChildListDelegate(
       List<Widget>.generate(

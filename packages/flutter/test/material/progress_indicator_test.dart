@@ -2,6 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// no-shuffle:
+//   //TODO(gspencergoog): Remove this tag once this test's state leaks/test
+//   dependencies have been fixed.
+//   https://github.com/flutter/flutter/issues/85160
+//   Fails with "flutter test --test-randomize-ordering-seed=456"
+// reduced-test-set:
+//   This file is run as part of a reduced test set in CI on Mac and Windows
+//   machines.
+@Tags(<String>['reduced-test-set', 'no-shuffle'])
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -40,7 +50,7 @@ void main() {
         child: Center(
           child: SizedBox(
             width: 200.0,
-            child: LinearProgressIndicator(value: null),
+            child: LinearProgressIndicator(),
           ),
         ),
       ),
@@ -358,7 +368,7 @@ void main() {
     final SemanticsHandle handle = tester.ensureSemantics();
     await tester.pumpWidget(
       const Center(
-        child: CircularProgressIndicator(value: null),
+        child: CircularProgressIndicator(),
       ),
     );
 
@@ -523,6 +533,19 @@ void main() {
     await tester.pump(const Duration(days: 9999));
     expect(tester.hasRunningAnimations, isTrue);
   });
+
+  testWidgets('RefreshProgressIndicator uses expected animation', (WidgetTester tester) async {
+    final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(frameSize: const Size(50, 50));
+
+    await tester.pumpFrames(animationSheet.record(
+      const _RefreshProgressIndicatorGolden(),
+    ), const Duration(seconds: 3));
+
+    await expectLater(
+      await animationSheet.collate(20),
+      matchesGoldenFile('material.refresh_progress_indicator.png'),
+    );
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
 
   testWidgets('Determinate CircularProgressIndicator stops the animator', (WidgetTester tester) async {
     double? progressValue;
@@ -776,7 +799,7 @@ void main() {
       await animationSheet.collate(20),
       matchesGoldenFile('material.circular_progress_indicator.indeterminate.png'),
     );
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/42767
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
 
   testWidgets(
     'Adaptive CircularProgressIndicator displays CupertinoActivityIndicator in iOS',
@@ -792,6 +815,34 @@ void main() {
       );
 
       expect(find.byType(CupertinoActivityIndicator), findsOneWidget);
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform> {
+      TargetPlatform.iOS,
+      TargetPlatform.macOS,
+    }),
+  );
+
+  testWidgets(
+    'Adaptive CircularProgressIndicator can use backgroundColor to change tick color for iOS',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: Material(
+              child: CircularProgressIndicator.adaptive(
+                backgroundColor: Color(0xFF5D3FD3),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        find.byType(CupertinoActivityIndicator),
+        paints
+          ..rrect(rrect: const RRect.fromLTRBXY(-1, -10 / 3, 1, -10, 1, 1),
+                color: const Color(0x935D3FD3)),
+      );
     },
     variant: const TargetPlatformVariant(<TargetPlatform> {
       TargetPlatform.iOS,
@@ -852,4 +903,47 @@ void main() {
     expect(wrappedTheme, isInstanceOf<ProgressIndicatorTheme>());
     expect((wrappedTheme as ProgressIndicatorTheme).data, themeData);
   });
+}
+
+class _RefreshProgressIndicatorGolden extends StatefulWidget {
+  const _RefreshProgressIndicatorGolden({Key? key}) : super(key: key);
+
+  @override
+  _RefreshProgressIndicatorGoldenState createState() => _RefreshProgressIndicatorGoldenState();
+}
+
+class _RefreshProgressIndicatorGoldenState extends State<_RefreshProgressIndicatorGolden> with SingleTickerProviderStateMixin {
+  late final AnimationController controller = AnimationController(
+    vsync: this,
+    duration: const Duration(seconds: 1),
+  )
+    ..forward()
+    ..addListener(() {
+        setState(() {});
+      })
+    ..addStatusListener((AnimationStatus status) {
+        if (status == AnimationStatus.completed) {
+          indeterminate = true;
+        }
+      });
+
+  bool indeterminate = false;
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: RefreshProgressIndicator(
+          value: indeterminate ? null : controller.value,
+        ),
+      ),
+    );
+  }
 }

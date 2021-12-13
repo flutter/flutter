@@ -1595,7 +1595,7 @@ void main() {
     expect(find.text('second'), findsOneWidget);
 
     myPages = <Page<void>>[
-      CupertinoPage<void>(key: pageKeyOne, maintainState: true, child: const Text('first')),
+      CupertinoPage<void>(key: pageKeyOne, child: const Text('first')),
       CupertinoPage<void>(key: pageKeyTwo, child: const Text('second')),
     ];
 
@@ -1670,7 +1670,7 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    await gesture.down(const Offset(3, 300), timeStamp: Duration.zero);
+    await gesture.down(const Offset(3, 300));
 
     // Need 2 events to form a valid drag
     await tester.pump(const Duration(milliseconds: 100));
@@ -1901,7 +1901,7 @@ class _TestPostRouteCancelState extends State<_TestPostRouteCancel> {
   }
 }
 
-class _RestorableModalTestWidget extends StatelessWidget{
+class _RestorableModalTestWidget extends StatelessWidget {
   static Route<void> _modalBuilder(BuildContext context, Object? arguments) {
     return CupertinoModalPopupRoute<void>(
       builder: (BuildContext context) {
