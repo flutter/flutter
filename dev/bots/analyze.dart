@@ -24,6 +24,7 @@ import 'utils.dart';
 final String flutterRoot = path.dirname(path.dirname(path.dirname(path.fromUri(Platform.script))));
 final String flutter = path.join(flutterRoot, 'bin', Platform.isWindows ? 'flutter.bat' : 'flutter');
 final String flutterPackages = path.join(flutterRoot, 'packages');
+final String flutterExamples = path.join(flutterRoot, 'examples');
 final String dart = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', Platform.isWindows ? 'dart.exe' : 'dart');
 final String pub = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', Platform.isWindows ? 'pub.bat' : 'pub');
 final String pubCache = path.join(flutterRoot, '.pub-cache');
@@ -50,6 +51,10 @@ Future<void> run(List<String> arguments) async {
   if (!assertsEnabled) {
     exitWithError(<String>['The analyze.dart script must be run with --enable-asserts.']);
   }
+
+  print('$clock No sync*/async*');
+  await verifyNoSyncAsyncStar(flutterPackages);
+  await verifyNoSyncAsyncStar(flutterExamples, minimumMatches: 200);
 
   print('$clock No runtimeType in toString...');
   await verifyNoRuntimeTypeInToString(flutterRoot);
@@ -152,6 +157,34 @@ Future<void> run(List<String> arguments) async {
 
 
 // TESTS
+
+Future<void> verifyNoSyncAsyncStar(String workingDirectory, {int minimumMatches = 2000 }) async {
+  final RegExp syncPattern = RegExp(r'\s*?a?sync\*\s*?{');
+  const String ignorePattern = 'no_sync_async_star';
+  final RegExp commentPattern = RegExp(r'^\s*?///?');
+  final List<String> errors = <String>[];
+  await for (final File file in _allFiles(workingDirectory, 'dart', minimumMatches: minimumMatches)) {
+    if (file.path.contains('test')) {
+      continue;
+    }
+    final List<String> lines = file.readAsLinesSync();
+    for (int index = 0; index < lines.length; index += 1) {
+      final String line = lines[index];
+      if (line.startsWith(commentPattern)) {
+        continue;
+      }
+      if (line.contains(syncPattern) && !line.contains(ignorePattern) && (index == 0 || !lines[index - 1].contains(ignorePattern))) {
+        errors.add('${file.path}:$index: sync*/async* without an ignore (no_sync_async_star).');
+      }
+    }
+  }
+  if (errors.isNotEmpty) {
+    exitWithError(<String>[
+      '${bold}Do not use sync*/async* methods. See https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#avoid-syncasync for details.$reset',
+      ...errors,
+    ]);
+  }
+}
 
 final RegExp _findGoldenTestPattern = RegExp(r'matchesGoldenFile\(');
 final RegExp _findGoldenDefinitionPattern = RegExp(r'matchesGoldenFile\(Object');

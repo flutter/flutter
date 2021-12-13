@@ -430,6 +430,8 @@ Future<void> runForbiddenFromReleaseTests() async {
     '--snapshot', path.join(tempDirectory.path, 'snapshot.arm64-v8a.json'),
     '--package-config', path.join(flutterRoot, 'examples', 'hello_world', '.dart_tool', 'package_config.json'),
     '--forbidden-type', 'package:flutter/src/widgets/widget_inspector.dart::WidgetInspectorService',
+    '--forbidden-type', 'package:flutter/src/widgets/framework.dart::DebugCreator',
+    '--forbidden-type', 'package:flutter/src/foundation/print.dart::debugPrint',
   ];
   await runCommand(
     dart,
