@@ -955,7 +955,7 @@ void main() {
         child: DropdownButton<String>(
           value: value,
           items: <DropdownMenuItem<String>>[
-            DropdownMenuItem<String>(              
+            DropdownMenuItem<String>(
               key: itemKey,
               value: 'foo',
               child: const Text(value),
@@ -973,7 +973,7 @@ void main() {
       matchesGoldenFile('dropdown_test.text_style.png'),
     );
   });
-  
+
   testWidgets('Dropdown menu scrolls to first item in long lists', (WidgetTester tester) async {
     // Open the dropdown menu
     final Key buttonKey = UniqueKey();
