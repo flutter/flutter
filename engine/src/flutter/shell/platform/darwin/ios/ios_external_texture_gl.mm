@@ -18,9 +18,11 @@
 namespace flutter {
 
 IOSExternalTextureGL::IOSExternalTextureGL(int64_t textureId,
-                                           NSObject<FlutterTexture>* externalTexture)
+                                           NSObject<FlutterTexture>* externalTexture,
+                                           fml::scoped_nsobject<EAGLContext> context)
     : Texture(textureId),
-      external_texture_(fml::scoped_nsobject<NSObject<FlutterTexture>>([externalTexture retain])) {
+      external_texture_(fml::scoped_nsobject<NSObject<FlutterTexture>>([externalTexture retain])),
+      context_(context) {
   FML_DCHECK(external_texture_);
 }
 
@@ -29,8 +31,8 @@ IOSExternalTextureGL::~IOSExternalTextureGL() = default;
 void IOSExternalTextureGL::EnsureTextureCacheExists() {
   if (!cache_ref_) {
     CVOpenGLESTextureCacheRef cache;
-    CVReturn err = CVOpenGLESTextureCacheCreate(kCFAllocatorDefault, NULL,
-                                                [EAGLContext currentContext], NULL, &cache);
+    CVReturn err =
+        CVOpenGLESTextureCacheCreate(kCFAllocatorDefault, NULL, context_.get(), NULL, &cache);
     if (err == noErr) {
       cache_ref_.Reset(cache);
     } else {
