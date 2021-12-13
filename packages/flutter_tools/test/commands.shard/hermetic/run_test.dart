@@ -594,6 +594,26 @@ void main() {
     FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
   });
+
+  testUsingContext('Does not support "--web-launch-url"', () async {
+    final RunCommand command = RunCommand();
+    await expectLater(
+          () => createTestCommandRunner(command).run(<String>[
+        'run',
+        '--web-launch-url=example_url',
+      ]),
+      throwsA(isException.having(
+            (Exception exception) => exception.toString(),
+        'toString',
+        isNot(contains('web-launch-url')),
+      )),
+    );
+    final DebuggingOptions options = await command.createDebuggingOptions(true);
+    expect(options.webLaunchUrl, 'example_url');
+  }, overrides: <Type, Generator>{
+    ProcessManager: () => FakeProcessManager.any(),
+    Logger: () => BufferLogger.test(),
+  });
 }
 
 class FakeDeviceManager extends Fake implements DeviceManager {
