@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:developer' show Timeline;
 import 'dart:math' as math;
 import 'dart:ui' as ui show lerpDouble;
 
@@ -1358,6 +1359,7 @@ abstract class RenderBox extends RenderObject {
   }
 
   Map<_IntrinsicDimensionsCacheEntry, double>? _cachedIntrinsicDimensions;
+  static int _debugIntrinsicsDepth = 0;
 
   double _computeIntrinsicDimension(_IntrinsicDimension dimension, double argument, double Function(double argument) computer) {
     assert(RenderObject.debugCheckingIntrinsics || !debugDoingThisResize); // performResize should not depend on anything except the incoming constraints
@@ -1370,11 +1372,38 @@ abstract class RenderBox extends RenderObject {
       return true;
     }());
     if (shouldCache) {
+      Map<String, String> debugTimelineArguments = timelineArgumentsIndicatingLandmarkEvent;
+      assert(() {
+        if (debugProfileLayoutsEnabled) {
+          debugTimelineArguments = toDiagnosticsNode().toTimelineArguments();
+        } else {
+          debugTimelineArguments = Map<String, String>.of(debugTimelineArguments);
+        }
+        debugTimelineArguments['intrinsics dimension'] = describeEnum(dimension);
+        debugTimelineArguments['intrinsics argument'] = '$argument';
+        return true;
+      }());
+      if (!kReleaseMode) {
+        if (debugProfileLayoutsEnabled || _debugIntrinsicsDepth == 0) {
+          Timeline.startSync(
+            '$runtimeType intrinsics',
+            arguments: debugTimelineArguments,
+          );
+        }
+        _debugIntrinsicsDepth += 1;
+      }
       _cachedIntrinsicDimensions ??= <_IntrinsicDimensionsCacheEntry, double>{};
-      return _cachedIntrinsicDimensions!.putIfAbsent(
+      final double result = _cachedIntrinsicDimensions!.putIfAbsent(
         _IntrinsicDimensionsCacheEntry(dimension, argument),
         () => computer(argument),
       );
+      if (!kReleaseMode) {
+        _debugIntrinsicsDepth -= 1;
+        if (debugProfileLayoutsEnabled || _debugIntrinsicsDepth == 0) {
+          Timeline.finishSync();
+        }
+      }
+      return result;
     }
     return computer(argument);
   }
@@ -1807,8 +1836,34 @@ abstract class RenderBox extends RenderObject {
       return true;
     }());
     if (shouldCache) {
+      Map<String, String> debugTimelineArguments = timelineArgumentsIndicatingLandmarkEvent;
+      assert(() {
+        if (debugProfileLayoutsEnabled) {
+          debugTimelineArguments = toDiagnosticsNode().toTimelineArguments();
+        } else {
+          debugTimelineArguments = Map<String, String>.of(debugTimelineArguments);
+        }
+        debugTimelineArguments['getDryLayout constraints'] = '$constraints';
+        return true;
+      }());
+      if (!kReleaseMode) {
+        if (debugProfileLayoutsEnabled || _debugIntrinsicsDepth == 0) {
+          Timeline.startSync(
+            '$runtimeType.getDryLayout',
+            arguments: debugTimelineArguments,
+          );
+        }
+        _debugIntrinsicsDepth += 1;
+      }
       _cachedDryLayoutSizes ??= <BoxConstraints, Size>{};
-      return _cachedDryLayoutSizes!.putIfAbsent(constraints, () => _computeDryLayout(constraints));
+      final Size result = _cachedDryLayoutSizes!.putIfAbsent(constraints, () => _computeDryLayout(constraints));
+      if (!kReleaseMode) {
+        _debugIntrinsicsDepth -= 1;
+        if (debugProfileLayoutsEnabled || _debugIntrinsicsDepth == 0) {
+          Timeline.finishSync();
+        }
+      }
+      return result;
     }
     return _computeDryLayout(constraints);
   }

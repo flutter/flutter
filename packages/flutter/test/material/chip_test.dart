@@ -271,15 +271,22 @@ Finder findTooltipContainer(String tooltipText) {
 
 void main() {
   testWidgets('Chip defaults', (WidgetTester tester) async {
+    late TextTheme textTheme;
+
     Widget buildFrame(Brightness brightness) {
       return MaterialApp(
         theme: ThemeData(brightness: brightness),
         home: Scaffold(
           body: Center(
-            child: Chip(
-              avatar: const CircleAvatar(child: Text('A')),
-              label: const Text('Chip A'),
-              onDeleted: () { },
+            child: Builder(
+              builder: (BuildContext context) {
+                textTheme = Theme.of(context).textTheme;
+                return Chip(
+                  avatar: const CircleAvatar(child: Text('A')),
+                  label: const Text('Chip A'),
+                  onDeleted: () { },
+                );
+              },
             ),
           ),
         ),
@@ -295,7 +302,22 @@ void main() {
     expect(getIconData(tester).color?.value, 0xffffffff);
     expect(getIconData(tester).opacity, null);
     expect(getIconData(tester).size, null);
-    expect(getLabelStyle(tester, 'Chip A').style.color?.value, 0xde000000);
+
+    TextStyle labelStyle = getLabelStyle(tester, 'Chip A').style;
+    expect(labelStyle.color?.value, 0xde000000);
+    expect(labelStyle.fontFamily, textTheme.bodyText1?.fontFamily);
+    expect(labelStyle.fontFamilyFallback, textTheme.bodyText1?.fontFamilyFallback);
+    expect(labelStyle.fontFeatures, textTheme.bodyText1?.fontFeatures);
+    expect(labelStyle.fontSize, textTheme.bodyText1?.fontSize);
+    expect(labelStyle.fontStyle, textTheme.bodyText1?.fontStyle);
+    expect(labelStyle.fontWeight, textTheme.bodyText1?.fontWeight);
+    expect(labelStyle.height, textTheme.bodyText1?.height);
+    expect(labelStyle.inherit, textTheme.bodyText1?.inherit);
+    expect(labelStyle.leadingDistribution, textTheme.bodyText1?.leadingDistribution);
+    expect(labelStyle.letterSpacing, textTheme.bodyText1?.letterSpacing);
+    expect(labelStyle.overflow, textTheme.bodyText1?.overflow);
+    expect(labelStyle.textBaseline, textTheme.bodyText1?.textBaseline);
+    expect(labelStyle.wordSpacing, textTheme.bodyText1?.wordSpacing);
 
     await tester.pumpWidget(buildFrame(Brightness.dark));
     await tester.pumpAndSettle(); // Theme transition animation
@@ -307,7 +329,22 @@ void main() {
     expect(getIconData(tester).color?.value, 0xffffffff);
     expect(getIconData(tester).opacity, null);
     expect(getIconData(tester).size, null);
-    expect(getLabelStyle(tester, 'Chip A').style.color?.value, 0xdeffffff);
+
+    labelStyle = getLabelStyle(tester, 'Chip A').style;
+    expect(labelStyle.color?.value, 0xdeffffff);
+    expect(labelStyle.fontFamily, textTheme.bodyText1?.fontFamily);
+    expect(labelStyle.fontFamilyFallback, textTheme.bodyText1?.fontFamilyFallback);
+    expect(labelStyle.fontFeatures, textTheme.bodyText1?.fontFeatures);
+    expect(labelStyle.fontSize, textTheme.bodyText1?.fontSize);
+    expect(labelStyle.fontStyle, textTheme.bodyText1?.fontStyle);
+    expect(labelStyle.fontWeight, textTheme.bodyText1?.fontWeight);
+    expect(labelStyle.height, textTheme.bodyText1?.height);
+    expect(labelStyle.inherit, textTheme.bodyText1?.inherit);
+    expect(labelStyle.leadingDistribution, textTheme.bodyText1?.leadingDistribution);
+    expect(labelStyle.letterSpacing, textTheme.bodyText1?.letterSpacing);
+    expect(labelStyle.overflow, textTheme.bodyText1?.overflow);
+    expect(labelStyle.textBaseline, textTheme.bodyText1?.textBaseline);
+    expect(labelStyle.wordSpacing, textTheme.bodyText1?.wordSpacing);
   });
 
   testWidgets('ChoiceChip defaults', (WidgetTester tester) async {
@@ -342,7 +379,6 @@ void main() {
     expect(getMaterial(tester).shape, const StadiumBorder());
     expect(getLabelStyle(tester, 'Chip A').style.color?.value, 0xdeffffff);
   });
-
 
   testWidgets('Chip control test', (WidgetTester tester) async {
     final FeedbackTester feedback = FeedbackTester();
@@ -1726,7 +1762,52 @@ void main() {
     await tester.pumpWidget(buildChip());
 
     final TextStyle labelStyle = getLabelStyle(tester, 'Label').style;
+    expect(labelStyle.inherit, false);
     expect(labelStyle.fontFamily, 'MyFont');
+    expect(labelStyle.fontWeight, FontWeight.w200);
+  });
+
+  testWidgets('ChipTheme labelStyle with inherit:true', (WidgetTester tester) async {
+    Widget buildChip() {
+      return _wrapForChip(
+        child: Theme(
+          data: ThemeData.light().copyWith(
+            chipTheme: const ChipThemeData(
+              labelStyle: TextStyle(height: 4), // inherit: true
+            ),
+          ),
+          child: const Chip(label: Text('Label')), // labeStyle: null
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildChip());
+    final TextStyle labelStyle = getLabelStyle(tester, 'Label').style;
+    expect(labelStyle.inherit, true); // because chipTheme.labelStyle.merge(null)
+    expect(labelStyle.height, 4);
+  });
+
+  testWidgets('Chip does not merge inherit:false label style with the theme label style', (WidgetTester tester) async {
+    Widget buildChip() {
+      return _wrapForChip(
+        child: Theme(
+          data: ThemeData(fontFamily: 'MyFont'),
+          child: const DefaultTextStyle(
+            style: TextStyle(height: 8),
+            child: Chip(
+              label: Text('Label'),
+              labelStyle: TextStyle(fontWeight: FontWeight.w200, inherit: false),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildChip());
+    final TextStyle labelStyle = getLabelStyle(tester, 'Label').style;
+    expect(labelStyle.inherit, false);
+    expect(labelStyle.fontFamily, null);
+    expect(labelStyle.height, null);
     expect(labelStyle.fontWeight, FontWeight.w200);
   });
 

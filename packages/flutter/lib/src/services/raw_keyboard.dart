@@ -672,7 +672,7 @@ class RawKeyboard {
       '${event.data}',
     );
     // Send the event to passive listeners.
-    for (final ValueChanged<RawKeyEvent> listener in List<ValueChanged<RawKeyEvent>>.from(_listeners)) {
+    for (final ValueChanged<RawKeyEvent> listener in List<ValueChanged<RawKeyEvent>>.of(_listeners)) {
       try {
         if (_listeners.contains(listener)) {
           listener(event);
@@ -680,9 +680,9 @@ class RawKeyboard {
       } catch (exception, stack) {
         InformationCollector? collector;
         assert(() {
-          collector = () sync* {
-            yield DiagnosticsProperty<RawKeyEvent>('Event', event);
-          };
+          collector = () => <DiagnosticsNode>[
+            DiagnosticsProperty<RawKeyEvent>('Event', event),
+          ];
           return true;
         }());
         FlutterError.reportError(FlutterErrorDetails(

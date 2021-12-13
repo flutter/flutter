@@ -139,7 +139,7 @@ class LicenseEntryWithLineBreaks extends LicenseEntry {
   final String text;
 
   @override
-  Iterable<LicenseParagraph> get paragraphs sync* {
+  Iterable<LicenseParagraph> get paragraphs {
     int lineStart = 0;
     int currentPosition = 0;
     int lastLineIndent = 0;
@@ -147,6 +147,7 @@ class LicenseEntryWithLineBreaks extends LicenseEntry {
     int? currentParagraphIndentation;
     _LicenseEntryWithLineBreaksParserState state = _LicenseEntryWithLineBreaksParserState.beforeParagraph;
     final List<String> lines = <String>[];
+    final List<LicenseParagraph> result = <LicenseParagraph>[];
 
     void addLine() {
       assert(lineStart < currentPosition);
@@ -182,7 +183,7 @@ class LicenseEntryWithLineBreaks extends LicenseEntry {
             case '\n':
             case '\f':
               if (lines.isNotEmpty) {
-                yield getParagraph();
+                result.add(getParagraph());
               }
               if (text[currentPosition] == '\r' && currentPosition < text.length - 1
                   && text[currentPosition + 1] == '\n') {
@@ -206,7 +207,7 @@ class LicenseEntryWithLineBreaks extends LicenseEntry {
             startParagraph:
             default:
               if (lines.isNotEmpty && currentLineIndent > lastLineIndent) {
-                yield getParagraph();
+                result.add(getParagraph());
                 currentParagraphIndentation = null;
               }
               // The following is a wild heuristic for guessing the indentation level.
@@ -231,7 +232,7 @@ class LicenseEntryWithLineBreaks extends LicenseEntry {
               break;
             case '\f':
               addLine();
-              yield getParagraph();
+              result.add(getParagraph());
               lastLineIndent = 0;
               currentLineIndent = 0;
               currentParagraphIndentation = null;
@@ -248,14 +249,15 @@ class LicenseEntryWithLineBreaks extends LicenseEntry {
     switch (state) {
       case _LicenseEntryWithLineBreaksParserState.beforeParagraph:
         if (lines.isNotEmpty) {
-          yield getParagraph();
+          result.add(getParagraph());
         }
         break;
       case _LicenseEntryWithLineBreaksParserState.inParagraph:
         addLine();
-        yield getParagraph();
+        result.add(getParagraph());
         break;
     }
+    return result;
   }
 }
 
@@ -307,6 +309,9 @@ class LicenseRegistry {
   /// Returns the licenses that have been registered.
   ///
   /// Generating the list of licenses is expensive.
+  // TODO(dnfield): Refactor the license logic.
+  // https://github.com/flutter/flutter/issues/95043
+  // flutter_ignore: no_sync_async_star
   static Stream<LicenseEntry> get licenses async* {
     if (_collectors == null)
       return;

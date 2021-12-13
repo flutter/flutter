@@ -30,6 +30,7 @@ class MyStatefulWidget extends StatefulWidget {
 }
 
 class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+  // ignore: no_sync_async_star
   final Stream<int> _bids = (() async* {
     await Future<void>.delayed(const Duration(seconds: 1));
     yield 1;
