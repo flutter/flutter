@@ -383,6 +383,7 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> with 
 class _CircularProgressIndicatorPainter extends CustomPainter {
   _CircularProgressIndicatorPainter({
     this.backgroundColor,
+    double maxArcLength = 3 / 2,
     required this.valueColor,
     required this.value,
     required this.headValue,
@@ -392,10 +393,10 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
     required this.strokeWidth,
   }) : arcStart = value != null
          ? _startAngle
-         : _startAngle + tailValue * 3 / 2 * math.pi + rotationValue * math.pi * 2.0 + offsetValue * 0.5 * math.pi,
+         : _startAngle + tailValue * maxArcLength * math.pi + rotationValue * math.pi * 2.0 + offsetValue * (2.0 - maxArcLength) * math.pi,
        arcSweep = value != null
          ? value.clamp(0.0, 1.0) * _sweep
-         : math.max(headValue * 3 / 2 * math.pi - tailValue * 3 / 2 * math.pi, _epsilon);
+         : math.max(headValue * maxArcLength * math.pi - tailValue * maxArcLength * math.pi, _epsilon);
 
   final Color? backgroundColor;
   final Color valueColor;
@@ -545,10 +546,10 @@ class CircularProgressIndicator extends ProgressIndicator {
   final double strokeWidth;
 
   @override
-  State<CircularProgressIndicator> createState() => _CircularProgressIndicatorState();
+  State<CircularProgressIndicator> createState() => _CircularProgressIndicatorState<CircularProgressIndicator>();
 }
 
-class _CircularProgressIndicatorState extends State<CircularProgressIndicator> with SingleTickerProviderStateMixin {
+class _CircularProgressIndicatorState<T extends CircularProgressIndicator> extends State<T> with SingleTickerProviderStateMixin {
   static const int _pathCount = _kIndeterminateCircularDuration ~/ 1333;
   static const int _rotationCount = _kIndeterminateCircularDuration ~/ 2222;
 
@@ -579,7 +580,7 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
   }
 
   @override
-  void didUpdateWidget(CircularProgressIndicator oldWidget) {
+  void didUpdateWidget(T oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.value == null && !_controller.isAnimating)
       _controller.repeat();
@@ -676,6 +677,8 @@ class _RefreshProgressIndicatorPainter extends _CircularProgressIndicatorPainter
     required double strokeWidth,
     required this.arrowheadScale,
   }) : super(
+    // Lengthen the arc a little
+    maxArcLength: 3 / 2 * 1.05, // = 1.575
     valueColor: valueColor,
     value: value,
     headValue: headValue,
@@ -751,6 +754,7 @@ class RefreshProgressIndicator extends CircularProgressIndicator {
     double strokeWidth = defaultStrokeWidth, // Different default than CircularProgressIndicator.
     String? semanticsLabel,
     String? semanticsValue,
+    this.additionalArrowheadScale = 1.0,
   }) : super(
     key: key,
     value: value,
@@ -765,6 +769,12 @@ class RefreshProgressIndicator extends CircularProgressIndicator {
   /// Default stroke width.
   static const double defaultStrokeWidth = 2.5;
 
+  /// Additional arrowhead scale to be multiplied with the internal animation
+  /// scale value.
+  ///
+  /// Used by [RefreshIndicator] to animate arrowhead hide animation on snapping.
+  final double additionalArrowheadScale;
+
   /// {@template flutter.material.RefreshProgressIndicator.backgroundColor}
   /// Background color of that fills the circle under the refresh indicator.
   ///
@@ -777,10 +787,10 @@ class RefreshProgressIndicator extends CircularProgressIndicator {
   Color? get backgroundColor => super.backgroundColor;
 
   @override
-  State<CircularProgressIndicator> createState() => _RefreshProgressIndicatorState();
+  State<RefreshProgressIndicator> createState() => _RefreshProgressIndicatorState();
 }
 
-class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
+class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState<RefreshProgressIndicator> {
   static const double _indicatorSize = 41.0;
 
   /// Interval for arrow head to fully grow.
@@ -794,7 +804,7 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
     <TweenSequenceItem<double>>[
       // Makes arrow to expand a little bit earlier, to match the Android look.
       TweenSequenceItem<double>(
-        tween: Tween<double>(begin: -0.1, end: -0.2),
+        tween: Tween<double>(begin: 0.4, end: -0.2),
         weight: _strokeHeadInterval,
       ),
       // Additional rotation after the arrow expanded
@@ -826,26 +836,9 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
   }
 
   @override
-  Widget _buildAnimation() {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (BuildContext context, Widget? child) {
-        return _buildMaterialIndicator(
-          context,
-          // Lengthen the arc a little
-          1.05 * _CircularProgressIndicatorState._strokeHeadTween.evaluate(_controller),
-          _CircularProgressIndicatorState._strokeTailTween.evaluate(_controller),
-          _CircularProgressIndicatorState._offsetTween.evaluate(_controller),
-          _CircularProgressIndicatorState._rotationTween.evaluate(_controller),
-        );
-      },
-    );
-  }
-
-  @override
   Widget _buildMaterialIndicator(BuildContext context, double headValue, double tailValue, double offsetValue, double rotationValue) {
     final double? value = widget.value;
-    final double arrowheadScale = value == null ? 0.0 : const Interval(0.1, _strokeHeadInterval).transform(value);
+    final double arrowheadScale = widget.additionalArrowheadScale * (value == null ? 0.0 : const Interval(0.1, _strokeHeadInterval).transform(value));
     final double rotation;
 
     if (value == null && _lastValue == null) {
