@@ -72,7 +72,7 @@ enum _LicenseEntryWithLineBreaksParserState {
 ///
 /// ```dart
 /// void initMyLibrary() {
-///   LicenseRegistry.addLicense(() => Stream.value<LicenseEntry>(
+///   LicenseRegistry.addLicense(() => Stream<LicenseEntry>.value(
 ///     const LicenseEntryWithLineBreaks(<String>['my_library'], '''
 /// Copyright 2016 The Sample Authors. All rights reserved.
 ///
@@ -100,7 +100,7 @@ enum _LicenseEntryWithLineBreaksParserState {
 /// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 /// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 /// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-/// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.'''));
+/// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
 ///   ));
 /// }
 /// ```
