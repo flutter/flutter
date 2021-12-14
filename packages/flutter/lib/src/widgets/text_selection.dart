@@ -1395,7 +1395,8 @@ class TextSelectionGestureDetectorBuilder {
 
   /// Handler for [TextSelectionGestureDetector.onDragSelectionEnd].
   ///
-  /// By default, it services as place holder to enable subclass override.
+  /// By default, it simply cleans up the state used for handling certain
+  /// built-in behaviors.
   ///
   /// See also:
   ///
