@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:meta/meta.dart' show visibleForTesting;
 
 /// Signature for callbacks passed to [LicenseRegistry.addLicense].
@@ -70,8 +72,8 @@ enum _LicenseEntryWithLineBreaksParserState {
 ///
 /// ```dart
 /// void initMyLibrary() {
-///   LicenseRegistry.addLicense(() async* {
-///     yield const LicenseEntryWithLineBreaks(<String>['my_library'], '''
+///   LicenseRegistry.addLicense(() => Stream<LicenseEntry>.value(
+///     const LicenseEntryWithLineBreaks(<String>['my_library'], '''
 /// Copyright 2016 The Sample Authors. All rights reserved.
 ///
 /// Redistribution and use in source and binary forms, with or without
@@ -98,8 +100,9 @@ enum _LicenseEntryWithLineBreaksParserState {
 /// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 /// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 /// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-/// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''');
-///   });
+/// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+///     ),
+///   ));
 /// }
 /// ```
 /// {@end-tool}
@@ -309,14 +312,19 @@ class LicenseRegistry {
   /// Returns the licenses that have been registered.
   ///
   /// Generating the list of licenses is expensive.
-  // TODO(dnfield): Refactor the license logic.
-  // https://github.com/flutter/flutter/issues/95043
-  // flutter_ignore: no_sync_async_star
-  static Stream<LicenseEntry> get licenses async* {
+  static Stream<LicenseEntry> get licenses {
     if (_collectors == null)
-      return;
-    for (final LicenseEntryCollector collector in _collectors!)
-      yield* collector();
+      return const Stream<LicenseEntry>.empty();
+
+    late final StreamController<LicenseEntry> controller;
+    controller = StreamController<LicenseEntry>(
+      onListen: () async {
+        for (final LicenseEntryCollector collector in _collectors!)
+          await controller.addStream(collector());
+        await controller.close();
+      },
+    );
+    return controller.stream;
   }
 
   /// Resets the internal state of [LicenseRegistry]. Intended for use in

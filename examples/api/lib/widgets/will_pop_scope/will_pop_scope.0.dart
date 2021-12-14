@@ -69,7 +69,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
               ),
               const Text('Push to a new screen, then tap on shouldPop '
                   'button to toggle its value. Press the back '
-                  'button in the appBar to check its behaviour '
+                  'button in the appBar to check its behavior '
                   'for different values of shouldPop'),
             ],
           ),
