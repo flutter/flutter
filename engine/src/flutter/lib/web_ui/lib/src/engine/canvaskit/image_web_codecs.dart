@@ -9,16 +9,36 @@
 ///  * `image_wasm_codecs.dart`, which uses codecs supplied by the CanvasKit WASM bundle.
 
 import 'dart:async';
+import 'dart:convert' show base64;
 import 'dart:html' as html;
 import 'dart:math' as math;
 import 'dart:typed_data';
 
+import 'package:meta/meta.dart';
 import 'package:ui/ui.dart' as ui;
 
+import '../alarm_clock.dart';
 import '../safe_browser_api.dart';
 import '../util.dart';
 import 'canvaskit_api.dart';
 import 'image.dart';
+
+Duration _kDefaultWebDecoderExpireDuration = const Duration(seconds: 3);
+Duration _kWebDecoderExpireDuration = _kDefaultWebDecoderExpireDuration;
+
+/// Overrides the inactivity duration after which the web decoder is closed.
+///
+/// This should only be used in tests.
+void debugOverrideWebDecoderExpireDuration(Duration override) {
+  _kWebDecoderExpireDuration = override;
+}
+
+/// Restores the web decoder inactivity expiry duration to its original value.
+///
+/// This should only be used in tests.
+void debugRestoreWebDecoderExpireDuration() {
+  _kWebDecoderExpireDuration = _kDefaultWebDecoderExpireDuration;
+}
 
 /// Image decoder backed by the browser's `ImageDecoder`.
 class CkBrowserImageDecoder implements ui.Codec {
@@ -46,12 +66,99 @@ class CkBrowserImageDecoder implements ui.Codec {
       );
     }
 
+    final CkBrowserImageDecoder decoder = CkBrowserImageDecoder._(
+      contentType: contentType,
+      targetWidth: targetWidth,
+      targetHeight: targetHeight,
+      data: data,
+      debugSource: debugSource,
+    );
+
+    // Call once to initialize the decoder and populate late fields.
+    await decoder._getOrCreateWebDecoder();
+    return decoder;
+  }
+
+  CkBrowserImageDecoder._({
+    required this.contentType,
+    required this.targetWidth,
+    required this.targetHeight,
+    required this.data,
+    required this.debugSource,
+  });
+
+  final String contentType;
+  final int? targetWidth;
+  final int? targetHeight;
+  final Uint8List data;
+  final String debugSource;
+
+  @override
+  late int frameCount;
+
+  @override
+  late int repetitionCount;
+
+  /// Whether this decoder has been disposed of.
+  ///
+  /// Once this turns true it stays true forever, and this decoder becomes
+  /// unusable.
+  bool _isDisposed = false;
+
+  @override
+  void dispose() {
+    _isDisposed = true;
+
+    // This releases all resources, including any currently running decoding work.
+    _cachedWebDecoder?.close();
+    _cachedWebDecoder = null;
+  }
+
+  void _debugCheckNotDisposed() {
+    assert(
+      !_isDisposed,
+      'Cannot use this image decoder. It has been disposed of.'
+    );
+  }
+
+  /// The index of the frame that will be decoded on the next call of [getNextFrame];
+  int _nextFrameIndex = 0;
+
+  /// Creating a new decoder is expensive, so we cache the decoder for reuse.
+  ///
+  /// This decoder is closed and the field is nulled out after some time of
+  /// inactivity.
+  ImageDecoder? _cachedWebDecoder;
+
+  /// The underlying image decoder used to decode images.
+  ///
+  /// This value is volatile. It may be closed or become null any time.
+  ///
+  ///
+  /// This is only meant to be used in tests.
+  @visibleForTesting
+  ImageDecoder? get debugCachedWebDecoder => _cachedWebDecoder;
+
+  final AlarmClock _cacheExpirationClock = AlarmClock(() => DateTime.now());
+
+  Future<ImageDecoder> _getOrCreateWebDecoder() async {
+    if (_cachedWebDecoder != null) {
+      // Give the cached value some time for reuse, e.g. if the image is
+      // currently animating.
+      _cacheExpirationClock.datetime = DateTime.now().add(_kWebDecoderExpireDuration);
+      return _cachedWebDecoder!;
+    }
+
+    // Null out the callback so the clock doesn't try to expire the decoder
+    // while it's initializing. There's no way to tell how long the
+    // initialization will take place. We just let it proceed at its own pace.
+    _cacheExpirationClock.callback = null;
     try {
       final ImageDecoder webDecoder = ImageDecoder(ImageDecoderOptions(
         type: contentType,
         data: data,
 
-        // Flutter always uses premultiplied alpha.
+        // Flutter always uses premultiplied alpha when decoding.
         premultiplyAlpha: 'premultiply',
         desiredWidth: targetWidth,
         desiredHeight: targetHeight,
@@ -72,7 +179,28 @@ class CkBrowserImageDecoder implements ui.Codec {
       // package:js bindings don't work with getters that return a Promise, which
       // is why js_util is used instead.
       await promiseToFuture<void>(getJsProperty(webDecoder, 'completed'));
-      return CkBrowserImageDecoder._(webDecoder, debugSource);
+      frameCount = webDecoder.tracks.selectedTrack!.frameCount;
+      repetitionCount = webDecoder.tracks.selectedTrack!.repetitionCount;
+
+      _cachedWebDecoder = webDecoder;
+
+      // Expire the decoder if it's not used for several seconds. If the image is
+      // not animated, it could mean that the framework has cached the frame and
+      // therefore doesn't need the decoder any more, or it could mean that the
+      // widget is gone and it's time to collect resources associated with it.
+      // If it's an animated image it means the animation has stopped, otherwise
+      // we'd see calls to [getNextFrame] which would update the expiry date on
+      // the decoder. If the animation is stopped for long enough, it's better
+      // to collect resources. If and when the animation resumes, a new decoder
+      // will be instantiated.
+      _cacheExpirationClock.callback = () {
+        _cachedWebDecoder?.close();
+        _cachedWebDecoder = null;
+        _cacheExpirationClock.callback = null;
+      };
+      _cacheExpirationClock.datetime = DateTime.now().add(_kWebDecoderExpireDuration);
+
+      return webDecoder;
     } catch (error) {
       if (error is html.DomException) {
         if (error.name == html.DomException.NOT_SUPPORTED) {
@@ -90,44 +218,10 @@ class CkBrowserImageDecoder implements ui.Codec {
     }
   }
 
-  CkBrowserImageDecoder._(this.webDecoder, this.debugSource);
-
-  final ImageDecoder webDecoder;
-  final String debugSource;
-
-  /// Whether this decoded has been disposed of.
-  ///
-  /// Once this turns true it stays true forever, and this decoder becomes
-  /// unusable.
-  bool _isDisposed = false;
-
-  @override
-  void dispose() {
-    _isDisposed = true;
-
-    // This releases all resources, including any currently running decoding work.
-    webDecoder.close();
-  }
-
-  void _debugCheckNotDisposed() {
-    assert(
-      !_isDisposed,
-      'Cannot use this image decoder. It has been disposed of.'
-    );
-  }
-
-  @override
-  int get frameCount {
-    _debugCheckNotDisposed();
-    return webDecoder.tracks.selectedTrack!.frameCount;
-  }
-
-  /// The index of the frame that will be decoded on the next call of [getNextFrame];
-  int _nextFrameIndex = 0;
-
   @override
   Future<ui.FrameInfo> getNextFrame() async {
     _debugCheckNotDisposed();
+    final ImageDecoder webDecoder = await _getOrCreateWebDecoder();
     final DecodeResult result = await promiseToFuture<DecodeResult>(
       webDecoder.decode(DecodeOptions(frameIndex: _nextFrameIndex)),
     );
@@ -156,14 +250,8 @@ class CkBrowserImageDecoder implements ui.Codec {
       );
     }
 
-    final CkImage image = CkImage(skImage);
+    final CkImage image = CkImage(skImage, videoFrame: frame);
     return Future<ui.FrameInfo>.value(AnimatedImageFrameInfo(duration, image));
-  }
-
-  @override
-  int get repetitionCount {
-    _debugCheckNotDisposed();
-    return webDecoder.tracks.selectedTrack!.repetitionCount;
   }
 }
 
@@ -301,4 +389,80 @@ bool isAvif(Uint8List data) {
     return true;
   }
   return false;
+}
+
+Future<ByteData> readPixelsFromVideoFrame(VideoFrame videoFrame, ui.ImageByteFormat format) async {
+  if (format == ui.ImageByteFormat.png) {
+    final Uint8List png = await encodeVideoFrameAsPng(videoFrame);
+    return png.buffer.asByteData();
+  }
+
+  final ByteBuffer pixels = await readVideoFramePixelsUnmodified(videoFrame);
+
+  // Check if the pixels are already in the right format and if so, return the
+  // original pixels without modification.
+  if (_shouldReadPixelsUnmodified(videoFrame, format)) {
+    return pixels.asByteData();
+  }
+
+  // At this point we know we want to read unencoded pixels, and that the video
+  // frame is _not_ using the same format as the requested one.
+  final bool isBgrFrame = videoFrame.format == 'BGRA' || videoFrame.format == 'BGRX';
+  if (format == ui.ImageByteFormat.rawRgba && isBgrFrame) {
+    _bgrToRgba(pixels);
+    return pixels.asByteData();
+  }
+
+  // Last resort, just return the original pixels.
+  return pixels.asByteData();
+}
+
+/// Mutates the [pixels], converting them from BGRX/BGRA to RGBA.
+void _bgrToRgba(ByteBuffer pixels) {
+  final int pixelCount = pixels.lengthInBytes ~/ 4;
+  final Uint8List pixelBytes = pixels.asUint8List();
+  for (int i = 0; i < pixelCount; i += 4) {
+    // It seems even in little-endian machines the BGR_ pixels are encoded as
+    // big-endian, i.e. the blue byte is written into the lowest byte in the
+    // memory address space.
+    final int b = pixelBytes[i];
+    final int r = pixelBytes[i + 2];
+
+    // So far the codec has reported 255 for the X component, so there's no
+    // special treatment for alpha. This may need to change if we ever face
+    // codecs that do something different.
+    pixelBytes[i] = r;
+    pixelBytes[i + 2] = b;
+  }
+}
+
+bool _shouldReadPixelsUnmodified(VideoFrame videoFrame, ui.ImageByteFormat format) {
+  if (format == ui.ImageByteFormat.rawUnmodified) {
+    return true;
+  }
+
+  // Do not convert if the requested format is RGBA and the video frame is
+  // encoded as either RGBA or RGBX.
+  final bool isRgbFrame = videoFrame.format == 'RGBA' || videoFrame.format == 'RGBX';
+  return format == ui.ImageByteFormat.rawRgba && isRgbFrame;
+}
+
+Future<ByteBuffer> readVideoFramePixelsUnmodified(VideoFrame videoFrame) async {
+  final int size = videoFrame.allocationSize();
+  final Uint8List destination = Uint8List(size);
+  final JsPromise copyPromise = videoFrame.copyTo(destination);
+  await promiseToFuture<void>(copyPromise);
+  return destination.buffer;
+}
+
+Future<Uint8List> encodeVideoFrameAsPng(VideoFrame videoFrame) async {
+  final int width = videoFrame.displayWidth;
+  final int height = videoFrame.displayHeight;
+  final html.CanvasElement canvas = html.CanvasElement()
+    ..width = width
+    ..height = height;
+  final html.CanvasRenderingContext2D ctx = canvas.context2D;
+  ctx.drawImage(videoFrame, 0, 0);
+  final String pngBase64 = canvas.toDataUrl().substring('data:image/png;base64,'.length);
+  return base64.decode(pngBase64);
 }

@@ -28,10 +28,12 @@ void testMain() {
       debugRestoreHttpRequestFactory();
     });
 
+    _testCkAnimatedImage();
     _testForImageCodecs(useBrowserImageDecoder: false);
 
     if (browserSupportsImageDecoder) {
       _testForImageCodecs(useBrowserImageDecoder: true);
+      _testCkBrowserImageDecoder();
     }
 
     test('isAvif', () {
@@ -87,19 +89,14 @@ void _testForImageCodecs({required bool useBrowserImageDecoder}) {
     test('CkAnimatedImage remembers last animation position after resurrection', () async {
       browserSupportsFinalizationRegistry = false;
 
-      Future<void> expectFrameData(ui.FrameInfo frame, List<int> data) async {
-        final ByteData frameData = (await frame.image.toByteData())!;
-        expect(frameData.buffer.asUint8List(), Uint8List.fromList(data));
-      }
-
       final CkAnimatedImage image = CkAnimatedImage.decodeFromBytes(kAnimatedGif, 'test');
       expect(image.frameCount, 3);
       expect(image.repetitionCount, -1);
 
       final ui.FrameInfo frame1 = await image.getNextFrame();
-      expectFrameData(frame1, <int>[0, 255, 0, 255]);
+      await expectFrameData(frame1, <int>[0, 255, 0, 255]);
       final ui.FrameInfo frame2 = await image.getNextFrame();
-      expectFrameData(frame2, <int>[0, 0, 255, 255]);
+      await expectFrameData(frame2, <int>[0, 0, 255, 255]);
 
       // Pretend that the image is temporarily deleted.
       image.delete();
@@ -107,7 +104,7 @@ void _testForImageCodecs({required bool useBrowserImageDecoder}) {
 
       // Check that we got the 3rd frame after resurrection.
       final ui.FrameInfo frame3 = await image.getNextFrame();
-      expectFrameData(frame3, <int>[255, 0, 0, 255]);
+      await expectFrameData(frame3, <int>[255, 0, 0, 255]);
 
       testCollector.collectNow();
     });
@@ -535,6 +532,122 @@ void _testForImageCodecs({required bool useBrowserImageDecoder}) {
   });
 }
 
+/// Tests specific to WASM codecs bundled with CanvasKit.
+void _testCkAnimatedImage() {
+  test('ImageDecoder toByteData(PNG)', () async {
+    final CkAnimatedImage image = CkAnimatedImage.decodeFromBytes(kAnimatedGif, 'test');
+    final ui.FrameInfo frame = await image.getNextFrame();
+    final ByteData? png = await frame.image.toByteData(format: ui.ImageByteFormat.png);
+    expect(png, isNotNull);
+
+    // The precise PNG encoding is browser-specific, but we can check the file
+    // signature.
+    expect(detectContentType(png!.buffer.asUint8List()), 'image/png');
+    testCollector.collectNow();
+  });
+
+  test('CkAnimatedImage toByteData(RGBA)', () async {
+    final CkAnimatedImage image = CkAnimatedImage.decodeFromBytes(kAnimatedGif, 'test');
+    // TODO(yjbanov): frame sequence is wrong (https://github.com/flutter/flutter/issues/95281)
+    const List<List<int>> expectedColors = <List<int>>[
+      <int>[0, 255, 0, 255],
+      <int>[0, 0, 255, 255],
+      <int>[255, 0, 0, 255],
+    ];
+    for (int i = 0; i < image.frameCount; i++) {
+      final ui.FrameInfo frame = await image.getNextFrame();
+      final ByteData? rgba = await frame.image.toByteData(format: ui.ImageByteFormat.rawRgba);
+      expect(rgba, isNotNull);
+      expect(rgba!.buffer.asUint8List(), expectedColors[i]);
+    }
+    testCollector.collectNow();
+  });
+}
+
+/// Tests specific to browser image codecs based functionality.
+void _testCkBrowserImageDecoder() {
+  assert(browserSupportsImageDecoder);
+
+  test('ImageDecoder toByteData(PNG)', () async {
+    final CkBrowserImageDecoder image = await CkBrowserImageDecoder.create(
+      data: kAnimatedGif,
+      debugSource: 'test',
+    );
+    final ui.FrameInfo frame = await image.getNextFrame();
+    final ByteData? png = await frame.image.toByteData(format: ui.ImageByteFormat.png);
+    expect(png, isNotNull);
+
+    // The precise PNG encoding is browser-specific, but we can check the file
+    // signature.
+    expect(detectContentType(png!.buffer.asUint8List()), 'image/png');
+    testCollector.collectNow();
+  });
+
+  test('ImageDecoder toByteData(RGBA)', () async {
+    final CkBrowserImageDecoder image = await CkBrowserImageDecoder.create(
+      data: kAnimatedGif,
+      debugSource: 'test',
+    );
+    const List<List<int>> expectedColors = <List<int>>[
+      <int>[255, 0, 0, 255],
+      <int>[0, 255, 0, 255],
+      <int>[0, 0, 255, 255],
+    ];
+    for (int i = 0; i < image.frameCount; i++) {
+      final ui.FrameInfo frame = await image.getNextFrame();
+      final ByteData? rgba = await frame.image.toByteData(format: ui.ImageByteFormat.rawRgba);
+      expect(rgba, isNotNull);
+      expect(rgba!.buffer.asUint8List(), expectedColors[i]);
+    }
+    testCollector.collectNow();
+  });
+
+  test('ImageDecoder expires after inactivity', () async {
+    const Duration testExpireDuration = Duration(milliseconds: 100);
+    debugOverrideWebDecoderExpireDuration(testExpireDuration);
+
+    final CkBrowserImageDecoder image = await CkBrowserImageDecoder.create(
+      data: kAnimatedGif,
+      debugSource: 'test',
+    );
+
+    // ImageDecoder is initialized eagerly to populate `frameCount` and
+    // `repetitionCount`.
+    final ImageDecoder? decoder1 = image.debugCachedWebDecoder;
+    expect(decoder1, isNotNull);
+    expect(image.frameCount, 3);
+    expect(image.repetitionCount, double.infinity);
+
+    // A frame can be decoded right away.
+    final ui.FrameInfo frame1 = await image.getNextFrame();
+    await expectFrameData(frame1, <int>[255, 0, 0, 255]);
+    expect(frame1, isNotNull);
+
+    // The cached decoder should not yet expire.
+    await Future<void>.delayed(testExpireDuration ~/ 2);
+    expect(image.debugCachedWebDecoder, same(decoder1));
+
+    // Now it expires.
+    await Future<void>.delayed(testExpireDuration);
+    expect(image.debugCachedWebDecoder, isNull);
+
+    // A new decoder should be created upon the next frame request.
+    final ui.FrameInfo frame2 = await image.getNextFrame();
+
+    // Check that the cached decoder is indeed new.
+    final ImageDecoder? decoder2 = image.debugCachedWebDecoder;
+    expect(decoder2, isNot(same(decoder1)));
+    await expectFrameData(frame2, <int>[0, 255, 0, 255]);
+
+    // Check that the new decoder remembers the last frame index.
+    final ui.FrameInfo frame3 = await image.getNextFrame();
+    await expectFrameData(frame3, <int>[0, 0, 255, 255]);
+
+    testCollector.collectNow();
+    debugRestoreWebDecoderExpireDuration();
+  });
+}
+
 class TestHttpRequest implements html.HttpRequest {
   @override
   String responseType = 'invalid';
@@ -645,4 +758,9 @@ class TestHttpRequest implements html.HttpRequest {
 
   @override
   html.HttpRequestUpload get upload => throw UnimplementedError();
+}
+
+Future<void> expectFrameData(ui.FrameInfo frame, List<int> data) async {
+  final ByteData frameData = (await frame.image.toByteData())!;
+  expect(frameData.buffer.asUint8List(), Uint8List.fromList(data));
 }

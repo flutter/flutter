@@ -313,7 +313,7 @@ class DecodeOptions {
 ///  * https://www.w3.org/TR/webcodecs/#videoframe-interface
 @JS()
 @anonymous
-class VideoFrame {
+class VideoFrame implements html.CanvasImageSource {
   external int allocationSize();
   external JsPromise copyTo(Uint8List destination);
   external String? get format;

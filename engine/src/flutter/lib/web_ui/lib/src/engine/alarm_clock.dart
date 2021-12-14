@@ -33,7 +33,11 @@ class AlarmClock {
   DateTime? _datetime;
 
   /// The callback called when the alarm goes off.
-  late ui.VoidCallback callback;
+  ///
+  /// If this is null, the alarm goes off without calling the callback. Set the
+  /// callback to null if the callback is a closure holding onto expensive
+  /// resources.
+  ui.VoidCallback? callback;
 
   /// The time when the alarm clock will go off.
   ///
@@ -103,7 +107,7 @@ class AlarmClock {
     // zero difference between now and _datetime.
     if (!now.isBefore(_datetime!)) {
       _timer = null;
-      callback();
+      callback?.call();
     } else {
       // The timer fired before the target date. We need to reschedule.
       _timer = Timer(_datetime!.difference(now), _timerDidFire);
