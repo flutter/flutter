@@ -94,6 +94,7 @@ void main() {
       projectBundleId: 'app',
       bundleName: 'Runner',
       bundleDir: MemoryFileSystem.test().directory('bundle'),
+      applicationPackage: MemoryFileSystem.test().directory('bundle'),
     );
 
     device.portForwarder = devicePortForwarder;
@@ -117,6 +118,7 @@ void main() {
       projectBundleId: 'app',
       bundleName: 'Runner',
       bundleDir: fileSystem.currentDirectory,
+      applicationPackage: fileSystem.currentDirectory,
     );
     final FakeDeviceLogReader deviceLogReader = FakeDeviceLogReader();
 
@@ -154,6 +156,7 @@ void main() {
       projectBundleId: 'app',
       bundleName: 'Runner',
       bundleDir: fileSystem.currentDirectory,
+      applicationPackage: fileSystem.currentDirectory,
     );
     final FakeDeviceLogReader deviceLogReader = FakeDeviceLogReader();
 
@@ -192,6 +195,7 @@ void main() {
       projectBundleId: 'app',
       bundleName: 'Runner',
       bundleDir: fileSystem.currentDirectory,
+      applicationPackage: fileSystem.currentDirectory,
     );
     final FakeDeviceLogReader deviceLogReader = FakeDeviceLogReader();
 
@@ -231,6 +235,7 @@ void main() {
       projectBundleId: 'app',
       bundleName: 'Runner',
       bundleDir: fileSystem.currentDirectory,
+      applicationPackage: fileSystem.currentDirectory,
     );
 
     final LaunchResult launchResult = await device.startApp(iosApp,
@@ -297,6 +302,7 @@ void main() {
       projectBundleId: 'app',
       bundleName: 'Runner',
       bundleDir: fileSystem.currentDirectory,
+      applicationPackage: fileSystem.currentDirectory,
     );
     final FakeDeviceLogReader deviceLogReader = FakeDeviceLogReader();
 

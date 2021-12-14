@@ -84,6 +84,8 @@ void main() {
         applicationBinary: apkFile,
       );
       expect(applicationPackage.name, 'app.apk');
+      expect(applicationPackage, isA<PrebuiltApplicationPackage>());
+      expect((applicationPackage as PrebuiltApplicationPackage).applicationPackage.path, apkFile.path);
       expect(fakeProcessManager.hasRemainingExpectations, isFalse);
     }, overrides: overrides);
 
@@ -301,6 +303,7 @@ void main() {
       expect(iosApp.bundleDir.path, 'bundle.app');
       expect(iosApp.id, 'fooBundleId');
       expect(iosApp.bundleName, 'bundle.app');
+      expect(iosApp.applicationPackage.path, globals.fs.directory('bundle.app').path);
     }, overrides: overrides);
 
     testUsingContext('Bad ipa zip-file, no payload dir', () {
@@ -351,6 +354,7 @@ void main() {
       expect(iosApp.bundleDir.path, endsWith('bundle.app'));
       expect(iosApp.id, 'fooBundleId');
       expect(iosApp.bundleName, 'bundle.app');
+      expect(iosApp.applicationPackage.path, globals.fs.file('app.ipa').path);
     }, overrides: overrides);
 
     testUsingContext('returns null when there is no ios or .ios directory', () async {
@@ -427,6 +431,7 @@ void main() {
       final PrebuiltFuchsiaApp fuchsiaApp = FuchsiaApp.fromPrebuiltApp(globals.fs.file('bundle.far')) as PrebuiltFuchsiaApp;
       expect(testLogger.errorText, isEmpty);
       expect(fuchsiaApp.id, 'bundle.far');
+      expect(fuchsiaApp.applicationPackage.path, globals.fs.file('bundle.far').path);
     }, overrides: overrides);
 
     testUsingContext('returns null when there is no fuchsia', () async {

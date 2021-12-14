@@ -21,7 +21,7 @@ import 'android_sdk.dart';
 import 'gradle.dart';
 
 /// An application package created from an already built Android APK.
-class AndroidApk extends ApplicationPackage {
+class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackage {
   AndroidApk({
     required String id,
     required this.file,
@@ -88,6 +88,9 @@ class AndroidApk extends ApplicationPackage {
 
   /// Path to the actual apk file.
   final File file;
+
+  @override
+  FileSystemEntity get applicationPackage => file;
 
   /// The path to the activity that should be launched.
   final String launchActivity;

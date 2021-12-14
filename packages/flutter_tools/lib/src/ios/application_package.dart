@@ -69,6 +69,7 @@ abstract class IOSApp extends ApplicationPackage {
       bundleDir: bundleDir,
       bundleName: globals.fs.path.basename(bundleDir.path),
       projectBundleId: id,
+      applicationPackage: applicationBinary,
     );
   }
 
@@ -152,11 +153,12 @@ class BuildableIOSApp extends IOSApp {
   }
 }
 
-class PrebuiltIOSApp extends IOSApp {
+class PrebuiltIOSApp extends IOSApp implements PrebuiltApplicationPackage {
   PrebuiltIOSApp({
     required this.bundleDir,
     this.bundleName,
     required String projectBundleId,
+    required this.applicationPackage,
   }) : super(projectBundleId: projectBundleId);
 
   final Directory bundleDir;
@@ -175,4 +177,7 @@ class PrebuiltIOSApp extends IOSApp {
   String get deviceBundlePath => _bundlePath;
 
   String get _bundlePath => bundleDir.path;
+
+  @override
+  final FileSystemEntity applicationPackage;
 }

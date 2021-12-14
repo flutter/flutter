@@ -34,6 +34,7 @@ abstract class FuchsiaApp extends ApplicationPackage {
     }
     return PrebuiltFuchsiaApp(
       farArchive: applicationBinary.path,
+      applicationPackage: applicationBinary,
     );
   }
 
@@ -44,9 +45,10 @@ abstract class FuchsiaApp extends ApplicationPackage {
   File farArchive(BuildMode buildMode);
 }
 
-class PrebuiltFuchsiaApp extends FuchsiaApp {
+class PrebuiltFuchsiaApp extends FuchsiaApp implements PrebuiltApplicationPackage {
   PrebuiltFuchsiaApp({
     required String farArchive,
+    required this.applicationPackage,
   }) : _farArchive = farArchive,
        // TODO(zanderso): Extract the archive and extract the id from meta/package.
        super(projectBundleId: farArchive);
@@ -58,6 +60,9 @@ class PrebuiltFuchsiaApp extends FuchsiaApp {
 
   @override
   String get name => _farArchive;
+
+  @override
+  final FileSystemEntity applicationPackage;
 }
 
 class BuildableFuchsiaApp extends FuchsiaApp {

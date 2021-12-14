@@ -42,6 +42,7 @@ abstract class MacOSApp extends ApplicationPackage {
       bundleName: bundleInfo.bundle.path,
       projectBundleId: bundleInfo.id,
       executable: bundleInfo.executable,
+      applicationPackage: applicationBinary,
     );
   }
 
@@ -110,12 +111,13 @@ abstract class MacOSApp extends ApplicationPackage {
   String? executable(BuildMode buildMode);
 }
 
-class PrebuiltMacOSApp extends MacOSApp {
+class PrebuiltMacOSApp extends MacOSApp implements PrebuiltApplicationPackage {
   PrebuiltMacOSApp({
     required this.bundleDir,
     required this.bundleName,
     required this.projectBundleId,
     required String executable,
+    required this.applicationPackage,
   }) : _executable = executable,
        super(projectBundleId: projectBundleId);
 
@@ -133,6 +135,9 @@ class PrebuiltMacOSApp extends MacOSApp {
 
   @override
   String? executable(BuildMode buildMode) => _executable;
+
+  @override
+  final FileSystemEntity applicationPackage;
 }
 
 class BuildableMacOSApp extends MacOSApp {
