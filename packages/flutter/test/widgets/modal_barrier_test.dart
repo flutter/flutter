@@ -162,9 +162,8 @@ void main() {
       tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
         if (methodCall.method == 'SystemSound.play') {
           playedSystemSounds.add(methodCall.arguments as String);
-	} else {
-          return null;
 	}
+    return null;
       });
 
       final Widget subject = Stack(
