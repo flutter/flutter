@@ -2676,6 +2676,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   Rect? _cachedFirstRect;
   Size _cachedSize = Size.zero;
   int _cachedPlaceholder = -1;
+  TextStyle? _cachedTextStyle;
 
   void _updateSelectionRects({bool force = false}) {
     if (defaultTargetPlatform != TargetPlatform.iOS)
@@ -2683,18 +2684,21 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     // This is to avoid sending selection rects on non-iPad devices.
     if (WidgetsBinding.instance!.window.physicalSize.shortestSide < _kIPadWidth)
       return;
-    final String text = buildTextSpan().toPlainText(includeSemanticsLabels: false, includePlaceholders: false);
+
+    final String text = renderEditable.text?.toPlainText(includeSemanticsLabels: false, includePlaceholders: false) ?? '';
     final List<Rect> firstSelectionBoxes = renderEditable.getBoxesForSelection(const TextSelection(baseOffset: 0, extentOffset: 1));
     final Rect? firstRect = firstSelectionBoxes.isNotEmpty ? firstSelectionBoxes.first : null;
     final ScrollDirection scrollDirection = _scrollController.position.userScrollDirection;
     final Size size = renderEditable.size;
     final bool textChanged = text != _cachedText;
+    final bool textStyleChanged = _cachedTextStyle != widget.style;
     final bool firstRectChanged = _cachedFirstRect != firstRect;
     final bool sizeChanged = _cachedSize != size;
     final bool placeholderChanged = _cachedPlaceholder != _placeholderLocation;
-    if (scrollDirection == ScrollDirection.idle && (force || textChanged || firstRectChanged || sizeChanged || placeholderChanged)) {
+    if (scrollDirection == ScrollDirection.idle && (force || textChanged || textStyleChanged || firstRectChanged || sizeChanged || placeholderChanged)) {
       _cachedText = text;
       _cachedFirstRect = firstRect;
+      _cachedTextStyle = widget.style;
       _cachedSize = size;
       _cachedPlaceholder = _placeholderLocation;
       bool belowRenderEditableBottom = false;
@@ -3172,6 +3176,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       final List<_ScribblePlaceholder> placeholders = <_ScribblePlaceholder>[];
       final int placeholderLocation = _value.text.length - _placeholderLocation;
       if (_isMultiline) {
+        // The zero size placeholder here allows the line to break and keep the caret on the first line.
         placeholders.add(const _ScribblePlaceholder(child: SizedBox(), size: Size.zero));
         placeholders.add(_ScribblePlaceholder(child: const SizedBox(), size: Size(renderEditable.size.width, 0.0)));
       } else {
@@ -3966,8 +3971,8 @@ class _ScribbleFocusableState extends State<_ScribbleFocusable> implements Scrib
 
   @override
   void dispose() {
-    super.dispose();
     TextInput.unregisterScribbleElement(elementIdentifier);
+    super.dispose();
   }
 
   RenderEditable? get renderEditable => widget.editableKey.currentContext?.findRenderObject() as RenderEditable?;

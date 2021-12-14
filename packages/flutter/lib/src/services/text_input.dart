@@ -1112,7 +1112,7 @@ abstract class TextInputClient {
   /// Requests that the client show the editing toolbar, for example when the
   /// platform changes the selection through a non-flutter method such as
   /// scribble.
-  void showToolbar();
+  void showToolbar() {}
 
   /// Requests that the client add a text placeholder to reserve visual space
   /// in the text.
@@ -1120,10 +1120,10 @@ abstract class TextInputClient {
   /// For example, this is called when responding to UIKit requesting
   /// a text placeholder be added at the current selection, such as when
   /// requesting additional writing space with iPadOS14 Scribble.
-  void insertTextPlaceholder(Size size);
+  void insertTextPlaceholder(Size size) {}
 
   /// Requests that the client remove the text placeholder.
-  void removeTextPlaceholder();
+  void removeTextPlaceholder() {}
 }
 
 /// An interface to receive focus from the engine.
@@ -1354,7 +1354,8 @@ class TextInputConnection {
     );
   }
 
-  /// Send selection rects.
+  /// Send the bounding boxes of the current selected glyphs in the client to
+  /// the platform's text input plugin.
   ///
   /// These are used by the engine during a UIDirectScribbleInteraction.
   void setSelectionRects(List<SelectionRect> selectionRects) {
@@ -1641,9 +1642,7 @@ class TextInput {
     final String method = methodCall.method;
     if (method == 'TextInputClient.focusElement') {
       final List<dynamic> args = methodCall.arguments as List<dynamic>;
-      if (_scribbleClients.containsKey(args[0])) {
-        _scribbleClients[args[0]]?.onScribbleFocus(Offset((args[1] as num).toDouble(), (args[2] as num).toDouble()));
-      }
+      _scribbleClients[args[0]]?.onScribbleFocus(Offset((args[1] as num).toDouble(), (args[2] as num).toDouble()));
       return;
     } else if (method == 'TextInputClient.requestElementsInRect') {
       final List<double> args = (methodCall.arguments as List<dynamic>).cast<num>().map<double>((num value) => value.toDouble()).toList();
