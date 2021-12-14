@@ -128,7 +128,18 @@ abstract class ChromiumDevice extends Device {
   }) async {
     // See [ResidentWebRunner.run] in flutter_tools/lib/src/resident_web_runner.dart
     // for the web initialization and server logic.
-    final String url = debuggingOptions.webLaunchUrl ?? platformArgs['uri']! as String;
+    String url;
+    if (debuggingOptions.webLaunchUrl != null) {
+      final RegExp pattern = RegExp(r'^((http)?:\/\/)[^\s]+');
+      if (pattern.hasMatch(debuggingOptions.webLaunchUrl!)) {
+        url = debuggingOptions.webLaunchUrl!;
+      } else {
+        url = platformArgs['uri']! as String;
+        _logger.printStatus('"${debuggingOptions.webLaunchUrl}" is not a vaild HTTP URL,"$url" will be used.');
+      }
+    } else {
+      url = platformArgs['uri']! as String;
+    }
     final bool launchChrome = platformArgs['no-launch-chrome'] != true;
     if (launchChrome) {
       _chrome = await chromeLauncher.launch(

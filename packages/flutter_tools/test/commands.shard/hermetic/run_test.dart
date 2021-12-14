@@ -595,12 +595,12 @@ void main() {
     ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testUsingContext('Does not support "--web-launch-url"', () async {
+  testUsingContext('fails when "--web-launch-url" is not supported', () async {
     final RunCommand command = RunCommand();
     await expectLater(
           () => createTestCommandRunner(command).run(<String>[
         'run',
-        '--web-launch-url=example_url',
+        '--web-launch-url=http://flutter.dev',
       ]),
       throwsA(isException.having(
             (Exception exception) => exception.toString(),
@@ -608,8 +608,12 @@ void main() {
         isNot(contains('web-launch-url')),
       )),
     );
+
     final DebuggingOptions options = await command.createDebuggingOptions(true);
-    expect(options.webLaunchUrl, 'example_url');
+    expect(options.webLaunchUrl, 'http://flutter.dev');
+
+    final RegExp pattern = RegExp(r'^((http)?:\/\/)[^\s]+');
+    expect(pattern.hasMatch(options.webLaunchUrl), true);
   }, overrides: <Type, Generator>{
     ProcessManager: () => FakeProcessManager.any(),
     Logger: () => BufferLogger.test(),

@@ -227,7 +227,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         webRunHeadless: featureFlags.isWebEnabled && boolArg('web-run-headless'),
         webBrowserDebugPort: browserDebugPort,
         webEnableExpressionEvaluation: featureFlags.isWebEnabled && boolArg('web-enable-expression-evaluation'),
-        webLaunchUrl: featureFlags.isWebEnabled ? stringArg('web-launch-url') : '',
+        webLaunchUrl: featureFlags.isWebEnabled ? stringArg('web-launch-url') : null,
         vmserviceOutFile: stringArg('vmservice-out-file'),
         fastStart: argParser.options.containsKey('fast-start')
           && boolArg('fast-start')
