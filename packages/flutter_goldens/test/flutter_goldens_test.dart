@@ -100,7 +100,7 @@ void main() {
         httpClient: fakeHttpClient,
       );
 
-      process.fallbackProcessResult = ProcessResult(123, 1, 'fail', 'fail');
+      process.fallbackProcessResult = ProcessResult(123, 1, 'Fallback failure', 'Fallback failure');
 
       expect(
         skiaClient.auth(),
@@ -125,8 +125,6 @@ void main() {
         httpClient: fakeHttpClient,
       );
 
-      process.fallbackProcessResult = ProcessResult(123, 1, 'fail', 'fail');
-
       const RunInvocation gitInvocation = RunInvocation(
         <String>['git', 'rev-parse', 'HEAD'],
         '/flutter',
@@ -145,12 +143,119 @@ void main() {
         null,
       );
       process.processResults[gitInvocation] = ProcessResult(12345678, 0, '12345678', '');
-      process.processResults[goldctlInvocation] = ProcessResult(123, 1, 'fail', 'fail');
+      process.processResults[goldctlInvocation] = ProcessResult(123, 1, 'Expected failure', 'Expected failure');
+      process.fallbackProcessResult = ProcessResult(123, 1, 'Fallback failure', 'Fallback failure');
 
       expect(
         skiaClient.imgtestInit(),
         throwsException,
       );
+    });
+
+    test('Only calls init once', () async {
+      platform = FakePlatform(
+        environment: <String, String>{
+          'FLUTTER_ROOT': _kFlutterRoot,
+          'GOLDCTL' : 'goldctl',
+        },
+        operatingSystem: 'macos'
+      );
+
+      skiaClient = SkiaGoldClient(
+        workDirectory,
+        fs: fs,
+        process: process,
+        platform: platform,
+        httpClient: fakeHttpClient,
+      );
+
+      const RunInvocation gitInvocation = RunInvocation(
+        <String>['git', 'rev-parse', 'HEAD'],
+        '/flutter',
+      );
+      const RunInvocation goldctlInvocation = RunInvocation(
+        <String>[
+          'goldctl',
+          'imgtest', 'init',
+          '--instance', 'flutter',
+          '--work-dir', '/workDirectory/temp',
+          '--commit', '1234',
+          '--keys-file', '/workDirectory/keys.json',
+          '--failure-file', '/workDirectory/failures.json',
+          '--passfail',
+        ],
+        null,
+      );
+      process.processResults[gitInvocation] = ProcessResult(1234, 0, '1234', '');
+      process.processResults[goldctlInvocation] = ProcessResult(5678, 0, '5678', '');
+      process.fallbackProcessResult = ProcessResult(123, 1, 'Fallback failure', 'Fallback failure');
+
+      // First call
+      await skiaClient.imgtestInit();
+
+      // Remove fake process result.
+      // If the init call is executed again, the fallback process will throw.
+      process.processResults.remove(goldctlInvocation);
+
+      // Second call
+      await skiaClient.imgtestInit();
+    });
+
+    test('Only calls tryjob init once', () async {
+      platform = FakePlatform(
+        environment: <String, String>{
+          'FLUTTER_ROOT': _kFlutterRoot,
+          'GOLDCTL' : 'goldctl',
+          'SWARMING_TASK_ID' : '4ae997b50dfd4d11',
+          'LOGDOG_STREAM_PREFIX' : 'buildbucket/cr-buildbucket.appspot.com/8885996262141582672',
+          'GOLD_TRYJOB' : 'refs/pull/49815/head',
+        },
+        operatingSystem: 'macos'
+      );
+
+      skiaClient = SkiaGoldClient(
+        workDirectory,
+        fs: fs,
+        process: process,
+        platform: platform,
+        httpClient: fakeHttpClient,
+      );
+
+      const RunInvocation gitInvocation = RunInvocation(
+        <String>['git', 'rev-parse', 'HEAD'],
+        '/flutter',
+      );
+      const RunInvocation goldctlInvocation = RunInvocation(
+        <String>[
+          'goldctl',
+          'imgtest', 'init',
+          '--instance', 'flutter',
+          '--work-dir', '/workDirectory/temp',
+          '--commit', '1234',
+          '--keys-file', '/workDirectory/keys.json',
+          '--failure-file', '/workDirectory/failures.json',
+          '--passfail',
+          '--crs', 'github',
+          '--patchset_id', '1234',
+          '--changelist', '49815',
+          '--cis', 'buildbucket',
+          '--jobid', '8885996262141582672',
+        ],
+        null,
+      );
+      process.processResults[gitInvocation] = ProcessResult(1234, 0, '1234', '');
+      process.processResults[goldctlInvocation] = ProcessResult(5678, 0, '5678', '');
+      process.fallbackProcessResult = ProcessResult(123, 1, 'Fallback failure', 'Fallback failure');
+
+      // First call
+      await skiaClient.tryjobInit();
+
+      // Remove fake process result.
+      // If the init call is executed again, the fallback process will throw.
+      process.processResults.remove(goldctlInvocation);
+
+      // Second call
+      await skiaClient.tryjobInit();
     });
 
     test('throws for error state from imgtestAdd', () {
@@ -172,7 +277,6 @@ void main() {
         httpClient: fakeHttpClient,
       );
 
-      process.fallbackProcessResult = ProcessResult(123, 1, 'fail', 'fail');
       const RunInvocation goldctlInvocation = RunInvocation(
         <String>[
           'goldctl',
@@ -184,7 +288,8 @@ void main() {
         ],
         null,
       );
-      process.processResults[goldctlInvocation] = ProcessResult(123, 1, 'fail', 'fail');
+      process.processResults[goldctlInvocation] = ProcessResult(123, 1, 'Expected failure', 'Expected failure');
+      process.fallbackProcessResult = ProcessResult(123, 1, 'Fallback failure', 'Fallback failure');
 
       expect(
         skiaClient.imgtestAdd('golden_file_test', goldenFile),
@@ -327,7 +432,7 @@ void main() {
   });
 
   group('FlutterGoldenFileComparator', () {
-    late FlutterPostSubmitFileComparator comparator;
+    late FlutterGoldenFileComparator comparator;
 
     setUp(() {
       final Directory basedir = fs.directory('flutter/test/library/')
@@ -362,9 +467,10 @@ void main() {
     });
 
     group('Post-Submit', () {
-      final FakeSkiaGoldClient fakeSkiaClient = FakeSkiaGoldClient();
+      late FakeSkiaGoldClient fakeSkiaClient;
 
       setUp(() {
+        fakeSkiaClient = FakeSkiaGoldClient();
         final Directory basedir = fs.directory('flutter/test/library/')
           ..createSync(recursive: true);
         comparator = FlutterPostSubmitFileComparator(
@@ -373,6 +479,24 @@ void main() {
           fs: fs,
           platform: platform,
         );
+      });
+
+      test('calls init during compare', () {
+        expect(fakeSkiaClient.initCalls, 0);
+        comparator.compare(
+          Uint8List.fromList(_kTestPngBytes),
+          Uri.parse('flutter.golden_test.1.png'),
+        );
+        expect(fakeSkiaClient.initCalls, 1);
+      });
+
+      test('does not call init in during construction', () {
+        expect(fakeSkiaClient.initCalls, 0);
+        FlutterPostSubmitFileComparator.fromDefaultComparator(
+          platform,
+          goldens: fakeSkiaClient,
+        );
+        expect(fakeSkiaClient.initCalls, 0);
       });
 
       group('correctly determines testing environment', () {
@@ -441,6 +565,38 @@ void main() {
     });
 
     group('Pre-Submit', () {
+      late FakeSkiaGoldClient fakeSkiaClient;
+
+      setUp(() {
+        fakeSkiaClient = FakeSkiaGoldClient();
+        final Directory basedir = fs.directory('flutter/test/library/')
+          ..createSync(recursive: true);
+        comparator = FlutterPreSubmitFileComparator(
+          basedir.uri,
+          fakeSkiaClient,
+          fs: fs,
+          platform: platform,
+        );
+      });
+
+      test('calls init during compare', () {
+        expect(fakeSkiaClient.tryInitCalls, 0);
+        comparator.compare(
+          Uint8List.fromList(_kTestPngBytes),
+          Uri.parse('flutter.golden_test.1.png'),
+        );
+        expect(fakeSkiaClient.tryInitCalls, 1);
+      });
+
+      test('does not call init in during construction', () {
+        expect(fakeSkiaClient.tryInitCalls, 0);
+        FlutterPostSubmitFileComparator.fromDefaultComparator(
+          platform,
+          goldens: fakeSkiaClient,
+        );
+        expect(fakeSkiaClient.tryInitCalls, 0);
+      });
+
       group('correctly determines testing environment', () {
         test('returns true for Luci', () {
           platform = FakePlatform(
@@ -682,8 +838,8 @@ class FakeProcessManager extends Fake implements ProcessManager {
     Map<String, String>? environment,
     bool includeParentEnvironment = true,
     bool runInShell = false,
-    Encoding stdoutEncoding = systemEncoding,
-    Encoding stderrEncoding = systemEncoding,
+    Encoding? stdoutEncoding = systemEncoding,
+    Encoding? stderrEncoding = systemEncoding,
   }) async {
     workingDirectories.add(workingDirectory);
     final ProcessResult? result = processResults[RunInvocation(command.cast<String>(), workingDirectory)];
@@ -706,6 +862,21 @@ class FakeSkiaGoldClient extends Fake implements SkiaGoldClient {
     }
     return expectationForTestValues[testName] ?? '';
   }
+
+  @override
+  Future<void> auth() async {}
+
+  int initCalls = 0;
+  @override
+  Future<void> imgtestInit() async => initCalls += 1;
+  @override
+  Future<bool> imgtestAdd(String testName, File goldenFile) async => true;
+
+  int tryInitCalls = 0;
+  @override
+  Future<void> tryjobInit() async => tryInitCalls += 1;
+  @override
+  Future<bool> tryjobAdd(String testName, File goldenFile) async => true;
 
   Map<String, List<int>> imageBytesValues = <String, List<int>>{};
   @override

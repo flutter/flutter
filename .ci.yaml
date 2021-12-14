@@ -8,9 +8,7 @@
 enabled_branches:
   - main
   - master
-  - dev
-  - beta
-  - stable
+  - flutter-\d+\.\d+-candidate\.\d+
 
 platform_properties:
   linux:
@@ -87,7 +85,7 @@ platform_properties:
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "open_jdk"}
         ]
-      os: Mac-10.15
+      os: Mac-12.0
       device_os: N
   mac_ios:
     properties:
@@ -108,9 +106,9 @@ platform_properties:
           {"dependency": "gems"},
           {"dependency": "ios_signing"}
         ]
-      os: Mac-10.15
-      device_os: iOS-14.4.2
-      xcode: 12c33
+      os: Mac-12.0
+      device_os: iOS-15.1
+      xcode: 13a233
   mac_ios32:
     properties:
       caches: >-
@@ -130,9 +128,9 @@ platform_properties:
           {"dependency": "gems"},
           {"dependency": "ios_signing"}
         ]
-      os: Mac-10.15
+      os: Mac-12.0
       device_os: iOS-9.3.6
-      xcode: 12c33
+      xcode: 13a233
   windows:
     properties:
       caches: >-
@@ -250,7 +248,6 @@ targets:
 
   - name: Linux ci_yaml flutter roller
     recipe: infra/ci_yaml
-    bringup: true # TODO(chillers): https://github.com/flutter/flutter/issues/93225
     timeout: 30
     properties:
       tags: >
@@ -401,7 +398,9 @@ targets:
           {"dependency": "goldctl"},
           {"dependency": "clang"},
           {"dependency": "cmake"},
-          {"dependency": "ninja"}
+          {"dependency": "ninja"},
+          {"dependency": "open_jdk"},
+          {"dependency": "android_sdk", "version": "version:29.0"}
         ]
       shard: framework_tests
       subshard: misc
@@ -1603,6 +1602,7 @@ targets:
     scheduler: luci
 
   - name: Linux_android flutter_gallery__back_button_memory
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/94036
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -1704,12 +1704,13 @@ targets:
 
   - name: Linux_android hot_mode_dev_cycle_linux__benchmark
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
         ["devicelab","android","linux"]
       task_name: hot_mode_dev_cycle_linux__benchmark
+    runIf:
+      - dev/**
     scheduler: luci
 
   - name: Linux_android image_list_jit_reported_duration
@@ -1834,7 +1835,6 @@ targets:
 
   - name: Linux android views
     recipe: flutter/android_views
-    presubmit: true
     properties:
       dependencies: >-
         [
@@ -1848,7 +1848,6 @@ targets:
 
   - name: Linux deferred components
     recipe: flutter/deferred_components
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/90071
     properties:
       dependencies: >-
         [
@@ -1859,6 +1858,56 @@ targets:
       tags: >
         ["framework","hostonly"]
     timeout: 60
+    scheduler: luci
+
+  - name: Linux_android opacity_peephole_one_rect_perf__e2e_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux"]
+      task_name: opacity_peephole_one_rect_perf__e2e_summary
+    scheduler: luci
+
+  - name: Linux_android opacity_peephole_col_of_rows_perf__e2e_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux"]
+      task_name: opacity_peephole_col_of_rows_perf__e2e_summary
+    scheduler: luci
+
+  - name: Linux_android opacity_peephole_opacity_of_grid_perf__e2e_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux"]
+      task_name: opacity_peephole_opacity_of_grid_perf__e2e_summary
+    scheduler: luci
+
+  - name: Linux_android opacity_peephole_grid_of_opacity_perf__e2e_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux"]
+      task_name: opacity_peephole_grid_of_opacity_perf__e2e_summary
+    scheduler: luci
+
+  - name: Linux_android opacity_peephole_fade_transition_text_perf__e2e_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux"]
+      task_name: opacity_peephole_fade_transition_text_perf__e2e_summary
     scheduler: luci
 
   - name: Mac build_aar_module_test
@@ -2060,7 +2109,9 @@ targets:
         [
           {"dependency": "goldctl"},
           {"dependency": "xcode"},
-          {"dependency": "gems"}
+          {"dependency": "gems"},
+          {"dependency": "open_jdk"},
+          {"dependency": "android_sdk", "version": "version:29.0"}
         ]
       shard: framework_tests
       subshard: misc
@@ -2254,6 +2305,7 @@ targets:
       - .ci.yaml
 
   - name: Mac module_test_ios
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/94732
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -2558,7 +2610,7 @@ targets:
       - .ci.yaml
 
   - name: Mac_android android_semantics_integration_test
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/93253
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/94730
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2943,8 +2995,8 @@ targets:
     scheduler: luci
 
   - name: Mac_android run_release_test
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/91625
     recipe: devicelab/devicelab_drone
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/91625
     presubmit: false
     timeout: 60
     properties:
@@ -2963,14 +3015,14 @@ targets:
       task_name: service_extensions_test
     scheduler: luci
 
-  - name: Mac_android smoke_catalina_start_up
+  - name: Mac_android flutter_gallery_mac__start_up
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
     properties:
       tags: >
         ["devicelab","android","mac"]
-      task_name: smoke_catalina_start_up
+      task_name: flutter_gallery_mac__start_up
     scheduler: luci
 
   - name: Mac_android textfield_perf__timeline_summary
@@ -3167,12 +3219,13 @@ targets:
 
   - name: Mac_ios hot_mode_dev_cycle_macos_target__benchmark
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
         ["devicelab","ios","mac"]
       task_name: hot_mode_dev_cycle_macos_target__benchmark
+    runIf:
+      - dev/**
     scheduler: luci
 
   - name: Mac_ios integration_test_test_ios
@@ -3395,14 +3448,14 @@ targets:
       task_name: simple_animation_perf_ios
     scheduler: luci
 
-  - name: Mac_ios smoke_catalina_hot_mode_dev_cycle_ios__benchmark
+  - name: Mac_ios hot_mode_dev_cycle_ios__benchmark
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
     properties:
       tags: >
         ["devicelab","ios","mac"]
-      task_name: smoke_catalina_hot_mode_dev_cycle_ios__benchmark
+      task_name: hot_mode_dev_cycle_ios__benchmark
     scheduler: luci
 
   - name: Mac_ios tiles_scroll_perf_ios__timeline_summary
@@ -3592,7 +3645,9 @@ targets:
       dependencies: >-
         [
           {"dependency": "goldctl"},
-          {"dependency": "vs_build", "version": "version:vs2019"}
+          {"dependency": "vs_build", "version": "version:vs2019"},
+          {"dependency": "open_jdk"},
+          {"dependency": "android_sdk", "version": "version:29.0"}
         ]
       shard: framework_tests
       subshard: misc

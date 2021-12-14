@@ -5,26 +5,32 @@
 import 'package:args/args.dart';
 
 import 'proto/conductor_state.pb.dart' as pb;
+import 'repository.dart';
 
 const String gsutilBinary = 'gsutil.py';
 
 const String kFrameworkDefaultBranch = 'master';
 const String kForceFlag = 'force';
 
-const List<String> kReleaseChannels = <String>[
-  'stable',
-  'beta',
-  'dev',
-  'master',
-];
+const List<String> kBaseReleaseChannels = <String>['stable', 'beta', 'dev'];
+
+const List<String> kReleaseChannels = <String>[...kBaseReleaseChannels, FrameworkRepository.defaultBranch];
+
+const List<String> kReleaseIncrements = <String>['y', 'z', 'm', 'n'];
 
 const String kReleaseDocumentationUrl = 'https://github.com/flutter/flutter/wiki/Flutter-Cherrypick-Process';
 
 const String kLuciPackagingConsoleLink = 'https://ci.chromium.org/p/flutter/g/packaging/console';
 
+const String kWebsiteReleasesUrl = 'https://docs.flutter.dev/development/tools/sdk/releases';
+
 final RegExp releaseCandidateBranchRegex = RegExp(
   r'flutter-(\d+)\.(\d+)-candidate\.(\d+)',
 );
+
+/// Whether all releases published to the beta channel should be mirrored to
+/// dev.
+const bool kSynchronizeDevWithBeta = true;
 
 /// Cast a dynamic to String and trim.
 String stdoutToString(dynamic input) {
@@ -77,9 +83,8 @@ String? getValueFromEnvOrArgs(
   if (allowNull) {
     return null;
   }
-  throw ConductorException(
-    'Expected either the CLI arg --$name or the environment variable $envName '
-    'to be provided!');
+  throw ConductorException('Expected either the CLI arg --$name or the environment variable $envName '
+      'to be provided!');
 }
 
 bool getBoolFromEnvOrArgs(
@@ -117,9 +122,8 @@ List<String> getValuesFromEnvOrArgs(
     return argValues;
   }
 
-  throw ConductorException(
-    'Expected either the CLI arg --$name or the environment variable $envName '
-    'to be provided!');
+  throw ConductorException('Expected either the CLI arg --$name or the environment variable $envName '
+      'to be provided!');
 }
 
 /// Translate CLI arg names to env variable names.

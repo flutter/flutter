@@ -5,7 +5,6 @@ body {
   line-height: 1.5;
   color: #111;
   background-color: #fdfdfd;
-  font-weight: 300;
   -webkit-font-smoothing: auto;
 }
 
@@ -23,21 +22,9 @@ header.header-fixed nav.navbar-fixed-top {
   box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.37);
 }
 
-h1, h2 {
-  font-weight: 300;
-}
-
-h3, h4, h5, h6 {
-  font-weight: 400;
-}
-
 h1 {
   font-size: 42px !important;
   letter-spacing: -1px;
-}
-
-header h1 {
-  font-weight: 300;
 }
 
 h2 {
@@ -92,7 +79,6 @@ pre.prettyprint {
 code {
   background-color: inherit;
   font-size: 1em; /* browsers default to smaller font for code */
-  font-weight: 300;
   padding-left: 0; /* otherwise we get ragged left margins */
   padding-right: 0;
 }
@@ -123,11 +109,6 @@ dl.dl-horizontal dt {
 /* Line the material icons up with their labels */
 i.md-36 {
   vertical-align: bottom;
-}
-
-/* thinify the inherited names in lists */
-li.inherited a {
-  font-weight: 100;
 }
 
 /* address a style issue with the background of code sections */
