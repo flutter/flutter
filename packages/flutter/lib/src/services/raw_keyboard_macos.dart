@@ -12,8 +12,8 @@ import 'raw_keyboard.dart';
 
 /// Convert a UTF32 rune to its lower case.
 int runeToLowerCase(int rune) {
-  // Assume only BMP runes have lower and upper cases. For other characters,
-  // return them as is.
+  // Assume only Basic Multilingual Plane runes have lower and upper cases.
+  // For other characters, return them as is.
   const int utf16BmpUpperBound = 0xD7FF;
   if (rune > utf16BmpUpperBound)
     return rune;
