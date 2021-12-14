@@ -558,11 +558,9 @@ Command: /home/android/gradlew assembleRelease
         contains(
           '\n'
           '┌─ Flutter Fix ───────────────────────────────────────────────────────────────────────────────────┐\n'
-          '│                                                                                                 │\n'
           '│ [!] Gradle does not have execution permission.                                                  │\n'
           '│ You should change the ownership of the project directory to your user, or move the project to a │\n'
           '│ directory with execute permissions.                                                             │\n'
-          '│                                                                                                 │\n'
           '└─────────────────────────────────────────────────────────────────────────────────────────────────┘\n'
         )
       );
@@ -590,11 +588,9 @@ Command: /home/android/gradlew assembleRelease
         contains(
           '\n'
           '┌─ Flutter Fix ───────────────────────────────────────────────────────────────────────────────────┐\n'
-          '│                                                                                                 │\n'
           '│ [!] Gradle does not have execution permission.                                                  │\n'
           '│ You should change the ownership of the project directory to your user, or move the project to a │\n'
           '│ directory with execute permissions.                                                             │\n'
-          '│                                                                                                 │\n'
           '└─────────────────────────────────────────────────────────────────────────────────────────────────┘\n'
         )
       );
@@ -622,13 +618,11 @@ Command: /home/android/gradlew assembleRelease
         contains(
           '\n'
           '┌─ Flutter Fix ─────────────────────────────────────────────────────────────────────────────────┐\n'
-          '│                                                                                               │\n'
           '│ [!] Unable to download needed Android SDK components, as the following licenses have not been │\n'
           '│ accepted: foo, bar                                                                            │\n'
           '│                                                                                               │\n'
           '│ To resolve this, please run the following command in a Terminal:                              │\n'
           '│ flutter doctor --android-licenses                                                             │\n'
-          '│                                                                                               │\n'
           '└───────────────────────────────────────────────────────────────────────────────────────────────┘\n'
         )
       );
@@ -706,12 +700,10 @@ assembleFooTest
         contains(
           '\n'
           '┌─ Flutter Fix ───────────────────────────────────────────────────────────────────────────────────┐\n'
-          '│                                                                                                 │\n'
           '│ [!]  Gradle project does not define a task suitable for the requested build.                    │\n'
           '│                                                                                                 │\n'
           '│ The /android/app/build.gradle file defines product flavors: flavor1, flavor_2. You must specify │\n'
           '│ a --flavor option to select one of them.                                                        │\n'
-          '│                                                                                                 │\n'
           '└─────────────────────────────────────────────────────────────────────────────────────────────────┘\n'
         )
       );
@@ -747,12 +739,10 @@ assembleProfile
         contains(
           '\n'
           '┌─ Flutter Fix ─────────────────────────────────────────────────────────────────────────────────┐\n'
-          '│                                                                                               │\n'
           '│ [!]  Gradle project does not define a task suitable for the requested build.                  │\n'
           '│                                                                                               │\n'
           '│ The /android/app/build.gradle file does not define any custom product flavors. You cannot use │\n'
           '│ the --flavor option.                                                                          │\n'
-          '│                                                                                               │\n'
           '└───────────────────────────────────────────────────────────────────────────────────────────────┘\n'
         )
       );
@@ -786,7 +776,6 @@ assembleProfile
         contains(
           '\n'
           '┌─ Flutter Fix ─────────────────────────────────────────────────────────────────────────────────┐\n'
-          '│                                                                                               │\n'
           '│ The plugin webview_flutter requires a higher Android SDK version.                             │\n'
           '│ Fix this issue by adding the following to the file /android/app/build.gradle:                 │\n'
           '│ android {                                                                                     │\n'
@@ -798,7 +787,6 @@ assembleProfile
           "│ Note that your app won't be available to users running Android SDKs below 19.                 │\n"
           '│ Alternatively, try to find a version of this plugin that supports these lower versions of the │\n'
           '│ Android SDK.                                                                                  │\n'
-          '│                                                                                               │\n'
           '└───────────────────────────────────────────────────────────────────────────────────────────────┘\n'
         )
       );
@@ -831,7 +819,6 @@ assembleProfile
         contains(
           '\n'
           '┌─ Flutter Fix ─────────────────────────────────────────────────────────────────┐\n'
-          '│                                                                               │\n'
           '│ This issue appears to be https://github.com/flutter/flutter/issues/58247.     │\n'
           '│ Fix this issue by adding the following to the file /android/app/build.gradle: │\n'
           '│ android {                                                                     │\n'
@@ -839,7 +826,6 @@ assembleProfile
           '│     checkReleaseBuilds false                                                  │\n'
           '│   }                                                                           │\n'
           '│ }                                                                             │\n'
-          '│                                                                               │\n'
           '└───────────────────────────────────────────────────────────────────────────────┘\n'
         )
       );
@@ -875,11 +861,9 @@ Execution failed for task ':app:generateDebugFeatureTransitiveDeps'.
         contains(
           '\n'
           '┌─ Flutter Fix ────────────────────────────────────────────────────────────────────────────┐\n'
-          '│                                                                                          │\n'
           '│ You need to update the lockfile, or disable Gradle dependency locking.                   │\n'
           '│ To regenerate the lockfiles run: `./gradlew :generateLockfiles` in /android/build.gradle │\n'
           '│ To remove dependency locking, remove the `dependencyLocking` from /android/build.gradle  │\n'
-          '│                                                                                          │\n'
           '└──────────────────────────────────────────────────────────────────────────────────────────┘\n'
         )
       );
@@ -909,12 +893,10 @@ Execution failed for task ':app:generateDebugFeatureTransitiveDeps'.
         contains(
           '\n'
           '┌─ Flutter Fix ────────────────────────────────────────────────────────────────────────────────┐\n'
-          '│                                                                                              │\n'
           '│ [!] Your project requires a newer version of the Kotlin Gradle plugin.                       │\n'
           '│ Find the latest version on https://kotlinlang.org/docs/gradle.html#plugin-and-versions, then │\n'
           '│ update /android/build.gradle:                                                                │\n'
           "│ ext.kotlin_version = '<latest-version>'                                                      │\n"
-          '│                                                                                              │\n'
           '└──────────────────────────────────────────────────────────────────────────────────────────────┘\n'
         )
       );

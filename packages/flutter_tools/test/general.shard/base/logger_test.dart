@@ -943,9 +943,7 @@ void main() {
         contains(
           '\n'
           '┌─ Test title ┐\n'
-          '│             │\n'
           '│ Hello world │\n'
-          '│             │\n'
           '└─────────────┘\n'
         ),
       );
@@ -966,9 +964,7 @@ void main() {
         contains(
           '\n'
           '┌─────────────┐\n'
-          '│             │\n'
           '│ Hello world │\n'
-          '│             │\n'
           '└─────────────┘\n'
         ),
       );
@@ -989,10 +985,8 @@ void main() {
         contains(
           '\n'
           '┌─ Test title ───────┐\n'
-          '│                    │\n'
           '│ Hello world        │\n'
           '│ This is a new line │\n'
-          '│                    │\n'
           '└────────────────────┘\n'
         ),
       );
@@ -1015,16 +1009,14 @@ void main() {
         contains(
           '\n'
           '┌─ Test title ┐\n'
-          '│             │\n'
           '│ ${bold}Hello world$clear │\n'
-          '│             │\n'
           '└─────────────┘\n'
         ),
       );
     });
 
     testWithoutContext('Stdout printBox handles column limit', () {
-      const int columnLimit = 13;
+      const int columnLimit = 14;
       final Logger logger = StdoutLogger(
         terminal: AnsiTerminal(
           stdio: fakeStdio,
@@ -1042,20 +1034,18 @@ void main() {
       expect(stdout,
         contains(
           '\n'
-          '┌─ Test ────┐\n'
-          '│           │\n'
-          '│ This line │\n'
-          '│ is longer │\n'
-          '│ than 13   │\n'
-          '│ characters│\n'
-          '│           │\n'
-          '└───────────┘\n'
+          '┌─ Test ─────┐\n'
+          '│ This line  │\n'
+          '│ is longer  │\n'
+          '│ than 14    │\n'
+          '│ characters │\n'
+          '└────────────┘\n'
         ),
       );
     });
 
     testWithoutContext('Stdout printBox handles column limit and respects new lines', () {
-      const int columnLimit = 13;
+      const int columnLimit = 14;
       final Logger logger = StdoutLogger(
         terminal: AnsiTerminal(
           stdio: fakeStdio,
@@ -1073,23 +1063,21 @@ void main() {
       expect(stdout,
         contains(
           '\n'
-          '┌─ Test ────┐\n'
-          '│           │\n'
-          '│ This      │\n'
-          '│ line is   │\n'
-          '│ longer    │\n'
-          '│ than      │\n'
-          '│           │\n'
-          '│ 13        │\n'
-          '│ characters│\n'
-          '│           │\n'
-          '└───────────┘\n'
+          '┌─ Test ─────┐\n'
+          '│ This       │\n'
+          '│ line is    │\n'
+          '│ longer     │\n'
+          '│ than       │\n'
+          '│            │\n'
+          '│ 14         │\n'
+          '│ characters │\n'
+          '└────────────┘\n'
         ),
       );
     });
 
     testWithoutContext('Stdout printBox breaks long words that exceed the column limit', () {
-      const int columnLimit = 13;
+      const int columnLimit = 14;
       final Logger logger = StdoutLogger(
         terminal: AnsiTerminal(
           stdio: fakeStdio,
@@ -1107,14 +1095,12 @@ void main() {
       expect(stdout,
         contains(
           '\n'
-          '┌─ Test ────┐\n'
-          '│           │\n'
-          '│ Thiswordis│\n'
-          '│ longerthan│\n'
-          '│ 13characte│\n'
-          '│ rs        │\n'
-          '│           │\n'
-          '└───────────┘\n'
+          '┌─ Test ─────┐\n'
+          '│ Thiswordis │\n'
+          '│ longerthan │\n'
+          '│ 14characte │\n'
+          '│ rs         │\n'
+          '└────────────┘\n'
         ),
       );
     });
