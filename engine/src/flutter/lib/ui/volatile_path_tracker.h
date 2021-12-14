@@ -6,8 +6,9 @@
 #define FLUTTER_LIB_VOLATILE_PATH_TRACKER_H_
 
 #include <deque>
+#include <memory>
 #include <mutex>
-#include <set>
+#include <vector>
 
 #include "flutter/fml/macros.h"
 #include "flutter/fml/task_runner.h"
@@ -15,6 +16,10 @@
 #include "third_party/skia/include/core/SkPath.h"
 
 namespace flutter {
+
+namespace testing {
+class ShellTest;
+}  // namespace testing
 
 /// A cache for paths drawn from dart:ui.
 ///
@@ -46,12 +51,7 @@ class VolatilePathTracker {
   // Must be called from the UI task runner.
   //
   // Callers should only insert paths that are currently volatile.
-  void Insert(std::shared_ptr<TrackedPath> path);
-
-  // Removes a path from tracking.
-  //
-  // May be called from any thread.
-  void Erase(std::shared_ptr<TrackedPath> path);
+  void Track(std::shared_ptr<TrackedPath> path);
 
   // Called by the shell at the end of a frame after notifying Dart about idle
   // time.
@@ -66,13 +66,10 @@ class VolatilePathTracker {
 
  private:
   fml::RefPtr<fml::TaskRunner> ui_task_runner_;
-  std::atomic_bool needs_drain_ = false;
-  std::mutex paths_to_remove_mutex_;
-  std::deque<std::shared_ptr<TrackedPath>> paths_to_remove_;
-  std::set<std::shared_ptr<TrackedPath>> paths_;
+  std::vector<std::weak_ptr<TrackedPath>> paths_;
   bool enabled_ = true;
 
-  void Drain();
+  friend class testing::ShellTest;
 
   FML_DISALLOW_COPY_AND_ASSIGN(VolatilePathTracker);
 };

@@ -91,7 +91,7 @@ static void BM_PathVolatilityTracker(benchmark::State& state) {
     fml::AutoResetWaitableEvent latch;
     task_runners.GetUITaskRunner()->PostTask([&]() {
       for (auto path : paths) {
-        tracker.Insert(path);
+        tracker.Track(path);
       }
       latch.Signal();
     });
@@ -101,7 +101,7 @@ static void BM_PathVolatilityTracker(benchmark::State& state) {
     task_runners.GetUITaskRunner()->PostTask([&]() { tracker.OnFrame(); });
 
     for (int i = 0; i < path_count - 10; ++i) {
-      tracker.Erase(paths[i]);
+      paths[i].reset();
     }
 
     task_runners.GetUITaskRunner()->PostTask([&]() { tracker.OnFrame(); });
