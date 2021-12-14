@@ -102,7 +102,7 @@ allowed_hosts = [
 ]
 
 deps = {
-  'src': 'https://github.com/flutter/buildroot.git' + '@' + 'd45d8382665c923bdc2f8ab4e49f0deef84dd173',
+  'src': 'https://github.com/flutter/buildroot.git' + '@' + '88c2c61d323e3141849611b2d7fd4ac14103c61f',
 
    # Fuchsia compatibility
    #
@@ -417,7 +417,7 @@ deps = {
    Var('fuchsia_git') + '/third_party/Vulkan-Headers.git' + '@' + '0255987d2457576907f046c6d52b89bc6131981d',
 
    'src/third_party/swiftshader':
-   Var('swiftshader_git') + '/SwiftShader.git' + '@' + 'dc0f1319307ee723c6e8a09f2ac7efd9d7bf70c3',
+   Var('swiftshader_git') + '/SwiftShader.git' + '@' + 'd4130e9ac3675dadbec8442dc2310a80ea4ddfb2',
 
    'src/third_party/angle':
    Var('github_git') + '/google/angle.git' + '@' + '06d194e2ae7b1d7e0eda0c0c911eff92dec7d3d1',
