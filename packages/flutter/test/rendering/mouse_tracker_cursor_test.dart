@@ -59,9 +59,8 @@ void main() {
     _binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.mouseCursor, (MethodCall call) async {
       if (_methodCallHandler != null) {
         return _methodCallHandler!(call);
-      } else {
-        return null;
       }
+      return null;
     });
   });
 
