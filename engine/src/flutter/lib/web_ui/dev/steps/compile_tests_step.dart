@@ -258,6 +258,14 @@ Future<bool> compileUnitTest(FilePath input, { required bool forCanvasKit }) asy
     '-DFLUTTER_WEB_AUTO_DETECT=false',
     '-DFLUTTER_WEB_USE_SKIA=$forCanvasKit',
 
+    // Enable the image decoder experiment in tests so we can test the new
+    // functionality. WASM decoders are still tested by forcing the value of
+    // `browserSupportsImageDecoder` to false in the test. See also:
+    //
+    // lib/web_ui/test/canvaskit/image_golden_test.dart
+    // TODO(yjbanov): https://github.com/flutter/flutter/issues/95277
+    '-DEXPERIMENTAL_IMAGE_DECODER=true',
+
     '-O2',
     '-o',
     targetFileName, // target path.

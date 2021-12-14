@@ -218,9 +218,18 @@ html.CanvasElement? tryCreateCanvasElement(int width, int height) {
 @JS('window.ImageDecoder')
 external Object? get _imageDecoderConstructor;
 
+/// Hides `image_web_codecs.dart` behind a flag.
+// TODO(yjbanov): https://github.com/flutter/flutter/issues/95277
+const bool _imageDecoderExperimentEnabled = bool.fromEnvironment(
+  'EXPERIMENTAL_IMAGE_DECODER',
+  defaultValue: false,
+);
+
 /// Whether the current browser supports `ImageDecoder`.
 bool browserSupportsImageDecoder =
-    _imageDecoderConstructor != null && browserEngine == BrowserEngine.blink;
+  _imageDecoderExperimentEnabled &&
+  _imageDecoderConstructor != null &&
+  browserEngine == BrowserEngine.blink;
 
 /// Sets the value of [browserSupportsImageDecoder] to its default value.
 void debugResetBrowserSupportsImageDecoder() {
