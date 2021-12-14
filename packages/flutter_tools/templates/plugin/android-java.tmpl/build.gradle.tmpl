@@ -2,6 +2,7 @@ group '{{androidIdentifier}}'
 version '1.0'
 
 buildscript {
+    ext.kotlin_version = '1.4.32'
     repositories {
         google()
         mavenCentral()
@@ -9,6 +10,7 @@ buildscript {
 
     dependencies {
         classpath 'com.android.tools.build:gradle:4.1.0'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
 
