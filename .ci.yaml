@@ -2323,6 +2323,8 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: module_test_ios
+      device_os: iOS-15.1
+      xcode: 13a233
     scheduler: luci
     runIf:
       - dev/**
