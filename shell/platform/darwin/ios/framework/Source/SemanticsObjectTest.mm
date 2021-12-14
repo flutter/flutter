@@ -266,14 +266,27 @@ class MockAccessibilityBridgeNoWindow : public AccessibilityBridgeIos {
   [scrollable setSemanticsNode:&node];
   [scrollable accessibilityBridgeDidFinishUpdate];
   UIScrollView* scrollView = [scrollable nativeAccessibility];
-  XCTAssertTrue(
-      CGRectEqualToRect(scrollView.frame, CGRectMake(x * effectivelyScale, y * effectivelyScale,
-                                                     w * effectivelyScale, h * effectivelyScale)));
-  XCTAssertTrue(CGSizeEqualToSize(
-      scrollView.contentSize,
-      CGSizeMake(w * effectivelyScale, (h + scrollExtentMax) * effectivelyScale)));
-  XCTAssertTrue(CGPointEqualToPoint(scrollView.contentOffset,
-                                    CGPointMake(0, scrollPosition * effectivelyScale)));
+
+  CGRect actualFrame = scrollView.frame;
+  CGRect expectedFrame = CGRectMake(x * effectivelyScale, y * effectivelyScale,
+                                    w * effectivelyScale, h * effectivelyScale);
+  XCTAssertTrue(CGRectEqualToRect(actualFrame, expectedFrame),
+                @"Scroll view %@ frame is %@, expected %@", scrollView,
+                NSStringFromCGRect(actualFrame), NSStringFromCGRect(expectedFrame));
+
+  CGSize actualContentSize = scrollView.contentSize;
+  CGSize expectedContentSize =
+      CGSizeMake(w * effectivelyScale, (h + scrollExtentMax) * effectivelyScale);
+  XCTAssertTrue(CGSizeEqualToSize(actualContentSize, expectedContentSize),
+                @"Scroll view %@ size is %@, expected %@", scrollView,
+                NSStringFromCGSize(actualContentSize), NSStringFromCGSize(expectedContentSize));
+
+  CGPoint actualContentOffset = scrollView.contentOffset;
+  CGPoint expectedContentOffset = CGPointMake(0, scrollPosition * effectivelyScale);
+  XCTAssertTrue(CGPointEqualToPoint(actualContentOffset, expectedContentOffset),
+                @"Scroll view %@ offset is %@, expected %@", scrollView,
+                NSStringFromCGPoint(actualContentOffset),
+                NSStringFromCGPoint(expectedContentOffset));
 }
 
 - (void)testHorizontalFlutterScrollableSemanticsObject {
