@@ -37,6 +37,22 @@ export 'package:flutter/rendering.dart' show RenderObject, RenderBox, debugDumpR
 // abstract class FrogJar extends RenderObjectWidget { const FrogJar({Key? key}) : super(key: key); }
 // abstract class FrogJarParentData extends ParentData { late Size size; }
 
+// An annotation used by test_analysis package to verify patterns are followed
+// that allow for tree-shaking of both fields and their initializers. This
+// annotation has no impact on code by itself, but indicates the following pattern
+// should be followed for a given field:
+//
+// ```dart
+// class Foo {
+//   final bar = kDebugMode ? Object() : null;
+// }
+// ```
+class _DebugOnly {
+  const _DebugOnly();
+}
+
+const _DebugOnly _debugOnly = _DebugOnly();
+
 // KEYS
 
 /// A key that is only equal to itself.
@@ -2667,6 +2683,7 @@ class BuildOwner {
 
   // In Profile/Release mode this field is initialized to `null`. The Dart compiler can
   // eliminate unused fields, but not their initializers.
+  @_debugOnly
   final Set<Element>? _debugIllFatedElements = kDebugMode ? HashSet<Element>() : null;
 
   // This map keeps track which child reserves the global key with the parent.
@@ -2676,6 +2693,7 @@ class BuildOwner {
   //
   // In Profile/Release mode this field is initialized to `null`. The Dart compiler can
   // eliminate unused fields, but not their initializers.
+  @_debugOnly
   final Map<Element, Map<Element, GlobalKey>>? _debugGlobalKeyReservations = kDebugMode ? <Element, Map<Element, GlobalKey>>{} : null;
 
   /// The number of [GlobalKey] instances that are currently associated with
@@ -3695,6 +3713,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   //
   // In Profile/Release mode this field is initialized to `null`. The Dart compiler can
   // eliminate unused fields, but not their initializers.
+  @_debugOnly
   final Set<Element>? _debugForgottenChildrenWithGlobalKey = kDebugMode ? HashSet<Element>() : null;
 
   /// Remove the given child from the element's child list, in preparation for

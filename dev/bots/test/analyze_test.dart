@@ -193,4 +193,14 @@ void main() {
       },
     ));
   });
+
+  test('analyze.dart - verifyNullInitializedDebugExpensiveFields', () async {
+    final String result = await capture(() => verifyNullInitializedDebugExpensiveFields(
+      testRootPath,
+      minimumMatches: 1,
+    ), exitCode: 1);
+
+    expect(result, contains('final Map<String, String>? bar = kDebugMode'));
+    expect(result, isNot(contains('final Map<String, String>? foo = kDebugMode')));
+  });
 }
