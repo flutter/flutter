@@ -81,14 +81,8 @@ void CanvasPath::resetVolatility() {
     mutable_path().setIsVolatile(true);
     tracked_path_->frame_count = 0;
     tracked_path_->tracking_volatility = true;
-    path_tracker_->Insert(tracked_path_);
+    path_tracker_->Track(tracked_path_);
   }
-}
-
-void CanvasPath::ReleaseDartWrappableReference() const {
-  FML_DCHECK(path_tracker_);
-  path_tracker_->Erase(tracked_path_);
-  RefCountedDartWrappable::ReleaseDartWrappableReference();
 }
 
 int CanvasPath::getFillType() {

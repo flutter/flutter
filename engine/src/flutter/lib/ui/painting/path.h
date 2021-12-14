@@ -115,8 +115,6 @@ class CanvasPath : public RefCountedDartWrappable<CanvasPath> {
 
   static void RegisterNatives(tonic::DartLibraryNatives* natives);
 
-  virtual void ReleaseDartWrappableReference() const override;
-
  private:
   CanvasPath();
 
