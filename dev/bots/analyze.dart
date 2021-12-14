@@ -41,7 +41,7 @@ final String pubCache = path.join(flutterRoot, '.pub-cache');
 /// For example:
 /// bin/cache/dart-sdk/bin/dart dev/bots/analyze.dart --dart-sdk=/tmp/dart-sdk
 Future<void> main(List<String> arguments) async {
-  String dartSdk = path.join(
+  final String dartSdk = path.join(
     Directory.current.absolute.path,
     _getDartSdkFromArguments(arguments) ?? path.join(flutterRoot, 'bin', 'cache', 'dart-sdk'),
   );
