@@ -63,8 +63,7 @@ bool ShellTestPlatformViewGL::GLContextClearCurrent() {
 }
 
 // |GPUSurfaceGLDelegate|
-bool ShellTestPlatformViewGL::GLContextPresent(fml::TimePoint target_time,
-                                               uint32_t fbo_id) {
+bool ShellTestPlatformViewGL::GLContextPresent(uint32_t fbo_id) {
   return gl_surface_.Present();
 }
 
