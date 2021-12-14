@@ -2495,7 +2495,7 @@ class Path extends NativeFieldWrapperClass1 {
   /// argument.
   void addRRect(RRect rrect) {
     assert(_rrectIsValid(rrect));
-    _addRRect(rrect._value32);
+    _addRRect(rrect._getValue32());
   }
   void _addRRect(Float32List rrect) native 'Path_addRRect';
 
@@ -4333,7 +4333,7 @@ class Canvas extends NativeFieldWrapperClass1 {
   void clipRRect(RRect rrect, {bool doAntiAlias = true}) {
     assert(_rrectIsValid(rrect));
     assert(doAntiAlias != null);
-    _clipRRect(rrect._value32, doAntiAlias);
+    _clipRRect(rrect._getValue32(), doAntiAlias);
   }
   void _clipRRect(Float32List rrect, bool doAntiAlias) native 'Canvas_clipRRect';
 
@@ -4409,7 +4409,7 @@ class Canvas extends NativeFieldWrapperClass1 {
   void drawRRect(RRect rrect, Paint paint) {
     assert(_rrectIsValid(rrect));
     assert(paint != null);
-    _drawRRect(rrect._value32, paint._objects, paint._data);
+    _drawRRect(rrect._getValue32(), paint._objects, paint._data);
   }
   void _drawRRect(Float32List rrect,
                   List<dynamic>? paintObjects,
@@ -4424,7 +4424,7 @@ class Canvas extends NativeFieldWrapperClass1 {
     assert(_rrectIsValid(outer));
     assert(_rrectIsValid(inner));
     assert(paint != null);
-    _drawDRRect(outer._value32, inner._value32, paint._objects, paint._data);
+    _drawDRRect(outer._getValue32(), inner._getValue32(), paint._objects, paint._data);
   }
   void _drawDRRect(Float32List outer,
                    Float32List inner,
@@ -4863,7 +4863,7 @@ class Canvas extends NativeFieldWrapperClass1 {
     }
 
     final Int32List? colorBuffer = (colors == null || colors.isEmpty) ? null : _encodeColorList(colors);
-    final Float32List? cullRectBuffer = cullRect?._value32;
+    final Float32List? cullRectBuffer = cullRect?._getValue32();
     final int qualityIndex = paint.filterQuality.index;
 
     _drawAtlas(
@@ -5037,7 +5037,7 @@ class Canvas extends NativeFieldWrapperClass1 {
 
     _drawAtlas(
       paint._objects, paint._data, qualityIndex, atlas._image, rstTransforms, rects,
-      colors, (blendMode ?? BlendMode.src).index, cullRect?._value32
+      colors, (blendMode ?? BlendMode.src).index, cullRect?._getValue32()
     );
   }
 
