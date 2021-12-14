@@ -85,21 +85,21 @@ class ExpansionPanel {
        assert(body != null),
        assert(isExpanded != null),
        assert(canTapOnHeader != null);
-    
+
   /// Specifies the color of the icon inside the header.
   ///
   /// Defaults to [Colors.black54] when the theme's
   /// [ThemeData.brightness] is [Brightness.light] and to
   /// [Colors.white60] when it is [Brightness.dark].
   final Color? iconColor;
-     
+
   /// The color of the icon when the header is expanded.
   ///
   /// Defaults to [Colors.black54] when the theme's
   /// [ThemeData.brightness] is [Brightness.light] and to
   /// [Colors.white] when it is [Brightness.dark].
   final Color? expandedIconColor;
-    
+
   /// The color of the icon when it is disabled,
   /// i.e. if [canTapOnHeader] is true.
   ///
