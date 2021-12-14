@@ -144,7 +144,7 @@ class _TaskRunner {
       }
 
       final Device? device = await _getWorkingDeviceIfAvailable();
-      
+
       // Some tests assume the phone is in home
       await device?.home();
 
