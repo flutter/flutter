@@ -162,6 +162,9 @@ class ExpansionPanelRadio extends ExpansionPanel {
         headerBuilder: headerBuilder,
         canTapOnHeader: canTapOnHeader,
         backgroundColor: backgroundColor,
+        iconColor: iconColor,
+        expandedIconColor: expandedIconColor,
+        disabledIconColor: disabledIconColor,
       );
 
   /// The value that uniquely identifies a radio panel so that the currently
