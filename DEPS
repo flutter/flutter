@@ -582,7 +582,7 @@ deps = {
     'packages': [
       {
         'package': 'fuchsia/third_party/clang/windows-amd64',
-        'version': '6u9Xk_Dr7e_2dXmuP5zwTi2yfZ7ChIcJ3aVTfR-154wC'
+        'version': '25xTI5-MiVJ87YWFvdlrwmn4O0DVDz-j3oHlszZAyoQC'
       }
     ],
     'condition': 'download_windows_deps',
