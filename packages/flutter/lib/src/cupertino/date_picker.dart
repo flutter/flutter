@@ -203,8 +203,11 @@ enum _PickerColumnType {
 /// [CupertinoTextThemeData.dateTimePickerTextStyle].
 ///
 /// {@tool dartpad}
-/// This example shows a [CupertinoDatePicker] with different picker modes.
+/// This sample shows how to implement CupertinoDatePicker with different picker modes.
+/// We can provide intiial dateTime value for the picker to display. When user changes
+/// the drag the date or time wheels, the picker will call onDateTimeChanged callback.
 ///
+/// CupertinoDatePicker can be displayed directly on a screen or in a popup.
 /// ** See code in examples/api/lib/cupertino/date_picker/cupertino_date_picker.0.dart **
 /// {@end-tool}
 ///

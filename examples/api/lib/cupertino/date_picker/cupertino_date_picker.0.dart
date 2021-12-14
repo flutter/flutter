@@ -2,11 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// This sample shows how to implement CupertinoDatePicker with different picker modes.
-// We can provide intiial dateTime value for the picker to display. When user changes
-// the drag the date or time wheels, the picker will call onDateTimeChanged callback.
-//
-// CupertinoDatePicker can be displayed directly on a screen or in a popup.
+// Flutter code sample for CupertinoDatePicker
 
 import 'package:flutter/cupertino.dart';
 
@@ -38,20 +34,20 @@ class _MyStatelessWidgetState extends State<MyStatelessWidget> {
   DateTime time = DateTime(2016, 5, 10, 22, 35);
   DateTime dateTime = DateTime(2016, 8, 3, 17, 45);
 
-  // This shows CupertinoModalPopup with a reasonable fixed height which host CupertinoDatePicker.
+  // This shows a CupertinoModalPopup with a reasonable fixed height which hosts CupertinoDatePicker.
   void _showDialog(Widget child) {
     showCupertinoModalPopup<void>(
       context: context,
       builder: (BuildContext context) => Container(
         height: 216,
         padding: const EdgeInsets.only(top: 6.0),
-        // Bottom margin is provided to align popup above the system navigation bar.
+        // The Bottom margin is provided to align the popup above the system navigation bar.
         margin: EdgeInsets.only(
           bottom: MediaQuery.of(context).viewInsets.bottom,
         ),
-        // Provide
+        // Provide a background color for the popup.
         color: CupertinoColors.systemBackground.resolveFrom(context),
-        // SafeArea widget to avoid system overlaps.
+        // Use a SafeArea widget to avoid system overlaps.
         child: SafeArea(
           top: false,
           child: child,
@@ -76,7 +72,7 @@ class _MyStatelessWidgetState extends State<MyStatelessWidget> {
                 children: <Widget>[
                   const Text('Date'),
                   CupertinoButton(
-                    // Display CupertinoDatePicker with date picker mode.
+                    // Display a CupertinoDatePicker in date picker mode.
                     onPressed: () => _showDialog(
                       CupertinoDatePicker(
                         initialDateTime: date,
@@ -88,8 +84,8 @@ class _MyStatelessWidgetState extends State<MyStatelessWidget> {
                         },
                       ),
                     ),
-                    // In this example, date value is formatted manually.
-                    // You can use intl package to format the value based on user's locale settings.
+                    // In this example, the date value is formatted manually. You can use intl package
+                    // to format the value based on user's locale settings.
                     child: Text('${date.month}-${date.day}-${date.year}',
                       style: const TextStyle(
                         fontSize: 22.0,
@@ -102,7 +98,7 @@ class _MyStatelessWidgetState extends State<MyStatelessWidget> {
                 children: <Widget>[
                   const Text('Time'),
                   CupertinoButton(
-                    // Display CupertinoDatePicker with time picker mode.
+                    // Display a CupertinoDatePicker in time picker mode.
                     onPressed: () => _showDialog(
                       CupertinoDatePicker(
                         initialDateTime: time,
@@ -114,8 +110,8 @@ class _MyStatelessWidgetState extends State<MyStatelessWidget> {
                         },
                       ),
                     ),
-                    // In this example, time value is formatted manually.
-                    // You can use intl package to format the value based on user's locale settings.
+                    // In this example, the time value is formatted manually. You can use intl package to
+                    // format the value based on the user's locale settings.
                     child: Text('${time.hour}:${time.minute}',
                       style: const TextStyle(
                         fontSize: 22.0,
@@ -128,7 +124,7 @@ class _MyStatelessWidgetState extends State<MyStatelessWidget> {
                 children: <Widget>[
                   const Text('DateTime'),
                   CupertinoButton(
-                    // Display CupertinoDatePicker with dateTime picker mode.
+                    // Display a CupertinoDatePicker in dateTime picker mode.
                     onPressed: () => _showDialog(
                       CupertinoDatePicker(
                         initialDateTime: dateTime,
@@ -139,8 +135,8 @@ class _MyStatelessWidgetState extends State<MyStatelessWidget> {
                         },
                       ),
                     ),
-                    // In this example, time value is formatted manually.
-                    // You can use intl package to format the value based on user's locale settings.
+                    // In this example, time value is formatted manually. You can use intl package to
+                    // format the value based on the user's locale settings.
                     child: Text('${dateTime.month}-${dateTime.day}-${dateTime.year} ${dateTime.hour}:${dateTime.minute}',
                       style: const TextStyle(
                         fontSize: 22.0,
