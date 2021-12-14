@@ -178,8 +178,9 @@ class XCResultIssue {
     required XCResultIssueType type,
     required Map<String, Object?> issueJson,
   }) {
+    // Parse type.
     final Object? issueSubTypeMap = issueJson['issueType'];
-    String subType = '';
+    String? subType;
     if (issueSubTypeMap is Map<String, Object?>) {
       final Object? subTypeValue = issueSubTypeMap['_value'];
       if (subTypeValue is String) {
@@ -187,7 +188,8 @@ class XCResultIssue {
       }
     }
 
-    String message = '';
+    // Parse message.
+    String? message;
     final Object? messageMap = issueJson['message'];
     if (messageMap is Map<String, Object?>) {
       final Object? messageValue = messageMap['_value'];
@@ -196,10 +198,30 @@ class XCResultIssue {
       }
     }
 
+    final List<String> warnings = <String>[];
+    // Parse url and convert it to a location String.
+    String? location;
+    final Object? documentLocationInCreatingWorkspaceMap =
+        issueJson['documentLocationInCreatingWorkspace'];
+    if (documentLocationInCreatingWorkspaceMap is Map<String, Object?>) {
+      final Object? urlMap = documentLocationInCreatingWorkspaceMap['url'];
+      if (urlMap is Map<String, Object?>) {
+        final Object? urlValue = urlMap['_value'];
+        if (urlValue is String) {
+          location = _convertUrlToLocationString(urlValue);
+          if (location == null) {
+            warnings.add('(XCResult) The `url` exists but it was failed to be parsed. url: $urlValue');
+          }
+        }
+      }
+    }
+
     return XCResultIssue._(
       type: type,
       subType: subType,
       message: message,
+      location: location,
+      warnings: warnings,
     );
   }
 
@@ -207,6 +229,8 @@ class XCResultIssue {
     required this.type,
     required this.subType,
     required this.message,
+    required this.location,
+    required this.warnings,
   });
 
   /// The type of the issue.
@@ -216,12 +240,21 @@ class XCResultIssue {
   ///
   /// This is a more detailed category about the issue.
   /// The possible values are `Warning`, `Semantic Issue'` etc.
-  final String subType;
+  final String? subType;
 
   /// Human readable message for the issue.
   ///
   /// This can be displayed to user for their information.
-  final String message;
+  final String? message;
+
+  /// The location where the issue occurs.
+  ///
+  /// This is a re-formatted version of the "url" value in the json.
+  /// The format looks like <FileLocation>:<StartingLineNumber>:<StartingColumnNumber>.
+  final String? location;
+
+  /// Warnings when constructing the issue object.
+  final List<String> warnings;
 }
 
 /// The type of an `XCResultIssue`.
@@ -235,4 +268,30 @@ enum XCResultIssueType {
   ///
   /// This is for all the issues under the `errorSummaries` key in the xcresult.
   error,
+}
+
+// A typical location url string looks like file:///foo.swift#CharacterRangeLen=0&EndingColumnNumber=82&EndingLineNumber=7&StartingColumnNumber=82&StartingLineNumber=7.
+//
+// This function converts it to something like: /foo.swift:<StartingLineNumber>:<StartingColumnNumber>.
+String? _convertUrlToLocationString(String url) {
+  final Uri? fragmentLocation = Uri.tryParse(url);
+  if (fragmentLocation == null) {
+    return null;
+  }
+  // Parse the fragment as a query of key-values:
+  final Uri fileLocation = Uri(
+    path: fragmentLocation.path,
+    query: fragmentLocation.fragment,
+  );
+  String startingLineNumber =
+      fileLocation.queryParameters['StartingLineNumber'] ?? '';
+  if (startingLineNumber.isNotEmpty) {
+    startingLineNumber = ':$startingLineNumber';
+  }
+  String startingColumnNumber =
+      fileLocation.queryParameters['StartingColumnNumber'] ?? '';
+  if (startingColumnNumber.isNotEmpty) {
+    startingColumnNumber = ':$startingColumnNumber';
+  }
+  return '${fileLocation.path}$startingLineNumber$startingColumnNumber';
 }

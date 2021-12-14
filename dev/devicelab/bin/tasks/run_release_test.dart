@@ -76,6 +76,8 @@ void main() {
       run.stderr
         .transform<String>(utf8.decoder)
         .transform<String>(const LineSplitter())
+        // TODO(egarciad): Remove once https://github.com/flutter/flutter/issues/95131 is fixed.
+        .skipWhile((String line) => line.contains('Mapping new ns'))
         .listen((String line) {
           print('run:stderr: $line');
           stderr.add(line);
