@@ -78,10 +78,35 @@ class ExpansionPanel {
     this.isExpanded = false,
     this.canTapOnHeader = false,
     this.backgroundColor,
+    this.iconColor,
+    this.expandedIconColor,
+    this.disabledIconColor,
   }) : assert(headerBuilder != null),
        assert(body != null),
        assert(isExpanded != null),
        assert(canTapOnHeader != null);
+    
+  /// Specifies the color of the icon inside the header.
+  ///
+  /// Defaults to [Colors.black54] when the theme's
+  /// [ThemeData.brightness] is [Brightness.light] and to
+  /// [Colors.white60] when it is [Brightness.dark].
+  final Color? iconColor;
+     
+  /// The color of the icon when the header is expanded.
+  ///
+  /// Defaults to [Colors.black54] when the theme's
+  /// [ThemeData.brightness] is [Brightness.light] and to
+  /// [Colors.white] when it is [Brightness.dark].
+  final Color? expandedIconColor;
+    
+  /// The color of the icon when it is disabled,
+  /// i.e. if [canTapOnHeader] is true.
+  ///
+  /// Defaults to [Colors.black38] when the theme's
+  /// [ThemeData.brightness] is [Brightness.light] and to
+  /// [Colors.white38] when it is [Brightness.dark].
+  final Color? disabledIconColor;
 
   /// The widget builder that builds the expansion panels' header.
   final ExpansionPanelHeaderBuilder headerBuilder;
@@ -126,6 +151,9 @@ class ExpansionPanelRadio extends ExpansionPanel {
     required this.value,
     required ExpansionPanelHeaderBuilder headerBuilder,
     required Widget body,
+    Color? iconColor,
+    Color? expandedIconColor,
+    Color? disabledIconColor,
     bool canTapOnHeader = false,
     Color? backgroundColor,
   }) : assert(value != null),
@@ -359,6 +387,9 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
         margin: const EdgeInsetsDirectional.only(end: 8.0),
         child: ExpandIcon(
           isExpanded: _isChildExpanded(index),
+          color: child.iconColor,
+          expandedColor: child.expandedIconColor,
+          disabledColor: child.disabledIconColor,
           padding: const EdgeInsets.all(16.0),
           onPressed: !child.canTapOnHeader
               ? (bool isExpanded) => _handlePressed(isExpanded, index)
