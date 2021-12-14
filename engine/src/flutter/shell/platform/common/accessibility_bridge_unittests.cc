@@ -314,5 +314,28 @@ TEST(AccessibilityBridgeTest, ToggleHasToggleButtonRole) {
   EXPECT_EQ(root_node->GetData().role, ax::mojom::Role::kToggleButton);
 }
 
+TEST(AccessibilityBridgeTest, SliderHasSliderRole) {
+  std::shared_ptr<AccessibilityBridge> bridge =
+      std::make_shared<AccessibilityBridge>(
+          std::make_unique<TestAccessibilityBridgeDelegate>());
+  FlutterSemanticsNode root{.id = 0};
+  root.flags = static_cast<FlutterSemanticsFlag>(
+      FlutterSemanticsFlag::kFlutterSemanticsFlagIsSlider |
+      FlutterSemanticsFlag::kFlutterSemanticsFlagHasEnabledState |
+      FlutterSemanticsFlag::kFlutterSemanticsFlagIsEnabled |
+      FlutterSemanticsFlag::kFlutterSemanticsFlagIsFocusable);
+  root.actions = static_cast<FlutterSemanticsAction>(0);
+  root.text_selection_base = -1;
+  root.text_selection_extent = -1;
+  root.label = "root";
+  root.child_count = 0;
+  root.custom_accessibility_actions_count = 0;
+  bridge->AddFlutterSemanticsNodeUpdate(&root);
+  bridge->CommitUpdates();
+
+  auto root_node = bridge->GetFlutterPlatformNodeDelegateFromID(0).lock();
+  EXPECT_EQ(root_node->GetData().role, ax::mojom::Role::kSlider);
+}
+
 }  // namespace testing
 }  // namespace flutter
