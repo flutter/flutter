@@ -25,9 +25,13 @@ final String flutterRoot = path.dirname(path.dirname(path.dirname(path.fromUri(P
 final String flutter = path.join(flutterRoot, 'bin', Platform.isWindows ? 'flutter.bat' : 'flutter');
 final String flutterPackages = path.join(flutterRoot, 'packages');
 final String flutterExamples = path.join(flutterRoot, 'examples');
-late final String dartSdk;
-final String dart = path.join(dartSdk, 'bin', Platform.isWindows ? 'dart.exe' : 'dart');
-final String pub = path.join(dartSdk, 'bin', Platform.isWindows ? 'pub.bat' : 'pub');
+
+/// The path to the `dart` executable; set at the top of `main`
+late final String dart;
+
+/// The path to the `pub` executable; set at the top of `main`
+late final String pub;
+
 final String pubCache = path.join(flutterRoot, '.pub-cache');
 
 /// When you call this, you can pass additional arguments to pass custom
@@ -37,10 +41,12 @@ final String pubCache = path.join(flutterRoot, '.pub-cache');
 /// For example:
 /// bin/cache/dart-sdk/bin/dart dev/bots/analyze.dart --dart-sdk=/tmp/dart-sdk
 Future<void> main(List<String> arguments) async {
-  dartSdk = path.join(
+  String dartSdk = path.join(
     Directory.current.absolute.path,
     _getDartSdkFromArguments(arguments) ?? path.join(flutterRoot, 'bin', 'cache', 'dart-sdk'),
   );
+  dart = path.join(dartSdk, 'bin', Platform.isWindows ? 'dart.exe' : 'dart');
+  pub = path.join(dartSdk, 'bin', Platform.isWindows ? 'pub.bat' : 'pub');
   print('$clock STARTING ANALYSIS');
   try {
     await run(arguments);
