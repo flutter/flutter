@@ -127,10 +127,14 @@ class IntelliJPlugins {
     }
 
     for (final File file in mainJarFileList) {
-      final Archive archive = ZipDecoder().decodeBytes(file.readAsBytesSync());
-      final ArchiveFile? archiveFile = archive.findFile('META-INF/plugin.xml');
-      if (archiveFile != null) {
-        return archiveFile;
+      try {
+        final Archive archive = ZipDecoder().decodeBytes(file.readAsBytesSync());
+        final ArchiveFile? archiveFile = archive.findFile('META-INF/plugin.xml');
+        if (archiveFile != null) {
+          return archiveFile;
+        }
+      } on FormatException {
+        return null;
       }
     }
     return null;

@@ -69,6 +69,34 @@ void main() {
     expect(message.message, contains('recommended minimum version'));
   });
 
+  testWithoutContext('Dart plugin version not found', () async {
+    final IntelliJPlugins plugins = IntelliJPlugins(_kPluginsPath, fileSystem: fileSystem);
+
+    // Bad plugin.xml file.
+    final Archive dartJarArchive =
+        buildSingleFileArchive('META-INF/plugin.xm', r'''
+<idea=plugin version="2">
+<name>Flutter</name>
+<version>0.1.3</version>
+</idea-plugin>
+''');
+    writeFileCreatingDirectories(
+      fileSystem.path.join(_kPluginsPath, 'Dart', 'lib', 'Dart.jar'),
+      ZipEncoder().encode(dartJarArchive)!,
+    );
+
+    final List<ValidationMessage> messages = <ValidationMessage>[];
+    plugins.validatePackage(messages, <String>['Dart'], 'Dart', 'download-Dart');
+    plugins.validatePackage(messages,
+      <String>['flutter-intellij', 'flutter-intellij.jar'], 'Flutter', 'download-Flutter',
+      minVersion: IntelliJPlugins.kMinFlutterPluginVersion,
+    );
+
+    final ValidationMessage message = messages
+        .firstWhere((ValidationMessage m) => m.message.startsWith('Dart '));
+    expect(message.message, 'Dart plugin installed');
+  });
+
   testWithoutContext('IntelliJPlugins can read the package version of the flutter-intellij 50.0+/IntelliJ 2020.2+ layout', () async {
     final IntelliJPlugins plugins = IntelliJPlugins(_kPluginsPath, fileSystem: fileSystem);
 
