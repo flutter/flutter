@@ -148,7 +148,7 @@ Future<Uint8List> fetchImage(
 
 /// A [ui.Image] backed by an `SkImage` from Skia.
 class CkImage implements ui.Image, StackTraceDebugger {
-  CkImage(SkImage skImage) {
+  CkImage(SkImage skImage, { this.videoFrame }) {
     if (assertionsEnabled) {
       _debugStackTrace = StackTrace.current;
     }
@@ -213,6 +213,14 @@ class CkImage implements ui.Image, StackTraceDebugger {
   // Use a box because `SkImage` may be deleted either due to this object
   // being garbage-collected, or by an explicit call to [delete].
   late final SkiaObjectBox<CkImage, SkImage> box;
+
+  /// For browsers that support `ImageDecoder` this field holds the video frame
+  /// from which this image was created.
+  ///
+  /// Skia owns the video frame and will close it when it's no longer used.
+  /// However, Flutter co-owns the [SkImage] and therefore it's safe to access
+  /// the video frame until the image is [dispose]d of.
+  VideoFrame? videoFrame;
 
   /// The underlying Skia image object.
   ///
@@ -279,6 +287,14 @@ class CkImage implements ui.Image, StackTraceDebugger {
     ui.ImageByteFormat format = ui.ImageByteFormat.rawRgba,
   }) {
     assert(_debugCheckIsNotDisposed());
+    if (videoFrame != null) {
+      return readPixelsFromVideoFrame(videoFrame!, format);
+    } else {
+      return _readPixelsFromSkImage(format);
+    }
+  }
+
+  Future<ByteData> _readPixelsFromSkImage(ui.ImageByteFormat format) {
     final SkAlphaType alphaType = format == ui.ImageByteFormat.rawStraightRgba ? canvasKit.AlphaType.Unpremul : canvasKit.AlphaType.Premul;
     final ByteData? data = _encodeImage(
       skImage: skImage,
@@ -313,7 +329,7 @@ class CkImage implements ui.Image, StackTraceDebugger {
       );
       bytes = skImage.readPixels(0, 0, imageInfo);
     } else {
-      bytes = skImage.encodeToBytes(); //defaults to PNG 100%
+      bytes = skImage.encodeToBytes(); // defaults to PNG 100%
     }
 
     return bytes?.buffer.asByteData(0, bytes.length);
