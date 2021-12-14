@@ -18,8 +18,7 @@ bool AndroidSurfaceMock::GLContextClearCurrent() {
   return true;
 }
 
-bool AndroidSurfaceMock::GLContextPresent(fml::TimePoint target_time,
-                                          uint32_t fbo_id) {
+bool AndroidSurfaceMock::GLContextPresent(uint32_t fbo_id) {
   return true;
 }
 

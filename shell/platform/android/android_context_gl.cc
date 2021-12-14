@@ -8,7 +8,6 @@
 
 #include <utility>
 
-#include "android_environment_gl.h"
 #include "flutter/fml/trace_event.h"
 
 namespace flutter {
@@ -106,14 +105,13 @@ static bool TeardownContext(EGLDisplay display, EGLContext context) {
   return true;
 }
 
-AndroidEGLSurface::AndroidEGLSurface(
-    EGLSurface surface,
-    fml::RefPtr<AndroidEnvironmentGL> environment,
-    EGLContext context)
-    : surface_(surface), environment_(environment), context_(context) {}
+AndroidEGLSurface::AndroidEGLSurface(EGLSurface surface,
+                                     EGLDisplay display,
+                                     EGLContext context)
+    : surface_(surface), display_(display), context_(context) {}
 
 AndroidEGLSurface::~AndroidEGLSurface() {
-  auto result = eglDestroySurface(environment_->Display(), surface_);
+  auto result = eglDestroySurface(display_, surface_);
   FML_DCHECK(result == EGL_TRUE);
 }
 
@@ -122,8 +120,7 @@ bool AndroidEGLSurface::IsValid() const {
 }
 
 bool AndroidEGLSurface::MakeCurrent() const {
-  if (eglMakeCurrent(environment_->Display(), surface_, surface_, context_) !=
-      EGL_TRUE) {
+  if (eglMakeCurrent(display_, surface_, surface_, context_) != EGL_TRUE) {
     FML_LOG(ERROR) << "Could not make the context current";
     LogLastEGLError();
     return false;
@@ -131,19 +128,17 @@ bool AndroidEGLSurface::MakeCurrent() const {
   return true;
 }
 
-bool AndroidEGLSurface::SwapBuffers(fml::TimePoint target_time) {
+bool AndroidEGLSurface::SwapBuffers() {
   TRACE_EVENT0("flutter", "AndroidContextGL::SwapBuffers");
-  environment_->SetPresentationTime(surface_, target_time);
-  return eglSwapBuffers(environment_->Display(), surface_);
+  return eglSwapBuffers(display_, surface_);
 }
 
 SkISize AndroidEGLSurface::GetSize() const {
   EGLint width = 0;
   EGLint height = 0;
 
-  if (!eglQuerySurface(environment_->Display(), surface_, EGL_WIDTH, &width) ||
-      !eglQuerySurface(environment_->Display(), surface_, EGL_HEIGHT,
-                       &height)) {
+  if (!eglQuerySurface(display_, surface_, EGL_WIDTH, &width) ||
+      !eglQuerySurface(display_, surface_, EGL_HEIGHT, &height)) {
     FML_LOG(ERROR) << "Unable to query EGL surface size";
     LogLastEGLError();
     return SkISize::Make(0, 0);
@@ -234,12 +229,14 @@ std::unique_ptr<AndroidEGLSurface> AndroidContextGL::CreateOnscreenSurface(
   if (window->IsFakeWindow()) {
     return CreatePbufferSurface();
   } else {
+    EGLDisplay display = environment_->Display();
+
     const EGLint attribs[] = {EGL_NONE};
 
     EGLSurface surface = eglCreateWindowSurface(
-        environment_->Display(), config_,
+        display, config_,
         reinterpret_cast<EGLNativeWindowType>(window->handle()), attribs);
-    return std::make_unique<AndroidEGLSurface>(surface, environment_, context_);
+    return std::make_unique<AndroidEGLSurface>(surface, display, context_);
   }
 }
 
@@ -247,11 +244,12 @@ std::unique_ptr<AndroidEGLSurface> AndroidContextGL::CreateOffscreenSurface()
     const {
   // We only ever create pbuffer surfaces for background resource loading
   // contexts. We never bind the pbuffer to anything.
+  EGLDisplay display = environment_->Display();
+
   const EGLint attribs[] = {EGL_WIDTH, 1, EGL_HEIGHT, 1, EGL_NONE};
 
-  EGLSurface surface =
-      eglCreatePbufferSurface(environment_->Display(), config_, attribs);
-  return std::make_unique<AndroidEGLSurface>(surface, environment_,
+  EGLSurface surface = eglCreatePbufferSurface(display, config_, attribs);
+  return std::make_unique<AndroidEGLSurface>(surface, display,
                                              resource_context_);
 }
 
@@ -262,7 +260,7 @@ std::unique_ptr<AndroidEGLSurface> AndroidContextGL::CreatePbufferSurface()
   const EGLint attribs[] = {EGL_WIDTH, 1, EGL_HEIGHT, 1, EGL_NONE};
 
   EGLSurface surface = eglCreatePbufferSurface(display, config_, attribs);
-  return std::make_unique<AndroidEGLSurface>(surface, environment_, context_);
+  return std::make_unique<AndroidEGLSurface>(surface, display, context_);
 }
 
 fml::RefPtr<AndroidEnvironmentGL> AndroidContextGL::Environment() const {
