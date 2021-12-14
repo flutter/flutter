@@ -2207,6 +2207,7 @@ void main() {
     final List<MethodCall> log = <MethodCall>[];
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) async {
       log.add(methodCall);
+      return null;
     });
 
     await tester.showKeyboard(find.byType(EditableText));
@@ -3502,6 +3503,7 @@ void main() {
     final List<MethodCall> log = <MethodCall>[];
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) async {
       log.add(methodCall);
+      return null;
     });
 
     final TextEditingController controller = TextEditingController();
@@ -3531,6 +3533,7 @@ void main() {
     final List<MethodCall> log = <MethodCall>[];
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) async {
       log.add(methodCall);
+      return null;
     });
 
     final TextEditingController controller = TextEditingController();
@@ -3566,6 +3569,7 @@ void main() {
     final List<MethodCall> log = <MethodCall>[];
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) async {
       log.add(methodCall);
+      return null;
     });
 
     final TextEditingController controller1 = TextEditingController();
@@ -3651,6 +3655,7 @@ void main() {
     final List<MethodCall> log = <MethodCall>[];
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) async {
       log.add(methodCall);
+      return null;
     });
 
     const Offset offset = Offset(10.0, 20.0);
@@ -3693,6 +3698,7 @@ void main() {
     final List<MethodCall> log = <MethodCall>[];
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) async {
       log.add(methodCall);
+      return null;
     });
 
     final TextEditingController controller = TextEditingController();
@@ -3780,6 +3786,7 @@ void main() {
     final List<MethodCall> log = <MethodCall>[];
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) async {
       log.add(methodCall);
+      return null;
     });
     setState(() {
       currentTextStyle = textStyle2;
@@ -4007,6 +4014,7 @@ void main() {
     final List<MethodCall> log = <MethodCall>[];
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) async {
       log.add(methodCall);
+      return null;
     });
 
     final TextEditingController controller = TextEditingController();
@@ -6706,6 +6714,7 @@ void main() {
     final List<MethodCall> log = <MethodCall>[];
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) async {
       log.add(methodCall);
+      return null;
     });
     final TextInputFormatter formatter = TextInputFormatter.withFunction((TextEditingValue oldValue, TextEditingValue newValue) {
       if (newValue.text == 'I will be modified by the formatter.') {
@@ -6834,6 +6843,7 @@ void main() {
     final List<MethodCall> log = <MethodCall>[];
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) async {
       log.add(methodCall);
+      return null;
     });
     final TextInputFormatter formatter = TextInputFormatter.withFunction((TextEditingValue oldValue, TextEditingValue newValue) {
       return const TextEditingValue(text: 'Flutter is the best!');
@@ -6913,6 +6923,7 @@ void main() {
     final List<MethodCall> log = <MethodCall>[];
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) async {
       log.add(methodCall);
+      return null;
     });
     final TextEditingController controller = TextEditingController();
 
@@ -7034,6 +7045,7 @@ void main() {
       final List<MethodCall> log = <MethodCall>[];
       tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) async {
         log.add(methodCall);
+        return null;
       });
       final TextEditingController controller = TextEditingController();
 
@@ -8635,7 +8647,7 @@ void main() {
     );
     bool myIntentWasCalled = false;
     final CallbackAction<ExtendSelectionByCharacterIntent> overrideAction = CallbackAction<ExtendSelectionByCharacterIntent>(
-      onInvoke: (ExtendSelectionByCharacterIntent intent) { myIntentWasCalled = true; },
+      onInvoke: (ExtendSelectionByCharacterIntent intent) { myIntentWasCalled = true; return null; },
     );
     await tester.pumpWidget(MaterialApp(
       home: Align(
@@ -8690,7 +8702,7 @@ void main() {
           child: Actions(
             actions: <Type, Action<Intent>>{
               ExtendSelectionByCharacterIntent: CallbackAction<ExtendSelectionByCharacterIntent>(
-                onInvoke: (ExtendSelectionByCharacterIntent intent) { myIntentWasCalled = true; },
+                onInvoke: (ExtendSelectionByCharacterIntent intent) { myIntentWasCalled = true; return null; },
               ),
             },
             child: EditableText(
