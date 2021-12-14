@@ -251,12 +251,13 @@ class InteractiveViewer extends StatefulWidget {
   ///   * [panEnabled], which is similar but for panning.
   final bool scaleEnabled;
 
-  // TODO(justinmc): What if people DO end up adjusting this per-platform?
-  // And what if they want to adjust the exponential function?
   /// Determines the amount of scale to be performed per pointer scroll.
   ///
   /// Defaults to 200.0, which was arbitrarily chosen to feel natural for most
   /// trackpads and mousewheels on all supported platforms.
+  ///
+  /// Increasing this value above the default causes scaling to feel slower,
+  /// while decreasing it causes scaling to feel faster.
   ///
   /// The amount of scale is calculated as the exponential function of the
   /// [PointerSignalEvent.scrollDelta] to [scaleFactor] ratio. In the Flutter
