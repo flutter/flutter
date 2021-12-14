@@ -964,6 +964,23 @@ class VerboseLogger extends DelegatingLogger {
   }
 
   @override
+  void printBox(String message, {
+    String? title,
+  }) {
+    String composedMessage = '';
+    _generateBox(
+      title: title,
+      message: message,
+      wrapColumn: _outputPreferences.wrapColumn,
+      terminal: terminal,
+      write: (String line) {
+        composedMessage += line;
+      },
+    );
+    _emit(_LogType.status, composedMessage);
+  }
+
+  @override
   void printTrace(String message) {
     _emit(_LogType.trace, message);
   }

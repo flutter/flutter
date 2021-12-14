@@ -282,6 +282,31 @@ void main() {
           mockLogger.errorText,
           matches('^$red' r'\[ (?: {0,2}\+[0-9]{1,4} ms|       )\] ' '${bold}Helpless!$resetBold$resetColor' r'\n$'));
     });
+
+    testWithoutContext('printBox', () {
+      final BufferLogger mockLogger = BufferLogger(
+        terminal: AnsiTerminal(
+          stdio:  FakeStdio(),
+          platform: FakePlatform(stdoutSupportsAnsi: true),
+        ),
+        outputPreferences: OutputPreferences.test(showColor: true),
+      );
+      final VerboseLogger verboseLogger = VerboseLogger(
+        mockLogger, stopwatchFactory: FakeStopwatchFactory(stopwatch: fakeStopWatch),
+      );
+
+      verboseLogger.printBox('This is the box message', title: 'Sample title');
+
+      expect(
+        mockLogger.statusText,
+        contains('[        ] \x1B[1m\x1B[22m\n'
+            '\x1B[1m           ┌─ Sample title ──────────┐\x1B[22m\n'
+            '\x1B[1m           │ This is the box message │\x1B[22m\n'
+            '\x1B[1m           └─────────────────────────┘\x1B[22m\n'
+            '\x1B[1m           \x1B[22m\n'
+        ),
+      );
+    });
   });
 
   testWithoutContext('Logger does not throw when stdio write throws synchronously', () async {
