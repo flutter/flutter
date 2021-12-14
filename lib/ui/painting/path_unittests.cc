@@ -67,6 +67,7 @@ TEST_F(ShellTest, PathVolatilityOldPathsBecomeNonVolatile) {
 }
 
 TEST_F(ShellTest, PathVolatilityGCRemovesPathFromTracker) {
+  static_assert(VolatilePathTracker::kFramesOfVolatility > 1);
   auto message_latch = std::make_shared<fml::AutoResetWaitableEvent>();
 
   auto native_validate_path = [message_latch](Dart_NativeArguments args) {
@@ -77,26 +78,23 @@ TEST_F(ShellTest, PathVolatilityGCRemovesPathFromTracker) {
     EXPECT_FALSE(Dart_IsError(result));
     CanvasPath* path = reinterpret_cast<CanvasPath*>(peer);
     EXPECT_TRUE(path);
-    path->AddRef();
     EXPECT_TRUE(path->path().isVolatile());
     std::shared_ptr<VolatilePathTracker> tracker =
         UIDartState::Current()->GetVolatilePathTracker();
     EXPECT_TRUE(tracker);
-
-    static_assert(VolatilePathTracker::kFramesOfVolatility > 1);
+    EXPECT_EQ(GetLiveTrackedPathCount(tracker), 1ul);
     EXPECT_TRUE(path->path().isVolatile());
+
     tracker->OnFrame();
+    EXPECT_EQ(GetLiveTrackedPathCount(tracker), 1ul);
     EXPECT_TRUE(path->path().isVolatile());
 
     // simulate GC
-    path->ReleaseDartWrappableReference();
+    path->Release();
+    EXPECT_EQ(GetLiveTrackedPathCount(tracker), 0ul);
 
     tracker->OnFrame();
-    // Because the path got GC'd, it was removed from the cache and we're the
-    // only one holding it.
-    EXPECT_TRUE(path->path().isVolatile());
-
-    path->Release();
+    EXPECT_EQ(GetLiveTrackedPathCount(tracker), 0ul);
 
     message_latch->Signal();
   };
