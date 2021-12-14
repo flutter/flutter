@@ -6,6 +6,7 @@
 
 #include <cerrno>
 #include <cstddef>
+#include <string>
 
 #include "base/logging.h"
 #include "gtest/gtest.h"
@@ -42,17 +43,38 @@ TEST(StringUtilsTest, canUTF16ToUTF8) {
 }
 
 TEST(StringUtilsTest, canNumberToString16) {
-  float number = 1.123;
-  EXPECT_EQ(NumberToString16(number).compare(u"1.123000"), 0);
+  EXPECT_EQ(NumberToString16(1.123f), std::u16string(u"1.123"));
 }
 
-TEST(StringUtilsTest, canNumberToString) {
-  float f = 1.123;
-  EXPECT_EQ(NumberToString(f).compare("1.123000"), 0);
-  unsigned int s = 11;
-  EXPECT_EQ(NumberToString(s).compare("11"), 0);
-  int32_t i = -23;
-  EXPECT_EQ(NumberToString(i).compare("-23"), 0);
+TEST(StringUtilsTest, numberToStringSimplifiesOutput) {
+  EXPECT_STREQ(NumberToString(0.0).c_str(), "0");
+  EXPECT_STREQ(NumberToString(0.0f).c_str(), "0");
+  EXPECT_STREQ(NumberToString(1.123).c_str(), "1.123");
+  EXPECT_STREQ(NumberToString(1.123f).c_str(), "1.123");
+  EXPECT_STREQ(NumberToString(-1.123).c_str(), "-1.123");
+  EXPECT_STREQ(NumberToString(-1.123f).c_str(), "-1.123");
+  EXPECT_STREQ(NumberToString(1.00001).c_str(), "1.00001");
+  EXPECT_STREQ(NumberToString(1.00001f).c_str(), "1.00001");
+  EXPECT_STREQ(NumberToString(1000.000001).c_str(), "1000.000001");
+  EXPECT_STREQ(NumberToString(10.00001f).c_str(), "10.00001");
+  EXPECT_STREQ(NumberToString(1.0 + 1e-8).c_str(), "1.00000001");
+  EXPECT_STREQ(NumberToString(1.0f + 1e-8f).c_str(), "1");
+  EXPECT_STREQ(NumberToString(1e-6).c_str(), "0.000001");
+  EXPECT_STREQ(NumberToString(1e-6f).c_str(), "0.000001");
+  EXPECT_STREQ(NumberToString(1e-8).c_str(), "1e-8");
+  EXPECT_STREQ(NumberToString(1e-8f).c_str(), "1e-8");
+  EXPECT_STREQ(NumberToString(100.0).c_str(), "100");
+  EXPECT_STREQ(NumberToString(100.0f).c_str(), "100");
+  EXPECT_STREQ(NumberToString(-1.0 - 1e-7).c_str(), "-1.0000001");
+  EXPECT_STREQ(NumberToString(-1.0f - 1e-7f).c_str(), "-1.0000001");
+  EXPECT_STREQ(NumberToString(0.00000012345678).c_str(), "1.2345678e-7");
+  // Difference in output is due to differences in double and float precision.
+  EXPECT_STREQ(NumberToString(0.00000012345678f).c_str(), "1.2345679e-7");
+  EXPECT_STREQ(NumberToString(-0.00000012345678).c_str(), "-1.2345678e-7");
+  // Difference in output is due to differences in double and float precision.
+  EXPECT_STREQ(NumberToString(-0.00000012345678f).c_str(), "-1.2345679e-7");
+  EXPECT_STREQ(NumberToString(static_cast<unsigned int>(11)).c_str(), "11");
+  EXPECT_STREQ(NumberToString(static_cast<int32_t>(-23)).c_str(), "-23");
 }
 
 }  // namespace base
