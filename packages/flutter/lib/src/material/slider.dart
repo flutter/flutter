@@ -698,9 +698,32 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     // in range_slider.dart.
     Size _screenSize() => MediaQuery.of(context).size;
 
+    VoidCallback? handleDidGainAccessibilityFocus;
+    switch (theme.platform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.iOS:
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+        break;
+      case TargetPlatform.windows:
+        handleDidGainAccessibilityFocus = () {
+          // Automatically activate the slider when it receives a11y focus.
+          final BuildContext? context = _renderObjectKey.currentContext;
+          if (context != null) {
+            final FocusNode focusNode = Focus.of(context);
+            if (!focusNode.hasFocus && focusNode.canRequestFocus) {
+              focusNode.requestFocus();
+            }
+          }
+        };
+        break;
+    }
+
     return Semantics(
       container: true,
       slider: true,
+      onDidGainAccessibilityFocus: handleDidGainAccessibilityFocus,
       child: FocusableActionDetector(
         actions: _actionMap,
         shortcuts: _shortcutMap,
