@@ -163,7 +163,7 @@ void main() {
         if (methodCall.method == 'SystemSound.play') {
           playedSystemSounds.add(methodCall.arguments as String);
 	}
-    return null;
+        return null;
       });
 
       final Widget subject = Stack(
