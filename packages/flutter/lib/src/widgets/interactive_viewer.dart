@@ -260,8 +260,8 @@ class InteractiveViewer extends StatefulWidget {
   /// while decreasing it causes scaling to feel faster.
   ///
   /// The amount of scale is calculated as the exponential function of the
-  /// [PointerSignalEvent.scrollDelta] to [scaleFactor] ratio. In the Flutter
-  /// engine, the mousewheel [PointerSignalEvent.scrollDelta] is hardcoded to 20
+  /// [PointerScrollEvent.scrollDelta] to [scaleFactor] ratio. In the Flutter
+  /// engine, the mousewheel [PointerScrollEvent.scrollDelta] is hardcoded to 20
   /// per scroll, while a trackpad scroll can be any amount.
   ///
   /// Affects only pointer device scrolling, not pinch to zoom.
