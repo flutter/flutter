@@ -272,7 +272,7 @@ class CreateCommand extends CreateBase {
       dartSdkVersionBounds: '">=$dartSdk <3.0.0"',
       implementationTests: boolArg('implementation-tests'),
       agpVersion: gradle.templateAndroidGradlePluginVersion,
-      kotlinVersion: gradle.templateKotlinGradlePluginVersion,,
+      kotlinVersion: gradle.templateKotlinGradlePluginVersion,
       gradleVersion: gradle.templateDefaultGradleVersion,
     );
 
