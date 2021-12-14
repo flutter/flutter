@@ -393,19 +393,10 @@ class SingleActivator with Diagnosticable implements ShortcutActivator {
   ///
   /// The `trigger` should be the non-modifier key that is pressed after all the
   /// modifiers, such as [LogicalKeyboardKey.keyC] as in `Ctrl+C`. It must not be
-  /// a modifier key.
+  /// a modifier key (sided or unsided).
   ///
-  /// The `control`, `shift`, `alt`, and `meta` flags represent the required
-  /// modifier state at the `trigger` key event for this activator to be
-  /// accepted. Their values have three options:
-  ///
-  /// {@template flutter.widgets.singleActivator.modifierValue}
-  /// * By default, the value is false, meaning none of this kind of modifier
-  ///   keys should be pressed.
-  /// * If the value is true, at least one this kind of modifier keys should be
-  ///   pressed.
-  /// * If the value is null, the state of this modifier is not checked.
-  /// {@endtemplate}
+  /// The `control`, `shift`, `alt`, and `meta` flags represent whether
+  /// the respect modifier keys should be held (true) or released (false)
   ///
   /// On each [RawKeyDownEvent] of the [trigger] key, this activator checks
   /// whether the specified modifier conditions are met.
@@ -450,68 +441,60 @@ class SingleActivator with Diagnosticable implements ShortcutActivator {
   /// Whether either (or both) control keys should be held for [trigger] to
   /// activate the shortcut.
   ///
-  /// This value has three options:
-  ///
-  /// {@macro flutter.widgets.singleActivator.modifierValue}
+  /// If false, then all control keys must be released when the event is received
+  /// in order to activate the shortcut.
   ///
   /// See also:
   ///
   ///  * [LogicalKeyboardKey.controlLeft], [LogicalKeyboardKey.controlRight].
-  final bool? control;
+  final bool control;
 
   /// Whether either (or both) shift keys should be held for [trigger] to
   /// activate the shortcut.
   ///
-  /// This value has three options:
-  ///
-  /// {@macro flutter.widgets.singleActivator.modifierValue}
+  /// If false, then all shift keys must be released when the event is received
+  /// in order to activate the shortcut.
   ///
   /// See also:
   ///
   ///  * [LogicalKeyboardKey.shiftLeft], [LogicalKeyboardKey.shiftRight].
-  final bool? shift;
+  final bool shift;
 
   /// Whether either (or both) alt keys should be held for [trigger] to
   /// activate the shortcut.
   ///
-  /// This value has three options:
-  ///
-  /// {@macro flutter.widgets.singleActivator.modifierValue}
+  /// If false, then all alt keys must be released when the event is received
+  /// in order to activate the shortcut.
   ///
   /// See also:
   ///
   ///  * [LogicalKeyboardKey.altLeft], [LogicalKeyboardKey.altRight].
-  final bool? alt;
+  final bool alt;
 
   /// Whether either (or both) meta keys should be held for [trigger] to
   /// activate the shortcut.
   ///
-  /// This value has three options:
-  ///
-  /// {@macro flutter.widgets.singleActivator.modifierValue}
+  /// If false, then all meta keys must be released when the event is received
+  /// in order to activate the shortcut.
   ///
   /// See also:
   ///
   ///  * [LogicalKeyboardKey.metaLeft], [LogicalKeyboardKey.metaRight].
-  final bool? meta;
+  final bool meta;
 
   @override
-  Iterable<LogicalKeyboardKey> get triggers sync* {
-    yield trigger;
+  Iterable<LogicalKeyboardKey> get triggers {
+    return <LogicalKeyboardKey>[trigger];
   }
 
   @override
   bool accepts(RawKeyEvent event, RawKeyboard state) {
     final Set<LogicalKeyboardKey> pressed = state.keysPressed;
     return event is RawKeyDownEvent
-      && (control == null ||
-          (control == (pressed.contains(LogicalKeyboardKey.controlLeft) || pressed.contains(LogicalKeyboardKey.controlRight))))
-      && (shift == null   ||
-          (shift == (pressed.contains(LogicalKeyboardKey.shiftLeft) || pressed.contains(LogicalKeyboardKey.shiftRight))))
-      && (alt == null     ||
-          (alt == (pressed.contains(LogicalKeyboardKey.altLeft) || pressed.contains(LogicalKeyboardKey.altRight))))
-      && (meta == null    ||
-          (meta == (pressed.contains(LogicalKeyboardKey.metaLeft) || pressed.contains(LogicalKeyboardKey.metaRight))));
+      && (control == (pressed.contains(LogicalKeyboardKey.controlLeft) || pressed.contains(LogicalKeyboardKey.controlRight)))
+      && (shift == (pressed.contains(LogicalKeyboardKey.shiftLeft) || pressed.contains(LogicalKeyboardKey.shiftRight)))
+      && (alt == (pressed.contains(LogicalKeyboardKey.altLeft) || pressed.contains(LogicalKeyboardKey.altRight)))
+      && (meta == (pressed.contains(LogicalKeyboardKey.metaLeft) || pressed.contains(LogicalKeyboardKey.metaRight)));
   }
 
   /// Returns a short and readable description of the key combination.
@@ -522,24 +505,14 @@ class SingleActivator with Diagnosticable implements ShortcutActivator {
   String debugDescribeKeys() {
     String result = '';
     assert(() {
-      String keyState(bool? value, String name) {
-        switch (value) {
-          case false:
-            return '';
-          case true:
-            return '$name +';
-          default: // value == null
-            return '($name)? +';
-        }
-      }
       final List<String> keys = <String>[
-        keyState(control, 'Control'),
-        keyState(alt, 'Alt'),
-        keyState(meta, 'Meta'),
-        keyState(shift, 'Shift'),
+        if (control) 'Control',
+        if (alt) 'Alt',
+        if (meta) 'Meta',
+        if (shift) 'Shift',
         trigger.debugName ?? trigger.toStringShort(),
       ];
-      result = keys.join();
+      result = keys.join(' + ');
       return true;
     }());
     return result;
@@ -550,8 +523,6 @@ class SingleActivator with Diagnosticable implements ShortcutActivator {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<String>('keys', debugDescribeKeys()));
   }
-
-  static const bool? kAny = null;
 }
 
 /// A shortcut combination that is triggered by a key event that produces a

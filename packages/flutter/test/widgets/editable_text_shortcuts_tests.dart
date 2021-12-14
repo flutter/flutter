@@ -13,10 +13,10 @@ Future<void> sendKeyCombination(
   SingleActivator activator,
 ) async {
   final List<LogicalKeyboardKey> modifiers = <LogicalKeyboardKey>[
-    if (activator.control != false) LogicalKeyboardKey.control,
-    if (activator.shift != false) LogicalKeyboardKey.shift,
-    if (activator.alt != false) LogicalKeyboardKey.alt,
-    if (activator.meta != false) LogicalKeyboardKey.meta,
+    if (activator.control) LogicalKeyboardKey.control,
+    if (activator.shift) LogicalKeyboardKey.shift,
+    if (activator.alt) LogicalKeyboardKey.alt,
+    if (activator.meta) LogicalKeyboardKey.meta,
   ];
   for (final LogicalKeyboardKey modifier in modifiers) {
     await tester.sendKeyDownEvent(modifier);

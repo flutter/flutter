@@ -8288,7 +8288,7 @@ void main() {
       await sendKeys(
         tester,
         <LogicalKeyboardKey>[singleActivator.trigger],
-        shortcutModifier: singleActivator.control != false,
+        shortcutModifier: singleActivator.control,
         targetPlatform: defaultTargetPlatform,
       );
       expect(controller.selection.isCollapsed, isTrue);
