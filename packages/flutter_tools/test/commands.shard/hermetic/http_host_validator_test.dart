@@ -26,7 +26,7 @@ void main() {
     const List<String> osTested = <String>['windows', 'macos', 'linux'];
 
     group('no env variables', () {
-      test('all http hosts are available', () async {
+      testWithoutContext('all http hosts are available', () async {
         final FakeHttpClient mockClient = FakeHttpClient.any();
 
         // Run the check for all operating systems one by one
@@ -45,7 +45,7 @@ void main() {
         }
       });
 
-      test('all http hosts are not available', () async {
+      testWithoutContext('all http hosts are not available', () async {
         // Run the check for all operating systems one by one
         for(final String os in osTested) {
           final HttpHostValidator httpHostValidator = HttpHostValidator(
@@ -67,7 +67,7 @@ void main() {
         }
       });
 
-      test('one http hosts are not available', () async {
+      testWithoutContext('one http hosts are not available', () async {
         // Run the check for all operating systems one by one
         for(final String os in osTested) {
           final HttpHostValidator httpHostValidator = HttpHostValidator(
@@ -89,7 +89,7 @@ void main() {
         }
       });
 
-      test('one http hosts are not available', () async {
+      testWithoutContext('one http hosts are not available', () async {
         // Run the check for all operating systems one by one
         for(final String os in osTested) {
           final HttpHostValidator httpHostValidator = HttpHostValidator(
@@ -113,7 +113,7 @@ void main() {
     });
 
     group('with env variables', () {
-      test('all http hosts are available', () async {
+      testWithoutContext('all http hosts are available', () async {
         final FakeHttpClient mockClient = FakeHttpClient.any();
 
         // Run the check for all operating systems one by one
@@ -132,7 +132,7 @@ void main() {
         }
       });
 
-      test('all http hosts are not available', () async {
+      testWithoutContext('all http hosts are not available', () async {
         // Run the check for all operating systems one by one
         for(final String os in osTested) {
           final HttpHostValidator httpHostValidator = HttpHostValidator(
@@ -154,7 +154,7 @@ void main() {
         }
       });
 
-      test('one http hosts are not available', () async {
+      testWithoutContext('one http hosts are not available', () async {
         // Run the check for all operating systems one by one
         for(final String os in osTested) {
           final HttpHostValidator httpHostValidator = HttpHostValidator(
@@ -176,7 +176,7 @@ void main() {
         }
       });
 
-      test('one http hosts are not available', () async {
+      testWithoutContext('one http hosts are not available', () async {
         // Run the check for all operating systems one by one
         for(final String os in osTested) {
           final HttpHostValidator httpHostValidator = HttpHostValidator(
@@ -200,7 +200,7 @@ void main() {
     });
 
     group('specific os disabled', () {
-      test('all http hosts are available - android disabled', () async {
+      testWithoutContext('all http hosts are available - android disabled', () async {
         // Run the check for all operating systems one by one
         for(final String os in osTested) {
           final HttpHostValidator httpHostValidator = HttpHostValidator(
@@ -221,7 +221,7 @@ void main() {
         }
       });
 
-      test('all http hosts are available - iOS disabled', () async {
+      testWithoutContext('all http hosts are available - iOS disabled', () async {
         // Run the check for all operating systems one by one
         for(final String os in osTested) {
           final HttpHostValidator httpHostValidator = HttpHostValidator(
@@ -242,7 +242,7 @@ void main() {
         }
       });
 
-      test('all http hosts are available - android, iOS disabled', () async {
+      testWithoutContext('all http hosts are available - android, iOS disabled', () async {
         // Run the check for all operating systems one by one
         for(final String os in osTested) {
           final HttpHostValidator httpHostValidator = HttpHostValidator(
