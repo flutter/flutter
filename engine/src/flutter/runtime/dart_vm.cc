@@ -170,14 +170,6 @@ Dart_Handle GetVMServiceAssetsArchiveCallback() {
 #endif
 }
 
-void PostTaskCallback(void* post_task_data,
-                      Dart_Task task,
-                      Dart_TaskData task_data) {
-  auto* dart_vm = reinterpret_cast<DartVM*>(post_task_data);
-  dart_vm->GetConcurrentWorkerTaskRunner()->PostTask(
-      [task] { Dart_RunTask(task); });
-}
-
 static const char kStdoutStreamId[] = "Stdout";
 static const char kStderrStreamId[] = "Stderr";
 
@@ -450,8 +442,6 @@ DartVM::DartVM(std::shared_ptr<const DartVMData> vm_data,
     params.thread_exit = ThreadExitCallback;
     params.get_service_assets = GetVMServiceAssetsArchiveCallback;
     params.entropy_source = dart::bin::GetEntropy;
-    params.post_task = PostTaskCallback;
-    params.post_task_data = this;
     DartVMInitializer::Initialize(&params);
     // Send the earliest available timestamp in the application lifecycle to
     // timeline. The difference between this timestamp and the time we render
@@ -486,10 +476,6 @@ DartVM::DartVM(std::shared_ptr<const DartVMData> vm_data,
     Dart_SetDartLibrarySourcesKernel(dart_library_sources->GetMapping(),
                                      dart_library_sources->GetSize());
   }
-
-  // Update thread names now that the Dart VM is initialized.
-  concurrent_message_loop_->PostTaskToAllWorkers(
-      [] { Dart_SetThreadName("FlutterConcurrentMessageLoopWorker"); });
 }
 
 DartVM::~DartVM() {
