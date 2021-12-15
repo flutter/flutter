@@ -257,7 +257,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
 
   @override
   void didUpdateWidget(ExpansionTile oldWidget) {
-    if (oldWidget.isExpanded != widget.isExpanded &&
+    if (widget.isExpanded != _isExpanded &&
         (_controller.status != AnimationStatus.forward ||
             _controller.status != AnimationStatus.reverse) && widget.isExpanded != null) {
       _isExpanded = widget.isExpanded!;
