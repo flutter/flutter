@@ -208,6 +208,7 @@ enum _PickerColumnType {
 /// the drag the date or time wheels, the picker will call onDateTimeChanged callback.
 ///
 /// CupertinoDatePicker can be displayed directly on a screen or in a popup.
+///
 /// ** See code in examples/api/lib/cupertino/date_picker/cupertino_date_picker.0.dart **
 /// {@end-tool}
 ///
