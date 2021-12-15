@@ -7,31 +7,17 @@
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(const MyApp(
-    image: NetworkImage(
-      'https://flutter.github.io/assets-for-api-docs/assets/widgets/puffin.jpg',
-    ),
-  ));
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key, required this.image}) : super(key: key);
-
-  final ImageProvider image;
-  static const String _title = 'Flutter Code Sample';
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: _title,
-      home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
-        body: Center(
-          child: MyStatelessWidget(image: image,),
+  runApp(MaterialApp(
+    title: 'Flutter Code Sample',
+    home: Scaffold(
+      appBar: AppBar(title: const Text('Flutter Code Sample')),
+      body: const Center(
+        child: MyStatelessWidget(
+          image: NetworkImage('https://flutter.github.io/assets-for-api-docs/assets/widgets/puffin.jpg'),
         ),
       ),
-    );
-  }
+    ),
+  ));
 }
 
 class MyStatelessWidget extends StatelessWidget {
@@ -49,19 +35,19 @@ class MyStatelessWidget extends StatelessWidget {
         height: 300,
         image: image,
         child: InkWell(
-            onTap: () { /* ... */ },
-            child: const Align(
-              child: Padding(
-                padding: EdgeInsets.all(10.0),
-                child: Text(
-                  'PUFFIN',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w900,
-                    color: Colors.white,
-                  ),
+          onTap: () {/* ... */},
+          child: const Align(
+            child: Padding(
+              padding: EdgeInsets.all(10.0),
+              child: Text(
+                'PUFFIN',
+                style: TextStyle(
+                  fontWeight: FontWeight.w900,
+                  color: Colors.white,
                 ),
               ),
-            )
+            ),
+          ),
         ),
       ),
     );

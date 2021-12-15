@@ -19,8 +19,11 @@ void main() {
 
   testWidgets('Ink ancestor material is not clipped', (WidgetTester tester) async {
     await tester.pumpWidget(
-      example.MyApp(
-        image: MemoryImage(Uint8List.fromList(kTransparentImage),
+      MaterialApp(
+        home: Scaffold(
+          body: example.MyStatelessWidget(
+            image: MemoryImage(Uint8List.fromList(kTransparentImage)),
+          ),
         ),
       ),
     );
