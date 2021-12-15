@@ -5,11 +5,12 @@
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/embedder/test_utils/key_codes.h"
 #include "flutter/shell/platform/windows/flutter_windows_engine.h"
+#include "flutter/shell/platform/windows/flutter_windows_view.h"
 #include "flutter/shell/platform/windows/keyboard_key_channel_handler.h"
 #include "flutter/shell/platform/windows/keyboard_key_embedder_handler.h"
 #include "flutter/shell/platform/windows/keyboard_key_handler.h"
+#include "flutter/shell/platform/windows/keyboard_manager_win32.h"
 #include "flutter/shell/platform/windows/testing/engine_modifier.h"
-#include "flutter/shell/platform/windows/testing/flutter_window_win32_test.h"
 #include "flutter/shell/platform/windows/testing/mock_window_binding_handler.h"
 #include "flutter/shell/platform/windows/testing/test_keyboard.h"
 
@@ -58,54 +59,28 @@ uint32_t LayoutFrench(uint32_t virtual_key) {
   }
 }
 
-class MockFlutterWindowWin32 : public FlutterWindowWin32,
-                               public MockMessageQueue {
+class MockKeyboardManagerWin32Delegate
+    : public KeyboardManagerWin32::WindowDelegate,
+      public MockMessageQueue {
  public:
-  typedef std::function<void(const std::u16string& text)> U16StringHandler;
-
-  MockFlutterWindowWin32(U16StringHandler on_text)
-      : FlutterWindowWin32(800, 600),
-        on_text_(std::move(on_text)),
-        map_vk_to_char_(LayoutDefault) {
-    ON_CALL(*this, GetDpiScale())
-        .WillByDefault(Return(this->FlutterWindowWin32::GetDpiScale()));
+  MockKeyboardManagerWin32Delegate(WindowBindingHandlerDelegate* view)
+      : view_(view), map_vk_to_char_(LayoutDefault) {
+    keyboard_manager_ = std::make_unique<KeyboardManagerWin32>(this);
   }
-  virtual ~MockFlutterWindowWin32() {}
+  virtual ~MockKeyboardManagerWin32Delegate() {}
 
-  // Prevent copying.
-  MockFlutterWindowWin32(MockFlutterWindowWin32 const&) = delete;
-  MockFlutterWindowWin32& operator=(MockFlutterWindowWin32 const&) = delete;
-
-  // Wrapper for GetCurrentDPI() which is a protected method.
-  UINT GetDpi() { return GetCurrentDPI(); }
-
-  LRESULT Win32DefWindowProc(HWND hWnd,
-                             UINT Msg,
-                             WPARAM wParam,
-                             LPARAM lParam) override {
-    return kWmResultDefault;
+  // |WindowWin32|
+  bool OnKey(int key,
+             int scancode,
+             int action,
+             char32_t character,
+             bool extended,
+             bool was_down) override {
+    return view_->OnKey(key, scancode, action, character, extended, was_down);
   }
 
-  // Simulates a WindowProc message from the OS.
-  LRESULT InjectWindowMessage(UINT const message,
-                              WPARAM const wparam,
-                              LPARAM const lparam) {
-    return Win32SendMessage(NULL, message, wparam, lparam);
-  }
-
-  void OnText(const std::u16string& text) override { on_text_(text); }
-
-  MOCK_METHOD1(OnDpiScale, void(unsigned int));
-  MOCK_METHOD2(OnResize, void(unsigned int, unsigned int));
-  MOCK_METHOD2(OnPointerMove, void(double, double));
-  MOCK_METHOD3(OnPointerDown, void(double, double, UINT));
-  MOCK_METHOD3(OnPointerUp, void(double, double, UINT));
-  MOCK_METHOD0(OnPointerLeave, void());
-  MOCK_METHOD0(OnSetCursor, void());
-  MOCK_METHOD2(OnScroll, void(double, double));
-  MOCK_METHOD0(GetDpiScale, float());
-  MOCK_METHOD0(IsVisible, bool());
-  MOCK_METHOD1(UpdateCursorRect, void(const Rect&));
+  // |WindowWin32|
+  void OnText(const std::u16string& text) override { view_->OnText(text); }
 
   void SetLayout(MapVkToCharHandler map_vk_to_char) {
     map_vk_to_char_ =
@@ -114,11 +89,10 @@ class MockFlutterWindowWin32 : public FlutterWindowWin32,
 
  protected:
   virtual BOOL Win32PeekMessage(LPMSG lpMsg,
-                                HWND hWnd,
                                 UINT wMsgFilterMin,
                                 UINT wMsgFilterMax,
                                 UINT wRemoveMsg) override {
-    return MockMessageQueue::Win32PeekMessage(lpMsg, hWnd, wMsgFilterMin,
+    return MockMessageQueue::Win32PeekMessage(lpMsg, wMsgFilterMin,
                                               wMsgFilterMax, wRemoveMsg);
   }
 
@@ -126,17 +100,20 @@ class MockFlutterWindowWin32 : public FlutterWindowWin32,
     return map_vk_to_char_(virtual_key);
   }
 
+  virtual LRESULT Win32SendMessage(UINT const message,
+                                   WPARAM const wparam,
+                                   LPARAM const lparam) override {
+    return keyboard_manager_->HandleMessage(message, wparam, lparam)
+               ? 0
+               : kWmResultDefault;
+  }
+
  private:
-  U16StringHandler on_text_;
+  WindowBindingHandlerDelegate* view_;
+
+  std::unique_ptr<KeyboardManagerWin32> keyboard_manager_;
 
   MapVkToCharHandler map_vk_to_char_;
-
-  LRESULT Win32SendMessage(HWND hWnd,
-                           UINT const message,
-                           WPARAM const wparam,
-                           LPARAM const lparam) override {
-    return HandleMessage(message, wparam, lparam);
-  }
 };
 
 class TestKeystate {
@@ -166,17 +143,21 @@ typedef struct {
 // to register the keyboard hook handlers that can be spied upon.
 class TestFlutterWindowsView : public FlutterWindowsView {
  public:
-  TestFlutterWindowsView()
+  typedef std::function<void(const std::u16string& text)> U16StringHandler;
+
+  TestFlutterWindowsView(U16StringHandler on_text)
       // The WindowBindingHandler is used for window size and such, and doesn't
       // affect keyboard.
       : FlutterWindowsView(
             std::make_unique<::testing::NiceMock<MockWindowBindingHandler>>()),
+        on_text_(std::move(on_text)),
         redispatch_char(0) {}
 
   uint32_t redispatch_char;
 
-  int InjectPendingEvents(MockFlutterWindowWin32* win32window,
-                          uint32_t redispatch_char) {
+  void OnText(const std::u16string& text) override { on_text_(text); }
+
+  int InjectPendingEvents(MockMessageQueue* queue, uint32_t redispatch_char) {
     std::vector<Win32Message> messages;
     int num_pending_responds = pending_responds_.size();
     for (const SendInputInfo& input : pending_responds_) {
@@ -199,7 +180,7 @@ class TestFlutterWindowsView : public FlutterWindowsView {
       }
     }
 
-    win32window->InjectMessageList(messages.size(), messages.data());
+    queue->InjectMessageList(messages.size(), messages.data());
     pending_responds_.clear();
     return num_pending_responds;
   }
@@ -227,6 +208,7 @@ class TestFlutterWindowsView : public FlutterWindowsView {
     return 1;
   }
 
+  U16StringHandler on_text_;
   std::vector<SendInputInfo> pending_responds_;
   TestKeystate key_state_;
 };
@@ -261,16 +243,15 @@ std::unique_ptr<FlutterWindowsEngine> GetTestEngine();
 class KeyboardTester {
  public:
   explicit KeyboardTester() {
-    view_ = std::make_unique<TestFlutterWindowsView>();
-    view_->SetEngine(std::move(GetTestEngine()));
-    window_ = std::make_unique<MockFlutterWindowWin32>(
+    view_ = std::make_unique<TestFlutterWindowsView>(
         [](const std::u16string& text) {
           key_calls.push_back(KeyCall{
               .type = kKeyCallOnText,
               .text = text,
           });
         });
-    window_->SetView(view_.get());
+    view_->SetEngine(std::move(GetTestEngine()));
+    window_ = std::make_unique<MockKeyboardManagerWin32Delegate>(view_.get());
   }
 
   void SetKeyState(uint32_t key, bool pressed, bool toggled_on) {
@@ -308,7 +289,7 @@ class KeyboardTester {
 
  private:
   std::unique_ptr<TestFlutterWindowsView> view_;
-  std::unique_ptr<MockFlutterWindowWin32> window_;
+  std::unique_ptr<MockKeyboardManagerWin32Delegate> window_;
 };
 
 bool KeyboardTester::test_response = false;

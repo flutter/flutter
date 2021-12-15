@@ -30,11 +30,16 @@ LRESULT MockWin32Window::InjectWindowMessage(UINT const message,
   return HandleMessage(message, wparam, lparam);
 }
 
-LRESULT MockWin32Window::Win32SendMessage(HWND hWnd,
-                                          UINT const message,
-                                          WPARAM const wparam,
-                                          LPARAM const lparam) {
-  return HandleMessage(message, wparam, lparam);
+void MockWin32Window::InjectMessageList(int count,
+                                        const Win32Message* messages) {
+  for (int message_id = 0; message_id < count; message_id += 1) {
+    const Win32Message& message = messages[message_id];
+    LRESULT result =
+        InjectWindowMessage(message.message, message.wParam, message.lParam);
+    if (message.expected_result != kWmResultDontCheck) {
+      EXPECT_EQ(result, message.expected_result);
+    }
+  }
 }
 
 void MockWin32Window::CallOnImeComposition(UINT const message,

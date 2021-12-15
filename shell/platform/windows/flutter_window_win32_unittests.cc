@@ -122,7 +122,7 @@ class MockFlutterWindowWin32 : public FlutterWindowWin32,
   LRESULT InjectWindowMessage(UINT const message,
                               WPARAM const wparam,
                               LPARAM const lparam) {
-    return Win32SendMessage(NULL, message, wparam, lparam);
+    return Win32SendMessage(message, wparam, lparam);
   }
 
   void InjectMessages(int count, Win32Message message1, ...) {
@@ -156,11 +156,10 @@ class MockFlutterWindowWin32 : public FlutterWindowWin32,
 
  protected:
   virtual BOOL Win32PeekMessage(LPMSG lpMsg,
-                                HWND hWnd,
                                 UINT wMsgFilterMin,
                                 UINT wMsgFilterMax,
                                 UINT wRemoveMsg) override {
-    return MockMessageQueue::Win32PeekMessage(lpMsg, hWnd, wMsgFilterMin,
+    return MockMessageQueue::Win32PeekMessage(lpMsg, wMsgFilterMin,
                                               wMsgFilterMax, wRemoveMsg);
   }
 
@@ -172,8 +171,7 @@ class MockFlutterWindowWin32 : public FlutterWindowWin32,
   }
 
  private:
-  LRESULT Win32SendMessage(HWND hWnd,
-                           UINT const message,
+  LRESULT Win32SendMessage(UINT const message,
                            WPARAM const wparam,
                            LPARAM const lparam) override {
     return HandleMessage(message, wparam, lparam);
