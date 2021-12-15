@@ -183,8 +183,8 @@ void MockMessageQueue::InjectMessageList(int count,
   while (!_pending_messages.empty()) {
     Win32Message message = _pending_messages.front();
     _pending_messages.pop_front();
-    LRESULT result = Win32SendMessage(message.hWnd, message.message,
-                                      message.wParam, message.lParam);
+    LRESULT result =
+        Win32SendMessage(message.message, message.wParam, message.lParam);
     if (message.expected_result != kWmResultDontCheck) {
       EXPECT_EQ(result, message.expected_result);
     }
@@ -192,7 +192,6 @@ void MockMessageQueue::InjectMessageList(int count,
 }
 
 BOOL MockMessageQueue::Win32PeekMessage(LPMSG lpMsg,
-                                        HWND hWnd,
                                         UINT wMsgFilterMin,
                                         UINT wMsgFilterMax,
                                         UINT wRemoveMsg) {
