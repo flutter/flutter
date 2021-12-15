@@ -543,6 +543,9 @@ class AndroidProject extends FlutterProjectPlatform {
         'projectName': parent.manifest.appName,
         'androidIdentifier': androidIdentifier,
         'androidX': usesAndroidX,
+        'agpVersion': gradle.templateAndroidGradlePluginVersion,
+        'kotlinVersion': gradle.templateKotlinGradlePluginVersion,
+        'gradleVersion': gradle.templateDefaultGradleVersion,
       },
       printStatusWhenWriting: false,
     );
