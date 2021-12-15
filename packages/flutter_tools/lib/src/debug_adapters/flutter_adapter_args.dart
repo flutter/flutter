@@ -54,6 +54,8 @@ class FlutterLaunchRequestArguments
     required this.program,
     this.args,
     this.toolArgs,
+    this.customTool,
+    this.customToolReplacesArgs,
     Object? restart,
     String? name,
     String? cwd,
@@ -80,6 +82,8 @@ class FlutterLaunchRequestArguments
         program = obj['program'] as String?,
         args = (obj['args'] as List<Object?>?)?.cast<String>(),
         toolArgs = (obj['toolArgs'] as List<Object?>?)?.cast<String>(),
+        customTool = obj['customTool'] as String?,
+        customToolReplacesArgs = obj['customToolReplacesArgs'] as int?,
         super.fromMap(obj);
 
   /// If noDebug is true the launch request should launch the program without enabling debugging.
@@ -95,6 +99,24 @@ class FlutterLaunchRequestArguments
   /// Arguments to be passed to the tool that will run [program] (for example, the VM or Flutter tool).
   final List<String>? toolArgs;
 
+  /// An optional tool to run instead of "flutter".
+  ///
+  /// In combination with [customToolReplacesArgs] allows invoking a custom
+  /// tool instead of "flutter" to launch scripts/tests. The custom tool must be
+  /// completely compatible with the tool/command it is replacing.
+  ///
+  /// This field should be a full absolute path if the tool may not be available
+  /// in `PATH`.
+  final String? customTool;
+
+  /// The number of arguments to delete from the beginning of the argument list
+  /// when invoking [customTool].
+  ///
+  /// For example, setting [customTool] to `flutter_test_wrapper` and
+  /// `customToolReplacesArgs` to `1` for a test run would invoke
+  /// `flutter_test_wrapper foo_test.dart` instead of `flutter test foo_test.dart`.
+  final int? customToolReplacesArgs;
+
   @override
   Map<String, Object?> toJson() => <String, Object?>{
         ...super.toJson(),
@@ -102,6 +124,8 @@ class FlutterLaunchRequestArguments
         if (program != null) 'program': program,
         if (args != null) 'args': args,
         if (toolArgs != null) 'toolArgs': toolArgs,
+        if (customTool != null) 'customTool': customTool,
+        if (customToolReplacesArgs != null) 'customToolReplacesArgs': customToolReplacesArgs,
       };
 
   static FlutterLaunchRequestArguments fromJson(Map<String, Object?> obj) =>
