@@ -481,6 +481,9 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
   // Value Indicator Animation that appears on the Overlay.
   PaintValueIndicator? paintValueIndicator;
 
+  FocusNode? _focusNode;
+  FocusNode get focusNode => widget.focusNode ?? _focusNode!;
+
   @override
   void initState() {
     super.initState();
@@ -507,6 +510,10 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
         onInvoke: _actionHandler,
       ),
     };
+    if (widget.focusNode == null) {
+      // Only create a new node if the widget doesn't have one.
+      _focusNode ??= FocusNode();
+    }
   }
 
   @override
@@ -520,6 +527,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       overlayEntry!.remove();
       overlayEntry = null;
     }
+    _focusNode?.dispose();
     super.dispose();
   }
 
@@ -709,12 +717,8 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       case TargetPlatform.windows:
         handleDidGainAccessibilityFocus = () {
           // Automatically activate the slider when it receives a11y focus.
-          final BuildContext? context = _renderObjectKey.currentContext;
-          if (context != null) {
-            final FocusNode focusNode = Focus.of(context);
-            if (!focusNode.hasFocus && focusNode.canRequestFocus) {
-              focusNode.requestFocus();
-            }
+          if (!focusNode.hasFocus && focusNode.canRequestFocus) {
+            focusNode.requestFocus();
           }
         };
         break;
@@ -727,7 +731,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       child: FocusableActionDetector(
         actions: _actionMap,
         shortcuts: _shortcutMap,
-        focusNode: widget.focusNode,
+        focusNode: focusNode,
         autofocus: widget.autofocus,
         enabled: _enabled,
         onShowFocusHighlight: _handleFocusHighlightChanged,
