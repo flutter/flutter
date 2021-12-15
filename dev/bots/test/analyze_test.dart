@@ -193,14 +193,4 @@ void main() {
       },
     ));
   });
-
-  test('analyze.dart - verifyNullInitializedDebugExpensiveFields', () async {
-    final String result = await capture(() => verifyNullInitializedDebugExpensiveFields(
-      testRootPath,
-      minimumMatches: 1,
-    ), exitCode: 1);
-
-    expect(result, contains('L15'));
-    expect(result, isNot(contains('L12')));
-  });
 }
