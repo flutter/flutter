@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:developer' show Flow, Timeline, TimelineTask;
-import 'dart:ui' show AppLifecycleState, FramePhase, FrameTiming, TimingsCallback, PlatformDispatcher;
+import 'dart:ui' show AppLifecycleState, FramePhase, FrameTiming, TimingsCallback, PlatformDispatcher, Application;
 
 import 'package:collection/collection.dart' show PriorityQueue, HeapPriorityQueue;
 import 'package:flutter/foundation.dart';
@@ -309,7 +309,8 @@ mixin SchedulerBinding on BindingBase {
 
   /// The current [SchedulerBinding], if one has been created.
   static SchedulerBinding? get instance => _instance;
-  static SchedulerBinding? _instance;
+  static SchedulerBinding? get _instance => Application.current.find(SchedulerBinding);
+  static set _instance(SchedulerBinding? instance) => Application.current.put(SchedulerBinding, instance);
 
   @override
   void initServiceExtensions() {

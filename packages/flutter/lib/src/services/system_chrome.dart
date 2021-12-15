@@ -598,10 +598,16 @@ class SystemChrome {
     });
   }
 
-  static SystemUiOverlayStyle? _pendingStyle;
+  static SystemUiOverlayStyle? get _pendingStyle =>
+      Application.current.find(#SystemChrome.pendingStyle);
+  static set _pendingStyle(SystemUiOverlayStyle? pendingStyle) =>
+      Application.current.put(#SystemChrome.pendingStyle, pendingStyle);
 
   /// The last style that was set using [SystemChrome.setSystemUIOverlayStyle].
   @visibleForTesting
   static SystemUiOverlayStyle? get latestStyle => _latestStyle;
-  static SystemUiOverlayStyle? _latestStyle;
+  static SystemUiOverlayStyle? get _latestStyle =>
+      Application.current.find(#SystemChrome.latestStyle);
+  static set _latestStyle(SystemUiOverlayStyle? latestStyle) =>
+      Application.current.put(#SystemChrome.latestStyle, latestStyle);
 }

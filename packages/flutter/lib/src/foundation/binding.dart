@@ -5,7 +5,7 @@
 import 'dart:convert' show json;
 import 'dart:developer' as developer;
 import 'dart:io' show exit;
-import 'dart:ui' as ui show SingletonFlutterWindow, Brightness, PlatformDispatcher, window;
+import 'dart:ui' as ui show SingletonFlutterWindow, Brightness, PlatformDispatcher, window, Application;
 // Before adding any more dart:ui imports, please read the README.
 
 import 'package:meta/meta.dart';
@@ -56,8 +56,9 @@ abstract class BindingBase {
     initInstances();
     assert(_debugInitialized);
 
-    assert(!_debugServiceExtensionsRegistered);
-    initServiceExtensions();
+    if (!_debugServiceExtensionsRegistered) {
+      initServiceExtensions();
+    }
     assert(_debugServiceExtensionsRegistered);
 
     developer.postEvent('Flutter.FrameworkInitialization', <String, String>{});
@@ -65,7 +66,7 @@ abstract class BindingBase {
     developer.Timeline.finishSync();
   }
 
-  static bool _debugInitialized = false;
+  bool _debugInitialized = false;
   static bool _debugServiceExtensionsRegistered = false;
 
   /// Additional configuration used by the framework during hot reload.
@@ -572,6 +573,9 @@ abstract class BindingBase {
     required String name,
     required ServiceExtensionCallback callback,
   }) {
+    if (!ui.Application.current.isDefaultApplication()) {
+      return;
+    }
     assert(name != null);
     assert(callback != null);
     final String methodName = 'ext.flutter.$name';

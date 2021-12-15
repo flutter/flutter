@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:developer';
+import 'dart:ui' as ui show Application;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -50,7 +51,8 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
 
   /// The current [RendererBinding], if one has been created.
   static RendererBinding? get instance => _instance;
-  static RendererBinding? _instance;
+  static RendererBinding? get _instance => ui.Application.current.find(RendererBinding);
+  static set _instance(RendererBinding? instance) => ui.Application.current.put(RendererBinding, instance);
 
   @override
   void initServiceExtensions() {

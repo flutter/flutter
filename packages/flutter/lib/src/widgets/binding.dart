@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:developer' as developer;
-import 'dart:ui' show AppLifecycleState, Locale, AccessibilityFeatures, FrameTiming, TimingsCallback, PlatformDispatcher;
+import 'dart:ui' show AppLifecycleState, Locale, AccessibilityFeatures, FrameTiming, TimingsCallback, PlatformDispatcher, Application;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -383,7 +383,8 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   /// you can ensure a Widget binding has been constructed by calling the
   /// `WidgetsFlutterBinding.ensureInitialized()` function.
   static WidgetsBinding? get instance => _instance;
-  static WidgetsBinding? _instance;
+  static WidgetsBinding? get _instance => Application.current.find(WidgetsBinding);
+  static set _instance(WidgetsBinding? instance) => Application.current.put(WidgetsBinding, instance);
 
   @override
   void initServiceExtensions() {

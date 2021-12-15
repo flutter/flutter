@@ -11,7 +11,8 @@ import 'dart:ui' show
   Rect,
   TextAlign,
   TextDirection,
-  hashValues;
+  hashValues,
+  Application;
 
 import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix4;
@@ -1443,7 +1444,7 @@ class TextInput {
     }());
   }
 
-  static final TextInput _instance = TextInput._();
+  static TextInput get _instance => Application.current.get(TextInput, () => TextInput._());
 
   static const List<TextInputAction> _androidSupportedInputActions = <TextInputAction>[
     TextInputAction.none,

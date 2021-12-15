@@ -42,7 +42,8 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
 
   /// The current [ServicesBinding], if one has been created.
   static ServicesBinding? get instance => _instance;
-  static ServicesBinding? _instance;
+  static ServicesBinding? get _instance => ui.Application.current.find(ServicesBinding);
+  static set _instance(ServicesBinding? instance) => ui.Application.current.put(ServicesBinding, instance);
 
   /// The global singleton instance of [HardwareKeyboard], which can be used to
   /// query keyboard states.

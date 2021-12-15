@@ -55,9 +55,12 @@ class SystemChannels {
   ///    [Navigator.push], [Navigator.pushReplacement], [Navigator.pop] and
   ///    [Navigator.replace], utilize this channel's methods to send route
   ///    change information from framework to engine.
-  static const MethodChannel navigation = OptionalMethodChannel(
-      'flutter/navigation',
-      JSONMethodCodec(),
+  static MethodChannel get navigation => Application.current.get(
+      #SystemChannels.navigation,
+      () => OptionalMethodChannel(
+        'flutter/navigation',
+        JSONMethodCodec(),
+      )
   );
 
   /// A JSON [MethodChannel] for invoking miscellaneous platform methods.
@@ -129,9 +132,12 @@ class SystemChannels {
   ///
   /// Calls to methods that are not implemented on the shell side are ignored
   /// (so it is safe to call methods when the relevant plugin might be missing).
-  static const MethodChannel platform = OptionalMethodChannel(
-      'flutter/platform',
-      JSONMethodCodec(),
+  static MethodChannel get platform => Application.current.get(
+      #SystemChannels.platform,
+      () => OptionalMethodChannel(
+        'flutter/platform',
+        JSONMethodCodec(),
+      )
   );
 
   /// A JSON [MethodChannel] for handling text input.
@@ -215,9 +221,12 @@ class SystemChannels {
   ///
   /// Calls to methods that are not implemented on the shell side are ignored
   /// (so it is safe to call methods when the relevant plugin might be missing).
-  static const MethodChannel textInput = OptionalMethodChannel(
-      'flutter/textinput',
-      JSONMethodCodec(),
+  static MethodChannel get textInput => Application.current.get(
+      #SystemChannels.textInput,
+      () => OptionalMethodChannel(
+        'flutter/textinput',
+        JSONMethodCodec(),
+      )
   );
 
   /// A JSON [BasicMessageChannel] for keyboard events.
@@ -240,9 +249,12 @@ class SystemChannels {
   ///  * [RawKeyboard], which uses this channel to expose key data.
   ///  * [new RawKeyEvent.fromMessage], which can decode this data into the [RawKeyEvent]
   ///    subclasses mentioned above.
-  static const BasicMessageChannel<dynamic> keyEvent = BasicMessageChannel<dynamic>(
-      'flutter/keyevent',
-      JSONMessageCodec(),
+  static BasicMessageChannel<dynamic> get keyEvent => Application.current.get(
+      #SystemChannels.keyEvent,
+      ()=> BasicMessageChannel<dynamic>(
+        'flutter/keyevent',
+        JSONMessageCodec(),
+      )
   );
 
   /// A string [BasicMessageChannel] for lifecycle events.
@@ -255,9 +267,12 @@ class SystemChannels {
   ///
   ///  * [WidgetsBindingObserver.didChangeAppLifecycleState], which triggers
   ///    whenever a message is received on this channel.
-  static const BasicMessageChannel<String?> lifecycle = BasicMessageChannel<String?>(
-      'flutter/lifecycle',
-      StringCodec(),
+  static BasicMessageChannel<String?> get lifecycle => Application.current.get(
+      #SystemChannels.lifecycle,
+      () => BasicMessageChannel<String?>(
+        'flutter/lifecycle',
+        StringCodec(),
+      )
   );
 
   /// A JSON [BasicMessageChannel] for system events.
@@ -271,9 +286,12 @@ class SystemChannels {
   ///    applications to release caches to free up more memory. See
   ///    [WidgetsBindingObserver.didHaveMemoryPressure], which triggers whenever
   ///    a message is received on this channel.
-  static const BasicMessageChannel<dynamic> system = BasicMessageChannel<dynamic>(
-      'flutter/system',
-      JSONMessageCodec(),
+  static BasicMessageChannel<dynamic> get system => Application.current.get(
+      #SystemChannels.system,
+      () => BasicMessageChannel<dynamic>(
+        'flutter/system',
+        JSONMessageCodec(),
+      )
   );
 
   /// A [BasicMessageChannel] for accessibility events.
@@ -283,9 +301,12 @@ class SystemChannels {
   ///  * [SemanticsEvent] and its subclasses for a list of valid accessibility
   ///    events that can be sent over this channel.
   ///  * [SemanticsNode.sendEvent], which uses this channel to dispatch events.
-  static const BasicMessageChannel<dynamic> accessibility = BasicMessageChannel<dynamic>(
-    'flutter/accessibility',
-    StandardMessageCodec(),
+  static BasicMessageChannel<dynamic> get accessibility => Application.current.get(
+      #SystemChannels.accessibility,
+      () => BasicMessageChannel<dynamic>(
+        'flutter/accessibility',
+        StandardMessageCodec(),
+      )
   );
 
   /// A [MethodChannel] for controlling platform views.
@@ -293,8 +314,9 @@ class SystemChannels {
   /// See also:
   ///
   ///  * [PlatformViewsService] for the available operations on this channel.
-  static const MethodChannel platform_views = MethodChannel(
-    'flutter/platform_views',
+  static MethodChannel get platform_views => Application.current.get(
+      #SystemChannels.platform_views,
+      () => MethodChannel('flutter/platform_views')
   );
 
   /// A [MethodChannel] for configuring the Skia graphics library.
@@ -304,9 +326,9 @@ class SystemChannels {
   ///
   ///  * `Skia.setResourceCacheMaxBytes`: Set the maximum number of bytes that
   ///    can be held in the GPU resource cache.
-  static const MethodChannel skia = MethodChannel(
-    'flutter/skia',
-    JSONMethodCodec(),
+  static MethodChannel get skia => Application.current.get(
+      #SystemChannels.skia,
+      () =>  MethodChannel('flutter/skia', JSONMethodCodec())
   );
 
   /// A [MethodChannel] for configuring mouse cursors.
@@ -318,8 +340,9 @@ class SystemChannels {
   ///  * `activateSystemCursor`: Request to set the cursor of a pointer
   ///    device to a system cursor. The parameters are
   ///    integer `device`, and string `kind`.
-  static const MethodChannel mouseCursor = OptionalMethodChannel(
-    'flutter/mousecursor',
+  static MethodChannel get mouseCursor => Application.current.get(
+      #SystemChannels.mouseCursor,
+      () => OptionalMethodChannel('flutter/mousecursor')
   );
 
   /// A [MethodChannel] for synchronizing restoration data with the engine.
@@ -348,8 +371,9 @@ class SystemChannels {
   ///
   ///  * [RestorationManager], which uses this channel and also describes how
   ///    restoration data is used in Flutter.
-  static const MethodChannel restoration = OptionalMethodChannel(
-    'flutter/restoration',
+  static MethodChannel get restoration => Application.current.get(
+      #SystemChannels.restoration,
+      () => OptionalMethodChannel('flutter/restoration')
   );
 
   /// A [MethodChannel] for installing and managing deferred components.
@@ -373,8 +397,9 @@ class SystemChannels {
   ///    assets and files) may occur at a later time. However, once uninstallation
   ///    is requested, the deferred component should not be used anymore until
   ///    `installDeferredComponent` or `loadLibrary` is called again.
-  static const MethodChannel deferredComponent = OptionalMethodChannel(
-    'flutter/deferredcomponent',
+  static MethodChannel get deferredComponent => Application.current.get(
+      #SystemChannels.deferredComponent,
+      () => OptionalMethodChannel('flutter/deferredcomponent')
   );
 
   /// A JSON [MethodChannel] for localization.
@@ -388,8 +413,11 @@ class SystemChannels {
   ///    `locale` which is a [String] containing the BCP47 locale identifier of
   ///    the locale requested. See [Locale.toLanguageTag]. When `locale` is not
   ///    specified, the current system locale is used instead.
-  static const MethodChannel localization = OptionalMethodChannel(
-    'flutter/localization',
-    JSONMethodCodec(),
+  static MethodChannel get localization => Application.current.get(
+      #SystemChannels.localization,
+      () => OptionalMethodChannel(
+          'flutter/localization',
+          JSONMethodCodec()
+      )
   );
 }

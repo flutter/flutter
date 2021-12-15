@@ -5,7 +5,7 @@
 
 import 'dart:async';
 import 'dart:collection';
-import 'dart:ui' as ui show PointerDataPacket;
+import 'dart:ui' as ui show PointerDataPacket, Application;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
@@ -267,7 +267,8 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
 
   /// The singleton instance of this object.
   static GestureBinding? get instance => _instance;
-  static GestureBinding? _instance;
+  static GestureBinding? get _instance => ui.Application.current.find(GestureBinding);
+  static set _instance(GestureBinding? instance) => ui.Application.current.put(GestureBinding, instance);
 
   final Queue<PointerEvent> _pendingPointerEvents = Queue<PointerEvent>();
 

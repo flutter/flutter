@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show AccessibilityFeatures, SemanticsUpdateBuilder;
+import 'dart:ui' as ui show AccessibilityFeatures, SemanticsUpdateBuilder, Application;
 
 import 'package:flutter/foundation.dart';
 
@@ -15,7 +15,8 @@ export 'dart:ui' show AccessibilityFeatures;
 mixin SemanticsBinding on BindingBase {
   /// The current [SemanticsBinding], if one has been created.
   static SemanticsBinding? get instance => _instance;
-  static SemanticsBinding? _instance;
+  static SemanticsBinding? get _instance => ui.Application.current.find(SemanticsBinding);
+  static set _instance(SemanticsBinding? instance) =>  ui.Application.current.put(SemanticsBinding, instance);
 
   @override
   void initInstances() {
