@@ -98,8 +98,7 @@ class NavigationRail extends StatefulWidget {
     this.useIndicator,
     this.indicatorColor,
   }) :  assert(destinations != null && destinations.length >= 2),
-        assert(selectedIndex != null),
-        assert(0 <= selectedIndex && selectedIndex < destinations.length),
+        assert(selectedIndex == null || (0 <= selectedIndex && selectedIndex < destinations.length)),
         assert(elevation == null || elevation > 0),
         assert(minWidth == null || minWidth > 0),
         assert(minExtendedWidth == null || minExtendedWidth > 0),
@@ -160,8 +159,8 @@ class NavigationRail extends StatefulWidget {
   final List<NavigationRailDestination> destinations;
 
   /// The index into [destinations] for the current selected
-  /// [NavigationRailDestination].
-  final int selectedIndex;
+  /// [NavigationRailDestination] or null if no destination is selected.
+  final int? selectedIndex;
 
   /// Called when one of the [destinations] is selected.
   ///
@@ -357,8 +356,12 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
     }
 
     if (widget.selectedIndex != oldWidget.selectedIndex) {
-      _destinationControllers[oldWidget.selectedIndex].reverse();
-      _destinationControllers[widget.selectedIndex].forward();
+      if (oldWidget.selectedIndex != null) {
+        _destinationControllers[oldWidget.selectedIndex!].reverse();
+      }
+      if (widget.selectedIndex != null) {
+        _destinationControllers[widget.selectedIndex!].forward();
+      }
       return;
     }
   }
@@ -475,7 +478,9 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
       )..addListener(_rebuild);
     });
     _destinationAnimations = _destinationControllers.map((AnimationController controller) => controller.view).toList();
-    _destinationControllers[widget.selectedIndex].value = 1.0;
+    if (widget.selectedIndex != null) {
+      _destinationControllers[widget.selectedIndex!].value = 1.0;
+    }
     _extendedController = AnimationController(
       duration: kThemeAnimationDuration,
       vsync: this,

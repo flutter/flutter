@@ -55,6 +55,19 @@ void main() {
     expect(actualUnselectedIconTheme.fontSize, equals(unselectedIconTheme.size));
   });
 
+  testWidgets('No selected destination when selectedIndex is null', (WidgetTester tester) async {
+    await _pumpNavigationRail(
+      tester,
+      navigationRail: NavigationRail(
+        selectedIndex: null,
+        destinations: _destinations(),
+      ),
+    );
+
+    final Iterable<Semantics> semantics = tester.widgetList<Semantics>(find.byType(Semantics));
+    expect(semantics.where((Semantics s) => s.properties.selected == true), isEmpty);
+  });
+
   testWidgets('backgroundColor can be changed', (WidgetTester tester) async {
     await _pumpNavigationRail(
       tester,
