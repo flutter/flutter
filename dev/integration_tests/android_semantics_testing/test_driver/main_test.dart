@@ -11,6 +11,9 @@ import 'package:path/path.dart' as path;
 import 'package:pub_semver/pub_semver.dart';
 import 'package:test/test.dart' hide isInstanceOf;
 
+// The accessibility focus actions are added when a semantics node receives or
+// lose accessibility focus. This test ignores these actions since it is hard to
+// predict which node has the accessibility focus after a screen changes.
 const List<AndroidSemanticsAction> ignoredAccessibilityFocusActions = <AndroidSemanticsAction>[
   AndroidSemanticsAction.accessibilityFocus,
   AndroidSemanticsAction.clearAccessibilityFocus,
