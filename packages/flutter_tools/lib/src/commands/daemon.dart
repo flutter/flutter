@@ -1037,6 +1037,13 @@ class NotifyingLogger extends DelegatingLogger {
   }
 
   @override
+  void printBox(String message, {
+    String title,
+  }) {
+    _sendMessage(LogMessage('status', title == null ? message : '$title: $message'));
+  }
+
+  @override
   void printTrace(String message) {
     if (!verbose) {
       return;

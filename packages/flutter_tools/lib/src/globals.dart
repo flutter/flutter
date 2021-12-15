@@ -204,6 +204,23 @@ void printStatus(
   );
 }
 
+
+/// Display the [message] inside a box.
+///
+/// For example, this is the generated output:
+///
+///   ┌─ [title] ─┐
+///   │ [message] │
+///   └───────────┘
+///
+/// If a terminal is attached, the lines in [message] are automatically wrapped based on
+/// the available columns.
+void printBox(String message, {
+  String? title,
+}) {
+  logger.printBox(message, title: title);
+}
+
 /// Use this for verbose tracing output. Users can turn this output on in order
 /// to help diagnose issues with the toolchain or with their setup.
 void printTrace(String message) => logger.printTrace(message);
