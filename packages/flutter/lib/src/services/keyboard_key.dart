@@ -46,7 +46,7 @@ abstract class KeyboardKey with Diagnosticable {
 /// look at the physical key to make sure that regardless of the character the
 /// key produces, you got the key that is in that location on the keyboard.
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold}
+/// {@tool dartpad}
 /// This example shows how to detect if the user has selected the logical "Q"
 /// key.
 ///
@@ -254,9 +254,9 @@ class LogicalKeyboardKey extends KeyboardKey {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(StringProperty('keyId', '0x${keyId.toRadixString(16).padLeft(8, '0')}', showName: true));
-    properties.add(StringProperty('keyLabel', keyLabel, showName: true));
-    properties.add(StringProperty('debugName', debugName, showName: true, defaultValue: null));
+    properties.add(StringProperty('keyId', '0x${keyId.toRadixString(16).padLeft(8, '0')}'));
+    properties.add(StringProperty('keyLabel', keyLabel));
+    properties.add(StringProperty('debugName', debugName, defaultValue: null));
   }
 
   /// Mask for the 32-bit value portion of the key code.
@@ -3492,7 +3492,7 @@ class LogicalKeyboardKey extends KeyboardKey {
 /// looking for "the key next to the TAB key", since on a French keyboard,
 /// the key next to the TAB key has an "A" on it.
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold}
+/// {@tool dartpad}
 /// This example shows how to detect if the user has selected the physical key
 /// to the right of the CAPS LOCK key.
 ///
@@ -3552,8 +3552,8 @@ class PhysicalKeyboardKey extends KeyboardKey {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(StringProperty('usbHidUsage', '0x${usbHidUsage.toRadixString(16).padLeft(8, '0')}', showName: true));
-    properties.add(StringProperty('debugName', debugName, showName: true, defaultValue: null));
+    properties.add(StringProperty('usbHidUsage', '0x${usbHidUsage.toRadixString(16).padLeft(8, '0')}'));
+    properties.add(StringProperty('debugName', debugName, defaultValue: null));
   }
 
   // Key constants for all keyboard keys in the USB HID specification at the
@@ -3599,6 +3599,12 @@ class PhysicalKeyboardKey extends KeyboardKey {
   ///
   /// See the function [RawKeyEvent.physicalKey] for more information.
   static const PhysicalKeyboardKey privacyScreenToggle = PhysicalKeyboardKey(0x00000017);
+
+  /// Represents the location of the "Microphone Mute Toggle" key on a
+  /// generalized keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey microphoneMuteToggle = PhysicalKeyboardKey(0x00000018);
 
   /// Represents the location of the "Sleep" key on a generalized keyboard.
   ///
@@ -5031,6 +5037,7 @@ class PhysicalKeyboardKey extends KeyboardKey {
     0x00000015: resume,
     0x00000016: turbo,
     0x00000017: privacyScreenToggle,
+    0x00000018: microphoneMuteToggle,
     0x00010082: sleep,
     0x00010083: wakeUp,
     0x000100b5: displayToggleIntExt,
@@ -5304,6 +5311,7 @@ class PhysicalKeyboardKey extends KeyboardKey {
       0x00000015: 'Resume',
       0x00000016: 'Turbo',
       0x00000017: 'Privacy Screen Toggle',
+      0x00000018: 'Microphone Mute Toggle',
       0x00010082: 'Sleep',
       0x00010083: 'Wake Up',
       0x000100b5: 'Display Toggle Int Ext',

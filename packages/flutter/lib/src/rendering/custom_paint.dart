@@ -739,7 +739,7 @@ class RenderCustomPaint extends RenderProxyBox {
     int newChildrenBottom = newChildSemantics.length - 1;
     int oldChildrenBottom = oldSemantics.length - 1;
 
-    final List<SemanticsNode?> newChildren = List<SemanticsNode?>.filled(newChildSemantics.length, null, growable: false);
+    final List<SemanticsNode?> newChildren = List<SemanticsNode?>.filled(newChildSemantics.length, null);
 
     // Update the top of the list.
     while ((oldChildrenTop <= oldChildrenBottom) && (newChildrenTop <= newChildrenBottom)) {
@@ -1016,5 +1016,15 @@ class RenderCustomPaint extends RenderProxyBox {
       ..tags = newSemantics.tags;
 
     return newChild;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(MessageProperty('painter', '$painter'));
+    properties.add(MessageProperty('foregroundPainter', '$foregroundPainter', level: foregroundPainter != null ? DiagnosticLevel.info : DiagnosticLevel.fine));
+    properties.add(DiagnosticsProperty<Size>('preferredSize', preferredSize, defaultValue: Size.zero));
+    properties.add(DiagnosticsProperty<bool>('isComplex', isComplex, defaultValue: false));
+    properties.add(DiagnosticsProperty<bool>('willChange', willChange, defaultValue: false));
   }
 }

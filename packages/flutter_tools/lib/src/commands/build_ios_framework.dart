@@ -18,7 +18,7 @@ import '../build_system/build_system.dart';
 import '../build_system/targets/ios.dart';
 import '../cache.dart';
 import '../flutter_plugins.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../macos/cocoapod_utils.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart' show DevelopmentArtifact, FlutterCommandResult;
@@ -39,7 +39,8 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
   }) : _flutterVersion = flutterVersion,
        _buildSystem = buildSystem,
        _injectedCache = cache,
-       _injectedPlatform = platform {
+       _injectedPlatform = platform,
+       super(verboseHelp: verboseHelp) {
     addTreeShakeIconsFlag();
     usesTargetOption();
     usesFlavorOption();
@@ -179,7 +180,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
     for (final BuildInfo buildInfo in buildInfos) {
       final String productBundleIdentifier = await _project.ios.productBundleIdentifier(buildInfo);
       globals.printStatus('Building frameworks for $productBundleIdentifier in ${getNameForBuildMode(buildInfo.mode)} mode...');
-      final String xcodeBuildConfiguration = toTitleCase(getNameForBuildMode(buildInfo.mode));
+      final String xcodeBuildConfiguration = sentenceCase(getNameForBuildMode(buildInfo.mode));
       final Directory modeDirectory = outputDirectory.childDirectory(xcodeBuildConfiguration);
 
       if (modeDirectory.existsSync()) {
@@ -359,7 +360,7 @@ end
           projectDir: globals.fs.currentDirectory,
           outputDir: outputBuildDirectory,
           buildDir: _project.dartTool.childDirectory('flutter_build'),
-          cacheDir: null,
+          cacheDir: globals.cache.getRoot(),
           flutterRootDir: globals.fs.directory(Cache.flutterRoot),
           defines: <String, String>{
             kTargetFile: targetFile,
@@ -446,7 +447,7 @@ end
       }
 
       // Always build debug for simulator.
-      final String simulatorConfiguration = toTitleCase(getNameForBuildMode(BuildMode.debug));
+      final String simulatorConfiguration = sentenceCase(getNameForBuildMode(BuildMode.debug));
       pluginsBuildCommand = <String>[
         ...globals.xcode.xcrunCommand(),
         'xcodebuild',

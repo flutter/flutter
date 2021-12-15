@@ -1007,7 +1007,7 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(buildRadio(active: false, useOverlay: false));
+    await tester.pumpWidget(buildRadio(useOverlay: false));
     await tester.press(_findRadio());
     await tester.pumpAndSettle();
 
@@ -1035,7 +1035,7 @@ void main() {
       reason: 'Default active pressed Radio should have overlay color from fillColor',
     );
 
-    await tester.pumpWidget(buildRadio(active: false));
+    await tester.pumpWidget(buildRadio());
     await tester.press(_findRadio());
     await tester.pumpAndSettle();
 

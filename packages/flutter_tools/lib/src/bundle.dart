@@ -9,7 +9,7 @@ import 'base/config.dart';
 import 'base/file_system.dart';
 import 'build_info.dart';
 import 'convert.dart';
-import 'globals_null_migrated.dart' as globals;
+import 'globals.dart' as globals;
 
 String get defaultMainPath => globals.fs.path.join('lib', 'main.dart');
 const String defaultManifestPath = 'pubspec.yaml';

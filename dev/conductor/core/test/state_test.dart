@@ -23,14 +23,14 @@ void main() {
         candidateBranch: candidateBranch,
         upstream: pb.Remote(
           name: 'upstream',
-          url: 'https://github.com/flutter/engine.git',
+          url: 'git@github.com:flutter/engine.git',
         ),
       ),
       framework: pb.Repository(
         candidateBranch: candidateBranch,
         upstream: pb.Remote(
           name: 'upstream',
-          url: 'https://github.com/flutter/flutter.git',
+          url: 'git@github.com:flutter/flutter.git',
         ),
       ),
     );
@@ -48,14 +48,14 @@ void main() {
     "candidateBranch": "flutter-2.3-candidate.0",
     "upstream": {
       "name": "upstream",
-      "url": "https://github.com/flutter/engine.git"
+      "url": "git@github.com:flutter/engine.git"
     }
   },
   "framework": {
     "candidateBranch": "flutter-2.3-candidate.0",
     "upstream": {
       "name": "upstream",
-      "url": "https://github.com/flutter/flutter.git"
+      "url": "git@github.com:flutter/flutter.git"
     }
   },
   "logs": [

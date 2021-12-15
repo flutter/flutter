@@ -2,30 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Template: dev/snippets/config/templates/stateful_widget_material.tmpl
-//
-// Comment lines marked with "▼▼▼" and "▲▲▲" are used for authoring
-// of samples, and may be ignored if you are just exploring the sample.
-
 // Flutter code sample for StreamBuilder
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
-// This sample shows a [StreamBuilder] that listens to a Stream that emits bids
-// for an auction. Every time the StreamBuilder receives a bid from the Stream,
-// it will display the price of the bid below an icon. If the Stream emits an
-// error, the error is displayed below an error icon. When the Stream finishes
-// emitting bids, the final price is displayed.
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
+import 'dart:async';
 
 import 'package:flutter/material.dart';
 
 void main() => runApp(const MyApp());
 
-/// This is the main application widget.
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
@@ -40,7 +24,6 @@ class MyApp extends StatelessWidget {
   }
 }
 
-/// This is the stateful widget that the main application instantiates.
 class MyStatefulWidget extends StatefulWidget {
   const MyStatefulWidget({Key? key}) : super(key: key);
 
@@ -48,15 +31,18 @@ class MyStatefulWidget extends StatefulWidget {
   State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
 }
 
-/// This is the private State class that goes with MyStatefulWidget.
 class _MyStatefulWidgetState extends State<MyStatefulWidget> {
-//********************************************************************
-//* ▼▼▼▼▼▼▼▼ code ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
-
-  final Stream<int> _bids = (() async* {
-    await Future<void>.delayed(const Duration(seconds: 1));
-    yield 1;
-    await Future<void>.delayed(const Duration(seconds: 1));
+  final Stream<int> _bids = (() {
+    late final StreamController<int> controller;
+    controller = StreamController<int>(
+      onListen: () async {
+        await Future<void>.delayed(const Duration(seconds: 1));
+        controller.add(1);
+        await Future<void>.delayed(const Duration(seconds: 1));
+        await controller.close();
+      },
+    );
+    return controller.stream;
   })();
 
   @override
@@ -105,9 +91,9 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                 case ConnectionState.waiting:
                   children = const <Widget>[
                     SizedBox(
-                      child: CircularProgressIndicator(),
                       width: 60,
                       height: 60,
+                      child: CircularProgressIndicator(),
                     ),
                     Padding(
                       padding: EdgeInsets.only(top: 16),
@@ -146,7 +132,6 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
 
             return Column(
               mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
               children: children,
             );
           },
@@ -154,8 +139,4 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
       ),
     );
   }
-
-//* ▲▲▲▲▲▲▲▲ code ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//********************************************************************
-
 }

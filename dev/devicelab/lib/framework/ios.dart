@@ -140,13 +140,22 @@ Future<void> removeIOSimulator(String deviceId) async {
   }
 }
 
-Future<bool> runXcodeTests(String projectDirectory, String deviceId, String testName) async {
+Future<bool> runXcodeTests({
+  required String platformDirectory,
+  required String destination,
+  required String testName,
+  bool skipCodesign = false,
+}) async {
   final Map<String, String> environment = Platform.environment;
-  // If not running on CI, inject the Flutter team code signing properties.
-  final String developmentTeam = environment['FLUTTER_XCODE_DEVELOPMENT_TEAM'] ?? 'S8QB4VV633';
-  final String? codeSignStyle = environment['FLUTTER_XCODE_CODE_SIGN_STYLE'];
-  final String? provisioningProfile = environment['FLUTTER_XCODE_PROVISIONING_PROFILE_SPECIFIER'];
-
+  String? developmentTeam;
+  String? codeSignStyle;
+  String? provisioningProfile;
+  if (!skipCodesign) {
+    // If not running on CI, inject the Flutter team code signing properties.
+    developmentTeam = environment['FLUTTER_XCODE_DEVELOPMENT_TEAM'] ?? 'S8QB4VV633';
+    codeSignStyle = environment['FLUTTER_XCODE_CODE_SIGN_STYLE'];
+    provisioningProfile = environment['FLUTTER_XCODE_PROVISIONING_PROFILE_SPECIFIER'];
+  }
   final String resultBundleTemp = Directory.systemTemp.createTempSync('flutter_xcresult.').path;
   final String resultBundlePath = path.join(resultBundleTemp, 'result');
   final int testResultExit = await exec(
@@ -159,38 +168,44 @@ Future<bool> runXcodeTests(String projectDirectory, String deviceId, String test
       '-configuration',
       'Release',
       '-destination',
-      'id=$deviceId',
+      destination,
       '-resultBundlePath',
       resultBundlePath,
       'test',
       'COMPILER_INDEX_STORE_ENABLE=NO',
-      'DEVELOPMENT_TEAM=$developmentTeam',
+      if (developmentTeam != null)
+        'DEVELOPMENT_TEAM=$developmentTeam',
       if (codeSignStyle != null)
         'CODE_SIGN_STYLE=$codeSignStyle',
       if (provisioningProfile != null)
         'PROVISIONING_PROFILE_SPECIFIER=$provisioningProfile',
     ],
-    workingDirectory: path.join(projectDirectory, 'ios'),
+    workingDirectory: platformDirectory,
     canFail: true,
   );
 
   if (testResultExit != 0) {
     final Directory? dumpDirectory = hostAgent.dumpDirectory;
+    final Directory xcresultBundle = Directory(path.join(resultBundleTemp, 'result.xcresult'));
     if (dumpDirectory != null) {
-      // Zip the test results to the artifacts directory for upload.
-      final String zipPath = path.join(dumpDirectory.path,
-          '$testName-${DateTime.now().toLocal().toIso8601String()}.zip');
-      await exec(
-        'zip',
-        <String>[
-          '-r',
-          '-9',
-          zipPath,
-          'result.xcresult',
-        ],
-        workingDirectory: resultBundleTemp,
-        canFail: true, // Best effort to get the logs.
-      );
+      if (xcresultBundle.existsSync()) {
+        // Zip the test results to the artifacts directory for upload.
+        final String zipPath = path.join(dumpDirectory.path,
+            '$testName-${DateTime.now().toLocal().toIso8601String()}.zip');
+        await exec(
+          'zip',
+          <String>[
+            '-r',
+            '-9',
+            zipPath,
+            path.basename(xcresultBundle.path),
+          ],
+          workingDirectory: resultBundleTemp,
+          canFail: true, // Best effort to get the logs.
+        );
+      } else {
+        print('xcresult bundle ${xcresultBundle.path} does not exist, skipping upload');
+      }
     }
     return false;
   }

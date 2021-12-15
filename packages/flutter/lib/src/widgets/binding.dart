@@ -635,7 +635,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   /// [SystemChannels.navigation].
   @protected
   Future<void> handlePopRoute() async {
-    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.from(_observers)) {
+    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
       if (await observer.didPopRoute())
         return;
     }
@@ -655,14 +655,14 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   @protected
   @mustCallSuper
   Future<void> handlePushRoute(String route) async {
-    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.from(_observers)) {
+    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
       if (await observer.didPushRoute(route))
         return;
     }
   }
 
   Future<void> _handlePushRouteInformation(Map<dynamic, dynamic> routeArguments) async {
-    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.from(_observers)) {
+    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
       if (
         await observer.didPushRouteInformation(
           RouteInformation(

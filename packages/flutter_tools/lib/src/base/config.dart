@@ -38,8 +38,7 @@ class Config {
       name,
       fileSystem: fileSystem,
       logger: logger,
-      platform: platform,
-      managed: false
+      platform: platform
     );
   }
 

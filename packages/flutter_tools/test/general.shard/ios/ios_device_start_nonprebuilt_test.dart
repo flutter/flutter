@@ -54,6 +54,8 @@ const List<String> kRunReleaseArgs = <String>[
   'BUILD_DIR=/build/ios',
   '-sdk',
   'iphoneos',
+  '-destination',
+  'id=123',
   'ONLY_ACTIVE_ARCH=YES',
   'ARCHS=arm64',
   'FLUTTER_SUPPRESS_ANALYTICS=true',

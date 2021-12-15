@@ -59,10 +59,10 @@ void validateNodeJsonSerializationHelper(Map<String, Object?> json, DiagnosticsN
   expect(json['name'], equals(node.name));
   expect(json['showSeparator'] ?? true, equals(node.showSeparator));
   expect(json['description'], equals(node.toDescription()));
-  expect(json['level'] ?? describeEnum(DiagnosticLevel.info), equals(describeEnum(node.level)));
+  expect(json['level'] ?? DiagnosticLevel.info.name, equals(node.level.name));
   expect(json['showName'] ?? true, equals(node.showName));
   expect(json['emptyBodyDescription'], equals(node.emptyBodyDescription));
-  expect(json['style'] ?? describeEnum(DiagnosticsTreeStyle.sparse), equals(describeEnum(node.style!)));
+  expect(json['style'] ?? DiagnosticsTreeStyle.sparse.name, equals(node.style!.name));
   expect(json['type'], equals(node.runtimeType.toString()));
   expect(json['hasChildren'] ?? false, equals(node.getChildren().isNotEmpty));
 }
@@ -959,7 +959,6 @@ void main() {
     final StringProperty quoted = StringProperty(
       'name',
       'value',
-      quoted: true,
     );
     expect(quoted.toString(), equals('name: "value"'));
     validateStringPropertyJsonSerialization(quoted);
@@ -974,7 +973,6 @@ void main() {
         'name',
         null,
         showName: false,
-        quoted: true,
       ).toString(),
       equals('null'),
     );

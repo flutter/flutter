@@ -55,7 +55,6 @@ final FakePlatform macosPlatformCustomEnv = FakePlatform(
 );
 
 final Platform notMacosPlatform = FakePlatform(
-  operatingSystem: 'linux',
   environment: <String, String>{
     'FLUTTER_ROOT': '/',
   }
@@ -170,7 +169,7 @@ void main() {
     Platform: () => macosPlatform,
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
-    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: false),
+    FeatureFlags: () => TestFeatureFlags(),
   });
 
   testUsingContext('macOS build forwards error stdout to status logger error', () async {
@@ -394,13 +393,13 @@ void main() {
     expect(() => runner.run(<String>['build', 'macos', '--no-pub']),
       supported ? throwsToolExit() : throwsA(isA<UsageException>()));
   }, overrides: <Type, Generator>{
-    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: false),
+    FeatureFlags: () => TestFeatureFlags(),
   });
 
   testUsingContext('hidden when not enabled on macOS host', () {
     expect(BuildMacosCommand(verboseHelp: false).hidden, true);
   }, overrides: <Type, Generator>{
-    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: false),
+    FeatureFlags: () => TestFeatureFlags(),
     Platform: () => macosPlatform,
   });
 

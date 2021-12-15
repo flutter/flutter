@@ -2,10 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'package:meta/meta.dart';
-
 import '../../artifacts.dart';
 import '../../base/file_system.dart';
 import '../../build_info.dart';
@@ -68,7 +64,11 @@ class UnpackWindows extends Target {
 
   @override
   Future<void> build(Environment environment) async {
-    final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
+    final String? buildModeEnvironment = environment.defines[kBuildMode];
+    if (buildModeEnvironment == null) {
+      throw MissingDefineException(kBuildMode, name);
+    }
+    final BuildMode buildMode = getBuildModeForName(buildModeEnvironment);
     final String engineSourcePath = environment.artifacts
       .getArtifactPath(
         Artifact.windowsDesktopPath,
@@ -135,7 +135,11 @@ class UnpackWindowsUwp extends Target {
 
   @override
   Future<void> build(Environment environment) async {
-    final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
+    final String? buildModeEnvironment = environment.defines[kBuildMode];
+    if (buildModeEnvironment == null) {
+      throw MissingDefineException(kBuildMode, name);
+    }
+    final BuildMode buildMode = getBuildModeForName(buildModeEnvironment);
     final String engineSourcePath = environment.artifacts
       .getArtifactPath(
         Artifact.windowsUwpDesktopPath,
@@ -209,10 +213,11 @@ abstract class BundleWindowsAssets extends Target {
 
   @override
   Future<void> build(Environment environment) async {
-    if (environment.defines[kBuildMode] == null) {
+    final String? buildModeEnvironment = environment.defines[kBuildMode];
+    if (buildModeEnvironment == null) {
       throw MissingDefineException(kBuildMode, 'bundle_windows_assets');
     }
-    final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
+    final BuildMode buildMode = getBuildModeForName(buildModeEnvironment);
     final Directory outputDirectory = environment.outputDir
       .childDirectory('flutter_assets');
     if (!outputDirectory.existsSync()) {
@@ -255,7 +260,7 @@ abstract class BundleWindowsAssetsUwp extends BundleWindowsAssets {
 /// A wrapper for AOT compilation that copies app.so into the output directory.
 class WindowsAotBundle extends Target {
   /// Create a [WindowsAotBundle] wrapper for [aotTarget].
-  const WindowsAotBundle(this.aotTarget, {@required this.uwp});
+  const WindowsAotBundle(this.aotTarget, {required this.uwp});
 
   /// The [AotElfBase] subclass that produces the app.so.
   final AotElfBase aotTarget;

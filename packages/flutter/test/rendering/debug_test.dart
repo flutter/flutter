@@ -224,7 +224,7 @@ void main() {
     );
     layout(root, phase: EnginePhase.compositingBits);
 
-    final OffsetLayer rootLayer = OffsetLayer(offset: Offset.zero);
+    final OffsetLayer rootLayer = OffsetLayer();
     final PaintingContext context = PaintingContext(
       rootLayer,
       const Rect.fromLTWH(0, 0, 500, 500),
@@ -232,6 +232,30 @@ void main() {
     root.paint(context, const Offset(40, 40));
     final OpacityLayer opacityLayer = rootLayer.firstChild! as OpacityLayer;
     expect(opacityLayer.offset, const Offset(40, 40));
+    debugDisableOpacityLayers = false;
+  });
+
+  test('debugAssertAllRenderVarsUnset warns when debugProfileLayoutsEnabled set', () {
+    debugProfileLayoutsEnabled = true;
+    expect(() => debugAssertAllRenderVarsUnset('ERROR'), throwsFlutterError);
+    debugProfileLayoutsEnabled = false;
+  });
+
+  test('debugAssertAllRenderVarsUnset warns when debugDisableClipLayers set', () {
+    debugDisableClipLayers = true;
+    expect(() => debugAssertAllRenderVarsUnset('ERROR'), throwsFlutterError);
+    debugDisableClipLayers = false;
+  });
+
+  test('debugAssertAllRenderVarsUnset warns when debugDisablePhysicalShapeLayers set', () {
+    debugDisablePhysicalShapeLayers = true;
+    expect(() => debugAssertAllRenderVarsUnset('ERROR'), throwsFlutterError);
+    debugDisablePhysicalShapeLayers = false;
+  });
+
+  test('debugAssertAllRenderVarsUnset warns when debugDisableOpacityLayers set', () {
+    debugDisableOpacityLayers = true;
+    expect(() => debugAssertAllRenderVarsUnset('ERROR'), throwsFlutterError);
     debugDisableOpacityLayers = false;
   });
 }

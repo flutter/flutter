@@ -2,28 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Template: dev/snippets/config/templates/freeform.tmpl
-//
-// Comment lines marked with "▼▼▼" and "▲▲▲" are used for authoring
-// of samples, and may be ignored if you are just exploring the sample.
-
 // Flutter code sample for InteractiveViewer.builder
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
-
-// This example shows how to use builder to create a [Table] whose cell
-// contents are only built when they are visible. Built and remove cells are
-// logged in the console for illustration.
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-//*************************************************************************
-//* ▼▼▼▼▼▼▼▼ code-main ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
-
 import 'package:vector_math/vector_math_64.dart' show Quad, Vector3;
 
 void main() => runApp(const IVBuilderExampleApp());
@@ -46,7 +28,7 @@ class IVBuilderExampleApp extends StatelessWidget {
 
 class _IVBuilderExample extends StatefulWidget {
   @override
-  _IVBuilderExampleState createState() => _IVBuilderExampleState();
+  State<_IVBuilderExample> createState() => _IVBuilderExampleState();
 }
 
 class _IVBuilderExampleState extends State<_IVBuilderExample> {
@@ -58,7 +40,7 @@ class _IVBuilderExampleState extends State<_IVBuilderExample> {
 
   // Returns true iff the given cell is currently visible. Caches viewport
   // calculations.
-  late Quad _cachedViewport;
+  Quad? _cachedViewport;
   late int _firstVisibleRow;
   late int _firstVisibleColumn;
   late int _lastVisibleRow;
@@ -140,10 +122,10 @@ class _IVBuilderExampleState extends State<_IVBuilderExample> {
                   cellWidth: _cellWidth,
                   builder: (BuildContext context, int row, int column) {
                     if (!_isCellVisible(row, column, viewport)) {
-                      print('removing cell ($row, $column)');
+                      debugPrint('removing cell ($row, $column)');
                       return Container(height: _cellHeight);
                     }
-                    print('building cell ($row, $column)');
+                    debugPrint('building cell ($row, $column)');
                     return Container(
                       height: _cellHeight,
                       color: row % 2 + column % 2 == 1
@@ -203,6 +185,3 @@ class _TableBuilder extends StatelessWidget {
     );
   }
 }
-
-//* ▲▲▲▲▲▲▲▲ code-main ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//*************************************************************************

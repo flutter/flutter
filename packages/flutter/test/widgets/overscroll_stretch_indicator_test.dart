@@ -11,9 +11,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   Widget buildTest(
-    Key box1Key,
-    Key box2Key,
-    Key box3Key,
+    GlobalKey box1Key,
+    GlobalKey box2Key,
+    GlobalKey box3Key,
     ScrollController controller, {
     Axis axis = Axis.vertical,
     bool reverse = false,
@@ -30,34 +30,37 @@ void main() {
 
     return Directionality(
       textDirection: TextDirection.ltr,
-      child: ScrollConfiguration(
-        behavior: const ScrollBehavior().copyWith(overscroll: false),
-        child: StretchingOverscrollIndicator(
-          axisDirection: axisDirection,
-          child: CustomScrollView(
-            reverse: reverse,
-            scrollDirection: axis,
-            controller: controller,
-            slivers: <Widget>[
-              SliverToBoxAdapter(child: Container(
-                color: const Color(0xD0FF0000),
-                key: box1Key,
-                height: 250.0,
-                width: 300.0,
-              )),
-              SliverToBoxAdapter(child: Container(
-                color: const Color(0xFFFFFF00),
-                key: box2Key,
-                height: 250.0,
-                width: 300.0,
-              )),
-              SliverToBoxAdapter(child: Container(
-                color: const Color(0xFF6200EA),
-                key: box3Key,
-                height: 250.0,
-                width: 300.0,
-              )),
-            ],
+      child: MediaQuery(
+        data: const MediaQueryData(size: Size(800.0, 600.0)),
+        child: ScrollConfiguration(
+          behavior: const ScrollBehavior().copyWith(overscroll: false),
+          child: StretchingOverscrollIndicator(
+            axisDirection: axisDirection,
+            child: CustomScrollView(
+              reverse: reverse,
+              scrollDirection: axis,
+              controller: controller,
+              slivers: <Widget>[
+                SliverToBoxAdapter(child: Container(
+                  color: const Color(0xD0FF0000),
+                  key: box1Key,
+                  height: 250.0,
+                  width: 300.0,
+                )),
+                SliverToBoxAdapter(child: Container(
+                  color: const Color(0xFFFFFF00),
+                  key: box2Key,
+                  height: 250.0,
+                  width: 300.0,
+                )),
+                SliverToBoxAdapter(child: Container(
+                  color: const Color(0xFF6200EA),
+                  key: box3Key,
+                  height: 250.0,
+                  width: 300.0,
+                )),
+              ],
+            ),
           ),
         ),
       ),
@@ -65,9 +68,9 @@ void main() {
   }
 
   testWidgets('Stretch overscroll vertically', (WidgetTester tester) async {
-    final Key box1Key = UniqueKey();
-    final Key box2Key = UniqueKey();
-    final Key box3Key = UniqueKey();
+    final GlobalKey box1Key = GlobalKey();
+    final GlobalKey box2Key = GlobalKey();
+    final GlobalKey box3Key = GlobalKey();
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(
       buildTest(box1Key, box2Key, box3Key, controller),
@@ -142,9 +145,9 @@ void main() {
   });
 
   testWidgets('Stretch overscroll works in reverse - vertical', (WidgetTester tester) async {
-    final Key box1Key = UniqueKey();
-    final Key box2Key = UniqueKey();
-    final Key box3Key = UniqueKey();
+    final GlobalKey box1Key = GlobalKey();
+    final GlobalKey box2Key = GlobalKey();
+    final GlobalKey box3Key = GlobalKey();
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(
       buildTest(box1Key, box2Key, box3Key, controller, reverse: true),
@@ -175,9 +178,9 @@ void main() {
   });
 
   testWidgets('Stretch overscroll works in reverse - horizontal', (WidgetTester tester) async {
-    final Key box1Key = UniqueKey();
-    final Key box2Key = UniqueKey();
-    final Key box3Key = UniqueKey();
+    final GlobalKey box1Key = GlobalKey();
+    final GlobalKey box2Key = GlobalKey();
+    final GlobalKey box3Key = GlobalKey();
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(
         buildTest(
@@ -203,11 +206,11 @@ void main() {
 
     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(CustomScrollView)));
     // Overscroll
-    await gesture.moveBy(const Offset(200.0, 0.0));
+    await gesture.moveBy(const Offset(-200.0, 0.0));
     await tester.pumpAndSettle();
-    expect(box1.localToGlobal(Offset.zero).dx, greaterThan(500.0));
-    expect(box2.localToGlobal(Offset.zero).dx, greaterThan(200.0));
-    expect(box3.localToGlobal(Offset.zero).dx, greaterThan(-100.0));
+    expect(box1.localToGlobal(Offset.zero).dx, lessThan(500.0));
+    expect(box2.localToGlobal(Offset.zero).dx, lessThan(200.0));
+    expect(box3.localToGlobal(Offset.zero).dx, lessThan(-100.0));
     await expectLater(
       find.byType(CustomScrollView),
       matchesGoldenFile('overscroll_stretch.horizontal.reverse.png'),
@@ -215,9 +218,9 @@ void main() {
   });
 
   testWidgets('Stretch overscroll horizontally', (WidgetTester tester) async {
-    final Key box1Key = UniqueKey();
-    final Key box2Key = UniqueKey();
-    final Key box3Key = UniqueKey();
+    final GlobalKey box1Key = GlobalKey();
+    final GlobalKey box2Key = GlobalKey();
+    final GlobalKey box3Key = GlobalKey();
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(
       buildTest(box1Key, box2Key, box3Key, controller, axis: Axis.horizontal)
@@ -292,9 +295,9 @@ void main() {
   });
 
   testWidgets('Disallow stretching overscroll', (WidgetTester tester) async {
-    final Key box1Key = UniqueKey();
-    final Key box2Key = UniqueKey();
-    final Key box3Key = UniqueKey();
+    final GlobalKey box1Key = GlobalKey();
+    final GlobalKey box2Key = GlobalKey();
+    final GlobalKey box3Key = GlobalKey();
     final ScrollController controller = ScrollController();
     double indicatorNotification =0;
     await tester.pumpWidget(
@@ -337,34 +340,37 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/90197
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
-      child: ScrollConfiguration(
-        behavior: const ScrollBehavior().copyWith(overscroll: false),
-        child: Column(
-          children: <Widget>[
-            StretchingOverscrollIndicator(
-              axisDirection: AxisDirection.down,
-              child: SizedBox(
-                height: 300,
-                child: ListView.builder(
-                  itemCount: 20,
-                  itemBuilder: (BuildContext context, int index){
-                    return Padding(
-                        padding: const EdgeInsets.all(10.0),
-                        child: Text('Index $index'),
-                    );
-                  },
+      child: MediaQuery(
+        data: const MediaQueryData(size: Size(800.0, 600.0)),
+        child: ScrollConfiguration(
+          behavior: const ScrollBehavior().copyWith(overscroll: false),
+          child: Column(
+            children: <Widget>[
+              StretchingOverscrollIndicator(
+                axisDirection: AxisDirection.down,
+                child: SizedBox(
+                  height: 300,
+                  child: ListView.builder(
+                    itemCount: 20,
+                    itemBuilder: (BuildContext context, int index){
+                      return Padding(
+                          padding: const EdgeInsets.all(10.0),
+                          child: Text('Index $index'),
+                      );
+                    },
+                  ),
                 ),
               ),
-            ),
-            Opacity(
-              opacity: 0.5,
-              child: Container(
-                color: const Color(0xD0FF0000),
-                height: 100,
-              ),
-            )
-          ],
-        )
+              Opacity(
+                opacity: 0.5,
+                child: Container(
+                  color: const Color(0xD0FF0000),
+                  height: 100,
+                ),
+              )
+            ],
+          )
+        ),
       )
     ));
 

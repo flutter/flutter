@@ -174,19 +174,19 @@ void main() {
     final TestGesture gesture = await tester.createGesture(kind: ui.PointerDeviceKind.mouse);
     await gesture.addPointer();
     addTearDown(gesture.removePointer);
-    await gesture.moveTo(const Offset(794.0, 5.0));
+    await gesture.moveTo(const Offset(794.0, 15.0));
     await tester.pumpAndSettle();
 
     expect(
       find.byType(Scrollbar),
       paints
         ..rect(
-          rect: const Rect.fromLTRB(770.0, 0.0, 800.0, 580.0),
+          rect: const Rect.fromLTRB(770.0, 10.0, 800.0, 590.0),
           color: const Color(0xff000000),
         )
         ..line(
-          p1: const Offset(770.0, 0.0),
-          p2: const Offset(770.0, 580.0),
+          p1: const Offset(770.0, 10.0),
+          p2: const Offset(770.0, 590.0),
           strokeWidth: 1.0,
           color: const Color(0xffffeb3b),
         )
@@ -574,6 +574,52 @@ void main() {
     }),
   );
 
+  testWidgets('ScrollbarThemeData.trackVisibility test', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    bool? _getTrackVisibility(Set<MaterialState> states) {
+      return true;
+    }
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData().copyWith(
+          scrollbarTheme: _scrollbarTheme(
+            trackVisibility: MaterialStateProperty.resolveWith(_getTrackVisibility),
+          ),
+        ),
+        home: ScrollConfiguration(
+          behavior: const NoScrollbarBehavior(),
+          child: Scrollbar(
+            isAlwaysShown: true,
+            showTrackOnHover: true,
+            controller: scrollController,
+            child: SingleChildScrollView(
+              controller: scrollController,
+              child: const SizedBox(width: 4000.0, height: 4000.0),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byType(Scrollbar),
+      paints
+        ..rect(color: const Color(0x08000000))
+        ..line(
+          strokeWidth: 1.0,
+          color: const Color(0x1a000000),
+        )
+        ..rrect(color: const Color(0xff4caf50)),
+    );
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{
+    TargetPlatform.linux,
+    TargetPlatform.macOS,
+    TargetPlatform.windows,
+    TargetPlatform.fuchsia,
+  }),
+  );
+
   testWidgets('Default ScrollbarTheme debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const ScrollbarThemeData().debugFillProperties(builder);
@@ -636,6 +682,7 @@ class NoScrollbarBehavior extends ScrollBehavior {
 
 ScrollbarThemeData _scrollbarTheme({
   MaterialStateProperty<double?>? thickness,
+  MaterialStateProperty<bool?>? trackVisibility,
   bool showTrackOnHover = true,
   bool isAlwaysShown = true,
   Radius radius = const Radius.circular(6.0),
@@ -648,6 +695,7 @@ ScrollbarThemeData _scrollbarTheme({
 }) {
   return ScrollbarThemeData(
     thickness: thickness ?? MaterialStateProperty.resolveWith(_getThickness),
+    trackVisibility: trackVisibility,
     showTrackOnHover: showTrackOnHover,
     isAlwaysShown: isAlwaysShown,
     radius: radius,

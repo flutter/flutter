@@ -2,26 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Template: dev/snippets/config/templates/stateless_widget_material.tmpl
-//
-// Comment lines marked with "▼▼▼" and "▲▲▲" are used for authoring
-// of samples, and may be ignored if you are just exploring the sample.
-
 // Flutter code sample for MaterialBanner
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
-
-// Banners placed directly into the widget tree are static.
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
 
 import 'package:flutter/material.dart';
 
 void main() => runApp(const MyApp());
 
-/// This is the main application widget.
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
@@ -36,14 +22,10 @@ class MyApp extends StatelessWidget {
   }
 }
 
-/// This is the stateless widget that the main application instantiates.
 class MyStatelessWidget extends StatelessWidget {
   const MyStatelessWidget({Key? key}) : super(key: key);
 
   @override
-//********************************************************************
-//* ▼▼▼▼▼▼▼▼ code ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
-
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -56,19 +38,15 @@ class MyStatelessWidget extends StatelessWidget {
         backgroundColor: Color(0xFFE0E0E0),
         actions: <Widget>[
           TextButton(
-            child: Text('OPEN'),
             onPressed: null,
+            child: Text('OPEN'),
           ),
           TextButton(
-            child: Text('DISMISS'),
             onPressed: null,
+            child: Text('DISMISS'),
           ),
         ],
       ),
     );
   }
-
-//* ▲▲▲▲▲▲▲▲ code ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//********************************************************************
-
 }

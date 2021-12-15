@@ -127,7 +127,7 @@ class GestureRecognizerFactoryWithHandlers<T extends GestureRecognizer> extends 
 /// effects. The [InkWell] class implements this effect and can be used in place
 /// of a [GestureDetector] for handling taps.
 ///
-/// {@tool dartpad --template=stateful_widget_material}
+/// {@tool dartpad}
 /// This example contains a black light bulb wrapped in a [GestureDetector]. It
 /// turns the light bulb yellow when the "TURN LIGHT ON" button is tapped by
 /// setting the `_lights` field, and off again when "TURN LIGHT OFF" is tapped.
@@ -135,7 +135,7 @@ class GestureRecognizerFactoryWithHandlers<T extends GestureRecognizer> extends 
 /// ** See code in examples/api/lib/widgets/gesture_detector/gesture_detector.0.dart **
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateful_widget_material}
+/// {@tool dartpad}
 /// This example uses a [Container] that wraps a [GestureDetector] widget which
 /// detects a tap.
 ///

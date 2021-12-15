@@ -16,8 +16,8 @@ void main() {
       child: CustomPaint(
         key: key,
         painter: SimplePainter(),
-        child: const RepaintBoundary(child: Placeholder()),
         foregroundPainter: SimplePainter(),
+        child: const RepaintBoundary(child: Placeholder()),
       ),
     ));
 

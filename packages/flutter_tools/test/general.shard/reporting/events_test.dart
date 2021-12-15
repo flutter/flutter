@@ -107,7 +107,7 @@ void main() {
   testWithoutContext('a null language version is treated as unmigrated', () {
     final TestUsage usage = TestUsage();
     final PackageConfig packageConfig = PackageConfig(<Package>[
-      Package('foo', Uri.parse('file:///foo/lib/'), languageVersion: null),
+      Package('foo', Uri.parse('file:///foo/lib/')),
     ]);
 
     NullSafetyAnalysisEvent(

@@ -2,23 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Template: dev/snippets/config/templates/freeform.tmpl
-//
-// Comment lines marked with "▼▼▼" and "▲▲▲" are used for authoring
-// of samples, and may be ignored if you are just exploring the sample.
-
 // Flutter code sample for RawAutocomplete
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
-
-// This example shows the use of RawAutocomplete in a form.
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
-
-//*************************************************************************
-//* ▼▼▼▼▼▼▼▼ code-main ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -72,7 +56,6 @@ class AutocompleteFormExampleState extends State<AutocompleteFormExample> {
             value: _dropdownValue,
             icon: const Icon(Icons.arrow_downward),
             hint: const Text('This is a regular DropdownButtonFormField'),
-            iconSize: 24,
             elevation: 16,
             style: const TextStyle(color: Colors.deepPurple),
             onChanged: (String? newValue) {
@@ -207,6 +190,3 @@ class AutocompleteFormExampleState extends State<AutocompleteFormExample> {
     );
   }
 }
-
-//* ▲▲▲▲▲▲▲▲ code-main ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//*************************************************************************

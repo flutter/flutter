@@ -23,7 +23,7 @@ import 'package:flutter_tools/src/commands/daemon.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_workflow.dart';
-import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/ios_workflow.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:test/fake.dart';
@@ -123,6 +123,29 @@ void main() {
       expect(response['event'], 'daemon.logMessage');
       final Map<String, String> logMessage = castStringKeyedMap(response['params']).cast<String, String>();
       expect(logMessage['level'], 'error');
+      expect(logMessage['message'], 'daemon.logMessage test');
+      await responses.close();
+      await commands.close();
+    }, overrides: <Type, Generator>{
+      Logger: () => notifyingLogger,
+    });
+
+    testUsingContext('printWarning should send daemon.logMessage event', () async {
+      final StreamController<Map<String, dynamic>> commands = StreamController<Map<String, dynamic>>();
+      final StreamController<Map<String, dynamic>> responses = StreamController<Map<String, dynamic>>();
+      daemon = Daemon(
+        commands.stream,
+        responses.add,
+        notifyingLogger: notifyingLogger,
+      );
+      globals.printWarning('daemon.logMessage test');
+      final Map<String, dynamic> response = await responses.stream.firstWhere((Map<String, dynamic> map) {
+        return map['event'] == 'daemon.logMessage' && (map['params'] as Map<String, dynamic>)['level'] == 'warning';
+      });
+      expect(response['id'], isNull);
+      expect(response['event'], 'daemon.logMessage');
+      final Map<String, String> logMessage = castStringKeyedMap(response['params']).cast<String, String>();
+      expect(logMessage['level'], 'warning');
       expect(logMessage['message'], 'daemon.logMessage test');
       await responses.close();
       await commands.close();
@@ -563,6 +586,9 @@ class FakeIOSWorkflow extends Fake implements IOSWorkflow {
   final bool canListDevices;
 }
 
+// Unfortunately Device, despite not being immutable, has an `operator ==`.
+// Until we fix that, we have to also ignore related lints here.
+// ignore: avoid_implementing_value_types
 class FakeAndroidDevice extends Fake implements AndroidDevice {
   @override
   final String id = 'device';

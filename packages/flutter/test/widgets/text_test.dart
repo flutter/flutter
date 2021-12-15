@@ -1045,7 +1045,7 @@ void main() {
         ),
       ],
     )));
-  }, semanticsEnabled: true, skip: isBrowser); // https://github.com/flutter/flutter/issues/87877
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/87877
 
   // Regression test for https://github.com/flutter/flutter/issues/69787
   testWidgets('WidgetSpans with no semantic information are elided from semantics - case 2', (WidgetTester tester) async {
@@ -1091,7 +1091,7 @@ void main() {
     ignoreRect: true,
     ignoreTransform: true,
     ));
-  }, semanticsEnabled: true, skip: isBrowser); // https://github.com/flutter/flutter/issues/87877
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/87877
 
   // Regression test for https://github.com/flutter/flutter/issues/69787
   testWidgets('WidgetSpans with no semantic information are elided from semantics - case 3', (WidgetTester tester) async {
@@ -1149,7 +1149,7 @@ void main() {
     ignoreRect: true,
     ignoreTransform: true,
     ));
-  }, semanticsEnabled: true, skip: isBrowser); // https://github.com/flutter/flutter/issues/87877
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/87877
 
   // Regression test for https://github.com/flutter/flutter/issues/69787
   testWidgets('WidgetSpans with no semantic information are elided from semantics - case 4', (WidgetTester tester) async {
@@ -1215,7 +1215,7 @@ void main() {
     ignoreRect: true,
     ignoreTransform: true,
     ));
-  }, semanticsEnabled: true, skip: isBrowser); // https://github.com/flutter/flutter/issues/87877
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/87877
 
   testWidgets('RenderParagraph intrinsic width', (WidgetTester tester) async {
     await tester.pumpWidget(

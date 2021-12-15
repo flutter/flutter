@@ -127,9 +127,10 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
             ErrorDescription('building $widget'),
             e,
             stack,
-            informationCollector: () sync* {
-              yield DiagnosticsDebugCreator(DebugCreator(this));
-            },
+            informationCollector: () => <DiagnosticsNode>[
+              if (kDebugMode)
+                DiagnosticsDebugCreator(DebugCreator(this)),
+            ],
           ),
         );
       }
@@ -142,9 +143,10 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
             ErrorDescription('building $widget'),
             e,
             stack,
-            informationCollector: () sync* {
-              yield DiagnosticsDebugCreator(DebugCreator(this));
-            },
+            informationCollector: () => <DiagnosticsNode>[
+              if (kDebugMode)
+                DiagnosticsDebugCreator(DebugCreator(this)),
+            ],
           ),
         );
         _child = updateChild(null, built, slot);
@@ -246,7 +248,7 @@ mixin RenderConstrainedLayoutBuilder<ConstraintType extends Constraints, ChildTy
 /// in an [Align] widget. If the child might want to be bigger, consider
 /// wrapping it in a [SingleChildScrollView] or [OverflowBox].
 ///
-/// {@tool dartpad --template=stateless_widget_material}
+/// {@tool dartpad}
 /// This example uses a [LayoutBuilder] to build a different widget depending on the available width. Resize the
 /// DartPad window to see [LayoutBuilder] in action!
 ///

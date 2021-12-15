@@ -61,7 +61,7 @@ class KeyboardKeysCodeGenerator extends BaseCodeGenerator {
         '[RawKeyEvent.physicalKey] for more information.');
       lines.add(entry.usbHidCode, '''
 $firstComment  ///
-$otherComments  static const PhysicalKeyboardKey ${entry.constantName} = PhysicalKeyboardKey(${toHex(entry.usbHidCode, digits: 8)});
+$otherComments  static const PhysicalKeyboardKey ${entry.constantName} = PhysicalKeyboardKey(${toHex(entry.usbHidCode)});
 ''');
     }
     return lines.sortedJoin().trimRight();
@@ -71,7 +71,7 @@ $otherComments  static const PhysicalKeyboardKey ${entry.constantName} = Physica
     final OutputLines<int> lines = OutputLines<int>('Physical debug names');
     for (final PhysicalKeyEntry entry in keyData.entries) {
       lines.add(entry.usbHidCode, '''
-      ${toHex(entry.usbHidCode, digits: 8)}: '${entry.commentName}',''');
+      ${toHex(entry.usbHidCode)}: '${entry.commentName}',''');
     }
     return lines.sortedJoin().trimRight();
   }

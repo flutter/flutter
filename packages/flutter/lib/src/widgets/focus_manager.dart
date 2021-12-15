@@ -69,7 +69,7 @@ KeyEventResult combineKeyEventResults(Iterable<KeyEventResult> results) {
       case KeyEventResult.skipRemainingHandlers:
         hasSkipRemainingHandlers = true;
         break;
-      default:
+      case KeyEventResult.ignored:
         break;
     }
   }
@@ -373,7 +373,7 @@ enum UnfocusDisposition {
 /// [DirectionalFocusTraversalPolicyMixin], but custom policies can be built
 /// based upon these policies. See [FocusTraversalPolicy] for more information.
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold}
+/// {@tool dartpad}
 /// This example shows how a FocusNode should be managed if not using the
 /// [Focus] or [FocusScope] widgets. See the [Focus] widget for a similar
 /// example using [Focus] and [FocusScope] widgets.
@@ -768,7 +768,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// previous node in the enclosing [FocusTraversalGroup], call [nextFocus] or
   /// [previousFocus] instead of calling `unfocus`.
   ///
-  /// {@tool dartpad --template=stateful_widget_material}
+  /// {@tool dartpad}
   /// This example shows the difference between the different [UnfocusDisposition]
   /// values for [unfocus].
   ///
@@ -1511,7 +1511,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
     if (_listeners.isEmpty) {
       return;
     }
-    final List<ValueChanged<FocusHighlightMode>> localListeners = List<ValueChanged<FocusHighlightMode>>.from(_listeners);
+    final List<ValueChanged<FocusHighlightMode>> localListeners = List<ValueChanged<FocusHighlightMode>>.of(_listeners);
     for (final ValueChanged<FocusHighlightMode> listener in localListeners) {
       try {
         if (_listeners.contains(listener)) {
@@ -1520,13 +1520,13 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
       } catch (exception, stack) {
         InformationCollector? collector;
         assert(() {
-          collector = () sync* {
-            yield DiagnosticsProperty<FocusManager>(
+          collector = () => <DiagnosticsNode>[
+            DiagnosticsProperty<FocusManager>(
               'The $runtimeType sending notification was',
               this,
               style: DiagnosticsTreeStyle.errorProperty,
-            );
-          };
+            ),
+          ];
           return true;
         }());
         FlutterError.reportError(FlutterErrorDetails(

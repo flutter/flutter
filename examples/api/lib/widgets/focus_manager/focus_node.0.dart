@@ -2,35 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Template: dev/snippets/config/templates/stateless_widget_scaffold.tmpl
-//
-// Comment lines marked with "▼▼▼" and "▲▲▲" are used for authoring
-// of samples, and may be ignored if you are just exploring the sample.
-
 // Flutter code sample for FocusNode
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
-
-// This example shows how a FocusNode should be managed if not using the
-// [Focus] or [FocusScope] widgets. See the [Focus] widget for a similar
-// example using [Focus] and [FocusScope] widgets.
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
 
 import 'package:flutter/material.dart';
-//****************************************************************************
-//* ▼▼▼▼▼▼▼▼ code-imports ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
-
 import 'package:flutter/services.dart';
-
-//* ▲▲▲▲▲▲▲▲ code-imports ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//****************************************************************************
 
 void main() => runApp(const MyApp());
 
-/// This is the main application widget.
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
@@ -47,9 +25,6 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
-//*****************************************************************************
-//* ▼▼▼▼▼▼▼▼ code-preamble ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
 class ColorfulButton extends StatefulWidget {
   const ColorfulButton({Key? key}) : super(key: key);
@@ -82,21 +57,21 @@ class _ColorfulButtonState extends State<ColorfulButton> {
 
   KeyEventResult _handleKeyPress(FocusNode node, RawKeyEvent event) {
     if (event is RawKeyDownEvent) {
-      print('Focus node ${node.debugLabel} got key event: ${event.logicalKey}');
+      debugPrint('Focus node ${node.debugLabel} got key event: ${event.logicalKey}');
       if (event.logicalKey == LogicalKeyboardKey.keyR) {
-        print('Changing color to red.');
+        debugPrint('Changing color to red.');
         setState(() {
           _color = Colors.red;
         });
         return KeyEventResult.handled;
       } else if (event.logicalKey == LogicalKeyboardKey.keyG) {
-        print('Changing color to green.');
+        debugPrint('Changing color to green.');
         setState(() {
           _color = Colors.green;
         });
         return KeyEventResult.handled;
       } else if (event.logicalKey == LogicalKeyboardKey.keyB) {
-        print('Changing color to blue.');
+        debugPrint('Changing color to blue.');
         setState(() {
           _color = Colors.blue;
         });
@@ -139,17 +114,10 @@ class _ColorfulButtonState extends State<ColorfulButton> {
   }
 }
 
-//* ▲▲▲▲▲▲▲▲ code-preamble ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//*****************************************************************************
-
-/// This is the stateless widget that the main application instantiates.
 class MyStatelessWidget extends StatelessWidget {
   const MyStatelessWidget({Key? key}) : super(key: key);
 
   @override
-//********************************************************************
-//* ▼▼▼▼▼▼▼▼ code ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
-
   Widget build(BuildContext context) {
     final TextTheme textTheme = Theme.of(context).textTheme;
     return DefaultTextStyle(
@@ -157,8 +125,4 @@ class MyStatelessWidget extends StatelessWidget {
       child: const ColorfulButton(),
     );
   }
-
-//* ▲▲▲▲▲▲▲▲ code ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//********************************************************************
-
 }

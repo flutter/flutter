@@ -304,7 +304,7 @@ class RestorationManager extends ChangeNotifier {
     );
   }
 
-  Future<Object?> _methodHandler(MethodCall call) async {
+  Future<void> _methodHandler(MethodCall call) async {
     switch (call.method) {
       case 'push':
         _parseAndHandleRestorationUpdateFromEngine(call.arguments as Map<Object?, Object?>);
@@ -1006,7 +1006,9 @@ bool debugIsSerializableForRestoration(Object? object) {
     try {
       const StandardMessageCodec().encodeMessage(object);
       result = true;
-    } catch (_) {
+    } catch (error) {
+      // This is only used in asserts, so reporting the exception isn't
+      // particularly useful, since the assert itself will likely fail.
       result = false;
     }
     return true;

@@ -42,7 +42,6 @@ void main() {
   test('RenderOpacity and children and semantics', () {
     final AnimationController controller = AnimationController(vsync: const TestVSync());
     final RenderAnimatedOpacity box = RenderAnimatedOpacity(
-      alwaysIncludeSemantics: false,
       opacity: controller,
       child: RenderParagraph(
         const TextSpan(),

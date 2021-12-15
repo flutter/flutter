@@ -11,8 +11,6 @@ import '../rendering/rendering_tester.dart';
 import 'semantics_tester.dart';
 import 'states.dart';
 
-const Duration _frameDuration = Duration(milliseconds: 100);
-
 void main() {
   testWidgets('PageView resize from zero-size viewport should not lose state', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/88956
@@ -27,9 +25,9 @@ void main() {
           child: SizedBox.fromSize(
             size: size,
             child: PageView(
-              children: kStates.map<Widget>((String state) => Text(state)).toList(),
               controller: controller,
               onPageChanged: (int page) { },
+              children: kStates.map<Widget>((String state) => Text(state)).toList(),
             ),
           ),
         ),
@@ -72,9 +70,9 @@ void main() {
           child: SizedBox.fromSize(
             size: size,
             child: PageView(
-              children: kStates.map<Widget>((String state) => Text(state)).toList(),
               controller: controller,
               onPageChanged: (int page) { },
+              children: kStates.map<Widget>((String state) => Text(state)).toList(),
             ),
           ),
         ),
@@ -141,13 +139,13 @@ void main() {
     expect(find.text('Alaska'), findsOneWidget);
     expect(find.text('Arizona'), findsNothing);
 
-    await tester.pumpAndSettle(_frameDuration);
+    await tester.pumpAndSettle();
 
     expect(find.text('Alabama'), findsOneWidget);
     expect(find.text('Alaska'), findsNothing);
 
     await tester.drag(find.byType(PageView), const Offset(-401.0, 0.0));
-    await tester.pumpAndSettle(_frameDuration);
+    await tester.pumpAndSettle();
 
     expect(find.text('Alabama'), findsNothing);
     expect(find.text('Alaska'), findsOneWidget);
@@ -158,14 +156,14 @@ void main() {
     log.clear();
 
     await tester.fling(find.byType(PageView), const Offset(-200.0, 0.0), 1000.0);
-    await tester.pumpAndSettle(_frameDuration);
+    await tester.pumpAndSettle();
 
     expect(find.text('Alabama'), findsNothing);
     expect(find.text('Alaska'), findsNothing);
     expect(find.text('Arizona'), findsOneWidget);
 
     await tester.fling(find.byType(PageView), const Offset(200.0, 0.0), 1000.0);
-    await tester.pumpAndSettle(_frameDuration);
+    await tester.pumpAndSettle();
 
     expect(find.text('Alabama'), findsNothing);
     expect(find.text('Alaska'), findsOneWidget);
@@ -225,7 +223,7 @@ void main() {
     expect(find.text('California'), findsOneWidget);
 
     controller.nextPage(duration: const Duration(milliseconds: 150), curve: Curves.ease);
-    await tester.pumpAndSettle(const Duration(milliseconds: 100));
+    await tester.pumpAndSettle();
 
     expect(find.text('Colorado'), findsOneWidget);
 
@@ -246,7 +244,7 @@ void main() {
     expect(find.text('Colorado'), findsOneWidget);
 
     controller.previousPage(duration: const Duration(milliseconds: 150), curve: Curves.ease);
-    await tester.pumpAndSettle(const Duration(milliseconds: 100));
+    await tester.pumpAndSettle();
 
     expect(find.text('California'), findsOneWidget);
   });
@@ -268,7 +266,7 @@ void main() {
     expect(find.text('Alabama'), findsOneWidget);
 
     await tester.drag(find.byType(PageView), const Offset(-1250.0, 0.0));
-    await tester.pumpAndSettle(const Duration(milliseconds: 100));
+    await tester.pumpAndSettle();
 
     expect(find.text('Arizona'), findsOneWidget);
 
@@ -732,7 +730,7 @@ void main() {
     'All visible pages are able to receive touch events',
     (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/23873.
-      final PageController controller = PageController(viewportFraction: 1/4, initialPage: 0);
+      final PageController controller = PageController(viewportFraction: 1/4);
       late int tappedIndex;
 
       Widget build() {
@@ -1083,9 +1081,7 @@ void main() {
     // PageView() defaults to true.
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
-      child: PageView(
-        children: const <Widget>[],
-      ),
+      child: PageView(),
     ));
 
     expect(tester.widget<SliverFillViewport>(viewportFinder()).padEnds, true);
@@ -1095,7 +1091,6 @@ void main() {
       textDirection: TextDirection.ltr,
       child: PageView(
         padEnds: false,
-        children: const <Widget>[],
       ),
     ));
 

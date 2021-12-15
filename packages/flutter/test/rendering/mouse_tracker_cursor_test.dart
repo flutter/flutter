@@ -57,8 +57,10 @@ void main() {
   setUp(() {
     _binding.postFrameCallbacks.clear();
     _binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.mouseCursor, (MethodCall call) async {
-      if (_methodCallHandler != null)
+      if (_methodCallHandler != null) {
         return _methodCallHandler!(call);
+      }
+      return null;
     });
   });
 
@@ -251,7 +253,7 @@ void main() {
     );
 
     annotations = <TestAnnotationTarget>[
-      const TestAnnotationTarget(cursor: MouseCursor.defer),
+      const TestAnnotationTarget(),
       const TestAnnotationTarget(cursor: SystemMouseCursors.click),
       const TestAnnotationTarget(cursor: SystemMouseCursors.grabbing),
     ];
@@ -279,8 +281,8 @@ void main() {
     );
 
     annotations = <TestAnnotationTarget>[
-      const TestAnnotationTarget(cursor: MouseCursor.defer),
-      const TestAnnotationTarget(cursor: MouseCursor.defer),
+      const TestAnnotationTarget(),
+      const TestAnnotationTarget(),
       const TestAnnotationTarget(cursor: SystemMouseCursors.grabbing),
     ];
     ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[

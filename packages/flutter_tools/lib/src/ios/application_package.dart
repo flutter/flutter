@@ -5,7 +5,7 @@
 import '../application_package.dart';
 import '../base/file_system.dart';
 import '../build_info.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../xcode_project.dart';
 import 'plist_parser.dart';
 
@@ -56,7 +56,7 @@ abstract class IOSApp extends ApplicationPackage {
       globals.printError('Invalid prebuilt iOS app. Does not contain Info.plist.');
       return null;
     }
-    final String? id = globals.plistParser.getValueFromFile(
+    final String? id = globals.plistParser.getStringValueFromFile(
       plistPath,
       PlistParser.kCFBundleIdentifierKey,
     );

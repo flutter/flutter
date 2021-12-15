@@ -176,7 +176,7 @@ void main() {
       globalEvents.add(event);
     }, transform);
 
-    final TestPointer pointer1 = TestPointer(1);
+    final TestPointer pointer1 = TestPointer();
     const Offset firstPosition = Offset(16, 36);
     router.route(pointer1.down(firstPosition));
 

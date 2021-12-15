@@ -25,7 +25,7 @@ import 'toggleable.dart';
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_center}
+/// {@tool dartpad}
 /// This example shows how you can override the default theme of
 /// of a [Checkbox] with a [MaterialStateProperty].
 /// In this example, the checkbox's color will be `Colors.blue` when the [Checkbox]
@@ -301,8 +301,9 @@ class Checkbox extends StatefulWidget {
   /// compatibility.
   /// {@endtemplate}
   ///
-  /// If this property is null then [CheckboxThemeData.side] of [ThemeData.checkboxTheme]
-  /// is used. If that's null then the side will be width 2.
+  /// If this property is null, then [CheckboxThemeData.side] of
+  /// [ThemeData.checkboxTheme] is used. If that is also null, then the side
+  /// will be width 2.
   final BorderSide? side;
 
   /// The width of a checkbox widget.

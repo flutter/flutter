@@ -227,7 +227,7 @@ class Dialog extends StatelessWidget {
 /// ```
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold_center}
+/// {@tool dartpad}
 /// This demo shows a [TextButton] which when pressed, calls [showDialog]. When called, this method
 /// displays a Material dialog above the current contents of the app and returns
 /// a [Future] that completes when the dialog is dismissed.
@@ -995,7 +995,7 @@ Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> a
 ///
 /// For more information about state restoration, see [RestorationManager].
 ///
-/// {@tool sample --template=stateless_widget_restoration_material}
+/// {@tool sample}
 /// This sample demonstrates how to create a restorable Material dialog. This is
 /// accomplished by enabling state restoration by specifying
 /// [MaterialApp.restorationScopeId] and using [Navigator.restorablePush] to

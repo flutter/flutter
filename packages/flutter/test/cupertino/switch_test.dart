@@ -53,6 +53,7 @@ void main() {
 
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       log.add(methodCall);
+      return null;
     });
 
     await tester.pumpWidget(
@@ -93,6 +94,7 @@ void main() {
 
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       log.add(methodCall);
+      return null;
     });
 
     await tester.pumpWidget(
@@ -160,6 +162,7 @@ void main() {
 
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       log.add(methodCall);
+      return null;
     });
 
     await tester.pumpWidget(
@@ -198,6 +201,7 @@ void main() {
     final List<MethodCall> log = <MethodCall>[];
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       log.add(methodCall);
+      return null;
     });
 
     await tester.pumpWidget(
@@ -331,7 +335,6 @@ void main() {
             return Center(
               child: CupertinoSwitch(
                 value: value,
-                dragStartBehavior: DragStartBehavior.start,
                 onChanged: (bool newValue) {
                   setState(() {
                     value = newValue;

@@ -35,12 +35,12 @@ void main() {
 
   testWidgets('BottomSheetThemeData implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
-    BottomSheetThemeData(
-      backgroundColor: const Color(0xFFFFFFFF),
+    const BottomSheetThemeData(
+      backgroundColor: Color(0xFFFFFFFF),
       elevation: 2.0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2.0)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2.0))),
       clipBehavior: Clip.antiAlias,
-      constraints: const BoxConstraints(minWidth: 200, maxWidth: 640),
+      constraints: BoxConstraints(minWidth: 200, maxWidth: 640),
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -329,10 +329,10 @@ Widget bottomSheetWithElevations(BottomSheetThemeData bottomSheetTheme) {
 }
 
 BottomSheetThemeData _bottomSheetTheme() {
-  return BottomSheetThemeData(
+  return const BottomSheetThemeData(
     backgroundColor: Colors.orange,
     elevation: 12.0,
-    shape: BeveledRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    shape: BeveledRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
     clipBehavior: Clip.antiAlias,
   );
 }

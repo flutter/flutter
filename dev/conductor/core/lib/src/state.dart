@@ -15,11 +15,11 @@ const String kStateFileName = '.flutter_conductor_state.json';
 
 String luciConsoleLink(String channel, String groupName) {
   assert(
-    <String>['stable', 'beta', 'dev', 'master'].contains(channel),
+    kReleaseChannels.contains(channel),
     'channel $channel not recognized',
   );
   assert(
-    <String>['framework', 'engine', 'devicelab', 'packaging'].contains(groupName),
+    <String>['flutter', 'engine', 'packaging'].contains(groupName),
     'group named $groupName not recognized',
   );
   final String consoleName = channel == 'master' ? groupName : '${channel}_$groupName';
@@ -42,10 +42,10 @@ String presentState(pb.ConductorState state) {
   buffer.writeln('Conductor version: ${state.conductorVersion}');
   buffer.writeln('Release channel: ${state.releaseChannel}');
   buffer.writeln('Release version: ${state.releaseVersion}');
-  buffer.writeln('');
+  buffer.writeln();
   buffer.writeln('Release started at: ${DateTime.fromMillisecondsSinceEpoch(state.createdDate.toInt())}');
   buffer.writeln('Last updated at: ${DateTime.fromMillisecondsSinceEpoch(state.lastUpdatedDate.toInt())}');
-  buffer.writeln('');
+  buffer.writeln();
   buffer.writeln('Engine Repo');
   buffer.writeln('\tCandidate branch: ${state.engine.candidateBranch}');
   buffer.writeln('\tStarting git HEAD: ${state.engine.startingGitHead}');
@@ -68,8 +68,7 @@ String presentState(pb.ConductorState state) {
   buffer.writeln('\tStarting git HEAD: ${state.framework.startingGitHead}');
   buffer.writeln('\tCurrent git HEAD: ${state.framework.currentGitHead}');
   buffer.writeln('\tPath to checkout: ${state.framework.checkoutPath}');
-  buffer.writeln('\tPost-submit LUCI dashboard: ${luciConsoleLink(state.releaseChannel, 'framework')}');
-  buffer.writeln('\tDevicelab LUCI dashboard: ${luciConsoleLink(state.releaseChannel, 'devicelab')}');
+  buffer.writeln('\tPost-submit LUCI dashboard: ${luciConsoleLink(state.releaseChannel, 'flutter')}');
   if (state.framework.cherrypicks.isNotEmpty) {
     buffer.writeln('${state.framework.cherrypicks.length} Framework Cherrypicks:');
     for (final pb.Cherrypick cherrypick in state.framework.cherrypicks) {
@@ -78,7 +77,7 @@ String presentState(pb.ConductorState state) {
   } else {
     buffer.writeln('0 Framework cherrypicks.');
   }
-  buffer.writeln('');
+  buffer.writeln();
   if (state.currentPhase == ReleasePhase.VERIFY_RELEASE) {
     buffer.writeln(
       '${state.releaseChannel} release ${state.releaseVersion} has been published and verified.\n',
@@ -89,7 +88,7 @@ String presentState(pb.ConductorState state) {
   buffer.writeln(presentPhases(state.currentPhase));
 
   buffer.writeln(phaseInstructions(state));
-  buffer.writeln('');
+  buffer.writeln();
   buffer.writeln('Issue `conductor next` when you are ready to proceed.');
   return buffer.toString();
 }

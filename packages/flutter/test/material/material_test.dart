@@ -97,7 +97,6 @@ void main() {
   testWidgets('Material implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const Material(
-      type: MaterialType.canvas,
       color: Color(0xFFFFFFFF),
       shadowColor: Color(0xffff0000),
       textStyle: TextStyle(color: Color(0xff00ff00)),
@@ -190,7 +189,7 @@ void main() {
     // This code verifies that the PhysicalModel's elevation animates over
     // a kThemeChangeDuration time interval.
 
-    await tester.pumpWidget(buildMaterial(elevation: 0.0));
+    await tester.pumpWidget(buildMaterial());
     final RenderPhysicalShape modelA = getModel(tester);
     expect(modelA.elevation, equals(0.0));
 
@@ -215,7 +214,7 @@ void main() {
     // This code verifies that the PhysicalModel's shadowColor animates over
     // a kThemeChangeDuration time interval.
 
-    await tester.pumpWidget(buildMaterial(shadowColor: const Color(0xFF00FF00)));
+    await tester.pumpWidget(buildMaterial());
     final RenderPhysicalShape modelA = getModel(tester);
     expect(modelA.shadowColor, equals(const Color(0xFF00FF00)));
 
@@ -366,7 +365,7 @@ void main() {
         Theme(
           data: ThemeData(
             applyElevationOverlayColor: true,
-            colorScheme: const ColorScheme.dark(surface: surfaceColor),
+            colorScheme: const ColorScheme.dark(),
           ),
           child: buildMaterial(
             color: surfaceColor.withOpacity(.75),
@@ -548,7 +547,6 @@ void main() {
       await tester.pumpWidget(
         Material(
           key: materialKey,
-          type: MaterialType.canvas,
           child: const SizedBox(width: 100.0, height: 100.0),
         ),
       );
@@ -565,7 +563,6 @@ void main() {
       await tester.pumpWidget(
         Material(
           key: materialKey,
-          type: MaterialType.canvas,
           borderRadius: const BorderRadius.all(Radius.circular(5.0)),
           elevation: 1.0,
           child: const SizedBox(width: 100.0, height: 100.0),
@@ -584,7 +581,6 @@ void main() {
       await tester.pumpWidget(
         Material(
           key: materialKey,
-          type: MaterialType.canvas,
           shape: const StadiumBorder(),
           elevation: 1.0,
           child: const SizedBox(width: 100.0, height: 100.0),
@@ -796,10 +792,9 @@ void main() {
                 height: 300,
                 child: Material(
                   clipBehavior: Clip.hardEdge,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    side: const BorderSide(color: Colors.grey, width: 6),
-                    borderRadius: BorderRadius.circular(8),
+                  shape: const RoundedRectangleBorder(
+                    side: BorderSide(color: Colors.grey, width: 6),
+                    borderRadius: BorderRadius.all(Radius.circular(8)),
                   ),
                   child: Column(
                     children: <Widget>[
@@ -835,10 +830,9 @@ void main() {
                 height: 300,
                 child: Material(
                   clipBehavior: Clip.hardEdge,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    side: const BorderSide(color: Colors.grey, width: 6),
-                    borderRadius: BorderRadius.circular(8),
+                  shape: const RoundedRectangleBorder(
+                    side: BorderSide(color: Colors.grey, width: 6),
+                    borderRadius: BorderRadius.all(Radius.circular(8)),
                   ),
                   borderOnForeground: false,
                   child: Column(

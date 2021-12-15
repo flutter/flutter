@@ -32,8 +32,8 @@ abstract class ProgressIndicator extends StatefulWidget {
   ///
   /// {@template flutter.material.ProgressIndicator.ProgressIndicator}
   /// The [value] argument can either be null for an indeterminate
-  /// progress indicator, or non-null for a determinate progress
-  /// indicator.
+  /// progress indicator, or a non-null value between 0.0 and 1.0 for a
+  /// determinate progress indicator.
   ///
   /// ## Accessibility
   ///
@@ -54,6 +54,7 @@ abstract class ProgressIndicator extends StatefulWidget {
   /// If non-null, the value of this progress indicator.
   ///
   /// A value of 0.0 means no progress and 1.0 means that progress is complete.
+  /// The value will be clamped to be in the range 0.0-1.0.
   ///
   /// If null, this progress indicator is indeterminate, which means the
   /// indicator displays a predetermined animation that does not indicate how
@@ -246,7 +247,7 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
 /// The minimum height of the indicator can be specified using [minHeight].
 /// The indicator can be made taller by wrapping the widget with a [SizedBox].
 ///
-/// {@tool dartpad --template=stateful_widget_material_ticker}
+/// {@tool dartpad}
 /// This example shows a [LinearProgressIndicator] with a changing value.
 ///
 /// ** See code in examples/api/lib/material/progress_indicator/linear_progress_indicator.0.dart **
@@ -466,7 +467,7 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
 /// The indicator arc is displayed with [valueColor], an animated value. To
 /// specify a constant color use: `AlwaysStoppedAnimation<Color>(color)`.
 ///
-/// {@tool dartpad --template=stateful_widget_material_ticker}
+/// {@tool dartpad}
 /// This example shows a [CircularProgressIndicator] with a changing value.
 ///
 /// ** See code in examples/api/lib/material/progress_indicator/circular_progress_indicator.0.dart **
@@ -593,7 +594,8 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
   }
 
   Widget _buildCupertinoIndicator(BuildContext context) {
-    return CupertinoActivityIndicator(key: widget.key);
+    final Color? tickColor = widget.backgroundColor;
+    return CupertinoActivityIndicator(key: widget.key, color: tickColor);
   }
 
   Widget _buildMaterialIndicator(BuildContext context, double headValue, double tailValue, double offsetValue, double rotationValue) {

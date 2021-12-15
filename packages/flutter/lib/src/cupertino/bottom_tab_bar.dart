@@ -44,6 +44,12 @@ const Color _kDefaultTabBarInactiveColor = CupertinoColors.inactiveGray;
 /// value from the operating system can be retrieved in many ways, such as querying
 /// [MediaQuery.textScaleFactorOf] against [CupertinoApp]'s [BuildContext].
 ///
+/// {@tool dartpad}
+/// This example shows a [CupertinoTabBar] placed in a [CupertinoTabScaffold].
+///
+/// ** See code in examples/api/lib/cupertino/bottom_tab_bar/bottom_tab_bar.0.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [CupertinoTabScaffold], which hosts the [CupertinoTabBar] at the bottom.
@@ -59,11 +65,11 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
     this.activeColor,
     this.inactiveColor = _kDefaultTabBarInactiveColor,
     this.iconSize = 30.0,
+    this.height = _kTabBarHeight,
     this.border = const Border(
       top: BorderSide(
         color: _kDefaultTabBarBorderColor,
-        width: 0.0, // One physical pixel.
-        style: BorderStyle.solid,
+        width: 0.0, // 0.0 means one physical pixel
       ),
     ),
   }) : assert(items != null),
@@ -74,6 +80,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
        assert(currentIndex != null),
        assert(0 <= currentIndex && currentIndex < items.length),
        assert(iconSize != null),
+       assert(height != null && height >= 0.0),
        assert(inactiveColor != null),
        super(key: key);
 
@@ -124,13 +131,18 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
   /// Must not be null.
   final double iconSize;
 
+  /// The height of the [CupertinoTabBar].
+  ///
+  /// Defaults to 50.0. Must not be null.
+  final double height;
+
   /// The border of the [CupertinoTabBar].
   ///
   /// The default value is a one physical pixel top border with grey color.
   final Border? border;
 
   @override
-  Size get preferredSize => const Size.fromHeight(_kTabBarHeight);
+  Size get preferredSize => Size.fromHeight(height);
 
   /// Indicates whether the tab bar is fully opaque or can have contents behind
   /// it show through it.
@@ -173,7 +185,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
         color: backgroundColor,
       ),
       child: SizedBox(
-        height: _kTabBarHeight + bottomPadding,
+        height: height + bottomPadding,
         child: IconTheme.merge( // Default with the inactive state.
           data: IconThemeData(color: inactive, size: iconSize),
           child: DefaultTextStyle( // Default with the inactive state.
@@ -249,7 +261,6 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
       Expanded(
         child: Center(child: active ? item.activeIcon : item.icon),
       ),
-      if (item.title != null) item.title!,
       if (item.label != null) Text(item.label!),
     ];
   }
@@ -281,6 +292,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
     Color? activeColor,
     Color? inactiveColor,
     double? iconSize,
+    double? height,
     Border? border,
     int? currentIndex,
     ValueChanged<int>? onTap,
@@ -292,6 +304,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
       activeColor: activeColor ?? this.activeColor,
       inactiveColor: inactiveColor ?? this.inactiveColor,
       iconSize: iconSize ?? this.iconSize,
+      height: height ?? this.height,
       border: border ?? this.border,
       currentIndex: currentIndex ?? this.currentIndex,
       onTap: onTap ?? this.onTap,

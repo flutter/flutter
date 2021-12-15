@@ -23,7 +23,7 @@ import 'theme.dart';
 /// The box's total height is controlled by [height]. The appropriate
 /// padding is automatically computed from the height.
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold}
+/// {@tool dartpad}
 /// This sample shows how to display a Divider between an orange and blue box
 /// inside a column. The Divider is 20 logical pixels in height and contains a
 /// vertically centered black line that is 5 logical pixels thick. The black
@@ -187,7 +187,7 @@ class Divider extends StatelessWidget {
 /// The box's total width is controlled by [width]. The appropriate
 /// padding is automatically computed from the width.
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold}
+/// {@tool dartpad}
 /// This sample shows how to display a [VerticalDivider] between a purple and orange box
 /// inside a [Row]. The [VerticalDivider] is 20 logical pixels in width and contains a
 /// horizontally centered black line that is 1 logical pixels thick. The grey

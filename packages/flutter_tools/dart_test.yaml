@@ -6,6 +6,9 @@
 # overloaded. For this reason, we set the test timeout to
 # significantly more than it would be by default, and we never set the
 # timeouts in the tests themselves.
+#
+# For the `test/general.shard` specifically, the `dev/bots/test.dart` script
+# overrides this, reducing it to only 2000ms. Unit tests must run fast!
 timeout: 15m
 
 tags:

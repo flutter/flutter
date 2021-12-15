@@ -648,7 +648,6 @@ void main() {
   testWithoutContext('Build completes all dependencies before failing', () async {
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
     final BuildSystem buildSystem = setUpBuildSystem(fileSystem, FakePlatform(
-      operatingSystem: 'linux',
       numberOfProcessors: 10, // Ensure the tool will process tasks concurrently.
     ));
     final Completer<void> startB = Completer<void>();
@@ -687,7 +686,7 @@ BuildSystem setUpBuildSystem(FileSystem fileSystem, [FakePlatform? platform]) {
   return FlutterBuildSystem(
     fileSystem: fileSystem,
     logger: BufferLogger.test(),
-    platform: platform ?? FakePlatform(operatingSystem: 'linux'),
+    platform: platform ?? FakePlatform(),
   );
 }
 

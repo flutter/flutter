@@ -182,9 +182,9 @@ void main() {
             width: 300.0,
             child: CupertinoPicker(
               itemExtent: 15.0,
-              children: const <Widget>[Text('1'), Text('1')],
               onSelectedItemChanged: (int i) {},
               selectionOverlay: const CupertinoPickerDefaultSelectionOverlay(background: Color(0x12345678)),
+              children: const <Widget>[Text('1'), Text('1')],
             ),
           ),
         ),
@@ -226,6 +226,7 @@ void main() {
 
         tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
           systemCalls.add(methodCall);
+          return null;
         });
 
         await tester.pumpWidget(
@@ -279,6 +280,7 @@ void main() {
 
         tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
           systemCalls.add(methodCall);
+          return null;
         });
 
         await tester.pumpWidget(
