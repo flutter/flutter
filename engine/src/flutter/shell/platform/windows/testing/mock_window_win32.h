@@ -15,7 +15,7 @@ namespace flutter {
 namespace testing {
 
 /// Mock for the |WindowWin32| base class.
-class MockWin32Window : public WindowWin32, public MockMessageQueue {
+class MockWin32Window : public WindowWin32 {
  public:
   MockWin32Window();
   MockWin32Window(std::unique_ptr<TextInputManagerWin32> text_input_manager);
@@ -32,6 +32,8 @@ class MockWin32Window : public WindowWin32, public MockMessageQueue {
   LRESULT InjectWindowMessage(UINT const message,
                               WPARAM const wparam,
                               LPARAM const lparam);
+
+  void InjectMessageList(int count, const Win32Message* messages);
 
   MOCK_METHOD1(OnDpiScale, void(unsigned int));
   MOCK_METHOD2(OnResize, void(unsigned int, unsigned int));
@@ -61,11 +63,6 @@ class MockWin32Window : public WindowWin32, public MockMessageQueue {
 
  protected:
   LRESULT Win32DefWindowProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
-
-  LRESULT Win32SendMessage(HWND hWnd,
-                           UINT const message,
-                           WPARAM const wparam,
-                           LPARAM const lparam) override;
 };
 
 }  // namespace testing

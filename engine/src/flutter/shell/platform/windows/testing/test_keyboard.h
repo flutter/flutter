@@ -64,14 +64,12 @@ class MockMessageQueue {
   //
   // See Win32's |PeekMessage| for documentation.
   BOOL Win32PeekMessage(LPMSG lpMsg,
-                        HWND hWnd,
                         UINT wMsgFilterMin,
                         UINT wMsgFilterMax,
                         UINT wRemoveMsg);
 
  protected:
-  virtual LRESULT Win32SendMessage(HWND hWnd,
-                                   UINT const message,
+  virtual LRESULT Win32SendMessage(UINT const message,
                                    WPARAM const wparam,
                                    LPARAM const lparam) = 0;
 
