@@ -30,11 +30,12 @@
                                     textureID:(int64_t)textureID
                                       texture:(nonnull NSObject<FlutterTexture>*)texture;
 
-- (void)paint:(SkCanvas&)canvas
-       bounds:(const SkRect&)bounds
-       freeze:(BOOL)freeze
-    grContext:(nonnull GrDirectContext*)grContext
-     sampling:(const SkSamplingOptions&)sampling;
+- (void)canvas:(SkCanvas&)canvas
+        bounds:(const SkRect&)bounds
+        freeze:(BOOL)freeze
+     grContext:(nonnull GrDirectContext*)grContext
+      sampling:(const SkSamplingOptions&)sampling
+         paint:(nullable const SkPaint*)paint;
 
 - (void)onGrContextCreated;
 

@@ -244,13 +244,16 @@ static void EmptyDlRenderer(DisplayListBuilder&) {}
 
 class RenderSurface {
  public:
-  explicit RenderSurface(sk_sp<SkSurface> surface) : surface_(surface) {}
+  explicit RenderSurface(sk_sp<SkSurface> surface) : surface_(surface) {
+    EXPECT_EQ(canvas()->save(), 1);
+  }
   ~RenderSurface() { sk_free(addr_); }
 
   SkCanvas* canvas() { return surface_->getCanvas(); }
 
   const SkPixmap* pixmap() {
     if (!pixmap_.addr()) {
+      canvas()->restoreToCount(1);
       SkImageInfo info = surface_->imageInfo();
       if (info.colorType() != kN32_SkColorType ||
           !surface_->peekPixels(&pixmap_)) {
@@ -280,13 +283,14 @@ class RenderEnvironment {
     return RenderEnvironment(SkImageInfo::MakeN32Premul(1, 1));
   }
 
-  RenderSurface MakeSurface(const SkColor bg = SK_ColorTRANSPARENT,
-                            int width = TestWidth,
-                            int height = TestHeight) const {
+  std::unique_ptr<RenderSurface> MakeSurface(
+      const SkColor bg = SK_ColorTRANSPARENT,
+      int width = TestWidth,
+      int height = TestHeight) const {
     sk_sp<SkSurface> surface =
         SkSurface::MakeRaster(info_.makeWH(width, height));
     surface->getCanvas()->clear(bg);
-    return RenderSurface(surface);
+    return std::make_unique<RenderSurface>(surface);
   }
 
   void init_ref(CvRenderer& cv_renderer, SkColor bg = SK_ColorTRANSPARENT) {
@@ -301,25 +305,27 @@ class RenderEnvironment {
     ref_matrix_ = ref_canvas()->getTotalMatrix();
     ref_clip_ = ref_canvas()->getDeviceClipBounds();
     cv_renderer(ref_canvas(), ref_paint_);
-    ref_pixmap_ = ref_surface_.pixmap();
+    ref_pixmap_ = ref_surface_->pixmap();
   }
 
-  SkCanvas* ref_canvas() { return ref_surface_.canvas(); }
+  const SkImageInfo& info() const { return info_; }
+  SkCanvas* ref_canvas() { return ref_surface_->canvas(); }
   const SkPaint& ref_paint() const { return ref_paint_; }
   const SkMatrix& ref_matrix() const { return ref_matrix_; }
   const SkIRect& ref_clip_bounds() const { return ref_clip_; }
   const SkPixmap* ref_pixmap() const { return ref_pixmap_; }
 
  private:
-  explicit RenderEnvironment(const SkImageInfo& info)
-      : info_(info), ref_surface_(MakeSurface()) {}
+  explicit RenderEnvironment(const SkImageInfo& info) : info_(info) {
+    ref_surface_ = MakeSurface();
+  }
 
   const SkImageInfo info_;
 
   SkPaint ref_paint_;
   SkMatrix ref_matrix_;
   SkIRect ref_clip_;
-  RenderSurface ref_surface_;
+  std::unique_ptr<RenderSurface> ref_surface_;
   const SkPixmap* ref_pixmap_ = nullptr;
 };
 
@@ -1280,7 +1286,7 @@ class CanvasCompareTester {
   }
 
   static void RenderWithStrokes(const TestParameters& testP,
-                                const RenderEnvironment env,
+                                const RenderEnvironment& env,
                                 const BoundsTolerance& tolerance_in) {
     // The test cases were generated with geometry that will try to fill
     // out the various miter limits used for testing, but they can be off
@@ -1512,8 +1518,16 @@ class CanvasCompareTester {
                    [=](SkCanvas* c, SkPaint&) { c->skew(0.05, 0.05); },
                    [=](DisplayListBuilder& b) { b.skew(0.05, 0.05); }));
     {
-      SkMatrix tx = SkMatrix::MakeAll(1.10, 0.10, 5,   //
-                                      0.05, 1.05, 10,  //
+      // This rather odd transform can cause slight differences in
+      // computing in-bounds samples depending on which base rendering
+      // routine Skia uses. Making sure our matrix values are powers
+      // of 2 reduces, but does not eliminate, these slight differences
+      // in calculation when we are comparing rendering with an alpha
+      // to rendering opaque colors in the group opacity tests, for
+      // example.
+      SkScalar tweak = 1.0 / 16.0;
+      SkMatrix tx = SkMatrix::MakeAll(1.0 + tweak, tweak, 5,   //
+                                      tweak, 1.0 + tweak, 10,  //
                                       0, 0, 1);
       RenderWith(testP, env, skewed_tolerance,
                  CaseParameters(
@@ -1660,8 +1674,8 @@ class CanvasCompareTester {
     // DisplayList mechanisms are not involved in this operation
     const std::string info = caseP.info();
     const SkColor bg = caseP.bg();
-    RenderSurface sk_surface = env.MakeSurface(bg);
-    SkCanvas* sk_canvas = sk_surface.canvas();
+    std::unique_ptr<RenderSurface> sk_surface = env.MakeSurface(bg);
+    SkCanvas* sk_canvas = sk_surface->canvas();
     SkPaint sk_paint;
     caseP.cv_setup()(sk_canvas, sk_paint);
     SkMatrix sk_matrix = sk_canvas->getTotalMatrix();
@@ -1672,7 +1686,7 @@ class CanvasCompareTester {
     caseP.cv_restore()(sk_canvas, sk_paint);
     const sk_sp<SkPicture> sk_picture = getSkPicture(testP, caseP);
     SkRect sk_bounds = sk_picture->cullRect();
-    const SkPixmap* sk_pixels = sk_surface.pixmap();
+    const SkPixmap* sk_pixels = sk_surface->pixmap();
     ASSERT_EQ(sk_pixels->width(), TestWidth) << info;
     ASSERT_EQ(sk_pixels->height(), TestHeight) << info;
     ASSERT_EQ(sk_pixels->info().bytesPerPixel(), 4) << info;
@@ -1692,7 +1706,6 @@ class CanvasCompareTester {
       // This sequence plays the provided equivalently constructed
       // DisplayList onto the SkCanvas of the surface
       // DisplayList => direct rendering
-      RenderSurface dl_surface = env.MakeSurface(bg);
       DisplayListBuilder builder(TestBounds);
       caseP.render_to(builder, testP);
       sk_sp<DisplayList> display_list = builder.Build();
@@ -1729,10 +1742,16 @@ class CanvasCompareTester {
             << info;
       }
 
-      display_list->RenderTo(dl_surface.canvas());
-      compareToReference(dl_surface.pixmap(), sk_pixels,
+      std::unique_ptr<RenderSurface> dl_surface = env.MakeSurface(bg);
+      display_list->RenderTo(dl_surface->canvas());
+      compareToReference(dl_surface->pixmap(), sk_pixels,
                          info + " (DisplayList built directly -> surface)",
                          &dl_bounds, &tolerance, bg);
+
+      if (display_list->can_apply_group_opacity()) {
+        checkGroupOpacity(env, display_list, dl_surface->pixmap(),
+                          info + " with Group Opacity", bg);
+      }
     }
 
     // This test cannot work if the rendering is using shadows until
@@ -1741,11 +1760,11 @@ class CanvasCompareTester {
       // This sequence renders SkCanvas calls to a DisplayList and then
       // plays them back on SkCanvas to SkSurface
       // SkCanvas calls => DisplayList => rendering
-      RenderSurface cv_dl_surface = env.MakeSurface(bg);
+      std::unique_ptr<RenderSurface> cv_dl_surface = env.MakeSurface(bg);
       DisplayListCanvasRecorder dl_recorder(TestBounds);
       caseP.render_to(&dl_recorder, testP);
-      dl_recorder.builder()->Build()->RenderTo(cv_dl_surface.canvas());
-      compareToReference(cv_dl_surface.pixmap(), sk_pixels,
+      dl_recorder.builder()->Build()->RenderTo(cv_dl_surface->canvas());
+      compareToReference(cv_dl_surface->pixmap(), sk_pixels,
                          info + " (Skia calls -> DisplayList -> surface)",
                          nullptr, nullptr, bg);
     }
@@ -1766,12 +1785,12 @@ class CanvasCompareTester {
       caseP.render_to(ref_canvas, testP);
       sk_sp<SkPicture> ref_x2_picture =
           sk_x2_recorder.finishRecordingAsPicture();
-      RenderSurface ref_x2_surface =
+      std::unique_ptr<RenderSurface> ref_x2_surface =
           env.MakeSurface(bg, TestWidth2, TestHeight2);
-      SkCanvas* ref_x2_canvas = ref_x2_surface.canvas();
+      SkCanvas* ref_x2_canvas = ref_x2_surface->canvas();
       ref_x2_canvas->scale(TestScale, TestScale);
       ref_x2_picture->playback(ref_x2_canvas);
-      const SkPixmap* ref_x2_pixels = ref_x2_surface.pixmap();
+      const SkPixmap* ref_x2_pixels = ref_x2_surface->pixmap();
       ASSERT_EQ(ref_x2_pixels->width(), TestWidth2) << info;
       ASSERT_EQ(ref_x2_pixels->height(), TestHeight2) << info;
       ASSERT_EQ(ref_x2_pixels->info().bytesPerPixel(), 4) << info;
@@ -1779,19 +1798,75 @@ class CanvasCompareTester {
       DisplayListBuilder builder_x2(TestBounds);
       caseP.render_to(builder_x2, testP);
       sk_sp<DisplayList> display_list_x2 = builder_x2.Build();
-      RenderSurface test_x2_surface =
+      std::unique_ptr<RenderSurface> test_x2_surface =
           env.MakeSurface(bg, TestWidth2, TestHeight2);
-      SkCanvas* test_x2_canvas = test_x2_surface.canvas();
+      SkCanvas* test_x2_canvas = test_x2_surface->canvas();
       test_x2_canvas->scale(TestScale, TestScale);
       display_list_x2->RenderTo(test_x2_canvas);
-      compareToReference(test_x2_surface.pixmap(), ref_x2_pixels,
+      compareToReference(test_x2_surface->pixmap(), ref_x2_pixels,
                          info + " (Both rendered scaled 2x)", nullptr, nullptr,
                          bg, TestWidth2, TestHeight2, false);
     }
   }
 
+  static void checkGroupOpacity(const RenderEnvironment& env,
+                                sk_sp<DisplayList> display_list,
+                                const SkPixmap* ref_pixmap,
+                                const std::string info,
+                                SkColor bg) {
+    SkScalar opacity = 128.0 / 255.0;
+
+    std::unique_ptr<RenderSurface> group_opacity_surface = env.MakeSurface(bg);
+    SkCanvas* group_opacity_canvas = group_opacity_surface->canvas();
+    display_list->RenderTo(group_opacity_canvas, opacity);
+    const SkPixmap* group_opacity_pixmap = group_opacity_surface->pixmap();
+
+    ASSERT_EQ(group_opacity_pixmap->width(), TestWidth) << info;
+    ASSERT_EQ(group_opacity_pixmap->height(), TestHeight) << info;
+    ASSERT_EQ(group_opacity_pixmap->info().bytesPerPixel(), 4) << info;
+
+    ASSERT_EQ(ref_pixmap->width(), TestWidth) << info;
+    ASSERT_EQ(ref_pixmap->height(), TestHeight) << info;
+    ASSERT_EQ(ref_pixmap->info().bytesPerPixel(), 4) << info;
+
+    int pixels_touched = 0;
+    int pixels_different = 0;
+    // We need to allow some slight differences per component due to the
+    // fact that rearranging discrete calculations can compound round off
+    // errors. Off-by-2 is enough for 8 bit components, but for the 565
+    // tests we allow at least 9 which is the maximum distance between
+    // samples when converted to 8 bits. (You might think it would be a
+    // max step of 8 converting 5 bits to 8 bits, but it is really
+    // converting 31 steps to 255 steps with an average step size of
+    // 8.23 - 24 of the steps are by 8, but 7 of them are by 9.)
+    int fudge = env.info().bytesPerPixel() < 4 ? 9 : 2;
+    for (int y = 0; y < TestHeight; y++) {
+      const uint32_t* ref_row = ref_pixmap->addr32(0, y);
+      const uint32_t* test_row = group_opacity_pixmap->addr32(0, y);
+      for (int x = 0; x < TestWidth; x++) {
+        uint32_t ref_pixel = ref_row[x];
+        uint32_t test_pixel = test_row[x];
+        if (ref_pixel != bg || test_pixel != bg) {
+          pixels_touched++;
+          for (int i = 0; i < 32; i += 8) {
+            int ref_comp = (ref_pixel >> i) & 0xff;
+            int bg_comp = (bg >> i) & 0xff;
+            SkScalar faded_comp = bg_comp + (ref_comp - bg_comp) * opacity;
+            int test_comp = (test_pixel >> i) & 0xff;
+            if (std::abs(faded_comp - test_comp) > fudge) {
+              pixels_different++;
+              break;
+            }
+          }
+        }
+      }
+    }
+    ASSERT_GT(pixels_touched, 20) << info;
+    ASSERT_LE(pixels_different, 1) << info;
+  }
+
   static void checkPixels(const SkPixmap* ref_pixels,
-                          SkRect ref_bounds,
+                          const SkRect ref_bounds,
                           const std::string info,
                           const SkColor bg) {
     SkPMColor untouched = SkPreMultiplyColor(bg);
@@ -2844,7 +2919,7 @@ TEST_F(DisplayListCanvas, DrawPicture) {
 
 TEST_F(DisplayListCanvas, DrawPictureWithMatrix) {
   sk_sp<SkPicture> picture = makeTestPicture();
-  SkMatrix matrix = SkMatrix::Scale(0.95, 0.95);
+  SkMatrix matrix = SkMatrix::Scale(0.9, 0.9);
   CanvasCompareTester::RenderAll(  //
       TestParameters(
           [=](SkCanvas* canvas, const SkPaint& paint) {  //

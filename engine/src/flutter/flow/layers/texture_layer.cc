@@ -17,7 +17,9 @@ TextureLayer::TextureLayer(const SkPoint& offset,
       size_(size),
       texture_id_(texture_id),
       freeze_(freeze),
-      sampling_(sampling) {}
+      sampling_(sampling) {
+  set_layer_can_inherit_opacity(true);
+}
 
 void TextureLayer::Diff(DiffContext* context, const Layer* old_layer) {
   DiffContext::AutoSubtreeRestore subtree(context);
@@ -58,8 +60,9 @@ void TextureLayer::Paint(PaintContext& context) const {
     TRACE_EVENT_INSTANT0("flutter", "null texture");
     return;
   }
+  AutoCachePaint cache_paint(context);
   texture->Paint(*context.leaf_nodes_canvas, paint_bounds(), freeze_,
-                 context.gr_context, sampling_);
+                 context.gr_context, sampling_, cache_paint.paint());
 }
 
 }  // namespace flutter

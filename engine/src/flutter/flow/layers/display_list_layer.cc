@@ -15,7 +15,12 @@ DisplayListLayer::DisplayListLayer(const SkPoint& offset,
     : offset_(offset),
       display_list_(std::move(display_list)),
       is_complex_(is_complex),
-      will_change_(will_change) {}
+      will_change_(will_change) {
+  if (display_list_.skia_object()) {
+    set_layer_can_inherit_opacity(
+        display_list_.skia_object()->can_apply_group_opacity());
+  }
+}
 
 bool DisplayListLayer::IsReplacing(DiffContext* context,
                                    const Layer* layer) const {
@@ -94,8 +99,10 @@ void DisplayListLayer::Preroll(PrerollContext* context,
   if (auto* cache = context->raster_cache) {
     TRACE_EVENT0("flutter", "DisplayListLayer::RasterCache (Preroll)");
     if (context->cull_rect.intersects(bounds)) {
-      cache->Prepare(context, disp_list, is_complex_, will_change_, matrix,
-                     offset_);
+      if (cache->Prepare(context, disp_list, is_complex_, will_change_, matrix,
+                         offset_)) {
+        context->subtree_can_inherit_opacity = true;
+      }
     } else {
       // Don't evict raster cache entry during partial repaint
       cache->Touch(disp_list, matrix);
@@ -116,13 +123,17 @@ void DisplayListLayer::Paint(PaintContext& context) const {
       context.leaf_nodes_canvas->getTotalMatrix()));
 #endif
 
-  if (context.raster_cache &&
-      context.raster_cache->Draw(*display_list(), *context.leaf_nodes_canvas)) {
-    TRACE_EVENT_INSTANT0("flutter", "raster cache hit");
-    return;
+  if (context.raster_cache) {
+    AutoCachePaint cache_paint(context);
+    if (context.raster_cache->Draw(*display_list(), *context.leaf_nodes_canvas,
+                                   cache_paint.paint())) {
+      TRACE_EVENT_INSTANT0("flutter", "raster cache hit");
+      return;
+    }
   }
 
-  display_list()->RenderTo(context.leaf_nodes_canvas);
+  display_list()->RenderTo(context.leaf_nodes_canvas,
+                           context.inherited_opacity);
 }
 
 }  // namespace flutter

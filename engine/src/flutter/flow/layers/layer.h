@@ -61,6 +61,25 @@ struct PrerollContext {
   // These allow us to track properties like elevation, opacity, and the
   // prescence of a texture layer during Preroll.
   bool has_texture_layer = false;
+
+  // This value indicates that the entire subtree below the layer can inherit
+  // an opacity value and modulate its own visibility accordingly.
+  // For Layers which cannot either apply such an inherited opacity nor pass
+  // it along to their children, they can ignore this value as its default
+  // behavior is "opt-in".
+  // For Layers that support this condition, it can be recorded in their
+  // constructor using the |set_layer_can_inherit_opacity| method and the
+  // value will be accumulated and recorded by the |PrerollChidren| method
+  // automatically.
+  // If the property is more dynamic then the Layer can dynamically set this
+  // flag before returning from the |Preroll| method.
+  // For ContainerLayers that need to know if their children can inherit
+  // the value, the |PrerollChildren| method will have set this value in
+  // the context before it returns. If the container can support it as long
+  // as the subtree can support it, no further work needs to be done other
+  // than to remember the value so that it can choose the right strategy
+  // for its |Paint| method.
+  bool subtree_can_inherit_opacity = false;
 };
 
 class PictureLayer;
@@ -147,6 +166,34 @@ class Layer {
     const RasterCache* raster_cache;
     const bool checkerboard_offscreen_layers;
     const float frame_device_pixel_ratio;
+
+    // The following value should be used to modulate the opacity of the
+    // layer during |Paint|. If the layer does not set the corresponding
+    // |layer_can_inherit_opacity()| flag, then this value should always
+    // be |SK_Scalar1|. The value is to be applied as if by using a
+    // |saveLayer| with an |SkPaint| initialized to this alphaf value and
+    // a |kSrcOver| blend mode.
+    SkScalar inherited_opacity = SK_Scalar1;
+  };
+
+  class AutoCachePaint {
+   public:
+    AutoCachePaint(PaintContext& context) : context_(context) {
+      needs_paint_ = context.inherited_opacity < SK_Scalar1;
+      if (needs_paint_) {
+        paint_.setAlphaf(context.inherited_opacity);
+        context.inherited_opacity = SK_Scalar1;
+      }
+    }
+
+    ~AutoCachePaint() { context_.inherited_opacity = paint_.getAlphaf(); }
+
+    const SkPaint* paint() { return needs_paint_ ? &paint_ : nullptr; }
+
+   private:
+    PaintContext& context_;
+    SkPaint paint_;
+    bool needs_paint_;
   };
 
   // Calls SkCanvas::saveLayer and restores the layer upon destruction. Also
@@ -216,6 +263,18 @@ class Layer {
     subtree_has_platform_view_ = value;
   }
 
+  // Returns true if the layer can render with an added opacity value inherited
+  // from an OpacityLayer ancestor and delivered to its |Paint| method through
+  // the |PaintContext.inherited_opacity| field. This flag can be set either
+  // in the Layer's constructor if it is a lifetime constant value, or during
+  // the |Preroll| method if it must determine the capability based on data
+  // only available when it is part of a tree. It must set this value before
+  // recursing to its children if it is a |ContainerLayer|.
+  bool layer_can_inherit_opacity() const { return layer_can_inherit_opacity_; }
+  void set_layer_can_inherit_opacity(bool value) {
+    layer_can_inherit_opacity_ = value;
+  }
+
   // Returns the paint bounds in the layer's local coordinate system
   // as determined during Preroll().  The bounds should include any
   // transform, clip or distortions performed by the layer itself,
@@ -253,6 +312,9 @@ class Layer {
       // See https://github.com/flutter/flutter/issues/81419
       return true;
     }
+    if (context.inherited_opacity == 0) {
+      return false;
+    }
     // Workaround for Skia bug (quickReject does not reject empty bounds).
     // https://bugs.chromium.org/p/skia/issues/detail?id=10951
     if (paint_bounds_.isEmpty()) {
@@ -282,6 +344,7 @@ class Layer {
   uint64_t unique_id_;
   uint64_t original_layer_id_;
   bool subtree_has_platform_view_;
+  bool layer_can_inherit_opacity_;
 
   static uint64_t NextUniqueID();
 

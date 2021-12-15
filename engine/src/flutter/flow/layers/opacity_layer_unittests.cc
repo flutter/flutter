@@ -262,8 +262,8 @@ TEST_F(OpacityLayerTest, HalfTransparent) {
   EXPECT_EQ(mock_layer->parent_mutators(),
             std::vector({Mutator(layer_transform), Mutator(alpha_half)}));
 
-  const SkPaint opacity_paint =
-      SkPaint(SkColor4f::FromColor(SkColorSetA(SK_ColorBLACK, alpha_half)));
+  SkPaint opacity_paint;
+  opacity_paint.setAlphaf(alpha_half * (1.0 / SK_AlphaOPAQUE));
   SkRect opacity_bounds;
   expected_layer_bounds.makeOffset(-layer_offset.fX, -layer_offset.fY)
       .roundOut(&opacity_bounds);
@@ -352,10 +352,10 @@ TEST_F(OpacityLayerTest, Nested) {
   //   EXPECT_EQ(mock_layer3->parent_mutators(),
   //             std::vector({Mutator(layer1_transform), Mutator(alpha1)}));
 
-  const SkPaint opacity1_paint =
-      SkPaint(SkColor4f::FromColor(SkColorSetA(SK_ColorBLACK, alpha1)));
-  const SkPaint opacity2_paint =
-      SkPaint(SkColor4f::FromColor(SkColorSetA(SK_ColorBLACK, alpha2)));
+  SkPaint opacity1_paint;
+  opacity1_paint.setAlphaf(alpha1 * (1.0 / SK_AlphaOPAQUE));
+  SkPaint opacity2_paint;
+  opacity2_paint.setAlphaf(alpha2 * (1.0 / SK_AlphaOPAQUE));
   SkRect opacity1_bounds, opacity2_bounds;
   expected_layer1_bounds.makeOffset(-layer1_offset.fX, -layer1_offset.fY)
       .roundOut(&opacity1_bounds);

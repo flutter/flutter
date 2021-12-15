@@ -36,7 +36,8 @@ class EmbedderExternalTextureGL : public flutter::Texture {
              const SkRect& bounds,
              bool freeze,
              GrDirectContext* context,
-             const SkSamplingOptions& sampling) override;
+             const SkSamplingOptions& sampling,
+             const SkPaint* paint) override;
 
   // |flutter::Texture|
   void OnGrContextCreated() override;

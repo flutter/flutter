@@ -26,6 +26,25 @@ constexpr float invert_color_matrix[20] = {
 };
 // clang-format on
 
+void SkPaintDispatchHelper::save_opacity(bool reset_and_restore) {
+  if (opacity_ >= SK_Scalar1) {
+    reset_and_restore = false;
+  }
+  save_stack_.emplace_back(opacity_, reset_and_restore);
+  if (reset_and_restore) {
+    opacity_ = SK_Scalar1;
+    setColor(current_color_);
+  }
+}
+void SkPaintDispatchHelper::restore_opacity() {
+  SaveInfo& info = save_stack_.back();
+  if (info.restore_opacity) {
+    opacity_ = info.opacity;
+    setColor(current_color_);
+  }
+  save_stack_.pop_back();
+}
+
 void SkPaintDispatchHelper::setAntiAlias(bool aa) {
   paint_.setAntiAlias(aa);
 }
@@ -52,7 +71,11 @@ void SkPaintDispatchHelper::setStrokeMiter(SkScalar limit) {
   paint_.setStrokeMiter(limit);
 }
 void SkPaintDispatchHelper::setColor(SkColor color) {
+  current_color_ = color;
   paint_.setColor(color);
+  if (has_opacity()) {
+    paint_.setAlphaf(paint_.getAlphaf() * opacity());
+  }
 }
 void SkPaintDispatchHelper::setBlendMode(SkBlendMode mode) {
   paint_.setBlendMode(mode);

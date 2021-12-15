@@ -171,15 +171,7 @@ class DisplayList : public SkRefCnt {
   static const SkSamplingOptions MipmapSampling;
   static const SkSamplingOptions CubicSampling;
 
-  DisplayList()
-      : byte_count_(0),
-        op_count_(0),
-        nested_byte_count_(0),
-        nested_op_count_(0),
-        unique_id_(0),
-        bounds_({0, 0, 0, 0}),
-        bounds_cull_({0, 0, 0, 0}) {}
-
+  DisplayList();
   ~DisplayList();
 
   void Dispatch(Dispatcher& ctx) const {
@@ -187,7 +179,7 @@ class DisplayList : public SkRefCnt {
     Dispatch(ctx, ptr, ptr + byte_count_);
   }
 
-  void RenderTo(SkCanvas* canvas) const;
+  void RenderTo(SkCanvas* canvas, SkScalar opacity = SK_Scalar1) const;
 
   // SkPicture always includes nested bytes, but nested ops are
   // only included if requested. The defaults used here for these
@@ -212,13 +204,16 @@ class DisplayList : public SkRefCnt {
 
   bool Equals(const DisplayList& other) const;
 
+  bool can_apply_group_opacity() { return can_apply_group_opacity_; }
+
  private:
   DisplayList(uint8_t* ptr,
               size_t byte_count,
               int op_count,
               size_t nested_byte_count,
               int nested_op_count,
-              const SkRect& cull_rect);
+              const SkRect& cull_rect,
+              bool can_apply_group_opacity);
 
   std::unique_ptr<uint8_t, SkFunctionWrapper<void(void*), sk_free>> storage_;
   size_t byte_count_;
@@ -232,6 +227,8 @@ class DisplayList : public SkRefCnt {
 
   // Only used for drawPaint() and drawColor()
   SkRect bounds_cull_;
+
+  bool can_apply_group_opacity_;
 
   void ComputeBounds();
   void Dispatch(Dispatcher& ctx, uint8_t* ptr, uint8_t* end) const;
@@ -548,6 +545,13 @@ class DisplayListFlags {
   static constexpr int kUsesMaskFilter_      = 1 << 18;
   static constexpr int kUsesImageFilter_     = 1 << 19;
 
+  // Some ops have an optional paint argument. If the version
+  // stored in the DisplayList ignores the paint, but there
+  // is an option to render the same op with a paint then
+  // both of the following flags are set to indicate that
+  // a default paint object can be constructed when rendering
+  // the op to carry information imposed from outside the
+  // DisplayList (for example, the opacity override).
   static constexpr int kIgnoresPaint_        = 1 << 30;
   // clang-format on
 
@@ -746,7 +750,9 @@ class DisplayListOpFlags : DisplayListFlags {
 // If there is some code that already renders to an SkCanvas object,
 // those rendering commands can be captured into a DisplayList using
 // the DisplayListCanvasRecorder class.
-class DisplayListBuilder final : public virtual Dispatcher, public SkRefCnt {
+class DisplayListBuilder final : public virtual Dispatcher,
+                                 public SkRefCnt,
+                                 DisplayListOpFlags {
  public:
   explicit DisplayListBuilder(const SkRect& cull_rect = kMaxCullRect_);
   ~DisplayListBuilder();
@@ -880,7 +886,7 @@ class DisplayListBuilder final : public virtual Dispatcher, public SkRefCnt {
   void save() override;
   void saveLayer(const SkRect* bounds, bool restore_with_paint) override;
   void restore() override;
-  int getSaveCount() { return save_level_ + 1; }
+  int getSaveCount() { return layer_stack_.size(); }
 
   void translate(SkScalar tx, SkScalar ty) override;
   void scale(SkScalar sx, SkScalar sy) override;
@@ -977,7 +983,6 @@ class DisplayListBuilder final : public virtual Dispatcher, public SkRefCnt {
   size_t used_ = 0;
   size_t allocated_ = 0;
   int op_count_ = 0;
-  int save_level_ = 0;
 
   // bytes and ops from |drawPicture| and |drawDisplayList|
   size_t nested_bytes_ = 0;
@@ -994,6 +999,94 @@ class DisplayListBuilder final : public virtual Dispatcher, public SkRefCnt {
   static constexpr SkScalar kInvalidSigma = 0.0;
   static bool mask_sigma_valid(SkScalar sigma) {
     return SkScalarIsFinite(sigma) && sigma > 0.0;
+  }
+
+  struct LayerInfo {
+    LayerInfo(bool has_layer = false)
+        : has_layer(has_layer),
+          cannot_inherit_opacity(false),
+          has_compatible_op(false) {}
+
+    bool has_layer;
+    bool cannot_inherit_opacity;
+    bool has_compatible_op;
+
+    bool is_group_opacity_compatible() const { return !cannot_inherit_opacity; }
+
+    void mark_incompatible() { cannot_inherit_opacity = true; }
+
+    // For now this only allows a single compatible op to mark the
+    // layer as being compatible with group opacity. If we start
+    // computing bounds of ops in the Builder methods then we
+    // can upgrade this to checking for overlapping ops.
+    // See https://github.com/flutter/flutter/issues/93899
+    void add_compatible_op() {
+      if (!cannot_inherit_opacity) {
+        if (has_compatible_op) {
+          cannot_inherit_opacity = true;
+        } else {
+          has_compatible_op = true;
+        }
+      }
+    }
+  };
+
+  std::vector<LayerInfo> layer_stack_;
+  LayerInfo* current_layer_;
+
+  // This flag indicates whether or not the current rendering attributes
+  // are compatible with rendering ops applying an inherited opacity.
+  bool current_opacity_compatibility_ = true;
+
+  // Returns the compatibility of a given blend mode for applying an
+  // inherited opacity value to modulate the visibility of the op.
+  // For now we only accept SrcOver blend modes but this could be expanded
+  // in the future to include other (rarely used) modes that also modulate
+  // the opacity of a rendering operation at the cost of a switch statement
+  // or lookup table.
+  static bool IsOpacityCompatible(SkBlendMode mode) {
+    return (mode == SkBlendMode::kSrcOver);
+  }
+
+  void UpdateCurrentOpacityCompatibility() {
+    current_opacity_compatibility_ =         //
+        current_color_filter_ == nullptr &&  //
+        !current_invert_colors_ &&           //
+        current_blender_ == nullptr &&       //
+        IsOpacityCompatible(current_blend_mode_);
+  }
+
+  // Update the opacity compatibility flags of the current layer for an op
+  // that has determined its compatibility as indicated by |compatible|.
+  void UpdateLayerOpacityCompatibility(bool compatible) {
+    if (compatible) {
+      current_layer_->add_compatible_op();
+    } else {
+      current_layer_->mark_incompatible();
+    }
+  }
+
+  // Check for opacity compatibility for an op that may or may not use the
+  // current rendering attributes as indicated by |uses_blend_attribute|.
+  // If the flag is false then the rendering op will be able to substitute
+  // a default Paint object with the opacity applied using the default SrcOver
+  // blend mode which is always compatible with applying an inherited opacity.
+  void CheckLayerOpacityCompatibility(bool uses_blend_attribute = true) {
+    UpdateLayerOpacityCompatibility(!uses_blend_attribute ||
+                                    current_opacity_compatibility_);
+  }
+
+  void CheckLayerOpacityHairlineCompatibility() {
+    UpdateLayerOpacityCompatibility(
+        current_opacity_compatibility_ &&
+        (current_style_ == SkPaint::kFill_Style || current_stroke_width_ > 0));
+  }
+
+  // Check for opacity compatibility for an op that ignores the current
+  // attributes and uses the indicated blend |mode| to render to the layer.
+  // This is only used by |drawColor| currently.
+  void CheckLayerOpacityCompatibility(SkBlendMode mode) {
+    UpdateLayerOpacityCompatibility(IsOpacityCompatible(mode));
   }
 
   void onSetAntiAlias(bool aa);

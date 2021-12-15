@@ -25,7 +25,8 @@ class AndroidExternalTextureGL : public flutter::Texture {
              const SkRect& bounds,
              bool freeze,
              GrDirectContext* context,
-             const SkSamplingOptions& sampling) override;
+             const SkSamplingOptions& sampling,
+             const SkPaint* paint) override;
 
   void OnGrContextCreated() override;
 

@@ -11,16 +11,32 @@
 
 namespace flutter {
 
+const SkPaint* DisplayListCanvasDispatcher::safe_paint(bool use_attributes) {
+  if (use_attributes) {
+    // The accumulated SkPaint object will already have incorporated
+    // any attribute overrides.
+    return &paint();
+  } else if (has_opacity()) {
+    temp_paint_.setAlphaf(opacity());
+    return &temp_paint_;
+  } else {
+    return nullptr;
+  }
+}
+
 void DisplayListCanvasDispatcher::save() {
   canvas_->save();
+  save_opacity(false);
 }
 void DisplayListCanvasDispatcher::restore() {
   canvas_->restore();
+  restore_opacity();
 }
 void DisplayListCanvasDispatcher::saveLayer(const SkRect* bounds,
                                             bool restore_with_paint) {
   TRACE_EVENT0("flutter", "Canvas::saveLayer");
-  canvas_->saveLayer(bounds, restore_with_paint ? &paint() : nullptr);
+  canvas_->saveLayer(bounds, safe_paint(restore_with_paint));
+  save_opacity(true);
 }
 
 void DisplayListCanvasDispatcher::translate(SkScalar tx, SkScalar ty) {
@@ -87,7 +103,11 @@ void DisplayListCanvasDispatcher::drawPaint() {
   canvas_->drawPaint(sk_paint);
 }
 void DisplayListCanvasDispatcher::drawColor(SkColor color, SkBlendMode mode) {
-  canvas_->drawColor(color, mode);
+  // SkCanvas::drawColor(SkColor) does the following conversion anyway
+  // We do it here manually to increase precision on applying opacity
+  SkColor4f color4f = SkColor4f::FromColor(color);
+  color4f.fA *= opacity();
+  canvas_->drawColor(color4f, mode);
 }
 void DisplayListCanvasDispatcher::drawLine(const SkPoint& p0,
                                            const SkPoint& p1) {
@@ -133,7 +153,7 @@ void DisplayListCanvasDispatcher::drawImage(const sk_sp<SkImage> image,
                                             const SkSamplingOptions& sampling,
                                             bool render_with_attributes) {
   canvas_->drawImage(image, point.fX, point.fY, sampling,
-                     render_with_attributes ? &paint() : nullptr);
+                     safe_paint(render_with_attributes));
 }
 void DisplayListCanvasDispatcher::drawImageRect(
     const sk_sp<SkImage> image,
@@ -143,8 +163,7 @@ void DisplayListCanvasDispatcher::drawImageRect(
     bool render_with_attributes,
     SkCanvas::SrcRectConstraint constraint) {
   canvas_->drawImageRect(image, src, dst, sampling,
-                         render_with_attributes ? &paint() : nullptr,
-                         constraint);
+                         safe_paint(render_with_attributes), constraint);
 }
 void DisplayListCanvasDispatcher::drawImageNine(const sk_sp<SkImage> image,
                                                 const SkIRect& center,
@@ -152,7 +171,7 @@ void DisplayListCanvasDispatcher::drawImageNine(const sk_sp<SkImage> image,
                                                 SkFilterMode filter,
                                                 bool render_with_attributes) {
   canvas_->drawImageNine(image.get(), center, dst, filter,
-                         render_with_attributes ? &paint() : nullptr);
+                         safe_paint(render_with_attributes));
 }
 void DisplayListCanvasDispatcher::drawImageLattice(
     const sk_sp<SkImage> image,
@@ -161,7 +180,7 @@ void DisplayListCanvasDispatcher::drawImageLattice(
     SkFilterMode filter,
     bool render_with_attributes) {
   canvas_->drawImageLattice(image.get(), lattice, dst, filter,
-                            render_with_attributes ? &paint() : nullptr);
+                            safe_paint(render_with_attributes));
 }
 void DisplayListCanvasDispatcher::drawAtlas(const sk_sp<SkImage> atlas,
                                             const SkRSXform xform[],
@@ -173,15 +192,16 @@ void DisplayListCanvasDispatcher::drawAtlas(const sk_sp<SkImage> atlas,
                                             const SkRect* cullRect,
                                             bool render_with_attributes) {
   canvas_->drawAtlas(atlas.get(), xform, tex, colors, count, mode, sampling,
-                     cullRect, render_with_attributes ? &paint() : nullptr);
+                     cullRect, safe_paint(render_with_attributes));
 }
 void DisplayListCanvasDispatcher::drawPicture(const sk_sp<SkPicture> picture,
                                               const SkMatrix* matrix,
                                               bool render_with_attributes) {
-  if (render_with_attributes) {
+  const SkPaint* paint = safe_paint(render_with_attributes);
+  if (paint) {
     // drawPicture does an implicit saveLayer if an SkPaint is supplied.
     TRACE_EVENT0("flutter", "Canvas::saveLayer");
-    canvas_->drawPicture(picture, matrix, &paint());
+    canvas_->drawPicture(picture, matrix, paint);
   } else {
     canvas_->drawPicture(picture, matrix, nullptr);
   }
@@ -189,10 +209,7 @@ void DisplayListCanvasDispatcher::drawPicture(const sk_sp<SkPicture> picture,
 void DisplayListCanvasDispatcher::drawDisplayList(
     const sk_sp<DisplayList> display_list) {
   int save_count = canvas_->save();
-  {
-    DisplayListCanvasDispatcher dispatcher(canvas_);
-    display_list->Dispatch(dispatcher);
-  }
+  display_list->RenderTo(canvas_, opacity());
   canvas_->restoreToCount(save_count);
 }
 void DisplayListCanvasDispatcher::drawTextBlob(const sk_sp<SkTextBlob> blob,

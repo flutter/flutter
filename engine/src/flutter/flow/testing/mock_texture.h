@@ -22,6 +22,7 @@ class MockTexture : public Texture {
     bool freeze;
     GrDirectContext* context;
     SkSamplingOptions sampling;
+    const SkPaint* paint;
   };
 
   explicit MockTexture(int64_t textureId);
@@ -31,7 +32,8 @@ class MockTexture : public Texture {
              const SkRect& bounds,
              bool freeze,
              GrDirectContext* context,
-             const SkSamplingOptions& sampling) override;
+             const SkSamplingOptions& sampling,
+             const SkPaint* paint = nullptr) override;
 
   void OnGrContextCreated() override { gr_context_created_ = true; }
   void OnGrContextDestroyed() override { gr_context_destroyed_ = true; }

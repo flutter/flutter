@@ -26,7 +26,8 @@ class Texture {
                      const SkRect& bounds,
                      bool freeze,
                      GrDirectContext* context,
-                     const SkSamplingOptions& sampling) = 0;
+                     const SkSamplingOptions& sampling,
+                     const SkPaint* paint = nullptr) = 0;
 
   // Called from raster thread.
   virtual void OnGrContextCreated() = 0;

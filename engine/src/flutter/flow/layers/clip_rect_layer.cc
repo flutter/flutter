@@ -10,6 +10,7 @@ namespace flutter {
 ClipRectLayer::ClipRectLayer(const SkRect& clip_rect, Clip clip_behavior)
     : clip_rect_(clip_rect), clip_behavior_(clip_behavior) {
   FML_DCHECK(clip_behavior != Clip::none);
+  set_layer_can_inherit_opacity(true);
 }
 
 void ClipRectLayer::Diff(DiffContext* context, const Layer* old_layer) {
@@ -57,16 +58,20 @@ void ClipRectLayer::Paint(PaintContext& context) const {
   context.internal_nodes_canvas->clipRect(clip_rect_,
                                           clip_behavior_ != Clip::hardEdge);
 
-  if (UsesSaveLayer()) {
-    TRACE_EVENT0("flutter", "Canvas::saveLayer");
-    context.internal_nodes_canvas->saveLayer(clip_rect_, nullptr);
+  if (!UsesSaveLayer()) {
+    PaintChildren(context);
+    return;
   }
+
+  AutoCachePaint cache_paint(context);
+  TRACE_EVENT0("flutter", "Canvas::saveLayer");
+  context.internal_nodes_canvas->saveLayer(clip_rect_, cache_paint.paint());
+
   PaintChildren(context);
-  if (UsesSaveLayer()) {
-    context.internal_nodes_canvas->restore();
-    if (context.checkerboard_offscreen_layers) {
-      DrawCheckerboard(context.internal_nodes_canvas, clip_rect_);
-    }
+
+  context.internal_nodes_canvas->restore();
+  if (context.checkerboard_offscreen_layers) {
+    DrawCheckerboard(context.internal_nodes_canvas, clip_rect_);
   }
 }
 

@@ -35,16 +35,17 @@ void EmbedderExternalTextureMetal::Paint(SkCanvas& canvas,
                                          const SkRect& bounds,
                                          bool freeze,
                                          GrDirectContext* context,
-                                         const SkSamplingOptions& sampling) {
+                                         const SkSamplingOptions& sampling,
+                                         const SkPaint* paint) {
   if (last_image_ == nullptr) {
     last_image_ = ResolveTexture(Id(), context, SkISize::Make(bounds.width(), bounds.height()));
   }
 
   if (last_image_) {
     if (bounds != SkRect::Make(last_image_->bounds())) {
-      canvas.drawImageRect(last_image_, bounds, sampling);
+      canvas.drawImageRect(last_image_, bounds, sampling, paint);
     } else {
-      canvas.drawImage(last_image_, bounds.x(), bounds.y(), sampling, nullptr);
+      canvas.drawImage(last_image_, bounds.x(), bounds.y(), sampling, paint);
     }
   }
 }
