@@ -163,8 +163,8 @@ Future<void> run(List<String> arguments) async {
 
 Future<void> verifyNoSyncAsyncStar(String workingDirectory, {int minimumMatches = 2000 }) async {
   final RegExp syncPattern = RegExp(r'\s*?a?sync\*\s*?{');
-  const String ignorePattern = 'no_sync_async_star';
-  final RegExp commentPattern = RegExp(r'^\s*?///?');
+  final RegExp ignorePattern = RegExp(r'^\s*?// The following uses a?sync\* because:? ');
+  final RegExp commentPattern = RegExp(r'^\s*?//');
   final List<String> errors = <String>[];
   await for (final File file in _allFiles(workingDirectory, 'dart', minimumMatches: minimumMatches)) {
     if (file.path.contains('test')) {
@@ -176,8 +176,19 @@ Future<void> verifyNoSyncAsyncStar(String workingDirectory, {int minimumMatches 
       if (line.startsWith(commentPattern)) {
         continue;
       }
-      if (line.contains(syncPattern) && !line.contains(ignorePattern) && (index == 0 || !lines[index - 1].contains(ignorePattern))) {
-        errors.add('${file.path}:$index: sync*/async* without an ignore (no_sync_async_star).');
+      if (line.contains(syncPattern)) {
+        int lookBehindIndex = index - 1;
+        bool hasExplanation = false;
+        while (lookBehindIndex >= 0 && lines[lookBehindIndex].startsWith(commentPattern)) {
+          if (lines[lookBehindIndex].startsWith(ignorePattern)) {
+            hasExplanation = true;
+            break;
+          }
+          lookBehindIndex -= 1;
+        }
+        if (!hasExplanation) {
+          errors.add('${file.path}:$index: sync*/async* without an explanation.');
+        }
       }
     }
   }
