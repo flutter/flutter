@@ -16,7 +16,13 @@ void main() {
       } on Exception catch (exception) {
         fail('Failed parsing "$versionString" with:\n$exception');
       }
-      expect(version, isA<Version>());
+      expect(version.x, 2);
+      expect(version.y, 8);
+      expect(version.z, 0);
+      expect(version.m, isNull);
+      expect(version.n, isNull);
+      expect(version.commits, 1);
+      expect(version.type, VersionType.gitDescribe);
     });
   });
   group('Version.increment()', () {
