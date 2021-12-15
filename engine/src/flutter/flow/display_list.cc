@@ -978,8 +978,8 @@ static bool CompareOps(uint8_t* ptrA,
   return true;
 }
 
-void DisplayList::RenderTo(SkCanvas* canvas) const {
-  DisplayListCanvasDispatcher dispatcher(canvas);
+void DisplayList::RenderTo(SkCanvas* canvas, SkScalar opacity) const {
+  DisplayListCanvasDispatcher dispatcher(canvas, opacity);
   Dispatch(dispatcher);
 }
 
@@ -995,19 +995,31 @@ bool DisplayList::Equals(const DisplayList& other) const {
   return CompareOps(ptr, ptr + byte_count_, o_ptr, o_ptr + other.byte_count_);
 }
 
+DisplayList::DisplayList()
+    : byte_count_(0),
+      op_count_(0),
+      nested_byte_count_(0),
+      nested_op_count_(0),
+      unique_id_(0),
+      bounds_({0, 0, 0, 0}),
+      bounds_cull_({0, 0, 0, 0}),
+      can_apply_group_opacity_(true) {}
+
 DisplayList::DisplayList(uint8_t* ptr,
                          size_t byte_count,
                          int op_count,
                          size_t nested_byte_count,
                          int nested_op_count,
-                         const SkRect& cull_rect)
+                         const SkRect& cull_rect,
+                         bool can_apply_group_opacity)
     : storage_(ptr),
       byte_count_(byte_count),
       op_count_(op_count),
       nested_byte_count_(nested_byte_count),
       nested_op_count_(nested_op_count),
       bounds_({0, 0, -1, -1}),
-      bounds_cull_(cull_rect) {
+      bounds_cull_(cull_rect),
+      can_apply_group_opacity_(can_apply_group_opacity) {
   static std::atomic<uint32_t> nextID{1};
   do {
     unique_id_ = nextID.fetch_add(+1, std::memory_order_relaxed);
@@ -1057,7 +1069,7 @@ void* DisplayListBuilder::Push(size_t pod, int op_inc, Args&&... args) {
 }
 
 sk_sp<DisplayList> DisplayListBuilder::Build() {
-  while (save_level_ > 0) {
+  while (layer_stack_.size() > 1) {
     restore();
   }
   size_t bytes = used_;
@@ -1067,13 +1079,17 @@ sk_sp<DisplayList> DisplayListBuilder::Build() {
   used_ = allocated_ = op_count_ = 0;
   nested_bytes_ = nested_op_count_ = 0;
   storage_.realloc(bytes);
+  bool compatible = layer_stack_.back().is_group_opacity_compatible();
   return sk_sp<DisplayList>(new DisplayList(storage_.release(), bytes, count,
                                             nested_bytes, nested_count,
-                                            cull_rect_));
+                                            cull_rect_, compatible));
 }
 
 DisplayListBuilder::DisplayListBuilder(const SkRect& cull_rect)
-    : cull_rect_(cull_rect) {}
+    : cull_rect_(cull_rect) {
+  layer_stack_.emplace_back();
+  current_layer_ = &layer_stack_.back();
+}
 
 DisplayListBuilder::~DisplayListBuilder() {
   uint8_t* ptr = storage_.get();
@@ -1090,6 +1106,7 @@ void DisplayListBuilder::onSetDither(bool dither) {
 }
 void DisplayListBuilder::onSetInvertColors(bool invert) {
   Push<SetInvertColorsOp>(0, 0, current_invert_colors_ = invert);
+  UpdateCurrentOpacityCompatibility();
 }
 void DisplayListBuilder::onSetStrokeCap(SkPaint::Cap cap) {
   Push<SetStrokeCapOp>(0, 0, current_stroke_cap_ = cap);
@@ -1112,6 +1129,7 @@ void DisplayListBuilder::onSetColor(SkColor color) {
 void DisplayListBuilder::onSetBlendMode(SkBlendMode mode) {
   current_blender_ = nullptr;
   Push<SetBlendModeOp>(0, 0, current_blend_mode_ = mode);
+  UpdateCurrentOpacityCompatibility();
 }
 void DisplayListBuilder::onSetBlender(sk_sp<SkBlender> blender) {
   // setBlender(nullptr) should be redirected to setBlendMode(SrcOver)
@@ -1126,6 +1144,7 @@ void DisplayListBuilder::onSetBlender(sk_sp<SkBlender> blender) {
     (current_blender_ = blender)  //
         ? Push<SetBlenderOp>(0, 0, std::move(blender))
         : Push<ClearBlenderOp>(0, 0);
+    UpdateCurrentOpacityCompatibility();
   }
 }
 void DisplayListBuilder::onSetShader(sk_sp<SkShader> shader) {
@@ -1142,6 +1161,7 @@ void DisplayListBuilder::onSetColorFilter(sk_sp<SkColorFilter> filter) {
   (current_color_filter_ = filter)  //
       ? Push<SetColorFilterOp>(0, 0, std::move(filter))
       : Push<ClearColorFilterOp>(0, 0);
+  UpdateCurrentOpacityCompatibility();
 }
 void DisplayListBuilder::onSetPathEffect(sk_sp<SkPathEffect> effect) {
   (current_path_effect_ = effect)  //
@@ -1228,21 +1248,37 @@ void DisplayListBuilder::setAttributesFromPaint(
 }
 
 void DisplayListBuilder::save() {
-  save_level_++;
   Push<SaveOp>(0, 1);
+  layer_stack_.emplace_back();
+  current_layer_ = &layer_stack_.back();
 }
 void DisplayListBuilder::restore() {
-  if (save_level_ > 0) {
+  if (layer_stack_.size() > 1) {
+    // Grab the current layer info before we push the restore
+    // on the stack.
+    LayerInfo layer_info = layer_stack_.back();
+    layer_stack_.pop_back();
+    current_layer_ = &layer_stack_.back();
     Push<RestoreOp>(0, 1);
-    save_level_--;
+    if (!layer_info.has_layer) {
+      // For regular save() ops there was no protecting layer so we have to
+      // accumulate the values into the enclosing layer.
+      if (layer_info.cannot_inherit_opacity) {
+        current_layer_->mark_incompatible();
+      } else if (layer_info.has_compatible_op) {
+        current_layer_->add_compatible_op();
+      }
+    }
   }
 }
 void DisplayListBuilder::saveLayer(const SkRect* bounds,
                                    bool restore_with_paint) {
-  save_level_++;
   bounds  //
       ? Push<SaveLayerBoundsOp>(0, 1, *bounds, restore_with_paint)
       : Push<SaveLayerOp>(0, 1, restore_with_paint);
+  CheckLayerOpacityCompatibility(restore_with_paint);
+  layer_stack_.emplace_back(true);
+  current_layer_ = &layer_stack_.back();
 }
 
 void DisplayListBuilder::translate(SkScalar tx, SkScalar ty) {
@@ -1356,21 +1392,27 @@ void DisplayListBuilder::clipPath(const SkPath& path,
 
 void DisplayListBuilder::drawPaint() {
   Push<DrawPaintOp>(0, 1);
+  CheckLayerOpacityCompatibility();
 }
 void DisplayListBuilder::drawColor(SkColor color, SkBlendMode mode) {
   Push<DrawColorOp>(0, 1, color, mode);
+  CheckLayerOpacityCompatibility(mode);
 }
 void DisplayListBuilder::drawLine(const SkPoint& p0, const SkPoint& p1) {
   Push<DrawLineOp>(0, 1, p0, p1);
+  CheckLayerOpacityCompatibility();
 }
 void DisplayListBuilder::drawRect(const SkRect& rect) {
   Push<DrawRectOp>(0, 1, rect);
+  CheckLayerOpacityCompatibility();
 }
 void DisplayListBuilder::drawOval(const SkRect& bounds) {
   Push<DrawOvalOp>(0, 1, bounds);
+  CheckLayerOpacityCompatibility();
 }
 void DisplayListBuilder::drawCircle(const SkPoint& center, SkScalar radius) {
   Push<DrawCircleOp>(0, 1, center, radius);
+  CheckLayerOpacityCompatibility();
 }
 void DisplayListBuilder::drawRRect(const SkRRect& rrect) {
   if (rrect.isRect()) {
@@ -1379,14 +1421,17 @@ void DisplayListBuilder::drawRRect(const SkRRect& rrect) {
     drawOval(rrect.rect());
   } else {
     Push<DrawRRectOp>(0, 1, rrect);
+    CheckLayerOpacityCompatibility();
   }
 }
 void DisplayListBuilder::drawDRRect(const SkRRect& outer,
                                     const SkRRect& inner) {
   Push<DrawDRRectOp>(0, 1, outer, inner);
+  CheckLayerOpacityCompatibility();
 }
 void DisplayListBuilder::drawPath(const SkPath& path) {
   Push<DrawPathOp>(0, 1, path);
+  CheckLayerOpacityHairlineCompatibility();
 }
 
 void DisplayListBuilder::drawArc(const SkRect& bounds,
@@ -1394,6 +1439,11 @@ void DisplayListBuilder::drawArc(const SkRect& bounds,
                                  SkScalar sweep,
                                  bool useCenter) {
   Push<DrawArcOp>(0, 1, bounds, start, sweep, useCenter);
+  if (useCenter) {
+    CheckLayerOpacityHairlineCompatibility();
+  } else {
+    CheckLayerOpacityCompatibility();
+  }
 }
 void DisplayListBuilder::drawPoints(SkCanvas::PointMode mode,
                                     uint32_t count,
@@ -1416,10 +1466,19 @@ void DisplayListBuilder::drawPoints(SkCanvas::PointMode mode,
       return;
   }
   CopyV(data_ptr, pts, count);
+  // drawPoints treats every point or line (or segment of a polygon)
+  // as a completely separate operation meaning we cannot ensure
+  // distribution of group opacity without analyzing the mode and the
+  // bounds of every sub-primitive.
+  // See: https://fiddle.skia.org/c/228459001d2de8db117ce25ef5cedb0c
+  UpdateLayerOpacityCompatibility(false);
 }
 void DisplayListBuilder::drawVertices(const sk_sp<SkVertices> vertices,
                                       SkBlendMode mode) {
   Push<DrawVerticesOp>(0, 1, std::move(vertices), mode);
+  // DrawVertices applies its colors to the paint so we have no way
+  // of controlling opacity using the current paint attributes.
+  UpdateLayerOpacityCompatibility(false);
 }
 
 void DisplayListBuilder::drawImage(const sk_sp<SkImage> image,
@@ -1429,6 +1488,7 @@ void DisplayListBuilder::drawImage(const sk_sp<SkImage> image,
   render_with_attributes
       ? Push<DrawImageWithAttrOp>(0, 1, std::move(image), point, sampling)
       : Push<DrawImageOp>(0, 1, std::move(image), point, sampling);
+  CheckLayerOpacityCompatibility(render_with_attributes);
 }
 void DisplayListBuilder::drawImageRect(const sk_sp<SkImage> image,
                                        const SkRect& src,
@@ -1438,6 +1498,7 @@ void DisplayListBuilder::drawImageRect(const sk_sp<SkImage> image,
                                        SkCanvas::SrcRectConstraint constraint) {
   Push<DrawImageRectOp>(0, 1, std::move(image), src, dst, sampling,
                         render_with_attributes, constraint);
+  CheckLayerOpacityCompatibility(render_with_attributes);
 }
 void DisplayListBuilder::drawImageNine(const sk_sp<SkImage> image,
                                        const SkIRect& center,
@@ -1448,6 +1509,7 @@ void DisplayListBuilder::drawImageNine(const sk_sp<SkImage> image,
       ? Push<DrawImageNineWithAttrOp>(0, 1, std::move(image), center, dst,
                                       filter)
       : Push<DrawImageNineOp>(0, 1, std::move(image), center, dst, filter);
+  CheckLayerOpacityCompatibility(render_with_attributes);
 }
 void DisplayListBuilder::drawImageLattice(const sk_sp<SkImage> image,
                                           const SkCanvas::Lattice& lattice,
@@ -1469,6 +1531,7 @@ void DisplayListBuilder::drawImageLattice(const sk_sp<SkImage> image,
       filter, render_with_attributes);
   CopyV(pod, lattice.fXDivs, xDivCount, lattice.fYDivs, yDivCount,
         lattice.fColors, cellCount, lattice.fRectTypes, cellCount);
+  CheckLayerOpacityCompatibility(render_with_attributes);
 }
 void DisplayListBuilder::drawAtlas(const sk_sp<SkImage> atlas,
                                    const SkRSXform xform[],
@@ -1503,6 +1566,10 @@ void DisplayListBuilder::drawAtlas(const sk_sp<SkImage> atlas,
     }
     CopyV(data_ptr, xform, count, tex, count);
   }
+  // drawAtlas treats each image as a separate operation so we cannot rely
+  // on it to distribute the opacity without overlap without checking all
+  // of the transforms and texture rectangles.
+  UpdateLayerOpacityCompatibility(false);
 }
 
 void DisplayListBuilder::drawPicture(const sk_sp<SkPicture> picture,
@@ -1520,6 +1587,7 @@ void DisplayListBuilder::drawPicture(const sk_sp<SkPicture> picture,
   // This behavior is identical to the way SkPicture computes nested op counts.
   nested_op_count_ += picture->approximateOpCount(true) - 1;
   nested_bytes_ += picture->approximateBytesUsed();
+  CheckLayerOpacityCompatibility(render_with_attributes);
 }
 void DisplayListBuilder::drawDisplayList(
     const sk_sp<DisplayList> display_list) {
@@ -1532,11 +1600,13 @@ void DisplayListBuilder::drawDisplayList(
   // This behavior is identical to the way SkPicture computes nested op counts.
   nested_op_count_ += display_list->op_count(true) - 1;
   nested_bytes_ += display_list->bytes(true);
+  UpdateLayerOpacityCompatibility(display_list->can_apply_group_opacity());
 }
 void DisplayListBuilder::drawTextBlob(const sk_sp<SkTextBlob> blob,
                                       SkScalar x,
                                       SkScalar y) {
   Push<DrawTextBlobOp>(0, 1, std::move(blob), x, y);
+  CheckLayerOpacityCompatibility();
 }
 void DisplayListBuilder::drawShadow(const SkPath& path,
                                     const SkColor color,
@@ -1546,6 +1616,7 @@ void DisplayListBuilder::drawShadow(const SkPath& path,
   transparent_occluder  //
       ? Push<DrawShadowTransparentOccluderOp>(0, 1, path, color, elevation, dpr)
       : Push<DrawShadowOp>(0, 1, path, color, elevation, dpr);
+  UpdateLayerOpacityCompatibility(false);
 }
 
 // clang-format off

@@ -27,7 +27,11 @@ namespace flutter {
 class DisplayListCanvasDispatcher : public virtual Dispatcher,
                                     public SkPaintDispatchHelper {
  public:
-  explicit DisplayListCanvasDispatcher(SkCanvas* canvas) : canvas_(canvas) {}
+  explicit DisplayListCanvasDispatcher(SkCanvas* canvas,
+                                       SkScalar opacity = SK_Scalar1)
+      : SkPaintDispatchHelper(opacity), canvas_(canvas) {}
+
+  const SkPaint* safe_paint(bool use_attributes);
 
   void save() override;
   void restore() override;
@@ -115,6 +119,7 @@ class DisplayListCanvasDispatcher : public virtual Dispatcher,
 
  private:
   SkCanvas* canvas_;
+  SkPaint temp_paint_;
 };
 
 // Receives all methods on SkCanvas and sends them to a DisplayListBuilder

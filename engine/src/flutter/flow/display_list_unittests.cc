@@ -232,6 +232,7 @@ struct DisplayListInvocation {
   size_t sk_byte_count_;
 
   DlInvoker invoker;
+  bool supports_group_opacity_ = false;
 
   bool sk_version_matches() {
     return (op_count_ == sk_op_count_ && byte_count_ == sk_byte_count_);
@@ -245,6 +246,8 @@ struct DisplayListInvocation {
   bool sk_testing_invalid() { return sk_op_count_ < 0; }
 
   bool is_empty() { return byte_count_ == 0; }
+
+  bool supports_group_opacity() { return supports_group_opacity_; }
 
   int op_count() { return op_count_; }
   // byte count for the individual ops, no DisplayList overhead
@@ -1395,6 +1398,184 @@ TEST(DisplayList, SetMaskFilterNullResetsMaskFilter) {
   sk_sp<DisplayList> display_list = builder.Build();
   ASSERT_EQ(display_list->op_count(), 2);
   ASSERT_EQ(display_list->bytes(), sizeof(DisplayList) + 8u + 24u + 8u + 24u);
+}
+
+TEST(DisplayList, SingleOpsMightSupportGroupOpacityWithOrWithoutBlendMode) {
+  auto run_tests = [](std::string name,
+                      void build(DisplayListBuilder & builder),
+                      bool expect_for_op, bool expect_with_kSrc) {
+    {
+      // First test is the draw op, by itself
+      // (usually supports group opacity)
+      DisplayListBuilder builder;
+      build(builder);
+      auto display_list = builder.Build();
+      EXPECT_EQ(display_list->can_apply_group_opacity(), expect_for_op)
+          << "{" << std::endl
+          << "  " << name << std::endl
+          << "}";
+    }
+    {
+      // Second test i the draw op with kSrc,
+      // (usually fails group opacity)
+      DisplayListBuilder builder;
+      builder.setBlendMode(SkBlendMode::kSrc);
+      build(builder);
+      auto display_list = builder.Build();
+      EXPECT_EQ(display_list->can_apply_group_opacity(), expect_with_kSrc)
+          << "{" << std::endl
+          << "  builder.setBlendMode(kSrc);" << std::endl
+          << "  " << name << std::endl
+          << "}";
+    }
+  };
+
+#define RUN_TESTS(body) \
+  run_tests(            \
+      #body, [](DisplayListBuilder& builder) { body }, true, false)
+#define RUN_TESTS2(body, expect) \
+  run_tests(                     \
+      #body, [](DisplayListBuilder& builder) { body }, expect, expect)
+
+  RUN_TESTS(builder.drawPaint(););
+  RUN_TESTS2(builder.drawColor(SK_ColorRED, SkBlendMode::kSrcOver);, true);
+  RUN_TESTS2(builder.drawColor(SK_ColorRED, SkBlendMode::kSrc);, false);
+  RUN_TESTS(builder.drawLine({0, 0}, {10, 10}););
+  RUN_TESTS(builder.drawRect({0, 0, 10, 10}););
+  RUN_TESTS(builder.drawOval({0, 0, 10, 10}););
+  RUN_TESTS(builder.drawCircle({10, 10}, 5););
+  RUN_TESTS(builder.drawRRect(SkRRect::MakeRectXY({0, 0, 10, 10}, 2, 2)););
+  RUN_TESTS(builder.drawDRRect(SkRRect::MakeRectXY({0, 0, 10, 10}, 2, 2),
+                               SkRRect::MakeRectXY({2, 2, 8, 8}, 2, 2)););
+  RUN_TESTS(builder.drawPath(
+      SkPath().addOval({0, 0, 10, 10}).addOval({5, 5, 15, 15})););
+  RUN_TESTS(builder.drawArc({0, 0, 10, 10}, 0, M_PI, true););
+  RUN_TESTS2(builder.drawPoints(SkCanvas::kPoints_PointMode, TestPointCount,
+                                TestPoints);
+             , false);
+  RUN_TESTS2(builder.drawVertices(TestVertices1, SkBlendMode::kSrc);, false);
+  RUN_TESTS(builder.drawImage(TestImage1, {0, 0}, DisplayList::LinearSampling,
+                              true););
+  RUN_TESTS2(
+      builder.drawImage(TestImage1, {0, 0}, DisplayList::LinearSampling, false);
+      , true);
+  RUN_TESTS(builder.drawImageRect(TestImage1, {10, 10, 20, 20}, {0, 0, 10, 10},
+                                  DisplayList::NearestSampling, true););
+  RUN_TESTS2(builder.drawImageRect(TestImage1, {10, 10, 20, 20}, {0, 0, 10, 10},
+                                   DisplayList::NearestSampling, false);
+             , true);
+  RUN_TESTS(builder.drawImageNine(TestImage2, {20, 20, 30, 30}, {0, 0, 20, 20},
+                                  SkFilterMode::kLinear, true););
+  RUN_TESTS2(builder.drawImageNine(TestImage2, {20, 20, 30, 30}, {0, 0, 20, 20},
+                                   SkFilterMode::kLinear, false);
+             , true);
+  RUN_TESTS(builder.drawImageLattice(
+      TestImage1,
+      {TestDivs1, TestDivs1, nullptr, 3, 3, &TestLatticeSrcRect, nullptr},
+      {10, 10, 40, 40}, SkFilterMode::kNearest, true););
+  RUN_TESTS2(builder.drawImageLattice(
+      TestImage1,
+      {TestDivs1, TestDivs1, nullptr, 3, 3, &TestLatticeSrcRect, nullptr},
+      {10, 10, 40, 40}, SkFilterMode::kNearest, false);
+             , true);
+  static SkRSXform xforms[] = {{1, 0, 0, 0}, {0, 1, 0, 0}};
+  static SkRect texs[] = {{10, 10, 20, 20}, {20, 20, 30, 30}};
+  RUN_TESTS2(builder.drawAtlas(TestImage1, xforms, texs, nullptr, 2,
+                               SkBlendMode::kSrcIn,
+                               DisplayList::NearestSampling, nullptr, true);
+             , false);
+  RUN_TESTS2(builder.drawAtlas(TestImage1, xforms, texs, nullptr, 2,
+                               SkBlendMode::kSrcIn,
+                               DisplayList::NearestSampling, nullptr, false);
+             , false);
+  RUN_TESTS(builder.drawPicture(TestPicture1, nullptr, true););
+  RUN_TESTS2(builder.drawPicture(TestPicture1, nullptr, false);, true);
+  EXPECT_TRUE(TestDisplayList1->can_apply_group_opacity());
+  RUN_TESTS2(builder.drawDisplayList(TestDisplayList1);, true);
+  {
+    static DisplayListBuilder builder;
+    builder.drawRect({0, 0, 10, 10});
+    builder.drawRect({5, 5, 15, 15});
+    static auto display_list = builder.Build();
+    RUN_TESTS2(builder.drawDisplayList(display_list);, false);
+  }
+  RUN_TESTS(builder.drawTextBlob(TestBlob1, 0, 0););
+  RUN_TESTS2(builder.drawShadow(TestPath1, SK_ColorBLACK, 1.0, false, 1.0);
+             , false);
+
+#undef RUN_TESTS2
+#undef RUN_TESTS
+}
+
+TEST(DisplayList, OverlappingOpsDoNotSupportGroupOpacity) {
+  DisplayListBuilder builder;
+  for (int i = 0; i < 10; i++) {
+    builder.drawRect(SkRect::MakeXYWH(i * 10, 0, 30, 30));
+  }
+  auto display_list = builder.Build();
+  EXPECT_FALSE(display_list->can_apply_group_opacity());
+}
+
+TEST(DisplayList, SaveLayerFalseSupportsGroupOpacityWithOverlappingChidren) {
+  DisplayListBuilder builder;
+  builder.saveLayer(nullptr, false);
+  for (int i = 0; i < 10; i++) {
+    builder.drawRect(SkRect::MakeXYWH(i * 10, 0, 30, 30));
+  }
+  builder.restore();
+  auto display_list = builder.Build();
+  EXPECT_TRUE(display_list->can_apply_group_opacity());
+}
+
+TEST(DisplayList, SaveLayerTrueSupportsGroupOpacityWithOverlappingChidren) {
+  DisplayListBuilder builder;
+  builder.saveLayer(nullptr, true);
+  for (int i = 0; i < 10; i++) {
+    builder.drawRect(SkRect::MakeXYWH(i * 10, 0, 30, 30));
+  }
+  builder.restore();
+  auto display_list = builder.Build();
+  EXPECT_TRUE(display_list->can_apply_group_opacity());
+}
+
+TEST(DisplayList, SaveLayerFalseWithSrcBlendSupportsGroupOpacity) {
+  DisplayListBuilder builder;
+  builder.setBlendMode(SkBlendMode::kSrc);
+  builder.saveLayer(nullptr, false);
+  builder.drawRect({0, 0, 10, 10});
+  builder.restore();
+  auto display_list = builder.Build();
+  EXPECT_TRUE(display_list->can_apply_group_opacity());
+}
+
+TEST(DisplayList, SaveLayerTrueWithSrcBlendDoesNotSupportGroupOpacity) {
+  DisplayListBuilder builder;
+  builder.setBlendMode(SkBlendMode::kSrc);
+  builder.saveLayer(nullptr, true);
+  builder.drawRect({0, 0, 10, 10});
+  builder.restore();
+  auto display_list = builder.Build();
+  EXPECT_FALSE(display_list->can_apply_group_opacity());
+}
+
+TEST(DisplayList, SaveLayerFalseSupportsGroupOpacityWithChildSrcBlend) {
+  DisplayListBuilder builder;
+  builder.saveLayer(nullptr, false);
+  builder.setBlendMode(SkBlendMode::kSrc);
+  builder.drawRect({0, 0, 10, 10});
+  builder.restore();
+  auto display_list = builder.Build();
+  EXPECT_TRUE(display_list->can_apply_group_opacity());
+}
+
+TEST(DisplayList, SaveLayerTrueSupportsGroupOpacityWithChildSrcBlend) {
+  DisplayListBuilder builder;
+  builder.saveLayer(nullptr, true);
+  builder.setBlendMode(SkBlendMode::kSrc);
+  builder.drawRect({0, 0, 10, 10});
+  builder.restore();
+  auto display_list = builder.Build();
+  EXPECT_TRUE(display_list->can_apply_group_opacity());
 }
 
 }  // namespace testing

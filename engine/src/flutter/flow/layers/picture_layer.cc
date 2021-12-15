@@ -117,8 +117,10 @@ void PictureLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
   if (auto* cache = context->raster_cache) {
     TRACE_EVENT0("flutter", "PictureLayer::RasterCache (Preroll)");
     if (context->cull_rect.intersects(bounds)) {
-      cache->Prepare(context, sk_picture, is_complex_, will_change_, matrix,
-                     offset_);
+      if (cache->Prepare(context, sk_picture, is_complex_, will_change_, matrix,
+                         offset_)) {
+        context->subtree_can_inherit_opacity = true;
+      }
     } else {
       // Don't evict raster cache entry during partial repaint
       cache->Touch(sk_picture, matrix);
@@ -140,11 +142,16 @@ void PictureLayer::Paint(PaintContext& context) const {
       context.leaf_nodes_canvas->getTotalMatrix()));
 #endif
 
-  if (context.raster_cache &&
-      context.raster_cache->Draw(*picture(), *context.leaf_nodes_canvas)) {
-    TRACE_EVENT_INSTANT0("flutter", "raster cache hit");
-    return;
+  if (context.raster_cache) {
+    AutoCachePaint cache_paint(context);
+    if (context.raster_cache->Draw(*picture(), *context.leaf_nodes_canvas,
+                                   cache_paint.paint())) {
+      TRACE_EVENT_INSTANT0("flutter", "raster cache hit");
+      return;
+    }
   }
+
+  FML_DCHECK(context.inherited_opacity == SK_Scalar1);
   picture()->playback(context.leaf_nodes_canvas);
 }
 

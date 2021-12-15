@@ -341,7 +341,9 @@ void RasterCache::Touch(DisplayList* display_list,
   }
 }
 
-bool RasterCache::Draw(const SkPicture& picture, SkCanvas& canvas) const {
+bool RasterCache::Draw(const SkPicture& picture,
+                       SkCanvas& canvas,
+                       const SkPaint* paint) const {
   PictureRasterCacheKey cache_key(picture.uniqueID(), canvas.getTotalMatrix());
   auto it = picture_cache_.find(cache_key);
   if (it == picture_cache_.end()) {
@@ -353,7 +355,7 @@ bool RasterCache::Draw(const SkPicture& picture, SkCanvas& canvas) const {
   entry.used_this_frame = true;
 
   if (entry.image) {
-    entry.image->draw(canvas, nullptr);
+    entry.image->draw(canvas, paint);
     return true;
   }
 
@@ -361,7 +363,8 @@ bool RasterCache::Draw(const SkPicture& picture, SkCanvas& canvas) const {
 }
 
 bool RasterCache::Draw(const DisplayList& display_list,
-                       SkCanvas& canvas) const {
+                       SkCanvas& canvas,
+                       const SkPaint* paint) const {
   DisplayListRasterCacheKey cache_key(display_list.unique_id(),
                                       canvas.getTotalMatrix());
   auto it = display_list_cache_.find(cache_key);
@@ -374,7 +377,7 @@ bool RasterCache::Draw(const DisplayList& display_list,
   entry.used_this_frame = true;
 
   if (entry.image) {
-    entry.image->draw(canvas, nullptr);
+    entry.image->draw(canvas, paint);
     return true;
   }
 
@@ -383,7 +386,7 @@ bool RasterCache::Draw(const DisplayList& display_list,
 
 bool RasterCache::Draw(const Layer* layer,
                        SkCanvas& canvas,
-                       SkPaint* paint) const {
+                       const SkPaint* paint) const {
   LayerRasterCacheKey cache_key(layer->unique_id(), canvas.getTotalMatrix());
   auto it = layer_cache_.find(cache_key);
   if (it == layer_cache_.end()) {

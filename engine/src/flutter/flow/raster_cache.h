@@ -205,12 +205,16 @@ class RasterCache {
   // Find the raster cache for the picture and draw it to the canvas.
   //
   // Return true if it's found and drawn.
-  bool Draw(const SkPicture& picture, SkCanvas& canvas) const;
+  bool Draw(const SkPicture& picture,
+            SkCanvas& canvas,
+            const SkPaint* paint = nullptr) const;
 
   // Find the raster cache for the display list and draw it to the canvas.
   //
   // Return true if it's found and drawn.
-  bool Draw(const DisplayList& display_list, SkCanvas& canvas) const;
+  bool Draw(const DisplayList& display_list,
+            SkCanvas& canvas,
+            const SkPaint* paint = nullptr) const;
 
   // Find the raster cache for the layer and draw it to the canvas.
   //
@@ -220,7 +224,7 @@ class RasterCache {
   // Return true if the layer raster cache is found and drawn.
   bool Draw(const Layer* layer,
             SkCanvas& canvas,
-            SkPaint* paint = nullptr) const;
+            const SkPaint* paint = nullptr) const;
 
   void PrepareNewFrame();
   void CleanupAfterFrame();
