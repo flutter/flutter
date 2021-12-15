@@ -15,12 +15,6 @@ static NSString* const kUIBackgroundMode = @"UIBackgroundModes";
 static NSString* const kRemoteNotificationCapabitiliy = @"remote-notification";
 static NSString* const kBackgroundFetchCapatibility = @"fetch";
 static NSString* const kRestorationStateAppModificationKey = @"mod-date";
-static NSString* const kApplicationDidReceiveRemoteNotificationFetchCompletionHandler =
-    @"application:didReceiveRemoteNotification:fetchCompletionHandler:";
-
-static SEL ApplicationDidReceiveRemoteNotificationFetchCompletionHandlerSelector() {
-  return NSSelectorFromString(kApplicationDidReceiveRemoteNotificationFetchCompletionHandler);
-}
 
 @interface FlutterAppDelegate ()
 @property(nonatomic, copy) FlutterViewController* (^rootFlutterViewControllerGetter)(void);
@@ -95,6 +89,18 @@ static SEL ApplicationDidReceiveRemoteNotificationFetchCompletionHandlerSelector
       didRegisterUserNotificationSettings:notificationSettings];
 }
 #pragma GCC diagnostic pop
+
+- (void)application:(UIApplication*)application
+    didRegisterForRemoteNotificationsWithDeviceToken:(NSData*)deviceToken {
+  [_lifeCycleDelegate application:application
+      didRegisterForRemoteNotificationsWithDeviceToken:deviceToken];
+}
+
+- (void)application:(UIApplication*)application
+    didFailToRegisterForRemoteNotificationsWithError:(NSError*)error {
+  [_lifeCycleDelegate application:application
+      didFailToRegisterForRemoteNotificationsWithError:error];
+}
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
@@ -290,7 +296,7 @@ static SEL ApplicationDidReceiveRemoteNotificationFetchCompletionHandlerSelector
   NSArray* backgroundModesArray =
       [[NSBundle mainBundle] objectForInfoDictionaryKey:kUIBackgroundMode];
   NSSet* backgroundModesSet = [[[NSSet alloc] initWithArray:backgroundModesArray] autorelease];
-  if (selector == ApplicationDidReceiveRemoteNotificationFetchCompletionHandlerSelector()) {
+  if (selector == @selector(application:didReceiveRemoteNotification:fetchCompletionHandler:)) {
     if (![backgroundModesSet containsObject:kRemoteNotificationCapabitiliy]) {
       NSLog(
           @"You've implemented -[<UIApplicationDelegate> "
