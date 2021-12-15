@@ -96,6 +96,13 @@ class IgnoreTransformDispatchHelper : public virtual Dispatcher {
 // which can be accessed at any time via paint().
 class SkPaintDispatchHelper : public virtual Dispatcher {
  public:
+  SkPaintDispatchHelper(SkScalar opacity = SK_Scalar1)
+      : current_color_(SK_ColorBLACK), opacity_(opacity) {
+    if (opacity < SK_Scalar1) {
+      paint_.setAlphaf(opacity);
+    }
+  }
+
   void setAntiAlias(bool aa) override;
   void setDither(bool dither) override;
   void setStyle(SkPaint::Style style) override;
@@ -115,6 +122,12 @@ class SkPaintDispatchHelper : public virtual Dispatcher {
   void setImageFilter(sk_sp<SkImageFilter> filter) override;
 
   const SkPaint& paint() { return paint_; }
+  SkScalar opacity() { return opacity_; }
+  bool has_opacity() { return opacity_ < SK_Scalar1; }
+
+ protected:
+  void save_opacity(bool reset_and_restore);
+  void restore_opacity();
 
  private:
   SkPaint paint_;
@@ -122,6 +135,18 @@ class SkPaintDispatchHelper : public virtual Dispatcher {
   sk_sp<SkColorFilter> color_filter_;
 
   sk_sp<SkColorFilter> makeColorFilter();
+
+  struct SaveInfo {
+    SaveInfo(SkScalar opacity, bool restore_opacity)
+        : opacity(opacity), restore_opacity(restore_opacity) {}
+
+    SkScalar opacity;
+    bool restore_opacity;
+  };
+  std::vector<SaveInfo> save_stack_;
+
+  SkColor current_color_;
+  SkScalar opacity_;
 };
 
 class SkMatrixSource {

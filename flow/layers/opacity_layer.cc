@@ -10,7 +10,12 @@
 namespace flutter {
 
 OpacityLayer::OpacityLayer(SkAlpha alpha, const SkPoint& offset)
-    : alpha_(alpha), offset_(offset) {}
+    : alpha_(alpha), offset_(offset), children_can_accept_opacity_(false) {
+  // We can always inhert opacity even if we cannot pass it along to
+  // our children as we can accumulate the inherited opacity into our
+  // own opacity value before we recurse.
+  set_layer_can_inherit_opacity(true);
+}
 
 void OpacityLayer::Diff(DiffContext* context, const Layer* old_layer) {
   DiffContext::AutoSubtreeRestore subtree(context);
@@ -50,8 +55,11 @@ void OpacityLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
   context->mutators_stack.Pop();
   context->mutators_stack.Pop();
 
-  {
-    set_paint_bounds(paint_bounds().makeOffset(offset_.fX, offset_.fY));
+  set_children_can_accept_opacity(context->subtree_can_inherit_opacity);
+
+  set_paint_bounds(paint_bounds().makeOffset(offset_.fX, offset_.fY));
+
+  if (!children_can_accept_opacity()) {
 #ifndef SUPPORT_FRACTIONAL_TRANSLATION
     child_matrix = RasterCache::GetIntegralTransCTM(child_matrix);
 #endif
@@ -66,9 +74,6 @@ void OpacityLayer::Paint(PaintContext& context) const {
   TRACE_EVENT0("flutter", "OpacityLayer::Paint");
   FML_DCHECK(needs_painting(context));
 
-  SkPaint paint;
-  paint.setAlpha(alpha_);
-
   SkAutoCanvasRestore save(context.internal_nodes_canvas, true);
   context.internal_nodes_canvas->translate(offset_.fX, offset_.fY);
 
@@ -76,6 +81,19 @@ void OpacityLayer::Paint(PaintContext& context) const {
   context.internal_nodes_canvas->setMatrix(RasterCache::GetIntegralTransCTM(
       context.leaf_nodes_canvas->getTotalMatrix()));
 #endif
+
+  SkScalar inherited_opacity = context.inherited_opacity;
+  SkScalar subtree_opacity = opacity() * inherited_opacity;
+
+  if (children_can_accept_opacity()) {
+    context.inherited_opacity = subtree_opacity;
+    PaintChildren(context);
+    context.inherited_opacity = inherited_opacity;
+    return;
+  }
+
+  SkPaint paint;
+  paint.setAlphaf(subtree_opacity);
 
   if (context.raster_cache &&
       context.raster_cache->Draw(GetCacheableChild(),
