@@ -481,6 +481,9 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
   // Value Indicator Animation that appears on the Overlay.
   PaintValueIndicator? paintValueIndicator;
 
+  FocusNode? _focusNode;
+  FocusNode get focusNode => widget.focusNode ?? _focusNode!;
+
   @override
   void initState() {
     super.initState();
@@ -507,6 +510,10 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
         onInvoke: _actionHandler,
       ),
     };
+    if (widget.focusNode == null) {
+      // Only create a new node if the widget doesn't have one.
+      _focusNode ??= FocusNode();
+    }
   }
 
   @override
@@ -520,6 +527,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       overlayEntry!.remove();
       overlayEntry = null;
     }
+    _focusNode?.dispose();
     super.dispose();
   }
 
@@ -698,13 +706,32 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     // in range_slider.dart.
     Size _screenSize() => MediaQuery.of(context).size;
 
+    VoidCallback? handleDidGainAccessibilityFocus;
+    switch (theme.platform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.iOS:
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+        break;
+      case TargetPlatform.windows:
+        handleDidGainAccessibilityFocus = () {
+          // Automatically activate the slider when it receives a11y focus.
+          if (!focusNode.hasFocus && focusNode.canRequestFocus) {
+            focusNode.requestFocus();
+          }
+        };
+        break;
+    }
+
     return Semantics(
       container: true,
       slider: true,
+      onDidGainAccessibilityFocus: handleDidGainAccessibilityFocus,
       child: FocusableActionDetector(
         actions: _actionMap,
         shortcuts: _shortcutMap,
-        focusNode: widget.focusNode,
+        focusNode: focusNode,
         autofocus: widget.autofocus,
         enabled: _enabled,
         onShowFocusHighlight: _handleFocusHighlightChanged,
