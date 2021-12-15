@@ -206,6 +206,7 @@ void printStatus(
 
 
 /// Display the [message] inside a box.
+///
 /// For example, this is the generated output:
 ///
 ///   ┌─ [title] ─┐
