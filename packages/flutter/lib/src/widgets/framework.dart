@@ -438,9 +438,9 @@ abstract class Widget extends DiagnosticableTree {
 ///  * Use `const` widgets where possible, and provide a `const` constructor for
 ///    the widget so that users of the widget can also do so.
 ///
-///  * When you need to create a reusable piece of UI, prefer using a widget 
-///    rather than a helper method. For example, if you're using a function to 
-///    build a widget, a [State.setState] call would require Flutter to entirely 
+///  * When you need to create a reusable piece of UI, prefer using a widget
+///    rather than a helper method. For example, if you're using a function to
+///    build a widget, a [State.setState] call would require Flutter to entirely
 ///    rebuild the returned wrapping widget. If you used a [Widget] instead,
 ///    Flutter would be able to efficiently re-render only those parts that
 ///    really need to be updated. Furthermore, if the widget you created is
@@ -660,9 +660,9 @@ abstract class StatelessWidget extends Widget {
 ///  * Use `const` widgets where possible. (This is equivalent to caching a
 ///    widget and re-using it.)
 ///
-///  * When you need to create a reusable piece of UI, prefer using a widget 
-///    rather than a helper method. For example, if you're using a function to 
-///    build a widget, a [State.setState] call would require Flutter to entirely 
+///  * When you need to create a reusable piece of UI, prefer using a widget
+///    rather than a helper method. For example, if you're using a function to
+///    build a widget, a [State.setState] call would require Flutter to entirely
 ///    rebuild the returned wrapping widget. If you used a [Widget] instead,
 ///    Flutter would be able to efficiently re-render only those parts that
 ///    really need to be updated. Furthermore, if the widget you created is
