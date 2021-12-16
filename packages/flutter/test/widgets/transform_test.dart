@@ -444,11 +444,11 @@ void main() {
     );
     expect(tester.layers.whereType<ImageFilterLayer>().length, 1);
     final ImageFilterLayer layer = tester.layers.whereType<ImageFilterLayer>().first;
-    expect(extractMatrix(layer.imageFilter), <double>[
-      0.7071067811865476, 0.7071067811865475, 0.0, 0.0,
-      -0.7071067811865475, 0.7071067811865476, 0.0, 0.0,
+    expect(extractMatrix(layer.imageFilter), <dynamic>[
+      moreOrLessEquals(0.7071067811865476), moreOrLessEquals(0.7071067811865475), 0.0, 0.0,
+      moreOrLessEquals(-0.7071067811865475), moreOrLessEquals(0.7071067811865476), 0.0, 0.0,
       0.0, 0.0, 1.0, 0.0,
-      329.28932188134524, -194.97474683058323, 0.0, 1.0]
+      moreOrLessEquals(329.28932188134524), moreOrLessEquals(-194.97474683058329), 0.0, 1.0]
     );
   });
 
@@ -466,11 +466,11 @@ void main() {
     );
     expect(tester.layers.whereType<ImageFilterLayer>().length, 1);
     final ImageFilterLayer layer = tester.layers.whereType<ImageFilterLayer>().first;
-    expect(extractMatrix(layer.imageFilter), <double>[
-      0.7071067811865476, 0.7071067811865475, 0.0, 0.0,
-      -0.7071067811865475, 0.7071067811865476, 0.0, 0.0,
+    expect(extractMatrix(layer.imageFilter), <dynamic>[
+      moreOrLessEquals(0.7071067811865476), moreOrLessEquals(0.7071067811865475), 0.0, 0.0,
+      moreOrLessEquals(-0.7071067811865475), moreOrLessEquals(0.7071067811865476), 0.0, 0.0,
       0.0, 0.0, 1.0, 0.0,
-      329.28932188134524, -194.97474683058329, 0.0, 1.0]
+      moreOrLessEquals(329.28932188134524), moreOrLessEquals(-194.97474683058329), 0.0, 1.0]
     );
   });
 
