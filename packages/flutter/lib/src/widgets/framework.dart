@@ -438,13 +438,13 @@ abstract class Widget extends DiagnosticableTree {
 ///  * Use `const` widgets where possible, and provide a `const` constructor for
 ///    the widget so that users of the widget can also do so.
 ///
-///  * When you need to create a reusable piece of UI, prefer using a widget
-///    rather than a helper method. For example, if you're using a function to
+///  * When trying to create a reusable piece of UI, prefer using a widget
+///    rather than a helper method. For example, if there was a function used to
 ///    build a widget, a [State.setState] call would require Flutter to entirely
-///    rebuild the returned wrapping widget. If you used a [Widget] instead,
+///    rebuild the returned wrapping widget. If a [Widget] was used instead,
 ///    Flutter would be able to efficiently re-render only those parts that
-///    really need to be updated. Furthermore, if the widget you created is
-///    `const`, Flutter would short-circuit most of the rebuild work.
+///    really need to be updated. Even better, if the created widget is `const`,
+///    Flutter would short-circuit most of the rebuild work.
 ///
 ///  * Consider refactoring the stateless widget into a stateful widget so that
 ///    it can use some of the techniques described at [StatefulWidget], such as
@@ -654,19 +654,19 @@ abstract class StatelessWidget extends Widget {
 ///    efficient for a widget to be re-used than for a new (but
 ///    identically-configured) widget to be created. Factoring out the stateful
 ///    part into a widget that takes a child argument is a common way of doing
-///    this. Alternatively, you could create a `final` variable inside the state
-///    and assign to it the widget you want to cache.
+///    this. Another caching strategy consists of assigning a widget to a
+///    `final` state variable which can be used in the build method.
 ///
 ///  * Use `const` widgets where possible. (This is equivalent to caching a
 ///    widget and re-using it.)
 ///
-///  * When you need to create a reusable piece of UI, prefer using a widget
-///    rather than a helper method. For example, if you're using a function to
+///  * When trying to create a reusable piece of UI, prefer using a widget
+///    rather than a helper method. For example, if there was a function used to
 ///    build a widget, a [State.setState] call would require Flutter to entirely
-///    rebuild the returned wrapping widget. If you used a [Widget] instead,
+///    rebuild the returned wrapping widget. If a [Widget] was used instead,
 ///    Flutter would be able to efficiently re-render only those parts that
-///    really need to be updated. Furthermore, if the widget you created is
-///    `const`, Flutter would short-circuit most of the rebuild work.
+///    really need to be updated. Even better, if the created widget is `const`,
+///    Flutter would short-circuit most of the rebuild work.
 ///
 ///  * Avoid changing the depth of any created subtrees or changing the type of
 ///    any widgets in the subtree. For example, rather than returning either the
