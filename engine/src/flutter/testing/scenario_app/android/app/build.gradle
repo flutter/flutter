@@ -2,8 +2,6 @@ apply plugin: 'com.android.application'
 apply plugin: 'com.facebook.testing.screenshot'
 apply plugin: 'kotlin-android'
 
-def leakcanary_version = '2.7'
-
 screenshots {
     failureDir = "${rootProject.buildDir}/reports/diff_failures"
     recordDir = "${rootProject.projectDir}/reports/screenshots"
@@ -57,22 +55,32 @@ android {
 }
 
 dependencies {
+    // Please *don't* add embedding dependencies to this file.
+    // The embedding dependencies are configured in tools/androidx/files.json.
+    // Only add test dependencies.
+
     if (project.hasProperty('flutter_jar')) {
         implementation files(project.property('flutter_jar'))
     }
     implementation 'com.facebook.testing.screenshot:layout-hierarchy-common:0.12.0'
-    implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
-    implementation 'androidx.tracing:tracing:1.0.0'
     implementation 'com.google.android.material:material:1.0.0'
-    implementation 'androidx.lifecycle:lifecycle-common-java8:2.2.0-alpha01'
-    implementation "com.squareup.leakcanary:leakcanary-android:$leakcanary_version"
-    implementation 'com.google.guava:guava:28.1-android'
-    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.2.0'
     androidTestImplementation 'androidx.test:rules:1.2.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+
+    def leakcanary_version = '2.7'
+    androidTestImplementation "com.squareup.leakcanary:leakcanary-android:$leakcanary_version"
     androidTestImplementation "com.squareup.leakcanary:leakcanary-android-instrumentation:$leakcanary_version"
+}
+
+// Configure the embedding dependencies.
+apply from: new File(rootDir, '../../../tools/androidx/configure.gradle').absolutePath;
+configureDependencies(new File(rootDir, '../../..')) { dependency ->
+    dependencies {
+        implementation "$dependency"
+    }
 }
 
 tasks.register('generateLockfiles') {
