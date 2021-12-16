@@ -73,6 +73,10 @@ void FlatlandPlatformView::OnGetLayout(
                         static_cast<float>(info.logical_size().height)};
 
   // TODO(fxbug.dev/64201): Set device pixel ratio.
+  if (info.pixel_scale().width != 1 || info.pixel_scale().height != 1) {
+    FML_LOG(ERROR)
+        << "Flutter does not currently support pixel_scale's other than 1";
+  }
 
   SetViewportMetrics({
       1,                              // device_pixel_ratio
@@ -204,6 +208,7 @@ void FlatlandPlatformView::OnCreateView(ViewCallback on_view_created,
                   });
         }));
   };
+
   on_create_view_callback_(view_id_raw, std::move(on_view_created),
                            std::move(on_view_bound), hit_testable, focusable);
 }
@@ -211,9 +216,9 @@ void FlatlandPlatformView::OnCreateView(ViewCallback on_view_created,
 void FlatlandPlatformView::OnDisposeView(int64_t view_id_raw) {
   auto on_view_unbound =
       [weak = weak_factory_.GetWeakPtr(),
-       platform_task_runner = task_runners_.GetPlatformTaskRunner()](
-          fuchsia::ui::composition::ContentId content_id) {
-        platform_task_runner->PostTask([weak, content_id]() {
+       platform_task_runner = task_runners_.GetPlatformTaskRunner(),
+       view_id_raw](fuchsia::ui::composition::ContentId content_id) {
+        platform_task_runner->PostTask([weak, content_id, view_id_raw]() {
           if (!weak) {
             FML_LOG(WARNING)
                 << "Flatland View unbound from PlatformView after PlatformView"
@@ -223,6 +228,7 @@ void FlatlandPlatformView::OnDisposeView(int64_t view_id_raw) {
 
           FML_DCHECK(weak->child_view_info_.count(content_id.value) == 1);
           weak->child_view_info_.erase(content_id.value);
+          weak->focus_delegate_->OnDisposeChildView(view_id_raw);
         });
       };
   on_destroy_view_callback_(view_id_raw, std::move(on_view_unbound));
