@@ -15,6 +15,7 @@ import 'theme.dart';
 const double _kMinCircularProgressIndicatorSize = 36.0;
 const int _kIndeterminateLinearDuration = 1800;
 const int _kIndeterminateCircularDuration = 1333 * 2222;
+const double _kMaxArcLength = 3 / 2;
 
 enum _ActivityIndicatorType { material, adaptive }
 
@@ -383,7 +384,7 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> with 
 class _CircularProgressIndicatorPainter extends CustomPainter {
   _CircularProgressIndicatorPainter({
     this.backgroundColor,
-    double maxArcLength = 3 / 2,
+    double maxArcLength = _kMaxArcLength,
     required this.valueColor,
     required this.value,
     required this.headValue,
@@ -678,7 +679,7 @@ class _RefreshProgressIndicatorPainter extends _CircularProgressIndicatorPainter
     required this.arrowheadScale,
   }) : super(
     // Lengthen the arc a little
-    maxArcLength: 3 / 2 * 1.05, // = 1.575
+    maxArcLength: _kMaxArcLength * 1.05,
     valueColor: valueColor,
     value: value,
     headValue: headValue,

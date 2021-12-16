@@ -239,7 +239,12 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
   bool? _isIndicatorAtTop;
   double? _dragOffset;
 
-  static final Animatable<double> _valueTween = Tween<double>(begin: 0.0, end: 0.78);
+  static final Animatable<double> _valueTween = Tween<double>(
+    begin: 0.0,
+    end: 0.8,
+  ).chain(CurveTween(
+    curve: const Cubic(0.5, 0.35, 0.4, 0.8),
+  ));
   static final Animatable<double> _kDragSizeFactorLimitTween = Tween<double>(
     begin: 0.0,
     end: _kDragSizeFactorLimit,
@@ -254,11 +259,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
     _positionController = AnimationController(vsync: this);
     _positionFactor = _positionController.drive(_kDragSizeFactorLimitTween);
     // The "value" of the circular progress indicator during a drag.
-    _value = _positionController.drive(
-      _valueTween
-        .chain(CurveTween(curve: _kDragCurve))
-        .chain(CurveTween(curve: const Interval(0.1, 1.0))),
-    );
+    _value = _positionController.drive(_valueTween);
 
     _scaleController = AnimationController(vsync: this);
     _scaleFactor = _scaleController.drive(_oneToZeroTween);
