@@ -153,7 +153,7 @@ TEST(FlutterWindowsViewTest, EnableSemantics) {
   EXPECT_TRUE(semantics_enabled);
 }
 
-TEST(FlutterWindowsEngine, AddSemanticsNodeUpdate) {
+TEST(FlutterWindowsView, AddSemanticsNodeUpdate) {
   std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
   EngineModifier modifier(engine.get());
   modifier.embedder_api().UpdateSemanticsEnabled =
@@ -228,7 +228,7 @@ TEST(FlutterWindowsEngine, AddSemanticsNodeUpdate) {
 //             node3
 //
 // node0 and node2 are grouping nodes. node1 and node2 are static text nodes.
-TEST(FlutterWindowsEngine, AddSemanticsNodeUpdateWithChildren) {
+TEST(FlutterWindowsView, AddSemanticsNodeUpdateWithChildren) {
   std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
   EngineModifier modifier(engine.get());
   modifier.embedder_api().UpdateSemanticsEnabled =
