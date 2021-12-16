@@ -937,7 +937,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     double actualSize = sizes.mainSize;
     double crossSize = sizes.crossSize;
     double maxBaselineDistance = 0.0;
-    if (crossAxisAlignment == CrossAxisAlignment.baseline) {
+    if (crossAxisAlignment == CrossAxisAlignment.baseline && direction == Axis.horizontal) {
       RenderBox? child = firstChild;
       double maxSizeAboveBaseline = 0;
       double maxSizeBelowBaseline = 0;
