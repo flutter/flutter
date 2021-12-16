@@ -1218,7 +1218,7 @@ flutter:
 
       expect(fs.isFileSync(fs.path.join(syntheticL10nPackagePath, 'output-localization-file_en.dart')), true);
       expect(fs.isFileSync(fs.path.join(syntheticL10nPackagePath, 'output-localization-file_en_US.dart')), false);
-      expect(fs.isFileSync(fs.path.join(syntheticL10nPackagePath, 'output-localization-file_sr_Latn.dart')), true);
+      expect(fs.isFileSync(fs.path.join(syntheticL10nPackagePath, 'output-localization-file_sr.dart')), true);
 
       final String englishLocalizationsFile = fs.file(
         fs.path.join(syntheticL10nPackagePath, 'output-localization-file_en.dart')

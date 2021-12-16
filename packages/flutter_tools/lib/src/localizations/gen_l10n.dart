@@ -1270,7 +1270,7 @@ class LocalizationsGenerator {
     }).toList();
 
     for (final LocaleInfo locale in localesWithoutBaseClass) {
-        final File languageMessageFile = outputDirectory.childFile('${fileName}_$locale.$fileExtension');
+        final File languageMessageFile = outputDirectory.childFile('${fileName}_${locale.languageCode}.$fileExtension');
 
         // Generate the template for the base class file.
         final String languageBaseClassFile = _generateBaseClassFile(
