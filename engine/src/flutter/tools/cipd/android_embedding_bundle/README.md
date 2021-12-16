@@ -7,8 +7,6 @@
 
 ## Steps
 
-1. `cd` into this directory.
-2. Update the dependency in build.gradle.
-3. Update the dependency used in Android unit tests `shell/platform/android/test_runner/build.gradle`
-4. Run `./generate.sh`.
-5. Update tools/androidx/files.json. (This file includes the Maven dependencies used to build Flutter apps).
+1. Update tools/androidx/files.json. (This file includes the Maven dependencies used to build Flutter apps).
+2. `cd` into this directory.
+3. Run `./generate.sh`.
