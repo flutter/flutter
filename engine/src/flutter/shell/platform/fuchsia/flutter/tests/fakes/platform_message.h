@@ -29,6 +29,8 @@ class FakePlatformMessageResponse : public PlatformMessageResponse {
     }
   }
 
+  bool IsCompleted() { return is_complete_; }
+
   std::unique_ptr<PlatformMessage> WithMessage(std::string channel,
                                                std::string message) {
     return std::make_unique<PlatformMessage>(
