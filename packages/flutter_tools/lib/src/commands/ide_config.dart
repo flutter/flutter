@@ -273,4 +273,6 @@ String? _validateFlutterDir(String dirPath, { String? flutterRoot }) {
     case FileSystemEntityType.notFound:
       return null;
   }
+  // In the case of any other [FileSystemEntityType]s, like the deprecated ones, return null.
+  return null;
 }
