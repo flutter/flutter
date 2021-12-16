@@ -420,5 +420,116 @@ TEST(FlutterWindowsEngine, AddSemanticsNodeUpdateWithChildren) {
   }
 }
 
+// Verify the native IAccessible accHitTest method returns the correct
+// IAccessible COM object for the given coordinates.
+//
+//                         +-----------+
+//                         |     |     |
+//        node0            |     |  B  |
+//        /   \            |  A  |-----|
+//    node1    node2       |     |  C  |
+//               |         |     |     |
+//             node3       +-----------+
+//
+// node0 and node2 are grouping nodes. node1 and node2 are static text nodes.
+//
+// node0 is located at 0,0 with size 500x500. It spans areas A, B, and C.
+// node1 is located at 0,0 with size 250x500. It spans area A.
+// node2 is located at 250,0 with size 250x500. It spans areas B and C.
+// node3 is located at 250,250 with size 250x250. It spans area C.
+TEST(FlutterWindowsViewTest, AccessibilityHitTesting) {
+  constexpr FlutterTransformation kIdentityTransform = {1, 0, 0,  //
+                                                        0, 1, 0,  //
+                                                        0, 0, 1};
+
+  std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
+  EngineModifier modifier(engine.get());
+  modifier.embedder_api().UpdateSemanticsEnabled =
+      [](FLUTTER_API_SYMBOL(FlutterEngine) engine, bool enabled) {
+        return kSuccess;
+      };
+
+  auto window_binding_handler =
+      std::make_unique<::testing::NiceMock<MockWindowBindingHandler>>();
+  FlutterWindowsView view(std::move(window_binding_handler));
+  view.SetEngine(std::move(engine));
+
+  // Enable semantics to instantiate accessibility bridge.
+  view.OnUpdateSemanticsEnabled(true);
+
+  auto bridge = view.GetEngine()->accessibility_bridge().lock();
+  ASSERT_TRUE(bridge);
+
+  // Add root node at origin. Size 500x500.
+  FlutterSemanticsNode node0{sizeof(FlutterSemanticsNode), 0};
+  std::vector<int32_t> node0_children{1, 2};
+  node0.rect = {0, 0, 500, 500};
+  node0.transform = kIdentityTransform;
+  node0.child_count = node0_children.size();
+  node0.children_in_traversal_order = node0_children.data();
+  node0.children_in_hit_test_order = node0_children.data();
+
+  // Add node 1 located at 0,0 relative to node 0. Size 250x500.
+  FlutterSemanticsNode node1{sizeof(FlutterSemanticsNode), 1};
+  node1.rect = {0, 0, 250, 500};
+  node1.transform = kIdentityTransform;
+  node1.label = "prefecture";
+  node1.value = "Kyoto";
+
+  // Add node 2 located at 250,0 relative to node 0. Size 250x500.
+  FlutterSemanticsNode node2{sizeof(FlutterSemanticsNode), 2};
+  std::vector<int32_t> node2_children{3};
+  node2.rect = {0, 0, 250, 500};
+  node2.transform = {1, 0, 250, 0, 1, 0, 0, 0, 1};
+  node2.child_count = node2_children.size();
+  node2.children_in_traversal_order = node2_children.data();
+  node2.children_in_hit_test_order = node2_children.data();
+
+  // Add node 3 located at 0,250 relative to node 2. Size 250, 250.
+  FlutterSemanticsNode node3{sizeof(FlutterSemanticsNode), 3};
+  node3.rect = {0, 0, 250, 250};
+  node3.transform = {1, 0, 0, 0, 1, 250, 0, 0, 1};
+  node3.label = "city";
+  node3.value = "Uji";
+
+  bridge->AddFlutterSemanticsNodeUpdate(&node0);
+  bridge->AddFlutterSemanticsNodeUpdate(&node1);
+  bridge->AddFlutterSemanticsNodeUpdate(&node2);
+  bridge->AddFlutterSemanticsNodeUpdate(&node3);
+  bridge->CommitUpdates();
+
+  // Look up the root windows node delegate.
+  auto node0_delegate = bridge->GetFlutterPlatformNodeDelegateFromID(0).lock();
+  ASSERT_TRUE(node0_delegate);
+  auto node1_delegate = bridge->GetFlutterPlatformNodeDelegateFromID(1).lock();
+  ASSERT_TRUE(node1_delegate);
+  auto node2_delegate = bridge->GetFlutterPlatformNodeDelegateFromID(2).lock();
+  ASSERT_TRUE(node2_delegate);
+  auto node3_delegate = bridge->GetFlutterPlatformNodeDelegateFromID(3).lock();
+  ASSERT_TRUE(node3_delegate);
+
+  // Get the native IAccessible root object.
+  IAccessible* node0_accessible = node0_delegate->GetNativeViewAccessible();
+  ASSERT_TRUE(node0_accessible != nullptr);
+
+  // Perform a hit test that should hit node 1.
+  VARIANT varchild{};
+  ASSERT_TRUE(SUCCEEDED(node0_accessible->accHitTest(150, 150, &varchild)));
+  EXPECT_EQ(varchild.vt, VT_DISPATCH);
+  EXPECT_EQ(varchild.pdispVal, node1_delegate->GetNativeViewAccessible());
+
+  // Perform a hit test that should hit node 2.
+  varchild = {};
+  ASSERT_TRUE(SUCCEEDED(node0_accessible->accHitTest(450, 150, &varchild)));
+  EXPECT_EQ(varchild.vt, VT_DISPATCH);
+  EXPECT_EQ(varchild.pdispVal, node2_delegate->GetNativeViewAccessible());
+
+  // Perform a hit test that should hit node 3.
+  varchild = {};
+  ASSERT_TRUE(SUCCEEDED(node0_accessible->accHitTest(450, 450, &varchild)));
+  EXPECT_EQ(varchild.vt, VT_DISPATCH);
+  EXPECT_EQ(varchild.pdispVal, node3_delegate->GetNativeViewAccessible());
+}
+
 }  // namespace testing
 }  // namespace flutter

@@ -7,6 +7,8 @@
 #include "flutter/shell/platform/windows/flutter_platform_node_delegate_win32.h"
 
 #include "flutter/shell/platform/windows/flutter_windows_view.h"
+#include "flutter/third_party/accessibility/ax/ax_clipping_behavior.h"
+#include "flutter/third_party/accessibility/ax/ax_coordinate_system.h"
 
 namespace flutter {
 
@@ -34,6 +36,38 @@ void FlutterPlatformNodeDelegateWin32::Init(std::weak_ptr<OwnerBridge> bridge,
 gfx::NativeViewAccessible
 FlutterPlatformNodeDelegateWin32::GetNativeViewAccessible() {
   assert(ax_platform_node_);
+  return ax_platform_node_->GetNativeViewAccessible();
+}
+
+// |ui::AXPlatformNodeDelegate|
+gfx::NativeViewAccessible FlutterPlatformNodeDelegateWin32::HitTestSync(
+    int screen_physical_pixel_x,
+    int screen_physical_pixel_y) const {
+  // If this node doesn't contain the point, return.
+  ui::AXOffscreenResult result;
+  gfx::Rect rect = GetBoundsRect(ui::AXCoordinateSystem::kScreenPhysicalPixels,
+                                 ui::AXClippingBehavior::kUnclipped, &result);
+  gfx::Point screen_point(screen_physical_pixel_x, screen_physical_pixel_y);
+  if (!rect.Contains(screen_point)) {
+    return nullptr;
+  }
+
+  // If any child in this node's subtree contains the point, return that child.
+  auto bridge = engine_->accessibility_bridge().lock();
+  assert(bridge);
+  for (const ui::AXNode* child : GetAXNode()->children()) {
+    std::shared_ptr<FlutterPlatformNodeDelegateWin32> win_delegate =
+        std::static_pointer_cast<FlutterPlatformNodeDelegateWin32>(
+            bridge->GetFlutterPlatformNodeDelegateFromID(child->id()).lock());
+    assert(win_delegate);
+    auto hit_view = win_delegate->HitTestSync(screen_physical_pixel_x,
+                                              screen_physical_pixel_y);
+    if (hit_view) {
+      return hit_view;
+    }
+  }
+
+  // If no children contain the point, but this node does, return this node.
   return ax_platform_node_->GetNativeViewAccessible();
 }
 

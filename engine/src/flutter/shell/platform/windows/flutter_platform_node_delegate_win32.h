@@ -29,6 +29,11 @@ class FlutterPlatformNodeDelegateWin32 : public FlutterPlatformNodeDelegate {
   // |ui::AXPlatformNodeDelegate|
   gfx::NativeViewAccessible GetNativeViewAccessible() override;
 
+  // |ui::AXPlatformNodeDelegate|
+  gfx::NativeViewAccessible HitTestSync(
+      int screen_physical_pixel_x,
+      int screen_physical_pixel_y) const override;
+
   // |FlutterPlatformNodeDelegate|
   gfx::Rect GetBoundsRect(
       const ui::AXCoordinateSystem coordinate_system,
