@@ -10,6 +10,16 @@ import 'keyboard_key.dart';
 import 'keyboard_maps.dart';
 import 'raw_keyboard.dart';
 
+/// Convert a UTF32 rune to its lower case.
+int runeToLowerCase(int rune) {
+  // Assume only Basic Multilingual Plane runes have lower and upper cases.
+  // For other characters, return them as is.
+  const int utf16BmpUpperBound = 0xD7FF;
+  if (rune > utf16BmpUpperBound)
+    return rune;
+  return String.fromCharCode(rune).toLowerCase().codeUnitAt(0);
+}
+
 /// Platform-specific key event data for macOS.
 ///
 /// This object contains information about key events obtained from macOS's
@@ -99,7 +109,7 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
           // only tests BMP, it is fine to test keyLabel instead.
           !LogicalKeyboardKey.isControlCharacter(keyLabel) &&
           !_isUnprintableKey(keyLabel)) {
-        character = codePoints[0];
+        character = runeToLowerCase(codePoints[0]);
       }
     }
     if (character != null) {
