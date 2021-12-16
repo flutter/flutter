@@ -402,6 +402,14 @@ void main() {
       ),
     );
     expect(tester.layers.whereType<ImageFilterLayer>().length, 1);
+    ImageFilterLayer layer = tester.layers.whereType<ImageFilterLayer>().first;
+    expect(layer.imageFilter.toString(),
+           'ImageFilter.matrix(['
+               '1.0, 0.0, 0.0, 0.0, '
+               '0.0, 1.0, 0.0, 0.0, '
+               '0.0, 0.0, 1.0, 0.0, '
+               '25.0, 25.0, 0.0, 1.0], '
+               'FilterQuality.low)');
   });
 
   testWidgets('Transform.scale with FilterQuality produces filter layer', (WidgetTester tester) async {
@@ -413,6 +421,14 @@ void main() {
       ),
     );
     expect(tester.layers.whereType<ImageFilterLayer>().length, 1);
+    ImageFilterLayer layer = tester.layers.whereType<ImageFilterLayer>().first;
+    expect(layer.imageFilter.toString(),
+           'ImageFilter.matrix(['
+               '3.14159, 0.0, 0.0, 0.0, '
+               '0.0, 3.14159, 0.0, 0.0, '
+               '0.0, 0.0, 1.0, 0.0, '
+               '-856.636, -642.477, 0.0, 1.0], '
+               'FilterQuality.low)');
   });
 
   testWidgets('Transform.rotate with FilterQuality produces filter layer', (WidgetTester tester) async {
@@ -424,6 +440,36 @@ void main() {
       ),
     );
     expect(tester.layers.whereType<ImageFilterLayer>().length, 1);
+    ImageFilterLayer layer = tester.layers.whereType<ImageFilterLayer>().first;
+    expect(layer.imageFilter.toString(),
+           'ImageFilter.matrix(['
+               '0.7071067811865476, 0.7071067811865475, 0.0, 0.0, '
+               '-0.7071067811865475, 0.7071067811865476, 0.0, 0.0, '
+               '0.0, 0.0, 1.0, 0.0, '
+               '329.28932188134524, -194.97474683058323, 0.0, 1.0], '
+               'FilterQuality.low)');
+  });
+
+  testWidgets('Offset Transform.rotate with FilterQuality produces filter layer', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      SizedBox(width: 400, height: 400,
+        child: Center(
+          child: Transform.rotate(
+            angle: math.pi / 4,
+            filterQuality: FilterQuality.low,
+            child: const SizedBox(width: 100, height: 100),
+          ),
+        ),
+      ),
+    );
+    expect(tester.layers.whereType<ImageFilterLayer>().length, 1);
+    ImageFilterLayer layer = tester.layers.whereType<ImageFilterLayer>().first;
+    expect(layer.imageFilter.toString(),
+        'ImageFilter.matrix([0.7071067811865476, 0.7071067811865475, 0.0, 0.0, '
+            '-0.7071067811865475, 0.7071067811865476, 0.0, 0.0, '
+            '0.0, 0.0, 1.0, 0.0, '
+            '329.28932188134524, -194.97474683058329, 0.0, 1.0], '
+            'FilterQuality.low)');
   });
 
   testWidgets('Transform layers update to match child and filterQuality', (WidgetTester tester) async {
