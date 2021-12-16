@@ -53,6 +53,8 @@ class FocusDelegate {
   void OnChildViewViewRef(uint64_t view_id,
                           fuchsia::ui::views::ViewRef view_ref);
 
+  void OnDisposeChildView(uint64_t view_id);
+
  private:
   fuchsia::ui::views::ViewRefFocusedPtr view_ref_focused_;
   fuchsia::ui::views::FocuserPtr focuser_;

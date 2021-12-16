@@ -87,7 +87,8 @@ bool FocusDelegate::HandlePlatformMessage(
     if (child_view_view_refs_.count(id) != 1) {
       FML_LOG(ERROR) << "Argument 'viewId' (" << id
                      << ") does not refer to a valid ChildView";
-      return false;
+      Complete(std::move(response), "[1]");
+      return true;
     }
 
     return RequestFocusById(id, std::move(response));
@@ -102,6 +103,11 @@ void FocusDelegate::OnChildViewViewRef(uint64_t view_id,
                                        fuchsia::ui::views::ViewRef view_ref) {
   FML_CHECK(child_view_view_refs_.count(view_id) == 0);
   child_view_view_refs_[view_id] = std::move(view_ref);
+}
+
+void FocusDelegate::OnDisposeChildView(uint64_t view_id) {
+  FML_CHECK(child_view_view_refs_.count(view_id) == 1);
+  child_view_view_refs_.erase(view_id);
 }
 
 void FocusDelegate::Complete(
