@@ -508,7 +508,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
       child.parentData = FlexParentData();
   }
 
-  bool get _canComputeIntrinsics => crossAxisAlignment != CrossAxisAlignment.baseline;
+  bool get _canComputeIntrinsics => crossAxisAlignment != CrossAxisAlignment.baseline || direction == Axis.vertical;
 
   double _getIntrinsicSize({
     required Axis sizingDirection,
