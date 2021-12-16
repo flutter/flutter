@@ -402,7 +402,7 @@ void main() {
       ),
     );
     expect(tester.layers.whereType<ImageFilterLayer>().length, 1);
-    ImageFilterLayer layer = tester.layers.whereType<ImageFilterLayer>().first;
+    final ImageFilterLayer layer = tester.layers.whereType<ImageFilterLayer>().first;
     expect(layer.imageFilter.toString(),
            'ImageFilter.matrix(['
                '1.0, 0.0, 0.0, 0.0, '
@@ -421,7 +421,7 @@ void main() {
       ),
     );
     expect(tester.layers.whereType<ImageFilterLayer>().length, 1);
-    ImageFilterLayer layer = tester.layers.whereType<ImageFilterLayer>().first;
+    final ImageFilterLayer layer = tester.layers.whereType<ImageFilterLayer>().first;
     expect(layer.imageFilter.toString(),
            'ImageFilter.matrix(['
                '3.14159, 0.0, 0.0, 0.0, '
@@ -440,7 +440,7 @@ void main() {
       ),
     );
     expect(tester.layers.whereType<ImageFilterLayer>().length, 1);
-    ImageFilterLayer layer = tester.layers.whereType<ImageFilterLayer>().first;
+    final ImageFilterLayer layer = tester.layers.whereType<ImageFilterLayer>().first;
     expect(layer.imageFilter.toString(),
            'ImageFilter.matrix(['
                '0.7071067811865476, 0.7071067811865475, 0.0, 0.0, '
@@ -463,7 +463,7 @@ void main() {
       ),
     );
     expect(tester.layers.whereType<ImageFilterLayer>().length, 1);
-    ImageFilterLayer layer = tester.layers.whereType<ImageFilterLayer>().first;
+    final ImageFilterLayer layer = tester.layers.whereType<ImageFilterLayer>().first;
     expect(layer.imageFilter.toString(),
         'ImageFilter.matrix([0.7071067811865476, 0.7071067811865475, 0.0, 0.0, '
             '-0.7071067811865475, 0.7071067811865476, 0.0, 0.0, '
