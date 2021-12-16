@@ -160,28 +160,12 @@ abstract class MouseCursorSession {
 /// another widget that exposes the [MouseRegion] API, such as
 /// [InkResponse.mouseCursor].
 ///
-/// {@tool snippet --template=stateless_widget_material}
+/// {@tool dartpad}
 /// This sample creates a rectangular region that is wrapped by a [MouseRegion]
 /// with a system mouse cursor. The mouse pointer becomes an I-beam when
 /// hovering over the region.
 ///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return Center(
-///     child: MouseRegion(
-///       cursor: SystemMouseCursors.text,
-///       child: Container(
-///         width: 200,
-///         height: 100,
-///         decoration: BoxDecoration(
-///           color: Colors.blue,
-///           border: Border.all(color: Colors.yellow),
-///         ),
-///       ),
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/services/mouse_cursor/mouse_cursor.0.dart **
 /// {@end-tool}
 ///
 /// Assigning regions with mouse cursors on platforms that do not support mouse

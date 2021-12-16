@@ -103,6 +103,7 @@ Widget activatorTester(
       if (hasSecond)
         TestIntent2: TestAction(onInvoke: (Intent intent) {
           onInvoke2(intent);
+	  return null;
         }),
     },
     child: Shortcuts(

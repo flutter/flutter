@@ -239,7 +239,7 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
 ///
 /// {@animation 250 500 https://flutter.github.io/assets-for-api-docs/assets/widgets/sliver_fill_remaining_fill_overscroll.mp4}
 ///
-/// {@tool sample}
+/// {@tool dartpad}
 /// In this sample the [SliverFillRemaining]'s child stretches to fill the
 /// overscroll area when [fillOverscroll] is true. This sample also features a
 /// button that is pinned to the bottom of the sliver, regardless of size or

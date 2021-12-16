@@ -629,7 +629,6 @@ class AndroidDevice extends Device {
       'shell', 'am', 'start',
       '-a', 'android.intent.action.RUN',
       '-f', '0x20000000', // FLAG_ACTIVITY_SINGLE_TOP
-      '--ez', 'enable-background-compilation', 'true',
       '--ez', 'enable-dart-profiling', 'true',
       if (traceStartup)
         ...<String>['--ez', 'trace-startup', 'true'],

@@ -3741,13 +3741,13 @@ class _UpdateTextSelectionToAdjacentLineAction<T extends DirectionalCaretMovemen
   }
 
   @override
-  Object? invoke(T intent, [BuildContext? context]) {
+  void invoke(T intent, [BuildContext? context]) {
     assert(state._value.selection.isValid);
 
     final bool collapseSelection = intent.collapseSelection || !state.widget.selectionEnabled;
     final TextEditingValue value = state._textEditingValueforTextLayoutMetrics;
     if (!value.selection.isValid) {
-      return null;
+      return;
     }
 
     if (_verticalMovementRun?.isValid == false) {
@@ -3807,7 +3807,7 @@ class _CopySelectionAction extends ContextAction<CopySelectionTextIntent> {
   final EditableTextState state;
 
   @override
-  Object? invoke(CopySelectionTextIntent intent, [BuildContext? context]) {
+  void invoke(CopySelectionTextIntent intent, [BuildContext? context]) {
     if (intent.collapseSelection) {
       state.cutSelection(intent.cause);
     } else {

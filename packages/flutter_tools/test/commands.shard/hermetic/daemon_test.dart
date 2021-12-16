@@ -172,6 +172,25 @@ void main() {
       Logger: () => notifyingLogger,
     });
 
+    testUsingContext('printBox should log to stdout when logToStdout is enabled', () async {
+      final StringBuffer buffer = await capturedConsolePrint(() {
+        final StreamController<Map<String, dynamic>> commands = StreamController<Map<String, dynamic>>();
+        final StreamController<Map<String, dynamic>> responses = StreamController<Map<String, dynamic>>();
+        daemon = Daemon(
+          commands.stream,
+          responses.add,
+          notifyingLogger: notifyingLogger,
+          logToStdout: true,
+        );
+        globals.printBox('This is the box message', title: 'Sample title');
+        return Future<void>.value();
+      });
+
+      expect(buffer.toString().trim(), contains('Sample title: This is the box message'));
+    }, overrides: <Type, Generator>{
+      Logger: () => notifyingLogger,
+    });
+
     testUsingContext('daemon.shutdown command should stop daemon', () async {
       final StreamController<Map<String, dynamic>> commands = StreamController<Map<String, dynamic>>();
       final StreamController<Map<String, dynamic>> responses = StreamController<Map<String, dynamic>>();
