@@ -36,7 +36,7 @@ void main() {
   tearDown(() {
     resetNetworkInterfaceLister();
   });
-  
+
   testWithoutContext('ProxyValidator does not show if HTTP_PROXY is not set', () {
     final Platform platform = FakePlatform(environment: <String, String>{});
 
