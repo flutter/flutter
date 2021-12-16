@@ -28,34 +28,19 @@ allprojects {
 
 apply plugin: "com.android.application"
 
-configurations {
-  // Use this configuration for dependencies required by the embedding.
-  embedding
-  // Use any of these configurations for dependencies required for testing the embedding.
-  embeddingTesting
-  embeddingTesting_v16
-}
-
 android {
   compileSdkVersion 31
+}
 
+configurations {
+  embedding
+}
+
+// Configure the embedding dependencies.
+apply from: new File(rootDir, '../tools/androidx/configure.gradle').absolutePath;
+configureDependencies(new File(rootDir, '../..')) { dependency ->
   dependencies {
-    embedding "androidx.annotation:annotation:1.1.0"
-    embedding "androidx.core:core:1.6.0"
-    embedding "androidx.fragment:fragment:1.1.0"
-    embedding "androidx.tracing:tracing:1.0.0"
-    embedding "androidx.window:window-java:1.0.0-beta04"
-
-    def lifecycle_version = "2.2.0"
-    embedding "androidx.lifecycle:lifecycle-runtime:$lifecycle_version"
-    embedding "androidx.lifecycle:lifecycle-common:$lifecycle_version"
-    embedding "androidx.lifecycle:lifecycle-common-java8:$lifecycle_version"
-
-    // This dependency is here to allow linking to Play core in tests, but
-    // is not used in a default Flutter app. This dependency should be manually
-    // added to the user's app gradle in order to opt into using split AOT
-    // dynamic features.
-    embedding "com.google.android.play:core:1.8.0"
+     embedding "$dependency"
   }
 }
 
@@ -65,8 +50,6 @@ task updateDependencies() {
   // the destination directory.
   copy {
     from configurations.embedding
-    from configurations.embeddingTesting
-    from configurations.embeddingTesting_v16
     into destinationDir
   }
   doLast {
