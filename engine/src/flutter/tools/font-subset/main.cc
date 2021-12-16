@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include <hb-subset.h>
+
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
@@ -58,25 +59,15 @@ struct HarfBuzzSubset {
     // The prior version of harfbuzz automatically dropped layout tables,
     // but in the new version they are kept by default. So re-add them to the
     // drop list to retain the same behaviour.
-    hb_set_add(hb_subset_input_drop_tables_set(input),
+
+    hb_set_add(hb_subset_input_set(input, HB_SUBSET_SETS_DROP_TABLE_TAG),
                HB_TAG('G', 'S', 'U', 'B'));
-    hb_set_add(hb_subset_input_drop_tables_set(input),
+    hb_set_add(hb_subset_input_set(input, HB_SUBSET_SETS_DROP_TABLE_TAG),
                HB_TAG('G', 'P', 'O', 'S'));
-    hb_set_add(hb_subset_input_drop_tables_set(input),
+    hb_set_add(hb_subset_input_set(input, HB_SUBSET_SETS_DROP_TABLE_TAG),
                HB_TAG('G', 'D', 'E', 'F'));
 
     return HarfbuzzWrappers::HbFacePtr(hb_subset_or_fail(face, input));
-  }
-};
-template <typename T>
-struct HarfBuzzSubset<T,
-                      void_t<decltype(hb_subset(std::declval<hb_face_t*>(),
-                                                std::declval<T>()))>> {
-  // This is the HarfBuzz 2.0 (non-public) interface, used if it exists.
-  // This code should be removed as soon as all users are migrated to the newer
-  // API.
-  static HarfbuzzWrappers::HbFacePtr Make(hb_face_t* face, T input) {
-    return HarfbuzzWrappers::HbFacePtr(hb_subset(face, input));
   }
 };
 
