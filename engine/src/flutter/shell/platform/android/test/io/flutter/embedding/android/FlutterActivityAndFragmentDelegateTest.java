@@ -599,6 +599,28 @@ public class FlutterActivityAndFragmentDelegateTest {
   }
 
   @Test
+  public void itDoesNotSendPushRouteMessageWhenOnNewIntentIsNonHierarchicalUri() {
+    when(mockHost.shouldHandleDeeplinking()).thenReturn(true);
+    // Create the real object that we're testing.
+    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
+
+    // --- Execute the behavior under test ---
+    // The FlutterEngine is set up in onAttach().
+    delegate.onAttach(RuntimeEnvironment.application);
+
+    Intent mockIntent = mock(Intent.class);
+
+    // mailto: URIs are non-hierarchical
+    when(mockIntent.getData()).thenReturn(Uri.parse("mailto:test@test.com"));
+
+    // Emulate the host and call the method
+    delegate.onNewIntent(mockIntent);
+
+    // Verify that the navigation channel was not given a push route message.
+    verify(mockFlutterEngine.getNavigationChannel(), times(0)).pushRoute("mailto:test@test.com");
+  }
+
+  @Test
   public void itSendsPushRouteMessageWhenOnNewIntentWithQueryParameterAndFragment() {
     when(mockHost.shouldHandleDeeplinking()).thenReturn(true);
     // Create the real object that we're testing.
