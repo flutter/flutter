@@ -122,6 +122,7 @@
         "templates/app_shared/web/icons/Icon-512.png.copy.tmpl",
         "templates/app_shared/web/icons/Icon-maskable-192.png.img.tmpl",
         "templates/app_shared/web/icons/Icon-maskable-512.png.img.tmpl",
+        "templates/app_shared/web/flutter.js.tmpl",
         "templates/app_shared/web/index.html.tmpl",
         "templates/app_shared/web/manifest.json.tmpl",
         "templates/app_shared/windows.tmpl/.gitignore",

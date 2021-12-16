@@ -149,16 +149,33 @@ Future<void> main() async {
 }
 ''';
     } else {
+
+// TODO: Add the FlutterLoader code to the if-case above (with plugins)!
+
       contents = '''
 // @dart=${languageVersion.major}.${languageVersion.minor}
 
 import 'dart:ui' as ui;
 
+import 'package:flutter_web_plugins/flutter_loader.dart';
+
 import '$mainImport' as entrypoint;
 
 Future<void> main() async {
-  await ui.webOnlyInitializePlatform();
-  entrypoint.main();
+  if (isFlutterJsLoaderConfigured) {
+    FlutterLoader(
+      initEngine: () async {
+        await ui.webOnlyInitializePlatform();
+      },
+      runApp: () {
+        entrypoint.main();
+      }
+    )..notifyFlutterReady();
+  } else {
+    // Legacy mode
+    await ui.webOnlyInitializePlatform();
+    entrypoint.main();
+  }
 }
 ''';
     }

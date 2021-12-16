@@ -465,6 +465,8 @@ class ResidentWebRunner extends ResidentRunner {
         "import 'dart:async';",
         '',
         "import '$importedEntrypoint' as entrypoint;",
+        '',
+        "import 'package:flutter_web_plugins/flutter_loader.dart';",
         if (hasWebPlugins)
           "import 'package:flutter_web_plugins/flutter_web_plugins.dart';",
         if (hasWebPlugins)
@@ -475,11 +477,29 @@ class ResidentWebRunner extends ResidentRunner {
         'Future<void> main() async {',
         if (hasWebPlugins)
           '  registerPlugins(webPluginRegistrar);',
-        '  await ui.webOnlyInitializePlatform();',
-        '  if (entrypoint.main is _UnaryFunction) {',
-        '    return (entrypoint.main as _UnaryFunction)(<String>[]);',
-        '  }',
-        '  return (entrypoint.main as _NullaryFunction)();',
+        '''
+  if (isFlutterJsLoaderConfigured) {
+    FlutterLoader(
+      initEngine: () async {
+        await ui.webOnlyInitializePlatform();
+      },
+      runApp: () {
+        if (entrypoint.main is _UnaryFunction) {
+          // pass possible params arg here
+          return (entrypoint.main as _UnaryFunction)(<String>[]);
+        }
+        return entrypoint.main();
+      }
+    )..notifyFlutterReady();
+  } else {
+    // Legacy mode
+    await ui.webOnlyInitializePlatform();
+    if (entrypoint.main is _UnaryFunction) {
+      return (entrypoint.main as _UnaryFunction)(<String>[]);
+    }
+    return entrypoint.main();
+  }
+        ''',
         '}',
         '',
       ].join('\n');
