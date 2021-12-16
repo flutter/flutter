@@ -114,7 +114,7 @@ deps = {
    Var('fuchsia_git') + '/third_party/rapidjson' + '@' + 'ef3564c5c8824989393b87df25355baf35ff544b',
 
   'src/third_party/harfbuzz':
-   Var('fuchsia_git') + '/third_party/harfbuzz' + '@' + '047b946d1d0a159d7ef9691a44a91bd1253aec6b',
+   Var('flutter_git') + '/third_party/harfbuzz' + '@' + 'd40d15e994ed60d32bcfc9ab87004dfb028dfbd6',
 
   'src/third_party/libcxx':
    Var('fuchsia_git') + '/third_party/libcxx' + '@' + '7524ef50093a376f334a62a7e5cebf5d238d4c99',

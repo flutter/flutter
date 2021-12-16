@@ -5592,9 +5592,9 @@ TEST_F(ParagraphTest, LINUX_ONLY(KernScaleParagraph)) {
 
   EXPECT_DOUBLE_EQ(paragraph->records_[0].offset().x(), 0);
   EXPECT_DOUBLE_EQ(paragraph->records_[1].offset().x(), 0);
-  EXPECT_DOUBLE_EQ(paragraph->records_[2].offset().x(), 207.359375f);
-  EXPECT_DOUBLE_EQ(paragraph->records_[3].offset().x(), 230.859375f);
-  EXPECT_DOUBLE_EQ(paragraph->records_[4].offset().x(), 253.34765625f);
+  EXPECT_DOUBLE_EQ(paragraph->records_[2].offset().x(), 207.3671875f);
+  EXPECT_DOUBLE_EQ(paragraph->records_[3].offset().x(), 230.8671875f);
+  EXPECT_DOUBLE_EQ(paragraph->records_[4].offset().x(), 253.35546875f);
 }
 
 TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(NewlineParagraph)) {
