@@ -393,6 +393,11 @@ void main() {
     skip: isBrowser, // due to https://github.com/flutter/flutter/issues/49857
   );
 
+  List<double> extractMatrix(ui.ImageFilter? filter) {
+    final List<String> numbers = filter.toString().split('[').last.split(']').first.split(',');
+    return numbers.map<double>((String str) => double.parse(str.trim())).toList();
+  }
+
   testWidgets('Transform.translate with FilterQuality produces filter layer', (WidgetTester tester) async {
     await tester.pumpWidget(
       Transform.translate(
@@ -403,13 +408,12 @@ void main() {
     );
     expect(tester.layers.whereType<ImageFilterLayer>().length, 1);
     final ImageFilterLayer layer = tester.layers.whereType<ImageFilterLayer>().first;
-    expect(layer.imageFilter.toString(),
-           'ImageFilter.matrix(['
-               '1.0, 0.0, 0.0, 0.0, '
-               '0.0, 1.0, 0.0, 0.0, '
-               '0.0, 0.0, 1.0, 0.0, '
-               '25.0, 25.0, 0.0, 1.0], '
-               'FilterQuality.low)');
+    expect(extractMatrix(layer.imageFilter), <double>[
+      1.0, 0.0, 0.0, 0.0,
+      0.0, 1.0, 0.0, 0.0,
+      0.0, 0.0, 1.0, 0.0,
+      25.0, 25.0, 0.0, 1.0]
+    );
   });
 
   testWidgets('Transform.scale with FilterQuality produces filter layer', (WidgetTester tester) async {
@@ -422,13 +426,12 @@ void main() {
     );
     expect(tester.layers.whereType<ImageFilterLayer>().length, 1);
     final ImageFilterLayer layer = tester.layers.whereType<ImageFilterLayer>().first;
-    expect(layer.imageFilter.toString(),
-           'ImageFilter.matrix(['
-               '3.14159, 0.0, 0.0, 0.0, '
-               '0.0, 3.14159, 0.0, 0.0, '
-               '0.0, 0.0, 1.0, 0.0, '
-               '-856.636, -642.477, 0.0, 1.0], '
-               'FilterQuality.low)');
+    expect(extractMatrix(layer.imageFilter), <double>[
+      3.14159, 0.0, 0.0, 0.0,
+      0.0, 3.14159, 0.0, 0.0,
+      0.0, 0.0, 1.0, 0.0,
+      -856.636, -642.477, 0.0, 1.0]
+    );
   });
 
   testWidgets('Transform.rotate with FilterQuality produces filter layer', (WidgetTester tester) async {
@@ -441,13 +444,12 @@ void main() {
     );
     expect(tester.layers.whereType<ImageFilterLayer>().length, 1);
     final ImageFilterLayer layer = tester.layers.whereType<ImageFilterLayer>().first;
-    expect(layer.imageFilter.toString(),
-           'ImageFilter.matrix(['
-               '0.7071067811865476, 0.7071067811865475, 0.0, 0.0, '
-               '-0.7071067811865475, 0.7071067811865476, 0.0, 0.0, '
-               '0.0, 0.0, 1.0, 0.0, '
-               '329.28932188134524, -194.97474683058323, 0.0, 1.0], '
-               'FilterQuality.low)');
+    expect(extractMatrix(layer.imageFilter), <double>[
+      0.7071067811865476, 0.7071067811865475, 0.0, 0.0,
+      -0.7071067811865475, 0.7071067811865476, 0.0, 0.0,
+      0.0, 0.0, 1.0, 0.0,
+      329.28932188134524, -194.97474683058323, 0.0, 1.0]
+    );
   });
 
   testWidgets('Offset Transform.rotate with FilterQuality produces filter layer', (WidgetTester tester) async {
@@ -464,12 +466,12 @@ void main() {
     );
     expect(tester.layers.whereType<ImageFilterLayer>().length, 1);
     final ImageFilterLayer layer = tester.layers.whereType<ImageFilterLayer>().first;
-    expect(layer.imageFilter.toString(),
-        'ImageFilter.matrix([0.7071067811865476, 0.7071067811865475, 0.0, 0.0, '
-            '-0.7071067811865475, 0.7071067811865476, 0.0, 0.0, '
-            '0.0, 0.0, 1.0, 0.0, '
-            '329.28932188134524, -194.97474683058329, 0.0, 1.0], '
-            'FilterQuality.low)');
+    expect(extractMatrix(layer.imageFilter), <double>[
+      0.7071067811865476, 0.7071067811865475, 0.0, 0.0,
+      -0.7071067811865475, 0.7071067811865476, 0.0, 0.0,
+      0.0, 0.0, 1.0, 0.0,
+      329.28932188134524, -194.97474683058329, 0.0, 1.0]
+    );
   });
 
   testWidgets('Transform layers update to match child and filterQuality', (WidgetTester tester) async {
