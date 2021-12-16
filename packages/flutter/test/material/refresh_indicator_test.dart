@@ -364,7 +364,7 @@ void main() {
     expect(completed2, true);
   });
 
-  testWidgets('Refresh starts while scroll view moves back to 0.0 after overscroll', (WidgetTester tester) async {
+  testWidgets('RefreshIndicator - refresh and cancel happen while scroll view moves back to 0.0 after overscroll', (WidgetTester tester) async {
     double lastScrollOffset;
     final ScrollController controller = ScrollController();
 
@@ -386,14 +386,29 @@ void main() {
       ),
     );
 
-    await tester.fling(find.text('A'), const Offset(0.0, 300.0), 1000.0);
+    // test cancel
+
+    await tester.drag(find.text('A'), const Offset(0.0, expectedArmOffset - 1));
     await tester.pump();
+    final Offset position = tester.getTopLeft(find.byType(RefreshProgressIndicator));
+    await tester.pump(const Duration(milliseconds: 1));
+    await tester.pump(const Duration(milliseconds: 1));
+    expect(tester.getTopLeft(find.byType(RefreshProgressIndicator)).dy, lessThan(position.dy));
+    expect(refreshCalled, isFalse);
+    await tester.pumpAndSettle();
+
+    // test refresh
+
+    await tester.fling(find.text('A'), const Offset(0.0, 300.0), 1000.0);
+    await tester.pump(const Duration(milliseconds: 100));
     expect(lastScrollOffset = controller.offset, lessThan(0.0));
     expect(refreshCalled, isFalse);
 
-    expect(await tester.pumpAndSettle(), 9);
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 100));
     expect(controller.offset, greaterThan(lastScrollOffset));
-    expect(controller.offset, 0.0);
+    expect(controller.offset, lessThan(0.0));
     expect(refreshCalled, isTrue);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
@@ -912,7 +927,7 @@ void main() {
     expect(refreshCalled, true);
   });
 
-  testWidgets('RefreshIndicator - respects BouncingScrollPhysics friction', (WidgetTester tester) async {
+  testWidgets('RefreshIndicator - not affected by BouncingScrollPhysics friction', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: RefreshIndicator(
@@ -930,12 +945,11 @@ void main() {
       ),
     );
 
-    const double iosExpectedArmOffset = 131;
-    await tester.drag(find.text('X'), const Offset(0.0, iosExpectedArmOffset - 1.0));
+    await tester.drag(find.text('X'), const Offset(0.0, expectedArmOffset - 1.0));
     await tester.pumpAndSettle();
     expect(refreshCalled, false);
 
-    await tester.drag(find.text('X'), const Offset(0.0, iosExpectedArmOffset));
+    await tester.drag(find.text('X'), const Offset(0.0, expectedArmOffset));
     await tester.pumpAndSettle();
     expect(refreshCalled, true);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));

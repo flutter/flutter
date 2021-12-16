@@ -348,20 +348,21 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
           // Prevent moving the scroll view until indicator drag offset is fully consumed.
           position.correctBy(-notification.scrollDelta!);
         }
-        _dragOffset = _dragOffset! - notification.scrollDelta!;
-        _updateDragOffset(
-          notification.metrics.viewportDimension,
-          // Mitigate an extra friction on iOS.
-          extentPercentage: position.physics is BouncingScrollPhysics ? 0.25 : null,
-        );
+        // Use primaryDelta instead of scrollDelta to ignore any friction applied by ScrollPhysics.
+        _dragOffset = _dragOffset! - notification.dragDetails!.primaryDelta!.abs() * notification.scrollDelta!.sign;
+        _updateDragOffset(notification.metrics.viewportDimension);
         if (_dragOffset! <= 0.0) {
           _dismiss(_RefreshIndicatorMode.canceled);
         }
-      } else if (notification.dragDetails == null && _mode == _RefreshIndicatorMode.armed) {
-        // On iOS start the refresh when the Scrollable bounces back from the
+      } else if (notification.dragDetails == null) {
+        // Handle drag up on iOS - i.e. when the Scrollable bounces back from the
         // overscroll (ScrollNotification indicating this don't have dragDetails
         // because the scroll activity is not directly triggered by a drag).
-        _show();
+        if (_mode == _RefreshIndicatorMode.armed) {
+          _show();
+        } else if (_mode == _RefreshIndicatorMode.drag) {
+          _dismiss(_RefreshIndicatorMode.canceled);
+        }
       }
     } else if (notification is OverscrollNotification) {
       if (_mode == _RefreshIndicatorMode.drag || _mode == _RefreshIndicatorMode.armed) {
@@ -421,9 +422,9 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
     return true;
   }
 
-  void _updateDragOffset(double containerExtent, {double? extentPercentage}) {
+  void _updateDragOffset(double containerExtent) {
     assert(_mode == _RefreshIndicatorMode.drag || _mode == _RefreshIndicatorMode.armed);
-    final double newValue = _dragOffset! / (containerExtent * (extentPercentage ?? _kDragContainerExtentPercentage));
+    final double newValue = _dragOffset! / (containerExtent * _kDragContainerExtentPercentage);
     _positionController.value = newValue.clamp(0.0, 1.0); // this triggers various rebuilds
 
     if (_mode == _RefreshIndicatorMode.drag && _positionController.value >= _kArmedThreshold) {
