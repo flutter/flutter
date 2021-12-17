@@ -372,6 +372,11 @@ class Doctor {
       _logger.printStatus('');
     }
 
+    if(verbose) {
+      final String? path = globals.platform.environment['PATH'];
+      _logger.printStatus('🔨 PATH: $path\n');
+    }
+
     if (issues > 0) {
       _logger.printStatus('${showColor ? globals.terminal.color('!', TerminalColor.yellow) : '!'}'
         ' Doctor found issues in $issues categor${issues > 1 ? "ies" : "y"}.', hangingIndent: 2);

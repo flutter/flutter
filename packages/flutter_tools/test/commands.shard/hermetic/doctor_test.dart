@@ -453,8 +453,14 @@ void main() {
               '    ! Maybe a hint will help the user\n'
               '    • An extra message with some verbose details\n'
               '\n'
+              '🔨 PATH: /usr/bin:/usr/local/bin:/home/user/.bin\n'
+              '\n'
               '! Doctor found issues in 4 categories.\n'
       ));
+    }, overrides: <Type, Generator>{
+      Platform: () => FakePlatform(environment: <String, String>{
+        'PATH': '/usr/bin:/usr/local/bin:/home/user/.bin',
+      }),
     });
   });
 
@@ -530,9 +536,17 @@ void main() {
         '    • An extra message with\n'
         '      some verbose details\n'
         '\n'
+        '🔨 PATH:\n'
+        '/usr/bin:/usr/local/bin:/home/\n'
+        'user/.bin\n'
+        '\n'
         '! Doctor found issues in 4\n'
         '  categories.\n'
     ));
+  }, overrides: <Type, Generator>{
+    Platform: () => FakePlatform(environment: <String, String>{
+      'PATH': '/usr/bin:/usr/local/bin:/home/user/.bin',
+    }),
   });
 
 
@@ -548,8 +562,14 @@ void main() {
               '    • A helpful message\n'
               '    ✗ A useful error message\n'
               '\n'
+              '🔨 PATH: /usr/bin:/usr/local/bin:/home/user/.bin\n'
+              '\n'
               '! Doctor found issues in 1 category.\n'
       ));
+    }, overrides: <Type, Generator>{
+      Platform: () => FakePlatform(environment: <String, String>{
+        'PATH': '/usr/bin:/usr/local/bin:/home/user/.bin',
+      }),
     });
 
     testUsingContext('validate merging assigns statusInfo and title', () async {
@@ -560,8 +580,14 @@ void main() {
               '    • A helpful message\n'
               '    • A different message\n'
               '\n'
+              '🔨 PATH: /usr/bin:/usr/local/bin:/home/user/.bin\n'
+              '\n'
               '• No issues found!\n'
       ));
+    }, overrides: <Type, Generator>{
+      Platform: () => FakePlatform(environment: <String, String>{
+        'PATH': '/usr/bin:/usr/local/bin:/home/user/.bin',
+      }),
     });
   });
 
