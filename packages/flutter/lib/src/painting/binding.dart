@@ -4,7 +4,7 @@
 
 
 import 'dart:typed_data' show Uint8List;
-import 'dart:ui' as ui show instantiateImageCodec, Codec;
+import 'dart:ui' as ui show instantiateImageCodec, Codec, Application;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show ServicesBinding;
 
@@ -21,13 +21,14 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
   void initInstances() {
     super.initInstances();
     _instance = this;
-    _imageCache = createImageCache();
+    _imageCache ??= createImageCache();
     shaderWarmUp?.execute();
   }
 
   /// The current [PaintingBinding], if one has been created.
   static PaintingBinding? get instance => _instance;
-  static PaintingBinding? _instance;
+  static PaintingBinding? get _instance => ui.Application.current.find(PaintingBinding);
+  static set _instance(PaintingBinding? instance) => ui.Application.current.put(PaintingBinding, instance);
 
   /// [ShaderWarmUp] instance to be executed during [initInstances].
   ///
@@ -68,7 +69,7 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
   /// The image cache is created during startup by the [createImageCache]
   /// method.
   ImageCache? get imageCache => _imageCache;
-  ImageCache? _imageCache;
+  static ImageCache? _imageCache;
 
   /// Creates the [ImageCache] singleton (accessible via [imageCache]).
   ///

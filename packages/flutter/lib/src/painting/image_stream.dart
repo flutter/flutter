@@ -158,11 +158,14 @@ class ImageStreamListener {
   /// Creates a new [ImageStreamListener].
   ///
   /// The [onImage] parameter must not be null.
-  const ImageStreamListener(
-    this.onImage, {
-    this.onChunk,
-    this.onError,
-  }) : assert(onImage != null);
+  ImageStreamListener(
+    onImage, {
+    onChunk,
+    onError,
+  }) : assert(onImage != null),
+     onImage = Zone.current.bindBinaryCallback(onImage),
+     onChunk = onChunk != null ? Zone.current.bindUnaryCallback(onChunk) : null,
+     onError = onError != null ? Zone.current.bindBinaryCallback(onError) : null;
 
   /// Callback for getting notified that an image is available.
   ///
