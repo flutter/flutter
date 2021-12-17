@@ -1,4 +1,4 @@
-Signature: 637c92a08b8852b586596e4a18e5d7ad
+Signature: 7e09e40b0c31a271ca7710a9ff04432d
 
 UNUSED LICENSES:
 
@@ -9858,6 +9858,7 @@ FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/late_helper.dar
 FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/ffi_allocation_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/core/enum.dart
 FILE: ../../../third_party/dart/sdk/lib/ffi/abi.dart
+FILE: ../../../third_party/dart/sdk/lib/ffi/abi_specific.dart
 FILE: ../../../third_party/dart/sdk/lib/ffi/allocation.dart
 FILE: ../../../third_party/dart/sdk/lib/ffi/union.dart
 ----------------------------------------------------------------------------------------------------
