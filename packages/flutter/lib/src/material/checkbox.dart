@@ -339,7 +339,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
   }
 
   @override
-  ValueChanged<bool?>? get onChanged => widget.onChanged;
+  ValueChanged<bool> get onChanged => widget.onChanged;
 
   @override
   bool get tristate => widget.tristate;
