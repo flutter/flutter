@@ -395,6 +395,36 @@ abstract class Widget extends DiagnosticableTree {
   }
 }
 
+// A cache of inherited elements with an optional parent pointer.
+//
+// When looking up an inherited element, this will look through parent
+// pointers until the element is found or the end is reached. When an element
+// is found, it is cached at the first element where the search began.
+//
+// The intention of this cache is to speed up the initial build of widget
+// trees that contain a significant number of inherited widgets by deferring
+// expensive map allocations until they are needed.
+class _InheritedLookup {
+  _InheritedLookup? parent;
+  final HashMap<Type, InheritedElement> current = HashMap<Type, InheritedElement>();
+
+  InheritedElement? operator[](Type type) {
+    InheritedElement? potential = current[type];
+    if (potential != null) {
+      return potential;
+    }
+    potential =  parent?._lookupWithoutCaching(type);
+    if (potential != null) {
+      current[type] = potential;
+    }
+    return potential;
+  }
+
+  InheritedElement? _lookupWithoutCaching(Type type) {
+    return current[type] ?? parent?._lookupWithoutCaching(type);
+  }
+}
+
 /// A widget that does not require mutable state.
 ///
 /// A stateless widget is a widget that describes part of the user interface by
@@ -3934,7 +3964,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       // implementation to decide whether to rebuild based on whether we had
       // dependencies here.
     }
-    _inheritedWidgets = null;
+    _inheritedLookup = null;
     _lifecycleState = _ElementLifecycle.inactive;
   }
 
@@ -4126,7 +4156,8 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     return null;
   }
 
-  Map<Type, InheritedElement>? _inheritedWidgets;
+  _InheritedLookup? _inheritedLookup;
+
   Set<InheritedElement>? _dependencies;
   bool _hadUnsatisfiedDependencies = false;
 
@@ -4163,7 +4194,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   @override
   T? dependOnInheritedWidgetOfExactType<T extends InheritedWidget>({Object? aspect}) {
     assert(_debugCheckStateIsActiveForAncestorLookup());
-    final InheritedElement? ancestor = _inheritedWidgets == null ? null : _inheritedWidgets![T];
+    final InheritedElement? ancestor = _inheritedLookup?[T];
     if (ancestor != null) {
       return dependOnInheritedElement(ancestor, aspect: aspect) as T;
     }
@@ -4174,13 +4205,13 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   @override
   InheritedElement? getElementForInheritedWidgetOfExactType<T extends InheritedWidget>() {
     assert(_debugCheckStateIsActiveForAncestorLookup());
-    final InheritedElement? ancestor = _inheritedWidgets == null ? null : _inheritedWidgets![T];
+    final InheritedElement? ancestor = _inheritedLookup?[T];
     return ancestor;
   }
 
   void _updateInheritance() {
     assert(_lifecycleState == _ElementLifecycle.active);
-    _inheritedWidgets = _parent?._inheritedWidgets;
+    _inheritedLookup = _parent?._inheritedLookup;
   }
 
   @override
@@ -5188,12 +5219,9 @@ class InheritedElement extends ProxyElement {
   @override
   void _updateInheritance() {
     assert(_lifecycleState == _ElementLifecycle.active);
-    final Map<Type, InheritedElement>? incomingWidgets = _parent?._inheritedWidgets;
-    if (incomingWidgets != null)
-      _inheritedWidgets = HashMap<Type, InheritedElement>.of(incomingWidgets);
-    else
-      _inheritedWidgets = HashMap<Type, InheritedElement>();
-    _inheritedWidgets![widget.runtimeType] = this;
+    _inheritedLookup = _InheritedLookup()
+      ..parent = _parent?._inheritedLookup
+      ..current[widget.runtimeType] = this;
   }
 
   @override
