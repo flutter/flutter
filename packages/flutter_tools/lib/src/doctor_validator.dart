@@ -285,7 +285,7 @@ class NoIdeValidator extends DoctorValidator {
   @override
   Future<ValidationResult> validate() async {
     return ValidationResult(
-      ValidationType.missing,
+      ValidationType.notAvailable,
       globals.userMessages.noIdeInstallationInfo.map((String ideInfo) => ValidationMessage(ideInfo)).toList(),
       statusInfo: globals.userMessages.noIdeStatusInfo,
     );
