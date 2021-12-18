@@ -44,7 +44,7 @@ class DecorationImage {
   /// The [image], [alignment], [repeat], and [matchTextDirection] arguments
   /// must not be null.
   const DecorationImage({
-    required this.image,
+    this.image,
     this.onError,
     this.colorFilter,
     this.fit,
@@ -57,8 +57,7 @@ class DecorationImage {
     this.filterQuality = FilterQuality.low,
     this.invertColors = false,
     this.isAntiAlias = false,
-  }) : assert(image != null),
-       assert(alignment != null),
+  }) : assert(alignment != null),
        assert(repeat != null),
        assert(matchTextDirection != null),
        assert(scale != null);
@@ -67,7 +66,7 @@ class DecorationImage {
   ///
   /// Typically this will be an [AssetImage] (for an image shipped with the
   /// application) or a [NetworkImage] (for an image obtained from the network).
-  final ImageProvider image;
+  final ImageProvider? image;
 
   /// An optional error callback for errors emitted when loading [image].
   final ImageErrorListener? onError;
@@ -323,7 +322,7 @@ class DecorationImagePainter {
       _imageStream = newImageStream;
       _imageStream!.addListener(listener);
     }
-    if (_image == null)
+    if (_image == null||image==null)
       return;
 
     if (clipPath != null) {
@@ -480,7 +479,7 @@ void debugFlushLastFrameImageSizeInfo() {
 void paintImage({
   required Canvas canvas,
   required Rect rect,
-  required ui.Image image,
+  ui.Image image,
   String? debugImageLabel,
   double scale = 1.0,
   double opacity = 1.0,
@@ -495,7 +494,6 @@ void paintImage({
   bool isAntiAlias = false,
 }) {
   assert(canvas != null);
-  assert(image != null);
   assert(alignment != null);
   assert(repeat != null);
   assert(flipHorizontally != null);
@@ -506,7 +504,7 @@ void paintImage({
     'The caller of paintImage is expected to wait to dispose the image until '
     'after painting has completed.',
   );
-  if (rect.isEmpty)
+  if (rect.isEmpty|| image ==null)
     return;
   Size outputSize = rect.size;
   Size inputSize = Size(image.width.toDouble(), image.height.toDouble());
@@ -657,7 +655,7 @@ void paintImage({
   }
 }
 
-Iterable<Rect> _generateImageTileRects(Rect outputRect, Rect fundamentalRect, ImageRepeat repeat) {
+Iterable<Rect> _generateImageTileRects(Rect outputRect, Rect fundamentalRect, ImageRepeat repeat) sync* {
   int startX = 0;
   int startY = 0;
   int stopX = 0;
@@ -675,11 +673,10 @@ Iterable<Rect> _generateImageTileRects(Rect outputRect, Rect fundamentalRect, Im
     stopY = ((outputRect.bottom - fundamentalRect.bottom) / strideY).ceil();
   }
 
-  return <Rect>[
-    for (int i = startX; i <= stopX; ++i)
-      for (int j = startY; j <= stopY; ++j)
-        fundamentalRect.shift(Offset(i * strideX, j * strideY)),
-  ];
+  for (int i = startX; i <= stopX; ++i) {
+    for (int j = startY; j <= stopY; ++j)
+      yield fundamentalRect.shift(Offset(i * strideX, j * strideY));
+  }
 }
 
 Rect _scaleRect(Rect rect, double scale) => Rect.fromLTRB(rect.left * scale, rect.top * scale, rect.right * scale, rect.bottom * scale);
