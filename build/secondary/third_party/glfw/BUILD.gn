@@ -5,7 +5,10 @@
 _checkout_dir = "//third_party/glfw"
 
 config("relative_glfw_headers") {
-  include_dirs = [ "$_checkout_dir/include" ]
+  include_dirs = [
+    "$_checkout_dir/include",
+    "$_checkout_dir/include/GLFW",
+  ]
 }
 
 source_set("glfw") {
