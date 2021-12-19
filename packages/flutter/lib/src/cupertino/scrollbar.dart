@@ -98,6 +98,7 @@ class CupertinoScrollbar extends RawScrollbar {
          pressDuration: const Duration(milliseconds: 100),
          notificationPredicate: notificationPredicate ?? defaultScrollNotificationPredicate,
          scrollbarOrientation: scrollbarOrientation,
+         padding: padding,
        );
 
   /// Default value for [thickness] if it's not specified in [CupertinoScrollbar].
