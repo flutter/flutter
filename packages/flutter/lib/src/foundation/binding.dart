@@ -52,6 +52,8 @@ abstract class BindingBase {
   BindingBase() {
     developer.Timeline.startSync('Framework initialization');
 
+    _applicationId = ui.Application.current.id;
+
     assert(!_debugInitialized);
     initInstances();
     assert(_debugInitialized);
@@ -66,6 +68,7 @@ abstract class BindingBase {
     developer.Timeline.finishSync();
   }
 
+  late Object _applicationId;
   bool _debugInitialized = false;
   static bool _debugServiceExtensionsRegistered = false;
 
@@ -105,7 +108,7 @@ abstract class BindingBase {
   /// provides access to the one and only window.
   // TODO(gspencergoog): remove the preceding note once multi-window support is
   // active.
-  ui.SingletonFlutterWindow get window => ui.window;
+  ui.SingletonFlutterWindow get window => ui.Application.fromId(_applicationId).window;
 
   /// The [ui.PlatformDispatcher] to which this binding is bound.
   ///
@@ -126,7 +129,7 @@ abstract class BindingBase {
   /// for use by other bindings. A subclass of [BindingBase], such as
   /// [TestWidgetsFlutterBinding], can override this accessor to return a
   /// different [ui.PlatformDispatcher] implementation.
-  ui.PlatformDispatcher get platformDispatcher => ui.PlatformDispatcher.instance;
+  ui.PlatformDispatcher get platformDispatcher => ui.Application.fromId(_applicationId).platformDispatcher;
 
   /// The initialization method. Subclasses override this method to hook into
   /// the platform and otherwise configure their services. Subclasses must call
