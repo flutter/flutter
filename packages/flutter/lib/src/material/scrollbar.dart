@@ -85,6 +85,7 @@ class Scrollbar extends StatelessWidget {
     this.notificationPredicate,
     this.interactive,
     this.scrollbarOrientation,
+    this.padding,
   }) : super(key: key);
 
   /// {@macro flutter.widgets.Scrollbar.child}
