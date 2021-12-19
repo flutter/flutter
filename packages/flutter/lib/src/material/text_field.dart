@@ -1217,6 +1217,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       child: UnmanagedRestorationScope(
         bucket: bucket,
         child: EditableText(
+          autofillHints: widget.autofillHints,
           key: editableTextKey,
           readOnly: widget.readOnly || !_isEnabled,
           toolbarOptions: widget.toolbarOptions,
