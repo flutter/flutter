@@ -150,7 +150,7 @@ class Scrollbar extends StatelessWidget {
 
   /// {@macro flutter.widgets.Scrollbar.scrollbarOrientation}
   final ScrollbarOrientation? scrollbarOrientation;
-  
+
   /// The amount of space by which to inset the [child].
   final EdgeInsets? padding;
 
