@@ -150,6 +150,9 @@ class Scrollbar extends StatelessWidget {
 
   /// {@macro flutter.widgets.Scrollbar.scrollbarOrientation}
   final ScrollbarOrientation? scrollbarOrientation;
+  
+  /// The amount of space by which to inset the [child].
+  final EdgeInsets? padding;
 
   @override
   Widget build(BuildContext context) {
@@ -163,6 +166,7 @@ class Scrollbar extends StatelessWidget {
         controller: controller,
         notificationPredicate: notificationPredicate,
         scrollbarOrientation: scrollbarOrientation,
+        padding: padding,
         child: child,
       );
     }
@@ -177,6 +181,7 @@ class Scrollbar extends StatelessWidget {
       notificationPredicate: notificationPredicate,
       interactive: interactive,
       scrollbarOrientation: scrollbarOrientation,
+      padding: padding,
       child: child,
     );
   }
@@ -196,6 +201,7 @@ class _MaterialScrollbar extends RawScrollbar {
     ScrollNotificationPredicate? notificationPredicate,
     bool? interactive,
     ScrollbarOrientation? scrollbarOrientation,
+    this.padding,
   }) : super(
          key: key,
          child: child,
@@ -214,6 +220,7 @@ class _MaterialScrollbar extends RawScrollbar {
   final bool? trackVisibility;
   final bool? showTrackOnHover;
   final double? hoverThickness;
+  final EdgeInsets? padding;
 
   @override
   _MaterialScrollbarState createState() => _MaterialScrollbarState();
@@ -373,7 +380,7 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
       ..crossAxisMargin = _scrollbarTheme.crossAxisMargin ?? (_useAndroidScrollbar ? 0.0 : _kScrollbarMargin)
       ..mainAxisMargin = _scrollbarTheme.mainAxisMargin ?? 0.0
       ..minLength = _scrollbarTheme.minThumbLength ?? _kScrollbarMinLength
-      ..padding = MediaQuery.of(context).padding
+      ..padding = widget.padding ?? MediaQuery.of(context).padding
       ..scrollbarOrientation = widget.scrollbarOrientation
       ..ignorePointer = !enableGestures;
   }
