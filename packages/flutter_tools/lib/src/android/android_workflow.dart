@@ -21,6 +21,7 @@ import 'android_studio.dart';
 
 const int kAndroidSdkMinVersion = 29;
 final Version kAndroidJavaMinVersion = Version(1, 8, 0);
+final Version kAndroidJavaMaxVersion = Version(1, 9, 0);
 final Version kAndroidSdkBuildToolsMinVersion = Version(28, 0, 3);
 
 AndroidWorkflow? get androidWorkflow => context.get<AndroidWorkflow>();
@@ -158,6 +159,10 @@ class AndroidValidator extends DoctorValidator {
       }
       if (javaVersion < kAndroidJavaMinVersion) {
         messages.add(ValidationMessage.error(_userMessages.androidJavaMinimumVersion(javaVersionText)));
+        return false;
+      }
+      if (javaVersion > kAndroidJavaMaxVersion) {
+        messages.add(ValidationMessage.error(_userMessages.androidJavaMaximumVersion(javaVersionText)));
         return false;
       }
       messages.add(ValidationMessage(_userMessages.androidJavaVersion(javaVersionText)));

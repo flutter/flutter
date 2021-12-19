@@ -510,6 +510,52 @@ Review licenses that have not been accepted (y/N)?
     );
   });
 
+  testWithoutContext('detects maximum required java version', () async {
+    // Test with newer version of JDK
+    const String javaVersionText = 'openjdk version "1.14.0_212"';
+    processManager.addCommand(const FakeCommand(
+      command: <String>[
+        'home/java/bin/java',
+        '-version',
+      ], stderr: javaVersionText,
+    ));
+    final FakeAndroidSdkVersion sdkVersion = FakeAndroidSdkVersion()
+      ..sdkLevel = 29
+      ..buildToolsVersion = Version(28, 0, 3);
+
+    // Mock a pass through scenario to reach _checkJavaVersion()
+    sdk
+      ..licensesAvailable = true
+      ..platformToolsAvailable = true
+      ..cmdlineToolsAvailable = true
+      ..directory = fileSystem.directory('/foo/bar')
+      ..sdkManagerPath = '/foo/bar/sdkmanager';
+    sdk.latestVersion = sdkVersion;
+
+    final String errorMessage = UserMessages().androidJavaMaximumVersion(javaVersionText);
+
+    final ValidationResult validationResult = await AndroidValidator(
+      androidSdk: sdk,
+      androidStudio: null, // ignore: avoid_redundant_argument_values
+      fileSystem: fileSystem,
+      logger: logger,
+      platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me', 'JAVA_HOME': 'home/java'},
+      processManager: processManager,
+      userMessages: UserMessages(),
+    ).validate();
+    expect(validationResult.type, ValidationType.partial);
+    expect(
+      validationResult.messages.last.message,
+      errorMessage,
+    );
+    expect(
+      validationResult.messages.any(
+              (ValidationMessage message) => message.message.contains('Unable to locate Android SDK')
+      ),
+      false,
+    );
+  });
+
   testWithoutContext('Mentions `flutter config --android-sdk if user has no AndroidSdk`', () async {
     final ValidationResult validationResult = await AndroidValidator(
       androidSdk: null, // ignore: avoid_redundant_argument_values

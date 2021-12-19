@@ -64,6 +64,11 @@ class UserMessages {
   String get androidUnknownJavaVersion => 'Could not determine java version';
   String androidJavaVersion(String javaVersion) => 'Java version $javaVersion';
   String androidJavaMinimumVersion(String javaVersion) => 'Java version $javaVersion is older than the minimum recommended version of 1.8';
+  String androidJavaMaximumVersion(String javaVersion) =>
+      'Java version $javaVersion is newer than the maximum supported version of the Android SDK tooling which is version 1.8\n'
+      'If you already have Android Studio installed, please point JAVA_HOME to the JDK installed within the bundle\n'
+      'Please install JDK 8 and update JAVA_HOME environment variable to point to it\n'
+      'You can download Java JDK 8 from: https://adoptopenjdk.net/?variant=openjdk8\n';
   String androidSdkLicenseOnly(String envKey) =>
       'Android SDK contains licenses only.\n'
       'Your first build of an Android application will take longer than usual, '
