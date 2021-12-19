@@ -128,7 +128,7 @@ class CupertinoScrollbar extends RawScrollbar {
   /// from [radius] to this value, then animate back when the user stops
   /// dragging the scrollbar.
   final Radius radiusWhileDragging;
-  
+
   /// The amount of space by which to inset the [child].
   final EdgeInsets? padding;
 
