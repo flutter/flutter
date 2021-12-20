@@ -69,7 +69,7 @@ platform_properties:
       device_type: none
       mac_model: "Macmini8,1"
       os: Mac-10.15
-      xcode: 12a7209 # xcode 12
+      xcode: 12c33 # xcode 12.3
   windows:
     properties:
       build_host: "false"
