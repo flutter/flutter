@@ -1429,13 +1429,13 @@ class RenderClipRect extends _RenderCustomClip<Rect> {
   /// If [clipper] is null, the clip will match the layout size and position of
   /// the child.
   ///
-  /// The [clipBehavior] must not be null or [Clip.none].
+  /// The [clipBehavior] must not be null. If [clipBehavior] is
+  /// [Clip.none], no clipping will be applied.
   RenderClipRect({
     RenderBox? child,
     CustomClipper<Rect>? clipper,
     Clip clipBehavior = Clip.antiAlias,
   }) : assert(clipBehavior != null),
-       assert(clipBehavior != Clip.none),
        super(child: child, clipper: clipper, clipBehavior: clipBehavior);
 
   @override
@@ -1454,16 +1454,21 @@ class RenderClipRect extends _RenderCustomClip<Rect> {
 
   @override
   void paint(PaintingContext context, Offset offset) {
+    _updateClip();
     if (child != null) {
-      _updateClip();
-      layer = context.pushClipRect(
-        needsCompositing,
-        offset,
-        _clip!,
-        super.paint,
-        clipBehavior: clipBehavior,
-        oldLayer: layer as ClipRectLayer?,
-      );
+      if (clipBehavior != Clip.none) {
+        layer = context.pushClipRect(
+          needsCompositing,
+          offset,
+          _clip!,
+          super.paint,
+          clipBehavior: clipBehavior,
+          oldLayer: layer as ClipRectLayer?,
+        );
+      } else {
+        context.paintChild(child!, offset);
+        layer = null;
+      }
     } else {
       layer = null;
     }
@@ -1495,14 +1500,14 @@ class RenderClipRRect extends _RenderCustomClip<RRect> {
   ///
   /// If [clipper] is non-null, then [borderRadius] is ignored.
   ///
-  /// The [clipBehavior] argument must not be null or [Clip.none].
+  /// The [clipBehavior] argument must not be null. If [clipBehavior] is
+  /// [Clip.none], no clipping will be applied.
   RenderClipRRect({
     RenderBox? child,
     BorderRadius borderRadius = BorderRadius.zero,
     CustomClipper<RRect>? clipper,
     Clip clipBehavior = Clip.antiAlias,
   }) : assert(clipBehavior != null),
-       assert(clipBehavior != Clip.none),
        _borderRadius = borderRadius,
        super(child: child, clipper: clipper, clipBehavior: clipBehavior) {
     assert(_borderRadius != null || clipper != null);
@@ -1540,15 +1545,22 @@ class RenderClipRRect extends _RenderCustomClip<RRect> {
 
   @override
   void paint(PaintingContext context, Offset offset) {
+    _updateClip();
     if (child != null) {
-      _updateClip();
-      layer = context.pushClipRRect(
-        needsCompositing,
-        offset,
-        _clip!.outerRect,
-        _clip!,
-        super.paint, clipBehavior: clipBehavior, oldLayer: layer as ClipRRectLayer?,
-      );
+      if (clipBehavior != Clip.none) {
+        layer = context.pushClipRRect(
+          needsCompositing,
+          offset,
+          _clip!.outerRect,
+          _clip!,
+          super.paint,
+          clipBehavior: clipBehavior,
+          oldLayer: layer as ClipRRectLayer?,
+        );
+      } else {
+        context.paintChild(child!, offset);
+        layer = null;
+      }
     } else {
       layer = null;
     }
@@ -1578,13 +1590,13 @@ class RenderClipOval extends _RenderCustomClip<Rect> {
   /// If [clipper] is null, the oval will be inscribed into the layout size and
   /// position of the child.
   ///
-  /// The [clipBehavior] argument must not be null or [Clip.none].
+  /// The [clipBehavior] argument must not be null. If [clipBehavior] is
+  /// [Clip.none], no clipping will be applied.
   RenderClipOval({
     RenderBox? child,
     CustomClipper<Rect>? clipper,
     Clip clipBehavior = Clip.antiAlias,
   }) : assert(clipBehavior != null),
-       assert(clipBehavior != Clip.none),
        super(child: child, clipper: clipper, clipBehavior: clipBehavior);
 
   Rect? _cachedRect;
@@ -1619,17 +1631,22 @@ class RenderClipOval extends _RenderCustomClip<Rect> {
 
   @override
   void paint(PaintingContext context, Offset offset) {
+    _updateClip();
     if (child != null) {
-      _updateClip();
-      layer = context.pushClipPath(
-        needsCompositing,
-        offset,
-        _clip!,
-        _getClipPath(_clip!),
-        super.paint,
-        clipBehavior: clipBehavior,
-        oldLayer: layer as ClipPathLayer?,
-      );
+      if (clipBehavior != Clip.none) {
+        layer = context.pushClipPath(
+          needsCompositing,
+          offset,
+          _clip!,
+          _getClipPath(_clip!),
+          super.paint,
+          clipBehavior: clipBehavior,
+          oldLayer: layer as ClipPathLayer?,
+        );
+      } else {
+        context.paintChild(child!, offset);
+        layer = null;
+      }
     } else {
       layer = null;
     }
@@ -1667,13 +1684,13 @@ class RenderClipPath extends _RenderCustomClip<Path> {
   /// consider using a [RenderClipRect], which can achieve the same effect more
   /// efficiently.
   ///
-  /// The [clipBehavior] argument must not be null or [Clip.none].
+  /// The [clipBehavior] argument must not be null. If [clipBehavior] is
+  /// [Clip.none], no clipping will be applied.
   RenderClipPath({
     RenderBox? child,
     CustomClipper<Path>? clipper,
     Clip clipBehavior = Clip.antiAlias,
   }) : assert(clipBehavior != null),
-       assert(clipBehavior != Clip.none),
        super(child: child, clipper: clipper, clipBehavior: clipBehavior);
 
   @override
@@ -1692,17 +1709,22 @@ class RenderClipPath extends _RenderCustomClip<Path> {
 
   @override
   void paint(PaintingContext context, Offset offset) {
+    _updateClip();
     if (child != null) {
-      _updateClip();
-      layer = context.pushClipPath(
-        needsCompositing,
-        offset,
-        Offset.zero & size,
-        _clip!,
-        super.paint,
-        clipBehavior: clipBehavior,
-        oldLayer: layer as ClipPathLayer?,
-      );
+      if (clipBehavior != Clip.none) {
+        layer = context.pushClipPath(
+          needsCompositing,
+          offset,
+          Offset.zero & size,
+          _clip!,
+          super.paint,
+          clipBehavior: clipBehavior,
+          oldLayer: layer as ClipPathLayer?,
+        );
+      } else {
+        context.paintChild(child!, offset);
+        layer = null;
+      }
     } else {
       layer = null;
     }
