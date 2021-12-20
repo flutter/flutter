@@ -937,6 +937,45 @@ void main() {
     );
   });
 
+  group('Cupertino page transitions', () {
+    CupertinoPageRoute<void> buildRoute({required bool fullscreenDialog}) {
+      return CupertinoPageRoute<void>(
+        fullscreenDialog: fullscreenDialog,
+        builder: (_) => const SizedBox(),
+      );
+    }
+
+    testWidgets('when route is not fullScreenDialog, it has a barrierColor', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: SizedBox.expand(),
+        ),
+      );
+
+      tester.state<NavigatorState>(find.byType(Navigator)).push(
+        buildRoute(fullscreenDialog: false),
+      );
+      await tester.pumpAndSettle();
+
+      expect(tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).color, const Color(0x18000000));
+    });
+
+    testWidgets('when route is a fullScreenDialog, it has no barrierColor', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: SizedBox.expand(),
+        ),
+      );
+
+      tester.state<NavigatorState>(find.byType(Navigator)).push(
+        buildRoute(fullscreenDialog: true),
+      );
+      await tester.pumpAndSettle();
+
+      expect(tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).color, isNull);
+    });
+  });
+
   testWidgets('ModalPopup overlay dark mode', (WidgetTester tester) async {
     late StateSetter stateSetter;
     Brightness brightness = Brightness.light;
