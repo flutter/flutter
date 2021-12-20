@@ -1,4 +1,4 @@
-Signature: 38bc8d281ba1b7c4d05d87f93c765a39
+Signature: cb0913810ebd78ec7ee2fb9d569aa8c4
 
 UNUSED LICENSES:
 
@@ -2599,6 +2599,7 @@ FILE: ../../../third_party/skia/src/gpu/GrWritePixelsRenderTask.cpp
 FILE: ../../../third_party/skia/src/gpu/GrWritePixelsRenderTask.h
 FILE: ../../../third_party/skia/src/gpu/GrYUVATextureProxies.cpp
 FILE: ../../../third_party/skia/src/gpu/GrYUVATextureProxies.h
+FILE: ../../../third_party/skia/src/gpu/KeyBuilder.h
 FILE: ../../../third_party/skia/src/gpu/ShaderErrorHandler.cpp
 FILE: ../../../third_party/skia/src/gpu/SurfaceFillContext.cpp
 FILE: ../../../third_party/skia/src/gpu/SurfaceFillContext.h
