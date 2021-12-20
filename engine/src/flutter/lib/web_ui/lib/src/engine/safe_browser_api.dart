@@ -200,19 +200,20 @@ html.CanvasElement? tryCreateCanvasElement(int width, int height) {
     'createElement',
     <dynamic>['CANVAS'],
   );
-  if (canvas != null) {
-    try {
-      canvas.width = width;
-      canvas.height = height;
-    } catch (e) {
-      // It seems the tribal knowledge of why we anticipate an exception while
-      // setting width/height on a non-null canvas and why it's OK to return
-      // null in this case has been lost. Kudos to the one who can recover it
-      // and leave a proper comment here!
-      return null;
-    }
-    return canvas;
+  if (canvas == null) {
+    return null;
   }
+  try {
+    canvas.width = width;
+    canvas.height = height;
+  } catch (e) {
+    // It seems the tribal knowledge of why we anticipate an exception while
+    // setting width/height on a non-null canvas and why it's OK to return null
+    // in this case has been lost. Kudos to the one who can recover it and leave
+    // a proper comment here!
+    return null;
+  }
+  return canvas;
 }
 
 @JS('window.ImageDecoder')

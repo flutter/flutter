@@ -195,6 +195,8 @@ class RunTestsStep implements PipelineStep {
     if (requireSkiaGold) {
       throw ToolExit('Skia Gold is required but is unavailable.');
     }
+
+    return null;
   }
 
   /// Checks whether the Skia Client is usable in this environment.
