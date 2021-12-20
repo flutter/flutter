@@ -252,6 +252,16 @@ class DecorationImage {
   }
 }
 
+/// The paint state of [DecorationImagePainter]
+/// the state is [DecorationImagePainterPaintState.BeginPaint] when [DecorationImagePainter] entry [DecorationImagePainter.paint]
+/// the state is [DecorationImagePainterPaintState.EndPaint] when [DecorationImagePainter.paint] doesn't loaded image successfully or paint finish
+enum DecorationImagePainterPaintState {
+  /// The Painter will [DecorationImagePainter.paint] image
+  BeginPaint,
+  /// The Painter finish [DecorationImagePainter.paint] image or doesn't loaded image successfully
+  EndPaint,
+}
+
 /// The painter for a [DecorationImage].
 ///
 /// To obtain a painter, call [DecorationImage.createPainter].
@@ -272,6 +282,8 @@ class DecorationImagePainter {
   ImageStream? _imageStream;
   ImageInfo? _image;
 
+  late DecorationImagePainterPaintState _paintState;
+
   /// Draw the image onto the given canvas.
   ///
   /// The image is drawn at the position and size given by the `rect` argument.
@@ -290,7 +302,7 @@ class DecorationImagePainter {
     assert(canvas != null);
     assert(rect != null);
     assert(configuration != null);
-
+    _paintState = DecorationImagePainterPaintState.BeginPaint;
     bool flipHorizontally = false;
     if (_details.matchTextDirection) {
       assert(() {
@@ -323,8 +335,10 @@ class DecorationImagePainter {
       _imageStream = newImageStream;
       _imageStream!.addListener(listener);
     }
-    if (_image == null)
+    if (_image == null){
+      _paintState = DecorationImagePainterPaintState.EndPaint;
       return;
+    }
 
     if (clipPath != null) {
       canvas.save();
@@ -351,6 +365,7 @@ class DecorationImagePainter {
 
     if (clipPath != null)
       canvas.restore();
+    _paintState = DecorationImagePainterPaintState.EndPaint;
   }
 
   void _handleImage(ImageInfo value, bool synchronousCall) {
@@ -363,7 +378,7 @@ class DecorationImagePainter {
     _image?.dispose();
     _image = value;
     assert(_onChanged != null);
-    if (!synchronousCall)
+    if (_paintState == DecorationImagePainterPaintState.EndPaint)
       _onChanged();
   }
 

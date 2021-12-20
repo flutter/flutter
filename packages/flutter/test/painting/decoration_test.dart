@@ -58,6 +58,36 @@ class SynchronousErrorTestImageProvider extends ImageProvider<int> {
   }
 }
 
+
+class AssertImageProvider extends ImageProvider<int> {
+  AssertImageProvider(this.image);
+
+  final Map<ImageConfiguration, Future<dynamic>> _structuredDataCache = <ImageConfiguration, Future<dynamic>>{};
+
+  final ui.Image image;
+
+  @override
+  ImageStreamCompleter load(int key, DecoderCallback decode) {
+    return OneFrameImageStreamCompleter(
+      SynchronousFuture<ImageInfo>(TestImageInfo(key, image: image)),
+    );
+  }
+
+  @override
+  Future<int> obtainKey(ImageConfiguration configuration) {
+    if (_structuredDataCache.containsKey(configuration)) {
+      return _structuredDataCache[configuration]! as Future<int>;
+    }
+    final Future<int> res = Future<int>.value(2);
+    _structuredDataCache[configuration] = res;
+    return res;
+  }
+
+  void lowMemory() {
+    _structuredDataCache.clear();
+  }
+}
+
 class AsyncTestImageProvider extends ImageProvider<int> {
   AsyncTestImageProvider(this.image);
 
@@ -716,4 +746,35 @@ void main() {
 
     info.dispose();
   }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/87442
+
+  test('DecorationImagePainter paint assert image fail when the app entry foreground from background',  () async {
+    final ui.Image image = await createTestImage(width: 100, height: 100);
+    FakeAsync().run((FakeAsync async) async {
+      final AssertImageProvider provider = AssertImageProvider(image);
+
+      bool asyncRepaintImage = false;
+      DecorationImagePainter painter = DecorationImage(image: provider).createPainter(() {
+        asyncRepaintImage = true;
+      });
+      final Canvas canvas = TestCanvas();
+      painter.paint(canvas, Rect.zero, Path(), ImageConfiguration.empty);
+      async.flushMicrotasks();
+      expect(asyncRepaintImage, true);
+
+      asyncRepaintImage = false;
+      painter = DecorationImage(image: provider).createPainter(() {
+        asyncRepaintImage = true;
+      });
+      painter.paint(canvas, Rect.zero, Path(), ImageConfiguration.empty);
+      expect(asyncRepaintImage, false);
+
+      // iOS App entry background, send lowMemory message
+      // AssertBundler will clean the cache
+      provider.lowMemory();
+      painter.paint(canvas, Rect.zero, Path(), ImageConfiguration.empty);
+      expect(asyncRepaintImage, false);
+      async.flushMicrotasks();
+      expect(asyncRepaintImage, true);
+    });
+  });
 }
