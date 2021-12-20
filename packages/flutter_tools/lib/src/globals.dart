@@ -24,6 +24,7 @@ import 'base/template.dart';
 import 'base/terminal.dart';
 import 'base/time.dart';
 import 'base/user_messages.dart';
+import 'build_info.dart';
 import 'build_system/build_system.dart';
 import 'cache.dart';
 import 'custom_devices/custom_devices_config.dart';
@@ -69,6 +70,11 @@ FuchsiaArtifacts? get fuchsiaArtifacts => context.get<FuchsiaArtifacts>();
 Usage get flutterUsage => context.get<Usage>()!;
 XcodeProjectInterpreter? get xcodeProjectInterpreter => context.get<XcodeProjectInterpreter>();
 XCDevice? get xcdevice => context.get<XCDevice>();
+
+// TODO(eggfly)
+TargetPlatform? targetPlatform;
+
+
 Xcode? get xcode => context.get<Xcode>();
 IOSWorkflow? get iosWorkflow => context.get<IOSWorkflow>();
 LocalEngineLocator? get localEngineLocator => context.get<LocalEngineLocator>();

@@ -120,6 +120,7 @@ TargetPlatform? _mapTargetPlatform(TargetPlatform? targetPlatform) {
     case TargetPlatform.linux_x64:
     case TargetPlatform.linux_arm64:
     case TargetPlatform.windows_x64:
+    case TargetPlatform.windows_x86:
     case TargetPlatform.windows_uwp_x64:
     case TargetPlatform.fuchsia_arm64:
     case TargetPlatform.fuchsia_x64:
@@ -138,6 +139,7 @@ bool _isWindows(TargetPlatform? platform) {
   switch (platform) {
     case TargetPlatform.windows_x64:
     case TargetPlatform.windows_uwp_x64:
+    case TargetPlatform.windows_x86:
       return true;
     case TargetPlatform.android:
     case TargetPlatform.android_arm:
@@ -432,6 +434,7 @@ class CachedArtifacts implements Artifacts {
       case TargetPlatform.linux_arm64:
       case TargetPlatform.windows_x64:
       case TargetPlatform.windows_uwp_x64:
+      case TargetPlatform.windows_x86:
         return _getDesktopArtifactPath(artifact, platform, mode);
       case TargetPlatform.fuchsia_arm64:
       case TargetPlatform.fuchsia_x64:
@@ -439,7 +442,7 @@ class CachedArtifacts implements Artifacts {
       case TargetPlatform.tester:
       case TargetPlatform.web_javascript:
       case null:
-        return _getHostArtifactPath(artifact, platform ?? _currentHostPlatform(_platform, _operatingSystemUtils), mode);
+        return _getHostArtifactPath(artifact, platform ?? globals.targetPlatform ?? _currentHostPlatform(_platform, _operatingSystemUtils), mode);
     }
   }
 
@@ -629,6 +632,9 @@ class CachedArtifacts implements Artifacts {
         return _fileSystem.path.join(engineArtifactsPath, 'windows-uwp-x64-${getNameForBuildMode(mode!)}', _artifactToFileName(artifact, platform, mode));
       case Artifact.windowsCppClientWrapper:
         final String engineArtifactsPath = _cache.getArtifactDirectory('engine').path;
+        if (platform == TargetPlatform.windows_x86) {
+          return _fileSystem.path.join(engineArtifactsPath, 'windows-x86', _artifactToFileName(artifact, platform, mode));
+        }
         return _fileSystem.path.join(engineArtifactsPath, 'windows-x64', _artifactToFileName(artifact, platform, mode));
       case Artifact.windowsUwpCppClientWrapper:
         final String engineArtifactsPath = _cache.getArtifactDirectory('engine').path;
@@ -663,6 +669,8 @@ class CachedArtifacts implements Artifacts {
       case TargetPlatform.linux_arm64:
       case TargetPlatform.darwin:
       case TargetPlatform.windows_x64:
+      case TargetPlatform.windows_x86:
+
         // TODO(zanderso): remove once debug desktop artifacts are uploaded
         // under a separate directory from the host artifacts.
         // https://github.com/flutter/flutter/issues/38935
@@ -705,7 +713,8 @@ TargetPlatform _currentHostPlatform(Platform platform, OperatingSystemUtils oper
              TargetPlatform.linux_x64 : TargetPlatform.linux_arm64;
   }
   if (platform.isWindows) {
-    return TargetPlatform.windows_x64;
+    return operatingSystemUtils.hostPlatform == HostPlatform.windows_x64 ?
+            TargetPlatform.windows_x64 : TargetPlatform.windows_x86;
   }
   throw UnimplementedError('Host OS not supported.');
 }

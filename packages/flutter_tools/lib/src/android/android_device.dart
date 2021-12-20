@@ -230,6 +230,7 @@ class AndroidDevice extends Device {
       case TargetPlatform.web_javascript:
       case TargetPlatform.windows_uwp_x64:
       case TargetPlatform.windows_x64:
+      case TargetPlatform.windows_x86:
         throw UnsupportedError('Invalid target platform for Android');
     }
   }
@@ -568,6 +569,7 @@ class AndroidDevice extends Device {
       case TargetPlatform.web_javascript:
       case TargetPlatform.windows_uwp_x64:
       case TargetPlatform.windows_x64:
+      case TargetPlatform.windows_x86:
         _logger.printError('Android platforms are only supported.');
         return LaunchResult.failed();
     }

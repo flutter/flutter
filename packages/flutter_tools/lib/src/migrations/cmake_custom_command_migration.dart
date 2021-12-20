@@ -64,6 +64,10 @@ class CmakeCustomCommandMigration extends ProjectMigrator {
       // ------------------------------
       if (addCustomCommandOriginal?.contains('linux-x64') == true) {
         newProjectContents = newProjectContents.replaceAll('linux-x64', r'${FLUTTER_TARGET_PLATFORM}');
+      } else if (addCustomCommandOriginal?.contains('windows-x64') == true) {
+        newProjectContents = newProjectContents.replaceAll('windows-x64', r'${FLUTTER_TARGET_PLATFORM}');
+      } else if (addCustomCommandOriginal?.contains('windows-x86') == true) {
+        newProjectContents = newProjectContents.replaceAll('windows-x86', r'${FLUTTER_TARGET_PLATFORM}');
       }
     }
     if (originalProjectContents != newProjectContents) {

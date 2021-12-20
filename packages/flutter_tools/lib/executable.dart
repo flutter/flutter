@@ -59,6 +59,9 @@ import 'src/resident_runner.dart';
 import 'src/runner/flutter_command.dart';
 import 'src/web/web_runner.dart';
 
+import 'src/build_info.dart';
+
+
 /// Main entry point for commands.
 ///
 /// This function is intended to be used from the `flutter` command line tool.
@@ -81,6 +84,9 @@ Future<void> main(List<String> args) async {
   final bool daemon = args.contains('daemon');
   final bool runMachine = (args.contains('--machine') && args.contains('run')) ||
                           (args.contains('--machine') && args.contains('attach'));
+  if (args.contains('-dTargetPlatform=windows-x86')) {
+    globals.targetPlatform = TargetPlatform.windows_x86;
+  }
 
   // Cache.flutterRoot must be set early because other features use it (e.g.
   // enginePath's initializer uses it). This can only work with the real

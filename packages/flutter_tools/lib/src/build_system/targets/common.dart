@@ -163,7 +163,9 @@ class KernelSnapshot extends Target {
     if (targetPlatformEnvironment == null) {
       throw MissingDefineException(kTargetPlatform, 'kernel_snapshot');
     }
-    final BuildMode buildMode = getBuildModeForName(buildModeEnvironment);
+    final BuildMode buildMode = getTargetPlatformForName(environment.defines[kTargetPlatform]!) == TargetPlatform.windows_x86
+        ? BuildMode.debug: getBuildModeForName(environment.defines[kBuildMode]!);
+
     final String targetFile = environment.defines[kTargetFile] ?? environment.fileSystem.path.join('lib', 'main.dart');
     final File packagesFile = environment.projectDir
       .childDirectory('.dart_tool')
@@ -190,6 +192,7 @@ class KernelSnapshot extends Target {
     switch (targetPlatform) {
       case TargetPlatform.darwin:
       case TargetPlatform.windows_x64:
+      case TargetPlatform.windows_x86:
       case TargetPlatform.linux_x64:
         forceLinkPlatform = true;
         break;

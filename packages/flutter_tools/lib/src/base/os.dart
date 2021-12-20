@@ -599,6 +599,7 @@ enum HostPlatform {
   linux_x64,
   linux_arm64,
   windows_x64,
+  windows_x86,
 }
 
 String getNameForHostPlatform(HostPlatform platform) {
@@ -613,5 +614,7 @@ String getNameForHostPlatform(HostPlatform platform) {
       return 'linux-arm64';
     case HostPlatform.windows_x64:
       return 'windows-x64';
+    case HostPlatform.windows_x86:
+      return 'windows-x86';
   }
 }

@@ -28,6 +28,7 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
   String? target,
   VisualStudio? visualStudioOverride,
   SizeAnalyzer? sizeAnalyzer,
+  TargetPlatform targetPlatform = TargetPlatform.windows_x64
 }) async {
   if (!windowsProject.cmakeFile.existsSync()) {
     throwToolExit(
@@ -73,7 +74,9 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
       generator: cmakeGenerator,
       buildDir: buildDirectory,
       sourceDir: windowsProject.cmakeFile.parent,
+      targetPlatform: targetPlatform,
     );
+
     await _runBuild(cmakePath, buildDirectory, buildModeName);
   } finally {
     status.cancel();
@@ -172,6 +175,7 @@ Future<void> buildWindowsUwp(WindowsUwpProject windowsProject, BuildInfo buildIn
       generator: cmakeGenerator,
       buildDir: buildDirectory,
       sourceDir: windowsProject.cmakeFile.parent,
+      targetPlatform: TargetPlatform.windows_uwp_x64,
     );
     await _runBuild(cmakePath, buildDirectory, buildModeName, install: false);
   } finally {
@@ -244,22 +248,28 @@ Future<void> _runCmakeGeneration({
   required String generator,
   required Directory buildDir,
   required Directory sourceDir,
+  required TargetPlatform targetPlatform,
 }) async {
   final Stopwatch sw = Stopwatch()..start();
 
   await buildDir.create(recursive: true);
   int result;
   try {
+    final List<String> args = targetPlatform == TargetPlatform.windows_x86 ? <String> [cmakePath, '-A', 'Win32'] : <String>[cmakePath];
+    args.addAll(
+        [
+          '-S',
+          sourceDir.path,
+          '-B',
+          buildDir.path,
+          '-G',
+          generator,
+          '-DFLUTTER_TARGET_PLATFORM=' + getNameForTargetPlatform(targetPlatform),
+        ]
+    );
+
     result = await globals.processUtils.stream(
-      <String>[
-        cmakePath,
-        '-S',
-        sourceDir.path,
-        '-B',
-        buildDir.path,
-        '-G',
-        generator,
-      ],
+      args,
       trace: true,
     );
   } on ArgumentError {

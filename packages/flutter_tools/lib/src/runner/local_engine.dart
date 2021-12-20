@@ -151,7 +151,7 @@ class LocalEngineLocator {
   // Strip '_sim_' since there are no host simulator builds.
   String _getHostEngineBasename(String localEngineBasename) {
     // Allow winuwp builds to be treated as host builds.
-    if (localEngineBasename.startsWith('winuwp')) {
+    if (localEngineBasename.startsWith('winuwp') || localEngineBasename.startsWith('host')) {
       return localEngineBasename;
     }
     String tmpBasename = localEngineBasename.replaceFirst('_sim_', '_');
