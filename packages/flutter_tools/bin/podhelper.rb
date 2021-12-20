@@ -33,9 +33,6 @@ end
 def flutter_additional_ios_build_settings(target)
   return unless target.platform_name == :ios
 
-  # Return if it's not a Flutter plugin (transitive dependency).
-  return unless target.dependencies.any? { |dependency| dependency.name == 'Flutter' }
-
   # [target.deployment_target] is a [String] formatted as "8.0".
   inherit_deployment_target = target.deployment_target[/\d+/].to_i < 9
 
@@ -52,6 +49,14 @@ def flutter_additional_ios_build_settings(target)
   release_framework_dir = File.expand_path(File.join(artifacts_dir, 'ios-release', 'Flutter.xcframework'), __FILE__)
 
   target.build_configurations.each do |build_configuration|
+    # Build both x86_64 and arm64 simulator archs for all dependencies. If a single plugin does not support arm64 simulators,
+    # the app and all frameworks will fall back to x86_64. Unfortunately that case is not detectable in this script.
+    # Therefore all pods must have a x86_64 slice available, or linking a x86_64 app will fail.
+    build_configuration.build_settings['ONLY_ACTIVE_ARCH'] = 'NO' if build_configuration.type == :debug
+
+    # Skip other updates if it's not a Flutter plugin (transitive dependency).
+    next unless target.dependencies.any? { |dependency| dependency.name == 'Flutter' }
+
     # Profile can't be derived from the CocoaPods build configuration. Use release framework (for linking only).
     configuration_engine_dir = build_configuration.type == :debug ? debug_framework_dir : release_framework_dir
     Dir.new(configuration_engine_dir).each_child do |xcframework_file|

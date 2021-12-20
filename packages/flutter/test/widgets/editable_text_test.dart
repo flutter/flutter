@@ -2207,6 +2207,7 @@ void main() {
     final List<MethodCall> log = <MethodCall>[];
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) async {
       log.add(methodCall);
+      return null;
     });
 
     await tester.showKeyboard(find.byType(EditableText));
@@ -3502,6 +3503,7 @@ void main() {
     final List<MethodCall> log = <MethodCall>[];
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) async {
       log.add(methodCall);
+      return null;
     });
 
     final TextEditingController controller = TextEditingController();
@@ -3531,6 +3533,7 @@ void main() {
     final List<MethodCall> log = <MethodCall>[];
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) async {
       log.add(methodCall);
+      return null;
     });
 
     final TextEditingController controller = TextEditingController();
@@ -3566,6 +3569,7 @@ void main() {
     final List<MethodCall> log = <MethodCall>[];
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) async {
       log.add(methodCall);
+      return null;
     });
 
     final TextEditingController controller1 = TextEditingController();
@@ -3651,6 +3655,7 @@ void main() {
     final List<MethodCall> log = <MethodCall>[];
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) async {
       log.add(methodCall);
+      return null;
     });
 
     const Offset offset = Offset(10.0, 20.0);
@@ -3693,6 +3698,7 @@ void main() {
     final List<MethodCall> log = <MethodCall>[];
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) async {
       log.add(methodCall);
+      return null;
     });
 
     final TextEditingController controller = TextEditingController();
@@ -3780,6 +3786,7 @@ void main() {
     final List<MethodCall> log = <MethodCall>[];
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) async {
       log.add(methodCall);
+      return null;
     });
     setState(() {
       currentTextStyle = textStyle2;
@@ -4007,6 +4014,7 @@ void main() {
     final List<MethodCall> log = <MethodCall>[];
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) async {
       log.add(methodCall);
+      return null;
     });
 
     final TextEditingController controller = TextEditingController();
@@ -5029,6 +5037,50 @@ void main() {
       reason: 'on $platform',
     );
     expect(controller.text, isEmpty, reason: 'on $platform');
+
+    controller.text = 'abc';
+    controller.selection = const TextSelection(baseOffset: 2, extentOffset: 2);
+
+    // Backspace
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.backspace,
+      ],
+      targetPlatform: defaultTargetPlatform,
+    );
+    expect(
+      selection,
+      equals(
+        const TextSelection(
+          baseOffset: 1,
+          extentOffset: 1,
+        ),
+      ),
+      reason: 'on $platform',
+    );
+    expect(controller.text, 'ac', reason: 'on $platform');
+
+    // Shift-backspace (same as backspace)
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.backspace,
+      ],
+      shift: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+    expect(
+      selection,
+      equals(
+        const TextSelection(
+          baseOffset: 0,
+          extentOffset: 0,
+        ),
+      ),
+      reason: 'on $platform',
+    );
+    expect(controller.text, 'c', reason: 'on $platform');
   }
 
   testWidgets('keyboard text selection works (RawKeyEvent)', (WidgetTester tester) async {
@@ -5054,7 +5106,7 @@ void main() {
   testWidgets(
     'keyboard shortcuts respect read-only',
     (WidgetTester tester) async {
-      final String platform = describeEnum(defaultTargetPlatform).toLowerCase();
+      final String platform = defaultTargetPlatform.name.toLowerCase();
       final TextEditingController controller = TextEditingController(text: testText);
       controller.selection = const TextSelection(
         baseOffset: 0,
@@ -6077,109 +6129,10 @@ void main() {
     state.bringIntoView(TextPosition(offset: controller.text.length));
 
     await tester.pumpAndSettle();
-    // The SingleChildScrollView is scrolled instead of the EditableText to reveal the caret.
+    // The SingleChildScrollView is scrolled instead of the EditableText to
+    // reveal the caret.
     expect(outerController.offset, outerController.position.maxScrollExtent);
     expect(editableScrollController.offset, 0);
-  });
-
-  testWidgets('bringIntoView centers the viewport on caret when the caret is wider than the viewport', (WidgetTester tester) async {
-    const String text = 'to coz ze ze Szwecji';
-    final TextEditingController controller = TextEditingController(text: text);
-
-    await tester.pumpWidget(MaterialApp(
-      home: Align(
-        alignment: Alignment.topLeft,
-        child: SizedBox(
-          width: 32.0,
-          height: 100.0,
-          child: EditableText(
-            showSelectionHandles: true,
-            controller: controller,
-            focusNode: FocusNode(),
-            style: const TextStyle(fontFamily: 'Ahem', fontSize: 48.0, height: 1.0),
-            cursorColor: Colors.blue,
-            cursorWidth: 48.0,
-            backgroundCursorColor: Colors.grey,
-            selectionControls: materialTextSelectionControls,
-            keyboardType: TextInputType.text,
-          ),
-        ),
-      ),
-    ));
-
-    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
-    final RenderEditable renderEditable = state.renderEditable;
-    final Scrollable scrollable = tester.widget<Scrollable>(find.byType(Scrollable));
-
-    expect(scrollable.controller!.position.viewportDimension, equals(32.0));
-    expect(scrollable.controller!.offset, 0.0);
-    expect(renderEditable.maxScrollExtent, equals(977.0));
-
-    state.bringIntoView(const TextPosition(offset: 2));
-    await tester.pumpAndSettle();
-    expect(scrollable.controller!.offset, 2 * 48.0 + 48.0 / 2 - 32.0 / 2);
-
-    state.bringIntoView(const TextPosition(offset: 5));
-    await tester.pumpAndSettle();
-    expect(scrollable.controller!.offset, 5 * 48.0 + 48.0 / 2 - 32.0 / 2);
-
-    state.bringIntoView(const TextPosition(offset: 7));
-    await tester.pumpAndSettle();
-    expect(scrollable.controller!.offset, 7 * 48.0 + 48.0 / 2 - 32.0 / 2);
-
-    state.bringIntoView(const TextPosition(offset: 9));
-    await tester.pumpAndSettle();
-    expect(scrollable.controller!.offset, 9 * 48.0 + 48.0 / 2 - 32.0 / 2);
-  });
-
-  testWidgets('bringIntoView centers the viewport on caret when the caret is taller than the viewport', (WidgetTester tester) async {
-    const String text = 'to\ncoz\nze\nze\nSzwecji';
-    final TextEditingController controller = TextEditingController(text: text);
-
-    await tester.pumpWidget(MaterialApp(
-      home: Align(
-        alignment: Alignment.topLeft,
-        child: SizedBox(
-          width: 500.0,
-          height: 32.0,
-          child: EditableText(
-            showSelectionHandles: true,
-            maxLines: null,
-            controller: controller,
-            focusNode: FocusNode(),
-            style: const TextStyle(fontFamily: 'Ahem', fontSize: 48.0, height: 1.0),
-            cursorColor: Colors.blue,
-            backgroundCursorColor: Colors.grey,
-            selectionControls: materialTextSelectionControls,
-            keyboardType: TextInputType.text,
-          ),
-        ),
-      ),
-    ));
-
-    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
-    final RenderEditable renderEditable = state.renderEditable;
-    final Scrollable scrollable = tester.widget<Scrollable>(find.byType(Scrollable));
-
-    expect(scrollable.controller!.position.viewportDimension, equals(32.0));
-    expect(scrollable.controller!.offset, 0.0);
-    expect(renderEditable.maxScrollExtent, equals(208.0));
-
-    state.bringIntoView(const TextPosition(offset: 3));
-    await tester.pumpAndSettle();
-    expect(scrollable.controller!.offset, 48.0 + 48.0 / 2 - 32.0 / 2);
-
-    state.bringIntoView(const TextPosition(offset: 7));
-    await tester.pumpAndSettle();
-    expect(scrollable.controller!.offset, 2 * 48.0 + 48.0 / 2 - 32.0 / 2);
-
-    state.bringIntoView(const TextPosition(offset: 10));
-    await tester.pumpAndSettle();
-    expect(scrollable.controller!.offset, 3 * 48.0 + 48.0 / 2 - 32.0 / 2);
-
-    state.bringIntoView(const TextPosition(offset: 13));
-    await tester.pumpAndSettle();
-    expect(scrollable.controller!.offset, 4 * 48.0 + 48.0 / 2 - 32.0 / 2);
   });
 
   testWidgets('bringIntoView does nothing if the physics prohibits implicit scrolling', (WidgetTester tester) async {
@@ -6207,6 +6160,7 @@ void main() {
         ),
       ));
     }
+
 
     await buildWithPhysics();
     expect(scrollController.offset, 0);
@@ -6804,6 +6758,7 @@ void main() {
     final List<MethodCall> log = <MethodCall>[];
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) async {
       log.add(methodCall);
+      return null;
     });
     final TextInputFormatter formatter = TextInputFormatter.withFunction((TextEditingValue oldValue, TextEditingValue newValue) {
       if (newValue.text == 'I will be modified by the formatter.') {
@@ -6932,6 +6887,7 @@ void main() {
     final List<MethodCall> log = <MethodCall>[];
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) async {
       log.add(methodCall);
+      return null;
     });
     final TextInputFormatter formatter = TextInputFormatter.withFunction((TextEditingValue oldValue, TextEditingValue newValue) {
       return const TextEditingValue(text: 'Flutter is the best!');
@@ -7011,6 +6967,7 @@ void main() {
     final List<MethodCall> log = <MethodCall>[];
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) async {
       log.add(methodCall);
+      return null;
     });
     final TextEditingController controller = TextEditingController();
 
@@ -7132,6 +7089,7 @@ void main() {
       final List<MethodCall> log = <MethodCall>[];
       tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) async {
         log.add(methodCall);
+        return null;
       });
       final TextEditingController controller = TextEditingController();
 
@@ -8733,7 +8691,7 @@ void main() {
     );
     bool myIntentWasCalled = false;
     final CallbackAction<ExtendSelectionByCharacterIntent> overrideAction = CallbackAction<ExtendSelectionByCharacterIntent>(
-      onInvoke: (ExtendSelectionByCharacterIntent intent) { myIntentWasCalled = true; },
+      onInvoke: (ExtendSelectionByCharacterIntent intent) { myIntentWasCalled = true; return null; },
     );
     await tester.pumpWidget(MaterialApp(
       home: Align(
@@ -8788,7 +8746,7 @@ void main() {
           child: Actions(
             actions: <Type, Action<Intent>>{
               ExtendSelectionByCharacterIntent: CallbackAction<ExtendSelectionByCharacterIntent>(
-                onInvoke: (ExtendSelectionByCharacterIntent intent) { myIntentWasCalled = true; },
+                onInvoke: (ExtendSelectionByCharacterIntent intent) { myIntentWasCalled = true; return null; },
               ),
             },
             child: EditableText(

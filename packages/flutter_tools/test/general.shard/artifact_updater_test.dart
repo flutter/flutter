@@ -32,6 +32,7 @@ void main() {
       httpClient: FakeHttpClient.any(),
       tempStorage: fileSystem.currentDirectory.childDirectory('temp')
         ..createSync(),
+      allowedBaseUrls: <String>['http://test.zip'],
     );
 
     await artifactUpdater.downloadZipArchive(
@@ -55,6 +56,7 @@ void main() {
       httpClient: FakeHttpClient.any(),
       tempStorage: fileSystem.currentDirectory.childDirectory('temp')
         ..createSync(),
+      allowedBaseUrls: <String>['http://test.zip'],
     );
     // Unrelated file from another cache.
     fileSystem.file('out/bar').createSync(recursive: true);
@@ -92,6 +94,7 @@ void main() {
       ]),
       tempStorage: fileSystem.currentDirectory.childDirectory('temp')
         ..createSync(),
+      allowedBaseUrls: <String>['http://test.zip'],
     );
 
     await artifactUpdater.downloadZipArchive(
@@ -127,6 +130,7 @@ void main() {
       ]),
       tempStorage: fileSystem.currentDirectory.childDirectory('temp')
         ..createSync(),
+      allowedBaseUrls: <String>['http://test.zip'],
     );
 
     await artifactUpdater.downloadZipArchive(
@@ -170,6 +174,7 @@ void main() {
       ]),
       tempStorage: fileSystem.currentDirectory.childDirectory('temp')
         ..createSync(),
+      allowedBaseUrls: <String>['http://test.zip'],
     );
 
     await expectLater(() async => artifactUpdater.downloadZipArchive(
@@ -198,6 +203,7 @@ void main() {
       ]),
       tempStorage: fileSystem.currentDirectory.childDirectory('temp')
         ..createSync(),
+      allowedBaseUrls: <String>['http://test.zip'],
     );
 
     await artifactUpdater.downloadZipArchive(
@@ -225,6 +231,7 @@ void main() {
       ]),
       tempStorage: fileSystem.currentDirectory.childDirectory('temp')
         ..createSync(),
+      allowedBaseUrls: <String>['http://test.zip'],
     );
 
     await expectLater(() async => artifactUpdater.downloadZipArchive(
@@ -251,15 +258,16 @@ void main() {
         },
       ),
       httpClient: FakeHttpClient.list(<FakeRequest>[
-        FakeRequest(Uri.parse('http:///foo-bar/test.zip'), responseError: ArgumentError())
+        FakeRequest(Uri.parse('http://foo-bar/test.zip'), responseError: ArgumentError())
       ]),
       tempStorage: fileSystem.currentDirectory.childDirectory('temp')
         ..createSync(),
+      allowedBaseUrls: <String>['http://foo-bar/test.zip'],
     );
 
     await expectLater(() async => artifactUpdater.downloadZipArchive(
       'test message',
-      Uri.parse('http:///foo-bar/test.zip'),
+      Uri.parse('http://foo-bar/test.zip'),
       fileSystem.currentDirectory.childDirectory('out'),
     ), throwsToolExit());
 
@@ -281,6 +289,7 @@ void main() {
       ]),
       tempStorage: fileSystem.currentDirectory.childDirectory('temp')
         ..createSync(),
+      allowedBaseUrls: <String>['http://test.zip'],
     );
 
     await expectLater(() async => artifactUpdater.downloadZipArchive(
@@ -305,6 +314,7 @@ void main() {
       httpClient: FakeHttpClient.any(),
       tempStorage: fileSystem.currentDirectory.childDirectory('temp')
         ..createSync(),
+      allowedBaseUrls: <String>['http://test.zip'],
     );
     operatingSystemUtils.failures = 1;
 
@@ -329,6 +339,7 @@ void main() {
       httpClient: FakeHttpClient.any(),
       tempStorage: fileSystem.currentDirectory.childDirectory('temp')
         ..createSync(),
+      allowedBaseUrls: <String>['http://test.zip'],
     );
     operatingSystemUtils.failures = 1;
 
@@ -353,6 +364,7 @@ void main() {
       httpClient: FakeHttpClient.any(),
       tempStorage: fileSystem.currentDirectory.childDirectory('temp')
         ..createSync(),
+      allowedBaseUrls: <String>['http://test.zip'],
     );
     operatingSystemUtils.failures = 2;
 
@@ -377,6 +389,7 @@ void main() {
       httpClient: FakeHttpClient.any(),
       tempStorage: fileSystem.currentDirectory.childDirectory('temp')
         ..createSync(),
+      allowedBaseUrls: <String>['http://test.zip'],
     );
     operatingSystemUtils.failures = 2;
 
@@ -401,6 +414,7 @@ void main() {
       httpClient: FakeHttpClient.any(),
       tempStorage: fileSystem.currentDirectory.childDirectory('temp')
         ..createSync(),
+      allowedBaseUrls: <String>['http://test.zip'],
     );
 
     await artifactUpdater.downloadZippedTarball(
@@ -423,6 +437,7 @@ void main() {
       httpClient: FakeHttpClient.any(),
       tempStorage: fileSystem.currentDirectory.childDirectory('temp')
         ..createSync(),
+      allowedBaseUrls: <String>['http://test.zip'],
     );
 
     artifactUpdater.downloadedFiles.addAll(<File>[
@@ -450,6 +465,7 @@ void main() {
       httpClient: FakeHttpClient.any(),
       tempStorage: fileSystem.currentDirectory.childDirectory('temp')
         ..createSync(),
+      allowedBaseUrls: <String>['http://test.zip'],
     );
 
     final Directory errorDirectory = fileSystem.currentDirectory

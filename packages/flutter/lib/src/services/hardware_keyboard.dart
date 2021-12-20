@@ -516,9 +516,9 @@ class HardwareKeyboard {
       } catch (exception, stack) {
         InformationCollector? collector;
         assert(() {
-          collector = () sync* {
-            yield DiagnosticsProperty<KeyEvent>('Event', event);
-          };
+          collector = () => <DiagnosticsNode>[
+            DiagnosticsProperty<KeyEvent>('Event', event),
+          ];
           return true;
         }());
         FlutterError.reportError(FlutterErrorDetails(
@@ -833,9 +833,9 @@ class KeyEventManager {
       } catch (exception, stack) {
         InformationCollector? collector;
         assert(() {
-          collector = () sync* {
-            yield DiagnosticsProperty<KeyMessage>('KeyMessage', message);
-          };
+          collector = () => <DiagnosticsNode>[
+            DiagnosticsProperty<KeyMessage>('KeyMessage', message),
+          ];
           return true;
         }());
         FlutterError.reportError(FlutterErrorDetails(

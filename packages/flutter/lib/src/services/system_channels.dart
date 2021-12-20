@@ -249,9 +249,9 @@ class SystemChannels {
   ///  * [RawKeyboard], which uses this channel to expose key data.
   ///  * [new RawKeyEvent.fromMessage], which can decode this data into the [RawKeyEvent]
   ///    subclasses mentioned above.
-  static BasicMessageChannel<dynamic> get keyEvent => Application.current.get(
+  static BasicMessageChannel<Object?> get keyEvent => Application.current.get(
       #SystemChannels.keyEvent,
-      ()=> BasicMessageChannel<dynamic>(
+      ()=> BasicMessageChannel<Object?>(
         'flutter/keyevent',
         JSONMessageCodec(),
       )
@@ -286,9 +286,9 @@ class SystemChannels {
   ///    applications to release caches to free up more memory. See
   ///    [WidgetsBindingObserver.didHaveMemoryPressure], which triggers whenever
   ///    a message is received on this channel.
-  static BasicMessageChannel<dynamic> get system => Application.current.get(
+  static BasicMessageChannel<Object?> get system => Application.current.get(
       #SystemChannels.system,
-      () => BasicMessageChannel<dynamic>(
+      () => BasicMessageChannel<Object?>(
         'flutter/system',
         JSONMessageCodec(),
       )
@@ -301,9 +301,9 @@ class SystemChannels {
   ///  * [SemanticsEvent] and its subclasses for a list of valid accessibility
   ///    events that can be sent over this channel.
   ///  * [SemanticsNode.sendEvent], which uses this channel to dispatch events.
-  static BasicMessageChannel<dynamic> get accessibility => Application.current.get(
+  static BasicMessageChannel<Object?> get accessibility => Application.current.get(
       #SystemChannels.accessibility,
-      () => BasicMessageChannel<dynamic>(
+      () => BasicMessageChannel<Object?>(
         'flutter/accessibility',
         StandardMessageCodec(),
       )
@@ -333,7 +333,7 @@ class SystemChannels {
 
   /// A [MethodChannel] for configuring mouse cursors.
   ///
-  /// All outgoing methods defined for this channel uses a `Map<String, dynamic>`
+  /// All outgoing methods defined for this channel uses a `Map<String, Object?>`
   /// to contain multiple parameters, including the following methods (invoked
   /// using [OptionalMethodChannel.invokeMethod]):
   ///

@@ -124,6 +124,9 @@ abstract class Device {
   /// Send the device to sleep mode.
   Future<void> sendToSleep();
 
+  /// Emulates pressing the home button.
+  Future<void> home();
+
   /// Emulates pressing the power button, toggling the device's on/off state.
   Future<void> togglePower();
 
@@ -468,6 +471,12 @@ class AndroidDevice extends Device {
   Future<void> sendToSleep() async {
     if (!(await isAsleep()))
       await togglePower();
+  }
+
+  /// Sends `KEYCODE_HOME` (3), which causes the device to go to the home screen.
+  @override
+  Future<void> home() async {
+    await shellExec('input', const <String>['keyevent', '3']);
   }
 
   /// Sends `KEYCODE_POWER` (26), which causes the device to toggle its mode
@@ -896,6 +905,9 @@ class IosDevice extends Device {
   Future<void> sendToSleep() async {}
 
   @override
+  Future<void> home() async {}
+
+  @override
   Future<void> togglePower() async {}
 
   @override
@@ -944,6 +956,9 @@ class FuchsiaDevice extends Device {
 
   @override
   Future<void> sendToSleep() async {}
+
+  @override
+  Future<void> home() async {}
 
   @override
   Future<void> togglePower() async {}
@@ -1010,6 +1025,9 @@ class FakeDevice extends Device {
 
   @override
   Future<void> sendToSleep() async {}
+
+  @override
+  Future<void> home() async {}
 
   @override
   Future<void> togglePower() async {}

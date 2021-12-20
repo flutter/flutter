@@ -4067,6 +4067,53 @@ void main() {
   testWidgets(
     'InputDecorator OutlineBorder focused label with icon',
     (WidgetTester tester) async {
+      // This is a regression test for https://github.com/flutter/flutter/issues/82321
+      Widget buildFrame(TextDirection textDirection) {
+        return MaterialApp(
+          home: Scaffold(
+            body: Container(
+              padding: const EdgeInsets.all(16.0),
+              alignment: Alignment.center,
+              child: Directionality(
+                textDirection: textDirection,
+                child: RepaintBoundary(
+                  child: InputDecorator(
+                    isFocused: true,
+                    isEmpty: true,
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: const Color(0xFF00FF00),
+                      labelText: 'label text',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30.0),
+                        gapPadding: 0.0,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildFrame(TextDirection.ltr));
+      await expectLater(
+        find.byType(InputDecorator),
+        matchesGoldenFile('input_decorator.outline_label.ltr.png'),
+      );
+
+      await tester.pumpWidget(buildFrame(TextDirection.rtl));
+      await expectLater(
+        find.byType(InputDecorator),
+        matchesGoldenFile('input_decorator.outline_label.rtl.png'),
+      );
+    },
+  );
+
+  testWidgets(
+    'InputDecorator OutlineBorder focused label with icon',
+    (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/18111
 
       Widget buildFrame(TextDirection textDirection) {
@@ -4678,6 +4725,98 @@ void main() {
           // Top-left arc
           Offset(inputDecoratorWidth, 0.0 + smallerBorderRadiusScaled),
           Offset(inputDecoratorWidth - smallerBorderRadiusScaled, 0.0),
+        ],
+      )
+      ..restore(),
+    );
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/55317
+
+  testWidgets('rounded OutlineInputBorder with zero padding just wraps the label', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/82321
+    const double borderRadius = 30.0;
+    const String labelText = 'label text';
+
+    // Overall height for this InputDecorator is 56dps:
+    //   12 - top padding
+    //   12 - floating label (ahem font size 16dps * 0.75 = 12)
+    //    4 - floating label / input text gap
+    //   16 - input text (ahem font size 16dps)
+    //   12 - bottom padding
+    const double inputDecoratorHeight = 56.0;
+    const double inputDecoratorWidth = 800.0;
+
+    await tester.pumpWidget(
+      buildInputDecorator(
+        decoration: InputDecoration(
+          filled: true,
+          fillColor: const Color(0xFF00FF00),
+          labelText: labelText,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(borderRadius),
+            gapPadding: 0.0,
+          ),
+        ),
+      ),
+    );
+
+    const double denominator = borderRadius * 2.0;
+    const double borderRadiusScaled = borderRadius / denominator * inputDecoratorHeight;
+
+    expect(find.text(labelText), findsOneWidget);
+    final Rect labelRect = tester.getRect(find.text(labelText));
+
+    expect(findBorderPainter(), paints
+      ..save()
+      ..path(
+        style: PaintingStyle.fill,
+        color: const Color(0xFF00FF00),
+        includes: <Offset>[
+          // The border should draw along the four edges of the
+          // InputDecorator.
+
+          // Top center
+          const Offset(inputDecoratorWidth / 2.0, 0.0),
+          // Bottom center
+          const Offset(inputDecoratorWidth / 2.0, inputDecoratorHeight),
+          // Left center
+          const Offset(0.0, inputDecoratorHeight / 2.0),
+          // Right center
+          const Offset(inputDecoratorWidth, inputDecoratorHeight / 2.0),
+
+          // The border path should contain points where each rounded corner
+          // ends.
+
+          // Bottom-right arc
+          const Offset(inputDecoratorWidth, inputDecoratorHeight - borderRadiusScaled),
+          const Offset(inputDecoratorWidth - borderRadiusScaled, inputDecoratorHeight),
+          // Top-right arc
+          const Offset(inputDecoratorWidth,0.0 + borderRadiusScaled),
+          const Offset(inputDecoratorWidth - borderRadiusScaled, 0.0),
+          // Bottom-left arc
+          const Offset(0.0, inputDecoratorHeight - borderRadiusScaled),
+          const Offset(0.0 + borderRadiusScaled, inputDecoratorHeight),
+          // Top-left arc
+          const Offset(0.0,0.0 + borderRadiusScaled),
+          const Offset(0.0 + borderRadiusScaled, 0.0),
+
+          // Gap edges
+          // gap start x = radius - radius * cos(arc sweep)
+          // gap start y = radius - radius * sin(arc sweep)
+          const Offset(39.49999999999999, 32.284366616798906),
+          Offset(39.49999999999999 + labelRect.width, 0.0),
+        ],
+        excludes: const <Offset>[
+          // The border should not contain the corner points, since the border
+          // is rounded.
+
+          // Top-left
+          Offset.zero,
+          // Top-right
+          Offset(inputDecoratorWidth, 0.0),
+          // Bottom-left
+          Offset(0.0, inputDecoratorHeight),
+          // Bottom-right
+          Offset(inputDecoratorWidth, inputDecoratorHeight),
         ],
       )
       ..restore(),

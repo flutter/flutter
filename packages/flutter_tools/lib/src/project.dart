@@ -417,6 +417,9 @@ class AndroidProject extends FlutterProjectPlatform {
   /// True if the parent Flutter project is a module.
   bool get isModule => parent.isModule;
 
+  /// True if the parent Flutter project is a plugin.
+  bool get isPlugin => parent.isPlugin;
+
   /// True if the Flutter project is using the AndroidX support library.
   bool get usesAndroidX => parent.usesAndroidX;
 
@@ -540,13 +543,17 @@ class AndroidProject extends FlutterProjectPlatform {
         'projectName': parent.manifest.appName,
         'androidIdentifier': androidIdentifier,
         'androidX': usesAndroidX,
+        'agpVersion': gradle.templateAndroidGradlePluginVersion,
+        'kotlinVersion': gradle.templateKotlinGradlePluginVersion,
+        'gradleVersion': gradle.templateDefaultGradleVersion,
       },
       printStatusWhenWriting: false,
     );
   }
 
   void checkForDeprecation({DeprecationBehavior deprecationBehavior = DeprecationBehavior.none}) {
-    if (getEmbeddingVersion() == AndroidEmbeddingVersion.v1) {
+    final AndroidEmbeddingVersionResult result = computeEmbeddingVersion();
+    if (result.version == AndroidEmbeddingVersion.v1) {
       globals.printStatus(
 '''
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -561,6 +568,10 @@ https://flutter.dev/go/android-project-migration
 to migrate your project. You may also pass the --ignore-deprecation flag to
 ignore this check and continue with the deprecated v1 embedding. However,
 the v1 Android embedding will be removed in future versions of Flutter.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+The detected reason was:
+
+  ${result.reason}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 '''
       );
@@ -581,13 +592,24 @@ the v1 Android embedding will be removed in future versions of Flutter.
   }
 
   AndroidEmbeddingVersion getEmbeddingVersion() {
+    return computeEmbeddingVersion().version;
+  }
+
+  AndroidEmbeddingVersionResult computeEmbeddingVersion() {
     if (isModule) {
       // A module type's Android project is used in add-to-app scenarios and
       // only supports the V2 embedding.
-      return AndroidEmbeddingVersion.v2;
+      return AndroidEmbeddingVersionResult(AndroidEmbeddingVersion.v2, 'Is add-to-app module');
+    }
+    if (isPlugin) {
+      // Plugins do not use an appManifest, so we stop here.
+      //
+      // TODO(garyq): This method does not currently check for code references to
+      // the v1 embedding, we should check for this once removal is further along.
+      return AndroidEmbeddingVersionResult(AndroidEmbeddingVersion.v2, 'Is plugin');
     }
     if (appManifestFile == null || !appManifestFile.existsSync()) {
-      return AndroidEmbeddingVersion.v1;
+      return AndroidEmbeddingVersionResult(AndroidEmbeddingVersion.v1, 'No `${appManifestFile.absolute.path}` file');
     }
     XmlDocument document;
     try {
@@ -602,7 +624,7 @@ the v1 Android embedding will be removed in future versions of Flutter.
     for (final XmlElement application in document.findAllElements('application')) {
       final String? applicationName = application.getAttribute('android:name');
       if (applicationName == 'io.flutter.app.FlutterApplication') {
-        return AndroidEmbeddingVersion.v1;
+        return AndroidEmbeddingVersionResult(AndroidEmbeddingVersion.v1, '${appManifestFile.absolute.path} uses `android:name="io.flutter.app.FutterApplication"`');
       }
     }
     for (final XmlElement metaData in document.findAllElements('meta-data')) {
@@ -610,14 +632,14 @@ the v1 Android embedding will be removed in future versions of Flutter.
       if (name == 'flutterEmbedding') {
         final String? embeddingVersionString = metaData.getAttribute('android:value');
         if (embeddingVersionString == '1') {
-          return AndroidEmbeddingVersion.v1;
+          return AndroidEmbeddingVersionResult(AndroidEmbeddingVersion.v1, '${appManifestFile.absolute.path} `<meta-data android:name="flutterEmbedding"` has value 1');
         }
         if (embeddingVersionString == '2') {
-          return AndroidEmbeddingVersion.v2;
+          return AndroidEmbeddingVersionResult(AndroidEmbeddingVersion.v2, '${appManifestFile.absolute.path} `<meta-data android:name="flutterEmbedding"` has value 2');
         }
       }
     }
-    return AndroidEmbeddingVersion.v1;
+    return AndroidEmbeddingVersionResult(AndroidEmbeddingVersion.v1, 'No `<meta-data android:name="flutterEmbedding" android:value="2"/>` in ${appManifestFile.absolute.path}');
   }
 }
 
@@ -627,6 +649,19 @@ enum AndroidEmbeddingVersion {
   v1,
   /// V2 APIs based on io.flutter.embedding.android.FlutterActivity.
   v2,
+}
+
+/// Data class that holds the results of checking for embedding version.
+///
+/// This class includes the reason why a particular embedding was selected.
+class AndroidEmbeddingVersionResult {
+  AndroidEmbeddingVersionResult(this.version, this.reason);
+
+  /// The embedding version.
+  AndroidEmbeddingVersion version;
+
+  /// The reason why the embedding version was selected.
+  String reason;
 }
 
 // What the tool should do when encountering deprecated API in applications.

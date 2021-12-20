@@ -1077,6 +1077,7 @@ void main() {
         }
         return inactivePressedOverlayColor;
       }
+      return null;
     }
     const double splashRadius = 24.0;
     TestGesture gesture;
