@@ -518,4 +518,19 @@ void main() {
   colorScheme = colorScheme.copyWith(primaryVariant: Colors.black, secondaryVariant: Colors.white);
   colorScheme.primaryVariant;
   colorScheme.secondaryVariant;
+
+  // Changes made in https://github.com/flutter/flutter/pull/73352
+  var myButton = FlatButton(
+    key: UniqueKey(),
+    onPressed: (){},
+    onLongPress: (){},
+    clipBehavior: Clip.hardEdge,
+    focusNode: FocusNode(),
+    autofocus: true,
+    child: Text('FlatButton'),
+    onHighlightChanged: (_) {},
+    textTheme: ButtonTextTheme(),
+    highlightColor: Colors.blue,
+    colorBrightness: Brightness.dark,
+  );
 }

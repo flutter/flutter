@@ -491,4 +491,15 @@ void main() {
   colorScheme = colorScheme.copyWith();
   colorScheme.primaryContainer;
   colorScheme.secondaryContainer;
+
+  // Changes made in https://github.com/flutter/flutter/pull/73352
+  var myButton = TextButton(
+    key: UniqueKey(),
+    onPressed: (){},
+    onLongPress: (){},
+    clipBehavior: Clip.hardEdge,
+    focusNode: FocusNode(),
+    autofocus: true,
+    child: Text('FlatButton'),
+  );
 }
