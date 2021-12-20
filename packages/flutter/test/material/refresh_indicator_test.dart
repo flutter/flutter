@@ -972,19 +972,11 @@ void main() {
             localRefreshCalled = true;
             return Future<void>.delayed(indeterminateDuration);
           },
-          child: NotificationListener<OverscrollIndicatorNotification>(
-            onNotification: (OverscrollIndicatorNotification overscroll) {
-              // Remove glow from the golden
-              // TODO(Piinks): remove this when https://github.com/flutter/flutter/issues/94933 is fixed
-              overscroll.disallowGlow();
-              return false;
-            },
-            child: SingleChildScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              child: Container(
-                height: sheetHeight,
-                color: backgroundColor,
-              ),
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: Container(
+              height: sheetHeight,
+              color: backgroundColor,
             ),
           ),
         ),
@@ -1011,7 +1003,7 @@ void main() {
 
     // 12 frames of hide animation
     await tester.pumpFrames(animationSheet.record(
-      buildApp(Colors.white),
+      buildApp(Colors.yellow),
     ), const Duration(milliseconds: 12 * frameTime));
 
     expect(localRefreshCalled, false);
@@ -1032,11 +1024,11 @@ void main() {
       ), const Duration(milliseconds: frameTime));
     }
 
-    // 6 frames after expand
-    for (num i = 0; i < 10; i++) {
+    // 20 frames after expand - make sure there's no glow
+    for (num i = 0; i < 20; i++) {
       await drag2.moveBy(const Offset(0.0, dragInterval));
       await tester.pumpFrames(animationSheet.record(
-        buildApp(Colors.green),
+        buildApp(Colors.white),
       ), const Duration(milliseconds: frameTime));
     }
 
@@ -1051,7 +1043,7 @@ void main() {
 
     // 20 frames of indeterminate animation
     await tester.pumpFrames(animationSheet.record(
-      buildApp(Colors.yellow),
+      buildApp(Colors.green),
     ), const Duration(milliseconds: indeterminateFrames * frameTime));
 
     // 12 frames of hide animation
