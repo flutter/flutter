@@ -46,6 +46,22 @@ void main() {
     );
   });
 
+  testWidgets('Double tapping empty TextField opens the Toolbar', (WidgetTester tester) async {
+    final _TestSearchDelegate delegate = _TestSearchDelegate();
+
+    await tester.pumpWidget(TestHomePage(delegate: delegate));
+    await tester.tap(find.byTooltip('Search'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    // Double tap shows the Toolbar.
+    expect(find.text('Paste'), findsNothing);
+    await tester.tap(find.byType(TextField));
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+    expect(find.text('Paste'), findsOneWidget);
+  });
+
   testWidgets('Can open and close search', (WidgetTester tester) async {
     final _TestSearchDelegate delegate = _TestSearchDelegate();
     final List<String> selectedResults = <String>[];
