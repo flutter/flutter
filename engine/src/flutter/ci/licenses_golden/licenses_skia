@@ -1,4 +1,4 @@
-Signature: c1da29356b0c5b3b2d565a3825cb0917
+Signature: 38bc8d281ba1b7c4d05d87f93c765a39
 
 UNUSED LICENSES:
 
@@ -2548,6 +2548,7 @@ FILE: ../../../third_party/skia/experimental/tskit/bindings/bindings.h
 FILE: ../../../third_party/skia/experimental/tskit/bindings/core.cpp
 FILE: ../../../third_party/skia/experimental/tskit/bindings/extension.cpp
 FILE: ../../../third_party/skia/experimental/webgpu-bazel/src/bindings.cpp
+FILE: ../../../third_party/skia/gm/attributes.cpp
 FILE: ../../../third_party/skia/gm/composecolorfilter.cpp
 FILE: ../../../third_party/skia/gm/crbug_1167277.cpp
 FILE: ../../../third_party/skia/gm/crbug_1174186.cpp
