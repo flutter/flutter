@@ -1121,5 +1121,6 @@ void main() {
 
     controller.jumpToPage(365);
     await tester.pump();
+    expect(tester.takeException(), isNull);
   });
 }
