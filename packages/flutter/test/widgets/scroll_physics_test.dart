@@ -93,7 +93,7 @@ void main() {
     );
   });
 
-  test("ScrollPhysics scrolling subclasses - Creating the simulation doesn't alter the velocity for time 0", () {
+  test('ScrollPhysics scrolling subclasses - initial velocity when creating the simulation', () {
     final ScrollMetrics position = FixedScrollMetrics(
       minScrollExtent: 0.0,
       maxScrollExtent: 100.0,
@@ -106,11 +106,19 @@ void main() {
     const ClampingScrollPhysics clamp = ClampingScrollPhysics();
     const PageScrollPhysics page = PageScrollPhysics();
 
+    // Verify creating these simulations doesn't alter the velocity for time 0.
+    //
     // Calls to createBallisticSimulation may happen on every frame (i.e. when the maxScrollExtent changes)
-    // Changing velocity for time 0 may cause a sudden, unwanted damping/speedup effect
-    expect(bounce.createBallisticSimulation(position, 1000)!.dx(0), moreOrLessEquals(1000));
-    expect(clamp.createBallisticSimulation(position, 1000)!.dx(0), moreOrLessEquals(1000));
-    expect(page.createBallisticSimulation(position, 1000)!.dx(0), moreOrLessEquals(1000));
+    // Changing velocity for time 0 may cause a sudden, unwanted damping/speedup effect.
+    expect(bounce.createBallisticSimulation(position, 1000)!.dx(0), 1000);
+    expect(clamp.createBallisticSimulation(position, 1000)!.dx(0), 1000);
+
+    // Contrary to the other two scroll physics, PageScrollPhysics do intentionally produce
+    // a bigger velocity than supplied to them, but they won't suffer from this, because the simulation
+    // velocity depends on a ratio of velocity / pageDelta.
+    const double pageDelta = 500.0 - 20.0; // viewportDimension - pixels
+    // 5.0 is the initial velocity factor, see [PageScrollSimulation.dx]
+    expect(page.createBallisticSimulation(position, 1000)!.dx(0), 5.0 * pageDelta);
   });
 
   group('BouncingScrollPhysics test', () {

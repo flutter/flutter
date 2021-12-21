@@ -4,6 +4,7 @@
 
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/material.dart';
+import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -1123,4 +1124,58 @@ void main() {
     await tester.pump();
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('PageView PageScrollPhysics - default simulation is PageScrollSumulation and custom spring can be specified', (WidgetTester tester) async {
+    Widget build([ ScrollPhysics? physics ]) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: PageView.builder(
+          itemCount: kStates.length,
+          physics: physics,
+          itemBuilder: (BuildContext context, int index) {
+            return Container(
+              height: 200.0,
+              color: index.isEven
+                ? const Color(0xFF0000FF)
+                : const Color(0xFF00FF00),
+              child: Text(kStates[index]),
+            );
+          },
+        ),
+      );
+    }
+
+    // Verify PageView uses PageScrollSumulation by default
+    await tester.pumpWidget(build());
+    await tester.fling(find.byType(PageView), const Offset(-200.0, 0.0), 1000.0);
+    final ScrollPosition position1 = tester.state<ScrollableState>(find.byType(Scrollable)).position;
+    expect(position1.physics.createBallisticSimulation(position1, 50.0), isA<PageScrollSimulation>());
+    expect(await tester.pumpAndSettle(), 8);
+
+    // Verify custom spring will enable PageView to use ScrollSpringSimulation
+    await tester.pumpWidget(build(const ScrollPhysicsWithCustomSpring()));
+    await tester.fling(find.byType(PageView), const Offset(-200.0, 0.0), 1000.0);
+    final ScrollPosition position2 = tester.state<ScrollableState>(find.byType(Scrollable)).position;
+    expect(position2.physics.createBallisticSimulation(position2, 50.0), isA<ScrollSpringSimulation>());
+    expect(await tester.pumpAndSettle(), 11);
+  });
+}
+
+class ScrollPhysicsWithCustomSpring extends ScrollPhysics {
+  const ScrollPhysicsWithCustomSpring({ ScrollPhysics? parent }) : super(parent: parent);
+
+  @override
+  ScrollPhysicsWithCustomSpring applyTo(ScrollPhysics? ancestor) {
+    return ScrollPhysicsWithCustomSpring(parent: buildParent(ancestor));
+  }
+
+  @override
+  SpringDescription get spring {
+    final SpringDescription defaultSpring = const ScrollPhysics().spring;
+    return SpringDescription(
+      mass: defaultSpring.mass,
+      stiffness: defaultSpring.stiffness,
+      damping: defaultSpring.damping
+    );
+  }
 }
