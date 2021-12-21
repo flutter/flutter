@@ -1549,7 +1549,15 @@ class TextSelectionGestureDetectorBuilder {
             case PointerDeviceKind.unknown:
               // On macOS/iOS/iPadOS a touch tap places the cursor at the edge
               // of the word.
-              renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
+              final TextSelection? previousSelection = renderEditable.selection;
+              final TextSelection newSelection = renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
+              if (previousSelection != newSelection) {
+                  editableText.hideToolbar();
+              } else {
+                if (renderEditable.hasFocus && renderEditable.selectionEnabled) {
+                  editableText.toggleToolbar();
+                }
+              }
               break;
           }
           break;
@@ -1557,6 +1565,7 @@ class TextSelectionGestureDetectorBuilder {
         case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
         case TargetPlatform.windows:
+          editableText.hideToolbar();
           renderEditable.selectPosition(cause: SelectionChangedCause.tap);
           break;
       }

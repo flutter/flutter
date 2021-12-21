@@ -1996,8 +1996,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
 
   /// Move the selection to the beginning or end of a word.
   ///
+  /// Returns the resulting text selection.
   /// {@macro flutter.rendering.RenderEditable.selectPosition}
-  void selectWordEdge({ required SelectionChangedCause cause }) {
+  TextSelection selectWordEdge({ required SelectionChangedCause cause }) {
     assert(cause != null);
     _computeTextMetricsIfNeeded();
     assert(_lastTapDownPosition != null);
@@ -2010,6 +2011,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       newSelection = TextSelection.collapsed(offset: word.end, affinity: TextAffinity.upstream);
     }
     _setSelection(newSelection, cause);
+    return newSelection;
   }
 
   TextSelection _getWordAtOffset(TextPosition position) {
