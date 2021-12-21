@@ -580,6 +580,34 @@ void main() {
     }
   }, variant: TargetPlatformVariant.all());
 
+   testWidgets('toolbar state is correct on each platform when tapping focused editable', (WidgetTester tester) async {
+    await pumpTextSelectionGestureDetectorBuilder(tester);
+    final FakeEditableTextState state = tester.state(find.byType(FakeEditableText));
+    final FakeRenderEditable renderEditable = tester.renderObject(find.byType(FakeEditable));
+    renderEditable.hasFocus = true;
+
+    final TestGesture gesture = await tester.startGesture(
+      const Offset(200.0, 200.0),
+      pointer: 0,
+    );
+    addTearDown(gesture.removePointer);
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        expect(state.showToolbarCalled, isTrue);
+        break;
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        expect(state.showToolbarCalled, isFalse);
+        break;
+    }
+  }, variant: TargetPlatformVariant.all());
+
   testWidgets('test TextSelectionGestureDetectorBuilder double tap', (WidgetTester tester) async {
     await pumpTextSelectionGestureDetectorBuilder(tester);
     final TestGesture gesture = await tester.startGesture(
@@ -1414,8 +1442,9 @@ class FakeRenderEditable extends RenderEditable {
 
   bool selectWordEdgeCalled = false;
   @override
-  void selectWordEdge({ required SelectionChangedCause cause }) {
+  TextSelection selectWordEdge({ required SelectionChangedCause cause }) {
     selectWordEdgeCalled = true;
+    return const TextSelection(extentOffset:  0, baseOffset: 0);
   }
 
   bool selectPositionAtCalled = false;
