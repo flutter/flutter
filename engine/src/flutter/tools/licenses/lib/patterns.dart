@@ -1581,6 +1581,13 @@ final List<RegExp> csLicenses = <RegExp>[
       r'|'
 
       r'\1\2 '
+      r'The above copyright notice including the dates of first publication and either this '
+      r'permission notice or a reference to .+ shall be '
+      r'included in all copies or substantial portions of the Software.'
+
+      r'|'
+
+      r'\1\2 '
       r'In addition, the following condition applies:'
 
       r'|'
@@ -1612,6 +1619,13 @@ final List<RegExp> csLicenses = <RegExp>[
       r'DAMAGES OF ANY KIND, OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, '
       r'WHETHER OR NOT ADVISED OF THE POSSIBILITY OF DAMAGE, AND ON ANY THEORY OF LIABILITY, ARISING '
       r'OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE\.'
+
+      r'|'
+
+      r'\1\2 '
+      r'Except as contained in this notice, the name of .+ shall not '
+      r'be used in advertising or otherwise to promote the sale, use or other dealings in '
+      r'this Software without prior written authorization from .+\.'
 
       .replaceAll(' ', _linebreak)
     )
