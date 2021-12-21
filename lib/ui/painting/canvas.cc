@@ -661,7 +661,7 @@ void Canvas::drawShadow(const CanvasPath* path,
     builder()->drawShadow(path->path(), color, elevation, transparentOccluder,
                           dpr);
   } else if (canvas_) {
-    flutter::PhysicalShapeLayer::DrawShadow(
+    DisplayListCanvasDispatcher::DrawShadow(
         canvas_, path->path(), color, elevation, transparentOccluder, dpr);
   }
 }

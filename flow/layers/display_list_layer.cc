@@ -4,7 +4,7 @@
 
 #include "flutter/flow/layers/display_list_layer.h"
 
-#include "flutter/flow/display_list_canvas.h"
+#include "flutter/display_list/display_list_canvas.h"
 
 namespace flutter {
 

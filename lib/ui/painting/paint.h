@@ -5,10 +5,9 @@
 #ifndef FLUTTER_LIB_UI_PAINTING_PAINT_H_
 #define FLUTTER_LIB_UI_PAINTING_PAINT_H_
 
+#include "flutter/display_list/display_list.h"
 #include "third_party/skia/include/core/SkPaint.h"
 #include "third_party/tonic/converter/dart_converter.h"
-
-#include "flow/display_list.h"
 
 namespace flutter {
 
