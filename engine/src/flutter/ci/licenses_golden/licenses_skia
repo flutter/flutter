@@ -1,4 +1,4 @@
-Signature: 77c81264e2edea7e32fcb9f4002dd979
+Signature: cb0913810ebd78ec7ee2fb9d569aa8c4
 
 UNUSED LICENSES:
 
@@ -2676,8 +2676,6 @@ FILE: ../../../third_party/skia/src/sksl/transform/SkSLEliminateDeadGlobalVariab
 FILE: ../../../third_party/skia/src/sksl/transform/SkSLEliminateDeadLocalVariables.cpp
 FILE: ../../../third_party/skia/src/sksl/transform/SkSLEliminateUnreachableCode.cpp
 FILE: ../../../third_party/skia/src/sksl/transform/SkSLProgramWriter.h
-FILE: ../../../third_party/skia/src/utils/SkVMVisualizer.cpp
-FILE: ../../../third_party/skia/src/utils/SkVMVisualizer.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2021 Google LLC
 
