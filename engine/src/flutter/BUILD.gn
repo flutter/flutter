@@ -79,6 +79,11 @@ group("flutter") {
     "//flutter/sky",
   ]
 
+  # Ensure the example for a sample embedder compiles.
+  if (is_mac || is_linux) {
+    public_deps += [ "//flutter/examples/glfw" ]
+  }
+
   # If enbaled, compile the SDK / snapshot.
   if (!is_fuchsia) {
     public_deps += [ "//flutter/lib/snapshot:generate_snapshot_bins" ]
