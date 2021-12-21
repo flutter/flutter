@@ -89,7 +89,7 @@ bool RunFlutter(GLFWwindow* window,
   config.type = kOpenGL;
   config.open_gl.struct_size = sizeof(config.open_gl);
   config.open_gl.make_current = [](void* userdata) -> bool {
-    glfwMakeContextCurrent((GLFWwindow*)userdata);
+    glfwMakeContextCurrent(static_cast<GLFWwindow*>(userdata));
     return true;
   };
   config.open_gl.clear_current = [](void*) -> bool {
@@ -97,7 +97,7 @@ bool RunFlutter(GLFWwindow* window,
     return true;
   };
   config.open_gl.present = [](void* userdata) -> bool {
-    glfwSwapBuffers((GLFWwindow*)userdata);
+    glfwSwapBuffers(static_cast<GLFWwindow*>(userdata));
     return true;
   };
   config.open_gl.fbo_callback = [](void*) -> uint32_t {
@@ -116,7 +116,10 @@ bool RunFlutter(GLFWwindow* window,
   FlutterEngineResult result =
       FlutterEngineRun(FLUTTER_ENGINE_VERSION, &config,  // renderer
                        &args, window, &engine);
-  assert(result == kSuccess && engine != nullptr);
+  if (result != kSuccess || engine == nullptr) {
+    std::cout << "Could not run the Flutter Engine." << std::endl;
+    return false;
+  }
 
   glfwSetWindowUserPointer(window, engine);
   GLFWwindowSizeCallback(window, kInitialWindowWidth, kInitialWindowHeight);
@@ -125,7 +128,7 @@ bool RunFlutter(GLFWwindow* window,
 }
 
 void printUsage() {
-  std::cout << "usage: flutter_glfw <path to project> <path to icudtl.dat>"
+  std::cout << "usage: embedder_example <path to project> <path to icudtl.dat>"
             << std::endl;
 }
 
@@ -145,25 +148,33 @@ int main(int argc, const char* argv[]) {
   glfwSetErrorCallback(GLFW_ErrorCallback);
 
   int result = glfwInit();
-  assert(result == GLFW_TRUE);
+  if (result != GLFW_TRUE) {
+    std::cout << "Could not initialize GLFW." << std::endl;
+    return EXIT_FAILURE;
+  }
 
   GLFWwindow* window = glfwCreateWindow(
       kInitialWindowWidth, kInitialWindowHeight, "Flutter", NULL, NULL);
-  assert(window != nullptr);
+  if (window == nullptr) {
+    std::cout << "Could not create GLFW window." << std::endl;
+    return EXIT_FAILURE;
+  }
 
   int framebuffer_width, framebuffer_height;
   glfwGetFramebufferSize(window, &framebuffer_width, &framebuffer_height);
   g_pixelRatio = framebuffer_width / kInitialWindowWidth;
 
   bool runResult = RunFlutter(window, project_path, icudtl_path);
-  assert(runResult);
+  if (!runResult) {
+    std::cout << "Could not run the Flutter engine." << std::endl;
+    return EXIT_FAILURE;
+  }
 
   glfwSetKeyCallback(window, GLFWKeyCallback);
   glfwSetWindowSizeCallback(window, GLFWwindowSizeCallback);
   glfwSetMouseButtonCallback(window, GLFWmouseButtonCallback);
 
   while (!glfwWindowShouldClose(window)) {
-    std::cout << "Looping..." << std::endl;
     glfwWaitEvents();
   }
 
