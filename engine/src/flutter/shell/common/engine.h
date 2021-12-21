@@ -364,9 +364,7 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   /// @brief      Create a Engine that shares as many resources as
   ///             possible with the calling Engine such that together
   ///             they occupy less memory and be created faster.
-  /// @details    This method ultimately calls DartIsolate::SpawnIsolate to make
-  ///             sure resources are shared.  This should only be called on
-  ///             running Engines.
+  /// @details    This should only be called on running Engines.
   /// @return     A new Engine with a running isolate.
   /// @see        Engine::Engine
   /// @see        DartIsolate::SpawnIsolate

@@ -199,8 +199,7 @@ class DartIsolate : public UIDartState {
   /// @param[in]  context                     Engine-owned state which is
   ///                                         accessed by the root dart isolate.
   /// @param[in]  spawning_isolate            The isolate that is spawning the
-  ///                                         new isolate. See also
-  ///                                         DartIsolate::SpawnIsolate.
+  ///                                         new isolate.
   /// @return     A weak pointer to the root Dart isolate. The caller must
   ///             ensure that the isolate is not referenced for long periods of
   ///             time as it prevents isolate collection when the isolate
@@ -221,35 +220,6 @@ class DartIsolate : public UIDartState {
       std::unique_ptr<IsolateConfiguration> isolate_configuration,
       const UIDartState::Context& context,
       const DartIsolate* spawning_isolate = nullptr);
-
-  //----------------------------------------------------------------------------
-  /// @brief     Creates a running DartIsolate who shares as many resources as
-  ///            possible with the caller DartIsolate.  This allows them to
-  ///            occupy less memory together and to be created faster.
-  /// @details   Shared components will be destroyed when the last live
-  ///            DartIsolate is destroyed.  SpawnIsolate can only be used to
-  ///            create DartIsolates whose executable code is shared with the
-  ///            calling DartIsolate.
-  /// @attention Only certain setups can take advantage of the most savings
-  ///            currently, AOT specifically.
-  /// @return     A weak pointer to a new running DartIsolate. The caller must
-  ///             ensure that the isolate is not referenced for long periods of
-  ///             time as it prevents isolate collection when the isolate
-  ///             terminates itself. The caller may also only use the isolate on
-  ///             the thread on which the isolate was created.
-  std::weak_ptr<DartIsolate> SpawnIsolate(
-      const Settings& settings,
-      std::unique_ptr<PlatformConfiguration> platform_configuration,
-      fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
-      std::string advisory_script_uri,
-      std::string advisory_script_entrypoint,
-      Flags flags,
-      const fml::closure& isolate_create_callback,
-      const fml::closure& isolate_shutdown_callback,
-      std::optional<std::string> dart_entrypoint,
-      std::optional<std::string> dart_entrypoint_library,
-      const std::vector<std::string>& dart_entrypoint_args,
-      std::unique_ptr<IsolateConfiguration> isolate_configuration) const;
 
   // |UIDartState|
   ~DartIsolate() override;
