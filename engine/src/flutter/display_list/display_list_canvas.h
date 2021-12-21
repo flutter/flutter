@@ -5,10 +5,9 @@
 #ifndef FLUTTER_FLOW_DISPLAY_LIST_CANVAS_H_
 #define FLUTTER_FLOW_DISPLAY_LIST_CANVAS_H_
 
-#include "flutter/flow/display_list.h"
-#include "flutter/flow/display_list_utils.h"
+#include "flutter/display_list/display_list.h"
+#include "flutter/display_list/display_list_utils.h"
 #include "flutter/fml/logging.h"
-
 #include "third_party/skia/include/core/SkCanvasVirtualEnforcer.h"
 #include "third_party/skia/include/utils/SkNoDrawCanvas.h"
 
@@ -116,6 +115,18 @@ class DisplayListCanvasDispatcher : public virtual Dispatcher,
                   const SkScalar elevation,
                   bool transparent_occluder,
                   SkScalar dpr) override;
+
+  static SkRect ComputeShadowBounds(const SkPath& path,
+                                    float elevation,
+                                    SkScalar dpr,
+                                    const SkMatrix& ctm);
+
+  static void DrawShadow(SkCanvas* canvas,
+                         const SkPath& path,
+                         SkColor color,
+                         float elevation,
+                         bool transparentOccluder,
+                         SkScalar dpr);
 
  private:
   SkCanvas* canvas_;

@@ -1,0 +1,37 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+source_set("display_list") {
+  sources = [
+    "display_list.cc",
+    "display_list.h",
+    "display_list_canvas.cc",
+    "display_list_canvas.h",
+    "display_list_utils.cc",
+    "display_list_utils.h",
+  ]
+
+  public_deps = [
+    "//flutter/fml",
+    "//third_party/skia",
+  ]
+}
+
+# Instead of creating a new test harness for display lists, the flow_unittests
+# harness includes these in its own.
+source_set("unittests") {
+  testonly = true
+
+  sources = [
+    "display_list_canvas_unittests.cc",
+    "display_list_unittests.cc",
+  ]
+
+  deps = [
+    "//flutter/testing:testing_lib",
+    "//third_party/skia",
+  ]
+
+  public_deps = [ ":display_list" ]
+}

@@ -7,6 +7,7 @@
 
 #include <optional>
 
+#include "flutter/fml/logging.h"
 #include "third_party/skia/include/core/SkBlender.h"
 #include "third_party/skia/include/core/SkBlurTypes.h"
 #include "third_party/skia/include/core/SkCanvas.h"
@@ -18,8 +19,6 @@
 #include "third_party/skia/include/core/SkPicture.h"
 #include "third_party/skia/include/core/SkShader.h"
 #include "third_party/skia/include/core/SkVertices.h"
-
-#include "flutter/fml/logging.h"
 
 // The Flutter DisplayList mechanism encapsulates a persistent sequence of
 // rendering operations.

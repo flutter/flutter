@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "flutter/display_list/display_list_utils.h"
+
 #include <math.h>
 #include <type_traits>
 
-#include "flutter/flow/display_list_utils.h"
-#include "flutter/flow/layers/physical_shape_layer.h"
+#include "flutter/display_list/display_list_canvas.h"
 #include "flutter/fml/logging.h"
-
 #include "third_party/skia/include/core/SkMaskFilter.h"
 #include "third_party/skia/include/core/SkPath.h"
 #include "third_party/skia/include/core/SkRSXform.h"
@@ -518,8 +518,8 @@ void DisplayListBoundsCalculator::drawShadow(const SkPath& path,
                                              const SkScalar elevation,
                                              bool transparent_occluder,
                                              SkScalar dpr) {
-  SkRect shadow_bounds =
-      PhysicalShapeLayer::ComputeShadowBounds(path, elevation, dpr, matrix());
+  SkRect shadow_bounds = DisplayListCanvasDispatcher::ComputeShadowBounds(
+      path, elevation, dpr, matrix());
   AccumulateRect(shadow_bounds, kDrawShadowFlags);
 }
 

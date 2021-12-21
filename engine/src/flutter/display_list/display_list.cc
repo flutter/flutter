@@ -4,10 +4,9 @@
 
 #include <type_traits>
 
-#include "flutter/flow/display_list.h"
-#include "flutter/flow/display_list_canvas.h"
-#include "flutter/flow/display_list_utils.h"
-
+#include "flutter/display_list/display_list.h"
+#include "flutter/display_list/display_list_canvas.h"
+#include "flutter/display_list/display_list_utils.h"
 #include "third_party/skia/include/core/SkPath.h"
 #include "third_party/skia/include/core/SkRSXform.h"
 #include "third_party/skia/include/core/SkTextBlob.h"

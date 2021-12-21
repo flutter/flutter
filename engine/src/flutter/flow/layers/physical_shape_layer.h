@@ -17,17 +17,6 @@ class PhysicalShapeLayer : public ContainerLayer {
                      const SkPath& path,
                      Clip clip_behavior);
 
-  static SkRect ComputeShadowBounds(const SkPath& path,
-                                    float elevation,
-                                    SkScalar dpr,
-                                    const SkMatrix& ctm);
-  static void DrawShadow(SkCanvas* canvas,
-                         const SkPath& path,
-                         SkColor color,
-                         float elevation,
-                         bool transparentOccluder,
-                         SkScalar dpr);
-
   void Diff(DiffContext* context, const Layer* old_layer) override;
 
   void Preroll(PrerollContext* context, const SkMatrix& matrix) override;

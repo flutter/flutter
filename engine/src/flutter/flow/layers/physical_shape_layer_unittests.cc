@@ -4,6 +4,7 @@
 
 #include "flutter/flow/layers/physical_shape_layer.h"
 
+#include "flutter/display_list/display_list_canvas.h"
 #include "flutter/flow/testing/diff_context_test.h"
 #include "flutter/flow/testing/layer_test.h"
 #include "flutter/flow/testing/mock_layer.h"
@@ -125,7 +126,7 @@ TEST_F(PhysicalShapeLayerTest, ElevationSimple) {
   // The Fuchsia system compositor handles all elevated PhysicalShapeLayers and
   // their shadows , so we do not do any painting there.
   EXPECT_EQ(layer->paint_bounds(),
-            PhysicalShapeLayer::ComputeShadowBounds(
+            DisplayListCanvasDispatcher::ComputeShadowBounds(
                 layer_path, initial_elevation, 1.0f, SkMatrix()));
   EXPECT_TRUE(layer->needs_painting(paint_context()));
   EXPECT_EQ(layer->elevation(), initial_elevation);
@@ -174,7 +175,7 @@ TEST_F(PhysicalShapeLayerTest, ElevationComplex) {
     // PhysicalShapeLayers and their shadows , so we do not do any painting
     // there.
     EXPECT_EQ(layers[i]->paint_bounds(),
-              (PhysicalShapeLayer::ComputeShadowBounds(
+              (DisplayListCanvasDispatcher::ComputeShadowBounds(
                   layer_path, initial_elevations[i], 1.0f /* pixel_ratio */,
                   SkMatrix())));
     EXPECT_TRUE(layers[i]->needs_painting(paint_context()));
@@ -210,14 +211,14 @@ TEST_F(PhysicalShapeLayerTest, ShadowNotDependsCtm) {
   path.addRect(0, 0, 8, 8).close();
 
   for (SkScalar elevation : elevations) {
-    SkRect baseline_bounds = PhysicalShapeLayer::ComputeShadowBounds(
+    SkRect baseline_bounds = DisplayListCanvasDispatcher::ComputeShadowBounds(
         path, elevation, 1.0f, SkMatrix());
     for (SkScalar scale : scales) {
       for (SkScalar translateX : translates) {
         for (SkScalar translateY : translates) {
           SkMatrix ctm;
           ctm.setScaleTranslate(scale, scale, translateX, translateY);
-          SkRect bounds = PhysicalShapeLayer::ComputeShadowBounds(
+          SkRect bounds = DisplayListCanvasDispatcher::ComputeShadowBounds(
               path, elevation, scale, ctm);
           EXPECT_FLOAT_EQ(bounds.fLeft, baseline_bounds.fLeft);
           EXPECT_FLOAT_EQ(bounds.fTop, baseline_bounds.fTop);
@@ -274,14 +275,14 @@ TEST_F(PhysicalShapeLayerTest, ShadowNotDependsPathSize) {
                   [=](SkCanvas* canvas) {
                     SkPath path;
                     path.addRect(test_case[0]).close();
-                    PhysicalShapeLayer::DrawShadow(canvas, path, SK_ColorBLACK,
-                                                   1.0f, false, 1.0f);
+                    DisplayListCanvasDispatcher::DrawShadow(
+                        canvas, path, SK_ColorBLACK, 1.0f, false, 1.0f);
                   },
                   [=](SkCanvas* canvas) {
                     SkPath path;
                     path.addRect(test_case[1]).close();
-                    PhysicalShapeLayer::DrawShadow(canvas, path, SK_ColorBLACK,
-                                                   1.0f, false, 1.0f);
+                    DisplayListCanvasDispatcher::DrawShadow(
+                        canvas, path, SK_ColorBLACK, 1.0f, false, 1.0f);
                   },
                   SkSize::Make(100, 100)),
               0);

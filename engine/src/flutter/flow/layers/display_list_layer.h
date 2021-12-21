@@ -5,7 +5,7 @@
 #ifndef FLUTTER_FLOW_LAYERS_DISPLAY_LIST_LAYER_H_
 #define FLUTTER_FLOW_LAYERS_DISPLAY_LIST_LAYER_H_
 
-#include "flutter/flow/display_list.h"
+#include "flutter/display_list/display_list.h"
 #include "flutter/flow/layers/layer.h"
 #include "flutter/flow/skia_gpu_object.h"
 

@@ -2,14 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/flow/display_list_canvas.h"
+#include "flutter/display_list/display_list_canvas.h"
 
-#include "flutter/flow/layers/physical_shape_layer.h"
-
+#include "flutter/fml/trace_event.h"
 #include "third_party/skia/include/core/SkMaskFilter.h"
 #include "third_party/skia/include/core/SkTextBlob.h"
+#include "third_party/skia/include/utils/SkShadowUtils.h"
 
 namespace flutter {
+
+const SkScalar kLightHeight = 600;
+const SkScalar kLightRadius = 800;
 
 const SkPaint* DisplayListCanvasDispatcher::safe_paint(bool use_attributes) {
   if (use_attributes) {
@@ -217,13 +220,49 @@ void DisplayListCanvasDispatcher::drawTextBlob(const sk_sp<SkTextBlob> blob,
                                                SkScalar y) {
   canvas_->drawTextBlob(blob, x, y, paint());
 }
+
+SkRect DisplayListCanvasDispatcher::ComputeShadowBounds(const SkPath& path,
+                                                        float elevation,
+                                                        SkScalar dpr,
+                                                        const SkMatrix& ctm) {
+  SkRect shadow_bounds(path.getBounds());
+  SkShadowUtils::GetLocalBounds(
+      ctm, path, SkPoint3::Make(0, 0, dpr * elevation),
+      SkPoint3::Make(0, -1, 1), kLightRadius / kLightHeight,
+      SkShadowFlags::kDirectionalLight_ShadowFlag, &shadow_bounds);
+  return shadow_bounds;
+}
+
+void DisplayListCanvasDispatcher::DrawShadow(SkCanvas* canvas,
+                                             const SkPath& path,
+                                             SkColor color,
+                                             float elevation,
+                                             bool transparentOccluder,
+                                             SkScalar dpr) {
+  const SkScalar kAmbientAlpha = 0.039f;
+  const SkScalar kSpotAlpha = 0.25f;
+
+  uint32_t flags = transparentOccluder
+                       ? SkShadowFlags::kTransparentOccluder_ShadowFlag
+                       : SkShadowFlags::kNone_ShadowFlag;
+  flags |= SkShadowFlags::kDirectionalLight_ShadowFlag;
+  SkColor inAmbient = SkColorSetA(color, kAmbientAlpha * SkColorGetA(color));
+  SkColor inSpot = SkColorSetA(color, kSpotAlpha * SkColorGetA(color));
+  SkColor ambientColor, spotColor;
+  SkShadowUtils::ComputeTonalColors(inAmbient, inSpot, &ambientColor,
+                                    &spotColor);
+  SkShadowUtils::DrawShadow(canvas, path, SkPoint3::Make(0, 0, dpr * elevation),
+                            SkPoint3::Make(0, -1, 1),
+                            kLightRadius / kLightHeight, ambientColor,
+                            spotColor, flags);
+}
+
 void DisplayListCanvasDispatcher::drawShadow(const SkPath& path,
                                              const SkColor color,
                                              const SkScalar elevation,
                                              bool transparent_occluder,
                                              SkScalar dpr) {
-  flutter::PhysicalShapeLayer::DrawShadow(canvas_, path, color, elevation,
-                                          transparent_occluder, dpr);
+  DrawShadow(canvas_, path, color, elevation, transparent_occluder, dpr);
 }
 
 DisplayListCanvasRecorder::DisplayListCanvasRecorder(const SkRect& bounds)

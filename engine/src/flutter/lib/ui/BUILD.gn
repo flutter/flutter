@@ -138,6 +138,7 @@ source_set("ui") {
   deps = [
     "//flutter/assets",
     "//flutter/common",
+    "//flutter/display_list",
     "//flutter/fml",
     "//flutter/runtime:test_font",
     "//flutter/third_party/tonic",
