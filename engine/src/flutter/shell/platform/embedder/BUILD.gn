@@ -24,6 +24,10 @@ shell_gpu_configuration("embedder_gpu_configuration") {
 
 _framework_binary_subpath = "Versions/A/FlutterEmbedder"
 
+config("embedder_header_config") {
+  include_dirs = [ "." ]
+}
+
 # Template for the embedder build. Used to allow building it multiple times with
 # different flags.
 template("embedder_source_set") {
@@ -108,6 +112,7 @@ template("embedder_source_set") {
 
     public_configs += [
       ":embedder_gpu_configuration_config",
+      ":embedder_header_config",
       "//flutter:config",
     ]
   }
