@@ -85,7 +85,7 @@ class DaemonCommand extends FlutterCommand {
     globals.printStatus('Starting device daemon...');
     final Daemon daemon = Daemon(
       DaemonConnection(
-        daemonStreams: StdioDaemonStreams(),
+        daemonStreams: StdioDaemonStreams(globals.stdio),
         logger: globals.logger,
       ),
       notifyingLogger: asLogger<NotifyingLogger>(globals.logger),
@@ -128,7 +128,7 @@ class _DaemonServer {
         });
         final Daemon daemon = Daemon(
           DaemonConnection(
-            daemonStreams: TcpDaemonStreams(socket),
+            daemonStreams: TcpDaemonStreams(socket, logger: logger),
             logger: logger,
           ),
           notifyingLogger: notifyingLogger,

@@ -9,7 +9,6 @@ import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/utils.dart';
 import 'convert.dart';
-import 'globals.dart' as globals;
 
 /// Parse binary streams in the JSON RPC format understood by the daemon, and
 /// convert it into a stream of JSON RPC messages.
@@ -39,9 +38,9 @@ abstract class DaemonStreams {
 
 /// A [DaemonStream] that uses stdin and stdout as the underlying streams.
 class StdioDaemonStreams extends DaemonStreams {
-  StdioDaemonStreams([Stdio? stdio]) :
-    _stdio = stdio ?? globals.stdio,
-    inputStream = _convertInputStream((stdio ?? globals.stdio).stdin);
+  StdioDaemonStreams(Stdio stdio) :
+    _stdio = stdio,
+    inputStream = _convertInputStream(stdio.stdin);
 
   final Stdio _stdio;
 
@@ -64,8 +63,8 @@ class TcpDaemonStreams extends DaemonStreams {
   /// Creates a [DaemonStreams] with an existing [Socket].
   TcpDaemonStreams(
     Socket socket, {
-    Logger? logger,
-  }): _logger = logger ?? globals.logger {
+    required Logger logger,
+  }): _logger = logger {
     _socket = Future<Socket>.value(_initializeSocket(socket));
   }
 
@@ -73,8 +72,8 @@ class TcpDaemonStreams extends DaemonStreams {
   TcpDaemonStreams.connect(
     String host,
     int port, {
-    Logger? logger,
-  }) : _logger = logger ?? globals.logger {
+    required Logger logger,
+  }) : _logger = logger {
     _socket = Socket.connect(host, port).then(_initializeSocket);
   }
 

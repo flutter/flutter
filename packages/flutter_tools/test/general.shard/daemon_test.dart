@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 import 'dart:typed_data';
 
@@ -39,9 +37,9 @@ class FakeDaemonStreams extends DaemonStreams {
 }
 
 void main() {
-  BufferLogger bufferLogger;
-  FakeDaemonStreams daemonStreams;
-  DaemonConnection daemonConnection;
+  late BufferLogger bufferLogger;
+  late FakeDaemonStreams daemonStreams;
+  late DaemonConnection daemonConnection;
   setUp(() {
     bufferLogger = BufferLogger.test();
     daemonStreams = FakeDaemonStreams();
@@ -184,12 +182,12 @@ void main() {
   });
 
   group('TcpDaemonStreams', () {
-    final Map<String, dynamic> testCommand = <String, dynamic>{
+    final Map<String, Object?> testCommand = <String, Object?>{
       'id': 100,
       'method': 'test',
     };
-    FakeSocket socket;
-    TcpDaemonStreams daemonStreams;
+    late FakeSocket socket;
+    late TcpDaemonStreams daemonStreams;
     setUp(() {
       socket = FakeSocket();
       daemonStreams = TcpDaemonStreams(socket, logger: bufferLogger);
@@ -197,7 +195,7 @@ void main() {
 
     test('parses the message received on the socket', () async {
       socket.controller.add(Uint8List.fromList(utf8.encode('[${jsonEncode(testCommand)}]\n')));
-      final Map<String, Object> command = await daemonStreams.inputStream.first;
+      final Map<String, Object?> command = await daemonStreams.inputStream.first;
       expect(command, testCommand);
     });
 
@@ -218,15 +216,20 @@ void main() {
 class FakeSocket extends Fake implements Socket {
   bool closeCalled = false;
   final StreamController<Uint8List> controller = StreamController<Uint8List>();
-  final List<Object> writtenObjects = <Object>[];
+  final List<Object?> writtenObjects = <Object?>[];
 
   @override
-  StreamSubscription<Uint8List> listen(void Function(Uint8List event) onData, {Function onError, void Function() onDone, bool cancelOnError}) {
+  StreamSubscription<Uint8List> listen(
+    void Function(Uint8List event)? onData, {
+    Function? onError,
+    void Function()? onDone,
+    bool? cancelOnError,
+  }) {
     return controller.stream.listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);
   }
 
   @override
-  void write(Object object) {
+  void write(Object? object) {
     writtenObjects.add(object);
   }
 
