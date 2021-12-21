@@ -533,4 +533,19 @@ void main() {
     highlightColor: Colors.blue,
     colorBrightness: Brightness.dark,
   );
+
+  var myIconButton = FlatButton.icon(
+    key: UniqueKey(),
+    icon: Icon(Icons.ten_k_outlined),
+    label: Text('FlatButton'),
+    onPressed: (){},
+    onLongPress: (){},
+    clipBehavior: Clip.hardEdge,
+    focusNode: FocusNode(),
+    autofocus: true,
+    onHighlightChanged: (_) {},
+    textTheme: ButtonTextTheme(),
+    highlightColor: Colors.blue,
+    colorBrightness: Brightness.dark,
+  );
 }

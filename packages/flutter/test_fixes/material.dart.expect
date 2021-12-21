@@ -502,4 +502,14 @@ void main() {
     autofocus: true,
     child: Text('FlatButton'),
   );
+  var myIconButton = TextButton.icon(
+    key: UniqueKey(),
+    icon: Icon(Icons.ten_k_outlined),
+    label: Text('FlatButton'),
+    onPressed: (){},
+    onLongPress: (){},
+    clipBehavior: Clip.hardEdge,
+    focusNode: FocusNode(),
+    autofocus: true,
+  );
 }

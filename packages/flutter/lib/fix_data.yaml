@@ -15,6 +15,28 @@
 version: 1
 transforms:
   # Changes made in https://github.com/flutter/flutter/pull/73352
+  - title: "Migrate to 'TextButton.icon'"
+    date: 2021-01-08
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'icon'
+      inClass: 'FlatButton'
+    changes:
+      - kind: 'removeParameter'
+        name: 'onHighlightChanged'
+      - kind: 'removeParameter'
+        name: 'textTheme'
+      - kind: 'removeParameter'
+        name: 'highlightColor'
+      - kind: 'removeParameter'
+        name: 'colorBrightness'
+      - kind: 'replacedBy'
+        newElement:
+          uris: [ 'material.dart' ]
+          constructor: 'icon'
+          inClass: 'TextButton'
+
+  # Changes made in https://github.com/flutter/flutter/pull/73352
   - title: "Migrate to 'TextButton'"
     date: 2021-01-08
     element:
