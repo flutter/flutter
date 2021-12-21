@@ -7,10 +7,9 @@
 
 #include <optional>
 
-#include "flutter/flow/display_list.h"
+#include "flutter/display_list/display_list.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/macros.h"
-
 #include "third_party/skia/include/core/SkMaskFilter.h"
 
 // This file contains various utility classes to ease implementing

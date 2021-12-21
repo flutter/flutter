@@ -2,8 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/flow/display_list_canvas.h"
-
+#include "flutter/display_list/display_list_canvas.h"
+#include "flutter/fml/math.h"
+#include "flutter/testing/testing.h"
 #include "third_party/skia/include/core/SkColor.h"
 #include "third_party/skia/include/core/SkImageInfo.h"
 #include "third_party/skia/include/core/SkPath.h"
@@ -18,10 +19,6 @@
 #include "third_party/skia/include/effects/SkDashPathEffect.h"
 #include "third_party/skia/include/effects/SkGradientShader.h"
 #include "third_party/skia/include/effects/SkImageFilters.h"
-
-#include <cmath>
-
-#include "gtest/gtest.h"
 
 namespace flutter {
 namespace testing {
@@ -1449,7 +1446,7 @@ TEST(DisplayList, SingleOpsMightSupportGroupOpacityWithOrWithoutBlendMode) {
                                SkRRect::MakeRectXY({2, 2, 8, 8}, 2, 2)););
   RUN_TESTS(builder.drawPath(
       SkPath().addOval({0, 0, 10, 10}).addOval({5, 5, 15, 15})););
-  RUN_TESTS(builder.drawArc({0, 0, 10, 10}, 0, M_PI, true););
+  RUN_TESTS(builder.drawArc({0, 0, 10, 10}, 0, math::kPi, true););
   RUN_TESTS2(builder.drawPoints(SkCanvas::kPoints_PointMode, TestPointCount,
                                 TestPoints);
              , false);

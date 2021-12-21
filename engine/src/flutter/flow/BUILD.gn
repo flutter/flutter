@@ -12,12 +12,6 @@ source_set("flow") {
     "compositor_context.h",
     "diff_context.cc",
     "diff_context.h",
-    "display_list.cc",
-    "display_list.h",
-    "display_list_canvas.cc",
-    "display_list_canvas.h",
-    "display_list_utils.cc",
-    "display_list_utils.h",
     "embedded_views.cc",
     "embedded_views.h",
     "frame_timings.cc",
@@ -89,6 +83,8 @@ source_set("flow") {
     "//flutter/fml",
     "//third_party/skia",
   ]
+
+  public_deps = [ "//flutter/display_list" ]
 }
 
 if (enable_unittests) {
@@ -125,6 +121,7 @@ if (enable_unittests) {
     deps = [
       ":flow",
       "//flutter/common/graphics",
+      "//flutter/display_list:unittests",
     ]
   }
 
@@ -132,8 +129,6 @@ if (enable_unittests) {
     testonly = true
 
     sources = [
-      "display_list_canvas_unittests.cc",
-      "display_list_unittests.cc",
       "embedded_view_params_unittests.cc",
       "flow_run_all_unittests.cc",
       "flow_test_utils.cc",
