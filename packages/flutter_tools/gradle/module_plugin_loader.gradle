@@ -20,6 +20,10 @@ if (pluginsFile.exists()) {
     object.plugins.android.each { androidPlugin ->
         assert androidPlugin.name instanceof String
         assert androidPlugin.path instanceof String
+        def needsBuild = androidPlugin.containsKey('native_build') ? androidPlugin['native_build'] : true
+        if (!needsBuild) {
+            return
+        }
         def pluginDirectory = new File(androidPlugin.path, 'android')
         assert pluginDirectory.exists()
         include ":${androidPlugin.name}"
