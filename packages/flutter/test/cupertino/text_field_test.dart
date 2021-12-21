@@ -1759,7 +1759,7 @@ void main() {
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets(
-    'slow double tap does not trigger double tap',
+    'slow double tap on an unfocused field shows the toolbar',
     (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
@@ -1787,8 +1787,8 @@ void main() {
         const TextSelection.collapsed(offset: 7, affinity: TextAffinity.upstream),
       );
 
-      // No toolbar.
-      expect(find.byType(CupertinoButton), findsNothing);
+      // Toolbar is present.
+      expect(find.byType(CupertinoButton), findsWidgets);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets(
