@@ -176,6 +176,8 @@ FILE: ../../../flutter/fml/make_copyable.h
 FILE: ../../../flutter/fml/mapping.cc
 FILE: ../../../flutter/fml/mapping.h
 FILE: ../../../flutter/fml/mapping_unittests.cc
+FILE: ../../../flutter/fml/math.h
+FILE: ../../../flutter/fml/math_unittests.cc
 FILE: ../../../flutter/fml/memory/ref_counted.h
 FILE: ../../../flutter/fml/memory/ref_counted_internal.h
 FILE: ../../../flutter/fml/memory/ref_counted_unittest.cc
