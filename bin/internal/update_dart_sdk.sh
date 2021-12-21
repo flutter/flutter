@@ -123,11 +123,11 @@ if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != `cat "$ENGINE_STAMP"` ]; t
     >&2 echo "Retrying download without \`--continue-at -\` flag"
     curl ${verbose_curl} --retry 3 --location --output "$DART_SDK_ZIP" "$DART_SDK_URL" 2>&1
   } || {
-    echo >&2
-    echo >&2 "Failed to retrieve the Dart SDK from: $DART_SDK_URL"
-    echo >&2 "If you're located in China, please see this page:"
-    echo >&2 "  https://flutter.dev/community/china"
-    echo >&2
+    >&2 echo
+    >&2 echo "Failed to retrieve the Dart SDK from: $DART_SDK_URL"
+    >&2 echo "If you're located in China, please see this page:"
+    >&2 echo "  https://flutter.dev/community/china"
+    >&2 echo
     rm -f -- "$DART_SDK_ZIP"
     exit 1
   }
