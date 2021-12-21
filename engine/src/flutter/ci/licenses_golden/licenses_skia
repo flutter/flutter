@@ -1,4 +1,4 @@
-Signature: 7d3ebd5919d95601576023693fa97543
+Signature: b10293afe4afd673618fe1ac521d3e6e
 
 UNUSED LICENSES:
 
@@ -2556,12 +2556,14 @@ FILE: ../../../third_party/skia/gm/crbug_1174354.cpp
 FILE: ../../../third_party/skia/gm/crbug_1177833.cpp
 FILE: ../../../third_party/skia/gm/crbug_1257515.cpp
 FILE: ../../../third_party/skia/gm/crop_imagefilter.cpp
+FILE: ../../../third_party/skia/gm/custommesh.cpp
 FILE: ../../../third_party/skia/gm/fillrect_gradient.cpp
 FILE: ../../../third_party/skia/gm/graphitestart.cpp
 FILE: ../../../third_party/skia/gm/hardstop_gradients_many.cpp
 FILE: ../../../third_party/skia/gm/lazytiling.cpp
 FILE: ../../../third_party/skia/gm/particles.cpp
 FILE: ../../../third_party/skia/include/core/SkBlender.h
+FILE: ../../../third_party/skia/include/core/SkCustomMesh.h
 FILE: ../../../third_party/skia/include/effects/SkBlenders.h
 FILE: ../../../third_party/skia/include/gpu/GrSurfaceInfo.h
 FILE: ../../../third_party/skia/include/gpu/ShaderErrorHandler.h
@@ -2575,6 +2577,9 @@ FILE: ../../../third_party/skia/modules/canvaskit/paragraph_bindings_gen.cpp
 FILE: ../../../third_party/skia/src/core/SkBlendModeBlender.cpp
 FILE: ../../../third_party/skia/src/core/SkBlendModeBlender.h
 FILE: ../../../third_party/skia/src/core/SkBlenderBase.h
+FILE: ../../../third_party/skia/src/core/SkCustomMesh.cpp
+FILE: ../../../third_party/skia/src/core/SkCustomMeshPriv.cpp
+FILE: ../../../third_party/skia/src/core/SkCustomMeshPriv.h
 FILE: ../../../third_party/skia/src/core/SkMatrixInvert.cpp
 FILE: ../../../third_party/skia/src/core/SkMatrixInvert.h
 FILE: ../../../third_party/skia/src/core/SkVMBlitter.h
@@ -2609,6 +2614,8 @@ FILE: ../../../third_party/skia/src/gpu/geometry/GrInnerFanTriangulator.h
 FILE: ../../../third_party/skia/src/gpu/gl/egl/GrGLMakeNativeInterface_egl.cpp
 FILE: ../../../third_party/skia/src/gpu/gl/glx/GrGLMakeNativeInterface_glx.cpp
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlTypesPriv.mm
+FILE: ../../../third_party/skia/src/gpu/ops/DrawCustomMeshOp.cpp
+FILE: ../../../third_party/skia/src/gpu/ops/DrawCustomMeshOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/FillPathFlags.h
 FILE: ../../../third_party/skia/src/gpu/text/GrSlug.cpp
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkBuffer.cpp
@@ -2676,6 +2683,8 @@ FILE: ../../../third_party/skia/src/sksl/transform/SkSLEliminateDeadGlobalVariab
 FILE: ../../../third_party/skia/src/sksl/transform/SkSLEliminateDeadLocalVariables.cpp
 FILE: ../../../third_party/skia/src/sksl/transform/SkSLEliminateUnreachableCode.cpp
 FILE: ../../../third_party/skia/src/sksl/transform/SkSLProgramWriter.h
+FILE: ../../../third_party/skia/src/utils/SkVMVisualizer.cpp
+FILE: ../../../third_party/skia/src/utils/SkVMVisualizer.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2021 Google LLC
 
