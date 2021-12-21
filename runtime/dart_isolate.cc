@@ -81,44 +81,6 @@ Dart_IsolateFlags DartIsolate::Flags::Get() const {
   return flags_;
 }
 
-std::weak_ptr<DartIsolate> DartIsolate::SpawnIsolate(
-    const Settings& settings,
-    std::unique_ptr<PlatformConfiguration> platform_configuration,
-    fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
-    std::string advisory_script_uri,
-    std::string advisory_script_entrypoint,
-    Flags flags,
-    const fml::closure& isolate_create_callback,
-    const fml::closure& isolate_shutdown_callback,
-    std::optional<std::string> dart_entrypoint,
-    std::optional<std::string> dart_entrypoint_library,
-    const std::vector<std::string>& dart_entrypoint_args,
-    std::unique_ptr<IsolateConfiguration> isolate_configuration) const {
-  return CreateRunningRootIsolate(
-      settings,                                          //
-      GetIsolateGroupData().GetIsolateSnapshot(),        //
-      std::move(platform_configuration),                 //
-      flags,                                             //
-      nullptr,                                           //
-      isolate_create_callback,                           //
-      isolate_shutdown_callback,                         //
-      dart_entrypoint,                                   //
-      dart_entrypoint_library,                           //
-      dart_entrypoint_args,                              //
-      std::move(isolate_configuration),                  //
-      UIDartState::Context{GetTaskRunners(),             //
-                           snapshot_delegate,            //
-                           GetIOManager(),               //
-                           GetSkiaUnrefQueue(),          //
-                           GetImageDecoder(),            //
-                           GetImageGeneratorRegistry(),  //
-                           advisory_script_uri,          //
-                           advisory_script_entrypoint,   //
-                           GetVolatilePathTracker()},    //
-      this                                               //
-  );
-}
-
 std::weak_ptr<DartIsolate> DartIsolate::CreateRunningRootIsolate(
     const Settings& settings,
     fml::RefPtr<const DartSnapshot> isolate_snapshot,
