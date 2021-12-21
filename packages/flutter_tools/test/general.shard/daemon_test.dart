@@ -5,27 +5,16 @@
 // @dart = 2.8
 
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:flutter_tools/src/base/common.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/daemon.dart';
+import 'package:test/fake.dart';
 
 import '../src/common.dart';
-
-/// Runs a callback using FakeAsync.run while continually pumping the
-/// microtask queue. This avoids a deadlock when tests `await` a Future
-/// which queues a microtask that will not be processed unless the queue
-/// is flushed.
-// Future<T> _runFakeAsync<T>(Future<T> Function(FakeAsync time) f) async {
-//   return FakeAsync().run((FakeAsync time) async {
-//     bool pump = true;
-//     final Future<T> future = f(time).whenComplete(() => pump = false);
-//     while (pump) {
-//       time.flushMicrotasks();
-//     }
-//     return future;
-//   });
-// }
 
 class FakeDaemonStreams extends DaemonStreams {
   final StreamController<Map<String, dynamic>> inputs = StreamController<Map<String, dynamic>>();
@@ -193,4 +182,56 @@ void main() {
       expect(requestFuture, throwsA('some_error'));
     });
   });
+
+  group('TcpDaemonStreams', () {
+    final Map<String, dynamic> testCommand = <String, dynamic>{
+      'id': 100,
+      'method': 'test',
+    };
+    FakeSocket socket;
+    TcpDaemonStreams daemonStreams;
+    setUp(() {
+      socket = FakeSocket();
+      daemonStreams = TcpDaemonStreams(socket, logger: bufferLogger);
+    });
+
+    test('parses the message received on the socket', () async {
+      socket.controller.add(Uint8List.fromList(utf8.encode('[${jsonEncode(testCommand)}]\n')));
+      final Map<String, Object> command = await daemonStreams.inputStream.first;
+      expect(command, testCommand);
+    });
+
+    test('sends the encoded message through the socket', () async {
+      daemonStreams.send(testCommand);
+      await pumpEventQueue();
+      expect(socket.writtenObjects.length, 1);
+      expect(socket.writtenObjects[0].toString(), '[${jsonEncode(testCommand)}]\n');
+    });
+
+    test('dispose calls socket.close', () async {
+      await daemonStreams.dispose();
+      expect(socket.closeCalled, isTrue);
+    });
+  });
+}
+
+class FakeSocket extends Fake implements Socket {
+  bool closeCalled = false;
+  final StreamController<Uint8List> controller = StreamController<Uint8List>();
+  final List<Object> writtenObjects = <Object>[];
+
+  @override
+  StreamSubscription<Uint8List> listen(void Function(Uint8List event) onData, {Function onError, void Function() onDone, bool cancelOnError}) {
+    return controller.stream.listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);
+  }
+
+  @override
+  void write(Object object) {
+    writtenObjects.add(object);
+  }
+
+  @override
+  Future<void> close() async {
+    closeCalled = true;
+  }
 }

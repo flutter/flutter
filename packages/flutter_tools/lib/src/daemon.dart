@@ -39,16 +39,20 @@ abstract class DaemonStreams {
 
 /// A [DaemonStream] that uses stdin and stdout as the underlying streams.
 class StdioDaemonStreams extends DaemonStreams {
-  StdioDaemonStreams(): inputStream = _convertInputStream(globals.stdio.stdin);
+  StdioDaemonStreams([Stdio? stdio]) :
+    _stdio = stdio ?? globals.stdio,
+    inputStream = _convertInputStream((stdio ?? globals.stdio).stdin);
+
+  final Stdio _stdio;
 
   @override
   final Stream<Map<String, Object?>> inputStream;
 
   @override
   void send(Map<String, Object?> message) {
-    globals.stdio.stdoutWrite(
+    _stdio.stdoutWrite(
       '[${json.encode(message)}]\n',
-      fallback: (String message, dynamic error, StackTrace stack) {
+      fallback: (String message, Object? error, StackTrace stack) {
         throwToolExit('Failed to write daemon command response to stdout: $error');
       },
     );
@@ -58,17 +62,25 @@ class StdioDaemonStreams extends DaemonStreams {
 /// A [DaemonStream] that uses [Socket] as the underlying stream.
 class TcpDaemonStreams extends DaemonStreams {
   /// Creates a [DaemonStreams] with an existing [Socket].
-  TcpDaemonStreams(Socket socket) {
+  TcpDaemonStreams(
+    Socket socket, {
+    Logger? logger,
+  }): _logger = logger ?? globals.logger {
     _socket = Future<Socket>.value(_initializeSocket(socket));
   }
 
   /// Connects to a remote host and creates a [DaemonStreams] from the socket.
-  TcpDaemonStreams.connect(String host, int port) {
+  TcpDaemonStreams.connect(
+    String host,
+    int port, {
+    Logger? logger,
+  }) : _logger = logger ?? globals.logger {
     _socket = Socket.connect(host, port).then(_initializeSocket);
   }
 
   late final Future<Socket> _socket;
   final StreamController<Map<String, Object?>> _commands = StreamController<Map<String, Object?>>();
+  final Logger _logger;
 
   @override
   Stream<Map<String, Object?>> get inputStream => _commands.stream;
@@ -79,7 +91,7 @@ class TcpDaemonStreams extends DaemonStreams {
       try {
         socket.write('[${json.encode(message)}]\n');
       } on SocketException catch (error) {
-        globals.logger.printError('Failed to write daemon command response to socket: $error');
+        _logger.printError('Failed to write daemon command response to socket: $error');
         // Failed to send, close the connection
         socket.close();
       }

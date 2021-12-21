@@ -64,9 +64,15 @@ class DaemonCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     if (argResults['listen-on-tcp-port'] != null) {
-      final String port = stringArg('listen-on-tcp-port');
+      int port;
+      try {
+        port = int.parse(stringArg('listen-on-tcp-port'));
+      } on FormatException catch (error) {
+        throwToolExit('Invalid port for `--listen-on-tcp-port`: $error');
+      }
+
       await _DaemonServer(
-        port: int.parse(port),
+        port: port,
         logger: StdoutLogger(
           terminal: globals.terminal,
           stdio: globals.stdio,
@@ -99,13 +105,13 @@ class _DaemonServer {
     this.notifyingLogger,
   });
 
-  int port;
+  final int port;
 
   /// Stdout logger used to print general server-related errors.
-  Logger logger;
+  final Logger logger;
 
   // Logger that sends the message to the other end of daemon connection.
-  NotifyingLogger notifyingLogger;
+  final NotifyingLogger notifyingLogger;
 
   Future<void> run() async {
     final ServerSocket serverSocket = await ServerSocket.bind(InternetAddress.loopbackIPv4, port);
@@ -165,7 +171,7 @@ class Daemon {
     );
   }
 
-  DaemonConnection connection;
+  final DaemonConnection connection;
 
   DaemonDomain daemonDomain;
   AppDomain appDomain;
@@ -262,7 +268,7 @@ abstract class Domain {
   }
 
   void sendEvent(String name, [ dynamic args ]) {
-    daemon.connection.sendEvent(name, args != null ? _toJsonable(args) : null);
+    daemon.connection.sendEvent(name, _toJsonable(args));
   }
 
   String _getStringArg(Map<String, dynamic> args, String name, { bool required = false }) {
