@@ -2437,6 +2437,33 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
+  /// Creates the selection overlay if it is null.
+  ///
+  /// Returns `true` if the overlay was created, and `false` if it already
+  /// existed.
+  bool _createSelectionOverlayIfNeeded() {
+     if (_selectionOverlay == null) {
+        _selectionOverlay = TextSelectionOverlay(
+          clipboardStatus: _clipboardStatus,
+          context: context,
+          value: _value,
+          debugRequiredFor: widget,
+          toolbarLayerLink: _toolbarLayerLink,
+          startHandleLayerLink: _startHandleLayerLink,
+          endHandleLayerLink: _endHandleLayerLink,
+          renderObject: renderEditable,
+          selectionControls: widget.selectionControls,
+          selectionDelegate: this,
+          dragStartBehavior: widget.dragStartBehavior,
+          onSelectionHandleTapped: widget.onSelectionHandleTapped,
+        );
+
+        return true;
+      }
+
+      return false;
+  }
+
   void _updateSelectionOverlayForScroll() {
     _selectionOverlay?.updateForScroll();
   }
@@ -3006,7 +3033,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   /// Toggles the visibility of the toolbar.
   void toggleToolbar() {
-    assert(_selectionOverlay != null);
+    _createSelectionOverlayIfNeeded();
     if (_selectionOverlay!.toolbarIsVisible) {
       hideToolbar();
     } else {
