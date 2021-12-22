@@ -7170,8 +7170,8 @@ void main() {
         const TextSelection.collapsed(offset: 7, affinity: TextAffinity.upstream),
       );
 
-      // Toolbar is present.
-      expect(find.byType(CupertinoButton), findsWidgets);
+      // Toolbar is present if the platform doesn't provide a context menu.
+      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsWidgets);
     },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
   );
