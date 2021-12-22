@@ -1552,7 +1552,7 @@ class TextSelectionGestureDetectorBuilder {
               final TextSelection? previousSelection = renderEditable.selection;
               final TextSelection newSelection = renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
               if (previousSelection != newSelection) {
-                  editableText.hideToolbar();
+                  editableText.hideToolbar(false);
               } else {
                 if (renderEditable.hasFocus && renderEditable.selectionEnabled) {
                   editableText.toggleToolbar();
