@@ -83,7 +83,7 @@ class _FuchsiaLogReader extends DeviceLogReader {
   Stream<String>? _logLines;
   @override
   Stream<String> get logLines {
-    final Stream<String>? logStream = fuchsiaSdk?.syslogs(_device.id);
+    final Stream<String>? logStream = globals.fuchsiaSdk?.syslogs(_device.id);
     _logLines ??= _processLogs(logStream);
     return _logLines ?? const Stream<String>.empty();
   }
@@ -158,7 +158,7 @@ class FuchsiaDevices extends PollingDeviceDiscovery {
   FuchsiaDevices({
     required Platform platform,
     required FuchsiaWorkflow fuchsiaWorkflow,
-    FuchsiaSdk? fuchsiaSdk,
+    required FuchsiaSdk fuchsiaSdk,
     required Logger logger,
   }) : _platform = platform,
        _fuchsiaWorkflow = fuchsiaWorkflow,
@@ -168,7 +168,7 @@ class FuchsiaDevices extends PollingDeviceDiscovery {
 
   final Platform _platform;
   final FuchsiaWorkflow _fuchsiaWorkflow;
-  final FuchsiaSdk? _fuchsiaSdk;
+  final FuchsiaSdk _fuchsiaSdk;
   final Logger _logger;
 
   @override
@@ -183,7 +183,7 @@ class FuchsiaDevices extends PollingDeviceDiscovery {
       return <Device>[];
     }
     // TODO(omerlevran): Remove once soft transition is complete fxb/67602.
-    final List<String>? text = (await _fuchsiaSdk?.listDevices(
+    final List<String>? text = (await _fuchsiaSdk.listDevices(
       timeout: timeout,
     ))?.split('\n');
     if (text == null || text.isEmpty) {
@@ -213,7 +213,7 @@ class FuchsiaDevices extends PollingDeviceDiscovery {
     final String name = words[1];
 
      // TODO(omerlevran): Add support for resolve on the FuchsiaSdk Object.
-    final String? resolvedHost = await _fuchsiaSdk?.fuchsiaFfx.resolve(name);
+    final String? resolvedHost = await _fuchsiaSdk.fuchsiaFfx.resolve(name);
     if (resolvedHost == null) {
       _logger.printError('Failed to resolve host for Fuchsia device `$name`');
       return null;

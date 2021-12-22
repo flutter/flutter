@@ -53,6 +53,7 @@ class FlutterDeviceManager extends DeviceManager {
     required FlutterVersion flutterVersion,
     required Artifacts artifacts,
     required MacOSWorkflow macOSWorkflow,
+    required FuchsiaSdk fuchsiaSdk,
     required UserMessages userMessages,
     required OperatingSystemUtils operatingSystemUtils,
     required WindowsWorkflow windowsWorkflow,
