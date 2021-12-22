@@ -108,6 +108,7 @@ import 'text_editing_intents.dart';
 ///                       setState(() {
 ///                         _counter++;
 ///                       });
+///                       return null;
 ///                     },
 ///                   ),
 ///                   DecrementCounterIntent: CallbackAction<DecrementCounterIntent>(
@@ -115,6 +116,7 @@ import 'text_editing_intents.dart';
 ///                       setState(() {
 ///                         _counter--;
 ///                       });
+///                       return null;
 ///                     },
 ///                   ),
 ///                 },
