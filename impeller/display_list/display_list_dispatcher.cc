@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "impeller/display_list/display_list_impeller.h"
+#include "impeller/display_list/display_list_dispatcher.h"
 
 #include "impeller/geometry/path_builder.h"
 
@@ -11,17 +11,17 @@ namespace impeller {
 #define UNIMPLEMENTED \
   FML_LOG(ERROR) << "Unimplemented detail in " << __FUNCTION__;
 
-DisplayListImpeller::DisplayListImpeller() = default;
+DisplayListDispatcher::DisplayListDispatcher() = default;
 
-DisplayListImpeller::~DisplayListImpeller() = default;
+DisplayListDispatcher::~DisplayListDispatcher() = default;
 
 // |flutter::Dispatcher|
-void DisplayListImpeller::setAntiAlias(bool aa) {
+void DisplayListDispatcher::setAntiAlias(bool aa) {
   // Nothing to do because AA is implicit.
 }
 
 // |flutter::Dispatcher|
-void DisplayListImpeller::setDither(bool dither) {}
+void DisplayListDispatcher::setDither(bool dither) {}
 
 static Paint::Style ToStyle(SkPaint::Style style) {
   switch (style) {
@@ -37,12 +37,12 @@ static Paint::Style ToStyle(SkPaint::Style style) {
 }
 
 // |flutter::Dispatcher|
-void DisplayListImpeller::setStyle(SkPaint::Style style) {
+void DisplayListDispatcher::setStyle(SkPaint::Style style) {
   paint_.style = ToStyle(style);
 }
 
 // |flutter::Dispatcher|
-void DisplayListImpeller::setColor(SkColor color) {
+void DisplayListDispatcher::setColor(SkColor color) {
   paint_.color = {
       SkColorGetR(color) / 255.0f,  // red
       SkColorGetG(color) / 255.0f,  // green
@@ -52,72 +52,73 @@ void DisplayListImpeller::setColor(SkColor color) {
 }
 
 // |flutter::Dispatcher|
-void DisplayListImpeller::setStrokeWidth(SkScalar width) {
+void DisplayListDispatcher::setStrokeWidth(SkScalar width) {
   paint_.stroke_width = width;
 }
 
 // |flutter::Dispatcher|
-void DisplayListImpeller::setStrokeMiter(SkScalar limit) {
+void DisplayListDispatcher::setStrokeMiter(SkScalar limit) {
   UNIMPLEMENTED;
 }
 
 // |flutter::Dispatcher|
-void DisplayListImpeller::setStrokeCap(SkPaint::Cap cap) {
+void DisplayListDispatcher::setStrokeCap(SkPaint::Cap cap) {
   UNIMPLEMENTED;
 }
 
 // |flutter::Dispatcher|
-void DisplayListImpeller::setStrokeJoin(SkPaint::Join join) {
+void DisplayListDispatcher::setStrokeJoin(SkPaint::Join join) {
   UNIMPLEMENTED;
 }
 
 // |flutter::Dispatcher|
-void DisplayListImpeller::setShader(sk_sp<SkShader> shader) {
+void DisplayListDispatcher::setShader(sk_sp<SkShader> shader) {
   UNIMPLEMENTED;
 }
 
 // |flutter::Dispatcher|
-void DisplayListImpeller::setColorFilter(sk_sp<SkColorFilter> filter) {
+void DisplayListDispatcher::setColorFilter(sk_sp<SkColorFilter> filter) {
   UNIMPLEMENTED;
 }
 
 // |flutter::Dispatcher|
-void DisplayListImpeller::setInvertColors(bool invert) {
+void DisplayListDispatcher::setInvertColors(bool invert) {
   UNIMPLEMENTED;
 }
 
 // |flutter::Dispatcher|
-void DisplayListImpeller::setBlendMode(SkBlendMode mode) {
+void DisplayListDispatcher::setBlendMode(SkBlendMode mode) {
   UNIMPLEMENTED;
 }
 
 // |flutter::Dispatcher|
-void DisplayListImpeller::setBlender(sk_sp<SkBlender> blender) {
+void DisplayListDispatcher::setBlender(sk_sp<SkBlender> blender) {
   UNIMPLEMENTED;
 }
 
 // |flutter::Dispatcher|
-void DisplayListImpeller::setPathEffect(sk_sp<SkPathEffect> effect) {
+void DisplayListDispatcher::setPathEffect(sk_sp<SkPathEffect> effect) {
   UNIMPLEMENTED;
 }
 
 // |flutter::Dispatcher|
-void DisplayListImpeller::setMaskFilter(sk_sp<SkMaskFilter> filter) {
+void DisplayListDispatcher::setMaskFilter(sk_sp<SkMaskFilter> filter) {
   UNIMPLEMENTED;
 }
 
 // |flutter::Dispatcher|
-void DisplayListImpeller::setMaskBlurFilter(SkBlurStyle style, SkScalar sigma) {
+void DisplayListDispatcher::setMaskBlurFilter(SkBlurStyle style,
+                                              SkScalar sigma) {
   UNIMPLEMENTED;
 }
 
 // |flutter::Dispatcher|
-void DisplayListImpeller::setImageFilter(sk_sp<SkImageFilter> filter) {
+void DisplayListDispatcher::setImageFilter(sk_sp<SkImageFilter> filter) {
   UNIMPLEMENTED;
 }
 
 // |flutter::Dispatcher|
-void DisplayListImpeller::save() {
+void DisplayListDispatcher::save() {
   canvas_.Save();
 }
 
@@ -129,43 +130,43 @@ static std::optional<Rect> ToRect(const SkRect* rect) {
 }
 
 // |flutter::Dispatcher|
-void DisplayListImpeller::saveLayer(const SkRect* bounds,
-                                    bool restore_with_paint) {
+void DisplayListDispatcher::saveLayer(const SkRect* bounds,
+                                      bool restore_with_paint) {
   canvas_.SaveLayer(restore_with_paint ? paint_ : Paint{}, ToRect(bounds));
 }
 
 // |flutter::Dispatcher|
-void DisplayListImpeller::restore() {
+void DisplayListDispatcher::restore() {
   canvas_.Restore();
 }
 
 // |flutter::Dispatcher|
-void DisplayListImpeller::translate(SkScalar tx, SkScalar ty) {
+void DisplayListDispatcher::translate(SkScalar tx, SkScalar ty) {
   canvas_.Translate({tx, ty, 0.0});
 }
 
 // |flutter::Dispatcher|
-void DisplayListImpeller::scale(SkScalar sx, SkScalar sy) {
+void DisplayListDispatcher::scale(SkScalar sx, SkScalar sy) {
   canvas_.Scale({sx, sy, 1.0});
 }
 
 // |flutter::Dispatcher|
-void DisplayListImpeller::rotate(SkScalar degrees) {
+void DisplayListDispatcher::rotate(SkScalar degrees) {
   canvas_.Rotate(Degrees{degrees});
 }
 
 // |flutter::Dispatcher|
-void DisplayListImpeller::skew(SkScalar sx, SkScalar sy) {
+void DisplayListDispatcher::skew(SkScalar sx, SkScalar sy) {
   canvas_.Skew(sx, sy);
 }
 
 // |flutter::Dispatcher|
-void DisplayListImpeller::transform2DAffine(SkScalar mxx,
-                                            SkScalar mxy,
-                                            SkScalar mxt,
-                                            SkScalar myx,
-                                            SkScalar myy,
-                                            SkScalar myt) {
+void DisplayListDispatcher::transform2DAffine(SkScalar mxx,
+                                              SkScalar mxy,
+                                              SkScalar mxt,
+                                              SkScalar myx,
+                                              SkScalar myy,
+                                              SkScalar myt) {
   // clang-format off
   transformFullPerspective(
     mxx, mxy,  0, mxt,
@@ -177,22 +178,22 @@ void DisplayListImpeller::transform2DAffine(SkScalar mxx,
 }
 
 // |flutter::Dispatcher|
-void DisplayListImpeller::transformFullPerspective(SkScalar mxx,
-                                                   SkScalar mxy,
-                                                   SkScalar mxz,
-                                                   SkScalar mxt,
-                                                   SkScalar myx,
-                                                   SkScalar myy,
-                                                   SkScalar myz,
-                                                   SkScalar myt,
-                                                   SkScalar mzx,
-                                                   SkScalar mzy,
-                                                   SkScalar mzz,
-                                                   SkScalar mzt,
-                                                   SkScalar mwx,
-                                                   SkScalar mwy,
-                                                   SkScalar mwz,
-                                                   SkScalar mwt) {
+void DisplayListDispatcher::transformFullPerspective(SkScalar mxx,
+                                                     SkScalar mxy,
+                                                     SkScalar mxz,
+                                                     SkScalar mxt,
+                                                     SkScalar myx,
+                                                     SkScalar myy,
+                                                     SkScalar myz,
+                                                     SkScalar myt,
+                                                     SkScalar mzx,
+                                                     SkScalar mzy,
+                                                     SkScalar mzz,
+                                                     SkScalar mzt,
+                                                     SkScalar mwx,
+                                                     SkScalar mwy,
+                                                     SkScalar mwz,
+                                                     SkScalar mwt) {
   // The order of arguments is row-major but Impeller matrices are column-major.
   // clang-format off
   auto xformation = Matrix{
@@ -210,9 +211,9 @@ static Rect ToRect(const SkRect& rect) {
 }
 
 // |flutter::Dispatcher|
-void DisplayListImpeller::clipRect(const SkRect& rect,
-                                   SkClipOp clip_op,
-                                   bool is_aa) {
+void DisplayListDispatcher::clipRect(const SkRect& rect,
+                                     SkClipOp clip_op,
+                                     bool is_aa) {
   auto path = PathBuilder{}.AddRect(ToRect(rect)).TakePath();
   canvas_.ClipPath(std::move(path));
 }
@@ -306,61 +307,61 @@ static Path ToPath(const SkRRect& rrect) {
 }
 
 // |flutter::Dispatcher|
-void DisplayListImpeller::clipRRect(const SkRRect& rrect,
-                                    SkClipOp clip_op,
-                                    bool is_aa) {
+void DisplayListDispatcher::clipRRect(const SkRRect& rrect,
+                                      SkClipOp clip_op,
+                                      bool is_aa) {
   canvas_.ClipPath(ToPath(rrect));
 }
 
 // |flutter::Dispatcher|
-void DisplayListImpeller::clipPath(const SkPath& path,
-                                   SkClipOp clip_op,
-                                   bool is_aa) {
+void DisplayListDispatcher::clipPath(const SkPath& path,
+                                     SkClipOp clip_op,
+                                     bool is_aa) {
   canvas_.ClipPath(ToPath(path));
 }
 
 // |flutter::Dispatcher|
-void DisplayListImpeller::drawColor(SkColor color, SkBlendMode mode) {
+void DisplayListDispatcher::drawColor(SkColor color, SkBlendMode mode) {
   UNIMPLEMENTED;
 }
 
 // |flutter::Dispatcher|
-void DisplayListImpeller::drawPaint() {
+void DisplayListDispatcher::drawPaint() {
   UNIMPLEMENTED;
 }
 
 // |flutter::Dispatcher|
-void DisplayListImpeller::drawLine(const SkPoint& p0, const SkPoint& p1) {
+void DisplayListDispatcher::drawLine(const SkPoint& p0, const SkPoint& p1) {
   auto path = PathBuilder{}.AddLine(ToPoint(p0), ToPoint(p1)).TakePath();
   canvas_.DrawPath(std::move(path), paint_);
 }
 
 // |flutter::Dispatcher|
-void DisplayListImpeller::drawRect(const SkRect& rect) {
+void DisplayListDispatcher::drawRect(const SkRect& rect) {
   auto path = PathBuilder{}.AddRect(ToRect(rect)).TakePath();
   canvas_.DrawPath(std::move(path), paint_);
 }
 
 // |flutter::Dispatcher|
-void DisplayListImpeller::drawOval(const SkRect& bounds) {
+void DisplayListDispatcher::drawOval(const SkRect& bounds) {
   auto path = PathBuilder{}.AddOval(ToRect(bounds)).TakePath();
   canvas_.DrawPath(std::move(path), paint_);
 }
 
 // |flutter::Dispatcher|
-void DisplayListImpeller::drawCircle(const SkPoint& center, SkScalar radius) {
+void DisplayListDispatcher::drawCircle(const SkPoint& center, SkScalar radius) {
   auto path = PathBuilder{}.AddCircle(ToPoint(center), radius).TakePath();
   canvas_.DrawPath(std::move(path), paint_);
 }
 
 // |flutter::Dispatcher|
-void DisplayListImpeller::drawRRect(const SkRRect& rrect) {
+void DisplayListDispatcher::drawRRect(const SkRRect& rrect) {
   canvas_.DrawPath(ToPath(rrect), paint_);
 }
 
 // |flutter::Dispatcher|
-void DisplayListImpeller::drawDRRect(const SkRRect& outer,
-                                     const SkRRect& inner) {
+void DisplayListDispatcher::drawDRRect(const SkRRect& outer,
+                                       const SkRRect& inner) {
   PathBuilder builder;
   builder.AddPath(ToPath(outer));
   builder.AddPath(ToPath(inner));
@@ -368,41 +369,41 @@ void DisplayListImpeller::drawDRRect(const SkRRect& outer,
 }
 
 // |flutter::Dispatcher|
-void DisplayListImpeller::drawPath(const SkPath& path) {
+void DisplayListDispatcher::drawPath(const SkPath& path) {
   canvas_.DrawPath(ToPath(path), paint_);
 }
 
 // |flutter::Dispatcher|
-void DisplayListImpeller::drawArc(const SkRect& oval_bounds,
-                                  SkScalar start_degrees,
-                                  SkScalar sweep_degrees,
-                                  bool use_center) {
+void DisplayListDispatcher::drawArc(const SkRect& oval_bounds,
+                                    SkScalar start_degrees,
+                                    SkScalar sweep_degrees,
+                                    bool use_center) {
   UNIMPLEMENTED;
 }
 
 // |flutter::Dispatcher|
-void DisplayListImpeller::drawPoints(SkCanvas::PointMode mode,
-                                     uint32_t count,
-                                     const SkPoint points[]) {
+void DisplayListDispatcher::drawPoints(SkCanvas::PointMode mode,
+                                       uint32_t count,
+                                       const SkPoint points[]) {
   UNIMPLEMENTED;
 }
 
 // |flutter::Dispatcher|
-void DisplayListImpeller::drawVertices(const sk_sp<SkVertices> vertices,
-                                       SkBlendMode mode) {
+void DisplayListDispatcher::drawVertices(const sk_sp<SkVertices> vertices,
+                                         SkBlendMode mode) {
   UNIMPLEMENTED;
 }
 
 // |flutter::Dispatcher|
-void DisplayListImpeller::drawImage(const sk_sp<SkImage> image,
-                                    const SkPoint point,
-                                    const SkSamplingOptions& sampling,
-                                    bool render_with_attributes) {
+void DisplayListDispatcher::drawImage(const sk_sp<SkImage> image,
+                                      const SkPoint point,
+                                      const SkSamplingOptions& sampling,
+                                      bool render_with_attributes) {
   UNIMPLEMENTED;
 }
 
 // |flutter::Dispatcher|
-void DisplayListImpeller::drawImageRect(
+void DisplayListDispatcher::drawImageRect(
     const sk_sp<SkImage> image,
     const SkRect& src,
     const SkRect& dst,
@@ -413,62 +414,62 @@ void DisplayListImpeller::drawImageRect(
 }
 
 // |flutter::Dispatcher|
-void DisplayListImpeller::drawImageNine(const sk_sp<SkImage> image,
-                                        const SkIRect& center,
-                                        const SkRect& dst,
-                                        SkFilterMode filter,
-                                        bool render_with_attributes) {
+void DisplayListDispatcher::drawImageNine(const sk_sp<SkImage> image,
+                                          const SkIRect& center,
+                                          const SkRect& dst,
+                                          SkFilterMode filter,
+                                          bool render_with_attributes) {
   UNIMPLEMENTED;
 }
 
 // |flutter::Dispatcher|
-void DisplayListImpeller::drawImageLattice(const sk_sp<SkImage> image,
-                                           const SkCanvas::Lattice& lattice,
-                                           const SkRect& dst,
-                                           SkFilterMode filter,
-                                           bool render_with_attributes) {
+void DisplayListDispatcher::drawImageLattice(const sk_sp<SkImage> image,
+                                             const SkCanvas::Lattice& lattice,
+                                             const SkRect& dst,
+                                             SkFilterMode filter,
+                                             bool render_with_attributes) {
   UNIMPLEMENTED;
 }
 
 // |flutter::Dispatcher|
-void DisplayListImpeller::drawAtlas(const sk_sp<SkImage> atlas,
-                                    const SkRSXform xform[],
-                                    const SkRect tex[],
-                                    const SkColor colors[],
-                                    int count,
-                                    SkBlendMode mode,
-                                    const SkSamplingOptions& sampling,
-                                    const SkRect* cull_rect,
-                                    bool render_with_attributes) {
-  UNIMPLEMENTED;
-}
-
-// |flutter::Dispatcher|
-void DisplayListImpeller::drawPicture(const sk_sp<SkPicture> picture,
-                                      const SkMatrix* matrix,
+void DisplayListDispatcher::drawAtlas(const sk_sp<SkImage> atlas,
+                                      const SkRSXform xform[],
+                                      const SkRect tex[],
+                                      const SkColor colors[],
+                                      int count,
+                                      SkBlendMode mode,
+                                      const SkSamplingOptions& sampling,
+                                      const SkRect* cull_rect,
                                       bool render_with_attributes) {
   UNIMPLEMENTED;
 }
 
 // |flutter::Dispatcher|
-void DisplayListImpeller::drawDisplayList(
+void DisplayListDispatcher::drawPicture(const sk_sp<SkPicture> picture,
+                                        const SkMatrix* matrix,
+                                        bool render_with_attributes) {
+  UNIMPLEMENTED;
+}
+
+// |flutter::Dispatcher|
+void DisplayListDispatcher::drawDisplayList(
     const sk_sp<flutter::DisplayList> display_list) {
   UNIMPLEMENTED;
 }
 
 // |flutter::Dispatcher|
-void DisplayListImpeller::drawTextBlob(const sk_sp<SkTextBlob> blob,
-                                       SkScalar x,
-                                       SkScalar y) {
+void DisplayListDispatcher::drawTextBlob(const sk_sp<SkTextBlob> blob,
+                                         SkScalar x,
+                                         SkScalar y) {
   UNIMPLEMENTED;
 }
 
 // |flutter::Dispatcher|
-void DisplayListImpeller::drawShadow(const SkPath& path,
-                                     const SkColor color,
-                                     const SkScalar elevation,
-                                     bool transparent_occluder,
-                                     SkScalar dpr) {
+void DisplayListDispatcher::drawShadow(const SkPath& path,
+                                       const SkColor color,
+                                       const SkScalar elevation,
+                                       bool transparent_occluder,
+                                       SkScalar dpr) {
   UNIMPLEMENTED;
 }
 
