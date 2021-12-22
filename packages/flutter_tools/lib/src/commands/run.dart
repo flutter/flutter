@@ -14,7 +14,6 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
-import '../daemon.dart';
 import '../device.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
@@ -557,10 +556,8 @@ class RunCommand extends RunCommandBase {
         throwToolExit('"--machine" does not support "-d all".');
       }
       final Daemon daemon = Daemon(
-        DaemonConnection(
-          daemonStreams: StdioDaemonStreams(globals.stdio),
-          logger: globals.logger,
-        ),
+        stdinCommandStream,
+        stdoutCommandResponse,
         notifyingLogger: (globals.logger is NotifyingLogger)
           ? globals.logger as NotifyingLogger
           : NotifyingLogger(verbose: globals.logger.isVerbose, parent: globals.logger),
