@@ -11,11 +11,11 @@
 
 namespace impeller {
 
-class DisplayListImpeller final : public flutter::Dispatcher {
+class DisplayListDispatcher final : public flutter::Dispatcher {
  public:
-  DisplayListImpeller();
+  DisplayListDispatcher();
 
-  ~DisplayListImpeller();
+  ~DisplayListDispatcher();
 
   // |flutter::Dispatcher|
   void setAntiAlias(bool aa) override;
@@ -229,7 +229,7 @@ class DisplayListImpeller final : public flutter::Dispatcher {
   Paint paint_;
   Canvas canvas_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(DisplayListImpeller);
+  FML_DISALLOW_COPY_AND_ASSIGN(DisplayListDispatcher);
 };
 
 }  // namespace impeller
