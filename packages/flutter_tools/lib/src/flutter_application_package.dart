@@ -48,7 +48,7 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
   @override
   Future<ApplicationPackage?> getPackageForPlatform(
     TargetPlatform platform, {
-    required BuildInfo buildInfo,
+    BuildInfo? buildInfo,
     File? applicationBinary,
   }) async {
     switch (platform) {

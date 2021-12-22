@@ -216,7 +216,7 @@ class IosProject extends XcodeBasedProject {
   }
 
   /// The bundle name of the host app, `My App.app`.
-  Future<String?> hostAppBundleName(BuildInfo buildInfo) async {
+  Future<String?> hostAppBundleName(BuildInfo? buildInfo) async {
     if (!existsSync()) {
       return null;
     }
@@ -224,7 +224,7 @@ class IosProject extends XcodeBasedProject {
   }
   String? _hostAppBundleName;
 
-  Future<String> _parseHostAppBundleName(BuildInfo buildInfo) async {
+  Future<String> _parseHostAppBundleName(BuildInfo? buildInfo) async {
     // The product name and bundle name are derived from the display name, which the user
     // is instructed to change in Xcode as part of deploying to the App Store.
     // https://flutter.dev/docs/deployment/ios#review-xcode-project-settings

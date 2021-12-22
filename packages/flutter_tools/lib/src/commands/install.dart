@@ -6,7 +6,6 @@ import '../android/android_device.dart';
 import '../application_package.dart';
 import '../base/common.dart';
 import '../base/io.dart';
-import '../build_info.dart';
 import '../device.dart';
 import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
@@ -52,7 +51,6 @@ class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts
     final Device targetDevice = device!;
     final ApplicationPackage? package = await applicationPackages?.getPackageForPlatform(
       await targetDevice.targetPlatform,
-      buildInfo: BuildInfo.debug, // If app is not pre-built, default to building debug.
     );
     if (package == null) {
       throwToolExit('Could not find or build package');
