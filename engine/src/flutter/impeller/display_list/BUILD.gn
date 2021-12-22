@@ -12,7 +12,7 @@ impeller_component("display_list") {
 
   deps = [
     "../aiks",
-    "//flutter/flow",
+    "//flutter/display_list",
     "//flutter/fml",
     "//third_party/skia",
   ]
