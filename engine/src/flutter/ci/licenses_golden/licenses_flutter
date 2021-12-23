@@ -34,6 +34,10 @@ FILE: ../../../flutter/common/task_runners.cc
 FILE: ../../../flutter/common/task_runners.h
 FILE: ../../../flutter/display_list/display_list.cc
 FILE: ../../../flutter/display_list/display_list.h
+FILE: ../../../flutter/display_list/display_list_benchmarks.cc
+FILE: ../../../flutter/display_list/display_list_benchmarks.h
+FILE: ../../../flutter/display_list/display_list_benchmarks_gl.cc
+FILE: ../../../flutter/display_list/display_list_benchmarks_metal.cc
 FILE: ../../../flutter/display_list/display_list_canvas.cc
 FILE: ../../../flutter/display_list/display_list_canvas.h
 FILE: ../../../flutter/display_list/display_list_canvas_unittests.cc
