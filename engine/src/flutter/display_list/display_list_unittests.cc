@@ -1575,5 +1575,16 @@ TEST(DisplayList, SaveLayerTrueSupportsGroupOpacityWithChildSrcBlend) {
   EXPECT_TRUE(display_list->can_apply_group_opacity());
 }
 
+TEST(DisplayList, SaveLayerBoundsSnapshotsImageFilter) {
+  DisplayListBuilder builder;
+  builder.saveLayer(nullptr, true);
+  builder.drawRect({50, 50, 100, 100});
+  // This image filter should be ignored since it was not set before saveLayer
+  builder.setImageFilter(TestImageFilter1);
+  builder.restore();
+  SkRect bounds = builder.Build()->bounds();
+  EXPECT_EQ(bounds, SkRect::MakeLTRB(50, 50, 100, 100));
+}
+
 }  // namespace testing
 }  // namespace flutter

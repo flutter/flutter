@@ -1039,7 +1039,7 @@ class CanvasCompareTester {
       {
         RenderWith(testP, env, tolerance,
                    CaseParameters(
-                       "ImageFilter == Blender Arithmetic 0.25-false",
+                       "Blender == Arithmetic 0.25-false",
                        [=](SkCanvas*, SkPaint& p) { p.setBlender(blender); },
                        [=](DisplayListBuilder& b) { b.setBlender(blender); }));
       }
@@ -1048,7 +1048,7 @@ class CanvasCompareTester {
       {
         RenderWith(testP, env, tolerance,
                    CaseParameters(
-                       "ImageFilter == Blender Arithmetic 0.25-true",
+                       "Blender == Arithmetic 0.25-true",
                        [=](SkCanvas*, SkPaint& p) { p.setBlender(blender); },
                        [=](DisplayListBuilder& b) { b.setBlender(blender); }));
       }

@@ -578,15 +578,33 @@ class DisplayListBoundsCalculator final
 
   bool paint_nops_on_transparency();
 
-  static bool ComputeFilteredBounds(SkRect& rect, SkImageFilter* filter);
+  // Computes the bounds of an operation adjusted for a given ImageFilter
+  static bool ComputeFilteredBounds(SkRect& bounds, SkImageFilter* filter);
+
+  // Adjusts the indicated bounds for the given flags and returns true if
+  // the calculation was possible, or false if it could not be estimated.
   bool AdjustBoundsForPaint(SkRect& bounds, DisplayListAttributeFlags flags);
 
+  // Records the fact that we encountered an op that either could not
+  // estimate its bounds or that fills all of the destination space.
   void AccumulateUnbounded();
-  void AccumulateRect(const SkRect& rect, DisplayListAttributeFlags flags) {
-    SkRect bounds = rect;
-    AccumulateRect(bounds, flags);
+
+  // Records the bounds for an op after modifying them according to the
+  // supplied attribute flags and transforming by the current matrix.
+  void AccumulateOpBounds(const SkRect& bounds,
+                          DisplayListAttributeFlags flags) {
+    SkRect safe_bounds = bounds;
+    AccumulateOpBounds(safe_bounds, flags);
   }
-  void AccumulateRect(SkRect& rect, DisplayListAttributeFlags flags);
+
+  // Records the bounds for an op after modifying them according to the
+  // supplied attribute flags and transforming by the current matrix
+  // and clipping against the current clip.
+  void AccumulateOpBounds(SkRect& bounds, DisplayListAttributeFlags flags);
+
+  // Records the given bounds after transforming by the current matrix
+  // and clipping against the current clip.
+  void AccumulateBounds(SkRect& bounds);
 };
 
 }  // namespace flutter
