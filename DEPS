@@ -467,9 +467,6 @@ deps = {
   'src/third_party/pkg/vector_math':
   Var('github_git') + '/google/vector_math.dart.git' + '@' + 'v2.1.0',
 
-  'src/third_party/pkg/when':
-  Var('dart_git') + '/when.git' + '@' + '0.2.0',
-
   'src/gradle': {
     'packages': [
       {
