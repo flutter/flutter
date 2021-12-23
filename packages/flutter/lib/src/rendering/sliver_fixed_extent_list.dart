@@ -201,7 +201,12 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
       collectGarbage(0, 0);
     }
 
-    if (firstChild == null) {
+    if (remainingExtent == 0.0) {
+      // The viewable area + cache extent have been consumed.
+      geometry = SliverGeometry.zero;
+      childManager.didFinishLayout();
+      return;
+    } else if (firstChild == null) {
       if (!addInitialChild(index: firstIndex, layoutOffset: indexToLayoutOffset(itemExtent, firstIndex))) {
         // There are either no children, or we are past the end of all our children.
         final double max;

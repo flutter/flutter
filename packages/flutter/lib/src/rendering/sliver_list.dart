@@ -74,14 +74,12 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
     // that the nodes that might get removed are always at the edges of what has
     // already been laid out.
 
-    // Make sure we have at least one child to start from.
-    if (firstChild == null) {
-      if (!addInitialChild()) {
-        // There are no children.
-        geometry = SliverGeometry.zero;
-        childManager.didFinishLayout();
-        return;
-      }
+    // Make sure we have at least one child to start from, or that preceding
+    // slivers have not already consumed the cacheExtent.
+    if (constraints.remainingCacheExtent == 0.0 || (firstChild == null && !addInitialChild())) {
+      geometry = SliverGeometry.zero;
+      childManager.didFinishLayout();
+      return;
     }
 
     // We have at least one child.

@@ -86,6 +86,11 @@ class RenderSliverFillRemainingWithScrollable extends RenderSliverSingleBoxAdapt
   @override
   void performLayout() {
     final SliverConstraints constraints = this.constraints;
+    if (constraints.remainingCacheExtent == 0.0) {
+      geometry = SliverGeometry.zero;
+      return;
+    }
+
     final double extent = constraints.remainingPaintExtent - math.min(constraints.overlap, 0.0);
 
     if (child != null)
@@ -136,6 +141,11 @@ class RenderSliverFillRemaining extends RenderSliverSingleBoxAdapter {
   @override
   void performLayout() {
     final SliverConstraints constraints = this.constraints;
+    if (constraints.remainingCacheExtent == 0.0) {
+      geometry = SliverGeometry.zero;
+      return;
+    }
+
     // The remaining space in the viewportMainAxisExtent. Can be <= 0 if we have
     // scrolled beyond the extent of the screen.
     double extent = constraints.viewportMainAxisExtent - constraints.precedingScrollExtent;
@@ -209,6 +219,11 @@ class RenderSliverFillRemainingAndOverscroll extends RenderSliverSingleBoxAdapte
   @override
   void performLayout() {
     final SliverConstraints constraints = this.constraints;
+    if (constraints.remainingCacheExtent == 0.0) {
+      geometry = SliverGeometry.zero;
+      return;
+    }
+
     // The remaining space in the viewportMainAxisExtent. Can be <= 0 if we have
     // scrolled beyond the extent of the screen.
     double extent = constraints.viewportMainAxisExtent - constraints.precedingScrollExtent;

@@ -117,7 +117,10 @@ abstract class RenderSliverEdgeInsetsPadding extends RenderSliver with RenderObj
     final double afterPadding = this.afterPadding;
     final double mainAxisPadding = this.mainAxisPadding;
     final double crossAxisPadding = this.crossAxisPadding;
-    if (child == null) {
+    if (constraints.remainingCacheExtent == 0.0) {
+      geometry = SliverGeometry.zero;
+      return;
+    } else if (child == null) {
       geometry = SliverGeometry(
         scrollExtent: mainAxisPadding,
         paintExtent: math.min(mainAxisPadding, constraints.remainingPaintExtent),

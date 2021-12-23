@@ -584,7 +584,12 @@ class RenderSliverGrid extends RenderSliverMultiBoxAdaptor {
     final double leadingScrollOffset = firstChildGridGeometry.scrollOffset;
     double trailingScrollOffset = firstChildGridGeometry.trailingScrollOffset;
 
-    if (firstChild == null) {
+    if (remainingExtent == 0.0) {
+      // The viewable area + cache extent have been consumed.
+      geometry = SliverGeometry.zero;
+      childManager.didFinishLayout();
+      return;
+    } else if (firstChild == null) {
       if (!addInitialChild(index: firstIndex, layoutOffset: firstChildGridGeometry.scrollOffset)) {
         // There are either no children, or we are past the end of all our children.
         final double max = layout.computeMaxScrollOffset(childManager.childCount);

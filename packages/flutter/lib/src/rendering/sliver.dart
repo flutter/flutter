@@ -1801,11 +1801,11 @@ class RenderSliverToBoxAdapter extends RenderSliverSingleBoxAdapter {
 
   @override
   void performLayout() {
-    if (child == null) {
+    final SliverConstraints constraints = this.constraints;
+    if (child == null || constraints.remainingCacheExtent == 0.0) {
       geometry = SliverGeometry.zero;
       return;
     }
-    final SliverConstraints constraints = this.constraints;
     child!.layout(constraints.asBoxConstraints(), parentUsesSize: true);
     final double childExtent;
     switch (constraints.axis) {

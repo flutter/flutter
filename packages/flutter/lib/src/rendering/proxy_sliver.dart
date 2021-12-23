@@ -49,6 +49,11 @@ abstract class RenderProxySliver extends RenderSliver with RenderObjectWithChild
   @override
   void performLayout() {
     assert(child != null);
+    if (constraints.remainingCacheExtent == 0.0) {
+      // Preceding slivers have consumed the usable extent.
+      geometry = SliverGeometry.zero;
+      return;
+    }
     child!.layout(constraints, parentUsesSize: true);
     geometry = child!.geometry;
   }
@@ -307,6 +312,12 @@ class RenderSliverOffstage extends RenderProxySliver {
   @override
   void performLayout() {
     assert(child != null);
+    if (constraints.remainingCacheExtent == 0.0) {
+      // Preceding slivers have consumed the usable extent.
+      geometry = SliverGeometry.zero;
+      return;
+    }
+
     child!.layout(constraints, parentUsesSize: true);
     if (!offstage)
       geometry = child!.geometry;
