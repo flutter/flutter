@@ -13,8 +13,10 @@
 import 'dart:async';
 
 import 'package:fake_async/fake_async.dart';
+import 'package:file/src/interface/file.dart';
 import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/android/android_workflow.dart';
+import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/utils.dart';
@@ -27,6 +29,7 @@ import 'package:flutter_tools/src/fuchsia/fuchsia_workflow.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/ios_workflow.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
+import 'package:flutter_tools/src/vmservice.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
@@ -300,6 +303,175 @@ void main() {
       FuchsiaWorkflow: () => FakeFuchsiaWorkflow(),
     });
 
+    testUsingContext('device.discoverDevices should respond with list', () async {
+      daemon = Daemon(
+        daemonConnection,
+        notifyingLogger: notifyingLogger,
+      );
+      daemonStreams.inputs.add(<String, dynamic>{'id': 0, 'method': 'device.discoverDevices'});
+      final Map<String, dynamic> response = await daemonStreams.outputs.stream.firstWhere(_notEvent);
+      expect(response['id'], 0);
+      expect(response['result'], isList);
+    });
+
+    testUsingContext('device.discoverDevices reports available devices', () async {
+      daemon = Daemon(
+        daemonConnection,
+        notifyingLogger: notifyingLogger,
+      );
+      final FakePollingDeviceDiscovery discoverer = FakePollingDeviceDiscovery();
+      daemon.deviceDomain.addDeviceDiscoverer(discoverer);
+      discoverer.addDevice(FakeAndroidDevice());
+      daemonStreams.inputs.add(<String, dynamic>{'id': 0, 'method': 'device.discoverDevices'});
+      final Map<String, dynamic> response = await daemonStreams.outputs.stream.firstWhere(_notEvent);
+      expect(response['id'], 0);
+      final dynamic result = response['result'];
+      expect(result, isList);
+      expect(result, isNotEmpty);
+      expect(discoverer.discoverDevicesCalled, true);
+    });
+
+    testUsingContext('device.supportsRuntimeMode returns correct value', () async {
+      daemon = Daemon(
+        daemonConnection,
+        notifyingLogger: notifyingLogger,
+      );
+      final FakePollingDeviceDiscovery discoverer = FakePollingDeviceDiscovery();
+      daemon.deviceDomain.addDeviceDiscoverer(discoverer);
+      final FakeAndroidDevice device = FakeAndroidDevice();
+      discoverer.addDevice(device);
+      daemonStreams.inputs.add(<String, dynamic>{
+        'id': 0,
+        'method': 'device.supportsRuntimeMode',
+        'params': <String, dynamic>{
+          'deviceId': 'device',
+          'buildMode': 'profile',
+        },
+      });
+      final Map<String, dynamic> response = await daemonStreams.outputs.stream.firstWhere(_notEvent);
+      expect(response['id'], 0);
+      final dynamic result = response['result'];
+      expect(result, true);
+      expect(device.supportsRuntimeModeCalledBuildMode, BuildMode.profile);
+    });
+
+    testUsingContext('device.logReader.start and .stop starts and stops log reader', () async {
+      daemon = Daemon(
+        daemonConnection,
+        notifyingLogger: notifyingLogger,
+      );
+      final FakePollingDeviceDiscovery discoverer = FakePollingDeviceDiscovery();
+      daemon.deviceDomain.addDeviceDiscoverer(discoverer);
+      final FakeAndroidDevice device = FakeAndroidDevice();
+      discoverer.addDevice(device);
+      final FakeDeviceLogReader logReader = FakeDeviceLogReader();
+      device.logReader = logReader;
+      daemonStreams.inputs.add(<String, dynamic>{
+        'id': 0,
+        'method': 'device.logReader.start',
+        'params': <String, dynamic>{
+          'deviceId': 'device',
+        },
+      });
+      final Stream<Map<String, dynamic>> broadcastOutput = daemonStreams.outputs.stream.asBroadcastStream();
+      final Map<String, dynamic> firstResponse = await broadcastOutput.firstWhere(_notEvent);
+      expect(firstResponse['id'], 0);
+      final String logReaderId = firstResponse['result'] as String;
+      expect(logReaderId, isNotNull);
+
+      // Try sending logs.
+      logReader.logLinesController.add('Sample log line');
+      final Map<String, dynamic> logEvent = await broadcastOutput.firstWhere(
+        (Map<String, dynamic> map) => map['event'] != null && map['event'] != 'device.added',
+      );
+      expect(logEvent['params'], 'Sample log line');
+
+      // Now try to stop the log reader.
+      expect(logReader.disposeCalled, false);
+      daemonStreams.inputs.add(<String, dynamic>{
+        'id': 1,
+        'method': 'device.logReader.stop',
+        'params': <String, dynamic>{
+          'id': logReaderId,
+        },
+      });
+      final Map<String, dynamic> stopResponse = await broadcastOutput.firstWhere(_notEvent);
+      expect(stopResponse['id'], 1);
+      expect(logReader.disposeCalled, true);
+    });
+
+    group('device.startApp and .stopApp', () {
+      FakeApplicationPackageFactory applicationPackageFactory;
+      setUp(() {
+        applicationPackageFactory = FakeApplicationPackageFactory();
+      });
+
+      testUsingContext('device.startApp and .stopApp starts and stops an app', () async {
+        daemon = Daemon(
+          daemonConnection,
+          notifyingLogger: notifyingLogger,
+        );
+        final FakePollingDeviceDiscovery discoverer = FakePollingDeviceDiscovery();
+        daemon.deviceDomain.addDeviceDiscoverer(discoverer);
+        final FakeAndroidDevice device = FakeAndroidDevice();
+        discoverer.addDevice(device);
+        final Stream<Map<String, dynamic>> broadcastOutput = daemonStreams.outputs.stream.asBroadcastStream();
+
+        // First upload the application package.
+        final FakeApplicationPackage applicationPackage = FakeApplicationPackage();
+        applicationPackageFactory.applicationPackage = applicationPackage;
+        daemonStreams.inputs.add(<String, dynamic>{
+          'id': 0,
+          'method': 'device.uploadApplicationPackage',
+          'params': <String, dynamic>{
+            'targetPlatform': 'android',
+            'applicationBinary': 'test_file',
+          },
+        });
+        final Map<String, dynamic> applicationPackageIdResponse = await broadcastOutput.firstWhere(_notEvent);
+        expect(applicationPackageIdResponse['id'], 0);
+        expect(applicationPackageFactory.applicationBinaryRequested.basename, 'test_file');
+        expect(applicationPackageFactory.platformRequested, TargetPlatform.android);
+        final String applicationPackageId = applicationPackageIdResponse['result'] as String;
+
+        // Try starting the app.
+        final Uri observatoryUri = Uri.parse('http://127.0.0.1:12345/observatory');
+        device.launchResult = LaunchResult.succeeded(observatoryUri: observatoryUri);
+        daemonStreams.inputs.add(<String, dynamic>{
+          'id': 1,
+          'method': 'device.startApp',
+          'params': <String, dynamic>{
+            'deviceId': 'device',
+            'applicationPackageId': applicationPackageId,
+            'debuggingOptions': DebuggingOptions.enabled(BuildInfo.debug).toJson(),
+          },
+        });
+        final Map<String, dynamic> startAppResponse = await broadcastOutput.firstWhere(_notEvent);
+        expect(startAppResponse['id'], 1);
+        expect(device.startAppPackage, applicationPackage);
+        final Map<String, dynamic> startAppResult = startAppResponse['result'] as Map<String, dynamic>;
+        expect(startAppResult['started'], true);
+        expect(startAppResult['observatoryUri'], observatoryUri.toString());
+
+        // Try stopping the app.
+        daemonStreams.inputs.add(<String, dynamic>{
+          'id': 2,
+          'method': 'device.stopApp',
+          'params': <String, dynamic>{
+            'deviceId': 'device',
+            'applicationPackageId': applicationPackageId,
+          },
+        });
+        final Map<String, dynamic> stopAppResponse = await broadcastOutput.firstWhere(_notEvent);
+        expect(stopAppResponse['id'], 2);
+        expect(device.stopAppPackage, applicationPackage);
+        final bool stopAppResult = stopAppResponse['result'] as bool;
+        expect(stopAppResult, true);
+      }, overrides: <Type, Generator>{
+        ApplicationPackageFactory: () => applicationPackageFactory,
+      });
+    });
+
     testUsingContext('emulator.launch without an emulatorId should report an error', () async {
       daemon = Daemon(
         daemonConnection,
@@ -559,6 +731,94 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
 
   @override
   final bool ephemeral = false;
+
+  @override
+  Future<String> get sdkNameAndVersion async => 'Android 12';
+
+  @override
+  bool get supportsHotReload => true;
+
+  @override
+  bool get supportsHotRestart => true;
+
+  @override
+  bool get supportsScreenshot => true;
+
+  @override
+  bool get supportsFastStart => true;
+
+  @override
+  bool get supportsFlutterExit => true;
+
+  @override
+  Future<bool> get supportsHardwareRendering async => true;
+
+  @override
+  bool get supportsStartPaused => true;
+
+  BuildMode supportsRuntimeModeCalledBuildMode;
+  @override
+  Future<bool> supportsRuntimeMode(BuildMode buildMode) async {
+    supportsRuntimeModeCalledBuildMode = buildMode;
+    return true;
+  }
+
+  DeviceLogReader logReader;
+  @override
+  FutureOr<DeviceLogReader> getLogReader({
+    covariant ApplicationPackage app,
+    bool includePastLogs = false,
+  }) => logReader;
+
+  ApplicationPackage startAppPackage;
+  LaunchResult launchResult;
+  @override
+  Future<LaunchResult> startApp(
+    ApplicationPackage package, {
+    String mainPath,
+    String route,
+    DebuggingOptions debuggingOptions,
+    Map<String, Object> platformArgs = const <String, Object>{},
+    bool prebuiltApplication = false,
+    bool ipv6 = false,
+    String userIdentifier,
+  }) async {
+    startAppPackage = package;
+    return launchResult;
+  }
+
+  ApplicationPackage stopAppPackage;
+  @override
+  Future<bool> stopApp(
+    ApplicationPackage app, {
+    String userIdentifier,
+  }) async {
+    stopAppPackage = app;
+    return true;
+  }
+}
+
+class FakeDeviceLogReader implements DeviceLogReader {
+  final StreamController<String> logLinesController = StreamController<String>();
+  bool disposeCalled = false;
+
+  @override
+  int appPid;
+
+  @override
+  FlutterVmService connectedVMService;
+
+  @override
+  void dispose() {
+    disposeCalled = true;
+  }
+
+  @override
+  Stream<String> get logLines => logLinesController.stream;
+
+  @override
+  String get name => 'device';
+
 }
 
 class FakeDevtoolsLauncher extends Fake implements DevtoolsLauncher {
@@ -572,3 +832,18 @@ class FakeDevtoolsLauncher extends Fake implements DevtoolsLauncher {
   @override
   Future<void> close() async {}
 }
+
+class FakeApplicationPackageFactory implements ApplicationPackageFactory {
+  TargetPlatform platformRequested;
+  File applicationBinaryRequested;
+  ApplicationPackage applicationPackage;
+
+  @override
+  Future<ApplicationPackage> getPackageForPlatform(TargetPlatform platform, {BuildInfo buildInfo, File applicationBinary}) async {
+    platformRequested = platform;
+    applicationBinaryRequested = applicationBinary;
+    return applicationPackage;
+  }
+}
+
+class FakeApplicationPackage extends Fake implements ApplicationPackage {}
