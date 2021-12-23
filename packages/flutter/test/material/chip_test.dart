@@ -198,8 +198,8 @@ Widget _chipWithOptionalDeleteButton({
   Key? labelKey,
   required bool deletable,
   TextDirection textDirection = TextDirection.ltr,
-  bool useDeleteButtonTooltip = true,
   String? chipTooltip,
+  String? deleteButtonTooltip,
   VoidCallback? onPressed = _doNothing,
 }) {
   return _wrapForChip(
@@ -211,7 +211,7 @@ Widget _chipWithOptionalDeleteButton({
           onPressed: onPressed,
           onDeleted: deletable ? _doNothing : null,
           deleteIcon: Icon(Icons.close, key: deleteButtonKey),
-          useDeleteButtonTooltip: useDeleteButtonTooltip,
+          deleteButtonTooltipMessage: deleteButtonTooltip,
           label: Text(
             deletable
               ? 'Chip with Delete Button'
@@ -3498,7 +3498,7 @@ void main() {
     await tester.pumpWidget(
       _chipWithOptionalDeleteButton(
         deletable: true,
-        useDeleteButtonTooltip: false,
+        deleteButtonTooltip: '',
       ),
     );
 
@@ -3519,13 +3519,13 @@ void main() {
     await tapGesture.up();
   });
 
-  testWidgets('useDeleteButtonTooltip only applies to tooltip', (WidgetTester tester) async {
+  testWidgets('Disabling delete button tooltip does not disable chip tooltip', (WidgetTester tester) async {
     final UniqueKey deleteButtonKey = UniqueKey();
     await tester.pumpWidget(
       _chipWithOptionalDeleteButton(
         deleteButtonKey: deleteButtonKey,
         deletable: true,
-        useDeleteButtonTooltip: false,
+        deleteButtonTooltip: '',
         chipTooltip: 'Chip Tooltip',
       ),
     );
@@ -3548,7 +3548,7 @@ void main() {
     expect(findTooltipContainer('Chip Tooltip'), findsOneWidget);
   });
 
-  testWidgets('Setting useDeleteButtonTooltip also allows Chip tooltip', (WidgetTester tester) async {
+  testWidgets('Setting delete button tooltip also allows Chip tooltip', (WidgetTester tester) async {
     final UniqueKey deleteButtonKey = UniqueKey();
     await tester.pumpWidget(
       _chipWithOptionalDeleteButton(

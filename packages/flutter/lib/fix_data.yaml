@@ -14,6 +14,99 @@
 
 version: 1
 transforms:
+  # Changes made in
+  - title: "Deprecate 'useDeleteButtonTooltip' for Chip"
+    date: 2021-12-19
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'Chip'
+    oneOf:
+    - if: "useDeleteButtonTooltip == 'false'"
+      changes:
+      - kind: 'addParameter'
+        index: 9
+        name: 'deleteButtonTooltipMessage'
+        style: optional_named
+        argumentValue:
+          expression: "''"
+          requiredIf: "useDeleteButtonTooltip == 'false' && deleteButtonTooltipMessage == ''"
+      - kind: 'removeParameter'
+        name: 'useDeleteButtonTooltip'
+    - if: "useDeleteButtonTooltip == 'true'"
+      changes:
+      - kind: 'removeParameter'
+        name: 'useDeleteButtonTooltip'
+    variables:
+      useDeleteButtonTooltip:
+        kind: 'fragment'
+        value: 'arguments[useDeleteButtonTooltip]'
+      deleteButtonTooltipMessage:
+        kind: 'fragment'
+        value: 'arguments[deleteButtonTooltipMessage]'
+
+  # Changes made in
+  - title: "Deprecate 'useDeleteButtonTooltip' for InputChip"
+    date: 2021-12-19
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'InputChip'
+    oneOf:
+    - if: "useDeleteButtonTooltip == 'false'"
+      changes:
+      - kind: 'addParameter'
+        index: 9
+        name: 'deleteButtonTooltipMessage'
+        style: optional_named
+        argumentValue:
+          expression: "''"
+          requiredIf: "useDeleteButtonTooltip == 'false' && deleteButtonTooltipMessage == ''"
+      - kind: 'removeParameter'
+        name: 'useDeleteButtonTooltip'
+    - if: "useDeleteButtonTooltip == 'true'"
+      changes:
+      - kind: 'removeParameter'
+        name: 'useDeleteButtonTooltip'
+    variables:
+      useDeleteButtonTooltip:
+        kind: 'fragment'
+        value: 'arguments[useDeleteButtonTooltip]'
+      deleteButtonTooltipMessage:
+        kind: 'fragment'
+        value: 'arguments[deleteButtonTooltipMessage]'
+
+  # Changes made in
+  - title: "Deprecate 'useDeleteButtonTooltip' for RawChip"
+    date: 2021-12-19
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'RawChip'
+    oneOf:
+    - if: "useDeleteButtonTooltip == 'false'"
+      changes:
+      - kind: 'addParameter'
+        index: 9
+        name: 'deleteButtonTooltipMessage'
+        style: optional_named
+        argumentValue:
+          expression: "''"
+          requiredIf: "useDeleteButtonTooltip == 'false' && deleteButtonTooltipMessage == ''"
+      - kind: 'removeParameter'
+        name: 'useDeleteButtonTooltip'
+    - if: "useDeleteButtonTooltip == 'true'"
+      changes:
+      - kind: 'removeParameter'
+        name: 'useDeleteButtonTooltip'
+    variables:
+      useDeleteButtonTooltip:
+        kind: 'fragment'
+        value: 'arguments[useDeleteButtonTooltip]'
+      deleteButtonTooltipMessage:
+        kind: 'fragment'
+        value: 'arguments[deleteButtonTooltipMessage]'
+
   # Changes made in https://github.com/flutter/flutter/pull/96957
   - title: "Migrate to 'thumbVisibility'"
     date: 2022-01-20

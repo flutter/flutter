@@ -241,14 +241,18 @@ abstract class DeletableChipAttributes {
   /// [deleteButtonTooltipMessage].
   ///
   /// Must not be null. Defaults to true.
+  @Deprecated(
+    'Set deleteButtonTooltipMessage of this Chip as an empty string instead. '
+    'This feature was deprecated after'
+  )
   bool get useDeleteButtonTooltip;
 
   /// The message to be used for the chip's delete button tooltip.
   ///
-  /// This will be shown only if [useDeleteButtonTooltip] is true.
+  /// If empty, the delete button tooltip of the chip will be disabled.
   ///
-  /// If not specified, the default [MaterialLocalizations.deleteButtonTooltip] will
-  /// be used.
+  /// If null, the default [MaterialLocalizations.deleteButtonTooltip] will be
+  /// used.
   String? get deleteButtonTooltipMessage;
 }
 
@@ -557,7 +561,6 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
     this.deleteIcon,
     this.onDeleted,
     this.deleteIconColor,
-    this.useDeleteButtonTooltip = true,
     this.deleteButtonTooltipMessage,
     this.side,
     this.shape,
@@ -570,11 +573,15 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
     this.materialTapTargetSize,
     this.elevation,
     this.shadowColor,
+    @Deprecated(
+      'Set deleteButtonTooltipMessage of this Chip as an empty string instead. '
+      'This feature was deprecated after'
+    )
+    this.useDeleteButtonTooltip = true,
   }) : assert(label != null),
        assert(autofocus != null),
        assert(clipBehavior != null),
        assert(elevation == null || elevation >= 0.0),
-       assert(useDeleteButtonTooltip != null),
        super(key: key);
 
   @override
@@ -608,8 +615,6 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
   @override
   final Color? deleteIconColor;
   @override
-  final bool useDeleteButtonTooltip;
-  @override
   final String? deleteButtonTooltipMessage;
   @override
   final MaterialTapTargetSize? materialTapTargetSize;
@@ -617,6 +622,12 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
   final double? elevation;
   @override
   final Color? shadowColor;
+  @override
+  @Deprecated(
+    'Set deleteButtonTooltipMessage of this Chip as an empty string instead. '
+    'This feature was deprecated after'
+  )
+  final bool useDeleteButtonTooltip;
 
   @override
   Widget build(BuildContext context) {
@@ -721,7 +732,6 @@ class InputChip extends StatelessWidget
     this.deleteIcon,
     this.onDeleted,
     this.deleteIconColor,
-    this.useDeleteButtonTooltip = true,
     this.deleteButtonTooltipMessage,
     this.onPressed,
     this.pressElevation,
@@ -743,6 +753,11 @@ class InputChip extends StatelessWidget
     this.showCheckmark,
     this.checkmarkColor,
     this.avatarBorder = const CircleBorder(),
+    @Deprecated(
+      'Set deleteButtonTooltipMessage of this Chip as an empty string instead. '
+      'This feature was deprecated after'
+    )
+    this.useDeleteButtonTooltip = true,
   }) : assert(selected != null),
        assert(isEnabled != null),
        assert(label != null),
@@ -750,7 +765,6 @@ class InputChip extends StatelessWidget
        assert(autofocus != null),
        assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0),
-       assert(useDeleteButtonTooltip != null),
        super(key: key);
 
   @override
@@ -773,8 +787,6 @@ class InputChip extends StatelessWidget
   final VoidCallback? onDeleted;
   @override
   final Color? deleteIconColor;
-  @override
-  final bool useDeleteButtonTooltip;
   @override
   final String? deleteButtonTooltipMessage;
   @override
@@ -817,6 +829,12 @@ class InputChip extends StatelessWidget
   final Color? checkmarkColor;
   @override
   final ShapeBorder avatarBorder;
+  @override
+  @Deprecated(
+    'Set deleteButtonTooltipMessage of this Chip as an empty string instead. '
+    'This feature was deprecated after'
+  )
+  final bool useDeleteButtonTooltip;
 
   @override
   Widget build(BuildContext context) {
@@ -1469,7 +1487,6 @@ class RawChip extends StatefulWidget
     Widget? deleteIcon,
     this.onDeleted,
     this.deleteIconColor,
-    this.useDeleteButtonTooltip = true,
     this.deleteButtonTooltipMessage,
     this.onPressed,
     this.onSelected,
@@ -1493,6 +1510,11 @@ class RawChip extends StatefulWidget
     this.showCheckmark = true,
     this.checkmarkColor,
     this.avatarBorder = const CircleBorder(),
+    @Deprecated(
+      'Set deleteButtonTooltipMessage of this Chip as an empty string instead. '
+      'This feature was deprecated after'
+    )
+    this.useDeleteButtonTooltip = true,
   }) : assert(label != null),
        assert(isEnabled != null),
        assert(selected != null),
@@ -1500,7 +1522,6 @@ class RawChip extends StatefulWidget
        assert(autofocus != null),
        assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0),
-       assert(useDeleteButtonTooltip != null),
        deleteIcon = deleteIcon ?? _kDefaultDeleteIcon,
        super(key: key);
 
@@ -1518,8 +1539,6 @@ class RawChip extends StatefulWidget
   final VoidCallback? onDeleted;
   @override
   final Color? deleteIconColor;
-  @override
-  final bool useDeleteButtonTooltip;
   @override
   final String? deleteButtonTooltipMessage;
   @override
@@ -1568,6 +1587,12 @@ class RawChip extends StatefulWidget
   final Color? checkmarkColor;
   @override
   final ShapeBorder avatarBorder;
+  @override
+  @Deprecated(
+    'Set deleteButtonTooltipMessage of this Chip as an empty string instead. '
+    'This feature was deprecated after'
+  )
+  final bool useDeleteButtonTooltip;
 
   /// If set, this indicates that the chip should be disabled if all of the
   /// tap callbacks ([onSelected], [onPressed]) are null.

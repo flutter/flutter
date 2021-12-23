@@ -530,4 +530,18 @@ void main() {
   scrollbarTheme.isAlwaysShown;
   RawScrollbar rawScrollbar = RawScrollbar(isAlwaysShown: true);
   nowShowing = rawScrollbar.isAlwaysShown;
+
+  // Changes made in
+  Chip chip = Chip();
+  chip = Chip(useDeleteButtonTooltip: false);
+  chip = Chip(useDeleteButtonTooltip: true);
+  chip = Chip(useDeleteButtonTooltip: false, deleteButtonTooltipMessage: 'Tooltip');
+  InputChip inputChip = InputChip();
+  inputChip = InputChip(useDeleteButtonTooltip: false);
+  inputChip = InputChip(useDeleteButtonTooltip: true);
+  inputChip = InputChip(useDeleteButtonTooltip: false, deleteButtonTooltipMessage: 'Tooltip');
+  RawChip rawChip = Rawchip();
+  rawChip = RawChip(useDeleteButtonTooltip: false);
+  rawChip = RawChip(useDeleteButtonTooltip: true);
+  rawChip = RawChip(useDeleteButtonTooltip: false, deleteButtonTooltipMessage: 'Tooltip');
 }

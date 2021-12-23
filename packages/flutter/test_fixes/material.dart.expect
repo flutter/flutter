@@ -503,4 +503,18 @@ void main() {
   scrollbarTheme.thumbVisibility;
   RawScrollbar rawScrollbar = RawScrollbar(thumbVisibility: true);
   nowShowing = rawScrollbar.thumbVisibility;
+
+  // Changes made in
+  Chip chip = Chip();
+  chip = Chip(deleteButtonTooltipMessage: '');
+  chip = Chip();
+  chip = Chip(deleteButtonTooltipMessage: 'Tooltip');
+  InputChip inputChip = InputChip();
+  inputChip = InputChip(deleteButtonTooltipMessage: '');
+  inputChip = InputChip();
+  inputChip = InputChip(deleteButtonTooltipMessage: 'Tooltip');
+  RawChip rawChip = Rawchip();
+  rawChip = RawChip(deleteButtonTooltipMessage: '');
+  rawChip = RawChip();
+  rawChip = RawChip(deleteButtonTooltipMessage: 'Tooltip');
 }
