@@ -271,6 +271,9 @@ class CreateCommand extends CreateBase {
       // Enable null safety everywhere.
       dartSdkVersionBounds: '">=$dartSdk <3.0.0"',
       implementationTests: boolArg('implementation-tests'),
+      agpVersion: gradle.templateAndroidGradlePluginVersion,
+      kotlinVersion: gradle.templateKotlinGradlePluginVersion,
+      gradleVersion: gradle.templateDefaultGradleVersion,
     );
 
     final String relativeDirPath = globals.fs.path.relative(projectDirPath);

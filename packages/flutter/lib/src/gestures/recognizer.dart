@@ -199,10 +199,10 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
     } catch (exception, stack) {
       InformationCollector? collector;
       assert(() {
-        collector = () sync* {
-          yield StringProperty('Handler', name);
-          yield DiagnosticsProperty<GestureRecognizer>('Recognizer', this, style: DiagnosticsTreeStyle.errorProperty);
-        };
+        collector = () => <DiagnosticsNode>[
+          StringProperty('Handler', name),
+          DiagnosticsProperty<GestureRecognizer>('Recognizer', this, style: DiagnosticsTreeStyle.errorProperty),
+        ];
         return true;
       }());
       FlutterError.reportError(FlutterErrorDetails(
@@ -300,7 +300,7 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
   @protected
   @mustCallSuper
   void resolve(GestureDisposition disposition) {
-    final List<GestureArenaEntry> localEntries = List<GestureArenaEntry>.from(_entries.values);
+    final List<GestureArenaEntry> localEntries = List<GestureArenaEntry>.of(_entries.values);
     _entries.clear();
     for (final GestureArenaEntry entry in localEntries)
       entry.resolve(disposition);

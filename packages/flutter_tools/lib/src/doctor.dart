@@ -10,6 +10,7 @@ import 'artifacts.dart';
 import 'base/async_guard.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
+import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
@@ -22,6 +23,7 @@ import 'doctor_validator.dart';
 import 'features.dart';
 import 'fuchsia/fuchsia_workflow.dart';
 import 'globals.dart' as globals;
+import 'http_host_validator.dart';
 import 'intellij/intellij_validator.dart';
 import 'linux/linux_doctor.dart';
 import 'linux/linux_workflow.dart';
@@ -132,6 +134,11 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
           deviceManager: globals.deviceManager,
           userMessages: globals.userMessages,
         ),
+      HttpHostValidator(
+        platform: globals.platform,
+        featureFlags: featureFlags,
+        httpClient: globals.httpClientFactory?.call() ?? HttpClient(),
+      ),
     ];
     return _validators!;
   }
@@ -520,7 +527,7 @@ class DeviceValidator extends DoctorValidator {
     final List<Device> devices = await _deviceManager.getAllConnectedDevices();
     List<ValidationMessage> installedMessages = <ValidationMessage>[];
     if (devices.isNotEmpty) {
-      installedMessages = await Device.descriptions(devices)
+      installedMessages = (await Device.descriptions(devices))
           .map<ValidationMessage>((String msg) => ValidationMessage(msg)).toList();
     }
 

@@ -2,12 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:args/args.dart';
-import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import '../artifacts.dart';
@@ -24,12 +21,12 @@ class AnalyzeOnce extends AnalyzeBase {
     ArgResults argResults,
     List<String> repoRoots,
     List<Directory> repoPackages, {
-    @required FileSystem fileSystem,
-    @required Logger logger,
-    @required Platform platform,
-    @required ProcessManager processManager,
-    @required Terminal terminal,
-    @required Artifacts artifacts,
+    required FileSystem fileSystem,
+    required Logger logger,
+    required Platform platform,
+    required ProcessManager processManager,
+    required Terminal terminal,
+    required Artifacts artifacts,
     this.workingDirectory,
   }) : super(
         argResults,
@@ -44,7 +41,7 @@ class AnalyzeOnce extends AnalyzeBase {
       );
 
   /// The working directory for testing analysis using dartanalyzer.
-  final Directory workingDirectory;
+  final Directory? workingDirectory;
 
   @override
   Future<void> analyze() async {
@@ -98,10 +95,10 @@ class AnalyzeOnce extends AnalyzeBase {
       protocolTrafficLog: protocolTrafficLog,
     );
 
-    Stopwatch timer;
-    Status progress;
+    Stopwatch? timer;
+    Status? progress;
     try {
-      StreamSubscription<bool> subscription;
+      StreamSubscription<bool>? subscription;
 
       void handleAnalysisStatus(bool isAnalyzing) {
         if (!isAnalyzing) {
@@ -123,7 +120,7 @@ class AnalyzeOnce extends AnalyzeBase {
 
       await server.start();
       // Completing the future in the callback can't fail.
-      unawaited(server.onExit.then<void>((int exitCode) {
+      unawaited(server.onExit.then<void>((int? exitCode) {
         if (!analysisCompleter.isCompleted) {
           analysisCompleter.completeError(
             // Include the last 20 lines of server output in exception message
@@ -139,7 +136,7 @@ class AnalyzeOnce extends AnalyzeBase {
       final String message = directories.length > 1
           ? '${directories.length} ${directories.length == 1 ? 'directory' : 'directories'}'
           : fileSystem.path.basename(directories.first);
-      progress = argResults['preamble'] as bool
+      progress = argResults['preamble'] == true
           ? logger.startProgress(
             'Analyzing $message...',
           )

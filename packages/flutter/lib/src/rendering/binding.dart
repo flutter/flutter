@@ -508,11 +508,15 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   Future<void> performReassemble() async {
     await super.performReassemble();
     if (BindingBase.debugReassembleConfig?.widgetName == null) {
-      Timeline.startSync('Dirty Render Tree', arguments: timelineArgumentsIndicatingLandmarkEvent);
+      if (!kReleaseMode) {
+        Timeline.startSync('Preparing Hot Reload (layout)', arguments: timelineArgumentsIndicatingLandmarkEvent);
+      }
       try {
         renderView.reassemble();
       } finally {
-        Timeline.finishSync();
+        if (!kReleaseMode) {
+          Timeline.finishSync();
+        }
       }
     }
     scheduleWarmUpFrame();

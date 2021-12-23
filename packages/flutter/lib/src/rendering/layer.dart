@@ -67,9 +67,8 @@ class AnnotationResult<T> {
   /// tree.
   ///
   /// It is similar to [entries] but does not contain other information.
-  Iterable<T> get annotations sync* {
-    for (final AnnotationEntry<T> entry in _entries)
-      yield entry.annotation;
+  Iterable<T> get annotations {
+    return _entries.map((AnnotationEntry<T> entry) => entry.annotation);
   }
 }
 
