@@ -10,10 +10,10 @@ abstract class ApplicationPackageFactory {
   static ApplicationPackageFactory? get instance => context.get<ApplicationPackageFactory>();
 
   /// Create an [ApplicationPackage] for the given platform.
-  Future<ApplicationPackage> getPackageForPlatform(
+  Future<ApplicationPackage?> getPackageForPlatform(
     TargetPlatform platform, {
-    BuildInfo buildInfo,
-    File applicationBinary,
+    BuildInfo? buildInfo,
+    File? applicationBinary,
   });
 }
 

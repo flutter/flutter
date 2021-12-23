@@ -543,6 +543,7 @@ class AndroidDevice extends Device {
       return LaunchResult.failed();
     }
 
+    AndroidApk? builtPackage = package;
     AndroidArch androidArch;
     switch (devicePlatform) {
       case TargetPlatform.android_arm:
@@ -587,18 +588,18 @@ class AndroidDevice extends Device {
       );
       // Package has been built, so we can get the updated application ID and
       // activity name from the .apk.
-      package = await ApplicationPackageFactory.instance!
-        .getPackageForPlatform(devicePlatform, buildInfo: debuggingOptions.buildInfo) as AndroidApk;
+      builtPackage = await ApplicationPackageFactory.instance!
+        .getPackageForPlatform(devicePlatform, buildInfo: debuggingOptions.buildInfo) as AndroidApk?;
     }
     // There was a failure parsing the android project information.
-    if (package == null) {
+    if (builtPackage == null) {
       throwToolExit('Problem building Android application: see above error(s).');
     }
 
-    _logger.printTrace("Stopping app '${package.name}' on $name.");
-    await stopApp(package, userIdentifier: userIdentifier);
+    _logger.printTrace("Stopping app '${builtPackage.name}' on $name.");
+    await stopApp(builtPackage, userIdentifier: userIdentifier);
 
-    if (!await installApp(package, userIdentifier: userIdentifier)) {
+    if (!await installApp(builtPackage, userIdentifier: userIdentifier)) {
       return LaunchResult.failed();
     }
 
@@ -672,7 +673,7 @@ class AndroidDevice extends Device {
         if (userIdentifier != null)
           ...<String>['--user', userIdentifier],
       ],
-      package.launchActivity,
+      builtPackage.launchActivity,
     ];
     final String result = (await runAdbCheckedAsync(cmd)).stdout;
     // This invocation returns 0 even when it fails.
@@ -681,7 +682,7 @@ class AndroidDevice extends Device {
       return LaunchResult.failed();
     }
 
-    _package = package;
+    _package = builtPackage;
     if (!debuggingOptions.debuggingEnabled) {
       return LaunchResult.succeeded();
     }

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:vm_service/vm_service.dart';
@@ -16,9 +14,9 @@ import 'test_utils.dart';
 
 void main() {
   group('Flutter Tool VMService method', () {
-    Directory tempDir;
-    FlutterRunTestDriver flutter;
-    VmService vmService;
+    late Directory tempDir;
+    late FlutterRunTestDriver flutter;
+    late VmService vmService;
 
     setUp(() async {
       tempDir = createResolvedTempDirectorySync('vmservice_integration_test.');
@@ -28,12 +26,13 @@ void main() {
 
       flutter = FlutterRunTestDriver(tempDir);
       await flutter.run(withDebugger: true);
-      final int port = flutter.vmServicePort;
+      final int? port = flutter.vmServicePort;
+      expect(port != null, true);
       vmService = await vmServiceConnectUri('ws://localhost:$port/ws');
     });
 
     tearDown(() async {
-      await flutter?.stop();
+      await flutter.stop();
       tryToDelete(tempDir);
     });
 
@@ -41,7 +40,7 @@ void main() {
       final ProtocolList protocolList =
           await vmService.getSupportedProtocols();
       expect(protocolList.protocols, hasLength(2));
-      for (final Protocol protocol in protocolList.protocols) {
+      for (final Protocol protocol in protocolList.protocols!) {
         expect(protocol.protocolName, anyOf('VM Service', 'DDS'));
       }
     });
@@ -62,10 +61,10 @@ void main() {
 
     testWithoutContext('reloadSources can be called', () async {
       final VM vm = await vmService.getVM();
-      final IsolateRef isolateRef = vm.isolates.first;
-
+      final IsolateRef? isolateRef = vm.isolates?.first;
+      expect(isolateRef != null, true);
       final Response response = await vmService.callMethod('s0.reloadSources',
-          isolateId: isolateRef.id);
+          isolateId: isolateRef!.id);
       expect(response.type, 'Success');
     });
 
@@ -77,10 +76,10 @@ void main() {
 
     testWithoutContext('hotRestart can be called', () async {
       final VM vm = await vmService.getVM();
-      final IsolateRef isolateRef = vm.isolates.first;
-
+      final IsolateRef? isolateRef = vm.isolates?.first;
+      expect(isolateRef != null, true);
       final Response response =
-          await vmService.callMethod('s0.hotRestart', isolateId: isolateRef.id);
+          await vmService.callMethod('s0.hotRestart', isolateId: isolateRef!.id);
       expect(response.type, 'Success');
     });
 
@@ -102,7 +101,7 @@ void main() {
         'ext.flutter.brightnessOverride',
         isolateId: isolate.id,
       );
-      expect(response.json['value'], 'Brightness.light');
+      expect(response.json?['value'], 'Brightness.light');
 
       final Response updateResponse = await vmService.callServiceExtension(
         'ext.flutter.brightnessOverride',
@@ -111,7 +110,7 @@ void main() {
           'value': 'Brightness.dark',
         }
       );
-      expect(updateResponse.json['value'], 'Brightness.dark');
+      expect(updateResponse.json?['value'], 'Brightness.dark');
 
       // Change the brightness back to light
       final Response verifyResponse = await vmService.callServiceExtension(
@@ -121,7 +120,7 @@ void main() {
           'value': 'Brightness.light',
         }
       );
-      expect(verifyResponse.json['value'], 'Brightness.light');
+      expect(verifyResponse.json?['value'], 'Brightness.light');
 
       // Change with a bogus value
       final Response bogusResponse = await vmService.callServiceExtension(
@@ -131,7 +130,7 @@ void main() {
           'value': 'dark', // Intentionally invalid value.
         }
       );
-      expect(bogusResponse.json['value'], 'Brightness.light');
+      expect(bogusResponse.json?['value'], 'Brightness.light');
     });
 
     testWithoutContext('ext.flutter.debugPaint can toggle debug painting', () async {
@@ -140,7 +139,7 @@ void main() {
         'ext.flutter.debugPaint',
         isolateId: isolate.id,
       );
-      expect(response.json['enabled'], 'false');
+      expect(response.json?['enabled'], 'false');
 
       final Response updateResponse = await vmService.callServiceExtension(
         'ext.flutter.debugPaint',
@@ -149,7 +148,7 @@ void main() {
           'enabled': 'true',
         }
       );
-      expect(updateResponse.json['enabled'], 'true');
+      expect(updateResponse.json?['enabled'], 'true');
     });
   });
 }

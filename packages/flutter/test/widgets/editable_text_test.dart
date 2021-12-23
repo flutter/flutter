@@ -2207,6 +2207,7 @@ void main() {
     final List<MethodCall> log = <MethodCall>[];
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) async {
       log.add(methodCall);
+      return null;
     });
 
     await tester.showKeyboard(find.byType(EditableText));
@@ -3502,6 +3503,7 @@ void main() {
     final List<MethodCall> log = <MethodCall>[];
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) async {
       log.add(methodCall);
+      return null;
     });
 
     final TextEditingController controller = TextEditingController();
@@ -3531,6 +3533,7 @@ void main() {
     final List<MethodCall> log = <MethodCall>[];
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) async {
       log.add(methodCall);
+      return null;
     });
 
     final TextEditingController controller = TextEditingController();
@@ -3566,6 +3569,7 @@ void main() {
     final List<MethodCall> log = <MethodCall>[];
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) async {
       log.add(methodCall);
+      return null;
     });
 
     final TextEditingController controller1 = TextEditingController();
@@ -3651,6 +3655,7 @@ void main() {
     final List<MethodCall> log = <MethodCall>[];
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) async {
       log.add(methodCall);
+      return null;
     });
 
     const Offset offset = Offset(10.0, 20.0);
@@ -3693,6 +3698,7 @@ void main() {
     final List<MethodCall> log = <MethodCall>[];
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) async {
       log.add(methodCall);
+      return null;
     });
 
     final TextEditingController controller = TextEditingController();
@@ -3780,6 +3786,7 @@ void main() {
     final List<MethodCall> log = <MethodCall>[];
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) async {
       log.add(methodCall);
+      return null;
     });
     setState(() {
       currentTextStyle = textStyle2;
@@ -4007,6 +4014,7 @@ void main() {
     final List<MethodCall> log = <MethodCall>[];
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) async {
       log.add(methodCall);
+      return null;
     });
 
     final TextEditingController controller = TextEditingController();
@@ -5029,6 +5037,50 @@ void main() {
       reason: 'on $platform',
     );
     expect(controller.text, isEmpty, reason: 'on $platform');
+
+    controller.text = 'abc';
+    controller.selection = const TextSelection(baseOffset: 2, extentOffset: 2);
+
+    // Backspace
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.backspace,
+      ],
+      targetPlatform: defaultTargetPlatform,
+    );
+    expect(
+      selection,
+      equals(
+        const TextSelection(
+          baseOffset: 1,
+          extentOffset: 1,
+        ),
+      ),
+      reason: 'on $platform',
+    );
+    expect(controller.text, 'ac', reason: 'on $platform');
+
+    // Shift-backspace (same as backspace)
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.backspace,
+      ],
+      shift: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+    expect(
+      selection,
+      equals(
+        const TextSelection(
+          baseOffset: 0,
+          extentOffset: 0,
+        ),
+      ),
+      reason: 'on $platform',
+    );
+    expect(controller.text, 'c', reason: 'on $platform');
   }
 
   testWidgets('keyboard text selection works (RawKeyEvent)', (WidgetTester tester) async {
@@ -6706,6 +6758,7 @@ void main() {
     final List<MethodCall> log = <MethodCall>[];
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) async {
       log.add(methodCall);
+      return null;
     });
     final TextInputFormatter formatter = TextInputFormatter.withFunction((TextEditingValue oldValue, TextEditingValue newValue) {
       if (newValue.text == 'I will be modified by the formatter.') {
@@ -6834,6 +6887,7 @@ void main() {
     final List<MethodCall> log = <MethodCall>[];
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) async {
       log.add(methodCall);
+      return null;
     });
     final TextInputFormatter formatter = TextInputFormatter.withFunction((TextEditingValue oldValue, TextEditingValue newValue) {
       return const TextEditingValue(text: 'Flutter is the best!');
@@ -6913,6 +6967,7 @@ void main() {
     final List<MethodCall> log = <MethodCall>[];
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) async {
       log.add(methodCall);
+      return null;
     });
     final TextEditingController controller = TextEditingController();
 
@@ -7034,6 +7089,7 @@ void main() {
       final List<MethodCall> log = <MethodCall>[];
       tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) async {
         log.add(methodCall);
+        return null;
       });
       final TextEditingController controller = TextEditingController();
 
@@ -8635,7 +8691,7 @@ void main() {
     );
     bool myIntentWasCalled = false;
     final CallbackAction<ExtendSelectionByCharacterIntent> overrideAction = CallbackAction<ExtendSelectionByCharacterIntent>(
-      onInvoke: (ExtendSelectionByCharacterIntent intent) { myIntentWasCalled = true; },
+      onInvoke: (ExtendSelectionByCharacterIntent intent) { myIntentWasCalled = true; return null; },
     );
     await tester.pumpWidget(MaterialApp(
       home: Align(
@@ -8690,7 +8746,7 @@ void main() {
           child: Actions(
             actions: <Type, Action<Intent>>{
               ExtendSelectionByCharacterIntent: CallbackAction<ExtendSelectionByCharacterIntent>(
-                onInvoke: (ExtendSelectionByCharacterIntent intent) { myIntentWasCalled = true; },
+                onInvoke: (ExtendSelectionByCharacterIntent intent) { myIntentWasCalled = true; return null; },
               ),
             },
             child: EditableText(

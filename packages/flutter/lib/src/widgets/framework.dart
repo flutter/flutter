@@ -37,6 +37,22 @@ export 'package:flutter/rendering.dart' show RenderObject, RenderBox, debugDumpR
 // abstract class FrogJar extends RenderObjectWidget { const FrogJar({Key? key}) : super(key: key); }
 // abstract class FrogJarParentData extends ParentData { late Size size; }
 
+// An annotation used by test_analysis package to verify patterns are followed
+// that allow for tree-shaking of both fields and their initializers. This
+// annotation has no impact on code by itself, but indicates the following pattern
+// should be followed for a given field:
+//
+// ```dart
+// class Foo {
+//   final bar = kDebugMode ? Object() : null;
+// }
+// ```
+class _DebugOnly {
+  const _DebugOnly();
+}
+
+const _DebugOnly _debugOnly = _DebugOnly();
+
 // KEYS
 
 /// A key that is only equal to itself.
@@ -422,6 +438,14 @@ abstract class Widget extends DiagnosticableTree {
 ///  * Use `const` widgets where possible, and provide a `const` constructor for
 ///    the widget so that users of the widget can also do so.
 ///
+///  * When trying to create a reusable piece of UI, prefer using a widget
+///    rather than a helper method. For example, if there was a function used to
+///    build a widget, a [State.setState] call would require Flutter to entirely
+///    rebuild the returned wrapping widget. If a [Widget] was used instead,
+///    Flutter would be able to efficiently re-render only those parts that
+///    really need to be updated. Even better, if the created widget is `const`,
+///    Flutter would short-circuit most of the rebuild work.
+///
 ///  * Consider refactoring the stateless widget into a stateful widget so that
 ///    it can use some of the techniques described at [StatefulWidget], such as
 ///    caching common parts of subtrees and using [GlobalKey]s when changing the
@@ -630,10 +654,19 @@ abstract class StatelessWidget extends Widget {
 ///    efficient for a widget to be re-used than for a new (but
 ///    identically-configured) widget to be created. Factoring out the stateful
 ///    part into a widget that takes a child argument is a common way of doing
-///    this.
+///    this. Another caching strategy consists of assigning a widget to a
+///    `final` state variable which can be used in the build method.
 ///
 ///  * Use `const` widgets where possible. (This is equivalent to caching a
 ///    widget and re-using it.)
+///
+///  * When trying to create a reusable piece of UI, prefer using a widget
+///    rather than a helper method. For example, if there was a function used to
+///    build a widget, a [State.setState] call would require Flutter to entirely
+///    rebuild the returned wrapping widget. If a [Widget] was used instead,
+///    Flutter would be able to efficiently re-render only those parts that
+///    really need to be updated. Even better, if the created widget is `const`,
+///    Flutter would short-circuit most of the rebuild work.
 ///
 ///  * Avoid changing the depth of any created subtrees or changing the type of
 ///    any widgets in the subtree. For example, rather than returning either the
@@ -2705,12 +2738,21 @@ class BuildOwner {
   }
 
   final Map<GlobalKey, Element> _globalKeyRegistry = <GlobalKey, Element>{};
-  final Set<Element> _debugIllFatedElements = HashSet<Element>();
+
+  // In Profile/Release mode this field is initialized to `null`. The Dart compiler can
+  // eliminate unused fields, but not their initializers.
+  @_debugOnly
+  final Set<Element>? _debugIllFatedElements = kDebugMode ? HashSet<Element>() : null;
+
   // This map keeps track which child reserves the global key with the parent.
   // Parent, child -> global key.
   // This provides us a way to remove old reservation while parent rebuilds the
   // child in the same slot.
-  final Map<Element, Map<Element, GlobalKey>> _debugGlobalKeyReservations = <Element, Map<Element, GlobalKey>>{};
+  //
+  // In Profile/Release mode this field is initialized to `null`. The Dart compiler can
+  // eliminate unused fields, but not their initializers.
+  @_debugOnly
+  final Map<Element, Map<Element, GlobalKey>>? _debugGlobalKeyReservations = kDebugMode ? <Element, Map<Element, GlobalKey>>{} : null;
 
   /// The number of [GlobalKey] instances that are currently associated with
   /// [Element]s that have been built by this build owner.
@@ -2720,7 +2762,7 @@ class BuildOwner {
     assert(() {
       assert(parent != null);
       assert(child != null);
-      _debugGlobalKeyReservations[parent]?.remove(child);
+      _debugGlobalKeyReservations?[parent]?.remove(child);
       return true;
     }());
   }
@@ -2732,7 +2774,7 @@ class BuildOwner {
         final Element oldElement = _globalKeyRegistry[key]!;
         assert(oldElement.widget != null);
         assert(element.widget.runtimeType != oldElement.widget.runtimeType);
-        _debugIllFatedElements.add(oldElement);
+        _debugIllFatedElements?.add(oldElement);
       }
       return true;
     }());
@@ -2757,8 +2799,8 @@ class BuildOwner {
     assert(() {
       assert(parent != null);
       assert(child != null);
-      _debugGlobalKeyReservations[parent] ??= <Element, GlobalKey>{};
-      _debugGlobalKeyReservations[parent]![child] = key;
+      _debugGlobalKeyReservations?[parent] ??= <Element, GlobalKey>{};
+      _debugGlobalKeyReservations?[parent]![child] = key;
       return true;
     }());
   }
@@ -2766,7 +2808,7 @@ class BuildOwner {
   void _debugVerifyGlobalKeyReservation() {
     assert(() {
       final Map<GlobalKey, Element> keyToParent = <GlobalKey, Element>{};
-      _debugGlobalKeyReservations.forEach((Element parent, Map<Element, GlobalKey> childToKey) {
+      _debugGlobalKeyReservations?.forEach((Element parent, Map<Element, GlobalKey> childToKey) {
         // We ignore parent that are unmounted or detached.
         if (parent._lifecycleState == _ElementLifecycle.defunct || parent.renderObject?.attached == false)
           return;
@@ -2829,7 +2871,7 @@ class BuildOwner {
           }
         });
       });
-      _debugGlobalKeyReservations.clear();
+      _debugGlobalKeyReservations?.clear();
       return true;
     }());
   }
@@ -2837,7 +2879,7 @@ class BuildOwner {
   void _debugVerifyIllFatedPopulation() {
     assert(() {
       Map<GlobalKey, Set<Element>>? duplicates;
-      for (final Element element in _debugIllFatedElements) {
+      for (final Element element in _debugIllFatedElements!) {
         if (element._lifecycleState != _ElementLifecycle.defunct) {
           assert(element != null);
           assert(element.widget != null);
@@ -2851,7 +2893,7 @@ class BuildOwner {
           elements.add(_globalKeyRegistry[key]!);
         }
       }
-      _debugIllFatedElements.clear();
+      _debugIllFatedElements?.clear();
       if (duplicates != null) {
         final List<DiagnosticsNode> information = <DiagnosticsNode>[];
         information.add(ErrorSummary('Multiple widgets used the same GlobalKey.'));
@@ -2887,9 +2929,7 @@ class BuildOwner {
       Timeline.startSync('FINALIZE TREE', arguments: timelineArgumentsIndicatingLandmarkEvent);
     }
     try {
-      lockState(() {
-        _inactiveElements._unmountAll(); // this unregisters the GlobalKeys
-      });
+      lockState(_inactiveElements._unmountAll); // this unregisters the GlobalKeys
       assert(() {
         try {
           _debugVerifyGlobalKeyReservation();
@@ -3588,8 +3628,8 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     // never updates (the forgotten children are not removed from the tree
     // until the call to update happens)
     assert(() {
-      _debugForgottenChildrenWithGlobalKey.forEach(_debugRemoveGlobalKeyReservation);
-      _debugForgottenChildrenWithGlobalKey.clear();
+      _debugForgottenChildrenWithGlobalKey?.forEach(_debugRemoveGlobalKeyReservation);
+      _debugForgottenChildrenWithGlobalKey?.clear();
       return true;
     }());
     _widget = newWidget;
@@ -3795,7 +3835,11 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
 
   // The children that have been forgotten by forgetChild. This will be used in
   // [update] to remove the global key reservations of forgotten children.
-  final Set<Element> _debugForgottenChildrenWithGlobalKey = HashSet<Element>();
+  //
+  // In Profile/Release mode this field is initialized to `null`. The Dart compiler can
+  // eliminate unused fields, but not their initializers.
+  @_debugOnly
+  final Set<Element>? _debugForgottenChildrenWithGlobalKey = kDebugMode ? HashSet<Element>() : null;
 
   /// Remove the given child from the element's child list, in preparation for
   /// the child being reused elsewhere in the element tree.
@@ -3821,7 +3865,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     // key duplication that we need to catch.
     assert(() {
       if (child.widget.key is GlobalKey)
-        _debugForgottenChildrenWithGlobalKey.add(child);
+        _debugForgottenChildrenWithGlobalKey?.add(child);
       return true;
     }());
   }
