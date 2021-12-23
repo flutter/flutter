@@ -221,18 +221,19 @@ void main() {
     });
   });
 }
-class FakeDaemonStreams extends DaemonStreams {
-  final StreamController<Map<String, dynamic>> inputs = StreamController<Map<String, dynamic>>();
-  final StreamController<Map<String, dynamic>> outputs = StreamController<Map<String, dynamic>>();
+
+class FakeDaemonStreams implements DaemonStreams {
+  final StreamController<DaemonMessage> inputs = StreamController<DaemonMessage>();
+  final StreamController<DaemonMessage> outputs = StreamController<DaemonMessage>();
 
   @override
-  Stream<Map<String, dynamic>> get inputStream {
+  Stream<DaemonMessage> get inputStream {
     return inputs.stream;
   }
 
   @override
-  void send(Map<String, dynamic> message) {
-    outputs.add(message);
+  void send(Map<String, dynamic> message, [ List<int> binary ]) {
+    outputs.add(DaemonMessage(message, binary != null ? Stream<List<int>>.value(binary) : null));
   }
 
   @override

@@ -280,8 +280,8 @@ class ProxiedDevice extends Device {
     _applicationPackageMap[path] = idCompleter.future;
     await connection.sendRequest('proxy.writeTempFile', <String, Object>{
       'path': fileName,
-      'content': base64.encode(await binary.readAsBytes()),
-    });
+      // 'content': base64.encode(await binary.readAsBytes()),
+    }, await binary.readAsBytes());
     final String id = _cast<String>(await connection.sendRequest('device.uploadApplicationPackage', <String, Object>{
       'targetPlatform': getNameForTargetPlatform(_targetPlatform),
       'applicationBinary': fileName,
@@ -321,7 +321,7 @@ class _ProxiedLogReader extends DeviceLogReader {
       })));
     idFuture.then((String id) {
       _id = id;
-      final Stream<String> stream = connection.listenToEvent('device.logReader.logLines.$_id').cast<String>();
+      final Stream<String> stream = connection.listenToEvent('device.logReader.logLines.$_id').map((DaemonEventData event) => event.data! as String);
       _logLinesStreamController.addStream(stream);
     });
     return _logLinesStreamController.stream;
@@ -356,17 +356,16 @@ class _ProxiedPortForwarder extends DevicePortForwarder {
       final String id = _cast<String>(await connection.sendRequest('proxy.connect', <String, Object>{
         'port': devicePort,
       }));
-      final Stream<List<int>> dataStream = connection.listenToEvent('proxy.data.$id').cast<String>().map(base64.decode);
+      final Stream<List<int>> dataStream = connection.listenToEvent('proxy.data.$id').asyncExpand((DaemonEventData event) => event.binary);
       dataStream.listen(socket.add);
-      final Future<Object?> disconnectFuture = connection.listenToEvent('proxy.disconnected.$id').first;
+      final Future<DaemonEventData> disconnectFuture = connection.listenToEvent('proxy.disconnected.$id').first;
       unawaited(disconnectFuture.then((_) {
         socket.close();
       }));
       socket.listen((Uint8List data) {
         connection.sendRequest('proxy.write', <String, Object>{
           'id': id,
-          'data': base64.encode(data),
-        });
+        }, data);
       });
       connectedSockets.add(socket);
       unawaited(socket.done.then((dynamic value) {
