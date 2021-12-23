@@ -15,28 +15,22 @@
 version: 1
 transforms:
   # Changes made in
-  - title: "Deprecate 'useDeleteButtonTooltip' for Chip"
-    date: 2021-12-19
+  - title: "Remove 'useDeleteButtonTooltip'"
+    date: 2021-12-24
     element:
       uris: [ 'material.dart' ]
       constructor: ''
       inClass: 'Chip'
-    oneOf:
-    - if: "useDeleteButtonTooltip == 'false'"
-      changes:
-      - kind: 'addParameter'
-        index: 9
-        name: 'deleteButtonTooltipMessage'
-        style: optional_named
-        argumentValue:
-          expression: "''"
-          requiredIf: "useDeleteButtonTooltip == 'false' && deleteButtonTooltipMessage == ''"
-      - kind: 'removeParameter'
-        name: 'useDeleteButtonTooltip'
-    - if: "useDeleteButtonTooltip == 'true'"
-      changes:
-      - kind: 'removeParameter'
-        name: 'useDeleteButtonTooltip'
+    changes:
+    - kind: 'addParameter'
+      index: 9
+      name: 'deleteButtonTooltipMessage'
+      style: optional_named
+      argumentValue:
+        expression: "''"
+        requiredIf: "useDeleteButtonTooltip == 'false' && deleteButtonTooltipMessage == ''"
+    - kind: 'removeParameter'
+      name: 'useDeleteButtonTooltip'
     variables:
       useDeleteButtonTooltip:
         kind: 'fragment'
@@ -46,28 +40,22 @@ transforms:
         value: 'arguments[deleteButtonTooltipMessage]'
 
   # Changes made in
-  - title: "Deprecate 'useDeleteButtonTooltip' for InputChip"
-    date: 2021-12-19
+  - title: "Remove 'useDeleteButtonTooltip'"
+    date: 2021-12-24
     element:
       uris: [ 'material.dart' ]
       constructor: ''
       inClass: 'InputChip'
-    oneOf:
-    - if: "useDeleteButtonTooltip == 'false'"
-      changes:
-      - kind: 'addParameter'
-        index: 9
-        name: 'deleteButtonTooltipMessage'
-        style: optional_named
-        argumentValue:
-          expression: "''"
-          requiredIf: "useDeleteButtonTooltip == 'false' && deleteButtonTooltipMessage == ''"
-      - kind: 'removeParameter'
-        name: 'useDeleteButtonTooltip'
-    - if: "useDeleteButtonTooltip == 'true'"
-      changes:
-      - kind: 'removeParameter'
-        name: 'useDeleteButtonTooltip'
+    changes:
+    - kind: 'addParameter'
+      index: 9
+      name: 'deleteButtonTooltipMessage'
+      style: optional_named
+      argumentValue:
+        expression: "''"
+        requiredIf: "useDeleteButtonTooltip == 'false' && deleteButtonTooltipMessage == ''"
+    - kind: 'removeParameter'
+      name: 'useDeleteButtonTooltip'
     variables:
       useDeleteButtonTooltip:
         kind: 'fragment'
@@ -77,28 +65,22 @@ transforms:
         value: 'arguments[deleteButtonTooltipMessage]'
 
   # Changes made in
-  - title: "Deprecate 'useDeleteButtonTooltip' for RawChip"
-    date: 2021-12-19
+  - title: "Remove 'useDeleteButtonTooltip'"
+    date: 2021-12-24
     element:
       uris: [ 'material.dart' ]
       constructor: ''
       inClass: 'RawChip'
-    oneOf:
-    - if: "useDeleteButtonTooltip == 'false'"
-      changes:
-      - kind: 'addParameter'
-        index: 9
-        name: 'deleteButtonTooltipMessage'
-        style: optional_named
-        argumentValue:
-          expression: "''"
-          requiredIf: "useDeleteButtonTooltip == 'false' && deleteButtonTooltipMessage == ''"
-      - kind: 'removeParameter'
-        name: 'useDeleteButtonTooltip'
-    - if: "useDeleteButtonTooltip == 'true'"
-      changes:
-      - kind: 'removeParameter'
-        name: 'useDeleteButtonTooltip'
+    changes:
+    - kind: 'addParameter'
+      index: 9
+      name: 'deleteButtonTooltipMessage'
+      style: optional_named
+      argumentValue:
+        expression: "''"
+        requiredIf: "useDeleteButtonTooltip == 'false' && deleteButtonTooltipMessage == ''"
+    - kind: 'removeParameter'
+      name: 'useDeleteButtonTooltip'
     variables:
       useDeleteButtonTooltip:
         kind: 'fragment'
@@ -106,6 +88,39 @@ transforms:
       deleteButtonTooltipMessage:
         kind: 'fragment'
         value: 'arguments[deleteButtonTooltipMessage]'
+
+  # Changes made in
+  - title: "Migrate 'useDeleteButtonTooltip' to 'deleteButtonTooltipMessage'"
+    date: 2021-12-24
+    element:
+      uris: [ 'material.dart' ]
+      field: 'useDeleteButtonTooltip'
+      inClass: 'Chip'
+    changes:
+    - kind: 'rename'
+      newName: 'deleteButtonTooltipMessage'
+
+  # Changes made in
+  - title: "Migrate 'useDeleteButtonTooltip' to 'deleteButtonTooltipMessage'"
+    date: 2021-12-24
+    element:
+      uris: [ 'material.dart' ]
+      field: 'useDeleteButtonTooltip'
+      inClass: 'InputChip'
+    changes:
+    - kind: 'rename'
+      newName: 'deleteButtonTooltipMessage'
+
+  # Changes made in
+  - title: "Migrate 'useDeleteButtonTooltip' to 'deleteButtonTooltipMessage'"
+    date: 2021-12-24
+    element:
+      uris: [ 'material.dart' ]
+      field: 'useDeleteButtonTooltip'
+      inClass: 'RawChip'
+    changes:
+    - kind: 'rename'
+      newName: 'deleteButtonTooltipMessage'
 
   # Changes made in https://github.com/flutter/flutter/pull/96957
   - title: "Migrate to 'thumbVisibility'"
