@@ -1,4 +1,4 @@
-Signature: de412db2ee4e10979a4ce2a3a3ebcf7f
+Signature: 4a00825e63fe4940cb662ba26a04049c
 
 UNUSED LICENSES:
 
@@ -1691,7 +1691,6 @@ FILE: ../../../third_party/skia/include/core/SkTextBlob.h
 FILE: ../../../third_party/skia/include/gpu/gl/GrGLAssembleInterface.h
 FILE: ../../../third_party/skia/include/ports/SkFontMgr_indirect.h
 FILE: ../../../third_party/skia/include/ports/SkRemotableFontMgr.h
-FILE: ../../../third_party/skia/include/private/GrResourceKey.h
 FILE: ../../../third_party/skia/include/private/SkHalf.h
 FILE: ../../../third_party/skia/samplecode/SampleRectanizer.cpp
 FILE: ../../../third_party/skia/src/c/sk_surface.cpp
@@ -1745,6 +1744,7 @@ FILE: ../../../third_party/skia/src/gpu/GrResourceCache.cpp
 FILE: ../../../third_party/skia/src/gpu/GrResourceCache.h
 FILE: ../../../third_party/skia/src/gpu/GrTracing.h
 FILE: ../../../third_party/skia/src/gpu/GrXferProcessor.h
+FILE: ../../../third_party/skia/src/gpu/ResourceKey.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrBicubicEffect.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/GrConvexPolyEffect.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/GrConvexPolyEffect.h
@@ -2605,6 +2605,7 @@ FILE: ../../../third_party/skia/src/gpu/GrWritePixelsRenderTask.h
 FILE: ../../../third_party/skia/src/gpu/GrYUVATextureProxies.cpp
 FILE: ../../../third_party/skia/src/gpu/GrYUVATextureProxies.h
 FILE: ../../../third_party/skia/src/gpu/KeyBuilder.h
+FILE: ../../../third_party/skia/src/gpu/ResourceKey.cpp
 FILE: ../../../third_party/skia/src/gpu/ShaderErrorHandler.cpp
 FILE: ../../../third_party/skia/src/gpu/SurfaceFillContext.cpp
 FILE: ../../../third_party/skia/src/gpu/SurfaceFillContext.h
