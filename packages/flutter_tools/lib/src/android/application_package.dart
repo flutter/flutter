@@ -24,10 +24,10 @@ import 'gradle.dart';
 class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackage {
   AndroidApk({
     required String id,
-    required this.file,
+    required this.applicationPackage,
     required this.versionCode,
     required this.launchActivity,
-  }) : assert(file != null),
+  }) : assert(applicationPackage != null),
        assert(launchActivity != null),
        super(id: id);
 
@@ -80,17 +80,14 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
 
     return AndroidApk(
       id: packageName,
-      file: apk,
+      applicationPackage: apk,
       versionCode: data.versionCode == null ? null : int.tryParse(data.versionCode!),
       launchActivity: '${data.packageName}/${data.launchableActivityName}',
     );
   }
 
-  /// Path to the actual apk file.
-  final File file;
-
   @override
-  FileSystemEntity get applicationPackage => file;
+  final FileSystemEntity applicationPackage;
 
   /// The path to the activity that should be launched.
   final String launchActivity;
@@ -200,14 +197,14 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
 
     return AndroidApk(
       id: packageId,
-      file: apkFile,
+      applicationPackage: apkFile,
       versionCode: null,
       launchActivity: launchActivity,
     );
   }
 
   @override
-  String get name => file.basename;
+  String get name => applicationPackage.basename;
 }
 
 abstract class _Entry {
