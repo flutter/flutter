@@ -83,6 +83,9 @@ vars = {
   # So by default we will not download prebuilts. This varible is needed in
   # the flutter engine to ensure that Dart gn has access to it as well.
   "checkout_llvm": False,
+
+  # Setup Git hooks by default.
+  "setup_githooks": True,
 }
 
 gclient_gn_args_file = 'src/third_party/dart/build/config/gclient_args.gni'
@@ -718,6 +721,7 @@ hooks = [
   {
     'name': 'Setup githooks',
     'pattern': '.',
+    'condition': 'setup_githooks',
     'action': [
       'python3',
       'src/flutter/tools/githooks/setup.py',
