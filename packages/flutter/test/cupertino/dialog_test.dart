@@ -1074,6 +1074,8 @@ void main() {
     transition = tester.firstWidget(fadeTransitionFinder);
     expect(transition.opacity.value, moreOrLessEquals(1.0, epsilon: 0.001));
 
+    await tester.pumpAndSettle();
+
     await tester.tap(find.text('Delete'));
 
     // Exit animation, look at reverse FadeTransition.
