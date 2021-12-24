@@ -16,7 +16,6 @@ import '../globals.dart' as globals;
 import '../project.dart';
 
 import 'fuchsia_pm.dart';
-import 'fuchsia_sdk.dart';
 
 Future<void> _timedBuildStep(String name, Future<void> Function() action) async {
   final Stopwatch sw = Stopwatch()..start();
@@ -55,7 +54,7 @@ Future<void> buildFuchsia({
   }
 
   await _timedBuildStep('fuchsia-kernel-compile',
-    () => fuchsiaSdk!.fuchsiaKernelCompiler.build(
+    () => globals.fuchsiaSdk!.fuchsiaKernelCompiler.build(
       fuchsiaProject: fuchsiaProject, target: targetPath, buildInfo: buildInfo));
 
   if (buildInfo.usesAot) {
@@ -214,7 +213,7 @@ Future<void> _buildPackage(
   manifestFile.writeAsStringSync('meta/package=$pkgDir/meta/package\n',
       mode: FileMode.append);
 
-  final FuchsiaPM? fuchsiaPM = fuchsiaSdk?.fuchsiaPM;
+  final FuchsiaPM? fuchsiaPM = globals.fuchsiaSdk?.fuchsiaPM;
   if (fuchsiaPM == null) {
     return;
   }
