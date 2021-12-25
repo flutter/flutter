@@ -15,7 +15,7 @@
 version: 1
 transforms:
   # Changes made in
-  - title: "Remove 'useDeleteButtonTooltip'"
+  - title: "Migrate 'useDeleteButtonTooltip' to 'deleteButtonTooltipMessage'"
     date: 2021-12-24
     element:
       uris: [ 'material.dart' ]
@@ -40,7 +40,7 @@ transforms:
         value: 'arguments[deleteButtonTooltipMessage]'
 
   # Changes made in
-  - title: "Remove 'useDeleteButtonTooltip'"
+  - title: "Migrate 'useDeleteButtonTooltip' to 'deleteButtonTooltipMessage'"
     date: 2021-12-24
     element:
       uris: [ 'material.dart' ]
@@ -65,7 +65,7 @@ transforms:
         value: 'arguments[deleteButtonTooltipMessage]'
 
   # Changes made in
-  - title: "Remove 'useDeleteButtonTooltip'"
+  - title: "Migrate 'useDeleteButtonTooltip' to 'deleteButtonTooltipMessage'"
     date: 2021-12-24
     element:
       uris: [ 'material.dart' ]

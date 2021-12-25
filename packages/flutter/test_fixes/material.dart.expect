@@ -511,12 +511,14 @@ void main() {
   chip = Chip(deleteButtonTooltipMessage: 'Delete Tooltip');
   chip.deleteButtonTooltipMessage;
 
+  // Changes made in
   InputChip inputChip = InputChip();
   inputChip = InputChip(deleteButtonTooltipMessage: '');
   inputChip = InputChip();
   inputChip = InputChip(deleteButtonTooltipMessage: 'Delete Tooltip');
   inputChip.deleteButtonTooltipMessage;
 
+  // Changes made in
   RawChip rawChip = Rawchip();
   rawChip = RawChip(deleteButtonTooltipMessage: '');
   rawChip = RawChip();

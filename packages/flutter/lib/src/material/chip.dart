@@ -237,23 +237,23 @@ abstract class DeletableChipAttributes {
   /// non-null.
   Color? get deleteIconColor;
 
+  /// The message to be used for the chip's delete button tooltip.
+  ///
+  /// If empty, the tooltip of the delete button will be disabled.
+  ///
+  /// If null, the default [MaterialLocalizations.deleteButtonTooltip] will be
+  /// used.
+  String? get deleteButtonTooltipMessage;
+
   /// Whether to use a tooltip on the chip's delete button showing the
   /// [deleteButtonTooltipMessage].
   ///
-  /// Must not be null. Defaults to true.
+  /// Defaults to true.
   @Deprecated(
     'Set deleteButtonTooltipMessage of this Chip as an empty string instead. '
     'This feature was deprecated after'
   )
   bool get useDeleteButtonTooltip;
-
-  /// The message to be used for the chip's delete button tooltip.
-  ///
-  /// If empty, the delete button tooltip of the chip will be disabled.
-  ///
-  /// If null, the default [MaterialLocalizations.deleteButtonTooltip] will be
-  /// used.
-  String? get deleteButtonTooltipMessage;
 }
 
 /// An interface for material design chips that can have check marks.

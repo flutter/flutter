@@ -198,8 +198,9 @@ Widget _chipWithOptionalDeleteButton({
   Key? labelKey,
   required bool deletable,
   TextDirection textDirection = TextDirection.ltr,
+  bool useDeleteButtonTooltip = true,
   String? chipTooltip,
-  String? deleteButtonTooltip,
+  String? deleteButtonTooltipMessage,
   VoidCallback? onPressed = _doNothing,
 }) {
   return _wrapForChip(
@@ -211,7 +212,8 @@ Widget _chipWithOptionalDeleteButton({
           onPressed: onPressed,
           onDeleted: deletable ? _doNothing : null,
           deleteIcon: Icon(Icons.close, key: deleteButtonKey),
-          deleteButtonTooltipMessage: deleteButtonTooltip,
+          useDeleteButtonTooltip: useDeleteButtonTooltip,
+          deleteButtonTooltipMessage: deleteButtonTooltipMessage,
           label: Text(
             deletable
               ? 'Chip with Delete Button'
@@ -3494,11 +3496,11 @@ void main() {
     );
   });
 
-  testWidgets('Chip delete button tooltip can be disabled', (WidgetTester tester) async {
+  testWidgets('Chip delete button tooltip can be disabled using useDeleteButtonTooltip', (WidgetTester tester) async {
     await tester.pumpWidget(
       _chipWithOptionalDeleteButton(
         deletable: true,
-        deleteButtonTooltip: '',
+        useDeleteButtonTooltip: false,
       ),
     );
 
@@ -3519,13 +3521,38 @@ void main() {
     await tapGesture.up();
   });
 
+  testWidgets('Chip delete button tooltip is disabled if deleteButtonTooltipMessage is empty', (WidgetTester tester) async {
+    final UniqueKey deleteButtonKey = UniqueKey();
+    await tester.pumpWidget(
+      _chipWithOptionalDeleteButton(
+        deleteButtonKey: deleteButtonKey,
+        deletable: true,
+        deleteButtonTooltipMessage: '',
+      ),
+    );
+
+    // Hover over the delete icon of the chip
+    final Offset centerOfDeleteButton = tester.getCenter(find.byKey(deleteButtonKey));
+    final TestGesture hoverGesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await hoverGesture.moveTo(centerOfDeleteButton);
+    addTearDown(hoverGesture.removePointer);
+
+    await tester.pump();
+
+    // Wait for some more time while hovering over the delete button
+    await tester.pumpAndSettle();
+
+    // There should be no delete button tooltip
+    expect(findTooltipContainer(''), findsNothing);
+  });
+
   testWidgets('Disabling delete button tooltip does not disable chip tooltip', (WidgetTester tester) async {
     final UniqueKey deleteButtonKey = UniqueKey();
     await tester.pumpWidget(
       _chipWithOptionalDeleteButton(
         deleteButtonKey: deleteButtonKey,
         deletable: true,
-        deleteButtonTooltip: '',
+        deleteButtonTooltipMessage: '',
         chipTooltip: 'Chip Tooltip',
       ),
     );
@@ -3543,12 +3570,12 @@ void main() {
     await tester.pumpAndSettle();
 
     // There should be no delete tooltip
-    expect(findTooltipContainer('Delete'), findsNothing);
+    expect(findTooltipContainer(''), findsNothing);
     // There should be a chip tooltip, however.
     expect(findTooltipContainer('Chip Tooltip'), findsOneWidget);
   });
 
-  testWidgets('Setting delete button tooltip also allows Chip tooltip', (WidgetTester tester) async {
+  testWidgets('Triggering delete button tooltip does not trigger Chip tooltip', (WidgetTester tester) async {
     final UniqueKey deleteButtonKey = UniqueKey();
     await tester.pumpWidget(
       _chipWithOptionalDeleteButton(
