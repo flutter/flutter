@@ -4,7 +4,7 @@
 
 import 'dart:developer';
 import 'dart:io' show Platform;
-import 'dart:ui' as ui show Scene, SceneBuilder, FlutterView;
+import 'dart:ui' as ui show Scene, SceneBuilder, FlutterView, Application;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -70,6 +70,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     required ViewConfiguration configuration,
     required ui.FlutterView window,
   }) : assert(configuration != null),
+       _applicationId = ui.Application.current.id,
        _configuration = configuration,
        _window = window {
     this.child = child;
@@ -97,6 +98,8 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   }
 
   final ui.FlutterView _window;
+
+  final Object _applicationId;
 
   /// Whether Flutter should automatically compute the desired system UI.
   ///
@@ -224,7 +227,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
       Timeline.startSync('COMPOSITING', arguments: timelineArgumentsIndicatingLandmarkEvent);
     }
     try {
-      final ui.SceneBuilder builder = ui.SceneBuilder(applicationId : _window.platformDispatcher.applicationId);
+      final ui.SceneBuilder builder = ui.SceneBuilder(_applicationId);
       final ui.Scene scene = layer!.buildScene(builder);
       if (automaticSystemUiAdjustment)
         _updateSystemChrome();
