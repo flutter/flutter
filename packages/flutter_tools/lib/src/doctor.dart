@@ -372,11 +372,6 @@ class Doctor {
       _logger.printStatus('');
     }
 
-    if(verbose) {
-      final String? path = globals.platform.environment['PATH'];
-      _logger.printStatus('🔨 PATH: $path\n');
-    }
-
     if (issues > 0) {
       _logger.printStatus('${showColor ? globals.terminal.color('!', TerminalColor.yellow) : '!'}'
         ' Doctor found issues in $issues categor${issues > 1 ? "ies" : "y"}.', hangingIndent: 2);
@@ -463,6 +458,7 @@ class FlutterValidator extends DoctorValidator {
       messages.add(ValidationMessage(_userMessages.engineRevision(version.engineRevisionShort)));
       messages.add(ValidationMessage(_userMessages.dartRevision(version.dartSdkVersion)));
       messages.add(ValidationMessage(_userMessages.devToolsVersion(_devToolsVersion())));
+      messages.add(ValidationMessage(_userMessages.userPath(_platform.environment['PATH'])));
       final String? pubUrl = _platform.environment['PUB_HOSTED_URL'];
       if (pubUrl != null) {
         messages.add(ValidationMessage(_userMessages.pubMirrorURL(pubUrl)));
