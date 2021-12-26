@@ -25,6 +25,19 @@ class MyApp extends StatelessWidget {
     return AnimatedBuilder(
       animation: settingsController,
       builder: (BuildContext context, Widget? child) {
+        // Define a PageTransitionsTheme and provide it to an app's theme to
+        // override the default page transition animations that are used
+        // on each platform to match native behavior. In this case, using a
+        // ZoomPageTransitionsBuilder will make animations on Android devices
+        // match the default animations seen on Android 10 and above.
+        const pageTransitionsTheme = PageTransitionsTheme(
+          builders: {
+            TargetPlatform.android: ZoomPageTransitionsBuilder(),
+            TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+            TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
+          },
+        );
+
         return MaterialApp(
           // Providing a restorationScopeId allows the Navigator built by the
           // MaterialApp to restore the navigation stack when a user leaves and
@@ -56,8 +69,13 @@ class MyApp extends StatelessWidget {
           // Define a light and dark color theme. Then, read the user's
           // preferred ThemeMode (light, dark, or system default) from the
           // SettingsController to display the correct theme.
-          theme: ThemeData(),
-          darkTheme: ThemeData.dark(),
+          theme: ThemeData(
+            pageTransitionsTheme: pageTransitionsTheme,
+          ),
+          darkTheme: ThemeData(
+            brightness: Brightness.dark,
+            pageTransitionsTheme: pageTransitionsTheme,
+          ),
           themeMode: settingsController.themeMode,
 
           // Define a function to handle named routes in order to support
