@@ -37,7 +37,7 @@ void main() {
     processManager = FakeProcessManager.empty();
     logger = BufferLogger.test();
     artifacts = Artifacts.test();
-    fileSystem = MemoryFileSystem.test(style: FileSystemStyle.posix);
+    fileSystem = MemoryFileSystem.test();
     androidEnvironment = Environment.test(
       fileSystem.currentDirectory,
       defines: <String, String>{

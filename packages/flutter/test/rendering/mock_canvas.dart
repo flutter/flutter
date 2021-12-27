@@ -1399,8 +1399,7 @@ class _SomethingPaintPredicate extends _PaintPredicate {
       currentCall = call.current;
       if (!currentCall.invocation.isMethod)
         throw 'It called $currentCall, which was not a method, when the paint pattern expected a method call';
-      call.moveNext();
-    } while (!_runPredicate(currentCall.invocation.memberName, currentCall.invocation.positionalArguments));
+    } while (call.moveNext() && !_runPredicate(currentCall.invocation.memberName, currentCall.invocation.positionalArguments));
   }
 
   bool _runPredicate(Symbol methodName, List<dynamic> arguments) {

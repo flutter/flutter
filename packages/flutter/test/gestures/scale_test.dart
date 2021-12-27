@@ -32,7 +32,7 @@ void main() {
       updatedHorizontalScale = details.horizontalScale;
       updatedVerticalScale = details.verticalScale;
       updatedFocalPoint = details.focalPoint;
-      updatedDelta = details.delta;
+      updatedDelta = details.focalPointDelta;
     };
 
     bool didEndScale = false;
@@ -45,7 +45,7 @@ void main() {
       didTap = true;
     };
 
-    final TestPointer pointer1 = TestPointer(1);
+    final TestPointer pointer1 = TestPointer();
 
     final PointerDownEvent down = pointer1.down(Offset.zero);
     scale.addPointer(down);
@@ -118,7 +118,7 @@ void main() {
     expect(updatedScale, 0.5);
     expect(updatedHorizontalScale, 0.5);
     expect(updatedVerticalScale, 0.5);
-    expect(updatedDelta, const Offset(2.5, 2.5));
+    expect(updatedDelta, const Offset(7.5, 7.5));
     expect(didTap, isFalse);
 
     // Horizontal scaling
@@ -130,7 +130,7 @@ void main() {
     tester.route(pointer2.move(const Offset(10.0, 10.0)));
     expect(updatedHorizontalScale, 1.0);
     expect(updatedVerticalScale, 2.0);
-    expect(updatedDelta, const Offset(0.0, -5.0));
+    expect(updatedDelta, const Offset(5.0, -5.0));
     tester.route(pointer2.move(const Offset(15.0, 25.0)));
     updatedFocalPoint = null;
     updatedScale = null;
@@ -173,7 +173,8 @@ void main() {
     updatedFocalPoint = null;
     expect(updatedScale, 1.0);
     updatedScale = null;
-    expect(updatedDelta, Offset.zero);
+    expect(updatedDelta!.dx, closeTo(-13.3, 0.1));
+    expect(updatedDelta!.dy, closeTo(-13.3, 0.1));
     updatedDelta = null;
     expect(didEndScale, isFalse);
     expect(didTap, isFalse);
@@ -204,12 +205,14 @@ void main() {
     updatedFocalPoint = null;
     expect(updatedScale, 2.0);
     updatedScale = null;
+    expect(updatedDelta, const Offset(10.0, 10.0));
+    updatedDelta = null;
     tester.route(pointer3.move(const Offset(10.0, 20.0)));
     expect(updatedFocalPoint, const Offset(15.0, 25.0));
     updatedFocalPoint = null;
     expect(updatedScale, 2.0);
     updatedScale = null;
-    expect(updatedDelta, const Offset(-2.5, -2.5));
+    expect(updatedDelta, const Offset(-10.0, -10.0));
     updatedDelta = null;
 
     tester.route(pointer2.up());
@@ -299,7 +302,7 @@ void main() {
       didEndScale = true;
     };
 
-    final TestPointer touchPointer = TestPointer(1, PointerDeviceKind.touch);
+    final TestPointer touchPointer = TestPointer();
 
     final PointerDownEvent down = touchPointer.down(Offset.zero);
     scale.addPointer(down);
@@ -354,7 +357,7 @@ void main() {
     drag.onStart = (DragStartDetails details) { log.add('drag-start'); };
     drag.onEnd = (DragEndDetails details) { log.add('drag-end'); };
 
-    final TestPointer pointer1 = TestPointer(1);
+    final TestPointer pointer1 = TestPointer();
 
     final PointerDownEvent down = pointer1.down(const Offset(10.0, 10.0));
     scale.addPointer(down);
@@ -439,7 +442,7 @@ void main() {
     scale.onUpdate = (ScaleUpdateDetails details) {
       updatedRotation = details.rotation;
       updatedFocalPoint = details.focalPoint;
-      updatedDelta = details.delta;
+      updatedDelta = details.focalPointDelta;
     };
 
     bool didEndScale = false;
@@ -452,7 +455,7 @@ void main() {
       didTap = true;
     };
 
-    final TestPointer pointer1 = TestPointer(1);
+    final TestPointer pointer1 = TestPointer();
 
     final PointerDownEvent down = pointer1.down(Offset.zero);
     scale.addPointer(down);
@@ -512,7 +515,7 @@ void main() {
     tester.route(pointer2.move(const Offset(0.0, 10.0)));
     expect(updatedFocalPoint, const Offset(10.0, 20.0));
     updatedFocalPoint = null;
-    expect(updatedDelta, const Offset(-15.0, -15.0));
+    expect(updatedDelta, const Offset(-20.0, -20.0));
     updatedDelta = null;
     expect(updatedRotation, math.pi);
     updatedRotation = null;
@@ -554,7 +557,8 @@ void main() {
     expect(didStartScale, isFalse);
     expect(updatedFocalPoint, const Offset(20.0, 30.0));
     updatedFocalPoint = null;
-    expect(updatedDelta, const Offset(5.0, 5.0));
+    expect(updatedDelta!.dx, closeTo(-13.3, 0.1));
+    expect(updatedDelta!.dy, closeTo(-13.3, 0.1));
     updatedDelta = null;
     expect(updatedRotation, 0.0);
     updatedRotation = null;
@@ -585,14 +589,14 @@ void main() {
     tester.route(pointer3.move(const Offset(30.0, 40.0)));
     expect(updatedFocalPoint, const Offset(25.0, 35.0));
     updatedFocalPoint = null;
-    expect(updatedDelta, const Offset(7.5, 7.5));
+    expect(updatedDelta, const Offset(10.0, 10.0));
     updatedDelta = null;
     expect(updatedRotation, - math.pi);
     updatedRotation = null;
     tester.route(pointer3.move(const Offset(10.0, 20.0)));
     expect(updatedFocalPoint, const Offset(15.0, 25.0));
     updatedFocalPoint = null;
-    expect(updatedDelta, const Offset(-2.5, -2.5));
+    expect(updatedDelta, const Offset(-10.0, -10.0));
     updatedDelta = null;
     expect(updatedRotation, 0.0);
     updatedRotation = null;
@@ -629,7 +633,7 @@ void main() {
       updatedRotation = details.rotation;
     };
 
-    final TestPointer pointer1 = TestPointer(1);
+    final TestPointer pointer1 = TestPointer();
     final PointerDownEvent down = pointer1.down(Offset.zero);
     scale.addPointer(down);
     tester.closeArena(1);
@@ -660,7 +664,7 @@ void main() {
     int pointerCountOfEnd = 0;
     scale.onEnd = (ScaleEndDetails details) => pointerCountOfEnd = details.pointerCount;
 
-    final TestPointer pointer1 = TestPointer(1);
+    final TestPointer pointer1 = TestPointer();
     final PointerDownEvent down = pointer1.down(Offset.zero);
     scale.addPointer(down);
     tester.closeArena(1);

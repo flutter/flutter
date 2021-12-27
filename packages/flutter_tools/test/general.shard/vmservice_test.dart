@@ -697,7 +697,7 @@ void main() {
           args: <String, Object>{
             'streamId': 'Isolate',
           },
-          // Stream already subscribed - https://github.com/dart-lang/sdk/blob/master/runtime/vm/service/service.md#streamlisten
+          // Stream already subscribed - https://github.com/dart-lang/sdk/blob/main/runtime/vm/service/service.md#streamlisten
           errorCode: 103,
         ),
         listViewsRequest,
@@ -835,6 +835,9 @@ class MockVMService extends Fake implements vm_service.VmService {
   }
 }
 
+// Unfortunately Device, despite not being immutable, has an `operator ==`.
+// Until we fix that, we have to also ignore related lints here.
+// ignore: avoid_implementing_value_types
 class FakeDevice extends Fake implements Device { }
 
 class FakeFlutterVersion extends Fake implements FlutterVersion {

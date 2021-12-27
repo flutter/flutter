@@ -24,7 +24,7 @@ void main() {
     binding.handleDrawFrame();
 
     await expectLater(completer.future, completes);
-  }, skip: !kIsWeb);
+  }, skip: !kIsWeb); // [intended] the test is only makes sense on the web.
 }
 
 class TestRenderBinding extends BindingBase

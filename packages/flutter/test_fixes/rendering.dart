@@ -9,11 +9,13 @@ void main() {
   RenderStack renderStack = RenderStack();
   renderStack = RenderStack(overflow: Overflow.visible);
   renderStack = RenderStack(overflow: Overflow.clip);
+  renderStack = RenderStack(error: '');
   renderStack.overflow;
 
   // Changes made in https://flutter.dev/docs/release/breaking-changes/clip-behavior
   RenderListWheelViewport renderListWheelViewport = RenderListWheelViewport();
   renderListWheelViewport = RenderListWheelViewport(clipToSize: true);
   renderListWheelViewport = RenderListWheelViewport(clipToSize: false);
+  renderListWheelViewport = RenderListWheelViewport(error: '');
   renderListWheelViewport.clipToSize;
 }

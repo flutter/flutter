@@ -40,17 +40,13 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     _init(version: version);
   }
 
-  factory AndroidStudio.fromMacOSBundle(String bundlePath) {
-    String studioPath = globals.fs.path.join(bundlePath, 'Contents');
-    String plistFile = globals.fs.path.join(studioPath, 'Info.plist');
-    Map<String, dynamic> plistValues = globals.plistParser.parseFile(plistFile);
-    // As AndroidStudio managed by JetBrainsToolbox could have a wrapper pointing to the real Android Studio.
-    // Check if we've found a JetBrainsToolbox wrapper and deal with it properly.
-    final String? jetBrainsToolboxAppBundlePath = plistValues['JetBrainsToolboxApp'] as String?;
-    if (jetBrainsToolboxAppBundlePath != null) {
-      studioPath = globals.fs.path.join(jetBrainsToolboxAppBundlePath, 'Contents');
-      plistFile = globals.fs.path.join(studioPath, 'Info.plist');
-      plistValues = globals.plistParser.parseFile(plistFile);
+  static AndroidStudio? fromMacOSBundle(String bundlePath) {
+    final String studioPath = globals.fs.path.join(bundlePath, 'Contents');
+    final String plistFile = globals.fs.path.join(studioPath, 'Info.plist');
+    final Map<String, dynamic> plistValues = globals.plistParser.parseFile(plistFile);
+    // If we've found a JetBrainsToolbox wrapper, ignore it.
+    if (plistValues.containsKey('JetBrainsToolboxApp')) {
+      return null;
     }
 
     final String versionString = plistValues[PlistParser.kCFBundleShortVersionStringKey] as String;
@@ -317,7 +313,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     }
 
     return candidatePaths
-        .map<AndroidStudio>((FileSystemEntity e) => AndroidStudio.fromMacOSBundle(e.path))
+        .map<AndroidStudio?>((FileSystemEntity e) => AndroidStudio.fromMacOSBundle(e.path))
         .whereType<AndroidStudio>()
         .toList();
   }

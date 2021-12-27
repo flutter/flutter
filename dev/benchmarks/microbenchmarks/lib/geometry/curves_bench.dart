@@ -48,7 +48,7 @@ void main() {
     Offset(0.70, 0.04),
     Offset(0.78, 0.98),
     Offset(0.88, -0.00),
-  ], tension: 0.00);
+  ]);
   _testCurve(
     catmullRomCurve,
     name: 'catmullrom_transform_iteration',

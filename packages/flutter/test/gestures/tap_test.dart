@@ -2,12 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(gspencergoog): Remove this tag once this test's state leaks/test
-// dependencies have been fixed.
-// https://github.com/flutter/flutter/issues/85160
-// Fails with "flutter test --test-randomize-ordering-seed=1000"
-@Tags(<String>['no-shuffle'])
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -838,11 +832,11 @@ void main() {
     });
 
     tearDown(() {
-      recognized.clear();
       primary.dispose();
       primary2.dispose();
       secondary.dispose();
       tertiary.dispose();
+      recognized.clear();
     });
 
     testGesture('A primary tap recognizer does not form competition with a secondary tap recognizer', (GestureTester tester) {
@@ -1026,7 +1020,7 @@ void main() {
     final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer()
       ..onStart = (_) {};
 
-    final TestPointer pointer1 = TestPointer(1);
+    final TestPointer pointer1 = TestPointer();
 
     final PointerDownEvent down = pointer1.down(Offset.zero);
     drag.addPointer(down);

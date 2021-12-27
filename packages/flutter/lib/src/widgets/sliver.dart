@@ -204,6 +204,7 @@ abstract class SliverChildDelegate {
       if (children != null)
         description.add('estimated child count: $children');
     } catch (e) {
+      // The exception is forwarded to widget inspector.
       description.add('estimated child count: EXCEPTION (${e.runtimeType})');
     }
   }
@@ -752,7 +753,7 @@ class SliverChildListDelegate extends SliverChildDelegate {
 ///
 /// * [KeepAlive], which marks whether its child widget should be kept alive.
 /// * [SliverChildBuilderDelegate] and [SliverChildListDelegate], slivers
-///    which make usr of the keep alive functionality through the
+///    which make use of the keep alive functionality through the
 ///    `addAutomaticKeepAlives` property.
 /// * [SliverGrid] and [SliverList], two sliver widgets that are commonly
 ///    wrapped with [KeepAlive] widgets to preserve their sliver child subtrees.

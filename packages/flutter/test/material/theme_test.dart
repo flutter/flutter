@@ -694,6 +694,7 @@ class _TestState extends State<Test> {
 /// This class exists only to make sure that we test all the properties of the
 /// [TextStyle] class. If a property is added/removed/renamed, the analyzer will
 /// complain that this class has incorrect overrides.
+// ignore: avoid_implementing_value_types
 class _TextStyleProxy implements TextStyle {
   _TextStyleProxy(this._delegate);
 
@@ -790,6 +791,7 @@ class _TextStyleProxy implements TextStyle {
     List<ui.Shadow>? shadows,
     List<ui.FontFeature>? fontFeatures,
     TextOverflow? overflow,
+    String? package,
   }) {
     throw UnimplementedError();
   }
@@ -825,6 +827,7 @@ class _TextStyleProxy implements TextStyle {
     double? decorationThickness,
     String? debugLabel,
     TextOverflow? overflow,
+    String? package,
   }) {
     throw UnimplementedError();
   }

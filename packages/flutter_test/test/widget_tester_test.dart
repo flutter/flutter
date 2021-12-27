@@ -40,7 +40,7 @@ void main() {
 
     testWidgets('respects the skip flag', (WidgetTester tester) async {
       final Completer<void> completer = Completer<void>();
-      final Future<void> future = expectLater(null, FakeMatcher(completer), skip: 'testing skip');
+      final Future<void> future = expectLater(null, FakeMatcher(completer), skip: 'testing skip'); // [intended] API testing
       bool completed = false;
       future.then<void>((_) {
         completed = true;
@@ -55,7 +55,7 @@ void main() {
     testWidgets('should be skipped', (WidgetTester tester) async {
       expect(false, true);
     });
-  }, skip: true);
+  }, skip: true); // [intended] API testing
 
   group('findsOneWidget', () {
     testWidgets('finds exactly one widget', (WidgetTester tester) async {
@@ -508,11 +508,9 @@ void main() {
           // Typically PointerAddedEvent is not used in testers, but for records
           // captured on a device it is usually what start a gesture.
           PointerAddedEvent(
-            timeStamp: Duration.zero,
             position: location,
           ),
           PointerDownEvent(
-            timeStamp: Duration.zero,
             position: location,
             buttons: kSecondaryMouseButton,
             pointer: 1,

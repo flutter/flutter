@@ -11,7 +11,7 @@ import 'debug.dart';
 export 'dart:ui' show AccessibilityFeatures;
 
 /// The glue between the semantics layer and the Flutter engine.
-// TODO(jonahwilliams): move the remaining semantic related bindings here.
+// TODO(zanderso): move the remaining semantic related bindings here.
 mixin SemanticsBinding on BindingBase {
   /// The current [SemanticsBinding], if one has been created.
   static SemanticsBinding? get instance => _instance;

@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
+
 import 'dart:async';
 import 'dart:ui' as ui;
 
@@ -237,7 +241,6 @@ void main() {
             return Material(
               child: Center(
                 child: Switch(
-                    dragStartBehavior: DragStartBehavior.start,
                     value: value,
                     onChanged: (bool newValue) {
                       setState(() {
@@ -1596,7 +1599,7 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(buildSwitch(active: false, useOverlay: false));
+    await tester.pumpWidget(buildSwitch(useOverlay: false));
     await tester.press(find.byType(Switch));
     await tester.pumpAndSettle();
 
@@ -1626,7 +1629,7 @@ void main() {
       reason: 'Default active pressed Switch should have overlay color from thumbColor',
     );
 
-    await tester.pumpWidget(buildSwitch(active: false));
+    await tester.pumpWidget(buildSwitch());
     await tester.press(find.byType(Switch));
     await tester.pumpAndSettle();
 

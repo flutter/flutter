@@ -54,11 +54,11 @@ enum MaterialType {
 ///
 ///  * [MaterialType]
 ///  * [Material]
-final Map<MaterialType, BorderRadius?> kMaterialEdges = <MaterialType, BorderRadius?>{
+const Map<MaterialType, BorderRadius?> kMaterialEdges = <MaterialType, BorderRadius?>{
   MaterialType.canvas: null,
-  MaterialType.card: BorderRadius.circular(2.0),
+  MaterialType.card: BorderRadius.all(Radius.circular(2.0)),
   MaterialType.circle: null,
-  MaterialType.button: BorderRadius.circular(2.0),
+  MaterialType.button: BorderRadius.all(Radius.circular(2.0)),
   MaterialType.transparency: null,
 };
 
@@ -350,7 +350,9 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
         case MaterialType.card:
           color = theme.cardColor;
           break;
-        default:
+        case MaterialType.button:
+        case MaterialType.circle:
+        case MaterialType.transparency:
           break;
       }
     }
@@ -405,7 +407,6 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
         duration: widget.animationDuration,
         shape: BoxShape.rectangle,
         clipBehavior: widget.clipBehavior,
-        borderRadius: BorderRadius.zero,
         elevation: widget.elevation,
         color: ElevationOverlay.applyOverlay(context, backgroundColor!, widget.elevation),
         shadowColor: widget.shadowColor ?? Theme.of(context).shadowColor,

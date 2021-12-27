@@ -42,39 +42,13 @@ import 'theme_data.dart';
 /// To show the [RadioListTile] as disabled, pass null as the [onChanged]
 /// callback.
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold}
-///
+/// {@tool dartpad}
 /// ![RadioListTile sample](https://flutter.github.io/assets-for-api-docs/assets/material/radio_list_tile.png)
 ///
 /// This widget shows a pair of radio buttons that control the `_character`
 /// field. The field is of the type `SingingCharacter`, an enum.
 ///
-/// ```dart preamble
-/// enum SingingCharacter { lafayette, jefferson }
-/// ```
-/// ```dart
-/// SingingCharacter? _character = SingingCharacter.lafayette;
-///
-/// @override
-/// Widget build(BuildContext context) {
-///   return Column(
-///     children: <Widget>[
-///       RadioListTile<SingingCharacter>(
-///         title: const Text('Lafayette'),
-///         value: SingingCharacter.lafayette,
-///         groupValue: _character,
-///         onChanged: (SingingCharacter? value) { setState(() { _character = value; }); },
-///       ),
-///       RadioListTile<SingingCharacter>(
-///         title: const Text('Thomas Jefferson'),
-///         value: SingingCharacter.jefferson,
-///         groupValue: _character,
-///         onChanged: (SingingCharacter? value) { setState(() { _character = value; }); },
-///       ),
-///     ],
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/material/radio_list_tile/radio_list_tile.0.dart **
 /// {@end-tool}
 ///
 /// ## Semantics in RadioListTile
@@ -94,102 +68,14 @@ import 'theme_data.dart';
 /// into one. Therefore, it may be necessary to create a custom radio tile
 /// widget to accommodate similar use cases.
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold}
-///
+/// {@tool dartpad}
 /// ![Radio list tile semantics sample](https://flutter.github.io/assets-for-api-docs/assets/material/radio_list_tile_semantics.png)
 ///
 /// Here is an example of a custom labeled radio widget, called
 /// LinkedLabelRadio, that includes an interactive [RichText] widget that
 /// handles tap gestures.
 ///
-/// ```dart imports
-/// import 'package:flutter/gestures.dart';
-/// ```
-/// ```dart preamble
-/// class LinkedLabelRadio extends StatelessWidget {
-///   const LinkedLabelRadio({
-///     Key? key,
-///     required this.label,
-///     required this.padding,
-///     required this.groupValue,
-///     required this.value,
-///     required this.onChanged,
-///   }) :super(key: key);
-///
-///   final String label;
-///   final EdgeInsets padding;
-///   final bool groupValue;
-///   final bool value;
-///   final Function onChanged;
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return Padding(
-///       padding: padding,
-///       child: Row(
-///         children: <Widget>[
-///           Radio<bool>(
-///             groupValue: groupValue,
-///             value: value,
-///             onChanged: (bool? newValue) {
-///               onChanged(newValue);
-///             }
-///           ),
-///           RichText(
-///             text: TextSpan(
-///               text: label,
-///               style: const TextStyle(
-///                 color: Colors.blueAccent,
-///                 decoration: TextDecoration.underline,
-///               ),
-///               recognizer: TapGestureRecognizer()
-///                 ..onTap = () {
-///                 print('Label has been tapped.');
-///               },
-///             ),
-///           ),
-///         ],
-///       ),
-///     );
-///   }
-/// }
-/// ```
-/// ```dart
-/// bool _isRadioSelected = false;
-///
-/// @override
-/// Widget build(BuildContext context) {
-///   return Scaffold(
-///     body: Column(
-///       mainAxisAlignment: MainAxisAlignment.center,
-///       children: <Widget>[
-///         LinkedLabelRadio(
-///           label: 'First tappable label text',
-///           padding: const EdgeInsets.symmetric(horizontal: 5.0),
-///           value: true,
-///           groupValue: _isRadioSelected,
-///           onChanged: (bool newValue) {
-///             setState(() {
-///               _isRadioSelected = newValue;
-///             });
-///           },
-///         ),
-///         LinkedLabelRadio(
-///           label: 'Second tappable label text',
-///           padding: const EdgeInsets.symmetric(horizontal: 5.0),
-///           value: false,
-///           groupValue: _isRadioSelected,
-///           onChanged: (bool newValue) {
-///             setState(() {
-///               _isRadioSelected = newValue;
-///             });
-///           },
-///         ),
-///       ],
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/material/radio_list_tile/radio_list_tile.1.dart **
 /// {@end-tool}
 ///
 /// ## RadioListTile isn't exactly what I want
@@ -199,93 +85,13 @@ import 'theme_data.dart';
 /// combining [Radio] with other widgets, such as [Text], [Padding] and
 /// [InkWell].
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold}
-///
+/// {@tool dartpad}
 /// ![Custom radio list tile sample](https://flutter.github.io/assets-for-api-docs/assets/material/radio_list_tile_custom.png)
 ///
 /// Here is an example of a custom LabeledRadio widget, but you can easily
 /// make your own configurable widget.
 ///
-/// ```dart preamble
-/// class LabeledRadio extends StatelessWidget {
-///   const LabeledRadio({
-///     Key? key,
-///     required this.label,
-///     required this.padding,
-///     required this.groupValue,
-///     required this.value,
-///     required this.onChanged,
-///   }) : super(key: key);
-///
-///   final String label;
-///   final EdgeInsets padding;
-///   final bool groupValue;
-///   final bool value;
-///   final Function onChanged;
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return InkWell(
-///       onTap: () {
-///         if (value != groupValue) {
-///           onChanged(value);
-///         }
-///       },
-///       child: Padding(
-///         padding: padding,
-///         child: Row(
-///           children: <Widget>[
-///             Radio<bool>(
-///               groupValue: groupValue,
-///               value: value,
-///               onChanged: (bool? newValue) {
-///                 onChanged(newValue);
-///               },
-///             ),
-///             Text(label),
-///           ],
-///         ),
-///       ),
-///     );
-///   }
-/// }
-/// ```
-/// ```dart
-/// bool _isRadioSelected = false;
-///
-/// @override
-/// Widget build(BuildContext context) {
-///   return Scaffold(
-///     body: Column(
-///       mainAxisAlignment: MainAxisAlignment.center,
-///       children: <LabeledRadio>[
-///         LabeledRadio(
-///           label: 'This is the first label text',
-///           padding: const EdgeInsets.symmetric(horizontal: 5.0),
-///           value: true,
-///           groupValue: _isRadioSelected,
-///           onChanged: (bool newValue) {
-///             setState(() {
-///               _isRadioSelected = newValue;
-///             });
-///           },
-///         ),
-///         LabeledRadio(
-///           label: 'This is the second label text',
-///           padding: const EdgeInsets.symmetric(horizontal: 5.0),
-///           value: false,
-///           groupValue: _isRadioSelected,
-///           onChanged: (bool newValue) {
-///             setState(() {
-///               _isRadioSelected = newValue;
-///             });
-///           },
-///         ),
-///       ],
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/material/radio_list_tile/radio_list_tile.2.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -328,6 +134,9 @@ class RadioListTile<T> extends StatelessWidget {
     this.shape,
     this.tileColor,
     this.selectedTileColor,
+    this.visualDensity,
+    this.focusNode,
+    this.enableFeedback,
   }) : assert(toggleable != null),
        assert(isThreeLine != null),
        assert(!isThreeLine || subtitle != null),
@@ -391,42 +200,11 @@ class RadioListTile<T> extends StatelessWidget {
   ///
   /// The default is false.
   ///
-  /// {@tool dartpad --template=stateful_widget_scaffold}
+  /// {@tool dartpad}
   /// This example shows how to enable deselecting a radio button by setting the
   /// [toggleable] attribute.
   ///
-  /// ```dart
-  /// int? groupValue;
-  /// static const List<String> selections = <String>[
-  ///   'Hercules Mulligan',
-  ///   'Eliza Hamilton',
-  ///   'Philip Schuyler',
-  ///   'Maria Reynolds',
-  ///   'Samuel Seabury',
-  /// ];
-  ///
-  /// @override
-  /// Widget build(BuildContext context) {
-  ///   return Scaffold(
-  ///     body: ListView.builder(
-  ///       itemBuilder: (BuildContext context, int index) {
-  ///         return RadioListTile<int>(
-  ///           value: index,
-  ///           groupValue: groupValue,
-  ///           toggleable: true,
-  ///           title: Text(selections[index]),
-  ///           onChanged: (int? value) {
-  ///             setState(() {
-  ///               groupValue = value;
-  ///             });
-  ///           },
-  ///         );
-  ///       },
-  ///       itemCount: selections.length,
-  ///     ),
-  ///   );
-  /// }
-  /// ```
+  /// ** See code in examples/api/lib/material/radio_list_tile/radio_list_tile.toggleable.0.dart **
   /// {@end-tool}
   final bool toggleable;
 
@@ -458,7 +236,7 @@ class RadioListTile<T> extends StatelessWidget {
 
   /// Whether this list tile is part of a vertically dense list.
   ///
-  /// If this property is null then its value is based on [ListTileTheme.dense].
+  /// If this property is null then its value is based on [ListTileThemeData.dense].
   final bool? dense;
 
   /// Whether to render icons and text in the [activeColor].
@@ -499,6 +277,21 @@ class RadioListTile<T> extends StatelessWidget {
 
   /// If non-null, defines the background color when [RadioListTile.selected] is true.
   final Color? selectedTileColor;
+
+  /// Defines how compact the list tile's layout will be.
+  ///
+  /// {@macro flutter.material.themedata.visualDensity}
+  final VisualDensity? visualDensity;
+
+  /// {@macro flutter.widgets.Focus.focusNode}
+  final FocusNode? focusNode;
+
+  /// {@macro flutter.material.ListTile.enableFeedback}
+  ///
+  /// See also:
+  ///
+  ///  * [Feedback] for providing platform-specific feedback to certain actions.
+  final bool? enableFeedback;
 
   @override
   Widget build(BuildContext context) {
@@ -549,6 +342,9 @@ class RadioListTile<T> extends StatelessWidget {
           selected: selected,
           autofocus: autofocus,
           contentPadding: contentPadding,
+          visualDensity: visualDensity,
+          focusNode: focusNode,
+          enableFeedback: enableFeedback,
         ),
       ),
     );

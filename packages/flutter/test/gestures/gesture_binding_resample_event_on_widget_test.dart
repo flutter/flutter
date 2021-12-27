@@ -38,12 +38,10 @@ void main() {
       data: <ui.PointerData>[
         ui.PointerData(
             change: ui.PointerChange.add,
-            physicalX: 0.0,
             timeStamp: epoch,
         ),
         ui.PointerData(
             change: ui.PointerChange.down,
-            physicalX: 0.0,
             timeStamp: epoch,
         ),
         ui.PointerData(

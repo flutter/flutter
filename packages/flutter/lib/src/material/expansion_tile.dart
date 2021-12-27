@@ -21,7 +21,7 @@ const Duration _kExpand = Duration(milliseconds: 200);
 /// [ExpansionTile] to save and restore its expanded state when it is scrolled
 /// in and out of view.
 ///
-/// This class overrides the [ListTileTheme.iconColor] and [ListTileTheme.textColor]
+/// This class overrides the [ListTileThemeData.iconColor] and [ListTileThemeData.textColor]
 /// theme properties for its [ListTile]. These colors animate between values when
 /// the tile is expanded and collapsed: between [iconColor], [collapsedIconColor] and
 /// between [textColor] and [collapsedTextColor].
@@ -30,51 +30,10 @@ const Duration _kExpand = Duration(milliseconds: 200);
 /// (i.e. the trailing edge). This can be changed using [controlAffinity]. This maps
 /// to the [leading] and [trailing] properties of [ExpansionTile].
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold}
-///
+/// {@tool dartpad}
 /// This example demonstrates different configurations of ExpansionTile.
 ///
-/// ```dart
-/// bool _customTileExpanded = false;
-///
-/// @override
-/// Widget build(BuildContext context) {
-///   return Column(
-///     children: <Widget>[
-///       const ExpansionTile(
-///         title: Text('ExpansionTile 1'),
-///         subtitle: Text('Trailing expansion arrow icon'),
-///         children: <Widget>[
-///           ListTile(title: Text('This is tile number 1')),
-///         ],
-///       ),
-///       ExpansionTile(
-///         title: const Text('ExpansionTile 2'),
-///         subtitle: const Text('Custom expansion arrow icon'),
-///         trailing: Icon(
-///           _customTileExpanded
-///               ? Icons.arrow_drop_down_circle
-///               : Icons.arrow_drop_down,
-///         ),
-///         children: const <Widget>[
-///           ListTile(title: Text('This is tile number 2')),
-///         ],
-///         onExpansionChanged: (bool expanded) {
-///           setState(() => _customTileExpanded = expanded);
-///         },
-///       ),
-///       const ExpansionTile(
-///         title: Text('ExpansionTile 3'),
-///         subtitle: Text('Leading expansion arrow icon'),
-///         controlAffinity: ListTileControlAffinity.leading,
-///         children: <Widget>[
-///           ListTile(title: Text('This is tile number 3')),
-///         ],
-///       ),
-///     ],
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/material/expansion_tile/expansion_tile.0.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -217,23 +176,23 @@ class ExpansionTile extends StatefulWidget {
 
   /// The icon color of tile's expansion arrow icon when the sublist is expanded.
   ///
-  /// Used to override to the [ListTileTheme.iconColor].
+  /// Used to override to the [ListTileThemeData.iconColor].
   final Color? iconColor;
 
   /// The icon color of tile's expansion arrow icon when the sublist is collapsed.
   ///
-  /// Used to override to the [ListTileTheme.iconColor].
+  /// Used to override to the [ListTileThemeData.iconColor].
   final Color? collapsedIconColor;
 
 
   /// The color of the tile's titles when the sublist is expanded.
   ///
-  /// Used to override to the [ListTileTheme.textColor].
+  /// Used to override to the [ListTileThemeData.textColor].
   final Color? textColor;
 
   /// The color of the tile's titles when the sublist is collapsed.
   ///
-  /// Used to override to the [ListTileTheme.textColor].
+  /// Used to override to the [ListTileThemeData.textColor].
   final Color? collapsedTextColor;
 
   /// Typically used to force the expansion arrow icon to the tile's leading or trailing edge.
