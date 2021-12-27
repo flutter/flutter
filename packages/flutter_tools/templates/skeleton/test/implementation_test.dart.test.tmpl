@@ -75,10 +75,6 @@ void main() {
     await tester.pumpAndSettle();
 
     final app = find.byType(MaterialApp).evaluate().single.widget as MaterialApp;
-    // The theme overrides the default page transition builders
-    // with a custom implementation
-    final defaultBuilders = const PageTransitionsTheme().builders;
-    expect(app.theme!.pageTransitionsTheme.builders != defaultBuilders, true);
 
     // The app uses the same PageTransitionsTheme for the light and dark themes
     expect(
@@ -86,11 +82,15 @@ void main() {
       app.darkTheme!.pageTransitionsTheme.builders,
     );
 
-    // The app uses the ZoomPageTransitionsBuilder for TargetPlatform.android
+    // The app overrides the default builder for TargetPlatform.android with
+    // ZoomPageTransitionsBuilder
+    final appBuilders = app.theme!.pageTransitionsTheme.builders;
+    final defaultBuilders = const PageTransitionsTheme().builders;
     expect(
-      app.theme!.pageTransitionsTheme.builders[TargetPlatform.android],
-      isA<ZoomPageTransitionsBuilder>(),
+      appBuilders[TargetPlatform.android] != defaultBuilders[TargetPlatform.android],
+      true,
     );
+    expect(appBuilders[TargetPlatform.android], isA<ZoomPageTransitionsBuilder>());
   });
 }
 
