@@ -712,10 +712,12 @@ void main() {
 
     const Color activeColor = Color(0xff00ff00);
 
-    Widget buildFrame({ Color? activeColor, Color? toggleableActiveColor }) {
+    Widget buildFrame({ Color? activeColor, Color? secondaryColor }) {
       return MaterialApp(
         theme: ThemeData.light().copyWith(
-          toggleableActiveColor: toggleableActiveColor,
+          colorScheme: const ColorScheme.light().copyWith(
+            secondary: secondaryColor,
+          ),
         ),
         home: Scaffold(
           body: Center(
@@ -736,7 +738,7 @@ void main() {
       return tester.renderObject<RenderParagraph>(find.text(text)).text.style?.color;
     }
 
-    await tester.pumpWidget(buildFrame(toggleableActiveColor: activeColor));
+    await tester.pumpWidget(buildFrame(secondaryColor: activeColor));
     expect(textColor('title'), activeColor);
 
     await tester.pumpWidget(buildFrame(activeColor: activeColor));
