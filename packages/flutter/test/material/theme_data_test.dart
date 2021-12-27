@@ -801,7 +801,6 @@ void main() {
       'indicatorColor',
       'hintColor',
       'errorColor',
-      'toggleableActiveColor',
       // TYPOGRAPHY & ICONOGRAPHY
       'typography',
       'textTheme',
@@ -853,6 +852,7 @@ void main() {
       'buttonColor',
       'fixTextFieldOutlineLabel',
       'primaryColorBrightness',
+      'toggleableActiveColor',
     };
 
     final DiagnosticPropertiesBuilder properties = DiagnosticPropertiesBuilder();
