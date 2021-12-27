@@ -2561,8 +2561,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     if (_primaryScrollController != null && _primaryScrollController.hasClients) {
       _primaryScrollController.animateTo(
         0.0,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.linear, // TODO(ianh): Use a more appropriate curve.
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeInOutQuart,
       );
     }
   }
