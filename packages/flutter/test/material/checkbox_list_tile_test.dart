@@ -36,7 +36,7 @@ void main() {
   });
 
   testWidgets('CheckboxListTile checkColor test', (WidgetTester tester) async {
-    const Color checkBoxBorderColor = Color(0xff1e88e5);
+    const Color checkBoxBorderColor = Color(0xff2196f3);
     Color checkBoxCheckColor = const Color(0xffFFFFFF);
 
     Widget buildFrame(Color? color) {
@@ -65,10 +65,14 @@ void main() {
   });
 
   testWidgets('CheckboxListTile activeColor test', (WidgetTester tester) async {
-    Widget buildFrame(Color? themeColor, Color? activeColor) {
+    Widget buildFrame(Color themeColor, Color? activeColor) {
       return wrap(
         child: Theme(
-          data: ThemeData(toggleableActiveColor: themeColor),
+          data: ThemeData(
+            colorScheme: ColorScheme.light(
+              secondary: themeColor,
+            ),
+          ),
           child: CheckboxListTile(
             value: true,
             activeColor: activeColor,
@@ -291,10 +295,12 @@ void main() {
 
     const Color activeColor = Color(0xff00ff00);
 
-    Widget buildFrame({ Color? activeColor, Color? toggleableActiveColor }) {
+    Widget buildFrame({ Color? activeColor, Color? secondaryColor }) {
       return MaterialApp(
         theme: ThemeData.light().copyWith(
-          toggleableActiveColor: toggleableActiveColor,
+          colorScheme: const ColorScheme.light().copyWith(
+            secondary: secondaryColor,
+          ),
         ),
         home: Scaffold(
           body: Center(
@@ -314,7 +320,7 @@ void main() {
       return tester.renderObject<RenderParagraph>(find.text(text)).text.style?.color;
     }
 
-    await tester.pumpWidget(buildFrame(toggleableActiveColor: activeColor));
+    await tester.pumpWidget(buildFrame(secondaryColor: activeColor));
     expect(textColor('title'), activeColor);
 
     await tester.pumpWidget(buildFrame(activeColor: activeColor));
