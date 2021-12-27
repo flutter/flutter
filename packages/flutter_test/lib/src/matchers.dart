@@ -312,6 +312,10 @@ Matcher coversSameAreaAs(Path expectedPath, { required Rect areaToCompare, int s
 /// The [version] is a number that can be used to differentiate historical
 /// golden files. This parameter is optional.
 ///
+/// By default, golden images use a font called 'Ahem' which shows squares
+/// instead of characters. When [useRoboto] is true, the 'Roboto' font is used
+/// so the text is rendered with human-readable characters.
+///
 /// This is an asynchronous matcher, meaning that callers should use
 /// [expectLater] when using this matcher and await the future returned by
 /// [expectLater].
@@ -363,12 +367,11 @@ Matcher coversSameAreaAs(Path expectedPath, { required Rect areaToCompare, int s
 ///    verify that two different code paths create identical images.
 ///  * [flutter_test] for a discussion of test configurations, whereby callers
 ///    may swap out the backend for this matcher.
-AsyncMatcher
-matchesGoldenFile(Object key, {int? version}) {
+AsyncMatcher matchesGoldenFile(Object key, {int? version, bool useRoboto = false,}) {
   if (key is Uri) {
-    return MatchesGoldenFile(key, version);
+    return MatchesGoldenFile(key, version, useRoboto);
   } else if (key is String) {
-    return MatchesGoldenFile.forStringPath(key, version);
+    return MatchesGoldenFile.forStringPath(key, version, useRoboto);
   }
   throw ArgumentError('Unexpected type for golden file: ${key.runtimeType}');
 }

@@ -46,4 +46,10 @@ dependencies:
 dev_dependencies:
   file: 6.1.2
 
+flutter:
+  fonts:
+    - family: Roboto
+      fonts:
+        - asset: fonts/Roboto-Regular.ttf
+
 # PUBSPEC CHECKSUM: 3f6e

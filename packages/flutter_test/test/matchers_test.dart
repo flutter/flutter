@@ -363,6 +363,15 @@ void main() {
         expect(comparator.golden, Uri.parse('foo.png'));
       });
 
+      testWidgets('if comparator succeeds using Roboto', (WidgetTester tester) async {
+        await tester.pumpWidget(boilerplate(const Text('hello')));
+        final Finder finder = find.byType(Text);
+        await expectLater(finder, matchesGoldenFile('foo.png', useRoboto: true,));
+        expect(comparator.invocation, _ComparatorInvocation.compare);
+        expect(comparator.imageBytes, hasLength(greaterThan(0)));
+        expect(comparator.golden, Uri.parse('foo.png'));
+      });
+
       testWidgets('list of integers', (WidgetTester tester) async {
         await expectLater(<int>[1, 2], matchesGoldenFile('foo.png'));
         expect(comparator.invocation, _ComparatorInvocation.compare);
