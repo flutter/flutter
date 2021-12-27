@@ -38,28 +38,13 @@ class MatchesGoldenFile extends AsyncMatcher {
   /// Whether using the 'Roboto' font for golden images or not.
   final bool useRoboto;
 
-  Future<void> _loadRoboto() async {
-    final Iterable<dynamic> manifest = await rootBundle.loadStructuredData<Iterable<dynamic>>(
-      'FontManifest.json',
-      (String manifestJson) async => json.decode(manifestJson) as Iterable<dynamic>,
-    );
-    for (final dynamic font in manifest) {
-      final FontLoader fontLoader = FontLoader('Roboto');
-      final Map<String, dynamic> fontEntry = font as Map<String, dynamic>;
-      for (final Map<String, dynamic> fontType in fontEntry['fonts']) {
-        fontLoader.addFont(rootBundle.load(fontType['asset'] as String));
-      }
-      await fontLoader.load();
-    }
-  }
-
   @override
   Future<String?> matchAsync(dynamic item) async {
     if (item is! Finder) {
       return 'web goldens only supports matching finders.';
     }
     if (useRoboto) {
-      await _loadRoboto();
+      return 'web goldens do not support Roboto font.';
     }
     final Iterable<Element> elements = item.evaluate();
     if (elements.isEmpty) {

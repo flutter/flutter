@@ -2,13 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:path/path.dart' as path;
 import 'package:test_api/src/expect/async_matcher.dart'; // ignore: implementation_imports
 import 'package:test_api/test_api.dart'; // ignore: deprecated_member_use
 
@@ -51,18 +52,21 @@ class MatchesGoldenFile extends AsyncMatcher {
   final bool useRoboto;
 
   Future<void> _loadRoboto() async {
-    final Iterable<dynamic> manifest = await rootBundle.loadStructuredData<Iterable<dynamic>>(
-      'FontManifest.json',
-      (String manifestJson) async => json.decode(manifestJson) as Iterable<dynamic>,
+    final String robotoPath = path.joinAll(<String>[
+      Platform.environment['FLUTTER_ROOT']!,
+      'bin',
+      'cache',
+      'artifacts',
+      'material_fonts',
+      'Roboto-Regular.ttf',
+    ]);
+
+    final File roboto = File(robotoPath);
+    final Future<ByteData> bytes = Future<ByteData>.value(
+      roboto.readAsBytesSync().buffer.asByteData(),
     );
-    for (final dynamic font in manifest) {
-      final FontLoader fontLoader = FontLoader('Roboto');
-      final Map<String, dynamic> fontEntry = font as Map<String, dynamic>;
-      for (final Map<String, dynamic> fontType in fontEntry['fonts']) {
-        fontLoader.addFont(rootBundle.load(fontType['asset'] as String));
-      }
-      await fontLoader.load();
-    }
+
+    await (FontLoader('Roboto')..addFont(bytes)).load();
   }
 
   @override
