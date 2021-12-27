@@ -51,6 +51,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
     usesExtraDartFlagOptions(verboseHelp: verboseHelp);
     addNullSafetyModeOptions(hide: !verboseHelp);
     addEnableExperimentation(hide: !verboseHelp);
+    addBundleSkSLPathOption(hide: !verboseHelp);
 
     argParser
       ..addFlag('debug',
