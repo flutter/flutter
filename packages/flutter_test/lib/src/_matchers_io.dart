@@ -55,11 +55,9 @@ class MatchesGoldenFile extends AsyncMatcher {
       'FontManifest.json',
       (String manifestJson) async => json.decode(manifestJson) as Iterable<dynamic>,
     );
-
     for (final dynamic font in manifest) {
       final FontLoader fontLoader = FontLoader('Roboto');
       final Map<String, dynamic> fontEntry = font as Map<String, dynamic>;
-
       for (final Map<String, dynamic> fontType in fontEntry['fonts']) {
         fontLoader.addFont(rootBundle.load(fontType['asset'] as String));
       }
