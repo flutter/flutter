@@ -15,7 +15,7 @@ dependencies:
   test_api: 0.4.8
 
   # Used by golden file comparator
-  path: 1.8.0
+  path: 1.8.1
 
   # Testing utilities for dealing with async calls and time.
   fake_async: 1.2.0
