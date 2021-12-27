@@ -385,7 +385,6 @@ class CustomDeviceAppSession {
     final ProtocolDiscovery discovery = ProtocolDiscovery.observatory(
       logReader,
       portForwarder: _device._config.usesPortForwarding ? _device.portForwarder : null,
-      hostPort: null, devicePort: null,
       logger: _logger,
       ipv6: ipv6,
     );

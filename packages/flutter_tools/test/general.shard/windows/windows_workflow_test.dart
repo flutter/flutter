@@ -10,7 +10,7 @@ import '../../src/fakes.dart';
 
 void main() {
   final FakePlatform windows = FakePlatform(operatingSystem: 'windows');
-  final FakePlatform notWindows = FakePlatform(operatingSystem: 'linux');
+  final FakePlatform notWindows = FakePlatform();
 
   testWithoutContext('Windows workflow configuration when feature is enabled on Windows host machine', () {
     final WindowsWorkflow windowsWorkflow = WindowsWorkflow(
@@ -27,7 +27,7 @@ void main() {
   testWithoutContext('Windows workflow configuration when feature is disabled on Windows host machine', () {
     final WindowsWorkflow windowsWorkflow = WindowsWorkflow(
       platform: windows,
-      featureFlags: TestFeatureFlags(isWindowsEnabled: false),
+      featureFlags: TestFeatureFlags(),
     );
 
     expect(windowsWorkflow.appliesToHostPlatform, false);
@@ -51,7 +51,7 @@ void main() {
   testWithoutContext('Windows workflow configuration when feature is disabled on non-Windows host machine', () {
     final WindowsWorkflow windowsWorkflow = WindowsWorkflow(
       platform: notWindows,
-      featureFlags: TestFeatureFlags(isWindowsEnabled: false),
+      featureFlags: TestFeatureFlags(),
     );
 
     expect(windowsWorkflow.appliesToHostPlatform, false);

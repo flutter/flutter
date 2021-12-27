@@ -525,7 +525,6 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
       _gestureDetectorKey.currentState!.replaceSemanticsActions(actions);
   }
 
-
   // GESTURE RECOGNITION AND POINTER IGNORING
 
   final GlobalKey<RawGestureDetectorState> _gestureDetectorKey = GlobalKey<RawGestureDetectorState>();
@@ -540,10 +539,10 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
 
   @override
   @protected
-  void setCanDrag(bool canDrag) {
-    if (canDrag == _lastCanDrag && (!canDrag || widget.axis == _lastAxisDirection))
+  void setCanDrag(bool value) {
+    if (value == _lastCanDrag && (!value || widget.axis == _lastAxisDirection))
       return;
-    if (!canDrag) {
+    if (!value) {
       _gestureRecognizers = const <Type, GestureRecognizerFactory>{};
       // Cancel the active hold/drag (if any) because the gesture recognizers
       // will soon be disposed by our RawGestureDetector, and we won't be
@@ -593,7 +592,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
           break;
       }
     }
-    _lastCanDrag = canDrag;
+    _lastCanDrag = value;
     _lastAxisDirection = widget.axis;
     if (_gestureDetectorKey.currentState != null)
       _gestureDetectorKey.currentState!.replaceGestureRecognizers(_gestureRecognizers);
@@ -719,6 +718,15 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     }
   }
 
+  bool _handleScrollMetricsNotification(ScrollMetricsNotification notification) {
+    if (notification.depth == 0) {
+      final RenderObject? scrollSemanticsRenderObject = _scrollSemanticsKey.currentContext?.findRenderObject();
+      if (scrollSemanticsRenderObject != null)
+        scrollSemanticsRenderObject.markNeedsSemanticsUpdate();
+    }
+    return false;
+  }
+
   // DESCRIPTION
 
   @override
@@ -757,12 +765,15 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     );
 
     if (!widget.excludeFromSemantics) {
-      result = _ScrollSemantics(
-        key: _scrollSemanticsKey,
-        position: position,
-        allowImplicitScrolling: _physics!.allowImplicitScrolling,
-        semanticChildCount: widget.semanticChildCount,
-        child: result,
+      result = NotificationListener<ScrollMetricsNotification>(
+        onNotification: _handleScrollMetricsNotification,
+        child: _ScrollSemantics(
+          key: _scrollSemanticsKey,
+          position: position,
+          allowImplicitScrolling: _physics!.allowImplicitScrolling,
+          semanticChildCount: widget.semanticChildCount,
+          child: result,
+        )
       );
     }
 

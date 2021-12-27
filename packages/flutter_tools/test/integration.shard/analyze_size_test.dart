@@ -31,8 +31,9 @@ void main() {
       '--target-platform=android-arm64'
     ], workingDirectory: workingDirectory);
 
-    print(result.stdout);
-    print(result.stderr);
+    printOnFailure('Output of flutter build apk:');
+    printOnFailure(result.stdout.toString());
+    printOnFailure(result.stderr.toString());
     expect(result.stdout.toString(), contains('app-release.apk (total compressed)'));
 
     final String line = result.stdout.toString()
@@ -67,8 +68,9 @@ void main() {
       '--no-codesign',
     ], workingDirectory: workingDirectory);
 
-    print(result.stdout);
-    print(result.stderr);
+    printOnFailure('Output of flutter build ios:');
+    printOnFailure(result.stdout.toString());
+    printOnFailure(result.stderr.toString());
     expect(result.stdout.toString(), contains('Dart AOT symbols accounted decompressed size'));
 
     final String line = result.stdout.toString()
@@ -88,7 +90,7 @@ void main() {
     expect(codeSizeDir.existsSync(), true);
     expect(result.exitCode, 0);
     tempDir.deleteSync(recursive: true);
-  }, skip: !platform.isMacOS);
+  }, skip: !platform.isMacOS); // [intended] iOS can only be built on macos.
 
   testWithoutContext('--analyze-size flag produces expected output on hello_world for macOS', () async {
     final String workingDirectory = fileSystem.path.join(getFlutterRoot(), 'examples', 'hello_world');
@@ -102,8 +104,9 @@ void main() {
       '--enable-macos-desktop',
     ], workingDirectory: workingDirectory);
 
-    print(configResult.stdout);
-    print(configResult.stderr);
+    printOnFailure('Output of flutter config:');
+    printOnFailure(configResult.stdout.toString());
+    printOnFailure(configResult.stderr.toString());
 
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
@@ -113,8 +116,9 @@ void main() {
       '--code-size-directory=${codeSizeDir.path}',
     ], workingDirectory: workingDirectory);
 
-    print(result.stdout);
-    print(result.stderr);
+    printOnFailure('Output of flutter build macos:');
+    printOnFailure(result.stdout.toString());
+    printOnFailure(result.stderr.toString());
     expect(result.stdout.toString(), contains('Dart AOT symbols accounted decompressed size'));
 
     final String line = result.stdout.toString()
@@ -134,7 +138,7 @@ void main() {
     expect(codeSizeDir.existsSync(), true);
     expect(result.exitCode, 0);
     tempDir.deleteSync(recursive: true);
-  }, skip: !platform.isMacOS);
+  }, skip: !platform.isMacOS); // [intended] this is a macos only test.
 
   testWithoutContext('--analyze-size is only supported in release mode', () async {
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
@@ -147,8 +151,9 @@ void main() {
       '--debug',
     ], workingDirectory: fileSystem.path.join(getFlutterRoot(), 'examples', 'hello_world'));
 
-    print(result.stdout);
-    print(result.stderr);
+    printOnFailure('Output of flutter build apk:');
+    printOnFailure(result.stdout.toString());
+    printOnFailure(result.stderr.toString());
     expect(result.stderr.toString(), contains('"--analyze-size" can only be used on release builds'));
 
     expect(result.exitCode, 1);

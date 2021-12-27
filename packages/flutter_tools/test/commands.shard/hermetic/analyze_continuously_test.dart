@@ -198,7 +198,7 @@ void main() {
       terminal: Terminal.test(),
       artifacts: artifacts,
       logger: BufferLogger.test(),
-      platform: FakePlatform(operatingSystem: 'linux'),
+      platform: FakePlatform(),
       fileSystem: MemoryFileSystem.test(),
       processManager: processManager,
     );
@@ -236,7 +236,7 @@ void main() {
       terminal: Terminal.test(),
       artifacts: artifacts,
       logger: BufferLogger.test(),
-      platform: FakePlatform(operatingSystem: 'linux'),
+      platform: FakePlatform(),
       fileSystem: MemoryFileSystem.test(),
       processManager: processManager,
     );

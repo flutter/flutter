@@ -14,7 +14,7 @@ void main() {
     Widget builder() {
       return MaterialApp(
         home: MediaQuery(
-          data: const MediaQueryData(devicePixelRatio: 1.0),
+          data: const MediaQueryData(),
           child: Directionality(
             textDirection: TextDirection.ltr,
             child: Center(
@@ -53,7 +53,7 @@ void main() {
     Widget builder() {
       return MaterialApp(
         home: MediaQuery(
-          data: const MediaQueryData(devicePixelRatio: 1.0),
+          data: const MediaQueryData(),
           child: Directionality(
             textDirection: TextDirection.ltr,
             child: Center(
@@ -91,7 +91,7 @@ void main() {
     Widget builder(AutovalidateMode autovalidateMode) {
       return MaterialApp(
         home: MediaQuery(
-          data: const MediaQueryData(devicePixelRatio: 1.0),
+          data: const MediaQueryData(),
           child: Directionality(
             textDirection: TextDirection.ltr,
             child: Center(
@@ -147,7 +147,7 @@ void main() {
     Widget builder() {
       return MaterialApp(
         home: MediaQuery(
-          data: const MediaQueryData(devicePixelRatio: 1.0),
+          data: const MediaQueryData(),
           child: Directionality(
             textDirection: TextDirection.ltr,
             child: Center(
@@ -194,7 +194,7 @@ void main() {
       Widget builder() {
         return MaterialApp(
           home: MediaQuery(
-            data: const MediaQueryData(devicePixelRatio: 1.0),
+            data: const MediaQueryData(),
             child: Directionality(
               textDirection: TextDirection.ltr,
               child: Center(
@@ -241,7 +241,7 @@ void main() {
     Widget builder() {
       return MaterialApp(
         home: MediaQuery(
-          data: const MediaQueryData(devicePixelRatio: 1.0),
+          data: const MediaQueryData(),
           child: Directionality(
             textDirection: TextDirection.ltr,
             child: Center(
@@ -289,7 +289,7 @@ void main() {
     Widget builder() {
       return MaterialApp(
         home: MediaQuery(
-          data: const MediaQueryData(devicePixelRatio: 1.0),
+          data: const MediaQueryData(),
           child: Directionality(
             textDirection: TextDirection.ltr,
             child: Center(
@@ -334,7 +334,7 @@ void main() {
     Widget builder() {
       return MaterialApp(
         home: MediaQuery(
-          data: const MediaQueryData(devicePixelRatio: 1.0),
+          data: const MediaQueryData(),
           child: Directionality(
             textDirection: TextDirection.ltr,
             child: Center(
@@ -381,7 +381,7 @@ void main() {
     Widget builder() {
       return MaterialApp(
         home: MediaQuery(
-          data: const MediaQueryData(devicePixelRatio: 1.0),
+          data: const MediaQueryData(),
           child: Directionality(
             textDirection: TextDirection.ltr,
             child: Center(
@@ -433,7 +433,7 @@ void main() {
           setState = setter;
           return MaterialApp(
             home: MediaQuery(
-              data: const MediaQueryData(devicePixelRatio: 1.0),
+              data: const MediaQueryData(),
               child: Directionality(
                 textDirection: TextDirection.ltr,
                 child: Center(
@@ -533,7 +533,7 @@ void main() {
     Widget builder(bool remove) {
       return MaterialApp(
         home: MediaQuery(
-          data: const MediaQueryData(devicePixelRatio: 1.0),
+          data: const MediaQueryData(),
           child: Directionality(
             textDirection: TextDirection.ltr,
             child: Center(
@@ -588,7 +588,7 @@ void main() {
     Widget builder() {
       return MaterialApp(
         home: MediaQuery(
-          data: const MediaQueryData(devicePixelRatio: 1.0),
+          data: const MediaQueryData(),
           child: Directionality(
             textDirection: TextDirection.ltr,
             child: Center(
@@ -624,7 +624,7 @@ void main() {
     Widget builder() {
       return MaterialApp(
         home: MediaQuery(
-          data: const MediaQueryData(devicePixelRatio: 1.0),
+          data: const MediaQueryData(),
           child: Directionality(
             textDirection: TextDirection.ltr,
             child: Center(
@@ -684,7 +684,7 @@ void main() {
       );
     }
 
-    // Makes sure the Form widget won't autovalidate the form fields
+    // Makes sure the Form widget won't auto-validate the form fields
     // after rebuilds if there is not user interaction.
     await tester.pumpWidget(builder());
     await tester.pumpWidget(builder());
@@ -733,38 +733,6 @@ void main() {
     expect(find.text(errorText('')!), findsOneWidget);
   });
 
-  testWidgets('autovalidate parameter is still used if true', (WidgetTester tester) async {
-    late FormFieldState<String> formFieldState;
-    String? errorText(String? value) => '$value/error';
-
-    Widget builder() {
-      return MaterialApp(
-        home: MediaQuery(
-          data: const MediaQueryData(devicePixelRatio: 1.0),
-          child: Directionality(
-            textDirection: TextDirection.ltr,
-            child: Center(
-              child: Material(
-                child: FormField<String>(
-                  initialValue: 'foo',
-                  autovalidate: true,
-                  builder: (FormFieldState<String> state) {
-                    formFieldState = state;
-                    return Container();
-                  },
-                  validator: errorText,
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-
-    await tester.pumpWidget(builder());
-    expect(formFieldState.hasError, isTrue);
-  });
-
   testWidgets('Form.reset() resets form fields, and auto validation will only happen on the next user interaction if autovalidateMode is onUserInteraction', (WidgetTester tester) async {
     final GlobalKey<FormState> formState = GlobalKey<FormState>();
     String? errorText(String? value) => '$value/error';
@@ -773,7 +741,7 @@ void main() {
       return MaterialApp(
         theme: ThemeData(),
         home: MediaQuery(
-          data: const MediaQueryData(devicePixelRatio: 1.0),
+          data: const MediaQueryData(),
           child: Directionality(
             textDirection: TextDirection.ltr,
             child: Center(
@@ -809,46 +777,6 @@ void main() {
     expect(find.text(errorText('bar')!), findsNothing);
   });
 
-  testWidgets('Form.autovalidateMode and Form.autovalidate should not be used at the same time', (WidgetTester tester) async {
-    Widget builder() {
-      return MaterialApp(
-        home: MediaQuery(
-          data: const MediaQueryData(devicePixelRatio: 1.0),
-          child: Directionality(
-            textDirection: TextDirection.ltr,
-            child: Form(
-              autovalidate: true,
-              autovalidateMode: AutovalidateMode.disabled,
-              child: Container(),
-            ),
-          ),
-        ),
-      );
-    }
-    expect(() => builder(), throwsAssertionError);
-  });
-
-  testWidgets('FormField.autovalidateMode and FormField.autovalidate should not be used at the same time', (WidgetTester tester) async {
-    Widget builder() {
-      return MaterialApp(
-        home: MediaQuery(
-          data: const MediaQueryData(devicePixelRatio: 1.0),
-          child: Directionality(
-            textDirection: TextDirection.ltr,
-            child: FormField<String>(
-              autovalidate: true,
-              autovalidateMode: AutovalidateMode.disabled,
-              builder: (_) {
-                return Container();
-              },
-            ),
-          ),
-        ),
-      );
-    }
-    expect(() => builder(), throwsAssertionError);
-  });
-
   // Regression test for https://github.com/flutter/flutter/issues/63753.
   testWidgets('Validate form should return correct validation if the value is composing', (WidgetTester tester) async {
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
@@ -856,7 +784,7 @@ void main() {
 
     final Widget widget = MaterialApp(
       home: MediaQuery(
-        data: const MediaQueryData(devicePixelRatio: 1.0),
+        data: const MediaQueryData(),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: Center(
@@ -885,88 +813,5 @@ void main() {
     formKey.currentState!.save();
     expect(fieldValue, '123456');
     expect(formKey.currentState!.validate(), isFalse);
-  });
-
-  testWidgets('FormField.autovalidate parameter is passed into class the property', (WidgetTester tester) async {
-    String? errorText(String? value) => '$value/error';
-    const ObjectKey widgetKey = ObjectKey('key');
-
-    Widget builder({required bool autovalidate}) {
-      return MaterialApp(
-        home: MediaQuery(
-          data: const MediaQueryData(devicePixelRatio: 1.0),
-          child: Directionality(
-            textDirection: TextDirection.ltr,
-            child: Center(
-              child: Material(
-                child: FormField<String>(
-                  key: widgetKey,
-                  initialValue: 'foo',
-                  autovalidate: autovalidate,
-                  builder: (FormFieldState<String> state) {
-                    return Container();
-                  },
-                  validator: errorText,
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-
-    // When autovalidate is true
-    await tester.pumpWidget(builder(autovalidate: true));
-
-    final Finder formFieldFinder = find.byKey(widgetKey);
-    FormField<String> formField = tester.widget(formFieldFinder);
-    expect(formField.autovalidate, isTrue);
-    expect(formField.autovalidateMode, equals(AutovalidateMode.always));
-
-    // When autovalidate is false
-    await tester.pumpWidget(builder(autovalidate: false));
-
-    formField = tester.widget(formFieldFinder);
-    expect(formField.autovalidate, isFalse);
-    expect(formField.autovalidateMode, equals(AutovalidateMode.disabled));
-  });
-
-  testWidgets('Form.autovalidate parameter is passed into class the property', (WidgetTester tester) async {
-    const ObjectKey widgetKey = ObjectKey('key');
-
-    Widget builder({required bool autovalidate}) {
-      return MaterialApp(
-        home: MediaQuery(
-          data: const MediaQueryData(devicePixelRatio: 1.0),
-          child: Directionality(
-            textDirection: TextDirection.ltr,
-            child: Center(
-              child: Material(
-                child: Form(
-                  key: widgetKey,
-                  autovalidate: autovalidate,
-                  child: Container(),
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-
-    // When autovalidate is true
-    await tester.pumpWidget(builder(autovalidate: true));
-
-    final Finder formFinder = find.byKey(widgetKey);
-    Form formWidget = tester.widget(formFinder);
-    expect(formWidget.autovalidate, isTrue);
-    expect(formWidget.autovalidateMode, equals(AutovalidateMode.always));
-
-    // When autovalidate is false
-    await tester.pumpWidget(builder(autovalidate: false));
-
-    formWidget = tester.widget(formFinder);
-    expect(formWidget.autovalidate, isFalse);
-    expect(formWidget.autovalidateMode, equals(AutovalidateMode.disabled));
   });
 }

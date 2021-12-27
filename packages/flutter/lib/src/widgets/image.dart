@@ -756,40 +756,14 @@ class Image extends StatefulWidget {
   /// ```
   /// {@endtemplate}
   ///
-  /// {@tool dartpad --template=stateless_widget_material}
-  ///
+  /// {@tool dartpad}
   /// The following sample demonstrates how to use this builder to implement an
   /// image that fades in once it's been loaded.
   ///
   /// This sample contains a limited subset of the functionality that the
   /// [FadeInImage] widget provides out of the box.
   ///
-  /// ```dart
-  /// @override
-  /// Widget build(BuildContext context) {
-  ///   return DecoratedBox(
-  ///     decoration: BoxDecoration(
-  ///       color: Colors.white,
-  ///       border: Border.all(),
-  ///       borderRadius: BorderRadius.circular(20),
-  ///     ),
-  ///     child: Image.network(
-  ///       'https://flutter.github.io/assets-for-api-docs/assets/widgets/puffin.jpg',
-  ///       frameBuilder: (BuildContext context, Widget child, int? frame, bool wasSynchronouslyLoaded) {
-  ///         if (wasSynchronouslyLoaded) {
-  ///           return child;
-  ///         }
-  ///         return AnimatedOpacity(
-  ///           child: child,
-  ///           opacity: frame == null ? 0 : 1,
-  ///           duration: const Duration(seconds: 1),
-  ///           curve: Curves.easeOut,
-  ///         );
-  ///       },
-  ///     ),
-  ///   );
-  /// }
-  /// ```
+  /// ** See code in examples/api/lib/widgets/image/image.frame_builder.0.dart **
   /// {@end-tool}
   final ImageFrameBuilder? frameBuilder;
 
@@ -822,37 +796,11 @@ class Image extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.Image.frameBuilder.chainedBuildersExample}
   ///
-  /// {@tool dartpad --template=stateless_widget_material}
-  ///
+  /// {@tool dartpad}
   /// The following sample uses [loadingBuilder] to show a
   /// [CircularProgressIndicator] while an image loads over the network.
   ///
-  /// ```dart
-  /// Widget build(BuildContext context) {
-  ///   return DecoratedBox(
-  ///     decoration: BoxDecoration(
-  ///       color: Colors.white,
-  ///       border: Border.all(),
-  ///       borderRadius: BorderRadius.circular(20),
-  ///     ),
-  ///     child: Image.network(
-  ///       'https://example.com/image.jpg',
-  ///       loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
-  ///         if (loadingProgress == null) {
-  ///           return child;
-  ///         }
-  ///         return Center(
-  ///           child: CircularProgressIndicator(
-  ///             value: loadingProgress.expectedTotalBytes != null
-  ///                 ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
-  ///                 : null,
-  ///           ),
-  ///         );
-  ///       },
-  ///     ),
-  ///   );
-  /// }
-  /// ```
+  /// ** See code in examples/api/lib/widgets/image/image.loading_builder.0.dart **
   /// {@end-tool}
   ///
   /// Run against a real-world image on a slow network, the previous example
@@ -868,34 +816,11 @@ class Image extends StatefulWidget {
   /// [FlutterError.onError]. If it is provided, the caller should either handle
   /// the exception by providing a replacement widget, or rethrow the exception.
   ///
-  /// {@tool dartpad --template=stateless_widget_material}
-  ///
+  /// {@tool dartpad}
   /// The following sample uses [errorBuilder] to show a '😢' in place of the
   /// image that fails to load, and prints the error to the console.
   ///
-  /// ```dart
-  /// Widget build(BuildContext context) {
-  ///   return DecoratedBox(
-  ///     decoration: BoxDecoration(
-  ///       color: Colors.white,
-  ///       border: Border.all(),
-  ///       borderRadius: BorderRadius.circular(20),
-  ///     ),
-  ///     child: Image.network(
-  ///       'https://example.does.not.exist/image.jpg',
-  ///       errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
-  ///         // Appropriate logging or analytics, e.g.
-  ///         // myAnalytics.recordError(
-  ///         //   'An error occurred loading "https://example.does.not.exist/image.jpg"',
-  ///         //   exception,
-  ///         //   stackTrace,
-  ///         // );
-  ///         return const Text('😢');
-  ///       },
-  ///     ),
-  ///   );
-  /// }
-  /// ```
+  /// ** See code in examples/api/lib/widgets/image/image.error_builder.0.dart **
   /// {@end-tool}
   final ImageErrorWidgetBuilder? errorBuilder;
 
@@ -1207,8 +1132,10 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
                   _lastStack = stackTrace;
                 });
                 assert(() {
-                  if (widget.errorBuilder == null)
+                  if (widget.errorBuilder == null) {
+                    // ignore: only_throw_errors, since we're just proxying the error.
                     throw error; // Ensures the error message is printed to the console.
+                  }
                   return true;
                 }());
               }

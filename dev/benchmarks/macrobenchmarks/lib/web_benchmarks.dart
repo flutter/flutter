@@ -7,9 +7,6 @@ import 'dart:convert' show json;
 import 'dart:html' as html;
 import 'dart:math' as math;
 
-import 'package:macrobenchmarks/src/web/bench_text_layout.dart';
-import 'package:macrobenchmarks/src/web/bench_text_out_of_picture_bounds.dart';
-
 import 'src/web/bench_build_image.dart';
 import 'src/web/bench_build_material_checkbox.dart';
 import 'src/web/bench_card_infinite_scroll.dart';
@@ -25,13 +22,14 @@ import 'src/web/bench_pageview_scroll_linethrough.dart';
 import 'src/web/bench_paths.dart';
 import 'src/web/bench_picture_recording.dart';
 import 'src/web/bench_simple_lazy_text_scroll.dart';
+import 'src/web/bench_text_layout.dart';
 import 'src/web/bench_text_out_of_picture_bounds.dart';
 import 'src/web/bench_wrapbox_scroll.dart';
 import 'src/web/recorder.dart';
 
 typedef RecorderFactory = Recorder Function();
 
-const bool isCanvasKit = bool.fromEnvironment('FLUTTER_WEB_USE_SKIA', defaultValue: false);
+const bool isCanvasKit = bool.fromEnvironment('FLUTTER_WEB_USE_SKIA');
 
 /// List of all benchmarks that run in the devicelab.
 ///

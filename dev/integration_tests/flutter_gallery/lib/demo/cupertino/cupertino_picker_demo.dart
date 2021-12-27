@@ -247,7 +247,6 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
             return _BottomPicker(
               child: CupertinoDatePicker(
                 backgroundColor: CupertinoColors.systemBackground.resolveFrom(context),
-                mode: CupertinoDatePickerMode.dateAndTime,
                 initialDateTime: dateTime,
                 onDateTimeChanged: (DateTime newDateTime) {
                   setState(() => dateTime = newDateTime);

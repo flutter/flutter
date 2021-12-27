@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
+
 import 'dart:ui' as ui show BoxHeightStyle;
 
 import 'package:flutter/cupertino.dart';
@@ -11,23 +15,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../widgets/clipboard_utils.dart';
 import '../widgets/editable_text_utils.dart' show textOffsetToPosition, findRenderEditable;
-
-class MockClipboard {
-  Object _clipboardData = <String, dynamic>{
-    'text': null,
-  };
-
-  Future<dynamic> handleMethodCall(MethodCall methodCall) async {
-    switch (methodCall.method) {
-      case 'Clipboard.getData':
-        return _clipboardData;
-      case 'Clipboard.setData':
-        _clipboardData = methodCall.arguments! as Object;
-        break;
-    }
-  }
-}
 
 class _LongCupertinoLocalizationsDelegate extends LocalizationsDelegate<CupertinoLocalizations> {
   const _LongCupertinoLocalizationsDelegate();
@@ -69,7 +58,6 @@ const _LongCupertinoLocalizations _longLocalizations = _LongCupertinoLocalizatio
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   final MockClipboard mockClipboard = MockClipboard();
-  TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
 
   // Returns true iff the button is visually enabled.
   bool appearsEnabled(WidgetTester tester, String text) {
@@ -91,6 +79,23 @@ void main() {
       );
     }).toList();
   }
+
+  setUp(() async {
+    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.platform,
+      mockClipboard.handleMethodCall,
+    );
+    // Fill the clipboard so that the Paste option is available in the text
+    // selection menu.
+    await Clipboard.setData(const ClipboardData(text: 'Clipboard data'));
+  });
+
+  tearDown(() {
+    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.platform,
+      null,
+    );
+  });
 
   group('canSelectAll', () {
     Widget createEditableText({
@@ -168,7 +173,6 @@ void main() {
                       context,
                       TextSelectionHandleType.right,
                       10.0,
-                      null,
                     ),
                   ),
                 ),
@@ -184,76 +188,6 @@ void main() {
       );
     });
   });
-
-  // TODO(justinmc): https://github.com/flutter/flutter/issues/60145
-  testWidgets('Paste always appears regardless of clipboard content on iOS', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(
-      text: 'Atwater Peel Sherbrooke Bonaventure',
-    );
-    await tester.pumpWidget(
-      CupertinoApp(
-        home: Column(
-          children: <Widget>[
-            CupertinoTextField(
-              controller: controller,
-            ),
-          ],
-        ),
-      ),
-    );
-
-    // Make sure the clipboard is empty to start.
-    await Clipboard.setData(const ClipboardData(text: ''));
-
-    // Double tap to select the first word.
-    const int index = 4;
-    await tester.tapAt(textOffsetToPosition(tester, index));
-    await tester.pump(const Duration(milliseconds: 50));
-    await tester.tapAt(textOffsetToPosition(tester, index));
-    await tester.pumpAndSettle();
-    expect(controller.selection.isCollapsed, isFalse);
-    expect(controller.selection.baseOffset, 0);
-    expect(controller.selection.extentOffset, 7);
-
-    // Paste is showing even though clipboard is empty.
-    expect(find.text('Paste'), findsOneWidget);
-    expect(find.text('Copy'), findsOneWidget);
-    expect(find.text('Cut'), findsOneWidget);
-    expect(find.descendant(
-      of: find.byType(Overlay),
-      matching: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_TextSelectionHandleOverlay'),
-    ), findsNWidgets(2));
-
-    // Tap copy to add something to the clipboard and close the menu.
-    await tester.tapAt(tester.getCenter(find.text('Copy')));
-    await tester.pumpAndSettle();
-
-    // The menu is gone, but the handles are visible on the existing selection.
-    expect(find.text('Copy'), findsNothing);
-    expect(find.text('Cut'), findsNothing);
-    expect(find.text('Paste'), findsNothing);
-    expect(controller.selection.isCollapsed, isFalse);
-    expect(controller.selection.baseOffset, 0);
-    expect(controller.selection.extentOffset, 7);
-    expect(find.descendant(
-      of: find.byType(Overlay),
-      matching: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_TextSelectionHandleOverlay'),
-    ), findsNWidgets(2));
-
-    // Double tap to show the menu again.
-    await tester.tapAt(textOffsetToPosition(tester, index));
-    await tester.pump(const Duration(milliseconds: 50));
-    await tester.tapAt(textOffsetToPosition(tester, index));
-    await tester.pumpAndSettle();
-
-    // Paste still shows.
-    expect(find.text('Paste'), findsOneWidget);
-    expect(find.text('Copy'), findsOneWidget);
-    expect(find.text('Cut'), findsOneWidget);
-  },
-    skip: isBrowser, // [intended] We do not use Flutter-rendered context menu on the Web.
-    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
-  );
 
   group('Text selection menu overflow (iOS)', () {
     testWidgets('All menu items show when they fit.', (WidgetTester tester) async {

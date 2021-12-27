@@ -5,10 +5,26 @@
 #import "IntegrationTestIosTest.h"
 #import "IntegrationTestPlugin.h"
 
+@interface IntegrationTestIosTest()
+@property (nonatomic) IntegrationTestPlugin *integrationTestPlugin;
+@end
+
 @implementation IntegrationTestIosTest
 
+- (instancetype)initWithScreenshotDelegate:(id<FLTIntegrationTestScreenshotDelegate>)delegate {
+  self = [super init];
+  _integrationTestPlugin = [IntegrationTestPlugin instance];
+  _integrationTestPlugin.screenshotDelegate = delegate;
+  return self;
+}
+
+- (instancetype)init {
+  return [self initWithScreenshotDelegate:nil];
+}
+
 - (BOOL)testIntegrationTest:(NSString **)testResult {
-  IntegrationTestPlugin *integrationTestPlugin = [IntegrationTestPlugin instance];
+  IntegrationTestPlugin *integrationTestPlugin = self.integrationTestPlugin;
+
   UIViewController *rootViewController =
       [[[[UIApplication sharedApplication] delegate] window] rootViewController];
   if (![rootViewController isKindOfClass:[FlutterViewController class]]) {

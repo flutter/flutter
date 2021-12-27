@@ -100,7 +100,7 @@ class WebEntrypointTarget extends Target {
     final String targetFile = environment.defines[kTargetFile];
     final bool hasPlugins = environment.defines[kHasWebPlugins] == 'true';
     final Uri importUri = environment.fileSystem.file(targetFile).absolute.uri;
-    // TODO(jonahwilliams): support configuration of this file.
+    // TODO(zanderso): support configuration of this file.
     const String packageFile = '.packages';
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
       environment.fileSystem.file(packageFile),
@@ -404,17 +404,57 @@ class WebReleaseBundle extends Target {
   }
 }
 
+/// Static assets provided by the Flutter SDK that do not change, such as
+/// CanvasKit.
+///
+/// These assets can be cached forever and are only invalidated when the
+/// Flutter SDK is upgraded to a new version.
+class WebBuiltInAssets extends Target {
+  const WebBuiltInAssets(this.fileSystem);
+
+  final FileSystem fileSystem;
+
+  @override
+  String get name => 'web_static_assets';
+
+  @override
+  List<Target> get dependencies => const <Target>[];
+
+  @override
+  List<String> get depfiles => const <String>[];
+
+  @override
+  List<Source> get inputs => const <Source>[];
+
+  @override
+  List<Source> get outputs => const <Source>[];
+
+  @override
+  Future<void> build(Environment environment) async {
+    final Directory flutterWebSdk = globals.artifacts.getHostArtifact(HostArtifact.flutterWebSdk) as Directory;
+    final Directory canvasKitDirectory = flutterWebSdk.childDirectory('canvaskit');
+    for (final File file in canvasKitDirectory.listSync(recursive: true).whereType<File>()) {
+      final String relativePath = fileSystem.path.relative(file.path, from: canvasKitDirectory.path);
+      final String targetPath = fileSystem.path.join(environment.outputDir.path, 'canvaskit', relativePath);
+      file.copySync(targetPath);
+    }
+  }
+}
+
 /// Generate a service worker for a web target.
 class WebServiceWorker extends Target {
-  const WebServiceWorker();
+  const WebServiceWorker(this.fileSystem);
+
+  final FileSystem fileSystem;
 
   @override
   String get name => 'web_service_worker';
 
   @override
-  List<Target> get dependencies => const <Target>[
-    Dart2JSTarget(),
-    WebReleaseBundle(),
+  List<Target> get dependencies => <Target>[
+    const Dart2JSTarget(),
+    const WebReleaseBundle(),
+    WebBuiltInAssets(fileSystem),
   ];
 
   @override

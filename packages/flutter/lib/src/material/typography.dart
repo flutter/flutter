@@ -332,76 +332,76 @@ class Typography with Diagnosticable {
   ///
   /// This [TextTheme] provides color but not geometry (font size, weight, etc).
   static const TextTheme blackMountainView = TextTheme(
-    headline1 : TextStyle(debugLabel: 'blackMountainView headline1', fontFamily: 'Roboto', inherit: true, color: Colors.black54, decoration: TextDecoration.none),
-    headline2 : TextStyle(debugLabel: 'blackMountainView headline2', fontFamily: 'Roboto', inherit: true, color: Colors.black54, decoration: TextDecoration.none),
-    headline3 : TextStyle(debugLabel: 'blackMountainView headline3', fontFamily: 'Roboto', inherit: true, color: Colors.black54, decoration: TextDecoration.none),
-    headline4 : TextStyle(debugLabel: 'blackMountainView headline4', fontFamily: 'Roboto', inherit: true, color: Colors.black54, decoration: TextDecoration.none),
-    headline5 : TextStyle(debugLabel: 'blackMountainView headline5', fontFamily: 'Roboto', inherit: true, color: Colors.black87, decoration: TextDecoration.none),
-    headline6 : TextStyle(debugLabel: 'blackMountainView headline6', fontFamily: 'Roboto', inherit: true, color: Colors.black87, decoration: TextDecoration.none),
-    bodyText1 : TextStyle(debugLabel: 'blackMountainView bodyText1', fontFamily: 'Roboto', inherit: true, color: Colors.black87, decoration: TextDecoration.none),
-    bodyText2 : TextStyle(debugLabel: 'blackMountainView bodyText2', fontFamily: 'Roboto', inherit: true, color: Colors.black87, decoration: TextDecoration.none),
-    subtitle1 : TextStyle(debugLabel: 'blackMountainView subtitle1', fontFamily: 'Roboto', inherit: true, color: Colors.black87, decoration: TextDecoration.none),
-    subtitle2 : TextStyle(debugLabel: 'blackMountainView subtitle2', fontFamily: 'Roboto', inherit: true, color: Colors.black,   decoration: TextDecoration.none),
-    caption   : TextStyle(debugLabel: 'blackMountainView caption',   fontFamily: 'Roboto', inherit: true, color: Colors.black54, decoration: TextDecoration.none),
-    button    : TextStyle(debugLabel: 'blackMountainView button',    fontFamily: 'Roboto', inherit: true, color: Colors.black87, decoration: TextDecoration.none),
-    overline  : TextStyle(debugLabel: 'blackMountainView overline',  fontFamily: 'Roboto', inherit: true, color: Colors.black,   decoration: TextDecoration.none),
+    headline1 : TextStyle(debugLabel: 'blackMountainView headline1', fontFamily: 'Roboto', color: Colors.black54, decoration: TextDecoration.none),
+    headline2 : TextStyle(debugLabel: 'blackMountainView headline2', fontFamily: 'Roboto', color: Colors.black54, decoration: TextDecoration.none),
+    headline3 : TextStyle(debugLabel: 'blackMountainView headline3', fontFamily: 'Roboto', color: Colors.black54, decoration: TextDecoration.none),
+    headline4 : TextStyle(debugLabel: 'blackMountainView headline4', fontFamily: 'Roboto', color: Colors.black54, decoration: TextDecoration.none),
+    headline5 : TextStyle(debugLabel: 'blackMountainView headline5', fontFamily: 'Roboto', color: Colors.black87, decoration: TextDecoration.none),
+    headline6 : TextStyle(debugLabel: 'blackMountainView headline6', fontFamily: 'Roboto', color: Colors.black87, decoration: TextDecoration.none),
+    bodyText1 : TextStyle(debugLabel: 'blackMountainView bodyText1', fontFamily: 'Roboto', color: Colors.black87, decoration: TextDecoration.none),
+    bodyText2 : TextStyle(debugLabel: 'blackMountainView bodyText2', fontFamily: 'Roboto', color: Colors.black87, decoration: TextDecoration.none),
+    subtitle1 : TextStyle(debugLabel: 'blackMountainView subtitle1', fontFamily: 'Roboto', color: Colors.black87, decoration: TextDecoration.none),
+    subtitle2 : TextStyle(debugLabel: 'blackMountainView subtitle2', fontFamily: 'Roboto', color: Colors.black,   decoration: TextDecoration.none),
+    caption   : TextStyle(debugLabel: 'blackMountainView caption',   fontFamily: 'Roboto', color: Colors.black54, decoration: TextDecoration.none),
+    button    : TextStyle(debugLabel: 'blackMountainView button',    fontFamily: 'Roboto', color: Colors.black87, decoration: TextDecoration.none),
+    overline  : TextStyle(debugLabel: 'blackMountainView overline',  fontFamily: 'Roboto', color: Colors.black,   decoration: TextDecoration.none),
   );
 
   /// A material design text theme with light glyphs based on Roboto.
   ///
   /// This [TextTheme] provides color but not geometry (font size, weight, etc).
   static const TextTheme whiteMountainView = TextTheme(
-    headline1 : TextStyle(debugLabel: 'whiteMountainView headline1', fontFamily: 'Roboto', inherit: true, color: Colors.white70, decoration: TextDecoration.none),
-    headline2 : TextStyle(debugLabel: 'whiteMountainView headline2', fontFamily: 'Roboto', inherit: true, color: Colors.white70, decoration: TextDecoration.none),
-    headline3 : TextStyle(debugLabel: 'whiteMountainView headline3', fontFamily: 'Roboto', inherit: true, color: Colors.white70, decoration: TextDecoration.none),
-    headline4 : TextStyle(debugLabel: 'whiteMountainView headline4', fontFamily: 'Roboto', inherit: true, color: Colors.white70, decoration: TextDecoration.none),
-    headline5 : TextStyle(debugLabel: 'whiteMountainView headline5', fontFamily: 'Roboto', inherit: true, color: Colors.white,   decoration: TextDecoration.none),
-    headline6 : TextStyle(debugLabel: 'whiteMountainView headline6', fontFamily: 'Roboto', inherit: true, color: Colors.white,   decoration: TextDecoration.none),
-    bodyText1 : TextStyle(debugLabel: 'whiteMountainView bodyText1', fontFamily: 'Roboto', inherit: true, color: Colors.white,   decoration: TextDecoration.none),
-    bodyText2 : TextStyle(debugLabel: 'whiteMountainView bodyText2', fontFamily: 'Roboto', inherit: true, color: Colors.white,   decoration: TextDecoration.none),
-    subtitle1 : TextStyle(debugLabel: 'whiteMountainView subtitle1', fontFamily: 'Roboto', inherit: true, color: Colors.white,   decoration: TextDecoration.none),
-    subtitle2 : TextStyle(debugLabel: 'whiteMountainView subtitle2', fontFamily: 'Roboto', inherit: true, color: Colors.white,   decoration: TextDecoration.none),
-    caption   : TextStyle(debugLabel: 'whiteMountainView caption',   fontFamily: 'Roboto', inherit: true, color: Colors.white70, decoration: TextDecoration.none),
-    button    : TextStyle(debugLabel: 'whiteMountainView button',    fontFamily: 'Roboto', inherit: true, color: Colors.white,   decoration: TextDecoration.none),
-    overline  : TextStyle(debugLabel: 'whiteMountainView overline',  fontFamily: 'Roboto', inherit: true, color: Colors.white,   decoration: TextDecoration.none),
+    headline1 : TextStyle(debugLabel: 'whiteMountainView headline1', fontFamily: 'Roboto', color: Colors.white70, decoration: TextDecoration.none),
+    headline2 : TextStyle(debugLabel: 'whiteMountainView headline2', fontFamily: 'Roboto', color: Colors.white70, decoration: TextDecoration.none),
+    headline3 : TextStyle(debugLabel: 'whiteMountainView headline3', fontFamily: 'Roboto', color: Colors.white70, decoration: TextDecoration.none),
+    headline4 : TextStyle(debugLabel: 'whiteMountainView headline4', fontFamily: 'Roboto', color: Colors.white70, decoration: TextDecoration.none),
+    headline5 : TextStyle(debugLabel: 'whiteMountainView headline5', fontFamily: 'Roboto', color: Colors.white,   decoration: TextDecoration.none),
+    headline6 : TextStyle(debugLabel: 'whiteMountainView headline6', fontFamily: 'Roboto', color: Colors.white,   decoration: TextDecoration.none),
+    bodyText1 : TextStyle(debugLabel: 'whiteMountainView bodyText1', fontFamily: 'Roboto', color: Colors.white,   decoration: TextDecoration.none),
+    bodyText2 : TextStyle(debugLabel: 'whiteMountainView bodyText2', fontFamily: 'Roboto', color: Colors.white,   decoration: TextDecoration.none),
+    subtitle1 : TextStyle(debugLabel: 'whiteMountainView subtitle1', fontFamily: 'Roboto', color: Colors.white,   decoration: TextDecoration.none),
+    subtitle2 : TextStyle(debugLabel: 'whiteMountainView subtitle2', fontFamily: 'Roboto', color: Colors.white,   decoration: TextDecoration.none),
+    caption   : TextStyle(debugLabel: 'whiteMountainView caption',   fontFamily: 'Roboto', color: Colors.white70, decoration: TextDecoration.none),
+    button    : TextStyle(debugLabel: 'whiteMountainView button',    fontFamily: 'Roboto', color: Colors.white,   decoration: TextDecoration.none),
+    overline  : TextStyle(debugLabel: 'whiteMountainView overline',  fontFamily: 'Roboto', color: Colors.white,   decoration: TextDecoration.none),
   );
 
   /// A material design text theme with dark glyphs based on Segoe UI.
   ///
   /// This [TextTheme] provides color but not geometry (font size, weight, etc).
   static const TextTheme blackRedmond = TextTheme(
-    headline1 : TextStyle(debugLabel: 'blackRedmond headline1', fontFamily: 'Segoe UI', inherit: true, color: Colors.black54, decoration: TextDecoration.none),
-    headline2 : TextStyle(debugLabel: 'blackRedmond headline2', fontFamily: 'Segoe UI', inherit: true, color: Colors.black54, decoration: TextDecoration.none),
-    headline3 : TextStyle(debugLabel: 'blackRedmond headline3', fontFamily: 'Segoe UI', inherit: true, color: Colors.black54, decoration: TextDecoration.none),
-    headline4 : TextStyle(debugLabel: 'blackRedmond headline4', fontFamily: 'Segoe UI', inherit: true, color: Colors.black54, decoration: TextDecoration.none),
-    headline5 : TextStyle(debugLabel: 'blackRedmond headline5', fontFamily: 'Segoe UI', inherit: true, color: Colors.black87, decoration: TextDecoration.none),
-    headline6 : TextStyle(debugLabel: 'blackRedmond headline6', fontFamily: 'Segoe UI', inherit: true, color: Colors.black87, decoration: TextDecoration.none),
-    bodyText1 : TextStyle(debugLabel: 'blackRedmond bodyText1', fontFamily: 'Segoe UI', inherit: true, color: Colors.black87, decoration: TextDecoration.none),
-    bodyText2 : TextStyle(debugLabel: 'blackRedmond bodyText2', fontFamily: 'Segoe UI', inherit: true, color: Colors.black87, decoration: TextDecoration.none),
-    subtitle1 : TextStyle(debugLabel: 'blackRedmond subtitle1', fontFamily: 'Segoe UI', inherit: true, color: Colors.black87, decoration: TextDecoration.none),
-    subtitle2 : TextStyle(debugLabel: 'blackRedmond subtitle2', fontFamily: 'Segoe UI', inherit: true, color: Colors.black,   decoration: TextDecoration.none),
-    caption   : TextStyle(debugLabel: 'blackRedmond caption',   fontFamily: 'Segoe UI', inherit: true, color: Colors.black54, decoration: TextDecoration.none),
-    button    : TextStyle(debugLabel: 'blackRedmond button',    fontFamily: 'Segoe UI', inherit: true, color: Colors.black87, decoration: TextDecoration.none),
-    overline  : TextStyle(debugLabel: 'blackRedmond overline',  fontFamily: 'Segoe UI', inherit: true, color: Colors.black,   decoration: TextDecoration.none),
+    headline1 : TextStyle(debugLabel: 'blackRedmond headline1', fontFamily: 'Segoe UI', color: Colors.black54, decoration: TextDecoration.none),
+    headline2 : TextStyle(debugLabel: 'blackRedmond headline2', fontFamily: 'Segoe UI', color: Colors.black54, decoration: TextDecoration.none),
+    headline3 : TextStyle(debugLabel: 'blackRedmond headline3', fontFamily: 'Segoe UI', color: Colors.black54, decoration: TextDecoration.none),
+    headline4 : TextStyle(debugLabel: 'blackRedmond headline4', fontFamily: 'Segoe UI', color: Colors.black54, decoration: TextDecoration.none),
+    headline5 : TextStyle(debugLabel: 'blackRedmond headline5', fontFamily: 'Segoe UI', color: Colors.black87, decoration: TextDecoration.none),
+    headline6 : TextStyle(debugLabel: 'blackRedmond headline6', fontFamily: 'Segoe UI', color: Colors.black87, decoration: TextDecoration.none),
+    bodyText1 : TextStyle(debugLabel: 'blackRedmond bodyText1', fontFamily: 'Segoe UI', color: Colors.black87, decoration: TextDecoration.none),
+    bodyText2 : TextStyle(debugLabel: 'blackRedmond bodyText2', fontFamily: 'Segoe UI', color: Colors.black87, decoration: TextDecoration.none),
+    subtitle1 : TextStyle(debugLabel: 'blackRedmond subtitle1', fontFamily: 'Segoe UI', color: Colors.black87, decoration: TextDecoration.none),
+    subtitle2 : TextStyle(debugLabel: 'blackRedmond subtitle2', fontFamily: 'Segoe UI', color: Colors.black,   decoration: TextDecoration.none),
+    caption   : TextStyle(debugLabel: 'blackRedmond caption',   fontFamily: 'Segoe UI', color: Colors.black54, decoration: TextDecoration.none),
+    button    : TextStyle(debugLabel: 'blackRedmond button',    fontFamily: 'Segoe UI', color: Colors.black87, decoration: TextDecoration.none),
+    overline  : TextStyle(debugLabel: 'blackRedmond overline',  fontFamily: 'Segoe UI', color: Colors.black,   decoration: TextDecoration.none),
   );
 
   /// A material design text theme with light glyphs based on Segoe UI.
   ///
   /// This [TextTheme] provides color but not geometry (font size, weight, etc).
   static const TextTheme whiteRedmond = TextTheme(
-    headline1 : TextStyle(debugLabel: 'whiteRedmond headline1', fontFamily: 'Segoe UI', inherit: true, color: Colors.white70, decoration: TextDecoration.none),
-    headline2 : TextStyle(debugLabel: 'whiteRedmond headline2', fontFamily: 'Segoe UI', inherit: true, color: Colors.white70, decoration: TextDecoration.none),
-    headline3 : TextStyle(debugLabel: 'whiteRedmond headline3', fontFamily: 'Segoe UI', inherit: true, color: Colors.white70, decoration: TextDecoration.none),
-    headline4 : TextStyle(debugLabel: 'whiteRedmond headline4', fontFamily: 'Segoe UI', inherit: true, color: Colors.white70, decoration: TextDecoration.none),
-    headline5 : TextStyle(debugLabel: 'whiteRedmond headline5', fontFamily: 'Segoe UI', inherit: true, color: Colors.white,   decoration: TextDecoration.none),
-    headline6 : TextStyle(debugLabel: 'whiteRedmond headline6', fontFamily: 'Segoe UI', inherit: true, color: Colors.white,   decoration: TextDecoration.none),
-    bodyText1 : TextStyle(debugLabel: 'whiteRedmond bodyText1', fontFamily: 'Segoe UI', inherit: true, color: Colors.white,   decoration: TextDecoration.none),
-    bodyText2 : TextStyle(debugLabel: 'whiteRedmond bodyText2', fontFamily: 'Segoe UI', inherit: true, color: Colors.white,   decoration: TextDecoration.none),
-    subtitle1 : TextStyle(debugLabel: 'whiteRedmond subtitle1', fontFamily: 'Segoe UI', inherit: true, color: Colors.white,   decoration: TextDecoration.none),
-    subtitle2 : TextStyle(debugLabel: 'whiteRedmond subtitle2', fontFamily: 'Segoe UI', inherit: true, color: Colors.white,   decoration: TextDecoration.none),
-    caption   : TextStyle(debugLabel: 'whiteRedmond caption',   fontFamily: 'Segoe UI', inherit: true, color: Colors.white70, decoration: TextDecoration.none),
-    button    : TextStyle(debugLabel: 'whiteRedmond button',    fontFamily: 'Segoe UI', inherit: true, color: Colors.white,   decoration: TextDecoration.none),
-    overline  : TextStyle(debugLabel: 'whiteRedmond overline',  fontFamily: 'Segoe UI', inherit: true, color: Colors.white,   decoration: TextDecoration.none),
+    headline1 : TextStyle(debugLabel: 'whiteRedmond headline1', fontFamily: 'Segoe UI', color: Colors.white70, decoration: TextDecoration.none),
+    headline2 : TextStyle(debugLabel: 'whiteRedmond headline2', fontFamily: 'Segoe UI', color: Colors.white70, decoration: TextDecoration.none),
+    headline3 : TextStyle(debugLabel: 'whiteRedmond headline3', fontFamily: 'Segoe UI', color: Colors.white70, decoration: TextDecoration.none),
+    headline4 : TextStyle(debugLabel: 'whiteRedmond headline4', fontFamily: 'Segoe UI', color: Colors.white70, decoration: TextDecoration.none),
+    headline5 : TextStyle(debugLabel: 'whiteRedmond headline5', fontFamily: 'Segoe UI', color: Colors.white,   decoration: TextDecoration.none),
+    headline6 : TextStyle(debugLabel: 'whiteRedmond headline6', fontFamily: 'Segoe UI', color: Colors.white,   decoration: TextDecoration.none),
+    bodyText1 : TextStyle(debugLabel: 'whiteRedmond bodyText1', fontFamily: 'Segoe UI', color: Colors.white,   decoration: TextDecoration.none),
+    bodyText2 : TextStyle(debugLabel: 'whiteRedmond bodyText2', fontFamily: 'Segoe UI', color: Colors.white,   decoration: TextDecoration.none),
+    subtitle1 : TextStyle(debugLabel: 'whiteRedmond subtitle1', fontFamily: 'Segoe UI', color: Colors.white,   decoration: TextDecoration.none),
+    subtitle2 : TextStyle(debugLabel: 'whiteRedmond subtitle2', fontFamily: 'Segoe UI', color: Colors.white,   decoration: TextDecoration.none),
+    caption   : TextStyle(debugLabel: 'whiteRedmond caption',   fontFamily: 'Segoe UI', color: Colors.white70, decoration: TextDecoration.none),
+    button    : TextStyle(debugLabel: 'whiteRedmond button',    fontFamily: 'Segoe UI', color: Colors.white,   decoration: TextDecoration.none),
+    overline  : TextStyle(debugLabel: 'whiteRedmond overline',  fontFamily: 'Segoe UI', color: Colors.white,   decoration: TextDecoration.none),
   );
 
   static const List<String> _helsinkiFontFallbacks = <String>['Ubuntu', 'Cantarell', 'DejaVu Sans', 'Liberation Sans', 'Arial'];
@@ -411,38 +411,38 @@ class Typography with Diagnosticable {
   ///
   /// This [TextTheme] provides color but not geometry (font size, weight, etc).
   static const TextTheme blackHelsinki = TextTheme(
-    headline1 : TextStyle(debugLabel: 'blackHelsinki headline1', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, inherit: true, color: Colors.black54, decoration: TextDecoration.none),
-    headline2 : TextStyle(debugLabel: 'blackHelsinki headline2', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, inherit: true, color: Colors.black54, decoration: TextDecoration.none),
-    headline3 : TextStyle(debugLabel: 'blackHelsinki headline3', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, inherit: true, color: Colors.black54, decoration: TextDecoration.none),
-    headline4 : TextStyle(debugLabel: 'blackHelsinki headline4', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, inherit: true, color: Colors.black54, decoration: TextDecoration.none),
-    headline5 : TextStyle(debugLabel: 'blackHelsinki headline5', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, inherit: true, color: Colors.black87, decoration: TextDecoration.none),
-    headline6 : TextStyle(debugLabel: 'blackHelsinki headline6', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, inherit: true, color: Colors.black87, decoration: TextDecoration.none),
-    bodyText1 : TextStyle(debugLabel: 'blackHelsinki bodyText1', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, inherit: true, color: Colors.black87, decoration: TextDecoration.none),
-    bodyText2 : TextStyle(debugLabel: 'blackHelsinki bodyText2', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, inherit: true, color: Colors.black87, decoration: TextDecoration.none),
-    subtitle1 : TextStyle(debugLabel: 'blackHelsinki subtitle1', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, inherit: true, color: Colors.black87, decoration: TextDecoration.none),
-    subtitle2 : TextStyle(debugLabel: 'blackHelsinki subtitle2', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, inherit: true, color: Colors.black,   decoration: TextDecoration.none),
-    caption   : TextStyle(debugLabel: 'blackHelsinki caption',   fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, inherit: true, color: Colors.black54, decoration: TextDecoration.none),
-    button    : TextStyle(debugLabel: 'blackHelsinki button',    fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, inherit: true, color: Colors.black87, decoration: TextDecoration.none),
-    overline  : TextStyle(debugLabel: 'blackHelsinki overline',  fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, inherit: true, color: Colors.black,   decoration: TextDecoration.none),
+    headline1 : TextStyle(debugLabel: 'blackHelsinki headline1', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.black54, decoration: TextDecoration.none),
+    headline2 : TextStyle(debugLabel: 'blackHelsinki headline2', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.black54, decoration: TextDecoration.none),
+    headline3 : TextStyle(debugLabel: 'blackHelsinki headline3', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.black54, decoration: TextDecoration.none),
+    headline4 : TextStyle(debugLabel: 'blackHelsinki headline4', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.black54, decoration: TextDecoration.none),
+    headline5 : TextStyle(debugLabel: 'blackHelsinki headline5', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.black87, decoration: TextDecoration.none),
+    headline6 : TextStyle(debugLabel: 'blackHelsinki headline6', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.black87, decoration: TextDecoration.none),
+    bodyText1 : TextStyle(debugLabel: 'blackHelsinki bodyText1', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.black87, decoration: TextDecoration.none),
+    bodyText2 : TextStyle(debugLabel: 'blackHelsinki bodyText2', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.black87, decoration: TextDecoration.none),
+    subtitle1 : TextStyle(debugLabel: 'blackHelsinki subtitle1', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.black87, decoration: TextDecoration.none),
+    subtitle2 : TextStyle(debugLabel: 'blackHelsinki subtitle2', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.black,   decoration: TextDecoration.none),
+    caption   : TextStyle(debugLabel: 'blackHelsinki caption',   fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.black54, decoration: TextDecoration.none),
+    button    : TextStyle(debugLabel: 'blackHelsinki button',    fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.black87, decoration: TextDecoration.none),
+    overline  : TextStyle(debugLabel: 'blackHelsinki overline',  fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.black,   decoration: TextDecoration.none),
   );
 
   /// A material design text theme with light glyphs based on Roboto, with fallbacks of DejaVu Sans, Liberation Sans and Arial.
   ///
   /// This [TextTheme] provides color but not geometry (font size, weight, etc).
   static const TextTheme whiteHelsinki = TextTheme(
-    headline1 : TextStyle(debugLabel: 'whiteHelsinki headline1', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, inherit: true, color: Colors.white70, decoration: TextDecoration.none),
-    headline2 : TextStyle(debugLabel: 'whiteHelsinki headline2', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, inherit: true, color: Colors.white70, decoration: TextDecoration.none),
-    headline3 : TextStyle(debugLabel: 'whiteHelsinki headline3', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, inherit: true, color: Colors.white70, decoration: TextDecoration.none),
-    headline4 : TextStyle(debugLabel: 'whiteHelsinki headline4', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, inherit: true, color: Colors.white70, decoration: TextDecoration.none),
-    headline5 : TextStyle(debugLabel: 'whiteHelsinki headline5', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, inherit: true, color: Colors.white,   decoration: TextDecoration.none),
-    headline6 : TextStyle(debugLabel: 'whiteHelsinki headline6', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, inherit: true, color: Colors.white,   decoration: TextDecoration.none),
-    bodyText1 : TextStyle(debugLabel: 'whiteHelsinki bodyText1', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, inherit: true, color: Colors.white,   decoration: TextDecoration.none),
-    bodyText2 : TextStyle(debugLabel: 'whiteHelsinki bodyText2', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, inherit: true, color: Colors.white,   decoration: TextDecoration.none),
-    subtitle1 : TextStyle(debugLabel: 'whiteHelsinki subtitle1', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, inherit: true, color: Colors.white,   decoration: TextDecoration.none),
-    subtitle2 : TextStyle(debugLabel: 'whiteHelsinki subtitle2', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, inherit: true, color: Colors.white,   decoration: TextDecoration.none),
-    caption   : TextStyle(debugLabel: 'whiteHelsinki caption',   fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, inherit: true, color: Colors.white70, decoration: TextDecoration.none),
-    button    : TextStyle(debugLabel: 'whiteHelsinki button',    fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, inherit: true, color: Colors.white,   decoration: TextDecoration.none),
-    overline  : TextStyle(debugLabel: 'whiteHelsinki overline',  fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, inherit: true, color: Colors.white,   decoration: TextDecoration.none),
+    headline1 : TextStyle(debugLabel: 'whiteHelsinki headline1', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.white70, decoration: TextDecoration.none),
+    headline2 : TextStyle(debugLabel: 'whiteHelsinki headline2', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.white70, decoration: TextDecoration.none),
+    headline3 : TextStyle(debugLabel: 'whiteHelsinki headline3', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.white70, decoration: TextDecoration.none),
+    headline4 : TextStyle(debugLabel: 'whiteHelsinki headline4', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.white70, decoration: TextDecoration.none),
+    headline5 : TextStyle(debugLabel: 'whiteHelsinki headline5', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.white,   decoration: TextDecoration.none),
+    headline6 : TextStyle(debugLabel: 'whiteHelsinki headline6', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.white,   decoration: TextDecoration.none),
+    bodyText1 : TextStyle(debugLabel: 'whiteHelsinki bodyText1', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.white,   decoration: TextDecoration.none),
+    bodyText2 : TextStyle(debugLabel: 'whiteHelsinki bodyText2', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.white,   decoration: TextDecoration.none),
+    subtitle1 : TextStyle(debugLabel: 'whiteHelsinki subtitle1', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.white,   decoration: TextDecoration.none),
+    subtitle2 : TextStyle(debugLabel: 'whiteHelsinki subtitle2', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.white,   decoration: TextDecoration.none),
+    caption   : TextStyle(debugLabel: 'whiteHelsinki caption',   fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.white70, decoration: TextDecoration.none),
+    button    : TextStyle(debugLabel: 'whiteHelsinki button',    fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.white,   decoration: TextDecoration.none),
+    overline  : TextStyle(debugLabel: 'whiteHelsinki overline',  fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, color: Colors.white,   decoration: TextDecoration.none),
   );
 
   /// A material design text theme with dark glyphs based on San Francisco.
@@ -451,19 +451,19 @@ class Typography with Diagnosticable {
   ///
   /// This theme uses the iOS version of the font names.
   static const TextTheme blackCupertino = TextTheme(
-    headline1 : TextStyle(debugLabel: 'blackCupertino headline1', fontFamily: '.SF UI Display', inherit: true, color: Colors.black54, decoration: TextDecoration.none),
-    headline2 : TextStyle(debugLabel: 'blackCupertino headline2', fontFamily: '.SF UI Display', inherit: true, color: Colors.black54, decoration: TextDecoration.none),
-    headline3 : TextStyle(debugLabel: 'blackCupertino headline3', fontFamily: '.SF UI Display', inherit: true, color: Colors.black54, decoration: TextDecoration.none),
-    headline4 : TextStyle(debugLabel: 'blackCupertino headline4', fontFamily: '.SF UI Display', inherit: true, color: Colors.black54, decoration: TextDecoration.none),
-    headline5 : TextStyle(debugLabel: 'blackCupertino headline5', fontFamily: '.SF UI Display', inherit: true, color: Colors.black87, decoration: TextDecoration.none),
-    headline6 : TextStyle(debugLabel: 'blackCupertino headline6', fontFamily: '.SF UI Display', inherit: true, color: Colors.black87, decoration: TextDecoration.none),
-    bodyText1 : TextStyle(debugLabel: 'blackCupertino bodyText1', fontFamily: '.SF UI Text',    inherit: true, color: Colors.black87, decoration: TextDecoration.none),
-    bodyText2 : TextStyle(debugLabel: 'blackCupertino bodyText2', fontFamily: '.SF UI Text',    inherit: true, color: Colors.black87, decoration: TextDecoration.none),
-    subtitle1 : TextStyle(debugLabel: 'blackCupertino subtitle1', fontFamily: '.SF UI Text',    inherit: true, color: Colors.black87, decoration: TextDecoration.none),
-    subtitle2 : TextStyle(debugLabel: 'blackCupertino subtitle2', fontFamily: '.SF UI Text',    inherit: true, color: Colors.black,   decoration: TextDecoration.none),
-    caption   : TextStyle(debugLabel: 'blackCupertino caption',   fontFamily: '.SF UI Text',    inherit: true, color: Colors.black54, decoration: TextDecoration.none),
-    button    : TextStyle(debugLabel: 'blackCupertino button',    fontFamily: '.SF UI Text',    inherit: true, color: Colors.black87, decoration: TextDecoration.none),
-    overline  : TextStyle(debugLabel: 'blackCupertino overline',  fontFamily: '.SF UI Text',    inherit: true, color: Colors.black,   decoration: TextDecoration.none),
+    headline1 : TextStyle(debugLabel: 'blackCupertino headline1', fontFamily: '.SF UI Display', color: Colors.black54, decoration: TextDecoration.none),
+    headline2 : TextStyle(debugLabel: 'blackCupertino headline2', fontFamily: '.SF UI Display', color: Colors.black54, decoration: TextDecoration.none),
+    headline3 : TextStyle(debugLabel: 'blackCupertino headline3', fontFamily: '.SF UI Display', color: Colors.black54, decoration: TextDecoration.none),
+    headline4 : TextStyle(debugLabel: 'blackCupertino headline4', fontFamily: '.SF UI Display', color: Colors.black54, decoration: TextDecoration.none),
+    headline5 : TextStyle(debugLabel: 'blackCupertino headline5', fontFamily: '.SF UI Display', color: Colors.black87, decoration: TextDecoration.none),
+    headline6 : TextStyle(debugLabel: 'blackCupertino headline6', fontFamily: '.SF UI Display', color: Colors.black87, decoration: TextDecoration.none),
+    bodyText1 : TextStyle(debugLabel: 'blackCupertino bodyText1', fontFamily: '.SF UI Text', color: Colors.black87, decoration: TextDecoration.none),
+    bodyText2 : TextStyle(debugLabel: 'blackCupertino bodyText2', fontFamily: '.SF UI Text', color: Colors.black87, decoration: TextDecoration.none),
+    subtitle1 : TextStyle(debugLabel: 'blackCupertino subtitle1', fontFamily: '.SF UI Text', color: Colors.black87, decoration: TextDecoration.none),
+    subtitle2 : TextStyle(debugLabel: 'blackCupertino subtitle2', fontFamily: '.SF UI Text', color: Colors.black,   decoration: TextDecoration.none),
+    caption   : TextStyle(debugLabel: 'blackCupertino caption',   fontFamily: '.SF UI Text', color: Colors.black54, decoration: TextDecoration.none),
+    button    : TextStyle(debugLabel: 'blackCupertino button',    fontFamily: '.SF UI Text', color: Colors.black87, decoration: TextDecoration.none),
+    overline  : TextStyle(debugLabel: 'blackCupertino overline',  fontFamily: '.SF UI Text', color: Colors.black,   decoration: TextDecoration.none),
   );
 
   /// A material design text theme with light glyphs based on San Francisco.
@@ -472,19 +472,19 @@ class Typography with Diagnosticable {
   ///
   /// This theme uses the iOS version of the font names.
   static const TextTheme whiteCupertino = TextTheme(
-    headline1 : TextStyle(debugLabel: 'whiteCupertino headline1', fontFamily: '.SF UI Display', inherit: true, color: Colors.white70, decoration: TextDecoration.none),
-    headline2 : TextStyle(debugLabel: 'whiteCupertino headline2', fontFamily: '.SF UI Display', inherit: true, color: Colors.white70, decoration: TextDecoration.none),
-    headline3 : TextStyle(debugLabel: 'whiteCupertino headline3', fontFamily: '.SF UI Display', inherit: true, color: Colors.white70, decoration: TextDecoration.none),
-    headline4 : TextStyle(debugLabel: 'whiteCupertino headline4', fontFamily: '.SF UI Display', inherit: true, color: Colors.white70, decoration: TextDecoration.none),
-    headline5 : TextStyle(debugLabel: 'whiteCupertino headline5', fontFamily: '.SF UI Display', inherit: true, color: Colors.white,   decoration: TextDecoration.none),
-    headline6 : TextStyle(debugLabel: 'whiteCupertino headline6', fontFamily: '.SF UI Display', inherit: true, color: Colors.white,   decoration: TextDecoration.none),
-    subtitle1 : TextStyle(debugLabel: 'whiteCupertino subtitle1', fontFamily: '.SF UI Text',    inherit: true, color: Colors.white,   decoration: TextDecoration.none),
-    bodyText1 : TextStyle(debugLabel: 'whiteCupertino bodyText1', fontFamily: '.SF UI Text',    inherit: true, color: Colors.white,   decoration: TextDecoration.none),
-    bodyText2 : TextStyle(debugLabel: 'whiteCupertino bodyText2', fontFamily: '.SF UI Text',    inherit: true, color: Colors.white,   decoration: TextDecoration.none),
-    caption   : TextStyle(debugLabel: 'whiteCupertino caption',   fontFamily: '.SF UI Text',    inherit: true, color: Colors.white70, decoration: TextDecoration.none),
-    button    : TextStyle(debugLabel: 'whiteCupertino button',    fontFamily: '.SF UI Text',    inherit: true, color: Colors.white,   decoration: TextDecoration.none),
-    subtitle2 : TextStyle(debugLabel: 'whiteCupertino subtitle2', fontFamily: '.SF UI Text',    inherit: true, color: Colors.white,   decoration: TextDecoration.none),
-    overline  : TextStyle(debugLabel: 'whiteCupertino overline',  fontFamily: '.SF UI Text',    inherit: true, color: Colors.white,   decoration: TextDecoration.none),
+    headline1 : TextStyle(debugLabel: 'whiteCupertino headline1', fontFamily: '.SF UI Display', color: Colors.white70, decoration: TextDecoration.none),
+    headline2 : TextStyle(debugLabel: 'whiteCupertino headline2', fontFamily: '.SF UI Display', color: Colors.white70, decoration: TextDecoration.none),
+    headline3 : TextStyle(debugLabel: 'whiteCupertino headline3', fontFamily: '.SF UI Display', color: Colors.white70, decoration: TextDecoration.none),
+    headline4 : TextStyle(debugLabel: 'whiteCupertino headline4', fontFamily: '.SF UI Display', color: Colors.white70, decoration: TextDecoration.none),
+    headline5 : TextStyle(debugLabel: 'whiteCupertino headline5', fontFamily: '.SF UI Display', color: Colors.white,   decoration: TextDecoration.none),
+    headline6 : TextStyle(debugLabel: 'whiteCupertino headline6', fontFamily: '.SF UI Display', color: Colors.white,   decoration: TextDecoration.none),
+    subtitle1 : TextStyle(debugLabel: 'whiteCupertino subtitle1', fontFamily: '.SF UI Text', color: Colors.white,   decoration: TextDecoration.none),
+    bodyText1 : TextStyle(debugLabel: 'whiteCupertino bodyText1', fontFamily: '.SF UI Text', color: Colors.white,   decoration: TextDecoration.none),
+    bodyText2 : TextStyle(debugLabel: 'whiteCupertino bodyText2', fontFamily: '.SF UI Text', color: Colors.white,   decoration: TextDecoration.none),
+    caption   : TextStyle(debugLabel: 'whiteCupertino caption',   fontFamily: '.SF UI Text', color: Colors.white70, decoration: TextDecoration.none),
+    button    : TextStyle(debugLabel: 'whiteCupertino button',    fontFamily: '.SF UI Text', color: Colors.white,   decoration: TextDecoration.none),
+    subtitle2 : TextStyle(debugLabel: 'whiteCupertino subtitle2', fontFamily: '.SF UI Text', color: Colors.white,   decoration: TextDecoration.none),
+    overline  : TextStyle(debugLabel: 'whiteCupertino overline',  fontFamily: '.SF UI Text', color: Colors.white,   decoration: TextDecoration.none),
   );
 
   /// A material design text theme with dark glyphs based on San Francisco.
@@ -493,19 +493,19 @@ class Typography with Diagnosticable {
   ///
   /// This theme uses the macOS version of the font names.
   static const TextTheme blackRedwoodCity = TextTheme(
-    headline1 : TextStyle(debugLabel: 'blackRedwoodCity headline1', fontFamily: '.AppleSystemUIFont', inherit: true, color: Colors.black54, decoration: TextDecoration.none),
-    headline2 : TextStyle(debugLabel: 'blackRedwoodCity headline2', fontFamily: '.AppleSystemUIFont', inherit: true, color: Colors.black54, decoration: TextDecoration.none),
-    headline3 : TextStyle(debugLabel: 'blackRedwoodCity headline3', fontFamily: '.AppleSystemUIFont', inherit: true, color: Colors.black54, decoration: TextDecoration.none),
-    headline4 : TextStyle(debugLabel: 'blackRedwoodCity headline4', fontFamily: '.AppleSystemUIFont', inherit: true, color: Colors.black54, decoration: TextDecoration.none),
-    headline5 : TextStyle(debugLabel: 'blackRedwoodCity headline5', fontFamily: '.AppleSystemUIFont', inherit: true, color: Colors.black87, decoration: TextDecoration.none),
-    headline6 : TextStyle(debugLabel: 'blackRedwoodCity headline6', fontFamily: '.AppleSystemUIFont', inherit: true, color: Colors.black87, decoration: TextDecoration.none),
-    bodyText1 : TextStyle(debugLabel: 'blackRedwoodCity bodyText1', fontFamily: '.AppleSystemUIFont', inherit: true, color: Colors.black87, decoration: TextDecoration.none),
-    bodyText2 : TextStyle(debugLabel: 'blackRedwoodCity bodyText2', fontFamily: '.AppleSystemUIFont', inherit: true, color: Colors.black87, decoration: TextDecoration.none),
-    subtitle1 : TextStyle(debugLabel: 'blackRedwoodCity subtitle1', fontFamily: '.AppleSystemUIFont', inherit: true, color: Colors.black87, decoration: TextDecoration.none),
-    subtitle2 : TextStyle(debugLabel: 'blackRedwoodCity subtitle2', fontFamily: '.AppleSystemUIFont', inherit: true, color: Colors.black,   decoration: TextDecoration.none),
-    caption   : TextStyle(debugLabel: 'blackRedwoodCity caption',   fontFamily: '.AppleSystemUIFont', inherit: true, color: Colors.black54, decoration: TextDecoration.none),
-    button    : TextStyle(debugLabel: 'blackRedwoodCity button',    fontFamily: '.AppleSystemUIFont', inherit: true, color: Colors.black87, decoration: TextDecoration.none),
-    overline  : TextStyle(debugLabel: 'blackRedwoodCity overline',  fontFamily: '.AppleSystemUIFont', inherit: true, color: Colors.black,   decoration: TextDecoration.none),
+    headline1 : TextStyle(debugLabel: 'blackRedwoodCity headline1', fontFamily: '.AppleSystemUIFont', color: Colors.black54, decoration: TextDecoration.none),
+    headline2 : TextStyle(debugLabel: 'blackRedwoodCity headline2', fontFamily: '.AppleSystemUIFont', color: Colors.black54, decoration: TextDecoration.none),
+    headline3 : TextStyle(debugLabel: 'blackRedwoodCity headline3', fontFamily: '.AppleSystemUIFont', color: Colors.black54, decoration: TextDecoration.none),
+    headline4 : TextStyle(debugLabel: 'blackRedwoodCity headline4', fontFamily: '.AppleSystemUIFont', color: Colors.black54, decoration: TextDecoration.none),
+    headline5 : TextStyle(debugLabel: 'blackRedwoodCity headline5', fontFamily: '.AppleSystemUIFont', color: Colors.black87, decoration: TextDecoration.none),
+    headline6 : TextStyle(debugLabel: 'blackRedwoodCity headline6', fontFamily: '.AppleSystemUIFont', color: Colors.black87, decoration: TextDecoration.none),
+    bodyText1 : TextStyle(debugLabel: 'blackRedwoodCity bodyText1', fontFamily: '.AppleSystemUIFont', color: Colors.black87, decoration: TextDecoration.none),
+    bodyText2 : TextStyle(debugLabel: 'blackRedwoodCity bodyText2', fontFamily: '.AppleSystemUIFont', color: Colors.black87, decoration: TextDecoration.none),
+    subtitle1 : TextStyle(debugLabel: 'blackRedwoodCity subtitle1', fontFamily: '.AppleSystemUIFont', color: Colors.black87, decoration: TextDecoration.none),
+    subtitle2 : TextStyle(debugLabel: 'blackRedwoodCity subtitle2', fontFamily: '.AppleSystemUIFont', color: Colors.black,   decoration: TextDecoration.none),
+    caption   : TextStyle(debugLabel: 'blackRedwoodCity caption',   fontFamily: '.AppleSystemUIFont', color: Colors.black54, decoration: TextDecoration.none),
+    button    : TextStyle(debugLabel: 'blackRedwoodCity button',    fontFamily: '.AppleSystemUIFont', color: Colors.black87, decoration: TextDecoration.none),
+    overline  : TextStyle(debugLabel: 'blackRedwoodCity overline',  fontFamily: '.AppleSystemUIFont', color: Colors.black,   decoration: TextDecoration.none),
   );
 
   /// A material design text theme with light glyphs based on San Francisco.
@@ -514,19 +514,19 @@ class Typography with Diagnosticable {
   ///
   /// This theme uses the macOS version of the font names.
   static const TextTheme whiteRedwoodCity = TextTheme(
-    headline1 : TextStyle(debugLabel: 'whiteRedwoodCity headline1', fontFamily: '.AppleSystemUIFont', inherit: true, color: Colors.white70, decoration: TextDecoration.none),
-    headline2 : TextStyle(debugLabel: 'whiteRedwoodCity headline2', fontFamily: '.AppleSystemUIFont', inherit: true, color: Colors.white70, decoration: TextDecoration.none),
-    headline3 : TextStyle(debugLabel: 'whiteRedwoodCity headline3', fontFamily: '.AppleSystemUIFont', inherit: true, color: Colors.white70, decoration: TextDecoration.none),
-    headline4 : TextStyle(debugLabel: 'whiteRedwoodCity headline4', fontFamily: '.AppleSystemUIFont', inherit: true, color: Colors.white70, decoration: TextDecoration.none),
-    headline5 : TextStyle(debugLabel: 'whiteRedwoodCity headline5', fontFamily: '.AppleSystemUIFont', inherit: true, color: Colors.white,   decoration: TextDecoration.none),
-    headline6 : TextStyle(debugLabel: 'whiteRedwoodCity headline6', fontFamily: '.AppleSystemUIFont', inherit: true, color: Colors.white,   decoration: TextDecoration.none),
-    subtitle1 : TextStyle(debugLabel: 'whiteRedwoodCity subtitle1', fontFamily: '.AppleSystemUIFont', inherit: true, color: Colors.white,   decoration: TextDecoration.none),
-    bodyText1 : TextStyle(debugLabel: 'whiteRedwoodCity bodyText1', fontFamily: '.AppleSystemUIFont', inherit: true, color: Colors.white,   decoration: TextDecoration.none),
-    bodyText2 : TextStyle(debugLabel: 'whiteRedwoodCity bodyText2', fontFamily: '.AppleSystemUIFont', inherit: true, color: Colors.white,   decoration: TextDecoration.none),
-    caption   : TextStyle(debugLabel: 'whiteRedwoodCity caption',   fontFamily: '.AppleSystemUIFont', inherit: true, color: Colors.white70, decoration: TextDecoration.none),
-    button    : TextStyle(debugLabel: 'whiteRedwoodCity button',    fontFamily: '.AppleSystemUIFont', inherit: true, color: Colors.white,   decoration: TextDecoration.none),
-    subtitle2 : TextStyle(debugLabel: 'whiteRedwoodCity subtitle2', fontFamily: '.AppleSystemUIFont', inherit: true, color: Colors.white,   decoration: TextDecoration.none),
-    overline  : TextStyle(debugLabel: 'whiteRedwoodCity overline',  fontFamily: '.AppleSystemUIFont', inherit: true, color: Colors.white,   decoration: TextDecoration.none),
+    headline1 : TextStyle(debugLabel: 'whiteRedwoodCity headline1', fontFamily: '.AppleSystemUIFont', color: Colors.white70, decoration: TextDecoration.none),
+    headline2 : TextStyle(debugLabel: 'whiteRedwoodCity headline2', fontFamily: '.AppleSystemUIFont', color: Colors.white70, decoration: TextDecoration.none),
+    headline3 : TextStyle(debugLabel: 'whiteRedwoodCity headline3', fontFamily: '.AppleSystemUIFont', color: Colors.white70, decoration: TextDecoration.none),
+    headline4 : TextStyle(debugLabel: 'whiteRedwoodCity headline4', fontFamily: '.AppleSystemUIFont', color: Colors.white70, decoration: TextDecoration.none),
+    headline5 : TextStyle(debugLabel: 'whiteRedwoodCity headline5', fontFamily: '.AppleSystemUIFont', color: Colors.white,   decoration: TextDecoration.none),
+    headline6 : TextStyle(debugLabel: 'whiteRedwoodCity headline6', fontFamily: '.AppleSystemUIFont', color: Colors.white,   decoration: TextDecoration.none),
+    subtitle1 : TextStyle(debugLabel: 'whiteRedwoodCity subtitle1', fontFamily: '.AppleSystemUIFont', color: Colors.white,   decoration: TextDecoration.none),
+    bodyText1 : TextStyle(debugLabel: 'whiteRedwoodCity bodyText1', fontFamily: '.AppleSystemUIFont', color: Colors.white,   decoration: TextDecoration.none),
+    bodyText2 : TextStyle(debugLabel: 'whiteRedwoodCity bodyText2', fontFamily: '.AppleSystemUIFont', color: Colors.white,   decoration: TextDecoration.none),
+    caption   : TextStyle(debugLabel: 'whiteRedwoodCity caption',   fontFamily: '.AppleSystemUIFont', color: Colors.white70, decoration: TextDecoration.none),
+    button    : TextStyle(debugLabel: 'whiteRedwoodCity button',    fontFamily: '.AppleSystemUIFont', color: Colors.white,   decoration: TextDecoration.none),
+    subtitle2 : TextStyle(debugLabel: 'whiteRedwoodCity subtitle2', fontFamily: '.AppleSystemUIFont', color: Colors.white,   decoration: TextDecoration.none),
+    overline  : TextStyle(debugLabel: 'whiteRedwoodCity overline',  fontFamily: '.AppleSystemUIFont', color: Colors.white,   decoration: TextDecoration.none),
   );
 
   /// Defines text geometry for [ScriptCategory.englishLike] scripts, such as

@@ -100,22 +100,22 @@ flutter drive \
 You can use `integration_test` to take screenshots of the UI rendered on the mobile device or
 Web browser at a specific time during the test.
 
-This feature is currently supported on Android, and Web.
+This feature is currently supported on Android, iOS, and Web.
 
-#### Android
+#### Android and iOS
 
 **integration_test/screenshot_test.dart**
 
 ```dart
 void main() {
-  final IntegrationTestWidgetsFlutterBinding binding =
-      IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized()
+      as IntegrationTestWidgetsFlutterBinding;
 
   testWidgets('screenshot', (WidgetTester tester) async {
     // Build the app.
     app.main();
 
-    // This is required prior to taking the screenshot.
+    // This is required prior to taking the screenshot (Android only).
     await binding.convertFlutterSurfaceToImage();
 
     // Trigger a frame.
@@ -126,7 +126,8 @@ void main() {
 ```
 
 You can use a driver script to pull in the screenshot from the device.
-This way, you can store the images locally on your computer.
+This way, you can store the images locally on your computer.  On iOS, the
+screenshot will also be available in Xcode test results.
 
 **test_driver/integration_test.dart**
 
@@ -152,8 +153,8 @@ Future<void> main() async {
 
 ```dart
 void main() {
-  final IntegrationTestWidgetsFlutterBinding binding =
-      IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized()
+      as IntegrationTestWidgetsFlutterBinding;
 
   testWidgets('screenshot', (WidgetTester tester) async {
     // Build the app.
@@ -322,5 +323,5 @@ xcodebuild test-without-building -xctestrun "build/ios_integ/Build/Products/Runn
 Once everything is ok, you can upload the resulting zip to Firebase Test Lab (change the model with your values):
 
 ```sh
-gcloud firebase test ios run --test "build/ios_integ/ios_tests.zip" --device model=iphone11pro,version=14.1,locale=fr_FR,orientation=portrait
+gcloud firebase test ios run --test "build/ios_integ/Build/Products/ios_tests.zip" --device model=iphone11pro,version=14.1,locale=fr_FR,orientation=portrait
 ```

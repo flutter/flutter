@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
+
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -29,7 +33,6 @@ void main() {
     }
 
     final Widget widget = Align(
-      alignment: Alignment.center,
       child: SizedBox(
         width: 400.0,
         height: 400.0,
@@ -56,7 +59,6 @@ void main() {
           alignment: Alignment.bottomRight,
           child: ShaderMask(
             shaderCallback: (Rect bounds) => const RadialGradient(
-              center: Alignment.center,
               radius: 0.05,
               colors:  <Color>[Color(0xFFFF0000),  Color(0xFF00FF00)],
               tileMode: TileMode.mirror,
@@ -86,7 +88,6 @@ void main() {
           alignment: Alignment.topLeft,
           child: ShaderMask(
             shaderCallback: (Rect bounds) => const RadialGradient(
-              center: Alignment.center,
               radius: 0.05,
               colors:  <Color>[Color(0xFFFF0000),  Color(0xFF00FF00)],
               tileMode: TileMode.mirror,

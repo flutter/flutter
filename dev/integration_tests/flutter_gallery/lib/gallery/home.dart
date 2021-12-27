@@ -58,14 +58,12 @@ class _CategoryItem extends StatelessWidget {
     // repainted when the button's ink splash animates.
     return RepaintBoundary(
       child: RawMaterialButton(
-        padding: EdgeInsets.zero,
         hoverColor: theme.primaryColor.withOpacity(0.05),
         splashColor: theme.primaryColor.withOpacity(0.12),
         highlightColor: Colors.transparent,
         onPressed: onTap,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.end,
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
             Padding(
               padding: const EdgeInsets.all(6.0),
@@ -184,7 +182,6 @@ class _DemoItem extends StatelessWidget {
     final bool isDark = theme.brightness == Brightness.dark;
     final double textScaleFactor = MediaQuery.textScaleFactorOf(context);
     return RawMaterialButton(
-      padding: EdgeInsets.zero,
       splashColor: theme.primaryColor.withOpacity(0.12),
       highlightColor: Colors.transparent,
       onPressed: () {

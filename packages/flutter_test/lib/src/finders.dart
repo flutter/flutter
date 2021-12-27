@@ -23,8 +23,20 @@ const CommonFinders find = CommonFinders._();
 class CommonFinders {
   const CommonFinders._();
 
-  /// Finds [Text] and [EditableText] widgets containing string equal to the
-  /// `text` argument.
+  /// Finds [Text], [EditableText], and optionally [RichText] widgets
+  /// containing string equal to the `text` argument.
+  ///
+  /// If `findRichText` is false, all standalone [RichText] widgets are
+  /// ignored and `text` is matched with [Text.data] or [Text.textSpan].
+  /// If `findRichText` is true, [RichText] widgets (and therefore also
+  /// [Text] and [Text.rich] widgets) are matched by comparing the
+  /// [InlineSpan.toPlainText] with the given `text`.
+  ///
+  /// For [EditableText] widgets, the `text` is always compared to the current
+  /// value of the [EditableText.controller].
+  ///
+  /// If the `skipOffstage` argument is true (the default), then this skips
+  /// nodes that are [Offstage] or that are from inactive [Route]s.
   ///
   /// ## Sample code
   ///
@@ -32,9 +44,26 @@ class CommonFinders {
   /// expect(find.text('Back'), findsOneWidget);
   /// ```
   ///
-  /// If the `skipOffstage` argument is true (the default), then this skips
-  /// nodes that are [Offstage] or that are from inactive [Route]s.
-  Finder text(String text, { bool skipOffstage = true }) => _TextFinder(text, skipOffstage: skipOffstage);
+  /// This will match [Text], [Text.rich], and [EditableText] widgets that
+  /// contain the "Back" string.
+  ///
+  /// ```dart
+  /// expect(find.text('Close', findRichText: true), findsOneWidget);
+  /// ```
+  ///
+  /// This will match [Text], [Text.rich], [EditableText], as well as standalone
+  /// [RichText] widgets that contain the "Close" string.
+  Finder text(
+    String text, {
+    bool findRichText = false,
+    bool skipOffstage = true,
+  }) {
+    return _TextFinder(
+      text,
+      findRichText: findRichText,
+      skipOffstage: skipOffstage,
+    );
+  }
 
   /// Finds [Text] and [EditableText] widgets which contain the given
   /// `pattern` argument.
@@ -73,6 +102,19 @@ class CommonFinders {
       matching: find.byType(widgetType, skipOffstage: skipOffstage),
     );
   }
+
+  /// Finds [Image] and [FadeInImage] widgets containing `image` equal to the
+  /// `image` argument.
+  ///
+  /// ## Sample code
+  ///
+  /// ```dart
+  /// expect(find.image(FileImage(File(filePath))), findsOneWidget);
+  /// ```
+  ///
+  /// If the `skipOffstage` argument is true (the default), then this skips
+  /// nodes that are [Offstage] or that are from inactive [Route]s.
+  Finder image(ImageProvider image, { bool skipOffstage = true }) => _WidgetImageFinder(image, skipOffstage: skipOffstage);
 
   /// Finds widgets by searching for one with a particular [Key].
   ///
@@ -137,6 +179,30 @@ class CommonFinders {
   Finder widgetWithIcon(Type widgetType, IconData icon, { bool skipOffstage = true }) {
     return find.ancestor(
       of: find.byIcon(icon),
+      matching: find.byType(widgetType),
+    );
+  }
+
+  /// Looks for widgets that contain an [Image] descendant displaying [ImageProvider]
+  /// `image` in it.
+  ///
+  /// ## Sample code
+  ///
+  /// ```dart
+  /// // Suppose you have a button with image in it:
+  /// Button(
+  ///   child: Image.file(filePath)
+  /// )
+  ///
+  /// // You can find and tap on it like this:
+  /// tester.tap(find.widgetWithImage(Button, FileImage(filePath)));
+  /// ```
+  ///
+  /// If the `skipOffstage` argument is true (the default), then this skips
+  /// nodes that are [Offstage] or that are from inactive [Route]s.
+  Finder widgetWithImage(Type widgetType, ImageProvider image, { bool skipOffstage = true }) {
+    return find.ancestor(
+      of: find.image(image),
       matching: find.byType(widgetType),
     );
   }
@@ -548,9 +614,26 @@ abstract class MatchFinder extends Finder {
 }
 
 class _TextFinder extends MatchFinder {
-  _TextFinder(this.text, { bool skipOffstage = true }) : super(skipOffstage: skipOffstage);
+  _TextFinder(
+    this.text, {
+    this.findRichText = false,
+    bool skipOffstage = true,
+  }) : super(skipOffstage: skipOffstage);
 
   final String text;
+
+  /// Whether standalone [RichText] widgets should be found or not.
+  ///
+  /// Defaults to `false`.
+  ///
+  /// If disabled, only [Text] widgets will be matched. [RichText] widgets
+  /// *without* a [Text] ancestor will be ignored.
+  /// If enabled, only [RichText] widgets will be matched. This *implicitly*
+  /// matches [Text] widgets as well since they always insert a [RichText]
+  /// child.
+  ///
+  /// In either case, [EditableText] widgets will also be matched.
+  final bool findRichText;
 
   @override
   String get description => 'text "$text"';
@@ -558,15 +641,37 @@ class _TextFinder extends MatchFinder {
   @override
   bool matches(Element candidate) {
     final Widget widget = candidate.widget;
+    if (widget is EditableText)
+      return _matchesEditableText(widget);
+
+    if (!findRichText)
+      return _matchesNonRichText(widget);
+    // It would be sufficient to always use _matchesRichText if we wanted to
+    // match both standalone RichText widgets as well as Text widgets. However,
+    // the find.text() finder used to always ignore standalone RichText widgets,
+    // which is why we need the _matchesNonRichText method in order to not be
+    // backwards-compatible and not break existing tests.
+    return _matchesRichText(widget);
+  }
+
+  bool _matchesRichText(Widget widget) {
+    if (widget is RichText)
+      return widget.text.toPlainText() == text;
+    return false;
+  }
+
+  bool _matchesNonRichText(Widget widget) {
     if (widget is Text) {
       if (widget.data != null)
         return widget.data == text;
       assert(widget.textSpan != null);
       return widget.textSpan!.toPlainText() == text;
-    } else if (widget is EditableText) {
-      return widget.controller.text == text;
     }
     return false;
+  }
+
+  bool _matchesEditableText(EditableText widget) {
+    return widget.controller.text == text;
   }
 }
 
@@ -619,6 +724,26 @@ class _WidgetTypeFinder extends MatchFinder {
   @override
   bool matches(Element candidate) {
     return candidate.widget.runtimeType == widgetType;
+  }
+}
+
+class _WidgetImageFinder extends MatchFinder {
+  _WidgetImageFinder(this.image, { bool skipOffstage = true }) : super(skipOffstage: skipOffstage);
+
+  final ImageProvider image;
+
+  @override
+  String get description => 'image "$image"';
+
+  @override
+  bool matches(Element candidate) {
+    final Widget widget = candidate.widget;
+    if (widget is Image) {
+      return widget.image == image;
+    } else if (widget is FadeInImage) {
+      return widget.image == image;
+    }
+    return false;
   }
 }
 

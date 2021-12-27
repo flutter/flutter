@@ -21,7 +21,6 @@ void main() {
   setUp(() {
     memoryFileSystem = MemoryFileSystem.test();
     fakePlatform = FakePlatform(
-      operatingSystem: 'linux',
       environment: <String, String>{
         'HOME': '/',
       },
@@ -96,7 +95,7 @@ void main() {
   testWithoutContext('Config does not error on a normally fatal file system exception', () {
     final BufferLogger bufferLogger = BufferLogger.test();
     final File file = ErrorHandlingFile(
-      platform: FakePlatform(operatingSystem: 'linux'),
+      platform: FakePlatform(),
       fileSystem: MemoryFileSystem.test(),
       delegate: FakeFile('testfile'),
     );

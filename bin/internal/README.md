@@ -25,7 +25,3 @@ of the `flutter/plugins` repository to be used for testing. The
 `flutter/flutter`; it is only used as part of the test suite for
 verification, and the pinned version here makes sure that tests are
 deterministic at each `flutter/flutter` commit.
-
-The `bin/internal/devtools.version` file specifies the version of the
-`devtools` package on `pub` that should be activated when running the
-Flutter command line tool.

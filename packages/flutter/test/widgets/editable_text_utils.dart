@@ -45,3 +45,26 @@ Offset textOffsetToPosition(WidgetTester tester, int offset) {
   expect(endpoints.length, 1);
   return endpoints[0].point + const Offset(0.0, -2.0);
 }
+
+// Simple controller that builds a WidgetSpan with 100 height.
+class OverflowWidgetTextEditingController extends TextEditingController {
+  @override
+  TextSpan buildTextSpan({
+    required BuildContext context,
+    TextStyle? style,
+    required bool withComposing,
+  }) {
+    return TextSpan(
+      style: style,
+      children: <InlineSpan>[
+        const TextSpan(text: 'Hi'),
+        WidgetSpan(
+          child: Container(
+            color: Colors.redAccent,
+            height: 100.0,
+          ),
+        ),
+      ],
+    );
+  }
+}

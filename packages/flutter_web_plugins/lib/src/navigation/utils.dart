@@ -11,7 +11,7 @@ final AnchorElement _urlParsingNode = AnchorElement();
 /// Example: for the url `http://example.com/foo`, the extracted pathname will
 /// be `/foo`.
 String extractPathname(String url) {
-  _urlParsingNode.href = url;
+  _urlParsingNode.href = url; // ignore: unsafe_html, node is never exposed to the user
   final String pathname = _urlParsingNode.pathname ?? '';
   return (pathname.isEmpty || pathname[0] == '/') ? pathname : '/$pathname';
 }

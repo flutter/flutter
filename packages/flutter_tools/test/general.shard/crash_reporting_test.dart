@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:convert';
 
 import 'package:file/file.dart';
@@ -12,8 +10,6 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/doctor.dart';
-import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/crash_reporting.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
@@ -25,18 +21,19 @@ import '../src/fake_http_client.dart';
 import '../src/fake_process_manager.dart';
 
 void main() {
-  BufferLogger logger;
-  FileSystem fs;
-  TestUsage testUsage;
-  Platform platform;
-  OperatingSystemUtils operatingSystemUtils;
+  late BufferLogger logger;
+  late FileSystem fs;
+  late TestUsage testUsage;
+  late Platform platform;
+  late OperatingSystemUtils operatingSystemUtils;
+  late StackTrace stackTrace;
 
   setUp(() async {
     logger = BufferLogger.test();
     fs = MemoryFileSystem.test();
     testUsage = TestUsage();
 
-    platform = FakePlatform(environment: <String, String>{}, operatingSystem: 'linux');
+    platform = FakePlatform(environment: <String, String>{});
     operatingSystemUtils = OperatingSystemUtils(
       fileSystem: fs,
       logger: logger,
@@ -45,6 +42,9 @@ void main() {
     );
 
     MockCrashReportSender.sendCalls = 0;
+    stackTrace = StackTrace.fromString('''
+#0      _File.open.<anonymous closure> (dart:io/file_impl.dart:366:9)
+#1      _rootRunUnary (dart:async/zone.dart:1141:38)''');
   });
 
   Future<void> verifyCrashReportSent(RequestInfo crashInfo, {
@@ -62,15 +62,15 @@ void main() {
         'version': 'test-version',
       },
     ));
-    expect(crashInfo.fields['uuid'], testUsage.clientId);
-    expect(crashInfo.fields['product'], 'Flutter_Tools');
-    expect(crashInfo.fields['version'], 'test-version');
-    expect(crashInfo.fields['osName'], 'linux');
-    expect(crashInfo.fields['osVersion'], 'Linux');
-    expect(crashInfo.fields['type'], 'DartError');
-    expect(crashInfo.fields['error_runtime_type'], 'StateError');
-    expect(crashInfo.fields['error_message'], 'Bad state: Test bad state error');
-    expect(crashInfo.fields['comments'], 'crash');
+    expect(crashInfo.fields?['uuid'], testUsage.clientId);
+    expect(crashInfo.fields?['product'], 'Flutter_Tools');
+    expect(crashInfo.fields?['version'], 'test-version');
+    expect(crashInfo.fields?['osName'], 'linux');
+    expect(crashInfo.fields?['osVersion'], 'Linux');
+    expect(crashInfo.fields?['type'], 'DartError');
+    expect(crashInfo.fields?['error_runtime_type'], 'StateError');
+    expect(crashInfo.fields?['error_message'], 'Bad state: Test bad state error');
+    expect(crashInfo.fields?['comments'], 'crash');
 
     expect(logger.traceText, contains('Sending crash report to Google.'));
     expect(logger.traceText, contains('Crash report sent (report ID: test-report-id)'));
@@ -112,7 +112,7 @@ void main() {
 
     await crashReportSender.sendReport(
       error: StateError('Test bad state error'),
-      stackTrace: null,
+      stackTrace: stackTrace,
       getFlutterVersion: () => 'test-version',
       command: 'crash',
     );
@@ -138,7 +138,7 @@ void main() {
 
       await crashReportSender.sendReport(
         error: StateError('Test bad state error'),
-        stackTrace: null,
+        stackTrace: stackTrace,
         getFlutterVersion: () => 'test-version',
         command: 'crash',
       );
@@ -157,7 +157,7 @@ void main() {
 
       await crashReportSender.sendReport(
         error: StateError('Test bad state error'),
-        stackTrace: null,
+        stackTrace: stackTrace,
         getFlutterVersion: () => 'test-version',
         command: 'crash',
       );
@@ -176,7 +176,7 @@ void main() {
 
       await crashReportSender.sendReport(
         error: StateError('Test bad state error'),
-        stackTrace: null,
+        stackTrace: stackTrace,
         getFlutterVersion: () => 'test-version',
         command: 'crash',
       );
@@ -195,7 +195,7 @@ void main() {
 
       await crashReportSender.sendReport(
         error: ClientException('Test bad state error'),
-        stackTrace: null,
+        stackTrace: stackTrace,
         getFlutterVersion: () => 'test-version',
         command: 'crash',
       );
@@ -216,28 +216,28 @@ void main() {
 
       await crashReportSender.sendReport(
         error: StateError('Test bad state error'),
-        stackTrace: null,
+        stackTrace: stackTrace,
         getFlutterVersion: () => 'test-version',
         command: 'crash',
       );
 
       await crashReportSender.sendReport(
         error: StateError('Test bad state error'),
-        stackTrace: null,
+        stackTrace: stackTrace,
         getFlutterVersion: () => 'test-version',
         command: 'crash',
       );
 
       await crashReportSender.sendReport(
         error: StateError('Test bad state error'),
-        stackTrace: null,
+        stackTrace: stackTrace,
         getFlutterVersion: () => 'test-version',
         command: 'crash',
       );
 
       await crashReportSender.sendReport(
         error: StateError('Test bad state error'),
-        stackTrace: null,
+        stackTrace: stackTrace,
         getFlutterVersion: () => 'test-version',
         command: 'crash',
       );
@@ -247,8 +247,8 @@ void main() {
     });
 
     testWithoutContext('should not send a crash report if on a user-branch', () async {
-      String method;
-      Uri uri;
+      String? method;
+      Uri? uri;
 
       final MockClient mockClient = MockClient((Request request) async {
         method = request.method;
@@ -270,7 +270,7 @@ void main() {
 
       await crashReportSender.sendReport(
         error: StateError('Test bad state error'),
-        stackTrace: null,
+        stackTrace: stackTrace,
         getFlutterVersion: () => '[user-branch]/v1.2.3',
         command: 'crash',
       );
@@ -283,14 +283,13 @@ void main() {
     });
 
     testWithoutContext('can override base URL', () async {
-      Uri uri;
+      Uri? uri;
       final MockClient mockClient = MockClient((Request request) async {
         uri = request.url;
         return Response('test-report-id', 200);
       });
 
       final Platform environmentPlatform = FakePlatform(
-        operatingSystem: 'linux',
         environment: <String, String>{
           'HOME': '/',
           'FLUTTER_CRASH_SERVER_BASE_URL': 'https://localhost:12345/fake_server',
@@ -308,7 +307,7 @@ void main() {
 
       await crashReportSender.sendReport(
         error: StateError('Test bad state error'),
-        stackTrace: null,
+        stackTrace: stackTrace,
         getFlutterVersion: () => 'test-version',
         command: 'crash',
       );
@@ -330,9 +329,9 @@ void main() {
 }
 
 class RequestInfo {
-  String method;
-  Uri uri;
-  Map<String, String> fields;
+  String? method;
+  Uri? uri;
+  Map<String, String>? fields;
 }
 
 class MockCrashReportSender extends MockClient {
@@ -342,21 +341,20 @@ class MockCrashReportSender extends MockClient {
     crashInfo.uri = request.url;
 
     // A very ad-hoc multipart request parser. Good enough for this test.
-    String boundary = request.headers['Content-Type'];
-    boundary = boundary.substring(boundary.indexOf('boundary=') + 9);
+    String? boundary = request.headers['Content-Type'];
+    boundary = boundary?.substring(boundary.indexOf('boundary=') + 9);
     crashInfo.fields = Map<String, String>.fromIterable(
       utf8.decode(request.bodyBytes)
         .split('--$boundary')
-        .map<List<String>>((String part) {
-        final Match nameMatch = RegExp(r'name="(.*)"').firstMatch(part);
+        .map<List<String>?>((String part) {
+        final Match? nameMatch = RegExp(r'name="(.*)"').firstMatch(part);
         if (nameMatch == null) {
           return null;
         }
-        final String name = nameMatch[1];
+        final String name = nameMatch[1]!;
         final String value = part.split('\n').skip(2).join('\n').trim();
         return <String>[name, value];
-      })
-        .where((List<String> pair) => pair != null),
+      }).whereType<List<String>>(),
       key: (dynamic key) {
         final List<String> pair = key as List<String>;
         return pair[0];
@@ -380,14 +378,4 @@ class CrashingCrashReportSender extends MockClient {
   CrashingCrashReportSender(Object exception) : super((Request request) async {
     throw exception;
   });
-}
-
-/// A DoctorValidatorsProvider that overrides the default validators without
-/// overriding the doctor.
-class FakeDoctorValidatorsProvider implements DoctorValidatorsProvider {
-  @override
-  List<DoctorValidator> get validators => <DoctorValidator>[];
-
-  @override
-  List<Workflow> get workflows => <Workflow>[];
 }

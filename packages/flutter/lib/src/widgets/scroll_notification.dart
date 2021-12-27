@@ -144,7 +144,12 @@ class ScrollUpdateNotification extends ScrollNotification {
     required BuildContext context,
     this.dragDetails,
     this.scrollDelta,
-  }) : super(metrics: metrics, context: context);
+    int? depth,
+  }) : super(metrics: metrics, context: context) {
+    if (depth != null) {
+      _depth = depth;
+    }
+  }
 
   /// If the [Scrollable] changed its scroll position because of a drag, the
   /// details about that drag update.

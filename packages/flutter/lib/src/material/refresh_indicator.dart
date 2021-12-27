@@ -120,7 +120,7 @@ class RefreshIndicator extends StatefulWidget {
     this.notificationPredicate = defaultScrollNotificationPredicate,
     this.semanticsLabel,
     this.semanticsValue,
-    this.strokeWidth = 2.0,
+    this.strokeWidth = RefreshProgressIndicator.defaultStrokeWidth,
     this.triggerMode = RefreshIndicatorTriggerMode.onEdge,
   }) : assert(child != null),
        assert(onRefresh != null),
@@ -346,7 +346,11 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
         case _RefreshIndicatorMode.drag:
           _dismiss(_RefreshIndicatorMode.canceled);
           break;
-        default:
+        case _RefreshIndicatorMode.canceled:
+        case _RefreshIndicatorMode.done:
+        case _RefreshIndicatorMode.refresh:
+        case _RefreshIndicatorMode.snap:
+        case null:
           // do nothing
           break;
       }
@@ -407,14 +411,17 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
     setState(() {
       _mode = newMode;
     });
-    switch (_mode) {
+    switch (_mode!) {
       case _RefreshIndicatorMode.done:
         await _scaleController.animateTo(1.0, duration: _kIndicatorScaleDuration);
         break;
       case _RefreshIndicatorMode.canceled:
         await _positionController.animateTo(0.0, duration: _kIndicatorScaleDuration);
         break;
-      default:
+      case _RefreshIndicatorMode.armed:
+      case _RefreshIndicatorMode.drag:
+      case _RefreshIndicatorMode.refresh:
+      case _RefreshIndicatorMode.snap:
         assert(false);
     }
     if (mounted && _mode == newMode) {

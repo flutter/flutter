@@ -156,7 +156,7 @@ class _ListDemoState extends State<ReorderableListDemo> {
           ),
         );
         break;
-      default:
+      case null:
         listTile = Container(
           key: Key(item.value),
         );

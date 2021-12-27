@@ -701,7 +701,6 @@ void main() {
     expect(
       const SliverGeometry(
         scrollExtent: 100.0,
-        paintExtent: 0.0,
         layoutExtent: 20.0,
       ).toString(),
       equals(
@@ -717,7 +716,6 @@ void main() {
         child: RenderSizedBox(const Size(400.0, height)),
     );
     final RenderViewport root = RenderViewport(
-      axisDirection: AxisDirection.down,
       crossAxisDirection: AxisDirection.right,
       offset: ViewportOffset.zero(),
       children: <RenderSliver>[
@@ -760,7 +758,6 @@ void main() {
       child: RenderSizedBox(const Size(viewportWidth, 150.0)),
     );
     final RenderViewport root = RenderViewport(
-      axisDirection: AxisDirection.down,
       crossAxisDirection: AxisDirection.right,
       offset: ViewportOffset.zero(),
       children: <RenderSliver>[
@@ -784,7 +781,6 @@ void main() {
       child: RenderSizedBox(const Size(viewportWidth, 150.0)),
     );
     final RenderViewport root = RenderViewport(
-      axisDirection: AxisDirection.down,
       crossAxisDirection: AxisDirection.right,
       offset: ViewportOffset.zero(),
       children: <RenderSliver>[
@@ -811,7 +807,6 @@ void main() {
       child: RenderSizedBox(const Size(viewportWidth, 150.0)),
     );
     final RenderViewport root = RenderViewport(
-      axisDirection: AxisDirection.down,
       crossAxisDirection: AxisDirection.right,
       offset: ViewportOffset.fixed(100.0),
       children: <RenderSliver>[
