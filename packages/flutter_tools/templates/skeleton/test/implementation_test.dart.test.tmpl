@@ -66,6 +66,32 @@ void main() {
       expect(findApp(ThemeMode.light), findsOneWidget);
     });
   });
+
+  testWidgets('overrides PageTransitionsTheme with ZoomPageTransitionsBuilder for Android', (WidgetTester tester) async {
+    final controller = SettingsController(SettingsService());
+    await controller.loadSettings();
+
+    await tester.pumpWidget(MyApp(settingsController: controller));
+    await tester.pumpAndSettle();
+
+    final app = find.byType(MaterialApp).evaluate().single.widget as MaterialApp;
+    // The theme overrides the default page transition builders
+    // with a custom implementation
+    final defaultBuilders = const PageTransitionsTheme().builders;
+    expect(app.theme!.pageTransitionsTheme.builders != defaultBuilders, true);
+
+    // The app uses the same PageTransitionsTheme for the light and dark themes
+    expect(
+      app.theme!.pageTransitionsTheme.builders,
+      app.darkTheme!.pageTransitionsTheme.builders,
+    );
+
+    // The app uses the ZoomPageTransitionsBuilder for TargetPlatform.android
+    expect(
+      app.theme!.pageTransitionsTheme.builders[TargetPlatform.android],
+      isA<ZoomPageTransitionsBuilder>(),
+    );
+  });
 }
 
 Finder findApp(ThemeMode themeMode) => find.byWidgetPredicate(
