@@ -462,6 +462,7 @@ Future<XcodeBuildResult> buildXcodeProject({
         await globals.processUtils.run(
           <String>[
             'rsync',
+            '-8',
             '-av',
             '--delete',
             expectedOutputDirectory,
