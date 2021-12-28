@@ -6,10 +6,19 @@ source_set("display_list") {
   sources = [
     "display_list.cc",
     "display_list.h",
-    "display_list_canvas.cc",
-    "display_list_canvas.h",
+    "display_list_builder.cc",
+    "display_list_builder.h",
+    "display_list_canvas_dispatcher.cc",
+    "display_list_canvas_dispatcher.h",
+    "display_list_canvas_recorder.cc",
+    "display_list_canvas_recorder.h",
+    "display_list_dispatcher.cc",
+    "display_list_dispatcher.h",
+    "display_list_flags.cc",
+    "display_list_flags.h",
     "display_list_utils.cc",
     "display_list_utils.h",
+    "types.h",
   ]
 
   public_deps = [

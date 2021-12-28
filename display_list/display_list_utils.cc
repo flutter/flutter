@@ -7,7 +7,7 @@
 #include <math.h>
 #include <type_traits>
 
-#include "flutter/display_list/display_list_canvas.h"
+#include "flutter/display_list/display_list_canvas_dispatcher.h"
 #include "flutter/fml/logging.h"
 #include "third_party/skia/include/core/SkMaskFilter.h"
 #include "third_party/skia/include/core/SkPath.h"
