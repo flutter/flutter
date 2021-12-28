@@ -400,6 +400,21 @@ void main() {
     expect(scrollable.position.pixels, equals(500.0));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }));
 
+  testWidgets('Tapping the status bar scrolls to top use a more appropriate curve',
+          (WidgetTester tester) async {
+        await tester
+            .pumpWidget(_buildStatusBarTestApp(debugDefaultTargetPlatformOverride));
+        final ScrollableState scrollable = tester.state(find.byType(Scrollable));
+        scrollable.position.jumpTo(500.0);
+        expect(scrollable.position.pixels, equals(500.0));
+        await tester.tapAt(const Offset(100.0, 10.0));
+        await tester.pumpAndSettle();
+        expect(scrollable.position.pixels, equals(0.0));
+      },
+      variant: const TargetPlatformVariant(
+          <TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}));
+
+
   testWidgets('Bottom sheet cannot overlap app bar', (WidgetTester tester) async {
     final Key sheetKey = UniqueKey();
 
