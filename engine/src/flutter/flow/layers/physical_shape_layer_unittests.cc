@@ -4,7 +4,7 @@
 
 #include "flutter/flow/layers/physical_shape_layer.h"
 
-#include "flutter/display_list/display_list_canvas.h"
+#include "flutter/display_list/display_list_canvas_dispatcher.h"
 #include "flutter/flow/testing/diff_context_test.h"
 #include "flutter/flow/testing/layer_test.h"
 #include "flutter/flow/testing/mock_layer.h"

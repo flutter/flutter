@@ -4,6 +4,7 @@
 
 #include "flutter/lib/ui/painting/picture_recorder.h"
 
+#include "flutter/display_list/display_list.h"
 #include "flutter/lib/ui/painting/canvas.h"
 #include "flutter/lib/ui/painting/picture.h"
 #include "third_party/tonic/converter/dart_converter.h"

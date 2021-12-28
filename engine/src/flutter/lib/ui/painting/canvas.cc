@@ -7,6 +7,8 @@
 
 #include <cmath>
 
+#include "flutter/display_list/display_list_builder.h"
+#include "flutter/display_list/display_list_canvas_dispatcher.h"
 #include "flutter/flow/layers/physical_shape_layer.h"
 #include "flutter/lib/ui/painting/image.h"
 #include "flutter/lib/ui/painting/matrix.h"
