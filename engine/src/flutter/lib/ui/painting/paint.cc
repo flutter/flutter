@@ -4,6 +4,7 @@
 
 #include "flutter/lib/ui/painting/paint.h"
 
+#include "flutter/display_list/display_list_builder.h"
 #include "flutter/fml/logging.h"
 #include "flutter/lib/ui/painting/color_filter.h"
 #include "flutter/lib/ui/painting/image_filter.h"

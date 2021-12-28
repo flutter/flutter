@@ -8,6 +8,7 @@
 #include <optional>
 
 #include "flutter/display_list/display_list.h"
+#include "flutter/display_list/display_list_builder.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/macros.h"
 #include "third_party/skia/include/core/SkMaskFilter.h"

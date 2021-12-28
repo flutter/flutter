@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 #include "flutter/display_list/display_list.h"
+#include "flutter/display_list/display_list_builder.h"
 #include "flutter/flow/raster_cache.h"
-
 #include "flutter/flow/testing/mock_raster_cache.h"
 #include "gtest/gtest.h"
 #include "third_party/skia/include/core/SkCanvas.h"
