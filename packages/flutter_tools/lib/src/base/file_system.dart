@@ -184,12 +184,25 @@ class LocalFileSystem extends local_fs.LocalFileSystem {
     List<ProcessSignal> fatalSignals = Signals.defaultExitSignals,
   }) : this(signals, fatalSignals, null);
 
+  void deletePreviousTempDirs() {
+    final List<FileSystemEntity> tempEntities = super.systemTempDirectory.listSync();
+
+    for (final FileSystemEntity entity in tempEntities) {
+      if (entity is Directory) {
+        if (entity.path.contains(r'flutter_tools.')) {
+          _tryToDelete(entity);
+        }
+      }
+    }
+  }
+
   Directory? _systemTemp;
   final Map<ProcessSignal, Object> _signalTokens = <ProcessSignal, Object>{};
   final ShutdownHooks? _shutdownHooks;
 
   Future<void> dispose() async {
     _tryToDeleteTemp();
+
     for (final MapEntry<ProcessSignal, Object> signalToken in _signalTokens.entries) {
       await _signals.removeHandler(signalToken.key, signalToken.value);
     }
@@ -199,17 +212,20 @@ class LocalFileSystem extends local_fs.LocalFileSystem {
   final Signals _signals;
   final List<ProcessSignal> _fatalSignals;
 
-  void _tryToDeleteTemp() {
+  void _tryToDelete(FileSystemEntity? entity) {
     try {
-      if (_systemTemp?.existsSync() ?? false) {
-        _systemTemp?.deleteSync(recursive: true);
+      if (entity?.existsSync() ?? false) {
+        entity?.deleteSync(recursive: true);
       }
     } on FileSystemException {
       // ignore.
     }
-    _systemTemp = null;
   }
 
+  void _tryToDeleteTemp() {
+    _tryToDelete(_systemTemp);
+    _systemTemp = null;
+  }
   // This getter returns a fresh entry under /tmp, like
   // /tmp/flutter_tools.abcxyz, then the rest of the tool creates /tmp entries
   // under that, like /tmp/flutter_tools.abcxyz/flutter_build_stuff.123456.

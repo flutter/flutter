@@ -144,43 +144,6 @@ void main() {
       expect(fsUtils.escapePath(r'foo\cool.dart'), r'foo\cool.dart');
     });
   });
-
-  group('LocalFileSystem', () {
-    late FakeProcessSignal fakeSignal;
-    late ProcessSignal signalUnderTest;
-
-    setUp(() {
-      fakeSignal = FakeProcessSignal();
-      signalUnderTest = ProcessSignal(fakeSignal);
-    });
-
-    testWithoutContext('deletes system temp entry on a fatal signal', () async {
-      final Completer<void> completer = Completer<void>();
-      final Signals signals = Signals.test();
-      final LocalFileSystem localFileSystem = LocalFileSystem.test(
-        signals: signals,
-        fatalSignals: <ProcessSignal>[signalUnderTest],
-      );
-      final Directory temp = localFileSystem.systemTempDirectory;
-
-      signals.addHandler(signalUnderTest, (ProcessSignal s) {
-        completer.complete();
-      });
-
-      expect(temp.existsSync(), isTrue);
-
-      fakeSignal.controller.add(fakeSignal);
-      await completer.future;
-
-      expect(temp.existsSync(), isFalse);
-    });
-  });
 }
 
-class FakeProcessSignal extends Fake implements io.ProcessSignal {
-  final StreamController<io.ProcessSignal> controller = StreamController<io.ProcessSignal>();
-
-  @override
-  Stream<io.ProcessSignal> watch() => controller.stream;
-}
 class FakeFile extends Fake implements File { }

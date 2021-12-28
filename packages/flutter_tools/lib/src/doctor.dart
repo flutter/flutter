@@ -124,9 +124,9 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
         ),
       if (windowsWorkflow!.appliesToHostPlatform)
         visualStudioValidator!,
-      if (ideValidators.isNotEmpty)
-        ...ideValidators
-      else
+      //if (ideValidators.isNotEmpty)
+      //  ...ideValidators
+      //else
         NoIdeValidator(),
       if (proxyValidator.shouldShow)
         proxyValidator,
