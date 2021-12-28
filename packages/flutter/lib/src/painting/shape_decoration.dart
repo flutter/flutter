@@ -237,12 +237,31 @@ class ShapeDecoration extends Decoration {
       if (t == 1.0)
         return b;
     }
+
+    Color? lerpColor = Color.lerp(a?.color, b?.color, t);
+    Gradient? lerpGradient = Gradient.lerp(a?.gradient, b?.gradient, t);
+    final DecorationImage? lerpImage = t < 0.5 ? a!.image : b!.image; // TODO(ianh): cross-fade the image
+    final List<BoxShadow>? lerpShadows = BoxShadow.lerpList(a?.shadows, b?.shadows, t);
+    final ShapeBorder lerpShape = ShapeBorder.lerp(a?.shape, b?.shape, t)!;
+
+    // The [color] and [gradient] properties are mutually exclusive, one (or
+    // both) of them must be null.
+    if (lerpColor != null && lerpGradient != null) {
+      if (t < 0.5) {
+        lerpColor = a?.color == null ? null : lerpColor;
+        lerpGradient = a?.gradient == null ? null : lerpGradient;
+      } else {
+        lerpColor = b?.color == null ? null : lerpColor;
+        lerpGradient = b?.gradient == null ? null : lerpGradient;
+      }
+    }
+
     return ShapeDecoration(
-      color: Color.lerp(a?.color, b?.color, t),
-      gradient: Gradient.lerp(a?.gradient, b?.gradient, t),
-      image: t < 0.5 ? a!.image : b!.image, // TODO(ianh): cross-fade the image
-      shadows: BoxShadow.lerpList(a?.shadows, b?.shadows, t),
-      shape: ShapeBorder.lerp(a?.shape, b?.shape, t)!,
+      color: lerpColor,
+      gradient: lerpGradient,
+      image: lerpImage,
+      shadows: lerpShadows,
+      shape: lerpShape,
     );
   }
 

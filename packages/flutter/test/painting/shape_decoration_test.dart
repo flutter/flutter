@@ -55,6 +55,30 @@ void main() {
     expect(b.hitTest(size, const Offset(20.0, 50.0)), isTrue);
   });
 
+  test('ShapeDecoration lerp between gradient and color', () {
+    // Regression test for https://github.com/flutter/flutter/issues/93953
+
+    const Color colorR = Color(0xffff0000);
+    const Color colorG = Color(0xff00ff00);
+    const Gradient gradient = LinearGradient(colors: <Color>[colorR, colorG]);
+    const ShapeDecoration a = ShapeDecoration(
+      color: colorR,
+      shape: CircleBorder(),
+    );
+    const ShapeDecoration b = ShapeDecoration(
+      gradient: gradient,
+      shape: RoundedRectangleBorder(),
+    );
+    expect(ShapeDecoration.lerp(a, b, 0.0), a);
+    expect(ShapeDecoration.lerp(a, b, 1.0), b);
+
+    expect(ShapeDecoration.lerp(a, b, 0.49)!.color, isNotNull);
+    expect(ShapeDecoration.lerp(a, b, 0.49)!.gradient, null);
+
+    expect(ShapeDecoration.lerp(a, b, 0.5)!.color, null);
+    expect(ShapeDecoration.lerp(a, b, 0.5)!.gradient, isNotNull);
+  });
+
   test('ShapeDecoration.image RTL test', () async {
     final ui.Image image = await createTestImage(width: 100, height: 200);
     final List<int> log = <int>[];
