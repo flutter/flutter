@@ -21,6 +21,7 @@ void main() {
       final Directory oldTempDir = LocalFileSystem.test(signals: signals)
           .systemTempDirectory
           .createTempSync('foo');
+      oldTempDir.childFile('bar.txt').writeAsStringSync('Hello, world!');
       // since we do not call .dispose() on the fs, the temp directory is not
       // deleted
       expect(oldTempDir.existsSync(), true);
