@@ -11,12 +11,12 @@
 #include "impeller/playground/playground.h"
 #include "impeller/renderer/allocator.h"
 #include "impeller/renderer/backend/metal/context_mtl.h"
+#include "impeller/renderer/backend/metal/surface_mtl.h"
 #include "impeller/renderer/backend/metal/texture_mtl.h"
 #include "impeller/renderer/context.h"
 #include "impeller/renderer/formats.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/renderer.h"
-#include "impeller/renderer/surface.h"
 
 #define GLFW_INCLUDE_NONE
 #import "third_party/glfw/include/GLFW/glfw3.h"
@@ -138,81 +138,17 @@ bool Playground::OpenPlaygroundHere(Renderer::RenderCallback render_callback) {
       return true;
     }
 
-    auto current_drawable = [layer nextDrawable];
-
-    if (!current_drawable) {
-      VALIDATION_LOG << "Could not acquire current drawable.";
-      return false;
-    }
-
-    TextureDescriptor msaa_tex_desc;
-    msaa_tex_desc.type = TextureType::k2DMultisample;
-    msaa_tex_desc.sample_count = SampleCount::kCount4;
-    msaa_tex_desc.format = PixelFormat::kB8G8R8A8UNormInt;
-    msaa_tex_desc.size = {
-        static_cast<ISize::Type>(current_drawable.texture.width),
-        static_cast<ISize::Type>(current_drawable.texture.height)};
-    msaa_tex_desc.usage = static_cast<uint64_t>(TextureUsage::kRenderTarget);
-
-    auto msaa_tex =
-        renderer_.GetContext()->GetPermanentsAllocator()->CreateTexture(
-            StorageMode::kDeviceTransient, msaa_tex_desc);
-    if (!msaa_tex) {
-      FML_LOG(ERROR) << "Could not allocate MSAA resolve texture.";
-      return false;
-    }
-
-    msaa_tex->SetLabel("PlaygroundMainColor4xMSAA");
-
-    TextureDescriptor onscreen_tex_desc;
-    onscreen_tex_desc.format = PixelFormat::kB8G8R8A8UNormInt;
-    onscreen_tex_desc.size = msaa_tex_desc.size;
-    onscreen_tex_desc.usage =
-        static_cast<uint64_t>(TextureUsage::kRenderTarget);
-
-    ColorAttachment color0;
-    color0.texture = msaa_tex;
-    color0.clear_color = Color::DarkSlateGray();
-    color0.load_action = LoadAction::kClear;
-    color0.store_action = StoreAction::kMultisampleResolve;
-    color0.resolve_texture = std::make_shared<TextureMTL>(
-        onscreen_tex_desc, current_drawable.texture);
-
-    TextureDescriptor stencil0_tex;
-    stencil0_tex.type = TextureType::k2DMultisample;
-    stencil0_tex.sample_count = SampleCount::kCount4;
-    stencil0_tex.format = PixelFormat::kD32FloatS8UNormInt;
-    stencil0_tex.size = msaa_tex_desc.size;
-    stencil0_tex.usage =
-        static_cast<TextureUsageMask>(TextureUsage::kRenderTarget);
-    auto stencil_texture =
-        renderer_.GetContext()->GetPermanentsAllocator()->CreateTexture(
-            StorageMode::kDeviceTransient, stencil0_tex);
-    stencil_texture->SetLabel("PlaygroundMainStencil");
-
-    StencilAttachment stencil0;
-    stencil0.texture = stencil_texture;
-    stencil0.clear_stencil = 0;
-    stencil0.load_action = LoadAction::kClear;
-    stencil0.store_action = StoreAction::kDontCare;
-
-    RenderTarget desc;
-    desc.SetColorAttachment(color0, 0u);
-    desc.SetStencilAttachment(stencil0);
-
-    Surface surface(desc);
-
     Renderer::RenderCallback wrapped_callback = [render_callback](auto& pass) {
       pass.SetLabel("Playground Main Render Pass");
       return render_callback(pass);
     };
 
-    if (!renderer_.Render(surface, wrapped_callback)) {
+    if (!renderer_.Render(SurfaceMTL::WrapCurrentMetalLayerDrawable(
+                              renderer_.GetContext(), layer),
+                          wrapped_callback)) {
       VALIDATION_LOG << "Could not render into the surface.";
       return false;
     }
-
-    [current_drawable present];
   }
 
   return true;
