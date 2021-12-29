@@ -3678,4 +3678,56 @@ void main() {
 
     expect(tester.takeException(), null);
   });
+
+  group('BorderRadius property works properly for DropdownButtonFormField', () {
+    const double radius = 20;
+
+    Widget build({List<String>? items, String? value, BorderRadius? borderRadius}) {
+      return MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: DropdownButtonFormField<String>(
+              borderRadius: borderRadius,
+              value: value,
+              items: items!
+                .map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+              }).toList(),
+              onChanged: (_) { },
+            ),
+          ),
+        ),
+      );
+    }
+
+    testWidgets('When multiple items are available', (WidgetTester tester) async {
+
+      await tester.pumpWidget(build(items: <String>['One', 'Two', 'Three'], value: 'One', borderRadius: BorderRadius.circular(radius)));
+
+      await tester.tap(find.text('One'));
+      await tester.pumpAndSettle();
+
+      final InkWell firstItem = tester.widget(find.widgetWithText(InkWell, 'One'));
+      final InkWell lastItem = tester.widget(find.widgetWithText(InkWell, 'Three'));
+
+      expect(firstItem.borderRadius, const BorderRadius.vertical(top: Radius.circular(radius)));
+      expect(lastItem.borderRadius, const BorderRadius.vertical(bottom: Radius.circular(radius)));  
+    });
+
+    testWidgets('When only one item is available', (WidgetTester tester) async {
+
+      await tester.pumpWidget(build(items: <String>['One'], value: 'One', borderRadius: BorderRadius.circular(radius)));
+
+      await tester.tap(find.text('One'));
+      await tester.pumpAndSettle();
+
+      final InkWell item = tester.widget(find.widgetWithText(InkWell, 'One'));
+      const BorderRadius borderRadius = BorderRadius.all(Radius.circular(20.0));
+
+      expect(item.borderRadius, borderRadius);
+    });
+  });
 }
