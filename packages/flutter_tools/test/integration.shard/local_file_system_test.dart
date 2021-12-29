@@ -22,7 +22,7 @@ void main() {
       signalUnderTest = ProcessSignal(fakeSignal);
     });
 
-    testWithoutContext('cleans up previous temp dirs on instantiation', () async {
+    testWithoutContext('.deletePreviousTempDirs() deletes previous temp dirs', () async {
       final Signals signals = Signals.test();
       final Directory oldTempDir = LocalFileSystem.test(signals: signals)
           .systemTempDirectory
