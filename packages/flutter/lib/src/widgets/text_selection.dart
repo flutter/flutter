@@ -1550,8 +1550,8 @@ class TextSelectionGestureDetectorBuilder {
               // On macOS/iOS/iPadOS a touch tap places the cursor at the edge
               // of the word.
               final TextSelection? previousSelection = renderEditable.selection;
-              final TextSelection newSelection = renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
-              if (previousSelection != newSelection) {
+              renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
+              if (previousSelection != renderEditable.selection) {
                   editableText.hideToolbar(false);
               } else {
                 if (renderEditable.hasFocus && renderEditable.selectionEnabled) {
