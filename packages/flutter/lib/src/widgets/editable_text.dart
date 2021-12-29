@@ -3648,9 +3648,14 @@ class _UpdateTextSelectionAction<T extends DirectionalCaretMovementIntent> exten
       ? textBoundary.getTrailingTextBoundaryAt(extent)
       : textBoundary.getLeadingTextBoundaryAt(extent);
 
-    final TextSelection newSelection = collapseSelection
-      ? TextSelection.fromPosition(newExtent)
-      : textBoundarySelection.extendTo(newExtent);
+    late final TextSelection newSelection;
+    if (collapseSelection) {
+      newSelection = TextSelection.fromPosition(newExtent);
+    } else {
+      newSelection = intent.expand
+          ? textBoundarySelection.expandTo(newExtent, textBoundarySelection.isCollapsed)
+          : textBoundarySelection.extendTo(newExtent);
+    }
 
     // If collapseAtReversal is true and would have an effect, collapse it.
     if (!selection.isCollapsed && intent.collapseAtReversal
