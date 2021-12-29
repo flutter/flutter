@@ -7,7 +7,7 @@
 #include <memory>
 
 #include "flutter/fml/macros.h"
-#include "impeller/entity/content_renderer.h"
+#include "impeller/entity/content_context.h"
 #include "impeller/renderer/context.h"
 
 namespace impeller {
@@ -15,11 +15,11 @@ namespace impeller {
 struct Picture;
 class RenderPass;
 
-class AiksRenderer {
+class AiksContext {
  public:
-  AiksRenderer(std::shared_ptr<Context> context);
+  AiksContext(std::shared_ptr<Context> context);
 
-  ~AiksRenderer();
+  ~AiksContext();
 
   bool IsValid() const;
 
@@ -27,10 +27,10 @@ class AiksRenderer {
 
  private:
   std::shared_ptr<Context> context_;
-  std::unique_ptr<ContentRenderer> content_renderer_;
+  std::unique_ptr<ContentContext> content_context_;
   bool is_valid_ = false;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(AiksRenderer);
+  FML_DISALLOW_COPY_AND_ASSIGN(AiksContext);
 };
 
 }  // namespace impeller

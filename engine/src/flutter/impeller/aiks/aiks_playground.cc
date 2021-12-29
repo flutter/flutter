@@ -4,7 +4,7 @@
 
 #include "impeller/aiks/aiks_playground.h"
 
-#include "impeller/aiks/aiks_renderer.h"
+#include "impeller/aiks/aiks_context.h"
 
 namespace impeller {
 
@@ -13,7 +13,7 @@ AiksPlayground::AiksPlayground() = default;
 AiksPlayground::~AiksPlayground() = default;
 
 bool AiksPlayground::OpenPlaygroundHere(const Picture& picture) {
-  AiksRenderer renderer(GetContext());
+  AiksContext renderer(GetContext());
 
   if (!renderer.IsValid()) {
     return false;

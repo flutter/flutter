@@ -4,7 +4,7 @@
 
 #include "impeller/entity/entity_pass.h"
 
-#include "impeller/entity/content_renderer.h"
+#include "impeller/entity/content_context.h"
 #include "impeller/geometry/path_builder.h"
 #include "impeller/renderer/command_buffer.h"
 #include "impeller/renderer/render_pass.h"
@@ -97,7 +97,7 @@ EntityPass* EntityPass::AddSubpass(std::unique_ptr<EntityPass> pass) {
   return subpasses_.emplace_back(std::move(pass)).get();
 }
 
-bool EntityPass::Render(ContentRenderer& renderer,
+bool EntityPass::Render(ContentContext& renderer,
                         RenderPass& parent_pass) const {
   for (const auto& entity : entities_) {
     if (!entity.Render(renderer, parent_pass)) {

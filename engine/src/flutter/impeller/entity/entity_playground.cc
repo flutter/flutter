@@ -4,7 +4,7 @@
 
 #include "impeller/entity/entity_playground.h"
 
-#include "impeller/entity/content_renderer.h"
+#include "impeller/entity/content_context.h"
 
 namespace impeller {
 
@@ -13,12 +13,12 @@ EntityPlayground::EntityPlayground() = default;
 EntityPlayground::~EntityPlayground() = default;
 
 bool EntityPlayground::OpenPlaygroundHere(Entity entity) {
-  ContentRenderer renderer(GetContext());
-  if (!renderer.IsValid()) {
+  ContentContext context_context(GetContext());
+  if (!context_context.IsValid()) {
     return false;
   }
   Renderer::RenderCallback callback = [&](RenderPass& pass) -> bool {
-    return entity.Render(renderer, pass);
+    return entity.Render(context_context, pass);
   };
   return Playground::OpenPlaygroundHere(callback);
 }

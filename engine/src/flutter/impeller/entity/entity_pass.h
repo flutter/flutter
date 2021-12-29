@@ -16,7 +16,7 @@
 
 namespace impeller {
 
-class ContentRenderer;
+class ContentContext;
 
 class EntityPass {
  public:
@@ -45,7 +45,7 @@ class EntityPass {
 
   EntityPass* GetSuperpass() const;
 
-  bool Render(ContentRenderer& renderer, RenderPass& parent_pass) const;
+  bool Render(ContentContext& renderer, RenderPass& parent_pass) const;
 
   void IterateAllEntities(std::function<bool(Entity&)> iterator);
 

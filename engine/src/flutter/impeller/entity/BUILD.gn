@@ -21,8 +21,8 @@ impeller_shaders("entity_shaders") {
 
 impeller_component("entity") {
   sources = [
-    "content_renderer.cc",
-    "content_renderer.h",
+    "content_context.cc",
+    "content_context.h",
     "contents.cc",
     "contents.h",
     "entity.cc",

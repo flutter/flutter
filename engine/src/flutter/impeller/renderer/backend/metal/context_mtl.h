@@ -7,6 +7,7 @@
 #include <Metal/Metal.h>
 
 #include <string>
+#include <vector>
 
 #include "flutter/fml/macros.h"
 #include "impeller/renderer/backend/metal/allocator_mtl.h"

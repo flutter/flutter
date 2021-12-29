@@ -10,7 +10,7 @@
 #include <memory>
 
 #include "flutter/fml/macros.h"
-#include "fml/synchronization/semaphore.h"
+#include "flutter/fml/synchronization/semaphore.h"
 #include "impeller/geometry/size.h"
 #include "impeller/renderer/context.h"
 
@@ -21,9 +21,12 @@ class RenderPass;
 
 class Renderer {
  public:
+  static constexpr size_t kDefaultMaxFramesInFlight = 3u;
+
   using RenderCallback = std::function<bool(RenderPass& pass)>;
 
-  Renderer(std::shared_ptr<Context> context);
+  Renderer(std::shared_ptr<Context> context,
+           size_t max_frames_in_flight = kDefaultMaxFramesInFlight);
 
   ~Renderer();
 

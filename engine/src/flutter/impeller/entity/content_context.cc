@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "impeller/entity/content_renderer.h"
+#include "impeller/entity/content_context.h"
 
 namespace impeller {
 
-ContentRenderer::ContentRenderer(std::shared_ptr<Context> context)
+ContentContext::ContentContext(std::shared_ptr<Context> context)
     : context_(std::move(context)) {
   if (!context_ || !context_->IsValid()) {
     return;
@@ -46,13 +46,13 @@ ContentRenderer::ContentRenderer(std::shared_ptr<Context> context)
   is_valid_ = true;
 }
 
-ContentRenderer::~ContentRenderer() = default;
+ContentContext::~ContentContext() = default;
 
-bool ContentRenderer::IsValid() const {
+bool ContentContext::IsValid() const {
   return is_valid_;
 }
 
-std::shared_ptr<Context> ContentRenderer::GetContext() const {
+std::shared_ptr<Context> ContentContext::GetContext() const {
   return context_;
 }
 

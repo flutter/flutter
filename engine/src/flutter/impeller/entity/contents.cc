@@ -7,7 +7,7 @@
 #include <memory>
 
 #include "flutter/fml/logging.h"
-#include "impeller/entity/content_renderer.h"
+#include "impeller/entity/content_context.h"
 #include "impeller/entity/entity.h"
 #include "impeller/geometry/path_builder.h"
 #include "impeller/geometry/vector.h"
@@ -19,8 +19,8 @@
 
 namespace impeller {
 
-static ContentRenderer::Options OptionsFromPass(const RenderPass& pass) {
-  ContentRenderer::Options opts;
+static ContentContext::Options OptionsFromPass(const RenderPass& pass) {
+  ContentContext::Options opts;
   opts.sample_count = pass.GetRenderTarget().GetSampleCount();
   return opts;
 }
@@ -60,7 +60,7 @@ const std::vector<Color>& LinearGradientContents::GetColors() const {
   return colors_;
 }
 
-bool LinearGradientContents::Render(const ContentRenderer& renderer,
+bool LinearGradientContents::Render(const ContentContext& renderer,
                                     const Entity& entity,
                                     RenderPass& pass) const {
   using VS = GradientFillPipeline::VertexShader;
@@ -137,7 +137,7 @@ static VertexBuffer CreateSolidFillVertices(const Path& path,
   return vtx_builder.CreateVertexBuffer(buffer);
 }
 
-bool SolidColorContents::Render(const ContentRenderer& renderer,
+bool SolidColorContents::Render(const ContentContext& renderer,
                                 const Entity& entity,
                                 RenderPass& pass) const {
   if (color_.IsTransparent()) {
@@ -194,7 +194,7 @@ void TextureContents::SetOpacity(Scalar opacity) {
   opacity_ = opacity;
 }
 
-bool TextureContents::Render(const ContentRenderer& renderer,
+bool TextureContents::Render(const ContentContext& renderer,
                              const Entity& entity,
                              RenderPass& pass) const {
   if (texture_ == nullptr) {
@@ -328,7 +328,7 @@ static VertexBuffer CreateSolidStrokeVertices(const Path& path,
   return vtx_builder.CreateVertexBuffer(buffer);
 }
 
-bool SolidStrokeContents::Render(const ContentRenderer& renderer,
+bool SolidStrokeContents::Render(const ContentContext& renderer,
                                  const Entity& entity,
                                  RenderPass& pass) const {
   if (color_.IsTransparent() || stroke_size_ <= 0.0) {
@@ -377,7 +377,7 @@ ClipContents::ClipContents() = default;
 
 ClipContents::~ClipContents() = default;
 
-bool ClipContents::Render(const ContentRenderer& renderer,
+bool ClipContents::Render(const ContentContext& renderer,
                           const Entity& entity,
                           RenderPass& pass) const {
   using VS = ClipPipeline::VertexShader;
