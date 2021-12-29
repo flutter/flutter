@@ -1194,7 +1194,6 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// This value should generally be true for Cupertino routes.
   ///
   /// Returns false by default.
-  ///
   @protected
   bool get ignorePointerWhenCurrentDuringTransitions => false;
 

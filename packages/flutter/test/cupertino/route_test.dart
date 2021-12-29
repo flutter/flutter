@@ -691,6 +691,11 @@ void main() {
 
       await tester.tap(find.text('Home'), warnIfMissed: false); // Home route is not tappable
       expect(homeTapped, false);
+
+      await tester.pumpAndSettle(); // Transition completes
+
+      await tester.tap(find.text('Home'));
+      expect(homeTapped, true);
     });
 
     testWidgets('fullscreenDialog CupertinoPageRoute ignores pointers when route on top of it pops', (WidgetTester tester) async {
@@ -721,6 +726,11 @@ void main() {
 
       await tester.tap(find.text('Home'), warnIfMissed: false); // Home route is not tappable
       expect(homeTapped, false);
+
+      await tester.pumpAndSettle(); // Transition completes
+
+      await tester.tap(find.text('Home'));
+      expect(homeTapped, true);
     });
 
     testWidgets('CupertinoPageRoute ignores pointers when user pop gesture is in progress', (WidgetTester tester) async {
