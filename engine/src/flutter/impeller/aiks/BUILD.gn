@@ -6,8 +6,8 @@ import("../tools/impeller.gni")
 
 impeller_component("aiks") {
   sources = [
-    "aiks_renderer.cc",
-    "aiks_renderer.h",
+    "aiks_context.cc",
+    "aiks_context.h",
     "canvas.cc",
     "canvas.h",
     "image.cc",

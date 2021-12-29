@@ -15,7 +15,7 @@
 
 namespace impeller {
 
-class ContentRenderer;
+class ContentContext;
 class Entity;
 class Surface;
 class RenderPass;
@@ -26,7 +26,7 @@ class Contents {
 
   virtual ~Contents();
 
-  virtual bool Render(const ContentRenderer& renderer,
+  virtual bool Render(const ContentContext& renderer,
                       const Entity& entity,
                       RenderPass& pass) const = 0;
 
@@ -41,7 +41,7 @@ class LinearGradientContents final : public Contents {
   ~LinearGradientContents() override;
 
   // |Contents|
-  bool Render(const ContentRenderer& renderer,
+  bool Render(const ContentContext& renderer,
               const Entity& entity,
               RenderPass& pass) const override;
 
@@ -72,7 +72,7 @@ class SolidColorContents final : public Contents {
   const Color& GetColor() const;
 
   // |Contents|
-  bool Render(const ContentRenderer& renderer,
+  bool Render(const ContentContext& renderer,
               const Entity& entity,
               RenderPass& pass) const override;
 
@@ -99,7 +99,7 @@ class TextureContents final : public Contents {
   const IRect& GetSourceRect() const;
 
   // |Contents|
-  bool Render(const ContentRenderer& renderer,
+  bool Render(const ContentContext& renderer,
               const Entity& entity,
               RenderPass& pass) const override;
 
@@ -126,7 +126,7 @@ class SolidStrokeContents final : public Contents {
   Scalar GetStrokeSize() const;
 
   // |Contents|
-  bool Render(const ContentRenderer& renderer,
+  bool Render(const ContentContext& renderer,
               const Entity& entity,
               RenderPass& pass) const override;
 
@@ -144,7 +144,7 @@ class ClipContents final : public Contents {
   ~ClipContents();
 
   // |Contents|
-  bool Render(const ContentRenderer& renderer,
+  bool Render(const ContentContext& renderer,
               const Entity& entity,
               RenderPass& pass) const override;
 

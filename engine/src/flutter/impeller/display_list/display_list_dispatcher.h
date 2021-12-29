@@ -5,6 +5,7 @@
 #pragma once
 
 #include "flutter/display_list/display_list.h"
+#include "flutter/display_list/display_list_dispatcher.h"
 #include "flutter/fml/macros.h"
 #include "impeller/aiks/canvas.h"
 #include "impeller/aiks/paint.h"
