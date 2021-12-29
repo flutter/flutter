@@ -2437,10 +2437,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
-  /// Creates the selection overlay if it is null.
-  ///
-  /// Returns `true` if the overlay was created, and `false` if it already
-  /// existed.
+  // Creates the selection overlay if it is null.
+  //
+  // Returns `true` if the overlay was created, and `false` if it already
+  // existed.
   bool _createSelectionOverlayIfNeeded() {
      if (_selectionOverlay == null) {
         _selectionOverlay = TextSelectionOverlay(
