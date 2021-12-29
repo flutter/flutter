@@ -14,29 +14,29 @@ import '../src/common.dart';
 
 void main() {
   group('LocalFileSystem', () {
-    late FakeProcessSignal fakeSignal;
-    late ProcessSignal signalUnderTest;
-
-    setUp(() {
-      fakeSignal = FakeProcessSignal();
-      signalUnderTest = ProcessSignal(fakeSignal);
-    });
-
     testWithoutContext('.deletePreviousTempDirs() deletes previous temp dirs', () async {
       final Signals signals = Signals.test();
+      // create one LocalFileSystem and generate a 'flutter_tools' namespaced
+      // temp directory
       final Directory oldTempDir = LocalFileSystem.test(signals: signals)
           .systemTempDirectory
           .createTempSync('foo');
+      // since we do not call .dispose() on the fs, the temp directory is not
+      // deleted
       expect(oldTempDir.existsSync(), true);
+
+      // now create "another" LocalFileSystem, to simulate a second flutter
+      // tools invocation
       final LocalFileSystem localFileSystem = LocalFileSystem.test(
         signals: signals,
-        fatalSignals: <ProcessSignal>[signalUnderTest],
       );
       localFileSystem.deletePreviousTempDirs();
       expect(oldTempDir.existsSync(), false, reason: '${oldTempDir.path} still exists!');
     });
 
     testWithoutContext('deletes system temp entry on a fatal signal', () async {
+      final FakeProcessSignal fakeSignal = FakeProcessSignal();
+      final ProcessSignal signalUnderTest = ProcessSignal(fakeSignal);
       final Completer<void> completer = Completer<void>();
       final Signals signals = Signals.test();
       final LocalFileSystem localFileSystem = LocalFileSystem.test(
