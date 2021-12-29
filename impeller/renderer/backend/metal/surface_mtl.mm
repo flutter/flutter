@@ -43,7 +43,7 @@ std::unique_ptr<Surface> SurfaceMTL::WrapCurrentMetalLayerDrawable(
     return nullptr;
   }
 
-  msaa_tex->SetLabel("PlaygroundMainColor4xMSAA");
+  msaa_tex->SetLabel("ImpellerOnscreenColor4xMSAA");
 
   TextureDescriptor onscreen_tex_desc;
   onscreen_tex_desc.format = PixelFormat::kB8G8R8A8UNormInt;
@@ -67,7 +67,7 @@ std::unique_ptr<Surface> SurfaceMTL::WrapCurrentMetalLayerDrawable(
       static_cast<TextureUsageMask>(TextureUsage::kRenderTarget);
   auto stencil_texture = context->GetPermanentsAllocator()->CreateTexture(
       StorageMode::kDeviceTransient, stencil0_tex);
-  stencil_texture->SetLabel("PlaygroundMainStencil");
+  stencil_texture->SetLabel("ImpellerOnscreenStencil");
 
   StencilAttachment stencil0;
   stencil0.texture = stencil_texture;
