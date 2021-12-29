@@ -31,13 +31,13 @@ bool Renderer::IsValid() const {
   return is_valid_;
 }
 
-bool Renderer::Render(const Surface& surface,
+bool Renderer::Render(std::unique_ptr<Surface> surface,
                       RenderCallback render_callback) const {
   if (!IsValid()) {
     return false;
   }
 
-  if (!surface.IsValid()) {
+  if (!surface || !surface->IsValid()) {
     return false;
   }
 
@@ -49,8 +49,8 @@ bool Renderer::Render(const Surface& surface,
 
   command_buffer->SetLabel("Onscreen Command Buffer");
 
-  auto render_pass =
-      command_buffer->CreateRenderPass(surface.GetTargetRenderPassDescriptor());
+  auto render_pass = command_buffer->CreateRenderPass(
+      surface->GetTargetRenderPassDescriptor());
   if (!render_pass) {
     return false;
   }
@@ -67,13 +67,17 @@ bool Renderer::Render(const Surface& surface,
     return false;
   }
 
-  return command_buffer->SubmitCommands(
-      [sema = frames_in_flight_sema_](CommandBuffer::Status result) {
-        sema->Signal();
-        if (result != CommandBuffer::Status::kCompleted) {
-          VALIDATION_LOG << "Could not commit command buffer.";
-        }
-      });
+  if (!command_buffer->SubmitCommands(
+          [sema = frames_in_flight_sema_](CommandBuffer::Status result) {
+            sema->Signal();
+            if (result != CommandBuffer::Status::kCompleted) {
+              VALIDATION_LOG << "Could not commit command buffer.";
+            }
+          })) {
+    return false;
+  }
+
+  return surface->Present();
 }
 
 std::shared_ptr<Context> Renderer::GetContext() const {

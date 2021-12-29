@@ -31,6 +31,8 @@ impeller_component("renderer") {
     "backend/metal/shader_function_mtl.mm",
     "backend/metal/shader_library_mtl.h",
     "backend/metal/shader_library_mtl.mm",
+    "backend/metal/surface_mtl.h",
+    "backend/metal/surface_mtl.mm",
     "backend/metal/texture_mtl.h",
     "backend/metal/texture_mtl.mm",
     "backend/metal/vertex_descriptor_mtl.h",
