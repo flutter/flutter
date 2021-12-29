@@ -16,15 +16,19 @@ namespace impeller {
 
 class Surface {
  public:
+  Surface();
+
   Surface(RenderTarget target_desc);
 
-  ~Surface();
+  virtual ~Surface();
 
   const ISize& GetSize() const;
 
   bool IsValid() const;
 
   const RenderTarget& GetTargetRenderPassDescriptor() const;
+
+  virtual bool Present() const;
 
  private:
   RenderTarget desc_;

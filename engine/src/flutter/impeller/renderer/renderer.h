@@ -32,7 +32,7 @@ class Renderer {
 
   bool IsValid() const;
 
-  bool Render(const Surface& surface, RenderCallback callback) const;
+  bool Render(std::unique_ptr<Surface> surface, RenderCallback callback) const;
 
   std::shared_ptr<Context> GetContext() const;
 
