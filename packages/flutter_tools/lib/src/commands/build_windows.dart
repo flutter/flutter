@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'package:meta/meta.dart';
 
@@ -41,7 +41,7 @@ class BuildWindowsCommand extends BuildSubCommand {
   String get description => 'Build a Windows desktop application.';
 
   @visibleForTesting
-  VisualStudio visualStudioOverride;
+  VisualStudio? visualStudioOverride;
 
   @override
   Future<FlutterCommandResult> runCommand() async {

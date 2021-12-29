@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import '../android/android_builder.dart';
 import '../android/build_validation.dart';
@@ -129,14 +129,14 @@ class BuildAppBundleCommand extends BuildSubCommand {
         title: 'Deferred components prebuild validation',
       );
       validator.clearOutputDir();
-      await validator.checkAndroidDynamicFeature(FlutterProject.current().manifest.deferredComponents);
-      validator.checkAndroidResourcesStrings(FlutterProject.current().manifest.deferredComponents);
+      await validator.checkAndroidDynamicFeature(FlutterProject.current().manifest.deferredComponents!);
+      validator.checkAndroidResourcesStrings(FlutterProject.current().manifest.deferredComponents!);
 
       validator.handleResults();
 
       // Delete intermediates libs dir for components to resolve mismatching
       // abis supported by base and dynamic feature modules.
-      for (final DeferredComponent component in FlutterProject.current().manifest.deferredComponents) {
+      for (final DeferredComponent component in FlutterProject.current().manifest.deferredComponents!) {
         final Directory deferredLibsIntermediate = FlutterProject.current().directory
           .childDirectory('build')
           .childDirectory(component.name)
@@ -153,7 +153,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
     validateBuild(androidBuildInfo);
     displayNullSafetyMode(androidBuildInfo.buildInfo);
     globals.terminal.usesTerminalUi = true;
-    await androidBuilder.buildAab(
+    await androidBuilder!.buildAab(
       project: FlutterProject.current(),
       target: targetFile,
       androidBuildInfo: androidBuildInfo,

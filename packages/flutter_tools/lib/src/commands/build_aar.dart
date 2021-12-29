@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 import 'package:meta/meta.dart';
 
 import '../android/android_builder.dart';
@@ -20,7 +20,7 @@ import '../runner/flutter_command.dart' show FlutterCommandResult;
 import 'build.dart';
 
 class BuildAarCommand extends BuildSubCommand {
-  BuildAarCommand({ @required bool verboseHelp }) : super(verboseHelp: verboseHelp) {
+  BuildAarCommand({ required bool verboseHelp }) : super(verboseHelp: verboseHelp) {
     argParser
       ..addFlag(
         'debug',
@@ -118,8 +118,8 @@ class BuildAarCommand extends BuildSubCommand {
 
     final String buildNumber = argParser.options.containsKey('build-number')
       && stringArg('build-number') != null
-      && stringArg('build-number').isNotEmpty
-      ? stringArg('build-number')
+      && stringArg('build-number')!.isNotEmpty
+      ? stringArg('build-number')!
       : '1.0';
 
     final File targetFile = globals.fs.file(globals.fs.path.join('lib', 'main.dart'));
@@ -141,7 +141,7 @@ class BuildAarCommand extends BuildSubCommand {
     }
 
     displayNullSafetyMode(androidBuildInfo.first.buildInfo);
-    await androidBuilder.buildAar(
+    await androidBuilder!.buildAar(
       project: _getProject(),
       target: targetFile.path,
       androidBuildInfo: androidBuildInfo,
@@ -154,9 +154,9 @@ class BuildAarCommand extends BuildSubCommand {
   /// Returns the [FlutterProject] which is determined from the remaining command-line
   /// argument if any or the current working directory.
   FlutterProject _getProject() {
-    if (argResults.rest.isEmpty) {
+    if (argResults!.rest.isEmpty) {
       return FlutterProject.current();
     }
-    return FlutterProject.fromDirectory(globals.fs.directory(findProjectRoot(globals.fs, argResults.rest.first)));
+    return FlutterProject.fromDirectory(globals.fs.directory(findProjectRoot(globals.fs, argResults!.rest.first)));
   }
 }

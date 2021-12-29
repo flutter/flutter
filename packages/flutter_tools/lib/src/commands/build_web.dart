@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'package:meta/meta.dart';
 
@@ -19,7 +19,7 @@ import 'build.dart';
 
 class BuildWebCommand extends BuildSubCommand {
   BuildWebCommand({
-    @required bool verboseHelp,
+    required bool verboseHelp,
   }) : super(verboseHelp: verboseHelp) {
     addTreeShakeIconsFlag(enabledByDefault: false);
     usesTargetOption();
@@ -91,12 +91,12 @@ class BuildWebCommand extends BuildSubCommand {
       throwToolExit('"build web" is not currently supported. To enable, run "flutter config --enable-web".');
     }
     final FlutterProject flutterProject = FlutterProject.current();
-    final String target = stringArg('target');
+    final String target = stringArg('target')!;
     final BuildInfo buildInfo = await getBuildInfo();
     if (buildInfo.isDebug) {
       throwToolExit('debug builds cannot be built directly for the web. Try using "flutter run"');
     }
-    if (stringArg('base-href') != null && !(stringArg('base-href').startsWith('/') && stringArg('base-href').endsWith('/'))) {
+    if (stringArg('base-href') != null && !(stringArg('base-href')!.startsWith('/') && stringArg('base-href')!.endsWith('/'))) {
       throwToolExit('base-href should start and end with /');
     }
     if (!flutterProject.web.existsSync()) {
@@ -119,10 +119,10 @@ class BuildWebCommand extends BuildSubCommand {
       target,
       buildInfo,
       boolArg('csp'),
-      stringArg('pwa-strategy'),
+      stringArg('pwa-strategy')!,
       boolArg('source-maps'),
       boolArg('native-null-assertions'),
-      stringArg('base-href'),
+      stringArg('base-href')!,
     );
     return FlutterCommandResult.success();
   }

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import '../base/common.dart';
 import '../build_info.dart';
@@ -65,7 +65,7 @@ class BuildBundleCommand extends BuildSubCommand {
     bundleBuilder ??= BundleBuilder();
   }
 
-  BundleBuilder bundleBuilder;
+  BundleBuilder? bundleBuilder;
 
   @override
   final String name = 'bundle';
@@ -93,7 +93,7 @@ class BuildBundleCommand extends BuildSubCommand {
 
   @override
   Future<void> validateCommand() async {
-    if (argResults['tree-shake-icons'] as bool) {
+    if (argResults!['tree-shake-icons'] as bool) {
       throwToolExit('The "--tree-shake-icons" flag is deprecated for "build bundle" and will be removed in a future version of Flutter.');
     }
     return super.validateCommand();
@@ -101,7 +101,7 @@ class BuildBundleCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final String targetPlatform = stringArg('target-platform');
+    final String targetPlatform = stringArg('target-platform')!;
     final TargetPlatform platform = getTargetPlatformForName(targetPlatform);
     if (platform == null) {
       throwToolExit('Unknown platform: $targetPlatform');
@@ -141,7 +141,7 @@ class BuildBundleCommand extends BuildSubCommand {
     final BuildInfo buildInfo = await getBuildInfo();
     displayNullSafetyMode(buildInfo);
 
-    await bundleBuilder.build(
+    await bundleBuilder!.build(
       platform: platform,
       buildInfo: buildInfo,
       mainPath: targetFile,

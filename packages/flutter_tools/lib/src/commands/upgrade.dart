@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'package:meta/meta.dart';
 
@@ -21,8 +21,8 @@ const String _flutterInstallDocs = 'https://flutter.dev/docs/get-started/install
 
 class UpgradeCommand extends FlutterCommand {
   UpgradeCommand({
-    @required bool verboseHelp,
-    UpgradeCommandRunner commandRunner,
+    required bool verboseHelp,
+    UpgradeCommandRunner? commandRunner,
   })
     : _commandRunner = commandRunner ?? UpgradeCommandRunner() {
     argParser
@@ -87,15 +87,15 @@ class UpgradeCommand extends FlutterCommand {
 @visibleForTesting
 class UpgradeCommandRunner {
 
-  String workingDirectory;
+  String? workingDirectory;
 
   Future<FlutterCommandResult> runCommand({
-    @required bool force,
-    @required bool continueFlow,
-    @required bool testFlow,
-    @required GitTagVersion gitTagVersion,
-    @required FlutterVersion flutterVersion,
-    @required bool verifyOnly,
+    required bool force,
+    required bool continueFlow,
+    required bool testFlow,
+    required GitTagVersion gitTagVersion,
+    required FlutterVersion flutterVersion,
+    required bool verifyOnly,
   }) async {
     if (!continueFlow) {
       await runCommandFirstHalf(
@@ -112,11 +112,11 @@ class UpgradeCommandRunner {
   }
 
   Future<void> runCommandFirstHalf({
-    @required bool force,
-    @required GitTagVersion gitTagVersion,
-    @required FlutterVersion flutterVersion,
-    @required bool testFlow,
-    @required bool verifyOnly,
+    required bool force,
+    required GitTagVersion gitTagVersion,
+    required FlutterVersion flutterVersion,
+    required bool testFlow,
+    required bool verifyOnly,
   }) async {
     final FlutterVersion upstreamVersion = await fetchLatestVersion(localVersion: flutterVersion);
     if (flutterVersion.frameworkRevision == upstreamVersion.frameworkRevision) {
@@ -172,11 +172,11 @@ class UpgradeCommandRunner {
   }
 
   void recordState(FlutterVersion flutterVersion) {
-    final Channel channel = getChannelForName(flutterVersion.channel);
+    final Channel? channel = getChannelForName(flutterVersion.channel);
     if (channel == null) {
       return;
     }
-    globals.persistentToolState.updateLastActiveVersion(flutterVersion.frameworkRevision, channel);
+    globals.persistentToolState!.updateLastActiveVersion(flutterVersion.frameworkRevision, channel);
   }
 
   Future<void> flutterUpgradeContinue() async {
@@ -200,12 +200,12 @@ class UpgradeCommandRunner {
   // re-entrantly with the `--continue` flag
   Future<void> runCommandSecondHalf(FlutterVersion flutterVersion) async {
     // Make sure the welcome message re-display is delayed until the end.
-    globals.persistentToolState.setShouldRedisplayWelcomeMessage(false);
+    globals.persistentToolState!.setShouldRedisplayWelcomeMessage(false);
     await precacheArtifacts();
     await updatePackages(flutterVersion);
     await runDoctor();
     // Force the welcome message to re-display following the upgrade.
-    globals.persistentToolState.setShouldRedisplayWelcomeMessage(true);
+    globals.persistentToolState!.setShouldRedisplayWelcomeMessage(true);
   }
 
   Future<bool> hasUncommittedChanges() async {
@@ -244,8 +244,8 @@ class UpgradeCommandRunner {
     }
 
     // Strip `.git` suffix before comparing the remotes
-    final String trackingUrl = stripDotGit(localVersion.repositoryUrl);
-    final String flutterGitUrl = stripDotGit(globals.flutterGit);
+    final String? trackingUrl = stripDotGit(localVersion.repositoryUrl!);
+    final String? flutterGitUrl = stripDotGit(globals.flutterGit);
 
     // Exempt the official flutter git SSH remote from this check
     if (trackingUrl == 'git@github.com:flutter/flutter') {
@@ -285,9 +285,9 @@ class UpgradeCommandRunner {
   // Strips ".git" suffix from a given string, preferably an url.
   // For example, changes 'https://github.com/flutter/flutter.git' to 'https://github.com/flutter/flutter'.
   // URLs without ".git" suffix will remain unaffected.
-  String stripDotGit(String url) {
+  String? stripDotGit(String url) {
     final RegExp pattern = RegExp(r'(.*)(\.git)$');
-    final RegExpMatch match = pattern.firstMatch(url);
+    final RegExpMatch? match = pattern.firstMatch(url);
     if (match == null) {
       return url;
     }
@@ -298,9 +298,9 @@ class UpgradeCommandRunner {
   ///
   /// Exits tool if HEAD isn't pointing to a branch, or there is no upstream.
   Future<FlutterVersion> fetchLatestVersion({
-    @required FlutterVersion localVersion,
+    required FlutterVersion localVersion,
   }) async {
-    String revision;
+    String? revision;
     try {
       // Fetch upstream branch's commits and tags
       await globals.processUtils.run(
@@ -380,7 +380,7 @@ class UpgradeCommandRunner {
   Future<void> updatePackages(FlutterVersion flutterVersion) async {
     globals.printStatus('');
     globals.printStatus(flutterVersion.toString());
-    final String projectRoot = findProjectRoot(globals.fs);
+    final String? projectRoot = findProjectRoot(globals.fs);
     if (projectRoot != null) {
       globals.printStatus('');
       await pub.get(

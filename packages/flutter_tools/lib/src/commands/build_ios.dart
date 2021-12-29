@@ -2,8 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
 
+
+import 'package:collection/collection.dart' show IterableExtension;
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 
@@ -23,7 +24,7 @@ import 'build.dart';
 /// Builds an .app for an iOS app to be used for local testing on an iOS device
 /// or simulator. Can only be run on a macOS host.
 class BuildIOSCommand extends _BuildIOSSubCommand {
-  BuildIOSCommand({ @required bool verboseHelp }) : super(verboseHelp: verboseHelp) {
+  BuildIOSCommand({ required bool verboseHelp }) : super(verboseHelp: verboseHelp) {
     argParser
       ..addFlag('config-only',
         help: 'Update the project configuration without performing a build. '
@@ -59,7 +60,7 @@ class BuildIOSCommand extends _BuildIOSSubCommand {
   bool get shouldCodesign => boolArg('codesign');
 
   @override
-  Directory _outputAppDirectory(String xcodeResultOutput) => globals.fs.directory(xcodeResultOutput).parent;
+  Directory _outputAppDirectory(String? xcodeResultOutput) => globals.fs.directory(xcodeResultOutput).parent;
 }
 
 /// Builds an .xcarchive and optionally .ipa for an iOS app to be generated for
@@ -67,7 +68,7 @@ class BuildIOSCommand extends _BuildIOSSubCommand {
 ///
 /// Can only be run on a macOS host.
 class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
-  BuildIOSArchiveCommand({@required bool verboseHelp})
+  BuildIOSArchiveCommand({required bool verboseHelp})
       : super(verboseHelp: verboseHelp) {
     argParser.addOption(
       'export-options-plist',
@@ -99,10 +100,10 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
   @override
   final bool shouldCodesign = true;
 
-  String get exportOptionsPlist => stringArg('export-options-plist');
+  String? get exportOptionsPlist => stringArg('export-options-plist');
 
   @override
-  Directory _outputAppDirectory(String xcodeResultOutput) => globals.fs
+  Directory _outputAppDirectory(String? xcodeResultOutput) => globals.fs
       .directory(xcodeResultOutput)
       .childDirectory('Products')
       .childDirectory('Applications');
@@ -110,7 +111,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     if (exportOptionsPlist != null) {
-      final FileSystemEntityType type = globals.fs.typeSync(exportOptionsPlist);
+      final FileSystemEntityType type = globals.fs.typeSync(exportOptionsPlist!);
       if (type == FileSystemEntityType.notFound) {
         throwToolExit(
             '"$exportOptionsPlist" property list does not exist.');
@@ -134,16 +135,16 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     }
 
     // Build IPA from generated xcarchive.
-    final BuildableIOSApp app = await buildableIOSApp(buildInfo);
-    Status status;
+    final BuildableIOSApp? app = await buildableIOSApp(buildInfo);
+    late Status status;
     RunResult result;
-    final String outputPath = globals.fs.path.absolute(app.ipaOutputPath);
+    final String outputPath = globals.fs.path.absolute(app!.ipaOutputPath);
     try {
       status = globals.logger.startProgress('Building IPA...');
 
       result = await globals.processUtils.run(
         <String>[
-          ...globals.xcode.xcrunCommand(),
+          ...globals.xcode!.xcrunCommand(),
           'xcodebuild',
           '-exportArchive',
           if (shouldCodesign) ...<String>[
@@ -155,7 +156,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
           '-exportPath',
           outputPath,
           '-exportOptionsPlist',
-          globals.fs.path.absolute(exportOptionsPlist),
+          globals.fs.path.absolute(exportOptionsPlist!),
         ],
       );
     } finally {
@@ -184,7 +185,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
 
 abstract class _BuildIOSSubCommand extends BuildSubCommand {
   _BuildIOSSubCommand({
-    @required bool verboseHelp
+    required bool verboseHelp
   }) : super(verboseHelp: verboseHelp) {
     addTreeShakeIconsFlag();
     addSplitDebugInfoOption();
@@ -214,17 +215,17 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
   bool get configOnly;
   bool get shouldCodesign;
 
-  Future<BuildableIOSApp> buildableIOSApp(BuildInfo buildInfo) async {
-    _buildableIOSApp ??= await applicationPackages.getPackageForPlatform(
+  Future<BuildableIOSApp?> buildableIOSApp(BuildInfo buildInfo) async {
+    _buildableIOSApp ??= await applicationPackages!.getPackageForPlatform(
       TargetPlatform.ios,
       buildInfo: buildInfo,
-    ) as BuildableIOSApp;
+    ) as BuildableIOSApp?;
     return _buildableIOSApp;
   }
 
-  BuildableIOSApp _buildableIOSApp;
+  BuildableIOSApp? _buildableIOSApp;
 
-  Directory _outputAppDirectory(String xcodeResultOutput);
+  Directory _outputAppDirectory(String? xcodeResultOutput);
 
   @override
   bool get supported => globals.platform.isMacOS;
@@ -250,14 +251,14 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
       );
     }
 
-    final BuildableIOSApp app = await buildableIOSApp(buildInfo);
+    final BuildableIOSApp? app = await buildableIOSApp(buildInfo);
 
     if (app == null) {
       throwToolExit('Application not configured for iOS');
     }
 
     final String logTarget = environmentType == EnvironmentType.simulator ? 'simulator' : 'device';
-    final String typeName = globals.artifacts.getEngineType(TargetPlatform.ios, buildInfo.mode);
+    final String typeName = globals.artifacts!.getEngineType(TargetPlatform.ios, buildInfo.mode);
     if (xcodeBuildAction == XcodeBuildAction.build) {
       globals.printStatus('Building $app for $logTarget ($typeName)...');
     } else {
@@ -295,18 +296,18 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
 
       final Directory outputAppDirectoryCandidate = _outputAppDirectory(result.output);
 
-      Directory appDirectory;
+      Directory? appDirectory;
       if (outputAppDirectoryCandidate.existsSync()) {
         appDirectory = outputAppDirectoryCandidate.listSync()
             .whereType<Directory>()
-            .firstWhere((Directory directory) {
+            .firstWhereOrNull((Directory directory) {
           return globals.fs.path.extension(directory.path) == '.app';
-        }, orElse: () => null);
+        });
       }
       if (appDirectory == null) {
         throwToolExit('Could not find app to analyze code size in ${outputAppDirectoryCandidate.path}');
       }
-      final Map<String, Object> output = await sizeAnalyzer.analyzeAotSnapshot(
+      final Map<String, Object?> output = await sizeAnalyzer.analyzeAotSnapshot(
         aotSnapshot: aotSnapshot,
         precompilerTrace: precompilerTrace,
         outputDirectory: appDirectory,

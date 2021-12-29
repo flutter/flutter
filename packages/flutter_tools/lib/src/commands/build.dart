@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'package:meta/meta.dart';
 
@@ -61,11 +61,11 @@ class BuildCommand extends FlutterCommand {
   String get category => FlutterCommandCategory.project;
 
   @override
-  Future<FlutterCommandResult> runCommand() async => null;
+  Future<FlutterCommandResult> runCommand() async => FlutterCommandResult.fail();
 }
 
 abstract class BuildSubCommand extends FlutterCommand {
-  BuildSubCommand({@required bool verboseHelp}) {
+  BuildSubCommand({required bool verboseHelp}) {
     requiresPubspecYaml();
     usesFatalWarningsOption(verboseHelp: verboseHelp);
   }

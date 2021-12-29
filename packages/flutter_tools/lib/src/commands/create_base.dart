@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'package:meta/meta.dart';
 import 'package:uuid/uuid.dart';
@@ -55,7 +55,7 @@ const String _kDefaultPlatformArgumentHelp =
 /// Common behavior for `flutter create` commands.
 abstract class CreateBase extends FlutterCommand {
   CreateBase({
-    @required bool verboseHelp,
+    required bool verboseHelp,
   }) {
     argParser.addFlag(
       'pub',
@@ -138,7 +138,7 @@ abstract class CreateBase extends FlutterCommand {
   /// The output directory of the command.
   @protected
   Directory get projectDir {
-    return globals.fs.directory(argResults.rest.first);
+    return globals.fs.directory(argResults!.rest.first);
   }
 
   /// The normalized absolute path of [projectDir].
@@ -151,7 +151,7 @@ abstract class CreateBase extends FlutterCommand {
   ///
   /// The help message of the argument is replaced with `customHelp` if `customHelp` is not null.
   @protected
-  void addPlatformsOptions({String customHelp}) {
+  void addPlatformsOptions({String? customHelp}) {
     argParser.addMultiOption('platforms',
       help: customHelp ?? _kDefaultPlatformArgumentHelp,
       aliases: <String>[ 'platform' ],
@@ -171,16 +171,16 @@ abstract class CreateBase extends FlutterCommand {
   /// Throw with exit code 2 if the output directory is invalid.
   @protected
   void validateOutputDirectoryArg() {
-    if (argResults.rest.isEmpty) {
+    if (argResults!.rest.isEmpty) {
       throwToolExit(
         'No option specified for the output directory.\n$usage',
         exitCode: 2,
       );
     }
 
-    if (argResults.rest.length > 1) {
+    if (argResults!.rest.length > 1) {
       String message = 'Multiple output directories specified.';
-      for (final String arg in argResults.rest) {
+      for (final String arg in argResults!.rest) {
         if (arg.startsWith('-')) {
           message += '\nTry moving $arg to be immediately following $name';
           break;
@@ -192,7 +192,7 @@ abstract class CreateBase extends FlutterCommand {
 
   /// Gets the flutter root directory.
   @protected
-  String get flutterRoot => Cache.flutterRoot;
+  String? get flutterRoot => Cache.flutterRoot;
 
   /// Determines the project type in an existing flutter project.
   ///
@@ -205,7 +205,7 @@ abstract class CreateBase extends FlutterCommand {
   /// Throws assertion if [projectDir] does not exist or empty.
   /// Returns null if no project type can be determined.
   @protected
-  FlutterProjectType determineTemplateType() {
+  FlutterProjectType? determineTemplateType() {
     assert(projectDir.existsSync() && projectDir.listSync().isNotEmpty);
     final File metadataFile = globals.fs
         .file(globals.fs.path.join(projectDir.absolute.path, '.metadata'));
@@ -240,9 +240,9 @@ abstract class CreateBase extends FlutterCommand {
   /// If `--org` is specified in the command, returns that directly.
   /// If `--org` is not specified, returns the organization from the existing project.
   @protected
-  Future<String> getOrganization() async {
-    String organization = stringArg('org');
-    if (!argResults.wasParsed('org')) {
+  Future<String?> getOrganization() async {
+    String? organization = stringArg('org');
+    if (!argResults!.wasParsed('org')) {
       final FlutterProject project = FlutterProject.fromDirectory(projectDir);
       final Set<String> existingOrganizations = await project.organizationNames;
       if (existingOrganizations.length == 1) {
@@ -259,10 +259,10 @@ abstract class CreateBase extends FlutterCommand {
   /// Throws with exit 2 if the project directory is illegal.
   @protected
   void validateProjectDir({bool overwrite = false}) {
-    if (globals.fs.path.isWithin(flutterRoot, projectDirPath)) {
+    if (globals.fs.path.isWithin(flutterRoot!, projectDirPath)) {
       // Make exception for dev and examples to facilitate example project development.
-      final String examplesDirectory = globals.fs.path.join(flutterRoot, 'examples');
-      final String devDirectory = globals.fs.path.join(flutterRoot, 'dev');
+      final String examplesDirectory = globals.fs.path.join(flutterRoot!, 'examples');
+      final String devDirectory = globals.fs.path.join(flutterRoot!, 'dev');
       if (!globals.fs.path.isWithin(examplesDirectory, projectDirPath) &&
           !globals.fs.path.isWithin(devDirectory, projectDirPath)) {
         throwToolExit(
@@ -315,7 +315,7 @@ abstract class CreateBase extends FlutterCommand {
     final String projectName =
         stringArg('project-name') ?? globals.fs.path.basename(projectDirPath);
     if (!boolArg('skip-name-checks')) {
-      final String error = _validateProjectName(projectName);
+      final String? error = _validateProjectName(projectName);
       if (error != null) {
         throwToolExit(error);
       }
@@ -326,19 +326,19 @@ abstract class CreateBase extends FlutterCommand {
 
   /// Creates a template to use for [renderTemplate].
   @protected
-  Map<String, Object> createTemplateContext({
-    String organization,
-    String projectName,
-    String titleCaseProjectName,
-    String projectDescription,
-    String androidLanguage,
-    String iosDevelopmentTeam,
-    String iosLanguage,
-    String flutterRoot,
-    String dartSdkVersionBounds,
-    String agpVersion,
-    String kotlinVersion,
-    String gradleVersion,
+  Map<String, Object?> createTemplateContext({
+    String? organization,
+    required String projectName,
+    String? titleCaseProjectName,
+    String? projectDescription,
+    String? androidLanguage,
+    String? iosDevelopmentTeam,
+    String? iosLanguage,
+    String? flutterRoot,
+    String? dartSdkVersionBounds,
+    String? agpVersion,
+    String? kotlinVersion,
+    String? gradleVersion,
     bool withPluginHook = false,
     bool ios = false,
     bool android = false,
@@ -366,7 +366,7 @@ abstract class CreateBase extends FlutterCommand {
     // https://developer.gnome.org/gio/stable/GApplication.html#g-application-id-is-valid
     final String linuxIdentifier = androidIdentifier;
 
-    return <String, Object>{
+    return <String, Object?>{
       'organization': organization,
       'projectName': projectName,
       'titleCaseProjectName': titleCaseProjectName,
@@ -415,7 +415,7 @@ abstract class CreateBase extends FlutterCommand {
   Future<int> renderTemplate(
     String templateName,
     Directory directory,
-    Map<String, Object> context, {
+    Map<String, Object?> context, {
     bool overwrite = false,
     bool printStatusWhenWriting = true,
   }) async {
@@ -428,7 +428,7 @@ abstract class CreateBase extends FlutterCommand {
     );
     return template.render(
       directory,
-      context,
+      context as Map<String, Object>,
       overwriteExisting: overwrite,
       printStatusWhenWriting: printStatusWhenWriting,
     );
@@ -443,7 +443,7 @@ abstract class CreateBase extends FlutterCommand {
   Future<int> renderMerged(
     List<String> names,
     Directory directory,
-    Map<String, Object> context, {
+    Map<String, Object?> context, {
     bool overwrite = false,
     bool printStatusWhenWriting = true,
   }) async {
@@ -457,7 +457,7 @@ abstract class CreateBase extends FlutterCommand {
     );
     return template.render(
       directory,
-      context,
+      context as Map<String, Object>,
       overwriteExisting: overwrite,
       printStatusWhenWriting: printStatusWhenWriting,
     );
@@ -470,7 +470,7 @@ abstract class CreateBase extends FlutterCommand {
   Future<int> generateApp(
     String templateName,
     Directory directory,
-    Map<String, Object> templateContext, {
+    Map<String, Object?> templateContext, {
     bool overwrite = false,
     bool pluginExampleApp = false,
     bool printStatusWhenWriting = true,
@@ -490,7 +490,7 @@ abstract class CreateBase extends FlutterCommand {
 
     if (boolArg('pub')) {
       final Environment environment = Environment(
-        artifacts: globals.artifacts,
+        artifacts: globals.artifacts!,
         logger: globals.logger,
         cacheDir: globals.cache.getRoot(),
         engineVersion: globals.flutterVersion.engineRevision,
@@ -507,7 +507,7 @@ abstract class CreateBase extends FlutterCommand {
       // package_config in the call to pub.get() below.
       await generateLocalizationsSyntheticPackage(
         environment: environment,
-        buildSystem: globals.buildSystem,
+        buildSystem: globals.buildSystem!,
       );
 
       await pub.get(
@@ -520,13 +520,13 @@ abstract class CreateBase extends FlutterCommand {
       );
 
       await project.ensureReadyForPlatformSpecificTooling(
-        androidPlatform: templateContext['android'] as bool ?? false,
-        iosPlatform: templateContext['ios'] as bool ?? false,
-        linuxPlatform: templateContext['linux'] as bool ?? false,
-        macOSPlatform: templateContext['macos'] as bool ?? false,
-        windowsPlatform: templateContext['windows'] as bool ?? false,
-        webPlatform: templateContext['web'] as bool ?? false,
-        winUwpPlatform: templateContext['winuwp'] as bool ?? false,
+        androidPlatform: templateContext['android'] as bool? ?? false,
+        iosPlatform: templateContext['ios'] as bool? ?? false,
+        linuxPlatform: templateContext['linux'] as bool? ?? false,
+        macOSPlatform: templateContext['macos'] as bool? ?? false,
+        windowsPlatform: templateContext['windows'] as bool? ?? false,
+        webPlatform: templateContext['web'] as bool? ?? false,
+        winUwpPlatform: templateContext['winuwp'] as bool? ?? false,
       );
     }
     if (templateContext['android'] == true) {
@@ -539,7 +539,7 @@ abstract class CreateBase extends FlutterCommand {
   ///
   /// Android application ID is specified in: https://developer.android.com/studio/build/application-id
   /// All characters must be alphanumeric or an underscore [a-zA-Z0-9_].
-  static String createAndroidIdentifier(String organization, String name) {
+  static String createAndroidIdentifier(String? organization, String name) {
     String tmpIdentifier = '$organization.$name';
     final RegExp disallowed = RegExp(r'[^\w\.]');
     tmpIdentifier = tmpIdentifier.replaceAll(disallowed, '');
@@ -567,7 +567,7 @@ abstract class CreateBase extends FlutterCommand {
   /// Creates a Windows package name.
   ///
   /// Package names must be a globally unique, commonly a GUID.
-  static String createWindowsIdentifier(String organization, String name) {
+  static String createWindowsIdentifier(String? organization, String name) {
     return const Uuid().v4().toUpperCase();
   }
 
@@ -577,7 +577,7 @@ abstract class CreateBase extends FlutterCommand {
   }
 
   /// Create a UTI (https://en.wikipedia.org/wiki/Uniform_Type_Identifier) from a base name
-  static String createUTIIdentifier(String organization, String name) {
+  static String createUTIIdentifier(String? organization, String name) {
     name = camelCase(name);
     String tmpIdentifier = '$organization.$name';
     final RegExp disallowed = RegExp(r'[^a-zA-Z0-9\-\.\u0080-\uffff]+');
@@ -597,10 +597,10 @@ abstract class CreateBase extends FlutterCommand {
 
   Set<Uri> get _templateManifest =>
       __templateManifest ??= _computeTemplateManifest();
-  Set<Uri> __templateManifest;
+  Set<Uri>? __templateManifest;
   Set<Uri> _computeTemplateManifest() {
     final String flutterToolsAbsolutePath = globals.fs.path.join(
-      Cache.flutterRoot,
+      Cache.flutterRoot!,
       'packages',
       'flutter_tools',
     );
@@ -725,7 +725,7 @@ const Set<String> _packageDependencies = <String>{
 /// Whether [name] is a valid Pub package.
 @visibleForTesting
 bool isValidPackageName(String name) {
-  final Match match = _identifierRegExp.matchAsPrefix(name);
+  final Match? match = _identifierRegExp.matchAsPrefix(name);
   return match != null &&
       match.end == name.length &&
       !_keywords.contains(name);
@@ -733,7 +733,7 @@ bool isValidPackageName(String name) {
 
 // Return null if the project name is legal. Return a validation message if
 // we should disallow the project name.
-String _validateProjectName(String projectName) {
+String? _validateProjectName(String projectName) {
   if (!isValidPackageName(projectName)) {
     return '"$projectName" is not a valid Dart package name.\n\n'
         'See https://dart.dev/tools/pub/pubspec#name for more information.';

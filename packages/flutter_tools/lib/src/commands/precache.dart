@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'package:meta/meta.dart';
 
@@ -18,10 +18,10 @@ import '../runner/flutter_command.dart';
 class PrecacheCommand extends FlutterCommand {
   PrecacheCommand({
     bool verboseHelp = false,
-    @required Cache cache,
-    @required Platform platform,
-    @required Logger logger,
-    @required FeatureFlags featureFlags,
+    required Cache cache,
+    required Platform platform,
+    required Logger logger,
+    required FeatureFlags featureFlags,
   }) : _cache = cache,
        _platform = platform,
        _logger = logger,
@@ -108,9 +108,9 @@ class PrecacheCommand extends FlutterCommand {
   Set<String> _explicitArtifactSelections() {
     final Map<String, String> umbrellaForArtifact = _umbrellaForArtifactMap();
     final Set<String> selections = <String>{};
-    bool explicitlySelected(String name) => boolArg(name) && argResults.wasParsed(name);
+    bool explicitlySelected(String name) => boolArg(name) && argResults!.wasParsed(name);
     for (final DevelopmentArtifact artifact in DevelopmentArtifact.values) {
-      final String umbrellaName = umbrellaForArtifact[artifact.name];
+      final String? umbrellaName = umbrellaForArtifact[artifact.name];
       if (explicitlySelected(artifact.name) ||
           (umbrellaName != null && explicitlySelected(umbrellaName))) {
         selections.add(artifact.name);
@@ -122,11 +122,11 @@ class PrecacheCommand extends FlutterCommand {
   @override
   Future<void> validateCommand() {
     _expandedArtifacts.forEach((String umbrellaName, List<String> childArtifactNames) {
-      if (!argResults.arguments.contains('--no-$umbrellaName')) {
+      if (!argResults!.arguments.contains('--no-$umbrellaName')) {
         return;
       }
       for (final String childArtifactName in childArtifactNames) {
-        if (argResults.arguments.contains('--$childArtifactName')) {
+        if (argResults!.arguments.contains('--$childArtifactName')) {
           throwToolExit('--$childArtifactName requires --$umbrellaName');
         }
       }
@@ -161,7 +161,7 @@ class PrecacheCommand extends FlutterCommand {
     final Map<String, String> umbrellaForArtifact = _umbrellaForArtifactMap();
     final Set<DevelopmentArtifact> requiredArtifacts = <DevelopmentArtifact>{};
     for (final DevelopmentArtifact artifact in DevelopmentArtifact.values) {
-      if (artifact.feature != null && !_featureFlags.isEnabled(artifact.feature)) {
+      if (artifact.feature != null && !_featureFlags.isEnabled(artifact.feature!)) {
         continue;
       }
 

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import '../android/gradle_utils.dart' as gradle;
 import '../base/common.dart';
@@ -84,7 +84,7 @@ class CreateCommand extends CreateBase {
   String get category => FlutterCommandCategory.project;
 
   @override
-  String get invocation => '${runner.executableName} $name <output directory>';
+  String get invocation => '${runner!.executableName} $name <output directory>';
 
   @override
   Future<CustomDimensions> get usageValues async {
@@ -96,7 +96,7 @@ class CreateCommand extends CreateBase {
   }
 
   // Lazy-initialize the net utilities with values from the context.
-  Net _cachedNet;
+  Net? _cachedNet;
   Net get _net => _cachedNet ??= Net(
     httpClientFactory: context.get<HttpClientFactory>(),
     logger: globals.logger,
@@ -108,7 +108,7 @@ class CreateCommand extends CreateBase {
         ? 'api.flutter.dev'
         : 'master-api.flutter.dev';
 
-  Future<String> _fetchSampleFromServer(String sampleId) async {
+  Future<String?> _fetchSampleFromServer(String sampleId) async {
     // Sanity check the sampleId
     if (sampleId.contains(RegExp(r'[^-\w\.]'))) {
       throwToolExit('Sample ID "$sampleId" contains invalid characters. Check the ID in the '
@@ -116,7 +116,7 @@ class CreateCommand extends CreateBase {
     }
 
     final Uri snippetsUri = Uri.https(_snippetsHost, 'snippets/$sampleId.dart');
-    final List<int> data = await _net.fetchUrl(snippetsUri);
+    final List<int>? data = await _net.fetchUrl(snippetsUri);
     if (data == null || data.isEmpty) {
       return null;
     }
@@ -124,9 +124,9 @@ class CreateCommand extends CreateBase {
   }
 
   /// Fetches the samples index file from the Flutter docs website.
-  Future<String> _fetchSamplesIndexFromServer() async {
+  Future<String?> _fetchSamplesIndexFromServer() async {
     final Uri snippetsUri = Uri.https(_snippetsHost, 'snippets/index.json');
-    final List<int> data = await _net.fetchUrl(snippetsUri, maxAttempts: 2);
+    final List<int>? data = await _net.fetchUrl(snippetsUri, maxAttempts: 2);
     if (data == null || data.isEmpty) {
       return null;
     }
@@ -135,13 +135,13 @@ class CreateCommand extends CreateBase {
 
   /// Fetches the samples index file from the server and writes it to
   /// [outputFilePath].
-  Future<void> _writeSamplesJson(String outputFilePath) async {
+  Future<void> _writeSamplesJson(String? outputFilePath) async {
     try {
       final File outputFile = globals.fs.file(outputFilePath);
       if (outputFile.existsSync()) {
         throwToolExit('File "$outputFilePath" already exists', exitCode: 1);
       }
-      final String samplesJson = await _fetchSamplesIndexFromServer();
+      final String? samplesJson = await _fetchSamplesIndexFromServer();
       if (samplesJson == null) {
         throwToolExit('Unable to download samples', exitCode: 2);
       } else {
@@ -154,11 +154,11 @@ class CreateCommand extends CreateBase {
   }
 
   FlutterProjectType _getProjectType(Directory projectDir) {
-    FlutterProjectType template;
-    FlutterProjectType detectedProjectType;
+    FlutterProjectType? template;
+    FlutterProjectType? detectedProjectType;
     final bool metadataExists = projectDir.absolute.childFile('.metadata').existsSync();
-    if (argResults['template'] != null) {
-      template = stringToProjectType(stringArg('template'));
+    if (argResults!['template'] != null) {
+      template = stringToProjectType(stringArg('template')!);
     } else {
       // If the project directory exists and isn't empty, then try to determine the template
       // type from the project directory.
@@ -185,7 +185,7 @@ class CreateCommand extends CreateBase {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    if (argResults['list-samples'] != null) {
+    if (argResults!['list-samples'] != null) {
       // _writeSamplesJson can potentially be long-lived.
       await _writeSamplesJson(stringArg('list-samples'));
       return FlutterCommandResult.success();
@@ -193,15 +193,15 @@ class CreateCommand extends CreateBase {
 
     validateOutputDirectoryArg();
 
-    String sampleCode;
-    if (argResults['sample'] != null) {
-      if (argResults['template'] != null &&
+    String? sampleCode;
+    if (argResults!['sample'] != null) {
+      if (argResults!['template'] != null &&
         stringToProjectType(stringArg('template') ?? 'app') != FlutterProjectType.app) {
         throwToolExit('Cannot specify --sample with a project type other than '
           '"${flutterProjectTypeToString(FlutterProjectType.app)}"');
       }
       // Fetch the sample from the server.
-      sampleCode = await _fetchSampleFromServer(stringArg('sample'));
+      sampleCode = await _fetchSampleFromServer(stringArg('sample')!);
     }
 
     final FlutterProjectType template = _getProjectType(projectDir);
@@ -211,7 +211,7 @@ class CreateCommand extends CreateBase {
 
     final List<String> platforms = stringsArg('platforms');
     // `--platforms` does not support module or package.
-    if (argResults.wasParsed('platforms') && (generateModule || generatePackage)) {
+    if (argResults!.wasParsed('platforms') && (generateModule || generatePackage)) {
       final String template = generateModule ? 'module' : 'package';
       throwToolExit(
         'The "--platforms" argument is not supported in $template template.',
@@ -222,7 +222,7 @@ class CreateCommand extends CreateBase {
         exitCode: 2);
     }
 
-    final String organization = await getOrganization();
+    final String? organization = await getOrganization();
 
     final bool overwrite = boolArg('overwrite');
     validateProjectDir(overwrite: overwrite);
@@ -237,7 +237,7 @@ class CreateCommand extends CreateBase {
 
     final String dartSdk = globals.cache.dartSdkBuild;
     final bool includeIos = featureFlags.isIOSEnabled && platforms.contains('ios');
-    String developmentTeam;
+    String? developmentTeam;
     if (includeIos) {
       developmentTeam = await getCodeSigningIdentityDevelopmentTeam(
         processManager: globals.processManager,
@@ -251,7 +251,7 @@ class CreateCommand extends CreateBase {
     // The dart project_name is in snake_case, this variable is the Title Case of the Project Name.
     final String titleCaseProjectName = snakeCaseToTitleCase(projectName);
 
-    final Map<String, Object> templateContext = createTemplateContext(
+    final Map<String, Object?> templateContext = createTemplateContext(
       organization: organization,
       projectName: projectName,
       titleCaseProjectName: titleCaseProjectName,
@@ -404,8 +404,8 @@ Your $application code is in $relativeAppMain.
     bool printStatusWhenWriting = true,
   }) async {
     int generatedCount = 0;
-    final String description = argResults.wasParsed('description')
-        ? stringArg('description')
+    final String description = argResults!.wasParsed('description')
+        ? stringArg('description')!
         : 'A new flutter module project.';
     templateContext['description'] = description;
     generatedCount += await renderTemplate(
@@ -438,8 +438,8 @@ Your $application code is in $relativeAppMain.
     bool printStatusWhenWriting = true,
   }) async {
     int generatedCount = 0;
-    final String description = argResults.wasParsed('description')
-        ? stringArg('description')
+    final String description = argResults!.wasParsed('description')
+        ? stringArg('description')!
         : 'A new Flutter package project.';
     templateContext['description'] = description;
     generatedCount += await renderTemplate(
@@ -467,7 +467,7 @@ Your $application code is in $relativeAppMain.
     bool printStatusWhenWriting = true,
   }) async {
     // Plugins only add a platform if it was requested explicitly by the user.
-    if (!argResults.wasParsed('platforms')) {
+    if (!argResults!.wasParsed('platforms')) {
       for (final String platform in kAllCreatePlatforms) {
         templateContext[platform] = false;
       }
@@ -483,8 +483,8 @@ Your $application code is in $relativeAppMain.
     final bool willAddPlatforms = platformsToAdd.isNotEmpty;
     templateContext['no_platforms'] = !willAddPlatforms;
     int generatedCount = 0;
-    final String description = argResults.wasParsed('description')
-        ? stringArg('description')
+    final String description = argResults!.wasParsed('description')
+        ? stringArg('description')!
         : 'A new flutter plugin project.';
     templateContext['description'] = description;
     generatedCount += await renderTemplate(
@@ -512,7 +512,7 @@ Your $application code is in $relativeAppMain.
     }
 
     final String projectName = templateContext['projectName'] as String;
-    final String organization = templateContext['organization'] as String;
+    final String? organization = templateContext['organization'] as String?;
     final String androidPluginIdentifier = templateContext['androidIdentifier'] as String;
     final String exampleProjectName = '${projectName}_example';
     templateContext['projectName'] = exampleProjectName;
@@ -558,7 +558,7 @@ Your $application code is in $relativeAppMain.
 
   // Returns a list of platforms that are explicitly requested by user via `--platforms`.
   List<String> _getUserRequestedPlatforms() {
-    if (!argResults.wasParsed('platforms')) {
+    if (!argResults!.wasParsed('platforms')) {
       return <String>[];
     }
     return stringsArg('platforms');
@@ -569,10 +569,10 @@ Your $application code is in $relativeAppMain.
 // Determine what platforms are supported based on generated files.
 List<String> _getSupportedPlatformsInPlugin(Directory projectDir) {
   final String pubspecPath = globals.fs.path.join(projectDir.absolute.path, 'pubspec.yaml');
-  final FlutterManifest manifest = FlutterManifest.createFromPath(pubspecPath, fileSystem: globals.fs, logger: globals.logger);
+  final FlutterManifest manifest = FlutterManifest.createFromPath(pubspecPath, fileSystem: globals.fs, logger: globals.logger)!;
   final List<String> platforms = manifest.validSupportedPlatforms == null
     ? <String>[]
-    : manifest.validSupportedPlatforms.keys.toList();
+    : manifest.validSupportedPlatforms!.keys.toList();
   return platforms;
 }
 

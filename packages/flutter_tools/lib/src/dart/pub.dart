@@ -101,7 +101,7 @@ abstract class Pub {
     bool upgrade = false,
     bool offline = false,
     bool generateSyntheticPackage = false,
-    String flutterRootOverride,
+    String? flutterRootOverride,
     bool checkUpToDate = false,
     bool shouldSkipThirdPartyGenerator = true,
     bool printProgress = true,

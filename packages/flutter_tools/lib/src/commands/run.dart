@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'dart:async';
 
@@ -31,7 +31,7 @@ import 'daemon.dart';
 
 /// Shared logic between `flutter run` and `flutter drive` commands.
 abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
-  RunCommandBase({ @required bool verboseHelp }) {
+  RunCommandBase({ required bool verboseHelp }) {
     addBuildModeFlags(verboseHelp: verboseHelp, defaultToRelease: false);
     usesDartDefineOption();
     usesFlavorOption();
@@ -162,7 +162,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   bool get dumpSkpOnShaderCompilation => boolArg('dump-skp-on-shader-compilation');
   bool get purgePersistentCache => boolArg('purge-persistent-cache');
   bool get disableServiceAuthCodes => boolArg('disable-service-auth-codes');
-  bool get runningWithPrebuiltApplication => argResults['use-application-binary'] != null;
+  bool get runningWithPrebuiltApplication => argResults!['use-application-binary'] != null;
   bool get trackWidgetCreation => boolArg('track-widget-creation');
 
   @override
@@ -171,15 +171,15 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   /// Whether to start the application paused by default.
   bool get startPausedDefault;
 
-  String get route => stringArg('route');
+  String? get route => stringArg('route');
 
-  String get traceAllowlist => stringArg('trace-allowlist');
+  String? get traceAllowlist => stringArg('trace-allowlist');
 
   /// Create a debugging options instance for the current `run` or `drive` invocation.
   Future<DebuggingOptions> createDebuggingOptions(bool webMode) async {
     final BuildInfo buildInfo = await getBuildInfo();
-    final int browserDebugPort = featureFlags.isWebEnabled && argResults.wasParsed('web-browser-debug-port')
-      ? int.parse(stringArg('web-browser-debug-port'))
+    final int? browserDebugPort = featureFlags.isWebEnabled && argResults!.wasParsed('web-browser-debug-port')
+      ? int.parse(stringArg('web-browser-debug-port')!)
       : null;
     if (buildInfo.mode.isRelease) {
       return DebuggingOptions.disabled(
@@ -354,25 +354,25 @@ class RunCommand extends RunCommandBase {
   @override
   String get category => FlutterCommandCategory.project;
 
-  List<Device> devices;
+  List<Device>? devices;
   bool webMode = false;
 
-  String get userIdentifier => stringArg(FlutterOptions.kDeviceUser);
+  String? get userIdentifier => stringArg(FlutterOptions.kDeviceUser);
 
   @override
   bool get startPausedDefault => false;
 
   @override
-  Future<String> get usagePath async {
-    final String command = await super.usagePath;
+  Future<String?> get usagePath async {
+    final String? command = await super.usagePath;
 
     if (devices == null) {
       return command;
     }
-    if (devices.length > 1) {
+    if (devices!.length > 1) {
       return '$command/all';
     }
-    return '$command/${getNameForTargetPlatform(await devices[0].targetPlatform)}';
+    return '$command/${getNameForTargetPlatform(await devices![0].targetPlatform)}';
   }
 
   @override
@@ -382,22 +382,22 @@ class RunCommand extends RunCommandBase {
     bool anyAndroidDevices = false;
     bool anyIOSDevices = false;
 
-    if (devices == null || devices.isEmpty) {
+    if (devices == null || devices!.isEmpty) {
       deviceType = 'none';
       deviceOsVersion = 'none';
       isEmulator = false;
-    } else if (devices.length == 1) {
-      final TargetPlatform platform = await devices[0].targetPlatform;
+    } else if (devices!.length == 1) {
+      final TargetPlatform platform = await devices![0].targetPlatform;
       anyAndroidDevices = platform == TargetPlatform.android;
       anyIOSDevices = platform == TargetPlatform.ios;
       deviceType = getNameForTargetPlatform(platform);
-      deviceOsVersion = await devices[0].sdkNameAndVersion;
-      isEmulator = await devices[0].isLocalEmulator;
+      deviceOsVersion = await devices![0].sdkNameAndVersion;
+      isEmulator = await devices![0].isLocalEmulator;
     } else {
       deviceType = 'multiple';
       deviceOsVersion = 'multiple';
       isEmulator = false;
-      for (final Device device in devices) {
+      for (final Device device in devices!) {
         final TargetPlatform platform = await device.targetPlatform;
         anyAndroidDevices = anyAndroidDevices || (platform == TargetPlatform.android);
         anyIOSDevices = anyIOSDevices || (platform == TargetPlatform.ios);
@@ -407,7 +407,7 @@ class RunCommand extends RunCommandBase {
       }
     }
 
-    String androidEmbeddingVersion;
+    String? androidEmbeddingVersion;
     final List<String> hostLanguage = <String>[];
     if (anyAndroidDevices) {
       final AndroidProject androidProject = FlutterProject.current().android;
@@ -471,33 +471,33 @@ class RunCommand extends RunCommandBase {
     if (devices == null) {
       throwToolExit(null);
     }
-    if (globals.deviceManager.hasSpecifiedAllDevices && runningWithPrebuiltApplication) {
+    if (globals.deviceManager!.hasSpecifiedAllDevices && runningWithPrebuiltApplication) {
       throwToolExit('Using "-d all" with "--use-application-binary" is not supported');
     }
 
     if (userIdentifier != null
-      && devices.every((Device device) => device is! AndroidDevice)) {
+      && devices!.every((Device device) => device is! AndroidDevice)) {
       throwToolExit(
         '--${FlutterOptions.kDeviceUser} is only supported for Android. At least one Android device is required.'
       );
     }
 
-    if (devices.any((Device device) => device is AndroidDevice)) {
+    if (devices!.any((Device device) => device is AndroidDevice)) {
       _deviceDeprecationBehavior = DeprecationBehavior.exit;
     }
     // Only support "web mode" with a single web device due to resident runner
     // refactoring required otherwise.
     webMode = featureFlags.isWebEnabled &&
-      devices.length == 1  &&
-      await devices.single.targetPlatform == TargetPlatform.web_javascript;
+      devices!.length == 1  &&
+      await devices!.single.targetPlatform == TargetPlatform.web_javascript;
   }
 
   @visibleForTesting
   Future<ResidentRunner> createRunner({
-    @required bool hotMode,
-    @required List<FlutterDevice> flutterDevices,
-    @required String applicationBinaryPath,
-    @required FlutterProject flutterProject,
+    required bool hotMode,
+    required List<FlutterDevice> flutterDevices,
+    required String? applicationBinaryPath,
+    required FlutterProject flutterProject,
   }) async {
     if (hotMode && !webMode) {
       return HotRunner(
@@ -508,10 +508,10 @@ class RunCommand extends RunCommandBase {
         applicationBinary: applicationBinaryPath == null
             ? null
             : globals.fs.file(applicationBinaryPath),
-        projectRootPath: stringArg('project-root'),
-        dillOutputPath: stringArg('output-dill'),
+        projectRootPath: stringArg('project-root')!,
+        dillOutputPath: stringArg('output-dill')!,
         stayResident: stayResident,
-        ipv6: ipv6,
+        ipv6: ipv6!,
         multidexEnabled: boolArg('multidex'),
       );
     } else if (webMode) {
@@ -519,7 +519,7 @@ class RunCommand extends RunCommandBase {
         flutterDevices.single,
         target: targetFile,
         flutterProject: flutterProject,
-        ipv6: ipv6,
+        ipv6: ipv6!,
         debuggingOptions: await createDebuggingOptions(webMode),
         stayResident: stayResident,
         urlTunneller: null,
@@ -538,7 +538,7 @@ class RunCommand extends RunCommandBase {
       applicationBinary: applicationBinaryPath == null
           ? null
           : globals.fs.file(applicationBinaryPath),
-      ipv6: ipv6,
+      ipv6: ipv6!,
       stayResident: stayResident,
       multidexEnabled: boolArg('multidex'),
     );
@@ -550,10 +550,10 @@ class RunCommand extends RunCommandBase {
     // debug mode.
     final BuildInfo buildInfo = await getBuildInfo();
     final bool hotMode = shouldUseHotMode(buildInfo);
-    final String applicationBinaryPath = stringArg('use-application-binary');
+    final String? applicationBinaryPath = stringArg('use-application-binary');
 
     if (boolArg('machine')) {
-      if (devices.length > 1) {
+      if (devices!.length > 1) {
         throwToolExit('"--machine" does not support "-d all".');
       }
       final Daemon daemon = Daemon(
@@ -566,17 +566,17 @@ class RunCommand extends RunCommandBase {
           : NotifyingLogger(verbose: globals.logger.isVerbose, parent: globals.logger),
         logToStdout: true,
       );
-      AppInstance app;
+      late AppInstance app;
       try {
         app = await daemon.appDomain.startApp(
-          devices.first, globals.fs.currentDirectory.path, targetFile, route,
+          devices!.first, globals.fs.currentDirectory.path, targetFile, route,
           await createDebuggingOptions(webMode), hotMode,
           applicationBinary: applicationBinaryPath == null
               ? null
               : globals.fs.file(applicationBinaryPath),
           trackWidgetCreation: trackWidgetCreation,
           projectRootPath: stringArg('project-root'),
-          packagesFilePath: globalResults['packages'] as String,
+          packagesFilePath: globalResults!['packages'] as String?,
           dillOutputPath: stringArg('output-dill'),
           ipv6: ipv6,
         );
@@ -584,7 +584,7 @@ class RunCommand extends RunCommandBase {
         throwToolExit(error.toString());
       }
       final DateTime appStartedTime = globals.systemClock.now();
-      final int result = await app.runner.waitForAppToFinish();
+      final int result = await app.runner!.waitForAppToFinish();
       if (result != 0) {
         throwToolExit(null, exitCode: result);
       }
@@ -597,7 +597,7 @@ class RunCommand extends RunCommandBase {
     globals.terminal.usesTerminalUi = true;
 
     final BuildMode buildMode = getBuildMode();
-    for (final Device device in devices) {
+    for (final Device device in devices!) {
       if (!await device.supportsRuntimeMode(buildMode)) {
         throwToolExit(
           '${sentenceCase(getFriendlyModeName(buildMode))} '
@@ -624,20 +624,20 @@ class RunCommand extends RunCommandBase {
       }
     }
 
-    List<String> expFlags;
+    late List<String> expFlags;
     if (argParser.options.containsKey(FlutterOptions.kEnableExperiment) &&
         stringsArg(FlutterOptions.kEnableExperiment).isNotEmpty) {
       expFlags = stringsArg(FlutterOptions.kEnableExperiment);
     }
     final FlutterProject flutterProject = FlutterProject.current();
     final List<FlutterDevice> flutterDevices = <FlutterDevice>[
-      for (final Device device in devices)
+      for (final Device device in devices!)
         await FlutterDevice.create(
           device,
           experimentalFlags: expFlags,
           target: targetFile,
           buildInfo: buildInfo,
-          userIdentifier: userIdentifier,
+          userIdentifier: userIdentifier!,
           platform: globals.platform,
         ),
     ];
@@ -649,14 +649,14 @@ class RunCommand extends RunCommandBase {
       hotMode: hotMode,
     );
 
-    DateTime appStartedTime;
+    DateTime? appStartedTime;
     // Sync completer so the completing agent attaching to the resident doesn't
     // need to know about analytics.
     //
     // Do not add more operations to the future.
     final Completer<void> appStartedTimeRecorder = Completer<void>.sync();
 
-    TerminalHandler handler;
+    TerminalHandler? handler;
     // This callback can't throw.
     unawaited(appStartedTimeRecorder.future.then<void>(
       (_) {
@@ -669,7 +669,7 @@ class RunCommand extends RunCommandBase {
             signals: globals.signals,
             processInfo: globals.processInfo,
             reportReady: boolArg('report-ready'),
-            pidFile: stringArg('pid-file'),
+            pidFile: stringArg('pid-file')!,
           )
             ..registerSignalHandlers()
             ..setupTerminal();
@@ -680,7 +680,7 @@ class RunCommand extends RunCommandBase {
       final int result = await runner.run(
         appStartedCompleter: appStartedTimeRecorder,
         enableDevTools: stayResident && boolArg(FlutterCommand.kEnableDevTools),
-        route: route,
+        route: route!,
       );
       handler?.stop();
       if (result != 0) {
@@ -697,14 +697,12 @@ class RunCommand extends RunCommandBase {
       timingLabelParts: <String>[
         if (hotMode) 'hot' else 'cold',
         getModeName(getBuildMode()),
-        if (devices.length == 1)
-          getNameForTargetPlatform(await devices[0].targetPlatform)
+        if (devices!.length == 1)
+          getNameForTargetPlatform(await devices![0].targetPlatform)
         else
           'multiple',
-        if (devices.length == 1 && await devices[0].isLocalEmulator)
-          'emulator'
-        else
-          null,
+        if (devices!.length == 1 && await devices![0].isLocalEmulator)
+          'emulator',
       ],
       endTimeOverride: appStartedTime,
     );

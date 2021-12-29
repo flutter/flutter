@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'dart:math' as math;
 
@@ -255,8 +255,8 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   String get category => FlutterCommandCategory.project;
 
   @override
-  Future<FlutterCommandResult> verifyThenRunCommand(String commandPath) {
-    _testFiles = argResults.rest.map<String>(globals.fs.path.absolute).toList();
+  Future<FlutterCommandResult> verifyThenRunCommand(String? commandPath) {
+    _testFiles = argResults!.rest.map<String>(globals.fs.path.absolute).toList();
     if (_testFiles.isEmpty) {
       // We don't scan the entire package, only the test/ subdirectory, so that
       // files with names like "hit_test.dart" don't get run.
@@ -305,8 +305,8 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     final bool buildTestAssets = boolArg('test-assets');
     final List<String> names = stringsArg('name');
     final List<String> plainNames = stringsArg('plain-name');
-    final String tags = stringArg('tags');
-    final String excludeTags = stringArg('exclude-tags');
+    final String tags = stringArg('tags')!;
+    final String excludeTags = stringArg('exclude-tags')!;
     final BuildInfo buildInfo = await getBuildInfo(forcedBuildMode: BuildMode.debug);
 
     if (buildInfo.packageConfig['test_api'] == null) {
@@ -332,14 +332,14 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       );
     }
 
-    int jobs = int.tryParse(stringArg('concurrency'));
+    int? jobs = int.tryParse(stringArg('concurrency')!);
     if (jobs == null || jobs <= 0 || !jobs.isFinite) {
       throwToolExit(
         'Could not parse -j/--concurrency argument. It must be an integer greater than zero.'
       );
     }
     if (_isIntegrationTest) {
-      if (argResults.wasParsed('concurrency')) {
+      if (argResults!.wasParsed('concurrency')) {
         globals.printStatus(
           '-j/--concurrency was parsed but will be ignored, this option is not '
           'supported when running Integration Tests.',
@@ -350,13 +350,13 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       jobs = 1;
     }
 
-    final int shardIndex = int.tryParse(stringArg('shard-index') ?? '');
+    final int shardIndex = int.tryParse(stringArg('shard-index') ?? '')!;
     if (shardIndex != null && (shardIndex < 0 || !shardIndex.isFinite)) {
       throwToolExit(
           'Could not parse --shard-index=$shardIndex argument. It must be an integer greater than -1.');
     }
 
-    final int totalShards = int.tryParse(stringArg('total-shards') ?? '');
+    final int totalShards = int.tryParse(stringArg('total-shards') ?? '')!;
     if (totalShards != null && (totalShards <= 0 || !totalShards.isFinite)) {
       throwToolExit(
           'Could not parse --total-shards=$totalShards argument. It must be an integer greater than zero.');
@@ -372,7 +372,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     }
 
     final bool machine = boolArg('machine');
-    CoverageCollector collector;
+    CoverageCollector? collector;
     if (boolArg('coverage') || boolArg('merge-coverage')) {
       final String projectName = flutterProject.manifest.appName;
       collector = CoverageCollector(
@@ -383,7 +383,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       );
     }
 
-    TestWatcher watcher;
+    late TestWatcher watcher;
     if (machine) {
       watcher = EventPrinter(parent: collector, out: globals.stdio.stdout);
     } else if (collector != null) {
@@ -400,7 +400,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       nullAssertions: boolArg(FlutterOptions.kNullAssertions),
     );
 
-    Device integrationTestDevice;
+    Device? integrationTestDevice;
     if (_isIntegrationTest) {
       integrationTestDevice = await findTargetDevice();
 
@@ -448,19 +448,19 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       buildTestAssets: buildTestAssets,
       flutterProject: flutterProject,
       web: stringArg('platform') == 'chrome',
-      randomSeed: stringArg('test-randomize-ordering-seed'),
-      reporter: stringArg('reporter'),
-      timeout: stringArg('timeout'),
+      randomSeed: stringArg('test-randomize-ordering-seed')!,
+      reporter: stringArg('reporter')!,
+      timeout: stringArg('timeout')!,
       runSkipped: boolArg('run-skipped'),
       shardIndex: shardIndex,
       totalShards: totalShards,
-      integrationTestDevice: integrationTestDevice,
-      integrationTestUserIdentifier: stringArg(FlutterOptions.kDeviceUser),
+      integrationTestDevice: integrationTestDevice!,
+      integrationTestUserIdentifier: stringArg(FlutterOptions.kDeviceUser)!,
     );
 
     if (collector != null) {
       final bool collectionResult = await collector.collectCoverageData(
-        stringArg('coverage-path'),
+        stringArg('coverage-path')!,
         mergeCoverageData: boolArg('merge-coverage'),
       );
       if (!collectionResult) {
