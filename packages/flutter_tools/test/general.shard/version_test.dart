@@ -257,7 +257,7 @@ void main() {
           clock: _testClock,
           logger: logger,
           localFrameworkCommitDate: getChannelUpToDateVersion(),
-          latestFlutterCommitDate: null, // we failed to get remote version
+          // latestFlutterCommitDate defaults to null because we failed to get remote version
         ).run();
 
         _expectVersionMessage('', logger);
@@ -278,7 +278,7 @@ void main() {
           clock: _testClock,
           logger: logger,
           localFrameworkCommitDate: getChannelOutOfDateVersion(),
-          latestFlutterCommitDate: null, // we failed to get remote version
+          // latestFlutterCommitDate defaults to null because we failed to get remote version
         ).run();
 
         _expectVersionMessage(versionOutOfDateMessage(_testClock.now().difference(getChannelOutOfDateVersion())), logger);

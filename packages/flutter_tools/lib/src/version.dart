@@ -771,7 +771,7 @@ class VersionFreshnessValidator {
     required this.clock,
     required this.cache,
     required this.logger,
-    required this.latestFlutterCommitDate,
+    this.latestFlutterCommitDate,
     this.pauseTime = Duration.zero,
   });
 
