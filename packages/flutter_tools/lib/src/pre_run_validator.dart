@@ -28,10 +28,15 @@ class _DefaultPreRunValidator implements PreRunValidator {
 
   @override
   void validate() {
-    // If a user downloads the Flutter SDK via a pre-built archive and there is
-    // an error during extraction, the user could have a valid Dart snapshot of
-    // the tool but not the source directory. We still need the source, so
-    // validate the source directory exists and toolExit if not.
+    _ensureToolsDirExists();
+    _deletePreviousToolTempDirs();
+  }
+
+  // If a user downloads the Flutter SDK via a pre-built archive and there is
+  // an error during extraction, the user could have a valid Dart snapshot of
+  // the tool but not the source directory. We still need the source, so
+  // validate the source directory exists and toolExit if not.
+  void _ensureToolsDirExists() {
     if (!_toolsDir.existsSync()) {
       throwToolExit(
         'Flutter SDK installation appears corrupted: expected to find the '
@@ -39,6 +44,14 @@ class _DefaultPreRunValidator implements PreRunValidator {
         'https://flutter.dev/setup for instructions on how to re-install '
         'Flutter.',
       );
+    }
+  }
+
+  // Delete any temp dirs created by previous tool invocations
+  void _deletePreviousToolTempDirs() {
+    // this is not relevant with test file systems
+    if (fileSystem is LocalFileSystem) {
+      (fileSystem as LocalFileSystem).deletePreviousTempDirs();
     }
   }
 }
