@@ -4682,17 +4682,41 @@ void main() {
       targetPlatform: defaultTargetPlatform,
     );
 
-    expect(
-      selection,
-      equals(
-        const TextSelection(
-          baseOffset: 20,
-          extentOffset: 36,
-          affinity: TextAffinity.upstream,
-        ),
-      ),
-      reason: 'on $platform',
-    );
+    switch (defaultTargetPlatform) {
+      // These platforms extend by line.
+      case TargetPlatform.iOS:
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        expect(
+          selection,
+          equals(
+            const TextSelection(
+              baseOffset: 20,
+              extentOffset: 36,
+              affinity: TextAffinity.upstream,
+            ),
+          ),
+          reason: 'on $platform',
+        );
+        break;
+
+      // Mac expands by line.
+      case TargetPlatform.macOS:
+        expect(
+          selection,
+          equals(
+            const TextSelection(
+              baseOffset: 20,
+              extentOffset: 54,
+              affinity: TextAffinity.upstream,
+            ),
+          ),
+          reason: 'on $platform',
+        );
+        break;
+    }
 
     // Select All
     await sendKeys(
@@ -8498,7 +8522,7 @@ void main() {
     expect(controller.selection.baseOffset, 17);
     expect(controller.selection.extentOffset, 24);
 
-    // Multiple expandLeftByLine shortcuts only move ot the start of the line
+    // Multiple expandLeftByLine shortcuts only move to the start of the line
     // and not to the previous line.
     await sendKeys(
       tester,
@@ -8512,8 +8536,23 @@ void main() {
       targetPlatform: defaultTargetPlatform,
     );
     expect(controller.selection.isCollapsed, false);
-    expect(controller.selection.baseOffset, 17);
-    expect(controller.selection.extentOffset, 15);
+    switch (defaultTargetPlatform) {
+      // These platforms extend by line.
+      case TargetPlatform.iOS:
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        expect(controller.selection.baseOffset, 17);
+        expect(controller.selection.extentOffset, 15);
+        break;
+
+      // Mac expands by line.
+      case TargetPlatform.macOS:
+        expect(controller.selection.baseOffset, 15);
+        expect(controller.selection.extentOffset, 24);
+        break;
+    }
 
     // Set the caret to the end of a line.
     controller.selection = const TextSelection(
