@@ -78,7 +78,7 @@ Point Playground::GetCursorPosition() const {
 }
 
 ISize Playground::GetWindowSize() const {
-  return {1024, 768};
+  return window_size_;
 }
 
 void Playground::SetCursorPosition(Point pos) {
@@ -100,10 +100,6 @@ bool Playground::OpenPlaygroundHere(Renderer::RenderCallback render_callback) {
   fml::ScopedCleanupClosure terminate([]() { ::glfwTerminate(); });
 
   ::glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-  // Recreation of the target render buffer is not setup in the playground yet.
-  // So prevent users from resizing and getting confused that their math is
-  // wrong.
-  ::glfwWindowHint(GLFW_RESIZABLE, false);
 
   auto window_title = GetWindowTitle(flutter::testing::GetCurrentTestName());
   auto window =
@@ -114,6 +110,16 @@ bool Playground::OpenPlaygroundHere(Renderer::RenderCallback render_callback) {
   }
 
   ::glfwSetWindowUserPointer(window, this);
+  ::glfwSetWindowSizeCallback(
+      window, [](GLFWwindow* window, int width, int height) -> void {
+        auto playground =
+            reinterpret_cast<Playground*>(::glfwGetWindowUserPointer(window));
+        if (!playground) {
+          return;
+        }
+        playground->SetWindowSize(
+            ISize{std::max(width, 0), std::max(height, 0)});
+      });
   ::glfwSetKeyCallback(window, &PlaygroundKeyCallback);
   ::glfwSetCursorPosCallback(window, [](GLFWwindow* window, double x,
                                         double y) {
@@ -137,6 +143,11 @@ bool Playground::OpenPlaygroundHere(Renderer::RenderCallback render_callback) {
     if (::glfwWindowShouldClose(window)) {
       return true;
     }
+
+    const auto layer_size = layer.bounds.size;
+    const auto layer_scale = layer.contentsScale;
+    layer.drawableSize = CGSizeMake(layer_size.width * layer_scale,
+                                    layer_size.height * layer_scale);
 
     Renderer::RenderCallback wrapped_callback = [render_callback](auto& pass) {
       pass.SetLabel("Playground Main Render Pass");
@@ -191,6 +202,10 @@ std::shared_ptr<Texture> Playground::CreateTextureForFixture(
     return nullptr;
   }
   return texture;
+}
+
+void Playground::SetWindowSize(ISize size) {
+  window_size_ = size;
 }
 
 }  // namespace impeller
