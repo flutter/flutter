@@ -83,7 +83,7 @@ class _FuchsiaLogReader extends DeviceLogReader {
   Stream<String>? _logLines;
   @override
   Stream<String> get logLines {
-    final Stream<String>? logStream = fuchsiaSdk?.syslogs(_device.id);
+    final Stream<String>? logStream = globals.fuchsiaSdk?.syslogs(_device.id);
     _logLines ??= _processLogs(logStream);
     return _logLines ?? const Stream<String>.empty();
   }
