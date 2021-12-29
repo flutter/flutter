@@ -46,7 +46,7 @@ class Entity {
 
   uint32_t GetStencilDepth() const;
 
-  bool Render(ContentRenderer& renderer, RenderPass& parent_pass) const;
+  bool Render(ContentContext& renderer, RenderPass& parent_pass) const;
 
  private:
   Matrix transformation_;

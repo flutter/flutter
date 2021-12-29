@@ -33,7 +33,7 @@ using SolidStrokePipeline =
 // to redirect writing to the stencil instead of color attachments.
 using ClipPipeline = PipelineT<SolidFillVertexShader, SolidFillFragmentShader>;
 
-class ContentRenderer {
+class ContentContext {
  public:
   struct Options {
     SampleCount sample_count = SampleCount::kCount1;
@@ -51,9 +51,9 @@ class ContentRenderer {
     };
   };
 
-  ContentRenderer(std::shared_ptr<Context> context);
+  ContentContext(std::shared_ptr<Context> context);
 
-  ~ContentRenderer();
+  ~ContentContext();
 
   bool IsValid() const;
 
@@ -128,7 +128,7 @@ class ContentRenderer {
 
   bool is_valid_ = false;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(ContentRenderer);
+  FML_DISALLOW_COPY_AND_ASSIGN(ContentContext);
 };
 
 }  // namespace impeller

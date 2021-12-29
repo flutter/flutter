@@ -4,6 +4,8 @@
 
 #include "impeller/renderer/renderer.h"
 
+#include <algorithm>
+
 #include "flutter/fml/logging.h"
 #include "impeller/base/validation.h"
 #include "impeller/renderer/command_buffer.h"
@@ -11,11 +13,10 @@
 
 namespace impeller {
 
-constexpr size_t kMaxFramesInFlight = 3u;
-
-Renderer::Renderer(std::shared_ptr<Context> context)
-    : frames_in_flight_sema_(
-          std::make_shared<fml::Semaphore>(kMaxFramesInFlight)),
+Renderer::Renderer(std::shared_ptr<Context> context,
+                   size_t max_frames_in_flight)
+    : frames_in_flight_sema_(std::make_shared<fml::Semaphore>(
+          std::max<std::size_t>(1u, max_frames_in_flight))),
       context_(std::move(context)) {
   if (!context_->IsValid()) {
     return;
