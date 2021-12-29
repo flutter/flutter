@@ -26,7 +26,9 @@ const int _kMaxDroppedSwipePageForwardAnimationTime = 800; // Milliseconds.
 const int _kMaxPageBackAnimationTime = 300; // Milliseconds.
 
 /// Barrier color used for a barrier visible during transitions for Cupertino
-/// page routes. This barrier color is only used for full-screen page routes with
+/// page routes.
+///
+/// This barrier color is only used for full-screen page routes with
 /// `fullscreenDialog: false`.
 ///
 /// By default, `fullScreenDialog` Cupertino route transitions have no
@@ -803,7 +805,6 @@ class _CupertinoEdgeShadowDecoration extends Decoration {
       // Eyeballed gradient used to mimic a drop shadow on the start side only.
       <Color>[
         Color(0x04000000),
-        Color(0x02000000),
         Color(0x00000000),
       ],
     ),
