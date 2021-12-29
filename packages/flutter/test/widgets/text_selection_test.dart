@@ -586,13 +586,10 @@ void main() {
     final FakeRenderEditable renderEditable = tester.renderObject(find.byType(FakeEditable));
     renderEditable.hasFocus = true;
 
-    final TestGesture gesture = await tester.startGesture(
+    await tester.tapAt(
       const Offset(200.0, 200.0),
       pointer: 0,
     );
-    addTearDown(gesture.removePointer);
-    await gesture.up();
-    await tester.pumpAndSettle();
 
     switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
