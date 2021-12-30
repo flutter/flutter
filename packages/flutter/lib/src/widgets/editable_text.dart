@@ -3643,10 +3643,19 @@ class _UpdateTextSelectionAction<T extends DirectionalCaretMovementIntent> exten
       );
     }
 
-    final TextPosition extent = textBoundarySelection.extent;
+    late final TextPosition position;
+    if (!intent.expand) {
+      position = textBoundarySelection.extent;
+    } else {
+      final bool inOrder = textBoundarySelection.baseOffset <= textBoundarySelection.extentOffset;
+      final bool towardsExtent = intent.forward == inOrder;
+      position = towardsExtent
+          ? textBoundarySelection.extent
+          : textBoundarySelection.base;
+    }
     final TextPosition newExtent = intent.forward
-      ? textBoundary.getTrailingTextBoundaryAt(extent)
-      : textBoundary.getLeadingTextBoundaryAt(extent);
+      ? textBoundary.getTrailingTextBoundaryAt(position)
+      : textBoundary.getLeadingTextBoundaryAt(position);
 
     late final TextSelection newSelection;
     if (collapseSelection) {
