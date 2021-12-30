@@ -1449,9 +1449,8 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     bool _isTransitioning(Animation<double>? animation) {
       return animation?.status == AnimationStatus.forward || animation?.status == AnimationStatus.reverse;
     }
-    // Pointers are implicitly ignored here during Cupertino user pop gestures, as
-    // full-screen Cupertino page routes ignore pointers during transitions by default.
     _ignorePointerNotifier.value = !isCurrent ||
+        (navigator?.userGestureInProgress ?? false) ||
         (ignorePointerDuringTransitions &&
             (_isTransitioning(animation) || _isTransitioning(secondaryAnimation)));
   }
