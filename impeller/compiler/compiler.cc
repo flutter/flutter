@@ -298,6 +298,10 @@ Compiler::Compiler(const fml::Mapping& source_mapping,
   {
     spirv_cross::CompilerMSL::Options msl_options;
     msl_options.platform = spirv_cross::CompilerMSL::Options::Platform::macOS;
+    // If this version specification changes, the GN rules that process the
+    // Metal to AIR must be updated as well.
+    msl_options.msl_version =
+        spirv_cross::CompilerMSL::Options::make_msl_version(1, 2);
     msl_compiler->set_msl_options(msl_options);
   }
 
