@@ -37,6 +37,7 @@ bool Main(const fml::CommandLine& command_line) {
   }
 
   Compiler::SourceOptions options;
+  options.target_platform = switches.target_platform;
   options.type = Compiler::SourceTypeFromFileName(switches.source_file_name);
   options.working_directory = switches.working_directory;
   options.file_name = switches.source_file_name;
