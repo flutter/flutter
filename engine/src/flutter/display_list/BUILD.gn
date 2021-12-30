@@ -16,6 +16,8 @@ source_set("display_list") {
     "display_list_dispatcher.h",
     "display_list_flags.cc",
     "display_list_flags.h",
+    "display_list_ops.cc",
+    "display_list_ops.h",
     "display_list_utils.cc",
     "display_list_utils.h",
     "types.h",
