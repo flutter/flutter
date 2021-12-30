@@ -1204,9 +1204,14 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   void install() {
     super.install();
     _animationProxy = ProxyAnimation(super.animation)
-      ..addStatusListener(_maybeUpdateIgnorePointer);
+      ..addStatusListener(_handleAnimationStatusChanged);
     _secondaryAnimationProxy = ProxyAnimation(super.secondaryAnimation)
-      ..addStatusListener(_maybeUpdateIgnorePointer);
+      ..addStatusListener(_handleAnimationStatusChanged);
+    navigator!.userGestureInProgressNotifier.addListener(_maybeUpdateIgnorePointer);
+  }
+
+  void _handleAnimationStatusChanged(AnimationStatus status) {
+    _maybeUpdateIgnorePointer();
   }
 
   @override
@@ -1445,7 +1450,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   bool get _ignorePointer => _ignorePointerNotifier.value;
   final ValueNotifier<bool> _ignorePointerNotifier = ValueNotifier<bool>(false);
 
-  void _maybeUpdateIgnorePointer(AnimationStatus status) {
+  void _maybeUpdateIgnorePointer() {
     bool _isTransitioning(Animation<double>? animation) {
       return animation?.status == AnimationStatus.forward || animation?.status == AnimationStatus.reverse;
     }
