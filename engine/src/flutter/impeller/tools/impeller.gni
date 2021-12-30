@@ -75,6 +75,18 @@ template("metal_library") {
       rebase_path(depfile),
     ]
 
+    if (!is_debug) {
+      args += [ "--optimize" ]
+    }
+
+    if (is_ios) {
+      args += [ "--platform=ios" ]
+    } else if (is_mac) {
+      args += [ "--platform=mac" ]
+    } else {
+      assert(false, "Unsupported platform for generating Metal shaders.")
+    }
+
     foreach(source, invoker.sources) {
       args += [
         "--source",
