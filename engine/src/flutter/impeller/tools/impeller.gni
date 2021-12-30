@@ -142,6 +142,13 @@ template("impeller_shaders") {
       "--include={{source_dir}}",
       "--depfile=$depfile_intermediate_path",
     ]
+
+    if (is_mac) {
+      args += [ "--macos" ]
+    }
+    if (is_ios) {
+      args += [ "--ios" ]
+    }
   }
 
   metal_library_target_name = "metal_library_$target_name"

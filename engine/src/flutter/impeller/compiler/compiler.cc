@@ -198,6 +198,19 @@ static spv::ExecutionModel ToExecutionModel(Compiler::SourceType type) {
   ;
 }
 
+static spirv_cross::CompilerMSL::Options::Platform
+CompilerTargetPlatformToCompilerMSLTargetPlatform(
+    Compiler::TargetPlatform platform) {
+  switch (platform) {
+    case Compiler::TargetPlatform::kIPhoneOS:
+      return spirv_cross::CompilerMSL::Options::Platform::iOS;
+    case Compiler::TargetPlatform::kMacOS:
+    // Unknown should not happen due to prior validation.
+    case Compiler::TargetPlatform::kUnknown:
+      return spirv_cross::CompilerMSL::Options::Platform::macOS;
+  }
+}
+
 Compiler::Compiler(const fml::Mapping& source_mapping,
                    SourceOptions source_options,
                    Reflector::Options reflector_options)
@@ -205,6 +218,11 @@ Compiler::Compiler(const fml::Mapping& source_mapping,
   if (source_mapping.GetMapping() == nullptr) {
     COMPILER_ERROR
         << "Could not read shader source or shader source was empty.";
+    return;
+  }
+
+  if (source_options.target_platform == TargetPlatform::kUnknown) {
+    COMPILER_ERROR << "Target platform not specified.";
     return;
   }
 
@@ -297,7 +315,8 @@ Compiler::Compiler(const fml::Mapping& source_mapping,
 
   {
     spirv_cross::CompilerMSL::Options msl_options;
-    msl_options.platform = spirv_cross::CompilerMSL::Options::Platform::macOS;
+    msl_options.platform = CompilerTargetPlatformToCompilerMSLTargetPlatform(
+        options_.target_platform);
     // If this version specification changes, the GN rules that process the
     // Metal to AIR must be updated as well.
     msl_options.msl_version =

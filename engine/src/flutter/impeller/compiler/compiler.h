@@ -27,6 +27,12 @@ class Compiler {
     kFragmentShader,
   };
 
+  enum class TargetPlatform {
+    kUnknown,
+    kMacOS,
+    kIPhoneOS,
+  };
+
   static SourceType SourceTypeFromFileName(const std::string& file_name);
 
   static std::string EntryPointFromSourceName(const std::string& file_name,
@@ -34,6 +40,7 @@ class Compiler {
 
   struct SourceOptions {
     SourceType type = SourceType::kUnknown;
+    TargetPlatform target_platform = TargetPlatform::kUnknown;
     std::shared_ptr<fml::UniqueFD> working_directory;
     std::vector<IncludeDir> include_dirs;
     std::string file_name = "main.glsl";
