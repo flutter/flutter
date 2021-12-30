@@ -29,6 +29,10 @@ def Main():
   parser.add_argument("--source",
                     type=str, action="append", required=True,
                     help="The source file to compile. Can be specified multiple times.")
+  parser.add_argument("--optimize", action="store_true", default=False,
+                    help="If available optimizations must be applied to the compiled Metal sources.")
+  parser.add_argument("--platform", required=True, choices=["mac", "ios"],
+                    help="Select the platform.")
 
   args = parser.parse_args()
 
@@ -36,11 +40,21 @@ def Main():
 
   command = [
     "xcrun",
+  ]
+
+  if args.platform == "mac":
+    command += [
+      "-sdk",
+      "macosx",
+    ]
+  elif args.platform == "ios":
+    command += [
+      "-sdk",
+      "iphoneos",
+    ]
+
+  command += [
     "metal",
-    # TODO: Embeds both sources and driver options in the output. This aids in
-    # debugging but should be removed from release builds.
-    "-MO",
-    "-gline-tables-only",
     # These warnings are from generated code and would make no sense to the GLSL
     # author.
     "-Wno-unused-variable",
@@ -49,8 +63,37 @@ def Main():
     "-MF",
     args.depfile,
     "-o",
-    args.output
+    args.output,
   ]
+
+  # The Metal standard must match the specification in impellerc.
+  if args.platform == "mac":
+    command += [
+      "--std=macos-metal1.2",
+    ]
+  elif args.platform == "ios":
+    command += [
+      "--std=ios-metal1.2",
+    ]
+
+  if args.optimize:
+    command += [
+      # Like -Os (and thus -O2), but reduces code size further.
+      "-Oz",
+      # Allow aggressive, lossy floating-point optimizations.
+      "-ffast-math",
+    ]
+  else:
+    command += [
+      # Embeds both sources and driver options in the output. This aids in
+      # debugging but should be removed from release builds.
+      "-frecord-sources",
+      # Assist the sampling profiler.
+      "-gline-tables-only",
+      "-g",
+      # Optimize for debuggability.
+      "-Og",
+    ]
 
   command += args.source
 
