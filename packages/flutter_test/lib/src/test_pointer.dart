@@ -76,6 +76,13 @@ class TestPointer {
   Offset? get location => _location;
   Offset? _location;
 
+
+  /// The pan offset of the last pointer pan/zoom event sent by this object.
+  ///
+  /// If no pan/zoom event has ever been sent by this object, returns null.
+  Offset? get pan => _pan;
+  Offset? _pan;
+
   /// If a custom event is created outside of this class, this function is used
   /// to set the [isDown].
   bool setDownInfo(
@@ -281,6 +288,57 @@ class TestPointer {
       device: _device,
       position: location!,
       scrollDelta: scrollDelta,
+    );
+  }
+
+  PointerPanZoomStartEvent panZoomStart(
+    Offset location, {
+    Duration timeStamp = Duration.zero
+  }) {
+    _location = location;
+    _pan = Offset.zero;
+    return PointerPanZoomStartEvent(
+      timeStamp: timeStamp,
+      kind: kind,
+      device: _device,
+      pointer: pointer,
+      position: location,
+    );
+  }
+
+  PointerPanZoomUpdateEvent panZoomUpdate(
+    Offset location, {
+    Offset pan = Offset.zero,
+    double scale = 1,
+    double rotation = 0,
+    Duration timeStamp = Duration.zero,
+  }) {
+    _location = location;
+    Offset panDelta = pan - _pan!;
+    _pan = pan;
+    return PointerPanZoomUpdateEvent(
+      timeStamp: timeStamp,
+      kind: kind,
+      device: _device,
+      pointer: pointer,
+      position: location,
+      pan: pan,
+      panDelta: panDelta,
+      scale: scale,
+      rotation: rotation,
+    );
+  }
+
+  PointerPanZoomEndEvent panZoomEnd({
+    Duration timeStamp = Duration.zero
+  }) {
+    _pan = null;
+    return PointerPanZoomEndEvent(
+      timeStamp: timeStamp,
+      kind: kind,
+      device: _device,
+      pointer: pointer,
+      position: location!,
     );
   }
 }

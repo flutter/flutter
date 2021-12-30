@@ -1986,6 +1986,320 @@ class _TransformedPointerScrollEvent extends _TransformedPointerEvent with _Copy
   }
 }
 
+mixin _CopyPointerPanZoomStartEvent on PointerEvent {
+  @override
+  PointerPanZoomStartEvent copyWith({
+    Duration? timeStamp,
+    int? pointer,
+    PointerDeviceKind? kind,
+    int? device,
+    Offset? position,
+    Offset? delta,
+    int? buttons,
+    bool? obscured,
+    double? pressure,
+    double? pressureMin,
+    double? pressureMax,
+    double? distance,
+    double? distanceMax,
+    double? size,
+    double? radiusMajor,
+    double? radiusMinor,
+    double? radiusMin,
+    double? radiusMax,
+    double? orientation,
+    double? tilt,
+    bool? synthesized,
+    int? embedderId,
+  }) {
+    return PointerPanZoomStartEvent(
+      timeStamp: timeStamp ?? this.timeStamp,
+      kind: kind ?? this.kind,
+      device: device ?? this.device,
+      position: position ?? this.position,
+      embedderId: embedderId ?? this.embedderId,
+    ).transformed(transform);
+  }
+}
+
+/// A pan/zoom has begun on this pointer
+///
+/// See also:
+///
+///  * [Listener.onPointerPanZoomStart], which allows callers to be notified of these
+///    events in a widget tree.
+class PointerPanZoomStartEvent extends PointerEvent with _PointerEventDescription, _CopyPointerPanZoomStartEvent {
+  /// Creates a pointer pan/zoom start event.
+  ///
+  /// All of the arguments must be non-null.
+  const PointerPanZoomStartEvent({
+    Duration timeStamp = Duration.zero,
+    PointerDeviceKind kind = PointerDeviceKind.mouse,
+    int device = 0,
+    int pointer = 0,
+    Offset position = Offset.zero,
+    int embedderId = 0,
+    bool synthesized = false,
+  }) : assert(timeStamp != null),
+       assert(kind != null),
+       assert(device != null),
+       assert(position != null),
+       super(
+         timeStamp: timeStamp,
+         kind: kind,
+         device: device,
+         pointer: pointer,
+         position: position,
+         embedderId: embedderId,
+         synthesized: synthesized,
+       );
+
+  @override
+  PointerPanZoomStartEvent transformed(Matrix4? transform) {
+    if (transform == null || transform == this.transform) {
+      return this;
+    }
+    return _TransformedPointerPanZoomStartEvent(original as PointerPanZoomStartEvent? ?? this, transform);
+  }
+}
+
+class _TransformedPointerPanZoomStartEvent extends _TransformedPointerEvent with _CopyPointerPanZoomStartEvent implements PointerPanZoomStartEvent {
+  _TransformedPointerPanZoomStartEvent(this.original, this.transform)
+    : assert(original != null), assert(transform != null);
+
+  @override
+  final PointerPanZoomStartEvent original;
+
+  @override
+  final Matrix4 transform;
+
+  @override
+  PointerPanZoomStartEvent transformed(Matrix4? transform) => original.transformed(transform);
+}
+
+mixin _CopyPointerPanZoomUpdateEvent on PointerEvent {
+  /// The total pan offset of the pan/zoom
+  Offset get pan;
+  /// The amount the pan offset changed since the last event
+  Offset get panDelta;
+  /// The scale (zoom factor) of the pan/zoom
+  double get scale;
+  /// The amount the pan/zoom has rotated in radians so far
+  double get rotation;
+
+  @override
+  PointerPanZoomUpdateEvent copyWith({
+    Duration? timeStamp,
+    int? pointer,
+    PointerDeviceKind? kind,
+    int? device,
+    Offset? position,
+    Offset? delta,
+    int? buttons,
+    bool? obscured,
+    double? pressure,
+    double? pressureMin,
+    double? pressureMax,
+    double? distance,
+    double? distanceMax,
+    double? size,
+    double? radiusMajor,
+    double? radiusMinor,
+    double? radiusMin,
+    double? radiusMax,
+    double? orientation,
+    double? tilt,
+    bool? synthesized,
+    int? embedderId,
+    Offset? pan,
+    Offset? panDelta,
+    double? scale,
+    double? rotation,
+  }) {
+    return PointerPanZoomUpdateEvent(
+      timeStamp: timeStamp ?? this.timeStamp,
+      kind: kind ?? this.kind,
+      device: device ?? this.device,
+      position: position ?? this.position,
+      embedderId: embedderId ?? this.embedderId,
+      pan: pan ?? this.pan,
+      panDelta: panDelta ?? this.panDelta,
+      scale: scale ?? this.scale,
+      rotation: rotation ?? this.rotation,
+    ).transformed(transform);
+  }
+}
+
+/// The active pan/zoom on this pointer has updated.
+///
+/// See also:
+///
+///  * [Listener.onPointerPanZoomUpdate], which allows callers to be notified of these
+///    events in a widget tree.
+class PointerPanZoomUpdateEvent extends PointerEvent with _PointerEventDescription, _CopyPointerPanZoomUpdateEvent {
+  /// Creates a pointer pan/zoom update event.
+  ///
+  /// All of the arguments must be non-null.
+  const PointerPanZoomUpdateEvent({
+    Duration timeStamp = Duration.zero,
+    PointerDeviceKind kind = PointerDeviceKind.mouse,
+    int device = 0,
+    int pointer = 0,
+    Offset position = Offset.zero,
+    int embedderId = 0,
+    this.pan = Offset.zero,
+    this.panDelta = Offset.zero,
+    this.scale = 1.0,
+    this.rotation = 0.0,
+    bool synthesized = false,
+  }) : assert(timeStamp != null),
+       assert(kind != null),
+       assert(device != null),
+       assert(position != null),
+       super(
+         timeStamp: timeStamp,
+         kind: kind,
+         device: device,
+         pointer: pointer,
+         position: position,
+         embedderId: embedderId,
+         synthesized: synthesized,
+       );
+  @override
+  final Offset pan;
+  @override
+  final Offset panDelta;
+  @override
+  final double scale;
+  @override
+  final double rotation;
+
+  @override
+  PointerPanZoomUpdateEvent transformed(Matrix4? transform) {
+    if (transform == null || transform == this.transform) {
+      return this;
+    }
+    return _TransformedPointerPanZoomUpdateEvent(original as PointerPanZoomUpdateEvent? ?? this, transform);
+  }
+}
+
+class _TransformedPointerPanZoomUpdateEvent extends _TransformedPointerEvent with _CopyPointerPanZoomUpdateEvent implements PointerPanZoomUpdateEvent {
+  _TransformedPointerPanZoomUpdateEvent(this.original, this.transform)
+    : assert(original != null), assert(transform != null);
+
+  @override
+  Offset get pan => original.pan;
+
+  @override
+  Offset get panDelta => original.panDelta;
+
+  @override
+  double get scale => original.scale;
+
+  @override
+  double get rotation => original.rotation;
+
+  @override
+  final PointerPanZoomUpdateEvent original;
+
+  @override
+  final Matrix4 transform;
+
+  @override
+  PointerPanZoomUpdateEvent transformed(Matrix4? transform) => original.transformed(transform);
+}
+
+mixin _CopyPointerPanZoomEndEvent on PointerEvent {
+  @override
+  PointerPanZoomEndEvent copyWith({
+    Duration? timeStamp,
+    int? pointer,
+    PointerDeviceKind? kind,
+    int? device,
+    Offset? position,
+    Offset? delta,
+    int? buttons,
+    bool? obscured,
+    double? pressure,
+    double? pressureMin,
+    double? pressureMax,
+    double? distance,
+    double? distanceMax,
+    double? size,
+    double? radiusMajor,
+    double? radiusMinor,
+    double? radiusMin,
+    double? radiusMax,
+    double? orientation,
+    double? tilt,
+    bool? synthesized,
+    int? embedderId,
+  }) {
+    return PointerPanZoomEndEvent(
+      timeStamp: timeStamp ?? this.timeStamp,
+      kind: kind ?? this.kind,
+      device: device ?? this.device,
+      position: position ?? this.position,
+      embedderId: embedderId ?? this.embedderId,
+    ).transformed(transform);
+  }
+}
+
+/// The pan/zoom on this pointer has ended.
+///
+/// See also:
+///
+///  * [Listener.onPointerPanZoomEnd], which allows callers to be notified of these
+///    events in a widget tree.
+class PointerPanZoomEndEvent extends PointerEvent with _PointerEventDescription, _CopyPointerPanZoomEndEvent {
+  /// Creates a pointer pan/zoom end event.
+  ///
+  /// All of the arguments must be non-null.
+  const PointerPanZoomEndEvent({
+    Duration timeStamp = Duration.zero,
+    PointerDeviceKind kind = PointerDeviceKind.mouse,
+    int device = 0,
+    int pointer = 0,
+    Offset position = Offset.zero,
+    int embedderId = 0,
+    bool synthesized = false,
+  }) : assert(timeStamp != null),
+       assert(kind != null),
+       assert(device != null),
+       assert(position != null),
+       super(
+         timeStamp: timeStamp,
+         kind: kind,
+         device: device,
+         pointer: pointer,
+         position: position,
+         embedderId: embedderId,
+         synthesized: synthesized,
+       );
+
+  @override
+  PointerPanZoomEndEvent transformed(Matrix4? transform) {
+    if (transform == null || transform == this.transform) {
+      return this;
+    }
+    return _TransformedPointerPanZoomEndEvent(original as PointerPanZoomEndEvent? ?? this, transform);
+  }
+}
+
+class _TransformedPointerPanZoomEndEvent extends _TransformedPointerEvent with _CopyPointerPanZoomEndEvent implements PointerPanZoomEndEvent {
+  _TransformedPointerPanZoomEndEvent(this.original, this.transform)
+    : assert(original != null), assert(transform != null);
+
+  @override
+  final PointerPanZoomEndEvent original;
+
+  @override
+  final Matrix4 transform;
+
+  @override
+  PointerPanZoomEndEvent transformed(Matrix4? transform) => original.transformed(transform);
+}
+
 mixin _CopyPointerCancelEvent on PointerEvent {
   @override
   PointerCancelEvent copyWith({

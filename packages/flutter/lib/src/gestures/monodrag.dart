@@ -280,13 +280,39 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   @override
+  bool isPointerPanZoomAllowed(PointerPanZoomStartEvent event) => true;
+
+  @override
+  void addAllowedPointerPanZoom(PointerPanZoomStartEvent event) {
+    super.addAllowedPointerPanZoom(event);
+    _velocityTrackers[event.pointer] = velocityTrackerBuilder(event);
+    if (_state == _DragState.ready) {
+      _state = _DragState.possible;
+      _initialPosition = OffsetPair(global: event.position, local: event.localPosition);
+      _initialButtons = kPrimaryButton;
+      _pendingDragOffset = OffsetPair.zero;
+      _globalDistanceMoved = 0.0;
+      _lastPendingEventTimestamp = event.timeStamp;
+      _lastTransform = event.transform;
+      _checkDown();
+    } else if (_state == _DragState.accepted) {
+      resolve(GestureDisposition.accepted);
+    }
+  }
+
+  @override
   void handleEvent(PointerEvent event) {
     assert(_state != _DragState.ready);
     if (!event.synthesized
-        && (event is PointerDownEvent || event is PointerMoveEvent)) {
+        && (event is PointerDownEvent || event is PointerMoveEvent || event is PointerPanZoomUpdateEvent)) {
       final VelocityTracker tracker = _velocityTrackers[event.pointer]!;
       assert(tracker != null);
-      tracker.addPosition(event.timeStamp, event.localPosition);
+      if (event is PointerPanZoomUpdateEvent) {
+        tracker.addPosition(event.timeStamp, event.pan);
+      }
+      else {
+        tracker.addPosition(event.timeStamp, event.localPosition);
+      }
     }
 
     if (event is PointerMoveEvent) {
@@ -317,7 +343,32 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
           resolve(GestureDisposition.accepted);
       }
     }
-    if (event is PointerUpEvent || event is PointerCancelEvent) {
+    if (event is PointerPanZoomUpdateEvent) {
+      if (_state == _DragState.accepted) {
+        _checkUpdate(
+          sourceTimeStamp: event.timeStamp,
+          delta: _getDeltaForDetails(event.panDelta),
+          primaryDelta: _getPrimaryValueFromOffset(event.panDelta),
+          globalPosition: event.position + event.pan,
+          localPosition: event.localPosition + event.pan
+        );
+      }
+      else {
+        _pendingDragOffset += OffsetPair(local: event.panDelta, global: event.panDelta);
+        _lastPendingEventTimestamp = event.timeStamp;
+        _lastTransform = event.transform;
+        final Offset movedLocally = _getDeltaForDetails(event.panDelta);
+        final Matrix4? localToGlobalTransform = event.transform == null ? null : Matrix4.tryInvert(event.transform!);
+        _globalDistanceMoved += PointerEvent.transformDeltaViaPositions(
+          transform: localToGlobalTransform,
+          untransformedDelta: movedLocally,
+          untransformedEndPosition: event.localPosition + event.pan
+        ).distance * (_getPrimaryValueFromOffset(movedLocally) ?? 1).sign;
+        if (_hasSufficientGlobalDistanceToAccept(event.kind, gestureSettings?.touchSlop))
+          resolve(GestureDisposition.accepted);
+      }
+    }
+    if (event is PointerUpEvent || event is PointerCancelEvent || event is PointerPanZoomEndEvent) {
       _giveUpPointer(event.pointer);
     }
   }
