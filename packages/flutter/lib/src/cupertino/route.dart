@@ -236,7 +236,7 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
   }
 
   @override
-  bool get ignorePointerWhenCurrentDuringTransitions => true;
+  bool get ignorePointerDuringTransitions => true;
 
   // Called by _CupertinoBackGestureDetector when a pop ("back") drag start
   // gesture is detected. The returned controller handles all of the subsequent
@@ -1053,7 +1053,7 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
   Duration get transitionDuration => _kModalPopupTransitionDuration;
 
   @override
-  bool get ignorePointerWhenCurrentDuringTransitions => true;
+  bool get ignorePointerDuringTransitions => true;
 
   Animation<double>? _animation;
 
@@ -1357,5 +1357,5 @@ class CupertinoDialogRoute<T> extends RawDialogRoute<T> {
       );
 
   @override
-  bool get ignorePointerWhenCurrentDuringTransitions => true;
+  bool get ignorePointerDuringTransitions => true;
 }

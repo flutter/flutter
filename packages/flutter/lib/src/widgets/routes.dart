@@ -1182,8 +1182,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     return child;
   }
 
-  /// Whether this route should ignore pointers when it is the current route and
-  /// transitions are in progress.
+  /// Whether this route should ignore pointers when transitions are in progress.
   ///
   /// Pointers always are ignored when [isCurrent] is false (e.g., when a route
   /// has a new route pushed on top of it, or during a route's exit transition
@@ -1191,19 +1190,23 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// transitions where this route is the current route (e.g., after the route
   /// above this route pops, or during this route's entrance transition).
   ///
-  /// This value should generally be true for Cupertino routes.
-  ///
   /// Returns false by default.
+  ///
+  /// See also:
+  ///
+  ///  * [CupertinoRouteTransitionMixin], [CupertinoModalPopupRoute], and
+  ///    [CupertinoDialogRoute], which use this property to specify that
+  ///    Cupertino routes ignore pointers during transitions.
   @protected
-  bool get ignorePointerWhenCurrentDuringTransitions => false;
+  bool get ignorePointerDuringTransitions => false;
 
   @override
   void install() {
     super.install();
     _animationProxy = ProxyAnimation(super.animation)
-      ..addStatusListener((_) => _maybeUpdateIgnorePointer());
+      ..addStatusListener(_maybeUpdateIgnorePointer);
     _secondaryAnimationProxy = ProxyAnimation(super.secondaryAnimation)
-      ..addStatusListener((_) => _maybeUpdateIgnorePointer());
+      ..addStatusListener(_maybeUpdateIgnorePointer);
   }
 
   @override
@@ -1442,14 +1445,14 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   bool get _ignorePointer => _ignorePointerNotifier.value;
   final ValueNotifier<bool> _ignorePointerNotifier = ValueNotifier<bool>(false);
 
-  void _maybeUpdateIgnorePointer() {
+  void _maybeUpdateIgnorePointer(AnimationStatus status) {
     bool _isTransitioning(Animation<double>? animation) {
       return animation?.status == AnimationStatus.forward || animation?.status == AnimationStatus.reverse;
     }
     // Pointers are implicitly ignored here during Cupertino user pop gestures, as
     // full-screen Cupertino page routes ignore pointers during transitions by default.
     _ignorePointerNotifier.value = !isCurrent ||
-        (ignorePointerWhenCurrentDuringTransitions &&
+        (ignorePointerDuringTransitions &&
             (_isTransitioning(animation) || _isTransitioning(secondaryAnimation)));
   }
 
