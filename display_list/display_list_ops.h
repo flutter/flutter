@@ -6,6 +6,7 @@
 #define FLUTTER_DISPLAY_LIST_DISPLAY_LIST_OPS_H_
 
 #include "flutter/display_list/display_list.h"
+#include "flutter/display_list/display_list_dispatcher.h"
 #include "flutter/display_list/types.h"
 #include "flutter/fml/macros.h"
 
