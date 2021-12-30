@@ -3714,7 +3714,7 @@ void main() {
       final InkWell lastItem = tester.widget(find.widgetWithText(InkWell, 'Three'));
 
       expect(firstItem.borderRadius, const BorderRadius.vertical(top: Radius.circular(radius)));
-      expect(lastItem.borderRadius, const BorderRadius.vertical(bottom: Radius.circular(radius)));  
+      expect(lastItem.borderRadius, const BorderRadius.vertical(bottom: Radius.circular(radius)));
     });
 
     testWidgets('When only one item is available', (WidgetTester tester) async {
