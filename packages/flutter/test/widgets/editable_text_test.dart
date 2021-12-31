@@ -2142,13 +2142,13 @@ void main() {
 
       // Show prompt rect when told to.
       verifyAutocorrectionRectVisibility(expectVisible: true);
-      // Verify twice because the rect is drawn twice and paints..something()
-      // matches eagerly on the first success
-      verifyAutocorrectionRectVisibility(expectVisible: true);
 
       // Text changed, prompt rect goes away.
       controller.text = '12345';
       await tester.pump();
+      // TODO: I think this test has been silently broken for a long time, because
+      // previously, paints..everything() was accidentally skipping every one if its
+      // first calls, and here, the first call fails the expectation
       verifyAutocorrectionRectVisibility(expectVisible: false);
 
       state.showAutocorrectionPromptRect(0, 1);

@@ -1435,20 +1435,13 @@ class _EverythingPaintPredicate extends _PaintPredicate {
 
   @override
   void match(Iterator<RecordedInvocation> call) {
-    // do {
-    //   final RecordedInvocation currentCall = call.current;
-    //   if (!currentCall.invocation.isMethod)
-    //     throw 'It called $currentCall, which was not a method, when the paint pattern expected a method call';
-    //   if (!_runPredicate(currentCall.invocation.memberName, currentCall.invocation.positionalArguments))
-    //     return;
-    // } while (call.moveNext());
-    while (call.moveNext()) {
+    do {
       final RecordedInvocation currentCall = call.current;
       if (!currentCall.invocation.isMethod)
         throw 'It called $currentCall, which was not a method, when the paint pattern expected a method call';
       if (!_runPredicate(currentCall.invocation.memberName, currentCall.invocation.positionalArguments))
         return;
-    }
+    } while (call.moveNext());
   }
 
   bool _runPredicate(Symbol methodName, List<dynamic> arguments) {
