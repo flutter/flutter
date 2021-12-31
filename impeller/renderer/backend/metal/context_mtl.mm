@@ -14,34 +14,30 @@
 
 namespace impeller {
 
-static NSArray<id<MTLLibrary>>* ShaderLibrariesFromFiles(
-    id<MTLDevice> device,
-    const std::vector<std::string>& libraries_paths) {
-  NSMutableArray<id<MTLLibrary>>* found_libraries = [NSMutableArray array];
-  for (const auto& library_path : libraries_paths) {
-    if (!fml::IsFile(library_path)) {
-      VALIDATION_LOG << "Shader library does not exist at path '"
-                     << library_path << "'";
-      continue;
-    }
-    NSError* shader_library_error = nil;
-    auto library = [device newLibraryWithFile:@(library_path.c_str())
-                                        error:&shader_library_error];
-    if (!library) {
-      FML_LOG(ERROR) << "Could not create shader library: "
-                     << shader_library_error.localizedDescription.UTF8String;
-      continue;
-    }
-    [found_libraries addObject:library];
-  }
-  return found_libraries;
-}
-
-ContextMTL::ContextMTL(const std::vector<std::string>& libraries_paths)
-    : device_(::MTLCreateSystemDefaultDevice()) {
-  // Setup device.
+ContextMTL::ContextMTL(id<MTLDevice> device,
+                       NSArray<id<MTLLibrary>>* shader_libraries)
+    : device_(device) {
+  // Validate device.
   if (!device_) {
+    VALIDATION_LOG << "Could not setup valid Metal device.";
     return;
+  }
+
+  // Setup the shader library.
+  {
+    if (shader_libraries == nil) {
+      VALIDATION_LOG << "Shader libraries were null.";
+      return;
+    }
+
+    // std::make_shared disallowed because of private friend ctor.
+    auto library = std::shared_ptr<ShaderLibraryMTL>(
+        new ShaderLibraryMTL(shader_libraries));
+    if (!library->IsValid()) {
+      VALIDATION_LOG << "Could not create valid Metal shader library.";
+      return;
+    }
+    shader_library_ = std::move(library);
   }
 
   // Setup command queues.
@@ -54,18 +50,6 @@ ContextMTL::ContextMTL(const std::vector<std::string>& libraries_paths)
 
   render_queue_.label = @"Impeller Render Queue";
   transfer_queue_.label = @"Impeller Transfer Queue";
-
-  // Setup the shader library.
-  {
-    // std::make_shared disallowed because of private friend ctor.
-    auto library = std::shared_ptr<ShaderLibraryMTL>(new ShaderLibraryMTL(
-        ShaderLibrariesFromFiles(device_, libraries_paths)));
-    if (!library->IsValid()) {
-      VALIDATION_LOG << "Could not create valid Metal shader library.";
-      return;
-    }
-    shader_library_ = std::move(library);
-  }
 
   // Setup the pipeline library.
   {  //
@@ -94,6 +78,96 @@ ContextMTL::ContextMTL(const std::vector<std::string>& libraries_paths)
   }
 
   is_valid_ = true;
+}
+
+static NSArray<id<MTLLibrary>>* MTLShaderLibraryFromFilePaths(
+    id<MTLDevice> device,
+    const std::vector<std::string>& libraries_paths) {
+  NSMutableArray<id<MTLLibrary>>* found_libraries = [NSMutableArray array];
+  for (const auto& library_path : libraries_paths) {
+    if (!fml::IsFile(library_path)) {
+      VALIDATION_LOG << "Shader library does not exist at path '"
+                     << library_path << "'";
+      return nil;
+    }
+    NSError* shader_library_error = nil;
+    auto library = [device newLibraryWithFile:@(library_path.c_str())
+                                        error:&shader_library_error];
+    if (!library) {
+      FML_LOG(ERROR) << "Could not create shader library: "
+                     << shader_library_error.localizedDescription.UTF8String;
+      return nil;
+    }
+    [found_libraries addObject:library];
+  }
+  return found_libraries;
+}
+
+static NSArray<id<MTLLibrary>>* MTLShaderLibraryFromFileData(
+    id<MTLDevice> device,
+    const std::vector<std::shared_ptr<fml::Mapping>>& libraries_data) {
+  NSMutableArray<id<MTLLibrary>>* found_libraries = [NSMutableArray array];
+  for (const auto& library_data : libraries_data) {
+    if (library_data == nullptr) {
+      FML_LOG(ERROR) << "Shader library data was null.";
+      return nil;
+    }
+
+    __block auto data = library_data;
+
+    auto dispatch_data =
+        ::dispatch_data_create(library_data->GetMapping(),  // buffer
+                               library_data->GetSize(),     // size
+                               dispatch_get_main_queue(),   // queue
+                               ^() {
+                                 // We just need a reference.
+                                 data.reset();
+                               }  // destructor
+        );
+    if (!dispatch_data) {
+      FML_LOG(ERROR) << "Could not wrap shader data in dispatch data.";
+      return nil;
+    }
+
+    NSError* shader_library_error = nil;
+    auto library = [device newLibraryWithData:dispatch_data
+                                        error:&shader_library_error];
+    if (!library) {
+      FML_LOG(ERROR) << "Could not create shader library: "
+                     << shader_library_error.localizedDescription.UTF8String;
+      return nil;
+    }
+    [found_libraries addObject:library];
+  }
+  return found_libraries;
+}
+
+static id<MTLDevice> CreateMetalDevice() {
+  return ::MTLCreateSystemDefaultDevice();
+}
+
+std::shared_ptr<Context> ContextMTL::Create(
+    const std::vector<std::string>& shader_library_paths) {
+  auto device = CreateMetalDevice();
+  auto context = std::shared_ptr<ContextMTL>(new ContextMTL(
+      device, MTLShaderLibraryFromFilePaths(device, shader_library_paths)));
+  if (!context->IsValid()) {
+    FML_LOG(ERROR) << "Could not create Metal context.";
+    return nullptr;
+  }
+  return context;
+}
+
+std::shared_ptr<Context> ContextMTL::Create(
+    const std::vector<std::shared_ptr<fml::Mapping>>& shader_libraries_data) {
+  auto device = CreateMetalDevice();
+  auto context = std::shared_ptr<ContextMTL>(new ContextMTL(
+      device, MTLShaderLibraryFromFileData(device, shader_libraries_data)));
+  if (!context->IsValid()) {
+    FML_LOG(ERROR) << "Could not create Metal context.";
+    return nullptr;
+  }
+  return context;
 }
 
 ContextMTL::~ContextMTL() = default;
