@@ -23,7 +23,11 @@ namespace impeller {
 class ContextMTL final : public Context,
                          public BackendCast<ContextMTL, Context> {
  public:
-  ContextMTL(const std::vector<std::string>& shader_libraries);
+  static std::shared_ptr<Context> Create(
+      const std::vector<std::string>& shader_library_paths);
+
+  static std::shared_ptr<Context> Create(
+      const std::vector<std::shared_ptr<fml::Mapping>>& shader_libraries_data);
 
   // |Context|
   ~ContextMTL() override;
@@ -40,6 +44,8 @@ class ContextMTL final : public Context,
   std::shared_ptr<AllocatorMTL> permanents_allocator_;
   std::shared_ptr<AllocatorMTL> transients_allocator_;
   bool is_valid_ = false;
+
+  ContextMTL(id<MTLDevice> device, NSArray<id<MTLLibrary>>* shader_libraries);
 
   // |Context|
   bool IsValid() const override;

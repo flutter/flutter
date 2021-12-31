@@ -100,6 +100,7 @@ template("impeller_shaders") {
   assert(defined(invoker.shaders), "Impeller shaders must be specified.")
   assert(defined(invoker.name), "Name of the shader library must be specified.")
 
+  base_target_name = target_name
   impellerc_target_name = "impellerc_$target_name"
   compiled_action_foreach(impellerc_target_name) {
     tool = "//flutter/impeller/compiler:impellerc"
@@ -192,9 +193,40 @@ template("impeller_shaders") {
     ]
   }
 
+  generate_embedder_data_sources = "embedded_data_gen_sources_$target_name"
+  action(generate_embedder_data_sources) {
+    metal_library_files = get_target_outputs(":$metal_library_target_name")
+    metal_library_file = metal_library_files[0]
+    inputs = [ metal_library_file ]
+    output_header = "$target_gen_dir/$base_target_name.h"
+    output_source = "$target_gen_dir/$base_target_name.c"
+    outputs = [
+      output_header,
+      output_source,
+    ]
+    args = [
+      "--symbol-name",
+      base_target_name,
+      "--output-header",
+      rebase_path(output_header),
+      "--output-source",
+      rebase_path(output_source),
+      "--source",
+      rebase_path(metal_library_file),
+    ]
+    script = "//flutter/impeller/tools/xxd.py"
+    deps = [ ":$metal_library_target_name" ]
+  }
+
+  shader_embedded_data_target_name = "embedded_data_$target_name"
+  source_set(shader_embedded_data_target_name) {
+    sources = get_target_outputs(":$generate_embedder_data_sources")
+    deps = [ ":$generate_embedder_data_sources" ]
+  }
+
   group(target_name) {
     public_deps = [
-      ":$metal_library_target_name",
+      ":$shader_embedded_data_target_name",
       ":$shader_glue_target_name",
     ]
   }
