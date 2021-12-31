@@ -28,18 +28,18 @@ import '../../src/context.dart';
 void main() {
   testUsingContext('All build commands support null safety options', () {
     final List<FlutterCommand> commands = <FlutterCommand>[
-      BuildWindowsCommand(verboseHelp: false),
-      BuildLinuxCommand(verboseHelp: false, operatingSystemUtils: globals.os),
+      BuildWindowsCommand(),
+      BuildLinuxCommand(operatingSystemUtils: globals.os),
       BuildMacosCommand(verboseHelp: false),
       BuildWebCommand(verboseHelp: false),
-      BuildApkCommand(verboseHelp: false),
+      BuildApkCommand(),
       BuildIOSCommand(verboseHelp: false),
       BuildIOSArchiveCommand(verboseHelp: false),
-      BuildAppBundleCommand(verboseHelp: false),
+      BuildAppBundleCommand(),
       BuildFuchsiaCommand(verboseHelp: false),
       BuildAarCommand(verboseHelp: false),
       BuildIOSFrameworkCommand(verboseHelp: false, buildSystem: globals.buildSystem),
-      AttachCommand(verboseHelp: false),
+      AttachCommand(),
     ];
 
     for (final FlutterCommand command in commands) {
@@ -57,15 +57,12 @@ void main() {
     const BuildInfo unsound = BuildInfo(
       BuildMode.debug,
       '',
-      trackWidgetCreation: false,
       nullSafetyMode: NullSafetyMode.unsound,
       treeShakeIcons: false,
     );
     const BuildInfo sound = BuildInfo(
       BuildMode.debug,
       '',
-      trackWidgetCreation: false,
-      nullSafetyMode: NullSafetyMode.sound,
       treeShakeIcons: false,
     );
 

@@ -2,9 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'package:meta/meta.dart';
+import 'package:file/file.dart';
 import 'package:process/process.dart';
 
 import '../base/common.dart';
@@ -32,15 +30,15 @@ import 'fuchsia_sdk.dart';
 /// A simple wrapper for the Fuchsia SDK's 'ffx' tool.
 class FuchsiaFfx {
   FuchsiaFfx({
-    @required FuchsiaArtifacts fuchsiaArtifacts,
-    @required Logger logger,
-    @required ProcessManager processManager,
+    required FuchsiaArtifacts? fuchsiaArtifacts,
+    required Logger logger,
+    required ProcessManager processManager,
   })  : _fuchsiaArtifacts = fuchsiaArtifacts,
         _logger = logger,
         _processUtils =
             ProcessUtils(logger: logger, processManager: processManager);
 
-  final FuchsiaArtifacts _fuchsiaArtifacts;
+  final FuchsiaArtifacts? _fuchsiaArtifacts;
   final Logger _logger;
   final ProcessUtils _processUtils;
 
@@ -48,12 +46,13 @@ class FuchsiaFfx {
   /// formatted as follows:
   ///
   /// abcd::abcd:abc:abcd:abcd%qemu scare-cable-skip-joy
-  Future<List<String>> list({Duration timeout}) async {
-    if (_fuchsiaArtifacts.ffx == null || !_fuchsiaArtifacts.ffx.existsSync()) {
+  Future<List<String>?> list({Duration? timeout}) async {
+    final File? ffx = _fuchsiaArtifacts?.ffx;
+    if (ffx == null || !ffx.existsSync()) {
       throwToolExit('Fuchsia ffx tool not found.');
     }
     final List<String> command = <String>[
-      _fuchsiaArtifacts.ffx.path,
+      ffx.path,
       if (timeout != null)
         ...<String>['-T', '${timeout.inSeconds}'],
       'target',
@@ -76,12 +75,13 @@ class FuchsiaFfx {
   ///
   /// The string [deviceName] should be the name of the device from the
   /// 'list' command, e.g. 'scare-cable-skip-joy'.
-  Future<String> resolve(String deviceName) async {
-    if (_fuchsiaArtifacts.ffx == null || !_fuchsiaArtifacts.ffx.existsSync()) {
+  Future<String?> resolve(String deviceName) async {
+    final File? ffx = _fuchsiaArtifacts?.ffx;
+    if (ffx == null || !ffx.existsSync()) {
       throwToolExit('Fuchsia ffx tool not found.');
     }
     final List<String> command = <String>[
-      _fuchsiaArtifacts.ffx.path,
+      ffx.path,
       'target',
       'list',
       '--format',

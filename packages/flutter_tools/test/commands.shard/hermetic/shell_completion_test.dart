@@ -31,6 +31,8 @@ void main() {
       expect(fakeStdio.writtenToStdout.length, equals(1));
       expect(fakeStdio.writtenToStdout.first, contains('__flutter_completion'));
     }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.any(),
       Stdio: () => fakeStdio,
     });
 
@@ -40,6 +42,8 @@ void main() {
       expect(fakeStdio.writtenToStdout.length, equals(1));
       expect(fakeStdio.writtenToStdout.first, contains('__flutter_completion'));
     }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.any(),
       Stdio: () => fakeStdio,
     });
 

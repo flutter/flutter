@@ -24,7 +24,6 @@ SET engine_version_path=%FLUTTER_ROOT%\bin\internal\engine.version
 SET pub_cache_path=%FLUTTER_ROOT%\.pub-cache
 
 SET dart=%dart_sdk_path%\bin\dart.exe
-SET pub=%dart_sdk_path%\bin\pub.bat
 
 REM Detect which PowerShell executable is available on the Host
 REM PowerShell version <= 5: PowerShell.exe
@@ -139,7 +138,7 @@ GOTO :after_subroutine
       SET /A remaining_tries=%total_tries%-1
       :retry_pub_upgrade
         ECHO Running pub upgrade... 1>&2
-        CALL "%pub%" upgrade "%VERBOSITY%" --no-precompile
+        "%dart%" __deprecated_pub upgrade "%VERBOSITY%" --no-precompile
         IF "%ERRORLEVEL%" EQU "0" goto :upgrade_succeeded
         ECHO Error (%ERRORLEVEL%): Unable to 'pub upgrade' flutter tool. Retrying in five seconds... (%remaining_tries% tries left) 1>&2
         timeout /t 5 /nobreak 2>NUL

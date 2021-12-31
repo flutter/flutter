@@ -28,8 +28,7 @@ import 'framework.dart';
 /// changed. When it returns true, the dependents are marked as needing to be
 /// rebuilt this frame.
 ///
-/// {@tool dartpad --template=stateful_widget_material_ticker}
-///
+/// {@tool dartpad}
 /// This example shows three spinning squares that use the value of the notifier
 /// on an ancestor [InheritedNotifier] (`SpinModel`) to give them their
 /// rotation. The [InheritedNotifier] doesn't need to know about the children,
@@ -43,76 +42,7 @@ import 'framework.dart';
 /// just need to know that there is one in their ancestry. This can help with
 /// decoupling widgets from their models.
 ///
-/// ```dart dartImports
-/// import 'dart:math' as math;
-/// ```
-///
-/// ```dart preamble
-/// class SpinModel extends InheritedNotifier<AnimationController> {
-///   const SpinModel({
-///     Key? key,
-///     AnimationController? notifier,
-///     required Widget child,
-///   }) : super(key: key, notifier: notifier, child: child);
-///
-///   static double of(BuildContext context) {
-///     return context.dependOnInheritedWidgetOfExactType<SpinModel>()!.notifier!.value;
-///   }
-/// }
-///
-/// class Spinner extends StatelessWidget {
-///   const Spinner({Key? key}) : super(key: key);
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return Transform.rotate(
-///       angle: SpinModel.of(context) * 2.0 * math.pi,
-///       child: Container(
-///         width: 100,
-///         height: 100,
-///         color: Colors.green,
-///         child: const Center(
-///           child: Text('Whee!'),
-///         ),
-///       ),
-///     );
-///   }
-/// }
-/// ```
-///
-/// ```dart
-/// late AnimationController _controller;
-///
-/// @override
-/// void initState() {
-///   super.initState();
-///   _controller = AnimationController(
-///     duration: const Duration(seconds: 10),
-///     vsync: this,
-///   )..repeat();
-/// }
-///
-/// @override
-/// void dispose() {
-///   _controller.dispose();
-///   super.dispose();
-/// }
-///
-/// @override
-/// Widget build(BuildContext context) {
-///   return SpinModel(
-///     notifier: _controller,
-///     child: Row(
-///       mainAxisAlignment: MainAxisAlignment.spaceAround,
-///       children: const <Widget>[
-///         Spinner(),
-///         Spinner(),
-///         Spinner(),
-///       ],
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/widgets/inherited_notifier/inherited_notifier.0.dart **
 /// {@end-tool}
 ///
 /// See also:

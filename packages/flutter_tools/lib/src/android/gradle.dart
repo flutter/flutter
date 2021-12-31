@@ -28,6 +28,7 @@ import 'android_builder.dart';
 import 'android_studio.dart';
 import 'gradle_errors.dart';
 import 'gradle_utils.dart';
+import 'multidex.dart';
 
 /// The directory where the APK artifact is generated.
 Directory getApkDirectory(FlutterProject project) {
@@ -68,7 +69,7 @@ Directory getRepoDirectory(Directory buildDirectory) {
 String _taskFor(String prefix, BuildInfo buildInfo) {
   final String buildType = camelCase(buildInfo.modeName);
   final String productFlavor = buildInfo.flavor ?? '';
-  return '$prefix${toTitleCase(productFlavor)}${toTitleCase(buildType)}';
+  return '$prefix${sentenceCase(productFlavor)}${sentenceCase(buildType)}';
 }
 
 /// Returns the task to build an APK.
@@ -293,6 +294,22 @@ class AndroidGradleBuilder implements AndroidBuilder {
     if (target != null) {
       command.add('-Ptarget=$target');
     }
+    // Only attempt adding multidex support if all the flutter generated files exist.
+    // If the files do not exist and it was unintentional, the app will fail to build
+    // and prompt the developer if they wish Flutter to add the files again via gradle_error.dart.
+    if (androidBuildInfo.multidexEnabled &&
+        multiDexApplicationExists(project.directory) &&
+        androidManifestHasNameVariable(project.directory)) {
+      command.add('-Pmultidex-enabled=true');
+      ensureMultiDexApplicationExists(project.directory);
+      _logger.printStatus('Building with Flutter multidex support enabled.');
+    }
+    // If using v1 embedding, we want to use FlutterApplication as the base app.
+    final String baseApplicationName =
+        project.android.getEmbeddingVersion() == AndroidEmbeddingVersion.v2 ?
+          'android.app.Application' :
+          'io.flutter.app.FlutterApplication';
+    command.add('-Pbase-application-name=$baseApplicationName');
     final List<DeferredComponent>? deferredComponents = project.manifest.deferredComponents;
     if (deferredComponents != null) {
       if (deferredComponentsEnabled) {
@@ -389,6 +406,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
           line: detectedGradleErrorLine!,
           project: project,
           usesAndroidX: usesAndroidX,
+          multidexEnabled: androidBuildInfo.multidexEnabled,
         );
 
         if (retries >= 1) {
@@ -574,7 +592,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
     command.addAll(androidBuildInfo.buildInfo.toGradleConfig());
     if (buildInfo.dartObfuscation && buildInfo.mode != BuildMode.release) {
       _logger.printStatus(
-        'Dart obfuscation is not supported in ${toTitleCase(buildInfo.friendlyModeName)}'
+        'Dart obfuscation is not supported in ${sentenceCase(buildInfo.friendlyModeName)}'
             ' mode, building as un-obfuscated.',
       );
     }

@@ -6,7 +6,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -67,8 +66,11 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   /// This is used to send messages from the application to the platform, and
   /// keeps track of which handlers have been registered on each channel so
   /// it may dispatch incoming messages to the registered handler.
+  ///
+  /// The default implementation returns a [BinaryMessenger] that delivers the
+  /// messages in the same order in which they are sent.
   BinaryMessenger get defaultBinaryMessenger => _defaultBinaryMessenger;
-  late BinaryMessenger _defaultBinaryMessenger;
+  late final BinaryMessenger _defaultBinaryMessenger;
 
   /// The low level buffering and dispatch mechanism for messages sent by
   /// plugins on the engine side to their corresponding plugin code on
@@ -94,6 +96,11 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
 
   /// Creates a default [BinaryMessenger] instance that can be used for sending
   /// platform messages.
+  ///
+  /// Many Flutter framework components that communicate with the platform
+  /// assume messages are received by the platform in the same order in which
+  /// they are sent. When overriding this method, be sure the [BinaryMessenger]
+  /// implementation guarantees FIFO delivery.
   @protected
   BinaryMessenger createBinaryMessenger() {
     return const _DefaultBinaryMessenger._();
@@ -106,7 +113,9 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   /// [SystemChannels.system].
   @protected
   @mustCallSuper
-  void handleMemoryPressure() { }
+  void handleMemoryPressure() {
+    rootBundle.clear();
+  }
 
   /// Handler called for messages received on the [SystemChannels.system]
   /// message channel.
@@ -310,6 +319,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   ///
   ///   * [SystemChrome.setEnabledSystemUIMode], which specifies the
   ///     [SystemUiMode] to have visible when the application is running.
+  // ignore: use_setters_to_change_properties, (API predates enforcing the lint)
   void setSystemUiChangeCallback(SystemUiChangeCallback? callback) {
     _systemUiChangeCallback = callback;
   }
@@ -378,7 +388,6 @@ class _DefaultBinaryMessenger extends BinaryMessenger {
         try {
           response = await handler(data);
         } catch (exception, stack) {
-
           FlutterError.reportError(FlutterErrorDetails(
             exception: exception,
             stack: stack,

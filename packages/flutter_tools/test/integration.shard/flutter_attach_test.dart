@@ -104,5 +104,5 @@ void main() {
       continuePollingValue: '',
       matches: equals(vmServiceUri),
     );
-  }, timeout: const Timeout.factor(4));
+  });
 }

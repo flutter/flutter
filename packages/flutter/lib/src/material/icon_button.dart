@@ -40,38 +40,34 @@ const double _kMinButtonSize = kMinInteractiveDimension;
 /// requirements in the Material Design specification. The [alignment] controls
 /// how the icon itself is positioned within the hit region.
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_center}
-///
+/// {@tool dartpad}
 /// This sample shows an `IconButton` that uses the Material icon "volume_up" to
 /// increase the volume.
 ///
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/icon_button.png)
 ///
-/// ```dart preamble
-/// double _volume = 0.0;
-/// ```
+/// ** See code in examples/api/lib/material/icon_button/icon_button.0.dart **
+/// {@end-tool}
+///
+/// ### Icon sizes
+///
+/// When creating an icon button with an [Icon], do not override the
+/// icon's size with its [Icon.size] parameter, use the icon button's
+/// [iconSize] parameter instead.  For example do this:
 ///
 /// ```dart
-/// @override
-/// Widget build(BuildContext context) {
-///   return Column(
-///     mainAxisSize: MainAxisSize.min,
-///     children: <Widget>[
-///       IconButton(
-///         icon: const Icon(Icons.volume_up),
-///         tooltip: 'Increase volume by 10',
-///         onPressed: () {
-///           setState(() {
-///             _volume += 10;
-///           });
-///         },
-///       ),
-///       Text('Volume : $_volume')
-///     ],
-///   );
-/// }
+/// IconButton(iconSize: 72, icon: Icon(Icons.favorite), ...)
 /// ```
-/// {@end-tool}
+///
+/// Avoid doing this:
+///
+/// ```dart
+/// IconButton(icon: Icon(Icons.favorite, size: 72), ...)
+/// ```
+///
+/// If you do, the button's size will be based on the default icon
+/// size, not 72, which may produce unexpected layouts and clipping
+/// issues.
 ///
 /// ### Adding a filled background
 ///
@@ -85,8 +81,7 @@ const double _kMinButtonSize = kMinInteractiveDimension;
 /// the underlying [Material] along with the splash and highlight
 /// [InkResponse] contributed by descendant widgets.
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold}
-///
+/// {@tool dartpad}
 /// In this sample the icon button's background color is defined with an [Ink]
 /// widget whose child is an [IconButton]. The icon button's filled background
 /// is a light shade of blue, it's a filled circle, and it's as big as the
@@ -94,27 +89,7 @@ const double _kMinButtonSize = kMinInteractiveDimension;
 ///
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/icon_button_background.png)
 ///
-/// ```dart
-/// @override
-/// Widget build(BuildContext context) {
-///   return Material(
-///     color: Colors.white,
-///     child: Center(
-///       child: Ink(
-///         decoration: const ShapeDecoration(
-///           color: Colors.lightBlue,
-///           shape: CircleBorder(),
-///         ),
-///         child: IconButton(
-///           icon: const Icon(Icons.android),
-///           color: Colors.white,
-///           onPressed: () {},
-///         ),
-///       ),
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/material/icon_button/icon_button.1.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -153,7 +128,7 @@ class IconButton extends StatelessWidget {
     this.splashColor,
     this.disabledColor,
     required this.onPressed,
-    this.mouseCursor = SystemMouseCursors.click,
+    this.mouseCursor,
     this.focusNode,
     this.autofocus = false,
     this.tooltip,
@@ -280,8 +255,10 @@ class IconButton extends StatelessWidget {
 
   /// {@macro flutter.material.RawMaterialButton.mouseCursor}
   ///
-  /// Defaults to [SystemMouseCursors.click].
-  final MouseCursor mouseCursor;
+  /// If set to null, will default to
+  /// - [SystemMouseCursors.forbidden], if [onPressed] is null
+  /// - [SystemMouseCursors.click], otherwise
+  final MouseCursor? mouseCursor;
 
   /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode? focusNode;
@@ -366,7 +343,7 @@ class IconButton extends StatelessWidget {
 
     if (tooltip != null) {
       result = Tooltip(
-        message: tooltip!,
+        message: tooltip,
         child: result,
       );
     }
@@ -379,7 +356,7 @@ class IconButton extends StatelessWidget {
         autofocus: autofocus,
         canRequestFocus: onPressed != null,
         onTap: onPressed,
-        mouseCursor: mouseCursor,
+        mouseCursor: mouseCursor ?? (onPressed == null ? SystemMouseCursors.forbidden : SystemMouseCursors.click),
         enableFeedback: enableFeedback,
         focusColor: focusColor ?? theme.focusColor,
         hoverColor: hoverColor ?? theme.hoverColor,

@@ -61,7 +61,7 @@ void main() {
     final IOSDevice device = setUpIOSDevice(
       processManager: processManager,
       fileSystem: fileSystem,
-      interfaceType: IOSDeviceInterface.usb,
+      interfaceType: IOSDeviceConnectionInterface.usb,
       artifacts: artifacts,
     );
     final bool wasInstalled = await device.installApp(iosApp);
@@ -90,7 +90,7 @@ void main() {
     final IOSDevice device = setUpIOSDevice(
       processManager: processManager,
       fileSystem: fileSystem,
-      interfaceType: IOSDeviceInterface.network,
+      interfaceType: IOSDeviceConnectionInterface.network,
       artifacts: artifacts,
     );
     final bool wasInstalled = await device.installApp(iosApp);
@@ -161,7 +161,7 @@ void main() {
         ], environment: const <String, String>{
           'PATH': '/usr/bin:null',
           ...kDyLdLibEntry,
-        }, exitCode: 0)
+        })
       ]);
       final IOSDevice device = setUpIOSDevice(processManager: processManager, artifacts: artifacts);
       final bool isAppInstalled = await device.isAppInstalled(iosApp);
@@ -275,7 +275,7 @@ IOSDevice setUpIOSDevice({
   @required ProcessManager processManager,
   FileSystem fileSystem,
   Logger logger,
-  IOSDeviceInterface interfaceType,
+  IOSDeviceConnectionInterface interfaceType,
   Artifacts artifacts,
 }) {
   logger ??= BufferLogger.test();

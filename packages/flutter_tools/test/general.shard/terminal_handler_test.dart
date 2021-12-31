@@ -791,9 +791,7 @@ void main() {
     });
 
     testWithoutContext('v - launchDevToolsInBrowser', () async {
-      final TerminalHandler terminalHandler = setUpTerminalHandler(
-          <FakeVmServiceRequest>[],
-          supportsServiceProtocol: true);
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[]);
       final FakeResidentRunner runner = terminalHandler.residentRunner as FakeResidentRunner;
       final FakeResidentDevtoolsHandler devtoolsHandler = runner.residentDevtoolsHandler as FakeResidentDevtoolsHandler;
 
@@ -1007,7 +1005,7 @@ void main() {
           'enabled': 'true',
         },
       )
-    ], logger: logger, supportsScreenshot: false, fileSystem: fileSystem);
+    ], logger: logger, fileSystem: fileSystem);
 
     await terminalHandler.processTerminalInput('s');
 
@@ -1041,7 +1039,7 @@ void main() {
           'enabled': 'true',
         },
       )
-    ], logger: logger, supportsScreenshot: false, web: true, fileSystem: fileSystem);
+    ], logger: logger, web: true, fileSystem: fileSystem);
 
     await terminalHandler.processTerminalInput('s');
 
@@ -1072,7 +1070,6 @@ void main() {
     final TerminalHandler terminalHandler = setUpTerminalHandler(
       <FakeVmServiceRequest>[],
       logger: logger,
-      supportsScreenshot: false,
       supportsServiceProtocol: false,
       fileSystem: fileSystem,
     );
@@ -1089,7 +1086,6 @@ void main() {
     final TerminalHandler terminalHandler = setUpTerminalHandler(
       <FakeVmServiceRequest>[],
       logger: logger,
-      supportsScreenshot: false,
       supportsServiceProtocol: false,
       web: true,
       fileSystem: fileSystem,
@@ -1118,7 +1114,6 @@ void main() {
         ),
       ],
       logger: logger,
-      supportsScreenshot: false,
       fileSystem: fileSystem,
     );
 
@@ -1154,7 +1149,6 @@ void main() {
         ),
       ],
       logger: logger,
-      supportsScreenshot: false,
       fileSystem: fileSystem,
     );
 
@@ -1190,7 +1184,6 @@ void main() {
         ),
       ],
       logger: logger,
-      supportsScreenshot: false,
       web: true,
       fileSystem: fileSystem,
     );
@@ -1372,6 +1365,9 @@ class FakeResidentDevtoolsHandler extends Fake implements ResidentDevtoolsHandle
   }
 }
 
+// Unfortunately Device, despite not being immutable, has an `operator ==`.
+// Until we fix that, we have to also ignore related lints here.
+// ignore: avoid_implementing_value_types
 class FakeDevice extends Fake implements Device {
   @override
   bool isSupported() => true;

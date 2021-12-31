@@ -200,74 +200,25 @@ abstract class TextSelectionControls {
     return delegate.selectAllEnabled && delegate.textEditingValue.text.isNotEmpty && delegate.textEditingValue.selection.isCollapsed;
   }
 
-  // TODO(justinmc): This and other methods should be ported to Actions and
-  // removed, along with their keyboard shortcut equivalents.
-  // https://github.com/flutter/flutter/issues/75004
-  /// Copy the current selection of the text field managed by the given
-  /// `delegate` to the [Clipboard]. Then, remove the selected text from the
-  /// text field and hide the toolbar.
+  /// Call [TextSelectionDelegate.cutSelection] to cut current selection.
   ///
   /// This is called by subclasses when their cut affordance is activated by
   /// the user.
-  void handleCut(TextSelectionDelegate delegate) {
-    final TextEditingValue value = delegate.textEditingValue;
-    Clipboard.setData(ClipboardData(
-      text: value.selection.textInside(value.text),
-    ));
-    delegate.userUpdateTextEditingValue(
-      TextEditingValue(
-        text: value.selection.textBefore(value.text)
-            + value.selection.textAfter(value.text),
-        selection: TextSelection.collapsed(
-          offset: value.selection.start,
-        ),
-      ),
-      SelectionChangedCause.toolBar,
-    );
-    delegate.bringIntoView(delegate.textEditingValue.selection.extent);
-    delegate.hideToolbar();
+  void handleCut(TextSelectionDelegate delegate, ClipboardStatusNotifier? clipboardStatus) {
+    delegate.cutSelection(SelectionChangedCause.toolbar);
+    clipboardStatus?.update();
   }
 
-  /// Copy the current selection of the text field managed by the given
-  /// `delegate` to the [Clipboard]. Then, move the cursor to the end of the
-  /// text (collapsing the selection in the process), and hide the toolbar.
+  /// Call [TextSelectionDelegate.copySelection] to copy current selection.
   ///
   /// This is called by subclasses when their copy affordance is activated by
   /// the user.
   void handleCopy(TextSelectionDelegate delegate, ClipboardStatusNotifier? clipboardStatus) {
-    final TextEditingValue value = delegate.textEditingValue;
-    Clipboard.setData(ClipboardData(
-      text: value.selection.textInside(value.text),
-    ));
+    delegate.copySelection(SelectionChangedCause.toolbar);
     clipboardStatus?.update();
-    delegate.bringIntoView(delegate.textEditingValue.selection.extent);
-
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.iOS:
-        // Hide the toolbar, but keep the selection and keep the handles.
-        delegate.hideToolbar(false);
-        return;
-      case TargetPlatform.macOS:
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        // Collapse the selection and hide the toolbar and handles.
-        delegate.userUpdateTextEditingValue(
-          TextEditingValue(
-            text: value.text,
-            selection: TextSelection.collapsed(offset: value.selection.end),
-          ),
-          SelectionChangedCause.toolBar,
-        );
-        delegate.hideToolbar();
-        return;
-    }
   }
 
-  /// Paste the current clipboard selection (obtained from [Clipboard]) into
-  /// the text field managed by the given `delegate`, replacing its current
-  /// selection, if any. Then, hide the toolbar.
+  /// Call [TextSelectionDelegate.pasteText] to paste text.
   ///
   /// This is called by subclasses when their paste affordance is activated by
   /// the user.
@@ -277,43 +228,18 @@ abstract class TextSelectionControls {
   /// implemented.
   // TODO(ianh): https://github.com/flutter/flutter/issues/11427
   Future<void> handlePaste(TextSelectionDelegate delegate) async {
-    final TextEditingValue value = delegate.textEditingValue; // Snapshot the input before using `await`.
-    final ClipboardData? data = await Clipboard.getData(Clipboard.kTextPlain);
-    if (data != null) {
-      delegate.userUpdateTextEditingValue(
-        TextEditingValue(
-          text: value.selection.textBefore(value.text)
-              + data.text!
-              + value.selection.textAfter(value.text),
-          selection: TextSelection.collapsed(
-              offset: value.selection.start + data.text!.length,
-          ),
-        ),
-        SelectionChangedCause.toolBar,
-      );
-    }
-    delegate.bringIntoView(delegate.textEditingValue.selection.extent);
-    delegate.hideToolbar();
+    delegate.pasteText(SelectionChangedCause.toolbar);
   }
 
-  /// Adjust the selection of the text field managed by the given `delegate` so
-  /// that everything is selected.
+  /// Call [TextSelectionDelegate.selectAll] to set the current selection to
+  /// contain the entire text value.
   ///
   /// Does not hide the toolbar.
   ///
   /// This is called by subclasses when their select-all affordance is activated
   /// by the user.
   void handleSelectAll(TextSelectionDelegate delegate) {
-    delegate.userUpdateTextEditingValue(
-      TextEditingValue(
-        text: delegate.textEditingValue.text,
-        selection: TextSelection(
-          baseOffset: 0,
-          extentOffset: delegate.textEditingValue.text.length,
-        ),
-      ),
-      SelectionChangedCause.toolBar,
-    );
+    delegate.selectAll(SelectionChangedCause.toolbar);
     delegate.bringIntoView(delegate.textEditingValue.selection.extent);
   }
 }
@@ -410,7 +336,7 @@ class TextSelectionOverlay {
   /// A callback that's optionally invoked when a selection handle is tapped.
   ///
   /// The [TextSelectionControls.buildHandle] implementation the text field
-  /// uses decides where the the handle's tap "hotspot" is, or whether the
+  /// uses decides where the handle's tap "hotspot" is, or whether the
   /// selection handle supports tap gestures at all. For instance,
   /// [MaterialTextSelectionControls] calls [onSelectionHandleTapped] when the
   /// selection handle's "knob" is tapped, while
@@ -432,7 +358,7 @@ class TextSelectionOverlay {
   /// Controls the fade-in and fade-out animations for the toolbar and handles.
   static const Duration fadeDuration = Duration(milliseconds: 150);
 
-  late AnimationController _toolbarController;
+  late final AnimationController _toolbarController;
   Animation<double> get _toolbarOpacity => _toolbarController.view;
 
   /// Retrieve current value.
@@ -571,7 +497,7 @@ class TextSelectionOverlay {
   void hideToolbar() {
     assert(_toolbar != null);
     _toolbarController.stop();
-    _toolbar!.remove();
+    _toolbar?.remove();
     _toolbar = null;
   }
 
@@ -947,27 +873,27 @@ class _TextSelectionHandleOverlayState
 
 /// Delegate interface for the [TextSelectionGestureDetectorBuilder].
 ///
-/// The interface is usually implemented by textfield implementations wrapping
+/// The interface is usually implemented by text field implementations wrapping
 /// [EditableText], that use a [TextSelectionGestureDetectorBuilder] to build a
 /// [TextSelectionGestureDetector] for their [EditableText]. The delegate provides
-/// the builder with information about the current state of the textfield.
+/// the builder with information about the current state of the text field.
 /// Based on these information, the builder adds the correct gesture handlers
 /// to the gesture detector.
 ///
 /// See also:
 ///
-///  * [TextField], which implements this delegate for the Material textfield.
+///  * [TextField], which implements this delegate for the Material text field.
 ///  * [CupertinoTextField], which implements this delegate for the Cupertino
-///    textfield.
+///    text field.
 abstract class TextSelectionGestureDetectorBuilderDelegate {
   /// [GlobalKey] to the [EditableText] for which the
   /// [TextSelectionGestureDetectorBuilder] will build a [TextSelectionGestureDetector].
   GlobalKey<EditableTextState> get editableTextKey;
 
-  /// Whether the textfield should respond to force presses.
+  /// Whether the text field should respond to force presses.
   bool get forcePressEnabled;
 
-  /// Whether the user may select text in the textfield.
+  /// Whether the user may select text in the text field.
   bool get selectionEnabled;
 }
 
@@ -1000,7 +926,7 @@ class TextSelectionGestureDetectorBuilder {
   /// The delegate for this [TextSelectionGestureDetectorBuilder].
   ///
   /// The delegate provides the builder with information about what actions can
-  /// currently be performed on the textfield. Based on this, the builder adds
+  /// currently be performed on the text field. Based on this, the builder adds
   /// the correct gesture handlers to the gesture detector.
   @protected
   final TextSelectionGestureDetectorBuilderDelegate delegate;
@@ -1655,29 +1581,20 @@ class ClipboardStatusNotifier extends ValueNotifier<ClipboardStatus> with Widget
 
   /// Check the [Clipboard] and update [value] if needed.
   Future<void> update() async {
-    // iOS 14 added a notification that appears when an app accesses the
-    // clipboard. To avoid the notification, don't access the clipboard on iOS,
-    // and instead always show the paste button, even when the clipboard is
-    // empty.
-    // TODO(justinmc): Use the new iOS 14 clipboard API method hasStrings that
-    // won't trigger the notification.
-    // https://github.com/flutter/flutter/issues/60145
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.iOS:
-        value = ClipboardStatus.pasteable;
-        return;
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.macOS:
-      case TargetPlatform.windows:
-        break;
+    if (_disposed) {
+      return;
     }
 
-    ClipboardData? data;
+    final bool hasStrings;
     try {
-      data = await Clipboard.getData(Clipboard.kTextPlain);
-    } catch (stacktrace) {
+      hasStrings = await Clipboard.hasStrings();
+    } catch (exception, stack) {
+      FlutterError.reportError(FlutterErrorDetails(
+        exception: exception,
+        stack: stack,
+        library: 'widget library',
+        context: ErrorDescription('while checking if the clipboard has strings'),
+      ));
       // In the case of an error from the Clipboard API, set the value to
       // unknown so that it will try to update again later.
       if (_disposed || value == ClipboardStatus.unknown) {
@@ -1687,13 +1604,14 @@ class ClipboardStatusNotifier extends ValueNotifier<ClipboardStatus> with Widget
       return;
     }
 
-    final ClipboardStatus clipboardStatus = data != null && data.text != null && data.text!.isNotEmpty
+    final ClipboardStatus nextStatus = hasStrings
         ? ClipboardStatus.pasteable
         : ClipboardStatus.notPasteable;
-    if (_disposed || clipboardStatus == value) {
+
+    if (_disposed || nextStatus == value) {
       return;
     }
-    value = clipboardStatus;
+    value = nextStatus;
   }
 
   @override

@@ -142,25 +142,25 @@ abstract class RawKeyEventData with Diagnosticable {
   /// regardless of which side of the keyboard it is on.
   ///
   /// Use [isModifierPressed] if you need to know which control key was pressed.
-  bool get isControlPressed => isModifierPressed(ModifierKey.controlModifier, side: KeyboardSide.any);
+  bool get isControlPressed => isModifierPressed(ModifierKey.controlModifier);
 
   /// Returns true if a SHIFT modifier key was pressed at the time of this
   /// event, regardless of which side of the keyboard it is on.
   ///
   /// Use [isModifierPressed] if you need to know which shift key was pressed.
-  bool get isShiftPressed => isModifierPressed(ModifierKey.shiftModifier, side: KeyboardSide.any);
+  bool get isShiftPressed => isModifierPressed(ModifierKey.shiftModifier);
 
   /// Returns true if a ALT modifier key was pressed at the time of this event,
   /// regardless of which side of the keyboard it is on.
   ///
   /// Use [isModifierPressed] if you need to know which alt key was pressed.
-  bool get isAltPressed => isModifierPressed(ModifierKey.altModifier, side: KeyboardSide.any);
+  bool get isAltPressed => isModifierPressed(ModifierKey.altModifier);
 
   /// Returns true if a META modifier key was pressed at the time of this event,
   /// regardless of which side of the keyboard it is on.
   ///
   /// Use [isModifierPressed] if you need to know which meta key was pressed.
-  bool get isMetaPressed => isModifierPressed(ModifierKey.metaModifier, side: KeyboardSide.any);
+  bool get isMetaPressed => isModifierPressed(ModifierKey.metaModifier);
 
   /// Returns a map of modifier keys that were pressed at the time of this
   /// event, and the keyboard side or sides that the key was on.
@@ -606,7 +606,7 @@ class RawKeyboard {
   /// This property is only a wrapper over [KeyEventManager.keyMessageHandler],
   /// and is kept only for backward compatibility. New code should use
   /// [KeyEventManager.keyMessageHandler] to set custom global key event
-  /// handler.  Setting [keyEventHandler] will cause
+  /// handler. Setting [keyEventHandler] will cause
   /// [KeyEventManager.keyMessageHandler] to be set with a converted handler.
   /// If [KeyEventManager.keyMessageHandler] is set by [FocusManager] (the most
   /// common situation), then the exact value of [keyEventHandler] is a dummy
@@ -673,8 +673,25 @@ class RawKeyboard {
     );
     // Send the event to passive listeners.
     for (final ValueChanged<RawKeyEvent> listener in List<ValueChanged<RawKeyEvent>>.from(_listeners)) {
-      if (_listeners.contains(listener)) {
-        listener(event);
+      try {
+        if (_listeners.contains(listener)) {
+          listener(event);
+        }
+      } catch (exception, stack) {
+        InformationCollector? collector;
+        assert(() {
+          collector = () sync* {
+            yield DiagnosticsProperty<RawKeyEvent>('Event', event);
+          };
+          return true;
+        }());
+        FlutterError.reportError(FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'services library',
+          context: ErrorDescription('while processing a raw key listener'),
+          informationCollector: collector,
+        ));
       }
     }
 

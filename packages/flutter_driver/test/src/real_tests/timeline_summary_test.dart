@@ -451,6 +451,22 @@ void main() {
             'average_vsync_frame_lag': 0.0,
             '90th_percentile_vsync_frame_lag': 0.0,
             '99th_percentile_vsync_frame_lag': 0.0,
+            'average_layer_cache_count': 0.0,
+            '90th_percentile_layer_cache_count': 0.0,
+            '99th_percentile_layer_cache_count': 0.0,
+            'worst_layer_cache_count': 0.0,
+            'average_layer_cache_memory': 0.0,
+            '90th_percentile_layer_cache_memory': 0.0,
+            '99th_percentile_layer_cache_memory': 0.0,
+            'worst_layer_cache_memory': 0.0,
+            'average_picture_cache_count': 0.0,
+            '90th_percentile_picture_cache_count': 0.0,
+            '99th_percentile_picture_cache_count': 0.0,
+            'worst_picture_cache_count': 0.0,
+            'average_picture_cache_memory': 0.0,
+            '90th_percentile_picture_cache_memory': 0.0,
+            '99th_percentile_picture_cache_memory': 0.0,
+            'worst_picture_cache_memory': 0.0,
           },
         );
       });
@@ -486,7 +502,6 @@ void main() {
         ]).writeTimelineToFile(
           'test',
           destinationDirectory: tempDir.path,
-          includeSummary: true,
         );
         final String written =
             await fs.file(path.join(tempDir.path, 'test.timeline.json')).readAsString();
@@ -550,6 +565,22 @@ void main() {
           'average_memory_usage': 67.5,
           '90th_percentile_memory_usage': 75.0,
           '99th_percentile_memory_usage': 75.0,
+          'average_layer_cache_count': 0.0,
+          '90th_percentile_layer_cache_count': 0.0,
+          '99th_percentile_layer_cache_count': 0.0,
+          'worst_layer_cache_count': 0.0,
+          'average_layer_cache_memory': 0.0,
+          '90th_percentile_layer_cache_memory': 0.0,
+          '99th_percentile_layer_cache_memory': 0.0,
+          'worst_layer_cache_memory': 0.0,
+          'average_picture_cache_count': 0.0,
+          '90th_percentile_picture_cache_count': 0.0,
+          '99th_percentile_picture_cache_count': 0.0,
+          'worst_picture_cache_count': 0.0,
+          'average_picture_cache_memory': 0.0,
+          '90th_percentile_picture_cache_memory': 0.0,
+          '99th_percentile_picture_cache_memory': 0.0,
+          'worst_picture_cache_memory': 0.0,
         });
       });
     });

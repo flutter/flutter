@@ -111,16 +111,27 @@ class BuildBundleCommand extends BuildSubCommand {
         }
         break;
       case TargetPlatform.windows_x64:
+      case TargetPlatform.windows_uwp_x64:
         if (!featureFlags.isWindowsEnabled) {
           throwToolExit('Windows is not a supported target platform.');
         }
         break;
       case TargetPlatform.linux_x64:
+      case TargetPlatform.linux_arm64:
         if (!featureFlags.isLinuxEnabled) {
           throwToolExit('Linux is not a supported target platform.');
         }
         break;
-      default:
+      case TargetPlatform.android:
+      case TargetPlatform.android_arm:
+      case TargetPlatform.android_arm64:
+      case TargetPlatform.android_x64:
+      case TargetPlatform.android_x86:
+      case TargetPlatform.fuchsia_arm64:
+      case TargetPlatform.fuchsia_x64:
+      case TargetPlatform.ios:
+      case TargetPlatform.tester:
+      case TargetPlatform.web_javascript:
         break;
     }
 
@@ -131,7 +142,6 @@ class BuildBundleCommand extends BuildSubCommand {
       platform: platform,
       buildInfo: buildInfo,
       mainPath: targetFile,
-      manifestPath: defaultManifestPath,
       depfilePath: stringArg('depfile'),
       assetDirPath: stringArg('asset-dir'),
     );

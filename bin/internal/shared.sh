@@ -21,7 +21,7 @@ function retry_upgrade {
   local total_tries="10"
   local remaining_tries=$((total_tries - 1))
   while [[ "$remaining_tries" -gt 0 ]]; do
-    (cd "$FLUTTER_TOOLS_DIR" && "$PUB" upgrade "$VERBOSITY" --no-precompile) && break
+    (cd "$FLUTTER_TOOLS_DIR" && "$DART" __deprecated_pub upgrade "$VERBOSITY" --no-precompile) && break
     >&2 echo "Error: Unable to 'pub upgrade' flutter tool. Retrying in five seconds... ($remaining_tries tries left)"
     remaining_tries=$((remaining_tries - 1))
     sleep 5
@@ -180,14 +180,12 @@ function shared::execute() {
   DART_SDK_PATH="$FLUTTER_ROOT/bin/cache/dart-sdk"
 
   DART="$DART_SDK_PATH/bin/dart"
-  PUB="$DART_SDK_PATH/bin/pub"
 
   # If running over git-bash, overrides the default UNIX executables with win32
   # executables
   case "$(uname -s)" in
     MINGW*)
       DART="$DART.exe"
-      PUB="$PUB.bat"
       ;;
   esac
 

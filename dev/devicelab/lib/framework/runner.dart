@@ -7,10 +7,10 @@ import 'dart:convert';
 // import 'dart:core' as core;
 import 'dart:io';
 
-import 'package:flutter_devicelab/common.dart';
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../common.dart';
 import 'cocoon.dart';
 import 'devices.dart';
 import 'task_result.dart';

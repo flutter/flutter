@@ -2,12 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(gspencergoog): Remove this tag once this test's state leaks/test
-// dependencies have been fixed.
-// https://github.com/flutter/flutter/issues/85160
-// Fails with "flutter test --test-randomize-ordering-seed=123"
-@Tags(<String>['no-shuffle'])
-
 import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -306,6 +300,7 @@ void main() {
         position: Offset(15, 15),
       ));
       expect(recognized, const <String>['down', 'start', 'move']);
+      gesture.dispose();
     });
   });
 
@@ -532,7 +527,6 @@ void main() {
     const PointerDownEvent touchDown = PointerDownEvent(
       pointer: 5,
       position: Offset(10, 10),
-      kind: PointerDeviceKind.touch,
     );
 
     // Touch events shouldn't be recognized.

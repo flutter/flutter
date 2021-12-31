@@ -47,10 +47,14 @@ class GalleryTransitionTest {
     this.timelineTraceFile = 'transitions.timeline',
     this.transitionDurationFile = 'transition_durations.timeline',
     this.driverFile,
+    this.measureCpuGpu = true,
+    this.measureMemory = true,
   });
 
   final bool semanticsEnabled;
   final bool needFullTimeline;
+  final bool measureCpuGpu;
+  final bool measureMemory;
   final String testFile;
   final String timelineSummaryFile;
   final String? timelineTraceFile;
@@ -121,6 +125,7 @@ class GalleryTransitionTest {
       summary['missed_transition_count'] = _countMissedTransitions(transitions);
     }
 
+    final bool isAndroid = deviceOperatingSystem == DeviceOperatingSystem.android;
     return TaskResult.success(summary,
       detailFiles: <String>[
         if (transitionDurationFile != null)
@@ -139,6 +144,33 @@ class GalleryTransitionTest {
         'worst_frame_rasterizer_time_millis',
         '90th_percentile_frame_rasterizer_time_millis',
         '99th_percentile_frame_rasterizer_time_millis',
+        'average_layer_cache_count',
+        '90th_percentile_layer_cache_count',
+        '99th_percentile_layer_cache_count',
+        'worst_layer_cache_count',
+        'average_layer_cache_memory',
+        '90th_percentile_layer_cache_memory',
+        '99th_percentile_layer_cache_memory',
+        'worst_layer_cache_memory',
+        'average_picture_cache_count',
+        '90th_percentile_picture_cache_count',
+        '99th_percentile_picture_cache_count',
+        'worst_picture_cache_count',
+        'average_picture_cache_memory',
+        '90th_percentile_picture_cache_memory',
+        '99th_percentile_picture_cache_memory',
+        'worst_picture_cache_memory',
+        if (measureCpuGpu && !isAndroid) ...<String>[
+          // See https://github.com/flutter/flutter/issues/68888
+          if (summary['average_cpu_usage'] != null) 'average_cpu_usage',
+          if (summary['average_gpu_usage'] != null) 'average_gpu_usage',
+        ],
+        if (measureMemory && !isAndroid) ...<String>[
+          // See https://github.com/flutter/flutter/issues/68888
+          if (summary['average_memory_usage'] != null) 'average_memory_usage',
+          if (summary['90th_percentile_memory_usage'] != null) '90th_percentile_memory_usage',
+          if (summary['99th_percentile_memory_usage'] != null) '99th_percentile_memory_usage',
+        ],
       ],
     );
   }

@@ -15,6 +15,479 @@
 version: 1
 transforms:
 
+  # Changes made in https://github.com/flutter/flutter/pull/86198
+  - title: "Migrate to 'backgroundColor'"
+    date: 2021-07-12
+    element:
+      uris: [ 'material.dart' ]
+      getter: color
+      inClass: 'AppBarTheme'
+    changes:
+      - kind: 'rename'
+        newName: 'backgroundColor'
+
+  # Changes made in https://github.com/flutter/flutter/pull/86198
+  - title: "Remove 'backwardsCompatibility'"
+    date: 2021-07-12
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'AppBarTheme'
+    changes:
+    - kind: 'removeParameter'
+      name: 'backwardsCompatibility'
+
+  # Changes made in https://github.com/flutter/flutter/pull/86198
+  - title: "Remove 'backwardsCompatibility'"
+    date: 2020-07-12
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'AppBarTheme'
+    changes:
+    - kind: 'removeParameter'
+      name: 'backwardsCompatibility'
+
+  # Changes made in https://github.com/flutter/flutter/pull/86198
+  - title: "Remove 'backwardsCompatibility'"
+    date: 2020-07-12
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'SliverAppBar'
+    changes:
+    - kind: 'removeParameter'
+      name: 'backwardsCompatibility'
+
+  # Changes made in https://github.com/flutter/flutter/pull/86198
+  - title: "Remove 'backwardsCompatibility'"
+    date: 2020-07-12
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'AppBar'
+    changes:
+    - kind: 'removeParameter'
+      name: 'backwardsCompatibility'
+
+  # Changes made in https://github.com/flutter/flutter/pull/86198
+  - title: "Migrate to 'toolbarTextStyle' & 'titleTextStyle'"
+    date: 2021-07-12
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'AppBarTheme'
+    changes:
+    - kind: 'addParameter'
+      index: 12
+      name: 'toolbarTextStyle'
+      style: optional_named
+      argumentValue:
+        expression: '{% textTheme %}.bodyText2'
+        requiredIf: "textTheme != ''"
+    - kind: 'addParameter'
+      index: 13
+      name: 'titleTextStyle'
+      style: optional_named
+      argumentValue:
+        expression: '{% textTheme %}.headline6'
+        requiredIf: "textTheme != ''"
+    - kind: 'removeParameter'
+      name: 'textTheme'
+    variables:
+      textTheme:
+        kind: 'fragment'
+        value: 'arguments[textTheme]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/86198
+  - title: "Migrate to 'toolbarTextStyle' & 'titleTextStyle'"
+    date: 2020-07-12
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'AppBarTheme'
+    changes:
+    - kind: 'addParameter'
+      index: 13
+      name: 'toolbarTextStyle'
+      style: optional_named
+      argumentValue:
+        expression: '{% textTheme %}.bodyText2'
+        requiredIf: "textTheme != ''"
+    - kind: 'addParameter'
+      index: 14
+      name: 'titleTextStyle'
+      style: optional_named
+      argumentValue:
+        expression: '{% textTheme %}.headline6'
+        requiredIf: "textTheme != ''"
+    - kind: 'removeParameter'
+      name: 'textTheme'
+    variables:
+      textTheme:
+        kind: 'fragment'
+        value: 'arguments[textTheme]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/86198
+  - title: "Migrate to 'toolbarTextStyle'"
+    date: 2021-07-12
+    # TODO(Piinks): Add tests when `bulkApply:false` testing is supported, https://github.com/dart-lang/sdk/issues/44639
+    bulkApply: false
+    element:
+      uris: [ 'material.dart' ]
+      field: 'textTheme'
+      inClass: 'AppBarTheme'
+    changes:
+      - kind: 'rename'
+        newName: 'toolbarTextStyle'
+
+  # Changes made in https://github.com/flutter/flutter/pull/86198
+  - title: "Migrate to 'titleTextStyle'"
+    date: 2021-07-12
+    # TODO(Piinks): Add tests when `bulkApply:false` testing is supported, https://github.com/dart-lang/sdk/issues/44639
+    bulkApply: false
+    element:
+      uris: [ 'material.dart' ]
+      field: 'textTheme'
+      inClass: 'AppBarTheme'
+    changes:
+      - kind: 'rename'
+        newName: 'titleTextStyle'
+
+  # Changes made in https://github.com/flutter/flutter/pull/86198
+  - title: "Migrate to 'toolbarTextStyle' & 'titleTextStyle'"
+    date: 2020-07-12
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'SliverAppBar'
+    changes:
+    - kind: 'addParameter'
+      index: 32
+      name: 'toolbarTextStyle'
+      style: optional_named
+      argumentValue:
+        expression: '{% textTheme %}.bodyText2'
+        requiredIf: "textTheme != ''"
+    - kind: 'addParameter'
+      index: 33
+      name: 'titleTextStyle'
+      style: optional_named
+      argumentValue:
+        expression: '{% textTheme %}.headline6'
+        requiredIf: "textTheme != ''"
+    - kind: 'removeParameter'
+      name: 'textTheme'
+    variables:
+      textTheme:
+        kind: 'fragment'
+        value: 'arguments[textTheme]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/86198
+  - title: "Migrate to 'toolbarTextStyle'"
+    date: 2021-07-12
+    # TODO(Piinks): Add tests when `bulkApply:false` testing is supported, https://github.com/dart-lang/sdk/issues/44639
+    bulkApply: false
+    element:
+      uris: [ 'material.dart' ]
+      field: 'textTheme'
+      inClass: 'SliverAppBar'
+    changes:
+      - kind: 'rename'
+        newName: 'toolbarTextStyle'
+
+  # Changes made in https://github.com/flutter/flutter/pull/86198
+  - title: "Migrate to 'titleTextStyle'"
+    date: 2021-07-12
+    # TODO(Piinks): Add tests when `bulkApply:false` testing is supported, https://github.com/dart-lang/sdk/issues/44639
+    bulkApply: false
+    element:
+      uris: [ 'material.dart' ]
+      field: 'textTheme'
+      inClass: 'SliverAppBar'
+    changes:
+      - kind: 'rename'
+        newName: 'titleTextStyle'
+
+  # Changes made in https://github.com/flutter/flutter/pull/86198
+  - title: "Migrate to 'toolbarTextStyle' & 'titleTextStyle'"
+    date: 2020-07-12
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'AppBar'
+    changes:
+      - kind: 'addParameter'
+        index: 24
+        name: 'toolbarTextStyle'
+        style: optional_named
+        argumentValue:
+          expression: '{% textTheme %}.bodyText2'
+          requiredIf: "textTheme != ''"
+      - kind: 'addParameter'
+        index: 25
+        name: 'titleTextStyle'
+        style: optional_named
+        argumentValue:
+          expression: '{% textTheme %}.headline6'
+          requiredIf: "textTheme != ''"
+      - kind: 'removeParameter'
+        name: 'textTheme'
+    variables:
+      textTheme:
+        kind: 'fragment'
+        value: 'arguments[textTheme]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/86198
+  - title: "Migrate to 'toolbarTextStyle'"
+    date: 2021-07-12
+    # TODO(Piinks): Add tests when `bulkApply:false` testing is supported, https://github.com/dart-lang/sdk/issues/44639
+    bulkApply: false
+    element:
+      uris: [ 'material.dart' ]
+      field: 'textTheme'
+      inClass: 'AppBar'
+    changes:
+      - kind: 'rename'
+        newName: 'toolbarTextStyle'
+
+  # Changes made in https://github.com/flutter/flutter/pull/86198
+  - title: "Migrate to 'titleTextStyle'"
+    date: 2021-07-12
+    # TODO(Piinks): Add tests when `bulkApply:false` testing is supported, https://github.com/dart-lang/sdk/issues/44639
+    bulkApply: false
+    element:
+      uris: [ 'material.dart' ]
+      field: 'textTheme'
+      inClass: 'AppBar'
+    changes:
+      - kind: 'rename'
+        newName: 'titleTextStyle'
+
+  # Changes made in https://github.com/flutter/flutter/pull/86198
+  - title: "Migrate to 'systemOverlayStyle'"
+    date: 2021-07-12
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'AppBarTheme'
+    oneOf:
+    - if: "brightness == 'Brightness.dark'"
+      changes:
+        - kind: 'addParameter'
+          index: 14
+          name: 'systemOverlayStyle'
+          style: optional_named
+          argumentValue:
+            expression: '{% SystemUiOverlayStyle %}.light'
+            requiredIf: "brightness == 'Brightness.dark'"
+            variables:
+              SystemUiOverlayStyle:
+                kind: 'import'
+                uris: [ 'services.dart' ]
+                name: 'SystemUiOverlayStyle'
+        - kind: 'removeParameter'
+          name: 'brightness'
+    - if: "brightness == 'Brightness.light'"
+      changes:
+        - kind: 'addParameter'
+          index: 14
+          name: 'systemOverlayStyle'
+          style: optional_named
+          argumentValue:
+            expression: '{% SystemUiOverlayStyle %}.dark'
+            requiredIf: "brightness == 'Brightness.light'"
+            variables:
+              SystemUiOverlayStyle:
+                kind: 'import'
+                uris: [ 'services.dart' ]
+                name: 'SystemUiOverlayStyle'
+        - kind: 'removeParameter'
+          name: 'brightness'
+    variables:
+      brightness:
+        kind: 'fragment'
+        value: 'arguments[brightness]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/86198
+  - title: "Migrate to 'systemOverlayStyle'"
+    date: 2020-07-12
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'AppBarTheme'
+    oneOf:
+    - if: "brightness == 'Brightness.dark'"
+      changes:
+        - kind: 'addParameter'
+          index: 14
+          name: 'systemOverlayStyle'
+          style: optional_named
+          argumentValue:
+            expression: '{% SystemUiOverlayStyle %}.light'
+            requiredIf: "brightness == 'Brightness.dark'"
+            variables:
+              SystemUiOverlayStyle:
+                kind: 'import'
+                uris: [ 'services.dart' ]
+                name: 'SystemUiOverlayStyle'
+        - kind: 'removeParameter'
+          name: 'brightness'
+    - if: "brightness == 'Brightness.light'"
+      changes:
+        - kind: 'addParameter'
+          index: 14
+          name: 'systemOverlayStyle'
+          style: optional_named
+          argumentValue:
+            expression: '{% SystemUiOverlayStyle %}.dark'
+            requiredIf: "brightness == 'Brightness.light'"
+            variables:
+              SystemUiOverlayStyle:
+                kind: 'import'
+                uris: [ 'services.dart' ]
+                name: 'SystemUiOverlayStyle'
+        - kind: 'removeParameter'
+          name: 'brightness'
+    variables:
+      brightness:
+        kind: 'fragment'
+        value: 'arguments[brightness]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/86198
+  - title: "Migrate to 'systemOverlayStyle'"
+    date: 2021-07-12
+    element:
+      uris: [ 'material.dart' ]
+      field: 'brightness'
+      inClass: 'AppBarTheme'
+    changes:
+      - kind: 'rename'
+        newName: 'systemOverlayStyle'
+
+  # Changes made in https://github.com/flutter/flutter/pull/86198
+  - title: "Migrate to 'systemOverlayStyle'"
+    date: 2020-07-12
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'SliverAppBar'
+    oneOf:
+    - if: "brightness == 'Brightness.dark'"
+      changes:
+        - kind: 'addParameter'
+          index: 34
+          name: 'systemOverlayStyle'
+          style: optional_named
+          argumentValue:
+            expression: '{% SystemUiOverlayStyle %}.light'
+            requiredIf: "brightness == 'Brightness.dark'"
+            variables:
+              SystemUiOverlayStyle:
+                kind: 'import'
+                uris: [ 'services.dart' ]
+                name: 'SystemUiOverlayStyle'
+        - kind: 'removeParameter'
+          name: 'brightness'
+    - if: "brightness == 'Brightness.light'"
+      changes:
+        - kind: 'addParameter'
+          index: 34
+          name: 'systemOverlayStyle'
+          style: optional_named
+          argumentValue:
+            expression: '{% SystemUiOverlayStyle %}.dark'
+            requiredIf: "brightness == 'Brightness.light'"
+            variables:
+              SystemUiOverlayStyle:
+                kind: 'import'
+                uris: [ 'services.dart' ]
+                name: 'SystemUiOverlayStyle'
+        - kind: 'removeParameter'
+          name: 'brightness'
+    variables:
+      brightness:
+        kind: 'fragment'
+        value: 'arguments[brightness]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/86198
+  - title: "Migrate to 'systemOverlayStyle'"
+    date: 2021-07-12
+    element:
+      uris: [ 'material.dart' ]
+      field: 'brightness'
+      inClass: 'SliverAppBar'
+    changes:
+      - kind: 'rename'
+        newName: 'systemOverlayStyle'
+
+  # Changes made in https://github.com/flutter/flutter/pull/86198
+  - title: "Migrate to 'systemOverlayStyle'"
+    date: 2020-07-12
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'AppBar'
+    oneOf:
+    - if: "brightness == 'Brightness.dark'"
+      changes:
+        - kind: 'addParameter'
+          index: 27
+          name: 'systemOverlayStyle'
+          style: optional_named
+          argumentValue:
+            expression: '{% SystemUiOverlayStyle %}.light'
+            requiredIf: "brightness == 'Brightness.dark'"
+            variables:
+              SystemUiOverlayStyle:
+                kind: 'import'
+                uris: [ 'services.dart' ]
+                name: 'SystemUiOverlayStyle'
+        - kind: 'removeParameter'
+          name: 'brightness'
+    - if: "brightness == 'Brightness.light'"
+      changes:
+        - kind: 'addParameter'
+          index: 27
+          name: 'systemOverlayStyle'
+          style: optional_named
+          argumentValue:
+            expression: '{% SystemUiOverlayStyle %}.dark'
+            requiredIf: "brightness == 'Brightness.light'"
+            variables:
+              SystemUiOverlayStyle:
+                kind: 'import'
+                uris: [ 'services.dart' ]
+                name: 'SystemUiOverlayStyle'
+        - kind: 'removeParameter'
+          name: 'brightness'
+    variables:
+      brightness:
+        kind: 'fragment'
+        value: 'arguments[brightness]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/86198
+  - title: "Migrate to 'systemOverlayStyle'"
+    date: 2021-07-12
+    element:
+      uris: [ 'material.dart' ]
+      field: 'brightness'
+      inClass: 'AppBar'
+    changes:
+      - kind: 'rename'
+        newName: 'systemOverlayStyle'
+
+  # Changes made in https://github.com/flutter/flutter/pull/87839
+  - title: "Migrate to 'disallowIndicator'"
+    date: 2021-08-06
+    element:
+      uris: [ 'material.dart', 'widgets.dart', 'cupertino.dart' ]
+      method: 'disallowGlow'
+      inClass: 'OverscrollIndicatorNotification'
+    changes:
+      - kind: 'rename'
+        newName: 'disallowIndicator'
+
   # Changes made in https://github.com/flutter/flutter/pull/87281
   - title: "Remove 'fixTextFieldOutlineLabel'"
     date: 2021-04-30
@@ -1689,22 +2162,6 @@ transforms:
                   name: 'FloatingLabelBehavior'
           - kind: 'removeParameter'
             name: 'hasFloatingPlaceholder'
-      - if: "hasFloatingPlaceholder != 'true' && hasFloatingPlaceholder != 'false'"
-        changes:
-          - kind: 'addParameter'
-            index: 14
-            name: 'floatingLabelBehavior'
-            style: optional_named
-            argumentValue:
-              expression: '{% hasFloatingPlaceholder %} ? {% FloatingLabelBehavior %}.auto : {% FloatingLabelBehavior %}.never'
-              requiredIf: "hasFloatingPlaceholder != 'true' && hasFloatingPlaceholder != 'false'"
-              variables:
-                FloatingLabelBehavior:
-                  kind: 'import'
-                  uris: [ 'material.dart' ]
-                  name: 'FloatingLabelBehavior'
-          - kind: 'removeParameter'
-            name: 'hasFloatingPlaceholder'
     variables:
       hasFloatingPlaceholder:
         kind: 'fragment'
@@ -1743,22 +2200,6 @@ transforms:
             argumentValue:
               expression: '{% FloatingLabelBehavior %}.never'
               requiredIf: "hasFloatingPlaceholder == 'false'"
-              variables:
-                FloatingLabelBehavior:
-                  kind: 'import'
-                  uris: [ 'material.dart' ]
-                  name: 'FloatingLabelBehavior'
-          - kind: 'removeParameter'
-            name: 'hasFloatingPlaceholder'
-      - if: "hasFloatingPlaceholder != 'true' && hasFloatingPlaceholder != 'false'"
-        changes:
-          - kind: 'addParameter'
-            index: 14
-            name: 'floatingLabelBehavior'
-            style: optional_named
-            argumentValue:
-              expression: '{% hasFloatingPlaceholder %} ? {% FloatingLabelBehavior %}.auto : {% FloatingLabelBehavior %}.never'
-              requiredIf: "hasFloatingPlaceholder != 'true' && hasFloatingPlaceholder != 'false'"
               variables:
                 FloatingLabelBehavior:
                   kind: 'import'
@@ -1822,22 +2263,6 @@ transforms:
                   name: 'FloatingLabelBehavior'
           - kind: 'removeParameter'
             name: 'hasFloatingPlaceholder'
-      - if: "hasFloatingPlaceholder != 'true' && hasFloatingPlaceholder != 'false'"
-        changes:
-          - kind: 'addParameter'
-            index: 14
-            name: 'floatingLabelBehavior'
-            style: optional_named
-            argumentValue:
-              expression: '{% hasFloatingPlaceholder %} ? {% FloatingLabelBehavior %}.auto : {% FloatingLabelBehavior %}.never'
-              requiredIf: "hasFloatingPlaceholder != 'true' && hasFloatingPlaceholder != 'false'"
-              variables:
-                FloatingLabelBehavior:
-                  kind: 'import'
-                  uris: [ 'material.dart' ]
-                  name: 'FloatingLabelBehavior'
-          - kind: 'removeParameter'
-            name: 'hasFloatingPlaceholder'
     variables:
       hasFloatingPlaceholder:
         kind: 'fragment'
@@ -1876,22 +2301,6 @@ transforms:
             argumentValue:
               expression: '{% FloatingLabelBehavior %}.never'
               requiredIf: "hasFloatingPlaceholder == 'false'"
-              variables:
-                FloatingLabelBehavior:
-                  kind: 'import'
-                  uris: [ 'material.dart' ]
-                  name: 'FloatingLabelBehavior'
-          - kind: 'removeParameter'
-            name: 'hasFloatingPlaceholder'
-      - if: "hasFloatingPlaceholder != 'true' && hasFloatingPlaceholder != 'false'"
-        changes:
-          - kind: 'addParameter'
-            index: 14
-            name: 'floatingLabelBehavior'
-            style: optional_named
-            argumentValue:
-              expression: '{% hasFloatingPlaceholder %} ? {% FloatingLabelBehavior %}.auto : {% FloatingLabelBehavior %}.never'
-              requiredIf: "hasFloatingPlaceholder != 'true' && hasFloatingPlaceholder != 'false'"
               variables:
                 FloatingLabelBehavior:
                   kind: 'import'

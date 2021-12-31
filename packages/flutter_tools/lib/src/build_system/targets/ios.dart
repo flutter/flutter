@@ -35,7 +35,6 @@ abstract class AotAssemblyBase extends Target {
   @override
   Future<void> build(Environment environment) async {
     final AOTSnapshotter snapshotter = AOTSnapshotter(
-      reportTimings: false,
       fileSystem: environment.fileSystem,
       logger: environment.logger,
       xcode: globals.xcode,
@@ -140,7 +139,7 @@ class AotAssemblyRelease extends AotAssemblyBase {
     Source.pattern('{BUILD_DIR}/app.dill'),
     Source.hostArtifact(HostArtifact.engineDartBinary),
     Source.artifact(Artifact.skyEnginePath),
-    // TODO(jonahwilliams): cannot reference gen_snapshot with artifacts since
+    // TODO(zanderso): cannot reference gen_snapshot with artifacts since
     // it resolves to a file (ios/gen_snapshot) that never exists. This was
     // split into gen_snapshot_arm64 and gen_snapshot_armv7.
     // Source.artifact(Artifact.genSnapshot,
@@ -175,7 +174,7 @@ class AotAssemblyProfile extends AotAssemblyBase {
     Source.pattern('{BUILD_DIR}/app.dill'),
     Source.hostArtifact(HostArtifact.engineDartBinary),
     Source.artifact(Artifact.skyEnginePath),
-    // TODO(jonahwilliams): cannot reference gen_snapshot with artifacts since
+    // TODO(zanderso): cannot reference gen_snapshot with artifacts since
     // it resolves to a file (ios/gen_snapshot) that never exists. This was
     // split into gen_snapshot_arm64 and gen_snapshot_armv7.
     // Source.artifact(Artifact.genSnapshot,
@@ -502,7 +501,7 @@ abstract class IosAssetBundle extends Target {
     );
 
     // Copy the plist from either the project or module.
-    // TODO(jonahwilliams): add plist to inputs
+    // TODO(zanderso): add plist to inputs
     final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
     flutterProject.ios.appFrameworkInfoPlist
       .copySync(environment.outputDir

@@ -824,7 +824,7 @@ class WebDevFS implements DevFS {
           nativeNullAssertions: nativeNullAssertions,
         ),
       );
-      // TODO(jonahwilliams): refactor the asset code in this and the regular devfs to
+      // TODO(zanderso): refactor the asset code in this and the regular devfs to
       // be shared.
       if (bundle != null) {
         await writeBundle(
@@ -854,7 +854,7 @@ class WebDevFS implements DevFS {
       fs: globals.fs,
     );
     if (compilerOutput == null || compilerOutput.errorCount > 0) {
-      return UpdateFSReport(success: false);
+      return UpdateFSReport();
     }
 
     // Only update the last compiled time if we successfully compiled.

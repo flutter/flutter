@@ -215,6 +215,10 @@ void main() {
     }
     expect(result.exitCode, 0);
   });
+
+  testWithoutContext('flutter gold skips tests where the expectations are missing', () async {
+    return _testFile('flutter_gold', automatedTestsDirectory, flutterTestDirectory, exitCode: isZero);
+  });
 }
 
 Future<void> _testFile(
@@ -246,6 +250,9 @@ Future<void> _testFile(
   if (output.first.startsWith('Running "flutter pub get" in')) {
     output.removeAt(0);
   }
+  // Whether cached artifacts need to be downloaded is dependent on what
+  // previous tests have run. Disregard these messages.
+  output.removeWhere(RegExp(r'Downloading .*\.\.\.').hasMatch);
   output.add('<<stderr>>');
   output.addAll((exec.stderr as String).split('\n'));
   final List<String> expectations = fileSystem.file(fullTestExpectation).readAsLinesSync();

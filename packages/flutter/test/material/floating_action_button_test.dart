@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
+
 @TestOn('!chrome')
 import 'dart:ui';
 
@@ -905,7 +909,7 @@ void main() {
         isFocusable: true,
       ),
     );
-  }, semanticsEnabled: true);
+  });
 
   testWidgets('Foreground color applies to icon on fab', (WidgetTester tester) async {
     const Color foregroundColor = Color(0xcafefeed);
