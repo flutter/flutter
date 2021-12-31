@@ -1440,23 +1440,17 @@ class _EverythingPaintPredicate extends _PaintPredicate {
       if (!currentCall.invocation.isMethod)
         throw 'It called $currentCall, which was not a method, when the paint pattern expected a method call';
       if (!_runPredicate(currentCall.invocation.memberName, currentCall.invocation.positionalArguments))
-        return;
+        throw 'It painted something that the predicate passed to an "everything" step '
+              'in the paint pattern considered incorrect.\n';
     } while (call.moveNext());
   }
 
   bool _runPredicate(Symbol methodName, List<dynamic> arguments) {
-    final bool predicateSucceeded;
     try {
-      predicateSucceeded = predicate(methodName, arguments);
+      return predicate(methodName, arguments);
     } on String catch (s) {
       throw 'It painted something that the predicate passed to an "everything" step '
             'in the paint pattern considered incorrect:\n      $s\n  ';
-    }
-    if (predicateSucceeded) {
-      return true;
-    } else {
-      throw 'It painted something that the predicate passed to an "everything" step '
-            'in the paint pattern considered incorrect.\n';
     }
   }
 
