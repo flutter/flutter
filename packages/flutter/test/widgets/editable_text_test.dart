@@ -2154,9 +2154,8 @@ void main() {
 
       // Unfocus, prompt rect should go away.
       focusNode.unfocus();
-      await tester.pump();
-      // TODO: This is now failing because there's another drawRect happening
-      //  and I don't know why
+      await tester.pumpAndSettle();
+
       verifyAutocorrectionRectVisibility(expectVisible: false);
     },
   );
