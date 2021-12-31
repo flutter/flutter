@@ -261,6 +261,7 @@ class AlertDialog extends StatelessWidget {
     this.actions,
     this.actionsPadding = EdgeInsets.zero,
     this.actionsAlignment,
+    this.actionsOverflowAlignment,
     this.actionsOverflowDirection,
     this.actionsOverflowButtonSpacing,
     this.buttonPadding,
@@ -374,6 +375,21 @@ class AlertDialog extends StatelessWidget {
   /// If this parameter is null (the default) then [MainAxisAlignment.end]
   /// is used.
   final MainAxisAlignment? actionsAlignment;
+
+  /// The horizontal alignment of [actions] within the vertical
+  /// "overflow" layout.
+  ///
+  /// If the dialog's [actions] do not fit into a single row, then they
+  /// are arranged in a column. This parameter controls the horizontal
+  /// alignment of widgets in the case of an overflow.
+  ///
+  /// If this parameter is null (the default) then [OverflowBarAlignment.end]
+  /// is used.
+  ///
+  /// See also:
+  ///
+  /// * [OverflowBar], which [actions] configures to lay itself out.
+  final OverflowBarAlignment? actionsOverflowAlignment;
 
   /// The vertical direction of [actions] if the children overflow
   /// horizontally.
@@ -535,7 +551,7 @@ class AlertDialog extends StatelessWidget {
         child: OverflowBar(
           alignment: actionsAlignment ?? MainAxisAlignment.end,
           spacing: spacing,
-          overflowAlignment: OverflowBarAlignment.end,
+          overflowAlignment: actionsOverflowAlignment ?? OverflowBarAlignment.end,
           overflowDirection: actionsOverflowDirection ?? VerticalDirection.down,
           overflowSpacing: actionsOverflowButtonSpacing ?? 0,
           children: actions!,
