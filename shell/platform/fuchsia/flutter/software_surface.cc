@@ -19,7 +19,6 @@
 #include "third_party/skia/include/core/SkImageInfo.h"
 
 #include "../runtime/dart/utils/inlines.h"
-#include "zx/cpp/fidl.h"
 
 namespace flutter_runner {
 
