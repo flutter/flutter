@@ -131,10 +131,12 @@ bool VulkanSurfaceProducer::Initialize(scenic::Session* scenic_session) {
   const char* device_extensions[] = {
       VK_KHR_GET_MEMORY_REQUIREMENTS_2_EXTENSION_NAME,
   };
+  const int device_extensions_count =
+      sizeof(device_extensions) / sizeof(device_extensions[0]);
   GrVkExtensions vk_extensions;
   vk_extensions.init(backend_context.fGetProc, backend_context.fInstance,
                      backend_context.fPhysicalDevice, 0, nullptr,
-                     countof(device_extensions), device_extensions);
+                     device_extensions_count, device_extensions);
   backend_context.fVkExtensions = &vk_extensions;
   GrContextOptions options;
   options.fReduceOpsTaskSplitting = GrContextOptions::Enable::kNo;
