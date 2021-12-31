@@ -5,6 +5,8 @@
 #include <sstream>
 
 #include "flutter/fml/paths.h"
+#include "flutter/impeller/entity/entity_shaders.h"
+#include "flutter/impeller/fixtures/shader_fixtures.h"
 #include "flutter/testing/testing.h"
 #include "impeller/base/validation.h"
 #include "impeller/image/compressed_image.h"
@@ -28,27 +30,19 @@
 
 namespace impeller {
 
-static std::string ShaderLibraryDirectory() {
-  auto path_result = fml::paths::GetExecutableDirectoryPath();
-  if (!path_result.first) {
-    return {};
-  }
-  return fml::paths::JoinPaths({path_result.second, "shaders"});
-}
+static std::vector<std::shared_ptr<fml::Mapping>>
+ShaderLibraryMappingsForPlayground() {
+  return {
+      std::make_shared<fml::NonOwnedMapping>(impeller_entity_shaders_data,
+                                             impeller_entity_shaders_length),
+      std::make_shared<fml::NonOwnedMapping>(impeller_shader_fixtures_data,
+                                             impeller_shader_fixtures_length),
 
-static std::vector<std::string> ShaderLibraryPathsForPlayground() {
-  std::vector<std::string> paths;
-  paths.emplace_back(fml::paths::JoinPaths(
-      {ShaderLibraryDirectory(), "shader_fixtures.metallib"}));
-  paths.emplace_back(
-      fml::paths::JoinPaths({fml::paths::GetExecutableDirectoryPath().second,
-                             "shaders", "entity.metallib"}));
-  return paths;
+  };
 }
 
 Playground::Playground()
-    : renderer_(
-          std::make_shared<ContextMTL>(ShaderLibraryPathsForPlayground())) {}
+    : renderer_(ContextMTL::Create(ShaderLibraryMappingsForPlayground())) {}
 
 Playground::~Playground() = default;
 
@@ -170,10 +164,10 @@ std::shared_ptr<Texture> Playground::CreateTextureForFixture(
   CompressedImage compressed_image(
       flutter::testing::OpenFixtureAsMapping(fixture_name));
   // The decoded image is immediately converted into RGBA as that format is
-  // known to be supported everywhere. For image sources that don't need 32 bit
-  // pixel strides, this is overkill. Since this is a test fixture we aren't
-  // necessarily trying to eke out memory savings here and instead favor
-  // simplicity.
+  // known to be supported everywhere. For image sources that don't need 32
+  // bit pixel strides, this is overkill. Since this is a test fixture we
+  // aren't necessarily trying to eke out memory savings here and instead
+  // favor simplicity.
   auto image = compressed_image.Decode().ConvertToRGBA();
   if (!image.IsValid()) {
     VALIDATION_LOG << "Could not find fixture named " << fixture_name;
