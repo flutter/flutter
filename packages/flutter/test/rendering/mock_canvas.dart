@@ -426,6 +426,10 @@ abstract class PaintPattern {
   /// The predicate will be applied to each [Canvas] call until it returns false
   /// or all of the method calls have been tested.
   ///
+  /// If the predicate returns false, then the [paints] [Matcher] is considered
+  /// to have failed. If all calls are tested without failing, then the [paints]
+  /// [Matcher] is considered a success.
+  ///
   /// If the predicate throws a [String], then the [paints] [Matcher] is
   /// considered to have failed. The thrown string is used in the message
   /// displayed from the test framework and should be complete sentence
@@ -831,7 +835,11 @@ class _TestRecordingCanvasPatternMatcher extends _TestRecordingCanvasMatcher imp
       return false;
     } on String catch (s) {
       description.writeln(s);
-      description.write('The stack of the offending call was:\n${call.current.stackToString(indent: "  ")}\n');
+      try {
+        description.write('The stack of the offending call was:\n${call.current.stackToString(indent: "  ")}\n');
+      } on TypeError catch (_) {
+        // All calls have been evaluated
+      }
       return false;
     }
     return true;
@@ -1393,13 +1401,18 @@ class _SomethingPaintPredicate extends _PaintPredicate {
 
   @override
   void match(Iterator<RecordedInvocation> call) {
-    assert(predicate != null);
     RecordedInvocation currentCall;
+    bool testedAllCalls = false;
     do {
+      if (testedAllCalls) {
+        throw 'It painted methods that the predicate passed to a "something" step, '
+              'in the paint pattern, none of which were considered correct.';
+      }
       currentCall = call.current;
       if (!currentCall.invocation.isMethod)
         throw 'It called $currentCall, which was not a method, when the paint pattern expected a method call';
-    } while (call.moveNext() && !_runPredicate(currentCall.invocation.memberName, currentCall.invocation.positionalArguments));
+      testedAllCalls = !call.moveNext();
+    } while (!_runPredicate(currentCall.invocation.memberName, currentCall.invocation.positionalArguments));
   }
 
   bool _runPredicate(Symbol methodName, List<dynamic> arguments) {
@@ -1422,7 +1435,13 @@ class _EverythingPaintPredicate extends _PaintPredicate {
 
   @override
   void match(Iterator<RecordedInvocation> call) {
-    assert(predicate != null);
+    // do {
+    //   final RecordedInvocation currentCall = call.current;
+    //   if (!currentCall.invocation.isMethod)
+    //     throw 'It called $currentCall, which was not a method, when the paint pattern expected a method call';
+    //   if (!_runPredicate(currentCall.invocation.memberName, currentCall.invocation.positionalArguments))
+    //     return;
+    // } while (call.moveNext());
     while (call.moveNext()) {
       final RecordedInvocation currentCall = call.current;
       if (!currentCall.invocation.isMethod)
@@ -1433,11 +1452,18 @@ class _EverythingPaintPredicate extends _PaintPredicate {
   }
 
   bool _runPredicate(Symbol methodName, List<dynamic> arguments) {
+    final bool predicateSucceeded;
     try {
-      return predicate(methodName, arguments);
+      predicateSucceeded = predicate(methodName, arguments);
     } on String catch (s) {
       throw 'It painted something that the predicate passed to an "everything" step '
             'in the paint pattern considered incorrect:\n      $s\n  ';
+    }
+    if (predicateSucceeded) {
+      return true;
+    } else {
+      throw 'It painted something that the predicate passed to an "everything" step '
+            'in the paint pattern considered incorrect.\n';
     }
   }
 

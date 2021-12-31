@@ -2142,6 +2142,9 @@ void main() {
 
       // Show prompt rect when told to.
       verifyAutocorrectionRectVisibility(expectVisible: true);
+      // Verify twice because the rect is drawn twice and paints..something()
+      // matches eagerly on the first success
+      verifyAutocorrectionRectVisibility(expectVisible: true);
 
       // Text changed, prompt rect goes away.
       controller.text = '12345';
