@@ -388,6 +388,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(scrollable.position.pixels, equals(0.0));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+
   testWidgets('Tapping the status bar scrolls to top in nested navigator', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
