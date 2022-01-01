@@ -1306,7 +1306,7 @@ void main() {
       checkboxTheme: CheckboxThemeData(
         fillColor: MaterialStateProperty.all(fillColor),
         checkColor: MaterialStateProperty.all(checkColor),
-      )
+      ),
     );
     Widget buildTable() {
       return MaterialApp(
@@ -1332,25 +1332,15 @@ void main() {
       );
     }
 
-    RenderObject lastCheckboxPainter() {
-      return tester.renderObject(
-        find.descendant(of: find.byType(Checkbox), matching: find.byType(CustomPaint)).last,
-      );
-    }
-
-    PaintPattern paintsPath(PaintingStyle style, Color color) {
-      return paints..something((Symbol method, List<dynamic> arguments) {
-        if (method != #drawPath)
-          return false;
-        final Paint paint = arguments[1] as Paint;
-        return paint.style == PaintingStyle.fill && paint.color == color;
-      });
-    }
-
     await tester.pumpWidget(buildTable());
-    await tester.pump();
-    expect(lastCheckboxPainter(), paintsPath(PaintingStyle.fill, fillColor));
-    expect(lastCheckboxPainter(), paintsPath(PaintingStyle.stroke, checkColor));
+
+    expect(
+      Material.of(tester.element(find.byType(Checkbox).last)),
+      paints
+        ..path()
+        ..path(color: fillColor)
+        ..path(color: checkColor),
+    );
   });
 
   testWidgets('DataRow renders custom colors when selected', (WidgetTester tester) async {
