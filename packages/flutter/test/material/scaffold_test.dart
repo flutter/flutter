@@ -388,7 +388,49 @@ void main() {
     await tester.pumpAndSettle();
     expect(scrollable.position.pixels, equals(0.0));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
-
+  testWidgets('Tapping the status bar scrolls to top in nested navigator', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(platform: debugDefaultTargetPlatformOverride),
+        home: MediaQuery(
+          data: const MediaQueryData(padding: EdgeInsets.only(top: 25.0)), // status bar
+          child: Scaffold(
+            appBar: AppBar(),
+            body: Navigator(
+              onGenerateRoute: (RouteSettings settings) =>
+                  MaterialPageRoute<dynamic>(
+                builder: (BuildContext ctx) {
+                  return Scaffold(
+                    body: ListView.separated(
+                        controller:
+                            PrimaryScrollController.of(ctx, rootState: true),
+                        itemBuilder: (BuildContext c, int index) {
+                          return ListTile(
+                            tileColor: Colors.red[100 * (index % 9 + 1)],
+                            title: Text('A :  $index'),
+                            trailing: const Icon(Icons.chevron_right),
+                          );
+                        },
+                        separatorBuilder: (BuildContext c, int index) =>
+                            const Divider(),
+                        itemCount: 100),
+                  );
+                },
+                settings: settings,
+              ),
+            ),
+          ),
+        ),
+      )
+    );
+    final ScrollableState scrollable = tester.state(find.byType(Scrollable));
+    scrollable.position.jumpTo(500.0);
+    expect(scrollable.position.pixels, equals(500.0));
+    await tester.tapAt(const Offset(100.0, 3.0));
+    await tester.pumpAndSettle();
+    expect(scrollable.position.pixels, equals(0.0));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
+  
   testWidgets('Tapping the status bar does not scroll to top', (WidgetTester tester) async {
     await tester.pumpWidget(_buildStatusBarTestApp(TargetPlatform.android));
     final ScrollableState scrollable = tester.state(find.byType(Scrollable));

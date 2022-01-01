@@ -4,8 +4,10 @@
 
 import 'package:flutter/foundation.dart';
 
+import '../material/scaffold.dart';
 import 'framework.dart';
 import 'scroll_controller.dart';
+
 
 /// Associates a [ScrollController] with a subtree.
 ///
@@ -56,10 +58,23 @@ class PrimaryScrollController extends InheritedWidget {
   /// Returns the [ScrollController] most closely associated with the given
   /// context.
   ///
+  /// If `rootState` is set to true, the [ScrollController] from the furthest
+  /// Scaffold instead. Useful for using nested [Navigator].
+  ///
   /// Returns null if there is no [ScrollController] associated with the given
   /// context.
-  static ScrollController? of(BuildContext context) {
-    final PrimaryScrollController? result = context.dependOnInheritedWidgetOfExactType<PrimaryScrollController>();
+    static ScrollController? of(
+    BuildContext context, {
+    bool rootState = false,
+  }) {
+    BuildContext ctx;
+    if (rootState) {
+      ctx = context.findRootAncestorStateOfType<ScaffoldState>()?.context ?? context;
+    } else {
+      ctx = context;
+    }
+    final PrimaryScrollController? result =
+        ctx.dependOnInheritedWidgetOfExactType<PrimaryScrollController>();
     return result?.controller;
   }
 
