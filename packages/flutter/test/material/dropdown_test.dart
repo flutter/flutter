@@ -3681,7 +3681,7 @@ void main() {
 
   testWidgets('BorderRadius property works properly for DropdownButtonFormField', (WidgetTester tester) async {
     const double radius = 20.0;
-    
+
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
