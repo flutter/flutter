@@ -188,8 +188,8 @@ class BasicDeferredComponentsConfig extends DeferredComponentsConfig {
       defaultConfig {
           // Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
           applicationId "ninja.qian.splitaottest1"
-          minSdkVersion flutter.minSdkVersion
-          targetSdkVersion flutter.targetSdkVersion
+        minSdkVersion localProperties.getProperty('flutter.minSdkVersion') ?: flutter.minSdkVersion
+        targetSdkVersion localProperties.getProperty('flutter.targetSdkVersion') ?: flutter.targetSdkVersion
           versionCode flutterVersionCode.toInteger()
           versionName flutterVersionName
       }
