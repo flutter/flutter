@@ -41,6 +41,10 @@ typedef InteractiveViewerWidgetBuilder = Widget Function(BuildContext context, Q
 /// robust positioning of an InteractiveViewer child that works for all screen
 /// sizes and child sizes.
 ///
+/// See [Lazy Flutter performance](https://www.youtube.com/watch?v=qax_nOpgz7E)
+/// for a video on using an InteractiveViewer to performantly view subsets of
+/// a large set of widgets using the builder constructor.
+///
 /// The [child] must not be null.
 ///
 /// See also:
