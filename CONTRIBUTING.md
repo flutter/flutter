@@ -67,7 +67,7 @@ presented.
    to ask questions.
 
 2. [Values](https://github.com/flutter/flutter/wiki/Values),
-   which elucidates what we care most about.
+   which mentions what we care most about.
 
 3. [Setting up your engine development environment](https://github.com/flutter/flutter/wiki/Setting-up-the-Engine-development-environment),
    which describes the steps you need to configure your computer to
