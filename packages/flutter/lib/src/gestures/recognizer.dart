@@ -302,17 +302,13 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
   @override
   @protected
   void addAllowedPointer(PointerDownEvent event) {
-    if (!_trackedPointers.contains(event.pointer)) {
-      startTrackingPointer(event.pointer, event.transform);
-    }
+    startTrackingPointer(event.pointer, event.transform);
   }
 
   @override
   @protected
   void addAllowedPointerPanZoom(PointerPanZoomStartEvent event) {
-    if (!_trackedPointers.contains(event.pointer)) {
-      startTrackingPointer(event.pointer, event.transform);
-    }
+    startTrackingPointer(event.pointer, event.transform);
   }
 
   @override
