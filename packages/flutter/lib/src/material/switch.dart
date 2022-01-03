@@ -167,7 +167,7 @@ class Switch extends StatelessWidget {
 
   /// The color to use when this switch is on.
   ///
-  /// Defaults to [ThemeData.colorScheme.secondary].
+  /// Defaults to [ColorScheme.secondary].
   ///
   /// If [thumbColor] returns a non-null color in the [MaterialState.selected]
   /// state, it will be used instead of this color.
@@ -175,7 +175,7 @@ class Switch extends StatelessWidget {
 
   /// The color to use on the track when this switch is on.
   ///
-  /// Defaults to [ThemeData.colorScheme.secondary] with the opacity set at 50%.
+  /// Defaults to [ColorScheme.secondary] with the opacity set at 50%.
   ///
   /// Ignored if this switch is created with [Switch.adaptive].
   ///
@@ -258,7 +258,7 @@ class Switch extends StatelessWidget {
   /// | State    | Light theme                       | Dark theme                        |
   /// |----------|-----------------------------------|-----------------------------------|
   /// | Default  | `Colors.grey.shade50`             | `Colors.grey.shade400`            |
-  /// | Selected | [ThemeData.colorScheme.secondary] | [ThemeData.colorScheme.secondary] |
+  /// | Selected | [ColorScheme.secondary] | [ColorScheme.secondary] |
   /// | Disabled | `Colors.grey.shade400`            | `Colors.grey.shade800`            |
   final MaterialStateProperty<Color?>? thumbColor;
 
@@ -378,7 +378,7 @@ class Switch extends StatelessWidget {
   /// [kRadialReactionAlpha], [focusColor] and [hoverColor] is used in the
   /// pressed, focused and hovered state. If that is also null,
   /// the value of [SwitchThemeData.overlayColor] is used. If that is
-  /// also null, then the value of [ThemeData.colorScheme.secondary] with alpha
+  /// also null, then the value of [ColorScheme.secondary] with alpha
   /// [kRadialReactionAlpha], [ThemeData.focusColor] and [ThemeData.hoverColor]
   /// is used in the pressed, focused and hovered state.
   final MaterialStateProperty<Color?>? overlayColor;

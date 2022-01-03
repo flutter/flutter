@@ -36,7 +36,7 @@ enum _SwitchListTileType { material, adaptive }
 ///
 /// The [selected] property on this widget is similar to the [ListTile.selected]
 /// property. This tile's [activeColor] is used for the selected item's text color, or
-/// the theme's [ThemeData.colorScheme.secondary] if [activeColor] is null.
+/// the theme's [ColorScheme.secondary] if [activeColor] is null.
 ///
 /// This widget does not coordinate the [selected] state and the
 /// [value]; to have the list tile appear selected when the
@@ -238,7 +238,7 @@ class SwitchListTile extends StatelessWidget {
 
   /// The color to use on the track when this switch is on.
   ///
-  /// Defaults to [ThemeData.colorScheme.secondary] with the opacity set at 50%.
+  /// Defaults to [ColorScheme.secondary] with the opacity set at 50%.
   ///
   /// Ignored if created with [SwitchListTile.adaptive].
   final Color? activeTrackColor;
