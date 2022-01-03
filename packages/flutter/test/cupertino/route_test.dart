@@ -1069,8 +1069,14 @@ void main() {
             return true;
           final Rect rect = arguments[0] as Rect;
           // _CupertinoEdgeShadowDecoration draws the shadows with a series of
-          // differently colored 1px rects. Verify that no 1px rects are drawn.
-          return rect.width != 1.0;
+          // differently colored 1px rects. Skip all rects not drawn by a
+          // _CupertinoEdgeShadowDecoration.
+          if (rect.width != 1.0)
+            return true;
+          throw '''
+    Expected: no rects with a width of 1px.
+          Found: $rect.
+          ''';
         });
       }
 
