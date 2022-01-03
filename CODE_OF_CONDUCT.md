@@ -14,7 +14,7 @@ Specifically:
 
 Should you experience anything that makes you feel unwelcome in Flutter's
 community, please contact [conduct@flutter.dev](mailto:conduct@flutter.dev)
-or, if you prefer, directly contact someone on the project, for instance
+or, if you prefer, directly contact someone on the project, for instance,
 [Hixie](mailto:ian@hixie.ch) or [Tim](mailto:timsneath@google.com).
 
 The Flutter project will not tolerate harassment in Flutter's
