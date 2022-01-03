@@ -946,7 +946,7 @@ void main() {
       );
     }
 
-    testWidgets('when route is not fullScreenDialog, it has a barrierColor', (WidgetTester tester) async {
+    testWidgets('when route is not fullscreenDialog, it has a barrierColor', (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: SizedBox.expand(),
@@ -961,7 +961,7 @@ void main() {
       expect(tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).color, const Color(0x18000000));
     });
 
-    testWidgets('when route is a fullScreenDialog, it has no barrierColor', (WidgetTester tester) async {
+    testWidgets('when route is a fullscreenDialog, it has no barrierColor', (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: SizedBox.expand(),
@@ -978,14 +978,26 @@ void main() {
 
     testWidgets('when route is not fullscreenDialog, it has a _CupertinoEdgeShadowDecoration', (WidgetTester tester) async {
       PaintPattern paintsShadowRect({required double dx, required Color color}) {
-        return paints..something((Symbol methodName, List<dynamic> arguments) {
+        return paints..everything((Symbol methodName, List<dynamic> arguments) {
           if (methodName != #drawRect)
-            return false;
+            return true;
           final Rect rect = arguments[0] as Rect;
           final Color paintColor = (arguments[1] as Paint).color;
           if (rect.top != 0 || rect.width != 1.0 || rect.height != 600)
-            return false; // Skip rects that aren't 1px-wide shadows
-          return ((rect.left - dx).abs() < 1) && (paintColor.value == color.value);
+            // _CupertinoEdgeShadowDecoration draws the shadows with a series of
+            // differently colored 1px-wide rects. Skip rects that aren't being
+            // drawn by the _CupertinoEdgeShadowDecoration.
+            return true;
+          if ((rect.left - dx).abs() >= 1)
+            // Skip calls for rects until the one with the given position offset
+            return true;
+          if (paintColor.value == color.value)
+            return true;
+          throw '''
+  For a rect with an expected left-side position: $dx (drawn at ${rect.left}):
+              Expected a rect with color: $color,
+              And drew a rect with color: $paintColor.
+          ''';
         });
       }
 
@@ -1050,13 +1062,15 @@ void main() {
       expect(box, paintsShadowRect(dx: 754, color: const Color(0x00000000)));
     });
 
-    testWidgets('when route is fullScreenDialog, it has no visible _CupertinoEdgeShadowDecoration', (WidgetTester tester) async {
+    testWidgets('when route is fullscreenDialog, it has no visible _CupertinoEdgeShadowDecoration', (WidgetTester tester) async {
       PaintPattern paintsNoShadows() {
         return paints..everything((Symbol methodName, List<dynamic> arguments) {
           if (methodName != #drawRect)
             return true;
           final Rect rect = arguments[0] as Rect;
-          return rect.width != 1.0; // No 1-px shadow rects are drawn
+          // _CupertinoEdgeShadowDecoration draws the shadows with a series of
+          // differently colored 1px rects. Verify that no 1px rects are drawn.
+          return rect.width != 1.0;
         });
       }
 
