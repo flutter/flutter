@@ -44,7 +44,7 @@ typedef ScrollableWidgetBuilder = Widget Function(
 ///
 /// The controller's methods cannot be used until after the controller has been
 /// passed into a [DraggableScrollableSheet] and the sheet has run initState.
-class DraggableScrollableController {
+class DraggableScrollableController extends ChangeNotifier {
   _DraggableScrollableSheetScrollController? _attachedController;
 
   /// Get the current size (as a fraction of the parent height) of the attached sheet.
@@ -160,9 +160,11 @@ class DraggableScrollableController {
   void _attach(_DraggableScrollableSheetScrollController scrollController) {
     assert(_attachedController == null, 'Draggable scrollable controller is already attached to a sheet.');
     _attachedController = scrollController;
+    _attachedController!.extent.addListener(notifyListeners);
   }
 
   void _detach() {
+    _attachedController?.extent.removeListener(notifyListeners);
     _attachedController = null;
   }
 }
@@ -421,7 +423,7 @@ class DraggableScrollableNotification extends Notification with ViewportNotifica
 ///
 /// The [currentSize] will never be null.
 /// The [availablePixels] will never be null, but may be `double.infinity`.
-class _DraggableSheetExtent {
+class _DraggableSheetExtent implements Listenable {
   _DraggableSheetExtent({
     required this.minSize,
     required this.maxSize,
@@ -548,6 +550,12 @@ class _DraggableSheetExtent {
       hasDragged: hasDragged,
     );
   }
+
+  @override
+  void addListener(VoidCallback listener) => _currentSize.addListener(listener);
+
+  @override
+  void removeListener(VoidCallback listener) => _currentSize.removeListener(listener);
 }
 
 class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
