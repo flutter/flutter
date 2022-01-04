@@ -160,6 +160,7 @@ class GalleryTransitionTest {
         '90th_percentile_picture_cache_memory',
         '99th_percentile_picture_cache_memory',
         'worst_picture_cache_memory',
+        'total_ui_gc_time',
         if (measureCpuGpu && !isAndroid) ...<String>[
           // See https://github.com/flutter/flutter/issues/68888
           if (summary['average_cpu_usage'] != null) 'average_cpu_usage',
