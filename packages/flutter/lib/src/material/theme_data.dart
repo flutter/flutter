@@ -386,7 +386,9 @@ class ThemeData with Diagnosticable {
     Brightness? primaryColorBrightness,
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
-      'This feature was deprecated after v2.9.0-1.0.pre.211.',
+      'For more information, consult the migration guide at '
+      'https://flutter.dev/docs/release/breaking-changes/toggleable-active-color#migration-guide. '
+      'This feature was deprecated after 2.9.0-1.0.pre.211.',
     )
     Color? toggleableActiveColor,
   }) {
@@ -804,7 +806,9 @@ class ThemeData with Diagnosticable {
     required this.primaryColorBrightness,
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
-      'This feature was deprecated after v2.9.0-1.0.pre.211.',
+      'For more information, consult the migration guide at '
+      'https://flutter.dev/docs/release/breaking-changes/toggleable-active-color#migration-guide. '
+      'This feature was deprecated after 2.9.0-1.0.pre.211.',
     )
     required this.toggleableActiveColor,
   }) : // GENERAL CONFIGURATION
@@ -1554,7 +1558,9 @@ class ThemeData with Diagnosticable {
   /// [Switch], [Radio], and [Checkbox].
   @Deprecated(
     'No longer used by the framework, please remove any reference to it. '
-    'This feature was deprecated after v2.9.0-1.0.pre.211.',
+    'For more information, consult the migration guide at '
+    'https://flutter.dev/docs/release/breaking-changes/toggleable-active-color#migration-guide. '
+    'This feature was deprecated after 2.9.0-1.0.pre.211.',
   )
   final Color toggleableActiveColor;
 
@@ -1707,7 +1713,9 @@ class ThemeData with Diagnosticable {
     Brightness? primaryColorBrightness,
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
-      'This feature was deprecated after v2.9.0-1.0.pre.211.',
+      'For more information, consult the migration guide at '
+      'https://flutter.dev/docs/release/breaking-changes/toggleable-active-color#migration-guide. '
+      'This feature was deprecated after 2.9.0-1.0.pre.211.',
     )
     Color? toggleableActiveColor,
   }) {
