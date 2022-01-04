@@ -111,14 +111,16 @@ class ContentContext {
       return found->second->WaitAndGet();
     }
 
-    auto found = container.find({});
+    auto prototype = container.find({});
 
     // The prototype must always be initialized in the constructor.
-    FML_CHECK(found != container.end());
+    FML_CHECK(prototype != container.end());
 
-    auto variant_future = found->second->WaitAndGet()->CreateVariant(
-        [&opts](PipelineDescriptor& desc) {
+    auto variant_future = prototype->second->WaitAndGet()->CreateVariant(
+        [&opts, variants_count = container.size()](PipelineDescriptor& desc) {
           ApplyOptionsToDescriptor(desc, opts);
+          desc.SetLabel(
+              SPrintF("%s V#%zu", desc.GetLabel().c_str(), variants_count));
         });
     auto variant = std::make_unique<TypedPipeline>(std::move(variant_future));
     auto variant_pipeline = variant->WaitAndGet();

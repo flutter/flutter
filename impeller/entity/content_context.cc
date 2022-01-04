@@ -4,6 +4,8 @@
 
 #include "impeller/entity/content_context.h"
 
+#include <sstream>
+
 namespace impeller {
 
 ContentContext::ContentContext(std::shared_ptr<Context> context)
@@ -23,6 +25,7 @@ ContentContext::ContentContext(std::shared_ptr<Context> context)
   // Pipelines that are variants of the base pipelines with custom descriptors.
   if (auto solid_fill_pipeline = solid_fill_pipelines_[{}]->WaitAndGet()) {
     auto clip_pipeline_descriptor = solid_fill_pipeline->GetDescriptor();
+    clip_pipeline_descriptor.SetLabel("Clip Pipeline");
     // Write to the stencil buffer.
     StencilAttachmentDescriptor stencil0;
     stencil0.stencil_compare = CompareFunction::kGreaterEqual;
