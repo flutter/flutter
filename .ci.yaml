@@ -3033,7 +3033,6 @@ targets:
 
   - name: Mac_android run_release_test
     recipe: devicelab/devicelab_drone
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/91625
     presubmit: false
     timeout: 60
     properties:
@@ -3147,6 +3146,7 @@ targets:
     scheduler: luci
 
   - name: Mac_ios cubic_bezier_perf_ios_sksl_warmup__timeline_summary
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/95867
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
