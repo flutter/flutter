@@ -560,22 +560,25 @@ RasterStatus Rasterizer::DrawToSurfaceUnsafe(
         external_view_embedder_ &&
         (!raster_thread_merger_ || raster_thread_merger_->IsMerged());
 
-    FrameDamage damage;
+    std::unique_ptr<FrameDamage> damage;
     if (!disable_partial_repaint && frame->framebuffer_info().existing_damage) {
-      damage.SetPreviousLayerTree(last_layer_tree_.get());
-      damage.AddAdditonalDamage(*frame->framebuffer_info().existing_damage);
+      damage = std::make_unique<FrameDamage>();
+      damage->SetPreviousLayerTree(last_layer_tree_.get());
+      damage->AddAdditonalDamage(*frame->framebuffer_info().existing_damage);
     }
 
     RasterStatus raster_status =
-        compositor_frame->Raster(layer_tree, false, &damage);
+        compositor_frame->Raster(layer_tree, false, damage.get());
     if (raster_status == RasterStatus::kFailed ||
         raster_status == RasterStatus::kSkipAndRetry) {
       return raster_status;
     }
 
     SurfaceFrame::SubmitInfo submit_info;
-    submit_info.frame_damage = damage.GetFrameDamage();
-    submit_info.buffer_damage = damage.GetBufferDamage();
+    if (damage) {
+      submit_info.frame_damage = damage->GetFrameDamage();
+      submit_info.buffer_damage = damage->GetBufferDamage();
+    }
 
     frame->set_submit_info(submit_info);
 
