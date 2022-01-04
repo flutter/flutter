@@ -701,9 +701,6 @@ class DataTable extends StatelessWidget {
         ),
         child: Center(
           child: Checkbox(
-            // TODO(per): Remove when Checkbox has theme, https://github.com/flutter/flutter/issues/53420.
-            activeColor: themeData.colorScheme.primary,
-            checkColor: themeData.colorScheme.onPrimary,
             value: checked,
             onChanged: onCheckboxChanged,
             tristate: tristate,
