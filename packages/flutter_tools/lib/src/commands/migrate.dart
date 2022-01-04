@@ -11,6 +11,7 @@ import '../globals.dart' as globals;
 import '../project.dart';
 import '../runner/flutter_command.dart';
 import '../migrate_utils.dart';
+import '../migrate/migrate_config.dart';
 import '../cache.dart';
 
 class MigrateCommand extends FlutterCommand {
@@ -38,8 +39,27 @@ class MigrateCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     final FlutterProject flutterProject = FlutterProject.current();
 
-    final Directory buildDir = globals.fs.directory(getBuildDirectory());
+    // final Directory buildDir = globals.fs.directory(getBuildDirectory());
     print('HERE');
+
+    List<MigrateConfig> configs = <MigrateConfig>[];
+    List<String> platforms = <String>['root', 'android'];
+    for (String platform in platforms) {
+      if (MigrateConfig.getFileFromPlatform(platform).existsSync()) {
+        configs.add(MigrateConfig.fromPlatform(platform));
+      } else {
+        MigrateConfig newConfig = MigrateConfig(
+          platform: platform,
+          createVersion: 'vklalckasjlcksa',
+          lastMigrateVersion: 'askdl;laskdlas;kd',
+          unmanagedFiles: <String>[
+            'blah/file/path',
+          ],
+        );
+        newConfig.writeFile();
+        configs.add(newConfig);
+      }
+    }
 
     List<String> files = await MigrateUtils.getFileNamesInDirectory(
       revision: '5344ed71561b924fb23300fb7fdb306744718767',

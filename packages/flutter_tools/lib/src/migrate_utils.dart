@@ -57,7 +57,7 @@ class MigrateUtils {
     return result.stdout as String;
   }
 
-  static Future<void> apply(File diff, required String workingDirectory) async {
+  static Future<void> apply({required File diff, required String workingDirectory}) async {
     List<String> cmdArgs = ['apply', diff.absolute.path];
     ProcessResult result = await Process.run('git', cmdArgs, workingDirectory: workingDirectory);
     checkForErrors(result);

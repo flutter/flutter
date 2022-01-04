@@ -17,34 +17,77 @@ import '../cache.dart';
 
 class MigrateConfig {
 
-  MigrateConfig.fromFile(File file) {
-    YamlMap = loadYaml(file.readAsStringSync());
+  MigrateConfig.fromFile(File file) : unmanagedFiles = <String>[] {
+    YamlMap yamlRoot = loadYaml(file.readAsStringSync());
+    if (!validate(yamlRoot)) {
+      // Error
+      return;
+    }
+    populateFromYaml(yamlRoot);
+  }
+
+  MigrateConfig.fromPlatform(this.platform) : unmanagedFiles = <String>[] {
+    MigrateConfig.fromFile(getFileFromPlatform(platform));
   }
 
   MigrateConfig({
-    this.platform,
-    this.createVersion,
-    this.lastMigrateVersion,
-    this.unmanagedFiles
-  }) {
+    required this.platform,
+    required this.createVersion,
+    required this.lastMigrateVersion,
+    required this.unmanagedFiles
+  }) {}
 
-  }
-
-  String platform;
-  String createVersion;
-  String lastMigrateVersion;
+  String? platform;
+  String? createVersion;
+  String? lastMigrateVersion;
   List<String> unmanagedFiles;
 
+  void populateFromYaml(YamlMap yamlRoot) {
+    platform = yamlRoot['platform'];
+    createVersion = yamlRoot['createVersion'];
+    lastMigrateVersion = yamlRoot['lastMigrateVersion'];
+    unmanagedFiles = yamlRoot['unmanagedFiles'];
+  }
+
   void writeFile() {
-    Directory platformDir;
+    File file = getFileFromPlatform(platform);
+    file.createSync(recursive: true);
+    String unmanagedFilesString = '';
+    for (String path in unmanagedFiles) {
+      unmanagedFilesString += '  - $path\n';
+    }
+    file.writeAsStringSync('''
+# Generated section.
+platform: $platform
+createVersion: $createVersion
+lastMigrateVersion: $lastMigrateVersion
+
+# User provided section
+
+# List of Local paths (relative to this file) that should be
+# ignored by the migrate tool.
+#
+# Files that are not part of the templates will be ignored by default.
+unmanagedFiles:
+$unmanagedFilesString
+''',
+    flush: true);
+  }
+
+  static File getFileFromPlatform(String? platform) {
+    Directory? platformDir;
     FlutterProject project = FlutterProject.current();
     switch (platform) {
+      case 'root': {
+        platformDir = project.directory;
+        break;
+      }
       case 'android': {
-        platformDir = project.android.directory;
+        platformDir = project.android.hostAppGradleRoot;
         break;
       }
       case 'ios': {
-        platformDir = project.ios.directory;
+        platformDir = project.ios.hostAppRoot;
         break;
       }
       case 'web': {
@@ -52,40 +95,38 @@ class MigrateConfig {
         break;
       }
       case 'macos': {
-        platformDir = project.macos.directory;
+        platformDir = project.macos.hostAppRoot;
         break;
       }
       case 'linux': {
-        platformDir = project.linux.directory;
+        platformDir = project.linux.managedDirectory.parent;
         break;
       }
       case 'windows': {
-        platformDir = project.windows.directory;
+        platformDir = project.windows.managedDirectory.parent;
         break;
       }
       case 'windowsUwp': {
-        platformDir = project.windowsUwp.directory;
+        platformDir = project.windowsUwp.managedDirectory.parent;
         break;
       }
       case 'fuchsia': {
-        platformDir = project.fuchsia.directory;
+        platformDir = project.fuchsia.editableHostAppDirectory;
         break;
       }
     }
-    File file = platformDir.childFile('.migrate_config');
-    file.createSync(recursive: true);
-    String unmanagedFilesString = '';
-    for (String path in unmanagedFiles) {
-      unmanagedFilesString += '  - $path\n';
+    if (platformDir == null) {
+      throwToolExit('Invalid platform when creating MigrateConfig', exitCode: 1);
     }
-    file.writeAsStringSync('''
-# Generated file
-platform: $platform
-createVersion: $createVersion
-lastMigrateVersion: $lastMigrateVersion
-unmanagedFiles:
-$unmanagedFilesString
-'''
-    flush: true);
+    File file = platformDir.childFile('.migrate_config');
+    return file;
+  }
+
+  bool validate(YamlMap yamlRoot) {
+    return yamlRoot.keys.contains('platform') &&
+    yamlRoot.keys.contains('createVersion') &&
+    yamlRoot.keys.contains('lastMigrateVersion') &&
+    yamlRoot.keys.contains('unmanagedFiles') &&
+    yamlRoot['unmanagedFiles'] is YamlList;
   }
 }
