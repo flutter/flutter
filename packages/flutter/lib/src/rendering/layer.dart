@@ -2276,9 +2276,8 @@ class LeaderLayer extends ContainerLayer {
   /// children.
   @override
   void applyTransform(Layer? child, Matrix4 transform) {
-    assert(_lastOffset != null);
-    if (_lastOffset != Offset.zero)
-      transform.translate(_lastOffset!.dx, _lastOffset!.dy);
+    if (offset != Offset.zero)
+      transform.translate(offset.dx, offset.dy);
   }
 
   @override
