@@ -8,9 +8,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-{{^withFfiPluginHook}}
 import 'package:{{projectName}}/main.dart';
-{{/withFfiPluginHook}}
 
 {{^withPluginHook}}
 void main() {
@@ -32,7 +30,7 @@ void main() {
   });
 }
 {{/withPluginHook}}
-{{#withPlatformChannelPluginHook}}
+{{#withPluginHook}}
 void main() {
   testWidgets('Verify Platform version', (WidgetTester tester) async {
     // Build our app and trigger a frame.
@@ -48,4 +46,4 @@ void main() {
     );
   });
 }
-{{/withPlatformChannelPluginHook}}
+{{/withPluginHook}}
