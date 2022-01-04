@@ -1,0 +1,13 @@
+cmake_minimum_required(VERSION 3.14)
+set(PROJECT_NAME "{{projectName}}")
+project(${PROJECT_NAME} LANGUAGES CXX)
+
+# Invoke the build for native code shared with the other target platforms.
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/../src" "${CMAKE_CURRENT_BINARY_DIR}/shared")
+
+# List of absolute paths to libraries that should be bundled with the plugin.
+set({{projectName}}_bundled_libraries
+  # Defined in ../src/CMakeLists.txt.
+  $<TARGET_FILE:{{projectName}}>
+  PARENT_SCOPE
+)
