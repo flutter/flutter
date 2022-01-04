@@ -21,7 +21,7 @@ class Pipeline;
 // would be a concurrency pessimization.
 //
 // Use a struct that stores the future and the descriptor separately.
-using PipelineFuture = std::future<std::shared_ptr<Pipeline>>;
+using PipelineFuture = std::shared_future<std::shared_ptr<Pipeline>>;
 
 //------------------------------------------------------------------------------
 /// @brief      Describes the fixed function and programmable aspects of
@@ -48,6 +48,13 @@ class Pipeline {
 
   virtual bool IsValid() const = 0;
 
+  //----------------------------------------------------------------------------
+  /// @brief      Get the descriptor that was responsible for creating this
+  ///             pipeline. It may be copied and modified to create a pipeline
+  ///             variant.
+  ///
+  /// @return     The descriptor.
+  ///
   const PipelineDescriptor& GetDescriptor() const;
 
   PipelineFuture CreateVariant(

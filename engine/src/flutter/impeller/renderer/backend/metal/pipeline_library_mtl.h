@@ -26,17 +26,15 @@ class PipelineLibraryMTL final : public PipelineLibrary {
  private:
   friend ContextMTL;
 
-  using Pipelines = std::unordered_map<PipelineDescriptor,
-                                       std::shared_ptr<const Pipeline>,
-                                       ComparableHash<PipelineDescriptor>,
-                                       ComparableEqual<PipelineDescriptor>>;
+  using Pipelines =
+      std::unordered_map<PipelineDescriptor,
+                         std::shared_future<std::shared_ptr<Pipeline>>,
+                         ComparableHash<PipelineDescriptor>,
+                         ComparableEqual<PipelineDescriptor>>;
   id<MTLDevice> device_ = nullptr;
   Pipelines pipelines_;
 
   PipelineLibraryMTL(id<MTLDevice> device);
-
-  void SavePipeline(PipelineDescriptor descriptor,
-                    std::shared_ptr<const Pipeline> pipeline);
 
   // |PipelineLibrary|
   PipelineFuture GetRenderPipeline(PipelineDescriptor descriptor) override;
