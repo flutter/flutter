@@ -14,6 +14,17 @@
 
 version: 1
 transforms:
+  # Changes made in https://github.com/flutter/flutter/pull/96115
+  - title: "Migrate 'Icons.pie_chart_outlined' to 'Icons.pie_chart_outline'"
+    date: 2022-01-04
+    element:
+      uris: [ 'material.dart' ]
+      field: 'pie_chart_outlined'
+      inClass: 'Icons'
+    changes:
+      - kind: 'rename'
+        newName: 'pie_chart_outline'
+
   # Changes made in https://github.com/flutter/flutter/pull/93427
   - title: "Remove 'primaryVariant' and 'secondaryVariant'"
     date: 2021-11-19
