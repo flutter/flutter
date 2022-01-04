@@ -699,10 +699,16 @@ class RenderListWheelViewport
       targetLastIndex--;
 
     // If it turns out there's no children to layout, we remove old children and
-    // return.
+    // apply the new content dimensions.
     if (targetFirstIndex > targetLastIndex) {
       while (firstChild != null)
         _destroyChild(firstChild!);
+
+      if (!offset.applyContentDimensions(_minEstimatedScrollExtent, _maxEstimatedScrollExtent)) {
+        // Re-layout due to the scroll offset changed.
+        performLayout();
+        return;
+      }
       return;
     }
 
@@ -772,7 +778,11 @@ class RenderListWheelViewport
     final double maxScrollExtent = childManager.childExistsAt(targetLastIndex + 1)
         ? _maxEstimatedScrollExtent
         : indexToScrollOffset(targetLastIndex);
-    offset.applyContentDimensions(minScrollExtent, maxScrollExtent);
+    if (!offset.applyContentDimensions(minScrollExtent, maxScrollExtent)) {
+      // Re-layout due to the scroll offset changed.
+      performLayout();
+      return;
+    }
   }
 
   bool _shouldClipAtCurrentOffset() {
