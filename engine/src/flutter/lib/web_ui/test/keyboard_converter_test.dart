@@ -378,7 +378,7 @@ void testMain() {
     converter.handleEvent(keyUpEvent('ShiftLeft', 'Shift', 0, kLocationLeft));
   });
 
-  test('Duplicate down is ignored', () {
+  test('Duplicate down is preceded with synthesized up', () {
     final List<ui.KeyData> keyDataList = <ui.KeyData>[];
     final KeyboardConverter converter = KeyboardConverter((ui.KeyData key) {
       keyDataList.add(key);
@@ -392,15 +392,26 @@ void testMain() {
     );
     expect(preventedDefault, isTrue);
     preventedDefault = false;
-    // A KeyUp of ShiftLeft is missed due to loss of focus.
+    // A KeyUp of ShiftLeft is missed.
 
     keyDataList.clear();
     converter.handleEvent(keyDownEvent('ShiftLeft', 'Shift', kShift, kLocationLeft)
       ..onPreventDefault = onPreventDefault
     );
-    expect(keyDataList, hasLength(1));
-    expect(keyDataList[0].physical, 0);
-    expect(keyDataList[0].logical, 0);
+    expect(keyDataList, hasLength(2));
+    expectKeyData(keyDataList.first,
+      type: ui.KeyEventType.up,
+      physical: kPhysicalShiftLeft,
+      logical: kLogicalShiftLeft,
+      character: null,
+      synthesized: true,
+    );
+    expectKeyData(keyDataList.last,
+      type: ui.KeyEventType.down,
+      physical: kPhysicalShiftLeft,
+      logical: kLogicalShiftLeft,
+      character: null,
+    );
     expect(preventedDefault, isTrue);
 
     keyDataList.clear();
