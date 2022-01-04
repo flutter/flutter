@@ -38,8 +38,8 @@ abstract class MacOSApp extends ApplicationPackage {
     }
 
     return PrebuiltMacOSApp(
-      bundleDir: bundleInfo.bundle,
-      bundleName: bundleInfo.bundle.path,
+      uncompressedBundle: bundleInfo.uncompressedBundle,
+      bundleName: bundleInfo.uncompressedBundle.path,
       projectBundleId: bundleInfo.id,
       executable: bundleInfo.executable,
       applicationPackage: applicationBinary,
@@ -53,14 +53,14 @@ abstract class MacOSApp extends ApplicationPackage {
       globals.printError('File "${applicationBundle.path}" does not exist.');
       return null;
     }
-    Directory bundleDir;
+    Directory uncompressedBundle;
     if (entityType == FileSystemEntityType.directory) {
       final Directory directory = globals.fs.directory(applicationBundle);
       if (!_isBundleDirectory(directory)) {
         globals.printError('Folder "${applicationBundle.path}" is not an app bundle.');
         return null;
       }
-      bundleDir = globals.fs.directory(applicationBundle);
+      uncompressedBundle = globals.fs.directory(applicationBundle);
     } else {
       // Try to unpack as a zip.
       final Directory tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_app.');
@@ -71,7 +71,7 @@ abstract class MacOSApp extends ApplicationPackage {
         return null;
       }
       try {
-        bundleDir = tempDir
+        uncompressedBundle = tempDir
             .listSync()
             .whereType<Directory>()
             .singleWhere(_isBundleDirectory);
@@ -80,7 +80,7 @@ abstract class MacOSApp extends ApplicationPackage {
         return null;
       }
     }
-    final String plistPath = globals.fs.path.join(bundleDir.path, 'Contents', 'Info.plist');
+    final String plistPath = globals.fs.path.join(uncompressedBundle.path, 'Contents', 'Info.plist');
     if (!globals.fs.file(plistPath).existsSync()) {
       globals.printError('Invalid prebuilt macOS app. Does not contain Info.plist.');
       return null;
@@ -96,11 +96,11 @@ abstract class MacOSApp extends ApplicationPackage {
       globals.printError('Invalid prebuilt macOS app. Info.plist does not contain bundle executable');
       return null;
     }
-    final String executable = globals.fs.path.join(bundleDir.path, 'Contents', 'MacOS', executableName);
+    final String executable = globals.fs.path.join(uncompressedBundle.path, 'Contents', 'MacOS', executableName);
     if (!globals.fs.file(executable).existsSync()) {
       globals.printError('Could not find macOS binary at $executable');
     }
-    return _BundleInfo(executable, id, bundleDir);
+    return _BundleInfo(executable, id, uncompressedBundle);
   }
 
   @override
@@ -113,7 +113,7 @@ abstract class MacOSApp extends ApplicationPackage {
 
 class PrebuiltMacOSApp extends MacOSApp implements PrebuiltApplicationPackage {
   PrebuiltMacOSApp({
-    required this.bundleDir,
+    required this.uncompressedBundle,
     required this.bundleName,
     required this.projectBundleId,
     required String executable,
@@ -121,7 +121,11 @@ class PrebuiltMacOSApp extends MacOSApp implements PrebuiltApplicationPackage {
   }) : _executable = executable,
        super(projectBundleId: projectBundleId);
 
-  final Directory bundleDir;
+  /// The uncompressed bundle of the application.
+  ///
+  /// [MacOSApp.fromPrebuiltApp] will uncompress the application into a temporary
+  /// directory even when an `.zip` file was used to create the [MacOSApp] instance.
+  final Directory uncompressedBundle;
   final String bundleName;
   final String projectBundleId;
 
@@ -131,11 +135,14 @@ class PrebuiltMacOSApp extends MacOSApp implements PrebuiltApplicationPackage {
   String get name => bundleName;
 
   @override
-  String? applicationBundle(BuildMode buildMode) => bundleDir.path;
+  String? applicationBundle(BuildMode buildMode) => uncompressedBundle.path;
 
   @override
   String? executable(BuildMode buildMode) => _executable;
 
+  /// A [File] or [Directory] pointing to the application bundle.
+  ///
+  /// This can be either a `.zip` file or an uncompressed `.app` directory.
   @override
   final FileSystemEntity applicationPackage;
 }
@@ -175,9 +182,9 @@ class BuildableMacOSApp extends MacOSApp {
 }
 
 class _BundleInfo {
-  _BundleInfo(this.executable, this.id, this.bundle);
+  _BundleInfo(this.executable, this.id, this.uncompressedBundle);
 
-  final Directory bundle;
+  final Directory uncompressedBundle;
   final String executable;
   final String id;
 }

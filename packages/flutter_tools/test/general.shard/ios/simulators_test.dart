@@ -920,7 +920,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
       final IOSApp package = PrebuiltIOSApp(
         projectBundleId: 'incorrect',
         bundleName: 'name',
-        bundleDir: mockDir,
+        uncompressedBundle: mockDir,
         applicationPackage: mockDir,
       );
 
@@ -948,7 +948,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
       final IOSApp package = PrebuiltIOSApp(
         projectBundleId: 'incorrect',
         bundleName: 'name',
-        bundleDir: mockDir,
+        uncompressedBundle: mockDir,
         applicationPackage: mockDir,
       );
 
@@ -980,7 +980,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
       final IOSApp package = PrebuiltIOSApp(
         projectBundleId: 'correct',
         bundleName: 'name',
-        bundleDir: mockDir,
+        uncompressedBundle: mockDir,
         applicationPackage: mockDir,
       );
 

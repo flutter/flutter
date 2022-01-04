@@ -93,7 +93,7 @@ void main() {
     final IOSApp iosApp = PrebuiltIOSApp(
       projectBundleId: 'app',
       bundleName: 'Runner',
-      bundleDir: MemoryFileSystem.test().directory('bundle'),
+      uncompressedBundle: MemoryFileSystem.test().directory('bundle'),
       applicationPackage: MemoryFileSystem.test().directory('bundle'),
     );
 
@@ -117,7 +117,7 @@ void main() {
     final IOSApp iosApp = PrebuiltIOSApp(
       projectBundleId: 'app',
       bundleName: 'Runner',
-      bundleDir: fileSystem.currentDirectory,
+      uncompressedBundle: fileSystem.currentDirectory,
       applicationPackage: fileSystem.currentDirectory,
     );
     final FakeDeviceLogReader deviceLogReader = FakeDeviceLogReader();
@@ -155,7 +155,7 @@ void main() {
     final IOSApp iosApp = PrebuiltIOSApp(
       projectBundleId: 'app',
       bundleName: 'Runner',
-      bundleDir: fileSystem.currentDirectory,
+      uncompressedBundle: fileSystem.currentDirectory,
       applicationPackage: fileSystem.currentDirectory,
     );
     final FakeDeviceLogReader deviceLogReader = FakeDeviceLogReader();
@@ -194,7 +194,7 @@ void main() {
     final IOSApp iosApp = PrebuiltIOSApp(
       projectBundleId: 'app',
       bundleName: 'Runner',
-      bundleDir: fileSystem.currentDirectory,
+      uncompressedBundle: fileSystem.currentDirectory,
       applicationPackage: fileSystem.currentDirectory,
     );
     final FakeDeviceLogReader deviceLogReader = FakeDeviceLogReader();
@@ -234,7 +234,7 @@ void main() {
     final IOSApp iosApp = PrebuiltIOSApp(
       projectBundleId: 'app',
       bundleName: 'Runner',
-      bundleDir: fileSystem.currentDirectory,
+      uncompressedBundle: fileSystem.currentDirectory,
       applicationPackage: fileSystem.currentDirectory,
     );
 
@@ -301,7 +301,7 @@ void main() {
     final IOSApp iosApp = PrebuiltIOSApp(
       projectBundleId: 'app',
       bundleName: 'Runner',
-      bundleDir: fileSystem.currentDirectory,
+      uncompressedBundle: fileSystem.currentDirectory,
       applicationPackage: fileSystem.currentDirectory,
     );
     final FakeDeviceLogReader deviceLogReader = FakeDeviceLogReader();

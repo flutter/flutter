@@ -100,7 +100,7 @@ group('PrebuiltMacOSApp', () {
       final PrebuiltMacOSApp macosApp = MacOSApp.fromPrebuiltApp(fileSystem.file('bundle.app')) as PrebuiltMacOSApp;
 
       expect(logger.errorText, isEmpty);
-      expect(macosApp.bundleDir.path, 'bundle.app');
+      expect(macosApp.uncompressedBundle.path, 'bundle.app');
       expect(macosApp.id, 'fooBundleId');
       expect(macosApp.bundleName, 'bundle.app');
     }, overrides: overrides);
@@ -152,7 +152,7 @@ group('PrebuiltMacOSApp', () {
       final PrebuiltMacOSApp macosApp = MacOSApp.fromPrebuiltApp(fileSystem.file('app.zip')) as PrebuiltMacOSApp;
 
       expect(logger.errorText, isEmpty);
-      expect(macosApp.bundleDir.path, endsWith('bundle.app'));
+      expect(macosApp.uncompressedBundle.path, endsWith('bundle.app'));
       expect(macosApp.id, 'fooBundleId');
       expect(macosApp.bundleName, endsWith('bundle.app'));
     }, overrides: overrides);

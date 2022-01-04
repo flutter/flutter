@@ -300,7 +300,7 @@ void main() {
       testPlistParser.setProperty('CFBundleIdentifier', 'fooBundleId');
       final PrebuiltIOSApp iosApp = IOSApp.fromPrebuiltApp(globals.fs.file('bundle.app')) as PrebuiltIOSApp;
       expect(testLogger.errorText, isEmpty);
-      expect(iosApp.bundleDir.path, 'bundle.app');
+      expect(iosApp.uncompressedBundle.path, 'bundle.app');
       expect(iosApp.id, 'fooBundleId');
       expect(iosApp.bundleName, 'bundle.app');
       expect(iosApp.applicationPackage.path, globals.fs.directory('bundle.app').path);
@@ -351,7 +351,7 @@ void main() {
       };
       final PrebuiltIOSApp iosApp = IOSApp.fromPrebuiltApp(globals.fs.file('app.ipa')) as PrebuiltIOSApp;
       expect(testLogger.errorText, isEmpty);
-      expect(iosApp.bundleDir.path, endsWith('bundle.app'));
+      expect(iosApp.uncompressedBundle.path, endsWith('bundle.app'));
       expect(iosApp.id, 'fooBundleId');
       expect(iosApp.bundleName, 'bundle.app');
       expect(iosApp.applicationPackage.path, globals.fs.file('app.ipa').path);
