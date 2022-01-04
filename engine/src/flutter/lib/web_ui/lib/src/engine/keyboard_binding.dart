@@ -371,9 +371,7 @@ class KeyboardConverter {
       // followed by an immediate cancel event.
       (_shouldSynthesizeCapsLockUp() && event.code! == _kPhysicalCapsLock);
 
-    final int? lastLogicalRecord = _pressingRecords[physicalKey];
-
-    ui.KeyEventType type;
+    final ui.KeyEventType type;
 
     if (_shouldSynthesizeCapsLockUp() && event.code! == _kPhysicalCapsLock) {
       // Case 1: Handle CapsLock on macOS
@@ -399,28 +397,45 @@ class KeyboardConverter {
 
     } else if (isPhysicalDown) {
       // Case 2: Handle key down of normal keys
-      type = ui.KeyEventType.down;
-      if (lastLogicalRecord != null) {
+      if (_pressingRecords[physicalKey] != null) {
         // This physical key is being pressed according to the record.
         if (event.repeat ?? false) {
           // A normal repeated key.
           type = ui.KeyEventType.repeat;
         } else {
           // A non-repeated key has been pressed that has the exact physical key as
-          // a currently pressed one, usually indicating multiple keyboards are
-          // pressing keys with the same physical key, or the up event was lost
-          // during a loss of focus. The down event is ignored.
-          event.preventDefault();
-          return;
+          // a currently pressed one. This can mean one of the following cases:
+          //
+          //  * Multiple keyboards are pressing keys with the same physical key.
+          //  * The up event was lost during a loss of focus.
+          //  * The previous down event was a system shortcut and its release
+          //    was skipped (see `_startGuardingKey`,) such as holding Ctrl and
+          //    pressing V then V, within the "guard window".
+          //
+          // The three cases can't be distinguished, and in the 3rd case, the
+          // latter event must be dispatched as down events for the framework to
+          // correctly recognize and choose to not to handle. Therefore, an up
+          // event is synthesized before it.
+          _dispatchKeyData!(ui.KeyData(
+            timeStamp: timeStamp,
+            type: ui.KeyEventType.up,
+            physical: physicalKey,
+            logical: logicalKey,
+            character: null,
+            synthesized: true,
+          ));
+          _pressingRecords.remove(physicalKey);
+          type = ui.KeyEventType.down;
         }
       } else {
         // This physical key is not being pressed according to the record. It's a
         // normal down event, whether the system event is a repeat or not.
+        type = ui.KeyEventType.down;
       }
 
     } else { // isPhysicalDown is false and not CapsLock
       // Case 2: Handle key up of normal keys
-      if (lastLogicalRecord == null) {
+      if (_pressingRecords[physicalKey] == null) {
         // The physical key has been released before. It indicates multiple
         // keyboards pressed keys with the same physical key. Ignore the up event.
         event.preventDefault();
@@ -429,6 +444,10 @@ class KeyboardConverter {
 
       type = ui.KeyEventType.up;
     }
+
+    // The _pressingRecords[physicalKey] might have been changed during the last
+    // `if` clause.
+    final int? lastLogicalRecord = _pressingRecords[physicalKey];
 
     final int? nextLogicalRecord;
     switch (type) {
