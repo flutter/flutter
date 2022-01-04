@@ -654,7 +654,7 @@ class SurfacePath implements ui.Path {
   }
 
   /// Appends up to four conic curves weighted to describe an oval of `radius`
-  /// and rotated by `rotation`.
+  /// and rotated by `rotation` (measured in degrees and clockwise).
   ///
   /// The first curve begins from the last point in the path and the last ends
   /// at `arcEnd`. The curves follow a path in a direction determined by
@@ -845,7 +845,7 @@ class SurfacePath implements ui.Path {
   }
 
   /// Appends up to four conic curves weighted to describe an oval of `radius`
-  /// and rotated by `rotation`.
+  /// and rotated by `rotation` (measured in degrees and clockwise).
   ///
   /// The last path point is described by (px, py).
   ///
