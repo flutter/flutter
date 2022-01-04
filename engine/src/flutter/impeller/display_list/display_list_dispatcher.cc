@@ -473,4 +473,8 @@ void DisplayListDispatcher::drawShadow(const SkPath& path,
   UNIMPLEMENTED;
 }
 
+Picture DisplayListDispatcher::EndRecordingAsPicture() {
+  return canvas_.EndRecordingAsPicture();
+}
+
 }  // namespace impeller

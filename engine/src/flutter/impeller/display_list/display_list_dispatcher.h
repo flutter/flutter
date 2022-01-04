@@ -18,6 +18,8 @@ class DisplayListDispatcher final : public flutter::Dispatcher {
 
   ~DisplayListDispatcher();
 
+  Picture EndRecordingAsPicture();
+
   // |flutter::Dispatcher|
   void setAntiAlias(bool aa) override;
 
