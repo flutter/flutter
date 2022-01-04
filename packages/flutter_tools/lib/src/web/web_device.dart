@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
@@ -134,8 +135,7 @@ abstract class ChromiumDevice extends Device {
       if (pattern.hasMatch(debuggingOptions.webLaunchUrl!)) {
         url = debuggingOptions.webLaunchUrl!;
       } else {
-        url = platformArgs['uri']! as String;
-        _logger.printStatus('"${debuggingOptions.webLaunchUrl}" is not a vaild HTTP URL,"$url" will be used.');
+        throwToolExit('"${debuggingOptions.webLaunchUrl}" is not a vaild HTTP URL.');
       }
     } else {
       url = platformArgs['uri']! as String;
