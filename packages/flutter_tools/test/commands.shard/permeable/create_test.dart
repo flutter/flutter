@@ -2761,6 +2761,71 @@ void main() {
       platform: globals.platform,
     ),
   });
+
+  testUsingContext('create an FFI plugin with ios, then add macos', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    await runner.run(<String>['create', '--no-pub', '--template=plugin_ffi', '--platform=ios', projectDir.path]);
+    expect(projectDir.childDirectory('src'), exists);
+    expect(projectDir.childDirectory('ios'), exists);
+    expect(projectDir.childDirectory('example').childDirectory('ios'), exists);
+    validatePubspecForPlugin(
+      projectDir: projectDir.absolute.path,
+      expectedPlatforms: const <String>[
+        'ios',
+      ],
+      ffiPlugin: true,
+      unexpectedPlatforms: <String>['some_platform'],
+    );
+
+    await runner.run(<String>['create', '--no-pub', '--template=plugin_ffi', '--platform=macos', projectDir.path]);
+    expect(projectDir.childDirectory('macos'), exists);
+    expect(
+        projectDir.childDirectory('example').childDirectory('macos'), exists);
+    expect(projectDir.childDirectory('ios'), exists);
+    expect(projectDir.childDirectory('example').childDirectory('ios'), exists);
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+  });
+
+  testUsingContext('FFI plugins error android and ios language', () async {
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    final List<String> args = <String>[
+      'create',
+      '--no-pub',
+      '--template=plugin_ffi',
+      '-a',
+      'kotlin',
+      '--ios-language',
+      'swift',
+      '--platforms=ios,android',
+      projectDir.path,
+    ];
+
+    await expectLater(
+        runner.run(args),
+        throwsToolExit(
+            message:
+                'The "ios-language" option is not supported with the plugin_ffi template: the language will always be C or C++.'));
+  });
+
+  testUsingContext('should show warning when disabled platforms are selected while creating an FFI plugin', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', '--template=plugin_ffi', '--platforms=android,ios,windows,macos,linux', projectDir.path]);
+    await runner.run(<String>['create', '--no-pub', '--template=plugin_ffi', projectDir.path]);
+    expect(logger.statusText, contains(_kDisabledPlatformRequestedMessage));
+
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(),
+    Logger: () => logger,
+  });
 }
 
 Future<void> _createProject(

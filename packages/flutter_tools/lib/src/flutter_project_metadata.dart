@@ -23,9 +23,14 @@ enum FlutterProjectType {
   package,
   /// This is a native plugin project.
   plugin,
+  /// This is an FFI native plugin project.
+  ffiPlugin,
 }
 
 String flutterProjectTypeToString(FlutterProjectType type) {
+  if (type == FlutterProjectType.ffiPlugin) {
+    return 'plugin_ffi';
+  }
   return getEnumName(type);
 }
 

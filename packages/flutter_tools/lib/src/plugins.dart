@@ -47,12 +47,17 @@ class Plugin {
   ///            package: io.flutter.plugins.sample
   ///            pluginClass: SamplePlugin
   ///          ios:
+  ///            # A plugin implemented through method channels.
   ///            pluginClass: SamplePlugin
   ///          linux:
-  ///            pluginClass: SamplePlugin
+  ///            # A plugin implemented purely in Dart code.
+  ///            dartPluginClass: SamplePlugin
   ///          macos:
-  ///            pluginClass: SamplePlugin
+  ///            # A plugin implemented `dart:ffi`.
+  ///            ffiPlugin: true
   ///          windows:
+  ///            # A plugin using platform-specific Dart and method channels.
+  ///            dartPluginClass: SamplePlugin
   ///            pluginClass: SamplePlugin
   factory Plugin.fromYaml(
     String name,

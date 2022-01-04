@@ -1,0 +1,25 @@
+# We use the CMake version connected to the version of the Android Gradle Plugin.
+#
+# Android Gradle Plugin 4.1.0: Android NDK 21.1.6352462.
+# https://developer.android.com/studio/projects/install-ndk#default-ndk-per-agp
+# CMake 3.10.2.
+# https://developer.android.com/studio/projects/install-ndk#vanilla_cmake
+#
+# You are strongly encouraged to not ship FFI plugins requiring newer versions
+# of the NDK or CMake, because your clients will not be able to use them.
+cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
+
+project({{projectName}}_library VERSION 0.0.1 LANGUAGES C)
+
+add_library(
+    {{projectName}}
+    SHARED
+    "{{projectName}}.c"
+)
+
+set_target_properties({{projectName}} PROPERTIES
+    PUBLIC_HEADER {{projectName}}.h
+    OUTPUT_NAME "{{projectName}}"
+)
+
+target_compile_definitions({{projectName}} PUBLIC DART_SHARED_LIB)
