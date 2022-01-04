@@ -201,7 +201,6 @@ public class MethodChannel {
      *     codec. For instance, if you are using {@link StandardMessageCodec} (default), please see
      *     its documentation on what types are supported.
      */
-    @UiThread
     void success(@Nullable Object result);
 
     /**
@@ -213,11 +212,9 @@ public class MethodChannel {
      *     supported by the codec. For instance, if you are using {@link StandardMessageCodec}
      *     (default), please see its documentation on what types are supported.
      */
-    @UiThread
     void error(String errorCode, @Nullable String errorMessage, @Nullable Object errorDetails);
 
     /** Handles a call to an unimplemented method. */
-    @UiThread
     void notImplemented();
   }
 
