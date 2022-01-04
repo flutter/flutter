@@ -17,3 +17,11 @@ group("dist") {
     "//flutter:dist",
   ]
 }
+
+group("archives") {
+  testonly = true
+
+  deps = [
+    "//flutter/build/archives:artifacts"
+  ]
+}
