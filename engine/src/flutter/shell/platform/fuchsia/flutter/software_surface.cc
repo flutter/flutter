@@ -8,6 +8,7 @@
 #include <lib/ui/scenic/cpp/commands.h>
 #include <zircon/status.h>
 #include <zircon/types.h>
+#include <zx/cpp/fidl.h>
 
 #include <cmath>
 
