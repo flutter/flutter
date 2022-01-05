@@ -108,7 +108,8 @@ class Engine final : public fuchsia::memorypressure::Watcher {
       SkISize size,
       std::shared_ptr<flutter::AssetManager> asset_manager,
       std::optional<const std::vector<std::string>> skp_names,
-      std::optional<std::function<void(uint32_t)>> completion_callback);
+      std::optional<std::function<void(uint32_t)>> completion_callback,
+      bool synchronous = false);
 
   void OnMainIsolateStart();
 
