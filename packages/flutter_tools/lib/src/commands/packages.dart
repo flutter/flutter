@@ -53,7 +53,7 @@ class PackagesCommand extends FlutterCommand {
   String get category => FlutterCommandCategory.project;
 
   @override
-  Future<FlutterCommandResult> runCommand() async => FlutterCommandResult.success();
+  Future<FlutterCommandResult> runCommand() async => FlutterCommandResult.fail();
 }
 
 class PackagesGetCommand extends FlutterCommand {
