@@ -14,9 +14,9 @@
 
 version: 1
 transforms:
-  # Changes made in
+  # Changes made in https://github.com/flutter/flutter/pull/96174
   - title: "Migrate 'useDeleteButtonTooltip' to 'deleteButtonTooltipMessage'"
-    date: 2021-12-24
+    date: 2022-01-05
     element:
       uris: [ 'material.dart' ]
       constructor: ''
@@ -39,9 +39,9 @@ transforms:
         kind: 'fragment'
         value: 'arguments[deleteButtonTooltipMessage]'
 
-  # Changes made in
+  # Changes made in https://github.com/flutter/flutter/pull/96174
   - title: "Migrate 'useDeleteButtonTooltip' to 'deleteButtonTooltipMessage'"
-    date: 2021-12-24
+    date: 2022-01-05
     element:
       uris: [ 'material.dart' ]
       constructor: ''
@@ -64,9 +64,9 @@ transforms:
         kind: 'fragment'
         value: 'arguments[deleteButtonTooltipMessage]'
 
-  # Changes made in
+  # Changes made in https://github.com/flutter/flutter/pull/96174
   - title: "Migrate 'useDeleteButtonTooltip' to 'deleteButtonTooltipMessage'"
-    date: 2021-12-24
+    date: 2022-01-05
     element:
       uris: [ 'material.dart' ]
       constructor: ''
@@ -89,9 +89,9 @@ transforms:
         kind: 'fragment'
         value: 'arguments[deleteButtonTooltipMessage]'
 
-  # Changes made in
+  # Changes made in https://github.com/flutter/flutter/pull/96174
   - title: "Migrate 'useDeleteButtonTooltip' to 'deleteButtonTooltipMessage'"
-    date: 2021-12-24
+    date: 2022-01-05
     element:
       uris: [ 'material.dart' ]
       field: 'useDeleteButtonTooltip'
@@ -100,9 +100,9 @@ transforms:
     - kind: 'rename'
       newName: 'deleteButtonTooltipMessage'
 
-  # Changes made in
+  # Changes made in https://github.com/flutter/flutter/pull/96174
   - title: "Migrate 'useDeleteButtonTooltip' to 'deleteButtonTooltipMessage'"
-    date: 2021-12-24
+    date: 2022-01-05
     element:
       uris: [ 'material.dart' ]
       field: 'useDeleteButtonTooltip'
@@ -111,9 +111,9 @@ transforms:
     - kind: 'rename'
       newName: 'deleteButtonTooltipMessage'
 
-  # Changes made in
+  # Changes made in https://github.com/flutter/flutter/pull/96174
   - title: "Migrate 'useDeleteButtonTooltip' to 'deleteButtonTooltipMessage'"
-    date: 2021-12-24
+    date: 2022-01-05
     element:
       uris: [ 'material.dart' ]
       field: 'useDeleteButtonTooltip'

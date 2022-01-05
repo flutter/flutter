@@ -531,21 +531,21 @@ void main() {
   RawScrollbar rawScrollbar = RawScrollbar(isAlwaysShown: true);
   nowShowing = rawScrollbar.isAlwaysShown;
 
-  // Changes made in
+  // Changes made in https://github.com/flutter/flutter/pull/96174
   Chip chip = Chip();
   chip = Chip(useDeleteButtonTooltip: false);
   chip = Chip(useDeleteButtonTooltip: true);
   chip = Chip(useDeleteButtonTooltip: false, deleteButtonTooltipMessage: 'Delete Tooltip');
   chip.useDeleteButtonTooltip;
 
-  // Changes made in
+  // Changes made in https://github.com/flutter/flutter/pull/96174
   InputChip inputChip = InputChip();
   inputChip = InputChip(useDeleteButtonTooltip: false);
   inputChip = InputChip(useDeleteButtonTooltip: true);
   inputChip = InputChip(useDeleteButtonTooltip: false, deleteButtonTooltipMessage: 'Delete Tooltip');
   inputChip.useDeleteButtonTooltip;
 
-  // Changes made in
+  // Changes made in https://github.com/flutter/flutter/pull/96174
   RawChip rawChip = Rawchip();
   rawChip = RawChip(useDeleteButtonTooltip: false);
   rawChip = RawChip(useDeleteButtonTooltip: true);
