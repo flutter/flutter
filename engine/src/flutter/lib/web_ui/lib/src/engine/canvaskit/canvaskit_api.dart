@@ -758,9 +758,14 @@ class SkColorType {
 class SkAnimatedImage {
   external int getFrameCount();
 
-  /// Returns duration in milliseconds.
   external int getRepetitionCount();
+
+  /// Returns duration in milliseconds.
+  external int currentFrameDuration();
+
+  /// Advances to the next frame and returns its duration in milliseconds.
   external int decodeNextFrame();
+
   external SkImage makeImageAtCurrentFrame();
   external int width();
   external int height();
