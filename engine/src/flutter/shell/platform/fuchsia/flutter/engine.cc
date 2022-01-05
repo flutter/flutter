@@ -860,26 +860,36 @@ void Engine::WarmupSkps(
     SkISize size,
     std::shared_ptr<flutter::AssetManager> asset_manager,
     std::optional<const std::vector<std::string>> skp_names,
-    std::optional<std::function<void(uint32_t)>> completion_callback) {
-  // We use a raw pointer here because we want to keep this alive until all gpu
-  // work is done and the callbacks skia takes for this are function pointers
-  // so we are unable to use a lambda that captures the smart pointer.
-  SurfaceProducerSurface* skp_warmup_surface =
-      surface_producer->ProduceOffscreenSurface(size).release();
-  if (!skp_warmup_surface) {
-    FML_LOG(ERROR) << "Failed to create offscreen warmup surface";
-    // Tell client that zero shaders were warmed up because warmup failed.
-    if (completion_callback.has_value() && completion_callback.value()) {
-      completion_callback.value()(0);
+    std::optional<std::function<void(uint32_t)>> maybe_completion_callback,
+    bool synchronous) {
+  // Wrap the optional validity checks up in a lambda to simplify the various
+  // callsites below
+  auto completion_callback = [maybe_completion_callback](uint32_t skp_count) {
+    if (maybe_completion_callback.has_value() &&
+        maybe_completion_callback.value()) {
+      maybe_completion_callback.value()(skp_count);
     }
-    return;
-  }
+  };
+
+  // We use this bizzare raw pointer to a smart pointer thing here because we
+  // want to keep the surface alive until all gpu work is done and the
+  // callbacks skia takes for this are function pointers so we are unable to
+  // use a lambda that captures the smart pointer. We need two levels of
+  // indirection because it needs to be the same across all invocations of the
+  // raster task lambda from a single invocation of WarmupSkps, but be
+  // different across different invocations of WarmupSkps (so we cant
+  // statically initialialize it in the lambda itself). Basically the result
+  // of a mashup of wierd call dynamics, multithreading, and lifecycle
+  // management with C style Skia callbacks.
+  std::unique_ptr<SurfaceProducerSurface>* skp_warmup_surface =
+      new std::unique_ptr<SurfaceProducerSurface>(nullptr);
 
   // tell concurrent task runner to deserialize all skps available from
   // the asset manager
-  concurrent_task_runner->PostTask([raster_task_runner, skp_warmup_surface,
-                                    surface_producer, asset_manager, skp_names,
-                                    completion_callback]() {
+  concurrent_task_runner->PostTask([raster_task_runner, size,
+                                    skp_warmup_surface, surface_producer,
+                                    asset_manager, skp_names,
+                                    completion_callback, synchronous]() {
     TRACE_DURATION("flutter", "DeserializeSkps");
     std::vector<std::unique_ptr<fml::Mapping>> skp_mappings;
     if (skp_names) {
@@ -893,6 +903,13 @@ void Engine::WarmupSkps(
       }
     } else {
       skp_mappings = asset_manager->GetAsMappings(".*\\.skp$", "shaders");
+    }
+
+    if (skp_mappings.size() == 0) {
+      FML_LOG(WARNING)
+          << "Engine::WarmupSkps got zero SKP mappings, returning early";
+      completion_callback(0);
+      return;
     }
 
     size_t total_size = 0;
@@ -920,20 +937,35 @@ void Engine::WarmupSkps(
 
       // Tell raster task runner to warmup have the compositor
       // context warm up the newly deserialized picture
-      raster_task_runner->PostTask([skp_warmup_surface, picture,
+      raster_task_runner->PostTask([picture, skp_warmup_surface, size,
                                     surface_producer, completion_callback, i,
-                                    count = skp_mappings.size()] {
+                                    count = skp_mappings.size(), synchronous] {
         TRACE_DURATION("flutter", "WarmupSkp");
-        skp_warmup_surface->GetSkiaSurface()->getCanvas()->drawPicture(picture);
+        if (*skp_warmup_surface == nullptr) {
+          skp_warmup_surface->reset(
+              surface_producer->ProduceOffscreenSurface(size).release());
+
+          if (*skp_warmup_surface == nullptr) {
+            FML_LOG(ERROR) << "Failed to create offscreen warmup surface";
+            // Tell client that zero shaders were warmed up because warmup
+            // failed.
+            completion_callback(0);
+            return;
+          }
+        }
+
+        // Do the actual warmup
+        (*skp_warmup_surface)
+            ->GetSkiaSurface()
+            ->getCanvas()
+            ->drawPicture(picture);
 
         if (i == count - 1) {
           // We call this here instead of inside fFinishedProc below because
-          // we want to unblock the dart animation code as soon as the raster
-          // thread is free to enque work, rather than waiting for the GPU work
-          // itself to finish.
-          if (completion_callback.has_value() && completion_callback.value()) {
-            completion_callback.value()(count);
-          }
+          // we want to unblock the dart animation code as soon as the
+          // raster thread is free to enque work, rather than waiting for
+          // the GPU work itself to finish.
+          completion_callback(count);
         }
 
         if (surface_producer->gr_context()) {
@@ -946,11 +978,12 @@ void Engine::WarmupSkps(
             struct GrFlushInfo flush_info;
             flush_info.fFinishedContext = skp_warmup_surface;
             flush_info.fFinishedProc = [](void* skp_warmup_surface) {
-              delete static_cast<SurfaceProducerSurface*>(skp_warmup_surface);
+              delete static_cast<std::unique_ptr<SurfaceProducerSurface>*>(
+                  skp_warmup_surface);
             };
 
             surface_producer->gr_context()->flush(flush_info);
-            surface_producer->gr_context()->submit();
+            surface_producer->gr_context()->submit(synchronous);
           }
         } else {
           if (i == count - 1) {
