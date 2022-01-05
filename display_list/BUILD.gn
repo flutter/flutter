@@ -2,6 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//flutter/testing/testing.gni")
+
 source_set("display_list") {
   sources = [
     "display_list.cc",
@@ -45,4 +47,41 @@ source_set("unittests") {
   ]
 
   public_deps = [ ":display_list" ]
+}
+
+fixtures_location("display_list_benchmarks_fixtures") {
+  assets_dir = "$target_gen_dir/"
+}
+
+if (enable_unittests) {
+  executable("display_list_benchmarks") {
+    testonly = true
+
+    sources = [
+      "display_list_benchmarks.cc",
+      "display_list_benchmarks.h",
+    ]
+
+    deps = [
+      ":display_list",
+      ":display_list_benchmarks_fixtures",
+      "//flutter/benchmarking",
+      "//flutter/common/graphics",
+      "//flutter/fml",
+      "//flutter/testing:skia",
+      "//flutter/testing:testing_lib",
+      "//third_party/dart/runtime:libdart_jit",  # for tracing
+      "//third_party/skia",
+    ]
+
+    if (!is_fuchsia) {
+      sources += [ "display_list_benchmarks_gl.cc" ]
+      deps += [ "//flutter/testing:opengl" ]
+    }
+
+    if (is_mac) {
+      sources += [ "display_list_benchmarks_metal.cc" ]
+      deps += [ "//flutter/testing:metal" ]
+    }
+  }
 }
