@@ -1,0 +1,64 @@
+import("//flutter/build/zip_bundle.gni")
+
+zip_bundle("artifacts") {
+  output = "$host_os-$target_cpu/artifacts.zip"
+  deps = [
+    "//flutter/flutter_frontend_server:frontend_server",
+    "//flutter/lib/snapshot:generate_snapshot_bin",
+    "//flutter/shell/testing:testing",
+  ]
+  files = [
+    {
+      source = "//third_party/icu/flutter/icudtl.dat"
+      destination = "icudtl.dat"
+    },
+    {
+      source = "$root_out_dir/gen/flutter/lib/snapshot/isolate_snapshot.bin"
+      destination = "isolate_snapshot.bin"
+    },
+    {
+      source = "$root_gen_dir/flutter/lib/snapshot/vm_isolate_snapshot.bin"
+      destination = "vm_isolate_snapshot.bin"
+    },
+    {
+      source = "$root_gen_dir/frontend_server.dart.snapshot"
+      destination = "frontend_server.dart.snapshot"
+    },
+  ]
+  if (host_os == "win") {
+    files += [
+      {
+        source = "$root_out_dir/flutter_tester.exe"
+        destination = "flutter_tester"
+      },
+    ]
+  } else {
+    files += [
+      {
+        source = "$root_out_dir/flutter_tester"
+        destination = "flutter_tester"
+      },
+    ]
+  }
+}
+
+if (host_os == "linux") {
+  group("linux-embedder") {
+    deps = [ "//flutter/shell/platform/embedder:linux-embedder-archive" ]
+  }
+}
+
+zip_bundle("flutter_patched_sdk") {
+  output = "flutter_patched_sdk.zip"
+  deps = [ "//flutter/lib/snapshot:strong_platform" ]
+  files = [
+    {
+      source = "$root_out_dir/flutter_patched_sdk/vm_outline_strong.dill"
+      destination = "vm_outline_strong.dill"
+    },
+    {
+      source = "$root_out_dir/flutter_patched_sdk/platform_strong.dill"
+      destination = "platform_strong.dill"
+    },
+  ]
+}

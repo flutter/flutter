@@ -4,6 +4,7 @@
 
 assert(is_linux)
 
+import("//flutter/build/zip_bundle.gni")
 import("//flutter/shell/platform/glfw/config.gni")
 import("//flutter/testing/testing.gni")
 
@@ -243,4 +244,29 @@ shared_library("flutter_linux_gtk") {
 copy("publish_headers_linux") {
   sources = _public_headers
   outputs = [ "$root_out_dir/flutter_linux/{{source_file_part}}" ]
+}
+
+zip_bundle("flutter_gtk") {
+  output = "$host_os-$target_cpu-flutter-gtk.zip"
+  deps = [
+    ":flutter_linux_gtk",
+    ":publish_headers_linux",
+  ]
+  sources = get_target_outputs(":publish_headers_linux")
+  tmp_files = []
+  foreach(source, sources) {
+    tmp_files += [
+      {
+        source = source
+        destination = rebase_path(source, "$root_build_dir")
+      },
+    ]
+  }
+  tmp_files += [
+    {
+      source = "$root_build_dir/libflutter_${host_os}_gtk.so"
+      destination = "libflutter_${host_os}_gtk.so"
+    },
+  ]
+  files = tmp_files
 }
