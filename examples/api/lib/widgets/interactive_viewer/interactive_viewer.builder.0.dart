@@ -117,13 +117,13 @@ class _TableBuilder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    int firstRow = (viewport.top / cellHeight).floor();
-    int lastRow = (viewport.bottom / cellHeight).ceil();
-    int firstCol = (viewport.left / cellWidth).floor();
-    int lastCol = (viewport.right / cellWidth).ceil();
+    final int firstRow = (viewport.top / cellHeight).floor();
+    final int lastRow = (viewport.bottom / cellHeight).ceil();
+    final int firstCol = (viewport.left / cellWidth).floor();
+    final int lastCol = (viewport.right / cellWidth).ceil();
 
-    int totalCells = (lastRow - firstRow) * (lastCol - firstCol);
-    debugPrint("Total cells: $totalCells");
+    final int totalCells = (lastRow - firstRow) * (lastCol - firstCol);
+    debugPrint('Total cells: $totalCells');
 
     return SizedBox(
         // Stack needs constraints, even though we then Clip.none outside of them.
