@@ -62,9 +62,6 @@ vars = {
 
   'ocmock_tag': 'v3.7.1',
 
-  # Build bot tooling for iOS
-  'ios_tools_revision': '69b7c1b160e7107a6a98d948363772dc9caea46f',
-
   # Download a prebuilt Dart SDK by default
   'download_dart_sdk': True,
 
@@ -147,9 +144,6 @@ deps = {
    #
    # As part of integrating with Fuchsia, we should eventually remove all these
    # Chromium-style dependencies.
-
-  'src/ios_tools':
-   Var('chromium_git') + '/chromium/src/ios.git' + '@' + Var('ios_tools_revision'),
 
   'src/third_party/icu':
    Var('chromium_git') + '/chromium/deps/icu.git' + '@' + '2b50fa94b07b601293d7c1f791e853bba8ffbb84',
