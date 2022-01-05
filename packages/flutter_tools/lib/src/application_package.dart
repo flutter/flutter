@@ -31,3 +31,12 @@ abstract class ApplicationPackage {
   @override
   String toString() => displayName ?? id;
 }
+
+/// An interface for application package that is created from prebuilt binary.
+abstract class PrebuiltApplicationPackage implements ApplicationPackage {
+  /// The application bundle of the prebuilt application.
+  ///
+  /// The same ApplicationPackage should be able to be recreated by passing
+  /// the file to [FlutterApplicationPackageFactory.getPackageForPlatform].
+  FileSystemEntity get applicationPackage;
+}
