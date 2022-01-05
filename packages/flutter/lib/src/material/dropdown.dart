@@ -1541,6 +1541,8 @@ class DropdownButtonFormField<T> extends FormField<T> {
     bool? enableFeedback,
     AlignmentGeometry alignment = AlignmentDirectional.centerStart,
     BorderRadius? borderRadius,
+    // When adding new arguments, consider adding similar arguments to
+    // DropdownButtonFormField.
   }) : assert(items == null || items.isEmpty || value == null ||
               items.where((DropdownMenuItem<T> item) {
                 return item.value == value;
