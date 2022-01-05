@@ -119,6 +119,9 @@ class DisplayListDispatcher final : public flutter::Dispatcher {
                                 SkScalar mwt) override;
 
   // |flutter::Dispatcher|
+  void transformReset() override;
+
+  // |flutter::Dispatcher|
   void clipRect(const SkRect& rect, SkClipOp clip_op, bool is_aa) override;
 
   // |flutter::Dispatcher|

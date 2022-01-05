@@ -50,6 +50,7 @@ enum class PixelFormat {
   kR8G8B8A8UNormIntSRGB,
   kB8G8R8A8UNormInt,
   kB8G8R8A8UNormIntSRGB,
+  kS8UInt,
   // Esoteric formats only used as render targets.
   kD32FloatS8UNormInt,
 };
@@ -166,6 +167,8 @@ constexpr size_t BytesPerPixelForPixelFormat(PixelFormat format) {
   switch (format) {
     case PixelFormat::kUnknown:
       return 0u;
+    case PixelFormat::kS8UInt:
+      return 1u;
     case PixelFormat::kR8G8B8A8UNormInt:
     case PixelFormat::kR8G8B8A8UNormIntSRGB:
     case PixelFormat::kB8G8R8A8UNormInt:

@@ -188,7 +188,7 @@ RenderTarget RenderTarget::CreateOffscreen(const Context& context,
                      static_cast<uint64_t>(TextureUsage::kShaderRead);
 
   TextureDescriptor stencil_tex0;
-  stencil_tex0.format = PixelFormat::kD32FloatS8UNormInt;
+  stencil_tex0.format = PixelFormat::kS8UInt;
   stencil_tex0.size = size;
   stencil_tex0.usage =
       static_cast<TextureUsageMask>(TextureUsage::kRenderTarget);

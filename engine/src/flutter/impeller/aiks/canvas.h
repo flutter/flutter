@@ -41,6 +41,8 @@ class Canvas {
 
   const Matrix& GetCurrentTransformation() const;
 
+  void ResetTransform();
+
   void Transform(const Matrix& xformation);
 
   void Concat(const Matrix& xformation);

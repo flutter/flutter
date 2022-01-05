@@ -29,6 +29,8 @@ constexpr MTLPixelFormat ToMTLPixelFormat(PixelFormat format) {
       return MTLPixelFormatDepth32Float_Stencil8;
     case PixelFormat::kR8G8B8A8UNormInt:
       return MTLPixelFormatRGBA8Unorm;
+    case PixelFormat::kS8UInt:
+      return MTLPixelFormatStencil8;
     case PixelFormat::kR8G8B8A8UNormIntSRGB:
       return MTLPixelFormatRGBA8Unorm_sRGB;
   }
