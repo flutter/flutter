@@ -3,6 +3,7 @@
 # found in the LICENSE file.
 
 import("//build/toolchain/clang.gni")
+import("//flutter/build/zip_bundle.gni")
 import("//flutter/common/config.gni")
 import("//flutter/shell/gpu/gpu.gni")
 import("//flutter/shell/platform/embedder/embedder.gni")
@@ -408,5 +409,25 @@ group("flutter_engine") {
     if (is_mac && !embedder_for_target) {
       deps += [ ":flutter_embedder_framework" ]
     }
+  }
+}
+
+if (host_os == "linux") {
+  zip_bundle("linux-embedder-archive") {
+    output = "${host_os}-${target_cpu}/${host_os}-${target_cpu}-embedder"
+    deps = [
+      "//flutter/shell/platform/embedder:copy_headers",
+      "//flutter/shell/platform/embedder:flutter_engine_library",
+    ]
+    files = [
+      {
+        source = "$root_out_dir/flutter_embedder.h"
+        destination = "flutter_embedder.h"
+      },
+      {
+        source = "$root_out_dir/libflutter_engine.so"
+        destination = "libflutter_engine.so"
+      },
+    ]
   }
 }
