@@ -354,6 +354,50 @@ Matcher coversSameAreaAs(Path expectedPath, { required Rect areaToCompare, int s
 /// ```
 /// {@end-tool}
 ///
+/// By default, the Flutter framework uses a font called 'Ahem' which shows
+/// squares instead of characters. To make golden tests more valuable, there
+/// is the possibility to render images using other more human-readable fonts.
+/// For example, this is how to load the 'Roboto' font for a golden test:
+///
+/// {@tool snippet}
+/// Using custom fonts in golden images
+/// ```dart
+/// testWidgets('Creating a golden image with a custom font', (tester) async {
+///   // Assuming the 'Roboto.ttf' file is declared in the pubspec.yaml file
+///   final font = rootBundle.load('path/to/font-file/Roboto.ttf');
+///
+///   final fontLoader = FontLoader('Roboto')..addFont(font);
+///   await fontLoader.load();
+///
+///   await tester.pumpWidget(const SomeWidget());
+///
+///   await expectLater(
+///     find.byType(SomeWidget),
+///     matchesGoldenFile('someWidget.png'),
+///   );
+/// });
+/// ```
+/// {@end-tool}
+///
+/// The above example loads the desired font only for that specific test. To load
+/// a font for any golden test in the app, the `FontLoader.load()` call could be
+/// moved in the `flutter_test_config.dart`. In this way, the font will always be
+/// loaded before a test:
+///
+/// {@tool snippet}
+/// Loading a custom font in flutter_test_config.dart
+/// ```dart
+/// Future<void> testExecutable(FutureOr<void> Function() testMain) async {
+///   setUpAll(() async {
+///     final fontLoader = FontLoader('SomeFont')..addFont(someFont);
+///     await fontLoader.load();
+///   });
+///
+///   await testMain();
+/// });
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [GoldenFileComparator], which acts as the backend for this matcher.
@@ -363,8 +407,7 @@ Matcher coversSameAreaAs(Path expectedPath, { required Rect areaToCompare, int s
 ///    verify that two different code paths create identical images.
 ///  * [flutter_test] for a discussion of test configurations, whereby callers
 ///    may swap out the backend for this matcher.
-AsyncMatcher
-matchesGoldenFile(Object key, {int? version}) {
+AsyncMatcher matchesGoldenFile(Object key, {int? version}) {
   if (key is Uri) {
     return MatchesGoldenFile(key, version);
   } else if (key is String) {
