@@ -109,8 +109,6 @@ KeyboardKeyHandler::KeyboardKeyHandler(EventDispatcher dispatch_event)
 
 KeyboardKeyHandler::~KeyboardKeyHandler() = default;
 
-void KeyboardKeyHandler::TextHook(const std::u16string& code_point) {}
-
 void KeyboardKeyHandler::AddDelegate(
     std::unique_ptr<KeyboardKeyHandlerDelegate> delegate) {
   delegates_.push_back(std::move(delegate));
@@ -289,23 +287,6 @@ void KeyboardKeyHandler::ResolvePendingEvent(uint64_t sequence_id,
   }
   // The pending event should always be found.
   assert(false);
-}
-
-void KeyboardKeyHandler::ComposeBeginHook() {
-  // Ignore.
-}
-
-void KeyboardKeyHandler::ComposeCommitHook() {
-  // Ignore.
-}
-
-void KeyboardKeyHandler::ComposeEndHook() {
-  // Ignore.
-}
-
-void KeyboardKeyHandler::ComposeChangeHook(const std::u16string& text,
-                                           int cursor_pos) {
-  // Ignore.
 }
 
 uint64_t KeyboardKeyHandler::ComputeEventHash(const PendingEvent& event) {

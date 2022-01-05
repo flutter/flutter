@@ -35,17 +35,13 @@ static constexpr int32_t kDefaultPointerDeviceId = 0;
 class SpyKeyboardKeyHandler : public KeyboardHandlerBase {
  public:
   SpyKeyboardKeyHandler(flutter::BinaryMessenger* messenger,
-                        KeyboardKeyHandler::EventDispatcher redispatch_event) {
-    real_implementation_ =
-        std::make_unique<KeyboardKeyHandler>(redispatch_event);
+                        KeyboardKeyHandler::EventDispatcher dispatch_event) {
+    real_implementation_ = std::make_unique<KeyboardKeyHandler>(dispatch_event);
     real_implementation_->AddDelegate(
         std::make_unique<KeyboardKeyChannelHandler>(messenger));
     ON_CALL(*this, KeyboardHook(_, _, _, _, _, _))
         .WillByDefault(Invoke(real_implementation_.get(),
                               &KeyboardKeyHandler::KeyboardHook));
-    ON_CALL(*this, TextHook(_))
-        .WillByDefault(
-            Invoke(real_implementation_.get(), &KeyboardKeyHandler::TextHook));
   }
 
   MOCK_METHOD6(KeyboardHook,
@@ -55,7 +51,6 @@ class SpyKeyboardKeyHandler : public KeyboardHandlerBase {
                     char32_t character,
                     bool extended,
                     bool was_down));
-  MOCK_METHOD1(TextHook, void(const std::u16string& text));
   MOCK_METHOD0(ComposeBeginHook, void());
   MOCK_METHOD0(ComposeCommitHook, void());
   MOCK_METHOD0(ComposeEndHook, void());
@@ -68,10 +63,11 @@ class SpyKeyboardKeyHandler : public KeyboardHandlerBase {
 
 // A text input plugin that can be spied on while it forwards calls to the real
 // text input plugin.
-class SpyTextInputPlugin : public KeyboardHandlerBase,
+class SpyTextInputPlugin : public TextInputPlugin,
                            public TextInputPluginDelegate {
  public:
-  SpyTextInputPlugin(flutter::BinaryMessenger* messenger) {
+  SpyTextInputPlugin(flutter::BinaryMessenger* messenger)
+      : TextInputPlugin(messenger, this) {
     real_implementation_ = std::make_unique<TextInputPlugin>(messenger, this);
     ON_CALL(*this, KeyboardHook(_, _, _, _, _, _))
         .WillByDefault(
@@ -82,7 +78,7 @@ class SpyTextInputPlugin : public KeyboardHandlerBase,
   }
 
   MOCK_METHOD6(KeyboardHook,
-               bool(int key,
+               void(int key,
                     int scancode,
                     int action,
                     char32_t character,
@@ -246,7 +242,7 @@ class TestFlutterWindowsView : public FlutterWindowsView {
   }
 
  protected:
-  void RegisterKeyboardHandlers(
+  std::unique_ptr<KeyboardHandlerBase> CreateKeyboardKeyHandler(
       flutter::BinaryMessenger* messenger,
       flutter::KeyboardKeyHandler::EventDispatcher dispatch_event,
       flutter::KeyboardKeyEmbedderHandler::GetKeyStateHandler get_key_state)
@@ -255,12 +251,16 @@ class TestFlutterWindowsView : public FlutterWindowsView {
         messenger, [this](UINT cInputs, LPINPUT pInputs, int cbSize) -> UINT {
           return this->SendInput(cInputs, pInputs, cbSize);
         });
-    auto spy_text_input_plugin =
-        std::make_unique<SpyTextInputPlugin>(messenger);
     key_event_handler = spy_key_event_handler.get();
-    text_input_plugin = spy_text_input_plugin.get();
-    AddKeyboardHandler(std::move(spy_key_event_handler));
-    AddKeyboardHandler(std::move(spy_text_input_plugin));
+    return spy_key_event_handler;
+  }
+
+  std::unique_ptr<TextInputPlugin> CreateTextInputPlugin(
+      flutter::BinaryMessenger* messenger) override {
+    auto spy_key_event_handler =
+        std::make_unique<SpyTextInputPlugin>(messenger);
+    text_input_plugin = spy_key_event_handler.get();
+    return spy_key_event_handler;
   }
 
  private:
@@ -357,7 +357,6 @@ TEST(FlutterWindowWin32Test, NonPrintableKeyDownPropagation) {
                 KeyboardHook(_, _, _, _, _, _))
         .Times(1)
         .RetiresOnSaturation();
-    EXPECT_CALL(*flutter_windows_view.key_event_handler, TextHook(_)).Times(0);
     EXPECT_CALL(*flutter_windows_view.text_input_plugin, TextHook(_)).Times(0);
     win32window.InjectMessages(1,
                                Win32Message{WM_KEYDOWN, virtual_key, lparam});
@@ -410,7 +409,6 @@ TEST(FlutterWindowWin32Test, SystemKeyDownPropagation) {
                 KeyboardHook(_, _, _, _, _, _))
         .Times(1)
         .RetiresOnSaturation();
-    EXPECT_CALL(*flutter_windows_view.key_event_handler, TextHook(_)).Times(0);
     EXPECT_CALL(*flutter_windows_view.text_input_plugin, TextHook(_)).Times(0);
     win32window.InjectMessages(
         1, Win32Message{WM_SYSKEYDOWN, virtual_key, lparam, kWmResultDefault});
@@ -436,7 +434,7 @@ TEST(FlutterWindowWin32Test, SystemKeyDownPropagation) {
 // differ from non-printable characters in that they follow a different code
 // path in the WndProc (HandleMessage), producing a follow-on WM_CHAR event.
 TEST(FlutterWindowWin32Test, CharKeyDownPropagation) {
-  // ::testing::InSequence in_sequence;
+  ::testing::InSequence in_sequence;
 
   constexpr WPARAM virtual_key = 65;  // The "A" key, which produces a character
   constexpr WPARAM scan_code = 30;
@@ -463,9 +461,6 @@ TEST(FlutterWindowWin32Test, CharKeyDownPropagation) {
                 KeyboardHook(_, _, _, _, _, _))
         .Times(1)
         .RetiresOnSaturation();
-    EXPECT_CALL(*flutter_windows_view.key_event_handler, TextHook(_))
-        .Times(1)
-        .RetiresOnSaturation();
     EXPECT_CALL(*flutter_windows_view.text_input_plugin, TextHook(_))
         .Times(1)
         .RetiresOnSaturation();
@@ -485,7 +480,6 @@ TEST(FlutterWindowWin32Test, CharKeyDownPropagation) {
     EXPECT_CALL(*flutter_windows_view.text_input_plugin,
                 KeyboardHook(_, _, _, _, _, _))
         .Times(0);
-    EXPECT_CALL(*flutter_windows_view.key_event_handler, TextHook(_)).Times(0);
     EXPECT_CALL(*flutter_windows_view.text_input_plugin, TextHook(_)).Times(0);
     win32window.InjectMessages(2, Win32Message{WM_KEYDOWN, virtual_key, lparam},
                                Win32Message{WM_CHAR, virtual_key, lparam});
@@ -521,7 +515,6 @@ TEST(FlutterWindowWin32Test, ModifierKeyDownPropagation) {
                 KeyboardHook(_, _, _, _, _, _))
         .Times(1)
         .RetiresOnSaturation();
-    EXPECT_CALL(*flutter_windows_view.key_event_handler, TextHook(_)).Times(0);
     EXPECT_CALL(*flutter_windows_view.text_input_plugin, TextHook(_)).Times(0);
     EXPECT_EQ(win32window.InjectWindowMessage(WM_KEYDOWN, virtual_key, lparam),
               0);

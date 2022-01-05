@@ -29,35 +29,6 @@ class KeyboardHandlerBase {
                             char32_t character,
                             bool extended,
                             bool was_down) = 0;
-
-  // A function for hooking into Unicode text input.
-  virtual void TextHook(const std::u16string& text) = 0;
-
-  // Handler for IME compose begin events.
-  //
-  // Triggered when the user begins editing composing text using a multi-step
-  // input method such as in CJK text input.
-  virtual void ComposeBeginHook() = 0;
-
-  // Handler for IME compose commit events.
-  //
-  // Triggered when the user commits the current composing text while using a
-  // multi-step input method such as in CJK text input. Composing continues with
-  // the next keypress.
-  virtual void ComposeCommitHook() = 0;
-
-  // Handler for IME compose end events.
-  //
-  // Triggered when the user ends editing composing text while using a
-  // multi-step input method such as in CJK text input.
-  virtual void ComposeEndHook() = 0;
-
-  // Handler for IME compose change events.
-  //
-  // Triggered when the user edits the composing text while using a multi-step
-  // input method such as in CJK text input.
-  virtual void ComposeChangeHook(const std::u16string& text,
-                                 int cursor_pos) = 0;
 };
 
 }  // namespace flutter

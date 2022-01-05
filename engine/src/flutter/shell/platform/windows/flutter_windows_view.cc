@@ -52,14 +52,14 @@ void FlutterWindowsView::SetEngine(
   engine_->SetView(this);
 
   internal_plugin_registrar_ =
-      std::make_unique<flutter::PluginRegistrar>(engine_->GetRegistrar());
+      std::make_unique<PluginRegistrar>(engine_->GetRegistrar());
 
   // Set up the system channel handlers.
   auto internal_plugin_messenger = internal_plugin_registrar_->messenger();
   InitializeKeyboard();
   platform_handler_ = PlatformHandler::Create(internal_plugin_messenger, this);
-  cursor_handler_ = std::make_unique<flutter::CursorHandler>(
-      internal_plugin_messenger, binding_handler_.get());
+  cursor_handler_ = std::make_unique<CursorHandler>(internal_plugin_messenger,
+                                                    binding_handler_.get());
 
   PhysicalWindowBounds bounds = binding_handler_->GetPhysicalWindowBounds();
 
@@ -67,10 +67,11 @@ void FlutterWindowsView::SetEngine(
                     binding_handler_->GetDpiScale());
 }
 
-void FlutterWindowsView::RegisterKeyboardHandlers(
-    flutter::BinaryMessenger* messenger,
-    flutter::KeyboardKeyHandler::EventDispatcher dispatch_event,
-    flutter::KeyboardKeyEmbedderHandler::GetKeyStateHandler get_key_state) {
+std::unique_ptr<KeyboardHandlerBase>
+FlutterWindowsView::CreateKeyboardKeyHandler(
+    BinaryMessenger* messenger,
+    KeyboardKeyHandler::EventDispatcher dispatch_event,
+    KeyboardKeyEmbedderHandler::GetKeyStateHandler get_key_state) {
   // There must be only one handler that receives |SendInput|, i.e. only one
   // handler that might redispatch events. (See the documentation of
   // |KeyboardKeyHandler| to learn about redispatching.)
@@ -79,24 +80,23 @@ void FlutterWindowsView::RegisterKeyboardHandlers(
   // of the event. In order to allow the same real event in the future, the
   // handler is "toggled" when events pass through, therefore the redispatching
   // algorithm does not allow more than 1 handler that takes |SendInput|.
-  auto key_handler =
-      std::make_unique<flutter::KeyboardKeyHandler>(dispatch_event);
-  key_handler->AddDelegate(std::make_unique<KeyboardKeyEmbedderHandler>(
-      [this](const FlutterKeyEvent& event, FlutterKeyEventCallback callback,
-             void* user_data) {
-        return engine_->SendKeyEvent(event, callback, user_data);
-      },
-      get_key_state));
-  key_handler->AddDelegate(
+  auto keyboard_key_handler =
+      std::make_unique<KeyboardKeyHandler>(dispatch_event);
+  keyboard_key_handler->AddDelegate(
+      std::make_unique<KeyboardKeyEmbedderHandler>(
+          [this](const FlutterKeyEvent& event, FlutterKeyEventCallback callback,
+                 void* user_data) {
+            return engine_->SendKeyEvent(event, callback, user_data);
+          },
+          get_key_state));
+  keyboard_key_handler->AddDelegate(
       std::make_unique<KeyboardKeyChannelHandler>(messenger));
-  AddKeyboardHandler(std::move(key_handler));
-  AddKeyboardHandler(
-      std::make_unique<flutter::TextInputPlugin>(messenger, this));
+  return keyboard_key_handler;
 }
 
-void FlutterWindowsView::AddKeyboardHandler(
-    std::unique_ptr<flutter::KeyboardHandlerBase> handler) {
-  keyboard_handlers_.push_back(std::move(handler));
+std::unique_ptr<TextInputPlugin> FlutterWindowsView::CreateTextInputPlugin(
+    BinaryMessenger* messenger) {
+  return std::make_unique<TextInputPlugin>(messenger, this);
 }
 
 uint32_t FlutterWindowsView::GetFrameBufferId(size_t width, size_t height) {
@@ -129,7 +129,6 @@ void FlutterWindowsView::ForceRedraw() {
 }
 
 void FlutterWindowsView::OnPreEngineRestart() {
-  keyboard_handlers_.clear();
   InitializeKeyboard();
 }
 
@@ -268,16 +267,16 @@ void FlutterWindowsView::OnResetImeComposing() {
 void FlutterWindowsView::InitializeKeyboard() {
   auto internal_plugin_messenger = internal_plugin_registrar_->messenger();
 #ifdef WINUWP
-  flutter::KeyboardKeyHandler::EventDispatcher dispatch_event = nullptr;
-  flutter::KeyboardKeyEmbedderHandler::GetKeyStateHandler get_key_state =
-      nullptr;
+  KeyboardKeyHandler::EventDispatcher dispatch_event = nullptr;
+  KeyboardKeyEmbedderHandler::GetKeyStateHandler get_key_state = nullptr;
 #else
-  flutter::KeyboardKeyHandler::EventDispatcher dispatch_event = SendInput;
-  flutter::KeyboardKeyEmbedderHandler::GetKeyStateHandler get_key_state =
-      GetKeyState;
+  KeyboardKeyHandler::EventDispatcher dispatch_event = SendInput;
+  KeyboardKeyEmbedderHandler::GetKeyStateHandler get_key_state = GetKeyState;
 #endif
-  RegisterKeyboardHandlers(internal_plugin_messenger, dispatch_event,
-                           get_key_state);
+  keyboard_key_handler_ = std::move(CreateKeyboardKeyHandler(
+      internal_plugin_messenger, dispatch_event, get_key_state));
+  text_input_plugin_ =
+      std::move(CreateTextInputPlugin(internal_plugin_messenger));
 }
 
 // Sends new size  information to FlutterEngine.
@@ -381,9 +380,7 @@ void FlutterWindowsView::SendPointerLeave(PointerState* state) {
 }
 
 void FlutterWindowsView::SendText(const std::u16string& text) {
-  for (const auto& handler : keyboard_handlers_) {
-    handler->TextHook(text);
-  }
+  text_input_plugin_->TextHook(text);
 }
 
 bool FlutterWindowsView::SendKey(int key,
@@ -392,39 +389,32 @@ bool FlutterWindowsView::SendKey(int key,
                                  char32_t character,
                                  bool extended,
                                  bool was_down) {
-  for (const auto& handler : keyboard_handlers_) {
-    if (handler->KeyboardHook(key, scancode, action, character, extended,
-                              was_down)) {
-      // key event was handled, so don't send to other handlers.
-      return true;
-    }
+  if (keyboard_key_handler_->KeyboardHook(key, scancode, action, character,
+                                          extended, was_down)) {
+    return true;
   }
+
+  text_input_plugin_->KeyboardHook(key, scancode, action, character, extended,
+                                   was_down);
+
   return false;
 }
 
 void FlutterWindowsView::SendComposeBegin() {
-  for (const auto& handler : keyboard_handlers_) {
-    handler->ComposeBeginHook();
-  }
+  text_input_plugin_->ComposeBeginHook();
 }
 
 void FlutterWindowsView::SendComposeCommit() {
-  for (const auto& handler : keyboard_handlers_) {
-    handler->ComposeCommitHook();
-  }
+  text_input_plugin_->ComposeCommitHook();
 }
 
 void FlutterWindowsView::SendComposeEnd() {
-  for (const auto& handler : keyboard_handlers_) {
-    handler->ComposeEndHook();
-  }
+  text_input_plugin_->ComposeEndHook();
 }
 
 void FlutterWindowsView::SendComposeChange(const std::u16string& text,
                                            int cursor_pos) {
-  for (const auto& handler : keyboard_handlers_) {
-    handler->ComposeChangeHook(text, cursor_pos);
-  }
+  text_input_plugin_->ComposeChangeHook(text, cursor_pos);
 }
 
 void FlutterWindowsView::SendScroll(double x,

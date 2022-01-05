@@ -96,21 +96,6 @@ class KeyboardKeyHandler : public KeyboardHandlerBase {
                     bool extended,
                     bool was_down) override;
 
-  // |KeyboardHandlerBase|
-  void TextHook(const std::u16string& text) override;
-
-  // |KeyboardHandlerBase|
-  void ComposeBeginHook() override;
-
-  // |KeyboardHandlerBase|
-  void ComposeCommitHook() override;
-
-  // |KeyboardHandlerBase|
-  void ComposeEndHook() override;
-
-  // |KeyboardHandlerBase|
-  void ComposeChangeHook(const std::u16string& text, int cursor_pos) override;
-
  protected:
   size_t RedispatchedCount();
 
