@@ -59,7 +59,7 @@ class BuildCommand extends FlutterCommand {
   String get category => FlutterCommandCategory.project;
 
   @override
-  Future<FlutterCommandResult> runCommand() async => FlutterCommandResult.success();
+  Future<FlutterCommandResult> runCommand() async => FlutterCommandResult.fail();
 }
 
 abstract class BuildSubCommand extends FlutterCommand {

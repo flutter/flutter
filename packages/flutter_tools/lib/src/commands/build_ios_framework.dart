@@ -29,7 +29,8 @@ import 'build.dart';
 /// managers.
 class BuildIOSFrameworkCommand extends BuildSubCommand {
   BuildIOSFrameworkCommand({
-    FlutterVersion? flutterVersion, // Instantiating FlutterVersion kicks off networking, so delay until it's needed, but allow test injection.
+    // Instantiating FlutterVersion kicks off networking, so delay until it's needed, but allow test injection.
+    @visibleForTesting FlutterVersion? flutterVersion,
     required BuildSystem buildSystem,
     required bool verboseHelp,
     Cache? cache,
