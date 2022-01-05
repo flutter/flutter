@@ -597,7 +597,7 @@ dependencies:
 
       testUsingContext(
         '.flutter-plugins-dependencies indicates native build inclusion', () async {
-        final Directory pluginA = createPlugin(
+        createPlugin(
           name: 'plugin-a',
           platforms: const <String, _PluginPlatformInfo>{
             // Native-only; should include native build.
