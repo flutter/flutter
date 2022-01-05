@@ -1,4 +1,4 @@
-Signature: a0eadc13712653dd4dd7a5006308f533
+Signature: 760c0a6b90e3c1793d24ced344e1d9e2
 
 UNUSED LICENSES:
 
@@ -4118,7 +4118,6 @@ FILE: ../../../third_party/skia/src/sksl/ir/SkSLFunctionPrototype.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLInlineMarker.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLPrefixExpression.cpp
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLStructDefinition.h
-FILE: ../../../third_party/skia/src/sksl/ir/SkSLSymbolAlias.h
 FILE: ../../../third_party/skia/src/utils/SkCustomTypeface.cpp
 ----------------------------------------------------------------------------------------------------
 Copyright 2020 Google LLC
