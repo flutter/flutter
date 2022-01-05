@@ -109,7 +109,7 @@ struct PipelineBuilder {
       StencilAttachmentDescriptor stencil0;
       stencil0.stencil_compare = CompareFunction::kLessEqual;
       desc.SetStencilAttachmentDescriptors(stencil0);
-      desc.SetStencilPixelFormat(PixelFormat::kD32FloatS8UNormInt);
+      desc.SetStencilPixelFormat(PixelFormat::kS8UInt);
     }
 
     return true;

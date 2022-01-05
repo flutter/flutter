@@ -206,6 +206,11 @@ void DisplayListDispatcher::transformFullPerspective(SkScalar mxx,
   canvas_.Transform(xformation);
 }
 
+// |flutter::Dispatcher|
+void DisplayListDispatcher::transformReset() {
+  canvas_.ResetTransform();
+}
+
 static Rect ToRect(const SkRect& rect) {
   return Rect::MakeLTRB(rect.fLeft, rect.fTop, rect.fRight, rect.fBottom);
 }

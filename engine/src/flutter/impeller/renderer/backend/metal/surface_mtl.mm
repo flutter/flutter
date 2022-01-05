@@ -61,7 +61,7 @@ std::unique_ptr<Surface> SurfaceMTL::WrapCurrentMetalLayerDrawable(
   TextureDescriptor stencil0_tex;
   stencil0_tex.type = TextureType::k2DMultisample;
   stencil0_tex.sample_count = SampleCount::kCount4;
-  stencil0_tex.format = PixelFormat::kD32FloatS8UNormInt;
+  stencil0_tex.format = PixelFormat::kS8UInt;
   stencil0_tex.size = msaa_tex_desc.size;
   stencil0_tex.usage =
       static_cast<TextureUsageMask>(TextureUsage::kRenderTarget);
