@@ -37,6 +37,9 @@ dartdevc:
     _isolate_helper:
       uri: "../dart-sdk/lib/_internal/js_dev_runtime/private/isolate_helper.dart"
 
+    _js_annotations:
+      uri: "../dart-sdk/lib/js/_js_annotations.dart"
+
     _js_helper:
       uri: "../dart-sdk/lib/_internal/js_dev_runtime/private/js_helper.dart"
 
@@ -103,9 +106,6 @@ dartdevc:
     js_util:
       uri: "../dart-sdk/lib/js_util/js_util.dart"
 
-    _js_annotations:
-      uri: "../dart-sdk/lib/js/_js_annotations.dart"
-
     svg:
       uri: "../dart-sdk/lib/svg/dart2js/svg_dart2js.dart"
 
@@ -114,9 +114,6 @@ dartdevc:
 
     web_gl:
       uri: "../dart-sdk/lib/web_gl/dart2js/web_gl_dart2js.dart"
-
-    web_sql:
-      uri: "../dart-sdk/lib/web_sql/dart2js/web_sql_dart2js.dart"
 
     ui:
       uri: "lib/ui/ui.dart"
@@ -166,7 +163,7 @@ dart2js:
 
     io:
       uri: "../dart-sdk/lib/io/io.dart"
-      patches: "io_patch.dart"
+      patches: "../dart-sdk/lib/_internal/js_runtime/lib/io_patch.dart"
       supported: false
 
     isolate:
@@ -176,7 +173,7 @@ dart2js:
 
     js:
       uri: "../dart-sdk/lib/js/js.dart"
-      patches: "../dart-sdk/lib/_internal/js_dev_runtime/patch/js_patch.dart"
+      patches: "../dart-sdk/lib/_internal/js_runtime/lib/js_patch.dart"
 
     _js:
       uri: "../dart-sdk/lib/js/_js.dart"
@@ -208,8 +205,8 @@ dart2js:
     web_gl:
       uri: "../dart-sdk/lib/web_gl/dart2js/web_gl_dart2js.dart"
 
-    web_sql:
-      uri: "../dart-sdk/lib/web_sql/dart2js/web_sql_dart2js.dart"
+    _dart2js_runtime_metrics:
+      uri: "../dart-sdk/lib/_internal/js_runtime/lib/dart2js_runtime_metrics.dart"
 
     _internal:
       uri: "../dart-sdk/lib/internal/internal.dart"
@@ -217,6 +214,12 @@ dart2js:
 
     _js_helper:
       uri: "../dart-sdk/lib/_internal/js_runtime/lib/js_helper.dart"
+
+    _late_helper:
+      uri: "../dart-sdk/lib/_internal/js_runtime/lib/late_helper.dart"
+
+    _rti:
+      uri: "../dart-sdk/lib/_internal/js_runtime/lib/rti.dart"
 
     _interceptors:
       uri: "../dart-sdk/lib/_internal/js_runtime/lib/interceptors.dart"
@@ -235,6 +238,9 @@ dart2js:
 
     _async_await_error_codes:
       uri: "../dart-sdk/lib/_internal/js_runtime/lib/shared/async_await_error_codes.dart"
+
+    _recipe_syntax:
+      uri: "../dart-sdk/lib/_internal/js_runtime/lib/shared/recipe_syntax.dart"
 
     _metadata:
       uri: "../dart-sdk/lib/html/html_common/metadata.dart"
