@@ -224,7 +224,7 @@ TEST_F(RendererTest, CanRenderToTexture) {
     stencil0.store_action = StoreAction::kDontCare;
     TextureDescriptor stencil_texture_desc;
     stencil_texture_desc.size = texture_descriptor.size;
-    stencil_texture_desc.format = PixelFormat::kD32FloatS8UNormInt;
+    stencil_texture_desc.format = PixelFormat::kS8UInt;
     stencil_texture_desc.usage =
         static_cast<TextureUsageMask>(TextureUsage::kRenderTarget);
     stencil0.texture = context->GetPermanentsAllocator()->CreateTexture(
