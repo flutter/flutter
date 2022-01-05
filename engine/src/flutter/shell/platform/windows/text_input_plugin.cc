@@ -58,14 +58,14 @@ void TextInputPlugin::TextHook(const std::u16string& text) {
   SendStateUpdate(*active_model_);
 }
 
-bool TextInputPlugin::KeyboardHook(int key,
+void TextInputPlugin::KeyboardHook(int key,
                                    int scancode,
                                    int action,
                                    char32_t character,
                                    bool extended,
                                    bool was_down) {
   if (active_model_ == nullptr) {
-    return false;
+    return;
   }
   if (action == WM_KEYDOWN || action == WM_SYSKEYDOWN) {
     // Most editing keys (arrow keys, backspace, delete, etc.) are handled in
@@ -78,7 +78,6 @@ bool TextInputPlugin::KeyboardHook(int key,
         break;
     }
   }
-  return false;
 }
 
 TextInputPlugin::TextInputPlugin(flutter::BinaryMessenger* messenger,

@@ -190,11 +190,11 @@ class TestFlutterWindowsView : public FlutterWindowsView {
   }
 
  protected:
-  void RegisterKeyboardHandlers(
+  std::unique_ptr<KeyboardHandlerBase> CreateKeyboardKeyHandler(
       BinaryMessenger* messenger,
       KeyboardKeyHandler::EventDispatcher dispatch_event,
       KeyboardKeyEmbedderHandler::GetKeyStateHandler get_key_state) override {
-    FlutterWindowsView::RegisterKeyboardHandlers(
+    return FlutterWindowsView::CreateKeyboardKeyHandler(
         messenger,
         [this](UINT cInputs, LPINPUT pInputs, int cbSize) -> UINT {
           return this->SendInput(cInputs, pInputs, cbSize);

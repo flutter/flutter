@@ -22,9 +22,9 @@
 #include "flutter/shell/platform/windows/flutter_windows_engine.h"
 #include "flutter/shell/platform/windows/keyboard_handler_base.h"
 #include "flutter/shell/platform/windows/keyboard_key_embedder_handler.h"
-#include "flutter/shell/platform/windows/keyboard_key_handler.h"
 #include "flutter/shell/platform/windows/platform_handler.h"
 #include "flutter/shell/platform/windows/public/flutter_windows.h"
+#include "flutter/shell/platform/windows/text_input_plugin.h"
 #include "flutter/shell/platform/windows/text_input_plugin_delegate.h"
 #include "flutter/shell/platform/windows/window_binding_handler.h"
 #include "flutter/shell/platform/windows/window_binding_handler_delegate.h"
@@ -171,20 +171,20 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate,
   void OnResetImeComposing() override;
 
  protected:
-  // Called to create the keyboard hook handlers.
+  // Called to create keyboard key handler.
   //
   // The provided |dispatch_event| is where to inject events into the system,
   // while |get_key_state| is where to acquire keyboard states. They will be
   // the system APIs in production classes, but might be replaced with mock
   // functions in unit tests.
-  virtual void RegisterKeyboardHandlers(
-      flutter::BinaryMessenger* messenger,
-      flutter::KeyboardKeyHandler::EventDispatcher dispatch_event,
-      flutter::KeyboardKeyEmbedderHandler::GetKeyStateHandler get_key_state);
+  virtual std::unique_ptr<KeyboardHandlerBase> CreateKeyboardKeyHandler(
+      BinaryMessenger* messenger,
+      KeyboardKeyHandler::EventDispatcher dispatch_event,
+      KeyboardKeyEmbedderHandler::GetKeyStateHandler get_key_state);
 
-  // Used by RegisterKeyboardHandlers to add a new keyboard hook handler.
-  void AddKeyboardHandler(
-      std::unique_ptr<flutter::KeyboardHandlerBase> handler);
+  // Called to create text input plugin.
+  virtual std::unique_ptr<TextInputPlugin> CreateTextInputPlugin(
+      BinaryMessenger* messenger);
 
  private:
   // Struct holding the state of an individual pointer. The engine doesn't keep
@@ -322,19 +322,22 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate,
   std::unordered_map<int32_t, std::unique_ptr<PointerState>> pointer_states_;
 
   // The plugin registrar managing internal plugins.
-  std::unique_ptr<flutter::PluginRegistrar> internal_plugin_registrar_;
+  std::unique_ptr<PluginRegistrar> internal_plugin_registrar_;
 
   // Handlers for keyboard events from Windows.
-  std::vector<std::unique_ptr<flutter::KeyboardHandlerBase>> keyboard_handlers_;
+  std::unique_ptr<KeyboardHandlerBase> keyboard_key_handler_;
+
+  // Handlers for text events from Windows.
+  std::unique_ptr<TextInputPlugin> text_input_plugin_;
 
   // Handler for the flutter/platform channel.
-  std::unique_ptr<flutter::PlatformHandler> platform_handler_;
+  std::unique_ptr<PlatformHandler> platform_handler_;
 
   // Handler for cursor events.
-  std::unique_ptr<flutter::CursorHandler> cursor_handler_;
+  std::unique_ptr<CursorHandler> cursor_handler_;
 
   // Currently configured WindowBindingHandler for view.
-  std::unique_ptr<flutter::WindowBindingHandler> binding_handler_;
+  std::unique_ptr<WindowBindingHandler> binding_handler_;
 
   // Resize events are synchronized using this mutex and the corresponding
   // condition variable.
