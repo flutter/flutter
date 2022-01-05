@@ -219,16 +219,22 @@ html.CanvasElement? tryCreateCanvasElement(int width, int height) {
 @JS('window.ImageDecoder')
 external Object? get _imageDecoderConstructor;
 
-/// Hides `image_web_codecs.dart` behind a flag.
-// TODO(yjbanov): https://github.com/flutter/flutter/issues/95277
-const bool _imageDecoderExperimentEnabled = bool.fromEnvironment(
-  'EXPERIMENTAL_IMAGE_DECODER',
-  defaultValue: false,
+/// Environment variable that allows the developer to opt out of using browser's
+/// `ImageDecoder` API, and use the WASM codecs bundled with CanvasKit.
+///
+/// While all reported severe issues with `ImageDecoder` have been fixed, this
+/// API remains relatively new. This option will allow developers to opt out of
+/// it, if they hit a severe bug that we did not anticipate.
+// TODO(yjbanov): remove this flag once we're fully confident in the new API.
+//                https://github.com/flutter/flutter/issues/95277
+const bool _browserImageDecodingEnabled = bool.fromEnvironment(
+  'BROWSER_IMAGE_DECODING_ENABLED',
+  defaultValue: true,
 );
 
 /// Whether the current browser supports `ImageDecoder`.
 bool browserSupportsImageDecoder =
-  _imageDecoderExperimentEnabled &&
+  _browserImageDecodingEnabled &&
   _imageDecoderConstructor != null &&
   browserEngine == BrowserEngine.blink;
 
