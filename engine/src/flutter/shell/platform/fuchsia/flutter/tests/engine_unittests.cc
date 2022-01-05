@@ -66,10 +66,11 @@ class EngineTest : public ::testing::Test {
       uint64_t height,
       std::shared_ptr<flutter::AssetManager> asset_manager,
       std::optional<const std::vector<std::string>> skp_names,
-      std::optional<std::function<void(uint32_t)>> completion_callback) {
+      std::optional<std::function<void(uint32_t)>> completion_callback,
+      bool synchronous = true) {
     // Have to create a message loop so default async dispatcher gets set,
     // otherwise we segfault creating the VulkanSurfaceProducer
-    auto loop = fml::MessageLoopImpl::Create();
+    loop_ = fml::MessageLoopImpl::Create();
 
     context_ = sys::ComponentContext::CreateAndServeOutgoingDirectory();
     scenic_ = context_->svc()->Connect<fuchsia::ui::scenic::Scenic>();
@@ -79,10 +80,12 @@ class EngineTest : public ::testing::Test {
 
     Engine::WarmupSkps(&concurrent_task_runner_, &raster_task_runner_,
                        surface_producer_, SkISize::Make(width, height),
-                       asset_manager, std::nullopt, std::nullopt);
+                       asset_manager, skp_names, completion_callback,
+                       synchronous);
   }
 
  protected:
+  fml::RefPtr<fml::MessageLoopImpl> loop_;
   MockTaskRunner concurrent_task_runner_;
   MockTaskRunner raster_task_runner_;
   std::shared_ptr<VulkanSurfaceProducer> surface_producer_;
@@ -163,7 +166,7 @@ TEST_F(EngineTest, SkpWarmup) {
       std::make_unique<DirectoryAssetBundle>(std::move(asset_dir_fd), false));
 
   WarmupSkps(draw_size.width(), draw_size.height(), asset_manager, std::nullopt,
-             std::nullopt);
+             [](uint32_t count) { EXPECT_EQ(1u, count); });
   concurrent_task_runner_.Run();
   raster_task_runner_.Run();
 
@@ -196,8 +199,9 @@ TEST_F(EngineTest, SkpWarmupAsync) {
   fml::ScopedTemporaryDirectory asset_dir;
   fml::UniqueFD asset_dir_fd = fml::OpenDirectory(
       asset_dir.path().c_str(), false, fml::FilePermission::kRead);
-  fml::UniqueFD subdir_fd = fml::OpenDirectory(asset_dir_fd, "shaders", true,
-                                               fml::FilePermission::kReadWrite);
+  std::string subdir_name = "shaders";
+  fml::UniqueFD subdir_fd = fml::OpenDirectory(
+      asset_dir_fd, subdir_name.c_str(), true, fml::FilePermission::kReadWrite);
   std::string skp_name = "test.skp";
 
   bool success = fml::WriteAtomically(subdir_fd, skp_name.c_str(), mapping);
@@ -207,7 +211,7 @@ TEST_F(EngineTest, SkpWarmupAsync) {
   asset_manager->PushBack(
       std::make_unique<DirectoryAssetBundle>(std::move(asset_dir_fd), false));
 
-  std::vector<std::string> skp_names = {skp_name};
+  std::vector<std::string> skp_names = {subdir_name + "/" + skp_name};
 
   WarmupSkps(draw_size.width(), draw_size.height(), asset_manager, skp_names,
              [](uint32_t count) { EXPECT_EQ(1u, count); });
