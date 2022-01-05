@@ -94,9 +94,9 @@ void _testForImageCodecs({required bool useBrowserImageDecoder}) {
       expect(image.repetitionCount, -1);
 
       final ui.FrameInfo frame1 = await image.getNextFrame();
-      await expectFrameData(frame1, <int>[0, 255, 0, 255]);
+      await expectFrameData(frame1, <int>[255, 0, 0, 255]);
       final ui.FrameInfo frame2 = await image.getNextFrame();
-      await expectFrameData(frame2, <int>[0, 0, 255, 255]);
+      await expectFrameData(frame2, <int>[0, 255, 0, 255]);
 
       // Pretend that the image is temporarily deleted.
       image.delete();
@@ -104,7 +104,7 @@ void _testForImageCodecs({required bool useBrowserImageDecoder}) {
 
       // Check that we got the 3rd frame after resurrection.
       final ui.FrameInfo frame3 = await image.getNextFrame();
-      await expectFrameData(frame3, <int>[255, 0, 0, 255]);
+      await expectFrameData(frame3, <int>[0, 0, 255, 255]);
 
       testCollector.collectNow();
     });
@@ -548,11 +548,10 @@ void _testCkAnimatedImage() {
 
   test('CkAnimatedImage toByteData(RGBA)', () async {
     final CkAnimatedImage image = CkAnimatedImage.decodeFromBytes(kAnimatedGif, 'test');
-    // TODO(yjbanov): frame sequence is wrong (https://github.com/flutter/flutter/issues/95281)
     const List<List<int>> expectedColors = <List<int>>[
+      <int>[255, 0, 0, 255],
       <int>[0, 255, 0, 255],
       <int>[0, 0, 255, 255],
-      <int>[255, 0, 0, 255],
     ];
     for (int i = 0; i < image.frameCount; i++) {
       final ui.FrameInfo frame = await image.getNextFrame();

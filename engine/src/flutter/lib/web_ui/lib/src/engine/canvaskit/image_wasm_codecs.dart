@@ -31,8 +31,8 @@ class CkAnimatedImage extends ManagedSkiaObject<SkAnimatedImage>
   int _frameCount = 0;
   int _repetitionCount = -1;
 
-  /// The index to the next frame to be decoded.
-  int _nextFrameIndex = 0;
+  /// Current frame index.
+  int _currentFrameIndex = 0;
 
   @override
   SkAnimatedImage createDefault() {
@@ -48,11 +48,16 @@ class CkAnimatedImage extends ManagedSkiaObject<SkAnimatedImage>
     _frameCount = animatedImage.getFrameCount();
     _repetitionCount = animatedImage.getRepetitionCount();
 
-    // If the object has been deleted then resurrected, it may already have
-    // iterated over some frames. We need to skip over them.
-    for (int i = 0; i < _nextFrameIndex; i++) {
+    // Normally CanvasKit initializes `SkAnimatedImage` to point to the first
+    // frame in the animation. However, if the Skia object has been deleted then
+    // resurrected, the framework/app may already have advanced to one of the
+    // subsequent frames. When that happens the value of _currentFrameIndex will
+    // be something other than zero, and we need to tell the decoder to skip
+    // over the previous frames to point to the current one.
+    for (int i = 0; i < _currentFrameIndex; i++) {
       animatedImage.decodeNextFrame();
     }
+
     return animatedImage;
   }
 
@@ -100,10 +105,23 @@ class CkAnimatedImage extends ManagedSkiaObject<SkAnimatedImage>
   @override
   Future<ui.FrameInfo> getNextFrame() {
     assert(_debugCheckIsNotDisposed());
-    final int durationMillis = skiaObject.decodeNextFrame();
-    final Duration duration = Duration(milliseconds: durationMillis);
-    final CkImage image = CkImage(skiaObject.makeImageAtCurrentFrame());
-    _nextFrameIndex = (_nextFrameIndex + 1) % _frameCount;
-    return Future<ui.FrameInfo>.value(AnimatedImageFrameInfo(duration, image));
+    final SkAnimatedImage animatedImage = skiaObject;
+
+    // SkAnimatedImage comes pre-initialized to point to the current frame (by
+    // default the first frame, and, with some special resurrection logic in
+    // `createDefault`, to a subsequent frame if resurrection happens in the
+    // middle of animation). Flutter's `Codec` semantics is to initialize to
+    // point to "just before the first frame", i.e. the first invocation of
+    // `getNextFrame` returns the first frame. Therefore, we have to read the
+    // current Skia frame, then advance SkAnimatedImage to the next frame, and
+    // return the current frame.
+    final ui.FrameInfo currentFrame = AnimatedImageFrameInfo(
+      Duration(milliseconds: animatedImage.currentFrameDuration()),
+      CkImage(animatedImage.makeImageAtCurrentFrame()),
+    );
+
+    animatedImage.decodeNextFrame();
+    _currentFrameIndex = (_currentFrameIndex + 1) % _frameCount;
+    return Future<ui.FrameInfo>.value(currentFrame);
   }
 }
