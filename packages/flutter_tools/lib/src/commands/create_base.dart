@@ -23,6 +23,7 @@ import '../dart/pub.dart';
 import '../features.dart';
 import '../flutter_project_metadata.dart';
 import '../globals.dart' as globals;
+import '../migrate/migrate_config.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
 import '../template.dart';
@@ -546,6 +547,16 @@ abstract class CreateBase extends FlutterCommand {
     if (templateContext['android'] == true) {
       gradle.updateLocalProperties(project: project, requireAndroidSdk: false);
     }
+    print('GENERATING MIGRATECONFIG');
+    List<String> platformsForMigrateConfig = <String>['root'];
+    if (templateContext['android'] == true) platformsForMigrateConfig.add('android');
+    if (templateContext['ios'] == true) platformsForMigrateConfig.add('ios');
+    if (templateContext['linux'] == true) platformsForMigrateConfig.add('linux');
+    if (templateContext['macos'] == true) platformsForMigrateConfig.add('macos');
+    if (templateContext['windows'] == true) platformsForMigrateConfig.add('windows');
+    if (templateContext['winuwp'] == true) platformsForMigrateConfig.add('windowsUwp');
+    if (templateContext['fuchsia'] == true) platformsForMigrateConfig.add('fuchisa');
+    await MigrateConfig.parseOrCreateMigrateConfigs(platforms: platformsForMigrateConfig, projectDirectory: directory);
     return generatedCount;
   }
 

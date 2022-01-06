@@ -555,12 +555,10 @@ class AndroidProject extends FlutterProjectPlatform {
     if (deprecationBehavior == DeprecationBehavior.none) {
       return;
     }
-
     final AndroidEmbeddingVersionResult result = computeEmbeddingVersion();
     if (result.version != AndroidEmbeddingVersion.v1) {
       return;
     }
-
     globals.printStatus(
 '''
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -584,11 +582,11 @@ The detected reason was:
     if (deprecationBehavior == DeprecationBehavior.ignore) {
       BuildEvent('deprecated-v1-android-embedding-ignored', type: 'gradle', flutterUsage: globals.flutterUsage).send();
     } else { // DeprecationBehavior.exit
-        BuildEvent('deprecated-v1-android-embedding-failed', type: 'gradle', flutterUsage: globals.flutterUsage).send();
-        throwToolExit(
-          'Build failed due to use of deprecated Android v1 embedding.',
-          exitCode: 1,
-        );
+      BuildEvent('deprecated-v1-android-embedding-failed', type: 'gradle', flutterUsage: globals.flutterUsage).send();
+      throwToolExit(
+        'Build failed due to use of deprecated Android v1 embedding.',
+        exitCode: 1,
+      );
     }
   }
 
