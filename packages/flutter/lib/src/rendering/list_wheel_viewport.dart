@@ -697,7 +697,7 @@ class RenderListWheelViewport
       targetLastIndex--;
 
     // If it turns out there's no children to layout, we remove old children and
-    // apply the new content dimensions.
+    // return.
     if (targetFirstIndex > targetLastIndex) {
       while (firstChild != null)
         _destroyChild(firstChild!);
