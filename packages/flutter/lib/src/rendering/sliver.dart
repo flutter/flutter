@@ -479,20 +479,18 @@ class SliverConstraints extends Constraints {
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      axisDirection,
-      growthDirection,
-      scrollOffset,
-      overlap,
-      remainingPaintExtent,
-      crossAxisExtent,
-      crossAxisDirection,
-      viewportMainAxisExtent,
-      remainingCacheExtent,
-      cacheOrigin,
-    );
-  }
+  int get hashCode => Object.hash(
+    axisDirection,
+    growthDirection,
+    scrollOffset,
+    overlap,
+    remainingPaintExtent,
+    crossAxisExtent,
+    crossAxisDirection,
+    viewportMainAxisExtent,
+    remainingCacheExtent,
+    cacheOrigin,
+  );
 
   @override
   String toString() {
