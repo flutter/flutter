@@ -354,6 +354,13 @@ Matcher coversSameAreaAs(Path expectedPath, { required Rect areaToCompare, int s
 /// ```
 /// {@end-tool}
 ///
+/// Fonts can be rendered differently according with the platform or the Flutter
+/// version in which the test is run. While the difference may be minimal, it's
+/// still valuable to make the test fail. For example, a golden file generated
+/// on Windows is going to differ from the one produced by another operating
+/// system. Even on the same platform, if the generated golden is tested with a
+/// different Flutter version, the test may fail.
+///
 /// By default, the Flutter framework uses a font called 'Ahem' which shows
 /// squares instead of characters. To make golden tests more valuable, there
 /// is the possibility to render images using other more human-readable fonts.
@@ -379,7 +386,7 @@ Matcher coversSameAreaAs(Path expectedPath, { required Rect areaToCompare, int s
 /// ```
 /// {@end-tool}
 ///
-/// The above example loads the desired font only for that specific test. To load
+/// The example above loads the desired font only for that specific test. To load
 /// a font for any golden test in the app, the `FontLoader.load()` call could be
 /// moved in the `flutter_test_config.dart`. In this way, the font will always be
 /// loaded before a test:
