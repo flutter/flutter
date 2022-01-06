@@ -5,7 +5,7 @@
 import 'dart:io';
 
 abstract class TokenTemplate {
-  TokenTemplate(this.fileName, this.tokens);
+  const TokenTemplate(this.fileName, this.tokens);
 
   static const String beginGeneratedComment = '''
 
