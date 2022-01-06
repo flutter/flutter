@@ -1,4 +1,4 @@
-Signature: 8a9bd29cd311cec5b1872f61e86eead5
+Signature: 3ef76d017bd8be5d68f3d42808ea723e
 
 UNUSED LICENSES:
 
@@ -1294,6 +1294,7 @@ FILE: ../../../third_party/skia/src/sksl/sksl_gpu.sksl
 FILE: ../../../third_party/skia/src/sksl/sksl_public.sksl
 FILE: ../../../third_party/skia/src/sksl/sksl_rt_shader.sksl
 FILE: ../../../third_party/skia/src/sksl/sksl_vert.sksl
+FILE: ../../../third_party/skia/src/sksl/tracing/BUILD.bazel
 FILE: ../../../third_party/skia/src/sksl/transform/BUILD.bazel
 FILE: ../../../third_party/skia/src/svg/BUILD.bazel
 FILE: ../../../third_party/skia/src/utils/BUILD.bazel
