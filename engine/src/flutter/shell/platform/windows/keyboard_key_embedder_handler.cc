@@ -243,7 +243,9 @@ void KeyboardKeyEmbedderHandler::KeyboardHookImpl(
   if (eventual_logical_record != 0) {
     pressingRecords_[physical_key] = eventual_logical_record;
   } else {
-    pressingRecords_.erase(last_logical_record_iter);
+    auto record_iter = pressingRecords_.find(physical_key);
+    assert(record_iter != pressingRecords_.end());
+    pressingRecords_.erase(record_iter);
   }
 
   if (result_logical_key == VK_PROCESSKEY) {

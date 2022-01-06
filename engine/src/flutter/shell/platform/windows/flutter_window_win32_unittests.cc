@@ -225,12 +225,10 @@ class TestFlutterWindowsView : public FlutterWindowsView {
  public:
   TestFlutterWindowsView(std::unique_ptr<WindowBindingHandler> window_binding,
                          WPARAM virtual_key,
-                         bool is_printable = true,
-                         bool is_syskey = false)
+                         bool is_printable = true)
       : FlutterWindowsView(std::move(window_binding)),
         virtual_key_(virtual_key),
-        is_printable_(is_printable),
-        is_syskey_(is_syskey) {}
+        is_printable_(is_printable) {}
 
   SpyKeyboardKeyHandler* key_event_handler;
   SpyTextInputPlugin* text_input_plugin;
@@ -269,8 +267,7 @@ class TestFlutterWindowsView : public FlutterWindowsView {
     // "SendInput" directly to the window.
     const KEYBDINPUT kbdinput = pInputs->ki;
     const bool is_key_up = kbdinput.dwFlags & KEYEVENTF_KEYUP;
-    const UINT message = is_key_up ? (is_syskey_ ? WM_SYSKEYUP : WM_KEYUP)
-                                   : (is_syskey_ ? WM_SYSKEYDOWN : WM_KEYDOWN);
+    const UINT message = is_key_up ? WM_KEYUP : WM_KEYDOWN;
 
     const LPARAM lparam = CreateKeyEventLparam(
         kbdinput.wScan, kbdinput.dwFlags & KEYEVENTF_EXTENDEDKEY, is_key_up);
@@ -295,7 +292,6 @@ class TestFlutterWindowsView : public FlutterWindowsView {
   std::vector<Win32Message> pending_responds_;
   WPARAM virtual_key_;
   bool is_printable_;
-  bool is_syskey_;
 };
 
 // The static value to return as the "handled" value from the framework for key
@@ -315,9 +311,12 @@ std::unique_ptr<FlutterWindowsEngine> GetTestEngine() {
   auto engine = std::make_unique<FlutterWindowsEngine>(project);
 
   EngineModifier modifier(engine.get());
-  MockEmbedderApiForKeyboard(
-      modifier, [] { return test_response; },
-      [](const FlutterKeyEvent* event) { return false; });
+  auto key_response_controller = std::make_shared<MockKeyResponseController>();
+  key_response_controller->SetChannelResponse(
+      [](MockKeyResponseController::ResponseCallback callback) {
+        callback(test_response);
+      });
+  MockEmbedderApiForKeyboard(modifier, key_response_controller);
 
   return engine;
 }
@@ -391,8 +390,7 @@ TEST(FlutterWindowWin32Test, SystemKeyDownPropagation) {
   auto window_binding_handler =
       std::make_unique<::testing::NiceMock<MockWindowBindingHandler>>();
   TestFlutterWindowsView flutter_windows_view(
-      std::move(window_binding_handler), virtual_key, false /* is_printable */,
-      true /* is_syskey */);
+      std::move(window_binding_handler), virtual_key, false /* is_printable */);
   win32window.SetView(&flutter_windows_view);
   LPARAM lparam = CreateKeyEventLparam(scan_code, false, false);
 
@@ -405,9 +403,11 @@ TEST(FlutterWindowWin32Test, SystemKeyDownPropagation) {
                              false /* extended */, _))
         .Times(2)
         .RetiresOnSaturation();
+    // Syskey events are not redispatched, so TextInputPlugin, which relies on
+    // them to receive events, no longer works.
     EXPECT_CALL(*flutter_windows_view.text_input_plugin,
                 KeyboardHook(_, _, _, _, _, _))
-        .Times(1)
+        .Times(0)
         .RetiresOnSaturation();
     EXPECT_CALL(*flutter_windows_view.text_input_plugin, TextHook(_)).Times(0);
     win32window.InjectMessages(

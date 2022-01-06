@@ -174,10 +174,7 @@ bool KeyboardManagerWin32::HandleMessage(UINT const message,
       keyCode = ResolveKeyCode(keyCode, extended, scancode);
       const bool was_down = lparam & 0x40000000;
       bool is_syskey = message == WM_SYSKEYDOWN || message == WM_SYSKEYUP;
-      const int action = is_keydown_message
-                             ? (is_syskey ? WM_SYSKEYDOWN : WM_KEYDOWN)
-                             : (is_syskey ? WM_SYSKEYUP : WM_KEYUP);
-      if (window_delegate_->OnKey(keyCode, scancode, action, 0, extended,
+      if (window_delegate_->OnKey(keyCode, scancode, message, 0, extended,
                                   was_down)) {
         // For system keys, always pass them to the default WndProc so that keys
         // like the ALT-TAB or Kanji switches are processed correctly.

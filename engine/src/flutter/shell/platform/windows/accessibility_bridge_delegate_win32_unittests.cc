@@ -82,9 +82,9 @@ std::unique_ptr<FlutterWindowsEngine> GetTestEngine() {
       [](FLUTTER_API_SYMBOL(FlutterEngine) engine, bool enabled) {
         return kSuccess;
       };
-  MockEmbedderApiForKeyboard(
-      modifier, [] { return false; },
-      [](const FlutterKeyEvent* event) { return false; });
+
+  MockEmbedderApiForKeyboard(modifier,
+                             std::make_shared<MockKeyResponseController>());
 
   engine->RunWithEntrypoint(nullptr);
   return engine;
