@@ -76,7 +76,7 @@ void main() {
     expect(logger.traceText, contains('Crash report sent (report ID: test-report-id)'));
   }
 
-  testWithoutContext('CrashReporter.informUser provides basic instructions', () async {
+  testWithoutContext('CrashReporter.informUser provides basic instructions without PII', () async {
     final CrashReporter crashReporter = CrashReporter(
       fileSystem: fs,
       logger: logger,
@@ -91,12 +91,17 @@ void main() {
         command: 'arg1 arg2 arg3',
         error: Exception('Dummy exception'),
         stackTrace: StackTrace.current,
-        doctorText: 'Fake doctor text'),
+        doctorText: 'Ignored',
+        // Spaces are URL query encoded in the output, make it one word to make this test simpler.
+        piiStrippedDoctorText: 'NoPIIFakeDoctorText',
+      ),
       file,
     );
 
-    expect(logger.errorText, contains('A crash report has been written to ${file.path}.'));
+    expect(logger.statusText, contains('NoPIIFakeDoctorText'));
+    expect(logger.statusText, isNot(contains('Ignored')));
     expect(logger.statusText, contains('https://github.com/flutter/flutter/issues/new'));
+    expect(logger.errorText, contains('A crash report has been written to ${file.path}.'));
   });
 
   testWithoutContext('suppress analytics', () async {

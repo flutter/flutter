@@ -290,11 +290,17 @@ class Doctor {
   }
 
   /// Print information about the state of installed tooling.
+  ///
+  /// To exclude personally identifiable information like device names and
+  /// paths, set [showPii] to false.
   Future<bool> diagnose({
     bool androidLicenses = false,
     bool verbose = true,
     bool showColor = true,
     AndroidLicenseValidator? androidLicenseValidator,
+    bool showPii = true,
+    List<ValidatorTask>? startedValidatorTasks,
+    bool sendEvent = true,
   }) async {
     if (androidLicenses && androidLicenseValidator != null) {
       return androidLicenseValidator.runLicenseManager();
@@ -306,7 +312,7 @@ class Doctor {
     bool doctorResult = true;
     int issues = 0;
 
-    for (final ValidatorTask validatorTask in startValidatorTasks()) {
+    for (final ValidatorTask validatorTask in startedValidatorTasks ?? startValidatorTasks()) {
       final DoctorValidator validator = validatorTask.validator;
       final Status status = _logger.startSpinner();
       ValidationResult result;
@@ -334,8 +340,9 @@ class Doctor {
         case ValidationType.installed:
           break;
       }
-
-      DoctorResultEvent(validator: validator, result: result).send();
+      if (sendEvent) {
+        DoctorResultEvent(validator: validator, result: result).send();
+      }
 
       final String leadingBox = showColor ? result.coloredLeadingBox : result.leadingBox;
       if (result.statusInfo != null) {
@@ -351,7 +358,7 @@ class Doctor {
           int hangingIndent = 2;
           int indent = 4;
           final String indicator = showColor ? message.coloredIndicator : message.indicator;
-          for (final String line in '$indicator ${message.message}'.split('\n')) {
+          for (final String line in '$indicator ${showPii ? message.message : message.piiStrippedMessage}'.split('\n')) {
             _logger.printStatus(line, hangingIndent: hangingIndent, indent: indent, emphasis: true);
             // Only do hanging indent for the first line.
             hangingIndent = 0;

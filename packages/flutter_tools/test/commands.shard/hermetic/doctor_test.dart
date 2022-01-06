@@ -313,6 +313,14 @@ void main() {
     }, overrides: <Type, Generator>{
       Usage: () => testUsage,
     });
+
+    testUsingContext('sending events can be skipped', () async {
+      await FakePassingDoctor(logger).diagnose(verbose: false, sendEvent: false);
+
+      expect(testUsage.events, isEmpty);
+    }, overrides: <Type, Generator>{
+      Usage: () => testUsage,
+    });
   });
 
   group('doctor with fake validators', () {
@@ -454,6 +462,25 @@ void main() {
               '    • An extra message with some verbose details\n'
               '\n'
               '! Doctor found issues in 4 categories.\n'
+      ));
+    });
+
+    testUsingContext('validate PII can be hidden', () async {
+      expect(await FakePiiDoctor(logger).diagnose(showPii: false), isTrue);
+      expect(logger.statusText, equals(
+        '[✓] PII Validator\n'
+        '    • Does not contain PII\n'
+        '\n'
+        '• No issues found!\n'
+      ));
+      logger.clear();
+      // PII shown.
+      expect(await FakePiiDoctor(logger).diagnose(), isTrue);
+      expect(logger.statusText, equals(
+          '[✓] PII Validator\n'
+              '    • Contains PII path/to/username\n'
+              '\n'
+              '• No issues found!\n'
       ));
     });
   });
@@ -666,6 +693,9 @@ class NoOpDoctor implements Doctor {
     bool verbose = true,
     bool showColor = true,
     AndroidLicenseValidator androidLicenseValidator,
+    bool showPii = true,
+    List<ValidatorTask> startedValidatorTasks,
+    bool sendEvent = true,
   }) async => true;
 
   @override
@@ -691,6 +721,18 @@ class PassingValidator extends DoctorValidator {
       ValidationMessage('A second, somewhat longer helpful message'),
     ];
     return const ValidationResult(ValidationType.installed, messages, statusInfo: 'with statusInfo');
+  }
+}
+
+class PiiValidator extends DoctorValidator {
+  PiiValidator() : super('PII Validator');
+
+  @override
+  Future<ValidationResult> validate() async {
+    const List<ValidationMessage> messages = <ValidationMessage>[
+      ValidationMessage('Contains PII path/to/username', piiStrippedMessage: 'Does not contain PII'),
+    ];
+    return const ValidationResult(ValidationType.installed, messages);
   }
 }
 
@@ -836,6 +878,20 @@ class FakeQuietDoctor extends Doctor {
       PassingValidator('Another Passing Validator'),
       PassingValidator('Validators are fun'),
       PassingValidator('Four score and seven validators ago'),
+    ];
+  }
+}
+
+
+/// A doctor that passes and contains PII that can be hidden.
+class FakePiiDoctor extends Doctor {
+  FakePiiDoctor(Logger logger) : super(logger: logger);
+
+  List<DoctorValidator> _validators;
+  @override
+  List<DoctorValidator> get validators {
+    return _validators ??= <DoctorValidator>[
+      PiiValidator(),
     ];
   }
 }
