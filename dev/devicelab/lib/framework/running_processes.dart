@@ -14,7 +14,7 @@ class RunningProcessInfo {
         assert(commandLine != null);
 
   final String commandLine;
-  final String pid;
+  final int pid;
   final DateTime creationDate;
 
   @override
@@ -30,29 +30,8 @@ class RunningProcessInfo {
 
   @override
   String toString() {
-    return 'RunningProcesses{pid: $pid, commandLine: $commandLine, creationDate: $creationDate}';
+    return 'RunningProcesses(pid: $pid, commandLine: $commandLine, creationDate: $creationDate)';
   }
-}
-
-Future<bool> killProcess(String pid, {ProcessManager? processManager}) async {
-  assert(pid != null, 'Must specify a pid to kill');
-  processManager ??= const LocalProcessManager();
-  ProcessResult result;
-  if (Platform.isWindows) {
-    result = await processManager.run(<String>[
-      'taskkill.exe',
-      '/pid',
-      pid,
-      '/f',
-    ]);
-  } else {
-    result = await processManager.run(<String>[
-      'kill',
-      '-9',
-      pid,
-    ]);
-  }
-  return result.exitCode == 0;
 }
 
 Stream<RunningProcessInfo> getRunningProcesses({
@@ -149,7 +128,7 @@ Iterable<RunningProcessInfo> processPowershellOutput(String output) sync* {
       time = '${hours + 12}${time.substring(2)}';
     }
 
-    final String pid = line.substring(0, processIdHeaderSize).trim();
+    final int pid = int.parse(line.substring(0, processIdHeaderSize).trim());
     final DateTime creationDate = DateTime.parse('$year-$month-${day}T$time');
     final String commandLine = line.substring(commandLineHeaderStart).trim();
     yield RunningProcessInfo(pid, creationDate, commandLine);
@@ -163,7 +142,7 @@ Stream<RunningProcessInfo> posixRunningProcesses(
 ) async* {
   // Cirrus is missing this in Linux for some reason.
   if (!processManager.canRun('ps')) {
-    print('Cannot list processes on this system: `ps` not available.');
+    print('Cannot list processes on this system: "ps" not available.');
     return;
   }
   final ProcessResult result = await processManager.run(<String>[
@@ -240,7 +219,7 @@ Iterable<RunningProcessInfo> processPsOutput(
     final DateTime creationDate = DateTime.parse('$year-$month-${day}T$time');
     line = line.substring(24).trim();
     final int nextSpace = line.indexOf(' ');
-    final String pid = line.substring(0, nextSpace);
+    final int pid = int.parse(line.substring(0, nextSpace));
     final String commandLine = line.substring(nextSpace + 1);
     yield RunningProcessInfo(pid, creationDate, commandLine);
   }

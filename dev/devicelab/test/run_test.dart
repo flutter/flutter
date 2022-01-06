@@ -20,6 +20,7 @@ void main() {
       final ProcessResult scriptProcess = processManager.runSync(<String>[
         dart,
         'bin/run.dart',
+        '--no-terminate-stray-dart-processes',
         ...otherArgs,
         for (final String testName in testNames) ...<String>['-t', testName],
       ]);

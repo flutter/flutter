@@ -65,11 +65,15 @@ class _TaskRunner {
       final Duration? taskTimeout = parameters.containsKey('timeoutInMinutes')
         ? Duration(minutes: int.parse(parameters['timeoutInMinutes']!))
         : null;
-      // This is only expected to be passed in unit test runs so they do not
-      // kill the Dart process that is running them and waste time running config.
-      final bool runFlutterConfig = parameters['runFlutterConfig'] != 'false';
+      final bool runFlutterConfig = parameters['runFlutterConfig'] != 'false'; // used by tests to avoid changing the configuration
       final bool runProcessCleanup = parameters['runProcessCleanup'] != 'false';
-      final TaskResult result = await run(taskTimeout, runProcessCleanup: runProcessCleanup, runFlutterConfig: runFlutterConfig);
+      final String? localEngine = parameters['localEngine'];
+      final TaskResult result = await run(
+        taskTimeout,
+        runProcessCleanup: runProcessCleanup,
+        runFlutterConfig: runFlutterConfig,
+        localEngine: localEngine,
+      );
       return ServiceExtensionResponse.result(json.encode(result.toJson()));
     });
     registerExtension('ext.cocoonRunnerReady',
@@ -103,6 +107,7 @@ class _TaskRunner {
   Future<TaskResult> run(Duration? taskTimeout, {
     bool runFlutterConfig = true,
     bool runProcessCleanup = true,
+    required String? localEngine,
   }) async {
     try {
       _taskStarted = true;
@@ -121,12 +126,10 @@ class _TaskRunner {
             print('[LEAK]: ${info.commandLine} ${info.creationDate} ${info.pid} ');
           }
         }
-      } else {
-        section('Skipping check running Dart$exe processes');
       }
 
       if (runFlutterConfig) {
-        print('enabling configs for macOS, Linux, Windows, and Web...');
+        print('Enabling configs for macOS, Linux, Windows, and Web...');
         final int configResult = await exec(path.join(flutterDirectory.path, 'bin', 'flutter'), <String>[
           'config',
           '-v',
@@ -134,13 +137,11 @@ class _TaskRunner {
           '--enable-windows-desktop',
           '--enable-linux-desktop',
           '--enable-web',
-          if (localEngine != null) ...<String>['--local-engine', localEngine!],
+          if (localEngine != null) ...<String>['--local-engine', localEngine],
         ], canFail: true);
         if (configResult != 0) {
           print('Failed to enable configuration, tasks may not run.');
         }
-      } else {
-        print('Skipping enabling configs for macOS, Linux, Windows, and Web');
       }
 
       final Device? device = await _getWorkingDeviceIfAvailable();
@@ -169,7 +170,7 @@ class _TaskRunner {
       }
 
       if (runProcessCleanup) {
-        section('Checking running Dart$exe processes after task...');
+        section('Terminating lingering Dart$exe processes after task...');
         final List<RunningProcessInfo> afterRunningDartInstances = await getRunningProcesses(
           processName: 'dart$exe',
         ).toList();
@@ -179,7 +180,7 @@ class _TaskRunner {
             if (result is TaskResultCheckProcesses) {
               result = TaskResult.failure('This test leaked dart processes');
             }
-            final bool killed = await killProcess(info.pid);
+            final bool killed = Process.killPid(info.pid, ProcessSignal.sigkill);
             if (!killed) {
               print('Failed to kill process ${info.pid}.');
             } else {
@@ -187,8 +188,6 @@ class _TaskRunner {
             }
           }
         }
-      } else {
-        print('Skipping check running Dart$exe processes after task');
       }
       _completer.complete(result);
       return result;
