@@ -93,6 +93,13 @@ class UpdatePackagesCommand extends FlutterCommand {
         negatable: false,
       )
       ..addFlag(
+        'parallel',
+        help: 'Causes the "pub get" runs to happen concurrently on as many CPUs '
+            'as this machine has.',
+        defaultsTo: true,
+        negatable: true,
+      )
+      ..addFlag(
         'crash',
         help: 'For Flutter CLI testing only, forces this command to throw an unhandled exception.',
         defaultsTo: false,
@@ -242,6 +249,7 @@ class UpdatePackagesCommand extends FlutterCommand {
     // First, collect up the explicit dependencies:
     final List<PubspecYaml> pubspecs = <PubspecYaml>[];
     final Set<String> specialDependencies = <String>{};
+    final Map<String, PubspecDependency> allDependencies = <String, PubspecDependency>{};
     // Visit all the directories with pubspec.yamls we care about.
     for (final Directory directory in packages) {
       if (doUpgrade) {
@@ -254,7 +262,37 @@ class UpdatePackagesCommand extends FlutterCommand {
         throwToolExit(message);
       }
       pubspecs.add(pubspec); // remember it for later
-      for (final PubspecDependency dependency in pubspec.allDependencies) { // this is all the explicit dependencies
+      for (final PubspecDependency dependency in pubspec.allDependencies) {
+        if (allDependencies.containsKey(dependency.name)) {
+          // If we've seen the dependency before, make sure that we are
+          // importing it the same way. There's several ways to import a
+          // dependency. Hosted (from pub via version number), by path (e.g.
+          // pointing at the version of a package we get from the Dart SDK
+          // that we download with Flutter), by SDK (e.g. the "flutter"
+          // package is explicitly from "sdk: flutter").
+          //
+          // This makes sure that we don't import a package in two different
+          // ways, e.g. by saying "sdk: flutter" in one pubspec.yaml and
+          // saying "path: ../../..." in another.
+          final PubspecDependency previous = allDependencies[dependency.name];
+          if (dependency.kind != previous.kind || dependency.lockTarget != previous.lockTarget) {
+            throwToolExit(
+                'Inconsistent requirements around ${dependency.name}; '
+                    'saw ${dependency.kind} (${dependency.lockTarget}) in "${dependency.sourcePath}" '
+                    'and ${previous.kind} (${previous.lockTarget}) in "${previous.sourcePath}".'
+            );
+          }
+          if (dependency.version != previous.version) {
+            globals.printError(
+                'Requiring multiple versions: multiple versions required by ${dependency.name}; '
+                    'saw ${dependency.version} in "${dependency.sourcePath}" '
+                    'and ${previous.version} in "${previous.sourcePath}".'
+            );
+          }
+        }
+        allDependencies[dependency.name] = dependency;
+      }
+      for (final PubspecDependency dependency in pubspec.allExplicitDependencies) {
         if (dependencies.containsKey(dependency.name)) {
           // If we've seen the dependency before, make sure that we are
           // importing it the same way. There's several ways to import a
@@ -301,7 +339,7 @@ class UpdatePackagesCommand extends FlutterCommand {
       fakePackage.createSync();
       fakePackage.writeAsStringSync(
         _generateFakePubspec(
-          dependencies.values,
+          allDependencies.values,
           useAnyVersion: doUpgrade,
         ),
       );
@@ -352,7 +390,8 @@ class UpdatePackagesCommand extends FlutterCommand {
         );
       }
     } finally {
-      tempDir.deleteSync(recursive: true);
+      globals.printStatus('Not deleting $tempDir');
+      // tempDir.deleteSync(recursive: true);
     }
 
     if (doUpgrade) {
@@ -416,7 +455,7 @@ class UpdatePackagesCommand extends FlutterCommand {
       'Running "flutter pub get" in affected packages...',
     );
     try {
-      final TaskQueue<void> queue = TaskQueue<void>();
+      final TaskQueue<void> queue = TaskQueue<void>(maxJobs: boolArg('parallel') ? null : 1);
       for (final Directory dir in packages) {
         unawaited(queue.add(() async {
           final Stopwatch stopwatch = Stopwatch();
@@ -424,7 +463,9 @@ class UpdatePackagesCommand extends FlutterCommand {
           await pub.get(
             context: PubContext.updatePackages,
             directory: dir.path,
-            offline: offline,
+            // All dependencies should already have been downloaded by the fake
+            // package, so the concurrent checks can all happen offline.
+            offline: true,
             generateSyntheticPackage: false,
             printProgress: false,
           );
@@ -752,10 +793,15 @@ class PubspecYaml {
   }
 
   /// This returns all regular dependencies and all dev dependencies.
-  Iterable<PubspecDependency> get allDependencies {
+  Iterable<PubspecDependency> get allExplicitDependencies {
     return inputData
         .whereType<PubspecDependency>()
         .where((PubspecDependency data) => data.kind != DependencyKind.overridden && !data.isTransitive);
+  }
+
+  /// This returns all dependencies.
+  Iterable<PubspecDependency> get allDependencies {
+    return inputData.whereType<PubspecDependency>();
   }
 
   /// Take a dependency graph with explicit version numbers, and apply them to
