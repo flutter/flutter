@@ -1786,7 +1786,7 @@ class OpacityLayer extends ContainerLayer {
     if (enabled) {
       engineLayer = builder.pushOpacity(
         alpha!,
-        offset: offset,
+        offset: offset!,
         oldLayer: _engineLayer as ui.OpacityEngineLayer?,
       );
     } else
