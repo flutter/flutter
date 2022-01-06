@@ -46,7 +46,7 @@ class MigrateConfig {
     platform = yamlRoot['platform'];
     createVersion = yamlRoot['createVersion'];
     lastMigrateVersion = yamlRoot['lastMigrateVersion'];
-    unmanagedFiles = yamlRoot['unmanagedFiles'];
+    unmanagedFiles = List<String>.from(yamlRoot['unmanagedFiles']);
   }
 
   void writeFile() {

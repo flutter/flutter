@@ -10,7 +10,7 @@ import '../build_info.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../runner/flutter_command.dart';
-import '../migrate_utils.dart';
+import '../migrate/migrate_utils.dart';
 import '../migrate/migrate_config.dart';
 import '../cache.dart';
 
@@ -61,35 +61,96 @@ class MigrateCommand extends FlutterCommand {
       }
     }
 
+    String revision = '5344ed71561b924fb23300fb7fdb306744718767';
+
+    // Get the list of file names in the old templates directory
     List<String> files = await MigrateUtils.getFileNamesInDirectory(
-      revision: '5344ed71561b924fb23300fb7fdb306744718767',
-      searchPath: 'packages/flutter_tools/lib/src/android',
+      revision: revision,
+      searchPath: 'packages/flutter_tools/templates',
       workingDirectory: Cache.flutterRoot!,
     );
+
+    // Clone a copy of the old templates directory into a temp dir.
+    Directory tempDir = await MigrateUtils.createTempDirectory('tempdir1');
+    print(tempDir.path);
     for (String f in files) {
-      print(f);
+      print('REtrieving $f');
+      File fileOld = tempDir.childFile(f);
+      String contents = await MigrateUtils.getFileContents(
+        revision: revision,
+        file: f,
+        workingDirectory: Cache.flutterRoot!,
+        outputPath: fileOld.path.trim(),
+      );
     }
 
-    Directory tempDir = await MigrateUtils.createTempDirectory('tempdir1');
+    // Generate the old templates
 
-    String contents = await MigrateUtils.getFileContents(
-      revision: '5344ed71561b924fb23300fb7fdb306744718767',
-      file: files[4],
-      workingDirectory: Cache.flutterRoot!,
-    );
-    print(contents);
-    File fileOld = tempDir.childFile(files[4]);
-    fileOld.createSync(recursive: true);
-    fileOld.writeAsStringSync(contents, flush: true);
+    Directory generatedOldTemplateDirectory = await MigrateUtils.createTempDirectory('generatedOldTemplate');
+    Directory generatedNewTemplateDirectory = await MigrateUtils.createTempDirectory('generateNewTemplate');
 
-    File fileNew = globals.fs.file('${Cache.flutterRoot}/${files[4]}');
-    // fileNew.createSync();
+    // Generate diffs
+    List<FileSystemEntity> generatedOldFiles = generatedOldTemplateDirectory.listSync(recursive: true);
+    List<FileSystemEntity> generatedNewFiles = generatedNewTemplateDirectory.listSync(recursive: true);
 
-    String diff = await MigrateUtils.diffFiles(fileOld, fileNew);
-    print(diff);
+    for (FileSystemEntity entity in generatedOldFiles) {
+      if (entity is! File) {
+        continue;
+      }
+      File oldTemplateFile = (entity as File).absolute;
+      if (!oldTemplateFile.path.startsWith(generatedOldTemplateDirectory.absolute.path)) {
+        continue;
+      }
+      File newTemplateFile = generatedNewTemplateDirectory.childFile(oldTemplateFile.path.replaceFirst(generatedOldTemplateDirectory.absolute.path, ''));
+      if (newTemplateFile.existsSync()) {
+        DiffResult diff = await MigrateUtils.diffFiles(oldTemplateFile, newTemplateFile);
+        print(diff.diff);
+      } else {
+        // current file has no new template counterpart.
+      }
+    }
+    // TODO write diffs to files
+
+    Directory diffRootDirectory = await MigrateUtils.createTempDirectory('diffRoot');
+
+
+    // for each file
+    List<FileSystemEntity> currentFiles = flutterProject.directory.listSync(recursive: true);
+    String projectRootPath = flutterProject.directory.absolute.path;
+    for (FileSystemEntity entity in currentFiles) {
+      if (entity is! File) {
+        continue;
+      }
+      File currentFile = (entity as File).absolute;
+      if (!currentFile.path.startsWith(projectRootPath)) {
+        continue; // Not a project file.
+      }
+      // Diff the current file against the old generated template
+      File oldTemplateFile = generatedOldTemplateDirectory.childFile(currentFile.path.replaceFirst(projectRootPath, ''));
+      DiffResult userDiff = await MigrateUtils.diffFiles(oldTemplateFile, currentFile);
+
+      File diffFile = diffRootDirectory.childFile(currentFile.path.replaceFirst(projectRootPath, ''));
+      if (userDiff.exitCode == 0) {
+        // Current file unchanged by user
+        if (false) { // File is deleted in new template
+          currentFile.deleteSync();
+        }
+        continue;
+      }
+
+      if (diffFile.existsSync()) {
+        merge(currentFile, diffFile, userDiff);
+      }
+    }
+
+    print(tempDir.path);
 
     print('DONE');
 
     return const FlutterCommandResult(ExitStatus.success);
+  }
+
+  void merge(File currentFile, File diffFile, DiffResult userDiff) {
+
   }
 }
