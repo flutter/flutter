@@ -42,13 +42,51 @@ LPARAM CreateKeyEventLparam(USHORT scancode,
                             bool context_code = 0,
                             bool transition_state = 1);
 
-typedef std::function<bool()> MockKeyEventChannelHandler;
-typedef std::function<bool(const FlutterKeyEvent* event)>
-    MockKeyEventEmbedderHandler;
+class MockKeyResponseController {
+ public:
+  using ResponseCallback = std::function<void(bool)>;
+  using EmbedderCallbackHandler =
+      std::function<void(const FlutterKeyEvent*, ResponseCallback)>;
+  using ChannelCallbackHandler = std::function<void(ResponseCallback)>;
 
-void MockEmbedderApiForKeyboard(EngineModifier& modifier,
-                                MockKeyEventChannelHandler channel_handler,
-                                MockKeyEventEmbedderHandler embedder_handler);
+  MockKeyResponseController()
+      : channel_response_(ChannelRespondFalse),
+        embedder_response_(EmbedderRespondFalse) {}
+
+  void SetChannelResponse(ChannelCallbackHandler handler) {
+    channel_response_ = std::move(handler);
+  }
+
+  void SetEmbedderResponse(EmbedderCallbackHandler handler) {
+    embedder_response_ = std::move(handler);
+  }
+
+  void HandleChannelMessage(ResponseCallback callback) {
+    channel_response_(callback);
+  }
+
+  void HandleEmbedderMessage(const FlutterKeyEvent* event,
+                             ResponseCallback callback) {
+    embedder_response_(event, std::move(callback));
+  }
+
+ private:
+  EmbedderCallbackHandler embedder_response_;
+  ChannelCallbackHandler channel_response_;
+
+  static void ChannelRespondFalse(ResponseCallback callback) {
+    callback(false);
+  }
+
+  static void EmbedderRespondFalse(const FlutterKeyEvent* event,
+                                   ResponseCallback callback) {
+    callback(false);
+  }
+};
+
+void MockEmbedderApiForKeyboard(
+    EngineModifier& modifier,
+    std::shared_ptr<MockKeyResponseController> response_controller);
 
 // Simulate a message queue for WM messages.
 //
