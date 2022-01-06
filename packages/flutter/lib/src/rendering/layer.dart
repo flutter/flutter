@@ -1729,7 +1729,7 @@ class TransformLayer extends OffsetLayer {
 ///
 /// Try to avoid an [OpacityLayer] with no children. Remove that layer if
 /// possible to save some tree walks.
-class OpacityLayer extends OffsetLayer {
+class OpacityLayer extends ContainerLayer {
   /// Creates an opacity layer.
   ///
   /// The [alpha] property must be non-null before the compositing phase of
@@ -1738,7 +1738,7 @@ class OpacityLayer extends OffsetLayer {
     int? alpha,
     Offset offset = Offset.zero,
   }) : _alpha = alpha,
-       super(offset: offset);
+       _offset = offset;
 
   /// The amount to multiply into the alpha channel.
   ///
@@ -1760,45 +1760,50 @@ class OpacityLayer extends OffsetLayer {
     }
   }
 
+  /// Offset from parent in the parent's coordinate system.
+  Offset? get offset => _offset;
+  Offset? _offset;
+  set offset(Offset? value) {
+    if (value != _offset) {
+      _offset = value;
+      markNeedsAddToScene();
+    }
+  }
+
+  @override
+  void applyTransform(Layer? child, Matrix4 transform) {
+    assert(child != null);
+    assert(transform != null);
+    transform.translate(offset!.dx, offset!.dy);
+  }
+
   @override
   void addToScene(ui.SceneBuilder builder) {
     assert(alpha != null);
     bool enabled = firstChild != null;  // don't add this layer if there's no child
-    if (!enabled) {
-      // TODO(dnfield): Remove this if/when we can fix https://github.com/flutter/flutter/issues/90004
-      return;
-    }
     assert(() {
       enabled = enabled && !debugDisableOpacityLayers;
       return true;
     }());
 
-    final int realizedAlpha = alpha!;
-    // The type assertions work because the [alpha] setter nulls out the
-    // engineLayer if it would have changed type (i.e. changed to or from 255).
-    if (enabled && realizedAlpha < 255) {
-      assert(_engineLayer is ui.OpacityEngineLayer?);
+    if (enabled) {
       engineLayer = builder.pushOpacity(
-        realizedAlpha,
+        alpha!,
         offset: offset,
         oldLayer: _engineLayer as ui.OpacityEngineLayer?,
       );
-    } else {
-      assert(_engineLayer is ui.OffsetEngineLayer?);
-      engineLayer = builder.pushOffset(
-        offset.dx,
-        offset.dy,
-        oldLayer: _engineLayer as ui.OffsetEngineLayer?,
-      );
-    }
+    } else
+      engineLayer = null;
     addChildrenToScene(builder);
-    builder.pop();
+    if (enabled)
+      builder.pop();
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(IntProperty('alpha', alpha));
+    properties.add(DiagnosticsProperty<Offset>('offset', offset));
   }
 }
 
