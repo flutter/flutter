@@ -7,7 +7,7 @@ extracted into a JSON file from an internal Google database.
 ## Usage
 Run this program from the root of the git repository:
 ```
-dart dev/tools/tokens/bin/gen_defaults.dart
+dart dev/tools/gen_defaults/bin/gen_defaults.dart
 ```
 
 ## Templates

@@ -7,36 +7,51 @@ import 'dart:io';
 abstract class TokenTemplate {
   TokenTemplate(this.fileName, this.tokens);
 
+  static const String beginGeneratedComment = '''
+
+// BEGIN GENERATED TOKEN PROPERTIES
+''';
+
   static const String headerComment = '''
 
 // Generated code to the end of this file. Do not edit by hand.
 // These defaults are generated from the Material Design Token
-// database by the script dev/tools/tokens/bin/gen_defaults.dart.
-
-// BEGIN GENERATED TOKEN PROPERTIES
+// database by the script dev/tools/gen_defaults/bin/gen_defaults.dart.
 
 ''';
 
   static const String endGeneratedComment = '''
+
 // END GENERATED TOKEN PROPERTIES
 ''';
 
   final String fileName;
   final Map<String, dynamic> tokens;
 
+  /// Replace or append the contents of the file with the text from [generate].
+  ///
+  /// If the file already contains generated block at the end, it will
+  /// be replaced by the [generate] output. Otherwise the content will
+  /// just be appended to the end of the file.
   Future<void> updateFile() async {
     String contents = File(fileName).readAsStringSync();
-    final int previousHeaderIndex = contents.indexOf(headerComment);
-    if (previousHeaderIndex != -1) {
-      contents = contents.substring(0, previousHeaderIndex);
+    final int previousGeneratedIndex = contents.indexOf(beginGeneratedComment);
+    if (previousGeneratedIndex != -1) {
+      contents = contents.substring(0, previousGeneratedIndex);
     }
     final StringBuffer buffer = StringBuffer(contents);
+    buffer.write(beginGeneratedComment);
     buffer.write(headerComment);
     buffer.write(generate());
     buffer.write(endGeneratedComment);
     File(fileName).writeAsStringSync(buffer.toString());
   }
 
+  /// Provide the generated content for the template.
+  ///
+  /// This abstract method needs to be implemented by subclasses
+  /// to provide the content that [updateFile] will append to the
+  /// bottom of the file.
   String generate();
 
   String color(String tokenName) {

@@ -11,7 +11,7 @@
 // Run this program from the root of the git repository.
 //
 // ```
-// dart dev/tools/tokens/bin/gen_defaults.dart
+// dart dev/tools/gen_defaults/bin/gen_defaults.dart
 // ```
 
 import 'dart:convert';
@@ -20,7 +20,7 @@ import 'dart:io';
 import 'package:gen_defaults/fab_template.dart';
 
 Future<void> main(List<String> args) async {
-  const String tokensDB = 'dev/tools/tokens/data/material-tokens.json';
+  const String tokensDB = 'dev/tools/gen_defaults/data/material-tokens.json';
   final Map<String, dynamic> tokens = jsonDecode(File(tokensDB).readAsStringSync()) as Map<String, dynamic>;
 
   const String materialLib = 'packages/flutter/lib/src/material';
