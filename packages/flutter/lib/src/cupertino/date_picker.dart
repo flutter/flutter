@@ -450,7 +450,7 @@ class CupertinoDatePicker extends StatefulWidget {
       case _PickerColumnType.month:
         for (int i = 1; i <=12; i++) {
           final String month = localizations.datePickerMonth(i);
-          if (longestText.length < month.length)
+          if (longestText.compareTo(month).isNegative)
             longestText = month;
         }
         break;
