@@ -45,9 +45,9 @@ class ProcessInfo {
   @override
   String toString() {
     return '''
-  command : $command
-  started : $startTime
-  pid     : ${process.pid}
+  command: $command
+  started: $startTime
+  pid    : ${process.pid}
 '''
         .trim();
   }
@@ -275,7 +275,7 @@ Future<Process> startProcess(
   final Map<String, String> newEnvironment = Map<String, String>.from(environment ?? <String, String>{});
   newEnvironment['BOT'] = isBot ? 'true' : 'false';
   newEnvironment['LANG'] = 'en_US.UTF-8';
-  print('\nExecuting: $command in $finalWorkingDirectory with environment $newEnvironment');
+  print('Executing "$command" in "$finalWorkingDirectory" with environment $newEnvironment');
   final Process process = await _processManager.start(
     <String>[executable, ...?arguments],
     environment: newEnvironment,
@@ -303,7 +303,7 @@ Future<void> forceQuitRunningProcesses() async {
   for (final ProcessInfo p in _runningProcesses) {
     print('Force-quitting process:\n$p');
     if (!p.process.kill()) {
-      print('Failed to force quit process');
+      print('Failed to force quit process.');
     }
   }
   _runningProcesses.clear();
@@ -349,7 +349,7 @@ Future<int> _execute(
     stderr: stderr,
     printStdout: printStdout,
     printStderr: printStderr,
-    );
+  );
   final int exitCode = await process.exitCode;
 
   if (exitCode != 0 && !canFail)
@@ -373,23 +373,23 @@ Future<void> forwardStandardStreams(
   final Completer<void> stdoutDone = Completer<void>();
   final Completer<void> stderrDone = Completer<void>();
   process.stdout
-      .transform<String>(utf8.decoder)
-      .transform<String>(const LineSplitter())
-      .listen((String line) {
-        if (printStdout) {
-          print('stdout: $line');
-        }
-        output?.writeln(line);
-      }, onDone: () { stdoutDone.complete(); });
+    .transform<String>(utf8.decoder)
+    .transform<String>(const LineSplitter())
+    .listen((String line) {
+      if (printStdout) {
+        print('stdout: $line');
+      }
+      output?.writeln(line);
+    }, onDone: () { stdoutDone.complete(); });
   process.stderr
-      .transform<String>(utf8.decoder)
-      .transform<String>(const LineSplitter())
-      .listen((String line) {
-        if (printStderr) {
-          print('stderr: $line');
-        }
-        stderr?.writeln(line);
-      }, onDone: () { stderrDone.complete(); });
+    .transform<String>(utf8.decoder)
+    .transform<String>(const LineSplitter())
+    .listen((String line) {
+      if (printStderr) {
+        print('stderr: $line');
+      }
+      stderr?.writeln(line);
+    }, onDone: () { stderrDone.complete(); });
 
   return Future.wait<void>(<Future<void>>[
     stdoutDone.future,

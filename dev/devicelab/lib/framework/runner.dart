@@ -58,15 +58,17 @@ Future<void> runTasks(
         isolateParams: isolateParams,
       );
 
-      section('Flaky status for "$taskName"');
       if (!result.succeeded) {
-        retry++;
+        retry += 1;
       } else {
+        section('Flaky status for "$taskName"');
         if (retry > 0) {
-          print('Total ${retry+1} executions: $retry failures and 1 success');
+          print('Total ${retry+1} executions: $retry failures and 1 false positive.');
           print('flaky: true');
+          // TODO(ianh): stop ignoring this failure. We should set exitCode=1, and quit
+          // if exitOnFirstTestFailure is true.
         } else {
-          print('Total ${retry+1} executions: 1 success');
+          print('Test passed on first attempt.');
           print('flaky: false');
         }
         break;
@@ -74,7 +76,8 @@ Future<void> runTasks(
     }
 
     if (!result.succeeded) {
-      print('Total $retry executions: 0 success');
+      section('Flaky status for "$taskName"');
+      print('Consistently failed across all $retry executions.');
       print('flaky: false');
       exitCode = 1;
       if (exitOnFirstTestFailure) {

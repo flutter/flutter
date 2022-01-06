@@ -121,12 +121,10 @@ class _TaskRunner {
             print('[LEAK]: ${info.commandLine} ${info.creationDate} ${info.pid} ');
           }
         }
-      } else {
-        section('Skipping check running Dart$exe processes');
       }
 
       if (runFlutterConfig) {
-        print('enabling configs for macOS, Linux, Windows, and Web...');
+        print('Enabling configs for macOS, Linux, Windows, and Web...');
         final int configResult = await exec(path.join(flutterDirectory.path, 'bin', 'flutter'), <String>[
           'config',
           '-v',
@@ -139,8 +137,6 @@ class _TaskRunner {
         if (configResult != 0) {
           print('Failed to enable configuration, tasks may not run.');
         }
-      } else {
-        print('Skipping enabling configs for macOS, Linux, Windows, and Web');
       }
 
       final Device? device = await _getWorkingDeviceIfAvailable();
@@ -187,8 +183,6 @@ class _TaskRunner {
             }
           }
         }
-      } else {
-        print('Skipping check running Dart$exe processes after task');
       }
       _completer.complete(result);
       return result;
