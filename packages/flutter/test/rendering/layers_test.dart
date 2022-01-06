@@ -164,6 +164,18 @@ void main() {
     expect(followerLayer.debugSubtreeNeedsAddToScene, true);
   });
 
+  test('switching layer link of an attached leader layer should not crash', () {
+    final LayerLink link = LayerLink();
+    final LeaderLayer leaderLayer = LeaderLayer(link: link);
+    final RenderView view = RenderView(configuration: const ViewConfiguration(), window: window);
+    leaderLayer.attach(view);
+    final LayerLink link2 = LayerLink();
+    leaderLayer.link = link2;
+    // This should not crash.
+    leaderLayer.detach();
+    expect(leaderLayer.link, link2);
+  });
+
   test('leader layers are always dirty when connected to follower layer', () {
     final ContainerLayer root = ContainerLayer()..attach(Object());
 
