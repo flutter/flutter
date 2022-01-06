@@ -688,7 +688,7 @@ abstract class StatelessWidget extends Widget {
 ///
 /// This is a skeleton of a stateful widget subclass called `YellowBird`.
 ///
-/// In this example. the [State] has no actual state. State is normally
+/// In this example, the [State] has no actual state. State is normally
 /// represented as private member fields. Also, normally widgets have more
 /// constructor arguments, each of which corresponds to a `final` property.
 ///
