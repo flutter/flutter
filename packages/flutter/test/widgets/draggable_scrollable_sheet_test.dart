@@ -1024,6 +1024,100 @@ void main() {
     loggedSizes.clear();
   });
 
+  testWidgets('Listener does not fire on parameter change and persists after change', (WidgetTester tester) async {
+    const Key stackKey = ValueKey<String>('stack');
+    const Key containerKey = ValueKey<String>('container');
+    final List<double> loggedSizes = <double>[];
+    final DraggableScrollableController controller = DraggableScrollableController();
+    controller.addListener(() {
+      loggedSizes.add(controller.size);
+    });
+    await tester.pumpWidget(_boilerplate(
+      null,
+      controller: controller,
+      stackKey: stackKey,
+      containerKey: containerKey,
+    ));
+    await tester.pumpAndSettle();
+    final double screenHeight = tester
+        .getSize(find.byKey(stackKey))
+        .height;
+
+    expect(loggedSizes.isEmpty, true);
+
+    await tester.drag(find.text('Item 1'), Offset(0, .1 * screenHeight), touchSlopY: 0);
+    await tester.pumpAndSettle();
+    expect(loggedSizes, <double>[.4].map((double v) => closeTo(v, precisionErrorTolerance)));
+    loggedSizes.clear();
+
+    // Update a parameter without forcing a change in the current size.
+    await tester.pumpWidget(_boilerplate(
+      null,
+      minChildSize: .1,
+      controller: controller,
+      stackKey: stackKey,
+      containerKey: containerKey,
+    ));
+    expect(loggedSizes.isEmpty, true);
+
+    await tester.drag(find.text('Item 1'), Offset(0, .1 * screenHeight), touchSlopY: 0);
+    await tester.pumpAndSettle();
+    expect(loggedSizes, <double>[.3].map((double v) => closeTo(v, precisionErrorTolerance)));
+    loggedSizes.clear();
+  });
+
+  testWidgets('Listener fires if a parameter change forces a change in size', (WidgetTester tester) async {
+    const Key stackKey = ValueKey<String>('stack');
+    const Key containerKey = ValueKey<String>('container');
+    final List<double> loggedSizes = <double>[];
+    final DraggableScrollableController controller = DraggableScrollableController();
+    controller.addListener(() {
+      loggedSizes.add(controller.size);
+    });
+    await tester.pumpWidget(_boilerplate(
+      null,
+      controller: controller,
+      stackKey: stackKey,
+      containerKey: containerKey,
+    ));
+    await tester.pumpAndSettle();
+    final double screenHeight = tester
+        .getSize(find.byKey(stackKey))
+        .height;
+
+    expect(loggedSizes.isEmpty, true);
+
+    // Set a new `initialChildSize` which will trigger a size change because we
+    // haven't moved away initial size yet.
+    await tester.pumpWidget(_boilerplate(
+      null,
+      initialChildSize: .6,
+      controller: controller,
+      stackKey: stackKey,
+      containerKey: containerKey,
+    ));
+    expect(loggedSizes, <double>[.6].map((double v) => closeTo(v, precisionErrorTolerance)));
+    loggedSizes.clear();
+
+    // Move away from initial child size.
+    await tester.drag(find.text('Item 1'), Offset(0, .3 * screenHeight), touchSlopY: 0);
+    await tester.pumpAndSettle();
+    expect(loggedSizes, <double>[.3].map((double v) => closeTo(v, precisionErrorTolerance)));
+    loggedSizes.clear();
+
+    // Set a `minChildSize` greater than the current size.
+    await tester.pumpWidget(_boilerplate(
+      null,
+      minChildSize: .4,
+      controller: controller,
+      stackKey: stackKey,
+      containerKey: containerKey,
+    ));
+    expect(loggedSizes, <double>[.4].map((double v) => closeTo(v, precisionErrorTolerance)));
+    loggedSizes.clear();
+  });
+
+
   testWidgets('Invalid controller interactions throw assertion errors', (WidgetTester tester) async {
     final DraggableScrollableController controller = DraggableScrollableController();
     // Can't use a controller before attaching it.
