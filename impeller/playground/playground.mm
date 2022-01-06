@@ -13,6 +13,7 @@
 #include "impeller/playground/playground.h"
 #include "impeller/renderer/allocator.h"
 #include "impeller/renderer/backend/metal/context_mtl.h"
+#include "impeller/renderer/backend/metal/formats_mtl.h"
 #include "impeller/renderer/backend/metal/surface_mtl.h"
 #include "impeller/renderer/backend/metal/texture_mtl.h"
 #include "impeller/renderer/context.h"
@@ -127,7 +128,8 @@ bool Playground::OpenPlaygroundHere(Renderer::RenderCallback render_callback) {
   NSWindow* cocoa_window = ::glfwGetCocoaWindow(window);
   CAMetalLayer* layer = [CAMetalLayer layer];
   layer.device = ContextMTL::Cast(*renderer_.GetContext()).GetMTLDevice();
-  layer.pixelFormat = MTLPixelFormatBGRA8Unorm;
+  // This pixel format is one of the documented supported formats.
+  layer.pixelFormat = ToMTLPixelFormat(PixelFormat::kDefaultColor);
   cocoa_window.contentView.layer = layer;
   cocoa_window.contentView.wantsLayer = YES;
 
@@ -175,6 +177,7 @@ std::shared_ptr<Texture> Playground::CreateTextureForFixture(
   }
 
   auto texture_descriptor = TextureDescriptor{};
+  // We just converted to RGBA above.
   texture_descriptor.format = PixelFormat::kR8G8B8A8UNormInt;
   texture_descriptor.size = image.GetSize();
   texture_descriptor.mip_count = 1u;

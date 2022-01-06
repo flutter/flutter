@@ -17,6 +17,28 @@ namespace impeller {
 
 class RenderTarget;
 
+constexpr PixelFormat FromMTLPixelFormat(MTLPixelFormat format) {
+  switch (format) {
+    case MTLPixelFormatInvalid:
+      return PixelFormat::kUnknown;
+    case MTLPixelFormatBGRA8Unorm:
+      return PixelFormat::kB8G8R8A8UNormInt;
+    case MTLPixelFormatBGRA8Unorm_sRGB:
+      return PixelFormat::kB8G8R8A8UNormIntSRGB;
+    case MTLPixelFormatDepth32Float_Stencil8:
+      return PixelFormat::kD32FloatS8UNormInt;
+    case MTLPixelFormatRGBA8Unorm:
+      return PixelFormat::kR8G8B8A8UNormInt;
+    case MTLPixelFormatStencil8:
+      return PixelFormat::kS8UInt;
+    case MTLPixelFormatRGBA8Unorm_sRGB:
+      return PixelFormat::kR8G8B8A8UNormIntSRGB;
+    default:
+      return PixelFormat::kUnknown;
+  }
+  return PixelFormat::kUnknown;
+}
+
 constexpr MTLPixelFormat ToMTLPixelFormat(PixelFormat format) {
   switch (format) {
     case PixelFormat::kUnknown:
