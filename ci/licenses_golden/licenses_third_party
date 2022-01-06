@@ -1,4 +1,4 @@
-Signature: 79b0c354265bcb11af475cd806235eed
+Signature: 49a681051f210ef77fe2c686e6a67701
 
 UNUSED LICENSES:
 
@@ -14479,7 +14479,7 @@ THE SOFTWARE.
 
 ====================================================================================================
 LIBRARY: glfw
-ORIGIN: ../../../third_party/glfw/COPYING.txt
+ORIGIN: ../../../third_party/glfw/LICENSE.md
 TYPE: LicenseType.zlib
 FILE: ../../../third_party/glfw/.appveyor.yml
 FILE: ../../../third_party/glfw/CMake/MacOSXBundleInfo.plist.in
@@ -14519,10 +14519,10 @@ FILE: ../../../third_party/glfw/src/input.c
 FILE: ../../../third_party/glfw/src/internal.h
 FILE: ../../../third_party/glfw/src/linux_joystick.c
 FILE: ../../../third_party/glfw/src/monitor.c
+FILE: ../../../third_party/glfw/src/posix_thread.c
+FILE: ../../../third_party/glfw/src/posix_thread.h
 FILE: ../../../third_party/glfw/src/posix_time.c
 FILE: ../../../third_party/glfw/src/posix_time.h
-FILE: ../../../third_party/glfw/src/posix_tls.c
-FILE: ../../../third_party/glfw/src/posix_tls.h
 FILE: ../../../third_party/glfw/src/vulkan.c
 FILE: ../../../third_party/glfw/src/wgl_context.c
 FILE: ../../../third_party/glfw/src/wgl_context.h
@@ -14530,8 +14530,8 @@ FILE: ../../../third_party/glfw/src/win32_init.c
 FILE: ../../../third_party/glfw/src/win32_joystick.c
 FILE: ../../../third_party/glfw/src/win32_monitor.c
 FILE: ../../../third_party/glfw/src/win32_platform.h
+FILE: ../../../third_party/glfw/src/win32_thread.c
 FILE: ../../../third_party/glfw/src/win32_time.c
-FILE: ../../../third_party/glfw/src/win32_tls.c
 FILE: ../../../third_party/glfw/src/win32_window.c
 FILE: ../../../third_party/glfw/src/x11_init.c
 FILE: ../../../third_party/glfw/src/x11_monitor.c
@@ -14540,7 +14540,7 @@ FILE: ../../../third_party/glfw/src/x11_window.c
 FILE: ../../../third_party/glfw/src/xkb_unicode.c
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2002-2006 Marcus Geelnard
-Copyright (c) 2006-2016 Camilla Berglund <elmindreda@glfw.org>
+Copyright (c) 2006-2016 Camilla Löwy <elmindreda@glfw.org>
 
 This software is provided 'as-is', without any express or implied
 warranty. In no event will the authors be held liable for any damages
@@ -14573,7 +14573,7 @@ FILE: ../../../third_party/glfw/src/cocoa_window.m
 FILE: ../../../third_party/glfw/src/nsgl_context.h
 FILE: ../../../third_party/glfw/src/nsgl_context.m
 ----------------------------------------------------------------------------------------------------
-Copyright (c) 2009-2016 Camilla Berglund <elmindreda@glfw.org>
+Copyright (c) 2009-2016 Camilla Löwy <elmindreda@glfw.org>
 
 This software is provided 'as-is', without any express or implied
 warranty. In no event will the authors be held liable for any damages
@@ -14600,9 +14600,13 @@ LIBRARY: glfw
 ORIGIN: ../../../third_party/glfw/src/cocoa_joystick.h
 TYPE: LicenseType.zlib
 FILE: ../../../third_party/glfw/src/cocoa_joystick.h
+FILE: ../../../third_party/glfw/src/mappings.h
+FILE: ../../../third_party/glfw/src/mappings.h.in
+FILE: ../../../third_party/glfw/src/null_joystick.c
+FILE: ../../../third_party/glfw/src/null_joystick.h
 FILE: ../../../third_party/glfw/src/win32_joystick.h
 ----------------------------------------------------------------------------------------------------
-Copyright (c) 2006-2016 Camilla Berglund <elmindreda@glfw.org>
+Copyright (c) 2006-2016 Camilla Löwy <elmindreda@glfw.org>
 
 This software is provided 'as-is', without any express or implied
 warranty. In no event will the authors be held liable for any damages
@@ -14630,7 +14634,7 @@ ORIGIN: ../../../third_party/glfw/src/cocoa_joystick.m
 TYPE: LicenseType.zlib
 FILE: ../../../third_party/glfw/src/cocoa_joystick.m
 ----------------------------------------------------------------------------------------------------
-Copyright (c) 2009-2016 Camilla Berglund <elmindreda@glfw.org>
+Copyright (c) 2009-2016 Camilla Löwy <elmindreda@glfw.org>
 Copyright (c) 2012 Torsten Walluhn <tw@mad-cad.net>
 
 This software is provided 'as-is', without any express or implied
@@ -14659,7 +14663,7 @@ ORIGIN: ../../../third_party/glfw/src/glfw_config.h.in
 TYPE: LicenseType.zlib
 FILE: ../../../third_party/glfw/src/glfw_config.h.in
 ----------------------------------------------------------------------------------------------------
-Copyright (c) 2010-2016 Camilla Berglund <elmindreda@glfw.org>
+Copyright (c) 2010-2016 Camilla Löwy <elmindreda@glfw.org>
 
 This software is provided 'as-is', without any express or implied
 warranty. In no event will the authors be held liable for any damages
@@ -14716,14 +14720,17 @@ freely, subject to the following restrictions:
 
 ====================================================================================================
 LIBRARY: glfw
-ORIGIN: ../../../third_party/glfw/src/mir_init.c
+ORIGIN: ../../../third_party/glfw/src/null_init.c
 TYPE: LicenseType.zlib
-FILE: ../../../third_party/glfw/src/mir_init.c
-FILE: ../../../third_party/glfw/src/mir_monitor.c
-FILE: ../../../third_party/glfw/src/mir_platform.h
-FILE: ../../../third_party/glfw/src/mir_window.c
+FILE: ../../../third_party/glfw/src/null_init.c
+FILE: ../../../third_party/glfw/src/null_monitor.c
+FILE: ../../../third_party/glfw/src/null_platform.h
+FILE: ../../../third_party/glfw/src/null_window.c
+FILE: ../../../third_party/glfw/src/osmesa_context.c
+FILE: ../../../third_party/glfw/src/osmesa_context.h
 ----------------------------------------------------------------------------------------------------
-Copyright (c) 2014-2015 Brandon Schaefer <brandon.schaefer@canonical.com>
+Copyright (c) 2016 Google Inc.
+Copyright (c) 2006-2016 Camilla Löwy <elmindreda@glfw.org>
 
 This software is provided 'as-is', without any express or implied
 warranty. In no event will the authors be held liable for any damages
@@ -14752,7 +14759,7 @@ TYPE: LicenseType.zlib
 FILE: ../../../third_party/glfw/src/window.c
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2002-2006 Marcus Geelnard
-Copyright (c) 2006-2016 Camilla Berglund <elmindreda@glfw.org>
+Copyright (c) 2006-2016 Camilla Löwy <elmindreda@glfw.org>
 Copyright (c) 2012 Torsten Walluhn <tw@mad-cad.net>
 
 This software is provided 'as-is', without any express or implied
