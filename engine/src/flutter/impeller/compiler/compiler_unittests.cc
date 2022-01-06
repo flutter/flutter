@@ -30,6 +30,7 @@ class CompilerTest : public ::testing::Test {
       return false;
     }
     Compiler::SourceOptions compiler_options(fixture_name);
+    compiler_options.target_platform = Compiler::TargetPlatform::kMacOS;
     compiler_options.working_directory = std::make_shared<fml::UniqueFD>(
         flutter::testing::OpenFixturesDirectory());
     Reflector::Options reflector_options;

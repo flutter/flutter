@@ -6,6 +6,7 @@
 
 #include "flutter/fml/trace_event.h"
 #include "impeller/base/validation.h"
+#include "impeller/renderer/backend/metal/formats_mtl.h"
 #include "impeller/renderer/backend/metal/texture_mtl.h"
 #include "impeller/renderer/render_target.h"
 
@@ -27,46 +28,60 @@ std::unique_ptr<Surface> SurfaceMTL::WrapCurrentMetalLayerDrawable(
     return nullptr;
   }
 
-  TextureDescriptor msaa_tex_desc;
-  msaa_tex_desc.type = TextureType::k2DMultisample;
-  msaa_tex_desc.sample_count = SampleCount::kCount4;
-  msaa_tex_desc.format = PixelFormat::kB8G8R8A8UNormInt;
-  msaa_tex_desc.size = {
+  const auto color_format =
+      FromMTLPixelFormat(current_drawable.texture.pixelFormat);
+
+  if (color_format == PixelFormat::kUnknown) {
+    VALIDATION_LOG << "Unknown drawable color format.";
+    return nullptr;
+  }
+
+  TextureDescriptor color0_tex_desc;
+  color0_tex_desc.type = TextureType::k2DMultisample;
+  color0_tex_desc.sample_count = SampleCount::kCount4;
+  color0_tex_desc.format = color_format;
+  color0_tex_desc.size = {
       static_cast<ISize::Type>(current_drawable.texture.width),
       static_cast<ISize::Type>(current_drawable.texture.height)};
-  msaa_tex_desc.usage = static_cast<uint64_t>(TextureUsage::kRenderTarget);
+  color0_tex_desc.usage = static_cast<uint64_t>(TextureUsage::kRenderTarget);
 
   auto msaa_tex = context->GetPermanentsAllocator()->CreateTexture(
-      StorageMode::kDeviceTransient, msaa_tex_desc);
+      StorageMode::kDeviceTransient, color0_tex_desc);
   if (!msaa_tex) {
-    FML_LOG(ERROR) << "Could not allocate MSAA resolve texture.";
+    VALIDATION_LOG << "Could not allocate MSAA resolve texture.";
     return nullptr;
   }
 
   msaa_tex->SetLabel("ImpellerOnscreenColor4xMSAA");
 
-  TextureDescriptor onscreen_tex_desc;
-  onscreen_tex_desc.format = PixelFormat::kB8G8R8A8UNormInt;
-  onscreen_tex_desc.size = msaa_tex_desc.size;
-  onscreen_tex_desc.usage = static_cast<uint64_t>(TextureUsage::kRenderTarget);
+  TextureDescriptor color0_resolve_tex_desc;
+  color0_resolve_tex_desc.format = color_format;
+  color0_resolve_tex_desc.size = color0_tex_desc.size;
+  color0_resolve_tex_desc.usage =
+      static_cast<uint64_t>(TextureUsage::kRenderTarget);
 
   ColorAttachment color0;
   color0.texture = msaa_tex;
   color0.clear_color = Color::DarkSlateGray();
   color0.load_action = LoadAction::kClear;
   color0.store_action = StoreAction::kMultisampleResolve;
-  color0.resolve_texture =
-      std::make_shared<TextureMTL>(onscreen_tex_desc, current_drawable.texture);
+  color0.resolve_texture = std::make_shared<TextureMTL>(
+      color0_resolve_tex_desc, current_drawable.texture);
 
   TextureDescriptor stencil0_tex;
   stencil0_tex.type = TextureType::k2DMultisample;
   stencil0_tex.sample_count = SampleCount::kCount4;
-  stencil0_tex.format = PixelFormat::kS8UInt;
-  stencil0_tex.size = msaa_tex_desc.size;
+  stencil0_tex.format = PixelFormat::kDefaultStencil;
+  stencil0_tex.size = color0_tex_desc.size;
   stencil0_tex.usage =
       static_cast<TextureUsageMask>(TextureUsage::kRenderTarget);
   auto stencil_texture = context->GetPermanentsAllocator()->CreateTexture(
       StorageMode::kDeviceTransient, stencil0_tex);
+
+  if (!stencil_texture) {
+    VALIDATION_LOG << "Could not create stencil texture.";
+    return nullptr;
+  }
   stencil_texture->SetLabel("ImpellerOnscreenStencil");
 
   StencilAttachment stencil0;
