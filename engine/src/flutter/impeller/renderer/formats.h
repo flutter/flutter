@@ -52,9 +52,6 @@ enum class PixelFormat {
   kB8G8R8A8UNormIntSRGB,
   kS8UInt,
 
-  // Esoteric formats only used as render targets.
-  kD32FloatS8UNormInt,
-
   // Defaults. If you don't know which ones to use, these are usually a safe
   // bet.
   //
@@ -183,11 +180,6 @@ constexpr size_t BytesPerPixelForPixelFormat(PixelFormat format) {
     case PixelFormat::kB8G8R8A8UNormInt:
     case PixelFormat::kB8G8R8A8UNormIntSRGB:
       return 4u;
-    case PixelFormat::kD32FloatS8UNormInt:
-      // This is an esoteric format and implementations may use 64 bits.
-      // Impeller doesn't work with these natively and this return is only here
-      // for completeness. The 40 bits is as documented.
-      return 5u;
   }
   return 0u;
 }
