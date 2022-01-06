@@ -281,6 +281,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     Locale? locale,
     double cursorWidth = 1.0,
     double? cursorHeight,
+    bool fixedCursorHeight = false,
     Radius? cursorRadius,
     bool paintCursorAboveText = false,
     Offset cursorOffset = Offset.zero,
@@ -345,6 +346,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
        _offset = offset,
        _cursorWidth = cursorWidth,
        _cursorHeight = cursorHeight,
+        _fixedCursorHeight = fixedCursorHeight,
        _paintCursorOnTop = paintCursorAboveText,
        _enableInteractiveSelection = enableInteractiveSelection,
        _devicePixelRatio = devicePixelRatio,
@@ -1084,6 +1086,19 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       return;
     _cursorHeight = value;
     markNeedsLayout();
+  }
+
+  /// {@template flutter.rendering.RenderEditable.fixedCursorHeight}
+  /// If the cursor height should be fixed.
+  ///
+  /// {@endtemplate}
+  bool get fixedCursorHeight => _fixedCursorHeight;
+  bool _fixedCursorHeight;
+
+  set fixedCursorHeight(bool value) {
+    if (_fixedCursorHeight == value)
+      return;
+    _fixedCursorHeight = value;
   }
 
   /// {@template flutter.rendering.RenderEditable.paintCursorAboveText}
@@ -2874,6 +2889,12 @@ class _FloatingCursorPainter extends RenderEditablePainter {
     }
 
     caretRect = caretRect.shift(renderEditable._paintOffset);
+
+    //If fixed cursorHeight, caretRect top bottom will fixed
+    if (renderEditable.fixedCursorHeight != null && renderEditable.fixedCursorHeight) {
+      caretRect = Rect.fromLTRB(caretRect.left, 0.0, caretRect.right, renderEditable.cursorHeight + 2.0);
+    }
+
     final Rect integralRect = caretRect.shift(renderEditable._snapToPhysicalPixel(caretRect.topLeft));
 
     if (shouldPaint) {

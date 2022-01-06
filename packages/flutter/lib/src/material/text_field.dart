@@ -312,6 +312,7 @@ class TextField extends StatefulWidget {
     this.enabled,
     this.cursorWidth = 2.0,
     this.cursorHeight,
+    this.fixedCursorHeight = false,
     this.cursorRadius,
     this.cursorColor,
     this.selectionHeightStyle = ui.BoxHeightStyle.tight,
@@ -613,6 +614,9 @@ class TextField extends StatefulWidget {
 
   /// {@macro flutter.widgets.editableText.cursorHeight}
   final double? cursorHeight;
+
+  /// {@macro flutter.widgets.editableText.fixedCursorHeight}
+  final bool fixedCursorHeight;
 
   /// {@macro flutter.widgets.editableText.cursorRadius}
   final Radius? cursorRadius;
@@ -1255,6 +1259,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
           mouseCursor: MouseCursor.defer, // TextField will handle the cursor
           cursorWidth: widget.cursorWidth,
           cursorHeight: widget.cursorHeight,
+          fixedCursorHeight: widget.fixedCursorHeight,
           cursorRadius: cursorRadius,
           cursorColor: cursorColor,
           selectionHeightStyle: widget.selectionHeightStyle,
