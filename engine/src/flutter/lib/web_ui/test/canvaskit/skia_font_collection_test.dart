@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:typed_data';
+
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 
@@ -71,6 +73,57 @@ void testMain() {
           ],
         ),
       );
+    });
+
+    test('prioritizes Ahem loaded via FontManifest.json', () async {
+      final SkiaFontCollection fontCollection = SkiaFontCollection();
+      final WebOnlyMockAssetManager mockAssetManager =
+          WebOnlyMockAssetManager();
+      mockAssetManager.defaultFontManifest = '''
+        [
+          {
+            "family":"Ahem",
+            "fonts":[{"asset":"/assets/fonts/Roboto-Regular.ttf"}]
+          }
+        ]
+      '''.trim();
+
+      final ByteBuffer robotoData = (await (await httpFetch('/assets/fonts/Roboto-Regular.ttf')).arrayBuffer())! as ByteBuffer;
+
+      await fontCollection.registerFonts(mockAssetManager);
+      fontCollection.debugRegisterTestFonts();
+      await fontCollection.ensureFontsLoaded();
+      expect(warnings, isEmpty);
+
+      // Use `singleWhere` to make sure only one version of 'Ahem' is loaded.
+      final RegisteredFont ahem = fontCollection.debugDownloadedFonts!
+        .singleWhere((RegisteredFont font) => font.family == 'Ahem');
+
+      // Check that the contents of 'Ahem' is actually Roboto, because that's
+      // what's specified in the manifest, and the manifest takes precedence.
+      expect(ahem.bytes.length, robotoData.lengthInBytes);
+    });
+
+    test('falls back to default Ahem URL', () async {
+      final SkiaFontCollection fontCollection = SkiaFontCollection();
+      final WebOnlyMockAssetManager mockAssetManager =
+          WebOnlyMockAssetManager();
+      mockAssetManager.defaultFontManifest = '[]';
+
+      final ByteBuffer ahemData = (await (await httpFetch('/assets/fonts/ahem.ttf')).arrayBuffer())! as ByteBuffer;
+
+      await fontCollection.registerFonts(mockAssetManager);
+      fontCollection.debugRegisterTestFonts();
+      await fontCollection.ensureFontsLoaded();
+      expect(warnings, isEmpty);
+
+      // Use `singleWhere` to make sure only one version of 'Ahem' is loaded.
+      final RegisteredFont ahem = fontCollection.debugDownloadedFonts!
+        .singleWhere((RegisteredFont font) => font.family == 'Ahem');
+
+      // Check that the contents of 'Ahem' is actually Roboto, because that's
+      // what's specified in the manifest, and the manifest takes precedence.
+      expect(ahem.bytes.length, ahemData.lengthInBytes);
     });
     // TODO(hterkelsen): https://github.com/flutter/flutter/issues/60040
   }, skip: isIosSafari);
