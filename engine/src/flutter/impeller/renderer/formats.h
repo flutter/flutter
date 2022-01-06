@@ -51,8 +51,17 @@ enum class PixelFormat {
   kB8G8R8A8UNormInt,
   kB8G8R8A8UNormIntSRGB,
   kS8UInt,
+
   // Esoteric formats only used as render targets.
   kD32FloatS8UNormInt,
+
+  // Defaults. If you don't know which ones to use, these are usually a safe
+  // bet.
+  //
+  // On Metal, this is a support format for layer drawable and can be used to
+  // specify the format of the resolve texture if needed.
+  kDefaultColor = kB8G8R8A8UNormInt,
+  kDefaultStencil = kS8UInt,
 };
 
 enum class BlendFactor {
