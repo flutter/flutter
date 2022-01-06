@@ -483,7 +483,7 @@ class InkResponse extends StatelessWidget {
   /// Defines the ink response focus, hover, and splash colors.
   ///
   /// This default null property can be used as an alternative to
-  /// [focusColor], [hoverColor], [highlightColor], and
+  /// [focusColor], [hoverColor], [highlightColor] and
   /// [splashColor]. If non-null, it is resolved against one of
   /// [MaterialState.focused], [MaterialState.hovered], and
   /// [MaterialState.pressed]. It's convenient to use when the parent
