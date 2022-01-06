@@ -1752,9 +1752,6 @@ class OpacityLayer extends ContainerLayer {
   set alpha(int? value) {
     assert(value != null);
     if (value != _alpha) {
-      if (value == 255 || _alpha == 255) {
-        engineLayer = null;
-      }
       _alpha = value;
       markNeedsAddToScene();
     }
