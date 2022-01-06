@@ -527,6 +527,7 @@ class EditableText extends StatefulWidget {
     this.clipBehavior = Clip.hardEdge,
     this.restorationId,
     this.scrollBehavior,
+    this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
   }) : assert(controller != null),
        assert(focusNode != null),
@@ -1214,6 +1215,13 @@ class EditableText extends StatefulWidget {
   /// [scrollPhysics].
   final ScrollPhysics? scrollPhysics;
 
+  /// {@template flutter.widgets.editableText.scribbleEnabled}
+  /// Whether iOS 14 Scribble features are enabled for this widget.
+  ///
+  /// Defaults to true.
+  /// {@endtemplate}
+  final bool scribbleEnabled;
+
   /// {@template flutter.widgets.editableText.selectionEnabled}
   /// Same as [enableInteractiveSelection].
   ///
@@ -1514,6 +1522,7 @@ class EditableText extends StatefulWidget {
     properties.add(DiagnosticsProperty<ScrollPhysics>('scrollPhysics', scrollPhysics, defaultValue: null));
     properties.add(DiagnosticsProperty<Iterable<String>>('autofillHints', autofillHints, defaultValue: null));
     properties.add(DiagnosticsProperty<TextHeightBehavior>('textHeightBehavior', textHeightBehavior, defaultValue: null));
+    properties.add(DiagnosticsProperty<bool>('scribbleEnabled', scribbleEnabled, defaultValue: true));
     properties.add(DiagnosticsProperty<bool>('enableIMEPersonalizedLearning', enableIMEPersonalizedLearning, defaultValue: true));
   }
 }
@@ -2679,6 +2688,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   TextStyle? _cachedTextStyle;
 
   void _updateSelectionRects({bool force = false}) {
+    if (!widget.scribbleEnabled)
+      return;
     if (defaultTargetPlatform != TargetPlatform.iOS)
       return;
     // This is to avoid sending selection rects on non-iPad devices.
@@ -2872,6 +2883,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   void insertTextPlaceholder(Size size) {
+    if (!widget.scribbleEnabled)
+      return;
+
     if (!widget.controller.selection.isValid)
       return;
 
@@ -2882,6 +2896,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   void removeTextPlaceholder() {
+    if (!widget.scribbleEnabled)
+      return;
+
     setState(() {
       _placeholderLocation = -1;
     });
@@ -3091,6 +3108,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                   child: _ScribbleFocusable(
                     focusNode: widget.focusNode,
                     editableKey: _editableKey,
+                    enabled: widget.scribbleEnabled,
                     updateSelectionRects: () {
                       _openInputConnection();
                       _updateSelectionRects(force: true);
@@ -3391,6 +3409,142 @@ class _Editable extends MultiChildRenderObjectWidget {
       ..promptRectColor = promptRectColor
       ..clipBehavior = clipBehavior
       ..setPromptRectRange(promptRectRange);
+  }
+}
+
+class _ScribbleFocusable extends StatefulWidget {
+  const _ScribbleFocusable({
+    Key? key,
+    required this.child,
+    required this.focusNode,
+    required this.editableKey,
+    required this.updateSelectionRects,
+    required this.enabled,
+  }): super(key: key);
+
+  final Widget child;
+  final FocusNode focusNode;
+  final GlobalKey editableKey;
+  final VoidCallback updateSelectionRects;
+  final bool enabled;
+
+  @override
+  _ScribbleFocusableState createState() => _ScribbleFocusableState();
+}
+
+class _ScribbleFocusableState extends State<_ScribbleFocusable> implements ScribbleClient {
+  _ScribbleFocusableState(): _elementIdentifier = (_nextElementIdentifier++).toString();
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.enabled) {
+      TextInput.registerScribbleElement(elementIdentifier, this);
+    }
+  }
+
+  @override
+  void didUpdateWidget(_ScribbleFocusable oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!oldWidget.enabled && widget.enabled) {
+      TextInput.registerScribbleElement(elementIdentifier, this);
+    }
+
+    if (oldWidget.enabled && !widget.enabled) {
+      TextInput.unregisterScribbleElement(elementIdentifier);
+    }
+  }
+
+  @override
+  void dispose() {
+    TextInput.unregisterScribbleElement(elementIdentifier);
+    super.dispose();
+  }
+
+  RenderEditable? get renderEditable => widget.editableKey.currentContext?.findRenderObject() as RenderEditable?;
+
+  static int _nextElementIdentifier = 1;
+  final String _elementIdentifier;
+
+  @override
+  String get elementIdentifier => _elementIdentifier;
+
+  @override
+  void onScribbleFocus(Offset offset) {
+    widget.focusNode.requestFocus();
+    renderEditable?.selectPositionAt(from: offset, cause: SelectionChangedCause.scribble);
+    widget.updateSelectionRects();
+  }
+
+  @override
+  bool isInScribbleRect(Rect rect) {
+    final Rect _bounds = bounds;
+    if (renderEditable?.readOnly ?? false)
+      return false;
+    if (_bounds == Rect.zero)
+      return false;
+    if (!_bounds.overlaps(rect))
+      return false;
+    final Rect intersection = _bounds.intersect(rect);
+    final HitTestResult result = HitTestResult();
+    WidgetsBinding.instance?.hitTest(result, intersection.center);
+    return result.path.any((HitTestEntry entry) => entry.target == renderEditable);
+  }
+
+  @override
+  Rect get bounds {
+    final RenderBox? box = context.findRenderObject() as RenderBox?;
+    if (box == null || !mounted || !box.attached)
+      return Rect.zero;
+    final Matrix4 transform = box.getTransformTo(null);
+    return MatrixUtils.transformRect(transform, Rect.fromLTWH(0, 0, box.size.width, box.size.height));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return widget.child;
+  }
+}
+
+class _ScribblePlaceholder extends WidgetSpan {
+  const _ScribblePlaceholder({
+    required Widget child,
+    ui.PlaceholderAlignment alignment = ui.PlaceholderAlignment.bottom,
+    TextBaseline? baseline,
+    TextStyle? style,
+    required this.size,
+  }) : assert(child != null),
+       assert(baseline != null || !(
+         identical(alignment, ui.PlaceholderAlignment.aboveBaseline) ||
+         identical(alignment, ui.PlaceholderAlignment.belowBaseline) ||
+         identical(alignment, ui.PlaceholderAlignment.baseline)
+       )),
+       super(
+         alignment: alignment,
+         baseline: baseline,
+         style: style,
+         child: child,
+       );
+
+  /// The size of the span, used in place of adding a placeholder size to the [TextPainter].
+  final Size size;
+
+  @override
+  void build(ui.ParagraphBuilder builder, { double textScaleFactor = 1.0, List<PlaceholderDimensions>? dimensions }) {
+    assert(debugAssertIsValid());
+    final bool hasStyle = style != null;
+    if (hasStyle) {
+      builder.pushStyle(style!.getTextStyle(textScaleFactor: textScaleFactor));
+    }
+    builder.addPlaceholder(
+      size.width,
+      size.height,
+      alignment,
+      scale: textScaleFactor,
+    );
+    if (hasStyle) {
+      builder.pop();
+    }
   }
 }
 
@@ -3940,124 +4094,4 @@ class _CopySelectionAction extends ContextAction<CopySelectionTextIntent> {
 
   @override
   bool get isActionEnabled => state._value.selection.isValid && !state._value.selection.isCollapsed;
-}
-
-class _ScribbleFocusable extends StatefulWidget {
-  const _ScribbleFocusable({
-    Key? key,
-    required this.child,
-    required this.focusNode,
-    required this.editableKey,
-    required this.updateSelectionRects,
-  }): super(key: key);
-
-  final Widget child;
-  final FocusNode focusNode;
-  final GlobalKey editableKey;
-  final VoidCallback updateSelectionRects;
-
-  @override
-  _ScribbleFocusableState createState() => _ScribbleFocusableState();
-}
-
-class _ScribbleFocusableState extends State<_ScribbleFocusable> implements ScribbleClient {
-  _ScribbleFocusableState(): _elementIdentifier = (_nextElementIdentifier++).toString();
-
-  @override
-  void initState() {
-    super.initState();
-    TextInput.registerScribbleElement(elementIdentifier, this);
-  }
-
-  @override
-  void dispose() {
-    TextInput.unregisterScribbleElement(elementIdentifier);
-    super.dispose();
-  }
-
-  RenderEditable? get renderEditable => widget.editableKey.currentContext?.findRenderObject() as RenderEditable?;
-
-  static int _nextElementIdentifier = 1;
-  final String _elementIdentifier;
-
-  @override
-  String get elementIdentifier => _elementIdentifier;
-
-  @override
-  void onScribbleFocus(Offset offset) {
-    widget.focusNode.requestFocus();
-    renderEditable?.selectPositionAt(from: offset, cause: SelectionChangedCause.scribble);
-    widget.updateSelectionRects();
-  }
-
-  @override
-  bool isInScribbleRect(Rect rect) {
-    final Rect _bounds = bounds;
-    if (renderEditable?.readOnly ?? false)
-      return false;
-    if (_bounds == Rect.zero)
-      return false;
-    if (!_bounds.overlaps(rect))
-      return false;
-    final Rect intersection = _bounds.intersect(rect);
-    final HitTestResult result = HitTestResult();
-    WidgetsBinding.instance?.hitTest(result, intersection.center);
-    return result.path.any((HitTestEntry entry) => entry.target == renderEditable);
-  }
-
-  @override
-  Rect get bounds {
-    final RenderBox? box = context.findRenderObject() as RenderBox?;
-    if (box == null || !mounted || !box.attached)
-      return Rect.zero;
-    final Matrix4 transform = box.getTransformTo(null);
-    return MatrixUtils.transformRect(transform, Rect.fromLTWH(0, 0, box.size.width, box.size.height));
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return widget.child;
-  }
-}
-
-class _ScribblePlaceholder extends WidgetSpan {
-  const _ScribblePlaceholder({
-    required Widget child,
-    ui.PlaceholderAlignment alignment = ui.PlaceholderAlignment.bottom,
-    TextBaseline? baseline,
-    TextStyle? style,
-    required this.size,
-  }) : assert(child != null),
-       assert(baseline != null || !(
-         identical(alignment, ui.PlaceholderAlignment.aboveBaseline) ||
-         identical(alignment, ui.PlaceholderAlignment.belowBaseline) ||
-         identical(alignment, ui.PlaceholderAlignment.baseline)
-       )),
-       super(
-         alignment: alignment,
-         baseline: baseline,
-         style: style,
-         child: child,
-       );
-
-  /// The size of the span, used in place of adding a placeholder size to the [TextPainter].
-  final Size size;
-
-  @override
-  void build(ui.ParagraphBuilder builder, { double textScaleFactor = 1.0, List<PlaceholderDimensions>? dimensions }) {
-    assert(debugAssertIsValid());
-    final bool hasStyle = style != null;
-    if (hasStyle) {
-      builder.pushStyle(style!.getTextStyle(textScaleFactor: textScaleFactor));
-    }
-    builder.addPlaceholder(
-      size.width,
-      size.height,
-      alignment,
-      scale: textScaleFactor,
-    );
-    if (hasStyle) {
-      builder.pop();
-    }
-  }
 }

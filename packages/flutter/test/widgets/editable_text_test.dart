@@ -1809,6 +1809,25 @@ void main() {
     elements = await tester.testTextInput.scribbleRequestElementsInRect(const Rect.fromLTWH(0, 0, 1, 1));
     expect(elements.length, 0);
 
+    // Widget has scribble disabled.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          controller: controller,
+          backgroundCursorColor: Colors.grey,
+          focusNode: focusNode,
+          style: textStyle,
+          cursorColor: cursorColor,
+          selectionControls: materialTextSelectionControls,
+          scribbleEnabled: false,
+        ),
+      ),
+    );
+
+    elements = await tester.testTextInput.scribbleRequestElementsInRect(const Rect.fromLTWH(0, 0, 1, 1));
+    expect(elements.length, 0);
+
+
     // On web, we should rely on the browser's implementation of Scribble, so the engine will
     // never request the scribble elements.
   }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS })); // [intended]
@@ -1848,6 +1867,36 @@ void main() {
     expect((textSpan.children![2] as TextSpan).text, ' ipsum dolor sit amet');
 
     await tester.testTextInput.scribbleRemovePlaceholder();
+    await tester.pumpAndSettle();
+
+    textSpan = findRenderEditable(tester).text! as TextSpan;
+    expect(textSpan.children, null);
+    expect(textSpan.text, 'Lorem ipsum dolor sit amet');
+
+    // Widget has scribble disabled.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          controller: controller,
+          backgroundCursorColor: Colors.grey,
+          focusNode: focusNode,
+          style: textStyle,
+          cursorColor: cursorColor,
+          selectionControls: materialTextSelectionControls,
+          scribbleEnabled: false,
+        ),
+      ),
+    );
+
+    await tester.showKeyboard(find.byType(EditableText));
+
+    tester.testTextInput.updateEditingValue(TextEditingValue(
+      text: controller.text,
+      selection: const TextSelection(baseOffset: 5, extentOffset: 5),
+    ));
+    await tester.pumpAndSettle();
+
+    await tester.testTextInput.scribbleInsertPlaceholder();
     await tester.pumpAndSettle();
 
     textSpan = findRenderEditable(tester).text! as TextSpan;
@@ -1895,6 +1944,37 @@ void main() {
     expect((textSpan.children![3] as TextSpan).text, ' ipsum dolor sit amet');
 
     await tester.testTextInput.scribbleRemovePlaceholder();
+    await tester.pumpAndSettle();
+
+    textSpan = findRenderEditable(tester).text! as TextSpan;
+    expect(textSpan.children, null);
+    expect(textSpan.text, 'Lorem ipsum dolor sit amet');
+
+    // Widget has scribble disabled.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          controller: controller,
+          backgroundCursorColor: Colors.grey,
+          focusNode: focusNode,
+          style: textStyle,
+          cursorColor: cursorColor,
+          selectionControls: materialTextSelectionControls,
+          maxLines: 2,
+          scribbleEnabled: false,
+        ),
+      ),
+    );
+
+    await tester.showKeyboard(find.byType(EditableText));
+
+    tester.testTextInput.updateEditingValue(TextEditingValue(
+      text: controller.text,
+      selection: const TextSelection(baseOffset: 5, extentOffset: 5),
+    ));
+    await tester.pumpAndSettle();
+
+    await tester.testTextInput.scribbleInsertPlaceholder();
     await tester.pumpAndSettle();
 
     textSpan = findRenderEditable(tester).text! as TextSpan;
@@ -3973,6 +4053,45 @@ void main() {
     final MethodCall methodCall = log.firstWhere((MethodCall m) => m.method == 'TextInput.setSelectionRects');
     expect(methodCall.method, 'TextInput.setSelectionRects');
     expect((methodCall.arguments as List<dynamic>).length, 5);
+
+    // On web, we should rely on the browser's implementation of Scribble, so we will not send selection rects.
+  }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS })); // [intended]
+
+  testWidgets('selection rects are not sent if scribbleEnabled is false', (WidgetTester tester) async {
+    final List<MethodCall> log = <MethodCall>[];
+    SystemChannels.textInput.setMockMethodCallHandler((MethodCall methodCall) async {
+      log.add(methodCall);
+    });
+
+    final TextEditingController controller = TextEditingController();
+    controller.text = 'Text1';
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children:  <Widget>[
+              EditableText(
+                key: ValueKey<String>(controller.text),
+                controller: controller,
+                focusNode: FocusNode(),
+                style: Typography.material2018().black.subtitle1!,
+                cursorColor: Colors.blue,
+                backgroundCursorColor: Colors.grey,
+                scribbleEnabled: false,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.showKeyboard(find.byKey(ValueKey<String>(controller.text)));
+
+    // There should be a new platform message updating the selection rects.
+    expect(log.where((MethodCall m) => m.method == 'TextInput.setSelectionRects').length, 0);
 
     // On web, we should rely on the browser's implementation of Scribble, so we will not send selection rects.
   }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS })); // [intended]
