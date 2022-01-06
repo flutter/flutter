@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'package:flutter/foundation.dart';
 
 import 'basic_types.dart';
@@ -261,15 +260,13 @@ class ShapeDecoration extends Decoration {
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      color,
-      gradient,
-      image,
-      shape,
-      hashList(shadows),
-    );
-  }
+  int get hashCode => Object.hash(
+    color,
+    gradient,
+    image,
+    shape,
+    Object.hashAll(shadows ?? const <Object>[]),
+  );
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

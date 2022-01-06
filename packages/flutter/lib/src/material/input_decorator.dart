@@ -55,7 +55,7 @@ class _InputBorderGap extends ChangeNotifier {
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes, this class is not used in collection
-  int get hashCode => hashValues(start, extent);
+  int get hashCode => Object.hash(start, extent);
 
   @override
   String toString() => describeIdentity(this);
@@ -637,30 +637,28 @@ class _Decoration {
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      contentPadding,
-      floatingLabelHeight,
-      floatingLabelProgress,
-      floatingLabelAlignment,
-      border,
-      borderGap,
-      alignLabelWithHint,
-      isDense,
-      visualDensity,
-      icon,
-      input,
-      label,
-      hint,
-      prefix,
-      suffix,
-      prefixIcon,
-      suffixIcon,
-      helperError,
-      counter,
-      container,
-    );
-  }
+  int get hashCode => Object.hash(
+    contentPadding,
+    floatingLabelHeight,
+    floatingLabelProgress,
+    floatingLabelAlignment,
+    border,
+    borderGap,
+    alignLabelWithHint,
+    isDense,
+    visualDensity,
+    icon,
+    input,
+    label,
+    hint,
+    prefix,
+    suffix,
+    prefixIcon,
+    suffixIcon,
+    helperError,
+    counter,
+    container,
+  );
 }
 
 // A container for the layout values computed by _RenderDecoration._layout.
@@ -3618,7 +3616,7 @@ class InputDecoration {
       alignLabelWithHint,
       constraints,
     ];
-    return hashList(values);
+    return Object.hashAll(values);
   }
 
   @override
@@ -4161,40 +4159,38 @@ class InputDecorationTheme with Diagnosticable {
   }
 
   @override
-  int get hashCode {
-    return hashList(<dynamic>[
-      labelStyle,
-      floatingLabelStyle,
-      helperStyle,
-      helperMaxLines,
-      hintStyle,
-      errorStyle,
-      errorMaxLines,
-      floatingLabelBehavior,
-      floatingLabelAlignment,
-      isDense,
-      contentPadding,
-      isCollapsed,
-      iconColor,
-      prefixStyle,
-      prefixIconColor,
-      suffixStyle,
-      suffixIconColor,
-      counterStyle,
-      filled,
-      fillColor,
-      focusColor,
-      hoverColor,
-      errorBorder,
-      focusedBorder,
-      focusedErrorBorder,
-      disabledBorder,
-      enabledBorder,
-      border,
-      alignLabelWithHint,
-      constraints,
-    ]);
-  }
+  int get hashCode => Object.hashAll(<Object?>[
+    labelStyle,
+    floatingLabelStyle,
+    helperStyle,
+    helperMaxLines,
+    hintStyle,
+    errorStyle,
+    errorMaxLines,
+    floatingLabelBehavior,
+    floatingLabelAlignment,
+    isDense,
+    contentPadding,
+    isCollapsed,
+    iconColor,
+    prefixStyle,
+    prefixIconColor,
+    suffixStyle,
+    suffixIconColor,
+    counterStyle,
+    filled,
+    fillColor,
+    focusColor,
+    hoverColor,
+    errorBorder,
+    focusedBorder,
+    focusedErrorBorder,
+    disabledBorder,
+    enabledBorder,
+    border,
+    alignLabelWithHint,
+    constraints,
+  ]);
 
   @override
   bool operator ==(Object other) {

@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:ui' show TextDirection;
 
 export 'dart:ui' show
@@ -42,6 +41,7 @@ export 'dart:ui' show
   TextPosition,
   TileMode,
   VertexMode,
+  // TODO(werainkhatri): remove these after all the dependencies are migrated
   hashValues,
   hashList;
 

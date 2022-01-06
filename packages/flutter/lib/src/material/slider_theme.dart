@@ -674,38 +674,36 @@ class SliderThemeData with Diagnosticable {
   }
 
   @override
-  int get hashCode {
-    return hashList(<Object?>[
-      trackHeight,
-      activeTrackColor,
-      inactiveTrackColor,
-      disabledActiveTrackColor,
-      disabledInactiveTrackColor,
-      activeTickMarkColor,
-      inactiveTickMarkColor,
-      disabledActiveTickMarkColor,
-      disabledInactiveTickMarkColor,
-      thumbColor,
-      overlappingShapeStrokeColor,
-      disabledThumbColor,
-      overlayColor,
-      valueIndicatorColor,
-      overlayShape,
-      tickMarkShape,
-      thumbShape,
-      trackShape,
-      valueIndicatorShape,
-      rangeTickMarkShape,
-      rangeThumbShape,
-      rangeTrackShape,
-      rangeValueIndicatorShape,
-      showValueIndicator,
-      valueIndicatorTextStyle,
-      minThumbSeparation,
-      thumbSelector,
-      mouseCursor,
-    ]);
-  }
+  int get hashCode => Object.hashAll(<Object?>[
+    trackHeight,
+    activeTrackColor,
+    inactiveTrackColor,
+    disabledActiveTrackColor,
+    disabledInactiveTrackColor,
+    activeTickMarkColor,
+    inactiveTickMarkColor,
+    disabledActiveTickMarkColor,
+    disabledInactiveTickMarkColor,
+    thumbColor,
+    overlappingShapeStrokeColor,
+    disabledThumbColor,
+    overlayColor,
+    valueIndicatorColor,
+    overlayShape,
+    tickMarkShape,
+    thumbShape,
+    trackShape,
+    valueIndicatorShape,
+    rangeTickMarkShape,
+    rangeThumbShape,
+    rangeTrackShape,
+    rangeValueIndicatorShape,
+    showValueIndicator,
+    valueIndicatorTextStyle,
+    minThumbSeparation,
+    thumbSelector,
+    mouseCursor,
+  ]);
 
   @override
   bool operator ==(Object other) {
@@ -3306,7 +3304,7 @@ class RangeValues {
   }
 
   @override
-  int get hashCode => hashValues(start, end);
+  int get hashCode => Object.hash(start, end);
 
   @override
   String toString() {
@@ -3346,7 +3344,7 @@ class RangeLabels {
   }
 
   @override
-  int get hashCode => hashValues(start, end);
+  int get hashCode => Object.hash(start, end);
 
   @override
   String toString() {

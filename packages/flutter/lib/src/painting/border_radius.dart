@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'package:flutter/foundation.dart';
 
 import 'basic_types.dart';
@@ -257,18 +256,16 @@ abstract class BorderRadiusGeometry {
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      _topLeft,
-      _topRight,
-      _bottomLeft,
-      _bottomRight,
-      _topStart,
-      _topEnd,
-      _bottomStart,
-      _bottomEnd,
-    );
-  }
+  int get hashCode => Object.hash(
+    _topLeft,
+    _topRight,
+    _bottomLeft,
+    _bottomRight,
+    _topStart,
+    _topEnd,
+    _bottomStart,
+    _bottomEnd,
+  );
 }
 
 /// An immutable set of radii for each corner of a rectangle.
