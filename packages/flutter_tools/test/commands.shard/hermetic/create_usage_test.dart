@@ -48,8 +48,6 @@ void main() {
           globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'module', 'common'),
           globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'package'),
           globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'plugin'),
-          globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'plugin_ffi'),
-          globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'plugin_shared'),
         ];
         for (final String templatePath in templatePaths) {
           globals.fs.directory(templatePath).createSync(recursive: true);
@@ -98,9 +96,6 @@ void main() {
 
       await runner.run(<String>['create', '--no-pub', '--template=plugin', 'testy']);
       expect((await command.usageValues).commandCreateProjectType, 'plugin');
-
-      await runner.run(<String>['create', '--no-pub', '--template=plugin_ffi', 'testy']);
-      expect((await command.usageValues).commandCreateProjectType, 'plugin_ffi');
     }));
 
     testUsingContext('set iOS host language type as usage value', () => testbed.run(() async {

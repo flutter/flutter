@@ -11,23 +11,19 @@ import 'common.dart';
 /// Check if the pubspec.yaml file under the `projectDir` is valid for a plugin project.
 void validatePubspecForPlugin({
   required String projectDir,
-  String? pluginClass,
-  bool ffiPlugin = false,
+  required String pluginClass,
   required List<String> expectedPlatforms,
   List<String> unexpectedPlatforms = const <String>[],
   String? androidIdentifier,
   String? webFileName,
 }) {
-  assert(pluginClass != null || ffiPlugin);
   final FlutterManifest manifest =
       FlutterManifest.createFromPath('$projectDir/pubspec.yaml', fileSystem: globals.fs, logger: globals.logger)!;
   final YamlMap platformMaps = YamlMap.wrap(manifest.supportedPlatforms!);
   for (final String platform in expectedPlatforms) {
     expect(platformMaps[platform], isNotNull);
     final YamlMap platformMap = platformMaps[platform]! as YamlMap;
-    if (pluginClass != null) {
-      expect(platformMap['pluginClass'], pluginClass);
-    }
+    expect(platformMap['pluginClass'], pluginClass);
     if (platform == 'android') {
       expect(platformMap['package'], androidIdentifier);
     }
