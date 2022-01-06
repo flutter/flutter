@@ -135,6 +135,20 @@ class TestWindow implements ui.SingletonFlutterWindow {
   }
 
   @override
+  List<ui.DisplayFeature> get displayFeatures => _displayFeaturesTestValue ?? _window.displayFeatures;
+  List<ui.DisplayFeature>? _displayFeaturesTestValue;
+  /// Hides the real displayFeatures and reports the given [displayFeaturesTestValue] instead.
+  set displayFeaturesTestValue(List<ui.DisplayFeature> displayFeaturesTestValue) { // ignore: avoid_setters_without_getters
+    _displayFeaturesTestValue = displayFeaturesTestValue;
+    onMetricsChanged?.call();
+  }
+  /// Deletes any existing test padding and returns to using the real padding.
+  void clearDisplayFeaturesTestValue() {
+    _displayFeaturesTestValue = null;
+    onMetricsChanged?.call();
+  }
+
+  @override
   ui.WindowPadding get systemGestureInsets => _systemGestureInsetsTestValue ?? _window.systemGestureInsets;
   ui.WindowPadding? _systemGestureInsetsTestValue;
   /// Hides the real system gesture insets and reports the given [systemGestureInsetsTestValue] instead.
@@ -427,6 +441,7 @@ class TestWindow implements ui.SingletonFlutterWindow {
     clearLocaleTestValue();
     clearLocalesTestValue();
     clearPaddingTestValue();
+    clearDisplayFeaturesTestValue();
     clearPhysicalSizeTestValue();
     clearSemanticsEnabledTestValue();
     clearTextScaleFactorTestValue();
