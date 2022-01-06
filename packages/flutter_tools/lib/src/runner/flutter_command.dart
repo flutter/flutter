@@ -1295,7 +1295,7 @@ abstract class FlutterCommand extends Command<void> {
 
       await generateLocalizationsSyntheticPackage(
         environment: environment,
-        buildSystem: globals.buildSystem!,
+        buildSystem: globals.buildSystem,
       );
 
       await pub.get(
