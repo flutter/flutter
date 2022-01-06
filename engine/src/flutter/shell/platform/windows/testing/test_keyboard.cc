@@ -85,8 +85,7 @@ LPARAM CreateKeyEventLparam(USHORT scancode,
           (LPARAM(scancode) << 16) | LPARAM(repeat_count));
 }
 
-static MockKeyEventChannelHandler stored_channel_handler;
-static MockKeyEventEmbedderHandler stored_embedder_handler;
+static std::shared_ptr<MockKeyResponseController> stored_response_controller;
 
 // Set EngineModifier, listen to event messages that go through the channel and
 // the embedder API, while disabling other methods so that the engine can be
@@ -94,11 +93,10 @@ static MockKeyEventEmbedderHandler stored_embedder_handler;
 //
 // The |channel_handler| and |embedder_handler| should return a boolean
 // indicating whether the framework decides to handle the event.
-void MockEmbedderApiForKeyboard(EngineModifier& modifier,
-                                MockKeyEventChannelHandler channel_handler,
-                                MockKeyEventEmbedderHandler embedder_handler) {
-  stored_channel_handler = channel_handler;
-  stored_embedder_handler = embedder_handler;
+void MockEmbedderApiForKeyboard(
+    EngineModifier& modifier,
+    std::shared_ptr<MockKeyResponseController> response_controller) {
+  stored_response_controller = response_controller;
   // This mock handles channel messages.
   modifier.embedder_api().SendPlatformMessage =
       [](FLUTTER_API_SYMBOL(FlutterEngine) engine,
@@ -107,29 +105,32 @@ void MockEmbedderApiForKeyboard(EngineModifier& modifier,
           return kSuccess;
         }
         if (std::string(message->channel) == std::string("flutter/keyevent")) {
-          bool result = stored_channel_handler();
-          auto response = _keyHandlingResponse(result);
-          const TestResponseHandle* response_handle =
-              reinterpret_cast<const TestResponseHandle*>(
-                  message->response_handle);
-          if (response_handle->callback != nullptr) {
-            response_handle->callback(response->data(), response->size(),
-                                      response_handle->user_data);
-          }
+          stored_response_controller->HandleChannelMessage(
+              [message](bool handled) {
+                auto response = _keyHandlingResponse(handled);
+                const TestResponseHandle* response_handle =
+                    reinterpret_cast<const TestResponseHandle*>(
+                        message->response_handle);
+                if (response_handle->callback != nullptr) {
+                  response_handle->callback(response->data(), response->size(),
+                                            response_handle->user_data);
+                }
+              });
           return kSuccess;
         }
         return kSuccess;
       };
 
-  // This mock handles key events sent through the embedder API,
-  // and records it in `key_calls`.
+  // This mock handles key events sent through the embedder API.
   modifier.embedder_api().SendKeyEvent =
       [](FLUTTER_API_SYMBOL(FlutterEngine) engine, const FlutterKeyEvent* event,
          FlutterKeyEventCallback callback, void* user_data) {
-        bool result = stored_embedder_handler(event);
-        if (callback != nullptr) {
-          callback(result, user_data);
-        }
+        stored_response_controller->HandleEmbedderMessage(
+            event, [callback, user_data](bool handled) {
+              if (callback != nullptr) {
+                callback(handled, user_data);
+              }
+            });
         return kSuccess;
       };
 

@@ -127,9 +127,9 @@ void KeyboardKeyHandler::DispatchEvent(const PendingEvent& event) {
 #else
   char32_t character = event.character;
 
-  if (event.action == WM_SYSKEYDOWN || event.action == WM_SYSKEYUP) {
-    return;
-  }
+  assert(event.action != WM_SYSKEYDOWN && event.action != WM_SYSKEYUP &&
+         "Unexpectedly dispatching a SYS event. SYS events can't be dispatched "
+         "and should have been prevented in earlier code.");
 
   INPUT input_event{
       .type = INPUT_KEYBOARD,
@@ -270,13 +270,18 @@ void KeyboardKeyHandler::ResolvePendingEvent(uint64_t sequence_id,
       if (event.unreplied == 0) {
         std::unique_ptr<PendingEvent> event_ptr = std::move(*iter);
         pending_responds_.erase(iter);
-        // Don't dispatch handled events or dead key events.
+        // Don't dispatch handled events, and also ignore dead key events and
+        // sys events.
         //
         // Redispatching dead keys events makes Win32 ignore the dead key state
         // and redispatches a normal character without combining it with the
-        // next letter key.
-        const bool should_redispatch =
-            !event_ptr->any_handled && !_IsDeadKey(event_ptr->character);
+        // next letter key. Redispatching sys events is impossible due to
+        // the limitation of |SendInput|.
+        const bool is_syskey =
+            event.action == WM_SYSKEYDOWN || event.action == WM_SYSKEYUP;
+        const bool should_redispatch = !event_ptr->any_handled &&
+                                       !_IsDeadKey(event_ptr->character) &&
+                                       !is_syskey;
         if (should_redispatch) {
           RedispatchEvent(std::move(event_ptr));
         }
