@@ -73,7 +73,7 @@ void main() {
     ]);
     final File apk = fileSystem.file('app.apk')..createSync();
     final AndroidApk androidApk = AndroidApk(
-      file: apk,
+      applicationPackage: apk,
       id: 'app',
       versionCode: 22,
       launchActivity: 'Main',
@@ -89,7 +89,7 @@ void main() {
   testWithoutContext('Cannot install app if APK file is missing', () async {
     final File apk = fileSystem.file('app.apk');
     final AndroidApk androidApk = AndroidApk(
-      file: apk,
+      applicationPackage: apk,
       id: 'app',
       versionCode: 22,
       launchActivity: 'Main',
@@ -117,7 +117,7 @@ void main() {
     ]);
     final File apk = fileSystem.file('app.apk')..createSync();
     final AndroidApk androidApk = AndroidApk(
-      file: apk,
+      applicationPackage: apk,
       id: 'app',
       versionCode: 22,
       launchActivity: 'Main',
@@ -146,7 +146,7 @@ void main() {
     ]);
     final File apk = fileSystem.file('app.apk')..createSync();
     final AndroidApk androidApk = AndroidApk(
-      file: apk,
+      applicationPackage: apk,
       id: 'app',
       versionCode: 22,
       launchActivity: 'Main',
@@ -190,7 +190,7 @@ void main() {
     ]);
     final File apk = fileSystem.file('app.apk')..createSync();
     final AndroidApk androidApk = AndroidApk(
-      file: apk,
+      applicationPackage: apk,
       id: 'app',
       versionCode: 22,
       launchActivity: 'Main',
@@ -224,7 +224,7 @@ void main() {
     final File apk = fileSystem.file('app.apk')..createSync();
     fileSystem.file('app.apk.sha1').writeAsStringSync('example_sha');
     final AndroidApk androidApk = AndroidApk(
-      file: apk,
+      applicationPackage: apk,
       id: 'app',
       versionCode: 22,
       launchActivity: 'Main',
@@ -265,7 +265,7 @@ void main() {
     final File apk = fileSystem.file('app.apk')..createSync();
     fileSystem.file('app.apk.sha1').writeAsStringSync('example_sha');
     final AndroidApk androidApk = AndroidApk(
-      file: apk,
+      applicationPackage: apk,
       id: 'app',
       versionCode: 22,
       launchActivity: 'Main',
@@ -298,7 +298,7 @@ void main() {
     ]);
     final File apk = fileSystem.file('app.apk')..createSync();
     final AndroidApk androidApk = AndroidApk(
-      file: apk,
+      applicationPackage: apk,
       id: 'app',
       versionCode: 22,
       launchActivity: 'Main',
