@@ -218,6 +218,7 @@ class CkCanvas {
   }
 
   void drawPicture(CkPicture picture) {
+    assert(picture.debugCheckNotDisposed('Failed to draw picture.'));
     skCanvas.drawPicture(picture.skiaObject);
   }
 
