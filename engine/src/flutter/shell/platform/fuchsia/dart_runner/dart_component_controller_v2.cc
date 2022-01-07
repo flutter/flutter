@@ -412,7 +412,11 @@ bool DartComponentControllerV2::RunDartMain() {
   // that run in the dart runner are written with main functions that have the
   // signature `void main(List<String> args)`. In order to ensure that these
   // components do not break we need to have this stub argument list.
-  Dart_Handle dart_arguments = Dart_NewListOf(Dart_CoreType_String, 0);
+  Dart_Handle corelib = Dart_LookupLibrary(ToDart("dart:core"));
+  Dart_Handle string_type =
+      Dart_GetNonNullableType(corelib, ToDart("String"), 0, NULL);
+  Dart_Handle dart_arguments =
+      Dart_NewListOfTypeFilled(string_type, Dart_EmptyString(), 0);
 
   if (Dart_IsError(dart_arguments)) {
     FX_LOGF(ERROR, LOG_TAG, "Failed to allocate Dart arguments list: %s",
