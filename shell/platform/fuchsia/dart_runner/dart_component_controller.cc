@@ -400,8 +400,13 @@ bool DartComponentController::Main() {
   Dart_EnterIsolate(isolate_);
   Dart_EnterScope();
 
-  Dart_Handle dart_arguments =
-      Dart_NewListOf(Dart_CoreType_String, arguments.size());
+  Dart_Handle corelib = Dart_LookupLibrary(ToDart("dart:core"));
+  Dart_Handle string_type =
+      Dart_GetNonNullableType(corelib, ToDart("String"), 0, NULL);
+
+  Dart_Handle dart_arguments = Dart_NewListOfTypeFilled(
+      string_type, Dart_EmptyString(), arguments.size());
+
   if (Dart_IsError(dart_arguments)) {
     FX_LOGF(ERROR, LOG_TAG, "Failed to allocate Dart arguments list: %s",
             Dart_GetError(dart_arguments));
