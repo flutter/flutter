@@ -68,26 +68,26 @@ class MigrateCommand extends FlutterCommand {
     // String revision = '5344ed71561b924fb23300fb7fdb306744718767';
     String revision = '18116933e77adc82f80866c928266a5b4f1ed645';
 
-    // Get the list of file names in the old templates directory
-    List<String> files = await MigrateUtils.getFileNamesInDirectory(
-      revision: revision,
-      searchPath: 'packages/flutter_tools/templates',
-      workingDirectory: Cache.flutterRoot!,
-    );
+    // // Get the list of file names in the old templates directory
+    // List<String> files = await MigrateUtils.getFileNamesInDirectory(
+    //   revision: revision,
+    //   searchPath: 'packages/flutter_tools/templates',
+    //   workingDirectory: Cache.flutterRoot!,
+    // );
 
-    // Clone a copy of the old templates directory into a temp dir.
-    Directory tempDir = await MigrateUtils.createTempDirectory('tempdir1');
-    print(tempDir.path);
-    for (String f in files) {
-      print('Retrieving $f');
-      File fileOld = tempDir.childFile(f);
-      String contents = await MigrateUtils.getFileContents(
-        revision: revision,
-        file: f,
-        workingDirectory: Cache.flutterRoot!,
-        outputPath: fileOld.path.trim(),
-      );
-    }
+    // // Clone a copy of the old templates directory into a temp dir.
+    // Directory tempDir = await MigrateUtils.createTempDirectory('tempdir1');
+    // print(tempDir.path);
+    // for (String f in files) {
+    //   print('Retrieving $f');
+    //   File fileOld = tempDir.childFile(f);
+    //   String contents = await MigrateUtils.getFileContents(
+    //     revision: revision,
+    //     file: f,
+    //     workingDirectory: Cache.flutterRoot!,
+    //     outputPath: fileOld.path.trim(),
+    //   );
+    // }
 
     // Generate the old templates
     Directory generatedOldTemplateDirectory = await MigrateUtils.createTempDirectory('generatedOldTemplate');
@@ -167,7 +167,7 @@ class MigrateCommand extends FlutterCommand {
       }
     }
 
-    print(tempDir.path);
+    // print(tempDir.path);
 
     if (boolArg('delete-temp-directories')) {
 
@@ -178,7 +178,7 @@ class MigrateCommand extends FlutterCommand {
         directories: <Directory>[
           generatedOldTemplateDirectory,
           generatedNewTemplateDirectory,
-          tempDir,
+          // tempDir,
           oldFlutterRoot,
         ],
       );
