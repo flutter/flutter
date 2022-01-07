@@ -791,7 +791,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   ///
   /// If the overlay color is null or resolves to null, then the default values
   /// for [InkResponse.focusColor], [InkResponse.hoverColor], [InkResponse.splashColor],
-  /// and [InkResponse.highlighColor] will be used instead.
+  /// and [InkResponse.highlightColor] will be used instead.
   final MaterialStateProperty<Color?>? overlayColor;
 
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
