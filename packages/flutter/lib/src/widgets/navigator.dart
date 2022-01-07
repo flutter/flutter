@@ -3188,7 +3188,11 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   final Queue<_NavigatorObservation> _observedRouteAdditions = Queue<_NavigatorObservation>();
   final Queue<_NavigatorObservation> _observedRouteDeletions = Queue<_NavigatorObservation>();
 
-  /// The [PrimaryScrollController] from current State
+  /// The [PrimaryScrollController] from current State. It is useful to access
+  /// root PrimaryScrollController in deeply nested Navigator.
+  /// ```dart
+  /// Navigator.of(context, rootNavigator: true).PrimaryScrollController
+  /// ```
   late ScrollController? primaryScrollController;
 
   /// The [FocusScopeNode] for the [FocusScope] that encloses the routes.
