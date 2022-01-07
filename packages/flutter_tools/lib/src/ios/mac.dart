@@ -462,7 +462,7 @@ Future<XcodeBuildResult> buildXcodeProject({
         await globals.processUtils.run(
           <String>[
             'rsync',
-            '-8',
+            '-8', // Avoid mangling filenames with encodings that do not match the current locale.
             '-av',
             '--delete',
             expectedOutputDirectory,
