@@ -1454,9 +1454,9 @@ class RenderClipRect extends _RenderCustomClip<Rect> {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    _updateClip();
     if (child != null) {
       if (clipBehavior != Clip.none) {
+        _updateClip();
         layer = context.pushClipRect(
           needsCompositing,
           offset,
@@ -1545,9 +1545,9 @@ class RenderClipRRect extends _RenderCustomClip<RRect> {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    _updateClip();
     if (child != null) {
       if (clipBehavior != Clip.none) {
+        _updateClip();
         layer = context.pushClipRRect(
           needsCompositing,
           offset,
@@ -1631,9 +1631,9 @@ class RenderClipOval extends _RenderCustomClip<Rect> {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    _updateClip();
     if (child != null) {
       if (clipBehavior != Clip.none) {
+        _updateClip();
         layer = context.pushClipPath(
           needsCompositing,
           offset,
@@ -1709,9 +1709,9 @@ class RenderClipPath extends _RenderCustomClip<Path> {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    _updateClip();
     if (child != null) {
       if (clipBehavior != Clip.none) {
+        _updateClip();
         layer = context.pushClipPath(
           needsCompositing,
           offset,
