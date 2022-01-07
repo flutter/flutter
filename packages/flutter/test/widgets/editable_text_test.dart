@@ -8632,7 +8632,7 @@ void main() {
     expect(controller.selection.baseOffset, 15);
     expect(controller.selection.extentOffset, 24);
     // On web, using keyboard for selection is handled by the browser.
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS }));
+  }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
 
   testWidgets("Mac's expand by line behavior on multiple lines", (WidgetTester tester) async {
     const String multilineText = 'word word word\nword word\nword'; // 15 + 10 + 4;
