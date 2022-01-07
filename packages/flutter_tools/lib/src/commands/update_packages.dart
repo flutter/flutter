@@ -93,17 +93,16 @@ class UpdatePackagesCommand extends FlutterCommand {
         negatable: false,
       )
       ..addFlag(
-        'parallel',
-        help: 'Causes the "pub get" runs to happen concurrently on as many CPUs '
-            'as this machine has.',
-        defaultsTo: true,
-        negatable: true,
-      )
-      ..addFlag(
         'crash',
         help: 'For Flutter CLI testing only, forces this command to throw an unhandled exception.',
         defaultsTo: false,
         negatable: false,
+      )
+      ..addOption(
+        'jobs',
+        abbr: 'j',
+        help: 'Causes the "pub get" runs to happen concurrently on this many '
+              'CPUs. Defaults to the number of CPUs that this machine has.',
       );
   }
 
@@ -154,10 +153,9 @@ class UpdatePackagesCommand extends FlutterCommand {
     final bool isVerifyOnly = boolArg('verify-only');
     final bool isConsumerOnly = boolArg('consumer-only');
     final bool offline = boolArg('offline');
-    final bool crash = boolArg('crash');
     final bool doUpgrade = forceUpgrade || isPrintPaths || isPrintTransitiveClosure;
 
-    if (crash) {
+    if (boolArg('crash')) {
       throw StateError('test crash please ignore.');
     }
 
@@ -185,7 +183,7 @@ class UpdatePackagesCommand extends FlutterCommand {
     }
 
     if (isVerifyOnly) {
-      verifyPubspecs(packages);
+      _verifyPubspecs(packages);
       return FlutterCommandResult.success();
     }
 
@@ -202,7 +200,7 @@ class UpdatePackagesCommand extends FlutterCommand {
     final Map<String, PubspecDependency> explicitDependencies = <String, PubspecDependency>{};
     final Map<String, PubspecDependency> allDependencies = <String, PubspecDependency>{};
     final Set<String> specialDependencies = <String>{};
-    collectDependencies(
+    _collectDependencies(
       packages: packages,
       pubspecs: pubspecs,
       explicitDependencies: explicitDependencies,
@@ -220,7 +218,7 @@ class UpdatePackagesCommand extends FlutterCommand {
     // warm the cache.
     final PubDependencyTree tree = PubDependencyTree(); // object to collect results
     final Directory tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_update_packages.');
-    await generateFakePackage(
+    await _generateFakePackage(
       tempDir: tempDir,
       dependencies: allDependencies.values,
       offline: offline,
@@ -230,7 +228,7 @@ class UpdatePackagesCommand extends FlutterCommand {
     );
 
     if (doUpgrade) {
-      final bool done = upgradePubspecs(
+      final bool done = _upgradePubspecs(
         tree: tree,
         pubspecs: pubspecs,
         explicitDependencies: explicitDependencies,
@@ -243,13 +241,12 @@ class UpdatePackagesCommand extends FlutterCommand {
       }
     }
 
-    await runPubGetOnPackages(packages);
+    await _runPubGetOnPackages(packages);
 
     return FlutterCommandResult.success();
   }
 
-  @visibleForTesting
-  void verifyPubspecs(List<Directory> packages) {
+  void _verifyPubspecs(List<Directory> packages) {
     bool needsUpdate = false;
     globals.printStatus('Verifying pubspecs...');
     for (final Directory directory in packages) {
@@ -301,8 +298,7 @@ class UpdatePackagesCommand extends FlutterCommand {
     globals.printStatus('All pubspecs were up to date.');
   }
 
-  @visibleForTesting
-  void collectDependencies({
+  void _collectDependencies({
     @required List<Directory> packages,
     @required List<PubspecYaml> pubspecs,
     @required Set<String> specialDependencies,
@@ -386,8 +382,7 @@ class UpdatePackagesCommand extends FlutterCommand {
     }
   }
 
-  @visibleForTesting
-  Future<void> generateFakePackage({
+  Future<void> _generateFakePackage({
     Directory tempDir,
     Iterable<PubspecDependency> dependencies,
     List<PubspecYaml> pubspecs,
@@ -416,9 +411,8 @@ class UpdatePackagesCommand extends FlutterCommand {
         );
       }
 
-      // Next we run "pub upgrade" on this generated package, if we're doing
-      // an upgrade. Otherwise, we just run a regular "pub get" on it in order
-      // to force the download of any needed packages to the pub cache.
+      // Next we run "pub get" on it in order to force the download of any
+      // needed packages to the pub cache, upgrading if requested.
       await pub.get(
         context: PubContext.updatePackages,
         directory: tempDir.path,
@@ -454,8 +448,7 @@ class UpdatePackagesCommand extends FlutterCommand {
     }
   }
 
-  @visibleForTesting
-  bool upgradePubspecs({
+  bool _upgradePubspecs({
     @required PubDependencyTree tree,
     @required List<PubspecYaml> pubspecs,
     @required Set<String> specialDependencies,
@@ -503,8 +496,7 @@ class UpdatePackagesCommand extends FlutterCommand {
     return false;
   }
 
-  @visibleForTesting
-  Future<void> runPubGetOnPackages(List<Directory> packages) async {
+  Future<void> _runPubGetOnPackages(List<Directory> packages) async {
     final Stopwatch timer = Stopwatch()..start();
     int count = 0;
 
@@ -519,7 +511,7 @@ class UpdatePackagesCommand extends FlutterCommand {
       'Running "flutter pub get" in affected packages...',
     );
     try {
-      final TaskQueue<void> queue = TaskQueue<void>(maxJobs: boolArg('parallel') ? null : 1);
+      final TaskQueue<void> queue = TaskQueue<void>(maxJobs: intArg('jobs'));
       for (final Directory dir in packages) {
         unawaited(queue.add(() async {
           final Stopwatch stopwatch = Stopwatch();
@@ -922,7 +914,8 @@ class PubspecYaml {
                 // We output data that matches the format that
                 // PubspecDependency.parse can handle. The data.suffix is any
                 // previously-specified trailing comment.
-                assert(versions.contains(data.name));
+                assert(versions.contains(data.name),
+                       "versions doesn't contain ${data.name}");
                 output.add('  ${data.name}: ${versions.versionFor(data.name)}${data.suffix}');
               } else {
                 // If it wasn't a regular dependency, then we output the line
