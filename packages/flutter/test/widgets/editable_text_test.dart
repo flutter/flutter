@@ -2143,8 +2143,7 @@ void main() {
       // Show prompt rect when told to.
       verifyAutocorrectionRectVisibility(expectVisible: true);
 
-      // Text changed, prompt rect goes away.
-      controller.text = '12345';
+      await tester.enterText(find.byType(EditableText), '12345');
       await tester.pump();
       verifyAutocorrectionRectVisibility(expectVisible: false);
 
@@ -2155,7 +2154,8 @@ void main() {
 
       // Unfocus, prompt rect should go away.
       focusNode.unfocus();
-      await tester.pump();
+      await tester.pumpAndSettle();
+
       verifyAutocorrectionRectVisibility(expectVisible: false);
     },
   );
