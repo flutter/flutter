@@ -5,6 +5,7 @@
 import 'package:flutter/foundation.dart';
 
 import 'framework.dart';
+import 'scroll_controller.dart';
 
 /// Associates a [ScrollController] with a subtree.
 ///
