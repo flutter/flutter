@@ -38,6 +38,8 @@ bool VmoFromFd(int fd, bool executable, fuchsia::mem::Buffer* buffer) {
   }
 
   if (status != ZX_OK) {
+    FX_LOGF(ERROR, LOG_TAG, "fdio_get_vmo_%s failed: %s",
+            executable ? "exec" : "copy", zx_status_get_string(status));
     return false;
   }
 
