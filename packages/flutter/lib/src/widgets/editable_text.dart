@@ -560,19 +560,19 @@ class EditableText extends StatefulWidget {
            // No point in even offering "Select All" in a read-only obscured
            // field.
            const ToolbarOptions() :
-           // Writable, but obscured
+           // Writable, but obscured.
            const ToolbarOptions(
              selectAll: true,
              paste: true,
            )
          ) :
          (readOnly ?
-           // Read-only, not obscured
+           // Read-only, not obscured.
            const ToolbarOptions(
              selectAll: true,
              copy: true,
            ) :
-           // Writable, not obscured
+           // Writable, not obscured.
            const ToolbarOptions(
              copy: true,
              cut: true,
@@ -580,7 +580,8 @@ class EditableText extends StatefulWidget {
              paste: true,
            )
          )
-       ),       assert(clipBehavior != null),
+       ),
+       assert(clipBehavior != null),
        assert(enableIMEPersonalizedLearning != null),
        _strutStyle = strutStyle,
        keyboardType = keyboardType ?? _inferKeyboardType(autofillHints: autofillHints, maxLines: maxLines),
