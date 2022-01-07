@@ -404,7 +404,7 @@ void main() {
                   return Scaffold(
                     body: ListView.separated(
                         controller:
-                            PrimaryScrollController.of(ctx, rootState: true),
+                            Navigator.of(ctx, rootNavigator: true).primaryScrollController,
                         itemBuilder: (BuildContext c, int index) {
                           return ListTile(
                             tileColor: Colors.red[100 * (index % 9 + 1)],
