@@ -92,6 +92,42 @@ class MigrateUtils {
     checkForErrors(result);
   }
 
+  static Future<void> cloneFlutter(String revision, String destination) async {
+    // Use https url instead of ssh to avoid need to setup ssh on git.
+    List<String> cmdArgs = ['clone', 'https://github.com/flutter/flutter.git', destination];
+    print('Cloning old revision flutter');
+    ProcessResult result = await Process.run('git', cmdArgs);
+    checkForErrors(result);
+    print('Done Cloning old revision flutter to $destination');
+
+    cmdArgs.clear();
+    cmdArgs = <String>['reset', '--hard', revision];
+    result = await Process.run('git', cmdArgs, workingDirectory: destination);
+    checkForErrors(result);
+ }
+
+  static Future<String> createFromTemplates(String flutterBinPath, String name, {String? outputDirectory}) async {
+     List<String> cmdArgs = ['create', '--project-name', name];
+    if (outputDirectory != null) {
+      cmdArgs.add(outputDirectory);
+    }
+    print('CREATING');
+    ProcessResult result = await Process.run('./flutter', cmdArgs, workingDirectory: flutterBinPath);
+    checkForErrors(result);
+    print('CREATING DONE: $outputDirectory');
+    return result.stdout;
+  }
+
+  static void deleteTempDirectories({List<String> paths = const <String>[], List<Directory> directories = const <Directory>[]}) {
+    print('Deleting temp directories');
+    for (Directory d in directories) {
+      d.deleteSync(recursive: true);
+    }
+    for (String p in paths) {
+      globals.fs.directory(p).deleteSync(recursive: true);
+    }
+  }
+
   static checkForErrors(ProcessResult result, {List<int> allowedExitCodes = const <int>[]}) {
     if (result.exitCode != 0 && !allowedExitCodes.contains(result.exitCode)) {
       globals.printError('Git command encountered an error. Stdout:');

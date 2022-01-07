@@ -350,7 +350,7 @@ class Template {
 }
 
 Directory _templateDirectoryInPackage(String name, FileSystem fileSystem) {
-  final String templatesDir = fileSystem.path.join(Cache.flutterRoot!,
+  String templatesDir = fileSystem.path.join(Cache.flutterRoot!,
       'packages', 'flutter_tools', 'templates');
   return fileSystem.directory(fileSystem.path.join(templatesDir, name));
 }

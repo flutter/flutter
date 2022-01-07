@@ -75,6 +75,12 @@ class CreateCommand extends CreateBase {
         'that can be created with "--sample".',
       valueHelp: 'path',
     );
+    argParser.addOption(
+      'template-path',
+      help: '',
+      defaultsTo: null,
+      valueHelp: 'path',
+    );
   }
 
   @override
