@@ -220,8 +220,7 @@ class UpdatePackagesCommand extends FlutterCommand {
     final Directory tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_update_packages.');
     await _generateFakePackage(
       tempDir: tempDir,
-      dependencies: allDependencies.values,
-      offline: offline,
+      dependencies: doUpgrade ? explicitDependencies.values : allDependencies.values,
       pubspecs: pubspecs,
       tree: tree,
       doUpgrade: doUpgrade,
@@ -262,7 +261,7 @@ class UpdatePackagesCommand extends FlutterCommand {
         // upgrade again to compute it.
         globals.printWarning(
             'Warning: pubspec in ${directory.path} has out of date dependencies. '
-                'Please run "flutter update-packages --force-upgrade" to update them correctly.'
+            'Please run "flutter update-packages --force-upgrade" to update them correctly.'
         );
         needsUpdate = true;
       }
@@ -279,8 +278,8 @@ class UpdatePackagesCommand extends FlutterCommand {
         // we need to run update-packages to recapture the transitive deps.
         globals.printWarning(
             'Warning: pubspec in ${directory.path} has updated or new dependencies. '
-                'Please run "flutter update-packages --force-upgrade" to update them correctly '
-                '(checksum ${pubspec.checksum.value} != $checksum).'
+            'Please run "flutter update-packages --force-upgrade" to update them correctly '
+            '(checksum ${pubspec.checksum.value} != $checksum).'
         );
         needsUpdate = true;
       } else {
@@ -291,7 +290,7 @@ class UpdatePackagesCommand extends FlutterCommand {
     if (needsUpdate) {
       throwToolExit(
         'Warning: one or more pubspecs have invalid dependencies. '
-            'Please run "flutter update-packages --force-upgrade" to update them correctly.',
+        'Please run "flutter update-packages --force-upgrade" to update them correctly.',
         exitCode: 1,
       );
     }
@@ -388,7 +387,6 @@ class UpdatePackagesCommand extends FlutterCommand {
     List<PubspecYaml> pubspecs,
     PubDependencyTree tree,
     bool doUpgrade,
-    bool offline,
   }) async {
     try {
       final File fakePackage = _pubspecFor(tempDir);
@@ -417,7 +415,7 @@ class UpdatePackagesCommand extends FlutterCommand {
         context: PubContext.updatePackages,
         directory: tempDir.path,
         upgrade: doUpgrade,
-        offline: offline,
+        offline: boolArg('offline'),
         flutterRootOverride: doUpgrade ? temporaryFlutterSdk.path : null,
         generateSyntheticPackage: false,
       );
@@ -439,8 +437,7 @@ class UpdatePackagesCommand extends FlutterCommand {
           context: PubContext.updatePackages,
           directory: tempDir.path,
           filter: tree.fill,
-          retry:
-          false, // errors here are usually fatal since we're not hitting the network
+          retry: false, // errors here are usually fatal since we're not hitting the network
         );
       }
     } finally {
@@ -1408,6 +1405,7 @@ String _generateFakePubspec(
       for (final PubspecDependency dependency in dependencies)
         dependency.name,
     };
+    globals.printStatus('All Transitives: $allTransitive');
     for (final String package in kManuallyPinnedDependencies.keys) {
       // Don't add pinned dependency if it is not in the set of all transitive dependencies.
       if (!allTransitive.contains(package)) {
