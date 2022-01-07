@@ -88,7 +88,7 @@ void main() {
 
     testUsingContext('No IDE Validator includes expected installation messages', () async {
       final ValidationResult result = await NoIdeValidator().validate();
-      expect(result.type, ValidationType.missing);
+      expect(result.type, ValidationType.notAvailable);
 
       expect(
         result.messages.map((ValidationMessage vm) => vm.message),
