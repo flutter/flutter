@@ -748,7 +748,6 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
 
   /// The node this scope will use for its root [FocusScope] widget.
   final FocusScopeNode focusScopeNode = FocusScopeNode(debugLabel: '$_ModalScopeState Focus Scope');
-  final ScrollController primaryScrollController = ScrollController();
 
   @override
   void initState() {
@@ -760,6 +759,7 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
     _listenable = Listenable.merge(animations);
     if (widget.route.isCurrent && _shouldRequestFocus) {
       widget.route.navigator!.focusScopeNode.setFirstFocus(focusScopeNode);
+      widget.route.navigator!.primaryScrollController = widget.route.primaryScrollController;
     }
   }
 
@@ -834,7 +834,7 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
                     DismissIntent: _DismissModalAction(context),
                   },
                   child: PrimaryScrollController(
-                    controller: primaryScrollController,
+                    controller: widget.route.primaryScrollController,
                     child: FocusScope(
                       node: focusScopeNode, // immutable
                       child: FocusTrap(
@@ -1380,6 +1380,10 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   @override
   Animation<double>? get secondaryAnimation => _secondaryAnimationProxy;
   ProxyAnimation? _secondaryAnimationProxy;
+
+  /// Retruns [PrimaryScrollController] from current ModalRoute
+  ScrollController get primaryScrollController => _primaryScrollController;
+  final ScrollController _primaryScrollController = ScrollController();
 
   final List<WillPopCallback> _willPopCallbacks = <WillPopCallback>[];
 

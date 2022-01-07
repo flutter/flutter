@@ -23,6 +23,7 @@ import 'overlay.dart';
 import 'restoration.dart';
 import 'restoration_properties.dart';
 import 'routes.dart';
+import 'scroll_controller.dart';
 import 'ticker_provider.dart';
 
 // Examples can assume:
@@ -3186,6 +3187,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   final _HistoryProperty _serializableHistory = _HistoryProperty();
   final Queue<_NavigatorObservation> _observedRouteAdditions = Queue<_NavigatorObservation>();
   final Queue<_NavigatorObservation> _observedRouteDeletions = Queue<_NavigatorObservation>();
+
+  /// The [PrimaryScrollController] from current State
+  late ScrollController? primaryScrollController;
 
   /// The [FocusScopeNode] for the [FocusScope] that encloses the routes.
   final FocusScopeNode focusScopeNode = FocusScopeNode(debugLabel: 'Navigator Scope');
