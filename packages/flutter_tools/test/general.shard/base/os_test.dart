@@ -586,7 +586,7 @@ void main() {
         ),
         FakeCommand(command: <String>[
           'rsync',
-          '-8'
+          '-8',
           '-av',
           '--delete',
           tempDirectory.childDirectory('dirA').path,
@@ -594,7 +594,7 @@ void main() {
         ]),
         FakeCommand(command: <String>[
           'rsync',
-          '-8'
+          '-8',
           '-av',
           '--delete',
           tempDirectory.childDirectory('dirB').path,
