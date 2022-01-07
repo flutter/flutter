@@ -158,6 +158,7 @@ class TabBarTheme with Diagnosticable {
 }
 
 
+@immutable
 class _LerpColors implements MaterialStateProperty<Color?> {
   const _LerpColors(this.a, this.b, this.t);
 
@@ -170,5 +171,22 @@ class _LerpColors implements MaterialStateProperty<Color?> {
     final Color? resolvedA = a?.resolve(states);
     final Color? resolvedB = b?.resolve(states);
     return Color.lerp(resolvedA, resolvedB, t);
+  }
+
+  @override
+  int get hashCode {
+    return hashValues(a, b, t);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other))
+      return true;
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is _LerpColors
+      && other.a == a
+      && other.b == b
+      && other.t == t;
   }
 }
