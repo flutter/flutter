@@ -1,6 +1,6 @@
 name: flutter_web_plugins
 description: Library to register Flutter Web plugins
-homepage: http://flutter.dev
+homepage: https://flutter.dev
 
 environment:
   sdk: ">=2.12.0-0 <3.0.0"

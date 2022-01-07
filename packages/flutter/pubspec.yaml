@@ -1,6 +1,6 @@
 name: flutter
 description: A framework for writing Flutter applications
-homepage: http://flutter.dev
+homepage: https://flutter.dev
 
 environment:
   sdk: ">=2.12.0-0 <3.0.0"
