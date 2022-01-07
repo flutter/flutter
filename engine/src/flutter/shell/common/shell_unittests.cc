@@ -2821,20 +2821,16 @@ TEST_F(ShellTest, Spawn) {
                              spawn->GetEngine()->GetLastEntrypoint());
                    ASSERT_EQ(initial_route, spawn->GetEngine()->InitialRoute());
 
-                   // TODO(74520): Remove conditional once isolate groups are
-                   // supported by JIT.
-                   if (DartVM::IsRunningPrecompiledCode()) {
-                     ASSERT_NE(spawner->GetEngine()
-                                   ->GetRuntimeController()
-                                   ->GetRootIsolateGroup(),
-                               0u);
-                     ASSERT_EQ(spawner->GetEngine()
-                                   ->GetRuntimeController()
-                                   ->GetRootIsolateGroup(),
-                               spawn->GetEngine()
-                                   ->GetRuntimeController()
-                                   ->GetRootIsolateGroup());
-                   }
+                   ASSERT_NE(spawner->GetEngine()
+                                 ->GetRuntimeController()
+                                 ->GetRootIsolateGroup(),
+                             0u);
+                   ASSERT_EQ(spawner->GetEngine()
+                                 ->GetRuntimeController()
+                                 ->GetRootIsolateGroup(),
+                             spawn->GetEngine()
+                                 ->GetRuntimeController()
+                                 ->GetRootIsolateGroup());
                  });
 
         PostSync(
@@ -2928,20 +2924,16 @@ TEST_F(ShellTest, SpawnWithDartEntrypointArgs) {
                              spawn->GetEngine()->GetLastEntrypoint());
                    ASSERT_EQ(initial_route, spawn->GetEngine()->InitialRoute());
 
-                   // TODO(74520): Remove conditional once isolate groups are
-                   // supported by JIT.
-                   if (DartVM::IsRunningPrecompiledCode()) {
-                     ASSERT_NE(spawner->GetEngine()
-                                   ->GetRuntimeController()
-                                   ->GetRootIsolateGroup(),
-                               0u);
-                     ASSERT_EQ(spawner->GetEngine()
-                                   ->GetRuntimeController()
-                                   ->GetRootIsolateGroup(),
-                               spawn->GetEngine()
-                                   ->GetRuntimeController()
-                                   ->GetRootIsolateGroup());
-                   }
+                   ASSERT_NE(spawner->GetEngine()
+                                 ->GetRuntimeController()
+                                 ->GetRootIsolateGroup(),
+                             0u);
+                   ASSERT_EQ(spawner->GetEngine()
+                                 ->GetRuntimeController()
+                                 ->GetRootIsolateGroup(),
+                             spawn->GetEngine()
+                                 ->GetRuntimeController()
+                                 ->GetRootIsolateGroup());
                  });
 
         PostSync(
