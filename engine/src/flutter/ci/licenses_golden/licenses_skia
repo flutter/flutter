@@ -1,4 +1,4 @@
-Signature: f95112c821af609d343be9a450f625c4
+Signature: be441a7043d7534260c911d64114c48a
 
 UNUSED LICENSES:
 
@@ -2976,6 +2976,8 @@ FILE: ../../../third_party/skia/src/gpu/ops/DashLinePathRenderer.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/DashLinePathRenderer.h
 FILE: ../../../third_party/skia/src/gpu/ops/DrawAtlasOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/DrawAtlasOp.h
+FILE: ../../../third_party/skia/src/gpu/ops/DrawVerticesOp.cpp
+FILE: ../../../third_party/skia/src/gpu/ops/DrawVerticesOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrDrawOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrMeshDrawOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrMeshDrawOp.h
@@ -6068,6 +6070,9 @@ ORIGIN: ../../../third_party/skia/experimental/graphite/src/Resource.cpp + ../..
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/experimental/graphite/src/Resource.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/Resource.h
+FILE: ../../../third_party/skia/experimental/graphite/src/ShaderCodeDictionary.cpp
+FILE: ../../../third_party/skia/experimental/graphite/src/ShaderCodeDictionary.h
+FILE: ../../../third_party/skia/experimental/graphite/src/UniquePaintParamsID.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2022 Google LLC
 
