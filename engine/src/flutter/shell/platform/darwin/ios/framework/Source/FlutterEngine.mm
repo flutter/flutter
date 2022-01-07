@@ -530,10 +530,10 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
       binaryMessenger:self.binaryMessenger
                 codec:[FlutterJSONMessageCodec sharedInstance]]);
 
-  _textInputPlugin.reset([[FlutterTextInputPlugin alloc] init]);
-  _textInputPlugin.get().textInputDelegate = self;
-  _textInputPlugin.get().indirectScribbleDelegate = self;
-  [_textInputPlugin.get() setupIndirectScribbleInteraction:self.viewController];
+  FlutterTextInputPlugin* textInputPlugin = [[FlutterTextInputPlugin alloc] initWithDelegate:self];
+  _textInputPlugin.reset(textInputPlugin);
+  textInputPlugin.indirectScribbleDelegate = self;
+  [textInputPlugin setupIndirectScribbleInteraction:self.viewController];
 
   _platformPlugin.reset([[FlutterPlatformPlugin alloc] initWithEngine:[self getWeakPtr]]);
 
