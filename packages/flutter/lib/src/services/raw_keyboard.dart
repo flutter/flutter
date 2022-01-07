@@ -512,10 +512,10 @@ abstract class RawKeyEvent with Diagnosticable {
   /// Whether this is a repeated down event.
   ///
   /// When a key is held down, the systems usually fire a down event and then
-  /// by a series of repeated down events. The [repeat] is false for the
-  /// first event and true for the follows.
+  /// a series of repeated down events. The [repeat] is false for the
+  /// first event and true for the following events.
   ///
-  /// The [repeat] is always false for [RawKeyUpEvent]s.
+  /// The [repeat] attribute is always false for [RawKeyUpEvent]s.
   final bool repeat;
 
   /// Platform-specific information about the key event.

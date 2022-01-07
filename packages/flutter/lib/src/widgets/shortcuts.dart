@@ -388,7 +388,7 @@ class ShortcutMapProperty extends DiagnosticsProperty<Map<ShortcutActivator, Int
 ///  * [CharacterActivator], an activator that represents key combinations
 ///    that result in the specified character, such as question mark.
 class SingleActivator with Diagnosticable implements ShortcutActivator {
-  /// Triggered when the [trigger] key is pressed when the modifiers are held.
+  /// Triggered when the [trigger] key is pressed while the modifiers are held.
   ///
   /// The `trigger` should be the non-modifier key that is pressed after all the
   /// modifiers, such as [LogicalKeyboardKey.keyC] as in `Ctrl+C`. It must not be
@@ -399,7 +399,7 @@ class SingleActivator with Diagnosticable implements ShortcutActivator {
   ///
   /// By default, the activator is checked on all [RawKeyDownEvent] events for
   /// the [trigger] key. If `includeRepeats` is false, only the [trigger] key
-  /// events with false [RawKeyDownEvent.repeat] will be valid.
+  /// events with a false [RawKeyDownEvent.repeat] attribute will be considered.
   ///
   /// {@tool dartpad}
   /// In the following example, the shortcut `Control + C` increases the counter:
@@ -487,8 +487,8 @@ class SingleActivator with Diagnosticable implements ShortcutActivator {
   ///
   /// If [includeRepeats] is true, the activator is checked on all
   /// [RawKeyDownEvent] events for the [trigger] key. If `includeRepeats` is
-  /// false, only the [trigger] key events with false [RawKeyDownEvent.repeat]
-  /// will be valid.
+  /// false, only the [trigger] key events with a false [RawKeyDownEvent.repeat]
+  /// attribute will be considered.
   final bool includeRepeats;
 
   @override
