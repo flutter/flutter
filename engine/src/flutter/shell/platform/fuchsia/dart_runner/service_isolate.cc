@@ -73,9 +73,10 @@ void EmbedderInformationCallback(Dart_EmbedderInformation* info) {
 
 }  // namespace
 
-Dart_Isolate CreateServiceIsolate(const char* uri,
-                                  Dart_IsolateFlags* flags,
-                                  char** error) {
+Dart_Isolate CreateServiceIsolate(
+    const char* uri,
+    Dart_IsolateFlags* flags_unused,  // These flags are currently unused
+    char** error) {
   Dart_SetEmbedderInformationCallback(EmbedderInformationCallback);
 
   const uint8_t *vmservice_data = nullptr, *vmservice_instructions = nullptr;
@@ -122,10 +123,24 @@ Dart_Isolate CreateServiceIsolate(const char* uri,
   }
 #endif
 
+  bool is_null_safe =
+      Dart_DetectNullSafety(nullptr,         // script_uri
+                            nullptr,         // package_config
+                            nullptr,         // original_working_directory
+                            vmservice_data,  // snapshot_data
+                            vmservice_instructions,  // snapshot_instructions
+                            nullptr,                 // kernel_buffer
+                            0u                       // kernel_buffer_size
+      );
+
+  Dart_IsolateFlags flags;
+  Dart_IsolateFlagsInitialize(&flags);
+  flags.null_safety = is_null_safe;
+
   auto state = new std::shared_ptr<tonic::DartState>(new tonic::DartState());
   Dart_Isolate isolate = Dart_CreateIsolateGroup(
       uri, DART_VM_SERVICE_ISOLATE_NAME, vmservice_data, vmservice_instructions,
-      nullptr /* flags */, state, state, error);
+      &flags, state, state, error);
   if (!isolate) {
     FX_LOGF(ERROR, LOG_TAG, "Dart_CreateIsolateGroup failed: %s", *error);
     return nullptr;

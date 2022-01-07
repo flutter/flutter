@@ -160,7 +160,7 @@ fdio_ns_t* GetNamespace() {
   Dart_Handle zircon_lib = Dart_LookupLibrary(ToDart("dart:zircon"));
   FML_DCHECK(!tonic::LogIfError(zircon_lib));
   Dart_Handle namespace_type =
-      Dart_GetType(zircon_lib, ToDart("_Namespace"), 0, nullptr);
+      Dart_GetNonNullableType(zircon_lib, ToDart("_Namespace"), 0, nullptr);
   FML_DCHECK(!tonic::LogIfError(namespace_type));
   Dart_Handle namespace_field =
       Dart_GetField(namespace_type, ToDart("_namespace"));
