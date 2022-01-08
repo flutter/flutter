@@ -2292,8 +2292,8 @@ class LeaderLayer extends ContainerLayer {
 
   @override
   void detach() {
-    _link._unregisterLeader(this);
     assert(_debugSetLastOffset(null));
+    _link._unregisterLeader(this);
     super.detach();
   }
 
