@@ -81,7 +81,6 @@ class _IVBuilderExampleState extends State<_IVBuilderExample> {
                           ? Colors.white
                           : Colors.grey.withOpacity(0.1),
                       child: Align(
-                        alignment: Alignment.center,
                         child: Text('$row x $column'),
                       ),
                     );
