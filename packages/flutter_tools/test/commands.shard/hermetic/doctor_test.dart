@@ -485,6 +485,59 @@ void main() {
     });
   });
 
+  group('doctor diagnosis wrapper', () {
+    TestUsage testUsage;
+    BufferLogger logger;
+
+    setUp(() {
+      testUsage = TestUsage();
+      logger = BufferLogger.test();
+    });
+
+    testUsingContext('PII separated, events only sent once', () async {
+      final Doctor fakeDoctor = FakePiiDoctor(logger);
+      final DoctorText doctorText = DoctorText(logger, doctor: fakeDoctor);
+      const String expectedPiiText = '[✓] PII Validator\n'
+          '    • Contains PII path/to/username\n'
+          '\n'
+          '• No issues found!\n';
+      const String expectedPiiStrippedText =
+          '[✓] PII Validator\n'
+          '    • Does not contain PII\n'
+          '\n'
+          '• No issues found!\n';
+
+      // Run each multiple times to make sure the logger buffer is being cleared,
+      // and that events are only sent once.
+      expect(await doctorText.text, expectedPiiText);
+      expect(await doctorText.text, expectedPiiText);
+
+      expect(await doctorText.piiStrippedText, expectedPiiStrippedText);
+      expect(await doctorText.piiStrippedText, expectedPiiStrippedText);
+
+      // Only one event sent.
+      expect(testUsage.events, <TestUsageEvent>[
+        const TestUsageEvent(
+          'doctor-result',
+          'PiiValidator',
+          label: 'installed',
+        ),
+      ]);
+    }, overrides: <Type, Generator>{
+      Usage: () => testUsage,
+    });
+
+    testUsingContext('without PII has same text and PII-stripped text', () async {
+      final Doctor fakeDoctor = FakePassingDoctor(logger);
+      final DoctorText doctorText = DoctorText(logger, doctor: fakeDoctor);
+      final String piiText = await doctorText.text;
+      expect(piiText, isNotEmpty);
+      expect(piiText, await doctorText.piiStrippedText);
+    }, overrides: <Type, Generator>{
+      Usage: () => testUsage,
+    });
+  });
+
   testUsingContext('validate non-verbose output wrapping', () async {
     final BufferLogger wrapLogger = BufferLogger.test(
       outputPreferences: OutputPreferences(wrapText: true, wrapColumn: 30),
@@ -561,7 +614,6 @@ void main() {
         '  categories.\n'
     ));
   });
-
 
   group('doctor with grouped validators', () {
     testUsingContext('validate diagnose combines validator output', () async {
@@ -881,7 +933,6 @@ class FakeQuietDoctor extends Doctor {
     ];
   }
 }
-
 
 /// A doctor that passes and contains PII that can be hidden.
 class FakePiiDoctor extends Doctor {

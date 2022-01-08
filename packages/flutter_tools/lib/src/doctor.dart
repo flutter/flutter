@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import 'android/android_studio_validator.dart';
@@ -563,4 +564,37 @@ class DeviceValidator extends DoctorValidator {
       );
     }
   }
+}
+
+/// Wrapper for doctor to run multiple times with PII and without, running the validators only once.
+class DoctorText {
+  DoctorText(
+    BufferLogger logger, {
+    @visibleForTesting Doctor? doctor,
+  }) : _doctor = doctor ?? Doctor(logger: logger), _logger = logger;
+
+  final BufferLogger _logger;
+  final Doctor _doctor;
+  bool _sendDoctorEvent = true;
+
+  late final Future<String> text = () async {
+    await _doctor.diagnose(showColor: false, startedValidatorTasks: _validatorTasks, sendEvent: _sendDoctorEvent);
+    // Do not send the doctor event a second time.
+    _sendDoctorEvent = false;
+    final String text = _logger.statusText;
+    _logger.clear();
+    return text;
+  }();
+
+  late final Future<String> piiStrippedText = () async {
+    await _doctor.diagnose(showColor: false, startedValidatorTasks: _validatorTasks, showPii: false, sendEvent: _sendDoctorEvent);
+    // Do not send the doctor event a second time.
+    _sendDoctorEvent = false;
+    final String piiStrippedText = _logger.statusText;
+    _logger.clear();
+    return piiStrippedText;
+  }();
+
+  // Start the validator tasks only once.
+  late final List<ValidatorTask> _validatorTasks = _doctor.startValidatorTasks();
 }

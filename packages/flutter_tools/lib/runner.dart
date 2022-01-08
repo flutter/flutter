@@ -19,7 +19,6 @@ import 'src/base/logger.dart';
 import 'src/base/process.dart';
 import 'src/context_runner.dart';
 import 'src/doctor.dart';
-import 'src/doctor_validator.dart';
 import 'src/globals.dart' as globals;
 import 'src/reporting/crash_reporting.dart';
 import 'src/runner/flutter_command.dart';
@@ -150,7 +149,7 @@ Future<int> _handleToolError(
     globals.printError('Oops; flutter has exited unexpectedly: "$error".');
 
     try {
-      String doctorText;
+      String piiDoctorText;
       String piiStrippedDoctorText;
       try {
         final BufferLogger logger = BufferLogger(
@@ -161,29 +160,18 @@ Future<int> _handleToolError(
         // Run doctor twice: once with PII for the locally saved crash report, and again without PII
         // for the GitHub template. The GitHub template is sent to the GitHub URL shortener service,
         // avoid leaking PII.
-        final Doctor doctor = Doctor(logger: logger);
-
-        // Start the validator tasks only once.
-        final List<ValidatorTask> validatorTasks = doctor.startValidatorTasks();
-
-        // Run with PII.
-        await doctor.diagnose(showColor: false, startedValidatorTasks: validatorTasks);
-        doctorText = logger.statusText;
-
-        logger.clear();
-
-        // Run without PII. Do not send the doctor event a second time.
-        await doctor.diagnose(showColor: false, startedValidatorTasks: validatorTasks, showPii: false, sendEvent: false);
-        piiStrippedDoctorText = logger.statusText;
+        final DoctorText doctorText = DoctorText(logger);
+        piiDoctorText = await doctorText.text;
+        piiStrippedDoctorText = await doctorText.piiStrippedText;
       } on Exception catch (error, trace) {
-        doctorText = 'encountered exception: $error\n\n${trace.toString().trim()}\n';
+        piiDoctorText = 'encountered exception: $error\n\n${trace.toString().trim()}\n';
       }
 
       final CrashDetails details = CrashDetails(
         command: _crashCommand(args),
         error: error,
         stackTrace: stackTrace,
-        doctorText: doctorText,
+        doctorText: piiDoctorText,
         piiStrippedDoctorText: piiStrippedDoctorText,
       );
       final File file = await _createLocalCrashReport(details);
