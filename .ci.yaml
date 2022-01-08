@@ -1399,6 +1399,17 @@ targets:
       task_name: android_obfuscate_test
     scheduler: luci
 
+  - name: Linux_android android_semantics_integration_test
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/74522
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux"]
+      task_name: android_semantics_integration_test
+    scheduler: luci
+
   - name: Linux_android android_stack_size_test
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -2975,17 +2986,6 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
-
-  - name: Mac_android android_semantics_integration_test
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/94730
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab","android","mac"]
-      task_name: android_semantics_integration_test
-    scheduler: luci
 
   - name: Mac_android hello_world_android__compile
     recipe: devicelab/devicelab_drone
