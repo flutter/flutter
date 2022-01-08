@@ -354,6 +354,7 @@ Matcher coversSameAreaAs(Path expectedPath, { required Rect areaToCompare, int s
 /// ```
 /// {@end-tool}
 ///
+/// {@template flutter.flutter_test.matchesGoldenFile.custom_fonts}
 /// By default, the Flutter framework uses a font called 'Ahem' which shows
 /// squares instead of characters. It is possible to render images using
 /// custom fonts. For example, this is how to load the 'Roboto' font for a
@@ -406,6 +407,7 @@ Matcher coversSameAreaAs(Path expectedPath, { required Rect areaToCompare, int s
 /// operating system. Even on the same platform, if the generated golden is
 /// tested with a different Flutter version, the test may fail and require an updated
 /// image.
+/// {@endtemplate}
 ///
 /// See also:
 ///
