@@ -206,7 +206,7 @@ Future<File> _createLocalCrashReport(CrashDetails details) async {
   buffer.writeln('```\n${details.stackTrace}```\n');
 
   buffer.writeln('## flutter doctor\n');
-  buffer.writeln('```\n${details.doctorText}```');
+  buffer.writeln('```\n${await details.doctorText.text}```');
 
   try {
     crashFile.writeAsStringSync(buffer.toString());
