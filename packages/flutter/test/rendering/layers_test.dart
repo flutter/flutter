@@ -218,6 +218,36 @@ void main() {
     expect(leaderLayer.debugSubtreeNeedsAddToScene, false);
   });
 
+  test('LeaderLayer.applyTransform can be called after retained rendering', () {
+    void expectTransform(RenderObject leader) {
+      final LeaderLayer leaderLayer = leader.debugLayer! as LeaderLayer;
+      final Matrix4 expected = Matrix4.identity()
+        ..translate(leaderLayer.offset.dx, leaderLayer.offset.dy);
+      final Matrix4 transformed = Matrix4.identity();
+      leaderLayer.applyTransform(null, transformed);
+      expect(transformed, expected);
+    }
+
+    final LayerLink link = LayerLink();
+    late RenderLeaderLayer leader;
+    final RenderRepaintBoundary root = RenderRepaintBoundary(
+      child:RenderRepaintBoundary(
+        child: leader = RenderLeaderLayer(link: link),
+      ),
+    );
+    layout(root, phase: EnginePhase.composite);
+
+    expectTransform(leader);
+
+    // Causes a repaint, but the LeaderLayer of RenderLeaderLayer will be added
+    // as retained and LeaderLayer.addChildrenToScene will not be called.
+    root.markNeedsPaint();
+    pumpFrame(phase: EnginePhase.composite);
+
+    // The LeaderLayer.applyTransform call shouldn't crash.
+    expectTransform(leader);
+  });
+
   test('depthFirstIterateChildren', () {
     final ContainerLayer a = ContainerLayer();
     final ContainerLayer b = ContainerLayer();

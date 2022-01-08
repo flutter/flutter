@@ -2234,7 +2234,7 @@ class LeaderLayer extends ContainerLayer {
   void attach(Object owner) {
     super.attach(owner);
     assert(link._leader == null);
-    _lastOffset = null;
+    assert(_debugSetLastOffset(null));
     link._leader = this;
   }
 
@@ -2242,7 +2242,7 @@ class LeaderLayer extends ContainerLayer {
   void detach() {
     assert(link._leader == this);
     link._leader = null;
-    _lastOffset = null;
+    assert(_debugSetLastOffset(null));
     super.detach();
   }
 
@@ -2251,7 +2251,17 @@ class LeaderLayer extends ContainerLayer {
   /// This is reset to null when the layer is attached or detached, to help
   /// catch cases where the follower layer ends up before the leader layer, but
   /// not every case can be detected.
-  Offset? _lastOffset;
+  Offset? _debugLastOffset;
+
+  bool _debugSetLastOffset(Offset? offset) {
+    bool result = false;
+    assert(() {
+      _debugLastOffset = offset;
+      result = true;
+      return true;
+    }());
+    return result;
+  }
 
   @override
   bool findAnnotations<S extends Object>(AnnotationResult<S> result, Offset localPosition, { required bool onlyFirst }) {
@@ -2261,14 +2271,14 @@ class LeaderLayer extends ContainerLayer {
   @override
   void addToScene(ui.SceneBuilder builder) {
     assert(offset != null);
-    _lastOffset = offset;
-    if (_lastOffset != Offset.zero)
+    assert(_debugSetLastOffset(offset));
+    if (offset != Offset.zero)
       engineLayer = builder.pushTransform(
-        Matrix4.translationValues(_lastOffset!.dx, _lastOffset!.dy, 0.0).storage,
+        Matrix4.translationValues(offset.dx, offset.dy, 0.0).storage,
         oldLayer: _engineLayer as ui.TransformEngineLayer?,
       );
     addChildrenToScene(builder);
-    if (_lastOffset != Offset.zero)
+    if (offset != Offset.zero)
       builder.pop();
   }
 
@@ -2281,9 +2291,8 @@ class LeaderLayer extends ContainerLayer {
   /// children.
   @override
   void applyTransform(Layer? child, Matrix4 transform) {
-    assert(_lastOffset != null);
-    if (_lastOffset != Offset.zero)
-      transform.translate(_lastOffset!.dx, _lastOffset!.dy);
+    if (offset != Offset.zero)
+      transform.translate(offset.dx, offset.dy);
   }
 
   @override
@@ -2499,7 +2508,7 @@ class FollowerLayer extends ContainerLayer {
       'Linked LeaderLayer anchor is not in the same layer tree as the FollowerLayer.',
     );
     assert(
-      leader._lastOffset != null,
+      leader._debugLastOffset != null,
       'LeaderLayer anchor must come before FollowerLayer in paint order, but the reverse was true.',
     );
 
