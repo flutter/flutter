@@ -20,7 +20,10 @@ class DoNothingAndStopPropagationTextIntent extends Intent {
 /// direction of the current caret location.
 abstract class DirectionalTextEditingIntent extends Intent {
   /// Creates a [DirectionalTextEditingIntent].
-  const DirectionalTextEditingIntent(this.forward);
+  const DirectionalTextEditingIntent(
+    this.forward,
+    [this.continuesAtWrap = false]
+  );
 
   /// Whether the input field, if applicable, should perform the text editing
   /// operation from the current caret location towards the end of the document.
@@ -29,6 +32,11 @@ abstract class DirectionalTextEditingIntent extends Intent {
   /// uses the logical order of characters in the string to determind the
   /// direction, and is not affected by the writing direction of the text.
   final bool forward;
+
+  // TODO(justinmc): Better docs.
+  /// Indicates whether the next/previous line boundary should be given when then
+  /// position is already on the trailing/leading wordwrapped line break.
+  final bool continuesAtWrap;
 }
 
 /// Deletes the character before or after the caret location, based on whether
@@ -65,7 +73,10 @@ abstract class DirectionalCaretMovementIntent extends DirectionalTextEditingInte
   const DirectionalCaretMovementIntent(
     bool forward,
     this.collapseSelection,
-    [this.collapseAtReversal = false]
+    [
+      this.collapseAtReversal = false,
+      this.continuesAtWrap = false,
+    ]
   ) : assert(!collapseSelection || !collapseAtReversal),
       super(forward);
 
@@ -90,6 +101,9 @@ abstract class DirectionalCaretMovementIntent extends DirectionalTextEditingInte
   ///
   /// Cannot be true when collapseSelection is true.
   final bool collapseAtReversal;
+
+  // TODO(justinmc): Document with macro.
+  final bool continuesAtWrap;
 }
 
 /// Extends, or moves the current selection from the current
@@ -165,8 +179,9 @@ class ExtendSelectionToLineBreakIntent extends DirectionalCaretMovementIntent {
     required bool forward,
     required bool collapseSelection,
     bool collapseAtReversal = false,
+    bool continuesAtWrap = false,
   }) : assert(!collapseSelection || !collapseAtReversal),
-       super(forward, collapseSelection, collapseAtReversal);
+       super(forward, collapseSelection, collapseAtReversal, continuesAtWrap);
 }
 
 /// Extends, or moves the current selection from the current

@@ -3042,7 +3042,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     } else {
       final TextEditingValue textEditingValue = _textEditingValueforTextLayoutMetrics;
       atomicTextBoundary = _CharacterBoundary(textEditingValue);
-      boundary = _LineBreak(renderEditable, textEditingValue);
+      boundary = _LineBreak(renderEditable, textEditingValue, intent.continuesAtWrap);
     }
 
     // The _MixedBoundary is to make sure we don't leave invalid code units in
@@ -3763,24 +3763,60 @@ class _WordBoundary extends _TextBoundary {
 // interpreted as caret locations because [TextPainter.getLineAtOffset] is
 // text-affinity-aware.
 class _LineBreak extends _TextBoundary {
-  const _LineBreak(this.textLayout, this.textEditingValue);
+  const _LineBreak(
+    this.textLayout,
+    this.textEditingValue,
+    [this.continuesAtWrap = false]
+  );
+
+  static const int NEWLINE_CODE_UNIT = 10;
 
   final TextLayoutMetrics textLayout;
+
+  final bool continuesAtWrap;
 
   @override
   final TextEditingValue textEditingValue;
 
   @override
   TextPosition getLeadingTextBoundaryAt(TextPosition position) {
-    return TextPosition(
+    final TextPosition start = TextPosition(
       offset: textLayout.getLineAtOffset(position).start,
     );
+
+    if (!continuesAtWrap || start != position || start.offset == 0
+        || textEditingValue.text.codeUnitAt(position.offset - 1) == NEWLINE_CODE_UNIT) {
+      return start;
+    }
+    // If continuesAtWrap is true and the position is at a wordwrap, then return
+    // the beginning of the previous line.
+    return TextPosition(
+      offset: textLayout.getLineAtOffset(TextPosition(
+      affinity: TextAffinity.upstream,
+        offset: position.offset,
+      )).start,
+    );
   }
+
   @override
   TextPosition getTrailingTextBoundaryAt(TextPosition position) {
-    return TextPosition(
+    final TextPosition end = TextPosition(
       offset: textLayout.getLineAtOffset(position).end,
       affinity: TextAffinity.upstream,
+    );
+    if (!continuesAtWrap || end != position
+        || end.offset == textEditingValue.text.length
+        || textEditingValue.text.codeUnitAt(position.offset) == NEWLINE_CODE_UNIT) {
+      return end;
+    }
+
+    // If continuesAtWrap is true and the position is at a wordwrap, then return
+    // the end of the next line.
+    return TextPosition(
+      affinity: TextAffinity.upstream,
+      offset: textLayout.getLineAtOffset(TextPosition(
+        offset: position.offset,
+      )).end,
     );
   }
 }
