@@ -239,7 +239,8 @@ abstract class DeletableChipAttributes {
 
   /// The message to be used for the chip's delete button tooltip.
   ///
-  /// If empty, the tooltip of the delete button will be disabled.
+  /// If provided with an empty string, the tooltip of the delete button will be
+  /// disabled.
   ///
   /// If null, the default [MaterialLocalizations.deleteButtonTooltip] will be
   /// used.
