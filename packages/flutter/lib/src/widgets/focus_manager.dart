@@ -446,15 +446,15 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// If set to false on a [FocusScopeNode], will cause all of the children of
   /// the scope node to not be focusable.
   ///
-  /// If set to false on a [FocusNode], it will not affect the children of the
-  /// node.
+  /// If set to false on a [FocusNode], it will not affect the focusability of
+  /// children of the node.
   ///
   /// The [hasFocus] member can still return true if this node is the ancestor
   /// of a node with primary focus.
   ///
   /// This is different than [skipTraversal] because [skipTraversal] still
   /// allows the node to be focused, just not traversed to via the
-  /// [FocusTraversalPolicy]
+  /// [FocusTraversalPolicy].
   ///
   /// Setting [canRequestFocus] to false implies that the node will also be
   /// skipped for traversal purposes.
@@ -575,9 +575,18 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
 
   /// An iterator over the children that are allowed to be traversed by the
   /// [FocusTraversalPolicy].
+  ///
+  /// Returns the list of focusable, traversable children of this node,
+  /// regardless of those settings on this focus node. Will return an empty
+  /// iterable if [descendantsAreFocusable] is false.
+  ///
+  /// See also
+  ///
+  ///  * [traversalDescendants], which traverses all of the node's descendants,
+  ///    not just the immediate children.
   Iterable<FocusNode> get traversalChildren {
-    if (!canRequestFocus) {
-      return const <FocusNode>[];
+    if (!descendantsAreFocusable) {
+      return const Iterable<FocusNode>.empty();
     }
     return children.where(
       (FocusNode node) => !node.skipTraversal && node.canRequestFocus,
@@ -615,7 +624,12 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
 
   /// Returns all descendants which do not have the [skipTraversal] and do have
   /// the [canRequestFocus] flag set.
-  Iterable<FocusNode> get traversalDescendants => descendants.where((FocusNode node) => !node.skipTraversal && node.canRequestFocus);
+  Iterable<FocusNode> get traversalDescendants {
+    if (!descendantsAreFocusable) {
+      return const Iterable<FocusNode>.empty();
+    }
+    return descendants.where((FocusNode node) => !node.skipTraversal && node.canRequestFocus);
+  }
 
   /// An [Iterable] over the ancestors of this node.
   ///
@@ -1184,6 +1198,37 @@ class FocusScopeNode extends FocusNode {
   // last (which is the top of the stack).
   final List<FocusNode> _focusedChildren = <FocusNode>[];
 
+  /// An iterator over the children that are allowed to be traversed by the
+  /// [FocusTraversalPolicy].
+  ///
+  /// Will return an empty iterable if this scope node is not focusable, or if
+  /// [descendantsAreFocusable] is false.
+  ///
+  /// See also:
+  ///
+  ///  * [traversalDescendants], which traverses all of the node's descendants,
+  ///    not just the immediate children.
+  @override
+  Iterable<FocusNode> get traversalChildren {
+    if (!canRequestFocus) {
+      return const Iterable<FocusNode>.empty();
+    }
+    return super.traversalChildren;
+  }
+
+  /// Returns all descendants which do not have the [skipTraversal] and do have
+  /// the [canRequestFocus] flag set.
+  ///
+  /// Will return an empty iterable if this scope node is not focusable, or if
+  /// [descendantsAreFocusable] is false.
+  @override
+  Iterable<FocusNode> get traversalDescendants {
+    if (!canRequestFocus) {
+      return const Iterable<FocusNode>.empty();
+    }
+    return super.traversalDescendants;
+  }
+
   /// Make the given [scope] the active child scope for this scope.
   ///
   /// If the given [scope] is not yet a part of the focus tree, then add it to
@@ -1259,7 +1304,7 @@ class FocusScopeNode extends FocusNode {
     final List<String> childList = _focusedChildren.reversed.map<String>((FocusNode child) {
       return child.toStringShort();
     }).toList();
-    properties.add(IterableProperty<String>('focusedChildren', childList, defaultValue: <String>[]));
+    properties.add(IterableProperty<String>('focusedChildren', childList, defaultValue: const Iterable<String>.empty()));
   }
 }
 
