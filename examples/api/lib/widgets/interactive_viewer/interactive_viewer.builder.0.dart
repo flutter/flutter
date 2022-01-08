@@ -31,11 +31,8 @@ class _IVBuilderExample extends StatefulWidget {
 }
 
 class _IVBuilderExampleState extends State<_IVBuilderExample> {
-  final TransformationController _transformationController =
-      TransformationController();
-
-  static const double _cellWidth = 200.0;
-  static const double _cellHeight = 26.0;
+  static const double _cellWidth = 160.0;
+  static const double _cellHeight = 80.0;
 
   // Returns the axis aligned bounding box for the given Quad, which might not be axis aligned.
   Rect axisAlignedBoundingBox(Quad quad) {
@@ -71,9 +68,7 @@ class _IVBuilderExampleState extends State<_IVBuilderExample> {
         builder: (BuildContext context, BoxConstraints constraints) {
           return InteractiveViewer.builder(
             boundaryMargin: const EdgeInsets.all(double.infinity),
-            transformationController: _transformationController,
             builder: (BuildContext context, Quad viewport) {
-              // A simple extension of Table that builds cells.
               return _TableBuilder(
                   cellWidth: _cellWidth,
                   cellHeight: _cellHeight,
@@ -86,7 +81,7 @@ class _IVBuilderExampleState extends State<_IVBuilderExample> {
                           ? Colors.white
                           : Colors.grey.withOpacity(0.1),
                       child: Align(
-                        alignment: Alignment.centerLeft,
+                        alignment: Alignment.center,
                         child: Text('$row x $column'),
                       ),
                     );
@@ -122,11 +117,12 @@ class _TableBuilder extends StatelessWidget {
     final int firstCol = (viewport.left / cellWidth).floor();
     final int lastCol = (viewport.right / cellWidth).ceil();
 
-    final int totalCells = (lastRow - firstRow) * (lastCol - firstCol);
-    debugPrint('Total cells: $totalCells');
+    // This will create and render exactly (lastRow - firstRow) * (lastCol - firstCol) cells
 
     return SizedBox(
         // Stack needs constraints, even though we then Clip.none outside of them.
+        // InteractiveViewer.builder always sets constrained to false, giving infinite constraints to the child.
+        // See: https://master-api.flutter.dev/flutter/widgets/InteractiveViewer/constrained.html
         width: 1,
         height: 1,
         child: Stack(
