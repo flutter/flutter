@@ -7,6 +7,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'debug.dart';
@@ -2110,6 +2111,55 @@ class PhysicalModelLayer extends ContainerLayer {
 class LayerLink {
   LeaderLayer? _leader;
 
+  void _registerLeader(LeaderLayer leader) {
+    assert(_leader != leader);
+    assert((){
+      if (_leader != null) {
+        _debugPreviousLeaders ??= <LeaderLayer>{};
+        _debugPreviousLeaders!.add(_leader!);
+        _debugScheduleLeadersCleanUpCheck();
+      }
+      return true;
+    }());
+    _leader = leader;
+  }
+
+  void _unregisterLeader(LeaderLayer leader) {
+    assert(_leader != null);
+    if (_leader == leader) {
+      _leader = null;
+    } else {
+      assert((){
+        _debugPreviousLeaders!.remove(leader);
+        return true;
+      }());
+    }
+  }
+
+  /// Stores the previous leaders that were replaced by the current [_leader]
+  /// in the current frame.
+  ///
+  /// These leaders need to give up their leaderships of this link by the end of
+  /// the current frame.
+  Set<LeaderLayer>? _debugPreviousLeaders;
+  bool _debugLeaderCheckScheduled = false;
+
+  /// Schedules the check as post frame callback to make sure the
+  /// [_debugPreviousLeaders] is empty.
+  void _debugScheduleLeadersCleanUpCheck() {
+    assert(_debugPreviousLeaders != null);
+    assert(() {
+      if (_debugLeaderCheckScheduled)
+        return true;
+      _debugLeaderCheckScheduled = true;
+      SchedulerBinding.instance!.addPostFrameCallback((Duration timeStamp) {
+        _debugLeaderCheckScheduled = false;
+        assert(_debugPreviousLeaders!.isEmpty);
+      });
+      return true;
+    }());
+  }
+
   int _connectedFollowers = 0;
 
   /// Whether a [LeaderLayer] is currently connected to this link.
@@ -2202,7 +2252,10 @@ class LeaderLayer extends ContainerLayer {
     if (_link == value) {
       return;
     }
-    _link._leader = null;
+    if (attached) {
+      _link._unregisterLeader(this);
+      value._registerLeader(this);
+    }
     _link = value;
   }
 
@@ -2233,16 +2286,14 @@ class LeaderLayer extends ContainerLayer {
   @override
   void attach(Object owner) {
     super.attach(owner);
-    assert(link._leader == null);
     assert(_debugSetLastOffset(null));
-    link._leader = this;
+    _link._registerLeader(this);
   }
 
   @override
   void detach() {
-    assert(link._leader == this);
-    link._leader = null;
     assert(_debugSetLastOffset(null));
+    _link._unregisterLeader(this);
     super.detach();
   }
 
