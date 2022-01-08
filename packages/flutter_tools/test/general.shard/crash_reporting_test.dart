@@ -10,11 +10,13 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/crash_reporting.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:http/http.dart';
 import 'package:http/testing.dart';
+import 'package:test/fake.dart';
 
 import '../src/common.dart';
 import '../src/fake_http_client.dart';
@@ -91,9 +93,8 @@ void main() {
         command: 'arg1 arg2 arg3',
         error: Exception('Dummy exception'),
         stackTrace: StackTrace.current,
-        doctorText: 'Ignored',
         // Spaces are URL query encoded in the output, make it one word to make this test simpler.
-        piiStrippedDoctorText: 'NoPIIFakeDoctorText',
+        doctorText: FakeDoctorText('Ignored', 'NoPIIFakeDoctorText'),
       ),
       file,
     );
@@ -383,4 +384,17 @@ class CrashingCrashReportSender extends MockClient {
   CrashingCrashReportSender(Object exception) : super((Request request) async {
     throw exception;
   });
+}
+
+class FakeDoctorText extends Fake implements DoctorText {
+  FakeDoctorText(String text, String piiStrippedText)
+      : _text = text, _piiStrippedText = piiStrippedText;
+
+  @override
+  Future<String> get text async => _text;
+  final String _text;
+
+  @override
+  Future<String> get piiStrippedText async => _piiStrippedText;
+  final String _piiStrippedText;
 }

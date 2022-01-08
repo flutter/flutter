@@ -578,21 +578,29 @@ class DoctorText {
   bool _sendDoctorEvent = true;
 
   late final Future<String> text = () async {
-    await _doctor.diagnose(showColor: false, startedValidatorTasks: _validatorTasks, sendEvent: _sendDoctorEvent);
-    // Do not send the doctor event a second time.
-    _sendDoctorEvent = false;
-    final String text = _logger.statusText;
-    _logger.clear();
-    return text;
+    try {
+      await _doctor.diagnose(showColor: false, startedValidatorTasks: _validatorTasks, sendEvent: _sendDoctorEvent);
+      // Do not send the doctor event a second time.
+      _sendDoctorEvent = false;
+      final String text = _logger.statusText;
+      _logger.clear();
+      return text;
+    } on Exception catch (error, trace) {
+      return 'encountered exception: $error\n\n${trace.toString().trim()}\n';
+    }
   }();
 
   late final Future<String> piiStrippedText = () async {
-    await _doctor.diagnose(showColor: false, startedValidatorTasks: _validatorTasks, showPii: false, sendEvent: _sendDoctorEvent);
-    // Do not send the doctor event a second time.
-    _sendDoctorEvent = false;
-    final String piiStrippedText = _logger.statusText;
-    _logger.clear();
-    return piiStrippedText;
+    try {
+      await _doctor.diagnose(showColor: false, startedValidatorTasks: _validatorTasks, showPii: false, sendEvent: _sendDoctorEvent);
+      // Do not send the doctor event a second time.
+      _sendDoctorEvent = false;
+      final String piiStrippedText = _logger.statusText;
+      _logger.clear();
+      return piiStrippedText;
+    } on Exception catch (error, trace) {
+      return 'encountered exception: $error\n\n${trace.toString().trim()}\n';
+    }
   }();
 
   // Start the validator tasks only once.

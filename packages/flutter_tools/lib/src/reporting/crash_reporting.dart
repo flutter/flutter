@@ -12,6 +12,7 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
+import '../doctor.dart';
 import '../project.dart';
 import 'github_template.dart';
 import 'reporting.dart';
@@ -44,14 +45,12 @@ class CrashDetails {
     required this.error,
     required this.stackTrace,
     required this.doctorText,
-    String? piiStrippedDoctorText,
-  }) : piiStrippedDoctorText = piiStrippedDoctorText ?? doctorText;
+  });
 
   final String command;
   final Object error;
   final StackTrace stackTrace;
-  final String doctorText;
-  final String piiStrippedDoctorText;
+  final DoctorText doctorText;
 }
 
 /// Reports information about the crash to the user.
@@ -94,7 +93,7 @@ class CrashReporter {
       details.command,
       details.error,
       details.stackTrace,
-      details.piiStrippedDoctorText,
+      await details.doctorText.piiStrippedText,
     );
     _logger.printStatus('$gitHubTemplateURL\n', wrap: false);
   }

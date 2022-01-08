@@ -149,30 +149,18 @@ Future<int> _handleToolError(
     globals.printError('Oops; flutter has exited unexpectedly: "$error".');
 
     try {
-      String piiDoctorText;
-      String piiStrippedDoctorText;
-      try {
-        final BufferLogger logger = BufferLogger(
-          terminal: globals.terminal,
-          outputPreferences: globals.outputPreferences,
-        );
+      final BufferLogger logger = BufferLogger(
+        terminal: globals.terminal,
+        outputPreferences: globals.outputPreferences,
+      );
 
-        // Run doctor twice: once with PII for the locally saved crash report, and again without PII
-        // for the GitHub template. The GitHub template is sent to the GitHub URL shortener service,
-        // avoid leaking PII.
-        final DoctorText doctorText = DoctorText(logger);
-        piiDoctorText = await doctorText.text;
-        piiStrippedDoctorText = await doctorText.piiStrippedText;
-      } on Exception catch (error, trace) {
-        piiDoctorText = 'encountered exception: $error\n\n${trace.toString().trim()}\n';
-      }
+      final DoctorText doctorText = DoctorText(logger);
 
       final CrashDetails details = CrashDetails(
         command: _crashCommand(args),
         error: error,
         stackTrace: stackTrace,
-        doctorText: piiDoctorText,
-        piiStrippedDoctorText: piiStrippedDoctorText,
+        doctorText: doctorText,
       );
       final File file = await _createLocalCrashReport(details);
       await globals.crashReporter.informUser(details, file);
