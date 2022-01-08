@@ -354,20 +354,13 @@ Matcher coversSameAreaAs(Path expectedPath, { required Rect areaToCompare, int s
 /// ```
 /// {@end-tool}
 ///
-/// Fonts can be rendered differently according with the platform or the Flutter
-/// version in which the test is run. While the difference may be minimal, it's
-/// still valuable to make the test fail. For example, a golden file generated
-/// on Windows is going to differ from the one produced by another operating
-/// system. Even on the same platform, if the generated golden is tested with a
-/// different Flutter version, the test may fail.
-///
 /// By default, the Flutter framework uses a font called 'Ahem' which shows
-/// squares instead of characters. To make golden tests more valuable, there
-/// is the possibility to render images using other more human-readable fonts.
-/// For example, this is how to load the 'Roboto' font for a golden test:
+/// squares instead of characters. It is possible to render images using
+/// custom fonts. For example, this is how to load the 'Roboto' font for a
+/// golden test:
 ///
 /// {@tool snippet}
-/// Using custom fonts in golden images
+/// How to load a custom font for golden images.
 /// ```dart
 /// testWidgets('Creating a golden image with a custom font', (tester) async {
 ///   // Assuming the 'Roboto.ttf' file is declared in the pubspec.yaml file
@@ -387,12 +380,12 @@ Matcher coversSameAreaAs(Path expectedPath, { required Rect areaToCompare, int s
 /// {@end-tool}
 ///
 /// The example above loads the desired font only for that specific test. To load
-/// a font for any golden test in the app, the `FontLoader.load()` call could be
+/// a font for all golden file tests, the `FontLoader.load()` call could be
 /// moved in the `flutter_test_config.dart`. In this way, the font will always be
 /// loaded before a test:
 ///
 /// {@tool snippet}
-/// Loading a custom font in flutter_test_config.dart
+/// Loading a custom font from the flutter_test_config.dart file.
 /// ```dart
 /// Future<void> testExecutable(FutureOr<void> Function() testMain) async {
 ///   setUpAll(() async {
@@ -404,6 +397,15 @@ Matcher coversSameAreaAs(Path expectedPath, { required Rect areaToCompare, int s
 /// });
 /// ```
 /// {@end-tool}
+///
+/// ## Including Fonts
+///
+/// Custom fonts may render differently across different platforms, or
+/// between different versions of Flutter. For example, a golden file generated
+/// on Windows with fonts will likely differ from the one produced by another
+/// operating system. Even on the same platform, if the generated golden is
+/// tested with a different Flutter version, the test may fail and require an updated
+/// image.
 ///
 /// See also:
 ///
