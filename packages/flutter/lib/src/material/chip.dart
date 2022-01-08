@@ -251,7 +251,7 @@ abstract class DeletableChipAttributes {
   /// Defaults to true.
   @Deprecated(
     'Set deleteButtonTooltipMessage of this Chip as an empty string instead. '
-    'This feature was deprecated after'
+    'This feature was deprecated after 2.9.0-1.0.pre.290'
   )
   bool get useDeleteButtonTooltip;
 }
@@ -575,7 +575,7 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
     this.shadowColor,
     @Deprecated(
       'Set deleteButtonTooltipMessage of this Chip as an empty string instead. '
-      'This feature was deprecated after'
+      'This feature was deprecated after 2.9.0-1.0.pre.290'
     )
     this.useDeleteButtonTooltip = true,
   }) : assert(label != null),
@@ -625,7 +625,7 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
   @override
   @Deprecated(
     'Set deleteButtonTooltipMessage of this Chip as an empty string instead. '
-    'This feature was deprecated after'
+    'This feature was deprecated after 2.9.0-1.0.pre.290'
   )
   final bool useDeleteButtonTooltip;
 
@@ -755,7 +755,7 @@ class InputChip extends StatelessWidget
     this.avatarBorder = const CircleBorder(),
     @Deprecated(
       'Set deleteButtonTooltipMessage of this Chip as an empty string instead. '
-      'This feature was deprecated after'
+      'This feature was deprecated after 2.9.0-1.0.pre.290'
     )
     this.useDeleteButtonTooltip = true,
   }) : assert(selected != null),
@@ -832,7 +832,7 @@ class InputChip extends StatelessWidget
   @override
   @Deprecated(
     'Set deleteButtonTooltipMessage of this Chip as an empty string instead. '
-    'This feature was deprecated after'
+    'This feature was deprecated after 2.9.0-1.0.pre.290'
   )
   final bool useDeleteButtonTooltip;
 
@@ -1512,7 +1512,7 @@ class RawChip extends StatefulWidget
     this.avatarBorder = const CircleBorder(),
     @Deprecated(
       'Set deleteButtonTooltipMessage of this Chip as an empty string instead. '
-      'This feature was deprecated after'
+      'This feature was deprecated after 2.9.0-1.0.pre.290'
     )
     this.useDeleteButtonTooltip = true,
   }) : assert(label != null),
@@ -1590,7 +1590,7 @@ class RawChip extends StatefulWidget
   @override
   @Deprecated(
     'Set deleteButtonTooltipMessage of this Chip as an empty string instead. '
-    'This feature was deprecated after'
+    'This feature was deprecated after 2.9.0-1.0.pre.290'
   )
   final bool useDeleteButtonTooltip;
 
