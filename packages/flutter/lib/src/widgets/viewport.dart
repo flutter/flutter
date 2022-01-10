@@ -212,7 +212,7 @@ class _ViewportElement extends MultiChildRenderObjectElement {
   _ViewportElement(Viewport widget) : super(widget);
 
   bool _doingMountOrUpdate = false;
-  int? _centerSlotIndex = null;
+  int? _centerSlotIndex;
 
   @override
   Viewport get widget => super.widget as Viewport;
