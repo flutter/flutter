@@ -22,7 +22,7 @@ const ui.Color _defaultTextColor = ui.Color(0xFFFF0000);
 /// [CanvasParagraph] doesn't use a DOM element to represent the structure of
 /// its spans and styles. Instead it uses a flat list of [ParagraphSpan]
 /// objects.
-class CanvasParagraph implements EngineParagraph {
+class CanvasParagraph implements ui.Paragraph {
   /// This class is created by the engine, and should not be instantiated
   /// or extended directly.
   ///
@@ -47,7 +47,7 @@ class CanvasParagraph implements EngineParagraph {
   /// The number of placeholders in this paragraph.
   final int placeholderCount;
 
-  @override
+  /// Whether this paragraph can be drawn on a bitmap canvas.
   final bool drawOnCanvas;
 
   @override
@@ -74,7 +74,7 @@ class CanvasParagraph implements EngineParagraph {
   @override
   bool get didExceedMaxLines => _layoutService.didExceedMaxLines;
 
-  @override
+  /// Whether this paragraph has been laid out or not.
   bool isLaidOut = false;
 
   bool get isRtl => paragraphStyle.effectiveTextDirection == ui.TextDirection.rtl;
@@ -119,20 +119,24 @@ class CanvasParagraph implements EngineParagraph {
 
   // TODO(mdebbar): Returning true means we always require a bitmap canvas. Revisit
   // this decision once `CanvasParagraph` is fully implemented.
-  @override
+  /// Whether this paragraph is doing arbitrary paint operations that require
+  /// a bitmap canvas, and can't be expressed in a DOM canvas.
   bool get hasArbitraryPaint => true;
 
-  @override
+  /// Paints this paragraph instance on a [canvas] at the given [offset].
   void paint(BitmapCanvas canvas, ui.Offset offset) {
     _paintService.paint(canvas, offset);
   }
 
-  @override
+  /// Generates a flat string computed from all the spans of the paragraph.
   String toPlainText() => plainText;
 
   html.HtmlElement? _cachedDomElement;
 
-  @override
+  /// Returns a DOM element that represents the entire paragraph and its
+  /// children.
+  ///
+  /// Generates a new DOM element on every invocation.
   html.HtmlElement toDomElement() {
     assert(isLaidOut);
     final html.HtmlElement? domElement = _cachedDomElement;

@@ -16,7 +16,7 @@ import '../engine_canvas.dart';
 import '../frame_reference.dart';
 import '../html_image_codec.dart';
 import '../platform_dispatcher.dart';
-import '../text/paragraph.dart';
+import '../text/canvas_paragraph.dart';
 import '../util.dart';
 import '../vector_math.dart';
 import '../window.dart';
@@ -936,7 +936,7 @@ class BitmapCanvas extends EngineCanvas {
   }
 
   @override
-  void drawParagraph(EngineParagraph paragraph, ui.Offset offset) {
+  void drawParagraph(CanvasParagraph paragraph, ui.Offset offset) {
     assert(paragraph.isLaidOut);
 
     /// - paragraph.drawOnCanvas checks that the text styling doesn't include

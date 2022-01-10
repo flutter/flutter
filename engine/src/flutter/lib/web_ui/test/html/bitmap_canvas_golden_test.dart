@@ -147,9 +147,9 @@ Future<void> testMain() async {
   //
   // More details: https://github.com/flutter/flutter/issues/32274
   test('renders clipped DOM text with high quality', () async {
-    final EngineParagraph paragraph =
+    final CanvasParagraph paragraph =
         (ParagraphBuilder(ParagraphStyle(fontFamily: 'Roboto'))
-          ..addText('Am I blurry?')).build() as EngineParagraph;
+          ..addText('Am I blurry?')).build() as CanvasParagraph;
     paragraph.layout(const ParagraphConstraints(width: 1000));
 
     final Rect canvasSize = Rect.fromLTRB(
@@ -199,7 +199,7 @@ Future<void> testMain() async {
       'breaks into multiple lines.';
     builder.addText(text);
 
-    final EngineParagraph paragraph = builder.build() as EngineParagraph;
+    final CanvasParagraph paragraph = builder.build() as CanvasParagraph;
     paragraph.layout(const ParagraphConstraints(width: 100));
 
     final Rect canvasSize = Offset.zero & const Size(500, 500);
