@@ -29,7 +29,7 @@ class UpgradeCommand extends FlutterCommand {
       ..addFlag(
         'force',
         abbr: 'f',
-        help: 'Force upgrade the flutter branch, potentially discarding local changes.',
+        help: 'Force upgrade the Flutter branch, potentially discarding local changes.',
         negatable: false,
       )
       ..addFlag(
@@ -49,7 +49,7 @@ class UpgradeCommand extends FlutterCommand {
       )
       ..addFlag(
         'verify-only',
-        help: 'Checks for any new flutter updates, without actually fetching them.',
+        help: 'Checks for any new Flutter updates, without actually fetching them.',
         negatable: false,
       );
   }
