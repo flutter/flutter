@@ -218,57 +218,5 @@ void main() {
       expect(renderBox.size.height, equals(600.0));
       expect(renderBox.localToGlobal(Offset.zero), equals(Offset.zero));
     });
-
-    testWidgets('with Overlay at [100,100]', (WidgetTester tester) async {
-      const Key childKey = Key('childKey');
-      final GlobalKey<NavigatorState> navigatorKey = GlobalKey();
-      final MediaQueryData mediaQuery = MediaQueryData.fromWindow(WidgetsBinding.instance!.window).copyWith(
-          displayFeatures: <DisplayFeature>[
-            // Top notch
-            const DisplayFeature(
-              bounds: Rect.fromLTRB(100, 0, 700, 100),
-              type: DisplayFeatureType.cutout,
-              state: DisplayFeatureState.unknown,
-            ),
-            // Bottom notch
-            const DisplayFeature(
-              bounds: Rect.fromLTRB(100, 500, 700, 600),
-              type: DisplayFeatureType.cutout,
-              state: DisplayFeatureState.unknown,
-            ),
-          ]
-      );
-
-      await tester.pumpWidget(
-        MediaQuery(
-          data: mediaQuery,
-          child: Padding(
-            padding: const EdgeInsets.all(100),
-            child: MaterialApp(
-              navigatorKey: navigatorKey,
-              home: Container(),
-            ),
-          ),
-        ),
-      );
-
-      navigatorKey.currentState!.push(MaterialPageRoute<void>(builder: (_){
-        return const DisplayFeatureSubScreen(
-          child: SizedBox(
-            key: childKey,
-            width: double.infinity,
-            height: double.infinity,
-          ),
-        );
-      }));
-
-      await tester.pumpAndSettle();
-
-      // The display features provided are not wide enough to produce sub-screens
-      final RenderBox renderBox = tester.renderObject(find.byKey(childKey));
-      expect(renderBox.size.width, equals(600.0));
-      expect(renderBox.size.height, equals(400.0));
-      expect(renderBox.localToGlobal(Offset.zero), equals(const Offset(100, 100)));
-    });
   });
 }
