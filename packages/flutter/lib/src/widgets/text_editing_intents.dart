@@ -75,10 +75,10 @@ abstract class DirectionalCaretMovementIntent extends DirectionalTextEditingInte
     this.collapseSelection,
     [
       this.collapseAtReversal = false,
-      this.continuesAtWrap = false,
+      final bool continuesAtWrap = false,
     ]
   ) : assert(!collapseSelection || !collapseAtReversal),
-      super(forward);
+      super(forward, continuesAtWrap);
 
   /// Whether this [Intent] should make the selection collapsed (so it becomes a
   /// caret), after the movement.
@@ -101,9 +101,6 @@ abstract class DirectionalCaretMovementIntent extends DirectionalTextEditingInte
   ///
   /// Cannot be true when collapseSelection is true.
   final bool collapseAtReversal;
-
-  // TODO(justinmc): Document with macro.
-  final bool continuesAtWrap;
 }
 
 /// Extends, or moves the current selection from the current
