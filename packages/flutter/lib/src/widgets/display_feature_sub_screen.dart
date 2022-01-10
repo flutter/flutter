@@ -173,34 +173,36 @@ class DisplayFeatureSubScreen extends StatelessWidget {
       Rect wantedBounds, Iterable<Rect> avoidBounds) {
     Iterable<Rect> subScreens = <Rect>[wantedBounds];
     for (final Rect bounds in avoidBounds) {
-      subScreens = subScreens.expand((Rect screen) sync* {
+      subScreens = subScreens.expand((Rect screen) {
+        final List<Rect> results = <Rect>[];
         if (screen.top >= bounds.top && screen.bottom <= bounds.bottom) {
           // Display feature splits the screen vertically
           if (screen.left < bounds.left) {
             // There is a smaller sub-screen, left of the display feature
-            yield Rect.fromLTWH(screen.left, screen.top,
-                bounds.left - screen.left, screen.height);
+            results.add(Rect.fromLTWH(screen.left, screen.top,
+                bounds.left - screen.left, screen.height));
           }
           if (screen.right > bounds.right) {
             // There is a smaller sub-screen, right of the display feature
-            yield Rect.fromLTWH(bounds.right, screen.top,
-                screen.right - bounds.right, screen.height);
+            results.add(Rect.fromLTWH(bounds.right, screen.top,
+                screen.right - bounds.right, screen.height));
           }
         } else if (screen.left >= bounds.left && screen.right <= bounds.right) {
           // Display feature splits the sub-screen horizontally
           if (screen.top < bounds.top) {
             // There is a smaller sub-screen, above the display feature
-            yield Rect.fromLTWH(
-                screen.left, screen.top, screen.width, bounds.top - screen.top);
+            results.add(Rect.fromLTWH(
+                screen.left, screen.top, screen.width, bounds.top - screen.top));
           }
           if (screen.bottom > bounds.bottom) {
             // There is a smaller sub-screen, below the display feature
-            yield Rect.fromLTWH(screen.left, bounds.bottom, screen.width,
-                screen.bottom - bounds.bottom);
+            results.add(Rect.fromLTWH(screen.left, bounds.bottom, screen.width,
+                screen.bottom - bounds.bottom));
           }
         } else {
-          yield screen;
+          results.add(screen);
         }
+        return results;
       });
     }
     return subScreens;
