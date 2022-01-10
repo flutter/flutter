@@ -1117,7 +1117,6 @@ void main() {
     loggedSizes.clear();
   });
 
-
   testWidgets('Invalid controller interactions throw assertion errors', (WidgetTester tester) async {
     final DraggableScrollableController controller = DraggableScrollableController();
     // Can't use a controller before attaching it.
