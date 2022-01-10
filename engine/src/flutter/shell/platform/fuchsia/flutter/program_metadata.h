@@ -26,6 +26,9 @@ struct ProgramMetadata {
 
   /// The preferred heap size for the Flutter component in megabytes.
   std::optional<int64_t> old_gen_heap_size = std::nullopt;
+
+  /// A list of additional directories that we will expose in out/
+  std::vector<std::string> expose_dirs;
 };
 
 }  // namespace flutter_runner

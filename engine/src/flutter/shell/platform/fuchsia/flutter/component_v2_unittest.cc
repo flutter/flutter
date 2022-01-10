@@ -103,5 +103,78 @@ TEST(ComponentV2, ParseProgramMetadataOldGenHeapSizeInvalid) {
   EXPECT_EQ(result.old_gen_heap_size, std::nullopt);
 }
 
+TEST(ComponentV2, ParseProgramMetadataNoExposeDirs) {
+  // Should always have a valid expose_dirs entry
+  std::vector<fuchsia::data::DictionaryEntry> entries;
+
+  fuchsia::data::Dictionary program_metadata;
+  program_metadata.set_entries(std::move(entries));
+
+  ProgramMetadata result = ComponentV2::ParseProgramMetadata(program_metadata);
+
+  EXPECT_EQ(result.expose_dirs.empty(), true);
+}
+
+TEST(ComponentV2, ParseProgramMetadataWithSingleExposeDirs) {
+  // Can parse a single exposed dir
+  std::vector<fuchsia::data::DictionaryEntry> entries;
+
+  fuchsia::data::DictionaryEntry args_entry;
+  args_entry.key = "args";
+  args_entry.value = std::make_unique<fuchsia::data::DictionaryValue>(
+      fuchsia::data::DictionaryValue::WithStrVec({"--expose_dirs=foo"}));
+  entries.push_back(std::move(args_entry));
+
+  fuchsia::data::Dictionary program_metadata;
+  program_metadata.set_entries(std::move(entries));
+
+  ProgramMetadata result = ComponentV2::ParseProgramMetadata(program_metadata);
+
+  ASSERT_EQ(result.expose_dirs.size(), 1u);
+  EXPECT_EQ(result.expose_dirs[0], "foo");
+}
+
+TEST(ComponentV2, ParseProgramMetadataWithMultipleExposeDirs) {
+  // Can parse a multiple exposed dirs
+  std::vector<fuchsia::data::DictionaryEntry> entries;
+
+  fuchsia::data::DictionaryEntry args_entry;
+  args_entry.key = "args";
+  args_entry.value = std::make_unique<fuchsia::data::DictionaryValue>(
+      fuchsia::data::DictionaryValue::WithStrVec(
+          {"--expose_dirs=foo,bar,baz"}));
+  entries.push_back(std::move(args_entry));
+
+  fuchsia::data::Dictionary program_metadata;
+  program_metadata.set_entries(std::move(entries));
+
+  ProgramMetadata result = ComponentV2::ParseProgramMetadata(program_metadata);
+
+  ASSERT_EQ(result.expose_dirs.size(), 3u);
+  EXPECT_EQ(result.expose_dirs[0], "foo");
+  EXPECT_EQ(result.expose_dirs[1], "bar");
+  EXPECT_EQ(result.expose_dirs[2], "baz");
+}
+
+TEST(ComponentV2, ParseProgramMetadataWithSingleExposeDirsAndOtherArgs) {
+  // Can parse a single exposed dir when other args are present
+  std::vector<fuchsia::data::DictionaryEntry> entries;
+
+  fuchsia::data::DictionaryEntry args_entry;
+  args_entry.key = "args";
+  args_entry.value = std::make_unique<fuchsia::data::DictionaryValue>(
+      fuchsia::data::DictionaryValue::WithStrVec(
+          {"--expose_dirs=foo", "--foo=bar"}));
+  entries.push_back(std::move(args_entry));
+
+  fuchsia::data::Dictionary program_metadata;
+  program_metadata.set_entries(std::move(entries));
+
+  ProgramMetadata result = ComponentV2::ParseProgramMetadata(program_metadata);
+
+  ASSERT_EQ(result.expose_dirs.size(), 1u);
+  EXPECT_EQ(result.expose_dirs[0], "foo");
+}
+
 }  // anonymous namespace
 }  // namespace flutter_runner

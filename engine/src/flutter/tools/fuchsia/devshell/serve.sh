@@ -247,7 +247,7 @@ while true; do
     config_url="http://${addr}:${port}/config.json"
 
     if [[ ${component_framework_version} == 2 ]]; then
-      run_ssh_command pkgctl repo add \
+      run_ssh_command pkgctl repo add url \
         -n "engine" \
         "${config_url}"
     else

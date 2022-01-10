@@ -51,6 +51,7 @@ constexpr char kAssetsKey[] = "assets";
 // "args" are how the component specifies arguments to the runner.
 constexpr char kArgsKey[] = "args";
 constexpr char kOldGenHeapSizeKey[] = "old_gen_heap_size";
+constexpr char kExposeDirsKey[] = "expose_dirs";
 
 constexpr char kTmpPath[] = "/tmp";
 constexpr char kServiceRootPath[] = "/svc";
@@ -86,6 +87,18 @@ void ParseArgs(std::vector<std::string>& args, ProgramMetadata* metadata) {
     } else {
       FML_LOG(ERROR) << "Invalid old_gen_heap_size: "
                      << old_gen_heap_size_option;
+    }
+  }
+
+  std::string expose_dirs_option;
+  if (parsed_args.GetOptionValue(kExposeDirsKey, &expose_dirs_option)) {
+    // Parse the comma delimited string
+    std::vector<std::string> expose_dirs;
+    std::stringstream s(expose_dirs_option);
+    while (s.good()) {
+      std::string dir;
+      getline(s, dir, ',');  // get first string delimited by comma
+      metadata->expose_dirs.push_back(dir);
     }
   }
 }
@@ -258,32 +271,41 @@ ComponentV2::ComponentV2(
                             fuchsia::io::OPEN_RIGHT_WRITABLE,
                         cloned_directory_ptr_.NewRequest());
 
-  cloned_directory_ptr_.events().OnOpen =
-      [this](zx_status_t status, std::unique_ptr<fuchsia::io::NodeInfo> info) {
-        cloned_directory_ptr_.Unbind();
-        if (status != ZX_OK) {
-          FML_LOG(ERROR)
-              << "could not bind out directory for flutter component("
-              << debug_label_ << "): " << zx_status_get_string(status);
-          return;
-        }
-        const char* other_dirs[] = {"debug", "ctrl", "diagnostics"};
-        // add other directories as RemoteDirs.
-        for (auto& dir_str : other_dirs) {
-          fuchsia::io::DirectoryHandle dir;
-          auto request = dir.NewRequest().TakeChannel();
-          auto status = fdio_service_connect_at(directory_ptr_.channel().get(),
-                                                dir_str, request.release());
-          if (status == ZX_OK) {
-            outgoing_dir_->AddEntry(
-                dir_str, std::make_unique<vfs::RemoteDir>(dir.TakeChannel()));
-          } else {
-            FML_LOG(ERROR) << "could not add out directory entry(" << dir_str
-                           << ") for flutter component(" << debug_label_
-                           << "): " << zx_status_get_string(status);
-          }
-        }
-      };
+  // Collect our standard set of directories along with directories that are
+  // included in the cml file to expose.
+  std::vector<std::string> other_dirs = {"debug", "ctrl", "diagnostics"};
+  for (auto dir : metadata.expose_dirs) {
+    other_dirs.push_back(dir);
+  }
+
+  cloned_directory_ptr_.events()
+      .OnOpen = [this, other_dirs](
+                    zx_status_t status,
+                    std::unique_ptr<fuchsia::io::NodeInfo> info) {
+    cloned_directory_ptr_.Unbind();
+    if (status != ZX_OK) {
+      FML_LOG(ERROR) << "could not bind out directory for flutter component("
+                     << debug_label_ << "): " << zx_status_get_string(status);
+      return;
+    }
+
+    // add other directories as RemoteDirs.
+    for (auto& dir_str : other_dirs) {
+      fuchsia::io::DirectoryHandle dir;
+      auto request = dir.NewRequest().TakeChannel();
+      auto status = fdio_service_connect_at(directory_ptr_.channel().get(),
+                                            dir_str.c_str(), request.release());
+      if (status == ZX_OK) {
+        outgoing_dir_->AddEntry(
+            dir_str.c_str(),
+            std::make_unique<vfs::RemoteDir>(dir.TakeChannel()));
+      } else {
+        FML_LOG(ERROR) << "could not add out directory entry(" << dir_str
+                       << ") for flutter component(" << debug_label_
+                       << "): " << zx_status_get_string(status);
+      }
+    }
+  };
 
   cloned_directory_ptr_.set_error_handler(
       [this](zx_status_t status) { cloned_directory_ptr_.Unbind(); });
