@@ -719,29 +719,29 @@ class _RenderChildOverflowBox extends RenderAligningShiftedBox {
 // need upfront.
 class _M2Defaults extends FloatingActionButtonThemeData {
   _M2Defaults(BuildContext context, this.type, this.hasChild)
-      : theme = Theme.of(context),
-        colors = Theme.of(context).colorScheme;
+      : _theme = Theme.of(context),
+        _colors = Theme.of(context).colorScheme;
 
   final _FloatingActionButtonType type;
   final bool hasChild;
-  final ThemeData theme;
-  final ColorScheme colors;
+  final ThemeData _theme;
+  final ColorScheme _colors;
 
-  bool get isExtended => type == _FloatingActionButtonType.extended;
-  bool get isLarge => type == _FloatingActionButtonType.large;
+  bool get _isExtended => type == _FloatingActionButtonType.extended;
+  bool get _isLarge => type == _FloatingActionButtonType.large;
 
-  @override Color? get foregroundColor => colors.onSecondary;
-  @override Color? get backgroundColor => colors.secondary;
-  @override Color? get focusColor => theme.focusColor;
-  @override Color? get hoverColor => theme.hoverColor;
-  @override Color? get splashColor => theme.splashColor;
+  @override Color? get foregroundColor => _colors.onSecondary;
+  @override Color? get backgroundColor => _colors.secondary;
+  @override Color? get focusColor => _theme.focusColor;
+  @override Color? get hoverColor => _theme.hoverColor;
+  @override Color? get splashColor => _theme.splashColor;
   @override double? get elevation => 6;
   @override double? get focusElevation => 6;
   @override double? get hoverElevation => 8;
   @override double? get highlightElevation => 12;
-  @override ShapeBorder? get shape => isExtended ? const StadiumBorder() : const CircleBorder();
+  @override ShapeBorder? get shape => _isExtended ? const StadiumBorder() : const CircleBorder();
   @override bool? get enableFeedback => true;
-  @override double? get iconSize => isLarge ? 36.0 : 24.0;
+  @override double? get iconSize => _isLarge ? 36.0 : 24.0;
 
   @override
   BoxConstraints? get sizeConstraints => const BoxConstraints.tightFor(
@@ -767,8 +767,8 @@ class _M2Defaults extends FloatingActionButtonThemeData {
   );
 
   @override double? get extendedIconLabelSpacing => 8.0;
-  @override EdgeInsetsGeometry? get extendedPadding => EdgeInsetsDirectional.only(start: hasChild && isExtended ? 16.0 : 20.0, end: 20.0);
-  @override TextStyle? get extendedTextStyle => theme.textTheme.button!.copyWith(letterSpacing: 1.2);
+  @override EdgeInsetsGeometry? get extendedPadding => EdgeInsetsDirectional.only(start: hasChild && _isExtended ? 16.0 : 20.0, end: 20.0);
+  @override TextStyle? get extendedTextStyle => _theme.textTheme.button!.copyWith(letterSpacing: 1.2);
 }
 
 // BEGIN GENERATED TOKEN PROPERTIES
