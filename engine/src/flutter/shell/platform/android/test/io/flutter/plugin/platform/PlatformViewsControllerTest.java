@@ -61,7 +61,7 @@ public class PlatformViewsControllerTest {
   public void itNotifiesVirtualDisplayControllersOfViewAttachmentAndDetachment() {
     // Setup test structure.
     // Create a fake View that represents the View that renders a Flutter UI.
-    View fakeFlutterView = new View(RuntimeEnvironment.systemContext);
+    FlutterView fakeFlutterView = new FlutterView(RuntimeEnvironment.systemContext);
 
     // Create fake VirtualDisplayControllers. This requires internal knowledge of
     // PlatformViewsController. We know that all PlatformViewsController does is

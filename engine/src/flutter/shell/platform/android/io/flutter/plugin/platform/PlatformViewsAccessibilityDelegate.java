@@ -32,5 +32,5 @@ public interface PlatformViewsAccessibilityDelegate {
    * <p>Any accessibility events sent by platform views belonging to this delegate will be ignored
    * until a new accessibility bridge is attached.
    */
-  void detachAccessibiltyBridge();
+  void detachAccessibilityBridge();
 }
