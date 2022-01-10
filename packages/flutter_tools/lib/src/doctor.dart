@@ -466,7 +466,6 @@ class FlutterValidator extends DoctorValidator {
       messages.add(ValidationMessage(_userMessages.engineRevision(version.engineRevisionShort)));
       messages.add(ValidationMessage(_userMessages.dartRevision(version.dartSdkVersion)));
       messages.add(ValidationMessage(_userMessages.devToolsVersion(_devToolsVersion())));
-      messages.add(ValidationMessage(_userMessages.userPath(_platform.environment['PATH'])));
       final String? pubUrl = _platform.environment['PUB_HOSTED_URL'];
       if (pubUrl != null) {
         messages.add(ValidationMessage(_userMessages.pubMirrorURL(pubUrl)));

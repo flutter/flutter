@@ -25,7 +25,6 @@ class UserMessages {
   String engineRevision(String revision) => 'Engine revision $revision';
   String dartRevision(String revision) => 'Dart version $revision';
   String devToolsVersion(String version) => 'DevTools version $version';
-  String userPath(String? path) => 'PATH = $path';
   String pubMirrorURL(String url) => 'Pub download mirror $url';
   String flutterMirrorURL(String url) => 'Flutter download mirror $url';
   String get flutterBinariesDoNotRun =>
