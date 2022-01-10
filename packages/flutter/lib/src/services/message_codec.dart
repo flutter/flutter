@@ -5,6 +5,8 @@
 
 import 'dart:typed_data';
 
+import 'dart:ui' show keepToString;
+
 import 'package:flutter/foundation.dart';
 
 import 'platform_channel.dart';
@@ -169,6 +171,9 @@ class MissingPluginException implements Exception {
   /// A human-readable error message, possibly null.
   final String? message;
 
+  // `keepToString` to avoid removal of the toString implementation and help
+  // diagnose misbehaving plugins.
+  @keepToString
   @override
   String toString() => 'MissingPluginException($message)';
 }
