@@ -347,7 +347,6 @@ void main() {
       expect(tester.renderObject(find.text('0')).attached, true);
       expect(tester.renderObject(find.text('1')).attached, true);
       expect(find.text('3'), findsNothing);
-
     });
 
     // Regression test for https://github.com/flutter/flutter/issues/58144
