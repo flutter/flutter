@@ -349,12 +349,10 @@ android {
       path.join(parent.path, 'hello', 'pubspec.yaml')
     );
     final String contents = pubspec.readAsStringSync();
-    final String newContents = contents.replaceFirst('# The following section is specific to Flutter.${platformLineSep}flutter:$platformLineSep', '''
+    final String newContents = contents.replaceFirst(r'^flutter:$', '''
 flutter:
   assets:
-    - lib/gallery/example_code.dart
-
-''');
+    - lib/gallery/example_code.dart''');
     pubspec.writeAsStringSync(newContents);
   }
 
