@@ -18,6 +18,10 @@ import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
 
 void main() {
+
+  final ThemeData material3Theme = ThemeData.light().copyWith(useMaterial3: true);
+  final ThemeData material2Theme = ThemeData.light().copyWith(useMaterial3: false);
+
   testWidgets('Floating Action Button control test', (WidgetTester tester) async {
     bool didPressButton = false;
     await tester.pumpWidget(
@@ -171,7 +175,7 @@ void main() {
   testWidgets('Floating Action Button elevation when highlighted - effect', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.light().copyWith(useMaterial3: true),
+        theme: material3Theme,
         home: Scaffold(
           floatingActionButton: FloatingActionButton(
             onPressed: () { },
@@ -278,7 +282,7 @@ void main() {
   testWidgets('Floating Action Button elevation when disabled while highlighted - effect', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.light().copyWith(useMaterial3: true),
+        theme: material3Theme,
         home: Scaffold(
           floatingActionButton: FloatingActionButton(
             onPressed: () { },
@@ -294,7 +298,7 @@ void main() {
     expect(tester.widget<PhysicalShape>(find.byType(PhysicalShape)).elevation, 6.0);
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.light().copyWith(useMaterial3: true),
+        theme: material3Theme,
         home: const Scaffold(
           floatingActionButton: FloatingActionButton(
             onPressed: null,
@@ -308,7 +312,7 @@ void main() {
     expect(tester.widget<PhysicalShape>(find.byType(PhysicalShape)).elevation, 6.0);
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.light().copyWith(useMaterial3: true),
+        theme: material3Theme,
         home: Scaffold(
           floatingActionButton: FloatingActionButton(
             onPressed: () { },
@@ -327,7 +331,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.light().copyWith(useMaterial3: true),
+        theme: material3Theme,
         home: Scaffold(
           body: FloatingActionButton.extended(
             label: const Text('tooltip'),
@@ -408,7 +412,7 @@ void main() {
   testWidgets('FloatingActionButton.isExtended', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.light().copyWith(useMaterial3: true),
+        theme: material3Theme,
         home: const Scaffold(
           floatingActionButton: FloatingActionButton(onPressed: null),
         ),
@@ -492,7 +496,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.light().copyWith(useMaterial3: true),
+        theme: material3Theme,
         home: const Scaffold(
           floatingActionButton: FloatingActionButton.extended(
             label: SizedBox(
@@ -786,7 +790,7 @@ void main() {
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.light().copyWith(useMaterial3: true),
+        theme: material3Theme,
         home: Scaffold(
           body: Center(
             child: RepaintBoundary(
@@ -1074,8 +1078,6 @@ void main() {
   group('Material 2', () {
     // Tests that are only relevant for Material 2. Once ThemeData.useMaterial3
     // is turned on by default, these tests can be removed.
-
-    final ThemeData material2Theme = ThemeData.light().copyWith(useMaterial3: false);
 
     testWidgets('Floating Action Button elevation when highlighted - effect', (WidgetTester tester) async {
       await tester.pumpWidget(
