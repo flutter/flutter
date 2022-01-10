@@ -230,6 +230,7 @@ void main() {
     });
 
     testWidgets('child builder with lower and upper limits', (WidgetTester tester) async {
+      // Adjust the content dimensions at the end of `RenderListWheelViewport.performLayout()`
       final List<int> paintedChildren = <int>[];
 
       final FixedExtentScrollController controller =

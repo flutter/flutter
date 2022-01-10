@@ -767,8 +767,6 @@ class RenderListWheelViewport
     // we don't know whether there's a limit yet, and set the dimension to the
     // estimated value. Otherwise, we set the dimension limited to our target
     // range.
-    // Test by 'infinite scrolling child builder with lower and upper limits' at
-    // 'list_wheel_scroll_view_test.dart'.
     final double minScrollExtent = childManager.childExistsAt(targetFirstIndex - 1)
       ? _minEstimatedScrollExtent
       : indexToScrollOffset(targetFirstIndex);
