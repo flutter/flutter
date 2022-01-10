@@ -86,7 +86,7 @@ class MigrateUtils {
     return DiffResult(result, outputPath);
   }
 
-  static Future<void> apply({required File diff, required String workingDirectory}) async {
+  static Future<void> gitApply({required File diff, required String workingDirectory}) async {
     List<String> cmdArgs = ['apply', diff.absolute.path];
     ProcessResult result = await Process.run('git', cmdArgs, workingDirectory: workingDirectory);
     checkForErrors(result);
@@ -116,6 +116,14 @@ class MigrateUtils {
     checkForErrors(result);
     print('CREATING DONE: $outputDirectory');
     return result.stdout;
+  }
+
+  static Future<MergeResult> gitMergeFile({required String ancestor, required String current, required String other}) async {
+    print('  git Merging');
+    List<String> cmdArgs = ['merge-file', '-p', current, ancestor, other];
+    ProcessResult result = await Process.run('git', cmdArgs);
+    checkForErrors(result, allowedExitCodes: <int>[1]);
+    return MergeResult(result);
   }
 
   static void deleteTempDirectories({List<String> paths = const <String>[], List<Directory> directories = const <Directory>[]}) {
@@ -165,5 +173,16 @@ class DiffResult {
   bool isDeletion;
   bool isAddition;
   String? outputPath;
+  int exitCode;
+}
+
+class MergeResult {
+  MergeResult(ProcessResult result) :
+    mergedContents = result.stdout as String,
+    hasConflict = result.exitCode != 0,
+    exitCode = result.exitCode;
+
+  String mergedContents;
+  bool hasConflict;
   int exitCode;
 }
