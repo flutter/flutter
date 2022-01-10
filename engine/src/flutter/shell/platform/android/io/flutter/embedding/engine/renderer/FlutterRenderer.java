@@ -221,11 +221,24 @@ public class FlutterRenderer implements TextureRegistry {
    * Notifies Flutter that the given {@code surface} was created and is available for Flutter
    * rendering.
    *
+   * <p>If called more than once, the current native resources are released. This can be undesired
+   * if the Engine expects to reuse this surface later. For example, this is true when platform
+   * views are displayed in a frame, and then removed in the next frame.
+   *
+   * <p>To avoid releasing the current surface resources, set {@code keepCurrentSurface} to true.
+   *
    * <p>See {@link android.view.SurfaceHolder.Callback} and {@link
    * android.view.TextureView.SurfaceTextureListener}
+   *
+   * @param surface The render surface.
+   * @param keepCurrentSurface True if the current active surface should not be released.
    */
-  public void startRenderingToSurface(@NonNull Surface surface) {
-    if (this.surface != null) {
+  public void startRenderingToSurface(@NonNull Surface surface, boolean keepCurrentSurface) {
+    // Don't stop rendering the surface if it's currently paused.
+    // Stop rendering to the surface releases the associated native resources, which
+    // causes a glitch when showing platform views.
+    // For more, https://github.com/flutter/flutter/issues/95343
+    if (this.surface != null && !keepCurrentSurface) {
       stopRenderingToSurface();
     }
 
@@ -248,8 +261,8 @@ public class FlutterRenderer implements TextureRegistry {
 
   /**
    * Notifies Flutter that a {@code surface} previously registered with {@link
-   * #startRenderingToSurface(Surface)} has changed size to the given {@code width} and {@code
-   * height}.
+   * #startRenderingToSurface(Surface, boolean)} has changed size to the given {@code width} and
+   * {@code height}.
    *
    * <p>See {@link android.view.SurfaceHolder.Callback} and {@link
    * android.view.TextureView.SurfaceTextureListener}
@@ -260,8 +273,8 @@ public class FlutterRenderer implements TextureRegistry {
 
   /**
    * Notifies Flutter that a {@code surface} previously registered with {@link
-   * #startRenderingToSurface(Surface)} has been destroyed and needs to be released and cleaned up
-   * on the Flutter side.
+   * #startRenderingToSurface(Surface, boolean)} has been destroyed and needs to be released and
+   * cleaned up on the Flutter side.
    *
    * <p>See {@link android.view.SurfaceHolder.Callback} and {@link
    * android.view.TextureView.SurfaceTextureListener}

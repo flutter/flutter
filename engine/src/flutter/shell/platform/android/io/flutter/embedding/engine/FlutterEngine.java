@@ -134,7 +134,7 @@ public class FlutterEngine {
    *
    * <p>A new {@code FlutterEngine} will not display any UI until a {@link RenderSurface} is
    * registered. See {@link #getRenderer()} and {@link
-   * FlutterRenderer#startRenderingToSurface(Surface)}.
+   * FlutterRenderer#startRenderingToSurface(Surface, boolean)}.
    *
    * <p>A new {@code FlutterEngine} automatically attaches all plugins. See {@link #getPlugins()}.
    *
