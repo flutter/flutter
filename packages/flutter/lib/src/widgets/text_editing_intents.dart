@@ -33,9 +33,12 @@ abstract class DirectionalTextEditingIntent extends Intent {
   /// direction, and is not affected by the writing direction of the text.
   final bool forward;
 
-  // TODO(justinmc): Better docs.
-  /// Indicates whether the next/previous line boundary should be given when then
-  /// position is already on the trailing/leading wordwrapped line break.
+  /// Whether or not to continue to the next line at a wordwrap.
+  ///
+  /// If true, when an [Intent] to go to the beginning/end of a wordwrapped line
+  /// is received and the selection is already at the beginning/end of the line,
+  /// then the selection will be moved to the next/previous line.  If false, the
+  /// selection will remain at the wordwrap.
   final bool continuesAtWrap;
 }
 
