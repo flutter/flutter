@@ -12,7 +12,7 @@ import 'package:ui/ui.dart' as ui;
 
 import 'html/painting.dart';
 import 'html/render_vertices.dart';
-import 'text/paragraph.dart';
+import 'text/canvas_paragraph.dart';
 import 'util.dart';
 import 'vector_math.dart';
 
@@ -76,7 +76,7 @@ abstract class EngineCanvas {
   void drawImageRect(
       ui.Image image, ui.Rect src, ui.Rect dst, SurfacePaintData paint);
 
-  void drawParagraph(EngineParagraph paragraph, ui.Offset offset);
+  void drawParagraph(CanvasParagraph paragraph, ui.Offset offset);
 
   void drawVertices(
       SurfaceVertices vertices, ui.BlendMode blendMode, SurfacePaintData paint);
@@ -258,7 +258,7 @@ mixin SaveStackTracking on EngineCanvas {
 }
 
 html.Element drawParagraphElement(
-  EngineParagraph paragraph,
+  CanvasParagraph paragraph,
   ui.Offset offset, {
   Matrix4? transform,
 }) {

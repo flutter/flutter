@@ -30,7 +30,7 @@ Future<void> testMain() async {
 
   testEachCanvas('maxLines clipping', (EngineCanvas canvas) {
     Offset offset = Offset.zero;
-    EngineParagraph p;
+    CanvasParagraph p;
 
     // All three lines are rendered.
     p = paragraph(threeLines);
