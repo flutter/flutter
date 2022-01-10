@@ -321,6 +321,25 @@ public class FlutterActivityAndFragmentDelegateTest {
   }
 
   @Test
+  public void itExecutesDartLibraryUriProvidedByHost() {
+    when(mockHost.getAppBundlePath()).thenReturn("/my/bundle/path");
+    when(mockHost.getDartEntrypointFunctionName()).thenReturn("myEntrypoint");
+    when(mockHost.getDartEntrypointLibraryUri()).thenReturn("package:foo/bar.dart");
+
+    DartExecutor.DartEntrypoint expectedEntrypoint =
+        new DartExecutor.DartEntrypoint("/my/bundle/path", "package:foo/bar.dart", "myEntrypoint");
+
+    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
+
+    delegate.onAttach(RuntimeEnvironment.application);
+    delegate.onCreateView(null, null, null, 0, true);
+    delegate.onStart();
+
+    verify(mockFlutterEngine.getDartExecutor(), times(1))
+        .executeDartEntrypoint(eq(expectedEntrypoint));
+  }
+
+  @Test
   public void itUsesDefaultFlutterLoaderAppBundlePathWhenUnspecified() {
     // ---- Test setup ----
     FlutterLoader mockFlutterLoader = mock(FlutterLoader.class);

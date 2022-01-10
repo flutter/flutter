@@ -417,12 +417,16 @@ import java.util.Arrays;
         initialRoute = DEFAULT_INITIAL_ROUTE;
       }
     }
+    @Nullable String libraryUri = host.getDartEntrypointLibraryUri();
     Log.v(
         TAG,
         "Executing Dart entrypoint: "
-            + host.getDartEntrypointFunctionName()
-            + ", and sending initial route: "
-            + initialRoute);
+                    + host.getDartEntrypointFunctionName()
+                    + ", library uri: "
+                    + libraryUri
+                == null
+            ? "\"\""
+            : libraryUri + ", and sending initial route: " + initialRoute);
 
     // The engine needs to receive the Flutter app's initial route before executing any
     // Dart code to ensure that the initial route arrives in time to be applied.
@@ -435,8 +439,11 @@ import java.util.Arrays;
 
     // Configure the Dart entrypoint and execute it.
     DartExecutor.DartEntrypoint entrypoint =
-        new DartExecutor.DartEntrypoint(
-            appBundlePathOverride, host.getDartEntrypointFunctionName());
+        libraryUri == null
+            ? new DartExecutor.DartEntrypoint(
+                appBundlePathOverride, host.getDartEntrypointFunctionName())
+            : new DartExecutor.DartEntrypoint(
+                appBundlePathOverride, libraryUri, host.getDartEntrypointFunctionName());
     flutterEngine.getDartExecutor().executeDartEntrypoint(entrypoint);
   }
 
@@ -915,6 +922,14 @@ import java.util.Arrays;
      */
     @NonNull
     String getDartEntrypointFunctionName();
+
+    /**
+     * Returns the URI of the Dart library which contains the entrypoint method (example
+     * "package:foo_package/main.dart"). If null, this will default to the same library as the
+     * `main()` function in the Dart program.
+     */
+    @Nullable
+    String getDartEntrypointLibraryUri();
 
     /** Returns the path to the app bundle where the Dart code exists. */
     @NonNull
