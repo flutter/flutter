@@ -305,6 +305,12 @@ public class FlutterAndroidComponentTest {
       return "main";
     }
 
+    @Nullable
+    @Override
+    public String getDartEntrypointLibraryUri() {
+      return null;
+    }
+
     @NonNull
     @Override
     public String getAppBundlePath() {

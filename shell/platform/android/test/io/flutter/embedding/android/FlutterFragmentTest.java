@@ -38,6 +38,7 @@ public class FlutterFragmentTest {
     fragment.setDelegate(new FlutterActivityAndFragmentDelegate(fragment));
 
     assertEquals("main", fragment.getDartEntrypointFunctionName());
+    assertNull(fragment.getDartEntrypointLibraryUri());
     assertEquals("/", fragment.getInitialRoute());
     assertArrayEquals(new String[] {}, fragment.getFlutterShellArgs().toArray());
     assertTrue(fragment.shouldAttachEngineToActivity());
@@ -54,6 +55,7 @@ public class FlutterFragmentTest {
     FlutterFragment fragment =
         FlutterFragment.withNewEngine()
             .dartEntrypoint("custom_entrypoint")
+            .dartLibraryUri("package:foo/bar.dart")
             .initialRoute("/custom/route")
             .shouldAttachEngineToActivity(false)
             .handleDeeplinking(true)
@@ -63,6 +65,7 @@ public class FlutterFragmentTest {
     fragment.setDelegate(new FlutterActivityAndFragmentDelegate(fragment));
 
     assertEquals("custom_entrypoint", fragment.getDartEntrypointFunctionName());
+    assertEquals("package:foo/bar.dart", fragment.getDartEntrypointLibraryUri());
     assertEquals("/custom/route", fragment.getInitialRoute());
     assertArrayEquals(new String[] {}, fragment.getFlutterShellArgs().toArray());
     assertFalse(fragment.shouldAttachEngineToActivity());
