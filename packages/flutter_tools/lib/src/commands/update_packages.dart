@@ -363,8 +363,8 @@ class UpdatePackagesCommand extends FlutterCommand {
           if (dependency.kind != previous.kind || dependency.lockTarget != previous.lockTarget) {
             throwToolExit(
                 'Inconsistent requirements around ${dependency.name}; '
-                    'saw ${dependency.kind} (${dependency.lockTarget}) in "${dependency.sourcePath}" '
-                    'and ${previous.kind} (${previous.lockTarget}) in "${previous.sourcePath}".'
+                'saw ${dependency.kind} (${dependency.lockTarget}) in "${dependency.sourcePath}" '
+                'and ${previous.kind} (${previous.lockTarget}) in "${previous.sourcePath}".'
             );
           }
         }
@@ -1405,7 +1405,6 @@ String _generateFakePubspec(
       for (final PubspecDependency dependency in dependencies)
         dependency.name,
     };
-    globals.printStatus('All Transitives: $allTransitive');
     for (final String package in kManuallyPinnedDependencies.keys) {
       // Don't add pinned dependency if it is not in the set of all transitive dependencies.
       if (!allTransitive.contains(package)) {
