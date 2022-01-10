@@ -103,8 +103,8 @@ abstract class FlutterTestDriver {
     }
     _debugPrint('Spawning flutter $arguments in ${_projectFolder.path}');
 
-    const ProcessManager _processManager = LocalProcessManager();
-    _process = await _processManager.start(
+    const ProcessManager processManager = LocalProcessManager();
+    _process = await processManager.start(
       <String>[flutterBin]
         .followedBy(arguments)
         .toList(),
@@ -760,8 +760,8 @@ class FlutterRunTestDriver extends FlutterTestDriver {
 }
 
 class FlutterTestTestDriver extends FlutterTestDriver {
-  FlutterTestTestDriver(Directory _projectFolder, {String? logPrefix})
-    : super(_projectFolder, logPrefix: logPrefix);
+  FlutterTestTestDriver(Directory projectFolder, {String? logPrefix})
+    : super(projectFolder, logPrefix: logPrefix);
 
   Future<void> test({
     String testFile = 'test/test.dart',

@@ -16,7 +16,7 @@ import 'package:http/testing.dart';
 import 'common.dart';
 
 void main() {
-  late ProcessResult _processResult;
+  late ProcessResult processResult;
   ProcessResult runSyncStub(String executable, List<String> args,
           {Map<String, String>? environment,
           bool includeParentEnvironment = true,
@@ -24,7 +24,7 @@ void main() {
           Encoding? stderrEncoding,
           Encoding? stdoutEncoding,
           String? workingDirectory}) =>
-      _processResult;
+      processResult;
 
   // Expected test values.
   const String commitSha = 'a4952838bf288a81d8ea11edfd4b4cd649fa94cc';
@@ -45,7 +45,7 @@ void main() {
     });
 
     test('returns expected commit sha', () {
-      _processResult = ProcessResult(1, 0, commitSha, '');
+      processResult = ProcessResult(1, 0, commitSha, '');
       cocoon = Cocoon(
         serviceAccountTokenPath: serviceAccountTokenPath,
         fs: fs,
@@ -57,7 +57,7 @@ void main() {
     });
 
     test('throws exception on git cli errors', () {
-      _processResult = ProcessResult(1, 1, '', '');
+      processResult = ProcessResult(1, 1, '', '');
       cocoon = Cocoon(
         serviceAccountTokenPath: serviceAccountTokenPath,
         fs: fs,
@@ -69,7 +69,7 @@ void main() {
     });
 
     test('writes expected update task json', () async {
-      _processResult = ProcessResult(1, 0, commitSha, '');
+      processResult = ProcessResult(1, 0, commitSha, '');
       final TaskResult result = TaskResult.fromJson(<String, dynamic>{
         'success': true,
         'data': <String, dynamic>{
@@ -105,7 +105,7 @@ void main() {
     });
 
     test('uploads metrics sends expected post body', () async {
-      _processResult = ProcessResult(1, 0, commitSha, '');
+      processResult = ProcessResult(1, 0, commitSha, '');
       const String uploadMetricsRequestWithSpaces =
           '{"CommitBranch":"master","CommitSha":"a4952838bf288a81d8ea11edfd4b4cd649fa94cc","BuilderName":"builder a b c","NewStatus":"Succeeded","ResultData":{},"BenchmarkScoreKeys":[],"TestFlaky":false}';
       final MockClient client = MockClient((Request request) async {
@@ -136,7 +136,7 @@ void main() {
     });
 
     test('uploads expected update task payload from results file', () async {
-      _processResult = ProcessResult(1, 0, commitSha, '');
+      processResult = ProcessResult(1, 0, commitSha, '');
       cocoon = Cocoon(
         fs: fs,
         httpClient: mockClient,
@@ -168,7 +168,7 @@ void main() {
         }
       });
 
-      _processResult = ProcessResult(1, 0, commitSha, '');
+      processResult = ProcessResult(1, 0, commitSha, '');
       cocoon = Cocoon(
         fs: fs,
         httpClient: mockClient,
@@ -202,7 +202,7 @@ void main() {
         }
       });
 
-      _processResult = ProcessResult(1, 0, commitSha, '');
+      processResult = ProcessResult(1, 0, commitSha, '');
       cocoon = Cocoon(
         fs: fs,
         httpClient: mockClient,
@@ -237,7 +237,7 @@ void main() {
         }
       });
 
-      _processResult = ProcessResult(1, 0, commitSha, '');
+      processResult = ProcessResult(1, 0, commitSha, '');
       cocoon = Cocoon(
         fs: fs,
         httpClient: mockClient,
@@ -270,7 +270,7 @@ void main() {
         }
       });
 
-      _processResult = ProcessResult(1, 0, commitSha, '');
+      processResult = ProcessResult(1, 0, commitSha, '');
       cocoon = Cocoon(
         fs: fs,
         httpClient: mockClient,

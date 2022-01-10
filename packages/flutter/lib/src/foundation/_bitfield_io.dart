@@ -28,19 +28,19 @@ class BitField<T extends dynamic> implements bitfield.BitField<T> {
 
   @override
   bool operator [](T index) {
-    final int _index = index.index as int;
-    assert(_index < _length);
-    return (_bits & 1 << _index) > 0;
+    final int intIndex = index.index as int;
+    assert(intIndex < _length);
+    return (_bits & 1 << intIndex) > 0;
   }
 
   @override
   void operator []=(T index, bool value) {
-    final int _index = index.index as int;
-    assert(_index < _length);
+    final int intIndex = index.index as int;
+    assert(intIndex < _length);
     if (value)
-      _bits = _bits | (1 << _index);
+      _bits = _bits | (1 << intIndex);
     else
-      _bits = _bits & ~(1 << _index);
+      _bits = _bits & ~(1 << intIndex);
   }
 
   @override

@@ -360,8 +360,8 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSegmentedC
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> _gestureChildren = <Widget>[];
-    final List<Color> _backgroundColors = <Color>[];
+    final List<Widget> gestureChildren = <Widget>[];
+    final List<Color> backgroundColors = <Color>[];
     int index = 0;
     int? selectedIndex;
     int? pressedIndex;
@@ -403,17 +403,17 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSegmentedC
         ),
       );
 
-      _backgroundColors.add(getBackgroundColor(index, currentKey)!);
-      _gestureChildren.add(child);
+      backgroundColors.add(getBackgroundColor(index, currentKey)!);
+      gestureChildren.add(child);
       index += 1;
     }
 
     final Widget box = _SegmentedControlRenderWidget<T>(
       selectedIndex: selectedIndex,
       pressedIndex: pressedIndex,
-      backgroundColors: _backgroundColors,
+      backgroundColors: backgroundColors,
       borderColor: _borderColor!,
-      children: _gestureChildren,
+      children: gestureChildren,
     );
 
     return Padding(

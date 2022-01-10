@@ -37,8 +37,8 @@ void main() {
   });
 
   testWithoutContext('can run and terminate a Flutter app in debug mode', () async {
-    final BasicProject _project = BasicProject();
-    await _project.setUpIn(tempDir);
+    final BasicProject project = BasicProject();
+    await project.setUpIn(tempDir);
 
     // Once the "topLevelFunction" output arrives, we can terminate the app.
     unawaited(
@@ -50,7 +50,7 @@ void main() {
     final List<OutputEventBody> outputEvents = await dap.client.collectAllOutput(
       launch: () => dap.client
           .launch(
-            cwd: _project.dir.path,
+            cwd: project.dir.path,
             toolArgs: <String>['-d', 'flutter-tester'],
           ),
     );
@@ -67,8 +67,8 @@ void main() {
   });
 
   testWithoutContext('can run and terminate a Flutter app in noDebug mode', () async {
-    final BasicProject _project = BasicProject();
-    await _project.setUpIn(tempDir);
+    final BasicProject project = BasicProject();
+    await project.setUpIn(tempDir);
 
     // Once the "topLevelFunction" output arrives, we can terminate the app.
     unawaited(
@@ -80,7 +80,7 @@ void main() {
     final List<OutputEventBody> outputEvents = await dap.client.collectAllOutput(
       launch: () => dap.client
           .launch(
-            cwd: _project.dir.path,
+            cwd: project.dir.path,
             noDebug: true,
             toolArgs: <String>['-d', 'flutter-tester'],
           ),
@@ -97,13 +97,13 @@ void main() {
   });
 
   testWithoutContext('correctly outputs launch errors and terminates', () async {
-    final CompileErrorProject _project = CompileErrorProject();
-    await _project.setUpIn(tempDir);
+    final CompileErrorProject project = CompileErrorProject();
+    await project.setUpIn(tempDir);
 
     final List<OutputEventBody> outputEvents = await dap.client.collectAllOutput(
       launch: () => dap.client
           .launch(
-            cwd: _project.dir.path,
+            cwd: project.dir.path,
             toolArgs: <String>['-d', 'flutter-tester'],
           ),
     );
@@ -115,15 +115,15 @@ void main() {
   });
 
   testWithoutContext('can hot reload', () async {
-    final BasicProject _project = BasicProject();
-    await _project.setUpIn(tempDir);
+    final BasicProject project = BasicProject();
+    await project.setUpIn(tempDir);
 
     // Launch the app and wait for it to print "topLevelFunction".
     await Future.wait(<Future<Object>>[
       dap.client.outputEvents.firstWhere((OutputEventBody output) => output.output.startsWith('topLevelFunction')),
       dap.client.start(
         launch: () => dap.client.launch(
-          cwd: _project.dir.path,
+          cwd: project.dir.path,
           noDebug: true,
           toolArgs: <String>['-d', 'flutter-tester'],
         ),
@@ -152,15 +152,15 @@ void main() {
   });
 
   testWithoutContext('can hot restart', () async {
-    final BasicProject _project = BasicProject();
-    await _project.setUpIn(tempDir);
+    final BasicProject project = BasicProject();
+    await project.setUpIn(tempDir);
 
     // Launch the app and wait for it to print "topLevelFunction".
     await Future.wait(<Future<Object>>[
       dap.client.outputEvents.firstWhere((OutputEventBody output) => output.output.startsWith('topLevelFunction')),
       dap.client.start(
         launch: () => dap.client.launch(
-          cwd: _project.dir.path,
+          cwd: project.dir.path,
           noDebug: true,
           toolArgs: <String>['-d', 'flutter-tester'],
         ),
@@ -189,8 +189,8 @@ void main() {
   });
 
   testWithoutContext('can hot restart when exceptions occur on outgoing isolates', () async {
-    final BasicProjectThatThrows _project = BasicProjectThatThrows();
-    await _project.setUpIn(tempDir);
+    final BasicProjectThatThrows project = BasicProjectThatThrows();
+    await project.setUpIn(tempDir);
 
     // Launch the app and wait for it to stop at an exception.
     int originalThreadId, newThreadId;
@@ -200,7 +200,7 @@ void main() {
       dap.client.start(
         exceptionPauseMode: 'All', // Ensure we stop on all exceptions
         launch: () => dap.client.launch(
-          cwd: _project.dir.path,
+          cwd: project.dir.path,
           toolArgs: <String>['-d', 'flutter-tester'],
         ),
       ),
@@ -222,8 +222,8 @@ void main() {
   });
 
   testWithoutContext('sends events for extension state updates', () async {
-    final BasicProject _project = BasicProject();
-    await _project.setUpIn(tempDir);
+    final BasicProject project = BasicProject();
+    await project.setUpIn(tempDir);
     const String debugPaintRpc = 'ext.flutter.debugPaint';
 
     // Create a future to capture the isolate ID when the debug paint service
@@ -239,7 +239,7 @@ void main() {
           output.output.startsWith('topLevelFunction')),
       dap.client.start(
         launch: () => dap.client.launch(
-          cwd: _project.dir.path,
+          cwd: project.dir.path,
           toolArgs: <String>['-d', 'flutter-tester'],
         ),
       ),

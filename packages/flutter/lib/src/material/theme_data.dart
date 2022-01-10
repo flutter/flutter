@@ -413,10 +413,10 @@ class ThemeData with Diagnosticable {
     assert(colorSchemeSeed == null || colorScheme == null);
     assert(colorSchemeSeed == null || primarySwatch == null);
     assert(colorSchemeSeed == null || primaryColor == null);
-    final Brightness _brightness = brightness ?? colorScheme?.brightness ?? Brightness.light;
-    final bool isDark = _brightness == Brightness.dark;
+    final Brightness effectiveBrightness = brightness ?? colorScheme?.brightness ?? Brightness.light;
+    final bool isDark = effectiveBrightness == Brightness.dark;
     if (colorSchemeSeed != null) {
-      colorScheme = ColorScheme.fromSeed(seedColor: colorSchemeSeed, brightness: _brightness);
+      colorScheme = ColorScheme.fromSeed(seedColor: colorSchemeSeed, brightness: effectiveBrightness);
 
       // For surfaces that use primary color in light themes and surface color in dark
       final Color primarySurfaceColor = isDark ? colorScheme.surface : colorScheme.primary;
@@ -441,10 +441,10 @@ class ThemeData with Diagnosticable {
     applyElevationOverlayColor ??= false;
     primarySwatch ??= Colors.blue;
     primaryColor ??= isDark ? Colors.grey[900]! : primarySwatch;
-    final Brightness _primaryColorBrightness = estimateBrightnessForColor(primaryColor);
+    final Brightness estimatedPrimaryColorBrightness = estimateBrightnessForColor(primaryColor);
     primaryColorLight ??= isDark ? Colors.grey[500]! : primarySwatch[100]!;
     primaryColorDark ??= isDark ? Colors.black : primarySwatch[700]!;
-    final bool primaryIsDark = _primaryColorBrightness == Brightness.dark;
+    final bool primaryIsDark = estimatedPrimaryColorBrightness == Brightness.dark;
     toggleableActiveColor ??= isDark ? Colors.tealAccent[200]! : (accentColor ?? primarySwatch[600]!);
     accentColor ??= isDark ? Colors.tealAccent[200]! : primarySwatch[500]!;
     accentColorBrightness ??= estimateBrightnessForColor(accentColor);
@@ -466,7 +466,7 @@ class ThemeData with Diagnosticable {
       cardColor: cardColor,
       backgroundColor: backgroundColor,
       errorColor: errorColor,
-      brightness: _brightness,
+      brightness: effectiveBrightness,
     );
     selectedRowColor ??= Colors.grey[100]!;
     unselectedWidgetColor ??= isDark ? Colors.white70 : Colors.black54;
@@ -551,7 +551,7 @@ class ThemeData with Diagnosticable {
     accentIconTheme ??= accentIsDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black);
     buttonColor ??= isDark ? primarySwatch[600]! : Colors.grey[300]!;
     fixTextFieldOutlineLabel ??= true;
-    primaryColorBrightness = _primaryColorBrightness;
+    primaryColorBrightness = estimatedPrimaryColorBrightness;
 
     return ThemeData.raw(
       // GENERAL CONFIGURATION
