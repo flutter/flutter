@@ -36,6 +36,7 @@ public class FlutterTextureView extends TextureView implements RenderSurface {
 
   private boolean isSurfaceAvailableForRendering = false;
   private boolean isAttachedToFlutterRenderer = false;
+  private boolean isPaused = false;
   @Nullable private FlutterRenderer flutterRenderer;
   @Nullable private Surface renderSurface;
 
@@ -187,6 +188,7 @@ public class FlutterTextureView extends TextureView implements RenderSurface {
   public void pause() {
     if (flutterRenderer != null) {
       flutterRenderer = null;
+      isPaused = true;
       isAttachedToFlutterRenderer = false;
     } else {
       Log.w(TAG, "pause() invoked when no FlutterRenderer was attached.");
@@ -217,7 +219,8 @@ public class FlutterTextureView extends TextureView implements RenderSurface {
     }
 
     renderSurface = new Surface(getSurfaceTexture());
-    flutterRenderer.startRenderingToSurface(renderSurface);
+    flutterRenderer.startRenderingToSurface(renderSurface, isPaused);
+    isPaused = false;
   }
 
   // FlutterRenderer must be non-null.

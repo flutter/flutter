@@ -1,9 +1,11 @@
 package io.flutter.plugin.platform;
 
+import static android.os.Looper.getMainLooper;
 import static io.flutter.embedding.engine.systemchannels.PlatformViewsChannel.PlatformViewTouch;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
+import static org.robolectric.Shadows.shadowOf;
 
 import android.content.Context;
 import android.content.res.AssetManager;
@@ -486,10 +488,7 @@ public class PlatformViewsControllerTest {
     platformViewsController.onBeginFrame();
     platformViewsController.onEndFrame();
 
-    verify(overlayImageView, never()).detachFromRenderer();
-
-    // Simulate first frame from the framework.
-    jni.onFirstFrame();
+    shadowOf(getMainLooper()).idle();
     verify(overlayImageView, times(1)).detachFromRenderer();
   }
 
