@@ -1032,7 +1032,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   }
 
   bool _isWidgetEnabled(_InkResponseStateWidget widget) {
-    return widget.onTap != null || widget.onDoubleTap != null || widget.onLongPress != null;
+    return widget.onTap != null || widget.onDoubleTap != null || widget.onLongPress != null || widget.onTapDown != null;
   }
 
   bool get enabled => _isWidgetEnabled(widget);
