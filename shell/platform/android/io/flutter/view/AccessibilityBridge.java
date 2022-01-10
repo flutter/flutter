@@ -137,8 +137,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
   @NonNull private final AccessibilityViewEmbedder accessibilityViewEmbedder;
 
   // The delegate for interacting with embedded platform views. Used to embed accessibility data for
-  // an embedded
-  // view in the accessibility tree.
+  // an embedded view in the accessibility tree.
   @NonNull private final PlatformViewsAccessibilityDelegate platformViewsAccessibilityDelegate;
 
   // Android's {@link ContentResolver}, which is used to observe the global
@@ -386,11 +385,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       @NonNull AccessibilityChannel accessibilityChannel,
       @NonNull AccessibilityManager accessibilityManager,
       @NonNull ContentResolver contentResolver,
-      // This should be @NonNull once the plumbing for
-      // io.flutter.embedding.engine.android.FlutterView is done.
-      // TODO(mattcarrol): Add the annotation once the plumbing is done.
-      // https://github.com/flutter/flutter/issues/29618
-      PlatformViewsAccessibilityDelegate platformViewsAccessibilityDelegate) {
+      @NonNull PlatformViewsAccessibilityDelegate platformViewsAccessibilityDelegate) {
     this(
         rootAccessibilityView,
         accessibilityChannel,
@@ -407,11 +402,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       @NonNull AccessibilityManager accessibilityManager,
       @NonNull ContentResolver contentResolver,
       @NonNull AccessibilityViewEmbedder accessibilityViewEmbedder,
-      // This should be @NonNull once the plumbing for
-      // io.flutter.embedding.engine.android.FlutterView is done.
-      // TODO(mattcarrol): Add the annotation once the plumbing is done.
-      // https://github.com/flutter/flutter/issues/29618
-      PlatformViewsAccessibilityDelegate platformViewsAccessibilityDelegate) {
+      @NonNull PlatformViewsAccessibilityDelegate platformViewsAccessibilityDelegate) {
     this.rootAccessibilityView = rootAccessibilityView;
     this.accessibilityChannel = accessibilityChannel;
     this.accessibilityManager = accessibilityManager;
@@ -464,13 +455,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       this.contentResolver.registerContentObserver(transitionUri, false, animationScaleObserver);
     }
 
-    // platformViewsAccessibilityDelegate should be @NonNull once the plumbing
-    // for io.flutter.embedding.engine.android.FlutterView is done.
-    // TODO(mattcarrol): Remove the null check once the plumbing is done.
-    // https://github.com/flutter/flutter/issues/29618
-    if (platformViewsAccessibilityDelegate != null) {
-      platformViewsAccessibilityDelegate.attachAccessibilityBridge(this);
-    }
+    platformViewsAccessibilityDelegate.attachAccessibilityBridge(this);
   }
 
   /**
@@ -482,13 +467,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
    */
   public void release() {
     isReleased = true;
-    // platformViewsAccessibilityDelegate should be @NonNull once the plumbing
-    // for io.flutter.embedding.engine.android.FlutterView is done.
-    // TODO(mattcarrol): Remove the null check once the plumbing is done.
-    // https://github.com/flutter/flutter/issues/29618
-    if (platformViewsAccessibilityDelegate != null) {
-      platformViewsAccessibilityDelegate.detachAccessibiltyBridge();
-    }
+    platformViewsAccessibilityDelegate.detachAccessibilityBridge();
     setOnAccessibilityChangeListener(null);
     accessibilityManager.removeAccessibilityStateChangeListener(accessibilityStateChangeListener);
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {

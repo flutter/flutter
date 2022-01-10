@@ -4,7 +4,6 @@
 
 package io.flutter.plugin.platform;
 
-import static android.content.Context.INPUT_METHOD_SERVICE;
 import static android.content.Context.WINDOW_SERVICE;
 import static android.view.View.OnFocusChangeListener;
 
@@ -99,7 +98,7 @@ class SingleViewPresentation extends Presentation {
   // presentation.
   private FrameLayout container;
 
-  private PresentationState state;
+  private final PresentationState state;
 
   private boolean startFocused = false;
 
