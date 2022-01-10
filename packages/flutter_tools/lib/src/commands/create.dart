@@ -436,7 +436,7 @@ Your $application code is in $relativeAppMain.
     int generatedCount = 0;
     final String description = argResults.wasParsed('description')
         ? stringArg('description')
-        : 'A new flutter module project.';
+        : 'A new Flutter module project.';
     templateContext['description'] = description;
     generatedCount += await renderTemplate(
       globals.fs.path.join('module', 'common'),
@@ -515,7 +515,7 @@ Your $application code is in $relativeAppMain.
     int generatedCount = 0;
     final String description = argResults.wasParsed('description')
         ? stringArg('description')
-        : 'A new flutter plugin project.';
+        : 'A new Flutter plugin project.';
     templateContext['description'] = description;
     generatedCount += await renderMerged(
       <String>['plugin', 'plugin_shared'],
