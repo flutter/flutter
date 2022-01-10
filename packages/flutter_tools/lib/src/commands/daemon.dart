@@ -1488,7 +1488,7 @@ class LogMessage {
   final StackTrace stackTrace;
 }
 
-/// The method by which the flutter app was launched.
+/// The method by which the Flutter app was launched.
 class LaunchMode {
   const LaunchMode._(this._value);
 
