@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+@Tags(<String>['reduced-test-set'])
+
 import 'dart:math' as math show pi;
 
 import 'package:flutter/material.dart';
@@ -234,9 +236,11 @@ void main() {
           data: IconThemeData(
             color: Color(0xFF666666),
           ),
-          child: AnimatedIcon(
-            progress: AlwaysStoppedAnimation<double>(0.0),
-            icon: AnimatedIcons.arrow_menu,
+          child: RepaintBoundary(
+            child: AnimatedIcon(
+              progress: AlwaysStoppedAnimation<double>(0.0),
+              icon: AnimatedIcons.arrow_menu,
+            ),
           ),
         ),
       ),
@@ -261,9 +265,11 @@ void main() {
           data: IconThemeData(
             color: Color(0xFF666666),
           ),
-          child: AnimatedIcon(
-            progress: AlwaysStoppedAnimation<double>(0.0),
-            icon: AnimatedIcons.arrow_menu,
+          child: RepaintBoundary(
+            child: AnimatedIcon(
+              progress: AlwaysStoppedAnimation<double>(0.0),
+              icon: AnimatedIcons.arrow_menu,
+            ),
           ),
         ),
       ),
@@ -278,8 +284,7 @@ void main() {
         matchesGoldenFile('animated_icons_test.icon.ltr.png'));
   });
 
-  testWidgets('Inherited text direction overridden',
-      (WidgetTester tester) async {
+  testWidgets('Inherited text direction overridden', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -305,8 +310,7 @@ void main() {
     ]);
   });
 
-  testWidgets('Direction has no effect on position of widget',
-      (WidgetTester tester) async {
+  testWidgets('Direction has no effect on position of widget', (WidgetTester tester) async {
     const AnimatedIcon icon = AnimatedIcon(
       progress: AlwaysStoppedAnimation<double>(0.0),
       icon: AnimatedIcons.arrow_menu,
@@ -334,7 +338,7 @@ class PaintColorMatcher extends Matcher {
 
   @override
   Description describe(Description description) =>
-      description.add('color was not $expectedColor');
+    description.add('color was not $expectedColor');
 
   @override
   bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
