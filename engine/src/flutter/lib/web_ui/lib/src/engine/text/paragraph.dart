@@ -9,7 +9,6 @@ import 'package:ui/ui.dart' as ui;
 
 import '../browser_detection.dart';
 import '../embedder.dart';
-import '../html/bitmap_canvas.dart';
 import '../util.dart';
 import 'layout_service.dart';
 import 'ruler.dart';
@@ -180,31 +179,6 @@ class EngineLineMetrics implements ui.LineMetrics {
       return super.toString();
     }
   }
-}
-
-/// Common interface for all the implementations of [ui.Paragraph] in the web
-/// engine.
-abstract class EngineParagraph implements ui.Paragraph {
-  /// Whether this paragraph has been laid out or not.
-  bool get isLaidOut;
-
-  /// Whether this paragraph can be drawn on a bitmap canvas.
-  bool get drawOnCanvas;
-
-  /// Whether this paragraph is doing arbitrary paint operations that require
-  /// a bitmap canvas, and can't be expressed in a DOM canvas.
-  bool get hasArbitraryPaint;
-
-  void paint(BitmapCanvas canvas, ui.Offset offset);
-
-  /// Generates a flat string computed from all the spans of the paragraph.
-  String toPlainText();
-
-  /// Returns a DOM element that represents the entire paragraph and its
-  /// children.
-  ///
-  /// Generates a new DOM element on every invocation.
-  html.HtmlElement toDomElement();
 }
 
 /// The web implementation of [ui.ParagraphStyle].
