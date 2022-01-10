@@ -37,7 +37,7 @@ public interface RenderSurface {
    * FlutterRenderer} at the appropriate times:
    *
    * <ol>
-   *   <li>{@link FlutterRenderer#startRenderingToSurface(Surface)}
+   *   <li>{@link FlutterRenderer#startRenderingToSurface(Surface, boolean)}
    *   <li>{@link FlutterRenderer#surfaceChanged(int, int)}}
    *   <li>{@link FlutterRenderer#stopRenderingToSurface()}
    * </ol>
