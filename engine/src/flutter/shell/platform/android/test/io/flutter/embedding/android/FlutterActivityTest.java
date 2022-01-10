@@ -95,6 +95,7 @@ public class FlutterActivityTest {
     flutterActivity.setDelegate(new FlutterActivityAndFragmentDelegate(flutterActivity));
 
     assertEquals("main", flutterActivity.getDartEntrypointFunctionName());
+    assertNull(flutterActivity.getDartEntrypointLibraryUri());
     assertEquals("/", flutterActivity.getInitialRoute());
     assertArrayEquals(new String[] {}, flutterActivity.getFlutterShellArgs().toArray());
     assertTrue(flutterActivity.shouldAttachEngineToActivity());

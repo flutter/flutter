@@ -11,6 +11,7 @@ package io.flutter.embedding.android;
 public class FlutterActivityLaunchConfigs {
   // Meta-data arguments, processed from manifest XML.
   /* package */ static final String DART_ENTRYPOINT_META_DATA_KEY = "io.flutter.Entrypoint";
+  /* package */ static final String DART_ENTRYPOINT_URI_META_DATA_KEY = "io.flutter.EntrypointUri";
   /* package */ static final String INITIAL_ROUTE_META_DATA_KEY = "io.flutter.InitialRoute";
   /* package */ static final String SPLASH_SCREEN_META_DATA_KEY =
       "io.flutter.embedding.android.SplashScreenDrawable";
