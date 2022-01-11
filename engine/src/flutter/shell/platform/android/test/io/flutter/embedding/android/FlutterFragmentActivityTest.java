@@ -92,6 +92,19 @@ public class FlutterFragmentActivityTest {
   }
 
   @Test
+  public void createFlutterFragment__customDartEntrypointLibraryUri() {
+    final FlutterFragmentActivity activity =
+        new FakeFlutterFragmentActivity() {
+          @Override
+          public String getDartEntrypointLibraryUri() {
+            return "package:foo/bar.dart";
+          }
+        };
+    assertEquals(
+        activity.createFlutterFragment().getDartEntrypointLibraryUri(), "package:foo/bar.dart");
+  }
+
+  @Test
   public void itRegistersPluginsAtConfigurationTime() {
     try (ActivityScenario<FlutterFragmentActivity> scenario =
         ActivityScenario.launch(FlutterFragmentActivity.class)) {
@@ -346,6 +359,11 @@ public class FlutterFragmentActivityTest {
     @Override
     public String getDartEntrypointFunctionName() {
       return "";
+    }
+
+    @Nullable
+    public String getDartEntrypointLibraryUri() {
+      return null;
     }
 
     @Override
