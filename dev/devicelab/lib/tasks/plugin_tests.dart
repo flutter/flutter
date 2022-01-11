@@ -108,7 +108,7 @@ class _FlutterProject {
     final File pubspec = pubspecFile;
     String content = await pubspec.readAsString();
     content = content.replaceAll(
-      ' pluginClass: .*?\n',
+      RegExp(r' pluginClass: .*?\n'),
       ' dartPluginClass: $dartPluginClass\n',
     );
     await pubspec.writeAsString(content, flush: true);

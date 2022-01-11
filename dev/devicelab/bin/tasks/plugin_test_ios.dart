@@ -12,6 +12,6 @@ Future<void> main() async {
     PluginTest('macos', <String>['--platforms=macos']),
     // Test that Dart-only plugins are supported.
     PluginTest('ios', <String>['--platforms=ios'], dartOnlyPlugin: true),
-    PluginTest('macos', <String>['--platforms=ios'], dartOnlyPlugin: true),
+    PluginTest('macos', <String>['--platforms=macos'], dartOnlyPlugin: true),
   ]));
 }
