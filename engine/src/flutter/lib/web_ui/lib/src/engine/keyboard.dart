@@ -130,6 +130,7 @@ class Keyboard {
       'key': keyboardEvent.key,
       'location': keyboardEvent.location,
       'metaState': _lastMetaState,
+      'keyCode': keyboardEvent.keyCode,
     };
 
     EnginePlatformDispatcher.instance.invokeOnPlatformMessage('flutter/keyevent',
@@ -154,6 +155,7 @@ class Keyboard {
       'key': event.key,
       'location': event.location,
       'metaState': _lastMetaState,
+      'keyCode': event.keyCode,
     };
 
     EnginePlatformDispatcher.instance.invokeOnPlatformMessage('flutter/keyevent',
