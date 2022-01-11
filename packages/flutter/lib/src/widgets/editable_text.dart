@@ -3069,6 +3069,16 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
   late final Action<ReplaceTextIntent> _replaceTextAction = CallbackAction<ReplaceTextIntent>(onInvoke: _replaceText);
 
+  // Scrolls either to the beginning or end of the document depending on the
+  // intent's `forward` parameter.
+  void _scrollToDocumentBoundary(ScrollToDocumentBoundaryIntent intent) {
+    if (intent.forward) {
+      bringIntoView(TextPosition(offset: _value.text.length));
+    } else {
+      bringIntoView(const TextPosition(offset: 0));
+    }
+  }
+
   void _updateSelection(UpdateSelectionIntent intent) {
     bringIntoView(intent.newSelection.extent);
     userUpdateTextEditingValue(
@@ -3123,6 +3133,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     ExtendSelectionVerticallyToAdjacentLineIntent: _makeOverridable(_adjacentLineAction),
     ExtendSelectionToDocumentBoundaryIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionToDocumentBoundaryIntent>(this, true, _documentBoundary)),
     ExtendSelectionToNextWordBoundaryOrCaretLocationIntent: _makeOverridable(_ExtendSelectionOrCaretPositionAction(this, _nextWordBoundary)),
+    ScrollToDocumentBoundaryIntent: _makeOverridable(CallbackAction<ScrollToDocumentBoundaryIntent>(onInvoke: _scrollToDocumentBoundary)),
 
     // Copy Paste
     SelectAllTextIntent: _makeOverridable(_SelectAllAction(this)),

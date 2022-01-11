@@ -22,6 +22,7 @@ abstract class DirectionalTextEditingIntent extends Intent {
   /// Creates a [DirectionalTextEditingIntent].
   const DirectionalTextEditingIntent(
     this.forward,
+    // TODO(justinmc): Any way to put this only on the relevant intent classes?
     [this.continuesAtWrap = false]
   );
 
@@ -203,6 +204,15 @@ class ExtendSelectionToDocumentBoundaryIntent extends DirectionalCaretMovementIn
     required bool forward,
     required bool collapseSelection,
   }) : super(forward, collapseSelection);
+}
+
+/// Scrolls to the beginning or end of the document depending on the [forward]
+/// parameter.
+class ScrollToDocumentBoundaryIntent extends DirectionalTextEditingIntent {
+  /// Creates a [ScrollToDocumentBoundaryIntent].
+  const ScrollToDocumentBoundaryIntent({
+    required bool forward,
+  }) : super(forward);
 }
 
 /// An [Intent] to select everything in the field.
