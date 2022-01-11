@@ -76,6 +76,7 @@ final List<GradleHandledError> gradleErrors = <GradleHandledError>[
   lockFileDepMissing,
   multidexErrorHandler,
   incompatibleKotlinVersionHandler,
+  minCompileSdkVersionHandler,
 ];
 
 const String _boxTitle = 'Flutter Fix';
@@ -504,4 +505,35 @@ final GradleHandledError incompatibleKotlinVersionHandler = GradleHandledError(
     return GradleBuildStatus.exit;
   },
   eventLabel: 'incompatible-kotlin-version',
+);
+
+final RegExp _minCompileSdkVersionPattern = RegExp(r'The minCompileSdk \(([0-9]+)\) specified in a');
+
+@visibleForTesting
+final GradleHandledError minCompileSdkVersionHandler = GradleHandledError(
+  test: _minCompileSdkVersionPattern.hasMatch,
+  handler: ({
+    required String line,
+    required FlutterProject project,
+    required bool usesAndroidX,
+    required bool multidexEnabled,
+  }) async {
+    final Match? minSdkVersionMatch = _minCompileSdkVersionPattern.firstMatch(line);
+    assert(minSdkVersionMatch?.groupCount == 1);
+
+    final File gradleFile = project.directory
+        .childDirectory('android')
+        .childDirectory('app')
+        .childFile('build.gradle');
+    globals.printBox(
+      '${globals.logger.terminal.warningMark} Your project requires a higher compileSdkVersion.\n'
+      'Fix this issue by bumping the compileSdkVersion in ${gradleFile.path}:\n'
+      'android {\n'
+      '  compileSdkVersion ${minSdkVersionMatch?.group(1)}\n'
+      '}',
+      title: _boxTitle,
+    );
+    return GradleBuildStatus.exit;
+  },
+  eventLabel: 'min-compile-sdk-version',
 );

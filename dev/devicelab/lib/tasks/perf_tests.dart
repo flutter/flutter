@@ -847,12 +847,14 @@ class PerfTest {
       final Device device = await devices.workingDevice;
       await device.unlock();
       final String deviceId = device.deviceId;
+      final String? localEngine = localEngineFromEnv;
+      final String? localEngineSrcPath = localEngineSrcPathFromEnv;
 
       await flutter('drive', options: <String>[
         if (localEngine != null)
-          ...<String>['--local-engine', localEngine!],
+          ...<String>['--local-engine', localEngine],
         if (localEngineSrcPath != null)
-          ...<String>['--local-engine-src-path', localEngineSrcPath!],
+          ...<String>['--local-engine-src-path', localEngineSrcPath],
         '--no-dds',
         '--no-android-gradle-daemon',
         '-v',
@@ -942,7 +944,6 @@ const List<String> _kCommonScoreKeys = <String>[
   'worst_picture_cache_memory',
   'new_gen_gc_count',
   'old_gen_gc_count',
-  'total_ui_gc_time',
 ];
 
 class PerfTestWithSkSL extends PerfTest {
@@ -1029,15 +1030,16 @@ class PerfTestWithSkSL extends PerfTest {
     if (File(_vmserviceFileName).existsSync()) {
       File(_vmserviceFileName).deleteSync();
     }
-
+    final String? localEngine = localEngineFromEnv;
+    final String? localEngineSrcPath = localEngineSrcPathFromEnv;
     _runProcess = await startProcess(
       _flutterPath,
       <String>[
         'run',
         if (localEngine != null)
-          ...<String>['--local-engine', localEngine!],
+          ...<String>['--local-engine', localEngine],
         if (localEngineSrcPath != null)
-          ...<String>['--local-engine-src-path', localEngineSrcPath!],
+          ...<String>['--local-engine-src-path', localEngineSrcPath],
         '--no-dds',
         if (deviceOperatingSystem == DeviceOperatingSystem.ios)
           ...<String>[
