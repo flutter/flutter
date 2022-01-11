@@ -628,7 +628,7 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
     }
   }
 
-  Drag? _dragStart(Offset position) {
+  Drag? _dragStart(PointerEvent initialPointerEvent) {// todo get PointerDownEvent passed here
     assert(_dragInfo == null);
     final _ReorderableItemState item = _items[_dragIndex!]!;
     item.dragging = true;
@@ -641,7 +641,7 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
     _insertIndex = item.index;
     _dragInfo = _DragInfo(
       item: item,
-      initialPosition: position,
+      initialPosition: initialPointerEvent.position,
       scrollDirection: _scrollDirection,
       onUpdate: _dragUpdate,
       onCancel: _dragCancel,
@@ -650,7 +650,9 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
       proxyDecorator: widget.proxyDecorator,
       tickerProvider: this,
     );
-    _dragInfo!.startDrag();
+    // todo: or just use this one?
+    assert(initialPointerEvent is PointerDownEvent);
+    _dragInfo!.start(DragStartDetails(event: initialPointerEvent as PointerDownEvent)); // todo: pass the reference of the PointerDownEvent here?
 
     final OverlayState overlay = Overlay.of(context)!;
     assert(_overlayEntry == null);
@@ -1218,6 +1220,23 @@ class _DragInfo extends Drag {
     })
     ..forward();
   }
+
+  @override
+  void start(DragStartDetails details) {
+    _proxyAnimation = AnimationController(
+      vsync: tickerProvider,
+      duration: const Duration(milliseconds: 250),
+    )
+      ..addStatusListener((AnimationStatus status) {
+        if (status == AnimationStatus.dismissed) {
+          _dropCompleted();
+        }
+      })
+      ..forward();
+
+    onUpdate?.call(this, dragPosition, Offset.zero);
+  }
+
 
   @override
   void update(DragUpdateDetails details) {

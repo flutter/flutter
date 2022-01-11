@@ -6,8 +6,35 @@
 import 'dart:ui' show Offset, PointerDeviceKind;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 
 import 'velocity_tracker.dart';
+
+
+/// Details object that contains the [PointerEvent] that caused it.
+///
+/// See also:
+///  * [DragDownDetails], which takes a [PointerDownEvent].
+///  * [DragStartDetails], which takes a [PointerDownEvent].
+///  * [DragUpdateDetails], which takes a [PointerMoveEvent].
+///  * [DragEndDetails], the details for [PointerUpEvent].
+abstract class DragDetails {
+
+  /// Creates drag details containing the associated [PointerEvent].
+  ///
+  /// The [raw] argument is required.
+  DragDetails(this.raw);
+
+  /// The PointerEvent that this DragDetail describes.
+  ///
+  /// This is useful if the consumer needs more info about the [PointerEvent] that caused
+  /// the specific [DragDetails].
+  ///
+  /// Example:
+  /// The consumer may want to pan the view if dragging with [kSecondaryMouseButton]
+  /// and drag a selection box that follows the mouse if dragging with [kPrimaryMouseButton].
+  final PointerEvent raw;
+}
 
 /// Details object for callbacks that use [GestureDragDownCallback].
 ///
@@ -17,15 +44,16 @@ import 'velocity_tracker.dart';
 ///  * [DragStartDetails], the details for [GestureDragStartCallback].
 ///  * [DragUpdateDetails], the details for [GestureDragUpdateCallback].
 ///  * [DragEndDetails], the details for [GestureDragEndCallback].
-class DragDownDetails {
+class DragDownDetails extends DragDetails {
   /// Creates details for a [GestureDragDownCallback].
   ///
   /// The [globalPosition] argument must not be null.
   DragDownDetails({
+    PointerDownEvent event = const PointerDownEvent(),
     this.globalPosition = Offset.zero,
     Offset? localPosition,
   }) : assert(globalPosition != null),
-       localPosition = localPosition ?? globalPosition;
+        localPosition = localPosition ?? globalPosition, super(event);
 
   /// The global position at which the pointer contacted the screen.
   ///
@@ -63,17 +91,27 @@ typedef GestureDragDownCallback = void Function(DragDownDetails details);
 ///  * [DragDownDetails], the details for [GestureDragDownCallback].
 ///  * [DragUpdateDetails], the details for [GestureDragUpdateCallback].
 ///  * [DragEndDetails], the details for [GestureDragEndCallback].
-class DragStartDetails {
+class DragStartDetails extends DragDetails {
   /// Creates details for a [GestureDragStartCallback].
   ///
   /// The [globalPosition] argument must not be null.
   DragStartDetails({
+    PointerDownEvent event = const PointerDownEvent(),
     this.sourceTimeStamp,
     this.globalPosition = Offset.zero,
     Offset? localPosition,
     this.kind,
   }) : assert(globalPosition != null),
-       localPosition = localPosition ?? globalPosition;
+        localPosition = localPosition ?? globalPosition, super(event);
+
+  /// Create [DragStartDetails] from a [PointerDownEvent].
+  DragStartDetails.fromPointerDownEvent(PointerDownEvent event) :
+        sourceTimeStamp = event.timeStamp,
+        globalPosition = event.position,
+        localPosition = event.localPosition,
+        kind = event.kind,
+        super(event);
+
 
   /// Recorded timestamp of the source pointer event that triggered the drag
   /// event.
@@ -124,7 +162,7 @@ typedef GestureDragStartCallback = void Function(DragStartDetails details);
 ///  * [DragDownDetails], the details for [GestureDragDownCallback].
 ///  * [DragStartDetails], the details for [GestureDragStartCallback].
 ///  * [DragEndDetails], the details for [GestureDragEndCallback].
-class DragUpdateDetails {
+class DragUpdateDetails extends DragDetails {
   /// Creates details for a [DragUpdateDetails].
   ///
   /// The [delta] argument must not be null.
@@ -134,18 +172,19 @@ class DragUpdateDetails {
   ///
   /// The [globalPosition] argument must be provided and must not be null.
   DragUpdateDetails({
+    PointerMoveEvent event = const PointerMoveEvent(),
     this.sourceTimeStamp,
     this.delta = Offset.zero,
     this.primaryDelta,
     required this.globalPosition,
     Offset? localPosition,
   }) : assert(delta != null),
-       assert(
-         primaryDelta == null
-           || (primaryDelta == delta.dx && delta.dy == 0.0)
-           || (primaryDelta == delta.dy && delta.dx == 0.0),
-       ),
-       localPosition = localPosition ?? globalPosition;
+        assert(
+        primaryDelta == null
+            || (primaryDelta == delta.dx && delta.dy == 0.0)
+            || (primaryDelta == delta.dy && delta.dx == 0.0),
+        ),
+        localPosition = localPosition ?? globalPosition, super(event);
 
   /// Recorded timestamp of the source pointer event that triggered the drag
   /// event.
@@ -211,19 +250,20 @@ typedef GestureDragUpdateCallback = void Function(DragUpdateDetails details);
 ///  * [DragDownDetails], the details for [GestureDragDownCallback].
 ///  * [DragStartDetails], the details for [GestureDragStartCallback].
 ///  * [DragUpdateDetails], the details for [GestureDragUpdateCallback].
-class DragEndDetails {
+class DragEndDetails extends DragDetails {
   /// Creates details for a [GestureDragEndCallback].
   ///
   /// The [velocity] argument must not be null.
   DragEndDetails({
+    PointerUpEvent event = const PointerUpEvent(),
     this.velocity = Velocity.zero,
     this.primaryVelocity,
   }) : assert(velocity != null),
-       assert(
-         primaryVelocity == null
-           || primaryVelocity == velocity.pixelsPerSecond.dx
-           || primaryVelocity == velocity.pixelsPerSecond.dy,
-       );
+        assert(
+        primaryVelocity == null
+            || primaryVelocity == velocity.pixelsPerSecond.dx
+            || primaryVelocity == velocity.pixelsPerSecond.dy,
+        ), super(event);
 
   /// The velocity the pointer was moving when it stopped contacting the screen.
   ///

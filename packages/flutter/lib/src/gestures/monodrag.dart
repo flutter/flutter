@@ -263,6 +263,8 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 
   @override
   void addAllowedPointer(PointerDownEvent event) {
+    print('addAllowedPointer');
+    //todo: Track initial pointerDownEvent here
     super.addAllowedPointer(event);
     _velocityTrackers[event.pointer] = velocityTrackerBuilder(event);
     if (_state == _DragState.ready) {
@@ -273,7 +275,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       _globalDistanceMoved = 0.0;
       _lastPendingEventTimestamp = event.timeStamp;
       _lastTransform = event.transform;
-      _checkDown();
+      _checkDown(event);
     } else if (_state == _DragState.accepted) {
       resolve(GestureDisposition.accepted);
     }
@@ -281,9 +283,11 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 
   @override
   void handleEvent(PointerEvent event) {
+    print('Handle: ${event.runtimeType}.position = ${event.position}');
     assert(_state != _DragState.ready);
     if (!event.synthesized
         && (event is PointerDownEvent || event is PointerMoveEvent)) {
+      // todo: update state on start??
       final VelocityTracker tracker = _velocityTrackers[event.pointer]!;
       assert(tracker != null);
       tracker.addPosition(event.timeStamp, event.localPosition);
@@ -296,6 +300,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       }
       if (_state == _DragState.accepted) {
         _checkUpdate(
+          event: event,
           sourceTimeStamp: event.timeStamp,
           delta: _getDeltaForDetails(event.localDelta),
           primaryDelta: _getPrimaryValueFromOffset(event.localDelta),
@@ -326,6 +331,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 
   @override
   void acceptGesture(int pointer) {
+    print('acceptGesture');
     assert(!_acceptedActivePointers.contains(pointer));
     _acceptedActivePointers.add(pointer);
     if (_state != _DragState.accepted) {
@@ -346,7 +352,10 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       _pendingDragOffset = OffsetPair.zero;
       _lastPendingEventTimestamp = null;
       _lastTransform = null;
-      _checkStart(timestamp, pointer);
+      print('InitialButtons: $_initialButtons');
+      print('InitialPosition: $_initialPosition');
+      //todo: Use initial pointerDownEvent here
+      _checkStart(timestamp, pointer, const PointerDownEvent());
       if (localUpdateDelta != Offset.zero && onUpdate != null) {
         final Matrix4? localToGlobal = transform != null ? Matrix4.tryInvert(transform) : null;
         final Offset correctedLocalPosition = _initialPosition.local + localUpdateDelta;
@@ -358,6 +367,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
         final OffsetPair updateDelta = OffsetPair(local: localUpdateDelta, global: globalUpdateDelta);
         final OffsetPair correctedPosition = _initialPosition + updateDelta; // Only adds delta for down behaviour
         _checkUpdate(
+          event: const PointerMoveEvent(),// todo: figure out how to get proper PointerMoveEvent here.
           sourceTimeStamp: timestamp,
           delta: localUpdateDelta,
           primaryDelta: _getPrimaryValueFromOffset(localUpdateDelta),
@@ -406,10 +416,11 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       resolvePointer(pointer, GestureDisposition.rejected);
   }
 
-  void _checkDown() {
+  void _checkDown(PointerDownEvent event) {
     assert(_initialButtons == kPrimaryButton);
     if (onDown != null) {
       final DragDownDetails details = DragDownDetails(
+        event: event,
         globalPosition: _initialPosition.global,
         localPosition: _initialPosition.local,
       );
@@ -417,10 +428,11 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     }
   }
 
-  void _checkStart(Duration timestamp, int pointer) {
+  void _checkStart(Duration timestamp, int pointer, PointerDownEvent event) {
     assert(_initialButtons == kPrimaryButton);
     if (onStart != null) {
       final DragStartDetails details = DragStartDetails(
+        event: event,
         sourceTimeStamp: timestamp,
         globalPosition: _initialPosition.global,
         localPosition: _initialPosition.local,
@@ -431,6 +443,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   void _checkUpdate({
+    required PointerMoveEvent event,
     Duration? sourceTimeStamp,
     required Offset delta,
     double? primaryDelta,
@@ -440,6 +453,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     assert(_initialButtons == kPrimaryButton);
     if (onUpdate != null) {
       final DragUpdateDetails details = DragUpdateDetails(
+        event: event,
         sourceTimeStamp: sourceTimeStamp,
         delta: delta,
         primaryDelta: primaryDelta,
@@ -466,6 +480,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       final Velocity velocity = Velocity(pixelsPerSecond: estimate.pixelsPerSecond)
         .clampMagnitude(minFlingVelocity ?? kMinFlingVelocity, maxFlingVelocity ?? kMaxFlingVelocity);
       details = DragEndDetails(
+        event: const PointerUpEvent(),// todo: figure out how to get proper PointerUpEvent here.
         velocity: velocity,
         primaryVelocity: _getPrimaryValueFromOffset(velocity.pixelsPerSecond),
       );
@@ -474,6 +489,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       };
     } else {
       details = DragEndDetails(
+        event: const PointerUpEvent(),// todo: figure out how to get proper PointerUpEvent here.
         primaryVelocity: 0.0,
       );
       debugReport = () {

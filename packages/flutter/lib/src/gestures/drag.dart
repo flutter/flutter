@@ -13,6 +13,9 @@ import 'drag_details.dart';
 /// library uses it to notify the [DragScrollActivity] when the user drags the
 /// scrollable.
 abstract class Drag {
+  /// The pointer has made contact with the screen.
+  void start(DragStartDetails details) { }
+
   /// The pointer has moved.
   void update(DragUpdateDetails details) { }
 

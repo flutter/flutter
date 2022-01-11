@@ -478,8 +478,8 @@ class LongPressDraggable<T extends Object> extends Draggable<T> {
   @override
   DelayedMultiDragGestureRecognizer createRecognizer(GestureMultiDragStartCallback onStart) {
     return DelayedMultiDragGestureRecognizer(delay: delay)
-      ..onStart = (Offset position) {
-        final Drag? result = onStart(position);
+      ..onStart = (PointerEvent initialPointerEvent) {
+        final Drag? result = onStart(initialPointerEvent);
         if (result != null && hapticFeedbackOnStart)
           HapticFeedback.selectionClick();
         return result;
@@ -525,21 +525,21 @@ class _DraggableState<T extends Object> extends State<Draggable<T>> {
     _recognizer!.addPointer(event);
   }
 
-  _DragAvatar<T>? _startDrag(Offset position) {
+  _DragAvatar<T>? _startDrag(PointerEvent event) {
     if (widget.maxSimultaneousDrags != null && _activeCount >= widget.maxSimultaneousDrags!)
       return null;
     final Offset dragStartPoint;
     if (widget.dragAnchorStrategy == null) {
       switch (widget.dragAnchor) {
         case DragAnchor.child:
-          dragStartPoint = childDragAnchorStrategy(widget, context, position);
+          dragStartPoint = childDragAnchorStrategy(widget, context, event.position);
           break;
         case DragAnchor.pointer:
-          dragStartPoint = pointerDragAnchorStrategy(widget, context, position);
+          dragStartPoint = pointerDragAnchorStrategy(widget, context, event.position);
           break;
       }
     } else {
-      dragStartPoint = widget.dragAnchorStrategy!(widget, context, position);
+      dragStartPoint = widget.dragAnchorStrategy!(widget, context, event.position);
     }
     setState(() {
       _activeCount += 1;
@@ -548,7 +548,7 @@ class _DraggableState<T extends Object> extends State<Draggable<T>> {
       overlayState: Overlay.of(context, debugRequiredFor: widget, rootOverlay: widget.rootOverlay)!,
       data: widget.data,
       axis: widget.axis,
-      initialPosition: position,
+      initialPosition: event.position,
       dragStartPoint: dragStartPoint,
       feedback: widget.feedback,
       feedbackOffset: widget.feedbackOffset,

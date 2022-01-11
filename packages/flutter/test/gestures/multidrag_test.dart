@@ -16,7 +16,7 @@ void main() {
     final DelayedMultiDragGestureRecognizer drag = DelayedMultiDragGestureRecognizer();
 
     bool didStartDrag = false;
-    drag.onStart = (Offset position) {
+    drag.onStart = (PointerEvent event) {
       didStartDrag = true;
       return TestDrag();
     };
@@ -41,7 +41,7 @@ void main() {
     final DelayedMultiDragGestureRecognizer drag = DelayedMultiDragGestureRecognizer();
 
     bool didStartDrag = false;
-    drag.onStart = (Offset position) {
+    drag.onStart = (PointerEvent event) {
       didStartDrag = true;
       return TestDrag();
     };
@@ -67,7 +67,7 @@ void main() {
         DelayedMultiDragGestureRecognizer(kind: PointerDeviceKind.touch);
 
     bool didStartDrag = false;
-    drag.onStart = (Offset position) {
+    drag.onStart = (PointerEvent event) {
       didStartDrag = true;
       return TestDrag();
     };
