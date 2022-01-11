@@ -6648,8 +6648,6 @@ void main() {
   );
 
   testWidgets('home/end keys scrolling (Mac only)', (WidgetTester tester) async {
-    final String targetPlatformString = defaultTargetPlatform.toString();
-    final String platform = targetPlatformString.substring(targetPlatformString.indexOf('.') + 1).toLowerCase();
     const String testText = 'Now is the time for all good people to come to the aid of their country. Now is the time for all good people to come to the aid of their country.';
     final TextEditingController controller = TextEditingController(text: testText);
     controller.selection = const TextSelection(
@@ -6657,8 +6655,6 @@ void main() {
       extentOffset: 0,
       affinity: TextAffinity.upstream,
     );
-    late TextSelection selection;
-    late SelectionChangedCause cause;
     await tester.pumpWidget(MaterialApp(
       home: Align(
         alignment: Alignment.topLeft,
@@ -6676,10 +6672,6 @@ void main() {
             selectionControls: materialTextSelectionControls,
             keyboardType: TextInputType.text,
             textAlign: TextAlign.right,
-            onSelectionChanged: (TextSelection newSelection, SelectionChangedCause? newCause) {
-              selection = newSelection;
-              cause = newCause!;
-            },
           ),
         ),
       ),
