@@ -65,21 +65,9 @@ abstract class DirectionalCaretMovementIntent extends DirectionalTextEditingInte
   const DirectionalCaretMovementIntent(
     bool forward,
     this.collapseSelection,
-    [
-      this.collapseAtReversal = false,
-      this.expand = false,
-    ]
+    [this.collapseAtReversal = false]
   ) : assert(!collapseSelection || !collapseAtReversal),
       super(forward);
-
-  /// Whether to expand an uncollapsed selection or extend it.
-  ///
-  /// When set to false, the selection will extend, meaning that the base will
-  /// be held in place while the extent is moved.
-  ///
-  /// When set to true, the selection will expand, meaning that the selection
-  /// will grow by moving either the base or the extent.
-  final bool expand;
 
   /// Whether this [Intent] should make the selection collapsed (so it becomes a
   /// caret), after the movement.
@@ -150,15 +138,17 @@ class ExtendSelectionToNextWordBoundaryOrCaretLocationIntent extends Directional
 /// Either the base or extent can move, whichever is closer to the line break.
 /// The selection will never shrink.
 ///
+/// This behavior is common on MacOS.
+///
 /// See also:
 ///
 ///   [ExtendSelectionToLineBreakIntent], which is similar but always moves the
 ///   extent.
-class ExpandSelectionToLineBreakIntent extends DirectionalCaretMovementIntent {
+class ExpandSelectionToLineBreakIntent extends DirectionalTextEditingIntent {
   /// Creates an [ExpandSelectionToLineBreakIntent].
   const ExpandSelectionToLineBreakIntent({
     required bool forward,
-  }) : super(forward, false, false, true);
+  }) : super(forward);
 }
 
 /// Extends, or moves the current selection from the current
