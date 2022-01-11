@@ -1227,7 +1227,10 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     }
   }
 
-  TextStyle? get _textStyle => Theme.of(context).textTheme.subtitle1?.merge(widget.style);
+  TextStyle? get _textStyle {
+    final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(context);
+     return widget.style != null ? defaultTextStyle.style.merge(widget.style) : Theme.of(context).textTheme.subtitle1;
+  }
 
   void _handleTap() {
     final TextDirection? textDirection = Directionality.maybeOf(context);
