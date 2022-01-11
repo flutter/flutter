@@ -101,10 +101,15 @@ template("_fuchsia_fidl_library") {
     ]
 
     outputs = [
-      "$target_gen_dir/$library_name_slashes/cpp/fidl.h",
-      "$target_gen_dir/$library_name_slashes/cpp/fidl.cc",
       "$target_gen_dir/$library_name_slashes/cpp/tables.c",
     ]
+    # TODO(https://fxbug.dev/90838): Make zx library less special-cased.
+    if (library_name != "zx") {
+      outputs += [
+        "$target_gen_dir/$library_name_slashes/cpp/fidl.h",
+        "$target_gen_dir/$library_name_slashes/cpp/fidl.cc",
+      ]
+    }
 
     args = [
       "--fidlc-bin",
