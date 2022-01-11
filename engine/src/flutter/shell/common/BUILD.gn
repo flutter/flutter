@@ -96,6 +96,9 @@ source_set("common") {
     "switches.h",
     "thread_host.cc",
     "thread_host.h",
+    "variable_refresh_rate_display.cc",
+    "variable_refresh_rate_display.h",
+    "variable_refresh_rate_reporter.h",
     "vsync_waiter.cc",
     "vsync_waiter.h",
     "vsync_waiter_fallback.cc",
@@ -266,6 +269,7 @@ if (enable_unittests) {
       "shell_unittests.cc",
       "skp_shader_warmup_unittests.cc",
       "switches_unittests.cc",
+      "variable_refresh_rate_display_unittests.cc",
     ]
 
     deps = [

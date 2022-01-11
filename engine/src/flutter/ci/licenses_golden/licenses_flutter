@@ -765,6 +765,10 @@ FILE: ../../../flutter/shell/common/switches.h
 FILE: ../../../flutter/shell/common/switches_unittests.cc
 FILE: ../../../flutter/shell/common/thread_host.cc
 FILE: ../../../flutter/shell/common/thread_host.h
+FILE: ../../../flutter/shell/common/variable_refresh_rate_display.cc
+FILE: ../../../flutter/shell/common/variable_refresh_rate_display.h
+FILE: ../../../flutter/shell/common/variable_refresh_rate_display_unittests.cc
+FILE: ../../../flutter/shell/common/variable_refresh_rate_reporter.h
 FILE: ../../../flutter/shell/common/vsync_waiter.cc
 FILE: ../../../flutter/shell/common/vsync_waiter.h
 FILE: ../../../flutter/shell/common/vsync_waiter_fallback.cc

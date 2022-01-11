@@ -8,6 +8,7 @@
 #include "flutter/fml/macros.h"
 #include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/fml/platform/darwin/scoped_nsobject.h"
+#include "flutter/shell/common/variable_refresh_rate_reporter.h"
 #include "flutter/shell/common/vsync_waiter.h"
 
 @interface DisplayLinkManager : NSObject
@@ -34,15 +35,20 @@
 
 - (void)invalidate;
 
+- (double)getRefreshRate;
+
 @end
 
 namespace flutter {
 
-class VsyncWaiterIOS final : public VsyncWaiter {
+class VsyncWaiterIOS final : public VsyncWaiter, public VariableRefreshRateReporter {
  public:
   explicit VsyncWaiterIOS(flutter::TaskRunners task_runners);
 
   ~VsyncWaiterIOS() override;
+
+  // |VariableRefreshRateReporter|
+  double GetRefreshRate() const override;
 
  private:
   fml::scoped_nsobject<VSyncClient> client_;
