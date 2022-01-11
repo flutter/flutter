@@ -3106,6 +3106,92 @@ void main() {
     expect(const LongPressDraggable<int>(feedback: widget2, dragAnchor: DragAnchor.pointer, child: widget1).dragAnchor, DragAnchor.pointer);
     expect(LongPressDraggable<int>(feedback: widget2, dragAnchorStrategy: dummyStrategy, child: widget1).dragAnchorStrategy, dummyStrategy);
   });
+
+  testWidgets('Draggable.supportedDevices test', (WidgetTester tester) async {
+    final List<int> accepted = <int>[];
+    final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
+    int dragStartedCount = 0;
+    int moveCount = 0;
+
+    await tester.pumpWidget(MaterialApp(
+      home: Column(
+        children: <Widget>[
+          Draggable<int>(
+            data: 1,
+            feedback: const Text('Dragging'),
+            onDragStarted: () {
+              ++dragStartedCount;
+            },
+            // Block all input devices from dragging
+            supportedDevices: const <PointerDeviceKind>{},
+            child: const Text('Source'),
+          ),
+          DragTarget<int>(
+            builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
+              return const SizedBox(height: 100.0, child: Text('Target'));
+            },
+            onMove: (_) => moveCount++,
+            onAccept: accepted.add,
+            onAcceptWithDetails: acceptedDetails.add,
+          ),
+        ],
+      ),
+    ));
+
+    expect(accepted, isEmpty);
+    expect(acceptedDetails, isEmpty);
+    expect(find.text('Source'), findsOneWidget);
+    expect(find.text('Dragging'), findsNothing);
+    expect(find.text('Target'), findsOneWidget);
+    expect(dragStartedCount, 0);
+    expect(moveCount, 0);
+
+    final Offset firstLocation = tester.getCenter(find.text('Source'));
+    await tester.startGesture(firstLocation, pointer: 7);
+    await tester.pump();
+
+    expect(accepted, isEmpty);
+    expect(acceptedDetails, isEmpty);
+    expect(find.text('Source'), findsOneWidget);
+    expect(find.text('Dragging'), findsNothing);
+    expect(find.text('Target'), findsOneWidget);
+    expect(dragStartedCount, 0);
+    expect(moveCount, 0);
+  });
+
+  testWidgets('LongPressDraggable.supportedDevices test', (WidgetTester tester) async {
+    bool onDragStartedCalled = false;
+    await tester.pumpWidget(MaterialApp(
+      home: LongPressDraggable<int>(
+        data: 1,
+        feedback: const Text('Dragging'),
+        onDragStarted: () {
+          onDragStartedCalled = true;
+        },
+        supportedDevices: const <PointerDeviceKind>{},
+        child: const Text('Source'),
+      ),
+    ));
+    expect(find.text('Source'), findsOneWidget);
+    expect(find.text('Dragging'), findsNothing);
+    expect(onDragStartedCalled, isFalse);
+    final Offset firstLocation = tester.getCenter(find.text('Source'));
+    await tester.startGesture(firstLocation, pointer: 7);
+    await tester.pump();
+    expect(find.text('Source'), findsOneWidget);
+    expect(find.text('Dragging'), findsNothing);
+    expect(onDragStartedCalled, isFalse);
+    // Halfway into the long press duration.
+    await tester.pump(const Duration(milliseconds: 250));
+    expect(find.text('Source'), findsOneWidget);
+    expect(find.text('Dragging'), findsNothing);
+    expect(onDragStartedCalled, isFalse);
+    // Long press draggable would be showing if dragging was allowed.
+    await tester.pump(const Duration(milliseconds: 250));
+    expect(find.text('Source'), findsOneWidget);
+    expect(find.text('Dragging'), findsNothing);
+    expect(onDragStartedCalled, isFalse);
+  });
 }
 
 Future<void> _testLongPressDraggableHapticFeedback({ required WidgetTester tester, required bool hapticFeedbackOnStart, required int expectedHapticFeedbackCount }) async {

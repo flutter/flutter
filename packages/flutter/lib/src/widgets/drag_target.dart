@@ -535,7 +535,8 @@ class _DraggableState<T extends Object> extends State<Draggable<T>> {
   void _routePointer(PointerDownEvent event) {
     if (widget.maxSimultaneousDrags != null && _activeCount >= widget.maxSimultaneousDrags!)
       return;
-    _recognizer!.addPointer(event);
+    if (widget.supportedDevices == null || widget.supportedDevices!.contains(event.kind))
+      _recognizer!.addPointer(event);
   }
 
   _DragAvatar<T>? _startDrag(Offset position) {
