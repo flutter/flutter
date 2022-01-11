@@ -250,8 +250,12 @@ class DismissUpdateDetails {
   final bool previousReached;
 
   /// The offset ratio of the dismissible in its parent container.
+  ///
   /// A value of 0.0 represents the normal position and 1.0 means the child is
   /// completely outside its parent.
+  ///
+  /// This can be used to synchronize other elements to what the dismissible is doing on screen,
+  /// e.g. using this value to set the opacity thereby fading dismissible as it's dragged offscreen.
   final double progress;
 }
 
