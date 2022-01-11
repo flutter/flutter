@@ -2180,17 +2180,6 @@ class LayerLink {
     return _LayerLinkHandle(this);
   }
 
-  /// Returns the [LeaderLayer] currently connected to this link.
-  ///
-  /// Valid in debug mode only. Returns null in all other modes.
-  LeaderLayer? get debugLeader {
-    LeaderLayer? result;
-    if (kDebugMode) {
-      result = _leader;
-    }
-    return result;
-  }
-
   /// The total size of the content of the connected [LeaderLayer].
   ///
   /// Generally this should be set by the [RenderObject] that paints on the

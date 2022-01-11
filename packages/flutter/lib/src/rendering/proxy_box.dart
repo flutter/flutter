@@ -5314,7 +5314,7 @@ class RenderFollowerLayer extends RenderProxyBox {
     final Size? leaderSize = link.leaderSize;
     assert(
       link.leaderSize != null || (!link.leaderConnected || leaderAnchor == Alignment.topLeft),
-      '$link: layer is linked to ${link.debugLeader} but a valid leaderSize is not set. '
+      '$link: layer is linked to ${link.leader} but a valid leaderSize is not set. '
       'leaderSize is required when leaderAnchor is not Alignment.topLeft '
       '(current value is $leaderAnchor).',
     );
