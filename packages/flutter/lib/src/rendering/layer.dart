@@ -2109,6 +2109,8 @@ class PhysicalModelLayer extends ContainerLayer {
 ///  * [RenderLeaderLayer] and [RenderFollowerLayer], the corresponding
 ///    render objects.
 class LayerLink {
+  /// The currently-registered [LeaderLayer], if any.
+  LeaderLayer? get leader => _leader;
   LeaderLayer? _leader;
 
   void _registerLeader(LeaderLayer leader) {
