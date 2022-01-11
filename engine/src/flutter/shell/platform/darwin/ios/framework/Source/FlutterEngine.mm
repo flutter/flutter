@@ -17,6 +17,7 @@
 #include "flutter/shell/common/shell.h"
 #include "flutter/shell/common/switches.h"
 #include "flutter/shell/common/thread_host.h"
+#include "flutter/shell/common/variable_refresh_rate_display.h"
 #import "flutter/shell/platform/darwin/common/command_line.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterBinaryMessengerRelay.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterDartProject_Internal.h"
@@ -699,9 +700,10 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 }
 
 - (void)initializeDisplays {
-  double refresh_rate = [DisplayLinkManager displayRefreshRate];
+  const flutter::VsyncWaiterIOS& vsync_waiter_ios =
+      static_cast<const flutter::VsyncWaiterIOS&>(_shell->GetVsyncWaiter());
   std::vector<std::unique_ptr<flutter::Display>> displays;
-  displays.push_back(std::make_unique<flutter::Display>(refresh_rate));
+  displays.push_back(std::make_unique<flutter::VariableRefreshRateDisplay>(vsync_waiter_ios));
   _shell->OnDisplayUpdates(flutter::DisplayUpdateType::kStartup, std::move(displays));
 }
 

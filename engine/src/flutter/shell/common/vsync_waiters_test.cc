@@ -64,5 +64,16 @@ void ConstantFiringVsyncWaiter::AwaitVSync() {
   });
 }
 
+TestRefreshRateReporter::TestRefreshRateReporter(double refresh_rate)
+    : refresh_rate_(refresh_rate) {}
+
+void TestRefreshRateReporter::UpdateRefreshRate(double refresh_rate) {
+  refresh_rate_ = refresh_rate;
+}
+
+double TestRefreshRateReporter::GetRefreshRate() const {
+  return refresh_rate_;
+}
+
 }  // namespace testing
 }  // namespace flutter

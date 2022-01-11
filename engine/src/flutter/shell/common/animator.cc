@@ -206,6 +206,10 @@ void Animator::Render(std::unique_ptr<flutter::LayerTree> layer_tree) {
                            std::move(frame_timings_recorder_));
 }
 
+const VsyncWaiter& Animator::GetVsyncWaiter() const {
+  return *waiter_.get();
+}
+
 bool Animator::CanReuseLastLayerTree() {
   return !regenerate_layer_tree_;
 }

@@ -903,6 +903,8 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
     return runtime_controller_.get();
   }
 
+  const VsyncWaiter& GetVsyncWaiter() const;
+
  private:
   // |RuntimeDelegate|
   std::string DefaultRouteName() override;
