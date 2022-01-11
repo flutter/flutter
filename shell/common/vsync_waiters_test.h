@@ -56,6 +56,18 @@ class ConstantFiringVsyncWaiter : public VsyncWaiter {
   void AwaitVSync() override;
 };
 
+class TestRefreshRateReporter final : public VariableRefreshRateReporter {
+ public:
+  explicit TestRefreshRateReporter(double refresh_rate);
+  void UpdateRefreshRate(double refresh_rate);
+
+  // |RefreshRateReporter|
+  double GetRefreshRate() const override;
+
+ private:
+  double refresh_rate_;
+};
+
 }  // namespace testing
 }  // namespace flutter
 
