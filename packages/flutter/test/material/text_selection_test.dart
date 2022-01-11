@@ -613,7 +613,7 @@ void main() {
       expect(cutOffset.dy + 25, equals(textFieldOffset.dy));
     },
       skip: isBrowser, // [intended] We do not use Flutter-rendered context menu on the Web.
-      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
+      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS }),
     );
   });
 
