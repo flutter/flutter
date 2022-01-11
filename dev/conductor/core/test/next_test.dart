@@ -25,7 +25,6 @@ void main() {
   const String remoteUrl = 'https://github.com/org/repo.git';
   const String revision1 = 'd3af60d18e01fcb36e0c0fa06c8502e4935ed095';
   const String revision2 = 'f99555c1e1392bf2a8135056b9446680c2af4ddf';
-  const String revision3 = '98a5ca242b9d270ce000b26309b8a3cdc9c89df5';
   const String revision4 = '280e23318a0d8341415c66aa32581352a421d974';
   const String releaseVersion = '1.2.0-3.0.pre';
   const String releaseChannel = 'beta';
