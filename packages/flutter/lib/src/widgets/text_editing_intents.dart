@@ -22,8 +22,6 @@ abstract class DirectionalTextEditingIntent extends Intent {
   /// Creates a [DirectionalTextEditingIntent].
   const DirectionalTextEditingIntent(
     this.forward,
-    // TODO(justinmc): Any way to put this only on the relevant intent classes?
-    [this.continuesAtWrap = false]
   );
 
   /// Whether the input field, if applicable, should perform the text editing
@@ -33,14 +31,6 @@ abstract class DirectionalTextEditingIntent extends Intent {
   /// uses the logical order of characters in the string to determind the
   /// direction, and is not affected by the writing direction of the text.
   final bool forward;
-
-  /// Whether or not to continue to the next line at a wordwrap.
-  ///
-  /// If true, when an [Intent] to go to the beginning/end of a wordwrapped line
-  /// is received and the selection is already at the beginning/end of the line,
-  /// then the selection will be moved to the next/previous line.  If false, the
-  /// selection will remain at the wordwrap.
-  final bool continuesAtWrap;
 }
 
 /// Deletes the character before or after the caret location, based on whether
@@ -79,10 +69,9 @@ abstract class DirectionalCaretMovementIntent extends DirectionalTextEditingInte
     this.collapseSelection,
     [
       this.collapseAtReversal = false,
-      final bool continuesAtWrap = false,
     ]
   ) : assert(!collapseSelection || !collapseAtReversal),
-      super(forward, continuesAtWrap);
+      super(forward);
 
   /// Whether this [Intent] should make the selection collapsed (so it becomes a
   /// caret), after the movement.
@@ -180,9 +169,17 @@ class ExtendSelectionToLineBreakIntent extends DirectionalCaretMovementIntent {
     required bool forward,
     required bool collapseSelection,
     bool collapseAtReversal = false,
-    bool continuesAtWrap = false,
+    this.continuesAtWrap = false,
   }) : assert(!collapseSelection || !collapseAtReversal),
-       super(forward, collapseSelection, collapseAtReversal, continuesAtWrap);
+       super(forward, collapseSelection, collapseAtReversal);
+
+  /// Whether or not to continue to the next line at a wordwrap.
+  ///
+  /// If true, when an [Intent] to go to the beginning/end of a wordwrapped line
+  /// is received and the selection is already at the beginning/end of the line,
+  /// then the selection will be moved to the next/previous line.  If false, the
+  /// selection will remain at the wordwrap.
+  final bool continuesAtWrap;
 }
 
 /// Extends, or moves the current selection from the current

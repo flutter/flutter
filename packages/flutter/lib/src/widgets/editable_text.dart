@@ -3032,7 +3032,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     return _CollapsedSelectionBoundary(mixedBoundary, intent.forward);
   }
 
-  _TextBoundary _linebreak(DirectionalTextEditingIntent intent) {
+  _TextBoundary _extendingLinebreak(ExtendSelectionToLineBreakIntent intent) {
+    return _linebreak(intent, intent.continuesAtWrap);
+  }
+
+  _TextBoundary _linebreak(DirectionalTextEditingIntent intent, [bool continuesAtWrap = false]) {
     final _TextBoundary atomicTextBoundary;
     final _TextBoundary boundary;
 
@@ -3042,7 +3046,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     } else {
       final TextEditingValue textEditingValue = _textEditingValueforTextLayoutMetrics;
       atomicTextBoundary = _CharacterBoundary(textEditingValue);
-      boundary = _LineBreak(renderEditable, textEditingValue, intent.continuesAtWrap);
+      boundary = _LineBreak(renderEditable, textEditingValue, continuesAtWrap);
     }
 
     // The _MixedBoundary is to make sure we don't leave invalid code units in
@@ -3128,7 +3132,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     // Extend/Move Selection
     ExtendSelectionByCharacterIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionByCharacterIntent>(this, false, _characterBoundary,)),
     ExtendSelectionToNextWordBoundaryIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionToNextWordBoundaryIntent>(this, true, _nextWordBoundary)),
-    ExtendSelectionToLineBreakIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionToLineBreakIntent>(this, true, _linebreak)),
+    ExtendSelectionToLineBreakIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionToLineBreakIntent>(this, true, _extendingLinebreak)),
     ExpandSelectionToLineBreakIntent: _makeOverridable(CallbackAction<ExpandSelectionToLineBreakIntent>(onInvoke: _expandSelection)),
     ExtendSelectionVerticallyToAdjacentLineIntent: _makeOverridable(_adjacentLineAction),
     ExtendSelectionToDocumentBoundaryIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionToDocumentBoundaryIntent>(this, true, _documentBoundary)),
