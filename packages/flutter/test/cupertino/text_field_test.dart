@@ -2368,7 +2368,7 @@ void main() {
     );
 
     final RenderEditable renderEditable = tester.renderObject<RenderEditable>(
-      find.byElementPredicate((Element element) => element.renderObject is RenderEditable),
+      find.byElementPredicate((Element element) => element.renderObject is RenderEditable).last,
     );
 
     List<TextSelectionPoint> lastCharEndpoint = renderEditable.getEndpointsForSelection(
@@ -3166,7 +3166,7 @@ void main() {
 
       expect(
         tester.renderObject<RenderEditable>(
-          find.byElementPredicate((Element element) => element.renderObject is RenderEditable),
+          find.byElementPredicate((Element element) => element.renderObject is RenderEditable).last,
         ).text!.style!.color,
         isSameColorAs(CupertinoColors.white),
       );
