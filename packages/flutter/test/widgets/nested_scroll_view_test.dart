@@ -2491,6 +2491,68 @@ void main() {
     await tester.fling(find.text('Item 25'), const Offset(0.0, -50.0), 4000.0);
     await tester.pumpAndSettle();
   });
+
+  testWidgets('NestedScrollViewCoordinator.pointerScroll dispatches correct scroll notifications', (WidgetTester tester) async {
+    int scrollEnded = 0;
+    int scrollStarted = 0;
+    bool isScrolled = false;
+
+    await tester.pumpWidget(MaterialApp(
+      home: NotificationListener<ScrollNotification>(
+        onNotification: (ScrollNotification notification) {
+          if (notification is ScrollStartNotification) {
+            scrollStarted += 1;
+          } else if (notification is ScrollEndNotification) {
+            scrollEnded += 1;
+          }
+          return false;
+        },
+        child: Scaffold(
+          body: NestedScrollView(
+            headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+              isScrolled = innerBoxIsScrolled;
+              return <Widget>[
+                const SliverAppBar(
+                  expandedHeight: 250.0,
+                ),
+              ];
+            },
+            body: CustomScrollView(
+              physics: const BouncingScrollPhysics(),
+              slivers: <Widget>[
+                SliverPadding(
+                  padding: const EdgeInsets.all(8.0),
+                  sliver: SliverFixedExtentList(
+                    itemExtent: 48.0,
+                    delegate: SliverChildBuilderDelegate(
+                          (BuildContext context, int index) {
+                        return ListTile(
+                          title: Text('Item $index'),
+                        );
+                      },
+                      childCount: 30,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    final Offset scrollEventLocation = tester.getCenter(find.byType(NestedScrollView));
+    final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+    // Create a hover event so that |testPointer| has a location when generating the scroll.
+    testPointer.hover(scrollEventLocation);
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 300.0)));
+    await tester.pumpAndSettle();
+
+    expect(isScrolled, isTrue);
+    // There should have been a notification for each nested position (2).
+    expect(scrollStarted, 2);
+    expect(scrollEnded, 2);
+  });
 }
 
 class TestHeader extends SliverPersistentHeaderDelegate {
