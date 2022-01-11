@@ -13,6 +13,9 @@ REM --------------------------------------------------------------------------
 
 SETLOCAL ENABLEDELAYEDEXPANSION
 
+REM To debug the tool, you can uncomment the following line to enable debug mode:
+REM SET FLUTTER_TOOL_ARGS="--enable-asserts %FLUTTER_TOOL_ARGS%"
+
 FOR %%i IN ("%~dp0..") DO SET FLUTTER_ROOT=%%~fi
 
 REM If available, add location of bundled mingit to PATH
@@ -39,9 +42,6 @@ SET cache_dir=%FLUTTER_ROOT%\bin\cache
 SET snapshot_path=%cache_dir%\flutter_tools.snapshot
 SET dart_sdk_path=%cache_dir%\dart-sdk
 SET dart=%dart_sdk_path%\bin\dart.exe
-
-REM To debug the tool, you can uncomment the following lines to enable checked mode and set an observatory port:
-REM SET FLUTTER_TOOL_ARGS="--enable-asserts %FLUTTER_TOOL_ARGS%"
 
 REM Chaining the call to 'dart' and 'exit' with an ampersand ensures that
 REM Windows reads both commands into memory once before executing them. This

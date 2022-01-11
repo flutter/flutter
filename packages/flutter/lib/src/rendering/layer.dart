@@ -7,6 +7,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'debug.dart';
@@ -1763,11 +1764,16 @@ class OpacityLayer extends OffsetLayer {
   @override
   void addToScene(ui.SceneBuilder builder) {
     assert(alpha != null);
-    bool enabled = firstChild != null;  // don't add this layer if there's no child
+
+    // Don't add this layer if there's no child.
+    bool enabled = firstChild != null;
     if (!enabled) {
+      // Ensure the engineLayer is disposed.
+      engineLayer = null;
       // TODO(dnfield): Remove this if/when we can fix https://github.com/flutter/flutter/issues/90004
       return;
     }
+
     assert(() {
       enabled = enabled && !debugDisableOpacityLayers;
       return true;
@@ -2105,6 +2111,55 @@ class PhysicalModelLayer extends ContainerLayer {
 class LayerLink {
   LeaderLayer? _leader;
 
+  void _registerLeader(LeaderLayer leader) {
+    assert(_leader != leader);
+    assert((){
+      if (_leader != null) {
+        _debugPreviousLeaders ??= <LeaderLayer>{};
+        _debugPreviousLeaders!.add(_leader!);
+        _debugScheduleLeadersCleanUpCheck();
+      }
+      return true;
+    }());
+    _leader = leader;
+  }
+
+  void _unregisterLeader(LeaderLayer leader) {
+    assert(_leader != null);
+    if (_leader == leader) {
+      _leader = null;
+    } else {
+      assert((){
+        _debugPreviousLeaders!.remove(leader);
+        return true;
+      }());
+    }
+  }
+
+  /// Stores the previous leaders that were replaced by the current [_leader]
+  /// in the current frame.
+  ///
+  /// These leaders need to give up their leaderships of this link by the end of
+  /// the current frame.
+  Set<LeaderLayer>? _debugPreviousLeaders;
+  bool _debugLeaderCheckScheduled = false;
+
+  /// Schedules the check as post frame callback to make sure the
+  /// [_debugPreviousLeaders] is empty.
+  void _debugScheduleLeadersCleanUpCheck() {
+    assert(_debugPreviousLeaders != null);
+    assert(() {
+      if (_debugLeaderCheckScheduled)
+        return true;
+      _debugLeaderCheckScheduled = true;
+      SchedulerBinding.instance!.addPostFrameCallback((Duration timeStamp) {
+        _debugLeaderCheckScheduled = false;
+        assert(_debugPreviousLeaders!.isEmpty);
+      });
+      return true;
+    }());
+  }
+
   int _connectedFollowers = 0;
 
   /// Whether a [LeaderLayer] is currently connected to this link.
@@ -2197,7 +2252,10 @@ class LeaderLayer extends ContainerLayer {
     if (_link == value) {
       return;
     }
-    _link._leader = null;
+    if (attached) {
+      _link._unregisterLeader(this);
+      value._registerLeader(this);
+    }
     _link = value;
   }
 
@@ -2228,16 +2286,14 @@ class LeaderLayer extends ContainerLayer {
   @override
   void attach(Object owner) {
     super.attach(owner);
-    assert(link._leader == null);
-    _lastOffset = null;
-    link._leader = this;
+    assert(_debugSetLastOffset(null));
+    _link._registerLeader(this);
   }
 
   @override
   void detach() {
-    assert(link._leader == this);
-    link._leader = null;
-    _lastOffset = null;
+    assert(_debugSetLastOffset(null));
+    _link._unregisterLeader(this);
     super.detach();
   }
 
@@ -2246,7 +2302,17 @@ class LeaderLayer extends ContainerLayer {
   /// This is reset to null when the layer is attached or detached, to help
   /// catch cases where the follower layer ends up before the leader layer, but
   /// not every case can be detected.
-  Offset? _lastOffset;
+  Offset? _debugLastOffset;
+
+  bool _debugSetLastOffset(Offset? offset) {
+    bool result = false;
+    assert(() {
+      _debugLastOffset = offset;
+      result = true;
+      return true;
+    }());
+    return result;
+  }
 
   @override
   bool findAnnotations<S extends Object>(AnnotationResult<S> result, Offset localPosition, { required bool onlyFirst }) {
@@ -2256,14 +2322,14 @@ class LeaderLayer extends ContainerLayer {
   @override
   void addToScene(ui.SceneBuilder builder) {
     assert(offset != null);
-    _lastOffset = offset;
-    if (_lastOffset != Offset.zero)
+    assert(_debugSetLastOffset(offset));
+    if (offset != Offset.zero)
       engineLayer = builder.pushTransform(
-        Matrix4.translationValues(_lastOffset!.dx, _lastOffset!.dy, 0.0).storage,
+        Matrix4.translationValues(offset.dx, offset.dy, 0.0).storage,
         oldLayer: _engineLayer as ui.TransformEngineLayer?,
       );
     addChildrenToScene(builder);
-    if (_lastOffset != Offset.zero)
+    if (offset != Offset.zero)
       builder.pop();
   }
 
@@ -2276,9 +2342,8 @@ class LeaderLayer extends ContainerLayer {
   /// children.
   @override
   void applyTransform(Layer? child, Matrix4 transform) {
-    assert(_lastOffset != null);
-    if (_lastOffset != Offset.zero)
-      transform.translate(_lastOffset!.dx, _lastOffset!.dy);
+    if (offset != Offset.zero)
+      transform.translate(offset.dx, offset.dy);
   }
 
   @override
@@ -2494,7 +2559,7 @@ class FollowerLayer extends ContainerLayer {
       'Linked LeaderLayer anchor is not in the same layer tree as the FollowerLayer.',
     );
     assert(
-      leader._lastOffset != null,
+      leader._debugLastOffset != null,
       'LeaderLayer anchor must come before FollowerLayer in paint order, but the reverse was true.',
     );
 
