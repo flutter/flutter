@@ -144,18 +144,39 @@ class ExtendSelectionToNextWordBoundaryOrCaretLocationIntent extends Directional
   }) : super(forward);
 }
 
-/// Expands, or moves the current selection from the current
+/// Expands the current selection to the closest line break in the direction
+/// given by [forward].
+///
+/// Either the base or extent can move, whichever is closer to the line break.
+/// The selection will never shrink.
+///
+/// See also:
+///
+///   [ExtendSelectionToLineBreakIntent], which is similar but always moves the
+///   extent.
+class ExpandSelectionToLineBreakIntent extends DirectionalCaretMovementIntent {
+  /// Creates an [ExpandSelectionToLineBreakIntent].
+  const ExpandSelectionToLineBreakIntent({
+    required bool forward,
+  }) : super(forward, false, false, true);
+}
+
+/// Extends, or moves the current selection from the current
 /// [TextSelection.extent] position to the closest line break in the direction
 /// given by [forward].
+///
+/// See also:
+///
+///   [ExpandSelectionToLineBreakIntent], which is similar but always increases
+///   the size of the selection.
 class ExtendSelectionToLineBreakIntent extends DirectionalCaretMovementIntent {
   /// Creates an [ExtendSelectionToLineBreakIntent].
   const ExtendSelectionToLineBreakIntent({
     required bool forward,
     required bool collapseSelection,
     bool collapseAtReversal = false,
-    bool expand = false,
   }) : assert(!collapseSelection || !collapseAtReversal),
-       super(forward, collapseSelection, collapseAtReversal, expand);
+       super(forward, collapseSelection, collapseAtReversal);
 }
 
 /// Expands, or moves the current selection from the current
