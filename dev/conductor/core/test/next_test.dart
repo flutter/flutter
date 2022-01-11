@@ -82,12 +82,7 @@ void main() {
 
     group('APPLY_ENGINE_CHERRYPICKS to CODESIGN_ENGINE_BINARIES', () {
       test('does not prompt user and updates currentPhase if there are no engine cherrypicks', () async {
-        final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-          const FakeCommand(command: <String>['git', 'fetch', 'upstream']),
-          const FakeCommand(
-            command: <String>['git', 'checkout', workingBranch],
-          ),
-        ]);
+        final FakeProcessManager processManager = FakeProcessManager.empty();
         final FakePlatform platform = FakePlatform(
           environment: <String, String>{
             'HOME': <String>['path', 'to', 'home'].join(localPathSeparator),
@@ -145,24 +140,7 @@ void main() {
         final File ciYaml = fileSystem.file('$checkoutsParentDirectory/engine/.ci.yaml')
             ..createSync(recursive: true);
         _initializeCiYamlFile(ciYaml);
-        final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-          const FakeCommand(command: <String>['git', 'fetch', 'upstream']),
-          const FakeCommand(command: <String>['git', 'checkout', workingBranch]),
-          const FakeCommand(
-            command: <String>['git', 'status', '--porcelain'],
-            stdout: 'MM blah',
-          ),
-          const FakeCommand(command: <String>['git', 'add', '--all']),
-          const FakeCommand(command: <String>[
-            'git',
-            'commit',
-            "--message='add branch $candidateBranch to enabled_branches in .ci.yaml'",
-          ]),
-          const FakeCommand(
-            command: <String>['git', 'rev-parse', 'HEAD'],
-            stdout: revision2,
-          ),
-        ]);
+        final FakeProcessManager processManager = FakeProcessManager.empty();
         final FakePlatform platform = FakePlatform(
           environment: <String, String>{
             'HOME': <String>['path', 'to', 'home'].join(localPathSeparator),
@@ -227,16 +205,6 @@ void main() {
                   ..createSync(recursive: true);
               _initializeCiYamlFile(file);
             },
-          ),
-          const FakeCommand(
-            command: <String>['git', 'status', '--porcelain'],
-            stdout: 'MM .ci.yaml',
-          ),
-          const FakeCommand(command: <String>['git', 'add', '--all']),
-          const FakeCommand(command: <String>['git', 'commit', "--message='add branch $candidateBranch to enabled_branches in .ci.yaml'"]),
-          const FakeCommand(
-            command: <String>['git', 'rev-parse', 'HEAD'],
-            stdout: revision2,
           ),
           const FakeCommand(command: <String>['git', 'push', 'mirror', 'HEAD:refs/heads/$workingBranch']),
         ]);
@@ -355,6 +323,7 @@ void main() {
           fileSystem.file(stateFile),
         );
 
+        expect(processManager, hasNoRemainingExpectations);
         expect(stdio.stdout, contains('Has CI passed for the engine PR and binaries been codesigned? (y/n) '));
         expect(finalState.currentPhase, ReleasePhase.CODESIGN_ENGINE_BINARIES);
         expect(stdio.error.contains('Aborting command.'), true);
@@ -392,6 +361,7 @@ void main() {
           fileSystem.file(stateFile),
         );
 
+        expect(processManager, hasNoRemainingExpectations);
         expect(stdio.stdout, contains('Has CI passed for the engine PR and binaries been codesigned? (y/n) '));
         expect(finalState.currentPhase, ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS);
       });
@@ -526,20 +496,6 @@ void main() {
           ),
           const FakeCommand(
             command: <String>['git', 'status', '--porcelain'],
-            stdout: 'MM /path/to/.ci.yaml',
-          ),
-          const FakeCommand(command: <String>['git', 'add', '--all']),
-          const FakeCommand(command: <String>[
-            'git',
-            'commit',
-            "--message='add branch $candidateBranch to enabled_branches in .ci.yaml'",
-          ]),
-          const FakeCommand(
-            command: <String>['git', 'rev-parse', 'HEAD'],
-            stdout: revision3,
-          ),
-          const FakeCommand(
-            command: <String>['git', 'status', '--porcelain'],
             stdout: 'MM /path/to/engine.version',
           ),
           const FakeCommand(command: <String>['git', 'add', '--all']),
@@ -616,20 +572,6 @@ void main() {
           const FakeCommand(command: <String>['git', 'checkout', workingBranch]),
           const FakeCommand(
             command: <String>['git', 'status', '--porcelain'],
-            stdout: 'MM path/to/.ci.yaml',
-          ),
-          const FakeCommand(command: <String>['git', 'add', '--all']),
-          const FakeCommand(command: <String>[
-            'git',
-            'commit',
-            "--message='add branch $candidateBranch to enabled_branches in .ci.yaml'",
-          ]),
-          const FakeCommand(
-            command: <String>['git', 'rev-parse', 'HEAD'],
-            stdout: revision3,
-          ),
-          const FakeCommand(
-            command: <String>['git', 'status', '--porcelain'],
             stdout: 'MM path/to/engine.version',
           ),
           const FakeCommand(command: <String>['git', 'add', '--all']),
@@ -695,20 +637,6 @@ void main() {
           const FakeCommand(
             command: <String>['git', 'status', '--porcelain'],
             stdout: 'MM path/to/.ci.yaml',
-          ),
-          const FakeCommand(command: <String>['git', 'add', '--all']),
-          const FakeCommand(command: <String>[
-            'git',
-            'commit',
-            "--message='add branch $candidateBranch to enabled_branches in .ci.yaml'",
-          ]),
-          const FakeCommand(
-            command: <String>['git', 'rev-parse', 'HEAD'],
-            stdout: revision3,
-          ),
-          const FakeCommand(
-            command: <String>['git', 'status', '--porcelain'],
-            stdout: 'MM path/to/engine.version',
           ),
           const FakeCommand(command: <String>['git', 'add', '--all']),
           const FakeCommand(command: <String>[
