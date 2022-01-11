@@ -598,6 +598,49 @@ void main() {
       );
     }, skip: isBrowser); // [intended] This is an iOS-specific test.
 
+    testWidgets('repeat events', (WidgetTester tester) async {
+      expect(RawKeyboard.instance.keysPressed, isEmpty);
+      late RawKeyEvent receivedEvent;
+      RawKeyboard.instance.keyEventHandler = (RawKeyEvent event) {
+        receivedEvent = event;
+        return true;
+      };
+
+      // Dispatch a down event.
+      final Map<String, dynamic> downData = KeyEventSimulator.getKeyData(
+        LogicalKeyboardKey.keyA,
+        platform: 'windows',
+      );
+      await ServicesBinding.instance?.defaultBinaryMessenger.handlePlatformMessage(
+        SystemChannels.keyEvent.name,
+        SystemChannels.keyEvent.codec.encodeMessage(downData),
+        (ByteData? data) {},
+      );
+      expect(receivedEvent.repeat, false);
+
+      // Dispatch another down event, which should be recognized as a repeat.
+      await ServicesBinding.instance?.defaultBinaryMessenger.handlePlatformMessage(
+        SystemChannels.keyEvent.name,
+        SystemChannels.keyEvent.codec.encodeMessage(downData),
+        (ByteData? data) {},
+      );
+      expect(receivedEvent.repeat, true);
+
+      // Dispatch an up event.
+      await ServicesBinding.instance?.defaultBinaryMessenger.handlePlatformMessage(
+        SystemChannels.keyEvent.name,
+        SystemChannels.keyEvent.codec.encodeMessage(KeyEventSimulator.getKeyData(
+          LogicalKeyboardKey.keyA,
+          isDown: false,
+          platform: 'windows',
+        )),
+        (ByteData? data) {},
+      );
+      expect(receivedEvent.repeat, false);
+
+      RawKeyboard.instance.keyEventHandler = null;
+    }, skip: isBrowser); // [intended] This is a Windows-specific test.
+
     testWidgets('sided modifiers without a side set return all sides on Windows', (WidgetTester tester) async {
       expect(RawKeyboard.instance.keysPressed, isEmpty);
       // Generate the data for a regular key down event.

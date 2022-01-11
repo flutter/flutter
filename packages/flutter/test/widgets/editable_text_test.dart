@@ -2143,8 +2143,7 @@ void main() {
       // Show prompt rect when told to.
       verifyAutocorrectionRectVisibility(expectVisible: true);
 
-      // Text changed, prompt rect goes away.
-      controller.text = '12345';
+      await tester.enterText(find.byType(EditableText), '12345');
       await tester.pump();
       verifyAutocorrectionRectVisibility(expectVisible: false);
 
@@ -2155,7 +2154,8 @@ void main() {
 
       // Unfocus, prompt rect should go away.
       focusNode.unfocus();
-      await tester.pump();
+      await tester.pumpAndSettle();
+
       verifyAutocorrectionRectVisibility(expectVisible: false);
     },
   );
@@ -6585,6 +6585,7 @@ void main() {
       'TextInput.setStyle',
       'TextInput.setEditingState',
       'TextInput.show',
+      'TextInput.requestAutofill',
       'TextInput.setEditingState',
       'TextInput.show',
       'TextInput.setCaretRect',
@@ -6648,6 +6649,7 @@ void main() {
         'TextInput.setStyle',
         'TextInput.setEditingState',
         'TextInput.show',
+        'TextInput.requestAutofill',
         'TextInput.setCaretRect',
       ];
       expect(
@@ -6690,6 +6692,7 @@ void main() {
       'TextInput.setStyle',
       'TextInput.setEditingState',
       'TextInput.show',
+      'TextInput.requestAutofill',
       'TextInput.setEditingState',
       'TextInput.show',
       'TextInput.setCaretRect',
@@ -6740,6 +6743,7 @@ void main() {
       'TextInput.setStyle',
       'TextInput.setEditingState',
       'TextInput.show',
+      'TextInput.requestAutofill',
       'TextInput.setEditingState',
       'TextInput.show',
       'TextInput.setCaretRect',
@@ -8973,6 +8977,53 @@ void main() {
     textSelectionDelegate.copySelection(SelectionChangedCause.toolbar);
     await tester.pump();
     expect(scrollController.offset.roundToDouble(), 0.0);
+  });
+
+  testWidgets('Autofill enabled by default', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          autofocus: true,
+          controller: TextEditingController(text: 'A'),
+          focusNode: focusNode,
+          style: textStyle,
+          cursorColor: Colors.blue,
+          backgroundCursorColor: Colors.grey,
+          cursorOpacityAnimates: true,
+        ),
+      ),
+    );
+
+    assert(focusNode.hasFocus);
+    expect(
+      tester.testTextInput.log,
+      contains(matchesMethodCall('TextInput.requestAutofill')),
+    );
+  });
+
+  testWidgets('Autofill can be disabled', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          autofocus: true,
+          controller: TextEditingController(text: 'A'),
+          focusNode: focusNode,
+          style: textStyle,
+          cursorColor: Colors.blue,
+          backgroundCursorColor: Colors.grey,
+          cursorOpacityAnimates: true,
+          autofillHints: null,
+        ),
+      ),
+    );
+
+    assert(focusNode.hasFocus);
+    expect(
+      tester.testTextInput.log,
+      isNot(contains(matchesMethodCall('TextInput.requestAutofill'))),
+    );
   });
 }
 

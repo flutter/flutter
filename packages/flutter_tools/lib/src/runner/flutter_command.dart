@@ -1295,7 +1295,7 @@ abstract class FlutterCommand extends Command<void> {
 
       await generateLocalizationsSyntheticPackage(
         environment: environment,
-        buildSystem: globals.buildSystem!,
+        buildSystem: globals.buildSystem,
       );
 
       await pub.get(
@@ -1473,11 +1473,14 @@ abstract class FlutterCommand extends Command<void> {
 
   ApplicationPackageFactory? applicationPackages;
 
-  /// Gets the parsed command-line option named [name] as `bool`.
+  /// Gets the parsed command-line option named [name] as a `bool`.
   bool boolArg(String name) => argResults?[name] as bool? ?? false;
 
-  /// Gets the parsed command-line option named [name] as `String`.
+  /// Gets the parsed command-line option named [name] as a `String`.
   String? stringArg(String name) => argResults?[name] as String?;
+
+  /// Gets the parsed command-line option named [name] as an `int`.
+  int? intArg(String name) => argResults?[name] as int?;
 
   /// Gets the parsed command-line option named [name] as `List<String>`.
   List<String> stringsArg(String name) => argResults?[name] as List<String>? ?? <String>[];

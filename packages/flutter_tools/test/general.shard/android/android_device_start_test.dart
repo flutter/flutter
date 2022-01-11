@@ -68,7 +68,7 @@ void main() {
       final File apkFile = fileSystem.file('app.apk')..createSync();
       final AndroidApk apk = AndroidApk(
         id: 'FlutterApp',
-        file: apkFile,
+        applicationPackage: apkFile,
         launchActivity: 'FlutterActivity',
         versionCode: 1,
       );
@@ -133,7 +133,7 @@ void main() {
     final File apkFile = fileSystem.file('app.apk')..createSync();
     final AndroidApk apk = AndroidApk(
       id: 'FlutterApp',
-      file: apkFile,
+      applicationPackage: apkFile,
       launchActivity: 'FlutterActivity',
       versionCode: 1,
     );
@@ -171,7 +171,7 @@ void main() {
     final File apkFile = fileSystem.file('app.apk')..createSync();
     final AndroidApk apk = AndroidApk(
       id: 'FlutterApp',
-      file: apkFile,
+      applicationPackage: apkFile,
       launchActivity: 'FlutterActivity',
       versionCode: 1,
     );

@@ -91,6 +91,7 @@ abstract class MaterialInkController {
 /// 1. Clipping: If [clipBehavior] is not [Clip.none], Material clips its widget
 ///    sub-tree to the shape specified by [shape], [type], and [borderRadius].
 ///    By default, [clipBehavior] is [Clip.none] for performance considerations.
+///    See [Ink] for an example of how this affects clipping [Ink] widgets.
 /// 2. Elevation: Material elevates its widget sub-tree on the Z axis by
 ///    [elevation] pixels, and draws the appropriate shadow.
 /// 3. Ink effects: Material shows ink effects implemented by [InkFeature]s

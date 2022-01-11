@@ -164,6 +164,18 @@ void main() {
     expect(followerLayer.debugSubtreeNeedsAddToScene, true);
   });
 
+  test('switching layer link of an attached leader layer should not crash', () {
+    final LayerLink link = LayerLink();
+    final LeaderLayer leaderLayer = LeaderLayer(link: link);
+    final RenderView view = RenderView(configuration: const ViewConfiguration(), window: window);
+    leaderLayer.attach(view);
+    final LayerLink link2 = LayerLink();
+    leaderLayer.link = link2;
+    // This should not crash.
+    leaderLayer.detach();
+    expect(leaderLayer.link, link2);
+  });
+
   test('leader layers are always dirty when connected to follower layer', () {
     final ContainerLayer root = ContainerLayer()..attach(Object());
 
@@ -216,6 +228,36 @@ void main() {
     leaderLayer.debugMarkClean();
     leaderLayer.updateSubtreeNeedsAddToScene();
     expect(leaderLayer.debugSubtreeNeedsAddToScene, false);
+  });
+
+  test('LeaderLayer.applyTransform can be called after retained rendering', () {
+    void expectTransform(RenderObject leader) {
+      final LeaderLayer leaderLayer = leader.debugLayer! as LeaderLayer;
+      final Matrix4 expected = Matrix4.identity()
+        ..translate(leaderLayer.offset.dx, leaderLayer.offset.dy);
+      final Matrix4 transformed = Matrix4.identity();
+      leaderLayer.applyTransform(null, transformed);
+      expect(transformed, expected);
+    }
+
+    final LayerLink link = LayerLink();
+    late RenderLeaderLayer leader;
+    final RenderRepaintBoundary root = RenderRepaintBoundary(
+      child:RenderRepaintBoundary(
+        child: leader = RenderLeaderLayer(link: link),
+      ),
+    );
+    layout(root, phase: EnginePhase.composite);
+
+    expectTransform(leader);
+
+    // Causes a repaint, but the LeaderLayer of RenderLeaderLayer will be added
+    // as retained and LeaderLayer.addChildrenToScene will not be called.
+    root.markNeedsPaint();
+    pumpFrame(phase: EnginePhase.composite);
+
+    // The LeaderLayer.applyTransform call shouldn't crash.
+    expectTransform(leader);
   });
 
   test('depthFirstIterateChildren', () {
@@ -636,6 +678,21 @@ void main() {
     expect(builder.pushedOffset, false);
     expect(builder.addedPicture, true);
     expect(layer.engineLayer, isA<FakeOpacityEngineLayer>());
+  });
+
+  test('OpacityLayer dispose its engineLayer if there are no children', () {
+    final OpacityLayer layer = OpacityLayer(alpha: 128);
+    final FakeSceneBuilder builder = FakeSceneBuilder();
+    layer.addToScene(builder);
+    expect(layer.engineLayer, null);
+
+    layer.append(PictureLayer(Rect.largest)..picture = FakePicture());
+    layer.addToScene(builder);
+    expect(layer.engineLayer, isA<FakeOpacityEngineLayer>());
+
+    layer.removeAllChildren();
+    layer.addToScene(builder);
+    expect(layer.engineLayer, null);
   });
 }
 

@@ -95,37 +95,36 @@ void main() {
       'ts': timeStamp,
     };
 
-    List<Map<String, dynamic>> newGenGC(int count) => List<Map<String, dynamic>>.filled(
-      count,
-      <String, dynamic>{
-        'name': 'CollectNewGeneration',
-        'cat': 'GC',
-        'tid': 19695,
-        'pid': 19650,
-        'ts': 358849612473,
-        'tts': 476761,
-        'ph': 'B',
-        'args': <String, dynamic>{
-          'isolateGroupId': 'isolateGroups/10824099774666259225',
-        },
-      },
-    );
+    List<Map<String, dynamic>> _genGC(String name, int count, int startTime, int timeDiff) {
+      int ts = startTime;
+      bool begin = true;
+      final List<Map<String, dynamic>> ret = <Map<String, dynamic>>[];
+      for (int i = 0; i < count; i++) {
+        ret.add(<String, dynamic>{
+          'name': name,
+          'cat': 'GC',
+          'tid': 19695,
+          'pid': 19650,
+          'ts': ts,
+          'tts': ts,
+          'ph': begin ? 'B' : 'E',
+          'args': <String, dynamic>{
+            'isolateGroupId': 'isolateGroups/10824099774666259225',
+          },
+        });
+        ts = ts + timeDiff;
+        begin = !begin;
+      }
+      return ret;
+    }
 
-    List<Map<String, dynamic>> oldGenGC(int count) => List<Map<String, dynamic>>.filled(
-      count,
-      <String, dynamic>{
-        'name': 'CollectOldGeneration',
-        'cat': 'GC',
-        'tid': 19695,
-        'pid': 19650,
-        'ts': 358849612473,
-        'tts': 476761,
-        'ph': 'B',
-        'args': <String, dynamic>{
-          'isolateGroupId': 'isolateGroups/10824099774666259225',
-        },
-      },
-    );
+    List<Map<String, dynamic>> newGenGC(int count, int startTime, int timeDiff) {
+      return _genGC('CollectNewGeneration', count, startTime, timeDiff);
+    }
+
+    List<Map<String, dynamic>> oldGenGC(int count, int startTime, int timeDiff) {
+      return _genGC('CollectOldGeneration', count, startTime, timeDiff);
+    }
 
     List<Map<String, dynamic>> rasterizeTimeSequenceInMillis(List<int> sequence) {
       final List<Map<String, dynamic>> result = <Map<String, dynamic>>[];
@@ -420,8 +419,8 @@ void main() {
             begin(1000), end(19000),
             begin(19000), end(29000),
             begin(29000), end(49000),
-            ...newGenGC(4),
-            ...oldGenGC(5),
+            ...newGenGC(4, 10, 100),
+            ...oldGenGC(5, 10000, 100),
             frameBegin(1000), frameEnd(18000),
             frameBegin(19000), frameEnd(28000),
             frameBegin(29000), frameEnd(48000),
@@ -467,6 +466,7 @@ void main() {
             '90th_percentile_picture_cache_memory': 0.0,
             '99th_percentile_picture_cache_memory': 0.0,
             'worst_picture_cache_memory': 0.0,
+            'total_ui_gc_time': 0.4,
           },
         );
       });
@@ -526,8 +526,8 @@ void main() {
           lagBegin(1000, 4), lagEnd(2000, 4),
           lagBegin(1200, 12), lagEnd(2400, 12),
           lagBegin(4200, 8), lagEnd(9400, 8),
-          ...newGenGC(4),
-          ...oldGenGC(5),
+          ...newGenGC(4, 10, 100),
+          ...oldGenGC(5, 10000, 100),
           cpuUsage(5000, 20), cpuUsage(5010, 60),
           memoryUsage(6000, 20, 40), memoryUsage(6100, 30, 45),
           platformVsync(7000), vsyncCallback(7500),
@@ -581,6 +581,7 @@ void main() {
           '90th_percentile_picture_cache_memory': 0.0,
           '99th_percentile_picture_cache_memory': 0.0,
           'worst_picture_cache_memory': 0.0,
+          'total_ui_gc_time': 0.4,
         });
       });
     });

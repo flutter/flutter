@@ -2,10 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'package:meta/meta.dart';
-
 import '../base/common.dart';
 import '../build_info.dart';
 import '../cache.dart';
@@ -20,7 +16,7 @@ import 'build.dart';
 /// A command to build a Fuchsia target.
 class BuildFuchsiaCommand extends BuildSubCommand {
   BuildFuchsiaCommand({
-    @required bool verboseHelp,
+    required bool verboseHelp,
   }) : super(verboseHelp: verboseHelp) {
     addTreeShakeIconsFlag();
     usesTargetOption();
@@ -83,9 +79,9 @@ class BuildFuchsiaCommand extends BuildSubCommand {
     await buildFuchsia(
       fuchsiaProject: flutterProject.fuchsia,
       target: targetFile,
-      targetPlatform: getTargetPlatformForName(stringArg('target-platform')),
+      targetPlatform: getTargetPlatformForName(stringArg('target-platform')!),
       buildInfo: buildInfo,
-      runnerPackageSource: stringArg('runner-source'),
+      runnerPackageSource: stringArg('runner-source')!,
     );
     return FlutterCommandResult.success();
   }

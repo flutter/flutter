@@ -76,6 +76,26 @@ void main() {
     expect(log, equals(<String>['tap-down', 'tap-cancel']));
   });
 
+  testWidgets('InkWell only onTapDown enables gestures', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/96030
+    bool downTapped = false;
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: Material(
+        child: Center(
+          child: InkWell(
+            onTapDown: (TapDownDetails details) {
+              downTapped = true;
+            },
+          ),
+        ),
+      ),
+    ));
+
+    await tester.tap(find.byType(InkWell));
+    expect(downTapped, true);
+  });
+
   testWidgets('InkWell invokes activation actions when expected', (WidgetTester tester) async {
     final List<String> log = <String>[];
 
