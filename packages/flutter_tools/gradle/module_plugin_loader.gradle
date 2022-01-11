@@ -35,13 +35,12 @@ if (pluginsFile.exists()) {
     }
 }
 
-String flutterModulePath = project(':flutter').projectDir.parentFile.parentFile.getAbsolutePath()
 gradle.getGradle().projectsLoaded { g ->
     g.rootProject.beforeEvaluate { p ->
         //let the plugin's output generated in flutterModule/build/host/${androidPlugin.name}.
         p.subprojects { sp ->
             if (pluginsNames.contains(sp.name.replace(":", ""))){
-                File androidPluginBuildOutputDir = new File(flutterModulePath + File.separator + "build" + File.separator + "host" + File.separator + sp.name.replace(":", ""));
+                File androidPluginBuildOutputDir = new File(moduleProjectRoot.getAbsolutePath() + File.separator + "build" + File.separator + "host" + File.separator + sp.name.replace(":", ""));
                 if (!androidPluginBuildOutputDir.exists()){
                     //make dir if not exist.
                     androidPluginBuildOutputDir.mkdirs()
