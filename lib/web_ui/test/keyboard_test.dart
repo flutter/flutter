@@ -53,7 +53,7 @@ void testMain() {
 
       html.KeyboardEvent event;
 
-      event = dispatchKeyboardEvent('keyup', key: 'SomeKey', code: 'SomeCode');
+      event = dispatchKeyboardEvent('keyup', key: 'SomeKey', code: 'SomeCode', keyCode: 1);
 
       expect(event.defaultPrevented, isFalse);
       expect(channelReceived, 'flutter/keyevent');
@@ -64,6 +64,7 @@ void testMain() {
         'location': 0,
         'key': 'SomeKey',
         'metaState': 0x0,
+        'keyCode': 1,
       });
 
       Keyboard.instance!.dispose();
@@ -85,7 +86,7 @@ void testMain() {
       html.KeyboardEvent event;
 
       event =
-          dispatchKeyboardEvent('keydown', key: 'SomeKey', code: 'SomeCode');
+          dispatchKeyboardEvent('keydown', key: 'SomeKey', code: 'SomeCode', keyCode: 1);
 
       expect(channelReceived, 'flutter/keyevent');
       expect(dataReceived, <String, dynamic>{
@@ -95,6 +96,7 @@ void testMain() {
         'key': 'SomeKey',
         'location': 0,
         'metaState': 0x0,
+        'keyCode': 1,
       });
       expect(event.defaultPrevented, isFalse);
 
@@ -129,6 +131,7 @@ void testMain() {
         'location': 0,
         //          ctrl
         'metaState': 0x4,
+        'keyCode': 0,
       });
 
       event = dispatchKeyboardEvent(
@@ -148,6 +151,7 @@ void testMain() {
         'location': 0,
         //          shift  alt   meta
         'metaState': 0x1 | 0x2 | 0x8,
+        'keyCode': 0,
       });
 
       Keyboard.instance!.dispose();
@@ -197,6 +201,7 @@ void testMain() {
         'key': 'SomeKey',
         'location': 0,
         'metaState': 0,
+        'keyCode': 0,
       };
       expect(messages, <Map<String, dynamic>>[
         expectedMessage,
@@ -394,6 +399,7 @@ void testMain() {
             'location': 1,
             //           meta
             'metaState': 0x8,
+            'keyCode': 0,
           },
           <String, dynamic>{
             'type': 'keydown',
@@ -403,6 +409,7 @@ void testMain() {
             'location': 1,
             //           alt   meta
             'metaState': 0x2 | 0x8,
+            'keyCode': 0,
           },
           <String, dynamic>{
             'type': 'keydown',
@@ -412,6 +419,7 @@ void testMain() {
             'location': 0,
             //           alt   meta
             'metaState': 0x2 | 0x8,
+            'keyCode': 0,
           },
           <String, dynamic>{
             'type': 'keyup',
@@ -421,6 +429,7 @@ void testMain() {
             'location': 1,
             //           alt
             'metaState': 0x2,
+            'keyCode': 0,
           },
           <String, dynamic>{
             'type': 'keyup',
@@ -429,6 +438,7 @@ void testMain() {
             'code': 'AltLeft',
             'location': 1,
             'metaState': 0x0,
+            'keyCode': 0,
           },
         ]);
         messages.clear();
@@ -446,6 +456,7 @@ void testMain() {
             'code': 'KeyI',
             'location': 0,
             'metaState': 0x0,
+            'keyCode': 0,
           }
         ]);
 
@@ -526,6 +537,7 @@ void testMain() {
             'code': 'KeyI',
             'location': 0,
             'metaState': 0x0,
+            'keyCode': 0,
           });
         }
         messages.clear();
@@ -621,6 +633,7 @@ void testMain() {
           'location': 0,
           //           alt
           'metaState': 0x2,
+          'keyCode': 0,
         }
       ]);
 
@@ -654,6 +667,7 @@ html.KeyboardEvent dispatchKeyboardEvent(
   bool isAltPressed = false,
   bool isControlPressed = false,
   bool isMetaPressed = false,
+  int keyCode = 0,
 }) {
   target ??= html.window;
 
@@ -670,6 +684,7 @@ html.KeyboardEvent dispatchKeyboardEvent(
       'altKey': isAltPressed,
       'ctrlKey': isControlPressed,
       'metaKey': isMetaPressed,
+      'keyCode': keyCode,
       'bubbles': true,
       'cancelable': true,
     }
