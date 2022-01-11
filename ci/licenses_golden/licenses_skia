@@ -1,4 +1,4 @@
-Signature: d46223871840fe9cf94533cc26c5fb23
+Signature: 249f40295c4ee734d2c3b06bc7721f40
 
 UNUSED LICENSES:
 
@@ -2976,8 +2976,6 @@ FILE: ../../../third_party/skia/src/gpu/ops/DashLinePathRenderer.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/DashLinePathRenderer.h
 FILE: ../../../third_party/skia/src/gpu/ops/DrawAtlasOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/DrawAtlasOp.h
-FILE: ../../../third_party/skia/src/gpu/ops/DrawVerticesOp.cpp
-FILE: ../../../third_party/skia/src/gpu/ops/DrawVerticesOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrDrawOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrMeshDrawOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrMeshDrawOp.h
