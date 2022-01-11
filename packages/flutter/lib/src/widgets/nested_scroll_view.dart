@@ -890,6 +890,9 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
   }
 
   void pointerScroll(double delta) {
+    // If an update is made to pointer scrolling here, consider if the same
+    // (or similar) change should be made in
+    // ScrollPositionWithSingleContext.pointerScroll.
     assert(delta != 0.0);
 
     goIdle();
