@@ -3202,6 +3202,7 @@ Future<void> _testLongPressDraggableHapticFeedback({ required WidgetTester teste
     if (methodCall.method == 'HapticFeedback.vibrate') {
       hapticFeedbackCalls++;
     }
+    return null;
   });
 
   await tester.pumpWidget(MaterialApp(

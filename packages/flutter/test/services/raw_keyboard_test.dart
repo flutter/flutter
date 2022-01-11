@@ -598,6 +598,49 @@ void main() {
       );
     }, skip: isBrowser); // [intended] This is an iOS-specific test.
 
+    testWidgets('repeat events', (WidgetTester tester) async {
+      expect(RawKeyboard.instance.keysPressed, isEmpty);
+      late RawKeyEvent receivedEvent;
+      RawKeyboard.instance.keyEventHandler = (RawKeyEvent event) {
+        receivedEvent = event;
+        return true;
+      };
+
+      // Dispatch a down event.
+      final Map<String, dynamic> downData = KeyEventSimulator.getKeyData(
+        LogicalKeyboardKey.keyA,
+        platform: 'windows',
+      );
+      await ServicesBinding.instance?.defaultBinaryMessenger.handlePlatformMessage(
+        SystemChannels.keyEvent.name,
+        SystemChannels.keyEvent.codec.encodeMessage(downData),
+        (ByteData? data) {},
+      );
+      expect(receivedEvent.repeat, false);
+
+      // Dispatch another down event, which should be recognized as a repeat.
+      await ServicesBinding.instance?.defaultBinaryMessenger.handlePlatformMessage(
+        SystemChannels.keyEvent.name,
+        SystemChannels.keyEvent.codec.encodeMessage(downData),
+        (ByteData? data) {},
+      );
+      expect(receivedEvent.repeat, true);
+
+      // Dispatch an up event.
+      await ServicesBinding.instance?.defaultBinaryMessenger.handlePlatformMessage(
+        SystemChannels.keyEvent.name,
+        SystemChannels.keyEvent.codec.encodeMessage(KeyEventSimulator.getKeyData(
+          LogicalKeyboardKey.keyA,
+          isDown: false,
+          platform: 'windows',
+        )),
+        (ByteData? data) {},
+      );
+      expect(receivedEvent.repeat, false);
+
+      RawKeyboard.instance.keyEventHandler = null;
+    }, skip: isBrowser); // [intended] This is a Windows-specific test.
+
     testWidgets('sided modifiers without a side set return all sides on Windows', (WidgetTester tester) async {
       expect(RawKeyboard.instance.keysPressed, isEmpty);
       // Generate the data for a regular key down event.
@@ -1415,20 +1458,34 @@ void main() {
       }
     });
 
-    test('Printable keyboard keys are correctly translated', () {
-      const String unmodifiedCharacter = 'a';
+    test('Lower letter keys are correctly translated', () {
       final RawKeyEvent keyAEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
         'type': 'keydown',
         'keymap': 'macos',
         'keyCode': 0x00000000,
         'characters': 'a',
-        'charactersIgnoringModifiers': unmodifiedCharacter,
+        'charactersIgnoringModifiers': 'a',
         'modifiers': 0x0,
       });
       final RawKeyEventDataMacOs data = keyAEvent.data as RawKeyEventDataMacOs;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.keyA));
       expect(data.logicalKey, equals(LogicalKeyboardKey.keyA));
       expect(data.keyLabel, equals('a'));
+    });
+
+    test('Upper letter keys are correctly translated', () {
+      final RawKeyEvent keyAEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
+        'type': 'keydown',
+        'keymap': 'macos',
+        'keyCode': 0x00000000,
+        'characters': 'A',
+        'charactersIgnoringModifiers': 'A',
+        'modifiers': 0x20002,
+      });
+      final RawKeyEventDataMacOs data = keyAEvent.data as RawKeyEventDataMacOs;
+      expect(data.physicalKey, equals(PhysicalKeyboardKey.keyA));
+      expect(data.logicalKey, equals(LogicalKeyboardKey.keyA));
+      expect(data.keyLabel, equals('A'));
     });
 
     test('Control keyboard keys are correctly translated', () {
@@ -2482,7 +2539,7 @@ void main() {
       }
     });
 
-    test('Printable keyboard keys are correctly translated', () {
+    test('Lower letter keys are correctly translated', () {
       final RawKeyEvent keyAEvent = RawKeyEvent.fromMessage(const <String, Object?>{
         'type': 'keydown',
         'keymap': 'web',
@@ -2495,6 +2552,21 @@ void main() {
       expect(data.physicalKey, equals(PhysicalKeyboardKey.keyA));
       expect(data.logicalKey, equals(LogicalKeyboardKey.keyA));
       expect(data.keyLabel, equals('a'));
+    });
+
+    test('Upper letter keys are correctly translated', () {
+      final RawKeyEvent keyAEvent = RawKeyEvent.fromMessage(const <String, Object?>{
+        'type': 'keydown',
+        'keymap': 'web',
+        'code': 'KeyA',
+        'key': 'A',
+        'location': 0,
+        'metaState': 0x1, // Shift
+      });
+      final RawKeyEventDataWeb data = keyAEvent.data as RawKeyEventDataWeb;
+      expect(data.physicalKey, equals(PhysicalKeyboardKey.keyA));
+      expect(data.logicalKey, equals(LogicalKeyboardKey.keyA));
+      expect(data.keyLabel, equals('A'));
     });
 
     test('Control keyboard keys are correctly translated', () {

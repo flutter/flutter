@@ -1432,7 +1432,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
         case TargetPlatform.linux:
         case TargetPlatform.macOS:
         case TargetPlatform.windows:
-          newPosition = newPosition.clamp(0.0, position.maxScrollExtent);
+          newPosition = newPosition.clamp(position.minScrollExtent, position.maxScrollExtent);
           break;
         case TargetPlatform.iOS:
         case TargetPlatform.android:

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:convert' show utf8;
+import 'dart:ui';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -62,5 +63,31 @@ class FakeTextChannel implements MethodChannel {
     if (hasError) {
       fail('Calls did not match:\n$output');
     }
+  }
+}
+
+class FakeScribbleElement implements ScribbleClient {
+  FakeScribbleElement({required String elementIdentifier, Rect bounds = Rect.zero})
+      : _elementIdentifier = elementIdentifier,
+        _bounds = bounds;
+
+  final String _elementIdentifier;
+  final Rect _bounds;
+  String latestMethodCall = '';
+
+  @override
+  Rect get bounds => _bounds;
+
+  @override
+  String get elementIdentifier => _elementIdentifier;
+
+  @override
+  bool isInScribbleRect(Rect rect) {
+    return _bounds.overlaps(rect);
+  }
+
+  @override
+  void onScribbleFocus(Offset offset) {
+    latestMethodCall = 'onScribbleFocus';
   }
 }

@@ -18,7 +18,9 @@ import 'package:path/path.dart' as path;
 /// adding Flutter to an existing iOS app.
 Future<void> main() async {
   await task(() async {
-    late String simulatorDeviceId;
+    // this variable cannot be `late`, as we reference it in the `finally` block
+    // which may execute before this field has been initialized
+    String? simulatorDeviceId;
     section('Create Flutter module project');
 
     final Directory tempDir = Directory.systemTemp.createTempSync('flutter_module_test.');

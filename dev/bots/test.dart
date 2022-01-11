@@ -430,6 +430,8 @@ Future<void> runForbiddenFromReleaseTests() async {
     '--snapshot', path.join(tempDirectory.path, 'snapshot.arm64-v8a.json'),
     '--package-config', path.join(flutterRoot, 'examples', 'hello_world', '.dart_tool', 'package_config.json'),
     '--forbidden-type', 'package:flutter/src/widgets/widget_inspector.dart::WidgetInspectorService',
+    '--forbidden-type', 'package:flutter/src/widgets/framework.dart::DebugCreator',
+    '--forbidden-type', 'package:flutter/src/foundation/print.dart::debugPrint',
   ];
   await runCommand(
     dart,
@@ -847,30 +849,17 @@ Future<void> _runFrameworkTests() async {
       '--sound-null-safety',
       'test_private.dart',
     ];
-    final Map<String, String> pubEnvironment = <String, String>{
+    final Map<String, String> environment = <String, String>{
       'FLUTTER_ROOT': flutterRoot,
+      if (Directory(pubCache).existsSync())
+        'PUB_CACHE': pubCache,
     };
-    if (Directory(pubCache).existsSync()) {
-      pubEnvironment['PUB_CACHE'] = pubCache;
-    }
-
-    // If an existing env variable exists append to it, but only if
-    // it doesn't appear to already include enable-asserts.
-    String toolsArgs = Platform.environment['FLUTTER_TOOL_ARGS'] ?? '';
-    if (!toolsArgs.contains('--enable-asserts')) {
-      toolsArgs += ' --enable-asserts';
-    }
-    pubEnvironment['FLUTTER_TOOL_ARGS'] = toolsArgs.trim();
-    // The flutter_tool will originally have been snapshotted without asserts.
-    // We need to force it to be regenerated with them enabled.
-    deleteFile(path.join(flutterRoot, 'bin', 'cache', 'flutter_tools.snapshot'));
-    deleteFile(path.join(flutterRoot, 'bin', 'cache', 'flutter_tools.stamp'));
-
+    adjustEnvironmentToEnableFlutterAsserts(environment);
     await runCommand(
       pub,
       args,
       workingDirectory: path.join(flutterRoot, 'packages', 'flutter', 'test_private'),
-      environment: pubEnvironment,
+      environment: environment,
     );
   }
 
@@ -884,6 +873,7 @@ Future<void> _runFrameworkTests() async {
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'android_semantics_testing'), fatalWarnings: false);
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'manual_tests'));
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'vitool'));
+    await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'gen_defaults'));
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'gen_keycodes'));
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'benchmarks', 'test_apps', 'stocks'));
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'), tests: <String>[path.join('test', 'src', 'real_tests')], options: soundNullSafetyOptions);
@@ -1536,6 +1526,10 @@ Future<void> _runWebDebugTest(String target, {
 }) async {
   final String testAppDirectory = path.join(flutterRoot, 'dev', 'integration_tests', 'web');
   bool success = false;
+  final Map<String, String> environment = <String, String>{
+    'FLUTTER_WEB': 'true',
+  };
+  adjustEnvironmentToEnableFlutterAsserts(environment);
   final CommandResult result = await runCommand(
     flutter,
     <String>[
@@ -1565,9 +1559,7 @@ Future<void> _runWebDebugTest(String target, {
       }
     },
     workingDirectory: testAppDirectory,
-    environment: <String, String>{
-      'FLUTTER_WEB': 'true',
-    },
+    environment: environment,
   );
 
   if (success) {
@@ -1655,30 +1647,21 @@ Future<void> _pubRunTest(String workingDirectory, {
       for (final String testPath in testPaths)
         testPath,
   ];
-  final Map<String, String> pubEnvironment = <String, String>{
+  final Map<String, String> environment = <String, String>{
     'FLUTTER_ROOT': flutterRoot,
-    if (includeLocalEngineEnv) ...localEngineEnv,
+    if (includeLocalEngineEnv)
+      ...localEngineEnv,
+    if (Directory(pubCache).existsSync())
+      'PUB_CACHE': pubCache,
   };
-  if (Directory(pubCache).existsSync()) {
-    pubEnvironment['PUB_CACHE'] = pubCache;
-  }
   if (enableFlutterToolAsserts) {
-    // If an existing env variable exists append to it, but only if
-    // it doesn't appear to already include enable-asserts.
-    String toolsArgs = Platform.environment['FLUTTER_TOOL_ARGS'] ?? '';
-    if (!toolsArgs.contains('--enable-asserts'))
-      toolsArgs += ' --enable-asserts';
-    pubEnvironment['FLUTTER_TOOL_ARGS'] = toolsArgs.trim();
-    // The flutter_tool will originally have been snapshotted without asserts.
-    // We need to force it to be regenerated with them enabled.
-    deleteFile(path.join(flutterRoot, 'bin', 'cache', 'flutter_tools.snapshot'));
-    deleteFile(path.join(flutterRoot, 'bin', 'cache', 'flutter_tools.stamp'));
+    adjustEnvironmentToEnableFlutterAsserts(environment);
   }
   if (ensurePrecompiledTool) {
     // We rerun the `flutter` tool here just to make sure that it is compiled
     // before tests run, because the tests might time out if they have to rebuild
     // the tool themselves.
-    await runCommand(flutter, <String>['--version'], environment: pubEnvironment);
+    await runCommand(flutter, <String>['--version'], environment: environment);
   }
   if (useFlutterTestFormatter) {
     final FlutterCompactFormatter formatter = FlutterCompactFormatter();
@@ -1688,7 +1671,7 @@ Future<void> _pubRunTest(String workingDirectory, {
         pub,
         args,
         workingDirectory: workingDirectory,
-        environment: pubEnvironment,
+        environment: environment,
       );
     } finally {
       formatter.finish();
@@ -1699,7 +1682,7 @@ Future<void> _pubRunTest(String workingDirectory, {
       pub,
       args,
       workingDirectory: workingDirectory,
-      environment: pubEnvironment,
+      environment: environment,
       removeLine: useBuildRunner ? (String line) => line.startsWith('[INFO]') : null,
     );
   }
@@ -1798,6 +1781,18 @@ Future<void> _runFlutterTest(String workingDirectory, {
       expectNonZeroExit: expectFailure,
     );
   }
+}
+
+/// This will force the next run of the Flutter tool (if it uses the provided
+/// environment) to have asserts enabled, by setting an environment variable.
+void adjustEnvironmentToEnableFlutterAsserts(Map<String, String> environment) {
+  // If an existing env variable exists append to it, but only if
+  // it doesn't appear to already include enable-asserts.
+  String toolsArgs = Platform.environment['FLUTTER_TOOL_ARGS'] ?? '';
+  if (!toolsArgs.contains('--enable-asserts')) {
+    toolsArgs += ' --enable-asserts';
+  }
+  environment['FLUTTER_TOOL_ARGS'] = toolsArgs.trim();
 }
 
 Map<String, String> _initGradleEnvironment() {

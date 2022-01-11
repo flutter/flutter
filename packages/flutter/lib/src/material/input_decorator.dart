@@ -723,29 +723,31 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
 
   // The returned list is ordered for hit testing.
   @override
-  Iterable<RenderBox> get children sync* {
-    if (icon != null)
-      yield icon!;
-    if (input != null)
-      yield input!;
-    if (prefixIcon != null)
-      yield prefixIcon!;
-    if (suffixIcon != null)
-      yield suffixIcon!;
-    if (prefix != null)
-      yield prefix!;
-    if (suffix != null)
-      yield suffix!;
-    if (label != null)
-      yield label!;
-    if (hint != null)
-      yield hint!;
-    if (helperError != null)
-      yield helperError!;
-    if (counter != null)
-      yield counter!;
-    if (container != null)
-      yield container!;
+  Iterable<RenderBox> get children {
+    return <RenderBox>[
+      if (icon != null)
+        icon!,
+      if (input != null)
+        input!,
+      if (prefixIcon != null)
+        prefixIcon!,
+      if (suffixIcon != null)
+        suffixIcon!,
+      if (prefix != null)
+        prefix!,
+      if (suffix != null)
+        suffix!,
+      if (label != null)
+        label!,
+      if (hint != null)
+        hint!,
+      if (helperError != null)
+        helperError!,
+      if (counter != null)
+        counter!,
+      if (container != null)
+        container!,
+    ];
   }
 
   _Decoration get decoration => _decoration;
@@ -2395,7 +2397,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 /// ** See code in examples/api/lib/material/input_decorator/input_decoration.3.dart **
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold}
+/// {@tool dartpad}
 /// This sample shows how to style a `TextField` with a prefixIcon that changes color
 /// based on the `MaterialState`. The color defaults to gray, be blue while focused
 /// and red if in an error state.
@@ -2403,7 +2405,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 /// ** See code in examples/api/lib/material/input_decorator/input_decoration.material_state.0.dart **
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold}
+/// {@tool dartpad}
 /// This sample shows how to style a `TextField` with a prefixIcon that changes color
 /// based on the `MaterialState` through the use of `ThemeData`. The color defaults
 /// to gray, be blue while focused and red if in an error state.

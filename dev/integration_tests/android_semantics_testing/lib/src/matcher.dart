@@ -25,6 +25,7 @@ Matcher hasAndroidSemantics({
   Rect rect,
   Size size,
   List<AndroidSemanticsAction> actions,
+  List<AndroidSemanticsAction> ignoredActions,
   List<AndroidSemanticsNode> children,
   bool isChecked,
   bool isCheckable,
@@ -44,6 +45,7 @@ Matcher hasAndroidSemantics({
     size: size,
     id: id,
     actions: actions,
+    ignoredActions: ignoredActions,
     isChecked: isChecked,
     isCheckable: isCheckable,
     isEditable: isEditable,
@@ -63,6 +65,7 @@ class _AndroidSemanticsMatcher extends Matcher {
     this.className,
     this.id,
     this.actions,
+    this.ignoredActions,
     this.rect,
     this.size,
     this.isChecked,
@@ -81,6 +84,7 @@ class _AndroidSemanticsMatcher extends Matcher {
   final String contentDescription;
   final int id;
   final List<AndroidSemanticsAction> actions;
+  final List<AndroidSemanticsAction> ignoredActions;
   final Rect rect;
   final Size size;
   final bool isChecked;
@@ -148,9 +152,13 @@ class _AndroidSemanticsMatcher extends Matcher {
       if (!unorderedEquals(actions).matches(itemActions, matchState)) {
         final List<String> actionsString = actions.map<String>((AndroidSemanticsAction action) => action.toString()).toList()..sort();
         final List<String> itemActionsString = itemActions.map<String>((AndroidSemanticsAction action) => action.toString()).toList()..sort();
-        final Set<String> unexpected = itemActionsString.toSet().difference(actionsString.toSet());
-        final Set<String> missing = actionsString.toSet().difference(itemActionsString.toSet());
-        return _failWithMessage('Expected actions: $actionsString\nActual actions: $itemActionsString\nUnexpected: $unexpected\nMissing: $missing', matchState);
+        final Set<AndroidSemanticsAction> unexpected = itemActions.toSet().difference(actions.toSet());
+        final Set<String> unexpectedInString = itemActionsString.toSet().difference(actionsString.toSet());
+        final Set<String> missingInString = actionsString.toSet().difference(itemActionsString.toSet());
+        if (missingInString.isEmpty && ignoredActions != null && unexpected.every(ignoredActions.contains)) {
+          return true;
+        }
+        return _failWithMessage('Expected actions: $actionsString\nActual actions: $itemActionsString\nUnexpected: $unexpectedInString\nMissing: $missingInString', matchState);
       }
     }
     if (isChecked != null && isChecked != item.isChecked)

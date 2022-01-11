@@ -35,7 +35,11 @@ class XCResultGenerator {
   ///
   /// Calls `xcrun xcresulttool get --path <resultPath> --format json`,
   /// then stores the useful information the json into an [XCResult] object.
-  Future<XCResult> generate() async {
+  ///
+  /// A`issueDiscarders` can be passed to discard any issues that matches the description of any [XCResultIssueDiscarder] in the list.
+  Future<XCResult> generate(
+      {List<XCResultIssueDiscarder> issueDiscarders =
+          const <XCResultIssueDiscarder>[]}) async {
     final RunResult result = await processUtils.run(
       <String>[
         ...xcode.xcrunCommand(),
@@ -62,7 +66,7 @@ class XCResultGenerator {
       return XCResult.failed(
           errorMessage: 'xcresult parser: Unrecognized top level json format.');
     }
-    return XCResult(resultJson: resultJson);
+    return XCResult(resultJson: resultJson, issueDiscarders: issueDiscarders);
   }
 }
 
@@ -72,56 +76,13 @@ class XCResultGenerator {
 /// The result contains useful information such as build errors and warnings.
 class XCResult {
   /// Parse the `resultJson` and stores useful informations in the returned `XCResult`.
-  factory XCResult({required Map<String, Object?> resultJson}) {
+  factory XCResult({required Map<String, Object?> resultJson, List<XCResultIssueDiscarder> issueDiscarders = const <XCResultIssueDiscarder>[]}) {
     final List<XCResultIssue> issues = <XCResultIssue>[];
-    final Object? actionsMap = resultJson['actions'];
-    if (actionsMap == null || actionsMap is! Map<String, Object?>) {
-      return XCResult.failed(
-          errorMessage: 'xcresult parser: Failed to parse the actions map.');
-    }
-    final Object? actionValueList = actionsMap['_values'];
-    if (actionValueList == null ||
-        actionValueList is! List<Object?> ||
-        actionValueList.isEmpty) {
-      return XCResult.failed(
-          errorMessage: 'xcresult parser: Failed to parse the actions map.');
-    }
-    final Object? actionMap = actionValueList.first;
-    if (actionMap == null || actionMap is! Map<String, Object?>) {
-      return XCResult.failed(
-          errorMessage:
-              'xcresult parser: Failed to parse the first action map.');
-    }
-    final Object? buildResultMap = actionMap['buildResult'];
-    if (buildResultMap == null || buildResultMap is! Map<String, Object?>) {
-      return XCResult.failed(
-          errorMessage:
-              'xcresult parser: Failed to parse the buildResult map.');
-    }
-    final Object? issuesMap = buildResultMap['issues'];
+
+    final Object? issuesMap = resultJson['issues'];
     if (issuesMap == null || issuesMap is! Map<String, Object?>) {
       return XCResult.failed(
           errorMessage: 'xcresult parser: Failed to parse the issues map.');
-    }
-    List<XCResultIssue> _parseIssuesFromIssueSummariesJson({
-      required XCResultIssueType type,
-      required Map<String, Object?> issueSummariesJson,
-    }) {
-      final List<XCResultIssue> issues = <XCResultIssue>[];
-      final Object? errorsList = issueSummariesJson['_values'];
-      if (errorsList is List<Object?>) {
-        for (final Object? issueJson in errorsList) {
-          if (issueJson == null || issueJson is! Map<String, Object?>) {
-            continue;
-          }
-          final XCResultIssue resultIssue = XCResultIssue(
-            type: type,
-            issueJson: issueJson,
-          );
-          issues.add(resultIssue);
-        }
-      }
-      return issues;
     }
 
     final Object? errorSummaries = issuesMap['errorSummaries'];
@@ -129,6 +90,7 @@ class XCResult {
       issues.addAll(_parseIssuesFromIssueSummariesJson(
         type: XCResultIssueType.error,
         issueSummariesJson: errorSummaries,
+        issueDiscarder: issueDiscarders,
       ));
     }
 
@@ -137,6 +99,7 @@ class XCResult {
       issues.addAll(_parseIssuesFromIssueSummariesJson(
         type: XCResultIssueType.warning,
         issueSummariesJson: warningSummaries,
+        issueDiscarder: issueDiscarders,
       ));
     }
     return XCResult._(issues: issues);
@@ -178,8 +141,9 @@ class XCResultIssue {
     required XCResultIssueType type,
     required Map<String, Object?> issueJson,
   }) {
+    // Parse type.
     final Object? issueSubTypeMap = issueJson['issueType'];
-    String subType = '';
+    String? subType;
     if (issueSubTypeMap is Map<String, Object?>) {
       final Object? subTypeValue = issueSubTypeMap['_value'];
       if (subTypeValue is String) {
@@ -187,7 +151,8 @@ class XCResultIssue {
       }
     }
 
-    String message = '';
+    // Parse message.
+    String? message;
     final Object? messageMap = issueJson['message'];
     if (messageMap is Map<String, Object?>) {
       final Object? messageValue = messageMap['_value'];
@@ -196,10 +161,31 @@ class XCResultIssue {
       }
     }
 
+    final List<String> warnings = <String>[];
+    // Parse url and convert it to a location String.
+    String? location;
+    final Object? documentLocationInCreatingWorkspaceMap =
+        issueJson['documentLocationInCreatingWorkspace'];
+    if (documentLocationInCreatingWorkspaceMap is Map<String, Object?>) {
+      final Object? urlMap = documentLocationInCreatingWorkspaceMap['url'];
+      if (urlMap is Map<String, Object?>) {
+        final Object? urlValue = urlMap['_value'];
+        if (urlValue is String) {
+          location = _convertUrlToLocationString(urlValue);
+          if (location == null) {
+            warnings.add(
+                '(XCResult) The `url` exists but it was failed to be parsed. url: $urlValue');
+          }
+        }
+      }
+    }
+
     return XCResultIssue._(
       type: type,
       subType: subType,
       message: message,
+      location: location,
+      warnings: warnings,
     );
   }
 
@@ -207,6 +193,8 @@ class XCResultIssue {
     required this.type,
     required this.subType,
     required this.message,
+    required this.location,
+    required this.warnings,
   });
 
   /// The type of the issue.
@@ -216,12 +204,21 @@ class XCResultIssue {
   ///
   /// This is a more detailed category about the issue.
   /// The possible values are `Warning`, `Semantic Issue'` etc.
-  final String subType;
+  final String? subType;
 
   /// Human readable message for the issue.
   ///
   /// This can be displayed to user for their information.
-  final String message;
+  final String? message;
+
+  /// The location where the issue occurs.
+  ///
+  /// This is a re-formatted version of the "url" value in the json.
+  /// The format looks like <FileLocation>:<StartingLineNumber>:<StartingColumnNumber>.
+  final String? location;
+
+  /// Warnings when constructing the issue object.
+  final List<String> warnings;
 }
 
 /// The type of an `XCResultIssue`.
@@ -235,4 +232,120 @@ enum XCResultIssueType {
   ///
   /// This is for all the issues under the `errorSummaries` key in the xcresult.
   error,
+}
+
+/// Discards the [XCResultIssue] that matches any of the matchers.
+class XCResultIssueDiscarder {
+  XCResultIssueDiscarder(
+      {this.typeMatcher,
+      this.subTypeMatcher,
+      this.messageMatcher,
+      this.locationMatcher})
+      : assert(typeMatcher != null ||
+            subTypeMatcher != null ||
+            messageMatcher != null ||
+            locationMatcher != null);
+
+  /// The type of the discarder.
+  ///
+  /// A [XCResultIssue] should be discarded if its `type` equals to this.
+  final XCResultIssueType? typeMatcher;
+
+  /// The subType of the discarder.
+  ///
+  /// A [XCResultIssue] should be discarded if its `subType` matches the RegExp.
+  final RegExp? subTypeMatcher;
+
+  /// The message of the discarder.
+  ///
+  /// A [XCResultIssue] should be discarded if its `message` matches the RegExp.
+  final RegExp? messageMatcher;
+
+  /// The location of the discarder.
+  ///
+  /// A [XCResultIssue] should be discarded if its `location` matches the RegExp.
+  final RegExp? locationMatcher;
+}
+
+// A typical location url string looks like file:///foo.swift#CharacterRangeLen=0&EndingColumnNumber=82&EndingLineNumber=7&StartingColumnNumber=82&StartingLineNumber=7.
+//
+// This function converts it to something like: /foo.swift:<StartingLineNumber>:<StartingColumnNumber>.
+String? _convertUrlToLocationString(String url) {
+  final Uri? fragmentLocation = Uri.tryParse(url);
+  if (fragmentLocation == null) {
+    return null;
+  }
+  // Parse the fragment as a query of key-values:
+  final Uri fileLocation = Uri(
+    path: fragmentLocation.path,
+    query: fragmentLocation.fragment,
+  );
+  String startingLineNumber =
+      fileLocation.queryParameters['StartingLineNumber'] ?? '';
+  if (startingLineNumber.isNotEmpty) {
+    startingLineNumber = ':$startingLineNumber';
+  }
+  String startingColumnNumber =
+      fileLocation.queryParameters['StartingColumnNumber'] ?? '';
+  if (startingColumnNumber.isNotEmpty) {
+    startingColumnNumber = ':$startingColumnNumber';
+  }
+  return '${fileLocation.path}$startingLineNumber$startingColumnNumber';
+}
+
+// Determine if an `issue` should be discarded based on the `discarder`.
+bool _shouldDiscardIssue(
+    {required XCResultIssue issue, required XCResultIssueDiscarder discarder}) {
+  if (issue.type == discarder.typeMatcher) {
+    return true;
+  }
+  if (issue.subType != null &&
+      discarder.subTypeMatcher != null &&
+      discarder.subTypeMatcher!.hasMatch(issue.subType!)) {
+    return true;
+  }
+  if (issue.message != null &&
+      discarder.messageMatcher != null &&
+      discarder.messageMatcher!.hasMatch(issue.message!)) {
+    return true;
+  }
+  if (issue.location != null &&
+      discarder.locationMatcher != null &&
+      discarder.locationMatcher!.hasMatch(issue.location!)) {
+    return true;
+  }
+
+  return false;
+}
+
+List<XCResultIssue> _parseIssuesFromIssueSummariesJson({
+  required XCResultIssueType type,
+  required Map<String, Object?> issueSummariesJson,
+  required List<XCResultIssueDiscarder> issueDiscarder,
+}) {
+  final List<XCResultIssue> issues = <XCResultIssue>[];
+  final Object? errorsList = issueSummariesJson['_values'];
+  if (errorsList is List<Object?>) {
+    for (final Object? issueJson in errorsList) {
+      if (issueJson == null || issueJson is! Map<String, Object?>) {
+        continue;
+      }
+      final XCResultIssue resultIssue = XCResultIssue(
+        type: type,
+        issueJson: issueJson,
+      );
+      bool discard = false;
+      for (final XCResultIssueDiscarder discarder in issueDiscarder) {
+        if (_shouldDiscardIssue(issue: resultIssue, discarder: discarder)) {
+          discard = true;
+          break;
+        }
+      }
+      if (discard) {
+        continue;
+      }
+      issues.add(resultIssue);
+    }
+  }
+  return issues;
 }
