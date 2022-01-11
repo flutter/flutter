@@ -1218,6 +1218,8 @@ class EditableText extends StatefulWidget {
   /// {@template flutter.widgets.editableText.scribbleEnabled}
   /// Whether iOS 14 Scribble features are enabled for this widget.
   ///
+  /// Only available on iPads.
+  ///
   /// Defaults to true.
   /// {@endtemplate}
   final bool scribbleEnabled;
