@@ -337,24 +337,4 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle) {
   return @"io.flutter.flutter.app";
 }
 
-#pragma mark - Settings utilities
-
-- (void)setPersistentIsolateData:(NSData*)data {
-  if (data == nil) {
-    return;
-  }
-
-  NSData* persistent_isolate_data = [data copy];
-  fml::NonOwnedMapping::ReleaseProc data_release_proc = [persistent_isolate_data](auto, auto) {
-    [persistent_isolate_data release];
-  };
-  _settings.persistent_isolate_data = std::make_shared<fml::NonOwnedMapping>(
-      static_cast<const uint8_t*>(persistent_isolate_data.bytes),  // bytes
-      persistent_isolate_data.length,                              // byte length
-      data_release_proc                                            // release proc
-  );
-}
-
-#pragma mark - PlatformData utilities
-
 @end
