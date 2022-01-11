@@ -122,6 +122,25 @@ Future<void> dismissElement(WidgetTester tester, Finder finder, { required AxisD
   await gesture.up();
 }
 
+Future<void> dragElement(WidgetTester tester, Finder finder, { required AxisDirection gestureDirection, required double amount }) async {
+  Offset delta;
+  switch (gestureDirection) {
+    case AxisDirection.left:
+      delta = Offset(-amount, 0.0);
+      break;
+    case AxisDirection.right:
+      delta = Offset(amount, 0.0);
+      break;
+    case AxisDirection.up:
+      delta = Offset(0.0, -amount);
+      break;
+    case AxisDirection.down:
+      delta = Offset(0.0, amount);
+      break;
+  }
+  await tester.drag(finder, delta);
+}
+
 Future<void> flingElement(WidgetTester tester, Finder finder, { required AxisDirection gestureDirection, double initialOffsetFactor = 0.0 }) async {
   Offset delta;
   switch (gestureDirection) {
@@ -161,6 +180,20 @@ Future<void> dismissItem(
 
   await mechanism(tester, itemFinder, gestureDirection: gestureDirection);
   await tester.pumpAndSettle();
+}
+
+Future<void> dragItem(
+    WidgetTester tester,
+    int item, {
+      required AxisDirection gestureDirection,
+      required double amount,
+    }) async {
+  assert(gestureDirection != null);
+  final Finder itemFinder = find.text(item.toString());
+  expect(itemFinder, findsOneWidget);
+
+  await dragElement(tester, itemFinder, gestureDirection: gestureDirection, amount: amount);
+  await tester.pump();
 }
 
 Future<void> checkFlingItemBeforeMovementEnd(
@@ -1070,6 +1103,10 @@ void main() {
     ));
     expect(dismissedItems, isEmpty);
     expect(reportedDismissUpdateProgress, 0.0);
+
+    // Unsuccessful dismiss, fractional progress reported
+    await dragItem(tester, 0, gestureDirection: AxisDirection.right, amount: 20);
+    expect(reportedDismissUpdateProgress, 0.2);
 
     // Successful dismiss therefore threshold has been reached
     await dismissItem(tester, 0, mechanism: flingElement, gestureDirection: AxisDirection.left);
