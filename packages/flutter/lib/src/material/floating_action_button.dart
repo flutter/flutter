@@ -546,7 +546,7 @@ class FloatingActionButton extends StatelessWidget {
 
     BoxConstraints sizeConstraints;
     Widget? resolvedChild = child != null ? IconTheme.merge(
-      data: IconThemeData(size: iconSize, color: foregroundColor),
+      data: IconThemeData(size: iconSize),
       child: child!,
     ) : child;
     switch(_floatingActionButtonType) {
