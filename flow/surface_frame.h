@@ -28,6 +28,10 @@ class SurfaceFrame {
     // circumstances such as a BackdropFilter.
     bool supports_readback = false;
 
+    // Indicates that target device supports partial repaint. At very minimum
+    // this means that the surface will provide valid existing damage.
+    bool supports_partial_repaint = false;
+
     // This is the area of framebuffer that lags behind the front buffer.
     //
     // Correctly providing exiting_damage is necessary for supporting double and
