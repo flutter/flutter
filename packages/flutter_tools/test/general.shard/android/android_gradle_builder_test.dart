@@ -218,7 +218,7 @@ void main() {
       expect(logger.statusText, contains('Retrying Gradle Build: #1, wait time: 100'));
       expect(logger.statusText, contains('Retrying Gradle Build: #2, wait time: 200'));
 
-      expect(testFnCalled, equals(3));
+      expect(testFnCalled, equals(testFnCalled + 1));
       expect(testUsage.events, contains(
         const TestUsageEvent(
           'build',
