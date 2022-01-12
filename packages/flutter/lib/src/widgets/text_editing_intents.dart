@@ -92,7 +92,7 @@ abstract class DirectionalCaretMovementIntent extends DirectionalTextEditingInte
   final bool collapseAtReversal;
 }
 
-/// Expands, or moves the current selection from the current
+/// Extends, or moves the current selection from the current
 /// [TextSelection.extent] position to the previous or the next character
 /// boundary.
 class ExtendSelectionByCharacterIntent extends DirectionalCaretMovementIntent {
@@ -103,7 +103,7 @@ class ExtendSelectionByCharacterIntent extends DirectionalCaretMovementIntent {
   }) : super(forward, collapseSelection);
 }
 
-/// Expands, or moves the current selection from the current
+/// Extends, or moves the current selection from the current
 /// [TextSelection.extent] position to the previous or the next word
 /// boundary.
 class ExtendSelectionToNextWordBoundaryIntent extends DirectionalCaretMovementIntent {
@@ -114,7 +114,7 @@ class ExtendSelectionToNextWordBoundaryIntent extends DirectionalCaretMovementIn
   }) : super(forward, collapseSelection);
 }
 
-/// Expands, or moves the current selection from the current
+/// Extends, or moves the current selection from the current
 /// [TextSelection.extent] position to the previous or the next word
 /// boundary, or the [TextSelection.base] position if it's closer in the move
 /// direction.
@@ -124,7 +124,7 @@ class ExtendSelectionToNextWordBoundaryIntent extends DirectionalCaretMovementIn
 /// when the order of [TextSelection.base] and [TextSelection.extent] would
 /// reverse.
 ///
-/// This is typically only used on macOS.
+/// This is typically only used on MacOS.
 class ExtendSelectionToNextWordBoundaryOrCaretLocationIntent extends DirectionalTextEditingIntent {
   /// Creates an [ExtendSelectionToNextWordBoundaryOrCaretLocationIntent].
   const ExtendSelectionToNextWordBoundaryOrCaretLocationIntent({
@@ -169,7 +169,7 @@ class ExtendSelectionToLineBreakIntent extends DirectionalCaretMovementIntent {
        super(forward, collapseSelection, collapseAtReversal);
 }
 
-/// Expands, or moves the current selection from the current
+/// Extends, or moves the current selection from the current
 /// [TextSelection.extent] position to the closest position on the adjacent
 /// line.
 class ExtendSelectionVerticallyToAdjacentLineIntent extends DirectionalCaretMovementIntent {
@@ -180,7 +180,7 @@ class ExtendSelectionVerticallyToAdjacentLineIntent extends DirectionalCaretMove
   }) : super(forward, collapseSelection);
 }
 
-/// Expands, or moves the current selection from the current
+/// Extends, or moves the current selection from the current
 /// [TextSelection.extent] position to the start or the end of the document.
 class ExtendSelectionToDocumentBoundaryIntent extends DirectionalCaretMovementIntent {
   /// Creates an [ExtendSelectionToDocumentBoundaryIntent].
