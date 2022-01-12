@@ -6,13 +6,22 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/physics.dart';
+import 'package:flutter/src/widgets/scroll_position.dart';
+import 'scroll_activity.dart';
+
+/// Extension of ScrollSimulation
+mixin ScrollSimulationMixin {
+  /// Called when the scroll view that is performing this activity changes its metrics.
+  /// Only call when the current scrollActivity is [BallisticScrollActivity]
+  void applyNewDimensions(ScrollPosition newScrollPosition, double velocity) {}
+}
 
 /// An implementation of scroll physics that matches iOS.
 ///
 /// See also:
 ///
 ///  * [ClampingScrollSimulation], which implements Android scroll physics.
-class BouncingScrollSimulation extends Simulation {
+class BouncingScrollSimulation extends Simulation with ScrollSimulationMixin {
   /// Creates a simulation group for scrolling on iOS, with the given
   /// parameters.
   ///
@@ -52,19 +61,19 @@ class BouncingScrollSimulation extends Simulation {
       // Taken from UIScrollView.decelerationRate (.normal = 0.998)
       // 0.998^1000 = ~0.135
       _frictionSimulation = FrictionSimulation(0.135, position, velocity);
-      final double finalX = _frictionSimulation.finalX;
+      final double finalX = _frictionSimulation!.finalX;
       if (velocity > 0.0 && finalX > trailingExtent) {
-        _springTime = _frictionSimulation.timeAtX(trailingExtent);
+        _springTime = _frictionSimulation!.timeAtX(trailingExtent);
         _springSimulation = _overscrollSimulation(
           trailingExtent,
-          math.min(_frictionSimulation.dx(_springTime), maxSpringTransferVelocity),
+          math.min(_frictionSimulation!.dx(_springTime), maxSpringTransferVelocity),
         );
         assert(_springTime.isFinite);
       } else if (velocity < 0.0 && finalX < leadingExtent) {
-        _springTime = _frictionSimulation.timeAtX(leadingExtent);
+        _springTime = _frictionSimulation!.timeAtX(leadingExtent);
         _springSimulation = _underscrollSimulation(
           leadingExtent,
-          math.min(_frictionSimulation.dx(_springTime), maxSpringTransferVelocity),
+          math.min(_frictionSimulation!.dx(_springTime), maxSpringTransferVelocity),
         );
         assert(_springTime.isFinite);
       } else {
@@ -80,19 +89,54 @@ class BouncingScrollSimulation extends Simulation {
 
   /// When [x] falls below this value the simulation switches from an internal friction
   /// model to a spring model which causes [x] to "spring" back to [leadingExtent].
-  final double leadingExtent;
+  double leadingExtent;
 
   /// When [x] exceeds this value the simulation switches from an internal friction
   /// model to a spring model which causes [x] to "spring" back to [trailingExtent].
-  final double trailingExtent;
+  double trailingExtent;
 
   /// The spring used to return [x] to either [leadingExtent] or [trailingExtent].
   final SpringDescription spring;
 
-  late FrictionSimulation _frictionSimulation;
-  late Simulation _springSimulation;
+  FrictionSimulation? _frictionSimulation;
+  Simulation? _springSimulation;
   late double _springTime;
   double _timeOffset = 0.0;
+
+  void _updateSpringTime(
+    double position,
+    double velocity,
+  ) {
+    if (position < leadingExtent) {
+      _springTime = double.negativeInfinity;
+    } else if (position > trailingExtent) {
+      _springTime = double.negativeInfinity;
+    } else {
+      // Taken from UIScrollView.decelerationRate (.normal = 0.998)
+      // 0.998^1000 = ~0.135
+      final double finalX = _frictionSimulation!.finalX;
+      if (velocity > 0.0 && finalX > trailingExtent) {
+        _springTime = _frictionSimulation!.timeAtX(trailingExtent);
+        _springSimulation = _overscrollSimulation(
+          trailingExtent,
+          math.min(
+              _frictionSimulation!.dx(_springTime), maxSpringTransferVelocity),
+        );
+        assert(_springTime.isFinite);
+      } else if (velocity < 0.0 && finalX < leadingExtent) {
+        _springTime = _frictionSimulation!.timeAtX(leadingExtent);
+        _springSimulation = _underscrollSimulation(
+          leadingExtent,
+          math.min(
+              _frictionSimulation!.dx(_springTime), maxSpringTransferVelocity),
+        );
+        assert(_springTime.isFinite);
+      } else {
+        _springTime = double.infinity;
+      }
+    }
+    assert(_springTime != null);
+  }
 
   Simulation _underscrollSimulation(double x, double dx) {
     return ScrollSpringSimulation(spring, x, leadingExtent, dx);
@@ -103,7 +147,7 @@ class BouncingScrollSimulation extends Simulation {
   }
 
   Simulation _simulation(double time) {
-    final Simulation simulation;
+    final Simulation? simulation;
     if (time > _springTime) {
       _timeOffset = _springTime.isFinite ? _springTime : 0.0;
       simulation = _springSimulation;
@@ -111,7 +155,23 @@ class BouncingScrollSimulation extends Simulation {
       _timeOffset = 0.0;
       simulation = _frictionSimulation;
     }
-    return simulation..tolerance = tolerance;
+    return simulation!..tolerance = tolerance;
+  }
+
+  @override
+  void applyNewDimensions(ScrollPosition newScrollPosition, double velocity) {
+    if (leadingExtent != newScrollPosition.minScrollExtent) {
+      leadingExtent = newScrollPosition.minScrollExtent;
+      if (_frictionSimulation != null && _frictionSimulation!.finalX < leadingExtent) {
+        _updateSpringTime(newScrollPosition.pixels, velocity);
+      }
+    }
+    if (trailingExtent != newScrollPosition.maxScrollExtent) {
+      trailingExtent = newScrollPosition.maxScrollExtent;
+      if (_frictionSimulation != null && _frictionSimulation!.finalX > trailingExtent) {
+        _updateSpringTime(newScrollPosition.pixels, velocity);
+      }
+    }
   }
 
   @override
@@ -134,12 +194,12 @@ class BouncingScrollSimulation extends Simulation {
 /// See also:
 ///
 ///  * [BouncingScrollSimulation], which implements iOS scroll physics.
-//
-// This class is based on Scroller.java from Android:
-//   https://android.googlesource.com/platform/frameworks/base/+/master/core/java/android/widget
-//
-// The "See..." comments below refer to Scroller methods and values. Some
-// simplifications have been made.
+///
+/// This class is based on Scroller.java from Android:
+///   https://android.googlesource.com/platform/frameworks/base/+/master/core/java/android/widget
+///
+/// The "See..." comments below refer to Scroller methods and values. Some
+/// simplifications have been made.
 class ClampingScrollSimulation extends Simulation {
   /// Creates a scroll physics simulation that matches Android scrolling.
   ClampingScrollSimulation({
@@ -168,46 +228,46 @@ class ClampingScrollSimulation extends Simulation {
   late double _duration;
   late double _distance;
 
-  // See DECELERATION_RATE.
+  /// See DECELERATION_RATE.
   static final double _kDecelerationRate = math.log(0.78) / math.log(0.9);
 
-  // See computeDeceleration().
+  /// See computeDeceleration().
   static double _decelerationForFriction(double friction) {
     return friction * 61774.04968;
   }
 
-  // See getSplineFlingDuration(). Returns a value in seconds.
+  /// See getSplineFlingDuration(). Returns a value in seconds.
   double _flingDuration(double velocity) {
-    // See mPhysicalCoeff
+    /// See mPhysicalCoeff
     final double scaledFriction = friction * _decelerationForFriction(0.84);
 
-    // See getSplineDeceleration().
+    /// See getSplineDeceleration().
     final double deceleration = math.log(0.35 * velocity.abs() / scaledFriction);
 
     return math.exp(deceleration / (_kDecelerationRate - 1.0));
   }
 
-  // Based on a cubic curve fit to the Scroller.computeScrollOffset() values
-  // produced for an initial velocity of 4000. The value of Scroller.getDuration()
-  // and Scroller.getFinalY() were 686ms and 961 pixels respectively.
-  //
-  // Algebra courtesy of Wolfram Alpha.
-  //
-  // f(x) = scrollOffset, x is time in milliseconds
-  // f(x) = 3.60882×10^-6 x^3 - 0.00668009 x^2 + 4.29427 x - 3.15307
-  // f(x) = 3.60882×10^-6 x^3 - 0.00668009 x^2 + 4.29427 x, so f(0) is 0
-  // f(686ms) = 961 pixels
-  // Scale to f(0 <= t <= 1.0), x = t * 686
-  // f(t) = 1165.03 t^3 - 3143.62 t^2 + 2945.87 t
-  // Scale f(t) so that 0.0 <= f(t) <= 1.0
-  // f(t) = (1165.03 t^3 - 3143.62 t^2 + 2945.87 t) / 961.0
-  //      = 1.2 t^3 - 3.27 t^2 + 3.065 t
+  /// Based on a cubic curve fit to the Scroller.computeScrollOffset() values
+  /// produced for an initial velocity of 4000. The value of Scroller.getDuration()
+  /// and Scroller.getFinalY() were 686ms and 961 pixels respectively.
+  ///
+  /// Algebra courtesy of Wolfram Alpha.
+  ///
+  /// f(x) = scrollOffset, x is time in milliseconds
+  /// f(x) = 3.60882×10^-6 x^3 - 0.00668009 x^2 + 4.29427 x - 3.15307
+  /// f(x) = 3.60882×10^-6 x^3 - 0.00668009 x^2 + 4.29427 x, so f(0) is 0
+  /// f(686ms) = 961 pixels
+  /// Scale to f(0 <= t <= 1.0), x = t * 686
+  /// f(t) = 1165.03 t^3 - 3143.62 t^2 + 2945.87 t
+  /// Scale f(t) so that 0.0 <= f(t) <= 1.0
+  /// f(t) = (1165.03 t^3 - 3143.62 t^2 + 2945.87 t) / 961.0
+  ///      = 1.2 t^3 - 3.27 t^2 + 3.065 t
   static const double _initialVelocityPenetration = 3.065;
   static double _flingDistancePenetration(double t) {
     return (1.2 * t * t * t) - (3.27 * t * t) + (_initialVelocityPenetration * t);
   }
 
-  // The derivative of the _flingDistancePenetration() function.
+  /// The derivative of the _flingDistancePenetration() function.
   static double _flingVelocityPenetration(double t) {
     return (3.6 * t * t) - (6.54 * t) + _initialVelocityPenetration;
   }

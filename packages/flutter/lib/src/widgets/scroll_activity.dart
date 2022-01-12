@@ -15,6 +15,8 @@ import 'basic.dart';
 import 'framework.dart';
 import 'scroll_metrics.dart';
 import 'scroll_notification.dart';
+import 'scroll_position.dart';
+import 'scroll_simulation.dart';
 
 /// A backend for a [ScrollActivity].
 ///
@@ -527,17 +529,19 @@ class BallisticScrollActivity extends ScrollActivity {
     ScrollActivityDelegate delegate,
     Simulation simulation,
     TickerProvider vsync,
-  ) : super(delegate) {
+  ) : _simulation = simulation, super(delegate) {
     _controller = AnimationController.unbounded(
       debugLabel: kDebugMode ? objectRuntimeType(this, 'BallisticScrollActivity') : null,
       vsync: vsync,
     )
       ..addListener(_tick)
-      ..animateWith(simulation)
+      ..animateWith(_simulation)
        .whenComplete(_end); // won't trigger if we dispose _controller first
   }
 
   late AnimationController _controller;
+
+  final Simulation _simulation;
 
   @override
   void resetActivity() {
@@ -546,7 +550,17 @@ class BallisticScrollActivity extends ScrollActivity {
 
   @override
   void applyNewDimensions() {
-    delegate.goBallistic(velocity);
+    // delegate.goBallistic(velocity);
+    final ScrollPosition? position = _scrollPosition;
+    if (position != null && _simulation is ScrollSimulationMixin){
+      final ScrollSimulationMixin simulation = _simulation as ScrollSimulationMixin;
+      simulation.applyNewDimensions(position,velocity);
+    }
+  }
+
+  ScrollPosition? get _scrollPosition {
+    final Object position = delegate;
+    return position is ScrollPosition ? position : null;
   }
 
   void _tick() {
