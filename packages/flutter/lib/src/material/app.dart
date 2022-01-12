@@ -57,6 +57,11 @@ enum ThemeMode {
 /// adding material-design specific functionality, such as [AnimatedTheme] and
 /// [GridPaper].
 ///
+/// The [MaterialApp] passes a fallback [TextStyle] to [WidgetsApp] which is used in 
+/// absense of [Material] widgets. The [Material] widgets builds a [DefaultTextStyle]
+/// which assigns a [TextTheme]. If you see the fallback [TextStyle] instead of
+/// [DefaultTextStyle], ensure a [Material] widget is one of the ancestor of your widgets.
+///
 /// The [MaterialApp] configures the top-level [Navigator] to search for routes
 /// in the following order:
 ///
