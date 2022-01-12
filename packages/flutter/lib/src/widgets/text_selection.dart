@@ -572,7 +572,7 @@ class TextSelectionOverlay {
         child: CompositedTransformFollower(
           link: toolbarLayerLink,
           showWhenUnlinked: false,
-          offset: -editingRegion.topLeft - Offset(0, endpoints[0].point.dy - renderObject.preferredLineHeight),
+          offset: -editingRegion.topLeft - Offset(0, -renderObject.offset.pixels),
           child: Builder(
             builder: (BuildContext context) {
               return selectionControls!.buildToolbar(
