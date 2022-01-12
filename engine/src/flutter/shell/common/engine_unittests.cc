@@ -340,6 +340,41 @@ TEST_F(EngineTest, SpawnResetsViewportMetrics) {
   });
 }
 
+TEST_F(EngineTest, SpawnWithCustomSettings) {
+  PostUITaskSync([this] {
+    MockRuntimeDelegate client;
+    auto mock_runtime_controller =
+        std::make_unique<MockRuntimeController>(client, task_runners_);
+    auto vm_ref = DartVMRef::Create(settings_);
+    EXPECT_CALL(*mock_runtime_controller, GetDartVM())
+        .WillRepeatedly(::testing::Return(vm_ref.get()));
+    auto engine = std::make_unique<Engine>(
+        /*delegate=*/delegate_,
+        /*dispatcher_maker=*/dispatcher_maker_,
+        /*image_decoder_task_runner=*/image_decoder_task_runner_,
+        /*task_runners=*/task_runners_,
+        /*settings=*/settings_,
+        /*animator=*/std::move(animator_),
+        /*io_manager=*/io_manager_,
+        /*font_collection=*/std::make_shared<FontCollection>(),
+        /*runtime_controller=*/std::move(mock_runtime_controller));
+
+    Settings custom_settings = settings_;
+    custom_settings.persistent_isolate_data =
+        std::make_shared<fml::DataMapping>("foo");
+    auto spawn = engine->Spawn(delegate_, dispatcher_maker_, custom_settings,
+                               nullptr, std::string(), io_manager_);
+    EXPECT_TRUE(spawn != nullptr);
+    auto new_persistent_isolate_data =
+        const_cast<RuntimeController*>(spawn->GetRuntimeController())
+            ->GetPersistentIsolateData();
+    EXPECT_EQ(custom_settings.persistent_isolate_data->GetMapping(),
+              new_persistent_isolate_data->GetMapping());
+    EXPECT_EQ(custom_settings.persistent_isolate_data->GetSize(),
+              new_persistent_isolate_data->GetSize());
+  });
+}
+
 TEST_F(EngineTest, PassesLoadDartDeferredLibraryErrorToRuntime) {
   PostUITaskSync([this] {
     intptr_t error_id = 123;
