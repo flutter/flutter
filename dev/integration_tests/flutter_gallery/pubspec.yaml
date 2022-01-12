@@ -13,7 +13,7 @@ dependencies:
   string_scanner: 1.1.0
   url_launcher: 6.0.17
   cupertino_icons: 1.0.4
-  video_player: 2.1.1
+  video_player: 2.2.11
   scoped_model:
     git:
       url: https://github.com/kevmoo/scoped_model.git
