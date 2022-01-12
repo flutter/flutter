@@ -661,7 +661,7 @@ class SemanticsData with Diagnosticable {
       transform,
       elevation,
       thickness,
-      Object.hashAll(customSemanticsActionIds ?? const <Object?>[]),
+      customSemanticsActionIds == null ? null : Object.hashAll(customSemanticsActionIds!),
     ),
   );
 

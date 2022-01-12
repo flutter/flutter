@@ -503,7 +503,14 @@ class FakeAndroidPlatformView {
   }
 
   @override
-  int get hashCode => Object.hash(id, type, Object.hashAll(creationParams ?? const <Object?>[]), size, layoutDirection, hybrid);
+  int get hashCode => Object.hash(
+    id,
+    type,
+    creationParams == null ? null : Object.hashAll(creationParams!),
+    size,
+    layoutDirection,
+    hybrid,
+  );
 
   @override
   String toString() {

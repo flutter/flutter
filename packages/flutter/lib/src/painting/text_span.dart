@@ -526,7 +526,7 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
     onEnter,
     onExit,
     mouseCursor,
-    Object.hashAll(children ?? const <Object?>[]),
+    children == null ? null : Object.hashAll(children!),
   );
 
   @override

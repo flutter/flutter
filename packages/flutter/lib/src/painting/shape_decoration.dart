@@ -265,7 +265,7 @@ class ShapeDecoration extends Decoration {
     gradient,
     image,
     shape,
-    Object.hashAll(shadows ?? const <Object>[]),
+    shadows == null ? null : Object.hashAll(shadows!),
   );
 
   @override

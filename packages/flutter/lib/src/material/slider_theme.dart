@@ -674,7 +674,7 @@ class SliderThemeData with Diagnosticable {
   }
 
   @override
-  int get hashCode => Object.hashAll(<Object?>[
+  int get hashCode => Object.hash(
     trackHeight,
     activeTrackColor,
     inactiveTrackColor,
@@ -694,16 +694,18 @@ class SliderThemeData with Diagnosticable {
     thumbShape,
     trackShape,
     valueIndicatorShape,
-    rangeTickMarkShape,
-    rangeThumbShape,
-    rangeTrackShape,
-    rangeValueIndicatorShape,
-    showValueIndicator,
-    valueIndicatorTextStyle,
-    minThumbSeparation,
-    thumbSelector,
-    mouseCursor,
-  ]);
+    Object.hash(
+      rangeTickMarkShape,
+      rangeThumbShape,
+      rangeTrackShape,
+      rangeValueIndicatorShape,
+      showValueIndicator,
+      valueIndicatorTextStyle,
+      minThumbSeparation,
+      thumbSelector,
+      mouseCursor,
+    ),
+  );
 
   @override
   bool operator ==(Object other) {

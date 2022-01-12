@@ -524,7 +524,7 @@ class LinearGradient extends Gradient {
     tileMode,
     transform,
     Object.hashAll(colors),
-    Object.hashAll(stops ?? const <Object>[]),
+    stops == null ? null : Object.hashAll(stops!),
   );
 
   @override
@@ -805,7 +805,7 @@ class RadialGradient extends Gradient {
     tileMode,
     transform,
     Object.hashAll(colors),
-    Object.hashAll(stops ?? const <Object>[]),
+    stops == null ? null : Object.hashAll(stops!),
     focal,
     focalRadius,
   );
@@ -1073,7 +1073,7 @@ class SweepGradient extends Gradient {
     tileMode,
     transform,
     Object.hashAll(colors),
-    Object.hashAll(stops ?? const <Object>[]),
+    stops == null ? null : Object.hashAll(stops!),
   );
 
   @override

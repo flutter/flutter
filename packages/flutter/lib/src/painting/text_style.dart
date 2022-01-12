@@ -1307,7 +1307,7 @@ class TextStyle with Diagnosticable {
   }
 
   @override
-  int get hashCode => Object.hashAll(<Object?>[
+  int get hashCode => Object.hash(
     inherit,
     color,
     backgroundColor,
@@ -1322,17 +1322,19 @@ class TextStyle with Diagnosticable {
     locale,
     foreground,
     background,
-    Object.hashAll(shadows ?? const <Object?>[]),
-    Object.hashAll(fontFeatures ?? const <Object?>[]),
+    shadows == null ? null : Object.hashAll(shadows!),
+    fontFeatures == null ? null : Object.hashAll(fontFeatures!),
     decoration,
     decorationColor,
     decorationStyle,
-    decorationThickness,
-    fontFamily,
-    Object.hashAll(fontFamilyFallback ?? const <Object?>[]),
-    _package,
-    overflow,
-  ]);
+    Object.hash(
+      decorationThickness,
+      fontFamily,
+      fontFamilyFallback == null ? null : Object.hashAll(fontFamilyFallback!),
+      _package,
+      overflow,
+    ),
+  );
 
   @override
   String toStringShort() => objectRuntimeType(this, 'TextStyle');

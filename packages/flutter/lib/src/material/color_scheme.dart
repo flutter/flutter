@@ -900,7 +900,7 @@ class ColorScheme with Diagnosticable {
   }
 
   @override
-  int get hashCode => Object.hashAll(<Object?>[
+  int get hashCode => Object.hash(
     brightness,
     primary,
     onPrimary,
@@ -920,18 +920,20 @@ class ColorScheme with Diagnosticable {
     onErrorContainer,
     background,
     onBackground,
-    surface,
-    onSurface,
-    surfaceVariant,
-    onSurfaceVariant,
-    outline,
-    shadow,
-    inverseSurface,
-    onInverseSurface,
-    inversePrimary,
-    primaryVariant,
-    secondaryVariant,
-  ]);
+    Object.hash(
+      surface,
+      onSurface,
+      surfaceVariant,
+      onSurfaceVariant,
+      outline,
+      shadow,
+      inverseSurface,
+      onInverseSurface,
+      inversePrimary,
+      primaryVariant,
+      secondaryVariant,
+    ),
+  );
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

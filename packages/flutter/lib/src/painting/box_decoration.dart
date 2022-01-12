@@ -329,7 +329,7 @@ class BoxDecoration extends Decoration {
     image,
     border,
     borderRadius,
-    Object.hashAll(boxShadow ?? const <Object>[]),
+    boxShadow == null ? null : Object.hashAll(boxShadow!),
     gradient,
     shape,
   );

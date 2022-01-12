@@ -4159,7 +4159,7 @@ class InputDecorationTheme with Diagnosticable {
   }
 
   @override
-  int get hashCode => Object.hashAll(<Object?>[
+  int get hashCode => Object.hash(
     labelStyle,
     floatingLabelStyle,
     helperStyle,
@@ -4179,18 +4179,20 @@ class InputDecorationTheme with Diagnosticable {
     suffixIconColor,
     counterStyle,
     filled,
-    fillColor,
-    focusColor,
-    hoverColor,
-    errorBorder,
-    focusedBorder,
-    focusedErrorBorder,
-    disabledBorder,
-    enabledBorder,
-    border,
-    alignLabelWithHint,
-    constraints,
-  ]);
+    Object.hash(
+      fillColor,
+      focusColor,
+      hoverColor,
+      errorBorder,
+      focusedBorder,
+      focusedErrorBorder,
+      disabledBorder,
+      enabledBorder,
+      border,
+      alignLabelWithHint,
+      constraints,
+    ),
+  );
 
   @override
   bool operator ==(Object other) {
