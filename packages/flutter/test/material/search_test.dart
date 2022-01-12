@@ -629,7 +629,8 @@ void main() {
                                 debugDefaultTargetPlatformOverride != TargetPlatform.macOS) SemanticsFlag.namesRoute,
                             ],
                             actions: <SemanticsAction>[
-                              if (debugDefaultTargetPlatformOverride == TargetPlatform.macOS)
+                              if (debugDefaultTargetPlatformOverride == TargetPlatform.macOS ||
+                                debugDefaultTargetPlatformOverride == TargetPlatform.windows)
                                 SemanticsAction.didGainAccessibilityFocus,
                               SemanticsAction.tap,
                               SemanticsAction.setSelection,

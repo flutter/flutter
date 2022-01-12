@@ -11,6 +11,14 @@ import 'package:path/path.dart' as path;
 import 'package:pub_semver/pub_semver.dart';
 import 'package:test/test.dart' hide isInstanceOf;
 
+// The accessibility focus actions are added when a semantics node receives or
+// lose accessibility focus. This test ignores these actions since it is hard to
+// predict which node has the accessibility focus after a screen changes.
+const List<AndroidSemanticsAction> ignoredAccessibilityFocusActions = <AndroidSemanticsAction>[
+  AndroidSemanticsAction.accessibilityFocus,
+  AndroidSemanticsAction.clearAccessibilityFocus,
+];
+
 String adbPath() {
   final String androidHome = io.Platform.environment['ANDROID_HOME'] ?? io.Platform.environment['ANDROID_SDK_ROOT'];
   if (androidHome == null) {
@@ -157,10 +165,10 @@ void main() {
             isFocused: false,
             isPassword: false,
             actions: <AndroidSemanticsAction>[
-              if (talkbackVersion < fixedTalkback) AndroidSemanticsAction.accessibilityFocus,
-              if (talkbackVersion >= fixedTalkback) AndroidSemanticsAction.clearAccessibilityFocus,
               AndroidSemanticsAction.click,
             ],
+            // We can't predict the a11y focus when the screen changes.
+            ignoredActions: ignoredAccessibilityFocusActions
           ),
         );
 

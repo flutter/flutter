@@ -547,7 +547,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// The default value of this property is false.
   bool ignorePointer;
 
-  /// {@macro flutter.dart:ui.textHeightBehavior}
+  /// {@macro dart.ui.textHeightBehavior}
   TextHeightBehavior? get textHeightBehavior => _textPainter.textHeightBehavior;
   set textHeightBehavior(TextHeightBehavior? value) {
     if (_textPainter.textHeightBehavior == value)
@@ -1265,6 +1265,16 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   // [assembleSemanticsNode] invocations.
   Queue<SemanticsNode>? _cachedChildNodes;
 
+  /// Returns a list of rects that bound the given selection.
+  ///
+  /// See [TextPainter.getBoxesForSelection] for more details.
+  List<Rect> getBoxesForSelection(TextSelection selection) {
+    _computeTextMetricsIfNeeded();
+    return _textPainter.getBoxesForSelection(selection)
+                       .map((TextBox textBox) => textBox.toRect().shift(_paintOffset))
+                       .toList();
+  }
+
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
@@ -1664,8 +1674,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       final Offset start = Offset(0.0, preferredLineHeight) + caretOffset + paintOffset;
       return <TextSelectionPoint>[TextSelectionPoint(start, null)];
     } else {
-      final Offset start = Offset(boxes.first.start, boxes.first.bottom) + paintOffset;
-      final Offset end = Offset(boxes.last.end, boxes.last.bottom) + paintOffset;
+      final Offset start = Offset(boxes.first.start.clamp(0, _textPainter.size.width), boxes.first.bottom) + paintOffset;
+      final Offset end = Offset(boxes.last.end.clamp(0, _textPainter.size.width), boxes.last.bottom) + paintOffset;
       return <TextSelectionPoint>[
         TextSelectionPoint(start, boxes.first.direction),
         TextSelectionPoint(end, boxes.last.direction),
@@ -2410,7 +2420,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
         return MapEntry<int, Offset>(lineMetrics.lineNumber, Offset(offset.dx, lineMetrics.baseline));
       }
     }
-    assert(false, 'unable to find the line for $startPosition');
+    assert(startPosition.offset == 0, 'unable to find the line for $startPosition');
     return MapEntry<int, Offset>(
       math.max(0, metrics.length - 1),
       Offset(offset.dx, metrics.isNotEmpty ? metrics.last.baseline + metrics.last.descent : 0.0),
@@ -2741,14 +2751,19 @@ class _TextHighlightPainter extends RenderEditablePainter {
     }
 
     highlightPaint.color = color;
-    final List<TextBox> boxes = renderEditable._textPainter.getBoxesForSelection(
+    final TextPainter textPainter = renderEditable._textPainter;
+    final List<TextBox> boxes = textPainter.getBoxesForSelection(
       TextSelection(baseOffset: range.start, extentOffset: range.end),
       boxHeightStyle: selectionHeightStyle,
       boxWidthStyle: selectionWidthStyle,
     );
 
     for (final TextBox box in boxes)
-      canvas.drawRect(box.toRect().shift(renderEditable._paintOffset), highlightPaint);
+      canvas.drawRect(
+        box.toRect().shift(renderEditable._paintOffset)
+          .intersect(Rect.fromLTWH(0, 0, textPainter.width, textPainter.height)),
+        highlightPaint,
+      );
   }
 
   @override

@@ -42,7 +42,7 @@ static const CGFloat kStandardTimeOut = 60.0;
     if (!newPageAppeared) {
         // Sometimes, the element doesn't respond to the tap, it seems an XCUITest race condition where the tap happened
         // too soon. Trying to tap the element again.
-        [self waitForAndTapElement:app.buttons[@"Full Screen (Warm))"]];
+        [self waitForAndTapElement:app.buttons[@"Full Screen (Warm)"]];
         newPageAppeared = [app.staticTexts[@"Button tapped 0 times."] waitForExistenceWithTimeout:kStandardTimeOut];
     }
     XCTAssertTrue(newPageAppeared);

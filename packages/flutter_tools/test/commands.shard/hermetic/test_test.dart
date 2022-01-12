@@ -561,7 +561,7 @@ dev_dependencies:
     DeviceManager: () => _FakeDeviceManager(<Device>[]),
   });
 
-  // TODO(jiahaog): Remove this when web is supported. https://github.com/flutter/flutter/pull/74236
+  // TODO(jiahaog): Remove this when web is supported. https://github.com/flutter/flutter/issues/66264
   testUsingContext('Integration tests when only web devices are connected', () async {
     final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
 
@@ -596,6 +596,32 @@ dev_dependencies:
     expect(
       testRunner.lastDebuggingOptionsValue.buildInfo.dartDefines,
       contains('INTEGRATION_TEST_SHOULD_REPORT_RESULTS_TO_NATIVE=false'),
+    );
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fs,
+    ProcessManager: () => FakeProcessManager.any(),
+    DeviceManager: () => _FakeDeviceManager(<Device>[
+      FakeDevice('ephemeral', 'ephemeral', type: PlatformType.android),
+    ]),
+  });
+
+  testUsingContext('Integration tests given flavor', () async {
+    final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
+
+    final TestCommand testCommand = TestCommand(testRunner: testRunner);
+    final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+    await commandRunner.run(const <String>[
+      'test',
+      '--no-pub',
+      '--flavor',
+      'dev',
+      'integration_test',
+    ]);
+
+    expect(
+      testRunner.lastDebuggingOptionsValue.buildInfo.flavor,
+      contains('dev'),
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => fs,

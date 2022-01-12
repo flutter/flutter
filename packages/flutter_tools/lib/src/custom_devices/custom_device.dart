@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import '../application_package.dart';
@@ -53,7 +54,11 @@ class CustomDeviceLogReader extends DeviceLogReader {
   @override
   final String name;
 
-  final StreamController<String> _logLinesController = StreamController<String>.broadcast();
+  @visibleForTesting
+  final StreamController<String> logLinesController = StreamController<String>.broadcast();
+
+  @visibleForTesting
+  final List<StreamSubscription<String>> subscriptions = <StreamSubscription<String>>[];
 
   /// Listen to [process]' stdout and stderr, decode them using [SystemEncoding]
   /// and add each decoded line to [logLines].
@@ -66,13 +71,17 @@ class CustomDeviceLogReader extends DeviceLogReader {
   void listenToProcessOutput(Process process, {Encoding encoding = systemEncoding}) {
     final Converter<List<int>, String> decoder = encoding.decoder;
 
-    process.stdout.transform<String>(decoder)
-      .transform<String>(const LineSplitter())
-      .listen(_logLinesController.add);
+    subscriptions.add(
+      process.stdout.transform<String>(decoder)
+        .transform<String>(const LineSplitter())
+        .listen(logLinesController.add),
+    );
 
-    process.stderr.transform<String>(decoder)
-      .transform<String>(const LineSplitter())
-      .listen(_logLinesController.add);
+    subscriptions.add(
+      process.stderr.transform<String>(decoder)
+        .transform<String>(const LineSplitter())
+        .listen(logLinesController.add)
+    );
   }
 
   /// Add all lines emitted by [lines] to this [CustomDeviceLogReader]s [logLines]
@@ -83,18 +92,28 @@ class CustomDeviceLogReader extends DeviceLogReader {
   ///
   /// Useful when you want to combine the contents of multiple log readers.
   void listenToLinesStream(Stream<String> lines) {
-    _logLinesController.addStream(lines);
+    subscriptions.add(
+      lines.listen(logLinesController.add)
+    );
   }
 
   /// Dispose this log reader, freeing all associated resources and marking
   /// [logLines] as done.
   @override
-  void dispose() {
-    _logLinesController.close();
+  Future<void> dispose() async {
+    final List<Future<void>> futures = <Future<void>>[];
+
+    for (final StreamSubscription<String> subscription in subscriptions) {
+      futures.add(subscription.cancel());
+    }
+
+    futures.add(logLinesController.close());
+
+    await Future.wait(futures);
   }
 
   @override
-  Stream<String> get logLines => _logLinesController.stream;
+  Stream<String> get logLines => logLinesController.stream;
 }
 
 /// A [DevicePortForwarder] that uses commands to forward / unforward a port.
@@ -170,8 +189,8 @@ class CustomDevicePortForwarder extends DevicePortForwarder {
     }));
 
     unawaited(completer.future.whenComplete(() {
-      logLinesSubscription.cancel();
-      reader.dispose();
+      unawaited(logLinesSubscription.cancel());
+      unawaited(reader.dispose());
     }));
 
     return completer.future;
@@ -261,7 +280,7 @@ class CustomDeviceAppSession {
   /// [debuggingOptions] and [route] can be null.
   ///
   /// For example, `_getEngineOptions(null, false, null)` will return
-  /// `['enable-dart-profiling=true', 'enable-background-compilation=true']`
+  /// `['enable-dart-profiling=true']`
   List<String> _getEngineOptions(DebuggingOptions debuggingOptions, bool traceStartup, String? route) {
     final List<String> options = <String>[];
 
@@ -270,7 +289,6 @@ class CustomDeviceAppSession {
     }
 
     addFlag('enable-dart-profiling=true');
-    addFlag('enable-background-compilation=true');
 
     if (traceStartup) {
       addFlag('trace-startup=true');
@@ -344,7 +362,7 @@ class CustomDeviceAppSession {
   /// [debuggingOptions] and [route] can be null.
   ///
   /// For example, `_getEngineOptionsForCmdline(null, false, null)` will return
-  /// `--enable-dart-profiling=true --enable-background-compilation=true`
+  /// `--enable-dart-profiling=true`
   String _getEngineOptionsForCmdline(DebuggingOptions debuggingOptions, bool traceStartup, String? route) {
     return _getEngineOptions(debuggingOptions, traceStartup, route).map((String e) => '--$e').join(' ');
   }
@@ -440,7 +458,7 @@ class CustomDeviceAppSession {
       _process = null;
     }
 
-    logReader.dispose();
+    unawaited(logReader.dispose());
   }
 }
 

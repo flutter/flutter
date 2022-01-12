@@ -34,9 +34,9 @@ Arguments specific to `launchRequest` are:
 - `bool? noDebug` - whether to run in debug or noDebug mode (if not supplied, defaults to debug)
 - `String program` - the path of the Flutter application to run
 - `List<String>? args` - arguments to be passed to the Flutter program
-- `List<String>? toolArgs` - arguments for the `flutter` tool
-- `String? console` - if set to `"terminal"` or `"externalTerminal"` will be run using the `runInTerminal` reverse-request; otherwise the debug adapter spawns the Dart process
-- `bool? enableAsserts` - whether to enable asserts (if not supplied, defaults to `true`)
+- `List<String>? toolArgs` - arguments for the `flutter run` or `flutter test` commands
+- `String? customTool` - an optional tool to run instead of `flutter` - the custom tool must be completely compatible with the tool/command it is replacing
+- `int? customToolReplacesArgs` - the number of arguments to delete from the beginning of the argument list when invoking `customTool` - e.g. setting `customTool` to `flutter_test_wrapper` and `customToolReplacesArgs` to `1` for a test run would invoke `flutter_test_wrapper foo_test.dart` instead of `flutter test foo_test.dart` (if larger than the number of computed arguments all arguments will be removed, if not supplied will default to `0`)
 
 `attachRequest` is not currently supported, but will be documented here when it is.
 
@@ -66,4 +66,19 @@ Some custom requests are available for clients to call. Below are the Flutter-sp
 
 ## Custom Events
 
-The debug adapter may emit several custom events that are useful to clients. There are not currently any custom Flutter events, but the standard Dart DAP custom requests are [documented here](https://github.com/dart-lang/sdk/blob/main/pkg/dds/tool/dap/README.md#custom-events).
+The debug adapter may emit several custom events that are useful to clients. Below are the Flutter-specific custom events, and the standard Dart DAP custom events are [documented here](https://github.com/dart-lang/sdk/blob/main/pkg/dds/tool/dap/README.md#custom-events).
+
+### `flutter.serviceExtensionStateChanged`
+
+When the value of a Flutter service extension changes, this event is emitted and includes the new value. Values are always encoded as strings, even if numeric/boolean.
+
+```
+{
+	"type": "event",
+	"event": "flutter.serviceExtensionStateChanged",
+	"body": {
+		"extension": "ext.flutter.debugPaint",
+		"value": "true",
+	}
+}
+```

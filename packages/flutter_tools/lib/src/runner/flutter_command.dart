@@ -181,6 +181,8 @@ abstract class FlutterCommand extends Command<void> {
 
   bool _usesFatalWarnings = false;
 
+  DeprecationBehavior get deprecationBehavior => DeprecationBehavior.none;
+
   bool get shouldRunPub => _usesPubOption && boolArg('pub');
 
   bool get shouldUpdateCache => true;
@@ -834,6 +836,15 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
+  void addIgnoreDeprecationOption({ bool hide = false }) {
+    argParser.addFlag('ignore-deprecation',
+      negatable: false,
+      help: 'Indicates that the app should ignore deprecation warnings and continue to build '
+            'using deprecated APIs. Use of this flag may cause your app to fail to build when '
+            'deprecated APIs are removed.',
+    );
+  }
+
   /// Adds build options common to all of the desktop build commands.
   void addCommonDesktopBuildOptions({ required bool verboseHelp }) {
     addBuildModeFlags(verboseHelp: verboseHelp);
@@ -1251,6 +1262,7 @@ abstract class FlutterCommand extends Command<void> {
   /// rather than calling [runCommand] directly.
   @mustCallSuper
   Future<FlutterCommandResult> verifyThenRunCommand(String? commandPath) async {
+    globals.preRunValidator.validate();
     // Populate the cache. We call this before pub get below so that the
     // sky_engine package is available in the flutter cache for pub to find.
     if (shouldUpdateCache) {
@@ -1263,8 +1275,10 @@ abstract class FlutterCommand extends Command<void> {
 
     await validateCommand();
 
+    final FlutterProject project = FlutterProject.current();
+    project.checkForDeprecation(deprecationBehavior: deprecationBehavior);
+
     if (shouldRunPub) {
-      final FlutterProject project = FlutterProject.current();
       final Environment environment = Environment(
         artifacts: globals.artifacts!,
         logger: globals.logger,
@@ -1281,7 +1295,7 @@ abstract class FlutterCommand extends Command<void> {
 
       await generateLocalizationsSyntheticPackage(
         environment: environment,
-        buildSystem: globals.buildSystem!,
+        buildSystem: globals.buildSystem,
       );
 
       await pub.get(
@@ -1358,7 +1372,7 @@ abstract class FlutterCommand extends Command<void> {
         final StringBuffer result = StringBuffer();
         result.writeln(userMessages.flutterFoundButUnsupportedDevices);
         result.writeAll(
-          await Device.descriptions(unsupportedDevices)
+          (await Device.descriptions(unsupportedDevices))
               .map((String desc) => desc)
               .toList(),
           '\n',
@@ -1459,11 +1473,14 @@ abstract class FlutterCommand extends Command<void> {
 
   ApplicationPackageFactory? applicationPackages;
 
-  /// Gets the parsed command-line option named [name] as `bool`.
+  /// Gets the parsed command-line option named [name] as a `bool`.
   bool boolArg(String name) => argResults?[name] as bool? ?? false;
 
-  /// Gets the parsed command-line option named [name] as `String`.
+  /// Gets the parsed command-line option named [name] as a `String`.
   String? stringArg(String name) => argResults?[name] as String?;
+
+  /// Gets the parsed command-line option named [name] as an `int`.
+  int? intArg(String name) => argResults?[name] as int?;
 
   /// Gets the parsed command-line option named [name] as `List<String>`.
   List<String> stringsArg(String name) => argResults?[name] as List<String>? ?? <String>[];

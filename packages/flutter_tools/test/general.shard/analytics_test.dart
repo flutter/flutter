@@ -17,6 +17,7 @@ import 'package:flutter_tools/src/commands/build.dart';
 import 'package:flutter_tools/src/commands/config.dart';
 import 'package:flutter_tools/src/commands/doctor.dart';
 import 'package:flutter_tools/src/doctor.dart';
+import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/reporting/reporting.dart';
@@ -368,6 +369,9 @@ class FakeDoctor extends Fake implements Doctor {
     bool verbose = true,
     bool showColor = true,
     AndroidLicenseValidator androidLicenseValidator,
+    bool showPii = true,
+    List<ValidatorTask> startedValidatorTasks,
+    bool sendEvent = true,
   }) async {
     return diagnoseSucceeds;
   }
