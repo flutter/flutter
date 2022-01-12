@@ -53,7 +53,8 @@ PlatformViewIOS::PlatformViewIOS(
     : PlatformView(delegate, std::move(task_runners)),
       ios_context_(context),
       platform_views_controller_(platform_views_controller),
-      accessibility_bridge_([this](bool enabled) { PlatformView::SetSemanticsEnabled(enabled); }) {}
+      accessibility_bridge_([this](bool enabled) { PlatformView::SetSemanticsEnabled(enabled); }),
+      platform_message_handler_(new PlatformMessageHandlerIos(task_runners)) {}
 
 PlatformViewIOS::PlatformViewIOS(
     PlatformView::Delegate& delegate,
@@ -67,13 +68,9 @@ PlatformViewIOS::PlatformViewIOS(
 
 PlatformViewIOS::~PlatformViewIOS() = default;
 
-PlatformMessageRouter& PlatformViewIOS::GetPlatformMessageRouter() {
-  return platform_message_router_;
-}
-
 // |PlatformView|
 void PlatformViewIOS::HandlePlatformMessage(std::unique_ptr<flutter::PlatformMessage> message) {
-  platform_message_router_.HandlePlatformMessage(std::move(message));
+  platform_message_handler_->HandlePlatformMessage(std::move(message));
 }
 
 fml::WeakPtr<FlutterViewController> PlatformViewIOS::GetOwnerViewController() const {

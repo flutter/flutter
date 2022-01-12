@@ -11,6 +11,9 @@
 
 FLUTTER_ASSERT_ARC
 
+@protocol FlutterTaskQueue <NSObject>
+@end
+
 @interface FlutterBinaryMessengerRelayTest : XCTestCase
 @end
 
@@ -50,6 +53,28 @@ FLUTTER_ASSERT_ARC
   NSString* channel = @"foobar";
   relay.parent = nil;
   [relay sendOnChannel:channel message:message binaryReply:nil];
+}
+
+- (void)testSetMessageHandlerWithTaskQueue {
+  id messenger = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
+  FlutterBinaryMessengerRelay* relay =
+      [[FlutterBinaryMessengerRelay alloc] initWithParent:messenger];
+  NSString* channel = @"foobar";
+  NSObject<FlutterTaskQueue>* taskQueue = OCMProtocolMock(@protocol(FlutterTaskQueue));
+  FlutterBinaryMessageHandler handler = ^(NSData* _Nullable, FlutterBinaryReply _Nonnull) {
+  };
+  [relay setMessageHandlerOnChannel:channel binaryMessageHandler:handler taskQueue:taskQueue];
+  OCMVerify([messenger setMessageHandlerOnChannel:channel
+                             binaryMessageHandler:handler
+                                        taskQueue:taskQueue]);
+}
+
+- (void)testMakeBackgroundTaskQueue {
+  id messenger = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
+  FlutterBinaryMessengerRelay* relay =
+      [[FlutterBinaryMessengerRelay alloc] initWithParent:messenger];
+  [relay makeBackgroundTaskQueue];
+  OCMVerify([messenger makeBackgroundTaskQueue]);
 }
 
 @end
