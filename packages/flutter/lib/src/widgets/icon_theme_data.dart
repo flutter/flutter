@@ -4,7 +4,6 @@
 
 import 'dart:ui' as ui show lerpDouble;
 
-import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
@@ -115,11 +114,11 @@ class IconThemeData with Diagnosticable {
         && other.color == color
         && other.opacity == opacity
         && other.size == size
-        && const ListEquality<Shadow>().equals(other.shadows, shadows);
+        && listEquals(other.shadows, shadows);
   }
 
   @override
-  int get hashCode => hashValues(color, opacity, size);
+  int get hashCode => hashValues(color, opacity, size, hashList(shadows));
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
