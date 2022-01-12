@@ -300,6 +300,7 @@ abstract class RawKeyEvent with Diagnosticable {
         key: key ?? '',
         location: message['location'] as int? ?? 0,
         metaState: message['metaState'] as int? ?? 0,
+        keyCode: message['keyCode'] as int? ?? 0,
       );
     }
 

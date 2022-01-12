@@ -300,4 +300,22 @@ void main() {
       }
     }
   });
+
+  testWidgets('Leader after Follower asserts', (WidgetTester tester) async {
+    final LayerLink link = LayerLink();
+    await tester.pumpWidget(
+      CompositedTransformFollower(
+        link: link,
+        child: CompositedTransformTarget(
+          link: link,
+          child: const SizedBox(height: 20, width: 20),
+        ),
+      ),
+    );
+
+    expect(
+      (tester.takeException() as AssertionError).message,
+      contains('LeaderLayer anchor must come before FollowerLayer in paint order'),
+    );
+  });
 }
