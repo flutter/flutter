@@ -766,24 +766,26 @@ class _ListWheelScrollViewState extends State<ListWheelScrollView> {
     }
   }
 
+  bool _handleScrollNotification(ScrollNotification notification) {
+    if (notification.depth == 0
+        && widget.onSelectedItemChanged != null
+        && notification is ScrollUpdateNotification
+        && notification.metrics is FixedExtentMetrics) {
+      final FixedExtentMetrics metrics = notification.metrics as FixedExtentMetrics;
+      final int currentItemIndex = metrics.itemIndex;
+      if (currentItemIndex != _lastReportedItemIndex) {
+        _lastReportedItemIndex = currentItemIndex;
+        final int trueIndex = widget.childDelegate.trueIndexOf(currentItemIndex);
+        widget.onSelectedItemChanged!(trueIndex);
+      }
+    }
+    return false;
+  }
+
   @override
   Widget build(BuildContext context) {
     return NotificationListener<ScrollNotification>(
-      onNotification: (ScrollNotification notification) {
-        if (notification.depth == 0
-            && widget.onSelectedItemChanged != null
-            && notification is ScrollUpdateNotification
-            && notification.metrics is FixedExtentMetrics) {
-          final FixedExtentMetrics metrics = notification.metrics as FixedExtentMetrics;
-          final int currentItemIndex = metrics.itemIndex;
-          if (currentItemIndex != _lastReportedItemIndex) {
-            _lastReportedItemIndex = currentItemIndex;
-            final int trueIndex = widget.childDelegate.trueIndexOf(currentItemIndex);
-            widget.onSelectedItemChanged!(trueIndex);
-          }
-        }
-        return false;
-      },
+      onNotification: _handleScrollNotification,
       child: _FixedExtentScrollable(
         controller: scrollController,
         physics: widget.physics,
