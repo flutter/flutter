@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
 
@@ -19,6 +18,11 @@ const double _kDragContainerExtentPercentage = 0.25;
 // How much the scroll's drag gesture can overshoot the RefreshIndicator's
 // displacement; max displacement = _kDragSizeFactorLimit * displacement.
 const double _kDragSizeFactorLimit = 1.5;
+
+/// The drag threshold after which the refresh indicator goes
+/// into [_RefreshIndicatorMode.armed].
+// TODO(nt4f04und): remove this when https://github.com/flutter/flutter/issues/96528 is fixed
+const double _kArmedThreshold = 1 / _kDragSizeFactorLimit;
 
 // When the scroll ends, the duration of the refresh indicator's animation
 // to the RefreshIndicator's displacement.
@@ -255,15 +259,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
 
   @override
   void didChangeDependencies() {
-    final ThemeData theme = Theme.of(context);
-    _valueColor = _positionController.drive(
-      ColorTween(
-        begin: (widget.color ?? theme.colorScheme.primary).withOpacity(0.0),
-        end: (widget.color ?? theme.colorScheme.primary).withOpacity(1.0),
-      ).chain(CurveTween(
-        curve: const Interval(0.0, 1.0 / _kDragSizeFactorLimit),
-      )),
-    );
+    _updateValueColor();
     super.didChangeDependencies();
   }
 
@@ -271,15 +267,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
   void didUpdateWidget(covariant RefreshIndicator oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.color != widget.color) {
-      final ThemeData theme = Theme.of(context);
-      _valueColor = _positionController.drive(
-        ColorTween(
-          begin: (widget.color ?? theme.colorScheme.primary).withOpacity(0.0),
-          end: (widget.color ?? theme.colorScheme.primary).withOpacity(1.0),
-        ).chain(CurveTween(
-            curve: const Interval(0.0, 1.0 / _kDragSizeFactorLimit),
-        )),
-      );
+      _updateValueColor();
     }
   }
 
@@ -290,13 +278,25 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
     super.dispose();
   }
 
+  void _updateValueColor() {
+    final ThemeData theme = Theme.of(context);
+    _valueColor = _positionController.drive(
+      ColorTween(
+        begin: (widget.color ?? theme.colorScheme.primary).withOpacity(0.0),
+        end: (widget.color ?? theme.colorScheme.primary).withOpacity(1.0),
+      ).chain(CurveTween(
+        curve: const Interval(0.0, _kArmedThreshold),
+      )),
+    );
+  }
+
   bool _shouldStart(ScrollNotification notification) {
     // If the notification.dragDetails is null, this scroll is not triggered by
     // user dragging. It may be a result of ScrollController.jumpTo or ballistic scroll.
     // In this case, we don't want to trigger the refresh indicator.
     return ((notification is ScrollStartNotification && notification.dragDetails != null)
             || (notification is ScrollUpdateNotification && notification.dragDetails != null && widget.triggerMode == RefreshIndicatorTriggerMode.anywhere))
-      && (( notification.metrics.axisDirection == AxisDirection.up && notification.metrics.extentAfter == 0.0)
+      && ((notification.metrics.axisDirection == AxisDirection.up && notification.metrics.extentAfter == 0.0)
             || (notification.metrics.axisDirection == AxisDirection.down && notification.metrics.extentBefore == 0.0))
       && _mode == null
       && _start(notification.metrics.axisDirection);
@@ -326,24 +326,36 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
       if (_mode == _RefreshIndicatorMode.drag || _mode == _RefreshIndicatorMode.armed)
         _dismiss(_RefreshIndicatorMode.canceled);
     } else if (notification is ScrollUpdateNotification) {
-      if (_mode == _RefreshIndicatorMode.drag || _mode == _RefreshIndicatorMode.armed) {
-        if ((notification.metrics.axisDirection  == AxisDirection.down && notification.metrics.extentBefore > 0.0)
-            || (notification.metrics.axisDirection  == AxisDirection.up && notification.metrics.extentAfter > 0.0)) {
-          _dismiss(_RefreshIndicatorMode.canceled);
-        } else {
+      if (notification.dragDetails != null) {
+        if (_mode == _RefreshIndicatorMode.drag || _mode == _RefreshIndicatorMode.armed) {
+          final ScrollPosition position = Scrollable.of(notification.context!)!.position;
           if (notification.metrics.axisDirection == AxisDirection.down) {
+            if (notification.metrics.extentBefore > 0.0) {
+              // Prevent moving the scroll view until indicator drag offset is fully consumed.
+              position.correctBy(-notification.scrollDelta!);
+            }
             _dragOffset = _dragOffset! - notification.scrollDelta!;
           } else if (notification.metrics.axisDirection == AxisDirection.up) {
+            if (notification.metrics.extentAfter > 0.0) {
+              // Prevent moving the scroll view until indicator drag offset is fully consumed.
+              position.correctBy(notification.scrollDelta!);
+            }
             _dragOffset = _dragOffset! + notification.scrollDelta!;
           }
-          _checkDragOffset(notification.metrics.viewportDimension);
+          _updateDragOffset(notification.metrics.viewportDimension);
+          if (_dragOffset! <= 0.0) {
+            _dismiss(_RefreshIndicatorMode.canceled);
+          }
         }
-      }
-      if (_mode == _RefreshIndicatorMode.armed && notification.dragDetails == null) {
-        // On iOS start the refresh when the Scrollable bounces back from the
+      } else {
+        // Handle drag up on iOS - i.e. when the Scrollable bounces back from the
         // overscroll (ScrollNotification indicating this don't have dragDetails
         // because the scroll activity is not directly triggered by a drag).
-        _show();
+        if (_mode == _RefreshIndicatorMode.armed) {
+          _show();
+        } else if (_mode == _RefreshIndicatorMode.drag) {
+          _dismiss(_RefreshIndicatorMode.canceled);
+        }
       }
     } else if (notification is OverscrollNotification) {
       if (_mode == _RefreshIndicatorMode.drag || _mode == _RefreshIndicatorMode.armed) {
@@ -352,7 +364,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
         } else if (notification.metrics.axisDirection == AxisDirection.up) {
           _dragOffset = _dragOffset! + notification.overscroll;
         }
-        _checkDragOffset(notification.metrics.viewportDimension);
+        _updateDragOffset(notification.metrics.viewportDimension);
       }
     } else if (notification is ScrollEndNotification) {
       switch (_mode) {
@@ -405,14 +417,16 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
     return true;
   }
 
-  void _checkDragOffset(double containerExtent) {
+  void _updateDragOffset(double containerExtent) {
     assert(_mode == _RefreshIndicatorMode.drag || _mode == _RefreshIndicatorMode.armed);
-    double newValue = _dragOffset! / (containerExtent * _kDragContainerExtentPercentage);
-    if (_mode == _RefreshIndicatorMode.armed)
-      newValue = math.max(newValue, 1.0 / _kDragSizeFactorLimit);
+    final double newValue = _dragOffset! / (containerExtent * _kDragContainerExtentPercentage);
     _positionController.value = newValue.clamp(0.0, 1.0); // this triggers various rebuilds
-    if (_mode == _RefreshIndicatorMode.drag && _valueColor.value!.alpha == 0xFF)
+
+    if (_mode == _RefreshIndicatorMode.drag && _positionController.value >= _kArmedThreshold) {
       _mode = _RefreshIndicatorMode.armed;
+    } else if (_mode == _RefreshIndicatorMode.armed && _positionController.value < _kArmedThreshold) {
+      _mode = _RefreshIndicatorMode.drag;
+    }
   }
 
   // Stop showing the refresh indicator.
@@ -454,7 +468,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
     _pendingRefreshFuture = completer.future;
     _mode = _RefreshIndicatorMode.snap;
     _positionController
-      .animateTo(1.0 / _kDragSizeFactorLimit, duration: _kIndicatorSnapDuration)
+      .animateTo(_kArmedThreshold, duration: _kIndicatorSnapDuration)
       .then<void>((void value) {
         if (mounted && _mode == _RefreshIndicatorMode.snap) {
           assert(widget.onRefresh != null);

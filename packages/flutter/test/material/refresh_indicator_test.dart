@@ -7,6 +7,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+// The offset after which the indicator is expected to become armed.
+// Equals to: viewport height * _kDragContainerExtentPercentage * _kArmedThreshold
+const double kExpectedArmOffset = 600 * 0.25 * 1 / 1.5;
+
 bool refreshCalled = false;
 
 Future<void> refresh() {
@@ -223,11 +227,8 @@ void main() {
       ),
     );
 
-    await tester.fling(find.text('X'), const Offset(0.0, 50.0), 1000.0);
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
-    await tester.pump(const Duration(seconds: 1));
-    await tester.pump(const Duration(seconds: 1));
+    await tester.drag(find.text('X'), const Offset(0.0, kExpectedArmOffset - 1.0));
+    await tester.pumpAndSettle();
     expect(refreshCalled, false);
   });
 
@@ -250,11 +251,8 @@ void main() {
       ),
     );
 
-    await tester.fling(find.text('X'), const Offset(0.0, 100.0), 1000.0);
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
-    await tester.pump(const Duration(seconds: 1));
-    await tester.pump(const Duration(seconds: 1));
+    await tester.drag(find.text('X'), const Offset(0.0, kExpectedArmOffset));
+    await tester.pumpAndSettle();
     expect(refreshCalled, true);
   });
 
@@ -383,7 +381,7 @@ void main() {
     expect(completed2, true);
   });
 
-  testWidgets('Refresh starts while scroll view moves back to 0.0 after overscroll', (WidgetTester tester) async {
+  testWidgets('RefreshIndicator - refresh and cancel happen while scroll view moves back to 0.0 after overscroll', (WidgetTester tester) async {
     refreshCalled = false;
     double lastScrollOffset;
     final ScrollController controller = ScrollController();
@@ -406,15 +404,31 @@ void main() {
       ),
     );
 
+    // test cancel
+
+    await tester.drag(find.text('A'), const Offset(0.0, kExpectedArmOffset - 1));
+    await tester.pump();
+    final Offset position = tester.getTopLeft(find.byType(RefreshProgressIndicator));
+    // wait before it starts moving
+    await tester.pump(const Duration(milliseconds: 1));
+    await tester.pump(const Duration(milliseconds: 1));
+    expect(tester.getTopLeft(find.byType(RefreshProgressIndicator)).dy, lessThan(position.dy));
+    expect(refreshCalled, false);
+    await tester.pumpAndSettle();
+
+    // test refresh
+
     await tester.fling(find.text('A'), const Offset(0.0, 300.0), 1000.0);
     await tester.pump(const Duration(milliseconds: 100));
     expect(lastScrollOffset = controller.offset, lessThan(0.0));
-    expect(refreshCalled, isFalse);
+    expect(refreshCalled, false);
 
-    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 1));   // accept refresh
+    await tester.pump(const Duration(milliseconds: 150)); // wait for animation
+    await tester.pump(const Duration(milliseconds: 1));   // wait for the refresh callback to be called
     expect(controller.offset, greaterThan(lastScrollOffset));
     expect(controller.offset, lessThan(0.0));
-    expect(refreshCalled, isTrue);
+    expect(refreshCalled, true);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('RefreshIndicator does not force child to relayout', (WidgetTester tester) async {
@@ -900,6 +914,74 @@ void main() {
     await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
     await tester.pump(const Duration(seconds: 1)); // finish the indicator settle animation
     await tester.pump(const Duration(seconds: 1)); // finish the indicator hide animation
+    expect(refreshCalled, true);
+  });
+
+  testWidgets("RefreshIndicator - can be cancelled and list doesn't move", (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/36158
+
+    refreshCalled = false;
+
+    const Color primaryColor = Colors.red;
+    final ThemeData theme = ThemeData.from(colorScheme: const ColorScheme.light().copyWith(primary: primaryColor));
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: RefreshIndicator(
+          onRefresh: refresh,
+          triggerMode: RefreshIndicatorTriggerMode.anywhere,
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
+              return SizedBox(
+                height: 200.0,
+                child: Text(item),
+              );
+            }).toList(),
+          ),
+        ),
+      ),
+    );
+
+    final Offset itemPosition = tester.getTopLeft(find.text('A'));
+    final TestGesture drag = await tester.startGesture(Offset.zero);
+
+    Future<void> moveAndVerifyItemPosition(double value) async {
+      await drag.moveBy(Offset(0.0, value));
+      await tester.pump();
+      expect(tester.getTopLeft(find.text('A')), itemPosition);
+    }
+
+    // move to become armed and verify the list doesn't move
+    await moveAndVerifyItemPosition(kExpectedArmOffset / 2);
+    await moveAndVerifyItemPosition(kExpectedArmOffset / 2);
+
+    // verify we became armed
+    await tester.pumpAndSettle();
+    expect(tester.widget<RefreshProgressIndicator>(find.byType(RefreshProgressIndicator)).valueColor!.value, primaryColor.withOpacity(1.0));
+
+    // move to 0 and verify the list doesn't move
+    await moveAndVerifyItemPosition(-kExpectedArmOffset / 2);
+
+    // verify we stopped being armed
+    await tester.pumpAndSettle();
+    // TODO(nt4f04und): change to the proper expect when https://github.com/flutter/flutter/issues/96528 is fixed
+    // expect(tester.widget<RefreshProgressIndicator>(find.byType(RefreshProgressIndicator)).valueColor!.value, primaryColor.withOpacity(0.3));
+    expect(tester.widget<RefreshProgressIndicator>(find.byType(RefreshProgressIndicator)).valueColor!.value, primaryColor.withOpacity(0.499));
+
+    await moveAndVerifyItemPosition(-kExpectedArmOffset / 2);
+
+    // verify now list can be moved
+    await drag.moveBy(const Offset(0.0, -1.0));
+    await tester.pump();
+    expect(tester.getTopLeft(find.text('A')), itemPosition + const Offset(0.0, -1.0));
+
+    expect(refreshCalled, false);
+    await drag.up();
+
+    // verify we can drag again right after releasing
+    await tester.drag(find.text('A'), const Offset(0.0, kExpectedArmOffset + 1));
+    await tester.pumpAndSettle();
     expect(refreshCalled, true);
   });
 }
