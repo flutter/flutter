@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math';
+
 import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
@@ -105,6 +107,11 @@ Iterable<String> _apkFilesFor(AndroidBuildInfo androidBuildInfo) {
   }
   return <String>['app$flavorString-$buildType.apk'];
 }
+
+// The maximum number of Gradle retries.
+// When a build fails due to a network failure, this is the maximum number
+// of times that the build is re-attempted.
+const int kMaxGradleRetries = 10;
 
 /// An implementation of the [AndroidBuilder] that delegates to gradle.
 class AndroidGradleBuilder implements AndroidBuilder {
@@ -221,7 +228,8 @@ class AndroidGradleBuilder implements AndroidBuilder {
     required List<GradleHandledError> localGradleErrors,
     bool validateDeferredComponents = true,
     bool deferredComponentsEnabled = false,
-    int retries = 1,
+    int retry = 0,
+    int maxRetries = kMaxGradleRetries,
   }) async {
     assert(project != null);
     assert(androidBuildInfo != null);
@@ -401,38 +409,44 @@ class AndroidGradleBuilder implements AndroidBuilder {
           'Gradle task $assembleTask failed with exit code $exitCode',
           exitCode: exitCode,
         );
-      } else {
-        final GradleBuildStatus status = await detectedGradleError!.handler(
-          line: detectedGradleErrorLine!,
-          project: project,
-          usesAndroidX: usesAndroidX,
-          multidexEnabled: androidBuildInfo.multidexEnabled,
-        );
+      } 
+      final GradleBuildStatus status = await detectedGradleError!.handler(
+        line: detectedGradleErrorLine!,
+        project: project,
+        usesAndroidX: usesAndroidX,
+        multidexEnabled: androidBuildInfo.multidexEnabled,
+      );
 
-        if (retries >= 1) {
-          final String successEventLabel = 'gradle-${detectedGradleError!.eventLabel}-success';
-          switch (status) {
-            case GradleBuildStatus.retry:
-              await buildGradleApp(
-                project: project,
-                androidBuildInfo: androidBuildInfo,
-                target: target,
-                isBuildingBundle: isBuildingBundle,
-                localGradleErrors: localGradleErrors,
-                retries: retries - 1,
-              );
-              BuildEvent(successEventLabel, type: 'gradle', flutterUsage: _usage).send();
-              return;
-            case GradleBuildStatus.exit:
-            // noop.
-          }
+      if (retry < maxRetries) {
+        switch (status) {
+          case GradleBuildStatus.retry:
+            // Use binary exponential backoff before retriggering the build.
+            // The expected wait times are: 100ms, 200ms, 400ms, and so on...
+            final int waitTime = pow(2, retry).toInt() * 100;
+            retry += 1;
+            _logger.printStatus('Retrying Gradle Build: #$retry, wait time: $waitTime');
+            await Future<void>.delayed(Duration(milliseconds: waitTime));
+            await buildGradleApp(
+              project: project,
+              androidBuildInfo: androidBuildInfo,
+              target: target,
+              isBuildingBundle: isBuildingBundle,
+              localGradleErrors: localGradleErrors,
+              retry: retry,
+              maxRetries: maxRetries,
+            );
+            final String successEventLabel = 'gradle-${detectedGradleError!.eventLabel}-success';
+            BuildEvent(successEventLabel, type: 'gradle', flutterUsage: _usage).send();
+            return;
+          case GradleBuildStatus.exit:
+          // noop.
         }
-        BuildEvent('gradle-${detectedGradleError?.eventLabel}-failure', type: 'gradle', flutterUsage: _usage).send();
-        throwToolExit(
-          'Gradle task $assembleTask failed with exit code $exitCode',
-          exitCode: exitCode,
-        );
       }
+      BuildEvent('gradle-${detectedGradleError?.eventLabel}-failure', type: 'gradle', flutterUsage: _usage).send();
+      throwToolExit(
+        'Gradle task $assembleTask failed with exit code $exitCode',
+        exitCode: exitCode,
+      );
     }
 
     if (isBuildingBundle) {
