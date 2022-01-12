@@ -145,7 +145,6 @@ class _BorderContainer extends StatefulWidget {
     required this.fillColor,
     required this.hoverColor,
     required this.isHovering,
-    this.child,
   }) : assert(border != null),
        assert(gap != null),
        assert(fillColor != null),
@@ -157,7 +156,6 @@ class _BorderContainer extends StatefulWidget {
   final Color fillColor;
   final Color hoverColor;
   final bool isHovering;
-  final Widget? child;
 
   @override
   _BorderContainerState createState() => _BorderContainerState();
@@ -249,7 +247,6 @@ class _BorderContainerState extends State<_BorderContainer> with TickerProviderS
         hoverColorTween: _hoverColorTween,
         hoverAnimation: _hoverAnimation,
       ),
-      child: widget.child,
     );
   }
 }
