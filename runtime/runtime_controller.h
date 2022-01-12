@@ -532,6 +532,10 @@ class RuntimeController : public PlatformConfigurationClient {
 
   // |PlatformConfigurationClient|
   void RequestDartDeferredLibrary(intptr_t loading_unit_id) override;
+
+  // |PlatformConfigurationClient|
+  std::shared_ptr<const fml::Mapping> GetPersistentIsolateData() override;
+
   const fml::WeakPtr<IOManager>& GetIOManager() const {
     return context_.io_manager;
   }
@@ -612,9 +616,6 @@ class RuntimeController : public PlatformConfigurationClient {
 
   // |PlatformConfigurationClient|
   void SetNeedsReportTimings(bool value) override;
-
-  // |PlatformConfigurationClient|
-  std::shared_ptr<const fml::Mapping> GetPersistentIsolateData() override;
 
   // |PlatformConfigurationClient|
   std::unique_ptr<std::vector<std::string>> ComputePlatformResolvedLocale(
