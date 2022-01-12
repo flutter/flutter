@@ -340,9 +340,9 @@ class ImageStream with Diagnosticable {
     if (_listeners != null) {
       final List<ImageStreamListener> initialListeners = _listeners!;
       _listeners = null;
-      _completer!.synchronousCall = false;
+      _completer!._synchronousCall = false;
       initialListeners.forEach(_completer!.addListener);
-      _completer!.synchronousCall = true;
+      _completer!._synchronousCall = true;
     }
   }
 
@@ -492,7 +492,7 @@ abstract class ImageStreamCompleter with Diagnosticable {
   bool _hadAtLeastOneListener = false;
 
   /// Whether the listeners should be called synchronously
-  bool synchronousCall = true;
+  bool _synchronousCall = true;
 
   /// Adds a listener callback that is called whenever a new concrete [ImageInfo]
   /// object is available or an error is reported. If a concrete image is
@@ -509,7 +509,7 @@ abstract class ImageStreamCompleter with Diagnosticable {
     _listeners.add(listener);
     if (_currentImage != null) {
       try {
-        listener.onImage(_currentImage!.clone(), synchronousCall);
+        listener.onImage(_currentImage!.clone(), _synchronousCall);
       } catch (exception, stack) {
         reportError(
           context: ErrorDescription('by a synchronously-called image listener'),
