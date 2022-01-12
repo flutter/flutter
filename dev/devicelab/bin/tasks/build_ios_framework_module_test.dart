@@ -66,7 +66,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
   String content = pubspec.readAsStringSync();
   content = content.replaceFirst(
     '\ndependencies:\n',
-    '\ndependencies:\n  device_info: 0.4.1\n  package_info: 0.4.0+9\n  connectivity: 3.0.3\n',
+    '\ndependencies:\n  device_info: 2.0.3\n  package_info: 0.4.0+9\n  connectivity: 3.0.3\n',
   );
   pubspec.writeAsStringSync(content, flush: true);
   await inDirectory(projectDir, () async {
