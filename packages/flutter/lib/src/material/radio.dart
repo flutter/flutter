@@ -197,6 +197,9 @@ class Radio<T> extends StatefulWidget {
   ///
   /// ```dart
   /// Radio<int>(
+  ///   value: 1,
+  ///   groupValue: 1,
+  ///   onChanged: (){},
   ///   fillColor: MaterialStateProperty.resolveWith<Color>((states) {
   ///     if (states.contains(MaterialState.disabled)) {
   ///       return Colors.orange.withOpacity(.32);
