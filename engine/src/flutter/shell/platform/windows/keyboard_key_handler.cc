@@ -105,7 +105,8 @@ KeyboardKeyHandler::KeyboardKeyHandlerDelegate::~KeyboardKeyHandlerDelegate() =
 KeyboardKeyHandler::KeyboardKeyHandler(EventDispatcher dispatch_event)
     : dispatch_event_(dispatch_event),
       last_sequence_id_(1),
-      last_key_is_ctrl_left_down(false) {}
+      last_key_is_ctrl_left_down(false),
+      should_synthesize_ctrl_left_up(false) {}
 
 KeyboardKeyHandler::~KeyboardKeyHandler() = default;
 

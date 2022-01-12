@@ -115,6 +115,28 @@ typedef struct WmCharInfo {
                      HWND hWnd = NULL);
 } WmCharInfo;
 
+// WM_SYSKEYDOWN  messages.
+//
+// See https://docs.microsoft.com/en-us/windows/win32/inputdev/wm-syskeydown.
+typedef struct WmSysKeyDownInfo {
+  uint32_t key;
+
+  uint8_t scan_code;
+
+  WmFieldExtended extended;
+
+  WmFieldPrevState prev_state;
+
+  // WmFieldTransitionState transition; // Always 0.
+
+  WmFieldContext context;
+
+  uint16_t repeat_count;
+
+  Win32Message Build(LRESULT expected_result = kWmResultDontCheck,
+                     HWND hWnd = NULL);
+} WmSysKeyDownInfo;
+
 // WM_SYSKEYUP  messages.
 //
 // See https://docs.microsoft.com/en-us/windows/win32/inputdev/wm-syskeyup.
