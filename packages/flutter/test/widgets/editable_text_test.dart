@@ -8736,6 +8736,241 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS })
   );
 
+  testWidgets("Mac\'s expand extent position", (WidgetTester tester) async {
+    const String testText = 'Now is the time for all good people to come to the aid of their country';
+    final TextEditingController controller = TextEditingController(text: testText);
+    // Start the selection in the middle somewhere.
+    controller.selection = const TextSelection.collapsed(offset: 10);
+    await tester.pumpWidget(MaterialApp(
+      home: Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          width: 400,
+          child: EditableText(
+            maxLines: 10,
+            controller: controller,
+            autofocus: true,
+            focusNode: focusNode,
+            style: Typography.material2018().black.subtitle1!,
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+            keyboardType: TextInputType.text,
+          ),
+        ),
+      ),
+    ));
+
+    await tester.pump(); // Wait for autofocus to take effect.
+    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection.baseOffset, 10);
+
+    // With cursor in the middle of the line, cmd + left. Left end is the extent.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowLeft,
+      ],
+      lineModifier: true,
+      shift: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+    expect(
+      controller.selection,
+      equals(
+        const TextSelection(
+          baseOffset: 10,
+          extentOffset: 0,
+          affinity: TextAffinity.upstream,
+        ),
+      ),
+    );
+
+    // With cursor in the middle of the line, cmd + right. Right end is the extent.
+    controller.selection = const TextSelection.collapsed(offset: 10);
+    await tester.pump();
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowRight,
+      ],
+      lineModifier: true,
+      shift: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+    expect(
+      controller.selection,
+      equals(
+        const TextSelection(
+          baseOffset: 10,
+          extentOffset: 29,
+          affinity: TextAffinity.upstream,
+        ),
+      ),
+    );
+
+    // With cursor in the middle of the line, cmd + left then cmd + right. Left end is the extent.
+    controller.selection = const TextSelection.collapsed(offset: 10);
+    await tester.pump();
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowLeft,
+      ],
+      lineModifier: true,
+      shift: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+    await tester.pump();
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowRight,
+      ],
+      lineModifier: true,
+      shift: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+    expect(
+      controller.selection,
+      equals(
+        const TextSelection(
+          baseOffset: 29,
+          extentOffset: 0,
+          affinity: TextAffinity.upstream,
+        ),
+      ),
+    );
+
+    // With cursor in the middle of the line, cmd + right then cmd + left. Right end is the extent.
+    controller.selection = const TextSelection.collapsed(offset: 10);
+    await tester.pump();
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowRight,
+      ],
+      lineModifier: true,
+      shift: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+    await tester.pump();
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowLeft,
+      ],
+      lineModifier: true,
+      shift: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+    expect(
+      controller.selection,
+      equals(
+        const TextSelection(
+          baseOffset: 0,
+          extentOffset: 29,
+          affinity: TextAffinity.upstream,
+        ),
+      ),
+    );
+
+    // With an RTL selection in the middle of the line, cmd + left. Left end is the extent.
+    controller.selection = const TextSelection(baseOffset: 12, extentOffset: 8);
+    await tester.pump();
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowLeft,
+      ],
+      lineModifier: true,
+      shift: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+    expect(
+      controller.selection,
+      equals(
+        const TextSelection(
+          baseOffset: 12,
+          extentOffset: 0,
+          affinity: TextAffinity.upstream,
+        ),
+      ),
+    );
+
+    // With an RTL selection in the middle of the line, cmd + right. Left end is the extent.
+    controller.selection = const TextSelection(baseOffset: 12, extentOffset: 8);
+    await tester.pump();
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowRight,
+      ],
+      lineModifier: true,
+      shift: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+    expect(
+      controller.selection,
+      equals(
+        const TextSelection(
+          baseOffset: 29,
+          extentOffset: 8,
+          affinity: TextAffinity.upstream,
+        ),
+      ),
+    );
+
+    // With an LTR selection in the middle of the line, cmd + right. Right end is the extent.
+    controller.selection = const TextSelection(baseOffset: 8, extentOffset: 12);
+    await tester.pump();
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowRight,
+      ],
+      lineModifier: true,
+      shift: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+    expect(
+      controller.selection,
+      equals(
+        const TextSelection(
+          baseOffset: 8,
+          extentOffset: 29,
+          affinity: TextAffinity.upstream,
+        ),
+      ),
+    );
+
+    // With an LTR selection in the middle of the line, cmd + left. Right end is the extent.
+    controller.selection = const TextSelection(baseOffset: 8, extentOffset: 12);
+    await tester.pump();
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowLeft,
+      ],
+      lineModifier: true,
+      shift: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+    expect(
+      controller.selection,
+      equals(
+        const TextSelection(
+          baseOffset: 0,
+          extentOffset: 12,
+          affinity: TextAffinity.upstream,
+        ),
+      ),
+    );
+  },
+    // On web, using keyboard for selection is handled by the browser.
+    skip: kIsWeb, // [intended]
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS })
+  );
+
   testWidgets('expanding selection to start/end', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(text: 'word word word');
     // word wo|rd| word
