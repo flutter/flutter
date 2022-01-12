@@ -921,10 +921,12 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
     switch (_effectiveType) {
       case BottomNavigationBarType.fixed:
         colorTween = ColorTween(
-          begin: widget.unselectedItemColor
+          begin: widget.unselectedLabelStyle?.color
+            ?? widget.unselectedItemColor
             ?? bottomTheme.unselectedItemColor
             ?? themeData.unselectedWidgetColor,
-          end: widget.selectedItemColor
+          end: widget.selectedLabelStyle?.color
+            ?? widget.selectedItemColor
             ?? bottomTheme.selectedItemColor
             ?? widget.fixedColor
             ?? themeColor,
@@ -932,10 +934,12 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
         break;
       case BottomNavigationBarType.shifting:
         colorTween = ColorTween(
-          begin: widget.unselectedItemColor
+          begin: widget.unselectedLabelStyle?.color
+            ??  widget.unselectedItemColor
             ?? bottomTheme.unselectedItemColor
             ?? themeData.colorScheme.surface,
-          end: widget.selectedItemColor
+          end: widget.selectedLabelStyle?.color
+            ?? widget.selectedItemColor
             ?? bottomTheme.selectedItemColor
             ?? themeData.colorScheme.surface,
         );
