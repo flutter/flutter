@@ -81,5 +81,61 @@ TEST(TextInputPluginTest, ClearClientResetsComposing) {
   EXPECT_TRUE(delegate.ime_was_reset());
 }
 
+// Verify that the embedder sends state update messages to the framework during
+// IME composing.
+TEST(TextInputPluginTest, VerifyComposingSendStateUpdate) {
+  bool sent_message = false;
+  TestBinaryMessenger messenger(
+      [&sent_message](const std::string& channel, const uint8_t* message,
+                      size_t message_size,
+                      BinaryReply reply) { sent_message = true; });
+  BinaryReply reply_handler = [](const uint8_t* reply, size_t reply_size) {};
+
+  EmptyTextInputPluginDelegate delegate;
+  TextInputPlugin handler(&messenger, &delegate);
+
+  auto& codec = JsonMethodCodec::GetInstance();
+
+  // Call TextInput.setClient to initialize the TextInputModel.
+  auto arguments = std::make_unique<rapidjson::Document>(rapidjson::kArrayType);
+  auto& allocator = arguments->GetAllocator();
+  arguments->PushBack(42, allocator);
+  rapidjson::Value config(rapidjson::kObjectType);
+  config.AddMember("inputAction", "done", allocator);
+  config.AddMember("inputType", "text", allocator);
+  arguments->PushBack(config, allocator);
+  auto message =
+      codec.EncodeMethodCall({"TextInput.setClient", std::move(arguments)});
+  messenger.SimulateEngineMessage("flutter/textinput", message->data(),
+                                  message->size(), reply_handler);
+
+  // ComposeBeginHook should send state update.
+  sent_message = false;
+  handler.ComposeBeginHook();
+  EXPECT_TRUE(sent_message);
+
+  // ComposeChangeHook should send state update.
+  sent_message = false;
+  handler.ComposeChangeHook(u"4", 1);
+  EXPECT_TRUE(sent_message);
+
+  // ComposeCommitHook should NOT send state update.
+  //
+  // Commit messages are always immediately followed by a change message or an
+  // end message, both of which will send an update. Sending intermediate state
+  // with a collapsed composing region will trigger the framework to assume
+  // composing has ended, which is not the case until a WM_IME_ENDCOMPOSING
+  // event is received in the main event loop, which will trigger a call to
+  // ComposeEndHook.
+  sent_message = false;
+  handler.ComposeCommitHook();
+  EXPECT_FALSE(sent_message);
+
+  // ComposeEndHook should send state update.
+  sent_message = false;
+  handler.ComposeEndHook();
+  EXPECT_TRUE(sent_message);
+}
+
 }  // namespace testing
 }  // namespace flutter
