@@ -409,7 +409,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
           'Gradle task $assembleTask failed with exit code $exitCode',
           exitCode: exitCode,
         );
-      } 
+      }
       final GradleBuildStatus status = await detectedGradleError!.handler(
         line: detectedGradleErrorLine!,
         project: project,
