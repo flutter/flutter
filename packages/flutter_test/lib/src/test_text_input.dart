@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:typed_data';
+import 'dart:ui' show Rect, Offset;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -266,6 +268,86 @@ class TestTextInput {
         MethodCall(
           'TextInputClient.onConnectionClosed',
            <dynamic>[_client ?? -1],
+        ),
+      ),
+      (ByteData? data) { /* response from framework is discarded */ },
+    );
+  }
+
+  /// Simulates a scribble interaction starting.
+  Future<void> startScribbleInteraction() async {
+    assert(isRegistered);
+    await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+      SystemChannels.textInput.name,
+      SystemChannels.textInput.codec.encodeMethodCall(
+        MethodCall(
+          'TextInputClient.scribbleInteractionBegan',
+           <dynamic>[_client ?? -1,]
+        ),
+      ),
+      (ByteData? data) { /* response from framework is discarded */ },
+    );
+  }
+
+  /// Simulates a Scribble focus.
+  Future<void> scribbleFocusElement(String elementIdentifier, Offset offset) async {
+    assert(isRegistered);
+    await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+      SystemChannels.textInput.name,
+      SystemChannels.textInput.codec.encodeMethodCall(
+        MethodCall(
+          'TextInputClient.focusElement',
+           <dynamic>[elementIdentifier, offset.dx, offset.dy]
+        ),
+      ),
+      (ByteData? data) { /* response from framework is discarded */ },
+    );
+  }
+
+  /// Simulates iOS asking for the list of Scribble elements during UIIndirectScribbleInteraction.
+  Future<List<List<dynamic>>> scribbleRequestElementsInRect(Rect rect) async {
+    assert(isRegistered);
+    List<List<dynamic>> response = <List<dynamic>>[];
+    await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+      SystemChannels.textInput.name,
+      SystemChannels.textInput.codec.encodeMethodCall(
+        MethodCall(
+          'TextInputClient.requestElementsInRect',
+           <dynamic>[rect.left, rect.top, rect.width, rect.height]
+        ),
+      ),
+      (ByteData? data) {
+        response = (SystemChannels.textInput.codec.decodeEnvelope(data!) as List<dynamic>).map((dynamic element) => element as List<dynamic>).toList();
+      },
+    );
+
+    return response;
+  }
+
+  /// Simulates iOS inserting a UITextPlaceholder during a long press with the pencil.
+  Future<void> scribbleInsertPlaceholder() async {
+    assert(isRegistered);
+    await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+      SystemChannels.textInput.name,
+      SystemChannels.textInput.codec.encodeMethodCall(
+        MethodCall(
+          'TextInputClient.insertTextPlaceholder',
+           <dynamic>[_client ?? -1, 0.0, 0.0]
+        ),
+      ),
+      (ByteData? data) { /* response from framework is discarded */ },
+    );
+  }
+
+  /// Simulates iOS removing a UITextPlaceholder after a long press with the pencil is released.
+  Future<void> scribbleRemovePlaceholder() async {
+    assert(isRegistered);
+    await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+      SystemChannels.textInput.name,
+      SystemChannels.textInput.codec.encodeMethodCall(
+        MethodCall(
+          'TextInputClient.removeTextPlaceholder',
+           <dynamic>[_client ?? -1]
         ),
       ),
       (ByteData? data) { /* response from framework is discarded */ },

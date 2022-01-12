@@ -8,7 +8,7 @@ import 'dart:ui';
 import 'package:path/path.dart' as path;
 import 'package:test_api/test_api.dart'; // ignore: deprecated_member_use
 
-import '_goldens_io.dart' if (dart.library.html) '_goldens_web.dart' as _goldens;
+import '_goldens_io.dart' if (dart.library.html) '_goldens_web.dart' as goldens;
 
 /// Compares image pixels against a golden image file.
 ///
@@ -94,7 +94,7 @@ abstract class GoldenFileComparator {
   /// Returns a [ComparisonResult] to describe the pixel differential of the
   /// [test] and [master] image bytes provided.
   static Future<ComparisonResult> compareLists(List<int> test, List<int> master) {
-    return _goldens.compareLists(test, master);
+    return goldens.compareLists(test, master);
   }
 }
 
