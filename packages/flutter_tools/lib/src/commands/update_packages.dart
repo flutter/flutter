@@ -35,7 +35,7 @@ const Map<String, String> kManuallyPinnedDependencies = <String, String>{
   // feature from https://github.com/dart-lang/shelf/issues/189 . This can be
   // removed when a new major version of shelf is published.
   'shelf': '1.1.4',
-  'video_player': '2.1.1', // Latest version does not resolve on our CI.
+  'video_player': '2.2.11',
 };
 
 class UpdatePackagesCommand extends FlutterCommand {
