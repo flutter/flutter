@@ -34,6 +34,7 @@ void main() {
           lockFileDepMissing,
           multidexErrorHandler,
           incompatibleKotlinVersionHandler,
+          minCompileSdkVersionHandler,
         ])
       );
     });
@@ -898,6 +899,59 @@ Execution failed for task ':app:generateDebugFeatureTransitiveDeps'.
           '│ update /android/build.gradle:                                                                │\n'
           "│ ext.kotlin_version = '<latest-version>'                                                      │\n"
           '└──────────────────────────────────────────────────────────────────────────────────────────────┘\n'
+        )
+      );
+    }, overrides: <Type, Generator>{
+      GradleUtils: () => FakeGradleUtils(),
+      Platform: () => fakePlatform('android'),
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.empty(),
+    });
+  });
+
+  group('Required compileSdkVersion', () {
+    const String errorMessage = '''
+Execution failed for task ':app:checkDebugAarMetadata'.
+> A failure occurred while executing com.android.build.gradle.internal.tasks.CheckAarMetadataWorkAction
+   > One or more issues found when checking AAR metadata values:
+
+     The minCompileSdk (31) specified in a
+     dependency's AAR metadata (META-INF/com/android/build/gradle/aar-metadata.properties)
+     is greater than this module's compileSdkVersion (android-30).
+     Dependency: androidx.window:window-java:1.0.0-beta04.
+     AAR metadata file: ~/.gradle/caches/transforms-3/2adc32c5b3f24bed763d33fbfb203338/transformed/jetified-window-java-1.0.0-beta04/META-INF/com/android/build/gradle/aar-metadata.properties.
+
+     The minCompileSdk (31) specified in a
+     dependency's AAR metadata (META-INF/com/android/build/gradle/aar-metadata.properties)
+     is greater than this module's compileSdkVersion (android-30).
+     Dependency: androidx.window:window:1.0.0-beta04.
+     AAR metadata file: ~/.gradle/caches/transforms-3/88f7e476ef68cecca729426edff955b5/transformed/jetified-window-1.0.0-beta04/META-INF/com/android/build/gradle/aar-metadata.properties.
+''';
+
+    testWithoutContext('pattern', () {
+      expect(
+        minCompileSdkVersionHandler.test(errorMessage),
+        isTrue,
+      );
+    });
+
+    testUsingContext('suggestion', () async {
+      await minCompileSdkVersionHandler.handler(
+        line: errorMessage,
+        project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
+      );
+
+      expect(
+        testLogger.statusText,
+        contains(
+          '\n'
+          '┌─ Flutter Fix ─────────────────────────────────────────────────────────────────┐\n'
+          '│ [!] Your project requires a higher compileSdkVersion.                         │\n'
+          '│ Fix this issue by bumping the compileSdkVersion in /android/app/build.gradle: │\n'
+          '│ android {                                                                     │\n'
+          '│   compileSdkVersion 31                                                        │\n'
+          '│ }                                                                             │\n'
+          '└───────────────────────────────────────────────────────────────────────────────┘\n'
         )
       );
     }, overrides: <Type, Generator>{

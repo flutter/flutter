@@ -188,31 +188,6 @@ void main() {
     ));
   });
 
-  testWithoutContext('FlutterValidator shows PATH environment variable when set', () async {
-    final FlutterValidator flutterValidator = FlutterValidator(
-      platform: FakePlatform(
-        localeName: 'en_US.UTF-8',
-        environment: <String, String> {
-          'PATH': '/usr/bin:/usr/local/bin:/home/user/.bin',
-        },
-      ),
-      flutterVersion: () => FakeFlutterVersion(frameworkVersion: '1.0.0'),
-      devToolsVersion: () => '2.8.0',
-      userMessages: UserMessages(),
-      artifacts: Artifacts.test(),
-      fileSystem: MemoryFileSystem.test(),
-      processManager: FakeProcessManager.any(),
-      operatingSystemUtils: FakeOperatingSystemUtils(name: 'Linux'),
-      flutterRoot: () => 'sdk/flutter',
-    );
-
-    expect(await flutterValidator.validate(), _matchDoctorValidation(
-      validationType: ValidationType.installed,
-      statusInfo: 'Channel unknown, 1.0.0, on Linux, locale en_US.UTF-8',
-      messages: contains(const ValidationMessage('PATH = /usr/bin:/usr/local/bin:/home/user/.bin')),
-    ));
-  });
-
   group('FlutterValidator shows flutter upstream remote', () {
     testWithoutContext('default url', () async {
       final FlutterValidator flutterValidator = FlutterValidator(
