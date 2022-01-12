@@ -170,7 +170,7 @@ class Checkbox extends StatefulWidget {
   /// ```dart
   /// Checkbox(
   ///   value: true,
-  ///   onChanged: (){},
+  ///   onChanged: (_){},
   ///   fillColor: MaterialStateProperty.resolveWith<Color>((states) {
   ///     if (states.contains(MaterialState.disabled)) {
   ///       return Colors.orange.withOpacity(.32);

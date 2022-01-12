@@ -238,7 +238,7 @@ class Switch extends StatelessWidget {
   /// ```dart
   /// Switch(
   ///   value: true,
-  ///   onChanged: () => true,
+  ///   onChanged: (_) => true,
   ///   thumbColor: MaterialStateProperty.resolveWith<Color>((states) {
   ///     if (states.contains(MaterialState.disabled)) {
   ///       return Colors.orange.withOpacity(.48);
@@ -279,7 +279,7 @@ class Switch extends StatelessWidget {
   /// ```dart
   /// Switch(
   ///   value: true,
-  ///   onChanged: () => true,
+  ///   onChanged: (_) => true,
   ///   thumbColor: MaterialStateProperty.resolveWith<Color>((states) {
   ///     if (states.contains(MaterialState.disabled)) {
   ///       return Colors.orange.withOpacity(.48);
