@@ -159,7 +159,7 @@ Future<void> main() async {
       content = content.replaceFirst(
         '\ndependencies:\n',
         // One dynamic framework, one static framework, and one that does not support iOS.
-        '\ndependencies:\n  device_info: 0.4.2+4\n  google_sign_in: 4.5.1\n  android_alarm_manager: 0.4.5+11\n',
+        '\ndependencies:\n  device_info: 2.0.3\n  google_sign_in: 4.5.1\n  android_alarm_manager: 0.4.5+11\n',
       );
       await pubspec.writeAsString(content, flush: true);
       await inDirectory(projectDir, () async {
