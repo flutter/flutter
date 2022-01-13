@@ -6,9 +6,9 @@
 
 #include <lib/async/default.h>
 #include <lib/ui/scenic/cpp/commands.h>
+#include <zircon/rights.h>
 #include <zircon/status.h>
 #include <zircon/types.h>
-#include <zx/cpp/fidl.h>
 
 #include <cmath>
 
@@ -145,7 +145,7 @@ bool SoftwareSurface::SetupSkiaSurface(
   // token represents scenic's handle to the sysmem buffer.
   std::vector<fuchsia::sysmem::BufferCollectionTokenHandle> duplicate_tokens;
   zx_status_t duplicate_status = local_token->DuplicateSync(
-      std::vector<zx::rights>{zx::rights::SAME_RIGHTS}, &duplicate_tokens);
+      std::vector<zx_rights_t>{ZX_RIGHT_SAME_RIGHTS}, &duplicate_tokens);
   if (duplicate_status != ZX_OK) {
     FML_LOG(ERROR) << "Failed to duplicate collection token: "
                    << zx_status_get_string(duplicate_status);
