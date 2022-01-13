@@ -153,7 +153,7 @@ void main() {
 
     await buildFrame(splashRadius: 50);
     expect(tester.widget<IconButton>(find.byType(IconButton)).splashRadius, 50);
-  });  
+  });
 
   testWidgets('disabled PopupMenuButton will not call itemBuilder, onSelected or onCanceled', (WidgetTester tester) async {
     final GlobalKey popupButtonKey = GlobalKey();
