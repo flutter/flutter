@@ -16,5 +16,7 @@ Future<void> main() async {
         <String, String>{'ENABLE_ANDROID_EMBEDDING_V2': 'true'}),
     PluginTest('apk', <String>['-a', 'kotlin', '--platforms=android'], pluginCreateEnvironment:
         <String, String>{'ENABLE_ANDROID_EMBEDDING_V2': 'true'}),
+    // Test that Dart-only plugins are supported.
+    PluginTest('apk', <String>['--platforms=android'], dartOnlyPlugin: true),
   ]));
 }
