@@ -103,30 +103,33 @@ template("_fuchsia_fidl_library") {
     outputs = [
       "$target_gen_dir/$library_name_slashes/cpp/tables.c",
     ]
-    # TODO(https://fxbug.dev/90838): Make zx library less special-cased.
-    if (library_name != "zx") {
-      outputs += [
-        "$target_gen_dir/$library_name_slashes/cpp/fidl.h",
-        "$target_gen_dir/$library_name_slashes/cpp/fidl.cc",
-      ]
-    }
 
     args = [
       "--fidlc-bin",
       rebase_path("$_fuchsia_sdk_path/tools/fidlc"),
-      "--fidlgen-bin",
-      rebase_path("$_fuchsia_sdk_path/tools/fidlgen"),
       "--sdk-base",
       rebase_path(_fuchsia_sdk_path),
       "--root",
       rebase_path(invoker.meta),
       "--json",
       rebase_path("$target_gen_dir/$library_name_json"),
-      "--fidlgen-root",
-      rebase_path("$target_gen_dir"),
       "--output-c-tables",
       rebase_path("$target_gen_dir/$library_name_slashes/cpp/tables.c"),
     ]
+
+    if (!defined(invoker.only_generate_tables) || !invoker.only_generate_tables) {
+      outputs += [
+        "$target_gen_dir/$library_name_slashes/cpp/fidl.h",
+        "$target_gen_dir/$library_name_slashes/cpp/fidl.cc",
+      ]
+
+      args += [
+        "--fidlgen-bin",
+        rebase_path("$_fuchsia_sdk_path/tools/fidlgen"),
+        "--fidlgen-output-root",
+        rebase_path("$target_gen_dir"),
+      ]
+    }
   }
 
   source_set(target_name) {
@@ -243,35 +246,29 @@ template("fuchsia_sdk") {
 
     part_meta_json = read_file(part_meta_rebased, "json")
 
-    # version_history.json does not have a name and thus fails when we try to read it.
-    if (part_meta != "version_history.json") {
+    # Check if `part.type` is in `invoker.enabled_parts`.
+    if (invoker.enabled_parts + [part.type] - [part.type] != invoker.enabled_parts) {
       subtarget_name = part_meta_json.name
 
-      foreach(enabled_part, invoker.enabled_parts) {
-        if (part.type == "cc_source_library") {
-          if (part.type == enabled_part) {
-            _fuchsia_cc_source_library(subtarget_name) {
-              meta = part_meta_rebased
-            }
-          }
-        } else if (part.type == "sysroot") {
-          if (part.type == enabled_part) {
-            _fuchsia_sysroot(subtarget_name) {
-              meta = part_meta_rebased
-            }
-          }
-        } else if (part.type == "fidl_library") {
-          if (part.type == enabled_part) {
-            _fuchsia_fidl_library(subtarget_name) {
-              meta = part_meta_rebased
-            }
-          }
-        } else if (part.type == "cc_prebuilt_library") {
-          if (part.type == enabled_part) {
-            _fuchsia_cc_prebuilt_library(subtarget_name) {
-              meta = part_meta_rebased
-            }
-          }
+      if (part.type == "cc_source_library") {
+        _fuchsia_cc_source_library(subtarget_name) {
+          meta = part_meta_rebased
+        }
+      } else if (part.type == "sysroot") {
+        _fuchsia_sysroot(subtarget_name) {
+          meta = part_meta_rebased
+        }
+      } else if (part.type == "fidl_library") {
+        _fuchsia_fidl_library(subtarget_name) {
+          meta = part_meta_rebased
+
+          # TODO(fxbug.dev/90838): Remove the zx special-case when generic
+          # option is available.
+          only_generate_tables = subtarget_name == "zx"
+        }
+      } else if (part.type == "cc_prebuilt_library") {
+        _fuchsia_cc_prebuilt_library(subtarget_name) {
+          meta = part_meta_rebased
         }
       }
     }

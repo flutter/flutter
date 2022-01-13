@@ -35,18 +35,19 @@ def main():
   parser = argparse.ArgumentParser();
 
   parser.add_argument('--fidlc-bin', dest='fidlc_bin', action='store', required=True)
-  parser.add_argument('--fidlgen-bin', dest='fidlgen_bin', action='store', required=True)
+  parser.add_argument('--fidlgen-bin', dest='fidlgen_bin', action='store', required=False)
 
   parser.add_argument('--sdk-base', dest='sdk_base', action='store', required=True)
   parser.add_argument('--root', dest='root', action='store', required=True)
   parser.add_argument('--json', dest='json', action='store', required=True)
-  parser.add_argument('--fidlgen-root', dest='fidlgen_root', action='store', required=True)
+  parser.add_argument('--fidlgen-output-root', dest='fidlgen_output_root', action='store', required=False)
   parser.add_argument('--output-c-tables', dest='output_c_tables', action='store', required=True)
 
   args = parser.parse_args()
 
   assert os.path.exists(args.fidlc_bin)
-  assert os.path.exists(args.fidlgen_bin)
+  # --fidlgen-bin and --fidlgen-output-root should be passed in together.
+  assert os.path.exists(args.fidlgen_bin or '') == bool(args.fidlgen_output_root)
 
   fidl_files_by_name = GetFIDLFilesByLibraryName(args.sdk_base, args.root)
 
@@ -72,19 +73,19 @@ def main():
       fidl_abspath = os.path.abspath('%s/%s' % (args.sdk_base, fidl_file))
       fidlc_command.append(fidl_abspath)
 
-  subprocess.check_call(fidlc_command);
+  subprocess.check_call(fidlc_command)
 
-  assert os.path.exists(args.json)
+  if args.fidlgen_output_root:
+    assert os.path.exists(args.json)
+    fidlgen_command = [
+      args.fidlgen_bin,
+      '-json',
+      args.json,
+      '-root',
+      args.fidlgen_output_root
+    ]
 
-  fidlgen_command = [
-    args.fidlgen_bin,
-    '-json',
-    args.json,
-    '-root',
-    args.fidlgen_root
-  ]
-
-  subprocess.check_call(fidlgen_command)
+    subprocess.check_call(fidlgen_command)
 
   return 0
 
