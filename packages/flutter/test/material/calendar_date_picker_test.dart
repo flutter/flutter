@@ -840,6 +840,7 @@ void main() {
             hasTapAction: true,
             isSelected: year == 2016,
             isFocusable: true,
+            isButton: true,
           ));
         }
       });
