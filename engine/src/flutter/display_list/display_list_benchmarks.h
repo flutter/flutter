@@ -5,10 +5,10 @@
 #ifndef FLUTTER_FLOW_DISPLAY_LIST_BENCHMARKS_H_
 #define FLUTTER_FLOW_DISPLAY_LIST_BENCHMARKS_H_
 
-#include "flutter/benchmarking/benchmarking.h"
 #include "flutter/fml/mapping.h"
 #include "flutter/testing/testing.h"
 
+#include "third_party/benchmark/include/benchmark/benchmark.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkPath.h"
 #include "third_party/skia/include/core/SkSurface.h"
