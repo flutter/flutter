@@ -86,7 +86,9 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
   @override
   void onSingleTapUp(TapUpDetails details) {
     editableText.hideToolbar(ToolbarType.copyPasteControls);
-    editableText.showToolbar(ToolbarType.spellCheckerSuggestionsControls);
+    //TODO(camillesimon): Finish adding logic to show suggestions toolbar here 
+    // and hide appropriately.
+    // editableText.showToolbar(ToolbarType.spellCheckerSuggestionsControls);
     super.onSingleTapUp(details);
     _state._requestKeyboard();
     _state.widget.onTap?.call();

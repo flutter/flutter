@@ -57,7 +57,7 @@ class MaterialTextSelectionControls extends TextSelectionControls {
             handleSelectAll: canSelectAll(delegate) ? () => handleSelectAll(delegate) : null,
           );
       case ToolbarType.spellCheckerSuggestionsControls:
-          //TODO(camillesimon): Eventually change this to be different toolbar.
+          //TODO(camillesimon): Change to call in spell_check.dart for suggestions toolbar.
           return _TextSelectionControlsToolbar(
             globalEditableRegion: globalEditableRegion,
             textLineHeight: textLineHeight,
