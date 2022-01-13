@@ -1,4 +1,4 @@
-Signature: 284236d0814d48d5e275ee1472cefe9f
+Signature: ff35b56e1c1f82c855fa4d21b4537db9
 
 UNUSED LICENSES:
 
@@ -6009,14 +6009,14 @@ FILE: ../../../third_party/skia/experimental/graphite/src/PaintParams.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/PaintParams.h
 FILE: ../../../third_party/skia/experimental/graphite/src/Resource.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/Resource.h
-FILE: ../../../third_party/skia/experimental/graphite/src/ShaderCodeDictionary.cpp
-FILE: ../../../third_party/skia/experimental/graphite/src/ShaderCodeDictionary.h
-FILE: ../../../third_party/skia/experimental/graphite/src/UniquePaintParamsID.h
+FILE: ../../../third_party/skia/include/private/SkPaintParamsKey.h
+FILE: ../../../third_party/skia/include/private/SkShaderCodeDictionary.h
+FILE: ../../../third_party/skia/include/private/SkUniquePaintParamsID.h
 FILE: ../../../third_party/skia/src/core/SkDebugUtils.h
 FILE: ../../../third_party/skia/src/core/SkKeyHelpers.cpp
 FILE: ../../../third_party/skia/src/core/SkKeyHelpers.h
 FILE: ../../../third_party/skia/src/core/SkPaintParamsKey.cpp
-FILE: ../../../third_party/skia/src/core/SkPaintParamsKey.h
+FILE: ../../../third_party/skia/src/core/SkShaderCodeDictionary.cpp
 ----------------------------------------------------------------------------------------------------
 Copyright 2022 Google LLC
 
