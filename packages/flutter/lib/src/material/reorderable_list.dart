@@ -32,7 +32,7 @@ import 'theme.dart';
 /// A drag handle is stacked over the center of edge on
 /// [TargetPlatformVariant.desktop] platforms. On [TargetPlatformVariant.mobile]
 /// platforms, no handle is visible and a long press anywhere on the item starts
-/// a drag. To change this behavior use
+/// a drag. To change this behavior consider 
 /// [ReorderableListView.buildDefaultDragHandles].
 ///
 /// {@tool dartpad --template=stateful_widget_scaffold}
