@@ -785,6 +785,53 @@ void main() {
     });
   }
 
+  testWidgets('Can animateTo with a nonlinear curve', (WidgetTester tester) async {
+    const Key stackKey = ValueKey<String>('stack');
+    const Key containerKey = ValueKey<String>('container');
+    final DraggableScrollableController controller = DraggableScrollableController();
+    await tester.pumpWidget(_boilerplate(
+      null,
+      controller: controller,
+      stackKey: stackKey,
+      containerKey: containerKey,
+    ));
+    await tester.pumpAndSettle();
+    final double screenHeight = tester.getSize(find.byKey(stackKey)).height;
+
+    controller.animateTo(.6, curve: Curves.linear, duration: const Duration(milliseconds: 100));
+    // We need to call one pump first to get the animation to start.
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(
+      tester.getSize(find.byKey(containerKey)).height / screenHeight,
+      closeTo(.55, precisionErrorTolerance),
+    );
+    await tester.pumpAndSettle();
+    expect(
+      tester.getSize(find.byKey(containerKey)).height / screenHeight,
+      closeTo(.6, precisionErrorTolerance),
+    );
+
+    controller.animateTo(.7, curve: const Interval(.5, 1), duration: const Duration(milliseconds: 100));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+    // The curve should result in the sheet not moving for the first 50 ms.
+    expect(
+      tester.getSize(find.byKey(containerKey)).height / screenHeight,
+      closeTo(.6, precisionErrorTolerance),
+    );
+    await tester.pump(const Duration(milliseconds: 25));
+    expect(
+      tester.getSize(find.byKey(containerKey)).height / screenHeight,
+      closeTo(.65, precisionErrorTolerance),
+    );
+    await tester.pumpAndSettle();
+    expect(
+      tester.getSize(find.byKey(containerKey)).height / screenHeight,
+      closeTo(.7, precisionErrorTolerance),
+    );
+  });
+
   testWidgets('Can reuse a controller after the old controller is disposed', (WidgetTester tester) async {
     const Key stackKey = ValueKey<String>('stack');
     const Key containerKey = ValueKey<String>('container');
