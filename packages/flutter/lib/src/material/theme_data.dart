@@ -2592,7 +2592,7 @@ class VisualDensity with Diagnosticable {
   static VisualDensity lerp(VisualDensity a, VisualDensity b, double t) {
     return VisualDensity(
       horizontal: lerpDouble(a.horizontal, b.horizontal, t)!,
-      vertical: lerpDouble(a.horizontal, b.horizontal, t)!,
+      vertical: lerpDouble(a.vertical, b.vertical, t)!,
     );
   }
 
