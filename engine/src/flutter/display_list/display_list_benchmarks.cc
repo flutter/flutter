@@ -11,29 +11,6 @@
 namespace flutter {
 namespace testing {
 
-class SoftwareCanvasProvider : public CanvasProvider {
- public:
-  virtual ~SoftwareCanvasProvider() = default;
-  void InitializeSurface(const size_t width, const size_t height) override {
-    surface_ = SkSurface::MakeRasterN32Premul(width, height);
-    surface_->getCanvas()->clear(SK_ColorTRANSPARENT);
-  }
-
-  sk_sp<SkSurface> GetSurface() override { return surface_; }
-
-  sk_sp<SkSurface> MakeOffscreenSurface(const size_t width,
-                                        const size_t height) override {
-    auto surface = SkSurface::MakeRasterN32Premul(width, height);
-    surface->getCanvas()->clear(SK_ColorTRANSPARENT);
-    return surface;
-  }
-
-  const std::string BackendName() override { return "Software"; }
-
- private:
-  sk_sp<SkSurface> surface_;
-};
-
 // Constants chosen to produce benchmark results in the region of 1-50ms
 constexpr size_t kLinesToDraw = 10000;
 constexpr size_t kRectsToDraw = 5000;
@@ -1053,8 +1030,6 @@ void BM_DrawShadow(benchmark::State& state,
                   std::to_string(elevation) + "-" + ".png";
   canvas_provider->Snapshot(filename);
 }
-
-RUN_DISPLAYLIST_BENCHMARKS(Software)
 
 }  // namespace testing
 }  // namespace flutter

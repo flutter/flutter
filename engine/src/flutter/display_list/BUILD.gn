@@ -60,6 +60,7 @@ if (enable_unittests) {
     sources = [
       "display_list_benchmarks.cc",
       "display_list_benchmarks.h",
+      "display_list_benchmarks_software.cc",
     ]
 
     deps = [
