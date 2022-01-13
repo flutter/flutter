@@ -348,19 +348,13 @@ ComponentV1::ComponentV1(
       return MakeFileMapping("/pkg/data/vm_snapshot_data.bin",
                              false /* executable */);
     };
-    settings_.vm_snapshot_instr = []() {
-      return MakeFileMapping("/pkg/data/vm_snapshot_instructions.bin",
-                             true /* executable */);
-    };
-
     settings_.isolate_snapshot_data = []() {
       return MakeFileMapping("/pkg/data/isolate_core_snapshot_data.bin",
                              false /* executable */);
     };
-    settings_.isolate_snapshot_instr = [] {
-      return MakeFileMapping("/pkg/data/isolate_core_snapshot_instructions.bin",
-                             true /* executable */);
-    };
+
+    // 'core' snapshots do not separate instructions from data, so we
+    // don't set isolate_snapshot_instr here.
   }
 
 #if defined(DART_PRODUCT)
