@@ -14,7 +14,7 @@
 namespace flutter {
 
 TestMetalContext::TestMetalContext() {
-  auto device = fml::scoped_nsprotocol{[MTLCreateSystemDefaultDevice() retain]};
+  auto device = fml::scoped_nsprotocol{MTLCreateSystemDefaultDevice()};
   if (!device) {
     FML_LOG(ERROR) << "Could not acquire Metal device.";
     return;
@@ -82,8 +82,7 @@ TestMetalContext::TextureInfo TestMetalContext::CreateMetalTexture(const SkISize
   }
 
   id<MTLDevice> device = (__bridge id<MTLDevice>)GetMetalDevice();
-  sk_cfp<void*> texture =
-      sk_cfp<void*>{[[device newTextureWithDescriptor:texture_descriptor.get()] retain]};
+  sk_cfp<void*> texture = sk_cfp<void*>{[device newTextureWithDescriptor:texture_descriptor.get()]};
 
   if (!texture) {
     FML_CHECK(false) << "Could not create texture from texture descriptor.";
