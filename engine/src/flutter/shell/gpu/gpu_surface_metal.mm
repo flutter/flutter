@@ -133,7 +133,10 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetal::AcquireFrameFromCAMetalLayer(
       return false;
     }
 
-    canvas->flush();
+    {
+      TRACE_EVENT0("flutter", "SkCanvas::Flush");
+      canvas->flush();
+    }
 
     uintptr_t texture = reinterpret_cast<uintptr_t>(drawable.get().texture);
     for (auto& entry : damage_) {
@@ -191,7 +194,10 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetal::AcquireFrameFromMTLTexture(
       return false;
     }
 
-    canvas->flush();
+    {
+      TRACE_EVENT0("flutter", "SkCanvas::Flush");
+      canvas->flush();
+    }
 
     return delegate->PresentTexture(texture);
   };
