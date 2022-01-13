@@ -844,46 +844,4 @@ class CiYaml {
   /// This is not cached as the contents can be written to while the conductor
   /// is running.
   YamlMap get contents => loadYaml(stringContents) as YamlMap;
-
-  List<String> get enabledBranches {
-    final YamlList yamlList = contents['enabled_branches'] as YamlList;
-    return yamlList.map<String>((dynamic element) {
-      return element as String;
-    }).toList();
-  }
-
-  static final RegExp _enabledBranchPattern = RegExp(r'enabled_branches:');
-
-  /// Update this .ci.yaml file with the given branch name.
-  ///
-  /// The underlying [File] is written to, but not committed to git. This method
-  /// will throw a [ConductorException] if the [branchName] is already present
-  /// in the file or if the file does not have an "enabled_branches:" field.
-  void enableBranch(String branchName) {
-    final List<String> newStrings = <String>[];
-    if (enabledBranches.contains(branchName)) {
-      throw ConductorException('${file.path} already contains the branch $branchName');
-    }
-    if (!_enabledBranchPattern.hasMatch(stringContents)) {
-      throw ConductorException(
-        'Did not find the expected string "enabled_branches:" in the file ${file.path}',
-      );
-    }
-    final List<String> lines = stringContents.split('\n');
-    bool insertedCurrentBranch = false;
-    for (final String line in lines) {
-      // Every existing line should be copied to the new Yaml
-      newStrings.add(line);
-      if (insertedCurrentBranch) {
-        continue;
-      }
-      if (_enabledBranchPattern.hasMatch(line)) {
-        insertedCurrentBranch = true;
-        // Indent two spaces
-        final String indent = ' ' * 2;
-        newStrings.add('$indent- ${branchName.trim()}');
-      }
-    }
-    file.writeAsStringSync(newStrings.join('\n'), flush: true);
-  }
 }
