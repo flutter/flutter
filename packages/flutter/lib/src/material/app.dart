@@ -58,7 +58,7 @@ enum ThemeMode {
 /// [GridPaper].
 ///
 /// The [MaterialApp] passes a fallback [TextStyle] to [WidgetsApp] which is used in
-/// absense of [Material] widgets. The [Material] widgets builds a [DefaultTextStyle]
+/// absence of a [Material] widget. The [Material] widgets builds a [DefaultTextStyle]
 /// which assigns a [TextTheme]. If you see the fallback [TextStyle] instead of
 /// [DefaultTextStyle], ensure a [Material] widget is one of the ancestor of your widgets.
 ///
@@ -150,6 +150,25 @@ enum ThemeMode {
 /// ```
 /// {@end-tool}
 ///
+/// ## Troubleshooting
+///
+/// ### Why my text is red with yellow underlines?
+///
+/// If the [Text] widget doesn't have a [Material] widget then it uses a fallback
+/// [TextStyle] which doesn't have a [Material] style [TextTheme].
+///
+/// The fix is to wrap the [Text] widget with a [Material] widget such as [Scaffold].
+///
+/// ```dart
+/// MaterialApp(
+///   title: 'Material App',
+///   home: Scaffold(
+///     body: Center(
+///       child: Text('Hello World'),
+///     ),
+///   ),
+/// )
+/// ```
 /// See also:
 ///
 ///  * [Scaffold], which provides standard app elements like an [AppBar] and a [Drawer].
