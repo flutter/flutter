@@ -85,3 +85,42 @@ if (enable_unittests) {
     }
   }
 }
+
+if (is_ios) {
+  shared_library("ios_display_list_benchmarks") {
+    testonly = true
+    visibility = [ ":*" ]
+
+    configs -= [
+      "//build/config/gcc:symbol_visibility_hidden",
+      "//build/config:symbol_visibility_hidden",
+    ]
+    configs += [ "//flutter/benchmarking:benchmark_library_config" ]
+    cflags = [
+      "-fobjc-arc",
+      "-mios-simulator-version-min=$ios_testing_deployment_target",
+    ]
+    ldflags =
+        [ "-Wl,-install_name,@rpath/libios_display_list_benchmarks.dylib" ]
+
+    sources = [
+      "display_list_benchmarks.cc",
+      "display_list_benchmarks.h",
+      "display_list_benchmarks_metal.cc",
+    ]
+
+    deps = [
+      ":display_list",
+      ":display_list_benchmarks_fixtures",
+      "//flutter/benchmarking:benchmarking_library",
+      "//flutter/common/graphics",
+      "//flutter/fml",
+      "//flutter/testing:metal",
+      "//flutter/testing:skia",
+      "//flutter/testing:testing_lib",
+      "//third_party/benchmark",
+      "//third_party/dart/runtime:libdart_jit",  # for tracing
+      "//third_party/skia",
+    ]
+  }
+}

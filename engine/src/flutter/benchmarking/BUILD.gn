@@ -24,3 +24,26 @@ source_set("benchmarking") {
     ":benchmark_config",
   ]
 }
+
+config("benchmark_library_config") {
+  if (is_ios) {
+    ldflags = [ "-Wl,-exported_symbol,_RunBenchmarks" ]
+  }
+}
+
+source_set("benchmarking_library") {
+  testonly = true
+
+  sources = [
+    "library.cc",
+    "library.h",
+  ]
+
+  public_deps = [ "//third_party/benchmark" ]
+
+  public_configs = [
+    "//flutter:config",
+    ":benchmark_config",
+    ":benchmark_library_config",
+  ]
+}
