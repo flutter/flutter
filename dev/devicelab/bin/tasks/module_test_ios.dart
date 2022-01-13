@@ -168,7 +168,7 @@ Future<void> main() async {
         // and one that does not support iOS.
         '''
 dependencies:
-  device_info: 0.4.2+4
+  device_info: 2.0.3
   google_sign_in: 4.5.1
   android_alarm_manager: 0.4.5+11
   $dartPluginName:
