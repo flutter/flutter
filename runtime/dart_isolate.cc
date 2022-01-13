@@ -566,7 +566,7 @@ bool DartIsolate::LoadKernel(std::shared_ptr<const fml::Mapping> mapping,
 
   tonic::DartState::Scope scope(this);
 
-  if (!child_isolate || !Dart_IsVMFlagSet("--enable-isolate-groups")) {
+  if (!child_isolate) {
     // Use root library provided by kernel in favor of one provided by snapshot.
     Dart_SetRootLibrary(Dart_Null());
 
