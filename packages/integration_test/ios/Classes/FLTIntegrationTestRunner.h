@@ -17,12 +17,19 @@ typedef void (^FLTIntegrationTestResults)(SEL nativeTestSelector, BOOL success, 
  */
 @property (copy, readonly) NSDictionary<NSString *, UIImage *> *capturedScreenshotsByName;
 
-/*!
- Start dart tests and wait for results.
-
- @param testResult Will be called once per every completed dart test.
+/**
+ * Starts dart tests and waits for results.
+ *
+ * @param testResult Will be called once per every completed dart test.
  */
 - (void)testIntegrationTestWithResults:(NS_NOESCAPE FLTIntegrationTestResults)testResult;
+
+/**
+ * An appropriate XCTest method name based on the dart test name.
+ *
+ * Example: dart test "verify widget-ABC123" becomes "testVerifyWidgetABC123"
+ */
++ (NSString *)testCaseNameFromDartTestName:(NSString *)dartTestName;
 
 @end
 

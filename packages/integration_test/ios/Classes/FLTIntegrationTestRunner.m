@@ -38,11 +38,19 @@
     [NSRunLoop.currentRunLoop runUntilDate:[NSDate dateWithTimeIntervalSinceNow:1.0]];
   }
 
+  NSMutableSet<NSString *> *testCaseNames = [[NSMutableSet alloc] init];
+
   [integrationTestPlugin.testResults enumerateKeysAndObjectsUsingBlock:^(NSString *test, NSString *result, BOOL *stop) {
-    // Create an appropriate XCTest method name based on the dart test name.
-    // Example: dart test "verify widget" becomes "testVerifyWidget"
-    NSString *upperCamelTestName = [test.localizedCapitalizedString stringByReplacingOccurrencesOfString:@" " withString:@""];
-    NSString *testSelectorName = [NSString stringWithFormat:@"test%@", upperCamelTestName];
+    NSString *testSelectorName = [[self class] testCaseNameFromDartTestName:test];
+
+    // Validate Objective-C test names are unique after sanitization.
+    if ([testCaseNames containsObject:testSelectorName]) {
+      NSString *reason = [NSString stringWithFormat:@"Cannot test \"%@\", duplicate XCTestCase tests named %@", test, testSelectorName];
+      testResult(NSSelectorFromString(@"testDuplicateTestNames"), NO, reason);
+      *stop = YES;
+      return;
+    }
+    [testCaseNames addObject:testSelectorName];
     SEL testSelector = NSSelectorFromString(testSelectorName);
 
     if ([result isEqualToString:@"success"]) {
@@ -55,6 +63,15 @@
 
 - (NSDictionary<NSString *,UIImage *> *)capturedScreenshotsByName {
   return self.integrationTestPlugin.capturedScreenshotsByName;
+}
+
++ (NSString *)testCaseNameFromDartTestName:(NSString *)dartTestName {
+  NSString *capitalizedString = dartTestName.localizedCapitalizedString;
+  // Objective-C method names must be alphanumeric.
+  NSCharacterSet *disallowedCharacters = NSCharacterSet.alphanumericCharacterSet.invertedSet;
+  // Remove disallowed characters.
+  NSString *upperCamelTestName = [[capitalizedString componentsSeparatedByCharactersInSet:disallowedCharacters] componentsJoinedByString:@""];
+  return [NSString stringWithFormat:@"test%@", upperCamelTestName];
 }
 
 @end
