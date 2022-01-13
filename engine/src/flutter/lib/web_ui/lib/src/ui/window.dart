@@ -252,11 +252,11 @@ class IsolateNameServer {
 SingletonFlutterWindow get window => engine.window;
 
 class FrameData {
-  const FrameData._({this.frameNumber = -1});
+  const FrameData._();
 
-  const FrameData.webOnly() : frameNumber = -1;
+  const FrameData.webOnly();
 
-  final int frameNumber;
+  int get frameNumber => -1;
 }
 
 class GestureSettings {
