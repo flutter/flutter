@@ -8,6 +8,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/src/widgets/spell_check.dart';
 
 import 'desktop_text_selection.dart';
 import 'feedback.dart';
@@ -32,7 +33,8 @@ class _TextSpanEditingController extends TextEditingController {
   final TextSpan _textSpan;
 
   @override
-  TextSpan buildTextSpan({required BuildContext context, TextStyle? style, required bool withComposing}) {
+  TextSpan buildTextSpan({required BuildContext context, TextStyle? style, required bool withComposing, 
+    List<SpellCheckerSuggestionSpan>? spellCheckerSuggestionSpans}) {
     // This does not care about composing.
     return TextSpan(
       style: style,
@@ -59,7 +61,7 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
   void onForcePressStart(ForcePressDetails details) {
     super.onForcePressStart(details);
     if (delegate.selectionEnabled && shouldShowSelectionToolbar) {
-      editableText.showToolbar();
+      editableText.showToolbar(ToolbarType.copyPasteControls);
     }
   }
 
@@ -81,7 +83,7 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
 
   @override
   void onSingleTapUp(TapUpDetails details) {
-    editableText.hideToolbar();
+    editableText.hideToolbar(ToolbarType.copyPasteControls);
     if (delegate.selectionEnabled) {
       switch (Theme.of(_state.context).platform) {
         case TargetPlatform.iOS:

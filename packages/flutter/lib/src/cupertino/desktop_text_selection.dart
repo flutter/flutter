@@ -4,6 +4,7 @@
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/src/widgets/spell_check.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button.dart';
@@ -50,6 +51,8 @@ class _CupertinoDesktopTextSelectionControls extends TextSelectionControls {
     TextSelectionDelegate delegate,
     ClipboardStatusNotifier clipboardStatus,
     Offset? lastSecondaryTapDownPosition,
+    ToolbarType toolbarType,
+    List<SpellCheckerSuggestionSpan>? spellCheckerSuggestionSpans,
   ) {
     return _CupertinoDesktopTextSelectionControlsToolbar(
       clipboardStatus: clipboardStatus,

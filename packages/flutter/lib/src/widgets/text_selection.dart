@@ -20,6 +20,7 @@ import 'editable_text.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
 import 'overlay.dart';
+import 'spell_check.dart';
 import 'ticker_provider.dart';
 import 'transitions.dart';
 import 'visibility.dart';
@@ -149,6 +150,8 @@ abstract class TextSelectionControls {
     TextSelectionDelegate delegate,
     ClipboardStatusNotifier clipboardStatus,
     Offset? lastSecondaryTapDownPosition,
+    ToolbarType toolbarType,
+    List<SpellCheckerSuggestionSpan>? spellCheckerSuggestionSpans,
   );
 
   /// Returns the size of the selection handle.
@@ -430,9 +433,10 @@ class TextSelectionOverlay {
   }
 
   /// Shows the toolbar by inserting it into the [context]'s overlay.
-  void showToolbar() {
+  void showToolbar(ToolbarType toolbarType, List<SpellCheckerSuggestionSpan>?
+    spellCheckerSuggestionSpans) {
     assert(_toolbar == null);
-    _toolbar = OverlayEntry(builder: _buildToolbar);
+    _toolbar = OverlayEntry(builder: (BuildContext context) => _buildToolbar(context, toolbarType, spellCheckerSuggestionSpans));
     Overlay.of(context, rootOverlay: true, debugRequiredFor: debugRequiredFor)!.insert(_toolbar!);
     _toolbarController.forward(from: 0.0);
   }
@@ -487,14 +491,15 @@ class TextSelectionOverlay {
       _handles = null;
     }
     if (_toolbar != null) {
-      hideToolbar();
+      hideToolbar(ToolbarType.copyPasteControls);
     }
   }
 
   /// Hides the toolbar part of the overlay.
   ///
   /// To hide the whole overlay, see [hide].
-  void hideToolbar() {
+  void hideToolbar(ToolbarType toolbarType) {
+    //TODO(camillesimon): Add logic to hide specific toolbar.
     assert(_toolbar != null);
     _toolbarController.stop();
     _toolbar?.remove();
@@ -537,7 +542,8 @@ class TextSelectionOverlay {
     );
   }
 
-  Widget _buildToolbar(BuildContext context) {
+  Widget _buildToolbar(BuildContext context, ToolbarType toolbarType,
+    List<SpellCheckerSuggestionSpan>? spellCheckerSuggestionSpans) {
     if (selectionControls == null)
       return Container();
 
@@ -584,6 +590,8 @@ class TextSelectionOverlay {
                 selectionDelegate!,
                 clipboardStatus!,
                 renderObject.lastSecondaryTapDownPosition,
+                toolbarType,
+                spellCheckerSuggestionSpans,
               );
             },
           ),
@@ -1114,7 +1122,7 @@ class TextSelectionGestureDetectorBuilder {
       cause: SelectionChangedCause.forcePress,
     );
     if (shouldShowSelectionToolbar)
-      editableText.showToolbar();
+      editableText.showToolbar(ToolbarType.copyPasteControls);
   }
 
   /// Handler for [TextSelectionGestureDetector.onSingleTapUp].
@@ -1221,7 +1229,7 @@ class TextSelectionGestureDetectorBuilder {
   @protected
   void onSingleLongTapEnd(LongPressEndDetails details) {
     if (shouldShowSelectionToolbar)
-      editableText.showToolbar();
+      editableText.showToolbar(ToolbarType.copyPasteControls);
   }
 
   /// Handler for [TextSelectionGestureDetector.onSecondaryTap].
@@ -1234,8 +1242,8 @@ class TextSelectionGestureDetectorBuilder {
         renderEditable.selectWord(cause: SelectionChangedCause.tap);
       }
       if (shouldShowSelectionToolbar) {
-        editableText.hideToolbar();
-        editableText.showToolbar();
+        editableText.hideToolbar(ToolbarType.copyPasteControls);
+        editableText.showToolbar(ToolbarType.copyPasteControls);
       }
     }
   }
@@ -1267,7 +1275,7 @@ class TextSelectionGestureDetectorBuilder {
     if (delegate.selectionEnabled) {
       renderEditable.selectWord(cause: SelectionChangedCause.tap);
       if (shouldShowSelectionToolbar)
-        editableText.showToolbar();
+        editableText.showToolbar(ToolbarType.copyPasteControls);
     }
   }
 
@@ -1777,4 +1785,16 @@ enum ClipboardStatus {
 
   /// The content on the clipboard is not pasteable, such as when it is empty.
   notPasteable,
+}
+
+/// An enumeration of the types of toolbars that can be rendered by a
+/// TextSelectionOverlay.
+enum ToolbarType {
+  /// The toolbar that will provide copy, paste, and cut options for a selection
+  /// of text.
+  copyPasteControls,
+
+  /// The toolbar that will provide suggestions for misspelled words and a click
+  /// and replace option.
+  spellCheckerSuggestionsControls,
 }

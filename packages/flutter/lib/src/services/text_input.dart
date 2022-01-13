@@ -14,6 +14,7 @@ import 'dart:ui' show
   hashValues;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/src/widgets/text_selection.dart' show ToolbarType;
 import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
 import '../../services.dart' show Clipboard;
@@ -995,7 +996,7 @@ mixin TextSelectionDelegate {
   /// By default, hideHandles is true, and the toolbar is hidden along with its
   /// handles. If hideHandles is set to false, then the toolbar will be hidden
   /// but the handles will remain.
-  void hideToolbar([bool hideHandles = true]);
+  void hideToolbar(ToolbarType toolbarType, [bool hideHandles = true]);
 
   /// Brings the provided [TextPosition] into the visible area of the text
   /// input.
@@ -1112,7 +1113,7 @@ abstract class TextInputClient {
   /// Requests that the client show the editing toolbar, for example when the
   /// platform changes the selection through a non-flutter method such as
   /// scribble.
-  void showToolbar() {}
+  void showToolbar(ToolbarType toolbarType) {}
 
   /// Requests that the client add a text placeholder to reserve visual space
   /// in the text.
@@ -1274,6 +1275,13 @@ class TextInputConnection {
     assert(attached);
     TextInput._instance._requestAutofill();
   }
+
+    /// Requests that spell checking be initiated on the specified text.
+    void initiateSpellChecking(String text) {
+      assert(attached);
+      TextInput._instance.initiateSpellChecking(text);
+    }
+
 
   /// Requests that the text input control update itself according to the new
   /// [TextInputConfiguration].
@@ -1757,7 +1765,7 @@ class TextInput {
         _currentConnection!._client.showAutocorrectionPromptRect(args[1] as int, args[2] as int);
         break;
       case 'TextInputClient.showToolbar':
-        _currentConnection!._client.showToolbar();
+        _currentConnection!._client.showToolbar(ToolbarType.copyPasteControls);
         break;
       case 'TextInputClient.insertTextPlaceholder':
         _currentConnection!._client.insertTextPlaceholder(Size((args[1] as num).toDouble(), (args[2] as num).toDouble()));
@@ -1815,6 +1823,14 @@ class TextInput {
 
   void _requestAutofill() {
     _channel.invokeMethod<void>('TextInput.requestAutofill');
+  }
+
+  void initiateSpellChecking(String text) {
+    assert(text != null);
+    _channel.invokeMethod<void>(
+      'TextInput.initiateSpellChecking',
+      text,
+    );
   }
 
   void _setEditableSizeAndTransform(Map<String, dynamic> args) {

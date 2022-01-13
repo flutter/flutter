@@ -49,7 +49,7 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
   void onForcePressStart(ForcePressDetails details) {
     super.onForcePressStart(details);
     if (delegate.selectionEnabled && shouldShowSelectionToolbar) {
-      editableText.showToolbar();
+      editableText.showToolbar(ToolbarType.copyPasteControls);
     }
   }
 
@@ -85,7 +85,8 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 
   @override
   void onSingleTapUp(TapUpDetails details) {
-    editableText.hideToolbar();
+    editableText.hideToolbar(ToolbarType.copyPasteControls);
+    editableText.showToolbar(ToolbarType.spellCheckerSuggestionsControls);
     super.onSingleTapUp(details);
     _state._requestKeyboard();
     _state.widget.onTap?.call();

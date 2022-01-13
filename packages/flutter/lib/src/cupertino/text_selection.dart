@@ -5,6 +5,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/rendering.dart';
+import 'package:flutter/src/widgets/spell_check.dart';
 import 'package:flutter/widgets.dart';
 
 import 'localizations.dart';
@@ -231,6 +232,8 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
     TextSelectionDelegate delegate,
     ClipboardStatusNotifier clipboardStatus,
     Offset? lastSecondaryTapDownPosition,
+    ToolbarType toolbarType,
+    List<SpellCheckerSuggestionSpan>? spellCheckerSuggestionSpans,
   ) {
     return _CupertinoTextSelectionControlsToolbar(
       clipboardStatus: clipboardStatus,

@@ -4,6 +4,7 @@
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/src/widgets/spell_check.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -36,6 +37,8 @@ class _DesktopTextSelectionControls extends TextSelectionControls {
     TextSelectionDelegate delegate,
     ClipboardStatusNotifier clipboardStatus,
     Offset? lastSecondaryTapDownPosition,
+    ToolbarType toolbarType,
+    List<SpellCheckerSuggestionSpan>? spellCheckerSuggestionSpans,
   ) {
     return _DesktopTextSelectionControlsToolbar(
       clipboardStatus: clipboardStatus,

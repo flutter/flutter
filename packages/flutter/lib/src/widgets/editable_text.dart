@@ -30,6 +30,7 @@ import 'scroll_configuration.dart';
 import 'scroll_controller.dart';
 import 'scroll_physics.dart';
 import 'scrollable.dart';
+import 'spell_check.dart';
 import 'text.dart';
 import 'text_editing_intents.dart';
 import 'text_selection.dart';
@@ -162,7 +163,7 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   ///
   /// By default makes text in composing range appear as underlined. Descendants
   /// can override this method to customize appearance of text.
-  TextSpan buildTextSpan({required BuildContext context, TextStyle? style , required bool withComposing}) {
+  TextSpan buildTextSpan({required BuildContext context, TextStyle? style , required bool withComposing, List<SpellCheckerSuggestionSpan>? spellCheckerSuggestionSpans}) {
     assert(!value.composing.isValid || !withComposing || value.isComposingRangeValid);
     // If the composing range is out of range for the current text, ignore it to
     // preserve the tree integrity, otherwise in release mode a RangeError will
@@ -1582,6 +1583,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   AnimationController? _floatingCursorResetController;
 
+  // The results of spell checking the current text input
+  List<SpellCheckerSuggestionSpan>? spellCheckerSuggestionSpans;
+
   @override
   bool get wantKeepAlive => widget.focusNode.hasFocus;
 
@@ -1625,7 +1629,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     Clipboard.setData(ClipboardData(text: selection.textInside(text)));
     if (cause == SelectionChangedCause.toolbar) {
       bringIntoView(textEditingValue.selection.extent);
-      hideToolbar(false);
+      hideToolbar(ToolbarType.copyPasteControls, false);
 
       switch (defaultTargetPlatform) {
         case TargetPlatform.iOS:
@@ -1664,7 +1668,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _replaceText(ReplaceTextIntent(textEditingValue, '', selection, cause));
     if (cause == SelectionChangedCause.toolbar) {
       bringIntoView(textEditingValue.selection.extent);
-      hideToolbar();
+      hideToolbar(ToolbarType.copyPasteControls);
     }
   }
 
@@ -1689,7 +1693,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _replaceText(ReplaceTextIntent(textEditingValue, data.text!, selection, cause));
     if (cause == SelectionChangedCause.toolbar) {
       bringIntoView(textEditingValue.selection.extent);
-      hideToolbar();
+      hideToolbar(ToolbarType.copyPasteControls);
     }
   }
 
@@ -1890,7 +1894,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       // `selection` is the only change.
       _handleSelectionChanged(value.selection, (_textInputConnection?.scribbleInProgress ?? false) ? SelectionChangedCause.scribble : SelectionChangedCause.keyboard);
     } else {
-      hideToolbar();
+      hideToolbar(ToolbarType.copyPasteControls);
       _currentPromptRectRange = null;
 
       if (_hasInputConnection) {
@@ -2028,6 +2032,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
       renderEditable.setFloatingCursor(FloatingCursorDragState.Update, Offset(lerpX, lerpY), _lastTextPosition!, resetLerpValue: lerpValue);
     }
+  }
+
+  void updateSpellCheckerResults(List<SpellCheckerSuggestionSpan> spellCheckerSuggestionSpans) {
+    spellCheckerSuggestionSpans = spellCheckerSuggestionSpans;
   }
 
   @pragma('vm:notify-debugger-on-exception')
@@ -2509,6 +2517,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           value,
           (TextEditingValue newValue, TextInputFormatter formatter) => formatter.formatEditUpdate(_value, newValue),
         ) ?? value;
+        _textInputConnection!.initiateSpellChecking(value.text);
       } catch (exception, stack) {
         FlutterError.reportError(FlutterErrorDetails(
           exception: exception,
@@ -2838,7 +2847,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// Returns `false` if a toolbar couldn't be shown, such as when the toolbar
   /// is already shown, or when no text selection currently exists.
   @override
-  bool showToolbar() {
+  bool showToolbar(ToolbarType toolbarType) {
     // Web is using native dom elements to enable clipboard functionality of the
     // toolbar: copy, paste, select, cut. It might also provide additional
     // functionality depending on the browser (such as translate). Due to this
@@ -2851,18 +2860,18 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       return false;
     }
 
-    _selectionOverlay!.showToolbar();
+    _selectionOverlay!.showToolbar(toolbarType, spellCheckerSuggestionSpans);
     return true;
   }
 
   @override
-  void hideToolbar([bool hideHandles = true]) {
+  void hideToolbar(ToolbarType toolbarType, [bool hideHandles = true]) {
     if (hideHandles) {
       // Hide the handles and the toolbar.
       _selectionOverlay?.hide();
     } else if (_selectionOverlay?.toolbarIsVisible ?? false) {
       // Hide only the toolbar but not the handles.
-      _selectionOverlay?.hideToolbar();
+      _selectionOverlay?.hideToolbar(toolbarType);
     }
   }
 
@@ -2870,9 +2879,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   void toggleToolbar() {
     assert(_selectionOverlay != null);
     if (_selectionOverlay!.toolbarIsVisible) {
-      hideToolbar();
+      hideToolbar(ToolbarType.copyPasteControls);
     } else {
-      showToolbar();
+      showToolbar(ToolbarType.copyPasteControls);
     }
   }
 
@@ -3215,6 +3224,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       context: context,
       style: widget.style,
       withComposing: !widget.readOnly && _hasFocus,
+      spellCheckerSuggestionSpans: spellCheckerSuggestionSpans,
     );
   }
 }

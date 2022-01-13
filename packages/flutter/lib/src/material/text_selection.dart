@@ -6,6 +6,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/src/widgets/spell_check.dart';
+
 
 import 'debug.dart';
 import 'material_localizations.dart';
@@ -37,19 +39,38 @@ class MaterialTextSelectionControls extends TextSelectionControls {
     TextSelectionDelegate delegate,
     ClipboardStatusNotifier clipboardStatus,
     Offset? lastSecondaryTapDownPosition,
-  ) {
-    return _TextSelectionControlsToolbar(
-      globalEditableRegion: globalEditableRegion,
-      textLineHeight: textLineHeight,
-      selectionMidpoint: selectionMidpoint,
-      endpoints: endpoints,
-      delegate: delegate,
-      clipboardStatus: clipboardStatus,
-      handleCut: canCut(delegate) ? () => handleCut(delegate, clipboardStatus) : null,
-      handleCopy: canCopy(delegate) ? () => handleCopy(delegate, clipboardStatus) : null,
-      handlePaste: canPaste(delegate) ? () => handlePaste(delegate) : null,
-      handleSelectAll: canSelectAll(delegate) ? () => handleSelectAll(delegate) : null,
-    );
+    ToolbarType toolbarType,
+    List<SpellCheckerSuggestionSpan>? spellCheckerSuggestionSpans,
+    ) {
+      switch(toolbarType) {
+        case ToolbarType.copyPasteControls:
+          return _TextSelectionControlsToolbar(
+            globalEditableRegion: globalEditableRegion,
+            textLineHeight: textLineHeight,
+            selectionMidpoint: selectionMidpoint,
+            endpoints: endpoints,
+            delegate: delegate,
+            clipboardStatus: clipboardStatus,
+            handleCut: canCut(delegate) ? () => handleCut(delegate, clipboardStatus) : null,
+            handleCopy: canCopy(delegate) ? () => handleCopy(delegate, clipboardStatus) : null,
+            handlePaste: canPaste(delegate) ? () => handlePaste(delegate) : null,
+            handleSelectAll: canSelectAll(delegate) ? () => handleSelectAll(delegate) : null,
+          );
+      case ToolbarType.spellCheckerSuggestionsControls:
+          //TODO(camillesimon): Eventually change this to be different toolbar.
+          return _TextSelectionControlsToolbar(
+            globalEditableRegion: globalEditableRegion,
+            textLineHeight: textLineHeight,
+            selectionMidpoint: selectionMidpoint,
+            endpoints: endpoints,
+            delegate: delegate,
+            clipboardStatus: clipboardStatus,
+            handleCut: canCut(delegate) ? () => handleCut(delegate, clipboardStatus) : null,
+            handleCopy: canCopy(delegate) ? () => handleCopy(delegate, clipboardStatus) : null,
+            handlePaste: canPaste(delegate) ? () => handlePaste(delegate) : null,
+            handleSelectAll: canSelectAll(delegate) ? () => handleSelectAll(delegate) : null,
+          );
+    }
   }
 
   /// Builder for material-style text selection handles.
