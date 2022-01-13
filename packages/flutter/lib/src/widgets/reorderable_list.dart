@@ -547,8 +547,8 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
     super.didChangeDependencies();
     _scrollable = Scrollable.of(context)!;
     if (_autoScroller?.scrollable != _scrollable) {
-      _autoScroller?.end();
-      _autoScroller = _EdgeDraggingAutoScroller(_scrollable, onScrollViewScrolled: _dragUpdateItems, velocityScaler: _kAutoScrollVelocityScaler);
+      _autoScroller?.stopAutoScroll();
+      _autoScroller = _EdgeDraggingAutoScroller(_scrollable, onScrollViewScrolled: _handleScrollableAutoScrolled, velocityScaler: _kAutoScrollVelocityScaler);
     }
   }
 
@@ -563,7 +563,7 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
   @override
   void dispose() {
     _dragInfo?.dispose();
-    _autoScroller!.end();
+    _autoScroller!.stopAutoScroll();
     super.dispose();
   }
 
@@ -676,7 +676,7 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
     setState(() {
       _overlayEntry?.markNeedsBuild();
       _dragUpdateItems();
-      _autoScroller!.start(_dragTargetRect);
+      _autoScroller!.startAutoScrollIfNecessary(_dragTargetRect);
     });
   }
 
@@ -723,7 +723,7 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
         }
         _dragInfo?.dispose();
         _dragInfo = null;
-        _autoScroller!.end();
+        _autoScroller!.stopAutoScroll();
         _resetItemGap();
         _recognizer?.dispose();
         _recognizer = null;
@@ -740,9 +740,16 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
     }
   }
 
-  void _dragUpdateItems() {
+  void _handleScrollableAutoScrolled() {
     if (_dragInfo == null)
       return;
+    _dragUpdateItems();
+    // Continue scrolling if the drag is still in progress.
+    _autoScroller!.startAutoScrollIfNecessary(_dragTargetRect);
+  }
+
+  void _dragUpdateItems() {
+    assert(_dragInfo != null);
     final double gapExtent = _dragInfo!.itemExtent;
     final double proxyItemStart = _offsetExtent(_dragInfo!.dragPosition - _dragInfo!.dragOffset, _scrollDirection);
     final double proxyItemEnd = proxyItemStart + gapExtent;
@@ -901,7 +908,7 @@ class _EdgeDraggingAutoScroller {
 
   late Rect _dragTargetRelatedToScrollOrigin;
 
-  /// Whether the auto scroll is on going.
+  /// Whether the auto scroll is in progress.
   bool get scrolling => _scrolling;
   bool _scrolling = false;
 
@@ -926,11 +933,14 @@ class _EdgeDraggingAutoScroller {
   AxisDirection get _axisDirection => scrollable.axisDirection;
   Axis get _scrollDirection => axisDirectionToAxis(_axisDirection);
 
-  /// Starts the auto scroll with the drag target rectangle.
+  /// Starts the auto scroll if the [dragTarget] is close to the edge.
   ///
   /// The scroll starts to scroll the [scrollable] if the target rect is close
   /// to the edge of the [scrollable]; otherwise, it remains stationary.
-  void start(Rect dragTarget) {
+  ///
+  /// If the scrollable is already scrolling, calling this method updates the
+  /// previous dragTarget to the new value and continue scrolling if necessary.
+  void startAutoScrollIfNecessary(Rect dragTarget) {
     final Offset deltaToOrigin = _getDeltaToScrollOrigin(scrollable);
     _dragTargetRelatedToScrollOrigin = dragTarget.translate(deltaToOrigin.dx, deltaToOrigin.dy);
     if (_scrolling) {
@@ -942,7 +952,7 @@ class _EdgeDraggingAutoScroller {
   }
 
   /// Stop any ongoing auto scrolling.
-  void end() {
+  void stopAutoScroll() {
     _scrolling = false;
   }
 
