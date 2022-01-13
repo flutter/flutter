@@ -340,9 +340,9 @@ class ImageStream with Diagnosticable {
     if (_listeners != null) {
       final List<ImageStreamListener> initialListeners = _listeners!;
       _listeners = null;
-      _completer!._hasInitialListeners = false;
+      _completer!._addingInitialListeners = false;
       initialListeners.forEach(_completer!.addListener);
-      _completer!._hasInitialListeners = true;
+      _completer!._addingInitialListeners = true;
     }
   }
 
@@ -491,12 +491,13 @@ abstract class ImageStreamCompleter with Diagnosticable {
   /// if all [keepAlive] handles get disposed.
   bool _hadAtLeastOneListener = false;
 
-  /// Whether the listeners were added before a completer was attached
+  /// Whether the future listeners added to this completer are initial listeners.
   ///
-  /// This ultimately controls the synchronousCall parameter on the listeners.
-  /// When adding cached listeners after a completer was attached, [_hasInitialListeners] can 
-  /// be set to false to indicate to the listeners that they are being called asynchronously.
-  bool _hasInitialListeners = true;
+  /// This can be set to true when an [ImageStream] adds its initial listeners to this completer.
+  /// This ultimately controls the synchronousCall parameter for the listener callbacks.
+  /// When adding cached listeners to a completer, [_addingInitialListeners] can be 
+  /// set to false to indicate to the listeners that they are being called asynchronously.
+  bool _addingInitialListeners = true;
 
   /// Adds a listener callback that is called whenever a new concrete [ImageInfo]
   /// object is available or an error is reported. If a concrete image is
@@ -513,7 +514,7 @@ abstract class ImageStreamCompleter with Diagnosticable {
     _listeners.add(listener);
     if (_currentImage != null) {
       try {
-        listener.onImage(_currentImage!.clone(), _hasInitialListeners);
+        listener.onImage(_currentImage!.clone(), _addingInitialListeners);
       } catch (exception, stack) {
         reportError(
           context: ErrorDescription('by a synchronously-called image listener'),
