@@ -6,12 +6,15 @@ import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/scheduler.dart' show timeDilation, SchedulerBinding;
 import 'package:flutter_test/flutter_test.dart';
 
 import '../image_data.dart';
+import 'decoration_test.dart';
 import 'fake_codec.dart';
+import 'mocks_for_image_cache.dart';
 
 class FakeFrameInfo implements FrameInfo {
   const FakeFrameInfo(this._duration, this._image);
@@ -837,5 +840,42 @@ void main() {
     // receiving chunk events. Streams from the network can keep sending data
     // even after evicting an image from the cache, for example.
     chunkStream.add(const ImageChunkEvent(cumulativeBytesLoaded: 2, expectedTotalBytes: 3));
+  });
+
+  test('ImageStream, setCompleter before addListener - synchronousCall should be true', () async {
+    final Image image = await createTestImage(width: 100, height: 100);
+    final SynchronousTestImageProvider imageProvider = SynchronousTestImageProvider(image);
+    const ImageConfiguration imageConfiguration = ImageConfiguration(size: Size(100.0, 100.0));
+    final OneFrameImageStreamCompleter imageStreamCompleter =
+        OneFrameImageStreamCompleter(SynchronousFuture<ImageInfo>(TestImageInfo(await imageProvider.obtainKey(imageConfiguration), image: image)));
+
+    final ImageStream imageStream = imageProvider.createStream(imageConfiguration);
+    imageStream.setCompleter(imageStreamCompleter);
+
+    bool? synchronouslyCalled;
+    imageStream.addListener(ImageStreamListener((ImageInfo image, bool synchronousCall) {
+      synchronouslyCalled = synchronousCall;
+    }));
+
+    expect(synchronouslyCalled, true);
+  });
+
+  test('ImageStream, setCompleter after addListener - synchronousCall should be false', () async {
+    final Image image = await createTestImage(width: 100, height: 100);
+    final SynchronousTestImageProvider imageProvider = SynchronousTestImageProvider(image);
+    const ImageConfiguration imageConfiguration = ImageConfiguration(size: Size(100.0, 100.0));
+    final OneFrameImageStreamCompleter imageStreamCompleter =
+        OneFrameImageStreamCompleter(SynchronousFuture<ImageInfo>(TestImageInfo(await imageProvider.obtainKey(imageConfiguration), image: image)));
+
+    final ImageStream imageStream = imageProvider.createStream(imageConfiguration);
+
+    bool? synchronouslyCalled;
+    imageStream.addListener(ImageStreamListener((ImageInfo image, bool synchronousCall) {
+      synchronouslyCalled = synchronousCall;
+    }));
+
+    imageStream.setCompleter(imageStreamCompleter);
+
+    expect(synchronouslyCalled, false);
   });
 }
