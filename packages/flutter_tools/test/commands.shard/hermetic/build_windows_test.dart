@@ -480,7 +480,7 @@ C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier 
     Usage: () => usage,
   });
 
-  testUsingContext('Windows build fails when there is no windows project', () async {
+  testUsingContext('Windows UWP build fails when there is no windows project', () async {
     final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
     final BuildWindowsUwpCommand command = BuildWindowsUwpCommand()
       ..visualStudioOverride = fakeVisualStudio;
@@ -514,7 +514,7 @@ C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier 
     FeatureFlags: () => TestFeatureFlags(isWindowsUwpEnabled: true),
   });
 
-  testUsingContext('Windows UWP uild fails on non windows platform', () async {
+  testUsingContext('Windows UWP build fails on non windows platform', () async {
     final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
     final BuildWindowsUwpCommand command = BuildWindowsUwpCommand()
       ..visualStudioOverride = fakeVisualStudio;
