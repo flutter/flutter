@@ -38,7 +38,7 @@ Future<void> buildLinux(
   target ??= 'lib/main.dart';
   if (!linuxProject.cmakeFile.existsSync()) {
     throwToolExit('No Linux desktop project configured. See '
-      'https://flutter.dev/desktop#add-desktop-support-to-an-existing-flutter-app '
+      'https://docs.flutter.dev/desktop#add-desktop-support-to-an-existing-flutter-app '
       'to learn about adding Linux support to a project.');
   }
 
