@@ -157,7 +157,9 @@ enum ThemeMode {
 /// If the [Text] widget doesn't have a [Material] widget then it uses a fallback
 /// [TextStyle] which doesn't have a [Material] style [TextTheme].
 ///
-/// The fix is to wrap the [Text] widget with a [Material] widget such as [Scaffold].
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/material_textsyle.png)
+///
+/// The fix is to wrap the [Text] widget with a [Material] widget such as [Scaffold]:
 ///
 /// ```dart
 /// MaterialApp(
