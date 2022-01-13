@@ -96,12 +96,6 @@ Dart_Isolate CreateServiceIsolate(
         "/pkg/data/vmservice_isolate_snapshot_data.bin";
     const char* snapshot_instructions_path =
         "/pkg/data/vmservice_isolate_snapshot_instructions.bin";
-#else
-  // The VM service is embedded in the core snapshot.
-  const char* snapshot_data_path = "/pkg/data/isolate_core_snapshot_data.bin";
-  const char* snapshot_instructions_path =
-      "/pkg/data/isolate_core_snapshot_instructions.bin";
-#endif
 
     if (!dart_utils::MappedResource::LoadFromNamespace(
             nullptr, snapshot_data_path, mapped_isolate_snapshot_data)) {
@@ -119,8 +113,21 @@ Dart_Isolate CreateServiceIsolate(
 
     vmservice_data = mapped_isolate_snapshot_data.address();
     vmservice_instructions = mapped_isolate_snapshot_instructions.address();
-#if defined(AOT_RUNTIME)
   }
+#else
+  // The VM service is embedded in the core snapshot.
+  // 'core' snapshot_kinds do not separate instructions from data, so we don't
+  // load an instructions file.
+  const char* snapshot_data_path = "/pkg/data/isolate_core_snapshot_data.bin";
+  if (!dart_utils::MappedResource::LoadFromNamespace(
+          nullptr, snapshot_data_path, mapped_isolate_snapshot_data)) {
+    *error = strdup("Failed to load snapshot for service isolate");
+    FX_LOG(ERROR, LOG_TAG, *error);
+    return nullptr;
+  }
+
+  vmservice_data = mapped_isolate_snapshot_data.address();
+  vmservice_instructions = nullptr;
 #endif
 
   bool is_null_safe =
