@@ -1224,6 +1224,7 @@ class _YearPickerState extends State<YearPicker> {
         child: Center(
           child: Semantics(
             selected: isSelected,
+            button: true,
             child: Text(year.toString(), style: itemStyle),
           ),
         ),
