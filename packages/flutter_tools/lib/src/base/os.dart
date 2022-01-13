@@ -539,10 +539,26 @@ class _WindowsUtils extends OperatingSystemUtils {
         continue;
       }
 
-      final File destFile = _fileSystem.file(_fileSystem.path.join(
-        targetDirectory.path,
-        archiveFile.name,
-      ));
+      final File destFile = _fileSystem.file(
+        _fileSystem.path.normalize(
+          _fileSystem.path.join(
+            targetDirectory.path,
+            archiveFile.name,
+          ),
+        ),
+      );
+
+      // Validate that the destFile is within the targetDirectory we want to
+      // extract to.
+      //
+      // See https://snyk.io/research/zip-slip-vulnerability for more context.
+      if (!destFile.path.startsWith(targetDirectory.path)) {
+        throw StateError(
+          'Tried to extract the file ${destFile.path} outside of the target '
+          'directory ${targetDirectory.path}',
+        );
+      }
+
       if (!destFile.parent.existsSync()) {
         destFile.parent.createSync(recursive: true);
       }
