@@ -16,7 +16,6 @@ namespace flutter {
 PlatformView::PlatformView(Delegate& delegate, TaskRunners task_runners)
     : delegate_(delegate),
       task_runners_(std::move(task_runners)),
-      size_(SkISize::Make(0, 0)),
       weak_factory_(this) {}
 
 PlatformView::~PlatformView() = default;
