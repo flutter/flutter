@@ -8736,7 +8736,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS })
   );
 
-  testWidgets("Mac\'s expand extent position", (WidgetTester tester) async {
+  testWidgets("Mac's expand extent position", (WidgetTester tester) async {
     const String testText = 'Now is the time for all good people to come to the aid of their country';
     final TextEditingController controller = TextEditingController(text: testText);
     // Start the selection in the middle somewhere.
