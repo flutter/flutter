@@ -451,8 +451,9 @@ class _MacOSUtils extends _PosixUtils {
         );
         for (final FileSystemEntity unzippedFile in tempDirectory.listSync(followLinks: false)) {
           // rsync --delete the unzipped files so files removed from the archive are also removed from the target.
+          // Add the '-8' parameter to avoid mangling filenames with encodings that do not match the current locale.
           _processUtils.runSync(
-            <String>['rsync', '-av', '--delete', unzippedFile.path, targetDirectory.path],
+            <String>['rsync', '-8', '-av', '--delete', unzippedFile.path, targetDirectory.path],
             throwOnError: true,
             verboseExceptions: true,
           );
