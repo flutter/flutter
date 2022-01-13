@@ -9,7 +9,7 @@ Pod::Spec.new do |s|
   No-op implementation of integration to avoid build issues on iOS.
   See https://github.com/flutter/flutter/issues/39659
                        DESC
-  s.homepage         = 'https://github.com/flutter/plugins/tree/master/packages/integration_test/integration_test_macos'
+  s.homepage         = 'https://github.com/flutter/flutter/tree/master/packages/integration_test/integration_test_macos'
   s.license          = { :file => '../LICENSE' }
   s.author           = { 'Flutter Team' => 'flutter-dev@googlegroups.com' }
   s.source           = { :path => '.' }

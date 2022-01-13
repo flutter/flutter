@@ -448,7 +448,7 @@ class AlertDialog extends StatelessWidget {
   /// {@macro flutter.material.dialog.shape}
   final ShapeBorder? shape;
 
-  /// {@macro flutter.material.dialog.shape}
+  /// {@macro flutter.material.dialog.alignment}
   final AlignmentGeometry? alignment;
 
   /// Determines whether the [title] and [content] widgets are wrapped in a
