@@ -20,6 +20,8 @@ FILE: ../../../flutter/assets/directory_asset_bundle.cc
 FILE: ../../../flutter/assets/directory_asset_bundle.h
 FILE: ../../../flutter/benchmarking/benchmarking.cc
 FILE: ../../../flutter/benchmarking/benchmarking.h
+FILE: ../../../flutter/benchmarking/library.cc
+FILE: ../../../flutter/benchmarking/library.h
 FILE: ../../../flutter/common/constants.h
 FILE: ../../../flutter/common/exported_symbols.sym
 FILE: ../../../flutter/common/graphics/gl_context_switch.cc
