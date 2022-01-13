@@ -129,7 +129,6 @@ class InkSparkle extends InteractiveInkFeature {
 
   @override
   void cancel() {
-    print('sparkle cancel');
     _ticker.stop();
   }
 
@@ -140,16 +139,86 @@ class InkSparkle extends InteractiveInkFeature {
     super.dispose();
   }
 
+  /// Transforms the canvas for an ink feature to be painted on the [canvas].
+  ///
+  /// This should be called before painting ink features that do not use
+  /// [paintInkCircle].
+  ///
+  /// The [transform] argument is the [Matrix4] transform that typically
+  /// shifts the coordinate space of the canvas to the space in which
+  /// the ink feature is to be painted.
+  ///
+  /// For examples on how the function is used, see [InkSparkle] and [paintInkCircle].
+  /// 
+  /// TODO(clocksmith): Refactor and extract for general ink reuse.
+  void transformCanvas({
+    required Canvas canvas,
+    required Matrix4 transform,
+  }) {
+    final Offset? originOffset = MatrixUtils.getAsTranslation(transform);
+    if (originOffset == null) {
+      canvas.transform(transform.storage);
+    } else {
+      canvas.translate(originOffset.dx, originOffset.dy);
+    }
+  }
+
+  /// Clips the canvas for an ink feature to be painted on the [canvas].
+  ///
+  /// This should be called before painting ink features that do not use
+  /// [paintInkCircle].
+  ///
+  /// [clipCallback] is the callback used to obtain the [Rect] used for clipping the ink effect.
+  /// If [clipCallback] is null, no clipping is performed on the ink circle.
+  ///
+  /// Clipping can happen in 3 different ways:
+  ///  1. If [customBorder] is provided, it is used to determine the path
+  ///     for clipping.
+  ///  2. If [customBorder] is null, and [borderRadius] is provided, the canvas
+  ///     is clipped by an [RRect] created from [clipCallback] and [borderRadius].
+  ///  3. If [borderRadius] is the default [BorderRadius.zero], then the [Rect] provided
+  ///      by [clipCallback] is used for clipping.
+  ///
+  /// [textDirection] is used by [customBorder] if it is non-null. This allows 
+  /// the [customBorder]'s path to be properly defined if it was the path was
+  /// expressed in terms of "start" and "end" instead of
+  /// "left" and "right".
+  ///
+  /// For examples on how the function is used, see [InkSparkle].
+  /// 
+  /// TODO(clocksmith): Refactor and extract for general ink reuse.
+  void clipCanvas({
+    required Canvas canvas,
+    required RectCallback clipCallback,
+    TextDirection? textDirection,
+    ShapeBorder? customBorder,
+    BorderRadius borderRadius = BorderRadius.zero,
+  }) {
+    final Rect rect = clipCallback();
+    if (customBorder != null) {
+      canvas.clipPath(
+          customBorder.getOuterPath(rect, textDirection: textDirection));
+    } else if (borderRadius != BorderRadius.zero) {
+      canvas.clipRRect(RRect.fromRectAndCorners(
+        rect,
+        topLeft: borderRadius.topLeft,
+        topRight: borderRadius.topRight,
+        bottomLeft: borderRadius.bottomLeft,
+        bottomRight: borderRadius.bottomRight,
+      ));
+    } else {
+      canvas.clipRect(rect);
+    }
+  }
+
   @override
   void paintFeature(Canvas canvas, Matrix4 transform) {
-    print('sparkle paintFeature');
     // Can only paint after the shader has been compiled
     // and the _shaderManager has been initialized
     if (_shaderManager == null) return;
-    print('sparkle shader ready - continuing paintFeature');
 
-    final timeMillis = _time.inMilliseconds.toDouble();
-    final timeTouchUpMillis = _timeUpMillis.toDouble();
+    final double timeMillis = _time.inMilliseconds.toDouble();
+    final double timeTouchUpMillis = _timeUpMillis.toDouble();
 
     if (timeMillis != 0) {
       canvas.save();
@@ -166,7 +235,7 @@ class InkSparkle extends InteractiveInkFeature {
 
       double normalizeColorChannel(int c) => c / 255.0;
 
-      final shader = _shaderManager!.shader(
+      final Shader shader = _shaderManager!.shader(
         uColor: Vector4(
           normalizeColorChannel(_color.red),
           normalizeColorChannel(_color.blue),
@@ -231,7 +300,7 @@ class InkSparkleFactory extends InteractiveInkFeatureFactory {
 // GENERATED CODE BELOW - DO NOT EDIT //
 ////////////////////////////////////////
 
-// TODO(clocksmith): Move to sep file?
+// TODO(clocksmith): Move to separate file?
 
 /// A class for managing [FragmentProgram] that includes a pre-transpiled
 /// shader program into SPIR-V.
@@ -251,7 +320,7 @@ class FragmentShaderManager {
   /// Creates a shader with the original program and optional uniforms.
   /// 
   /// A new shader must be made whenever the uniforms are updated.
-  shader({
+  Shader shader({
     Vector4? uColor,
     Vector2? uResolution,
     Vector2? uTouch,
