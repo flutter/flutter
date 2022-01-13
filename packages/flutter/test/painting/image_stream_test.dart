@@ -861,12 +861,10 @@ void main() {
 
   test('ImageStream, setCompleter before addListener - synchronousCall should be true', () async {
     final Image image = await createTestImage(width: 100, height: 100);
-    final SynchronousTestImageProvider imageProvider = SynchronousTestImageProvider(image);
-    const ImageConfiguration imageConfiguration = ImageConfiguration(size: Size(100.0, 100.0));
     final OneFrameImageStreamCompleter imageStreamCompleter =
-        OneFrameImageStreamCompleter(SynchronousFuture<ImageInfo>(TestImageInfo(await imageProvider.obtainKey(imageConfiguration), image: image)));
+        OneFrameImageStreamCompleter(SynchronousFuture<ImageInfo>(TestImageInfo(1, image: image)));
 
-    final ImageStream imageStream = imageProvider.createStream(imageConfiguration);
+    final ImageStream imageStream = ImageStream();
     imageStream.setCompleter(imageStreamCompleter);
 
     bool? synchronouslyCalled;
@@ -879,12 +877,10 @@ void main() {
 
   test('ImageStream, setCompleter after addListener - synchronousCall should be false', () async {
     final Image image = await createTestImage(width: 100, height: 100);
-    final SynchronousTestImageProvider imageProvider = SynchronousTestImageProvider(image);
-    const ImageConfiguration imageConfiguration = ImageConfiguration(size: Size(100.0, 100.0));
     final OneFrameImageStreamCompleter imageStreamCompleter =
-        OneFrameImageStreamCompleter(SynchronousFuture<ImageInfo>(TestImageInfo(await imageProvider.obtainKey(imageConfiguration), image: image)));
+        OneFrameImageStreamCompleter(SynchronousFuture<ImageInfo>(TestImageInfo(1, image: image)));
 
-    final ImageStream imageStream = imageProvider.createStream(imageConfiguration);
+    final ImageStream imageStream = ImageStream();
 
     bool? synchronouslyCalled;
     imageStream.addListener(ImageStreamListener((ImageInfo image, bool synchronousCall) {
