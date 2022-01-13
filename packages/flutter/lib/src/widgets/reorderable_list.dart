@@ -514,7 +514,8 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
   // Map of index -> child state used manage where the dragging item will need
   // to be inserted.
   final Map<int, _ReorderableItemState> _items = <int, _ReorderableItemState>{};
-  static const double _kAutoScrollVelocityScaler = 100/14;
+  // An eyeball value for auto scroll when the item was dragged to the edge.
+  static const double _kAutoScrollVelocityScaler = 100 / 14;
 
   OverlayEntry? _overlayEntry;
   int? _dragIndex;
