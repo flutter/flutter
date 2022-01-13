@@ -514,8 +514,6 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
   // Map of index -> child state used manage where the dragging item will need
   // to be inserted.
   final Map<int, _ReorderableItemState> _items = <int, _ReorderableItemState>{};
-  // An eyeball value for auto scroll when the item was dragged to the edge.
-  static const double _kAutoScrollVelocityScaler = 100 / 14;
 
   OverlayEntry? _overlayEntry;
   int? _dragIndex;
@@ -548,7 +546,10 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
     _scrollable = Scrollable.of(context)!;
     if (_autoScroller?.scrollable != _scrollable) {
       _autoScroller?.stopAutoScroll();
-      _autoScroller = _EdgeDraggingAutoScroller(_scrollable, onScrollViewScrolled: _handleScrollableAutoScrolled, velocityScaler: _kAutoScrollVelocityScaler);
+      _autoScroller = _EdgeDraggingAutoScroller(
+        _scrollable,
+        onScrollViewScrolled: _handleScrollableAutoScrolled
+      );
     }
   }
 
@@ -563,7 +564,7 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
   @override
   void dispose() {
     _dragInfo?.dispose();
-    _autoScroller!.stopAutoScroll();
+    _autoScroller?.stopAutoScroll();
     super.dispose();
   }
 
@@ -676,7 +677,7 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
     setState(() {
       _overlayEntry?.markNeedsBuild();
       _dragUpdateItems();
-      _autoScroller!.startAutoScrollIfNecessary(_dragTargetRect);
+      _autoScroller?.startAutoScrollIfNecessary(_dragTargetRect);
     });
   }
 
@@ -723,7 +724,7 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
         }
         _dragInfo?.dispose();
         _dragInfo = null;
-        _autoScroller!.stopAutoScroll();
+        _autoScroller?.stopAutoScroll();
         _resetItemGap();
         _recognizer?.dispose();
         _recognizer = null;
@@ -745,7 +746,7 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
       return;
     _dragUpdateItems();
     // Continue scrolling if the drag is still in progress.
-    _autoScroller!.startAutoScrollIfNecessary(_dragTargetRect);
+    _autoScroller?.startAutoScrollIfNecessary(_dragTargetRect);
   }
 
   void _dragUpdateItems() {
@@ -884,11 +885,15 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
 /// An auto scroller that scrolls the [scrollable] if a drag gesture drag close
 /// to its edge.
 ///
-/// The [ReorderableList] uses this scroller to auto scroll the scroll view when
-/// user drag item toward the edge of the scroll view.
+/// The scroll velocity is controlled by the [velocityScalar]:
+///
+/// velocity = <distance of overscroll> * [velocityScalar].
 class _EdgeDraggingAutoScroller {
   /// Creates a auto scroller that scrolls the [scrollable].
-  _EdgeDraggingAutoScroller(this.scrollable, {this.onScrollViewScrolled, required this.velocityScaler});
+  _EdgeDraggingAutoScroller(this.scrollable, {this.onScrollViewScrolled, this.velocityScalar = _kDefaultAutoScrollVelocityScalar});
+
+  // An eyeball value
+  static const double _kDefaultAutoScrollVelocityScalar = 7;
 
   /// The [Scrollable] this auto scroller is scrolling.
   final ScrollableState scrollable;
@@ -900,11 +905,11 @@ class _EdgeDraggingAutoScroller {
   /// in between each scroll.
   final VoidCallback? onScrollViewScrolled;
 
-  /// The veloocity scaler per pixel over scroll.
+  /// The velocity scalar per pixel over scroll.
   ///
   /// How the velocity scale with the over scroll distance. The auto scroll
-  /// velocity = overscroll * velocityScaler.
-  final double velocityScaler;
+  /// velocity = <distance of overscroll> * velocityScalar.
+  final double velocityScalar;
 
   late Rect _dragTargetRelatedToScrollOrigin;
 
@@ -997,7 +1002,7 @@ class _EdgeDraggingAutoScroller {
       _scrolling = false;
       return;
     }
-    final Duration duration = Duration(milliseconds: (1000 / velocityScaler).round());
+    final Duration duration = Duration(milliseconds: (1000 / velocityScalar).round());
     await scrollable.position.animateTo(
       newOffset,
       duration: duration,
