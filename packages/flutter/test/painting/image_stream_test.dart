@@ -12,7 +12,6 @@ import 'package:flutter/scheduler.dart' show timeDilation, SchedulerBinding;
 import 'package:flutter_test/flutter_test.dart';
 
 import '../image_data.dart';
-import 'decoration_test.dart';
 import 'fake_codec.dart';
 import 'mocks_for_image_cache.dart';
 
@@ -77,6 +76,24 @@ class FakeEventReportingImageStreamCompleter extends ImageStreamCompleter {
         },
       );
     }
+  }
+}
+
+class SynchronousTestImageProvider extends ImageProvider<int> {
+  const SynchronousTestImageProvider(this.image);
+
+  final Image image;
+
+  @override
+  Future<int> obtainKey(ImageConfiguration configuration) {
+    return SynchronousFuture<int>(1);
+  }
+
+  @override
+  ImageStreamCompleter load(int key, DecoderCallback decode) {
+    return OneFrameImageStreamCompleter(
+      SynchronousFuture<ImageInfo>(TestImageInfo(key, image: image)),
+    );
   }
 }
 
