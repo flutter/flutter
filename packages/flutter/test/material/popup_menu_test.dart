@@ -130,6 +130,31 @@ void main() {
     expect(cancels, equals(2));
   });
 
+  testWidgets('Test splashRadius parameter', (WidgetTester tester) async {
+    Future<void> buildFrame({double? splashRadius}) {
+      return tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: PopupMenuButton<String>(
+                splashRadius: splashRadius,
+                itemBuilder: (_) => <PopupMenuEntry<String>>[
+                  const PopupMenuItem<String>(
+                    value: 'value',
+                    child: Text('child'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await buildFrame(splashRadius: 50);
+    expect(tester.widget<IconButton>(find.byType(IconButton)).splashRadius, 50);
+  });  
+
   testWidgets('disabled PopupMenuButton will not call itemBuilder, onSelected or onCanceled', (WidgetTester tester) async {
     final GlobalKey popupButtonKey = GlobalKey();
     bool itemBuilderCalled = false;
