@@ -152,7 +152,7 @@ class Slider extends StatefulWidget {
   /// Material design's
   /// [Cross-platform guidelines](https://material.io/design/platform-guidance/cross-platform-adaptation.html).
   ///
-  /// Creates a [CupertinoSlider] if the target platform is iOS, creates a
+  /// Creates a [CupertinoSlider] if the target platform is iOS or macOS, creates a
   /// Material Design slider otherwise.
   ///
   /// If a [CupertinoSlider] is created, the following parameters are
