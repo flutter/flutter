@@ -4,6 +4,8 @@
 
 @import XCTest;
 
+@import os.log;
+
 static const CGFloat kStandardTimeOut = 60.0;
 
 @interface FlutterUITests : XCTestCase
@@ -61,10 +63,13 @@ static const CGFloat kStandardTimeOut = 60.0;
     [self waitForAndTapElement:app.buttons[@"Flutter View (Warm)"]];
     BOOL newPageAppeared = [app.staticTexts[@"Button tapped 0 times."] waitForExistenceWithTimeout:kStandardTimeOut];
     if (!newPageAppeared) {
-        // Sometimes, the element doesn't respond to the tap, it seems an XCUITest race condition where the tap happened
-        // too soon. Trying to tap the element again.
-        [self waitForAndTapElement:app.buttons[@"Flutter View (Warm)"]];
-        newPageAppeared = [app.staticTexts[@"Button tapped 0 times."] waitForExistenceWithTimeout:kStandardTimeOut];
+      // Sometimes, the element doesn't respond to the tap, it seems an XCUITest race condition where the tap happened
+      // too soon. Trying to tap the element again.
+      [self waitForAndTapElement:app.buttons[@"Flutter View (Warm)"]];
+      newPageAppeared = [app.staticTexts[@"Button tapped 0 times."] waitForExistenceWithTimeout:kStandardTimeOut];
+      if (!newPageAppeared) {
+        os_log(OS_LOG_DEFAULT, "A11 Tree %@", app.debugDescription);
+      }
     }
     XCTAssertTrue(newPageAppeared);
 
