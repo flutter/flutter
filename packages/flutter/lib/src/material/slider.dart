@@ -380,6 +380,7 @@ class Slider extends StatefulWidget {
   /// If [mouseCursor] is a [MaterialStateProperty<MouseCursor>],
   /// [MaterialStateProperty.resolve] is used for the following [MaterialState]s:
   ///
+  ///  * [MaterialState.dragged].
   ///  * [MaterialState.hovered].
   ///  * [MaterialState.focused].
   ///  * [MaterialState.disabled].
@@ -760,7 +761,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
             screenSize: _screenSize(),
             onChanged: (widget.onChanged != null) && (widget.max > widget.min) ? _handleChanged : null,
             onChangeStart: _handleDragStart,
-            onChangeEnd: widget.onChangeEnd != null ? _handleDragEnd : null,
+            onChangeEnd: _handleDragEnd,
             state: this,
             semanticFormatterCallback: widget.semanticFormatterCallback,
             hasFocus: _focused,

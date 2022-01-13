@@ -2551,9 +2551,9 @@ void main() {
   });
 
   testWidgets('Slider MaterialStateMouseCursor resolves correctly', (WidgetTester tester) async {
-    const disabledCursor = SystemMouseCursors.basic;
-    const hoveredCursor = SystemMouseCursors.grab;
-    const draggedCursor = SystemMouseCursors.move;
+    const MouseCursor disabledCursor = SystemMouseCursors.basic;
+    const MouseCursor hoveredCursor = SystemMouseCursors.grab;
+    const MouseCursor draggedCursor = SystemMouseCursors.move;
 
     Widget buildFrame({ required bool enabled }) {
       return MaterialApp(
@@ -2564,7 +2564,7 @@ void main() {
               child: MouseRegion(
                 cursor: SystemMouseCursors.forbidden,
                 child: Slider(
-                  mouseCursor: _StateDependentMouseCursor(
+                  mouseCursor: const _StateDependentMouseCursor(
                     disabled: disabledCursor,
                     hovered: hoveredCursor,
                     dragged: draggedCursor,
@@ -2600,7 +2600,6 @@ void main() {
     );
     expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.move);
   });
-  return;
 
   testWidgets('Slider implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
