@@ -1,4 +1,4 @@
-Signature: 0633df71a2ea6ed6d0c4a5eb0b3816be
+Signature: 0ee1273f749766c0f6d9cc3294b86d69
 
 UNUSED LICENSES:
 
@@ -463,7 +463,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component.test/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component.types/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.data/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.deprecatedtimezone/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.developer.tiles/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.diagnostics.types/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.diagnostics/meta.json
@@ -1204,7 +1203,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component.test/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component.types/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.data/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.deprecatedtimezone/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.developer.tiles/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.diagnostics.types/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.diagnostics/meta.json
@@ -1842,7 +1840,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component.test/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component.types/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.data/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.deprecatedtimezone/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.developer.tiles/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.diagnostics.types/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.diagnostics/meta.json
@@ -2238,12 +2235,14 @@ FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_scenic_flutter/lib/src/fuchsia_vie
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_services/lib/src/dart_vm.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_vfs/lib/src/remote_dir.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/trace_processing/metrics/camera_metrics.dart
+FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/trace_processing/metrics/flatland_latency.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/virtual_camera.dart
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.accessibility.virtualkeyboard/virtual_keyboard.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.audio.effects/creator.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.audio.effects/processor.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.gatt2/client.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.gatt2/constants.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.gatt2/server.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.gatt2/types.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component.decl/capability.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component.decl/child.fidl
@@ -2297,7 +2296,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.common/wlan_common.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.ieee80211/constants.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.ieee80211/rsn.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.policy/types.fidl
-FILE: ../../../fuchsia/sdk/linux/pkg/fdio/include/lib/fdio/inotify.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/include/lib/fidl/transformer.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/transformer.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/wire_format_metadata.cc
@@ -2328,6 +2326,7 @@ FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/iterator.h
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/span.h
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/tuple.h
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_component_cpp_testing/internal/errors.cc
+FILE: ../../../fuchsia/sdk/linux/pkg/sys_component_cpp_testing/internal/local_component_runner.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_component_cpp_testing/internal/mock_runner.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_component_cpp_testing/internal/realm.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_component_cpp_testing/realm_builder.cc
@@ -2856,161 +2855,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
-ORIGIN: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/boot/e820.h + ../../../fuchsia/sdk/linux/LICENSE
-TYPE: LicenseType.bsd
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/boot/e820.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/device/audio.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/fidl.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/hw/gpt.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/hw/usb/cdc.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/hw/usb/video.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/process.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/rights.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/sanitizer.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/syscalls/hypervisor.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/syscalls/iommu.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/syscalls/policy.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/syscalls/system.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/tls.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/boot/e820.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/device/audio.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/fidl.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/hw/gpt.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/hw/usb/cdc.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/hw/usb/video.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/process.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/rights.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/sanitizer.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/syscalls/hypervisor.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/syscalls/iommu.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/syscalls/policy.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/syscalls/system.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/tls.h
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.auth/auth_provider.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.auth/token_manager.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.gatt/client.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.gatt/server.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.le/peripheral.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.le/types_deprecated.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.cobalt/cobalt_controller.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.images/presentation_info.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media/audio_capturer.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.mem/buffer.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/agent.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/agent_controller.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/component_context.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/intent.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/lifecycle.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/module_data.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/module_state.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/story_shell.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/story_state.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/surface.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.mdns/mdns.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys/flat_namespace.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.gfx/commands.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.gfx/display_info.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.gfx/events.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.gfx/nodes.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.gfx/renderer.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.gfx/resources.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.gfx/shapes.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.gfx/types.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input/ime_service.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input/input_device_registry.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input/input_reports.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input/text_editing.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input/text_input.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input/usages.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.policy/presentation.fidl
-FILE: ../../../fuchsia/sdk/linux/pkg/async-cpp/include/lib/async/cpp/receiver.h
-FILE: ../../../fuchsia/sdk/linux/pkg/async-cpp/include/lib/async/cpp/task.h
-FILE: ../../../fuchsia/sdk/linux/pkg/async-cpp/include/lib/async/cpp/wait.h
-FILE: ../../../fuchsia/sdk/linux/pkg/async-cpp/receiver.cc
-FILE: ../../../fuchsia/sdk/linux/pkg/async-cpp/task.cc
-FILE: ../../../fuchsia/sdk/linux/pkg/async-cpp/trap.cc
-FILE: ../../../fuchsia/sdk/linux/pkg/async-cpp/wait.cc
-FILE: ../../../fuchsia/sdk/linux/pkg/async-default/include/lib/async/default.h
-FILE: ../../../fuchsia/sdk/linux/pkg/async-loop-cpp/include/lib/async-loop/cpp/loop.h
-FILE: ../../../fuchsia/sdk/linux/pkg/async-loop-cpp/loop_wrapper.cc
-FILE: ../../../fuchsia/sdk/linux/pkg/async-loop-testing/real_loop.cc
-FILE: ../../../fuchsia/sdk/linux/pkg/async-loop/include/lib/async-loop/loop.h
-FILE: ../../../fuchsia/sdk/linux/pkg/async-loop/loop.c
-FILE: ../../../fuchsia/sdk/linux/pkg/async-testing/dispatcher_stub.cc
-FILE: ../../../fuchsia/sdk/linux/pkg/async-testing/include/lib/async-testing/dispatcher_stub.h
-FILE: ../../../fuchsia/sdk/linux/pkg/async/include/lib/async/dispatcher.h
-FILE: ../../../fuchsia/sdk/linux/pkg/async/include/lib/async/irq.h
-FILE: ../../../fuchsia/sdk/linux/pkg/async/include/lib/async/receiver.h
-FILE: ../../../fuchsia/sdk/linux/pkg/async/include/lib/async/task.h
-FILE: ../../../fuchsia/sdk/linux/pkg/async/include/lib/async/wait.h
-FILE: ../../../fuchsia/sdk/linux/pkg/async/ops.c
-FILE: ../../../fuchsia/sdk/linux/pkg/fdio/include/lib/fdio/limits.h
-FILE: ../../../fuchsia/sdk/linux/pkg/fdio/include/lib/fdio/namespace.h
-FILE: ../../../fuchsia/sdk/linux/pkg/fdio/include/lib/fdio/private.h
-FILE: ../../../fuchsia/sdk/linux/pkg/fdio/include/lib/fdio/unsafe.h
-FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/decoding_and_validating.cc
-FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/encoding.cc
-FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/formatting.cc
-FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/include/lib/fidl/coding.h
-FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/include/lib/fidl/internal.h
-FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/function.h
-FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/function_internal.h
-FILE: ../../../fuchsia/sdk/linux/pkg/memfs/include/lib/memfs/memfs.h
-FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/commands.cc
-FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/include/lib/ui/scenic/cpp/commands.h
-FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/include/lib/ui/scenic/cpp/resources.h
-FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/include/lib/ui/scenic/cpp/session.h
-FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/resources.cc
-FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/session.cc
-FILE: ../../../fuchsia/sdk/linux/pkg/trace-engine/include/lib/trace-engine/context.h
-FILE: ../../../fuchsia/sdk/linux/pkg/trace-engine/include/lib/trace-engine/fields.h
-FILE: ../../../fuchsia/sdk/linux/pkg/trace-engine/include/lib/trace-engine/handler.h
-FILE: ../../../fuchsia/sdk/linux/pkg/trace-engine/include/lib/trace-engine/instrumentation.h
-FILE: ../../../fuchsia/sdk/linux/pkg/trace-engine/include/lib/trace-engine/types.h
-FILE: ../../../fuchsia/sdk/linux/pkg/trace-provider-so/include/lib/trace-provider/handler.h
-FILE: ../../../fuchsia/sdk/linux/pkg/trace-provider-so/include/lib/trace-provider/provider.h
-FILE: ../../../fuchsia/sdk/linux/pkg/trace/event.cc
-FILE: ../../../fuchsia/sdk/linux/pkg/trace/include/lib/trace/event.h
-FILE: ../../../fuchsia/sdk/linux/pkg/trace/include/lib/trace/internal/event_common.h
-FILE: ../../../fuchsia/sdk/linux/pkg/trace/include/lib/trace/internal/event_internal.h
-FILE: ../../../fuchsia/sdk/linux/pkg/trace/include/lib/trace/internal/pairs_internal.h
-FILE: ../../../fuchsia/sdk/linux/pkg/trace/include/lib/trace/internal/string_traits.h
-FILE: ../../../fuchsia/sdk/linux/pkg/trace/include/lib/trace/observer.h
-FILE: ../../../fuchsia/sdk/linux/pkg/trace/observer.cc
-FILE: ../../../fuchsia/sdk/linux/pkg/zx/fifo.cc
-FILE: ../../../fuchsia/sdk/linux/pkg/zx/include/lib/zx/fifo.h
-FILE: ../../../fuchsia/sdk/linux/pkg/zx/include/lib/zx/handle.h
-FILE: ../../../fuchsia/sdk/linux/pkg/zx/include/lib/zx/timer.h
-FILE: ../../../fuchsia/sdk/linux/pkg/zx/timer.cc
-----------------------------------------------------------------------------------------------------
-Copyright 2017 The Fuchsia Authors. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: fuchsia_sdk
 ORIGIN: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/boot/multiboot.h + ../../../fuchsia/sdk/linux/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/boot/multiboot.h
@@ -3179,6 +3023,159 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
+ORIGIN: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/device/audio.h + ../../../fuchsia/sdk/linux/LICENSE
+TYPE: LicenseType.bsd
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/device/audio.h
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/fidl.h
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/hw/gpt.h
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/hw/usb/cdc.h
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/hw/usb/video.h
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/process.h
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/rights.h
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/sanitizer.h
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/syscalls/hypervisor.h
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/syscalls/iommu.h
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/syscalls/policy.h
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/syscalls/system.h
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/tls.h
+FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/device/audio.h
+FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/fidl.h
+FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/hw/gpt.h
+FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/hw/usb/cdc.h
+FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/hw/usb/video.h
+FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/process.h
+FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/rights.h
+FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/sanitizer.h
+FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/syscalls/hypervisor.h
+FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/syscalls/iommu.h
+FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/syscalls/policy.h
+FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/syscalls/system.h
+FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/tls.h
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.auth/auth_provider.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.auth/token_manager.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.gatt/client.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.gatt/server.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.le/peripheral.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.le/types_deprecated.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.cobalt/cobalt_controller.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.images/presentation_info.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media/audio_capturer.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.mem/buffer.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/agent.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/agent_controller.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/component_context.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/intent.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/lifecycle.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/module_data.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/module_state.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/story_shell.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/story_state.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/surface.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.mdns/mdns.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys/flat_namespace.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.gfx/commands.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.gfx/display_info.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.gfx/events.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.gfx/nodes.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.gfx/renderer.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.gfx/resources.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.gfx/shapes.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.gfx/types.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input/ime_service.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input/input_device_registry.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input/input_reports.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input/text_editing.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input/text_input.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input/usages.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.policy/presentation.fidl
+FILE: ../../../fuchsia/sdk/linux/pkg/async-cpp/include/lib/async/cpp/receiver.h
+FILE: ../../../fuchsia/sdk/linux/pkg/async-cpp/include/lib/async/cpp/task.h
+FILE: ../../../fuchsia/sdk/linux/pkg/async-cpp/include/lib/async/cpp/wait.h
+FILE: ../../../fuchsia/sdk/linux/pkg/async-cpp/receiver.cc
+FILE: ../../../fuchsia/sdk/linux/pkg/async-cpp/task.cc
+FILE: ../../../fuchsia/sdk/linux/pkg/async-cpp/trap.cc
+FILE: ../../../fuchsia/sdk/linux/pkg/async-cpp/wait.cc
+FILE: ../../../fuchsia/sdk/linux/pkg/async-default/include/lib/async/default.h
+FILE: ../../../fuchsia/sdk/linux/pkg/async-loop-cpp/include/lib/async-loop/cpp/loop.h
+FILE: ../../../fuchsia/sdk/linux/pkg/async-loop-cpp/loop_wrapper.cc
+FILE: ../../../fuchsia/sdk/linux/pkg/async-loop-testing/real_loop.cc
+FILE: ../../../fuchsia/sdk/linux/pkg/async-loop/include/lib/async-loop/loop.h
+FILE: ../../../fuchsia/sdk/linux/pkg/async-loop/loop.c
+FILE: ../../../fuchsia/sdk/linux/pkg/async-testing/dispatcher_stub.cc
+FILE: ../../../fuchsia/sdk/linux/pkg/async-testing/include/lib/async-testing/dispatcher_stub.h
+FILE: ../../../fuchsia/sdk/linux/pkg/async/include/lib/async/dispatcher.h
+FILE: ../../../fuchsia/sdk/linux/pkg/async/include/lib/async/irq.h
+FILE: ../../../fuchsia/sdk/linux/pkg/async/include/lib/async/receiver.h
+FILE: ../../../fuchsia/sdk/linux/pkg/async/include/lib/async/task.h
+FILE: ../../../fuchsia/sdk/linux/pkg/async/include/lib/async/wait.h
+FILE: ../../../fuchsia/sdk/linux/pkg/async/ops.c
+FILE: ../../../fuchsia/sdk/linux/pkg/fdio/include/lib/fdio/limits.h
+FILE: ../../../fuchsia/sdk/linux/pkg/fdio/include/lib/fdio/namespace.h
+FILE: ../../../fuchsia/sdk/linux/pkg/fdio/include/lib/fdio/private.h
+FILE: ../../../fuchsia/sdk/linux/pkg/fdio/include/lib/fdio/unsafe.h
+FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/decoding_and_validating.cc
+FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/encoding.cc
+FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/formatting.cc
+FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/include/lib/fidl/coding.h
+FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/include/lib/fidl/internal.h
+FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/function.h
+FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/function_internal.h
+FILE: ../../../fuchsia/sdk/linux/pkg/memfs/include/lib/memfs/memfs.h
+FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/commands.cc
+FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/include/lib/ui/scenic/cpp/commands.h
+FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/include/lib/ui/scenic/cpp/resources.h
+FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/include/lib/ui/scenic/cpp/session.h
+FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/resources.cc
+FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/session.cc
+FILE: ../../../fuchsia/sdk/linux/pkg/trace-engine/include/lib/trace-engine/context.h
+FILE: ../../../fuchsia/sdk/linux/pkg/trace-engine/include/lib/trace-engine/fields.h
+FILE: ../../../fuchsia/sdk/linux/pkg/trace-engine/include/lib/trace-engine/handler.h
+FILE: ../../../fuchsia/sdk/linux/pkg/trace-engine/include/lib/trace-engine/instrumentation.h
+FILE: ../../../fuchsia/sdk/linux/pkg/trace-engine/include/lib/trace-engine/types.h
+FILE: ../../../fuchsia/sdk/linux/pkg/trace-provider-so/include/lib/trace-provider/handler.h
+FILE: ../../../fuchsia/sdk/linux/pkg/trace-provider-so/include/lib/trace-provider/provider.h
+FILE: ../../../fuchsia/sdk/linux/pkg/trace/event.cc
+FILE: ../../../fuchsia/sdk/linux/pkg/trace/include/lib/trace/event.h
+FILE: ../../../fuchsia/sdk/linux/pkg/trace/include/lib/trace/internal/event_common.h
+FILE: ../../../fuchsia/sdk/linux/pkg/trace/include/lib/trace/internal/event_internal.h
+FILE: ../../../fuchsia/sdk/linux/pkg/trace/include/lib/trace/internal/pairs_internal.h
+FILE: ../../../fuchsia/sdk/linux/pkg/trace/include/lib/trace/internal/string_traits.h
+FILE: ../../../fuchsia/sdk/linux/pkg/trace/include/lib/trace/observer.h
+FILE: ../../../fuchsia/sdk/linux/pkg/trace/observer.cc
+FILE: ../../../fuchsia/sdk/linux/pkg/zx/fifo.cc
+FILE: ../../../fuchsia/sdk/linux/pkg/zx/include/lib/zx/fifo.h
+FILE: ../../../fuchsia/sdk/linux/pkg/zx/include/lib/zx/handle.h
+FILE: ../../../fuchsia/sdk/linux/pkg/zx/include/lib/zx/timer.h
+FILE: ../../../fuchsia/sdk/linux/pkg/zx/timer.cc
+----------------------------------------------------------------------------------------------------
+Copyright 2017 The Fuchsia Authors. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+   * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: fuchsia_sdk
 ORIGIN: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/hw/debug/arm64.h + ../../../fuchsia/sdk/linux/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/exception.h
@@ -3286,7 +3283,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.castauth/cast_auth.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.castconfig/cast_config.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.castsetup/cast_setup.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.castsysteminfo/cast_system_info.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.deprecatedtimezone/deprecated_time_zone.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.diagnostics/format.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.diagnostics/reader.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.diagnostics/selector.fidl
