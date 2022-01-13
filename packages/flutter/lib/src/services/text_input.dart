@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:io' show Platform;
 import 'dart:ui' show
   FontWeight,
+  Locale,
   Offset,
   Size,
   Rect,
@@ -1277,9 +1278,9 @@ class TextInputConnection {
   }
 
     /// Requests that spell checking be initiated on the specified text.
-    void initiateSpellChecking(String text) {
+    void initiateSpellChecking(Locale locale, String text) {
       assert(attached);
-      TextInput._instance.initiateSpellChecking(text);
+      TextInput._instance.initiateSpellChecking(locale, text);
     }
 
 
@@ -1825,11 +1826,12 @@ class TextInput {
     _channel.invokeMethod<void>('TextInput.requestAutofill');
   }
 
-  void initiateSpellChecking(String text) {
+  void initiateSpellChecking(Locale locale, String text) {
+    assert(locale != null);
     assert(text != null);
     _channel.invokeMethod<void>(
       'TextInput.initiateSpellChecking',
-      text,
+      <String>[ locale.toLanguageTag(), text ],
     );
   }
 

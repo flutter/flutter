@@ -2517,7 +2517,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           value,
           (TextEditingValue newValue, TextInputFormatter formatter) => formatter.formatEditUpdate(_value, newValue),
         ) ?? value;
-        _textInputConnection!.initiateSpellChecking(value.text);
+        Locale? localeForSpellChecking = widget.locale ?? Localizations.maybeLocaleOf(context);
+        _textInputConnection!.initiateSpellChecking(localeForSpellChecking as Locale, value.text);
       } catch (exception, stack) {
         FlutterError.reportError(FlutterErrorDetails(
           exception: exception,
