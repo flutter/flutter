@@ -68,7 +68,7 @@ static const CGFloat kStandardTimeOut = 60.0;
       [self waitForAndTapElement:app.buttons[@"Flutter View (Warm)"]];
       newPageAppeared = [app.staticTexts[@"Button tapped 0 times."] waitForExistenceWithTimeout:kStandardTimeOut];
       if (!newPageAppeared) {
-        os_log(OS_LOG_DEFAULT, "A11 Tree %@", app.debugDescription);
+        os_log(OS_LOG_DEFAULT, "%@", app.debugDescription);
       }
     }
     XCTAssertTrue(newPageAppeared);
