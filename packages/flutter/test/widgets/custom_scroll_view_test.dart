@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   // Regression test for https://github.com/flutter/flutter/issues/96024
-  testWidgets('CustomScrollView.center update test', (WidgetTester tester) async {
+  testWidgets('CustomScrollView.center update test 1', (WidgetTester tester) async {
     final Key centerKey = UniqueKey();
     late StateSetter setState;
     bool hasKey = false;
@@ -44,6 +44,38 @@ void main() {
       hasKey = true;
     });
 
+    await tester.pumpAndSettle();
+
+    // Pass without throw.
+  });
+
+  testWidgets('CustomScrollView.center update test 2', (WidgetTester tester) async {
+    const List<Widget> slivers1 = <Widget>[
+      SliverToBoxAdapter(key: Key('a'), child: SizedBox(height: 100.0)),
+      SliverToBoxAdapter(key: Key('b'), child: SizedBox(height: 100.0)),
+      SliverToBoxAdapter(key: Key('c'), child: SizedBox(height: 100.0)),
+    ];
+
+    const List<Widget> slivers2 = <Widget>[
+      SliverToBoxAdapter(key: Key('c'), child: SizedBox(height: 100.0)),
+      SliverToBoxAdapter(key: Key('d'), child: SizedBox(height: 100.0)),
+      SliverToBoxAdapter(key: Key('a'), child: SizedBox(height: 100.0)),
+    ];
+
+    Widget buildFrame(List<Widget> slivers, Key center) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: CustomScrollView(
+          center: center,
+          slivers: slivers,
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(slivers1, const Key('b')));
+    await tester.pumpAndSettle();
+
+    await tester.pumpWidget(buildFrame(slivers2, const Key('d')));
     await tester.pumpAndSettle();
 
     // Pass without throw.

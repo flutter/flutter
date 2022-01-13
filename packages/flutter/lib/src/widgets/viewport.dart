@@ -243,13 +243,16 @@ class _ViewportElement extends MultiChildRenderObjectElement {
   void _updateCenter() {
     // TODO(ianh): cache the keys to make this faster
     if (widget.center != null) {
-      for (int i = 0; i < children.length; i++) {
-        if (children.elementAt(i).widget.key == widget.center) {
-          renderObject.center = children.elementAt(i).renderObject as RenderSliver?;
-          _centerSlotIndex = i;
+      int elementIndex = 0;
+      for (final Element e in children) {
+        if (e.widget.key == widget.center) {
+          renderObject.center = e.renderObject as RenderSliver?;
           break;
         }
+        elementIndex++;
       }
+      assert(elementIndex < children.length);
+      _centerSlotIndex = elementIndex;
     } else if (children.isNotEmpty) {
       renderObject.center = children.first.renderObject as RenderSliver?;
       _centerSlotIndex = 0;
@@ -264,22 +267,22 @@ class _ViewportElement extends MultiChildRenderObjectElement {
     super.insertRenderObjectChild(child, slot);
     // Once [mount]/[update] are done, the `renderObject.center` will be updated
     // in [_updateCenter].
-    if (!_doingMountOrUpdate) {
-      if (slot.index == _centerSlotIndex) {
-        renderObject.center = child as RenderSliver?;
-      }
+    if (!_doingMountOrUpdate && slot.index == _centerSlotIndex) {
+      renderObject.center = child as RenderSliver?;
     }
   }
 
-  // `moveRenderObjectChild` only happens during [update] stage.
+  @override
+  void moveRenderObjectChild(RenderObject child, IndexedSlot<Element?> oldSlot, IndexedSlot<Element?> newSlot) {
+    super.moveRenderObjectChild(child, oldSlot, newSlot);
+    assert(_doingMountOrUpdate);
+  }
 
   @override
   void removeRenderObjectChild(RenderObject child, Object? slot) {
     super.removeRenderObjectChild(child, slot);
-    if (!_doingMountOrUpdate) {
-      if (renderObject.center == child) {
-        renderObject.center = null;
-      }
+    if (!_doingMountOrUpdate && renderObject.center == child) {
+      renderObject.center = null;
     }
   }
 
