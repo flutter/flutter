@@ -275,7 +275,7 @@ class CocoaPods {
       final String includeFile = 'Pods/Target Support Files/Pods-Runner/Pods-Runner.${mode
           .toLowerCase()}.xcconfig';
       final String include = '#include? "$includeFile"';
-      if (!content.contains(includeFile)) {
+      if (!content.contains('Pods/Target Support Files/Pods-')) {
         file.writeAsStringSync('$include\n$content', flush: true);
       }
     }

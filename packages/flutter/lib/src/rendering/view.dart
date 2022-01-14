@@ -300,9 +300,11 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
         statusBarBrightness: upperOverlayStyle?.statusBarBrightness,
         statusBarIconBrightness: upperOverlayStyle?.statusBarIconBrightness,
         statusBarColor: upperOverlayStyle?.statusBarColor,
+        systemStatusBarContrastEnforced: upperOverlayStyle?.systemStatusBarContrastEnforced,
         systemNavigationBarColor: lowerOverlayStyle?.systemNavigationBarColor,
         systemNavigationBarDividerColor: lowerOverlayStyle?.systemNavigationBarDividerColor,
         systemNavigationBarIconBrightness: lowerOverlayStyle?.systemNavigationBarIconBrightness,
+        systemNavigationBarContrastEnforced: lowerOverlayStyle?.systemNavigationBarContrastEnforced,
       );
       SystemChrome.setSystemUIOverlayStyle(overlayStyle);
     }

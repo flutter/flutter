@@ -213,8 +213,8 @@ void main() {
               labelText: 'labelText',
             ),
             value: value,
+            onChanged: null, // this disables the menu and shows the disabledHint.
             disabledHint: const Text('disabledHint'),
-            onChanged: null, // disable the menu to show the disabledHint.
             items: const <DropdownMenuItem<int?>>[
               DropdownMenuItem<int?>(
                 value: 1,
@@ -365,8 +365,8 @@ void main() {
             ),
             value: value,
             hint: const Text('hint'),
-            disabledHint: const Text('disabledHint'),
             onChanged: null, // disabled
+            disabledHint: const Text('disabledHint'),
             items: const <DropdownMenuItem<int?>>[
               DropdownMenuItem<int?>(
                 value: 1,
@@ -409,7 +409,6 @@ void main() {
             },
             items: const <DropdownMenuItem<int?>>[
               DropdownMenuItem<int?>(
-                value: null,
                 child: Text('None'),
               ),
               DropdownMenuItem<int?>(
@@ -531,12 +530,10 @@ void main() {
 
   testWidgets('DropdownButtonFormField with isDense:true aligns selected menu item', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
-    const String value = 'two';
 
     await tester.pumpWidget(
       buildFormFrame(
         buttonKey: buttonKey,
-        value: value,
         onChanged: onChanged,
       ),
     );
@@ -617,7 +614,6 @@ void main() {
                 child: const Text(value),
               ),
             ],
-            isDense: true,
             onChanged: (_) { },
             style: const TextStyle(
               color: Colors.amber,
@@ -652,7 +648,7 @@ void main() {
       );
     }
     // [disabledHint] should display when [items] is null
-    await tester.pumpWidget(build(items: null));
+    await tester.pumpWidget(build());
     expect(find.text('enabled'), findsNothing);
     expect(find.text('disabled'), findsOneWidget);
 
@@ -674,11 +670,10 @@ void main() {
           buttonKey: buttonKey,
           value: null,
           hint: const Text('hint used when disabled'),
-          disabledHint: null,
         );
       }
       // [hint] should display when [items] is null and [disabledHint] is not defined
-      await tester.pumpWidget(build(items: null));
+      await tester.pumpWidget(build());
       expect(find.text('hint used when disabled'), findsOneWidget);
 
       // [hint] should display when [items] is an empty list and [disabledHint] is not defined.
@@ -699,7 +694,7 @@ void main() {
       );
     }
     // [hint] should display when [items] is null and [disabledHint] is not defined
-    await tester.pumpWidget(build(items: null));
+    await tester.pumpWidget(build());
     expect(find.text('hint used when disabled'), findsOneWidget);
 
     // [hint] should display when [items] is an empty list and [disabledHint] is not defined.
@@ -719,7 +714,7 @@ void main() {
       );
     }
     // [hint] should display when [items] is null and [disabledHint] is not defined
-    await tester.pumpWidget(build(items: null));
+    await tester.pumpWidget(build());
     expect(find.text('hint used when disabled'), findsOneWidget);
 
     // [hint] should display when [items] is an empty list and [disabledHint] is not defined.
@@ -740,7 +735,7 @@ void main() {
         disabledHint: const Text('disabled'),
       );
     }
-    await tester.pumpWidget(build(items: menuItems, onChanged: null));
+    await tester.pumpWidget(build(items: menuItems));
     expect(find.text('enabled'), findsNothing);
     expect(find.text('disabled'), findsOneWidget);
   });
@@ -757,7 +752,7 @@ void main() {
         disabledHint: const Text('disabled'),
       );
     }
-    await tester.pumpWidget(build(items: null));
+    await tester.pumpWidget(build());
     final RenderBox disabledHintBox = tester.renderObject<RenderBox>(
       find.byKey(buttonKey),
     );
@@ -808,7 +803,6 @@ void main() {
     debugDisableShadows = false;
     await tester.pumpWidget(buildFormFrame(
       buttonKey: buttonKey,
-      items: menuItems,
       onChanged: onChanged,
     ));
     await tester.tap(find.byKey(buttonKey));
@@ -831,7 +825,6 @@ void main() {
 
     await tester.pumpWidget(buildFormFrame(
       buttonKey: buttonKeyOne,
-      items: menuItems,
       elevation: 16,
       onChanged: onChanged,
     ));
@@ -847,7 +840,6 @@ void main() {
     await tester.tap(find.text('one').last);
     await tester.pumpWidget(buildFormFrame(
       buttonKey: buttonKeyTwo,
-      items: menuItems,
       elevation: 24,
       onChanged: onChanged,
     ));
@@ -1084,29 +1076,6 @@ void main() {
     );
 
     expect(_validateCalled, 1);
-  });
-
-  testWidgets('autovalidateMode and autovalidate should not be used at the same time', (WidgetTester tester) async {
-    Widget builder() {
-      return MaterialApp(
-        home: Material(
-          child: Center(
-            child: DropdownButtonFormField<String>(
-              autovalidate: true,
-              autovalidateMode: AutovalidateMode.always,
-              items: menuItems.map((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(value),
-                );
-              }).toList(),
-              onChanged: onChanged,
-            ),
-          ),
-        ),
-      );
-    }
-    expect(() => builder(), throwsAssertionError);
   });
 
   testWidgets('DropdownButtonFormField - Custom button alignment', (WidgetTester tester) async {

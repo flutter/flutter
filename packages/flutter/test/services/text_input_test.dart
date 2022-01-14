@@ -3,14 +3,45 @@
 // found in the LICENSE file.
 
 
-import 'dart:convert' show utf8;
 import 'dart:convert' show jsonDecode;
 
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'text_input_utils.dart';
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+
+  group('TextSelection', () {
+    test('The invalid selection is a singleton', () {
+      const TextSelection invalidSelection1 = TextSelection(
+        baseOffset: -1,
+        extentOffset: 0,
+        isDirectional: true,
+      );
+      const TextSelection invalidSelection2 = TextSelection(baseOffset: 123,
+        extentOffset: -1,
+        affinity: TextAffinity.upstream,
+      );
+      expect(invalidSelection1, invalidSelection2);
+      expect(invalidSelection1.hashCode, invalidSelection2.hashCode);
+    });
+
+    test('TextAffinity does not affect equivalence when the selection is not collapsed', () {
+      const TextSelection selection1 = TextSelection(
+        baseOffset: 1,
+        extentOffset: 2,
+      );
+      const TextSelection selection2 = TextSelection(
+        baseOffset: 1,
+        extentOffset: 2,
+        affinity: TextAffinity.upstream,
+      );
+      expect(selection1, selection2);
+      expect(selection1.hashCode, selection2.hashCode);
+    });
+  });
 
   group('TextInput message channels', () {
     late FakeTextChannel fakeTextChannel;
@@ -32,7 +63,7 @@ void main() {
         MethodCall('TextInput.setClient', <dynamic>[1, client.configuration.toJson()]),
       ]);
 
-      fakeTextChannel.incoming!(const MethodCall('TextInputClient.requestExistingInputState', null));
+      fakeTextChannel.incoming!(const MethodCall('TextInputClient.requestExistingInputState'));
 
       expect(fakeTextChannel.outgoingCalls.length, 3);
       fakeTextChannel.validateOutgoingMethodCalls(<MethodCall>[
@@ -51,7 +82,7 @@ void main() {
         MethodCall('TextInput.setClient', <dynamic>[1, client.configuration.toJson()]),
       ]);
 
-      fakeTextChannel.incoming!(const MethodCall('TextInputClient.requestExistingInputState', null));
+      fakeTextChannel.incoming!(const MethodCall('TextInputClient.requestExistingInputState'));
 
       expect(fakeTextChannel.outgoingCalls.length, 3);
       fakeTextChannel.validateOutgoingMethodCalls(<MethodCall>[
@@ -86,6 +117,7 @@ void main() {
       expect(configuration.inputType, TextInputType.text);
       expect(configuration.readOnly, false);
       expect(configuration.obscureText, false);
+      expect(configuration.enableDeltaModel, false);
       expect(configuration.autocorrect, true);
       expect(configuration.actionLabel, null);
       expect(configuration.textCapitalization, TextCapitalization.none);
@@ -94,7 +126,6 @@ void main() {
 
     test('text serializes to JSON', () async {
       const TextInputConfiguration configuration = TextInputConfiguration(
-        inputType: TextInputType.text,
         readOnly: true,
         obscureText: true,
         autocorrect: false,
@@ -433,61 +464,4 @@ class FakeTextInputClient implements TextInputClient {
   }
 
   TextInputConfiguration get configuration => const TextInputConfiguration();
-}
-
-class FakeTextChannel implements MethodChannel {
-  FakeTextChannel(this.outgoing) : assert(outgoing != null);
-
-  Future<dynamic> Function(MethodCall) outgoing;
-  Future<void> Function(MethodCall)? incoming;
-
-  List<MethodCall> outgoingCalls = <MethodCall>[];
-
-  @override
-  BinaryMessenger get binaryMessenger => throw UnimplementedError();
-
-  @override
-  MethodCodec get codec => const JSONMethodCodec();
-
-  @override
-  Future<List<T>> invokeListMethod<T>(String method, [dynamic arguments]) => throw UnimplementedError();
-
-  @override
-  Future<Map<K, V>> invokeMapMethod<K, V>(String method, [dynamic arguments]) => throw UnimplementedError();
-
-  @override
-  Future<T> invokeMethod<T>(String method, [dynamic arguments]) async {
-    final MethodCall call = MethodCall(method, arguments);
-    outgoingCalls.add(call);
-    return await outgoing(call) as T;
-  }
-
-  @override
-  String get name => 'flutter/textinput';
-
-  @override
-  void setMethodCallHandler(Future<void> Function(MethodCall call)? handler) => incoming = handler;
-
-  void validateOutgoingMethodCalls(List<MethodCall> calls) {
-    expect(outgoingCalls.length, calls.length);
-    bool hasError = false;
-    for (int i = 0; i < calls.length; i++) {
-      final ByteData outgoingData = codec.encodeMethodCall(outgoingCalls[i]);
-      final ByteData expectedData = codec.encodeMethodCall(calls[i]);
-      final String outgoingString = utf8.decode(outgoingData.buffer.asUint8List());
-      final String expectedString = utf8.decode(expectedData.buffer.asUint8List());
-
-      if (outgoingString != expectedString) {
-        print(
-          'Index $i did not match:\n'
-          '  actual:   $outgoingString\n'
-          '  expected: $expectedString',
-        );
-        hasError = true;
-      }
-    }
-    if (hasError) {
-      fail('Calls did not match.');
-    }
-  }
 }

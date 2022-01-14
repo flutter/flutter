@@ -575,37 +575,12 @@ abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> exten
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=yI-8QHpGIP4}
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold}
-///
+/// {@tool dartpad}
 /// The following example (depicted above) transitions an AnimatedContainer
 /// between two states. It adjusts the `height`, `width`, `color`, and
 /// [alignment] properties when tapped.
 ///
-/// ```dart
-/// bool selected = false;
-///
-/// @override
-/// Widget build(BuildContext context) {
-///   return GestureDetector(
-///     onTap: () {
-///       setState(() {
-///         selected = !selected;
-///       });
-///     },
-///     child: Center(
-///       child: AnimatedContainer(
-///         width: selected ? 200.0 : 100.0,
-///         height: selected ? 100.0 : 200.0,
-///         color: selected ? Colors.red : Colors.blue,
-///         alignment: selected ? Alignment.center : AlignmentDirectional.topCenter,
-///         duration: const Duration(seconds: 2),
-///         curve: Curves.fastOutSlowIn,
-///         child: const FlutterLogo(size: 75),
-///       ),
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/widgets/implicit_animations/animated_container.0.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -814,45 +789,11 @@ class _AnimatedContainerState extends AnimatedWidgetBaseState<AnimatedContainer>
 /// of [Curves.fastOutSlowIn].
 /// {@animation 250 266 https://flutter.github.io/assets-for-api-docs/assets/widgets/animated_padding.mp4}
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold}
-///
+/// {@tool dartpad}
 /// The following code implements the [AnimatedPadding] widget, using a [curve] of
 /// [Curves.easeInOut].
 ///
-/// ```dart
-/// double padValue = 0.0;
-/// void _updatePadding(double value) {
-///   setState(() {
-///     padValue = value;
-///   });
-/// }
-///
-/// @override
-/// Widget build(BuildContext context) {
-///   return Column(
-///     mainAxisAlignment: MainAxisAlignment.center,
-///     children: <Widget>[
-///       AnimatedPadding(
-///         padding: EdgeInsets.all(padValue),
-///         duration: const Duration(seconds: 2),
-///         curve: Curves.easeInOut,
-///         child: Container(
-///           width: MediaQuery.of(context).size.width,
-///           height: MediaQuery.of(context).size.height / 5,
-///           color: Colors.blue,
-///         ),
-///       ),
-///       Text('Padding: $padValue'),
-///       ElevatedButton(
-///         child: const Text('Change padding'),
-///         onPressed: () {
-///           _updatePadding(padValue == 0.0 ? 100.0 : 0.0);
-///         }
-///       ),
-///     ],
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/widgets/implicit_animations/animated_padding.0.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -935,38 +876,11 @@ class _AnimatedPaddingState extends AnimatedWidgetBaseState<AnimatedPadding> {
 /// it also requires more development overhead as you have to manually manage
 /// the lifecycle of the underlying [AnimationController].
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold}
-///
+/// {@tool dartpad}
 /// The following code implements the [AnimatedAlign] widget, using a [curve] of
 /// [Curves.fastOutSlowIn].
 ///
-/// ```dart
-/// bool selected = false;
-///
-/// @override
-/// Widget build(BuildContext context) {
-///   return GestureDetector(
-///     onTap: () {
-///       setState(() {
-///         selected = !selected;
-///       });
-///     },
-///     child: Center(
-///       child: Container(
-///         width: 250.0,
-///         height: 250.0,
-///         color: Colors.red,
-///         child: AnimatedAlign(
-///           alignment: selected ? Alignment.topRight : Alignment.bottomLeft,
-///           duration: const Duration(seconds: 1),
-///           curve: Curves.fastOutSlowIn,
-///           child: const FlutterLogo(size: 50.0),
-///         ),
-///       ),
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/widgets/implicit_animations/animated_align.0.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -1101,45 +1015,12 @@ class _AnimatedAlignState extends AnimatedWidgetBaseState<AnimatedAlign> {
 /// it also requires more development overhead as you have to manually manage
 /// the lifecycle of the underlying [AnimationController].
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_center}
-///
+/// {@tool dartpad}
 /// The following example transitions an AnimatedPositioned
 /// between two states. It adjusts the `height`, `width`, and
 /// [Positioned] properties when tapped.
 ///
-/// ```dart
-/// bool selected = false;
-///
-/// @override
-/// Widget build(BuildContext context) {
-///   return SizedBox(
-///     width: 200,
-///     height: 350,
-///     child: Stack(
-///       children: <Widget>[
-///         AnimatedPositioned(
-///           width: selected ? 200.0 : 50.0,
-///           height: selected ? 50.0 : 200.0,
-///           top: selected ? 50.0 : 150.0,
-///           duration: const Duration(seconds: 2),
-///           curve: Curves.fastOutSlowIn,
-///           child: GestureDetector(
-///             onTap: () {
-///               setState(() {
-///                 selected = !selected;
-///               });
-///             },
-///             child: Container(
-///               color: Colors.blue,
-///               child: const Center(child: Text('Tap me')),
-///             ),
-///           ),
-///         ),
-///       ],
-///     ),
-///   );
-/// }
-///```
+/// ** See code in examples/api/lib/widgets/implicit_animations/animated_positioned.0.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -1681,48 +1562,11 @@ class _AnimatedRotationState extends ImplicitlyAnimatedWidgetState<AnimatedRotat
 /// example, an [Offset] with a `dx` of 0.25 will result in a horizontal
 /// translation of one quarter the width of the child.
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold}
-///
+/// {@tool dartpad}
 /// This code defines a widget that uses [AnimatedSlide] to translate a [FlutterLogo]
 /// up or down by the amount of it's height with each press of the corresponding button.
 ///
-/// ```dart
-///  Offset offset = Offset.zero;
-///
-///  void _slideUp() {
-///    setState(() => offset -= const Offset(0, 1));
-///  }
-///
-///  void _slideDown() {
-///    setState(() => offset += const Offset(0, 1));
-///  }
-///
-///  @override
-///  Widget build(BuildContext context) {
-///    return Column(
-///      mainAxisSize: MainAxisSize.min,
-///      children: <Widget>[
-///        ElevatedButton(
-///          child: const Text('Slide up'),
-///          onPressed: _slideUp,
-///        ),
-///        ElevatedButton(
-///          child: const Text('Slide down'),
-///          onPressed: _slideDown,
-///        ),
-///        Padding(
-///          padding: const EdgeInsets.all(50),
-///          child: AnimatedSlide(
-///            offset: offset,
-///            duration: const Duration(milliseconds: 500),
-///            curve: Curves.easeInOut,
-///            child: const FlutterLogo(),
-///          ),
-///        ),
-///      ],
-///    );
-///  }
-/// ```
+/// ** See code in examples/api/lib/widgets/implicit_animations/animated_slide.0.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -1930,51 +1774,11 @@ class _AnimatedOpacityState extends ImplicitlyAnimatedWidgetState<AnimatedOpacit
 /// Here's an illustration of what using this widget looks like, using a [curve]
 /// of [Curves.fastOutSlowIn].
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_center_freeform_state}
+/// {@tool dartpad}
 /// Creates a [CustomScrollView] with a [SliverFixedExtentList] and a
 /// [FloatingActionButton]. Pressing the button animates the lists' opacity.
 ///
-/// ```dart
-/// class _MyStatefulWidgetState extends State<MyStatefulWidget> with SingleTickerProviderStateMixin {
-///   bool _visible = true;
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return CustomScrollView(
-///       slivers: <Widget>[
-///         SliverAnimatedOpacity(
-///           opacity: _visible ? 1.0 : 0.0,
-///           duration: const Duration(milliseconds: 500),
-///           sliver: SliverFixedExtentList(
-///             itemExtent: 100.0,
-///             delegate: SliverChildBuilderDelegate(
-///               (BuildContext context, int index) {
-///                 return Container(
-///                   color: index.isEven
-///                     ? Colors.indigo[200]
-///                     : Colors.orange[200],
-///                 );
-///               },
-///               childCount: 5,
-///             ),
-///           ),
-///         ),
-///         SliverToBoxAdapter(
-///           child: FloatingActionButton(
-///             onPressed: () {
-///               setState(() {
-///                 _visible = !_visible;
-///               });
-///             },
-///             tooltip: 'Toggle opacity',
-///             child: const Icon(Icons.flip),
-///           )
-///         ),
-///       ]
-///     );
-///   }
-/// }
-/// ```
+/// ** See code in examples/api/lib/widgets/implicit_animations/sliver_animated_opacity.0.dart **
 /// {@end-tool}
 ///
 /// See also:

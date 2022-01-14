@@ -118,7 +118,7 @@ void main() {
 
     final TextPosition positionBelow = paragraph.getPositionForOffset(const Offset(5.0, 20.0));
     expect(positionBelow.offset, greaterThan(position40.offset));
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61015
+  });
 
   test('getBoxesForSelection control test', () {
     final RenderParagraph paragraph = RenderParagraph(
@@ -184,7 +184,7 @@ void main() {
     expect(boxes[2], const TextBox.fromLTRBD(0.0, 10.0, 130.0, 20.0, TextDirection.ltr));
     // 'fifth':
     expect(boxes[3], const TextBox.fromLTRBD(0.0, 20.0, 50.0, 30.0, TextDirection.ltr));
-  }, skip: !isLinux); // mac typography values can differ
+  }, skip: !isLinux); // mac typography values can differ https://github.com/flutter/flutter/issues/12357
 
   test('getBoxesForSelection test with boxHeightStyle and boxWidthStyle set to max', () {
     final RenderParagraph paragraph = RenderParagraph(
@@ -243,7 +243,7 @@ void main() {
 
     final TextRange range85 = paragraph.getWordBoundary(const TextPosition(offset: 75));
     expect(range85.textInside(_kText), equals("Queen's"));
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61017
+  });
 
   test('overflow test', () {
     final RenderParagraph paragraph = RenderParagraph(
@@ -254,7 +254,6 @@ void main() {
       ),
       textDirection: TextDirection.ltr,
       maxLines: 1,
-      softWrap: true,
     );
 
     void relayoutWith({
@@ -276,7 +275,7 @@ void main() {
     relayoutWith(maxLines: 3, softWrap: true, overflow: TextOverflow.clip);
     expect(paragraph.size.height, equals(3 * lineHeight));
 
-    relayoutWith(maxLines: null, softWrap: true, overflow: TextOverflow.clip);
+    relayoutWith(softWrap: true, overflow: TextOverflow.clip);
     expect(paragraph.size.height, greaterThan(5 * lineHeight));
 
     // Try again with ellipsis overflow. We can't test that the ellipsis are
@@ -291,7 +290,7 @@ void main() {
     // infinite wrapping. However, if we did, we'd never know when to append an
     // ellipsis, so this really means "append ellipsis as soon as we exceed the
     // width".
-    relayoutWith(maxLines: null, softWrap: true, overflow: TextOverflow.ellipsis);
+    relayoutWith(softWrap: true, overflow: TextOverflow.ellipsis);
     expect(paragraph.size.height, equals(2 * lineHeight));
 
     // Now with no soft wrapping.
@@ -301,7 +300,7 @@ void main() {
     relayoutWith(maxLines: 3, softWrap: false, overflow: TextOverflow.clip);
     expect(paragraph.size.height, equals(2 * lineHeight));
 
-    relayoutWith(maxLines: null, softWrap: false, overflow: TextOverflow.clip);
+    relayoutWith(softWrap: false, overflow: TextOverflow.clip);
     expect(paragraph.size.height, equals(2 * lineHeight));
 
     relayoutWith(maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis);
@@ -310,7 +309,7 @@ void main() {
     relayoutWith(maxLines: 3, softWrap: false, overflow: TextOverflow.ellipsis);
     expect(paragraph.size.height, equals(3 * lineHeight));
 
-    relayoutWith(maxLines: null, softWrap: false, overflow: TextOverflow.ellipsis);
+    relayoutWith(softWrap: false, overflow: TextOverflow.ellipsis);
     expect(paragraph.size.height, equals(2 * lineHeight));
 
     // Test presence of the fade effect.
@@ -439,7 +438,7 @@ void main() {
     expect(boxes[2].toRect().height, moreOrLessEquals(26.0, epsilon: 0.0001));
     expect(boxes[3].toRect().width, anyOf(14.0, 13.0));
     expect(boxes[3].toRect().height, moreOrLessEquals(13.0, epsilon: 0.0001));
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61016
+  });
 
   test('toStringDeep', () {
     final RenderParagraph paragraph = RenderParagraph(
@@ -576,7 +575,6 @@ void main() {
           WidgetSpan(child: Text(sentence)),
         ],
       ),
-      textScaleFactor: 1.0,
       children: renderBoxes,
       textDirection: TextDirection.ltr,
     );
@@ -605,7 +603,7 @@ void main() {
     // intrinsicHeight = singleLineHeight * textScaleFactor * two lines.
     expect(maxIntrinsicHeight, singleLineHeight * 2.0 * 2);
     expect(maxIntrinsicHeight, minIntrinsicHeight);
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61020
+  });
 
   test('can compute IntrinsicWidth for widget span', () {
     // Regression test for https://github.com/flutter/flutter/issues/59316
@@ -621,7 +619,6 @@ void main() {
           WidgetSpan(child: Text(sentence)),
         ],
       ),
-      textScaleFactor: 1.0,
       children: renderBoxes,
       textDirection: TextDirection.ltr,
     );
@@ -648,7 +645,7 @@ void main() {
     final double maxIntrinsicWidth = paragraph.computeMaxIntrinsicWidth(fixedHeight);
     // maxIntrinsicWidth = widthForOneLine * textScaleFactor
     expect(maxIntrinsicWidth, widthForOneLine * 2.0);
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61020
+  });
 
   test('inline widgets multiline test', () {
     const TextSpan text = TextSpan(
@@ -702,7 +699,39 @@ void main() {
     expect(boxes[8], const TextBox.fromLTRBD(14.0, 28.0, 28.0, 42.0 , TextDirection.ltr));
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61020
 
-  test('Supports gesture recognizer semantics', () {
+  test('Does not include the semantics node of truncated rendering children', () {
+    // Regression test for https://github.com/flutter/flutter/issues/88180
+    const double screenWidth = 100;
+    const String sentence = 'truncated';
+    final List<RenderBox> renderBoxes = <RenderBox>[
+      RenderParagraph(
+          const TextSpan(text: sentence), textDirection: TextDirection.ltr),
+    ];
+    final RenderParagraph paragraph = RenderParagraph(
+      const TextSpan(
+        text: 'a long line to be truncated.',
+        children: <InlineSpan>[
+          WidgetSpan(child: Text(sentence)),
+        ],
+      ),
+      overflow: TextOverflow.ellipsis,
+      children: renderBoxes,
+      textDirection: TextDirection.ltr,
+    );
+    layout(paragraph, constraints: const BoxConstraints(maxWidth: screenWidth));
+    final SemanticsNode result = SemanticsNode();
+    final SemanticsNode truncatedChild = SemanticsNode();
+    truncatedChild.tags = <SemanticsTag>{const PlaceholderSpanIndexSemanticsTag(0)};
+    paragraph.assembleSemanticsNode(result, SemanticsConfiguration(), <SemanticsNode>[truncatedChild]);
+    // It should only contain the semantics node of the TextSpan.
+    expect(result.childrenCount, 1);
+    result.visitChildren((SemanticsNode node) {
+      expect(node != truncatedChild, isTrue);
+      return true;
+    });
+  });
+
+    test('Supports gesture recognizer semantics', () {
     final RenderParagraph paragraph = RenderParagraph(
       TextSpan(text: _kText, children: <InlineSpan>[
         TextSpan(text: 'one', recognizer: TapGestureRecognizer()..onTap = () {}),
@@ -714,7 +743,19 @@ void main() {
     layout(paragraph);
 
     paragraph.assembleSemanticsNode(SemanticsNode(), SemanticsConfiguration(), <SemanticsNode>[]);
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61020
+  });
+
+  test('Supports empty text span with spell out', () {
+    final RenderParagraph paragraph = RenderParagraph(
+      const TextSpan(text: '', spellOut: true),
+      textDirection: TextDirection.rtl,
+    );
+    layout(paragraph);
+    final SemanticsNode node = SemanticsNode();
+    paragraph.assembleSemanticsNode(node, SemanticsConfiguration(), <SemanticsNode>[]);
+    expect(node.attributedLabel.string, '');
+    expect(node.attributedLabel.attributes.length, 0);
+  });
 
   test('Asserts on unsupported gesture recognizer', () {
     final RenderParagraph paragraph = RenderParagraph(
@@ -733,7 +774,7 @@ void main() {
       expect(e.message, 'MultiTapGestureRecognizer is not supported.');
     }
     expect(failed, true);
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61020
+  });
 
   test('assembleSemanticsNode handles text spans that do not yield selection boxes', () {
     final RenderParagraph paragraph = RenderParagraphWithEmptySelectionBoxList(
@@ -750,7 +791,7 @@ void main() {
     final SemanticsNode node = SemanticsNode();
     paragraph.assembleSemanticsNode(node, SemanticsConfiguration(), <SemanticsNode>[]);
     expect(node.childrenCount, 2);
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61020
+  });
 
   test('assembleSemanticsNode handles empty WidgetSpans that do not yield selection boxes', () {
     final TextSpan text = TextSpan(text: '', children: <InlineSpan>[

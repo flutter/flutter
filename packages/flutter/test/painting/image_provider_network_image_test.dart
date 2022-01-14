@@ -261,7 +261,7 @@ class _FakeHttpClientResponse extends Fake implements HttpClientResponse {
   @override
   Future<E> drain<E>([E? futureValue]) async {
     drained = true;
-    return futureValue ?? <int>[] as E;
+    return futureValue ?? futureValue as E; // Mirrors the implementation in Stream.
   }
 }
 

@@ -21,7 +21,6 @@ void main() {
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       templateRenderer: FakeTemplateRenderer(),
-      templateManifest: null,
     ), throwsToolExit());
   });
 
@@ -34,7 +33,6 @@ void main() {
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       templateRenderer: FakeTemplateRenderer(),
-      templateManifest: null,
     );
     final Directory directory = fileSystem.directory('foo');
     handler.addError(directory, FileSystemOp.create, const FileSystemException());
@@ -58,7 +56,6 @@ void main() {
       templateDir,
       imageSourceDir,
       fileSystem: fileSystem,
-      templateManifest: null,
       logger: BufferLogger.test(),
       templateRenderer: FakeTemplateRenderer(),
     );

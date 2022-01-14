@@ -78,7 +78,7 @@ void main() {
 
     expect(log, equals(<TestInherited>[first]));
 
-    final TestInherited third = TestInherited(shouldNotify: true, child: builder);
+    final TestInherited third = TestInherited(child: builder);
     await tester.pumpWidget(third);
 
     expect(log, equals(<TestInherited>[first, third]));
@@ -471,7 +471,6 @@ void main() {
     expect(buildCount, equals(2));
 
     await tester.pumpWidget(ChangeNotifierInherited(
-      notifier: null,
       child: builder,
     ));
     expect(buildCount, equals(3));

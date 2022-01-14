@@ -252,7 +252,6 @@ class IdeConfigCommand extends FlutterCommand {
       _templateDirectory,
       null,
       fileSystem: globals.fs,
-      templateManifest: null,
       logger: globals.logger,
       templateRenderer: globals.templateRenderer,
     );
@@ -269,11 +268,14 @@ class IdeConfigCommand extends FlutterCommand {
 String _validateFlutterDir(String dirPath, { String flutterRoot }) {
   final FileSystemEntityType type = globals.fs.typeSync(dirPath);
 
-  switch (type) {
+  switch (type) { // ignore: exhaustive_cases, https://github.com/dart-lang/linter/issues/3017
     case FileSystemEntityType.link:
       // Do not overwrite links.
       return "Invalid project root dir: '$dirPath' - refers to a link.";
-    default:
+    case FileSystemEntityType.file:
+    case FileSystemEntityType.directory:
+    case FileSystemEntityType.notFound:
       return null;
   }
+  return null; // dead code, remove after null safety migration
 }

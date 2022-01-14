@@ -597,7 +597,7 @@ void main() {
     expect(testEnvironmentProfile.outputDir.childFile('.last_build_id').readAsStringSync(),
       'c20b3747fb2aa148cc4fd39bfbbd894f');
 
-    // Verify debug output removeds
+    // Verify debug output removed
     expect(fileSystem.file('output/debug'), isNot(exists));
     expect(fileSystem.file('output/release'), exists);
   });
@@ -648,7 +648,6 @@ void main() {
   testWithoutContext('Build completes all dependencies before failing', () async {
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
     final BuildSystem buildSystem = setUpBuildSystem(fileSystem, FakePlatform(
-      operatingSystem: 'linux',
       numberOfProcessors: 10, // Ensure the tool will process tasks concurrently.
     ));
     final Completer<void> startB = Completer<void>();
@@ -687,7 +686,7 @@ BuildSystem setUpBuildSystem(FileSystem fileSystem, [FakePlatform? platform]) {
   return FlutterBuildSystem(
     fileSystem: fileSystem,
     logger: BufferLogger.test(),
-    platform: platform ?? FakePlatform(operatingSystem: 'linux'),
+    platform: platform ?? FakePlatform(),
   );
 }
 

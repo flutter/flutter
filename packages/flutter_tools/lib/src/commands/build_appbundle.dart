@@ -39,6 +39,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
     addEnableExperimentation(hide: !verboseHelp);
     usesAnalyzeSizeFlag();
     addAndroidSpecificBuildOptions(hide: !verboseHelp);
+    addMultidexOption();
     argParser.addMultiOption('target-platform',
       splitCommas: true,
       defaultsTo: <String>['android-arm', 'android-arm64', 'android-x64'],
@@ -110,6 +111,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
 
     final AndroidBuildInfo androidBuildInfo = AndroidBuildInfo(await getBuildInfo(),
       targetArchs: stringsArg('target-platform').map<AndroidArch>(getAndroidArchForName),
+      multidexEnabled: boolArg('multidex'),
     );
     // Do all setup verification that doesn't involve loading units. Checks that
     // require generated loading units are done after gen_snapshot in assemble.
@@ -119,7 +121,6 @@ class BuildAppBundleCommand extends BuildSubCommand {
         globals.logger,
         globals.platform,
         title: 'Deferred components prebuild validation',
-        exitOnFail: true,
       );
       validator.clearOutputDir();
       await validator.checkAndroidDynamicFeature(FlutterProject.current().manifest.deferredComponents);
@@ -145,6 +146,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
 
     validateBuild(androidBuildInfo);
     displayNullSafetyMode(androidBuildInfo.buildInfo);
+    globals.terminal.usesTerminalUi = true;
     await androidBuilder.buildAab(
       project: FlutterProject.current(),
       target: targetFile,

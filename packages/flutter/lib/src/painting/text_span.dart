@@ -371,13 +371,14 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
     final bool effectiveSpellOut = spellOut ?? inheritedSpellOut;
 
     if (text != null) {
+      final int textLength = semanticsLabel?.length ?? text!.length;
       collector.add(InlineSpanSemanticsInformation(
         text!,
         stringAttributes: <ui.StringAttribute>[
-          if (effectiveSpellOut)
-            ui.SpellOutStringAttribute(range: TextRange(start: 0, end: semanticsLabel?.length ?? text!.length)),
-          if (effectiveLocale != null)
-            ui.LocaleStringAttribute(locale: effectiveLocale, range: TextRange(start: 0, end: semanticsLabel?.length ?? text!.length)),
+          if (effectiveSpellOut && textLength > 0)
+            ui.SpellOutStringAttribute(range: TextRange(start: 0, end: textLength)),
+          if (effectiveLocale != null && textLength > 0)
+            ui.LocaleStringAttribute(locale: effectiveLocale, range: TextRange(start: 0, end: textLength)),
         ],
         semanticsLabel: semanticsLabel,
         recognizer: recognizer,

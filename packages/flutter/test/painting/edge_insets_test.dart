@@ -118,8 +118,8 @@ void main() {
     expect(EdgeInsetsGeometry.lerp(const EdgeInsetsDirectional.only(bottom: 10.0), EdgeInsetsDirectional.zero, 0.5), const EdgeInsetsDirectional.only(bottom: 5.0));
     expect(EdgeInsetsGeometry.lerp(const EdgeInsetsDirectional.only(bottom: 10.0), EdgeInsets.zero, 0.5), const EdgeInsetsDirectional.only(bottom: 5.0));
     expect(EdgeInsetsGeometry.lerp(const EdgeInsetsDirectional.only(start: 10.0), const EdgeInsets.only(left: 20.0), 0.5), const EdgeInsetsDirectional.only(start: 5.0).add(const EdgeInsets.only(left: 10.0)));
-    expect(EdgeInsetsGeometry.lerp(const EdgeInsetsDirectional.only(start: 0.0, bottom: 1.0), const EdgeInsetsDirectional.only(start: 1.0, bottom: 1.0).add(const EdgeInsets.only(right: 2.0, bottom: 0.0)), 0.5), const EdgeInsetsDirectional.only(start: 0.5).add(const EdgeInsets.only(right: 1.0, bottom: 1.0)));
-    expect(EdgeInsetsGeometry.lerp(const EdgeInsets.only(left: 0.0, bottom: 1.0), const EdgeInsetsDirectional.only(end: 1.0, bottom: 1.0).add(const EdgeInsets.only(right: 2.0, bottom: 0.0)), 0.5), const EdgeInsetsDirectional.only(start: 0.0, end: 0.5).add(const EdgeInsets.only(right: 1.0, bottom: 1.0)));
+    expect(EdgeInsetsGeometry.lerp(const EdgeInsetsDirectional.only(bottom: 1.0), const EdgeInsetsDirectional.only(start: 1.0, bottom: 1.0).add(const EdgeInsets.only(right: 2.0)), 0.5), const EdgeInsetsDirectional.only(start: 0.5).add(const EdgeInsets.only(right: 1.0, bottom: 1.0)));
+    expect(EdgeInsetsGeometry.lerp(const EdgeInsets.only(bottom: 1.0), const EdgeInsetsDirectional.only(end: 1.0, bottom: 1.0).add(const EdgeInsets.only(right: 2.0)), 0.5), const EdgeInsetsDirectional.only(end: 0.5).add(const EdgeInsets.only(right: 1.0, bottom: 1.0)));
   });
 
   test('EdgeInsetsGeometry.lerp(normal, ...)', () {

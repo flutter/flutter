@@ -67,60 +67,23 @@ enum _FloatingActionButtonType {
 /// disabled. Consider changing the [backgroundColor] if disabling the floating
 /// action button.
 ///
-/// {@tool dartpad --template=stateless_widget_material}
+/// {@tool dartpad}
 /// This example shows how to display a [FloatingActionButton] in a
 /// [Scaffold], with a pink [backgroundColor] and a thumbs up [Icon].
 ///
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/floating_action_button.png)
 ///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return Scaffold(
-///     appBar: AppBar(
-///       title: const Text('Floating Action Button'),
-///     ),
-///     body: const Center(
-///       child: Text('Press the button below!')
-///     ),
-///     floatingActionButton: FloatingActionButton(
-///       onPressed: () {
-///         // Add your onPressed code here!
-///       },
-///       child: const Icon(Icons.navigation),
-///       backgroundColor: Colors.green,
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/material/floating_action_button/floating_action_button.0.dart **
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateless_widget_material}
+/// {@tool dartpad}
 /// This example shows how to make an extended [FloatingActionButton] in a
 /// [Scaffold], with a  pink [backgroundColor], a thumbs up [Icon] and a
 /// [Text] label that reads "Approve".
 ///
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/floating_action_button_label.png)
 ///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return Scaffold(
-///     appBar: AppBar(
-///       title: const Text('Floating Action Button Label'),
-///     ),
-///     body: const Center(
-///       child: Text('Press the button with a label below!'),
-///     ),
-///     floatingActionButton: FloatingActionButton.extended(
-///       onPressed: () {
-///         // Add your onPressed code here!
-///       },
-///       label: const Text('Approve'),
-///       icon: const Icon(Icons.thumb_up),
-///       backgroundColor: Colors.pink,
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/material/floating_action_button/floating_action_button.1.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -665,7 +628,7 @@ class FloatingActionButton extends StatelessWidget {
 
     if (tooltip != null) {
       result = Tooltip(
-        message: tooltip!,
+        message: tooltip,
         child: result,
       );
     }

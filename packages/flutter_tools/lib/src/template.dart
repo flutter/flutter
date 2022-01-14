@@ -42,7 +42,7 @@ class Template {
     required FileSystem fileSystem,
     required Logger logger,
     required TemplateRenderer templateRenderer,
-    required Set<Uri>? templateManifest,
+    Set<Uri>? templateManifest,
   }) {
     return Template._(
       <Directory>[templateSource],

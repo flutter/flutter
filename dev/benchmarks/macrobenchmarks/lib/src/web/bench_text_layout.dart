@@ -70,9 +70,12 @@ void _setTestMode(_TestMode? mode) {
     case _TestMode.useCanvasTextLayout:
       useCanvasText = true;
       break;
-    default:
+    case _TestMode.useCanvasKit:
+    case null:
       // Keep as null.
+      break;
   }
+  // ignore: implicit_dynamic_function
   js_util.callMethod(
     html.window,
     '_flutter_internal_update_experiment',
@@ -417,7 +420,6 @@ class ColorItem extends StatelessWidget {
           bottom: false,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
               Text('$_counter:$prefix$index'),
               Text(colorString()),

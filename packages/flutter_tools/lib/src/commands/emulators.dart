@@ -8,7 +8,7 @@ import '../base/common.dart';
 import '../base/utils.dart';
 import '../doctor_validator.dart';
 import '../emulator.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../runner/flutter_command.dart';
 
 class EmulatorsCommand extends FlutterCommand {
@@ -30,6 +30,9 @@ class EmulatorsCommand extends FlutterCommand {
 
   @override
   final String description = 'List, launch and create emulators.';
+
+  @override
+  final String category = FlutterCommandCategory.tools;
 
   @override
   final List<String> aliases = <String>['emulator'];

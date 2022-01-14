@@ -6,7 +6,7 @@
 
 import '../android/android_workflow.dart';
 import '../base/common.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../runner/flutter_command.dart';
 
 class DoctorCommand extends FlutterCommand {
@@ -30,6 +30,9 @@ class DoctorCommand extends FlutterCommand {
 
   @override
   final String description = 'Show information about the installed tooling.';
+
+  @override
+  final String category = FlutterCommandCategory.sdk;
 
   @override
   Future<FlutterCommandResult> runCommand() async {

@@ -2,12 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(gspencergoog): Remove this tag once this test's state leaks/test
-// dependencies have been fixed.
-// https://github.com/flutter/flutter/issues/85160
-// Fails with "flutter test --test-randomize-ordering-seed=456"
-@Tags(<String>['no-shuffle'])
-
 import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui';
@@ -428,7 +422,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 200));
   });
 
-  testWidgets('animation doesnt repeat more than specified', (WidgetTester tester) async {
+  testWidgets("animation doesn't repeat more than specified", (WidgetTester tester) async {
     final MockCodec mockCodec = MockCodec();
     mockCodec.frameCount = 2;
     mockCodec.repetitionCount = 0;
@@ -620,6 +614,7 @@ void main() {
     expect(mockCodec.numFramesAsked, 2);
     await tester.pump(const Duration(milliseconds: 200)); // emit 2nd frame.
     expect(mockCodec.numFramesAsked, 3);
+    timeDilation = 1.0; // restore time dilation, or it will affect other tests
   });
 
   testWidgets('error handlers can intercept errors', (WidgetTester tester) async {

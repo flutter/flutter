@@ -198,6 +198,7 @@ class SelectableText extends StatefulWidget {
     this.selectionControls,
     this.onTap,
     this.scrollPhysics,
+    this.semanticsLabel,
     this.textHeightBehavior,
     this.textWidthBasis,
     this.onSelectionChanged,
@@ -255,6 +256,7 @@ class SelectableText extends StatefulWidget {
     this.selectionControls,
     this.onTap,
     this.scrollPhysics,
+    this.semanticsLabel,
     this.textHeightBehavior,
     this.textWidthBasis,
     this.onSelectionChanged,
@@ -409,6 +411,9 @@ class SelectableText extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.scrollPhysics}
   final ScrollPhysics? scrollPhysics;
 
+  /// {@macro flutter.widgets.Text.semanticsLabel}
+  final String? semanticsLabel;
+
   /// {@macro flutter.dart:ui.textHeightBehavior}
   final TextHeightBehavior? textHeightBehavior;
 
@@ -425,6 +430,7 @@ class SelectableText extends StatefulWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<String>('data', data, defaultValue: null));
+    properties.add(DiagnosticsProperty<String>('semanticsLabel', semanticsLabel, defaultValue: null));
     properties.add(DiagnosticsProperty<FocusNode>('focusNode', focusNode, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('style', style, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
@@ -579,9 +585,11 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
   @override
   Widget build(BuildContext context) {
     super.build(context); // See AutomaticKeepAliveClientMixin.
-    assert(() {
-      return _controller._textSpan.visitChildren((InlineSpan span) => span.runtimeType == TextSpan);
-    }(), 'SelectableText only supports TextSpan; Other type of InlineSpan is not allowed');
+    // TODO(garyq): Assert to block WidgetSpans from being used here are removed,
+    // but we still do not yet have nice handling of things like carets, clipboard,
+    // and other features. We should add proper support. Currently, caret handling
+    // is blocked on SkParagraph switch and https://github.com/flutter/engine/pull/27010
+    // should be landed in SkParagraph after the switch is complete.
     assert(debugCheckHasMediaQuery(context));
     assert(debugCheckHasDirectionality(context));
     assert(
@@ -692,10 +700,13 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
         enableInteractiveSelection: widget.enableInteractiveSelection,
         dragStartBehavior: widget.dragStartBehavior,
         scrollPhysics: widget.scrollPhysics,
+        autofillHints: null,
       ),
     );
 
     return Semantics(
+      label: widget.semanticsLabel,
+      excludeSemantics: widget.semanticsLabel != null,
       onLongPress: () {
         _effectiveFocusNode.requestFocus();
       },

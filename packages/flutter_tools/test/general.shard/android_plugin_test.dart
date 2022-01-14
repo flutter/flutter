@@ -26,6 +26,40 @@ void main() {
     ));
   });
 
+  testWithoutContext('AndroidPlugin does not validate the main class for Dart-only plugins', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final AndroidPlugin androidPlugin = AndroidPlugin(
+      name: 'pluginA',
+      dartPluginClass: 'PluginA',
+      pluginPath: '.pub_cache/plugin_a',
+      fileSystem: fileSystem,
+    );
+
+    expect(androidPlugin.toMap(), <String, Object>{
+      'name': 'pluginA',
+      'dartPluginClass': 'PluginA',
+      'supportsEmbeddingV1': false,
+      'supportsEmbeddingV2': false,
+    });
+  });
+
+  testWithoutContext('AndroidPlugin does not validate the main class for default_package', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final AndroidPlugin androidPlugin = AndroidPlugin(
+      name: 'pluginA',
+      defaultPackage: 'plugin_a_android',
+      pluginPath: '.pub_cache/plugin_a',
+      fileSystem: fileSystem,
+    );
+
+    expect(androidPlugin.toMap(), <String, Object>{
+      'name': 'pluginA',
+      'default_package': 'plugin_a_android',
+      'supportsEmbeddingV1': false,
+      'supportsEmbeddingV2': false,
+    });
+  });
+
   testWithoutContext('AndroidPlugin parses embedding version 2 from the Java search path', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final AndroidPlugin androidPlugin = AndroidPlugin(

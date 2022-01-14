@@ -251,7 +251,7 @@ void main() {
     );
 
     annotations = <TestAnnotationTarget>[
-      const TestAnnotationTarget(cursor: MouseCursor.defer),
+      const TestAnnotationTarget(),
       const TestAnnotationTarget(cursor: SystemMouseCursors.click),
       const TestAnnotationTarget(cursor: SystemMouseCursors.grabbing),
     ];
@@ -279,8 +279,8 @@ void main() {
     );
 
     annotations = <TestAnnotationTarget>[
-      const TestAnnotationTarget(cursor: MouseCursor.defer),
-      const TestAnnotationTarget(cursor: MouseCursor.defer),
+      const TestAnnotationTarget(),
+      const TestAnnotationTarget(),
       const TestAnnotationTarget(cursor: SystemMouseCursors.grabbing),
     ];
     ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[

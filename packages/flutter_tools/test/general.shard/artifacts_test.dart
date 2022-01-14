@@ -25,7 +25,7 @@ void main() {
       fileSystem = MemoryFileSystem.test();
       final Directory cacheRoot = fileSystem.directory('root')
         ..createSync();
-      platform = FakePlatform(operatingSystem: 'linux');
+      platform = FakePlatform();
       cache = Cache(
         rootOverride: cacheRoot,
         fileSystem: fileSystem,
@@ -192,7 +192,7 @@ void main() {
       fileSystem = MemoryFileSystem.test();
       final Directory cacheRoot = fileSystem.directory('root')
         ..createSync();
-      platform = FakePlatform(operatingSystem: 'linux');
+      platform = FakePlatform();
       cache = Cache(
         rootOverride: cacheRoot,
         fileSystem: fileSystem,

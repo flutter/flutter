@@ -104,8 +104,8 @@ class RenderRotatedBox extends RenderBox with RenderObjectWithChildMixin<RenderB
     return result.addWithPaintTransform(
       transform: _paintTransform,
       position: position,
-      hitTest: (BoxHitTestResult result, Offset? position) {
-        return child!.hitTest(result, position: position!);
+      hitTest: (BoxHitTestResult result, Offset position) {
+        return child!.hitTest(result, position: position);
       },
     );
   }

@@ -879,7 +879,7 @@ void main() {
     expect(find.text('second'), findsOneWidget);
 
     myPages = <Page<void>>[
-      MaterialPage<void>(key: pageKeyOne, maintainState: true, child: const Text('first')),
+      MaterialPage<void>(key: pageKeyOne, child: const Text('first')),
       MaterialPage<void>(key: pageKeyTwo, child: const Text('second')),
     ];
 

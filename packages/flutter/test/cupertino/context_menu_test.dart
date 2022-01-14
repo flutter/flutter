@@ -122,6 +122,71 @@ void main() {
       await tester.pumpAndSettle();
       expect(_findStatic(), findsOneWidget);
     });
+
+    testWidgets('CupertinoContextMenu is in the correct position when within a nested navigator', (WidgetTester tester) async {
+      final Widget child = _getChild();
+      await tester.pumpWidget(CupertinoApp(
+        home: CupertinoPageScaffold(
+          child: MediaQuery(
+            data: const MediaQueryData(size: Size(800, 600)),
+            child: Align(
+              alignment: Alignment.bottomRight,
+              child: SizedBox(
+                width: 700,
+                height: 500,
+                child: Navigator(
+                  onGenerateRoute: (RouteSettings settings) {
+                    return CupertinoPageRoute<void>(
+                      builder: (BuildContext context) => Align(
+                        child: CupertinoContextMenu(
+                          actions: const <CupertinoContextMenuAction>[
+                            CupertinoContextMenuAction(
+                              child: Text('CupertinoContextMenuAction'),
+                            ),
+                          ],
+                          child: child
+                        ),
+                      )
+                    );
+                  }
+                )
+              )
+            )
+          )
+        )
+      ));
+      expect(find.byWidget(child), findsOneWidget);
+      final Rect childRect = tester.getRect(find.byWidget(child));
+      expect(find.byType(ShaderMask), findsNothing);
+
+      // Start a press on the child.
+      final TestGesture gesture = await tester.startGesture(childRect.center);
+      await tester.pump();
+
+      // The _DecoyChild is showing directly on top of the child.
+      expect(_findDecoyChild(child), findsOneWidget);
+      Rect decoyChildRect = tester.getRect(_findDecoyChild(child));
+      expect(childRect, equals(decoyChildRect));
+
+      expect(find.byType(ShaderMask), findsOneWidget);
+
+      // After a small delay, the _DecoyChild has begun to animate.
+      await tester.pump(const Duration(milliseconds: 100));
+      decoyChildRect = tester.getRect(_findDecoyChild(child));
+      expect(childRect, isNot(equals(decoyChildRect)));
+
+      // Eventually the decoy fully scales by _kOpenSize.
+      await tester.pump(const Duration(milliseconds: 500));
+      decoyChildRect = tester.getRect(_findDecoyChild(child));
+      expect(childRect, isNot(equals(decoyChildRect)));
+      expect(decoyChildRect.width, childRect.width * _kOpenScale);
+
+      // Then the CupertinoContextMenu opens.
+      await tester.pumpAndSettle();
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(_findStatic(), findsOneWidget);
+    });
   });
 
   group('CupertinoContextMenu when open', () {
@@ -234,7 +299,6 @@ void main() {
       // Pump a CupertinoContextMenu in the center of the screen and open it.
       final Widget child = _getChild();
       await tester.pumpWidget(_getContextMenu(
-        alignment: Alignment.center,
         screenSize: portraitScreenSize,
         child: child,
       ));
@@ -304,7 +368,6 @@ void main() {
       // Pump a CupertinoContextMenu in the center of the screen and open it.
       final Widget child = _getChild();
       await tester.pumpWidget(_getContextMenu(
-        alignment: Alignment.center,
         child: child,
       ));
       expect(find.byType(CupertinoContextMenuAction), findsNothing);

@@ -20,9 +20,7 @@ import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
-final FakePlatform linux = FakePlatform(
-  operatingSystem: 'linux',
-);
+final FakePlatform linux = FakePlatform();
 final FakePlatform windows = FakePlatform(
   operatingSystem: 'windows',
 );
@@ -78,7 +76,7 @@ void main() {
     expect(await LinuxDevices(
       fileSystem: MemoryFileSystem.test(),
       platform: linux,
-      featureFlags: TestFeatureFlags(isLinuxEnabled: false),
+      featureFlags: TestFeatureFlags(),
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
       operatingSystemUtils: FakeOperatingSystemUtils(),

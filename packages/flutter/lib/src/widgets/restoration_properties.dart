@@ -19,47 +19,10 @@ import 'restoration.dart';
 ///
 /// ## Using a RestorableValue
 ///
-/// {@tool dartpad --template=stateful_widget_restoration}
+/// {@tool dartpad}
 /// A [StatefulWidget] that has a restorable [int] property.
 ///
-/// ```dart
-///   // The current value of the answer is stored in a [RestorableProperty].
-///   // During state restoration it is automatically restored to its old value.
-///   // If no restoration data is available to restore the answer from, it is
-///   // initialized to the specified default value, in this case 42.
-///   final RestorableInt _answer = RestorableInt(42);
-///
-///   @override
-///   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
-///     // All restorable properties must be registered with the mixin. After
-///     // registration, the answer either has its old value restored or is
-///     // initialized to its default value.
-///     registerForRestoration(_answer, 'answer');
-///   }
-///
-///   void _incrementAnswer() {
-///     setState(() {
-///       // The current value of the property can be accessed and modified via
-///       // the value getter and setter.
-///       _answer.value += 1;
-///     });
-///   }
-///
-///   @override
-///   void dispose() {
-///     // Properties must be disposed when no longer used.
-///     _answer.dispose();
-///     super.dispose();
-///   }
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return OutlinedButton(
-///       child: Text('${_answer.value}'),
-///       onPressed: _incrementAnswer,
-///     );
-///   }
-/// ```
+/// ** See code in examples/api/lib/widgets/restoration_properties/restorable_value.0.dart **
 /// {@end-tool}
 ///
 /// ## Creating a subclass

@@ -547,7 +547,6 @@ class _MonthPickerState extends State<MonthPicker> with SingleTickerProviderStat
                   dragStartBehavior: widget.dragStartBehavior,
                   key: ValueKey<DateTime>(widget.selectedDate),
                   controller: _dayPickerController,
-                  scrollDirection: Axis.horizontal,
                   itemCount: _monthDelta(widget.firstDate, widget.lastDate) + 1,
                   itemBuilder: _buildItems,
                   onPageChanged: _handleMonthPageChanged,

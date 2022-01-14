@@ -111,20 +111,28 @@ String generateDateFormattingLogic(Message message) {
           'date formats.'
         );
       }
-      if (!placeholder.hasValidDateFormat) {
+      final bool? isCustomDateFormat = placeholder.isCustomDateFormat;
+      if (!placeholder.hasValidDateFormat
+          && (isCustomDateFormat == null || !isCustomDateFormat)) {
         throw L10nException(
           'Date format "$placeholderFormat" for placeholder '
           '${placeholder.name} does not have a corresponding DateFormat '
           "constructor\n. Check the intl library's DateFormat class "
-          'constructors for allowed date formats.'
+          'constructors for allowed date formats, or set "isCustomDateFormat" attribute '
+          'to "true".'
         );
       }
-      return dateFormatTemplate
+      if (placeholder.hasValidDateFormat) {
+        return dateFormatTemplate
+          .replaceAll('@(placeholder)', placeholder.name)
+          .replaceAll('@(format)', placeholderFormat);
+      }
+      return dateFormatCustomTemplate
         .replaceAll('@(placeholder)', placeholder.name)
-        .replaceAll('@(format)', placeholderFormat);
+        .replaceAll('@(format)', generateString(placeholderFormat));
     });
 
-  return formatStatements.isEmpty ? '@(none)' : formatStatements.join('');
+  return formatStatements.isEmpty ? '@(none)' : formatStatements.join();
 }
 
 String generateNumberFormattingLogic(Message message) {
@@ -166,7 +174,7 @@ String generateNumberFormattingLogic(Message message) {
       }
     });
 
-  return formatStatements.isEmpty ? '@(none)' : formatStatements.join('');
+  return formatStatements.isEmpty ? '@(none)' : formatStatements.join();
 }
 
 String _generatePluralMethod(Message message, String translationForMessage) {
@@ -292,6 +300,11 @@ String _generateSelectMethod(Message message, String translationForMessage) {
         );
       }
     }
+  } else {
+    throw L10nException(
+      'Incorrect select message format for: ${message.resourceId}.\n'
+      'Check to see if the select message is in the proper ICU syntax format.'
+    );
   }
 
   final List<String> parameters = message.placeholders.map((Placeholder placeholder) {

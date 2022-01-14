@@ -70,44 +70,11 @@ import 'text_field.dart';
 /// ```
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateful_widget_material}
+/// {@tool dartpad}
 /// This example shows how to move the focus to the next field when the user
 /// presses the SPACE key.
 ///
-/// ```dart imports
-/// import 'package:flutter/cupertino.dart';
-/// ```
-///
-/// ```dart
-/// @override
-/// Widget build(BuildContext context) {
-///   return CupertinoPageScaffold(
-///     child: Center(
-///       child: Form(
-///         autovalidateMode: AutovalidateMode.always,
-///         onChanged: () {
-///           Form.of(primaryFocus!.context!)?.save();
-///         },
-///         child: CupertinoFormSection.insetGrouped(
-///           header: const Text('SECTION 1'),
-///           children: List<Widget>.generate(5, (int index) {
-///             return CupertinoTextFormFieldRow(
-///               prefix: const Text('Enter text'),
-///               placeholder: 'Enter text',
-///               validator: (String? value) {
-///                 if (value == null || value.isEmpty) {
-///                   return 'Please enter a value';
-///                 }
-///                 return null;
-///               },
-///             );
-///          }),
-///         ),
-///       ),
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/cupertino/text_form_field_row/cupertino_text_form_field_row.1.dart **
 /// {@end-tool}
 class CupertinoTextFormFieldRow extends FormField<String> {
   /// Creates a [CupertinoFormRow] containing a [FormField] that wraps

@@ -165,15 +165,14 @@ void main() {
         stdout: revision),
         const FakeCommand(command: <String>[
           'git', 'tag', '--points-at', revision,
-        ],
-        stdout: ''),
+        ]),
         const FakeCommand(command: <String>[
           'git', 'describe', '--match', '*.*.*', '--long', '--tags', revision,
         ],
         stdout: version),
       ]);
 
-      final FlutterVersion updateVersion = await realCommandRunner.fetchLatestVersion();
+      final FlutterVersion updateVersion = await realCommandRunner.fetchLatestVersion(localVersion: FakeFlutterVersion());
 
       expect(updateVersion.frameworkVersion, version);
       expect(updateVersion.frameworkRevision, revision);
@@ -199,7 +198,7 @@ void main() {
       ]);
 
       await expectLater(
-        () async => realCommandRunner.fetchLatestVersion(),
+        () async => realCommandRunner.fetchLatestVersion(localVersion: FakeFlutterVersion()),
         throwsToolExit(message: 'Unable to upgrade Flutter: Your Flutter checkout '
           'is currently not on a release branch.\n'
           'Use "flutter channel" to switch to an official channel, and retry. '
@@ -228,7 +227,7 @@ void main() {
       ]);
 
       await expectLater(
-        () async => realCommandRunner.fetchLatestVersion(),
+        () async => realCommandRunner.fetchLatestVersion(localVersion: FakeFlutterVersion()),
         throwsToolExit(message: 'Unable to upgrade Flutter: The current Flutter '
           'branch/channel is not tracking any remote repository.\n'
           'Re-install Flutter by going to https://flutter.dev/docs/get-started/install.'
@@ -238,6 +237,130 @@ void main() {
     }, overrides: <Type, Generator>{
       ProcessManager: () => processManager,
       Platform: () => fakePlatform,
+    });
+
+    group('verifyStandardRemote', () {
+      const String flutterStandardUrlDotGit = 'https://github.com/flutter/flutter.git';
+      const String flutterNonStandardUrlDotGit = 'https://githubmirror.com/flutter/flutter.git';
+      const String flutterStandardSshUrl = 'git@github.com:flutter/flutter';
+
+      testUsingContext('throws toolExit if repository url is null', () async {
+        final FakeFlutterVersion flutterVersion = FakeFlutterVersion(
+          channel: 'dev',
+          repositoryUrl: null,
+        );
+
+        await expectLater(
+          () async => realCommandRunner.verifyStandardRemote(flutterVersion),
+          throwsToolExit(message: 'Unable to upgrade Flutter: The tool could not '
+            'determine the remote upstream which is being tracked by the SDK.\n'
+            'Re-install Flutter by going to https://flutter.dev/docs/get-started/install.'
+          ),
+        );
+        expect(processManager, hasNoRemainingExpectations);
+      }, overrides: <Type, Generator> {
+        ProcessManager: () => processManager,
+        Platform: () => fakePlatform,
+      });
+
+      testUsingContext('does not throw toolExit at standard remote url with FLUTTER_GIT_URL unset', () async {
+        final FakeFlutterVersion flutterVersion = FakeFlutterVersion(
+          channel: 'dev',
+        );
+        expect(() => realCommandRunner.verifyStandardRemote(flutterVersion), returnsNormally);
+        expect(processManager, hasNoRemainingExpectations);
+      }, overrides: <Type, Generator> {
+        ProcessManager: () => processManager,
+        Platform: () => fakePlatform,
+      });
+
+      testUsingContext('throws toolExit at non-standard remote url with FLUTTER_GIT_URL unset', () async {
+        final FakeFlutterVersion flutterVersion = FakeFlutterVersion(
+          channel: 'dev',
+          repositoryUrl: flutterNonStandardUrlDotGit,
+        );
+
+        await expectLater(
+          () async => realCommandRunner.verifyStandardRemote(flutterVersion),
+          throwsToolExit(message: 'Unable to upgrade Flutter: The Flutter SDK '
+            'is tracking a non-standard remote "$flutterNonStandardUrlDotGit".\n'
+            'Set the environment variable "FLUTTER_GIT_URL" to '
+            '"$flutterNonStandardUrlDotGit", and retry. '
+            'Alternatively, re-install Flutter by going to '
+            'https://flutter.dev/docs/get-started/install.\n'
+            'If this is intentional, it is recommended to use "git" directly to '
+            'keep Flutter SDK up-to date.'
+          ),
+        );
+        expect(processManager, hasNoRemainingExpectations);
+      }, overrides: <Type, Generator> {
+        ProcessManager: () => processManager,
+        Platform: () => fakePlatform,
+      });
+
+      testUsingContext('does not throw toolExit at non-standard remote url with FLUTTER_GIT_URL set', () async {
+        final FakeFlutterVersion flutterVersion = FakeFlutterVersion(
+          channel: 'dev',
+          repositoryUrl: flutterNonStandardUrlDotGit,
+        );
+
+        expect(() => realCommandRunner.verifyStandardRemote(flutterVersion), returnsNormally);
+        expect(processManager, hasNoRemainingExpectations);
+      }, overrides: <Type, Generator> {
+        ProcessManager: () => processManager,
+        Platform: () => fakePlatform..environment = Map<String, String>.unmodifiable(<String, String> {
+          'FLUTTER_GIT_URL': flutterNonStandardUrlDotGit,
+        }),
+      });
+
+      testUsingContext('throws toolExit at remote url and FLUTTER_GIT_URL set to different urls', () async {
+        final FakeFlutterVersion flutterVersion = FakeFlutterVersion(
+          channel: 'dev',
+          repositoryUrl: flutterNonStandardUrlDotGit,
+        );
+
+        await expectLater(
+          () async => realCommandRunner.verifyStandardRemote(flutterVersion),
+          throwsToolExit(message: 'Unable to upgrade Flutter: The Flutter SDK '
+            'is tracking "$flutterNonStandardUrlDotGit" but "FLUTTER_GIT_URL" '
+            'is set to "$flutterStandardUrlDotGit".\n'
+            'Either remove "FLUTTER_GIT_URL" from the environment or set it to '
+            '"$flutterNonStandardUrlDotGit", and retry. '
+            'Alternatively, re-install Flutter by going to '
+            'https://flutter.dev/docs/get-started/install.\n'
+            'If this is intentional, it is recommended to use "git" directly to '
+            'keep Flutter SDK up-to date.'
+          ),
+        );
+        expect(processManager, hasNoRemainingExpectations);
+      }, overrides: <Type, Generator> {
+        ProcessManager: () => processManager,
+        Platform: () => fakePlatform..environment = Map<String, String>.unmodifiable(<String, String> {
+          'FLUTTER_GIT_URL': flutterStandardUrlDotGit,
+        }),
+      });
+
+      testUsingContext('exempts standard ssh url from check with FLUTTER_GIT_URL unset', () async {
+        final FakeFlutterVersion flutterVersion = FakeFlutterVersion(
+          channel: 'dev',
+          repositoryUrl: flutterStandardSshUrl,
+        );
+
+        expect(() => realCommandRunner.verifyStandardRemote(flutterVersion), returnsNormally);
+        expect(processManager, hasNoRemainingExpectations);
+      }, overrides: <Type, Generator> {
+        ProcessManager: () => processManager,
+        Platform: () => fakePlatform,
+      });
+
+      testUsingContext('stripDotGit removes ".git" suffix if any', () async {
+        expect(realCommandRunner.stripDotGit('https://github.com/flutter/flutter.git'), 'https://github.com/flutter/flutter');
+        expect(realCommandRunner.stripDotGit('https://github.com/flutter/flutter'), 'https://github.com/flutter/flutter');
+        expect(realCommandRunner.stripDotGit('git@github.com:flutter/flutter.git'), 'git@github.com:flutter/flutter');
+        expect(realCommandRunner.stripDotGit('git@github.com:flutter/flutter'), 'git@github.com:flutter/flutter');
+        expect(realCommandRunner.stripDotGit('https://githubmirror.com/flutter/flutter.git.git'), 'https://githubmirror.com/flutter/flutter.git');
+        expect(realCommandRunner.stripDotGit('https://githubmirror.com/flutter/flutter.gitgit'), 'https://githubmirror.com/flutter/flutter.gitgit');
+      });
     });
 
     testUsingContext('git exception during attemptReset throwsToolExit', () async {
@@ -419,7 +542,6 @@ void main() {
               command: <String>[
                 'git', 'tag', '--points-at', 'HEAD',
               ],
-              stdout: '',
             ),
             const FakeCommand(
               command: <String>[
@@ -475,7 +597,7 @@ class FakeUpgradeCommandRunner extends UpgradeCommandRunner {
   FlutterVersion remoteVersion;
 
   @override
-  Future<FlutterVersion> fetchLatestVersion() async => remoteVersion;
+  Future<FlutterVersion> fetchLatestVersion({FlutterVersion localVersion}) async => remoteVersion;
 
   @override
   Future<bool> hasUncommittedChanges() async => willHaveUncommittedChanges;

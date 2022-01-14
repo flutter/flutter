@@ -187,7 +187,7 @@ Return a list of all connected devices. The `params` field will be a List; each 
 `category` is a string description of the kind of workflow the device supports. The current categories are "mobile", "web" and "desktop", or null if none.
 
 `platformType` is a string description of the platform sub-folder the device
-supports. The current catgetories are "android", "ios", "linux", "macos",
+supports. The current categories are "android", "ios", "linux", "macos",
 "fuchsia", "windows", and "web". These are kept in sync with the response from `daemon.getSupportedPlatforms`.
 
 `ephemeral` is a boolean which indicates where the device needs to be manually connected to a development machine. For example, a physical Android device is ephemeral, but the "web" device (that is always present) is not.

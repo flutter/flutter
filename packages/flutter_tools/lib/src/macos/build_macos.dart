@@ -21,7 +21,7 @@ import 'migrations/remove_macos_framework_link_and_embedding_migration.dart';
 final RegExp _anyOutput = RegExp('.*');
 
 /// Builds the macOS project through xcodebuild.
-// TODO(jonahwilliams): refactor to share code with the existing iOS code.
+// TODO(zanderso): refactor to share code with the existing iOS code.
 Future<void> buildMacOS({
   required FlutterProject flutterProject,
   required BuildInfo buildInfo,

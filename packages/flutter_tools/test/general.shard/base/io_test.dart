@@ -102,7 +102,7 @@ void main() {
 
   testWithoutContext('Does not listen to Posix process signals on windows', () async {
     final FakePlatform windows = FakePlatform(operatingSystem: 'windows');
-    final FakePlatform linux = FakePlatform(operatingSystem: 'linux');
+    final FakePlatform linux = FakePlatform();
     final FakeProcessSignal fakeSignalA = FakeProcessSignal();
     final FakeProcessSignal fakeSignalB = FakeProcessSignal();
     fakeSignalA.controller.add(fakeSignalA);

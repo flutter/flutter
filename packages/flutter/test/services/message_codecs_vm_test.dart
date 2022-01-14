@@ -5,7 +5,6 @@
 @TestOn('!chrome')
 import 'dart:typed_data';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -19,7 +18,7 @@ void main() {
       checkEncodeDecode<dynamic>(json, -9223372036854775807);
     });
     test('should encode and decode list with a big number', () {
-      final List<dynamic> message = <dynamic>[-7000000000000000007];
+      final List<dynamic> message = <dynamic>[-7000000000000000007]; // ignore: avoid_js_rounded_ints, since we check for round-tripping, the actual value doesn't matter!
       checkEncodeDecode<dynamic>(json, message);
     });
   });
@@ -73,10 +72,10 @@ void main() {
     });
     test('should encode and decode a list containing big numbers', () {
       final List<dynamic> message = <dynamic>[
-        -7000000000000000007,
+        -7000000000000000007, // ignore: avoid_js_rounded_ints, browsers are skipped below
         Int64List.fromList(<int>[-0x7fffffffffffffff - 1, 0, 0x7fffffffffffffff]),
       ];
       checkEncodeDecode<dynamic>(standard, message);
     });
-  }, skip: kIsWeb);
+  }, skip: isBrowser); // [intended] Javascript can't handle the big integer literals used here.
 }

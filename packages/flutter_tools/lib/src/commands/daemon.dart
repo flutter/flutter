@@ -23,7 +23,7 @@ import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../emulator.dart';
 import '../features.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../project.dart';
 import '../resident_runner.dart';
 import '../run_cold.dart';
@@ -48,6 +48,9 @@ class DaemonCommand extends FlutterCommand {
 
   @override
   final String description = 'Run a persistent, JSON-RPC based server to communicate with devices.';
+
+  @override
+  final String category = FlutterCommandCategory.tools;
 
   @override
   final bool hidden;
@@ -304,6 +307,7 @@ class DaemonDomain extends Domain {
         if (message.level == 'status') {
           // We use `print()` here instead of `stdout.writeln()` in order to
           // capture the print output for testing.
+          // ignore: avoid_print
           print(message.message);
         } else if (message.level == 'error') {
           globals.stdio.stderrWrite('${message.message}\n');
@@ -458,7 +462,7 @@ class AppDomain extends Domain {
   }) async {
     if (!await device.supportsRuntimeMode(options.buildInfo.mode)) {
       throw Exception(
-        '${toTitleCase(options.buildInfo.friendlyModeName)} '
+        '${sentenceCase(options.buildInfo.friendlyModeName)} '
         'mode is not supported for ${device.name}.',
       );
     }
@@ -1131,7 +1135,7 @@ class EmulatorDomain extends Domain {
   }
 
   Future<Map<String, dynamic>> create(Map<String, dynamic> args) async {
-    final String name = _getStringArg(args, 'name', required: false);
+    final String name = _getStringArg(args, 'name');
     final CreateEmulatorResult res = await emulators.createEmulator(name: name);
     return <String, dynamic>{
       'success': res.success,

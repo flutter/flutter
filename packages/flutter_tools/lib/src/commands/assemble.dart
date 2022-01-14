@@ -49,7 +49,7 @@ List<Target> _kDefaultTargets = <Target>[
   const ReleaseBundleLinuxAssets(TargetPlatform.linux_x64),
   const ReleaseBundleLinuxAssets(TargetPlatform.linux_arm64),
   // Web targets
-  const WebServiceWorker(),
+  WebServiceWorker(globals.fs),
   const ReleaseAndroidApplication(),
   // This is a one-off rule for bundle and aot compat.
   const CopyFlutterBundle(),
@@ -138,6 +138,9 @@ class AssembleCommand extends FlutterCommand {
 
   @override
   String get name => 'assemble';
+
+  @override
+  String get category => FlutterCommandCategory.project;
 
   @override
   Future<CustomDimensions> get usageValues async {

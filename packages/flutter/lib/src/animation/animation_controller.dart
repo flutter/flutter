@@ -33,7 +33,6 @@ enum _AnimationDirection {
 final SpringDescription _kFlingSpringDescription = SpringDescription.withDampingRatio(
   mass: 1.0,
   stiffness: 500.0,
-  ratio: 1.0,
 );
 
 const Tolerance _kFlingTolerance = Tolerance(
@@ -572,7 +571,9 @@ class AnimationController extends Animation<double>
         case AnimationBehavior.normal:
           // Since the framework cannot handle zero duration animations, we run it at 5% of the normal
           // duration to limit most animations to a single frame.
-          // TODO(jonahwilliams): determine a better process for setting duration.
+          // Ideally, the framework would be able to handle zero duration animations, however, the common
+          // pattern of an eternally repeating animation might cause an endless loop if it weren't delayed
+          // for at least one frame.
           scale = 0.05;
           break;
         case AnimationBehavior.preserve:
@@ -691,7 +692,7 @@ class AnimationController extends Animation<double>
     if (SemanticsBinding.instance!.disableAnimations) {
       switch (behavior) {
         case AnimationBehavior.normal:
-          // TODO(jonahwilliams): determine a better process for setting velocity.
+          // TODO(zanderso): determine a better process for setting velocity.
           // the value below was arbitrarily chosen because it worked for the drawer widget.
           scale = 200.0;
           break;

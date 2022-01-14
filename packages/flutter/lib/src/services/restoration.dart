@@ -1006,7 +1006,9 @@ bool debugIsSerializableForRestoration(Object? object) {
     try {
       const StandardMessageCodec().encodeMessage(object);
       result = true;
-    } catch (_) {
+    } catch (error) {
+      // This is only used in asserts, so reporting the exception isn't
+      // particularly useful, since the assert itself will likely fail.
       result = false;
     }
     return true;

@@ -50,7 +50,7 @@ import 'typography.dart';
 /// "medium" is `FontWeight.w500`.
 ///
 /// By default, text styles are initialized to match the 2018 Material Design
-/// specification as listed above. To provide backwards compatibility, the 2104
+/// specification as listed above. To provide backwards compatibility, the 2014
 /// specification is also available.
 ///
 /// To explicitly configure a [Theme] for the 2018 sizes, weights, and letter

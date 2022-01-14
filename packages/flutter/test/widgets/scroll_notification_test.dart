@@ -21,8 +21,9 @@ void main() {
       );
     }
     await tester.pumpWidget(buildFrame(1200.0));
-    expect(events.length, 0);
+    expect(events.length, 1);
 
+    events.clear();
     await tester.pumpWidget(buildFrame(1000.0));
     // Change the content dimensions will trigger a new event.
     expect(events.length, 1);

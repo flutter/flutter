@@ -47,30 +47,10 @@ typedef InteractiveViewerWidgetBuilder = Widget Function(BuildContext context, Q
 ///   * The [Flutter Gallery's transformations demo](https://github.com/flutter/gallery/blob/master/lib/demos/reference/transformations_demo.dart),
 ///     which includes the use of InteractiveViewer.
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold}
+/// {@tool dartpad}
 /// This example shows a simple Container that can be panned and zoomed.
 ///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return Center(
-///     child: InteractiveViewer(
-///       boundaryMargin: const EdgeInsets.all(20.0),
-///       minScale: 0.1,
-///       maxScale: 1.6,
-///       child: Container(
-///         decoration: const BoxDecoration(
-///           gradient: LinearGradient(
-///             begin: Alignment.topCenter,
-///             end: Alignment.bottomCenter,
-///             colors: <Color>[Colors.orange, Colors.red],
-///             stops: <double>[0.0, 1.0],
-///           ),
-///         ),
-///       ),
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/widgets/interactive_viewer/interactive_viewer.0.dart **
 /// {@end-tool}
 @immutable
 class InteractiveViewer extends StatefulWidget {
@@ -205,186 +185,12 @@ class InteractiveViewer extends StatefulWidget {
   /// Passed with the [InteractiveViewer.builder] constructor. Otherwise, the
   /// [child] parameter must be passed directly, and this is null.
   ///
-  /// {@tool dartpad --template=freeform}
-  ///
+  /// {@tool dartpad}
   /// This example shows how to use builder to create a [Table] whose cell
   /// contents are only built when they are visible. Built and remove cells are
   /// logged in the console for illustration.
   ///
-  /// ```dart main
-  /// import 'package:vector_math/vector_math_64.dart' show Quad, Vector3;
-  ///
-  /// import 'package:flutter/material.dart';
-  /// import 'package:flutter/widgets.dart';
-  ///
-  /// void main() => runApp(const IVBuilderExampleApp());
-  ///
-  /// class IVBuilderExampleApp extends StatelessWidget {
-  ///   const IVBuilderExampleApp({Key? key}) : super(key: key);
-  ///
-  ///   @override
-  ///   Widget build(BuildContext context) {
-  ///     return MaterialApp(
-  ///       home: Scaffold(
-  ///         appBar: AppBar(
-  ///           title: const Text('IV Builder Example'),
-  ///         ),
-  ///         body: _IVBuilderExample(),
-  ///       ),
-  ///     );
-  ///   }
-  /// }
-  ///
-  /// class _IVBuilderExample extends StatefulWidget {
-  ///   @override
-  ///   _IVBuilderExampleState createState() => _IVBuilderExampleState();
-  /// }
-  ///
-  /// class _IVBuilderExampleState extends State<_IVBuilderExample> {
-  ///   final TransformationController _transformationController = TransformationController();
-  ///
-  ///   static const double _cellWidth = 200.0;
-  ///   static const double _cellHeight = 26.0;
-  ///
-  ///   // Returns true iff the given cell is currently visible. Caches viewport
-  ///   // calculations.
-  ///   late Quad _cachedViewport;
-  ///   late int _firstVisibleRow;
-  ///   late int _firstVisibleColumn;
-  ///   late int _lastVisibleRow;
-  ///   late int _lastVisibleColumn;
-  ///   bool _isCellVisible(int row, int column, Quad viewport) {
-  ///     if (viewport != _cachedViewport) {
-  ///       final Rect aabb = _axisAlignedBoundingBox(viewport);
-  ///       _cachedViewport = viewport;
-  ///       _firstVisibleRow = (aabb.top / _cellHeight).floor();
-  ///       _firstVisibleColumn = (aabb.left / _cellWidth).floor();
-  ///       _lastVisibleRow = (aabb.bottom / _cellHeight).floor();
-  ///       _lastVisibleColumn = (aabb.right / _cellWidth).floor();
-  ///     }
-  ///     return row >= _firstVisibleRow && row <= _lastVisibleRow
-  ///         && column >= _firstVisibleColumn && column <= _lastVisibleColumn;
-  ///   }
-  ///
-  ///   // Returns the axis aligned bounding box for the given Quad, which might not
-  ///   // be axis aligned.
-  ///   Rect _axisAlignedBoundingBox(Quad quad) {
-  ///     double? xMin;
-  ///     double? xMax;
-  ///     double? yMin;
-  ///     double? yMax;
-  ///     for (final Vector3 point in <Vector3>[quad.point0, quad.point1, quad.point2, quad.point3]) {
-  ///       if (xMin == null || point.x < xMin) {
-  ///         xMin = point.x;
-  ///       }
-  ///       if (xMax == null || point.x > xMax) {
-  ///         xMax = point.x;
-  ///       }
-  ///       if (yMin == null || point.y < yMin) {
-  ///         yMin = point.y;
-  ///       }
-  ///       if (yMax == null || point.y > yMax) {
-  ///         yMax = point.y;
-  ///       }
-  ///     }
-  ///     return Rect.fromLTRB(xMin!, yMin!, xMax!, yMax!);
-  ///   }
-  ///
-  ///   void _onChangeTransformation() {
-  ///     setState(() {});
-  ///   }
-  ///
-  ///   @override
-  ///   void initState() {
-  ///     super.initState();
-  ///     _transformationController.addListener(_onChangeTransformation);
-  ///   }
-  ///
-  ///   @override
-  ///   void dispose() {
-  ///     _transformationController.removeListener(_onChangeTransformation);
-  ///     super.dispose();
-  ///   }
-  ///
-  ///   @override
-  ///   Widget build(BuildContext context) {
-  ///     return Center(
-  ///       child: LayoutBuilder(
-  ///         builder: (BuildContext context, BoxConstraints constraints) {
-  ///           return InteractiveViewer.builder(
-  ///             alignPanAxis: true,
-  ///             scaleEnabled: false,
-  ///             transformationController: _transformationController,
-  ///             builder: (BuildContext context, Quad viewport) {
-  ///               // A simple extension of Table that builds cells.
-  ///               return _TableBuilder(
-  ///                 rowCount: 60,
-  ///                 columnCount: 6,
-  ///                 cellWidth: _cellWidth,
-  ///                 builder: (BuildContext context, int row, int column) {
-  ///                   if (!_isCellVisible(row, column, viewport)) {
-  ///                     print('removing cell ($row, $column)');
-  ///                     return Container(height: _cellHeight);
-  ///                   }
-  ///                   print('building cell ($row, $column)');
-  ///                   return Container(
-  ///                     height: _cellHeight,
-  ///                     color: row % 2 + column % 2 == 1 ? Colors.white : Colors.grey.withOpacity(0.1),
-  ///                     child: Align(
-  ///                       alignment: Alignment.centerLeft,
-  ///                       child: Text('$row x $column'),
-  ///                     ),
-  ///                   );
-  ///                 }
-  ///               );
-  ///             },
-  ///           );
-  ///         },
-  ///       ),
-  ///     );
-  ///   }
-  /// }
-  ///
-  /// typedef _CellBuilder = Widget Function(BuildContext context, int row, int column);
-  ///
-  /// class _TableBuilder extends StatelessWidget {
-  ///   const _TableBuilder({
-  ///     required this.rowCount,
-  ///     required this.columnCount,
-  ///     required this.cellWidth,
-  ///     required this.builder,
-  ///   }) : assert(rowCount > 0),
-  ///        assert(columnCount > 0);
-  ///
-  ///   final int rowCount;
-  ///   final int columnCount;
-  ///   final double cellWidth;
-  ///   final _CellBuilder builder;
-  ///
-  ///   @override
-  ///   Widget build(BuildContext context) {
-  ///     return Table(
-  ///       // ignore: prefer_const_literals_to_create_immutables
-  ///       columnWidths: <int, TableColumnWidth>{
-  ///         for (int column = 0; column < columnCount; column++)
-  ///           column: FixedColumnWidth(cellWidth),
-  ///       },
-  ///       // ignore: prefer_const_literals_to_create_immutables
-  ///       children: <TableRow>[
-  ///         for (int row = 0; row < rowCount; row++)
-  ///           // ignore: prefer_const_constructors
-  ///           TableRow(
-  ///             // ignore: prefer_const_literals_to_create_immutables
-  ///             children: <Widget>[
-  ///               for (int column = 0; column < columnCount; column++)
-  ///                 builder(context, row, column),
-  ///             ],
-  ///           ),
-  ///       ],
-  ///     );
-  ///   }
-  /// }
-  /// ```
+  /// ** See code in examples/api/lib/widgets/interactive_viewer/interactive_viewer.builder.0.dart **
   /// {@end-tool}
   ///
   /// See also:
@@ -415,48 +221,13 @@ class InteractiveViewer extends StatefulWidget {
   ///
   /// Defaults to true.
   ///
-  /// {@tool dartpad --template=stateless_widget_scaffold}
+  /// {@tool dartpad}
   /// This example shows how to create a pannable table. Because the table is
   /// larger than the entire screen, setting `constrained` to false is necessary
   /// to allow it to be drawn to its full size. The parts of the table that
   /// exceed the screen size can then be panned into view.
   ///
-  /// ```dart
-  ///   Widget build(BuildContext context) {
-  ///     const int _rowCount = 48;
-  ///     const int _columnCount = 6;
-  ///
-  ///     return InteractiveViewer(
-  ///       alignPanAxis: true,
-  ///       constrained: false,
-  ///       scaleEnabled: false,
-  ///       child: Table(
-  ///         columnWidths: <int, TableColumnWidth>{
-  ///           for (int column = 0; column < _columnCount; column += 1)
-  ///             column: const FixedColumnWidth(200.0),
-  ///         },
-  ///         children: <TableRow>[
-  ///           for (int row = 0; row < _rowCount; row += 1)
-  ///             TableRow(
-  ///               children: <Widget>[
-  ///                 for (int column = 0; column < _columnCount; column += 1)
-  ///                   Container(
-  ///                     height: 26,
-  ///                     color: row % 2 + column % 2 == 1
-  ///                         ? Colors.white
-  ///                         : Colors.grey.withOpacity(0.1),
-  ///                     child: Align(
-  ///                       alignment: Alignment.centerLeft,
-  ///                       child: Text('$row x $column'),
-  ///                     ),
-  ///                   ),
-  ///               ],
-  ///             ),
-  ///         ],
-  ///       ),
-  ///     );
-  ///   }
-  /// ```
+  /// ** See code in examples/api/lib/widgets/interactive_viewer/interactive_viewer.constrained.0.dart **
   /// {@end-tool}
   final bool constrained;
 
@@ -571,103 +342,11 @@ class InteractiveViewer extends StatefulWidget {
   /// listeners are notified. If the value is set, InteractiveViewer will update
   /// to respect the new value.
   ///
-  /// {@tool dartpad --template=stateful_widget_material_ticker}
+  /// {@tool dartpad}
   /// This example shows how transformationController can be used to animate the
   /// transformation back to its starting position.
   ///
-  /// ```dart
-  /// final TransformationController _transformationController = TransformationController();
-  /// Animation<Matrix4>? _animationReset;
-  /// late final AnimationController _controllerReset;
-  ///
-  /// void _onAnimateReset() {
-  ///   _transformationController.value = _animationReset!.value;
-  ///   if (!_controllerReset.isAnimating) {
-  ///     _animationReset!.removeListener(_onAnimateReset);
-  ///     _animationReset = null;
-  ///     _controllerReset.reset();
-  ///   }
-  /// }
-  ///
-  /// void _animateResetInitialize() {
-  ///   _controllerReset.reset();
-  ///   _animationReset = Matrix4Tween(
-  ///     begin: _transformationController.value,
-  ///     end: Matrix4.identity(),
-  ///   ).animate(_controllerReset);
-  ///   _animationReset!.addListener(_onAnimateReset);
-  ///   _controllerReset.forward();
-  /// }
-  ///
-  /// // Stop a running reset to home transform animation.
-  /// void _animateResetStop() {
-  ///   _controllerReset.stop();
-  ///   _animationReset?.removeListener(_onAnimateReset);
-  ///   _animationReset = null;
-  ///   _controllerReset.reset();
-  /// }
-  ///
-  /// void _onInteractionStart(ScaleStartDetails details) {
-  ///   // If the user tries to cause a transformation while the reset animation is
-  ///   // running, cancel the reset animation.
-  ///   if (_controllerReset.status == AnimationStatus.forward) {
-  ///     _animateResetStop();
-  ///   }
-  /// }
-  ///
-  /// @override
-  /// void initState() {
-  ///   super.initState();
-  ///   _controllerReset = AnimationController(
-  ///     vsync: this,
-  ///     duration: const Duration(milliseconds: 400),
-  ///   );
-  /// }
-  ///
-  /// @override
-  /// void dispose() {
-  ///   _controllerReset.dispose();
-  ///   super.dispose();
-  /// }
-  ///
-  /// @override
-  /// Widget build(BuildContext context) {
-  ///   return Scaffold(
-  ///     backgroundColor: Theme.of(context).colorScheme.primary,
-  ///     appBar: AppBar(
-  ///       automaticallyImplyLeading: false,
-  ///       title: const Text('Controller demo'),
-  ///     ),
-  ///     body: Center(
-  ///       child: InteractiveViewer(
-  ///         boundaryMargin: const EdgeInsets.all(double.infinity),
-  ///         transformationController: _transformationController,
-  ///         minScale: 0.1,
-  ///         maxScale: 1.0,
-  ///         onInteractionStart: _onInteractionStart,
-  ///         child: Container(
-  ///           decoration: const BoxDecoration(
-  ///             gradient: LinearGradient(
-  ///               begin: Alignment.topCenter,
-  ///               end: Alignment.bottomCenter,
-  ///               colors: <Color>[Colors.orange, Colors.red],
-  ///               stops: <double>[0.0, 1.0],
-  ///             ),
-  ///           ),
-  ///         ),
-  ///       ),
-  ///     ),
-  ///     persistentFooterButtons: <Widget>[
-  ///       IconButton(
-  ///         onPressed: _animateResetInitialize,
-  ///         tooltip: 'Reset',
-  ///         color: Theme.of(context).colorScheme.surface,
-  ///         icon: const Icon(Icons.replay),
-  ///       ),
-  ///     ],
-  ///   );
-  /// }
-  /// ```
+  /// ** See code in examples/api/lib/widgets/interactive_viewer/interactive_viewer.transformation_controller.0.dart **
   /// {@end-tool}
   ///
   /// See also:
@@ -833,6 +512,10 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     final RenderBox childRenderBox = _childKey.currentContext!.findRenderObject()! as RenderBox;
     final Size childSize = childRenderBox.size;
     final Rect boundaryRect = widget.boundaryMargin.inflateRect(Offset.zero & childSize);
+    assert(
+      !boundaryRect.isEmpty,
+      "InteractiveViewer's child must have nonzero dimensions.",
+    );
     // Boundaries that are partially infinite are not allowed because Matrix4's
     // rotation and translation methods don't handle infinites well.
     assert(
@@ -1209,10 +892,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
         widget.onInteractionUpdate?.call(ScaleUpdateDetails(
           focalPoint: event.position,
           localFocalPoint: event.localPosition,
-          rotation: 0.0,
           scale: scaleChange,
-          horizontalScale: 1.0,
-          verticalScale: 1.0,
         ));
         widget.onInteractionEnd?.call(ScaleEndDetails());
         return;
@@ -1240,10 +920,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
       widget.onInteractionUpdate?.call(ScaleUpdateDetails(
         focalPoint: event.position,
         localFocalPoint: event.localPosition,
-        rotation: 0.0,
         scale: scaleChange,
-        horizontalScale: 1.0,
-        verticalScale: 1.0,
       ));
       widget.onInteractionEnd?.call(ScaleEndDetails());
     }
@@ -1365,7 +1042,6 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
       onPointerSignal: _receivedPointerSignal,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque, // Necessary when panning off screen.
-        dragStartBehavior: DragStartBehavior.start,
         onScaleEnd: _onScaleEnd,
         onScaleStart: _onScaleStart,
         onScaleUpdate: _onScaleUpdate,

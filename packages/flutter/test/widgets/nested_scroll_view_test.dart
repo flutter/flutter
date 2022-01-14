@@ -2444,6 +2444,53 @@ void main() {
     await tester.pumpWidget(buildFrame(physics: const _CustomPhysics()));
     expect(position.pixels, 0.0);
   });
+
+  testWidgets("NestedScrollView doesn't crash due to precision error", (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/63825
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: NestedScrollView(
+          floatHeaderSlivers: true,
+          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) => <Widget>[
+            const SliverAppBar(
+              expandedHeight: 250.0,
+            ),
+          ],
+          body: CustomScrollView(
+            physics: const BouncingScrollPhysics(),
+            slivers: <Widget>[
+              SliverPadding(
+                padding: const EdgeInsets.all(8.0),
+                sliver: SliverFixedExtentList(
+                  itemExtent: 48.0,
+                  delegate: SliverChildBuilderDelegate(
+                    (BuildContext context, int index) {
+                      return ListTile(
+                        title: Text('Item $index'),
+                      );
+                    },
+                    childCount: 30,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ));
+
+    // Scroll to bottom
+    await tester.fling(find.text('Item 3'), const Offset(0.0, -250.0), 10000.0);
+    await tester.pumpAndSettle();
+
+    // Fling down for AppBar to show
+    await tester.drag(find.text('Item 29'), const Offset(0.0, 250 - 133.7981622869321));
+
+    // Fling up to trigger ballistic activity
+    await tester.fling(find.text('Item 25'), const Offset(0.0, -50.0), 4000.0);
+    await tester.pumpAndSettle();
+  });
 }
 
 class TestHeader extends SliverPersistentHeaderDelegate {

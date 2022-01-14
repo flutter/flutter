@@ -344,7 +344,7 @@ class _ChipDemoState extends State<ChipDemo> {
         data: _showShapeBorder
             ? theme.chipTheme.copyWith(
                 shape: BeveledRectangleBorder(
-                side: const BorderSide(width: 0.66, style: BorderStyle.solid, color: Colors.grey),
+                side: const BorderSide(width: 0.66, color: Colors.grey),
                 borderRadius: BorderRadius.circular(10.0),
               ))
             : theme.chipTheme,

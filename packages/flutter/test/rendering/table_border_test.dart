@@ -8,16 +8,16 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   test('TableBorder constructor', () {
     const TableBorder border1 = TableBorder(
-      left: BorderSide(width: 1.0),
+      left: BorderSide(),
       right: BorderSide(color: Color(0xFF00FF00)),
       verticalInside: BorderSide(),
     );
     expect(border1.top, BorderSide.none);
     expect(border1.right, const BorderSide(color: Color(0xFF00FF00)));
     expect(border1.bottom, BorderSide.none);
-    expect(border1.left, const BorderSide(width: 1.0));
+    expect(border1.left, const BorderSide());
     expect(border1.horizontalInside, BorderSide.none);
-    expect(border1.verticalInside, const BorderSide(width: 1.0, color: Color(0xFF000000)));
+    expect(border1.verticalInside, const BorderSide());
     expect(border1.dimensions, const EdgeInsets.symmetric(horizontal: 1.0));
     expect(border1.isUniform, isFalse);
     expect(border1.scale(2.0), const TableBorder(
@@ -57,13 +57,12 @@ void main() {
     expect(border3.dimensions, const EdgeInsets.symmetric(horizontal: 1.0, vertical: 1.0));
     expect(border3.isUniform, isFalse);
     expect(border3.scale(0.0), TableBorder.symmetric(
-      inside: BorderSide.none,
       outside: const BorderSide(width: 0.0, color: Color(0xFFFF0000), style: BorderStyle.none),
     ));
   });
 
   test('TableBorder.lerp', () {
-    const BorderSide side1 = BorderSide(width: 1.0, color: Color(0x00000001));
+    const BorderSide side1 = BorderSide(color: Color(0x00000001));
     const BorderSide side2 = BorderSide(width: 2.0, color: Color(0x00000002));
     const BorderSide side3 = BorderSide(width: 3.0, color: Color(0x00000003));
     const BorderSide side4 = BorderSide(width: 4.0, color: Color(0x00000004));
@@ -111,7 +110,7 @@ void main() {
 
   test('TableBorder.lerp with nulls', () {
     final TableBorder table2 = TableBorder.all(width: 2.0);
-    final TableBorder table1 = TableBorder.all(width: 1.0);
+    final TableBorder table1 = TableBorder.all();
     expect(TableBorder.lerp(table2, null, 0.5), table1);
     expect(TableBorder.lerp(null, table2, 0.5), table1);
     expect(TableBorder.lerp(null, null, 0.5), null);
@@ -129,8 +128,8 @@ void main() {
   });
 
   test('TableBorder.all with a borderRadius', () {
-    final TableBorder tableA = TableBorder.all(borderRadius: BorderRadius.circular(8.0));
-    expect(tableA.borderRadius, BorderRadius.circular(8.0));
+    final TableBorder tableA = TableBorder.all(borderRadius: const BorderRadius.all(Radius.circular(8.0)));
+    expect(tableA.borderRadius, const BorderRadius.all(Radius.circular(8.0)));
   });
 
 }

@@ -23,7 +23,7 @@ void main() {
     await tester.pump();
     await tester.pumpWidget(MaterialApp(home: ListView(controller: controller, children: children(31))));
     expect(controller.position.pixels, thirty + 200.0); // same distance past the end
-    expect(await tester.pumpAndSettle(), 7); // now it goes ballistic...
+    expect(await tester.pumpAndSettle(), 8); // now it goes ballistic...
     expect(controller.position.pixels, thirty + 100.0); // and ends up at the end
   });
 
@@ -197,7 +197,7 @@ class _Carousel62209State extends State<Carousel62209> {
   void initState() {
     super.initState();
     _pages = widget.pages.toList();
-    _pageController = PageController(initialPage: 0, keepPage: false);
+    _pageController = PageController(keepPage: false);
   }
 
   @override

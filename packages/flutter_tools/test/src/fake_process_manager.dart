@@ -32,6 +32,7 @@ class FakeCommand {
     this.completer,
     this.stdin,
     this.exception,
+    this.outputFollowsExit = false,
   }) : assert(command != null),
        assert(duration != null),
        assert(exitCode != null);
@@ -99,6 +100,10 @@ class FakeCommand {
   /// If provided, this exception will be thrown when the fake command is run.
   final Object? exception;
 
+  /// Indicates that output will only be emitted after the `exitCode` [Future]
+  /// on [io.Process] completes.
+  final bool outputFollowsExit;
+
   void _matches(
     List<String> command,
     String? workingDirectory,
@@ -127,19 +132,35 @@ class _FakeProcess implements io.Process {
     IOSink? stdin,
     this._stdout,
     this._completer,
+    bool outputFollowsExit,
   ) : exitCode = Future<void>.delayed(duration).then((void value) {
         if (_completer != null) {
           return _completer.future.then((void _) => _exitCode);
         }
         return _exitCode;
       }),
-      stdin = stdin ?? IOSink(StreamController<List<int>>().sink),
-      stderr = _stderr == null
-        ? const Stream<List<int>>.empty()
-        : Stream<List<int>>.value(utf8.encode(_stderr)),
-      stdout = _stdout == null
-        ? const Stream<List<int>>.empty()
-        : Stream<List<int>>.value(utf8.encode(_stdout));
+      stdin = stdin ?? IOSink(StreamController<List<int>>().sink)
+  {
+    if (_stderr == null) {
+      stderr = const Stream<List<int>>.empty();
+    } else if (outputFollowsExit) {
+      stderr = Stream<List<int>>.fromFuture(exitCode.then((_) {
+        return Future<List<int>>(() => utf8.encode(_stderr));
+      }));
+    } else {
+      stderr = Stream<List<int>>.value(utf8.encode(_stderr));
+    }
+
+    if (_stdout == null) {
+      stdout = const Stream<List<int>>.empty();
+    } else if (outputFollowsExit) {
+      stdout = Stream<List<int>>.fromFuture(exitCode.then((_) {
+        return Future<List<int>>(() => utf8.encode(_stdout));
+      }));
+    } else {
+      stdout = Stream<List<int>>.value(utf8.encode(_stdout));
+    }
+  }
 
   final int _exitCode;
   final Completer<void>? _completer;
@@ -153,13 +174,13 @@ class _FakeProcess implements io.Process {
   final String _stderr;
 
   @override
-  final Stream<List<int>> stderr;
+  late final Stream<List<int>> stderr;
 
   @override
   final IOSink stdin;
 
   @override
-  final Stream<List<int>> stdout;
+  late final Stream<List<int>> stdout;
 
   final String _stdout;
 
@@ -250,6 +271,7 @@ abstract class FakeProcessManager implements ProcessManager {
       fakeCommand.stdin,
       fakeCommand.stdout,
       fakeCommand.completer,
+      fakeCommand.outputFollowsExit,
     );
   }
 
@@ -346,10 +368,6 @@ class _FakeAnyProcessManager extends FakeProcessManager {
       workingDirectory: workingDirectory,
       environment: environment,
       encoding: encoding,
-      duration: Duration.zero,
-      exitCode: 0,
-      stdout: '',
-      stderr: '',
     );
   }
 

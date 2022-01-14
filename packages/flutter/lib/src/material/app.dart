@@ -696,6 +696,11 @@ class MaterialApp extends StatefulWidget {
 /// When using the desktop platform, if the [Scrollable] widget scrolls in the
 /// [Axis.vertical], a [Scrollbar] is applied.
 ///
+/// [MaterialScrollBehavior.androidOverscrollIndicator] specifies the
+/// overscroll indicator that is used on [TargetPlatform.android]. When null,
+/// [ThemeData.androidOverscrollIndicator] is used. If also null, the default
+/// overscroll indicator is the [GlowingOverscrollIndicator].
+///
 /// See also:
 ///
 ///  * [ScrollBehavior], the default scrolling behavior extended by this class.
@@ -703,7 +708,17 @@ class MaterialScrollBehavior extends ScrollBehavior {
   /// Creates a MaterialScrollBehavior that decorates [Scrollable]s with
   /// [GlowingOverscrollIndicator]s and [Scrollbar]s based on the current
   /// platform and provided [ScrollableDetails].
-  const MaterialScrollBehavior();
+  ///
+  /// [MaterialScrollBehavior.androidOverscrollIndicator] specifies the
+  /// overscroll indicator that is used on [TargetPlatform.android]. When null,
+  /// [ThemeData.androidOverscrollIndicator] is used. If also null, the default
+  /// overscroll indicator is the [GlowingOverscrollIndicator].
+  const MaterialScrollBehavior({
+    AndroidOverscrollIndicator? androidOverscrollIndicator,
+  }) : _androidOverscrollIndicator = androidOverscrollIndicator,
+       super(androidOverscrollIndicator: androidOverscrollIndicator);
+
+  final AndroidOverscrollIndicator? _androidOverscrollIndicator;
 
   @override
   TargetPlatform getPlatform(BuildContext context) => Theme.of(context).platform;
@@ -736,6 +751,9 @@ class MaterialScrollBehavior extends ScrollBehavior {
   Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {
     // When modifying this function, consider modifying the implementation in
     // the base class as well.
+    final AndroidOverscrollIndicator indicator = _androidOverscrollIndicator
+        ?? Theme.of(context).androidOverscrollIndicator
+        ?? androidOverscrollIndicator;
     switch (getPlatform(context)) {
       case TargetPlatform.iOS:
       case TargetPlatform.linux:
@@ -743,6 +761,16 @@ class MaterialScrollBehavior extends ScrollBehavior {
       case TargetPlatform.windows:
         return child;
       case TargetPlatform.android:
+        switch (indicator) {
+          case AndroidOverscrollIndicator.stretch:
+            return StretchingOverscrollIndicator(
+              axisDirection: details.direction,
+              child: child,
+            );
+          case AndroidOverscrollIndicator.glow:
+            continue glow;
+        }
+      glow:
       case TargetPlatform.fuchsia:
         return GlowingOverscrollIndicator(
           axisDirection: details.direction,
@@ -920,7 +948,6 @@ class _MaterialAppState extends State<MaterialApp> {
         result = GridPaper(
           color: const Color(0xE0F9BBE0),
           interval: 8.0,
-          divisions: 2,
           subdivisions: 1,
           child: result,
         );

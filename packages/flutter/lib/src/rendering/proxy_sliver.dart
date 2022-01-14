@@ -112,7 +112,7 @@ class RenderSliverOpacity extends RenderProxySliver {
   }
 
   @override
-  bool get alwaysNeedsCompositing => child != null && (_alpha != 0 && _alpha != 255);
+  bool get alwaysNeedsCompositing => child != null && (_alpha > 0);
 
   int _alpha;
 
@@ -164,12 +164,6 @@ class RenderSliverOpacity extends RenderProxySliver {
       if (_alpha == 0) {
         // No need to keep the layer. We'll create a new one if necessary.
         layer = null;
-        return;
-      }
-      if (_alpha == 255) {
-        // No need to keep the layer. We'll create a new one if necessary.
-        layer = null;
-        context.paintChild(child!, offset);
         return;
       }
       assert(needsCompositing);

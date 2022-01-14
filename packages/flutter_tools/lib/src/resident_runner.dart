@@ -96,7 +96,7 @@ class FlutterDevice {
     // a warning message and dump some debug information which can be
     // used to file a bug, but the compiler will still start up correctly.
     if (targetPlatform == TargetPlatform.web_javascript) {
-      // TODO(jonahwilliams): consistently provide these flags across platforms.
+      // TODO(zanderso): consistently provide these flags across platforms.
       HostArtifact platformDillArtifact;
       final List<String> extraFrontEndOptions = List<String>.of(buildInfo.extraFrontEndOptions ?? <String>[]);
       if (buildInfo.nullSafetyMode == NullSafetyMode.unsound) {
@@ -263,9 +263,9 @@ class FlutterDevice {
         try {
           await device.dds.startDartDevelopmentService(
             observatoryUri,
-            ddsPort,
-            ipv6,
-            disableServiceAuthCodes,
+            hostPort: ddsPort,
+            ipv6: ipv6,
+            disableServiceAuthCodes: disableServiceAuthCodes,
             logger: globals.logger,
           );
         } on dds.DartDevelopmentServiceException catch (e, st) {
@@ -335,7 +335,7 @@ class FlutterDevice {
   Future<void> exitApps({
     @visibleForTesting Duration timeoutDelay = const Duration(seconds: 10),
   }) async {
-    // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/83127
+    // TODO(zanderso): https://github.com/flutter/flutter/issues/83127
     // When updating `flutter attach` to support running without a device,
     // this will need to be changed to fall back to io exit.
     return device.stopApp(package, userIdentifier: userIdentifier);
@@ -416,7 +416,9 @@ class FlutterDevice {
     }
     devFSWriter = device.createDevFSWriter(package, userIdentifier);
 
-    final Map<String, dynamic> platformArgs = <String, dynamic>{};
+    final Map<String, dynamic> platformArgs = <String, dynamic>{
+      'multidex': hotRunner.multidexEnabled,
+    };
 
     await startEchoingDeviceLog();
 
@@ -492,6 +494,7 @@ class FlutterDevice {
     if (coldRunner.traceStartup != null) {
       platformArgs['trace-startup'] = coldRunner.traceStartup;
     }
+    platformArgs['multidex'] = coldRunner.multidexEnabled;
 
     await startEchoingDeviceLog();
 
@@ -560,7 +563,7 @@ class FlutterDevice {
       );
     } on DevFSException {
       devFSStatus.cancel();
-      return UpdateFSReport(success: false);
+      return UpdateFSReport();
     }
     devFSStatus.stop();
     globals.printTrace('Synced ${getSizeAsMB(report.syncedBytes)}.');
@@ -1101,6 +1104,10 @@ abstract class ResidentRunner extends ResidentHandlers {
 
   bool get trackWidgetCreation => debuggingOptions.buildInfo.trackWidgetCreation;
 
+  /// True if the shared Dart plugin registry (which is different than the one
+  /// used for web) should be generated during source generation.
+  bool get generateDartPluginRegistry => true;
+
   // Returns the Uri of the first connected device for mobile,
   // and only connected device for web.
   //
@@ -1152,7 +1159,11 @@ abstract class ResidentRunner extends ResidentHandlers {
       processManager: globals.processManager,
       platform: globals.platform,
       projectDir: globals.fs.currentDirectory,
-      generateDartPluginRegistry: true,
+      generateDartPluginRegistry: generateDartPluginRegistry,
+      defines: <String, String>{
+        // Needed for Dart plugin registry generation.
+        kTargetFile: mainPath,
+      },
     );
 
     final CompositeTarget compositeTarget = CompositeTarget(<Target>[
@@ -1463,9 +1474,19 @@ Future<String> getMissingPackageHintForPlatform(TargetPlatform platform) async {
       return 'Is your project missing an $manifestPath?\nConsider running "flutter create ." to create one.';
     case TargetPlatform.ios:
       return 'Is your project missing an ios/Runner/Info.plist?\nConsider running "flutter create ." to create one.';
-    default:
+    case TargetPlatform.android:
+    case TargetPlatform.darwin:
+    case TargetPlatform.fuchsia_arm64:
+    case TargetPlatform.fuchsia_x64:
+    case TargetPlatform.linux_arm64:
+    case TargetPlatform.linux_x64:
+    case TargetPlatform.tester:
+    case TargetPlatform.web_javascript:
+    case TargetPlatform.windows_uwp_x64:
+    case TargetPlatform.windows_x64:
       return null;
   }
+  return null; // dead code, remove after null safety migration
 }
 
 /// Redirects terminal commands to the correct resident runner methods.
@@ -1603,7 +1624,7 @@ class TerminalHandler {
         if (!residentRunner.canHotReload) {
           return false;
         }
-        final OperationResult result = await residentRunner.restart(fullRestart: false);
+        final OperationResult result = await residentRunner.restart();
         if (result.fatal) {
           throwToolExit(result.message);
         }

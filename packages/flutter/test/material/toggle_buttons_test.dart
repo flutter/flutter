@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -616,7 +620,6 @@ void main() {
         child: boilerplate(
           child: ToggleButtons(
             isSelected: const <bool>[true],
-            onPressed: null,
             children: <Widget>[
               Row(children: const <Widget>[
                 Text('First child'),
@@ -705,7 +708,6 @@ void main() {
           child: ToggleButtons(
             fillColor: selectedFillColor,
             isSelected: const <bool>[false, true],
-            onPressed: null,
             children: const <Widget>[
               Text('First child'),
               Text('Second child'),
@@ -769,7 +771,6 @@ void main() {
           child: ToggleButtons(
             fillColor: MaterialStateColor.resolveWith(getFillColor),
             isSelected: const <bool>[false, true],
-            onPressed: null,
             children: const <Widget>[
               Text('First child'),
               Text('Second child'),
@@ -1488,7 +1489,6 @@ void main() {
           child: boilerplate(
             child: ToggleButtons(
               direction: Axis.vertical,
-              verticalDirection: VerticalDirection.down,
               isSelected: const <bool>[false, true, false],
               onPressed: (int index) {},
               children: const <Widget>[

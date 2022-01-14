@@ -246,7 +246,6 @@ class BorderSide {
     return BorderSide(
       color: Color.lerp(colorA, colorB, t)!,
       width: width,
-      style: BorderStyle.solid,
     );
   }
 

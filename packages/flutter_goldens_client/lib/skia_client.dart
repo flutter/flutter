@@ -5,6 +5,7 @@
 import 'dart:convert';
 import 'dart:io' as io;
 
+import 'package:crypto/crypto.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:path/path.dart' as path;
@@ -18,6 +19,7 @@ import 'package:process/process.dart';
 const String _kFlutterRootKey = 'FLUTTER_ROOT';
 const String _kGoldctlKey = 'GOLDCTL';
 const String _kTestBrowserKey = 'FLUTTER_TEST_BROWSER';
+const String _kWebRendererKey = 'FLUTTER_WEB_RENDERER';
 
 /// A client for uploading image tests and making baseline requests to the
 /// Flutter Gold Dashboard.
@@ -182,9 +184,10 @@ class SkiaGoldClient {
     if (result.exitCode != 0) {
       // We do not want to throw for non-zero exit codes here, as an intentional
       // change or new golden file test expect non-zero exit codes. Logging here
-      // is meant to inform when an unexpected result occurs.
-      print('goldctl imgtest add stdout: ${result.stdout}');
-      print('goldctl imgtest add stderr: ${result.stderr}');
+      // is meant to help debugging in CI when an unexpected result occurs.
+      // See also: https://github.com/flutter/flutter/issues/91285
+      print('goldctl imgtest add stdout: ${result.stdout}'); // ignore: avoid_print
+      print('goldctl imgtest add stderr: ${result.stderr}'); // ignore: avoid_print
     }
 
     return true;
@@ -288,7 +291,7 @@ class SkiaGoldClient {
     final String traceID = getTraceID(testName);
     await io.HttpOverrides.runWithHttpOverrides<Future<void>>(() async {
       final Uri requestForExpectations = Uri.parse(
-        'https://flutter-gold.skia.org/json/v1/latestpositivedigest/$traceID'
+        'https://flutter-gold.skia.org/json/v2/latestpositivedigest/$traceID'
       );
       late String rawResponse;
       try {
@@ -300,7 +303,10 @@ class SkiaGoldClient {
           throw const FormatException('Skia gold expectations do not match expected format.');
         expectation = jsonResponse['digest'] as String?;
       } on FormatException catch (error) {
-        print(
+        // Ideally we'd use something like package:test's printOnError, but best reliabilty
+        // in getting logs on CI for now we're just using print.
+        // See also: https://github.com/flutter/flutter/issues/91285
+        print( // ignore: avoid_print
           'Formatting error detected requesting expectations from Flutter Gold.\n'
           'error: $error\n'
           'url: $requestForExpectations\n'
@@ -324,15 +330,9 @@ class SkiaGoldClient {
       final Uri requestForImage = Uri.parse(
         'https://flutter-gold.skia.org/img/images/$imageHash.png',
       );
-
-      try {
-        final io.HttpClientRequest request = await httpClient.getUrl(requestForImage);
-        final io.HttpClientResponse response = await request.close();
-        await response.forEach((List<int> bytes) => imageBytes.addAll(bytes));
-
-      } catch(e) {
-        rethrow;
-      }
+      final io.HttpClientRequest request = await httpClient.getUrl(requestForImage);
+      final io.HttpClientResponse response = await request.close();
+      await response.forEach((List<int> bytes) => imageBytes.addAll(bytes));
     },
       SkiaGoldHttpOverrides(),
     );
@@ -369,6 +369,9 @@ class SkiaGoldClient {
     if (platform.environment[_kTestBrowserKey] != null) {
       keys['Browser'] = platform.environment[_kTestBrowserKey];
       keys['Platform'] = '${keys['Platform']}-browser';
+      if (platform.environment[_kWebRendererKey] == 'canvaskit') {
+        keys['WebRenderer'] = 'canvaskit';
+      }
     }
     return json.encode(keys);
   }
@@ -410,20 +413,22 @@ class SkiaGoldClient {
   }
 
   /// Returns a trace id based on the current testing environment to lookup
-  /// the latest positive digest on Flutter Gold.
-  ///
-  /// Trace IDs are case sensitive and should be in alphabetical order for the
-  /// keys, followed by the rest of the paramset, also in alphabetical order.
-  /// There should also be leading and trailing commas.
-  ///
-  /// Example TraceID for Flutter Gold:
-  ///   ',CI=cirrus,Platform=linux,name=cupertino.activityIndicator.inprogress.1.0,source_type=flutter,'
+  /// the latest positive digest on Flutter Gold with a hex-encoded md5 hash of
+  /// the image keys.
   String getTraceID(String testName) {
-    return '${platform.environment[_kTestBrowserKey] == null ? ',' : ',Browser=${platform.environment[_kTestBrowserKey]},'}'
-      'CI=luci,'
-      'Platform=${platform.operatingSystem},'
-      'name=$testName,'
-      'source_type=flutter,';
+    final Map<String, dynamic> keys = <String, dynamic>{
+      if (platform.environment[_kTestBrowserKey] != null)
+        'Browser' : platform.environment[_kTestBrowserKey],
+      if (platform.environment[_kTestBrowserKey] != null && platform.environment[_kWebRendererKey] == 'canvaskit')
+        'WebRenderer' : 'canvaskit',
+      'CI' : 'luci',
+      'Platform' : platform.operatingSystem,
+      'name' : testName,
+      'source_type' : 'flutter',
+    };
+    final String jsonTrace = json.encode(keys);
+    final String md5Sum = md5.convert(utf8.encode(jsonTrace)).toString();
+    return md5Sum;
   }
 }
 

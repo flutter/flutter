@@ -3,7 +3,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-# TODO(jonahwilliams): refactor this and xcode_backend.sh into one script
+# TODO(zanderso): refactor this and xcode_backend.sh into one script
 # once iOS is using 'assemble'.
 RunCommand() {
   if [[ -n "$VERBOSE_SCRIPT_LOGGING" ]]; then

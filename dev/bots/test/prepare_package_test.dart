@@ -266,7 +266,6 @@ void main() {
           tempDir,
           testRef,
           Branch.dev,
-          strict: true,
           processManager: processManager,
           subprocessOutput: false,
           platform: platform,
@@ -289,7 +288,7 @@ void main() {
       late FakeProcessManager processManager;
       late Directory tempDir;
       final String gsutilCall = platform.isWindows
-          ? 'python ${path.join("D:", "depot_tools", "gsutil.py")}'
+          ? 'python3 ${path.join("D:", "depot_tools", "gsutil.py")}'
           : 'gsutil.py';
       final String releasesName = 'releases_$platformName.json';
       final String archiveName = platform.isLinux ? 'archive.tar.xz' : 'archive.zip';
@@ -495,7 +494,7 @@ void main() {
           '$gsutilCall -- stat $gsArchivePath': <ProcessResult>[ProcessResult(0, 0, '', '')],
         };
         processManager.addCommands(convertResults(calls));
-        expect(() async => publisher.publishArchive(false), throwsException);
+        expect(() async => publisher.publishArchive(), throwsException);
       });
 
       test('publishArchive does not throw if forceUpload is true and artifact already exists on cloud storage', () async {

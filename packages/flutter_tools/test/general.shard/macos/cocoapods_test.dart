@@ -287,6 +287,32 @@ void main() {
       expect(releaseContents, isNot(contains('#include?')));
       expect(releaseContents, equals(legacyReleaseInclude));
     });
+
+    testUsingContext('does not include Pod config in xcconfig files, if flavor include present', () async {
+      final FlutterProject projectUnderTest = setupProjectUnderTest();
+      projectUnderTest.ios.podfile..createSync()..writeAsStringSync('Existing Podfile');
+
+      const String flavorDebugInclude = '#include? "Pods/Target Support Files/Pods-Free App/Pods-Free App.debug free.xcconfig"';
+      projectUnderTest.ios.xcodeConfigFor('Debug')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(flavorDebugInclude);
+      const String flavorReleaseInclude = '#include? "Pods/Target Support Files/Pods-Free App/Pods-Free App.release free.xcconfig"';
+      projectUnderTest.ios.xcodeConfigFor('Release')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(flavorReleaseInclude);
+
+      final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.directory('project'));
+      await cocoaPodsUnderTest.setupPodfile(project.ios);
+
+      final String debugContents = projectUnderTest.ios.xcodeConfigFor('Debug').readAsStringSync();
+      // Redundant contains check, but this documents what we're testing--that the optional
+      // #include? doesn't get written in addition to the previous style #include.
+      expect(debugContents, isNot(contains('Pods-Runner/Pods-Runner.debug')));
+      expect(debugContents, equals(flavorDebugInclude));
+      final String releaseContents = projectUnderTest.ios.xcodeConfigFor('Release').readAsStringSync();
+      expect(releaseContents, isNot(contains('Pods-Runner/Pods-Runner.release')));
+      expect(releaseContents, equals(flavorReleaseInclude));
+    });
   });
 
   group('Update xcconfig', () {

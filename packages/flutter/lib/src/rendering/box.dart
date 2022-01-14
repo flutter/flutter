@@ -202,9 +202,7 @@ class BoxConstraints extends Constraints {
   BoxConstraints loosen() {
     assert(debugAssertIsValid());
     return BoxConstraints(
-      minWidth: 0.0,
       maxWidth: maxWidth,
-      minHeight: 0.0,
       maxHeight: maxHeight,
     );
   }
@@ -2762,16 +2760,16 @@ mixin RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, ParentDataTyp
   ///  * [defaultPaint], which paints the children appropriate for this
   ///    hit-testing strategy.
   bool defaultHitTestChildren(BoxHitTestResult result, { required Offset position }) {
-    // The x, y parameters have the top left of the node's box as the origin.
     ChildType? child = lastChild;
     while (child != null) {
+      // The x, y parameters have the top left of the node's box as the origin.
       final ParentDataType childParentData = child.parentData! as ParentDataType;
       final bool isHit = result.addWithPaintOffset(
         offset: childParentData.offset,
         position: position,
-        hitTest: (BoxHitTestResult result, Offset? transformed) {
+        hitTest: (BoxHitTestResult result, Offset transformed) {
           assert(transformed == position - childParentData.offset);
-          return child!.hitTest(result, position: transformed!);
+          return child!.hitTest(result, position: transformed);
         },
       );
       if (isHit)
