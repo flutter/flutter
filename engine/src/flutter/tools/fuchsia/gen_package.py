@@ -35,11 +35,11 @@ def GenerateManifest(package_dir):
   return manifest_path
 
 
-def CreateFarPackage(pm_bin, package_dir, signing_key, dst_dir):
+def CreateFarPackage(pm_bin, package_dir, signing_key, dst_dir, api_level):
   manifest_path = GenerateManifest(package_dir)
 
   pm_command_base = [
-      pm_bin, '-m', manifest_path, '-k', signing_key, '-o', dst_dir
+      pm_bin, '-m', manifest_path, '-k', signing_key, '-o', dst_dir, '--api-level', api_level
   ]
 
   # Build the package
