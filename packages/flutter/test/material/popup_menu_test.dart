@@ -1471,6 +1471,72 @@ void main() {
     expect(tester.widget<Container>(find.widgetWithText(Container, 'Item 3')).padding, const EdgeInsets.all(20));
   });
 
+testWidgets('PopupMenu custom padding', (WidgetTester tester) async {
+    final Key popupMenuButtonWithDefaultPaddingKey = UniqueKey();
+    final Key popupMenuButtonWithOverriddenPaddingKey = UniqueKey();
+
+    const EdgeInsets padding = EdgeInsets.zero;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Column(
+            children: <PopupMenuButton<String>>[
+              PopupMenuButton<String>(
+                key: popupMenuButtonWithDefaultPaddingKey,
+                child: const Text('button'),
+                onSelected: (String result) {},
+                itemBuilder: (BuildContext context) {
+                  return <PopupMenuEntry<String>>[
+                    const PopupMenuItem<String>(
+                      value: '0',
+                      child: Text('Item 0'),
+                    ),
+                  ];
+                },
+              ),
+              PopupMenuButton<String>(
+                menuPadding: padding,
+                key: popupMenuButtonWithOverriddenPaddingKey,
+                child: const Text('button'),
+                onSelected: (String result) {},
+                itemBuilder: (BuildContext context) {
+                  return <PopupMenuEntry<String>>[
+                    const PopupMenuItem<String>(
+                      value: '0',
+                      child: Text('Item 0'),
+                    ),
+                  ];
+                },
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final Finder popupFinder = find.byType(SingleChildScrollView);
+    // Show the menu
+    await tester.tap(find.byKey(popupMenuButtonWithDefaultPaddingKey));
+    await tester.pumpAndSettle();
+
+    expect(tester.widget<SingleChildScrollView>(popupFinder).padding,
+      const EdgeInsets.symmetric(vertical: 8),
+      reason: 'The popup without explicit paddings should utilise the default ones.',);
+
+    // Close previous menu
+    await tester.tap(find.byKey(popupMenuButtonWithDefaultPaddingKey), warnIfMissed: false);
+    await tester.pumpAndSettle();
+
+    // Show the menu
+    await tester.tap(find.byKey(popupMenuButtonWithOverriddenPaddingKey));
+    await tester.pumpAndSettle();
+
+    expect(tester.widget<SingleChildScrollView>(popupFinder).padding,
+      padding,
+      reason: 'The popup should utilise explicitly set paddings.',);
+  });
+
   testWidgets('CheckedPopupMenuItem child height is a minimum, child is vertically centered', (WidgetTester tester) async {
     final Key popupMenuButtonKey = UniqueKey();
     final Type menuItemType = const CheckedPopupMenuItem<String>(child: Text('item')).runtimeType;
