@@ -229,6 +229,25 @@ class Switch extends StatelessWidget {
   ///  * [MaterialState.hovered].
   ///  * [MaterialState.focused].
   ///  * [MaterialState.disabled].
+  ///
+  /// {@tool snippet}
+  /// This example resolves the [thumbColor] based on the current
+  /// [MaterialState] of the [Switch], providing a different [Color] when it is
+  /// [MaterialState.disabled].
+  ///
+  /// ```dart
+  /// Switch(
+  ///   value: true,
+  ///   onChanged: (_) => true,
+  ///   thumbColor: MaterialStateProperty.resolveWith<Color>((states) {
+  ///     if (states.contains(MaterialState.disabled)) {
+  ///       return Colors.orange.withOpacity(.48);
+  ///     }
+  ///     return Colors.orange;
+  ///   }),
+  /// )
+  /// ```
+  /// {@end-tool}
   /// {@endtemplate}
   ///
   /// If null, then the value of [activeColor] is used in the selected
@@ -251,6 +270,25 @@ class Switch extends StatelessWidget {
   ///  * [MaterialState.hovered].
   ///  * [MaterialState.focused].
   ///  * [MaterialState.disabled].
+  ///
+  /// {@tool snippet}
+  /// This example resolves the [trackColor] based on the current
+  /// [MaterialState] of the [Switch], providing a different [Color] when it is
+  /// [MaterialState.disabled].
+  ///
+  /// ```dart
+  /// Switch(
+  ///   value: true,
+  ///   onChanged: (_) => true,
+  ///   thumbColor: MaterialStateProperty.resolveWith<Color>((states) {
+  ///     if (states.contains(MaterialState.disabled)) {
+  ///       return Colors.orange.withOpacity(.48);
+  ///     }
+  ///     return Colors.orange;
+  ///   }),
+  /// )
+  /// ```
+  /// {@end-tool}
   /// {@endtemplate}
   ///
   /// If null, then the value of [activeTrackColor] is used in the selected
