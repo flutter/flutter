@@ -67,6 +67,10 @@ winrt::Windows::UI::Core::CoreCursor GetCursorByName(
   }
 }
 
+// UWP does not care if key events are handled, since it can not redispatch them
+// anyway.
+static void IgnoreKeyEventResult(bool handled) {}
+
 }  // namespace
 
 FlutterWindowWinUWP::FlutterWindowWinUWP(
@@ -347,9 +351,9 @@ void FlutterWindowWinUWP::OnKeyUp(
   unsigned int scancode = status.ScanCode;
   int key = static_cast<int>(args.VirtualKey());
   int action = 0x0101;
-  binding_handler_delegate_->OnKey(key, scancode, action, 0,
-                                   status.IsExtendedKey /* extended */,
-                                   status.WasKeyDown /* was_down */);
+  binding_handler_delegate_->OnKey(
+      key, scancode, action, 0, status.IsExtendedKey /* extended */,
+      status.WasKeyDown /* was_down */, IgnoreKeyEventResult);
 }
 
 void FlutterWindowWinUWP::OnKeyDown(
@@ -363,9 +367,9 @@ void FlutterWindowWinUWP::OnKeyDown(
   unsigned int scancode = status.ScanCode;
   int key = static_cast<int>(args.VirtualKey());
   int action = 0x0100;
-  binding_handler_delegate_->OnKey(key, scancode, action, 0,
-                                   status.IsExtendedKey /* extended */,
-                                   status.WasKeyDown /* was_down */);
+  binding_handler_delegate_->OnKey(
+      key, scancode, action, 0, status.IsExtendedKey /* extended */,
+      status.WasKeyDown /* was_down */, IgnoreKeyEventResult);
 }
 
 void FlutterWindowWinUWP::OnCharacterReceived(

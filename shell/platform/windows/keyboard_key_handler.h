@@ -45,19 +45,13 @@ class KeyboardKeyHandler : public KeyboardHandlerBase {
                               char32_t character,
                               bool extended,
                               bool was_down,
-                              std::function<void(bool)> callback) = 0;
+                              KeyEventCallback callback) = 0;
 
     virtual ~KeyboardKeyHandlerDelegate();
   };
 
-  using EventDispatcher =
-      std::function<UINT(UINT cInputs, LPINPUT pInputs, int cbSize)>;
-
-  // Create a KeyboardKeyHandler and specify where to redispatch events.
-  //
-  // The |redispatch_event| is typically |SendInput|, but can also be nullptr
-  // (for UWP).
-  explicit KeyboardKeyHandler(EventDispatcher dispatch_event);
+  // Create a KeyboardKeyHandler.
+  explicit KeyboardKeyHandler();
 
   ~KeyboardKeyHandler();
 
@@ -89,25 +83,16 @@ class KeyboardKeyHandler : public KeyboardHandlerBase {
   // after which the channel delegate should be removed.
   //
   // Inherited from |KeyboardHandlerBase|.
-  bool KeyboardHook(int key,
+  void KeyboardHook(int key,
                     int scancode,
                     int action,
                     char32_t character,
                     bool extended,
-                    bool was_down) override;
-
- protected:
-  size_t RedispatchedCount();
+                    bool was_down,
+                    KeyEventCallback callback) override;
 
  private:
   struct PendingEvent {
-    uint32_t key;
-    uint8_t scancode;
-    uint32_t action;
-    char32_t character;
-    bool extended;
-    bool was_down;
-
     // Self-incrementing ID attached to an event sent to the framework.
     uint64_t sequence_id;
     // The number of delegates that haven't replied.
@@ -115,19 +100,12 @@ class KeyboardKeyHandler : public KeyboardHandlerBase {
     // Whether any replied delegates reported true (handled).
     bool any_handled;
 
-    // A value calculated out of critical event information that can be used
-    // to identify redispatched events.
-    uint64_t hash;
+    // Where to report the delegates' result to.
+    //
+    // Typically a callback provided by KeyboardManager32.
+    KeyEventCallback callback;
   };
 
-  void DispatchEvent(const PendingEvent& event);
-
-  // Find an event in the redispatch list that matches the given one.
-  //
-  // If an matching event is found, removes the matching event from the
-  // redispatch list, and returns true. Otherwise, returns false;
-  bool RemoveRedispatchedEvent(const PendingEvent& incoming);
-  void RedispatchEvent(std::unique_ptr<PendingEvent> event);
   void ResolvePendingEvent(uint64_t sequence_id, bool handled);
 
   std::vector<std::unique_ptr<KeyboardKeyHandlerDelegate>> delegates_;
@@ -136,47 +114,8 @@ class KeyboardKeyHandler : public KeyboardHandlerBase {
   // yet received a response.
   std::deque<std::unique_ptr<PendingEvent>> pending_responds_;
 
-  // The queue of key events that have been redispatched to the system but have
-  // not yet been received for a second time.
-  std::deque<std::unique_ptr<PendingEvent>> pending_redispatches_;
-
   // The sequence_id attached to the last event sent to the framework.
   uint64_t last_sequence_id_;
-
-  // The callback used to dispatch synthesized events.
-  EventDispatcher dispatch_event_;
-
-  // Whether the last event is a CtrlLeft key down.
-  //
-  // This is used to resolve a corner case described in |IsKeyDownAltRight|.
-  bool last_key_is_ctrl_left_down;
-
-  // The scancode of the last met CtrlLeft down.
-  //
-  // This is used to resolve a corner case described in |IsKeyDownAltRight|.
-  uint8_t ctrl_left_scancode;
-
-  // Whether a CtrlLeft up should be synthesized upon the next AltRight up.
-  //
-  // This is used to resolve a corner case described in |IsKeyDownAltRight|.
-  bool should_synthesize_ctrl_left_up;
-
-  // Calculate a hash based on event data for fast comparison for a redispatched
-  // event.
-  //
-  // This uses event data instead of generating a serial number because
-  // information can't be attached to the redispatched events, so it has to be
-  // possible to compute an ID from the identifying data in the event when it is
-  // received again in order to differentiate between events that are new, and
-  // events that have been redispatched.
-  //
-  // Another alternative would be to compute a checksum from all the data in the
-  // event (just compute it over the bytes in the struct, probably skipping
-  // timestamps), but the fields used are enough to differentiate them, and
-  // since Windows does some processing on the events (coming up with virtual
-  // key codes, setting timestamps, etc.), it's not clear that the redispatched
-  // events would have the same checksums.
-  static uint64_t ComputeEventHash(const PendingEvent& event);
 };
 
 }  // namespace flutter

@@ -38,6 +38,19 @@ std::unique_ptr<std::vector<uint8_t>> _keyHandlingResponse(bool handled) {
   return flutter::JsonMessageCodec::GetInstance().EncodeMessage(document);
 }
 
+static std::string ordinal(int num) {
+  switch (num) {
+    case 1:
+      return "st";
+    case 2:
+      return "nd";
+    case 3:
+      return "rd";
+    default:
+      return "th";
+  }
+}
+
 // A struct to use as a FlutterPlatformMessageResponseHandle so it can keep the
 // callbacks and user data passed to the engine's
 // PlatformMessageCreateResponseHandle for use in the SendPlatformMessage
@@ -184,10 +197,15 @@ void MockMessageQueue::InjectMessageList(int count,
   while (!_pending_messages.empty()) {
     Win32Message message = _pending_messages.front();
     _pending_messages.pop_front();
+    _sent_messages.push_back(message);
     LRESULT result =
         Win32SendMessage(message.message, message.wParam, message.lParam);
     if (message.expected_result != kWmResultDontCheck) {
-      EXPECT_EQ(result, message.expected_result);
+      EXPECT_EQ(result, message.expected_result)
+          << "  This is the " << _sent_messages.size()
+          << ordinal(_sent_messages.size()) << " event, with\n    " << std::hex
+          << "Message 0x" << message.message << " LParam 0x" << message.lParam
+          << " WParam 0x" << message.wParam;
     }
   }
 }
