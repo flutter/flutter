@@ -110,76 +110,11 @@ class FontWeight {
 /// determine what features are available.
 ///
 /// {@tool sample --template=stateless_widget_material}
-///
 /// This example shows usage of several OpenType font features,
 /// including Small Caps (selected manually using the "smcp" code),
 /// old-style figures, fractional ligatures, and stylistic sets.
 ///
-/// ```dart dartImports
-/// import 'dart:ui';
-/// ```
-///
-/// ```dart preamble
-/// final TextStyle titleStyle = TextStyle(
-///   fontSize: 18,
-///   fontFeatures: const <FontFeature>[FontFeature.enable('smcp')],
-///   color: Colors.blueGrey[600],
-/// );
-/// ```
-///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   // The Cardo, Milonga and Raleway Dots fonts can be downloaded from
-///   // Google Fonts (https://www.google.com/fonts).
-///   return Scaffold(
-///     body: Center(
-///       child: Column(
-///         mainAxisAlignment: MainAxisAlignment.center,
-///         children: <Widget>[
-///           const Spacer(flex: 5),
-///           Text('regular numbers have their place:', style: titleStyle),
-///           const Text('The 1972 cup final was a 1-1 draw.',
-///               style: TextStyle(
-///                 fontFamily: 'Cardo',
-///                 fontSize: 24,
-///               )),
-///           const Spacer(),
-///           Text('but old-style figures blend well with lower case:',
-///               style: titleStyle),
-///           const Text('The 1972 cup final was a 1-1 draw.',
-///               style: TextStyle(
-///                   fontFamily: 'Cardo',
-///                   fontSize: 24,
-///                   fontFeatures: <FontFeature>[FontFeature.oldstyleFigures()])),
-///           const Spacer(),
-///           const Divider(),
-///           const Spacer(),
-///           Text('fractions look better with a custom ligature:',
-///               style: titleStyle),
-///           const Text('Add 1/2 tsp of flour and stir.',
-///               style: TextStyle(
-///                   fontFamily: 'Milonga',
-///                   fontSize: 24,
-///                   fontFeatures: <FontFeature>[FontFeature.alternativeFractions()])),
-///           const Spacer(),
-///           const Divider(),
-///           const Spacer(),
-///           Text('multiple stylistic sets in one font:', style: titleStyle),
-///           const Text('Raleway Dots',
-///               style: TextStyle(fontFamily: 'Raleway Dots', fontSize: 48)),
-///           Text('Raleway Dots',
-///               style: TextStyle(
-///                 fontFeatures: <FontFeature>[FontFeature.stylisticSet(1)],
-///                 fontFamily: 'Raleway Dots',
-///                 fontSize: 48,
-///               )),
-///           const Spacer(flex: 5),
-///         ],
-///       ),
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/ui/text/font_feature.0.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -236,7 +171,6 @@ class FontFeature {
   /// This feature selects the given glyph variant for glyphs in the span.
   ///
   /// {@tool sample --template=stateless_widget}
-  ///
   /// The Raleway font supports several alternate glyphs. The code
   /// below shows how specific glyphs can be selected. With `aalt` set
   /// to zero, the default, the normal glyphs are used. With a
@@ -247,26 +181,9 @@ class FontFeature {
   /// (using [Text.rich]), the desired rendering for each glyph can be
   /// achieved.
   ///
-  /// ```dart dartImports
-  /// import 'dart:ui';
-  /// ```
-  ///
-  /// ```dart
-  /// Widget build(BuildContext context) {
-  ///   // The Raleway font can be downloaded from Google Fonts (https://www.google.com/fonts).
-  ///   return const Text(
-  ///     'The infamous Tuna Torture.',
-  ///     style: TextStyle(
-  ///       fontFamily: 'Raleway',
-  ///       fontFeatures: <FontFeature>[
-  ///         FontFeature.alternative(1), // or 2, or 3, or...
-  ///       ],
-  ///     ),
-  ///   );
-  /// }
-  /// ```
-  ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/font_feature_aalt.png)
+  ///
+  /// ** See code in examples/api/lib/ui/text/font_feature.font_feature_alternative.0.dart **
   /// {@end-tool}
   ///
   /// See also:
@@ -286,31 +203,13 @@ class FontFeature {
   /// This feature overrides all other features.
   ///
   /// {@tool sample --template=stateless_widget}
-  ///
   /// The Ubuntu Mono font supports the `afrc` feature. It causes digits
   /// before slashes to become superscripted and digits after slashes to become
   /// subscripted. This contrasts to the effect seen with [FontFeature.fractions].
   ///
-  /// ```dart dartImports
-  /// import 'dart:ui';
-  /// ```
-  ///
-  /// ```dart
-  /// Widget build(BuildContext context) {
-  ///   // The Ubuntu Mono font can be downloaded from Google Fonts (https://www.google.com/fonts).
-  ///   return const Text(
-  ///     'Fractions: 1/2 2/3 3/4 4/5',
-  ///     style: TextStyle(
-  ///       fontFamily: 'Ubuntu Mono',
-  ///       fontFeatures: <FontFeature>[
-  ///         FontFeature.alternativeFractions(),
-  ///       ],
-  ///     ),
-  ///   );
-  /// }
-  /// ```
-  ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/font_feature_afrc.png)
+  ///
+  /// ** See code in examples/api/lib/ui/text/font_feature.font_feature_alternative_fractions.0.dart **
   /// {@end-tool}
   ///
   /// See also:
@@ -326,33 +225,15 @@ class FontFeature {
   /// alternatives based on nearby text.
   ///
   /// {@tool sample --template=stateless_widget}
-  ///
   /// The Barriecito font supports the `calt` feature. It causes some
   /// letters in close proximity to other instances of themselves to
   /// use different glyphs, to give the appearance of more variation
   /// in the glyphs, rather than having each letter always use a
   /// particular glyph.
   ///
-  /// ```dart dartImports
-  /// import 'dart:ui';
-  /// ```
-  ///
-  /// ```dart
-  /// Widget build(BuildContext context) {
-  ///   // The Barriecito font can be downloaded from Google Fonts (https://www.google.com/fonts).
-  ///   return const Text(
-  ///     "Ooohh, we weren't going to tell him that.",
-  ///     style: TextStyle(
-  ///       fontFamily: 'Barriecito',
-  ///       fontFeatures: <FontFeature>[
-  ///         FontFeature.contextualAlternates(),
-  ///       ],
-  ///     ),
-  ///   );
-  /// }
-  /// ```
-  ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/font_feature_calt.png)
+  ///
+  /// ** See code in examples/api/lib/ui/text/font_feature.font_feature_contextual_alternates.0.dart **
   /// {@end-tool}
   ///
   /// See also:
@@ -375,7 +256,6 @@ class FontFeature {
   /// aethestically pleasing combination with capital letters.
   ///
   /// {@tool sample --template=stateless_widget}
-  ///
   /// The Piazzolla font supports the `case` feature. It causes
   /// parentheses, brackets, braces, guillemets, slashes, bullets, and
   /// some other glyphs (not shown below) to be shifted up slightly so
@@ -387,26 +267,9 @@ class FontFeature {
   /// The difference is very subtle. It may be most obvious when
   /// examining the square brackets compared to the capital A.
   ///
-  /// ```dart dartImports
-  /// import 'dart:ui';
-  /// ```
-  ///
-  /// ```dart
-  /// Widget build(BuildContext context) {
-  ///   // The Piazzolla font can be downloaded from Google Fonts (https://www.google.com/fonts).
-  ///   return const Text(
-  ///     '(A) [A] {A} «A» A/B A•B',
-  ///     style: TextStyle(
-  ///       fontFamily: 'Piazzolla',
-  ///       fontFeatures: <FontFeature>[
-  ///         FontFeature.caseSensitiveForms(),
-  ///       ],
-  ///     ),
-  ///   );
-  /// }
-  /// ```
-  ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/font_feature_case.png)
+  ///
+  /// ** See code in examples/api/lib/ui/text/font_feature.font_feature_case_sensitive_forms.0.dart **
   /// {@end-tool}
   ///
   /// See also:
@@ -426,7 +289,6 @@ class FontFeature {
   /// (`ssXX`).
   ///
   /// {@tool sample --template=stateless_widget}
-  ///
   /// The Source Code Pro font supports the `cvXX` feature for several
   /// characters. In the example below, variants 1 (`cv01`), 2
   /// (`cv02`), and 4 (`cv04`) are selected. Variant 1 changes the
@@ -441,28 +303,9 @@ class FontFeature {
   /// the set which affects the "g" character also affects theta and
   /// delta.
   ///
-  /// ```dart dartImports
-  /// import 'dart:ui';
-  /// ```
-  ///
-  /// ```dart
-  /// Widget build(BuildContext context) {
-  ///   // The Source Code Pro font can be downloaded from Google Fonts (https://www.google.com/fonts).
-  ///   return Text(
-  ///     'aáâ β gǵĝ θб Iiíî Ll',
-  ///     style: TextStyle(
-  ///       fontFamily: 'Source Code Pro',
-  ///       fontFeatures: <FontFeature>[
-  ///         FontFeature.characterVariant(1),
-  ///         FontFeature.characterVariant(2),
-  ///         FontFeature.characterVariant(4),
-  ///       ],
-  ///     ),
-  ///   );
-  /// }
-  /// ```
-  ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/font_feature_cvXX.png)
+  ///
+  /// ** See code in examples/api/lib/ui/text/font_feature.font_feature_character_variant.0.dart **
   /// {@end-tool}
   ///
   /// See also:
@@ -484,30 +327,12 @@ class FontFeature {
   /// part of fractions (see [FontFeature.fractions]).
   ///
   /// {@tool sample --template=stateless_widget}
-  ///
   /// The Piazzolla font supports the `dnom` feature. It causes
   /// the digits to be rendered smaller and near the bottom of the EM box.
   ///
-  /// ```dart dartImports
-  /// import 'dart:ui';
-  /// ```
-  ///
-  /// ```dart
-  /// Widget build(BuildContext context) {
-  ///   // The Piazzolla font can be downloaded from Google Fonts (https://www.google.com/fonts).
-  ///   return const Text(
-  ///     'Fractions: 1/2 2/3 3/4 4/5',
-  ///     style: TextStyle(
-  ///       fontFamily: 'Piazzolla',
-  ///       fontFeatures: <FontFeature>[
-  ///         FontFeature.denominator(),
-  ///       ],
-  ///     ),
-  ///   );
-  /// }
-  /// ```
-  ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/font_feature_dnom.png)
+  ///
+  /// ** See code in examples/api/lib/ui/text/font_feature.font_feature_denominator.0.dart **
   /// {@end-tool}
   ///
   /// See also:
@@ -527,32 +352,14 @@ class FontFeature {
   /// [FontFeature.denominator] features.
   ///
   /// {@tool sample --template=stateless_widget}
-  ///
   /// The Ubuntu Mono font supports the `frac` feature. It causes
   /// digits around slashes to be turned into dedicated fraction
   /// glpyhs. This contrasts to the effect seen with
   /// [FontFeature.alternativeFractions].
   ///
-  /// ```dart dartImports
-  /// import 'dart:ui';
-  /// ```
-  ///
-  /// ```dart
-  /// Widget build(BuildContext context) {
-  ///   // The Ubuntu Mono font can be downloaded from Google Fonts (https://www.google.com/fonts).
-  ///   return const Text(
-  ///     'Fractions: 1/2 2/3 3/4 4/5',
-  ///     style: TextStyle(
-  ///       fontFamily: 'Ubuntu Mono',
-  ///       fontFeatures: <FontFeature>[
-  ///         FontFeature.fractions(),
-  ///       ],
-  ///     ),
-  ///   );
-  /// }
-  /// ```
-  ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/font_feature_frac.png)
+  ///
+  /// ** See code in examples/api/lib/ui/text/font_feature.font_feature_fractions.0.dart **
   /// {@end-tool}
   ///
   /// See also:
@@ -575,32 +382,13 @@ class FontFeature {
   /// This feature may override other glyph-substitution features.
   ///
   /// {@tool sample --template=stateless_widget}
-  ///
   /// The Cardo font supports the `hist` feature specifically for the
   /// letter "s": it changes occurrences of that letter for the glyph
   /// used by U+017F LATIN SMALL LETTER LONG S.
   ///
-  /// ```dart dartImports
-  /// import 'dart:ui';
-  /// ```
-  ///
-  /// ```dart
-  /// Widget build(BuildContext context) {
-  ///   // The Cardo font can be downloaded from Google Fonts (https://www.google.com/fonts).
-  ///   return const Text(
-  ///     'VIBRANT fish assisted his business.',
-  ///     style: TextStyle(
-  ///       fontFamily: 'Sorts Mill Goudy',
-  ///       fontFeatures: <FontFeature>[
-  ///         FontFeature.historicalForms(), // Enables "hist".
-  ///         // Use FontFeature.historicalLigatures() to enable "hlig" as well.
-  ///       ],
-  ///     ),
-  ///   );
-  /// }
-  /// ```
-  ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/font_feature_historical.png)
+  ///
+  /// ** See code in examples/api/lib/ui/text/font_feature.font_feature_historical_forms.0.dart **
   /// {@end-tool}
   ///
   /// See also:
@@ -633,7 +421,6 @@ class FontFeature {
   /// This feature may override other glyph-substitution features.
   ///
   /// {@tool sample --template=stateless_widget}
-  ///
   /// The Cardo font supports the `hlig` feature. It has legacy
   /// ligatures for "VI" and "NT", and various ligatures involving the
   /// "long s". In the example below, both historical forms (`hist 1`)
@@ -646,27 +433,9 @@ class FontFeature {
   /// Observe in particular the position of the dot of the "i" in
   /// "business" in the various combinations of these features.
   ///
-  /// ```dart dartImports
-  /// import 'dart:ui';
-  /// ```
-  ///
-  /// ```dart
-  /// Widget build(BuildContext context) {
-  ///   // The Cardo font can be downloaded from Google Fonts (https://www.google.com/fonts).
-  ///   return const Text(
-  ///     'VIBRANT fish assisted his business.',
-  ///     style: TextStyle(
-  ///       fontFamily: 'Sorts Mill Goudy',
-  ///       fontFeatures: <FontFeature>[
-  ///         FontFeature.historicalForms(), // Enables "hist".
-  ///         FontFeature.historicalLigatures() // Enables "hlig".
-  ///       ],
-  ///     ),
-  ///   );
-  /// }
-  /// ```
-  ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/font_feature_historical.png)
+  ///
+  /// ** See code in examples/api/lib/ui/text/font_feature.font_feature_historical_ligatures.0.dart **
   /// {@end-tool}
   ///
   /// See also:
@@ -688,30 +457,12 @@ class FontFeature {
   /// This feature may conflict with [FontFeature.oldstyleFigures].
   ///
   /// {@tool sample --template=stateless_widget}
-  ///
   /// The Sorts Mill Goudy font supports the `lnum` feature. It causes
   /// digits to fit more seamlessly with capital letters.
   ///
-  /// ```dart dartImports
-  /// import 'dart:ui';
-  /// ```
-  ///
-  /// ```dart
-  /// Widget build(BuildContext context) {
-  ///   // The Sorts Mill Goudy font can be downloaded from Google Fonts (https://www.google.com/fonts).
-  ///   return const Text(
-  ///     'CALL 311-555-2368 NOW!',
-  ///     style: TextStyle(
-  ///       fontFamily: 'Sorts Mill Goudy',
-  ///       fontFeatures: <FontFeature>[
-  ///         FontFeature.liningFigures(),
-  ///       ],
-  ///     ),
-  ///   );
-  /// }
-  /// ```
-  ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/font_feature_lnum.png)
+  ///
+  /// ** See code in examples/api/lib/ui/text/font_feature.font_feature_lining_figures.0.dart **
   /// {@end-tool}
   ///
   /// See also:
@@ -746,30 +497,14 @@ class FontFeature {
   /// first place, of course.)
   ///
   /// {@tool sample --template=stateless_widget}
-  ///
   /// The Noto Sans CJK font supports the `locl` feature for CJK characters.
   /// In this example, the `localeAware` feature is not explicitly used, as it is
   /// enabled by default. This example instead shows how to set the locale,
   /// thus demonstrating how Noto Sans adapts the glyph shapes to the locale.
   ///
-  /// ```dart dartImports
-  /// import 'dart:ui';
-  /// ```
-  ///
-  /// ```dart
-  /// Widget build(BuildContext context) {
-  ///   // The Noto family of fonts can be downloaded from Google Fonts (https://www.google.com/fonts).
-  ///   return const Text(
-  ///     '次 化 刃 直 入 令',
-  ///     locale: Locale('zh', 'CN'), // or Locale('ja'), Locale('ko'), Locale('zh', 'TW'), etc
-  ///     style: TextStyle(
-  ///       fontFamily: 'Noto Sans',
-  ///     ),
-  ///   );
-  /// }
-  /// ```
-  ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/font_feature_locl.png)
+  ///
+  /// ** See code in examples/api/lib/ui/text/font_feature.font_feature_locale_aware.0.dart **
   /// {@end-tool}
   ///
   /// See also:
@@ -790,7 +525,6 @@ class FontFeature {
   /// feature). The default set if none is specified is 1.
   ///
   /// {@tool sample --template=stateless_widget}
-  ///
   /// The Gothic A1 font supports several notational variant sets via
   /// the `nalt` feature.
   ///
@@ -802,26 +536,9 @@ class FontFeature {
   ///
   /// The code below shows how to select set 3.
   ///
-  /// ```dart dartImports
-  /// import 'dart:ui';
-  /// ```
-  ///
-  /// ```dart
-  /// Widget build(BuildContext context) {
-  ///   // The Gothic A1 font can be downloaded from Google Fonts (https://www.google.com/fonts).
-  ///   return const Text(
-  ///     'abc 123',
-  ///     style: TextStyle(
-  ///       fontFamily: 'Gothic A1',
-  ///       fontFeatures: <FontFeature>[
-  ///         FontFeature.notationalForms(3), // circled letters and digits
-  ///       ],
-  ///     ),
-  ///   );
-  /// }
-  /// ```
-  ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/font_feature_nalt.png)
+  ///
+  /// ** See code in examples/api/lib/ui/text/font_feature.font_feature_notational_forms.0.dart **
   /// {@end-tool}
   ///
   /// See also:
@@ -837,30 +554,12 @@ class FontFeature {
   /// part of fractions (see [FontFeature.fractions]).
   ///
   /// {@tool sample --template=stateless_widget}
-  ///
   /// The Piazzolla font supports the `numr` feature. It causes
   /// the digits to be rendered smaller and near the top of the EM box.
   ///
-  /// ```dart dartImports
-  /// import 'dart:ui';
-  /// ```
-  ///
-  /// ```dart
-  /// Widget build(BuildContext context) {
-  ///   // The Piazzolla font can be downloaded from Google Fonts (https://www.google.com/fonts).
-  ///   return const Text(
-  ///     'Fractions: 1/2 2/3 3/4 4/5',
-  ///     style: TextStyle(
-  ///       fontFamily: 'Piazzolla',
-  ///       fontFeatures: <FontFeature>[
-  ///         FontFeature.numerators(),
-  ///       ],
-  ///     ),
-  ///   );
-  /// }
-  /// ```
-  ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/font_feature_numr.png)
+  ///
+  /// ** See code in examples/api/lib/ui/text/font_feature.font_feature_numerators.0.dart **
   /// {@end-tool}
   ///
   /// See also:
@@ -882,30 +581,12 @@ class FontFeature {
   /// [FontFeature.liningFigures].
   ///
   /// {@tool sample --template=stateless_widget}
-  ///
   /// The Piazzolla font supports the `onum` feature. It causes
   /// digits to extend below the baseline.
   ///
-  /// ```dart dartImports
-  /// import 'dart:ui';
-  /// ```
-  ///
-  /// ```dart
-  /// Widget build(BuildContext context) {
-  ///   // The Piazzolla font can be downloaded from Google Fonts (https://www.google.com/fonts).
-  ///   return const Text(
-  ///     'Call 311-555-2368 now!',
-  ///     style: TextStyle(
-  ///       fontFamily: 'Piazzolla',
-  ///       fontFeatures: <FontFeature>[
-  ///         FontFeature.oldstyleFigures(),
-  ///       ],
-  ///     ),
-  ///   );
-  /// }
-  /// ```
-  ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/font_feature_onum.png)
+  ///
+  /// ** See code in examples/api/lib/ui/text/font_feature.font_feature_oldstyle_figures.0.dart **
   /// {@end-tool}
   ///
   /// See also:
@@ -924,30 +605,12 @@ class FontFeature {
   /// This may override other features that substitute glyphs.
   ///
   /// {@tool sample --template=stateless_widget}
-  ///
   /// The Piazzolla font supports the `ordn` feature. It causes
   /// alphabetic glyphs to become smaller and superscripted.
   ///
-  /// ```dart dartImports
-  /// import 'dart:ui';
-  /// ```
-  ///
-  /// ```dart
-  /// Widget build(BuildContext context) {
-  ///   // The Piazzolla font can be downloaded from Google Fonts (https://www.google.com/fonts).
-  ///   return const Text(
-  ///     '1st, 2nd, 3rd, 4th...',
-  ///     style: TextStyle(
-  ///       fontFamily: 'Piazzolla',
-  ///       fontFeatures: <FontFeature>[
-  ///         FontFeature.ordinalForms(),
-  ///       ],
-  ///     ),
-  ///   );
-  /// }
-  /// ```
-  ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/font_feature_ordn.png)
+  ///
+  /// ** See code in examples/api/lib/ui/text/font_feature.font_feature_ordinal_forms.0.dart **
   /// {@end-tool}
   ///
   /// See also:
@@ -966,7 +629,6 @@ class FontFeature {
   /// The default behavior varies from font to font.
   ///
   /// {@tool sample --template=stateless_widget}
-  ///
   /// The Kufam font supports the `pnum` feature. It causes the digits
   /// to become proportionally-sized, rather than all being the same
   /// width. In this font this is especially noticeable with the digit
@@ -974,26 +636,9 @@ class FontFeature {
   /// sans-serif font, but with the proportionally figures enabled,
   /// the digit becomes much narrower.
   ///
-  /// ```dart dartImports
-  /// import 'dart:ui';
-  /// ```
-  ///
-  /// ```dart
-  /// Widget build(BuildContext context) {
-  ///   // The Kufam font can be downloaded from Google Fonts (https://www.google.com/fonts).
-  ///   return const Text(
-  ///     'Call 311-555-2368 now!',
-  ///     style: TextStyle(
-  ///       fontFamily: 'Kufam',
-  ///       fontFeatures: <FontFeature>[
-  ///         FontFeature.proportionalFigures(),
-  ///       ],
-  ///     ),
-  ///   );
-  /// }
-  /// ```
-  ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/font_feature_pnum.png)
+  ///
+  /// ** See code in examples/api/lib/ui/text/font_feature.font_feature_proportional_figures.0.dart **
   /// {@end-tool}
   ///
   /// See also:
@@ -1029,7 +674,6 @@ class FontFeature {
   /// This may override other features that substitute glyphs.
   ///
   /// {@tool sample --template=stateless_widget}
-  ///
   /// The Source Code Pro font supports the `salt` feature. It causes
   /// some glyphs to be rendered differently, for example the "a" and
   /// "g" glyphs change from their typographically common
@@ -1038,26 +682,9 @@ class FontFeature {
   /// angled), and the "0" rendering changes from a center dot to a
   /// slash.
   ///
-  /// ```dart dartImports
-  /// import 'dart:ui';
-  /// ```
-  ///
-  /// ```dart
-  /// Widget build(BuildContext context) {
-  ///   // The Source Code Pro font can be downloaded from Google Fonts (https://www.google.com/fonts).
-  ///   return const Text(
-  ///     r'Agile Game - $100 initial bet',
-  ///     style: TextStyle(
-  ///       fontFamily: 'Source Code Pro',
-  ///       fontFeatures: <FontFeature>[
-  ///         FontFeature.stylisticAlternates(),
-  ///       ],
-  ///     ),
-  ///   );
-  /// }
-  /// ```
-  ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/font_feature_salt.png)
+  ///
+  /// ** See code in examples/api/lib/ui/text/font_feature.font_feature_stylistic_alternates.0.dart **
   /// {@end-tool}
   ///
   /// See also:
@@ -1077,30 +704,12 @@ class FontFeature {
   /// This may override other features that substitute glyphs.
   ///
   /// {@tool sample --template=stateless_widget}
-  ///
   /// The Piazzolla font supports the `sinf` feature. It causes
   /// digits to be smaller and subscripted.
   ///
-  /// ```dart dartImports
-  /// import 'dart:ui';
-  /// ```
-  ///
-  /// ```dart
-  /// Widget build(BuildContext context) {
-  ///   // The Piazzolla font can be downloaded from Google Fonts (https://www.google.com/fonts).
-  ///   return const Text(
-  ///     'C8H10N4O2',
-  ///     style: TextStyle(
-  ///       fontFamily: 'Piazzolla',
-  ///       fontFeatures: <FontFeature>[
-  ///         FontFeature.scientificInferiors(),
-  ///       ],
-  ///     ),
-  ///   );
-  /// }
-  /// ```
-  ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/font_feature_sinf.png)
+  ///
+  /// ** See code in examples/api/lib/ui/text/font_feature.font_feature_scientific_inferiors.0.dart **
   /// {@end-tool}
   ///
   /// See also:
@@ -1119,7 +728,6 @@ class FontFeature {
   /// [FontFeature.characterVariant] feature (`cvXX`).
   ///
   /// {@tool sample --template=stateless_widget}
-  ///
   /// The Source Code Pro font supports the `ssXX` feature for several
   /// sets. In the example below, stylistic sets 2 (`ss02`), 3
   /// (`ss03`), and 4 (`ss04`) are selected. Stylistic set 2 changes
@@ -1131,32 +739,12 @@ class FontFeature {
   /// This font also supports character variants (see
   /// [FontFeature.characterVariant]).
   ///
-  /// ```dart dartImports
-  /// import 'dart:ui';
-  /// ```
-  ///
-  /// ```dart
-  /// Widget build(BuildContext context) {
-  ///   // The Source Code Pro font can be downloaded from Google Fonts (https://www.google.com/fonts).
-  ///   return Text(
-  ///     'aáâ β gǵĝ θб Iiíî Ll',
-  ///     style: TextStyle(
-  ///       fontFamily: 'Source Code Pro',
-  ///       fontFeatures: <FontFeature>[
-  ///         FontFeature.stylisticSet(2),
-  ///         FontFeature.stylisticSet(3),
-  ///         FontFeature.stylisticSet(4),
-  ///       ],
-  ///     ),
-  ///   );
-  /// }
-  /// ```
-  ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/font_feature_ssXX_1.png)
+  ///
+  /// ** See code in examples/api/lib/ui/text/font_feature.font_feature_stylistic_set.0.dart **
   /// {@end-tool}
   ///
   /// {@tool sample --template=stateless_widget}
-  ///
   /// The Piazzolla font supports the `ssXX` feature for more
   /// elaborate stylistic effects. Set 1 turns some Latin characters
   /// into Roman numerals, set 2 enables some ASCII characters to be
@@ -1164,27 +752,9 @@ class FontFeature {
   ///
   /// _These_ stylistic sets do _not_ correspond to character variants.
   ///
-  /// ```dart dartImports
-  /// import 'dart:ui';
-  /// ```
-  ///
-  /// ```dart
-  /// Widget build(BuildContext context) {
-  ///   // The Piazzolla font can be downloaded from Google Fonts (https://www.google.com/fonts).
-  ///   return Text(
-  ///     '-> MCMXCVII <-', // 1997
-  ///     style: TextStyle(
-  ///       fontFamily: 'Piazzolla',
-  ///       fontFeatures: <FontFeature>[
-  ///         FontFeature.stylisticSet(1),
-  ///         FontFeature.stylisticSet(2),
-  ///       ],
-  ///     ),
-  ///   );
-  /// }
-  /// ```
-  ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/font_feature_ssXX_2.png)
+  ///
+  /// ** See code in examples/api/lib/ui/text/font_feature.font_feature_stylistic_set.1.dart **
   /// {@end-tool}
   ///
   /// See also:
@@ -1209,30 +779,12 @@ class FontFeature {
   /// This may override other features that substitute glyphs.
   ///
   /// {@tool sample --template=stateless_widget}
-  ///
   /// The Piazzolla font supports the `subs` feature. It causes
   /// digits to be smaller and subscripted.
   ///
-  /// ```dart dartImports
-  /// import 'dart:ui';
-  /// ```
-  ///
-  /// ```dart
-  /// Widget build(BuildContext context) {
-  ///   // The Piazzolla font can be downloaded from Google Fonts (https://www.google.com/fonts).
-  ///   return const Text(
-  ///     'Line from x1,y1 to x2,y2',
-  ///     style: TextStyle(
-  ///       fontFamily: 'Piazzolla',
-  ///       fontFeatures: <FontFeature>[
-  ///         FontFeature.subscripts(),
-  ///       ],
-  ///     ),
-  ///   );
-  /// }
-  /// ```
-  ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/font_feature_subs.png)
+  ///
+  /// ** See code in examples/api/lib/ui/text/font_feature.font_feature_subscripts.0.dart **
   /// {@end-tool}
   ///
   /// See also:
@@ -1258,31 +810,13 @@ class FontFeature {
   /// This may override other features that substitute glyphs.
   ///
   /// {@tool sample --template=stateless_widget}
-  ///
   /// The Sorts Mill Goudy font supports the `sups` feature. It causes
   /// digits to be smaller, superscripted, and changes them to lining
   /// figures (so they are all the same height).
   ///
-  /// ```dart dartImports
-  /// import 'dart:ui';
-  /// ```
-  ///
-  /// ```dart
-  /// Widget build(BuildContext context) {
-  ///   // The Sorts Mill Goudy font can be downloaded from Google Fonts (https://www.google.com/fonts).
-  ///   return const Text(
-  ///     'The isotope 238U decays to 206Pb',
-  ///     style: TextStyle(
-  ///       fontFamily: 'Sorts Mill Goudy',
-  ///       fontFeatures: <FontFeature>[
-  ///         FontFeature.superscripts(),
-  ///       ],
-  ///     ),
-  ///   );
-  /// }
-  /// ```
-  ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/font_feature_sups.png)
+  ///
+  /// ** See code in examples/api/lib/ui/text/font_feature.font_feature_superscripts.0.dart **
   /// {@end-tool}
   ///
   /// See also:
@@ -1309,30 +843,12 @@ class FontFeature {
   /// forms available through this feature!
   ///
   /// {@tool sample --template=stateless_widget}
-  ///
   /// The BioRhyme Expanded font supports the `swsh` feature specifically
   /// for the capital "Q" and "R" glyphs and the ampersand.
   ///
-  /// ```dart dartImports
-  /// import 'dart:ui';
-  /// ```
-  ///
-  /// ```dart
-  /// Widget build(BuildContext context) {
-  ///   // The BioRhyme Expanded font can be downloaded from Google Fonts (https://www.google.com/fonts).
-  ///   return const Text(
-  ///     'Queer & Romantic',
-  ///     style: TextStyle(
-  ///       fontFamily: 'BioRhyme Expanded',
-  ///       fontFeatures: <FontFeature>[
-  ///         FontFeature.swash(),
-  ///       ],
-  ///     ),
-  ///   );
-  /// }
-  /// ```
-  ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/font_feature_swsh.png)
+  ///
+  /// ** See code in examples/api/lib/ui/text/font_feature.font_feature_swash.0.dart **
   /// {@end-tool}
   ///
   /// See also:
@@ -1353,33 +869,15 @@ class FontFeature {
   /// The default behavior varies from font to font.
   ///
   /// {@tool sample --template=stateless_widget}
-  ///
   /// The Piazzolla font supports the `tnum` feature. It causes the
   /// digits to become uniformally-sized, rather than having variable
   /// widths. In this font this is especially noticeable with the
   /// digit "1"; with tabular figures enabled, the "1" digit is more
   /// widely spaced.
   ///
-  /// ```dart dartImports
-  /// import 'dart:ui';
-  /// ```
-  ///
-  /// ```dart
-  /// Widget build(BuildContext context) {
-  ///   // The Piazzolla font can be downloaded from Google Fonts (https://www.google.com/fonts).
-  ///   return const Text(
-  ///     'Call 311-555-2368 now!',
-  ///     style: TextStyle(
-  ///       fontFamily: 'Piazzolla',
-  ///       fontFeatures: <FontFeature>[
-  ///         FontFeature.tabularFigures(),
-  ///       ],
-  ///     ),
-  ///   );
-  /// }
-  /// ```
-  ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/font_feature_tnum.png)
+  ///
+  /// ** See code in examples/api/lib/ui/text/font_feature.font_feature_tabular_figures.0.dart **
   /// {@end-tool}
   ///
   /// See also:
@@ -1396,31 +894,13 @@ class FontFeature {
   /// This is overridden by [FontFeature.oldstyleFigures].
   ///
   /// {@tool sample --template=stateless_widget}
-  ///
   /// The Source Code Pro font supports the `zero` feature. It causes the
   /// zero digit to be drawn with a slash rather than the default rendering,
   /// which in this case has a dot through the zero rather than a slash.
   ///
-  /// ```dart dartImports
-  /// import 'dart:ui';
-  /// ```
-  ///
-  /// ```dart
-  /// Widget build(BuildContext context) {
-  ///   // The Source Code Pro font can be downloaded from Google Fonts (https://www.google.com/fonts).
-  ///   return const Text(
-  ///     'One million is: 1,000,000.00',
-  ///     style: TextStyle(
-  ///       fontFamily: 'Source Code Pro',
-  ///       fontFeatures: <FontFeature>[
-  ///         FontFeature.slashedZero(),
-  ///       ],
-  ///     ),
-  ///   );
-  /// }
-  /// ```
-  ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/font_feature_zero.png)
+  ///
+  /// ** See code in examples/api/lib/ui/text/font_feature.font_feature_slashed_zero.0.dart **
   /// {@end-tool}
   ///
   /// See also:
