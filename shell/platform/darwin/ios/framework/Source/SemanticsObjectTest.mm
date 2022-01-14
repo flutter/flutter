@@ -734,7 +734,8 @@ class MockAccessibilityBridgeNoWindow : public AccessibilityBridgeIos {
   // Handle initial setting of node with header.
   flutter::SemanticsNode node;
   node.flags = static_cast<int32_t>(flutter::SemanticsFlags::kHasToggledState) |
-               static_cast<int32_t>(flutter::SemanticsFlags::kIsToggled);
+               static_cast<int32_t>(flutter::SemanticsFlags::kIsToggled) |
+               static_cast<int32_t>(flutter::SemanticsFlags::kIsEnabled);
   node.label = "foo";
   [object setSemanticsNode:&node];
   // Create ab real UISwitch to compare the FlutterSwitchSemanticsObject with.
@@ -746,11 +747,34 @@ class MockAccessibilityBridgeNoWindow : public AccessibilityBridgeIos {
 
   // Set the toggled to false;
   flutter::SemanticsNode update;
-  update.flags = static_cast<int32_t>(flutter::SemanticsFlags::kHasToggledState);
+  update.flags = static_cast<int32_t>(flutter::SemanticsFlags::kHasToggledState) |
+                 static_cast<int32_t>(flutter::SemanticsFlags::kIsEnabled);
   update.label = "foo";
   [object setSemanticsNode:&update];
 
   nativeSwitch.on = NO;
+
+  XCTAssertEqual(object.accessibilityTraits, nativeSwitch.accessibilityTraits);
+  XCTAssertEqual(object.accessibilityValue, nativeSwitch.accessibilityValue);
+}
+
+- (void)testFlutterSwitchSemanticsObjectMatchesUISwitchDisabled {
+  fml::WeakPtrFactory<flutter::MockAccessibilityBridge> factory(
+      new flutter::MockAccessibilityBridge());
+  fml::WeakPtr<flutter::MockAccessibilityBridge> bridge = factory.GetWeakPtr();
+  FlutterSwitchSemanticsObject* object = [[FlutterSwitchSemanticsObject alloc] initWithBridge:bridge
+                                                                                          uid:1];
+
+  // Handle initial setting of node with header.
+  flutter::SemanticsNode node;
+  node.flags = static_cast<int32_t>(flutter::SemanticsFlags::kHasToggledState) |
+               static_cast<int32_t>(flutter::SemanticsFlags::kIsToggled);
+  node.label = "foo";
+  [object setSemanticsNode:&node];
+  // Create ab real UISwitch to compare the FlutterSwitchSemanticsObject with.
+  UISwitch* nativeSwitch = [[UISwitch alloc] init];
+  nativeSwitch.on = YES;
+  nativeSwitch.enabled = NO;
 
   XCTAssertEqual(object.accessibilityTraits, nativeSwitch.accessibilityTraits);
   XCTAssertEqual(object.accessibilityValue, nativeSwitch.accessibilityValue);
