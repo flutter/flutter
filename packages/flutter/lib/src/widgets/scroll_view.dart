@@ -237,6 +237,8 @@ abstract class ScrollView extends StatelessWidget {
   /// scroll view needs to be recomputed whenever the scroll position changes.
   ///
   /// Defaults to false.
+  ///
+  /// {@youtube 560 315 https://www.youtube.com/watch?v=LUqDNnv_dh0}
   /// {@endtemplate}
   final bool shrinkWrap;
 
@@ -895,8 +897,6 @@ abstract class BoxScrollView extends ScrollView {
 ///
 /// A [ListView] is basically a [CustomScrollView] with a single [SliverList] in
 /// its [CustomScrollView.slivers] property.
-///
-/// {@youtube 560 315 https://www.youtube.com/watch?v=LUqDNnv_dh0}
 ///
 /// If [ListView] is no longer sufficient, for example because the scroll view
 /// is to have both a list and a grid, or because the list is to be combined

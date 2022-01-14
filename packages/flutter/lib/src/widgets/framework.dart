@@ -451,7 +451,7 @@ abstract class Widget extends DiagnosticableTree {
 ///    part of the build function that builds the inner-most widget into its own
 ///    widget, so that only the inner-most widget needs to be rebuilt when the
 ///    theme changes.
-///
+/// {@template flutter.flutter.widgets.framework.prefer_const_over_helper}
 ///  * When trying to create a reusable piece of UI, prefer using a widget
 ///    rather than a helper method. For example, if there was a function used to
 ///    build a widget, a [State.setState] call would require Flutter to entirely
@@ -459,6 +459,7 @@ abstract class Widget extends DiagnosticableTree {
 ///    Flutter would be able to efficiently re-render only those parts that
 ///    really need to be updated. Even better, if the created widget is `const`,
 ///    Flutter would short-circuit most of the rebuild work.
+/// {@endtemplate}
 ///
 /// This video gives more explainations on why `const` constructors are important
 /// and why a [Widget] is better than a helper method.
@@ -681,13 +682,7 @@ abstract class StatelessWidget extends Widget {
 ///    [KeyedSubtree] widget may be useful for this purpose if no other widget
 ///    can conveniently be assigned the key.)
 ///
-///  * When trying to create a reusable piece of UI, prefer using a widget
-///    rather than a helper method. For example, if there was a function used to
-///    build a widget, a [State.setState] call would require Flutter to entirely
-///    rebuild the returned wrapping widget. If a [Widget] was used instead,
-///    Flutter would be able to efficiently re-render only those parts that
-///    really need to be updated. Even better, if the created widget is `const`,
-///    Flutter would short-circuit most of the rebuild work.
+/// {@macro flutter.flutter.widgets.framework.prefer_const_over_helper}
 ///
 /// This video gives more explainations on why `const` constructors are important
 /// and why a [Widget] is better than a helper method.
