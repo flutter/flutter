@@ -984,7 +984,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   /// Lazily initialized when the `defaultRouteName` getter is invoked.
   ///
   /// The reason for the lazy initialization is to give enough time for the app
-  /// to set [locationStrategy] in `lib/src/ui/initialization.dart`.
+  /// to set [locationStrategy] in `lib/initialization.dart`.
   String? _defaultRouteName;
 
   @visibleForTesting
