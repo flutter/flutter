@@ -389,6 +389,16 @@ void main() {
     expect(scrollable.position.pixels, equals(0.0));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
+  testWidgets('Tapping the status bar scrolls to top use more appropriate curve', (WidgetTester tester) async {
+    await tester.pumpWidget(_buildStatusBarTestApp(debugDefaultTargetPlatformOverride));
+    final ScrollableState scrollable = tester.state(find.byType(Scrollable));
+    scrollable.position.jumpTo(5000.0);
+    expect(scrollable.position.pixels, equals(5000.0));
+    await tester.tapAt(const Offset(100.0, 10.0));
+    await tester.pumpAndSettle();
+    expect(scrollable.position.pixels, equals(0.0));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+
   testWidgets('Tapping the status bar does not scroll to top', (WidgetTester tester) async {
     await tester.pumpWidget(_buildStatusBarTestApp(TargetPlatform.android));
     final ScrollableState scrollable = tester.state(find.byType(Scrollable));
