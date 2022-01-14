@@ -245,7 +245,6 @@ class _CupertinoDesktopTextSelectionToolbar extends StatelessWidget {
     Key? key,
     required this.anchor,
     required this.children,
-    this.toolbarBuilder = _defaultToolbarBuilder,
   }) : assert(children.length > 0),
        super(key: key);
 
@@ -259,12 +258,6 @@ class _CupertinoDesktopTextSelectionToolbar extends StatelessWidget {
   ///   * [CupertinoDesktopTextSelectionToolbarButton], which builds a default
   ///     Mac-style text selection toolbar text button.
   final List<Widget> children;
-
-  /// {@macro flutter.material.TextSelectionToolbar.toolbarBuilder}
-  ///
-  /// The given anchor and isAbove can be used to position an arrow, as in the
-  /// default Cupertino toolbar.
-  final ToolbarBuilder toolbarBuilder;
 
   // Builds a toolbar just like the default Mac toolbar, with the right color
   // background, padding, and rounded corners.
@@ -308,7 +301,7 @@ class _CupertinoDesktopTextSelectionToolbar extends StatelessWidget {
         delegate: DesktopTextSelectionToolbarLayoutDelegate(
           anchor: anchor - localAdjustment,
         ),
-        child: toolbarBuilder(context, Column(
+        child: _defaultToolbarBuilder(context, Column(
           mainAxisSize: MainAxisSize.min,
           children: children,
         )),

@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:convert' show jsonDecode;
-import 'dart:ui';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -113,21 +112,6 @@ class FakeDeltaTextInputClient implements DeltaTextInputClient {
   @override
   void showAutocorrectionPromptRect(int start, int end) {
     latestMethodCall = 'showAutocorrectionPromptRect';
-  }
-
-  @override
-  void insertTextPlaceholder(Size size) {
-    latestMethodCall = 'insertTextPlaceholder';
-  }
-
-  @override
-  void removeTextPlaceholder() {
-    latestMethodCall = 'removeTextPlaceholder';
-  }
-
-  @override
-  void showToolbar() {
-    latestMethodCall = 'showToolbar';
   }
 
   TextInputConfiguration get configuration => const TextInputConfiguration(enableDeltaModel: true);
