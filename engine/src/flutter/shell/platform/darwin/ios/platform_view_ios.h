@@ -113,20 +113,20 @@ class PlatformViewIOS final : public PlatformView {
     id<NSObject> observer_;
   };
 
-  /// Smart pointer that guarantees we communicate clearing Accessibility
+  /// Wrapper that guarantees we communicate clearing Accessibility
   /// information to Dart.
-  class AccessibilityBridgePtr {
+  class AccessibilityBridgeManager {
    public:
-    explicit AccessibilityBridgePtr(const std::function<void(bool)>& set_semantics_enabled);
-    AccessibilityBridgePtr(const std::function<void(bool)>& set_semantics_enabled,
-                           AccessibilityBridge* bridge);
-    ~AccessibilityBridgePtr();
+    explicit AccessibilityBridgeManager(const std::function<void(bool)>& set_semantics_enabled);
+    AccessibilityBridgeManager(const std::function<void(bool)>& set_semantics_enabled,
+                               AccessibilityBridge* bridge);
     explicit operator bool() const noexcept { return static_cast<bool>(accessibility_bridge_); }
-    AccessibilityBridge* operator->() const noexcept { return accessibility_bridge_.get(); }
-    void reset(AccessibilityBridge* bridge = nullptr);
+    AccessibilityBridge* get() const noexcept { return accessibility_bridge_.get(); }
+    void Set(std::unique_ptr<AccessibilityBridge> bridge);
+    void Clear();
 
    private:
-    FML_DISALLOW_COPY_AND_ASSIGN(AccessibilityBridgePtr);
+    FML_DISALLOW_COPY_AND_ASSIGN(AccessibilityBridgeManager);
     std::unique_ptr<AccessibilityBridge> accessibility_bridge_;
     std::function<void(bool)> set_semantics_enabled_;
   };
@@ -138,7 +138,7 @@ class PlatformViewIOS final : public PlatformView {
   std::unique_ptr<IOSSurface> ios_surface_;
   std::shared_ptr<IOSContext> ios_context_;
   const std::shared_ptr<FlutterPlatformViewsController>& platform_views_controller_;
-  AccessibilityBridgePtr accessibility_bridge_;
+  AccessibilityBridgeManager accessibility_bridge_;
   fml::scoped_nsprotocol<FlutterTextInputPlugin*> text_input_plugin_;
   fml::closure firstFrameCallback_;
   ScopedObserver dealloc_view_controller_observer_;
