@@ -920,12 +920,14 @@ class _PackageLicensePageTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final Color? color = Theme.of(context).appBarTheme.foregroundColor;
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Text(title, style: theme.headline6),
-        Text(subtitle, style: theme.subtitle2),
+        Text(title, style: theme.headline6?.copyWith(color: color)),
+        Text(subtitle, style: theme.subtitle2?.copyWith(color: color)),
       ],
     );
   }
