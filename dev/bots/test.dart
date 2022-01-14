@@ -714,7 +714,7 @@ Future<void> _runFrameworkTests() async {
     await _runFlutterTest(
       path.join(flutterRoot, 'packages', 'flutter'),
       options: <String>['--dart-define=dart.vm.product=false', '--dart-define=dart.vm.profile=true', ...soundNullSafetyOptions],
-      tests: <String>['test_release${path.separator}'],
+      tests: <String>['test_profile${path.separator}'],
     );
   }
 
