@@ -4832,6 +4832,8 @@ class Row extends Flex {
 /// case is typically to remove the [Expanded] or [Flexible] widgets from around
 /// the inner children.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=jckqXR5CrPI}
+///
 /// For more discussion about constraints, see [BoxConstraints].
 ///
 /// ### The yellow and black striped banner
@@ -6154,6 +6156,8 @@ class Listener extends SingleChildRenderObjectWidget {
 }
 
 /// A widget that tracks the movement of mice.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=1oF3pI5umck}
 ///
 /// [MouseRegion] is used
 /// when it is needed to compare the list of objects that a mouse pointer is

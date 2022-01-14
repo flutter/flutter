@@ -1551,6 +1551,8 @@ class TabPageSelectorIndicator extends StatelessWidget {
 
 /// Displays a row of small circular indicators, one per tab.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=Q628ue9Cq7U}
+///
 /// The selected tab's indicator is highlighted. Often used in conjunction with
 /// a [TabBarView].
 ///
