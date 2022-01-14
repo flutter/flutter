@@ -10,6 +10,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
+import 'material_state.dart';
 import 'theme.dart';
 
 /// Applies a slider theme to descendant [Slider] widgets.
@@ -290,6 +291,7 @@ class SliderThemeData with Diagnosticable {
     this.valueIndicatorTextStyle,
     this.minThumbSeparation,
     this.thumbSelector,
+    this.mouseCursor,
   });
 
   /// Generates a SliderThemeData from three main colors.
@@ -561,6 +563,11 @@ class SliderThemeData with Diagnosticable {
   /// Override this for custom thumb selection.
   final RangeThumbSelector? thumbSelector;
 
+  /// {@macro flutter.material.slider.mouseCursor}
+  ///
+  /// If specified, overrides the default value of [Slider.mouseCursor].
+  final MaterialStateProperty<MouseCursor?>? mouseCursor;
+
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   SliderThemeData copyWith({
@@ -591,6 +598,7 @@ class SliderThemeData with Diagnosticable {
     TextStyle? valueIndicatorTextStyle,
     double? minThumbSeparation,
     RangeThumbSelector? thumbSelector,
+    MaterialStateProperty<MouseCursor?>? mouseCursor,
   }) {
     return SliderThemeData(
       trackHeight: trackHeight ?? this.trackHeight,
@@ -620,6 +628,7 @@ class SliderThemeData with Diagnosticable {
       valueIndicatorTextStyle: valueIndicatorTextStyle ?? this.valueIndicatorTextStyle,
       minThumbSeparation: minThumbSeparation ?? this.minThumbSeparation,
       thumbSelector: thumbSelector ?? this.thumbSelector,
+      mouseCursor: mouseCursor ?? this.mouseCursor,
     );
   }
 
@@ -660,6 +669,7 @@ class SliderThemeData with Diagnosticable {
       valueIndicatorTextStyle: TextStyle.lerp(a.valueIndicatorTextStyle, b.valueIndicatorTextStyle, t),
       minThumbSeparation: lerpDouble(a.minThumbSeparation, b.minThumbSeparation, t),
       thumbSelector: t < 0.5 ? a.thumbSelector : b.thumbSelector,
+      mouseCursor: t < 0.5 ? a.mouseCursor : b.mouseCursor,
     );
   }
 
@@ -693,6 +703,7 @@ class SliderThemeData with Diagnosticable {
       valueIndicatorTextStyle,
       minThumbSeparation,
       thumbSelector,
+      mouseCursor,
     ]);
   }
 
@@ -731,7 +742,8 @@ class SliderThemeData with Diagnosticable {
         && other.showValueIndicator == showValueIndicator
         && other.valueIndicatorTextStyle == valueIndicatorTextStyle
         && other.minThumbSeparation == minThumbSeparation
-        && other.thumbSelector == thumbSelector;
+        && other.thumbSelector == thumbSelector
+        && other.mouseCursor == mouseCursor;
   }
 
   @override
@@ -765,6 +777,7 @@ class SliderThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<TextStyle>('valueIndicatorTextStyle', valueIndicatorTextStyle, defaultValue: defaultData.valueIndicatorTextStyle));
     properties.add(DoubleProperty('minThumbSeparation', minThumbSeparation, defaultValue: defaultData.minThumbSeparation));
     properties.add(DiagnosticsProperty<RangeThumbSelector>('thumbSelector', thumbSelector, defaultValue: defaultData.thumbSelector));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>>('mouseCursor', mouseCursor, defaultValue: defaultData.mouseCursor));
   }
 }
 
