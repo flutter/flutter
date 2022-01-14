@@ -528,10 +528,12 @@ class _PopupMenu<T> extends StatelessWidget {
     Key? key,
     required this.route,
     required this.semanticLabel,
+    this.padding,
   }) : super(key: key);
 
   final _PopupMenuRoute<T> route;
   final String? semanticLabel;
+  final EdgeInsetsGeometry? padding;
 
   @override
   Widget build(BuildContext context) {
@@ -583,9 +585,7 @@ class _PopupMenu<T> extends StatelessWidget {
           explicitChildNodes: true,
           label: semanticLabel,
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(
-              vertical: _kMenuVerticalPadding,
-            ),
+            padding: padding,
             child: ListBody(children: children),
           ),
         ),
@@ -727,6 +727,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
   _PopupMenuRoute({
     required this.position,
     required this.items,
+    this.padding,
     this.initialValue,
     this.elevation,
     required this.barrierLabel,
@@ -740,6 +741,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
   final List<PopupMenuEntry<T>> items;
   final List<Size?> itemSizes;
   final T? initialValue;
+  final EdgeInsetsGeometry? padding;
   final double? elevation;
   final String? semanticLabel;
   final ShapeBorder? shape;
@@ -778,7 +780,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
       }
     }
 
-    final Widget menu = _PopupMenu<T>(route: this, semanticLabel: semanticLabel);
+    final Widget menu = _PopupMenu<T>(padding: padding, route: this, semanticLabel: semanticLabel);
     final MediaQueryData mediaQuery = MediaQuery.of(context);
     return MediaQuery.removePadding(
       context: context,
@@ -864,6 +866,7 @@ Future<T?> showMenu<T>({
   required RelativeRect position,
   required List<PopupMenuEntry<T>> items,
   T? initialValue,
+  EdgeInsetsGeometry? padding,
   double? elevation,
   String? semanticLabel,
   ShapeBorder? shape,
@@ -892,6 +895,7 @@ Future<T?> showMenu<T>({
     position: position,
     items: items,
     initialValue: initialValue,
+    padding: padding,
     elevation: elevation,
     semanticLabel: semanticLabel,
     barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
@@ -984,6 +988,7 @@ class PopupMenuButton<T> extends StatefulWidget {
     this.tooltip,
     this.elevation,
     this.padding = const EdgeInsets.all(8.0),
+    this.menuPadding,
     this.child,
     this.icon,
     this.iconSize,
@@ -1078,6 +1083,13 @@ class PopupMenuButton<T> extends StatefulWidget {
   /// Theme.of(context).cardColor is used.
   final Color? color;
 
+  /// If provided, menu padding is used for the popup menu.
+  ///
+  /// If this property is null, then [PopupMenuThemeData.padding] is used.
+  /// If [PopupMenuThemeData.padding] is also null, then
+  /// EdgeInsets.symmetric(vertical: [_kMenuVerticalPadding]) is used.
+  final EdgeInsetsGeometry? menuPadding;
+
   /// Whether detected gestures should provide acoustic and/or haptic feedback.
   ///
   /// For example, on Android a tap will produce a clicking sound and a
@@ -1121,6 +1133,11 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
       ),
       Offset.zero & overlay.size,
     );
+
+    final EdgeInsetsGeometry menuPadding = widget.menuPadding ??
+        popupMenuTheme.padding ??
+        const EdgeInsets.symmetric(vertical: _kMenuVerticalPadding);
+
     final List<PopupMenuEntry<T>> items = widget.itemBuilder(context);
     // Only show the menu if there is something to show
     if (items.isNotEmpty) {
@@ -1129,6 +1146,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
         elevation: widget.elevation ?? popupMenuTheme.elevation,
         items: items,
         initialValue: widget.initialValue,
+        padding: menuPadding,
         position: position,
         shape: widget.shape ?? popupMenuTheme.shape,
         color: widget.color ?? popupMenuTheme.color,
