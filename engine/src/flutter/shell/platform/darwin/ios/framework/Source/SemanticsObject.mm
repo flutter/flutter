@@ -93,9 +93,11 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 
 }  // namespace
 
-@implementation FlutterSwitchSemanticsObject {
-  UISwitch* _nativeSwitch;
-}
+@interface FlutterSwitchSemanticsObject ()
+@property(nonatomic, readonly) UISwitch* nativeSwitch;
+@end
+
+@implementation FlutterSwitchSemanticsObject
 
 - (instancetype)initWithBridge:(fml::WeakPtr<flutter::AccessibilityBridgeIos>)bridge
                            uid:(int32_t)uid {
@@ -140,6 +142,12 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 }
 
 - (UIAccessibilityTraits)accessibilityTraits {
+  if ([self node].HasFlag(flutter::SemanticsFlags::kIsEnabled)) {
+    _nativeSwitch.enabled = YES;
+  } else {
+    _nativeSwitch.enabled = NO;
+  }
+
   return _nativeSwitch.accessibilityTraits;
 }
 
