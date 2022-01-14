@@ -1656,6 +1656,21 @@ The findRenderObject() method was called for the following element:
       )),
     );
   });
+
+  testWidgets('Elements use the identity hashCode', (WidgetTester tester) async {
+    final StatefulElement statefulElement = StatefulElement(const _StatefulLeaf());
+    expect(statefulElement.hashCode, identityHashCode(statefulElement));
+
+    final StatelessElement statelessElement = StatelessElement(const Placeholder());
+
+    expect(statelessElement.hashCode, identityHashCode(statelessElement));
+
+    final InheritedElement inheritedElement = InheritedElement(
+      const Directionality(textDirection: TextDirection.ltr, child: Placeholder()),
+    );
+
+    expect(inheritedElement.hashCode, identityHashCode(inheritedElement));
+  });
 }
 
 class _WidgetWithNoVisitChildren extends StatelessWidget {
