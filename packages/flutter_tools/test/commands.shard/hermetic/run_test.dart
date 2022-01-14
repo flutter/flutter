@@ -750,21 +750,6 @@ class FakeDevice extends Fake implements Device {
   }
 }
 
-class FakeApplicationPackageFactory extends Fake implements ApplicationPackageFactory {
-  FakeApplicationPackageFactory(this.applicationPackage);
-
-  ApplicationPackage applicationPackage;
-
-  @override
-  Future<ApplicationPackage> getPackageForPlatform(
-      TargetPlatform platform, {
-        BuildInfo buildInfo,
-        File applicationBinary,
-      }) async => applicationPackage;
-}
-
-class FakeApplicationPackage extends Fake implements ApplicationPackage { }
-
 class TestRunCommandWithFakeResidentRunner extends RunCommand {
   FakeResidentRunner fakeResidentRunner;
 
