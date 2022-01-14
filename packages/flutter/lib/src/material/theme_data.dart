@@ -131,6 +131,7 @@ enum MaterialTapTargetSize {
 /// This sample shows how to display a [Container] widget that uses [Theme.of]
 /// to retrieve the primary color from the theme's [colorScheme] to draw an
 /// amber square.
+///
 /// The [Builder] widget separates the parent theme's [BuildContext] from the
 /// child's [BuildContext].
 ///
