@@ -6135,6 +6135,7 @@ class Listener extends SingleChildRenderObjectWidget {
       if (onPointerDown != null) 'down',
       if (onPointerMove != null) 'move',
       if (onPointerUp != null) 'up',
+      if (onPointerHover != null) 'hover',
       if (onPointerCancel != null) 'cancel',
       if (onPointerSignal != null) 'signal',
     ];

@@ -198,7 +198,7 @@ void main() {
       expect(sentDetails.command, 'flutter crash');
       expect(sentDetails.error, 'an exception % --');
       expect(sentDetails.stackTrace.toString(), contains('CrashingFlutterCommand.runCommand'));
-      expect(sentDetails.doctorText, contains('[✓] Flutter'));
+      expect(await sentDetails.doctorText.text, contains('[✓] Flutter'));
     }, overrides: <Type, Generator>{
       Platform: () => FakePlatform(
         environment: <String, String>{

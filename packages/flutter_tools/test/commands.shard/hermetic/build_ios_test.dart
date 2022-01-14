@@ -84,6 +84,7 @@ void main() {
     return FakeCommand(
       command: const <String>[
         'rsync',
+        '-8',
         '-av',
         '--delete',
         'build/ios/Release-iphoneos/Runner.app',

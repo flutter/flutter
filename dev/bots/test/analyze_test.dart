@@ -120,17 +120,20 @@ void main() {
 
   test('analyze.dart - verifyNoMissingLicense', () async {
     final String result = await capture(() => verifyNoMissingLicense(testRootPath, checkMinimums: false), exitCode: 1);
-    final String lines = 'test/analyze-test-input/root/packages/foo/foo.dart'
+    final String file = 'test/analyze-test-input/root/packages/foo/foo.dart'
       .replaceAll('/', Platform.isWindows ? r'\' : '/');
     expect(result,
       '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
-      'The following 1 file does not have the right license header:\n'
-      '$lines\n'
+      'The following file does not have the right license header for dart files:\n'
+      '  $file\n'
       'The expected license header is:\n'
       '// Copyright 2014 The Flutter Authors. All rights reserved.\n'
       '// Use of this source code is governed by a BSD-style license that can be\n'
       '// found in the LICENSE file.\n'
       '...followed by a blank line.\n'
+      '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
+      '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
+      'License check failed.\n'
       '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
     );
   });

@@ -1134,10 +1134,6 @@ class ThemeData with Diagnosticable {
   /// start using new colors, typography and other features of Material 3.
   /// If false, they will use the Material 2 look and feel.
   ///
-  /// Currently no components have been migrated to support Material 3.
-  /// As they are updated to include Material 3 support this documentation
-  /// will be modified to indicate exactly what widgets this flag will affect.
-  ///
   /// During the migration to Material 3, turning this on may yield
   /// inconsistent look and feel in your app. Some components will be migrated
   /// before others and typography changes will be coming in stages.
@@ -1147,6 +1143,10 @@ class ThemeData with Diagnosticable {
   /// that change has landed on stable, we will deprecate this flag and remove
   /// all uses of it. Everything will use the Material 3 look and feel at
   /// that point.
+  ///
+  /// Components that have been migrated to Material 3 are:
+  ///
+  ///   * [FloatingActionButton]
   ///
   /// See also:
   ///
