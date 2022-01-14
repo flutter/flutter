@@ -852,6 +852,11 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
 /// label is not provided, it will default to
 /// [MaterialLocalizations.popupMenuLabel].
 ///
+/// The `padding` argument is used to add empty space around the outside
+/// of the popup menu. If this property is not provided, then [PopupMenuThemeData.padding]
+/// is used. If [PopupMenuThemeData.padding] is also null, then 
+/// EdgeInsets.symmetric(vertical: 8.0) is used.
+///
 /// See also:
 ///
 ///  * [PopupMenuItem], a popup menu entry for a single value.
@@ -1083,11 +1088,12 @@ class PopupMenuButton<T> extends StatefulWidget {
   /// Theme.of(context).cardColor is used.
   final Color? color;
 
-  /// If provided, menu padding is used for the popup menu.
+  /// If provided, menu padding is used for empty space around the outside
+  /// of the popup menu.
   ///
   /// If this property is null, then [PopupMenuThemeData.padding] is used.
   /// If [PopupMenuThemeData.padding] is also null, then
-  /// EdgeInsets.symmetric(vertical: [_kMenuVerticalPadding]) is used.
+  /// EdgeInsets.symmetric(vertical: 8.0) is used.
   final EdgeInsetsGeometry? menuPadding;
 
   /// Whether detected gestures should provide acoustic and/or haptic feedback.
