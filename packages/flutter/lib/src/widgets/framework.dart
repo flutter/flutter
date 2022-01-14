@@ -438,14 +438,6 @@ abstract class Widget extends DiagnosticableTree {
 ///  * Use `const` widgets where possible, and provide a `const` constructor for
 ///    the widget so that users of the widget can also do so.
 ///
-///  * When trying to create a reusable piece of UI, prefer using a widget
-///    rather than a helper method. For example, if there was a function used to
-///    build a widget, a [State.setState] call would require Flutter to entirely
-///    rebuild the returned wrapping widget. If a [Widget] was used instead,
-///    Flutter would be able to efficiently re-render only those parts that
-///    really need to be updated. Even better, if the created widget is `const`,
-///    Flutter would short-circuit most of the rebuild work.
-///
 ///  * Consider refactoring the stateless widget into a stateful widget so that
 ///    it can use some of the techniques described at [StatefulWidget], such as
 ///    caching common parts of subtrees and using [GlobalKey]s when changing the
@@ -459,6 +451,20 @@ abstract class Widget extends DiagnosticableTree {
 ///    part of the build function that builds the inner-most widget into its own
 ///    widget, so that only the inner-most widget needs to be rebuilt when the
 ///    theme changes.
+/// {@template flutter.flutter.widgets.framework.prefer_const_over_helper}
+///  * When trying to create a reusable piece of UI, prefer using a widget
+///    rather than a helper method. For example, if there was a function used to
+///    build a widget, a [State.setState] call would require Flutter to entirely
+///    rebuild the returned wrapping widget. If a [Widget] was used instead,
+///    Flutter would be able to efficiently re-render only those parts that
+///    really need to be updated. Even better, if the created widget is `const`,
+///    Flutter would short-circuit most of the rebuild work.
+/// {@endtemplate}
+///
+/// This video gives more explainations on why `const` constructors are important
+/// and why a [Widget] is better than a helper method.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=IOyq-eTRhvo}
 ///
 /// {@tool snippet}
 ///
@@ -650,23 +656,15 @@ abstract class StatelessWidget extends Widget {
 ///    this ideal, the more efficient it will be.)
 ///
 ///  * If a subtree does not change, cache the widget that represents that
-///    subtree and re-use it each time it can be used. It is massively more
-///    efficient for a widget to be re-used than for a new (but
-///    identically-configured) widget to be created. Factoring out the stateful
-///    part into a widget that takes a child argument is a common way of doing
-///    this. Another caching strategy consists of assigning a widget to a
-///    `final` state variable which can be used in the build method.
+///    subtree and re-use it each time it can be used. To do this, simply assign
+///    a widget to a `final` state variable and re-use it in the build method. It
+///    is massively more efficient for a widget to be re-used than for a new (but
+///    identically-configured) widget to be created. Another caching stragegy
+///    consists in extracting the mutable part of the widget into a [StatefulWidget]
+///    which accepts a child parameter.
 ///
 ///  * Use `const` widgets where possible. (This is equivalent to caching a
 ///    widget and re-using it.)
-///
-///  * When trying to create a reusable piece of UI, prefer using a widget
-///    rather than a helper method. For example, if there was a function used to
-///    build a widget, a [State.setState] call would require Flutter to entirely
-///    rebuild the returned wrapping widget. If a [Widget] was used instead,
-///    Flutter would be able to efficiently re-render only those parts that
-///    really need to be updated. Even better, if the created widget is `const`,
-///    Flutter would short-circuit most of the rebuild work.
 ///
 ///  * Avoid changing the depth of any created subtrees or changing the type of
 ///    any widgets in the subtree. For example, rather than returning either the
@@ -683,6 +681,13 @@ abstract class StatelessWidget extends Widget {
 ///    remains consistent for the life of the stateful widget. (The
 ///    [KeyedSubtree] widget may be useful for this purpose if no other widget
 ///    can conveniently be assigned the key.)
+///
+/// {@macro flutter.flutter.widgets.framework.prefer_const_over_helper}
+///
+/// This video gives more explainations on why `const` constructors are important
+/// and why a [Widget] is better than a helper method.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=IOyq-eTRhvo}
 ///
 /// {@tool snippet}
 ///
@@ -2064,6 +2069,8 @@ typedef ElementVisitor = void Function(Element element);
 /// the widget is moved around the tree. Because of this, values returned from
 /// the methods on this class should not be cached beyond the execution of a
 /// single synchronous function.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=rIaaH87z1-g}
 ///
 /// [BuildContext] objects are actually [Element] objects. The [BuildContext]
 /// interface is used to discourage direct manipulation of [Element] objects.

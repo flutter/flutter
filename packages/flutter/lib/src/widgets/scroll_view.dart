@@ -237,6 +237,8 @@ abstract class ScrollView extends StatelessWidget {
   /// scroll view needs to be recomputed whenever the scroll position changes.
   ///
   /// Defaults to false.
+  ///
+  /// {@youtube 560 315 https://www.youtube.com/watch?v=LUqDNnv_dh0}
   /// {@endtemplate}
   final bool shrinkWrap;
 
