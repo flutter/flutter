@@ -57,10 +57,10 @@ enum ThemeMode {
 /// adding material-design specific functionality, such as [AnimatedTheme] and
 /// [GridPaper].
 ///
-/// The [MaterialApp] passes a fallback [TextStyle] to [WidgetsApp] which is used in
-/// absence of a [Material] widget. The [Material] widgets builds a [DefaultTextStyle]
-/// which assigns a [TextTheme]. If you see the fallback [TextStyle] instead of
-/// [DefaultTextStyle], ensure a [Material] widget is one of the ancestor of your widgets.
+/// [MaterialApp] configures its [WidgetsApp.textStyle] with an ugly red/yellow
+/// text style that's intended to warn the developer that their app hasn't defined
+/// a default text style. Typically the app's [Scaffold] builds a [Material] widget
+/// whose default [Material.textStyle] defines the text style for the entire scaffold.
 ///
 /// The [MaterialApp] configures the top-level [Navigator] to search for routes
 /// in the following order:
@@ -152,14 +152,15 @@ enum ThemeMode {
 ///
 /// ## Troubleshooting
 ///
-/// ### Why my text is red with yellow underlines?
+/// ### Why is my app's text red with yellow underlines?
 ///
-/// If the [Text] widget doesn't have a [Material] widget then it uses a fallback
-/// [TextStyle] which doesn't have a [Material] style [TextTheme].
+/// [Text] widgets that lack a [Material] ancestor will be rendered with an ugly
+/// red/yellow text style.
 ///
-/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/material_textsyle.png)
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/material_app_unspecified_textstyle.png)
 ///
-/// The fix is to wrap the [Text] widget with a [Material] widget such as [Scaffold]:
+/// The typical fix is to give the widget a [Scaffold] ancestor. The [Scaffold] creates
+/// a [Material] widget that defines its default text style.
 ///
 /// ```dart
 /// MaterialApp(
