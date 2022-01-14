@@ -3094,28 +3094,38 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   late final _UpdateTextSelectionToAdjacentLineAction<ExtendSelectionVerticallyToAdjacentLineIntent> _adjacentLineAction = _UpdateTextSelectionToAdjacentLineAction<ExtendSelectionVerticallyToAdjacentLineIntent>(this);
 
-  void _expandSelection(ExpandSelectionToLineBreakIntent intent) {
+  void _expandSelectionToDocumentBoundary(ExpandSelectionToDocumentBoundaryIntent intent) {
+    final _TextBoundary textBoundary = _documentBoundary(intent);
+    _expandSelection(intent.forward, textBoundary, true);
+  }
+
+  void _expandSelectionToLinebreak(ExpandSelectionToLineBreakIntent intent) {
     final _TextBoundary textBoundary = _linebreak(intent);
+    _expandSelection(intent.forward, textBoundary);
+  }
+
+  void _expandSelection(bool forward, _TextBoundary textBoundary, [bool extentAtIndex = false]) {
     final TextSelection textBoundarySelection = textBoundary.textEditingValue.selection;
     if (!textBoundarySelection.isValid) {
       return;
     }
 
     final bool inOrder = textBoundarySelection.baseOffset <= textBoundarySelection.extentOffset;
-    final bool towardsExtent = intent.forward == inOrder;
+    final bool towardsExtent = forward == inOrder;
     final TextPosition position = towardsExtent
         ? textBoundarySelection.extent
         : textBoundarySelection.base;
 
-    final TextPosition newExtent = intent.forward
+    final TextPosition newExtent = forward
       ? textBoundary.getTrailingTextBoundaryAt(position)
       : textBoundary.getLeadingTextBoundaryAt(position);
 
-    final TextSelection newSelection = textBoundarySelection.expandTo(newExtent, textBoundarySelection.isCollapsed);
+    final TextSelection newSelection = textBoundarySelection.expandTo(newExtent, textBoundarySelection.isCollapsed || extentAtIndex);
     userUpdateTextEditingValue(
       _value.copyWith(selection: newSelection),
       SelectionChangedCause.keyboard,
     );
+    bringIntoView(newSelection.extent);
   }
 
   late final Map<Type, Action<Intent>> _actions = <Type, Action<Intent>>{
@@ -3133,7 +3143,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     ExtendSelectionByCharacterIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionByCharacterIntent>(this, false, _characterBoundary,)),
     ExtendSelectionToNextWordBoundaryIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionToNextWordBoundaryIntent>(this, true, _nextWordBoundary)),
     ExtendSelectionToLineBreakIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionToLineBreakIntent>(this, true, _extendingLinebreak)),
-    ExpandSelectionToLineBreakIntent: _makeOverridable(CallbackAction<ExpandSelectionToLineBreakIntent>(onInvoke: _expandSelection)),
+    ExpandSelectionToLineBreakIntent: _makeOverridable(CallbackAction<ExpandSelectionToLineBreakIntent>(onInvoke: _expandSelectionToLinebreak)),
+    ExpandSelectionToDocumentBoundaryIntent: _makeOverridable(CallbackAction<ExpandSelectionToDocumentBoundaryIntent>(onInvoke: _expandSelectionToDocumentBoundary)),
     ExtendSelectionVerticallyToAdjacentLineIntent: _makeOverridable(_adjacentLineAction),
     ExtendSelectionToDocumentBoundaryIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionToDocumentBoundaryIntent>(this, true, _documentBoundary)),
     ExtendSelectionToNextWordBoundaryOrCaretLocationIntent: _makeOverridable(_ExtendSelectionOrCaretPositionAction(this, _nextWordBoundary)),

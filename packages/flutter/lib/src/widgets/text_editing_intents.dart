@@ -136,6 +136,23 @@ class ExtendSelectionToNextWordBoundaryOrCaretLocationIntent extends Directional
   }) : super(forward);
 }
 
+/// Expands the current selection to the document boundary in the direction
+/// given by [forward].
+///
+/// Unlike [ExpandSelectionToLineBreakIntent], the extent will be moved, which
+/// matches the behavior on MacOS.
+///
+/// See also:
+///
+///   [ExtendSelectionToDocumentBoundaryIntent], which is similar but always
+///   moves the extent.
+class ExpandSelectionToDocumentBoundaryIntent extends DirectionalTextEditingIntent {
+  /// Creates an [ExpandSelectionToDocumentBoundaryIntent].
+  const ExpandSelectionToDocumentBoundaryIntent({
+    required bool forward,
+  }) : super(forward);
+}
+
 /// Expands the current selection to the closest line break in the direction
 /// given by [forward].
 ///
@@ -195,6 +212,11 @@ class ExtendSelectionVerticallyToAdjacentLineIntent extends DirectionalCaretMove
 
 /// Extends, or moves the current selection from the current
 /// [TextSelection.extent] position to the start or the end of the document.
+///
+/// See also:
+///
+///   [ExtendSelectionToDocumentBoundaryIntent], which is similar but always
+///   increases the size of the selection.
 class ExtendSelectionToDocumentBoundaryIntent extends DirectionalCaretMovementIntent {
   /// Creates an [ExtendSelectionToDocumentBoundaryIntent].
   const ExtendSelectionToDocumentBoundaryIntent({

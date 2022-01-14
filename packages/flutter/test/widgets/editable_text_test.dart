@@ -7094,6 +7094,110 @@ void main() {
     variant: TargetPlatformVariant.all(),
   );
 
+  testWidgets('shift + home/end keys to document boundary (Mac only)', (WidgetTester tester) async {
+    const String testText = 'Now is the time for all good people to come to the aid of their country. Now is the time for all good people to come to the aid of their country.';
+    final TextEditingController controller = TextEditingController(text: testText);
+    controller.selection = const TextSelection(
+      baseOffset: 0,
+      extentOffset: 0,
+      affinity: TextAffinity.upstream,
+    );
+    late TextSelection selection;
+    await tester.pumpWidget(MaterialApp(
+      home: Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          width: 400,
+          child: EditableText(
+            maxLines: 10,
+            controller: controller,
+            showSelectionHandles: true,
+            autofocus: true,
+            focusNode: FocusNode(),
+            style: Typography.material2018().black.subtitle1!,
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+            selectionControls: materialTextSelectionControls,
+            keyboardType: TextInputType.text,
+            textAlign: TextAlign.right,
+            onSelectionChanged: (TextSelection newSelection, SelectionChangedCause? newCause) {
+              selection = newSelection;
+            },
+          ),
+        ),
+      ),
+    ));
+
+    await tester.pump(); // Wait for autofocus to take effect.
+
+    final Scrollable scrollable = tester.widget<Scrollable>(find.byType(Scrollable));
+    expect(scrollable.controller!.offset, 0.0);
+
+    // Move near the middle of the document.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowDown,
+        LogicalKeyboardKey.arrowRight,
+        LogicalKeyboardKey.arrowRight,
+        LogicalKeyboardKey.arrowRight,
+      ],
+      targetPlatform: defaultTargetPlatform,
+    );
+    expect(
+      selection,
+      equals(
+        const TextSelection.collapsed(
+          offset: 32,
+        ),
+      ),
+    );
+
+    // Expand to the start of the document with the home key.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.home,
+      ],
+      shift: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+    expect(scrollable.controller!.offset, 0.0);
+    expect(
+      selection,
+      equals(
+        const TextSelection(
+          baseOffset: 32,
+          extentOffset: 0,
+        ),
+      ),
+    );
+
+    // Expand to the end of the document with the end key.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.end,
+      ],
+      shift: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+    final double maxScrollExtent = scrollable.controller!.position.maxScrollExtent;
+    expect(scrollable.controller!.offset, maxScrollExtent);
+    expect(
+      selection,
+      equals(
+        const TextSelection(
+          baseOffset: 0,
+          extentOffset: 145,
+        ),
+      ),
+    );
+  },
+    skip: kIsWeb, // [intended] on web these keys are handled by the browser.
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS })
+  );
+
   testWidgets('control + home/end keys (Windows only)', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(text: testText);
     controller.selection = const TextSelection(
@@ -10326,7 +10430,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS })
   );
 
-  testWidgets('expanding selection to start/end', (WidgetTester tester) async {
+  testWidgets('expanding selection to start/end single line', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(text: 'word word word');
     // word wo|rd| word
     controller.selection = const TextSelection(
@@ -10376,7 +10480,7 @@ void main() {
       controller.selection,
       equals(
         const TextSelection(
-          baseOffset: 7,
+          baseOffset: 9,
           extentOffset: 0,
           affinity: TextAffinity.upstream,
         ),
@@ -10388,7 +10492,7 @@ void main() {
     await sendKeys(
       tester,
       <LogicalKeyboardKey>[
-        LogicalKeyboardKey.home,
+        LogicalKeyboardKey.end,
       ],
       shift: true,
       targetPlatform: defaultTargetPlatform,
@@ -10399,8 +10503,8 @@ void main() {
       controller.selection,
       equals(
         const TextSelection(
-          baseOffset: 7,
-          extentOffset: 0,
+          baseOffset: 0,
+          extentOffset: 14,
           affinity: TextAffinity.upstream,
         ),
       ),
