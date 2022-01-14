@@ -1664,4 +1664,51 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
   // flutterSemanticsScrollView) will cause an EXC_BAD_ACCESS.
   XCTAssertFalse([flutterSemanticsScrollView isAccessibilityElement]);
 }
+
+- (void)testPlatformViewDestructorDoesNotCallSemanticsAPIs {
+  class TestDelegate : public flutter::MockDelegate {
+   public:
+    void OnPlatformViewSetSemanticsEnabled(bool enabled) override { set_semantics_enabled_calls++; }
+    int set_semantics_enabled_calls = 0;
+  };
+
+  TestDelegate test_delegate;
+  auto thread = std::make_unique<fml::Thread>("AccessibilityBridgeTest");
+  auto thread_task_runner = thread->GetTaskRunner();
+  flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
+                               /*platform=*/thread_task_runner,
+                               /*raster=*/thread_task_runner,
+                               /*ui=*/thread_task_runner,
+                               /*io=*/thread_task_runner);
+
+  fml::AutoResetWaitableEvent latch;
+  thread_task_runner->PostTask([&] {
+    auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
+        /*delegate=*/test_delegate,
+        /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
+        /*platform_views_controller=*/nil,
+        /*task_runners=*/runners);
+
+    id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
+    auto flutterPlatformViewsController =
+        std::make_shared<flutter::FlutterPlatformViewsController>();
+    OCMStub([mockFlutterViewController platformViewsController])
+        .andReturn(flutterPlatformViewsController.get());
+    auto weakFactory =
+        std::make_unique<fml::WeakPtrFactory<FlutterViewController>>(mockFlutterViewController);
+    platform_view->SetOwnerViewController(weakFactory->GetWeakPtr());
+
+    platform_view->SetSemanticsEnabled(true);
+    XCTAssertNotEqual(test_delegate.set_semantics_enabled_calls, 0);
+
+    // Deleting PlatformViewIOS should not call OnPlatformViewSetSemanticsEnabled
+    test_delegate.set_semantics_enabled_calls = 0;
+    platform_view.reset();
+    XCTAssertEqual(test_delegate.set_semantics_enabled_calls, 0);
+
+    latch.Signal();
+  });
+  latch.Wait();
+}
+
 @end
