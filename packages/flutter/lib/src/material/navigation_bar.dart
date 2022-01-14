@@ -898,17 +898,9 @@ class _ClampTextScaleFactor extends StatelessWidget {
   /// surrounding [child].
   const _ClampTextScaleFactor({
     Key? key,
-    this.lowerLimit = 0,
     this.upperLimit = double.infinity,
     required this.child,
   }) : super(key: key);
-
-  /// The minimum amount that the text scale factor should be for the [child]
-  /// widget.
-  ///
-  /// If this is `.5`, the textScaleFactor for child widgets will never be
-  /// smaller than `.5`.
-  final double lowerLimit;
 
   /// The maximum amount that the text scale factor should be for the [child]
   /// widget.
@@ -926,7 +918,7 @@ class _ClampTextScaleFactor extends StatelessWidget {
     return MediaQuery(
       data: MediaQuery.of(context).copyWith(
         textScaleFactor: MediaQuery.of(context).textScaleFactor.clamp(
-          lowerLimit,
+          0.0,
           upperLimit,
         ),
       ),
