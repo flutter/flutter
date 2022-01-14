@@ -4322,6 +4322,62 @@ void main() {
     expect(controller3.index, 2);
     expect(pageController.page, 2);
   });
+
+  testWidgets('TabBar InkWell splashFactory and overlayColor', (WidgetTester tester) async {
+    const InteractiveInkFeatureFactory splashFactory = NoSplash.splashFactory;
+    final MaterialStateProperty<Color?> overlayColor = MaterialStateProperty.resolveWith<Color?>(
+      (Set<MaterialState> states) => Colors.transparent,
+    );
+
+    // TabBarTheme splashFactory and overlayColor
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.light().copyWith(
+          tabBarTheme: TabBarTheme(
+            splashFactory: splashFactory,
+            overlayColor: overlayColor,
+          )),
+        home: DefaultTabController(
+          length: 1,
+          child: Scaffold(
+            appBar: AppBar(
+              bottom: TabBar(
+                tabs: <Widget>[
+                  Container(width: 100, height: 100, color: Colors.green),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.widget<InkWell>(find.byType(InkWell)).splashFactory, splashFactory);
+    expect(tester.widget<InkWell>(find.byType(InkWell)).overlayColor, overlayColor);
+
+    // TabBar splashFactory and overlayColor
+    await tester.pumpWidget(
+      MaterialApp(
+        home: DefaultTabController(
+          length: 1,
+          child: Scaffold(
+            appBar: AppBar(
+              bottom: TabBar(
+                splashFactory: splashFactory,
+                overlayColor: overlayColor,
+                tabs: <Widget>[
+                  Container(width: 100, height: 100, color: Colors.green),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle(); // theme animation
+    expect(tester.widget<InkWell>(find.byType(InkWell)).splashFactory, splashFactory);
+    expect(tester.widget<InkWell>(find.byType(InkWell)).overlayColor, overlayColor);
+  });
 }
 
 class KeepAliveInk extends StatefulWidget {
