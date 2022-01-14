@@ -643,6 +643,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     this.enableFeedback,
     this.onTap,
     this.physics,
+    this.splashFactory,
   }) : assert(tabs != null),
        assert(isScrollable != null),
        assert(dragStartBehavior != null),
@@ -786,14 +787,11 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// [MaterialState.hovered], and [MaterialState.pressed].
   ///
   /// [MaterialState.pressed] triggers a ripple (an ink splash), per
-  /// the current Material Design spec. The [overlayColor] doesn't map
-  /// a state to [InkResponse.highlightColor] because a separate highlight
-  /// is not used by the current design guidelines. See
-  /// https://material.io/design/interaction/states.html#pressed
+  /// the current Material Design spec.
   ///
   /// If the overlay color is null or resolves to null, then the default values
-  /// for [InkResponse.focusColor], [InkResponse.hoverColor], [InkResponse.splashColor]
-  /// will be used instead.
+  /// for [InkResponse.focusColor], [InkResponse.hoverColor], [InkResponse.splashColor],
+  /// and [InkResponse.highlightColor] will be used instead.
   final MaterialStateProperty<Color?>? overlayColor;
 
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
@@ -831,6 +829,25 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   ///
   /// Defaults to matching platform conventions.
   final ScrollPhysics? physics;
+
+  /// Creates the tab bar's [InkWell] splash factory, which defines
+  /// the appearance of "ink" splashes that occur in response to taps.
+  ///
+  /// Use [NoSplash.splashFactory] to defeat ink splash rendering. For example
+  /// to defeat both the splash and the hover/pressed overlay, but not the
+  /// keyboard focused overlay:
+  /// ```dart
+  /// TabBar(
+  ///   splashFactory: NoSplash.splashFactory,
+  ///   overlayColor: MaterialStateProperty.resolveWith<Color?>(
+  ///     (Set<MaterialState> states) {
+  ///       return states.contains(MaterialState.focused) ? null : Colors.transparent;
+  ///     },
+  ///   ),
+  ///   ...
+  /// )
+  /// ```
+  final InteractiveInkFeatureFactory? splashFactory;
 
   /// A size whose height depends on if the tabs have both icons and text.
   ///
@@ -1187,7 +1204,8 @@ class _TabBarState extends State<TabBar> {
         mouseCursor: widget.mouseCursor ?? SystemMouseCursors.click,
         onTap: () { _handleTap(index); },
         enableFeedback: widget.enableFeedback ?? true,
-        overlayColor: widget.overlayColor,
+        overlayColor: widget.overlayColor ?? tabBarTheme.overlayColor,
+        splashFactory: widget.splashFactory ?? tabBarTheme.splashFactory,
         child: Padding(
           padding: EdgeInsets.only(bottom: widget.indicatorWeight),
           child: Stack(
