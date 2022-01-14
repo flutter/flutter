@@ -29,7 +29,12 @@ API_AVAILABLE(ios(13.4))
 
 @implementation FlutterChannelKeyResponderTest
 
-- (void)setUp API_AVAILABLE(ios(13.4)) {
+- (void)setUp {
+  // All of these tests were designed to run on iOS 13.4 or later.
+  if (@available(iOS 13.4, *)) {
+  } else {
+    XCTSkip(@"Required API not present for test.");
+  }
   _testKeyDownEvent = keyDownEvent(keyACode, 0x0, 0.0f, "a", "a");
   _testKeyUpEvent = keyUpEvent(keyACode, 0x0, 0.0f);
 }

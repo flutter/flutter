@@ -106,6 +106,11 @@ typedef void (^ResponseCallback)(bool handled);
 @implementation FlutterEmbedderKeyResponderTest
 
 - (void)setUp {
+  // All of these tests were designed to run on iOS 13.4 or later.
+  if (@available(iOS 13.4, *)) {
+  } else {
+    XCTSkip(@"Required API not present for test.");
+  }
 }
 
 - (void)tearDown {
