@@ -552,10 +552,10 @@ class _WindowsUtils extends OperatingSystemUtils {
       // extract to.
       //
       // See https://snyk.io/research/zip-slip-vulnerability for more context.
-      if (!destFile.path.startsWith(targetDirectory.path)) {
+      if (!destFile.absolute.path.startsWith(targetDirectory.absolute.path)) {
         throw StateError(
-          'Tried to extract the file ${destFile.path} outside of the target '
-          'directory ${targetDirectory.path}',
+          'Tried to extract the file ${destFile.absolute.path} outside of the '
+          'target directory ${targetDirectory.absolute.path}',
         );
       }
 
