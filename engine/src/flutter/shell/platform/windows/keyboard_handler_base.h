@@ -17,18 +17,18 @@ namespace flutter {
 // are called on each handler.
 class KeyboardHandlerBase {
  public:
+  using KeyEventCallback = std::function<void(bool)>;
+
   virtual ~KeyboardHandlerBase() = default;
 
   // A function for hooking into keyboard input.
-  //
-  // Returns true if the key event has been handled, to indicate that other
-  // handlers should not be called for this event.
-  virtual bool KeyboardHook(int key,
+  virtual void KeyboardHook(int key,
                             int scancode,
                             int action,
                             char32_t character,
                             bool extended,
-                            bool was_down) = 0;
+                            bool was_down,
+                            KeyEventCallback callback) = 0;
 };
 
 }  // namespace flutter

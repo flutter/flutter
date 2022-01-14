@@ -551,4 +551,10 @@ uint32_t WindowWin32::Win32MapVkToChar(uint32_t virtual_key) {
   return ::MapVirtualKey(virtual_key, MAPVK_VK_TO_CHAR);
 }
 
+UINT WindowWin32::Win32DispatchEvent(UINT cInputs,
+                                     LPINPUT pInputs,
+                                     int cbSize) {
+  return ::SendInput(cInputs, pInputs, cbSize);
+}
+
 }  // namespace flutter
