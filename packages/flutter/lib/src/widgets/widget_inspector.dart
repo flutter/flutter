@@ -54,8 +54,8 @@ class _ProxyLayer extends Layer {
   final Layer _layer;
 
   @override
-  void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
-    _layer.addToScene(builder, layerOffset);
+  void addToScene(ui.SceneBuilder builder) {
+    _layer.addToScene(builder);
   }
 
   @override
@@ -319,8 +319,8 @@ Rect _calculateSubtreeBounds(RenderObject object) {
 /// screenshots render to the scene in the local coordinate system of the layer.
 class _ScreenshotContainerLayer extends OffsetLayer {
   @override
-  void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
-    addChildrenToScene(builder, layerOffset);
+  void addToScene(ui.SceneBuilder builder) {
+    addChildrenToScene(builder);
   }
 }
 
@@ -1962,6 +1962,8 @@ mixin WidgetInspectorService {
         FlutterErrorDetails(
           exception: exception,
           stack: stack,
+          library: 'widget inspector library',
+          context: ErrorDescription('while tracking widget repaints'),
         ),
       );
     }
@@ -2665,7 +2667,7 @@ class _InspectorOverlayLayer extends Layer {
   double? _textPainterMaxWidth;
 
   @override
-  void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+  void addToScene(ui.SceneBuilder builder) {
     if (!selection.active)
       return;
 
@@ -2694,7 +2696,7 @@ class _InspectorOverlayLayer extends Layer {
       _lastState = state;
       _picture = _buildPicture(state);
     }
-    builder.addPicture(layerOffset, _picture);
+    builder.addPicture(Offset.zero, _picture);
   }
 
   ui.Picture _buildPicture(_InspectorOverlayRenderState state) {
@@ -2867,6 +2869,7 @@ class _Location {
     required this.file,
     required this.line,
     required this.column,
+    // ignore: unused_element
     this.name,
   });
 
@@ -2914,9 +2917,9 @@ bool _isDebugCreator(DiagnosticsNode node) => node is DiagnosticsDebugCreator;
 /// in [WidgetsBinding.initInstances].
 ///
 /// This is meant to be called only in debug mode. In other modes, it yields an empty list.
-Iterable<DiagnosticsNode> debugTransformDebugCreator(Iterable<DiagnosticsNode> properties) sync* {
+Iterable<DiagnosticsNode> debugTransformDebugCreator(Iterable<DiagnosticsNode> properties) {
   if (!kDebugMode) {
-    return;
+    return <DiagnosticsNode>[];
   }
   final List<DiagnosticsNode> pending = <DiagnosticsNode>[];
   ErrorSummary? errorSummary;
@@ -2927,20 +2930,22 @@ Iterable<DiagnosticsNode> debugTransformDebugCreator(Iterable<DiagnosticsNode> p
     }
   }
   bool foundStackTrace = false;
+  final List<DiagnosticsNode> result = <DiagnosticsNode>[];
   for (final DiagnosticsNode node in properties) {
     if (!foundStackTrace && node is DiagnosticsStackTrace)
       foundStackTrace = true;
     if (_isDebugCreator(node)) {
-      yield* _parseDiagnosticsNode(node, errorSummary);
+      result.addAll(_parseDiagnosticsNode(node, errorSummary));
     } else {
       if (foundStackTrace) {
         pending.add(node);
       } else {
-        yield node;
+        result.add(node);
       }
     }
   }
-  yield* pending;
+  result.addAll(pending);
+  return result;
 }
 
 /// Transform the input [DiagnosticsNode].
@@ -2949,23 +2954,24 @@ Iterable<DiagnosticsNode> debugTransformDebugCreator(Iterable<DiagnosticsNode> p
 Iterable<DiagnosticsNode> _parseDiagnosticsNode(
   DiagnosticsNode node,
   ErrorSummary? errorSummary,
-) sync* {
+) {
   assert(_isDebugCreator(node));
   try {
     final DebugCreator debugCreator = node.value! as DebugCreator;
     final Element element = debugCreator.element;
-    yield* _describeRelevantUserCode(element, errorSummary);
+    return _describeRelevantUserCode(element, errorSummary);
   } catch (error, stack) {
     scheduleMicrotask(() {
       FlutterError.reportError(FlutterErrorDetails(
         exception: error,
         stack: stack,
         library: 'widget inspector',
-        informationCollector: () sync* {
-          yield DiagnosticsNode.message('This exception was caught while trying to describe the user-relevant code of another error.');
-        }
+        informationCollector: () => <DiagnosticsNode>[
+          DiagnosticsNode.message('This exception was caught while trying to describe the user-relevant code of another error.'),
+        ],
       ));
     });
+    return <DiagnosticsNode>[];
   }
 }
 

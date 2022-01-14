@@ -19,7 +19,7 @@ import 'package:flutter_tools/src/custom_devices/custom_device.dart';
 import 'package:flutter_tools/src/custom_devices/custom_device_config.dart';
 import 'package:flutter_tools/src/custom_devices/custom_devices_config.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/linux/application_package.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:meta/meta.dart';
@@ -391,7 +391,7 @@ void main() {
       processManager: processManager,
     );
 
-    final LaunchResult launchResult = await appSession.start();
+    final LaunchResult launchResult = await appSession.start(debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug));
 
     expect(launchResult.started, true);
     expect(launchResult.observatoryUri, Uri.parse('http://127.0.0.1:12345/abcd/'));
@@ -428,7 +428,7 @@ void main() {
       processManager: processManager
     );
 
-    final LaunchResult launchResult = await appSession.start();
+    final LaunchResult launchResult = await appSession.start(debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug));
 
     expect(launchResult.started, true);
     expect(launchResult.observatoryUri, Uri.parse('http://192.168.178.123:12345/abcd/'));
@@ -587,6 +587,54 @@ void main() {
 
     expect(await device.targetPlatform, TargetPlatform.linux_x64);
   });
+
+  testWithoutContext('CustomDeviceLogReader cancels subscriptions before closing logLines stream', () async {
+    final CustomDeviceLogReader logReader = CustomDeviceLogReader('testname');
+
+    final Iterable<List<int>> lines = Iterable<List<int>>.generate(5, (int _) => utf8.encode('test'));
+
+    logReader.listenToProcessOutput(
+      FakeProcess(
+        exitCode: Future<int>.value(0),
+        stdout: Stream<List<int>>.fromIterable(lines),
+        stderr: Stream<List<int>>.fromIterable(lines),
+      ),
+    );
+
+    final List<MyFakeStreamSubscription<String>> subscriptions = <MyFakeStreamSubscription<String>>[];
+    bool logLinesStreamDone = false;
+    logReader.logLines.listen((_) {}, onDone: () {
+      expect(subscriptions, everyElement((MyFakeStreamSubscription<String> s) => s.canceled));
+      logLinesStreamDone = true;
+    });
+
+    logReader.subscriptions.replaceRange(
+      0,
+      logReader.subscriptions.length,
+      logReader.subscriptions.map(
+        (StreamSubscription<String> e) => MyFakeStreamSubscription<String>(e)
+      ),
+    );
+
+    subscriptions.addAll(logReader.subscriptions.cast());
+
+    await logReader.dispose();
+
+    expect(logLinesStreamDone, true);
+  });
+}
+
+class MyFakeStreamSubscription<T> extends Fake implements StreamSubscription<T> {
+  MyFakeStreamSubscription(this.parent);
+
+  StreamSubscription<T> parent;
+  bool canceled = false;
+
+  @override
+  Future<void> cancel() {
+    canceled = true;
+    return parent.cancel();
+  }
 }
 
 class FakeBundleBuilder extends Fake implements BundleBuilder {

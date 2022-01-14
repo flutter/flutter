@@ -36,8 +36,8 @@ class MyStatelessWidget extends StatelessWidget {
         onPressed: () {
           // Add your onPressed code here!
         },
-        child: const Icon(Icons.navigation),
         backgroundColor: Colors.green,
+        child: const Icon(Icons.navigation),
       ),
     );
   }

@@ -2775,6 +2775,54 @@ void main() {
     expect(Focus.of(tester.element(find.byKey(const ValueKey<int>(91)).last)).hasPrimaryFocus, isFalse);
   });
 
+  testWidgets('DropdownButton onTap callback can request focus', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode(debugLabel: 'DropdownButton')..addListener(() { });
+    int? value = 1;
+    final List<int> hugeMenuItems = List<int>.generate(100, (int index) => index);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return DropdownButton<int>(
+                  focusNode: focusNode,
+                  onChanged: (int? newValue) {
+                    setState(() {
+                      value = newValue;
+                    });
+                  },
+                  value: value,
+                  itemHeight: null,
+                  items: hugeMenuItems.map<DropdownMenuItem<int>>((int item) {
+                    return DropdownMenuItem<int>(
+                      key: ValueKey<int>(item),
+                      value: item,
+                      child: Text(item.toString()),
+                    );
+                  }).toList(),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump(); // Pump a frame for autofocus to take effect.
+    expect(focusNode.hasPrimaryFocus, isFalse);
+
+    await tester.tap(find.text('1'));
+    await tester.pumpAndSettle();
+
+    // Close the dropdown menu.
+    await tester.tapAt(const Offset(1.0, 1.0));
+    await tester.pumpAndSettle();
+
+    expect(focusNode.hasPrimaryFocus, isTrue);
+  });
+
   testWidgets('DropdownButton changes selected item with arrow keys', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'DropdownButton');
     String? value = 'one';
@@ -3536,7 +3584,8 @@ void main() {
               value: 'One',
               items: const <DropdownMenuItem<String>>[
                 DropdownMenuItem<String>(
-                  child: Text('One'), value: 'One'
+                  value: 'One',
+                  child: Text('One')
                 ),
               ],
               onChanged: (_) { },
@@ -3593,5 +3642,87 @@ void main() {
         expect(element.size!.height, itemHeight);
       }
     }
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/92438
+  testWidgets('Do not throw due to the double precision', (WidgetTester tester) async {
+    const String value = 'One';
+    const double itemHeight = 77.701;
+    final List<DropdownMenuItem<String>> menuItems = <String>[
+      value,
+      'Two',
+      'Free',
+    ].map<DropdownMenuItem<String>>((String value) {
+      return DropdownMenuItem<String>(
+        value: value,
+        child: Text(value),
+      );
+    }).toList();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: DropdownButton<String>(
+              value: value,
+              itemHeight: itemHeight,
+              onChanged: (_) {},
+              items: menuItems,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text(value));
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), null);
+  });
+
+  testWidgets('BorderRadius property works properly for DropdownButtonFormField', (WidgetTester tester) async {
+    const double radius = 20.0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: DropdownButtonFormField<String>(
+              borderRadius: BorderRadius.circular(radius),
+              value: 'One',
+              items: <String>['One', 'Two', 'Three', 'Four']
+                .map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+              }).toList(),
+              onChanged: (_) { },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('One'));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.ancestor(
+        of: find.text('One').last,
+        matching: find.byType(CustomPaint),
+      ).at(2),
+      paints
+        ..save()
+        ..rrect()
+        ..rrect()
+        ..rrect()
+        ..rrect(rrect: const RRect.fromLTRBXY(0.0, 0.0, 800.0, 208.0, radius, radius)),
+    );
+
+    final InkWell firstItem = tester.widget(find.widgetWithText(InkWell, 'One'));
+    final InkWell lastItem = tester.widget(find.widgetWithText(InkWell, 'Four'));
+
+    expect(firstItem.borderRadius, const BorderRadius.vertical(top: Radius.circular(radius)));
+    expect(lastItem.borderRadius, const BorderRadius.vertical(bottom: Radius.circular(radius)));
   });
 }

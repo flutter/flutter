@@ -291,16 +291,20 @@ class CardCollectionState extends State<CardCollection> {
       case DismissDirection.startToEnd:
         backgroundMessage = 'Swipe right to dismiss';
         break;
-      default:
+      case DismissDirection.vertical:
+      case DismissDirection.up:
+      case DismissDirection.down:
+      case DismissDirection.none:
         backgroundMessage = 'Unsupported dismissDirection';
+        break;
     }
 
-    // TODO(abarth): This icon is wrong in RTL.
+    // This icon is wrong in RTL.
     Widget leftArrowIcon = const Icon(Icons.arrow_back, size: 36.0);
     if (_dismissDirection == DismissDirection.startToEnd)
       leftArrowIcon = Opacity(opacity: 0.1, child: leftArrowIcon);
 
-      // TODO(abarth): This icon is wrong in RTL.
+    // This icon is wrong in RTL.
     Widget rightArrowIcon = const Icon(Icons.arrow_forward, size: 36.0);
     if (_dismissDirection == DismissDirection.endToStart)
       rightArrowIcon = Opacity(opacity: 0.1, child: rightArrowIcon);

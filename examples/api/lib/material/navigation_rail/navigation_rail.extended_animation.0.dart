@@ -105,8 +105,8 @@ class MyNavigationRailFab extends StatelessWidget {
           ),
           child: animation.value == 0
               ? FloatingActionButton(
-                  child: const Icon(Icons.add),
                   onPressed: onPressed,
+                  child: const Icon(Icons.add),
                 )
               : Align(
                   alignment: AlignmentDirectional.centerStart,

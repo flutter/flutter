@@ -21,13 +21,11 @@ class _TestSliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate
     this.key,
     required this.minExtent,
     required this.maxExtent,
-    this.child,
     this.vsync = const TestVSync(),
     this.showOnScreenConfiguration = const PersistentHeaderShowOnScreenConfiguration(),
   });
 
   final Key? key;
-  final Widget? child;
 
   @override
   final double maxExtent;
@@ -42,7 +40,7 @@ class _TestSliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate
   final PersistentHeaderShowOnScreenConfiguration showOnScreenConfiguration;
 
   @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) => child ?? SizedBox.expand(key: key);
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) => SizedBox.expand(key: key);
 
   @override
   bool shouldRebuild(_TestSliverPersistentHeaderDelegate oldDelegate) => true;
@@ -1846,41 +1844,50 @@ void main() {
     });
   });
 
-  Widget _buildShrinkWrap({
-    ScrollController? controller,
-    Axis scrollDirection = Axis.vertical,
-    ScrollPhysics? physics,
-  }) {
-    return Directionality(
-      textDirection: TextDirection.ltr,
-      child: MediaQuery(
-        data: const MediaQueryData(),
-        child: ListView.builder(
-          controller: controller,
-          physics: physics,
-          scrollDirection: scrollDirection,
-          shrinkWrap: true,
-          itemBuilder: (BuildContext context, int index) => SizedBox(height: 50, width: 50, child: Text('Item $index')),
-          itemCount: 20,
-          itemExtent: 50,
+  group('Overscrolling RenderShrinkWrappingViewport', () {
+    Widget _buildSimpleShrinkWrap({
+      ScrollController? controller,
+      Axis scrollDirection = Axis.vertical,
+      ScrollPhysics? physics,
+    }) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: ListView.builder(
+            controller: controller,
+            physics: physics,
+            scrollDirection: scrollDirection,
+            shrinkWrap: true,
+            itemBuilder: (BuildContext context, int index) => SizedBox(height: 50, width: 50, child: Text('Item $index')),
+            itemCount: 20,
+            itemExtent: 50,
+          ),
         ),
-      ),
-    );
-  }
+      );
+    }
 
-  testWidgets('Constrained Shrinkwrapping viewport will not overflow on overscroll', (WidgetTester tester) async {
-    // Regression test for https://github.com/flutter/flutter/issues/89717
-    final  ScrollController controller = ScrollController();
-    await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: MediaQuery(
-            data: const MediaQueryData(),
+    Widget _buildClippingShrinkWrap(
+      ScrollController controller, {
+      bool constrain = false,
+    }) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: Container(
+            color: const Color(0xFF000000),
             child: Column(
               children: <Widget>[
-                Container(height: 100, color: const Color(0x00000000)),
+                // Translucent boxes above and below the shrinkwrapped viewport
+                // make it easily discernible if the viewport is not being
+                // clipped properly.
+                Opacity(
+                  opacity: 0.5,
+                  child: Container(height: 100, color: const Color(0xFF00B0FF)),
+                ),
                 Container(
-                  height: 150,
+                  height: constrain ? 150 : null,
                   color: const Color(0xFFF44336),
                   child: ListView.builder(
                     controller: controller,
@@ -1890,189 +1897,230 @@ void main() {
                     itemCount: 10,
                   ),
                 ),
-                Container(height: 100, color: const Color(0x00000000)),
+                Opacity(
+                  opacity: 0.5,
+                  child: Container(height: 100, color: const Color(0xFF00B0FF)),
+                ),
               ],
             ),
           ),
-        )
-    );
-    expect(controller.offset, 0.0);
-    expect(tester.getTopLeft(find.text('Item 0')).dy, 100.0);
+        ),
+      );
+    }
 
-    // Overscroll
-    final TestGesture overscrollGesture = await tester.startGesture(tester.getCenter(find.text('Item 0')));
-    await overscrollGesture.moveBy(const Offset(0, 25));
-    await tester.pump();
-    expect(controller.offset, -25.0);
-    expect(tester.getTopLeft(find.text('Item 0')).dy, 125.0);
-    await expectLater(
-      find.byType(Directionality),
-      matchesGoldenFile('shrinkwrapped_overscroll.png'),
-    );
-    await overscrollGesture.up();
-    await tester.pumpAndSettle();
-    expect(controller.offset, 0.0);
-    expect(tester.getTopLeft(find.text('Item 0')).dy, 100.0);
-  });
+    testWidgets('constrained viewport correctly clips overflow', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/89717
+      final  ScrollController controller = ScrollController();
+      await tester.pumpWidget(
+        _buildClippingShrinkWrap(controller, constrain: true)
+      );
+      expect(controller.offset, 0.0);
+      expect(tester.getTopLeft(find.text('Item 0')).dy, 100.0);
+      expect(tester.getTopLeft(find.text('Item 9')).dy, 226.0);
 
-  testWidgets('Shrinkwrap allows overscrolling on default platforms - vertical', (WidgetTester tester) async {
-    // Regression test for https://github.com/flutter/flutter/issues/10949
-    // Scrollables should overscroll by default on iOS and macOS
-    final  ScrollController controller = ScrollController();
-    await tester.pumpWidget(
-      _buildShrinkWrap(controller: controller),
-    );
-    expect(controller.offset, 0.0);
-    expect(tester.getTopLeft(find.text('Item 0')).dy, 0.0);
-    // Check overscroll at both ends
-    // Start
-    TestGesture overscrollGesture = await tester.startGesture(tester.getCenter(find.byType(ListView)));
-    await overscrollGesture.moveBy(const Offset(0, 25));
-    await tester.pump();
-    expect(controller.offset, -25.0);
-    expect(tester.getTopLeft(find.text('Item 0')).dy, 25.0);
-    await overscrollGesture.up();
-    await tester.pumpAndSettle();
-    expect(controller.offset, 0.0);
-    expect(tester.getTopLeft(find.text('Item 0')).dy, 0.0);
+      // Overscroll
+      final TestGesture overscrollGesture = await tester.startGesture(tester.getCenter(find.text('Item 0')));
+      await overscrollGesture.moveBy(const Offset(0, 100));
+      await tester.pump();
+      expect(controller.offset, -100.0);
+      expect(tester.getTopLeft(find.text('Item 0')).dy, 200.0);
+      await expectLater(
+        find.byType(Directionality),
+        matchesGoldenFile('shrinkwrap_clipped_constrained_overscroll.png'),
+      );
+      await overscrollGesture.up();
+      await tester.pumpAndSettle();
+      expect(controller.offset, 0.0);
+      expect(tester.getTopLeft(find.text('Item 0')).dy, 100.0);
+      expect(tester.getTopLeft(find.text('Item 9')).dy, 226.0);
+    });
 
-    // End
-    final double maxExtent = controller.position.maxScrollExtent;
-    controller.jumpTo(controller.position.maxScrollExtent);
-    await tester.pumpAndSettle();
-    expect(controller.offset, maxExtent);
-    expect(tester.getBottomLeft(find.text('Item 19')).dy, 600.0);
+    testWidgets('correctly clips overflow without constraints', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/89717
+      final  ScrollController controller = ScrollController();
+      await tester.pumpWidget(
+        _buildClippingShrinkWrap(controller)
+      );
+      expect(controller.offset, 0.0);
+      expect(tester.getTopLeft(find.text('Item 0')).dy, 100.0);
+      expect(tester.getTopLeft(find.text('Item 9')).dy, 226.0);
 
-    overscrollGesture = await tester.startGesture(tester.getCenter(find.byType(ListView)));
-    await overscrollGesture.moveBy(const Offset(0, -25));
-    await tester.pump();
-    expect(controller.offset, greaterThan(maxExtent));
-    expect(tester.getBottomLeft(find.text('Item 19')).dy, 575.0);
-    await overscrollGesture.up();
-    await tester.pumpAndSettle();
-    expect(controller.offset, maxExtent);
-    expect(tester.getBottomLeft(find.text('Item 19')).dy, 600.0);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
+      // Overscroll
+      final TestGesture overscrollGesture = await tester.startGesture(tester.getCenter(find.text('Item 0')));
+      await overscrollGesture.moveBy(const Offset(0, 100));
+      await tester.pump();
+      expect(controller.offset, -100.0);
+      expect(tester.getTopLeft(find.text('Item 0')).dy, 200.0);
+      await expectLater(
+        find.byType(Directionality),
+        matchesGoldenFile('shrinkwrap_clipped_overscroll.png'),
+      );
+      await overscrollGesture.up();
+      await tester.pumpAndSettle();
+      expect(controller.offset, 0.0);
+      expect(tester.getTopLeft(find.text('Item 0')).dy, 100.0);
+      expect(tester.getTopLeft(find.text('Item 9')).dy, 226.0);
+    });
 
-  testWidgets('Shrinkwrap allows overscrolling on default platforms - horizontal', (WidgetTester tester) async {
-    // Regression test for https://github.com/flutter/flutter/issues/10949
-    // Scrollables should overscroll by default on iOS and macOS
-    final  ScrollController controller = ScrollController();
-    await tester.pumpWidget(
-      _buildShrinkWrap(controller: controller, scrollDirection: Axis.horizontal),
-    );
-    expect(controller.offset, 0.0);
-    expect(tester.getTopLeft(find.text('Item 0')).dx, 0.0);
-    // Check overscroll at both ends
-    // Start
-    TestGesture overscrollGesture = await tester.startGesture(tester.getCenter(find.byType(ListView)));
-    await overscrollGesture.moveBy(const Offset(25, 0));
-    await tester.pump();
-    expect(controller.offset, -25.0);
-    expect(tester.getTopLeft(find.text('Item 0')).dx, 25.0);
-    await overscrollGesture.up();
-    await tester.pumpAndSettle();
-    expect(controller.offset, 0.0);
-    expect(tester.getTopLeft(find.text('Item 0')).dx, 0.0);
+    testWidgets('allows overscrolling on default platforms - vertical', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/10949
+      // Scrollables should overscroll by default on iOS and macOS
+      final  ScrollController controller = ScrollController();
+      await tester.pumpWidget(
+        _buildSimpleShrinkWrap(controller: controller),
+      );
+      expect(controller.offset, 0.0);
+      expect(tester.getTopLeft(find.text('Item 0')).dy, 0.0);
+      // Check overscroll at both ends
+      // Start
+      TestGesture overscrollGesture = await tester.startGesture(tester.getCenter(find.byType(ListView)));
+      await overscrollGesture.moveBy(const Offset(0, 25));
+      await tester.pump();
+      expect(controller.offset, -25.0);
+      expect(tester.getTopLeft(find.text('Item 0')).dy, 25.0);
+      await overscrollGesture.up();
+      await tester.pumpAndSettle();
+      expect(controller.offset, 0.0);
+      expect(tester.getTopLeft(find.text('Item 0')).dy, 0.0);
 
-    // End
-    final double maxExtent = controller.position.maxScrollExtent;
-    controller.jumpTo(controller.position.maxScrollExtent);
-    await tester.pumpAndSettle();
-    expect(controller.offset, maxExtent);
-    expect(tester.getTopRight(find.text('Item 19')).dx, 800.0);
+      // End
+      final double maxExtent = controller.position.maxScrollExtent;
+      controller.jumpTo(controller.position.maxScrollExtent);
+      await tester.pumpAndSettle();
+      expect(controller.offset, maxExtent);
+      expect(tester.getBottomLeft(find.text('Item 19')).dy, 600.0);
 
-    overscrollGesture = await tester.startGesture(tester.getCenter(find.byType(ListView)));
-    await overscrollGesture.moveBy(const Offset(-25, 0));
-    await tester.pump();
-    expect(controller.offset, greaterThan(maxExtent));
-    expect(tester.getTopRight(find.text('Item 19')).dx, 775.0);
-    await overscrollGesture.up();
-    await tester.pumpAndSettle();
-    expect(controller.offset, maxExtent);
-    expect(tester.getTopRight(find.text('Item 19')).dx, 800.0);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
+      overscrollGesture = await tester.startGesture(tester.getCenter(find.byType(ListView)));
+      await overscrollGesture.moveBy(const Offset(0, -25));
+      await tester.pump();
+      expect(controller.offset, greaterThan(maxExtent));
+      expect(tester.getBottomLeft(find.text('Item 19')).dy, 575.0);
+      await overscrollGesture.up();
+      await tester.pumpAndSettle();
+      expect(controller.offset, maxExtent);
+      expect(tester.getBottomLeft(find.text('Item 19')).dy, 600.0);
+    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
-  testWidgets('Shrinkwrap allows overscrolling per physics - vertical', (WidgetTester tester) async {
-    // Regression test for https://github.com/flutter/flutter/issues/10949
-    // Scrollables should overscroll when the scroll physics allow
-    final  ScrollController controller = ScrollController();
-    await tester.pumpWidget(
-      _buildShrinkWrap(controller: controller, physics: const BouncingScrollPhysics()),
-    );
-    expect(controller.offset, 0.0);
-    expect(tester.getTopLeft(find.text('Item 0')).dy, 0.0);
-    // Check overscroll at both ends
-    // Start
-    TestGesture overscrollGesture = await tester.startGesture(tester.getCenter(find.byType(ListView)));
-    await overscrollGesture.moveBy(const Offset(0, 25));
-    await tester.pump();
-    expect(controller.offset, -25.0);
-    expect(tester.getTopLeft(find.text('Item 0')).dy, 25.0);
-    await overscrollGesture.up();
-    await tester.pumpAndSettle();
-    expect(controller.offset, 0.0);
-    expect(tester.getTopLeft(find.text('Item 0')).dy, 0.0);
+    testWidgets('allows overscrolling on default platforms - horizontal', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/10949
+      // Scrollables should overscroll by default on iOS and macOS
+      final  ScrollController controller = ScrollController();
+      await tester.pumpWidget(
+        _buildSimpleShrinkWrap(controller: controller, scrollDirection: Axis.horizontal),
+      );
+      expect(controller.offset, 0.0);
+      expect(tester.getTopLeft(find.text('Item 0')).dx, 0.0);
+      // Check overscroll at both ends
+      // Start
+      TestGesture overscrollGesture = await tester.startGesture(tester.getCenter(find.byType(ListView)));
+      await overscrollGesture.moveBy(const Offset(25, 0));
+      await tester.pump();
+      expect(controller.offset, -25.0);
+      expect(tester.getTopLeft(find.text('Item 0')).dx, 25.0);
+      await overscrollGesture.up();
+      await tester.pumpAndSettle();
+      expect(controller.offset, 0.0);
+      expect(tester.getTopLeft(find.text('Item 0')).dx, 0.0);
 
-    // End
-    final double maxExtent = controller.position.maxScrollExtent;
-    controller.jumpTo(controller.position.maxScrollExtent);
-    await tester.pumpAndSettle();
-    expect(controller.offset, maxExtent);
-    expect(tester.getBottomLeft(find.text('Item 19')).dy, 600.0);
+      // End
+      final double maxExtent = controller.position.maxScrollExtent;
+      controller.jumpTo(controller.position.maxScrollExtent);
+      await tester.pumpAndSettle();
+      expect(controller.offset, maxExtent);
+      expect(tester.getTopRight(find.text('Item 19')).dx, 800.0);
 
-    overscrollGesture = await tester.startGesture(tester.getCenter(find.byType(ListView)));
-    await overscrollGesture.moveBy(const Offset(0, -25));
-    await tester.pump();
-    expect(controller.offset, greaterThan(maxExtent));
-    expect(tester.getBottomLeft(find.text('Item 19')).dy, 575.0);
-    await overscrollGesture.up();
-    await tester.pumpAndSettle();
-    expect(controller.offset, maxExtent);
-    expect(tester.getBottomLeft(find.text('Item 19')).dy, 600.0);
-  });
+      overscrollGesture = await tester.startGesture(tester.getCenter(find.byType(ListView)));
+      await overscrollGesture.moveBy(const Offset(-25, 0));
+      await tester.pump();
+      expect(controller.offset, greaterThan(maxExtent));
+      expect(tester.getTopRight(find.text('Item 19')).dx, 775.0);
+      await overscrollGesture.up();
+      await tester.pumpAndSettle();
+      expect(controller.offset, maxExtent);
+      expect(tester.getTopRight(find.text('Item 19')).dx, 800.0);
+    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
-  testWidgets('Shrinkwrap allows overscrolling per physics - horizontal', (WidgetTester tester) async {
-    // Regression test for https://github.com/flutter/flutter/issues/10949
-    // Scrollables should overscroll when the scroll physics allow
-    final  ScrollController controller = ScrollController();
-    await tester.pumpWidget(
-      _buildShrinkWrap(
-        controller: controller,
-        scrollDirection: Axis.horizontal,
-        physics: const BouncingScrollPhysics(),
-      ),
-    );
-    expect(controller.offset, 0.0);
-    expect(tester.getTopLeft(find.text('Item 0')).dx, 0.0);
-    // Check overscroll at both ends
-    // Start
-    TestGesture overscrollGesture = await tester.startGesture(tester.getCenter(find.byType(ListView)));
-    await overscrollGesture.moveBy(const Offset(25, 0));
-    await tester.pump();
-    expect(controller.offset, -25.0);
-    expect(tester.getTopLeft(find.text('Item 0')).dx, 25.0);
-    await overscrollGesture.up();
-    await tester.pumpAndSettle();
-    expect(controller.offset, 0.0);
-    expect(tester.getTopLeft(find.text('Item 0')).dx, 0.0);
+    testWidgets('allows overscrolling per physics - vertical', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/10949
+      // Scrollables should overscroll when the scroll physics allow
+      final  ScrollController controller = ScrollController();
+      await tester.pumpWidget(
+        _buildSimpleShrinkWrap(controller: controller, physics: const BouncingScrollPhysics()),
+      );
+      expect(controller.offset, 0.0);
+      expect(tester.getTopLeft(find.text('Item 0')).dy, 0.0);
+      // Check overscroll at both ends
+      // Start
+      TestGesture overscrollGesture = await tester.startGesture(tester.getCenter(find.byType(ListView)));
+      await overscrollGesture.moveBy(const Offset(0, 25));
+      await tester.pump();
+      expect(controller.offset, -25.0);
+      expect(tester.getTopLeft(find.text('Item 0')).dy, 25.0);
+      await overscrollGesture.up();
+      await tester.pumpAndSettle();
+      expect(controller.offset, 0.0);
+      expect(tester.getTopLeft(find.text('Item 0')).dy, 0.0);
 
-    // End
-    final double maxExtent = controller.position.maxScrollExtent;
-    controller.jumpTo(controller.position.maxScrollExtent);
-    await tester.pumpAndSettle();
-    expect(controller.offset, maxExtent);
-    expect(tester.getTopRight(find.text('Item 19')).dx, 800.0);
+      // End
+      final double maxExtent = controller.position.maxScrollExtent;
+      controller.jumpTo(controller.position.maxScrollExtent);
+      await tester.pumpAndSettle();
+      expect(controller.offset, maxExtent);
+      expect(tester.getBottomLeft(find.text('Item 19')).dy, 600.0);
 
-    overscrollGesture = await tester.startGesture(tester.getCenter(find.byType(ListView)));
-    await overscrollGesture.moveBy(const Offset(-25, 0));
-    await tester.pump();
-    expect(controller.offset, greaterThan(maxExtent));
-    expect(tester.getTopRight(find.text('Item 19')).dx, 775.0);
-    await overscrollGesture.up();
-    await tester.pumpAndSettle();
-    expect(controller.offset, maxExtent);
-    expect(tester.getTopRight(find.text('Item 19')).dx, 800.0);
+      overscrollGesture = await tester.startGesture(tester.getCenter(find.byType(ListView)));
+      await overscrollGesture.moveBy(const Offset(0, -25));
+      await tester.pump();
+      expect(controller.offset, greaterThan(maxExtent));
+      expect(tester.getBottomLeft(find.text('Item 19')).dy, 575.0);
+      await overscrollGesture.up();
+      await tester.pumpAndSettle();
+      expect(controller.offset, maxExtent);
+      expect(tester.getBottomLeft(find.text('Item 19')).dy, 600.0);
+    });
+
+    testWidgets('allows overscrolling per physics - horizontal', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/10949
+      // Scrollables should overscroll when the scroll physics allow
+      final  ScrollController controller = ScrollController();
+      await tester.pumpWidget(
+        _buildSimpleShrinkWrap(
+          controller: controller,
+          scrollDirection: Axis.horizontal,
+          physics: const BouncingScrollPhysics(),
+        ),
+      );
+      expect(controller.offset, 0.0);
+      expect(tester.getTopLeft(find.text('Item 0')).dx, 0.0);
+      // Check overscroll at both ends
+      // Start
+      TestGesture overscrollGesture = await tester.startGesture(tester.getCenter(find.byType(ListView)));
+      await overscrollGesture.moveBy(const Offset(25, 0));
+      await tester.pump();
+      expect(controller.offset, -25.0);
+      expect(tester.getTopLeft(find.text('Item 0')).dx, 25.0);
+      await overscrollGesture.up();
+      await tester.pumpAndSettle();
+      expect(controller.offset, 0.0);
+      expect(tester.getTopLeft(find.text('Item 0')).dx, 0.0);
+
+      // End
+      final double maxExtent = controller.position.maxScrollExtent;
+      controller.jumpTo(controller.position.maxScrollExtent);
+      await tester.pumpAndSettle();
+      expect(controller.offset, maxExtent);
+      expect(tester.getTopRight(find.text('Item 19')).dx, 800.0);
+
+      overscrollGesture = await tester.startGesture(tester.getCenter(find.byType(ListView)));
+      await overscrollGesture.moveBy(const Offset(-25, 0));
+      await tester.pump();
+      expect(controller.offset, greaterThan(maxExtent));
+      expect(tester.getTopRight(find.text('Item 19')).dx, 775.0);
+      await overscrollGesture.up();
+      await tester.pumpAndSettle();
+      expect(controller.offset, maxExtent);
+      expect(tester.getTopRight(find.text('Item 19')).dx, 800.0);
+    });
   });
 
   testWidgets('Handles infinite constraints when TargetPlatform is iOS or macOS', (WidgetTester tester) async {

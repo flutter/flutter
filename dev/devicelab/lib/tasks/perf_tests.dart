@@ -7,15 +7,15 @@ import 'dart:convert' show LineSplitter, json, utf8;
 import 'dart:io';
 import 'dart:math' as math;
 
-import 'package:flutter_devicelab/framework/devices.dart';
-import 'package:flutter_devicelab/framework/framework.dart';
-import 'package:flutter_devicelab/framework/host_agent.dart';
-import 'package:flutter_devicelab/framework/task_result.dart';
-import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
 import '../common.dart';
+import '../framework/devices.dart';
+import '../framework/framework.dart';
+import '../framework/host_agent.dart';
+import '../framework/task_result.dart';
+import '../framework/utils.dart';
 
 /// Must match flutter_driver/lib/src/common.dart.
 ///
@@ -484,6 +484,41 @@ TaskFunction createFramePolicyIntegrationTest() {
   };
 }
 
+TaskFunction createOpacityPeepholeOneRectPerfE2ETest() {
+  return PerfTest.e2e(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test/opacity_peephole_one_rect_perf_e2e.dart',
+  ).run;
+}
+
+TaskFunction createOpacityPeepholeColOfRowsPerfE2ETest() {
+  return PerfTest.e2e(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test/opacity_peephole_col_of_rows_perf_e2e.dart',
+  ).run;
+}
+
+TaskFunction createOpacityPeepholeOpacityOfGridPerfE2ETest() {
+  return PerfTest.e2e(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test/opacity_peephole_opacity_of_grid_perf_e2e.dart',
+  ).run;
+}
+
+TaskFunction createOpacityPeepholeGridOfOpacityPerfE2ETest() {
+  return PerfTest.e2e(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test/opacity_peephole_grid_of_opacity_perf_e2e.dart',
+  ).run;
+}
+
+TaskFunction createOpacityPeepholeFadeTransitionTextPerfE2ETest() {
+  return PerfTest.e2e(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test/opacity_peephole_fade_transition_text_perf_e2e.dart',
+  ).run;
+}
+
 Map<String, dynamic> _average(List<Map<String, dynamic>> results, int iterations) {
   final Map<String, dynamic> tally = <String, dynamic>{};
   for (final Map<String, dynamic> item in results) {
@@ -812,8 +847,14 @@ class PerfTest {
       final Device device = await devices.workingDevice;
       await device.unlock();
       final String deviceId = device.deviceId;
+      final String? localEngine = localEngineFromEnv;
+      final String? localEngineSrcPath = localEngineSrcPathFromEnv;
 
       await flutter('drive', options: <String>[
+        if (localEngine != null)
+          ...<String>['--local-engine', localEngine],
+        if (localEngineSrcPath != null)
+          ...<String>['--local-engine-src-path', localEngineSrcPath],
         '--no-dds',
         '--no-android-gradle-daemon',
         '-v',
@@ -989,11 +1030,16 @@ class PerfTestWithSkSL extends PerfTest {
     if (File(_vmserviceFileName).existsSync()) {
       File(_vmserviceFileName).deleteSync();
     }
-
+    final String? localEngine = localEngineFromEnv;
+    final String? localEngineSrcPath = localEngineSrcPathFromEnv;
     _runProcess = await startProcess(
       _flutterPath,
       <String>[
         'run',
+        if (localEngine != null)
+          ...<String>['--local-engine', localEngine],
+        if (localEngineSrcPath != null)
+          ...<String>['--local-engine-src-path', localEngineSrcPath],
         '--no-dds',
         if (deviceOperatingSystem == DeviceOperatingSystem.ios)
           ...<String>[

@@ -109,7 +109,8 @@ message ConductorState {
   // The current [ReleasePhase] that has yet to be completed.
   ReleasePhase currentPhase = 9;
 
-  // Commit hash of the Conductor tool.
+  // A string used to validate that the current conductor is the same version
+  // that created the [ConductorState] object.
   string conductorVersion = 10;
 
   // One of x, y, z, m, or n.

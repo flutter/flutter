@@ -158,6 +158,7 @@ export 'src/material/toggle_buttons_theme.dart';
 export 'src/material/toggleable.dart';
 export 'src/material/tooltip.dart';
 export 'src/material/tooltip_theme.dart';
+export 'src/material/tooltip_visibility.dart';
 export 'src/material/typography.dart';
 export 'src/material/user_accounts_drawer_header.dart';
 export 'widgets.dart';

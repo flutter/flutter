@@ -244,7 +244,7 @@ typedef ImageErrorWidgetBuilder = Widget Function(
 ///  * [new Image.file], for obtaining an image from a [File].
 ///  * [new Image.memory], for obtaining an image from a [Uint8List].
 ///
-/// The following image formats are supported: {@macro flutter.dart:ui.imageFormats}
+/// The following image formats are supported: {@macro dart.ui.imageFormats}
 ///
 /// To automatically perform pixel-density-aware asset resolution, specify the
 /// image using an [AssetImage] and make sure that a [MaterialApp], [WidgetsApp],
@@ -464,7 +464,14 @@ class Image extends StatefulWidget {
     this.filterQuality = FilterQuality.low,
     int? cacheWidth,
     int? cacheHeight,
-  }) : image = ResizeImage.resizeIfNeeded(cacheWidth, cacheHeight, FileImage(file, scale: scale)),
+  }) :
+       // FileImage is not supported on Flutter Web therefore neither this method.
+       assert(
+         !kIsWeb,
+         'Image.file is not supported on Flutter Web. '
+         'Consider using either Image.asset or Image.network instead.',
+        ),
+       image = ResizeImage.resizeIfNeeded(cacheWidth, cacheHeight, FileImage(file, scale: scale)),
        loadingBuilder = null,
        assert(alignment != null),
        assert(repeat != null),
@@ -647,7 +654,7 @@ class Image extends StatefulWidget {
   ///
   /// The `bytes` argument specifies encoded image bytes, which can be encoded
   /// in any of the following supported image formats:
-  /// {@macro flutter.dart:ui.imageFormats}
+  /// {@macro dart.ui.imageFormats}
   ///
   /// The `scale` argument specifies the linear scale factor for drawing this
   /// image at its intended size and applies to both the width and the height.
@@ -1132,8 +1139,10 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
                   _lastStack = stackTrace;
                 });
                 assert(() {
-                  if (widget.errorBuilder == null)
+                  if (widget.errorBuilder == null) {
+                    // ignore: only_throw_errors, since we're just proxying the error.
                     throw error; // Ensures the error message is printed to the console.
+                  }
                   return true;
                 }());
               }

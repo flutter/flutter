@@ -703,7 +703,7 @@ class _FakeComparator implements GoldenFileComparator {
       case _ComparatorBehavior.returnFalse:
         return Future<bool>.value(false);
       case _ComparatorBehavior.throwTestFailure:
-        throw TestFailure('fake message');
+        fail('fake message');
     }
   }
 

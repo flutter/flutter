@@ -374,7 +374,8 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
         case AnimationStatus.dismissed:
           _controller.value = widget.isDrawerOpen ? 1.0 : 0.0;
           break;
-        default:
+        case AnimationStatus.forward:
+        case AnimationStatus.reverse:
           break;
       }
     }

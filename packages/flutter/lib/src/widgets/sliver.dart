@@ -204,6 +204,7 @@ abstract class SliverChildDelegate {
       if (children != null)
         description.add('estimated child count: $children');
     } catch (e) {
+      // The exception is forwarded to widget inspector.
       description.add('estimated child count: EXCEPTION (${e.runtimeType})');
     }
   }
@@ -661,7 +662,7 @@ class SliverChildListDelegate extends SliverChildDelegate {
   ///
   ///   Widget build(BuildContext context) {
   ///     // Always create a new list of children as a Widget is immutable.
-  ///     return PageView(children: List<Widget>.from(_children));
+  ///     return PageView(children: List<Widget>.of(_children));
   ///   }
   /// }
   /// ```

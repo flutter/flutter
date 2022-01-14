@@ -381,8 +381,8 @@ class _MaterialBannerState extends State<MaterialBanner> {
     }
 
     return Hero(
-      child: ClipRect(child: materialBannerTransition),
       tag: '<MaterialBanner Hero tag - ${widget.content}>',
+      child: ClipRect(child: materialBannerTransition),
     );
   }
 }

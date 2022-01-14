@@ -16,6 +16,7 @@ import 'test_utils.dart';
 void main() {
   group('iOS app validation', () {
     String flutterRoot;
+    Directory pluginRoot;
     String projectRoot;
     String flutterBin;
     Directory tempDir;
@@ -29,18 +30,20 @@ void main() {
         'flutter',
       );
 
+      // Test a plugin example app to allow plugins validation.
       processManager.runSync(<String>[
         flutterBin,
         ...getLocalEngineArguments(),
         'create',
         '--verbose',
         '--platforms=ios',
-        '-i',
-        'objc',
+        '-t',
+        'plugin',
         'hello',
       ], workingDirectory: tempDir.path);
 
-      projectRoot = tempDir.childDirectory('hello').path;
+      pluginRoot = tempDir.childDirectory('hello');
+      projectRoot = pluginRoot.childDirectory('example').path;
     });
 
     tearDownAll(() {
@@ -56,6 +59,7 @@ void main() {
         File outputFlutterFrameworkBinary;
         Directory outputAppFramework;
         File outputAppFrameworkBinary;
+        File outputPluginFrameworkBinary;
 
         setUpAll(() {
           processManager.runSync(<String>[
@@ -85,11 +89,13 @@ void main() {
 
           outputAppFramework = frameworkDirectory.childDirectory('App.framework');
           outputAppFrameworkBinary = outputAppFramework.childFile('App');
+
+          outputPluginFrameworkBinary = frameworkDirectory.childDirectory('hello.framework').childFile('hello');
         });
 
         testWithoutContext('flutter build ios builds a valid app', () {
-          // Should only contain Flutter.framework and App.framework.
-          expect(frameworkDirectory.listSync().length, 2);
+          expect(outputPluginFrameworkBinary, exists);
+
           expect(outputAppFrameworkBinary, exists);
           expect(outputAppFramework.childFile('Info.plist'), exists);
 
@@ -202,16 +208,60 @@ void main() {
         }, skip: !platform.isMacOS || buildMode != BuildMode.release); // [intended] only makes sense on macos.
 
         testWithoutContext('validate obfuscation', () {
-          final ProcessResult grepResult = processManager.runSync(<String>[
+          // HelloPlugin class is present in project.
+          ProcessResult grepResult = processManager.runSync(<String>[
             'grep',
-            '-i',
-            'hello',
+            '-r',
+            'HelloPlugin',
+            pluginRoot.path,
+          ]);
+          // Matches exits 0.
+          expect(grepResult.exitCode, 0);
+
+          // Not present in binary.
+          grepResult = processManager.runSync(<String>[
+            'grep',
+            'HelloPlugin',
             outputAppFrameworkBinary.path,
           ]);
-          expect(grepResult.stdout, isNot(contains('matches')));
+          // Does not match exits 1.
+          expect(grepResult.exitCode, 1);
         });
       });
     }
+
+    testWithoutContext('builds all plugin architectures for simulator', () {
+      final ProcessResult buildSimulator = processManager.runSync(
+        <String>[
+          flutterBin,
+          ...getLocalEngineArguments(),
+          'build',
+          'ios',
+          '--simulator',
+          '--verbose',
+          '--no-codesign',
+        ],
+        workingDirectory: projectRoot,
+      );
+      expect(buildSimulator.exitCode, 0);
+
+      final File pluginFrameworkBinary = fileSystem.file(fileSystem.path.join(
+        projectRoot,
+        'build',
+        'ios',
+        'iphonesimulator',
+        'Runner.app',
+        'Frameworks',
+        'hello.framework',
+        'hello',
+      ));
+      expect(pluginFrameworkBinary, exists);
+      final ProcessResult archs = processManager.runSync(
+        <String>['file', pluginFrameworkBinary.path],
+      );
+      expect(archs.stdout, contains('Mach-O 64-bit dynamically linked shared library x86_64'));
+      expect(archs.stdout, contains('Mach-O 64-bit dynamically linked shared library arm64'));
+    });
 
     testWithoutContext('build for simulator with all available architectures', () {
       final ProcessResult buildSimulator = processManager.runSync(
@@ -250,6 +300,6 @@ void main() {
       expect(archs.stdout, contains('Mach-O 64-bit dynamically linked shared library arm64'));
     });
   }, skip: !platform.isMacOS, // [intended] only makes sense for macos platform.
-     timeout: const Timeout(Duration(minutes: 5))
+     timeout: const Timeout(Duration(minutes: 7))
   );
 }

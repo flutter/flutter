@@ -1960,17 +1960,21 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   bool get isEndDrawerOpen => _endDrawerOpened.value;
 
   void _drawerOpenedCallback(bool isOpened) {
-    setState(() {
-      _drawerOpened.value = isOpened;
-    });
-    widget.onDrawerChanged?.call(isOpened);
+    if (_drawerOpened.value != isOpened) {
+      setState(() {
+        _drawerOpened.value = isOpened;
+      });
+      widget.onDrawerChanged?.call(isOpened);
+    }
   }
 
   void _endDrawerOpenedCallback(bool isOpened) {
-    setState(() {
-      _endDrawerOpened.value = isOpened;
-    });
-    widget.onEndDrawerChanged?.call(isOpened);
+    if (_endDrawerOpened.value != isOpened) {
+      setState(() {
+        _endDrawerOpened.value = isOpened;
+      });
+      widget.onEndDrawerChanged?.call(isOpened);
+    }
   }
 
   /// Opens the [Drawer] (if any).
@@ -2314,6 +2318,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     ShapeBorder? shape,
     Clip? clipBehavior,
     BoxConstraints? constraints,
+    bool? enableDrag,
     bool shouldDisposeAnimationController = true,
   }) {
     assert(() {
@@ -2355,7 +2360,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     final LocalHistoryEntry? entry = isPersistent
       ? null
       : LocalHistoryEntry(onRemove: () {
-          if (!removedEntry) {
+          if (!removedEntry && _currentBottomSheet?._widget == bottomSheet) {
             _removeCurrentBottomSheet();
           }
         });
@@ -2363,7 +2368,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     bottomSheet = _StandardBottomSheet(
       key: bottomSheetKey,
       animationController: animationController,
-      enableDrag: !isPersistent,
+      enableDrag: enableDrag ?? !isPersistent,
       onClosing: () {
         if (_currentBottomSheet == null) {
           return;
@@ -2464,6 +2469,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     ShapeBorder? shape,
     Clip? clipBehavior,
     BoxConstraints? constraints,
+    bool? enableDrag,
     AnimationController? transitionAnimationController,
   }) {
     assert(() {
@@ -2490,6 +2496,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
         shape: shape,
         clipBehavior: clipBehavior,
         constraints: constraints,
+        enableDrag: enableDrag,
         shouldDisposeAnimationController: transitionAnimationController == null,
       );
     });
@@ -2978,7 +2985,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
         removeLeftPadding: false,
         removeTopPadding: true,
         removeRightPadding: false,
-        removeBottomPadding: false,
+        removeBottomPadding: widget.bottomNavigationBar != null,
         maintainBottomViewPadding: !_resizeToAvoidBottomInset,
       );
     }

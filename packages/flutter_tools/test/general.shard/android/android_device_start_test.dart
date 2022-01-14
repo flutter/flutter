@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
@@ -42,9 +40,9 @@ const FakeCommand kShaCommand = FakeCommand(
 );
 
 void main() {
-  FileSystem fileSystem;
-  FakeProcessManager processManager;
-  AndroidSdk androidSdk;
+  late FileSystem fileSystem;
+  late FakeProcessManager processManager;
+  late AndroidSdk androidSdk;
 
   setUp(() {
     processManager = FakeProcessManager.empty();
@@ -70,7 +68,7 @@ void main() {
       final File apkFile = fileSystem.file('app.apk')..createSync();
       final AndroidApk apk = AndroidApk(
         id: 'FlutterApp',
-        file: apkFile,
+        applicationPackage: apkFile,
         launchActivity: 'FlutterActivity',
         versionCode: 1,
       );
@@ -105,7 +103,6 @@ void main() {
           'android.intent.action.RUN',
           '-f',
           '0x20000000',
-          '--ez', 'enable-background-compilation', 'true',
           '--ez', 'enable-dart-profiling', 'true',
           'FlutterActivity',
         ],
@@ -136,7 +133,7 @@ void main() {
     final File apkFile = fileSystem.file('app.apk')..createSync();
     final AndroidApk apk = AndroidApk(
       id: 'FlutterApp',
-      file: apkFile,
+      applicationPackage: apkFile,
       launchActivity: 'FlutterActivity',
       versionCode: 1,
     );
@@ -174,7 +171,7 @@ void main() {
     final File apkFile = fileSystem.file('app.apk')..createSync();
     final AndroidApk apk = AndroidApk(
       id: 'FlutterApp',
-      file: apkFile,
+      applicationPackage: apkFile,
       launchActivity: 'FlutterActivity',
       versionCode: 1,
     );
@@ -233,7 +230,6 @@ void main() {
         '-f',
         '0x20000000',
         // The DebuggingOptions arguments go here.
-        '--ez', 'enable-background-compilation', 'true',
         '--ez', 'enable-dart-profiling', 'true',
         '--ez', 'enable-software-rendering', 'true',
         '--ez', 'skia-deterministic-rendering', 'true',

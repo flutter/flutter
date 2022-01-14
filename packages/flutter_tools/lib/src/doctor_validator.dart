@@ -6,7 +6,7 @@ import 'package:meta/meta.dart';
 
 import 'base/async_guard.dart';
 import 'base/terminal.dart';
-import 'globals_null_migrated.dart' as globals;
+import 'globals.dart' as globals;
 
 class ValidatorTask {
   ValidatorTask(this.validator, this.result);
@@ -126,8 +126,6 @@ class GroupedValidator extends DoctorValidator {
             mergedType = ValidationType.partial;
           }
           break;
-        default:
-          throw 'Unrecognized validation type: ${result.type}';
       }
       mergedMessages.addAll(result.messages);
     }
@@ -223,22 +221,27 @@ class ValidationMessage {
   ///
   /// The [contextUrl] may be supplied to link to external resources. This
   /// is displayed after the informative message in verbose modes.
-  const ValidationMessage(this.message, {this.contextUrl}) : type = ValidationMessageType.information;
+  const ValidationMessage(this.message, { this.contextUrl, String? piiStrippedMessage })
+      : type = ValidationMessageType.information, piiStrippedMessage = piiStrippedMessage ?? message;
 
   /// Create a validation message with information for a failing validator.
-  const ValidationMessage.error(this.message)
+  const ValidationMessage.error(this.message, { String? piiStrippedMessage })
     : type = ValidationMessageType.error,
+      piiStrippedMessage = piiStrippedMessage ?? message,
       contextUrl = null;
 
   /// Create a validation message with information for a partially failing
   /// validator.
-  const ValidationMessage.hint(this.message)
+  const ValidationMessage.hint(this.message, { String? piiStrippedMessage })
     : type = ValidationMessageType.hint,
+      piiStrippedMessage = piiStrippedMessage ?? message,
       contextUrl = null;
 
   final ValidationMessageType type;
   final String? contextUrl;
   final String message;
+  /// Optional message with PII stripped, to show instead of [message].
+  final String piiStrippedMessage;
 
   bool get isError => type == ValidationMessageType.error;
 
@@ -287,7 +290,8 @@ class NoIdeValidator extends DoctorValidator {
   @override
   Future<ValidationResult> validate() async {
     return ValidationResult(
-      ValidationType.missing,
+      // Info hint to user they do not have a supported IDE installed
+      ValidationType.notAvailable,
       globals.userMessages.noIdeInstallationInfo.map((String ideInfo) => ValidationMessage(ideInfo)).toList(),
       statusInfo: globals.userMessages.noIdeStatusInfo,
     );

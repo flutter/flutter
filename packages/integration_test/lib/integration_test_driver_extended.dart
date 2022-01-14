@@ -106,8 +106,10 @@ Future<void> integrationDriver(
       try {
         ok = await onScreenshot(screenshotName, screenshotBytes.cast<int>());
       } catch (exception) {
-        throw StateError('Screenshot failure:\n'
-            'onScreenshot("$screenshotName", <bytes>) threw an exception: $exception');
+        throw StateError(
+          'Screenshot failure:\n'
+          'onScreenshot("$screenshotName", <bytes>) threw an exception: $exception',
+        );
       }
       if (!ok) {
         failures.add(screenshotName);

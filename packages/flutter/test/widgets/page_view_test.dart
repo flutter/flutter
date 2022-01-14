@@ -25,9 +25,9 @@ void main() {
           child: SizedBox.fromSize(
             size: size,
             child: PageView(
-              children: kStates.map<Widget>((String state) => Text(state)).toList(),
               controller: controller,
               onPageChanged: (int page) { },
+              children: kStates.map<Widget>((String state) => Text(state)).toList(),
             ),
           ),
         ),
@@ -70,9 +70,9 @@ void main() {
           child: SizedBox.fromSize(
             size: size,
             child: PageView(
-              children: kStates.map<Widget>((String state) => Text(state)).toList(),
               controller: controller,
               onPageChanged: (int page) { },
+              children: kStates.map<Widget>((String state) => Text(state)).toList(),
             ),
           ),
         ),
@@ -1095,5 +1095,32 @@ void main() {
     ));
 
     expect(tester.widget<SliverFillViewport>(viewportFinder()).padEnds, false);
+  });
+
+  testWidgets('PageView - precision error inside RenderSliverFixedExtentBoxAdaptor', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/95101
+
+    final PageController controller = PageController(initialPage: 152);
+    await tester.pumpWidget(
+      Center(
+        child: SizedBox(
+          width: 392.72727272727275,
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: PageView.builder(
+              controller: controller,
+              itemCount: 366,
+              itemBuilder: (BuildContext context, int index) {
+                return const SizedBox();
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    controller.jumpToPage(365);
+    await tester.pump();
+    expect(tester.takeException(), isNull);
   });
 }

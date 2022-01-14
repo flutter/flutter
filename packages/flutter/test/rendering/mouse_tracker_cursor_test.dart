@@ -57,8 +57,10 @@ void main() {
   setUp(() {
     _binding.postFrameCallbacks.clear();
     _binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.mouseCursor, (MethodCall call) async {
-      if (_methodCallHandler != null)
+      if (_methodCallHandler != null) {
         return _methodCallHandler!(call);
+      }
+      return null;
     });
   });
 

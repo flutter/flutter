@@ -20,7 +20,7 @@ import 'convert.dart';
 import 'dart/language_version.dart';
 import 'dart/package_map.dart';
 import 'features.dart';
-import 'globals_null_migrated.dart' as globals;
+import 'globals.dart' as globals;
 import 'platform_plugins.dart';
 import 'plugins.dart';
 import 'project.dart';
@@ -98,6 +98,7 @@ const String _kFlutterPluginsPluginListKey = 'plugins';
 const String _kFlutterPluginsNameKey = 'name';
 const String _kFlutterPluginsPathKey = 'path';
 const String _kFlutterPluginsDependenciesKey = 'dependencies';
+const String _kFlutterPluginsHasNativeBuildKey = 'native_build';
 
 /// Filters [plugins] to those supported by [platformKey].
 List<Map<String, Object>> _filterPluginsByPlatform(List<Plugin> plugins, String platformKey) {
@@ -108,9 +109,13 @@ List<Map<String, Object>> _filterPluginsByPlatform(List<Plugin> plugins, String 
   final Set<String> pluginNames = platformPlugins.map((Plugin plugin) => plugin.name).toSet();
   final List<Map<String, Object>> pluginInfo = <Map<String, Object>>[];
   for (final Plugin plugin in platformPlugins) {
+    // This is guaranteed to be non-null due to the `where` filter above.
+    final PluginPlatform platformPlugin = plugin.platforms[platformKey]!;
     pluginInfo.add(<String, Object>{
       _kFlutterPluginsNameKey: plugin.name,
       _kFlutterPluginsPathKey: globals.fsUtils.escapePath(plugin.path),
+      if (platformPlugin is NativeOrDartPlugin)
+        _kFlutterPluginsHasNativeBuildKey: (platformPlugin as NativeOrDartPlugin).isNative(),
       _kFlutterPluginsDependenciesKey: <String>[...plugin.dependencies.where(pluginNames.contains)],
     });
   }
@@ -130,7 +135,8 @@ List<Map<String, Object>> _filterPluginsByPlatform(List<Plugin> plugins, String 
 ///         "dependencies": [
 ///           "plugin-a",
 ///           "plugin-b"
-///         ]
+///         ],
+///         "native_build": true
 ///       }
 ///     ],
 ///     "android": [],
@@ -348,7 +354,6 @@ List<Map<String, Object?>> _extractPlatformMaps(List<Plugin> plugins, String typ
 /// [project] is using.
 AndroidEmbeddingVersion _getAndroidEmbeddingVersion(FlutterProject project) {
   assert(project.android != null);
-
   return project.android.getEmbeddingVersion();
 }
 
@@ -394,7 +399,7 @@ Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> 
         }
       }
       if (pluginsUsingV1.length > 1) {
-        globals.printError(
+        globals.printWarning(
           'The plugins `${pluginsUsingV1.join(', ')}` use a deprecated version of the Android embedding.\n'
           'To avoid unexpected runtime failures, or future build failures, try to see if these plugins '
           'support the Android V2 embedding. Otherwise, consider removing them since a future release '
@@ -403,7 +408,7 @@ Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> 
           'https://flutter.dev/go/android-plugin-migration.'
         );
       } else if (pluginsUsingV1.isNotEmpty) {
-        globals.printError(
+        globals.printWarning(
           'The plugin `${pluginsUsingV1.first}` uses a deprecated version of the Android embedding.\n'
           'To avoid unexpected runtime failures, or future build failures, try to see if this plugin '
           'supports the Android V2 embedding. Otherwise, consider removing it since a future release '
@@ -415,8 +420,7 @@ Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> 
       templateContent = _androidPluginRegistryTemplateNewEmbedding;
       break;
     case AndroidEmbeddingVersion.v1:
-    default:
-      globals.printError(
+      globals.printWarning(
         'This app is using a deprecated version of the Android embedding.\n'
         'To avoid unexpected runtime failures, or future build failures, try to migrate this '
         'app to the V2 embedding.\n'
@@ -686,6 +690,9 @@ const String _dartPluginRegistryForNonWebTemplate = '''
 //
 
 // @dart = {{dartLanguageVersion}}
+
+// When `{{mainEntrypoint}}` defines `main`, that definition is shadowed by the definition below.
+export '{{mainEntrypoint}}';
 
 import '{{mainEntrypoint}}' as entrypoint;
 import 'dart:io'; // flutter_ignore: dart_io_import.
@@ -1300,7 +1307,7 @@ Future<void> generateMainDartWithPluginRegistrant(
         newMainDart.deleteSync();
       }
     } on FileSystemException catch (error) {
-      globals.printError(
+      globals.printWarning(
         'Unable to remove ${newMainDart.path}, received error: $error.\n'
         'You might need to run flutter clean.'
       );

@@ -448,7 +448,7 @@ class Localizations extends StatefulWidget {
     assert(context != null);
     final _LocalizationsScope? scope = context.dependOnInheritedWidgetOfExactType<_LocalizationsScope>();
     assert(scope != null, 'a Localizations ancestor was not found');
-    return List<LocalizationsDelegate<dynamic>>.from(scope!.localizationsState.widget.delegates);
+    return List<LocalizationsDelegate<dynamic>>.of(scope!.localizationsState.widget.delegates);
   }
 
   /// Returns the localized resources object of the given `type` for the widget

@@ -288,7 +288,7 @@ class RenderParagraph extends RenderBox
     markNeedsLayout();
   }
 
-  /// {@macro flutter.dart:ui.textHeightBehavior}
+  /// {@macro dart.ui.textHeightBehavior}
   ui.TextHeightBehavior? get textHeightBehavior => _textPainter.textHeightBehavior;
   set textHeightBehavior(ui.TextHeightBehavior? value) {
     if (_textPainter.textHeightBehavior == value)
@@ -554,7 +554,11 @@ class RenderParagraph extends RenderBox
               _placeholderSpans[childIndex].baseline!,
             );
             break;
-          default:
+          case ui.PlaceholderAlignment.aboveBaseline:
+          case ui.PlaceholderAlignment.belowBaseline:
+          case ui.PlaceholderAlignment.bottom:
+          case ui.PlaceholderAlignment.middle:
+          case ui.PlaceholderAlignment.top:
             baselineOffset = null;
             break;
         }

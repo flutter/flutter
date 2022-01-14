@@ -50,8 +50,8 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
         },
         items: items.map((String item) {
           return DropdownMenuItem<String>(
-            child: Text('Log $item'),
             value: item,
+            child: Text('Log $item'),
           );
         }).toList(),
       ),

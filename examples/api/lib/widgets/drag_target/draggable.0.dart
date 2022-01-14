@@ -43,14 +43,6 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
         Draggable<int>(
           // Data is the value this Draggable stores.
           data: 10,
-          child: Container(
-            height: 100.0,
-            width: 100.0,
-            color: Colors.lightGreenAccent,
-            child: const Center(
-              child: Text('Draggable'),
-            ),
-          ),
           feedback: Container(
             color: Colors.deepOrange,
             height: 100,
@@ -63,6 +55,14 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
             color: Colors.pinkAccent,
             child: const Center(
               child: Text('Child When Dragging'),
+            ),
+          ),
+          child: Container(
+            height: 100.0,
+            width: 100.0,
+            color: Colors.lightGreenAccent,
+            child: const Center(
+              child: Text('Draggable'),
             ),
           ),
         ),

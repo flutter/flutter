@@ -4,6 +4,8 @@
 
 // Flutter code sample for StreamBuilder
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 void main() => runApp(const MyApp());
@@ -30,10 +32,17 @@ class MyStatefulWidget extends StatefulWidget {
 }
 
 class _MyStatefulWidgetState extends State<MyStatefulWidget> {
-  final Stream<int> _bids = (() async* {
-    await Future<void>.delayed(const Duration(seconds: 1));
-    yield 1;
-    await Future<void>.delayed(const Duration(seconds: 1));
+  final Stream<int> _bids = (() {
+    late final StreamController<int> controller;
+    controller = StreamController<int>(
+      onListen: () async {
+        await Future<void>.delayed(const Duration(seconds: 1));
+        controller.add(1);
+        await Future<void>.delayed(const Duration(seconds: 1));
+        await controller.close();
+      },
+    );
+    return controller.stream;
   })();
 
   @override
@@ -82,9 +91,9 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                 case ConnectionState.waiting:
                   children = const <Widget>[
                     SizedBox(
-                      child: CircularProgressIndicator(),
                       width: 60,
                       height: 60,
+                      child: CircularProgressIndicator(),
                     ),
                     Padding(
                       padding: EdgeInsets.only(top: 16),

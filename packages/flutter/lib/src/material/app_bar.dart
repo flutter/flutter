@@ -475,7 +475,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// This property is deprecated, please use [systemOverlayStyle] instead.
   ///
   /// Determines the brightness of the [SystemUiOverlayStyle]: for
-  /// [Brightness.dark], [SystemUiOverlayStyle.light] is used and fo
+  /// [Brightness.dark], [SystemUiOverlayStyle.light] is used and for
   /// [Brightness.light], [SystemUiOverlayStyle.dark] is used.
   ///
   /// If this value is null then [AppBarTheme.brightness] is used
@@ -1047,7 +1047,7 @@ class _AppBarState extends State<AppBar> {
       ? _systemOverlayStyleForBrightness(
           widget.brightness
           ?? appBarTheme.brightness
-          ?? theme.primaryColorBrightness,
+          ?? ThemeData.estimateBrightnessForColor(backgroundColor),
         )
       : widget.systemOverlayStyle
         ?? appBarTheme.systemOverlayStyle

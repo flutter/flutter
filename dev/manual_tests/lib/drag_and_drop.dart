@@ -132,18 +132,18 @@ class ExampleDragSource extends StatelessWidget {
     if (heavy) {
       return LongPressDraggable<Color>(
         data: color,
-        child: contents,
         feedback: feedback,
         feedbackOffset: feedbackOffset,
         dragAnchorStrategy: dragAnchorStrategy,
+        child: contents,
       );
     } else {
       return Draggable<Color>(
         data: color,
-        child: contents,
         feedback: feedback,
         feedbackOffset: feedbackOffset,
         dragAnchorStrategy: dragAnchorStrategy,
+        child: contents,
       );
     }
   }
@@ -208,10 +208,10 @@ class MovableBall extends StatelessWidget {
     if (position == ballPosition) {
       return Draggable<bool>(
         data: true,
-        child: ball,
         childWhenDragging: dashedBall,
         feedback: ball,
         maxSimultaneousDrags: 1,
+        child: ball,
       );
     } else {
       return DragTarget<bool>(

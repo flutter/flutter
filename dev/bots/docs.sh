@@ -20,7 +20,7 @@ function generate_docs() {
     # Install and activate dartdoc.
     # NOTE: When updating to a new dartdoc version, please also update
     # `dartdoc_options.yaml` to include newly introduced error and warning types.
-    "$DART" pub global activate dartdoc 4.0.0
+    "$DART" pub global activate dartdoc 4.1.0
 
     # Install and activate the snippets tool, which resides in the
     # assets-for-api-docs repo:
@@ -75,9 +75,6 @@ function create_docset() {
 }
 
 function deploy_docs() {
-    # Ensure google webmaster tools can verify our site.
-    cp "$FLUTTER_ROOT/dev/docs/google2ed1af765c529f57.html" "$FLUTTER_ROOT/dev/docs/doc"
-
     case "$LUCI_BRANCH" in
         master)
             echo "$(date): Updating $LUCI_BRANCH docs: https://master-api.flutter.dev/"

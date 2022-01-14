@@ -845,7 +845,7 @@ class _TestAnnotatedLayer extends Layer {
   final Size? size;
 
   @override
-  EngineLayer? addToScene(SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
+  EngineLayer? addToScene(SceneBuilder builder) {
     return null;
   }
 

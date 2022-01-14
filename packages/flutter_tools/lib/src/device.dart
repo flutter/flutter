@@ -214,7 +214,7 @@ abstract class DeviceManager {
   ///
   /// * If [flutterProject] is null, then assume the project supports all
   /// device types.
-  Future<List<Device>> findTargetDevices(FlutterProject flutterProject, { Duration? timeout }) async {
+  Future<List<Device>> findTargetDevices(FlutterProject? flutterProject, { Duration? timeout }) async {
     if (timeout != null) {
       // Reset the cache with the specified timeout.
       await refreshAllConnectedDevices(timeout: timeout);
@@ -317,7 +317,7 @@ abstract class DeviceManager {
   ///
   /// This exists to allow the check to be overridden for google3 clients. If
   /// [flutterProject] is null then return true.
-  bool isDeviceSupportedForProject(Device device, FlutterProject flutterProject) {
+  bool isDeviceSupportedForProject(Device device, FlutterProject? flutterProject) {
     if (flutterProject == null) {
       return true;
     }
@@ -444,10 +444,10 @@ abstract class Device {
   final String id;
 
   /// The [Category] for this device type.
-  final Category category;
+  final Category? category;
 
   /// The [PlatformType] for this device.
-  final PlatformType platformType;
+  final PlatformType? platformType;
 
   /// Whether this is an ephemeral device.
   final bool ephemeral;
@@ -468,7 +468,7 @@ abstract class Device {
   /// The ID returned matches that in the output of `flutter emulators`. Fetching
   /// this name may require connecting to the device and if an error occurs null
   /// will be returned.
-  Future<String> get emulatorId;
+  Future<String?> get emulatorId;
 
   /// Whether this device can run the provided [buildMode].
   ///
@@ -490,7 +490,7 @@ abstract class Device {
   /// Specify [userIdentifier] to check if installed for a particular user (Android only).
   Future<bool> isAppInstalled(
     covariant ApplicationPackage app, {
-    String userIdentifier,
+    String? userIdentifier,
   });
 
   /// Check if the latest build of the [app] is already installed.
@@ -501,7 +501,7 @@ abstract class Device {
   /// Specify [userIdentifier] to install for a particular user (Android only).
   Future<bool> installApp(
     covariant ApplicationPackage app, {
-    String userIdentifier,
+    String? userIdentifier,
   });
 
   /// Uninstall an app package from the current device.
@@ -510,7 +510,7 @@ abstract class Device {
   /// defaults to all users (Android only).
   Future<bool> uninstallApp(
     covariant ApplicationPackage app, {
-    String userIdentifier,
+    String? userIdentifier,
   });
 
   /// Check if the device is supported by Flutter.
@@ -550,12 +550,12 @@ abstract class Device {
   /// reader will also include log messages from before the invocation time.
   /// Defaults to false.
   FutureOr<DeviceLogReader> getLogReader({
-    covariant ApplicationPackage app,
+    covariant ApplicationPackage? app,
     bool includePastLogs = false,
   });
 
   /// Get the port forwarder for this device.
-  DevicePortForwarder get portForwarder;
+  DevicePortForwarder? get portForwarder;
 
   /// Get the DDS instance for this device.
   final DartDevelopmentService dds = DartDevelopmentService();
@@ -572,13 +572,13 @@ abstract class Device {
   /// start call. The build mode is not used by all platforms.
   Future<LaunchResult> startApp(
     covariant ApplicationPackage package, {
-    String mainPath,
-    String route,
-    DebuggingOptions debuggingOptions,
+    String? mainPath,
+    String? route,
+    required DebuggingOptions debuggingOptions,
     Map<String, Object?> platformArgs,
     bool prebuiltApplication = false,
     bool ipv6 = false,
-    String userIdentifier,
+    String? userIdentifier,
   });
 
   /// Whether this device implements support for hot reload.
@@ -603,7 +603,7 @@ abstract class Device {
   /// Specify [userIdentifier] to stop app installed to a profile (Android only).
   Future<bool> stopApp(
     covariant ApplicationPackage app, {
-    String userIdentifier,
+    String? userIdentifier,
   });
 
   /// Query the current application memory usage..
@@ -635,9 +635,9 @@ abstract class Device {
   @override
   String toString() => name;
 
-  static Stream<String> descriptions(List<Device> devices) async* {
+  static Future<List<String>> descriptions(List<Device> devices) async {
     if (devices.isEmpty) {
-      return;
+      return const <String>[];
     }
 
     // Extract device information
@@ -665,13 +665,14 @@ abstract class Device {
     }
 
     // Join columns into lines of text
-    for (final List<String> row in table) {
-      yield indices.map<String>((int i) => row[i].padRight(widths[i])).followedBy(<String>[row.last]).join(' • ');
-    }
+    return <String>[
+      for (final List<String> row in table)
+        indices.map<String>((int i) => row[i].padRight(widths[i])).followedBy(<String>[row.last]).join(' • '),
+    ];
   }
 
   static Future<void> printDevices(List<Device> devices, Logger logger) async {
-    await descriptions(devices).forEach(logger.printStatus);
+    (await descriptions(devices)).forEach(logger.printStatus);
   }
 
   static List<String> devicesPlatformTypes(List<Device> devices) {
@@ -917,7 +918,7 @@ class DiscoveredApp {
 
 // An empty device log reader
 class NoOpDeviceLogReader implements DeviceLogReader {
-  NoOpDeviceLogReader(this.name);
+  NoOpDeviceLogReader(String? nameOrNull) : name = nameOrNull ?? '';
 
   @override
   final String name;

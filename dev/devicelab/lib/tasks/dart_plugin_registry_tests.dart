@@ -6,11 +6,12 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:flutter_devicelab/common.dart';
-import 'package:flutter_devicelab/framework/framework.dart';
-import 'package:flutter_devicelab/framework/task_result.dart';
-import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:path/path.dart' as path;
+
+import '../common.dart';
+import '../framework/framework.dart';
+import '../framework/task_result.dart';
+import '../framework/utils.dart';
 
 TaskFunction dartPluginRegistryTest({
   String? deviceIdOverride,

@@ -3,10 +3,11 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_gallery/demo/shrine/model/app_state_model.dart';
-import 'package:flutter_gallery/demo/shrine/model/product.dart';
 import 'package:intl/intl.dart';
 import 'package:scoped_model/scoped_model.dart';
+
+import '../model/app_state_model.dart';
+import '../model/product.dart';
 
 class ProductCard extends StatelessWidget {
   const ProductCard({ Key? key, this.imageAspectRatio = 33 / 49, this.product })
