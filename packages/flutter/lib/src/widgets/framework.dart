@@ -405,7 +405,9 @@ abstract class Widget extends DiagnosticableTree {
 // trees that contain a significant number of inherited widgets by deferring
 // expensive map allocations until they are needed.
 class _InheritedLookup {
-  _InheritedLookup? parent;
+  _InheritedLookup(this.parent);
+
+  final _InheritedLookup? parent;
   final HashMap<Type, InheritedElement> current = HashMap<Type, InheritedElement>();
 
   InheritedElement? operator[](Type type) {
@@ -3160,8 +3162,29 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// in a build method if it is known that they will not change.
   @nonVirtual
   @override
-  // ignore: avoid_equals_and_hash_code_on_mutable_classes, hash_and_equals
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
   bool operator ==(Object other) => identical(this, other);
+
+  // Custom implementation of hash code optimized for the ".of" pattern used
+  // with `InheritedWidgets`.
+  //
+  // `Element.dependOnInheritedWidgetOfExactType` relies heavily on hash-based
+  // `Set` look-ups, putting this getter on the performance critical path.
+  //
+  // The value is designed to fit within the SMI representation. This makes
+  // the cached value use less memory (one field and no extra heap objects) and
+  // cheap to compare (no indirection).
+  //
+  // See also:
+  //
+  //  * https://dart.dev/articles/dart-vm/numeric-computation, which
+  //    explains how numbers are represented in Dart.
+  @nonVirtual
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _cachedHash;
+  final int _cachedHash = _nextHashCode = (_nextHashCode + 1) % 0xffffff;
+  static int _nextHashCode = 1;
 
   /// Information set by parent to define where this child fits in its parent's
   /// child list.
@@ -5215,8 +5238,7 @@ class InheritedElement extends ProxyElement {
   @override
   void _updateInheritance() {
     assert(_lifecycleState == _ElementLifecycle.active);
-    _inheritedLookup = _InheritedLookup()
-      ..parent = _parent?._inheritedLookup
+    _inheritedLookup = _InheritedLookup(_parent?._inheritedLookup)
       ..current[widget.runtimeType] = this;
   }
 
