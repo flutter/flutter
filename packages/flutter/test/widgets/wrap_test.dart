@@ -19,7 +19,6 @@ void main() {
   testWidgets('Basic Wrap test (LTR)', (WidgetTester tester) async {
     await tester.pumpWidget(
       Wrap(
-        alignment: WrapAlignment.start,
         textDirection: TextDirection.ltr,
         children: const <Widget>[
           SizedBox(width: 300.0, height: 100.0),
@@ -76,8 +75,6 @@ void main() {
 
     await tester.pumpWidget(
       Wrap(
-        alignment: WrapAlignment.start,
-        crossAxisAlignment: WrapCrossAlignment.start,
         textDirection: TextDirection.ltr,
         children: const <Widget>[
           SizedBox(width: 300.0, height: 50.0),
@@ -96,7 +93,6 @@ void main() {
 
     await tester.pumpWidget(
       Wrap(
-        alignment: WrapAlignment.start,
         crossAxisAlignment: WrapCrossAlignment.center,
         textDirection: TextDirection.ltr,
         children: const <Widget>[
@@ -116,7 +112,6 @@ void main() {
 
     await tester.pumpWidget(
       Wrap(
-        alignment: WrapAlignment.start,
         crossAxisAlignment: WrapCrossAlignment.end,
         textDirection: TextDirection.ltr,
         children: const <Widget>[
@@ -139,7 +134,6 @@ void main() {
   testWidgets('Basic Wrap test (RTL)', (WidgetTester tester) async {
     await tester.pumpWidget(
       Wrap(
-        alignment: WrapAlignment.start,
         textDirection: TextDirection.rtl,
         children: const <Widget>[
           SizedBox(width: 300.0, height: 100.0),
@@ -196,8 +190,6 @@ void main() {
 
     await tester.pumpWidget(
       Wrap(
-        alignment: WrapAlignment.start,
-        crossAxisAlignment: WrapCrossAlignment.start,
         textDirection: TextDirection.ltr,
         verticalDirection: VerticalDirection.up,
         children: const <Widget>[
@@ -217,7 +209,6 @@ void main() {
 
     await tester.pumpWidget(
       Wrap(
-        alignment: WrapAlignment.start,
         crossAxisAlignment: WrapCrossAlignment.center,
         textDirection: TextDirection.ltr,
         verticalDirection: VerticalDirection.up,
@@ -238,7 +229,6 @@ void main() {
 
     await tester.pumpWidget(
       Wrap(
-        alignment: WrapAlignment.start,
         crossAxisAlignment: WrapCrossAlignment.end,
         textDirection: TextDirection.ltr,
         verticalDirection: VerticalDirection.up,
@@ -638,8 +628,6 @@ void main() {
         alignment: Alignment.topLeft,
         child: Wrap(
           runSpacing: 10.0,
-          alignment: WrapAlignment.start,
-          crossAxisAlignment: WrapCrossAlignment.start,
           textDirection: TextDirection.ltr,
           children: const <Widget>[
             SizedBox(width: 500.0, height: 10.0),
@@ -667,8 +655,6 @@ void main() {
           direction: Axis.vertical,
           spacing: 10.0,
           runSpacing: 15.0,
-          alignment: WrapAlignment.start,
-          crossAxisAlignment: WrapCrossAlignment.start,
           textDirection: TextDirection.ltr,
           children: const <Widget>[
             SizedBox(width: 10.0, height: 250.0),
@@ -695,7 +681,6 @@ void main() {
       Align(
         alignment: Alignment.topLeft,
         child: Wrap(
-          direction: Axis.horizontal,
           spacing: 12.0,
           runSpacing: 8.0,
           textDirection: TextDirection.ltr,
@@ -834,7 +819,6 @@ void main() {
 
   testWidgets('Spacing with slight overflow', (WidgetTester tester) async {
     await tester.pumpWidget(Wrap(
-      direction: Axis.horizontal,
       textDirection: TextDirection.ltr,
       spacing: 10.0,
       runSpacing: 10.0,
@@ -860,7 +844,6 @@ void main() {
       Column(
         children: <Widget>[
           Wrap(
-            direction: Axis.horizontal,
             textDirection: TextDirection.ltr,
             spacing: 10.0,
             runSpacing: 10.0,
@@ -879,7 +862,6 @@ void main() {
       Column(
         children: <Widget>[
           Wrap(
-            direction: Axis.horizontal,
             textDirection: TextDirection.ltr,
             spacing: 10.0,
             runSpacing: 10.0,

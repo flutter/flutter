@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
+
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
@@ -156,7 +160,6 @@ void main() {
         Center(
           child: FractionalTranslation(
             translation: Offset.zero,
-            transformHitTests: true,
             child: Listener(
               onPointerDown: (PointerDownEvent event) {
                 _pointerDown = true;
@@ -186,7 +189,6 @@ void main() {
         Center(
           child: FractionalTranslation(
             translation: const Offset(0.5, 0.5),
-            transformHitTests: true,
             child: Listener(
               onPointerDown: (PointerDownEvent event) {
                 _pointerDown = true;
@@ -216,7 +218,6 @@ void main() {
         Center(
           child: FractionalTranslation(
             translation: const Offset(1.0, 1.0),
-            transformHitTests: true,
             child: Listener(
               onPointerDown: (PointerDownEvent event) {
                 _pointerDown = true;
@@ -254,7 +255,6 @@ void main() {
                   child: FractionalTranslation(
                     key: fractionalTranslationKey,
                     translation: offset,
-                    transformHitTests: true,
                     child: GestureDetector(
                       onTap: () {
                         setState(() {
@@ -858,6 +858,37 @@ void main() {
     await tester.pumpWidget(target(absorbing: true));
     expect(logs, <String>['exit3']);
     logs.clear();
+  });
+
+  testWidgets('Wrap implements debugFillProperties', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    Wrap(
+      spacing: 8.0, // gap between adjacent Text widget
+      runSpacing: 4.0, // gap between lines
+      textDirection: TextDirection.ltr,
+      verticalDirection: VerticalDirection.up,
+      children: const <Widget>[
+        Text('Hamilton'),
+        Text('Lafayette'),
+        Text('Mulligan'),
+      ],
+    ).debugFillProperties(builder);
+
+    final List<String> description = builder.properties
+      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((DiagnosticsNode node) => node.toString())
+      .toList();
+
+    expect(description, unorderedMatches(<dynamic>[
+      contains('direction: horizontal'),
+      contains('alignment: start'),
+      contains('spacing: 8.0'),
+      contains('runAlignment: start'),
+      contains('runSpacing: 4.0'),
+      contains('crossAxisAlignment: start'),
+      contains('textDirection: ltr'),
+      contains('verticalDirection: up'),
+    ]));
   });
 }
 

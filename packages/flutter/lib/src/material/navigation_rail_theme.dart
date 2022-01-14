@@ -44,6 +44,8 @@ class NavigationRailThemeData with Diagnosticable {
     this.selectedIconTheme,
     this.groupAlignment,
     this.labelType,
+    this.useIndicator,
+    this.indicatorColor,
   });
 
   /// Color to be used for the [NavigationRail]'s background.
@@ -76,6 +78,14 @@ class NavigationRailThemeData with Diagnosticable {
   /// [NavigationRail].
   final NavigationRailLabelType? labelType;
 
+  /// Whether or not the selected [NavigationRailDestination] should include a
+  /// [NavigationIndicator].
+  final bool? useIndicator;
+
+  /// Overrides the default value of [NavigationRail]'s selection indicator color,
+  /// when [useIndicator] is true.
+  final Color? indicatorColor;
+
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   NavigationRailThemeData copyWith({
@@ -87,6 +97,8 @@ class NavigationRailThemeData with Diagnosticable {
     IconThemeData? selectedIconTheme,
     double? groupAlignment,
     NavigationRailLabelType? labelType,
+    bool? useIndicator,
+    Color? indicatorColor,
   }) {
     return NavigationRailThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -97,6 +109,8 @@ class NavigationRailThemeData with Diagnosticable {
       selectedIconTheme: selectedIconTheme ?? this.selectedIconTheme,
       groupAlignment: groupAlignment ?? this.groupAlignment,
       labelType: labelType ?? this.labelType,
+      useIndicator: useIndicator ?? this.useIndicator,
+      indicatorColor: indicatorColor ?? this.indicatorColor,
     );
   }
 
@@ -118,6 +132,8 @@ class NavigationRailThemeData with Diagnosticable {
       selectedIconTheme: IconThemeData.lerp(a?.selectedIconTheme, b?.selectedIconTheme, t),
       groupAlignment: lerpDouble(a?.groupAlignment, b?.groupAlignment, t),
       labelType: t < 0.5 ? a?.labelType : b?.labelType,
+      useIndicator: t < 0.5 ? a?.useIndicator : b?.useIndicator,
+      indicatorColor: Color.lerp(a?.indicatorColor, b?.indicatorColor, t),
     );
   }
 
@@ -132,6 +148,8 @@ class NavigationRailThemeData with Diagnosticable {
       selectedIconTheme,
       groupAlignment,
       labelType,
+      useIndicator,
+      indicatorColor,
     );
   }
 
@@ -149,7 +167,9 @@ class NavigationRailThemeData with Diagnosticable {
         && other.unselectedIconTheme == unselectedIconTheme
         && other.selectedIconTheme == selectedIconTheme
         && other.groupAlignment == groupAlignment
-        && other.labelType == labelType;
+        && other.labelType == labelType
+        && other.useIndicator == useIndicator
+        && other.indicatorColor == indicatorColor;
   }
 
   @override
@@ -165,6 +185,8 @@ class NavigationRailThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<IconThemeData>('selectedIconTheme', selectedIconTheme, defaultValue: defaultData.selectedIconTheme));
     properties.add(DoubleProperty('groupAlignment', groupAlignment, defaultValue: defaultData.groupAlignment));
     properties.add(DiagnosticsProperty<NavigationRailLabelType>('labelType', labelType, defaultValue: defaultData.labelType));
+    properties.add(DiagnosticsProperty<bool>('useIndicator', useIndicator, defaultValue: defaultData.useIndicator));
+    properties.add(ColorProperty('indicatorColor', indicatorColor, defaultValue: defaultData.indicatorColor));
   }
 }
 

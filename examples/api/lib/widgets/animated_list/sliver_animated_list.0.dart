@@ -2,33 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Template: dev/snippets/config/templates/freeform.tmpl
-//
-// Comment lines marked with "▼▼▼" and "▲▲▲" are used for authoring
-// of samples, and may be ignored if you are just exploring the sample.
-
 // Flutter code sample for SliverAnimatedList
-//
-//***************************************************************************
-//* ▼▼▼▼▼▼▼▼ description ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
-
-// This sample application uses a [SliverAnimatedList] to create an animated
-// effect when items are removed or added to the list.
-
-//* ▲▲▲▲▲▲▲▲ description ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//***************************************************************************
-
-//****************************************************************************
-//* ▼▼▼▼▼▼▼▼ code-imports ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-
-//* ▲▲▲▲▲▲▲▲ code-imports ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//****************************************************************************
-
-//********************************************************************
-//* ▼▼▼▼▼▼▼▼ code ▼▼▼▼▼▼▼▼ (do not modify or remove section marker)
 
 void main() => runApp(const SliverAnimatedListSample());
 
@@ -88,7 +65,6 @@ class _SliverAnimatedListSampleState extends State<SliverAnimatedListSample> {
     return CardItem(
       animation: animation,
       item: item,
-      selected: false,
     );
   }
 
@@ -236,10 +212,8 @@ class CardItem extends StatelessWidget {
         left: 2.0,
         right: 2.0,
         top: 2.0,
-        bottom: 0.0,
       ),
       child: SizeTransition(
-        axis: Axis.vertical,
         sizeFactor: animation,
         child: GestureDetector(
           onTap: onTap,
@@ -262,6 +236,3 @@ class CardItem extends StatelessWidget {
     );
   }
 }
-
-//* ▲▲▲▲▲▲▲▲ code ▲▲▲▲▲▲▲▲ (do not modify or remove section marker)
-//********************************************************************

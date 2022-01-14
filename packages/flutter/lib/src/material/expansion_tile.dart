@@ -21,7 +21,7 @@ const Duration _kExpand = Duration(milliseconds: 200);
 /// [ExpansionTile] to save and restore its expanded state when it is scrolled
 /// in and out of view.
 ///
-/// This class overrides the [ListTileTheme.iconColor] and [ListTileTheme.textColor]
+/// This class overrides the [ListTileThemeData.iconColor] and [ListTileThemeData.textColor]
 /// theme properties for its [ListTile]. These colors animate between values when
 /// the tile is expanded and collapsed: between [iconColor], [collapsedIconColor] and
 /// between [textColor] and [collapsedTextColor].
@@ -30,7 +30,7 @@ const Duration _kExpand = Duration(milliseconds: 200);
 /// (i.e. the trailing edge). This can be changed using [controlAffinity]. This maps
 /// to the [leading] and [trailing] properties of [ExpansionTile].
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold}
+/// {@tool dartpad}
 /// This example demonstrates different configurations of ExpansionTile.
 ///
 /// ** See code in examples/api/lib/material/expansion_tile/expansion_tile.0.dart **
@@ -176,23 +176,23 @@ class ExpansionTile extends StatefulWidget {
 
   /// The icon color of tile's expansion arrow icon when the sublist is expanded.
   ///
-  /// Used to override to the [ListTileTheme.iconColor].
+  /// Used to override to the [ListTileThemeData.iconColor].
   final Color? iconColor;
 
   /// The icon color of tile's expansion arrow icon when the sublist is collapsed.
   ///
-  /// Used to override to the [ListTileTheme.iconColor].
+  /// Used to override to the [ListTileThemeData.iconColor].
   final Color? collapsedIconColor;
 
 
   /// The color of the tile's titles when the sublist is expanded.
   ///
-  /// Used to override to the [ListTileTheme.textColor].
+  /// Used to override to the [ListTileThemeData.textColor].
   final Color? textColor;
 
   /// The color of the tile's titles when the sublist is collapsed.
   ///
-  /// Used to override to the [ListTileTheme.textColor].
+  /// Used to override to the [ListTileThemeData.textColor].
   final Color? collapsedTextColor;
 
   /// Typically used to force the expansion arrow icon to the tile's leading or trailing edge.

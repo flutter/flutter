@@ -218,7 +218,7 @@ void main() {
     (WidgetTester tester) async {
       await tester.pumpWidget(
         const MediaQuery(
-          data: MediaQueryData(platformBrightness: Brightness.light),
+          data: MediaQueryData(),
           child: DependentWidget(color: vibrancyDependentColor1),
         ),
       );
@@ -262,7 +262,7 @@ void main() {
     (WidgetTester tester) async {
       await tester.pumpWidget(
         const MediaQuery(
-          data: MediaQueryData(highContrast: false),
+          data: MediaQueryData(),
           child: DependentWidget(color: contrastDependentColor1),
         ),
       );
@@ -328,7 +328,7 @@ void main() {
 
     await tester.pumpWidget(
       const MediaQuery(
-        data: MediaQueryData(platformBrightness: Brightness.light, highContrast: false),
+        data: MediaQueryData(),
         child: CupertinoUserInterfaceLevel(
           data: CupertinoUserInterfaceLevelData.base,
           child: DependentWidget(color: dynamicRainbowColor1),
@@ -339,7 +339,7 @@ void main() {
 
     await tester.pumpWidget(
       const MediaQuery(
-        data: MediaQueryData(platformBrightness: Brightness.dark, highContrast: false),
+        data: MediaQueryData(platformBrightness: Brightness.dark),
         child: CupertinoUserInterfaceLevel(
           data: CupertinoUserInterfaceLevelData.base,
           child: DependentWidget(color: dynamicRainbowColor1),
@@ -350,7 +350,7 @@ void main() {
 
     await tester.pumpWidget(
       const MediaQuery(
-        data: MediaQueryData(platformBrightness: Brightness.light, highContrast: true),
+        data: MediaQueryData(highContrast: true),
         child: CupertinoUserInterfaceLevel(
           data: CupertinoUserInterfaceLevelData.base,
           child: DependentWidget(color: dynamicRainbowColor1),
@@ -372,7 +372,7 @@ void main() {
 
     await tester.pumpWidget(
       const MediaQuery(
-        data: MediaQueryData(platformBrightness: Brightness.dark, highContrast: false),
+        data: MediaQueryData(platformBrightness: Brightness.dark),
         child: CupertinoUserInterfaceLevel(
           data: CupertinoUserInterfaceLevelData.elevated,
           child: DependentWidget(color: dynamicRainbowColor1),
@@ -383,7 +383,7 @@ void main() {
 
     await tester.pumpWidget(
       const MediaQuery(
-        data: MediaQueryData(platformBrightness: Brightness.light, highContrast: true),
+        data: MediaQueryData(highContrast: true),
         child: CupertinoUserInterfaceLevel(
           data: CupertinoUserInterfaceLevelData.elevated,
           child: DependentWidget(color: dynamicRainbowColor1),
@@ -405,7 +405,7 @@ void main() {
 
     await tester.pumpWidget(
       const MediaQuery(
-        data: MediaQueryData(platformBrightness: Brightness.light, highContrast: false),
+        data: MediaQueryData(),
         child: CupertinoUserInterfaceLevel(
           data: CupertinoUserInterfaceLevelData.elevated,
           child: DependentWidget(color: dynamicRainbowColor1),
@@ -457,7 +457,7 @@ void main() {
       CupertinoApp(
         theme: const CupertinoThemeData(primaryColor: dynamicColor),
         home: MediaQuery(
-          data: const MediaQueryData(platformBrightness: Brightness.light, highContrast: false),
+          data: const MediaQueryData(),
           child: CupertinoUserInterfaceLevel(
             data: CupertinoUserInterfaceLevelData.base,
             child: Builder(
@@ -512,7 +512,7 @@ void main() {
             ),
           ),
           home: MediaQuery(
-            data: const MediaQueryData(platformBrightness: Brightness.light, highContrast: false),
+            data: const MediaQueryData(),
             child: CupertinoUserInterfaceLevel(
               data: CupertinoUserInterfaceLevelData.base,
               child: Builder(

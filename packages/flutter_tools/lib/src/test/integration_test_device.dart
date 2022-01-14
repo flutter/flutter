@@ -14,7 +14,7 @@ import '../application_package.dart';
 import '../base/common.dart';
 import '../build_info.dart';
 import '../device.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../vmservice.dart';
 import 'test_device.dart';
 
@@ -97,7 +97,14 @@ class IntegrationTestTestDevice implements TestDevice {
       );
     });
 
-    unawaited(remoteMessages.pipe(controller.local.sink));
+    remoteMessages.listen(
+      (String s) => controller.local.sink.add(s),
+      onError: (Object error, StackTrace stack) => controller.local.sink.addError(error, stack),
+    );
+    unawaited(vmService.service.onDone.whenComplete(
+      () => controller.local.sink.close(),
+    ));
+
     return controller.foreign;
   }
 

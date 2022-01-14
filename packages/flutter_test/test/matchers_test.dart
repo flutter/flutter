@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// flutter_ignore_for_file: golden_tag (see analyze.dart)
+
 import 'dart:typed_data';
 import 'dart:ui';
 
@@ -701,7 +703,7 @@ class _FakeComparator implements GoldenFileComparator {
       case _ComparatorBehavior.returnFalse:
         return Future<bool>.value(false);
       case _ComparatorBehavior.throwTestFailure:
-        throw TestFailure('fake message');
+        fail('fake message');
     }
   }
 

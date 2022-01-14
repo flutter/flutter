@@ -7,9 +7,9 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
 
-import 'package:flutter_devicelab/common.dart';
 import 'package:path/path.dart' as path;
 
+import '../common.dart';
 import 'utils.dart';
 
 const String DeviceIdEnvName = 'FLUTTER_DEVICELAB_DEVICEID';
@@ -74,8 +74,6 @@ abstract class DeviceDiscovery {
       case DeviceOperatingSystem.fake:
         print('Looking for fake devices! You should not see this in release builds.');
         return FakeDeviceDiscovery();
-      default:
-        throw DeviceException('Unsupported device operating system: $deviceOperatingSystem');
     }
   }
 
@@ -125,6 +123,9 @@ abstract class Device {
 
   /// Send the device to sleep mode.
   Future<void> sendToSleep();
+
+  /// Emulates pressing the home button.
+  Future<void> home();
 
   /// Emulates pressing the power button, toggling the device's on/off state.
   Future<void> togglePower();
@@ -274,7 +275,7 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
 
   @override
   Future<List<String>> discoverDevices() async {
-    final List<String> output = (await eval(adbPath, <String>['devices', '-l'], canFail: false))
+    final List<String> output = (await eval(adbPath, <String>['devices', '-l']))
         .trim().split('\n');
     final List<String> results = <String>[];
     for (final String line in output) {
@@ -327,7 +328,7 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
     // Restarting `adb` helps with keeping device connections alive. When `adb`
     // runs non-stop for too long it loses connections to devices. There may be
     // a better method, but so far that's the best one I've found.
-    await exec(adbPath, <String>['kill-server'], canFail: false);
+    await exec(adbPath, <String>['kill-server']);
   }
 }
 
@@ -472,6 +473,12 @@ class AndroidDevice extends Device {
       await togglePower();
   }
 
+  /// Sends `KEYCODE_HOME` (3), which causes the device to go to the home screen.
+  @override
+  Future<void> home() async {
+    await shellExec('input', const <String>['keyevent', '3']);
+  }
+
   /// Sends `KEYCODE_POWER` (26), which causes the device to toggle its mode
   /// between awake and asleep.
   @override
@@ -555,7 +562,6 @@ class AndroidDevice extends Device {
       adbPath,
       <String>['-s', deviceId, ...arguments],
       environment: environment,
-      canFail: false,
       printStdout: !silent,
       printStderr: !silent,
     );
@@ -797,7 +803,7 @@ class IosDeviceDiscovery implements DeviceDiscovery {
     }
 
     if (deviceIds.isEmpty) {
-      throw const DeviceException('No connected iOS devices found.');
+      throw const DeviceException('No connected physical iOS devices found.');
     }
     return deviceIds;
   }
@@ -899,6 +905,9 @@ class IosDevice extends Device {
   Future<void> sendToSleep() async {}
 
   @override
+  Future<void> home() async {}
+
+  @override
   Future<void> togglePower() async {}
 
   @override
@@ -947,6 +956,9 @@ class FuchsiaDevice extends Device {
 
   @override
   Future<void> sendToSleep() async {}
+
+  @override
+  Future<void> home() async {}
 
   @override
   Future<void> togglePower() async {}
@@ -1013,6 +1025,9 @@ class FakeDevice extends Device {
 
   @override
   Future<void> sendToSleep() async {}
+
+  @override
+  Future<void> home() async {}
 
   @override
   Future<void> togglePower() async {}

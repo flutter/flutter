@@ -35,7 +35,7 @@ void main() {
     expect(material.color, null);
     expect(material.elevation, 0.0);
     expect(material.shadowColor, null);
-    expect(material.shape, RoundedRectangleBorder(borderRadius: BorderRadius.circular(2.0)));
+    expect(material.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2.0))));
     expect(material.textStyle!.color, const Color(0xdd000000));
     expect(material.textStyle!.fontFamily, 'Roboto');
     expect(material.textStyle!.fontSize, 14);
@@ -55,7 +55,7 @@ void main() {
     expect(material.color, null);
     expect(material.elevation, 0.0);
     expect(material.shadowColor, null);
-    expect(material.shape, RoundedRectangleBorder(borderRadius: BorderRadius.circular(2.0)));
+    expect(material.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2.0))));
     expect(material.textStyle!.color, const Color(0xdd000000));
     expect(material.textStyle!.fontFamily, 'Roboto');
     expect(material.textStyle!.fontSize, 14);
@@ -80,7 +80,7 @@ void main() {
     expect(material.color, null);
     expect(material.elevation, 0.0);
     expect(material.shadowColor, null);
-    expect(material.shape, RoundedRectangleBorder(borderRadius: BorderRadius.circular(2.0)));
+    expect(material.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2.0))));
     expect(material.textStyle!.color, const Color(0x61000000));
     expect(material.textStyle!.fontFamily, 'Roboto');
     expect(material.textStyle!.fontSize, 14);
@@ -154,13 +154,12 @@ void main() {
     await expectLater(tester, meetsGuideline(textContrastGuideline));
   },
     skip: isBrowser, // https://github.com/flutter/flutter/issues/44115
-    semanticsEnabled: true,
   );
 
   testWidgets('FlatButton with colored theme meets a11y contrast guidelines', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
 
-    final ColorScheme colorScheme = ColorScheme.fromSwatch(primarySwatch: Colors.blue);
+    final ColorScheme colorScheme = ColorScheme.fromSwatch();
 
     Color getTextColor(Set<MaterialState> states) {
       final Set<MaterialState> interactiveStates = <MaterialState>{
@@ -219,7 +218,6 @@ void main() {
     await expectLater(tester, meetsGuideline(textContrastGuideline));
   },
     skip: isBrowser, // https://github.com/flutter/flutter/issues/44115
-    semanticsEnabled: true,
   );
 
   testWidgets('FlatButton uses stateful color for text color in different states', (WidgetTester tester) async {
@@ -580,7 +578,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Material(
           child: MediaQuery(
-            data: const MediaQueryData(textScaleFactor: 1.0),
+            data: const MediaQueryData(),
             child: Center(
               child: FlatButton(
                 onPressed: () { },
@@ -707,7 +705,7 @@ void main() {
     // onPressed not null, onLongPress null.
     wasPressed = false;
     await tester.pumpWidget(
-      buildFrame(onPressed: () { wasPressed = true; }, onLongPress: null),
+      buildFrame(onPressed: () { wasPressed = true; }),
     );
     flatButton = find.byType(FlatButton);
     expect(tester.widget<FlatButton>(flatButton).enabled, true);
@@ -717,7 +715,7 @@ void main() {
     // onPressed null, onLongPress not null.
     wasPressed = false;
     await tester.pumpWidget(
-      buildFrame(onPressed: null, onLongPress: () { wasPressed = true; }),
+      buildFrame(onLongPress: () { wasPressed = true; }),
     );
     flatButton = find.byType(FlatButton);
     expect(tester.widget<FlatButton>(flatButton).enabled, true);
@@ -726,7 +724,7 @@ void main() {
 
     // onPressed null, onLongPress null.
     await tester.pumpWidget(
-      buildFrame(onPressed: null, onLongPress: null),
+      buildFrame(),
     );
     flatButton = find.byType(FlatButton);
     expect(tester.widget<FlatButton>(flatButton).enabled, false);

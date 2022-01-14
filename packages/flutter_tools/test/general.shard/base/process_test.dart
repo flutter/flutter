@@ -72,8 +72,8 @@ void main() {
       final List<String> testString = <String>['0123456789' * 10];
       processManager.addCommand(FakeCommand(
         command: const <String>['command'],
-        stdout: testString.join(''),
-        stderr: testString.join(''),
+        stdout: testString.join(),
+        stderr: testString.join(),
       ));
 
       await processUtils.stream(<String>['command']);
@@ -187,7 +187,7 @@ void main() {
       testLogger = BufferLogger(
         terminal: AnsiTerminal(
           stdio: FakeStdio(),
-          platform: FakePlatform(stdinSupportsAnsi: false),
+          platform: FakePlatform(),
         ),
         outputPreferences: OutputPreferences(wrapText: true, wrapColumn: 40),
       );

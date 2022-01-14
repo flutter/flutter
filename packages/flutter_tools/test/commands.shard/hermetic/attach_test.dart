@@ -21,7 +21,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/attach.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/device_port_forwarder.dart';
-import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/application_package.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/macos/macos_ipad_device.dart';
@@ -568,6 +568,20 @@ class StreamLogger extends Logger {
     int hangingIndent,
     bool wrap,
   }) {
+    hadErrorOutput = true;
+    _log('[stderr] $message');
+  }
+
+  @override
+  void printWarning(
+    String message, {
+    bool emphasis,
+    TerminalColor color,
+    int indent,
+    int hangingIndent,
+    bool wrap,
+  }) {
+    hadWarningOutput = true;
     _log('[stderr] $message');
   }
 
@@ -582,6 +596,18 @@ class StreamLogger extends Logger {
     bool wrap,
   }) {
     _log('[stdout] $message');
+  }
+
+  @override
+  void printBox(
+    String message, {
+    String title,
+  }) {
+    if (title == null) {
+      _log('[stdout] $message');
+    } else {
+      _log('[stdout] $title: $message');
+    }
   }
 
   @override
@@ -778,6 +804,9 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
   Uri get uri => Uri.parse('http://localhost:8181');
 }
 
+// Unfortunately Device, despite not being immutable, has an `operator ==`.
+// Until we fix that, we have to also ignore related lints here.
+// ignore: avoid_implementing_value_types
 class FakeAndroidDevice extends Fake implements AndroidDevice {
   FakeAndroidDevice({@required this.id});
 
@@ -837,6 +866,9 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   Category get category => Category.mobile;
 }
 
+// Unfortunately Device, despite not being immutable, has an `operator ==`.
+// Until we fix that, we have to also ignore related lints here.
+// ignore: avoid_implementing_value_types
 class FakeIOSDevice extends Fake implements IOSDevice {
   FakeIOSDevice({this.dds, this.portForwarder, this.logReader});
 

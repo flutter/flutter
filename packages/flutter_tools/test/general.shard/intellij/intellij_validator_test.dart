@@ -11,17 +11,16 @@ import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:flutter_tools/src/intellij/intellij_validator.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
-import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
+import '../../src/fakes.dart';
 
 final Platform macPlatform = FakePlatform(
   operatingSystem: 'macos',
   environment: <String, String>{'HOME': '/foo/bar'}
 );
 final Platform linuxPlatform = FakePlatform(
-  operatingSystem: 'linux',
   environment: <String, String>{
     'HOME': '/foo/bar'
   },
@@ -314,9 +313,9 @@ void main() {
     expect(ce.title, 'IntelliJ IDEA Community Edition');
     expect(ce.installPath, ceRandomLocation);
 
-    final IntelliJValidatorOnMac utlimate = validators.where((IntelliJValidatorOnMac validator) => validator.id == 'IntelliJIdea').single;
-    expect(utlimate.title, 'IntelliJ IDEA Ultimate Edition');
-    expect(utlimate.installPath, ultimateRandomLocation);
+    final IntelliJValidatorOnMac ultimate = validators.where((IntelliJValidatorOnMac validator) => validator.id == 'IntelliJIdea').single;
+    expect(ultimate.title, 'IntelliJ IDEA Ultimate Edition');
+    expect(ultimate.installPath, ultimateRandomLocation);
   });
 
   testWithoutContext('Intellij plugins path checking on mac', () async {
@@ -372,17 +371,6 @@ void main() {
 
     expect(validator.pluginsPath, '/path/to/JetBrainsToolboxApp.plugins');
   });
-}
-
-class FakePlistParser extends Fake implements PlistParser {
-  FakePlistParser(this.values);
-
-  final Map<String, String> values;
-
-  @override
-  String? getValueFromFile(String plistFilePath, String key) {
-    return values[key];
-  }
 }
 
 class IntelliJValidatorTestTarget extends IntelliJValidator {

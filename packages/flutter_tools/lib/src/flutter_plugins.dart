@@ -20,14 +20,14 @@ import 'convert.dart';
 import 'dart/language_version.dart';
 import 'dart/package_map.dart';
 import 'features.dart';
-import 'globals_null_migrated.dart' as globals;
+import 'globals.dart' as globals;
 import 'platform_plugins.dart';
 import 'plugins.dart';
 import 'project.dart';
 
 void _renderTemplateToFile(String template, Object? context, File file, TemplateRenderer templateRenderer) {
   final String renderedTemplate = templateRenderer
-    .renderString(template, context, htmlEscapeValues: false);
+    .renderString(template, context);
   file.createSync(recursive: true);
   file.writeAsStringSync(renderedTemplate);
 }
@@ -98,6 +98,7 @@ const String _kFlutterPluginsPluginListKey = 'plugins';
 const String _kFlutterPluginsNameKey = 'name';
 const String _kFlutterPluginsPathKey = 'path';
 const String _kFlutterPluginsDependenciesKey = 'dependencies';
+const String _kFlutterPluginsHasNativeBuildKey = 'native_build';
 
 /// Filters [plugins] to those supported by [platformKey].
 List<Map<String, Object>> _filterPluginsByPlatform(List<Plugin> plugins, String platformKey) {
@@ -108,9 +109,13 @@ List<Map<String, Object>> _filterPluginsByPlatform(List<Plugin> plugins, String 
   final Set<String> pluginNames = platformPlugins.map((Plugin plugin) => plugin.name).toSet();
   final List<Map<String, Object>> pluginInfo = <Map<String, Object>>[];
   for (final Plugin plugin in platformPlugins) {
+    // This is guaranteed to be non-null due to the `where` filter above.
+    final PluginPlatform platformPlugin = plugin.platforms[platformKey]!;
     pluginInfo.add(<String, Object>{
       _kFlutterPluginsNameKey: plugin.name,
       _kFlutterPluginsPathKey: globals.fsUtils.escapePath(plugin.path),
+      if (platformPlugin is NativeOrDartPlugin)
+        _kFlutterPluginsHasNativeBuildKey: (platformPlugin as NativeOrDartPlugin).isNative(),
       _kFlutterPluginsDependenciesKey: <String>[...plugin.dependencies.where(pluginNames.contains)],
     });
   }
@@ -130,7 +135,8 @@ List<Map<String, Object>> _filterPluginsByPlatform(List<Plugin> plugins, String 
 ///         "dependencies": [
 ///           "plugin-a",
 ///           "plugin-b"
-///         ]
+///         ],
+///         "native_build": true
 ///       }
 ///     ],
 ///     "android": [],
@@ -348,13 +354,13 @@ List<Map<String, Object?>> _extractPlatformMaps(List<Plugin> plugins, String typ
 /// [project] is using.
 AndroidEmbeddingVersion _getAndroidEmbeddingVersion(FlutterProject project) {
   assert(project.android != null);
-
   return project.android.getEmbeddingVersion();
 }
 
 Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
+  final List<Plugin> nativePlugins = _filterNativePlugins(plugins, AndroidPlugin.kConfigKey);
   final List<Map<String, Object?>> androidPlugins =
-    _extractPlatformMaps(plugins, AndroidPlugin.kConfigKey);
+    _extractPlatformMaps(nativePlugins, AndroidPlugin.kConfigKey);
 
   final Map<String, Object> templateContext = <String, Object>{
     'plugins': androidPlugins,
@@ -393,7 +399,7 @@ Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> 
         }
       }
       if (pluginsUsingV1.length > 1) {
-        globals.printError(
+        globals.printWarning(
           'The plugins `${pluginsUsingV1.join(', ')}` use a deprecated version of the Android embedding.\n'
           'To avoid unexpected runtime failures, or future build failures, try to see if these plugins '
           'support the Android V2 embedding. Otherwise, consider removing them since a future release '
@@ -402,7 +408,7 @@ Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> 
           'https://flutter.dev/go/android-plugin-migration.'
         );
       } else if (pluginsUsingV1.isNotEmpty) {
-        globals.printError(
+        globals.printWarning(
           'The plugin `${pluginsUsingV1.first}` uses a deprecated version of the Android embedding.\n'
           'To avoid unexpected runtime failures, or future build failures, try to see if this plugin '
           'supports the Android V2 embedding. Otherwise, consider removing it since a future release '
@@ -414,8 +420,7 @@ Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> 
       templateContent = _androidPluginRegistryTemplateNewEmbedding;
       break;
     case AndroidEmbeddingVersion.v1:
-    default:
-      globals.printError(
+      globals.printWarning(
         'This app is using a deprecated version of the Android embedding.\n'
         'To avoid unexpected runtime failures, or future build failures, try to migrate this '
         'app to the V2 embedding.\n'
@@ -676,9 +681,9 @@ const String _dartPluginRegisterWith = r'''
       }
 ''';
 
-// TODO(egarciad): Evaluate merging the web and desktop plugin registry templates.
+// TODO(egarciad): Evaluate merging the web and non-web plugin registry templates.
 // https://github.com/flutter/flutter/issues/80406
-const String _dartPluginRegistryForDesktopTemplate = '''
+const String _dartPluginRegistryForNonWebTemplate = '''
 //
 // Generated file. Do not edit.
 // This file is generated from template in file `flutter_tools/lib/src/flutter_plugins.dart`.
@@ -686,8 +691,17 @@ const String _dartPluginRegistryForDesktopTemplate = '''
 
 // @dart = {{dartLanguageVersion}}
 
+// When `{{mainEntrypoint}}` defines `main`, that definition is shadowed by the definition below.
+export '{{mainEntrypoint}}';
+
 import '{{mainEntrypoint}}' as entrypoint;
 import 'dart:io'; // flutter_ignore: dart_io_import.
+{{#android}}
+import 'package:{{pluginName}}/{{pluginName}}.dart';
+{{/android}}
+{{#ios}}
+import 'package:{{pluginName}}/{{pluginName}}.dart';
+{{/ios}}
 {{#linux}}
 import 'package:{{pluginName}}/{{pluginName}}.dart';
 {{/linux}}
@@ -703,7 +717,15 @@ class _PluginRegistrant {
 
   @pragma('vm:entry-point')
   static void register() {
-    if (Platform.isLinux) {
+    if (Platform.isAndroid) {
+      {{#android}}
+$_dartPluginRegisterWith
+      {{/android}}
+    } else if (Platform.isIOS) {
+      {{#ios}}
+$_dartPluginRegisterWith
+      {{/ios}}
+    } else if (Platform.isLinux) {
       {{#linux}}
 $_dartPluginRegisterWith
       {{/linux}}
@@ -733,7 +755,8 @@ void main(List<String> args) {
 ''';
 
 Future<void> _writeIOSPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
-  final List<Map<String, Object?>> iosPlugins = _extractPlatformMaps(plugins, IOSPlugin.kConfigKey);
+  final List<Plugin> nativePlugins = _filterNativePlugins(plugins, IOSPlugin.kConfigKey);
+  final List<Map<String, Object?>> iosPlugins = _extractPlatformMaps(nativePlugins, IOSPlugin.kConfigKey);
   final Map<String, Object> context = <String, Object>{
     'os': 'ios',
     'deploymentTarget': '9.0',
@@ -1119,11 +1142,15 @@ bool hasPlugins(FlutterProject project) {
 ///   * Else fail.
 ///
 ///  For more details, https://flutter.dev/go/federated-plugins.
+// TODO(stuartmorgan): Expand implementation to apply to all implementations,
+// not just Dart-only, per the federated plugin spec.
 List<PluginInterfaceResolution> resolvePlatformImplementation(
   List<Plugin> plugins, {
   bool throwOnPluginPubspecError = true,
 }) {
   final List<String> platforms = <String>[
+    AndroidPlugin.kConfigKey,
+    IOSPlugin.kConfigKey,
     LinuxPlugin.kConfigKey,
     MacOSPlugin.kConfigKey,
     WindowsPlugin.kConfigKey,
@@ -1135,20 +1162,28 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
 
   for (final Plugin plugin in plugins) {
     for (final String platform in platforms) {
-      // The plugin doesn't implement this platform.
       if (plugin.platforms[platform] == null &&
           plugin.defaultPackagePlatforms[platform] == null) {
+        // The plugin doesn't implement this platform.
         continue;
       }
-      // The plugin doesn't implement an interface, verify that it has a default implementation.
-      final String? implementsPackage = plugin.implementsPackage;
+      String? implementsPackage = plugin.implementsPackage;
       if (implementsPackage == null || implementsPackage.isEmpty) {
         final String? defaultImplementation = plugin.defaultPackagePlatforms[platform];
-        if (defaultImplementation == null) {
+        final bool hasInlineDartImplementation =
+          plugin.pluginDartClassPlatforms[platform] != null;
+        if (defaultImplementation == null && !hasInlineDartImplementation) {
           if (throwOnPluginPubspecError) {
             globals.printError(
-              "Plugin `${plugin.name}` doesn't implement a plugin interface, nor sets "
-              'a default implementation in pubspec.yaml.\n\n'
+              "Plugin `${plugin.name}` doesn't implement a plugin interface, nor does "
+              'it specify an implementation in pubspec.yaml.\n\n'
+              'To set an inline implementation, use:\n'
+              'flutter:\n'
+              '  plugin:\n'
+              '    platforms:\n'
+              '      $platform:\n'
+              '        $kDartPluginClass: <plugin-class>\n'
+              '\n'
               'To set a default implementation, use:\n'
               'flutter:\n'
               '  plugin:\n'
@@ -1166,8 +1201,18 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
           didFindError = true;
           continue;
         }
-        defaultImplementations['$platform/${plugin.name}'] = defaultImplementation;
-        continue;
+        if (defaultImplementation != null) {
+          defaultImplementations['$platform/${plugin.name}'] = defaultImplementation;
+          continue;
+        } else if (platform != 'linux' && platform != 'macos' && platform != 'windows') {
+          // An interface package (i.e., one with no 'implements') with an
+          // inline implementation is its own default implementation.
+          // TODO(stuartmorgan): This should be true on desktop as well, but
+          // enabling that would be a breaking change for most existing
+          // Dart-only plugins. See https://github.com/flutter/flutter/issues/87862
+          implementsPackage = plugin.name;
+          defaultImplementations['$platform/${plugin.name}'] = plugin.name;
+        }
       }
       if (plugin.pluginDartClassPlatforms[platform] == null ||
           plugin.pluginDartClassPlatforms[platform] == 'none') {
@@ -1233,7 +1278,6 @@ Future<void> generateMainDartWithPluginRegistrant(
   FlutterProject rootProject,
   PackageConfig packageConfig,
   String currentMainUri,
-  File newMainDart,
   File mainFile, {
   bool throwOnPluginPubspecError = false,
 }) async {
@@ -1250,17 +1294,20 @@ Future<void> generateMainDartWithPluginRegistrant(
   final Map<String, Object> templateContext = <String, Object>{
     'mainEntrypoint': currentMainUri,
     'dartLanguageVersion': entrypointVersion.toString(),
+    AndroidPlugin.kConfigKey: <Object?>[],
+    IOSPlugin.kConfigKey: <Object?>[],
     LinuxPlugin.kConfigKey: <Object?>[],
     MacOSPlugin.kConfigKey: <Object?>[],
     WindowsPlugin.kConfigKey: <Object?>[],
   };
+  final File newMainDart = rootProject.dartPluginRegistrant;
   if (resolutions.isEmpty) {
     try {
       if (newMainDart.existsSync()) {
         newMainDart.deleteSync();
       }
     } on FileSystemException catch (error) {
-      globals.printError(
+      globals.printWarning(
         'Unable to remove ${newMainDart.path}, received error: $error.\n'
         'You might need to run flutter clean.'
       );
@@ -1274,7 +1321,7 @@ Future<void> generateMainDartWithPluginRegistrant(
   }
   try {
     _renderTemplateToFile(
-      _dartPluginRegistryForDesktopTemplate,
+      _dartPluginRegistryForNonWebTemplate,
       templateContext,
       newMainDart,
       globals.templateRenderer,

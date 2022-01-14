@@ -12,14 +12,14 @@ import 'theme.dart';
 
 /// {@macro flutter.widgets.RawAutocomplete.RawAutocomplete}
 ///
-/// {@tool dartpad --template=freeform}
+/// {@tool dartpad}
 /// This example shows how to create a very basic Autocomplete widget using the
 /// default UI.
 ///
 /// ** See code in examples/api/lib/material/autocomplete/autocomplete.0.dart **
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=freeform}
+/// {@tool dartpad}
 /// This example shows how to create an Autocomplete widget with a custom type.
 /// Try searching with text from the name or email field.
 ///

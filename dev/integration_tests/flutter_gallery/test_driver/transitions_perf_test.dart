@@ -37,11 +37,11 @@ Future<void> saveDurationsHistogram(List<Map<String, dynamic>> events, String ou
     } else if (startEvent != null && eventName == 'Frame') {
       final String phase = event['ph'] as String;
       final int timestamp = event['ts'] as int;
-      if (phase == 'B') {
+      if (phase == 'B' || phase == 'b') {
         assert(frameStart == null);
         frameStart = timestamp;
       } else {
-        assert(phase == 'E');
+        assert(phase == 'E' || phase == 'e');
         final String routeName = (startEvent['args'] as Map<String, dynamic>)['to'] as String;
         durations[routeName] ??= <int>[];
         durations[routeName]!.add(timestamp - frameStart!);

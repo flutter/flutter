@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
@@ -22,7 +24,7 @@ import 'shortcuts.dart';
 /// See also:
 ///
 ///   * [RawAutocomplete.optionsBuilder], which is of this type.
-typedef AutocompleteOptionsBuilder<T extends Object> = Iterable<T> Function(TextEditingValue textEditingValue);
+typedef AutocompleteOptionsBuilder<T extends Object> = FutureOr<Iterable<T>> Function(TextEditingValue textEditingValue);
 
 /// The type of the callback used by the [RawAutocomplete] widget to indicate
 /// that the user has selected an option.
@@ -83,7 +85,7 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 ///
 /// This is a core framework widget with very basic UI.
 ///
-/// {@tool dartpad --template=freeform}
+/// {@tool dartpad}
 /// This example shows how to create a very basic autocomplete widget using the
 /// [fieldViewBuilder] and [optionsViewBuilder] parameters.
 ///
@@ -96,14 +98,14 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 /// Options will be compared using `==`, so it may be beneficial to override
 /// [Object.==] and [Object.hashCode] for custom types.
 ///
-/// {@tool dartpad --template=freeform}
+/// {@tool dartpad}
 /// This example is similar to the previous example, but it uses a custom T data
 /// type instead of directly using String.
 ///
 /// ** See code in examples/api/lib/widgets/autocomplete/raw_autocomplete.1.dart **
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=freeform}
+/// {@tool dartpad}
 /// This example shows the use of RawAutocomplete in a form.
 ///
 /// ** See code in examples/api/lib/widgets/autocomplete/raw_autocomplete.2.dart **
@@ -165,7 +167,7 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   /// FocusNode and TextEditingController can be passed both to that text field
   /// and to RawAutocomplete.
   ///
-  /// {@tool dartpad --template=freeform}
+  /// {@tool dartpad}
   /// This examples shows how to create an autocomplete widget with the text
   /// field in the AppBar and the results in the main body of the app.
   ///
@@ -293,8 +295,8 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   }
 
   // Called when _textEditingController changes.
-  void _onChangedField() {
-    final Iterable<T> options = widget.optionsBuilder(
+  Future<void> _onChangedField() async {
+    final Iterable<T> options = await widget.optionsBuilder(
       _textEditingController.value,
     );
     _options = options;
@@ -510,16 +512,12 @@ class _AutocompleteCallbackAction<T extends Intent> extends CallbackAction<T> {
 }
 
 /// An [Intent] to highlight the previous option in the autocomplete list.
-///
-/// {@macro flutter.widgets.TextEditingIntents.seeAlso}
 class AutocompletePreviousOptionIntent extends Intent {
   /// Creates an instance of AutocompletePreviousOptionIntent.
   const AutocompletePreviousOptionIntent();
 }
 
 /// An [Intent] to highlight the next option in the autocomplete list.
-///
-/// {@macro flutter.widgets.TextEditingIntents.seeAlso}
 class AutocompleteNextOptionIntent extends Intent {
   /// Creates an instance of AutocompleteNextOptionIntent.
   const AutocompleteNextOptionIntent();

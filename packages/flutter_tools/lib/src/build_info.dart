@@ -11,7 +11,7 @@ import 'base/logger.dart';
 import 'base/os.dart';
 import 'base/utils.dart';
 import 'convert.dart';
-import 'globals_null_migrated.dart' as globals;
+import 'globals.dart' as globals;
 
 /// Whether icon font subsetting is enabled by default.
 const bool kIconTreeShakerEnabledDefault = true;
@@ -304,6 +304,7 @@ class AndroidBuildInfo {
     ],
     this.splitPerAbi = false,
     this.fastStart = false,
+    this.multidexEnabled = false,
   });
 
   // The build info containing the mode and flavor.
@@ -321,6 +322,9 @@ class AndroidBuildInfo {
 
   /// Whether to bootstrap an empty application.
   final bool fastStart;
+
+  /// Whether to enable multidex support for apps with more than 64k methods.
+  final bool multidexEnabled;
 }
 
 /// A summary of the compilation strategy used for Dart.
@@ -634,7 +638,7 @@ String getNameForTargetPlatform(TargetPlatform platform, {DarwinArch? darwinArch
   }
 }
 
-TargetPlatform? getTargetPlatformForName(String platform) {
+TargetPlatform getTargetPlatformForName(String platform) {
   switch (platform) {
     case 'android':
       return TargetPlatform.android;
@@ -669,8 +673,7 @@ TargetPlatform? getTargetPlatformForName(String platform) {
     case 'web-javascript':
       return TargetPlatform.web_javascript;
   }
-  assert(platform != null);
-  return null;
+  throw Exception('Unsupported platform name "$platform"');
 }
 
 AndroidArch getAndroidArchForName(String platform) {
@@ -719,7 +722,19 @@ String fuchsiaArchForTargetPlatform(TargetPlatform targetPlatform) {
       return 'arm64';
     case TargetPlatform.fuchsia_x64:
       return 'x64';
-    default:
+    case TargetPlatform.android:
+    case TargetPlatform.android_arm:
+    case TargetPlatform.android_arm64:
+    case TargetPlatform.android_x64:
+    case TargetPlatform.android_x86:
+    case TargetPlatform.darwin:
+    case TargetPlatform.ios:
+    case TargetPlatform.linux_arm64:
+    case TargetPlatform.linux_x64:
+    case TargetPlatform.tester:
+    case TargetPlatform.web_javascript:
+    case TargetPlatform.windows_uwp_x64:
+    case TargetPlatform.windows_x64:
       throw UnsupportedError('Unexpected Fuchsia platform $targetPlatform');
   }
 }
@@ -736,7 +751,7 @@ HostPlatform getCurrentHostPlatform() {
     return HostPlatform.windows_x64;
   }
 
-  globals.printError('Unsupported host platform, defaulting to Linux');
+  globals.printWarning('Unsupported host platform, defaulting to Linux');
 
   return HostPlatform.linux_x64;
 }
@@ -964,7 +979,17 @@ String getNameForTargetPlatformArch(TargetPlatform platform) {
       return 'x64';
     case TargetPlatform.linux_arm64:
       return 'arm64';
-    default:
+    case TargetPlatform.android:
+    case TargetPlatform.android_arm:
+    case TargetPlatform.android_arm64:
+    case TargetPlatform.android_x64:
+    case TargetPlatform.android_x86:
+    case TargetPlatform.fuchsia_arm64:
+    case TargetPlatform.fuchsia_x64:
+    case TargetPlatform.ios:
+    case TargetPlatform.tester:
+    case TargetPlatform.web_javascript:
+    case TargetPlatform.windows_uwp_x64:
       throw UnsupportedError('Unexpected target platform $platform');
   }
 }

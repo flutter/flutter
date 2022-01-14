@@ -69,6 +69,28 @@ baz=qux
       expect(snakeCase('ABc'), equals('a_bc'));
       expect(snakeCase('ABC'), equals('a_b_c'));
     });
+
+    testWithoutContext('sentenceCase', () async {
+      expect(sentenceCase('abc'), equals('Abc'));
+      expect(sentenceCase('ab_c'), equals('Ab_c'));
+      expect(sentenceCase('a b c'), equals('A b c'));
+      expect(sentenceCase('a B c'), equals('A B c'));
+      expect(sentenceCase('Abc'), equals('Abc'));
+      expect(sentenceCase('ab_c'), equals('Ab_c'));
+      expect(sentenceCase('a_bc'), equals('A_bc'));
+      expect(sentenceCase('a_b_c'), equals('A_b_c'));
+    });
+
+    testWithoutContext('snakeCaseToTitleCase', () async {
+      expect(snakeCaseToTitleCase('abc'), equals('Abc'));
+      expect(snakeCaseToTitleCase('ab_c'), equals('Ab C'));
+      expect(snakeCaseToTitleCase('a_b_c'), equals('A B C'));
+      expect(snakeCaseToTitleCase('a_B_c'), equals('A B C'));
+      expect(snakeCaseToTitleCase('Abc'), equals('Abc'));
+      expect(snakeCaseToTitleCase('ab_c'), equals('Ab C'));
+      expect(snakeCaseToTitleCase('a_bc'), equals('A Bc'));
+      expect(snakeCaseToTitleCase('a_b_c'), equals('A B C'));
+    });
   });
 
   group('text wrapping', () {

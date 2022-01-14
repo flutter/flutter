@@ -51,7 +51,7 @@ enum AutofillContextAction {
 /// autofillable input fields in an [AutofillGroup], so the user input of the
 /// [Form] can be saved for future autofill by the platform.
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold}
+/// {@tool dartpad}
 /// An example form with autofillable fields grouped into different
 /// `AutofillGroup`s.
 ///
@@ -129,12 +129,12 @@ class AutofillGroupState extends State<AutofillGroup> with AutofillScopeMixin {
   bool _isTopmostAutofillGroup = false;
 
   @override
-  AutofillClient? getAutofillClient(String tag) => _clients[tag];
+  AutofillClient? getAutofillClient(String autofillId) => _clients[autofillId];
 
   @override
   Iterable<AutofillClient> get autofillClients {
     return _clients.values
-      .where((AutofillClient client) => client.textInputConfiguration.autofillConfiguration != null);
+      .where((AutofillClient client) => client.textInputConfiguration.autofillConfiguration.enabled);
   }
 
   /// Adds the [AutofillClient] to this [AutofillGroup].
@@ -155,9 +155,8 @@ class AutofillGroupState extends State<AutofillGroup> with AutofillScopeMixin {
   /// Removes an [AutofillClient] with the given `autofillId` from this
   /// [AutofillGroup].
   ///
-  /// Typically, this should be called by autofillable [TextInputClient]s in
-  /// [State.dispose] and [State.didChangeDependencies], when the input field
-  /// needs to be removed from the [AutofillGroup] it is currently registered to.
+  /// Typically, this should be called by a text field when it's being disposed,
+  /// or before it's registered with a different [AutofillGroup].
   ///
   /// See also:
   ///
@@ -196,7 +195,7 @@ class AutofillGroupState extends State<AutofillGroup> with AutofillScopeMixin {
         TextInput.finishAutofillContext(shouldSave: false);
         break;
       case AutofillContextAction.commit:
-        TextInput.finishAutofillContext(shouldSave: true);
+        TextInput.finishAutofillContext();
         break;
     }
   }

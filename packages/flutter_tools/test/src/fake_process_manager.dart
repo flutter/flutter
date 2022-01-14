@@ -108,7 +108,7 @@ class FakeCommand {
     List<String> command,
     String? workingDirectory,
     Map<String, String>? environment,
-    Encoding encoding,
+    Encoding? encoding,
   ) {
     expect(command, equals(this.command));
     if (this.workingDirectory != null) {
@@ -244,7 +244,7 @@ abstract class FakeProcessManager implements ProcessManager {
     List<String> command,
     String? workingDirectory,
     Map<String, String>? environment,
-    Encoding encoding,
+    Encoding? encoding,
   );
 
   int _pid = 9999;
@@ -253,7 +253,7 @@ abstract class FakeProcessManager implements ProcessManager {
     List<String> command,
     String? workingDirectory,
     Map<String, String>? environment,
-    Encoding encoding,
+    Encoding? encoding,
   ) {
     _pid += 1;
     final FakeCommand fakeCommand = findCommand(command, workingDirectory, environment, encoding);
@@ -301,8 +301,8 @@ abstract class FakeProcessManager implements ProcessManager {
     Map<String, String>? environment,
     bool includeParentEnvironment = true, // ignored
     bool runInShell = false, // ignored
-    Encoding stdoutEncoding = io.systemEncoding,
-    Encoding stderrEncoding = io.systemEncoding,
+    Encoding? stdoutEncoding = io.systemEncoding,
+    Encoding? stderrEncoding = io.systemEncoding,
   }) async {
     final _FakeProcess process = _runCommand(command.cast<String>(), workingDirectory, environment, stdoutEncoding);
     await process.exitCode;
@@ -321,8 +321,8 @@ abstract class FakeProcessManager implements ProcessManager {
     Map<String, String>? environment,
     bool includeParentEnvironment = true, // ignored
     bool runInShell = false, // ignored
-    Encoding stdoutEncoding = io.systemEncoding, // actual encoder is ignored
-    Encoding stderrEncoding = io.systemEncoding, // actual encoder is ignored
+    Encoding? stdoutEncoding = io.systemEncoding, // actual encoder is ignored
+    Encoding? stderrEncoding = io.systemEncoding, // actual encoder is ignored
   }) {
     final _FakeProcess process = _runCommand(command.cast<String>(), workingDirectory, environment, stdoutEncoding);
     return io.ProcessResult(
@@ -361,18 +361,13 @@ class _FakeAnyProcessManager extends FakeProcessManager {
     List<String> command,
     String? workingDirectory,
     Map<String, String>? environment,
-    Encoding encoding,
+    Encoding? encoding,
   ) {
     return FakeCommand(
       command: command,
       workingDirectory: workingDirectory,
       environment: environment,
       encoding: encoding,
-      duration: Duration.zero,
-      exitCode: 0,
-      stdout: '',
-      stderr: '',
-      outputFollowsExit: false,
     );
   }
 
@@ -396,7 +391,7 @@ class _SequenceProcessManager extends FakeProcessManager {
     List<String> command,
     String? workingDirectory,
     Map<String, String>? environment,
-    Encoding encoding,
+    Encoding? encoding,
   ) {
     expect(_commands, isNotEmpty,
       reason: 'ProcessManager was told to execute $command (in $workingDirectory) '

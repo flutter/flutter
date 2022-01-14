@@ -26,7 +26,7 @@ void checkTree(WidgetTester tester, List<BoxDecoration> expectedDecorations) {
     }
     expect(child, isNull);
   } catch (e) {
-    print(renderObject.toStringDeep());
+    debugPrint(renderObject.toStringDeep());
     rethrow;
   }
 }

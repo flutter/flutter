@@ -76,6 +76,26 @@ void main() {
     expect(log, equals(<String>['tap-down', 'tap-cancel']));
   });
 
+  testWidgets('InkWell only onTapDown enables gestures', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/96030
+    bool downTapped = false;
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: Material(
+        child: Center(
+          child: InkWell(
+            onTapDown: (TapDownDetails details) {
+              downTapped = true;
+            },
+          ),
+        ),
+      ),
+    ));
+
+    await tester.tap(find.byType(InkWell));
+    expect(downTapped, true);
+  });
+
   testWidgets('InkWell invokes activation actions when expected', (WidgetTester tester) async {
     final List<String> log = <String>[];
 
@@ -270,6 +290,40 @@ void main() {
       inkFeatures,
       paints..rect(rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0), color: const Color(0xff0000ff)),
     );
+  });
+
+  testWidgets('ink well changes color on pressed with overlayColor', (WidgetTester tester) async {
+    const Color pressedColor = Color(0xffdd00ff);
+
+    await tester.pumpWidget(Material(
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: Container(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: 100,
+            height: 100,
+            child: InkWell(
+              splashFactory: NoSplash.splashFactory,
+              overlayColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+                if (states.contains(MaterialState.pressed)) {
+                  return pressedColor;
+                }
+                return const Color(0xffbadbad); // Shouldn't happen.
+              }),
+              onTap: () { },
+            ),
+          ),
+        ),
+      ),
+    ));
+    await tester.pumpAndSettle();
+    final TestGesture gesture = await tester.startGesture(tester.getRect(find.byType(InkWell)).center);
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    expect(inkFeatures, paints..rect(rect: const Rect.fromLTRB(0, 0, 100, 100), color: pressedColor.withAlpha(0)));
+    await tester.pumpAndSettle(); // Let the press highlight animation finish.
+    expect(inkFeatures, paints..rect(rect: const Rect.fromLTRB(0, 0, 100, 100), color: pressedColor));
+    await gesture.up();
   });
 
   testWidgets('ink response splashColor matches splashColor parameter', (WidgetTester tester) async {
@@ -1339,7 +1393,6 @@ void main() {
 
     expect(tester.getSemantics(find.bySemanticsLabel('Foo')), matchesSemantics(
       label: 'Foo',
-      hasTapAction: false,
       hasLongPressAction: true,
       isFocusable: true,
       textDirection: TextDirection.ltr,

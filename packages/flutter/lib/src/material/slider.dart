@@ -38,7 +38,7 @@ enum _SliderType { material, adaptive }
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=ufb4gIPDmEs}
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold}
+/// {@tool dartpad}
 /// ![A slider widget, consisting of 5 divisions and showing the default value
 /// indicator.](https://flutter.github.io/assets-for-api-docs/assets/material/slider.png)
 ///
@@ -373,17 +373,26 @@ class Slider extends StatefulWidget {
   /// (like the native default iOS slider).
   final Color? thumbColor;
 
+  /// {@template flutter.material.slider.mouseCursor}
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// widget.
   ///
   /// If [mouseCursor] is a [MaterialStateProperty<MouseCursor>],
   /// [MaterialStateProperty.resolve] is used for the following [MaterialState]s:
   ///
+  ///  * [MaterialState.dragged].
   ///  * [MaterialState.hovered].
   ///  * [MaterialState.focused].
   ///  * [MaterialState.disabled].
+  /// {@endtemplate}
   ///
-  /// If this property is null, [MaterialStateMouseCursor.clickable] will be used.
+  /// If null, then the value of [SliderThemeData.mouseCursor] is used. If that
+  /// is also null, then [MaterialStateMouseCursor.clickable] is used.
+  ///
+  /// See also:
+  ///
+  ///  * [MaterialStateMouseCursor], which can be used to create a [MouseCursor]
+  ///    that is also a [MaterialStateProperty<MouseCursor>].
   final MouseCursor? mouseCursor;
 
   /// The callback used to create a semantic value from a slider value.
@@ -481,6 +490,11 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
   // Value Indicator Animation that appears on the Overlay.
   PaintValueIndicator? paintValueIndicator;
 
+  bool _dragging = false;
+
+  FocusNode? _focusNode;
+  FocusNode get focusNode => widget.focusNode ?? _focusNode!;
+
   @override
   void initState() {
     super.initState();
@@ -507,6 +521,10 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
         onInvoke: _actionHandler,
       ),
     };
+    if (widget.focusNode == null) {
+      // Only create a new node if the widget doesn't have one.
+      _focusNode ??= FocusNode();
+    }
   }
 
   @override
@@ -520,6 +538,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       overlayEntry!.remove();
       overlayEntry = null;
     }
+    _focusNode?.dispose();
     super.dispose();
   }
 
@@ -532,13 +551,13 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
   }
 
   void _handleDragStart(double value) {
-    assert(widget.onChangeStart != null);
-    widget.onChangeStart!(_lerp(value));
+    _dragging = true;
+    widget.onChangeStart?.call(_lerp(value));
   }
 
   void _handleDragEnd(double value) {
-    assert(widget.onChangeEnd != null);
-    widget.onChangeEnd!(_lerp(value));
+    _dragging = false;
+    widget.onChangeEnd?.call(_lerp(value));
   }
 
   void _actionHandler(_AdjustSliderIntent intent) {
@@ -684,27 +703,47 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
         color: theme.colorScheme.onPrimary,
       ),
     );
-    final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor>(
-      widget.mouseCursor ?? MaterialStateMouseCursor.clickable,
-      <MaterialState>{
-        if (!_enabled) MaterialState.disabled,
-        if (_hovering) MaterialState.hovered,
-        if (_focused) MaterialState.focused,
-      },
-    );
+    final Set<MaterialState> states = <MaterialState>{
+      if (!_enabled) MaterialState.disabled,
+      if (_hovering) MaterialState.hovered,
+      if (_focused) MaterialState.focused,
+      if (_dragging) MaterialState.dragged,
+    };
+    final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states)
+      ?? sliderTheme.mouseCursor?.resolve(states)
+      ?? MaterialStateMouseCursor.clickable.resolve(states);
 
     // This size is used as the max bounds for the painting of the value
     // indicators It must be kept in sync with the function with the same name
     // in range_slider.dart.
     Size _screenSize() => MediaQuery.of(context).size;
 
+    VoidCallback? handleDidGainAccessibilityFocus;
+    switch (theme.platform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.iOS:
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+        break;
+      case TargetPlatform.windows:
+        handleDidGainAccessibilityFocus = () {
+          // Automatically activate the slider when it receives a11y focus.
+          if (!focusNode.hasFocus && focusNode.canRequestFocus) {
+            focusNode.requestFocus();
+          }
+        };
+        break;
+    }
+
     return Semantics(
       container: true,
       slider: true,
+      onDidGainAccessibilityFocus: handleDidGainAccessibilityFocus,
       child: FocusableActionDetector(
         actions: _actionMap,
         shortcuts: _shortcutMap,
-        focusNode: widget.focusNode,
+        focusNode: focusNode,
         autofocus: widget.autofocus,
         enabled: _enabled,
         onShowFocusHighlight: _handleFocusHighlightChanged,
@@ -721,8 +760,8 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
             textScaleFactor: MediaQuery.of(context).textScaleFactor,
             screenSize: _screenSize(),
             onChanged: (widget.onChanged != null) && (widget.max > widget.min) ? _handleChanged : null,
-            onChangeStart: widget.onChangeStart != null ? _handleDragStart : null,
-            onChangeEnd: widget.onChangeEnd != null ? _handleDragEnd : null,
+            onChangeStart: _handleDragStart,
+            onChangeEnd: _handleDragEnd,
             state: this,
             semanticFormatterCallback: widget.semanticFormatterCallback,
             hasFocus: _focused,
@@ -947,7 +986,6 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   // (0,0).
   Rect get _trackRect => _sliderTheme.trackShape!.getPreferredRect(
     parentBox: this,
-    offset: Offset.zero,
     sliderTheme: _sliderTheme,
     isDiscrete: false,
   );

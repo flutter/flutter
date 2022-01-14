@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/device_port_forwarder.dart';
@@ -37,7 +35,6 @@ void main() {
       processManager: FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>['adb', '-s', '1', 'forward', 'tcp:456', 'tcp:123'],
-          stdout: '',
         )
       ]),
       logger: BufferLogger.test(),

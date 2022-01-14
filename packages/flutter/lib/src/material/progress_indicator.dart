@@ -32,8 +32,8 @@ abstract class ProgressIndicator extends StatefulWidget {
   ///
   /// {@template flutter.material.ProgressIndicator.ProgressIndicator}
   /// The [value] argument can either be null for an indeterminate
-  /// progress indicator, or non-null for a determinate progress
-  /// indicator.
+  /// progress indicator, or a non-null value between 0.0 and 1.0 for a
+  /// determinate progress indicator.
   ///
   /// ## Accessibility
   ///
@@ -54,6 +54,7 @@ abstract class ProgressIndicator extends StatefulWidget {
   /// If non-null, the value of this progress indicator.
   ///
   /// A value of 0.0 means no progress and 1.0 means that progress is complete.
+  /// The value will be clamped to be in the range 0.0-1.0.
   ///
   /// If null, this progress indicator is indeterminate, which means the
   /// indicator displays a predetermined animation that does not indicate how
@@ -246,7 +247,7 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
 /// The minimum height of the indicator can be specified using [minHeight].
 /// The indicator can be made taller by wrapping the widget with a [SizedBox].
 ///
-/// {@tool dartpad --template=stateful_widget_material_ticker}
+/// {@tool dartpad}
 /// This example shows a [LinearProgressIndicator] with a changing value.
 ///
 /// ** See code in examples/api/lib/material/progress_indicator/linear_progress_indicator.0.dart **
@@ -466,7 +467,7 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
 /// The indicator arc is displayed with [valueColor], an animated value. To
 /// specify a constant color use: `AlwaysStoppedAnimation<Color>(color)`.
 ///
-/// {@tool dartpad --template=stateful_widget_material_ticker}
+/// {@tool dartpad}
 /// This example shows a [CircularProgressIndicator] with a changing value.
 ///
 /// ** See code in examples/api/lib/material/progress_indicator/circular_progress_indicator.0.dart **
@@ -593,7 +594,8 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
   }
 
   Widget _buildCupertinoIndicator(BuildContext context) {
-    return CupertinoActivityIndicator(key: widget.key);
+    final Color? tickColor = widget.backgroundColor;
+    return CupertinoActivityIndicator(key: widget.key, color: tickColor);
   }
 
   Widget _buildMaterialIndicator(BuildContext context, double headValue, double tailValue, double offsetValue, double rotationValue) {
@@ -696,7 +698,7 @@ class _RefreshProgressIndicatorPainter extends _CircularProgressIndicatorPainter
     final double radius = size.width / 2.0;
     final double arrowheadPointX = radius + ux * radius + -uy * strokeWidth * 2.0 * arrowheadScale;
     final double arrowheadPointY = radius + uy * radius +  ux * strokeWidth * 2.0 * arrowheadScale;
-    final double arrowheadRadius = strokeWidth * 1.5 * arrowheadScale;
+    final double arrowheadRadius = strokeWidth * 2.0 * arrowheadScale;
     final double innerRadius = radius - arrowheadRadius;
     final double outerRadius = radius + arrowheadRadius;
 
@@ -746,7 +748,7 @@ class RefreshProgressIndicator extends CircularProgressIndicator {
     Color? backgroundColor,
     Color? color,
     Animation<Color?>? valueColor,
-    double strokeWidth = 2.0, // Different default than CircularProgressIndicator.
+    double strokeWidth = defaultStrokeWidth, // Different default than CircularProgressIndicator.
     String? semanticsLabel,
     String? semanticsValue,
   }) : super(
@@ -760,6 +762,9 @@ class RefreshProgressIndicator extends CircularProgressIndicator {
     semanticsValue: semanticsValue,
   );
 
+  /// Default stroke width.
+  static const double defaultStrokeWidth = 2.5;
+
   /// {@template flutter.material.RefreshProgressIndicator.backgroundColor}
   /// Background color of that fills the circle under the refresh indicator.
   ///
@@ -770,33 +775,94 @@ class RefreshProgressIndicator extends CircularProgressIndicator {
   /// {@endtemplate}
   @override
   Color? get backgroundColor => super.backgroundColor;
+
   @override
   State<CircularProgressIndicator> createState() => _RefreshProgressIndicatorState();
 }
 
 class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
-  static const double _indicatorSize = 40.0;
+  static const double _indicatorSize = 41.0;
+
+  /// Interval for arrow head to fully grow.
+  static const double _strokeHeadInterval = 0.33;
+
+  late final Animatable<double> _convertTween = CurveTween(
+    curve: const Interval(0.1, _strokeHeadInterval),
+  );
+
+  late final Animatable<double> _additionalRotationTween = TweenSequence<double>(
+    <TweenSequenceItem<double>>[
+      // Makes arrow to expand a little bit earlier, to match the Android look.
+      TweenSequenceItem<double>(
+        tween: Tween<double>(begin: -0.1, end: -0.2),
+        weight: _strokeHeadInterval,
+      ),
+      // Additional rotation after the arrow expanded
+      TweenSequenceItem<double>(
+        tween: Tween<double>(begin: -0.2, end: 1.35),
+        weight: 1 - _strokeHeadInterval,
+      ),
+    ],
+  );
+
+  // Last value received from the widget before null.
+  double? _lastValue;
 
   // Always show the indeterminate version of the circular progress indicator.
+  //
   // When value is non-null the sweep of the progress indicator arrow's arc
-  // varies from 0 to about 270 degrees. When value is null the arrow animates
-  // starting from wherever we left it.
+  // varies from 0 to about 300 degrees.
+  //
+  // When value is null the arrow animation starting from wherever we left it.
   @override
   Widget build(BuildContext context) {
-    if (widget.value != null)
-      _controller.value = widget.value! * (1333 / 2 / _kIndeterminateCircularDuration);
-    else if (!_controller.isAnimating)
-      _controller.repeat();
+    final double? value = widget.value;
+    if (value != null) {
+      _lastValue = value;
+      _controller.value = _convertTween.transform(value)
+        * (1333 / 2 / _kIndeterminateCircularDuration);
+    }
     return _buildAnimation();
   }
 
   @override
+  Widget _buildAnimation() {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (BuildContext context, Widget? child) {
+        return _buildMaterialIndicator(
+          context,
+          // Lengthen the arc a little
+          1.05 * _CircularProgressIndicatorState._strokeHeadTween.evaluate(_controller),
+          _CircularProgressIndicatorState._strokeTailTween.evaluate(_controller),
+          _CircularProgressIndicatorState._offsetTween.evaluate(_controller),
+          _CircularProgressIndicatorState._rotationTween.evaluate(_controller),
+        );
+      },
+    );
+  }
+
+  @override
   Widget _buildMaterialIndicator(BuildContext context, double headValue, double tailValue, double offsetValue, double rotationValue) {
-    final double arrowheadScale = widget.value == null ? 0.0 : (widget.value! * 2.0).clamp(0.0, 1.0);
+    final double? value = widget.value;
+    final double arrowheadScale = value == null ? 0.0 : const Interval(0.1, _strokeHeadInterval).transform(value);
+    final double rotation;
+
+    if (value == null && _lastValue == null) {
+      rotation = 0.0;
+    } else {
+      rotation = math.pi * _additionalRotationTween.transform(value ?? _lastValue!);
+    }
+
+    Color valueColor = widget._getValueColor(context);
+    final double opacity = valueColor.opacity;
+    valueColor = valueColor.withOpacity(1.0);
+
     final Color backgroundColor =
       widget.backgroundColor ??
       ProgressIndicatorTheme.of(context).refreshBackgroundColor ??
       Theme.of(context).canvasColor;
+
     return widget._buildSemanticsWrapper(
       context: context,
       child: Container(
@@ -809,16 +875,22 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
           elevation: 2.0,
           child: Padding(
             padding: const EdgeInsets.all(12.0),
-            child: CustomPaint(
-              painter: _RefreshProgressIndicatorPainter(
-                valueColor: widget._getValueColor(context),
-                value: null, // Draw the indeterminate progress indicator.
-                headValue: headValue,
-                tailValue: tailValue,
-                offsetValue: offsetValue,
-                rotationValue: rotationValue,
-                strokeWidth: widget.strokeWidth,
-                arrowheadScale: arrowheadScale,
+            child: Opacity(
+              opacity: opacity,
+              child: Transform.rotate(
+                angle: rotation,
+                child: CustomPaint(
+                  painter: _RefreshProgressIndicatorPainter(
+                    valueColor: valueColor,
+                    value: null, // Draw the indeterminate progress indicator.
+                    headValue: headValue,
+                    tailValue: tailValue,
+                    offsetValue: offsetValue,
+                    rotationValue: rotationValue,
+                    strokeWidth: widget.strokeWidth,
+                    arrowheadScale: arrowheadScale,
+                  ),
+                ),
               ),
             ),
           ),

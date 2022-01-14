@@ -7,6 +7,7 @@
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/executable.dart' as executable;
+import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 
 import '../src/common.dart';
@@ -34,6 +35,18 @@ void verifyCommandRunner(CommandRunner<Object> runner) {
 void verifyCommand(Command<Object> runner) {
   expect(runner.argParser, isNotNull, reason: 'command ${runner.name} has no argParser');
   verifyOptions(runner.name, runner.argParser.options.values);
+  if (runner.hidden == false && runner.parent == null) {
+    expect(
+      runner.category,
+      anyOf(
+        FlutterCommandCategory.sdk,
+        FlutterCommandCategory.project,
+        FlutterCommandCategory.tools,
+      ),
+      reason: "top-level command ${runner.name} doesn't have a valid category",
+    );
+  }
+
   runner.subcommands.values.forEach(verifyCommand);
 }
 

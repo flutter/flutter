@@ -124,7 +124,6 @@ class Tab extends StatelessWidget implements PreferredSizeWidget {
       calculatedHeight = _kTextAndIconTabHeight;
       label = Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           Container(
             margin: iconMargin,
@@ -587,14 +586,14 @@ class _TabBarScrollController extends ScrollController {
 ///
 /// Uses values from [TabBarTheme] if it is set in the current context.
 ///
-/// {@tool dartpad --template=stateless_widget_material}
+/// {@tool dartpad}
 /// This sample shows the implementation of [TabBar] and [TabBarView] using a [DefaultTabController].
 /// Each [Tab] corresponds to a child of the [TabBarView] in the order they are written.
 ///
 /// ** See code in examples/api/lib/material/tabs/tab_bar.0.dart **
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateful_widget_material_ticker}
+/// {@tool dartpad}
 /// [TabBar] can also be implemented by using a [TabController] which provides more options
 /// to control the behavior of the [TabBar] and [TabBarView]. This can be used instead of
 /// a [DefaultTabController], demonstrated below.
@@ -983,11 +982,11 @@ class _TabBarState extends State<TabBar> {
       _initIndicatorPainter();
     }
 
-    if (widget.tabs.length > oldWidget.tabs.length) {
-      final int delta = widget.tabs.length - oldWidget.tabs.length;
+    if (widget.tabs.length > _tabKeys.length) {
+      final int delta = widget.tabs.length - _tabKeys.length;
       _tabKeys.addAll(List<GlobalKey>.generate(delta, (int n) => GlobalKey()));
-    } else if (widget.tabs.length < oldWidget.tabs.length) {
-      _tabKeys.removeRange(widget.tabs.length, oldWidget.tabs.length);
+    } else if (widget.tabs.length < _tabKeys.length) {
+      _tabKeys.removeRange(widget.tabs.length, _tabKeys.length);
     }
   }
 
@@ -1349,15 +1348,18 @@ class _TabBarViewState extends State<TabBarView> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _updateTabController();
-    _currentIndex = _controller?.index;
-    _pageController = PageController(initialPage: _currentIndex ?? 0);
+    _currentIndex = _controller!.index;
+    _pageController = PageController(initialPage: _currentIndex!);
   }
 
   @override
   void didUpdateWidget(TabBarView oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.controller != oldWidget.controller)
+    if (widget.controller != oldWidget.controller) {
       _updateTabController();
+      _currentIndex = _controller!.index;
+      _pageController.jumpToPage(_currentIndex!);
+    }
     if (widget.children != oldWidget.children && _warpUnderwayCount == 0)
       _updateChildren();
   }
@@ -1393,10 +1395,18 @@ class _TabBarViewState extends State<TabBarView> {
     if (_pageController.page == _currentIndex!.toDouble())
       return Future<void>.value();
 
+    final Duration duration = _controller!.animationDuration;
+
+    if (duration == Duration.zero) {
+      _pageController.jumpToPage(_currentIndex!);
+      return Future<void>.value();
+    }
+
     final int previousIndex = _controller!.previousIndex;
+
     if ((_currentIndex! - previousIndex).abs() == 1) {
       _warpUnderwayCount += 1;
-      await _pageController.animateToPage(_currentIndex!, duration: kTabScrollDuration, curve: Curves.ease);
+      await _pageController.animateToPage(_currentIndex!, duration: duration, curve: Curves.ease);
       _warpUnderwayCount -= 1;
       return Future<void>.value();
     }
@@ -1409,14 +1419,14 @@ class _TabBarViewState extends State<TabBarView> {
     setState(() {
       _warpUnderwayCount += 1;
 
-      _childrenWithKey = List<Widget>.from(_childrenWithKey, growable: false);
+      _childrenWithKey = List<Widget>.of(_childrenWithKey, growable: false);
       final Widget temp = _childrenWithKey[initialPage];
       _childrenWithKey[initialPage] = _childrenWithKey[previousIndex];
       _childrenWithKey[previousIndex] = temp;
     });
     _pageController.jumpToPage(initialPage);
 
-    await _pageController.animateToPage(_currentIndex!, duration: kTabScrollDuration, curve: Curves.ease);
+    await _pageController.animateToPage(_currentIndex!, duration: duration, curve: Curves.ease);
     if (!mounted)
       return Future<void>.value();
     setState(() {
@@ -1440,7 +1450,7 @@ class _TabBarViewState extends State<TabBarView> {
     _warpUnderwayCount += 1;
     if (notification is ScrollUpdateNotification && !_controller!.indexIsChanging) {
       if ((_pageController.page! - _controller!.index).abs() > 1.0) {
-        _controller!.index = _pageController.page!.floor();
+        _controller!.index = _pageController.page!.round();
         _currentIndex =_controller!.index;
       }
       _controller!.offset = (_pageController.page! - _controller!.index).clamp(-1.0, 1.0);
@@ -1604,6 +1614,7 @@ class TabPageSelector extends StatelessWidget {
     final ColorTween selectedColorTween = ColorTween(begin: fixColor, end: fixSelectedColor);
     final ColorTween previousColorTween = ColorTween(begin: fixSelectedColor, end: fixColor);
     final TabController? tabController = controller ?? DefaultTabController.of(context);
+	  final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     assert(() {
       if (tabController == null) {
         throw FlutterError(
@@ -1624,7 +1635,7 @@ class TabPageSelector extends StatelessWidget {
       animation: animation,
       builder: (BuildContext context, Widget? child) {
         return Semantics(
-          label: 'Page ${tabController.index + 1} of ${tabController.length}',
+          label: localizations.tabLabel(tabIndex: tabController.index + 1, tabCount: tabController.length),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: List<Widget>.generate(tabController.length, (int tabIndex) {

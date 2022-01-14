@@ -541,7 +541,7 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
 /// A base class for widgets with implicit animations that need to rebuild their
 /// widget tree as the animation runs.
 ///
-/// This class calls [build] each frame that the animation tickets. For a
+/// This class calls [build] each frame that the animation ticks. For a
 /// variant that does not rebuild each frame, consider subclassing
 /// [ImplicitlyAnimatedWidgetState] directly.
 ///
@@ -575,7 +575,7 @@ abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> exten
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=yI-8QHpGIP4}
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold}
+/// {@tool dartpad}
 /// The following example (depicted above) transitions an AnimatedContainer
 /// between two states. It adjusts the `height`, `width`, `color`, and
 /// [alignment] properties when tapped.
@@ -789,7 +789,7 @@ class _AnimatedContainerState extends AnimatedWidgetBaseState<AnimatedContainer>
 /// of [Curves.fastOutSlowIn].
 /// {@animation 250 266 https://flutter.github.io/assets-for-api-docs/assets/widgets/animated_padding.mp4}
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold}
+/// {@tool dartpad}
 /// The following code implements the [AnimatedPadding] widget, using a [curve] of
 /// [Curves.easeInOut].
 ///
@@ -876,7 +876,7 @@ class _AnimatedPaddingState extends AnimatedWidgetBaseState<AnimatedPadding> {
 /// it also requires more development overhead as you have to manually manage
 /// the lifecycle of the underlying [AnimationController].
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold}
+/// {@tool dartpad}
 /// The following code implements the [AnimatedAlign] widget, using a [curve] of
 /// [Curves.fastOutSlowIn].
 ///
@@ -1015,7 +1015,7 @@ class _AnimatedAlignState extends AnimatedWidgetBaseState<AnimatedAlign> {
 /// it also requires more development overhead as you have to manually manage
 /// the lifecycle of the underlying [AnimationController].
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_center}
+/// {@tool dartpad}
 /// The following example transitions an AnimatedPositioned
 /// between two states. It adjusts the `height`, `width`, and
 /// [Positioned] properties when tapped.
@@ -1562,7 +1562,7 @@ class _AnimatedRotationState extends ImplicitlyAnimatedWidgetState<AnimatedRotat
 /// example, an [Offset] with a `dx` of 0.25 will result in a horizontal
 /// translation of one quarter the width of the child.
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold}
+/// {@tool dartpad}
 /// This code defines a widget that uses [AnimatedSlide] to translate a [FlutterLogo]
 /// up or down by the amount of it's height with each press of the corresponding button.
 ///
@@ -1774,7 +1774,7 @@ class _AnimatedOpacityState extends ImplicitlyAnimatedWidgetState<AnimatedOpacit
 /// Here's an illustration of what using this widget looks like, using a [curve]
 /// of [Curves.fastOutSlowIn].
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_center_freeform_state}
+/// {@tool dartpad}
 /// Creates a [CustomScrollView] with a [SliverFixedExtentList] and a
 /// [FloatingActionButton]. Pressing the button animates the lists' opacity.
 ///
@@ -1945,7 +1945,7 @@ class AnimatedDefaultTextStyle extends ImplicitlyAnimatedWidget {
   /// See [TextWidthBasis] for possible values and their implications.
   final TextWidthBasis textWidthBasis;
 
-  /// {@macro flutter.dart:ui.textHeightBehavior}
+  /// {@macro dart.ui.textHeightBehavior}
   final ui.TextHeightBehavior? textHeightBehavior;
 
   @override

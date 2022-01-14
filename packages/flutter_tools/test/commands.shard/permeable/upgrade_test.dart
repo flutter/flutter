@@ -10,7 +10,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/upgrade.dart';
 import 'package:flutter_tools/src/convert.dart';
-import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/persistent_tool_state.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/version.dart';
@@ -165,8 +165,7 @@ void main() {
         stdout: revision),
         const FakeCommand(command: <String>[
           'git', 'tag', '--points-at', revision,
-        ],
-        stdout: ''),
+        ]),
         const FakeCommand(command: <String>[
           'git', 'describe', '--match', '*.*.*', '--long', '--tags', revision,
         ],
@@ -267,7 +266,6 @@ void main() {
       testUsingContext('does not throw toolExit at standard remote url with FLUTTER_GIT_URL unset', () async {
         final FakeFlutterVersion flutterVersion = FakeFlutterVersion(
           channel: 'dev',
-          repositoryUrl: flutterStandardUrlDotGit,
         );
         expect(() => realCommandRunner.verifyStandardRemote(flutterVersion), returnsNormally);
         expect(processManager, hasNoRemainingExpectations);
@@ -544,7 +542,6 @@ void main() {
               command: <String>[
                 'git', 'tag', '--points-at', 'HEAD',
               ],
-              stdout: '',
             ),
             const FakeCommand(
               command: <String>[

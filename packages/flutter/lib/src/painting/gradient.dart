@@ -118,6 +118,24 @@ class GradientRotation extends GradientTransform {
       ..translate(originX, originY)
       ..rotateZ(radians);
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other))
+      return true;
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is GradientRotation
+        && other.radians == radians;
+  }
+
+  @override
+  int get hashCode => radians.hashCode;
+
+  @override
+  String toString() {
+    return '${objectRuntimeType(this, 'GradientRotation')}(radians: ${debugFormatDouble(radians)})';
+  }
 }
 
 /// A 2D gradient.
@@ -331,7 +349,7 @@ abstract class Gradient {
 /// Typically this class is used with [BoxDecoration], which does the painting.
 /// To use a [LinearGradient] to paint on a canvas directly, see [createShader].
 ///
-/// {@tool dartpad --template=stateless_widget_material}
+/// {@tool dartpad}
 /// This sample draws a picture that looks like vertical window shades by having
 /// a [Container] display a [BoxDecoration] with a [LinearGradient].
 ///
@@ -495,16 +513,26 @@ class LinearGradient extends Gradient {
         && other.begin == begin
         && other.end == end
         && other.tileMode == tileMode
+        && other.transform == transform
         && listEquals<Color>(other.colors, colors)
         && listEquals<double>(other.stops, stops);
   }
 
   @override
-  int get hashCode => hashValues(begin, end, tileMode, hashList(colors), hashList(stops));
+  int get hashCode => hashValues(begin, end, tileMode, transform, hashList(colors), hashList(stops));
 
   @override
   String toString() {
-    return '${objectRuntimeType(this, 'LinearGradient')}($begin, $end, $colors, $stops, $tileMode)';
+    final List<String> description = <String>[
+      'begin: $begin',
+      'end: $end',
+      'colors: $colors',
+      if (stops != null) 'stops: $stops',
+      'tileMode: $tileMode',
+      if (transform != null) 'transform: $transform',
+    ];
+
+    return '${objectRuntimeType(this, 'LinearGradient')}(${description.join(', ')})';
   }
 }
 
@@ -757,6 +785,7 @@ class RadialGradient extends Gradient {
         && other.center == center
         && other.radius == radius
         && other.tileMode == tileMode
+        && other.transform == transform
         && listEquals<Color>(other.colors, colors)
         && listEquals<double>(other.stops, stops)
         && other.focal == focal
@@ -764,11 +793,22 @@ class RadialGradient extends Gradient {
   }
 
   @override
-  int get hashCode => hashValues(center, radius, tileMode, hashList(colors), hashList(stops), focal, focalRadius);
+  int get hashCode => hashValues(center, radius, tileMode, transform, hashList(colors), hashList(stops), focal, focalRadius);
 
   @override
   String toString() {
-    return '${objectRuntimeType(this, 'RadialGradient')}($center, $radius, $colors, $stops, $tileMode, $focal, $focalRadius)';
+    final List<String> description = <String>[
+      'center: $center',
+      'radius: ${debugFormatDouble(radius)}',
+      'colors: $colors',
+      if (stops != null) 'stops: $stops',
+      'tileMode: $tileMode',
+      if (focal != null) 'focal: $focal',
+      'focalRadius: ${debugFormatDouble(focalRadius)}',
+      if (transform != null) 'transform: $transform',
+    ];
+
+    return '${objectRuntimeType(this, 'RadialGradient')}(${description.join(', ')})';
   }
 }
 
@@ -1005,15 +1045,26 @@ class SweepGradient extends Gradient {
         && other.startAngle == startAngle
         && other.endAngle == endAngle
         && other.tileMode == tileMode
+        && other.transform == transform
         && listEquals<Color>(other.colors, colors)
         && listEquals<double>(other.stops, stops);
   }
 
   @override
-  int get hashCode => hashValues(center, startAngle, endAngle, tileMode, hashList(colors), hashList(stops));
+  int get hashCode => hashValues(center, startAngle, endAngle, tileMode, transform, hashList(colors), hashList(stops));
 
   @override
   String toString() {
-    return '${objectRuntimeType(this, 'SweepGradient')}($center, $startAngle, $endAngle, $colors, $stops, $tileMode)';
+    final List<String> description = <String>[
+      'center: $center',
+      'startAngle: ${debugFormatDouble(startAngle)}',
+      'endAngle: ${debugFormatDouble(endAngle)}',
+      'colors: $colors',
+      if (stops != null) 'stops: $stops',
+      'tileMode: $tileMode',
+      if (transform != null) 'transform: $transform',
+    ];
+
+    return '${objectRuntimeType(this, 'SweepGradient')}(${description.join(', ')})';
   }
 }

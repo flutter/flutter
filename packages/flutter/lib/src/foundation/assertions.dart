@@ -228,7 +228,7 @@ abstract class _ErrorDiagnostic extends DiagnosticsProperty<List<Object>> {
 
   @override
   String valueToString({ TextTreeConfiguration? parentConfiguration }) {
-    return value.join('');
+    return value.join();
   }
 }
 
@@ -248,6 +248,7 @@ abstract class _ErrorDiagnostic extends DiagnosticsProperty<List<Object>> {
 ///    problem that was detected.
 ///  * [ErrorHint], which provides specific, non-obvious advice that may be
 ///    applicable.
+///  * [ErrorSpacer], which renders as a blank line.
 ///  * [FlutterError], which is the most common place to use an
 ///    [ErrorDescription].
 class ErrorDescription extends _ErrorDiagnostic {
@@ -323,6 +324,7 @@ class ErrorSummary extends _ErrorDiagnostic {
 ///  * [ErrorDescription], which provides an explanation of the problem and its
 ///    cause, any information that may help track down the problem, background
 ///    information, etc.
+///  * [ErrorSpacer], which renders as a blank line.
 ///  * [FlutterError], which is the most common place to use an [ErrorHint].
 class ErrorHint extends _ErrorDiagnostic {
   /// A lint enforces that this constructor can only be called with a string
@@ -516,14 +518,52 @@ class FlutterErrorDetails with Diagnosticable {
   /// This won't be called if [stack] is null.
   final IterableFilter<String>? stackFilter;
 
-  /// A callback which, when called with a [StringBuffer] will write to that buffer
-  /// information that could help with debugging the problem.
+  /// A callback which will provide information that could help with debugging
+  /// the problem.
   ///
-  /// Information collector callbacks can be expensive, so the generated information
-  /// should be cached, rather than the callback being called multiple times.
+  /// Information collector callbacks can be expensive, so the generated
+  /// information should be cached by the caller, rather than the callback being
+  /// called multiple times.
   ///
-  /// The text written to the information argument may contain newlines but should
-  /// not end with a newline.
+  /// The callback is expected to return an iterable of [DiagnosticsNode] objects,
+  /// typically implemented using `sync*` and `yield`.
+  ///
+  /// {@tool snippet}
+  /// In this example, the information collector returns two pieces of information,
+  /// one broadly-applicable statement regarding how the error happened, and one
+  /// giving a specific piece of information that may be useful in some cases but
+  /// may also be irrelevant most of the time (an argument to the method).
+  ///
+  /// ```dart
+  /// void climbElevator(int pid) {
+  ///   try {
+  ///     // ...
+  ///   } catch (error, stack) {
+  ///     FlutterError.reportError(FlutterErrorDetails(
+  ///       exception: error,
+  ///       stack: stack,
+  ///       informationCollector: () => <DiagnosticsNode>[
+  ///         ErrorDescription('This happened while climbing the space elevator.'),
+  ///         ErrorHint('The process ID is: $pid'),
+  ///       ],
+  ///     ));
+  ///   }
+  /// }
+  /// ```
+  /// {@end-tool}
+  ///
+  /// The following classes may be of particular use:
+  ///
+  ///  * [ErrorDescription], for information that is broadly applicable to the
+  ///    situation being described.
+  ///  * [ErrorHint], for specific information that may not always be applicable
+  ///    but can be helpful in certain situations.
+  ///  * [DiagnosticsStackTrace], for reporting stack traces.
+  ///  * [ErrorSpacer], for adding spaces (a blank line) between other items.
+  ///
+  /// For objects that implement [Diagnosticable] one may consider providing
+  /// additional information by yielding the output of the object's
+  /// [Diagnosticable.toDiagnosticsNode] method.
   final InformationCollector? informationCollector;
 
   /// Whether this error should be ignored by the default error reporting
@@ -867,7 +907,9 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
   /// The default behavior is to call [presentError].
   ///
   /// You can set this to your own function to override this default behavior.
-  /// For example, you could report all errors to your server.
+  /// For example, you could report all errors to your server. Consider calling
+  /// [presentError] from your custom error handler in order to see the logs in
+  /// the console as well.
   ///
   /// If the error handler throws an exception, it will not be caught by the
   /// Flutter framework.
@@ -877,6 +919,11 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
   ///
   /// Do not call [onError] directly, instead, call [reportError], which
   /// forwards to [onError] if it is not null.
+  ///
+  /// See also:
+  ///
+  ///  * <https://flutter.dev/docs/testing/errors>, more information about error
+  ///    handling in Flutter.
   static FlutterExceptionHandler? onError = presentError;
 
   /// Called by the Flutter framework before attempting to parse a [StackTrace].
@@ -962,7 +1009,6 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
       if (isInDebugMode) {
         debugPrint(
           TextTreeRenderer(
-            wrapWidth: wrapWidth,
             wrapWidthProperties: wrapWidth,
             maxDescendentsTruncatableNode: 5,
           ).render(details.toDiagnosticsNode(style: DiagnosticsTreeStyle.error)).trimRight(),
@@ -1035,7 +1081,7 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
         index -= 1;
       }
     }
-    final List<String?> reasons = List<String?>.filled(parsedFrames.length, null, growable: false);
+    final List<String?> reasons = List<String?>.filled(parsedFrames.length, null);
     for (final StackFilter filter in _stackFilters) {
       filter.filter(parsedFrames, reasons);
     }

@@ -9,10 +9,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter_driver/driver_extension.dart';
-import 'package:flutter_driver/src/extension/wait_conditions.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../driver_extension.dart';
+import '../extension/wait_conditions.dart';
 import 'diagnostics_tree.dart';
 import 'error.dart';
 import 'find.dart';
@@ -92,7 +92,7 @@ mixin CreateFinderFactory {
       case 'String':
         return find.byKey(ValueKey<String>(arguments.keyValue as String));
       default:
-        throw 'Unsupported ByValueKey type: ${arguments.keyValueType}';
+        throw UnimplementedError('Unsupported ByValueKey type: ${arguments.keyValueType}');
     }
   }
 
@@ -194,8 +194,10 @@ mixin CommandHandlerFactory {
 
   Future<Result> _enterText(Command command) async {
     if (!_testTextInput.isRegistered) {
-      throw 'Unable to fulfill `FlutterDriver.enterText`. Text emulation is '
-            'disabled. You can enable it using `FlutterDriver.setTextEntryEmulation`.';
+      throw StateError(
+        'Unable to fulfill `FlutterDriver.enterText`. Text emulation is '
+        'disabled. You can enable it using `FlutterDriver.setTextEntryEmulation`.',
+      );
     }
     final EnterText enterTextCommand = command as EnterText;
     _testTextInput.enterText(enterTextCommand.text);
@@ -367,7 +369,7 @@ mixin CommandHandlerFactory {
     final Duration pause = scrollCommand.duration ~/ totalMoves;
     final Offset startLocation = _prober.getCenter(target);
     Offset currentLocation = startLocation;
-    final TestPointer pointer = TestPointer(1);
+    final TestPointer pointer = TestPointer();
     _prober.binding.handlePointerEvent(pointer.down(startLocation));
     await Future<void>.value(); // so that down and move don't happen in the same microtask
     for (int moves = 0; moves < totalMoves; moves += 1) {

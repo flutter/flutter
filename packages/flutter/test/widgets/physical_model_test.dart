@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -44,7 +48,6 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: PhysicalModel(
-          shape: BoxShape.rectangle,
           color: Colors.grey,
           shadowColor: Colors.red,
           elevation: 1.0,
@@ -69,7 +72,7 @@ void main() {
     await tester.pumpWidget(
       MediaQuery(
         key: key,
-        data: const MediaQueryData(devicePixelRatio: 1.0),
+        data: const MediaQueryData(),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: Padding(

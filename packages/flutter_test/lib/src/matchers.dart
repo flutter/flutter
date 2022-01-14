@@ -363,7 +363,8 @@ Matcher coversSameAreaAs(Path expectedPath, { required Rect areaToCompare, int s
 ///    verify that two different code paths create identical images.
 ///  * [flutter_test] for a discussion of test configurations, whereby callers
 ///    may swap out the backend for this matcher.
-AsyncMatcher matchesGoldenFile(Object key, {int? version}) {
+AsyncMatcher
+matchesGoldenFile(Object key, {int? version}) {
   if (key is Uri) {
     return MatchesGoldenFile(key, version);
   } else if (key is String) {

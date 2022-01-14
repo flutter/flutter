@@ -412,7 +412,7 @@ void main() {
       vsync: const TestVSync(),
     );
     expect(() { controller.repeat(); }, throwsFlutterError);
-    expect(() { controller.repeat(period: null); }, throwsFlutterError);
+    expect(() { controller.repeat(); }, throwsFlutterError);
     controller.dispose();
   });
 
@@ -436,8 +436,6 @@ void main() {
 
     final AnimationController controller = AnimationController(
       value: 1.0,
-      upperBound: 1.0,
-      lowerBound: 0.0,
       vsync: const TestVSync(),
     )..addStatusListener(statusLog.add);
 
@@ -453,8 +451,6 @@ void main() {
 
     final AnimationController controller = AnimationController(
       value: 0.0,
-      upperBound: 1.0,
-      lowerBound: 0.0,
       vsync: const TestVSync(),
     )..addStatusListener(statusLog.add);
 
@@ -530,8 +526,6 @@ void main() {
     final AnimationController controller = AnimationController(
       duration: const Duration(milliseconds: 100),
       value: 0.0,
-      lowerBound: 0.0,
-      upperBound: 1.0,
       vsync: const TestVSync(),
     )..addStatusListener(statusLog.add);
 
@@ -582,8 +576,6 @@ void main() {
   test('setting value directly sets correct status', () {
     final AnimationController controller = AnimationController(
       value: 0.0,
-      lowerBound: 0.0,
-      upperBound: 1.0,
       vsync: const TestVSync(),
     );
 
@@ -613,8 +605,6 @@ void main() {
     final AnimationController controller = AnimationController(
       duration: const Duration(milliseconds: 100),
       value: 0.0,
-      lowerBound: 0.0,
-      upperBound: 1.0,
       vsync: const TestVSync(),
     )..addStatusListener(statusLog.add);
 
@@ -660,8 +650,6 @@ void main() {
     final AnimationController controller = AnimationController(
       duration: const Duration(milliseconds: 100),
       value: 1.0,
-      lowerBound: 0.0,
-      upperBound: 1.0,
       vsync: const TestVSync(),
     )..addStatusListener(statusLog.add);
 
@@ -689,8 +677,6 @@ void main() {
     final AnimationController controller = AnimationController(
       duration: const Duration(milliseconds: 100),
       value: 0.0,
-      lowerBound: 0.0,
-      upperBound: 1.0,
       vsync: const TestVSync(),
     )..addStatusListener(statusLog.add);
 
@@ -720,8 +706,6 @@ void main() {
       final AnimationController controller = AnimationController(
         duration: const Duration(milliseconds: 100),
         value: 0.0,
-        lowerBound: 0.0,
-        upperBound: 1.0,
         vsync: const TestVSync(),
       );
 
@@ -772,8 +756,6 @@ void main() {
       final AnimationController controller = AnimationController(
         duration: const Duration(milliseconds: 100),
         value: 0.0,
-        lowerBound: 0.0,
-        upperBound: 1.0,
         vsync: const TestVSync(),
       );
 
@@ -849,7 +831,6 @@ void main() {
       debugSemanticsDisableAnimations = true;
       final AnimationController controller = AnimationController(
         vsync: const TestVSync(),
-        animationBehavior: AnimationBehavior.normal,
       );
 
       expect(controller.value, 0.0);
@@ -880,8 +861,8 @@ void main() {
         vsync: const TestVSync(),
       );
 
-      controller.fling(velocity: 1.0, animationBehavior: AnimationBehavior.preserve);
-      fastController.fling(velocity: 1.0, animationBehavior: AnimationBehavior.normal);
+      controller.fling(animationBehavior: AnimationBehavior.preserve);
+      fastController.fling(animationBehavior: AnimationBehavior.normal);
       tick(Duration.zero);
       tick(const Duration(milliseconds: 50));
 

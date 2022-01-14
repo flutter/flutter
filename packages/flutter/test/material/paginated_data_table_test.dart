@@ -302,7 +302,6 @@ void main() {
         header: header != null ? Text(header) : null,
         actions: actions,
         source: TestDataSource(allowSelection: true),
-        showCheckboxColumn: true,
         columns: const <DataColumn>[
           DataColumn(label: Text('Name')),
           DataColumn(label: Text('Calories'), numeric: true),
@@ -771,12 +770,16 @@ void main() {
     final TestDataSource source = TestDataSource();
 
     // Note: 800 is wide enough to ensure that all of the columns fit in the
-    // Card. The DataTable can be larger than its containing Card, but this test
-    // is only concerned with ensuring the DataTable is at least as wide as the
-    // Card.
+    // Card. The test makes sure that the DataTable is exactly as wide
+    // as the Card, minus the Card's margin.
     const double _originalWidth = 800;
     const double _expandedWidth = 1600;
     const double _height = 400;
+
+    // By default, the margin of a Card is 4 in all directions, so
+    // the size of the DataTable (inside the Card) is horizontically
+    // reduced by 4 * 2; the left and right margins.
+    const double _cardMargin = 8;
 
     final Size originalSize = binding.renderView.size;
 
@@ -801,21 +804,23 @@ void main() {
     await binding.setSurfaceSize(const Size(_originalWidth, _height));
     await tester.pumpWidget(buildWidget());
 
+    double cardWidth = tester.renderObject<RenderBox>(find.byType(Card).first).size.width;
+
     // Widths should be equal before we resize...
     expect(
       tester.renderObject<RenderBox>(find.byType(DataTable).first).size.width,
-      moreOrLessEquals(tester.renderObject<RenderBox>(find.byType(Card).first).size.width),
+      moreOrLessEquals(cardWidth - _cardMargin),
     );
 
     await binding.setSurfaceSize(const Size(_expandedWidth, _height));
     await tester.pumpWidget(buildWidget());
 
-    final double cardWidth = tester.renderObject<RenderBox>(find.byType(Card).first).size.width;
+    cardWidth = tester.renderObject<RenderBox>(find.byType(Card).first).size.width;
 
     // ... and should still be equal after the resize.
     expect(
       tester.renderObject<RenderBox>(find.byType(DataTable).first).size.width,
-      moreOrLessEquals(cardWidth),
+      moreOrLessEquals(cardWidth - _cardMargin),
     );
 
     // Double check to ensure we actually resized the surface properly.
@@ -862,7 +867,6 @@ void main() {
         home: PaginatedDataTable(
           header: const Text('Test table'),
           source: TestDataSource(allowSelection: true),
-          showCheckboxColumn: true,
           columns: const <DataColumn>[
             DataColumn(label: Text('Name')),
             DataColumn(label: Text('Calories'), numeric: true),

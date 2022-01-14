@@ -370,7 +370,6 @@ class UserHeader extends StatelessWidget {
           ),
           Expanded(
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
                 RichText(text: TextSpan(
@@ -569,7 +568,6 @@ class BottomBar extends StatelessWidget {
         border: Border(
           top: BorderSide(
             color: Theme.of(context).dividerColor,
-            width: 1.0,
           ),
         ),
       ),

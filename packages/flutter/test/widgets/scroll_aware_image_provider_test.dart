@@ -2,12 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(gspencergoog): Remove this tag once this test's state leaks/test
-// dependencies have been fixed.
-// https://github.com/flutter/flutter/issues/85160
-// Fails with "flutter test --test-randomize-ordering-seed=123"
-@Tags(<String>['no-shuffle'])
-
 import 'dart:ui' as ui show Image;
 
 import 'package:flutter/widgets.dart';
@@ -374,7 +368,7 @@ void main() {
     expect(imageCache!.currentSize, 0);
 
     // Occupy the only slot in the cache with another image.
-    final TestImageProvider testImageProvider2 = TestImageProvider(testImage);
+    final TestImageProvider testImageProvider2 = TestImageProvider(testImage.clone());
     testImageProvider2.complete();
     await precacheImage(testImageProvider2, context.context!);
     expect(imageCache!.containsKey(testImageProvider), false);

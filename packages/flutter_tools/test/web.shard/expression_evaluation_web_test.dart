@@ -104,6 +104,11 @@ void main() {
       await start(expressionEvaluation: true);
       await evaluateComplexExpressionsInLibrary(flutter);
     });
+
+    testWithoutContext('evaluated expression includes web library environment defines', () async {
+      await start(expressionEvaluation: true);
+      await evaluateWebLibraryBooleanFromEnvironmentInLibrary(flutter);
+    });
   });
 
   group('Flutter test for web', () {
@@ -168,6 +173,10 @@ void main() {
       await startPaused(expressionEvaluation: true);
       await evaluateComplexExpressionsInLibrary(flutter);
     });
+    testWithoutContext('evaluated expression includes web library environment defines', () async {
+      await startPaused(expressionEvaluation: true);
+      await evaluateWebLibraryBooleanFromEnvironmentInLibrary(flutter);
+    });
   });
 }
 
@@ -220,6 +229,12 @@ Future<void> evaluateComplexExpressionsInLibrary(FlutterTestDriver flutter) asyn
   final LibraryRef library = await getRootLibrary(flutter);
   final ObjRef res = await flutter.evaluate(library.id, 'new DateTime.now().year');
   expectInstance(res, InstanceKind.kDouble, DateTime.now().year.toString());
+}
+
+Future<void> evaluateWebLibraryBooleanFromEnvironmentInLibrary(FlutterTestDriver flutter) async {
+  final LibraryRef library = await getRootLibrary(flutter);
+  final ObjRef res = await flutter.evaluate(library.id, 'const bool.fromEnvironment("dart.library.html")');
+  expectInstance(res, InstanceKind.kBool, true.toString());
 }
 
 Future<LibraryRef> getRootLibrary(FlutterTestDriver flutter) async {

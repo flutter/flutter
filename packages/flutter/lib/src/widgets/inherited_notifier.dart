@@ -28,7 +28,7 @@ import 'framework.dart';
 /// changed. When it returns true, the dependents are marked as needing to be
 /// rebuilt this frame.
 ///
-/// {@tool dartpad --template=stateful_widget_material_ticker}
+/// {@tool dartpad}
 /// This example shows three spinning squares that use the value of the notifier
 /// on an ancestor [InheritedNotifier] (`SpinModel`) to give them their
 /// rotation. The [InheritedNotifier] doesn't need to know about the children,

@@ -9,7 +9,7 @@ import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../project.dart';
 import '../template.dart';
 import 'deferred_components_validator.dart';
@@ -256,7 +256,6 @@ class _DeferredComponentAndroidFiles {
       final Directory templateComponentDir = templatesDir.childDirectory('module${globals.fs.path.separator}android${globals.fs.path.separator}deferred_component');
       template = Template(templateComponentDir, templateComponentDir,
         fileSystem: globals.fs,
-        templateManifest: null,
         logger: logger,
         templateRenderer: globals.templateRenderer,
       );

@@ -74,7 +74,7 @@ class KeySet<T extends KeyboardKey> {
       : assert(keys != null),
         assert(keys.isNotEmpty),
         assert(!keys.contains(null)),
-        _keys = HashSet<T>.from(keys);
+        _keys = HashSet<T>.of(keys);
 
   /// Returns a copy of the [KeyboardKey]s in this [KeySet].
   Set<T> get keys => _keys.toSet();
@@ -229,7 +229,7 @@ abstract class ShortcutActivator {
 /// considered without considering sides (e.g. control left and control right are
 /// considered the same).
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_center}
+/// {@tool dartpad}
 /// In the following example, the counter is increased when the following key
 /// sequences are pressed:
 ///
@@ -388,8 +388,7 @@ class ShortcutMapProperty extends DiagnosticsProperty<Map<ShortcutActivator, Int
 ///  * [CharacterActivator], an activator that represents key combinations
 ///    that result in the specified character, such as question mark.
 class SingleActivator with Diagnosticable implements ShortcutActivator {
-  /// Triggered when the [trigger] key is pressed or repeated when the
-  /// modifiers are held.
+  /// Triggered when the [trigger] key is pressed while the modifiers are held.
   ///
   /// The `trigger` should be the non-modifier key that is pressed after all the
   /// modifiers, such as [LogicalKeyboardKey.keyC] as in `Ctrl+C`. It must not be
@@ -398,10 +397,11 @@ class SingleActivator with Diagnosticable implements ShortcutActivator {
   /// The `control`, `shift`, `alt`, and `meta` flags represent whether
   /// the respect modifier keys should be held (true) or released (false)
   ///
-  /// On each [RawKeyDownEvent] of the [trigger] key, this activator checks
-  /// whether the specified modifier conditions are met.
+  /// By default, the activator is checked on all [RawKeyDownEvent] events for
+  /// the [trigger] key. If `includeRepeats` is false, only the [trigger] key
+  /// events with a false [RawKeyDownEvent.repeat] attribute will be considered.
   ///
-  /// {@tool dartpad --template=stateful_widget_scaffold_center}
+  /// {@tool dartpad}
   /// In the following example, the shortcut `Control + C` increases the counter:
   ///
   /// ** See code in examples/api/lib/widgets/shortcuts/single_activator.single_activator.0.dart **
@@ -412,6 +412,7 @@ class SingleActivator with Diagnosticable implements ShortcutActivator {
     this.shift = false,
     this.alt = false,
     this.meta = false,
+    this.includeRepeats = true,
   }) : // The enumerated check with `identical` is cumbersome but the only way
        // since const constructors can not call functions such as `==` or
        // `Set.contains`. Checking with `identical` might not work when the
@@ -482,15 +483,24 @@ class SingleActivator with Diagnosticable implements ShortcutActivator {
   ///  * [LogicalKeyboardKey.metaLeft], [LogicalKeyboardKey.metaRight].
   final bool meta;
 
+  /// Whether this activator accepts repeat events of the [trigger] key.
+  ///
+  /// If [includeRepeats] is true, the activator is checked on all
+  /// [RawKeyDownEvent] events for the [trigger] key. If `includeRepeats` is
+  /// false, only the [trigger] key events with a false [RawKeyDownEvent.repeat]
+  /// attribute will be considered.
+  final bool includeRepeats;
+
   @override
-  Iterable<LogicalKeyboardKey> get triggers sync* {
-    yield trigger;
+  Iterable<LogicalKeyboardKey> get triggers {
+    return <LogicalKeyboardKey>[trigger];
   }
 
   @override
   bool accepts(RawKeyEvent event, RawKeyboard state) {
     final Set<LogicalKeyboardKey> pressed = state.keysPressed;
     return event is RawKeyDownEvent
+      && (includeRepeats || !event.repeat)
       && (control == (pressed.contains(LogicalKeyboardKey.controlLeft) || pressed.contains(LogicalKeyboardKey.controlRight)))
       && (shift == (pressed.contains(LogicalKeyboardKey.shiftLeft) || pressed.contains(LogicalKeyboardKey.shiftRight)))
       && (alt == (pressed.contains(LogicalKeyboardKey.altLeft) || pressed.contains(LogicalKeyboardKey.altRight)))
@@ -522,6 +532,7 @@ class SingleActivator with Diagnosticable implements ShortcutActivator {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<String>('keys', debugDescribeKeys()));
+    properties.add(FlagProperty('includeRepeats', value: includeRepeats, ifFalse: 'excluding repeats'));
   }
 }
 
@@ -540,7 +551,7 @@ class SingleActivator with Diagnosticable implements ShortcutActivator {
 /// results in a question mark, which is 'Shift+Slash' on a US keyboard, but
 /// 'Shift+Comma' on a French keyboard.
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_center}
+/// {@tool dartpad}
 /// In the following example, when a key combination results in a question mark,
 /// the counter is increased:
 ///
@@ -732,14 +743,14 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
   }
 }
 
-/// A widget to that creates key bindings to specific actions for its
+/// A widget that creates key bindings to specific actions for its
 /// descendants.
 ///
 /// This widget establishes a [ShortcutManager] to be used by its descendants
 /// when invoking an [Action] via a keyboard key combination that maps to an
 /// [Intent].
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_center}
+/// {@tool dartpad}
 /// Here, we will use the [Shortcuts] and [Actions] widgets to add and subtract
 /// from a counter. When the child widget has keyboard focus, and a user presses
 /// the keys that have been defined in [Shortcuts], the action that is bound
@@ -751,7 +762,7 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
 /// ** See code in examples/api/lib/widgets/shortcuts/shortcuts.0.dart **
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_center}
+/// {@tool dartpad}
 /// This slightly more complicated, but more flexible, example creates a custom
 /// [Action] subclass to increment and decrement within a widget (a [Column])
 /// that has keyboard focus. When the user presses the up and down arrow keys,
@@ -1005,9 +1016,11 @@ class CallbackShortcuts extends StatelessWidget {
   // throws, by providing the activator and event as arguments that will appear
   // in the stack trace.
   bool _applyKeyBinding(ShortcutActivator activator, RawKeyEvent event) {
-    if (activator.accepts(event, RawKeyboard.instance)) {
-      bindings[activator]!.call();
-      return true;
+    if (activator.triggers?.contains(event.logicalKey) ?? true) {
+      if (activator.accepts(event, RawKeyboard.instance)) {
+        bindings[activator]!.call();
+        return true;
+      }
     }
     return false;
   }

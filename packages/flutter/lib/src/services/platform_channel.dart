@@ -27,6 +27,10 @@ import 'message_codecs.dart';
 /// The logical identity of the channel is given by its name. Identically named
 /// channels will interfere with each other's communication.
 ///
+/// All [BasicMessageChannel]s provided by the Flutter framework guarantee FIFO
+/// ordering. Applications can assume messages sent via a built-in
+/// [BasicMessageChannel] are delivered in the same order as they're sent.
+///
 /// See: <https://flutter.dev/platform-channels/>
 class BasicMessageChannel<T> {
   /// Creates a [BasicMessageChannel] with the specified [name], [codec] and [binaryMessenger].
@@ -95,6 +99,13 @@ class BasicMessageChannel<T> {
 /// The logical identity of the channel is given by its name. Identically named
 /// channels will interfere with each other's communication.
 ///
+/// {@template flutter.services.method_channel.FIFO}
+/// All [MethodChannel]s provided by the Flutter framework guarantee FIFO
+/// ordering. Applications can assume method calls sent via a built-in
+/// [MethodChannel] are received by the platform plugins in the same order as
+/// they're sent.
+/// {@endtemplate}
+///
 /// See: <https://flutter.dev/platform-channels/>
 class MethodChannel {
   /// Creates a [MethodChannel] with the specified [name].
@@ -118,7 +129,17 @@ class MethodChannel {
   /// The messenger used by this channel to send platform messages.
   ///
   /// The messenger may not be null.
-  BinaryMessenger get binaryMessenger => _binaryMessenger ?? ServicesBinding.instance!.defaultBinaryMessenger;
+  BinaryMessenger get binaryMessenger {
+    assert(
+      _binaryMessenger != null || ServicesBinding.instance != null,
+      'Cannot use this MethodChannel before the binary messenger has been initialized. '
+      'This happens when you invoke platform methods before the WidgetsFlutterBinding '
+      'has been initialized. You can fix this by either calling WidgetsFlutterBinding.ensureInitialized() '
+      'before this or by passing a custom BinaryMessenger instance to MethodChannel().',
+    );
+
+    return _binaryMessenger ?? ServicesBinding.instance!.defaultBinaryMessenger;
+  }
   final BinaryMessenger? _binaryMessenger;
 
   /// Backend implementation of [invokeMethod].
@@ -399,8 +420,8 @@ class MethodChannel {
       );
     } on MissingPluginException {
       return null;
-    } catch (e) {
-      return codec.encodeErrorEnvelope(code: 'error', message: e.toString(), details: null);
+    } catch (error) {
+      return codec.encodeErrorEnvelope(code: 'error', message: error.toString());
     }
   }
 
@@ -412,6 +433,8 @@ class MethodChannel {
 ///
 /// When [invokeMethod] fails to find the platform plugin, it returns null
 /// instead of throwing an exception.
+///
+/// {@macro flutter.services.method_channel.FIFO}
 class OptionalMethodChannel extends MethodChannel {
   /// Creates a [MethodChannel] that ignores missing platform plugins.
   const OptionalMethodChannel(String name, [MethodCodec codec = const StandardMethodCodec(), BinaryMessenger? binaryMessenger])

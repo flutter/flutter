@@ -78,7 +78,6 @@ void main() {
               ),
               ExpansionTile(
                 key: collapsedKey,
-                initiallyExpanded: false,
                 title: const Text('Collapsed'),
                 children: <Widget>[
                   ListTile(
@@ -176,14 +175,13 @@ void main() {
                   initiallyExpanded: true,
                   title: TestText('Expanded', key: expandedTitleKey),
                   backgroundColor: Colors.red,
-                  children: const <Widget>[ListTile(title: Text('0'))],
                   trailing: TestIcon(key: expandedIconKey),
+                  children: const <Widget>[ListTile(title: Text('0'))],
                 ),
                 ExpansionTile(
-                  initiallyExpanded: false,
                   title: TestText('Collapsed', key: collapsedTitleKey),
-                  children: const <Widget>[ListTile(title: Text('0'))],
                   trailing: TestIcon(key: collapsedIconKey),
+                  children: const <Widget>[ListTile(title: Text('0'))],
                 ),
               ],
             ),
@@ -242,7 +240,6 @@ void main() {
               children: const <Widget>[
                 ExpansionTile(
                   title: Text('Tile 1'),
-                  initiallyExpanded: false,
                   maintainState: true,
                   children: <Widget>[
                     Text('Maintaining State'),
@@ -250,8 +247,6 @@ void main() {
                 ),
                 ExpansionTile(
                   title: Text('Title 2'),
-                  initiallyExpanded: false,
-                  maintainState: false,
                   children: <Widget>[
                     Text('Discarding State'),
                   ],
@@ -538,7 +533,6 @@ void main() {
           collapsedIconColor: collapsedIconColor,
           textColor: textColor,
           collapsedTextColor: collapsedTextColor,
-          initiallyExpanded: false,
           title: TestText('title'),
           trailing: TestIcon(),
           children: <Widget>[

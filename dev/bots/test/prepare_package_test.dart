@@ -7,7 +7,7 @@ import 'dart:io' hide Platform;
 import 'dart:typed_data';
 
 import 'package:path/path.dart' as path;
-import 'package:platform/platform.dart' show FakePlatform;
+import 'package:platform/platform.dart' show FakePlatform, Platform;
 
 import '../../../packages/flutter_tools/test/src/fake_process_manager.dart';
 import '../prepare_package.dart';
@@ -34,7 +34,7 @@ void main() {
       )),
     );
   });
-  for (final String platformName in <String>['macos', 'linux', 'windows']) {
+  for (final String platformName in <String>[Platform.macOS, Platform.linux, Platform.windows]) {
     final FakePlatform platform = FakePlatform(
       operatingSystem: platformName,
       environment: <String, String>{
@@ -123,6 +123,10 @@ void main() {
           'git reset --hard $testRef': null,
           'git remote set-url origin https://github.com/flutter/flutter.git': null,
           'git describe --tags --exact-match $testRef': <ProcessResult>[ProcessResult(0, 0, 'v1.2.3', '')],
+          '$flutter --version --machine': <ProcessResult>[
+            ProcessResult(0, 0, '{"dartSdkVersion": "3.2.1"}', ''),
+            ProcessResult(0, 0, '{"dartSdkVersion": "3.2.1"}', ''),
+          ],
           if (platform.isWindows) '7za x ${path.join(tempDir.path, 'mingit.zip')}': null,
           '$flutter doctor': null,
           '$flutter update-packages': null,
@@ -152,6 +156,10 @@ void main() {
           'git reset --hard $testRef': null,
           'git remote set-url origin https://github.com/flutter/flutter.git': null,
           'git describe --tags --exact-match $testRef': <ProcessResult>[ProcessResult(0, 0, 'v1.2.3', '')],
+          '$flutter --version --machine': <ProcessResult>[
+            ProcessResult(0, 0, '{"dartSdkVersion": "3.2.1"}', ''),
+            ProcessResult(0, 0, '{"dartSdkVersion": "3.2.1"}', ''),
+          ],
           if (platform.isWindows) '7za x ${path.join(tempDir.path, 'mingit.zip')}': null,
           '$flutter doctor': null,
           '$flutter update-packages': null,
@@ -202,6 +210,10 @@ void main() {
           'git reset --hard $testRef': null,
           'git remote set-url origin https://github.com/flutter/flutter.git': null,
           'git describe --tags --abbrev=0 $testRef': <ProcessResult>[ProcessResult(0, 0, 'v1.2.3', '')],
+          '$flutter --version --machine': <ProcessResult>[
+            ProcessResult(0, 0, '{"dartSdkVersion": "3.2.1"}', ''),
+            ProcessResult(0, 0, '{"dartSdkVersion": "3.2.1"}', ''),
+          ],
           if (platform.isWindows) '7za x ${path.join(tempDir.path, 'mingit.zip')}': null,
           '$flutter doctor': null,
           '$flutter update-packages': null,
@@ -244,6 +256,10 @@ void main() {
           'git reset --hard $testRef': null,
           'git remote set-url origin https://github.com/flutter/flutter.git': null,
           'git describe --tags --exact-match $testRef': <ProcessResult>[ProcessResult(0, 0, 'v1.2.3', '')],
+          '$flutter --version --machine': <ProcessResult>[
+            ProcessResult(0, 0, '{"dartSdkVersion": "3.2.1"}', ''),
+            ProcessResult(0, 0, '{"dartSdkVersion": "3.2.1"}', ''),
+          ],
           if (platform.isWindows) '7za x ${path.join(tempDir.path, 'mingit.zip')}': null,
           '$flutter doctor': null,
           '$flutter update-packages': null,
@@ -266,7 +282,6 @@ void main() {
           tempDir,
           testRef,
           Branch.dev,
-          strict: true,
           processManager: processManager,
           subprocessOutput: false,
           platform: platform,
@@ -363,7 +378,7 @@ void main() {
           tempDir,
           testRef,
           Branch.stable,
-          'v1.2.3',
+          <String, String>{'frameworkVersionFromGit': 'v1.2.3', 'dartSdkVersion': '3.2.1'},
           outputFile,
           false,
           processManager: processManager,
@@ -459,7 +474,7 @@ void main() {
           tempDir,
           testRef,
           Branch.stable,
-          'v1.2.3',
+          <String, String>{'frameworkVersionFromGit': 'v1.2.3', 'dartSdkVersion': '3.2.1'},
           outputFile,
           false,
           processManager: processManager,
@@ -483,7 +498,7 @@ void main() {
           tempDir,
           testRef,
           Branch.stable,
-          'v1.2.3',
+          <String, String>{'frameworkVersionFromGit': 'v1.2.3', 'dartSdkVersion': '3.2.1'},
           outputFile,
           false,
           processManager: processManager,
@@ -495,7 +510,7 @@ void main() {
           '$gsutilCall -- stat $gsArchivePath': <ProcessResult>[ProcessResult(0, 0, '', '')],
         };
         processManager.addCommands(convertResults(calls));
-        expect(() async => publisher.publishArchive(false), throwsException);
+        expect(() async => publisher.publishArchive(), throwsException);
       });
 
       test('publishArchive does not throw if forceUpload is true and artifact already exists on cloud storage', () async {
@@ -505,7 +520,7 @@ void main() {
           tempDir,
           testRef,
           Branch.stable,
-          'v1.2.3',
+          <String, String>{'frameworkVersionFromGit': 'v1.2.3', 'dartSdkVersion': '3.2.1'},
           outputFile,
           false,
           processManager: processManager,

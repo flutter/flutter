@@ -2,13 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-@TestOn('!chrome')
+// no-shuffle:
+//   //TODO(gspencergoog): Remove this tag once this test's state leaks/test
+//   dependencies have been fixed.
+//   https://github.com/flutter/flutter/issues/85160
+//   Fails with "flutter test --test-randomize-ordering-seed=456"
+// reduced-test-set:
+//   This file is run as part of a reduced test set in CI on Mac and Windows
+//   machines.
+@Tags(<String>['reduced-test-set', 'no-shuffle'])
 
-// TODO(gspencergoog): Remove this tag once this test's state leaks/test
-// dependencies have been fixed.
-// https://github.com/flutter/flutter/issues/85160
-// Fails with "flutter test --test-randomize-ordering-seed=456"
-@Tags(<String>['no-shuffle'])
+@TestOn('!chrome')
 
 import 'dart:async';
 import 'dart:convert';
@@ -494,7 +498,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
             child: Overlay(
               initialEntries: <OverlayEntry>[
                 OverlayEntry(
-                  opaque: false,
                   maintainState: true,
                   builder: (BuildContext _) => createSubtree(width: 94.0),
                 ),
@@ -504,7 +507,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
                   builder: (BuildContext _) => createSubtree(width: 95.0),
                 ),
                 OverlayEntry(
-                  opaque: false,
                   maintainState: true,
                   builder: (BuildContext _) => createSubtree(width: 96.0, key: clickTarget),
                 ),
@@ -813,9 +815,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         elementA.toDiagnosticsNode().toJsonMap(
           InspectorSerializationDelegate(
             service: service,
-            summaryTree: false,
             includeProperties: true,
-            addAdditionalPropertiesCallback: null,
           ),
         ),
         isNotNull,
@@ -1999,7 +1999,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       _CreationLocation location = knownLocations[id]!;
       expect(location.file, equals(file));
       // ClockText widget.
-      expect(location.line, equals(60));
+      expect(location.line, equals(64));
       expect(location.column, equals(9));
       expect(location.name, equals('ClockText'));
       expect(count, equals(1));
@@ -2009,7 +2009,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       location = knownLocations[id]!;
       expect(location.file, equals(file));
       // Text widget in _ClockTextState build method.
-      expect(location.line, equals(98));
+      expect(location.line, equals(102));
       expect(location.column, equals(12));
       expect(location.name, equals('Text'));
       expect(count, equals(1));
@@ -2036,7 +2036,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       location = knownLocations[id]!;
       expect(location.file, equals(file));
       // ClockText widget.
-      expect(location.line, equals(60));
+      expect(location.line, equals(64));
       expect(location.column, equals(9));
       expect(location.name, equals('ClockText'));
       expect(count, equals(3)); // 3 clock widget instances rebuilt.
@@ -2046,7 +2046,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       location = knownLocations[id]!;
       expect(location.file, equals(file));
       // Text widget in _ClockTextState build method.
-      expect(location.line, equals(98));
+      expect(location.line, equals(102));
       expect(location.column, equals(12));
       expect(location.name, equals('Text'));
       expect(count, equals(3)); // 3 clock widget instances rebuilt.
@@ -2518,7 +2518,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         final ui.Codec codec = await ui.instantiateImageCodec(base64.decode(base64Screenshot));
         final ui.FrameInfo frame = await codec.getNextFrame();
         return frame.image;
-      }, additionalTime: const Duration(seconds: 11)))!;
+      }))!;
 
       await expectLater(
         screenshotImage,
@@ -2927,7 +2927,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       final InspectorSerializationDelegate delegate =
         InspectorSerializationDelegate(
           service: service,
-          summaryTree: false,
           includeProperties: true,
           addAdditionalPropertiesCallback:
             (DiagnosticsNode node, InspectorSerializationDelegate delegate) {
@@ -2956,7 +2955,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       final InspectorSerializationDelegate emptyDelegate =
         InspectorSerializationDelegate(
           service: service,
-          summaryTree: false,
           includeProperties: true,
           addAdditionalPropertiesCallback:
             (DiagnosticsNode node, InspectorSerializationDelegate delegate) {
@@ -2966,9 +2964,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       final InspectorSerializationDelegate defaultDelegate =
         InspectorSerializationDelegate(
           service: service,
-          summaryTree: false,
           includeProperties: true,
-          addAdditionalPropertiesCallback: null,
         );
       expect(node.toJsonMap(emptyDelegate), node.toJsonMap(defaultDelegate));
     });

@@ -508,11 +508,9 @@ void main() {
           // Typically PointerAddedEvent is not used in testers, but for records
           // captured on a device it is usually what start a gesture.
           PointerAddedEvent(
-            timeStamp: Duration.zero,
             position: location,
           ),
           PointerDownEvent(
-            timeStamp: Duration.zero,
             position: location,
             buttons: kSecondaryMouseButton,
             pointer: 1,
@@ -811,11 +809,9 @@ class _SingleTickerTestState extends State<_SingleTickerTest> with SingleTickerP
 
 class _AlwaysAnimating extends StatefulWidget {
   const _AlwaysAnimating({
-    this.child,
     required this.onPaint,
   });
 
-  final Widget? child;
   final VoidCallback onPaint;
 
   @override
@@ -848,7 +844,6 @@ class _AlwaysAnimatingState extends State<_AlwaysAnimating> with SingleTickerPro
       builder: (BuildContext context, Widget? child) {
         return CustomPaint(
           painter: _AlwaysRepaint(widget.onPaint),
-          child: widget.child,
         );
       },
     );

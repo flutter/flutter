@@ -12,6 +12,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -1095,7 +1096,6 @@ void main() {
             behavior: const NoScrollbarBehavior(),
             child: Scrollbar(
               key: key2,
-              notificationPredicate: null,
               child: SingleChildScrollView(
                 key: outerKey,
                 child: SizedBox(
@@ -1105,7 +1105,6 @@ void main() {
                     children: <Widget>[
                       Scrollbar(
                         key: key1,
-                        notificationPredicate: null,
                         child: SizedBox(
                           height: 300.0,
                           width: double.infinity,
@@ -1215,6 +1214,7 @@ void main() {
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.fuchsia }));
 
   testWidgets('Scrollbar dragging is disabled by default on Android', (WidgetTester tester) async {
+    int tapCount = 0;
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
       MaterialApp(
@@ -1223,8 +1223,18 @@ void main() {
           child: Scrollbar(
             isAlwaysShown: true,
             controller: scrollController,
-            child: const SingleChildScrollView(
-              child: SizedBox(width: 4000.0, height: 4000.0),
+            child: SingleChildScrollView(
+              dragStartBehavior: DragStartBehavior.down,
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {
+                  tapCount += 1;
+                },
+                child: const SizedBox(
+                  width: 4000.0,
+                  height: 4000.0,
+                ),
+              ),
             ),
           ),
         ),
@@ -1252,30 +1262,49 @@ void main() {
     );
 
     // Try to drag the thumb down.
-    const double scrollAmount = 10.0;
-    final TestGesture dragScrollbarThumbGesture = await tester.startGesture(const Offset(797.0, 45.0));
-    await tester.pumpAndSettle();
-    await dragScrollbarThumbGesture.moveBy(const Offset(0.0, scrollAmount));
-    await tester.pumpAndSettle();
-    await dragScrollbarThumbGesture.up();
+    const double scrollAmount = 50.0;
+    await tester.dragFrom(
+      const Offset(797.0, 45.0),
+      const Offset(0.0, scrollAmount),
+      touchSlopY: 0.0,
+    );
     await tester.pumpAndSettle();
     // Dragging on the thumb does not change the offset.
     expect(scrollController.offset, 0.0);
+    expect(tapCount, 0);
 
-    // Drag in the track area to validate pass through to scrollable.
-    final TestGesture dragPassThroughTrack = await tester.startGesture(const Offset(797.0, 250.0));
-    await dragPassThroughTrack.moveBy(const Offset(0.0, -scrollAmount));
-    await tester.pumpAndSettle();
-    await dragPassThroughTrack.up();
+    // Try to drag up in the thumb area to validate pass through to scrollable.
+    await tester.dragFrom(
+      const Offset(797.0, 45.0),
+      const Offset(0.0, -scrollAmount),
+    );
     await tester.pumpAndSettle();
     // The scroll view received the drag.
     expect(scrollController.offset, scrollAmount);
+    expect(tapCount, 0);
 
-    // Tap on the track to validate the scroll view will not page.
-    await tester.tapAt(const Offset(797.0, 200.0));
+    // Drag in the track area to validate pass through to scrollable.
+    await tester.dragFrom(
+      const Offset(797.0, 45.0),
+      const Offset(0.0, -scrollAmount),
+      touchSlopY: 0.0,
+    );
+    await tester.pumpAndSettle();
+    // The scroll view received the drag.
+    expect(scrollController.offset, scrollAmount * 2);
+    expect(tapCount, 0);
+
+    // Tap on the thumb to validate the scroll view receives a click.
+    await tester.tapAt(const Offset(797.0, 45.0));
+    await tester.pumpAndSettle();
+    expect(tapCount, 1);
+
+    // Tap on the track to validate the scroll view will not page and receives a click.
+    await tester.tapAt(const Offset(797.0, 400.0));
     await tester.pumpAndSettle();
     // The offset should not have changed.
-    expect(scrollController.offset, scrollAmount);
+    expect(scrollController.offset, scrollAmount * 2);
+    expect(tapCount, 2);
   });
 
   testWidgets('Simultaneous dragging and pointer scrolling does not cause a crash', (WidgetTester tester) async {
@@ -1546,8 +1575,8 @@ void main() {
           color: Colors.transparent,
         )
         ..line(
-          p1: Offset.zero,
-          p2: const Offset(0.0, 600.0),
+          p1: const Offset(4.0, 0.0),
+          p2: const Offset(4.0, 600.0),
           strokeWidth: 1.0,
           color: Colors.transparent,
         )

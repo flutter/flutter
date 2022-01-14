@@ -41,6 +41,7 @@ void main() {
       (ByteData? message) async {
         expect(message, bar);
         countInbound += 1;
+        return null;
       },
     );
     expect(countInbound, equals(0));
@@ -51,7 +52,7 @@ void main() {
   });
 
   test('can check the mock handler', () {
-    Future<ByteData?> handler(ByteData? call) => Future<ByteData?>.value(null);
+    Future<ByteData?> handler(ByteData? call) => Future<ByteData?>.value();
     final TestDefaultBinaryMessenger messenger = TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger;
 
     expect(messenger.checkMockMessageHandler('test_channel', null), true);

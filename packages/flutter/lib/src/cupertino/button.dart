@@ -26,6 +26,13 @@ const EdgeInsets _kBackgroundButtonPadding = EdgeInsets.symmetric(
 /// [EdgeInsets.zero], should be used to prevent clipping larger [child]
 /// widgets.
 ///
+/// {@tool dartpad}
+/// This sample shows produces an enabled and disabled [CupertinoButton] and
+/// [CupertinoButton.filled].
+///
+/// ** See code in examples/api/lib/cupertino/button/cupertino_button.0.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * <https://developer.apple.com/ios/human-interface-guidelines/controls/buttons/>

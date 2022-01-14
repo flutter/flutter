@@ -20,18 +20,23 @@ function generate_docs() {
     # Install and activate dartdoc.
     # NOTE: When updating to a new dartdoc version, please also update
     # `dartdoc_options.yaml` to include newly introduced error and warning types.
-    "$PUB" global activate dartdoc 2.0.0
+    "$DART" pub global activate dartdoc 4.1.0
 
     # Install and activate the snippets tool, which resides in the
     # assets-for-api-docs repo:
     # https://github.com/flutter/assets-for-api-docs/tree/master/packages/snippets
     # >>> If you update this version, also update it in dev/bots/analyze_sample_code.dart <<<
-    "$PUB" global activate snippets 0.2.3
+    "$DART" pub global activate snippets 0.2.5
+
+    # Run the snippets tool once to force building of the package executable,
+    # since "dart pub global run" has issues with startup concurrency.
+    # TODO(gspencergoog): Remove once pub issue is fixed, https://github.com/dart-lang/pub/issues/3165
+    "$DART" pub global run snippets --help
 
     # This script generates a unified doc set, and creates
     # a custom index.html, placing everything into dev/docs/doc.
     (cd "$FLUTTER_ROOT/dev/tools" && "$FLUTTER" pub get)
-    (cd "$FLUTTER_ROOT/dev/tools" && "$PUB" get)
+    (cd "$FLUTTER_ROOT/dev/tools" && "$DART" pub get)
     (cd "$FLUTTER_ROOT" && "$DART" --disable-dart-dev --enable-asserts "$FLUTTER_ROOT/dev/tools/dartdoc.dart")
     (cd "$FLUTTER_ROOT" && "$DART" --disable-dart-dev --enable-asserts "$FLUTTER_ROOT/dev/tools/java_and_objc_doc.dart")
 }
@@ -70,9 +75,6 @@ function create_docset() {
 }
 
 function deploy_docs() {
-    # Ensure google webmaster tools can verify our site.
-    cp "$FLUTTER_ROOT/dev/docs/google2ed1af765c529f57.html" "$FLUTTER_ROOT/dev/docs/doc"
-
     case "$LUCI_BRANCH" in
         master)
             echo "$(date): Updating $LUCI_BRANCH docs: https://master-api.flutter.dev/"
@@ -128,7 +130,6 @@ FLUTTER_BIN="$FLUTTER_ROOT/bin"
 DART_BIN="$FLUTTER_ROOT/bin/cache/dart-sdk/bin"
 FLUTTER="$FLUTTER_BIN/flutter"
 DART="$DART_BIN/dart"
-PUB="$DART_BIN/pub"
 export PATH="$FLUTTER_BIN:$DART_BIN:$PATH"
 
 # Make sure dart is installed by invoking Flutter to download it.

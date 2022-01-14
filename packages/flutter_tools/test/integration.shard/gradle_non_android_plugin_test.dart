@@ -90,5 +90,5 @@ void main() {
       'app-release.apk',
     );
     expect(fileSystem.file(exampleAppApk), exists);
-  }, timeout: const Timeout(Duration(minutes: 5)));
+  });
 }

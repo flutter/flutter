@@ -449,7 +449,7 @@ abstract class FloatingActionButtonLocation {
 /// You can create your own subclass of [StandardFabLocation]
 /// to implement a custom [FloatingActionButtonLocation].
 ///
-/// {@tool dartpad --template=stateless_widget_material}
+/// {@tool dartpad}
 /// This is an example of a user-defined [FloatingActionButtonLocation].
 ///
 /// The example shows a [Scaffold] with an [AppBar], a [BottomAppBar], and a

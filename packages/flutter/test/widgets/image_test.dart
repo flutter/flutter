@@ -2,7 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
+
 import 'dart:async';
+import 'dart:io';
 import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
@@ -206,13 +211,11 @@ void main() {
         key: mediaQueryKey1,
         data: const MediaQueryData(
           devicePixelRatio: 10.0,
-          padding: EdgeInsets.zero,
         ),
         child: MediaQuery(
           key: mediaQueryKey2,
           data: const MediaQueryData(
             devicePixelRatio: 5.0,
-            padding: EdgeInsets.zero,
           ),
           child: Image(
             excludeFromSemantics: true,
@@ -233,13 +236,11 @@ void main() {
         key: mediaQueryKey2,
         data: const MediaQueryData(
           devicePixelRatio: 5.0,
-          padding: EdgeInsets.zero,
         ),
         child: MediaQuery(
           key: mediaQueryKey1,
           data: const MediaQueryData(
             devicePixelRatio: 10.0,
-            padding: EdgeInsets.zero,
           ),
           child: Image(
             excludeFromSemantics: true,
@@ -271,7 +272,6 @@ void main() {
             key: mediaQueryKey2,
             data: const MediaQueryData(
               devicePixelRatio: 5.0,
-              padding: EdgeInsets.zero,
             ),
             child: Image(
               excludeFromSemantics: true,
@@ -283,7 +283,6 @@ void main() {
             key: mediaQueryKey1,
             data: const MediaQueryData(
               devicePixelRatio: 10.0,
-              padding: EdgeInsets.zero,
             ),
             child: Container(width: 100.0),
           ),
@@ -301,7 +300,6 @@ void main() {
             key: mediaQueryKey2,
             data: const MediaQueryData(
               devicePixelRatio: 5.0,
-              padding: EdgeInsets.zero,
             ),
             child: Container(width: 100.0),
           ),
@@ -309,7 +307,6 @@ void main() {
             key: mediaQueryKey1,
             data: const MediaQueryData(
               devicePixelRatio: 10.0,
-              padding: EdgeInsets.zero,
             ),
             child: Image(
               excludeFromSemantics: true,
@@ -339,13 +336,11 @@ void main() {
         key: mediaQueryKey1,
         data: const MediaQueryData(
           devicePixelRatio: 10.0,
-          padding: EdgeInsets.zero,
         ),
         child: MediaQuery(
           key: mediaQueryKey2,
           data: const MediaQueryData(
             devicePixelRatio: 5.0,
-            padding: EdgeInsets.zero,
           ),
           child: Image(
             excludeFromSemantics: true,
@@ -366,13 +361,11 @@ void main() {
         key: mediaQueryKey2,
         data: const MediaQueryData(
           devicePixelRatio: 5.0,
-          padding: EdgeInsets.zero,
         ),
         child: MediaQuery(
           key: mediaQueryKey1,
           data: const MediaQueryData(
             devicePixelRatio: 10.0,
-            padding: EdgeInsets.zero,
           ),
           child: Image(
             excludeFromSemantics: true,
@@ -404,7 +397,6 @@ void main() {
             key: mediaQueryKey2,
             data: const MediaQueryData(
               devicePixelRatio: 5.0,
-              padding: EdgeInsets.zero,
             ),
             child: Image(
               excludeFromSemantics: true,
@@ -416,7 +408,6 @@ void main() {
             key: mediaQueryKey1,
             data: const MediaQueryData(
               devicePixelRatio: 10.0,
-              padding: EdgeInsets.zero,
             ),
             child: Container(width: 100.0),
           ),
@@ -434,7 +425,6 @@ void main() {
             key: mediaQueryKey2,
             data: const MediaQueryData(
               devicePixelRatio: 5.0,
-              padding: EdgeInsets.zero,
             ),
             child: Container(width: 100.0),
           ),
@@ -442,7 +432,6 @@ void main() {
             key: mediaQueryKey1,
             data: const MediaQueryData(
               devicePixelRatio: 10.0,
-              padding: EdgeInsets.zero,
             ),
             child: Image(
               excludeFromSemantics: true,
@@ -1741,7 +1730,6 @@ void main() {
       await tester.pumpWidget(RepaintBoundary(
         key: key,
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           textDirection: TextDirection.ltr,
           children: <Widget>[
@@ -1797,7 +1785,6 @@ void main() {
     final _TestImageStreamCompleter streamCompleter = _TestImageStreamCompleter(
       ImageInfo(
         image: image,
-        scale: 1.0,
         debugLabel: 'test.png',
       ),
     );
@@ -1827,7 +1814,7 @@ void main() {
   });
 
   testWidgets('Disposes image handle when disposed', (WidgetTester tester) async {
-    final ui.Image image = (await tester.runAsync(() => createTestImage(width: 1, height: 1, cache: false)))!;
+    final ui.Image image = (await tester.runAsync(() => createTestImage(cache: false)))!;
 
     expect(image.debugGetOpenHandleStackTraces()!.length, 1);
 
@@ -1836,7 +1823,6 @@ void main() {
         Future<ImageInfo>.value(
           ImageInfo(
             image: image,
-            scale: 1.0,
             debugLabel: '_TestImage',
           ),
         ),
@@ -1869,7 +1855,7 @@ void main() {
 
   testWidgets('Keeps stream alive when ticker mode is disabled',  (WidgetTester tester) async {
     imageCache!.maximumSize = 0;
-    final ui.Image image = (await tester.runAsync(() => createTestImage(width: 1, height: 1, cache: false)))!;
+    final ui.Image image = (await tester.runAsync(() => createTestImage(cache: false)))!;
     final _TestImageProvider provider = _TestImageProvider();
     provider.complete(image);
 
@@ -1971,6 +1957,22 @@ void main() {
       matchesGoldenFile('image_test.missing.2.png'),
     );
   }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/74935 (broken assets not being reported on web)
+
+  testWidgets('Image.file throws a non-implemented error on web', (WidgetTester tester) async {
+    const String expectedError =
+      'Image.file is not supported on Flutter Web. '
+      'Consider using either Image.asset or Image.network instead.';
+    final Uri uri = Uri.parse('/home/flutter/dash.png');
+    final File file = File.fromUri(uri);
+    expect(
+      () => Image.file(file),
+      kIsWeb
+        // Web does not support file access, expect AssertionError
+        ? throwsA(predicate((AssertionError e) => e.message == expectedError))
+        // AOT supports file access, expect constructor to succeed
+        : isNot(throwsA(anything)),
+    );
+  });
 }
 
 @immutable

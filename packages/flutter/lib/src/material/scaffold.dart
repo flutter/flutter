@@ -13,6 +13,7 @@ import 'package:flutter/widgets.dart';
 
 import 'app_bar.dart';
 import 'banner.dart';
+import 'banner_theme.dart';
 import 'bottom_sheet.dart';
 import 'colors.dart';
 import 'curves.dart';
@@ -59,21 +60,23 @@ enum _ScaffoldSlot {
   statusBar,
 }
 
-/// Manages [SnackBar]s for descendant [Scaffold]s.
+/// Manages [SnackBar]s and [MaterialBanner]s for descendant [Scaffold]s.
 ///
-/// This class provides APIs for showing snack bars.
+/// This class provides APIs for showing snack bars and material banners at the
+/// bottom and top of the screen, respectively.
 ///
-/// To display a snack bar, obtain the [ScaffoldMessengerState] for the current
-/// [BuildContext] via [ScaffoldMessenger.of] and use the
-/// [ScaffoldMessengerState.showSnackBar] function.
+/// To display one of these notifications, obtain the [ScaffoldMessengerState]
+/// for the current [BuildContext] via [ScaffoldMessenger.of] and use the
+/// [ScaffoldMessengerState.showSnackBar] or the
+/// [ScaffoldMessengerState.showMaterialBanner] functions.
 ///
 /// When the [ScaffoldMessenger] has nested [Scaffold] descendants, the
-/// ScaffoldMessenger will only present a [SnackBar] to the root Scaffold of
-/// the subtree of Scaffolds. In order to show SnackBars in the inner, nested
-/// Scaffolds, set a new scope for your SnackBars by instantiating a new
-/// ScaffoldMessenger in between the levels of nesting.
+/// ScaffoldMessenger will only present the notification to the root Scaffold of
+/// the subtree of Scaffolds. In order to show notifications for the inner, nested
+/// Scaffolds, set a new scope by instantiating a new ScaffoldMessenger in
+/// between the levels of nesting.
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold_center}
+/// {@tool dartpad}
 /// Here is an example of showing a [SnackBar] when the user presses a button.
 ///
 /// ** See code in examples/api/lib/material/scaffold/scaffold_messenger.0.dart **
@@ -83,6 +86,8 @@ enum _ScaffoldSlot {
 ///
 ///  * [SnackBar], which is a temporary notification typically shown near the
 ///    bottom of the app using the [ScaffoldMessengerState.showSnackBar] method.
+///  * [MaterialBanner], which is a temporary notification typically shown at the
+///    top of the app using the [ScaffoldMessengerState.showMaterialBanner] method.
 ///  * [debugCheckHasScaffoldMessenger], which asserts that the given context
 ///    has a [ScaffoldMessenger] ancestor.
 ///  * Cookbook: [Display a SnackBar](https://flutter.dev/docs/cookbook/design/snackbars)
@@ -102,7 +107,7 @@ class ScaffoldMessenger extends StatefulWidget {
   /// The state from the closest instance of this class that encloses the given
   /// context.
   ///
-  /// {@tool dartpad --template=stateless_widget_scaffold_center}
+  /// {@tool dartpad}
   /// Typical usage of the [ScaffoldMessenger.of] function is to call it in
   /// response to a user gesture or an application state change.
   ///
@@ -115,7 +120,7 @@ class ScaffoldMessenger extends StatefulWidget {
   /// function. The [MaterialApp.scaffoldMessengerKey] refers to the root
   /// ScaffoldMessenger that is provided by default.
   ///
-  /// {@tool dartpad --template=freeform}
+  /// {@tool dartpad}
   /// Sometimes [SnackBar]s are produced by code that doesn't have ready access
   /// to a valid [BuildContext]. One such example of this is when you show a
   /// SnackBar from a method outside of the `build` function. In these
@@ -165,10 +170,11 @@ class ScaffoldMessenger extends StatefulWidget {
 
 /// State for a [ScaffoldMessenger].
 ///
-/// A [ScaffoldMessengerState] object can be used to [showSnackBar] for every
-/// registered [Scaffold] that is a descendant of the associated
-/// [ScaffoldMessenger]. Scaffolds will register to receive [SnackBar]s from
-/// their closest ScaffoldMessenger ancestor.
+/// A [ScaffoldMessengerState] object can be used to [showSnackBar] or
+/// [showMaterialBanner] for every registered [Scaffold] that is a descendant of
+/// the associated [ScaffoldMessenger]. Scaffolds will register to receive
+/// [SnackBar]s and [MaterialBanner]s from their closest ScaffoldMessenger
+/// ancestor.
 ///
 /// Typically obtained via [ScaffoldMessenger.of].
 class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProviderStateMixin {
@@ -252,7 +258,7 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
   /// See [ScaffoldMessenger.of] for information about how to obtain the
   /// [ScaffoldMessengerState].
   ///
-  /// {@tool dartpad --template=stateless_widget_scaffold_center}
+  /// {@tool dartpad}
   /// Here is an example of showing a [SnackBar] when the user presses a button.
   ///
   /// ** See code in examples/api/lib/material/scaffold/scaffold_messenger_state.show_snack_bar.0.dart **
@@ -273,7 +279,7 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
       Completer<SnackBarClosedReason>(),
         () {
           assert(_snackBars.first == controller);
-          hideCurrentSnackBar(reason: SnackBarClosedReason.hide);
+          hideCurrentSnackBar();
         },
       null, // SnackBar doesn't use a builder function so setState() wouldn't rebuild it
     );
@@ -378,7 +384,7 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
   /// See [ScaffoldMessenger.of] for information about how to obtain the
   /// [ScaffoldMessengerState].
   ///
-  /// {@tool dartpad --template=stateless_widget_scaffold_center}
+  /// {@tool dartpad}
   /// Here is an example of showing a [MaterialBanner] when the user presses a button.
   ///
   /// ** See code in examples/api/lib/material/scaffold/scaffold_messenger_state.show_material_banner.0.dart **
@@ -399,7 +405,7 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
       Completer<MaterialBannerClosedReason>(),
           () {
         assert(_materialBanners.first == controller);
-        hideCurrentMaterialBanner(reason: MaterialBannerClosedReason.hide);
+        hideCurrentMaterialBanner();
       },
       null, // MaterialBanner doesn't use a builder function so setState() wouldn't rebuild it
     );
@@ -797,14 +803,18 @@ class _BodyBoxConstraints extends BoxConstraints {
     double maxHeight = double.infinity,
     required this.bottomWidgetsHeight,
     required this.appBarHeight,
+    required this.materialBannerHeight,
   }) : assert(bottomWidgetsHeight != null),
        assert(bottomWidgetsHeight >= 0),
        assert(appBarHeight != null),
        assert(appBarHeight >= 0),
+       assert(materialBannerHeight != null),
+       assert(materialBannerHeight >= 0),
        super(minWidth: minWidth, maxWidth: maxWidth, minHeight: minHeight, maxHeight: maxHeight);
 
   final double bottomWidgetsHeight;
   final double appBarHeight;
+  final double materialBannerHeight;
 
   // RenderObject.layout() will only short-circuit its call to its performLayout
   // method if the new layout constraints are not == to the current constraints.
@@ -815,13 +825,14 @@ class _BodyBoxConstraints extends BoxConstraints {
     if (super != other)
       return false;
     return other is _BodyBoxConstraints
+        && other.materialBannerHeight == materialBannerHeight
         && other.bottomWidgetsHeight == bottomWidgetsHeight
         && other.appBarHeight == appBarHeight;
   }
 
   @override
   int get hashCode {
-    return hashValues(super.hashCode, bottomWidgetsHeight, appBarHeight);
+    return hashValues(super.hashCode, materialBannerHeight, bottomWidgetsHeight, appBarHeight);
   }
 }
 
@@ -861,7 +872,8 @@ class _BodyBuilder extends StatelessWidget {
           : metrics.padding.bottom;
 
         final double top = extendBodyBehindAppBar
-          ? math.max(metrics.padding.top, bodyConstraints.appBarHeight)
+          ? math.max(metrics.padding.top,
+              bodyConstraints.appBarHeight + bodyConstraints.materialBannerHeight)
           : metrics.padding.top;
 
         return MediaQuery(
@@ -893,6 +905,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     required this.snackBarWidth,
     required this.extendBody,
     required this.extendBodyBehindAppBar,
+    required this.extendBodyBehindMaterialBanner,
   }) : assert(minInsets != null),
        assert(textDirection != null),
        assert(geometryNotifier != null),
@@ -915,6 +928,8 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
 
   final bool isSnackBarFloating;
   final double? snackBarWidth;
+
+  final bool extendBodyBehindMaterialBanner;
 
   @override
   void performLayout(Size size) {
@@ -955,6 +970,17 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
       positionChild(_ScaffoldSlot.persistentFooter, Offset(0.0, math.max(0.0, bottom - bottomWidgetsHeight)));
     }
 
+    Size materialBannerSize = Size.zero;
+    if (hasChild(_ScaffoldSlot.materialBanner)) {
+      materialBannerSize = layoutChild(_ScaffoldSlot.materialBanner, fullWidthConstraints);
+      positionChild(_ScaffoldSlot.materialBanner, Offset(0.0, appBarHeight));
+
+      // Push content down only if elevation is 0.
+      if (!extendBodyBehindMaterialBanner) {
+        contentTop += materialBannerSize.height;
+      }
+    }
+
     // Set the content bottom to account for the greater of the height of any
     // bottom-anchored material widgets or of the keyboard or other
     // bottom-anchored system UI.
@@ -972,6 +998,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
       final BoxConstraints bodyConstraints = _BodyBoxConstraints(
         maxWidth: fullWidthConstraints.maxWidth,
         maxHeight: bodyMaxHeight,
+        materialBannerHeight: materialBannerSize.height,
         bottomWidgetsHeight: extendBody ? bottomWidgetsHeight : 0.0,
         appBarHeight: appBarHeight,
       );
@@ -1006,11 +1033,6 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     // the FAB can be positioned correctly.
     if (hasChild(_ScaffoldSlot.snackBar) && !isSnackBarFloating) {
       snackBarSize = layoutChild(_ScaffoldSlot.snackBar, fullWidthConstraints);
-    }
-
-    Size materialBannerSize = Size.zero;
-    if (hasChild(_ScaffoldSlot.materialBanner)) {
-      materialBannerSize = layoutChild(_ScaffoldSlot.materialBanner, fullWidthConstraints);
     }
 
     if (hasChild(_ScaffoldSlot.bottomSheet)) {
@@ -1079,17 +1101,6 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
 
       final double xOffset = hasCustomWidth ? (size.width - snackBarWidth!) / 2 : 0.0;
       positionChild(_ScaffoldSlot.snackBar, Offset(xOffset, snackBarYOffsetBase - snackBarSize.height));
-    }
-
-    if (hasChild(_ScaffoldSlot.materialBanner)) {
-      if (materialBannerSize == Size.zero) {
-        materialBannerSize = layoutChild(
-          _ScaffoldSlot.materialBanner,
-          fullWidthConstraints,
-        );
-      }
-
-      positionChild(_ScaffoldSlot.materialBanner, Offset(0.0, appBarHeight));
     }
 
     if (hasChild(_ScaffoldSlot.statusBar)) {
@@ -1342,7 +1353,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 /// [ScaffoldState] for the current [BuildContext] via [Scaffold.of] and use the
 /// [ScaffoldState.showBottomSheet] function.
 ///
-/// {@tool dartpad --template=stateful_widget_material}
+/// {@tool dartpad}
 /// This example shows a [Scaffold] with a [body] and [FloatingActionButton].
 /// The [body] is a [Text] placed in a [Center] in order to center the text
 /// within the [Scaffold]. The [FloatingActionButton] is connected to a
@@ -1353,7 +1364,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 /// ** See code in examples/api/lib/material/scaffold/scaffold.0.dart **
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateful_widget_material}
+/// {@tool dartpad}
 /// This example shows a [Scaffold] with a blueGrey [backgroundColor], [body]
 /// and [FloatingActionButton]. The [body] is a [Text] placed in a [Center] in
 /// order to center the text within the [Scaffold]. The [FloatingActionButton]
@@ -1364,7 +1375,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 /// ** See code in examples/api/lib/material/scaffold/scaffold.1.dart **
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateful_widget_material}
+/// {@tool dartpad}
 /// This example shows a [Scaffold] with an [AppBar], a [BottomAppBar] and a
 /// [FloatingActionButton]. The [body] is a [Text] placed in a [Center] in order
 /// to center the text within the [Scaffold]. The [FloatingActionButton] is
@@ -1581,7 +1592,7 @@ class Scaffold extends StatefulWidget {
   ///
   /// To close the drawer, use [Navigator.pop].
   ///
-  /// {@tool dartpad --template=stateful_widget_material}
+  /// {@tool dartpad}
   /// To disable the drawer edge swipe, set the
   /// [Scaffold.drawerEnableOpenDragGesture] to false. Then, use
   /// [ScaffoldState.openDrawer] to open the drawer and [Navigator.pop] to close
@@ -1604,7 +1615,7 @@ class Scaffold extends StatefulWidget {
   ///
   /// To close the drawer, use [Navigator.pop].
   ///
-  /// {@tool dartpad --template=stateful_widget_material}
+  /// {@tool dartpad}
   /// To disable the drawer edge swipe, set the
   /// [Scaffold.endDrawerEnableOpenDragGesture] to false. Then, use
   /// [ScaffoldState.openEndDrawer] to open the drawer and [Navigator.pop] to
@@ -1619,7 +1630,8 @@ class Scaffold extends StatefulWidget {
 
   /// The color to use for the scrim that obscures primary content while a drawer is open.
   ///
-  /// By default, the color is [Colors.black54]
+  /// If this is null, then [DrawerThemeData.scrimColor] is used. If that
+  /// is also null, then it defaults to [Colors.black54].
   final Color? drawerScrimColor;
 
   /// The color of the [Material] widget that underlies the entire Scaffold.
@@ -1735,14 +1747,14 @@ class Scaffold extends StatefulWidget {
   ///
   /// This method can be expensive (it walks the element tree).
   ///
-  /// {@tool dartpad --template=freeform}
+  /// {@tool dartpad}
   /// Typical usage of the [Scaffold.of] function is to call it from within the
   /// `build` method of a child of a [Scaffold].
   ///
   /// ** See code in examples/api/lib/material/scaffold/scaffold.of.0.dart **
   /// {@end-tool}
   ///
-  /// {@tool dartpad --template=stateless_widget_material}
+  /// {@tool dartpad}
   /// When the [Scaffold] is actually created in the same `build` function, the
   /// `context` argument to the `build` function can't be used to find the
   /// [Scaffold] (since it's "above" the widget being returned in the widget
@@ -1948,17 +1960,21 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   bool get isEndDrawerOpen => _endDrawerOpened.value;
 
   void _drawerOpenedCallback(bool isOpened) {
-    setState(() {
-      _drawerOpened.value = isOpened;
-    });
-    widget.onDrawerChanged?.call(isOpened);
+    if (_drawerOpened.value != isOpened) {
+      setState(() {
+        _drawerOpened.value = isOpened;
+      });
+      widget.onDrawerChanged?.call(isOpened);
+    }
   }
 
   void _endDrawerOpenedCallback(bool isOpened) {
-    setState(() {
-      _endDrawerOpened.value = isOpened;
-    });
-    widget.onEndDrawerChanged?.call(isOpened);
+    if (_endDrawerOpened.value != isOpened) {
+      setState(() {
+        _endDrawerOpened.value = isOpened;
+      });
+      widget.onEndDrawerChanged?.call(isOpened);
+    }
   }
 
   /// Opens the [Drawer] (if any).
@@ -2026,7 +2042,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   /// See [ScaffoldMessenger.of] for information about how to obtain the
   /// [ScaffoldMessengerState].
   ///
-  /// {@tool dartpad --template=stateless_widget_scaffold_center}
+  /// {@tool dartpad}
   /// Here is an example of showing a [SnackBar] when the user presses a button.
   ///
   /// ** See code in examples/api/lib/material/scaffold/scaffold_state.show_snack_bar.0.dart **
@@ -2055,7 +2071,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
       Completer<SnackBarClosedReason>(),
       () {
         assert(_snackBars.first == controller);
-        hideCurrentSnackBar(reason: SnackBarClosedReason.hide);
+        hideCurrentSnackBar();
       },
       null, // SnackBar doesn't use a builder function so setState() wouldn't rebuild it
     );
@@ -2302,6 +2318,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     ShapeBorder? shape,
     Clip? clipBehavior,
     BoxConstraints? constraints,
+    bool? enableDrag,
     bool shouldDisposeAnimationController = true,
   }) {
     assert(() {
@@ -2343,7 +2360,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     final LocalHistoryEntry? entry = isPersistent
       ? null
       : LocalHistoryEntry(onRemove: () {
-          if (!removedEntry) {
+          if (!removedEntry && _currentBottomSheet?._widget == bottomSheet) {
             _removeCurrentBottomSheet();
           }
         });
@@ -2351,7 +2368,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     bottomSheet = _StandardBottomSheet(
       key: bottomSheetKey,
       animationController: animationController,
-      enableDrag: !isPersistent,
+      enableDrag: enableDrag ?? !isPersistent,
       onClosing: () {
         if (_currentBottomSheet == null) {
           return;
@@ -2429,7 +2446,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   /// of the app. Modal bottom sheets can be created and displayed with the
   /// [showModalBottomSheet] function.
   ///
-  /// {@tool dartpad --template=stateless_widget_scaffold}
+  /// {@tool dartpad}
   /// This example demonstrates how to use `showBottomSheet` to display a
   /// bottom sheet when a user taps a button. It also demonstrates how to
   /// close a bottom sheet using the Navigator.
@@ -2452,6 +2469,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     ShapeBorder? shape,
     Clip? clipBehavior,
     BoxConstraints? constraints,
+    bool? enableDrag,
     AnimationController? transitionAnimationController,
   }) {
     assert(() {
@@ -2478,6 +2496,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
         shape: shape,
         clipBehavior: clipBehavior,
         constraints: constraints,
+        enableDrag: enableDrag,
         shouldDisposeAnimationController: transitionAnimationController == null,
       );
     });
@@ -2565,8 +2584,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     _previousFloatingActionButtonLocation = _floatingActionButtonLocation;
     _floatingActionButtonMoveController = AnimationController(
       vsync: this,
-      lowerBound: 0.0,
-      upperBound: 1.0,
       value: 1.0,
       duration: kFloatingActionButtonSegue * 2,
     );
@@ -2921,8 +2938,13 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
       );
     }
 
+    bool extendBodyBehindMaterialBanner = false;
     // MaterialBanner set by ScaffoldMessenger
     if (_messengerMaterialBanner != null) {
+      final MaterialBannerThemeData bannerTheme = MaterialBannerTheme.of(context);
+      final double elevation = _messengerMaterialBanner?._widget.elevation ?? bannerTheme.elevation ?? 0.0;
+      extendBodyBehindMaterialBanner = elevation != 0.0;
+
       _addIfNonNull(
         children,
         _messengerMaterialBanner?._widget,
@@ -2963,7 +2985,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
         removeLeftPadding: false,
         removeTopPadding: true,
         removeRightPadding: false,
-        removeBottomPadding: false,
+        removeBottomPadding: widget.bottomNavigationBar != null,
         maintainBottomViewPadding: !_resizeToAvoidBottomInset,
       );
     }
@@ -3064,6 +3086,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
                 previousFloatingActionButtonLocation: _previousFloatingActionButtonLocation!,
                 textDirection: textDirection,
                 isSnackBarFloating: isSnackBarFloating,
+                extendBodyBehindMaterialBanner: extendBodyBehindMaterialBanner,
                 snackBarWidth: snackBarWidth,
               ),
               children: children,

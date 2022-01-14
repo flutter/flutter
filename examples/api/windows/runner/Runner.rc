@@ -92,10 +92,10 @@ BEGIN
             VALUE "CompanyName", "dev.flutter" "\0"
             VALUE "FileDescription", "A temporary code sample for Curve2D" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "dartpad_curve2_d_0" "\0"
+            VALUE "InternalName", "flutter_api_samples" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2021 dev.flutter. All rights reserved." "\0"
-            VALUE "OriginalFilename", "dartpad_curve2_d_0.exe" "\0"
-            VALUE "ProductName", "dartpad_curve2_d_0" "\0"
+            VALUE "OriginalFilename", "flutter_api_samples.exe" "\0"
+            VALUE "ProductName", "flutter_api_samples" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END
