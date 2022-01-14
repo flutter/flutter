@@ -889,6 +889,12 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
     return textStyle.fontSize == null ? textStyle.copyWith(fontSize: fontSize) : textStyle;
   }
 
+  static IconThemeData _effectiveIconTheme(IconThemeData? iconTheme, Color? itemColor) {
+    iconTheme ??= const IconThemeData();
+    // Prefer the font size on textStyle if present.
+    return itemColor != null && iconTheme == null ? iconTheme.copyWith(color: itemColor) : iconTheme;
+  }
+
   List<Widget> _createTiles(BottomNavigationBarLandscapeLayout layout) {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     assert(localizations != null);
@@ -907,6 +913,18 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
         widget.unselectedFontSize,
       );
 
+    final IconThemeData effectiveSelectedIconTheme = 
+      _effectiveIconTheme(
+        widget.selectedIconTheme ?? bottomTheme.selectedIconTheme,
+        widget.selectedItemColor,
+      );
+
+    final IconThemeData effectiveUnselectedIconTheme = 
+      _effectiveIconTheme(
+        widget.unselectedIconTheme ?? bottomTheme.unselectedIconTheme,
+        widget.unselectedItemColor,
+      );
+
     final Color themeColor;
     switch (themeData.brightness) {
       case Brightness.light:
@@ -921,10 +939,12 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
     switch (_effectiveType) {
       case BottomNavigationBarType.fixed:
         colorTween = ColorTween(
-          begin: widget.unselectedItemColor
+          begin: effectiveUnselectedLabelStyle.color 
+            ?? widget.unselectedItemColor
             ?? bottomTheme.unselectedItemColor
             ?? themeData.unselectedWidgetColor,
-          end: widget.selectedItemColor
+          end: effectiveSelectedLabelStyle.color 
+            ?? widget.selectedItemColor
             ?? bottomTheme.selectedItemColor
             ?? widget.fixedColor
             ?? themeColor,
@@ -932,10 +952,12 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
         break;
       case BottomNavigationBarType.shifting:
         colorTween = ColorTween(
-          begin: widget.unselectedItemColor
+          begin: effectiveUnselectedLabelStyle.color 
+            ?? widget.unselectedItemColor
             ?? bottomTheme.unselectedItemColor
             ?? themeData.colorScheme.surface,
-          end: widget.selectedItemColor
+          end: effectiveSelectedLabelStyle.color 
+            ?? widget.selectedItemColor
             ?? bottomTheme.selectedItemColor
             ?? themeData.colorScheme.surface,
         );
@@ -950,8 +972,8 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
         widget.items[i],
         _animations[i],
         widget.iconSize,
-        selectedIconTheme: widget.selectedIconTheme ?? bottomTheme.selectedIconTheme,
-        unselectedIconTheme: widget.unselectedIconTheme ?? bottomTheme.unselectedIconTheme,
+        selectedIconTheme: effectiveSelectedIconTheme,
+        unselectedIconTheme: effectiveUnselectedIconTheme,
         selectedLabelStyle: effectiveSelectedLabelStyle,
         unselectedLabelStyle: effectiveUnselectedLabelStyle,
         enableFeedback: widget.enableFeedback ?? bottomTheme.enableFeedback ?? true,
