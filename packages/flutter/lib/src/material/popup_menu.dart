@@ -264,15 +264,20 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
   /// of [ThemeData.textTheme] is used.
   final TextStyle? textStyle;
 
+  /// {@template flutter.material.popupmenu.mouseCursor}
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// widget.
   ///
   /// If [mouseCursor] is a [MaterialStateProperty<MouseCursor>],
-  /// [MaterialStateProperty.resolve] is used for the following [MaterialState]:
+  /// [MaterialStateProperty.resolve] is used for the following [MaterialState]s:
   ///
+  ///  * [MaterialState.hovered].
+  ///  * [MaterialState.focused].
   ///  * [MaterialState.disabled].
+  /// {@endtemplate}
   ///
-  /// If this property is null, [MaterialStateMouseCursor.clickable] will be used.
+  /// If null, then the value of [PopupMenuThemeData.mouseCursor] is used. If
+  /// that is also null, then [MaterialStateMouseCursor.clickable] is used.
   final MouseCursor? mouseCursor;
 
   /// The widget below this widget in the tree.
@@ -355,12 +360,6 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
         child: item,
       );
     }
-    final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor>(
-      widget.mouseCursor ?? MaterialStateMouseCursor.clickable,
-      <MaterialState>{
-        if (!widget.enabled) MaterialState.disabled,
-      },
-    );
 
     return MergeSemantics(
       child: Semantics(
@@ -369,7 +368,7 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
         child: InkWell(
           onTap: widget.enabled ? handleTap : null,
           canRequestFocus: widget.enabled,
-          mouseCursor: effectiveMouseCursor,
+          mouseCursor: _EffectiveMouseCursor(widget.mouseCursor, popupMenuTheme.mouseCursor),
           child: item,
         ),
       ),
@@ -1184,4 +1183,24 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
       enableFeedback: enableFeedback,
     );
   }
+}
+
+// This MaterialStateProperty is passed along to the menu item's InkWell which
+// resolves the property against MaterialState.disabled, MaterialState.hovered,
+// MaterialState.focused.
+class _EffectiveMouseCursor extends MaterialStateMouseCursor {
+  const _EffectiveMouseCursor(this.widgetCursor, this.themeCursor);
+
+  final MouseCursor? widgetCursor;
+  final MaterialStateProperty<MouseCursor?>? themeCursor;
+
+  @override
+  MouseCursor resolve(Set<MaterialState> states) {
+    return MaterialStateProperty.resolveAs<MouseCursor?>(widgetCursor, states)
+      ?? themeCursor?.resolve(states)
+      ?? MaterialStateMouseCursor.clickable.resolve(states);
+  }
+
+  @override
+  String get debugDescription => 'MaterialStateMouseCursor(PopupMenuItemState)';
 }
