@@ -460,10 +460,10 @@ abstract class Widget extends DiagnosticableTree {
 ///    really need to be updated. Even better, if the created widget is `const`,
 ///    Flutter would short-circuit most of the rebuild work.
 ///
-/// This video gives more explainations on why constant constructors are important
+/// This video gives more explainations on why `const` constructors are important
 /// and why a [Widget] is better than a helper method.
 ///
-/// {@youtube 560 315 https://www.youtube.com/watch?v=wE7khGHVkYY}
+/// {@youtube 560 315 https://www.youtube.com/watch?v=IOyq-eTRhvo}
 ///
 /// {@tool snippet}
 ///
@@ -689,10 +689,10 @@ abstract class StatelessWidget extends Widget {
 ///    really need to be updated. Even better, if the created widget is `const`,
 ///    Flutter would short-circuit most of the rebuild work.
 ///
-/// This video gives more explainations on why constant constructors are important
+/// This video gives more explainations on why `const` constructors are important
 /// and why a [Widget] is better than a helper method.
 ///
-/// {@youtube 560 315 https://www.youtube.com/watch?v=wE7khGHVkYY}
+/// {@youtube 560 315 https://www.youtube.com/watch?v=IOyq-eTRhvo}
 ///
 /// {@tool snippet}
 ///

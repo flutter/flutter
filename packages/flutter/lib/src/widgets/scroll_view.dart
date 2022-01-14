@@ -894,9 +894,7 @@ abstract class BoxScrollView extends ScrollView {
 /// ## Transitioning to [CustomScrollView]
 ///
 /// A [ListView] is basically a [CustomScrollView] with a single [SliverList] in
-/// its [CustomScrollView.slivers] property. Instead of using [shrinkWrap], prefer
-/// a [CustomScrollView] with a [SliverChildBuilderDelegate] as explained in this
-/// video:
+/// its [CustomScrollView.slivers] property.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=LUqDNnv_dh0}
 ///
