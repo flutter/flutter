@@ -2138,6 +2138,15 @@ class LayoutId extends ParentDataWidget<MultiChildLayoutParentData> {
 /// Each child must be wrapped in a [LayoutId] widget to identify the widget for
 /// the delegate.
 ///
+/// {@tool dartpad}
+/// This example shows a [CustomMultiChildLayout] widget being used to lay out
+/// colored blocks from start to finish in a cascade that has some overlap.
+///
+/// It responds to changes in [Directionality] by re-laying out its children.
+///
+/// ** See code in examples/api/lib/widgets/basic/custom_multi_child_layout.0.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [MultiChildLayoutDelegate], for details about how to control the layout of
