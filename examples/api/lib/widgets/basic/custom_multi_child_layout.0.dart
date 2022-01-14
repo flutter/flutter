@@ -60,7 +60,8 @@ class _CascadeLayoutDelegate extends MultiChildLayoutDelegate {
         BoxConstraints(maxHeight: size.height, maxWidth: columnWidth),
       );
       // positionChild must be called to change the position of a child from
-      // what it was in the last layout. Each child starts at 0,0 initially.
+      // what it was in the previous layout. Each child starts at (0, 0) for the
+      // first layout.
       switch (textDirection) {
         case TextDirection.rtl:
           positionChild(color, childPosition - Offset(currentSize.width, 0));
@@ -74,13 +75,15 @@ class _CascadeLayoutDelegate extends MultiChildLayoutDelegate {
     }
   }
 
-  // shouldRelayout is called to see if the delegate has changed and requires
-  // a layout to occur. Should only return true if the delegate state itself
+  // shouldRelayout is called to see if the delegate has changed and requires a
+  // layout to occur. Should only return true if the delegate state itself
   // changes: changes in the CustomMultiChildLayout attributes will
   // automatically cause a relayout, like any other widget.
   @override
-  bool shouldRelayout(_CascadeLayoutDelegate oldDelegate) =>
-      oldDelegate.textDirection != textDirection;
+  bool shouldRelayout(_CascadeLayoutDelegate oldDelegate) {
+    return oldDelegate.textDirection != textDirection
+        || oldDelegate.overlap != overlap;
+  }
 }
 
 class ExampleWidget extends StatelessWidget {
