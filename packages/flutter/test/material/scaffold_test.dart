@@ -389,12 +389,7 @@ void main() {
     expect(scrollable.position.pixels, equals(0.0));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgets('Tapping the status bar scrolls to top use more appropriate curve', (WidgetTester tester) async {
-
-    // scrolls to top animation:
-    // Duration: 1000ms
-    // Curve: easeOutCirc
-
+  testWidgets('Tapping the status bar scrolls to top with ease out curve animation', (WidgetTester tester) async {
     const int duration = 1000;
     final List<double> stops = [0.842, 0.959, 0.993, 1.0];
     const double scrollOffset = 1000;
@@ -408,9 +403,9 @@ void main() {
     expect(scrollable.position.pixels, equals(scrollOffset));
 
     for (int i = 0; i < stops.length; i++) {
-      await tester.pump( Duration(milliseconds: 1000 ~/ stops.length));
-      // scroll pixcels of this step is very long double, so compare with
-      // floored position pixcels
+      await tester.pump( Duration(milliseconds: duration ~/ stops.length));
+      // Scroll pixel position is very long double, compare with floored int
+      // pixel position
       expect(
         scrollable.position.pixels.toInt(),
         equals(
@@ -419,7 +414,7 @@ void main() {
       );
     }
 
-    // finally stops at top
+    // Finally stops at the top.
     expect(scrollable.position.pixels, equals(0.0));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
