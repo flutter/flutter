@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 
-// KEEP THIS SYNCHRONIZED WITH ../web_ui/lib/src/ui/channel_buffers.dart
+// KEEP THIS SYNCHRONIZED WITH ../web_ui/lib/channel_buffers.dart
 
 // @dart = 2.12
 part of dart.ui;

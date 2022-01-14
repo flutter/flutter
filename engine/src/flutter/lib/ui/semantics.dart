@@ -325,7 +325,7 @@ class SemanticsFlag {
   // value in testing/dart/semantics_test.dart, or tests will fail. Also,
   // please update the Flag enum in
   // flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java,
-  // and the SemanticsFlag class in lib/web_ui/lib/src/ui/semantics.dart.
+  // and the SemanticsFlag class in lib/web_ui/lib/semantics.dart.
 
   /// The semantics node has the quality of either being "checked" or "unchecked".
   ///
@@ -643,7 +643,7 @@ class SemanticsFlag {
 
 // When adding a new StringAttribute, the classes in these files must be
 // updated as well.
-//  * engine/src/flutter/lib/web_ui/lib/src/ui/semantics.dart
+//  * engine/src/flutter/lib/web_ui/lib/semantics.dart
 //  * engine/src/flutter/lib/ui/semantics/string_attribute.h
 //  * engine/src/flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java
 //  * engine/src/flutter/lib/web_ui/test/engine/semantics/semantics_api_test.dart

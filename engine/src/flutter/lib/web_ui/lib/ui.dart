@@ -16,25 +16,25 @@ import 'dart:typed_data';
 
 import 'src/engine.dart' as engine;
 
-part 'src/ui/annotations.dart';
-part 'src/ui/canvas.dart';
-part 'src/ui/channel_buffers.dart';
-part 'src/ui/compositing.dart';
-part 'src/ui/geometry.dart';
-part 'src/ui/hash_codes.dart';
-part 'src/ui/initialization.dart';
-part 'src/ui/key.dart';
-part 'src/ui/lerp.dart';
-part 'src/ui/natives.dart';
-part 'src/ui/painting.dart';
-part 'src/ui/path.dart';
-part 'src/ui/path_metrics.dart';
-part 'src/ui/platform_dispatcher.dart';
-part 'src/ui/pointer.dart';
-part 'src/ui/semantics.dart';
-part 'src/ui/text.dart';
-part 'src/ui/tile_mode.dart';
-part 'src/ui/window.dart';
+part 'annotations.dart';
+part 'canvas.dart';
+part 'channel_buffers.dart';
+part 'compositing.dart';
+part 'geometry.dart';
+part 'hash_codes.dart';
+part 'initialization.dart';
+part 'key.dart';
+part 'lerp.dart';
+part 'natives.dart';
+part 'painting.dart';
+part 'path.dart';
+part 'path_metrics.dart';
+part 'platform_dispatcher.dart';
+part 'pointer.dart';
+part 'semantics.dart';
+part 'text.dart';
+part 'tile_mode.dart';
+part 'window.dart';
 
 /// Provides a compile time constant to customize flutter framework and other
 /// users of ui engine for web runtime.

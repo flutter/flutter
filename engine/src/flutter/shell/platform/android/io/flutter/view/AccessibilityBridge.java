@@ -2161,7 +2161,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
   // When adding a new StringAttributeType, the classes in these file must be
   // updated as well.
   //  * engine/src/flutter/lib/ui/semantics.dart
-  //  * engine/src/flutter/lib/web_ui/lib/src/ui/semantics.dart
+  //  * engine/src/flutter/lib/web_ui/lib/semantics.dart
   //  * engine/src/flutter/lib/ui/semantics/string_attribute.h
 
   private enum StringAttributeType {
