@@ -2454,6 +2454,34 @@ void main() {
     expect(controller.selection.isCollapsed, true);
   });
 
+  testWidgets('An obscured TextField is not selectable when read-only', (WidgetTester tester) async {
+    // This is a regression test for
+    // https://github.com/flutter/flutter/issues/32845
+
+    final TextEditingController controller = TextEditingController();
+    Widget buildFrame(bool obscureText, bool readOnly) {
+      return overlay(
+        child: TextField(
+          controller: controller,
+          obscureText: obscureText,
+          readOnly: readOnly,
+        ),
+      );
+    }
+
+    // Explicitly disabled selection on obscured text that is read-only.
+    await tester.pumpWidget(buildFrame(true, true));
+    await tester.enterText(find.byType(TextField), 'abcdefghi');
+    await skipPastScrollingAnimation(tester);
+    expect(controller.selection.isCollapsed, true);
+
+    // Long press doesn't select text.
+    final Offset ePos2 = textOffsetToPosition(tester, 1);
+    await tester.longPressAt(ePos2, pointer: 7);
+    await tester.pump();
+    expect(controller.selection.isCollapsed, true);
+  });
+
   testWidgets('An obscured TextField is selected as one word', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
 
@@ -4970,82 +4998,6 @@ void main() {
     variant: KeySimulatorTransitModeVariant.all()
   );
 
-  testWidgets('Copy paste obscured text test', (WidgetTester tester) async {
-    final FocusNode focusNode = FocusNode();
-    final TextEditingController controller = TextEditingController();
-    final TextField textField =
-      TextField(
-        controller: controller,
-        obscureText: true,
-      );
-
-    String clipboardContent = '';
-    tester.binding.defaultBinaryMessenger
-      .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
-        if (methodCall.method == 'Clipboard.setData')
-          // ignore: avoid_dynamic_calls
-          clipboardContent = methodCall.arguments['text'] as String;
-        else if (methodCall.method == 'Clipboard.getData')
-          return <String, dynamic>{'text': clipboardContent};
-        return null;
-      });
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: RawKeyboardListener(
-            focusNode: focusNode,
-            child: textField,
-          ),
-        ),
-      ),
-    );
-    focusNode.requestFocus();
-    await tester.pump();
-
-    const String testValue = 'a big house jumped over a mouse';
-    await tester.enterText(find.byType(TextField), testValue);
-
-    await tester.idle();
-    await tester.tap(find.byType(TextField));
-    await tester.pumpAndSettle();
-
-    // Select the first 5 characters
-    await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
-    for (int i = 0; i < 5; i += 1) {
-      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
-      await tester.pumpAndSettle();
-    }
-    await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
-
-    // Copy them
-    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlRight);
-    await tester.sendKeyEvent(LogicalKeyboardKey.keyC);
-    await tester.pumpAndSettle();
-    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlRight);
-    await tester.pumpAndSettle();
-
-    expect(clipboardContent, 'a big');
-
-    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
-    await tester.pumpAndSettle();
-
-    // Paste them
-    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlRight);
-    await tester.sendKeyDownEvent(LogicalKeyboardKey.keyV);
-    await tester.pumpAndSettle();
-    await tester.pump(const Duration(milliseconds: 200));
-    await tester.sendKeyUpEvent(LogicalKeyboardKey.keyV);
-    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlRight);
-    await tester.pumpAndSettle();
-
-    const String expected = 'a biga big house jumped over a mouse';
-    expect(find.text(expected), findsOneWidget, reason: 'Because text contains ${controller.text}');
-  },
-    skip: areKeyEventsHandledByPlatform, // [intended] only applies to platforms where we handle key events.
-    variant: KeySimulatorTransitModeVariant.all()
-  );
-
   // Regressing test for https://github.com/flutter/flutter/issues/78219
   testWidgets('Paste does not crash when the section is inValid', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
@@ -5172,83 +5124,6 @@ void main() {
   },
     skip: areKeyEventsHandledByPlatform, // [intended] only applies to platforms where we handle key events.
     variant: KeySimulatorTransitModeVariant.all()
-  );
-
-  testWidgets('Cut obscured text test', (WidgetTester tester) async {
-    final FocusNode focusNode = FocusNode();
-    final TextEditingController controller = TextEditingController();
-    final TextField textField = TextField(
-      controller: controller,
-      obscureText: true,
-    );
-    String clipboardContent = '';
-    tester.binding.defaultBinaryMessenger
-      .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
-        if (methodCall.method == 'Clipboard.setData')
-          // ignore: avoid_dynamic_calls
-          clipboardContent = methodCall.arguments['text'] as String;
-        else if (methodCall.method == 'Clipboard.getData')
-          return <String, dynamic>{'text': clipboardContent};
-        return null;
-      });
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: RawKeyboardListener(
-            focusNode: focusNode,
-            child: textField,
-          ),
-        ),
-      ),
-    );
-    focusNode.requestFocus();
-    await tester.pump();
-
-    const String testValue = 'a big house jumped over a mouse';
-    await tester.enterText(find.byType(TextField), testValue);
-
-    await tester.idle();
-    await tester.tap(find.byType(TextField));
-    await tester.pumpAndSettle();
-
-    // Select the first 5 characters
-    for (int i = 0; i < 5; i += 1) {
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
-      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
-      await tester.pumpAndSettle();
-      await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
-      await tester.pumpAndSettle();
-    }
-
-    // Cut them
-    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlRight);
-    await tester.sendKeyEvent(LogicalKeyboardKey.keyX);
-    await tester.pumpAndSettle();
-    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlRight);
-    await tester.pumpAndSettle();
-
-    expect(clipboardContent, 'a big');
-
-    for (int i = 0; i < 5; i += 1) {
-      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
-      await tester.pumpAndSettle();
-    }
-
-    // Paste them
-    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlRight);
-    await tester.sendKeyDownEvent(LogicalKeyboardKey.keyV);
-    await tester.pumpAndSettle();
-    await tester.pump(const Duration(milliseconds: 200));
-    await tester.sendKeyUpEvent(LogicalKeyboardKey.keyV);
-    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlRight);
-    await tester.pumpAndSettle();
-
-    const String expected = ' housa bige jumped over a mouse';
-    expect(find.text(expected), findsOneWidget);
-  },
-      skip: areKeyEventsHandledByPlatform, // [intended] only applies to platforms where we handle key events.
-      variant: KeySimulatorTransitModeVariant.all()
   );
 
   testWidgets('Select all test', (WidgetTester tester) async {
@@ -7121,6 +6996,55 @@ void main() {
 
       // Selected text shows 3 toolbar buttons.
       expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(3));
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
+  );
+
+  testWidgets(
+    'double tap does not select word on read-only obscured field',
+        (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController(
+        text: 'Atwater Peel Sherbrooke Bonaventure',
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: TextField(
+                obscureText: true,
+                readOnly: true,
+                controller: controller,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final Offset textfieldStart = tester.getTopLeft(find.byType(TextField));
+
+      // This tap just puts the cursor somewhere different than where the double
+      // tap will occur to test that the double tap moves the existing cursor first.
+      await tester.tapAt(textfieldStart + const Offset(50.0, 9.0));
+      await tester.pump(const Duration(milliseconds: 500));
+
+      await tester.tapAt(textfieldStart + const Offset(150.0, 9.0));
+      await tester.pump(const Duration(milliseconds: 50));
+      // First tap moved the cursor.
+      expect(
+        controller.selection,
+        const TextSelection.collapsed(offset: 35),
+      );
+      await tester.tapAt(textfieldStart + const Offset(150.0, 9.0));
+      await tester.pumpAndSettle();
+
+      // Second tap doesn't select anything.
+      expect(
+        controller.selection,
+        const TextSelection.collapsed(offset: 35),
+      );
+
+      // Selected text shows nothing.
+      expect(find.byType(CupertinoButton), findsNothing);
     },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
   );

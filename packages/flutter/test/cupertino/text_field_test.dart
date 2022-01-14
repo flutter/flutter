@@ -1747,6 +1747,44 @@ void main() {
     },
   );
 
+  testWidgets(
+    'double tap does not select word on read-only obscured field',
+        (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController(
+        text: 'Atwater Peel Sherbrooke Bonaventure',
+      );
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: CupertinoTextField(
+              readOnly: true,
+              obscureText: true,
+              controller: controller,
+            ),
+          ),
+        ),
+      );
+
+      // Long press to put the cursor after the "w".
+      const int index = 3;
+      await tester.longPressAt(textOffsetToPosition(tester, index));
+      await tester.pump();
+
+      // Second tap doesn't select anything.
+      await tester.tapAt(textOffsetToPosition(tester, index));
+      await tester.pump(const Duration(milliseconds: 50));
+      await tester.tapAt(textOffsetToPosition(tester, index));
+      await tester.pumpAndSettle();
+      expect(
+        controller.selection,
+        const TextSelection.collapsed(offset: 35),
+      );
+
+      // Selected text shows nothing.
+      expect(find.byType(CupertinoButton), findsNothing);
+    },
+  );
+
   testWidgets('Readonly text field does not have tap action', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
@@ -2127,6 +2165,54 @@ void main() {
       expect(
         controller.selection,
         const TextSelection(baseOffset: 35, extentOffset: 35),
+      );
+      expect(find.byType(CupertinoButton), findsNWidgets(0));
+    },
+  );
+
+  testWidgets(
+    'A read-only obscured CupertinoTextField is not selectable',
+        (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController(
+        text: 'Atwater Peel Sherbrooke Bonaventure',
+      );
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: CupertinoTextField(
+              controller: controller,
+              obscureText: true,
+              readOnly: true,
+            ),
+          ),
+        ),
+      );
+
+      final Offset textFieldStart = tester.getTopLeft(find.byType(CupertinoTextField));
+
+      await tester.tapAt(textFieldStart + const Offset(150.0, 5.0));
+      await tester.pump(const Duration(milliseconds: 50));
+      final TestGesture gesture =
+      await tester.startGesture(textFieldStart + const Offset(150.0, 5.0));
+      // Hold the press.
+      await tester.pump(const Duration(milliseconds: 500));
+
+      // Nothing is selected despite the double tap long press gesture.
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 35, extentOffset: 35),
+      );
+
+      // The selection menu is not present.
+      expect(find.byType(CupertinoButton), findsNWidgets(0));
+
+      await gesture.up();
+      await tester.pump();
+
+      // Still nothing selected and no selection menu.
+      expect(
+        controller.selection,
+        const TextSelection.collapsed(offset: 35),
       );
       expect(find.byType(CupertinoButton), findsNWidgets(0));
     },

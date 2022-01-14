@@ -1506,7 +1506,7 @@ void main() {
     expect(find.text('Cut'), findsNothing);
   });
 
-  testWidgets('cut and paste are disabled in read only mode even if explicit set', (WidgetTester tester) async {
+  testWidgets('cut and paste are disabled in read only mode even if explicitly set', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: EditableText(
@@ -1514,6 +1514,12 @@ void main() {
           controller: TextEditingController(text: 'blah blah'),
           focusNode: focusNode,
           readOnly: true,
+          toolbarOptions: const ToolbarOptions(
+            copy: true,
+            cut: true,
+            paste: true,
+            selectAll: true,
+          ),
           style: textStyle,
           cursorColor: cursorColor,
           selectionControls: materialTextSelectionControls,
@@ -1537,6 +1543,113 @@ void main() {
     expect(find.text('Copy'), kIsWeb ? findsNothing : findsOneWidget);
     expect(find.text('Paste'), findsNothing);
     expect(find.text('Cut'), findsNothing);
+  });
+
+  testWidgets('cut and copy are disabled in obscured mode even if explicitly set', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          backgroundCursorColor: Colors.grey,
+          controller: TextEditingController(text: 'blah blah'),
+          focusNode: focusNode,
+          obscureText: true,
+          toolbarOptions: const ToolbarOptions(
+            copy: true,
+            cut: true,
+            paste: true,
+            selectAll: true,
+          ),
+          style: textStyle,
+          cursorColor: cursorColor,
+          selectionControls: materialTextSelectionControls,
+        ),
+      ),
+    );
+
+    final EditableTextState state =
+    tester.state<EditableTextState>(find.byType(EditableText));
+    await tester.tap(find.byType(EditableText));
+    await tester.pump();
+    // Select something, but not the whole thing.
+    state.renderEditable.selectWord(cause: SelectionChangedCause.tap);
+    await tester.pump();
+    expect(state.selectAllEnabled, isTrue);
+    expect(state.pasteEnabled, isTrue);
+    expect(state.cutEnabled, isFalse);
+    expect(state.copyEnabled, isFalse);
+
+    // On web, we don't let Flutter show the toolbar.
+    expect(state.showToolbar(), kIsWeb ? isFalse : isTrue);
+    await tester.pump();
+    expect(find.text('Select all'), kIsWeb ? findsNothing : findsOneWidget);
+    expect(find.text('Copy'), findsNothing);
+    expect(find.text('Paste'), kIsWeb ? findsNothing : findsOneWidget);
+    expect(find.text('Cut'), findsNothing);
+  });
+
+  testWidgets('cut and copy do nothing in obscured mode even if explicitly called', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          backgroundCursorColor: Colors.grey,
+          controller: TextEditingController(text: 'blah blah'),
+          focusNode: focusNode,
+          obscureText: true,
+          style: textStyle,
+          cursorColor: cursorColor,
+          selectionControls: materialTextSelectionControls,
+        ),
+      ),
+    );
+
+    final EditableTextState state =
+    tester.state<EditableTextState>(find.byType(EditableText));
+    expect(state.selectAllEnabled, isTrue);
+    expect(state.pasteEnabled, isTrue);
+    expect(state.cutEnabled, isFalse);
+    expect(state.copyEnabled, isFalse);
+
+    // Select all.
+    state.selectAll(SelectionChangedCause.toolbar);
+    await tester.pump();
+    await Clipboard.setData(const ClipboardData(text: ''));
+    state.cutSelection(SelectionChangedCause.toolbar);
+    ClipboardData? data = await Clipboard.getData('text/plain');
+    expect(data, isNotNull);
+    expect(data!.text, isEmpty);
+
+    state.selectAll(SelectionChangedCause.toolbar);
+    await tester.pump();
+    await Clipboard.setData(const ClipboardData(text: ''));
+    state.copySelection(SelectionChangedCause.toolbar);
+    data = await Clipboard.getData('text/plain');
+    expect(data, isNotNull);
+    expect(data!.text, isEmpty);
+  });
+
+  testWidgets('select all does nothing if obscured and read-only, even if explicitly called', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          backgroundCursorColor: Colors.grey,
+          controller: TextEditingController(text: 'blah blah'),
+          focusNode: focusNode,
+          obscureText: true,
+          readOnly: true,
+          style: textStyle,
+          cursorColor: cursorColor,
+          selectionControls: materialTextSelectionControls,
+        ),
+      ),
+    );
+
+    final EditableTextState state =
+    tester.state<EditableTextState>(find.byType(EditableText));
+
+    // Select all.
+    state.selectAll(SelectionChangedCause.toolbar);
+    expect(state.selectAllEnabled, isFalse);
+    expect(state.textEditingValue.selection.isCollapsed, isTrue);
   });
 
   testWidgets('Handles the read-only flag correctly', (WidgetTester tester) async {

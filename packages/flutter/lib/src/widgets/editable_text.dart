@@ -508,16 +508,11 @@ class EditableText extends StatefulWidget {
     this.scrollPadding = const EdgeInsets.all(20.0),
     this.keyboardAppearance = Brightness.light,
     this.dragStartBehavior = DragStartBehavior.start,
-    this.enableInteractiveSelection = true,
+    bool? enableInteractiveSelection,
     this.scrollController,
     this.scrollPhysics,
     this.autocorrectionTextRectColor,
-    this.toolbarOptions = const ToolbarOptions(
-      copy: true,
-      cut: true,
-      paste: true,
-      selectAll: true,
-    ),
+    ToolbarOptions? toolbarOptions,
     this.autofillHints = const <String>[],
     this.autofillClient,
     this.clipBehavior = Clip.hardEdge,
@@ -533,7 +528,6 @@ class EditableText extends StatefulWidget {
        smartQuotesType = smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
        assert(enableSuggestions != null),
        assert(showSelectionHandles != null),
-       assert(enableInteractiveSelection != null),
        assert(readOnly != null),
        assert(forceLine != null),
        assert(style != null),
@@ -560,7 +554,31 @@ class EditableText extends StatefulWidget {
        assert(rendererIgnoresPointer != null),
        assert(scrollPadding != null),
        assert(dragStartBehavior != null),
-       assert(toolbarOptions != null),
+       enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText),
+       toolbarOptions = toolbarOptions ??
+           (obscureText
+               ? (readOnly
+                   // No point in even offering "Select All" in a read-only obscured
+                   // field.
+                   ? const ToolbarOptions()
+                   // Writable, but obscured.
+                   : const ToolbarOptions(
+                       selectAll: true,
+                       paste: true,
+                     ))
+               : (readOnly
+                   // Read-only, not obscured.
+                   ? const ToolbarOptions(
+                       selectAll: true,
+                       copy: true,
+                     )
+                   // Writable, not obscured.
+                   : const ToolbarOptions(
+                       copy: true,
+                       cut: true,
+                       selectAll: true,
+                       paste: true,
+                     ))),
        assert(clipBehavior != null),
        assert(enableIMEPersonalizedLearning != null),
        _strutStyle = strutStyle,
@@ -593,7 +611,9 @@ class EditableText extends StatefulWidget {
   /// Whether to hide the text being edited (e.g., for passwords).
   ///
   /// When this is set to true, all the characters in the text field are
-  /// replaced by [obscuringCharacter].
+  /// replaced by [obscuringCharacter], and the text in the field cannot be
+  /// copied with copy or cut. If [readOnly] is also true, then the text cannot
+  /// be selected.
   ///
   /// Defaults to false. Cannot be null.
   /// {@endtemplate}
@@ -629,8 +649,10 @@ class EditableText extends StatefulWidget {
 
   /// Configuration of toolbar options.
   ///
-  /// By default, all options are enabled. If [readOnly] is true,
-  /// paste and cut will be disabled regardless.
+  /// By default, all options are enabled. If [readOnly] is true, paste and cut
+  /// will be disabled regardless. If [obscureText] is true, cut and copy will
+  /// be disabled regardless. If [readOnly] and [obscureText] are both true,
+  /// select all will also be disabled.
   final ToolbarOptions toolbarOptions;
 
   /// Whether to show selection handles.
@@ -1492,6 +1514,7 @@ class EditableText extends StatefulWidget {
     properties.add(DiagnosticsProperty<TextEditingController>('controller', controller));
     properties.add(DiagnosticsProperty<FocusNode>('focusNode', focusNode));
     properties.add(DiagnosticsProperty<bool>('obscureText', obscureText, defaultValue: false));
+    properties.add(DiagnosticsProperty<bool>('readOnly', readOnly, defaultValue: false));
     properties.add(DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: true));
     properties.add(EnumProperty<SmartDashesType>('smartDashesType', smartDashesType, defaultValue: obscureText ? SmartDashesType.disabled : SmartDashesType.enabled));
     properties.add(EnumProperty<SmartQuotesType>('smartQuotesType', smartQuotesType, defaultValue: obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled));
@@ -1511,6 +1534,7 @@ class EditableText extends StatefulWidget {
     properties.add(DiagnosticsProperty<Iterable<String>>('autofillHints', autofillHints, defaultValue: null));
     properties.add(DiagnosticsProperty<TextHeightBehavior>('textHeightBehavior', textHeightBehavior, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('enableIMEPersonalizedLearning', enableIMEPersonalizedLearning, defaultValue: true));
+    properties.add(DiagnosticsProperty<bool>('enableInteractiveSelection', enableInteractiveSelection, defaultValue: true));
   }
 }
 
@@ -1573,16 +1597,16 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   Color get _cursorColor => widget.cursorColor.withOpacity(_cursorBlinkOpacityController!.value);
 
   @override
-  bool get cutEnabled => widget.toolbarOptions.cut && !widget.readOnly;
+  bool get cutEnabled => widget.toolbarOptions.cut && !widget.readOnly && !widget.obscureText;
 
   @override
-  bool get copyEnabled => widget.toolbarOptions.copy;
+  bool get copyEnabled => widget.toolbarOptions.copy && !widget.obscureText;
 
   @override
   bool get pasteEnabled => widget.toolbarOptions.paste && !widget.readOnly;
 
   @override
-  bool get selectAllEnabled => widget.toolbarOptions.selectAll;
+  bool get selectAllEnabled => widget.toolbarOptions.selectAll && (!widget.readOnly || !widget.obscureText) && widget.enableInteractiveSelection;
 
   void _onChangedClipboardStatus() {
     setState(() {
@@ -1602,11 +1626,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   @override
   void copySelection(SelectionChangedCause cause) {
     final TextSelection selection = textEditingValue.selection;
-    final String text = textEditingValue.text;
     assert(selection != null);
-    if (selection.isCollapsed) {
+    if (selection.isCollapsed || widget.obscureText) {
       return;
     }
+    final String text = textEditingValue.text;
     Clipboard.setData(ClipboardData(text: selection.textInside(text)));
     if (cause == SelectionChangedCause.toolbar) {
       bringIntoView(textEditingValue.selection.extent);
@@ -1636,7 +1660,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// Cut current selection to [Clipboard].
   @override
   void cutSelection(SelectionChangedCause cause) {
-    if (widget.readOnly) {
+    if (widget.readOnly || widget.obscureText) {
       return;
     }
     final TextSelection selection = textEditingValue.selection;
@@ -1681,6 +1705,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// Select the entire text value.
   @override
   void selectAll(SelectionChangedCause cause) {
+    if (widget.readOnly && widget.obscureText) {
+      // If we can't modify it, and we can't copy it, there's no point in
+      // selecting it.
+      return;
+    }
     userUpdateTextEditingValue(
       textEditingValue.copyWith(
         selection: TextSelection(baseOffset: 0, extentOffset: textEditingValue.text.length),
@@ -3057,7 +3086,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                     selectionHeightStyle: widget.selectionHeightStyle,
                     selectionWidthStyle: widget.selectionWidthStyle,
                     paintCursorAboveText: widget.paintCursorAboveText,
-                    enableInteractiveSelection: widget.enableInteractiveSelection,
+                    enableInteractiveSelection: widget.enableInteractiveSelection && (!widget.readOnly || !widget.obscureText),
                     textSelectionDelegate: this,
                     devicePixelRatio: _devicePixelRatio,
                     promptRectRange: _currentPromptRectRange,
@@ -3287,6 +3316,7 @@ class _Editable extends MultiChildRenderObjectWidget {
       ..cursorOffset = cursorOffset
       ..selectionHeightStyle = selectionHeightStyle
       ..selectionWidthStyle = selectionWidthStyle
+      ..enableInteractiveSelection = enableInteractiveSelection
       ..textSelectionDelegate = textSelectionDelegate
       ..devicePixelRatio = devicePixelRatio
       ..paintCursorAboveText = paintCursorAboveText
