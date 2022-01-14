@@ -64,7 +64,7 @@ class PopupMenuThemeData with Diagnosticable {
   ///
   /// If specified, overrides the default value of [PopupMenuItem.mouseCursor].
   final MaterialStateProperty<MouseCursor?>? mouseCursor;
-  
+
   /// If specified, defines the padding for the popup menu of [PopupMenuButton].
   ///
   /// If [PopupMenuButton.menuPadding] is provided, [padding] is ignored.

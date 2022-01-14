@@ -854,7 +854,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
 ///
 /// The `padding` argument is used to add empty space around the outside
 /// of the popup menu. If this property is not provided, then [PopupMenuThemeData.padding]
-/// is used. If [PopupMenuThemeData.padding] is also null, then 
+/// is used. If [PopupMenuThemeData.padding] is also null, then
 /// EdgeInsets.symmetric(vertical: 8.0) is used.
 ///
 /// See also:

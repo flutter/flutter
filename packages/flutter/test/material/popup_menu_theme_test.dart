@@ -345,7 +345,7 @@ void main() {
     await gesture.down(tester.getCenter(find.byKey(enabledPopupItemKey)));
     await tester.pumpAndSettle();
     expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.alias);
-    
+
     /// PopupMenu widget is private so in order to test padding we extract
     /// the widget which holds the padding.
     final SingleChildScrollView popupMenu = tester.widget<SingleChildScrollView>
