@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 @import XCTest;
-
 @import os.log;
 
 static const CGFloat kStandardTimeOut = 60.0;
