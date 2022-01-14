@@ -413,8 +413,8 @@ void main() {
     await tester.pump(const Duration(milliseconds: 1));
     await tester.pump(const Duration(milliseconds: 1));
     expect(tester.getTopLeft(find.byType(RefreshProgressIndicator)).dy, lessThan(position.dy));
-    expect(refreshCalled, false);
     await tester.pumpAndSettle();
+    expect(refreshCalled, false);
 
     // test refresh
 

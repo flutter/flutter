@@ -348,7 +348,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
           }
         }
       } else {
-        // Handle drag up on iOS - i.e. when the Scrollable bounces back from the
+        // Handle drag end on iOS - i.e. when the Scrollable bounces back from the
         // overscroll (ScrollNotification indicating this don't have dragDetails
         // because the scroll activity is not directly triggered by a drag).
         if (_mode == _RefreshIndicatorMode.armed) {
