@@ -887,10 +887,10 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
 ///
 /// The scroll velocity is controlled by the [velocityScalar]:
 ///
-/// velocity = <distance of overscroll> * [velocityScalar].
+/// velocity = <distance of overscroll> * [_kDefaultAutoScrollVelocityScalar].
 class _EdgeDraggingAutoScroller {
   /// Creates a auto scroller that scrolls the [scrollable].
-  _EdgeDraggingAutoScroller(this.scrollable, {this.onScrollViewScrolled, this.velocityScalar = _kDefaultAutoScrollVelocityScalar});
+  _EdgeDraggingAutoScroller(this.scrollable, {this.onScrollViewScrolled});
 
   // An eyeball value
   static const double _kDefaultAutoScrollVelocityScalar = 7;
@@ -904,12 +904,6 @@ class _EdgeDraggingAutoScroller {
   /// target no longer triggers the auto scroll. This callback will be called
   /// in between each scroll.
   final VoidCallback? onScrollViewScrolled;
-
-  /// The velocity scalar per pixel over scroll.
-  ///
-  /// How the velocity scale with the over scroll distance. The auto scroll
-  /// velocity = <distance of overscroll> * velocityScalar.
-  final double velocityScalar;
 
   late Rect _dragTargetRelatedToScrollOrigin;
 
@@ -1002,7 +996,7 @@ class _EdgeDraggingAutoScroller {
       _scrolling = false;
       return;
     }
-    final Duration duration = Duration(milliseconds: (1000 / velocityScalar).round());
+    final Duration duration = Duration(milliseconds: (1000 / _kDefaultAutoScrollVelocityScalar).round());
     await scrollable.position.animateTo(
       newOffset,
       duration: duration,
