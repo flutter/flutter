@@ -48,6 +48,11 @@ class WindowWin32 : public KeyboardManagerWin32::WindowDelegate {
   // |KeyboardManagerWin32::WindowDelegate|
   virtual uint32_t Win32MapVkToChar(uint32_t virtual_key) override;
 
+  // |KeyboardManagerWin32::WindowDelegate|
+  virtual UINT Win32DispatchEvent(UINT cInputs,
+                                  LPINPUT pInputs,
+                                  int cbSize) override;
+
  protected:
   // Converts a c string to a wide unicode string.
   std::wstring NarrowToWide(const char* source);
@@ -237,8 +242,6 @@ class WindowWin32 : public KeyboardManagerWin32::WindowDelegate {
   // Keeps track of the last key code produced by a WM_KEYDOWN or WM_SYSKEYDOWN
   // message.
   int keycode_for_char_message_ = 0;
-
-  std::map<uint16_t, std::u16string> text_for_scancode_on_redispatch_;
 
   // Manages IME state.
   std::unique_ptr<TextInputManagerWin32> text_input_manager_;

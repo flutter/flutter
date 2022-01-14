@@ -9,6 +9,10 @@ namespace flutter {
 
 static constexpr int32_t kDefaultPointerDeviceId = 0;
 
+// UWP does not care if key events are handled, since it can not redispatch them
+// anyway.
+static void IgnoreKeyEventResult(bool handled) {}
+
 GamepadCursorWinUWP::GamepadCursorWinUWP(
     WindowBindingHandlerDelegate* view,
     DisplayHelperWinUWP* displayhelper,
@@ -201,25 +205,25 @@ void GamepadCursorWinUWP::OnGamepadButtonPressed(
              winrt::Windows::Gaming::Input::GamepadButtons::DPadLeft) {
     binding_handler_delegate_->OnKey(
         static_cast<int>(winrt::Windows::System::VirtualKey::Left), kScanLeft,
-        0x0100, 0, true, true);
+        0x0100, 0, true, true, IgnoreKeyEventResult);
   } else if ((buttons &
               winrt::Windows::Gaming::Input::GamepadButtons::DPadRight) ==
              winrt::Windows::Gaming::Input::GamepadButtons::DPadRight) {
     binding_handler_delegate_->OnKey(
         static_cast<int>(winrt::Windows::System::VirtualKey::Right), kScanRight,
-        0x0100, 0, true, true);
+        0x0100, 0, true, true, IgnoreKeyEventResult);
   } else if ((buttons &
               winrt::Windows::Gaming::Input::GamepadButtons::DPadUp) ==
              winrt::Windows::Gaming::Input::GamepadButtons::DPadUp) {
     binding_handler_delegate_->OnKey(
         static_cast<int>(winrt::Windows::System::VirtualKey::Up), kScanUp,
-        0x0100, 0, true, true);
+        0x0100, 0, true, true, IgnoreKeyEventResult);
   } else if ((buttons &
               winrt::Windows::Gaming::Input::GamepadButtons::DPadDown) ==
              winrt::Windows::Gaming::Input::GamepadButtons::DPadDown) {
     binding_handler_delegate_->OnKey(
         static_cast<int>(winrt::Windows::System::VirtualKey::Down), kScanDown,
-        0x0100, 0, true, true);
+        0x0100, 0, true, true, IgnoreKeyEventResult);
   }
 }
 
@@ -246,25 +250,25 @@ void GamepadCursorWinUWP::OnGamepadButtonReleased(
              winrt::Windows::Gaming::Input::GamepadButtons::DPadLeft) {
     binding_handler_delegate_->OnKey(
         static_cast<int>(winrt::Windows::System::VirtualKey::Left), kScanLeft,
-        0x0100, 0, true, false);
+        0x0100, 0, true, false, IgnoreKeyEventResult);
   } else if ((buttons &
               winrt::Windows::Gaming::Input::GamepadButtons::DPadRight) ==
              winrt::Windows::Gaming::Input::GamepadButtons::DPadRight) {
     binding_handler_delegate_->OnKey(
         static_cast<int>(winrt::Windows::System::VirtualKey::Right), kScanRight,
-        0x0100, 0, true, false);
+        0x0100, 0, true, false, IgnoreKeyEventResult);
   } else if ((buttons &
               winrt::Windows::Gaming::Input::GamepadButtons::DPadUp) ==
              winrt::Windows::Gaming::Input::GamepadButtons::DPadUp) {
     binding_handler_delegate_->OnKey(
         static_cast<int>(winrt::Windows::System::VirtualKey::Up), kScanUp,
-        0x0100, 0, true, false);
+        0x0100, 0, true, false, IgnoreKeyEventResult);
   } else if ((buttons &
               winrt::Windows::Gaming::Input::GamepadButtons::DPadDown) ==
              winrt::Windows::Gaming::Input::GamepadButtons::DPadDown) {
     binding_handler_delegate_->OnKey(
         static_cast<int>(winrt::Windows::System::VirtualKey::Down), kScanDown,
-        0x0100, 0, true, false);
+        0x0100, 0, true, false, IgnoreKeyEventResult);
   }
 }
 

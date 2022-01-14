@@ -112,6 +112,7 @@ class MockMessageQueue {
                                    LPARAM const lparam) = 0;
 
   std::list<Win32Message> _pending_messages;
+  std::list<Win32Message> _sent_messages;
 };
 
 }  // namespace testing

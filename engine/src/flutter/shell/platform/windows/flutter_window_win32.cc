@@ -184,14 +184,15 @@ void FlutterWindowWin32::OnText(const std::u16string& text) {
   binding_handler_delegate_->OnText(text);
 }
 
-bool FlutterWindowWin32::OnKey(int key,
+void FlutterWindowWin32::OnKey(int key,
                                int scancode,
                                int action,
                                char32_t character,
                                bool extended,
-                               bool was_down) {
-  return binding_handler_delegate_->OnKey(key, scancode, action, character,
-                                          extended, was_down);
+                               bool was_down,
+                               KeyEventCallback callback) {
+  binding_handler_delegate_->OnKey(key, scancode, action, character, extended,
+                                   was_down, std::move(callback));
 }
 
 void FlutterWindowWin32::OnComposeBegin() {

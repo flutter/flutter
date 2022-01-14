@@ -97,7 +97,8 @@ TEST(FlutterWindowsViewTest, KeySequence) {
   FlutterWindowsView view(std::move(window_binding_handler));
   view.SetEngine(std::move(engine));
 
-  view.OnKey(kVirtualKeyA, kScanCodeKeyA, WM_KEYDOWN, 'a', false, false);
+  view.OnKey(kVirtualKeyA, kScanCodeKeyA, WM_KEYDOWN, 'a', false, false,
+             [](bool handled) {});
 
   EXPECT_EQ(key_event_logs.size(), 2);
   EXPECT_EQ(key_event_logs[0], kKeyEventFromEmbedder);
@@ -118,7 +119,8 @@ TEST(FlutterWindowsViewTest, RestartClearsKeyboardState) {
 
   // Receives a KeyA down. Events are dispatched and decided unhandled. Now the
   // keyboard key handler is waiting for the redispatched event.
-  view.OnKey(kVirtualKeyA, kScanCodeKeyA, WM_KEYDOWN, 'a', false, false);
+  view.OnKey(kVirtualKeyA, kScanCodeKeyA, WM_KEYDOWN, 'a', false, false,
+             [](bool handled) {});
   EXPECT_EQ(key_event_logs.size(), 2);
   EXPECT_EQ(key_event_logs[0], kKeyEventFromEmbedder);
   EXPECT_EQ(key_event_logs[1], kKeyEventFromChannel);
@@ -129,7 +131,8 @@ TEST(FlutterWindowsViewTest, RestartClearsKeyboardState) {
 
   // Receives another KeyA down. If the state had not been cleared, this event
   // will be considered the redispatched event and ignored.
-  view.OnKey(kVirtualKeyA, kScanCodeKeyA, WM_KEYDOWN, 'a', false, false);
+  view.OnKey(kVirtualKeyA, kScanCodeKeyA, WM_KEYDOWN, 'a', false, false,
+             [](bool handled) {});
   EXPECT_EQ(key_event_logs.size(), 2);
   EXPECT_EQ(key_event_logs[0], kKeyEventFromEmbedder);
   EXPECT_EQ(key_event_logs[1], kKeyEventFromChannel);
