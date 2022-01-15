@@ -395,35 +395,50 @@ abstract class Widget extends DiagnosticableTree {
   }
 }
 
-// A cache of inherited elements with an optional parent pointer.
-//
-// When looking up an inherited element, this will look through parent
-// pointers until the element is found or the end is reached. When an element
-// is found, it is cached at the first element where the search began.
-//
-// The intention of this cache is to speed up the initial build of widget
-// trees that contain a significant number of inherited widgets by deferring
-// expensive map allocations until they are needed.
-class _InheritedLookup {
-  _InheritedLookup(this.parent);
+/// A cache of inherited elements with an optional parent cache.
+///
+/// When looking up an inherited element, this will look through parent
+/// caches until the element is found or the end is reached. When an element
+/// is found, it is cached at the first element where the search began.
+///
+/// The intention of this cache is to speed up the initial build of widget
+/// trees that contain a significant number of inherited widgets by deferring
+/// expensive map allocations until they are needed, and by only allocating
+/// in the "closest" hash map.
+///
+/// This will not cache `null` results if an inherited element is not found.
+@visibleForTesting
+class InheritedTreeCache {
+  /// Create a new [InheritedTreeCache] with an optional parent.
+  InheritedTreeCache([this._parent]);
 
-  final _InheritedLookup? parent;
-  final HashMap<Type, InheritedElement> current = HashMap<Type, InheritedElement>();
+  final InheritedTreeCache? _parent;
+  final HashMap<Type, InheritedElement> _current = HashMap<Type, InheritedElement>();
 
+  /// Place the [element] in the cache under [type].
+  void operator []=(Type type, InheritedElement element) {
+    _current[type] = element;
+  }
+
+  /// Find the nearest [InheritedElement] of type [type], or `null` if it
+  /// cannot be found.
+  ///
+  /// This operation will also cache the inherited element to improve the
+  /// speed of future lookups.
   InheritedElement? operator[](Type type) {
-    InheritedElement? potential = current[type];
+    InheritedElement? potential = _current[type];
     if (potential != null) {
       return potential;
     }
-    potential =  parent?._lookupWithoutCaching(type);
+    potential =  _parent?._lookupWithoutCaching(type);
     if (potential != null) {
-      current[type] = potential;
+      _current[type] = potential;
     }
     return potential;
   }
 
   InheritedElement? _lookupWithoutCaching(Type type) {
-    return current[type] ?? parent?._lookupWithoutCaching(type);
+    return _current[type] ?? _parent?._lookupWithoutCaching(type);
   }
 }
 
@@ -4175,7 +4190,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     return null;
   }
 
-  _InheritedLookup? _inheritedLookup;
+  InheritedTreeCache? _inheritedLookup;
 
   Set<InheritedElement>? _dependencies;
   bool _hadUnsatisfiedDependencies = false;
@@ -5238,8 +5253,8 @@ class InheritedElement extends ProxyElement {
   @override
   void _updateInheritance() {
     assert(_lifecycleState == _ElementLifecycle.active);
-    _inheritedLookup = _InheritedLookup(_parent?._inheritedLookup)
-      ..current[widget.runtimeType] = this;
+    _inheritedLookup = InheritedTreeCache(_parent?._inheritedLookup)
+      ..[widget.runtimeType] = this;
   }
 
   @override
