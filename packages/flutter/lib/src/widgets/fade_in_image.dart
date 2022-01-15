@@ -9,7 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'basic.dart';
 import 'framework.dart';
 import 'image.dart';
-import 'ticker_provider.dart';
+import 'implicit_animations.dart';
 
 // Examples can assume:
 // late Uint8List bytes;
@@ -451,7 +451,7 @@ class _FadeInImageState extends State<FadeInImage> {
   }
 }
 
-class _AnimatedFadeOutFadeIn extends StatefulWidget {
+class _AnimatedFadeOutFadeIn extends ImplicitlyAnimatedWidget {
   const _AnimatedFadeOutFadeIn({
     Key? key,
     required this.target,
@@ -470,7 +470,7 @@ class _AnimatedFadeOutFadeIn extends StatefulWidget {
        assert(fadeOutCurve != null),
        assert(fadeInDuration != null),
        assert(fadeInCurve != null),
-       super(key: key);
+       super(key: key, duration: fadeInDuration + fadeOutDuration);
 
   final Widget target;
   final ProxyAnimation targetProxyAnimation;
@@ -486,44 +486,31 @@ class _AnimatedFadeOutFadeIn extends StatefulWidget {
   _AnimatedFadeOutFadeInState createState() => _AnimatedFadeOutFadeInState();
 }
 
-class _AnimatedFadeOutFadeInState extends State<_AnimatedFadeOutFadeIn> with SingleTickerProviderStateMixin<_AnimatedFadeOutFadeIn> {
-  late final AnimationController _controller = AnimationController(
-    duration: widget.fadeInDuration + widget.fadeOutDuration,
-    debugLabel: kDebugMode ? widget.toStringShort() : null,
-    vsync: this,
-  );
-  late final CurvedAnimation _animation = CurvedAnimation(parent: _controller, curve: Curves.linear);
-  final Tween<double> _targetOpacity = Tween<double>(begin: 0.0, end: 1.0);
-  final Tween<double> _placeholderOpacity = Tween<double>(begin: 1.0, end: 0.0);
+class _AnimatedFadeOutFadeInState extends ImplicitlyAnimatedWidgetState<_AnimatedFadeOutFadeIn> {
+  Tween<double>? _targetOpacity;
+  Tween<double>? _placeholderOpacity;
   Animation<double>? _targetOpacityAnimation;
   Animation<double>? _placeholderOpacityAnimation;
-  late bool isTargetLoaded = widget.isTargetLoaded;
 
   @override
-  void initState() {
-    super.initState();
-    _didUpdateTweens();
+  void forEachTween(TweenVisitor<dynamic> visitor) {
+    _targetOpacity = visitor(
+      _targetOpacity,
+      widget.isTargetLoaded ? 1.0 : 0.0,
+      (dynamic value) => Tween<double>(begin: value as double),
+    ) as Tween<double>?;
+    _placeholderOpacity = visitor(
+      _placeholderOpacity,
+      widget.isTargetLoaded ? 0.0 : 1.0,
+      (dynamic value) => Tween<double>(begin: value as double),
+    ) as Tween<double>?;
   }
 
   @override
-  void didUpdateWidget(_AnimatedFadeOutFadeIn oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (_controller.duration != widget.fadeInDuration + widget.fadeOutDuration)
-      _controller.duration = widget.fadeInDuration + widget.fadeOutDuration;
-    _didUpdateTweens();
-  }
-
-  @override
-  void dispose() {
-    _animation.dispose();
-    _controller.dispose();
-    super.dispose();
-  }
-
-  void _didUpdateTweens() {
-    _placeholderOpacityAnimation = _animation.drive(TweenSequence<double>(<TweenSequenceItem<double>>[
+  void didUpdateTweens() {
+    _placeholderOpacityAnimation = animation.drive(TweenSequence<double>(<TweenSequenceItem<double>>[
       TweenSequenceItem<double>(
-        tween: _placeholderOpacity.chain(CurveTween(curve: widget.fadeOutCurve)),
+        tween: _placeholderOpacity!.chain(CurveTween(curve: widget.fadeOutCurve)),
         weight: widget.fadeOutDuration.inMilliseconds.toDouble(),
       ),
       TweenSequenceItem<double>(
@@ -537,27 +524,28 @@ class _AnimatedFadeOutFadeInState extends State<_AnimatedFadeOutFadeIn> with Sin
       }
     });
 
-    _targetOpacityAnimation = _animation.drive(TweenSequence<double>(<TweenSequenceItem<double>>[
+    _targetOpacityAnimation = animation.drive(TweenSequence<double>(<TweenSequenceItem<double>>[
       TweenSequenceItem<double>(
         tween: ConstantTween<double>(0),
         weight: widget.fadeOutDuration.inMilliseconds.toDouble(),
       ),
       TweenSequenceItem<double>(
-        tween: _targetOpacity.chain(CurveTween(curve: widget.fadeInCurve)),
+        tween: _targetOpacity!.chain(CurveTween(curve: widget.fadeInCurve)),
         weight: widget.fadeInDuration.inMilliseconds.toDouble(),
       ),
     ]));
+    if (!widget.isTargetLoaded && _isValid(_placeholderOpacity!) && _isValid(_targetOpacity!)) {
+      // Jump (don't fade) back to the placeholder image, so as to be ready
+      // for the full animation when the new target image becomes ready.
+      controller.value = controller.upperBound;
+    }
 
-    if (!widget.isTargetLoaded && isTargetLoaded)
-      _controller.reset();
-
-    // Doesn't interrupt in-progress animation when animation values are updated.
-    if (widget.isTargetLoaded && !_controller.isAnimating)
-      _controller.forward();
-
-    isTargetLoaded = widget.isTargetLoaded;
     widget.targetProxyAnimation.parent = _targetOpacityAnimation;
     widget.placeholderProxyAnimation.parent = _placeholderOpacityAnimation;
+  }
+
+  bool _isValid(Tween<double> tween) {
+    return tween.begin != null && tween.end != null;
   }
 
   @override
