@@ -1564,7 +1564,7 @@ void main() {
     await tester.pumpAndSettle();
 
     iconButton = tester.widget(find.byType(IconButton).at(0));
-  
+
     expect(iconButton.color, expandedColor);
   });
 
@@ -1624,7 +1624,7 @@ void main() {
     await tester.pumpAndSettle();
 
     iconButton = tester.widget(find.byType(IconButton).at(0));
-  
+
     expect(iconButton.color, expandedColor);
   });
 }
