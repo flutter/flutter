@@ -4404,7 +4404,7 @@ void main() {
           ),
         ),
       ),
-    ),
+    );
     await tester.pumpAndSettle();
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
     await gesture.moveTo(tester.getCenter(find.byType(Tab)));
