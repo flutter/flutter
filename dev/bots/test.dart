@@ -710,6 +710,12 @@ Future<void> _runFrameworkTests() async {
       options: <String>['--dart-define=dart.vm.product=true', ...soundNullSafetyOptions],
       tests: <String>['test_release${path.separator}'],
     );
+    // Run profile mode tests (see packages/flutter/test_profile/README.md)
+    await _runFlutterTest(
+      path.join(flutterRoot, 'packages', 'flutter'),
+      options: <String>['--dart-define=dart.vm.product=false', '--dart-define=dart.vm.profile=true', ...soundNullSafetyOptions],
+      tests: <String>['test_profile${path.separator}'],
+    );
   }
 
   Future<void> runLibraries() async {

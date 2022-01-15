@@ -6,13 +6,6 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@protocol FLTIntegrationTestScreenshotDelegate
-
-/** This will be called when a dart integration test triggers a window screenshot with  @c takeScreenshot. */
-- (void)didTakeScreenshot:(UIImage *)screenshot attachmentName:(nullable NSString *)name;
-
-@end
-
 /** A Flutter plugin that's responsible for communicating the test results back
  * to iOS XCTest. */
 @interface IntegrationTestPlugin : NSObject <FlutterPlugin>
@@ -23,14 +16,17 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property(nonatomic, readonly, nullable) NSDictionary<NSString *, NSString *> *testResults;
 
+/**
+ * Mapping of screenshot images by suggested names, captured by the dart tests.
+ */
+@property (copy, readonly) NSDictionary<NSString *, UIImage *> *capturedScreenshotsByName;
+
 /** Fetches the singleton instance of the plugin. */
 + (IntegrationTestPlugin *)instance;
 
 - (void)setupChannels:(id<FlutterBinaryMessenger>)binaryMessenger;
 
 - (instancetype)init NS_UNAVAILABLE;
-
-@property(weak, nonatomic) id<FLTIntegrationTestScreenshotDelegate> screenshotDelegate;
 
 @end
 
