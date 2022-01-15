@@ -32,6 +32,7 @@ class RawKeyEventDataWeb extends RawKeyEventData {
     required this.key,
     this.location = 0,
     this.metaState = modifierNone,
+    this.keyCode = 0,
   })  : assert(code != null),
         assert(metaState != null);
 
@@ -79,6 +80,12 @@ class RawKeyEventDataWeb extends RawKeyEventData {
   ///  * [isAltPressed], to see if an ALT key is pressed.
   ///  * [isMetaPressed], to see if a META key is pressed.
   final int metaState;
+
+  /// The `KeyboardEvent.keyCode` corresponding to this event.
+  ///
+  /// See <https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/keyCode>
+  /// for more information.
+  final int keyCode;
 
   @override
   String get keyLabel => key == 'Unidentified' ? '' : _unicodeChar(key) ?? '';
@@ -156,6 +163,7 @@ class RawKeyEventDataWeb extends RawKeyEventData {
         properties.add(DiagnosticsProperty<String>('key', key));
         properties.add(DiagnosticsProperty<int>('location', location));
         properties.add(DiagnosticsProperty<int>('metaState', metaState));
+        properties.add(DiagnosticsProperty<int>('keyCode', keyCode));
   }
 
   @override
@@ -168,7 +176,8 @@ class RawKeyEventDataWeb extends RawKeyEventData {
         && other.code == code
         && other.key == key
         && other.location == location
-        && other.metaState == metaState;
+        && other.metaState == metaState
+        && other.keyCode == keyCode;
   }
 
   @override
@@ -177,6 +186,7 @@ class RawKeyEventDataWeb extends RawKeyEventData {
     key,
     location,
     metaState,
+    keyCode,
   );
 
   // Modifier key masks.

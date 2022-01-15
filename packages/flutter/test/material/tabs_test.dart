@@ -3136,6 +3136,7 @@ void main() {
       },
     );
   });
+
   testWidgets('Skipping tabs with global key does not crash', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/24660
     final List<String> tabs = <String>[
@@ -3433,9 +3434,9 @@ void main() {
                   title: const Text('Default TabBar Preview'),
                   bottom: tabTextContent.isNotEmpty
                     ? TabBar(
-                       isScrollable: true,
-                       tabs: tabTextContent.map((String textContent) => Tab(text: textContent)).toList(),
-                     )
+                        isScrollable: true,
+                        tabs: tabTextContent.map((String textContent) => Tab(text: textContent)).toList(),
+                      )
                     : null,
                 ),
                 body: tabTextContent.isNotEmpty
@@ -3490,31 +3491,96 @@ void main() {
     expect(find.text('No tabs'), findsOneWidget);
   });
 
-  testWidgets('TabBar - updating to and from zero tabs', (WidgetTester tester) async {
-    // Regression test for https://github.com/flutter/flutter/issues/68962.
+  testWidgets('DefaultTabController should allow dynamic length of tabs', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/94504.
     final List<String> tabTitles = <String>[];
-    final List<Widget> tabContents = <Widget>[];
-    TabController _tabController = TabController(length: tabContents.length, vsync: const TestVSync());
 
     void _onTabAdd(StateSetter setState) {
       setState(() {
         tabTitles.add('Tab ${tabTitles.length + 1}');
-        tabContents.add(
-          Container(
-            color: Colors.red,
-            height: 200,
-            width: 200,
-          ),
-        );
-        _tabController = TabController(length: tabContents.length, vsync: const TestVSync());
       });
     }
 
     void _onTabRemove(StateSetter setState) {
       setState(() {
         tabTitles.removeLast();
-        tabContents.removeLast();
-        _tabController = TabController(length: tabContents.length, vsync: const TestVSync());
+      });
+    }
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return DefaultTabController(
+              length: tabTitles.length,
+              child: Scaffold(
+                appBar: AppBar(
+                  actions: <Widget>[
+                    TextButton(
+                      key: const Key('Add tab'),
+                      child: const Text('Add tab'),
+                      onPressed: () => _onTabAdd(setState),
+                    ),
+                    TextButton(
+                      key: const Key('Remove tab'),
+                      child: const Text('Remove tab'),
+                      onPressed: () => _onTabRemove(setState),
+                    ),
+                  ],
+                  bottom: PreferredSize(
+                    preferredSize: const Size.fromHeight(40.0),
+                    child: Expanded(
+                      child: TabBar(
+                        tabs: tabTitles
+                            .map((String title) => Tab(text: title))
+                            .toList(),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(find.text('Tab 1'), findsNothing);
+    expect(find.text('Tab 2'), findsNothing);
+
+    await tester.tap(find.byKey(const Key('Add tab'))); // +1
+    await tester.pumpAndSettle();
+    expect(find.text('Tab 1'), findsOneWidget);
+    expect(find.text('Tab 2'), findsNothing);
+
+    await tester.tap(find.byKey(const Key('Add tab'))); // +2
+    await tester.pumpAndSettle();
+    expect(find.text('Tab 1'), findsOneWidget);
+    expect(find.text('Tab 2'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('Remove tab'))); // -2
+    await tester.tap(find.byKey(const Key('Remove tab'))); // -1
+    await tester.pumpAndSettle();
+    expect(find.text('Tab 1'), findsNothing);
+    expect(find.text('Tab 2'), findsNothing);
+  });
+
+  testWidgets('TabBar - updating to and from zero tabs', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/68962.
+    final List<String> tabTitles = <String>[];
+    TabController _tabController = TabController(length: tabTitles.length, vsync: const TestVSync());
+
+    void _onTabAdd(StateSetter setState) {
+      setState(() {
+        tabTitles.add('Tab ${tabTitles.length + 1}');
+        _tabController = TabController(length: tabTitles.length, vsync: const TestVSync());
+      });
+    }
+
+    void _onTabRemove(StateSetter setState) {
+      setState(() {
+        tabTitles.removeLast();
+        _tabController = TabController(length: tabTitles.length, vsync: const TestVSync());
       });
     }
 
@@ -4257,6 +4323,61 @@ void main() {
     expect(pageController.page, 2);
   });
 
+  testWidgets('TabBar InkWell splashFactory and overlayColor', (WidgetTester tester) async {
+    const InteractiveInkFeatureFactory splashFactory = NoSplash.splashFactory;
+    final MaterialStateProperty<Color?> overlayColor = MaterialStateProperty.resolveWith<Color?>(
+      (Set<MaterialState> states) => Colors.transparent,
+    );
+
+    // TabBarTheme splashFactory and overlayColor
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.light().copyWith(
+          tabBarTheme: TabBarTheme(
+            splashFactory: splashFactory,
+            overlayColor: overlayColor,
+          )),
+        home: DefaultTabController(
+          length: 1,
+          child: Scaffold(
+            appBar: AppBar(
+              bottom: TabBar(
+                tabs: <Widget>[
+                  Container(width: 100, height: 100, color: Colors.green),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.widget<InkWell>(find.byType(InkWell)).splashFactory, splashFactory);
+    expect(tester.widget<InkWell>(find.byType(InkWell)).overlayColor, overlayColor);
+
+    // TabBar splashFactory and overlayColor
+    await tester.pumpWidget(
+      MaterialApp(
+        home: DefaultTabController(
+          length: 1,
+          child: Scaffold(
+            appBar: AppBar(
+              bottom: TabBar(
+                splashFactory: splashFactory,
+                overlayColor: overlayColor,
+                tabs: <Widget>[
+                  Container(width: 100, height: 100, color: Colors.green),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle(); // theme animation
+    expect(tester.widget<InkWell>(find.byType(InkWell)).splashFactory, splashFactory);
+    expect(tester.widget<InkWell>(find.byType(InkWell)).overlayColor, overlayColor);
+  });
   testWidgets('splashBorderRadius is passed to InkWell.borderRadius', (WidgetTester tester) async {
     const Color _hoverColor = Color(0xfff44336);
     const double _radius = 20;
@@ -4279,10 +4400,6 @@ void main() {
                 child: Text(''),
               ),
             ],
-          ),
-        ),
-      ),
-    );
     await tester.pumpAndSettle();
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
     await gesture.moveTo(tester.getCenter(find.byType(Tab)));
@@ -4299,7 +4416,6 @@ void main() {
       ),
     );
     gesture.removePointer();
-  });
 }
 
 class KeepAliveInk extends StatefulWidget {

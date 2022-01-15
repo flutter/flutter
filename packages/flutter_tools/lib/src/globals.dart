@@ -50,7 +50,7 @@ import 'version.dart';
 String get flutterGit => platform.environment['FLUTTER_GIT_URL'] ?? 'https://github.com/flutter/flutter.git';
 
 Artifacts? get artifacts => context.get<Artifacts>();
-BuildSystem? get buildSystem => context.get<BuildSystem>();
+BuildSystem get buildSystem => context.get<BuildSystem>()!;
 Cache get cache => context.get<Cache>()!;
 CocoaPodsValidator? get cocoapodsValidator => context.get<CocoaPodsValidator>();
 Config get config => context.get<Config>()!;
@@ -278,3 +278,6 @@ FlutterProjectFactory get projectFactory {
 CustomDevicesConfig get customDevicesConfig => context.get<CustomDevicesConfig>()!;
 
 PreRunValidator get preRunValidator => context.get<PreRunValidator>() ?? const NoOpPreRunValidator();
+
+// TODO(fujino): Migrate to 'main' https://github.com/flutter/flutter/issues/95041
+const String kDefaultFrameworkChannel = 'master';

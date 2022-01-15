@@ -58,6 +58,8 @@ typedef ExpansionPanelHeaderBuilder = Widget Function(BuildContext context, bool
 /// expanded or collapsed. The body of the panel is only visible when it is
 /// expanded.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=2aJZzRMziJc}
+///
 /// Expansion panels are only intended to be used as children for
 /// [ExpansionPanelList].
 ///
