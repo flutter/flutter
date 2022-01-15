@@ -4378,6 +4378,7 @@ void main() {
     expect(tester.widget<InkWell>(find.byType(InkWell)).splashFactory, splashFactory);
     expect(tester.widget<InkWell>(find.byType(InkWell)).overlayColor, overlayColor);
   });
+
   testWidgets('splashBorderRadius is passed to InkWell.borderRadius', (WidgetTester tester) async {
     const Color _hoverColor = Color(0xfff44336);
     const double _radius = 20;
@@ -4400,6 +4401,10 @@ void main() {
                 child: Text(''),
               ),
             ],
+          ),
+        ),
+      ),
+    ),
     await tester.pumpAndSettle();
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
     await gesture.moveTo(tester.getCenter(find.byType(Tab)));
@@ -4416,7 +4421,7 @@ void main() {
       ),
     );
     gesture.removePointer();
-}
+});
 
 class KeepAliveInk extends StatefulWidget {
   const KeepAliveInk(this.title, {Key? key}) : super(key: key);
