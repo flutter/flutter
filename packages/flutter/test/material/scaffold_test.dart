@@ -391,7 +391,7 @@ void main() {
 
   testWidgets('Tapping the status bar scrolls to top with ease out curve animation', (WidgetTester tester) async {
     const int duration = 1000;
-    final List<double> stops = [0.842, 0.959, 0.993, 1.0];
+    final List<double> stops = <double>[0.842, 0.959, 0.993, 1.0];
     const double scrollOffset = 1000;
 
     await tester.pumpWidget(_buildStatusBarTestApp(debugDefaultTargetPlatformOverride));
