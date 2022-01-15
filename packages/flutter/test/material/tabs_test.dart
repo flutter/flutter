@@ -4422,6 +4422,7 @@ void main() {
     );
     gesture.removePointer();
 });
+}
 
 class KeepAliveInk extends StatefulWidget {
   const KeepAliveInk(this.title, {Key? key}) : super(key: key);
