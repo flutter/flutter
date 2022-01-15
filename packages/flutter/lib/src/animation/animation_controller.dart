@@ -840,7 +840,12 @@ class AnimationController extends Animation<double>
 
   void _tick(Duration elapsed) {
     _lastElapsedDuration = elapsed;
-    final double elapsedInSeconds = elapsed.inMicroseconds.toDouble() / Duration.microsecondsPerSecond;
+    double elapsedInSeconds = elapsed.inMicroseconds.toDouble() / Duration.microsecondsPerSecond;
+    // When a frame is a critical frame that in the course that the frame rate becomes faster from slow value
+    // the [elapsedInSeconds] will be < 0. So we set it 0
+    if(elapsedInSeconds < 0){
+      elapsedInSeconds = 0;
+    }
     assert(elapsedInSeconds >= 0.0);
     _value = _simulation!.x(elapsedInSeconds).clamp(lowerBound, upperBound);
     if (_simulation!.isDone(elapsedInSeconds)) {
