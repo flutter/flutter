@@ -14,7 +14,7 @@ import 'animation.dart';
 import 'curves.dart';
 import 'listener_helpers.dart';
 
-export 'package:flutter/scheduler.dart' show TickerFuture, TickerCanceled;
+export 'package:flutter/scheduler.dart' show TickerFuture, TickerCanceled, FrameRate;
 
 // Examples can assume:
 // late AnimationController _controller, fadeAnimationController, sizeAnimationController;
@@ -55,13 +55,17 @@ const Tolerance _kFlingTolerance = Tolerance(
 enum AnimationBehavior {
   /// The [AnimationController] will reduce its duration when
   /// [AccessibilityFeatures.disableAnimations] is true.
+  ///
+  /// This is the default for bounded animations.
   normal,
 
-  /// The [AnimationController] will preserve its behavior.
+  /// The [AnimationController] will ignore
+  /// [AccessibilityFeatures.disableAnimations].
   ///
-  /// This is the default for repeating animations in order to prevent them from
-  /// flashing rapidly on the screen if the widget does not take the
-  /// [AccessibilityFeatures.disableAnimations] flag into account.
+  /// This is the default for unbounded animations.
+  ///
+  /// Consider using this value for repeating animations in order to prevent
+  /// them from flashing rapidly on the screen.
   preserve,
 }
 
@@ -110,6 +114,13 @@ enum AnimationBehavior {
 /// This reduces the likelihood of leaks. When used with a [StatefulWidget], it
 /// is common for an [AnimationController] to be created in the
 /// [State.initState] method and then disposed in the [State.dispose] method.
+///
+/// ## Frame rates
+///
+/// A desired frame rate can be specified when constructing an animation
+/// controller. Typically, if a speed is specified, this is either
+/// [FrameRate.fastest], to get the smoothest possible animations, or
+/// [FrameRate.slow], to reduce the update rate and conserve battery.
 ///
 /// ## Using [Future]s with [AnimationController]
 ///
@@ -237,6 +248,7 @@ class AnimationController extends Animation<double>
     this.lowerBound = 0.0,
     this.upperBound = 1.0,
     this.animationBehavior = AnimationBehavior.normal,
+    this.frameRate = FrameRate.normal,
     required TickerProvider vsync,
   }) : assert(lowerBound != null),
        assert(upperBound != null),
@@ -269,8 +281,9 @@ class AnimationController extends Animation<double>
     this.duration,
     this.reverseDuration,
     this.debugLabel,
-    required TickerProvider vsync,
     this.animationBehavior = AnimationBehavior.preserve,
+    this.frameRate = FrameRate.normal,
+    required TickerProvider vsync,
   }) : assert(value != null),
        assert(vsync != null),
        lowerBound = double.negativeInfinity,
@@ -297,6 +310,15 @@ class AnimationController extends Animation<double>
   /// constructor, and [AnimationBehavior.preserve] for the
   /// [new AnimationController.unbounded] constructor.
   final AnimationBehavior animationBehavior;
+
+  /// The desired frame rate while this animation is ticking.
+  ///
+  /// This value is reported to [SchedulerBinding.requestFrameRate] each time
+  /// the animation ticks.
+  ///
+  /// This value may be changed during the lifetime of the animation controller;
+  /// the new value takes effect the next time the animation ticks.
+  FrameRate frameRate;
 
   /// Returns an [Animation<double>] for this animation controller, so that a
   /// pointer to this object can be passed around without allowing users of that
@@ -829,6 +851,9 @@ class AnimationController extends Animation<double>
     }
     notifyListeners();
     _checkStatusChanged();
+    if (isAnimating) {
+      SchedulerBinding.instance!.requestFrameRate(frameRate);
+    }
   }
 
   @override

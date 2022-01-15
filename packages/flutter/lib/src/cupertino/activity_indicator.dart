@@ -29,6 +29,7 @@ class CupertinoActivityIndicator extends StatefulWidget {
     Key? key,
     this.color,
     this.animating = true,
+    this.reduceFrameRate = false,
     this.radius = _kDefaultIndicatorRadius,
   })  : assert(animating != null),
         assert(radius != null),
@@ -53,6 +54,7 @@ class CupertinoActivityIndicator extends StatefulWidget {
         assert(progress >= 0.0),
         assert(progress <= 1.0),
         animating = false,
+        reduceFrameRate = false,
         super(key: key);
 
   /// Color of the activity indicator.
@@ -78,6 +80,18 @@ class CupertinoActivityIndicator extends StatefulWidget {
   /// Defaults to 1.0. Must be between 0.0 and 1.0 inclusive, and cannot be null.
   final double progress;
 
+  /// Whether to attempt to reduce the device's frame rate.
+  ///
+  /// When this is true and the activity indicator is [animating], the activity
+  /// indicator will request that the operating system reduce the frequency at
+  /// which the display is updating. (This will also affect other animations
+  /// unless they are explicitly requesting a higher frame rate.)
+  ///
+  /// See also:
+  ///
+  ///  * [FrameRate.slow], the requested frame rate when this true.
+  final bool reduceFrameRate;
+
   @override
   State<CupertinoActivityIndicator> createState() => _CupertinoActivityIndicatorState();
 }
@@ -91,9 +105,10 @@ class _CupertinoActivityIndicatorState extends State<CupertinoActivityIndicator>
     super.initState();
     _controller = AnimationController(
       duration: const Duration(seconds: 1),
+      frameRate: widget.reduceFrameRate ? FrameRate.slow : FrameRate.normal,
+      animationBehavior: AnimationBehavior.preserve,
       vsync: this,
     );
-
     if (widget.animating) {
       _controller.repeat();
     }
@@ -103,10 +118,14 @@ class _CupertinoActivityIndicatorState extends State<CupertinoActivityIndicator>
   void didUpdateWidget(CupertinoActivityIndicator oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.animating != oldWidget.animating) {
-      if (widget.animating)
+      if (widget.animating) {
         _controller.repeat();
-      else
+      } else {
         _controller.stop();
+      }
+    }
+    if (widget.reduceFrameRate != oldWidget.reduceFrameRate) {
+      _controller.frameRate = widget.reduceFrameRate ? FrameRate.slow : FrameRate.normal;
     }
   }
 

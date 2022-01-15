@@ -313,6 +313,9 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
   /// hit-testing on every frame.
   final Map<int, HitTestResult> _hitTests = <int, HitTestResult>{};
 
+  /// Indicates the whether user is interacting or not.
+  bool get isTracking => _hitTests.isNotEmpty;
+
   /// Dispatch an event to the targets found by a hit test on its position.
   ///
   /// This method sends the given event to [dispatchEvent] based on event types:

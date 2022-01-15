@@ -9,14 +9,19 @@ import 'package:flutter/foundation.dart';
 class Priority {
   const Priority._(this._value);
 
-  /// Integer that describes this Priority value.
+  /// Integer that describes this [Priority] value.
   int get value => _value;
   final int _value;
 
-  /// A task to run after all other tasks, when no animations are running.
+  /// A task to run after all other tasks, when no animations are running and
+  /// when the user is not interacting with the device.
+  ///
+  /// A [CircularProgressIndicator] is enough to prevent tasks from running
+  /// at this proirity level!
   static const Priority idle = Priority._(0);
 
-  /// A task to run even when animations are running.
+  /// A task to run even when animations are running, but not when the user is
+  /// interacting with the device.
   static const Priority animation = Priority._(100000);
 
   /// A task to run even when the user is interacting with the device.

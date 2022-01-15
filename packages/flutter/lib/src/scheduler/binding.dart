@@ -9,8 +9,10 @@ import 'dart:ui' show AppLifecycleState, FramePhase, FrameTiming, TimingsCallbac
 
 import 'package:collection/collection.dart' show PriorityQueue, HeapPriorityQueue;
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart' show GestureBinding;
 
 import 'debug.dart';
+import 'frame_rate.dart';
 import 'priority.dart';
 
 export 'dart:ui' show AppLifecycleState, VoidCallback, FrameTiming;
@@ -769,6 +771,9 @@ mixin SchedulerBinding on BindingBase {
   /// subtle and complicated, but the conceptual "Vsync" refresh signal continue
   /// to be used to indicate when applications should update their rendering.
   ///
+  /// To specify the frequency at which the screen should update, consider
+  /// [requestFrameRate].
+  ///
   /// To have a stack trace printed to the console any time this function
   /// schedules a frame, set [debugPrintScheduleFrameStacks] to true.
   ///
@@ -1088,6 +1093,7 @@ mixin SchedulerBinding on BindingBase {
       for (final FrameCallback callback in localPostFrameCallbacks)
         _invokeFrameCallback(callback, _currentFrameTimeStamp!);
     } finally {
+      _updateFrameRate();
       _schedulerPhase = SchedulerPhase.idle;
       _frameTimelineTask?.finish(); // end the Frame
       assert(() {
@@ -1125,6 +1131,37 @@ mixin SchedulerBinding on BindingBase {
     if (microseconds > 0)
       buffer.write('.${microseconds.toString().padLeft(3, "0")}');
     buffer.write('ms');
+  }
+
+  // The currently highest-requested frame rate.
+  // This resets at the end of each frame when we apply the current selection.
+  FrameRate _fastestRequestedFrameRate = FrameRate.normal;
+
+  /// Request that the operating system adjust to a specific frame rate.
+  ///
+  /// The frame rate request is forwarded to the operating system at the end of
+  /// the current frame (or the next, if [schedulerPhase] is
+  /// [SchedulerPhase.idle]). See [scheduleFrame] to schedule a frame. The last
+  /// opportunity for requesting a frame rate is in the post-frame callbacks
+  /// (scheduled with [addPostFrameCallback]).
+  ///
+  /// If multiple frame rates are requested, the fastest requested rate is used,
+  /// ignoring any requests for [FrameRate.normal].
+  ///
+  /// If no frame rates are requested, [FrameRate.normal] (the OS default) is
+  /// used instead.
+  void requestFrameRate(FrameRate frameRate) {
+    if (frameRate > _fastestRequestedFrameRate){
+      _fastestRequestedFrameRate = frameRate;
+    }
+  }
+
+  void _updateFrameRate() {
+    if(GestureBinding.instance!.isTracking){
+      _fastestRequestedFrameRate = FrameRate.fastest;
+    }
+    window.updateFrameRate(_fastestRequestedFrameRate.frequency);
+    _fastestRequestedFrameRate = FrameRate.normal;
   }
 
   // Calls the given [callback] with [timestamp] as argument.

@@ -194,6 +194,7 @@ class BottomSheet extends StatefulWidget {
       duration: _bottomSheetEnterDuration,
       reverseDuration: _bottomSheetExitDuration,
       debugLabel: 'BottomSheet',
+      frameRate: FrameRate.fastest,
       vsync: vsync,
     );
   }

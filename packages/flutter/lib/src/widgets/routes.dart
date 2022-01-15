@@ -175,6 +175,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
       duration: duration,
       reverseDuration: reverseDuration,
       debugLabel: debugLabel,
+      frameRate: FrameRate.fastest,
       vsync: navigator!,
     );
   }

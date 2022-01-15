@@ -763,6 +763,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
     _controllers = List<AnimationController>.generate(widget.items.length, (int index) {
       return AnimationController(
         duration: kThemeAnimationDuration,
+        frameRate: FrameRate.fastest,
         vsync: this,
       )..addListener(_rebuild);
     });

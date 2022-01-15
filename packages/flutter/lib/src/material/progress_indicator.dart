@@ -47,6 +47,7 @@ abstract class ProgressIndicator extends StatefulWidget {
     this.backgroundColor,
     this.color,
     this.valueColor,
+    this.reduceFrameRate = false,
     this.semanticsLabel,
     this.semanticsValue,
   }) : super(key: key);
@@ -84,6 +85,18 @@ abstract class ProgressIndicator extends StatefulWidget {
   /// then it will use the ambient [ProgressIndicatorThemeData.color]. If that
   /// is also null then it defaults to the current theme's [ColorScheme.primary].
   final Animation<Color?>? valueColor;
+
+  /// Whether to attempt to reduce the device's frame rate.
+  ///
+  /// When this is true and the progress indicator is animating, the progress
+  /// indicator will request that the operating system reduce the frequency at
+  /// which the display is updating. (This will also affect other animations
+  /// unless they are explicitly requesting a higher frame rate.)
+  ///
+  /// See also:
+  ///
+  ///  * [FrameRate.slow], the requested frame rate when this true.
+  final bool reduceFrameRate;
 
   /// {@template flutter.progress_indicator.ProgressIndicator.semanticsLabel}
   /// The [SemanticsProperties.label] for this progress indicator.
@@ -270,6 +283,7 @@ class LinearProgressIndicator extends ProgressIndicator {
     Color? color,
     Animation<Color?>? valueColor,
     this.minHeight,
+    bool reduceFrameRate = false,
     String? semanticsLabel,
     String? semanticsValue,
   }) : assert(minHeight == null || minHeight > 0),
@@ -279,6 +293,7 @@ class LinearProgressIndicator extends ProgressIndicator {
          backgroundColor: backgroundColor,
          color: color,
          valueColor: valueColor,
+         reduceFrameRate: reduceFrameRate,
          semanticsLabel: semanticsLabel,
          semanticsValue: semanticsValue,
        );
@@ -315,6 +330,8 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> with 
     super.initState();
     _controller = AnimationController(
       duration: const Duration(milliseconds: _kIndeterminateLinearDuration),
+      frameRate: widget.reduceFrameRate ? FrameRate.slow : FrameRate.normal,
+      animationBehavior: AnimationBehavior.preserve,
       vsync: this,
     );
     if (widget.value == null)
@@ -324,10 +341,14 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> with 
   @override
   void didUpdateWidget(LinearProgressIndicator oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.value == null && !_controller.isAnimating)
+    if (widget.value == null && !_controller.isAnimating) {
       _controller.repeat();
-    else if (widget.value != null && _controller.isAnimating)
+    } else if (widget.value != null && _controller.isAnimating) {
       _controller.stop();
+    }
+    if (widget.reduceFrameRate != oldWidget.reduceFrameRate) {
+      _controller.frameRate = widget.reduceFrameRate ? FrameRate.slow : FrameRate.normal;
+    }
   }
 
   @override
@@ -490,6 +511,7 @@ class CircularProgressIndicator extends ProgressIndicator {
     Color? color,
     Animation<Color?>? valueColor,
     this.strokeWidth = 4.0,
+    bool reduceFrameRate = false,
     String? semanticsLabel,
     String? semanticsValue,
   }) : _indicatorType = _ActivityIndicatorType.material,
@@ -499,6 +521,7 @@ class CircularProgressIndicator extends ProgressIndicator {
          backgroundColor: backgroundColor,
          color: color,
          valueColor: valueColor,
+         reduceFrameRate: reduceFrameRate,
          semanticsLabel: semanticsLabel,
          semanticsValue: semanticsValue,
        );
@@ -517,6 +540,7 @@ class CircularProgressIndicator extends ProgressIndicator {
     Color? backgroundColor,
     Animation<Color?>? valueColor,
     this.strokeWidth = 4.0,
+    bool reduceFrameRate = false,
     String? semanticsLabel,
     String? semanticsValue,
   }) : _indicatorType = _ActivityIndicatorType.adaptive,
@@ -525,6 +549,7 @@ class CircularProgressIndicator extends ProgressIndicator {
          value: value,
          backgroundColor: backgroundColor,
          valueColor: valueColor,
+         reduceFrameRate: reduceFrameRate,
          semanticsLabel: semanticsLabel,
          semanticsValue: semanticsValue,
        );
@@ -572,6 +597,8 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
     super.initState();
     _controller = AnimationController(
       duration: const Duration(milliseconds: _kIndeterminateCircularDuration),
+      frameRate: widget.reduceFrameRate ? FrameRate.slow : FrameRate.normal,
+      animationBehavior: AnimationBehavior.preserve,
       vsync: this,
     );
     if (widget.value == null)
@@ -581,10 +608,14 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
   @override
   void didUpdateWidget(CircularProgressIndicator oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.value == null && !_controller.isAnimating)
+    if (widget.value == null && !_controller.isAnimating) {
       _controller.repeat();
-    else if (widget.value != null && _controller.isAnimating)
+    } else if (widget.value != null && _controller.isAnimating) {
       _controller.stop();
+    }
+    if (widget.reduceFrameRate != oldWidget.reduceFrameRate) {
+      _controller.frameRate = widget.reduceFrameRate ? FrameRate.slow : FrameRate.normal;
+    }
   }
 
   @override
@@ -595,12 +626,14 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
 
   Widget _buildCupertinoIndicator(BuildContext context) {
     final Color? tickColor = widget.backgroundColor;
-    return CupertinoActivityIndicator(key: widget.key, color: tickColor);
+    return CupertinoActivityIndicator(
+      color: tickColor,
+      reduceFrameRate: widget.reduceFrameRate,
+    );
   }
 
   Widget _buildMaterialIndicator(BuildContext context, double headValue, double tailValue, double offsetValue, double rotationValue) {
     final Color? trackColor = widget.backgroundColor ?? ProgressIndicatorTheme.of(context).circularTrackColor;
-
     return widget._buildSemanticsWrapper(
       context: context,
       child: Container(
@@ -749,6 +782,7 @@ class RefreshProgressIndicator extends CircularProgressIndicator {
     Color? color,
     Animation<Color?>? valueColor,
     double strokeWidth = defaultStrokeWidth, // Different default than CircularProgressIndicator.
+    bool reduceFrameRate = false,
     String? semanticsLabel,
     String? semanticsValue,
   }) : super(
@@ -758,6 +792,7 @@ class RefreshProgressIndicator extends CircularProgressIndicator {
     color: color,
     valueColor: valueColor,
     strokeWidth: strokeWidth,
+    reduceFrameRate: reduceFrameRate,
     semanticsLabel: semanticsLabel,
     semanticsValue: semanticsValue,
   );

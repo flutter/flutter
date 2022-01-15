@@ -39,8 +39,6 @@ abstract class TickerProvider {
   Ticker createTicker(TickerCallback onTick);
 }
 
-// TODO(jacobr): make Ticker use Diagnosticable to simplify reporting errors
-// related to a ticker.
 /// Calls its callback once per animation frame.
 ///
 /// When created, a ticker is initially disabled. Call [start] to
@@ -56,6 +54,9 @@ abstract class TickerProvider {
 ///
 /// Tickers are driven by the [SchedulerBinding]. See
 /// [SchedulerBinding.scheduleFrameCallback].
+///
+/// Tickers use the current frame rate. To change the frame rate, consider
+/// calling [SchedulerBinding.requestFrameRate] each time the ticker ticks.
 class Ticker {
   /// Creates a ticker that will call the provided callback once per frame while
   /// running.

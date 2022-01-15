@@ -293,7 +293,11 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
   @override
   void initState() {
     super.initState();
-    _moveController = AnimationController(duration: widget.movementDuration, vsync: this)
+    _moveController = AnimationController(
+      duration: widget.movementDuration,
+      frameRate: FrameRate.fastest,
+      vsync: this,
+    )
       ..addStatusListener(_handleDismissStatusChanged)
       ..addListener(_handleDismissUpdateValueChanged);
     _updateMoveAnimation();

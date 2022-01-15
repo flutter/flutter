@@ -343,6 +343,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
     _controller = AnimationController(
       value: widget.isDrawerOpen ? 1.0 : 0.0,
       duration: _kBaseSettleDuration,
+      frameRate: FrameRate.fastest,
       vsync: this,
     );
     _controller
