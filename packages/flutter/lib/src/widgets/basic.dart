@@ -6172,7 +6172,7 @@ class Listener extends SingleChildRenderObjectWidget {
 ///
 ///  * [Listener], a similar widget that tracks pointer events when the pointer
 ///    has buttons pressed.
-class MouseRegion extends StatelessWidget {
+class MouseRegion extends SingleChildRenderObjectWidget {
   /// Creates a widget that forwards mouse events to callbacks.
   ///
   /// By default, all callbacks are empty, [cursor] is [MouseCursor.defer], and
@@ -6184,10 +6184,10 @@ class MouseRegion extends StatelessWidget {
     this.onHover,
     this.cursor = MouseCursor.defer,
     this.opaque = true,
-    this.child,
+    Widget? child,
   }) : assert(cursor != null),
        assert(opaque != null),
-       super(key: key);
+       super(key: key, child: child);
 
   /// Triggered when a mouse pointer has entered this widget.
   ///
@@ -6334,56 +6334,6 @@ class MouseRegion extends StatelessWidget {
   /// This defaults to true.
   final bool opaque;
 
-  /// The widget below this widget in the tree.
-  ///
-  /// {@macro flutter.widgets.ProxyWidget.child}
-  final Widget? child;
-
-  @override
-  Widget build(BuildContext context) {
-    return _RawMouseRegion(
-        onEnter: onEnter,
-        onHover: onHover,
-        onExit: onExit,
-        cursor: cursor,
-        opaque: opaque,
-        child: child
-    );
-  }
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    final List<String> listeners = <String>[];
-    if (onEnter != null)
-      listeners.add('enter');
-    if (onExit != null)
-      listeners.add('exit');
-    if (onHover != null)
-      listeners.add('hover');
-    properties.add(IterableProperty<String>('listeners', listeners, ifEmpty: '<none>'));
-    properties.add(DiagnosticsProperty<MouseCursor>('cursor', cursor, defaultValue: null));
-    properties.add(DiagnosticsProperty<bool>('opaque', opaque, defaultValue: true));
-  }
-}
-
-class _RawMouseRegion extends SingleChildRenderObjectWidget {
-  const _RawMouseRegion({
-    Key? key,
-    required this.onEnter,
-    required this.onHover,
-    required this.onExit,
-    required this.cursor,
-    required this.opaque,
-    required Widget? child,
-  }) : super(key: key, child: child);
-
-  final PointerEnterEventListener? onEnter;
-  final PointerHoverEventListener? onHover;
-  final PointerExitEventListener? onExit;
-  final MouseCursor cursor;
-  final bool opaque;
-
   @override
   RenderMouseRegion createRenderObject(BuildContext context) {
     return RenderMouseRegion(
@@ -6403,6 +6353,21 @@ class _RawMouseRegion extends SingleChildRenderObjectWidget {
       ..onExit = onExit
       ..cursor = cursor
       ..opaque = opaque;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    final List<String> listeners = <String>[];
+    if (onEnter != null)
+      listeners.add('enter');
+    if (onExit != null)
+      listeners.add('exit');
+    if (onHover != null)
+      listeners.add('hover');
+    properties.add(IterableProperty<String>('listeners', listeners, ifEmpty: '<none>'));
+    properties.add(DiagnosticsProperty<MouseCursor>('cursor', cursor, defaultValue: null));
+    properties.add(DiagnosticsProperty<bool>('opaque', opaque, defaultValue: true));
   }
 }
 
