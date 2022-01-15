@@ -6,7 +6,12 @@ import("//build/fuchsia/config.gni")
 import("//flutter/tools/fuchsia/fuchsia_debug_symbols.gni")
 import("//flutter/tools/fuchsia/fuchsia_libs.gni")
 
-# Compiles a cml file
+# Compiles a CML file for a V2 component.
+#
+# manifest (required):
+#   The path to the .cml file for the component. Should include the file extension.
+# output (optional):
+#   The path for the output .cm file. Should include the file extension.
 template("_compile_cml") {
   assert(defined(invoker.manifest), "_compile_cml must define manifest")
 
@@ -39,6 +44,25 @@ template("_compile_cml") {
 }
 
 # Creates a Fuchsia archive (.far) file using PM from the Fuchsia SDK.
+#
+# binary (required):
+#   The ELF binary for the archive's program.
+# cmx_file (optional):
+#   The path to the V1 component manifest (.cmx file) for the archive's component.
+#   Should include the file extension.
+# cml_file (optional):
+#   The path to the V2 component manifest (.cml file) for the archive's component.
+#   Should include the file extension.
+# deps (optional):
+#   The code dependencies for the archive.
+# inputs (optional):
+#   When these files are changed, the package should be regenerated.
+# libraries (optional):
+#   Paths to .so libraries that should be dynamically linked to the binary.
+# resources (optional):
+#   Files that should be placed into the `data/` directory of the archive.
+# testonly (optional):
+#   Set this to true for archives that are only used for tests.
 template("_fuchsia_archive") {
   assert(defined(invoker.binary), "package must define binary")
 
@@ -52,7 +76,6 @@ template("_fuchsia_archive") {
                              "deps",
                              "resources",
                              "libraries",
-                             "meta_dir",
                            ])
     if (!defined(package_name)) {
       package_name = pkg_target_name
@@ -131,9 +154,6 @@ template("_fuchsia_archive") {
              ":${_dbg_symbols_target}",
            ]
     sources = copy_outputs
-    if (defined(invoker.cml_file)) {
-      sources += [ invoker.cml_file ]
-    }
 
     inputs = []
     if (defined(invoker.inputs)) {
@@ -169,6 +189,27 @@ template("_fuchsia_archive") {
   }
 }
 
+# Creates a Fuchsia archive.
+#
+# An archive combines an ELF binary and a component manifest to create
+# a packaged Fuchsia program that can be deployed to a Fuchsia device.
+#
+# binary (required):
+#   The ELF binary for the archive's program.
+# cmx_file (required if cml_file is not set):
+#   The V1 component manifest for the Fuchsia component.
+# cml_file (required if cmx_file is not set):
+#   The V2 component manifest for the Fuchsia component.
+# deps (optional):
+#   The code dependencies for the archive.
+# inputs (optional):
+#   When these files are changed, the package should be regenerated.
+# libraries (optional):
+#   Paths to .so libraries that should be dynamically linked to the binary.
+# resources (optional):
+#   Files that should be placed into the `data/` directory of the archive.
+# testonly (optional):
+#   Set this to true for archives that are only used for tests.
 template("fuchsia_archive") {
   assert(defined(invoker.cmx_file) || defined(invoker.cml_file),
          "must specify either a cmx file, cml file or both")
@@ -199,7 +240,6 @@ template("fuchsia_archive") {
                              "cmx_file",
                              "inputs",
                              "libraries",
-                             "meta_dir",
                              "resources",
                              "testonly",
                            ])
@@ -208,6 +248,18 @@ template("fuchsia_archive") {
 
 # Creates a Fuchsia archive (.far) file containing a generated test root
 # component and test driver component, using PM from the Fuchsia SDK.
+#
+# binary (required):
+#   The binary for the test.
+# deps (required):
+#   Dependencies for the test archive.
+# cmx_file (optional):
+#   A path to the .cmx file for the test archive.
+#   If not defined, a generated .cml file for the test archive will be used instead.
+# libraries (optional):
+#   Paths to .so libraries that should be dynamically linked to the binary.
+# resources (optional):
+#   Files that should be placed into the `data/` directory of the archive.
 template("fuchsia_test_archive") {
   assert(defined(invoker.deps), "package must define deps")
 
