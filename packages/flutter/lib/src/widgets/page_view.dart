@@ -6,7 +6,6 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart' show precisionErrorTolerance;
 import 'package:flutter/gestures.dart' show DragStartBehavior;
-import 'package:flutter/physics.dart' show SpringDescription;
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
