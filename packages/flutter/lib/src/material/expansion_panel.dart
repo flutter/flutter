@@ -262,7 +262,7 @@ class ExpansionPanelList extends StatefulWidget {
   /// and for [dark theme](https://material.io/design/color/dark-theme.html#ui-application)
   final Color? color;
 
-  /// The color of the icon when the icon is expanded.
+  /// The color of the icon when panel is expanded .
   ///
   /// Defaults to [Colors.black54] when the theme's
   /// [ThemeData.brightness] is [Brightness.light] and to
