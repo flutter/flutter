@@ -104,7 +104,6 @@ void main() {
 
     const BouncingScrollPhysics bounce = BouncingScrollPhysics();
     const ClampingScrollPhysics clamp = ClampingScrollPhysics();
-    const PageScrollPhysics page = PageScrollPhysics();
 
     // Verify creating these simulations doesn't alter the velocity for time 0.
     //
@@ -115,10 +114,15 @@ void main() {
 
     // Contrary to the other two scroll physics, PageScrollPhysics do intentionally produce
     // a bigger velocity than supplied to them, but they won't suffer from this, because the simulation
-    // velocity depends on a ratio of velocity / pageDelta.
-    const double pageDelta = 500.0 - 20.0; // viewportDimension - pixels
-    // 5.0 is the initial velocity factor, see [PageScrollSimulation.dx]
-    expect(page.createBallisticSimulation(position, 1000)!.dx(0), 5.0 * pageDelta);
+    // velocity depends on a ratio of velocity / pageDelta, and because they are not affected by
+    // https://github.com/flutter/flutter/issues/11599
+
+    // TODO(nt4f04uNd): remove this test, because it is artifitial, in favor of a real one.
+    // Scroll simulations surely should be allowed to modify the speed they receive in whatever way they want.
+    // The proper fix for the original bug https://github.com/flutter/flutter/issues/24715
+    // would be to ensure this is not called too often https://github.com/flutter/flutter/issues/11599
+    // Proper test(s) should ensure the animations of the physics have the same duration
+    // for same fling conditions within different layouts.
   });
 
   group('BouncingScrollPhysics test', () {
