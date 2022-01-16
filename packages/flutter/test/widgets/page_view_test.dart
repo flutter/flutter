@@ -1201,6 +1201,18 @@ void main() {
       );
       await testPageViewPhysics(
         tester,
+        offset: 20.0,
+        expectedFrames: 25,
+        expectedEndValue: 0.0,
+      );
+      await testPageViewPhysics(
+        tester,
+        offset: 40.0,
+        expectedFrames: maxExpectedFrames,
+        expectedEndValue: 0.0,
+      );
+      await testPageViewPhysics(
+        tester,
         offset: 399.0,
         expectedFrames: maxExpectedFrames,
         expectedEndValue: 0.0,

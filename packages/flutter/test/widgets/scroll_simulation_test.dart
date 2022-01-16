@@ -50,7 +50,7 @@ void main() {
       for (double t = 0.01; t < duration; t += 1) {
         expectX(t, target > position ? greaterThan(lastX) : lessThan(lastX));
         expectDx(t, target > position ? lessThan(lastDx) : greaterThan(lastDx));
-        expect(simulation.isDone(0.0), false);
+        expect(simulation.isDone(t), false);
       }
 
       // verify end values
