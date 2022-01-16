@@ -544,17 +544,6 @@ class PageScrollPhysics extends ScrollPhysics {
   @override
   double get minFlingVelocity => _kMinFlingVelocity;
 
-  /// A spring to use for spring simulation of flings on a page view.
-  ///
-  /// By default this class uses a simulation matching native Android page view,
-  /// but if this getter is overridden, a spring simulation will be used instead.
-  /// The spring must be a different instance from [ScrollPhysics.spring] default value.
-  ///
-  /// Inititally this was the default implementation, but support for this was kept
-  /// to not break people who changed this getter to adjust the animation speed.
-  @override
-  SpringDescription get spring => super.spring;
-
   @override
   PageScrollPhysics applyTo(ScrollPhysics? ancestor) {
     return PageScrollPhysics(parent: buildParent(ancestor));
@@ -602,13 +591,6 @@ class PageScrollPhysics extends ScrollPhysics {
     final Tolerance tolerance = this.tolerance;
     final double target = _getTargetPixels(position, tolerance, velocity);
     if (target != position.pixels) {
-      if (!identical(spring, const ScrollPhysics().spring)) {
-        // Use old spring simulation.
-        return ScrollSpringSimulation(spring, position.pixels, target, velocity, tolerance: tolerance);
-      }
-
-      // Use page scroll simulation.
-
       // See Android ViewPager smoothScrollTo logic
       // https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:viewpager/viewpager/src/main/java/androidx/viewpager/widget/ViewPager.java;l=952;drc=1dcb8847e7aca80ee78c5d9864329b93dd276379
       final double delta = target - position.pixels;
@@ -632,7 +614,7 @@ class PageScrollPhysics extends ScrollPhysics {
         //
         // On Android it looks like this:
         //    duration = ((pageDelta + 1) * 100).toInt();
-        duration = ((pageDelta * 10 + 1) * 100).toInt();
+        duration = ((pageDelta * 100 + 1) * 100).toInt();
       }
       duration = math.min(duration, _kMaxSettleDuration);
       return PageScrollSimulation(

@@ -25,7 +25,7 @@ void main() {
   });
 
   test('PageScrollSimulation', () {
-    void doTest(double position, double target, double duration) {
+    void checkSimulation(double position, double target, double duration) {
       final double delta = target - position;
       final PageScrollSimulation simulation = PageScrollSimulation(position: position, target: target, duration: duration);
       late double lastX;
@@ -59,9 +59,9 @@ void main() {
       expect(simulation.isDone(duration), true);
     }
 
-    doTest(0, 500, 1000);
-    doTest(0, -500, 1000);
-    doTest(1000, 5000, 100);
-    doTest(100, -5000, 100);
+    checkSimulation(0, 500, 1000);
+    checkSimulation(0, -500, 1000);
+    checkSimulation(1000, 5000, 100);
+    checkSimulation(100, -5000, 100);
   });
 }

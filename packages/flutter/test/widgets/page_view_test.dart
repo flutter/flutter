@@ -4,7 +4,6 @@
 
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/material.dart';
-import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -1125,57 +1124,197 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('PageView PageScrollPhysics - default simulation is PageScrollSumulation and custom spring can be specified', (WidgetTester tester) async {
-    Widget build([ ScrollPhysics? physics ]) {
-      return Directionality(
-        textDirection: TextDirection.ltr,
-        child: PageView.builder(
-          itemCount: kStates.length,
-          physics: physics,
-          itemBuilder: (BuildContext context, int index) {
-            return Container(
-              height: 200.0,
-              color: index.isEven
-                ? const Color(0xFF0000FF)
-                : const Color(0xFF00FF00),
-              child: Text(kStates[index]),
-            );
-          },
-        ),
+  group('PageView uses PageScrollPhysics -', () {
+    const double expectedMinFlingVelocity = 400.0;
+    const int maxExpectedFrames = 41; // expected frames with _kMaxSettleDuration
+
+    /// Creates a page view, drags/flings it with specified parameters.
+    ///
+    /// When `flingVelocity` is not null, uses [WidgetTester.fling]
+    /// otherwise uses [WidgetTester.drag].
+    ///
+    /// Returns the length of animation in frames.
+    ///
+    /// At the end, runs expects:
+    ///
+    ///  * `expectedEndValue` will be used to verify the end scroll position
+    ///  * optional `expectedFrames` will be used to verify the length of animation
+    ///
+    Future<int> testPageViewPhysics(
+      WidgetTester tester, {
+      double? flingVelocity,
+      required double offset,
+      required double expectedEndValue,
+      Object? expectedFrames,
+    }) async {
+      await tester.pumpWidget(
+        Directionality(
+          key: UniqueKey(),
+          textDirection: TextDirection.ltr,
+          child: PageView.builder(
+            itemCount: kStates.length,
+            itemBuilder: (BuildContext context, int index) {
+              return Container(
+                height: 200.0,
+                color: index.isEven
+                  ? const Color(0xFF0000FF)
+                  : const Color(0xFF00FF00),
+                child: Text(kStates[index]),
+              );
+            },
+          ),
+        )
       );
+
+      if (flingVelocity != null)
+        await tester.fling(find.byType(PageView), Offset(-offset, 0.0), flingVelocity);
+      else
+        await tester.drag(find.byType(PageView), Offset(-offset, 0.0));
+
+      final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
+
+      final List<double> values = <double> [];
+      for (int i = 0; i < 100; i++) {
+        values.add(position.pixels);
+        if (values[i] == expectedEndValue) {
+          await tester.pump(const Duration(milliseconds: 16));
+          values.add(position.pixels);
+          break;
+        }
+        await tester.pump(const Duration(milliseconds: 16));
+      }
+      // verify the simulation ended
+      expect(values[values.length - 2], values.last);
+
+      if (expectedFrames != null)
+        expect(values, hasLength(expectedFrames));
+      expect(position.pixels, expectedEndValue);
+      return values.length;
     }
 
-    // Verify PageView uses PageScrollSumulation by default
-    await tester.pumpWidget(build());
-    await tester.fling(find.byType(PageView), const Offset(-200.0, 0.0), 1000.0);
-    final ScrollPosition position1 = tester.state<ScrollableState>(find.byType(Scrollable)).position;
-    expect(position1.physics.createBallisticSimulation(position1, 50.0), isA<PageScrollSimulation>());
-    expect(await tester.pumpAndSettle(), 8);
+    testWidgets('drag and release', (WidgetTester tester) async {
+      await testPageViewPhysics(
+        tester,
+        offset: 1.0,
+        expectedFrames: 10,
+        expectedEndValue: 0.0,
+      );
+      await testPageViewPhysics(
+        tester,
+        offset: 399.0,
+        expectedFrames: maxExpectedFrames,
+        expectedEndValue: 0.0,
+      );
+      await testPageViewPhysics(
+        tester,
+        offset: 400.0,
+        expectedFrames: maxExpectedFrames,
+        expectedEndValue: 800.0,
+      );
+      await testPageViewPhysics(
+        tester,
+        offset: 799.0,
+        expectedFrames: 10,
+        expectedEndValue: 800.0,
+      );
+    });
 
-    // Verify custom spring will enable PageView to use ScrollSpringSimulation
-    await tester.pumpWidget(build(const ScrollPhysicsWithCustomSpring()));
-    await tester.fling(find.byType(PageView), const Offset(-200.0, 0.0), 1000.0);
-    final ScrollPosition position2 = tester.state<ScrollableState>(find.byType(Scrollable)).position;
-    expect(position2.physics.createBallisticSimulation(position2, 50.0), isA<ScrollSpringSimulation>());
-    expect(await tester.pumpAndSettle(), 11);
+    testWidgets('min fling velocity', (WidgetTester tester) async {
+      // fling with velocity less than min fling velocity - goes back to 0
+      await testPageViewPhysics(
+        tester,
+        flingVelocity: 1.0,
+        offset: 200.0,
+        expectedEndValue: 0.0,
+      );
+      await testPageViewPhysics(
+        tester,
+        flingVelocity: expectedMinFlingVelocity,
+        offset: 200.0,
+        expectedEndValue: 0.0,
+      );
+
+      // fling with velocity greater than min fling velocity - goes to the next page
+      await testPageViewPhysics(
+        tester,
+        flingVelocity: expectedMinFlingVelocity + 1,
+        offset: 200.0,
+        expectedEndValue: 800.0,
+      );
+    });
+
+    testWidgets('fling has max settle duration, which decreases when user drags faster', (WidgetTester tester) async {
+      // The duration depends on the drag `offset` and `velocity`
+
+      // For offset 200.0
+
+      // Drag very slowly
+      int frames = await testPageViewPhysics(
+        tester,
+        flingVelocity: 500.0,
+        offset: 200.0,
+        expectedFrames: maxExpectedFrames,
+        expectedEndValue: 800.0,
+      );
+      // Drag about as fast to start going faster
+      frames = await testPageViewPhysics(
+        tester,
+        flingVelocity: 3000.0,
+        offset: 200.0,
+        expectedFrames: frames,
+        expectedEndValue: 800.0,
+      );
+      // Go faster
+      frames = await testPageViewPhysics(
+        tester,
+        flingVelocity: 3050.0,
+        offset: 200.0,
+        expectedFrames: lessThan(frames),
+        expectedEndValue: 800.0,
+      );
+      // Go even faster
+      frames = await testPageViewPhysics(
+        tester,
+        flingVelocity: 10000.0,
+        offset: 200.0,
+        expectedFrames: lessThan(frames),
+        expectedEndValue: 800.0,
+      );
+
+      // For offset 400.0
+
+      // Drag very slowly
+      frames = await testPageViewPhysics(
+        tester,
+        flingVelocity: 500.0,
+        offset: 400.0,
+        expectedFrames: maxExpectedFrames,
+        expectedEndValue: 800.0,
+      );
+      // Drag about as fast to start going faster
+      frames = await testPageViewPhysics(
+        tester,
+        flingVelocity: 2650.0,
+        offset: 400.0,
+        expectedFrames: frames,
+        expectedEndValue: 800.0,
+      );
+      // Go faster
+      frames = await testPageViewPhysics(
+        tester,
+        flingVelocity: 2700.0,
+        offset: 400.0,
+        expectedFrames: lessThan(frames),
+        expectedEndValue: 800.0,
+      );
+      // Go even faster
+      frames = await testPageViewPhysics(
+        tester,
+        flingVelocity: 10000.0,
+        offset: 400.0,
+        expectedFrames: lessThan(frames),
+        expectedEndValue: 800.0,
+      );
+    });
   });
-}
-
-class ScrollPhysicsWithCustomSpring extends ScrollPhysics {
-  const ScrollPhysicsWithCustomSpring({ ScrollPhysics? parent }) : super(parent: parent);
-
-  @override
-  ScrollPhysicsWithCustomSpring applyTo(ScrollPhysics? ancestor) {
-    return ScrollPhysicsWithCustomSpring(parent: buildParent(ancestor));
-  }
-
-  @override
-  SpringDescription get spring {
-    final SpringDescription defaultSpring = const ScrollPhysics().spring;
-    return SpringDescription(
-      mass: defaultSpring.mass,
-      stiffness: defaultSpring.stiffness,
-      damping: defaultSpring.damping
-    );
-  }
 }
