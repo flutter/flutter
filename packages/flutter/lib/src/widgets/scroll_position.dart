@@ -272,6 +272,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
         }
         return true;
       }());
+      SchedulerBinding.instance!.requestFrameRate(FrameRate.fastest);
       final double oldPixels = pixels;
       _pixels = newPixels - overscroll;
       if (_pixels != oldPixels) {
@@ -897,7 +898,6 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
 
   /// Called by [setPixels] to report a change to the [pixels] position.
   void didUpdateScrollPositionBy(double delta) {
-    SchedulerBinding.instance!.requestFrameRate(FrameRate.fastest);
     activity!.dispatchScrollUpdateNotification(copyWith(), context.notificationContext!, delta);
   }
 
