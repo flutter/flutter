@@ -841,8 +841,9 @@ class AnimationController extends Animation<double>
   void _tick(Duration elapsed) {
     _lastElapsedDuration = elapsed;
     double elapsedInSeconds = elapsed.inMicroseconds.toDouble() / Duration.microsecondsPerSecond;
-    // When a frame is a critical frame that in the course that the frame rate becomes faster from slow value
-    // the [elapsedInSeconds] will be < 0. So we set it 0
+    // When a frame is a critical frame in the course that the frame rate becomes faster from slow value
+    // such as: fps30 -> fps120 (90HZ diff)
+    // the [elapsedInSeconds] will be < 0. So we set it 0 to make it work fine
     if(elapsedInSeconds < 0){
       elapsedInSeconds = 0;
     }
