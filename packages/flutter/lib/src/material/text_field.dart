@@ -305,6 +305,7 @@ class TextField extends StatefulWidget {
     this.maxLengthEnforced = true,
     this.maxLengthEnforcement,
     this.onChanged,
+    this.onContentCommitted,
     this.onEditingComplete,
     this.onSubmitted,
     this.onAppPrivateCommand,
@@ -330,6 +331,7 @@ class TextField extends StatefulWidget {
     this.clipBehavior = Clip.hardEdge,
     this.restorationId,
     this.enableIMEPersonalizedLearning = true,
+    this.contentCommitMimeTypes = const <String> [],
   }) : assert(textAlign != null),
        assert(readOnly != null),
        assert(autofocus != null),
@@ -370,6 +372,7 @@ class TextField extends StatefulWidget {
        ),
        assert(clipBehavior != null),
        assert(enableIMEPersonalizedLearning != null),
+       assert(contentCommitMimeTypes != null),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
        enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText),
        toolbarOptions = toolbarOptions ??
@@ -596,6 +599,9 @@ class TextField extends StatefulWidget {
   ///    which are more specialized input change notifications.
   final ValueChanged<String>? onChanged;
 
+  /// {@macro flutter.widgets.editableText.onContentCommitted}
+  final ValueChanged<CommittedContent>? onContentCommitted;
+
   /// {@macro flutter.widgets.editableText.onEditingComplete}
   final VoidCallback? onEditingComplete;
 
@@ -784,6 +790,9 @@ class TextField extends StatefulWidget {
   /// {@macro flutter.services.TextInputConfiguration.enableIMEPersonalizedLearning}
   final bool enableIMEPersonalizedLearning;
 
+  /// {@macro flutter.widgets.editableText.contentCommitMimeTypes}
+  final List<String> contentCommitMimeTypes;
+
   @override
   State<TextField> createState() => _TextFieldState();
 
@@ -826,6 +835,7 @@ class TextField extends StatefulWidget {
     properties.add(DiagnosticsProperty<ScrollPhysics>('scrollPhysics', scrollPhysics, defaultValue: null));
     properties.add(DiagnosticsProperty<Clip>('clipBehavior', clipBehavior, defaultValue: Clip.hardEdge));
     properties.add(DiagnosticsProperty<bool>('enableIMEPersonalizedLearning', enableIMEPersonalizedLearning, defaultValue: true));
+    properties.add(DiagnosticsProperty<List<String>>('contentCommitMimeTypes', contentCommitMimeTypes, defaultValue: null));
   }
 }
 
@@ -1258,6 +1268,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
           selectionColor: focusNode.hasFocus ? selectionColor : null,
           selectionControls: widget.selectionEnabled ? textSelectionControls : null,
           onChanged: widget.onChanged,
+          onContentCommitted: widget.onContentCommitted,
           onSelectionChanged: _handleSelectionChanged,
           onEditingComplete: widget.onEditingComplete,
           onSubmitted: widget.onSubmitted,

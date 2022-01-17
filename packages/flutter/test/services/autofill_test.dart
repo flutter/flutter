@@ -141,6 +141,11 @@ class FakeAutofillClient implements TextInputClient, AutofillClient {
 
   @override
   void autofill(TextEditingValue newEditingValue) => updateEditingValue(newEditingValue);
+
+  @override
+  void commitContent(Map<String, dynamic> content) {
+    latestMethodCall = 'commitContent';
+  }
 }
 
 class FakeAutofillScope with AutofillScopeMixin implements AutofillScope {

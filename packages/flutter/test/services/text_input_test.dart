@@ -347,6 +347,31 @@ void main() {
       expect(client.latestMethodCall, 'connectionClosed');
     });
 
+    test('TextInputClient commitContent method is called', () async {
+      final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
+      const TextInputConfiguration configuration = TextInputConfiguration();
+      TextInput.attach(client, configuration);
+
+      expect(client.latestMethodCall, isEmpty);
+
+      // Send performPrivateCommand message.
+      final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
+        'args': <dynamic>[
+          1,
+          "TextInputAction.commitContent",
+          jsonDecode('{"mimeType": "image/gif", "data": "010101000", "uri": "content://com.google.android.inputmethod.latin.fileprovider/test.gif"}'),
+        ],
+        'method': 'TextInputClient.performAction',
+      });
+      await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/textinput',
+        messageBytes,
+            (ByteData? _) {},
+      );
+
+      expect(client.latestMethodCall, 'commitContent');
+    });
+
     test('TextInputClient performPrivateCommand method is called', () async {
       // Assemble a TextInputConnection so we can verify its change in state.
       final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
@@ -565,6 +590,11 @@ class FakeTextInputClient implements TextInputClient {
   @override
   void showAutocorrectionPromptRect(int start, int end) {
     latestMethodCall = 'showAutocorrectionPromptRect';
+  }
+
+  @override
+  void commitContent(Map<String, dynamic> content) {
+    latestMethodCall = 'commitContent';
   }
 
   TextInputConfiguration get configuration => const TextInputConfiguration();

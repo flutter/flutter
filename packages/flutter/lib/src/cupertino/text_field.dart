@@ -276,6 +276,7 @@ class CupertinoTextField extends StatefulWidget {
     this.maxLengthEnforced = true,
     this.maxLengthEnforcement,
     this.onChanged,
+    this.onContentCommitted,
     this.onEditingComplete,
     this.onSubmitted,
     this.inputFormatters,
@@ -295,6 +296,7 @@ class CupertinoTextField extends StatefulWidget {
     this.scrollController,
     this.scrollPhysics,
     this.autofillHints = const <String>[],
+    this.contentCommitMimeTypes = const <String>[],
     this.clipBehavior = Clip.hardEdge,
     this.restorationId,
     this.enableIMEPersonalizedLearning = true,
@@ -340,6 +342,7 @@ class CupertinoTextField extends StatefulWidget {
          'Use keyboardType TextInputType.multiline when using TextInputAction.newline on a multiline TextField.',
        ),
        assert(enableIMEPersonalizedLearning != null),
+       assert(contentCommitMimeTypes != null),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
        enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText),
        toolbarOptions = toolbarOptions ??
@@ -447,6 +450,7 @@ class CupertinoTextField extends StatefulWidget {
     this.maxLengthEnforced = true,
     this.maxLengthEnforcement,
     this.onChanged,
+    this.onContentCommitted,
     this.onEditingComplete,
     this.onSubmitted,
     this.inputFormatters,
@@ -466,6 +470,7 @@ class CupertinoTextField extends StatefulWidget {
     this.scrollController,
     this.scrollPhysics,
     this.autofillHints = const <String>[],
+    this.contentCommitMimeTypes = const <String>[],
     this.clipBehavior = Clip.hardEdge,
     this.restorationId,
     this.enableIMEPersonalizedLearning = true,
@@ -512,6 +517,7 @@ class CupertinoTextField extends StatefulWidget {
        ),
        assert(clipBehavior != null),
        assert(enableIMEPersonalizedLearning != null),
+       assert(contentCommitMimeTypes != null),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
        enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText),
        toolbarOptions = toolbarOptions ??
@@ -735,6 +741,9 @@ class CupertinoTextField extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.onChanged}
   final ValueChanged<String>? onChanged;
 
+  /// {@macro flutter.widgets.editableText.contentCommitMimeTypes}
+  final ValueChanged<CommittedContent>? onContentCommitted;
+
   /// {@macro flutter.widgets.editableText.onEditingComplete}
   final VoidCallback? onEditingComplete;
 
@@ -829,6 +838,47 @@ class CupertinoTextField extends StatefulWidget {
   /// {@macro flutter.services.TextInputConfiguration.enableIMEPersonalizedLearning}
   final bool enableIMEPersonalizedLearning;
 
+  /// Used when a user inserts image-based content through the device keyboard
+  /// on Android only.
+  ///
+  /// The passed list of strings will determine which MIME types are allowed to
+  /// be inserted via the device keyboard
+  ///
+  /// This example shows how to limit your keyboard commits to specific file types
+  /// `TextField`.
+  ///
+  /// ```dart
+  /// final TextEditingController _controller = TextEditingController();
+  ///
+  /// @override
+  /// void dispose() {
+  ///   _controller.dispose();
+  ///   super.dispose();
+  /// }
+  ///
+  /// @override
+  /// Widget build(BuildContext context) {
+  ///   return Scaffold(
+  ///     body: Column(
+  ///       mainAxisAlignment: MainAxisAlignment.center,
+  ///       children: <Widget>[
+  ///         const Text('Here's a text field that supports inserting gif content:'),
+  ///         TextField(
+  ///           controller: _controller,
+  ///           contentCommitMimeTypes: ['image/gif', 'image/png'],
+  ///           onContentCommitted: (CommittedContent data) async {
+  ///             ...
+  ///           },
+  ///         ),
+  ///       ],
+  ///     ),
+  ///   );
+  /// }
+  /// ```
+  /// {@end-tool}
+  /// {@endtemplate}
+  final List<String> contentCommitMimeTypes;
+
   @override
   State<CupertinoTextField> createState() => _CupertinoTextFieldState();
 
@@ -872,6 +922,7 @@ class CupertinoTextField extends StatefulWidget {
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     properties.add(DiagnosticsProperty<Clip>('clipBehavior', clipBehavior, defaultValue: Clip.hardEdge));
     properties.add(DiagnosticsProperty<bool>('enableIMEPersonalizedLearning', enableIMEPersonalizedLearning, defaultValue: true));
+    properties.add(DiagnosticsProperty<List<String>>('contentCommitMimeTypes', contentCommitMimeTypes, defaultValue: null));
   }
 }
 
@@ -1295,6 +1346,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
             selectionControls: widget.selectionEnabled
               ? textSelectionControls : null,
             onChanged: widget.onChanged,
+            onContentCommitted: widget.onContentCommitted,
             onSelectionChanged: _handleSelectionChanged,
             onEditingComplete: widget.onEditingComplete,
             onSubmitted: widget.onSubmitted,
