@@ -1032,6 +1032,8 @@ mixin SchedulerBinding on BindingBase {
     if (rawTimeStamp != null)
       _lastRawTimeStamp = rawTimeStamp;
 
+    _updateFrameRate();
+
     assert(() {
       _debugFrameNumber += 1;
 
@@ -1093,7 +1095,6 @@ mixin SchedulerBinding on BindingBase {
       for (final FrameCallback callback in localPostFrameCallbacks)
         _invokeFrameCallback(callback, _currentFrameTimeStamp!);
     } finally {
-      _updateFrameRate();
       _schedulerPhase = SchedulerPhase.idle;
       _frameTimelineTask?.finish(); // end the Frame
       assert(() {
@@ -1156,6 +1157,7 @@ mixin SchedulerBinding on BindingBase {
     }
   }
 
+  // Update the refresh frame rate
   void _updateFrameRate() {
     if(GestureBinding.instance!.isTracking){
       _fastestRequestedFrameRate = FrameRate.fastest;
