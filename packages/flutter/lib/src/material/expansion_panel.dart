@@ -57,7 +57,7 @@ typedef ExpansionPanelHeaderBuilder = Widget Function(BuildContext context, bool
 /// A material expansion panel. It has a header and a body and can be either
 /// expanded or collapsed. The body of the panel is only visible when it is
 /// expanded.
-/// 
+///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=2aJZzRMziJc}
 ///
 /// Expansion panels are only intended to be used as children for
@@ -266,7 +266,7 @@ class ExpansionPanelList extends StatefulWidget {
   ///
   /// Defaults to [Colors.black54] when the theme's
   /// [ThemeData.brightness] is [Brightness.light] and to
-  /// [Colors.white] when it is [Brightness.dark]. 
+  /// [Colors.white] when it is [Brightness.dark].
   final Color? expandedIconColor;
 
   /// Defines elevation for the [ExpansionPanel] while it's expanded.
