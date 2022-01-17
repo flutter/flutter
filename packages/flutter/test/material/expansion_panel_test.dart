@@ -13,8 +13,8 @@ class SimpleExpansionPanelListTestWidget extends StatefulWidget {
     this.canTapOnHeader = false,
     this.expandedHeaderPadding,
     this.dividerColor,
-    this.color,
-    this.expandedColor,
+    this.iconColor,
+    this.expandedIconColor,
     this.elevation = 2,
   }) : super(key: key);
 
@@ -22,8 +22,8 @@ class SimpleExpansionPanelListTestWidget extends StatefulWidget {
   final Key? secondPanelKey;
   final bool canTapOnHeader;
   final Color? dividerColor;
-  final Color? color;
-  final Color? expandedColor;
+  final Color? iconColor;
+  final Color? expandedIconColor;
   final double elevation;
 
   /// If null, the default [ExpansionPanelList]'s expanded header padding value is applied via [defaultExpandedHeaderPadding]
@@ -52,8 +52,8 @@ class _SimpleExpansionPanelListTestWidgetState extends State<SimpleExpansionPane
         });
       },
       dividerColor: widget.dividerColor,
-      color: widget.color,
-      expandedColor: widget.expandedColor,
+      iconColor: widget.iconColor,
+      expandedIconColor: widget.expandedIconColor,
       elevation: widget.elevation,
       children: <ExpansionPanel>[
         ExpansionPanel(
@@ -1528,76 +1528,49 @@ void main() {
     expect((mergeableMaterial.children.last as MaterialSlice).color, secondPanelColor);
   });
 
-  testWidgets('ExpansionPanelList expanded color test', (WidgetTester tester) async {
-    const Color expandedColor = Colors.orange;
-    const Color color = Colors.red;
-
-    const Key firstPanelKey = Key('firstPanelKey');
-    const Key secondPanelKey = Key('secondPanelKey');
+  testWidgets('ExpansionPanelList icon color test', (WidgetTester tester) async {
+    const Color expandedIconColor = Colors.orange;
+    const Color iconColor = Colors.red;
 
     await tester.pumpWidget(
       const MaterialApp(
         home: SingleChildScrollView(
           child: SimpleExpansionPanelListTestWidget(
-            firstPanelKey: firstPanelKey,
-            secondPanelKey: secondPanelKey,
-            color: color,
-            expandedColor: expandedColor,
+            iconColor: iconColor,
+            expandedIconColor: expandedIconColor,
           ),
         ),
       ),
     );
 
-    final Finder finder = find.descendant(
-      of: find.ancestor(
-        of: find.byKey(firstPanelKey),
-        matching: find.byType(Row),
-      ),
-      matching: find.byType(IconButton),
-    );
-
-    IconButton iconButton = tester.widget(finder);
-
-    expect(iconButton.color, color);
+    IconButton iconButton = tester.widget(find.byType(IconButton).at(0));
+    expect(iconButton.color, iconColor);
 
     await tester.tap(find.byType(ExpandIcon).at(0));
     await tester.pumpAndSettle();
 
     iconButton = tester.widget(find.byType(IconButton).at(0));
-
-    expect(iconButton.color, expandedColor);
+    expect(iconButton.color, expandedIconColor);
   });
 
-  testWidgets('ExpansionPanelRadio expanded color test', (WidgetTester tester) async {
-    const Color expandedColor = Colors.orange;
-    const Color color = Colors.red;
-
-    const Key firstPanelKey = Key('firstPanelKey');
-    const Key secondPanelKey = Key('secondPanelKey');
+  testWidgets('ExpansionPanelRadio icon color test', (WidgetTester tester) async {
+    const Color expandedIconColor = Colors.orange;
+    const Color iconColor = Colors.red;
 
     final List<ExpansionPanel> _demoItemsRadio = <ExpansionPanelRadio>[
       ExpansionPanelRadio(
         headerBuilder: (BuildContext context, bool isExpanded) {
-          return Text(isExpanded ? 'B' : 'A', key: firstPanelKey);
+          return const Text('A');
         },
         body: const SizedBox(height: 100.0),
         value: 0,
-        canTapOnHeader: true,
-      ),
-      ExpansionPanelRadio(
-        headerBuilder: (BuildContext context, bool isExpanded) {
-          return Text(isExpanded ? 'D' : 'C', key: secondPanelKey);
-        },
-        body: const SizedBox(height: 100.0),
-        value: 1,
-        canTapOnHeader: true,
       ),
     ];
 
     final ExpansionPanelList _expansionListRadio = ExpansionPanelList.radio(
       children: _demoItemsRadio,
-      color: color,
-      expandedColor: expandedColor,
+      iconColor: iconColor,
+      expandedIconColor: expandedIconColor,
     );
 
     await tester.pumpWidget(
@@ -1608,23 +1581,13 @@ void main() {
       ),
     );
 
-     final Finder finder = find.descendant(
-      of: find.ancestor(
-        of: find.byKey(firstPanelKey),
-        matching: find.byType(Row),
-      ),
-      matching: find.byType(IconButton),
-    );
-
-    IconButton iconButton = tester.widget(finder);
-
-    expect(iconButton.color, color);
+    IconButton iconButton = tester.widget(find.byType(IconButton).at(0));
+    expect(iconButton.color, iconColor);
 
     await tester.tap(find.byType(ExpandIcon).at(0));
     await tester.pumpAndSettle();
 
     iconButton = tester.widget(find.byType(IconButton).at(0));
-
-    expect(iconButton.color, expandedColor);
+    expect(iconButton.color, expandedIconColor);
   });
 }
