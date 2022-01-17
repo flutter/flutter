@@ -15,9 +15,14 @@ import 'media_query.dart';
 /// Positions [child] such that it avoids overlapping any [DisplayFeature] that
 /// splits the screen into sub-screens.
 ///
-/// A [DisplayFeature] splits the screen into sub-screens if it is at least as
-/// tall as the screen, producing a left and right sub-screen, or at least as
-/// wide as the screen, producing a top and bottom sub-screen.
+/// A [DisplayFeature] splits the screen into sub-screens if
+///  - it obstructs the screen, meaning the area it occupies is not 0. Display
+///  features of type [DisplayFeatureType.fold] can have height 0 or width 0 and
+///  not be obstructing the screen.
+///  - it is at least as tall as the screen, producing a left and right
+///  sub-screen or
+///  - it is at least as wide as the screen, producing a top and bottom
+///  sub-screen
 ///
 /// After determining the sub-screens, the closest one to [anchorPoint] is used
 /// to render the [child].
@@ -107,7 +112,8 @@ class DisplayFeatureSubScreen extends StatelessWidget {
   }
 
   static Iterable<Rect> _avoidBounds(MediaQueryData mediaQuery) {
-    return mediaQuery.displayFeatures.map((DisplayFeature e) => e.bounds);
+    return mediaQuery.displayFeatures.map((DisplayFeature d) => d.bounds)
+        .where((Rect r) => r.shortestSide > 0);
   }
 
   /// Returns the closest sub-screen to the [anchorPoint]
