@@ -513,11 +513,11 @@ void main() {
     expect(inkWellBorder(), roundedShape);
 
     // Cursor updates when hovering disabled ListTile
-    final Offset barItem = tester.getCenter(find.byKey(titleKey));
+    final Offset listTile = tester.getCenter(find.byKey(titleKey));
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
     addTearDown(gesture.removePointer);
-    await gesture.moveTo(barItem);
+    await gesture.moveTo(listTile);
     await tester.pumpAndSettle();
     expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.forbidden);
   });
@@ -2112,11 +2112,11 @@ void main() {
         ),
       );
 
-      final Offset barItem = tester.getCenter(find.byKey(tileKey));
+      final Offset listTile = tester.getCenter(find.byKey(tileKey));
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
       await gesture.addPointer();
       addTearDown(gesture.removePointer);
-      await gesture.moveTo(barItem);
+      await gesture.moveTo(listTile);
       await tester.pumpAndSettle();
       expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
     });
