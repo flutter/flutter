@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:typed_data';
 import 'dart:ui' as ui hide TextStyle;
 
 import 'package:characters/characters.dart' show CharacterRange;
@@ -489,6 +490,7 @@ class EditableText extends StatefulWidget {
     this.textInputAction,
     this.textCapitalization = TextCapitalization.none,
     this.onChanged,
+    this.onContentCommitted,
     this.onEditingComplete,
     this.onSubmitted,
     this.onAppPrivateCommand,
@@ -515,6 +517,7 @@ class EditableText extends StatefulWidget {
     ToolbarOptions? toolbarOptions,
     this.autofillHints = const <String>[],
     this.autofillClient,
+    this.contentCommitMimeTypes = const <String>[],
     this.clipBehavior = Clip.hardEdge,
     this.restorationId,
     this.scrollBehavior,
@@ -581,6 +584,7 @@ class EditableText extends StatefulWidget {
                      ))),
        assert(clipBehavior != null),
        assert(enableIMEPersonalizedLearning != null),
+       assert(contentCommitMimeTypes != null),
        _strutStyle = strutStyle,
        keyboardType = keyboardType ?? _inferKeyboardType(autofillHints: autofillHints, maxLines: maxLines),
        inputFormatters = maxLines == 1
@@ -1032,6 +1036,55 @@ class EditableText extends StatefulWidget {
   ///    which are more specialized input change notifications.
   final ValueChanged<String>? onChanged;
 
+  /// Called when a user inserts image-based content through the device keyboard
+  /// on Android only.
+  ///
+  /// The map will contain the following data:
+  ///  - MIME Type (supporting png, bmp, jpg, tiff, gif, jpeg, and webp)
+  ///  - Bytes
+  ///  - URI
+  ///
+  /// You will want to use the bytes to display the image.
+  ///
+  /// {@tool dartpad --template=stateful_widget_material}
+  ///
+  /// This example shows how to access the data for committed content in your
+  /// `TextField`.
+  ///
+  /// ```dart
+  /// final TextEditingController _controller = TextEditingController();
+  ///
+  /// @override
+  /// void dispose() {
+  ///   _controller.dispose();
+  ///   super.dispose();
+  /// }
+  ///
+  /// @override
+  /// Widget build(BuildContext context) {
+  ///   return Scaffold(
+  ///     body: Column(
+  ///       mainAxisAlignment: MainAxisAlignment.center,
+  ///       children: <Widget>[
+  ///         const Text('Here's a text field that supports inserting gif content:'),
+  ///         TextField(
+  ///           controller: _controller,
+  ///           onContentCommitted: (CommittedContent data) async {
+  ///             if (data.mimeType == "image/gif" && data.data != null) {
+  ///               //handle Uint8List (e.g. upload to server, display a MemoryImage, etc)
+  ///               ...
+  ///             }
+  ///           },
+  ///         ),
+  ///       ],
+  ///     ),
+  ///   );
+  /// }
+  /// ```
+  /// {@end-tool}
+  /// {@endtemplate}
+  final ValueChanged<CommittedContent>? onContentCommitted;
+
   /// {@template flutter.widgets.editableText.onEditingComplete}
   /// Called when the user submits editable content (e.g., user presses the "done"
   /// button on the keyboard).
@@ -1318,6 +1371,47 @@ class EditableText extends StatefulWidget {
   /// [AutofillClient]. This property may override [autofillHints].
   final AutofillClient? autofillClient;
 
+  /// Used when a user inserts image-based content through the device keyboard
+  /// on Android only.
+  ///
+  /// The passed list of strings will determine which MIME types are allowed to
+  /// be inserted via the device keyboard
+  ///
+  /// This example shows how to limit your keyboard commits to specific file types
+  /// `TextField`.
+  ///
+  /// ```dart
+  /// final TextEditingController _controller = TextEditingController();
+  ///
+  /// @override
+  /// void dispose() {
+  ///   _controller.dispose();
+  ///   super.dispose();
+  /// }
+  ///
+  /// @override
+  /// Widget build(BuildContext context) {
+  ///   return Scaffold(
+  ///     body: Column(
+  ///       mainAxisAlignment: MainAxisAlignment.center,
+  ///       children: <Widget>[
+  ///         const Text('Here's a text field that supports inserting gif content:'),
+  ///         TextField(
+  ///           controller: _controller,
+  ///           contentCommitMimeTypes: ['image/gif', 'image/png'],
+  ///           onContentCommitted: (CommittedContent data) async {
+  ///             ...
+  ///           },
+  ///         ),
+  ///       ],
+  ///     ),
+  ///   );
+  /// }
+  /// ```
+  /// {@end-tool}
+  /// {@endtemplate}
+  final List<String> contentCommitMimeTypes;
+
   /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.hardEdge].
@@ -1534,6 +1628,7 @@ class EditableText extends StatefulWidget {
     properties.add(DiagnosticsProperty<Iterable<String>>('autofillHints', autofillHints, defaultValue: null));
     properties.add(DiagnosticsProperty<TextHeightBehavior>('textHeightBehavior', textHeightBehavior, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('enableIMEPersonalizedLearning', enableIMEPersonalizedLearning, defaultValue: true));
+    properties.add(DiagnosticsProperty<List<String>>('contentCommitMimeTypes', contentCommitMimeTypes, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('enableInteractiveSelection', enableInteractiveSelection, defaultValue: true));
   }
 }
@@ -1964,6 +2059,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   @override
   void performPrivateCommand(String action, Map<String, dynamic> data) {
     widget.onAppPrivateCommand!(action, data);
+  }
+
+  @override
+  void commitContent(Map<String, dynamic> content) {
+    widget.onContentCommitted?.call(CommittedContent.fromMap(content));
   }
 
   // The original position of the caret on FloatingCursorDragState.start.
@@ -2849,6 +2949,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       keyboardAppearance: widget.keyboardAppearance,
       autofillConfiguration: autofillConfiguration,
       enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
+      contentCommitMimeTypes: widget.contentCommitMimeTypes,
     );
   }
 
@@ -3872,4 +3973,52 @@ class _CopySelectionAction extends ContextAction<CopySelectionTextIntent> {
 
   @override
   bool get isActionEnabled => state._value.selection.isValid && !state._value.selection.isCollapsed;
+}
+
+/// A class to return data for the `onContentCommitted` callback on text fields,
+/// which is when image content is inserted into the text field. The class holds
+/// information for the mime type, URI (location), and bytedata for the inserted
+/// content.
+class CommittedContent {
+  /// Creates a [CommittedContent] class. Any paramaters can be null.
+  CommittedContent({this.mimeType, this.uri, this.data});
+
+  /// mime type of inserted content
+  String? mimeType;
+
+  /// URI (location) of inserted content
+  String? uri;
+
+  /// Bytedata of inserted content
+  Uint8List? data;
+
+  /// Convenience getter to check if bytedata is available for the inserted content
+  bool get hasData => data != null && data!.isNotEmpty;
+
+  /// Converts Map received from Flutter Engine into the Dart class
+  static CommittedContent fromMap(Map<String, dynamic>? data) {
+    if (data == null || data.isEmpty)
+      return CommittedContent();
+    return CommittedContent(
+        mimeType: data['mimeType'] as String?,
+        uri: data['uri'] as String?,
+        data: Uint8List.fromList(List<int>.from(data['data'] as Iterable<dynamic>))
+    );
+  }
+
+  @override
+  String toString() => '${objectRuntimeType(this, 'CommittedContent')}($mimeType, $uri, $data)';
+
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is CommittedContent
+        && other.mimeType == mimeType
+        && other.uri == uri
+        && other.data == data;
+  }
+
+  @override
+  int get hashCode => hashValues(mimeType, uri, data);
 }
