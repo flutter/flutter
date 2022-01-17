@@ -517,7 +517,7 @@ class EditableText extends StatefulWidget {
     ToolbarOptions? toolbarOptions,
     this.autofillHints = const <String>[],
     this.autofillClient,
-    this.contentCommitMimeTypes = const <String>[],
+    List<String> contentCommitMimeTypes = const <String>[],
     this.clipBehavior = Clip.hardEdge,
     this.restorationId,
     this.scrollBehavior,
@@ -594,6 +594,16 @@ class EditableText extends StatefulWidget {
              ]
            : inputFormatters,
        showCursor = showCursor ?? !readOnly,
+       contentCommitMimeTypes = contentCommitMimeTypes.isEmpty
+            ? onContentCommitted == null ? <String>[] : <String>[
+          'image/png',
+          'image/bmp',
+          'image/jpg',
+          'image/tiff',
+          'image/gif',
+          'image/jpeg',
+          'image/webp'
+       ] : contentCommitMimeTypes,
        super(key: key);
 
   /// Controls the text being edited.
@@ -1628,8 +1638,17 @@ class EditableText extends StatefulWidget {
     properties.add(DiagnosticsProperty<Iterable<String>>('autofillHints', autofillHints, defaultValue: null));
     properties.add(DiagnosticsProperty<TextHeightBehavior>('textHeightBehavior', textHeightBehavior, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('enableIMEPersonalizedLearning', enableIMEPersonalizedLearning, defaultValue: true));
-    properties.add(DiagnosticsProperty<List<String>>('contentCommitMimeTypes', contentCommitMimeTypes, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('enableInteractiveSelection', enableInteractiveSelection, defaultValue: true));
+    properties.add(DiagnosticsProperty<List<String>>('contentCommitMimeTypes', contentCommitMimeTypes,
+        defaultValue: onContentCommitted == null ? null : <String>[
+          'image/png',
+          'image/bmp',
+          'image/jpg',
+          'image/tiff',
+          'image/gif',
+          'image/jpeg',
+          'image/webp'
+        ]));
   }
 }
 
@@ -3979,18 +3998,19 @@ class _CopySelectionAction extends ContextAction<CopySelectionTextIntent> {
 /// which is when image content is inserted into the text field. The class holds
 /// information for the mime type, URI (location), and bytedata for the inserted
 /// content.
+@immutable
 class CommittedContent {
-  /// Creates a [CommittedContent] class. Any paramaters can be null.
-  CommittedContent({this.mimeType, this.uri, this.data});
+  /// Creates a [CommittedContent] class. Any parameters can be null.
+  const CommittedContent({this.mimeType, this.uri, this.data});
 
   /// mime type of inserted content
-  String? mimeType;
+  final String? mimeType;
 
   /// URI (location) of inserted content
-  String? uri;
+  final String? uri;
 
   /// Bytedata of inserted content
-  Uint8List? data;
+  final Uint8List? data;
 
   /// Convenience getter to check if bytedata is available for the inserted content
   bool get hasData => data != null && data!.isNotEmpty;
@@ -3998,7 +4018,7 @@ class CommittedContent {
   /// Converts Map received from Flutter Engine into the Dart class
   static CommittedContent fromMap(Map<String, dynamic>? data) {
     if (data == null || data.isEmpty)
-      return CommittedContent();
+      return const CommittedContent();
     return CommittedContent(
         mimeType: data['mimeType'] as String?,
         uri: data['uri'] as String?,
