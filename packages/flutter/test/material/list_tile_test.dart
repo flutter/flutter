@@ -2112,13 +2112,13 @@ void main() {
         ),
       );
 
-    final Offset barItem = tester.getCenter(find.byKey(tileKey));
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-    await gesture.addPointer();
-    addTearDown(gesture.removePointer);
-    await gesture.moveTo(barItem);
-    await tester.pumpAndSettle();
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+      final Offset barItem = tester.getCenter(find.byKey(tileKey));
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.addPointer();
+      addTearDown(gesture.removePointer);
+      await gesture.moveTo(barItem);
+      await tester.pumpAndSettle();
+      expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
     });
   });
 
