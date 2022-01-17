@@ -57,6 +57,8 @@ typedef ExpansionPanelHeaderBuilder = Widget Function(BuildContext context, bool
 /// A material expansion panel. It has a header and a body and can be either
 /// expanded or collapsed. The body of the panel is only visible when it is
 /// expanded.
+/// 
+/// {@youtube 560 315 https://www.youtube.com/watch?v=2aJZzRMziJc}
 ///
 /// Expansion panels are only intended to be used as children for
 /// [ExpansionPanelList].
@@ -170,8 +172,8 @@ class ExpansionPanelList extends StatefulWidget {
     this.animationDuration = kThemeAnimationDuration,
     this.expandedHeaderPadding = _kPanelHeaderExpandedDefaultPadding,
     this.dividerColor,
-    this.color,
-    this.expandedColor,
+    this.iconColor,
+    this.expandedIconColor,
     this.elevation = 2,
   }) : assert(children != null),
        assert(animationDuration != null),
@@ -200,8 +202,8 @@ class ExpansionPanelList extends StatefulWidget {
     this.initialOpenPanelValue,
     this.expandedHeaderPadding = _kPanelHeaderExpandedDefaultPadding,
     this.dividerColor,
-    this.color,
-    this.expandedColor,
+    this.iconColor,
+    this.expandedIconColor,
     this.elevation = 2,
   }) : assert(children != null),
        assert(animationDuration != null),
@@ -257,19 +259,15 @@ class ExpansionPanelList extends StatefulWidget {
   ///
   /// Defaults to [Colors.black54] when the theme's
   /// [ThemeData.brightness] is [Brightness.light] and to
-  /// [Colors.white60] when it is [Brightness.dark]. This adheres to the
-  /// Material Design specifications for [icons](https://material.io/design/iconography/system-icons.html#color)
-  /// and for [dark theme](https://material.io/design/color/dark-theme.html#ui-application)
-  final Color? color;
+  /// [Colors.white60] when it is [Brightness.dark].
+  final Color? iconColor;
 
-  /// The color of the icon when panel is expanded .
+  /// The color of the icon when panel is expanded.
   ///
   /// Defaults to [Colors.black54] when the theme's
   /// [ThemeData.brightness] is [Brightness.light] and to
-  /// [Colors.white] when it is [Brightness.dark]. This adheres to the
-  /// Material Design specifications for [icons](https://material.io/design/iconography/system-icons.html#color)
-  /// and for [dark theme](https://material.io/design/color/dark-theme.html#ui-application)
-  final Color? expandedColor;
+  /// [Colors.white] when it is [Brightness.dark]. 
+  final Color? expandedIconColor;
 
   /// Defines elevation for the [ExpansionPanel] while it's expanded.
   ///
@@ -382,8 +380,8 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
         child: ExpandIcon(
           isExpanded: _isChildExpanded(index),
           padding: const EdgeInsets.all(16.0),
-          color: widget.color,
-          expandedColor: widget.expandedColor,
+          color: widget.iconColor,
+          expandedColor: widget.expandedIconColor,
           onPressed: !child.canTapOnHeader
               ? (bool isExpanded) => _handlePressed(isExpanded, index)
               : null,
