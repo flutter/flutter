@@ -99,6 +99,7 @@ class ListTileThemeData with Diagnosticable {
     this.minVerticalPadding,
     this.minLeadingWidth,
     this.enableFeedback,
+    this.mouseCursor,
   });
 
   /// Overrides the default value of [ListTile.dense].
@@ -140,6 +141,11 @@ class ListTileThemeData with Diagnosticable {
   /// Overrides the default value of [ListTile.enableFeedback].
   final bool? enableFeedback;
 
+  /// {@macro flutter.material.ListTile.mouseCursor}
+  ///
+  /// If specified, overrides the default value of [ListTile.mouseCursor].
+  final MaterialStateProperty<MouseCursor?>? mouseCursor;
+
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   ListTileThemeData copyWith({
@@ -156,6 +162,7 @@ class ListTileThemeData with Diagnosticable {
     double? minVerticalPadding,
     double? minLeadingWidth,
     bool? enableFeedback,
+    MaterialStateProperty<MouseCursor?>? mouseCursor,
   }) {
     return ListTileThemeData(
       dense: dense ?? this.dense,
@@ -171,6 +178,7 @@ class ListTileThemeData with Diagnosticable {
       minVerticalPadding: minVerticalPadding ?? this.minVerticalPadding,
       minLeadingWidth: minLeadingWidth ?? this.minLeadingWidth,
       enableFeedback: enableFeedback ?? this.enableFeedback,
+      mouseCursor: mouseCursor ?? this.mouseCursor,
     );
   }
 
@@ -193,6 +201,7 @@ class ListTileThemeData with Diagnosticable {
       minVerticalPadding: lerpDouble(a?.minVerticalPadding, b?.minVerticalPadding, t),
       minLeadingWidth: lerpDouble(a?.minLeadingWidth, b?.minLeadingWidth, t),
       enableFeedback: t < 0.5 ? a?.enableFeedback : b?.enableFeedback,
+      mouseCursor: t < 0.5 ? a?.mouseCursor : b?.mouseCursor,
     );
   }
 
@@ -212,6 +221,7 @@ class ListTileThemeData with Diagnosticable {
       minVerticalPadding,
       minLeadingWidth,
       enableFeedback,
+      mouseCursor,
     );
   }
 
@@ -234,7 +244,8 @@ class ListTileThemeData with Diagnosticable {
       && other.horizontalTitleGap == horizontalTitleGap
       && other.minVerticalPadding == minVerticalPadding
       && other.minLeadingWidth == minLeadingWidth
-      && other.enableFeedback == enableFeedback;
+      && other.enableFeedback == enableFeedback
+      && other.mouseCursor == mouseCursor;
   }
 
   @override
@@ -253,6 +264,7 @@ class ListTileThemeData with Diagnosticable {
     properties.add(DoubleProperty('minVerticalPadding', minVerticalPadding, defaultValue: null));
     properties.add(DoubleProperty('minLeadingWidth', minLeadingWidth, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('enableFeedback', enableFeedback, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>>('mouseCursor', mouseCursor, defaultValue: null));
   }
 }
 
@@ -283,6 +295,7 @@ class ListTileTheme extends InheritedTheme {
     Color? tileColor,
     Color? selectedTileColor,
     bool? enableFeedback,
+    MaterialStateProperty<MouseCursor?>? mouseCursor,
     double? horizontalTitleGap,
     double? minVerticalPadding,
     double? minLeadingWidth,
@@ -297,6 +310,7 @@ class ListTileTheme extends InheritedTheme {
           tileColor ??
           selectedTileColor ??
           enableFeedback ??
+          mouseCursor ??
           horizontalTitleGap ??
           minVerticalPadding ??
           minLeadingWidth) == null),
@@ -311,6 +325,7 @@ class ListTileTheme extends InheritedTheme {
        _tileColor = tileColor,
        _selectedTileColor = selectedTileColor,
        _enableFeedback = enableFeedback,
+       _mouseCursor = mouseCursor,
        _horizontalTitleGap = horizontalTitleGap,
        _minVerticalPadding = minVerticalPadding,
        _minLeadingWidth = minLeadingWidth,
@@ -330,6 +345,7 @@ class ListTileTheme extends InheritedTheme {
   final double? _minVerticalPadding;
   final double? _minLeadingWidth;
   final bool? _enableFeedback;
+  final MaterialStateProperty<MouseCursor?>? _mouseCursor;
 
   /// The configuration of this theme.
   ListTileThemeData get data {
@@ -344,6 +360,7 @@ class ListTileTheme extends InheritedTheme {
       tileColor: _tileColor,
       selectedTileColor: _selectedTileColor,
       enableFeedback: _enableFeedback,
+      mouseCursor: _mouseCursor,
       horizontalTitleGap: _horizontalTitleGap,
       minVerticalPadding: _minVerticalPadding,
       minLeadingWidth: _minLeadingWidth,
@@ -428,6 +445,12 @@ class ListTileTheme extends InheritedTheme {
   /// [ListTileThemeData.enableFeedback] property instead.
   bool? get enableFeedback => _data != null ? _data!.enableFeedback : _enableFeedback;
 
+  /// Overrides the default value of [ListTile.mouseCursor].
+  ///
+  /// This property is obsolete: please use the [data]
+  /// [ListTileThemeData.mouseCursor] property instead.
+  MaterialStateProperty<MouseCursor?>? get mouseCursor => _data != null ? _data!.mouseCursor : _mouseCursor;
+
   /// The [data] property of the closest instance of this class that
   /// encloses the given context.
   ///
@@ -460,6 +483,7 @@ class ListTileTheme extends InheritedTheme {
     Color? tileColor,
     Color? selectedTileColor,
     bool? enableFeedback,
+    MaterialStateProperty<MouseCursor?>? mouseCursor,
     double? horizontalTitleGap,
     double? minVerticalPadding,
     double? minLeadingWidth,
@@ -482,6 +506,7 @@ class ListTileTheme extends InheritedTheme {
             tileColor: tileColor ?? parent.tileColor,
             selectedTileColor: selectedTileColor ?? parent.selectedTileColor,
             enableFeedback: enableFeedback ?? parent.enableFeedback,
+            mouseCursor: mouseCursor ?? parent.mouseCursor,
             horizontalTitleGap: horizontalTitleGap ?? parent.horizontalTitleGap,
             minVerticalPadding: minVerticalPadding ?? parent.minVerticalPadding,
             minLeadingWidth: minLeadingWidth ?? parent.minLeadingWidth,
@@ -506,6 +531,7 @@ class ListTileTheme extends InheritedTheme {
         tileColor: tileColor,
         selectedTileColor: selectedTileColor,
         enableFeedback: enableFeedback,
+        mouseCursor: mouseCursor,
         horizontalTitleGap: horizontalTitleGap,
         minVerticalPadding: minVerticalPadding,
         minLeadingWidth: minLeadingWidth,
@@ -951,6 +977,7 @@ class ListTile extends StatelessWidget {
   /// Inoperative if [enabled] is false.
   final GestureLongPressCallback? onLongPress;
 
+  /// {@template flutter.material.ListTile.mouseCursor}
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// widget.
   ///
@@ -959,8 +986,15 @@ class ListTile extends StatelessWidget {
   ///
   ///  * [MaterialState.selected].
   ///  * [MaterialState.disabled].
+  /// {@endtemplate}
   ///
-  /// If this property is null, [MaterialStateMouseCursor.clickable] will be used.
+  /// If null, then the value of [ListTileThemeData.mouseCursor] is used. If
+  /// that is also null, then [MaterialStateMouseCursor.clickable] is used.
+  ///
+  /// See also:
+  ///
+  ///  * [MaterialStateMouseCursor], which can be used to create a [MouseCursor]
+  ///    that is also a [MaterialStateProperty<MouseCursor>].
   final MouseCursor? mouseCursor;
 
   /// If this tile is also [enabled] then icons and text are rendered with the same color.
@@ -1203,19 +1237,20 @@ class ListTile extends StatelessWidget {
       ?? tileTheme.contentPadding?.resolve(textDirection)
       ?? _defaultContentPadding;
 
-    final MouseCursor resolvedMouseCursor = MaterialStateProperty.resolveAs<MouseCursor>(
-      mouseCursor ?? MaterialStateMouseCursor.clickable,
-      <MaterialState>{
-        if (!enabled || (onTap == null && onLongPress == null)) MaterialState.disabled,
-        if (selected) MaterialState.selected,
-      },
-    );
+    final Set<MaterialState> states = <MaterialState>{
+      if (!enabled || (onTap == null && onLongPress == null)) MaterialState.disabled,
+      if (selected) MaterialState.selected,
+    };
+
+    final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor?>(mouseCursor, states)
+    ?? tileTheme.mouseCursor?.resolve(states)
+    ?? MaterialStateMouseCursor.clickable.resolve(states);
 
     return InkWell(
       customBorder: shape ?? tileTheme.shape,
       onTap: enabled ? onTap : null,
       onLongPress: enabled ? onLongPress : null,
-      mouseCursor: resolvedMouseCursor,
+      mouseCursor: effectiveMouseCursor,
       canRequestFocus: enabled,
       focusNode: focusNode,
       focusColor: focusColor,
