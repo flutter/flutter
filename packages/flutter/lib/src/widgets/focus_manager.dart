@@ -759,6 +759,10 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     return null;
   }
 
+  /// Returns the padding to apply around this node when making it visible inside
+  /// a scrolling container.
+  EdgeInsets get ensureVisiblePadding => _manager?.defaultEnsureVisiblePadding ?? EdgeInsets.zero;
+
   /// Returns the size of the attached widget's [RenderObject], in logical
   /// units.
   ///
@@ -1709,6 +1713,13 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
     }
     return handled;
   }
+
+  /// The amount of padding to apply around all nodes when making them visible inside a
+  /// scrolling container.
+  ///
+  /// Individual [FocusNode]s may increase or decrease this padding, use
+  /// [FocusNode.ensureVisiblePadding] to obtain a node's desired padding.
+  EdgeInsets defaultEnsureVisiblePadding = EdgeInsets.zero;
 
   /// The node that currently has the primary focus.
   FocusNode? get primaryFocus => _primaryFocus;

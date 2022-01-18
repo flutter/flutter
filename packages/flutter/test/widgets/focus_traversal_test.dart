@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -1860,6 +1861,113 @@ void main() {
         await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
         await tester.pump();
         final double expectedOffset = 100.0 * (i - 1);
+        expect(controller.offset, equals(expectedOffset), reason: "Focusing item $i didn't cause a scroll");
+      }
+
+      // Back at the left side of the scrollable.
+      expect(nodes[0].hasPrimaryFocus, isTrue);
+      expect(controller.offset, equals(0.0));
+
+      // Now we jump to the left edge of the app.
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+      await tester.pump();
+      expect(leftNode.hasPrimaryFocus, isTrue);
+      expect(controller.offset, equals(0.0));
+    }, skip: isBrowser, variant: KeySimulatorTransitModeVariant.all()); // https://github.com/flutter/flutter/issues/35347
+
+    testWidgets('Focus traversal inside a horizontal scrollable applies ensure visible padding.', (WidgetTester tester) async {
+      tester.binding.focusManager.defaultEnsureVisiblePadding = const EdgeInsets.all(50.0);
+
+      addTearDown(() {
+        tester.binding.focusManager.defaultEnsureVisiblePadding = EdgeInsets.zero;
+      });
+
+      const double minScrollExtent = 0.0;
+      const double maxScrollExtent = 500.0;
+
+      final List<int> items = List<int>.generate(11, (int index) => index).toList();
+      final List<FocusNode> nodes = List<FocusNode>.generate(11, (int index) => FocusNode(debugLabel: 'Item ${index + 1}')).toList();
+      final FocusNode leftNode = FocusNode(debugLabel: 'Left Side');
+      final FocusNode rightNode = FocusNode(debugLabel: 'Right Side');
+      final ScrollController controller = ScrollController();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Row(
+            children: <Widget>[
+              Focus(focusNode: leftNode, child: Container(width: 100)),
+              Expanded(
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  controller: controller,
+                  children: items.map<Widget>((int item) {
+                    return Focus(
+                      focusNode: nodes[item],
+                      child: Container(width: 100),
+                    );
+                  }).toList(),
+                ),
+              ),
+              Focus(focusNode: rightNode, child: Container(width: 100)),
+            ],
+          ),
+        ),
+      );
+
+      // Start at the right
+      expect(controller.offset, equals(0.0));
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      await tester.pump();
+      expect(leftNode.hasPrimaryFocus, isTrue);
+      expect(controller.offset, equals(0.0));
+
+      // Enter the list.
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      await tester.pump();
+      expect(nodes[0].hasPrimaryFocus, isTrue);
+      expect(controller.offset, equals(0.0));
+
+      // Go right until we hit the right of the visible area.
+      for (int i = 1; i <= 4; ++i) {
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+        await tester.pump();
+        expect(controller.offset, equals(0.0), reason: 'Focusing item $i caused a scroll');
+      }
+
+      // Now keep going right, and the scrollable should scroll automatically.
+      for (int i = 5; i <= 10; ++i) {
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+        await tester.pump();
+        final double expectedOffset = min(100.0 * (i - 5) + 50.0, maxScrollExtent);
+        expect(controller.offset, equals(expectedOffset), reason: "Focusing item $i didn't cause a scroll to $expectedOffset");
+      }
+
+      // Now go one more, and see that the right edge gets focused.
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      await tester.pump();
+      expect(rightNode.hasPrimaryFocus, isTrue);
+      expect(controller.offset, equals(100.0 * 5));
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+      await tester.pump();
+      expect(nodes[10].hasPrimaryFocus, isTrue);
+      expect(controller.offset, equals(100.0 * 5));
+
+      // Now reverse directions and go back to the left.
+
+      // These should not cause a scroll.
+      final double lowestOffset = controller.offset;
+      for (int i = 10; i >= 7; --i) {
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+        await tester.pump();
+        expect(controller.offset, equals(lowestOffset), reason: 'Focusing item $i caused a scroll');
+      }
+
+      // These should all cause a scroll.
+      for (int i = 6; i >= 1; --i) {
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+        await tester.pump();
+        final double expectedOffset = max(100.0 * (i - 1) - 50.0, minScrollExtent);
         expect(controller.offset, equals(expectedOffset), reason: "Focusing item $i didn't cause a scroll");
       }
 

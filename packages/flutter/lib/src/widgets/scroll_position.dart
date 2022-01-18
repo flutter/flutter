@@ -689,6 +689,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   Future<void> ensureVisible(
     RenderObject object, {
     double alignment = 0.0,
+    EdgeInsets padding = EdgeInsets.zero,
     Duration duration = Duration.zero,
     Curve curve = Curves.ease,
     ScrollPositionAlignmentPolicy alignmentPolicy = ScrollPositionAlignmentPolicy.explicit,
@@ -699,13 +700,17 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     final RenderAbstractViewport viewport = RenderAbstractViewport.of(object)!;
     assert(viewport != null);
 
-    Rect? targetRect;
+    Rect targetRect;
     if (targetRenderObject != null && targetRenderObject != object) {
       targetRect = MatrixUtils.transformRect(
         targetRenderObject.getTransformTo(object),
         object.paintBounds.intersect(targetRenderObject.paintBounds),
       );
+    } else {
+      targetRect = object.paintBounds;
     }
+
+    targetRect = padding.inflateRect(targetRect);
 
     double target;
     switch (alignmentPolicy) {

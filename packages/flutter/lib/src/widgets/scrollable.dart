@@ -314,6 +314,7 @@ class Scrollable extends StatefulWidget {
   static Future<void> ensureVisible(
     BuildContext context, {
     double alignment = 0.0,
+    EdgeInsets padding = EdgeInsets.zero,
     Duration duration = Duration.zero,
     Curve curve = Curves.ease,
     ScrollPositionAlignmentPolicy alignmentPolicy = ScrollPositionAlignmentPolicy.explicit,
@@ -332,6 +333,7 @@ class Scrollable extends StatefulWidget {
       futures.add(scrollable.position.ensureVisible(
         context.findRenderObject()!,
         alignment: alignment,
+        padding: padding,
         duration: duration,
         curve: curve,
         alignmentPolicy: alignmentPolicy,
