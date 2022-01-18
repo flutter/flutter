@@ -109,7 +109,7 @@ class FontWeight {
 /// such as <https://wakamaifondue.com/> to examine your fonts to
 /// determine what features are available.
 ///
-/// {@tool sample --template=stateless_widget_material}
+/// {@tool sample}
 /// This example shows usage of several OpenType font features,
 /// including Small Caps (selected manually using the "smcp" code),
 /// old-style figures, fractional ligatures, and stylistic sets.
@@ -165,12 +165,11 @@ class FontFeature {
   // Start of feature tag list.
   // ------------------------------------------------------------------------
 
-  // aalt
   /// Access alternative glyphs. (`aalt`)
   ///
   /// This feature selects the given glyph variant for glyphs in the span.
   ///
-  /// {@tool sample --template=stateless_widget}
+  /// {@tool sample}
   /// The Raleway font supports several alternate glyphs. The code
   /// below shows how specific glyphs can be selected. With `aalt` set
   /// to zero, the default, the normal glyphs are used. With a
@@ -191,7 +190,6 @@ class FontFeature {
   ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_ae#aalt>
   const FontFeature.alternative(this.value) : feature = 'aalt';
 
-  // afrc
   /// Use alternative ligatures to represent fractions. (`afrc`)
   ///
   /// When this feature is enabled (and the font supports it),
@@ -202,7 +200,7 @@ class FontFeature {
   ///
   /// This feature overrides all other features.
   ///
-  /// {@tool sample --template=stateless_widget}
+  /// {@tool sample}
   /// The Ubuntu Mono font supports the `afrc` feature. It causes digits
   /// before slashes to become superscripted and digits after slashes to become
   /// subscripted. This contrasts to the effect seen with [FontFeature.fractions].
@@ -218,13 +216,12 @@ class FontFeature {
   ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_ae#afrc>
   const FontFeature.alternativeFractions() : feature = 'afrc', value = 1;
 
-  // calt
   /// Enable contextual alternates. (`calt`)
   ///
   /// With this feature enabled, specific glyphs may be replaced by
   /// alternatives based on nearby text.
   ///
-  /// {@tool sample --template=stateless_widget}
+  /// {@tool sample}
   /// The Barriecito font supports the `calt` feature. It causes some
   /// letters in close proximity to other instances of themselves to
   /// use different glyphs, to give the appearance of more variation
@@ -243,7 +240,6 @@ class FontFeature {
   ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_ae#calt>
   const FontFeature.contextualAlternates() : feature = 'calt', value = 1;
 
-  // case
   /// Enable case-sensitive forms. (`case`)
   ///
   /// Some glyphs, for example parentheses or operators, are typically
@@ -253,9 +249,9 @@ class FontFeature {
   ///
   /// This feature, when supported by the font, causes these glyphs to
   /// be shifted slightly, or otherwise adjusted, so as to form a more
-  /// aethestically pleasing combination with capital letters.
+  /// aesthetically pleasing combination with capital letters.
   ///
-  /// {@tool sample --template=stateless_widget}
+  /// {@tool sample}
   /// The Piazzolla font supports the `case` feature. It causes
   /// parentheses, brackets, braces, guillemets, slashes, bullets, and
   /// some other glyphs (not shown below) to be shifted up slightly so
@@ -277,7 +273,6 @@ class FontFeature {
   ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_ae#case>
   const FontFeature.caseSensitiveForms() : feature = 'case', value = 1;
 
-  // cvXX
   /// Select a character variant. (`cv01` through `cv99`)
   ///
   /// Fonts may have up to 99 character variant sets, numbered 1
@@ -288,7 +283,7 @@ class FontFeature {
   /// sets, controlled by the [FontFeature.stylisticSet] feature
   /// (`ssXX`).
   ///
-  /// {@tool sample --template=stateless_widget}
+  /// {@tool sample}
   /// The Source Code Pro font supports the `cvXX` feature for several
   /// characters. In the example below, variants 1 (`cv01`), 2
   /// (`cv02`), and 4 (`cv04`) are selected. Variant 1 changes the
@@ -319,14 +314,13 @@ class FontFeature {
     return FontFeature('cv${value.toString().padLeft(2, "0")}');
   }
 
-  // dnom
   /// Display digits as denominators. (`dnom`)
   ///
   /// This is typically used automatically by the font rendering
   /// system as part of the implementation of `frac` for the denominator
   /// part of fractions (see [FontFeature.fractions]).
   ///
-  /// {@tool sample --template=stateless_widget}
+  /// {@tool sample}
   /// The Piazzolla font supports the `dnom` feature. It causes
   /// the digits to be rendered smaller and near the bottom of the EM box.
   ///
@@ -340,7 +334,6 @@ class FontFeature {
   ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_ae#dnom>
   const FontFeature.denominator() : feature = 'dnom', value = 1;
 
-  // frac
   /// Use ligatures to represent fractions. (`afrc`)
   ///
   /// When this feature is enabled (and the font supports it),
@@ -351,10 +344,10 @@ class FontFeature {
   /// This feature may imply the [FontFeature.numerator] and
   /// [FontFeature.denominator] features.
   ///
-  /// {@tool sample --template=stateless_widget}
+  /// {@tool sample}
   /// The Ubuntu Mono font supports the `frac` feature. It causes
   /// digits around slashes to be turned into dedicated fraction
-  /// glpyhs. This contrasts to the effect seen with
+  /// glyphs. This contrasts to the effect seen with
   /// [FontFeature.alternativeFractions].
   ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/font_feature_frac.png)
@@ -368,10 +361,9 @@ class FontFeature {
   ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_fj#frac>
   const FontFeature.fractions() : feature = 'frac', value = 1;
 
-  // hist
   /// Use historical forms. (`hist`)
   ///
-  /// Some fonts have alteratives for letters whose forms have changed
+  /// Some fonts have alternatives for letters whose forms have changed
   /// through the ages. In the Latin alphabet, this is common for
   /// example with the long-form "s" or the Fraktur "k". This feature enables
   /// those alternative glyphs.
@@ -381,7 +373,7 @@ class FontFeature {
   ///
   /// This feature may override other glyph-substitution features.
   ///
-  /// {@tool sample --template=stateless_widget}
+  /// {@tool sample}
   /// The Cardo font supports the `hist` feature specifically for the
   /// letter "s": it changes occurrences of that letter for the glyph
   /// used by U+017F LATIN SMALL LETTER LONG S.
@@ -396,7 +388,6 @@ class FontFeature {
   ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_fj#hist>
   const FontFeature.historicalForms() : feature = 'hist', value = 1;
 
-  // hlig
   /// Use historical ligatures. (`hlig`)
   ///
   /// Some fonts support ligatures that have fallen out of favor today,
@@ -420,7 +411,7 @@ class FontFeature {
   ///
   /// This feature may override other glyph-substitution features.
   ///
-  /// {@tool sample --template=stateless_widget}
+  /// {@tool sample}
   /// The Cardo font supports the `hlig` feature. It has legacy
   /// ligatures for "VI" and "NT", and various ligatures involving the
   /// "long s". In the example below, both historical forms (`hist 1`)
@@ -443,7 +434,6 @@ class FontFeature {
   ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_fj#hlig>
   const FontFeature.historicalLigatures() : feature = 'hlig', value = 1;
 
-  // lnum
   /// Use lining figures. (`lnum`)
   ///
   /// Some fonts have digits that, like lowercase latin letters, have
@@ -456,7 +446,7 @@ class FontFeature {
   ///
   /// This feature may conflict with [FontFeature.oldstyleFigures].
   ///
-  /// {@tool sample --template=stateless_widget}
+  /// {@tool sample}
   /// The Sorts Mill Goudy font supports the `lnum` feature. It causes
   /// digits to fit more seamlessly with capital letters.
   ///
@@ -470,7 +460,6 @@ class FontFeature {
   ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_ko#lnum>
   const FontFeature.liningFigures() : feature = 'lnum', value = 1;
 
-  // locl
   /// Use locale-specific glyphs. (`locl`)
   ///
   /// Some characters, most notably those in the Unicode Han
@@ -479,7 +468,7 @@ class FontFeature {
   /// broken top line in Traditional Chinese, but a solid top line in
   /// Simplified Chinese, Japanese, Korean, and Vietnamese. This kind
   /// of variation also exists with other alphabets, for example
-  /// Cyrilic characters as used in the Bulgarian and Serbian
+  /// Cyrillic characters as used in the Bulgarian and Serbian
   /// alphabets vary from their Russian counterparts.
   ///
   /// A particular font may default to the forms for the locale for
@@ -496,7 +485,7 @@ class FontFeature {
   /// locale-awareness. (So does not specifying the locale in the
   /// first place, of course.)
   ///
-  /// {@tool sample --template=stateless_widget}
+  /// {@tool sample}
   /// The Noto Sans CJK font supports the `locl` feature for CJK characters.
   /// In this example, the `localeAware` feature is not explicitly used, as it is
   /// enabled by default. This example instead shows how to set the locale,
@@ -514,7 +503,6 @@ class FontFeature {
   ///  * <https://en.wikipedia.org/wiki/Cyrillic_script>
   const FontFeature.localeAware({ bool enable = true }) : feature = 'locl', value = enable ? 1 : 0;
 
-  // nalt
   /// Display alternative glyphs for numerals (alternate annotation forms). (`nalt`)
   ///
   /// Replaces glyphs used in numbering lists (e.g. 1, 2, 3...; or a, b, c...) with notational
@@ -524,7 +512,7 @@ class FontFeature {
   /// selects the set to use (a positive integer, or 0 to disable the
   /// feature). The default set if none is specified is 1.
   ///
-  /// {@tool sample --template=stateless_widget}
+  /// {@tool sample}
   /// The Gothic A1 font supports several notational variant sets via
   /// the `nalt` feature.
   ///
@@ -546,14 +534,13 @@ class FontFeature {
   ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_ko#nalt>
   const FontFeature.notationalForms([this.value = 1]) : feature = 'nalt', assert(value >= 0);
 
-  // numr
   /// Display digits as numerators. (`numr`)
   ///
   /// This is typically used automatically by the font rendering
   /// system as part of the implementation of `frac` for the numerator
   /// part of fractions (see [FontFeature.fractions]).
   ///
-  /// {@tool sample --template=stateless_widget}
+  /// {@tool sample}
   /// The Piazzolla font supports the `numr` feature. It causes
   /// the digits to be rendered smaller and near the top of the EM box.
   ///
@@ -567,8 +554,7 @@ class FontFeature {
   ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_ko#numr>
   const FontFeature.numerators() : feature = 'numr', value = 1;
 
-  // onum
-  /// Use oldstyle figures. (`onum`)
+  /// Use old style figures. (`onum`)
   ///
   /// Some fonts have variants of the figures (e.g. the digit 9) that,
   /// when this feature is enabled, render with descenders under the
@@ -580,7 +566,7 @@ class FontFeature {
   /// This overrides [FontFeature.slashedZero] and may conflict with
   /// [FontFeature.liningFigures].
   ///
-  /// {@tool sample --template=stateless_widget}
+  /// {@tool sample}
   /// The Piazzolla font supports the `onum` feature. It causes
   /// digits to extend below the baseline.
   ///
@@ -595,7 +581,6 @@ class FontFeature {
   ///  * <https://en.wikipedia.org/wiki/Text_figures>
   const FontFeature.oldstyleFigures() : feature = 'onum', value = 1;
 
-  // ordn
   /// Use ordinal forms for alphabetic glyphs. (`ordn`)
   ///
   /// Some fonts have variants of the alphabetic glyphs intended for
@@ -604,7 +589,7 @@ class FontFeature {
   ///
   /// This may override other features that substitute glyphs.
   ///
-  /// {@tool sample --template=stateless_widget}
+  /// {@tool sample}
   /// The Piazzolla font supports the `ordn` feature. It causes
   /// alphabetic glyphs to become smaller and superscripted.
   ///
@@ -618,7 +603,6 @@ class FontFeature {
   ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_ko#ordn>
   const FontFeature.ordinalForms() : feature = 'ordn', value = 1;
 
-  // pnum
   /// Use proportional (varying width) figures. (`pnum`)
   ///
   /// For fonts that have both proportional and tabular (monospace) figures,
@@ -628,7 +612,7 @@ class FontFeature {
   ///
   /// The default behavior varies from font to font.
   ///
-  /// {@tool sample --template=stateless_widget}
+  /// {@tool sample}
   /// The Kufam font supports the `pnum` feature. It causes the digits
   /// to become proportionally-sized, rather than all being the same
   /// width. In this font this is especially noticeable with the digit
@@ -646,7 +630,6 @@ class FontFeature {
   ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_pt#pnum>
   const FontFeature.proportionalFigures() : feature = 'pnum', value = 1;
 
-  // rand
   /// Randomize the alternate forms used in text. (`rand`)
   ///
   /// For example, this can be used with suitably-prepared handwriting fonts to
@@ -663,7 +646,6 @@ class FontFeature {
   ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_pt#rand>
   const FontFeature.randomize() : feature = 'rand', value = 1;
 
-  // salt
   /// Enable stylistic alternates. (`salt`)
   ///
   /// Some fonts have alternative forms that are not tied to a
@@ -673,7 +655,7 @@ class FontFeature {
   ///
   /// This may override other features that substitute glyphs.
   ///
-  /// {@tool sample --template=stateless_widget}
+  /// {@tool sample}
   /// The Source Code Pro font supports the `salt` feature. It causes
   /// some glyphs to be rendered differently, for example the "a" and
   /// "g" glyphs change from their typographically common
@@ -693,7 +675,6 @@ class FontFeature {
   ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_pt#salt>
   const FontFeature.stylisticAlternates() : feature = 'salt', value = 1;
 
-  // sinf
   /// Use scientific inferiors. (`sinf`)
   ///
   /// Some fonts have variants of the figures (e.g. the digit 2) that,
@@ -703,7 +684,7 @@ class FontFeature {
   ///
   /// This may override other features that substitute glyphs.
   ///
-  /// {@tool sample --template=stateless_widget}
+  /// {@tool sample}
   /// The Piazzolla font supports the `sinf` feature. It causes
   /// digits to be smaller and subscripted.
   ///
@@ -717,7 +698,6 @@ class FontFeature {
   ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_pt#sinf>
   const FontFeature.scientificInferiors() : feature = 'sinf', value = 1;
 
-  // ssXX
   /// Select a stylistic set. (`ss01` through `ss20`)
   ///
   /// Fonts may have up to 20 stylistic sets, numbered 1 through 20,
@@ -727,7 +707,7 @@ class FontFeature {
   /// character variants can also be controlled by the
   /// [FontFeature.characterVariant] feature (`cvXX`).
   ///
-  /// {@tool sample --template=stateless_widget}
+  /// {@tool sample}
   /// The Source Code Pro font supports the `ssXX` feature for several
   /// sets. In the example below, stylistic sets 2 (`ss02`), 3
   /// (`ss03`), and 4 (`ss04`) are selected. Stylistic set 2 changes
@@ -744,7 +724,7 @@ class FontFeature {
   /// ** See code in examples/api/lib/ui/text/font_feature.font_feature_stylistic_set.0.dart **
   /// {@end-tool}
   ///
-  /// {@tool sample --template=stateless_widget}
+  /// {@tool sample}
   /// The Piazzolla font supports the `ssXX` feature for more
   /// elaborate stylistic effects. Set 1 turns some Latin characters
   /// into Roman numerals, set 2 enables some ASCII characters to be
@@ -768,7 +748,6 @@ class FontFeature {
     return FontFeature('ss${value.toString().padLeft(2, "0")}');
   }
 
-  // subs
   /// Enable subscripts. (`subs`)
   ///
   /// This feature causes some fonts to change some glyphs to their subscripted form.
@@ -778,7 +757,7 @@ class FontFeature {
   ///
   /// This may override other features that substitute glyphs.
   ///
-  /// {@tool sample --template=stateless_widget}
+  /// {@tool sample}
   /// The Piazzolla font supports the `subs` feature. It causes
   /// digits to be smaller and subscripted.
   ///
@@ -795,7 +774,6 @@ class FontFeature {
   ///  * [FontFeature.superscripts], which is similar but for subscripting.
   const FontFeature.subscripts() : feature = 'subs', value = 1;
 
-  // sups
   /// Enable superscripts. (`sups`)
   ///
   /// This feature causes some fonts to change some glyphs to their
@@ -809,7 +787,7 @@ class FontFeature {
   ///
   /// This may override other features that substitute glyphs.
   ///
-  /// {@tool sample --template=stateless_widget}
+  /// {@tool sample}
   /// The Sorts Mill Goudy font supports the `sups` feature. It causes
   /// digits to be smaller, superscripted, and changes them to lining
   /// figures (so they are all the same height).
@@ -825,7 +803,6 @@ class FontFeature {
   ///  * [FontFeature.subscripts], which is similar but for subscripting.
   const FontFeature.superscripts() : feature = 'sups', value = 1;
 
-  // swsh
   /// Enable swash glyphs. (`swsh`)
   ///
   /// Some fonts have beautiful flourishes on some characters. These
@@ -842,7 +819,7 @@ class FontFeature {
   /// example, Adobe's Poetica famously has 63 different ampersand
   /// forms available through this feature!
   ///
-  /// {@tool sample --template=stateless_widget}
+  /// {@tool sample}
   /// The BioRhyme Expanded font supports the `swsh` feature specifically
   /// for the capital "Q" and "R" glyphs and the ampersand.
   ///
@@ -857,7 +834,6 @@ class FontFeature {
   ///  * <https://en.wikipedia.org/wiki/Swash_(typography)>
   const FontFeature.swash([this.value = 1]) : feature = 'swsh', assert(value >= 0);
 
-  // tnum
   /// Use tabular (monospace) figures. (`tnum`)
   ///
   /// For fonts that have both proportional (varying width) and tabular figures,
@@ -868,9 +844,9 @@ class FontFeature {
   ///
   /// The default behavior varies from font to font.
   ///
-  /// {@tool sample --template=stateless_widget}
+  /// {@tool sample}
   /// The Piazzolla font supports the `tnum` feature. It causes the
-  /// digits to become uniformally-sized, rather than having variable
+  /// digits to become uniformly-sized, rather than having variable
   /// widths. In this font this is especially noticeable with the
   /// digit "1"; with tabular figures enabled, the "1" digit is more
   /// widely spaced.
@@ -885,7 +861,6 @@ class FontFeature {
   ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_pt#tnum>
   const FontFeature.tabularFigures() : feature = 'tnum', value = 1;
 
-  // zero
   /// Use the slashed zero. (`zero`)
   ///
   /// Some fonts contain both a circular zero and a zero with a slash. This
@@ -893,7 +868,7 @@ class FontFeature {
   ///
   /// This is overridden by [FontFeature.oldstyleFigures].
   ///
-  /// {@tool sample --template=stateless_widget}
+  /// {@tool sample}
   /// The Source Code Pro font supports the `zero` feature. It causes the
   /// zero digit to be drawn with a slash rather than the default rendering,
   /// which in this case has a dot through the zero rather than a slash.
@@ -1079,7 +1054,7 @@ enum TextDecorationStyle {
 enum TextLeadingDistribution {
   /// Distributes the [leading](https://en.wikipedia.org/wiki/Leading)
   /// of the text proportionally above and below the text, to the font's
-  /// ascent/discent ratio.
+  /// ascent/descent ratio.
   ///
   /// {@template dart.ui.leading}
   /// The leading of a text run is defined as
@@ -1372,7 +1347,7 @@ class TextStyle {
   /// * `decoration`: The decorations to paint near the text (e.g., an underline).
   /// * `decorationColor`: The color in which to paint the text decorations.
   /// * `decorationStyle`: The style in which to paint the text decorations (e.g., dashed).
-  /// * `decorationThickness`: The thickness of the decoration as a muliplier on the thickness specified by the font.
+  /// * `decorationThickness`: The thickness of the decoration as a multiplier on the thickness specified by the font.
   /// * `fontWeight`: The typeface thickness to use when painting the text (e.g., bold).
   /// * `fontStyle`: The typeface variant to use when drawing the letters (e.g., italics).
   /// * `fontFamily`: The name of the font to use when painting the text (e.g., Roboto). If a `fontFamilyFallback` is
@@ -1760,11 +1735,10 @@ class ParagraphStyle {
 }
 
 // Serialize strut properties into ByteData. This encoding errs towards
-// compactness. The first 8 bits is a bitmask that records which properties
-// are null. The rest of the values are encoded in the same order encountered
-// in the bitmask. The final returned value truncates any unused bytes
-// at the end. For ease of decoding, all 8 bit ints are stored before any 32 bit
-// ints.
+// compactness. The first 8 bits is a bitmask that records which properties are
+// null. The rest of the values are encoded in the same order encountered in the
+// bitmask. The final returned value truncates any unused bytes at the end. For
+// ease of decoding, all 8 bit integers are stored before any 32 bit integers.
 //
 // We serialize this more thoroughly than ParagraphStyle because it is
 // much more likely that the strut is empty/null and we wish to add
@@ -2747,7 +2721,7 @@ class Paragraph extends NativeFieldWrapperClass1 {
 
     // _getLineBoundary only considers the offset and assumes that the
     // TextAffinity is upstream. In the case that TextPosition is just after a
-    // wordwrap (downstream), we need to return the line for the next offset.
+    // word wrap (downstream), we need to return the line for the next offset.
     if (position.affinity == TextAffinity.downstream && line != nextLine
         && position.offset == line.end && line.end == nextLine.start) {
       final List<int> nextBoundary = _getLineBoundary(position.offset + 1);
