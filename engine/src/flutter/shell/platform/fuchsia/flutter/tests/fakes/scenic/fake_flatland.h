@@ -277,6 +277,11 @@ class FakeFlatland
                                fuchsia::math::SizeU size) override;
 
   // |fuchsia::ui::composition::Flatland|
+  void SetImageBlendingFunction(
+      fuchsia::ui::composition::ContentId image_id,
+      fuchsia::ui::composition::BlendMode blend_mode) override;
+
+  // |fuchsia::ui::composition::Flatland|
   void SetViewportProperties(
       fuchsia::ui::composition::ContentId viewport_id,
       fuchsia::ui::composition::ViewportProperties properties) override;

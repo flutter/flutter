@@ -51,6 +51,11 @@ using ::testing::VariantWith;
 namespace flutter_runner::testing {
 namespace {
 
+constexpr static fuchsia::ui::composition::BlendMode kFirstLayerBlendMode{
+    fuchsia::ui::composition::BlendMode::SRC};
+constexpr static fuchsia::ui::composition::BlendMode kUpperLayerBlendMode{
+    fuchsia::ui::composition::BlendMode::SRC_OVER};
+
 class FakeSurfaceProducerSurface : public SurfaceProducerSurface {
  public:
   explicit FakeSurfaceProducerSurface(
@@ -226,7 +231,8 @@ Matcher<FakeGraph> IsFlutterGraph(
 }
 
 Matcher<std::shared_ptr<FakeTransform>> IsImageLayer(
-    const fuchsia::math::SizeU& layer_size) {
+    const fuchsia::math::SizeU& layer_size,
+    fuchsia::ui::composition::BlendMode blend_mode) {
   return Pointee(FieldsAre(
       /*id*/ _, FakeTransform::kDefaultTranslation,
       FakeTransform::kDefaultClipBounds, FakeTransform::kDefaultOrientation,
@@ -235,7 +241,7 @@ Matcher<std::shared_ptr<FakeTransform>> IsImageLayer(
       Pointee(VariantWith<FakeImage>(FieldsAre(
           /*id*/ _, IsImageProperties(layer_size),
           FakeImage::kDefaultSampleRegion, layer_size,
-          FakeImage::kDefaultOpacity,
+          FakeImage::kDefaultOpacity, blend_mode,
           /*buffer_import_token*/ _, /*vmo_index*/ 0)))));
 }
 
@@ -454,13 +460,13 @@ TEST_F(FlatlandExternalViewEmbedderTest, SimpleScene) {
               IsFlutterGraph(parent_viewport_watcher, viewport_creation_token,
                              view_ref));
 
-  // Pump the message loop.  The scene updates should propagate to flatland.
+  // Pump the message loop. The scene updates should propagate to flatland.
   loop().RunUntilIdle();
   EXPECT_THAT(
       fake_flatland().graph(),
       IsFlutterGraph(parent_viewport_watcher, viewport_creation_token, view_ref,
                      /*layers*/
-                     {IsImageLayer(frame_size)}));
+                     {IsImageLayer(frame_size, kFirstLayerBlendMode)}));
 }
 
 TEST_F(FlatlandExternalViewEmbedderTest, SceneWithOneView) {
@@ -549,9 +555,9 @@ TEST_F(FlatlandExternalViewEmbedderTest, SceneWithOneView) {
       fake_flatland().graph(),
       IsFlutterGraph(
           parent_viewport_watcher, viewport_creation_token, view_ref, /*layers*/
-          {IsImageLayer(frame_size),
+          {IsImageLayer(frame_size, kFirstLayerBlendMode),
            IsViewportLayer(child_view_token, child_view_size, {0, 0}),
-           IsImageLayer(frame_size)}));
+           IsImageLayer(frame_size, kUpperLayerBlendMode)}));
 
   // Destroy the view.  The scene graph shouldn't change yet.
   external_view_embedder.DestroyView(
@@ -560,9 +566,9 @@ TEST_F(FlatlandExternalViewEmbedderTest, SceneWithOneView) {
       fake_flatland().graph(),
       IsFlutterGraph(
           parent_viewport_watcher, viewport_creation_token, view_ref, /*layers*/
-          {IsImageLayer(frame_size),
+          {IsImageLayer(frame_size, kFirstLayerBlendMode),
            IsViewportLayer(child_view_token, child_view_size, {0, 0}),
-           IsImageLayer(frame_size)}));
+           IsImageLayer(frame_size, kUpperLayerBlendMode)}));
 
   // Draw another frame without the view.  The scene graph shouldn't change yet.
   DrawSimpleFrame(
@@ -581,16 +587,16 @@ TEST_F(FlatlandExternalViewEmbedderTest, SceneWithOneView) {
       fake_flatland().graph(),
       IsFlutterGraph(
           parent_viewport_watcher, viewport_creation_token, view_ref, /*layers*/
-          {IsImageLayer(frame_size),
+          {IsImageLayer(frame_size, kFirstLayerBlendMode),
            IsViewportLayer(child_view_token, child_view_size, {0, 0}),
-           IsImageLayer(frame_size)}));
+           IsImageLayer(frame_size, kUpperLayerBlendMode)}));
 
   // Pump the message loop.  The scene updates should propagate to flatland.
   loop().RunUntilIdle();
   EXPECT_THAT(fake_flatland().graph(),
               IsFlutterGraph(parent_viewport_watcher, viewport_creation_token,
                              view_ref, /*layers*/
-                             {IsImageLayer(frame_size)}));
+                             {IsImageLayer(frame_size, kFirstLayerBlendMode)}));
 }
 
 }  // namespace flutter_runner::testing

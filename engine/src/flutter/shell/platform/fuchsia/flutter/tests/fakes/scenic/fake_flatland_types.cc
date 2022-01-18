@@ -40,6 +40,7 @@ std::shared_ptr<FakeContent> CloneFakeContent(
         .sample_region = image->sample_region,
         .destination_size = image->destination_size,
         .opacity = image->opacity,
+        .blend_mode = image->blend_mode,
         .import_token = image->import_token,
         .vmo_index = image->vmo_index,
     });
@@ -124,8 +125,8 @@ bool FakeImage::operator==(const FakeImage& other) const {
   return id == other.id && image_properties == other.image_properties &&
          sample_region == other.sample_region &&
          destination_size == other.destination_size &&
-         opacity == other.opacity && import_token == other.import_token &&
-         vmo_index == other.vmo_index;
+         opacity == other.opacity && blend_mode == other.blend_mode &&
+         import_token == other.import_token && vmo_index == other.vmo_index;
 }
 
 bool FakeTransform::operator==(const FakeTransform& other) const {
