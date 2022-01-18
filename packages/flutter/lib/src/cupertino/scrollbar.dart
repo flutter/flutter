@@ -172,7 +172,7 @@ class _CupertinoScrollbarState extends RawScrollbarState<CupertinoScrollbar> {
       ..minLength = _kScrollbarMinLength
       ..minOverscrollLength = _kScrollbarMinOverscrollLength
       ..scrollbarOrientation = widget.scrollbarOrientation
-      ..infiniteBehavior = widget.infiniteBehavior ?? InfiniteScrollBehavior.continuous;
+      ..infiniteBehavior = widget.infiniteBehavior;
   }
 
   double _pressStartAxisPosition = 0.0;

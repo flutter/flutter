@@ -104,7 +104,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     double minLength = _kMinThumbExtent,
     double? minOverscrollLength,
     ScrollbarOrientation? scrollbarOrientation,
-    InfiniteScrollBehavior infiniteBehavior = InfiniteScrollBehavior.continuous,
+    InfiniteScrollBehavior? infiniteBehavior,
     bool ignorePointer = false,
   }) : assert(color != null),
        assert(radius == null || shape == null),
@@ -118,7 +118,6 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
        assert(minOverscrollLength == null || minOverscrollLength >= 0),
        assert(padding != null),
        assert(padding.isNonNegative),
-       assert(infiniteBehavior != null),
        assert(trackColor != null),
        assert(trackBorderColor != null),
        assert(ignorePointer != null),
@@ -336,10 +335,9 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   }
 
   /// How the scrollbar will be rendered in an infinitely long [ScrollView].
-  InfiniteScrollBehavior get infiniteBehavior => _infiniteBehavior;
-  InfiniteScrollBehavior _infiniteBehavior;
-  set infiniteBehavior(InfiniteScrollBehavior value) {
-    assert(value != null);
+  InfiniteScrollBehavior? get infiniteBehavior => _infiniteBehavior;
+  InfiniteScrollBehavior? _infiniteBehavior;
+  set infiniteBehavior(InfiniteScrollBehavior? value) {
     if (infiniteBehavior == value)
       return;
 
@@ -403,6 +401,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   Rect? _thumbRect;
   Rect? _trackRect;
   late double _thumbOffset;
+
   // InfiniteScroll
   // The assumed depth of the scroll view.
   double _infiniteDepth = _infiniteLeadingExtent;
@@ -615,12 +614,14 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   double getTrackToScroll(double thumbOffsetLocal) {
     assert(thumbOffsetLocal != null);
     late double scrollableExtent;
-    if (_lastMetrics!.maxScrollExtent.isFinite) {
+    // If the ScrollView has a finite extent, and is not being overridden by
+    // infinite scroll, use the known extents.
+    if (_lastMetrics!.maxScrollExtent.isFinite && infiniteBehavior == null) {
       scrollableExtent = _lastMetrics!.maxScrollExtent - _lastMetrics!.minScrollExtent;
     } else {
-      // If we have an infinitely long scroll view, we pretend it isn't by keeping
-      // track of the last known depth, and adding on more 'extent' based on the
-      // InfiniteScrollBehavior.
+      // If we have an infinitely long scroll view (or are pretending to have
+      // one), we pretend it isn't by keeping track of the last known depth, and
+      // adding on more 'extent' based on the InfiniteScrollBehavior.
       scrollableExtent = _infiniteDepth - _lastMetrics!.minScrollExtent;
     }
     final double thumbMovableExtent = _trackExtent - _thumbExtent();
@@ -631,12 +632,14 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   // thumb track.
   double _getScrollToTrack(ScrollMetrics metrics, double thumbExtent) {
     late double scrollableExtent;
-    if (metrics.maxScrollExtent.isFinite) {
+    // If the ScrollView has a finite extent, and is not being overridden by
+    // infinite scroll, use the known extents.
+    if (metrics.maxScrollExtent.isFinite && infiniteBehavior == null) {
       scrollableExtent = metrics.maxScrollExtent - metrics.minScrollExtent;
     } else {
-      // If we have an infinitely long scroll view, we pretend it isn't by keeping
-      // track of the last known depth, and adding on more 'extent' based on the
-      // InfiniteScrollBehavior.
+      // If we have an infinitely long scroll view (or are pretending to have
+      // one), we pretend it isn't by keeping track of the last known depth, and
+      // adding on more 'extent' based on the InfiniteScrollBehavior.
       // Update the greatest know depth.
       switch (infiniteBehavior) {
         case InfiniteScrollBehavior.page:
@@ -644,6 +647,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
             _infiniteDepth = metrics.pixels;
           }
           break;
+        case null: // Infinite ScrollViews have continuous behavior by default
         case InfiniteScrollBehavior.continuous:
           if (_infiniteDepth - metrics.pixels < _infiniteLeadingExtent) {
             _infiniteDepth = metrics.pixels + _infiniteLeadingExtent;
@@ -846,18 +850,27 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 /// [ScrollNotification]s the Scrollbar should listen to.
 ///
 /// If the child [ScrollView] is infinitely long, the [RawScrollbar] will maintain a
-/// position relative to the know scroll offset. In this case, the scrollbar
+/// position relative to the known scroll offset. In this case, the scrollbar
 /// cannot accurately represent the relative location of the visible area, or
 /// calculate the accurate delta to apply when  dragging on the thumb or tapping
 /// on the track. In order to paint, the scrollbar will assume 1000 pixels ahead
 /// of itself, with the addition of the current scroll behind it. How the
 /// scrollbar adjusts in real-time to this calculation can be configured with
-/// [infiniteBehavior]. By default the scrollbar uses
-/// [InfiniteScrollBehavior.continuous] always assuming a fixed pixel distance
-/// ahead of the scrollbar thumb. [InfiniteScrollBehavior.page], will only
-/// assume more distance when it reached the end of the current approximated
-/// extent, as if more content had been appended or loaded as the end was
-/// reached.
+/// [infiniteBehavior]. By default, the scrollbar will use
+/// [InfiniteScrollBehavior.continuous] when the [ScrollView] is infinitely long.
+/// This behavior always assumes a fixed pixel distance
+/// ahead of the scrollbar thumb. [InfiniteScrollBehavior.page] will only
+/// assume more distance when the thumb has reached the end of the current
+/// approximated extent, as if more content had been appended or loaded as the
+/// end was reached. If no scrollbar is desired for an infinite ScrollView, use
+/// [InfiniteScrollBehavior.none].
+///
+/// An [InfiniteScrollBehavior] can also be used with [ScrollView]s that are not
+/// infinitely long. For a lazy-loading ScrollView of dynamically sized items,
+/// an estimate of maximum scroll extent is updated as more items are built. In
+/// some cases, this results in the scrollbar position adjusting its position on
+/// the track while scrolling is occurring. If this updating behavior is
+/// undesired, use an InfiniteScrollBehavior.
 ///
 /// ### Interaction
 ///
@@ -1328,7 +1341,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       mainAxisMargin: widget.mainAxisMargin,
       shape: widget.shape,
       crossAxisMargin: widget.crossAxisMargin,
-      infiniteBehavior: widget.infiniteBehavior ?? InfiniteScrollBehavior.continuous,
+      infiniteBehavior: widget.infiniteBehavior,
       minLength: widget.minThumbLength,
       minOverscrollLength: widget.minOverscrollLength ?? widget.minThumbLength,
     );
@@ -1466,7 +1479,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       ..crossAxisMargin = widget.crossAxisMargin
       ..minLength = widget.minThumbLength
       ..minOverscrollLength = widget.minOverscrollLength ?? widget.minThumbLength
-      ..infiniteBehavior = widget.infiniteBehavior ?? InfiniteScrollBehavior.continuous
+      ..infiniteBehavior = widget.infiniteBehavior
       ..ignorePointer = !enableGestures;
   }
 

@@ -386,7 +386,7 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
       ..padding = MediaQuery.of(context).padding
       ..scrollbarOrientation = widget.scrollbarOrientation
       ..ignorePointer = !enableGestures
-      ..infiniteBehavior = widget.infiniteBehavior ?? _scrollbarTheme.infiniteBehavior ?? InfiniteScrollBehavior.continuous;
+      ..infiniteBehavior = widget.infiniteBehavior ?? _scrollbarTheme.infiniteBehavior;
   }
 
   @override
