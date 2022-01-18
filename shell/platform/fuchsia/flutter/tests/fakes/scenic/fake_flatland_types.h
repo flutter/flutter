@@ -144,6 +144,8 @@ struct FakeImage {
   constexpr static fuchsia::math::RectF kDefaultSampleRegion{};
   constexpr static fuchsia::math::SizeU kDefaultDestinationSize{};
   constexpr static float kDefaultOpacity{1.f};
+  constexpr static fuchsia::ui::composition::BlendMode kDefaultBlendMode{
+      fuchsia::ui::composition::BlendMode::SRC_OVER};
 
   fuchsia::ui::composition::ContentId id{kInvalidContentId};
 
@@ -151,6 +153,7 @@ struct FakeImage {
   fuchsia::math::RectF sample_region{kDefaultSampleRegion};
   fuchsia::math::SizeU destination_size{kDefaultDestinationSize};
   float opacity{kDefaultOpacity};
+  fuchsia::ui::composition::BlendMode blend_mode{kDefaultBlendMode};
 
   zx_koid_t import_token{};
   uint32_t vmo_index{0};
