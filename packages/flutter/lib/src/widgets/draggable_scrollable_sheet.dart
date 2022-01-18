@@ -117,7 +117,7 @@ class DraggableScrollableController extends ChangeNotifier {
         animationController.stop();
       }
     });
-    CurvedAnimation(parent: animationController, curve: curve).addListener(() {
+    animationController.addListener(() {
       _attachedController!.extent.updateSize(
         animationController.value,
         _attachedController!.position.context.notificationContext!,
@@ -128,7 +128,7 @@ class DraggableScrollableController extends ChangeNotifier {
         animationController.stop(canceled: false);
       }
     });
-    await animationController.animateTo(size, duration: duration);
+    await animationController.animateTo(size, duration: duration, curve: curve);
   }
 
   /// Jumps the attached sheet from its current size to the given [size], a
