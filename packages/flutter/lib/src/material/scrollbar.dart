@@ -136,7 +136,7 @@ class Scrollbar extends StatelessWidget {
   /// {@macro flutter.widgets.Scrollbar.scrollbarOrientation}
   final ScrollbarOrientation? scrollbarOrientation;
 
-  /// Doc
+  /// {@macro flutter.widgets.Scrollbar.infiniteBehavior}
   final InfiniteScrollBehavior? infiniteBehavior;
 
   @override

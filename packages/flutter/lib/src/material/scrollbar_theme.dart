@@ -119,7 +119,8 @@ class ScrollbarThemeData with Diagnosticable {
   ///    overscrolled.
   final double? minThumbLength;
 
-  /// Doc
+  /// Overrides the default value of the [ScrollbarPainter.infiniteBehavior]
+  /// property in all descendant [Scrollbar] widgets.
   final InfiniteScrollBehavior? infiniteBehavior;
 
   /// Creates a copy of this object with the given fields replaced with the

@@ -45,11 +45,11 @@ enum ScrollbarOrientation {
   bottom,
 }
 
-/// How a scrollbar behaves in infinte [ScrollView]s.
+/// How a scrollbar behaves in [ScrollView]s that are infinitely long.
 enum InfiniteScrollBehavior {
-  /// The scrollbar will build up additioanl extent as it reaches the end of the
+  /// The scrollbar will build up additional extent as it reaches the end of the
   /// currently assumed extent, simulating the loading of additional content.
-  chunk,
+  page,
 
   /// The scrollbar will always assume a constant extent ahead of it along the
   /// scrollbar track.
@@ -330,7 +330,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     notifyListeners();
   }
 
-  /// Doc
+  /// How the scrollbar will be rendered in an infinitely long [ScrollView].
   InfiniteScrollBehavior get infiniteBehavior => _infiniteBehavior;
   InfiniteScrollBehavior _infiniteBehavior;
   set infiniteBehavior(InfiniteScrollBehavior value) {
@@ -623,7 +623,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
       // InfiniteScrollBehavior.
       // Update the greatest know depth.
       switch (infiniteBehavior) {
-        case InfiniteScrollBehavior.chunk:
+        case InfiniteScrollBehavior.page:
           if (_infiniteDepth < metrics.pixels) {
             _infiniteDepth = metrics.pixels;
           }
@@ -642,7 +642,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
         ? ((metrics.pixels - metrics.minScrollExtent) / scrollableExtent).clamp(0.0, 1.0)
         : 0;
 
-    if (fractionPast > 0.99 && infiniteBehavior == InfiniteScrollBehavior.chunk) {
+    if (fractionPast > 0.99 && infiniteBehavior == InfiniteScrollBehavior.page) {
       // If we are loading extent in chunks, add on when we reach the end of
       // the current 'extent'.
       _infiniteDepth += _infiniteLeadingExtent / 2;
@@ -808,7 +808,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 /// scrollbar adjusts in real-time to this calculation can be configured with
 /// [infiniteBehavior]. By default the scrollbar uses
 /// [InfiniteScrollBehavior.continuous] always assuming a fixed pixel distance
-/// ahead of the scrollbar thumb. [InfiniteScrollBehavior.chunk], will only
+/// ahead of the scrollbar thumb. [InfiniteScrollBehavior.page], will only
 /// assume more distance when it reached the end of the current approximated
 /// extent, as if more content had been appended or loaded as the end was
 /// reached.
@@ -1194,7 +1194,12 @@ class RawScrollbar extends StatefulWidget {
   /// Must not be null and defaults to 0.
   final double crossAxisMargin;
 
-  /// Doc
+  /// {@template flutter.widgets.Scrollbar.infiniteBehavior}
+  /// How the scrollbar will be rendered in an infinitely long [ScrollView].
+  ///
+  /// When null, will default to [InfiniteScrollBehavior.continuous], resulting
+  /// in smooth scrollbar movement along the track that will never reach the end.
+  /// {@endtemplate}
   final InfiniteScrollBehavior? infiniteBehavior;
 
   @override
