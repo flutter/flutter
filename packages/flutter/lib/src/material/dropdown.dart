@@ -1522,16 +1522,14 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       button: true,
       child: Actions(
         actions: _actionMap,
-        child: Focus(
+        child: InkWell(
+          mouseCursor: effectiveMouseCursor,
+          onTap: _enabled ? _handleTap : null,
           canRequestFocus: _enabled,
           focusNode: focusNode,
           autofocus: widget.autofocus,
-          child: InkWell(
-            mouseCursor: effectiveMouseCursor,
-            onTap: _enabled ? _handleTap : null,
-            excludeFromSemantics: true,
-            child: result,
-          ),
+          enableFeedback: false,
+          child: result,
         ),
       ),
     );
