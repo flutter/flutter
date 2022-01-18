@@ -110,6 +110,8 @@ export 'src/widgets/scroll_simulation.dart';
 export 'src/widgets/scroll_view.dart';
 export 'src/widgets/scrollable.dart';
 export 'src/widgets/scrollbar.dart';
+export 'src/widgets/selection_area.dart';
+export 'src/widgets/selection_container.dart';
 export 'src/widgets/semantics_debugger.dart';
 export 'src/widgets/shared_app_data.dart';
 export 'src/widgets/shortcuts.dart';

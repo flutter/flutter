@@ -2727,6 +2727,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     return true;
   }
 
+  /// {@template flutter.rendering.RenderObject.getTransformTo}
   /// Applies the paint transform up the tree to `ancestor`.
   ///
   /// Returns a matrix that maps the local paint coordinate system to the
@@ -2734,11 +2735,14 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   ///
   /// If `ancestor` is null, this method returns a matrix that maps from the
   /// local paint coordinate system to the coordinate system of the
-  /// [PipelineOwner.rootNode]. For the render tree owner by the
-  /// [RendererBinding] (i.e. for the main render tree displayed on the device)
-  /// this means that this method maps to the global coordinate system in
-  /// logical pixels. To get physical pixels, use [applyPaintTransform] from the
-  /// [RenderView] to further transform the coordinate.
+  /// [PipelineOwner.rootNode].
+  /// {@endtemplate}
+  ///
+  /// For the render tree owner by the [RendererBinding] (i.e. for the main
+  /// render tree displayed on the device) this means that this method maps to
+  /// the global coordinate system in logical pixels. To get physical pixels,
+  /// use [applyPaintTransform] from the [RenderView] to further transform the
+  /// coordinate.
   Matrix4 getTransformTo(RenderObject? ancestor) {
     final bool ancestorSpecified = ancestor != null;
     assert(attached);

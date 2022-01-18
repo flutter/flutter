@@ -5453,6 +5453,33 @@ class Flow extends MultiChildRenderObjectWidget {
 /// ```
 /// {@end-tool}
 ///
+/// ## Selections
+///
+/// To make this [RichText] Selectable, the [RichText] needs to be in the
+/// subtree of a [SelectionArea] and assigned a [SelectionRegistrar] to the
+/// [RichText.selectionRegistrar]. One can use [SelectionRegistrarScope.maybeOf]
+/// to get the [SelectionRegistrar] from a context. This enable users to select
+/// the texts in [RichText]s with mice or touches.
+///
+/// The [selectionColor] also needs to be set if the selection is enabled to
+/// draw the selection highlights.
+///
+/// {@tool snippet}
+///
+/// This sample demonstrates how to assign selection registrar for RichTexts
+/// in the SelectionArea subtree.
+///
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/widgets/rich_text.png)
+///
+/// ```dart
+/// RichText(
+///   text: const TextSpan(text: 'Hello'),
+///   selectionRegistrar: SelectionRegistrarScope.maybeOf(context),
+///   selectionColor: const Color(0xAF6694e8),
+/// )
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [TextStyle], which discusses how to style text.
@@ -5461,6 +5488,7 @@ class Flow extends MultiChildRenderObjectWidget {
 ///    [DefaultTextStyle] to a single string.
 ///  * [Text.rich], a const text widget that provides similar functionality
 ///    as [RichText]. [Text.rich] will inherit [TextStyle] from [DefaultTextStyle].
+///  * [SelectionArea], which provides an overview of the selection system.
 class RichText extends MultiChildRenderObjectWidget {
   /// Creates a paragraph of rich text.
   ///
@@ -5485,6 +5513,8 @@ class RichText extends MultiChildRenderObjectWidget {
     this.strutStyle,
     this.textWidthBasis = TextWidthBasis.parent,
     this.textHeightBehavior,
+    this.selectionRegistrar,
+    this.selectionColor,
   }) : assert(text != null),
        assert(textAlign != null),
        assert(softWrap != null),
@@ -5492,6 +5522,7 @@ class RichText extends MultiChildRenderObjectWidget {
        assert(textScaleFactor != null),
        assert(maxLines == null || maxLines > 0),
        assert(textWidthBasis != null),
+       assert(selectionRegistrar == null || selectionColor != null),
        super(children: _extractChildren(text));
 
   // Traverses the InlineSpan tree and depth-first collects the list of
@@ -5573,6 +5604,12 @@ class RichText extends MultiChildRenderObjectWidget {
   /// {@macro dart.ui.textHeightBehavior}
   final ui.TextHeightBehavior? textHeightBehavior;
 
+  /// The selection registrar this rich text is subscribed to.
+  final SelectionRegistrar? selectionRegistrar;
+
+  /// The color to use when painting the selection.
+  final Color? selectionColor;
+
   @override
   RenderParagraph createRenderObject(BuildContext context) {
     assert(textDirection != null || debugCheckHasDirectionality(context));
@@ -5587,6 +5624,8 @@ class RichText extends MultiChildRenderObjectWidget {
       textWidthBasis: textWidthBasis,
       textHeightBehavior: textHeightBehavior,
       locale: locale ?? Localizations.maybeLocaleOf(context),
+      registrar: selectionRegistrar,
+      selectionColor: selectionColor,
     );
   }
 
@@ -5604,7 +5643,9 @@ class RichText extends MultiChildRenderObjectWidget {
       ..strutStyle = strutStyle
       ..textWidthBasis = textWidthBasis
       ..textHeightBehavior = textHeightBehavior
-      ..locale = locale ?? Localizations.maybeLocaleOf(context);
+      ..locale = locale ?? Localizations.maybeLocaleOf(context)
+      ..registrar = selectionRegistrar
+      ..selectionColor = selectionColor;
   }
 
   @override

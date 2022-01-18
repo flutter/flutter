@@ -29,38 +29,6 @@ export 'package:flutter/services.dart' show TextSelectionDelegate;
 /// called.
 const Duration _kDragSelectionUpdateThrottle = Duration(milliseconds: 50);
 
-/// Which type of selection handle to be displayed.
-///
-/// With mixed-direction text, both handles may be the same type. Examples:
-///
-/// * LTR text: 'the &lt;quick brown&gt; fox':
-///
-///   The '&lt;' is drawn with the [left] type, the '&gt;' with the [right]
-///
-/// * RTL text: 'XOF &lt;NWORB KCIUQ&gt; EHT':
-///
-///   Same as above.
-///
-/// * mixed text: '&lt;the NWOR&lt;B KCIUQ fox'
-///
-///   Here 'the QUICK B' is selected, but 'QUICK BROWN' is RTL. Both are drawn
-///   with the [left] type.
-///
-/// See also:
-///
-///  * [TextDirection], which discusses left-to-right and right-to-left text in
-///    more detail.
-enum TextSelectionHandleType {
-  /// The selection handle is to the left of the selection end point.
-  left,
-
-  /// The selection handle is to the right of the selection end point.
-  right,
-
-  /// The start and end of the selection are co-incident at this point.
-  collapsed,
-}
-
 /// Signature for when a pointer that's dragging to select text has moved again.
 ///
 /// The first argument [startDetails] contains the details of the event that

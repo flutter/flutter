@@ -5,11 +5,13 @@
 import 'dart:ui' as ui show TextHeightBehavior;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
 import 'framework.dart';
 import 'inherited_theme.dart';
 import 'media_query.dart';
+import 'selection_container.dart';
 
 // Examples can assume:
 // late String _name;
@@ -342,10 +344,37 @@ class DefaultTextHeightBehavior extends InheritedTheme {
 /// [TapGestureRecognizer] as the [TextSpan.recognizer] of the relevant part of
 /// the text.
 ///
+/// ## Selections
+///
+/// [Text] is selectable by default if it is under a [SelectionArea]. To disable
+/// the selection, wraps the Text or part of the subtree with
+/// [SelectionRegistrarScope.disabled].
+///
+/// {@tool snippet}
+///
+/// This sample demonstrates how to disable selection for a Text in a Column.
+///
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/widgets/rich_text.png)
+///
+/// ```dart
+/// SelectionArea(
+///   selectionControls: materialTextSelectionControls,
+///   child: Column(
+///     children: const <Widget>[
+///       Text('Selectable text'),
+///       SelectionRegistrarScope.disabled(child: Text('Non-selectable text 1')),
+///       Text('Selectable text'),
+///     ],
+///   ),
+/// )
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [RichText], which gives you more control over the text styles.
 ///  * [DefaultTextStyle], which sets default styles for [Text] widgets.
+///  * [SelectionArea], which provides an overview of the selection system.
 class Text extends StatelessWidget {
   /// Creates a text widget.
   ///
@@ -372,6 +401,7 @@ class Text extends StatelessWidget {
     this.semanticsLabel,
     this.textWidthBasis,
     this.textHeightBehavior,
+    this.selectionColor = const Color(0xAF6694e8),
   }) : assert(
          data != null,
          'A non-null String must be provided to a Text widget.',
@@ -403,6 +433,7 @@ class Text extends StatelessWidget {
     this.semanticsLabel,
     this.textWidthBasis,
     this.textHeightBehavior,
+    this.selectionColor = const Color(0xAF6694e8),
   }) : assert(
          textSpan != null,
          'A non-null TextSpan must be provided to a Text.rich widget.',
@@ -512,6 +543,9 @@ class Text extends StatelessWidget {
   /// {@macro dart.ui.textHeightBehavior}
   final ui.TextHeightBehavior? textHeightBehavior;
 
+  /// The color to use when painting the selection.
+  final Color? selectionColor;
+
   @override
   Widget build(BuildContext context) {
     final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(context);
@@ -520,6 +554,7 @@ class Text extends StatelessWidget {
       effectiveTextStyle = defaultTextStyle.style.merge(style);
     if (MediaQuery.boldTextOverride(context))
       effectiveTextStyle = effectiveTextStyle!.merge(const TextStyle(fontWeight: FontWeight.bold));
+    final SelectionRegistrar? registrar = SelectionRegistrarScope.maybeOf(context);
     Widget result = RichText(
       textAlign: textAlign ?? defaultTextStyle.textAlign ?? TextAlign.start,
       textDirection: textDirection, // RichText uses Directionality.of to obtain a default if this is null.
@@ -531,12 +566,20 @@ class Text extends StatelessWidget {
       strutStyle: strutStyle,
       textWidthBasis: textWidthBasis ?? defaultTextStyle.textWidthBasis,
       textHeightBehavior: textHeightBehavior ?? defaultTextStyle.textHeightBehavior ?? DefaultTextHeightBehavior.of(context),
+      selectionRegistrar: registrar,
+      selectionColor: selectionColor,
       text: TextSpan(
         style: effectiveTextStyle,
         text: data,
         children: textSpan != null ? <InlineSpan>[textSpan!] : null,
       ),
     );
+    if (registrar != null) {
+      result = MouseRegion(
+        cursor: SystemMouseCursors.text,
+        child: result,
+      );
+    }
     if (semanticsLabel != null) {
       result = Semantics(
         textDirection: textDirection,
