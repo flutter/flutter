@@ -551,6 +551,40 @@ void testMain() {
       expect(spy.messages, isEmpty);
     });
 
+    test('setClient, setEditingState, setSizeAndTransform, show - input element is put into the DOM', () {
+      editingStrategy = SafariDesktopTextEditingStrategy(textEditing!);
+      textEditing!.debugTextEditingStrategyOverride = editingStrategy;
+      final MethodCall setClient = MethodCall(
+          'TextInput.setClient', <dynamic>[123, flutterSinglelineConfig]);
+      sendFrameworkMessage(codec.encodeMethodCall(setClient));
+
+      const MethodCall setEditingState =
+          MethodCall('TextInput.setEditingState', <String, dynamic>{
+        'text': 'abcd',
+        'selectionBase': 2,
+        'selectionExtent': 3,
+      });
+      sendFrameworkMessage(codec.encodeMethodCall(setEditingState));
+
+      // Editing shouldn't have started yet.
+      expect(document.activeElement, document.body);
+
+      // The "setSizeAndTransform" message has to be here before we call
+      // checkInputEditingState, since on some platforms (e.g. Desktop Safari)
+      // we don't put the input element into the DOM until we get its correct
+      // dimensions from the framework.
+      final MethodCall setSizeAndTransform =
+          configureSetSizeAndTransformMethodCall(150, 50,
+              Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList());
+      sendFrameworkMessage(codec.encodeMethodCall(setSizeAndTransform));
+
+      const MethodCall show = MethodCall('TextInput.show');
+      sendFrameworkMessage(codec.encodeMethodCall(show));
+
+      expect(defaultTextEditingRoot.activeElement,
+          textEditing!.strategy.domElement);
+    });
+
     test('setClient, setEditingState, show, updateConfig, clearClient', () {
       final MethodCall setClient = MethodCall('TextInput.setClient', <dynamic>[
         123,
