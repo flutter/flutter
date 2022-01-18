@@ -892,6 +892,63 @@ class DropdownButton<T> extends StatefulWidget {
        assert(isExpanded != null),
        assert(autofocus != null),
        assert(itemHeight == null || itemHeight >=  kMinInteractiveDimension),
+       _inputDecoration = null,
+       _isEmpty = false,
+       _isFocused = false,
+       super(key: key);
+
+  DropdownButton._formField({
+    Key? key,
+    required this.items,
+    this.selectedItemBuilder,
+    this.value,
+    this.hint,
+    this.disabledHint,
+    required this.onChanged,
+    this.onTap,
+    this.elevation = 8,
+    this.style,
+    this.underline,
+    this.icon,
+    this.iconDisabledColor,
+    this.iconEnabledColor,
+    this.iconSize = 24.0,
+    this.isDense = false,
+    this.isExpanded = false,
+    this.itemHeight = kMinInteractiveDimension,
+    this.focusColor,
+    this.focusNode,
+    this.autofocus = false,
+    this.dropdownColor,
+    this.menuMaxHeight,
+    this.enableFeedback,
+    this.alignment = AlignmentDirectional.centerStart,
+    this.borderRadius,
+    required InputDecoration? inputDecoration,
+    required bool isEmpty,
+    required bool isFocused,
+    // When adding new arguments, consider adding similar arguments to
+    // DropdownButtonFormField.
+  }) : assert(items == null || items.isEmpty || value == null ||
+              items.where((DropdownMenuItem<T> item) {
+                return item.value == value;
+              }).length == 1,
+                "There should be exactly one item with [DropdownButton]'s value: "
+                '$value. \n'
+                'Either zero or 2 or more [DropdownMenuItem]s were detected '
+                'with the same value',
+              ),
+       assert(elevation != null),
+       assert(iconSize != null),
+       assert(isDense != null),
+       assert(isExpanded != null),
+       assert(autofocus != null),
+       assert(itemHeight == null || itemHeight >=  kMinInteractiveDimension),
+       assert(isEmpty != null),
+       assert(isFocused != null),
+       _inputDecoration = inputDecoration,
+       _isEmpty = isEmpty,
+       _isFocused = isFocused,
        super(key: key);
 
   /// The list of items the user can select.
@@ -1100,6 +1157,12 @@ class DropdownButton<T> extends StatefulWidget {
 
   /// Defines the corner radii of the menu's rounded rectangle shape.
   final BorderRadius? borderRadius;
+
+  final InputDecoration? _inputDecoration;
+
+  final bool _isEmpty;
+
+  final bool _isFocused;
 
   @override
   State<DropdownButton<T>> createState() => _DropdownButtonState<T>();
@@ -1446,6 +1509,15 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       },
     );
 
+    if (widget._inputDecoration != null) {
+      result = InputDecorator(
+        decoration: widget._inputDecoration!,
+        isEmpty: widget._isEmpty,
+        isFocused: widget._isFocused,
+        child: result,
+      );
+    }
+
     return Semantics(
       button: true,
       child: Actions(
@@ -1454,13 +1526,11 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
           canRequestFocus: _enabled,
           focusNode: focusNode,
           autofocus: widget.autofocus,
-          child: MouseRegion(
-            cursor: effectiveMouseCursor,
-            child: GestureDetector(
-              onTap: _enabled ? _handleTap : null,
-              behavior: HitTestBehavior.opaque,
-              child: result,
-            ),
+          child: InkWell(
+            mouseCursor: effectiveMouseCursor,
+            onTap: _enabled ? _handleTap : null,
+            excludeFromSemantics: true,
+            child: result,
           ),
         ),
       ),
@@ -1570,37 +1640,35 @@ class DropdownButtonFormField<T> extends FormField<T> {
              canRequestFocus: false,
              skipTraversal: true,
              child: Builder(builder: (BuildContext context) {
-               return InputDecorator(
-                 decoration: effectiveDecoration.copyWith(errorText: field.errorText),
-                 isEmpty: isEmpty,
-                 isFocused: Focus.of(context).hasFocus,
-                 child: DropdownButtonHideUnderline(
-                   child: DropdownButton<T>(
-                     items: items,
-                     selectedItemBuilder: selectedItemBuilder,
-                     value: state.value,
-                     hint: hint,
-                     disabledHint: disabledHint,
-                     onChanged: onChanged == null ? null : state.didChange,
-                     onTap: onTap,
-                     elevation: elevation,
-                     style: style,
-                     icon: icon,
-                     iconDisabledColor: iconDisabledColor,
-                     iconEnabledColor: iconEnabledColor,
-                     iconSize: iconSize,
-                     isDense: isDense,
-                     isExpanded: isExpanded,
-                     itemHeight: itemHeight,
-                     focusColor: focusColor,
-                     focusNode: focusNode,
-                     autofocus: autofocus,
-                     dropdownColor: dropdownColor,
-                     menuMaxHeight: menuMaxHeight,
-                     enableFeedback: enableFeedback,
-                     alignment: alignment,
-                     borderRadius: borderRadius,
-                   ),
+               return DropdownButtonHideUnderline(
+                 child: DropdownButton<T>._formField(
+                   items: items,
+                   selectedItemBuilder: selectedItemBuilder,
+                   value: state.value,
+                   hint: hint,
+                   disabledHint: disabledHint,
+                   onChanged: onChanged == null ? null : state.didChange,
+                   onTap: onTap,
+                   elevation: elevation,
+                   style: style,
+                   icon: icon,
+                   iconDisabledColor: iconDisabledColor,
+                   iconEnabledColor: iconEnabledColor,
+                   iconSize: iconSize,
+                   isDense: isDense,
+                   isExpanded: isExpanded,
+                   itemHeight: itemHeight,
+                   focusColor: focusColor,
+                   focusNode: focusNode,
+                   autofocus: autofocus,
+                   dropdownColor: dropdownColor,
+                   menuMaxHeight: menuMaxHeight,
+                   enableFeedback: enableFeedback,
+                   alignment: alignment,
+                   borderRadius: borderRadius,
+                   inputDecoration: effectiveDecoration.copyWith(errorText: field.errorText),
+                   isEmpty: isEmpty,
+                   isFocused: Focus.of(context).hasFocus,
                  ),
                );
              }),
