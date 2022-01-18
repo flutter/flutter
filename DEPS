@@ -414,9 +414,9 @@ deps = {
    'src/third_party/vulkan':
    Var('github_git') + '/KhronosGroup/Vulkan-Docs.git' + '@' + 'v1.1.91',
 
-   # Downstream Fuchsia Vulkan Headers (v1.2.174)
+   # Downstream Fuchsia Vulkan Headers (v1.2.198)
   'src/third_party/fuchsia-vulkan':
-   Var('fuchsia_git') + '/third_party/Vulkan-Headers.git' + '@' + '0255987d2457576907f046c6d52b89bc6131981d',
+   Var('fuchsia_git') + '/third_party/Vulkan-Headers.git' + '@' + '32640ad82ef648768c706c9bf828b77123a09bc2',
 
    'src/third_party/swiftshader':
    Var('swiftshader_git') + '/SwiftShader.git' + '@' + 'd4130e9ac3675dadbec8442dc2310a80ea4ddfb2',
