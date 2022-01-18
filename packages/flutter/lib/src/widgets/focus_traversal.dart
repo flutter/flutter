@@ -6,7 +6,6 @@ import 'package:flutter/foundation.dart';
 
 import 'actions.dart';
 import 'basic.dart';
-import 'editable_text.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
@@ -389,6 +388,11 @@ abstract class FocusTraversalPolicy with Diagnosticable {
       }
     }
     final List<FocusNode> sortedNodes = _sortAllDescendants(nearestScope, currentNode);
+    if (sortedNodes.isEmpty) {
+      // If there are no nodes to traverse to, like when descendantsAreTraversable
+      // is false or skipTraversal for all the nodes is true.
+      return false;
+    }
     if (forward && focusedChild == sortedNodes.last) {
       _focusAndEnsureVisible(sortedNodes.first, alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd);
       return true;
@@ -1447,10 +1451,12 @@ class FocusTraversalGroup extends StatefulWidget {
     Key? key,
     FocusTraversalPolicy? policy,
     this.descendantsAreFocusable = true,
+    this.descendantsAreTraversable = true,
     required this.child,
-  })  : assert(descendantsAreFocusable != null),
-        policy = policy ?? ReadingOrderTraversalPolicy(),
-        super(key: key);
+  }) : assert(descendantsAreFocusable != null),
+       assert(descendantsAreTraversable != null),
+       policy = policy ?? ReadingOrderTraversalPolicy(),
+       super(key: key);
 
   /// The policy used to move the focus from one focus node to another when
   /// traversing them using a keyboard.
@@ -1471,6 +1477,9 @@ class FocusTraversalGroup extends StatefulWidget {
 
   /// {@macro flutter.widgets.Focus.descendantsAreFocusable}
   final bool descendantsAreFocusable;
+
+  /// {@macro flutter.widgets.Focus.descendantsAreTraversable}
+  final bool descendantsAreTraversable;
 
   /// The child widget of this [FocusTraversalGroup].
   ///
@@ -1574,6 +1583,7 @@ class _FocusTraversalGroupState extends State<FocusTraversalGroup> {
         skipTraversal: true,
         includeSemantics: false,
         descendantsAreFocusable: widget.descendantsAreFocusable,
+        descendantsAreTraversable: widget.descendantsAreTraversable,
         child: widget.child,
       ),
     );
@@ -1722,10 +1732,78 @@ class DirectionalFocusIntent extends Intent {
 /// [LogicalKeyboardKey.arrowLeft], and [LogicalKeyboardKey.arrowRight] keys in
 /// the [WidgetsApp], with the appropriate associated directions.
 class DirectionalFocusAction extends Action<DirectionalFocusIntent> {
+  /// Creates a [DirectionalFocusAction].
+  DirectionalFocusAction() : _isForTextField = false;
+
+  /// Creates a [DirectionalFocusAction] that ignores [DirectionalFocusIntent]s
+  /// whose `ignoreTextFields` field is true.
+  DirectionalFocusAction.forTextField() : _isForTextField = true;
+
+  // Whether this action is defined in a text field.
+  final bool _isForTextField;
   @override
   void invoke(DirectionalFocusIntent intent) {
-    if (!intent.ignoreTextFields || primaryFocus!.context!.widget is! EditableText) {
+    if (!intent.ignoreTextFields || !_isForTextField) {
       primaryFocus!.focusInDirection(intent.direction);
     }
+  }
+}
+
+/// A widget that controls whether or not the descendants of this widget are
+/// traversable.
+///
+/// Does not affect the value of [FocusNode.skipTraversal] of the descendants.
+///
+/// See also:
+///
+///  * [Focus], a widget for adding and managing a [FocusNode] in the widget tree.
+///  * [ExcludeFocus], a widget that excludes its descendants from focusability.
+///  * [FocusTraversalGroup], a widget that groups widgets for focus traversal,
+///    and can also be used in the same way as this widget by setting its
+///    `descendantsAreFocusable` attribute.
+class ExcludeFocusTraversal extends StatelessWidget {
+  /// Const constructor for [ExcludeFocusTraversal] widget.
+  ///
+  /// The [excluding] argument must not be null.
+  ///
+  /// The [child] argument is required, and must not be null.
+  const ExcludeFocusTraversal({
+    Key? key,
+    this.excluding = true,
+    required this.child,
+  }) : assert(excluding != null),
+       assert(child != null),
+       super(key: key);
+
+  /// If true, will make this widget's descendants untraversable.
+  ///
+  /// Defaults to true.
+  ///
+  /// Does not affect the value of [FocusNode.skipTraversal] on the descendants.
+  ///
+  /// See also:
+  ///
+  /// * [Focus.descendantsAreTraversable], the attribute of a [Focus] widget that
+  ///   controls this same property for focus widgets.
+  /// * [FocusTraversalGroup], a widget used to group together and configure the
+  ///   focus traversal policy for a widget subtree that has a
+  ///   `descendantsAreFocusable` parameter to conditionally block focus for a
+  ///   subtree.
+  final bool excluding;
+
+  /// The child widget of this [ExcludeFocusTraversal].
+  ///
+  /// {@macro flutter.widgets.ProxyWidget.child}
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Focus(
+      canRequestFocus: false,
+      skipTraversal: true,
+      includeSemantics: false,
+      descendantsAreTraversable: !excluding,
+      child: child,
+    );
   }
 }

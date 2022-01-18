@@ -124,6 +124,7 @@ class Focus extends StatefulWidget {
     bool? canRequestFocus,
     bool? skipTraversal,
     bool? descendantsAreFocusable,
+    bool? descendantsAreTraversable,
     this.includeSemantics = true,
     String? debugLabel,
   })  : _onKeyEvent = onKeyEvent,
@@ -131,6 +132,7 @@ class Focus extends StatefulWidget {
         _canRequestFocus = canRequestFocus,
         _skipTraversal = skipTraversal,
         _descendantsAreFocusable = descendantsAreFocusable,
+        _descendantsAreTraversable = descendantsAreTraversable,
         _debugLabel = debugLabel,
         assert(child != null),
         assert(autofocus != null),
@@ -279,10 +281,17 @@ class Focus extends StatefulWidget {
   /// Does not affect the value of [FocusNode.canRequestFocus] on the
   /// descendants.
   ///
+  /// If a descendant node loses focus when this value is changed, the focus
+  /// will move to the scope enclosing this node.
+  ///
   /// See also:
   ///
   /// * [ExcludeFocus], a widget that uses this property to conditionally
   ///   exclude focus for a subtree.
+  /// * [descendantsAreTraversable], which makes this widget's descendants
+  ///   untraversable.
+  /// * [ExcludeFocusTraversal], a widget that conditionally excludes focus
+  ///   traversal for a subtree.
   /// * [FocusTraversalGroup], a widget used to group together and configure the
   ///   focus traversal policy for a widget subtree that has a
   ///   `descendantsAreFocusable` parameter to conditionally block focus for a
@@ -290,6 +299,30 @@ class Focus extends StatefulWidget {
   /// {@endtemplate}
   bool get descendantsAreFocusable => _descendantsAreFocusable ?? focusNode?.descendantsAreFocusable ?? true;
   final bool? _descendantsAreFocusable;
+
+  /// {@template flutter.widgets.Focus.descendantsAreTraversable}
+  /// If false, will make this widget's descendants untraversable.
+  ///
+  /// Defaults to true. Does not affect traversablility of this node (just its
+  /// descendants): for that, use [FocusNode.skipTraversal].
+  ///
+  /// Does not affect the value of [FocusNode.skipTraversal] on the
+  /// descendants. Does not affect focusability of the descendants.
+  ///
+  /// See also:
+  ///
+  /// * [ExcludeFocusTraversal], a widget that uses this property to
+  ///   conditionally exclude focus traversal for a subtree.
+  /// * [descendantsAreFocusable], which makes this widget's descendants
+  ///   unfocusable.
+  /// * [ExcludeFocus], a widget that conditionally excludes focus for a subtree.
+  /// * [FocusTraversalGroup], a widget used to group together and configure the
+  ///   focus traversal policy for a widget subtree that has a
+  ///   `descendantsAreFocusable` parameter to conditionally block focus for a
+  ///   subtree.
+  /// {@endtemplate}
+  bool get descendantsAreTraversable => _descendantsAreTraversable ?? focusNode?.descendantsAreTraversable ?? true;
+  final bool? _descendantsAreTraversable;
 
   /// {@template flutter.widgets.Focus.includeSemantics}
   /// Include semantics information in this widget.
@@ -420,6 +453,7 @@ class Focus extends StatefulWidget {
     properties.add(FlagProperty('autofocus', value: autofocus, ifTrue: 'AUTOFOCUS', defaultValue: false));
     properties.add(FlagProperty('canRequestFocus', value: canRequestFocus, ifFalse: 'NOT FOCUSABLE', defaultValue: false));
     properties.add(FlagProperty('descendantsAreFocusable', value: descendantsAreFocusable, ifFalse: 'DESCENDANTS UNFOCUSABLE', defaultValue: true));
+    properties.add(FlagProperty('descendantsAreTraversable', value: descendantsAreTraversable, ifFalse: 'DESCENDANTS UNTRAVERSABLE', defaultValue: true));
     properties.add(DiagnosticsProperty<FocusNode>('focusNode', focusNode, defaultValue: null));
   }
 
@@ -459,6 +493,8 @@ class _FocusWithExternalFocusNode extends Focus {
   @override
   bool get descendantsAreFocusable => focusNode!.descendantsAreFocusable;
   @override
+  bool? get _descendantsAreTraversable => focusNode!.descendantsAreTraversable;
+  @override
   String? get debugLabel => focusNode!.debugLabel;
 }
 
@@ -468,6 +504,7 @@ class _FocusState extends State<Focus> {
   late bool _hadPrimaryFocus;
   late bool _couldRequestFocus;
   late bool _descendantsWereFocusable;
+  late bool _descendantsWereTraversable;
   bool _didAutofocus = false;
   FocusAttachment? _focusAttachment;
 
@@ -485,14 +522,16 @@ class _FocusState extends State<Focus> {
       _internalNode ??= _createNode();
     }
     focusNode.descendantsAreFocusable = widget.descendantsAreFocusable;
+    focusNode.descendantsAreTraversable = widget.descendantsAreTraversable;
     if (widget.skipTraversal != null) {
       focusNode.skipTraversal = widget.skipTraversal;
     }
-    if (widget.canRequestFocus != null) {
-      focusNode.canRequestFocus = widget.canRequestFocus;
+    if (widget._canRequestFocus != null) {
+      focusNode.canRequestFocus = widget._canRequestFocus!;
     }
     _couldRequestFocus = focusNode.canRequestFocus;
     _descendantsWereFocusable = focusNode.descendantsAreFocusable;
+    _descendantsWereTraversable = focusNode.descendantsAreTraversable;
     _hadPrimaryFocus = focusNode.hasPrimaryFocus;
     _focusAttachment = focusNode.attach(context, onKeyEvent: widget.onKeyEvent, onKey: widget.onKey);
 
@@ -507,6 +546,7 @@ class _FocusState extends State<Focus> {
       debugLabel: widget.debugLabel,
       canRequestFocus: widget.canRequestFocus,
       descendantsAreFocusable: widget.descendantsAreFocusable,
+      descendantsAreTraversable: widget.descendantsAreTraversable,
       skipTraversal: widget.skipTraversal,
     );
   }
@@ -575,10 +615,11 @@ class _FocusState extends State<Focus> {
         if (widget.skipTraversal != null) {
           focusNode.skipTraversal = widget.skipTraversal;
         }
-        if (widget.canRequestFocus != null) {
-          focusNode.canRequestFocus = widget.canRequestFocus;
+        if (widget._canRequestFocus != null) {
+          focusNode.canRequestFocus = widget._canRequestFocus!;
         }
         focusNode.descendantsAreFocusable = widget.descendantsAreFocusable;
+        focusNode.descendantsAreTraversable = widget.descendantsAreTraversable;
       }
     } else {
       _focusAttachment!.detach();
@@ -595,6 +636,7 @@ class _FocusState extends State<Focus> {
     final bool hasPrimaryFocus = focusNode.hasPrimaryFocus;
     final bool canRequestFocus = focusNode.canRequestFocus;
     final bool descendantsAreFocusable = focusNode.descendantsAreFocusable;
+    final bool descendantsAreTraversable = focusNode.descendantsAreTraversable;
     widget.onFocusChange?.call(focusNode.hasFocus);
     // Check the cached states that matter here, and call setState if they have
     // changed.
@@ -611,6 +653,11 @@ class _FocusState extends State<Focus> {
     if (_descendantsWereFocusable != descendantsAreFocusable) {
       setState(() {
         _descendantsWereFocusable = descendantsAreFocusable;
+      });
+    }
+    if (_descendantsWereTraversable != descendantsAreTraversable) {
+      setState(() {
+        _descendantsWereTraversable = descendantsAreTraversable;
       });
     }
   }
@@ -783,6 +830,8 @@ class _FocusScopeWithExternalFocusNode extends FocusScope {
   bool get skipTraversal => focusNode!.skipTraversal;
   @override
   bool get descendantsAreFocusable => focusNode!.descendantsAreFocusable;
+  @override
+  bool get descendantsAreTraversable => focusNode!.descendantsAreTraversable;
   @override
   String? get debugLabel => focusNode!.debugLabel;
 }

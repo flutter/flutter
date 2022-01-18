@@ -577,17 +577,7 @@ void main() {
         await tester.sendKeyEvent(LogicalKeyboardKey.space);
         await tester.pumpAndSettle();
 
-        // Navigate out of the grid and to the OK button.
-        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
-        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
-        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
-        await tester.pumpAndSettle();
-
-        // Activate OK.
-        await tester.sendKeyEvent(LogicalKeyboardKey.space);
-        await tester.pumpAndSettle();
-
-        // Should have selected Jan 18.
+        // Should have selected Jan 19.
         expect(selectedDate, DateTime(2016, DateTime.january, 19));
       });
     });
@@ -850,6 +840,7 @@ void main() {
             hasTapAction: true,
             isSelected: year == 2016,
             isFocusable: true,
+            isButton: true,
           ));
         }
       });

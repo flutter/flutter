@@ -399,7 +399,7 @@ Future<void> main() async {
 
       final File podfileLockFile = File(path.join(swiftAppPath, 'ios', 'Podfile.lock'));
       final String podfileLockOutput = podfileLockFile.readAsStringSync();
-      if (!podfileLockOutput.contains(':path: ".symlinks/plugins/url_launcher/ios"')
+      if (!podfileLockOutput.contains(':path: ".symlinks/plugins/url_launcher_ios/ios"')
         || !podfileLockOutput.contains(':path: Flutter')
           // test_plugin_objc no longer supports iOS, shouldn't be present.
         || podfileLockOutput.contains(':path: ".symlinks/plugins/test_plugin_objc/ios"')
@@ -417,7 +417,7 @@ Future<void> main() async {
 
       checkDirectoryExists(path.join(
         pluginSymlinks,
-        'url_launcher',
+        'url_launcher_ios',
         'ios',
       ));
 
@@ -447,7 +447,7 @@ void _validateIosPodfile(String appPath) {
 
   final File podfileLockFile = File(path.join(appPath, 'ios', 'Podfile.lock'));
   final String podfileLockOutput = podfileLockFile.readAsStringSync();
-  if (!podfileLockOutput.contains(':path: ".symlinks/plugins/url_launcher/ios"')
+  if (!podfileLockOutput.contains(':path: ".symlinks/plugins/url_launcher_ios/ios"')
     || !podfileLockOutput.contains(':path: Flutter')
     || !podfileLockOutput.contains(':path: ".symlinks/plugins/test_plugin_objc/ios"')
     || !podfileLockOutput.contains(':path: ".symlinks/plugins/test_plugin_swift/ios"')
@@ -479,7 +479,7 @@ void _validateIosPodfile(String appPath) {
 
   checkDirectoryExists(path.join(
     pluginSymlinks,
-    'url_launcher',
+    'url_launcher_ios',
     'ios',
   ));
 
@@ -516,7 +516,7 @@ void _validateMacOSPodfile(String appPath) {
   if (!podfileLockOutput.contains(':path: Flutter/ephemeral\n')
       || !podfileLockOutput.contains(':path: Flutter/ephemeral/.symlinks/plugins/url_launcher_macos/macos')
       || !podfileLockOutput.contains(':path: Flutter/ephemeral/.symlinks/plugins/test_plugin_swift/macos')
-      || podfileLockOutput.contains('url_launcher/')) {
+      || podfileLockOutput.contains('url_launcher_ios/')) {
     print(podfileLockOutput);
     throw TaskResult.failure('macOS Podfile.lock does not contain expected pods');
   }
@@ -546,7 +546,7 @@ void _validateMacOSPodfile(String appPath) {
 
   checkDirectoryNotExists(path.join(
     pluginSymlinks,
-    'url_launcher',
+    'url_launcher_ios',
   ));
 
   checkDirectoryExists(path.join(

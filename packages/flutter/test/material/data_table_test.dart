@@ -486,6 +486,105 @@ void main() {
     );
   });
 
+  testWidgets('DataTable sort indicator orientation does not change on state update', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/43724
+    Widget buildTable({String title = 'Name1'}) {
+      return DataTable(
+        sortColumnIndex: 0,
+        columns: <DataColumn>[
+          DataColumn(
+            label: Text(title),
+            tooltip: 'Name',
+            onSort: (int columnIndex, bool ascending) {},
+          ),
+        ],
+        rows: kDesserts.map<DataRow>((Dessert dessert) {
+          return DataRow(
+            cells: <DataCell>[
+              DataCell(
+                Text(dessert.name),
+              ),
+            ],
+          );
+        }).toList(),
+      );
+    }
+
+    // Check for ascending list
+    await tester.pumpWidget(MaterialApp(
+      home: Material(child: buildTable()),
+    ));
+    // The `tester.widget` ensures that there is exactly one upward arrow.
+    final Finder iconFinder = find.widgetWithIcon(Transform, Icons.arrow_upward);
+    Transform transformOfArrow = tester.widget<Transform>(iconFinder);
+    expect(
+      transformOfArrow.transform.getRotation(),
+      equals(Matrix3.identity()),
+    );
+
+    // Cause a rebuild by updating the widget
+    await tester.pumpWidget(MaterialApp(
+      home: Material(child: buildTable(title: 'Name2')),
+    ));
+    await tester.pumpAndSettle();
+    // The `tester.widget` ensures that there is exactly one upward arrow.
+    transformOfArrow = tester.widget<Transform>(iconFinder);
+    expect(
+      transformOfArrow.transform.getRotation(),
+      equals(Matrix3.identity()), // Should not have changed
+    );
+  });
+
+  testWidgets('DataTable sort indicator orientation does not change on state update - reverse', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/43724
+    Widget buildTable({String title = 'Name1'}) {
+      return DataTable(
+        sortColumnIndex: 0,
+        sortAscending: false,
+        columns: <DataColumn>[
+          DataColumn(
+            label: Text(title),
+            tooltip: 'Name',
+            onSort: (int columnIndex, bool ascending) {},
+          ),
+        ],
+        rows: kDesserts.map<DataRow>((Dessert dessert) {
+          return DataRow(
+            cells: <DataCell>[
+              DataCell(
+                Text(dessert.name),
+              ),
+            ],
+          );
+        }).toList(),
+      );
+    }
+
+    // Check for ascending list
+    await tester.pumpWidget(MaterialApp(
+      home: Material(child: buildTable()),
+    ));
+    // The `tester.widget` ensures that there is exactly one upward arrow.
+    final Finder iconFinder = find.widgetWithIcon(Transform, Icons.arrow_upward);
+    Transform transformOfArrow = tester.widget<Transform>(iconFinder);
+    expect(
+      transformOfArrow.transform.getRotation(),
+      equals(Matrix3.rotationZ(math.pi)),
+    );
+
+    // Cause a rebuild by updating the widget
+    await tester.pumpWidget(MaterialApp(
+      home: Material(child: buildTable(title: 'Name2')),
+    ));
+    await tester.pumpAndSettle();
+    // The `tester.widget` ensures that there is exactly one upward arrow.
+    transformOfArrow = tester.widget<Transform>(iconFinder);
+    expect(
+      transformOfArrow.transform.getRotation(),
+      equals(Matrix3.rotationZ(math.pi)), // Should not have changed
+    );
+  });
+
   testWidgets('DataTable row onSelectChanged test', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -1298,8 +1397,16 @@ void main() {
     );
   });
 
-  testWidgets('DataRow renders checkbox with colors from Theme', (WidgetTester tester) async {
-    final ThemeData _themeData = ThemeData.light();
+  testWidgets('DataRow renders checkbox with colors from CheckboxTheme', (WidgetTester tester) async {
+    const Color fillColor = Color(0xFF00FF00);
+    const Color checkColor = Color(0xFF0000FF);
+
+    final ThemeData _themeData = ThemeData(
+      checkboxTheme: CheckboxThemeData(
+        fillColor: MaterialStateProperty.all(fillColor),
+        checkColor: MaterialStateProperty.all(checkColor),
+      ),
+    );
     Widget buildTable() {
       return MaterialApp(
         theme: _themeData,
@@ -1312,6 +1419,7 @@ void main() {
             ],
             rows: <DataRow>[
               DataRow(
+                selected: true,
                 onSelectChanged: (bool? checked) {},
                 cells: const <DataCell>[
                   DataCell(Text('Content1')),
@@ -1323,13 +1431,15 @@ void main() {
       );
     }
 
-    Checkbox lastCheckbox() {
-      return tester.widgetList<Checkbox>(find.byType(Checkbox)).last;
-    }
-
     await tester.pumpWidget(buildTable());
-    expect(lastCheckbox().activeColor, _themeData.colorScheme.primary);
-    expect(lastCheckbox().checkColor, _themeData.colorScheme.onPrimary);
+
+    expect(
+      Material.of(tester.element(find.byType(Checkbox).last)),
+      paints
+        ..path()
+        ..path(color: fillColor)
+        ..path(color: checkColor),
+    );
   });
 
   testWidgets('DataRow renders custom colors when selected', (WidgetTester tester) async {
@@ -1669,5 +1779,70 @@ void main() {
     expect(find.widgetWithText(TableRowInkWell, 'Hello'), findsOneWidget);
     expect(find.widgetWithText(TableRowInkWell, 'Bug'), findsNothing);
     expect(find.widgetWithText(TableRowInkWell, 'GitHub'), findsNothing);
+  });
+
+  testWidgets('DataTable set interior border test', (WidgetTester tester) async {
+    const List<DataColumn> columns = <DataColumn>[
+      DataColumn(label: Text('column1')),
+      DataColumn(label: Text('column2')),
+    ];
+
+    const List<DataCell> cells = <DataCell>[
+      DataCell(Text('cell1')),
+      DataCell(Text('cell2')),
+    ];
+
+    const List<DataRow> rows = <DataRow>[
+      DataRow(cells: cells),
+      DataRow(cells: cells),
+    ];
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: DataTable(
+            border: TableBorder.all(width: 2, color: Colors.red),
+            columns: columns,
+            rows: rows,
+          ),
+        ),
+      ),
+    );
+
+    final Finder finder = find.byType(DataTable);
+    expect(tester.getSize(finder), equals(const Size(800, 600)));
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: DataTable(
+            border: TableBorder.all(color: Colors.red),
+            columns: columns,
+            rows: rows,
+          ),
+        ),
+      ),
+    );
+
+    Table table = tester.widget(find.byType(Table));
+    TableBorder? tableBorder = table.border;
+    expect(tableBorder!.top.color, Colors.red);
+    expect(tableBorder.bottom.width, 1);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: DataTable(
+            columns: columns,
+            rows: rows,
+          ),
+        ),
+      ),
+    );
+
+    table = tester.widget(find.byType(Table));
+    tableBorder = table.border;
+    expect(tableBorder?.bottom.width, null);
+    expect(tableBorder?.top.color, null);
   });
 }

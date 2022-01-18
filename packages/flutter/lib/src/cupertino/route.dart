@@ -25,6 +25,19 @@ const int _kMaxDroppedSwipePageForwardAnimationTime = 800; // Milliseconds.
 // user releases a page mid swipe.
 const int _kMaxPageBackAnimationTime = 300; // Milliseconds.
 
+/// Barrier color used for a barrier visible during transitions for Cupertino
+/// page routes.
+///
+/// This barrier color is only used for full-screen page routes with
+/// `fullscreenDialog: false`.
+///
+/// By default, `fullscreenDialog` Cupertino route transitions have no
+/// `barrierColor`, and [CupertinoDialogRoute]s and [CupertinoModalPopupRoute]s
+/// have a `barrierColor` defined by [kCupertinoModalBarrierColor].
+///
+/// A relatively rigorous eyeball estimation.
+const Color _kCupertinoPageTransitionBarrierColor = Color(0x18000000);
+
 /// Barrier color for a Cupertino modal barrier.
 ///
 /// Extracted from https://developer.apple.com/design/resources/.
@@ -126,7 +139,7 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
   Duration get transitionDuration => const Duration(milliseconds: 400);
 
   @override
-  Color? get barrierColor => null;
+  Color? get barrierColor => fullscreenDialog ? null : _kCupertinoPageTransitionBarrierColor;
 
   @override
   String? get barrierLabel => null;
@@ -791,8 +804,6 @@ class _CupertinoEdgeShadowDecoration extends Decoration {
     end: const _CupertinoEdgeShadowDecoration._(
       // Eyeballed gradient used to mimic a drop shadow on the start side only.
       <Color>[
-        Color(0x38000000),
-        Color(0x12000000),
         Color(0x04000000),
         Color(0x00000000),
       ],

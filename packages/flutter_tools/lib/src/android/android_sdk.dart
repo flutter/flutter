@@ -9,7 +9,7 @@ import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/version.dart';
 import '../convert.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import 'android_studio.dart';
 
 // ANDROID_HOME is deprecated.
@@ -198,7 +198,7 @@ class AndroidSdk {
       }
     }
 
-    for (final String searchPath in searchPaths.whereType<String>()) {
+    for (final String searchPath in searchPaths) {
       if (globals.fs.directory(searchPath).existsSync()) {
         return searchPath;
       }

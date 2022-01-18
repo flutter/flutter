@@ -48,9 +48,9 @@ class CastListState extends State<CastList> {
     const Actor('James Madison', 'JM'),
   ];
 
-  Iterable<Widget> get actorWidgets sync* {
-    for (final Actor actor in _cast) {
-      yield Padding(
+  Iterable<Widget> get actorWidgets {
+    return _cast.map((Actor actor) {
+      return Padding(
         padding: const EdgeInsets.all(4.0),
         child: Chip(
           avatar: CircleAvatar(child: Text(actor.initials)),
@@ -64,7 +64,7 @@ class CastListState extends State<CastList> {
           },
         ),
       );
-    }
+    });
   }
 
   @override

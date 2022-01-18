@@ -203,8 +203,8 @@ abstract class DesktopDevice extends Device {
   /// Builds the current project for this device, with the given options.
   Future<void> buildForDevice(
     ApplicationPackage package, {
+    required BuildInfo buildInfo,
     String? mainPath,
-    BuildInfo buildInfo,
   });
 
   /// Returns the path to the executable to run for [package] on this device for
@@ -235,7 +235,6 @@ abstract class DesktopDevice extends Device {
     }
 
     addFlag('enable-dart-profiling=true');
-    addFlag('enable-background-compilation=true');
 
     if (traceStartup) {
       addFlag('trace-startup=true');

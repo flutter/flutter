@@ -18,12 +18,12 @@ import '../base/logger.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
-import '../convert.dart';
+import '../daemon.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../emulator.dart';
 import '../features.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../project.dart';
 import '../resident_runner.dart';
 import '../run_cold.dart';
@@ -41,7 +41,13 @@ const String protocolVersion = '0.6.1';
 /// It can be shutdown with a `daemon.shutdown` command (or by killing the
 /// process).
 class DaemonCommand extends FlutterCommand {
-  DaemonCommand({ this.hidden = false });
+  DaemonCommand({ this.hidden = false }) {
+    argParser.addOption(
+      'listen-on-tcp-port',
+      help: 'If specified, the daemon will be listening for commands on the specified port instead of stdio.',
+      valueHelp: 'port',
+    );
+  }
 
   @override
   final String name = 'daemon';
@@ -57,9 +63,31 @@ class DaemonCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    if (argResults['listen-on-tcp-port'] != null) {
+      int port;
+      try {
+        port = int.parse(stringArg('listen-on-tcp-port'));
+      } on FormatException catch (error) {
+        throwToolExit('Invalid port for `--listen-on-tcp-port`: $error');
+      }
+
+      await _DaemonServer(
+        port: port,
+        logger: StdoutLogger(
+          terminal: globals.terminal,
+          stdio: globals.stdio,
+          outputPreferences: globals.outputPreferences,
+        ),
+        notifyingLogger: asLogger<NotifyingLogger>(globals.logger),
+      ).run();
+      return FlutterCommandResult.success();
+    }
     globals.printStatus('Starting device daemon...');
     final Daemon daemon = Daemon(
-      stdinCommandStream, stdoutCommandResponse,
+      DaemonConnection(
+        daemonStreams: StdioDaemonStreams(globals.stdio),
+        logger: globals.logger,
+      ),
       notifyingLogger: asLogger<NotifyingLogger>(globals.logger),
     );
     final int code = await daemon.onExit;
@@ -70,14 +98,57 @@ class DaemonCommand extends FlutterCommand {
   }
 }
 
-typedef DispatchCommand = void Function(Map<String, dynamic> command);
+class _DaemonServer {
+  _DaemonServer({
+    this.port,
+    this.logger,
+    this.notifyingLogger,
+  });
+
+  final int port;
+
+  /// Stdout logger used to print general server-related errors.
+  final Logger logger;
+
+  // Logger that sends the message to the other end of daemon connection.
+  final NotifyingLogger notifyingLogger;
+
+  Future<void> run() async {
+    final ServerSocket serverSocket = await ServerSocket.bind(InternetAddress.loopbackIPv4, port);
+    logger.printStatus('Daemon server listening on ${serverSocket.port}');
+
+    final StreamSubscription<Socket> subscription = serverSocket.listen(
+      (Socket socket) async {
+        // We have to listen to socket.done. Otherwise when the connection is
+        // reset, we will receive an uncatchable exception.
+        // https://github.com/dart-lang/sdk/issues/25518
+        final Future<void> socketDone = socket.done.catchError((dynamic error, StackTrace stackTrace) {
+          logger.printError('Socket error: $error');
+          logger.printTrace('$stackTrace');
+        });
+        final Daemon daemon = Daemon(
+          DaemonConnection(
+            daemonStreams: TcpDaemonStreams(socket, logger: logger),
+            logger: logger,
+          ),
+          notifyingLogger: notifyingLogger,
+        );
+        await daemon.onExit;
+        await socketDone;
+      },
+    );
+
+    // Wait indefinitely until the server closes.
+    await subscription.asFuture<void>();
+    await subscription.cancel();
+  }
+}
 
 typedef CommandHandler = Future<dynamic> Function(Map<String, dynamic> args);
 
 class Daemon {
   Daemon(
-    Stream<Map<String, dynamic>> commandStream,
-    this.sendCommand, {
+    this.connection, {
     this.notifyingLogger,
     this.logToStdout = false,
   }) {
@@ -89,9 +160,10 @@ class Daemon {
     _registerDomain(devToolsDomain = DevToolsDomain(this));
 
     // Start listening.
-    _commandSubscription = commandStream.listen(
+    _commandSubscription = connection.incomingCommands.listen(
       _handleRequest,
       onDone: () {
+        shutdown();
         if (!_onExitCompleter.isCompleted) {
           _onExitCompleter.complete(0);
         }
@@ -99,16 +171,15 @@ class Daemon {
     );
   }
 
+  final DaemonConnection connection;
+
   DaemonDomain daemonDomain;
   AppDomain appDomain;
   DeviceDomain deviceDomain;
   EmulatorDomain emulatorDomain;
   DevToolsDomain devToolsDomain;
   StreamSubscription<Map<String, dynamic>> _commandSubscription;
-  int _outgoingRequestId = 1;
-  final Map<String, Completer<dynamic>> _outgoingRequestCompleters = <String, Completer<dynamic>>{};
 
-  final DispatchCommand sendCommand;
   final NotifyingLogger notifyingLogger;
   final bool logToStdout;
 
@@ -134,62 +205,27 @@ class Daemon {
 
     try {
       final String method = request['method'] as String;
-      if (method != null) {
-        if (!method.contains('.')) {
-          throw 'method not understood: $method';
-        }
-
-        final String prefix = method.substring(0, method.indexOf('.'));
-        final String name = method.substring(method.indexOf('.') + 1);
-        if (_domainMap[prefix] == null) {
-          throw 'no domain for method: $method';
-        }
-
-        _domainMap[prefix].handleCommand(name, id, castStringKeyedMap(request['params']) ?? const <String, dynamic>{});
-      } else {
-        // If there was no 'method' field then it's a response to a daemon-to-editor request.
-        final Completer<dynamic> completer = _outgoingRequestCompleters[id.toString()];
-        if (completer == null) {
-          throw 'unexpected response with id: $id';
-        }
-        _outgoingRequestCompleters.remove(id.toString());
-
-        if (request['error'] != null) {
-          completer.completeError(request['error']);
-        } else {
-          completer.complete(request['result']);
-        }
+      assert(method != null);
+      if (!method.contains('.')) {
+        throw 'method not understood: $method';
       }
+
+      final String prefix = method.substring(0, method.indexOf('.'));
+      final String name = method.substring(method.indexOf('.') + 1);
+      if (_domainMap[prefix] == null) {
+        throw 'no domain for method: $method';
+      }
+
+      _domainMap[prefix].handleCommand(name, id, castStringKeyedMap(request['params']) ?? const <String, dynamic>{});
     } on Exception catch (error, trace) {
-      _send(<String, dynamic>{
-        'id': id,
-        'error': _toJsonable(error),
-        'trace': '$trace',
-      });
+      connection.sendErrorResponse(id, _toJsonable(error), trace);
     }
   }
-
-  Future<dynamic> sendRequest(String method, [ dynamic args ]) {
-    final Map<String, dynamic> map = <String, dynamic>{'method': method};
-    if (args != null) {
-      map['params'] = _toJsonable(args);
-    }
-
-    final int id = _outgoingRequestId++;
-    final Completer<dynamic> completer = Completer<dynamic>();
-
-    map['id'] = id.toString();
-    _outgoingRequestCompleters[id.toString()] = completer;
-
-    _send(map);
-    return completer.future;
-  }
-
-  void _send(Map<String, dynamic> map) => sendCommand(map);
 
   Future<void> shutdown({ dynamic error }) async {
     await devToolsDomain?.dispose();
     await _commandSubscription?.cancel();
+    await connection.dispose();
     for (final Domain domain in _domainMap.values) {
       await domain.dispose();
     }
@@ -225,29 +261,15 @@ abstract class Domain {
       }
       throw 'command not understood: $name.$command';
     }).then<dynamic>((dynamic result) {
-      if (result == null) {
-        _send(<String, dynamic>{'id': id});
-      } else {
-        _send(<String, dynamic>{'id': id, 'result': _toJsonable(result)});
-      }
-    }).catchError((dynamic error, dynamic trace) {
-      _send(<String, dynamic>{
-        'id': id,
-        'error': _toJsonable(error),
-        'trace': '$trace',
-      });
+      daemon.connection.sendResponse(id, _toJsonable(result));
+    }).catchError((Object error, StackTrace stackTrace) {
+      daemon.connection.sendErrorResponse(id, _toJsonable(error), stackTrace);
     });
   }
 
   void sendEvent(String name, [ dynamic args ]) {
-    final Map<String, dynamic> map = <String, dynamic>{'event': name};
-    if (args != null) {
-      map['params'] = _toJsonable(args);
-    }
-    _send(map);
+    daemon.connection.sendEvent(name, _toJsonable(args));
   }
-
-  void _send(Map<String, dynamic> map) => daemon._send(map);
 
   String _getStringArg(Map<String, dynamic> args, String name, { bool required = false }) {
     if (required && !args.containsKey(name)) {
@@ -309,7 +331,7 @@ class DaemonDomain extends Domain {
           // capture the print output for testing.
           // ignore: avoid_print
           print(message.message);
-        } else if (message.level == 'error') {
+        } else if (message.level == 'error' || message.level == 'warning') {
           globals.stdio.stderrWrite('${message.message}\n');
           if (message.stackTrace != null) {
             globals.stdio.stderrWrite(
@@ -346,7 +368,7 @@ class DaemonDomain extends Domain {
   /// --web-allow-expose-url switch. The client may return the same URL back if
   /// tunnelling is not required for a given URL.
   Future<String> exposeUrl(String url) async {
-    final dynamic res = await daemon.sendRequest('app.exposeUrl', <String, String>{'url': url});
+    final dynamic res = await daemon.connection.sendRequest('app.exposeUrl', <String, String>{'url': url});
     if (res is Map<String, dynamic> && res['url'] is String) {
       return res['url'] as String;
     } else {
@@ -907,35 +929,6 @@ class DevToolsDomain extends Domain {
   }
 }
 
-Stream<Map<String, dynamic>> get stdinCommandStream => globals.stdio.stdin
-  .transform<String>(utf8.decoder)
-  .transform<String>(const LineSplitter())
-  .where((String line) => line.startsWith('[{') && line.endsWith('}]'))
-  .map<Map<String, dynamic>>((String line) {
-    line = line.substring(1, line.length - 1);
-    return castStringKeyedMap(json.decode(line));
-  });
-
-void stdoutCommandResponse(Map<String, dynamic> command) {
-  globals.stdio.stdoutWrite(
-    '[${jsonEncodeObject(command)}]\n',
-    fallback: (String message, dynamic error, StackTrace stack) {
-      throwToolExit('Failed to write daemon command response to stdout: $error');
-    },
-  );
-}
-
-String jsonEncodeObject(dynamic object) {
-  return json.encode(object, toEncodable: _toEncodable);
-}
-
-dynamic _toEncodable(dynamic object) {
-  if (object is OperationResult) {
-    return _operationResultToMap(object);
-  }
-  return object;
-}
-
 Future<Map<String, dynamic>> _deviceToMap(Device device) async {
   return <String, dynamic>{
     'id': device.id,
@@ -970,7 +963,7 @@ dynamic _toJsonable(dynamic obj) {
     return obj;
   }
   if (obj is OperationResult) {
-    return obj;
+    return _operationResultToMap(obj);
   }
   if (obj is ToolExit) {
     return obj.message;
@@ -1012,6 +1005,18 @@ class NotifyingLogger extends DelegatingLogger {
   }
 
   @override
+  void printWarning(
+    String message, {
+    bool emphasis = false,
+    TerminalColor color,
+    int indent,
+    int hangingIndent,
+    bool wrap,
+  }) {
+    _sendMessage(LogMessage('warning', message));
+  }
+
+  @override
   void printStatus(
     String message, {
     bool emphasis = false,
@@ -1022,6 +1027,13 @@ class NotifyingLogger extends DelegatingLogger {
     bool wrap,
   }) {
     _sendMessage(LogMessage('status', message));
+  }
+
+  @override
+  void printBox(String message, {
+    String title,
+  }) {
+    _sendMessage(LogMessage('status', title == null ? message : '$title: $message'));
   }
 
   @override

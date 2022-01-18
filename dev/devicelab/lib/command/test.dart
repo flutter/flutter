@@ -49,6 +49,7 @@ class TestCommand extends Command<void> {
             'task, will write test results to the file.');
     argParser.addFlag(
       'silent',
+      help: 'Suppresses standard output and only print standard error output.',
     );
   }
 

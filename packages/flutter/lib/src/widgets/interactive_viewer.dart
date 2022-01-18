@@ -72,6 +72,7 @@ class InteractiveViewer extends StatefulWidget {
     this.onInteractionUpdate,
     this.panEnabled = true,
     this.scaleEnabled = true,
+    this.scaleFactor = 200.0,
     this.transformationController,
     required Widget this.child,
   }) : assert(alignPanAxis != null),
@@ -118,6 +119,7 @@ class InteractiveViewer extends StatefulWidget {
     this.onInteractionUpdate,
     this.panEnabled = true,
     this.scaleEnabled = true,
+    this.scaleFactor = 200.0,
     this.transformationController,
     required InteractiveViewerWidgetBuilder this.builder,
   }) : assert(alignPanAxis != null),
@@ -248,6 +250,22 @@ class InteractiveViewer extends StatefulWidget {
   ///
   ///   * [panEnabled], which is similar but for panning.
   final bool scaleEnabled;
+
+  /// Determines the amount of scale to be performed per pointer scroll.
+  ///
+  /// Defaults to 200.0, which was arbitrarily chosen to feel natural for most
+  /// trackpads and mousewheels on all supported platforms.
+  ///
+  /// Increasing this value above the default causes scaling to feel slower,
+  /// while decreasing it causes scaling to feel faster.
+  ///
+  /// The amount of scale is calculated as the exponential function of the
+  /// [PointerScrollEvent.scrollDelta] to [scaleFactor] ratio. In the Flutter
+  /// engine, the mousewheel [PointerScrollEvent.scrollDelta] is hardcoded to 20
+  /// per scroll, while a trackpad scroll can be any amount.
+  ///
+  /// Affects only pointer device scrolling, not pinch to zoom.
+  final double scaleFactor;
 
   /// The maximum allowed scale.
   ///
@@ -881,12 +899,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
           localFocalPoint: event.localPosition,
         ),
       );
-
-      // In the Flutter engine, the mousewheel scrollDelta is hardcoded to 20
-      // per scroll, while a trackpad scroll can be any amount. The calculation
-      // for scaleChange here was arbitrarily chosen to feel natural for both
-      // trackpads and mousewheels on all platforms.
-      final double scaleChange = math.exp(-event.scrollDelta.dy / 200);
+      final double scaleChange = math.exp(-event.scrollDelta.dy / widget.scaleFactor);
 
       if (!_gestureIsSupported(_GestureType.scale)) {
         widget.onInteractionUpdate?.call(ScaleUpdateDetails(

@@ -905,17 +905,19 @@ class _DragAvatar<T extends Object> extends Drag {
     _activeTarget = newTarget;
   }
 
-  Iterable<_DragTargetState<Object>> _getDragTargets(Iterable<HitTestEntry> path) sync* {
+  Iterable<_DragTargetState<Object>> _getDragTargets(Iterable<HitTestEntry> path) {
     // Look for the RenderBoxes that corresponds to the hit target (the hit target
     // widgets build RenderMetaData boxes for us for this purpose).
+    final List<_DragTargetState<Object>> targets = <_DragTargetState<Object>>[];
     for (final HitTestEntry entry in path) {
       final HitTestTarget target = entry.target;
       if (target is RenderMetaData) {
         final dynamic metaData = target.metaData;
         if (metaData is _DragTargetState && metaData.isExpectedDataType(data, T))
-          yield metaData;
+          targets.add(metaData);
       }
     }
+    return targets;
   }
 
   void _leaveAllEntered() {

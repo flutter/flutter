@@ -541,7 +541,7 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
 /// A base class for widgets with implicit animations that need to rebuild their
 /// widget tree as the animation runs.
 ///
-/// This class calls [build] each frame that the animation tickets. For a
+/// This class calls [build] each frame that the animation ticks. For a
 /// variant that does not rebuild each frame, consider subclassing
 /// [ImplicitlyAnimatedWidgetState] directly.
 ///
@@ -1945,7 +1945,7 @@ class AnimatedDefaultTextStyle extends ImplicitlyAnimatedWidget {
   /// See [TextWidthBasis] for possible values and their implications.
   final TextWidthBasis textWidthBasis;
 
-  /// {@macro flutter.dart:ui.textHeightBehavior}
+  /// {@macro dart.ui.textHeightBehavior}
   final ui.TextHeightBehavior? textHeightBehavior;
 
   @override

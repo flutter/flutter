@@ -2,15 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../convert.dart';
 import '../device.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 import '../vmservice.dart';
 
@@ -67,9 +65,9 @@ class ScreenshotCommand extends FlutterCommand {
   @override
   final List<String> aliases = <String>['pic'];
 
-  Device device;
+  Device? device;
 
-  Future<void> _validateOptions(String screenshotType, String observatoryUrl) async {
+  Future<void> _validateOptions(String? screenshotType, String? observatoryUrl) async {
     switch (screenshotType) {
       case _kDeviceType:
         if (observatoryUrl != null) {
@@ -79,8 +77,8 @@ class ScreenshotCommand extends FlutterCommand {
         if (device == null) {
           throwToolExit('Must have a connected device for screenshot type $screenshotType');
         }
-        if (!device.supportsScreenshot) {
-          throwToolExit('Screenshot not supported for ${device.name}.');
+        if (!device!.supportsScreenshot) {
+          throwToolExit('Screenshot not supported for ${device!.name}.');
         }
         break;
       default:
@@ -94,15 +92,15 @@ class ScreenshotCommand extends FlutterCommand {
   }
 
   @override
-  Future<FlutterCommandResult> verifyThenRunCommand(String commandPath) async {
+  Future<FlutterCommandResult> verifyThenRunCommand(String? commandPath) async {
     await _validateOptions(stringArg(_kType), stringArg(_kObservatoryUrl));
     return super.verifyThenRunCommand(commandPath);
   }
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    File outputFile;
-    if (argResults.wasParsed(_kOut)) {
+    File? outputFile;
+    if (argResults?.wasParsed(_kOut) == true) {
       outputFile = globals.fs.file(stringArg(_kOut));
     }
 
@@ -123,24 +121,24 @@ class ScreenshotCommand extends FlutterCommand {
                    : FlutterCommandResult.fail();
   }
 
-  Future<void> runScreenshot(File outputFile) async {
+  Future<void> runScreenshot(File? outputFile) async {
     outputFile ??= globals.fsUtils.getUniqueFile(
       globals.fs.currentDirectory,
       'flutter',
       'png',
     );
     try {
-      await device.takeScreenshot(outputFile);
+      await device!.takeScreenshot(outputFile);
     } on Exception catch (error) {
       throwToolExit('Error taking screenshot: $error');
     }
     _showOutputFileInfo(outputFile);
   }
 
-  Future<bool> runSkia(File outputFile) async {
-    final Uri observatoryUrl = Uri.parse(stringArg(_kObservatoryUrl));
+  Future<bool> runSkia(File? outputFile) async {
+    final Uri observatoryUrl = Uri.parse(stringArg(_kObservatoryUrl)!);
     final FlutterVmService vmService = await connectToVmService(observatoryUrl, logger: globals.logger);
-    final vm_service.Response skp = await vmService.screenshotSkp();
+    final vm_service.Response? skp = await vmService.screenshotSkp();
     if (skp == null) {
       globals.printError(
         'The Skia picture request failed, probably because the device was '
@@ -154,17 +152,17 @@ class ScreenshotCommand extends FlutterCommand {
       'skp',
     );
     final IOSink sink = outputFile.openWrite();
-    sink.add(base64.decode(skp.json['skp'] as String));
+    sink.add(base64.decode(skp.json?['skp'] as String));
     await sink.close();
     _showOutputFileInfo(outputFile);
     _ensureOutputIsNotJsonRpcError(outputFile);
     return true;
   }
 
-  Future<bool> runRasterizer(File outputFile) async {
-    final Uri observatoryUrl = Uri.parse(stringArg(_kObservatoryUrl));
+  Future<bool> runRasterizer(File? outputFile) async {
+    final Uri observatoryUrl = Uri.parse(stringArg(_kObservatoryUrl)!);
     final FlutterVmService vmService = await connectToVmService(observatoryUrl, logger: globals.logger);
-    final vm_service.Response response = await vmService.screenshot();
+    final vm_service.Response? response = await vmService.screenshot();
     if (response == null) {
       globals.printError(
         'The screenshot request failed, probably because the device was '
@@ -178,7 +176,7 @@ class ScreenshotCommand extends FlutterCommand {
       'png',
     );
     final IOSink sink = outputFile.openWrite();
-    sink.add(base64.decode(response.json['screenshot'] as String));
+    sink.add(base64.decode(response.json?['screenshot'] as String));
     await sink.close();
     _showOutputFileInfo(outputFile);
     _ensureOutputIsNotJsonRpcError(outputFile);
