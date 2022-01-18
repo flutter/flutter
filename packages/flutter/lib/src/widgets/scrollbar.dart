@@ -403,7 +403,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   late double _thumbOffset;
 
   // InfiniteScroll
-  // TODO(Piinks): Users may want to have access to these values to adjust as they like, evaluate and update.
+  // TODO(Piinks): Users may want to have access to these values to adjust as they like
   // The assumed depth of the scroll view when the maxExtent is infinity.
   // This value will be updated as this assumed extent is travelled.
   double _infiniteDepth = _infiniteLeadingExtent;
