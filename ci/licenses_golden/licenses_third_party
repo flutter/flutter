@@ -1,4 +1,4 @@
-Signature: f651dff37e63f8affc1c1981a8032b95
+Signature: a6c296a1a341b4bf66c0f202a397610c
 
 UNUSED LICENSES:
 
@@ -1171,6 +1171,13 @@ FILE: ../../../third_party/boringssl/src/third_party/wycheproof_testvectors/xcha
 FILE: ../../../third_party/expat/expat/fuzz/xml_parse_fuzzer.c
 FILE: ../../../third_party/expat/expat/fuzz/xml_parsebuffer_fuzzer.c
 FILE: ../../../third_party/fuchsia-vulkan/cmake/cmake_uninstall.cmake.in
+FILE: ../../../third_party/fuchsia-vulkan/include/vk_video/vulkan_video_codec_h264std.h
+FILE: ../../../third_party/fuchsia-vulkan/include/vk_video/vulkan_video_codec_h264std_decode.h
+FILE: ../../../third_party/fuchsia-vulkan/include/vk_video/vulkan_video_codec_h264std_encode.h
+FILE: ../../../third_party/fuchsia-vulkan/include/vk_video/vulkan_video_codec_h265std.h
+FILE: ../../../third_party/fuchsia-vulkan/include/vk_video/vulkan_video_codec_h265std_decode.h
+FILE: ../../../third_party/fuchsia-vulkan/include/vk_video/vulkan_video_codec_h265std_encode.h
+FILE: ../../../third_party/fuchsia-vulkan/include/vk_video/vulkan_video_codecs_common.h
 FILE: ../../../third_party/fuchsia-vulkan/include/vulkan/vk_icd.h
 FILE: ../../../third_party/fuchsia-vulkan/include/vulkan/vk_layer.h
 FILE: ../../../third_party/fuchsia-vulkan/include/vulkan/vk_platform.h
@@ -1181,12 +1188,17 @@ FILE: ../../../third_party/fuchsia-vulkan/include/vulkan/vulkan_android.h
 FILE: ../../../third_party/fuchsia-vulkan/include/vulkan/vulkan_beta.h
 FILE: ../../../third_party/fuchsia-vulkan/include/vulkan/vulkan_core.h
 FILE: ../../../third_party/fuchsia-vulkan/include/vulkan/vulkan_directfb.h
+FILE: ../../../third_party/fuchsia-vulkan/include/vulkan/vulkan_enums.hpp
 FILE: ../../../third_party/fuchsia-vulkan/include/vulkan/vulkan_fuchsia.h
+FILE: ../../../third_party/fuchsia-vulkan/include/vulkan/vulkan_funcs.hpp
 FILE: ../../../third_party/fuchsia-vulkan/include/vulkan/vulkan_ggp.h
+FILE: ../../../third_party/fuchsia-vulkan/include/vulkan/vulkan_handles.hpp
 FILE: ../../../third_party/fuchsia-vulkan/include/vulkan/vulkan_ios.h
 FILE: ../../../third_party/fuchsia-vulkan/include/vulkan/vulkan_macos.h
 FILE: ../../../third_party/fuchsia-vulkan/include/vulkan/vulkan_metal.h
+FILE: ../../../third_party/fuchsia-vulkan/include/vulkan/vulkan_raii.hpp
 FILE: ../../../third_party/fuchsia-vulkan/include/vulkan/vulkan_screen.h
+FILE: ../../../third_party/fuchsia-vulkan/include/vulkan/vulkan_structs.hpp
 FILE: ../../../third_party/fuchsia-vulkan/include/vulkan/vulkan_vi.h
 FILE: ../../../third_party/fuchsia-vulkan/include/vulkan/vulkan_wayland.h
 FILE: ../../../third_party/fuchsia-vulkan/include/vulkan/vulkan_win32.h
