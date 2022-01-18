@@ -272,7 +272,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
         }
         return true;
       }());
-      SchedulerBinding.instance!.requestFrameRate(FrameRate.fastest);
+      RendererBinding.instance!.requestFrameRate(FrameRate.fastest);
       final double oldPixels = pixels;
       _pixels = newPixels - overscroll;
       if (_pixels != oldPixels) {

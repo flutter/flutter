@@ -56,7 +56,7 @@ abstract class TickerProvider {
 /// [SchedulerBinding.scheduleFrameCallback].
 ///
 /// Tickers use the current frame rate. To change the frame rate, consider
-/// calling [SchedulerBinding.requestFrameRate] each time the ticker ticks.
+/// calling [RenderBinding.requestFrameRate] each time the ticker ticks.
 class Ticker {
   /// Creates a ticker that will call the provided callback once per frame while
   /// running.

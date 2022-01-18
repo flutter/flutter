@@ -15,6 +15,6 @@ library scheduler;
 
 export 'src/scheduler/binding.dart';
 export 'src/scheduler/debug.dart';
-export 'src/scheduler/frame_rate.dart';
+export 'src/rendering/frame_rate.dart';
 export 'src/scheduler/priority.dart';
 export 'src/scheduler/ticker.dart';

@@ -227,6 +227,35 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
     _pipelineOwner.rootNode = value;
   }
 
+  // The currently highest-requested frame rate.
+  // This resets in [_updateFrameRate].
+  FrameRate _fastestRequestedFrameRate = FrameRate.normal;
+
+  /// Request that the operating system adjust to a specific frame rate.
+  ///
+  /// If multiple frame rates are requested, the fastest requested rate is used,
+  /// ignoring any requests for [FrameRate.normal].
+  ///
+  /// If no frame rates are requested, [FrameRate.normal] (the OS default) is
+  /// used instead.
+  void requestFrameRate(FrameRate frameRate) {
+    if (frameRate > _fastestRequestedFrameRate){
+      _fastestRequestedFrameRate = frameRate;
+    }
+  }
+
+  // Update the refresh frame rate for rendering
+  void _updateFrameRate() {
+    // If user is interacting with app, we force to set the frame rate fastest.
+    if(isTracking){
+      _fastestRequestedFrameRate = FrameRate.fastest;
+    }
+    window.updateFrameRate(_fastestRequestedFrameRate.frequency);
+
+    // Reset frame rate.
+    _fastestRequestedFrameRate = FrameRate.normal;
+  }
+
   /// Called when the system metrics change.
   ///
   /// See [dart:ui.PlatformDispatcher.onMetricsChanged].
@@ -498,6 +527,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
     pipelineOwner.flushCompositingBits();
     pipelineOwner.flushPaint();
     if (sendFramesToEngine) {
+      _updateFrameRate(); // update the refresh rate
       renderView.compositeFrame(); // this sends the bits to the GPU
       pipelineOwner.flushSemantics(); // this also sends the semantics to the OS.
       _firstFrameSent = true;

@@ -7,6 +7,7 @@ import 'dart:ui' as ui show lerpDouble;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/physics.dart';
+import 'package:flutter/rendering.dart' show RendererBinding;
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/semantics.dart';
 
@@ -313,7 +314,7 @@ class AnimationController extends Animation<double>
 
   /// The desired frame rate while this animation is ticking.
   ///
-  /// This value is reported to [SchedulerBinding.requestFrameRate] each time
+  /// This value is reported to [RendererBinding.requestFrameRate] each time
   /// the animation ticks.
   ///
   /// This value may be changed during the lifetime of the animation controller;
@@ -858,7 +859,7 @@ class AnimationController extends Animation<double>
     notifyListeners();
     _checkStatusChanged();
     if (isAnimating) {
-      SchedulerBinding.instance!.requestFrameRate(frameRate);
+      RendererBinding.instance!.requestFrameRate(frameRate);
     }
   }
 
