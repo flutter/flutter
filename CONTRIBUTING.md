@@ -98,7 +98,7 @@ presented.
    practice to do before coding more intricate changes.
    
 
-[![How to contribute to Flutter](https://img.youtube.com/vi/4yBgOBAOx_A/sddefault.jpg)](https://www.youtube.com/watch?v=4yBgOBAOx_A)
+[![How to contribute to Flutter](https://img.youtube.com/vi/4yBgOBAOx_A/maxresdefault.jpg)](https://www.youtube.com/watch?v=4yBgOBAOx_A)
 
 
 In addition to the documents, there is a video linked above on **How to contribute to Flutter**
