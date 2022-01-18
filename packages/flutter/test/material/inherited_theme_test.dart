@@ -530,11 +530,11 @@ void main() {
     final Widget toggleButtons = Scaffold(
       body: Center(
         child: ToggleButtons(
+          isSelected: const <bool>[true, false],
           children: const <Widget>[
             Text('selected'),
             Text('unselected'),
           ],
-          isSelected: const <bool>[true, false],
           onPressed: (int index) { },
         ),
       ),
@@ -622,7 +622,7 @@ void main() {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            const RaisedButton(child: Text('disabled'), onPressed: null),
+            const RaisedButton(onPressed: null, child: Text('disabled')),
             RaisedButton(child: const Text('enabled'), onPressed: () { }),
           ],
         ),

@@ -2,10 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/src/material/selectable_text.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
@@ -81,7 +79,9 @@ void main() {
           child: Builder(
             builder: (BuildContext context) {
               return materialTextSelectionControls.buildHandle(
-                context, TextSelectionHandleType.left, 10.0
+                context,
+                TextSelectionHandleType.left,
+                10.0,
               );
             },
           ),
@@ -126,7 +126,9 @@ void main() {
           child: Builder(
             builder: (BuildContext context) {
               return materialTextSelectionControls.buildHandle(
-                  context, TextSelectionHandleType.left, 10.0
+                context,
+                TextSelectionHandleType.left,
+                10.0,
               );
             },
           ),
@@ -181,7 +183,9 @@ void main() {
             child: Builder(
               builder: (BuildContext context) {
                 return materialTextSelectionControls.buildHandle(
-                    context, TextSelectionHandleType.left, 10.0
+                  context,
+                  TextSelectionHandleType.left,
+                  10.0,
                 );
               },
             ),

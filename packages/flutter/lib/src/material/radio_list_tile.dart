@@ -26,11 +26,13 @@ import 'theme_data.dart';
 /// those of the same name on [ListTile].
 ///
 /// The [selected] property on this widget is similar to the [ListTile.selected]
-/// property, but the color used is that described by [activeColor], if any,
-/// defaulting to the accent color of the current [Theme]. No effort is made to
-/// coordinate the [selected] state and the [checked] state; to have the list
-/// tile appear selected when the radio button is the selected radio button, set
-/// [selected] to true when [value] matches [groupValue].
+/// property. This tile's [activeColor] is used for the selected item's text color, or
+/// the theme's [ThemeData.toggleableActiveColor] if [activeColor] is null.
+///
+/// This widget does not coordinate the [selected] state and the
+/// [checked] state; to have the list tile appear selected when the
+/// radio button is the selected radio button, set [selected] to true
+/// when [value] matches [groupValue].
 ///
 /// The radio button is shown on the left by default in left-to-right languages
 /// (i.e. the leading edge). This can be changed using [controlAffinity]. The
@@ -51,7 +53,7 @@ import 'theme_data.dart';
 /// enum SingingCharacter { lafayette, jefferson }
 /// ```
 /// ```dart
-/// SingingCharacter _character = SingingCharacter.lafayette;
+/// SingingCharacter? _character = SingingCharacter.lafayette;
 ///
 /// @override
 /// Widget build(BuildContext context) {
@@ -61,13 +63,13 @@ import 'theme_data.dart';
 ///         title: const Text('Lafayette'),
 ///         value: SingingCharacter.lafayette,
 ///         groupValue: _character,
-///         onChanged: (SingingCharacter value) { setState(() { _character = value; }); },
+///         onChanged: (SingingCharacter? value) { setState(() { _character = value; }); },
 ///       ),
 ///       RadioListTile<SingingCharacter>(
 ///         title: const Text('Thomas Jefferson'),
 ///         value: SingingCharacter.jefferson,
 ///         groupValue: _character,
-///         onChanged: (SingingCharacter value) { setState(() { _character = value; }); },
+///         onChanged: (SingingCharacter? value) { setState(() { _character = value; }); },
 ///       ),
 ///     ],
 ///   );
@@ -106,12 +108,13 @@ import 'theme_data.dart';
 /// ```dart preamble
 /// class LinkedLabelRadio extends StatelessWidget {
 ///   const LinkedLabelRadio({
-///     this.label,
-///     this.padding,
-///     this.groupValue,
-///     this.value,
-///     this.onChanged,
-///   });
+///     Key? key,
+///     required this.label,
+///     required this.padding,
+///     required this.groupValue,
+///     required this.value,
+///     required this.onChanged,
+///   }) :super(key: key);
 ///
 ///   final String label;
 ///   final EdgeInsets padding;
@@ -128,14 +131,14 @@ import 'theme_data.dart';
 ///           Radio<bool>(
 ///             groupValue: groupValue,
 ///             value: value,
-///             onChanged: (bool newValue) {
+///             onChanged: (bool? newValue) {
 ///               onChanged(newValue);
 ///             }
 ///           ),
 ///           RichText(
 ///             text: TextSpan(
 ///               text: label,
-///               style: TextStyle(
+///               style: const TextStyle(
 ///                 color: Colors.blueAccent,
 ///                 decoration: TextDecoration.underline,
 ///               ),
@@ -162,7 +165,7 @@ import 'theme_data.dart';
 ///       children: <Widget>[
 ///         LinkedLabelRadio(
 ///           label: 'First tappable label text',
-///           padding: EdgeInsets.symmetric(horizontal: 5.0),
+///           padding: const EdgeInsets.symmetric(horizontal: 5.0),
 ///           value: true,
 ///           groupValue: _isRadioSelected,
 ///           onChanged: (bool newValue) {
@@ -173,7 +176,7 @@ import 'theme_data.dart';
 ///         ),
 ///         LinkedLabelRadio(
 ///           label: 'Second tappable label text',
-///           padding: EdgeInsets.symmetric(horizontal: 5.0),
+///           padding: const EdgeInsets.symmetric(horizontal: 5.0),
 ///           value: false,
 ///           groupValue: _isRadioSelected,
 ///           onChanged: (bool newValue) {
@@ -206,12 +209,13 @@ import 'theme_data.dart';
 /// ```dart preamble
 /// class LabeledRadio extends StatelessWidget {
 ///   const LabeledRadio({
-///     this.label,
-///     this.padding,
-///     this.groupValue,
-///     this.value,
-///     this.onChanged,
-///   });
+///     Key? key,
+///     required this.label,
+///     required this.padding,
+///     required this.groupValue,
+///     required this.value,
+///     required this.onChanged,
+///   }) : super(key: key);
 ///
 ///   final String label;
 ///   final EdgeInsets padding;
@@ -223,8 +227,9 @@ import 'theme_data.dart';
 ///   Widget build(BuildContext context) {
 ///     return InkWell(
 ///       onTap: () {
-///         if (value != groupValue)
+///         if (value != groupValue) {
 ///           onChanged(value);
+///         }
 ///       },
 ///       child: Padding(
 ///         padding: padding,
@@ -233,7 +238,7 @@ import 'theme_data.dart';
 ///             Radio<bool>(
 ///               groupValue: groupValue,
 ///               value: value,
-///               onChanged: (bool newValue) {
+///               onChanged: (bool? newValue) {
 ///                 onChanged(newValue);
 ///               },
 ///             ),
@@ -391,7 +396,7 @@ class RadioListTile<T> extends StatelessWidget {
   /// [toggleable] attribute.
   ///
   /// ```dart
-  /// int groupValue;
+  /// int? groupValue;
   /// static const List<String> selections = <String>[
   ///   'Hercules Mulligan',
   ///   'Eliza Hamilton',
@@ -404,13 +409,13 @@ class RadioListTile<T> extends StatelessWidget {
   /// Widget build(BuildContext context) {
   ///   return Scaffold(
   ///     body: ListView.builder(
-  ///       itemBuilder: (context, index) {
+  ///       itemBuilder: (BuildContext context, int index) {
   ///         return RadioListTile<int>(
   ///           value: index,
   ///           groupValue: groupValue,
   ///           toggleable: true,
   ///           title: Text(selections[index]),
-  ///           onChanged: (int value) {
+  ///           onChanged: (int? value) {
   ///             setState(() {
   ///               groupValue = value;
   ///             });
@@ -520,7 +525,7 @@ class RadioListTile<T> extends StatelessWidget {
     }
     return MergeSemantics(
       child: ListTileTheme.merge(
-        selectedColor: activeColor ?? Theme.of(context).accentColor,
+        selectedColor: activeColor ?? Theme.of(context).toggleableActiveColor,
         child: ListTile(
           leading: leading,
           title: title,

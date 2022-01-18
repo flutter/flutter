@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'box.dart';
@@ -578,7 +577,13 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
 
   @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
-    if (_keepAliveBucket.containsKey(indexOf(child))) {
+    final SliverMultiBoxAdaptorParentData childParentData = child.parentData! as SliverMultiBoxAdaptorParentData;
+    if (childParentData.index == null) {
+      // If the child has no index, such as with the prototype of a
+      // SliverPrototypeExtentList, then it is not visible, so we give it a
+      // zero transform to prevent it from painting.
+      transform.setZero();
+    } else if (_keepAliveBucket.containsKey(childParentData.index)) {
       // It is possible that widgets under kept alive children want to paint
       // themselves. For example, the Material widget tries to paint all
       // InkFeatures under its subtree as long as they are not disposed. In

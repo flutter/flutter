@@ -123,7 +123,7 @@ abstract class AlignmentGeometry {
       return Alignment._stringify(_x, _y);
     if (_x == 0.0)
       return AlignmentDirectional._stringify(_start, _y);
-    return Alignment._stringify(_x, _y) + ' + ' + AlignmentDirectional._stringify(_start, 0.0);
+    return '${Alignment._stringify(_x, _y)} + ${AlignmentDirectional._stringify(_start, 0.0)}';
   }
 
   @override

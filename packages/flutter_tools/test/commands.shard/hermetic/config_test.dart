@@ -2,60 +2,47 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:convert';
 
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
-import 'package:flutter_tools/src/base/context.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/config.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/version.dart';
-import 'package:mockito/mockito.dart';
+import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/test_flutter_command_runner.dart';
 
 void main() {
-  MockAndroidStudio mockAndroidStudio;
-  MockAndroidSdk mockAndroidSdk;
-  MockFlutterVersion mockFlutterVersion;
-  MockUsage mockUsage;
+  FakeAndroidStudio fakeAndroidStudio;
+  FakeAndroidSdk fakeAndroidSdk;
+  FakeFlutterVersion fakeFlutterVersion;
+  TestUsage testUsage;
 
   setUpAll(() {
     Cache.disableLocking();
   });
 
   setUp(() {
-    mockAndroidStudio = MockAndroidStudio();
-    mockAndroidSdk = MockAndroidSdk();
-    mockFlutterVersion = MockFlutterVersion();
-    mockUsage = MockUsage();
-
-    when(mockUsage.isFirstRun).thenReturn(false);
+    fakeAndroidStudio = FakeAndroidStudio();
+    fakeAndroidSdk = FakeAndroidSdk();
+    fakeFlutterVersion = FakeFlutterVersion();
+    testUsage = TestUsage();
   });
 
   void verifyNoAnalytics() {
-    verifyNever(mockUsage.sendCommand(
-      any,
-      parameters: anyNamed('parameters'),
-    ));
-    verifyNever(mockUsage.sendEvent(
-      any,
-      any,
-      label: anyNamed('label'),
-      value: anyNamed('value'),
-      parameters: anyNamed('parameters'),
-    ));
-    verifyNever(mockUsage.sendTiming(
-      any,
-      any,
-      any,
-      label: anyNamed('label'),
-    ));
+    expect(testUsage.commands, isEmpty);
+    expect(testUsage.events, isEmpty);
+    expect(testUsage.timings, isEmpty);
   }
 
   group('config', () {
@@ -74,9 +61,9 @@ void main() {
       expect(jsonObject['android-sdk'], isNotNull);
       verifyNoAnalytics();
     }, overrides: <Type, Generator>{
-      AndroidStudio: () => mockAndroidStudio,
-      AndroidSdk: () => mockAndroidSdk,
-      Usage: () => mockUsage,
+      AndroidStudio: () => fakeAndroidStudio,
+      AndroidSdk: () => fakeAndroidSdk,
+      Usage: () => testUsage,
     });
 
     testUsingContext('Can set build-dir', () async {
@@ -91,7 +78,7 @@ void main() {
       expect(getBuildDirectory(), 'foo');
       verifyNoAnalytics();
     }, overrides: <Type, Generator>{
-      Usage: () => mockUsage,
+      Usage: () => testUsage,
     });
 
     testUsingContext('throws error on absolute path to build-dir', () async {
@@ -104,7 +91,7 @@ void main() {
       ]), throwsToolExit());
       verifyNoAnalytics();
     }, overrides: <Type, Generator>{
-      Usage: () => mockUsage,
+      Usage: () => testUsage,
     });
 
     testUsingContext('allows setting and removing feature flags', () async {
@@ -113,12 +100,16 @@ void main() {
 
       await commandRunner.run(<String>[
         'config',
+        '--enable-android',
+        '--enable-ios',
         '--enable-web',
         '--enable-linux-desktop',
         '--enable-windows-desktop',
         '--enable-macos-desktop',
       ]);
 
+      expect(globals.config.getValue('enable-android'), true);
+      expect(globals.config.getValue('enable-ios'), true);
       expect(globals.config.getValue('enable-web'), true);
       expect(globals.config.getValue('enable-linux-desktop'), true);
       expect(globals.config.getValue('enable-windows-desktop'), true);
@@ -128,6 +119,8 @@ void main() {
         'config', '--clear-features',
       ]);
 
+      expect(globals.config.getValue('enable-android'), null);
+      expect(globals.config.getValue('enable-ios'), null);
       expect(globals.config.getValue('enable-web'), null);
       expect(globals.config.getValue('enable-linux-desktop'), null);
       expect(globals.config.getValue('enable-windows-desktop'), null);
@@ -135,21 +128,25 @@ void main() {
 
       await commandRunner.run(<String>[
         'config',
+        '--no-enable-android',
+        '--no-enable-ios',
         '--no-enable-web',
         '--no-enable-linux-desktop',
         '--no-enable-windows-desktop',
         '--no-enable-macos-desktop',
       ]);
 
+      expect(globals.config.getValue('enable-android'), false);
+      expect(globals.config.getValue('enable-ios'), false);
       expect(globals.config.getValue('enable-web'), false);
       expect(globals.config.getValue('enable-linux-desktop'), false);
       expect(globals.config.getValue('enable-windows-desktop'), false);
       expect(globals.config.getValue('enable-macos-desktop'), false);
       verifyNoAnalytics();
     }, overrides: <Type, Generator>{
-      AndroidStudio: () => mockAndroidStudio,
-      AndroidSdk: () => mockAndroidSdk,
-      Usage: () => mockUsage,
+      AndroidStudio: () => fakeAndroidStudio,
+      AndroidSdk: () => fakeAndroidSdk,
+      Usage: () => testUsage,
     });
 
     testUsingContext('warns the user to reload IDE', () async {
@@ -166,11 +163,11 @@ void main() {
         containsIgnoringWhitespace('You may need to restart any open editors'),
       );
     }, overrides: <Type, Generator>{
-      Usage: () => mockUsage,
+      Usage: () => testUsage,
     });
 
     testUsingContext('displays which config settings are available on stable', () async {
-      when(mockFlutterVersion.channel).thenReturn('stable');
+      fakeFlutterVersion.channel = 'stable';
       final ConfigCommand configCommand = ConfigCommand();
       final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
 
@@ -188,68 +185,52 @@ void main() {
 
       expect(
         testLogger.statusText,
-        containsIgnoringWhitespace('enable-web: true (Unavailable)'),
+        containsIgnoringWhitespace('enable-web: true'),
       );
       expect(
         testLogger.statusText,
-        containsIgnoringWhitespace('enable-linux-desktop: true (Unavailable)'),
+        containsIgnoringWhitespace('enable-linux-desktop: true'),
       );
       expect(
         testLogger.statusText,
-        containsIgnoringWhitespace('enable-windows-desktop: true (Unavailable)'),
+        containsIgnoringWhitespace('enable-windows-desktop: true'),
       );
       expect(
         testLogger.statusText,
-        containsIgnoringWhitespace('enable-macos-desktop: true (Unavailable)'),
+        containsIgnoringWhitespace('enable-macos-desktop: true'),
       );
       verifyNoAnalytics();
     }, overrides: <Type, Generator>{
-      AndroidStudio: () => mockAndroidStudio,
-      AndroidSdk: () => mockAndroidSdk,
-      FlutterVersion: () => mockFlutterVersion,
-      Usage: () => mockUsage,
+      AndroidStudio: () => fakeAndroidStudio,
+      AndroidSdk: () => fakeAndroidSdk,
+      FlutterVersion: () => fakeFlutterVersion,
+      Usage: () => testUsage,
     });
 
     testUsingContext('no-analytics flag flips usage flag and sends event', () async {
       final ConfigCommand configCommand = ConfigCommand();
       final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
 
-      when(mockUsage.sendEvent(
-        captureAny,
-        captureAny,
-        label: captureAnyNamed('label'),
-        value: anyNamed('value'),
-        parameters: anyNamed('parameters'),
-      )).thenAnswer((Invocation invocation) async {
-        expect(mockUsage.enabled, true);
-        expect(invocation.positionalArguments, <String>['analytics', 'enabled']);
-        expect(invocation.namedArguments[#label], 'false');
-      });
-
+      expect(testUsage.enabled, true);
       await commandRunner.run(<String>[
         'config',
         '--no-analytics',
       ]);
 
-      expect(mockUsage.enabled, false);
+      expect(testUsage.enabled, false);
 
       // Verify that we flushed the analytics queue.
-      verify(mockUsage.ensureAnalyticsSent());
+      expect(testUsage.ensureAnalyticsSentCalls, 1);
 
       // Verify that we only send the analytics disable event, and no other
       // info.
-      verifyNever(mockUsage.sendCommand(
-        any,
-        parameters: anyNamed('parameters'),
-      ));
-      verifyNever(mockUsage.sendTiming(
-        any,
-        any,
-        any,
-        label: anyNamed('label'),
-      ));
+      expect(testUsage.events, equals(<TestUsageEvent>[
+        const TestUsageEvent('analytics', 'enabled', label: 'false'),
+      ]));
+      expect(testUsage.commands, isEmpty);
+      expect(testUsage.timings, isEmpty);
     }, overrides: <Type, Generator>{
-      Usage: () => mockUsage,
+      Usage: () => testUsage,
     });
 
     testUsingContext('analytics flag flips usage flag and sends event', () async {
@@ -261,39 +242,24 @@ void main() {
         '--analytics',
       ]);
 
-      expect(mockUsage.enabled, true);
+      expect(testUsage.enabled, true);
 
-      // Verify that we only send the analytics disable event, and no other
+      // Verify that we only send the analytics enable event, and no other
       // info.
-      verifyNever(mockUsage.sendCommand(
-        any,
-        parameters: anyNamed('parameters'),
-      ));
-      verifyNever(mockUsage.sendTiming(
-        any,
-        any,
-        any,
-        label: anyNamed('label'),
-      ));
-
-      expect(verify(mockUsage.sendEvent(
-        captureAny,
-        captureAny,
-        label: captureAnyNamed('label'),
-        value: anyNamed('value'),
-        parameters: anyNamed('parameters'),
-      )).captured,
-        <dynamic>['analytics', 'enabled', 'true'],
-      );
+      expect(testUsage.events, equals(<TestUsageEvent>[
+        const TestUsageEvent('analytics', 'enabled', label: 'true'),
+      ]));
+      expect(testUsage.commands, isEmpty);
+      expect(testUsage.timings, isEmpty);
     }, overrides: <Type, Generator>{
-      Usage: () => mockUsage,
+      Usage: () => testUsage,
     });
 
     testUsingContext('analytics reported disabled when suppressed', () async {
       final ConfigCommand configCommand = ConfigCommand();
       final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
 
-      mockUsage.suppressAnalytics = true;
+      testUsage.suppressAnalytics = true;
 
       await commandRunner.run(<String>[
         'config',
@@ -304,27 +270,28 @@ void main() {
         containsIgnoringWhitespace('Analytics reporting is currently disabled'),
       );
     }, overrides: <Type, Generator>{
-      Usage: () => mockUsage,
+      Usage: () => testUsage,
     });
   });
 }
 
-class MockAndroidStudio extends Mock implements AndroidStudio, Comparable<AndroidStudio> {
+class FakeAndroidStudio extends Fake implements AndroidStudio, Comparable<AndroidStudio> {
   @override
   String get directory => 'path/to/android/stdio';
 }
 
-class MockAndroidSdk extends Mock implements AndroidSdk {
+class FakeAndroidSdk extends Fake implements AndroidSdk {
   @override
-  String get directory => 'path/to/android/sdk';
+  Directory get directory => globals.fs.directory('path/to/android/sdk');
 }
 
-class MockFlutterVersion extends Mock implements FlutterVersion {}
-
-class MockUsage extends Mock implements Usage {
+class FakeFlutterVersion extends Fake implements FlutterVersion {
   @override
-  bool enabled = true;
+  String channel;
 
   @override
-  bool suppressAnalytics = false;
+  void ensureVersionFile() {}
+
+  @override
+  Future<void> checkFlutterVersionFreshness() async {}
 }

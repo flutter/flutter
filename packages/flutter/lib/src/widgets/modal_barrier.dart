@@ -8,7 +8,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
 import 'basic.dart';
-import 'container.dart';
 import 'debug.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
@@ -93,6 +92,11 @@ class ModalBarrier extends StatelessWidget {
     assert(platformSupportsDismissingBarrier != null);
     final bool semanticsDismissible = dismissible && platformSupportsDismissingBarrier;
     final bool modalBarrierSemanticsDismissible = barrierSemanticsDismissible ?? semanticsDismissible;
+
+    void handleDismiss() {
+      Navigator.maybePop(context);
+    }
+
     return BlockSemantics(
       child: ExcludeSemantics(
         // On Android, the back button is used to dismiss a modal. On iOS, some
@@ -101,22 +105,21 @@ class ModalBarrier extends StatelessWidget {
         child: _ModalBarrierGestureDetector(
           onDismiss: () {
             if (dismissible)
-              Navigator.maybePop(context);
+              handleDismiss();
             else
               SystemSound.play(SystemSoundType.alert);
           },
           child: Semantics(
             label: semanticsDismissible ? semanticsLabel : null,
+            onDismiss: semanticsDismissible ? handleDismiss : null,
             textDirection: semanticsDismissible && semanticsLabel != null ? Directionality.of(context) : null,
             child: MouseRegion(
               cursor: SystemMouseCursors.basic,
               opaque: true,
               child: ConstrainedBox(
                 constraints: const BoxConstraints.expand(),
-                child: color == null ? null : DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: color,
-                  ),
+                child: color == null ? null : ColoredBox(
+                  color: color!,
                 ),
               ),
             ),
@@ -225,8 +228,7 @@ class _AnyTapGestureRecognizer extends BaseTapGestureRecognizer {
   @protected
   @override
   void handleTapUp({PointerDownEvent? down, PointerUpEvent? up}) {
-    if (onAnyTapUp != null)
-      onAnyTapUp!();
+    onAnyTapUp?.call();
   }
 
   @protected

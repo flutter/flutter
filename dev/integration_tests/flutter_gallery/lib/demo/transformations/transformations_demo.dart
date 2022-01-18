@@ -13,7 +13,8 @@ class TransformationsDemo extends StatefulWidget {
 
   static const String routeName = '/transformations';
 
-  @override _TransformationsDemoState createState() => _TransformationsDemoState();
+  @override
+  State<TransformationsDemo> createState() => _TransformationsDemoState();
 }
 class _TransformationsDemoState extends State<TransformationsDemo> {
   // The radius of a hexagon tile in pixels.
@@ -67,9 +68,6 @@ class _TransformationsDemoState extends State<TransformationsDemo> {
                 _reset = false;
               });
             },
-            child: CustomPaint(
-              painter: painter,
-            ),
             boundaryRect: Rect.fromLTWH(
               -visibleSize.width / 2,
               -visibleSize.height / 2,
@@ -82,6 +80,9 @@ class _TransformationsDemoState extends State<TransformationsDemo> {
             initialTranslation: Offset(size.width / 2, size.height / 2),
             onTapUp: _onTapUp,
             size: size,
+            child: CustomPaint(
+              painter: painter,
+            ),
           );
         },
       ),

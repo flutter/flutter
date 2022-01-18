@@ -21,11 +21,18 @@ abstract class ProjectMigrator {
 
   /// Return null if the line should be deleted.
   @protected
-  String migrateLine(String line) {
+  String? migrateLine(String line) {
     return line;
   }
 
   @protected
+  String migrateFileContents(String fileContents) {
+    return fileContents;
+  }
+
+  @protected
+  /// Calls [migrateLine] per line, then [migrateFileContents]
+  /// including the line migrations.
   void processFileLines(File file) {
     final List<String> lines = file.readAsLinesSync();
 
@@ -34,7 +41,7 @@ abstract class ProjectMigrator {
 
     bool migrationRequired = false;
     for (final String line in lines) {
-      final String newProjectLine = migrateLine(line);
+      final String? newProjectLine = migrateLine(line);
       if (newProjectLine == null) {
         logger.printTrace('Migrating $basename, removing:');
         logger.printTrace('    $line');
@@ -51,9 +58,16 @@ abstract class ProjectMigrator {
       newProjectContents.writeln(newProjectLine);
     }
 
+    final String projectContentsWithMigratedLines = newProjectContents.toString();
+    final String projectContentsWithMigratedContents = migrateFileContents(projectContentsWithMigratedLines);
+    if (projectContentsWithMigratedLines != projectContentsWithMigratedContents) {
+      logger.printTrace('Migrating $basename contents');
+      migrationRequired = true;
+    }
+
     if (migrationRequired) {
       logger.printStatus('Upgrading $basename');
-      file.writeAsStringSync(newProjectContents.toString());
+      file.writeAsStringSync(projectContentsWithMigratedContents);
     }
   }
 }

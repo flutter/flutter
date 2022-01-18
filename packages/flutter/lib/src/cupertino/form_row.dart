@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -10,7 +9,7 @@ import 'theme.dart';
 
 // Content padding determined via SwiftUI's `Form` view in the iOS 14.2 SDK.
 const EdgeInsetsGeometry _kDefaultPadding =
-    EdgeInsetsDirectional.fromSTEB(16.0, 6.0, 6.0, 6.0);
+    EdgeInsetsDirectional.fromSTEB(20.0, 6.0, 6.0, 6.0);
 
 /// An iOS-style form row.
 ///
@@ -31,7 +30,7 @@ const EdgeInsetsGeometry _kDefaultPadding =
 /// The [helper] and [error] parameters are both optional widgets targeted at
 /// displaying more information about the row. Both widgets are placed
 /// underneath the [prefix] and [child], and will expand the row's height to
-/// accomodate for their presence. When a [Text] is given to [error], it will
+/// accommodate for their presence. When a [Text] is given to [error], it will
 /// be shown in [CupertinoColors.destructiveRed] coloring and
 /// medium-weighted font.
 ///
@@ -42,10 +41,10 @@ const EdgeInsetsGeometry _kDefaultPadding =
 ///
 /// ```dart
 /// class FlutterDemo extends StatefulWidget {
-///   FlutterDemo({Key key}) : super(key: key);
+///   const FlutterDemo({Key? key}) : super(key: key);
 ///
 ///   @override
-///   _FlutterDemoState createState() => _FlutterDemoState();
+///   State<FlutterDemo> createState() => _FlutterDemoState();
 /// }
 ///
 /// class _FlutterDemoState extends State<FlutterDemo> {
@@ -56,20 +55,20 @@ const EdgeInsetsGeometry _kDefaultPadding =
 ///     return CupertinoPageScaffold(
 ///       child: Center(
 ///         child: CupertinoFormSection(
-///           header: Text('SECTION 1'),
+///           header: const Text('SECTION 1'),
 ///           children: <Widget>[
 ///             CupertinoFormRow(
 ///               child: CupertinoSwitch(
-///                 value: this.toggleValue,
-///                 onChanged: (value) {
+///                 value: toggleValue,
+///                 onChanged: (bool value) {
 ///                   setState(() {
-///                     this.toggleValue = value;
+///                     toggleValue = value;
 ///                   });
 ///                 },
 ///               ),
-///               prefix: Text('Toggle'),
-///               helper: Text('Use your instincts'),
-///               error: toggleValue ? Text('Cannot be true') : null,
+///               prefix: const Text('Toggle'),
+///               helper: const Text('Use your instincts'),
+///               error: toggleValue ? const Text('Cannot be true') : null,
 ///             ),
 ///           ],
 ///         ),
@@ -97,7 +96,7 @@ class CupertinoFormRow extends StatelessWidget {
   /// The [helper] and [error] parameters are both optional widgets targeted at
   /// displaying more information about the row. Both widgets are placed
   /// underneath the [prefix] and [child], and will expand the row's height to
-  /// accomodate for their presence. When a [Text] is given to [error], it will
+  /// accommodate for their presence. When a [Text] is given to [error], it will
   /// be shown in [CupertinoColors.destructiveRed] coloring and
   /// medium-weighted font.
   const CupertinoFormRow({
@@ -149,22 +148,7 @@ class CupertinoFormRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final CupertinoThemeData themeData = CupertinoTheme.of(context);
-    final TextStyle textStyle = themeData.textTheme.textStyle;
-
-    final List<Widget> rowChildren = <Widget>[
-      if (prefix != null)
-        DefaultTextStyle(
-          style: textStyle,
-          child: prefix!,
-        ),
-      Flexible(
-        child: Align(
-          alignment: AlignmentDirectional.centerEnd,
-          child: child,
-        ),
-      ),
-    ];
+    final TextStyle textStyle = CupertinoTheme.of(context).textTheme.textStyle;
 
     return Padding(
       padding: padding ?? _kDefaultPadding,
@@ -172,7 +156,19 @@ class CupertinoFormRow extends StatelessWidget {
         children: <Widget>[
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: rowChildren,
+            children: <Widget>[
+              if (prefix != null)
+                DefaultTextStyle(
+                  style: textStyle,
+                  child: prefix!,
+                ),
+              Flexible(
+                child: Align(
+                  alignment: AlignmentDirectional.centerEnd,
+                  child: child,
+                ),
+              ),
+            ],
           ),
           if (helper != null)
             Align(

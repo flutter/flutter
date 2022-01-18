@@ -31,8 +31,8 @@ enum Orientation {
 /// window, use `MediaQuery.of(context).size`.
 ///
 /// If no [MediaQuery] is in scope then the [MediaQuery.of] method will throw an
-/// exception, unless the `nullOk` argument is set to true, in which case it
-/// returns null.
+/// exception. Alternatively, [MediaQuery.maybeOf] may be used, which returns
+/// null instead of throwing if no [MediaQuery] is in scope.
 ///
 /// ## Insets and Padding
 ///
@@ -265,16 +265,16 @@ class MediaQueryData {
   ///
   /// @override
   /// Widget build(BuildContext context) {
-  ///   EdgeInsets systemGestureInsets = MediaQuery.of(context).systemGestureInsets;
+  ///   final EdgeInsets systemGestureInsets = MediaQuery.of(context).systemGestureInsets;
   ///   return Scaffold(
-  ///     appBar: AppBar(title: Text('Pad Slider to avoid systemGestureInsets')),
+  ///     appBar: AppBar(title: const Text('Pad Slider to avoid systemGestureInsets')),
   ///     body: Padding(
   ///       padding: EdgeInsets.only( // only left and right padding are needed here
   ///         left: systemGestureInsets.left,
   ///         right: systemGestureInsets.right,
   ///       ),
   ///       child: Slider(
-  ///         value: _currentValue.toDouble(),
+  ///         value: _currentValue,
   ///         onChanged: (double newValue) {
   ///           setState(() {
   ///             _currentValue = newValue;
@@ -629,8 +629,8 @@ class MediaQueryData {
 /// user rotates their device).
 ///
 /// If no [MediaQuery] is in scope then the [MediaQuery.of] method will throw an
-/// exception, unless the `nullOk` argument is set to true, in which case it
-/// returns null.
+/// exception. Alternatively, [MediaQuery.maybeOf] may be used, which returns
+/// null instead of throwing if no [MediaQuery] is in scope.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=A3WrA4zAaPw}
 ///

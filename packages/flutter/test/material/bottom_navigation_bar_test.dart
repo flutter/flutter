@@ -10,6 +10,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:vector_math/vector_math_64.dart' show Vector3;
 
 import '../rendering/mock_canvas.dart';
+import '../widgets/semantics_tester.dart';
+import 'feedback_tester.dart';
 
 void main() {
   testWidgets('BottomNavigationBar callback test', (WidgetTester tester) async {
@@ -74,8 +76,8 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(
-          primaryColor: primaryColor,
+        theme: ThemeData.light().copyWith(
+          colorScheme: const ColorScheme.light().copyWith(primary: primaryColor),
           unselectedWidgetColor: unselectedWidgetColor,
         ),
         home: Scaffold(
@@ -719,9 +721,35 @@ void main() {
       ),
     );
 
-    const double labelBottomMargin = 7.0; // 7 == defaulted selectedFontSize / 2.0.
-    const double additionalPadding = 40.0 - labelBottomMargin;
-    const double expectedHeight = kBottomNavigationBarHeight + additionalPadding;
+    const double expectedHeight = kBottomNavigationBarHeight + 40.0;
+    expect(tester.getSize(find.byType(BottomNavigationBar)).height, expectedHeight);
+  });
+
+  testWidgets('BottomNavigationBar adds bottom padding to height with a custom font size', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(padding: EdgeInsets.only(bottom: 40.0)),
+          child: Scaffold(
+            bottomNavigationBar: BottomNavigationBar(
+              selectedFontSize: 8,
+              items: const <BottomNavigationBarItem>[
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.ac_unit),
+                  label: 'AC',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.access_alarm),
+                  label: 'Alarm',
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    const double expectedHeight = kBottomNavigationBarHeight + 40.0;
     expect(tester.getSize(find.byType(BottomNavigationBar)).height, expectedHeight);
   });
 
@@ -1113,22 +1141,23 @@ void main() {
             child: Navigator(
               onGenerateRoute: (RouteSettings settings) {
                 return MaterialPageRoute<void>(
-                    builder: (BuildContext context) {
-                      return Scaffold(
-                        bottomNavigationBar: BottomNavigationBar(
-                          items: const <BottomNavigationBarItem>[
-                            BottomNavigationBarItem(
-                              label: label,
-                              icon: Icon(Icons.ac_unit),
-                            ),
-                            BottomNavigationBarItem(
-                              label: 'B',
-                              icon: Icon(Icons.battery_alert),
-                            ),
-                          ],
-                        ),
-                      );
-                    }
+                  builder: (BuildContext context) {
+                    return Scaffold(
+                      bottomNavigationBar: BottomNavigationBar(
+                        items: const <BottomNavigationBarItem>[
+                          BottomNavigationBarItem(
+                            label: label,
+                            icon: Icon(Icons.ac_unit),
+                            tooltip: label,
+                          ),
+                          BottomNavigationBarItem(
+                            label: 'B',
+                            icon: Icon(Icons.battery_alert),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
                 );
               },
             ),
@@ -1148,6 +1177,45 @@ void main() {
     expect(find.text(label), findsOneWidget);
     await tester.longPress(find.text(label));
     expect(tester.getSize(find.text(label).last), equals(const Size(168.0, 56.0)));
+  });
+
+  testWidgets('Different behaviour of tool tip in BottomNavigationBarItem', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          bottomNavigationBar: BottomNavigationBar(
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                label: 'A',
+                tooltip: 'A tooltip',
+                icon: Icon(Icons.ac_unit),
+              ),
+              BottomNavigationBarItem(
+                label: 'B',
+                icon: Icon(Icons.battery_alert),
+              ),
+              BottomNavigationBarItem(
+                label: 'C',
+                icon: Icon(Icons.cake),
+                tooltip: '',
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('A'), findsOneWidget);
+    await tester.longPress(find.text('A'));
+    expect(find.byTooltip('A tooltip'), findsOneWidget);
+
+    expect(find.text('B'), findsOneWidget);
+    await tester.longPress(find.text('B'));
+    expect(find.byTooltip('B'), findsOneWidget);
+
+    expect(find.text('C'), findsOneWidget);
+    await tester.longPress(find.text('C'));
+    expect(find.byTooltip('C'), findsNothing);
   });
 
   testWidgets('BottomNavigationBar limits width of tiles with long titles', (WidgetTester tester) async {
@@ -1616,7 +1684,8 @@ void main() {
       expect(find.text('Green'), findsOneWidget);
       expect(tester.widget<Opacity>(find.byType(Opacity).first).opacity, 0.0);
       expect(tester.widget<Opacity>(find.byType(Opacity).last).opacity, 0.0);
-    });
+    },
+  );
 
   testWidgets(
     'BottomNavigationBar [showSelectedLabels]=false and [showUnselectedLabels]=false '
@@ -1653,7 +1722,8 @@ void main() {
       expect(find.text('Green'), findsOneWidget);
       expect(tester.widget<Opacity>(find.byType(Opacity).first).opacity, 0.0);
       expect(tester.widget<Opacity>(find.byType(Opacity).last).opacity, 0.0);
-    });
+    },
+  );
 
   testWidgets('BottomNavigationBar.fixed [showSelectedLabels]=false and [showUnselectedLabels]=false semantics', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -1785,6 +1855,165 @@ void main() {
     );
 
     expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+  });
+
+  group('feedback', () {
+    late FeedbackTester feedback;
+
+    setUp(() {
+      feedback = FeedbackTester();
+    });
+
+    tearDown(() {
+      feedback.dispose();
+    });
+
+    Widget feedbackBoilerplate({bool? enableFeedback, bool? enableFeedbackTheme}) {
+      return MaterialApp(
+        home: Scaffold(
+          bottomNavigationBar: BottomNavigationBarTheme(
+            data: BottomNavigationBarThemeData(
+              enableFeedback: enableFeedbackTheme,
+            ),
+            child: BottomNavigationBar(
+              enableFeedback: enableFeedback,
+              items: const <BottomNavigationBarItem>[
+                BottomNavigationBarItem(icon: Icon(Icons.ac_unit), title: Text('AC')),
+                BottomNavigationBarItem(icon: Icon(Icons.access_alarm), title: Text('Alarm')),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    testWidgets('BottomNavigationBar with enabled feedback', (WidgetTester tester) async {
+      const bool enableFeedback = true;
+
+      await tester.pumpWidget(feedbackBoilerplate(enableFeedback: enableFeedback));
+
+      await tester.tap(find.byType(InkResponse).first);
+      await tester.pumpAndSettle();
+      expect(feedback.clickSoundCount, 1);
+      expect(feedback.hapticCount, 0);
+    });
+
+    testWidgets('BottomNavigationBar with disabled feedback', (WidgetTester tester) async {
+      const bool enableFeedback = false;
+
+      await tester.pumpWidget(feedbackBoilerplate(enableFeedback: enableFeedback));
+
+      await tester.tap(find.byType(InkResponse).first);
+      await tester.pumpAndSettle();
+      expect(feedback.clickSoundCount, 0);
+      expect(feedback.hapticCount, 0);
+    });
+
+    testWidgets('BottomNavigationBar with enabled feedback by default', (WidgetTester tester) async {
+      await tester.pumpWidget(feedbackBoilerplate());
+
+      await tester.tap(find.byType(InkResponse).first);
+      await tester.pumpAndSettle();
+      expect(feedback.clickSoundCount, 1);
+      expect(feedback.hapticCount, 0);
+    });
+
+    testWidgets('BottomNavigationBar with disabled feedback using BottomNavigationBarTheme', (WidgetTester tester) async {
+      const bool enableFeedbackTheme = false;
+
+      await tester.pumpWidget(feedbackBoilerplate(enableFeedbackTheme: enableFeedbackTheme));
+
+      await tester.tap(find.byType(InkResponse).first);
+      await tester.pumpAndSettle();
+      expect(feedback.clickSoundCount, 0);
+      expect(feedback.hapticCount, 0);
+    });
+
+    testWidgets('BottomNavigationBar.enableFeedback overrides BottomNavigationBarTheme.enableFeedback', (WidgetTester tester) async {
+      const bool enableFeedbackTheme = false;
+      const bool enableFeedback = true;
+
+      await tester.pumpWidget(feedbackBoilerplate(
+        enableFeedbackTheme: enableFeedbackTheme,
+        enableFeedback: enableFeedback,
+      ));
+
+      await tester.tap(find.byType(InkResponse).first);
+      await tester.pumpAndSettle();
+      expect(feedback.clickSoundCount, 1);
+      expect(feedback.hapticCount, 0);
+    });
+  });
+
+  testWidgets('BottomNavigationBar excludes semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          bottomNavigationBar: BottomNavigationBar(
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                label: 'A',
+                icon: Icon(Icons.ac_unit),
+              ),
+              BottomNavigationBarItem(
+                label: 'B',
+                icon: Icon(Icons.battery_alert),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics(
+              textDirection: TextDirection.ltr,
+              children: <TestSemantics>[
+                TestSemantics(
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                      children: <TestSemantics>[
+                        TestSemantics(
+                          children: <TestSemantics>[
+                            TestSemantics(
+                              flags: <SemanticsFlag>[
+                                SemanticsFlag.isSelected,
+                                SemanticsFlag.isFocusable,
+                              ],
+                              actions: <SemanticsAction>[SemanticsAction.tap],
+                              label: 'A\nTab 1 of 2',
+                              textDirection: TextDirection.ltr,
+                            ),
+                            TestSemantics(
+                              flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
+                              actions: <SemanticsAction>[SemanticsAction.tap],
+                              label: 'B\nTab 2 of 2',
+                              textDirection: TextDirection.ltr,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+        ignoreId: true,
+        ignoreRect: true,
+        ignoreTransform: true,
+      ),
+    );
+
+    semantics.dispose();
   });
 }
 

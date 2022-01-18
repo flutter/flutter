@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/rendering.dart';
@@ -267,23 +266,19 @@ typedef RefreshCallback = Future<void> Function();
 /// sliver such as [CupertinoSliverNavigationBar] and your main scrollable
 /// content's sliver.
 ///
-/// {@tool dartpad --template=stateful_widget_material}
+/// {@tool dartpad --template=stateful_widget_cupertino}
 ///
 /// When the user scrolls past [refreshTriggerPullDistance],
 /// this sample shows the default iOS pull to refresh indicator for 1 second and
 /// adds a new item to the top of the list view.
 ///
-/// ```dart imports
-/// import 'package:flutter/cupertino.dart';
-/// ```
-///
 /// ```dart
-/// List<Color> colors = [
+/// List<Color> colors = <Color>[
 ///   CupertinoColors.systemYellow,
 ///   CupertinoColors.systemOrange,
 ///   CupertinoColors.systemPink
 /// ];
-/// List<Widget> items = [
+/// List<Widget> items = <Widget>[
 ///   Container(color: CupertinoColors.systemPink, height: 100.0),
 ///   Container(color: CupertinoColors.systemOrange, height: 100.0),
 ///   Container(color: CupertinoColors.systemYellow, height: 100.0),
@@ -301,7 +296,7 @@ typedef RefreshCallback = Future<void> Function();
 ///             refreshTriggerPullDistance: 100.0,
 ///             refreshIndicatorExtent: 60.0,
 ///             onRefresh: () async {
-///               await Future.delayed(Duration(milliseconds: 1000));
+///               await Future<void>.delayed(const Duration(milliseconds: 1000));
 ///               setState(() {
 ///                 items.insert(0, Container(color: colors[items.length % 3], height: 100.0));
 ///               });
@@ -356,7 +351,7 @@ class CupertinoSliverRefreshControl extends StatefulWidget {
        assert(
          refreshTriggerPullDistance >= refreshIndicatorExtent,
          'The refresh indicator cannot take more space in its final state '
-         'than the amount initially created by overscrolling.'
+         'than the amount initially created by overscrolling.',
        ),
        super(key: key);
 
@@ -425,7 +420,7 @@ class CupertinoSliverRefreshControl extends StatefulWidget {
     double refreshTriggerPullDistance,
     double refreshIndicatorExtent,
   ) {
-    final double percentageComplete = pulledExtent / refreshTriggerPullDistance;
+    final double percentageComplete = (pulledExtent / refreshTriggerPullDistance).clamp(0.0, 1.0);
 
     // Place the indicator at the top of the sliver that opens up. Note that we're using
     // a Stack/Positioned widget because the CupertinoActivityIndicator does some internal
@@ -474,7 +469,7 @@ class CupertinoSliverRefreshControl extends StatefulWidget {
   }
 
   @override
-  _CupertinoSliverRefreshControlState createState() => _CupertinoSliverRefreshControlState();
+  State<CupertinoSliverRefreshControl> createState() => _CupertinoSliverRefreshControlState();
 }
 
 class _CupertinoSliverRefreshControlState extends State<CupertinoSliverRefreshControl> {

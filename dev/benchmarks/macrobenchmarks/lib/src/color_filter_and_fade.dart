@@ -3,18 +3,16 @@
 // found in the LICENSE file.
 
 import 'dart:ui' as ui;
-import 'dart:ui';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:flutter/rendering.dart';
 
 // This tests whether the Opacity layer raster cache works with color filters.
 // See https://github.com/flutter/flutter/issues/51975.
 class ColorFilterAndFadePage extends StatefulWidget {
+  const ColorFilterAndFadePage({Key key}) : super(key: key);
+
   @override
-  _ColorFilterAndFadePageState createState() => _ColorFilterAndFadePageState();
+  State<ColorFilterAndFadePage> createState() => _ColorFilterAndFadePageState();
 }
 
 class _ColorFilterAndFadePageState extends State<ColorFilterAndFadePage> with TickerProviderStateMixin {

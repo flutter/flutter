@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:meta/meta.dart';
@@ -201,6 +203,61 @@ class DevFSStringContent extends DevFSByteContent {
   }
 }
 
+/// A string compressing DevFSContent.
+///
+/// A specialized DevFSContent similar to DevFSByteContent where the contents
+/// are the compressed bytes of a string. Its difference is that the original
+/// uncompressed string can be compared with directly without the indirection
+/// of a compute-expensive uncompress/decode and compress/encode to compare
+/// the strings.
+///
+/// The `hintString` parameter is a zlib dictionary hinting mechanism to suggest
+/// the most common string occurrences to potentially assist with compression.
+class DevFSStringCompressingBytesContent extends DevFSContent {
+  DevFSStringCompressingBytesContent(this._string, { String hintString })
+    : _compressor = ZLibEncoder(
+      dictionary: hintString == null
+          ? null
+          : utf8.encode(hintString),
+      gzip: true,
+      level: 9,
+    );
+
+  final String _string;
+  final ZLibEncoder _compressor;
+  final DateTime _modificationTime = DateTime.now();
+
+  List<int> _bytes;
+  bool _isModified = true;
+
+  List<int> get bytes => _bytes ??= _compressor.convert(utf8.encode(_string));
+
+  /// Return true only once so that the content is written to the device only once.
+  @override
+  bool get isModified {
+    final bool modified = _isModified;
+    _isModified = false;
+    return modified;
+  }
+
+  @override
+  bool isModifiedAfter(DateTime time) {
+    return time == null || _modificationTime.isAfter(time);
+  }
+
+  @override
+  int get size => bytes.length;
+
+  @override
+  Future<List<int>> contentsAsBytes() async => bytes;
+
+  @override
+  Stream<List<int>> contentsAsStream() => Stream<List<int>>.value(bytes);
+
+  /// This checks the source string with another string.
+  bool equals(String string) => _string == string;
+}
+
 class DevFSException implements Exception {
   DevFSException(this.message, [this.error, this.stackTrace]);
   final String message;
@@ -224,19 +281,22 @@ abstract class DevFSWriter {
 class _DevFSHttpWriter implements DevFSWriter {
   _DevFSHttpWriter(
     this.fsName,
-    vm_service.VmService serviceProtocol, {
+    FlutterVmService serviceProtocol, {
     @required OperatingSystemUtils osUtils,
     @required HttpClient httpClient,
     @required Logger logger,
+    Duration uploadRetryThrottle,
   })
     : httpAddress = serviceProtocol.httpAddress,
       _client = httpClient,
       _osUtils = osUtils,
+      _uploadRetryThrottle = uploadRetryThrottle,
       _logger = logger;
 
   final HttpClient _client;
   final OperatingSystemUtils _osUtils;
   final Logger _logger;
+  final Duration _uploadRetryThrottle;
 
   final String fsName;
   final Uri httpAddress;
@@ -320,7 +380,7 @@ class _DevFSHttpWriter implements DevFSWriter {
           if (retry > 0) {
             retry--;
             _logger.printTrace('trying again in a few - $retry more attempts left');
-            await Future<void>.delayed(const Duration(milliseconds: 500));
+            await Future<void>.delayed(_uploadRetryThrottle ?? const Duration(milliseconds: 500));
             continue;
           }
           _completer.completeError(error, trace);
@@ -364,14 +424,17 @@ class UpdateFSReport {
 
 class DevFS {
   /// Create a [DevFS] named [fsName] for the local files in [rootDirectory].
+  ///
+  /// Failed uploads are retried after [uploadRetryThrottle] duration, defaults to 500ms.
   DevFS(
-    vm_service.VmService serviceProtocol,
+    FlutterVmService serviceProtocol,
     this.fsName,
     this.rootDirectory, {
     @required OperatingSystemUtils osUtils,
     @required Logger logger,
     @required FileSystem fileSystem,
     HttpClient httpClient,
+    Duration uploadRetryThrottle,
   }) : _vmService = serviceProtocol,
        _logger = logger,
        _fileSystem = fileSystem,
@@ -380,12 +443,13 @@ class DevFS {
         serviceProtocol,
         osUtils: osUtils,
         logger: logger,
+        uploadRetryThrottle: uploadRetryThrottle,
         httpClient: httpClient ?? ((context.get<HttpClientFactory>() == null)
           ? HttpClient()
           : context.get<HttpClientFactory>()())
       );
 
-  final vm_service.VmService _vmService;
+  final FlutterVmService _vmService;
   final _DevFSHttpWriter _httpWriter;
   final Logger _logger;
   final FileSystem _fileSystem;
@@ -419,8 +483,15 @@ class DevFS {
       final vm_service.Response response = await _vmService.createDevFS(fsName);
       _baseUri = Uri.parse(response.json['uri'] as String);
     } on vm_service.RPCError catch (rpcException) {
+      if (rpcException.code == RPCErrorCodes.kServiceDisappeared) {
+        // This can happen if the device has been disconnected, so translate to
+        // a DevFSException, which the caller will handle.
+        throw DevFSException('Service disconnected', rpcException);
+      }
       // 1001 is kFileSystemAlreadyExists in //dart/runtime/vm/json_stream.h
       if (rpcException.code != 1001) {
+        // Other RPCErrors are unexpected. Rethrow so it will hit crash
+        // logging.
         rethrow;
       }
       _logger.printTrace('DevFS: Creating failed. Destroying and trying again');
@@ -508,6 +579,8 @@ class DevFS {
       mainUri,
       invalidatedFiles,
       outputPath: dillOutputPath,
+      fs: _fileSystem,
+      projectRootPath: projectRootPath,
       packageConfig: packageConfig,
     );
     if (bundle != null) {
@@ -567,7 +640,7 @@ class DevFS {
   }
 
   /// Converts a platform-specific file path to a platform-independent URL path.
-  String _asUriPath(String filePath) => _fileSystem.path.toUri(filePath).path + '/';
+  String _asUriPath(String filePath) => '${_fileSystem.path.toUri(filePath).path}/';
 }
 
 /// An implementation of a devFS writer which copies physical files for devices

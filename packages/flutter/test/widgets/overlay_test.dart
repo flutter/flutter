@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
 
@@ -28,7 +28,7 @@ void main() {
             ),
             OverlayEntry(
               builder: (BuildContext context) => Container(),
-            )
+            ),
           ],
         ),
       ),
@@ -75,7 +75,7 @@ void main() {
         ' ╎     size: Size(800.0, 600.0)\n'
         ' ╎     additionalConstraints: BoxConstraints(biggest)\n'
         ' ╎\n'
-        ' └╌no offstage children\n'
+        ' └╌no offstage children\n',
       ),
     );
   });
@@ -192,7 +192,7 @@ void main() {
         builder: (BuildContext context) {
           buildOrder.add('New');
           return Container();
-        }
+        },
       ),
     );
     await tester.pump();
@@ -227,10 +227,10 @@ void main() {
     final OverlayState overlay = overlayKey.currentState! as OverlayState;
     overlay.insert(
       OverlayEntry(
-          builder: (BuildContext context) {
-            buildOrder.add('New');
-            return Container();
-          }
+        builder: (BuildContext context) {
+          buildOrder.add('New');
+          return Container();
+        },
       ),
       below: base,
     );
@@ -272,10 +272,10 @@ void main() {
     final OverlayState overlay = overlayKey.currentState! as OverlayState;
     overlay.insert(
       OverlayEntry(
-          builder: (BuildContext context) {
-            buildOrder.add('New');
-            return Container();
-          }
+        builder: (BuildContext context) {
+          buildOrder.add('New');
+          return Container();
+        },
       ),
       above: base,
     );
@@ -732,7 +732,7 @@ void main() {
               ));
             }
             return Container();
-          }
+          },
         ),
       ),
     );
@@ -923,7 +923,7 @@ void main() {
     );
 
     expect(bottomTapCount, 0);
-    await tester.tap(find.byKey(overlayKey));
+    await tester.tap(find.byKey(overlayKey), warnIfMissed: false); // gesture detector is translucent; no hit is registered between it and the render view
     expect(bottomTapCount, 1);
 
     overlayKey.currentState!.insert(OverlayEntry(
@@ -938,7 +938,7 @@ void main() {
     // Bottom is offstage and does not receive tap events.
     expect(find.byType(GestureDetector), findsNothing);
     expect(find.byType(GestureDetector, skipOffstage: false), findsOneWidget);
-    await tester.tap(find.byKey(overlayKey));
+    await tester.tap(find.byKey(overlayKey), warnIfMissed: false); // gesture detector is translucent; no hit is registered between it and the render view
     expect(bottomTapCount, 1);
 
     int topTapCount = 0;
@@ -956,7 +956,7 @@ void main() {
     await tester.pump();
 
     expect(topTapCount, 0);
-    await tester.tap(find.byKey(overlayKey));
+    await tester.tap(find.byKey(overlayKey), warnIfMissed: false); // gesture detector is translucent; no hit is registered between it and the render view
     expect(topTapCount, 1);
     expect(bottomTapCount, 1);
   });
@@ -1035,11 +1035,10 @@ void main() {
     );
 
     // By default, clipBehavior should be Clip.hardEdge
-    // ignore: unnecessary_nullable_for_final_variable_declarations
     final dynamic renderObject = tester.renderObject(find.byType(Overlay));
     expect(renderObject.clipBehavior, equals(Clip.hardEdge));
 
-    for(final Clip clip in Clip.values) {
+    for (final Clip clip in Clip.values) {
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,

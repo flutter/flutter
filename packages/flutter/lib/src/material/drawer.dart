@@ -2,9 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
+import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 import 'debug.dart';
@@ -231,6 +230,7 @@ class DrawerController extends StatefulWidget {
     GlobalKey? key,
     required this.child,
     required this.alignment,
+    this.isDrawerOpen = false,
     this.drawerCallback,
     this.dragStartBehavior = DragStartBehavior.start,
     this.scrimColor,
@@ -259,9 +259,9 @@ class DrawerController extends StatefulWidget {
   /// Determines the way that drag start behavior is handled.
   ///
   /// If set to [DragStartBehavior.start], the drag behavior used for opening
-  /// and closing a drawer will begin upon the detection of a drag gesture. If
-  /// set to [DragStartBehavior.down] it will begin when a down event is first
-  /// detected.
+  /// and closing a drawer will begin at the position where the drag gesture won
+  /// the arena. If set to [DragStartBehavior.down] it will begin at the position
+  /// where a down event is first detected.
   ///
   /// In general, setting this to [DragStartBehavior.start] will make drag
   /// animation smoother and setting it to [DragStartBehavior.down] will make
@@ -298,6 +298,14 @@ class DrawerController extends StatefulWidget {
   /// 20.0 will be added to `MediaQuery.of(context).padding.left`.
   final double? edgeDragWidth;
 
+  /// Whether or not the drawer is opened or closed.
+  ///
+  /// This parameter is primarily used by the state restoration framework
+  /// to restore the drawer's animation controller to the open or closed state
+  /// depending on what was last saved to the target platform before the
+  /// application was killed.
+  final bool isDrawerOpen;
+
   @override
   DrawerControllerState createState() => DrawerControllerState();
 }
@@ -310,7 +318,12 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   void initState() {
     super.initState();
     _scrimColorTween = _buildScrimColorTween();
-    _controller = AnimationController(duration: _kBaseSettleDuration, vsync: this)
+    _controller = AnimationController(
+      value: widget.isDrawerOpen ? 1.0 : 0.0,
+      duration: _kBaseSettleDuration,
+      vsync: this,
+    );
+    _controller
       ..addListener(_animationChanged)
       ..addStatusListener(_animationStatusChanged);
   }
@@ -327,6 +340,16 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
     super.didUpdateWidget(oldWidget);
     if (widget.scrimColor != oldWidget.scrimColor)
       _scrimColorTween = _buildScrimColorTween();
+    if (widget.isDrawerOpen != oldWidget.isDrawerOpen) {
+      switch(_controller.status) {
+        case AnimationStatus.completed:
+        case AnimationStatus.dismissed:
+          _controller.value = widget.isDrawerOpen ? 1.0 : 0.0;
+          break;
+        default:
+          break;
+      }
+    }
   }
 
   void _animationChanged() {
@@ -437,13 +460,11 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
       switch (Directionality.of(context)) {
         case TextDirection.rtl:
           _controller.fling(velocity: -visualVelocity);
-          if (widget.drawerCallback != null)
-            widget.drawerCallback!(visualVelocity < 0.0);
+          widget.drawerCallback?.call(visualVelocity < 0.0);
           break;
         case TextDirection.ltr:
           _controller.fling(velocity: visualVelocity);
-          if (widget.drawerCallback != null)
-            widget.drawerCallback!(visualVelocity > 0.0);
+          widget.drawerCallback?.call(visualVelocity > 0.0);
           break;
       }
     } else if (_controller.value < 0.5) {
@@ -458,15 +479,13 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   /// Typically called by [ScaffoldState.openDrawer].
   void open() {
     _controller.fling(velocity: 1.0);
-    if (widget.drawerCallback != null)
-      widget.drawerCallback!(true);
+    widget.drawerCallback?.call(true);
   }
 
   /// Starts an animation to close the drawer.
   void close() {
     _controller.fling(velocity: -1.0);
-    if (widget.drawerCallback != null)
-      widget.drawerCallback!(false);
+    widget.drawerCallback?.call(false);
   }
 
   late ColorTween _scrimColorTween;

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -9,11 +11,10 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
 import 'package:flutter_tools/src/web/web_device.dart';
-import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
-import '../../src/testbed.dart';
+import '../../src/fake_process_manager.dart';
+import '../../src/fakes.dart';
 
 void main() {
   testWithoutContext('No web devices listed if feature is disabled', () async {
@@ -124,8 +125,8 @@ void main() {
   });
 
   testWithoutContext('Chrome device is not listed when Chrome cannot be run', () async {
-    final MockProcessManager processManager = MockProcessManager();
-    when(processManager.canRun(any)).thenReturn(false);
+    final FakeProcessManager processManager = FakeProcessManager.empty();
+    processManager.excludedExecutables = <String>{kLinuxExecutable};
     final WebDevices webDevices = WebDevices(
       featureFlags: TestFeatureFlags(isWebEnabled: true),
       fileSystem: MemoryFileSystem.test(),
@@ -139,24 +140,6 @@ void main() {
 
     expect(await webDevices.pollingGetDevices(),
       isNot(contains(isA<GoogleChromeDevice>())));
-  });
-
-  testWithoutContext('Edge device is not listed when Edge cannot be run', () async {
-    final MockProcessManager processManager = MockProcessManager();
-    when(processManager.canRun(any)).thenReturn(false);
-    final WebDevices webDevices = WebDevices(
-      featureFlags: TestFeatureFlags(isWebEnabled: true),
-      fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
-      platform: FakePlatform(
-        operatingSystem: 'linux',
-        environment: <String, String>{}
-      ),
-      processManager: processManager,
-    );
-
-    expect(await webDevices.pollingGetDevices(),
-      isNot(contains(isA<MicrosoftEdgeDevice>())));
   });
 
   testWithoutContext('Web Server device is listed if enabled via showWebServerDevice', () async {
@@ -223,7 +206,7 @@ void main() {
 
     // Verify caching works correctly.
     expect(await chromeDevice.sdkNameAndVersion, 'ABC');
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('Chrome and Edge version check invokes registry query on windows.', () async {
@@ -269,7 +252,43 @@ void main() {
 
     // Verify caching works correctly.
     expect(await chromeDevice.sdkNameAndVersion, 'Google Chrome 74.0.0');
-    expect(processManager.hasRemainingExpectations, false);
+    expect(processManager, hasNoRemainingExpectations);
+  });
+
+  testWithoutContext('Chrome and Edge version check handles missing registry on Windows', () async {
+    final FakeProcessManager processManager = FakeProcessManager.empty();
+    processManager.excludedExecutables.add('reg');
+
+    final Platform platform = FakePlatform(
+        operatingSystem: 'windows', environment: <String, String>{});
+    final ChromiumLauncher chromeLauncher = ChromiumLauncher(
+      fileSystem: MemoryFileSystem.test(),
+      platform: platform,
+      processManager: processManager,
+      operatingSystemUtils: null,
+      browserFinder: findChromeExecutable,
+      logger: BufferLogger.test(),
+    );
+    final MicrosoftEdgeDevice edgeDevice = MicrosoftEdgeDevice(
+      chromiumLauncher: chromeLauncher,
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      processManager: processManager,
+    );
+
+    expect(edgeDevice.isSupported(), true);
+    expect(await edgeDevice.sdkNameAndVersion, '');
+
+    final GoogleChromeDevice chromeDevice = GoogleChromeDevice(
+      chromiumLauncher: chromeLauncher,
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      processManager: processManager,
+      platform: platform,
+    );
+
+    expect(chromeDevice.isSupported(), true);
+    expect(await chromeDevice.sdkNameAndVersion, 'unknown');
   });
 
   testWithoutContext('Edge is not supported on versions less than 73', () async {
@@ -308,7 +327,7 @@ void main() {
         operatingSystem: 'linux',
         environment: <String, String>{}
       ),
-      processManager: FakeProcessManager.list(<FakeCommand>[]),
+      processManager: FakeProcessManager.empty(),
     );
 
     expect((await webDevices.pollingGetDevices()).whereType<MicrosoftEdgeDevice>(), isEmpty);
@@ -321,12 +340,9 @@ void main() {
         operatingSystem: 'macos',
         environment: <String, String>{}
       ),
-      processManager: FakeProcessManager.list(<FakeCommand>[]),
+      processManager: FakeProcessManager.empty(),
     );
 
     expect((await macosWebDevices.pollingGetDevices()).whereType<MicrosoftEdgeDevice>(), isEmpty);
   });
 }
-
-// This is used to set `canRun` to false in a test.
-class MockProcessManager extends Mock implements ProcessManager {}

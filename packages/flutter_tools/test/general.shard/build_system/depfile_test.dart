@@ -10,8 +10,8 @@ import 'package:flutter_tools/src/build_system/depfile.dart';
 import '../../src/common.dart';
 
 void main() {
-  FileSystem fileSystem;
-  DepfileService depfileService;
+  late FileSystem fileSystem;
+  late DepfileService depfileService;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();

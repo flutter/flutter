@@ -2,8 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file/file.dart';
-import 'package:matcher/matcher.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../integration.shard/test_data/basic_project.dart';
@@ -12,171 +13,175 @@ import '../integration.shard/test_driver.dart';
 import '../integration.shard/test_utils.dart';
 import '../src/common.dart';
 
-void batch1() {
-  final BasicProject _project = BasicProject();
-  Directory tempDir;
-  FlutterRunTestDriver _flutter;
+void main() {
+  group('Flutter run for web', () {
+    final BasicProject project = BasicProject();
+    Directory tempDir;
+    FlutterRunTestDriver flutter;
 
-  Future<void> initProject() async {
-    tempDir = createResolvedTempDirectorySync('run_expression_eval_test.');
-    await _project.setUpIn(tempDir);
-    _flutter = FlutterRunTestDriver(tempDir);
-  }
+    setUp(() async {
+      tempDir = createResolvedTempDirectorySync('run_expression_eval_test.');
+      await project.setUpIn(tempDir);
+      flutter = FlutterRunTestDriver(tempDir);
+    });
 
-  Future<void> cleanProject() async {
-    await _flutter.stop();
-    tryToDelete(tempDir);
-  }
+    tearDown(() async {
+      await flutter.stop();
+      tryToDelete(tempDir);
+    });
 
-  Future<void> start({bool expressionEvaluation}) {
-    // The non-test project has a loop around its breakpoints.
-    // No need to start paused as all breakpoint would be eventually reached.
-    return  _flutter.run(
-      withDebugger: true, chrome: true,
-      expressionEvaluation: expressionEvaluation,
-      additionalCommandArgs: <String>['--verbose']);
-  }
+    Future<void> start({bool expressionEvaluation}) async {
+      // The non-test project has a loop around its breakpoints.
+      // No need to start paused as all breakpoint would be eventually reached.
+      await flutter.run(
+        withDebugger: true, chrome: true,
+        expressionEvaluation: expressionEvaluation,
+        additionalCommandArgs: <String>['--verbose']);
+    }
 
-  Future<void> breakInBuildMethod(FlutterTestDriver flutter) async {
-    await _flutter.breakAt(
-      _project.buildMethodBreakpointUri,
-      _project.buildMethodBreakpointLine,
-    );
-  }
+    Future<void> breakInBuildMethod(FlutterTestDriver flutter) async {
+      await flutter.breakAt(
+        project.buildMethodBreakpointUri,
+        project.buildMethodBreakpointLine,
+      );
+    }
 
-  Future<void> breakInTopLevelFunction(FlutterTestDriver flutter) async {
-    await _flutter.breakAt(
-      _project.topLevelFunctionBreakpointUri,
-      _project.topLevelFunctionBreakpointLine,
-    );
-  }
+    Future<void> breakInTopLevelFunction(FlutterTestDriver flutter) async {
+      await flutter.breakAt(
+        project.topLevelFunctionBreakpointUri,
+        project.topLevelFunctionBreakpointLine,
+      );
+    }
 
-  testWithoutContext('flutter run expression evaluation - error if expression evaluation disabled', () async {
-    await initProject();
-    await start(expressionEvaluation: false);
-    await breakInTopLevelFunction(_flutter);
-    await failToEvaluateExpression(_flutter);
-    await cleanProject();
+    testWithoutContext('cannot evaluate expression if feature is disabled', () async {
+      await start(expressionEvaluation: false);
+      await breakInTopLevelFunction(flutter);
+      await failToEvaluateExpression(flutter);
+    });
+
+    testWithoutContext('shows no native javascript objects in static scope', () async {
+      await start(expressionEvaluation: true);
+      await breakInTopLevelFunction(flutter);
+      await checkStaticScope(flutter);
+    });
+
+    testWithoutContext('can handle compilation errors', () async {
+      await start(expressionEvaluation: true);
+      await breakInTopLevelFunction(flutter);
+      await evaluateErrorExpressions(flutter);
+    });
+
+    testWithoutContext('can evaluate trivial expressions in top level function', () async {
+      await start(expressionEvaluation: true);
+      await breakInTopLevelFunction(flutter);
+      await evaluateTrivialExpressions(flutter);
+    });
+
+    testWithoutContext('can evaluate trivial expressions in build method', () async {
+      await start(expressionEvaluation: true);
+      await breakInBuildMethod(flutter);
+      await evaluateTrivialExpressions(flutter);
+    });
+
+    testWithoutContext('can evaluate complex expressions in top level function', () async {
+      await start(expressionEvaluation: true);
+      await breakInTopLevelFunction(flutter);
+      await evaluateComplexExpressions(flutter);
+    });
+
+    testWithoutContext('can evaluate complex expressions in build method', () async {
+      await start(expressionEvaluation: true);
+      await breakInBuildMethod(flutter);
+      await evaluateComplexExpressions(flutter);
+    });
+
+    testWithoutContext('can evaluate trivial expressions in library without pause', () async {
+      await start(expressionEvaluation: true);
+      await evaluateTrivialExpressionsInLibrary(flutter);
+    });
+
+    testWithoutContext('can evaluate complex expressions in library without pause', () async {
+      await start(expressionEvaluation: true);
+      await evaluateComplexExpressionsInLibrary(flutter);
+    });
   });
 
- testWithoutContext('flutter run expression evaluation - no native javascript objects in static scope', () async {
-    await initProject();
-    await start(expressionEvaluation: true);
-    await breakInTopLevelFunction(_flutter);
-    await checkStaticScope(_flutter);
-    await cleanProject();
+
+  group('Flutter test for web', () {
+    final TestsProject project = TestsProject();
+    Directory tempDir;
+    FlutterRunTestDriver flutter;
+
+    setUp(() async {
+      tempDir = createResolvedTempDirectorySync('run_expression_eval_test.');
+      await project.setUpIn(tempDir);
+      flutter = FlutterRunTestDriver(tempDir);
+    });
+
+    tearDown(() async {
+      await flutter.stop();
+      tryToDelete(tempDir);
+    });
+
+    Future<Isolate> breakInMethod(FlutterTestDriver flutter) async {
+      await flutter.addBreakpoint(
+        project.breakpointAppUri,
+        project.breakpointLine,
+      );
+      await flutter.resume();
+      return flutter.waitForPause();
+    }
+
+    Future<void> startPaused({bool expressionEvaluation}) {
+      // The test project does not have a loop around its breakpoints.
+      // Start paused so we can set a breakpoint before passing it
+      // in the execution.
+      return flutter.run(
+        withDebugger: true, chrome: true,
+        expressionEvaluation: expressionEvaluation,
+        startPaused: true, script: project.testFilePath,
+        additionalCommandArgs: <String>['--verbose']);
+    }
+
+    testWithoutContext('cannot evaluate expressions if feature is disabled', () async {
+      await startPaused(expressionEvaluation: false);
+      await breakInMethod(flutter);
+      await failToEvaluateExpression(flutter);
+    });
+
+    testWithoutContext('can evaluate trivial expressions in a test', () async {
+      await startPaused(expressionEvaluation: true);
+      await breakInMethod(flutter);
+      await evaluateTrivialExpressions(flutter);
+    });
+
+    testWithoutContext('can evaluate complex expressions in a test', () async {
+      await startPaused(expressionEvaluation: true);
+      await breakInMethod(flutter);
+      await evaluateComplexExpressions(flutter);
+    });
+
+    testWithoutContext('can evaluate trivial expressions in library without pause', () async {
+      await startPaused(expressionEvaluation: true);
+      await evaluateTrivialExpressionsInLibrary(flutter);
+    });
+
+    testWithoutContext('can evaluate complex expressions in library without pause', () async {
+      await startPaused(expressionEvaluation: true);
+      await evaluateComplexExpressionsInLibrary(flutter);
+    });
   });
-
-  testWithoutContext('flutter run expression evaluation - can handle compilation errors', () async {
-    await initProject();
-    await start(expressionEvaluation: true);
-    await breakInTopLevelFunction(_flutter);
-    await evaluateErrorExpressions(_flutter);
-    await cleanProject();
-  });
-
-  testWithoutContext('flutter run expression evaluation - can evaluate trivial expressions in top level function', () async {
-    await initProject();
-    await start(expressionEvaluation: true);
-    await breakInTopLevelFunction(_flutter);
-    await evaluateTrivialExpressions(_flutter);
-    await cleanProject();
-  });
-
-  testWithoutContext('flutter run expression evaluation - can evaluate trivial expressions in build method', () async {
-    await initProject();
-    await start(expressionEvaluation: true);
-    await breakInBuildMethod(_flutter);
-    await evaluateTrivialExpressions(_flutter);
-    await cleanProject();
-  });
-
-  testWithoutContext('flutter run expression evaluation - can evaluate complex expressions in top level function', () async {
-    await initProject();
-    await start(expressionEvaluation: true);
-    await breakInTopLevelFunction(_flutter);
-    await evaluateComplexExpressions(_flutter);
-    await cleanProject();
-  });
-
-  testWithoutContext('flutter run expression evaluation - can evaluate complex expressions in build method', () async {
-    await initProject();
-    await _flutter.run(withDebugger: true, chrome: true);
-    await breakInBuildMethod(_flutter);
-    await evaluateComplexExpressions(_flutter);
-    await cleanProject();
-  });
-}
-
-void batch2() {
-  final TestsProject _project = TestsProject();
-  Directory tempDir;
-  FlutterRunTestDriver _flutter;
-
-  Future<void> initProject() async {
-    tempDir = createResolvedTempDirectorySync('test_expression_eval_test.');
-    await _project.setUpIn(tempDir);
-    _flutter = FlutterRunTestDriver(tempDir);
-  }
-
-  Future<void> cleanProject() async {
-    await _flutter.stop();
-    tryToDelete(tempDir);
-  }
-
-  Future<void> breakInMethod(FlutterTestDriver flutter) async {
-    await _flutter.addBreakpoint(
-      _project.breakpointAppUri,
-      _project.breakpointLine,
-    );
-    await _flutter.resume();
-    await _flutter.waitForPause();
-  }
-
-  Future<void> startPaused({bool expressionEvaluation}) {
-    // The test project does not have a loop around its breakpoints.
-    // Start paused so we can set a breakpoint before passing it
-    // in the execution.
-    return  _flutter.run(
-      withDebugger: true, chrome: true,
-      expressionEvaluation: expressionEvaluation,
-      startPaused: true, script: _project.testFilePath,
-      additionalCommandArgs: <String>['--verbose']);
-  }
-
-  testWithoutContext('flutter test expression evaluation - error if expression evaluation disabled', () async {
-    await initProject();
-    await startPaused(expressionEvaluation: false);
-    await breakInMethod(_flutter);
-    await failToEvaluateExpression(_flutter);
-    await cleanProject();
-  });
-
-  testWithoutContext('flutter test expression evaluation - can evaluate trivial expressions in a test', () async {
-    await initProject();
-    await startPaused(expressionEvaluation: true);
-    await breakInMethod(_flutter);
-    await evaluateTrivialExpressions(_flutter);
-    await cleanProject();
-  });
-
-  testWithoutContext('flutter test expression evaluation - can evaluate complex expressions in a test', () async {
-    await initProject();
-    await startPaused(expressionEvaluation: true);
-    await breakInMethod(_flutter);
-    await evaluateComplexExpressions(_flutter);
-    await cleanProject();
-  }, skip: 'https://github.com/dart-lang/sdk/issues/41480');
 }
 
 Future<void> failToEvaluateExpression(FlutterTestDriver flutter) async {
-  ObjRef res;
-  try {
-    res = await flutter.evaluateInFrame('"test"');
-  } on RPCError catch (e) {
-    expect(e.message, contains('Expression evaluation is not supported for this configuration'));
-  }
-  expect(res, null);
+  await expectLater(
+    () => flutter.evaluateInFrame('"test"'),
+    throwsA(isA<RPCError>().having(
+      (RPCError error) => error.message,
+      'message',
+      contains('Expression evaluation is not supported for this configuration'),
+    )),
+  );
 }
 
 Future<void> checkStaticScope(FlutterTestDriver flutter) async {
@@ -186,7 +191,7 @@ Future<void> checkStaticScope(FlutterTestDriver flutter) async {
 
 Future<void> evaluateErrorExpressions(FlutterTestDriver flutter) async {
   final ObjRef res = await flutter.evaluateInFrame('typo');
-  expectError(res, 'CompilationError: Getter not found: \'typo\'.\ntypo\n^^^^');
+  expectError(res, "CompilationError: Getter not found: 'typo'.\ntypo\n^^^^");
 }
 
 Future<void> evaluateTrivialExpressions(FlutterTestDriver flutter) async {
@@ -207,6 +212,28 @@ Future<void> evaluateComplexExpressions(FlutterTestDriver flutter) async {
   expectInstance(res, InstanceKind.kDouble, DateTime.now().year.toString());
 }
 
+Future<void> evaluateTrivialExpressionsInLibrary(FlutterTestDriver flutter) async {
+  final LibraryRef library = await getRootLibrary(flutter);
+  final ObjRef res = await flutter.evaluate(library.id, '"test"');
+  expectInstance(res, InstanceKind.kString, 'test');
+}
+
+Future<void> evaluateComplexExpressionsInLibrary(FlutterTestDriver flutter) async {
+  final LibraryRef library = await getRootLibrary(flutter);
+  final ObjRef res = await flutter.evaluate(library.id, 'new DateTime.now().year');
+  expectInstance(res, InstanceKind.kDouble, DateTime.now().year.toString());
+}
+
+Future<LibraryRef> getRootLibrary(FlutterTestDriver flutter) async {
+  // `isolate.rootLib` returns incorrect library, so find the
+  // entrypoint manually here instead.
+  //
+  // Issue: https://github.com/dart-lang/sdk/issues/44760
+  final Isolate isolate = await flutter.getFlutterIsolate();
+  return isolate.libraries
+    .firstWhere((LibraryRef l) => l.uri.contains('org-dartlang-app'));
+}
+
 void expectInstance(ObjRef result, String kind, String message) {
   expect(result,
     const TypeMatcher<InstanceRef>()
@@ -218,9 +245,4 @@ void expectError(ObjRef result, String message) {
   expect(result,
     const TypeMatcher<ErrorRef>()
       .having((ErrorRef instance) => instance.message, 'message', message));
-}
-
-void main() {
-  batch1();
-  batch2();
 }

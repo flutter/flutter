@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 // This program updates the language locale arb files with any missing resource
 // entries that are included in the English arb files. This is useful when
 // adding new resources for localization. You can just add the appropriate

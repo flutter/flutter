@@ -2,38 +2,62 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:io';
 
-import 'package:mockito/mockito.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import '../../../packages/flutter/test/image_data.dart';
 
 // Returns a mock HTTP client that responds with an image to all requests.
-MockHttpClient createMockImageHttpClient(SecurityContext _) {
-  final MockHttpClient client = MockHttpClient();
-  final MockHttpClientRequest request = MockHttpClientRequest();
-  final MockHttpClientResponse response = MockHttpClientResponse();
-  final MockHttpHeaders headers = MockHttpHeaders();
-  when(client.getUrl(any)).thenAnswer((_) => Future<HttpClientRequest>.value(request));
-  when(request.headers).thenReturn(headers);
-  when(request.close()).thenAnswer((_) => Future<HttpClientResponse>.value(response));
-  when(response.contentLength).thenReturn(kTransparentImage.length);
-  when(response.statusCode).thenReturn(HttpStatus.ok);
-  when(response.compressionState).thenReturn(HttpClientResponseCompressionState.notCompressed);
-  when(response.listen(any)).thenAnswer((Invocation invocation) {
-    final void Function(List<int>) onData = invocation.positionalArguments[0] as void Function(List<int>);
-    final void Function() onDone = invocation.namedArguments[#onDone] as void Function();
-    final void Function(Object, [StackTrace]) onError = invocation.namedArguments[#onError] as void Function(Object, [StackTrace]);
-    final bool cancelOnError = invocation.namedArguments[#cancelOnError] as bool;
-    return Stream<List<int>>.fromIterable(<List<int>>[kTransparentImage]).listen(onData, onDone: onDone, onError: onError, cancelOnError: cancelOnError);
-  });
+FakeHttpClient createMockImageHttpClient(SecurityContext? _) {
+  final FakeHttpClient client = FakeHttpClient();
   return client;
 }
 
-class MockHttpClient extends Mock implements HttpClient {}
+class FakeHttpClient extends Fake implements HttpClient {
+  @override
+  bool autoUncompress = false;
 
-class MockHttpClientRequest extends Mock implements HttpClientRequest {}
+  final FakeHttpClientRequest request = FakeHttpClientRequest();
 
-class MockHttpClientResponse extends Mock implements HttpClientResponse {}
+  @override
+  Future<HttpClientRequest> getUrl(Uri url) async {
+    return request;
+  }
+}
 
-class MockHttpHeaders extends Mock implements HttpHeaders {}
+class FakeHttpClientRequest extends Fake implements HttpClientRequest {
+  final FakeHttpClientResponse response = FakeHttpClientResponse();
+
+  @override
+  Future<HttpClientResponse> close() async {
+    return response;
+  }
+}
+
+class FakeHttpClientResponse extends Fake implements HttpClientResponse {
+  @override
+  int get statusCode => 200;
+
+  @override
+  int get contentLength => kTransparentImage.length;
+
+  @override
+  final FakeHttpHeaders headers = FakeHttpHeaders();
+
+  @override
+  HttpClientResponseCompressionState get compressionState => HttpClientResponseCompressionState.notCompressed;
+
+  @override
+  StreamSubscription<List<int>> listen(void Function(List<int>)? onData, {
+    void Function()? onDone,
+    Function? onError,
+    bool? cancelOnError,
+  }) {
+    return Stream<List<int>>.fromIterable(<List<int>>[kTransparentImage])
+      .listen(onData, onDone: onDone, onError: onError, cancelOnError: cancelOnError);
+  }
+}
+
+class FakeHttpHeaders extends Fake implements HttpHeaders {}

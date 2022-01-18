@@ -2,16 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter_devicelab/common.dart';
 import 'package:flutter_devicelab/framework/adb.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:path/path.dart' as path;
-import 'package:vm_service_client/vm_service_client.dart';
+import 'package:vm_service/vm_service.dart';
+import 'package:vm_service/vm_service_io.dart';
 
 void main() {
   task(() async {
@@ -26,7 +30,7 @@ void main() {
       print('run: starting...');
       final Process run = await startProcess(
         path.join(flutterDirectory.path, 'bin', 'flutter'),
-        <String>['run', '--verbose', '--no-fast-start', '--disable-service-auth-codes', '-d', device.deviceId, 'lib/main.dart'],
+        <String>['run', '--verbose', '--no-fast-start', '--no-publish-port', '--disable-service-auth-codes', '-d', device.deviceId, 'lib/main.dart'],
       );
       run.stdout
           .transform<String>(utf8.decoder)
@@ -49,57 +53,63 @@ void main() {
           .listen((String line) {
         stderr.writeln('run:stderr: $line');
       });
-      run.exitCode.then<void>((int exitCode) { ok = false; });
+      unawaited(run.exitCode.then<void>((int exitCode) { ok = false; }));
       await Future.any<dynamic>(<Future<dynamic>>[ ready.future, run.exitCode ]);
       if (!ok)
         throw 'Failed to run test app.';
 
-      final VMServiceClient client = VMServiceClient.connect('ws://localhost:$vmServicePort/ws');
+      final VmService client = await vmServiceConnectUri('ws://localhost:$vmServicePort/ws');
       final VM vm = await client.getVM();
-      final VMIsolateRef isolate = vm.isolates.first;
+      final IsolateRef isolate = vm.isolates.first;
 
-      final StreamController<VMExtensionEvent> frameEventsController = StreamController<VMExtensionEvent>();
-      final StreamController<VMExtensionEvent> navigationEventsController = StreamController<VMExtensionEvent>();
-      isolate.onExtensionEvent.listen((VMExtensionEvent event) {
-        if (event.kind == 'Flutter.Frame') {
+      final StreamController<Event> frameEventsController = StreamController<Event>();
+      final StreamController<Event> navigationEventsController = StreamController<Event>();
+      try {
+        await client.streamListen(EventKind.kExtension);
+      } catch (err) {
+        // Do nothing on errors.
+      }
+      client.onExtensionEvent.listen((Event event) {
+        if (event.extensionKind == 'Flutter.Frame') {
           frameEventsController.add(event);
-        } else if (event.kind == 'Flutter.Navigation') {
+        } else if (event.extensionKind == 'Flutter.Navigation') {
           navigationEventsController.add(event);
         }
       });
 
-      final Stream<VMExtensionEvent> frameEvents = frameEventsController.stream;
-      final Stream<VMExtensionEvent> navigationEvents = navigationEventsController.stream;
+      final Stream<Event> frameEvents = frameEventsController.stream;
+      final Stream<Event> navigationEvents = navigationEventsController.stream;
 
       print('reassembling app...');
-      final Future<VMExtensionEvent> frameFuture = frameEvents.first;
-      await isolate.invokeExtension('ext.flutter.reassemble');
+      final Future<Event> frameFuture = frameEvents.first;
+      await client.callServiceExtension('ext.flutter.reassemble', isolateId: isolate.id);
 
       // ensure we get an event
-      final VMExtensionEvent event = await frameFuture;
+      final Event event = await frameFuture;
       print('${event.kind}: ${event.data}');
 
       // validate the fields
       // {number: 8, startTime: 0, elapsed: 1437, build: 600, raster: 800}
-      expect(event.data['number'] is int);
-      expect((event.data['number'] as int) >= 0);
-      expect(event.data['startTime'] is int);
-      expect((event.data['startTime'] as int) >= 0);
-      expect(event.data['elapsed'] is int);
-      expect((event.data['elapsed'] as int) >= 0);
-      expect(event.data['build'] is int);
-      expect((event.data['build'] as int) >= 0);
-      expect(event.data['raster'] is int);
-      expect((event.data['raster'] as int) >= 0);
+      print(event.extensionData.data);
+      expect(event.extensionData.data['number'] is int);
+      expect((event.extensionData.data['number'] as int) >= 0);
+      expect(event.extensionData.data['startTime'] is int);
+      expect((event.extensionData.data['startTime'] as int) >= 0);
+      expect(event.extensionData.data['elapsed'] is int);
+      expect((event.extensionData.data['elapsed'] as int) >= 0);
+      expect(event.extensionData.data['build'] is int);
+      expect((event.extensionData.data['build'] as int) >= 0);
+      expect(event.extensionData.data['raster'] is int);
+      expect((event.extensionData.data['raster'] as int) >= 0);
 
-      final Future<VMExtensionEvent> navigationFuture = navigationEvents.first;
+      final Future<Event> navigationFuture = navigationEvents.first;
       // This tap triggers a navigation event.
-      device.tap(100, 200);
+      unawaited(device.tap(100, 200));
 
-      final VMExtensionEvent navigationEvent = await navigationFuture;
+      final Event navigationEvent = await navigationFuture;
       // validate the fields
-      expect(navigationEvent.data['route'] is Map<dynamic, dynamic>);
-      final Map<dynamic, dynamic> route = navigationEvent.data['route'] as Map<dynamic, dynamic>;
+      expect(navigationEvent.extensionData.data['route'] is Map<dynamic, dynamic>);
+      final Map<dynamic, dynamic> route = navigationEvent.extensionData.data['route'] as Map<dynamic, dynamic>;
       expect(route['description'] is String);
       expect(route['settings'] is Map<dynamic, dynamic>);
       final Map<dynamic, dynamic> settings = route['settings'] as Map<dynamic, dynamic>;

@@ -200,7 +200,7 @@ void main() {
       find.descendant(
         of: find.byType(CupertinoTabScaffold),
         matching: find.byType(DecoratedBox),
-      )
+      ),
     ).decoration as BoxDecoration;
 
     expect(tabDecoration.color!.value, backgroundColor.color.value);
@@ -223,7 +223,7 @@ void main() {
       find.descendant(
         of: find.byType(CupertinoTabScaffold),
         matching: find.byType(DecoratedBox),
-      )
+      ),
     ).decoration as BoxDecoration;
 
     expect(tabDecoration.color!.value, backgroundColor.darkColor.value);
@@ -235,7 +235,7 @@ void main() {
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(
-          viewInsets:  EdgeInsets.only(bottom: 0),
+          viewInsets:  EdgeInsets.zero,
         ),
         child: MaterialApp(
           home: Material(

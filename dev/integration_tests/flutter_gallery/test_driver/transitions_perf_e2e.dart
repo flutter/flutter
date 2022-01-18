@@ -5,13 +5,11 @@
 // @dart = 2.9
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_test/flutter_test.dart';
-
-import 'package:integration_test/integration_test.dart';
-
+import 'package:flutter_gallery/demo_lists.dart';
 import 'package:flutter_gallery/gallery/app.dart' show GalleryApp;
 import 'package:flutter_gallery/gallery/demos.dart';
-import 'package:flutter_gallery/demo_lists.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:integration_test/integration_test.dart';
 
 import 'run_demos.dart';
 

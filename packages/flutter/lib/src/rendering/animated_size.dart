@@ -327,8 +327,14 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
   void paint(PaintingContext context, Offset offset) {
     if (child != null && _hasVisualOverflow && clipBehavior != Clip.none) {
       final Rect rect = Offset.zero & size;
-      _clipRectLayer = context.pushClipRect(needsCompositing, offset, rect, super.paint,
-          clipBehavior: clipBehavior, oldLayer: _clipRectLayer);
+      _clipRectLayer = context.pushClipRect(
+        needsCompositing,
+        offset,
+        rect,
+        super.paint,
+        clipBehavior: clipBehavior,
+        oldLayer: _clipRectLayer,
+      );
     } else {
       _clipRectLayer = null;
       super.paint(context, offset);

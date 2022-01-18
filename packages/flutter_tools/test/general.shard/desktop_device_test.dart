@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:file/memory.dart';
@@ -13,14 +15,14 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/desktop_device.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/device_port_forwarder.dart';
 import 'package:flutter_tools/src/project.dart';
 
 import 'package:meta/meta.dart';
-import 'package:mockito/mockito.dart';
-import 'package:process/process.dart';
+import 'package:test/fake.dart';
 
 import '../src/common.dart';
-import '../src/context.dart';
+import '../src/fake_process_manager.dart';
 
 void main() {
   group('Basic info', () {
@@ -151,19 +153,20 @@ void main() {
           'FLUTTER_ENGINE_SWITCH_5': 'skia-deterministic-rendering=true',
           'FLUTTER_ENGINE_SWITCH_6': 'trace-skia=true',
           'FLUTTER_ENGINE_SWITCH_7': 'trace-allowlist=foo,bar',
-          'FLUTTER_ENGINE_SWITCH_8': 'trace-systrace=true',
-          'FLUTTER_ENGINE_SWITCH_9': 'endless-trace-buffer=true',
-          'FLUTTER_ENGINE_SWITCH_10': 'dump-skp-on-shader-compilation=true',
-          'FLUTTER_ENGINE_SWITCH_11': 'cache-sksl=true',
-          'FLUTTER_ENGINE_SWITCH_12': 'purge-persistent-cache=true',
-          'FLUTTER_ENGINE_SWITCH_13': 'enable-checked-mode=true',
-          'FLUTTER_ENGINE_SWITCH_14': 'verify-entry-points=true',
-          'FLUTTER_ENGINE_SWITCH_15': 'start-paused=true',
-          'FLUTTER_ENGINE_SWITCH_16': 'disable-service-auth-codes=true',
-          'FLUTTER_ENGINE_SWITCH_17': 'dart-flags=--null_assertions',
-          'FLUTTER_ENGINE_SWITCH_18': 'use-test-fonts=true',
-          'FLUTTER_ENGINE_SWITCH_19': 'verbose-logging=true',
-          'FLUTTER_ENGINE_SWITCHES': '19'
+          'FLUTTER_ENGINE_SWITCH_8': 'trace-skia-allowlist=skia.a,skia.b',
+          'FLUTTER_ENGINE_SWITCH_9': 'trace-systrace=true',
+          'FLUTTER_ENGINE_SWITCH_10': 'endless-trace-buffer=true',
+          'FLUTTER_ENGINE_SWITCH_11': 'dump-skp-on-shader-compilation=true',
+          'FLUTTER_ENGINE_SWITCH_12': 'cache-sksl=true',
+          'FLUTTER_ENGINE_SWITCH_13': 'purge-persistent-cache=true',
+          'FLUTTER_ENGINE_SWITCH_14': 'enable-checked-mode=true',
+          'FLUTTER_ENGINE_SWITCH_15': 'verify-entry-points=true',
+          'FLUTTER_ENGINE_SWITCH_16': 'start-paused=true',
+          'FLUTTER_ENGINE_SWITCH_17': 'disable-service-auth-codes=true',
+          'FLUTTER_ENGINE_SWITCH_18': 'dart-flags=--null_assertions',
+          'FLUTTER_ENGINE_SWITCH_19': 'use-test-fonts=true',
+          'FLUTTER_ENGINE_SWITCH_20': 'verbose-logging=true',
+          'FLUTTER_ENGINE_SWITCHES': '20'
         }
       ),
     ]);
@@ -184,6 +187,7 @@ void main() {
         skiaDeterministicRendering: true,
         traceSkia: true,
         traceAllowlist: 'foo,bar',
+        traceSkiaAllowlist: 'skia.a,skia.b',
         traceSystrace: true,
         endlessTraceBuffer: true,
         dumpSkpOnShaderCompilation: true,
@@ -242,7 +246,7 @@ void main() {
     expect(portForwarder.forwardedPorts.isEmpty, true);
   });
 
-  testUsingContext('createDevFSWriter returns a LocalDevFSWriter', () {
+  testWithoutContext('createDevFSWriter returns a LocalDevFSWriter', () {
     final FakeDesktopDevice device = setUpDesktopDevice();
 
     expect(device.createDevFSWriter(null, ''), isA<LocalDevFSWriter>());

@@ -3,8 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
+import 'package:yaml/yaml.dart';
 
 import '../base/file_system.dart';
+import '../base/logger.dart';
 import 'language_subtag_registry.dart';
 
 typedef HeaderGenerator = String Function(String regenerateInstructions);
@@ -18,11 +20,11 @@ int sortFilesByPath (File a, File b) {
 @immutable
 class LocaleInfo implements Comparable<LocaleInfo> {
   const LocaleInfo({
-    this.languageCode,
-    this.scriptCode,
-    this.countryCode,
-    this.length,
-    this.originalString,
+    required this.languageCode,
+    required this.scriptCode,
+    required this.countryCode,
+    required this.length,
+    required this.originalString,
   });
 
   /// Simple parser. Expects the locale string to be in the form of 'language_script_COUNTRY'
@@ -37,8 +39,8 @@ class LocaleInfo implements Comparable<LocaleInfo> {
     final List<String> codes = locale.split('_'); // [language, script, country]
     assert(codes.isNotEmpty && codes.length < 4);
     final String languageCode = codes[0];
-    String scriptCode;
-    String countryCode;
+    String? scriptCode;
+    String? countryCode;
     int length = codes.length;
     String originalString = locale;
     if (codes.length == 2) {
@@ -91,10 +93,10 @@ class LocaleInfo implements Comparable<LocaleInfo> {
       // Update the base string to reflect assumed scriptCodes.
       originalString = languageCode;
       if (scriptCode != null) {
-        originalString += '_' + scriptCode;
+        originalString += '_$scriptCode';
       }
       if (countryCode != null) {
-        originalString += '_' + countryCode;
+        originalString += '_$countryCode';
       }
     }
 
@@ -108,8 +110,8 @@ class LocaleInfo implements Comparable<LocaleInfo> {
   }
 
   final String languageCode;
-  final String scriptCode;
-  final String countryCode;
+  final String? scriptCode;
+  final String? countryCode;
   final int length;             // The number of fields. Ranges from 1-3.
   final String originalString;  // Original un-parsed locale string.
 
@@ -145,7 +147,7 @@ class LocaleInfo implements Comparable<LocaleInfo> {
 // See also //master/tools/gen_locale.dart in the engine repo.
 Map<String, List<String>> _parseSection(String section) {
   final Map<String, List<String>> result = <String, List<String>>{};
-  List<String> lastHeading;
+  late List<String> lastHeading;
   for (final String line in section.split('\n')) {
     if (line == '') {
       continue;
@@ -161,7 +163,7 @@ Map<String, List<String>> _parseSection(String section) {
     final String name = line.substring(0, colon);
     final String value = line.substring(colon + 2);
     lastHeading = result.putIfAbsent(name, () => <String>[]);
-    result[name].add(value);
+    result[name]!.add(value);
   }
   return result;
 }
@@ -180,11 +182,11 @@ void precacheLanguageAndRegionTags() {
       languageSubtagRegistry.split('%%').skip(1).map<Map<String, List<String>>>(_parseSection).toList();
   for (final Map<String, List<String>> section in sections) {
     assert(section.containsKey('Type'), section.toString());
-    final String type = section['Type'].single;
+    final String type = section['Type']!.single;
     if (type == 'language' || type == 'region' || type == 'script') {
       assert(section.containsKey('Subtag') && section.containsKey('Description'), section.toString());
-      final String subtag = section['Subtag'].single;
-      String description = section['Description'].join(' ');
+      final String subtag = section['Subtag']!.single;
+      String description = section['Description']!.join(' ');
       if (description.startsWith('United ')) {
         description = 'the $description';
       }
@@ -216,10 +218,10 @@ String describeLocale(String tag) {
   final List<String> subtags = tag.split('_');
   assert(subtags.isNotEmpty);
   assert(_languages.containsKey(subtags[0]));
-  final String language = _languages[subtags[0]];
+  final String language = _languages[subtags[0]]!;
   String output = language;
-  String region;
-  String script;
+  String? region;
+  String? script;
   if (subtags.length == 2) {
     region = _regions[subtags[1]];
     script = _scripts[subtags[1]];
@@ -285,4 +287,177 @@ String generateString(String value) {
     .replaceAll(backslash, r'\\');
 
   return "'$value'";
+}
+
+/// Typed configuration from the localizations config file.
+class LocalizationOptions {
+  const LocalizationOptions({
+    this.arbDirectory,
+    this.templateArbFile,
+    this.outputLocalizationsFile,
+    this.untranslatedMessagesFile,
+    this.header,
+    this.outputClass,
+    this.outputDirectory,
+    this.preferredSupportedLocales,
+    this.headerFile,
+    this.deferredLoading,
+    this.useSyntheticPackage = true,
+    this.areResourceAttributesRequired = false,
+    this.usesNullableGetter = true,
+  }) : assert(useSyntheticPackage != null);
+
+  /// The `--arb-dir` argument.
+  ///
+  /// The directory where all input localization files should reside.
+  final Uri? arbDirectory;
+
+  /// The `--template-arb-file` argument.
+  ///
+  /// This URI is relative to [arbDirectory].
+  final Uri? templateArbFile;
+
+  /// The `--output-localization-file` argument.
+  ///
+  /// This URI is relative to [arbDirectory].
+  final Uri? outputLocalizationsFile;
+
+  /// The `--untranslated-messages-file` argument.
+  ///
+  /// This URI is relative to [arbDirectory].
+  final Uri? untranslatedMessagesFile;
+
+  /// The `--header` argument.
+  ///
+  /// The header to prepend to the generated Dart localizations.
+  final String? header;
+
+  /// The `--output-class` argument.
+  final String? outputClass;
+
+  /// The `--output-dir` argument.
+  ///
+  /// The directory where all output localization files should be generated.
+  final Uri? outputDirectory;
+
+  /// The `--preferred-supported-locales` argument.
+  final List<String>? preferredSupportedLocales;
+
+  /// The `--header-file` argument.
+  ///
+  /// A file containing the header to prepend to the generated
+  /// Dart localizations.
+  final Uri? headerFile;
+
+  /// The `--use-deferred-loading` argument.
+  ///
+  /// Whether to generate the Dart localization file with locales imported
+  /// as deferred.
+  final bool? deferredLoading;
+
+  /// The `--synthetic-package` argument.
+  ///
+  /// Whether to generate the Dart localization files in a synthetic package
+  /// or in a custom directory.
+  final bool useSyntheticPackage;
+
+  /// The `required-resource-attributes` argument.
+  ///
+  /// Whether to require all resource ids to contain a corresponding
+  /// resource attribute.
+  final bool areResourceAttributesRequired;
+
+  /// The `nullable-getter` argument.
+  ///
+  /// Whether or not the localizations class getter is nullable.
+  final bool usesNullableGetter;
+}
+
+/// Parse the localizations configuration options from [file].
+///
+/// Throws [Exception] if any of the contents are invalid. Returns a
+/// [LocalizationOptions] with all fields as `null` if the config file exists
+/// but is empty.
+LocalizationOptions parseLocalizationsOptions({
+  required File file,
+  required Logger logger,
+}) {
+  final String contents = file.readAsStringSync();
+  if (contents.trim().isEmpty) {
+    return const LocalizationOptions();
+  }
+  final YamlNode yamlNode = loadYamlNode(file.readAsStringSync());
+  if (yamlNode is! YamlMap) {
+    logger.printError('Expected ${file.path} to contain a map, instead was $yamlNode');
+    throw Exception();
+  }
+  return LocalizationOptions(
+    arbDirectory: _tryReadUri(yamlNode, 'arb-dir', logger),
+    templateArbFile: _tryReadUri(yamlNode, 'template-arb-file', logger),
+    outputLocalizationsFile: _tryReadUri(yamlNode, 'output-localization-file', logger),
+    untranslatedMessagesFile: _tryReadUri(yamlNode, 'untranslated-messages-file', logger),
+    header: _tryReadString(yamlNode, 'header', logger),
+    outputClass: _tryReadString(yamlNode, 'output-class', logger),
+    outputDirectory: _tryReadUri(yamlNode, 'output-dir', logger),
+    preferredSupportedLocales: _tryReadStringList(yamlNode, 'preferred-supported-locales', logger),
+    headerFile: _tryReadUri(yamlNode, 'header-file', logger),
+    deferredLoading: _tryReadBool(yamlNode, 'use-deferred-loading', logger),
+    useSyntheticPackage: _tryReadBool(yamlNode, 'synthetic-package', logger) ?? true,
+    areResourceAttributesRequired: _tryReadBool(yamlNode, 'required-resource-attributes', logger) ?? false,
+    usesNullableGetter: _tryReadBool(yamlNode, 'nullable-getter', logger) ?? true,
+  );
+}
+
+// Try to read a `bool` value or null from `yamlMap`, otherwise throw.
+bool? _tryReadBool(YamlMap yamlMap, String key, Logger logger) {
+  final Object? value = yamlMap[key];
+  if (value == null) {
+    return null;
+  }
+  if (value is! bool) {
+    logger.printError('Expected "$key" to have a bool value, instead was "$value"');
+    throw Exception();
+  }
+  return value;
+}
+
+// Try to read a `String` value or null from `yamlMap`, otherwise throw.
+String? _tryReadString(YamlMap yamlMap, String key, Logger logger) {
+  final Object? value = yamlMap[key];
+  if (value == null) {
+    return null;
+  }
+  if (value is! String) {
+    logger.printError('Expected "$key" to have a String value, instead was "$value"');
+    throw Exception();
+  }
+  return value;
+}
+
+List<String>? _tryReadStringList(YamlMap yamlMap, String key, Logger logger) {
+  final Object? value = yamlMap[key];
+  if (value == null) {
+    return null;
+  }
+  if (value is String) {
+    return <String>[value];
+  }
+  if (value is Iterable) {
+    return value.map((dynamic e) => e.toString()).toList();
+  }
+  logger.printError('"$value" must be String or List.');
+  throw Exception();
+}
+
+// Try to read a valid `Uri` or null from `yamlMap`, otherwise throw.
+Uri? _tryReadUri(YamlMap yamlMap, String key, Logger logger) {
+  final String? value = _tryReadString(yamlMap, key, logger);
+  if (value == null) {
+    return null;
+  }
+  final Uri? uri = Uri.tryParse(value);
+  if (uri == null) {
+    logger.printError('"$value" must be a relative file URI');
+  }
+  return uri;
 }

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:meta/meta.dart';
@@ -9,7 +11,7 @@ import 'package:meta/meta.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
 import 'device.dart';
-import 'globals.dart' as globals;
+import 'device_port_forwarder.dart';
 
 /// Discovers a specific service protocol on a device, and forwards the service
 /// protocol device port to the host.
@@ -39,7 +41,7 @@ class ProtocolDiscovery {
     @required int hostPort,
     @required int devicePort,
     @required bool ipv6,
-    Logger logger, // TODO(jonahwilliams): make required.
+    @required Logger logger,
   }) {
     const String kObservatoryService = 'Observatory';
     return ProtocolDiscovery._(
@@ -50,7 +52,7 @@ class ProtocolDiscovery {
       hostPort: hostPort,
       devicePort: devicePort,
       ipv6: ipv6,
-      logger: logger ?? globals.logger,
+      logger: logger,
     );
   }
 
@@ -126,7 +128,7 @@ class ProtocolDiscovery {
     } on FormatException catch (error, stackTrace) {
       _uriStreamController.addError(error, stackTrace);
     }
-    if (uri == null) {
+    if (uri == null || uri.host.isEmpty) {
       return;
     }
     if (devicePort != null && uri.port != devicePort) {
@@ -147,8 +149,7 @@ class ProtocolDiscovery {
       hostUri = deviceUri.replace(port: actualHostPort);
     }
 
-    assert(InternetAddress(hostUri.host).isLoopback);
-    if (ipv6) {
+    if (InternetAddress(hostUri.host).isLoopback && ipv6) {
       hostUri = hostUri.replace(host: InternetAddress.loopbackIPv6.host);
     }
     return hostUri;

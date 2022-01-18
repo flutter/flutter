@@ -4,12 +4,11 @@
 
 import 'dart:ui' as ui;
 
-import 'package:flutter/rendering.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
 import 'semantics_tester.dart';
@@ -38,7 +37,7 @@ void main() {
 
   testWidgets('Text respects textScaleFactor with default font size', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const Center(child: Text('Hello', textDirection: TextDirection.ltr))
+      const Center(child: Text('Hello', textDirection: TextDirection.ltr)),
     );
 
     RichText text = tester.firstWidget(find.byType(RichText));
@@ -66,8 +65,11 @@ void main() {
 
   testWidgets('Text respects textScaleFactor with explicit font size', (WidgetTester tester) async {
     await tester.pumpWidget(const Center(
-      child: Text('Hello',
-        style: TextStyle(fontSize: 20.0), textDirection: TextDirection.ltr),
+      child: Text(
+        'Hello',
+        style: TextStyle(fontSize: 20.0),
+        textDirection: TextDirection.ltr,
+      ),
     ));
 
     RichText text = tester.firstWidget(find.byType(RichText));
@@ -78,10 +80,12 @@ void main() {
     expect(baseSize.height, equals(20.0));
 
     await tester.pumpWidget(const Center(
-      child: Text('Hello',
+      child: Text(
+        'Hello',
         style: TextStyle(fontSize: 20.0),
         textScaleFactor: 1.3,
-        textDirection: TextDirection.ltr),
+        textDirection: TextDirection.ltr,
+      ),
     ));
 
     text = tester.firstWidget(find.byType(RichText));
@@ -267,7 +271,7 @@ void main() {
         r'$$',
         semanticsLabel: 'Double dollars',
         textDirection: TextDirection.ltr,
-      )
+      ),
     );
     final TestSemantics expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
@@ -290,7 +294,8 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: Text(r'$$', semanticsLabel: 'Double dollars')),
+        child: Text(r'$$', semanticsLabel: 'Double dollars'),
+      ),
     );
 
     expect(
@@ -311,16 +316,17 @@ void main() {
       textDirection: TextDirection.ltr,
       child: RichText(
         text: TextSpan(
-        children: <InlineSpan>[
-          const TextSpan(
-            text: 'Some Text',
-            semanticsLabel: '',
-          ),
-          TextSpan(
-            text: 'Clickable',
-            recognizer: TapGestureRecognizer()..onTap = () { },
-          ),
-        ]),
+          children: <InlineSpan>[
+            const TextSpan(
+              text: 'Some Text',
+              semanticsLabel: '',
+            ),
+            TextSpan(
+              text: 'Clickable',
+              recognizer: TapGestureRecognizer()..onTap = () { },
+            ),
+          ],
+        ),
       ),
     ));
     final TestSemantics expectedSemantics = TestSemantics.root(
@@ -621,7 +627,7 @@ void main() {
               label: 'click me',
               textDirection: TextDirection.ltr,
               actions: <SemanticsAction>[SemanticsAction.tap],
-              flags: <SemanticsFlag>[SemanticsFlag.isLink]
+              flags: <SemanticsFlag>[SemanticsFlag.isLink],
             ),
           ],
         ),
@@ -872,14 +878,12 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: Center(
-              child: Container(
-                // Each word takes up more than a half of a line. Together they
-                // wrap onto two lines, but leave a lot of extra space.
-                child: Text(
-                  'twowordsthateachtakeupmorethanhalfof alineoftextsothattheywrapwithlotsofextraspace',
-                  textDirection: TextDirection.ltr,
-                  textWidthBasis: textWidthBasis,
-                ),
+              // Each word takes up more than a half of a line. Together they
+              // wrap onto two lines, but leave a lot of extra space.
+              child: Text(
+                'twowordsthateachtakeupmorethanhalfof alineoftextsothattheywrapwithlotsofextraspace',
+                textDirection: TextDirection.ltr,
+                textWidthBasis: textWidthBasis,
               ),
             ),
           ),
@@ -984,7 +988,9 @@ void main() {
           throw 'paragraph.width (${paragraph.width}) >= 400';
         return true;
       }));
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/44020
+    },
+    skip: isBrowser, // https://github.com/flutter/flutter/issues/44020
+  );
 
   testWidgets('Paragraph.getBoxesForRange returns nothing when selection range is zero length', (WidgetTester tester) async {
     final ui.ParagraphBuilder builder = ui.ParagraphBuilder(ui.ParagraphStyle());
@@ -1007,7 +1013,7 @@ void main() {
             text: 'HELLO',
             style: const TextStyle(color: Colors.black),
             recognizer: TapGestureRecognizer()..onTap = () {},
-          )
+          ),
         ]),
       ),
     );
@@ -1059,7 +1065,7 @@ void main() {
             const WidgetSpan(child: Text('included2')),
           ]),
         ),
-      )
+      ),
     );
 
     expect(semantics, hasSemantics(TestSemantics.root(
@@ -1117,7 +1123,7 @@ void main() {
             ),
           ]),
         ),
-      )
+      ),
     );
 
     expect(semantics, hasSemantics(TestSemantics.root(
@@ -1188,7 +1194,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     expect(semantics, hasSemantics(TestSemantics.root(
@@ -1216,7 +1222,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: SizedBox(
             height: 100,
             child: IntrinsicWidth(
               child: RichText(
@@ -1228,9 +1234,9 @@ void main() {
                       alignment: PlaceholderAlignment.top,
                       child: Wrap(
                         direction: Axis.vertical,
-                        children: <Widget>[
-                          Container(width: 200, height: 100),
-                          Container(width: 200, height: 30),
+                        children: const <Widget>[
+                          SizedBox(width: 200, height: 100),
+                          SizedBox(width: 200, height: 30),
                         ],
                       ),
                     ),
@@ -1251,6 +1257,21 @@ void main() {
     // The inline spans are rendered in one vertical run, the widest one determines the min intrinsic width.
     expect(paragraph.getMinIntrinsicWidth(0.0), 200);
   });
+
+  testWidgets('Text uses TextStyle.overflow', (WidgetTester tester) async {
+    const TextOverflow overflow = TextOverflow.fade;
+
+    await tester.pumpWidget( const Text(
+      'Hello World',
+      textDirection: TextDirection.ltr,
+      style: TextStyle(overflow: overflow),
+    ));
+
+    final RichText richText = tester.firstWidget(find.byType(RichText));
+
+    expect(richText.overflow, overflow);
+    expect(richText.text.style!.overflow, overflow);
+  });
 }
 
 Future<void> _pumpTextWidget({
@@ -1262,7 +1283,7 @@ Future<void> _pumpTextWidget({
     Directionality(
       textDirection: TextDirection.ltr,
       child: Center(
-        child: Container(
+        child: SizedBox(
           width: 50.0,
           height: 50.0,
           child: Text(

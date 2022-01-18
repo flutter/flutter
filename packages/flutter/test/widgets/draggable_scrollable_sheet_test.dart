@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -19,33 +18,36 @@ void main() {
   }) {
     return Directionality(
       textDirection: TextDirection.ltr,
-      child: Stack(
-        children: <Widget>[
-          TextButton(
-            child: const Text('TapHere'),
-            onPressed: onButtonPressed,
-          ),
-          DraggableScrollableSheet(
-            maxChildSize: maxChildSize,
-            minChildSize: minChildSize,
-            initialChildSize: initialChildSize,
-            builder: (BuildContext context, ScrollController scrollController) {
-              return NotificationListener<ScrollNotification>(
-                onNotification: onScrollNotification,
-                child: Container(
-                  key: containerKey,
-                  color: const Color(0xFFABCDEF),
-                  child: ListView.builder(
-                    controller: scrollController,
-                    itemExtent: itemExtent,
-                    itemCount: itemCount,
-                    itemBuilder: (BuildContext context, int index) => Text('Item $index'),
+      child: MediaQuery(
+        data: const MediaQueryData(),
+        child: Stack(
+          children: <Widget>[
+            TextButton(
+              onPressed: onButtonPressed,
+              child: const Text('TapHere'),
+            ),
+            DraggableScrollableSheet(
+              maxChildSize: maxChildSize,
+              minChildSize: minChildSize,
+              initialChildSize: initialChildSize,
+              builder: (BuildContext context, ScrollController scrollController) {
+                return NotificationListener<ScrollNotification>(
+                  onNotification: onScrollNotification,
+                  child: Container(
+                    key: containerKey,
+                    color: const Color(0xFFABCDEF),
+                    child: ListView.builder(
+                      controller: scrollController,
+                      itemExtent: itemExtent,
+                      itemCount: itemCount,
+                      itemBuilder: (BuildContext context, int index) => Text('Item $index'),
+                    ),
                   ),
-                ),
-              );
-            },
-          ),
-        ],
+                );
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -151,7 +153,7 @@ void main() {
         await tester.drag(find.text('Item 1'), const Offset(0, -325));
         await tester.pumpAndSettle();
         expect(find.text('TapHere'), findsOneWidget);
-        await tester.tap(find.text('TapHere'));
+        await tester.tap(find.text('TapHere'), warnIfMissed: false);
         expect(taps, 1);
         expect(find.text('Item 1'), findsOneWidget);
         expect(find.text('Item 21'), findsOneWidget);
@@ -203,7 +205,7 @@ void main() {
         await tester.fling(find.text('Item 1'), const Offset(0, -200), 2000);
         await tester.pumpAndSettle();
         expect(find.text('TapHere'), findsOneWidget);
-        await tester.tap(find.text('TapHere'));
+        await tester.tap(find.text('TapHere'), warnIfMissed: false);
         expect(taps, 1);
         expect(find.text('Item 1'), findsNothing);
         expect(find.text('Item 21'), findsNothing);
@@ -237,7 +239,7 @@ void main() {
         await tester.fling(find.text('Item 1'), const Offset(0, -200), 2000);
         await tester.pumpAndSettle();
         expect(find.text('TapHere'), findsOneWidget);
-        await tester.tap(find.text('TapHere'));
+        await tester.tap(find.text('TapHere'), warnIfMissed: false);
         expect(taps, 1);
         expect(find.text('Item 1'), findsNothing);
         expect(find.text('Item 21'), findsNothing);
@@ -246,7 +248,7 @@ void main() {
         await tester.fling(find.text('Item 70'), const Offset(0, 200), 2000);
         await tester.pumpAndSettle();
         expect(find.text('TapHere'), findsOneWidget);
-        await tester.tap(find.text('TapHere'));
+        await tester.tap(find.text('TapHere'), warnIfMissed: false);
         expect(taps, 1);
         expect(find.text('Item 1'), findsOneWidget);
         expect(find.text('Item 21'), findsOneWidget);

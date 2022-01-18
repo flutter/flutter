@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -33,7 +35,7 @@ TaskFunction createHotModeTest({String deviceIdOverride, Map<String, String> env
     final File benchmarkFile = file(path.join(_editedFlutterGalleryDir.path, 'hot_benchmark.json'));
     rm(benchmarkFile);
     final List<String> options = <String>[
-      '--hot', '-d', deviceIdOverride, '--benchmark', '--resident',  '--no-android-gradle-daemon', '--verbose',
+      '--hot', '-d', deviceIdOverride, '--benchmark', '--resident',  '--no-android-gradle-daemon', '--no-publish-port', '--verbose',
     ];
     int hotReloadCount = 0;
     Map<String, dynamic> smallReloadData;
@@ -95,7 +97,7 @@ TaskFunction createHotModeTest({String deviceIdOverride, Map<String, String> env
             if (hotReloadCount == 2) {
               // Trigger a framework invalidation (370 libraries) without modifying the source
               flutterFrameworkSource.writeAsStringSync(
-                flutterFrameworkSource.readAsStringSync() + '\n'
+                '${flutterFrameworkSource.readAsStringSync()}\n'
               );
               process.stdin.writeln('r');
               hotReloadCount += 1;

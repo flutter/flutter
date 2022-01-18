@@ -31,11 +31,11 @@ class Stock {
     percentChange = (_rng.nextDouble() * 20) - 10;
   }
 
-  String symbol;
-  String name;
-  double lastSale;
-  String marketCap;
-  double percentChange;
+  late String symbol;
+  late String name;
+  late double lastSale;
+  late String marketCap;
+  late double percentChange;
 }
 
 class StockData extends ChangeNotifier {
@@ -51,7 +51,7 @@ class StockData extends ChangeNotifier {
 
   List<String> get allSymbols => _symbols;
 
-  Stock operator [](String symbol) => _stocks[symbol];
+  Stock? operator [](String symbol) => _stocks[symbol];
 
   bool get loading => _httpClient != null;
 
@@ -68,16 +68,15 @@ class StockData extends ChangeNotifier {
   static const int _chunkCount = 30;
   int _nextChunk = 0;
 
-  String _urlToFetch(int chunk) {
-    return 'https://domokit.github.io/examples/stocks/data/stock_data_$chunk.json';
-  }
+  Uri _urlToFetch(int chunk) => Uri.https(
+      'domokit.github.io', 'examples/stocks/data/stock_data_$chunk.json');
 
-  http.Client _httpClient;
+  http.Client? _httpClient;
 
   static bool actuallyFetchData = true;
 
   void _fetchNextChunk() {
-    _httpClient.get(_urlToFetch(_nextChunk++)).then<void>((http.Response response) {
+    _httpClient!.get(_urlToFetch(_nextChunk++)).then<void>((http.Response response) {
       final String json = response.body;
       if (json == null) {
         debugPrint('Failed to load stock data chunk ${_nextChunk - 1}');
@@ -95,7 +94,7 @@ class StockData extends ChangeNotifier {
   }
 
   void _end() {
-    _httpClient?.close();
+    _httpClient!.close();
     _httpClient = null;
   }
 }

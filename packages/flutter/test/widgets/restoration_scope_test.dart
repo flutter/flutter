@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/widgets.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'restoration.dart';
@@ -334,12 +333,12 @@ Map<String, dynamic> _createRawDataSet() {
       'child1' : <String, dynamic>{
         valuesMapKey : <String, dynamic>{
           'foo': 22,
-        }
+        },
       },
       'child2' : <String, dynamic>{
         valuesMapKey : <String, dynamic>{
           'bar': 33,
-        }
+        },
       },
     },
   };

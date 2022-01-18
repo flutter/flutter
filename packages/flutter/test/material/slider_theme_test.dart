@@ -7,7 +7,6 @@ import 'dart:ui' show window;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/painting.dart';
 
 import '../rendering/mock_canvas.dart';
 
@@ -852,6 +851,47 @@ void main() {
     );
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/74503
+  testWidgets('The slider track layout correctly when the overlay size is smaller than the thumb size', (WidgetTester tester) async {
+    final SliderThemeData sliderTheme = ThemeData().sliderTheme.copyWith(
+      overlayShape: SliderComponentShape.noOverlay,
+    );
+
+    await tester.pumpWidget(_buildApp(sliderTheme, value: 0.5));
+
+    final MaterialInkController material = Material.of(
+      tester.element(find.byType(Slider)),
+    )!;
+
+    // The track rectangle begins at 10 pixels from the left of the screen and ends 10 pixels from the right
+    // (790 pixels from the left). The main check here it that the track itself should be centered on
+    // the 800 pixel-wide screen.
+    expect(
+      material,
+      paints
+        // active track RRect. Starts 10 pixels from left of screen.
+        ..rrect(rrect: RRect.fromLTRBAndCorners(
+            10.0,
+            297.0,
+            400.0,
+            303.0,
+            topLeft: const Radius.circular(3.0),
+            bottomLeft: const Radius.circular(3.0),
+        ))
+        // inactive track RRect. Ends 10 pixels from right of screen.
+        ..rrect(rrect: RRect.fromLTRBAndCorners(
+            400.0,
+            298.0,
+            790.0,
+            302.0,
+            topRight: const Radius.circular(2.0),
+            bottomRight: const Radius.circular(2.0),
+        ))
+        // The thumb.
+        ..circle(x: 400.0, y: 300.0, radius: 10.0),
+    );
+  });
+
   // Only the thumb, overlay, and tick mark have special shortcuts to provide
   // no-op or empty shapes.
   //
@@ -1096,23 +1136,23 @@ void main() {
         ..rrect(rrect: RRect.fromLTRBAndCorners(
           24.0, 298.0, 24.0, 302.0,
           topLeft: const Radius.circular(2.0),
-          topRight: const Radius.circular(0.0),
-          bottomRight: const Radius.circular(0.0),
+          topRight: Radius.zero,
+          bottomRight: Radius.zero,
           bottomLeft: const Radius.circular(2.0),
         ))
         ..rect(rect: const Rect.fromLTRB(24.0, 297.0, 24.0, 303.0))
         ..rrect(rrect: RRect.fromLTRBAndCorners(
           24.0, 298.0, 776.0, 302.0,
-          topLeft: const Radius.circular(0.0),
+          topLeft: Radius.zero,
           topRight: const Radius.circular(2.0),
           bottomRight: const Radius.circular(2.0),
-          bottomLeft: const Radius.circular(0.0),
+          bottomLeft: Radius.zero,
         ))
         ..circle(x: 24.0, y: 300.0)
         ..shadow(elevation: 1.0)
         ..circle(x: 24.0, y: 300.0)
         ..shadow(elevation: 6.0)
-        ..circle(x: 24.0, y: 300.0)
+        ..circle(x: 24.0, y: 300.0),
     );
 
     await gesture.up();

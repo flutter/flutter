@@ -6,7 +6,6 @@ import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button_style.dart';
@@ -14,6 +13,8 @@ import 'button_style_button.dart';
 import 'color_scheme.dart';
 import 'colors.dart';
 import 'constants.dart';
+import 'ink_ripple.dart';
+import 'ink_well.dart';
 import 'material_state.dart';
 import 'outlined_button_theme.dart';
 import 'theme.dart';
@@ -38,6 +39,30 @@ import 'theme_data.dart';
 /// overridden with the [OutlinedButtonTheme] and the style of all of the
 /// outlined buttons in an app can be overridden with the [Theme]'s
 /// [ThemeData.outlinedButtonTheme] property.
+///
+/// Unlike [TextButton] or [ElevatedButton], outline buttons have a
+/// default [ButtonStyle.side] which defines the appearance of the
+/// outline.  Because the default `side` is non-null, it
+/// unconditionally overrides the shape's [OutlinedBorder.side]. In
+/// other words, to specify an outlined button's shape _and_ the
+/// appearance of its outline, both the [ButtonStyle.shape] and
+/// [ButtonStyle.side] properties must be specified.
+///
+/// {@tool dartpad --template=stateless_widget_scaffold_center}
+///
+/// Here is an example of a basic [OutlinedButton].
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return OutlinedButton(
+///     onPressed: () {
+///       print('Received click');
+///     },
+///     child: const Text('Click Me'),
+///   );
+/// }
+/// ```
+/// {@end-tool}
 ///
 /// The static [styleFrom] method is a convenient way to create a
 /// outlined button [ButtonStyle] from simple values.
@@ -93,7 +118,7 @@ class OutlinedButton extends ButtonStyleButton {
   /// A static convenience method that constructs an outlined button
   /// [ButtonStyle] given simple values.
   ///
-  /// The [primary], and [onSurface] colors are used to to create a
+  /// The [primary], and [onSurface] colors are used to create a
   /// [MaterialStateProperty] [ButtonStyle.foregroundColor] value in the same
   /// way that [defaultStyleOf] uses the [ColorScheme] colors with the same
   /// names. Specify a value for [primary] to specify the color of the button's
@@ -131,6 +156,8 @@ class OutlinedButton extends ButtonStyleButton {
     TextStyle? textStyle,
     EdgeInsetsGeometry? padding,
     Size? minimumSize,
+    Size? fixedSize,
+    Size? maximumSize,
     BorderSide? side,
     OutlinedBorder? shape,
     MouseCursor? enabledMouseCursor,
@@ -139,6 +166,8 @@ class OutlinedButton extends ButtonStyleButton {
     MaterialTapTargetSize? tapTargetSize,
     Duration? animationDuration,
     bool? enableFeedback,
+    AlignmentGeometry? alignment,
+    InteractiveInkFeatureFactory? splashFactory,
   }) {
     final MaterialStateProperty<Color?>? foregroundColor = (onSurface == null && primary == null)
       ? null
@@ -159,6 +188,8 @@ class OutlinedButton extends ButtonStyleButton {
       elevation: ButtonStyleButton.allOrNull<double>(elevation),
       padding: ButtonStyleButton.allOrNull<EdgeInsetsGeometry>(padding),
       minimumSize: ButtonStyleButton.allOrNull<Size>(minimumSize),
+      fixedSize: ButtonStyleButton.allOrNull<Size>(fixedSize),
+      maximumSize: ButtonStyleButton.allOrNull<Size>(maximumSize),
       side: ButtonStyleButton.allOrNull<BorderSide>(side),
       shape: ButtonStyleButton.allOrNull<OutlinedBorder>(shape),
       mouseCursor: mouseCursor,
@@ -166,6 +197,8 @@ class OutlinedButton extends ButtonStyleButton {
       tapTargetSize: tapTargetSize,
       animationDuration: animationDuration,
       enableFeedback: enableFeedback,
+      alignment: alignment,
+      splashFactory: splashFactory,
     );
   }
 
@@ -185,7 +218,7 @@ class OutlinedButton extends ButtonStyleButton {
   /// "Theme.foo" is shorthand for `Theme.of(context).foo`. Color
   /// scheme values like "onSurface(0.38)" are shorthand for
   /// `onSurface.withOpacity(0.38)`. [MaterialStateProperty] valued
-  /// properties that are not followed by by a sublist have the same
+  /// properties that are not followed by a sublist have the same
   /// value for all states, otherwise the values are as specified for
   /// each state and "others" means all other states.
   ///
@@ -208,6 +241,8 @@ class OutlinedButton extends ButtonStyleButton {
   ///   * `2 < textScaleFactor <= 3` - lerp(horizontal(8), horizontal(4))
   ///   * `3 < textScaleFactor` - horizontal(4)
   /// * `minimumSize` - Size(64, 36)
+  /// * `fixedSize` - null
+  /// * `maximumSize` - Size.infinite
   /// * `side` - BorderSide(width: 1, color: Theme.colorScheme.onSurface(0.12))
   /// * `shape` - RoundedRectangleBorder(borderRadius: BorderRadius.circular(4))
   /// * `mouseCursor`
@@ -217,6 +252,8 @@ class OutlinedButton extends ButtonStyleButton {
   /// * `tapTargetSize` - theme.materialTapTargetSize
   /// * `animationDuration` - kThemeChangeDuration
   /// * `enableFeedback` - true
+  /// * `alignment` - Alignment.center
+  /// * `splashFactory` - InkRipple.splashFactory
   @override
   ButtonStyle defaultStyleOf(BuildContext context) {
     final ThemeData theme = Theme.of(context);
@@ -238,6 +275,7 @@ class OutlinedButton extends ButtonStyleButton {
       textStyle: theme.textTheme.button,
       padding: scaledPadding,
       minimumSize: const Size(64, 36),
+      maximumSize: Size.infinite,
       side: BorderSide(
         color: Theme.of(context).colorScheme.onSurface.withOpacity(0.12),
         width: 1,
@@ -249,6 +287,8 @@ class OutlinedButton extends ButtonStyleButton {
       tapTargetSize: theme.materialTapTargetSize,
       animationDuration: kThemeChangeDuration,
       enableFeedback: true,
+      alignment: Alignment.center,
+      splashFactory: InkRipple.splashFactory,
     );
   }
 
@@ -345,7 +385,7 @@ class _OutlinedButtonWithIconChild extends StatelessWidget {
     final double gap = scale <= 1 ? 8 : lerpDouble(8, 4, math.min(scale - 1, 1))!;
     return Row(
       mainAxisSize: MainAxisSize.min,
-      children: <Widget>[icon, SizedBox(width: gap), label],
+      children: <Widget>[icon, SizedBox(width: gap), Flexible(child: label)],
     );
   }
 }

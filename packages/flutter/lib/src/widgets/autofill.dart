@@ -80,11 +80,11 @@ enum AutofillContextAction {
 ///            children: <Widget>[
 ///              TextField(
 ///                controller: shippingAddress1,
-///                autofillHints: <String>[AutofillHints.streetAddressLine1],
+///                autofillHints: const <String>[AutofillHints.streetAddressLine1],
 ///              ),
 ///              TextField(
 ///                controller: shippingAddress2,
-///                autofillHints: <String>[AutofillHints.streetAddressLine2],
+///                autofillHints: const <String>[AutofillHints.streetAddressLine2],
 ///              ),
 ///            ],
 ///          ),
@@ -92,8 +92,10 @@ enum AutofillContextAction {
 ///        const Text('Billing address'),
 ///        Checkbox(
 ///          value: isSameAddress,
-///          onChanged: (bool newValue) {
-///            setState(() { isSameAddress = newValue; });
+///          onChanged: (bool? newValue) {
+///            if (newValue != null) {
+///              setState(() { isSameAddress = newValue; });
+///            }
 ///          },
 ///        ),
 ///        // Again the address fields are grouped together for the same reason.
@@ -102,11 +104,11 @@ enum AutofillContextAction {
 ///            children: <Widget>[
 ///              TextField(
 ///                controller: billingAddress1,
-///                autofillHints: <String>[AutofillHints.streetAddressLine1],
+///                autofillHints: const <String>[AutofillHints.streetAddressLine1],
 ///              ),
 ///              TextField(
 ///                controller: billingAddress2,
-///                autofillHints: <String>[AutofillHints.streetAddressLine2],
+///                autofillHints: const <String>[AutofillHints.streetAddressLine2],
 ///              ),
 ///            ],
 ///          ),
@@ -119,11 +121,11 @@ enum AutofillContextAction {
 ///            children: <Widget>[
 ///              TextField(
 ///                controller: creditCardNumber,
-///                autofillHints: <String>[AutofillHints.creditCardNumber],
+///                autofillHints: const <String>[AutofillHints.creditCardNumber],
 ///              ),
 ///              TextField(
 ///                controller: creditCardSecurityCode,
-///                autofillHints: <String>[AutofillHints.creditCardSecurityCode],
+///                autofillHints: const <String>[AutofillHints.creditCardSecurityCode],
 ///              ),
 ///            ],
 ///          ),
@@ -133,7 +135,7 @@ enum AutofillContextAction {
 ///        // `AutofillScope`.
 ///        TextField(
 ///          controller: phoneNumber,
-///          autofillHints: <String>[AutofillHints.telephoneNumber],
+///          autofillHints: const <String>[AutofillHints.telephoneNumber],
 ///        ),
 ///      ],
 ///    );

@@ -4,8 +4,6 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/gestures.dart';
-import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -64,7 +62,6 @@ const Icon _kDefaultDeleteIcon = Icon(Icons.cancel, size: _kDeleteIconSize);
 abstract class ChipAttributes {
   // This class is intended to be used as an interface, and should not be
   // extended directly; this constructor prevents instantiation and extension.
-  // ignore: unused_element
   ChipAttributes._();
 
   /// The primary content of the chip.
@@ -205,7 +202,6 @@ abstract class ChipAttributes {
 abstract class DeletableChipAttributes {
   // This class is intended to be used as an interface, and should not be
   // extended directly; this constructor prevents instantiation and extension.
-  // ignore: unused_element
   DeletableChipAttributes._();
 
   /// The icon displayed when [onDeleted] is set.
@@ -234,6 +230,8 @@ abstract class DeletableChipAttributes {
   /// }
   ///
   /// class CastList extends StatefulWidget {
+  ///   const CastList({Key? key}) : super(key: key);
+  ///
   ///   @override
   ///   State createState() => CastListState();
   /// }
@@ -277,7 +275,7 @@ abstract class DeletableChipAttributes {
   /// ```dart
   /// @override
   /// Widget build(BuildContext context) {
-  ///   return CastList();
+  ///   return const CastList();
   /// }
   /// ```
   /// {@end-tool}
@@ -315,7 +313,6 @@ abstract class DeletableChipAttributes {
 abstract class CheckmarkableChipAttributes {
   // This class is intended to be used as an interface, and should not be
   // extended directly; this constructor prevents instantiation and extension.
-  // ignore: unused_element
   CheckmarkableChipAttributes._();
 
   /// Whether or not to show a check mark when
@@ -351,7 +348,6 @@ abstract class CheckmarkableChipAttributes {
 abstract class SelectableChipAttributes {
   // This class is intended to be used as an interface, and should not be
   // extended directly; this constructor prevents instantiation and extension.
-  // ignore: unused_element
   SelectableChipAttributes._();
 
   /// Whether or not this chip is selected.
@@ -385,6 +381,8 @@ abstract class SelectableChipAttributes {
   ///
   /// ```dart
   /// class Wood extends StatefulWidget {
+  ///   const Wood({Key? key}) : super(key: key);
+  ///
   ///   @override
   ///   State<StatefulWidget> createState() => WoodState();
   /// }
@@ -460,7 +458,6 @@ abstract class SelectableChipAttributes {
 abstract class DisabledChipAttributes {
   // This class is intended to be used as an interface, and should not be
   // extended directly; this constructor prevents instantiation and extension.
-  // ignore: unused_element
   DisabledChipAttributes._();
 
   /// Whether or not this chip is enabled for input.
@@ -508,7 +505,6 @@ abstract class DisabledChipAttributes {
 abstract class TappableChipAttributes {
   // This class is intended to be used as an interface, and should not be
   // extended directly; this constructor prevents instantiation and extension.
-  // ignore: unused_element
   TappableChipAttributes._();
 
   /// Called when the user taps the chip.
@@ -521,6 +517,8 @@ abstract class TappableChipAttributes {
   ///
   /// ```dart
   /// class Blacksmith extends StatelessWidget {
+  ///   const Blacksmith({Key? key}) : super(key: key);
+  ///
   ///   void startHammering() {
   ///     print('bang bang bang');
   ///   }
@@ -569,9 +567,9 @@ abstract class TappableChipAttributes {
 /// Chip(
 ///   avatar: CircleAvatar(
 ///     backgroundColor: Colors.grey.shade800,
-///     child: Text('AB'),
+///     child: const Text('AB'),
 ///   ),
-///   label: Text('Aaron Burr'),
+///   label: const Text('Aaron Burr'),
 /// )
 /// ```
 /// {@end-tool}
@@ -718,9 +716,9 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
 /// InputChip(
 ///   avatar: CircleAvatar(
 ///     backgroundColor: Colors.grey.shade800,
-///     child: Text('AB'),
+///     child: const Text('AB'),
 ///   ),
-///   label: Text('Aaron Burr'),
+///   label: const Text('Aaron Burr'),
 ///   onPressed: () {
 ///     print('I am the one thing in life.');
 ///   }
@@ -918,12 +916,14 @@ class InputChip extends StatelessWidget
 ///
 /// ```dart
 /// class MyThreeOptions extends StatefulWidget {
+///   const MyThreeOptions({Key? key}) : super(key: key);
+///
 ///   @override
-///   _MyThreeOptionsState createState() => _MyThreeOptionsState();
+///   State<MyThreeOptions> createState() => _MyThreeOptionsState();
 /// }
 ///
 /// class _MyThreeOptionsState extends State<MyThreeOptions> {
-///   int _value = 1;
+///   int? _value = 1;
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
@@ -1108,6 +1108,8 @@ class ChoiceChip extends StatelessWidget
 /// }
 ///
 /// class CastFilter extends StatefulWidget {
+///   const CastFilter({Key? key}) : super(key: key);
+///
 ///   @override
 ///   State createState() => CastFilterState();
 /// }
@@ -1119,7 +1121,7 @@ class ChoiceChip extends StatelessWidget
 ///     const ActorFilterEntry('Eliza Hamilton', 'EH'),
 ///     const ActorFilterEntry('James Madison', 'JM'),
 ///   ];
-///   List<String> _filters = <String>[];
+///   final List<String> _filters = <String>[];
 ///
 ///   Iterable<Widget> get actorWidgets sync* {
 ///     for (final ActorFilterEntry actor in _cast) {
@@ -1333,11 +1335,11 @@ class FilterChip extends StatelessWidget
 /// ActionChip(
 ///   avatar: CircleAvatar(
 ///     backgroundColor: Colors.grey.shade800,
-///     child: Text('AB'),
+///     child: const Text('AB'),
 ///   ),
-///   label: Text('Aaron Burr'),
+///   label: const Text('Aaron Burr'),
 ///   onPressed: () {
-///     print("If you stand for nothing, Burr, what’ll you fall for?");
+///     print('If you stand for nothing, Burr, what’ll you fall for?');
 ///   }
 /// )
 /// ```
@@ -1626,7 +1628,7 @@ class RawChip extends StatefulWidget
   final bool tapEnabled;
 
   @override
-  _RawChipState createState() => _RawChipState();
+  State<RawChip> createState() => _RawChipState();
 }
 
 class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip> {
@@ -1980,14 +1982,14 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
                   child: widget.label,
                 ),
                 avatar: AnimatedSwitcher(
-                  child: widget.avatar,
                   duration: _kDrawerDuration,
                   switchInCurve: Curves.fastOutSlowIn,
+                  child: widget.avatar,
                 ),
                 deleteIcon: AnimatedSwitcher(
-                  child: _buildDeleteIcon(context, theme, chipTheme, deleteIconKey),
                   duration: _kDrawerDuration,
                   switchInCurve: Curves.fastOutSlowIn,
+                  child: _buildDeleteIcon(context, theme, chipTheme, deleteIconKey),
                 ),
                 brightness: chipTheme.brightness,
                 padding: (widget.padding ?? chipTheme.padding).resolve(textDirection),
@@ -2014,7 +2016,10 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     final Offset densityAdjustment = (widget.visualDensity ?? theme.visualDensity).baseSizeAdjustment;
     switch (widget.materialTapTargetSize ?? theme.materialTapTargetSize) {
       case MaterialTapTargetSize.padded:
-        constraints = BoxConstraints(minHeight: kMinInteractiveDimension + densityAdjustment.dy);
+        constraints = BoxConstraints(
+          minWidth: kMinInteractiveDimension + densityAdjustment.dx,
+          minHeight: kMinInteractiveDimension + densityAdjustment.dy,
+        );
         break;
       case MaterialTapTargetSize.shrinkWrap:
         constraints = const BoxConstraints();
@@ -2023,9 +2028,9 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     result = _ChipRedirectingHitDetectionWidget(
       constraints: constraints,
       child: Center(
-        child: result,
         widthFactor: 1.0,
         heightFactor: 1.0,
+        child: result,
       ),
     );
     return Semantics(
@@ -2184,7 +2189,7 @@ class _RenderChipElement extends RenderObjectElement {
   }
 
   @override
-  void mount(Element? parent, dynamic newSlot) {
+  void mount(Element? parent, Object? newSlot) {
     super.mount(parent, newSlot);
     _mountChild(widget.theme.avatar, _ChipSlot.avatar);
     _mountChild(widget.theme.deleteIcon, _ChipSlot.deleteIcon);
@@ -2241,7 +2246,7 @@ class _RenderChipElement extends RenderObjectElement {
   }
 
   @override
-  void moveRenderObjectChild(RenderObject child, dynamic oldSlot, dynamic newSlot) {
+  void moveRenderObjectChild(RenderObject child, Object? oldSlot, Object? newSlot) {
     assert(false, 'not reachable');
   }
 }
@@ -2774,13 +2779,15 @@ class _RenderChip extends RenderBox {
     );
     size = constraints.constrain(paddedSize);
     assert(
-        size.height == constraints.constrainHeight(paddedSize.height),
-        "Constrained height ${size.height} doesn't match expected height "
-        '${constraints.constrainWidth(paddedSize.height)}');
+      size.height == constraints.constrainHeight(paddedSize.height),
+      "Constrained height ${size.height} doesn't match expected height "
+      '${constraints.constrainWidth(paddedSize.height)}',
+    );
     assert(
-        size.width == constraints.constrainWidth(paddedSize.width),
-        "Constrained width ${size.width} doesn't match expected width "
-        '${constraints.constrainWidth(paddedSize.width)}');
+      size.width == constraints.constrainWidth(paddedSize.width),
+      "Constrained width ${size.width} doesn't match expected width "
+      '${constraints.constrainWidth(paddedSize.width)}',
+    );
   }
 
   static final ColorTween selectionScrimTween = ColorTween(

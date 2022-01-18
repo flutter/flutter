@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show hashValues;
-
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'debug.dart';
@@ -33,7 +32,7 @@ enum DayPeriod {
 ///
 /// ```dart
 /// TimeOfDay now = TimeOfDay.now();
-/// TimeOfDay releaseTime = TimeOfDay(hour: 15, minute: 0); // 3:00pm
+/// const TimeOfDay releaseTime = TimeOfDay(hour: 15, minute: 0); // 3:00pm
 /// TimeOfDay roomBooked = TimeOfDay.fromDateTime(DateTime.parse('2018-10-20 16:30:04Z')); // 4:30pm
 /// ```
 /// {@end-tool}
@@ -93,7 +92,9 @@ class TimeOfDay {
   DayPeriod get period => hour < hoursPerPeriod ? DayPeriod.am : DayPeriod.pm;
 
   /// Which hour of the current period (e.g., am or pm) this time is.
-  int get hourOfPeriod => hour - periodOffset;
+  ///
+  /// For 12AM (midnight) and 12PM (noon) this returns 12.
+  int get hourOfPeriod => hour == 0 || hour == 12 ? 12 : hour - periodOffset;
 
   /// The hour at which the current period starts.
   int get periodOffset => period == DayPeriod.am ? 0 : hoursPerPeriod;
@@ -134,6 +135,40 @@ class TimeOfDay {
 
     return '$TimeOfDay($hourLabel:$minuteLabel)';
   }
+}
+
+/// A [RestorableValue] that knows how to save and restore [TimeOfDay].
+///
+/// {@macro flutter.widgets.RestorableNum}.
+class RestorableTimeOfDay extends RestorableValue<TimeOfDay> {
+  /// Creates a [RestorableTimeOfDay].
+  ///
+  /// {@macro flutter.widgets.RestorableNum.constructor}
+  RestorableTimeOfDay(TimeOfDay defaultValue) : _defaultValue = defaultValue;
+
+  final TimeOfDay _defaultValue;
+
+  @override
+  TimeOfDay createDefaultValue() => _defaultValue;
+
+  @override
+  void didUpdateValue(TimeOfDay? oldValue) {
+    assert(debugIsSerializableForRestoration(value.hour));
+    assert(debugIsSerializableForRestoration(value.minute));
+    notifyListeners();
+  }
+
+  @override
+  TimeOfDay fromPrimitives(Object? data) {
+    final List<Object?> timeData = data! as List<Object?>;
+    return TimeOfDay(
+      minute: timeData[0]! as int,
+      hour: timeData[1]! as int,
+    );
+  }
+
+  @override
+  Object? toPrimitives() => <int>[value.minute, value.hour];
 }
 
 /// Determines how the time picker invoked using [showTimePicker] formats and

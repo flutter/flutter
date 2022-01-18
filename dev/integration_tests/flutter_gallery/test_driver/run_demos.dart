@@ -2,16 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter_gallery/demo_lists.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:flutter_gallery/demo_lists.dart';
-
-/// The demos we don't run as part of the integraiton test.
+/// The demos we don't run as part of the integration test.
 ///
 /// Demo names are formatted as 'DEMO_NAME@DEMO_CATEGORY' (see
 /// `demo_lists.dart` for more examples).
@@ -36,13 +32,16 @@ Future<void> runDemos(List<String> demos, WidgetController controller) async {
     print('> $demo');
     await controller.pump(const Duration(milliseconds: 250));
 
+    final Finder demoCategoryItem = find.text(demoCategory);
     if (currentDemoCategory == null) {
-      await controller.tap(find.text(demoCategory));
+      await controller.scrollUntilVisible(demoCategoryItem, 48.0);
+      await controller.tap(demoCategoryItem);
       await controller.pumpAndSettle();
     } else if (currentDemoCategory != demoCategory) {
       await controller.tap(find.byTooltip('Back'));
       await controller.pumpAndSettle();
-      await controller.tap(find.text(demoCategory));
+      await controller.scrollUntilVisible(demoCategoryItem, 48.0);
+      await controller.tap(demoCategoryItem);
       await controller.pumpAndSettle();
       // Scroll back to the top
       await controller.drag(demoList, const Offset(0.0, 10000.0));

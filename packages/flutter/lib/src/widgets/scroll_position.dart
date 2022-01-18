@@ -10,7 +10,6 @@ import 'package:flutter/scheduler.dart';
 
 import 'basic.dart';
 import 'framework.dart';
-import 'gesture_detector.dart';
 import 'page_storage.dart';
 import 'scroll_activity.dart';
 import 'scroll_context.dart';
@@ -255,7 +254,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   /// If there is any overscroll, it is reported using [didOverscrollBy].
   double setPixels(double newPixels) {
     assert(hasPixels);
-    assert(SchedulerBinding.instance!.schedulerPhase != SchedulerPhase.persistentCallbacks, 'A scrollable\'s position should not change during the build, layout, and paint phases, otherwise the rendering will be confused.');
+    assert(SchedulerBinding.instance!.schedulerPhase != SchedulerPhase.persistentCallbacks, "A scrollable's position should not change during the build, layout, and paint phases, otherwise the rendering will be confused.");
     if (newPixels != pixels) {
       final double overscroll = applyBoundaryConditions(newPixels);
       assert(() {
@@ -265,7 +264,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
             '$runtimeType.applyBoundaryConditions returned invalid overscroll value.\n'
             'setPixels() was called to change the scroll offset from $pixels to $newPixels.\n'
             'That is a delta of $delta units.\n'
-            '$runtimeType.applyBoundaryConditions reported an overscroll of $overscroll units.'
+            '$runtimeType.applyBoundaryConditions reported an overscroll of $overscroll units.',
           );
         }
         return true;
@@ -483,7 +482,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
           'The applyBoundaryConditions method is only supposed to reduce the possible range '
           'of movement, not increase it.\n'
           'The scroll extents are $minScrollExtent .. $maxScrollExtent, and the '
-          'viewport dimension is $viewportDimension.'
+          'viewport dimension is $viewportDimension.',
         );
       }
       return true;
@@ -507,6 +506,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
 
   bool _pendingDimensions = false;
   ScrollMetrics? _lastMetrics;
+  Axis? _lastAxis;
 
   @override
   bool applyContentDimensions(double minScrollExtent, double maxScrollExtent) {
@@ -515,12 +515,14 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     assert(haveDimensions == (_lastMetrics != null));
     if (!nearEqual(_minScrollExtent, minScrollExtent, Tolerance.defaultTolerance.distance) ||
         !nearEqual(_maxScrollExtent, maxScrollExtent, Tolerance.defaultTolerance.distance) ||
-        _didChangeViewportDimensionOrReceiveCorrection) {
+        _didChangeViewportDimensionOrReceiveCorrection ||
+        _lastAxis != axis) {
       assert(minScrollExtent != null);
       assert(maxScrollExtent != null);
       assert(minScrollExtent <= maxScrollExtent);
       _minScrollExtent = minScrollExtent;
       _maxScrollExtent = maxScrollExtent;
+      _lastAxis = axis;
       final ScrollMetrics? currentMetrics = haveDimensions ? copyWith() : null;
       _didChangeViewportDimensionOrReceiveCorrection = false;
       _pendingDimensions = true;
@@ -674,7 +676,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     if (targetRenderObject != null && targetRenderObject != object) {
       targetRect = MatrixUtils.transformRect(
         targetRenderObject.getTransformTo(object),
-        object.paintBounds.intersect(targetRenderObject.paintBounds)
+        object.paintBounds.intersect(targetRenderObject.paintBounds),
       );
     }
 
@@ -804,7 +806,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   bool get allowImplicitScrolling => physics.allowImplicitScrolling;
 
   /// Deprecated. Use [jumpTo] or a custom [ScrollPosition] instead.
-  @Deprecated('This will lead to bugs.') // ignore: flutter_deprecation_syntax, https://github.com/flutter/flutter/issues/44609
+  @Deprecated('This will lead to bugs.') // flutter_ignore: deprecation_syntax, https://github.com/flutter/flutter/issues/44609
   void jumpToWithoutSettling(double value);
 
   /// Stop the current activity and start a [HoldScrollActivity].

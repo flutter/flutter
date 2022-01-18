@@ -2,10 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import '../base/process.dart';
 import '../device.dart';
 import '../emulator.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import 'simulators.dart';
 
 class IOSEmulators extends EmulatorDiscovery {
@@ -38,7 +40,7 @@ class IOSEmulator extends Emulator {
   PlatformType get platformType => PlatformType.ios;
 
   @override
-  Future<void> launch() async {
+  Future<void> launch({bool coldBoot = false}) async {
     Future<bool> launchSimulator(List<String> additionalArgs) async {
       final List<String> args = <String>[
         'open',

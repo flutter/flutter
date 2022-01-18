@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 // This test runs `flutter test` on the `trivial_widget_test.dart` four times.
 //
 // The first time, the result is ignored, on the basis that it's warming the
@@ -18,11 +20,10 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:path/path.dart' as path;
-
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
+import 'package:path/path.dart' as path;
 
 // Matches the output of the "test" package, e.g.: "00:01 +1 loading foo"
 final RegExp testOutputPattern = RegExp(r'^[0-9][0-9]:[0-9][0-9] \+[0-9]+: (.+?) *$');
@@ -51,7 +52,8 @@ Future<int> runTest({bool coverage = false, bool noPub = false}) async {
   );
   int badLines = 0;
   TestStep step = TestStep.starting;
-  await for (final String entry in analysis.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter())) {
+
+  analysis.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen((String entry) {
     print('test stdout ($step): $entry');
     if (step == TestStep.starting && entry == 'Building flutter tool...') {
       // ignore this line
@@ -83,11 +85,11 @@ Future<int> runTest({bool coverage = false, bool noPub = false}) async {
         }
       }
     }
-  }
-  await for (final String entry in analysis.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter())) {
+  });
+  analysis.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen((String entry) {
     print('test stderr: $entry');
     badLines += 1;
-  }
+  });
   final int result = await analysis.exitCode;
   clock.stop();
   if (result != 0)
@@ -100,11 +102,20 @@ Future<int> runTest({bool coverage = false, bool noPub = false}) async {
   return clock.elapsedMilliseconds;
 }
 
+Future<void> pubGetDependencies(List<Directory> directories) async {
+  for (final Directory directory in directories) {
+    await inDirectory<void>(directory, () async {
+      await flutter('pub', options: <String>['get']);
+    });
+  }
+}
+
 void main() {
   task(() async {
     final File nodeSourceFile = File(path.join(
       flutterDirectory.path, 'packages', 'flutter', 'lib', 'src', 'foundation', 'node.dart',
     ));
+    await pubGetDependencies(<Directory>[Directory(path.join(flutterDirectory.path, 'dev', 'automated_tests')),]);
     final String originalSource = await nodeSourceFile.readAsString();
     try {
       await runTest(noPub: true); // first number is meaningless; could have had to build the tool, run pub get, have a cache, etc

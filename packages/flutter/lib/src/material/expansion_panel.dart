@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
@@ -15,7 +14,7 @@ import 'theme.dart';
 
 const double _kPanelHeaderCollapsedHeight = kMinInteractiveDimension;
 const EdgeInsets _kPanelHeaderExpandedDefaultPadding = EdgeInsets.symmetric(
-    vertical: 64.0 - _kPanelHeaderCollapsedHeight
+    vertical: 64.0 - _kPanelHeaderCollapsedHeight,
 );
 
 class _SaltedKey<S, V> extends LocalKey {
@@ -156,8 +155,8 @@ class ExpansionPanelRadio extends ExpansionPanel {
 /// // stores ExpansionPanel state information
 /// class Item {
 ///   Item({
-///     this.expandedValue,
-///     this.headerValue,
+///     required this.expandedValue,
+///     required this.headerValue,
 ///     this.isExpanded = false,
 ///   });
 ///
@@ -167,7 +166,7 @@ class ExpansionPanelRadio extends ExpansionPanel {
 /// }
 ///
 /// List<Item> generateItems(int numberOfItems) {
-///   return List.generate(numberOfItems, (int index) {
+///   return List<Item>.generate(numberOfItems, (int index) {
 ///     return Item(
 ///       headerValue: 'Panel $index',
 ///       expandedValue: 'This is item number $index',
@@ -177,7 +176,7 @@ class ExpansionPanelRadio extends ExpansionPanel {
 /// ```
 ///
 /// ```dart
-/// List<Item> _data = generateItems(8);
+/// final List<Item> _data = generateItems(8);
 ///
 /// @override
 /// Widget build(BuildContext context) {
@@ -204,11 +203,11 @@ class ExpansionPanelRadio extends ExpansionPanel {
 ///         },
 ///         body: ListTile(
 ///           title: Text(item.expandedValue),
-///           subtitle: Text('To delete this panel, tap the trash can icon'),
-///           trailing: Icon(Icons.delete),
+///           subtitle: const Text('To delete this panel, tap the trash can icon'),
+///           trailing: const Icon(Icons.delete),
 ///           onTap: () {
 ///             setState(() {
-///               _data.removeWhere((currentItem) => item == currentItem);
+///               _data.removeWhere((Item currentItem) => item == currentItem);
 ///             });
 ///           }
 ///         ),
@@ -260,9 +259,9 @@ class ExpansionPanelList extends StatefulWidget {
   /// // stores ExpansionPanel state information
   /// class Item {
   ///   Item({
-  ///     this.id,
-  ///     this.expandedValue,
-  ///     this.headerValue,
+  ///     required this.id,
+  ///     required this.expandedValue,
+  ///     required this.headerValue,
   ///   });
   ///
   ///   int id;
@@ -271,7 +270,7 @@ class ExpansionPanelList extends StatefulWidget {
   /// }
   ///
   /// List<Item> generateItems(int numberOfItems) {
-  ///   return List.generate(numberOfItems, (int index) {
+  ///   return List<Item>.generate(numberOfItems, (int index) {
   ///     return Item(
   ///       id: index,
   ///       headerValue: 'Panel $index',
@@ -282,7 +281,7 @@ class ExpansionPanelList extends StatefulWidget {
   /// ```
   ///
   /// ```dart
-  /// List<Item> _data = generateItems(8);
+  /// final List<Item> _data = generateItems(8);
   ///
   /// @override
   /// Widget build(BuildContext context) {
@@ -306,11 +305,11 @@ class ExpansionPanelList extends StatefulWidget {
   ///         },
   ///         body: ListTile(
   ///           title: Text(item.expandedValue),
-  ///           subtitle: Text('To delete this panel, tap the trash can icon'),
-  ///           trailing: Icon(Icons.delete),
+  ///           subtitle: const Text('To delete this panel, tap the trash can icon'),
+  ///           trailing: const Icon(Icons.delete),
   ///           onTap: () {
   ///             setState(() {
-  ///               _data.removeWhere((currentItem) => item == currentItem);
+  ///               _data.removeWhere((Item currentItem) => item == currentItem);
   ///             });
   ///           }
   ///         )
@@ -381,14 +380,8 @@ class ExpansionPanelList extends StatefulWidget {
 
   /// Defines elevation for the [ExpansionPanel] while it's expanded.
   ///
-  /// This uses [kElevationToShadow] to simulate shadows, it does not use
-  /// [Material]'s arbitrary elevation feature.
-  ///
-  /// The following values can be used to define the elevation: 0, 1, 2, 3, 4, 6,
-  /// 8, 9, 12, 16, 24.
-  ///
   /// By default, the value of elevation is 2.
-  final int elevation;
+  final double elevation;
 
   @override
   State<StatefulWidget> createState() => _ExpansionPanelListState();
@@ -443,8 +436,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
   }
 
   void _handlePressed(bool isExpanded, int index) {
-    if (widget.expansionCallback != null)
-      widget.expansionCallback!(index, isExpanded);
+    widget.expansionCallback?.call(index, isExpanded);
 
     if (widget._allowOnlyOnePanelOpen) {
       final ExpansionPanelRadio pressedChild = widget.children[index] as ExpansionPanelRadio;
@@ -477,7 +469,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
   Widget build(BuildContext context) {
     assert(kElevationToShadow.containsKey(widget.elevation),
       'Invalid value for elevation. See the kElevationToShadow constant for'
-      ' possible elevation values.'
+      ' possible elevation values.',
     );
 
     final List<MergeableMaterialItem> items = <MergeableMaterialItem>[];

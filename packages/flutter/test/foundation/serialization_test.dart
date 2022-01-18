@@ -5,7 +5,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
-import '../flutter_test_alternative.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('Write and read buffer round-trip', () {
@@ -99,6 +99,11 @@ void main() {
       final Float64List readDoubles = read.getFloat64List(2);
       expect(readDoubles[0], equals(3.14));
       expect(readDoubles[1], isNaN);
+    });
+    test('done twice', () {
+      final WriteBuffer write = WriteBuffer();
+      write.done();
+      expect(() => write.done(), throwsStateError);
     });
   });
 }

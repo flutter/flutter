@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -12,11 +14,11 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/linux/application_package.dart';
 import 'package:flutter_tools/src/linux/linux_device.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:mockito/mockito.dart';
+import 'package:test/fake.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
-import '../../src/testbed.dart';
+import '../../src/fake_process_manager.dart';
+import '../../src/fakes.dart';
 
 final FakePlatform linux = FakePlatform(
   operatingSystem: 'linux',
@@ -49,6 +51,16 @@ void main() {
     expect(device.supportsRuntimeMode(BuildMode.profile), true);
     expect(device.supportsRuntimeMode(BuildMode.release), true);
     expect(device.supportsRuntimeMode(BuildMode.jitRelease), false);
+  });
+
+  testWithoutContext('LinuxDevice on arm64 hosts is arm64', () async {
+    final LinuxDevice deviceArm64Host = LinuxDevice(
+      processManager: FakeProcessManager.any(),
+      logger: BufferLogger.test(),
+      fileSystem: MemoryFileSystem.test(),
+      operatingSystemUtils: FakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_arm64),
+    );
+    expect(await deviceArm64Host.targetPlatform, TargetPlatform.linux_arm64);
   });
 
   testWithoutContext('LinuxDevice: no devices listed if platform unsupported', () async {
@@ -127,23 +139,17 @@ void main() {
   });
 
   testWithoutContext('LinuxDevice.executablePathForDevice uses the correct package executable', () async {
-    final MockLinuxApp mockApp = MockLinuxApp();
+    final FakeLinuxApp mockApp = FakeLinuxApp();
     final LinuxDevice device = LinuxDevice(
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
       fileSystem: MemoryFileSystem.test(),
       operatingSystemUtils: FakeOperatingSystemUtils(),
     );
-    const String debugPath = 'debug/executable';
-    const String profilePath = 'profile/executable';
-    const String releasePath = 'release/executable';
-    when(mockApp.executable(BuildMode.debug)).thenReturn(debugPath);
-    when(mockApp.executable(BuildMode.profile)).thenReturn(profilePath);
-    when(mockApp.executable(BuildMode.release)).thenReturn(releasePath);
 
-    expect(device.executablePathForDevice(mockApp, BuildMode.debug), debugPath);
-    expect(device.executablePathForDevice(mockApp, BuildMode.profile), profilePath);
-    expect(device.executablePathForDevice(mockApp, BuildMode.release), releasePath);
+    expect(device.executablePathForDevice(mockApp, BuildMode.debug), 'debug/executable');
+    expect(device.executablePathForDevice(mockApp, BuildMode.profile), 'profile/executable');
+    expect(device.executablePathForDevice(mockApp, BuildMode.release), 'release/executable');
   });
 }
 
@@ -155,8 +161,31 @@ FlutterProject setUpFlutterProject(Directory directory) {
   return flutterProjectFactory.fromDirectory(directory);
 }
 
-class MockLinuxApp extends Mock implements LinuxApp {}
+class FakeLinuxApp extends Fake implements LinuxApp {
+  @override
+  String executable(BuildMode buildMode) {
+    switch (buildMode) {
+      case BuildMode.debug:
+        return 'debug/executable';
+      case BuildMode.profile:
+        return 'profile/executable';
+      case BuildMode.release:
+        return 'release/executable';
+      default:
+        throw StateError('Invalid mode: $buildMode');
+    }
+  }
+}
 class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
+  FakeOperatingSystemUtils({
+    HostPlatform hostPlatform = HostPlatform.linux_x64
+  })  : _hostPlatform = hostPlatform;
+
+  final HostPlatform _hostPlatform;
+
   @override
   String get name => 'Linux';
+
+  @override
+  HostPlatform get hostPlatform => _hostPlatform;
 }

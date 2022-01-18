@@ -2,35 +2,55 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
+import 'package:fake_async/fake_async.dart';
+import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/utils.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/commands/daemon.dart';
+import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_workflow.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 import 'package:flutter_tools/src/ios/ios_workflow.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
-import 'package:mockito/mockito.dart';
-import 'package:fake_async/fake_async.dart';
+import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/mocks.dart';
+import '../../src/fake_devices.dart';
+import '../../src/fakes.dart';
+
+/// Runs a callback using FakeAsync.run while continually pumping the
+/// microtask queue. This avoids a deadlock when tests `await` a Future
+/// which queues a microtask that will not be processed unless the queue
+/// is flushed.
+Future<T> _runFakeAsync<T>(Future<T> Function(FakeAsync time) f) async {
+  return FakeAsync().run((FakeAsync time) async {
+    bool pump = true;
+    final Future<T> future = f(time).whenComplete(() => pump = false);
+    while (pump) {
+      time.flushMicrotasks();
+    }
+    return future;
+  });
+}
 
 void main() {
   Daemon daemon;
   NotifyingLogger notifyingLogger;
   BufferLogger bufferLogger;
-  DevtoolsLauncher mockDevToolsLauncher;
 
   group('daemon', () {
     setUp(() {
       bufferLogger = BufferLogger.test();
       notifyingLogger = NotifyingLogger(verbose: false, parent: bufferLogger);
-      mockDevToolsLauncher = MockDevToolsLauncher();
     });
 
     tearDown(() {
@@ -55,6 +75,30 @@ void main() {
       expect(response['result'], isA<String>());
       await responses.close();
       await commands.close();
+    });
+
+    testUsingContext('daemon.getSupportedPlatforms command should succeed', () async {
+      final StreamController<Map<String, dynamic>> commands = StreamController<Map<String, dynamic>>();
+      final StreamController<Map<String, dynamic>> responses = StreamController<Map<String, dynamic>>();
+      daemon = Daemon(
+        commands.stream,
+        responses.add,
+        notifyingLogger: notifyingLogger,
+      );
+      // Use the flutter_gallery project which has a known set of supported platforms.
+      final String projectPath = globals.fs.path.join(getFlutterRoot(), 'dev', 'integration_tests', 'flutter_gallery');
+
+      commands.add(<String, dynamic>{'id': 0, 'method': 'daemon.getSupportedPlatforms', 'params': <String, Object>{'projectRoot': projectPath}});
+      final Map<String, dynamic> response = await responses.stream.firstWhere(_notEvent);
+
+      expect(response['id'], 0);
+      expect(response['result'], isNotEmpty);
+      expect(response['result']['platforms'], <String>{'macos'});
+      await responses.close();
+      await commands.close();
+    }, overrides: <Type, Generator>{
+      // Disable Android/iOS and enable macOS to make sure result is consistent and defaults are tested off.
+      FeatureFlags: () => TestFeatureFlags(isAndroidEnabled: false, isIOSEnabled: false, isMacOSEnabled: true),
     });
 
     testUsingContext('printError should send daemon.logMessage event', () async {
@@ -197,7 +241,7 @@ void main() {
       );
       final FakePollingDeviceDiscovery discoverer = FakePollingDeviceDiscovery();
       daemon.deviceDomain.addDeviceDiscoverer(discoverer);
-      discoverer.addDevice(MockAndroidDevice());
+      discoverer.addDevice(FakeAndroidDevice());
       commands.add(<String, dynamic>{'id': 0, 'method': 'device.getDevices'});
       final Map<String, dynamic> response = await responses.stream.firstWhere(_notEvent);
       expect(response['id'], 0);
@@ -219,22 +263,22 @@ void main() {
 
       final FakePollingDeviceDiscovery discoverer = FakePollingDeviceDiscovery();
       daemon.deviceDomain.addDeviceDiscoverer(discoverer);
-      discoverer.addDevice(MockAndroidDevice());
+      discoverer.addDevice(FakeAndroidDevice());
 
-      return await responses.stream.skipWhile(_isConnectedEvent).first.then<void>((Map<String, dynamic> response) async {
+      return responses.stream.skipWhile(_isConnectedEvent).first.then<void>((Map<String, dynamic> response) async {
         expect(response['event'], 'device.added');
         expect(response['params'], isMap);
 
         final Map<String, dynamic> params = castStringKeyedMap(response['params']);
-        expect(params['platform'], isNotEmpty); // the mock device has a platform of 'android-arm'
+        expect(params['platform'], isNotEmpty); // the fake device has a platform of 'android-arm'
 
         await responses.close();
         await commands.close();
       });
     }, overrides: <Type, Generator>{
-      AndroidWorkflow: () => MockAndroidWorkflow(),
-      IOSWorkflow: () => MockIOSWorkflow(),
-      FuchsiaWorkflow: () => MockFuchsiaWorkflow(),
+      AndroidWorkflow: () => FakeAndroidWorkflow(),
+      IOSWorkflow: () => FakeIOSWorkflow(),
+      FuchsiaWorkflow: () => FakeFuchsiaWorkflow(),
     });
 
     testUsingContext('emulator.launch without an emulatorId should report an error', () async {
@@ -250,6 +294,23 @@ void main() {
       final Map<String, dynamic> response = await responses.stream.firstWhere(_notEvent);
       expect(response['id'], 0);
       expect(response['error'], contains('emulatorId is required'));
+      await responses.close();
+      await commands.close();
+    });
+
+    testUsingContext('emulator.launch coldboot parameter must be boolean', () async {
+      final StreamController<Map<String, dynamic>> commands = StreamController<Map<String, dynamic>>();
+      final StreamController<Map<String, dynamic>> responses = StreamController<Map<String, dynamic>>();
+      daemon = Daemon(
+        commands.stream,
+        responses.add,
+        notifyingLogger: notifyingLogger,
+      );
+      final Map<String, dynamic> params = <String, dynamic>{'emulatorId': 'device', 'coldBoot': 1};
+      commands.add(<String, dynamic>{'id': 0, 'method': 'emulator.launch', 'params': params});
+      final Map<String, dynamic> response = await responses.stream.firstWhere(_notEvent);
+      expect(response['id'], 0);
+      expect(response['error'], contains('coldBoot is not a bool'));
       await responses.close();
       await commands.close();
     });
@@ -306,7 +367,6 @@ void main() {
         responses.add,
         notifyingLogger: notifyingLogger,
       );
-      when(mockDevToolsLauncher.serve()).thenAnswer((_) async => DevToolsServerAddress('127.0.0.1', 1234));
 
       commands.add(<String, dynamic>{'id': 0, 'method': 'devtools.serve'});
       final Map<String, dynamic> response = await responses.stream.firstWhere((Map<String, dynamic> response) => response['id'] == 0);
@@ -316,7 +376,7 @@ void main() {
       await responses.close();
       await commands.close();
     }, overrides: <Type, Generator>{
-      DevtoolsLauncher: () => mockDevToolsLauncher,
+      DevtoolsLauncher: () => FakeDevtoolsLauncher(DevToolsServerAddress('127.0.0.1', 1234)),
     });
 
     testUsingContext('devtools.serve command should return null fields if null returned', () async {
@@ -327,7 +387,6 @@ void main() {
         responses.add,
         notifyingLogger: notifyingLogger,
       );
-      when(mockDevToolsLauncher.serve()).thenAnswer((_) async => null);
 
       commands.add(<String, dynamic>{'id': 0, 'method': 'devtools.serve'});
       final Map<String, dynamic> response = await responses.stream.firstWhere((Map<String, dynamic> response) => response['id'] == 0);
@@ -337,7 +396,7 @@ void main() {
       await responses.close();
       await commands.close();
     }, overrides: <Type, Generator>{
-      DevtoolsLauncher: () => mockDevToolsLauncher,
+      DevtoolsLauncher: () => FakeDevtoolsLauncher(null),
     });
   });
 
@@ -398,7 +457,7 @@ void main() {
     testWithoutContext(
         'debounces/merges same operation type and returns same result',
         () async {
-      await runFakeAsync((FakeAsync time) async {
+      await _runFakeAsync((FakeAsync time) async {
         final List<Future<int>> operations = <Future<int>>[
           queue.queueAndDebounce('OP1', debounceDuration, () async => 1),
           queue.queueAndDebounce('OP1', debounceDuration, () async => 2),
@@ -413,7 +472,7 @@ void main() {
 
     testWithoutContext('does not merge results outside of the debounce duration',
         () async {
-      await runFakeAsync((FakeAsync time) async {
+      await _runFakeAsync((FakeAsync time) async {
         final List<Future<int>> operations = <Future<int>>[
           queue.queueAndDebounce('OP1', debounceDuration, () async => 1),
           Future<int>.delayed(debounceDuration * 2).then((_) =>
@@ -429,7 +488,7 @@ void main() {
 
     testWithoutContext('does not merge results of different operations',
         () async {
-      await runFakeAsync((FakeAsync time) async {
+      await _runFakeAsync((FakeAsync time) async {
         final List<Future<int>> operations = <Future<int>>[
           queue.queueAndDebounce('OP1', debounceDuration, () async => 1),
           queue.queueAndDebounce('OP2', debounceDuration, () async => 2),
@@ -443,7 +502,7 @@ void main() {
     });
 
     testWithoutContext('does not run any operations concurrently', () async {
-      // Crete a function thats slow, but throws if another instance of the
+      // Crete a function that's slow, but throws if another instance of the
       // function is running.
       bool isRunning = false;
       Future<int> f(int ret) async {
@@ -456,7 +515,7 @@ void main() {
         return ret;
       }
 
-      await runFakeAsync((FakeAsync time) async {
+      await _runFakeAsync((FakeAsync time) async {
         final List<Future<int>> operations = <Future<int>>[
           queue.queueAndDebounce('OP1', debounceDuration, () => f(1)),
           queue.queueAndDebounce('OP2', debounceDuration, () => f(2)),
@@ -475,25 +534,61 @@ bool _notEvent(Map<String, dynamic> map) => map['event'] == null;
 
 bool _isConnectedEvent(Map<String, dynamic> map) => map['event'] == 'daemon.connected';
 
-class MockFuchsiaWorkflow extends FuchsiaWorkflow {
-  MockFuchsiaWorkflow({ this.canListDevices = true });
+class FakeFuchsiaWorkflow extends Fake implements FuchsiaWorkflow {
+  FakeFuchsiaWorkflow({ this.canListDevices = true });
 
   @override
   final bool canListDevices;
 }
 
-class MockAndroidWorkflow extends AndroidWorkflow {
-  MockAndroidWorkflow({ this.canListDevices = true });
+class FakeAndroidWorkflow extends Fake implements AndroidWorkflow {
+  FakeAndroidWorkflow({ this.canListDevices = true });
 
   @override
   final bool canListDevices;
 }
 
-class MockIOSWorkflow extends IOSWorkflow {
-  MockIOSWorkflow({ this.canListDevices = true });
+class FakeIOSWorkflow extends Fake implements IOSWorkflow {
+  FakeIOSWorkflow({ this.canListDevices = true });
 
   @override
   final bool canListDevices;
 }
 
-class MockDevToolsLauncher extends Mock implements DevtoolsLauncher {}
+class FakeAndroidDevice extends Fake implements AndroidDevice {
+  @override
+  final String id = 'device';
+
+  @override
+  final String name = 'device';
+
+  @override
+  Future<String> get emulatorId async => 'device';
+
+  @override
+  Future<TargetPlatform> get targetPlatform async => TargetPlatform.android_arm;
+
+  @override
+  Future<bool> get isLocalEmulator async => false;
+
+  @override
+  final Category category = Category.mobile;
+
+  @override
+  final PlatformType platformType = PlatformType.android;
+
+  @override
+  final bool ephemeral = false;
+}
+
+class FakeDevtoolsLauncher extends Fake implements DevtoolsLauncher {
+  FakeDevtoolsLauncher(this._serverAddress);
+
+  final DevToolsServerAddress _serverAddress;
+
+  @override
+  Future<DevToolsServerAddress> serve() async => _serverAddress;
+
+  @override
+  Future<void> close() async {}
+}

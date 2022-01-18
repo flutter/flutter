@@ -3,8 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -152,8 +150,7 @@ void main() {
     );
 
     Text placeholder = tester.widget(find.text('Search'));
-    expect(placeholder.style!.color!.value,
-        CupertinoColors.systemGrey.darkColor.value);
+    expect(placeholder.style!.color!.value, CupertinoColors.systemGrey.darkColor.value);
 
     await tester.pumpAndSettle();
 
@@ -167,8 +164,7 @@ void main() {
     );
 
     placeholder = tester.widget(find.text('Search'));
-    expect(placeholder.style!.color!.value,
-        CupertinoColors.systemGrey.color.value);
+    expect(placeholder.style!.color!.value, CupertinoColors.systemGrey.color.value);
   });
 
   testWidgets(
@@ -261,6 +257,35 @@ void main() {
     },
   );
 
+  testWidgets('prefix widget visibility', (WidgetTester tester) async {
+      const Key prefixIcon = Key('prefix');
+
+      await tester.pumpWidget(
+        const CupertinoApp(
+          home: Center(
+            child: CupertinoSearchTextField(
+              prefixIcon: SizedBox(
+                key: prefixIcon,
+                width: 50,
+                height: 50,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byIcon(CupertinoIcons.search), findsNothing);
+      expect(find.byKey(prefixIcon), findsOneWidget);
+
+      await tester.enterText(
+          find.byType(CupertinoSearchTextField), 'text input');
+      await tester.pump();
+
+      expect(find.text('text input'), findsOneWidget);
+      expect(find.byIcon(CupertinoIcons.search), findsNothing);
+      expect(find.byKey(prefixIcon), findsOneWidget);
+  });
+
   testWidgets(
     'suffix widget respects visibility mode',
     (WidgetTester tester) async {
@@ -276,8 +301,7 @@ void main() {
 
       expect(find.byIcon(CupertinoIcons.xmark_circle_fill), findsOneWidget);
 
-      await tester.enterText(
-          find.byType(CupertinoSearchTextField), 'text input');
+      await tester.enterText(find.byType(CupertinoSearchTextField), 'text input');
       await tester.pump();
 
       expect(find.text('text input'), findsOneWidget);
@@ -302,8 +326,7 @@ void main() {
 
       expect(find.byIcon(CupertinoIcons.xmark_circle_fill), findsNothing);
 
-      await tester.enterText(
-          find.byType(CupertinoSearchTextField), 'text input');
+      await tester.enterText(find.byType(CupertinoSearchTextField), 'text input');
       await tester.pump();
 
       expect(find.byIcon(CupertinoIcons.xmark_circle_fill), findsOneWidget);
@@ -423,8 +446,8 @@ void main() {
           home: Center(
             child: CupertinoSearchTextField(
               suffixMode: OverlayVisibilityMode.always,
-              prefixInsets: EdgeInsets.all(0),
-              suffixInsets: EdgeInsets.all(0),
+              prefixInsets: EdgeInsets.zero,
+              suffixInsets: EdgeInsets.zero,
             ),
           ),
         ),
@@ -445,8 +468,7 @@ void main() {
   testWidgets(
     'custom suffix onTap overrides default clearing behavior',
     (WidgetTester tester) async {
-      final TextEditingController controller =
-          TextEditingController(text: 'Text');
+      final TextEditingController controller = TextEditingController(text: 'Text');
       await tester.pumpWidget(
         CupertinoApp(
           home: Center(
@@ -467,4 +489,77 @@ void main() {
       expect(find.text('Text'), findsOneWidget);
     },
   );
+
+  testWidgets('onTap is properly forwarded to the inner text field', (WidgetTester tester) async {
+    int onTapCallCount = 0;
+
+    // onTap can be null.
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(
+          child: CupertinoSearchTextField(),
+        ),
+      ),
+    );
+
+    // onTap callback is called if not null.
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoSearchTextField(
+            onTap: () {
+              onTapCallCount++;
+            },
+          ),
+        ),
+      ),
+    );
+
+    expect(onTapCallCount, 0);
+    await tester.tap(find.byType(CupertinoTextField));
+    expect(onTapCallCount, 1);
+  });
+
+  testWidgets('autocorrect is properly forwarded to the inner text field', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(
+          child: CupertinoSearchTextField(
+            autocorrect: false,
+          ),
+        ),
+      ),
+    );
+
+    final CupertinoTextField textField = tester.widget(find.byType(CupertinoTextField));
+    expect(textField.autocorrect, false);
+  });
+
+  testWidgets('enabled is properly forwarded to the inner text field', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(
+          child: CupertinoSearchTextField(
+            enabled: false,
+          ),
+        ),
+      ),
+    );
+
+    final CupertinoTextField textField = tester.widget(find.byType(CupertinoTextField));
+    expect(textField.enabled, false);
+  });
+
+  testWidgets('textInputAction is set to TextInputAction.search by default', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(
+          child: CupertinoSearchTextField(),
+        ),
+      ),
+    );
+
+    final CupertinoTextField textField = tester.widget(find.byType(CupertinoTextField));
+    expect(textField.textInputAction, TextInputAction.search);
+  });
 }

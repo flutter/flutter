@@ -14,7 +14,7 @@ void main() {
       IconTheme(data: data, child: Builder(builder: (BuildContext context) {
         retrieved = IconTheme.of(context);
         return const SizedBox();
-      }))
+      })),
     );
 
     expect(retrieved, data);
@@ -28,7 +28,7 @@ void main() {
               retrieved = IconTheme.of(context);
               return const SizedBox();
             },
-          )
+          ),
         ),
       ),
     );

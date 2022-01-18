@@ -2,16 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:path/path.dart' as path;
-
+import 'package:flutter_devicelab/common.dart';
 import 'package:flutter_devicelab/framework/adb.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
+import 'package:flutter_devicelab/framework/host_agent.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
+import 'package:path/path.dart' as path;
 
 void main() {
   task(() async {
@@ -22,9 +25,18 @@ void main() {
     final Directory appDir = dir(path.join(flutterDirectory.path, 'dev/integration_tests/ui'));
     section('TEST WHETHER `flutter drive --route` WORKS');
     await inDirectory(appDir, () async {
-      return await flutter(
+      return flutter(
         'drive',
-        options: <String>['--verbose', '-d', device.deviceId, '--route', '/smuggle-it', 'lib/route.dart'],
+        options: <String>[
+          '--verbose',
+          '-d',
+          device.deviceId,
+          '--screenshot',
+          hostAgent.dumpDirectory.path,
+          '--route',
+          '/smuggle-it',
+          'lib/route.dart',
+        ],
         canFail: false,
       );
     });
@@ -36,7 +48,7 @@ void main() {
       final Process run = await startProcess(
         path.join(flutterDirectory.path, 'bin', 'flutter'),
         // --fast-start does not support routes.
-        <String>['run', '--verbose', '--disable-service-auth-codes', '--no-fast-start', '-d', device.deviceId, '--route', '/smuggle-it', 'lib/route.dart'],
+        <String>['run', '--verbose', '--disable-service-auth-codes', '--no-fast-start', '--no-publish-port', '-d', device.deviceId, '--route', '/smuggle-it', 'lib/route.dart'],
       );
       run.stdout
         .transform<String>(utf8.decoder)
@@ -59,7 +71,7 @@ void main() {
         .listen((String line) {
           stderr.writeln('run:stderr: $line');
         });
-      run.exitCode.then<void>((int exitCode) { ok = false; });
+      unawaited(run.exitCode.then<void>((int exitCode) { ok = false; }));
       await Future.any<dynamic>(<Future<dynamic>>[ ready.future, run.exitCode ]);
       if (!ok)
         throw 'Failed to run test app.';

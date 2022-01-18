@@ -4,14 +4,19 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/rendering.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
+import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
+import 'focus_manager.dart';
+import 'focus_scope.dart';
 import 'framework.dart';
+import 'notification_listener.dart';
 import 'primary_scroll_controller.dart';
 import 'scroll_controller.dart';
+import 'scroll_notification.dart';
 import 'scroll_physics.dart';
+import 'scroll_view.dart';
 import 'scrollable.dart';
 
 /// A box in which a single widget can be scrolled.
@@ -91,7 +96,7 @@ import 'scrollable.dart';
 /// ```dart
 ///  Widget build(BuildContext context) {
 ///    return DefaultTextStyle(
-///      style: Theme.of(context).textTheme.bodyText2,
+///      style: Theme.of(context).textTheme.bodyText2!,
 ///      child: LayoutBuilder(
 ///        builder: (BuildContext context, BoxConstraints viewportConstraints) {
 ///          return SingleChildScrollView(
@@ -161,7 +166,7 @@ import 'scrollable.dart';
 /// ```dart
 ///  Widget build(BuildContext context) {
 ///    return DefaultTextStyle(
-///      style: Theme.of(context).textTheme.bodyText2,
+///      style: Theme.of(context).textTheme.bodyText2!,
 ///      child: LayoutBuilder(
 ///        builder: (BuildContext context, BoxConstraints viewportConstraints) {
 ///          return SingleChildScrollView(
@@ -221,12 +226,13 @@ class SingleChildScrollView extends StatelessWidget {
     this.dragStartBehavior = DragStartBehavior.start,
     this.clipBehavior = Clip.hardEdge,
     this.restorationId,
+    this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
   }) : assert(scrollDirection != null),
        assert(dragStartBehavior != null),
        assert(clipBehavior != null),
        assert(!(controller != null && primary == true),
           'Primary ScrollViews obtain their ScrollController via inheritance from a PrimaryScrollController widget. '
-          'You cannot both set primary to true and pass an explicit controller.'
+          'You cannot both set primary to true and pass an explicit controller.',
        ),
        primary = primary ?? controller == null && identical(scrollDirection, Axis.vertical),
        super(key: key);
@@ -306,6 +312,9 @@ class SingleChildScrollView extends StatelessWidget {
   /// {@macro flutter.widgets.scrollable.restorationId}
   final String? restorationId;
 
+  /// {@macro flutter.widgets.scroll_view.keyboardDismissBehavior}
+  final ScrollViewKeyboardDismissBehavior keyboardDismissBehavior;
+
   AxisDirection _getDirection(BuildContext context) {
     return getAxisDirectionFromAxisReverseAndDirectionality(context, scrollDirection, reverse);
   }
@@ -319,7 +328,7 @@ class SingleChildScrollView extends StatelessWidget {
     final ScrollController? scrollController = primary
         ? PrimaryScrollController.of(context)
         : controller;
-    final Scrollable scrollable = Scrollable(
+    Widget scrollable = Scrollable(
       dragStartBehavior: dragStartBehavior,
       axisDirection: axisDirection,
       controller: scrollController,
@@ -329,11 +338,25 @@ class SingleChildScrollView extends StatelessWidget {
         return _SingleChildViewport(
           axisDirection: axisDirection,
           offset: offset,
-          child: contents,
           clipBehavior: clipBehavior,
+          child: contents,
         );
       },
     );
+
+    if (keyboardDismissBehavior == ScrollViewKeyboardDismissBehavior.onDrag) {
+      scrollable = NotificationListener<ScrollUpdateNotification>(
+        child: scrollable,
+        onNotification: (ScrollUpdateNotification notification) {
+          final FocusScopeNode focusNode = FocusScope.of(context);
+          if (notification.dragDetails != null && focusNode.hasFocus) {
+            focusNode.unfocus();
+          }
+          return false;
+        },
+      );
+    }
+
     return primary && scrollController != null
       ? PrimaryScrollController.none(child: scrollable)
       : scrollable;
@@ -597,8 +620,14 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
       }
 
       if (_shouldClipAtPaintOffset(paintOffset) && clipBehavior != Clip.none) {
-        _clipRectLayer = context.pushClipRect(needsCompositing, offset, Offset.zero & size, paintContents,
-            clipBehavior: clipBehavior, oldLayer: _clipRectLayer);
+        _clipRectLayer = context.pushClipRect(
+          needsCompositing,
+          offset,
+          Offset.zero & size,
+          paintContents,
+          clipBehavior: clipBehavior,
+          oldLayer: _clipRectLayer,
+        );
       } else {
         _clipRectLayer = null;
         paintContents(context, offset);

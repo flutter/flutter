@@ -21,10 +21,6 @@ import 'theme.dart';
 // CalendarDatePicker (if needed, as showDatePicker has already been migrated
 // and it is what most apps would have used).
 
-
-// Examples can assume:
-// BuildContext context;
-
 const Duration _kMonthScrollDuration = Duration(milliseconds: 200);
 const double _kDayPickerRowHeight = 42.0;
 const int _kMaxDayPickerRowCount = 6; // A 31 day month that starts on Saturday.
@@ -73,12 +69,16 @@ const _DayPickerGridDelegate _kDayPickerGridDelegate = _DayPickerGridDelegate();
 ///
 @Deprecated(
   'Use CalendarDatePicker instead. '
-  'This feature was deprecated after v1.15.3.'
+  'This feature was deprecated after v1.26.0-18.0.pre.',
 )
 class DayPicker extends StatelessWidget {
   /// Creates a day picker.
   ///
   /// Rarely used directly. Instead, typically used as part of a [MonthPicker].
+  @Deprecated(
+    'Use CalendarDatePicker instead. '
+    'This feature was deprecated after v1.26.0-18.0.pre.',
+  )
   DayPicker({
     Key? key,
     required this.selectedDate,
@@ -124,9 +124,9 @@ class DayPicker extends StatelessWidget {
   /// Determines the way that drag start behavior is handled.
   ///
   /// If set to [DragStartBehavior.start], the drag gesture used to scroll a
-  /// date picker wheel will begin upon the detection of a drag gesture. If set
-  /// to [DragStartBehavior.down] it will begin when a down event is first
-  /// detected.
+  /// date picker wheel will begin at the position where the drag gesture won
+  /// the arena. If set to [DragStartBehavior.down] it will begin at the
+  /// position where a down event is first detected.
   ///
   /// In general, setting this to [DragStartBehavior.start] will make drag
   /// animation smoother and setting it to [DragStartBehavior.down] will make
@@ -263,16 +263,16 @@ class DayPicker extends StatelessWidget {
         final bool isSelectedDay = selectedDate.year == year && selectedDate.month == month && selectedDate.day == day;
         if (isSelectedDay) {
           // The selected day gets a circle background highlight, and a contrasting text color.
-          itemStyle = themeData.accentTextTheme.bodyText1;
+          itemStyle = themeData.textTheme.bodyText1;
           decoration = BoxDecoration(
-            color: themeData.accentColor,
+            color: themeData.colorScheme.secondary,
             shape: BoxShape.circle,
           );
         } else if (disabled) {
           itemStyle = themeData.textTheme.bodyText2!.copyWith(color: themeData.disabledColor);
         } else if (currentDate.year == year && currentDate.month == month && currentDate.day == day) {
           // The current day gets a different text color.
-          itemStyle = themeData.textTheme.bodyText1!.copyWith(color: themeData.accentColor);
+          itemStyle = themeData.textTheme.bodyText1!.copyWith(color: themeData.colorScheme.secondary);
         }
 
         Widget dayWidget = Container(
@@ -301,8 +301,8 @@ class DayPicker extends StatelessWidget {
             onTap: () {
               onChanged(dayToBuild);
             },
-            child: dayWidget,
             dragStartBehavior: dragStartBehavior,
+            child: dayWidget,
           );
         }
 
@@ -314,7 +314,7 @@ class DayPicker extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 8.0),
       child: Column(
         children: <Widget>[
-          Container(
+          SizedBox(
             height: _kDayPickerRowHeight,
             child: Center(
               child: ExcludeSemantics(
@@ -355,13 +355,17 @@ class DayPicker extends StatelessWidget {
 ///
 @Deprecated(
   'Use CalendarDatePicker instead. '
-  'This feature was deprecated after v1.15.3.'
+  'This feature was deprecated after v1.26.0-18.0.pre.',
 )
 class MonthPicker extends StatefulWidget {
   /// Creates a month picker.
   ///
   /// Rarely used directly. Instead, typically used as part of the dialog shown
   /// by [showDatePicker].
+  @Deprecated(
+    'Use CalendarDatePicker instead. '
+    'This feature was deprecated after v1.26.0-18.0.pre.',
+  )
   MonthPicker({
     Key? key,
     required this.selectedDate,
@@ -397,7 +401,7 @@ class MonthPicker extends StatefulWidget {
   final DragStartBehavior dragStartBehavior;
 
   @override
-  _MonthPickerState createState() => _MonthPickerState();
+  State<MonthPicker> createState() => _MonthPickerState();
 }
 
 class _MonthPickerState extends State<MonthPicker> with SingleTickerProviderStateMixin {
@@ -500,14 +504,12 @@ class _MonthPickerState extends State<MonthPicker> with SingleTickerProviderStat
 
   /// True if the earliest allowable month is displayed.
   bool get _isDisplayingFirstMonth {
-    return !_currentDisplayedMonthDate.isAfter(
-        DateTime(widget.firstDate.year, widget.firstDate.month));
+    return !_currentDisplayedMonthDate.isAfter(DateTime(widget.firstDate.year, widget.firstDate.month));
   }
 
   /// True if the latest allowable month is displayed.
   bool get _isDisplayingLastMonth {
-    return !_currentDisplayedMonthDate.isBefore(
-        DateTime(widget.lastDate.year, widget.lastDate.month));
+    return !_currentDisplayedMonthDate.isBefore(DateTime(widget.lastDate.year, widget.lastDate.month));
   }
 
   late DateTime _previousMonthDate;

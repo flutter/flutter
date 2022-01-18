@@ -48,7 +48,7 @@ void main() {
     await tester.pumpWidget(Container());
   });
 
-  testWidgets('Locale without coutryCode', (WidgetTester tester) async {
+  testWidgets('Locale without countryCode', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/pull/16782
     await tester.pumpWidget(
       MaterialApp(

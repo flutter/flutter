@@ -4,16 +4,16 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/physics.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/foundation.dart' show precisionErrorTolerance;
+import 'package:flutter/gestures.dart' show DragStartBehavior;
+import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
 import 'debug.dart';
 import 'framework.dart';
 import 'notification_listener.dart';
 import 'page_storage.dart';
+import 'scroll_configuration.dart';
 import 'scroll_context.dart';
 import 'scroll_controller.dart';
 import 'scroll_metrics.dart';
@@ -46,19 +46,14 @@ import 'viewport.dart';
 ///
 /// ```dart
 /// class MyPageView extends StatefulWidget {
-///   MyPageView({Key key}) : super(key: key);
+///   const MyPageView({Key? key}) : super(key: key);
 ///
-///   _MyPageViewState createState() => _MyPageViewState();
+///   @override
+///   State<MyPageView> createState() => _MyPageViewState();
 /// }
 ///
 /// class _MyPageViewState extends State<MyPageView> {
-///   PageController _pageController;
-///
-///   @override
-///   void initState() {
-///     super.initState();
-///     _pageController = PageController();
-///   }
+///   final PageController _pageController = PageController();
 ///
 ///   @override
 ///   void dispose() {
@@ -72,7 +67,7 @@ import 'viewport.dart';
 ///       home: Scaffold(
 ///         body: PageView(
 ///           controller: _pageController,
-///           children: [
+///           children: <Widget>[
 ///             Container(
 ///               color: Colors.red,
 ///               child: Center(
@@ -86,7 +81,7 @@ import 'viewport.dart';
 ///                       );
 ///                     }
 ///                   },
-///                   child: Text('Next'),
+///                   child: const Text('Next'),
 ///                 ),
 ///               ),
 ///             ),
@@ -103,7 +98,7 @@ import 'viewport.dart';
 ///                       );
 ///                     }
 ///                   },
-///                   child: Text('Previous'),
+///                   child: const Text('Previous'),
 ///                 ),
 ///               ),
 ///             ),
@@ -572,6 +567,35 @@ const PageScrollPhysics _kPagePhysics = PageScrollPhysics();
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=J1gE9xvph-A}
 ///
+/// {@tool dartpad --template=stateless_widget_scaffold}
+///
+/// Here is an example of [PageView]. It creates a centered [Text] in each of the three pages
+/// which scroll horizontally.
+///
+/// ```dart
+///  Widget build(BuildContext context) {
+///    final PageController controller = PageController(initialPage: 0);
+///    return PageView(
+///      /// [PageView.scrollDirection] defaults to [Axis.horizontal].
+///      /// Use [Axis.vertical] to scroll vertically.
+///      scrollDirection: Axis.horizontal,
+///      controller: controller,
+///      children: const <Widget>[
+///        Center(
+///          child: Text('First Page'),
+///        ),
+///        Center(
+///          child: Text('Second Page'),
+///        ),
+///        Center(
+///          child: Text('Third Page'),
+///        )
+///      ],
+///    );
+///  }
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [PageController], which controls which page is visible in the view.
@@ -612,6 +636,8 @@ class PageView extends StatefulWidget {
     this.allowImplicitScrolling = false,
     this.restorationId,
     this.clipBehavior = Clip.hardEdge,
+    this.scrollBehavior,
+    this.padEnds = true,
   }) : assert(allowImplicitScrolling != null),
        assert(clipBehavior != null),
        controller = controller ?? _defaultPageController,
@@ -650,6 +676,8 @@ class PageView extends StatefulWidget {
     this.allowImplicitScrolling = false,
     this.restorationId,
     this.clipBehavior = Clip.hardEdge,
+    this.scrollBehavior,
+    this.padEnds = true,
   }) : assert(allowImplicitScrolling != null),
        assert(clipBehavior != null),
        controller = controller ?? _defaultPageController,
@@ -666,8 +694,10 @@ class PageView extends StatefulWidget {
   ///
   /// ```dart
   /// class MyPageView extends StatefulWidget {
+  ///   const MyPageView({Key? key}) : super(key: key);
+  ///
   ///   @override
-  ///   _MyPageViewState createState() => _MyPageViewState();
+  ///   State<MyPageView> createState() => _MyPageViewState();
   /// }
   ///
   /// class _MyPageViewState extends State<MyPageView> {
@@ -693,7 +723,7 @@ class PageView extends StatefulWidget {
   ///             },
   ///             childCount: items.length,
   ///             findChildIndexCallback: (Key key) {
-  ///               final ValueKey valueKey = key;
+  ///               final ValueKey<String> valueKey = key as ValueKey<String>;
   ///               final String data = valueKey.value;
   ///               return items.indexOf(data);
   ///             }
@@ -706,7 +736,7 @@ class PageView extends StatefulWidget {
   ///           children: <Widget>[
   ///             TextButton(
   ///               onPressed: () => _reverse(),
-  ///               child: Text('Reverse items'),
+  ///               child: const Text('Reverse items'),
   ///             ),
   ///           ],
   ///         ),
@@ -716,12 +746,12 @@ class PageView extends StatefulWidget {
   /// }
   ///
   /// class KeepAlive extends StatefulWidget {
-  ///   const KeepAlive({Key key, this.data}) : super(key: key);
+  ///   const KeepAlive({Key? key, required this.data}) : super(key: key);
   ///
   ///   final String data;
   ///
   ///   @override
-  ///   _KeepAliveState createState() => _KeepAliveState();
+  ///   State<KeepAlive> createState() => _KeepAliveState();
   /// }
   ///
   /// class _KeepAliveState extends State<KeepAlive> with AutomaticKeepAliveClientMixin{
@@ -751,6 +781,8 @@ class PageView extends StatefulWidget {
     this.allowImplicitScrolling = false,
     this.restorationId,
     this.clipBehavior = Clip.hardEdge,
+    this.scrollBehavior,
+    this.padEnds = true,
   }) : assert(childrenDelegate != null),
        assert(allowImplicitScrolling != null),
        assert(clipBehavior != null),
@@ -804,10 +836,18 @@ class PageView extends StatefulWidget {
   /// The physics are modified to snap to page boundaries using
   /// [PageScrollPhysics] prior to being used.
   ///
+  /// If an explicit [ScrollBehavior] is provided to [scrollBehavior], the
+  /// [ScrollPhysics] provided by that behavior will take precedence after
+  /// [physics].
+  ///
   /// Defaults to matching platform conventions.
   final ScrollPhysics? physics;
 
   /// Set to false to disable page snapping, useful for custom scroll behavior.
+  ///
+  /// If the [padEnds] is false and [PageController.viewportFraction] < 1.0,
+  /// the page will snap to the beginning of the viewport; otherwise, the page
+  /// will snap to the center of the viewport.
   final bool pageSnapping;
 
   /// Called whenever the page in the center of the viewport changes.
@@ -829,8 +869,30 @@ class PageView extends StatefulWidget {
   /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
 
+  /// {@macro flutter.widgets.shadow.scrollBehavior}
+  ///
+  /// [ScrollBehavior]s also provide [ScrollPhysics]. If an explicit
+  /// [ScrollPhysics] is provided in [physics], it will take precedence,
+  /// followed by [scrollBehavior], and then the inherited ancestor
+  /// [ScrollBehavior].
+  ///
+  /// The [ScrollBehavior] of the inherited [ScrollConfiguration] will be
+  /// modified by default to not apply a [Scrollbar].
+  final ScrollBehavior? scrollBehavior;
+
+  /// Whether to add padding to both ends of the list.
+  ///
+  /// If this is set to true and [PageController.viewportFraction] < 1.0, padding will be added
+  /// such that the first and last child slivers will be in the center of
+  /// the viewport when scrolled all the way to the start or end, respectively.
+  ///
+  /// If [PageController.viewportFraction] >= 1.0, this property has no effect.
+  ///
+  /// This property defaults to true and must not be null.
+  final bool padEnds;
+
   @override
-  _PageViewState createState() => _PageViewState();
+  State<PageView> createState() => _PageViewState();
 }
 
 class _PageViewState extends State<PageView> {
@@ -859,9 +921,11 @@ class _PageViewState extends State<PageView> {
     final AxisDirection axisDirection = _getDirection(context);
     final ScrollPhysics physics = _ForceImplicitScrollPhysics(
       allowImplicitScrolling: widget.allowImplicitScrolling,
-    ).applyTo(widget.pageSnapping
-        ? _kPagePhysics.applyTo(widget.physics)
-        : widget.physics);
+    ).applyTo(
+      widget.pageSnapping
+        ? _kPagePhysics.applyTo(widget.physics ?? widget.scrollBehavior?.getScrollPhysics(context))
+        : widget.physics ?? widget.scrollBehavior?.getScrollPhysics(context),
+    );
 
     return NotificationListener<ScrollNotification>(
       onNotification: (ScrollNotification notification) {
@@ -881,6 +945,7 @@ class _PageViewState extends State<PageView> {
         controller: widget.controller,
         physics: physics,
         restorationId: widget.restorationId,
+        scrollBehavior: widget.scrollBehavior ?? ScrollConfiguration.of(context).copyWith(scrollbars: false),
         viewportBuilder: (BuildContext context, ViewportOffset position) {
           return Viewport(
             // TODO(dnfield): we should provide a way to set cacheExtent
@@ -895,6 +960,7 @@ class _PageViewState extends State<PageView> {
               SliverFillViewport(
                 viewportFraction: widget.controller.viewportFraction,
                 delegate: widget.childrenDelegate,
+                padEnds: widget.padEnds,
               ),
             ],
           );

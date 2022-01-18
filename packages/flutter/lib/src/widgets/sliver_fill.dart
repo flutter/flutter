@@ -5,7 +5,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
-import 'basic.dart';
 import 'framework.dart';
 import 'sliver.dart';
 
@@ -254,7 +253,7 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
 ///         delegate: SliverChildBuilderDelegate(
 ///           (BuildContext context, int index) {
 ///             return Container(
-///               color: index % 2 == 0
+///               color: index.isEven
 ///                 ? Colors.amber[200]
 ///                 : Colors.blue[200],
 ///             );
@@ -266,8 +265,8 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
 ///         hasScrollBody: false,
 ///         child: Container(
 ///           color: Colors.orange[300],
-///           child: Padding(
-///             padding: const EdgeInsets.all(50.0),
+///           child: const Padding(
+///             padding: EdgeInsets.all(50.0),
 ///             child: FlutterLogo(size: 100),
 ///           ),
 ///         ),
@@ -296,7 +295,7 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
 ///         delegate: SliverChildBuilderDelegate(
 ///           (BuildContext context, int index) {
 ///             return Container(
-///               color: index % 2 == 0
+///               color: index.isEven
 ///                 ? Colors.indigo[200]
 ///                 : Colors.orange[200],
 ///             );
@@ -304,16 +303,14 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
 ///           childCount: 5,
 ///         ),
 ///       ),
-///       SliverFillRemaining(
+///       const SliverFillRemaining(
 ///         hasScrollBody: false,
-///         child: Container(
-///           child: Padding(
-///             padding: const EdgeInsets.all(50.0),
-///             child: Icon(
-///               Icons.pan_tool,
-///               size: 60,
-///               color: Colors.blueGrey,
-///             ),
+///         child: Padding(
+///           padding: EdgeInsets.all(50.0),
+///           child: Icon(
+///             Icons.pan_tool,
+///             size: 60,
+///             color: Colors.blueGrey,
 ///           ),
 ///         ),
 ///       ),
@@ -351,7 +348,7 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
 ///     // BouncingScrollPhysics is combined with AlwaysScrollableScrollPhysics
 ///     // to allow for the overscroll, regardless of the depth of the
 ///     // scrollable.
-///     physics: BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+///     physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
 ///     slivers: <Widget>[
 ///       SliverToBoxAdapter(
 ///         child: Container(
@@ -375,7 +372,7 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
 ///                 onPressed: () {
 ///                   /* Place your onPressed code here! */
 ///                 },
-///                 child: Text('Bottom Pinned Button!'),
+///                 child: const Text('Bottom Pinned Button!'),
 ///               ),
 ///             ),
 ///           ),
@@ -448,7 +445,7 @@ class SliverFillRemaining extends StatelessWidget {
       DiagnosticsProperty<Widget>(
         'child',
         child,
-      )
+      ),
     );
     final List<String> flags = <String>[
       if (hasScrollBody) 'scrollable',

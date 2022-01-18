@@ -45,7 +45,8 @@ Widget _withTheme(
 
 RenderParagraph _iconRenderObject(WidgetTester tester, IconData icon) {
   return tester.renderObject<RenderParagraph>(
-      find.descendant(of: find.byIcon(icon), matching: find.byType(RichText)));
+    find.descendant(of: find.byIcon(icon), matching: find.byType(RichText)),
+  );
 }
 
 void main() {

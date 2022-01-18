@@ -7,11 +7,13 @@ import 'package:flutter/material.dart';
 
 // ignore_for_file: public_member_api_docs
 
-void startApp() => runApp(MyApp());
+void startApp() => runApp(const MyApp());
 
 class MyApp extends StatefulWidget {
+  const MyApp({Key? key}) : super(key: key);
+
   @override
-  _MyAppState createState() => _MyAppState();
+  State<MyApp> createState() => _MyAppState();
 }
 
 class _MyAppState extends State<MyApp> {

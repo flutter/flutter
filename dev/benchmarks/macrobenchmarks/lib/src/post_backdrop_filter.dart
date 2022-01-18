@@ -7,8 +7,10 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 
 class PostBackdropFilterPage extends StatefulWidget {
+  const PostBackdropFilterPage({Key key}) : super(key: key);
+
   @override
-  _PostBackdropFilterPageState createState() => _PostBackdropFilterPageState();
+  State<PostBackdropFilterPage> createState() => _PostBackdropFilterPageState();
 }
 
 class _PostBackdropFilterPageState extends State<PostBackdropFilterPage> with TickerProviderStateMixin {

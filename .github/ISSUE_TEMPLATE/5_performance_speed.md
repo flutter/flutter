@@ -32,7 +32,6 @@ assignees: ''
      using profile mode with Skia tracing enabled, as follows:
        flutter channel master
        flutter run --profile --trace-skia
-     Then press ‘P’ to enable the performance overlay.
 
      The bleeding edge master channel is encouraged here because Flutter is
      constantly fixing bugs and improving its performance. Your problem in an
@@ -46,6 +45,9 @@ assignees: ''
      so we know which functions might be causing it. See "How to Collect
      and Read Timeline Traces" on this blog post:
        https://medium.com/flutter/profiling-flutter-applications-using-the-timeline-a1a434964af3#a499
+     Make sure the performance overlay is turned OFF when recording the
+     trace as that may affect the performance of the profile run.
+     (Pressing ‘P’ on the command line toggles the overlay.)
 -->
 
 <!--
@@ -60,6 +62,9 @@ assignees: ''
 
 ## Logs
 
+<details>
+<summary>Logs</summary>
+
 <!--
      Run `flutter analyze` and attach any output of that command below.
      If there are any analysis errors, try resolving them before filing this issue.
@@ -72,3 +77,5 @@ assignees: ''
 
 ```
 ```
+
+</details>

@@ -2,13 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
 
-
 import '../framework/adb.dart';
 import '../framework/framework.dart';
+import '../framework/host_agent.dart';
 import '../framework/task_result.dart';
 import '../framework/utils.dart';
 
@@ -87,6 +89,7 @@ class GalleryTransitionTest {
           : '${testFile}_test');
       section('DRIVE START');
       await flutter('drive', options: <String>[
+        '--no-dds',
         '--profile',
         if (needFullTimeline)
           '--trace-startup',
@@ -101,16 +104,19 @@ class GalleryTransitionTest {
         'test_driver/$testDriver.dart',
         '-d',
         deviceId,
+        '--screenshot',
+        hostAgent.dumpDirectory.path,
       ]);
     });
 
+    final String testOutputDirectory = Platform.environment['FLUTTER_TEST_OUTPUTS_DIR'] ?? '${galleryDirectory.path}/build';
     final Map<String, dynamic> summary = json.decode(
-      file('${galleryDirectory.path}/build/$timelineSummaryFile.json').readAsStringSync(),
+      file('$testOutputDirectory/$timelineSummaryFile.json').readAsStringSync(),
     ) as Map<String, dynamic>;
 
     if (transitionDurationFile != null) {
       final Map<String, dynamic> original = json.decode(
-        file('${galleryDirectory.path}/build/$transitionDurationFile.json').readAsStringSync(),
+        file('$testOutputDirectory/$transitionDurationFile.json').readAsStringSync(),
       ) as Map<String, dynamic>;
       final Map<String, List<int>> transitions = <String, List<int>>{};
       for (final String key in original.keys) {
@@ -123,9 +129,9 @@ class GalleryTransitionTest {
     return TaskResult.success(summary,
       detailFiles: <String>[
         if (transitionDurationFile != null)
-          '${galleryDirectory.path}/build/$transitionDurationFile.json',
+          '$testOutputDirectory/$transitionDurationFile.json',
         if (timelineTraceFile != null)
-          '${galleryDirectory.path}/build/$timelineTraceFile.json'
+          '$testOutputDirectory/$timelineTraceFile.json'
       ],
       benchmarkScoreKeys: <String>[
         if (transitionDurationFile != null)

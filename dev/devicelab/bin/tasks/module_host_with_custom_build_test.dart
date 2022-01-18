@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:io';
 
 import 'package:flutter_devicelab/framework/apk_utils.dart';
@@ -77,7 +79,7 @@ Future<void> main() async {
         Directory(path.join(hostAppDir.path, 'gradle', 'wrapper')),
       );
 
-      final Function clean = () async {
+      Future<void> clean() async {
         section('Clean');
         await inDirectory(hostAppDir, () async {
           await exec(gradlewExecutable,
@@ -87,7 +89,7 @@ Future<void> main() async {
             },
           );
         });
-      };
+      }
 
       if (!Platform.isWindows) {
         section('Make $gradlewExecutable executable');

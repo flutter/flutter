@@ -5,7 +5,6 @@
 import 'dart:ui' as ui show TextHeightBehavior;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/painting.dart';
 
 import 'basic.dart';
 import 'framework.dart';
@@ -13,7 +12,7 @@ import 'inherited_theme.dart';
 import 'media_query.dart';
 
 // Examples can assume:
-// String _name;
+// late String _name;
 
 /// The text style to apply to descendant [Text] widgets which don't have an
 /// explicit style.
@@ -214,7 +213,7 @@ class _NullWidget extends StatelessWidget {
     throw FlutterError(
       'A DefaultTextStyle constructed with DefaultTextStyle.fallback cannot be incorporated into the widget tree, '
       'it is meant only to provide a fallback value returned by DefaultTextStyle.of() '
-      'when no enclosing default text style is present in a BuildContext.'
+      'when no enclosing default text style is present in a BuildContext.',
     );
   }
 }
@@ -305,7 +304,7 @@ class DefaultTextHeightBehavior extends InheritedTheme {
 ///   'Hello, $_name! How are you?',
 ///   textAlign: TextAlign.center,
 ///   overflow: TextOverflow.ellipsis,
-///   style: TextStyle(fontWeight: FontWeight.bold),
+///   style: const TextStyle(fontWeight: FontWeight.bold),
 /// )
 /// ```
 /// {@end-tool}
@@ -468,7 +467,8 @@ class Text extends StatelessWidget {
 
   /// How visual overflow should be handled.
   ///
-  /// Defaults to retrieving the value from the nearest [DefaultTextStyle] ancestor.
+  /// If this is null [TextStyle.overflow] will be used, otherwise the value
+  /// from the nearest [DefaultTextStyle] ancestor will be used.
   final TextOverflow? overflow;
 
   /// The number of font pixels for each logical pixel.
@@ -527,7 +527,7 @@ class Text extends StatelessWidget {
       textDirection: textDirection, // RichText uses Directionality.of to obtain a default if this is null.
       locale: locale, // RichText uses Localizations.localeOf to obtain a default if this is null
       softWrap: softWrap ?? defaultTextStyle.softWrap,
-      overflow: overflow ?? defaultTextStyle.overflow,
+      overflow: overflow ?? effectiveTextStyle?.overflow ?? defaultTextStyle.overflow,
       textScaleFactor: textScaleFactor ?? MediaQuery.textScaleFactorOf(context),
       maxLines: maxLines ?? defaultTextStyle.maxLines,
       strutStyle: strutStyle,

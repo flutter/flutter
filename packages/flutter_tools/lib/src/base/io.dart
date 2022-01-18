@@ -45,11 +45,11 @@ import 'dart:io' as io
     StdoutException,
     stdout;
 
+import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 
-import '../globals.dart' as globals;
 import 'async_guard.dart';
-import 'context.dart';
+import 'platform.dart';
 import 'process.dart';
 
 export 'dart:io'
@@ -102,7 +102,8 @@ export 'dart:io'
         systemEncoding,
         WebSocket,
         WebSocketException,
-        WebSocketTransformer;
+        WebSocketTransformer,
+        ZLibEncoder;
 
 /// Exits the process with the given [exitCode].
 typedef ExitFunction = void Function(int exitCode);
@@ -138,7 +139,7 @@ bool _inUnitTest() {
 /// Sets the [exit] function to a function that throws an exception rather
 /// than exiting the process; this is intended for testing purposes.
 @visibleForTesting
-void setExitFunctionForTests([ ExitFunction exitFunction ]) {
+void setExitFunctionForTests([ ExitFunction? exitFunction ]) {
   _exitFunction = exitFunction ?? (int exitCode) {
     throw ProcessExit(exitCode, immediate: true);
   };
@@ -162,16 +163,18 @@ void restoreExitFunction() {
 /// [ProcessSignal] instances are available on this class (e.g. "send").
 class ProcessSignal {
   @visibleForTesting
-  const ProcessSignal(this._delegate);
+  const ProcessSignal(this._delegate, {@visibleForTesting Platform platform = const LocalPlatform()})
+    : _platform = platform;
 
-  static const ProcessSignal SIGWINCH = _PosixProcessSignal._(io.ProcessSignal.sigwinch);
-  static const ProcessSignal SIGTERM = _PosixProcessSignal._(io.ProcessSignal.sigterm);
-  static const ProcessSignal SIGUSR1 = _PosixProcessSignal._(io.ProcessSignal.sigusr1);
-  static const ProcessSignal SIGUSR2 = _PosixProcessSignal._(io.ProcessSignal.sigusr2);
-  static const ProcessSignal SIGINT =  ProcessSignal(io.ProcessSignal.sigint);
-  static const ProcessSignal SIGKILL =  ProcessSignal(io.ProcessSignal.sigkill);
+  static const ProcessSignal sigwinch = PosixProcessSignal(io.ProcessSignal.sigwinch);
+  static const ProcessSignal sigterm = PosixProcessSignal(io.ProcessSignal.sigterm);
+  static const ProcessSignal sigusr1 = PosixProcessSignal(io.ProcessSignal.sigusr1);
+  static const ProcessSignal sigusr2 = PosixProcessSignal(io.ProcessSignal.sigusr2);
+  static const ProcessSignal sigint = ProcessSignal(io.ProcessSignal.sigint);
+  static const ProcessSignal sigkill = ProcessSignal(io.ProcessSignal.sigkill);
 
   final io.ProcessSignal _delegate;
+  final Platform _platform;
 
   Stream<ProcessSignal> watch() {
     return _delegate.watch().map<ProcessSignal>((io.ProcessSignal signal) => this);
@@ -181,12 +184,12 @@ class ProcessSignal {
   ///
   /// Returns true if the signal was delivered, false otherwise.
   ///
-  /// On Windows, this can only be used with [ProcessSignal.SIGTERM], which
+  /// On Windows, this can only be used with [ProcessSignal.sigterm], which
   /// terminates the process.
   ///
   /// This is implemented by sending the signal using [Process.killPid].
   bool send(int pid) {
-    assert(!globals.platform.isWindows || this == ProcessSignal.SIGTERM);
+    assert(!_platform.isWindows || this == ProcessSignal.sigterm);
     return io.Process.killPid(pid, _delegate);
   }
 
@@ -197,13 +200,16 @@ class ProcessSignal {
 /// A [ProcessSignal] that is only available on Posix platforms.
 ///
 /// Listening to a [_PosixProcessSignal] is a no-op on Windows.
-class _PosixProcessSignal extends ProcessSignal {
+@visibleForTesting
+class PosixProcessSignal extends ProcessSignal {
 
-  const _PosixProcessSignal._(io.ProcessSignal wrappedSignal) : super(wrappedSignal);
+  const PosixProcessSignal(io.ProcessSignal wrappedSignal, {@visibleForTesting Platform platform = const LocalPlatform()})
+    : super(wrappedSignal, platform: platform);
 
   @override
   Stream<ProcessSignal> watch() {
-    if (globals.platform.isWindows) {
+    // This uses the real platform since it invokes dart:io functionality directly.
+    if (_platform.isWindows) {
       return const Stream<ProcessSignal>.empty();
     }
     return super.watch();
@@ -228,12 +234,12 @@ class Stdio {
   /// dart:io.
   @visibleForTesting
   Stdio.test({
-    @required io.Stdout stdout,
-    @required io.IOSink stderr,
+    required io.Stdout stdout,
+    required io.IOSink stderr,
   }) : _stdoutOverride = stdout, _stderrOverride = stderr;
 
-  io.Stdout _stdoutOverride;
-  io.IOSink _stderrOverride;
+  io.Stdout? _stdoutOverride;
+  io.IOSink? _stderrOverride;
 
   // These flags exist to remember when the done Futures on stdout and stderr
   // complete to avoid trying to write to a closed stream sink, which would
@@ -243,37 +249,36 @@ class Stdio {
 
   Stream<List<int>> get stdin => io.stdin;
 
-  @visibleForTesting
   io.Stdout get stdout {
     if (_stdout != null) {
-      return _stdout;
+      return _stdout!;
     }
     _stdout = _stdoutOverride ?? io.stdout;
-    _stdout.done.then(
+    _stdout!.done.then(
       (void _) { _stdoutDone = true; },
       onError: (Object err, StackTrace st) { _stdoutDone = true; },
     );
-    return _stdout;
+    return _stdout!;
   }
-  io.Stdout _stdout;
+  io.Stdout? _stdout;
 
   @visibleForTesting
   io.IOSink get stderr {
     if (_stderr != null) {
-      return _stderr;
+      return _stderr!;
     }
     _stderr = _stderrOverride ?? io.stderr;
-    _stderr.done.then(
+    _stderr!.done.then(
       (void _) { _stderrDone = true; },
       onError: (Object err, StackTrace st) { _stderrDone = true; },
     );
-    return _stderr;
+    return _stderr!;
   }
-  io.IOSink _stderr;
+  io.IOSink? _stderr;
 
   bool get hasTerminal => io.stdout.hasTerminal;
 
-  static bool _stdinHasTerminal;
+  static bool? _stdinHasTerminal;
 
   /// Determines whether there is a terminal attached.
   ///
@@ -283,7 +288,7 @@ class Stdio {
   /// runtime errors such as "inappropriate ioctl for device" if not handled.
   bool get stdinHasTerminal {
     if (_stdinHasTerminal != null) {
-      return _stdinHasTerminal;
+      return _stdinHasTerminal!;
     }
     if (stdin is! io.Stdin) {
       return _stdinHasTerminal = false;
@@ -302,15 +307,15 @@ class Stdio {
     return _stdinHasTerminal = true;
   }
 
-  int get terminalColumns => hasTerminal ? stdout.terminalColumns : null;
-  int get terminalLines => hasTerminal ? stdout.terminalLines : null;
+  int? get terminalColumns => hasTerminal ? stdout.terminalColumns : null;
+  int? get terminalLines => hasTerminal ? stdout.terminalLines : null;
   bool get supportsAnsiEscapes => hasTerminal && stdout.supportsAnsiEscapes;
 
   /// Writes [message] to [stderr], falling back on [fallback] if the write
   /// throws any exception. The default fallback calls [print] on [message].
   void stderrWrite(
     String message, {
-    void Function(String, dynamic, StackTrace) fallback,
+    void Function(String, dynamic, StackTrace)? fallback,
   }) {
     if (!_stderrDone) {
       _stdioWrite(stderr, message, fallback: fallback);
@@ -327,7 +332,7 @@ class Stdio {
   /// throws any exception. The default fallback calls [print] on [message].
   void stdoutWrite(
     String message, {
-    void Function(String, dynamic, StackTrace) fallback,
+    void Function(String, dynamic, StackTrace)? fallback,
   }) {
     if (!_stdoutDone) {
       _stdioWrite(stdout, message, fallback: fallback);
@@ -342,7 +347,7 @@ class Stdio {
 
   // Helper for [stderrWrite] and [stdoutWrite].
   void _stdioWrite(io.IOSink sink, String message, {
-    void Function(String, dynamic, StackTrace) fallback,
+    void Function(String, dynamic, StackTrace)? fallback,
   }) {
     asyncGuard<void>(() async {
       sink.write(message);
@@ -358,38 +363,61 @@ class Stdio {
   /// Adds [stream] to [stdout].
   Future<void> addStdoutStream(Stream<List<int>> stream) => stdout.addStream(stream);
 
-  /// Adds [srtream] to [stderr].
+  /// Adds [stream] to [stderr].
   Future<void> addStderrStream(Stream<List<int>> stream) => stderr.addStream(stream);
-}
-
-// TODO(zra): Move pid and writePidFile into `ProcessInfo`.
-void writePidFile(String pidFile) {
-  if (pidFile != null) {
-    // Write our pid to the file.
-    globals.fs.file(pidFile).writeAsStringSync(io.pid.toString());
-  }
 }
 
 /// An overridable version of io.ProcessInfo.
 abstract class ProcessInfo {
-  factory ProcessInfo() => _DefaultProcessInfo();
+  factory ProcessInfo(FileSystem fs) => _DefaultProcessInfo(fs);
 
-  static ProcessInfo get instance => context.get<ProcessInfo>();
+  factory ProcessInfo.test(FileSystem fs) => _TestProcessInfo(fs);
 
   int get currentRss;
 
   int get maxRss;
-}
 
-ProcessInfo get processInfo => ProcessInfo.instance;
+  File writePidFile(String pidFile);
+}
 
 /// The default implementation of [ProcessInfo], which uses [io.ProcessInfo].
 class _DefaultProcessInfo implements ProcessInfo {
+  _DefaultProcessInfo(this._fileSystem);
+
+  final FileSystem _fileSystem;
+
   @override
   int get currentRss => io.ProcessInfo.currentRss;
 
   @override
   int get maxRss => io.ProcessInfo.maxRss;
+
+  @override
+  File writePidFile(String pidFile) {
+    assert(pidFile != null);
+    return _fileSystem.file(pidFile)
+      ..writeAsStringSync(io.pid.toString());
+  }
+}
+
+/// The test version of [ProcessInfo].
+class _TestProcessInfo implements ProcessInfo {
+  _TestProcessInfo(this._fileSystem);
+
+  final FileSystem _fileSystem;
+
+  @override
+  int currentRss = 1000;
+
+  @override
+  int maxRss = 2000;
+
+  @override
+  File writePidFile(String pidFile) {
+    assert(pidFile != null);
+    return _fileSystem.file(pidFile)
+      ..writeAsStringSync('12345');
+  }
 }
 
 /// The return type for [listNetworkInterfaces].
@@ -417,7 +445,7 @@ typedef NetworkInterfaceLister = Future<List<NetworkInterface>> Function({
   io.InternetAddressType type,
 });
 
-NetworkInterfaceLister _networkInterfaceListerOverride;
+NetworkInterfaceLister? _networkInterfaceListerOverride;
 
 // Tests can set up a non-default network interface lister.
 @visibleForTesting
@@ -439,7 +467,7 @@ Future<List<NetworkInterface>> listNetworkInterfaces({
   io.InternetAddressType type = io.InternetAddressType.any,
 }) async {
   if (_networkInterfaceListerOverride != null) {
-    return _networkInterfaceListerOverride(
+    return _networkInterfaceListerOverride!.call(
       includeLoopback: includeLoopback,
       includeLinkLocal: includeLinkLocal,
       type: type,

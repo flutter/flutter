@@ -54,8 +54,8 @@ void main() {
         builder: (BuildContext context) {
           capturedContext = context;
           return Container();
-        }
-      )
+        },
+      ),
     );
 
     expect(Theme.of(capturedContext), equals(ThemeData.localize(ThemeData.fallback(), defaultGeometryTheme)));
@@ -170,7 +170,7 @@ void main() {
                     },
                     child: const Text('SHOW'),
                   );
-                }
+                },
               ),
             ),
           ),
@@ -179,11 +179,9 @@ void main() {
     );
 
     await tester.tap(find.text('SHOW'));
-    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(); // start animation
+    await tester.pump(const Duration(seconds: 1)); // end animation
     expect(Theme.of(tester.element(find.text('bottomSheet'))).brightness, equals(Brightness.light));
-
-    await tester.tap(find.text('bottomSheet')); // dismiss the bottom sheet
-    await tester.pump(const Duration(seconds: 1));
   });
 
   testWidgets('Dialog inherits shadowed app theme', (WidgetTester tester) async {
@@ -207,7 +205,7 @@ void main() {
                     },
                     child: const Text('SHOW'),
                   );
-                }
+                },
               ),
             ),
           ),
@@ -530,7 +528,8 @@ void main() {
       expect(theme.primaryColor, Colors.orange);
     });
 
-    testWidgets("CupertinoThemeData does not override material theme's icon theme",
+    testWidgets(
+      "CupertinoThemeData does not override material theme's icon theme",
       (WidgetTester tester) async {
         const Color materialIconColor = Colors.blue;
         const Color cupertinoIconColor = Colors.black;
@@ -542,7 +541,8 @@ void main() {
 
         expect(buildCount, 1);
         expect(actualIconTheme!.color, materialIconColor);
-    });
+      },
+    );
 
     testWidgets(
       'Changing cupertino theme override triggers rebuilds',
@@ -676,7 +676,7 @@ class Test extends StatefulWidget {
   const Test({ Key? key }) : super(key: key);
 
   @override
-  _TestState createState() => _TestState();
+  State<Test> createState() => _TestState();
 }
 
 class _TestState extends State<Test> {
@@ -727,6 +727,8 @@ class _TextStyleProxy implements TextStyle {
   @override
   double? get height => _delegate.height;
   @override
+  TextLeadingDistribution? get leadingDistribution => _delegate.leadingDistribution;
+  @override
   Locale? get locale => _delegate.locale;
   @override
   ui.Paint? get foreground => _delegate.foreground;
@@ -744,6 +746,8 @@ class _TextStyleProxy implements TextStyle {
   List<Shadow>? get shadows => _delegate.shadows;
   @override
   List<ui.FontFeature>? get fontFeatures => _delegate.fontFeatures;
+  @override
+  TextOverflow? get overflow => _delegate.overflow;
 
   @override
   String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) =>
@@ -780,10 +784,12 @@ class _TextStyleProxy implements TextStyle {
     double wordSpacingDelta = 0.0,
     double heightFactor = 1.0,
     double heightDelta = 0.0,
+    TextLeadingDistribution? leadingDistribution,
     TextBaseline? textBaseline,
     Locale? locale,
     List<ui.Shadow>? shadows,
     List<ui.FontFeature>? fontFeatures,
+    TextOverflow? overflow,
   }) {
     throw UnimplementedError();
   }
@@ -807,6 +813,7 @@ class _TextStyleProxy implements TextStyle {
     double? wordSpacing,
     TextBaseline? textBaseline,
     double? height,
+    TextLeadingDistribution? leadingDistribution,
     Locale? locale,
     ui.Paint? foreground,
     ui.Paint? background,
@@ -817,6 +824,7 @@ class _TextStyleProxy implements TextStyle {
     TextDecorationStyle? decorationStyle,
     double? decorationThickness,
     String? debugLabel,
+    TextOverflow? overflow,
   }) {
     throw UnimplementedError();
   }

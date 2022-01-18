@@ -90,7 +90,9 @@ void main() {
     await testZone.run(() async {
       final ImageProvider imageProvider = LoadErrorCompleterImageProvider();
       final Completer<bool> caughtError = Completer<bool>();
+      final Completer<bool> onErrorCompleter = Completer<bool>();
       FlutterError.onError = (FlutterErrorDetails details) {
+        onErrorCompleter.complete(true);
         throw Error();
       };
       final ImageStream result = imageProvider.resolve(ImageConfiguration.empty);
@@ -99,6 +101,7 @@ void main() {
         caughtError.complete(true);
       }));
       expect(await caughtError.future, true);
+      expect(await onErrorCompleter.future, true);
     });
     expect(uncaught, false);
   });

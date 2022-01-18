@@ -78,7 +78,9 @@ public class MainActivity extends FlutterActivity {
         result.put("contentDescription", node.getContentDescription());
         flags.put("isChecked", node.isChecked());
         flags.put("isCheckable", node.isCheckable());
-        flags.put("isDismissable", node.isDismissable());
+        // This is not a typo.
+        // See: https://developer.android.com/reference/android/view/accessibility/AccessibilityNodeInfo#isDismissable()
+        flags.put("isDismissible", node.isDismissable());
         flags.put("isEditable", node.isEditable());
         flags.put("isEnabled", node.isEnabled());
         flags.put("isFocusable", node.isFocusable());

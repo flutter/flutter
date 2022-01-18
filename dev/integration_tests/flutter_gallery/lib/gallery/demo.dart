@@ -42,12 +42,13 @@ class ComponentDemoTabData {
 
 class TabbedComponentDemoScaffold extends StatelessWidget {
   const TabbedComponentDemoScaffold({
+    Key? key,
     this.title,
     this.demos,
     this.actions,
     this.isScrollable = true,
     this.showExampleCodeAction = true,
-  });
+  }) : super(key: key);
 
   final List<ComponentDemoTabData>? demos;
   final String? title;
@@ -147,7 +148,7 @@ class TabbedComponentDemoScaffold extends StatelessWidget {
 }
 
 class FullScreenCodeDialog extends StatefulWidget {
-  const FullScreenCodeDialog({ this.exampleCodeTag });
+  const FullScreenCodeDialog({ Key? key, this.exampleCodeTag }) : super(key: key);
 
   final String? exampleCodeTag;
 

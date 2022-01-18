@@ -2,9 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
@@ -169,17 +168,13 @@ void main() {
 
   testWidgets('Open/close drawers by flinging', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Scaffold(
           drawer: Drawer(
-            child: Container(
-              child: const Text('start drawer'),
-            ),
+            child: Text('start drawer'),
           ),
           endDrawer: Drawer(
-            child: Container(
-              child: const Text('end drawer'),
-            ),
+            child: Text('end drawer'),
           ),
         ),
       ),
@@ -214,5 +209,174 @@ void main() {
     await tester.pumpAndSettle();
     expect(state.isDrawerOpen, equals(false));
     expect(state.isEndDrawerOpen, equals(false));
+  });
+
+  testWidgets('Scaffold.drawer - null restorationId ', (WidgetTester tester) async {
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    await tester.pumpWidget(
+      MaterialApp(
+        restorationScopeId: 'app',
+        home: Scaffold(
+          key: scaffoldKey,
+          drawer: const Text('drawer'),
+          body: Container(),
+        ),
+      ),
+    );
+    await tester.pump(); // no effect
+    expect(find.text('drawer'), findsNothing);
+    scaffoldKey.currentState!.openDrawer();
+    await tester.pumpAndSettle();
+    expect(find.text('drawer'), findsOneWidget);
+
+    await tester.restartAndRestore();
+    // Drawer state should not have been saved.
+    expect(find.text('drawer'), findsNothing);
+  });
+
+  testWidgets('Scaffold.endDrawer - null restorationId ', (WidgetTester tester) async {
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    await tester.pumpWidget(
+      MaterialApp(
+        restorationScopeId: 'app',
+        home: Scaffold(
+          key: scaffoldKey,
+          drawer: const Text('endDrawer'),
+          body: Container(),
+        ),
+      ),
+    );
+    await tester.pump(); // no effect
+    expect(find.text('endDrawer'), findsNothing);
+    scaffoldKey.currentState!.openDrawer();
+    await tester.pumpAndSettle();
+    expect(find.text('endDrawer'), findsOneWidget);
+
+    await tester.restartAndRestore();
+    // Drawer state should not have been saved.
+    expect(find.text('endDrawer'), findsNothing);
+  });
+
+  testWidgets('Scaffold.drawer state restoration test', (WidgetTester tester) async {
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    await tester.pumpWidget(
+      MaterialApp(
+        restorationScopeId: 'app',
+        home: Scaffold(
+          key: scaffoldKey,
+          restorationId: 'scaffold',
+          drawer: const Text('drawer'),
+          body: Container(),
+        ),
+      ),
+    );
+    await tester.pump(); // no effect
+    expect(find.text('drawer'), findsNothing);
+    scaffoldKey.currentState!.openDrawer();
+    await tester.pumpAndSettle();
+    expect(find.text('drawer'), findsOneWidget);
+
+    await tester.restartAndRestore();
+    expect(find.text('drawer'), findsOneWidget);
+
+    final TestRestorationData data = await tester.getRestorationData();
+    await tester.tapAt(const Offset(750.0, 100.0)); // on the mask
+    await tester.pumpAndSettle();
+    expect(find.text('drawer'), findsNothing);
+
+    await tester.restoreFrom(data);
+    expect(find.text('drawer'), findsOneWidget);
+  });
+
+  testWidgets('Scaffold.endDrawer state restoration test', (WidgetTester tester) async {
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    await tester.pumpWidget(
+      MaterialApp(
+        restorationScopeId: 'app',
+        home: Scaffold(
+          key: scaffoldKey,
+          restorationId: 'scaffold',
+          endDrawer: const Text('endDrawer'),
+          body: Container(),
+        ),
+      ),
+    );
+    await tester.pump(); // no effect
+    expect(find.text('endDrawer'), findsNothing);
+    scaffoldKey.currentState!.openEndDrawer();
+    await tester.pumpAndSettle();
+    expect(find.text('endDrawer'), findsOneWidget);
+
+    await tester.restartAndRestore();
+    expect(find.text('endDrawer'), findsOneWidget);
+
+    final TestRestorationData data = await tester.getRestorationData();
+    await tester.tapAt(const Offset(750.0, 100.0)); // on the mask
+    await tester.pumpAndSettle();
+    expect(find.text('endDrawer'), findsNothing);
+
+    await tester.restoreFrom(data);
+    expect(find.text('endDrawer'), findsOneWidget);
+  });
+
+  testWidgets('Both drawer and endDrawer state restoration test', (WidgetTester tester) async {
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    await tester.pumpWidget(
+      MaterialApp(
+        restorationScopeId: 'app',
+        home: Scaffold(
+          restorationId: 'scaffold',
+          key: scaffoldKey,
+          drawer: const Text('drawer'),
+          endDrawer: const Text('endDrawer'),
+          body: Container(),
+        ),
+      ),
+    );
+    await tester.pump(); // no effect
+    expect(find.text('drawer'), findsNothing);
+    expect(find.text('endDrawer'), findsNothing);
+    scaffoldKey.currentState!.openDrawer();
+    await tester.pumpAndSettle();
+    expect(find.text('drawer'), findsOneWidget);
+    expect(find.text('endDrawer'), findsNothing);
+
+    await tester.restartAndRestore();
+    expect(find.text('drawer'), findsOneWidget);
+    expect(find.text('endDrawer'), findsNothing);
+
+    TestRestorationData data = await tester.getRestorationData();
+    await tester.tapAt(const Offset(750.0, 100.0)); // on the mask
+    await tester.pumpAndSettle();
+    expect(find.text('drawer'), findsNothing);
+    expect(find.text('endDrawer'), findsNothing);
+
+    await tester.restoreFrom(data);
+    expect(find.text('drawer'), findsOneWidget);
+    expect(find.text('endDrawer'), findsNothing);
+
+    await tester.tapAt(const Offset(750.0, 100.0)); // on the mask
+    await tester.pumpAndSettle();
+    expect(find.text('drawer'), findsNothing);
+    expect(find.text('endDrawer'), findsNothing);
+
+    scaffoldKey.currentState!.openEndDrawer();
+    await tester.pumpAndSettle();
+    expect(find.text('drawer'), findsNothing);
+    expect(find.text('endDrawer'), findsOneWidget);
+
+    await tester.restartAndRestore();
+    expect(find.text('drawer'), findsNothing);
+    expect(find.text('endDrawer'), findsOneWidget);
+
+    data = await tester.getRestorationData();
+    await tester.tapAt(const Offset(750.0, 100.0)); // on the mask
+    await tester.pumpAndSettle();
+    expect(find.text('drawer'), findsNothing);
+    expect(find.text('endDrawer'), findsNothing);
+
+    await tester.restoreFrom(data);
+    expect(find.text('drawer'), findsNothing);
+    expect(find.text('endDrawer'), findsOneWidget);
   });
 }

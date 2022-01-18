@@ -2,9 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 const Key blockKey = Key('test');
 
@@ -15,10 +14,10 @@ void main() {
         textDirection: TextDirection.ltr,
         child: ListView(
           key: blockKey,
-          children: <Widget>[
-            Container(
+          children: const <Widget>[
+            SizedBox(
               height: 200.0, // less than 600, the height of the test area
-              child: const Text('Hello'),
+              child: Text('Hello'),
             ),
           ],
         ),
@@ -43,10 +42,10 @@ void main() {
         textDirection: TextDirection.ltr,
         child: ListView(
           key: blockKey,
-          children: <Widget>[
-            Container(
+          children: const <Widget>[
+            SizedBox(
               height: 2000.0, // more than 600, the height of the test area
-              child: const Text('Hello'),
+              child: Text('Hello'),
             ),
           ],
         ),

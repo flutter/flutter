@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -24,7 +23,7 @@ class StructureErrorTestWidgetInspectorService extends Object with WidgetInspect
   @override
   void registerServiceExtension({
     required String name,
-    required FutureOr<Map<String, Object?>> callback(Map<String, String> parameters),
+    required FutureOr<Map<String, Object?>> Function(Map<String, String> parameters) callback,
   }) {
     assert(!extensions.containsKey(name));
     extensions[name] = callback;
@@ -56,22 +55,23 @@ class StructureErrorTestWidgetInspectorService extends Object with WidgetInspect
     final StructureErrorTestWidgetInspectorService service = StructureErrorTestWidgetInspectorService();
     WidgetInspectorService.instance = service;
 
-    test('ext.flutter.inspector.structuredErrors still report error to original on error', () async {
+    test('ext.flutter.inspector.structuredErrors reports error to _structuredExceptionHandler on error', () async {
       final FlutterExceptionHandler? oldHandler = FlutterError.onError;
 
-      late FlutterErrorDetails actualError;
+      bool usingNewHandler = false;
       // Creates a spy onError. This spy needs to be set before widgets binding
       // initializes.
       FlutterError.onError = (FlutterErrorDetails details) {
-        actualError = details;
+        usingNewHandler = true;
       };
 
       WidgetsFlutterBinding.ensureInitialized();
       try {
         // Enables structured errors.
-        expect(await service.testBoolExtension(
-          'structuredErrors', <String, String>{'enabled': 'true'}),
-          equals('true'));
+        expect(
+          await service.testBoolExtension('structuredErrors', <String, String>{'enabled': 'true'}),
+          equals('true'),
+        );
 
         // Creates an error.
         final FlutterErrorDetails expectedError = FlutterErrorDetails(
@@ -81,8 +81,13 @@ class StructureErrorTestWidgetInspectorService extends Object with WidgetInspect
         );
         FlutterError.reportError(expectedError);
 
-        // Validates the spy still received an error.
-        expect(actualError, expectedError);
+        // For non-web apps, this validates the new handler did not receive an
+        // error because `FlutterError.onError` was set to
+        // `WidgetInspectorService._structuredExceptionHandler` when service
+        // extensions were initialized. For web apps, the new handler should
+        // have received an error because structured errors are disabled by
+        // default on the web.
+        expect(usingNewHandler, equals(kIsWeb));
       } finally {
         FlutterError.onError = oldHandler;
       }

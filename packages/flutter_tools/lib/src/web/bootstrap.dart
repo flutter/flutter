@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 
 /// The JavaScript bootstrap script to support in-browser hot restart.
@@ -15,11 +14,84 @@ import 'package:package_config/package_config.dart';
 /// and is responsible for bootstrapping the RequireJS modules and attaching
 /// the hot reload hooks.
 String generateBootstrapScript({
-  @required String requireUrl,
-  @required String mapperUrl,
+  required String requireUrl,
+  required String mapperUrl,
 }) {
   return '''
 "use strict";
+
+var styles = `
+  .flutter-loader {
+    width: 100%;
+    height: 8px;
+    background-color: #13B9FD;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+  }
+
+  .indeterminate {
+      position: relative;
+      width: 100%;
+      height: 100%;
+  }
+
+  .indeterminate:before {
+      content: '';
+      position: absolute;
+      height: 100%;
+      background-color: #0175C2;
+      animation: indeterminate_first 2.0s infinite ease-out;
+  }
+
+  .indeterminate:after {
+      content: '';
+      position: absolute;
+      height: 100%;
+      background-color: #02569B;
+      animation: indeterminate_second 2.0s infinite ease-in;
+  }
+
+  @keyframes indeterminate_first {
+      0% {
+          left: -100%;
+          width: 100%;
+      }
+      100% {
+          left: 100%;
+          width: 10%;
+      }
+  }
+
+  @keyframes indeterminate_second {
+      0% {
+          left: -150%;
+          width: 100%;
+      }
+      100% {
+          left: 100%;
+          width: 10%;
+      }
+  }
+`;
+
+var styleSheet = document.createElement("style")
+styleSheet.type = "text/css";
+styleSheet.innerText = styles;
+document.head.appendChild(styleSheet);
+
+var loader = document.createElement('div');
+loader.className = "flutter-loader";
+document.body.append(loader);
+
+var indeterminate = document.createElement('div');
+indeterminate.className = "indeterminate";
+loader.appendChild(indeterminate);
+
+document.addEventListener('dart-app-ready', function (e) {
+   loader.parentNode.removeChild(loader);
+   styleSheet.parentNode.removeChild(styleSheet);
+});
 
 // Attach source mapping.
 var mapperEl = document.createElement("script");
@@ -52,9 +124,9 @@ document.head.appendChild(requireEl);
 /// `foo__bar__baz`. Rather than attempt to guess, we assume the first property of
 /// this object is the module.
 String generateMainModule({
-  @required String entrypoint,
-  @required bool nullAssertions,
-  @required bool nativeNullAssertions,
+  required String entrypoint,
+  required bool nullAssertions,
+  required bool nativeNullAssertions,
   String bootstrapModule = 'main_module.bootstrap',
 }) {
   // TODO(jonahwilliams): fix typo in dwds and update.
@@ -100,9 +172,10 @@ define("$bootstrapModule", ["$entrypoint", "dart_sdk"], function(app, dart_sdk) 
 ///
 /// This hard-codes the device pixel ratio to 3.0 and a 2400 x 1800 window size.
 String generateTestEntrypoint({
-  @required String relativeTestPath,
-  @required String absolutePath,
-  @required LanguageVersion languageVersion,
+  required String relativeTestPath,
+  required String absolutePath,
+  required String? testConfigPath,
+  required LanguageVersion languageVersion,
 }) {
   return '''
   // @dart = ${languageVersion.major}.${languageVersion.minor}
@@ -110,11 +183,12 @@ String generateTestEntrypoint({
   import 'dart:ui' as ui;
   import 'dart:html';
   import 'dart:js';
+  ${testConfigPath != null ? "import '${Uri.file(testConfigPath)}' as test_config;" : ""}
   import 'package:stream_channel/stream_channel.dart';
   import 'package:flutter_test/flutter_test.dart';
   import 'package:test_api/src/backend/stack_trace_formatter.dart'; // ignore: implementation_imports
   import 'package:test_api/src/remote_listener.dart'; // ignore: implementation_imports
-  import 'package:test_api/src/suite_channel_manager.dart'; // ignore: implementation_imports
+  import 'package:test_api/src/backend/suite_channel_manager.dart'; // ignore: implementation_imports
 
   Future<void> main() async {
     ui.debugEmulateFlutterTesterEnvironment = true;
@@ -122,7 +196,10 @@ String generateTestEntrypoint({
     webGoldenComparator = DefaultWebGoldenComparator(Uri.parse('$absolutePath'));
     (ui.window as dynamic).debugOverrideDevicePixelRatio(3.0);
     (ui.window as dynamic).webOnlyDebugPhysicalSizeOverride = const ui.Size(2400, 1800);
-    internalBootstrapBrowserTest(() => test.main);
+
+    internalBootstrapBrowserTest(() {
+      return ${testConfigPath != null ? "() => test_config.testExecutable(test.main)" : "test.main"};
+    });
   }
 
   void internalBootstrapBrowserTest(Function getMain()) {
@@ -131,14 +208,6 @@ String generateTestEntrypoint({
   }
 
   StreamChannel serializeSuite(Function getMain(), {bool hidePrints = true}) => RemoteListener.start(getMain, hidePrints: hidePrints);
-
-  StreamChannel suiteChannel(String name) {
-    var manager = SuiteChannelManager.current;
-    if (manager == null) {
-      throw StateError('suiteChannel() may only be called within a test worker.');
-    }
-    return manager.connectOut(name);
-  }
 
   StreamChannel postMessageChannel() {
     var controller = StreamChannelController(sync: true);
@@ -166,7 +235,8 @@ String generateTestEntrypoint({
 }
 
 /// Generate the unit test bootstrap file.
-String generateTestBootstrapFileContents(String mainUri, String requireUrl, String mapperUrl) {
+String generateTestBootstrapFileContents(
+    String mainUri, String requireUrl, String mapperUrl) {
   return '''
 (function() {
   if (typeof document != 'undefined') {

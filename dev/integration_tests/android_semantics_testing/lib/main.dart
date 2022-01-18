@@ -12,7 +12,6 @@ import 'package:flutter_driver/driver_extension.dart';
 
 import 'src/tests/controls_page.dart';
 import 'src/tests/headings_page.dart';
-import 'src/tests/popup_constants.dart';
 import 'src/tests/popup_page.dart';
 import 'src/tests/text_field_page.dart';
 
@@ -44,14 +43,14 @@ Future<String> dataHandler(String message) async {
 }
 
 Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-  selectionControlsRoute : (BuildContext context) => SelectionControlsPage(),
-  popupControlsRoute : (BuildContext context) => PopupControlsPage(),
-  textFieldRoute : (BuildContext context) => TextFieldPage(),
-  headingsRoute: (BuildContext context) => HeadingsPage(),
+  selectionControlsRoute : (BuildContext context) => const SelectionControlsPage(),
+  popupControlsRoute : (BuildContext context) => const PopupControlsPage(),
+  textFieldRoute : (BuildContext context) => const TextFieldPage(),
+  headingsRoute: (BuildContext context) => const HeadingsPage(),
 };
 
 class TestApp extends StatelessWidget {
-  const TestApp();
+  const TestApp({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

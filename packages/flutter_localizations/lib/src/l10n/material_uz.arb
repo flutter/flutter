@@ -9,6 +9,8 @@
   "previousMonthTooltip": "Avvalgi oy",
   "nextPageTooltip": "Keyingi sahifa",
   "previousPageTooltip": "Avvalgi sahifa",
+  "firstPageTooltip": "Birinchi sahifa",
+  "lastPageTooltip": "Oxirgi sahifa",
   "showMenuTooltip": "Menyuni koʻrsatish",
   "aboutListTileTitle": "$applicationName haqida",
   "licensesPageTitle": "Litsenziyalar",

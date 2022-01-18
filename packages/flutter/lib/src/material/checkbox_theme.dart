@@ -41,6 +41,8 @@ class CheckboxThemeData with Diagnosticable {
     this.splashRadius,
     this.materialTapTargetSize,
     this.visualDensity,
+    this.shape,
+    this.side,
   });
 
   /// {@macro flutter.material.checkbox.mouseCursor}
@@ -85,6 +87,16 @@ class CheckboxThemeData with Diagnosticable {
   /// If specified, overrides the default value of [Checkbox.visualDensity].
   final VisualDensity? visualDensity;
 
+  /// {@macro flutter.material.checkbox.shape}
+  ///
+  /// If specified, overrides the default value of [Checkbox.shape].
+  final OutlinedBorder? shape;
+
+  /// {@macro flutter.material.checkbox.side}
+  ///
+  /// If specified, overrides the default value of [Checkbox.side].
+  final BorderSide? side;
+
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   CheckboxThemeData copyWith({
@@ -95,6 +107,8 @@ class CheckboxThemeData with Diagnosticable {
     double? splashRadius,
     MaterialTapTargetSize? materialTapTargetSize,
     VisualDensity? visualDensity,
+    OutlinedBorder? shape,
+    BorderSide? side,
   }) {
     return CheckboxThemeData(
       mouseCursor: mouseCursor ?? this.mouseCursor,
@@ -104,6 +118,8 @@ class CheckboxThemeData with Diagnosticable {
       splashRadius: splashRadius ?? this.splashRadius,
       materialTapTargetSize: materialTapTargetSize ?? this.materialTapTargetSize,
       visualDensity: visualDensity ?? this.visualDensity,
+      shape: shape ?? this.shape,
+      side: side ?? this.side,
     );
   }
 
@@ -119,6 +135,8 @@ class CheckboxThemeData with Diagnosticable {
       splashRadius: lerpDouble(a?.splashRadius, b?.splashRadius, t),
       materialTapTargetSize: t < 0.5 ? a?.materialTapTargetSize : b?.materialTapTargetSize,
       visualDensity: t < 0.5 ? a?.visualDensity : b?.visualDensity,
+      shape: ShapeBorder.lerp(a?.shape, b?.shape, t) as OutlinedBorder?,
+      side: _lerpSides(a?.side, b?.side, t),
     );
   }
 
@@ -132,6 +150,8 @@ class CheckboxThemeData with Diagnosticable {
       splashRadius,
       materialTapTargetSize,
       visualDensity,
+      shape,
+      side,
     );
   }
 
@@ -148,7 +168,9 @@ class CheckboxThemeData with Diagnosticable {
       && other.overlayColor == overlayColor
       && other.splashRadius == splashRadius
       && other.materialTapTargetSize == materialTapTargetSize
-      && other.visualDensity == visualDensity;
+      && other.visualDensity == visualDensity
+      && other.shape == shape
+      && other.side == side;
   }
 
   @override
@@ -161,6 +183,8 @@ class CheckboxThemeData with Diagnosticable {
     properties.add(DoubleProperty('splashRadius', splashRadius, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialTapTargetSize>('materialTapTargetSize', materialTapTargetSize, defaultValue: null));
     properties.add(DiagnosticsProperty<VisualDensity>('visualDensity', visualDensity, defaultValue: null));
+    properties.add(DiagnosticsProperty<OutlinedBorder>('shape', shape, defaultValue: null));
+    properties.add(DiagnosticsProperty<BorderSide>('side', side, defaultValue: null));
   }
 
   static MaterialStateProperty<T>? _lerpProperties<T>(
@@ -173,6 +197,13 @@ class CheckboxThemeData with Diagnosticable {
     if (a == null && b == null)
       return null;
     return _LerpProperties<T>(a, b, t, lerpFunction);
+  }
+
+  // Special case because BorderSide.lerp() doesn't support null arguments
+  static BorderSide? _lerpSides(BorderSide? a, BorderSide? b, double t) {
+    if (a == null && b == null)
+      return null;
+    return BorderSide.lerp(a!, b!, t);
   }
 }
 

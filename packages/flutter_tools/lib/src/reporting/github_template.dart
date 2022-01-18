@@ -2,7 +2,25 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of reporting;
+// @dart = 2.8
+
+import 'dart:async';
+
+import 'package:file/file.dart';
+import 'package:intl/intl.dart';
+import 'package:meta/meta.dart';
+
+import '../base/file_system.dart';
+import '../base/io.dart';
+import '../base/logger.dart';
+import '../base/process.dart';
+import '../build_system/exceptions.dart';
+import '../convert.dart';
+import '../devfs.dart';
+import '../flutter_manifest.dart';
+import '../flutter_project_metadata.dart';
+import '../project.dart';
+import '../version.dart';
 
 /// Provide suggested GitHub issue templates to user when Flutter encounters an error.
 class GitHubTemplateCreator {
@@ -100,7 +118,7 @@ ${_projectMetadataInformation()}
       '&body=${Uri.encodeQueryComponent(body)}'
       '&labels=${Uri.encodeQueryComponent('tool,severe: crash')}';
 
-    return await _shortURL(fullURL);
+    return _shortURL(fullURL);
   }
 
   /// Provide information about the Flutter project in the working directory, if present.
@@ -119,7 +137,7 @@ ${_projectMetadataInformation()}
       }
       final FlutterProjectMetadata metadata = FlutterProjectMetadata(project.metadataFile, _logger);
       final StringBuffer description = StringBuffer()
-        ..writeln('**Type**: ${metadata.projectType?.name}')
+        ..writeln('**Type**: ${flutterProjectTypeToString(metadata.projectType)}')
         ..writeln('**Version**: ${manifest.appVersion}')
         ..writeln('**Material**: ${manifest.usesMaterialDesign}')
         ..writeln('**Android X**: ${manifest.usesAndroidX}')

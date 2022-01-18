@@ -2,19 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:io';
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/context.dart';
-import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/error_handling_io.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/process.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 
 import '../src/common.dart';
-import '../src/context.dart';
 import '../src/testbed.dart';
 
 void main() {
@@ -65,10 +66,10 @@ void main() {
       final Testbed testbed = Testbed();
       await testbed.run(() async {
         final HttpClient client = HttpClient();
-        final HttpClientRequest request = await client.getUrl(null);
+        final HttpClientRequest request = await client.getUrl(Uri.parse('http://foo.dev'));
         final HttpClientResponse response = await request.close();
 
-        expect(response.statusCode, HttpStatus.badRequest);
+        expect(response.statusCode, HttpStatus.ok);
         expect(response.contentLength, 0);
       });
     });
@@ -81,7 +82,7 @@ void main() {
       }), throwsStateError);
     });
 
-    test('Doesnt throw a StateError if Timer is left cleaned up', () async {
+    test("Doesn't throw a StateError if Timer is left cleaned up", () async {
       final Testbed testbed = Testbed();
 
       await testbed.run(() async {
@@ -95,7 +96,7 @@ void main() {
         ProcessUtils: () => null,
       });
 
-      expect(() => testbed.run(() {}), throwsA(isA<StateError>()));
+      expect(() => testbed.run(() {}), throwsStateError);
     });
   });
 }

@@ -3,12 +3,12 @@
 // found in the LICENSE file.
 
 
-import 'dart:typed_data';
-
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   testWidgets('SystemChrome overlay style test', (WidgetTester tester) async {
     // The first call is a cache miss and will queue a microtask
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.light);
@@ -26,7 +26,7 @@ void main() {
   test('setPreferredOrientations control test', () async {
     final List<MethodCall> log = <MethodCall>[];
 
-    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       log.add(methodCall);
     });
 
@@ -44,12 +44,12 @@ void main() {
   test('setApplicationSwitcherDescription control test', () async {
     final List<MethodCall> log = <MethodCall>[];
 
-    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       log.add(methodCall);
     });
 
     await SystemChrome.setApplicationSwitcherDescription(
-      const ApplicationSwitcherDescription(label: 'Example label', primaryColor: 0xFF00FF00)
+      const ApplicationSwitcherDescription(label: 'Example label', primaryColor: 0xFF00FF00),
     );
 
     expect(log, hasLength(1));
@@ -62,12 +62,12 @@ void main() {
   test('setApplicationSwitcherDescription missing plugin', () async {
     final List<ByteData?> log = <ByteData>[];
 
-    ServicesBinding.instance!.defaultBinaryMessenger.setMockMessageHandler('flutter/platform', (ByteData? message) async {
+    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMessageHandler('flutter/platform', (ByteData? message) async {
       log.add(message);
     });
 
     await SystemChrome.setApplicationSwitcherDescription(
-      const ApplicationSwitcherDescription(label: 'Example label', primaryColor: 0xFF00FF00)
+      const ApplicationSwitcherDescription(label: 'Example label', primaryColor: 0xFF00FF00),
     );
 
     expect(log, isNotEmpty);
@@ -76,7 +76,7 @@ void main() {
   test('setEnabledSystemUIOverlays control test', () async {
     final List<MethodCall> log = <MethodCall>[];
 
-    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       log.add(methodCall);
     });
 
@@ -87,5 +87,18 @@ void main() {
       'SystemChrome.setEnabledSystemUIOverlays',
       arguments: <String>['SystemUiOverlay.top'],
     ));
+  });
+
+  test('toString works as intended', () async {
+    const SystemUiOverlayStyle systemUiOverlayStyle = SystemUiOverlayStyle();
+
+    expect(systemUiOverlayStyle.toString(), 'SystemUiOverlayStyle({'
+      'systemNavigationBarColor: null, '
+      'systemNavigationBarDividerColor: null, '
+      'statusBarColor: null, '
+      'statusBarBrightness: null, '
+      'statusBarIconBrightness: null, '
+      'systemNavigationBarIconBrightness: null})',
+    );
   });
 }

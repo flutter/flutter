@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/rendering.dart';
-import '../flutter_test_alternative.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import 'rendering_tester.dart';
 
@@ -60,6 +60,21 @@ class RenderIntrinsicSize extends RenderProxyBox {
   }
 }
 
+class RenderInvalidIntrinsics extends RenderBox {
+  @override
+  bool get sizedByParent => true;
+  @override
+  double computeMinIntrinsicWidth(double height) => -1;
+  @override
+  double computeMaxIntrinsicWidth(double height) => -1;
+  @override
+  double computeMinIntrinsicHeight(double width) => -1;
+  @override
+  double computeMaxIntrinsicHeight(double width) => -1;
+  @override
+  Size computeDryLayout(BoxConstraints constraints) => Size.zero;
+}
+
 void main() {
   test('Whether using intrinsics means you get hooked into layout', () {
     RenderBox root;
@@ -67,8 +82,8 @@ void main() {
     layout(
       root = RenderIntrinsicSize(
         child: RenderParentSize(
-          child: inner = RenderFixedSize()
-        )
+          child: inner = RenderFixedSize(),
+        ),
       ),
       constraints: const BoxConstraints(
         minWidth: 0.0,
@@ -84,36 +99,52 @@ void main() {
     expect(root.size, equals(inner.size));
   });
 
-  test('When RenderObject.debugCheckingIntrinsics is true, parent returns correct intrinsics', () {
-    RenderObject.debugCheckingIntrinsics = true;
+  test('Parent returns correct intrinsics', () {
+    RenderParentSize parent;
+    RenderFixedSize inner;
 
-    try {
-      RenderParentSize parent;
-      RenderFixedSize inner;
-
-      layout(
-        RenderIntrinsicSize(
-          child: parent = RenderParentSize(
-            child: inner = RenderFixedSize()
-          )
+    layout(
+      RenderIntrinsicSize(
+        child: parent = RenderParentSize(
+          child: inner = RenderFixedSize(),
         ),
-        constraints: const BoxConstraints(
-          minWidth: 0.0,
-          minHeight: 0.0,
-          maxWidth: 1000.0,
-          maxHeight: 1000.0,
-        ),
-      );
+      ),
+      constraints: const BoxConstraints(
+        minWidth: 0.0,
+        minHeight: 0.0,
+        maxWidth: 1000.0,
+        maxHeight: 1000.0,
+      ),
+    );
 
-      _expectIntrinsicDimensions(parent, 100);
+    _expectIntrinsicDimensions(parent, 100);
 
-      inner.grow();
-      pumpFrame();
+    inner.grow();
+    pumpFrame();
 
-      _expectIntrinsicDimensions(parent, 200);
-    } finally {
-      RenderObject.debugCheckingIntrinsics = false;
-    }
+    _expectIntrinsicDimensions(parent, 200);
+  });
+
+  test('Intrinsic checks are turned on', () async {
+    final List<FlutterErrorDetails> errorDetails = <FlutterErrorDetails>[];
+    layout(
+      RenderInvalidIntrinsics(),
+      constraints: const BoxConstraints(
+        minWidth: 0.0,
+        minHeight: 0.0,
+        maxWidth: 1000.0,
+        maxHeight: 1000.0,
+      ),
+      onErrors: () {
+        errorDetails.addAll(renderer.takeAllFlutterErrorDetails());
+      },
+    );
+
+    expect(errorDetails, isNotEmpty);
+    expect(
+      errorDetails.map((FlutterErrorDetails details) => details.toString()),
+      everyElement(contains('violate the intrinsic protocol')),
+    );
   });
 }
 

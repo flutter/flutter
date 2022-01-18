@@ -5,7 +5,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/rendering.dart';
-import '../flutter_test_alternative.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import 'rendering_tester.dart';
 
@@ -22,11 +22,11 @@ void main() {
       child: inner = RenderSizedBox(const Size(100.0, 100.0)),
     );
     layout(sizer, constraints: BoxConstraints.tight(const Size(100.0, 100.0)), alignment: Alignment.topLeft);
-    expect(inner.globalToLocal(const Offset(0.0, 0.0)), equals(const Offset(0.0, 0.0)));
+    expect(inner.globalToLocal(Offset.zero), equals(Offset.zero));
     expect(inner.globalToLocal(const Offset(100.0, 100.0)), equals(const Offset(100.0, 100.0)));
     expect(inner.globalToLocal(const Offset(25.0, 75.0)), equals(const Offset(25.0, 75.0)));
     expect(inner.globalToLocal(const Offset(50.0, 50.0)), equals(const Offset(50.0, 50.0)));
-    expect(inner.localToGlobal(const Offset(0.0, 0.0)), equals(const Offset(0.0, 0.0)));
+    expect(inner.localToGlobal(Offset.zero), equals(Offset.zero));
     expect(inner.localToGlobal(const Offset(100.0, 100.0)), equals(const Offset(100.0, 100.0)));
     expect(inner.localToGlobal(const Offset(25.0, 75.0)), equals(const Offset(25.0, 75.0)));
     expect(inner.localToGlobal(const Offset(50.0, 50.0)), equals(const Offset(50.0, 50.0)));
@@ -43,11 +43,11 @@ void main() {
       ),
     );
     layout(sizer, constraints: BoxConstraints.tight(const Size(100.0, 100.0)), alignment: Alignment.topLeft);
-    expect(inner.globalToLocal(const Offset(0.0, 0.0)), equals(const Offset(-20.0, 0.0)));
+    expect(inner.globalToLocal(Offset.zero), equals(const Offset(-20.0, 0.0)));
     expect(inner.globalToLocal(const Offset(100.0, 100.0)), equals(const Offset(80.0, 100.0)));
     expect(inner.globalToLocal(const Offset(25.0, 75.0)), equals(const Offset(5.0, 75.0)));
     expect(inner.globalToLocal(const Offset(50.0, 50.0)), equals(const Offset(30.0, 50.0)));
-    expect(inner.localToGlobal(const Offset(0.0, 0.0)), equals(const Offset(20.0, 0.0)));
+    expect(inner.localToGlobal(Offset.zero), equals(const Offset(20.0, 0.0)));
     expect(inner.localToGlobal(const Offset(100.0, 100.0)), equals(const Offset(120.0, 100.0)));
     expect(inner.localToGlobal(const Offset(25.0, 75.0)), equals(const Offset(45.0, 75.0)));
     expect(inner.localToGlobal(const Offset(50.0, 50.0)), equals(const Offset(70.0, 50.0)));
@@ -61,11 +61,11 @@ void main() {
       child: inner = RenderSizedBox(const Size(100.0, 100.0)),
     );
     layout(sizer, constraints: BoxConstraints.tight(const Size(100.0, 100.0)), alignment: Alignment.topLeft);
-    expect(inner.globalToLocal(const Offset(0.0, 0.0)), equals(const Offset(-50.0, -200.0)));
+    expect(inner.globalToLocal(Offset.zero), equals(const Offset(-50.0, -200.0)));
     expect(inner.globalToLocal(const Offset(100.0, 100.0)), equals(const Offset(50.0, -100.0)));
     expect(inner.globalToLocal(const Offset(25.0, 75.0)), equals(const Offset(-25.0, -125.0)));
     expect(inner.globalToLocal(const Offset(50.0, 50.0)), equals(const Offset(0.0, -150.0)));
-    expect(inner.localToGlobal(const Offset(0.0, 0.0)), equals(const Offset(50.0, 200.0)));
+    expect(inner.localToGlobal(Offset.zero), equals(const Offset(50.0, 200.0)));
     expect(inner.localToGlobal(const Offset(100.0, 100.0)), equals(const Offset(150.0, 300.0)));
     expect(inner.localToGlobal(const Offset(25.0, 75.0)), equals(const Offset(75.0, 275.0)));
     expect(inner.localToGlobal(const Offset(50.0, 50.0)), equals(const Offset(100.0, 250.0)));
@@ -82,11 +82,11 @@ void main() {
       ),
     );
     layout(sizer, constraints: BoxConstraints.tight(const Size(100.0, 100.0)), alignment: Alignment.topLeft);
-    expect(inner.globalToLocal(const Offset(0.0, 0.0)), equals(const Offset(-70.0, -200.0)));
+    expect(inner.globalToLocal(Offset.zero), equals(const Offset(-70.0, -200.0)));
     expect(inner.globalToLocal(const Offset(100.0, 100.0)), equals(const Offset(30.0, -100.0)));
     expect(inner.globalToLocal(const Offset(25.0, 75.0)), equals(const Offset(-45.0, -125.0)));
     expect(inner.globalToLocal(const Offset(50.0, 50.0)), equals(const Offset(-20.0, -150.0)));
-    expect(inner.localToGlobal(const Offset(0.0, 0.0)), equals(const Offset(70.0, 200.0)));
+    expect(inner.localToGlobal(Offset.zero), equals(const Offset(70.0, 200.0)));
     expect(inner.localToGlobal(const Offset(100.0, 100.0)), equals(const Offset(170.0, 300.0)));
     expect(inner.localToGlobal(const Offset(25.0, 75.0)), equals(const Offset(95.0, 275.0)));
     expect(inner.localToGlobal(const Offset(50.0, 50.0)), equals(const Offset(120.0, 250.0)));
@@ -100,12 +100,12 @@ void main() {
       child: inner = RenderSizedBox(const Size(100.0, 100.0)),
     );
     layout(sizer, constraints: BoxConstraints.tight(const Size(100.0, 100.0)), alignment: Alignment.topLeft);
-    expect(round(inner.globalToLocal(const Offset(0.0, 0.0))), equals(const Offset(100.0, 100.0)));
-    expect(round(inner.globalToLocal(const Offset(100.0, 100.0))), equals(const Offset(0.0, 0.0)));
+    expect(round(inner.globalToLocal(Offset.zero)), equals(const Offset(100.0, 100.0)));
+    expect(round(inner.globalToLocal(const Offset(100.0, 100.0))), equals(Offset.zero));
     expect(round(inner.globalToLocal(const Offset(25.0, 75.0))), equals(const Offset(75.0, 25.0)));
     expect(round(inner.globalToLocal(const Offset(50.0, 50.0))), equals(const Offset(50.0, 50.0)));
-    expect(round(inner.localToGlobal(const Offset(0.0, 0.0))), equals(const Offset(100.0, 100.0)));
-    expect(round(inner.localToGlobal(const Offset(100.0, 100.0))), equals(const Offset(0.0, 0.0)));
+    expect(round(inner.localToGlobal(Offset.zero)), equals(const Offset(100.0, 100.0)));
+    expect(round(inner.localToGlobal(const Offset(100.0, 100.0))), equals(Offset.zero));
     expect(round(inner.localToGlobal(const Offset(25.0, 75.0))), equals(const Offset(75.0, 25.0)));
     expect(round(inner.localToGlobal(const Offset(50.0, 50.0))), equals(const Offset(50.0, 50.0)));
   });
@@ -121,11 +121,11 @@ void main() {
       ),
     );
     layout(sizer, constraints: BoxConstraints.tight(const Size(100.0, 100.0)), alignment: Alignment.topLeft);
-    expect(round(inner.globalToLocal(const Offset(0.0, 0.0))), equals(const Offset(80.0, 100.0)));
+    expect(round(inner.globalToLocal(Offset.zero)), equals(const Offset(80.0, 100.0)));
     expect(round(inner.globalToLocal(const Offset(100.0, 100.0))), equals(const Offset(-20.0, 0.0)));
     expect(round(inner.globalToLocal(const Offset(25.0, 75.0))), equals(const Offset(55.0, 25.0)));
     expect(round(inner.globalToLocal(const Offset(50.0, 50.0))), equals(const Offset(30.0, 50.0)));
-    expect(round(inner.localToGlobal(const Offset(0.0, 0.0))), equals(const Offset(80.0, 100.0)));
+    expect(round(inner.localToGlobal(Offset.zero)), equals(const Offset(80.0, 100.0)));
     expect(round(inner.localToGlobal(const Offset(100.0, 100.0))), equals(const Offset(-20.0, 0.0)));
     expect(round(inner.localToGlobal(const Offset(25.0, 75.0))), equals(const Offset(55.0, 25.0)));
     expect(round(inner.localToGlobal(const Offset(50.0, 50.0))), equals(const Offset(30.0, 50.0)));
@@ -145,8 +145,10 @@ void main() {
     expect(inner.globalToLocal(const Offset(25.0, 17.0)).dy, lessThan(10.0));
     expect(inner.globalToLocal(const Offset(25.0, 83.0)).dy, greaterThan(90.0));
     expect(inner.globalToLocal(const Offset(25.0, 83.0)).dy, lessThan(100.0));
-    expect(round(inner.globalToLocal(const Offset(25.0, 17.0))).dy,
-        equals(100 - round(inner.globalToLocal(const Offset(25.0, 83.0))).dy));
+    expect(
+      round(inner.globalToLocal(const Offset(25.0, 17.0))).dy,
+      equals(100 - round(inner.globalToLocal(const Offset(25.0, 83.0))).dy),
+    );
   });
 
   test('RenderTransform - perspective - localToGlobal', () {

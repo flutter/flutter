@@ -7,18 +7,14 @@ import 'dart:ui' as ui show ImageFilter, Gradient, Image, Color;
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/painting.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 
 import 'package:vector_math/vector_math_64.dart';
 
-import 'binding.dart';
 import 'box.dart';
 import 'layer.dart';
 import 'layout_helper.dart';
-import 'mouse_cursor.dart';
-import 'mouse_tracking.dart';
 import 'object.dart';
 
 export 'package:flutter/gestures.dart' show
@@ -505,8 +501,8 @@ class RenderAspectRatio extends RenderProxyBox {
           '$runtimeType has unbounded constraints.\n'
           'This $runtimeType was given an aspect ratio of $aspectRatio but was given '
           'both unbounded width and unbounded height constraints. Because both '
-          'constraints were unbounded, this render object doesn\'t know how much '
-          'size to consume.'
+          "constraints were unbounded, this render object doesn't know how much "
+          'size to consume.',
         );
       }
       return true;
@@ -997,7 +993,7 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
     _alpha = ui.Color.getAlphaFromOpacity(opacity.value);
     if (oldAlpha != _alpha) {
       final bool? didNeedCompositing = _currentlyNeedsCompositing;
-      _currentlyNeedsCompositing = _alpha! > 0 && _alpha! < 255;
+      _currentlyNeedsCompositing = _alpha! > 0;
       if (child != null && didNeedCompositing != _currentlyNeedsCompositing)
         markNeedsCompositingBitsUpdate();
       markNeedsPaint();
@@ -1012,12 +1008,6 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
       if (_alpha == 0) {
         // No need to keep the layer. We'll create a new one if necessary.
         layer = null;
-        return;
-      }
-      if (_alpha == 255) {
-        // No need to keep the layer. We'll create a new one if necessary.
-        layer = null;
-        context.paintChild(child!, offset);
         return;
       }
       assert(needsCompositing);
@@ -1145,9 +1135,13 @@ class RenderBackdropFilter extends RenderProxyBox {
   /// Creates a backdrop filter.
   ///
   /// The [filter] argument must not be null.
-  RenderBackdropFilter({ RenderBox? child, required ui.ImageFilter filter })
+  /// The [blendMode] argument, if provided, must not be null
+  /// and will default to [BlendMode.srcOver].
+  RenderBackdropFilter({ RenderBox? child, required ui.ImageFilter filter, BlendMode blendMode = BlendMode.srcOver })
     : assert(filter != null),
+      assert(blendMode != null),
       _filter = filter,
+      _blendMode = blendMode,
       super(child);
 
   @override
@@ -1168,6 +1162,20 @@ class RenderBackdropFilter extends RenderProxyBox {
     markNeedsPaint();
   }
 
+  /// The blend mode to use to apply the filtered background content onto the background
+  /// surface.
+  ///
+  /// {@macro flutter.widgets.BackdropFilter.blendMode}
+  BlendMode get blendMode => _blendMode;
+  BlendMode _blendMode;
+  set blendMode(BlendMode value) {
+    assert(value != null);
+    if (_blendMode == value)
+      return;
+    _blendMode = value;
+    markNeedsPaint();
+  }
+
   @override
   bool get alwaysNeedsCompositing => child != null;
 
@@ -1177,6 +1185,7 @@ class RenderBackdropFilter extends RenderProxyBox {
       assert(needsCompositing);
       layer ??= BackdropFilterLayer();
       layer!.filter = _filter;
+      layer!.blendMode = _blendMode;
       context.pushLayer(layer!, super.paint, offset);
     } else {
       layer = null;
@@ -1391,7 +1400,7 @@ abstract class _RenderCustomClip<T> extends RenderProxyBox {
     assert(() {
       _debugPaint ??= Paint()
         ..shader = ui.Gradient.linear(
-          const Offset(0.0, 0.0),
+          Offset.zero,
           const Offset(10.0, 10.0),
           <Color>[const Color(0x00000000), const Color(0xFFFF00FF), const Color(0xFFFF00FF), const Color(0x00000000)],
           <double>[0.25, 0.25, 0.75, 0.75],
@@ -1502,10 +1511,7 @@ class RenderClipRRect extends _RenderCustomClip<RRect> {
        assert(clipBehavior != Clip.none),
        _borderRadius = borderRadius,
        super(child: child, clipper: clipper, clipBehavior: clipBehavior) {
-    // `_borderRadius` has a non-nullable return type, but might be null when
-    // running with weak checking, so we need to null check it anyway (and
-    // ignore the warning that the null-handling logic is dead code).
-    assert(_borderRadius != null || clipper != null);// ignore: dead_code
+    assert(_borderRadius != null || clipper != null);
   }
 
   /// The border radius of the rounded corners.
@@ -1607,8 +1613,10 @@ class RenderClipOval extends _RenderCustomClip<Rect> {
     assert(_clip != null);
     final Offset center = _clip!.center;
     // convert the position to an offset from the center of the unit circle
-    final Offset offset = Offset((position.dx - center.dx) / _clip!.width,
-                                     (position.dy - center.dy) / _clip!.height);
+    final Offset offset = Offset(
+      (position.dx - center.dx) / _clip!.width,
+      (position.dy - center.dy) / _clip!.height,
+    );
     // check if the point is outside the unit circle
     if (offset.distanceSquared > 0.25) // x^2 + y^2 > r^2
       return false;
@@ -2153,7 +2161,7 @@ class RenderDecoratedBox extends RenderProxyBox {
             ErrorDescription(
               'Before painting the decoration, the canvas save count was $debugSaveCount. '
               'After painting it, the canvas save count was ${context.canvas.getSaveCount()}. '
-              'Every call to save() or saveLayer() must be matched by a call to restore().'
+              'Every call to save() or saveLayer() must be matched by a call to restore().',
             ),
             DiagnosticsProperty<Decoration>('The decoration was', decoration, style: DiagnosticsTreeStyle.errorProperty),
             DiagnosticsProperty<BoxPainter>('The painter was', _painter, style: DiagnosticsTreeStyle.errorProperty),
@@ -2191,12 +2199,14 @@ class RenderTransform extends RenderProxyBox {
     AlignmentGeometry? alignment,
     TextDirection? textDirection,
     this.transformHitTests = true,
+    FilterQuality? filterQuality,
     RenderBox? child,
   }) : assert(transform != null),
        super(child) {
     this.transform = transform;
     this.alignment = alignment;
     this.textDirection = textDirection;
+    this.filterQuality = filterQuality;
     this.origin = origin;
   }
 
@@ -2250,6 +2260,9 @@ class RenderTransform extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
+  @override
+  bool get alwaysNeedsCompositing => child != null && _filterQuality != null;
+
   /// When set to true, hit tests are performed based on the position of the
   /// child as it is painted. When set to false, hit tests are performed
   /// ignoring the transformation.
@@ -2269,6 +2282,21 @@ class RenderTransform extends RenderProxyBox {
     _transform = Matrix4.copy(value);
     markNeedsPaint();
     markNeedsSemanticsUpdate();
+  }
+
+  /// The filter quality with which to apply the transform as a bitmap operation.
+  ///
+  /// {@macro flutter.widgets.Transform.optional.FilterQuality}
+  FilterQuality? get filterQuality => _filterQuality;
+  FilterQuality? _filterQuality;
+  set filterQuality(FilterQuality? value) {
+    if (_filterQuality == value)
+      return;
+    final bool didNeedCompositing = alwaysNeedsCompositing;
+    _filterQuality = value;
+    if (didNeedCompositing != alwaysNeedsCompositing)
+      markNeedsCompositingBitsUpdate();
+    markNeedsPaint();
   }
 
   /// Sets the transform to the identity matrix.
@@ -2358,18 +2386,32 @@ class RenderTransform extends RenderProxyBox {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       final Matrix4 transform = _effectiveTransform!;
-      final Offset? childOffset = MatrixUtils.getAsTranslation(transform);
-      if (childOffset == null) {
-        layer = context.pushTransform(
-          needsCompositing,
-          offset,
-          transform,
-          super.paint,
-          oldLayer: layer as TransformLayer?,
-        );
+      if (filterQuality == null) {
+        final Offset? childOffset = MatrixUtils.getAsTranslation(transform);
+        if (childOffset == null) {
+          layer = context.pushTransform(
+            needsCompositing,
+            offset,
+            transform,
+            super.paint,
+            oldLayer: layer is TransformLayer ? layer as TransformLayer? : null,
+          );
+        } else {
+          super.paint(context, offset + childOffset);
+          layer = null;
+        }
       } else {
-        super.paint(context, offset + childOffset);
-        layer = null;
+        final ui.ImageFilter filter = ui.ImageFilter.matrix(
+          transform.storage,
+          filterQuality: filterQuality!,
+        );
+        if (layer is ImageFilterLayer) {
+          final ImageFilterLayer filterLayer = layer! as ImageFilterLayer;
+          filterLayer.imageFilter = filter;
+        } else {
+          layer = ImageFilterLayer(imageFilter: filter);
+        }
+        context.pushLayer(layer!, super.paint, offset);
       }
     }
   }
@@ -2504,7 +2546,7 @@ class RenderFittedBox extends RenderProxyBox {
         assert(debugCannotComputeDryLayout(
           reason: 'Child provided invalid size of $childSize.',
         ));
-        return const Size(0, 0);
+        return Size.zero;
       }
 
       switch (fit) {
@@ -2589,8 +2631,13 @@ class RenderFittedBox extends RenderProxyBox {
   TransformLayer? _paintChildWithTransform(PaintingContext context, Offset offset) {
     final Offset? childOffset = MatrixUtils.getAsTranslation(_transform!);
     if (childOffset == null)
-      return context.pushTransform(needsCompositing, offset, _transform!, super.paint,
-          oldLayer: layer is TransformLayer ? layer! as TransformLayer : null);
+      return context.pushTransform(
+        needsCompositing,
+        offset,
+        _transform!,
+        super.paint,
+        oldLayer: layer is TransformLayer ? layer! as TransformLayer : null,
+      );
     else
       super.paint(context, offset + childOffset);
     return null;
@@ -2603,8 +2650,14 @@ class RenderFittedBox extends RenderProxyBox {
     _updatePaintData();
     if (child != null) {
       if (_hasVisualOverflow! && clipBehavior != Clip.none)
-        layer = context.pushClipRect(needsCompositing, offset, Offset.zero & size, _paintChildWithTransform,
-            oldLayer: layer is ClipRectLayer ? layer! as ClipRectLayer : null, clipBehavior: clipBehavior);
+        layer = context.pushClipRect(
+          needsCompositing,
+          offset,
+          Offset.zero & size,
+          _paintChildWithTransform,
+          oldLayer: layer is ClipRectLayer ? layer! as ClipRectLayer : null,
+          clipBehavior: clipBehavior,
+        );
       else
         layer = _paintChildWithTransform(context, offset);
     }
@@ -3050,20 +3103,20 @@ class RenderRepaintBoundary extends RenderProxyBox {
   ///
   /// ```dart
   /// class PngHome extends StatefulWidget {
-  ///   PngHome({Key key}) : super(key: key);
+  ///   const PngHome({Key? key}) : super(key: key);
   ///
   ///   @override
-  ///   _PngHomeState createState() => _PngHomeState();
+  ///   State<PngHome> createState() => _PngHomeState();
   /// }
   ///
   /// class _PngHomeState extends State<PngHome> {
   ///   GlobalKey globalKey = GlobalKey();
   ///
   ///   Future<void> _capturePng() async {
-  ///     RenderRepaintBoundary boundary = globalKey.currentContext.findRenderObject();
-  ///     ui.Image image = await boundary.toImage();
-  ///     ByteData byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-  ///     Uint8List pngBytes = byteData.buffer.asUint8List();
+  ///     final RenderRepaintBoundary boundary = globalKey.currentContext!.findRenderObject()! as RenderRepaintBoundary;
+  ///     final ui.Image image = await boundary.toImage();
+  ///     final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+  ///     final Uint8List pngBytes = byteData!.buffer.asUint8List();
   ///     print(pngBytes);
   ///   }
   ///
@@ -3073,7 +3126,7 @@ class RenderRepaintBoundary extends RenderProxyBox {
   ///       key: globalKey,
   ///       child: Center(
   ///         child: TextButton(
-  ///           child: Text('Hello World', textDirection: TextDirection.ltr),
+  ///           child: const Text('Hello World', textDirection: TextDirection.ltr),
   ///           onPressed: _capturePng,
   ///         ),
   ///       ),
@@ -3516,10 +3569,10 @@ class RenderMetaData extends RenderProxyBoxWithHitTestBehavior {
 
 /// Listens for the specified gestures from the semantics server (e.g.
 /// an accessibility tool).
-class RenderSemanticsGestureHandler extends RenderProxyBox {
+class RenderSemanticsGestureHandler extends RenderProxyBoxWithHitTestBehavior {
   /// Creates a render object that listens for specific semantic gestures.
   ///
-  /// The [scrollFactor] argument must not be null.
+  /// The [scrollFactor] and [behavior] arguments must not be null.
   RenderSemanticsGestureHandler({
     RenderBox? child,
     GestureTapCallback? onTap,
@@ -3527,12 +3580,13 @@ class RenderSemanticsGestureHandler extends RenderProxyBox {
     GestureDragUpdateCallback? onHorizontalDragUpdate,
     GestureDragUpdateCallback? onVerticalDragUpdate,
     this.scrollFactor = 0.8,
+    HitTestBehavior behavior = HitTestBehavior.deferToChild,
   }) : assert(scrollFactor != null),
        _onTap = onTap,
        _onLongPress = onLongPress,
        _onHorizontalDragUpdate = onHorizontalDragUpdate,
        _onVerticalDragUpdate = onVerticalDragUpdate,
-       super(child);
+       super(behavior: behavior, child: child);
 
   /// If non-null, the set of actions to allow. Other actions will be omitted,
   /// even if their callback is provided.
@@ -3710,6 +3764,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     bool? selected,
     bool? button,
     bool? slider,
+    bool? keyboardKey,
     bool? link,
     bool? header,
     bool? textField,
@@ -3752,6 +3807,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     MoveCursorHandler? onMoveCursorForwardByWord,
     MoveCursorHandler? onMoveCursorBackwardByWord,
     SetSelectionHandler? onSetSelection,
+    SetTextHandler? onSetText,
     VoidCallback? onDidGainAccessibilityFocus,
     VoidCallback? onDidLoseAccessibilityFocus,
     Map<CustomSemanticsAction, VoidCallback>? customSemanticsActions,
@@ -3765,6 +3821,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
        _selected = selected,
        _button = button,
        _slider = slider,
+       _keyboardKey = keyboardKey,
        _link = link,
        _header = header,
        _textField = textField,
@@ -3807,6 +3864,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
        _onMoveCursorForwardByWord = onMoveCursorForwardByWord,
        _onMoveCursorBackwardByWord = onMoveCursorBackwardByWord,
        _onSetSelection = onSetSelection,
+       _onSetText = onSetText,
        _onDidGainAccessibilityFocus = onDidGainAccessibilityFocus,
        _onDidLoseAccessibilityFocus = onDidLoseAccessibilityFocus,
        _customSemanticsActions = customSemanticsActions,
@@ -3920,6 +3978,17 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     if (slider == value)
       return;
     _slider = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  /// If non-null, sets the [SemanticsConfiguration.isKeyboardKey] semantic to the
+  /// given value.
+  bool? get keyboardKey => _keyboardKey;
+  bool? _keyboardKey;
+  set keyboardKey(bool? value) {
+    if (keyboardKey == value)
+      return;
+    _keyboardKey = value;
     markNeedsSemanticsUpdate();
   }
 
@@ -4208,7 +4277,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
-  /// Adds a semenatics tag to the semantics subtree.
+  /// Adds a semantics tag to the semantics subtree.
   SemanticsTag? get tagForChildren => _tagForChildren;
   SemanticsTag? _tagForChildren;
   set tagForChildren(SemanticsTag? value) {
@@ -4542,6 +4611,24 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       markNeedsSemanticsUpdate();
   }
 
+  /// The handler for [SemanticsAction.setText].
+  ///
+  /// This handler is invoked when the user wants to replace the current text in
+  /// the text field with a new text.
+  ///
+  /// Voice access users can trigger this handler by speaking "type <text>" to
+  /// their Android devices.
+  SetTextHandler? get onSetText => _onSetText;
+  SetTextHandler? _onSetText;
+  set onSetText(SetTextHandler? handler) {
+    if (_onSetText == handler)
+      return;
+    final bool hadValue = _onSetText != null;
+    _onSetText = handler;
+    if ((handler != null) != hadValue)
+      markNeedsSemanticsUpdate();
+  }
+
   /// The handler for [SemanticsAction.didGainAccessibilityFocus].
   ///
   /// This handler is invoked when the node annotated with this handler gains
@@ -4628,10 +4715,14 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     super.describeSemanticsConfiguration(config);
     config.isSemanticBoundary = container;
     config.explicitChildNodes = explicitChildNodes;
-    assert((scopesRoute == true && explicitChildNodes == true) || scopesRoute != true,
-      'explicitChildNodes must be set to true if scopes route is true');
-    assert(!(toggled == true && checked == true),
-      'A semantics node cannot be toggled and checked at the same time');
+    assert(
+      (scopesRoute == true && explicitChildNodes == true) || scopesRoute != true,
+      'explicitChildNodes must be set to true if scopes route is true',
+    );
+    assert(
+      !(toggled == true && checked == true),
+      'A semantics node cannot be toggled and checked at the same time',
+    );
 
     if (enabled != null)
       config.isEnabled = enabled;
@@ -4647,6 +4738,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.isLink = link!;
     if (slider != null)
       config.isSlider = slider!;
+    if (keyboardKey != null)
+      config.isKeyboardKey = keyboardKey!;
     if (header != null)
       config.isHeader = header!;
     if (textField != null)
@@ -4734,6 +4827,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.onMoveCursorBackwardByWord = _performMoveCursorBackwardByWord;
     if (onSetSelection != null)
       config.onSetSelection = _performSetSelection;
+    if (onSetText != null)
+      config.onSetText = _performSetText;
     if (onDidGainAccessibilityFocus != null)
       config.onDidGainAccessibilityFocus = _performDidGainAccessibilityFocus;
     if (onDidLoseAccessibilityFocus != null)
@@ -4743,98 +4838,83 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   }
 
   void _performTap() {
-    if (onTap != null)
-      onTap!();
+    onTap?.call();
   }
 
   void _performLongPress() {
-    if (onLongPress != null)
-      onLongPress!();
+    onLongPress?.call();
   }
 
   void _performDismiss() {
-    if (onDismiss != null)
-      onDismiss!();
+    onDismiss?.call();
   }
 
   void _performScrollLeft() {
-    if (onScrollLeft != null)
-      onScrollLeft!();
+    onScrollLeft?.call();
   }
 
   void _performScrollRight() {
-    if (onScrollRight != null)
-      onScrollRight!();
+    onScrollRight?.call();
   }
 
   void _performScrollUp() {
-    if (onScrollUp != null)
-      onScrollUp!();
+    onScrollUp?.call();
   }
 
   void _performScrollDown() {
-    if (onScrollDown != null)
-      onScrollDown!();
+    onScrollDown?.call();
   }
 
   void _performIncrease() {
-    if (onIncrease != null)
-      onIncrease!();
+    onIncrease?.call();
   }
 
   void _performDecrease() {
-    if (onDecrease != null)
-      onDecrease!();
+    onDecrease?.call();
   }
 
   void _performCopy() {
-    if (onCopy != null)
-      onCopy!();
+    onCopy?.call();
   }
 
   void _performCut() {
-    if (onCut != null)
-      onCut!();
+    onCut?.call();
   }
 
   void _performPaste() {
-    if (onPaste != null)
-      onPaste!();
+    onPaste?.call();
   }
 
   void _performMoveCursorForwardByCharacter(bool extendSelection) {
-    if (onMoveCursorForwardByCharacter != null)
-      onMoveCursorForwardByCharacter!(extendSelection);
+    onMoveCursorForwardByCharacter?.call(extendSelection);
   }
 
   void _performMoveCursorBackwardByCharacter(bool extendSelection) {
-    if (onMoveCursorBackwardByCharacter != null)
-      onMoveCursorBackwardByCharacter!(extendSelection);
+    onMoveCursorBackwardByCharacter?.call(extendSelection);
   }
 
   void _performMoveCursorForwardByWord(bool extendSelection) {
-    if (onMoveCursorForwardByWord != null)
-      onMoveCursorForwardByWord!(extendSelection);
+    onMoveCursorForwardByWord?.call(extendSelection);
   }
 
   void _performMoveCursorBackwardByWord(bool extendSelection) {
-    if (onMoveCursorBackwardByWord != null)
-      onMoveCursorBackwardByWord!(extendSelection);
+    onMoveCursorBackwardByWord?.call(extendSelection);
   }
 
   void _performSetSelection(TextSelection selection) {
-    if (onSetSelection != null)
-      onSetSelection!(selection);
+    onSetSelection?.call(selection);
+  }
+
+  void _performSetText(String text) {
+    onSetText?.call(text);
   }
 
   void _performDidGainAccessibilityFocus() {
-    if (onDidGainAccessibilityFocus != null)
-      onDidGainAccessibilityFocus!();
+    onDidGainAccessibilityFocus?.call();
   }
 
   void _performDidLoseAccessibilityFocus() {
-    if (onDidLoseAccessibilityFocus != null)
-      onDidLoseAccessibilityFocus!();
+    onDidLoseAccessibilityFocus?.call();
   }
 }
 
@@ -5223,7 +5303,7 @@ class RenderFollowerLayer extends RenderProxyBox {
     assert(
       link.leaderSize != null || (link.leader == null || leaderAnchor == Alignment.topLeft),
       '$link: layer is linked to ${link.leader} but a valid leaderSize is not set. '
-      'leaderSize is required when leaderAnchor is not Alignment.topLeft'
+      'leaderSize is required when leaderAnchor is not Alignment.topLeft '
       '(current value is $leaderAnchor).',
     );
     final Offset effectiveLinkedOffset = leaderSize == null

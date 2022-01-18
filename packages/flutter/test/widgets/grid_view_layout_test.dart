@@ -18,7 +18,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: SizedBox(
             width: 200.0,
             child: GridView.extent(
               maxCrossAxisExtent: 100.0,
@@ -47,7 +47,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: SizedBox(
             width: 200.0,
             child: GridView.extent(
               maxCrossAxisExtent: 60.0,

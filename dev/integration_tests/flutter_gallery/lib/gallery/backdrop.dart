@@ -4,7 +4,6 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/rendering.dart';
 import 'package:flutter/material.dart';
 
 const double _kFrontHeadingHeight = 32.0; // front layer beveled rectangle
@@ -12,7 +11,7 @@ const double _kFrontClosedHeight = 92.0; // front layer height when closed
 const double _kBackAppBarHeight = 56.0; // back layer (options) appbar height
 
 // The size of the front layer heading's left and right beveled corners.
-final Animatable<BorderRadius> _kFrontHeadingBevelRadius = BorderRadiusTween(
+final Animatable<BorderRadius?> _kFrontHeadingBevelRadius = BorderRadiusTween(
   begin: const BorderRadius.only(
     topLeft: Radius.circular(12.0),
     topRight: Radius.circular(12.0),
@@ -180,13 +179,14 @@ class _BackAppBar extends StatelessWidget {
 
 class Backdrop extends StatefulWidget {
   const Backdrop({
+    Key? key,
     this.frontAction,
     this.frontTitle,
     this.frontHeading,
     this.frontLayer,
     this.backTitle,
     this.backLayer,
-  });
+  }) : super(key: key);
 
   final Widget? frontAction;
   final Widget? frontTitle;
@@ -196,7 +196,7 @@ class Backdrop extends StatefulWidget {
   final Widget? backLayer;
 
   @override
-  _BackdropState createState() => _BackdropState();
+  State<Backdrop> createState() => _BackdropState();
 }
 
 class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin {
@@ -296,9 +296,9 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
                 AnimationStatus.dismissed,
                 controller: _controller,
                 child: Visibility(
-                  child: widget.backLayer!,
                   visible: _controller!.status != AnimationStatus.completed,
                   maintainState: true,
+                  child: widget.backLayer!,
                 ),
               ),
             ),
@@ -315,7 +315,7 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
                 color: Theme.of(context).canvasColor,
                 clipper: ShapeBorderClipper(
                   shape: BeveledRectangleBorder(
-                    borderRadius: _kFrontHeadingBevelRadius.transform(_controller!.value),
+                    borderRadius: _kFrontHeadingBevelRadius.transform(_controller!.value)!,
                   ),
                 ),
                 clipBehavior: Clip.antiAlias,

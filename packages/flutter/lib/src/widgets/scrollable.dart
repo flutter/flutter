@@ -8,8 +8,6 @@ import 'dart:ui';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/scheduler.dart';
-import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
 
 import 'actions.dart';
@@ -27,7 +25,6 @@ import 'scroll_controller.dart';
 import 'scroll_metrics.dart';
 import 'scroll_physics.dart';
 import 'scroll_position.dart';
-import 'scroll_position_with_single_context.dart';
 import 'ticker_provider.dart';
 import 'viewport.dart';
 
@@ -93,6 +90,7 @@ class Scrollable extends StatefulWidget {
     this.semanticChildCount,
     this.dragStartBehavior = DragStartBehavior.start,
     this.restorationId,
+    this.scrollBehavior,
   }) : assert(axisDirection != null),
        assert(dragStartBehavior != null),
        assert(viewportBuilder != null),
@@ -136,6 +134,10 @@ class Scrollable extends StatefulWidget {
   ///
   /// Defaults to matching platform conventions via the physics provided from
   /// the ambient [ScrollConfiguration].
+  ///
+  /// If an explicit [ScrollBehavior] is provided to [scrollBehavior], the
+  /// [ScrollPhysics] provided by that behavior will take precedence after
+  /// [physics].
   ///
   /// The physics can be changed dynamically, but new physics will only take
   /// effect if the _class_ of the provided object changes. Merely constructing
@@ -212,8 +214,9 @@ class Scrollable extends StatefulWidget {
   /// Determines the way that drag start behavior is handled.
   ///
   /// If set to [DragStartBehavior.start], scrolling drag behavior will
-  /// begin upon the detection of a drag gesture. If set to
-  /// [DragStartBehavior.down] it will begin when a down event is first detected.
+  /// begin at the position where the drag gesture won the arena. If set to
+  /// [DragStartBehavior.down] it will begin at the position where a down
+  /// event is first detected.
   ///
   /// In general, setting this to [DragStartBehavior.start] will make drag
   /// animation smoother and setting it to [DragStartBehavior.down] will make
@@ -244,6 +247,14 @@ class Scrollable extends StatefulWidget {
   ///    Flutter.
   /// {@endtemplate}
   final String? restorationId;
+
+  /// {@macro flutter.widgets.shadow.scrollBehavior}
+  ///
+  /// [ScrollBehavior]s also provide [ScrollPhysics]. If an explicit
+  /// [ScrollPhysics] is provided in [physics], it will take precedence,
+  /// followed by [scrollBehavior], and then the inherited ancestor
+  /// [ScrollBehavior].
+  final ScrollBehavior? scrollBehavior;
 
   /// The axis along which the scroll view scrolls.
   ///
@@ -387,27 +398,31 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
 
   late ScrollBehavior _configuration;
   ScrollPhysics? _physics;
+  ScrollController? _fallbackScrollController;
+
+  ScrollController get _effectiveScrollController => widget.controller ?? _fallbackScrollController!;
 
   // Only call this from places that will definitely trigger a rebuild.
   void _updatePosition() {
-    _configuration = ScrollConfiguration.of(context);
+    _configuration = widget.scrollBehavior ?? ScrollConfiguration.of(context);
     _physics = _configuration.getScrollPhysics(context);
-    if (widget.physics != null)
+    if (widget.physics != null) {
       _physics = widget.physics!.applyTo(_physics);
-    final ScrollController? controller = widget.controller;
+    } else if (widget.scrollBehavior != null) {
+      _physics = widget.scrollBehavior!.getScrollPhysics(context).applyTo(_physics);
+    }
     final ScrollPosition? oldPosition = _position;
     if (oldPosition != null) {
-      controller?.detach(oldPosition);
+      _effectiveScrollController.detach(oldPosition);
       // It's important that we not dispose the old position until after the
       // viewport has had a chance to unregister its listeners from the old
       // position. So, schedule a microtask to do it.
       scheduleMicrotask(oldPosition.dispose);
     }
 
-    _position = controller?.createScrollPosition(_physics!, this, oldPosition)
-      ?? ScrollPositionWithSingleContext(physics: _physics!, context: this, oldPosition: oldPosition);
+    _position = _effectiveScrollController.createScrollPosition(_physics!, this, oldPosition);
     assert(_position != null);
-    controller?.attach(position);
+    _effectiveScrollController.attach(position);
   }
 
   @override
@@ -429,14 +444,21 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
   }
 
   @override
+  void initState() {
+    if (widget.controller == null)
+      _fallbackScrollController = ScrollController();
+    super.initState();
+  }
+
+  @override
   void didChangeDependencies() {
     _updatePosition();
     super.didChangeDependencies();
   }
 
   bool _shouldUpdatePosition(Scrollable oldWidget) {
-    ScrollPhysics? newPhysics = widget.physics;
-    ScrollPhysics? oldPhysics = oldWidget.physics;
+    ScrollPhysics? newPhysics = widget.physics ?? widget.scrollBehavior?.getScrollPhysics(context);
+    ScrollPhysics? oldPhysics = oldWidget.physics ?? oldWidget.scrollBehavior?.getScrollPhysics(context);
     do {
       if (newPhysics?.runtimeType != oldPhysics?.runtimeType)
         return true;
@@ -452,8 +474,25 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     super.didUpdateWidget(oldWidget);
 
     if (widget.controller != oldWidget.controller) {
-      oldWidget.controller?.detach(position);
-      widget.controller?.attach(position);
+      if (oldWidget.controller == null) {
+        // The old controller was null, meaning the fallback cannot be null.
+        // Dispose of the fallback.
+        assert(_fallbackScrollController !=  null);
+        assert(widget.controller != null);
+        _fallbackScrollController!.detach(position);
+        _fallbackScrollController!.dispose();
+        _fallbackScrollController = null;
+      } else {
+        // The old controller was not null, detach.
+        oldWidget.controller?.detach(position);
+        if (widget.controller == null) {
+          // If the new controller is null, we need to set up the fallback
+          // ScrollController.
+          _fallbackScrollController = ScrollController();
+        }
+      }
+      // Attach the updated effective scroll controller.
+      _effectiveScrollController.attach(position);
     }
 
     if (_shouldUpdatePosition(oldWidget))
@@ -462,7 +501,13 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
 
   @override
   void dispose() {
-    widget.controller?.detach(position);
+    if (widget.controller != null) {
+      widget.controller!.detach(position);
+    } else {
+      _fallbackScrollController?.detach(position);
+      _fallbackScrollController?.dispose();
+    }
+
     position.dispose();
     _persistedScrollOffset.dispose();
     super.dispose();
@@ -509,7 +554,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
         case Axis.vertical:
           _gestureRecognizers = <Type, GestureRecognizerFactory>{
             VerticalDragGestureRecognizer: GestureRecognizerFactoryWithHandlers<VerticalDragGestureRecognizer>(
-              () => VerticalDragGestureRecognizer(),
+              () => VerticalDragGestureRecognizer(supportedDevices: _configuration.dragDevices),
               (VerticalDragGestureRecognizer instance) {
                 instance
                   ..onDown = _handleDragDown
@@ -529,7 +574,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
         case Axis.horizontal:
           _gestureRecognizers = <Type, GestureRecognizerFactory>{
             HorizontalDragGestureRecognizer: GestureRecognizerFactoryWithHandlers<HorizontalDragGestureRecognizer>(
-              () => HorizontalDragGestureRecognizer(),
+              () => HorizontalDragGestureRecognizer(supportedDevices: _configuration.dragDevices),
               (HorizontalDragGestureRecognizer instance) {
                 instance
                   ..onDown = _handleDragDown
@@ -631,10 +676,11 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
 
   // Returns the offset that should result from applying [event] to the current
   // position, taking min/max scroll extent into account.
-  double _targetScrollOffsetForPointerScroll(PointerScrollEvent event) {
-    final double delta = _pointerSignalEventDelta(event);
-    return math.min(math.max(position.pixels + delta, position.minScrollExtent),
-      position.maxScrollExtent);
+  double _targetScrollOffsetForPointerScroll(double delta) {
+    return math.min(
+      math.max(position.pixels + delta, position.minScrollExtent),
+      position.maxScrollExtent,
+    );
   }
 
   // Returns the delta that should result from applying [event] with axis and
@@ -655,9 +701,10 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
       if (_physics != null && !_physics!.shouldAcceptUserOffset(position)) {
         return;
       }
-      final double targetScrollOffset = _targetScrollOffsetForPointerScroll(event);
+      final double delta = _pointerSignalEventDelta(event);
+      final double targetScrollOffset = _targetScrollOffsetForPointerScroll(delta);
       // Only express interest in the event if it would actually result in a scroll.
-      if (targetScrollOffset != position.pixels) {
+      if (delta != 0.0 && targetScrollOffset != position.pixels) {
         GestureBinding.instance!.pointerSignalResolver.register(event, _handlePointerScroll);
       }
     }
@@ -665,9 +712,10 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
 
   void _handlePointerScroll(PointerEvent event) {
     assert(event is PointerScrollEvent);
-    final double targetScrollOffset = _targetScrollOffsetForPointerScroll(event as PointerScrollEvent);
-    if (targetScrollOffset != position.pixels) {
-      position.pointerScroll(_pointerSignalEventDelta(event));
+    final double delta = _pointerSignalEventDelta(event as PointerScrollEvent);
+    final double targetScrollOffset = _targetScrollOffsetForPointerScroll(delta);
+    if (delta != 0.0 && targetScrollOffset != position.pixels) {
+      position.pointerScroll(delta);
     }
   }
 
@@ -711,14 +759,23 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     if (!widget.excludeFromSemantics) {
       result = _ScrollSemantics(
         key: _scrollSemanticsKey,
-        child: result,
         position: position,
         allowImplicitScrolling: _physics!.allowImplicitScrolling,
         semanticChildCount: widget.semanticChildCount,
+        child: result,
       );
     }
 
-    return _configuration.buildViewportChrome(context, result, widget.axisDirection);
+    final ScrollableDetails details = ScrollableDetails(
+      direction: widget.axisDirection,
+      controller: _effectiveScrollController,
+    );
+
+    return _configuration.buildScrollbar(
+      context,
+      _configuration.buildOverscrollIndicator(context, result, details),
+      details,
+    );
   }
 
   @override
@@ -730,6 +787,33 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
 
   @override
   String? get restorationId => widget.restorationId;
+}
+
+/// Describes the aspects of a Scrollable widget to inform inherited widgets
+/// like [ScrollBehavior] for decorating.
+///
+/// Decorations like [GlowingOverscrollIndicator]s and [Scrollbar]s require
+/// information about the Scrollable in order to be initialized.
+@immutable
+class ScrollableDetails {
+  /// Creates a set of details describing the [Scrollable]. The [direction]
+  /// cannot be null.
+  const ScrollableDetails({
+    required this.direction,
+    required this.controller,
+  });
+
+  /// The direction in which this widget scrolls.
+  ///
+  /// Cannot be null.
+  final AxisDirection direction;
+
+  /// A [ScrollController] that can be used to control the position of the
+  /// [Scrollable] widget.
+  ///
+  /// This can be used by [ScrollBehavior] to apply a [Scrollbar] to the associated
+  /// [Scrollable].
+  final ScrollController controller;
 }
 
 /// With [_ScrollSemantics] certain child [SemanticsNode]s can be
@@ -983,7 +1067,7 @@ class ScrollAction extends Action<ScrollIntent> {
     final bool contextIsValid = focus != null && focus.context != null;
     if (contextIsValid) {
       // Check for primary scrollable within the current context
-      if (Scrollable.of(focus!.context!) != null)
+      if (Scrollable.of(focus.context!) != null)
         return true;
       // Check for fallback scrollable with context from PrimaryScrollController
       if (PrimaryScrollController.of(focus.context!) != null) {

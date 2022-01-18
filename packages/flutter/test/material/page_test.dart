@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/cupertino.dart' show CupertinoPageRoute;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart' show CupertinoPageRoute;
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -66,7 +66,7 @@ void main() {
 
     expect(find.text('Page 1'), isOnstage);
     expect(find.text('Page 2'), findsNothing);
-  }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+  }, variant: TargetPlatformVariant.only(TargetPlatform.android), skip: kIsWeb);
 
   testWidgets('test page transition', (WidgetTester tester) async {
     final Key page2Key = UniqueKey();
@@ -104,14 +104,17 @@ void main() {
     expect(widget1InitialTopLeft.dy == widget2TopLeft.dy, true);
     // Page 2 is coming in from the right.
     expect(widget2TopLeft.dx > widget1InitialTopLeft.dx, true);
-    // The shadow should be drawn to one screen width to the left of where
-    // the page 2 box is. `paints` tests relative to the painter's given canvas
-    // rather than relative to the screen so assert that it's one screen
-    // width to the left of 0 offset box rect and nothing is drawn inside the
-    // box's rect.
-    expect(box, paints..rect(
-      rect: const Rect.fromLTWH(-800.0, 0.0, 800.0, 600.0)
-    ));
+    // As explained in _CupertinoEdgeShadowPainter.paint the shadow is drawn
+    // as a bunch of rects. The rects are covering an area to the left of
+    // where the page 2 box is and a width of 5% of the page 2 box width.
+    // `paints` tests relative to the painter's given canvas
+    // rather than relative to the screen so assert that the shadow starts at
+    // offset.dx = 0.
+    final PaintPattern paintsShadow = paints;
+    for (int i = 0; i < 0.05 * 800; i += 1) {
+      paintsShadow.rect(rect: Rect.fromLTWH(-i.toDouble() - 1.0 , 0.0, 1.0, 600));
+    }
+    expect(box, paintsShadow);
 
     await tester.pumpAndSettle();
 
@@ -144,7 +147,7 @@ void main() {
 
     // Page 1 is back where it started.
     expect(widget1InitialTopLeft == widget1TransientTopLeft, true);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
+  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS), skip: kIsWeb);
 
   testWidgets('test fullscreen dialog transition', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -204,7 +207,7 @@ void main() {
 
     // Page 1 is back where it started.
     expect(widget1InitialTopLeft == widget1TransientTopLeft, true);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
+  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS), skip: kIsWeb);
 
   testWidgets('test no back gesture on Android', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -234,7 +237,7 @@ void main() {
 
     // Page 2 didn't move
     expect(tester.getTopLeft(find.text('Page 2')), Offset.zero);
-  }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+  }, variant: TargetPlatformVariant.only(TargetPlatform.android), skip: kIsWeb);
 
   testWidgets('test back gesture', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -275,7 +278,7 @@ void main() {
     await tester.pump();
 
     expect(tester.getTopLeft(find.text('Page 2')), const Offset(100.0, 0.0));
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
+  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS), skip: kIsWeb);
 
   testWidgets('back gesture while OS changes', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
@@ -285,7 +288,7 @@ void main() {
           onPressed: () { Navigator.of(context).pushNamed('/b'); },
         ),
       ),
-      '/b': (BuildContext context) => Container(child: const Text('HELLO')),
+      '/b': (BuildContext context) => const Text('HELLO'),
     };
     await tester.pumpWidget(
       MaterialApp(
@@ -360,13 +363,13 @@ void main() {
     expect(find.text('PUSH'), findsNothing);
     expect(find.text('HELLO'), findsOneWidget);
     await tester.pump(const Duration(milliseconds: 20));
-    expect(find.text('PUSH'), findsOneWidget);
+    // As no transitions are specified for macOS the drag should do nothing
+    expect(find.text('PUSH'), findsNothing);
     expect(find.text('HELLO'), findsOneWidget);
     final Offset helloPosition6 = tester.getCenter(find.text('HELLO'));
-    expect(helloPosition5.dx, lessThan(helloPosition6.dx));
-    expect(helloPosition5.dy, helloPosition6.dy);
+    expect(helloPosition5, helloPosition6);
     expect(Theme.of(tester.element(find.text('HELLO'))).platform, TargetPlatform.macOS);
-  });
+  }, skip: kIsWeb);
 
   testWidgets('test no back gesture on fullscreen dialogs', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -477,7 +480,7 @@ void main() {
 
     // Page 1 is back where it started.
     expect(widget1InitialTopLeft == widget1TransientTopLeft, true);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS), skip: kIsWeb);
 
   testWidgets('test edge swipe then drop back at starting point works', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -545,7 +548,7 @@ void main() {
 
     expect(find.text('Page 1'), isOnstage);
     expect(find.text('Page 2'), findsNothing);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS), skip: kIsWeb);
 
   testWidgets('Back swipe dismiss interrupted by route push', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/28728
@@ -640,7 +643,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('route'), findsOneWidget);
     expect(find.text('push'), findsNothing);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS), skip: kIsWeb);
 
   testWidgets('During back swipe the route ignores input', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/39989
@@ -657,7 +660,7 @@ void main() {
           body: GestureDetector(
             onTap: () {
               homeTapCount += 1;
-            }
+            },
           ),
         ),
       ),
@@ -677,7 +680,7 @@ void main() {
             child: GestureDetector(
               onTap: () {
                 pageTapCount += 1;
-              }
+              },
             ),
           ),
         );
@@ -701,16 +704,16 @@ void main() {
 
     // Tapping on the "page" route doesn't trigger the GestureDetector because
     // it's being dragged.
-    await tester.tap(find.byKey(pageScaffoldKey));
+    await tester.tap(find.byKey(pageScaffoldKey), warnIfMissed: false);
     expect(homeTapCount, 1);
     expect(pageTapCount, 1);
 
     // Tapping the "page" route's back button doesn't do anything either.
-    await tester.tap(find.byTooltip('Back'));
+    await tester.tap(find.byTooltip('Back'), warnIfMissed: false);
     await tester.pumpAndSettle();
     expect(tester.getTopLeft(find.byKey(pageScaffoldKey)), const Offset(400, 0));
     expect(tester.getTopLeft(find.byKey(homeScaffoldKey)).dx, lessThan(0));
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS), skip: kIsWeb);
 
   testWidgets('After a pop caused by a back-swipe, input reaches the exposed route', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/41024
@@ -727,7 +730,7 @@ void main() {
           body: GestureDetector(
             onTap: () {
               homeTapCount += 1;
-            }
+            },
           ),
         ),
       ),
@@ -750,7 +753,7 @@ void main() {
             child: GestureDetector(
               onTap: () {
                 pageTapCount += 1;
-              }
+              },
             ),
           ),
         );
@@ -781,7 +784,7 @@ void main() {
     await tester.tap(find.byKey(homeScaffoldKey));
     expect(homeTapCount, 2);
     expect(pageTapCount, 1);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS), skip: kIsWeb);
 
   testWidgets('A MaterialPageRoute should slide out with CupertinoPageTransition when a compatible PageRoute is pushed on top of it', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/44864.
@@ -809,7 +812,7 @@ void main() {
     // Title of the first route slides to the left.
     expect(titleInitialTopLeft.dy, equals(titleTransientTopLeft.dy));
     expect(titleInitialTopLeft.dx, greaterThan(titleTransientTopLeft.dx));
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS), skip: kIsWeb);
 
   testWidgets('MaterialPage works', (WidgetTester tester) async {
     final LocalKey pageKey = UniqueKey();
@@ -825,7 +828,7 @@ void main() {
           return true;
         },
         transitionDelegate: detector,
-      )
+      ),
     );
 
     expect(detector.hasTransition, isFalse);
@@ -843,7 +846,7 @@ void main() {
           return true;
         },
         transitionDelegate: detector,
-      )
+      ),
     );
     // There should be no transition because the page has the same key.
     expect(detector.hasTransition, isFalse);
@@ -868,7 +871,7 @@ void main() {
           return true;
         },
         transitionDelegate: detector,
-      )
+      ),
     );
 
     expect(detector.hasTransition, isFalse);
@@ -889,7 +892,7 @@ void main() {
           return true;
         },
         transitionDelegate: detector,
-      )
+      ),
     );
     // There should be no transition because the page has the same key.
     expect(detector.hasTransition, isFalse);
@@ -911,6 +914,65 @@ void main() {
     expect(find.text('subpage'), findsOneWidget);
     expect(find.text('home'), findsOneWidget);
   });
+
+  testWidgets('MaterialPage restores its state', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      RootRestorationScope(
+        restorationId: 'root',
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Navigator(
+            onPopPage: (Route<dynamic> route, dynamic result) { return false; },
+            pages: const <Page<Object?>>[
+              MaterialPage<void>(
+                restorationId: 'p1',
+                child: TestRestorableWidget(restorationId: 'p1'),
+              ),
+            ],
+            restorationScopeId: 'nav',
+            onGenerateRoute: (RouteSettings settings) {
+              return MaterialPageRoute<void>(
+                settings: settings,
+                builder: (BuildContext context) {
+                  return TestRestorableWidget(restorationId: settings.name!);
+                },
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('p1'), findsOneWidget);
+    expect(find.text('count: 0'), findsOneWidget);
+
+    await tester.tap(find.text('increment'));
+    await tester.pump();
+    expect(find.text('count: 1'), findsOneWidget);
+
+    tester.state<NavigatorState>(find.byType(Navigator)).restorablePushNamed('p2');
+    await tester.pumpAndSettle();
+
+    expect(find.text('p1'), findsNothing);
+    expect(find.text('p2'), findsOneWidget);
+
+    await tester.tap(find.text('increment'));
+    await tester.pump();
+    await tester.tap(find.text('increment'));
+    await tester.pump();
+    expect(find.text('count: 2'), findsOneWidget);
+
+    await tester.restartAndRestore();
+
+    expect(find.text('p2'), findsOneWidget);
+    expect(find.text('count: 2'), findsOneWidget);
+
+    tester.state<NavigatorState>(find.byType(Navigator)).pop();
+    await tester.pumpAndSettle();
+
+    expect(find.text('p1'), findsOneWidget);
+    expect(find.text('count: 1'), findsOneWidget);
+  });
 }
 
 class TransitionDetector extends DefaultTransitionDelegate<void> {
@@ -919,13 +981,13 @@ class TransitionDetector extends DefaultTransitionDelegate<void> {
   Iterable<RouteTransitionRecord> resolve({
     required List<RouteTransitionRecord> newPageRouteHistory,
     required Map<RouteTransitionRecord?, RouteTransitionRecord> locationToExitingPageRoute,
-    required Map<RouteTransitionRecord?, List<RouteTransitionRecord>> pageRouteToPagelessRoutes
+    required Map<RouteTransitionRecord?, List<RouteTransitionRecord>> pageRouteToPagelessRoutes,
   }) {
     hasTransition = true;
     return super.resolve(
       newPageRouteHistory: newPageRouteHistory,
       locationToExitingPageRoute: locationToExitingPageRoute,
-      pageRouteToPagelessRoutes: pageRouteToPagelessRoutes
+      pageRouteToPagelessRoutes: pageRouteToPagelessRoutes,
     );
   }
 }
@@ -934,7 +996,7 @@ Widget buildNavigator({
   required List<Page<dynamic>> pages,
   required PopPageCallback onPopPage,
   GlobalKey<NavigatorState>? key,
-  TransitionDelegate<dynamic>? transitionDelegate
+  TransitionDelegate<dynamic>? transitionDelegate,
 }) {
   return MediaQuery(
     data: MediaQueryData.fromWindow(WidgetsBinding.instance!.window),
@@ -942,7 +1004,7 @@ Widget buildNavigator({
       locale: const Locale('en', 'US'),
       delegates: const <LocalizationsDelegate<dynamic>>[
         DefaultMaterialLocalizations.delegate,
-        DefaultWidgetsLocalizations.delegate
+        DefaultWidgetsLocalizations.delegate,
       ],
       child: Directionality(
         textDirection: TextDirection.ltr,
@@ -958,7 +1020,7 @@ Widget buildNavigator({
 }
 
 class KeepsStateTestWidget extends StatefulWidget {
-  const KeepsStateTestWidget({this.navigatorKey});
+  const KeepsStateTestWidget({Key? key, this.navigatorKey}) : super(key: key);
 
   final Key? navigatorKey;
 
@@ -988,6 +1050,45 @@ class _KeepsStateTestWidgetState extends State<KeepsStateTestWidget> {
           return true;
         },
       ),
+    );
+  }
+}
+
+class TestRestorableWidget extends StatefulWidget {
+  const TestRestorableWidget({Key? key, required this.restorationId}) : super(key: key);
+
+  final String restorationId;
+
+  @override
+  State<StatefulWidget> createState() => _TestRestorableWidgetState();
+}
+
+class _TestRestorableWidgetState extends State<TestRestorableWidget> with RestorationMixin {
+  @override
+  String? get restorationId => widget.restorationId;
+
+  final RestorableInt counter = RestorableInt(0);
+
+  @override
+  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
+    registerForRestoration(counter, 'counter');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: <Widget>[
+        Text(widget.restorationId),
+        Text('count: ${counter.value}'),
+        ElevatedButton(
+          onPressed: () {
+            setState(() {
+              counter.value++;
+            });
+          },
+          child: const Text('increment'),
+        ),
+      ],
     );
   }
 }

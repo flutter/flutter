@@ -2,19 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 
 // Standard header margin, determined from SwiftUI's Forms in iOS 14.2 SDK.
 const EdgeInsetsDirectional _kDefaultHeaderMargin =
-    EdgeInsetsDirectional.fromSTEB(16.5, 16.0, 16.5, 10.0);
+    EdgeInsetsDirectional.fromSTEB(20.0, 16.0, 20.0, 10.0);
+
+// Standard footer margin, determined from SwiftUI's Forms in iOS 14.2 SDK.
+const EdgeInsetsDirectional _kDefaultFooterMargin =
+    EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 10.0);
 
 // Used for iOS "Inset Grouped" margin, determined from SwiftUI's Forms in
 // iOS 14.2 SDK.
 const EdgeInsetsDirectional _kDefaultInsetGroupedRowsMargin =
-    EdgeInsetsDirectional.fromSTEB(16.5, 0.0, 16.5, 16.5);
+    EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 10.0);
 
 // Used for iOS "Inset Grouped" border radius, estimated from SwiftUI's Forms in
 // iOS 14.2 SDK.
@@ -39,6 +42,9 @@ enum _CupertinoFormSectionType { base, insetGrouped }
 /// The [header] parameter sets the form section header. The section header lies
 /// above the [children] rows, with margins that match the iOS style.
 ///
+/// The [footer] parameter sets the form section footer. The section footer
+/// lies below the [children] rows.
+///
 /// The [children] parameter is required and sets the list of rows shown in
 /// the section. The [children] parameter takes a list, as opposed to a more
 /// efficient builder function that lazy builds, because forms are intended to
@@ -60,7 +66,7 @@ enum _CupertinoFormSectionType { base, insetGrouped }
 ///
 /// {@macro flutter.material.Material.clipBehavior}
 class CupertinoFormSection extends StatelessWidget {
-  /// Creates a section that mimicks standard iOS forms.
+  /// Creates a section that mimics standard iOS forms.
   ///
   /// The base constructor for [CupertinoFormSection] constructs an
   /// edge-to-edge style section which includes an iOS-style header,
@@ -68,6 +74,9 @@ class CupertinoFormSection extends StatelessWidget {
   ///
   /// The [header] parameter sets the form section header. The section header
   /// lies above the [children] rows, with margins that match the iOS style.
+  ///
+  /// The [footer] parameter sets the form section footer. The section footer
+  /// lies below the [children] rows.
   ///
   /// The [children] parameter is required and sets the list of rows shown in
   /// the section. The [children] parameter takes a list, as opposed to a more
@@ -93,6 +102,7 @@ class CupertinoFormSection extends StatelessWidget {
     Key? key,
     required this.children,
     this.header,
+    this.footer,
     this.margin = EdgeInsets.zero,
     this.backgroundColor = CupertinoColors.systemGroupedBackground,
     this.decoration,
@@ -101,7 +111,7 @@ class CupertinoFormSection extends StatelessWidget {
         assert(children.length > 0),
         super(key: key);
 
-  /// Creates a section that mimicks standard "Inset Grouped" iOS forms.
+  /// Creates a section that mimics standard "Inset Grouped" iOS forms.
   ///
   /// The [CupertinoFormSection.insetGrouped] constructor creates a round-edged and
   /// padded section that is commonly seen in notched-displays like iPhone X and
@@ -110,6 +120,9 @@ class CupertinoFormSection extends StatelessWidget {
   ///
   /// The [header] parameter sets the form section header. The section header
   /// lies above the [children] rows, with margins that match the iOS style.
+  ///
+  /// The [footer] parameter sets the form section footer. The section footer
+  /// lies below the [children] rows.
   ///
   /// The [children] parameter is required and sets the list of rows shown in
   /// the section. The [children] parameter takes a list, as opposed to a more
@@ -136,6 +149,7 @@ class CupertinoFormSection extends StatelessWidget {
     Key? key,
     required this.children,
     this.header,
+    this.footer,
     this.margin = _kDefaultInsetGroupedRowsMargin,
     this.backgroundColor = CupertinoColors.systemGroupedBackground,
     this.decoration,
@@ -149,6 +163,10 @@ class CupertinoFormSection extends StatelessWidget {
   /// Sets the form section header. The section header lies above the
   /// [children] rows.
   final Widget? header;
+
+  /// Sets the form section footer. The section footer lies below the
+  /// [children] rows.
+  final Widget? footer;
 
   /// Margin around the content area of the section encapsulating [children].
   ///
@@ -199,7 +217,7 @@ class CupertinoFormSection extends StatelessWidget {
 
     // Short divider is used between rows.
     // The value of the starting inset (15.0) is determined using SwiftUI's Form
-    // seperators in the iOS 14.2 SDK.
+    // separators in the iOS 14.2 SDK.
     final Widget shortDivider = Container(
       margin: const EdgeInsetsDirectional.only(start: 15.0),
       color: dividerColor,
@@ -228,17 +246,26 @@ class CupertinoFormSection extends StatelessWidget {
       childrenWithDividers.add(longDivider);
     }
 
+    final BorderRadius childrenGroupBorderRadius;
+    switch (_type) {
+      case _CupertinoFormSectionType.insetGrouped:
+        childrenGroupBorderRadius = _kDefaultInsetGroupedBorderRadius;
+        break;
+      case _CupertinoFormSectionType.base:
+        childrenGroupBorderRadius = BorderRadius.zero;
+        break;
+    }
+
     // Refactored the decorate children group in one place to avoid repeating it
     // twice down bellow in the returned widget.
     final DecoratedBox decoratedChildrenGroup = DecoratedBox(
-      decoration: decoration ??
-          BoxDecoration(
-            color: CupertinoDynamicColor.resolve(
-                decoration?.color ??
-                    CupertinoColors.secondarySystemGroupedBackground,
-                context),
-            borderRadius: _kDefaultInsetGroupedBorderRadius,
-          ),
+      decoration: decoration ?? BoxDecoration(
+        color: CupertinoDynamicColor.resolve(
+          decoration?.color ?? CupertinoColors.secondarySystemGroupedBackground,
+          context,
+        ),
+        borderRadius: childrenGroupBorderRadius,
+      ),
       child: Column(
         children: childrenWithDividers,
       ),
@@ -250,31 +277,44 @@ class CupertinoFormSection extends StatelessWidget {
       ),
       child: Column(
         children: <Widget>[
-          Align(
-            alignment: AlignmentDirectional.centerStart,
-            child: header == null
-                ? null
-                : DefaultTextStyle(
-                    style: TextStyle(
-                      fontSize: 13.5,
-                      color:
-                          CupertinoColors.secondaryLabel.resolveFrom(context),
-                    ),
-                    child: Padding(
-                      padding: _kDefaultHeaderMargin,
-                      child: header!,
-                    ),
-                  ),
-          ),
+          if (header != null)
+            Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: DefaultTextStyle(
+                style: TextStyle(
+                  fontSize: 13.0,
+                  color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                ),
+                child: Padding(
+                  padding: _kDefaultHeaderMargin,
+                  child: header,
+                ),
+              ),
+            ),
           Padding(
             padding: margin,
             child: clipBehavior == Clip.none
-                ? decoratedChildrenGroup
-                : ClipRRect(
-                    borderRadius: _kDefaultInsetGroupedBorderRadius,
-                    clipBehavior: clipBehavior,
-                    child: decoratedChildrenGroup),
+              ? decoratedChildrenGroup
+              : ClipRRect(
+                  borderRadius: childrenGroupBorderRadius,
+                  clipBehavior: clipBehavior,
+                  child: decoratedChildrenGroup,
+                ),
           ),
+          if (footer != null)
+            Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: DefaultTextStyle(
+                style: TextStyle(
+                  fontSize: 13.0,
+                  color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                ),
+                child: Padding(
+                  padding: _kDefaultFooterMargin,
+                  child: footer,
+                ),
+              ),
+            ),
         ],
       ),
     );

@@ -18,7 +18,7 @@ void main() {
     expect(message(macPlatform), contains('https://flutter.dev/docs/get-started/install/macos#android-setup'));
     expect(message(linuxPlatform), contains('https://flutter.dev/docs/get-started/install/linux#android-setup'));
     expect(message(windowsPlatform), contains('https://flutter.dev/docs/get-started/install/windows#android-setup'));
-    expect(message(FakePlatform()), contains('https://flutter.dev/docs/get-started/install '));
+    expect(message(FakePlatform(operatingSystem: '')), contains('https://flutter.dev/docs/get-started/install '));
   }
 
   testWithoutContext('Android installation instructions', () {

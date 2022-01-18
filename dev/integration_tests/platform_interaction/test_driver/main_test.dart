@@ -7,7 +7,7 @@ import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
 void main() {
   group('channel suite', () {
-    FlutterDriver driver;
+    late FlutterDriver driver;
 
     setUpAll(() async {
       driver = await FlutterDriver.connect(printCommunication: true);
@@ -28,7 +28,7 @@ void main() {
     });
 
     tearDownAll(() async {
-      driver?.close();
+      driver.close();
     });
   });
 }

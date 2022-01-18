@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show Color;
-
 import 'package:flutter/painting.dart';
 
 /// Defines a single color as well a color swatch with ten shades of the color.
@@ -92,9 +90,9 @@ class MaterialAccentColor extends ColorSwatch<int> {
 /// [color palette](https://material.io/design/color/).
 ///
 /// Instead of using an absolute color from these palettes, consider using
-/// [Theme.of] to obtain the local [ThemeData] structure, which exposes the
-/// colors selected for the current theme, such as [ThemeData.primaryColor] and
-/// [ThemeData.accentColor] (among many others).
+/// [Theme.of] to obtain the local [ThemeData.colorScheme], which defines
+/// the colors that most of the Material components use by default.
+///
 ///
 /// Most swatches have colors from 100 to 900 in increments of one hundred, plus
 /// the color 50. The smaller the number, the more pale the color. The greater
@@ -110,7 +108,7 @@ class MaterialAccentColor extends ColorSwatch<int> {
 /// using an integer for the specific color desired, as follows:
 ///
 /// ```dart
-/// Color selection = Colors.green[400]; // Selects a mid-range green.
+/// Color selection = Colors.green[400]!; // Selects a mid-range green.
 /// ```
 /// {@end-tool}
 /// {@tool snippet}
@@ -198,7 +196,6 @@ class MaterialAccentColor extends ColorSwatch<int> {
 class Colors {
   // This class is not meant to be instantiated or extended; this constructor
   // prevents instantiation and extension.
-  // ignore: unused_element
   Colors._();
 
   /// Completely invisible.

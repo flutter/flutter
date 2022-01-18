@@ -152,12 +152,10 @@ void main() {
 
       await tester.pumpWidget(
         Center(
-          child: Container(
-            child: SizedBox(
-              width: 200.0,
-              height: 100.0,
-              child: HtmlElementView(viewType: 'webview', key: key),
-            ),
+          child: SizedBox(
+            width: 200.0,
+            height: 100.0,
+            child: HtmlElementView(viewType: 'webview', key: key),
           ),
         ),
       );

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/web/bootstrap.dart';
+import 'package:package_config/package_config.dart';
 
 import '../../src/common.dart';
 
@@ -18,6 +19,15 @@ void main() {
     expect(result, contains('mapperEl.src = "mapper.js";'));
     // data-main is set to correct bootstrap module.
     expect(result, contains('requireEl.setAttribute("data-main", "main_module.bootstrap");'));
+  });
+
+test('generateBootstrapScript includes loading indicator', () {
+    final String result = generateBootstrapScript(
+      requireUrl: 'require.js',
+      mapperUrl: 'mapper.js',
+    );
+    expect(result, contains('"flutter-loader"'));
+    expect(result, contains('"indeterminate"'));
   });
 
   test('generateMainModule embeds urls correctly', () {
@@ -69,5 +79,27 @@ void main() {
     final String result = generateTestBootstrapFileContents('foo.dart.js', 'require.js', 'mapper.js');
 
     expect(result, contains('el.setAttribute("data-main", \'foo.dart.js\');'));
+  });
+
+  test('generateTestEntrypoint does not generate test config wrappers when testConfigPath is not passed', () {
+    final String result = generateTestEntrypoint(
+      relativeTestPath: 'relative_path.dart',
+      absolutePath: 'absolute_path.dart',
+      testConfigPath: null,
+      languageVersion: LanguageVersion(2, 8),
+    );
+
+    expect(result, isNot(contains('test_config.testExecutable')));
+  });
+
+  test('generateTestEntrypoint generates test config wrappers when testConfigPath is passed', () {
+    final String result = generateTestEntrypoint(
+      relativeTestPath: 'relative_path.dart',
+      absolutePath: 'absolute_path.dart',
+      testConfigPath: 'test_config_path.dart',
+      languageVersion: LanguageVersion(2, 8),
+    );
+
+    expect(result, contains('test_config.testExecutable'));
   });
 }

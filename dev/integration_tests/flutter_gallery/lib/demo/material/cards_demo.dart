@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../gallery/demo.dart';
@@ -151,7 +150,7 @@ class SelectableTravelDestinationItem extends StatefulWidget {
   final ShapeBorder? shape;
 
   @override
-  _SelectableTravelDestinationItemState createState() => _SelectableTravelDestinationItemState();
+  State<SelectableTravelDestinationItem> createState() => _SelectableTravelDestinationItemState();
 }
 
 class _SelectableTravelDestinationItemState extends State<SelectableTravelDestinationItem> {
@@ -336,10 +335,12 @@ class TravelDestinationContent extends StatelessWidget {
 }
 
 class CardsDemo extends StatefulWidget {
+  const CardsDemo({Key? key}) : super(key: key);
+
   static const String routeName = '/material/cards';
 
   @override
-  _CardsDemoState createState() => _CardsDemoState();
+  State<CardsDemo> createState() => _CardsDemoState();
 }
 
 class _CardsDemoState extends State<CardsDemo> {

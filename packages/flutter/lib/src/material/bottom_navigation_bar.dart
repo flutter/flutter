@@ -6,7 +6,6 @@ import 'dart:collection' show Queue;
 import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
-import 'package:flutter/rendering.dart';
 import 'package:vector_math/vector_math_64.dart' show Vector3;
 
 import 'bottom_navigation_bar_theme.dart';
@@ -20,6 +19,7 @@ import 'tooltip.dart';
 
 /// Defines the layout and behavior of a [BottomNavigationBar].
 ///
+/// For a sample on how to use these, please see [BottomNavigationBar].
 /// See also:
 ///
 ///  * [BottomNavigationBar]
@@ -50,10 +50,15 @@ enum BottomNavigationBarType {
 /// [BottomNavigationBarType.fixed] when there are less than four items, and
 /// [BottomNavigationBarType.shifting] otherwise.
 ///
+/// The length of [items] must be at least two and each item's icon and title/label
+/// must not be null.
+///
 ///  * [BottomNavigationBarType.fixed], the default when there are less than
 ///    four [items]. The selected item is rendered with the
 ///    [selectedItemColor] if it's non-null, otherwise the theme's
-///    [ThemeData.primaryColor] is used. If [backgroundColor] is null, The
+///    [ColorScheme.primary] color is used for [Brightness.light] themes
+///    and [ColorScheme.secondary] for [Brightness.dark] themes.
+///    If [backgroundColor] is null, The
 ///    navigation bar's background color defaults to the [Material] background
 ///    color, [ThemeData.canvasColor] (essentially opaque white).
 ///  * [BottomNavigationBarType.shifting], the default when there are four
@@ -66,12 +71,10 @@ enum BottomNavigationBarType {
 /// {@tool dartpad --template=stateful_widget_material}
 /// This example shows a [BottomNavigationBar] as it is used within a [Scaffold]
 /// widget. The [BottomNavigationBar] has three [BottomNavigationBarItem]
-/// widgets and the [currentIndex] is set to index 0. The selected item is
+/// widgets, which means it defaults to [BottomNavigationBarType.fixed], and
+/// the [currentIndex] is set to index 0. The selected item is
 /// amber. The `_onItemTapped` function changes the selected item's index
 /// and displays a corresponding message in the center of the [Scaffold].
-///
-/// ![A scaffold with a bottom navigation bar containing three bottom navigation
-/// bar items. The first one is selected.](https://flutter.github.io/assets-for-api-docs/assets/material/bottom_navigation_bar.png)
 ///
 /// ```dart
 /// int _selectedIndex = 0;
@@ -130,6 +133,86 @@ enum BottomNavigationBarType {
 /// ```
 /// {@end-tool}
 ///
+/// {@tool dartpad --template=stateful_widget_material}
+/// This example shows a [BottomNavigationBar] as it is used within a [Scaffold]
+/// widget. The [BottomNavigationBar] has four [BottomNavigationBarItem]
+/// widgets, which means it defaults to [BottomNavigationBarType.shifting], and
+/// the [currentIndex] is set to index 0. The selected item is amber in color.
+/// With each [BottomNavigationBarItem] widget, backgroundColor property is
+/// also defined, which changes the background color of [BottomNavigationBar],
+/// when that item is selected. The `_onItemTapped` function changes the
+/// selected item's index and displays a corresponding message in the center of
+/// the [Scaffold].
+///
+///
+/// ```dart
+/// int _selectedIndex = 0;
+/// static const TextStyle optionStyle = TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
+/// static const List<Widget> _widgetOptions = <Widget>[
+///   Text(
+///     'Index 0: Home',
+///     style: optionStyle,
+///   ),
+///   Text(
+///     'Index 1: Business',
+///     style: optionStyle,
+///   ),
+///   Text(
+///     'Index 2: School',
+///     style: optionStyle,
+///   ),
+///   Text(
+///     'Index 3: Settings',
+///     style: optionStyle,
+///   ),
+/// ];
+///
+/// void _onItemTapped(int index) {
+///   setState(() {
+///     _selectedIndex = index;
+///   });
+/// }
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     appBar: AppBar(
+///       title: const Text('BottomNavigationBar Sample'),
+///     ),
+///     body: Center(
+///       child: _widgetOptions.elementAt(_selectedIndex),
+///     ),
+///     bottomNavigationBar: BottomNavigationBar(
+///       items: const <BottomNavigationBarItem>[
+///         BottomNavigationBarItem(
+///           icon: Icon(Icons.home),
+///           label: 'Home',
+///           backgroundColor: Colors.red,
+///         ),
+///         BottomNavigationBarItem(
+///           icon: Icon(Icons.business),
+///           label: 'Business',
+///           backgroundColor: Colors.green,
+///         ),
+///         BottomNavigationBarItem(
+///           icon: Icon(Icons.school),
+///           label: 'School',
+///           backgroundColor: Colors.purple,
+///         ),
+///         BottomNavigationBarItem(
+///           icon: Icon(Icons.settings),
+///           label: 'Settings',
+///           backgroundColor: Colors.pink,
+///         ),
+///       ],
+///       currentIndex: _selectedIndex,
+///       selectedItemColor: Colors.amber[800],
+///       onTap: _onItemTapped,
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
 /// See also:
 ///
 ///  * [BottomNavigationBarItem]
@@ -193,6 +276,7 @@ class BottomNavigationBar extends StatefulWidget {
     this.showSelectedLabels,
     this.showUnselectedLabels,
     this.mouseCursor,
+    this.enableFeedback,
   }) : assert(items != null),
        assert(items.length >= 2),
        assert(
@@ -205,7 +289,7 @@ class BottomNavigationBar extends StatefulWidget {
        assert(iconSize != null && iconSize >= 0.0),
        assert(
          selectedItemColor == null || fixedColor == null,
-         'Either selectedItemColor or fixedColor can be specified, but not both'
+         'Either selectedItemColor or fixedColor can be specified, but not both',
        ),
        assert(selectedFontSize != null && selectedFontSize >= 0.0),
        assert(unselectedFontSize != null && unselectedFontSize >= 0.0),
@@ -328,8 +412,18 @@ class BottomNavigationBar extends StatefulWidget {
   /// If this property is null, [SystemMouseCursors.click] will be used.
   final MouseCursor? mouseCursor;
 
+  /// Whether detected gestures should provide acoustic and/or haptic feedback.
+  ///
+  /// For example, on Android a tap will produce a clicking sound and a
+  /// long-press will produce a short vibration, when feedback is enabled.
+  ///
+  /// See also:
+  ///
+  ///  * [Feedback] for providing platform-specific feedback to certain actions.
+  final bool? enableFeedback;
+
   @override
-  _BottomNavigationBarState createState() => _BottomNavigationBarState();
+  State<BottomNavigationBar> createState() => _BottomNavigationBarState();
 }
 
 // This represents a single tile in the bottom navigation bar. It is intended
@@ -352,6 +446,7 @@ class _BottomNavigationTile extends StatelessWidget {
     required this.showUnselectedLabels,
     this.indexLabel,
     required this.mouseCursor,
+    required this.enableFeedback,
     }) : assert(type != null),
          assert(item != null),
          assert(animation != null),
@@ -376,6 +471,7 @@ class _BottomNavigationTile extends StatelessWidget {
   final bool showSelectedLabels;
   final bool showUnselectedLabels;
   final MouseCursor mouseCursor;
+  final bool enableFeedback;
 
   @override
   Widget build(BuildContext context) {
@@ -396,6 +492,9 @@ class _BottomNavigationTile extends StatelessWidget {
     // The amount that the unselected icons are bigger than the selected icon,
     // (or zero if the unselected icons are not any bigger than the selected icon).
     final double unselectedIconDiff = math.max(unselectedIconSize - selectedIconSize, 0);
+
+    // The effective tool tip message to be shown on the BottomNavigationBarItem.
+    final String? effectiveTooltip = item.tooltip == '' ? null : item.tooltip ?? item.label;
 
     // Defines the padding for the animating icons + labels.
     //
@@ -457,6 +556,7 @@ class _BottomNavigationTile extends StatelessWidget {
     Widget result = InkResponse(
       onTap: onTap,
       mouseCursor: mouseCursor,
+      enableFeedback: enableFeedback,
       child: Padding(
         padding: EdgeInsets.only(top: topPadding, bottom: bottomPadding),
         child: Column(
@@ -487,11 +587,12 @@ class _BottomNavigationTile extends StatelessWidget {
       ),
     );
 
-    if (item.label != null) {
+    if (effectiveTooltip != null) {
       result = Tooltip(
-        message: item.label!,
+        message: effectiveTooltip,
         preferBelow: false,
         verticalOffset: selectedIconSize + selectedFontSize,
+        excludeFromSemantics: true,
         child: result,
       );
     }
@@ -555,11 +656,9 @@ class _TileIcon extends StatelessWidget {
     return Align(
       alignment: Alignment.topCenter,
       heightFactor: 1.0,
-      child: Container(
-        child: IconTheme(
-          data: iconThemeData,
-          child: selected ? item.activeIcon : item.icon,
-        ),
+      child: IconTheme(
+        data: iconThemeData,
+        child: selected ? item.activeIcon : item.icon,
       ),
     );
   }
@@ -839,10 +938,10 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
     final Color themeColor;
     switch (themeData.brightness) {
       case Brightness.light:
-        themeColor = themeData.primaryColor;
+        themeColor = themeData.colorScheme.primary;
         break;
       case Brightness.dark:
-        themeColor = themeData.accentColor;
+        themeColor = themeData.colorScheme.secondary;
         break;
     }
 
@@ -883,9 +982,9 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
         unselectedIconTheme: widget.unselectedIconTheme ?? bottomTheme.unselectedIconTheme,
         selectedLabelStyle: effectiveSelectedLabelStyle,
         unselectedLabelStyle: effectiveUnselectedLabelStyle,
+        enableFeedback: widget.enableFeedback ?? bottomTheme.enableFeedback ?? true,
         onTap: () {
-          if (widget.onTap != null)
-            widget.onTap!(i);
+          widget.onTap?.call(i);
         },
         colorTween: colorTween,
         flex: _evaluateFlex(_animations[i]),
@@ -917,9 +1016,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
     assert(Overlay.of(context, debugRequiredFor: widget) != null);
 
     final BottomNavigationBarThemeData bottomTheme = BottomNavigationBarTheme.of(context);
-
-    // Labels apply up to _bottomMargin padding. Remainder is media padding.
-    final double additionalBottomPadding = math.max(MediaQuery.of(context).padding.bottom - widget.selectedFontSize / 2.0, 0.0);
+    final double additionalBottomPadding = MediaQuery.of(context).padding.bottom;
     Color? backgroundColor;
     switch (_effectiveType) {
       case BottomNavigationBarType.fixed:

@@ -2,10 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../cache.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../runner/flutter_command.dart';
 import '../template.dart';
 
@@ -21,19 +23,19 @@ class IdeConfigCommand extends FlutterCommand {
       'update-templates',
       negatable: false,
       help: 'Update the templates in the template directory from the current '
-          'configuration files. This is the opposite of what $name usually does. '
-          'Will search the flutter tree for .iml files and copy any missing ones '
-          'into the template directory. If --overwrite is also specified, it will '
-          'update any out-of-date files, and remove any deleted files from the '
-          'template directory.',
+            'configuration files. This is the opposite of what $name usually does. '
+            'Will search the flutter tree for *.iml files and copy any missing ones '
+            'into the template directory. If "--overwrite" is also specified, it will '
+            'update any out-of-date files, and remove any deleted files from the '
+            'template directory.',
     );
     argParser.addFlag(
       'with-root-module',
       negatable: true,
       defaultsTo: true,
       help: 'Also create module that corresponds to the root of Flutter tree. '
-          'This makes the entire Flutter tree browsable and searchable in IDE. '
-          'Without this flag, only the child modules will be visible in IDE.',
+            'This makes the entire Flutter tree browsable and searchable in IDE. '
+            'Without this flag, only the child modules will be visible in IDE.',
     );
   }
 
@@ -232,7 +234,7 @@ class IdeConfigCommand extends FlutterCommand {
 
     globals.printStatus('Updating IDE configuration for Flutter tree at $dirPath...');
     int generatedCount = 0;
-    generatedCount += _renderTemplate(_ideName, dirPath, <String, dynamic>{
+    generatedCount += _renderTemplate(_ideName, dirPath, <String, Object>{
       'withRootModule': boolArg('with-root-module'),
       'android': true,
     });
@@ -245,7 +247,7 @@ class IdeConfigCommand extends FlutterCommand {
     return FlutterCommandResult.success();
   }
 
-  int _renderTemplate(String templateName, String dirPath, Map<String, dynamic> context) {
+  int _renderTemplate(String templateName, String dirPath, Map<String, Object> context) {
     final Template template = Template(
       _templateDirectory,
       _templateDirectory,

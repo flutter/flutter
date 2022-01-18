@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:collection';
 
 import 'package:meta/meta.dart';
@@ -9,63 +11,69 @@ import 'package:meta/meta.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
-import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/net.dart';
 import '../cache.dart';
 import '../dart/pub.dart';
-import '../globals.dart' as globals;
+import '../globals_null_migrated.dart' as globals;
 import '../runner/flutter_command.dart';
 
 /// Map from package name to package version, used to artificially pin a pub
 /// package version in cases when upgrading to the latest breaks Flutter.
 const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
-  // Add pinned packages here.
+  // Add pinned packages here. Please leave a comment explaining why.
+  // PACKAGES WITH INCOMPATIBLE LATER VERSIONS
   // Dart analyzer does not catch renamed or deleted files.
   // Therefore, we control the version of flutter_gallery_assets so that
   // existing tests do not fail when the package has a new version.
-  'flutter_gallery_assets': '^0.2.0',
-  'mockito': '4.1.1',  // Prevent mockito from upgrading to the source gen version.
-  'vm_service_client': '0.2.6+2', // Final version before being marked deprecated.
-  'flutter_template_images': '1.0.1', // Must always exactly match flutter_tools template.
-  'shelf': '0.7.5',
-  // Dart team owned nnbd deps
-  'async': '2.5.0-nullsafety.3',
-  'boolean_selector': '2.1.0-nullsafety.3',
-  'characters': '1.1.0-nullsafety.5',
-  'charcode': '1.2.0-nullsafety.3',
-  'clock': '1.1.0-nullsafety.3',
-  'collection': '1.15.0-nullsafety.5',
-  'intl': '0.17.0-nullsafety.2',
-  'fake_async': '1.2.0-nullsafety.3',
-  'js': '0.6.3-nullsafety.3',
-  'matcher': '0.12.10-nullsafety.3',
-  'meta': '1.3.0-nullsafety.6',
-  'path': '1.8.0-nullsafety.3',
-  'pedantic': '1.10.0-nullsafety.3',
-  'pool': '1.5.0-nullsafety.3',
-  'source_maps': '0.10.10-nullsafety.3',
-  'source_map_stack_trace': '2.1.0-nullsafety.4',
-  'source_span': '1.8.0-nullsafety.4',
-  'stack_trace': '1.10.0-nullsafety.6',
-  'stream_channel': '2.1.0-nullsafety.3',
-  'string_scanner': '1.1.0-nullsafety.3',
-  'term_glyph': '1.2.0-nullsafety.3',
-  'test': '1.16.0-nullsafety.9',
-  'test_api': '0.2.19-nullsafety.6',
-  'test_core': '0.3.12-nullsafety.9',
-  'typed_data': '1.3.0-nullsafety.5',
-  'vector_math': '2.1.0-nullsafety.5',
-  // Flutter team owned nnbd deps
-  'platform': '3.0.0-nullsafety.4',
-  'file': '6.0.0-nullsafety.4',
-  'process': '4.0.0-nullsafety.4',
-  'process_runner': '4.0.0-nullsafety.5',
-  'path_provider': '1.6.14',
-  'video_player': '2.0.0-nullsafety.2',
-  'url_launcher': '6.0.0-nullsafety.1',
-  'connectivity': '3.0.0-nullsafety.1',
-  'device_info': '2.0.0-nullsafety.1',
+  'flutter_gallery_assets': '^1.0.1',
+  'flutter_template_images': '3.0.0', // Must always exactly match flutter_tools template.
+  // DART TEAM OWNED NNBD DEPS
+  'archive': '">=3.0.0-nullsafety.0"',
+  'async': '">=2.5.0-nullsafety.3"',
+  'boolean_selector': '">=2.1.0-nullsafety.3"',
+  'characters': '">=1.1.0-nullsafety.5"',
+  'charcode': '">=1.2.0-nullsafety.3"',
+  'clock': '">=1.1.0-nullsafety.3"',
+  'collection': '">=1.15.0-nullsafety.5"',
+  'fake_async': '">=1.2.0-nullsafety.3"',
+  'intl': '">=0.17.0-nullsafety.2"',
+  'js': '">=0.6.3-nullsafety.3"',
+  'matcher': '">=0.12.10-nullsafety.3"',
+  'meta': '">=1.3.0-nullsafety.6"',
+  'path': '">=1.8.0-nullsafety.3"',
+  'pedantic': '">=1.10.0-nullsafety.3"',
+  'petitparser': '">=4.0.0-nullsafety.1"',
+  'pool': '">=1.5.0-nullsafety.3"',
+  'source_map_stack_trace': '">=2.1.0-nullsafety.4"',
+  'source_maps': '">=0.10.10-nullsafety.3"',
+  'source_span': '">=1.8.0-nullsafety.4"',
+  'stack_trace': '">=1.10.0-nullsafety.6"',
+  'stream_channel': '">=2.1.0-nullsafety.3"',
+  'string_scanner': '">=1.1.0-nullsafety.3"',
+  'term_glyph': '">=1.2.0-nullsafety.3"',
+  'test': '">=1.16.0-nullsafety.16"',
+  'test_api': '">=0.2.19-nullsafety.6"',
+  'test_core': '">=0.3.12-nullsafety.15"',
+  'typed_data': '">=1.3.0-nullsafety.5"',
+  'vector_math': '">=2.1.0-nullsafety.5"',
+  'vm_service': '">=6.0.1-nullsafety.1"',
+  'xml': '">=5.0.0-nullsafety.1"',
+  // FLUTTER TEAM OWNED NNBD DEPS
+  'connectivity': '">=3.0.0-nullsafety.1"',
+  'device_info': '">=2.0.0-nullsafety.1"',
+  'file': '">=6.0.0-nullsafety.4"',
+  'path_provider': '">=2.0.0-nullsafety.1"',
+  'platform': '">=3.0.0-nullsafety.4"',
+  'process': '">=4.0.0-nullsafety.4"',
+  'process_runner': '">=4.0.0-nullsafety.5"',
+  'url_launcher': '">=6.0.0-nullsafety.1"',
+  // This is pinned to avoid the performance regression from a reverted feature
+  // from https://github.com/dart-lang/shelf/issues/189 . This can be removed
+  // when a new major version of shelf is published.
+  'shelf': '1.1.4',
+  // Latest version does not resolve on our CI.
+  'video_player': '2.1.1',
 };
 
 class UpdatePackagesCommand extends FlutterCommand {
@@ -81,19 +89,19 @@ class UpdatePackagesCommand extends FlutterCommand {
       ..addFlag(
         'paths',
         help: 'Finds paths in the dependency chain leading from package specified '
-              'in --from to package specified in --to.',
+              'in "--from" to package specified in "--to".',
         defaultsTo: false,
         negatable: false,
       )
       ..addOption(
         'from',
-        help: 'Used with flag --dependency-path. Specifies the package to begin '
+        help: 'Used with "--dependency-path". Specifies the package to begin '
               'searching dependency path from.',
       )
       ..addOption(
         'to',
-        help: 'Used with flag --dependency-path. Specifies the package that the '
-              'sought after dependency path leads to.',
+        help: 'Used with "--dependency-path". Specifies the package that the '
+              'sought-after dependency path leads to.',
       )
       ..addFlag(
         'transitive-closure',
@@ -105,20 +113,26 @@ class UpdatePackagesCommand extends FlutterCommand {
       ..addFlag(
         'consumer-only',
         help: 'Only prints the dependency graph that is the transitive closure '
-              'that a consumer of the Flutter SDK will observe (When combined '
-              'with transitive-closure)',
+              'that a consumer of the Flutter SDK will observe (when combined '
+              'with transitive-closure).',
         defaultsTo: false,
         negatable: false,
       )
       ..addFlag(
         'verify-only',
-        help: 'verifies the package checksum without changing or updating deps',
+        help: 'Verifies the package checksum without changing or updating deps.',
         defaultsTo: false,
         negatable: false,
       )
       ..addFlag(
         'offline',
-        help: 'Use cached packages instead of accessing the network',
+        help: 'Use cached packages instead of accessing the network.',
+        defaultsTo: false,
+        negatable: false,
+      )
+      ..addFlag(
+        'crash',
+        help: 'For Flutter CLI testing only, forces this command to throw an unhandled exception.',
         defaultsTo: false,
         negatable: false,
       );
@@ -140,7 +154,7 @@ class UpdatePackagesCommand extends FlutterCommand {
   // Lazy-initialize the net utilities with values from the context.
   Net _cachedNet;
   Net get _net => _cachedNet ??= Net(
-    httpClientFactory: context.get<HttpClientFactory>() ?? () => HttpClient(),
+    httpClientFactory: context.get<HttpClientFactory>(),
     logger: globals.logger,
     platform: globals.platform,
   );
@@ -150,7 +164,7 @@ class UpdatePackagesCommand extends FlutterCommand {
       'Downloading lcov data for package:flutter...',
     );
     final String urlBase = globals.platform.environment['FLUTTER_STORAGE_BASE_URL'] ?? 'https://storage.googleapis.com';
-    final Uri coverageUri = Uri.parse('$urlBase/flutter_infra/flutter/coverage/lcov.info');
+    final Uri coverageUri = Uri.parse('$urlBase/flutter_infra_release/flutter/coverage/lcov.info');
     final List<int> data = await _net.fetchUrl(coverageUri);
     final String coverageDir = globals.fs.path.join(
       Cache.flutterRoot,
@@ -175,6 +189,11 @@ class UpdatePackagesCommand extends FlutterCommand {
     final bool isVerifyOnly = boolArg('verify-only');
     final bool isConsumerOnly = boolArg('consumer-only');
     final bool offline = boolArg('offline');
+    final bool crash = boolArg('crash');
+
+    if (crash) {
+      throw StateError('test crash please ignore.');
+    }
 
     if (upgrade && offline) {
       throwToolExit(
@@ -1097,7 +1116,7 @@ class PubspecDependency extends PubspecLine {
       final String trailingComment = line.substring(hashIndex, line.length);
       assert(line.endsWith(trailingComment));
       isTransitive = trailingComment == kTransitiveMagicString;
-      suffix = ' ' + trailingComment;
+      suffix = ' $trailingComment';
       stripped = line.substring(colonIndex + 1, hashIndex).trimRight();
     } else {
       stripped = line.substring(colonIndex + 1, line.length).trimRight();
@@ -1392,7 +1411,7 @@ class PubDependencyTree {
 
 // Produces a 16-bit checksum from the codePoints of the package name and
 // version strings using Fletcher's algorithm.
-String _computeChecksum(Iterable<String> names, String getVersion(String name)) {
+String _computeChecksum(Iterable<String> names, String Function(String name) getVersion) {
   int lowerCheck = 0;
   int upperCheck = 0;
   final List<String> sortedNames = names.toList()..sort();
@@ -1425,12 +1444,13 @@ Directory createTemporaryFlutterSdk(
   Directory realFlutter,
   List<PubspecYaml> pubspecs,
 ) {
-  final Set<String> currentPackages = realFlutter
-    .childDirectory('packages')
-    .listSync()
-    .whereType<Directory>()
-    .map((Directory directory) => fileSystem.path.basename(directory.path))
-    .toSet();
+  final Set<String> currentPackages = <String>{};
+  for (final FileSystemEntity entity in realFlutter.childDirectory('packages').listSync()) {
+    // Verify that a pubspec.yaml exists to ensure this isn't a left over directory.
+    if (entity is Directory && entity.childFile('pubspec.yaml').existsSync()) {
+      currentPackages.add(fileSystem.path.basename(entity.path));
+    }
+  }
 
   final Map<String, PubspecYaml> pubspecsByName = <String, PubspecYaml>{};
   for (final PubspecYaml pubspec in pubspecs) {

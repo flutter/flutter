@@ -100,6 +100,42 @@ class InlineSpanSemanticsInformation {
   String toString() => '${objectRuntimeType(this, 'InlineSpanSemanticsInformation')}{text: $text, semanticsLabel: $semanticsLabel, recognizer: $recognizer}';
 }
 
+/// Combines _semanticsInfo entries where permissible.
+///
+/// Consecutive inline spans can be combined if their
+/// [InlineSpanSemanticsInformation.requiresOwnNode] return false.
+List<InlineSpanSemanticsInformation> combineSemanticsInfo(List<InlineSpanSemanticsInformation> infoList) {
+  final List<InlineSpanSemanticsInformation> combined = <InlineSpanSemanticsInformation>[];
+  String workingText = '';
+  // TODO(ianh): this algorithm is internally inconsistent. workingText
+  // never becomes null, but we check for it being so below.
+  String? workingLabel;
+  for (final InlineSpanSemanticsInformation info in infoList) {
+    if (info.requiresOwnNode) {
+      combined.add(InlineSpanSemanticsInformation(
+        workingText,
+        semanticsLabel: workingLabel ?? workingText,
+      ));
+      workingText = '';
+      workingLabel = null;
+      combined.add(info);
+    } else {
+      workingText += info.text;
+      workingLabel ??= '';
+      if (info.semanticsLabel != null) {
+        workingLabel += info.semanticsLabel!;
+      } else {
+        workingLabel += info.text;
+      }
+    }
+  }
+  combined.add(InlineSpanSemanticsInformation(
+    workingText,
+    semanticsLabel: workingLabel,
+  ));
+  return combined;
+}
+
 /// An immutable span of inline content which forms part of a paragraph.
 ///
 ///  * The subclass [TextSpan] specifies text and may contain child [InlineSpan]s.
@@ -119,17 +155,17 @@ class InlineSpanSemanticsInformation {
 /// Text.rich(
 ///   TextSpan(
 ///     text: 'My name is ',
-///     style: TextStyle(color: Colors.black),
+///     style: const TextStyle(color: Colors.black),
 ///     children: <InlineSpan>[
 ///       WidgetSpan(
 ///         alignment: PlaceholderAlignment.baseline,
 ///         baseline: TextBaseline.alphabetic,
 ///         child: ConstrainedBox(
-///           constraints: BoxConstraints(maxWidth: 100),
-///           child: TextField(),
+///           constraints: const BoxConstraints(maxWidth: 100),
+///           child: const TextField(),
 ///         )
 ///       ),
-///       TextSpan(
+///       const TextSpan(
 ///         text: '.',
 ///       ),
 ///     ],
@@ -156,32 +192,6 @@ abstract class InlineSpan extends DiagnosticableTree {
   /// of [TextSpan].
   final TextStyle? style;
 
-  // TODO(garyq): Remove the deprecated visitTextSpan, text, and children.
-  /// Returns the text associated with this span if this is an instance of [TextSpan],
-  /// otherwise returns null.
-  @Deprecated(
-    'InlineSpan does not innately have text. Use TextSpan.text instead. '
-    'This feature was deprecated after v1.7.3.'
-  )
-  String? get text => null;
-
-  // TODO(garyq): Remove the deprecated visitTextSpan, text, and children.
-  /// Returns the [InlineSpan] children list associated with this span if this is an
-  /// instance of [TextSpan], otherwise returns null.
-  @Deprecated(
-    'InlineSpan does not innately have children. Use TextSpan.children instead. '
-    'This feature was deprecated after v1.7.3.'
-  )
-  List<InlineSpan>? get children => null;
-
-  /// Returns the [GestureRecognizer] associated with this span if this is an
-  /// instance of [TextSpan], otherwise returns null.
-  @Deprecated(
-    'InlineSpan does not innately have a recognizer. Use TextSpan.recognizer instead. '
-    'This feature was deprecated after v1.7.3.'
-  )
-  GestureRecognizer? get recognizer => null;
-
   /// Apply the properties of this object to the given [ParagraphBuilder], from
   /// which a [Paragraph] can be obtained.
   ///
@@ -195,18 +205,6 @@ abstract class InlineSpan extends DiagnosticableTree {
   ///
   /// [Paragraph] objects can be drawn on [Canvas] objects.
   void build(ui.ParagraphBuilder builder, { double textScaleFactor = 1.0, List<PlaceholderDimensions>? dimensions });
-
-  // TODO(garyq): Remove the deprecated visitTextSpan, text, and children.
-  /// Walks this [TextSpan] and any descendants in pre-order and calls `visitor`
-  /// for each span that has content.
-  ///
-  /// When `visitor` returns true, the walk will continue. When `visitor` returns
-  /// false, then the walk will end.
-  @Deprecated(
-    'Use visitChildren instead. '
-    'This feature was deprecated after v1.7.3.'
-  )
-  bool visitTextSpan(bool visitor(TextSpan span));
 
   /// Walks this [InlineSpan] and any descendants in pre-order and calls `visitor`
   /// for each span that has content.
@@ -318,21 +316,6 @@ abstract class InlineSpan extends DiagnosticableTree {
   /// This method should not be directly called. Use [codeUnitAt] instead.
   @protected
   int? codeUnitAtVisitor(int index, Accumulator offset);
-
-  /// Populates the `semanticsOffsets` and `semanticsElements` with the appropriate data
-  /// to be able to construct a [SemanticsNode].
-  ///
-  /// If applicable, the beginning and end text offset are added to [semanticsOffsets].
-  /// [PlaceholderSpan]s have a text length of 1, which corresponds to the object
-  /// replacement character (0xFFFC) that is inserted to represent it.
-  ///
-  /// Any [GestureRecognizer]s are added to `semanticsElements`. Null is added to
-  /// `semanticsElements` for [PlaceholderSpan]s.
-  @Deprecated(
-    'Implement computeSemanticsInformation instead. '
-    'This feature was deprecated after v1.7.3.'
-  )
-  void describeSemantics(Accumulator offset, List<int> semanticsOffsets, List<dynamic> semanticsElements);
 
   /// In checked mode, throws an exception if the object is not in a
   /// valid configuration. Otherwise, returns true.

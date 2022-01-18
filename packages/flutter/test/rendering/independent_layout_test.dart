@@ -4,9 +4,8 @@
 
 import 'dart:ui' as ui show window;
 
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import '../flutter_test_alternative.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import 'rendering_tester.dart';
 
@@ -18,7 +17,7 @@ class TestLayout {
         additionalConstraints: const BoxConstraints.tightFor(width: 800.0),
         child: RenderCustomPaint(
           painter: TestCallbackPainter(
-            onPaint: () { painted = true; }
+            onPaint: () { painted = true; },
           ),
           child: child = RenderConstrainedBox(
             additionalConstraints: const BoxConstraints.tightFor(height: 10.0, width: 10.0),

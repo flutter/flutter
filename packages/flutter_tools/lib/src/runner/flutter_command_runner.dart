@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:completion/completion.dart';
@@ -20,12 +22,6 @@ import '../globals.dart' as globals;
 import '../tester/flutter_tester.dart';
 import '../web/web_device.dart';
 
-const String kFlutterRootEnvironmentVariableName = 'FLUTTER_ROOT'; // should point to //flutter/ (root of flutter/flutter repo)
-const String kFlutterEngineEnvironmentVariableName = 'FLUTTER_ENGINE'; // should point to //engine/src/ (root of flutter/engine repo)
-const String kSnapshotFileName = 'flutter_tools.snapshot'; // in //flutter/bin/cache/
-const String kFlutterToolsScriptFileName = 'flutter_tools.dart'; // in //flutter/packages/flutter_tools/bin/
-const String kFlutterEnginePackageName = 'sky_engine';
-
 class FlutterCommandRunner extends CommandRunner<void> {
   FlutterCommandRunner({ bool verboseHelp = false }) : super(
     'flutter',
@@ -43,7 +39,14 @@ class FlutterCommandRunner extends CommandRunner<void> {
         abbr: 'v',
         negatable: false,
         help: 'Noisy logging, including all shell commands executed.\n'
-              'If used with --help, shows hidden options.');
+              'If used with "--help", shows hidden options. '
+              'If used with "flutter doctor", shows additional diagnostic information. '
+              '(Use "-vv" to force verbose logging in those cases.)');
+    argParser.addFlag('prefixed-errors',
+        negatable: false,
+        help: 'Causes lines sent to stderr to be prefixed with "ERROR:".',
+        hide: !verboseHelp,
+        defaultsTo: false);
     argParser.addFlag('quiet',
         negatable: false,
         hide: !verboseHelp,
@@ -56,8 +59,8 @@ class FlutterCommandRunner extends CommandRunner<void> {
     argParser.addOption('wrap-column',
         hide: !verboseHelp,
         help: 'Sets the output wrap column. If not set, uses the width of the terminal. No '
-            'wrapping occurs if not writing to a terminal. Use --no-wrap to turn off wrapping '
-            'when connected to a terminal.',
+              'wrapping occurs if not writing to a terminal. Use "--no-wrap" to turn off wrapping '
+              'when connected to a terminal.',
         defaultsTo: null);
     argParser.addOption('device-id',
         abbr: 'd',
@@ -68,7 +71,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
     argParser.addFlag('machine',
         negatable: false,
         hide: !verboseHelp,
-        help: 'When used with the --version flag, outputs the information using JSON.');
+        help: 'When used with the "--version" flag, outputs the information using JSON.');
     argParser.addFlag('color',
         negatable: true,
         hide: !verboseHelp,
@@ -100,7 +103,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
         hide: !verboseHelp,
         help: 'Name of a build output within the engine out directory, if you are building Flutter locally.\n'
               'Use this to select a specific version of the engine if you have built multiple engine targets.\n'
-              'This path is relative to --local-engine-src-path/out.');
+              'This path is relative to "--local-engine-src-path" or "--local-engine-src-out" (q.v.).');
 
     if (verboseHelp) {
       argParser.addSeparator('Options for testing the "flutter" tool itself:');
@@ -108,12 +111,12 @@ class FlutterCommandRunner extends CommandRunner<void> {
     argParser.addFlag('show-test-device',
         negatable: false,
         hide: !verboseHelp,
-        help: "List the special 'flutter-tester' device in device listings. "
-              'This headless device is used to\ntest Flutter tooling.');
+        help: 'List the special "flutter-tester" device in device listings. '
+              'This headless device is used to test Flutter tooling.');
     argParser.addFlag('show-web-server-device',
         negatable: false,
         hide: !verboseHelp,
-        help: "List the special 'web-server' device in device listings. "
+        help: 'List the special "web-server" device in device listings.',
     );
   }
 
@@ -161,7 +164,6 @@ class FlutterCommandRunner extends CommandRunner<void> {
       }
 
       command.usageException(error.message);
-      return null;
     }
   }
 
@@ -244,7 +246,15 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
         globals.flutterVersion.ensureVersionFile();
         final bool machineFlag = topLevelResults['machine'] as bool;
-        if (topLevelResults.command?.name != 'upgrade' && topLevelResults['version-check'] as bool && !machineFlag) {
+        final bool ci = await globals.botDetector.isRunningOnBot;
+        final bool redirectedCompletion = !globals.stdio.hasTerminal &&
+            (topLevelResults.command?.name ?? '').endsWith('-completion');
+        final bool isMachine = machineFlag || ci || redirectedCompletion;
+        final bool versionCheckFlag = topLevelResults['version-check'] as bool;
+        final bool explicitVersionCheckPassed = topLevelResults.wasParsed('version-check') && versionCheckFlag;
+
+        if (topLevelResults.command?.name != 'upgrade' &&
+            (explicitVersionCheckPassed || (versionCheckFlag && !isMachine))) {
           await globals.flutterVersion.checkFlutterVersionFreshness();
         }
 
@@ -269,7 +279,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
         }
 
         if (machineFlag) {
-          throwToolExit('The --machine flag is only valid with the --version flag.', exitCode: 2);
+          throwToolExit('The "--machine" flag is only valid with the "--version" flag.', exitCode: 2);
         }
         await super.runCommand(topLevelResults);
       },

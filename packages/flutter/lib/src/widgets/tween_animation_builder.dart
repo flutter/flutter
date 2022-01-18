@@ -72,14 +72,14 @@ import 'value_listenable_builder.dart';
 ///
 /// @override
 /// Widget build(BuildContext context) {
-///   return TweenAnimationBuilder(
+///   return TweenAnimationBuilder<double>(
 ///     tween: Tween<double>(begin: 0, end: targetValue),
-///     duration: Duration(seconds: 1),
-///     builder: (BuildContext context, double size, Widget child) {
+///     duration: const Duration(seconds: 1),
+///     builder: (BuildContext context, double size, Widget? child) {
 ///       return IconButton(
 ///         iconSize: size,
 ///         color: Colors.blue,
-///         icon: child,
+///         icon: child!,
 ///         onPressed: () {
 ///           setState(() {
 ///             targetValue = targetValue == 24.0 ? 48.0 : 24.0;
@@ -87,7 +87,7 @@ import 'value_listenable_builder.dart';
 ///         },
 ///       );
 ///     },
-///     child: Icon(Icons.aspect_ratio),
+///     child: const Icon(Icons.aspect_ratio),
 ///   );
 /// }
 /// ```
@@ -113,7 +113,7 @@ import 'value_listenable_builder.dart';
 /// [AnimatedBuilder], which can be used similarly to this
 /// [TweenAnimationBuilder], but unlike the latter it is powered by a
 /// developer-managed [AnimationController].
-class TweenAnimationBuilder<T extends Object> extends ImplicitlyAnimatedWidget {
+class TweenAnimationBuilder<T extends Object?> extends ImplicitlyAnimatedWidget {
   /// Creates a [TweenAnimationBuilder].
   ///
   /// The properties [tween], [duration], and [builder] are required. The values
@@ -194,7 +194,7 @@ class TweenAnimationBuilder<T extends Object> extends ImplicitlyAnimatedWidget {
   }
 }
 
-class _TweenAnimationBuilderState<T extends Object> extends AnimatedWidgetBaseState<TweenAnimationBuilder<T>> {
+class _TweenAnimationBuilderState<T extends Object?> extends AnimatedWidgetBaseState<TweenAnimationBuilder<T>> {
   Tween<T>? _currentTween;
 
   @override
@@ -203,7 +203,7 @@ class _TweenAnimationBuilderState<T extends Object> extends AnimatedWidgetBaseSt
     _currentTween!.begin ??= _currentTween!.end;
     super.initState();
     if (_currentTween!.begin != _currentTween!.end) {
-      controller!.forward();
+      controller.forward();
     }
   }
 
@@ -221,6 +221,6 @@ class _TweenAnimationBuilderState<T extends Object> extends AnimatedWidgetBaseSt
 
   @override
   Widget build(BuildContext context) {
-    return widget.builder(context, _currentTween!.evaluate(animation!), widget.child);
+    return widget.builder(context, _currentTween!.evaluate(animation), widget.child);
   }
 }

@@ -4,9 +4,7 @@
 
 import 'dart:ui' as ui show TextHeightBehavior;
 
-import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:vector_math/vector_math_64.dart';
 
@@ -20,8 +18,8 @@ import 'transitions.dart';
 
 // Examples can assume:
 // class MyWidget extends ImplicitlyAnimatedWidget {
-//   MyWidget() : super(duration: const Duration(seconds: 1));
-//   final Color targetColor = Colors.black;
+//   const MyWidget({Key? key, this.targetColor = Colors.black}) : super(key: key, duration: const Duration(seconds: 1));
+//   final Color targetColor;
 //   @override
 //   MyWidgetState createState() => MyWidgetState();
 // }
@@ -127,7 +125,7 @@ class EdgeInsetsGeometryTween extends Tween<EdgeInsetsGeometry> {
 /// [BorderRadius.lerp].
 ///
 /// See [Tween] for a discussion on how to use interpolation objects.
-class BorderRadiusTween extends Tween<BorderRadius> {
+class BorderRadiusTween extends Tween<BorderRadius?> {
   /// Creates a [BorderRadius] tween.
   ///
   /// The [begin] and [end] properties may be null; the null value
@@ -136,7 +134,7 @@ class BorderRadiusTween extends Tween<BorderRadius> {
 
   /// Returns the value this variable has at the given animation clock value.
   @override
-  BorderRadius lerp(double t) => BorderRadius.lerp(begin, end, t)!;
+  BorderRadius? lerp(double t) => BorderRadius.lerp(begin, end, t);
 }
 
 /// An interpolation between two [Border]s.
@@ -145,7 +143,7 @@ class BorderRadiusTween extends Tween<BorderRadius> {
 /// [Border.lerp].
 ///
 /// See [Tween] for a discussion on how to use interpolation objects.
-class BorderTween extends Tween<Border> {
+class BorderTween extends Tween<Border?> {
   /// Creates a [Border] tween.
   ///
   /// The [begin] and [end] properties may be null; the null value
@@ -154,7 +152,7 @@ class BorderTween extends Tween<Border> {
 
   /// Returns the value this variable has at the given animation clock value.
   @override
-  Border lerp(double t) => Border.lerp(begin, end, t)!;
+  Border? lerp(double t) => Border.lerp(begin, end, t);
 }
 
 /// An interpolation between two [Matrix4]s.
@@ -351,33 +349,30 @@ typedef TweenVisitor<T extends Object> = Tween<T>? Function(Tween<T>? tween, T t
 abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget> extends State<T> with SingleTickerProviderStateMixin<T> {
   /// The animation controller driving this widget's implicit animations.
   @protected
-  AnimationController? get controller => _controller;
-  AnimationController? _controller;
+  AnimationController get controller => _controller;
+  late final AnimationController _controller = AnimationController(
+    duration: widget.duration,
+    debugLabel: kDebugMode ? widget.toStringShort() : null,
+    vsync: this,
+  );
 
   /// The animation driving this widget's implicit animations.
-  Animation<double>? get animation => _animation;
-  Animation<double>? _animation;
+  Animation<double> get animation => _animation;
+  late Animation<double> _animation = _createCurve();
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      duration: widget.duration,
-      debugLabel: kDebugMode ? widget.toStringShort() : null,
-      vsync: this,
-    );
-    _controller!.addStatusListener((AnimationStatus status) {
+    _controller.addStatusListener((AnimationStatus status) {
       switch (status) {
         case AnimationStatus.completed:
-          if (widget.onEnd != null)
-            widget.onEnd!();
+          widget.onEnd?.call();
           break;
         case AnimationStatus.dismissed:
         case AnimationStatus.forward:
         case AnimationStatus.reverse:
       }
     });
-    _updateCurve();
     _constructTweens();
     didUpdateTweens();
   }
@@ -386,27 +381,27 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
   void didUpdateWidget(T oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.curve != oldWidget.curve)
-      _updateCurve();
-    _controller!.duration = widget.duration;
+      _animation = _createCurve();
+    _controller.duration = widget.duration;
     if (_constructTweens()) {
       forEachTween((Tween<dynamic>? tween, dynamic targetValue, TweenConstructor<dynamic> constructor) {
         _updateTween(tween, targetValue);
         return tween;
       });
-      _controller!
+      _controller
         ..value = 0.0
         ..forward();
       didUpdateTweens();
     }
   }
 
-  void _updateCurve() {
-    _animation = CurvedAnimation(parent: _controller!, curve: widget.curve);
+  CurvedAnimation _createCurve() {
+    return CurvedAnimation(parent: _controller, curve: widget.curve);
   }
 
   @override
   void dispose() {
-    _controller!.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
@@ -418,7 +413,7 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
     if (tween == null)
       return;
     tween
-      ..begin = tween.evaluate(_animation!)
+      ..begin = tween.evaluate(_animation)
       ..end = targetValue;
   }
 
@@ -481,14 +476,14 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
   ///
   /// ```dart
   /// class MyWidgetState extends AnimatedWidgetBaseState<MyWidget> {
-  ///   ColorTween _colorTween;
+  ///   ColorTween? _colorTween;
   ///
   ///   @override
   ///   Widget build(BuildContext context) {
   ///     return Text(
   ///       'Hello World',
   ///       // Computes the value of the text color at any given time.
-  ///       style: TextStyle(color: _colorTween.evaluate(animation)),
+  ///       style: TextStyle(color: _colorTween?.evaluate(animation)),
   ///     );
   ///   }
   ///
@@ -502,8 +497,8 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
   ///       widget.targetColor,
   ///       // A function that takes a color value and returns a tween
   ///       // beginning at that value.
-  ///       (value) => ColorTween(begin: value),
-  ///     );
+  ///       (dynamic value) => ColorTween(begin: value as Color?),
+  ///     ) as ColorTween?;
   ///
   ///     // We could have more tweens than one by using the visitor
   ///     // multiple times.
@@ -551,7 +546,7 @@ abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> exten
   @override
   void initState() {
     super.initState();
-    controller!.addListener(_handleAnimationChanged);
+    controller.addListener(_handleAnimationChanged);
   }
 
   void _handleAnimationChanged() {
@@ -597,9 +592,9 @@ abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> exten
 ///         height: selected ? 100.0 : 200.0,
 ///         color: selected ? Colors.red : Colors.blue,
 ///         alignment: selected ? Alignment.center : AlignmentDirectional.topCenter,
-///         duration: Duration(seconds: 2),
+///         duration: const Duration(seconds: 2),
 ///         curve: Curves.fastOutSlowIn,
-///         child: FlutterLogo(size: 75),
+///         child: const FlutterLogo(size: 75),
 ///       ),
 ///     ),
 ///   );
@@ -647,7 +642,7 @@ class AnimatedContainer extends ImplicitlyAnimatedWidget {
        assert(constraints == null || constraints.debugAssertIsValid()),
        assert(color == null || decoration == null,
          'Cannot provide both a color and a decoration\n'
-         'The color argument is just a shorthand for "decoration: BoxDecoration(color: color)".'
+         'The color argument is just a shorthand for "decoration: BoxDecoration(color: color)".',
        ),
        decoration = decoration ?? (color != null ? BoxDecoration(color: color) : null),
        constraints =
@@ -734,7 +729,7 @@ class AnimatedContainer extends ImplicitlyAnimatedWidget {
   final Clip clipBehavior;
 
   @override
-  _AnimatedContainerState createState() => _AnimatedContainerState();
+  AnimatedWidgetBaseState<AnimatedContainer> createState() => _AnimatedContainerState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -775,9 +770,8 @@ class _AnimatedContainerState extends AnimatedWidgetBaseState<AnimatedContainer>
 
   @override
   Widget build(BuildContext context) {
-    final Animation<double> animation = this.animation!;
+    final Animation<double> animation = this.animation;
     return Container(
-      child: widget.child,
       alignment: _alignment?.evaluate(animation),
       padding: _padding?.evaluate(animation),
       decoration: _decoration?.evaluate(animation),
@@ -787,6 +781,7 @@ class _AnimatedContainerState extends AnimatedWidgetBaseState<AnimatedContainer>
       transform: _transform?.evaluate(animation),
       transformAlignment: _transformAlignment?.evaluate(animation),
       clipBehavior: widget.clipBehavior,
+      child: widget.child,
     );
   }
 
@@ -820,7 +815,7 @@ class _AnimatedContainerState extends AnimatedWidgetBaseState<AnimatedContainer>
 ///
 /// ```dart
 /// double padValue = 0.0;
-/// _updatePadding(double value) {
+/// void _updatePadding(double value) {
 ///   setState(() {
 ///     padValue = value;
 ///   });
@@ -830,7 +825,7 @@ class _AnimatedContainerState extends AnimatedWidgetBaseState<AnimatedContainer>
 /// Widget build(BuildContext context) {
 ///   return Column(
 ///     mainAxisAlignment: MainAxisAlignment.center,
-///     children: [
+///     children: <Widget>[
 ///       AnimatedPadding(
 ///         padding: EdgeInsets.all(padValue),
 ///         duration: const Duration(seconds: 2),
@@ -843,7 +838,7 @@ class _AnimatedContainerState extends AnimatedWidgetBaseState<AnimatedContainer>
 ///       ),
 ///       Text('Padding: $padValue'),
 ///       ElevatedButton(
-///         child: Text('Change padding'),
+///         child: const Text('Change padding'),
 ///         onPressed: () {
 ///           _updatePadding(padValue == 0.0 ? 100.0 : 0.0);
 ///         }
@@ -885,7 +880,7 @@ class AnimatedPadding extends ImplicitlyAnimatedWidget {
   final Widget? child;
 
   @override
-  _AnimatedPaddingState createState() => _AnimatedPaddingState();
+  AnimatedWidgetBaseState<AnimatedPadding> createState() => _AnimatedPaddingState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -906,7 +901,7 @@ class _AnimatedPaddingState extends AnimatedWidgetBaseState<AnimatedPadding> {
   Widget build(BuildContext context) {
     return Padding(
       padding: _padding!
-        .evaluate(animation!)
+        .evaluate(animation)
         .clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity),
       child: widget.child,
     );
@@ -1029,7 +1024,7 @@ class AnimatedAlign extends ImplicitlyAnimatedWidget {
   final double? widthFactor;
 
   @override
-  _AnimatedAlignState createState() => _AnimatedAlignState();
+  AnimatedWidgetBaseState<AnimatedAlign> createState() => _AnimatedAlignState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -1057,9 +1052,9 @@ class _AnimatedAlignState extends AnimatedWidgetBaseState<AnimatedAlign> {
   @override
   Widget build(BuildContext context) {
     return Align(
-      alignment: _alignment!.evaluate(animation!)!,
-      heightFactor: _heightFactorTween?.evaluate(animation!),
-      widthFactor: _widthFactorTween?.evaluate(animation!),
+      alignment: _alignment!.evaluate(animation)!,
+      heightFactor: _heightFactorTween?.evaluate(animation),
+      widthFactor: _widthFactorTween?.evaluate(animation),
       child: widget.child,
     );
   }
@@ -1110,16 +1105,16 @@ class _AnimatedAlignState extends AnimatedWidgetBaseState<AnimatedAlign> {
 ///
 /// @override
 /// Widget build(BuildContext context) {
-///   return Container(
+///   return SizedBox(
 ///     width: 200,
 ///     height: 350,
 ///     child: Stack(
-///       children: [
+///       children: <Widget>[
 ///         AnimatedPositioned(
 ///           width: selected ? 200.0 : 50.0,
 ///           height: selected ? 50.0 : 200.0,
 ///           top: selected ? 50.0 : 150.0,
-///           duration: Duration(seconds: 2),
+///           duration: const Duration(seconds: 2),
 ///           curve: Curves.fastOutSlowIn,
 ///           child: GestureDetector(
 ///             onTap: () {
@@ -1129,7 +1124,7 @@ class _AnimatedAlignState extends AnimatedWidgetBaseState<AnimatedAlign> {
 ///             },
 ///             child: Container(
 ///               color: Colors.blue,
-///               child: Center(child: Text('Tap me')),
+///               child: const Center(child: Text('Tap me')),
 ///             ),
 ///           ),
 ///         ),
@@ -1218,7 +1213,7 @@ class AnimatedPositioned extends ImplicitlyAnimatedWidget {
   final double? height;
 
   @override
-  _AnimatedPositionedState createState() => _AnimatedPositionedState();
+  AnimatedWidgetBaseState<AnimatedPositioned> createState() => _AnimatedPositionedState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -1253,13 +1248,13 @@ class _AnimatedPositionedState extends AnimatedWidgetBaseState<AnimatedPositione
   @override
   Widget build(BuildContext context) {
     return Positioned(
+      left: _left?.evaluate(animation),
+      top: _top?.evaluate(animation),
+      right: _right?.evaluate(animation),
+      bottom: _bottom?.evaluate(animation),
+      width: _width?.evaluate(animation),
+      height: _height?.evaluate(animation),
       child: widget.child,
-      left: _left?.evaluate(animation!),
-      top: _top?.evaluate(animation!),
-      right: _right?.evaluate(animation!),
-      bottom: _bottom?.evaluate(animation!),
-      width: _width?.evaluate(animation!),
-      height: _height?.evaluate(animation!),
     );
   }
 
@@ -1353,7 +1348,7 @@ class AnimatedPositionedDirectional extends ImplicitlyAnimatedWidget {
   final double? height;
 
   @override
-  _AnimatedPositionedDirectionalState createState() => _AnimatedPositionedDirectionalState();
+  AnimatedWidgetBaseState<AnimatedPositionedDirectional> createState() => _AnimatedPositionedDirectionalState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -1390,13 +1385,13 @@ class _AnimatedPositionedDirectionalState extends AnimatedWidgetBaseState<Animat
     assert(debugCheckHasDirectionality(context));
     return Positioned.directional(
       textDirection: Directionality.of(context),
+      start: _start?.evaluate(animation),
+      top: _top?.evaluate(animation),
+      end: _end?.evaluate(animation),
+      bottom: _bottom?.evaluate(animation),
+      width: _width?.evaluate(animation),
+      height: _height?.evaluate(animation),
       child: widget.child,
-      start: _start?.evaluate(animation!),
-      top: _top?.evaluate(animation!),
-      end: _end?.evaluate(animation!),
-      bottom: _bottom?.evaluate(animation!),
-      width: _width?.evaluate(animation!),
-      height: _height?.evaluate(animation!),
     );
   }
 
@@ -1428,8 +1423,10 @@ class _AnimatedPositionedDirectionalState extends AnimatedWidgetBaseState<Animat
 ///
 /// ```dart
 /// class LogoFade extends StatefulWidget {
+///   const LogoFade({Key? key}) : super(key: key);
+///
 ///   @override
-///   createState() => LogoFadeState();
+///   State<LogoFade> createState() => LogoFadeState();
 /// }
 ///
 /// class LogoFadeState extends State<LogoFade> {
@@ -1443,14 +1440,14 @@ class _AnimatedPositionedDirectionalState extends AnimatedWidgetBaseState<Animat
 ///   Widget build(BuildContext context) {
 ///     return Column(
 ///       mainAxisAlignment: MainAxisAlignment.center,
-///       children: [
+///       children: <Widget>[
 ///         AnimatedOpacity(
 ///           opacity: opacityLevel,
-///           duration: Duration(seconds: 3),
-///           child: FlutterLogo(),
+///           duration: const Duration(seconds: 3),
+///           child: const FlutterLogo(),
 ///         ),
 ///         ElevatedButton(
-///           child: Text('Fade Logo'),
+///           child: const Text('Fade Logo'),
 ///           onPressed: _changeOpacity,
 ///         ),
 ///       ],
@@ -1508,7 +1505,7 @@ class AnimatedOpacity extends ImplicitlyAnimatedWidget {
   final bool alwaysIncludeSemantics;
 
   @override
-  _AnimatedOpacityState createState() => _AnimatedOpacityState();
+  ImplicitlyAnimatedWidgetState<AnimatedOpacity> createState() => _AnimatedOpacityState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -1528,15 +1525,15 @@ class _AnimatedOpacityState extends ImplicitlyAnimatedWidgetState<AnimatedOpacit
 
   @override
   void didUpdateTweens() {
-    _opacityAnimation = animation!.drive(_opacity!);
+    _opacityAnimation = animation.drive(_opacity!);
   }
 
   @override
   Widget build(BuildContext context) {
     return FadeTransition(
       opacity: _opacityAnimation,
-      child: widget.child,
       alwaysIncludeSemantics: widget.alwaysIncludeSemantics,
+      child: widget.child,
     );
   }
 }
@@ -1559,18 +1556,19 @@ class _AnimatedOpacityState extends ImplicitlyAnimatedWidgetState<AnimatedOpacit
 /// class _MyStatefulWidgetState extends State<MyStatefulWidget> with SingleTickerProviderStateMixin {
 ///   bool _visible = true;
 ///
+///   @override
 ///   Widget build(BuildContext context) {
 ///     return CustomScrollView(
 ///       slivers: <Widget>[
 ///         SliverAnimatedOpacity(
 ///           opacity: _visible ? 1.0 : 0.0,
-///           duration: Duration(milliseconds: 500),
+///           duration: const Duration(milliseconds: 500),
 ///           sliver: SliverFixedExtentList(
 ///             itemExtent: 100.0,
 ///             delegate: SliverChildBuilderDelegate(
 ///               (BuildContext context, int index) {
 ///                 return Container(
-///                   color: index % 2 == 0
+///                   color: index.isEven
 ///                     ? Colors.indigo[200]
 ///                     : Colors.orange[200],
 ///                 );
@@ -1587,7 +1585,7 @@ class _AnimatedOpacityState extends ImplicitlyAnimatedWidgetState<AnimatedOpacit
 ///               });
 ///             },
 ///             tooltip: 'Toggle opacity',
-///             child: Icon(Icons.flip),
+///             child: const Icon(Icons.flip),
 ///           )
 ///         ),
 ///       ]
@@ -1641,7 +1639,7 @@ class SliverAnimatedOpacity extends ImplicitlyAnimatedWidget {
   final bool alwaysIncludeSemantics;
 
   @override
-  _SliverAnimatedOpacityState createState() => _SliverAnimatedOpacityState();
+  ImplicitlyAnimatedWidgetState<SliverAnimatedOpacity> createState() => _SliverAnimatedOpacityState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -1661,7 +1659,7 @@ class _SliverAnimatedOpacityState extends ImplicitlyAnimatedWidgetState<SliverAn
 
   @override
   void didUpdateTweens() {
-    _opacityAnimation = animation!.drive(_opacity!);
+    _opacityAnimation = animation.drive(_opacity!);
   }
 
   @override
@@ -1765,7 +1763,7 @@ class AnimatedDefaultTextStyle extends ImplicitlyAnimatedWidget {
   final ui.TextHeightBehavior? textHeightBehavior;
 
   @override
-  _AnimatedDefaultTextStyleState createState() => _AnimatedDefaultTextStyleState();
+  AnimatedWidgetBaseState<AnimatedDefaultTextStyle> createState() => _AnimatedDefaultTextStyleState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -1791,7 +1789,7 @@ class _AnimatedDefaultTextStyleState extends AnimatedWidgetBaseState<AnimatedDef
   @override
   Widget build(BuildContext context) {
     return DefaultTextStyle(
-      style: _style!.evaluate(animation!),
+      style: _style!.evaluate(animation),
       textAlign: widget.textAlign,
       softWrap: widget.softWrap,
       overflow: widget.overflow,
@@ -1889,7 +1887,7 @@ class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
   final bool animateShadowColor;
 
   @override
-  _AnimatedPhysicalModelState createState() => _AnimatedPhysicalModelState();
+  AnimatedWidgetBaseState<AnimatedPhysicalModel> createState() => _AnimatedPhysicalModelState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -1921,15 +1919,15 @@ class _AnimatedPhysicalModelState extends AnimatedWidgetBaseState<AnimatedPhysic
   @override
   Widget build(BuildContext context) {
     return PhysicalModel(
-      child: widget.child,
       shape: widget.shape,
       clipBehavior: widget.clipBehavior,
-      borderRadius: _borderRadius!.evaluate(animation!),
-      elevation: _elevation!.evaluate(animation!),
-      color: widget.animateColor ? _color!.evaluate(animation!)! : widget.color,
+      borderRadius: _borderRadius!.evaluate(animation),
+      elevation: _elevation!.evaluate(animation),
+      color: widget.animateColor ? _color!.evaluate(animation)! : widget.color,
       shadowColor: widget.animateShadowColor
-          ? _shadowColor!.evaluate(animation!)!
+          ? _shadowColor!.evaluate(animation)!
           : widget.shadowColor,
+      child: widget.child,
     );
   }
 }

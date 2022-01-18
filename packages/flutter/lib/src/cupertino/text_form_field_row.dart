@@ -2,14 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 import 'form_row.dart';
 import 'text_field.dart';
-import 'theme.dart';
 
 /// Creates a [CupertinoFormRow] containing a [FormField] that wraps
 /// a [CupertinoTextField].
@@ -60,13 +58,13 @@ import 'theme.dart';
 ///
 /// ```dart
 /// CupertinoTextFormFieldRow(
-///   prefix: Text('Username'),
-///   onSaved: (String value) {
+///   prefix: const Text('Username'),
+///   onSaved: (String? value) {
 ///     // This optional block of code can be used to run
 ///     // code when the user saves the form.
 ///   },
-///   validator: (String value) {
-///     return value.contains('@') ? 'Do not use the @ char.' : null;
+///   validator: (String? value) {
+///     return (value != null && value.contains('@')) ? 'Do not use the @ char.' : null;
 ///   },
 /// )
 /// ```
@@ -81,22 +79,23 @@ import 'theme.dart';
 /// ```
 ///
 /// ```dart
+/// @override
 /// Widget build(BuildContext context) {
 ///   return CupertinoPageScaffold(
 ///     child: Center(
 ///       child: Form(
 ///         autovalidateMode: AutovalidateMode.always,
 ///         onChanged: () {
-///           Form.of(primaryFocus.context).save();
+///           Form.of(primaryFocus!.context!)?.save();
 ///         },
 ///         child: CupertinoFormSection.insetGrouped(
-///           header: Text('SECTION 1'),
+///           header: const Text('SECTION 1'),
 ///           children: List<Widget>.generate(5, (int index) {
 ///             return CupertinoTextFormFieldRow(
-///               prefix: Text('Enter text'),
+///               prefix: const Text('Enter text'),
 ///               placeholder: 'Enter text',
-///               validator: (value) {
-///                 if (value.isEmpty) {
+///               validator: (String? value) {
+///                 if (value == null || value.isEmpty) {
 ///                   return 'Please enter a value';
 ///                 }
 ///                 return null;
@@ -204,8 +203,7 @@ class CupertinoTextFormFieldRow extends FormField<String> {
           !expands || (maxLines == null && minLines == null),
           'minLines and maxLines must be null when expands is true.',
         ),
-        assert(!obscureText || maxLines == 1,
-            'Obscured fields cannot be multiline.'),
+        assert(!obscureText || maxLines == 1, 'Obscured fields cannot be multiline.'),
         assert(maxLength == null || maxLength > 0),
         assert(enableInteractiveSelection != null),
         super(
@@ -300,8 +298,7 @@ class CupertinoTextFormFieldRow extends FormField<String> {
   final TextEditingController? controller;
 
   @override
-  _CupertinoTextFormFieldRowState createState() =>
-      _CupertinoTextFormFieldRowState();
+  FormFieldState<String> createState() => _CupertinoTextFormFieldRowState();
 }
 
 class _CupertinoTextFormFieldRowState extends FormFieldState<String> {

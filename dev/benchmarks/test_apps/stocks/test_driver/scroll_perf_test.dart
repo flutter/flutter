@@ -9,15 +9,14 @@ import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
 void main() {
   group('scrolling performance test', () {
-    FlutterDriver driver;
+    late FlutterDriver driver;
 
     setUpAll(() async {
       driver = await FlutterDriver.connect();
     });
 
     tearDownAll(() async {
-      if (driver != null)
-        driver.close();
+      driver.close();
     });
 
     test('measure', () async {
@@ -40,7 +39,6 @@ void main() {
       });
 
       final TimelineSummary summary = TimelineSummary.summarize(timeline);
-      await summary.writeSummaryToFile('stocks_scroll_perf', pretty: true);
       await summary.writeTimelineToFile('stocks_scroll_perf', pretty: true);
     });
   });

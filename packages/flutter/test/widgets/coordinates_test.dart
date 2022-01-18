@@ -2,9 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Comparing coordinates', (WidgetTester tester) async {
@@ -38,10 +37,10 @@ void main() {
     );
 
     final RenderBox boxA = tester.renderObject(find.byKey(keyA));
-    expect(boxA.localToGlobal(const Offset(0.0, 0.0)), equals(const Offset(100.0, 100.0)));
+    expect(boxA.localToGlobal(Offset.zero), equals(const Offset(100.0, 100.0)));
 
     final RenderBox boxB = tester.renderObject(find.byKey(keyB));
-    expect(boxB.localToGlobal(const Offset(0.0, 0.0)), equals(const Offset(100.0, 200.0)));
+    expect(boxB.localToGlobal(Offset.zero), equals(const Offset(100.0, 200.0)));
     expect(boxB.globalToLocal(const Offset(110.0, 205.0)), equals(const Offset(10.0, 5.0)));
   });
 }

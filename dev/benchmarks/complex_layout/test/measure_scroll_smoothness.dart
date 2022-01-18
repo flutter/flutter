@@ -6,12 +6,11 @@
 // the test should be run as:
 // flutter drive -t test/using_array.dart --driver test_driver/scrolling_test_e2e_test.dart
 
+import 'package:complex_layout/main.dart' as app;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:e2e/e2e.dart';
-
-import 'package:complex_layout/main.dart' as app;
+import 'package:integration_test/integration_test.dart';
 
 /// Generates the [PointerEvent] to simulate a drag operation from
 /// `center - totalMove/2` to `center + totalMove/2`.
@@ -62,7 +61,7 @@ enum TestScenario {
 
 class ResampleFlagVariant extends TestVariant<TestScenario> {
   ResampleFlagVariant(this.binding);
-  final E2EWidgetsFlutterBinding binding;
+  final IntegrationTestWidgetsFlutterBinding binding;
 
   @override
   final Set<TestScenario> values = Set<TestScenario>.from(TestScenario.values);
@@ -124,9 +123,9 @@ class ResampleFlagVariant extends TestVariant<TestScenario> {
 }
 
 Future<void> main() async {
-  final WidgetsBinding _binding = E2EWidgetsFlutterBinding.ensureInitialized();
-  assert(_binding is E2EWidgetsFlutterBinding);
-  final E2EWidgetsFlutterBinding binding = _binding as E2EWidgetsFlutterBinding;
+  final WidgetsBinding _binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  assert(_binding is IntegrationTestWidgetsFlutterBinding);
+  final IntegrationTestWidgetsFlutterBinding binding = _binding as IntegrationTestWidgetsFlutterBinding;
   binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.benchmarkLive;
   binding.reportData ??= <String, dynamic>{};
   final ResampleFlagVariant variant = ResampleFlagVariant(binding);
@@ -168,7 +167,7 @@ Future<void> main() async {
         } else if (delays.last < delay) {
           delays.last = delay;
         }
-        tester.binding.handlePointerEvent(event, source: TestBindingEventSource.test);
+        tester.binding.handlePointerEventForSource(event, source: TestBindingEventSource.test);
       }
     }
 
@@ -212,8 +211,11 @@ Future<void> main() async {
 /// response.
 ///
 /// The returned map has keys:
-/// `average_abs_jerk`: average for the overall smoothness.
-/// `janky_count`: number of frames with `abs_jerk` larger than 0.5.
+/// `average_abs_jerk`: average for the overall smoothness. The smaller this
+/// number the more smooth the scrolling is.
+/// `janky_count`: number of frames with `abs_jerk` larger than 0.5. The frames
+/// that take longer than the frame budget to build are ignored, so increase of
+/// this number itself may not represent a regression.
 /// `dropped_frame_count`: number of frames that are built longer than 40ms and
 ///  are not used for smoothness measurement.
 /// `frame_timestamp`: the list of the timestamp for each frame, in the time

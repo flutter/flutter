@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:async/async.dart';
+
 import '../base/io.dart';
 import '../convert.dart';
 
@@ -26,20 +27,20 @@ typedef AndroidConsoleSocketFactory = Future<Socket> Function(String host, int p
 class AndroidConsole {
   AndroidConsole(this._socket);
 
-  Socket _socket;
-  StreamQueue<String> _queue;
+  Socket? _socket;
+  StreamQueue<String>? _queue;
 
   Future<void> connect() async {
     assert(_socket != null);
     assert(_queue == null);
 
-    _queue = StreamQueue<String>(_socket.asyncMap(ascii.decode));
+    _queue = StreamQueue<String>(_socket!.asyncMap(ascii.decode));
 
     // Discard any initial connection text.
     await _readResponse();
   }
 
-  Future<String> getAvdName() async {
+  Future<String?> getAvdName() async {
     if (_queue == null) {
       return null;
     }
@@ -53,17 +54,17 @@ class AndroidConsole {
     _queue = null;
   }
 
-  Future<String> _readResponse() async {
+  Future<String?> _readResponse() async {
     if (_queue == null) {
       return null;
     }
     final StringBuffer output = StringBuffer();
     while (true) {
-      if (!await _queue.hasNext) {
+      if (!await _queue!.hasNext) {
         destroy();
         return null;
       }
-      final String text = await _queue.next;
+      final String text = await _queue!.next;
       final String trimmedText = text.trim();
       if (trimmedText == 'OK') {
         break;

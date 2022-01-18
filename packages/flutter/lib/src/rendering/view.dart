@@ -7,7 +7,6 @@ import 'dart:io' show Platform;
 import 'dart:ui' as ui show Scene, SceneBuilder, FlutterView;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:vector_math/vector_math_64.dart';
 
@@ -38,6 +37,18 @@ class ViewConfiguration {
   Matrix4 toMatrix() {
     return Matrix4.diagonal3Values(devicePixelRatio, devicePixelRatio, 1.0);
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is ViewConfiguration
+        && other.size == size
+        && other.devicePixelRatio == devicePixelRatio;
+  }
+
+  @override
+  int get hashCode => hashValues(size, devicePixelRatio);
 
   @override
   String toString() => '$size at ${debugFormatDouble(devicePixelRatio)}x';
@@ -107,19 +118,6 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   ///  * [AnnotatedRegion], for placing [SystemUiOverlayStyle] in the layer tree.
   ///  * [SystemChrome.setSystemUIOverlayStyle], for imperatively setting the system ui style.
   bool automaticSystemUiAdjustment = true;
-
-  /// Bootstrap the rendering pipeline by scheduling the first frame.
-  ///
-  /// Deprecated. Call [prepareInitialFrame] followed by a call to
-  /// [PipelineOwner.requestVisualUpdate] on [owner] instead.
-  @Deprecated(
-    'Call prepareInitialFrame followed by owner.requestVisualUpdate() instead. '
-    'This feature was deprecated after v1.10.0.'
-  )
-  void scheduleInitialFrame() {
-    prepareInitialFrame();
-    owner!.requestVisualUpdate();
-  }
 
   /// Bootstrap the rendering pipeline by preparing the first frame.
   ///
@@ -197,9 +195,6 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   ///    [AnnotatedRegionLayer]s annotated for mouse tracking.
   HitTestResult hitTestMouseTrackers(Offset position) {
     assert(position != null);
-    // Layer hit testing is done using device pixels, so we have to convert
-    // the logical coordinates of the event location back to device pixels
-    // here.
     final BoxHitTestResult result = BoxHitTestResult();
     hitTest(result, position: position);
     return result;

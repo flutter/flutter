@@ -8,7 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/material.dart';
 import '../services/fake_platform_views.dart';
 import 'rendering_tester.dart';
 
@@ -48,7 +47,7 @@ void main() {
       final SemanticsHandle semanticsHandle = renderer.pipelineOwner.ensureSemantics(
           listener: () {
             ++semanticsUpdateCount;
-          }
+          },
       );
       layout(tree, phase: EnginePhase.flushSemantics);
       // Initial semantics update
@@ -77,7 +76,7 @@ void main() {
       pumpFrame(phase: EnginePhase.flushSemantics);
 
       ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
-        _pointerData(ui.PointerChange.add, const Offset(0, 0)),
+        _pointerData(ui.PointerChange.add, Offset.zero),
         _pointerData(ui.PointerChange.hover, const Offset(10, 10)),
         _pointerData(ui.PointerChange.remove, const Offset(10, 10)),
       ]));
@@ -90,7 +89,7 @@ void main() {
       pumpFrame(phase: EnginePhase.flushSemantics);
 
       ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
-        _pointerData(ui.PointerChange.add, const Offset(0, 0)),
+        _pointerData(ui.PointerChange.add, Offset.zero),
         _pointerData(ui.PointerChange.hover, const Offset(10, 10)),
         _pointerData(ui.PointerChange.remove, const Offset(10, 10)),
       ]));

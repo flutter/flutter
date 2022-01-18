@@ -580,14 +580,14 @@ class RenderListWheelViewport
   @override
   double computeMinIntrinsicWidth(double height) {
     return _getIntrinsicCrossAxis(
-      (RenderBox child) => child.getMinIntrinsicWidth(height)
+      (RenderBox child) => child.getMinIntrinsicWidth(height),
     );
   }
 
   @override
   double computeMaxIntrinsicWidth(double height) {
     return _getIntrinsicCrossAxis(
-      (RenderBox child) => child.getMaxIntrinsicWidth(height)
+      (RenderBox child) => child.getMaxIntrinsicWidth(height),
     );
   }
 
@@ -880,20 +880,23 @@ class RenderListWheelViewport
     // Some part of the child is in the center magnifier.
     if (isAfterMagnifierTopLine && isBeforeMagnifierBottomLine) {
       final Rect centerRect = Rect.fromLTWH(
-          0.0,
-          magnifierTopLinePosition,
-          size.width,
-          _itemExtent * _magnification);
+        0.0,
+        magnifierTopLinePosition,
+        size.width,
+        _itemExtent * _magnification,
+      );
       final Rect topHalfRect = Rect.fromLTWH(
-          0.0,
-          0.0,
-          size.width,
-          magnifierTopLinePosition);
+        0.0,
+        0.0,
+        size.width,
+        magnifierTopLinePosition,
+      );
       final Rect bottomHalfRect = Rect.fromLTWH(
-          0.0,
-          magnifierBottomLinePosition,
-          size.width,
-          magnifierTopLinePosition);
+        0.0,
+        magnifierBottomLinePosition,
+        size.width,
+        magnifierTopLinePosition,
+      );
 
       // Clipping the part in the center.
       context.pushClipRect(
@@ -907,8 +910,10 @@ class RenderListWheelViewport
             _magnifyTransform(),
             (PaintingContext context, Offset offset) {
               context.paintChild(child, offset + untransformedPaintingCoordinates);
-          });
-      });
+            },
+          );
+        },
+      );
 
       // Clipping the part in either the top-half or bottom-half of the wheel.
       context.pushClipRect(
@@ -923,7 +928,8 @@ class RenderListWheelViewport
             offset,
             child,
             cylindricalTransform,
-            offsetToCenter);
+            offsetToCenter,
+          );
         },
       );
     } else {
@@ -932,7 +938,8 @@ class RenderListWheelViewport
         offset,
         child,
         cylindricalTransform,
-        offsetToCenter);
+        offsetToCenter,
+      );
     }
   }
 
@@ -945,18 +952,18 @@ class RenderListWheelViewport
     Offset offsetToCenter,
   ) {
     // Paint child cylindrically, without [overAndUnderCenterOpacity].
-    final PaintingContextCallback painter = (PaintingContext context, Offset offset) {
+    void painter(PaintingContext context, Offset offset) {
       context.paintChild(
         child,
         // Paint everything in the center (e.g. angle = 0), then transform.
         offset + offsetToCenter,
       );
-    };
+    }
 
     // Paint child cylindrically, with [overAndUnderCenterOpacity].
-    final PaintingContextCallback opacityPainter = (PaintingContext context, Offset offset) {
+    void opacityPainter(PaintingContext context, Offset offset) {
       context.pushOpacity(offset, (overAndUnderCenterOpacity * 255).round(), painter);
-    };
+    }
 
     context.pushTransform(
       needsCompositing,
@@ -982,11 +989,15 @@ class RenderListWheelViewport
   Matrix4 _centerOriginTransform(Matrix4 originalMatrix) {
     final Matrix4 result = Matrix4.identity();
     final Offset centerOriginTranslation = Alignment.center.alongSize(size);
-    result.translate(centerOriginTranslation.dx * (-_offAxisFraction * 2 + 1),
-                     centerOriginTranslation.dy);
+    result.translate(
+      centerOriginTranslation.dx * (-_offAxisFraction * 2 + 1),
+      centerOriginTranslation.dy,
+    );
     result.multiply(originalMatrix);
-    result.translate(-centerOriginTranslation.dx * (-_offAxisFraction * 2 + 1),
-                     -centerOriginTranslation.dy);
+    result.translate(
+      -centerOriginTranslation.dx * (-_offAxisFraction * 2 + 1),
+      -centerOriginTranslation.dy,
+    );
     return result;
   }
 

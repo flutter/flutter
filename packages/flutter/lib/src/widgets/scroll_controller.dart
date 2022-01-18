@@ -255,8 +255,8 @@ class ScrollController extends ChangeNotifier {
   /// the [ScrollController] base class calls [debugFillDescription] to collect
   /// useful information from subclasses to incorporate into its return value.
   ///
-  /// If you override this, make sure to start your method with a call to
-  /// `super.debugFillDescription(description)`.
+  /// Implementations of this method should start with a call to the inherited
+  /// method, as in `super.debugFillDescription(description)`.
   @mustCallSuper
   void debugFillDescription(List<String> description) {
     if (debugLabel != null)
@@ -275,7 +275,7 @@ class ScrollController extends ChangeNotifier {
 }
 
 // Examples can assume:
-// TrackingScrollController _trackingScrollController;
+// TrackingScrollController? _trackingScrollController;
 
 /// A [ScrollController] whose [initialScrollOffset] tracks its most recently
 /// updated [ScrollPosition].
@@ -321,9 +321,11 @@ class TrackingScrollController extends ScrollController {
     double initialScrollOffset = 0.0,
     bool keepScrollOffset = true,
     String? debugLabel,
-  }) : super(initialScrollOffset: initialScrollOffset,
-             keepScrollOffset: keepScrollOffset,
-             debugLabel: debugLabel);
+  }) : super(
+         initialScrollOffset: initialScrollOffset,
+         keepScrollOffset: keepScrollOffset,
+         debugLabel: debugLabel,
+       );
 
   final Map<ScrollPosition, VoidCallback> _positionToListener = <ScrollPosition, VoidCallback>{};
   ScrollPosition? _lastUpdated;

@@ -4,10 +4,8 @@
 
 import 'dart:ui' as ui;
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/animation.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import '../scheduler/scheduler_tester.dart';
 
@@ -245,19 +243,18 @@ void main() {
       error = e;
     }
     expect(error, isNotNull);
-    expect(error!.toStringDeep(), matches(
+    expect(
+      error!.toStringDeep(),
       // RegExp matcher is required here due to flutter web and flutter mobile generating
       // slightly different floating point numbers
       // in Flutter web 0.0 sometimes just appears as 0. or 0
-      RegExp(r'''
+      matches(RegExp(r'''
 FlutterError
    Invalid curve endpoint at \d+(\.\d*)?\.
    Curves must map 0\.0 to near zero and 1\.0 to near one but
    BogusCurve mapped \d+(\.\d*)? to \d+(\.\d*)?, which is near \d+(\.\d*)?\.
-''',
-        multiLine: true
-      ),
-    ));
+''', multiLine: true)),
+    );
   });
 
   test('CurvedAnimation running with different forward and reverse durations.', () {
@@ -269,7 +266,7 @@ FlutterError
     final CurvedAnimation curved = CurvedAnimation(parent: controller, curve: Curves.linear, reverseCurve: Curves.linear);
 
     controller.forward();
-    tick(const Duration(milliseconds: 0));
+    tick(Duration.zero);
     tick(const Duration(milliseconds: 10));
     expect(curved.value, moreOrLessEquals(0.1));
     tick(const Duration(milliseconds: 20));
@@ -320,7 +317,7 @@ FlutterError
     );
 
     controller.forward();
-    tick(const Duration(milliseconds: 0));
+    tick(Duration.zero);
     tick(const Duration(milliseconds: 10));
     expect(reversed.value, moreOrLessEquals(0.9));
     tick(const Duration(milliseconds: 20));

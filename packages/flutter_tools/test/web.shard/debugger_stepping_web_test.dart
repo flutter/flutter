@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
+// @dart = 2.8
 
 import 'package:file/file.dart';
 
@@ -48,7 +48,8 @@ void main() {
         reason: 'After $i steps, debugger should stop at $expectedLine but stopped at $actualLine'
       );
     }
-  }, skip: platform.isWindows); // https://github.com/flutter/flutter/issues/70486
+  }, skip: true, // Flaky: https://github.com/flutter/flutter/issues/83260
+  );
 
   tearDown(() async {
     await flutter.stop();

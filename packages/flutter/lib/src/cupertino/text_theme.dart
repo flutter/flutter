@@ -124,12 +124,6 @@ class CupertinoTextThemeData with Diagnosticable {
   /// unspecified.
   const CupertinoTextThemeData({
     Color primaryColor = CupertinoColors.systemBlue,
-    // ignore: avoid_unused_constructor_parameters, the parameter is deprecated.
-    @Deprecated(
-      'This argument no longer does anything. You can remove it. '
-      'This feature was deprecated after v1.10.14.'
-    )
-    Brightness? brightness,
     TextStyle? textStyle,
     TextStyle? actionTextStyle,
     TextStyle? tabLabelTextStyle,
@@ -230,11 +224,6 @@ class CupertinoTextThemeData with Diagnosticable {
   /// specified overrides.
   CupertinoTextThemeData copyWith({
     Color? primaryColor,
-    @Deprecated(
-      'This argument no longer does anything. You can remove it. '
-      'This feature was deprecated after v1.10.14.'
-    )
-    Brightness? brightness,
     TextStyle? textStyle,
     TextStyle? actionTextStyle,
     TextStyle? tabLabelTextStyle,

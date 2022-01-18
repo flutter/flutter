@@ -4,7 +4,6 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -106,19 +105,19 @@ class CalendarDatePicker extends StatefulWidget {
        super(key: key) {
     assert(
       !this.lastDate.isBefore(this.firstDate),
-      'lastDate ${this.lastDate} must be on or after firstDate ${this.firstDate}.'
+      'lastDate ${this.lastDate} must be on or after firstDate ${this.firstDate}.',
     );
     assert(
       !this.initialDate.isBefore(this.firstDate),
-      'initialDate ${this.initialDate} must be on or after firstDate ${this.firstDate}.'
+      'initialDate ${this.initialDate} must be on or after firstDate ${this.firstDate}.',
     );
     assert(
       !this.initialDate.isAfter(this.lastDate),
-      'initialDate ${this.initialDate} must be on or before lastDate ${this.lastDate}.'
+      'initialDate ${this.initialDate} must be on or before lastDate ${this.lastDate}.',
     );
     assert(
       selectableDayPredicate == null || selectableDayPredicate!(this.initialDate),
-      'Provided initialDate ${this.initialDate} must satisfy provided selectableDayPredicate.'
+      'Provided initialDate ${this.initialDate} must satisfy provided selectableDayPredicate.',
     );
   }
 
@@ -147,7 +146,7 @@ class CalendarDatePicker extends StatefulWidget {
   final SelectableDayPredicate? selectableDayPredicate;
 
   @override
-  _CalendarDatePickerState createState() => _CalendarDatePickerState();
+  State<CalendarDatePicker> createState() => _CalendarDatePickerState();
 }
 
 class _CalendarDatePickerState extends State<CalendarDatePicker> {
@@ -384,7 +383,7 @@ class _DatePickerModeToggleButtonState extends State<_DatePickerModeToggleButton
               label: MaterialLocalizations.of(context).selectYearSemanticsLabel,
               excludeSemantics: true,
               button: true,
-              child: Container(
+              child: SizedBox(
                 height: _subHeaderHeight,
                 child: InkWell(
                   onTap: widget.onTitlePressed,
@@ -496,7 +495,7 @@ class _MonthPickerState extends State<_MonthPicker> {
   late PageController _pageController;
   late MaterialLocalizations _localizations;
   late TextDirection _textDirection;
-  Map<LogicalKeySet, Intent>? _shortcutMap;
+  Map<ShortcutActivator, Intent>? _shortcutMap;
   Map<Type, Action<Intent>>? _actionMap;
   late FocusNode _dayGridFocus;
   DateTime? _focusedDay;
@@ -508,11 +507,11 @@ class _MonthPickerState extends State<_MonthPicker> {
     _previousMonthDate = DateUtils.addMonthsToMonthDate(_currentMonth, -1);
     _nextMonthDate = DateUtils.addMonthsToMonthDate(_currentMonth, 1);
     _pageController = PageController(initialPage: DateUtils.monthDelta(widget.firstDate, _currentMonth));
-    _shortcutMap = <LogicalKeySet, Intent>{
-      LogicalKeySet(LogicalKeyboardKey.arrowLeft): const DirectionalFocusIntent(TraversalDirection.left),
-      LogicalKeySet(LogicalKeyboardKey.arrowRight): const DirectionalFocusIntent(TraversalDirection.right),
-      LogicalKeySet(LogicalKeyboardKey.arrowDown): const DirectionalFocusIntent(TraversalDirection.down),
-      LogicalKeySet(LogicalKeyboardKey.arrowUp): const DirectionalFocusIntent(TraversalDirection.up),
+    _shortcutMap = const <ShortcutActivator, Intent>{
+      SingleActivator(LogicalKeyboardKey.arrowLeft): DirectionalFocusIntent(TraversalDirection.left),
+      SingleActivator(LogicalKeyboardKey.arrowRight): DirectionalFocusIntent(TraversalDirection.right),
+      SingleActivator(LogicalKeyboardKey.arrowDown): DirectionalFocusIntent(TraversalDirection.down),
+      SingleActivator(LogicalKeyboardKey.arrowUp): DirectionalFocusIntent(TraversalDirection.up),
     };
     _actionMap = <Type, Action<Intent>>{
       NextFocusIntent: CallbackAction<NextFocusIntent>(onInvoke: _handleGridNextFocus),
@@ -532,10 +531,10 @@ class _MonthPickerState extends State<_MonthPicker> {
   @override
   void didUpdateWidget(_MonthPicker oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.initialMonth != oldWidget.initialMonth) {
+    if (widget.initialMonth != oldWidget.initialMonth && widget.initialMonth != _currentMonth) {
       // We can't interrupt this widget build with a scroll, so do it next frame
       WidgetsBinding.instance!.addPostFrameCallback(
-        (Duration timeStamp) => _showMonth(widget.initialMonth, jump: true)
+        (Duration timeStamp) => _showMonth(widget.initialMonth, jump: true),
       );
     }
   }
@@ -628,9 +627,10 @@ class _MonthPickerState extends State<_MonthPicker> {
     if (jump) {
       _pageController.jumpToPage(monthPage);
     } else {
-      _pageController.animateToPage(monthPage,
+      _pageController.animateToPage(
+        monthPage,
         duration: _monthScrollDuration,
-        curve: Curves.ease
+        curve: Curves.ease,
       );
     }
   }
@@ -809,7 +809,7 @@ class _FocusedDate extends InheritedWidget {
   const _FocusedDate({
     Key? key,
     required Widget child,
-    this.date
+    this.date,
   }) : super(key: key, child: child);
 
   final DateTime? date;
@@ -893,7 +893,7 @@ class _DayPickerState extends State<_DayPicker> {
     final int daysInMonth = DateUtils.getDaysInMonth(widget.displayedMonth.year, widget.displayedMonth.month);
     _dayFocusNodes = List<FocusNode>.generate(
       daysInMonth,
-      (int index) => FocusNode(skipTraversal: true, debugLabel: 'Day ${index + 1}')
+      (int index) => FocusNode(skipTraversal: true, debugLabel: 'Day ${index + 1}'),
     );
   }
 
@@ -1064,8 +1064,10 @@ class _DayPickerGridDelegate extends SliverGridDelegate {
   SliverGridLayout getLayout(SliverConstraints constraints) {
     const int columnCount = DateTime.daysPerWeek;
     final double tileWidth = constraints.crossAxisExtent / columnCount;
-    final double tileHeight = math.min(_dayPickerRowHeight,
-      constraints.viewportMainAxisExtent / (_maxDayPickerRowCount + 1));
+    final double tileHeight = math.min(
+      _dayPickerRowHeight,
+      constraints.viewportMainAxisExtent / (_maxDayPickerRowCount + 1),
+    );
     return SliverGridRegularTileLayout(
       childCrossAxisExtent: tileWidth,
       childMainAxisExtent: tileHeight,
@@ -1144,7 +1146,7 @@ class YearPicker extends StatefulWidget {
   final DragStartBehavior dragStartBehavior;
 
   @override
-  _YearPickerState createState() => _YearPickerState();
+  State<YearPicker> createState() => _YearPickerState();
 }
 
 class _YearPickerState extends State<YearPicker> {

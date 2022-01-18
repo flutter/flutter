@@ -2,11 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
 
+import 'package:flutter_devicelab/common.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
@@ -52,7 +55,7 @@ String _findMatchId(List<String> idList, String idPattern) {
 DeviceDiscovery get devices => DeviceDiscovery();
 
 /// Device operating system the test is configured to test.
-enum DeviceOperatingSystem { android, ios, fuchsia, fake }
+enum DeviceOperatingSystem { android, androidArm, androidArm64 ,ios, fuchsia, fake }
 
 /// Device OS to test on.
 DeviceOperatingSystem deviceOperatingSystem = DeviceOperatingSystem.android;
@@ -63,13 +66,16 @@ abstract class DeviceDiscovery {
     switch (deviceOperatingSystem) {
       case DeviceOperatingSystem.android:
         return AndroidDeviceDiscovery();
+      case DeviceOperatingSystem.androidArm:
+        return AndroidDeviceDiscovery(cpu: AndroidCPU.arm);
+      case DeviceOperatingSystem.androidArm64:
+        return AndroidDeviceDiscovery(cpu: AndroidCPU.arm64);
       case DeviceOperatingSystem.ios:
         return IosDeviceDiscovery();
       case DeviceOperatingSystem.fuchsia:
         return FuchsiaDeviceDiscovery();
       case DeviceOperatingSystem.fake:
-        print('Looking for fake devices!'
-              'You should not see this in release builds.');
+        print('Looking for fake devices! You should not see this in release builds.');
         return FakeDeviceDiscovery();
       default:
         throw DeviceException('Unsupported device operating system: $deviceOperatingSystem');
@@ -155,12 +161,19 @@ abstract class Device {
   }
 }
 
+enum AndroidCPU {
+  arm,
+  arm64,
+}
+
 class AndroidDeviceDiscovery implements DeviceDiscovery {
-  factory AndroidDeviceDiscovery() {
-    return _instance ??= AndroidDeviceDiscovery._();
+  factory AndroidDeviceDiscovery({AndroidCPU cpu}) {
+    return _instance ??= AndroidDeviceDiscovery._(cpu);
   }
 
-  AndroidDeviceDiscovery._();
+  AndroidDeviceDiscovery._(this.cpu);
+
+  final AndroidCPU cpu;
 
   // Parses information about a device. Example:
   //
@@ -185,6 +198,18 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
     return _workingDevice;
   }
 
+  Future<bool> _matchesCPURequirement(AndroidDevice device) async {
+    if (cpu == null)
+      return true;
+    switch (cpu) {
+      case AndroidCPU.arm64:
+        return device.isArm64();
+      case AndroidCPU.arm:
+        return device.isArm();
+    }
+    return true;
+  }
+
   /// Picks a random Android device out of connected devices and sets it as
   /// [workingDevice].
   @override
@@ -196,8 +221,22 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
     if (allDevices.isEmpty)
       throw const DeviceException('No Android devices detected');
 
-    // TODO(yjbanov): filter out and warn about those with low battery level
-    _workingDevice = allDevices[math.Random().nextInt(allDevices.length)];
+    if (cpu != null) {
+      for (final AndroidDevice device in allDevices) {
+        if (await _matchesCPURequirement(device)) {
+          _workingDevice = device;
+          break;
+        }
+      }
+
+    } else {
+      // TODO(yjbanov): filter out and warn about those with low battery level
+      _workingDevice = allDevices[math.Random().nextInt(allDevices.length)];
+    }
+
+    if (_workingDevice == null)
+      throw const DeviceException('Cannot find a suitable Android device');
+
     print('Device chosen: $_workingDevice');
   }
 
@@ -206,6 +245,11 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
     final String matchedId = _findMatchId(await discoverDevices(), deviceId);
     if (matchedId != null) {
       _workingDevice = AndroidDevice(deviceId: matchedId);
+      if (cpu != null) {
+        if (!await _matchesCPURequirement(_workingDevice)) {
+          throw DeviceException('The selected device $matchedId does not match the cpu requirement');
+        }
+      }
       print('Choose device by ID: $matchedId');
       return;
     }
@@ -285,12 +329,12 @@ class FuchsiaDeviceDiscovery implements DeviceDiscovery {
 
  FuchsiaDevice _workingDevice;
 
- String get _devFinder {
-    final String devFinder = path.join(getArtifactPath(), 'fuchsia', 'tools', 'device-finder');
-    if (!File(devFinder).existsSync()) {
-      throw FileSystemException("Couldn't find device-finder at location $devFinder");
+ String get _ffx {
+    final String ffx = path.join(getArtifactPath(), 'fuchsia', 'tools','x64', 'ffx');
+    if (!File(ffx).existsSync()) {
+      throw FileSystemException("Couldn't find ffx at location $ffx");
     }
-    return devFinder;
+    return ffx;
  }
 
   @override
@@ -336,7 +380,7 @@ class FuchsiaDeviceDiscovery implements DeviceDiscovery {
 
   @override
   Future<List<String>> discoverDevices() async {
-    final List<String> output = (await eval(_devFinder, <String>['list', '-full']))
+    final List<String> output = (await eval(_ffx, <String>['target', 'list', '--format', 's']))
       .trim()
       .split('\n');
 
@@ -355,11 +399,12 @@ class FuchsiaDeviceDiscovery implements DeviceDiscovery {
     for (final String deviceId in await discoverDevices()) {
       try {
         final int resolveResult = await exec(
-          _devFinder,
+          _ffx,
           <String>[
-            'resolve',
-            '-device-limit',
-            '1',
+            'target',
+            'list',
+            '--format',
+            'a',
             deviceId,
           ]
         );
@@ -442,6 +487,16 @@ class AndroidDevice extends Device {
     final String powerInfo = await shellEval('dumpsys', <String>['power']);
     final String wakefulness = grep('mWakefulness=', from: powerInfo).single.split('=')[1].trim();
     return wakefulness;
+  }
+
+  Future<bool> isArm64() async {
+    final String cpuInfo = await shellEval('getprop', const <String>['ro.product.cpu.abi']);
+    return cpuInfo.contains('arm64');
+  }
+
+  Future<bool> isArm() async {
+    final String cpuInfo = await shellEval('getprop', const <String>['ro.product.cpu.abi']);
+    return cpuInfo.contains('armeabi');
   }
 
   Future<void> _updateDeviceInfo() async {
@@ -529,7 +584,9 @@ class AndroidDevice extends Device {
           .transform<String>(const LineSplitter())
           .listen((String line) {
             print('adb logcat: $line');
-            stream.sink.add(line);
+            if (!stream.isClosed) {
+              stream.sink.add(line);
+            }
           }, onDone: () { stdoutDone.complete(); });
         process.stderr
           .transform<String>(utf8.decoder)
@@ -537,13 +594,13 @@ class AndroidDevice extends Device {
           .listen((String line) {
             print('adb logcat stderr: $line');
           }, onDone: () { stderrDone.complete(); });
-        process.exitCode.then<void>((int exitCode) {
+        unawaited(process.exitCode.then<void>((int exitCode) {
           print('adb logcat process terminated with exit code $exitCode');
           if (!aborted) {
             stream.addError(BuildFailedError('adb logcat failed with exit code $exitCode.\n'));
             processDone.complete();
           }
-        });
+        }));
         await Future.any<dynamic>(<Future<dynamic>>[
           Future.wait<void>(<Future<void>>[
             stdoutDone.future,
@@ -751,7 +808,7 @@ class IosDevice extends Device {
 
   @override
   Future<void> reboot() {
-    return Process.run('idevicesyslog', <String>['reboot', '-u', deviceId]);
+    return Process.run('idevicediagnostics', <String>['restart', '-u', deviceId]);
   }
 }
 

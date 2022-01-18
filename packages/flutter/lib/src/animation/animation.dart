@@ -8,7 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'tween.dart';
 
 // Examples can assume:
-// AnimationController _controller;
+// late AnimationController _controller;
 
 /// The status of an animation.
 enum AnimationStatus {
@@ -138,7 +138,7 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
   /// final Animatable<Alignment> _tween = AlignmentTween(begin: Alignment.topLeft, end: Alignment.topRight)
   ///   .chain(CurveTween(curve: Curves.easeIn));
   /// // ...
-  /// Animation<Alignment> _alignment2 = _controller.drive(_tween);
+  /// final Animation<Alignment> _alignment2 = _controller.drive(_tween);
   /// ```
   /// {@end-tool}
   /// {@tool snippet}

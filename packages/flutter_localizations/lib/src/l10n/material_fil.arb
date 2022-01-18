@@ -9,6 +9,8 @@
   "previousMonthTooltip": "Nakaraang buwan",
   "nextPageTooltip": "Susunod na page",
   "previousPageTooltip": "Nakaraang page",
+  "firstPageTooltip": "Unang page",
+  "lastPageTooltip": "Huling page",
   "showMenuTooltip": "Ipakita ang menu",
   "aboutListTileTitle": "Tungkol sa $applicationName",
   "licensesPageTitle": "Mga Lisensya",

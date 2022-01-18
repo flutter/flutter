@@ -2,10 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
 import '../rendering/rendering_tester.dart';
@@ -37,8 +36,8 @@ void main() {
         textDirection: TextDirection.ltr,
         child: ListWheelScrollView(
           itemExtent: 2000.0, // huge extent to trigger clip
-          children: <Widget>[Container()],
           clipBehavior: Clip.antiAlias,
+          children: <Widget>[Container()],
         ),
       ),
     );
@@ -51,16 +50,18 @@ void main() {
 
   group('construction check', () {
     testWidgets('ListWheelScrollView needs positive diameter ratio', (WidgetTester tester) async {
-      try {
-        ListWheelScrollView(
+      expect(
+        () => ListWheelScrollView(
           diameterRatio: nonconst(-2.0),
           itemExtent: 20.0,
           children: const <Widget>[],
-        );
-        fail('Expected failure with negative diameterRatio');
-      } on AssertionError catch (exception) {
-        expect(exception.message, contains("You can't set a diameterRatio of 0"));
-      }
+        ),
+        throwsA(isAssertionError.having(
+          (AssertionError error) => error.message,
+          'message',
+          contains("You can't set a diameterRatio of 0"),
+        )),
+      );
     });
 
     testWidgets('ListWheelScrollView can have zero child', (WidgetTester tester) async {
@@ -152,7 +153,7 @@ void main() {
             onSelectedItemChanged: (_) { },
             childDelegate: ListWheelChildLoopingListDelegate(
               children: List<Widget>.generate(10, (int index) {
-                return Container(
+                return SizedBox(
                   width: 400.0,
                   height: 100.0,
                   child: Text(index.toString()),
@@ -165,13 +166,13 @@ void main() {
 
       // The first item is at the center of the viewport.
       expect(
-      tester.getTopLeft(find.widgetWithText(Container, '0')),
+      tester.getTopLeft(find.widgetWithText(SizedBox, '0')),
       const Offset(0.0, 250.0),
       );
 
       // The last item is just before the first item.
       expect(
-        tester.getTopLeft(find.widgetWithText(Container, '9')),
+        tester.getTopLeft(find.widgetWithText(SizedBox, '9')),
         const Offset(0.0, 150.0),
       );
 
@@ -180,7 +181,7 @@ void main() {
 
       // We have passed the end of the list, the list should have looped back.
       expect(
-        tester.getTopLeft(find.widgetWithText(Container, '0')),
+        tester.getTopLeft(find.widgetWithText(SizedBox, '0')),
         const Offset(0.0, 250.0),
       );
     });
@@ -198,7 +199,7 @@ void main() {
             onSelectedItemChanged: (_) { },
             childDelegate: ListWheelChildBuilderDelegate(
               builder: (BuildContext context, int index) {
-                return Container(
+                return SizedBox(
                   width: 400.0,
                   height: 100.0,
                   child: Text(index.toString()),
@@ -213,7 +214,7 @@ void main() {
       controller.jumpTo(-100000.0);
       await tester.pump();
       expect(
-        tester.getTopLeft(find.widgetWithText(Container, '-1000')),
+        tester.getTopLeft(find.widgetWithText(SizedBox, '-1000')),
         const Offset(0.0, 250.0),
       );
 
@@ -221,7 +222,7 @@ void main() {
       controller.jumpTo(100000.0);
       await tester.pump();
       expect(
-        tester.getTopLeft(find.widgetWithText(Container, '1000')),
+        tester.getTopLeft(find.widgetWithText(SizedBox, '1000')),
         const Offset(0.0, 250.0),
       );
     });
@@ -243,7 +244,7 @@ void main() {
               builder: (BuildContext context, int index) {
                 if (index < -15 || index > -5)
                   return null;
-                return Container(
+                return SizedBox(
                   width: 400.0,
                   height: 100.0,
                   child: CustomPaint(
@@ -298,7 +299,7 @@ void main() {
           ),
         ),
       );
-      expect(tester.getTopLeft(find.byType(ListWheelScrollView)), const Offset(0.0, 0.0));
+      expect(tester.getTopLeft(find.byType(ListWheelScrollView)), Offset.zero);
       // Standard test screen size.
       expect(tester.getBottomRight(find.byType(ListWheelScrollView)), const Offset(800.0, 600.0));
     });
@@ -319,7 +320,7 @@ void main() {
           ),
         ),
       );
-      expect(tester.getTopLeft(find.byType(ListWheelScrollView)), const Offset(0.0, 0.0));
+      expect(tester.getTopLeft(find.byType(ListWheelScrollView)), Offset.zero);
       // Still fills standard test screen size.
       expect(tester.getBottomRight(find.byType(ListWheelScrollView)), const Offset(800.0, 600.0));
     });
@@ -363,7 +364,7 @@ void main() {
                 expect(builtChildren.contains(index), false);
                 builtChildren.add(index);
 
-                return Container(
+                return SizedBox(
                   width: 400.0,
                   height: 100.0,
                   child: Text(index.toString()),
@@ -617,10 +618,10 @@ void main() {
           textDirection: TextDirection.ltr,
           child: ListWheelScrollView(
             itemExtent: 100.0,
-            children: <Widget>[
-              Container(
+            children: const <Widget>[
+              SizedBox(
                 width: 200.0,
-                child: const Center(
+                child: Center(
                   child: Text('blah'),
                 ),
               ),
@@ -674,10 +675,10 @@ void main() {
           child: ListWheelScrollView(
             controller: controller,
             itemExtent: 100.0,
-            children: <Widget>[
-              Container(
+            children: const <Widget>[
+              SizedBox(
                 width: 200.0,
-                child: const Center(
+                child: Center(
                   child: Text('blah'),
                 ),
               ),
@@ -704,10 +705,10 @@ void main() {
             controller: controller,
             diameterRatio: 3.0,
             itemExtent: 100.0,
-            children: <Widget>[
-              Container(
+            children: const <Widget>[
+              SizedBox(
                 width: 200.0,
-                child: const Center(
+                child: Center(
                   child: Text('blah'),
                 ),
               ),
@@ -733,10 +734,10 @@ void main() {
             controller: controller,
             perspective: 0.0001,
             itemExtent: 100.0,
-            children: <Widget>[
-              Container(
+            children: const <Widget>[
+              SizedBox(
                 width: 200.0,
-                child: const Center(
+                child: Center(
                   child: Text('blah'),
                 ),
               ),
@@ -762,10 +763,10 @@ void main() {
           child: ListWheelScrollView(
             controller: controller,
             itemExtent: 100.0,
-            children: <Widget>[
-              Container(
+            children: const <Widget>[
+              SizedBox(
                 width: 200.0,
-                child: const Center(
+                child: Center(
                   child: Text('blah'),
                 ),
               ),
@@ -785,8 +786,7 @@ void main() {
     });
 
     testWidgets('offAxisFraction, magnification changes matrix', (WidgetTester tester) async {
-      final ScrollController controller = ScrollController(
-          initialScrollOffset: 200.0);
+      final ScrollController controller = ScrollController(initialScrollOffset: 200.0);
 
       await tester.pumpWidget(
         Directionality(
@@ -795,10 +795,10 @@ void main() {
             controller: controller,
             itemExtent: 100.0,
             offAxisFraction: 0.5,
-            children: <Widget>[
-              Container(
+            children: const <Widget>[
+              SizedBox(
                 width: 200.0,
-                child: const Center(
+                child: Center(
                   child: Text('blah'),
                 ),
               ),
@@ -808,27 +808,30 @@ void main() {
       );
 
       final RenderListWheelViewport viewport = tester.renderObject(find.byType(ListWheelViewport)) as RenderListWheelViewport;
-      expect(viewport, paints
-        ..transform(
-          matrix4: equals(<dynamic>[
-            1.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            moreOrLessEquals(0.6318744917928063),
-            moreOrLessEquals(0.3420201433256688),
-            moreOrLessEquals(-0.0010260604299770066),
-            0.0,
-            moreOrLessEquals(-1.1877435020329863),
-            moreOrLessEquals(0.9396926207859083),
-            moreOrLessEquals(-0.002819077862357725),
-            0.0,
-            moreOrLessEquals(-62.20844875763376),
-            moreOrLessEquals(-138.79047052615562),
-            moreOrLessEquals(1.4163714115784667),
-          ]),
-        ));
+      expect(
+        viewport,
+        paints
+          ..transform(
+            matrix4: equals(<dynamic>[
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              moreOrLessEquals(0.6318744917928063),
+              moreOrLessEquals(0.3420201433256688),
+              moreOrLessEquals(-0.0010260604299770066),
+              0.0,
+              moreOrLessEquals(-1.1877435020329863),
+              moreOrLessEquals(0.9396926207859083),
+              moreOrLessEquals(-0.002819077862357725),
+              0.0,
+              moreOrLessEquals(-62.20844875763376),
+              moreOrLessEquals(-138.79047052615562),
+              moreOrLessEquals(1.4163714115784667),
+            ]),
+          ),
+      );
 
       controller.jumpTo(0.0);
 
@@ -841,10 +844,10 @@ void main() {
             offAxisFraction: 0.5,
             useMagnifier: true,
             magnification: 1.5,
-            children: <Widget>[
-              Container(
+            children: const <Widget>[
+              SizedBox(
                 width: 200.0,
-                child: const Center(
+                child: Center(
                   child: Text('blah'),
                 ),
               ),
@@ -853,35 +856,37 @@ void main() {
         ),
       );
 
-      expect(viewport, paints
-        ..transform(
-          matrix4: equals(<dynamic>[
-            1.5,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            1.5,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            1.5,
-            0.0,
-            0.0,
-            -150.0,
-            0.0,
-            1.0,
-          ]),
-        ));
-
+      expect(
+        viewport,
+        paints
+          ..transform(
+            matrix4: equals(<dynamic>[
+              1.5,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.5,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.5,
+              0.0,
+              0.0,
+              -150.0,
+              0.0,
+              1.0,
+            ]),
+          ),
+      );
     });
   });
 
   group('scroll notifications', () {
     testWidgets('no onSelectedItemChanged callback on first build', (WidgetTester tester) async {
       bool itemChangeCalled = false;
-      final ValueChanged<int> onItemChange = (_) { itemChangeCalled = true; };
+      void onItemChange(int _) { itemChangeCalled = true; }
 
       await tester.pumpWidget(
         Directionality(
@@ -889,10 +894,10 @@ void main() {
           child: ListWheelScrollView(
             itemExtent: 100.0,
             onSelectedItemChanged: onItemChange,
-            children: <Widget>[
-              Container(
+            children: const <Widget>[
+              SizedBox(
                 width: 200.0,
-                child: const Center(
+                child: Center(
                   child: Text('blah'),
                 ),
               ),
@@ -1196,7 +1201,7 @@ void main() {
       await tester.fling(
         find.byType(ListWheelScrollView),
         const Offset(0.0, -50.0),
-        800.0,
+        100.0,
       );
 
       // At this moment, the ballistics is started but 50px is still inside the
@@ -1276,20 +1281,18 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: SizedBox(
             height: 500.0,
             width: 300.0,
             child: ListWheelScrollView(
               controller: ScrollController(initialScrollOffset: 300.0),
               itemExtent: 100.0,
               children: outerChildren = List<Widget>.generate(10, (int i) {
-                return Container(
-                  child: Center(
-                    child: innerChildren[i] = Container(
-                      height: 50.0,
-                      width: 50.0,
-                      child: Text('Item $i'),
-                    ),
+                return Center(
+                  child: innerChildren[i] = SizedBox(
+                    height: 50.0,
+                    width: 50.0,
+                    child: Text('Item $i'),
                   ),
                 );
               }),
@@ -1347,7 +1350,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: SizedBox(
             height: 500.0,
             width: 300.0,
             child: ListWheelScrollView(
@@ -1355,13 +1358,11 @@ void main() {
               itemExtent: 100.0,
               children:
               outerChildren = List<Widget>.generate(10, (int i) {
-                return Container(
-                  child: Center(
-                    child: innerChildren[i] = Container(
-                      height: 50.0,
-                      width: 50.0,
-                      child: Text('Item $i'),
-                    ),
+                return Center(
+                  child: innerChildren[i] = SizedBox(
+                    height: 50.0,
+                    width: 50.0,
+                    child: Text('Item $i'),
                   ),
                 );
               }),

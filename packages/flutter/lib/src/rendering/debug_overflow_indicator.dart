@@ -5,7 +5,6 @@
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
-import 'package:flutter/painting.dart';
 import 'package:flutter/foundation.dart';
 
 import 'object.dart';
@@ -54,20 +53,20 @@ class _OverflowRegionData {
 /// ```dart
 /// class MyRenderObject extends RenderAligningShiftedBox with DebugOverflowIndicatorMixin {
 ///   MyRenderObject({
-///     AlignmentGeometry alignment,
-///     TextDirection textDirection,
-///     RenderBox child,
+///     AlignmentGeometry alignment = Alignment.center,
+///     TextDirection? textDirection,
+///     RenderBox? child,
 ///   }) : super.mixin(alignment, textDirection, child);
 ///
-///   Rect _containerRect;
-///   Rect _childRect;
+///   late Rect _containerRect;
+///   late Rect _childRect;
 ///
 ///   @override
 ///   void performLayout() {
 ///     // ...
-///     final BoxParentData childParentData = child.parentData;
+///     final BoxParentData childParentData = child!.parentData! as BoxParentData;
 ///     _containerRect = Offset.zero & size;
-///     _childRect = childParentData.offset & child.size;
+///     _childRect = childParentData.offset & child!.size;
 ///   }
 ///
 ///   @override
@@ -86,7 +85,8 @@ class _OverflowRegionData {
 ///
 /// See also:
 ///
-///  * [RenderUnconstrainedBox] and [RenderFlex] for examples of classes that use this indicator mixin.
+///  * [RenderConstraintsTransformBox], [RenderUnconstrainedBox] and
+///    [RenderFlex], for examples of classes that use this indicator mixin.
 mixin DebugOverflowIndicatorMixin on RenderObject {
   static const Color _black = Color(0xBF000000);
   static const Color _yellow = Color(0xBFFFFF00);
@@ -101,7 +101,7 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
   );
   static final Paint _indicatorPaint = Paint()
     ..shader = ui.Gradient.linear(
-      const Offset(0.0, 0.0),
+      Offset.zero,
       const Offset(10.0, 10.0),
       <Color>[_black, _yellow, _yellow, _black],
       <double>[0.25, 0.25, 0.75, 0.75],
@@ -206,14 +206,14 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
         'The edge of the $runtimeType that is '
         'overflowing has been marked in the rendering with a yellow and black '
         'striped pattern. This is usually caused by the contents being too big '
-        'for the $runtimeType.'
+        'for the $runtimeType.',
       ));
       overflowHints.add(ErrorHint(
         'This is considered an error condition because it indicates that there '
         'is content that cannot be seen. If the content is legitimately bigger '
         'than the available space, consider clipping it with a ClipRect widget '
         'before putting it in the $runtimeType, or using a scrollable '
-        'container, like a ListView.'
+        'container, like a ListView.',
       ));
     }
 
@@ -224,8 +224,7 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
       if (overflow.right > 0.0) '${_formatPixels(overflow.right)} pixels on the right',
     ];
     String overflowText = '';
-    assert(overflows.isNotEmpty,
-        "Somehow $runtimeType didn't actually overflow like it thought it did.");
+    assert(overflows.isNotEmpty, "Somehow $runtimeType didn't actually overflow like it thought it did.");
     switch (overflows.length) {
       case 1:
         overflowText = overflows.first;

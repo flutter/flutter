@@ -2,8 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 class TestItem extends StatelessWidget {
   const TestItem({ Key? key, required this.item, this.width, this.height }) : super(key: key);
@@ -21,14 +22,14 @@ class TestItem extends StatelessWidget {
   }
 }
 
-Widget buildFrame({ int? count, double? width, double? height, Axis? scrollDirection }) {
+Widget buildFrame({ int? count, double? width, double? height, Axis? scrollDirection, Key? prototypeKey }) {
   return Directionality(
     textDirection: TextDirection.ltr,
     child: CustomScrollView(
       scrollDirection: scrollDirection ?? Axis.vertical,
       slivers: <Widget>[
         SliverPrototypeExtentList(
-          prototypeItem: TestItem(item: -1, width: width, height: height),
+          prototypeItem: TestItem(item: -1, width: width, height: height, key: prototypeKey),
           delegate: SliverChildBuilderDelegate(
             (BuildContext context, int index) => TestItem(item: index),
             childCount: count,
@@ -135,5 +136,19 @@ void main() {
 
     for (int i = 1; i < 10; i += 1)
       expect(find.text('Item $i'), findsOneWidget);
+  });
+
+  testWidgets('SliverPrototypeExtentList prototypeItem paint transform is zero.', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/67117
+    // This test ensures that the SliverPrototypeExtentList does not cause an
+    // assertion error when calculating the paint transform of its prototypeItem.
+    // The paint transform of the prototypeItem should be zero, since it is not visible.
+    final GlobalKey prototypeKey = GlobalKey();
+    await tester.pumpWidget(buildFrame(count: 20, height: 100.0, prototypeKey: prototypeKey));
+
+    final RenderObject scrollView = tester.renderObject(find.byType(CustomScrollView));
+    final RenderObject prototype = prototypeKey.currentContext!.findRenderObject()!;
+
+    expect(prototype.getTransformTo(scrollView), Matrix4.zero());
   });
 }

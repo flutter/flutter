@@ -7,10 +7,12 @@ import 'package:flutter/cupertino.dart';
 import '../../gallery/demo.dart';
 
 class CupertinoSliderDemo extends StatefulWidget {
+  const CupertinoSliderDemo({Key? key}) : super(key: key);
+
   static const String routeName = '/cupertino/slider';
 
   @override
-  _CupertinoSliderDemoState createState() => _CupertinoSliderDemoState();
+  State<CupertinoSliderDemo> createState() => _CupertinoSliderDemoState();
 }
 
 class _CupertinoSliderDemoState extends State<CupertinoSliderDemo> {

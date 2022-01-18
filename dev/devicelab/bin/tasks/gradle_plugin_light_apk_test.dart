@@ -2,8 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:io';
 
+import 'package:flutter_devicelab/common.dart';
 import 'package:flutter_devicelab/framework/apk_utils.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
@@ -27,7 +30,7 @@ Future<void> main() async {
           );
         });
 
-        final Iterable<String> apkFiles = await getFilesInApk(pluginProject.debugApkPath);
+        Iterable<String> apkFiles = await getFilesInApk(pluginProject.debugApkPath);
 
         checkCollectionContains<String>(<String>[
           ...flutterAssets,
@@ -45,9 +48,7 @@ Future<void> main() async {
           'lib/x86/libapp.so',
           'lib/x86_64/libapp.so',
         ], apkFiles);
-      });
 
-      await runPluginProjectTest((FlutterPluginProject pluginProject) async {
         section('APK content for task assembleDebug with target platform = android-x86');
         // This is used by `flutter run`
         await inDirectory(pluginProject.exampleAndroidPath, () {
@@ -61,7 +62,7 @@ Future<void> main() async {
           );
         });
 
-        final Iterable<String> apkFiles = await getFilesInApk(pluginProject.debugApkPath);
+        apkFiles = await getFilesInApk(pluginProject.debugApkPath);
 
         checkCollectionContains<String>(<String>[
           ...flutterAssets,
@@ -77,9 +78,7 @@ Future<void> main() async {
           'lib/x86/libapp.so',
           'lib/x86_64/libapp.so',
         ], apkFiles);
-      });
 
-      await runPluginProjectTest((FlutterPluginProject pluginProject) async {
         section('APK content for task assembleDebug with target platform = android-x64');
         // This is used by `flutter run`
 
@@ -94,7 +93,7 @@ Future<void> main() async {
           );
         });
 
-        final Iterable<String> apkFiles = await getFilesInApk(pluginProject.debugApkPath);
+        apkFiles = await getFilesInApk(pluginProject.debugApkPath);
 
         checkCollectionContains<String>(<String>[
           ...flutterAssets,
@@ -110,9 +109,7 @@ Future<void> main() async {
           'lib/x86/libapp.so',
           'lib/x86_64/libapp.so',
         ], apkFiles);
-      });
 
-      await runPluginProjectTest((FlutterPluginProject pluginProject) async {
         section('APK content for task assembleRelease with target platform = android-arm');
 
         await inDirectory(pluginProject.exampleAndroidPath, () {
@@ -126,7 +123,7 @@ Future<void> main() async {
           );
         });
 
-        final Iterable<String> apkFiles = await getFilesInApk(pluginProject.releaseApkPath);
+        apkFiles = await getFilesInApk(pluginProject.releaseApkPath);
 
         checkCollectionContains<String>(<String>[
           ...flutterAssets,
@@ -140,9 +137,7 @@ Future<void> main() async {
           'lib/arm64-v8a/libflutter.so',
           'lib/arm64-v8a/libapp.so',
         ], apkFiles);
-      });
 
-      await runPluginProjectTest((FlutterPluginProject pluginProject) async {
         section('APK content for task assembleRelease with target platform = android-arm64');
 
         await inDirectory(pluginProject.exampleAndroidPath, () {
@@ -156,7 +151,7 @@ Future<void> main() async {
           );
         });
 
-        final Iterable<String> apkFiles = await getFilesInApk(pluginProject.releaseApkPath);
+        apkFiles = await getFilesInApk(pluginProject.releaseApkPath);
 
         checkCollectionContains<String>(<String>[
           ...flutterAssets,
@@ -187,9 +182,7 @@ Future<void> main() async {
         if (errorMessage != null) {
           throw TaskResult.failure(errorMessage);
         }
-      });
 
-      await runProjectTest((FlutterProject project) async {
         section('gradlew assembleProfile');
         await inDirectory(project.rootPath, () {
           return flutter(
@@ -200,9 +193,7 @@ Future<void> main() async {
             ],
           );
         });
-      });
 
-      await runProjectTest((FlutterProject project) async {
         section('gradlew assembleLocal (custom debug build)');
         await project.addCustomBuildType('local', initWith: 'debug');
         await project.runGradleTask('assembleLocal');
@@ -229,7 +220,8 @@ Future<void> main() async {
         });
 
         section('Configure');
-        project.addPlugin('plugin_under_test', value: '$platformLineSep    path: ${pluginDir.path}');
+        unawaited(project.addPlugin('plugin_under_test',
+            value: '$platformLineSep    path: ${pluginDir.path}'));
         await project.addCustomBuildType('local', initWith: 'debug');
         await project.getPackages();
 
@@ -263,7 +255,7 @@ Future<void> main() async {
       await runProjectTest((FlutterProject project) async {
         section('gradlew on build script with error');
         await project.introduceError();
-        final ProcessResult result = await inDirectory(project.rootPath, () {
+        ProcessResult result = await inDirectory(project.rootPath, () {
           return executeFlutter('build', options: <String>[
             'apk',
             '--release',
@@ -273,7 +265,7 @@ Future<void> main() async {
         if (result.exitCode == 0)
           throw failure(
               'Gradle did not exit with error as expected', result);
-        final String output = '${result.stdout}\n${result.stderr}';
+        String output = '${result.stdout}\n${result.stderr}';
         if (output.contains('GradleException') ||
             output.contains('Failed to notify') ||
             output.contains('at org.gradle'))
@@ -282,6 +274,27 @@ Future<void> main() async {
         if (!output.contains('Build failed'))
           throw failure(
               'Gradle output should contain a readable error message',
+              result);
+
+        section('flutter build apk on build script with error');
+        await project.introduceError();
+        result = await inDirectory(project.rootPath, () {
+          return executeFlutter('build', options: <String>[
+            'apk',
+            '--release',
+          ]);
+        });
+        if (result.exitCode == 0)
+          throw failure(
+              'flutter build apk should fail when Gradle does', result);
+        output = '${result.stdout}\n${result.stderr}';
+        if (!output.contains('Build failed'))
+          throw failure(
+              'flutter build apk output should contain a readable Gradle error message',
+              result);
+        if (hasMultipleOccurrences(output, 'Build failed'))
+          throw failure(
+              'flutter build apk should not invoke Gradle repeatedly on error',
               result);
       });
 
@@ -300,45 +313,6 @@ Future<void> main() async {
         final String output = '${result.stdout}\n${result.stderr}';
         if (!output.contains('No file or variants found for asset: lib/gallery/example_code.dart.'))
           throw failure(output, result);
-      });
-
-      await runProjectTest((FlutterProject project) async {
-        section('flutter build apk on build script with error');
-        await project.introduceError();
-        final ProcessResult result = await inDirectory(project.rootPath, () {
-          return executeFlutter('build', options: <String>[
-            'apk',
-            '--release',
-          ]);
-        });
-        if (result.exitCode == 0)
-          throw failure(
-              'flutter build apk should fail when Gradle does', result);
-        final String output = '${result.stdout}\n${result.stderr}';
-        if (!output.contains('Build failed'))
-          throw failure(
-              'flutter build apk output should contain a readable Gradle error message',
-              result);
-        if (hasMultipleOccurrences(output, 'Build failed'))
-          throw failure(
-              'flutter build apk should not invoke Gradle repeatedly on error',
-              result);
-      });
-
-      await runPluginProjectTest((FlutterPluginProject pluginProject) async {
-        section('gradlew assembleDebug on plugin example');
-        await inDirectory(pluginProject.exampleAndroidPath, () {
-          return flutter(
-            'build',
-            options: <String>[
-              'apk',
-              '--debug',
-            ],
-          );
-        });
-        if (!File(pluginProject.debugApkPath).existsSync())
-          throw TaskResult.failure(
-              'Gradle did not produce an apk file at the expected place');
       });
 
       return TaskResult.success(null);

@@ -117,6 +117,86 @@ const double _kLowDprLimit = 2.0;
 /// AssetImage('icons/heart.png')
 /// ```
 ///
+/// {@tool snippet}
+///
+/// The following shows the code required to write a widget that fully conforms
+/// to the [AssetImage] and [Widget] protocols. (It is essentially a
+/// bare-bones version of the [widgets.Image] widget made to work specifically for
+/// an [AssetImage].)
+///
+/// ```dart
+/// class MyImage extends StatefulWidget {
+///   const MyImage({
+///     Key? key,
+///     required this.assetImage,
+///   }) : super(key: key);
+///
+///   final AssetImage assetImage;
+///
+///   @override
+///   State<MyImage> createState() => _MyImageState();
+/// }
+///
+/// class _MyImageState extends State<MyImage> {
+///   ImageStream? _imageStream;
+///   ImageInfo? _imageInfo;
+///
+///   @override
+///   void didChangeDependencies() {
+///     super.didChangeDependencies();
+///     // We call _getImage here because createLocalImageConfiguration() needs to
+///     // be called again if the dependencies changed, in case the changes relate
+///     // to the DefaultAssetBundle, MediaQuery, etc, which that method uses.
+///     _getImage();
+///   }
+///
+///   @override
+///   void didUpdateWidget(MyImage oldWidget) {
+///     super.didUpdateWidget(oldWidget);
+///     if (widget.assetImage != oldWidget.assetImage)
+///       _getImage();
+///   }
+///
+///   void _getImage() {
+///     final ImageStream? oldImageStream = _imageStream;
+///     _imageStream = widget.assetImage.resolve(createLocalImageConfiguration(context));
+///     if (_imageStream!.key != oldImageStream?.key) {
+///       // If the keys are the same, then we got the same image back, and so we don't
+///       // need to update the listeners. If the key changed, though, we must make sure
+///       // to switch our listeners to the new image stream.
+///       final ImageStreamListener listener = ImageStreamListener(_updateImage);
+///       oldImageStream?.removeListener(listener);
+///       _imageStream!.addListener(listener);
+///     }
+///   }
+///
+///   void _updateImage(ImageInfo imageInfo, bool synchronousCall) {
+///     setState(() {
+///       // Trigger a build whenever the image changes.
+///       _imageInfo?.dispose();
+///       _imageInfo = imageInfo;
+///     });
+///   }
+///
+///   @override
+///   void dispose() {
+///     _imageStream?.removeListener(ImageStreamListener(_updateImage));
+///     _imageInfo?.dispose();
+///     _imageInfo = null;
+///     super.dispose();
+///   }
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return RawImage(
+///       image: _imageInfo?.image, // this is a dart:ui Image object
+///       scale: _imageInfo?.scale ?? 1.0,
+///     );
+///   }
+/// }
+/// ```
+/// {@end-tool}
+///
 /// ## Assets in packages
 ///
 /// To fetch an asset from a package, the [package] argument must be provided.
@@ -236,7 +316,7 @@ class AssetImage extends AssetBundleImageProvider {
           // ourselves.
           result = SynchronousFuture<AssetBundleImageKey>(key);
         }
-      }
+      },
     ).catchError((Object error, StackTrace stack) {
       // We had an error. (This guarantees we weren't called synchronously.)
       // Forward the error to the caller.
@@ -261,9 +341,9 @@ class AssetImage extends AssetBundleImageProvider {
     // TODO(ianh): JSON decoding really shouldn't be on the main thread.
     final Map<String, dynamic> parsedJson = json.decode(jsonData) as Map<String, dynamic>;
     final Iterable<String> keys = parsedJson.keys;
-    final Map<String, List<String>> parsedManifest =
-        Map<String, List<String>>.fromIterables(keys,
-          keys.map<List<String>>((String key) => List<String>.from(parsedJson[key] as List<dynamic>)));
+    final Map<String, List<String>> parsedManifest = <String, List<String>> {
+      for (final String key in keys) key: List<String>.from(parsedJson[key] as List<dynamic>),
+    };
     // TODO(ianh): convert that data structure to the right types.
     return SynchronousFuture<Map<String, List<String>>?>(parsedManifest);
   }
@@ -281,7 +361,7 @@ class AssetImage extends AssetBundleImageProvider {
     return _findBestVariant(mapping, config.devicePixelRatio!);
   }
 
-  // Returns the "best" asset variant amongst the availabe `candidates`.
+  // Returns the "best" asset variant amongst the available `candidates`.
   //
   // The best variant is chosen as follows:
   // - Choose a variant whose key matches `value` exactly, if available.
@@ -289,7 +369,7 @@ class AssetImage extends AssetBundleImageProvider {
   //   lowest key.
   // - If `value` is greater than the highest key, choose the variant with
   //   the highest key.
-  // - If the screen has low device pixel ratio, chosse the variant with the
+  // - If the screen has low device pixel ratio, choose the variant with the
   //   lowest key higher than `value`.
   // - If the screen has high device pixel ratio, choose the variant with the
   //   key nearest to `value`.

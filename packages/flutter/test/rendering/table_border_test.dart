@@ -57,7 +57,7 @@ void main() {
     expect(border3.dimensions, const EdgeInsets.symmetric(horizontal: 1.0, vertical: 1.0));
     expect(border3.isUniform, isFalse);
     expect(border3.scale(0.0), TableBorder.symmetric(
-      inside: const BorderSide(width: 0.0, style: BorderStyle.none),
+      inside: BorderSide.none,
       outside: const BorderSide(width: 0.0, color: Color(0xFFFF0000), style: BorderStyle.none),
     ));
   });
@@ -103,8 +103,10 @@ void main() {
     expect(TableBorder.lerp(tableA, tableB, 2.0), tableC);
     expect(TableBorder.lerp(tableB, tableC, -1.0), tableA);
     expect(TableBorder.lerp(tableA, tableC, 0.9195)!.isUniform, isFalse);
-    expect(TableBorder.lerp(tableA, tableC, 0.9195)!.dimensions,
-           EdgeInsets.lerp(tableA.dimensions, tableC.dimensions, 0.9195));
+    expect(
+      TableBorder.lerp(tableA, tableC, 0.9195)!.dimensions,
+      EdgeInsets.lerp(tableA.dimensions, tableC.dimensions, 0.9195),
+    );
   });
 
   test('TableBorder.lerp with nulls', () {

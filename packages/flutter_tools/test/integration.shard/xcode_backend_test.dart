@@ -2,11 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:io' as io;
 
-import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
 
 import '../src/common.dart';
 
@@ -33,7 +35,7 @@ const Map<String, String> localEngineDebugBuildModeRelease = <String, String>{
 };
 
 // Can't use a debug build with a profile engine.
-const Map<String, String> localEngineProfileBuildeModeRelease = <String, String>{
+const Map<String, String> localEngineProfileBuildModeRelease = <String, String>{
   'SOURCE_ROOT': '../examples/hello_world',
   'FLUTTER_ROOT': '../..',
   'LOCAL_ENGINE': '/engine/src/out/ios_profile',
@@ -69,7 +71,7 @@ void main() {
     await expectXcodeBackendFails(unknownConfiguration);
     await expectXcodeBackendFails(unknownFlutterBuildMode);
     await expectXcodeBackendFails(localEngineDebugBuildModeRelease);
-    await expectXcodeBackendFails(localEngineProfileBuildeModeRelease);
+    await expectXcodeBackendFails(localEngineProfileBuildModeRelease);
   }, skip: !io.Platform.isMacOS);
 
   test('Xcode backend warns archiving a non-release build.', () async {
@@ -94,7 +96,7 @@ void main() {
       infoPlist = buildDirectory.childFile('Info.plist');
     });
 
-    test('fails when the Info.plist is missing', () async {
+    test('handles when the Info.plist is missing', () async {
       final ProcessResult result = await Process.run(
         xcodeBackendPath,
         <String>['test_observatory_bonjour_service'],
@@ -104,8 +106,8 @@ void main() {
           'INFOPLIST_PATH': 'Info.plist',
         },
       );
-      expect(result.stderr, startsWith('error: Info.plist does not exist.'));
-      expect(result.exitCode, isNot(0));
+      expect(result.stdout, contains('Info.plist does not exist.'));
+      expect(result.exitCode, 0);
     });
 
     const String emptyPlist = '''

@@ -72,8 +72,7 @@ class CupertinoActivityIndicator extends StatefulWidget {
   final double progress;
 
   @override
-  _CupertinoActivityIndicatorState createState() =>
-      _CupertinoActivityIndicatorState();
+  State<CupertinoActivityIndicator> createState() => _CupertinoActivityIndicatorState();
 }
 
 class _CupertinoActivityIndicatorState extends State<CupertinoActivityIndicator>

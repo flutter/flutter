@@ -55,8 +55,8 @@ enum ButtonBarLayoutBehavior {
 /// Please use one or more of the new buttons and their themes
 /// instead: [TextButton] and [TextButtonTheme], [ElevatedButton] and
 /// [ElevatedButtonTheme], [OutlinedButton] and
-/// [OutlinedButtonTheme]. The original classes will be deprecated
-/// soon, please migrate code that uses them.  There's a detailed
+/// [OutlinedButtonTheme]. The original classes have been deprecated,
+/// please migrate code that uses them.  There's a detailed
 /// migration guide for the new button and button theme classes in
 /// [flutter.dev/go/material-button-migration-guide](https://flutter.dev/go/material-button-migration-guide).
 ///
@@ -130,89 +130,6 @@ class ButtonTheme extends InheritedTheme {
   }) : assert(data != null),
        super(key: key, child: child);
 
-  /// Creates a button theme that is appropriate for button bars, as used in
-  /// dialog footers and in the headers of data tables.
-  ///
-  /// Deprecated. Please use [ButtonBarTheme] instead which offers more
-  /// flexibility to configure [ButtonBar] widgets.
-  ///
-  /// To migrate instances of code that were just wrapping a [ButtonBar]:
-  ///
-  /// ```dart
-  /// ButtonTheme.bar(
-  ///   child: ButtonBar(...)
-  /// );
-  /// ```
-  ///
-  /// you can just remove the `ButtonTheme.bar` as the defaults are now handled
-  /// by [ButtonBar] directly.
-  ///
-  /// If you have more complicated usages of `ButtonTheme.bar` like:
-  ///
-  /// ```dart
-  /// ButtonTheme.bar(
-  ///   padding: EdgeInsets.symmetric(horizontal: 10.0),
-  ///   textTheme: ButtonTextTheme.accent,
-  ///   child: ButtonBar(...),
-  /// );
-  /// ```
-  ///
-  /// you can remove the `ButtonTheme.bar` and move the parameters to the
-  /// [ButtonBar] instance directly:
-  ///
-  /// ```dart
-  /// ButtonBar(
-  ///   padding: EdgeInsets.symmetric(horizontal: 10.0),
-  ///   textTheme: ButtonTextTheme.accent,
-  ///   ...
-  /// );
-  /// ```
-  ///
-  /// You can also replace the defaults for all [ButtonBar] widgets by updating
-  /// [ThemeData.buttonBarTheme] for your app.
-  @Deprecated(
-    'Use ButtonBarTheme instead. '
-    'This feature was deprecated after v1.9.1.'
-  )
-  ButtonTheme.bar({
-    Key? key,
-    ButtonTextTheme textTheme = ButtonTextTheme.accent,
-    double minWidth = 64.0,
-    double height = 36.0,
-    EdgeInsetsGeometry padding = const EdgeInsets.symmetric(horizontal: 8.0),
-    ShapeBorder? shape,
-    bool alignedDropdown = false,
-    Color? buttonColor,
-    Color? disabledColor,
-    Color? focusColor,
-    Color? hoverColor,
-    Color? highlightColor,
-    Color? splashColor,
-    ColorScheme? colorScheme,
-    required Widget child,
-    ButtonBarLayoutBehavior layoutBehavior = ButtonBarLayoutBehavior.padded,
-  }) : assert(textTheme != null),
-       assert(minWidth != null && minWidth >= 0.0),
-       assert(height != null && height >= 0.0),
-       assert(alignedDropdown != null),
-       data = ButtonThemeData(
-         textTheme: textTheme,
-         minWidth: minWidth,
-         height: height,
-         padding: padding,
-         shape: shape,
-         alignedDropdown: alignedDropdown,
-         layoutBehavior: layoutBehavior,
-         buttonColor: buttonColor,
-         disabledColor: disabledColor,
-         focusColor: focusColor,
-         hoverColor: hoverColor,
-         highlightColor: highlightColor,
-         splashColor: splashColor,
-         colorScheme: colorScheme,
-       ),
-       super(key: key, child: child);
-
   /// Specifies the color and geometry of buttons.
   final ButtonThemeData data;
 
@@ -262,7 +179,7 @@ class ButtonTheme extends InheritedTheme {
 /// TextButton, ElevatedButton, and OutlinedButton respectively.
 /// ButtonTheme has been replaced by TextButtonTheme,
 /// ElevatedButtonTheme, and OutlinedButtonTheme. The original classes
-/// will be deprecated soon, please migrate code that uses them.
+/// have been deprecated, please migrate code that uses them.
 /// There's a detailed migration guide for the new button and button
 /// theme classes in
 /// [flutter.dev/go/material-button-migration-guide](https://flutter.dev/go/material-button-migration-guide).

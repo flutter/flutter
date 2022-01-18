@@ -5,6 +5,8 @@
 import 'package:flutter/material.dart';
 
 class AnimatedIconsTestApp extends StatelessWidget {
+  const AnimatedIconsTestApp({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
@@ -17,7 +19,7 @@ class AnimatedIconsTestApp extends StatelessWidget {
 }
 
 class IconsList extends StatelessWidget {
-  const IconsList();
+  const IconsList({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +30,7 @@ class IconsList extends StatelessWidget {
 }
 
 class IconSampleRow extends StatefulWidget {
-  const IconSampleRow(this.sample);
+  const IconSampleRow(this.sample, {Key? key}) : super(key: key);
 
   final IconSample sample;
 
@@ -37,7 +39,7 @@ class IconSampleRow extends StatefulWidget {
 }
 
 class IconSampleRowState extends State<IconSampleRow> with SingleTickerProviderStateMixin {
-  AnimationController progress;
+  late final AnimationController progress = AnimationController(vsync: this, duration: const Duration(milliseconds: 300));
 
   @override
   Widget build(BuildContext context) {
@@ -61,7 +63,6 @@ class IconSampleRowState extends State<IconSampleRow> with SingleTickerProviderS
   @override
   void initState() {
     super.initState();
-    progress = AnimationController(vsync: this, duration: const Duration(milliseconds: 300));
     progress.addListener(_handleChange);
   }
 
@@ -105,4 +106,4 @@ class IconSample {
   final String description;
 }
 
-void main() => runApp(AnimatedIconsTestApp());
+void main() => runApp(const AnimatedIconsTestApp());

@@ -8,7 +8,10 @@ import 'stock_arrow.dart';
 import 'stock_data.dart';
 
 class _StockSymbolView extends StatelessWidget {
-  const _StockSymbolView({ this.stock, this.arrow });
+  const _StockSymbolView({
+    required this.stock,
+    required this.arrow,
+  });
 
   final Stock stock;
   final Widget arrow;
@@ -19,14 +22,16 @@ class _StockSymbolView extends StatelessWidget {
     final String lastSale = '\$${stock.lastSale.toStringAsFixed(2)}';
     String changeInPrice = '${stock.percentChange.toStringAsFixed(2)}%';
     if (stock.percentChange > 0)
-      changeInPrice = '+' + changeInPrice;
+      changeInPrice = '+$changeInPrice';
 
-    final TextStyle headings = Theme.of(context).textTheme.bodyText1;
+    final TextStyle headings = Theme.of(context).textTheme.bodyText1!;
     return Container(
       padding: const EdgeInsets.all(20.0),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
               Text(
                 stock.symbol,
@@ -35,7 +40,6 @@ class _StockSymbolView extends StatelessWidget {
               ),
               arrow,
             ],
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
           ),
           Text('Last Sale', style: headings),
           Text('$lastSale ($changeInPrice)'),
@@ -58,14 +62,17 @@ class _StockSymbolView extends StatelessWidget {
             ),
           ),
         ],
-        mainAxisSize: MainAxisSize.min,
       ),
     );
   }
 }
 
 class StockSymbolPage extends StatelessWidget {
-  const StockSymbolPage({ this.symbol, this.stocks });
+  const StockSymbolPage({
+    Key? key,
+    required this.symbol,
+    required this.stocks,
+  }) : super(key: key);
 
   final String symbol;
   final StockData stocks;
@@ -74,8 +81,8 @@ class StockSymbolPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: stocks,
-      builder: (BuildContext context, Widget child) {
-        final Stock stock = stocks[symbol];
+      builder: (BuildContext context, Widget? child) {
+        final Stock? stock = stocks[symbol];
         return Scaffold(
           appBar: AppBar(
             title: Text(stock?.name ?? symbol),
@@ -113,7 +120,10 @@ class StockSymbolPage extends StatelessWidget {
 }
 
 class StockSymbolBottomSheet extends StatelessWidget {
-  const StockSymbolBottomSheet({ this.stock });
+  const StockSymbolBottomSheet({
+    Key? key,
+    required this.stock,
+  }) : super(key: key);
 
   final Stock stock;
 

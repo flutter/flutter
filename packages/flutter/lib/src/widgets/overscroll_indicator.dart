@@ -5,7 +5,6 @@
 import 'dart:async' show Timer;
 import 'dart:math' as math;
 
-import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
@@ -28,10 +27,11 @@ import 'ticker_provider.dart';
 /// showing the indication, call [OverscrollIndicatorNotification.disallowGlow]
 /// on the notification.
 ///
-/// Created automatically by [ScrollBehavior.buildViewportChrome] on platforms
+/// Created automatically by [ScrollBehavior.buildOverscrollIndicator] on platforms
 /// (e.g., Android) that commonly use this type of overscroll indication.
 ///
-/// In a [MaterialApp], the edge glow color is the [ThemeData.accentColor].
+/// In a [MaterialApp], the edge glow color is the overall theme's
+/// [ColorScheme.secondary] color.
 ///
 /// ## Customizing the Glow Position for Advanced Scroll Views
 ///
@@ -55,25 +55,25 @@ import 'ticker_provider.dart';
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
-///   double leadingPaintOffset = MediaQuery.of(context).padding.top + AppBar().preferredSize.height;
+///   final double leadingPaintOffset = MediaQuery.of(context).padding.top + AppBar().preferredSize.height;
 ///   return NotificationListener<OverscrollIndicatorNotification>(
-///     onNotification: (notification) {
+///     onNotification: (OverscrollIndicatorNotification notification) {
 ///       if (notification.leading) {
 ///         notification.paintOffset = leadingPaintOffset;
 ///       }
 ///       return false;
 ///     },
 ///     child: CustomScrollView(
-///       slivers: [
-///         SliverAppBar(title: Text('Custom PaintOffset')),
+///       slivers: <Widget>[
+///         const SliverAppBar(title: Text('Custom PaintOffset')),
 ///         SliverToBoxAdapter(
 ///           child: Container(
 ///             color: Colors.amberAccent,
 ///             height: 100,
-///             child: Center(child: Text('Glow all day!')),
+///             child: const Center(child: Text('Glow all day!')),
 ///           ),
 ///         ),
-///         SliverFillRemaining(child: FlutterLogo()),
+///         const SliverFillRemaining(child: FlutterLogo()),
 ///       ],
 ///     ),
 ///   );
@@ -92,7 +92,7 @@ import 'ticker_provider.dart';
 /// Widget build(BuildContext context) {
 ///   return NestedScrollView(
 ///     headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-///       return <Widget>[
+///       return const <Widget>[
 ///         SliverAppBar(title: Text('Custom NestedScrollViews')),
 ///       ];
 ///     },
@@ -102,10 +102,10 @@ import 'ticker_provider.dart';
 ///           child: Container(
 ///             color: Colors.amberAccent,
 ///             height: 100,
-///             child: Center(child: Text('Glow all day!')),
+///             child: const Center(child: Text('Glow all day!')),
 ///           ),
 ///         ),
-///         SliverFillRemaining(child: FlutterLogo()),
+///         const SliverFillRemaining(child: FlutterLogo()),
 ///       ],
 ///     ),
 ///   );
@@ -189,12 +189,12 @@ class GlowingOverscrollIndicator extends StatefulWidget {
   /// subtree) should include a source of [ScrollNotification] notifications.
   ///
   /// Typically a [GlowingOverscrollIndicator] is created by a
-  /// [ScrollBehavior.buildViewportChrome] method, in which case
+  /// [ScrollBehavior.buildOverscrollIndicator] method, in which case
   /// the child is usually the one provided as an argument to that method.
   final Widget? child;
 
   @override
-  _GlowingOverscrollIndicatorState createState() => _GlowingOverscrollIndicatorState();
+  State<GlowingOverscrollIndicator> createState() => _GlowingOverscrollIndicatorState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

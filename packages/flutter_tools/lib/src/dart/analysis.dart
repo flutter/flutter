@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import '../base/common.dart';
@@ -22,16 +21,18 @@ class AnalysisServer {
   AnalysisServer(
     this.sdkPath,
     this.directories, {
-    @required FileSystem fileSystem,
-    @required ProcessManager processManager,
-    @required Logger logger,
-    @required Platform platform,
-    @required Terminal terminal,
+    required FileSystem fileSystem,
+    required ProcessManager processManager,
+    required Logger logger,
+    required Platform platform,
+    required Terminal terminal,
+    String? protocolTrafficLog,
   }) : _fileSystem = fileSystem,
        _processManager = processManager,
        _logger = logger,
        _platform = platform,
-       _terminal = terminal;
+       _terminal = terminal,
+       _protocolTrafficLog = protocolTrafficLog;
 
   final String sdkPath;
   final List<String> directories;
@@ -40,8 +41,9 @@ class AnalysisServer {
   final Logger _logger;
   final Platform _platform;
   final Terminal _terminal;
+  final String? _protocolTrafficLog;
 
-  Process _process;
+  Process? _process;
   final StreamController<bool> _analyzingController =
       StreamController<bool>.broadcast();
   final StreamController<FileAnalysisErrors> _errorsController =
@@ -65,19 +67,21 @@ class AnalysisServer {
       '--disable-server-feature-search',
       '--sdk',
       sdkPath,
+      if (_protocolTrafficLog != null)
+        '--protocol-traffic-log=$_protocolTrafficLog',
     ];
 
     _logger.printTrace('dart ${command.skip(1).join(' ')}');
     _process = await _processManager.start(command);
     // This callback hookup can't throw.
-    unawaited(_process.exitCode.whenComplete(() => _process = null));
+    unawaited(_process!.exitCode.whenComplete(() => _process = null));
 
-    final Stream<String> errorStream = _process.stderr
+    final Stream<String> errorStream = _process!.stderr
         .transform<String>(utf8.decoder)
         .transform<String>(const LineSplitter());
     errorStream.listen(_logger.printError);
 
-    final Stream<String> inStream = _process.stdout
+    final Stream<String> inStream = _process!.stdout
         .transform<String>(utf8.decoder)
         .transform<String>(const LineSplitter());
     inStream.listen(_handleServerResponse);
@@ -96,7 +100,7 @@ class AnalysisServer {
 
   Stream<FileAnalysisErrors> get onErrors => _errorsController.stream;
 
-  Future<int> get onExit => _process.exitCode;
+  Future<int?> get onExit async => _process?.exitCode;
 
   void _sendCommand(String method, Map<String, dynamic> params) {
     final String message = json.encode(<String, dynamic>{
@@ -104,7 +108,7 @@ class AnalysisServer {
       'method': method,
       'params': params,
     });
-    _process.stdin.writeln(message);
+    _process?.stdin.writeln(message);
     _logger.printTrace('==> $message');
   }
 
@@ -117,19 +121,23 @@ class AnalysisServer {
       if (response['event'] != null) {
         final String event = response['event'] as String;
         final dynamic params = response['params'];
-
+        Map<String, dynamic>? paramsMap;
         if (params is Map<String, dynamic>) {
+          paramsMap = castStringKeyedMap(params);
+        }
+
+        if (paramsMap != null) {
           if (event == 'server.status') {
-            _handleStatus(castStringKeyedMap(response['params']));
+            _handleStatus(paramsMap);
           } else if (event == 'analysis.errors') {
-            _handleAnalysisIssues(castStringKeyedMap(response['params']));
+            _handleAnalysisIssues(paramsMap);
           } else if (event == 'server.error') {
-            _handleServerError(castStringKeyedMap(response['params']));
+            _handleServerError(paramsMap);
           }
         }
       } else if (response['error'] != null) {
         // Fields are 'code', 'message', and 'stackTrace'.
-        final Map<String, dynamic> error = castStringKeyedMap(response['error']);
+        final Map<String, dynamic> error = castStringKeyedMap(response['error'])!;
         _logger.printError(
             'Error response from the server: ${error['code']} ${error['message']}');
         if (error['stackTrace'] != null) {
@@ -161,7 +169,7 @@ class AnalysisServer {
     final String file = issueInfo['file'] as String;
     final List<dynamic> errorsList = issueInfo['errors'] as List<dynamic>;
     final List<AnalysisError> errors = errorsList
-        .map<Map<String, dynamic>>(castStringKeyedMap)
+        .map<Map<String, dynamic>>((dynamic e) => castStringKeyedMap(e) ?? <String, dynamic>{})
         .map<AnalysisError>((Map<String, dynamic> json) {
           return AnalysisError(WrittenError.fromJson(json),
             fileSystem: _fileSystem,
@@ -175,7 +183,7 @@ class AnalysisServer {
     }
   }
 
-  Future<bool> dispose() async {
+  Future<bool?> dispose() async {
     await _analyzingController.close();
     await _errorsController.close();
     return _process?.kill();
@@ -193,9 +201,9 @@ enum AnalysisSeverity {
 class AnalysisError implements Comparable<AnalysisError> {
   AnalysisError(
     this.writtenError, {
-    @required Platform platform,
-    @required Terminal terminal,
-    @required FileSystem fileSystem,
+    required Platform platform,
+    required Terminal terminal,
+    required FileSystem fileSystem,
   }) : _platform = platform,
        _terminal = terminal,
        _fileSystem = fileSystem;
@@ -217,7 +225,6 @@ class AnalysisError implements Comparable<AnalysisError> {
       case AnalysisSeverity.none:
         return writtenError.severity;
     }
-    return null;
   }
 
   String get type => writtenError.type;
@@ -262,14 +269,14 @@ class AnalysisError implements Comparable<AnalysisError> {
 /// [AnalysisError] in plain text content.
 class WrittenError {
   WrittenError._({
-    @required this.severity,
-    @required this.type,
-    @required this.message,
-    @required this.code,
-    @required this.file,
-    @required this.startLine,
-    @required this.startColumn,
-    @required this.offset,
+    required this.severity,
+    required this.type,
+    required this.message,
+    required this.code,
+    required this.file,
+    required this.startLine,
+    required this.startColumn,
+    required this.offset,
   });
 
   ///  {

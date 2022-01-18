@@ -216,7 +216,7 @@ class HitTestResult {
       'events must be Vector4(0, 0, 1, 0) to ensure that a transformed '
       'point is directly under the pointing device. Did you forget to run the paint '
       'matrix through PointerEvent.removePerspectiveTransform? '
-      'The provided matrix is:\n$transform'
+      'The provided matrix is:\n$transform',
     );
     _localTransforms.add(_MatrixTransformPart(transform));
   }

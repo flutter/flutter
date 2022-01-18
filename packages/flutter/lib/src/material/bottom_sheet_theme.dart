@@ -34,6 +34,7 @@ class BottomSheetThemeData with Diagnosticable {
     this.modalElevation,
     this.shape,
     this.clipBehavior,
+    this.constraints,
   });
 
   /// Default value for [BottomSheet.backgroundColor].
@@ -67,6 +68,11 @@ class BottomSheetThemeData with Diagnosticable {
   /// If null, [BottomSheet] uses [Clip.none].
   final Clip? clipBehavior;
 
+  /// Constrains the size of the [BottomSheet].
+  ///
+  /// If null, the bottom sheet's size will be unconstrained.
+  final BoxConstraints? constraints;
+
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   BottomSheetThemeData copyWith({
@@ -76,6 +82,7 @@ class BottomSheetThemeData with Diagnosticable {
     double? modalElevation,
     ShapeBorder? shape,
     Clip? clipBehavior,
+    BoxConstraints? constraints,
   }) {
     return BottomSheetThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -84,6 +91,7 @@ class BottomSheetThemeData with Diagnosticable {
       modalElevation: modalElevation ?? this.modalElevation,
       shape: shape ?? this.shape,
       clipBehavior: clipBehavior ?? this.clipBehavior,
+      constraints: constraints ?? this.constraints,
     );
   }
 
@@ -103,6 +111,7 @@ class BottomSheetThemeData with Diagnosticable {
       modalElevation: lerpDouble(a?.modalElevation, b?.modalElevation, t),
       shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
       clipBehavior: t < 0.5 ? a?.clipBehavior : b?.clipBehavior,
+      constraints: BoxConstraints.lerp(a?.constraints, b?.constraints, t),
     );
   }
 
@@ -115,6 +124,7 @@ class BottomSheetThemeData with Diagnosticable {
       modalElevation,
       shape,
       clipBehavior,
+      constraints,
     );
   }
 
@@ -130,7 +140,8 @@ class BottomSheetThemeData with Diagnosticable {
         && other.modalBackgroundColor == modalBackgroundColor
         && other.modalElevation == modalElevation
         && other.shape == shape
-        && other.clipBehavior == clipBehavior;
+        && other.clipBehavior == clipBehavior
+        && other.constraints == constraints;
   }
 
   @override
@@ -142,5 +153,6 @@ class BottomSheetThemeData with Diagnosticable {
     properties.add(DoubleProperty('modalElevation', modalElevation, defaultValue: null));
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
     properties.add(DiagnosticsProperty<Clip>('clipBehavior', clipBehavior, defaultValue: null));
+    properties.add(DiagnosticsProperty<BoxConstraints>('constraints', constraints, defaultValue: null));
   }
 }

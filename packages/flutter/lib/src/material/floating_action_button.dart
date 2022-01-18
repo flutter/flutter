@@ -5,12 +5,10 @@
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button.dart';
-import 'colors.dart';
 import 'floating_action_button_theme.dart';
 import 'scaffold.dart';
 import 'theme.dart';
@@ -70,14 +68,14 @@ class _DefaultHeroTag {
 ///     appBar: AppBar(
 ///       title: const Text('Floating Action Button'),
 ///     ),
-///     body: Center(
-///       child: const Text('Press the button below!')
+///     body: const Center(
+///       child: Text('Press the button below!')
 ///     ),
 ///     floatingActionButton: FloatingActionButton(
 ///       onPressed: () {
 ///         // Add your onPressed code here!
 ///       },
-///       child: Icon(Icons.navigation),
+///       child: const Icon(Icons.navigation),
 ///       backgroundColor: Colors.green,
 ///     ),
 ///   );
@@ -98,15 +96,15 @@ class _DefaultHeroTag {
 ///     appBar: AppBar(
 ///       title: const Text('Floating Action Button Label'),
 ///     ),
-///     body: Center(
-///       child: const Text('Press the button with a label below!'),
+///     body: const Center(
+///       child: Text('Press the button with a label below!'),
 ///     ),
 ///     floatingActionButton: FloatingActionButton.extended(
 ///       onPressed: () {
 ///         // Add your onPressed code here!
 ///       },
-///       label: Text('Approve'),
-///       icon: Icon(Icons.thumb_up),
+///       label: const Text('Approve'),
+///       icon: const Icon(Icons.thumb_up),
 ///       backgroundColor: Colors.pink,
 ///     ),
 ///   );
@@ -149,6 +147,7 @@ class FloatingActionButton extends StatelessWidget {
     this.autofocus = false,
     this.materialTapTargetSize,
     this.isExtended = false,
+    this.enableFeedback,
   }) : assert(elevation == null || elevation >= 0.0),
        assert(focusElevation == null || focusElevation >= 0.0),
        assert(hoverElevation == null || hoverElevation >= 0.0),
@@ -191,6 +190,7 @@ class FloatingActionButton extends StatelessWidget {
     this.autofocus = false,
     Widget? icon,
     required Widget label,
+    this.enableFeedback,
   }) : assert(elevation == null || elevation >= 0.0),
        assert(focusElevation == null || focusElevation >= 0.0),
        assert(hoverElevation == null || hoverElevation >= 0.0),
@@ -210,7 +210,11 @@ class FloatingActionButton extends StatelessWidget {
                  label,
                  const SizedBox(width: 20.0),
                ]
-             : <Widget>[
+             : !isExtended ? <Widget>[
+               const SizedBox(width: 20.0),
+               icon,
+               const SizedBox(width: 20.0),
+           ] : <Widget>[
                  const SizedBox(width: 16.0),
                  icon,
                  const SizedBox(width: 8.0),
@@ -239,11 +243,6 @@ class FloatingActionButton extends StatelessWidget {
   /// [ThemeData.floatingActionButtonTheme] is used. If that property is also
   /// null, then the [ColorScheme.onSecondary] color of [ThemeData.colorScheme]
   /// is used.
-  ///
-  /// Although the color of theme's `accentIconTheme` currently provides a
-  /// default that supersedes the `onSecondary` color, this dependency
-  /// has been deprecated:  https://flutter.dev/go/remove-fab-accent-theme-dependency.
-  /// It will be removed in the future.
   final Color? foregroundColor;
 
   /// The button's background color.
@@ -412,6 +411,19 @@ class FloatingActionButton extends StatelessWidget {
   ///  * [MaterialTapTargetSize], for a description of how this affects tap targets.
   final MaterialTapTargetSize? materialTapTargetSize;
 
+  /// Whether detected gestures should provide acoustic and/or haptic feedback.
+  ///
+  /// For example, on Android a tap will produce a clicking sound and a
+  /// long-press will produce a short vibration, when feedback is enabled.
+  ///
+  /// If null, [FloatingActionButtonThemeData.enableFeedback] is used.
+  /// If both are null, then default value is true.
+  ///
+  /// See also:
+  ///
+  ///  * [Feedback] for providing platform-specific feedback to certain actions.
+  final bool? enableFeedback;
+
   final BoxConstraints _sizeConstraints;
 
   static const double _defaultElevation = 6;
@@ -425,25 +437,6 @@ class FloatingActionButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final FloatingActionButtonThemeData floatingActionButtonTheme = theme.floatingActionButtonTheme;
-
-    // Applications should no longer use accentIconTheme's color to configure
-    // the foreground color of floating action buttons. For more information, see
-    // https://flutter.dev/go/remove-fab-accent-theme-dependency.
-    if (this.foregroundColor == null && floatingActionButtonTheme.foregroundColor == null) {
-      final bool accentIsDark = theme.accentColorBrightness == Brightness.dark;
-      final Color defaultAccentIconThemeColor = accentIsDark ? Colors.white : Colors.black;
-      if (theme.accentIconTheme.color != defaultAccentIconThemeColor) {
-        debugPrint(
-          'Warning: '
-          'The support for configuring the foreground color of '
-          'FloatingActionButtons using ThemeData.accentIconTheme '
-          'has been deprecated. Please use ThemeData.floatingActionButtonTheme '
-          'instead. See '
-          'https://flutter.dev/go/remove-fab-accent-theme-dependency. '
-          'This feature was deprecated after v1.13.2.'
-        );
-      }
-    }
 
     final Color foregroundColor = this.foregroundColor
       ?? floatingActionButtonTheme.foregroundColor
@@ -477,6 +470,8 @@ class FloatingActionButton extends StatelessWidget {
       ?? _defaultHighlightElevation;
     final MaterialTapTargetSize materialTapTargetSize = this.materialTapTargetSize
       ?? theme.materialTapTargetSize;
+    final bool enableFeedback = this.enableFeedback
+      ?? floatingActionButtonTheme.enableFeedback ?? true;
     final TextStyle textStyle = theme.textTheme.button!.copyWith(
       color: foregroundColor,
       letterSpacing: 1.2,
@@ -504,6 +499,7 @@ class FloatingActionButton extends StatelessWidget {
       clipBehavior: clipBehavior,
       focusNode: focusNode,
       autofocus: autofocus,
+      enableFeedback: enableFeedback,
       child: child,
     );
 

@@ -5,15 +5,14 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:path/path.dart' as path;
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:path/path.dart' as path;
 
 import '../test_utils.dart';
 
-final String rootDirectoryPath = Directory.current.parent.path;
+final String rootDirectoryPath = Directory.current.path;
 
 void main() {
   for (final String language in kCupertinoSupportedLanguages) {
