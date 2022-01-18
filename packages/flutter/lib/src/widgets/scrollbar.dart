@@ -403,9 +403,12 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   late double _thumbOffset;
 
   // InfiniteScroll
-  // The assumed depth of the scroll view.
+  // TODO(Piinks): Users may want to have access to these values to adjust as they like, evaluate and update.
+  // The assumed depth of the scroll view when the maxExtent is infinity.
+  // This value will be updated as this assumed extent is travelled.
   double _infiniteDepth = _infiniteLeadingExtent;
-  // The amount of assumed leading distance following the _infiniteDepth.
+  // The assumed leading distance ahead of the scrollbar thumb when we are
+  // assuming an extent.
   static const double _infiniteLeadingExtent = 10000;
 
   /// Update with new [ScrollMetrics]. If the metrics change, the scrollbar will
@@ -632,10 +635,11 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   // thumb track.
   double _getScrollToTrack(ScrollMetrics metrics, double thumbExtent) {
     late double scrollableExtent;
+    final double trueScrollableExtent = metrics.maxScrollExtent - metrics.minScrollExtent;
     // If the ScrollView has a finite extent, and is not being overridden by
     // infinite scroll, use the known extents.
     if (metrics.maxScrollExtent.isFinite && infiniteBehavior == null) {
-      scrollableExtent = metrics.maxScrollExtent - metrics.minScrollExtent;
+      scrollableExtent = trueScrollableExtent;
     } else {
       // If we have an infinitely long scroll view (or are pretending to have
       // one), we pretend it isn't by keeping track of the last known depth, and
@@ -658,10 +662,18 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
       }
       scrollableExtent = _infiniteDepth - metrics.minScrollExtent;
     }
-    final double fractionPast = (scrollableExtent > 0)
-        ? ((metrics.pixels - metrics.minScrollExtent) / scrollableExtent).clamp(0.0, 1.0)
-        : 0;
+    final double trueFractionPast = (trueScrollableExtent > 0)
+      ? ((metrics.pixels - metrics.minScrollExtent) / trueScrollableExtent).clamp(0.0, 1.0)
+      : 0;
+    // If we have been mocking the extent, but truly reached the end, correct
+    // the scrollbar position.
+    if (trueFractionPast == 1.0) {
+      return (_isReversed ? 1 - trueFractionPast : trueFractionPast) * (_trackExtent - thumbExtent);
+    }
 
+    final double fractionPast = (scrollableExtent > 0)
+      ? ((metrics.pixels - metrics.minScrollExtent) / scrollableExtent).clamp(0.0, 1.0)
+      : 0;
     if (fractionPast > 0.99 && infiniteBehavior == InfiniteScrollBehavior.page) {
       // If we are loading extent in chunks, add on when we reach the end of
       // the current 'extent'.
@@ -853,10 +865,10 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 /// position relative to the known scroll offset. In this case, the scrollbar
 /// cannot accurately represent the relative location of the visible area, or
 /// calculate the accurate delta to apply when  dragging on the thumb or tapping
-/// on the track. In order to paint, the scrollbar will assume 1000 pixels ahead
-/// of itself, with the addition of the current scroll behind it. How the
-/// scrollbar adjusts in real-time to this calculation can be configured with
-/// [infiniteBehavior]. By default, the scrollbar will use
+/// on the track. In order to paint, the scrollbar will assume there is a large
+/// extent ahead of itself, with the addition of the current scroll behind it.
+/// How the scrollbar adjusts in real-time to this calculation can be configured
+/// with [infiniteBehavior]. By default, the scrollbar will use
 /// [InfiniteScrollBehavior.continuous] when the [ScrollView] is infinitely long.
 /// This behavior always assumes a fixed pixel distance
 /// ahead of the scrollbar thumb. [InfiniteScrollBehavior.page] will only
@@ -869,8 +881,8 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 /// infinitely long. For a lazy-loading ScrollView of dynamically sized items,
 /// an estimate of maximum scroll extent is updated as more items are built. In
 /// some cases, this results in the scrollbar position adjusting its position on
-/// the track while scrolling is occurring. If this updating behavior is
-/// undesired, use an InfiniteScrollBehavior.
+/// the track while scrolling is occurring. If this frequently updating behavior
+/// is undesired, try using an InfiniteScrollBehavior.
 ///
 /// ### Interaction
 ///
