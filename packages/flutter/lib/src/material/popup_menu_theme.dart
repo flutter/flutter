@@ -40,7 +40,6 @@ class PopupMenuThemeData with Diagnosticable {
     this.textStyle,
     this.enableFeedback,
     this.mouseCursor,
-    this.padding,
   });
 
   /// The background color of the popup menu.
@@ -65,11 +64,6 @@ class PopupMenuThemeData with Diagnosticable {
   /// If specified, overrides the default value of [PopupMenuItem.mouseCursor].
   final MaterialStateProperty<MouseCursor?>? mouseCursor;
 
-  /// If specified, defines the padding for the popup menu of [PopupMenuButton].
-  ///
-  /// If [PopupMenuButton.menuPadding] is provided, [padding] is ignored.
-  final EdgeInsetsGeometry? padding;
-
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   PopupMenuThemeData copyWith({
@@ -79,7 +73,6 @@ class PopupMenuThemeData with Diagnosticable {
     TextStyle? textStyle,
     bool? enableFeedback,
     MaterialStateProperty<MouseCursor?>? mouseCursor,
-    EdgeInsets? padding,
   }) {
     return PopupMenuThemeData(
       color: color ?? this.color,
@@ -88,7 +81,6 @@ class PopupMenuThemeData with Diagnosticable {
       textStyle: textStyle ?? this.textStyle,
       enableFeedback: enableFeedback ?? this.enableFeedback,
       mouseCursor: mouseCursor ?? this.mouseCursor,
-      padding: padding ?? this.padding,
     );
   }
 
@@ -108,7 +100,6 @@ class PopupMenuThemeData with Diagnosticable {
       textStyle: TextStyle.lerp(a?.textStyle, b?.textStyle, t),
       enableFeedback: t < 0.5 ? a?.enableFeedback : b?.enableFeedback,
       mouseCursor: t < 0.5 ? a?.mouseCursor : b?.mouseCursor,
-      padding: EdgeInsetsGeometry.lerp(a?.padding, b?.padding, t),
     );
   }
 
@@ -120,8 +111,7 @@ class PopupMenuThemeData with Diagnosticable {
       elevation,
       textStyle,
       enableFeedback,
-      mouseCursor,
-      padding,
+      mouseCursor
     );
   }
 
@@ -137,8 +127,7 @@ class PopupMenuThemeData with Diagnosticable {
         && other.shape == shape
         && other.textStyle == textStyle
         && other.enableFeedback == enableFeedback
-        && other.mouseCursor == mouseCursor
-        && other.padding == padding;
+        && other.mouseCursor == mouseCursor;
   }
 
   @override
@@ -150,7 +139,6 @@ class PopupMenuThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<TextStyle>('text style', textStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('enableFeedback', enableFeedback, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>>('mouseCursor', mouseCursor, defaultValue: null));
-    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
   }
 }
 
