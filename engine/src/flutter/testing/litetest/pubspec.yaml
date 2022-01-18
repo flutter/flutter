@@ -20,6 +20,7 @@ dependencies:
   async_helper: any
   expect: any
   meta: any
+  smith: any
 
 dependency_overrides:
   async_helper:
@@ -28,3 +29,5 @@ dependency_overrides:
     path: ../../../third_party/dart/pkg/expect
   meta:
     path: ../../../third_party/dart/pkg/meta
+  smith:
+    path: ../../../third_party/dart/pkg/smith
