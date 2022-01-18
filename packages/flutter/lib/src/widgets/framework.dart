@@ -413,7 +413,7 @@ class InheritedTreeCache {
   InheritedTreeCache([this._parent]);
 
   final InheritedTreeCache? _parent;
-  final HashMap<Type, InheritedElement> _current = HashMap<Type, InheritedElement>();
+  final Map<Type, InheritedElement> _current = createIdentityMap<Type, InheritedElement>();
 
   /// Place the [element] in the cache under [type].
   void operator []=(Type type, InheritedElement element) {
@@ -1960,7 +1960,7 @@ enum _ElementLifecycle {
 
 class _InactiveElements {
   bool _locked = false;
-  final Set<Element> _elements = HashSet<Element>();
+  final Set<Element> _elements = createIdentitySet<Element>();
 
   void _unmount(Element element) {
     assert(element._lifecycleState == _ElementLifecycle.inactive);
@@ -5234,7 +5234,7 @@ class InheritedElement extends ProxyElement {
   @override
   InheritedWidget get widget => super.widget as InheritedWidget;
 
-  final Map<Element, Object?> _dependents = HashMap<Element, Object?>();
+  final Map<Element, Object?> _dependents = createIdentityMap<Element, Object?>();
 
   @override
   void _updateInheritance() {
@@ -6383,7 +6383,7 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
   late List<Element> _children;
   // We keep a set of forgotten children to avoid O(n^2) work walking _children
   // repeatedly to remove children.
-  final Set<Element> _forgottenChildren = HashSet<Element>();
+  final Set<Element> _forgottenChildren = createIdentitySet<Element>();
 
   @override
   void insertRenderObjectChild(RenderObject child, IndexedSlot<Element?> slot) {
