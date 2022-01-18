@@ -374,6 +374,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   Rect? _thumbRect;
   Rect? _trackRect;
   late double _thumbOffset;
+  double _exposedContentExtent = 0.0;
 
   /// Update with new [ScrollMetrics]. If the metrics change, the scrollbar will
   /// show and redraw itself based on these new metrics.
@@ -567,11 +568,17 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   // The size of the thumb track.
   double get _trackExtent => _lastMetrics!.viewportDimension - 2 * mainAxisMargin - _mainAxisPadding;
 
+  double get _cachedContentExtent => math.max(RenderAbstractViewport.defaultCacheExtent, _lastMetrics!.viewportDimension * 2.0);
+
   // The total size of the scrollable content.
   double get _totalContentExtent {
-    return _lastMetrics!.maxScrollExtent
-      - _lastMetrics!.minScrollExtent
-      + _lastMetrics!.viewportDimension;
+    if (_lastMetrics!.maxScrollExtent.isInfinite) {
+      return _exposedContentExtent + _lastMetrics!.viewportDimension + _cachedContentExtent;
+    } else {
+      return _lastMetrics!.maxScrollExtent
+        - _lastMetrics!.minScrollExtent
+        + _lastMetrics!.viewportDimension;
+    }
   }
 
   /// Convert between a thumb track position and the corresponding scroll
@@ -580,7 +587,9 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   /// thumbOffsetLocal is a position in the thumb track. Cannot be null.
   double getTrackToScroll(double thumbOffsetLocal) {
     assert(thumbOffsetLocal != null);
-    final double scrollableExtent = _lastMetrics!.maxScrollExtent - _lastMetrics!.minScrollExtent;
+    final double scrollableExtent = _lastMetrics!.maxScrollExtent.isFinite
+      ? _lastMetrics!.maxScrollExtent - _lastMetrics!.minScrollExtent
+      : _exposedContentExtent + _cachedContentExtent;
     final double thumbMovableExtent = _trackExtent - _thumbExtent();
 
     return scrollableExtent * thumbOffsetLocal / thumbMovableExtent;
@@ -589,7 +598,9 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   // Converts between a scroll position and the corresponding position in the
   // thumb track.
   double _getScrollToTrack(ScrollMetrics metrics, double thumbExtent) {
-    final double scrollableExtent = metrics.maxScrollExtent - metrics.minScrollExtent;
+    final double scrollableExtent = metrics.maxScrollExtent.isFinite
+      ? metrics.maxScrollExtent - metrics.minScrollExtent
+      : _exposedContentExtent + _cachedContentExtent;
 
     final double fractionPast = (scrollableExtent > 0)
       ? ((metrics.pixels - metrics.minScrollExtent) / scrollableExtent).clamp(0.0, 1.0)
@@ -614,11 +625,6 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     final double thumbExtent = _thumbExtent();
     final double thumbOffsetLocal = _getScrollToTrack(_lastMetrics!, thumbExtent);
     _thumbOffset = thumbOffsetLocal + mainAxisMargin + beforePadding;
-
-    // Do not paint a scrollbar if the scroll view is infinitely long.
-    // TODO(Piinks): Special handling for infinite scroll views, https://github.com/flutter/flutter/issues/41434
-    if (_lastMetrics!.maxScrollExtent.isInfinite)
-      return;
 
     return _paintScrollbar(canvas, size, thumbExtent, _lastAxisDirection!);
   }
@@ -1183,6 +1189,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   final GlobalKey  _scrollbarPainterKey = GlobalKey();
   bool _hoverIsActive = false;
 
+  double _exposedContentExtent = 0.0;
+  BuildContext? _notificationContext;
 
   /// Used to paint the scrollbar.
   ///
@@ -1426,7 +1434,6 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       // Ensure we don't drag into overscroll if the physics do not allow it.
       final double physicsAdjustment = position.physics.applyBoundaryConditions(position, scrollOffsetGlobal);
       double newPosition = scrollOffsetGlobal - physicsAdjustment;
-
       // The physics may allow overscroll when actually *scrolling*, but
       // dragging on the scrollbar does not always allow us to enter overscroll.
       switch(ScrollConfiguration.of(context).getPlatform(context)) {
@@ -1598,6 +1605,23 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       || scrollController.position.axis == notificationAxis;
   }
 
+  void _updateExposedContentExtent(ScrollMetrics metrics, BuildContext? context) {
+    if (metrics.maxScrollExtent.isInfinite) {
+      if (_notificationContext != context) {
+        _exposedContentExtent = 0.0;
+      }
+      _exposedContentExtent = metrics.extentBefore > _exposedContentExtent
+        ? metrics.extentBefore
+        : _exposedContentExtent;
+    } else {
+      _exposedContentExtent = 0.0;
+    }
+    if (_exposedContentExtent != scrollbarPainter._exposedContentExtent) {
+      scrollbarPainter._exposedContentExtent = _exposedContentExtent;
+    }
+    _notificationContext = context;
+  }
+
   bool _handleScrollMetricsNotification(ScrollMetricsNotification notification) {
     if (!widget.notificationPredicate(ScrollUpdateNotification(
           metrics: notification.metrics,
@@ -1613,6 +1637,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     }
 
     final ScrollMetrics metrics = notification.metrics;
+    _updateExposedContentExtent(metrics, notification.context);
     if (_shouldUpdatePainter(metrics.axis)) {
       scrollbarPainter.update(metrics, metrics.axisDirection);
     }
@@ -1622,8 +1647,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   bool _handleScrollNotification(ScrollNotification notification) {
     if (!widget.notificationPredicate(notification))
       return false;
-
     final ScrollMetrics metrics = notification.metrics;
+    _updateExposedContentExtent(metrics, notification.context);
     if (metrics.maxScrollExtent <= metrics.minScrollExtent) {
       // Hide the bar when the Scrollable widget has no space to scroll.
       if (_fadeoutAnimationController.status != AnimationStatus.dismissed
