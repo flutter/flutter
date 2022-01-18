@@ -110,27 +110,29 @@ class AnalyzeContinuously extends AnalyzeBase {
       logger.printStatus(terminal.clearScreen(), newline: false);
 
       // Remove errors for deleted files, sort, and print errors.
-      final List<AnalysisError> errors = <AnalysisError>[];
+      final List<AnalysisError> sortedErrors = <AnalysisError>[];
+      final List<String> pathsToRemove = <String>[];
       analysisErrors.forEach((String path, List<AnalysisError> errors) {
         if (fileSystem.isFileSync(path)) {
-          errors.addAll(errors);
+          sortedErrors.addAll(errors);
         } else {
-          analysisErrors.remove(path);
+          pathsToRemove.add(path);
         }
       });
+      analysisErrors.removeWhere((String path, _) => pathsToRemove.contains(path));
 
-      errors.sort();
+      sortedErrors.sort();
 
-      for (final AnalysisError error in errors) {
+      for (final AnalysisError error in sortedErrors) {
         logger.printStatus(error.toString());
         if (error.code != null) {
           logger.printTrace('error code: ${error.code}');
         }
       }
 
-      dumpErrors(errors.map<String>((AnalysisError error) => error.toLegacyString()));
+      dumpErrors(sortedErrors.map<String>((AnalysisError error) => error.toLegacyString()));
 
-      final int issueCount = errors.length;
+      final int issueCount = sortedErrors.length;
       final int issueDiff = issueCount - lastErrorCount;
       lastErrorCount = issueCount;
       final String seconds = (analysisTimer.elapsedMilliseconds / 1000.0).toStringAsFixed(2);

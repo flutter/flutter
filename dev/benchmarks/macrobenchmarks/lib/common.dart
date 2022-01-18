@@ -34,5 +34,6 @@ const String kOpacityPeepholeOpacityOfColOfRowsRouteName = '$kOpacityPeepholeRou
 const String kOpacityPeepholeFadeTransitionTextRouteName = '$kOpacityPeepholeRouteName/fade_transition_text';
 
 const String kScrollableName = '/macrobenchmark_listview';
+const String kOpacityScrollableName = '$kOpacityPeepholeRouteName/listview';
 
 const String kStackSizeKey = 'stack_size';

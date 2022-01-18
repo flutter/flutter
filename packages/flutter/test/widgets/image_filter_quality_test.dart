@@ -72,8 +72,6 @@ Future<void> testImageQuality(WidgetTester tester, ui.FilterQuality? quality) as
 }
 
 class _TestImageStreamCompleter extends ImageStreamCompleter {
-  _TestImageStreamCompleter([this._currentImage]);
-
   ImageInfo? _currentImage;
   final Set<ImageStreamListener> listeners = <ImageStreamListener>{};
 

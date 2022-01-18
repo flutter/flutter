@@ -17,7 +17,7 @@ class OpacityPeepholePage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Opacity Peephole tests')),
       body: ListView(
-        key: const Key('${kOpacityPeepholeRouteName}_listview'),
+        key: const Key(kOpacityScrollableName),
         children: <Widget>[
           for (OpacityPeepholeCase variant in allOpacityPeepholeCases)
             ElevatedButton(

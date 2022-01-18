@@ -3678,4 +3678,51 @@ void main() {
 
     expect(tester.takeException(), null);
   });
+
+  testWidgets('BorderRadius property works properly for DropdownButtonFormField', (WidgetTester tester) async {
+    const double radius = 20.0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: DropdownButtonFormField<String>(
+              borderRadius: BorderRadius.circular(radius),
+              value: 'One',
+              items: <String>['One', 'Two', 'Three', 'Four']
+                .map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+              }).toList(),
+              onChanged: (_) { },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('One'));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.ancestor(
+        of: find.text('One').last,
+        matching: find.byType(CustomPaint),
+      ).at(2),
+      paints
+        ..save()
+        ..rrect()
+        ..rrect()
+        ..rrect()
+        ..rrect(rrect: const RRect.fromLTRBXY(0.0, 0.0, 800.0, 208.0, radius, radius)),
+    );
+
+    final InkWell firstItem = tester.widget(find.widgetWithText(InkWell, 'One'));
+    final InkWell lastItem = tester.widget(find.widgetWithText(InkWell, 'Four'));
+
+    expect(firstItem.borderRadius, const BorderRadius.vertical(top: Radius.circular(radius)));
+    expect(lastItem.borderRadius, const BorderRadius.vertical(bottom: Radius.circular(radius)));
+  });
 }

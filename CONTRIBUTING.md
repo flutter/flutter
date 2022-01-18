@@ -97,8 +97,9 @@ presented.
    which should be used when proposing a new technical design.  This is a good
    practice to do before coding more intricate changes.
 
-In addition to the above, there are many pages on [our
-Wiki](https://github.com/flutter/flutter/wiki/) and an article [Contributing to Flutter:
-Getting Started](https://medium.com/@ayushbherwani/contributing-to-flutter-getting-started-a0db68cbcd5b)
-on Medium that may be of interest. For a curated list of pages, see the sidebar
-on the Wiki's home page. They are more or less listed in order of importance.
+In addition to the documents, there is a video linked above on **How to contribute to Flutter**
+from the [Flutter](https://youtube.com/c/flutterdev) YouTube channel,
+there are many pages on [our Wiki](https://github.com/flutter/flutter/wiki/),
+and an article [Contributing to Flutter: Getting Started](https://medium.com/@ayushbherwani/contributing-to-flutter-getting-started-a0db68cbcd5b)
+on Medium that may be of interest. See the sidebar
+on the Wiki's home page for a curated list of pages. They are more or less listed in order of importance.

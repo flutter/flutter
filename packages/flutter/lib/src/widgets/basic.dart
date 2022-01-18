@@ -2138,6 +2138,15 @@ class LayoutId extends ParentDataWidget<MultiChildLayoutParentData> {
 /// Each child must be wrapped in a [LayoutId] widget to identify the widget for
 /// the delegate.
 ///
+/// {@tool dartpad}
+/// This example shows a [CustomMultiChildLayout] widget being used to lay out
+/// colored blocks from start to finish in a cascade that has some overlap.
+///
+/// It responds to changes in [Directionality] by re-laying out its children.
+///
+/// ** See code in examples/api/lib/widgets/basic/custom_multi_child_layout.0.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [MultiChildLayoutDelegate], for details about how to control the layout of
@@ -4823,6 +4832,8 @@ class Row extends Flex {
 /// case is typically to remove the [Expanded] or [Flexible] widgets from around
 /// the inner children.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=jckqXR5CrPI}
+///
 /// For more discussion about constraints, see [BoxConstraints].
 ///
 /// ### The yellow and black striped banner
@@ -6135,6 +6146,7 @@ class Listener extends SingleChildRenderObjectWidget {
       if (onPointerDown != null) 'down',
       if (onPointerMove != null) 'move',
       if (onPointerUp != null) 'up',
+      if (onPointerHover != null) 'hover',
       if (onPointerCancel != null) 'cancel',
       if (onPointerSignal != null) 'signal',
     ];
@@ -6144,6 +6156,8 @@ class Listener extends SingleChildRenderObjectWidget {
 }
 
 /// A widget that tracks the movement of mice.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=1oF3pI5umck}
 ///
 /// [MouseRegion] is used
 /// when it is needed to compare the list of objects that a mouse pointer is
