@@ -782,9 +782,10 @@ class SafariDesktopTextEditingStrategy extends DefaultTextEditingStrategy {
       // On Safari Desktop, when a form is focused, it opens an autofill menu
       // immediately.
       // Flutter framework sends `setEditableSizeAndTransform` for informing
-      // the engine about the location of the text field. This call will
-      // arrive after `show` call. Therefore form is placed, when
-      //  `setEditableSizeAndTransform` method is called and focus called on the
+      // the engine about the location of the text field. This call may arrive
+      // after the first `show` call, depending on the text input widget's
+      // implementation. Therefore form is placed, when
+      // `setEditableSizeAndTransform` method is called and focus called on the
       // form only after placing it to the correct position and only once after
       // that. Calling focus multiple times causes flickering.
       focusedFormElement!.focus();
@@ -800,6 +801,9 @@ class SafariDesktopTextEditingStrategy extends DefaultTextEditingStrategy {
 
   @override
   void initializeElementPlacement() {
+    if (geometry != null) {
+      placeElement();
+    }
     activeDomElement.focus();
   }
 }
