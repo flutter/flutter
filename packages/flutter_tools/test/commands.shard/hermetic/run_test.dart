@@ -594,6 +594,30 @@ void main() {
     FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
   });
+
+  testUsingContext('fails when "--web-launch-url" is not supported', () async {
+    final RunCommand command = RunCommand();
+    await expectLater(
+          () => createTestCommandRunner(command).run(<String>[
+        'run',
+        '--web-launch-url=http://flutter.dev',
+      ]),
+      throwsA(isException.having(
+            (Exception exception) => exception.toString(),
+        'toString',
+        isNot(contains('web-launch-url')),
+      )),
+    );
+
+    final DebuggingOptions options = await command.createDebuggingOptions(true);
+    expect(options.webLaunchUrl, 'http://flutter.dev');
+
+    final RegExp pattern = RegExp(r'^((http)?:\/\/)[^\s]+');
+    expect(pattern.hasMatch(options.webLaunchUrl), true);
+  }, overrides: <Type, Generator>{
+    ProcessManager: () => FakeProcessManager.any(),
+    Logger: () => BufferLogger.test(),
+  });
 }
 
 class FakeDeviceManager extends Fake implements DeviceManager {
