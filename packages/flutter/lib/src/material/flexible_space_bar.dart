@@ -85,6 +85,7 @@ class FlexibleSpaceBar extends StatefulWidget {
     Key? key,
     this.title,
     this.background,
+    this.backgroundBuilder,
     this.centerTitle,
     this.titlePadding,
     this.collapseMode = CollapseMode.parallax,
@@ -93,6 +94,10 @@ class FlexibleSpaceBar extends StatefulWidget {
     this.expandedTitleScale = 1.5,
   }) : assert(collapseMode != null),
        assert(expandedTitleScale >= 1),
+       assert(
+          background == null || backgroundBuilder == null,
+          'Cannot provide both a background and a backgroundBuilder',
+        ),
        super(key: key);
 
   /// The primary contents of the flexible space bar when expanded.
@@ -104,6 +109,10 @@ class FlexibleSpaceBar extends StatefulWidget {
   ///
   /// Typically an [Image] widget with [Image.fit] set to [BoxFit.cover].
   final Widget? background;
+
+  /// More flexibility build background Widget.
+  final Widget Function(BuildContext context, FlexibleSpaceBarSettings settings,
+      BoxConstraints constraints)? backgroundBuilder;
 
   /// Whether the title should be centered.
   ///
@@ -253,7 +262,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
         final double t = (1.0 - (settings.currentExtent - settings.minExtent) / deltaExtent).clamp(0.0, 1.0);
 
         // background
-        if (widget.background != null) {
+        if (widget.background != null || widget.backgroundBuilder != null) {
           final double fadeStart = math.max(0.0, 1.0 - kToolbarHeight / deltaExtent);
           const double fadeEnd = 1.0;
           assert(fadeStart <= fadeEnd);
@@ -279,7 +288,8 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
               // through the app bar when it is collapsed.
               alwaysIncludeSemantics: true,
               opacity: opacity,
-              child: widget.background,
+              child: widget.background ??
+                  widget.backgroundBuilder!(context, settings, constraints),
             ),
           ));
 
