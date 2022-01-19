@@ -285,15 +285,39 @@ class FlutterPlugin implements Plugin<Project> {
 
         if (useLocalEngine()) {
             // This is required to pass the local engine to flutter build aot.
-            String engineOutPath = project.property('local-engine-out')
+            String engineOutPath = project.property("local-engine-out")
             File engineOut = project.file(engineOutPath)
             if (!engineOut.isDirectory()) {
-                throw new GradleException('local-engine-out must point to a local engine build')
+                throw new GradleException("local-engine-out must point to a local engine build")
             }
             localEngine = engineOut.name
             localEngineSrcPath = engineOut.parentFile.parent
         }
         project.android.buildTypes.all this.&addFlutterDependencies
+
+        // Replace the Jcenter repository for Maven Central from any subproject.
+        // For more see: https://developer.android.com/studio/build/jcenter-migration,
+        // https://blog.gradle.org/jcenter-shutdown.
+        List<String> hadJcenter = []
+        rootProject.subprojects.each { subproject ->
+            boolean foundJCenter = false
+            subproject.repositories.each { repo ->
+                if (repo.url.host == "jcenter.bintray.com") {
+                    foundJCenter = true
+                    repo.url = ""
+                    hadJcenter.add("${subproject.projectDir}${File.separator}build.gradle")
+                }
+            }
+            if (foundJCenter) {
+                subproject.repositories {
+                    mavenCentral()
+                }
+            }
+        }
+        if (!hadJcenter.empty) {
+            String repos = hadJcenter.join(", ")
+            println "Flutter removed the jcenter repository from $repos and added Maven Central. For more, see: https://developer.android.com/studio/build/jcenter-migration."
+        }
     }
 
     private static Boolean shouldShrinkResources(Project project) {
@@ -430,7 +454,7 @@ class FlutterPlugin implements Plugin<Project> {
                     }
                 }
             }
-        }  
+        }
     }
 
     /**
