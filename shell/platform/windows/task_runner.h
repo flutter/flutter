@@ -66,6 +66,14 @@ class TaskRunner {
   // Each platform implementations must call this to schedule the tasks.
   std::chrono::nanoseconds ProcessTasks();
 
+  // Returns the current TaskTimePoint that can be used to determine whether a
+  // task is expired.
+  //
+  // Tests can override this to mock up the time.
+  virtual TaskTimePoint GetCurrentTimeForTask() const {
+    return TaskTimePoint::clock::now();
+  }
+
  private:
   typedef std::variant<FlutterTask, TaskClosure> TaskVariant;
 
