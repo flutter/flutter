@@ -25,6 +25,12 @@ class MockTaskRunner : public TaskRunner {
     // Do nothing to avoid processing tasks immediately after the tasks is
     // posted.
   }
+
+  virtual TaskTimePoint GetCurrentTimeForTask() const override {
+    return TaskTimePoint(
+        std::chrono::duration_cast<std::chrono::steady_clock::duration>(
+            std::chrono::nanoseconds(10000)));
+  }
 };
 
 uint64_t MockGetCurrentTime() {
