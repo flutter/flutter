@@ -104,12 +104,16 @@ class MigrateUtils {
     cmdArgs = <String>['reset', '--hard', revision];
     result = await Process.run('git', cmdArgs, workingDirectory: destination);
     checkForErrors(result);
- }
+  }
 
-  static Future<String> createFromTemplates(String flutterBinPath, String name, {String? outputDirectory}) async {
+  static Future<String> createFromTemplates(String flutterBinPath, String name, {String? outputDirectory, List<String> platforms = const <String>[]}) async {
      List<String> cmdArgs = ['create', '--project-name', name];
     if (outputDirectory != null) {
       cmdArgs.add(outputDirectory);
+    }
+    if (platforms.isNotEmpty) {
+      cmdArgs.add('--platforms');
+      cmdArgs.addAll(platforms);
     }
     print('CREATING');
     ProcessResult result = await Process.run('./flutter', cmdArgs, workingDirectory: flutterBinPath);
@@ -124,6 +128,13 @@ class MigrateUtils {
     ProcessResult result = await Process.run('git', cmdArgs);
     checkForErrors(result, allowedExitCodes: <int>[1]);
     return MergeResult(result);
+  }
+
+  static Future<String> getGitHash(String projectPath, [String tag = 'HEAD']) async {
+    List<String> cmdArgs = ['rev-parse', tag];
+    ProcessResult result = await Process.run('git', cmdArgs, workingDirectory: projectPath);
+    checkForErrors(result);
+    return result.stdout;
   }
 
   static void deleteTempDirectories({List<String> paths = const <String>[], List<Directory> directories = const <Directory>[]}) {

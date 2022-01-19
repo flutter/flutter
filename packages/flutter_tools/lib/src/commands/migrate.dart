@@ -46,24 +46,24 @@ class MigrateCommand extends FlutterCommand {
     // final Directory buildDir = globals.fs.directory(getBuildDirectory());
     print('HERE');
 
-    List<MigrateConfig> configs = <MigrateConfig>[];
-    List<String> platforms = <String>['root', 'android'];
-    for (String platform in platforms) {
-      if (MigrateConfig.getFileFromPlatform(platform).existsSync()) {
-        configs.add(MigrateConfig.fromPlatform(platform));
-      } else {
-        MigrateConfig newConfig = MigrateConfig(
-          platform: platform,
-          createVersion: 'vklalckasjlcksa',
-          lastMigrateVersion: 'askdl;laskdlas;kd',
-          unmanagedFiles: <String>[
-            'blah/file/path',
-          ],
-        );
-        newConfig.writeFile();
-        configs.add(newConfig);
-      }
-    }
+    List<MigrateConfig> configs = await MigrateConfig.parseOrCreateMigrateConfigs();
+    // List<String> platforms = <String>['root', 'android'];
+    // for (String platform in platforms) {
+    //   if (MigrateConfig.getFileFromPlatform(platform).existsSync()) {
+    //     configs.add(MigrateConfig.fromPlatform(platform));
+    //   } else {
+    //     MigrateConfig newConfig = MigrateConfig(
+    //       platform: platform,
+    //       createVersion: 'vklalckasjlcksa',
+    //       lastMigrateVersion: 'askdl;laskdlas;kd',
+    //       unmanagedFiles: <String>[
+    //         'blah/file/path',
+    //       ],
+    //     );
+    //     newConfig.writeFile();
+    //     configs.add(newConfig);
+    //   }
+    // }
 
     // String revision = '5344ed71561b924fb23300fb7fdb306744718767';
     String revision = '18116933e77adc82f80866c928266a5b4f1ed645';
@@ -199,8 +199,9 @@ class MigrateCommand extends FlutterCommand {
           other: globals.fs.path.join(generatedNewTemplateDirectory.path, localPath),
         );
         print(result.mergedContents);
-        // merge(currentFile, diffMap[localPath]!, userDiff);
+        continue;
       }
+      print('  File unhandled');
     }
 
     print('::::GENERATED FOLDERS::::::');
@@ -223,19 +224,7 @@ class MigrateCommand extends FlutterCommand {
         ],
       );
     }
-
-    print('DONE');
-
     return const FlutterCommandResult(ExitStatus.success);
-  }
-
-  void merge(File currentFile, DiffResult diffFile, DiffResult userDiff) {
-    print('  Merging');
-    // MigrateUtils.gitMergeFile(
-    //   ancestor: 
-    //   current:
-    //   other:
-    // );
   }
 
   void parseParameters() {
