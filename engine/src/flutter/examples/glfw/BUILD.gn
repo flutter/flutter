@@ -2,13 +2,17 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-executable("glfw") {
-  output_name = "embedder_example"
+import("//flutter/examples/examples.gni")
 
-  sources = [ "FlutterEmbedderGLFW.cc" ]
+if (build_embedder_examples) {
+  executable("glfw") {
+    output_name = "embedder_example"
 
-  deps = [
-    "//flutter/shell/platform/embedder:embedder",
-    "//third_party/glfw",
-  ]
+    sources = [ "FlutterEmbedderGLFW.cc" ]
+
+    deps = [
+      "//flutter/shell/platform/embedder:embedder",
+      "//third_party/glfw",
+    ]
+  }
 }
