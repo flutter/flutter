@@ -1383,6 +1383,8 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   final List<WillPopCallback> _willPopCallbacks = <WillPopCallback>[];
 
+  final List<VoidCallback> _onPopCallbacks = <VoidCallback>[];
+
   /// Returns [RoutePopDisposition.doNotPop] if any of callbacks added with
   /// [addScopedWillPopCallback] returns either false or null. If they all
   /// return true, the base [Route.willPop]'s result will be returned. The
@@ -1411,6 +1413,16 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     }
     return super.willPop();
   }
+
+  @override
+  void onPopCallback() {
+    final _ModalScopeState<T>? scope = _scopeKey.currentState;
+    assert(scope != null);
+    for (final VoidCallback callback in List<VoidCallback>.of(_onPopCallbacks)) {
+      callback();
+    }
+  }
+
 
   /// Enables this route to veto attempts by the user to dismiss it.
   ///
@@ -1507,6 +1519,19 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     assert(_scopeKey.currentState != null, 'Tried to remove a willPop callback from a route that is not currently in the tree.');
     _willPopCallbacks.remove(callback);
   }
+
+
+
+  void addScopedPopCallback(VoidCallback callback) {
+    assert(_scopeKey.currentState != null, 'Tried to add a pop callback to a route that is not currently in the tree.');
+    _onPopCallbacks.add(callback);
+  }
+
+  void removeScopedPopCallback(VoidCallback callback) {
+    assert(_scopeKey.currentState != null, 'Tried to remove a pop callback from a route that is not currently in the tree.');
+    _onPopCallbacks.remove(callback);
+  }
+
 
   /// True if one or more [WillPopCallback] callbacks exist.
   ///

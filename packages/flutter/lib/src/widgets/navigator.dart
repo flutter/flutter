@@ -296,6 +296,8 @@ abstract class Route<T> {
     return isFirst ? RoutePopDisposition.bubble : RoutePopDisposition.pop;
   }
 
+  void onPopCallback() {}
+  
   /// Whether calling [didPop] would return false.
   bool get willHandlePopInternally => false;
 
@@ -4895,6 +4897,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
         entry.currentState = _RouteLifecycle.pop;
       }
     } else {
+      entry.route.onPopCallback();
       entry.pop<T>(result);
       assert (entry.currentState == _RouteLifecycle.pop);
     }
