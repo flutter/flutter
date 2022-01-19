@@ -458,11 +458,11 @@ class _GarbageCollectionInfo {
   final int newCount;
 }
 
-/// Connect to the given uri and return a new [VmService] instance.
-///
-/// Copied from vm_service_io so that we can pass a custom [HttpClient] for
-/// testing. Currently, the WebSocket API reuses an HttpClient that
-/// is created before the test can change the HttpOverrides.
+// Connect to the given uri and return a new [VmService] instance.
+//
+// Copied from vm_service_io so that we can pass a custom [HttpClient] for
+// testing. Currently, the WebSocket API reuses an HttpClient that
+// is created before the test can change the HttpOverrides.
 Future<vm.VmService> _vmServiceConnectUri(
   String wsUri, {
   HttpClient? httpClient,
