@@ -11,6 +11,27 @@
 namespace flutter {
 namespace testing {
 
+std::unique_ptr<CanvasProvider> CreateCanvasProvider(BackendType backend_type) {
+  switch (backend_type) {
+#ifdef ENABLE_SOFTWARE_BENCHMARKS
+    case kSoftware_Backend:
+      return std::make_unique<SoftwareCanvasProvider>();
+#endif
+#ifdef ENABLE_OPENGL_BENCHMARKS
+    case kOpenGL_Backend:
+      return std::make_unique<OpenGLCanvasProvider>();
+#endif
+#ifdef ENABLE_METAL_BENCHMARKS
+    case kMetal_Backend:
+      return std::make_unique<MetalCanvasProvider>();
+#endif
+    default:
+      return nullptr;
+  }
+
+  return nullptr;
+}
+
 // Constants chosen to produce benchmark results in the region of 1-50ms
 constexpr size_t kLinesToDraw = 10000;
 constexpr size_t kRectsToDraw = 5000;
@@ -27,8 +48,8 @@ constexpr size_t kFixedCanvasSize = 1024;
 // to left (at the bottom) until 10,000 lines are drawn.
 //
 // The resulting image will be an hourglass shape.
-void BM_DrawLine(benchmark::State& state,
-                 std::unique_ptr<CanvasProvider> canvas_provider) {
+void BM_DrawLine(benchmark::State& state, BackendType backend_type) {
+  auto canvas_provider = CreateCanvasProvider(backend_type);
   DisplayListBuilder builder;
   size_t length = state.range(0);
 
@@ -57,8 +78,8 @@ void BM_DrawLine(benchmark::State& state,
 // the canvas and repeats until `kRectsToDraw` rects have been drawn.
 //
 // Half the drawn rects will not have an integral offset.
-void BM_DrawRect(benchmark::State& state,
-                 std::unique_ptr<CanvasProvider> canvas_provider) {
+void BM_DrawRect(benchmark::State& state, BackendType backend_type) {
+  auto canvas_provider = CreateCanvasProvider(backend_type);
   DisplayListBuilder builder;
   size_t length = state.range(0);
   size_t canvas_size = length * 2;
@@ -98,8 +119,8 @@ void BM_DrawRect(benchmark::State& state,
 // the canvas and repeats until `kOvalsToDraw` ovals have been drawn.
 //
 // Half the drawn ovals will not have an integral offset.
-void BM_DrawOval(benchmark::State& state,
-                 std::unique_ptr<CanvasProvider> canvas_provider) {
+void BM_DrawOval(benchmark::State& state, BackendType backend_type) {
+  auto canvas_provider = CreateCanvasProvider(backend_type);
   DisplayListBuilder builder;
   size_t length = state.range(0);
   size_t canvas_size = length * 2;
@@ -136,8 +157,8 @@ void BM_DrawOval(benchmark::State& state,
 // the canvas and repeats until `kCirclesToDraw` circles have been drawn.
 //
 // Half the drawn circles will not have an integral center point.
-void BM_DrawCircle(benchmark::State& state,
-                   std::unique_ptr<CanvasProvider> canvas_provider) {
+void BM_DrawCircle(benchmark::State& state, BackendType backend_type) {
+  auto canvas_provider = CreateCanvasProvider(backend_type);
   DisplayListBuilder builder;
   size_t length = state.range(0);
   size_t canvas_size = length * 2;
@@ -177,8 +198,9 @@ void BM_DrawCircle(benchmark::State& state,
 //
 // Half the drawn rounded rects will not have an integral offset.
 void BM_DrawRRect(benchmark::State& state,
-                  std::unique_ptr<CanvasProvider> canvas_provider,
+                  BackendType backend_type,
                   SkRRect::Type type) {
+  auto canvas_provider = CreateCanvasProvider(backend_type);
   DisplayListBuilder builder;
   size_t length = state.range(0);
   size_t canvas_size = length * 2;
@@ -242,8 +264,8 @@ void BM_DrawRRect(benchmark::State& state,
   canvas_provider->Snapshot(filename);
 }
 
-void BM_DrawArc(benchmark::State& state,
-                std::unique_ptr<CanvasProvider> canvas_provider) {
+void BM_DrawArc(benchmark::State& state, BackendType backend_type) {
+  auto canvas_provider = CreateCanvasProvider(backend_type);
   DisplayListBuilder builder;
   size_t length = state.range(0);
   size_t canvas_size = length * 2;
@@ -449,8 +471,9 @@ std::string VerbToString(SkPath::Verb type) {
 // cost of using drawPath as well as an idea of how the cost varies according
 // to the verb count.
 void BM_DrawPath(benchmark::State& state,
-                 std::unique_ptr<CanvasProvider> canvas_provider,
+                 BackendType backend_type,
                  SkPath::Verb type) {
+  auto canvas_provider = CreateCanvasProvider(backend_type);
   DisplayListBuilder builder;
   size_t length = kFixedCanvasSize;
   canvas_provider->InitializeSurface(length, length);
@@ -578,8 +601,9 @@ std::string VertexModeToString(SkVertices::VertexMode mode) {
 // The discs drawn will be centered on points along a circle with radius of 25%
 // of the canvas width/height, with each point being equally spaced out.
 void BM_DrawVertices(benchmark::State& state,
-                     std::unique_ptr<CanvasProvider> canvas_provider,
+                     BackendType backend_type,
                      SkVertices::VertexMode mode) {
+  auto canvas_provider = CreateCanvasProvider(backend_type);
   DisplayListBuilder builder;
   size_t length = kFixedCanvasSize;
   canvas_provider->InitializeSurface(length, length);
@@ -666,8 +690,9 @@ std::string PointModeToString(SkCanvas::PointMode mode) {
 // This benchmark will automatically calculate the Big-O complexity of
 // `DrawPoints` with N being the number of points being drawn.
 void BM_DrawPoints(benchmark::State& state,
-                   std::unique_ptr<CanvasProvider> canvas_provider,
+                   BackendType backend_type,
                    SkCanvas::PointMode mode) {
+  auto canvas_provider = CreateCanvasProvider(backend_type);
   DisplayListBuilder builder;
   size_t length = kFixedCanvasSize;
   canvas_provider->InitializeSurface(length, length);
@@ -706,9 +731,10 @@ sk_sp<SkImage> ImageFromBitmapWithNewID(const SkBitmap& bitmap) {
 // Draws `kImagesToDraw` bitmaps to a canvas, either with texture-backed
 // bitmaps or bitmaps that need to be uploaded to the GPU first.
 void BM_DrawImage(benchmark::State& state,
-                  std::unique_ptr<CanvasProvider> canvas_provider,
+                  BackendType backend_type,
                   const SkSamplingOptions& options,
                   bool upload_bitmap) {
+  auto canvas_provider = CreateCanvasProvider(backend_type);
   DisplayListBuilder builder;
   size_t bitmap_size = state.range(0);
   size_t canvas_size = 2 * bitmap_size;
@@ -776,10 +802,11 @@ std::string ConstraintToString(SkCanvas::SrcRectConstraint constraint) {
 //
 // The bitmaps are shrunk down to 75% of their size when rendered to the canvas.
 void BM_DrawImageRect(benchmark::State& state,
-                      std::unique_ptr<CanvasProvider> canvas_provider,
+                      BackendType backend_type,
                       const SkSamplingOptions& options,
                       SkCanvas::SrcRectConstraint constraint,
                       bool upload_bitmap) {
+  auto canvas_provider = CreateCanvasProvider(backend_type);
   DisplayListBuilder builder;
   size_t bitmap_size = state.range(0);
   size_t canvas_size = 2 * bitmap_size;
@@ -851,9 +878,10 @@ std::string FilterModeToString(const SkFilterMode mode) {
 // The image is split into 9 sub-rects and stretched proportionally for final
 // rendering.
 void BM_DrawImageNine(benchmark::State& state,
-                      std::unique_ptr<CanvasProvider> canvas_provider,
+                      BackendType backend_type,
                       const SkFilterMode filter,
                       bool upload_bitmap) {
+  auto canvas_provider = CreateCanvasProvider(backend_type);
   DisplayListBuilder builder;
   size_t bitmap_size = state.range(0);
   size_t canvas_size = 2 * bitmap_size;
@@ -916,8 +944,8 @@ void BM_DrawImageNine(benchmark::State& state,
 //
 // This benchmark will automatically calculate the Big-O complexity of
 // `DrawTextBlob` with N being the number of glyphs being drawn.
-void BM_DrawTextBlob(benchmark::State& state,
-                     std::unique_ptr<CanvasProvider> canvas_provider) {
+void BM_DrawTextBlob(benchmark::State& state, BackendType backend_type) {
+  auto canvas_provider = CreateCanvasProvider(backend_type);
   DisplayListBuilder builder;
   size_t glyph_runs = state.range(0);
   size_t canvas_size = kFixedCanvasSize;
@@ -981,9 +1009,10 @@ void BM_DrawTextBlob(benchmark::State& state,
 // The benchmark can be run with either a transparent occluder or an opaque
 // occluder.
 void BM_DrawShadow(benchmark::State& state,
-                   std::unique_ptr<CanvasProvider> canvas_provider,
+                   BackendType backend_type,
                    bool transparent_occluder,
                    SkPath::Verb type) {
+  auto canvas_provider = CreateCanvasProvider(backend_type);
   DisplayListBuilder builder;
   size_t length = kFixedCanvasSize;
   canvas_provider->InitializeSurface(length, length);
