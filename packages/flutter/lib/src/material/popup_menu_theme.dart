@@ -111,7 +111,7 @@ class PopupMenuThemeData with Diagnosticable {
       elevation,
       textStyle,
       enableFeedback,
-      mouseCursor
+      mouseCursor,
     );
   }
 

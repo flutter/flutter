@@ -3592,8 +3592,6 @@ class InputDecoration {
       fillColor,
       focusColor,
       hoverColor,
-      border,
-      enabled,
       prefixIcon,
       prefixIconColor,
       prefix,
