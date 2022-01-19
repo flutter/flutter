@@ -269,6 +269,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
       codesign: shouldCodesign,
       configOnly: configOnly,
       buildAction: xcodeBuildAction,
+      deviceID: globals.deviceManager?.specifiedDeviceId,
     );
 
     if (!result.success) {
