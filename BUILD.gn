@@ -3,6 +3,7 @@
 # found in the LICENSE file.
 
 import("//flutter/common/config.gni")
+import("//flutter/examples/examples.gni")
 import("//flutter/shell/platform/config.gni")
 import("//flutter/shell/platform/glfw/config.gni")
 import("//flutter/testing/testing.gni")
@@ -80,7 +81,7 @@ group("flutter") {
   ]
 
   # Ensure the example for a sample embedder compiles.
-  if (is_mac || is_linux) {
+  if (build_embedder_examples) {
     public_deps += [ "//flutter/examples/glfw" ]
   }
 

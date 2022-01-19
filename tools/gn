@@ -371,6 +371,9 @@ def to_gn_args(args):
     if args.build_glfw_shell is not None:
       gn_args['build_glfw_shell'] = args.build_glfw_shell
 
+    if args.build_embedder_examples is not None:
+      gn_args['build_embedder_examples'] = args.build_embedder_examples
+
     gn_args['stripped_symbols'] = args.stripped
 
     if args.msan:
@@ -503,6 +506,10 @@ def parse_args(args):
                       help='Build the GLFW shell on supported platforms where it is not built by default.')
   parser.add_argument('--no-build-glfw-shell', dest='build_glfw_shell', action='store_const', const=False,
                       help='Do not build the GLFW shell on platforms where it is built by default.')
+  parser.add_argument('--build-embedder-examples', action='store_const', const=True,
+                      help='Build the example embedders using the Embedder API.')
+  parser.add_argument('--no-build-embedder-examples', dest='build_embedder_examples', action='store_const', const=False,
+                      help='Do not build the example embedders using the Embedder API.')
 
   parser.add_argument('--bitcode', default=False, action='store_true',
                       help='Enable bitcode for iOS targets. On debug runtime modes, this will be a marker only.')
