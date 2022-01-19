@@ -633,13 +633,15 @@ enum KeyDataTransitMode {
 /// platform, every native message might result in multiple [KeyEvent]s. For
 /// example, this might happen in order to synthesize missed modifier key
 /// presses or releases.
+///
 /// A [KeyMessage] bundles all information related to a native key message
 /// together for the convenience of propagation on the [FocusNode] tree.
 ///
 /// When dispatched to handlers or listeners, or propagated through the
 /// [FocusNode] tree, all handlers or listeners belonging to a node are
 /// executed regardless of their [KeyEventResult], and all results are combined
-/// into the result of the node using [combineKeyEventResults].
+/// into the result of the node using [combineKeyEventResults]. Empty [events]
+/// or [rawEvent] should be considered as a result of [KeyEventResult.ignored].
 ///
 /// In very rare cases, a native key message might not result in a [KeyMessage].
 /// For example, key messages for Fn key are ignored on macOS for the
@@ -671,13 +673,16 @@ class KeyMessage {
   /// form as [RawKeyEvent]. Their stream is not as regular as [KeyEvent]'s,
   /// but keeps as much native information and structure as possible.
   ///
-  /// The [rawEvent] will be deprecated in the future.
+  /// The [rawEvent] field might be empty, for example, when the event
+  /// converting system dispatches isolated synthesized events.
+  ///
+  /// The [rawEvent] field will be deprecated in the future.
   ///
   /// See also:
   ///
   ///  * [RawKeyboard.addListener], [RawKeyboardListener], [Focus.onKey],
   ///    where [RawKeyEvent]s are commonly used.
-  final RawKeyEvent rawEvent;
+  final RawKeyEvent? rawEvent;
 
   @override
   String toString() {
@@ -789,15 +794,46 @@ class KeyEventManager {
       case KeyDataTransitMode.keyDataThenRawKeyData:
         assert((data.physical == 0 && data.logical == 0) ||
                (data.physical != 0 && data.logical != 0));
-        // Postpone key event dispatching until the handleRawKeyMessage.
-        //
-        // Having 0 as the physical or logical ID indicates an empty key data,
-        // transmitted to ensure that the transit mode is correctly inferred.
         if (data.physical != 0 && data.logical != 0) {
-          _keyEventsSinceLastMessage.add(_eventFromData(data));
+          final KeyEvent event = _eventFromData(data);
+          if (data.synthesized && _keyEventsSinceLastMessage.isEmpty) {
+            _hardwareKeyboard.handleKeyEvent(event);
+            _dispatchKeyMessage(<KeyEvent>[event], null);
+          } else {
+            // Postpone key event dispatching until the handleRawKeyMessage.
+            //
+            // Having 0 as the physical or logical ID indicates an empty key data,
+            // transmitted to ensure that the transit mode is correctly inferred.
+            _keyEventsSinceLastMessage.add(event);
+          }
         }
         return false;
     }
+  }
+
+  bool _dispatchKeyMessage(List<KeyEvent> keyEvents, RawKeyEvent? rawEvent) {
+    if (keyMessageHandler != null) {
+      final KeyMessage message = KeyMessage(keyEvents, rawEvent);
+      try {
+        return keyMessageHandler!(message);
+      } catch (exception, stack) {
+        InformationCollector? collector;
+        assert(() {
+          collector = () => <DiagnosticsNode>[
+            DiagnosticsProperty<KeyMessage>('KeyMessage', message),
+          ];
+          return true;
+        }());
+        FlutterError.reportError(FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'services library',
+          context: ErrorDescription('while processing the key message handler'),
+          informationCollector: collector,
+        ));
+      }
+    }
+    return false;
   }
 
   /// Handles a raw key message.
@@ -826,27 +862,7 @@ class KeyEventManager {
         'while HardwareKeyboard reported ${_hardwareKeyboard.physicalKeysPressed}');
     }
 
-    if (keyMessageHandler != null) {
-      final KeyMessage message = KeyMessage(_keyEventsSinceLastMessage, rawEvent);
-      try {
-        handled = keyMessageHandler!(message) || handled;
-      } catch (exception, stack) {
-        InformationCollector? collector;
-        assert(() {
-          collector = () => <DiagnosticsNode>[
-            DiagnosticsProperty<KeyMessage>('KeyMessage', message),
-          ];
-          return true;
-        }());
-        FlutterError.reportError(FlutterErrorDetails(
-          exception: exception,
-          stack: stack,
-          library: 'services library',
-          context: ErrorDescription('while processing the key message handler'),
-          informationCollector: collector,
-        ));
-      }
-    }
+    handled = _dispatchKeyMessage(_keyEventsSinceLastMessage, rawEvent) || handled;
     _keyEventsSinceLastMessage.clear();
 
     return <String, dynamic>{ 'handled': handled };
