@@ -12,7 +12,6 @@ void main() {
     set.add(2);
     set.add(3);
 
-
     expect(set.contains(1), isTrue);
     expect(set.contains(2), isTrue);
     expect(set.contains(3), isTrue);
@@ -33,7 +32,6 @@ void main() {
     set.add(1);
     set.add(2);
     set.add(3);
-
 
     expect(set.toList(), unorderedEquals(<int>[1, 2, 3]));
   });
