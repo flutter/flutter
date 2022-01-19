@@ -674,7 +674,7 @@ class KeyMessage {
   /// but keeps as much native information and structure as possible.
   ///
   /// The [rawEvent] field might be empty, for example, when the event
-  /// converting system dispatches isolated synthesized events.
+  /// converting system dispatches solitary synthesized events.
   ///
   /// The [rawEvent] field will be deprecated in the future.
   ///
@@ -792,20 +792,30 @@ class KeyEventManager {
         assert(false, 'Should never encounter KeyData when transitMode is rawKeyData.');
         return false;
       case KeyDataTransitMode.keyDataThenRawKeyData:
-        assert((data.physical == 0 && data.logical == 0) ||
-               (data.physical != 0 && data.logical != 0));
-        if (data.physical != 0 && data.logical != 0) {
-          final KeyEvent event = _eventFromData(data);
-          if (data.synthesized && _keyEventsSinceLastMessage.isEmpty) {
-            _hardwareKeyboard.handleKeyEvent(event);
-            _dispatchKeyMessage(<KeyEvent>[event], null);
-          } else {
-            // Postpone key event dispatching until the handleRawKeyMessage.
-            //
-            // Having 0 as the physical or logical ID indicates an empty key data,
-            // transmitted to ensure that the transit mode is correctly inferred.
-            _keyEventsSinceLastMessage.add(event);
-          }
+        // Having 0 as the physical and logical ID indicates an empty key data
+        // (the only occassion either field can be 0,) transmitted to ensure
+        // that the transit mode is correctly inferred. These events should be
+        // ignored.
+        if (data.physical == 0 && data.logical == 0) {
+          return false;
+        }
+        assert(data.physical != 0 && data.logical != 0);
+        final KeyEvent event = _eventFromData(data);
+        if (data.synthesized && _keyEventsSinceLastMessage.isEmpty) {
+          // Dispatch the event instantly if both conditions are met:
+          //
+          // - The event is synthesized, therefore the result does not matter.
+          // - The current queue is empty, therefore the order does not matter.
+          //
+          // This allows solitary synthesized `KeyEvent`s to be dispatched,
+          // since they won't be followed by `RawKeyEvent`s.
+          _hardwareKeyboard.handleKeyEvent(event);
+          _dispatchKeyMessage(<KeyEvent>[event], null);
+        } else {
+          // Otherwise, postpone key event dispatching until the next raw
+          // event. Normal key presses always send 0 or more `KeyEvent`s first,
+          // then 1 `RawKeyEvent`.
+          _keyEventsSinceLastMessage.add(event);
         }
         return false;
     }
