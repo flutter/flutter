@@ -97,7 +97,6 @@ class _DropdownMenuItemButton<T> extends StatefulWidget {
   const _DropdownMenuItemButton({
     Key? key,
     this.padding,
-    required this.borderRadius,
     required this.route,
     required this.buttonRect,
     required this.constraints,
@@ -111,7 +110,6 @@ class _DropdownMenuItemButton<T> extends StatefulWidget {
   final BoxConstraints constraints;
   final int itemIndex;
   final bool enableFeedback;
-  final BorderRadius borderRadius;
 
   @override
   _DropdownMenuItemButtonState<T> createState() => _DropdownMenuItemButtonState<T>();
@@ -178,16 +176,6 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
       height: widget.route.itemHeight,
       child: widget.route.items[widget.itemIndex],
     );
-    final BorderRadius itemBorderRadius;
-    if (widget.route.items.length == 1) {
-      itemBorderRadius = widget.borderRadius;
-    } else if (widget.itemIndex == 0) {
-      itemBorderRadius = BorderRadius.only(topLeft: widget.borderRadius.topLeft, topRight: widget.borderRadius.topRight);
-    } else if (widget.itemIndex == widget.route.items.length - 1) {
-      itemBorderRadius = BorderRadius.only(bottomLeft: widget.borderRadius.bottomLeft, bottomRight: widget.borderRadius.bottomRight);
-    } else {
-      itemBorderRadius = BorderRadius.zero;
-    }
     // An [InkWell] is added to the item only if it is enabled
     if (dropdownMenuItem.enabled) {
       child = InkWell(
@@ -195,7 +183,6 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
         enableFeedback: widget.enableFeedback,
         onTap: _handleOnTap,
         onFocusChange: _handleFocusChange,
-        borderRadius: itemBorderRadius,
         child: child,
       );
     }
@@ -279,7 +266,6 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
           constraints: widget.constraints,
           itemIndex: itemIndex,
           enableFeedback: widget.enableFeedback,
-          borderRadius: widget.borderRadius ?? BorderRadius.zero,
         ),
       ];
 
@@ -1113,11 +1099,6 @@ class DropdownButton<T> extends StatefulWidget {
   final AlignmentGeometry alignment;
 
   /// Defines the corner radii of the menu's rounded rectangle shape.
-  ///
-  /// The radii of the first menu item's top left and right corners are
-  /// defined by the corresponding properties of the [borderRadius].
-  /// Similarly, the radii of the last menu item's bottom and right corners
-  /// are defined by the corresponding properties of the [borderRadius].
   final BorderRadius? borderRadius;
 
   @override

@@ -3564,43 +3564,6 @@ void main() {
         ..rrect()
         ..rrect(rrect: const RRect.fromLTRBXY(0.0, 0.0, 144.0, 208.0, radius, radius)),
     );
-
-    final InkWell firstItem = tester.widget(find.widgetWithText(InkWell, 'One'));
-    final InkWell lastItem = tester.widget(find.widgetWithText(InkWell, 'Four'));
-
-    expect(firstItem.borderRadius, const BorderRadius.vertical(top: Radius.circular(radius)));
-    expect(lastItem.borderRadius, const BorderRadius.vertical(bottom: Radius.circular(radius)));
-  });
-
-  testWidgets('borderRadius is properly applied to InkWell when there is only one item', (WidgetTester tester) async {
-    const BorderRadius borderRadius = BorderRadius.all(Radius.circular(5.0));
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: Center(
-            child: DropdownButton<String>(
-              borderRadius: borderRadius,
-              value: 'One',
-              items: const <DropdownMenuItem<String>>[
-                DropdownMenuItem<String>(
-                  value: 'One',
-                  child: Text('One')
-                ),
-              ],
-              onChanged: (_) { },
-            ),
-          ),
-        ),
-      ),
-    );
-
-    await tester.tap(find.text('One'));
-    await tester.pumpAndSettle();
-
-    final InkWell menuItem = tester.widget(find.widgetWithText(InkWell, 'One'));
-
-    expect(menuItem.borderRadius, borderRadius);
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/88574
@@ -3718,11 +3681,5 @@ void main() {
         ..rrect()
         ..rrect(rrect: const RRect.fromLTRBXY(0.0, 0.0, 800.0, 208.0, radius, radius)),
     );
-
-    final InkWell firstItem = tester.widget(find.widgetWithText(InkWell, 'One'));
-    final InkWell lastItem = tester.widget(find.widgetWithText(InkWell, 'Four'));
-
-    expect(firstItem.borderRadius, const BorderRadius.vertical(top: Radius.circular(radius)));
-    expect(lastItem.borderRadius, const BorderRadius.vertical(bottom: Radius.circular(radius)));
   });
 }
