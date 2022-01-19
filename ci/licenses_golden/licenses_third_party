@@ -1,4 +1,4 @@
-Signature: a6c296a1a341b4bf66c0f202a397610c
+Signature: 8fe8cf68488e80b3b8ef147b6e010220
 
 UNUSED LICENSES:
 
@@ -10282,7 +10282,6 @@ FILE: ../../../third_party/dart/runtime/lib/isolate.cc
 FILE: ../../../third_party/dart/runtime/lib/mirrors.cc
 FILE: ../../../third_party/dart/runtime/lib/regexp.cc
 FILE: ../../../third_party/dart/runtime/lib/stopwatch.cc
-FILE: ../../../third_party/dart/runtime/lib/weak_property.cc
 FILE: ../../../third_party/dart/runtime/platform/assert.cc
 FILE: ../../../third_party/dart/runtime/platform/assert.h
 FILE: ../../../third_party/dart/runtime/platform/floating_point.h
