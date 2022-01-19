@@ -575,11 +575,8 @@ class _Theatre extends MultiChildRenderObjectWidget {
   }
 }
 
-class _TheatreElement extends MultiChildRenderObjectElement {
+class _TheatreElement extends MultiChildRenderObjectElement<_Theatre> {
   _TheatreElement(_Theatre widget) : super(widget);
-
-  @override
-  _Theatre get widget => super.widget as _Theatre;
 
   @override
   _RenderTheatre get renderObject => super.renderObject as _RenderTheatre;

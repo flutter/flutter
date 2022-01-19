@@ -73,7 +73,7 @@ class SwapperWithDeprecatedOverrides extends Swapper {
   SwapperElement createElement() => SwapperElementWithDeprecatedOverrides(this);
 }
 
-abstract class SwapperElement extends RenderObjectElement {
+abstract class SwapperElement extends RenderObjectElement<Swapper> {
   SwapperElement(Swapper widget) : super(widget);
 
   Element? stable;
@@ -82,9 +82,6 @@ abstract class SwapperElement extends RenderObjectElement {
   List<dynamic> insertSlots = <dynamic>[];
   List<Pair<dynamic>> moveSlots = <Pair<dynamic>>[];
   List<dynamic> removeSlots = <dynamic>[];
-
-  @override
-  Swapper get widget => super.widget as Swapper;
 
   @override
   RenderSwapper get renderObject => super.renderObject as RenderSwapper;

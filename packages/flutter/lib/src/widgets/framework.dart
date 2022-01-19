@@ -1945,7 +1945,7 @@ abstract class MultiChildRenderObjectWidget extends RenderObjectWidget {
   final List<Widget> children;
 
   @override
-  MultiChildRenderObjectElement createElement() => MultiChildRenderObjectElement(this);
+  MultiChildRenderObjectElement<MultiChildRenderObjectWidget> createElement() => MultiChildRenderObjectElement(this);
 }
 
 
@@ -5221,9 +5221,10 @@ class ParentDataElement<T extends ParentData> extends ProxyElement<ParentDataWid
 }
 
 /// An [Element] that uses an [InheritedWidget] as its configuration.
-class InheritedElement extends ProxyElement<InheritedWidget> {
+@optionalTypeArgs
+class InheritedElement<W extends InheritedWidget> extends ProxyElement<W> {
   /// Creates an element that uses the given widget as its configuration.
-  InheritedElement(InheritedWidget widget) : super(widget);
+  InheritedElement(W widget) : super(widget);
 
   final Map<Element, Object?> _dependents = HashMap<Element, Object?>();
 
@@ -5429,11 +5430,7 @@ class InheritedElement extends ProxyElement<InheritedWidget> {
 /// so that they return the specific type that the element expects, e.g.:
 ///
 /// ```dart
-/// class FooElement extends RenderObjectElement {
-///
-///   @override
-///   Foo get widget => super.widget as Foo;
-///
+/// class FooElement extends RenderObjectElement<Foo> {
 ///   @override
 ///   RenderFoo get renderObject => super.renderObject as RenderFoo;
 ///
@@ -6208,9 +6205,9 @@ abstract class RenderObjectElement<W extends RenderObjectWidget> extends Element
 ///
 /// Only root elements may have their owner set explicitly. All other
 /// elements inherit their owner from their parent.
-abstract class RootRenderObjectElement extends RenderObjectElement {
+abstract class RootRenderObjectElement<W extends RenderObjectWidget> extends RenderObjectElement<W> {
   /// Initializes fields for subclasses.
-  RootRenderObjectElement(RenderObjectWidget widget) : super(widget);
+  RootRenderObjectElement(W widget) : super(widget);
 
   /// Set the owner of the element. The owner will be propagated to all the
   /// descendants of this element.
@@ -6275,9 +6272,10 @@ class LeafRenderObjectElement extends RenderObjectElement {
 /// This element subclass can be used for RenderObjectWidgets whose
 /// RenderObjects use the [RenderObjectWithChildMixin] mixin. Such widgets are
 /// expected to inherit from [SingleChildRenderObjectWidget].
-class SingleChildRenderObjectElement extends RenderObjectElement<SingleChildRenderObjectWidget> {
+@optionalTypeArgs
+class SingleChildRenderObjectElement<S extends SingleChildRenderObjectWidget> extends RenderObjectElement<S> {
   /// Creates an element that uses the given widget as its configuration.
-  SingleChildRenderObjectElement(SingleChildRenderObjectWidget widget) : super(widget);
+  SingleChildRenderObjectElement(S widget) : super(widget);
 
   Element? _child;
 
@@ -6344,14 +6342,12 @@ class SingleChildRenderObjectElement extends RenderObjectElement<SingleChildRend
 ///   [MultiChildRenderObjectElement].
 /// * [RenderObjectElement.updateChildren], which discusses why [IndexedSlot]
 ///   is used for the slots of the children.
-class MultiChildRenderObjectElement extends RenderObjectElement {
+@optionalTypeArgs
+class MultiChildRenderObjectElement<W extends MultiChildRenderObjectWidget> extends RenderObjectElement<W> {
   /// Creates an element that uses the given widget as its configuration.
-  MultiChildRenderObjectElement(MultiChildRenderObjectWidget widget)
+  MultiChildRenderObjectElement(W widget)
     : assert(!debugChildrenHaveDuplicateKeys(widget, widget.children)),
       super(widget);
-
-  @override
-  MultiChildRenderObjectWidget get widget => super.widget as MultiChildRenderObjectWidget;
 
   @override
   ContainerRenderObjectMixin<RenderObject, ContainerParentDataMixin<RenderObject>> get renderObject {

@@ -1091,7 +1091,8 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
 ///
 /// Implements [RenderSliverBoxChildManager], which lets this element manage
 /// the children of subclasses of [RenderSliverMultiBoxAdaptor].
-class SliverMultiBoxAdaptorElement extends RenderObjectElement implements RenderSliverBoxChildManager {
+@optionalTypeArgs
+class SliverMultiBoxAdaptorElement<W extends SliverMultiBoxAdaptorWidget> extends RenderObjectElement<W> implements RenderSliverBoxChildManager {
   /// Creates an element that lazily builds children for the given widget.
   ///
   /// If `replaceMovedChildren` is set to true, a new child is proactively
@@ -1103,14 +1104,11 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
   /// layout offset of their children without looking at the layout offset of
   /// existing children this should be set to false (example:
   /// [RenderSliverFixedExtentList]) to avoid inflating unnecessary children.
-  SliverMultiBoxAdaptorElement(SliverMultiBoxAdaptorWidget widget, {bool replaceMovedChildren = false})
+  SliverMultiBoxAdaptorElement(W widget, {bool replaceMovedChildren = false})
      : _replaceMovedChildren = replaceMovedChildren,
        super(widget);
 
   final bool _replaceMovedChildren;
-
-  @override
-  SliverMultiBoxAdaptorWidget get widget => super.widget as SliverMultiBoxAdaptorWidget;
 
   @override
   RenderSliverMultiBoxAdaptor get renderObject => super.renderObject as RenderSliverMultiBoxAdaptor;
@@ -1674,11 +1672,8 @@ class SliverOffstage extends SingleChildRenderObjectWidget {
   SingleChildRenderObjectElement createElement() => _SliverOffstageElement(this);
 }
 
-class _SliverOffstageElement extends SingleChildRenderObjectElement {
+class _SliverOffstageElement extends SingleChildRenderObjectElement<SliverOffstage> {
   _SliverOffstageElement(SliverOffstage widget) : super(widget);
-
-  @override
-  SliverOffstage get widget => super.widget as SliverOffstage;
 
   @override
   void debugVisitOnstageChildren(ElementVisitor visitor) {

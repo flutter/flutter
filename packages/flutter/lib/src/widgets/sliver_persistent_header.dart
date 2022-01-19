@@ -245,7 +245,7 @@ class _FloatingHeaderState extends State<_FloatingHeader> {
   Widget build(BuildContext context) => widget.child;
 }
 
-class _SliverPersistentHeaderElement extends RenderObjectElement {
+class _SliverPersistentHeaderElement extends RenderObjectElement<_SliverPersistentHeaderRenderObjectWidget> {
   _SliverPersistentHeaderElement(
     _SliverPersistentHeaderRenderObjectWidget widget, {
     this.floating = false,
@@ -253,9 +253,6 @@ class _SliverPersistentHeaderElement extends RenderObjectElement {
        super(widget);
 
   final bool floating;
-
-  @override
-  _SliverPersistentHeaderRenderObjectWidget get widget => super.widget as _SliverPersistentHeaderRenderObjectWidget;
 
   @override
   _RenderSliverPersistentHeaderForWidgetsMixin get renderObject => super.renderObject as _RenderSliverPersistentHeaderForWidgetsMixin;

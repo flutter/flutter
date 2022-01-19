@@ -281,11 +281,8 @@ class Table extends RenderObjectWidget {
   }
 }
 
-class _TableElement extends RenderObjectElement {
+class _TableElement extends RenderObjectElement<Table> {
   _TableElement(Table widget) : super(widget);
-
-  @override
-  Table get widget => super.widget as Table;
 
   @override
   RenderTable get renderObject => super.renderObject as RenderTable;

@@ -188,7 +188,7 @@ class Viewport extends MultiChildRenderObjectWidget {
   }
 
   @override
-  MultiChildRenderObjectElement createElement() => _ViewportElement(this);
+  MultiChildRenderObjectElement<Viewport> createElement() => _ViewportElement(this);
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -207,15 +207,12 @@ class Viewport extends MultiChildRenderObjectWidget {
   }
 }
 
-class _ViewportElement extends MultiChildRenderObjectElement {
+class _ViewportElement extends MultiChildRenderObjectElement<Viewport> {
   /// Creates an element that uses the given widget as its configuration.
   _ViewportElement(Viewport widget) : super(widget);
 
   bool _doingMountOrUpdate = false;
   int? _centerSlotIndex;
-
-  @override
-  Viewport get widget => super.widget as Viewport;
 
   @override
   RenderViewport get renderObject => super.renderObject as RenderViewport;
