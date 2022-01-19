@@ -11,6 +11,44 @@ const double expandedAppbarHeight = 250.0;
 final Key appbarContainerKey = UniqueKey();
 
 void main() {
+  testWidgets('FlexibleSpaceBar collapse mode nonePin', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(platform: debugDefaultTargetPlatformOverride),
+        home: Scaffold(
+          body: CustomScrollView(
+            key: blockKey,
+            slivers: <Widget>[
+              SliverAppBar(
+                expandedHeight: 1000,
+                pinned: true,
+                flexibleSpace: FlexibleSpaceBar(
+                  nonePinBoundary: 500,
+                  background: Container(
+                    key: appbarContainerKey,
+                  ),
+                  collapseMode: CollapseMode.nonePin,
+                ),
+              ),
+              SliverToBoxAdapter(
+                child: Container(
+                  height: 10000.0,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final Finder appbarContainer = find.byKey(appbarContainerKey);
+    final Offset topBeforeScroll = tester.getTopLeft(appbarContainer);
+    await slowDrag(tester, blockKey, const Offset(0.0, -600.0));
+    final Offset topAfterScroll = tester.getTopLeft(appbarContainer);
+    expect(topBeforeScroll.dy, equals(0.0));
+    expect(topAfterScroll.dy, equals(-100.0));
+  }, variant: TargetPlatformVariant(TargetPlatform.values.where((TargetPlatform value) => value != TargetPlatform.fuchsia).toSet()));
+
   testWidgets('FlexibleSpaceBar collapse mode none', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
