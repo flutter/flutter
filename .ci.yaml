@@ -3787,6 +3787,7 @@ targets:
     scheduler: luci
 
   - name: Windows module_custom_host_app_name_test
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/96790
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
