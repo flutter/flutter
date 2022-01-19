@@ -104,6 +104,27 @@ import 'material.dart';
 /// ```
 /// {@end-tool}
 ///
+/// What to do if you want to clip this [Ink.image]?
+///
+/// {@tool dartpad}
+/// Wrapping the [Ink] in a clipping widget directly will not work since the
+/// [Material] it will be printed on is responsible for clipping.
+///
+/// In this example the image is not being clipped as expected. This is because
+/// it is being rendered onto the Scaffold body Material, which isn't wrapped in
+/// the [ClipRRect].
+///
+/// ** See code in examples/api/lib/material/ink/ink.image_clip.0.dart **
+/// {@end-tool}
+///
+/// {@tool dartpad}
+/// One solution would be to deliberately wrap the [Ink.image] in a [Material].
+/// This makes sure the Material that the image is painted on is also responsible
+/// for clipping said content.
+///
+/// ** See code in examples/api/lib/material/ink/ink.image_clip.1.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [Container], a more generic form of this widget which paints itself,

@@ -9,30 +9,12 @@ import 'routes.dart';
 /// Registers a callback to veto attempts by the user to dismiss the enclosing
 /// [ModalRoute].
 ///
-/// {@tool snippet --template=stateful_widget}
-///
+/// {@tool dartpad}
 /// Whenever the back button is pressed, you will get a callback at [onWillPop],
 /// which returns a [Future]. If the [Future] returns true, the screen is
 /// popped.
 ///
-/// ```dart
-/// bool shouldPop = true;
-/// @override
-/// Widget build(BuildContext context) {
-///   return WillPopScope (
-///     onWillPop: () async {
-///       return shouldPop;
-///     },
-///     child: const Text('WillPopScope sample'),
-///   );
-/// }
-/// ```
-/// {@end-tool}
-///
-/// {@tool dartpad}
-///
-///
-/// ** See code in examples/api/lib/widgets/will_pop_scope/will_pop_scope.1.dart **
+/// ** See code in examples/api/lib/widgets/will_pop_scope/will_pop_scope.0.dart **
 /// {@end-tool}
 ///
 /// See also:

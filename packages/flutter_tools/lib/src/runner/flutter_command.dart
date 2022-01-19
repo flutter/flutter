@@ -263,6 +263,10 @@ abstract class FlutterCommand extends Command<void> {
       help: 'Enables expression evaluation in the debugger.',
       hide: !verboseHelp,
     );
+    argParser.addOption('web-launch-url',
+      help: 'The URL to provide to the browser. Defaults to an HTTP URL with the host '
+          'name of "--web-hostname", the port of "--web-port", and the path set to "/".',
+    );
   }
 
   void usesTargetOption() {
@@ -1295,7 +1299,7 @@ abstract class FlutterCommand extends Command<void> {
 
       await generateLocalizationsSyntheticPackage(
         environment: environment,
-        buildSystem: globals.buildSystem!,
+        buildSystem: globals.buildSystem,
       );
 
       await pub.get(
@@ -1372,7 +1376,7 @@ abstract class FlutterCommand extends Command<void> {
         final StringBuffer result = StringBuffer();
         result.writeln(userMessages.flutterFoundButUnsupportedDevices);
         result.writeAll(
-          await Device.descriptions(unsupportedDevices)
+          (await Device.descriptions(unsupportedDevices))
               .map((String desc) => desc)
               .toList(),
           '\n',
@@ -1473,11 +1477,14 @@ abstract class FlutterCommand extends Command<void> {
 
   ApplicationPackageFactory? applicationPackages;
 
-  /// Gets the parsed command-line option named [name] as `bool`.
+  /// Gets the parsed command-line option named [name] as a `bool`.
   bool boolArg(String name) => argResults?[name] as bool? ?? false;
 
-  /// Gets the parsed command-line option named [name] as `String`.
+  /// Gets the parsed command-line option named [name] as a `String`.
   String? stringArg(String name) => argResults?[name] as String?;
+
+  /// Gets the parsed command-line option named [name] as an `int`.
+  int? intArg(String name) => argResults?[name] as int?;
 
   /// Gets the parsed command-line option named [name] as `List<String>`.
   List<String> stringsArg(String name) => argResults?[name] as List<String>? ?? <String>[];

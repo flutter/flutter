@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -26,7 +24,7 @@ Future<void> buildWeb(
   String serviceWorkerStrategy,
   bool sourceMaps,
   bool nativeNullAssertions,
-  String baseHref,
+  String? baseHref,
 ) async {
   final bool hasWebPlugins = (await findPlugins(flutterProject))
     .any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
@@ -47,20 +45,21 @@ Future<void> buildWeb(
         kTargetFile: target,
         kHasWebPlugins: hasWebPlugins.toString(),
         kCspMode: csp.toString(),
-        kBaseHref : baseHref,
+        if (baseHref != null)
+          kBaseHref : baseHref,
         kSourceMapsEnabled: sourceMaps.toString(),
         kNativeNullAssertions: nativeNullAssertions.toString(),
         if (serviceWorkerStrategy != null)
          kServiceWorkerStrategy: serviceWorkerStrategy,
         ...buildInfo.toBuildSystemEnvironment(),
       },
-      artifacts: globals.artifacts,
+      artifacts: globals.artifacts!,
       fileSystem: globals.fs,
       logger: globals.logger,
       processManager: globals.processManager,
       platform: globals.platform,
       cacheDir: globals.cache.getRoot(),
-      engineVersion: globals.artifacts.isLocalEngine
+      engineVersion: globals.artifacts!.isLocalEngine
         ? null
         : globals.flutterVersion.engineRevision,
       flutterRootDir: globals.fs.directory(Cache.flutterRoot),

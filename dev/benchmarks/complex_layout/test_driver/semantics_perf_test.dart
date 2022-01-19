@@ -33,9 +33,9 @@ void main() {
         expect(await driver.setSemantics(true), isTrue);
       });
 
-      final Iterable<TimelineEvent>? semanticsEvents = timeline.events?.where((TimelineEvent event) => event.name == 'Semantics');
+      final Iterable<TimelineEvent>? semanticsEvents = timeline.events?.where((TimelineEvent event) => event.name == 'SEMANTICS');
       if (semanticsEvents?.length != 2)
-        fail('Expected exactly two semantics events, got ${semanticsEvents?.length}');
+        fail('Expected exactly two "SEMANTICS" events, got ${semanticsEvents?.length}:\n$semanticsEvents');
       final Duration semanticsTreeCreation = Duration(microseconds: semanticsEvents!.last.timestampMicros! - semanticsEvents.first.timestampMicros!);
 
       final String jsonEncoded = json.encode(<String, dynamic>{'initialSemanticsTreeCreation': semanticsTreeCreation.inMilliseconds});

@@ -643,6 +643,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     this.enableFeedback,
     this.onTap,
     this.physics,
+    this.splashFactory,
   }) : assert(tabs != null),
        assert(isScrollable != null),
        assert(dragStartBehavior != null),
@@ -786,14 +787,11 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// [MaterialState.hovered], and [MaterialState.pressed].
   ///
   /// [MaterialState.pressed] triggers a ripple (an ink splash), per
-  /// the current Material Design spec. The [overlayColor] doesn't map
-  /// a state to [InkResponse.highlightColor] because a separate highlight
-  /// is not used by the current design guidelines. See
-  /// https://material.io/design/interaction/states.html#pressed
+  /// the current Material Design spec.
   ///
   /// If the overlay color is null or resolves to null, then the default values
-  /// for [InkResponse.focusColor], [InkResponse.hoverColor], [InkResponse.splashColor]
-  /// will be used instead.
+  /// for [InkResponse.focusColor], [InkResponse.hoverColor], [InkResponse.splashColor],
+  /// and [InkResponse.highlightColor] will be used instead.
   final MaterialStateProperty<Color?>? overlayColor;
 
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
@@ -831,6 +829,25 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   ///
   /// Defaults to matching platform conventions.
   final ScrollPhysics? physics;
+
+  /// Creates the tab bar's [InkWell] splash factory, which defines
+  /// the appearance of "ink" splashes that occur in response to taps.
+  ///
+  /// Use [NoSplash.splashFactory] to defeat ink splash rendering. For example
+  /// to defeat both the splash and the hover/pressed overlay, but not the
+  /// keyboard focused overlay:
+  /// ```dart
+  /// TabBar(
+  ///   splashFactory: NoSplash.splashFactory,
+  ///   overlayColor: MaterialStateProperty.resolveWith<Color?>(
+  ///     (Set<MaterialState> states) {
+  ///       return states.contains(MaterialState.focused) ? null : Colors.transparent;
+  ///     },
+  ///   ),
+  ///   ...
+  /// )
+  /// ```
+  final InteractiveInkFeatureFactory? splashFactory;
 
   /// A size whose height depends on if the tabs have both icons and text.
   ///
@@ -982,11 +999,11 @@ class _TabBarState extends State<TabBar> {
       _initIndicatorPainter();
     }
 
-    if (widget.tabs.length > oldWidget.tabs.length) {
-      final int delta = widget.tabs.length - oldWidget.tabs.length;
+    if (widget.tabs.length > _tabKeys.length) {
+      final int delta = widget.tabs.length - _tabKeys.length;
       _tabKeys.addAll(List<GlobalKey>.generate(delta, (int n) => GlobalKey()));
-    } else if (widget.tabs.length < oldWidget.tabs.length) {
-      _tabKeys.removeRange(widget.tabs.length, oldWidget.tabs.length);
+    } else if (widget.tabs.length < _tabKeys.length) {
+      _tabKeys.removeRange(widget.tabs.length, _tabKeys.length);
     }
   }
 
@@ -1187,7 +1204,8 @@ class _TabBarState extends State<TabBar> {
         mouseCursor: widget.mouseCursor ?? SystemMouseCursors.click,
         onTap: () { _handleTap(index); },
         enableFeedback: widget.enableFeedback ?? true,
-        overlayColor: widget.overlayColor,
+        overlayColor: widget.overlayColor ?? tabBarTheme.overlayColor,
+        splashFactory: widget.splashFactory ?? tabBarTheme.splashFactory,
         child: Padding(
           padding: EdgeInsets.only(bottom: widget.indicatorWeight),
           child: Stack(
@@ -1419,7 +1437,7 @@ class _TabBarViewState extends State<TabBarView> {
     setState(() {
       _warpUnderwayCount += 1;
 
-      _childrenWithKey = List<Widget>.from(_childrenWithKey, growable: false);
+      _childrenWithKey = List<Widget>.of(_childrenWithKey, growable: false);
       final Widget temp = _childrenWithKey[initialPage];
       _childrenWithKey[initialPage] = _childrenWithKey[previousIndex];
       _childrenWithKey[previousIndex] = temp;
@@ -1532,6 +1550,8 @@ class TabPageSelectorIndicator extends StatelessWidget {
 }
 
 /// Displays a row of small circular indicators, one per tab.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=Q628ue9Cq7U}
 ///
 /// The selected tab's indicator is highlighted. Often used in conjunction with
 /// a [TabBarView].

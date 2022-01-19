@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' as io;
+import 'package:flutter_tools/src/base/net.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -22,6 +23,7 @@ import 'package:flutter_tools/src/runner/flutter_command.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fake_http_client.dart';
 
 const String kCustomBugInstructions = 'These are instructions to report with a custom bug tracker.';
 
@@ -96,6 +98,7 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
       Usage: () => CrashingUsage(),
       Artifacts: () => Artifacts.test(),
+      HttpClientFactory: () => () => FakeHttpClient.any()
     });
 
     // This Completer completes when CrashingFlutterCommand.runCommand
@@ -138,6 +141,7 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
       CrashReporter: () => WaitingCrashReporter(commandCompleter.future),
       Artifacts: () => Artifacts.test(),
+      HttpClientFactory: () => () => FakeHttpClient.any()
     });
 
     testUsingContext('create local report', () async {
@@ -194,7 +198,7 @@ void main() {
       expect(sentDetails.command, 'flutter crash');
       expect(sentDetails.error, 'an exception % --');
       expect(sentDetails.stackTrace.toString(), contains('CrashingFlutterCommand.runCommand'));
-      expect(sentDetails.doctorText, contains('[✓] Flutter'));
+      expect(await sentDetails.doctorText.text, contains('[✓] Flutter'));
     }, overrides: <Type, Generator>{
       Platform: () => FakePlatform(
         environment: <String, String>{
@@ -206,7 +210,8 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
       UserMessages: () => CustomBugInstructions(),
       Artifacts: () => Artifacts.test(),
-      CrashReporter: () => WaitingCrashReporter(Future<void>.value())
+      CrashReporter: () => WaitingCrashReporter(Future<void>.value()),
+      HttpClientFactory: () => () => FakeHttpClient.any()
     });
   });
 }

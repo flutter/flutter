@@ -750,12 +750,17 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 
   @override
   SemanticsBuilderCallback? get semanticsBuilder => null;
+
+  @override
+  String toString() => describeIdentity(this);
 }
 
 /// An extendable base class for building scrollbars that fade in and out.
 ///
 /// To add a scrollbar to a [ScrollView], like a [ListView] or a
 /// [CustomScrollView], wrap the scroll view widget in a [RawScrollbar] widget.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=DbkIQSvwnZc}
 ///
 /// {@template flutter.widgets.Scrollbar}
 /// A scrollbar thumb indicates which portion of a [ScrollView] is actually
@@ -1437,7 +1442,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
         case TargetPlatform.linux:
         case TargetPlatform.macOS:
         case TargetPlatform.windows:
-          newPosition = newPosition.clamp(0.0, position.maxScrollExtent);
+          newPosition = newPosition.clamp(position.minScrollExtent, position.maxScrollExtent);
           break;
         case TargetPlatform.iOS:
         case TargetPlatform.android:

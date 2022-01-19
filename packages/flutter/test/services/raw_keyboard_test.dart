@@ -598,6 +598,49 @@ void main() {
       );
     }, skip: isBrowser); // [intended] This is an iOS-specific test.
 
+    testWidgets('repeat events', (WidgetTester tester) async {
+      expect(RawKeyboard.instance.keysPressed, isEmpty);
+      late RawKeyEvent receivedEvent;
+      RawKeyboard.instance.keyEventHandler = (RawKeyEvent event) {
+        receivedEvent = event;
+        return true;
+      };
+
+      // Dispatch a down event.
+      final Map<String, dynamic> downData = KeyEventSimulator.getKeyData(
+        LogicalKeyboardKey.keyA,
+        platform: 'windows',
+      );
+      await ServicesBinding.instance?.defaultBinaryMessenger.handlePlatformMessage(
+        SystemChannels.keyEvent.name,
+        SystemChannels.keyEvent.codec.encodeMessage(downData),
+        (ByteData? data) {},
+      );
+      expect(receivedEvent.repeat, false);
+
+      // Dispatch another down event, which should be recognized as a repeat.
+      await ServicesBinding.instance?.defaultBinaryMessenger.handlePlatformMessage(
+        SystemChannels.keyEvent.name,
+        SystemChannels.keyEvent.codec.encodeMessage(downData),
+        (ByteData? data) {},
+      );
+      expect(receivedEvent.repeat, true);
+
+      // Dispatch an up event.
+      await ServicesBinding.instance?.defaultBinaryMessenger.handlePlatformMessage(
+        SystemChannels.keyEvent.name,
+        SystemChannels.keyEvent.codec.encodeMessage(KeyEventSimulator.getKeyData(
+          LogicalKeyboardKey.keyA,
+          isDown: false,
+          platform: 'windows',
+        )),
+        (ByteData? data) {},
+      );
+      expect(receivedEvent.repeat, false);
+
+      RawKeyboard.instance.keyEventHandler = null;
+    }, skip: isBrowser); // [intended] This is a Windows-specific test.
+
     testWidgets('sided modifiers without a side set return all sides on Windows', (WidgetTester tester) async {
       expect(RawKeyboard.instance.keysPressed, isEmpty);
       // Generate the data for a regular key down event.
@@ -1415,20 +1458,34 @@ void main() {
       }
     });
 
-    test('Printable keyboard keys are correctly translated', () {
-      const String unmodifiedCharacter = 'a';
+    test('Lower letter keys are correctly translated', () {
       final RawKeyEvent keyAEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
         'type': 'keydown',
         'keymap': 'macos',
         'keyCode': 0x00000000,
         'characters': 'a',
-        'charactersIgnoringModifiers': unmodifiedCharacter,
+        'charactersIgnoringModifiers': 'a',
         'modifiers': 0x0,
       });
       final RawKeyEventDataMacOs data = keyAEvent.data as RawKeyEventDataMacOs;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.keyA));
       expect(data.logicalKey, equals(LogicalKeyboardKey.keyA));
       expect(data.keyLabel, equals('a'));
+    });
+
+    test('Upper letter keys are correctly translated', () {
+      final RawKeyEvent keyAEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
+        'type': 'keydown',
+        'keymap': 'macos',
+        'keyCode': 0x00000000,
+        'characters': 'A',
+        'charactersIgnoringModifiers': 'A',
+        'modifiers': 0x20002,
+      });
+      final RawKeyEventDataMacOs data = keyAEvent.data as RawKeyEventDataMacOs;
+      expect(data.physicalKey, equals(PhysicalKeyboardKey.keyA));
+      expect(data.logicalKey, equals(LogicalKeyboardKey.keyA));
+      expect(data.keyLabel, equals('A'));
     });
 
     test('Control keyboard keys are correctly translated', () {
@@ -1473,6 +1530,20 @@ void main() {
       final RawKeyEventDataMacOs data = leftArrowKey.data as RawKeyEventDataMacOs;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.arrowLeft));
       expect(data.logicalKey, equals(LogicalKeyboardKey.arrowLeft));
+    });
+
+    test('Multi-char keyboard keys are correctly translated', () {
+      final RawKeyEvent leftArrowKey = RawKeyEvent.fromMessage(const <String, dynamic>{
+        'type': 'keydown',
+        'keymap': 'macos',
+        'keyCode': 0x00000000,
+        'characters': 'án',
+        'charactersIgnoringModifiers': 'án',
+        'modifiers': 0,
+      });
+      final RawKeyEventDataMacOs data = leftArrowKey.data as RawKeyEventDataMacOs;
+      expect(data.physicalKey, equals(PhysicalKeyboardKey.keyA));
+      expect(data.logicalKey, equals(const LogicalKeyboardKey(0x1400000000)));
     });
 
     test('data.toString', () {
@@ -2468,7 +2539,7 @@ void main() {
       }
     });
 
-    test('Printable keyboard keys are correctly translated', () {
+    test('Lower letter keys are correctly translated', () {
       final RawKeyEvent keyAEvent = RawKeyEvent.fromMessage(const <String, Object?>{
         'type': 'keydown',
         'keymap': 'web',
@@ -2476,11 +2547,30 @@ void main() {
         'key': 'a',
         'location': 0,
         'metaState': 0x0,
+        'keyCode': 0x41,
       });
       final RawKeyEventDataWeb data = keyAEvent.data as RawKeyEventDataWeb;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.keyA));
       expect(data.logicalKey, equals(LogicalKeyboardKey.keyA));
       expect(data.keyLabel, equals('a'));
+      expect(data.keyCode, equals(0x41));
+    });
+
+    test('Upper letter keys are correctly translated', () {
+      final RawKeyEvent keyAEvent = RawKeyEvent.fromMessage(const <String, Object?>{
+        'type': 'keydown',
+        'keymap': 'web',
+        'code': 'KeyA',
+        'key': 'A',
+        'location': 0,
+        'metaState': 0x1, // Shift
+        'keyCode': 0x41,
+      });
+      final RawKeyEventDataWeb data = keyAEvent.data as RawKeyEventDataWeb;
+      expect(data.physicalKey, equals(PhysicalKeyboardKey.keyA));
+      expect(data.logicalKey, equals(LogicalKeyboardKey.keyA));
+      expect(data.keyLabel, equals('A'));
+      expect(data.keyCode, equals(0x41));
     });
 
     test('Control keyboard keys are correctly translated', () {
@@ -2491,11 +2581,13 @@ void main() {
         'key': 'Escape',
         'location': 0,
         'metaState': 0x0,
+        'keyCode': 0x1B,
       });
       final RawKeyEventDataWeb data = escapeKeyEvent.data as RawKeyEventDataWeb;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.escape));
       expect(data.logicalKey, equals(LogicalKeyboardKey.escape));
       expect(data.keyLabel, isEmpty);
+      expect(data.keyCode, equals(0x1B));
     });
 
     test('Modifier keyboard keys are correctly translated', () {
@@ -2506,11 +2598,13 @@ void main() {
         'key': 'Shift',
         'location': 1,
         'metaState': RawKeyEventDataWeb.modifierShift,
+        'keyCode': 0x10,
       });
       final RawKeyEventDataWeb data = shiftKeyEvent.data as RawKeyEventDataWeb;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.shiftLeft));
       expect(data.logicalKey, equals(LogicalKeyboardKey.shiftLeft));
       expect(data.keyLabel, isEmpty);
+      expect(data.keyCode, equals(0x10));
     });
 
     test('Arrow keys from a keyboard give correct physical key mappings', () {
@@ -2521,11 +2615,13 @@ void main() {
         'key': 'ArrowDown',
         'location': 0,
         'metaState': 0x0,
+        'keyCode': 0x28,
       });
       final RawKeyEventDataWeb data = arrowKeyDown.data as RawKeyEventDataWeb;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.arrowDown));
       expect(data.logicalKey, equals(LogicalKeyboardKey.arrowDown));
       expect(data.keyLabel, isEmpty);
+      expect(data.keyCode, equals(0x28));
     });
 
     test('Unrecognized keys are mapped to Web plane', () {
@@ -2545,6 +2641,7 @@ void main() {
       expect(data.logicalKey.keyId, greaterThan(0x01700000000));
       expect(data.logicalKey.keyId, lessThan(0x01800000000));
       expect(data.keyLabel, isEmpty);
+      expect(data.keyCode, equals(0));
     });
 
     test('data.toString', () {
@@ -2555,8 +2652,9 @@ void main() {
         'key': 'a',
         'location': 2,
         'metaState': 0x10,
+        'keyCode': 0x41,
       }).data.toString(), equalsIgnoringHashCodes(
-        'RawKeyEventDataWeb#00000(code: KeyA, key: a, location: 2, metaState: 16)'));
+        'RawKeyEventDataWeb#00000(code: KeyA, key: a, location: 2, metaState: 16, keyCode: 65)'));
 
       // Without location
       expect(RawKeyEvent.fromMessage(const <String, Object?>{
@@ -2565,8 +2663,9 @@ void main() {
         'code': 'KeyA',
         'key': 'a',
         'metaState': 0x10,
+        'keyCode': 0x41,
       }).data.toString(), equalsIgnoringHashCodes(
-        'RawKeyEventDataWeb#00000(code: KeyA, key: a, location: 0, metaState: 16)'));
+        'RawKeyEventDataWeb#00000(code: KeyA, key: a, location: 0, metaState: 16, keyCode: 65)'));
     });
 
     test('data.equality', () {
@@ -2577,11 +2676,13 @@ void main() {
         'key': 'a',
         'location': 2,
         'metaState': 0x10,
+        'keyCode': 0x41,
       }).data, const RawKeyEventDataWeb(
         key: 'a',
         code: 'KeyA',
         location: 2,
         metaState: 0x10,
+        keyCode: 0x41
       ));
 
       expect(RawKeyEvent.fromMessage(const <String, Object?>{
@@ -2591,6 +2692,7 @@ void main() {
         'key': 'a',
         'location': 2,
         'metaState': 0x10,
+        'keyCode': 0x41,
       }).data, isNot(equals(const RawKeyEventDataWeb(code: 'KeyA', key: 'a'))));
     });
   });

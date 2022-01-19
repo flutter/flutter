@@ -70,6 +70,35 @@ class TallSliderTickMarkShape extends SliderTickMarkShape {
   }
 }
 
+class _StateDependentMouseCursor extends MaterialStateMouseCursor {
+  const _StateDependentMouseCursor({
+    this.disabled = SystemMouseCursors.none,
+    this.dragged = SystemMouseCursors.none,
+    this.hovered = SystemMouseCursors.none,
+  });
+
+  final MouseCursor disabled;
+  final MouseCursor hovered;
+  final MouseCursor dragged;
+
+  @override
+  MouseCursor resolve(Set<MaterialState> states) {
+    if (states.contains(MaterialState.disabled)) {
+      return disabled;
+    }
+    if (states.contains(MaterialState.dragged)) {
+      return dragged;
+    }
+    if (states.contains(MaterialState.hovered)) {
+      return hovered;
+    }
+    return SystemMouseCursors.none;
+  }
+
+  @override
+  String get debugDescription => '_StateDependentMouseCursor';
+}
+
 void main() {
   testWidgets('Slider can move when tapped (LTR)', (WidgetTester tester) async {
     final Key sliderKey = UniqueKey();
@@ -1322,8 +1351,16 @@ void main() {
                       children: <TestSemantics>[
                         TestSemantics(
                           id: 4,
-                          flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled, SemanticsFlag.isFocusable, SemanticsFlag.isSlider],
-                          actions: <SemanticsAction>[SemanticsAction.increase, SemanticsAction.decrease],
+                          flags: <SemanticsFlag>[
+                            SemanticsFlag.hasEnabledState,
+                            SemanticsFlag.isEnabled,
+                            SemanticsFlag.isFocusable,
+                            SemanticsFlag.isSlider,
+                          ],
+                          actions: <SemanticsAction>[
+                            SemanticsAction.increase,
+                            SemanticsAction.decrease,
+                          ],
                           value: '50%',
                           increasedValue: '55%',
                           decreasedValue: '45%',
@@ -1439,7 +1476,7 @@ void main() {
     );
 
     semantics.dispose();
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android,  TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android,  TargetPlatform.fuchsia, TargetPlatform.linux }));
 
   testWidgets('Slider Semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -1551,6 +1588,175 @@ void main() {
     );
     semantics.dispose();
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+
+  testWidgets('Slider Semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(MaterialApp(
+      home: Directionality(
+        textDirection: TextDirection.ltr,
+        child: Material(
+          child: Slider(
+            value: 0.5,
+            onChanged: (double v) { },
+          ),
+        ),
+      ),
+    ));
+
+    await tester.pumpAndSettle();
+
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics(
+              id: 1,
+              textDirection: TextDirection.ltr,
+              children: <TestSemantics>[
+                TestSemantics(
+                  id: 2,
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      id: 3,
+                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                      children: <TestSemantics>[
+                        TestSemantics(
+                          id: 4,
+                          flags: <SemanticsFlag>[
+                            SemanticsFlag.hasEnabledState,
+                            SemanticsFlag.isEnabled,
+                            SemanticsFlag.isFocusable,
+                            SemanticsFlag.isSlider,
+                          ],
+                          actions: <SemanticsAction>[
+                            SemanticsAction.increase,
+                            SemanticsAction.decrease,
+                            SemanticsAction.didGainAccessibilityFocus,
+                          ],
+                          value: '50%',
+                          increasedValue: '55%',
+                          decreasedValue: '45%',
+                          textDirection: TextDirection.ltr,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+        ignoreRect: true,
+        ignoreTransform: true,
+      ),
+    );
+
+    // Disable slider
+    await tester.pumpWidget(const MaterialApp(
+      home: Directionality(
+        textDirection: TextDirection.ltr,
+        child: Material(
+          child: Slider(
+            value: 0.5,
+            onChanged: null,
+          ),
+        ),
+      ),
+    ));
+
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics(
+              id: 1,
+              textDirection: TextDirection.ltr,
+              children: <TestSemantics>[
+                TestSemantics(
+                  id: 2,
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      id: 3,
+                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                      children: <TestSemantics>[
+                        TestSemantics(
+                          id: 4,
+                          flags: <SemanticsFlag>[
+                            SemanticsFlag.hasEnabledState,
+                            // isFocusable is delayed by 1 frame.
+                            SemanticsFlag.isFocusable,
+                            SemanticsFlag.isSlider,
+                          ],
+                          actions: <SemanticsAction>[
+                            SemanticsAction.didGainAccessibilityFocus,
+                          ],
+                          value: '50%',
+                          increasedValue: '55%',
+                          decreasedValue: '45%',
+                          textDirection: TextDirection.ltr,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+        ignoreRect: true,
+        ignoreTransform: true,
+      ),
+    );
+
+    await tester.pump();
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics(
+              id: 1,
+              textDirection: TextDirection.ltr,
+              children: <TestSemantics>[
+                TestSemantics(
+                  id: 2,
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      id: 3,
+                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                      children: <TestSemantics>[
+                        TestSemantics(
+                          id: 4,
+                          flags: <SemanticsFlag>[
+                            SemanticsFlag.hasEnabledState,
+                            SemanticsFlag.isSlider,
+                          ],
+                          actions: <SemanticsAction>[
+                            SemanticsAction.didGainAccessibilityFocus,
+                          ],
+                          value: '50%',
+                          increasedValue: '55%',
+                          decreasedValue: '45%',
+                          textDirection: TextDirection.ltr,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+        ignoreRect: true,
+        ignoreTransform: true,
+      ),
+    );
+
+    semantics.dispose();
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.windows }));
 
   testWidgets('Slider semantics with custom formatter', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -1886,6 +2092,73 @@ void main() {
     await tester.pumpAndSettle();
     expect(value, 0.5);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+
+  testWidgets('Slider gains keyboard focus when it gains semantics focus on Windows', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
+    final FocusNode focusNode = FocusNode();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Slider(
+            value: 0.5,
+            onChanged: (double _) {},
+            focusNode: focusNode,
+          ),
+        ),
+      ),
+    );
+
+    expect(semantics, hasSemantics(
+      TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics(
+            id: 1,
+            textDirection: TextDirection.ltr,
+            children: <TestSemantics>[
+              TestSemantics(
+                id: 2,
+                children: <TestSemantics>[
+                  TestSemantics(
+                    id: 3,
+                    flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                    children: <TestSemantics>[
+                      TestSemantics(
+                        id: 4,
+                        flags: <SemanticsFlag>[
+                          SemanticsFlag.hasEnabledState,
+                          SemanticsFlag.isEnabled,
+                          SemanticsFlag.isFocusable,
+                          SemanticsFlag.isSlider,
+                        ],
+                        actions: <SemanticsAction>[
+                          SemanticsAction.increase,
+                          SemanticsAction.decrease,
+                          SemanticsAction.didGainAccessibilityFocus,
+                        ],
+                        value: '50%',
+                        increasedValue: '55%',
+                        decreasedValue: '45%',
+                        textDirection: TextDirection.ltr,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+      ignoreRect: true,
+      ignoreTransform: true,
+    ));
+
+    expect(focusNode.hasFocus, isFalse);
+    semanticsOwner.performAction(4, SemanticsAction.didGainAccessibilityFocus);
+    await tester.pumpAndSettle();
+    expect(focusNode.hasFocus, isTrue);
+    semantics.dispose();
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.windows }));
 
   testWidgets('Value indicator appears when it should', (WidgetTester tester) async {
     final ThemeData baseTheme = ThemeData(
@@ -2275,6 +2548,57 @@ void main() {
     );
 
     expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+  });
+
+  testWidgets('Slider MaterialStateMouseCursor resolves correctly', (WidgetTester tester) async {
+    const MouseCursor disabledCursor = SystemMouseCursors.basic;
+    const MouseCursor hoveredCursor = SystemMouseCursors.grab;
+    const MouseCursor draggedCursor = SystemMouseCursors.move;
+
+    Widget buildFrame({ required bool enabled }) {
+      return MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Material(
+            child: Center(
+              child: MouseRegion(
+                cursor: SystemMouseCursors.forbidden,
+                child: Slider(
+                  mouseCursor: const _StateDependentMouseCursor(
+                    disabled: disabledCursor,
+                    hovered: hoveredCursor,
+                    dragged: draggedCursor,
+                  ),
+                  value: 0.5,
+                  onChanged: enabled ? (double newValue) { } : null,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: Offset.zero);
+    addTearDown(gesture.removePointer);
+
+    await tester.pumpWidget(buildFrame(enabled: false));
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), disabledCursor);
+
+    await tester.pumpWidget(buildFrame(enabled: true));
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.none);
+
+    await gesture.moveTo(tester.getCenter(find.byType(Slider))); // start hover
+    await tester.pumpAndSettle();
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), hoveredCursor);
+
+    await tester.timedDrag(
+      find.byType(Slider),
+      const Offset(20.0, 0.0),
+      const Duration(milliseconds: 100),
+    );
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.move);
   });
 
   testWidgets('Slider implements debugFillProperties', (WidgetTester tester) async {

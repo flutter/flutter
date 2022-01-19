@@ -1360,8 +1360,8 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     // otherwise, no explicit type adding items maybe trigger a crash/failure
     // when hint and selectedItemBuilder are provided.
     final List<Widget> items = widget.selectedItemBuilder == null
-      ? (widget.items != null ? List<Widget>.from(widget.items!) : <Widget>[])
-      : List<Widget>.from(widget.selectedItemBuilder!(context));
+      ? (widget.items != null ? List<Widget>.of(widget.items!) : <Widget>[])
+      : List<Widget>.of(widget.selectedItemBuilder!(context));
 
     int? hintIndex;
     if (widget.hint != null || (!_enabled && widget.disabledHint != null)) {
@@ -1540,6 +1540,9 @@ class DropdownButtonFormField<T> extends FormField<T> {
     double? menuMaxHeight,
     bool? enableFeedback,
     AlignmentGeometry alignment = AlignmentDirectional.centerStart,
+    BorderRadius? borderRadius,
+    // When adding new arguments, consider adding similar arguments to
+    // DropdownButton.
   }) : assert(items == null || items.isEmpty || value == null ||
               items.where((DropdownMenuItem<T> item) {
                 return item.value == value;
@@ -1615,6 +1618,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
                      menuMaxHeight: menuMaxHeight,
                      enableFeedback: enableFeedback,
                      alignment: alignment,
+                     borderRadius: borderRadius,
                    ),
                  ),
                );

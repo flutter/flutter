@@ -116,14 +116,14 @@ Future<void> testWithNewIOSSimulator(
 }
 
 /// Shuts down and deletes simulator with deviceId.
-Future<void> removeIOSimulator(String deviceId) async {
+Future<void> removeIOSimulator(String? deviceId) async {
   if (deviceId != null && deviceId != '') {
     await eval(
       'xcrun',
       <String>[
         'simctl',
         'shutdown',
-        deviceId
+        deviceId,
       ],
       canFail: true,
       workingDirectory: flutterDirectory.path,
@@ -133,7 +133,8 @@ Future<void> removeIOSimulator(String deviceId) async {
       <String>[
         'simctl',
         'delete',
-        deviceId],
+        deviceId,
+      ],
       canFail: true,
       workingDirectory: flutterDirectory.path,
     );

@@ -29,5 +29,6 @@ class MockClipboard {
         _clipboardData = methodCall.arguments;
         break;
     }
+    return null;
   }
 }

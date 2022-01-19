@@ -96,9 +96,18 @@ bool debugCheckIntrinsicSizes = false;
 
 /// Adds [dart:developer.Timeline] events for every [RenderObject] layout.
 ///
-/// For details on how to use [dart:developer.Timeline] events in the Dart
-/// Observatory to optimize your app, see:
-/// <https://fuchsia.googlesource.com/topaz/+/master/shell/docs/performance.md>
+/// The timing information this flag exposes is not representative of the actual
+/// cost of layout, because the overhead of adding timeline events is
+/// significant relative to the time each object takes to lay out. However, it
+/// can expose unexpected layout behavior in the timeline.
+///
+/// In debug builds, additional information is included in the trace (such as
+/// the properties of render objects being laid out). Collecting this data is
+/// expensive and further makes these traces non-representative of actual
+/// performance. This data is omitted in profile builds.
+///
+/// For more information about performance debugging in Flutter, see
+/// <https://flutter.dev/docs/perf/rendering>.
 ///
 /// See also:
 ///
@@ -112,11 +121,17 @@ bool debugProfileLayoutsEnabled = false;
 /// Adds [dart:developer.Timeline] events for every [RenderObject] painted.
 ///
 /// The timing information this flag exposes is not representative of actual
-/// paints. However, it can expose unexpected painting in the timeline.
+/// paints, because the overhead of adding timeline events is significant
+/// relative to the time each object takes to paint. However, it can expose
+/// unexpected painting in the timeline.
 ///
-/// For details on how to use [dart:developer.Timeline] events in the Dart
-/// Observatory to optimize your app, see:
-/// <https://fuchsia.googlesource.com/topaz/+/master/shell/docs/performance.md>
+/// In debug builds, additional information is included in the trace (such as
+/// the properties of render objects being painted). Collecting this data is
+/// expensive and further makes these traces non-representative of actual
+/// performance. This data is omitted in profile builds.
+///
+/// For more information about performance debugging in Flutter, see
+/// <https://flutter.dev/docs/perf/rendering>.
 ///
 /// See also:
 ///

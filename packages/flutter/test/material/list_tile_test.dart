@@ -379,6 +379,11 @@ void main() {
     expect(output, isEmpty);
   });
 
+  testWidgets('ListTile.divideTiles with single item list', (WidgetTester tester) async {
+    final Iterable<Widget> output = ListTile.divideTiles(tiles: const <Widget>[SizedBox()], color: Colors.grey);
+    expect(output.single, isA<SizedBox>());
+  });
+
   testWidgets('ListTile.divideTiles only runs the generator once', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/pull/78879
     int callCount = 0;

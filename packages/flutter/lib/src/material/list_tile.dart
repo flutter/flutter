@@ -1041,33 +1041,31 @@ class ListTile extends StatelessWidget {
   /// See also:
   ///
   ///  * [Divider], which you can use to obtain this effect manually.
-  static Iterable<Widget> divideTiles({ BuildContext? context, required Iterable<Widget> tiles, Color? color }) sync* {
+  static Iterable<Widget> divideTiles({ BuildContext? context, required Iterable<Widget> tiles, Color? color }) {
     assert(tiles != null);
     assert(color != null || context != null);
+    tiles = tiles.toList();
 
-    final Iterator<Widget> iterator = tiles.iterator;
-    final bool hasNext = iterator.moveNext();
+    if (tiles.isEmpty || tiles.length == 1) {
+      return tiles;
+    }
 
-    if (!hasNext)
-      return;
-
-    final Decoration decoration = BoxDecoration(
-      border: Border(
-        bottom: Divider.createBorderSide(context, color: color),
-      ),
-    );
-
-    Widget tile = iterator.current;
-    while (iterator.moveNext()) {
-      yield DecoratedBox(
+    Widget wrapTile(Widget tile) {
+      return DecoratedBox(
         position: DecorationPosition.foreground,
-        decoration: decoration,
+        decoration: BoxDecoration(
+          border: Border(
+            bottom: Divider.createBorderSide(context, color: color),
+          ),
+        ),
         child: tile,
       );
-      tile = iterator.current;
     }
-    if (hasNext)
-      yield tile;
+
+    return <Widget>[
+      ...tiles.take(tiles.length - 1).map(wrapTile),
+      tiles.last,
+    ];
   }
 
   Color? _iconColor(ThemeData theme, ListTileThemeData tileTheme) {
@@ -1389,15 +1387,17 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
 
   // The returned list is ordered for hit testing.
   @override
-  Iterable<RenderBox> get children sync* {
-    if (leading != null)
-      yield leading!;
-    if (title != null)
-      yield title!;
-    if (subtitle != null)
-      yield subtitle!;
-    if (trailing != null)
-      yield trailing!;
+  Iterable<RenderBox> get children {
+    return <RenderBox>[
+      if (leading != null)
+        leading!,
+      if (title != null)
+        title!,
+      if (subtitle != null)
+        subtitle!,
+      if (trailing != null)
+        trailing!,
+    ];
   }
 
   bool get isDense => _isDense;

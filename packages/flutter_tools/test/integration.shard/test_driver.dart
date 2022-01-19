@@ -164,9 +164,9 @@ abstract class FlutterTestDriver {
 
     await waitForPause();
     if (pauseOnExceptions) {
-      await _vmService!.setExceptionPauseMode(
+      await _vmService!.setIsolatePauseMode(
         await _getFlutterIsolateId(),
-        ExceptionPauseMode.kUnhandled,
+        exceptionPauseMode: ExceptionPauseMode.kUnhandled,
       );
     }
   }
