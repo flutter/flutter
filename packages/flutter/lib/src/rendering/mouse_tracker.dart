@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: prefer_collection_literals
+
 import 'dart:collection' show LinkedHashMap;
 import 'dart:ui';
 
@@ -252,7 +254,7 @@ class MouseTracker extends ChangeNotifier {
     final Offset globalPosition = state.latestEvent.position;
     final int device = state.device;
     if (!_mouseStates.containsKey(device))
-      return <MouseTrackerAnnotation, Matrix4>{} as LinkedHashMap<MouseTrackerAnnotation, Matrix4>;
+      return LinkedHashMap<MouseTrackerAnnotation, Matrix4>();
 
     return _hitTestResultToAnnotations(hitTest(globalPosition));
   }
@@ -325,7 +327,7 @@ class MouseTracker extends ChangeNotifier {
 
         final PointerEvent lastEvent = targetState.replaceLatestEvent(event);
         final LinkedHashMap<MouseTrackerAnnotation, Matrix4> nextAnnotations = event is PointerRemovedEvent ?
-            <MouseTrackerAnnotation, Matrix4>{} as LinkedHashMap<MouseTrackerAnnotation, Matrix4> :
+            LinkedHashMap<MouseTrackerAnnotation, Matrix4>():
             _hitTestResultToAnnotations(result);
         final LinkedHashMap<MouseTrackerAnnotation, Matrix4> lastAnnotations = targetState.replaceAnnotations(nextAnnotations);
 

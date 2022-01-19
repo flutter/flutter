@@ -4852,9 +4852,10 @@ abstract class ComponentElement<W extends Widget> extends Element<W> {
 }
 
 /// An [Element] that uses a [StatelessWidget] as its configuration.
-class StatelessElement extends ComponentElement<StatelessWidget> {
+@optionalTypeArgs
+class StatelessElement<W extends StatelessWidget> extends ComponentElement<W> {
   /// Creates an element that uses the given widget as its configuration.
-  StatelessElement(StatelessWidget widget) : super(widget);
+  StatelessElement(W widget) : super(widget);
 
   @override
   Widget build() => widget.build(this);
@@ -4869,9 +4870,10 @@ class StatelessElement extends ComponentElement<StatelessWidget> {
 }
 
 /// An [Element] that uses a [StatefulWidget] as its configuration.
-class StatefulElement extends ComponentElement<StatefulWidget> {
+@optionalTypeArgs
+class StatefulElement<W extends StatefulWidget> extends ComponentElement<W> {
   /// Creates an element that uses the given widget as its configuration.
-  StatefulElement(StatefulWidget widget)
+  StatefulElement(W widget)
       : _state = widget.createState(),
         super(widget) {
     assert(() {

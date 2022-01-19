@@ -640,7 +640,7 @@ abstract class InkFeature {
     final List<RenderObject> descendants = <RenderObject>[referenceBox];
     RenderObject node = referenceBox;
     while (node != _controller) {
-      node = node.parent! as RenderObject;
+      node = node.parent!;
       descendants.add(node);
     }
     // determine the transform that gets our coordinate system to be like theirs

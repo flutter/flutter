@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'rendering_tester.dart';
 
-class RealRoot extends AbstractNode {
+class RealRoot extends AbstractNode<RenderObject> {
   RealRoot(this.child) {
     adoptChild(child);
   }
