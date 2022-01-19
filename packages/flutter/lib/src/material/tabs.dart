@@ -1508,7 +1508,8 @@ class _TabBarViewState extends State<TabBarView> {
   }
 }
 
-/// Displays a single circle with the specified border and background colors.
+/// Displays a single circle with the specified size, border style, border color
+/// and background colors.
 ///
 /// Used by [TabPageSelector] to indicate the selected page.
 class TabPageSelectorIndicator extends StatelessWidget {
@@ -1520,6 +1521,7 @@ class TabPageSelectorIndicator extends StatelessWidget {
     required this.backgroundColor,
     required this.borderColor,
     required this.size,
+    this.borderStyle = BorderStyle.solid,
   }) : assert(backgroundColor != null),
        assert(borderColor != null),
        assert(size != null),
@@ -1534,6 +1536,11 @@ class TabPageSelectorIndicator extends StatelessWidget {
   /// The indicator circle's diameter.
   final double size;
 
+  /// The indicator circle's border style.
+  ///
+  /// Defaults to [BorderStyle.solid] if value is not specified.
+  final BorderStyle borderStyle;
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -1542,14 +1549,15 @@ class TabPageSelectorIndicator extends StatelessWidget {
       margin: const EdgeInsets.all(4.0),
       decoration: BoxDecoration(
         color: backgroundColor,
-        border: Border.all(color: borderColor),
+        border: Border.all(color: borderColor, style: borderStyle),
         shape: BoxShape.circle,
       ),
     );
   }
 }
 
-/// Displays a row of small circular indicators, one per tab.
+/// Uses [TabPageSelectorIndicator] to display a row of small circular
+/// indicators, one per tab.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=Q628ue9Cq7U}
 ///
@@ -1566,6 +1574,7 @@ class TabPageSelector extends StatelessWidget {
     this.indicatorSize = 12.0,
     this.color,
     this.selectedColor,
+    this.borderStyle,
   }) : assert(indicatorSize != null && indicatorSize > 0.0),
        super(key: key);
 
@@ -1589,6 +1598,11 @@ class TabPageSelector extends StatelessWidget {
   /// If this parameter is null, then the indicator is filled with the theme's
   /// [ColorScheme.secondary].
   final Color? selectedColor;
+
+  /// The indicator circle's border style.
+  ///
+  /// Defaults to [BorderStyle.solid] if value is not specified.
+  final BorderStyle? borderStyle;
 
   Widget _buildTabIndicator(
     int tabIndex,
@@ -1624,6 +1638,7 @@ class TabPageSelector extends StatelessWidget {
       backgroundColor: background,
       borderColor: selectedColorTween.end!,
       size: indicatorSize,
+      borderStyle: borderStyle ?? BorderStyle.solid,
     );
   }
 
