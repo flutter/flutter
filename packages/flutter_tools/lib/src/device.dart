@@ -947,7 +947,6 @@ class DebuggingOptions {
   bool get hasObservatoryPort => hostVmServicePort != null;
 
   Map<String, Object?> toJson() => <String, Object?>{
-  // final BuildInfo buildInfo;
     'debuggingEnabled': debuggingEnabled,
     'startPaused': startPaused,
     'dartFlags': dartFlags,

@@ -9,6 +9,7 @@ import '../application_package.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
+import '../base/logger.dart';
 import '../build_info.dart';
 import '../convert.dart';
 import '../daemon.dart';
@@ -20,7 +21,7 @@ bool _isNullable<T>() => null is T;
 
 T _cast<T>(Object? object) {
   if (!_isNullable<T>() && object == null) {
-    throwToolExit('Expected $T, received null!');
+    throw Exception('Expected $T, received null!');
   } else {
     return object as T;
   }
@@ -29,10 +30,14 @@ T _cast<T>(Object? object) {
 /// A [DeviceDiscovery] that will connect to a flutter daemon and connects to
 /// the devices remotely.
 class ProxiedDevices extends DeviceDiscovery {
-  ProxiedDevices(this.connection);
+  ProxiedDevices(this.connection, {
+    required Logger logger,
+  }) : _logger = logger;
 
   /// [DaemonConnection] used to communicate with the daemon.
   final DaemonConnection connection;
+
+  final Logger _logger;
 
   @override
   bool get supportsPlatform => true;
@@ -79,6 +84,7 @@ class ProxiedDevices extends DeviceDiscovery {
       supportsScreenshot: _cast<bool>(capabilities['screenshot']),
       supportsFastStart: _cast<bool>(capabilities['fastStart']),
       supportsHardwareRendering: _cast<bool>(capabilities['hardwareRendering']),
+      logger: _logger,
     );
   }
 }
@@ -102,18 +108,22 @@ class ProxiedDevice extends Device {
     required this.supportsScreenshot,
     required this.supportsFastStart,
     required bool supportsHardwareRendering,
+    required Logger logger,
   }): _isLocalEmulator = isLocalEmulator,
       _emulatorId = emulatorId,
       _sdkNameAndVersion = sdkNameAndVersion,
       _supportsHardwareRendering = supportsHardwareRendering,
-  _targetPlatform = targetPlatform,
-  super(id,
-    category: category,
-    platformType: platformType,
-    ephemeral: ephemeral);
+      _targetPlatform = targetPlatform,
+      _logger = logger,
+      super(id,
+        category: category,
+        platformType: platformType,
+        ephemeral: ephemeral);
 
   /// [DaemonConnection] used to communicate with the daemon.
   final DaemonConnection connection;
+
+  final Logger _logger;
 
   @override
   final String name;
@@ -182,7 +192,7 @@ class ProxiedDevice extends Device {
   }) => _ProxiedLogReader(connection, this, app);
 
   _ProxiedPortForwarder? _proxiedPortForwarder;
-  _ProxiedPortForwarder get proxiedPortForwarder => _proxiedPortForwarder ??= _ProxiedPortForwarder(connection);
+  _ProxiedPortForwarder get proxiedPortForwarder => _proxiedPortForwarder ??= _ProxiedPortForwarder(connection, logger: _logger);
 
   @override
   DevicePortForwarder get portForwarder => throw UnimplementedError;
@@ -280,7 +290,6 @@ class ProxiedDevice extends Device {
     _applicationPackageMap[path] = idCompleter.future;
     await connection.sendRequest('proxy.writeTempFile', <String, Object>{
       'path': fileName,
-      // 'content': base64.encode(await binary.readAsBytes()),
     }, await binary.readAsBytes());
     final String id = _cast<String>(await connection.sendRequest('device.uploadApplicationPackage', <String, Object>{
       'targetPlatform': getNameForTargetPlatform(_targetPlatform),
@@ -339,18 +348,27 @@ class _ProxiedLogReader extends DeviceLogReader {
 
 /// A [DevicePortForwarder] for a proxied device.
 class _ProxiedPortForwarder extends DevicePortForwarder {
-  _ProxiedPortForwarder(this.connection);
+  _ProxiedPortForwarder(this.connection, {
+    required Logger logger,
+  }) : _logger = logger;
 
   DaemonConnection connection;
 
-  @override
-  List<ForwardedPort> forwardedPorts = <ForwardedPort>[];
+  final Logger _logger;
 
-  List<Socket> connectedSockets = <Socket>[];
+  @override
+  final List<ForwardedPort> forwardedPorts = <ForwardedPort>[];
+
+  final List<Socket> _connectedSockets = <Socket>[];
+
+  final Map<int, ServerSocket> _serverSockets = <int, ServerSocket>{};
 
   @override
   Future<int> forward(int devicePort, { int? hostPort }) async {
     final ServerSocket serverSocket = await ServerSocket.bind(InternetAddress.loopbackIPv4, hostPort ?? 0);
+
+    _serverSockets[serverSocket.port] = serverSocket;
+    forwardedPorts.add(ForwardedPort(serverSocket.port, devicePort));
 
     serverSocket.listen((Socket socket) async {
       final String id = _cast<String>(await connection.sendRequest('proxy.connect', <String, Object>{
@@ -367,18 +385,22 @@ class _ProxiedPortForwarder extends DevicePortForwarder {
           'id': id,
         }, data);
       });
-      connectedSockets.add(socket);
+      _connectedSockets.add(socket);
+
       unawaited(socket.done.then((dynamic value) {
         connection.sendRequest('proxy.disconnect', <String, Object>{
           'id': id,
         });
-        connectedSockets.remove(socket);
+        _connectedSockets.remove(socket);
       }).onError((Object? error, StackTrace stackTrace) {
         connection.sendRequest('proxy.disconnect', <String, Object>{
           'id': id,
         });
-        connectedSockets.remove(socket);
+        _connectedSockets.remove(socket);
       }));
+    }, onError: (Object error, StackTrace stackTrace) {
+      _logger.printWarning('Server socket error: $error');
+      _logger.printTrace('Server socket error: $error, stack trace: $stackTrace');
     });
     return serverSocket.port;
   }
@@ -391,12 +413,23 @@ class _ProxiedPortForwarder extends DevicePortForwarder {
     }
 
     forwardedPort.dispose();
+
+    final ServerSocket? serverSocket = _serverSockets.remove(forwardedPort.hostPort);
+    await serverSocket?.close();
   }
 
   @override
   Future<void> dispose() async {
     for (final ForwardedPort forwardedPort in forwardedPorts) {
       forwardedPort.dispose();
+    }
+
+    for (final ServerSocket serverSocket in _serverSockets.values) {
+      await serverSocket.close();
+    }
+
+    for (final Socket socket in _connectedSockets) {
+      await socket.close();
     }
   }
 }

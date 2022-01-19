@@ -146,7 +146,8 @@ class _DaemonServer {
   }
 }
 
-typedef CommandHandler = Future<dynamic> Function(Map<String, dynamic> args, Stream<List<int>> binary);
+typedef CommandHandler = Future<dynamic> Function(Map<String, dynamic> args);
+typedef CommandHandlerWithBinary = Future<dynamic> Function(Map<String, dynamic> args, Stream<List<int>> binary);
 
 class Daemon {
   Daemon(
@@ -250,9 +251,16 @@ abstract class Domain {
   final Daemon daemon;
   final String name;
   final Map<String, CommandHandler> _handlers = <String, CommandHandler>{};
+  final Map<String, CommandHandlerWithBinary> _handlersWithBinary = <String, CommandHandlerWithBinary>{};
 
   void registerHandler(String name, CommandHandler handler) {
+    assert(!_handlersWithBinary.containsKey(name));
     _handlers[name] = handler;
+  }
+
+  void registerHandlerWithBinary(String name, CommandHandlerWithBinary handler) {
+    assert(!_handlers.containsKey(name));
+    _handlersWithBinary[name] = handler;
   }
 
   @override
@@ -261,7 +269,9 @@ abstract class Domain {
   void handleCommand(String command, dynamic id, Map<String, dynamic> args, Stream<List<int>> binary) {
     Future<dynamic>.sync(() {
       if (_handlers.containsKey(command)) {
-        return _handlers[command](args, binary);
+        return _handlers[command](args);
+      } else if (_handlersWithBinary.containsKey(command)) {
+        return _handlersWithBinary[command](args, binary);
       }
       throw 'command not understood: $name.$command';
     }).then<dynamic>((dynamic result) {
@@ -362,7 +372,7 @@ class DaemonDomain extends Domain {
 
   StreamSubscription<LogMessage> _subscription;
 
-  Future<String> version(Map<String, dynamic> args, Stream<List<int>> binary) {
+  Future<String> version(Map<String, dynamic> args) {
     return Future<String>.value(protocolVersion);
   }
 
@@ -381,7 +391,7 @@ class DaemonDomain extends Domain {
     }
   }
 
-  Future<void> shutdown(Map<String, dynamic> args, Stream<List<int>> binary) {
+  Future<void> shutdown(Map<String, dynamic> args) {
     Timer.run(daemon.shutdown);
     return Future<void>.value();
   }
@@ -396,7 +406,7 @@ class DaemonDomain extends Domain {
   /// This does not filter based on the current workflow restrictions, such
   /// as whether command line tools are installed or whether the host platform
   /// is correct.
-  Future<Map<String, Object>> getSupportedPlatforms(Map<String, dynamic> args, Stream<List<int>> binary) async {
+  Future<Map<String, Object>> getSupportedPlatforms(Map<String, dynamic> args) async {
     final String projectRoot = _getStringArg(args, 'projectRoot', required: true);
     final List<String> result = <String>[];
     try {
@@ -647,7 +657,7 @@ class AppDomain extends Domain {
 
   final int _hotReloadDebounceDurationMs = 50;
 
-  Future<OperationResult> restart(Map<String, dynamic> args, Stream<List<int>> binary) async {
+  Future<OperationResult> restart(Map<String, dynamic> args) async {
     final String appId = _getStringArg(args, 'appId', required: true);
     final bool fullRestart = _getBoolArg(args, 'fullRestart') ?? false;
     final bool pauseAfterRestart = _getBoolArg(args, 'pause') ?? false;
@@ -709,7 +719,7 @@ class AppDomain extends Domain {
   ///       "type":"_extensionType",
   ///       "method":"ext.flutter.platformOverride"
   ///     }
-  Future<Map<String, dynamic>> callServiceExtension(Map<String, dynamic> args, Stream<List<int>> binary) async {
+  Future<Map<String, dynamic>> callServiceExtension(Map<String, dynamic> args) async {
     final String appId = _getStringArg(args, 'appId', required: true);
     final String methodName = _getStringArg(args, 'methodName');
     final Map<String, dynamic> params = args['params'] == null ? <String, dynamic>{} : castStringKeyedMap(args['params']);
@@ -739,7 +749,7 @@ class AppDomain extends Domain {
     return result;
   }
 
-  Future<bool> stop(Map<String, dynamic> args, Stream<List<int>> binary) async {
+  Future<bool> stop(Map<String, dynamic> args) async {
     final String appId = _getStringArg(args, 'appId', required: true);
 
     final AppInstance app = _getApp(appId);
@@ -758,7 +768,7 @@ class AppDomain extends Domain {
     );
   }
 
-  Future<bool> detach(Map<String, dynamic> args, Stream<List<int>> binary) async {
+  Future<bool> detach(Map<String, dynamic> args) async {
     final String appId = _getStringArg(args, 'appId', required: true);
 
     final AppInstance app = _getApp(appId);
@@ -816,6 +826,7 @@ class DeviceDomain extends Domain {
     globals.deviceManager.deviceDiscoverers.forEach(addDeviceDiscoverer);
   }
 
+  /// An incrementing number used to generate unique ids.
   int _id = 0;
   final Map<String, ApplicationPackage> _applicationPackages = <String, ApplicationPackage>{};
   final Map<String, DeviceLogReader> _logReaders = <String, DeviceLogReader>{};
@@ -851,7 +862,7 @@ class DeviceDomain extends Domain {
 
   /// Return a list of the current devices, with each device represented as a map
   /// of properties (id, name, platform, ...).
-  Future<List<Map<String, dynamic>>> getDevices([ Map<String, dynamic> args, Stream<List<int>> binary ]) async {
+  Future<List<Map<String, dynamic>>> getDevices([ Map<String, dynamic> args ]) async {
     return <Map<String, dynamic>>[
       for (final PollingDeviceDiscovery discoverer in _discoverers)
         for (final Device device in await discoverer.devices)
@@ -859,7 +870,8 @@ class DeviceDomain extends Domain {
     ];
   }
 
-  Future<List<Map<String, dynamic>>> discoverDevices([ Map<String, dynamic> args, Stream<List<int>> binary ]) async {
+  /// Return a list of the current devices, discarding existing cache of devices.
+  Future<List<Map<String, dynamic>>> discoverDevices([ Map<String, dynamic> args ]) async {
     return <Map<String, dynamic>>[
       for (final PollingDeviceDiscovery discoverer in _discoverers)
         for (final Device device in await discoverer.discoverDevices())
@@ -868,21 +880,21 @@ class DeviceDomain extends Domain {
   }
 
   /// Enable device events.
-  Future<void> enable(Map<String, dynamic> args, Stream<List<int>> binary) async {
+  Future<void> enable(Map<String, dynamic> args) async {
     for (final PollingDeviceDiscovery discoverer in _discoverers) {
       discoverer.startPolling();
     }
   }
 
   /// Disable device events.
-  Future<void> disable(Map<String, dynamic> args, Stream<List<int>> binary) async {
+  Future<void> disable(Map<String, dynamic> args) async {
     for (final PollingDeviceDiscovery discoverer in _discoverers) {
       discoverer.stopPolling();
     }
   }
 
   /// Forward a host port to a device port.
-  Future<Map<String, dynamic>> forward(Map<String, dynamic> args, Stream<List<int>> binary) async {
+  Future<Map<String, dynamic>> forward(Map<String, dynamic> args) async {
     final String deviceId = _getStringArg(args, 'deviceId', required: true);
     final int devicePort = _getIntArg(args, 'devicePort', required: true);
     int hostPort = _getIntArg(args, 'hostPort');
@@ -898,7 +910,7 @@ class DeviceDomain extends Domain {
   }
 
   /// Removes a forwarded port.
-  Future<void> unforward(Map<String, dynamic> args, Stream<List<int>> binary) async {
+  Future<void> unforward(Map<String, dynamic> args) async {
     final String deviceId = _getStringArg(args, 'deviceId', required: true);
     final int devicePort = _getIntArg(args, 'devicePort', required: true);
     final int hostPort = _getIntArg(args, 'hostPort', required: true);
@@ -912,7 +924,7 @@ class DeviceDomain extends Domain {
   }
 
   /// Returns whether a device supports runtime mode.
-  Future<bool> supportsRuntimeMode(Map<String, dynamic> args, Stream<List<int>> binary) async {
+  Future<bool> supportsRuntimeMode(Map<String, dynamic> args) async {
     final String deviceId = _getStringArg(args, 'deviceId', required: true);
     final Device device = await daemon.deviceDomain._getDevice(deviceId);
     if (device == null) {
@@ -923,7 +935,7 @@ class DeviceDomain extends Domain {
   }
 
   /// Creates an application package from a file in the temp directory.
-  Future<String> uploadApplicationPackage(Map<String, dynamic> args, Stream<List<int>> binary) async {
+  Future<String> uploadApplicationPackage(Map<String, dynamic> args) async {
     final TargetPlatform targetPlatform = getTargetPlatformForName(_getStringArg(args, 'targetPlatform', required: true));
     final File applicationBinary = daemon.proxyDomain.tempDirectory.childFile(_getStringArg(args, 'applicationBinary', required: true));
     final ApplicationPackage applicationPackage = await ApplicationPackageFactory.instance.getPackageForPlatform(
@@ -936,7 +948,7 @@ class DeviceDomain extends Domain {
   }
 
   /// Starts the log reader on the device.
-  Future<String> startLogReader(Map<String, dynamic> args, Stream<List<int>> binary) async {
+  Future<String> startLogReader(Map<String, dynamic> args) async {
     final String deviceId = _getStringArg(args, 'deviceId', required: true);
     final Device device = await daemon.deviceDomain._getDevice(deviceId);
     if (device == null) {
@@ -955,13 +967,13 @@ class DeviceDomain extends Domain {
   }
 
   /// Stops a log reader that was previously started.
-  Future<void> stopLogReader(Map<String, dynamic> args, Stream<List<int>> binary) async {
+  Future<void> stopLogReader(Map<String, dynamic> args) async {
     final String id = _getStringArg(args, 'id', required: true);
     _logReaders.remove(id)?.dispose();
   }
 
   /// Starts an app on a device.
-  Future<Map<String, dynamic>> startApp(Map<String, dynamic> args, Stream<List<int>> binary) async {
+  Future<Map<String, dynamic>> startApp(Map<String, dynamic> args) async {
     final String deviceId = _getStringArg(args, 'deviceId', required: true);
     final Device device = await daemon.deviceDomain._getDevice(deviceId);
     if (device == null) {
@@ -991,7 +1003,7 @@ class DeviceDomain extends Domain {
   }
 
   /// Stops an app.
-  Future<bool> stopApp(Map<String, dynamic> args, Stream<List<int>> binary) async {
+  Future<bool> stopApp(Map<String, dynamic> args) async {
     final String deviceId = _getStringArg(args, 'deviceId', required: true);
     final Device device = await daemon.deviceDomain._getDevice(deviceId);
     if (device == null) {
@@ -1006,7 +1018,7 @@ class DeviceDomain extends Domain {
   }
 
   /// Takes a screenshot.
-  Future<String> takeScreenshot(Map<String, dynamic> args, Stream<List<int>> binary) async {
+  Future<String> takeScreenshot(Map<String, dynamic> args) async {
     final String deviceId = _getStringArg(args, 'deviceId', required: true);
     final Device device = await daemon.deviceDomain._getDevice(deviceId);
     if (device == null) {
@@ -1050,7 +1062,7 @@ class DevToolsDomain extends Domain {
 
   DevtoolsLauncher _devtoolsLauncher;
 
-  Future<Map<String, dynamic>> serve([ Map<String, dynamic> args, Stream<List<int>> binary ]) async {
+  Future<Map<String, dynamic>> serve([ Map<String, dynamic> args ]) async {
     _devtoolsLauncher ??= DevtoolsLauncher.instance;
     final DevToolsServerAddress server = await _devtoolsLauncher.serve();
     return<String, dynamic>{
@@ -1273,12 +1285,12 @@ class EmulatorDomain extends Domain {
     androidWorkflow: androidWorkflow,
   );
 
-  Future<List<Map<String, dynamic>>> getEmulators([ Map<String, dynamic> args, Stream<List<int>> binary ]) async {
+  Future<List<Map<String, dynamic>>> getEmulators([ Map<String, dynamic> args ]) async {
     final List<Emulator> list = await emulators.getAllAvailableEmulators();
     return list.map<Map<String, dynamic>>(_emulatorToMap).toList();
   }
 
-  Future<void> launch(Map<String, dynamic> args, Stream<List<int>> binary) async {
+  Future<void> launch(Map<String, dynamic> args) async {
     final String emulatorId = _getStringArg(args, 'emulatorId', required: true);
     final bool coldBoot = _getBoolArg(args, 'coldBoot') ?? false;
     final List<Emulator> matches =
@@ -1292,7 +1304,7 @@ class EmulatorDomain extends Domain {
     }
   }
 
-  Future<Map<String, dynamic>> create(Map<String, dynamic> args, Stream<List<int>> binary) async {
+  Future<Map<String, dynamic>> create(Map<String, dynamic> args) async {
     final String name = _getStringArg(args, 'name');
     final CreateEmulatorResult res = await emulators.createEmulator(name: name);
     return <String, dynamic>{
@@ -1305,10 +1317,10 @@ class EmulatorDomain extends Domain {
 
 class ProxyDomain extends Domain {
   ProxyDomain(Daemon daemon) : super(daemon, 'proxy') {
-    registerHandler('writeTempFile', writeTempFile);
+    registerHandlerWithBinary('writeTempFile', writeTempFile);
     registerHandler('connect', connect);
     registerHandler('disconnect', disconnect);
-    registerHandler('write', write);
+    registerHandlerWithBinary('write', write);
   }
 
   final Map<String, Socket> _forwardedConnections = <String, Socket>{};
@@ -1323,7 +1335,7 @@ class ProxyDomain extends Domain {
   }
 
   /// Opens a connection to a local port, and returns the connection id.
-  Future<String> connect(Map<String, dynamic> args, Stream<List<int>> binary) async {
+  Future<String> connect(Map<String, dynamic> args) async {
     final int targetPort = _getIntArg(args, 'port', required: true);
     final String id = 'portForwarder_${targetPort}_${_id++}';
     final Socket socket = await Socket.connect('127.0.0.1', targetPort);
@@ -1338,14 +1350,13 @@ class ProxyDomain extends Domain {
   }
 
   /// Disconnects from a previously established connection.
-  Future<bool> disconnect(Map<String, dynamic> args, Stream<List<int>> binary) async {
+  Future<bool> disconnect(Map<String, dynamic> args) async {
     final String id = _getStringArg(args, 'id', required: true);
     if (_forwardedConnections.containsKey(id)) {
       await _forwardedConnections.remove(id)?.close();
       return true;
-    } else {
-      return false;
     }
+    return false;
   }
 
   /// Writes to a previously established connection.
@@ -1356,9 +1367,8 @@ class ProxyDomain extends Domain {
       await subscription.asFuture<void>();
       await subscription.cancel();
       return true;
-    } else {
-      return false;
     }
+    return false;
   }
 
   @override

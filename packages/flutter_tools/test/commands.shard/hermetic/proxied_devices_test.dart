@@ -79,7 +79,7 @@ void main() {
       daemon.deviceDomain.addDeviceDiscoverer(discoverer);
       discoverer.addDevice(fakeDevice);
 
-      final ProxiedDevices proxiedDevices = ProxiedDevices(clientDaemonConnection);
+      final ProxiedDevices proxiedDevices = ProxiedDevices(clientDaemonConnection, logger: bufferLogger);
 
       final List<Device> devices = await proxiedDevices.discoverDevices();
       expect(devices, hasLength(1));
@@ -100,7 +100,7 @@ void main() {
       daemon.deviceDomain.addDeviceDiscoverer(discoverer);
       discoverer.addDevice(fakeDevice);
 
-      final ProxiedDevices proxiedDevices = ProxiedDevices(clientDaemonConnection);
+      final ProxiedDevices proxiedDevices = ProxiedDevices(clientDaemonConnection, logger: bufferLogger);
 
       final List<Device> devices = await proxiedDevices.devices;
       expect(devices, hasLength(1));
@@ -120,7 +120,7 @@ void main() {
       daemon.deviceDomain.addDeviceDiscoverer(discoverer);
       discoverer.addDevice(fakeDevice);
 
-      final ProxiedDevices proxiedDevices = ProxiedDevices(clientDaemonConnection);
+      final ProxiedDevices proxiedDevices = ProxiedDevices(clientDaemonConnection, logger: bufferLogger);
 
       final FakeDeviceLogReader fakeLogReader = FakeDeviceLogReader();
       fakeDevice.logReader = fakeLogReader;
@@ -150,7 +150,7 @@ void main() {
       daemon.deviceDomain.addDeviceDiscoverer(discoverer);
       discoverer.addDevice(fakeDevice);
 
-      final ProxiedDevices proxiedDevices = ProxiedDevices(clientDaemonConnection);
+      final ProxiedDevices proxiedDevices = ProxiedDevices(clientDaemonConnection, logger: bufferLogger);
       final FakePrebuiltApplicationPackage prebuiltApplicationPackage = FakePrebuiltApplicationPackage();
       final File dummyApplicationBinary = memoryFileSystem.file('/directory/dummy_file');
       dummyApplicationBinary.parent.createSync();
@@ -202,7 +202,7 @@ void main() {
       daemon.deviceDomain.addDeviceDiscoverer(discoverer);
       discoverer.addDevice(fakeDevice);
 
-      final ProxiedDevices proxiedDevices = ProxiedDevices(clientDaemonConnection);
+      final ProxiedDevices proxiedDevices = ProxiedDevices(clientDaemonConnection, logger: bufferLogger);
 
       final List<Device> devices = await proxiedDevices.devices;
       expect(devices, hasLength(1));

@@ -181,7 +181,7 @@ void main() {
     });
   });
 
-  group('convertInputStream', () {
+  group('DaemonInputStreamConverter', () {
     Map<String, Object?> testCommand(int id, [int? binarySize]) => <String, Object?>{
       'id': id,
       'method': 'test',
@@ -190,23 +190,25 @@ void main() {
     };
     List<int> testCommandBinary(int id, [int? binarySize]) => utf8.encode('[${json.encode(testCommand(id, binarySize))}]\n');
 
-    test('can parse a single message', () async {
+    testWithoutContext('can parse a single message', () async {
       final Stream<List<int>> inputStream = Stream<List<int>>.fromIterable(<List<int>>[
         testCommandBinary(10),
       ]);
-      final Stream<DaemonMessage> outputStream = convertInputStream(inputStream);
+      final DaemonInputStreamConverter converter = DaemonInputStreamConverter(inputStream);
+      final Stream<DaemonMessage> outputStream = converter.convertedStream;
       final List<DaemonMessage> outputs = await outputStream.toList();
       expect(outputs, hasLength(1));
       expect(outputs[0].data, testCommand(10));
       expect(outputs[0].binary, null);
     });
 
-    test('can parse multiple messages', () async {
+    testWithoutContext('can parse multiple messages', () async {
       final Stream<List<int>> inputStream = Stream<List<int>>.fromIterable(<List<int>>[
         testCommandBinary(10),
         testCommandBinary(20),
       ]);
-      final Stream<DaemonMessage> outputStream = convertInputStream(inputStream);
+      final DaemonInputStreamConverter converter = DaemonInputStreamConverter(inputStream);
+      final Stream<DaemonMessage> outputStream = converter.convertedStream;
       final List<DaemonMessage> outputs = await outputStream.toList();
       expect(outputs, hasLength(2));
       expect(outputs[0].data, testCommand(10));
@@ -215,13 +217,14 @@ void main() {
       expect(outputs[1].binary, null);
     });
 
-    test('can parse multiple messages while ignoring non json data in between', () async {
+    testWithoutContext('can parse multiple messages while ignoring non json data in between', () async {
       final Stream<List<int>> inputStream = Stream<List<int>>.fromIterable(<List<int>>[
         testCommandBinary(10),
         utf8.encode('This is not a json data...\n'),
         testCommandBinary(20),
       ]);
-      final Stream<DaemonMessage> outputStream = convertInputStream(inputStream);
+      final DaemonInputStreamConverter converter = DaemonInputStreamConverter(inputStream);
+      final Stream<DaemonMessage> outputStream = converter.convertedStream;
       final List<DaemonMessage> outputs = await outputStream.toList();
       expect(outputs, hasLength(2));
       expect(outputs[0].data, testCommand(10));
@@ -230,7 +233,7 @@ void main() {
       expect(outputs[1].binary, null);
     });
 
-    test('can parse multiple messages even when they are split in multiple packets', () async {
+    testWithoutContext('can parse multiple messages even when they are split in multiple packets', () async {
       final List<int> binary1 = testCommandBinary(10);
       final List<int> binary2 = testCommandBinary(20);
       final Stream<List<int>> inputStream = Stream<List<int>>.fromIterable(<List<int>>[
@@ -239,7 +242,8 @@ void main() {
         binary1.sublist(15) + binary2.sublist(0, 13),
         binary2.sublist(13),
       ]);
-      final Stream<DaemonMessage> outputStream = convertInputStream(inputStream);
+      final DaemonInputStreamConverter converter = DaemonInputStreamConverter(inputStream);
+      final Stream<DaemonMessage> outputStream = converter.convertedStream;
       final List<DaemonMessage> outputs = await outputStream.toList();
       expect(outputs, hasLength(2));
       expect(outputs[0].data, testCommand(10));
@@ -248,13 +252,14 @@ void main() {
       expect(outputs[1].binary, null);
     });
 
-    test('can parse multiple messages even when they are combined in a single packet', () async {
+    testWithoutContext('can parse multiple messages even when they are combined in a single packet', () async {
       final List<int> binary1 = testCommandBinary(10);
       final List<int> binary2 = testCommandBinary(20);
       final Stream<List<int>> inputStream = Stream<List<int>>.fromIterable(<List<int>>[
         binary1 + binary2,
       ]);
-      final Stream<DaemonMessage> outputStream = convertInputStream(inputStream);
+      final DaemonInputStreamConverter converter = DaemonInputStreamConverter(inputStream);
+      final Stream<DaemonMessage> outputStream = converter.convertedStream;
       final List<DaemonMessage> outputs = await outputStream.toList();
       expect(outputs, hasLength(2));
       expect(outputs[0].data, testCommand(10));
@@ -263,30 +268,34 @@ void main() {
       expect(outputs[1].binary, null);
     });
 
-    test('can parse a single message with binary stream', () async {
+    testWithoutContext('can parse a single message with binary stream', () async {
       final List<int> binary = <int>[1,2,3,4,5];
       final Stream<List<int>> inputStream = Stream<List<int>>.fromIterable(<List<int>>[
         testCommandBinary(10, binary.length),
         binary,
       ]);
-      final List<_DaemonMessageAndBinary> allOutputs = await _readAllBinaries(convertInputStream(inputStream));
+      final DaemonInputStreamConverter converter = DaemonInputStreamConverter(inputStream);
+      final Stream<DaemonMessage> outputStream = converter.convertedStream;
+      final List<_DaemonMessageAndBinary> allOutputs = await _readAllBinaries(outputStream);
       expect(allOutputs, hasLength(1));
       expect(allOutputs[0].message.data, testCommand(10, binary.length));
       expect(allOutputs[0].binary, binary);
     });
 
-    test('can parse a single message with binary stream when messages are combined in a single packet', () async {
+    testWithoutContext('can parse a single message with binary stream when messages are combined in a single packet', () async {
       final List<int> binary = <int>[1,2,3,4,5];
       final Stream<List<int>> inputStream = Stream<List<int>>.fromIterable(<List<int>>[
         testCommandBinary(10, binary.length) + binary,
       ]);
-      final List<_DaemonMessageAndBinary> allOutputs = await _readAllBinaries(convertInputStream(inputStream));
+      final DaemonInputStreamConverter converter = DaemonInputStreamConverter(inputStream);
+      final Stream<DaemonMessage> outputStream = converter.convertedStream;
+      final List<_DaemonMessageAndBinary> allOutputs = await _readAllBinaries(outputStream);
       expect(allOutputs, hasLength(1));
       expect(allOutputs[0].message.data, testCommand(10, binary.length));
       expect(allOutputs[0].binary, binary);
     });
 
-    test('can parse multiple messages with binary stream', () async {
+    testWithoutContext('can parse multiple messages with binary stream', () async {
       final List<int> binary1 = <int>[1,2,3,4,5];
       final List<int> binary2 = <int>[6,7,8,9,10,11,12];
       final Stream<List<int>> inputStream = Stream<List<int>>.fromIterable(<List<int>>[
@@ -295,7 +304,9 @@ void main() {
         testCommandBinary(20, binary2.length),
         binary2,
       ]);
-      final List<_DaemonMessageAndBinary> allOutputs = await _readAllBinaries(convertInputStream(inputStream));
+      final DaemonInputStreamConverter converter = DaemonInputStreamConverter(inputStream);
+      final Stream<DaemonMessage> outputStream = converter.convertedStream;
+      final List<_DaemonMessageAndBinary> allOutputs = await _readAllBinaries(outputStream);
       expect(allOutputs, hasLength(2));
       expect(allOutputs[0].message.data, testCommand(10, binary1.length));
       expect(allOutputs[0].binary, binary1);
@@ -303,7 +314,7 @@ void main() {
       expect(allOutputs[1].binary, binary2);
     });
 
-    test('can parse multiple messages with binary stream when messages are split', () async {
+    testWithoutContext('can parse multiple messages with binary stream when messages are split', () async {
       final List<int> binary1 = <int>[1,2,3,4,5];
       final List<int> message1 = testCommandBinary(10, binary1.length);
       final List<int> binary2 = <int>[6,7,8,9,10,11,12];
@@ -315,7 +326,9 @@ void main() {
         binary2.sublist(3, 5),
         binary2.sublist(5),
       ]);
-      final List<_DaemonMessageAndBinary> allOutputs = await _readAllBinaries(convertInputStream(inputStream));
+      final DaemonInputStreamConverter converter = DaemonInputStreamConverter(inputStream);
+      final Stream<DaemonMessage> outputStream = converter.convertedStream;
+      final List<_DaemonMessageAndBinary> allOutputs = await _readAllBinaries(outputStream);
       expect(allOutputs, hasLength(2));
       expect(allOutputs[0].message.data, testCommand(10, binary1.length));
       expect(allOutputs[0].binary, binary1);
@@ -338,24 +351,20 @@ void main() {
       daemonStreams = DaemonStreams(inputStream.stream, outputStream.sink, logger: bufferLogger);
     });
 
-    test('parses the message received on the stream', () async {
+    testWithoutContext('parses the message received on the stream', () async {
       inputStream.add(utf8.encode('[${jsonEncode(testCommand)}]\n'));
-      // There was a problem using stream.first, so we use a StreamIterator instead.
-      // https://github.com/dart-lang/sdk/issues/34775
-      final StreamIterator<DaemonMessage> iterator = StreamIterator<DaemonMessage>(daemonStreams.inputStream);
-      await iterator.moveNext();
-      final DaemonMessage command = iterator.current;
+      final DaemonMessage command = await daemonStreams.inputStream.first;
       expect(command.data, testCommand);
       expect(command.binary, null);
     });
 
-    test('sends the encoded message through the sink', () async {
+    testWithoutContext('sends the encoded message through the sink', () async {
       daemonStreams.send(testCommand);
       final List<int> commands = await outputStream.stream.first;
       expect(commands, utf8.encode('[${jsonEncode(testCommand)}]\n'));
     });
 
-    test('dispose closes the sink', () async {
+    testWithoutContext('dispose closes the sink', () async {
       await daemonStreams.dispose();
       expect(outputStream.isClosed, true);
     });

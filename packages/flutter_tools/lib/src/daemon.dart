@@ -45,8 +45,8 @@ class DaemonEventData {
 const String _binaryLengthKey = '_binaryLength';
 
 enum _InputStreamParseState {
-  JSON,
-  BINARY,
+  json,
+  binary,
 }
 
 /// Converts a binary stream to a stream of [DaemonMessage].
@@ -60,18 +60,49 @@ enum _InputStreamParseState {
 /// value (will be refered to as N), the following N bytes after the newline
 /// character will contain the binary part of the message.
 @visibleForTesting
-Stream<DaemonMessage> convertInputStream(Stream<List<int>> inputStream) async* {
-  _InputStreamParseState state = _InputStreamParseState.JSON;
+class DaemonInputStreamConverter {
+  DaemonInputStreamConverter(this.inputStream) {
+    // Lazily listen to the input stream.
+    _controller.onListen = () {
+      final StreamSubscription<List<int>> subscription = inputStream.listen((List<int> chunk) {
+        _processChunk(chunk);
+      }, onError: (Object error, StackTrace stackTrace) {
+        _controller.addError(error, stackTrace);
+      }, onDone: () {
+        unawaited(_controller.close());
+      });
 
-  const int LF = 10; // The '\n' character
+      _controller.onCancel = subscription.cancel;
+      // We should not handle onPause or onResume. When the stream is paused, we
+      // still need to read from the input stream.
+    };
+  }
 
-  final BytesBuilder bytesBuilder = BytesBuilder(copy: false);
+  final Stream<List<int>> inputStream;
+
+  final StreamController<DaemonMessage> _controller = StreamController<DaemonMessage>();
+  Stream<DaemonMessage> get convertedStream => _controller.stream;
+
+  // Internal states
+  /// The current parse state, whether we are expecting JSON or binary data.
+  _InputStreamParseState state = _InputStreamParseState.json;
+
+  /// The binary stream that is being transferred.
   late StreamController<List<int>> currentBinaryStream;
+
+  /// Remaining length in bytes that have to be sent to the binary stream.
   int remainingBinaryLength = 0;
-  await for (final List<int> chunk in inputStream) {
+
+  /// Buffer to hold the current line of input data.
+  final BytesBuilder bytesBuilder = BytesBuilder(copy: false);
+
+  // Processes a single chunk received in the input stream.
+  void _processChunk(List<int> chunk) {
+    const int LF = 10; // The '\n' character
+
     int start = 0;
     while (start < chunk.length) {
-      if (state == _InputStreamParseState.JSON) {
+      if (state == _InputStreamParseState.json) {
         // Search for newline character.
         final int indexOfNewLine = chunk.indexOf(LF, start);
         if (indexOfNewLine < 0) {
@@ -92,40 +123,38 @@ Stream<DaemonMessage> convertInputStream(Stream<List<int>> inputStream) async* {
               if (value[_binaryLengthKey] != null) {
                 remainingBinaryLength = value[_binaryLengthKey]! as int;
                 currentBinaryStream = StreamController<List<int>>();
-                state = _InputStreamParseState.BINARY;
-                yield DaemonMessage(value, currentBinaryStream.stream);
+                state = _InputStreamParseState.binary;
+                _controller.add(DaemonMessage(value, currentBinaryStream.stream));
               } else {
-                yield DaemonMessage(value);
+                _controller.add(DaemonMessage(value));
               }
             }
           }
         }
-      } else if (state == _InputStreamParseState.BINARY) {
-        if (start == 0 && chunk.length <= remainingBinaryLength) {
-          currentBinaryStream.add(chunk);
-          start = chunk.length;
-          remainingBinaryLength -= chunk.length;
-        } else {
-          final int chunkRemainingLength = chunk.length - start;
-          final int sizeToRead = chunkRemainingLength < remainingBinaryLength ? chunkRemainingLength : remainingBinaryLength;
-          currentBinaryStream.add(chunk.sublist(start, start + sizeToRead));
-          start += sizeToRead;
-          remainingBinaryLength -= sizeToRead;
-        }
+      } else if (state == _InputStreamParseState.binary) {
+        final int bytesSent = _addBinaryChunk(chunk, start, remainingBinaryLength);
+        start += bytesSent;
+        remainingBinaryLength -= bytesSent;
 
         if (remainingBinaryLength <= 0) {
           assert(remainingBinaryLength == 0);
 
-          // If the stream has no listener, close will wait indefinitely.
-          // Threfore we only wait if there is a listener.
-          if (currentBinaryStream.hasListener) {
-            await currentBinaryStream.close();
-          } else {
-            unawaited(currentBinaryStream.close());
-          }
-          state = _InputStreamParseState.JSON;
+          unawaited(currentBinaryStream.close());
+          state = _InputStreamParseState.json;
         }
       }
+    }
+  }
+
+  int _addBinaryChunk(List<int> chunk, int start, int maximumSizeToRead) {
+    if (start == 0 && chunk.length <= remainingBinaryLength) {
+      currentBinaryStream.add(chunk);
+      return chunk.length;
+    } else {
+      final int chunkRemainingLength = chunk.length - start;
+      final int sizeToRead = chunkRemainingLength < remainingBinaryLength ? chunkRemainingLength : remainingBinaryLength;
+      currentBinaryStream.add(chunk.sublist(start, start + sizeToRead));
+      return sizeToRead;
     }
   }
 }
@@ -138,7 +167,7 @@ class DaemonStreams {
     required Logger logger,
   }) :
     _outputSink = outputSink,
-    inputStream = convertInputStream(rawInputStream),
+    inputStream = DaemonInputStreamConverter(rawInputStream).convertedStream,
     _logger = logger;
 
   final StreamSink<List<int>> _outputSink;
