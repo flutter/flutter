@@ -61,6 +61,7 @@ if (enable_unittests) {
       "display_list_benchmarks.cc",
       "display_list_benchmarks.h",
       "display_list_benchmarks_software.cc",
+      "display_list_benchmarks_software.h",
     ]
 
     deps = [
@@ -75,13 +76,23 @@ if (enable_unittests) {
       "//third_party/skia",
     ]
 
+    defines = [ "ENABLE_SOFTWARE_BENCHMARKS" ]
+
     if (!is_fuchsia) {
-      sources += [ "display_list_benchmarks_gl.cc" ]
+      defines += [ "ENABLE_OPENGL_BENCHMARKS" ]
+      sources += [
+        "display_list_benchmarks_gl.cc",
+        "display_list_benchmarks_gl.h",
+      ]
       deps += [ "//flutter/testing:opengl" ]
     }
 
     if (is_mac) {
-      sources += [ "display_list_benchmarks_metal.cc" ]
+      defines += [ "ENABLE_METAL_BENCHMARKS" ]
+      sources += [
+        "display_list_benchmarks_metal.cc",
+        "display_list_benchmarks_metal.h",
+      ]
       deps += [ "//flutter/testing:metal" ]
     }
   }
@@ -103,11 +114,15 @@ if (is_ios) {
     ]
     ldflags =
         [ "-Wl,-install_name,@rpath/libios_display_list_benchmarks.dylib" ]
-
+    defines = [
+      "BENCHMARKS_NO_SNAPSHOT",
+      "ENABLE_METAL_BENCHMARKS",
+    ]
     sources = [
       "display_list_benchmarks.cc",
       "display_list_benchmarks.h",
       "display_list_benchmarks_metal.cc",
+      "display_list_benchmarks_metal.h",
     ]
 
     deps = [
