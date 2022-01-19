@@ -21,6 +21,13 @@ enum CollapseMode {
 
   /// The background widget will act as normal with no collapsing effect.
   none,
+  
+  /// When `currentExtent` is greater than [FlexibleSpaceBar.nonePinBoundary],
+  /// the background widget no collapsing effect, when `currentExtent` is less 
+  /// than [FlexibleSpaceBar.nonePinBoundary], pin in place until it reaches 
+  /// the min extent. If [FlexibleSpaceBar.nonePinBoundary] is 0, the effect is
+  /// the same as [CollapseMode.none]
+  nonePin,
 }
 
 /// The stretching effect while the space bar stretches beyond its full size.
@@ -81,6 +88,7 @@ class FlexibleSpaceBar extends StatefulWidget {
     this.centerTitle,
     this.titlePadding,
     this.collapseMode = CollapseMode.parallax,
+    this.nonePinBoundary = 0,
     this.stretchModes = const <StretchMode>[StretchMode.zoomBackground],
     this.expandedTitleScale = 1.5,
   }) : assert(collapseMode != null),
@@ -107,6 +115,11 @@ class FlexibleSpaceBar extends StatefulWidget {
   ///
   /// Defaults to [CollapseMode.parallax].
   final CollapseMode collapseMode;
+  
+  /// When [collapseMode] is [CollapseMode.nonePin], boundary height of folding
+  /// effect switching. when [nonePinBoundary] is 0, the [CollapseMode.none] effect
+  /// will be used.
+  final double nonePinBoundary;
 
   /// Stretch effect while over-scrolling.
   ///
@@ -213,6 +226,11 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
       case CollapseMode.parallax:
         final double deltaExtent = settings.maxExtent - settings.minExtent;
         return -Tween<double>(begin: 0.0, end: deltaExtent / 4.0).transform(t);
+      case CollapseMode.nonePin:
+        if (settings.currentExtent >= widget.nonePinBoundary) {
+          return 0.0;
+        }
+        return -(widget.nonePinBoundary - settings.currentExtent);
     }
   }
 
