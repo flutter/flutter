@@ -15,7 +15,7 @@ TaskRunner::TaskRunner(CurrentTimeProc get_current_time,
       on_task_expired_(std::move(on_task_expired)) {}
 
 std::chrono::nanoseconds TaskRunner::ProcessTasks() {
-  const TaskTimePoint now = TaskTimePoint::clock::now();
+  const TaskTimePoint now = GetCurrentTimeForTask();
 
   std::vector<Task> expired_tasks;
 
@@ -64,7 +64,7 @@ std::chrono::nanoseconds TaskRunner::ProcessTasks() {
 
 TaskRunner::TaskTimePoint TaskRunner::TimePointFromFlutterTime(
     uint64_t flutter_target_time_nanos) const {
-  const auto now = TaskTimePoint::clock::now();
+  const auto now = GetCurrentTimeForTask();
   const auto flutter_duration = flutter_target_time_nanos - get_current_time_();
   return now + std::chrono::nanoseconds(flutter_duration);
 }
@@ -79,7 +79,7 @@ void TaskRunner::PostFlutterTask(FlutterTask flutter_task,
 
 void TaskRunner::PostTask(TaskClosure closure) {
   Task task;
-  task.fire_time = TaskTimePoint::clock::now();
+  task.fire_time = GetCurrentTimeForTask();
   task.variant = std::move(closure);
   EnqueueTask(std::move(task));
 }
