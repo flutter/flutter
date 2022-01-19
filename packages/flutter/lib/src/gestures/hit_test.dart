@@ -45,12 +45,13 @@ abstract class HitTestTarget {
 ///
 /// Subclass this object to pass additional information from the hit test phase
 /// to the event propagation phase.
-class HitTestEntry {
+@optionalTypeArgs
+class HitTestEntry<T extends HitTestTarget>  {
   /// Creates a hit test entry.
   HitTestEntry(this.target);
 
   /// The [HitTestTarget] encountered during the hit test.
-  final HitTestTarget target;
+  final T target;
 
   @override
   String toString() => '${describeIdentity(this)}($target)';
