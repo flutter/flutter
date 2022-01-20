@@ -19,8 +19,8 @@ const double _kDragContainerExtentPercentage = 0.25;
 // displacement; max displacement = _kDragSizeFactorLimit * displacement.
 const double _kDragSizeFactorLimit = 1.5;
 
-/// The drag threshold after which the refresh indicator goes
-/// into [_RefreshIndicatorMode.armed].
+// The drag threshold after which the refresh indicator goes
+// into [_RefreshIndicatorMode.armed].
 // TODO(nt4f04und): remove this when https://github.com/flutter/flutter/issues/96528 is fixed
 const double _kArmedThreshold = 1 / _kDragSizeFactorLimit;
 
