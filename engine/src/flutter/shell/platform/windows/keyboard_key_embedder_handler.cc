@@ -126,6 +126,10 @@ uint64_t KeyboardKeyEmbedderHandler::GetPhysicalKey(int scancode,
 uint64_t KeyboardKeyEmbedderHandler::GetLogicalKey(int key,
                                                    bool extended,
                                                    int scancode) {
+  if (key == VK_PROCESSKEY) {
+    return VK_PROCESSKEY;
+  }
+
   // Normally logical keys should only be derived from key codes, but since some
   // key codes are either 0 or ambiguous (multiple keys using the same key
   // code), these keys are resolved by scan codes.
@@ -220,6 +224,15 @@ void KeyboardKeyEmbedderHandler::KeyboardHookImpl(
     }
   }
 
+  if (result_logical_key == VK_PROCESSKEY) {
+    // VK_PROCESSKEY means that the key press is used by an IME. These key
+    // presses are considered handled and not sent to Flutter. These events must
+    // be filtered by result_logical_key because the key up event of such
+    // presses uses the "original" logical key.
+    callback(true);
+    return;
+  }
+
   UpdateLastSeenCritialKey(key, physical_key, result_logical_key);
   // Synchronize the toggled states of critical keys (such as whether CapsLocks
   // is enabled). Toggled states can only be changed upon a down event, so if
@@ -246,15 +259,6 @@ void KeyboardKeyEmbedderHandler::KeyboardHookImpl(
     auto record_iter = pressingRecords_.find(physical_key);
     assert(record_iter != pressingRecords_.end());
     pressingRecords_.erase(record_iter);
-  }
-
-  if (result_logical_key == VK_PROCESSKEY) {
-    // VK_PROCESSKEY means that the key press is used by an IME. These key
-    // presses are considered handled and not sent to Flutter. These events must
-    // be filtered by result_logical_key because the key up event of such
-    // presses uses the "original" logical key.
-    callback(true);
-    return;
   }
 
   FlutterKeyEvent key_data{

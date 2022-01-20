@@ -1545,7 +1545,7 @@ TEST(KeyboardTest, MultibyteCharacter) {
   tester.Responding(false);
 
   // Gothic Keyboard layout. (We need a layout that yields non-BMP characters
-  // without IME, which that is actually very rare.)
+  // without IME, which is actually very rare.)
 
   // Press key W of a US keyboard, which should yield character '𐍅'.
   tester.InjectMessages(
@@ -1615,6 +1615,33 @@ TEST(KeyboardTest, NeverRedispatchShiftRightKeyDown) {
   // Try to dispatch events. There should be nothing.
   EXPECT_EQ(tester.InjectPendingEvents(), 0);
   EXPECT_EQ(key_calls.size(), 0);
+}
+
+// Pressing modifiers during IME events should work properly by not sending any
+// events.
+//
+// Regression test for https://github.com/flutter/flutter/issues/95888 .
+TEST(KeyboardTest, ImeModifierEventsAreIgnored) {
+  KeyboardTester tester;
+  tester.Responding(false);
+
+  // US Keyboard layout.
+
+  // To make the keyboard into IME mode, there should have been events like
+  // letter key down with VK_PROCESSKEY. Omit them in this test since they don't
+  // seem significant.
+
+  // Press CtrlRight in IME mode.
+  tester.SetKeyState(VK_RCONTROL, true, false);
+  tester.InjectMessages(
+      1,
+      WmKeyDownInfo{VK_PROCESSKEY, kScanCodeControl, kExtended, kWasUp}.Build(
+          kWmResultZero));
+
+  EXPECT_EQ(key_calls.size(), 1);
+  EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeDown, 0, 0, "",
+                       kNotSynthesized);
+  clear_key_calls();
 }
 
 TEST(KeyboardTest, DisorderlyRespondedEvents) {
