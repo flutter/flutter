@@ -2596,6 +2596,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
 
   @override
   void didUpdateWidget(Scaffold oldWidget) {
+    super.didUpdateWidget(oldWidget);
     // Update the Floating Action Button Animator, and then schedule the Floating Action Button for repositioning.
     if (widget.floatingActionButtonAnimator != oldWidget.floatingActionButtonAnimator) {
       _floatingActionButtonAnimator = widget.floatingActionButtonAnimator ?? _kDefaultFloatingActionButtonAnimator;
@@ -2628,7 +2629,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
         _updatePersistentBottomSheet();
       }
     }
-    super.didUpdateWidget(oldWidget);
   }
 
   @override
