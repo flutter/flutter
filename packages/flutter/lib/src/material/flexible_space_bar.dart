@@ -22,11 +22,8 @@ enum CollapseMode {
   /// The background widget will act as normal with no collapsing effect.
   none,
 
-  /// When `currentExtent` is greater than [FlexibleSpaceBar.nonePinBoundary],
-  /// the background widget no collapsing effect, when `currentExtent` is less
-  /// than [FlexibleSpaceBar.nonePinBoundary], pin in place until it reaches
-  /// the min extent. If [FlexibleSpaceBar.nonePinBoundary] is 0, the effect is
-  /// the same as [CollapseMode.none]
+  /// The background widget will first be collapsed with the [CollapseMode.none]
+  /// effect and then replaced with the [CollapseMode.pin] effect
   nonePin,
 }
 
@@ -110,7 +107,9 @@ class FlexibleSpaceBar extends StatefulWidget {
   /// Typically an [Image] widget with [Image.fit] set to [BoxFit.cover].
   final Widget? background;
 
-  /// More flexibility build background Widget.
+  /// Shown behind the [title] when expanded.
+  ///
+  /// Compared to `background`, can build background widget more flexibly.
   final Widget Function(BuildContext context, FlexibleSpaceBarSettings settings,
       BoxConstraints constraints)? backgroundBuilder;
 
@@ -126,8 +125,13 @@ class FlexibleSpaceBar extends StatefulWidget {
   final CollapseMode collapseMode;
 
   /// When [collapseMode] is [CollapseMode.nonePin], boundary height of folding
-  /// effect switching. when [nonePinBoundary] is 0, the [CollapseMode.none] effect
-  /// will be used.
+  /// effect switching.
+  ///
+  /// When [collapseMode] is [CollapseMode.nonePin], and `currentExtent` is greater
+  /// than [FlexibleSpaceBar.nonePinBoundary], the background widget no collapsing
+  /// effect, when `currentExtent` is less than [FlexibleSpaceBar.nonePinBoundary],
+  /// pin in place until it reaches the min extent. If [FlexibleSpaceBar.nonePinBoundary]
+  /// is 0, the effect is the same as [CollapseMode.none]
   final double nonePinBoundary;
 
   /// Stretch effect while over-scrolling.
