@@ -15,9 +15,10 @@
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterMetalCompositor.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterMetalRenderer.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterOpenGLRenderer.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterPlatformViewController.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterRenderingBackend.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterViewController_Internal.h"
-#include "flutter/shell/platform/embedder/embedder.h"
+#import "flutter/shell/platform/embedder/embedder.h"
 
 /**
  * Constructs and returns a FlutterLocale struct corresponding to |locale|, which must outlive
@@ -95,6 +96,11 @@ static FlutterLocale FlutterLocaleFromNSLocale(NSLocale* locale) {
  */
 - (void)loadAOTData:(NSString*)assetsDir;
 
+/**
+ * Creates a platform view channel and sets up the method handler.
+ */
+- (void)setupPlatformViewChannel;
+
 @end
 
 #pragma mark -
@@ -145,6 +151,11 @@ static FlutterLocale FlutterLocaleFromNSLocale(NSLocale* locale) {
   }];
 }
 
+- (void)registerViewFactory:(nonnull NSObject<FlutterPlatformViewFactory>*)factory
+                     withId:(nonnull NSString*)factoryId {
+  [[_flutterEngine platformViewController] registerViewFactory:factory withId:factoryId];
+}
+
 @end
 
 // Callbacks provided to the engine. See the called methods for documentation.
@@ -186,6 +197,14 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
 
   // FlutterCompositor is copied and used in embedder.cc.
   FlutterCompositor _compositor;
+
+  // Method channel for platform view functions. These functions include creating, disposing and
+  // mutating a platform view.
+  FlutterMethodChannel* _platformViewsChannel;
+
+  // Used to support creation and deletion of platform views and registering platform view
+  // factories. Lifecycle is tied to the engine.
+  FlutterPlatformViewController* _platformViewController;
 }
 
 - (instancetype)initWithName:(NSString*)labelPrefix project:(FlutterDartProject*)project {
@@ -218,6 +237,9 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
                          selector:@selector(sendUserLocales)
                              name:NSCurrentLocaleDidChangeNotification
                            object:nil];
+
+  _platformViewController = [[FlutterPlatformViewController alloc] init];
+  [self setupPlatformViewChannel];
 
   return self;
 }
@@ -383,8 +405,8 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
 
   if ([FlutterRenderingBackend renderUsingMetal]) {
     FlutterMetalRenderer* metalRenderer = reinterpret_cast<FlutterMetalRenderer*>(_renderer);
-    _macOSCompositor =
-        std::make_unique<flutter::FlutterMetalCompositor>(_viewController, metalRenderer.device);
+    _macOSCompositor = std::make_unique<flutter::FlutterMetalCompositor>(
+        _viewController, _platformViewController, metalRenderer.device);
     _macOSCompositor->SetPresentCallback([weakSelf](bool has_flutter_content) {
       if (has_flutter_content) {
         FlutterMetalRenderer* metalRenderer =
@@ -541,6 +563,10 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
   _embedderAPI.DispatchSemanticsAction(_engine, target, action, data.GetMapping(), data.GetSize());
 }
 
+- (FlutterPlatformViewController*)platformViewController {
+  return _platformViewController;
+}
+
 #pragma mark - Private methods
 
 - (void)sendUserLocales {
@@ -628,6 +654,18 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
     NSLog(@"Failed to shut down Flutter engine: error %d", result);
   }
   _engine = nullptr;
+}
+
+- (void)setupPlatformViewChannel {
+  _platformViewsChannel =
+      [FlutterMethodChannel methodChannelWithName:@"flutter/platform_views"
+                                  binaryMessenger:self.binaryMessenger
+                                            codec:[FlutterStandardMethodCodec sharedInstance]];
+
+  __weak FlutterEngine* weakSelf = self;
+  [_platformViewsChannel setMethodCallHandler:^(FlutterMethodCall* call, FlutterResult result) {
+    [[weakSelf platformViewController] handleMethodCall:call result:result];
+  }];
 }
 
 #pragma mark - FlutterBinaryMessenger
@@ -781,20 +819,22 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
 
 #pragma mark - Task runner integration
 
-- (void)postMainThreadTask:(FlutterTask)task targetTimeInNanoseconds:(uint64_t)targetTime {
-  const auto engine_time = _embedderAPI.GetCurrentTime();
-
-  __weak FlutterEngine* weak_self = self;
-  auto worker = ^{
-    FlutterEngine* strong_self = weak_self;
-    if (strong_self && strong_self->_engine) {
-      auto result = _embedderAPI.RunTask(strong_self->_engine, &task);
-      if (result != kSuccess) {
-        NSLog(@"Could not post a task to the Flutter engine.");
-      }
+- (void)runTaskOnEmbedder:(FlutterTask)task {
+  if (_engine) {
+    auto result = _embedderAPI.RunTask(_engine, &task);
+    if (result != kSuccess) {
+      NSLog(@"Could not post a task to the Flutter engine.");
     }
+  }
+}
+
+- (void)postMainThreadTask:(FlutterTask)task targetTimeInNanoseconds:(uint64_t)targetTime {
+  __weak FlutterEngine* weakSelf = self;
+  auto worker = ^{
+    [weakSelf runTaskOnEmbedder:task];
   };
 
+  const auto engine_time = _embedderAPI.GetCurrentTime();
   if (targetTime <= engine_time) {
     dispatch_async(dispatch_get_main_queue(), worker);
 
