@@ -136,6 +136,24 @@ public class FlutterViewTest {
   }
 
   @Test
+  public void detachFromFlutterEngine_removeImageView() {
+    FlutterView flutterView = new FlutterView(RuntimeEnvironment.application);
+    FlutterEngine flutterEngine =
+        spy(new FlutterEngine(RuntimeEnvironment.application, mockFlutterLoader, mockFlutterJni));
+
+    flutterView.attachToFlutterEngine(flutterEngine);
+    flutterView.convertToImageView();
+    assertEquals(flutterView.getChildCount(), 2);
+    View view = flutterView.getChildAt(1);
+    assertTrue(view instanceof FlutterImageView);
+
+    flutterView.detachFromFlutterEngine();
+    assertEquals(flutterView.getChildCount(), 1);
+    view = flutterView.getChildAt(0);
+    assertFalse(view instanceof FlutterImageView);
+  }
+
+  @Test
   public void detachFromFlutterEngine_closesImageView() {
     FlutterEngine flutterEngine =
         spy(new FlutterEngine(RuntimeEnvironment.application, mockFlutterLoader, mockFlutterJni));
