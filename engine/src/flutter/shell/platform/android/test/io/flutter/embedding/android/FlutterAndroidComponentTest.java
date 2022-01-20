@@ -335,6 +335,11 @@ public class FlutterAndroidComponentTest {
       return TransparencyMode.transparent;
     }
 
+    @Override
+    public ExclusiveAppComponent<Activity> getExclusiveAppComponent() {
+      return null;
+    }
+
     @Nullable
     @Override
     public SplashScreen provideSplashScreen() {
