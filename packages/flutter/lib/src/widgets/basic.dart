@@ -1262,10 +1262,13 @@ class Transform extends SingleChildRenderObjectWidget {
        alignment = null,
        super(key: key, child: child);
 
-  /// Creates a widget that scales its child uniformly.
+  /// Creates a widget that scales its child along the 2D plane.
   ///
-  /// The `scale` argument must not be null. It gives the scalar by which
-  /// to multiply the `x` and `y` axes.
+  /// The `scaleX` argument provides the scalar by which to multiply the `x` axis, and the `scaleY` argument provides the scalar by which to multiply the `y` axis. Either may be omitted, in which case that axis defaults to 1.0.
+  ///
+  /// For convenience, to scale the child uniformly, instead of providing `scaleX` and `scaleY`, the `scale` parameter may be used.
+  ///
+  /// At least one of `scale`, `scaleX`, and `scaleY` must be non-null. If `scale` is provided, the other two must be null; similarly, if it is not provided, one of the other two must be provided.
   ///
   /// The [alignment] controls the origin of the scale; by default, this is
   /// the center of the box.
@@ -1293,14 +1296,18 @@ class Transform extends SingleChildRenderObjectWidget {
   ///    over a given duration.
   Transform.scale({
     Key? key,
-    required double scale,
+    double? scale,
+    double? scaleX,
+    double? scaleY,
     this.origin,
     this.alignment = Alignment.center,
     this.transformHitTests = true,
     this.filterQuality,
     Widget? child,
-  }) : transform = Matrix4.diagonal3Values(scale, scale, 1.0),
-       super(key: key, child: child);
+  })  : assert(!(scale == null && scaleX == null && scaleY == null), "At least one of 'scale', 'scaleX' and 'scaleY' is required to be non-null"),
+        assert(scale == null || (scaleX == null && scaleY == null), "If 'scale' is non-null then 'scaleX' and 'scaleY' must be left null"),
+        transform = Matrix4.diagonal3Values(scale ?? scaleX ?? 1.0, scale ?? scaleY ?? 1.0, 1.0),
+        super(key: key, child: child);
 
   /// The matrix to transform the child by during painting.
   final Matrix4 transform;
@@ -2130,6 +2137,15 @@ class LayoutId extends ParentDataWidget<MultiChildLayoutParentData> {
 ///
 /// Each child must be wrapped in a [LayoutId] widget to identify the widget for
 /// the delegate.
+///
+/// {@tool dartpad}
+/// This example shows a [CustomMultiChildLayout] widget being used to lay out
+/// colored blocks from start to finish in a cascade that has some overlap.
+///
+/// It responds to changes in [Directionality] by re-laying out its children.
+///
+/// ** See code in examples/api/lib/widgets/basic/custom_multi_child_layout.0.dart **
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -4816,6 +4832,8 @@ class Row extends Flex {
 /// case is typically to remove the [Expanded] or [Flexible] widgets from around
 /// the inner children.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=jckqXR5CrPI}
+///
 /// For more discussion about constraints, see [BoxConstraints].
 ///
 /// ### The yellow and black striped banner
@@ -5554,7 +5572,7 @@ class RichText extends MultiChildRenderObjectWidget {
   /// {@macro flutter.painting.textPainter.textWidthBasis}
   final TextWidthBasis textWidthBasis;
 
-  /// {@macro flutter.dart:ui.textHeightBehavior}
+  /// {@macro dart.ui.textHeightBehavior}
   final ui.TextHeightBehavior? textHeightBehavior;
 
   @override
@@ -6128,6 +6146,7 @@ class Listener extends SingleChildRenderObjectWidget {
       if (onPointerDown != null) 'down',
       if (onPointerMove != null) 'move',
       if (onPointerUp != null) 'up',
+      if (onPointerHover != null) 'hover',
       if (onPointerCancel != null) 'cancel',
       if (onPointerSignal != null) 'signal',
     ];
@@ -6137,6 +6156,8 @@ class Listener extends SingleChildRenderObjectWidget {
 }
 
 /// A widget that tracks the movement of mice.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=1oF3pI5umck}
 ///
 /// [MouseRegion] is used
 /// when it is needed to compare the list of objects that a mouse pointer is
@@ -6164,7 +6185,7 @@ class Listener extends SingleChildRenderObjectWidget {
 ///
 ///  * [Listener], a similar widget that tracks pointer events when the pointer
 ///    has buttons pressed.
-class MouseRegion extends StatefulWidget {
+class MouseRegion extends SingleChildRenderObjectWidget {
   /// Creates a widget that forwards mouse events to callbacks.
   ///
   /// By default, all callbacks are empty, [cursor] is [MouseCursor.defer], and
@@ -6176,10 +6197,10 @@ class MouseRegion extends StatefulWidget {
     this.onHover,
     this.cursor = MouseCursor.defer,
     this.opaque = true,
-    this.child,
+    Widget? child,
   }) : assert(cursor != null),
        assert(opaque != null),
-       super(key: key);
+       super(key: key, child: child);
 
   /// Triggered when a mouse pointer has entered this widget.
   ///
@@ -6326,13 +6347,26 @@ class MouseRegion extends StatefulWidget {
   /// This defaults to true.
   final bool opaque;
 
-  /// The widget below this widget in the tree.
-  ///
-  /// {@macro flutter.widgets.ProxyWidget.child}
-  final Widget? child;
+  @override
+  RenderMouseRegion createRenderObject(BuildContext context) {
+    return RenderMouseRegion(
+      onEnter: onEnter,
+      onHover: onHover,
+      onExit: onExit,
+      cursor: cursor,
+      opaque: opaque,
+    );
+  }
 
   @override
-  State<MouseRegion> createState() => _MouseRegionState();
+  void updateRenderObject(BuildContext context, RenderMouseRegion renderObject) {
+    renderObject
+      ..onEnter = onEnter
+      ..onHover = onHover
+      ..onExit = onExit
+      ..cursor = cursor
+      ..opaque = opaque;
+  }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -6347,51 +6381,6 @@ class MouseRegion extends StatefulWidget {
     properties.add(IterableProperty<String>('listeners', listeners, ifEmpty: '<none>'));
     properties.add(DiagnosticsProperty<MouseCursor>('cursor', cursor, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('opaque', opaque, defaultValue: true));
-  }
-}
-
-class _MouseRegionState extends State<MouseRegion> {
-  void handleExit(PointerExitEvent event) {
-    if (widget.onExit != null && mounted)
-      widget.onExit!(event);
-  }
-
-  PointerExitEventListener? getHandleExit() {
-    return widget.onExit == null ? null : handleExit;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return _RawMouseRegion(this);
-  }
-}
-
-class _RawMouseRegion extends SingleChildRenderObjectWidget {
-  _RawMouseRegion(this.owner) : super(child: owner.widget.child);
-
-  final _MouseRegionState owner;
-
-  @override
-  RenderMouseRegion createRenderObject(BuildContext context) {
-    final MouseRegion widget = owner.widget;
-    return RenderMouseRegion(
-      onEnter: widget.onEnter,
-      onHover: widget.onHover,
-      onExit: owner.getHandleExit(),
-      cursor: widget.cursor,
-      opaque: widget.opaque,
-    );
-  }
-
-  @override
-  void updateRenderObject(BuildContext context, RenderMouseRegion renderObject) {
-    final MouseRegion widget = owner.widget;
-    renderObject
-      ..onEnter = widget.onEnter
-      ..onHover = widget.onHover
-      ..onExit = owner.getHandleExit()
-      ..cursor = widget.cursor
-      ..opaque = widget.opaque;
   }
 }
 

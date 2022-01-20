@@ -240,7 +240,7 @@ class SystemChannels {
   ///  * [RawKeyboard], which uses this channel to expose key data.
   ///  * [new RawKeyEvent.fromMessage], which can decode this data into the [RawKeyEvent]
   ///    subclasses mentioned above.
-  static const BasicMessageChannel<dynamic> keyEvent = BasicMessageChannel<dynamic>(
+  static const BasicMessageChannel<Object?> keyEvent = BasicMessageChannel<Object?>(
       'flutter/keyevent',
       JSONMessageCodec(),
   );
@@ -271,7 +271,7 @@ class SystemChannels {
   ///    applications to release caches to free up more memory. See
   ///    [WidgetsBindingObserver.didHaveMemoryPressure], which triggers whenever
   ///    a message is received on this channel.
-  static const BasicMessageChannel<dynamic> system = BasicMessageChannel<dynamic>(
+  static const BasicMessageChannel<Object?> system = BasicMessageChannel<Object?>(
       'flutter/system',
       JSONMessageCodec(),
   );
@@ -283,7 +283,7 @@ class SystemChannels {
   ///  * [SemanticsEvent] and its subclasses for a list of valid accessibility
   ///    events that can be sent over this channel.
   ///  * [SemanticsNode.sendEvent], which uses this channel to dispatch events.
-  static const BasicMessageChannel<dynamic> accessibility = BasicMessageChannel<dynamic>(
+  static const BasicMessageChannel<Object?> accessibility = BasicMessageChannel<Object?>(
     'flutter/accessibility',
     StandardMessageCodec(),
   );
@@ -311,7 +311,7 @@ class SystemChannels {
 
   /// A [MethodChannel] for configuring mouse cursors.
   ///
-  /// All outgoing methods defined for this channel uses a `Map<String, dynamic>`
+  /// All outgoing methods defined for this channel uses a `Map<String, Object?>`
   /// to contain multiple parameters, including the following methods (invoked
   /// using [OptionalMethodChannel.invokeMethod]):
   ///

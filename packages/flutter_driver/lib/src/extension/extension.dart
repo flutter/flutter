@@ -366,11 +366,12 @@ class FlutterDriverExtension with DeserializeFinderFactory, CreateFinderFactory,
       final Command command = deserializeCommand(params, this);
       assert(WidgetsBinding.instance!.isRootWidgetAttached || !command.requiresRootWidgetAttached,
           'No root widget is attached; have you remembered to call runApp()?');
-      Future<Result?> responseFuture = handleCommand(command, _prober, this);
-      if (command.timeout != null)
-        responseFuture = responseFuture.timeout(command.timeout ?? Duration.zero);
-      final Result? response = await responseFuture;
-      return _makeResponse(response?.toJson());
+      Future<Result> responseFuture = handleCommand(command, _prober, this);
+      if (command.timeout != null) {
+        responseFuture = responseFuture.timeout(command.timeout!);
+      }
+      final Result response = await responseFuture;
+      return _makeResponse(response.toJson());
     } on TimeoutException catch (error, stackTrace) {
       final String message = 'Timeout while executing $commandKind: $error\n$stackTrace';
       _log(message);

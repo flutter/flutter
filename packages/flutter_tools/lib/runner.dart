@@ -39,7 +39,7 @@ Future<int> run(
     // Remove the verbose option; for help and doctor, users don't need to see
     // verbose logs.
     args = List<String>.of(args);
-    args.removeWhere((String option) => option == '-v' || option == '--verbose');
+    args.removeWhere((String option) => option == '-vv' || option == '-v' || option == '--verbose');
   }
 
   return runInContext<int>(() async {
@@ -149,11 +149,18 @@ Future<int> _handleToolError(
     globals.printError('Oops; flutter has exited unexpectedly: "$error".');
 
     try {
+      final BufferLogger logger = BufferLogger(
+        terminal: globals.terminal,
+        outputPreferences: globals.outputPreferences,
+      );
+
+      final DoctorText doctorText = DoctorText(logger);
+
       final CrashDetails details = CrashDetails(
         command: _crashCommand(args),
         error: error,
         stackTrace: stackTrace,
-        doctorText: await _doctorText(),
+        doctorText: doctorText,
       );
       final File file = await _createLocalCrashReport(details);
       await globals.crashReporter.informUser(details, file);
@@ -199,7 +206,7 @@ Future<File> _createLocalCrashReport(CrashDetails details) async {
   buffer.writeln('```\n${details.stackTrace}```\n');
 
   buffer.writeln('## flutter doctor\n');
-  buffer.writeln('```\n${details.doctorText}```');
+  buffer.writeln('```\n${await details.doctorText.text}```');
 
   try {
     crashFile.writeAsStringSync(buffer.toString());
@@ -219,22 +226,6 @@ Future<File> _createLocalCrashReport(CrashDetails details) async {
   }
 
   return crashFile;
-}
-
-Future<String> _doctorText() async {
-  try {
-    final BufferLogger logger = BufferLogger(
-      terminal: globals.terminal,
-      outputPreferences: globals.outputPreferences,
-    );
-
-    final Doctor doctor = Doctor(logger: logger);
-    await doctor.diagnose(showColor: false);
-
-    return logger.statusText;
-  } on Exception catch (error, trace) {
-    return 'encountered exception: $error\n\n${trace.toString().trim()}\n';
-  }
 }
 
 Future<int> _exit(int code) async {

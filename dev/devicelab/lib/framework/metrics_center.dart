@@ -54,7 +54,7 @@ Future<FlutterDestination> connectFlutterDestination() async {
 ///     "host_type": "linux",
 ///     "host_version": "debian-10.11"
 ///   }
-List<MetricPoint> parse(Map<String, dynamic> resultsJson, Map<String, dynamic> benchmarkTags) {
+List<MetricPoint> parse(Map<String, dynamic> resultsJson, Map<String, dynamic> benchmarkTags, String taskName) {
   print('Results to upload to skia perf: $resultsJson');
   print('Benchmark tags to upload to skia perf: $benchmarkTags');
   final List<String> scoreKeys =
@@ -63,14 +63,13 @@ List<MetricPoint> parse(Map<String, dynamic> resultsJson, Map<String, dynamic> b
       resultsJson['ResultData'] as Map<String, dynamic>? ?? const <String, dynamic>{};
   final String gitBranch = (resultsJson['CommitBranch'] as String).trim();
   final String gitSha = (resultsJson['CommitSha'] as String).trim();
-  final String builderName = (resultsJson['BuilderName'] as String).trim();
   final List<MetricPoint> metricPoints = <MetricPoint>[];
   for (final String scoreKey in scoreKeys) {
     Map<String, String> tags = <String, String>{
       kGithubRepoKey: kFlutterFrameworkRepo,
       kGitRevisionKey: gitSha,
       'branch': gitBranch,
-      kNameKey: builderName,
+      kNameKey: taskName,
       kSubResultKey: scoreKey,
     };
     // Append additional benchmark tags, which will surface in Skia Perf dashboards.
@@ -99,7 +98,7 @@ Future<void> upload(
   FlutterDestination metricsDestination,
   List<MetricPoint> metricPoints,
   int commitTimeSinceEpoch,
-  String? taskName,
+  String taskName,
 ) async {
   await metricsDestination.update(
     metricPoints,
@@ -107,7 +106,7 @@ Future<void> upload(
       commitTimeSinceEpoch,
       isUtc: true,
     ),
-    taskName ?? 'default',
+    taskName,
   );
 }
 
@@ -127,11 +126,12 @@ Future<void> uploadToSkiaPerf(String? resultsPath, String? commitTime, String? t
   } else {
     commitTimeSinceEpoch = DateTime.now().millisecondsSinceEpoch;
   }
+  taskName = taskName ?? 'default';
   final Map<String, dynamic> benchmarkTagsMap = jsonDecode(benchmarkTags ?? '{}') as Map<String, dynamic>;
   final File resultFile = File(resultsPath);
   Map<String, dynamic> resultsJson = <String, dynamic>{};
   resultsJson = json.decode(await resultFile.readAsString()) as Map<String, dynamic>;
-  final List<MetricPoint> metricPoints = parse(resultsJson, benchmarkTagsMap);
+  final List<MetricPoint> metricPoints = parse(resultsJson, benchmarkTagsMap, taskName);
   final FlutterDestination metricsDestination = await connectFlutterDestination();
   await upload(metricsDestination, metricPoints, commitTimeSinceEpoch, taskName);
 }

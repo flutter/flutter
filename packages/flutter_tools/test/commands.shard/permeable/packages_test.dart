@@ -23,7 +23,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/packages.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
-import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
+import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -449,6 +449,7 @@ void main() {
 
     testUsingContext('test without bot', () async {
       Cache.flutterRoot = '';
+      globals.fs.directory('/packages/flutter_tools').createSync(recursive: true);
       globals.fs.file('pubspec.yaml').createSync();
       processManager.addCommand(
         const FakeCommand(command: <String>['/bin/cache/dart-sdk/bin/dart', '__deprecated_pub', 'run', 'test']),

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/gestures.dart' show PointerDeviceKind, kSecondaryButton;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -506,8 +507,20 @@ void main() {
     final FakeEditableTextState state = tester.state(find.byType(FakeEditableText));
     final FakeRenderEditable renderEditable = tester.renderObject(find.byType(FakeEditable));
     expect(state.showToolbarCalled, isFalse);
-    expect(renderEditable.selectWordEdgeCalled, isTrue);
-  });
+
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        expect(renderEditable.selectWordEdgeCalled, isTrue);
+        break;
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        expect(renderEditable.selectPositionAtCalled, isTrue);
+        break;
+    }
+  }, variant: TargetPlatformVariant.all());
 
   testWidgets('test TextSelectionGestureDetectorBuilder double tap', (WidgetTester tester) async {
     await pumpTextSelectionGestureDetectorBuilder(tester);
@@ -759,6 +772,28 @@ void main() {
       });
     });
   });
+
+  group('TextSelectionControls', () {
+    test('ClipboardStatusNotifier is updated on handleCut', () async {
+      final FakeClipboardStatusNotifier clipboardStatus = FakeClipboardStatusNotifier();
+      final FakeTextSelectionDelegate delegate = FakeTextSelectionDelegate();
+      final CustomTextSelectionControls textSelectionControls = CustomTextSelectionControls();
+
+      expect(clipboardStatus.updateCalled, false);
+      textSelectionControls.handleCut(delegate, clipboardStatus);
+      expect(clipboardStatus.updateCalled, true);
+    });
+
+    test('ClipboardStatusNotifier is updated on handleCopy', () async {
+      final FakeClipboardStatusNotifier clipboardStatus = FakeClipboardStatusNotifier();
+      final FakeTextSelectionDelegate delegate = FakeTextSelectionDelegate();
+      final CustomTextSelectionControls textSelectionControls = CustomTextSelectionControls();
+
+      expect(clipboardStatus.updateCalled, false);
+      textSelectionControls.handleCopy(delegate, clipboardStatus);
+      expect(clipboardStatus.updateCalled, true);
+    });
+  });
 }
 
 class FakeTextSelectionGestureDetectorBuilderDelegate implements TextSelectionGestureDetectorBuilderDelegate {
@@ -871,4 +906,56 @@ class FakeRenderEditable extends RenderEditable {
   void selectWord({ required SelectionChangedCause cause }) {
     selectWordCalled = true;
   }
+}
+
+class CustomTextSelectionControls extends TextSelectionControls {
+  @override
+  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, [VoidCallback? onTap, double? startGlyphHeight, double? endGlyphHeight]) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Widget buildToolbar(
+    BuildContext context,
+    Rect globalEditableRegion,
+    double textLineHeight,
+    Offset position,
+    List<TextSelectionPoint> endpoints,
+    TextSelectionDelegate delegate,
+    ClipboardStatusNotifier clipboardStatus,
+    Offset? lastSecondaryTapDownPosition,
+  ) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight, [double? startGlyphHeight, double? endGlyphHeight]) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Size getHandleSize(double textLineHeight) {
+    throw UnimplementedError();
+  }
+}
+
+class FakeClipboardStatusNotifier extends ClipboardStatusNotifier {
+  FakeClipboardStatusNotifier() : super(value: ClipboardStatus.unknown);
+
+  @override
+  bool get disposed => false;
+
+  bool updateCalled = false;
+  @override
+  Future<void> update() async {
+    updateCalled = true;
+  }
+}
+
+class FakeTextSelectionDelegate extends Fake implements TextSelectionDelegate {
+  @override
+  void cutSelection(SelectionChangedCause cause) { }
+
+  @override
+  void copySelection(SelectionChangedCause cause) { }
 }

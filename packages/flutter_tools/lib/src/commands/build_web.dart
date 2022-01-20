@@ -2,15 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'package:meta/meta.dart';
-
 import '../base/common.dart';
 import '../build_info.dart';
 import '../build_system/targets/web.dart';
 import '../features.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../project.dart';
 import '../runner/flutter_command.dart'
     show DevelopmentArtifact, FlutterCommandResult;
@@ -19,8 +15,8 @@ import 'build.dart';
 
 class BuildWebCommand extends BuildSubCommand {
   BuildWebCommand({
-    @required bool verboseHelp,
-  }) {
+    required bool verboseHelp,
+  }) : super(verboseHelp: verboseHelp) {
     addTreeShakeIconsFlag(enabledByDefault: false);
     usesTargetOption();
     usesPubOption();
@@ -31,14 +27,12 @@ class BuildWebCommand extends BuildSubCommand {
     addNullSafetyModeOptions(hide: !verboseHelp);
     addNativeNullAssertions();
     argParser.addFlag('csp',
-      defaultsTo: false,
       negatable: false,
       help: 'Disable dynamic generation of code in the generated output. '
             'This is necessary to satisfy CSP restrictions (see http://www.w3.org/TR/CSP/).'
     );
     argParser.addFlag(
       'source-maps',
-      defaultsTo: false,
       help: 'Generate a sourcemap file. These can be used by browsers '
             'to view and debug the original source code of a compiled and minified Dart '
             'application.'
@@ -91,12 +85,13 @@ class BuildWebCommand extends BuildSubCommand {
       throwToolExit('"build web" is not currently supported. To enable, run "flutter config --enable-web".');
     }
     final FlutterProject flutterProject = FlutterProject.current();
-    final String target = stringArg('target');
+    final String target = stringArg('target')!;
     final BuildInfo buildInfo = await getBuildInfo();
     if (buildInfo.isDebug) {
       throwToolExit('debug builds cannot be built directly for the web. Try using "flutter run"');
     }
-    if (stringArg('base-href') != null && !(stringArg('base-href').startsWith('/') && stringArg('base-href').endsWith('/'))) {
+    final String? baseHref = stringArg('base-href');
+    if (baseHref != null && !(baseHref.startsWith('/') && baseHref.endsWith('/'))) {
       throwToolExit('base-href should start and end with /');
     }
     if (!flutterProject.web.existsSync()) {
@@ -107,7 +102,7 @@ class BuildWebCommand extends BuildSubCommand {
         .childFile('index.html')
         .readAsStringSync()
         .contains(kBaseHrefPlaceholder) &&
-        stringArg('base-href') != null) {
+        baseHref != null) {
       throwToolExit(
         "Couldn't find the placeholder for base href. "
         r'Please add `<base href="$FLUTTER_BASE_HREF">` to web/index.html'
@@ -119,10 +114,10 @@ class BuildWebCommand extends BuildSubCommand {
       target,
       buildInfo,
       boolArg('csp'),
-      stringArg('pwa-strategy'),
+      stringArg('pwa-strategy')!,
       boolArg('source-maps'),
       boolArg('native-null-assertions'),
-      stringArg('base-href'),
+      baseHref,
     );
     return FlutterCommandResult.success();
   }

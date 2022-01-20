@@ -129,7 +129,17 @@ class MethodChannel {
   /// The messenger used by this channel to send platform messages.
   ///
   /// The messenger may not be null.
-  BinaryMessenger get binaryMessenger => _binaryMessenger ?? ServicesBinding.instance!.defaultBinaryMessenger;
+  BinaryMessenger get binaryMessenger {
+    assert(
+      _binaryMessenger != null || ServicesBinding.instance != null,
+      'Cannot use this MethodChannel before the binary messenger has been initialized. '
+      'This happens when you invoke platform methods before the WidgetsFlutterBinding '
+      'has been initialized. You can fix this by either calling WidgetsFlutterBinding.ensureInitialized() '
+      'before this or by passing a custom BinaryMessenger instance to MethodChannel().',
+    );
+
+    return _binaryMessenger ?? ServicesBinding.instance!.defaultBinaryMessenger;
+  }
   final BinaryMessenger? _binaryMessenger;
 
   /// Backend implementation of [invokeMethod].

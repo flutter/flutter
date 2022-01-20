@@ -8,6 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   Widget _boilerplate(VoidCallback? onButtonPressed, {
+    DraggableScrollableController? controller,
     int itemCount = 100,
     double initialChildSize = .5,
     double maxChildSize = 1.0,
@@ -33,6 +34,7 @@ void main() {
             ),
             DraggableScrollableActuator(
               child: DraggableScrollableSheet(
+                controller: controller,
                 maxChildSize: maxChildSize,
                 minChildSize: minChildSize,
                 initialChildSize: initialChildSize,
@@ -346,33 +348,42 @@ void main() {
     ));
   }, variant: TargetPlatformVariant.all());
 
-  testWidgets('Does not snap away from initial child on reset', (WidgetTester tester) async {
-    const Key containerKey = ValueKey<String>('container');
-    const Key stackKey = ValueKey<String>('stack');
-    await tester.pumpWidget(_boilerplate(null,
-      snap: true,
-      containerKey: containerKey,
-      stackKey: stackKey,
-    ));
-    await tester.pumpAndSettle();
-    final double screenHeight = tester.getSize(find.byKey(stackKey)).height;
+  for (final bool useActuator in <bool>[false, true]) {
+    testWidgets('Does not snap away from initial child on ${useActuator ? 'actuator' : 'controller'}.reset()', (WidgetTester tester) async {
+      const Key containerKey = ValueKey<String>('container');
+      const Key stackKey = ValueKey<String>('stack');
+      final DraggableScrollableController controller = DraggableScrollableController();
+      await tester.pumpWidget(_boilerplate(
+        null,
+        controller: controller,
+        snap: true,
+        containerKey: containerKey,
+        stackKey: stackKey,
+      ));
+      await tester.pumpAndSettle();
+      final double screenHeight = tester.getSize(find.byKey(stackKey)).height;
 
-    await tester.drag(find.text('Item 1'), Offset(0, -.4 * screenHeight));
-    await tester.pumpAndSettle();
-    expect(
-      tester.getSize(find.byKey(containerKey)).height / screenHeight,
-      closeTo(1.0, precisionErrorTolerance),
-    );
+      await tester.drag(find.text('Item 1'), Offset(0, -.4 * screenHeight));
+      await tester.pumpAndSettle();
+      expect(
+        tester.getSize(find.byKey(containerKey)).height / screenHeight,
+        closeTo(1.0, precisionErrorTolerance),
+      );
 
-    DraggableScrollableActuator.reset(tester.element(find.byKey(containerKey)));
-    await tester.pumpAndSettle();
+      if (useActuator) {
+        DraggableScrollableActuator.reset(tester.element(find.byKey(containerKey)));
+      } else {
+        controller.reset();
+      }
+      await tester.pumpAndSettle();
 
-    // The sheet should have reset without snapping away from initial child.
-    expect(
-      tester.getSize(find.byKey(containerKey)).height / screenHeight,
-      closeTo(.5, precisionErrorTolerance),
-    );
-  }, variant: TargetPlatformVariant.all());
+      // The sheet should have reset without snapping away from initial child.
+      expect(
+        tester.getSize(find.byKey(containerKey)).height / screenHeight,
+        closeTo(.5, precisionErrorTolerance),
+      );
+    });
+  }
 
   testWidgets('Zero velocity drag snaps to nearest snap target', (WidgetTester tester) async {
     const Key stackKey = ValueKey<String>('stack');
@@ -694,5 +705,494 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
 
     expect(tester.takeException(), isNull);
+  });
+
+  for (final bool shouldAnimate in <bool>[true, false]) {
+    testWidgets('Can ${shouldAnimate ? 'animate' : 'jump'} to arbitrary positions', (WidgetTester tester) async {
+      const Key stackKey = ValueKey<String>('stack');
+      const Key containerKey = ValueKey<String>('container');
+      final DraggableScrollableController controller = DraggableScrollableController();
+      await tester.pumpWidget(_boilerplate(
+        null,
+        controller: controller,
+        stackKey: stackKey,
+        containerKey: containerKey,
+      ));
+      await tester.pumpAndSettle();
+      final double screenHeight = tester.getSize(find.byKey(stackKey)).height;
+      // Use a local helper to animate so we can share code across a jumpTo test
+      // and an animateTo test.
+      void goTo(double size) => shouldAnimate
+          ? controller.animateTo(size, duration: const Duration(milliseconds: 200), curve: Curves.linear)
+          : controller.jumpTo(size);
+      // If we're animating, pump will call four times, two of which are for the
+      // animation duration.
+      final int expectedPumpCount = shouldAnimate ? 4 : 2;
+
+      goTo(.6);
+      expect(await tester.pumpAndSettle(), expectedPumpCount);
+      expect(
+        tester.getSize(find.byKey(containerKey)).height / screenHeight,
+        closeTo(.6, precisionErrorTolerance),
+      );
+      expect(find.text('Item 1'), findsOneWidget);
+      expect(find.text('Item 20'), findsOneWidget);
+      expect(find.text('Item 70'), findsNothing);
+
+      goTo(.4);
+      expect(await tester.pumpAndSettle(), expectedPumpCount);
+      expect(
+        tester.getSize(find.byKey(containerKey)).height / screenHeight,
+        closeTo(.4, precisionErrorTolerance),
+      );
+      expect(find.text('Item 1'), findsOneWidget);
+      expect(find.text('Item 20'), findsNothing);
+      expect(find.text('Item 70'), findsNothing);
+
+      await tester.fling(find.text('Item 1'), Offset(0, -screenHeight), 100);
+      await tester.pumpAndSettle();
+      expect(
+        tester.getSize(find.byKey(containerKey)).height / screenHeight,
+        closeTo(1, precisionErrorTolerance),
+      );
+      expect(find.text('Item 1'), findsNothing);
+      expect(find.text('Item 20'), findsOneWidget);
+      expect(find.text('Item 70'), findsNothing);
+
+      // Programmatic control does not affect the inner scrollable's position.
+      goTo(.8);
+      expect(await tester.pumpAndSettle(), expectedPumpCount);
+      expect(
+        tester.getSize(find.byKey(containerKey)).height / screenHeight,
+        closeTo(.8, precisionErrorTolerance),
+      );
+      expect(find.text('Item 1'), findsNothing);
+      expect(find.text('Item 20'), findsOneWidget);
+      expect(find.text('Item 70'), findsNothing);
+
+      // Attempting to move to a size too big or too small instead moves to the
+      // min or max child size.
+      goTo(.5);
+      await tester.pumpAndSettle();
+      goTo(0);
+      // The animation was cut short by half, there should have been on less pumps
+      final int truncatedPumpCount = shouldAnimate ? expectedPumpCount - 1 : expectedPumpCount;
+      expect(await tester.pumpAndSettle(), truncatedPumpCount);
+      expect(
+        tester.getSize(find.byKey(containerKey)).height / screenHeight,
+        closeTo(.25, precisionErrorTolerance),
+      );
+    });
+  }
+
+  testWidgets('Can animateTo with a nonlinear curve', (WidgetTester tester) async {
+    const Key stackKey = ValueKey<String>('stack');
+    const Key containerKey = ValueKey<String>('container');
+    final DraggableScrollableController controller = DraggableScrollableController();
+    await tester.pumpWidget(_boilerplate(
+      null,
+      controller: controller,
+      stackKey: stackKey,
+      containerKey: containerKey,
+    ));
+    await tester.pumpAndSettle();
+    final double screenHeight = tester.getSize(find.byKey(stackKey)).height;
+
+    controller.animateTo(.6, curve: Curves.linear, duration: const Duration(milliseconds: 100));
+    // We need to call one pump first to get the animation to start.
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(
+      tester.getSize(find.byKey(containerKey)).height / screenHeight,
+      closeTo(.55, precisionErrorTolerance),
+    );
+    await tester.pumpAndSettle();
+    expect(
+      tester.getSize(find.byKey(containerKey)).height / screenHeight,
+      closeTo(.6, precisionErrorTolerance),
+    );
+
+    controller.animateTo(.7, curve: const Interval(.5, 1), duration: const Duration(milliseconds: 100));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+    // The curve should result in the sheet not moving for the first 50 ms.
+    expect(
+      tester.getSize(find.byKey(containerKey)).height / screenHeight,
+      closeTo(.6, precisionErrorTolerance),
+    );
+    await tester.pump(const Duration(milliseconds: 25));
+    expect(
+      tester.getSize(find.byKey(containerKey)).height / screenHeight,
+      closeTo(.65, precisionErrorTolerance),
+    );
+    await tester.pumpAndSettle();
+    expect(
+      tester.getSize(find.byKey(containerKey)).height / screenHeight,
+      closeTo(.7, precisionErrorTolerance),
+    );
+  });
+
+  testWidgets('Can reuse a controller after the old controller is disposed', (WidgetTester tester) async {
+    const Key stackKey = ValueKey<String>('stack');
+    const Key containerKey = ValueKey<String>('container');
+    final DraggableScrollableController controller = DraggableScrollableController();
+    await tester.pumpWidget(_boilerplate(
+      null,
+      controller: controller,
+      stackKey: stackKey,
+      containerKey: containerKey,
+    ));
+    await tester.pumpAndSettle();
+
+    // Pump a new sheet with the same controller. This will dispose of the old sheet first.
+    await tester.pumpWidget(_boilerplate(
+      null,
+      controller: controller,
+      stackKey: stackKey,
+      containerKey: containerKey,
+    ));
+    await tester.pumpAndSettle();
+    final double screenHeight = tester.getSize(find.byKey(stackKey)).height;
+
+    controller.jumpTo(.6);
+    await tester.pumpAndSettle();
+    expect(
+      tester.getSize(find.byKey(containerKey)).height / screenHeight,
+      closeTo(.6, precisionErrorTolerance),
+    );
+  });
+
+  testWidgets('animateTo interrupts other animations', (WidgetTester tester) async {
+    const Key stackKey = ValueKey<String>('stack');
+    const Key containerKey = ValueKey<String>('container');
+    final DraggableScrollableController controller = DraggableScrollableController();
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: _boilerplate(
+        null,
+        controller: controller,
+        stackKey: stackKey,
+        containerKey: containerKey,
+      ),
+    ));
+    await tester.pumpAndSettle();
+    final double screenHeight = tester.getSize(find.byKey(stackKey)).height;
+
+    await tester.flingFrom(Offset(0, .5*screenHeight), Offset(0, -.5*screenHeight), 2000);
+    // Wait until `flinFrom` finished dragging, but before the scrollable goes ballistic.
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(
+      tester.getSize(find.byKey(containerKey)).height / screenHeight,
+      closeTo(1, precisionErrorTolerance),
+    );
+    expect(find.text('Item 1'), findsOneWidget);
+
+    controller.animateTo(.9, duration: const Duration(milliseconds: 200), curve: Curves.linear);
+    await tester.pumpAndSettle();
+    expect(
+      tester.getSize(find.byKey(containerKey)).height / screenHeight,
+      closeTo(.9, precisionErrorTolerance),
+    );
+    // The ballistic animation should have been canceled so item 1 should still be visible.
+    expect(find.text('Item 1'), findsOneWidget);
+  });
+
+  testWidgets('Other animations interrupt animateTo', (WidgetTester tester) async {
+    const Key stackKey = ValueKey<String>('stack');
+    const Key containerKey = ValueKey<String>('container');
+    final DraggableScrollableController controller = DraggableScrollableController();
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: _boilerplate(
+        null,
+        controller: controller,
+        stackKey: stackKey,
+        containerKey: containerKey,
+      ),
+    ));
+    await tester.pumpAndSettle();
+    final double screenHeight = tester.getSize(find.byKey(stackKey)).height;
+
+    controller.animateTo(1, duration: const Duration(milliseconds: 200), curve: Curves.linear);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(
+      tester.getSize(find.byKey(containerKey)).height / screenHeight,
+      closeTo(.75, precisionErrorTolerance),
+    );
+
+    // Interrupt animation and drag downward.
+    await tester.drag(find.text('Item 1'), Offset(0, .1 * screenHeight));
+    await tester.pumpAndSettle();
+    expect(
+      tester.getSize(find.byKey(containerKey)).height / screenHeight,
+      closeTo(.65, precisionErrorTolerance),
+    );
+  });
+
+  testWidgets('animateTo can be interrupted by other animateTo or jumpTo', (WidgetTester tester) async {
+    const Key stackKey = ValueKey<String>('stack');
+    const Key containerKey = ValueKey<String>('container');
+    final DraggableScrollableController controller = DraggableScrollableController();
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: _boilerplate(
+        null,
+        controller: controller,
+        stackKey: stackKey,
+        containerKey: containerKey,
+      ),
+    ));
+    await tester.pumpAndSettle();
+    final double screenHeight = tester.getSize(find.byKey(stackKey)).height;
+
+    controller.animateTo(1, duration: const Duration(milliseconds: 200), curve: Curves.linear);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(
+      tester.getSize(find.byKey(containerKey)).height / screenHeight,
+      closeTo(.75, precisionErrorTolerance),
+    );
+
+    // Interrupt animation with a new `animateTo`.
+    controller.animateTo(.25, duration: const Duration(milliseconds: 200), curve: Curves.linear);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(
+      tester.getSize(find.byKey(containerKey)).height / screenHeight,
+      closeTo(.5, precisionErrorTolerance),
+    );
+
+    // Interrupt animation with a jump.
+    controller.jumpTo(.6);
+    await tester.pumpAndSettle();
+    expect(
+      tester.getSize(find.byKey(containerKey)).height / screenHeight,
+      closeTo(.6, precisionErrorTolerance),
+    );
+  });
+
+  testWidgets('Can get size and pixels', (WidgetTester tester) async {
+    const Key stackKey = ValueKey<String>('stack');
+    const Key containerKey = ValueKey<String>('container');
+    final DraggableScrollableController controller = DraggableScrollableController();
+    await tester.pumpWidget(_boilerplate(
+      null,
+      controller: controller,
+      stackKey: stackKey,
+      containerKey: containerKey,
+    ));
+    await tester.pumpAndSettle();
+    final double screenHeight = tester.getSize(find.byKey(stackKey)).height;
+
+    expect(controller.sizeToPixels(.25), .25*screenHeight);
+    expect(controller.pixelsToSize(.25*screenHeight), .25);
+
+    controller.animateTo(.6, duration: const Duration(milliseconds: 200), curve: Curves.linear);
+    await tester.pumpAndSettle();
+    expect(
+      tester.getSize(find.byKey(containerKey)).height / screenHeight,
+      closeTo(.6, precisionErrorTolerance),
+    );
+    expect(controller.size, closeTo(.6, precisionErrorTolerance));
+    expect(controller.pixels, closeTo(.6*screenHeight, precisionErrorTolerance));
+
+    await tester.drag(find.text('Item 5'), Offset(0, .2*screenHeight));
+    expect(controller.size, closeTo(.4, precisionErrorTolerance));
+    expect(controller.pixels, closeTo(.4*screenHeight, precisionErrorTolerance));
+  });
+
+  testWidgets('Cannot attach a controller to multiple sheets', (WidgetTester tester) async {
+    final DraggableScrollableController controller = DraggableScrollableController();
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: Stack(
+        children: <Widget>[
+          _boilerplate(
+            null,
+            controller: controller,
+          ),
+          _boilerplate(
+            null,
+            controller: controller,
+          )
+        ],
+      ),
+    ), null, EnginePhase.build);
+    expect(tester.takeException(), isAssertionError);
+  });
+
+  testWidgets('Can listen for changes in sheet size', (WidgetTester tester) async {
+    const Key stackKey = ValueKey<String>('stack');
+    const Key containerKey = ValueKey<String>('container');
+    final List<double> loggedSizes = <double>[];
+    final DraggableScrollableController controller = DraggableScrollableController();
+    controller.addListener(() {
+      loggedSizes.add(controller.size);
+    });
+    await tester.pumpWidget(_boilerplate(
+      null,
+      controller: controller,
+      stackKey: stackKey,
+      containerKey: containerKey,
+    ));
+    await tester.pumpAndSettle();
+    final double screenHeight = tester
+        .getSize(find.byKey(stackKey))
+        .height;
+
+    // The initial size shouldn't be logged because no change has occurred yet.
+    expect(loggedSizes.isEmpty, true);
+
+    await tester.drag(find.text('Item 1'), Offset(0, .1 * screenHeight), touchSlopY: 0);
+    await tester.pumpAndSettle();
+    expect(loggedSizes, <double>[.4].map((double v) => closeTo(v, precisionErrorTolerance)));
+    loggedSizes.clear();
+
+    await tester.timedDrag(find.text('Item 1'), Offset(0, -.1 * screenHeight), const Duration(seconds: 1), frequency: 2);
+    await tester.pumpAndSettle();
+    expect(loggedSizes, <double>[.45, .5].map((double v) => closeTo(v, precisionErrorTolerance)));
+    loggedSizes.clear();
+
+    controller.jumpTo(.6);
+    await tester.pumpAndSettle();
+    expect(loggedSizes, <double>[.6].map((double v) => closeTo(v, precisionErrorTolerance)));
+    loggedSizes.clear();
+
+    controller.animateTo(1, duration: const Duration(milliseconds: 400), curve: Curves.linear);
+    await tester.pumpAndSettle();
+    expect(loggedSizes, <double>[.7, .8, .9, 1].map((double v) => closeTo(v, precisionErrorTolerance)));
+    loggedSizes.clear();
+
+    DraggableScrollableActuator.reset(tester.element(find.byKey(containerKey)));
+    await tester.pumpAndSettle();
+    expect(loggedSizes, <double>[.5].map((double v) => closeTo(v, precisionErrorTolerance)));
+    loggedSizes.clear();
+  });
+
+  testWidgets('Listener does not fire on parameter change and persists after change', (WidgetTester tester) async {
+    const Key stackKey = ValueKey<String>('stack');
+    const Key containerKey = ValueKey<String>('container');
+    final List<double> loggedSizes = <double>[];
+    final DraggableScrollableController controller = DraggableScrollableController();
+    controller.addListener(() {
+      loggedSizes.add(controller.size);
+    });
+    await tester.pumpWidget(_boilerplate(
+      null,
+      controller: controller,
+      stackKey: stackKey,
+      containerKey: containerKey,
+    ));
+    await tester.pumpAndSettle();
+    final double screenHeight = tester
+        .getSize(find.byKey(stackKey))
+        .height;
+
+    expect(loggedSizes.isEmpty, true);
+
+    await tester.drag(find.text('Item 1'), Offset(0, .1 * screenHeight), touchSlopY: 0);
+    await tester.pumpAndSettle();
+    expect(loggedSizes, <double>[.4].map((double v) => closeTo(v, precisionErrorTolerance)));
+    loggedSizes.clear();
+
+    // Update a parameter without forcing a change in the current size.
+    await tester.pumpWidget(_boilerplate(
+      null,
+      minChildSize: .1,
+      controller: controller,
+      stackKey: stackKey,
+      containerKey: containerKey,
+    ));
+    expect(loggedSizes.isEmpty, true);
+
+    await tester.drag(find.text('Item 1'), Offset(0, .1 * screenHeight), touchSlopY: 0);
+    await tester.pumpAndSettle();
+    expect(loggedSizes, <double>[.3].map((double v) => closeTo(v, precisionErrorTolerance)));
+    loggedSizes.clear();
+  });
+
+  testWidgets('Listener fires if a parameter change forces a change in size', (WidgetTester tester) async {
+    const Key stackKey = ValueKey<String>('stack');
+    const Key containerKey = ValueKey<String>('container');
+    final List<double> loggedSizes = <double>[];
+    final DraggableScrollableController controller = DraggableScrollableController();
+    controller.addListener(() {
+      loggedSizes.add(controller.size);
+    });
+    await tester.pumpWidget(_boilerplate(
+      null,
+      controller: controller,
+      stackKey: stackKey,
+      containerKey: containerKey,
+    ));
+    await tester.pumpAndSettle();
+    final double screenHeight = tester
+        .getSize(find.byKey(stackKey))
+        .height;
+
+    expect(loggedSizes.isEmpty, true);
+
+    // Set a new `initialChildSize` which will trigger a size change because we
+    // haven't moved away initial size yet.
+    await tester.pumpWidget(_boilerplate(
+      null,
+      initialChildSize: .6,
+      controller: controller,
+      stackKey: stackKey,
+      containerKey: containerKey,
+    ));
+    expect(loggedSizes, <double>[.6].map((double v) => closeTo(v, precisionErrorTolerance)));
+    loggedSizes.clear();
+
+    // Move away from initial child size.
+    await tester.drag(find.text('Item 1'), Offset(0, .3 * screenHeight), touchSlopY: 0);
+    await tester.pumpAndSettle();
+    expect(loggedSizes, <double>[.3].map((double v) => closeTo(v, precisionErrorTolerance)));
+    loggedSizes.clear();
+
+    // Set a `minChildSize` greater than the current size.
+    await tester.pumpWidget(_boilerplate(
+      null,
+      minChildSize: .4,
+      controller: controller,
+      stackKey: stackKey,
+      containerKey: containerKey,
+    ));
+    expect(loggedSizes, <double>[.4].map((double v) => closeTo(v, precisionErrorTolerance)));
+    loggedSizes.clear();
+  });
+
+  testWidgets('Invalid controller interactions throw assertion errors', (WidgetTester tester) async {
+    final DraggableScrollableController controller = DraggableScrollableController();
+    // Can't use a controller before attaching it.
+    expect(() => controller.jumpTo(.1), throwsAssertionError);
+
+    expect(() => controller.pixels, throwsAssertionError);
+    expect(() => controller.size, throwsAssertionError);
+    expect(() => controller.pixelsToSize(0), throwsAssertionError);
+    expect(() => controller.sizeToPixels(0), throwsAssertionError);
+
+    await tester.pumpWidget(_boilerplate(
+      null,
+      controller: controller,
+    ));
+
+
+    // Can't jump or animate to invalid sizes.
+    expect(() => controller.jumpTo(-1), throwsAssertionError);
+    expect(() => controller.jumpTo(1.1), throwsAssertionError);
+    expect(
+      () => controller.animateTo(-1, duration: const Duration(milliseconds: 1), curve: Curves.linear),
+      throwsAssertionError,
+    );
+    expect(
+      () => controller.animateTo(1.1, duration: const Duration(milliseconds: 1), curve: Curves.linear),
+      throwsAssertionError,
+    );
+
+    // Can't use animateTo with a zero duration.
+    expect(() => controller.animateTo(.5, duration: Duration.zero, curve: Curves.linear), throwsAssertionError);
   });
 }

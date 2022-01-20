@@ -7,6 +7,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'debug.dart';
@@ -67,9 +68,8 @@ class AnnotationResult<T> {
   /// tree.
   ///
   /// It is similar to [entries] but does not contain other information.
-  Iterable<T> get annotations sync* {
-    for (final AnnotationEntry<T> entry in _entries)
-      yield entry.annotation;
+  Iterable<T> get annotations {
+    return _entries.map((AnnotationEntry<T> entry) => entry.annotation);
   }
 }
 
@@ -1764,11 +1764,16 @@ class OpacityLayer extends OffsetLayer {
   @override
   void addToScene(ui.SceneBuilder builder) {
     assert(alpha != null);
-    bool enabled = firstChild != null;  // don't add this layer if there's no child
+
+    // Don't add this layer if there's no child.
+    bool enabled = firstChild != null;
     if (!enabled) {
+      // Ensure the engineLayer is disposed.
+      engineLayer = null;
       // TODO(dnfield): Remove this if/when we can fix https://github.com/flutter/flutter/issues/90004
       return;
     }
+
     assert(() {
       enabled = enabled && !debugDisableOpacityLayers;
       return true;
@@ -2104,14 +2109,63 @@ class PhysicalModelLayer extends ContainerLayer {
 ///  * [RenderLeaderLayer] and [RenderFollowerLayer], the corresponding
 ///    render objects.
 class LayerLink {
-  /// The currently-registered [LeaderLayer], if any.
+  /// The [LeaderLayer] connected to this link.
   LeaderLayer? get leader => _leader;
   LeaderLayer? _leader;
 
-  /// The total size of [leader]'s contents.
+  void _registerLeader(LeaderLayer leader) {
+    assert(_leader != leader);
+    assert((){
+      if (_leader != null) {
+        _debugPreviousLeaders ??= <LeaderLayer>{};
+        _debugPreviousLeaders!.add(_leader!);
+        _debugScheduleLeadersCleanUpCheck();
+      }
+      return true;
+    }());
+    _leader = leader;
+  }
+
+  void _unregisterLeader(LeaderLayer leader) {
+    assert(_leader != null);
+    if (_leader == leader) {
+      _leader = null;
+    } else {
+      assert((){
+        _debugPreviousLeaders!.remove(leader);
+        return true;
+      }());
+    }
+  }
+
+  /// Stores the previous leaders that were replaced by the current [_leader]
+  /// in the current frame.
+  ///
+  /// These leaders need to give up their leaderships of this link by the end of
+  /// the current frame.
+  Set<LeaderLayer>? _debugPreviousLeaders;
+  bool _debugLeaderCheckScheduled = false;
+
+  /// Schedules the check as post frame callback to make sure the
+  /// [_debugPreviousLeaders] is empty.
+  void _debugScheduleLeadersCleanUpCheck() {
+    assert(_debugPreviousLeaders != null);
+    assert(() {
+      if (_debugLeaderCheckScheduled)
+        return true;
+      _debugLeaderCheckScheduled = true;
+      SchedulerBinding.instance!.addPostFrameCallback((Duration timeStamp) {
+        _debugLeaderCheckScheduled = false;
+        assert(_debugPreviousLeaders!.isEmpty);
+      });
+      return true;
+    }());
+  }
+
+  /// The total size of the content of the connected [LeaderLayer].
   ///
   /// Generally this should be set by the [RenderObject] that paints on the
-  /// registered [leader] layer (for instance a [RenderLeaderLayer] that shares
+  /// registered [LeaderLayer] (for instance a [RenderLeaderLayer] that shares
   /// this link with its followers). This size may be outdated before and during
   /// layout.
   Size? leaderSize;
@@ -2134,18 +2188,25 @@ class LeaderLayer extends ContainerLayer {
   ///
   /// The [offset] property must be non-null before the compositing phase of the
   /// pipeline.
-  LeaderLayer({ required LayerLink link, this.offset = Offset.zero }) : assert(link != null), _link = link;
+  LeaderLayer({ required LayerLink link, Offset offset = Offset.zero }) : assert(link != null), _link = link, _offset = offset;
 
   /// The object with which this layer should register.
   ///
   /// The link will be established when this layer is [attach]ed, and will be
   /// cleared when this layer is [detach]ed.
   LayerLink get link => _link;
+  LayerLink _link;
   set link(LayerLink value) {
     assert(value != null);
+    if (_link == value) {
+      return;
+    }
+    if (attached) {
+      _link._unregisterLeader(this);
+      value._registerLeader(this);
+    }
     _link = value;
   }
-  LayerLink _link;
 
   /// Offset from parent in the parent's coordinate system.
   ///
@@ -2154,34 +2215,30 @@ class LeaderLayer extends ContainerLayer {
   ///
   /// The [offset] property must be non-null before the compositing phase of the
   /// pipeline.
-  Offset offset;
-
-  /// {@macro flutter.rendering.FollowerLayer.alwaysNeedsAddToScene}
-  @override
-  bool get alwaysNeedsAddToScene => true;
+  Offset get offset => _offset;
+  Offset _offset;
+  set offset(Offset value) {
+    assert(value != null);
+    if (value == _offset) {
+      return;
+    }
+    _offset = value;
+    if (!alwaysNeedsAddToScene) {
+      markNeedsAddToScene();
+    }
+  }
 
   @override
   void attach(Object owner) {
     super.attach(owner);
-    assert(link.leader == null);
-    _lastOffset = null;
-    link._leader = this;
+    _link._registerLeader(this);
   }
 
   @override
   void detach() {
-    assert(link.leader == this);
-    link._leader = null;
-    _lastOffset = null;
+    _link._unregisterLeader(this);
     super.detach();
   }
-
-  /// The offset the last time this layer was composited.
-  ///
-  /// This is reset to null when the layer is attached or detached, to help
-  /// catch cases where the follower layer ends up before the leader layer, but
-  /// not every case can be detected.
-  Offset? _lastOffset;
 
   @override
   bool findAnnotations<S extends Object>(AnnotationResult<S> result, Offset localPosition, { required bool onlyFirst }) {
@@ -2191,14 +2248,13 @@ class LeaderLayer extends ContainerLayer {
   @override
   void addToScene(ui.SceneBuilder builder) {
     assert(offset != null);
-    _lastOffset = offset;
-    if (_lastOffset != Offset.zero)
+    if (offset != Offset.zero)
       engineLayer = builder.pushTransform(
-        Matrix4.translationValues(_lastOffset!.dx, _lastOffset!.dy, 0.0).storage,
+        Matrix4.translationValues(offset.dx, offset.dy, 0.0).storage,
         oldLayer: _engineLayer as ui.TransformEngineLayer?,
       );
     addChildrenToScene(builder);
-    if (_lastOffset != Offset.zero)
+    if (offset != Offset.zero)
       builder.pop();
   }
 
@@ -2211,9 +2267,8 @@ class LeaderLayer extends ContainerLayer {
   /// children.
   @override
   void applyTransform(Layer? child, Matrix4 transform) {
-    assert(_lastOffset != null);
-    if (_lastOffset != Offset.zero)
-      transform.translate(_lastOffset!.dx, _lastOffset!.dy);
+    if (offset != Offset.zero)
+      transform.translate(offset.dx, offset.dy);
   }
 
   @override
@@ -2321,7 +2376,7 @@ class FollowerLayer extends ContainerLayer {
 
   @override
   bool findAnnotations<S extends Object>(AnnotationResult<S> result, Offset localPosition, { required bool onlyFirst }) {
-    if (link.leader == null) {
+    if (_link.leader == null) {
       if (showWhenUnlinked!) {
         return super.findAnnotations(result, localPosition - unlinkedOffset!, onlyFirst: onlyFirst);
       }
@@ -2396,11 +2451,39 @@ class FollowerLayer extends ContainerLayer {
     return _pathsToCommonAncestor(a.parent, b.parent, ancestorsA, ancestorsB);
   }
 
+  bool _debugCheckLeaderBeforeFollower(
+    List<ContainerLayer> leaderToCommonAncestor,
+    List<ContainerLayer> followerToCommonAncestor,
+  ) {
+    if (followerToCommonAncestor.length <= 1) {
+      // Follower is the common ancestor, ergo the leader must come AFTER the follower.
+      return false;
+    }
+    if (leaderToCommonAncestor.length <= 1) {
+      // Leader is the common ancestor, ergo the leader must come BEFORE the follower.
+      return true;
+    }
+
+    // Common ancestor is neither the leader nor the follower.
+    final ContainerLayer leaderSubtreeBelowAncestor = leaderToCommonAncestor[leaderToCommonAncestor.length - 2];
+    final ContainerLayer followerSubtreeBelowAncestor = followerToCommonAncestor[followerToCommonAncestor.length - 2];
+
+    Layer? sibling = leaderSubtreeBelowAncestor;
+    while (sibling != null) {
+      if (sibling == followerSubtreeBelowAncestor) {
+        return true;
+      }
+      sibling = sibling.nextSibling;
+    }
+    // The follower subtree didn't come after the leader subtree.
+    return false;
+  }
+
   /// Populate [_lastTransform] given the current state of the tree.
   void _establishTransform() {
     assert(link != null);
     _lastTransform = null;
-    final LeaderLayer? leader = link.leader;
+    final LeaderLayer? leader = _link.leader;
     // Check to see if we are linked.
     if (leader == null)
       return;
@@ -2409,22 +2492,25 @@ class FollowerLayer extends ContainerLayer {
       leader.owner == owner,
       'Linked LeaderLayer anchor is not in the same layer tree as the FollowerLayer.',
     );
-    assert(
-      leader._lastOffset != null,
-      'LeaderLayer anchor must come before FollowerLayer in paint order, but the reverse was true.',
-    );
 
     // Stores [leader, ..., commonAncestor] after calling _pathsToCommonAncestor.
-    final List<ContainerLayer?> forwardLayers = <ContainerLayer>[leader];
+    final List<ContainerLayer> forwardLayers = <ContainerLayer>[leader];
     // Stores [this (follower), ..., commonAncestor] after calling
     // _pathsToCommonAncestor.
-    final List<ContainerLayer?> inverseLayers = <ContainerLayer>[this];
+    final List<ContainerLayer> inverseLayers = <ContainerLayer>[this];
 
     final Layer? ancestor = _pathsToCommonAncestor(
       leader, this,
       forwardLayers, inverseLayers,
     );
-    assert(ancestor != null);
+    assert(
+      ancestor != null,
+      'LeaderLayer and FollowerLayer do not have a common ancestor.',
+    );
+    assert(
+      _debugCheckLeaderBeforeFollower(forwardLayers, inverseLayers),
+      'LeaderLayer anchor must come before FollowerLayer in paint order, but the reverse was true.',
+    );
 
     final Matrix4 forwardTransform = _collectTransformForLayerChain(forwardLayers);
     // Further transforms the coordinate system to a hypothetical child (null)
@@ -2462,7 +2548,7 @@ class FollowerLayer extends ContainerLayer {
   void addToScene(ui.SceneBuilder builder) {
     assert(link != null);
     assert(showWhenUnlinked != null);
-    if (link.leader == null && !showWhenUnlinked!) {
+    if (_link.leader == null && !showWhenUnlinked!) {
       _lastTransform = null;
       _lastOffset = null;
       _inverseDirty = true;

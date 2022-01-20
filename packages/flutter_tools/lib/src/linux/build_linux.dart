@@ -15,7 +15,7 @@ import '../cmake.dart';
 import '../cmake_project.dart';
 import '../convert.dart';
 import '../flutter_plugins.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../migrations/cmake_custom_command_migration.dart';
 
 // Matches the following error and warning patterns:
@@ -29,15 +29,16 @@ final RegExp errorMatcher = RegExp(r'(?:(?:.*:\d+:\d+|clang):\s)?(fatal\s)?(?:er
 Future<void> buildLinux(
   LinuxProject linuxProject,
   BuildInfo buildInfo, {
-    String target = 'lib/main.dart',
+    String? target,
     SizeAnalyzer? sizeAnalyzer,
     bool needCrossBuild = false,
-    TargetPlatform targetPlatform = TargetPlatform.linux_x64,
+    required TargetPlatform targetPlatform,
     String targetSysroot = '/',
   }) async {
+  target ??= 'lib/main.dart';
   if (!linuxProject.cmakeFile.existsSync()) {
     throwToolExit('No Linux desktop project configured. See '
-      'https://flutter.dev/desktop#add-desktop-support-to-an-existing-flutter-app '
+      'https://docs.flutter.dev/desktop#add-desktop-support-to-an-existing-flutter-app '
       'to learn about adding Linux support to a project.');
   }
 

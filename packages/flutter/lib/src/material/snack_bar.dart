@@ -421,7 +421,7 @@ class _SnackBarState extends State<SnackBar> {
     final ColorScheme colorScheme = theme.colorScheme;
     final SnackBarThemeData snackBarTheme = theme.snackBarTheme;
     final bool isThemeDark = theme.brightness == Brightness.dark;
-    final Color buttonColor = isThemeDark ? colorScheme.primaryVariant : colorScheme.secondary;
+    final Color buttonColor = isThemeDark ? colorScheme.primary : colorScheme.secondary;
 
     // SnackBar uses a theme that is the opposite brightness from
     // the surrounding theme.
@@ -433,8 +433,6 @@ class _SnackBarState extends State<SnackBar> {
       colorScheme: ColorScheme(
         primary: colorScheme.onPrimary,
         primaryVariant: colorScheme.onPrimary,
-        // For the button color, the spec says it should be primaryVariant, but for
-        // backward compatibility on light themes we are leaving it as secondary.
         secondary: buttonColor,
         secondaryVariant: colorScheme.onSecondary,
         surface: colorScheme.onSurface,
@@ -614,7 +612,7 @@ class _SnackBarState extends State<SnackBar> {
 
     return Hero(
       tag: '<SnackBar Hero tag - ${widget.content}>',
-      child: ClipRect(child: snackBarTransition),
+      child: snackBarTransition,
     );
   }
 }

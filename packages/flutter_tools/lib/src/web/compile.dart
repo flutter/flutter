@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -13,7 +11,7 @@ import '../build_system/build_system.dart';
 import '../build_system/targets/web.dart';
 import '../cache.dart';
 import '../flutter_plugins.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../platform_plugins.dart';
 import '../plugins.dart';
 import '../project.dart';
@@ -26,7 +24,7 @@ Future<void> buildWeb(
   String serviceWorkerStrategy,
   bool sourceMaps,
   bool nativeNullAssertions,
-  String baseHref,
+  String? baseHref,
 ) async {
   final bool hasWebPlugins = (await findPlugins(flutterProject))
     .any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
@@ -37,7 +35,7 @@ Future<void> buildWeb(
   final Status status = globals.logger.startProgress('Compiling $target for the Web...');
   final Stopwatch sw = Stopwatch()..start();
   try {
-    final BuildResult result = await globals.buildSystem.build(WebServiceWorker(globals.fs), Environment(
+    final BuildResult result = await globals.buildSystem.build(WebServiceWorker(globals.fs, globals.cache), Environment(
       projectDir: globals.fs.currentDirectory,
       outputDir: outputDirectory,
       buildDir: flutterProject.directory
@@ -47,20 +45,21 @@ Future<void> buildWeb(
         kTargetFile: target,
         kHasWebPlugins: hasWebPlugins.toString(),
         kCspMode: csp.toString(),
-        kBaseHref : baseHref,
+        if (baseHref != null)
+          kBaseHref : baseHref,
         kSourceMapsEnabled: sourceMaps.toString(),
         kNativeNullAssertions: nativeNullAssertions.toString(),
         if (serviceWorkerStrategy != null)
          kServiceWorkerStrategy: serviceWorkerStrategy,
         ...buildInfo.toBuildSystemEnvironment(),
       },
-      artifacts: globals.artifacts,
+      artifacts: globals.artifacts!,
       fileSystem: globals.fs,
       logger: globals.logger,
       processManager: globals.processManager,
       platform: globals.platform,
       cacheDir: globals.cache.getRoot(),
-      engineVersion: globals.artifacts.isLocalEngine
+      engineVersion: globals.artifacts!.isLocalEngine
         ? null
         : globals.flutterVersion.engineRevision,
       flutterRootDir: globals.fs.directory(Cache.flutterRoot),

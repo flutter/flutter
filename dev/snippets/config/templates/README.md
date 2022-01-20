@@ -1,10 +1,21 @@
+## Templates are only used for Engine code samples.
+
+They should not be used in the Framework, since the code samples should reside
+in the [`examples/api`](../../../../examples/api) directory.
+
+If you are creating engine code samples, the following document may be of
+interest.
+
+Eventually, Engine code samples will also be converted to point to separate
+files as the framework does.
+
 ## Creating Code Snippets
 
 In general, creating application snippets can be accomplished with the following
-syntax inside of the dartdoc comment for a Flutter class/variable/enum/etc.:
+syntax inside the dartdoc comment for a Flutter class/variable/enum/etc.:
 
 ```dart
-/// {@tool snippet --template=stateful_widget}
+/// {@tool snippet}
 /// Any text outside of the code blocks will be accumulated and placed at the
 /// top of the snippet box as a description. Don't try and say "see the code
 /// above" or "see the code below", since the location of the description may

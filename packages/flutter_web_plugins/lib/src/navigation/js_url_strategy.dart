@@ -16,7 +16,7 @@ import 'dart:ui' as ui;
 import 'package:js/js.dart';
 import 'package:meta/meta.dart';
 
-import 'url_strategy.dart';
+import '../navigation_common/url_strategy.dart';
 
 typedef _JsSetUrlStrategy = void Function(JsUrlStrategy?);
 
@@ -33,7 +33,7 @@ typedef _PathGetter = String Function();
 
 typedef _StateGetter = Object? Function();
 
-typedef _AddPopStateListener = ui.VoidCallback Function(html.EventListener);
+typedef _AddPopStateListener = ui.VoidCallback Function(EventListener);
 
 typedef _StringToString = String Function(String);
 

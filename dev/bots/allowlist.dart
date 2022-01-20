@@ -47,12 +47,12 @@ const Set<String> kCorePackageAllowList = <String>{
   'js',
   'logging',
   'matcher',
+  'material_color_utilities',
   'meta',
   'mime',
   'node_preamble',
   'package_config',
   'path',
-  'pedantic', // resolving the pin on `test` should remove this, see https://github.com/dart-lang/test/issues/1594
   'pool',
   'pub_semver',
   'shelf',

@@ -1391,6 +1391,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   Completer<void>? _pendingFrame;
   bool _expectingFrame = false;
+  bool _expectingFrameToReassemble = false;
   bool _viewNeedsPaint = false;
   bool _runningAsyncTasks = false;
 
@@ -1426,12 +1427,19 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     super.scheduleForcedFrame();
   }
 
+  @override
+  Future<void> reassembleApplication() {
+    _expectingFrameToReassemble = true;
+    return super.reassembleApplication();
+  }
+
   bool? _doDrawThisFrame;
 
   @override
   void handleBeginFrame(Duration? rawTimeStamp) {
     assert(_doDrawThisFrame == null);
     if (_expectingFrame ||
+        _expectingFrameToReassemble ||
         (framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.fullyLive) ||
         (framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.benchmarkLive) ||
         (framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.benchmark) ||
@@ -1450,6 +1458,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
       super.handleDrawFrame();
     _doDrawThisFrame = null;
     _viewNeedsPaint = false;
+    _expectingFrameToReassemble = false;
     if (_expectingFrame) { // set during pump
       assert(_pendingFrame != null);
       _pendingFrame!.complete(); // unlocks the test API

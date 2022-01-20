@@ -43,6 +43,110 @@ void main() {
     });
   });
 
+  group('TextEditingValue', () {
+    group('replaced', () {
+      const String testText = 'From a false proposition, anything follows.';
+
+      test('selection deletion', () {
+        const TextSelection selection = TextSelection(baseOffset: 5, extentOffset: 13);
+        expect(
+          const TextEditingValue(text: testText, selection: selection).replaced(selection, ''),
+          const TextEditingValue(text:  'From proposition, anything follows.', selection: TextSelection.collapsed(offset: 5)),
+        );
+      });
+
+      test('reversed selection deletion', () {
+        const TextSelection selection = TextSelection(baseOffset: 13, extentOffset: 5);
+        expect(
+          const TextEditingValue(text: testText, selection: selection).replaced(selection, ''),
+          const TextEditingValue(text:  'From proposition, anything follows.', selection: TextSelection.collapsed(offset: 5)),
+        );
+      });
+
+      test('insert', () {
+        const TextSelection selection = TextSelection.collapsed(offset: 5);
+        expect(
+          const TextEditingValue(text: testText, selection: selection).replaced(selection, 'AA'),
+          const TextEditingValue(
+            text:  'From AAa false proposition, anything follows.',
+            // The caret moves to the end of the text inserted.
+            selection: TextSelection.collapsed(offset: 7),
+          ),
+        );
+      });
+
+      test('replace before selection', () {
+        const TextSelection selection = TextSelection(baseOffset: 13, extentOffset: 5);
+        expect(
+          // From |a false |proposition, anything follows.
+          // Replace the first whitespace with "AA".
+          const TextEditingValue(text: testText, selection: selection).replaced(const TextRange(start: 4, end: 5), 'AA'),
+          const TextEditingValue(text:  'FromAAa false proposition, anything follows.', selection: TextSelection(baseOffset: 14, extentOffset: 6)),
+        );
+      });
+
+      test('replace after selection', () {
+        const TextSelection selection = TextSelection(baseOffset: 13, extentOffset: 5);
+        expect(
+          // From |a false |proposition, anything follows.
+          // replace the first "p" with "AA".
+          const TextEditingValue(text: testText, selection: selection).replaced(const TextRange(start: 13, end: 14), 'AA'),
+          const TextEditingValue(text:  'From a false AAroposition, anything follows.', selection: selection),
+        );
+      });
+
+      test('replace inside selection - start boundary', () {
+        const TextSelection selection = TextSelection(baseOffset: 13, extentOffset: 5);
+        expect(
+          // From |a false |proposition, anything follows.
+          // replace the first "a" with "AA".
+          const TextEditingValue(text: testText, selection: selection).replaced(const TextRange(start: 5, end: 6), 'AA'),
+          const TextEditingValue(text:  'From AA false proposition, anything follows.', selection: TextSelection(baseOffset: 14, extentOffset: 5)),
+        );
+      });
+
+      test('replace inside selection - end boundary', () {
+        const TextSelection selection = TextSelection(baseOffset: 13, extentOffset: 5);
+        expect(
+          // From |a false |proposition, anything follows.
+          // replace the second whitespace with "AA".
+          const TextEditingValue(text: testText, selection: selection).replaced(const TextRange(start: 12, end: 13), 'AA'),
+          const TextEditingValue(text:  'From a falseAAproposition, anything follows.', selection: TextSelection(baseOffset: 14, extentOffset: 5)),
+        );
+      });
+
+      test('delete after selection', () {
+        const TextSelection selection = TextSelection(baseOffset: 13, extentOffset: 5);
+        expect(
+          // From |a false |proposition, anything follows.
+          // Delete the first "p".
+          const TextEditingValue(text: testText, selection: selection).replaced(const TextRange(start: 13, end: 14), ''),
+          const TextEditingValue(text:  'From a false roposition, anything follows.', selection: selection),
+        );
+      });
+
+      test('delete inside selection - start boundary', () {
+        const TextSelection selection = TextSelection(baseOffset: 13, extentOffset: 5);
+        expect(
+          // From |a false |proposition, anything follows.
+          // Delete the first "a".
+          const TextEditingValue(text: testText, selection: selection).replaced(const TextRange(start: 5, end: 6), ''),
+          const TextEditingValue(text:  'From  false proposition, anything follows.', selection: TextSelection(baseOffset: 12, extentOffset: 5)),
+        );
+      });
+
+      test('delete inside selection - end boundary', () {
+        const TextSelection selection = TextSelection(baseOffset: 13, extentOffset: 5);
+        expect(
+          // From |a false |proposition, anything follows.
+          // Delete the second whitespace.
+          const TextEditingValue(text: testText, selection: selection).replaced(const TextRange(start: 12, end: 13), ''),
+          const TextEditingValue(text:  'From a falseproposition, anything follows.', selection: TextSelection(baseOffset: 12, extentOffset: 5)),
+        );
+      });
+    });
+  });
+
   group('TextInput message channels', () {
     late FakeTextChannel fakeTextChannel;
 

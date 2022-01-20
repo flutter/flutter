@@ -82,6 +82,35 @@ class TestRenderingFlutterBinding extends BindingBase with SchedulerBinding, Ser
 
   EnginePhase phase = EnginePhase.composite;
 
+  /// Pumps a frame and runs its entire life cycle.
+  ///
+  /// This method runs all of the [SchedulerPhase]s in a frame, this is useful
+  /// to test [SchedulerPhase.postFrameCallbacks].
+  void pumpCompleteFrame() {
+    final FlutterExceptionHandler? oldErrorHandler = FlutterError.onError;
+    FlutterError.onError = (FlutterErrorDetails details) {
+      _errors.add(details);
+    };
+    try {
+      renderer.handleBeginFrame(null);
+      renderer.handleDrawFrame();
+    } finally {
+      FlutterError.onError = oldErrorHandler;
+      if (_errors.isNotEmpty) {
+        if (onErrors != null) {
+          onErrors!();
+          if (_errors.isNotEmpty) {
+            _errors.forEach(FlutterError.dumpErrorToConsole);
+            fail('There are more errors than the test inspected using TestRenderingFlutterBinding.takeFlutterErrorDetails.');
+          }
+        } else {
+          _errors.forEach(FlutterError.dumpErrorToConsole);
+          fail('Caught error while rendering frame. See preceding logs for details.');
+        }
+      }
+    }
+  }
+
   @override
   void drawFrame() {
     assert(phase != EnginePhase.build, 'rendering_tester does not support testing the build phase; use flutter_test instead');
@@ -124,7 +153,7 @@ class TestRenderingFlutterBinding extends BindingBase with SchedulerBinding, Ser
   }
 }
 
-late final TestRenderingFlutterBinding _renderer = TestRenderingFlutterBinding();
+final TestRenderingFlutterBinding _renderer = TestRenderingFlutterBinding();
 TestRenderingFlutterBinding get renderer => _renderer;
 
 
@@ -305,6 +334,7 @@ class TestClipPaintingContext extends PaintingContext {
     ClipRectLayer? oldLayer,
   }) {
     this.clipBehavior = clipBehavior;
+    return null;
   }
 
   Clip clipBehavior = Clip.none;

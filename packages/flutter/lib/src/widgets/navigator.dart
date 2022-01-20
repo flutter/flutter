@@ -2697,8 +2697,11 @@ class Navigator extends StatefulWidget {
 //                           \      /     /
 //                           idle--+-----+
 //                           /  \
-//                          /    \
-//                        pop*  remove*
+//                          /    +------+
+//                         /     |      |
+//                        /      |  complete*
+//                        |      |    /
+//                       pop*  remove*
 //                        /        \
 //                       /       removing#
 //                     popping#       |
@@ -2735,6 +2738,7 @@ enum _RouteLifecycle {
   //
   // routes that should be included in route announcement and should still listen to transition changes.
   pop, // we'll want to call didPop
+  complete, // we'll want to call didComplete,
   remove, // we'll want to run didReplace/didRemove etc
   // routes should not be included in route announcement but should still listen to transition changes.
   popping, // we're waiting for the route to call finalizeRoute to switch to dispose
@@ -2870,14 +2874,38 @@ class _RouteEntry extends RouteTransitionRecord {
     lastAnnouncedPoppedNextRoute = poppedRoute;
   }
 
-  void handlePop({ required NavigatorState navigator, required Route<dynamic>? previousPresent }) {
+  /// Process the to-be-popped route.
+  ///
+  /// A route can be marked for pop by transition delegate or Navigator.pop,
+  /// this method actually pops the route by calling Route.didPop.
+  ///
+  /// Returns true if the route is popped; otherwise, returns false if the route
+  /// refuses to be popped.
+  bool handlePop({ required NavigatorState navigator, required Route<dynamic>? previousPresent }) {
     assert(navigator != null);
     assert(navigator._debugLocked);
     assert(route._navigator == navigator);
     currentState = _RouteLifecycle.popping;
-    navigator._observedRouteDeletions.add(
-      _NavigatorPopObservation(route, previousPresent),
-    );
+    if (route._popCompleter.isCompleted) {
+      // This is a page-based route popped through the Navigator.pop. The
+      // didPop should have been called. No further action is needed.
+      assert(hasPage);
+      assert(pendingResult == null);
+      return true;
+    }
+    if (!route.didPop(pendingResult)) {
+      currentState = _RouteLifecycle.idle;
+      return false;
+    }
+    pendingResult = null;
+    return true;
+  }
+
+  void handleComplete() {
+    route.didComplete(pendingResult);
+    pendingResult = null;
+    assert(route._popCompleter.isCompleted); // implies didComplete was called
+    currentState = _RouteLifecycle.remove;
   }
 
   void handleRemoval({ required NavigatorState navigator, required Route<dynamic>? previousPresent }) {
@@ -2892,8 +2920,6 @@ class _RouteEntry extends RouteTransitionRecord {
     }
   }
 
-  bool doingPop = false;
-
   void didAdd({ required NavigatorState navigator, required bool isNewFirst}) {
     route.didAdd();
     currentState = _RouteLifecycle.idle;
@@ -2902,13 +2928,12 @@ class _RouteEntry extends RouteTransitionRecord {
     }
   }
 
+  Object? pendingResult;
+
   void pop<T>(T? result) {
     assert(isPresent);
-    doingPop = true;
-    if (route.didPop(result) && doingPop) {
-      currentState = _RouteLifecycle.pop;
-    }
-    doingPop = false;
+    pendingResult = result;
+    currentState = _RouteLifecycle.pop;
   }
 
   bool _reportRemovalToObserver = true;
@@ -2938,9 +2963,8 @@ class _RouteEntry extends RouteTransitionRecord {
       return;
     assert(isPresent);
     _reportRemovalToObserver = !isReplaced;
-    route.didComplete(result);
-    assert(route._popCompleter.isCompleted); // implies didComplete was called
-    currentState = _RouteLifecycle.remove;
+    pendingResult = result;
+    currentState = _RouteLifecycle.complete;
   }
 
   void finalize() {
@@ -3491,9 +3515,11 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   /// The overlay this navigator uses for its visual presentation.
   OverlayState? get overlay => _overlayKey.currentState;
 
-  Iterable<OverlayEntry> get _allRouteOverlayEntries sync* {
-    for (final _RouteEntry entry in _history)
-      yield* entry.route.overlayEntries;
+  Iterable<OverlayEntry> get _allRouteOverlayEntries {
+    return <OverlayEntry>[
+      for (final _RouteEntry entry in _history)
+        ...entry.route.overlayEntries,
+    ];
   }
 
   String? _lastAnnouncedRouteName;
@@ -3763,8 +3789,11 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     assert(() { _debugLocked = false; return true; }());
   }
 
+  bool _flushingHistory = false;
+
   void _flushHistoryUpdates({bool rearrangeOverlay = true}) {
     assert(_debugLocked && !_debugUpdatingPage);
+    _flushingHistory = true;
     // Clean up the list, sending updates to the routes that changed. Notably,
     // we don't send the didChangePrevious/didChangeNext updates to those that
     // did not change at this point, because we're not yet sure exactly what the
@@ -3828,21 +3857,35 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
           canRemoveOrAdd = true;
           break;
         case _RouteLifecycle.pop:
+          if (!entry.handlePop(
+                navigator: this,
+                previousPresent: _getRouteBefore(index, _RouteEntry.willBePresentPredicate)?.route)){
+            assert(entry.currentState == _RouteLifecycle.idle);
+            continue;
+          }
           if (!seenTopActiveRoute) {
             if (poppedRoute != null)
               entry.handleDidPopNext(poppedRoute);
             poppedRoute = entry.route;
           }
-          entry.handlePop(
-            navigator: this,
-            previousPresent: _getRouteBefore(index, _RouteEntry.willBePresentPredicate)?.route,
+          _observedRouteDeletions.add(
+            _NavigatorPopObservation(entry.route, _getRouteBefore(index, _RouteEntry.willBePresentPredicate)?.route),
           );
+          if (entry.currentState == _RouteLifecycle.dispose) {
+            // The pop finished synchronously. This can happen if transition
+            // duration is zero.
+            continue;
+          }
           assert(entry.currentState == _RouteLifecycle.popping);
           canRemoveOrAdd = true;
           break;
         case _RouteLifecycle.popping:
           // Will exit this state when animation completes.
           break;
+        case _RouteLifecycle.complete:
+          entry.handleComplete();
+          assert(entry.currentState == _RouteLifecycle.remove);
+          continue;
         case _RouteLifecycle.remove:
           if (!seenTopActiveRoute) {
             if (poppedRoute != null)
@@ -3877,7 +3920,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       entry = previous;
       previous = index > 0 ? _history[index - 1] : null;
     }
-
     // Informs navigator observers about route changes.
     _flushObserverNotifications();
 
@@ -3910,6 +3952,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     if (bucket != null) {
       _serializableHistory.update(_history);
     }
+    _flushingHistory = false;
   }
 
   void _flushObserverNotifications() {
@@ -4846,17 +4889,18 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     }());
     final _RouteEntry entry = _history.lastWhere(_RouteEntry.isPresentPredicate);
     if (entry.hasPage) {
-      if (widget.onPopPage!(entry.route, result))
+      if (widget.onPopPage!(entry.route, result) && entry.currentState == _RouteLifecycle.idle) {
+        // The entry may have been disposed if the pop finishes synchronously.
+        assert(entry.route._popCompleter.isCompleted);
         entry.currentState = _RouteLifecycle.pop;
+      }
     } else {
       entry.pop<T>(result);
+      assert (entry.currentState == _RouteLifecycle.pop);
     }
-    if (entry.currentState == _RouteLifecycle.pop) {
-      // Flush the history if the route actually wants to be popped (the pop
-      // wasn't handled internally).
+    if (entry.currentState == _RouteLifecycle.pop)
       _flushHistoryUpdates(rearrangeOverlay: false);
-      assert(entry.route._popCompleter.isCompleted);
-    }
+    assert(entry.currentState == _RouteLifecycle.idle || entry.route._popCompleter.isCompleted);
     assert(() {
       _debugLocked = false;
       return true;
@@ -4972,15 +5016,16 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     assert(() { wasDebugLocked = _debugLocked; _debugLocked = true; return true; }());
     assert(_history.where(_RouteEntry.isRoutePredicate(route)).length == 1);
     final _RouteEntry entry =  _history.firstWhere(_RouteEntry.isRoutePredicate(route));
-    if (entry.doingPop) {
-      // We were called synchronously from Route.didPop(), but didn't process
-      // the pop yet. Let's do that now before finalizing.
-      entry.currentState = _RouteLifecycle.pop;
-      _flushHistoryUpdates(rearrangeOverlay: false);
-    }
-    assert(entry.currentState != _RouteLifecycle.pop);
+    // For page-based route, the didPop can be called on any life cycle above
+    // pop.
+    assert(entry.currentState == _RouteLifecycle.popping ||
+          (entry.hasPage && entry.currentState.index < _RouteLifecycle.pop.index));
     entry.finalize();
-    _flushHistoryUpdates(rearrangeOverlay: false);
+    // finalizeRoute can be called during _flushHistoryUpdates if a pop
+    // finishes synchronously.
+    if (!_flushingHistory)
+      _flushHistoryUpdates(rearrangeOverlay: false);
+
     assert(() { _debugLocked = wasDebugLocked!; return true; }());
   }
 

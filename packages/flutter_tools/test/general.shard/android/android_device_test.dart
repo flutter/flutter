@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
@@ -459,15 +457,16 @@ Uptime: 441088659 Realtime: 521464097
 }
 
 AndroidDevice setUpAndroidDevice({
-  String id,
-  AndroidSdk androidSdk,
-  FileSystem fileSystem,
-  ProcessManager processManager,
-  Platform platform,
+  String? id,
+  AndroidSdk? androidSdk,
+  FileSystem? fileSystem,
+  ProcessManager? processManager,
+  Platform? platform,
   AndroidConsoleSocketFactory androidConsoleSocketFactory = kAndroidConsoleSocketFactory,
 }) {
   androidSdk ??= FakeAndroidSdk();
   return AndroidDevice(id ?? '1234',
+    modelID: 'TestModel',
     logger: BufferLogger.test(),
     platform: platform ?? FakePlatform(),
     androidSdk: androidSdk,

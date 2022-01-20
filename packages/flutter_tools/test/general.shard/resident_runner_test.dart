@@ -26,7 +26,7 @@ import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/device_port_forwarder.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/resident_devtools_handler.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
@@ -906,7 +906,7 @@ void main() {
     Usage: () => TestUsage(),
   }));
 
-  testUsingContext('ResidentRunner can remove breakpoints from paused isolate during hot restart', () => testbed.run(() async {
+  testUsingContext('ResidentRunner can remove breakpoints and exception-pause-mode from paused isolate during hot restart', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       listViews,
       listViews,
@@ -921,6 +921,13 @@ void main() {
       FakeVmServiceRequest(
         method: 'getVM',
         jsonResponse: vm_service.VM.parse(<String, Object>{}).toJson(),
+      ),
+      const FakeVmServiceRequest(
+        method: 'setIsolatePauseMode',
+        args: <String, String>{
+          'isolateId': '1',
+          'exceptionPauseMode': 'None',
+        }
       ),
       const FakeVmServiceRequest(
         method: 'removeBreakpoint',
@@ -1187,6 +1194,82 @@ void main() {
 
     await residentRunner.runSourceGenerators();
 
+    expect(testLogger.errorText, isEmpty);
+    expect(testLogger.statusText, isEmpty);
+  }));
+
+  testUsingContext('generated main uses correct target', () => testbed.run(() async {
+    final File arbFile = globals.fs.file(globals.fs.path.join('lib', 'l10n', 'app_en.arb'))
+      ..createSync(recursive: true);
+    arbFile.writeAsStringSync('''
+{
+  "helloWorld": "Hello, World!",
+  "@helloWorld": {
+    "description": "Sample description"
+  }
+}''');
+    globals.fs.file('l10n.yaml').createSync();
+    globals.fs.file('pubspec.yaml').writeAsStringSync('''
+flutter:
+  generate: true
+
+dependencies:
+  flutter:
+    sdk: flutter
+  path_provider_linux: 1.0.0
+''');
+
+    // Create necessary files for [DartPluginRegistrantTarget], including a
+    // plugin that will trigger generation.
+    final File packageConfig = globals.fs.directory('.dart_tool')
+        .childFile('package_config.json');
+    packageConfig.createSync(recursive: true);
+    packageConfig.writeAsStringSync('''
+{
+  "configVersion": 2,
+  "packages": [
+    {
+      "name": "path_provider_linux",
+      "rootUri": "../path_provider_linux",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    }
+  ]
+}
+''');
+    globals.fs.file('.packages').writeAsStringSync('''
+path_provider_linux:/path_provider_linux/lib/
+''');
+    final Directory fakePluginDir = globals.fs.directory('path_provider_linux');
+    final File pluginPubspec = fakePluginDir.childFile('pubspec.yaml');
+    pluginPubspec.createSync(recursive: true);
+    pluginPubspec.writeAsStringSync('''
+name: path_provider_linux
+
+flutter:
+  plugin:
+    implements: path_provider
+    platforms:
+      linux:
+        dartPluginClass: PathProviderLinux
+''');
+
+    residentRunner = HotRunner(
+        <FlutterDevice>[
+          flutterDevice,
+        ],
+        stayResident: false,
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+        target: 'custom_main.dart',
+        devtoolsHandler: createNoOpHandler,
+      );
+    await residentRunner.runSourceGenerators();
+
+    final File generatedMain = globals.fs.directory('.dart_tool')
+        .childDirectory('flutter_build')
+        .childFile('generated_main.dart');
+
+    expect(generatedMain.readAsStringSync(), contains('custom_main.dart'));
     expect(testLogger.errorText, isEmpty);
     expect(testLogger.statusText, isEmpty);
   }));

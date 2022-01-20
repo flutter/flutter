@@ -688,15 +688,15 @@ class KeyEventSimulator {
             result.complete(false);
             return;
           }
-          final Map<String, dynamic> decoded = SystemChannels.keyEvent.codec.decodeMessage(data) as Map<String, dynamic>;
-          result.complete(decoded['handled'] as bool);
+          final Map<String, Object?> decoded = SystemChannels.keyEvent.codec.decodeMessage(data)! as Map<String, dynamic>;
+          result.complete(decoded['handled']! as bool);
         }
       );
       return result.future;
     });
   }
 
-  static late final Map<String, PhysicalKeyboardKey> _debugNameToPhysicalKey = (() {
+  static final Map<String, PhysicalKeyboardKey> _debugNameToPhysicalKey = (() {
     final Map<String, PhysicalKeyboardKey> result = <String, PhysicalKeyboardKey>{};
     for (final PhysicalKeyboardKey key in PhysicalKeyboardKey.knownPhysicalKeys) {
       final String? debugName = key.debugName;

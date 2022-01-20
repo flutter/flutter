@@ -797,11 +797,13 @@ class _MaterialAppState extends State<MaterialApp> {
   // of a particular LocalizationsDelegate.type is loaded so the
   // localizationsDelegate parameter can be used to override
   // _MaterialLocalizationsDelegate.
-  Iterable<LocalizationsDelegate<dynamic>> get _localizationsDelegates sync* {
-    if (widget.localizationsDelegates != null)
-      yield* widget.localizationsDelegates!;
-    yield DefaultMaterialLocalizations.delegate;
-    yield DefaultCupertinoLocalizations.delegate;
+  Iterable<LocalizationsDelegate<dynamic>> get _localizationsDelegates {
+    return <LocalizationsDelegate<dynamic>>[
+      if (widget.localizationsDelegates != null)
+        ...widget.localizationsDelegates!,
+      DefaultMaterialLocalizations.delegate,
+      DefaultCupertinoLocalizations.delegate,
+    ];
   }
 
   Widget _inspectorSelectButtonBuilder(BuildContext context, VoidCallback onPressed) {

@@ -16,7 +16,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/flutter_cache.dart';
-import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:meta/meta.dart';
 import 'package:test/fake.dart';
 
@@ -137,7 +137,7 @@ void main() {
       final FakeSimpleArtifact artifact = FakeSimpleArtifact(cache);
       await artifact.update(FakeArtifactUpdater(), logger, fileSystem, FakeOperatingSystemUtils());
 
-      expect(logger.errorText, contains('stamp write failed'));
+      expect(logger.warningText, contains('stamp write failed'));
     });
 
     testWithoutContext('Continues on missing version file', () async {
@@ -153,7 +153,7 @@ void main() {
       final FakeSimpleArtifact artifact = FakeSimpleArtifact(cache);
       await artifact.update(FakeArtifactUpdater(), logger, fileSystem, FakeOperatingSystemUtils());
 
-      expect(logger.errorText, contains('No known version for the artifact name "fake"'));
+      expect(logger.warningText, contains('No known version for the artifact name "fake"'));
     });
 
     testWithoutContext('Gradle wrapper should not be up to date, if some cached artifact is not available', () {
@@ -725,18 +725,22 @@ void main() {
 
     cache.clearStampFiles();
 
-    expect(logger.errorText, contains('Failed to delete some stamp files'));
+    expect(logger.warningText, contains('Failed to delete some stamp files'));
   });
 
   testWithoutContext('FlutterWebSdk fetches web artifacts and deletes previous directory contents', () async {
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
-    final File canvasKitVersionFile = fileSystem.currentDirectory
+    final Directory internalDir = fileSystem.currentDirectory
       .childDirectory('cache')
       .childDirectory('bin')
-      .childDirectory('internal')
-      .childFile('canvaskit.version');
+      .childDirectory('internal');
+    final File canvasKitVersionFile = internalDir.childFile('canvaskit.version');
     canvasKitVersionFile.createSync(recursive: true);
     canvasKitVersionFile.writeAsStringSync('abcdefg');
+
+    final File engineVersionFile = internalDir.childFile('engine.version');
+    engineVersionFile.createSync(recursive: true);
+    engineVersionFile.writeAsStringSync('hijklmnop');
 
     final Cache cache = Cache.test(processManager: FakeProcessManager.any(), fileSystem: fileSystem);
     final Directory webCacheDirectory = cache.getWebSdkDirectory();
@@ -763,7 +767,7 @@ void main() {
     ]);
 
     expect(downloads, <String>[
-      'https://storage.googleapis.com/flutter_infra_release/flutter/null/flutter-web-sdk-linux-x64.zip',
+      'https://storage.googleapis.com/flutter_infra_release/flutter/hijklmnop/flutter-web-sdk-linux-x64.zip',
       'https://chrome-infra-packages.appspot.com/dl/flutter/web/canvaskit_bundle/+/abcdefg',
     ]);
 
@@ -774,6 +778,51 @@ void main() {
 
     expect(webCacheDirectory.childFile('foo'), exists);
     expect(webCacheDirectory.childFile('bar'), isNot(exists));
+  });
+
+  testWithoutContext('FlutterWebSdk CanvasKit URL can be overridden via FLUTTER_STORAGE_BASE_URL', () async {
+    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+    final Directory internalDir = fileSystem.currentDirectory
+      .childDirectory('cache')
+      .childDirectory('bin')
+      .childDirectory('internal');
+    final File canvasKitVersionFile = internalDir.childFile('canvaskit.version');
+    canvasKitVersionFile.createSync(recursive: true);
+    canvasKitVersionFile.writeAsStringSync('abcdefg');
+
+    final File engineVersionFile = internalDir.childFile('engine.version');
+    engineVersionFile.createSync(recursive: true);
+    engineVersionFile.writeAsStringSync('hijklmnop');
+
+    final Cache cache = Cache.test(
+      processManager: FakeProcessManager.any(),
+      fileSystem: fileSystem,
+      platform: FakePlatform(
+        environment: <String, String>{
+          'FLUTTER_STORAGE_BASE_URL': 'https://flutter.storage.com/override'
+        },
+      ),
+    );
+    final Directory webCacheDirectory = cache.getWebSdkDirectory();
+    final FakeArtifactUpdater artifactUpdater = FakeArtifactUpdater();
+    final FlutterWebSdk webSdk = FlutterWebSdk(cache, platform: FakePlatform());
+
+    final List<String> downloads = <String>[];
+    final List<String> locations = <String>[];
+    artifactUpdater.onDownloadZipArchive = (String message, Uri uri, Directory location) {
+      downloads.add(uri.toString());
+      locations.add(location.path);
+      location.createSync(recursive: true);
+      location.childFile('foo').createSync();
+    };
+    webCacheDirectory.childFile('bar').createSync(recursive: true);
+
+    await webSdk.updateInner(artifactUpdater, fileSystem, FakeOperatingSystemUtils());
+
+    expect(downloads, <String>[
+      'https://flutter.storage.com/override/flutter_infra_release/flutter/hijklmnop/flutter-web-sdk-linux-x64.zip',
+      'https://flutter.storage.com/override/flutter_infra_release/cipd/flutter/web/canvaskit_bundle/+/abcdefg'
+    ]);
   });
 
   testWithoutContext('FlutterWebSdk uses tryToDelete to handle directory edge cases', () async {
@@ -894,6 +943,12 @@ void main() {
     expect(pub.calledGet, 1);
   });
 
+  testUsingContext('Check current DevTools version', () async {
+    final String currentDevToolsVersion = globals.cache.devToolsVersion;
+    final RegExp devToolsVersionFormat = RegExp(r'\d+\.\d+\.\d+(?:-\S+)?');
+    expect(devToolsVersionFormat.allMatches(currentDevToolsVersion).length, 1,);
+  });
+
   // Check that the build number matches the format documented here:
   // https://dart.dev/get-dart#release-channels
   testUsingContext('Check current Dart SDK build number', () async {
@@ -923,18 +978,23 @@ void main() {
     });
 
     testUsingContext('AndroidMavenArtifacts can invoke Gradle resolve dependencies if Android SDK is present', () async {
+      final String oldRoot = Cache.flutterRoot;
       Cache.flutterRoot = '';
-      final AndroidMavenArtifacts mavenArtifacts = AndroidMavenArtifacts(cache, platform: FakePlatform());
-      expect(await mavenArtifacts.isUpToDate(memoryFileSystem), isFalse);
+      try {
+        final AndroidMavenArtifacts mavenArtifacts = AndroidMavenArtifacts(cache, platform: FakePlatform());
+        expect(await mavenArtifacts.isUpToDate(memoryFileSystem), isFalse);
 
-      final Directory gradleWrapperDir = cache.getArtifactDirectory('gradle_wrapper')..createSync(recursive: true);
-      gradleWrapperDir.childFile('gradlew').writeAsStringSync('irrelevant');
-      gradleWrapperDir.childFile('gradlew.bat').writeAsStringSync('irrelevant');
+        final Directory gradleWrapperDir = cache.getArtifactDirectory('gradle_wrapper')..createSync(recursive: true);
+        gradleWrapperDir.childFile('gradlew').writeAsStringSync('irrelevant');
+        gradleWrapperDir.childFile('gradlew.bat').writeAsStringSync('irrelevant');
 
-      await mavenArtifacts.update(FakeArtifactUpdater(), BufferLogger.test(), memoryFileSystem, FakeOperatingSystemUtils());
+        await mavenArtifacts.update(FakeArtifactUpdater(), BufferLogger.test(), memoryFileSystem, FakeOperatingSystemUtils());
 
-      expect(await mavenArtifacts.isUpToDate(memoryFileSystem), isFalse);
-      expect(fakeAndroidSdk.reinitialized, true);
+        expect(await mavenArtifacts.isUpToDate(memoryFileSystem), isFalse);
+        expect(fakeAndroidSdk.reinitialized, true);
+      } finally {
+        Cache.flutterRoot = oldRoot;
+      }
     }, overrides: <Type, Generator>{
       Cache: () => cache,
       FileSystem: () => memoryFileSystem,
@@ -1060,7 +1120,7 @@ class FakeSecondaryCache extends Fake implements Cache {
   Directory getArtifactDirectory(String name) => artifactDirectory;
 
   @override
-  Directory getCacheDir(String name) {
+  Directory getCacheDir(String name, { bool shouldCreate = true }) {
     return artifactDirectory.childDirectory(name);
   }
 

@@ -7,7 +7,7 @@ import '../../base/build.dart';
 import '../../base/deferred_component.dart';
 import '../../base/file_system.dart';
 import '../../build_info.dart';
-import '../../globals_null_migrated.dart' as globals show xcode;
+import '../../globals.dart' as globals show xcode;
 import '../../project.dart';
 import '../build_system.dart';
 import '../depfile.dart';

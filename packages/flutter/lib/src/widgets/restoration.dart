@@ -621,7 +621,7 @@ mixin RestorationMixin<S extends StatefulWidget> on State<S> {
   /// The restoration ID is used to claim a child [RestorationScope] from the
   /// surrounding [RestorationScope] (accessed via [RestorationScope.of]) and
   /// the ID must be unique in that scope (otherwise an exception is triggered
-  /// in debug move).
+  /// in debug mode).
   ///
   /// State restoration for this mixin is turned off when this getter returns
   /// null or when there is no surrounding [RestorationScope] available. When

@@ -792,6 +792,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
         SystemChannels.navigation,
         (MethodCall methodCall) async {
           log.add(methodCall);
+	  return null;
         }
       );
     final RouteInformationProvider provider = PlatformRouteInformationProvider(

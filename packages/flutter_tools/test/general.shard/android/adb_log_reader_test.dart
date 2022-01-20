@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:flutter_tools/src/android/android_device.dart';
@@ -183,7 +181,7 @@ void main() {
   });
 }
 
-AndroidDevice createFakeDevice(int sdkLevel) {
+AndroidDevice createFakeDevice(int? sdkLevel) {
   return FakeAndroidDevice(
     sdkLevel.toString(),
     kLastLogcatTimestamp,

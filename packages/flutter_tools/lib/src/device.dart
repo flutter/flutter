@@ -444,10 +444,10 @@ abstract class Device {
   final String id;
 
   /// The [Category] for this device type.
-  final Category category;
+  final Category? category;
 
   /// The [PlatformType] for this device.
-  final PlatformType platformType;
+  final PlatformType? platformType;
 
   /// Whether this is an ephemeral device.
   final bool ephemeral;
@@ -490,7 +490,7 @@ abstract class Device {
   /// Specify [userIdentifier] to check if installed for a particular user (Android only).
   Future<bool> isAppInstalled(
     covariant ApplicationPackage app, {
-    String userIdentifier,
+    String? userIdentifier,
   });
 
   /// Check if the latest build of the [app] is already installed.
@@ -635,9 +635,9 @@ abstract class Device {
   @override
   String toString() => name;
 
-  static Stream<String> descriptions(List<Device> devices) async* {
+  static Future<List<String>> descriptions(List<Device> devices) async {
     if (devices.isEmpty) {
-      return;
+      return const <String>[];
     }
 
     // Extract device information
@@ -665,13 +665,14 @@ abstract class Device {
     }
 
     // Join columns into lines of text
-    for (final List<String> row in table) {
-      yield indices.map<String>((int i) => row[i].padRight(widths[i])).followedBy(<String>[row.last]).join(' • ');
-    }
+    return <String>[
+      for (final List<String> row in table)
+        indices.map<String>((int i) => row[i].padRight(widths[i])).followedBy(<String>[row.last]).join(' • '),
+    ];
   }
 
   static Future<void> printDevices(List<Device> devices, Logger logger) async {
-    await descriptions(devices).forEach(logger.printStatus);
+    (await descriptions(devices)).forEach(logger.printStatus);
   }
 
   static List<String> devicesPlatformTypes(List<Device> devices) {
@@ -762,6 +763,7 @@ class DebuggingOptions {
     this.webRunHeadless = false,
     this.webBrowserDebugPort,
     this.webEnableExpressionEvaluation = false,
+    this.webLaunchUrl,
     this.vmserviceOutFile,
     this.fastStart = false,
     this.nullAssertions = false,
@@ -778,6 +780,7 @@ class DebuggingOptions {
       this.webUseSseForInjectedClient = true,
       this.webRunHeadless = false,
       this.webBrowserDebugPort,
+      this.webLaunchUrl,
       this.cacheSkSL = false,
       this.traceAllowlist,
     }) : debuggingEnabled = false,
@@ -850,6 +853,9 @@ class DebuggingOptions {
 
   /// Enable expression evaluation for web target.
   final bool webEnableExpressionEvaluation;
+
+  /// Allow developers to customize the browser's launch URL
+  final String? webLaunchUrl;
 
   /// A file where the VM Service URL should be written after the application is started.
   final String? vmserviceOutFile;

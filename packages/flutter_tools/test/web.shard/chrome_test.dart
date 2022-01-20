@@ -490,6 +490,15 @@ void main() {
   });
 
   testWithoutContext('gives up retrying when an error happens more than 3 times', () async {
+    final BufferLogger logger = BufferLogger.test();
+    final ChromiumLauncher chromiumLauncher = ChromiumLauncher(
+      fileSystem: fileSystem,
+      platform: platform,
+      processManager: processManager,
+      operatingSystemUtils: operatingSystemUtils,
+      browserFinder: findChromeExecutable,
+      logger: logger,
+    );
     for (int i = 0; i < 4; i++) {
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -508,13 +517,14 @@ void main() {
     }
 
     await expectToolExitLater(
-      chromeLauncher.launch(
+      chromiumLauncher.launch(
         'example_url',
         skipCheck: true,
         headless: true,
       ),
       contains('Failed to launch browser.'),
     );
+    expect(logger.errorText, contains('nothing in the std error indicating glibc error'));
   });
 
   testWithoutContext('Logs an error and exits if connection check fails.', () async {
