@@ -1590,7 +1590,8 @@ class Scaffold extends StatefulWidget {
   ///
   /// To open the drawer, use the [ScaffoldState.openDrawer] function.
   ///
-  /// To close the drawer, use [Navigator.pop].
+  /// To close the drawer, use either [ScaffoldState.closeDrawer] or
+  /// [Navigator.pop].
   ///
   /// {@tool dartpad}
   /// To disable the drawer edge swipe, set the
@@ -1613,7 +1614,8 @@ class Scaffold extends StatefulWidget {
   ///
   /// To open the drawer, use the [ScaffoldState.openEndDrawer] function.
   ///
-  /// To close the drawer, use [Navigator.pop].
+  /// To close the drawer, use either [ScaffoldState.closeEndDrawer] or
+  /// [Navigator.pop].
   ///
   /// {@tool dartpad}
   /// To disable the drawer edge swipe, set the
@@ -2302,6 +2304,20 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
         });
         return true;
       }());
+    }
+  }
+
+  /// Close Drawer if opened if it is currently opened.
+  void closeDrawer() {
+   if (hasDrawer && isDrawerOpen) {
+     _drawerKey.currentState!.close();
+   }
+  }
+
+  /// Closes the EndDrawer if it is currently opened.
+  void closeEndDrawer() {
+    if (hasEndDrawer && isEndDrawerOpen) {
+      _endDrawerKey.currentState!.close();
     }
   }
 
