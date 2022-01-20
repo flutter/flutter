@@ -60,9 +60,6 @@ class ListenableEditingState extends SpannableStringBuilder {
   public ListenableEditingState(
       @Nullable TextInputChannel.TextEditState initialState, @NonNull View view) {
     super();
-    if (initialState != null) {
-      setEditingState(initialState);
-    }
 
     Editable self = this;
     mDummyConnection =
@@ -72,6 +69,10 @@ class ListenableEditingState extends SpannableStringBuilder {
             return self;
           }
         };
+
+    if (initialState != null) {
+      setEditingState(initialState);
+    }
   }
 
   public ArrayList<TextEditingDelta> extractBatchTextEditingDeltas() {
