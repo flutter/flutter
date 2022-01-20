@@ -168,8 +168,9 @@ void Animator::BeginFrame(
           if (notify_idle_task_id == self->notify_idle_task_id_ &&
               !self->frame_scheduled_) {
             TRACE_EVENT0("flutter", "BeginFrame idle callback");
-            self->delegate_.OnAnimatorNotifyIdle(Dart_TimelineGetMicros() +
-                                                 100000);
+            self->delegate_.OnAnimatorNotifyIdle(
+                FxlToDartOrEarlier(fml::TimePoint::Now() +
+                                   fml::TimeDelta::FromMicroseconds(100000)));
           }
         },
         kNotifyIdleTaskWaitTime);
@@ -274,8 +275,7 @@ void Animator::AwaitVSync() {
         }
       });
   if (has_rendered_) {
-    delegate_.OnAnimatorNotifyIdle(
-        dart_frame_deadline_.ToEpochDelta().ToMicroseconds());
+    delegate_.OnAnimatorNotifyIdle(dart_frame_deadline_);
   }
 }
 

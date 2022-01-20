@@ -539,15 +539,12 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   ///             collection, just gives the Dart VM more hints about opportune
   ///             moments to perform collections.
   ///
-  //  TODO(chinmaygarde): This should just use fml::TimePoint instead of having
-  //  to remember that the unit is microseconds (which is no used anywhere else
-  //  in the engine).
   ///
-  /// @param[in]  deadline  The deadline as a timepoint in microseconds measured
-  ///                       against the system monotonic clock. Use
-  ///                       `Dart_TimelineGetMicros()`, for consistency.
+  /// @param[in]  deadline  The deadline is used by the VM to determine if the
+  ///                       corresponding sweep can be performed within the
+  ///                       deadline.
   ///
-  void NotifyIdle(int64_t deadline);
+  void NotifyIdle(fml::TimePoint deadline);
 
   //----------------------------------------------------------------------------
   /// @brief      Dart code cannot fully measure the time it takes for a

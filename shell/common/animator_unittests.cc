@@ -23,7 +23,7 @@ class FakeAnimatorDelegate : public Animator::Delegate {
   void OnAnimatorBeginFrame(fml::TimePoint frame_target_time,
                             uint64_t frame_number) override {}
 
-  void OnAnimatorNotifyIdle(int64_t deadline) override {
+  void OnAnimatorNotifyIdle(fml::TimePoint deadline) override {
     notify_idle_called_ = true;
   }
 

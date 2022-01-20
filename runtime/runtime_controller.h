@@ -350,13 +350,12 @@ class RuntimeController : public PlatformConfigurationClient {
   /// @bug        The `deadline` argument must be converted to `std::chrono`
   ///             instead of a raw integer.
   ///
-  /// @param[in]  deadline  The deadline measures in microseconds against the
-  ///             system's monotonic time. The clock can be accessed via
-  ///             `Dart_TimelineGetMicros`.
+  /// @param[in]  deadline  The deadline is used by the VM to determine if the
+  ///             corresponding sweep can be performed within the deadline.
   ///
   /// @return     If the idle notification was forwarded to the running isolate.
   ///
-  virtual bool NotifyIdle(int64_t deadline);
+  virtual bool NotifyIdle(fml::TimePoint deadline);
 
   //----------------------------------------------------------------------------
   /// @brief      Returns if the root isolate is running. The isolate must be
