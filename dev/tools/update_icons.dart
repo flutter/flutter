@@ -518,6 +518,10 @@ class _Icon {
         );
       }
     }
+    
+    // Prevent double understcores.
+    flutterId = flutterId.replaceAll('__', '_');
+    
     return flutterId;
   }
 }
