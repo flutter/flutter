@@ -6,8 +6,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/physics.dart';
-import 'package:flutter/src/widgets/scroll_position.dart';
 import 'scroll_activity.dart';
+import 'scroll_position.dart';
 
 /// Extension of ScrollSimulation
 mixin ScrollSimulationMixin {
@@ -194,7 +194,7 @@ class BouncingScrollSimulation extends Simulation with ScrollSimulationMixin {
 /// See also:
 ///
 ///  * [BouncingScrollSimulation], which implements iOS scroll physics.
-///
+//
 // This class is based on Scroller.java from Android:
 //   https://android.googlesource.com/platform/frameworks/base/+/master/core/java/android/widget
 //
@@ -228,10 +228,10 @@ class ClampingScrollSimulation extends Simulation {
   late double _duration;
   late double _distance;
 
-  /// See DECELERATION_RATE.
+  // See DECELERATION_RATE.
   static final double _kDecelerationRate = math.log(0.78) / math.log(0.9);
 
-  /// See computeDeceleration().
+  // See computeDeceleration().
   static double _decelerationForFriction(double friction) {
     return friction * 61774.04968;
   }
