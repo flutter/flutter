@@ -224,7 +224,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
     } else if (widget.scrollController == null && oldWidget.scrollController != null) {
       assert(_controller == null);
       _controller = FixedExtentScrollController();
-    }    
+    }
   }
 
   @override

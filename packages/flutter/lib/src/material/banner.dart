@@ -234,7 +234,7 @@ class _MaterialBannerState extends State<MaterialBanner> {
     if (widget.animation != oldWidget.animation) {
       oldWidget.animation?.removeStatusListener(_onAnimationStatusChanged);
       widget.animation?.addStatusListener(_onAnimationStatusChanged);
-    }  
+    }
   }
 
   @override

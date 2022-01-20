@@ -1092,7 +1092,7 @@ class _BackButtonListenerState extends State<BackButtonListener> {
       dispatcher?.removeCallback(oldWidget.onBackButtonPressed);
       dispatcher?.addCallback(widget.onBackButtonPressed);
       dispatcher?.takePriority();
-    }  
+    }
   }
 
   @override
