@@ -1681,8 +1681,8 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
           results.add(node.onKeyEvent!(node, event));
         }
       }
-      if (node.onKey != null) {
-        results.add(node.onKey!(node, message.rawEvent));
+      if (node.onKey != null && message.rawEvent != null) {
+        results.add(node.onKey!(node, message.rawEvent!));
       }
       final KeyEventResult result = combineKeyEventResults(results);
       switch (result) {

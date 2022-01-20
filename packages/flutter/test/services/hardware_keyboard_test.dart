@@ -195,6 +195,89 @@ void main() {
     logs.clear();
   }, variant: KeySimulatorTransitModeVariant.all());
 
+  testWidgets('Instantly dispatch synthesized key events when the queue is empty', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+    final List<int> logs = <int>[];
+
+    await tester.pumpWidget(
+      KeyboardListener(
+        autofocus: true,
+        focusNode: focusNode,
+        child: Container(),
+        onKeyEvent: (KeyEvent event) {
+          logs.add(1);
+        },
+      ),
+    );
+    ServicesBinding.instance!.keyboard.addHandler((KeyEvent event) {
+      logs.add(2);
+      return false;
+    });
+
+    // Dispatch a solitary synthesized event.
+    expect(ServicesBinding.instance!.keyEventManager.handleKeyData(ui.KeyData(
+      timeStamp: Duration.zero,
+      type: ui.KeyEventType.down,
+      logical: LogicalKeyboardKey.keyA.keyId,
+      physical: PhysicalKeyboardKey.keyA.usbHidUsage,
+      character: null,
+      synthesized: true,
+    )), false);
+    expect(logs, <int>[2, 1]);
+    logs.clear();
+  }, variant: KeySimulatorTransitModeVariant.keyDataThenRawKeyData());
+
+  testWidgets('Postpone synthesized key events when the queue is not empty', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+    final List<String> logs = <String>[];
+
+    await tester.pumpWidget(
+      RawKeyboardListener(
+        focusNode: FocusNode(),
+        onKey: (RawKeyEvent event) {
+          logs.add('${event.runtimeType}');
+        },
+        child: KeyboardListener(
+          autofocus: true,
+          focusNode: focusNode,
+          child: Container(),
+          onKeyEvent: (KeyEvent event) {
+            logs.add('${event.runtimeType}');
+          },
+        ),
+      ),
+    );
+
+    // On macOS, a CapsLock tap yields a down event and a synthesized up event.
+    expect(ServicesBinding.instance!.keyEventManager.handleKeyData(ui.KeyData(
+      timeStamp: Duration.zero,
+      type: ui.KeyEventType.down,
+      logical: LogicalKeyboardKey.capsLock.keyId,
+      physical: PhysicalKeyboardKey.capsLock.usbHidUsage,
+      character: null,
+      synthesized: false,
+    )), false);
+    expect(ServicesBinding.instance!.keyEventManager.handleKeyData(ui.KeyData(
+      timeStamp: Duration.zero,
+      type: ui.KeyEventType.up,
+      logical: LogicalKeyboardKey.capsLock.keyId,
+      physical: PhysicalKeyboardKey.capsLock.usbHidUsage,
+      character: null,
+      synthesized: true,
+    )), false);
+    expect(await ServicesBinding.instance!.keyEventManager.handleRawKeyMessage(<String, dynamic>{
+      'type': 'keydown',
+      'keymap': 'macos',
+      'keyCode': 0x00000039,
+      'characters': '',
+      'charactersIgnoringModifiers': '',
+      'modifiers': 0x10000,
+    }), equals(<String, dynamic>{'handled': false}));
+
+    expect(logs, <String>['RawKeyDownEvent', 'KeyDownEvent', 'KeyUpEvent']);
+    logs.clear();
+  }, variant: KeySimulatorTransitModeVariant.keyDataThenRawKeyData());
+
   // The first key data received from the engine might be an empty key data.
   // In that case, the key data should not be converted to any [KeyEvent]s,
   // but is only used so that *a* key data comes before the raw key message
