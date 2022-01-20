@@ -230,7 +230,8 @@ class Scrollbar extends StatelessWidget {
       thumbVisibility: isAlwaysShown ?? thumbVisibility,
       thickness: thickness,
       radius: radius,
-      trackVisibility: showTrackOnHover ?? trackVisibility,
+      trackVisibility: trackVisibility,
+      showTrackOnHover: showTrackOnHover,
       interactive: interactive,
       notificationPredicate: notificationPredicate,
       scrollbarOrientation: scrollbarOrientation,
@@ -245,10 +246,10 @@ class _MaterialScrollbar extends RawScrollbar {
     Key? key,
     required Widget child,
     ScrollController? controller,
-    this.thumbVisibility,
+    bool? thumbVisibility,
     double? thickness,
     Radius? radius,
-    this.trackVisibility,
+    bool? trackVisibility,
     bool? interactive,
     ScrollNotificationPredicate? notificationPredicate,
     ScrollbarOrientation? scrollbarOrientation,
@@ -257,8 +258,10 @@ class _MaterialScrollbar extends RawScrollbar {
          key: key,
          child: child,
          controller: controller,
+         thumbVisibility: thumbVisibility,
          thickness: thickness,
          radius: radius,
+         trackVisibility: trackVisibility,
          fadeDuration: _kScrollbarFadeDuration,
          timeToFade: _kScrollbarTimeToFade,
          interactive: interactive,
@@ -267,8 +270,6 @@ class _MaterialScrollbar extends RawScrollbar {
          scrollbarOrientation: scrollbarOrientation,
        );
 
-  final bool? thumbVisibility;
-  final bool? trackVisibility;
   final double? hoverThickness;
 
   @override

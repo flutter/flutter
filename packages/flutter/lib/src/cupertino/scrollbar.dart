@@ -43,7 +43,7 @@ const double _kScrollbarCrossAxisMargin = 3.0;
 /// {@tool dartpad}
 /// This sample shows a [CupertinoScrollbar] that fades in and out of view as scrolling occurs.
 /// The scrollbar will fade into view as the user scrolls, and fade out when scrolling stops.
-/// The `thickness` of the scrollbar will animate from 6 pixels to the `thicknessWhileDragging` of 10
+/// The thickness` of the scrollbar will animate from 6 pixels to the `thicknessWhileDragging` of 10
 /// when it is dragged by the user. The `radius` of the scrollbar thumb corners will animate from 34
 /// to the `radiusWhileDragging` of 0 when the scrollbar is being dragged by the user.
 ///
@@ -51,9 +51,9 @@ const double _kScrollbarCrossAxisMargin = 3.0;
 /// {@end-tool}
 ///
 /// {@tool dartpad}
-/// When `thumbVisibility` is true, the scrollbar thumb will remain visible without the
+/// When [thumbVisibility] is true, the scrollbar thumb will remain visible without the
 /// fade animation. This requires that a [ScrollController] is provided to controller,
-/// or that the [PrimaryScrollController] is available. `isAlwaysShown` is
+/// or that the [PrimaryScrollController] is available. [isAlwaysShown] is
 /// deprecated in favor of `thumbVisibility`.
 ///
 /// ** See code in examples/api/lib/cupertino/scrollbar/cupertino_scrollbar.1.dart **

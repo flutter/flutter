@@ -767,7 +767,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 /// visible.
 ///
 /// By default, the thumb will fade in and out as the child scroll view
-/// scrolls. When [isAlwaysShown] is true, the scrollbar thumb will remain
+/// scrolls. When [thumbVisibility] is true, the scrollbar thumb will remain
 /// visible without the fade animation. This requires that the [ScrollController]
 /// associated with the Scrollable widget is provided to [controller], or that
 /// the [PrimaryScrollController] is being used by that Scrollable widget.
@@ -843,7 +843,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 /// {@end-tool}
 ///
 /// {@tool dartpad}
-/// When `isAlwaysShown` is true, the scrollbar thumb will remain visible without
+/// When `thumbVisibility` is true, the scrollbar thumb will remain visible without
 /// the fade animation. This requires that a [ScrollController] is provided to
 /// `controller` for both the [RawScrollbar] and the [GridView].
 /// Alternatively, the [PrimaryScrollController] can be used automatically so long
@@ -1009,7 +1009,7 @@ class RawScrollbar extends StatefulWidget {
   ///     SizedBox(
   ///        height: 200,
   ///        child: Scrollbar(
-  ///          isAlwaysShown: true,
+  ///          thumbVisibility: true,
   ///          controller: _controllerOne,
   ///          child: ListView.builder(
   ///            controller: _controllerOne,
@@ -1023,7 +1023,7 @@ class RawScrollbar extends StatefulWidget {
   ///      SizedBox(
   ///        height: 200,
   ///        child: CupertinoScrollbar(
-  ///          isAlwaysShown: true,
+  ///          thumbVisibility: true,
   ///          controller: _controllerTwo,
   ///          child: SingleChildScrollView(
   ///            controller: _controllerTwo,
@@ -1050,7 +1050,7 @@ class RawScrollbar extends StatefulWidget {
   ///   * [PrimaryScrollController], which associates a [ScrollController] with
   ///     a subtree.
   ///
-  /// Replaces deprecated, [isAlwaysShown].
+  /// Replaces deprecated [isAlwaysShown].
   /// {@endtemplate}
   ///
   /// Subclass [Scrollbar] can hide and show the scrollbar thumb in response to
@@ -1322,13 +1322,14 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   /// Subclasses can override this getter to make its value depend on an inherited
   /// theme.
   ///
-  /// Defaults to false when [RawScrollbar.isAlwaysShown] is null.
+  /// Defaults to false when [RawScrollbar.isAlwaysShown] or
+  /// [RawScrollbar.thumbVisibility] is null.
   ///
   /// See also:
   ///
   ///   * [RawScrollbar.isAlwaysShown], which overrides the default behavior.
   @protected
-  bool get showScrollbar => widget.isAlwaysShown ?? false;
+  bool get showScrollbar => widget.isAlwaysShown ?? widget.thumbVisibility ?? false;
 
   /// Overridable getter to indicate is gestures should be enabled on the
   /// scrollbar.
@@ -1408,8 +1409,10 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       : 'provided ScrollController';
 
     String when = '';
-    if (showScrollbar) {
+    if (widget.isAlwaysShown != null && widget.isAlwaysShown!) {
       when = 'Scrollbar.isAlwaysShown is true';
+    } else if (widget.thumbVisibility != null && widget.thumbVisibility!) {
+      when = 'Scrollbar.thumbVisibility is true';
     } else if (enableGestures) {
       when = 'the scrollbar is interactive';
     } else {
@@ -1510,8 +1513,9 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   @override
   void didUpdateWidget(T oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.isAlwaysShown != oldWidget.isAlwaysShown) {
-      if (widget.isAlwaysShown == true) {
+    if (widget.isAlwaysShown != oldWidget.isAlwaysShown
+      || widget.thumbVisibility != oldWidget.thumbVisibility) {
+      if (widget.isAlwaysShown == true || widget.thumbVisibility == true) {
         assert(_debugScheduleCheckHasValidScrollPosition());
         _fadeoutTimer?.cancel();
         _fadeoutAnimationController.animateTo(1.0);
