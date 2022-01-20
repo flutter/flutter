@@ -240,22 +240,22 @@ class DriveCommand extends RunCommandBase {
     try {
       if (stringArg('use-existing-app') == null) {
         await driverService.start(
-            buildInfo,
-            device,
-            debuggingOptions,
-            ipv6,
-            applicationBinary: applicationBinary,
-            route: route,
-            userIdentifier: userIdentifier,
-            mainPath: targetFile,
-            platformArgs: <String, Object>{
-              if (traceStartup)
-                'trace-startup': traceStartup,
-              if (web)
-                '--no-launch-chrome': true,
-              if (boolArg('multidex'))
-                'multidex': true,
-            }
+          buildInfo,
+          device,
+          debuggingOptions,
+          ipv6,
+          applicationBinary: applicationBinary,
+          route: route,
+          userIdentifier: userIdentifier,
+          mainPath: targetFile,
+          platformArgs: <String, Object>{
+            if (traceStartup)
+              'trace-startup': traceStartup,
+            if (web)
+              '--no-launch-chrome': true,
+            if (boolArg('multidex'))
+              'multidex': true,
+          }
         );
       } else {
         final Uri uri = Uri.tryParse(stringArg('use-existing-app'));
@@ -285,9 +285,6 @@ class DriveCommand extends RunCommandBase {
         androidEmulator: boolArg('android-emulator'),
         profileMemory: stringArg('profile-memory'),
       );
-      if (testResult != 0 && screenshot != null) {
-        await _takeScreenshot(device);
-      }
 
       if (boolArg('keep-app-running') ?? (argResults['use-existing-app'] != null)) {
         _logger.printStatus('Leaving the application running.');

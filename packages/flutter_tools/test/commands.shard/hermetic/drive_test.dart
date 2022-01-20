@@ -15,7 +15,9 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/drive.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/drive/drive_service.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:package_config/package_config.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
@@ -43,7 +45,7 @@ void main() {
     Cache.enableLocking();
   });
 
-  testUsingContext('takes screenshot and rethrows on drive failure', () async {
+  testUsingContext('takes screenshot and rethrows on drive exception', () async {
     final DriveCommand command = DriveCommand(fileSystem: fileSystem, logger: logger, platform: platform);
     fileSystem.file('lib/main.dart').createSync(recursive: true);
     fileSystem.file('test_driver/main_test.dart').createSync(recursive: true);
@@ -66,6 +68,47 @@ void main() {
     );
 
     expect(logger.statusText, contains('Screenshot written to drive_screenshots/drive_01.png'));
+    expect(logger.statusText, isNot(contains('drive_02.png')));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+    Pub: () => FakePub(),
+    DeviceManager: () => fakeDeviceManager,
+  });
+
+  testUsingContext('takes screenshot on drive test failure', () async {
+    final DriveCommand command = DriveCommand(
+      fileSystem: fileSystem,
+      logger: logger,
+      platform: platform,
+      flutterDriverFactory: FailingFakeFlutterDriverFactory(),
+    );
+
+    fileSystem.file('lib/main.dart').createSync(recursive: true);
+    fileSystem.file('test_driver/main_test.dart').createSync(recursive: true);
+    fileSystem.file('pubspec.yaml').createSync();
+    fileSystem.directory('drive_screenshots').createSync();
+
+    final Device screenshotDevice = ScreenshotDevice();
+    fakeDeviceManager.devices = <Device>[screenshotDevice];
+
+    await expectLater(() => createTestCommandRunner(command).run(
+      <String>[
+        'drive',
+        '--no-pub',
+        '-d',
+        screenshotDevice.id,
+        '--use-existing-app',
+        'http://localhost:8181',
+        '--keep-app-running',
+        '--screenshot',
+        'drive_screenshots',
+      ]),
+      throwsToolExit(),
+    );
+
+    expect(logger.statusText, contains('Screenshot written to drive_screenshots/drive_01.png'));
+    expect(logger.statusText, isNot(contains('drive_02.png')));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
@@ -135,22 +178,7 @@ void main() {
 // Unfortunately Device, despite not being immutable, has an `operator ==`.
 // Until we fix that, we have to also ignore related lints here.
 // ignore: avoid_implementing_value_types
-class ThrowingScreenshotDevice extends Fake implements Device {
-  @override
-  String get name => 'FakeDevice';
-
-  @override
-  Category get category => Category.mobile;
-
-  @override
-  String get id => 'fake_device';
-
-  @override
-  Future<TargetPlatform> get targetPlatform async => TargetPlatform.android;
-
-  @override
-  bool get supportsScreenshot => true;
-
+class ThrowingScreenshotDevice extends ScreenshotDevice {
   @override
   Future<LaunchResult> startApp(
     ApplicationPackage package, {
@@ -165,6 +193,39 @@ class ThrowingScreenshotDevice extends Fake implements Device {
     }) async {
     throwToolExit('cannot start app');
   }
+}
+
+// Unfortunately Device, despite not being immutable, has an `operator ==`.
+// Until we fix that, we have to also ignore related lints here.
+// ignore: avoid_implementing_value_types
+class ScreenshotDevice extends Fake implements Device {
+  @override
+  final String name = 'FakeDevice';
+
+  @override
+  final Category category = Category.mobile;
+
+  @override
+  final String id = 'fake_device';
+
+  @override
+  Future<TargetPlatform> get targetPlatform async => TargetPlatform.android;
+
+  @override
+  final bool supportsScreenshot = true;
+
+  @override
+  Future<LaunchResult> startApp(
+    ApplicationPackage package, {
+      String mainPath,
+      String route,
+      DebuggingOptions debuggingOptions,
+      Map<String, dynamic> platformArgs,
+      bool prebuiltApplication = false,
+      bool usesTerminalUi = true,
+      bool ipv6 = false,
+      String userIdentifier,
+    }) async => LaunchResult.succeeded();
 
   @override
   Future<void> takeScreenshot(File outputFile) async {}
@@ -197,4 +258,29 @@ class FakeDeviceManager extends Fake implements DeviceManager {
 
   @override
   Future<List<Device>> findTargetDevices(FlutterProject flutterProject, {Duration timeout}) async => devices;
+}
+
+class FailingFakeFlutterDriverFactory extends Fake implements FlutterDriverFactory {
+  @override
+  DriverService createDriverService(bool web) => FailingFakeDriverService();
+}
+
+class FailingFakeDriverService extends Fake implements DriverService {
+  @override
+  Future<void> reuseApplication(Uri vmServiceUri, Device device, DebuggingOptions debuggingOptions, bool ipv6) async { }
+
+  @override
+  Future<int> startTest(
+    String testFile,
+    List<String> arguments,
+    Map<String, String> environment,
+    PackageConfig packageConfig, {
+      bool headless,
+      String chromeBinary,
+      String browserName,
+      bool androidEmulator,
+      int driverPort,
+      List<String> browserDimension,
+      String profileMemory,
+    }) async => 1;
 }
