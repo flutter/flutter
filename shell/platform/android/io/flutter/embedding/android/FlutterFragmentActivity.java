@@ -46,6 +46,7 @@ import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.FlutterShellArgs;
 import io.flutter.embedding.engine.plugins.util.GeneratedPluginRegister;
 import io.flutter.plugin.platform.PlatformPlugin;
+import io.flutter.util.ViewUtils;
 
 /**
  * A Flutter {@code Activity} that is based upon {@link FragmentActivity}.
@@ -65,7 +66,8 @@ public class FlutterFragmentActivity extends FragmentActivity
   // FlutterFragment management.
   private static final String TAG_FLUTTER_FRAGMENT = "flutter_fragment";
   // TODO(mattcarroll): replace ID with R.id when build system supports R.java
-  private static final int FRAGMENT_CONTAINER_ID = 609893468; // random number
+  public static final int FRAGMENT_CONTAINER_ID =
+      ViewUtils.generateViewId(609893468); // random number
 
   /**
    * Creates an {@link Intent} that launches a {@code FlutterFragmentActivity}, which executes a
