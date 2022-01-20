@@ -41,6 +41,8 @@ import '_goldens_io.dart' if (dart.library.html) '_goldens_web.dart' as goldens;
 /// |  Difference                    | ![The pixel difference](https://flutter.github.io/assets-for-api-docs/assets/flutter-test/goldens/widget_isolatedDiff.png)  |
 /// |  Test image after modification | ![Test image](https://flutter.github.io/assets-for-api-docs/assets/flutter-test/goldens/widget_testImage.png) |
 ///
+/// {@macro flutter.flutter_test.matchesGoldenFile.custom_fonts}
+///
 /// See also:
 ///
 ///  * [LocalFileComparator] for the default [GoldenFileComparator]
