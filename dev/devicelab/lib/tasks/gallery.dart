@@ -160,13 +160,14 @@ class GalleryTransitionTest {
         '90th_percentile_picture_cache_memory',
         '99th_percentile_picture_cache_memory',
         'worst_picture_cache_memory',
+        // The following cases are guarded because sometimes the keys are absent, and in those
+        // cases we don't want the test to fail we just want the data to be missing.
+        // See: https://github.com/flutter/flutter/issues/68888
         if (measureCpuGpu && !isAndroid) ...<String>[
-          // See https://github.com/flutter/flutter/issues/68888
           if (summary['average_cpu_usage'] != null) 'average_cpu_usage',
           if (summary['average_gpu_usage'] != null) 'average_gpu_usage',
         ],
         if (measureMemory && !isAndroid) ...<String>[
-          // See https://github.com/flutter/flutter/issues/68888
           if (summary['average_memory_usage'] != null) 'average_memory_usage',
           if (summary['90th_percentile_memory_usage'] != null) '90th_percentile_memory_usage',
           if (summary['99th_percentile_memory_usage'] != null) '99th_percentile_memory_usage',
