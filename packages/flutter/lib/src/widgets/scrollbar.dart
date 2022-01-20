@@ -1088,7 +1088,7 @@ class RawScrollbar extends StatefulWidget {
   ///     SizedBox(
   ///        height: 200,
   ///        child: Scrollbar(
-  ///          isAlwaysShown: true,
+  ///          thumbVisibility: true,
   ///          controller: _controllerOne,
   ///          child: ListView.builder(
   ///            controller: _controllerOne,
