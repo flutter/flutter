@@ -518,7 +518,7 @@ class Icon {
         );
       }
     }
-    
+
     // Prevent double underscores.
     flutterId = flutterId.replaceAll('__', '_');
 
