@@ -1179,7 +1179,6 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   FocusNode? get focusNode => widget.focusNode ?? _internalNode;
   bool _hasPrimaryFocus = false;
   late Map<Type, Action<Intent>> _actionMap;
-  late FocusHighlightMode _focusHighlightMode;
 
   // Only used if needed to create _internalNode.
   FocusNode _createFocusNode() {
@@ -1202,16 +1201,12 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       ),
     };
     focusNode!.addListener(_handleFocusChanged);
-    final FocusManager focusManager = WidgetsBinding.instance!.focusManager;
-    _focusHighlightMode = focusManager.highlightMode;
-    focusManager.addHighlightModeListener(_handleFocusHighlightModeChange);
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance!.removeObserver(this);
     _removeDropdownRoute();
-    WidgetsBinding.instance!.focusManager.removeHighlightModeListener(_handleFocusHighlightModeChange);
     focusNode!.removeListener(_handleFocusChanged);
     _internalNode?.dispose();
     super.dispose();
@@ -1231,14 +1226,6 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     }
   }
 
-  void _handleFocusHighlightModeChange(FocusHighlightMode mode) {
-    if (!mounted) {
-      return;
-    }
-    setState(() {
-      _focusHighlightMode = mode;
-    });
-  }
 
   @override
   void didUpdateWidget(DropdownButton<T> oldWidget) {
