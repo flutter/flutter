@@ -197,22 +197,15 @@ bool EmbedderTestBackingStoreProducer::CreateMTLTexture(
   // own MTLTexture and wrapping it.
   auto surface_size = SkISize::Make(config->size.width, config->size.height);
   auto texture_info = test_metal_context_->CreateMetalTexture(surface_size);
-  sk_cfp<FlutterMetalTextureHandle> texture;
-  texture.retain(texture_info.texture);
 
   GrMtlTextureInfo skia_texture_info;
-  skia_texture_info.fTexture = texture;
+  skia_texture_info.fTexture.reset(SkCFSafeRetain(texture_info.texture));
   GrBackendTexture backend_texture(surface_size.width(), surface_size.height(),
                                    GrMipmapped::kNo, skia_texture_info);
 
-  SkSurface::TextureReleaseProc release_mtltexture = [](void* user_data) {
-    SkCFSafeRelease(user_data);
-  };
-
   sk_sp<SkSurface> surface = SkSurface::MakeFromBackendTexture(
       context_.get(), backend_texture, kTopLeft_GrSurfaceOrigin, 1,
-      kBGRA_8888_SkColorType, nullptr, nullptr, release_mtltexture,
-      texture_info.texture);
+      kBGRA_8888_SkColorType, nullptr, nullptr);
 
   if (!surface) {
     FML_LOG(ERROR) << "Could not create Skia surface from a Metal texture.";
