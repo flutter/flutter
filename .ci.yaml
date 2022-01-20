@@ -4189,3 +4189,6 @@ targets:
     bringup: true
     presubmit: false
     scheduler: google_internal
+    properties:
+      tags: >
+          ["framework","hostonly","shard"]
