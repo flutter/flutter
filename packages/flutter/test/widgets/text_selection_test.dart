@@ -1439,9 +1439,8 @@ class FakeRenderEditable extends RenderEditable {
 
   bool selectWordEdgeCalled = false;
   @override
-  TextSelection selectWordEdge({ required SelectionChangedCause cause }) {
+  void selectWordEdge({ required SelectionChangedCause cause }) {
     selectWordEdgeCalled = true;
-    return const TextSelection(extentOffset:  0, baseOffset: 0);
   }
 
   bool selectPositionAtCalled = false;
