@@ -3413,7 +3413,7 @@ void main() {
 
       await tester.tap(find.text('One'));
       await tester.pumpAndSettle();
-      await tester.tap(find.widgetWithText(InkWell, 'One'));
+      await tester.tap(find.widgetWithText(InkWell, 'One').last);
       await tester.pumpAndSettle();
       expect(feedback.clickSoundCount, 1);
       expect(feedback.hapticCount, 0);
@@ -3426,7 +3426,7 @@ void main() {
 
       await tester.tap(find.text('One'));
       await tester.pumpAndSettle();
-      await tester.tap(find.widgetWithText(InkWell, 'One'));
+      await tester.tap(find.widgetWithText(InkWell, 'One').last);
       await tester.pumpAndSettle();
       expect(feedback.clickSoundCount, 0);
       expect(feedback.hapticCount, 0);
@@ -3437,7 +3437,7 @@ void main() {
 
       await tester.tap(find.text('One'));
       await tester.pumpAndSettle();
-      await tester.tap(find.widgetWithText(InkWell, 'Two'));
+      await tester.tap(find.widgetWithText(InkWell, 'Two').last);
       await tester.pumpAndSettle();
       expect(feedback.clickSoundCount, 1);
       expect(feedback.hapticCount, 0);
