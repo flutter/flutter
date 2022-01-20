@@ -1234,6 +1234,7 @@ class PipelineOwner {
 /// [RenderObject.markNeedsLayout] so that if a parent has queried the intrinsic
 /// or baseline information, it gets marked dirty whenever the child's geometry
 /// changes.
+@optionalTypeArgs
 abstract class RenderObject extends AbstractNode<RenderObject> with DiagnosticableTreeMixin implements HitTestTarget {
   /// Initializes internal fields for subclasses.
   RenderObject() {
@@ -1336,8 +1337,7 @@ abstract class RenderObject extends AbstractNode<RenderObject> with Diagnosticab
   /// child is added to the parent's child list.
   void setupParentData(covariant RenderObject child) {
     assert(_debugCanPerformMutations);
-    if (child.parentData is! ParentData)
-      child.parentData = ParentData();
+    child.parentData ??= ParentData();
   }
 
   /// Called by subclasses when they decide a render object is a child.
@@ -3291,7 +3291,7 @@ mixin ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType 
   ChildType? _firstChild;
   ChildType? _lastChild;
   void _insertIntoChildList(ChildType child, { ChildType? after }) {
-    final ParentDataType childParentData = child.parentData! as ParentDataType;
+    final ParentDataType childParentData = _unsafeCast<ParentDataType>(child.parentData);
     assert(childParentData.nextSibling == null);
     assert(childParentData.previousSibling == null);
     _childCount += 1;
@@ -3300,7 +3300,7 @@ mixin ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType 
       // insert at the start (_firstChild)
       childParentData.nextSibling = _firstChild;
       if (_firstChild != null) {
-        final ParentDataType _firstChildParentData = _firstChild!.parentData! as ParentDataType;
+        final ParentDataType _firstChildParentData = _unsafeCast<ParentDataType>(_firstChild!.parentData);
         _firstChildParentData.previousSibling = child;
       }
       _firstChild = child;
@@ -3310,7 +3310,7 @@ mixin ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType 
       assert(_lastChild != null);
       assert(_debugUltimatePreviousSiblingOf(after, equals: _firstChild));
       assert(_debugUltimateNextSiblingOf(after, equals: _lastChild));
-      final ParentDataType afterParentData = after.parentData! as ParentDataType;
+      final ParentDataType afterParentData = _unsafeCast<ParentDataType>(after.parentData);
       if (afterParentData.nextSibling == null) {
         // insert at the end (_lastChild); we'll end up with two or more children
         assert(after == _lastChild);
@@ -3323,8 +3323,8 @@ mixin ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType 
         childParentData.nextSibling = afterParentData.nextSibling;
         childParentData.previousSibling = after;
         // set up links from siblings to child
-        final ParentDataType childPreviousSiblingParentData = childParentData.previousSibling!.parentData! as ParentDataType;
-        final ParentDataType childNextSiblingParentData = childParentData.nextSibling!.parentData! as ParentDataType;
+        final ParentDataType childPreviousSiblingParentData = _unsafeCast<ParentDataType>(childParentData.previousSibling!.parentData);
+        final ParentDataType childNextSiblingParentData = _unsafeCast<ParentDataType>(childParentData.nextSibling!.parentData);
         childPreviousSiblingParentData.nextSibling = child;
         childNextSiblingParentData.previousSibling = child;
         assert(afterParentData.nextSibling == child);
@@ -3357,7 +3357,7 @@ mixin ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType 
   }
 
   void _removeFromChildList(ChildType child) {
-    final ParentDataType childParentData = child.parentData! as ParentDataType;
+    final ParentDataType childParentData = _unsafeCast<ParentDataType>(child.parentData);
     assert(_debugUltimatePreviousSiblingOf(child, equals: _firstChild));
     assert(_debugUltimateNextSiblingOf(child, equals: _lastChild));
     assert(_childCount >= 0);
@@ -3365,14 +3365,14 @@ mixin ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType 
       assert(_firstChild == child);
       _firstChild = childParentData.nextSibling;
     } else {
-      final ParentDataType childPreviousSiblingParentData = childParentData.previousSibling!.parentData! as ParentDataType;
+      final ParentDataType childPreviousSiblingParentData = _unsafeCast<ParentDataType>(childParentData.previousSibling!.parentData);
       childPreviousSiblingParentData.nextSibling = childParentData.nextSibling;
     }
     if (childParentData.nextSibling == null) {
       assert(_lastChild == child);
       _lastChild = childParentData.previousSibling;
     } else {
-      final ParentDataType childNextSiblingParentData = childParentData.nextSibling!.parentData! as ParentDataType;
+      final ParentDataType childNextSiblingParentData = _unsafeCast<ParentDataType>(childParentData.nextSibling!.parentData);
       childNextSiblingParentData.previousSibling = childParentData.previousSibling;
     }
     childParentData.previousSibling = null;
@@ -3394,7 +3394,7 @@ mixin ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType 
   void removeAll() {
     ChildType? child = _firstChild;
     while (child != null) {
-      final ParentDataType childParentData = child.parentData! as ParentDataType;
+      final ParentDataType childParentData = _unsafeCast<ParentDataType>(child.parentData);
       final ChildType? next = childParentData.nextSibling;
       childParentData.previousSibling = null;
       childParentData.nextSibling = null;
@@ -3416,7 +3416,7 @@ mixin ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType 
     assert(after != this);
     assert(child != after);
     assert(child.parent == this);
-    final ParentDataType childParentData = child.parentData! as ParentDataType;
+    final ParentDataType childParentData = _unsafeCast<ParentDataType>(child.parentData);
     if (childParentData.previousSibling == after)
       return;
     _removeFromChildList(child);
@@ -3430,7 +3430,7 @@ mixin ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType 
     ChildType? child = _firstChild;
     while (child != null) {
       child.attach(owner);
-      final ParentDataType childParentData = child.parentData! as ParentDataType;
+      final ParentDataType childParentData = _unsafeCast<ParentDataType>(child.parentData);
       child = childParentData.nextSibling;
     }
   }
@@ -3441,7 +3441,7 @@ mixin ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType 
     ChildType? child = _firstChild;
     while (child != null) {
       child.detach();
-      final ParentDataType childParentData = child.parentData! as ParentDataType;
+      final ParentDataType childParentData = _unsafeCast<ParentDataType>(child.parentData);
       child = childParentData.nextSibling;
     }
   }
@@ -3451,7 +3451,7 @@ mixin ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType 
     ChildType? child = _firstChild;
     while (child != null) {
       redepthChild(child);
-      final ParentDataType childParentData = child.parentData! as ParentDataType;
+      final ParentDataType childParentData = _unsafeCast<ParentDataType>(child.parentData);
       child = childParentData.nextSibling;
     }
   }
@@ -3461,7 +3461,7 @@ mixin ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType 
     ChildType? child = _firstChild;
     while (child != null) {
       visitor(child);
-      final ParentDataType childParentData = child.parentData! as ParentDataType;
+      final ParentDataType childParentData = _unsafeCast<ParentDataType>(child.parentData);
       child = childParentData.nextSibling;
     }
   }
@@ -3476,7 +3476,7 @@ mixin ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType 
   ChildType? childBefore(ChildType child) {
     assert(child != null);
     assert(child.parent == this);
-    final ParentDataType childParentData = child.parentData! as ParentDataType;
+    final ParentDataType childParentData = _unsafeCast<ParentDataType>(child.parentData);
     return childParentData.previousSibling;
   }
 
@@ -3484,7 +3484,7 @@ mixin ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType 
   ChildType? childAfter(ChildType child) {
     assert(child != null);
     assert(child.parent == this);
-    final ParentDataType childParentData = child.parentData! as ParentDataType;
+    final ParentDataType childParentData = _unsafeCast<ParentDataType>(child.parentData);
     return childParentData.nextSibling;
   }
 
@@ -3499,7 +3499,7 @@ mixin ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType 
         if (child == lastChild)
           break;
         count += 1;
-        final ParentDataType childParentData = child.parentData! as ParentDataType;
+        final ParentDataType childParentData = _unsafeCast<ParentDataType>(child.parentData);
         child = childParentData.nextSibling!;
       }
     }
@@ -4048,3 +4048,9 @@ class DiagnosticsDebugCreator extends DiagnosticsProperty<Object> {
         level: DiagnosticLevel.hidden,
       );
 }
+
+// This allows casting without a cost in web release builds. This is intentionally only used
+// for parent data casts that are known by the framework to be safe.
+@pragma('dart2js:tryInline')
+@pragma('dart2js:as:trust')
+T _unsafeCast<T>(dynamic any) => any as T;

@@ -3666,7 +3666,7 @@ abstract class Element<W extends Widget> extends DiagnosticableTree implements B
       _debugForgottenChildrenWithGlobalKey?.clear();
       return true;
     }());
-    _widget = newWidget as W;
+    _widget = _unsafeCast<W>(newWidget);
   }
 
   /// Change the slot that the given child occupies in its parent.
@@ -4217,7 +4217,7 @@ abstract class Element<W extends Widget> extends DiagnosticableTree implements B
     assert(_debugCheckStateIsActiveForAncestorLookup());
     final InheritedElement? ancestor = _inheritedLookup?[T];
     if (ancestor != null) {
-      return dependOnInheritedElement(ancestor, aspect: aspect) as T;
+      return _unsafeCast<T>(dependOnInheritedElement(ancestor, aspect: aspect));
     }
     _hadUnsatisfiedDependencies = true;
     return null;
@@ -4241,7 +4241,7 @@ abstract class Element<W extends Widget> extends DiagnosticableTree implements B
     Element? ancestor = _parent;
     while (ancestor != null && ancestor.widget.runtimeType != T)
       ancestor = ancestor._parent;
-    return ancestor?.widget as T?;
+    return _unsafeCast<T?>(ancestor?.widget);
   }
 
   @override
@@ -4254,7 +4254,7 @@ abstract class Element<W extends Widget> extends DiagnosticableTree implements B
       ancestor = ancestor._parent;
     }
     final StatefulElement? statefulAncestor = ancestor as StatefulElement?;
-    return statefulAncestor?.state as T?;
+    return _unsafeCast<T?>(statefulAncestor?.state);
   }
 
   @override
@@ -4267,7 +4267,7 @@ abstract class Element<W extends Widget> extends DiagnosticableTree implements B
         statefulAncestor = ancestor;
       ancestor = ancestor._parent;
     }
-    return statefulAncestor?.state as T?;
+    return _unsafeCast<T?>(statefulAncestor?.state);
   }
 
   @override
@@ -4276,7 +4276,7 @@ abstract class Element<W extends Widget> extends DiagnosticableTree implements B
     Element? ancestor = _parent;
     while (ancestor != null) {
       if (ancestor is RenderObjectElement && ancestor.renderObject is T)
-        return ancestor.renderObject as T;
+        return _unsafeCast<T?>(ancestor.renderObject);
       ancestor = ancestor._parent;
     }
     return null;
@@ -6557,3 +6557,10 @@ class _NullWidget extends Widget {
 bool _debugShouldReassemble(DebugReassembleConfig? config, Widget? widget) {
   return config == null || config.widgetName == null || widget?.runtimeType.toString() == config.widgetName;
 }
+
+// This allows casting without a cost in web release builds. This is intentionally only used
+// for inherited widget/state lookup, since by construction these caches are correct but
+// cannot be proven statically.
+@pragma('dart2js:tryInline')
+@pragma('dart2js:as:trust')
+T _unsafeCast<T>(dynamic any) => any as T;

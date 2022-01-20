@@ -134,7 +134,7 @@ class AbstractNode<T extends AbstractNode<T>> {
       assert(node != child); // indicates we are about to create a cycle
       return true;
     }());
-    child._parent = this as T?;
+    child._parent = _unsafeCast<T?>(this);
     if (attached)
       child.attach(_owner!);
     redepthChild(child);
@@ -154,3 +154,10 @@ class AbstractNode<T extends AbstractNode<T>> {
       child.detach();
   }
 }
+
+// This allows casting without a cost in web release builds. This is intentionally only used
+// for inherited widget/state lookup, since by construction these caches are correct but
+// cannot be proven statically.
+@pragma('dart2js:tryInline')
+@pragma('dart2js:as:trust')
+T _unsafeCast<T>(dynamic any) => any as T;

@@ -2542,7 +2542,7 @@ abstract class RenderBox extends RenderObject {
       }
       return true;
     }());
-    final BoxParentData childParentData = child.parentData! as BoxParentData;
+    final BoxParentData childParentData = _unsafeCast<BoxParentData>(child.parentData);
     final Offset offset = childParentData.offset;
     transform.translate(offset.dx, offset.dy);
   }
@@ -2770,7 +2770,7 @@ mixin RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, ParentDataTyp
     assert(!debugNeedsLayout);
     ChildType? child = firstChild;
     while (child != null) {
-      final ParentDataType? childParentData = child.parentData as ParentDataType?;
+      final ParentDataType? childParentData = _unsafeCast<ParentDataType?>(child.parentData);
       final double? result = child.getDistanceToActualBaseline(baseline);
       if (result != null)
         return result + childParentData!.offset.dy;
@@ -2788,7 +2788,7 @@ mixin RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, ParentDataTyp
     double? result;
     ChildType? child = firstChild;
     while (child != null) {
-      final ParentDataType childParentData = child.parentData! as ParentDataType;
+      final ParentDataType childParentData = _unsafeCast<ParentDataType>(child.parentData);
       double? candidate = child.getDistanceToActualBaseline(baseline);
       if (candidate != null) {
         candidate += childParentData.offset.dy;
@@ -2815,7 +2815,7 @@ mixin RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, ParentDataTyp
     ChildType? child = lastChild;
     while (child != null) {
       // The x, y parameters have the top left of the node's box as the origin.
-      final ParentDataType childParentData = child.parentData! as ParentDataType;
+      final ParentDataType childParentData = _unsafeCast<ParentDataType>(child.parentData);
       final bool isHit = result.addWithPaintOffset(
         offset: childParentData.offset,
         position: position,
@@ -2840,7 +2840,7 @@ mixin RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, ParentDataTyp
   void defaultPaint(PaintingContext context, Offset offset) {
     ChildType? child = firstChild;
     while (child != null) {
-      final ParentDataType childParentData = child.parentData! as ParentDataType;
+      final ParentDataType childParentData = _unsafeCast<ParentDataType>(child.parentData);
       context.paintChild(child, childParentData.offset + offset);
       child = childParentData.nextSibling;
     }
@@ -2855,10 +2855,16 @@ mixin RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, ParentDataTyp
     final List<ChildType> result = <ChildType>[];
     RenderBox? child = firstChild;
     while (child != null) {
-      final ParentDataType childParentData = child.parentData! as ParentDataType;
-      result.add(child as ChildType);
+      final ParentDataType childParentData = _unsafeCast<ParentDataType>(child.parentData);
+      result.add(_unsafeCast<ChildType>(child));
       child = childParentData.nextSibling;
     }
     return result;
   }
 }
+
+// This allows casting without a cost in web release builds. This is intentionally only used
+// for parent data casts that are known by the framework to be safe.
+@pragma('dart2js:tryInline')
+@pragma('dart2js:as:trust')
+T _unsafeCast<T>(dynamic any) => any as T;
