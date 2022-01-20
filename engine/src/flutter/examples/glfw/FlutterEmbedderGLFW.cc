@@ -164,8 +164,8 @@ int main(int argc, const char* argv[]) {
   glfwGetFramebufferSize(window, &framebuffer_width, &framebuffer_height);
   g_pixelRatio = framebuffer_width / kInitialWindowWidth;
 
-  bool runResult = RunFlutter(window, project_path, icudtl_path);
-  if (!runResult) {
+  bool run_result = RunFlutter(window, project_path, icudtl_path);
+  if (!run_result) {
     std::cout << "Could not run the Flutter engine." << std::endl;
     return EXIT_FAILURE;
   }
