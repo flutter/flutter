@@ -13,15 +13,15 @@ import 'theme.dart';
 /// Defines default property values for descendant [Scrollbar] widgets.
 ///
 /// Descendant widgets obtain the current [ScrollbarThemeData] object with
-/// `ScrollbarTheme.of(context)`. Instances of [ScrollbarThemeData] can be customized
-/// with [ScrollbarThemeData.copyWith].
+/// `ScrollbarTheme.of(context)`. Instances of [ScrollbarThemeData] can be
+/// customized with [ScrollbarThemeData.copyWith].
 ///
-/// Typically the [ScrollbarThemeData] of a [ScrollbarTheme] is specified as part of the overall
-/// [Theme] with [ThemeData.scrollbarTheme].
+/// Typically the [ScrollbarThemeData] of a [ScrollbarTheme] is specified as
+/// part of the overall [Theme] with [ThemeData.scrollbarTheme].
 ///
-/// All [ScrollbarThemeData] properties are `null` by default. When null, the [Scrollbar]
-/// computes its own default values, typically based on the overall theme's
-/// [ThemeData.colorScheme].
+/// All [ScrollbarThemeData] properties are `null` by default. When null, the
+/// [Scrollbar] computes its own default values, typically based on the overall
+/// theme's [ThemeData.colorScheme].
 ///
 /// See also:
 ///
@@ -31,19 +31,43 @@ import 'theme.dart';
 class ScrollbarThemeData with Diagnosticable {
   /// Creates a theme that can be used for [ThemeData.scrollbarTheme].
   const ScrollbarThemeData({
+    this.thumbVisibility,
     this.thickness,
-    this.trackVisibility,
-    this.showTrackOnHover,
-    this.isAlwaysShown,
     this.radius,
     this.thumbColor,
+    this.minThumbLength,
+    this.trackVisibility,
     this.trackColor,
     this.trackBorderColor,
+    this.interactive,
     this.crossAxisMargin,
     this.mainAxisMargin,
-    this.minThumbLength,
-    this.interactive,
-  });
+    @Deprecated(
+      'Use thumbVisibility instead. '
+      'This feature was deprecated after v2.9.0-1.0.pre.',
+    )
+    this.isAlwaysShown,
+    @Deprecated(
+      'Use trackVisibility to resolve based on the current state instead. '
+      'This feature was deprecated after v2.9.0-1.0.pre.',
+    )
+    this.showTrackOnHover,
+  }) : assert(
+         isAlwaysShown == null || thumbVisibility == null,
+         'Scrollbar thumb appearance should only be controlled with thumbVisibility, '
+         'isAlwaysShown is deprecated.'
+       ),
+       assert(
+         showTrackOnHover == null || trackVisibility == null,
+         'Scrollbar track appearance should only be controlled with trackVisibility, '
+         'isAlwaysShown is deprecated.'
+       );
+
+  /// Overrides the default value of [Scrollbar.thumbVisibility] in all
+  /// descendant [Scrollbar] widgets.
+  ///
+  /// Replaces deprecated [isAlwaysShown].
+  final MaterialStateProperty<bool?>? thumbVisibility;
 
   /// Overrides the default value of [Scrollbar.thickness] in all
   /// descendant [Scrollbar] widgets.
@@ -51,22 +75,6 @@ class ScrollbarThemeData with Diagnosticable {
   /// Resolves in the following states:
   ///  * [MaterialState.hovered] on web and desktop platforms.
   final MaterialStateProperty<double?>? thickness;
-
-  /// Overrides the default value of [Scrollbar.trackVisibility] in all
-  /// descendant [Scrollbar] widgets.
-  final MaterialStateProperty<bool?>? trackVisibility;
-
-  /// Overrides the default value of [Scrollbar.showTrackOnHover] in all
-  /// descendant [Scrollbar] widgets.
-  final bool? showTrackOnHover;
-
-  /// Overrides the default value of [Scrollbar.isAlwaysShown] in all
-  /// descendant [Scrollbar] widgets.
-  final bool? isAlwaysShown;
-
-  /// Overrides the default value of [Scrollbar.interactive] in all
-  /// descendant [Scrollbar] widgets.
-  final bool? interactive;
 
   /// Overrides the default value of [Scrollbar.radius] in all
   /// descendant widgets.
@@ -79,6 +87,23 @@ class ScrollbarThemeData with Diagnosticable {
   ///  * [MaterialState.dragged].
   ///  * [MaterialState.hovered] on web and desktop platforms.
   final MaterialStateProperty<Color?>? thumbColor;
+
+  /// Overrides the default value of the [ScrollbarPainter.minLength]
+  /// property in all descendant [Scrollbar] widgets.
+  ///
+  /// See also:
+  ///
+  ///  * [ScrollbarPainter.minLength], which sets the preferred smallest size
+  ///    the scrollbar can shrink to when the total scrollable extent is large,
+  ///    the current visible viewport is small, and the viewport is not
+  ///    overscrolled.
+  final double? minThumbLength;
+
+  /// Overrides the default value of [Scrollbar.trackVisibility] in all
+  /// descendant [Scrollbar] widgets.
+  ///
+  /// Replaces deprecated [showTrackOnHover].
+  final MaterialStateProperty<bool?>? trackVisibility;
 
   /// Overrides the default [Color] of the [Scrollbar] track when
   /// [showTrackOnHover] is true in all descendant [Scrollbar] widgets.
@@ -93,6 +118,10 @@ class ScrollbarThemeData with Diagnosticable {
   /// Resolves in the following states:
   ///  * [MaterialState.hovered] on web and desktop platforms.
   final MaterialStateProperty<Color?>? trackBorderColor;
+
+  /// Overrides the default value of [Scrollbar.interactive] in all
+  /// descendant [Scrollbar] widgets.
+  final bool? interactive;
 
   /// Overrides the default value of the [ScrollbarPainter.crossAxisMargin]
   /// property in all descendant [Scrollbar] widgets.
@@ -112,46 +141,57 @@ class ScrollbarThemeData with Diagnosticable {
   ///    scrollbar's start and end to the edge of the viewport in logical pixels.
   final double? mainAxisMargin;
 
-  /// Overrides the default value of the [ScrollbarPainter.minLength]
-  /// property in all descendant [Scrollbar] widgets.
+  /// Overrides the default value of [Scrollbar.isAlwaysShown] in all
+  /// descendant [Scrollbar] widgets.
   ///
-  /// See also:
+  /// Deprecated in favor of [thumbVisibility].
+  @Deprecated(
+    'Use thumbVisibility instead. '
+    'This feature was deprecated after v2.9.0-1.0.pre.',
+  )
+  final bool? isAlwaysShown;
+
+  /// Overrides the default value of [Scrollbar.showTrackOnHover] in all
+  /// descendant [Scrollbar] widgets.
   ///
-  ///  * [ScrollbarPainter.minLength], which sets the preferred smallest size
-  ///    the scrollbar can shrink to when the total scrollable extent is large,
-  ///    the current visible viewport is small, and the viewport is not
-  ///    overscrolled.
-  final double? minThumbLength;
+  /// Deprecated in favor of [trackVisibility].
+  @Deprecated(
+    'Use trackVisibility to resolve based on the current state instead. '
+    'This feature was deprecated after v2.9.0-1.0.pre.',
+  )
+  final bool? showTrackOnHover;
 
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   ScrollbarThemeData copyWith({
     MaterialStateProperty<double?>? thickness,
-    MaterialStateProperty<bool?>? trackVisibility,
-    bool? showTrackOnHover,
-    bool? isAlwaysShown,
-    bool? interactive,
     Radius? radius,
+    MaterialStateProperty<bool?>? thumbVisibility,
     MaterialStateProperty<Color?>? thumbColor,
+    MaterialStateProperty<bool?>? trackVisibility,
     MaterialStateProperty<Color?>? trackColor,
     MaterialStateProperty<Color?>? trackBorderColor,
+    bool? interactive,
     double? crossAxisMargin,
     double? mainAxisMargin,
     double? minThumbLength,
+    bool? isAlwaysShown,
+    bool? showTrackOnHover,
   }) {
     return ScrollbarThemeData(
       thickness: thickness ?? this.thickness,
-      trackVisibility: trackVisibility ?? this.trackVisibility,
-      showTrackOnHover: showTrackOnHover ?? this.showTrackOnHover,
-      isAlwaysShown: isAlwaysShown ?? this.isAlwaysShown,
-      interactive: interactive ?? this.interactive,
       radius: radius ?? this.radius,
+      thumbVisibility: thumbVisibility ?? this.thumbVisibility,
       thumbColor: thumbColor ?? this.thumbColor,
+      trackVisibility: trackVisibility ?? this.trackVisibility,
       trackColor: trackColor ?? this.trackColor,
       trackBorderColor: trackBorderColor ?? this.trackBorderColor,
+      interactive: interactive ?? this.interactive,
       crossAxisMargin: crossAxisMargin ?? this.crossAxisMargin,
       mainAxisMargin: mainAxisMargin ?? this.mainAxisMargin,
       minThumbLength: minThumbLength ?? this.minThumbLength,
+      isAlwaysShown: isAlwaysShown ?? this.isAlwaysShown,
+      showTrackOnHover: showTrackOnHover ?? this.showTrackOnHover,
     );
   }
 
@@ -164,17 +204,18 @@ class ScrollbarThemeData with Diagnosticable {
     assert(t != null);
     return ScrollbarThemeData(
       thickness: _lerpProperties<double?>(a?.thickness, b?.thickness, t, lerpDouble),
-      trackVisibility: _lerpProperties<bool?>(a?.trackVisibility, b?.trackVisibility, t, _lerpBool),
-      showTrackOnHover: _lerpBool(a?.showTrackOnHover, b?.showTrackOnHover, t),
-      isAlwaysShown: _lerpBool(a?.isAlwaysShown, b?.isAlwaysShown, t),
-      interactive: _lerpBool(a?.interactive, b?.interactive, t),
       radius: Radius.lerp(a?.radius, b?.radius, t),
+      thumbVisibility: _lerpProperties<bool?>(a?.thumbVisibility, b?.thumbVisibility, t, _lerpBool),
       thumbColor: _lerpProperties<Color?>(a?.thumbColor, b?.thumbColor, t, Color.lerp),
+      trackVisibility: _lerpProperties<bool?>(a?.trackVisibility, b?.trackVisibility, t, _lerpBool),
       trackColor: _lerpProperties<Color?>(a?.trackColor, b?.trackColor, t, Color.lerp),
       trackBorderColor: _lerpProperties<Color?>(a?.trackBorderColor, b?.trackBorderColor, t, Color.lerp),
+      interactive: _lerpBool(a?.interactive, b?.interactive, t),
       crossAxisMargin: lerpDouble(a?.crossAxisMargin, b?.crossAxisMargin, t),
       mainAxisMargin: lerpDouble(a?.mainAxisMargin, b?.mainAxisMargin, t),
       minThumbLength: lerpDouble(a?.minThumbLength, b?.minThumbLength, t),
+      isAlwaysShown: _lerpBool(a?.isAlwaysShown, b?.isAlwaysShown, t),
+      showTrackOnHover: _lerpBool(a?.showTrackOnHover, b?.showTrackOnHover, t),
     );
   }
 
@@ -182,17 +223,18 @@ class ScrollbarThemeData with Diagnosticable {
   int get hashCode {
     return hashValues(
       thickness,
-      trackVisibility,
-      showTrackOnHover,
-      isAlwaysShown,
-      interactive,
       radius,
+      thumbVisibility,
       thumbColor,
+      trackVisibility,
       trackColor,
       trackBorderColor,
+      interactive,
       crossAxisMargin,
       mainAxisMargin,
       minThumbLength,
+      isAlwaysShown,
+      showTrackOnHover,
     );
   }
 
@@ -204,34 +246,36 @@ class ScrollbarThemeData with Diagnosticable {
       return false;
     return other is ScrollbarThemeData
       && other.thickness == thickness
-      && other.trackVisibility == trackVisibility
-      && other.showTrackOnHover == showTrackOnHover
-      && other.isAlwaysShown == isAlwaysShown
-      && other.interactive == interactive
       && other.radius == radius
+      && other.thumbVisibility == thumbVisibility
       && other.thumbColor == thumbColor
+      && other.trackVisibility == trackVisibility
       && other.trackColor == trackColor
       && other.trackBorderColor == trackBorderColor
+      && other.interactive == interactive
       && other.crossAxisMargin == crossAxisMargin
       && other.mainAxisMargin == mainAxisMargin
-      && other.minThumbLength == minThumbLength;
+      && other.minThumbLength == minThumbLength
+      && other.isAlwaysShown == isAlwaysShown
+      && other.showTrackOnHover == showTrackOnHover;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<MaterialStateProperty<double?>>('thickness', thickness, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<bool?>>('trackVisibility', trackVisibility, defaultValue: null));
-    properties.add(DiagnosticsProperty<bool>('showTrackOnHover', showTrackOnHover, defaultValue: null));
-    properties.add(DiagnosticsProperty<bool>('isAlwaysShown', isAlwaysShown, defaultValue: null));
-    properties.add(DiagnosticsProperty<bool>('interactive', interactive, defaultValue: null));
     properties.add(DiagnosticsProperty<Radius>('radius', radius, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<bool?>>('thumbVisibility', thumbVisibility, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('thumbColor', thumbColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<bool?>>('trackVisibility', trackVisibility, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('trackColor', trackColor, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('trackBorderColor', trackBorderColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<bool>('interactive', interactive, defaultValue: null));
     properties.add(DiagnosticsProperty<double>('crossAxisMargin', crossAxisMargin, defaultValue: null));
     properties.add(DiagnosticsProperty<double>('mainAxisMargin', mainAxisMargin, defaultValue: null));
     properties.add(DiagnosticsProperty<double>('minThumbLength', minThumbLength, defaultValue: null));
+    properties.add(DiagnosticsProperty<bool>('isAlwaysShown', isAlwaysShown, defaultValue: null));
+    properties.add(DiagnosticsProperty<bool>('showTrackOnHover', showTrackOnHover, defaultValue: null));
   }
 
   static MaterialStateProperty<T>? _lerpProperties<T>(

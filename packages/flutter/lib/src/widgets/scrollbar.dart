@@ -869,9 +869,9 @@ class RawScrollbar extends StatefulWidget {
     required this.child,
     this.controller,
     this.thumbVisibility,
-    this.shape,
-    this.radius,
     this.thickness,
+    this.radius,
+    this.shape,
     this.thumbColor,
     this.minThumbLength = _kMinThumbExtent,
     this.minOverscrollLength,
@@ -888,7 +888,7 @@ class RawScrollbar extends StatefulWidget {
     this.crossAxisMargin = 0.0,
     @Deprecated(
       'Use thumbVisibility instead. '
-      'This feature was deprecated after v2.6.0-12.0.pre.',
+      'This feature was deprecated after v2.9.0-1.0.pre.',
     )
     this.isAlwaysShown,
   }) : assert(child != null),
@@ -902,6 +902,11 @@ class RawScrollbar extends StatefulWidget {
        assert(pressDuration != null),
        assert(mainAxisMargin != null),
        assert(crossAxisMargin != null),
+       assert(
+         thumbVisibility == null || isAlwaysShown == null,
+         'Scrollbar thumb appearance should only be controlled with thumbVisibility, '
+         'isAlwaysShown is deprecated.'
+       ),
        super(key: key);
 
   /// {@template flutter.widgets.Scrollbar.child}
@@ -969,6 +974,236 @@ class RawScrollbar extends StatefulWidget {
   /// {@end-tool}
   /// {@endtemplate}
   final ScrollController? controller;
+
+  /// {@template flutter.widgets.Scrollbar.thumbVisibility}
+  /// Indicates that the scrollbar thumb should be visible, even when a scroll
+  /// is not underway.
+  ///
+  /// When false, the scrollbar will be shown during scrolling
+  /// and will fade out otherwise.
+  ///
+  /// When true, the scrollbar will always be visible and never fade out. This
+  /// requires that the Scrollbar can access the [ScrollController] of the
+  /// associated Scrollable widget. This can either be the provided [controller],
+  /// or the [PrimaryScrollController] of the current context.
+  ///
+  ///   * When providing a controller, the same ScrollController must also be
+  ///     provided to the associated Scrollable widget.
+  ///   * The [PrimaryScrollController] is used by default for a [ScrollView]
+  ///     that has not been provided a [ScrollController] and that has an
+  ///     [Axis.vertical] [ScrollDirection]. This automatic behavior does not
+  ///     apply to those with a ScrollDirection of Axis.horizontal. To explicitly
+  ///     use the PrimaryScrollController, set [ScrollView.primary] to true.
+  ///
+  /// Defaults to false when null.
+  ///
+  /// {@tool snippet}
+  ///
+  /// ```dart
+  /// final ScrollController _controllerOne = ScrollController();
+  /// final ScrollController _controllerTwo = ScrollController();
+  ///
+  /// Widget build(BuildContext context) {
+  /// return Column(
+  ///   children: <Widget>[
+  ///     SizedBox(
+  ///        height: 200,
+  ///        child: Scrollbar(
+  ///          isAlwaysShown: true,
+  ///          controller: _controllerOne,
+  ///          child: ListView.builder(
+  ///            controller: _controllerOne,
+  ///            itemCount: 120,
+  ///            itemBuilder: (BuildContext context, int index) {
+  ///              return  Text('item $index');
+  ///            },
+  ///          ),
+  ///        ),
+  ///      ),
+  ///      SizedBox(
+  ///        height: 200,
+  ///        child: CupertinoScrollbar(
+  ///          isAlwaysShown: true,
+  ///          controller: _controllerTwo,
+  ///          child: SingleChildScrollView(
+  ///            controller: _controllerTwo,
+  ///            child: const SizedBox(
+  ///              height: 2000,
+  ///              width: 500,
+  ///              child: Placeholder(),
+  ///            ),
+  ///          ),
+  ///        ),
+  ///      ),
+  ///    ],
+  ///   );
+  /// }
+  /// ```
+  /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  ///   * [RawScrollbarState.showScrollbar], an overridable getter which uses
+  ///     this value to override the default behavior.
+  ///   * [ScrollView.primary], which indicates whether the ScrollView is the primary
+  ///     scroll view associated with the parent [PrimaryScrollController].
+  ///   * [PrimaryScrollController], which associates a [ScrollController] with
+  ///     a subtree.
+  ///
+  /// Replaces deprecated, [isAlwaysShown].
+  /// {@endtemplate}
+  ///
+  /// Subclass [Scrollbar] can hide and show the scrollbar thumb in response to
+  /// [MaterialState]s by using [ScrollbarThemeData.thumbVisibility].
+  final bool? thumbVisibility;
+
+  /// The thickness of the scrollbar in the cross axis of the scrollable.
+  ///
+  /// If null, will default to 6.0 pixels.
+  final double? thickness;
+
+  /// The [Radius] of the scrollbar thumb's rounded rectangle corners.
+  ///
+  /// Scrollbar will be rectangular if [radius] is null, which is the default
+  /// behavior.
+  final Radius? radius;
+
+  /// The [OutlinedBorder] of the scrollbar's thumb.
+  ///
+  /// Only one of [radius] and [shape] may be specified. For a rounded rectangle,
+  /// it's simplest to just specify [radius]. By default, the scrollbar thumb's
+  /// shape is a simple rectangle.
+  ///
+  /// If [shape] is specified, the thumb will take the shape of the passed
+  /// [OutlinedBorder] and fill itself with [thumbColor] (or grey if it
+  /// is unspecified).
+  ///
+  /// {@tool dartpad}
+  /// This is an example of using a [StadiumBorder] for drawing the [shape] of the
+  /// thumb in a [RawScrollbar].
+  ///
+  /// ** See code in examples/api/lib/widgets/scrollbar/raw_scrollbar.shape.0.dart **
+  /// {@end-tool}
+  final OutlinedBorder? shape;
+
+  /// The color of the scrollbar thumb.
+  ///
+  /// If null, defaults to Color(0x66BCBCBC).
+  final Color? thumbColor;
+
+  /// The preferred smallest size the scrollbar thumb can shrink to when the total
+  /// scrollable extent is large, the current visible viewport is small, and the
+  /// viewport is not overscrolled.
+  ///
+  /// The size of the scrollbar's thumb may shrink to a smaller size than [minThumbLength]
+  /// to fit in the available paint area (e.g., when [minThumbLength] is greater
+  /// than [ScrollMetrics.viewportDimension] and [mainAxisMargin] combined).
+  ///
+  /// Mustn't be null and the value has to be greater or equal to
+  /// [minOverscrollLength], which in turn is >= 0. Defaults to 18.0.
+  final double minThumbLength;
+
+  /// The preferred smallest size the scrollbar thumb can shrink to when viewport is
+  /// overscrolled.
+  ///
+  /// When overscrolling, the size of the scrollbar's thumb may shrink to a smaller size
+  /// than [minOverscrollLength] to fit in the available paint area (e.g., when
+  /// [minOverscrollLength] is greater than [ScrollMetrics.viewportDimension] and
+  /// [mainAxisMargin] combined).
+  ///
+  /// Overscrolling can be made possible by setting the `physics` property
+  /// of the `child` Widget to a `BouncingScrollPhysics`, which is a special
+  /// `ScrollPhysics` that allows overscrolling.
+  ///
+  /// The value is less than or equal to [minThumbLength] and greater than or equal to 0.
+  /// When null, it will default to the value of [minThumbLength].
+  final double? minOverscrollLength;
+
+  /// {@template flutter.widgets.Scrollbar.trackVisibility}
+  /// Indicates that the scrollbar track should be visible.
+  ///
+  /// When true, the scrollbar track will always be visible so long as the thumb
+  /// is visible. If the scrollbar thumb fades out of view, the track will as
+  /// well.
+  ///
+  /// Defaults to false when null.
+  /// {@endtemplate}
+  ///
+  /// Subclass [Scrollbar] can hide and show the scrollbar thumb in response to
+  /// [MaterialState]s by using [ScrollbarThemeData.trackVisibility].
+  final bool? trackVisibility;
+
+  /// The color of the scrollbar thumb.
+  ///
+  /// If null, defaults to Color(0x66BCBCBC).
+  final Color? trackColor;
+
+  /// The color of the scrollbar thumb.
+  ///
+  /// If null, defaults to Color(0x66BCBCBC).
+  final Color? trackBorderColor;
+
+  /// The [Duration] of the fade animation.
+  ///
+  /// Cannot be null, defaults to a [Duration] of 300 milliseconds.
+  final Duration fadeDuration;
+
+  /// The [Duration] of time until the fade animation begins.
+  ///
+  /// Cannot be null, defaults to a [Duration] of 600 milliseconds.
+  final Duration timeToFade;
+
+  /// {@template flutter.widgets.Scrollbar.interactive}
+  /// Whether the Scrollbar should be interactive and respond to dragging on the
+  /// thumb, or tapping in the track area.
+  ///
+  /// Does not apply to the [CupertinoScrollbar], which is always interactive to
+  /// match native behavior. On Android, the scrollbar is not interactive by
+  /// default.
+  ///
+  /// When false, the scrollbar will not respond to gesture or hover events,
+  /// and will allow to click through it.
+  ///
+  /// Defaults to true when null, unless on Android, which will default to false
+  /// when null.
+  ///
+  /// See also:
+  ///
+  ///   * [RawScrollbarState.enableGestures], an overridable getter which uses
+  ///     this value to override the default behavior.
+  /// {@endtemplate}
+  final bool? interactive;
+
+  /// The [Duration] of time that a LongPress will trigger the drag gesture of
+  /// the scrollbar thumb.
+  ///
+  /// Cannot be null, defaults to [Duration.zero].
+  final Duration pressDuration;
+
+  /// {@template flutter.widgets.Scrollbar.notificationPredicate}
+  /// A check that specifies whether a [ScrollNotification] should be
+  /// handled by this widget.
+  ///
+  /// By default, checks whether `notification.depth == 0`. That means if the
+  /// scrollbar is wrapped around multiple [ScrollView]s, it only responds to the
+  /// nearest scrollView and shows the corresponding scrollbar thumb.
+  /// {@endtemplate}
+  final ScrollNotificationPredicate notificationPredicate;
+
+  /// {@macro flutter.widgets.Scrollbar.scrollbarOrientation}
+  final ScrollbarOrientation? scrollbarOrientation;
+
+  /// Distance from the scrollbar's start and end to the edge of the viewport
+  /// in logical pixels. It affects the amount of available paint area.
+  ///
+  /// Mustn't be null and defaults to 0.
+  final double mainAxisMargin;
+
+  /// Distance from the scrollbar thumb side to the nearest cross axis edge
+  /// in logical pixels.
+  ///
+  /// Must not be null and defaults to 0.
+  final double crossAxisMargin;
 
   /// {@template flutter.widgets.Scrollbar.isAlwaysShown}
   /// Indicates that the scrollbar should be visible, even when a scroll is not
@@ -1044,132 +1279,14 @@ class RawScrollbar extends StatefulWidget {
   ///     scroll view associated with the parent [PrimaryScrollController].
   ///   * [PrimaryScrollController], which associates a [ScrollController] with
   ///     a subtree.
+  ///
+  /// This is deprecated, [thumbVisibility] should be used instead.
   /// {@endtemplate}
+  @Deprecated(
+    'Use thumbVisibility instead. '
+    'This feature was deprecated after v2.9.0-1.0.pre.',
+  )
   final bool? isAlwaysShown;
-
-  /// The [OutlinedBorder] of the scrollbar's thumb.
-  ///
-  /// Only one of [radius] and [shape] may be specified. For a rounded rectangle,
-  /// it's simplest to just specify [radius]. By default, the scrollbar thumb's
-  /// shape is a simple rectangle.
-  ///
-  /// If [shape] is specified, the thumb will take the shape of the passed
-  /// [OutlinedBorder] and fill itself with [thumbColor] (or grey if it
-  /// is unspecified).
-  ///
-  /// {@tool dartpad}
-  /// This is an example of using a [StadiumBorder] for drawing the [shape] of the
-  /// thumb in a [RawScrollbar].
-  ///
-  /// ** See code in examples/api/lib/widgets/scrollbar/raw_scrollbar.shape.0.dart **
-  /// {@end-tool}
-  final OutlinedBorder? shape;
-
-  /// The [Radius] of the scrollbar thumb's rounded rectangle corners.
-  ///
-  /// Scrollbar will be rectangular if [radius] is null, which is the default
-  /// behavior.
-  final Radius? radius;
-
-  /// The thickness of the scrollbar in the cross axis of the scrollable.
-  ///
-  /// If null, will default to 6.0 pixels.
-  final double? thickness;
-
-  /// The color of the scrollbar thumb.
-  ///
-  /// If null, defaults to Color(0x66BCBCBC).
-  final Color? thumbColor;
-
-  /// The preferred smallest size the scrollbar thumb can shrink to when the total
-  /// scrollable extent is large, the current visible viewport is small, and the
-  /// viewport is not overscrolled.
-  ///
-  /// The size of the scrollbar's thumb may shrink to a smaller size than [minThumbLength]
-  /// to fit in the available paint area (e.g., when [minThumbLength] is greater
-  /// than [ScrollMetrics.viewportDimension] and [mainAxisMargin] combined).
-  ///
-  /// Mustn't be null and the value has to be greater or equal to
-  /// [minOverscrollLength], which in turn is >= 0. Defaults to 18.0.
-  final double minThumbLength;
-
-  /// The preferred smallest size the scrollbar thumb can shrink to when viewport is
-  /// overscrolled.
-  ///
-  /// When overscrolling, the size of the scrollbar's thumb may shrink to a smaller size
-  /// than [minOverscrollLength] to fit in the available paint area (e.g., when
-  /// [minOverscrollLength] is greater than [ScrollMetrics.viewportDimension] and
-  /// [mainAxisMargin] combined).
-  ///
-  /// Overscrolling can be made possible by setting the `physics` property
-  /// of the `child` Widget to a `BouncingScrollPhysics`, which is a special
-  /// `ScrollPhysics` that allows overscrolling.
-  ///
-  /// The value is less than or equal to [minThumbLength] and greater than or equal to 0.
-  /// When null, it will default to the value of [minThumbLength].
-  final double? minOverscrollLength;
-
-  /// The [Duration] of the fade animation.
-  ///
-  /// Cannot be null, defaults to a [Duration] of 300 milliseconds.
-  final Duration fadeDuration;
-
-  /// The [Duration] of time until the fade animation begins.
-  ///
-  /// Cannot be null, defaults to a [Duration] of 600 milliseconds.
-  final Duration timeToFade;
-
-  /// The [Duration] of time that a LongPress will trigger the drag gesture of
-  /// the scrollbar thumb.
-  ///
-  /// Cannot be null, defaults to [Duration.zero].
-  final Duration pressDuration;
-
-  /// {@template flutter.widgets.Scrollbar.notificationPredicate}
-  /// A check that specifies whether a [ScrollNotification] should be
-  /// handled by this widget.
-  ///
-  /// By default, checks whether `notification.depth == 0`. That means if the
-  /// scrollbar is wrapped around multiple [ScrollView]s, it only responds to the
-  /// nearest scrollView and shows the corresponding scrollbar thumb.
-  /// {@endtemplate}
-  final ScrollNotificationPredicate notificationPredicate;
-
-  /// {@template flutter.widgets.Scrollbar.interactive}
-  /// Whether the Scrollbar should be interactive and respond to dragging on the
-  /// thumb, or tapping in the track area.
-  ///
-  /// Does not apply to the [CupertinoScrollbar], which is always interactive to
-  /// match native behavior. On Android, the scrollbar is not interactive by
-  /// default.
-  ///
-  /// When false, the scrollbar will not respond to gesture or hover events,
-  /// and will allow to click through it.
-  ///
-  /// Defaults to true when null, unless on Android, which will default to false
-  /// when null.
-  ///
-  /// See also:
-  ///
-  ///   * [RawScrollbarState.enableGestures], an overridable getter which uses
-  ///     this value to override the default behavior.
-  /// {@endtemplate}
-  final bool? interactive;
-
-  /// {@macro flutter.widgets.Scrollbar.scrollbarOrientation}
-  final ScrollbarOrientation? scrollbarOrientation;
-
-  /// Distance from the scrollbar's start and end to the edge of the viewport
-  /// in logical pixels. It affects the amount of available paint area.
-  ///
-  /// Mustn't be null and defaults to 0.
-  final double mainAxisMargin;
-
-  /// Distance from the scrollbar thumb side to the nearest cross axis edge
-  /// in logical pixels.
-  ///
-  /// Must not be null and defaults to 0.
-  final double crossAxisMargin;
 
   @override
   RawScrollbarState<RawScrollbar> createState() => RawScrollbarState<RawScrollbar>();
