@@ -53,13 +53,13 @@ void main() {
       "name": "flutter",
       "rootUri": "$flutterRootUri/packages/flutter",
       "packageUri": "lib/",
-      "languageVersion": "2.10"
+      "languageVersion": "2.12"
     },
     {
       "name": "sky_engine",
       "rootUri": "$flutterRootUri/bin/cache/pkg/sky_engine",
       "packageUri": "lib/",
-      "languageVersion": "2.10"
+      "languageVersion": "2.12"
     },
     {
       "name": "flutter_project",
