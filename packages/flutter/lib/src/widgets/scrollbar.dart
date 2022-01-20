@@ -1123,8 +1123,8 @@ class RawScrollbar extends StatefulWidget {
   /// Indicates that the scrollbar track should be visible.
   ///
   /// When true, the scrollbar track will always be visible so long as the thumb
-  /// is visible. If the scrollbar thumb fades out of view, the track will as
-  /// well.
+  /// is visible. If the scrollbar thumb is not visible, the track will not be
+  /// visible either.
   ///
   /// Defaults to false when null.
   /// {@endtemplate}
