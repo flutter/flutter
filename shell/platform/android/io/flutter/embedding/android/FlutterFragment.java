@@ -746,6 +746,15 @@ public class FlutterFragment extends Fragment
     this.delegate = delegate;
   }
 
+  /**
+   * Returns the Android App Component exclusively attached to {@link
+   * io.flutter.embedding.engine.FlutterEngine}.
+   */
+  @Override
+  public ExclusiveAppComponent<Activity> getExclusiveAppComponent() {
+    return delegate;
+  }
+
   @Override
   public void onAttach(@NonNull Context context) {
     super.onAttach(context);

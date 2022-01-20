@@ -214,6 +214,15 @@ public class FlutterFragmentTest {
   }
 
   @Test
+  public void itReturnsExclusiveAppComponent() {
+    FlutterFragment fragment = FlutterFragment.createDefault();
+    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(fragment);
+    fragment.setDelegate(delegate);
+
+    assertEquals(fragment.getExclusiveAppComponent(), delegate);
+  }
+
+  @Test
   public void itDelegatesOnBackPressedAutomaticallyWhenEnabled() {
     // We need to mock FlutterJNI to avoid triggering native code.
     FlutterJNI flutterJNI = mock(FlutterJNI.class);
