@@ -143,6 +143,19 @@ class MigrateUtils {
     return result.stdout;
   }
 
+ static Future<void> gitInit(String workingDirectory) async {
+    List<String> cmdArgs = ['init'];
+    ProcessResult result = await Process.run('git', cmdArgs, workingDirectory: workingDirectory);
+    checkForErrors(result, allowedExitCodes: <int>[0]);
+ }
+
+  static Future<bool> isGitIgnored(String filePath, String workingDirectory) async {
+    List<String> cmdArgs = ['check-ignore', filePath];
+    ProcessResult result = await Process.run('git', cmdArgs, workingDirectory: workingDirectory);
+    checkForErrors(result, allowedExitCodes: <int>[0, 1, 128]);
+    return result.exitCode == 0;
+  }
+
   static void deleteTempDirectories({List<String> paths = const <String>[], List<Directory> directories = const <Directory>[]}) {
     print('Deleting temp directories');
     for (Directory d in directories) {
@@ -171,12 +184,14 @@ class DiffResult {
     diff = result.stdout as String,
     isDeletion = false,
     isAddition = false,
+    isIgnored = false,
     exitCode = result.exitCode;
 
   DiffResult.addition() :
     diff = '',
     isDeletion = false,
     isAddition = true,
+    isIgnored = false,
     outputPath = null,
     exitCode = 0;
 
@@ -184,12 +199,22 @@ class DiffResult {
     diff = '',
     isDeletion = true, 
     isAddition = false,
+    isIgnored = false,
+    outputPath = null,
+    exitCode = 0;
+
+  DiffResult.ignored() :
+    diff = '',
+    isDeletion = false, 
+    isAddition = false,
+    isIgnored = true,
     outputPath = null,
     exitCode = 0;
 
   String diff;
   bool isDeletion;
   bool isAddition;
+  bool isIgnored;
   String? outputPath;
   int exitCode;
 }

@@ -14,6 +14,10 @@ import '../migrate/migrate_utils.dart';
 import '../migrate/migrate_config.dart';
 import '../cache.dart';
 
+List<String> blacklist = <String>[
+  '.dart_tool'
+];
+
 class MigrateCommand extends FlutterCommand {
   MigrateCommand({
     bool verbose = false,
@@ -59,6 +63,14 @@ class MigrateCommand extends FlutterCommand {
 
     List<MigrateConfig> configs = await MigrateConfig.parseOrCreateMigrateConfigs();
 
+    String rootBaseRevision = '';
+    // Map<
+    // for (MigrateConfig config in configs) {
+    //   if (config.platform == 'root') {
+    //     rootBaseRevision = config.lastMigrateVersion!;
+    //   }
+    // }
+
     String revision = '18116933e77adc82f80866c928266a5b4f1ed645';
 
     // Generate the old templates
@@ -75,6 +87,9 @@ class MigrateCommand extends FlutterCommand {
       generatedNewTemplateDirectory = await MigrateUtils.createTempDirectory('generatedNewTemplate');
     }
     Directory oldFlutterRoot;
+
+    await MigrateUtils.gitInit(generatedOldTemplateDirectory.absolute.path);
+    await MigrateUtils.gitInit(generatedNewTemplateDirectory.absolute.path);
 
     // /var/folders/md/gm0zgfcj07vcsj6jkh_mp_wh00ff02/T/generatedOldTemplate.XmklMKhV
 // /var/folders/md/gm0zgfcj07vcsj6jkh_mp_wh00ff02/T/generatedNewTemplate.r9TzOOvh
@@ -126,6 +141,9 @@ class MigrateCommand extends FlutterCommand {
         continue;
       }
       String localPath = oldTemplateFile.path.replaceFirst(generatedOldTemplateDirectory.absolute.path + globals.fs.path.separator, '');
+      if (await MigrateUtils.isGitIgnored(oldTemplateFile.absolute.path, generatedOldTemplateDirectory.absolute.path)) {
+        diffMap[localPath] = DiffResult.ignored();
+      }
       File newTemplateFile = generatedNewTemplateDirectory.childFile(localPath);
       print('  Comparing to new template: ${newTemplateFile.path}');
       if (newTemplateFile.existsSync()) {
@@ -140,6 +158,7 @@ class MigrateCommand extends FlutterCommand {
       }
     }
 
+    // Check for any new files that were added in the new template
     for (FileSystemEntity entity in generatedNewFiles) {
       print(entity.path);
       if (entity is! File) {
@@ -153,16 +172,18 @@ class MigrateCommand extends FlutterCommand {
       if (diffMap.containsKey(localPath)) {
         continue;
       }
+      if (await MigrateUtils.isGitIgnored(newTemplateFile.absolute.path, generatedNewTemplateDirectory.absolute.path)) {
+        diffMap[localPath] = DiffResult.ignored();
+      }
       print('  Addition');
       diffMap[localPath] = DiffResult.addition();
     }
-    // TODO write diffs to files
-
-    // Directory diffRootDirectory = await MigrateUtils.createTempDirectory('diffRoot');
 
     // for each file
     List<FileSystemEntity> currentFiles = flutterProject.directory.listSync(recursive: true);
     String projectRootPath = flutterProject.directory.absolute.path;
+    List<MergeResult> mergeResults = <MergeResult>[];
+    List<File> deletedFiles = <File>[];
     for (FileSystemEntity entity in currentFiles) {
       if (entity is! File) {
         continue;
@@ -174,6 +195,10 @@ class MigrateCommand extends FlutterCommand {
       }
       // Diff the current file against the old generated template
       String localPath = currentFile.path.replaceFirst(projectRootPath + globals.fs.path.separator, '');
+      if (diffMap.containsKey(localPath) && diffMap[localPath]!.isIgnored || await MigrateUtils.isGitIgnored(currentFile.path, flutterProject.directory.absolute.path)) {
+        print('  File git ignored');
+        continue;
+      }
       File oldTemplateFile = generatedOldTemplateDirectory.childFile(localPath);
       DiffResult userDiff = await MigrateUtils.diffFiles(oldTemplateFile, currentFile);
 
@@ -184,6 +209,7 @@ class MigrateCommand extends FlutterCommand {
         if (diffMap.containsKey(localPath) && diffMap[localPath]!.isDeletion) { // File is deleted in new template
           print('    DELETING');
           // currentFile.deleteSync();
+          deletedFiles.add(currentFile);
         }
         continue;
       }
@@ -194,11 +220,17 @@ class MigrateCommand extends FlutterCommand {
           current: currentFile.path,
           other: globals.fs.path.join(generatedNewTemplateDirectory.path, localPath),
         );
-        print(result.mergedContents);
+        print('Merged with ${result.exitCode} conflicts');
+        // print(result.mergedContents);
+        mergeResults.add(result);
         continue;
       }
       print('  File unhandled');
     }
+
+    // deletedFiles
+    // mergeResults
+
 
     print('::::GENERATED FOLDERS::::::');
     print(generatedOldTemplateDirectory.path);
