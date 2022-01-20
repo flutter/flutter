@@ -305,6 +305,19 @@ public class FlutterActivityTest {
   }
 
   @Test
+  public void itReturnsExclusiveAppComponent() {
+    Intent intent = FlutterActivity.createDefaultIntent(RuntimeEnvironment.application);
+    ActivityController<FlutterActivity> activityController =
+        Robolectric.buildActivity(FlutterActivity.class, intent);
+    FlutterActivity flutterActivity = activityController.get();
+    FlutterActivityAndFragmentDelegate delegate =
+        new FlutterActivityAndFragmentDelegate(flutterActivity);
+    flutterActivity.setDelegate(delegate);
+
+    assertEquals(flutterActivity.getExclusiveAppComponent(), delegate);
+  }
+
+  @Test
   public void itDelaysDrawing() {
     Intent intent = FlutterActivity.createDefaultIntent(RuntimeEnvironment.application);
     ActivityController<FlutterActivity> activityController =
