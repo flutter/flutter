@@ -23,6 +23,18 @@ class MigrateCommand extends FlutterCommand {
       negatable: true,
       help: "",
     );
+    argParser.addOption(
+      'old-app-directory',
+      help: '',
+      defaultsTo: null,
+      valueHelp: 'path',
+    );
+    argParser.addOption(
+      'new-app-directory',
+      help: '',
+      defaultsTo: null,
+      valueHelp: 'path',
+    );
   }
 
   final bool _verbose;
@@ -43,77 +55,61 @@ class MigrateCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     final FlutterProject flutterProject = FlutterProject.current();
 
-    // final Directory buildDir = globals.fs.directory(getBuildDirectory());
     print('HERE');
 
     List<MigrateConfig> configs = await MigrateConfig.parseOrCreateMigrateConfigs();
-    // List<String> platforms = <String>['root', 'android'];
-    // for (String platform in platforms) {
-    //   if (MigrateConfig.getFileFromPlatform(platform).existsSync()) {
-    //     configs.add(MigrateConfig.fromPlatform(platform));
-    //   } else {
-    //     MigrateConfig newConfig = MigrateConfig(
-    //       platform: platform,
-    //       createVersion: 'vklalckasjlcksa',
-    //       lastMigrateVersion: 'askdl;laskdlas;kd',
-    //       unmanagedFiles: <String>[
-    //         'blah/file/path',
-    //       ],
-    //     );
-    //     newConfig.writeFile();
-    //     configs.add(newConfig);
-    //   }
-    // }
 
-    // String revision = '5344ed71561b924fb23300fb7fdb306744718767';
     String revision = '18116933e77adc82f80866c928266a5b4f1ed645';
 
-    // // Get the list of file names in the old templates directory
-    // List<String> files = await MigrateUtils.getFileNamesInDirectory(
-    //   revision: revision,
-    //   searchPath: 'packages/flutter_tools/templates',
-    //   workingDirectory: Cache.flutterRoot!,
-    // );
-
-    // // Clone a copy of the old templates directory into a temp dir.
-    // Directory tempDir = await MigrateUtils.createTempDirectory('tempdir1');
-    // print(tempDir.path);
-    // for (String f in files) {
-    //   print('Retrieving $f');
-    //   File fileOld = tempDir.childFile(f);
-    //   String contents = await MigrateUtils.getFileContents(
-    //     revision: revision,
-    //     file: f,
-    //     workingDirectory: Cache.flutterRoot!,
-    //     outputPath: fileOld.path.trim(),
-    //   );
-    // }
-
     // Generate the old templates
-    // Directory generatedOldTemplateDirectory = await MigrateUtils.createTempDirectory('generatedOldTemplate');
-    // Directory generatedNewTemplateDirectory = await MigrateUtils.createTempDirectory('generateNewTemplate');
-    // Directory oldFlutterRoot = await MigrateUtils.createTempDirectory('oldFlutter');
+    Directory generatedOldTemplateDirectory;
+    Directory generatedNewTemplateDirectory;
+    if (stringArg('old-app-directory') != null) {
+      generatedOldTemplateDirectory = globals.fs.directory(stringArg('old-app-directory')!);
+    } else {
+      generatedOldTemplateDirectory = await MigrateUtils.createTempDirectory('generatedOldTemplate');
+    }
+    if (stringArg('new-app-directory') != null) {
+      generatedNewTemplateDirectory = globals.fs.directory(stringArg('new-app-directory')!);
+    } else {
+      generatedNewTemplateDirectory = await MigrateUtils.createTempDirectory('generatedNewTemplate');
+    }
+    Directory oldFlutterRoot;
 
-    Directory generatedOldTemplateDirectory = globals.fs.directory('/var/folders/md/gm0zgfcj07vcsj6jkh_mp_wh00ff02/T/generatedOldTemplate.j8Tto95k');
-    Directory generatedNewTemplateDirectory = globals.fs.directory('/var/folders/md/gm0zgfcj07vcsj6jkh_mp_wh00ff02/T/generateNewTemplate.0f4evU9N');
+    // /var/folders/md/gm0zgfcj07vcsj6jkh_mp_wh00ff02/T/generatedOldTemplate.XmklMKhV
+// /var/folders/md/gm0zgfcj07vcsj6jkh_mp_wh00ff02/T/generatedNewTemplate.r9TzOOvh
+    // Directory generatedOldTemplateDirectory = globals.fs.directory('/var/folders/md/gm0zgfcj07vcsj6jkh_mp_wh00ff02/T/generatedOldTemplate.j8Tto95k');
+    // Directory generatedNewTemplateDirectory = globals.fs.directory('/var/folders/md/gm0zgfcj07vcsj6jkh_mp_wh00ff02/T/generateNewTemplate.0f4evU9N');
     // Directory oldFlutterRoot = globals.fs.directory();
 
-    // // Clone old flutter
-    // await MigrateUtils.cloneFlutter(revision, oldFlutterRoot.absolute.path);
 
     // // Create old
-    // await MigrateUtils.createFromTemplates(
-    //   oldFlutterRoot.childDirectory('bin').absolute.path,
-    //   flutterProject.manifest.appName,
-    //   outputDirectory: generatedOldTemplateDirectory.absolute.path
-    // );
+    String name = flutterProject.manifest.appName;
+    String androidLanguage = FlutterProject.current().android.isKotlin ? 'kotlin' : 'java';
+    String iosLanguage = FlutterProject.current().ios.isSwift ? 'swift' : 'objc';
+    // // Clone old flutter
+    if (stringArg('old-app-directory') == null) {
+      oldFlutterRoot = await MigrateUtils.createTempDirectory('oldFlutter');
+      await MigrateUtils.cloneFlutter(revision, oldFlutterRoot.absolute.path);
+      await MigrateUtils.createFromTemplates(
+        oldFlutterRoot.childDirectory('bin').absolute.path,
+        name: name,
+        androidLanguage: androidLanguage,
+        iosLanguage: iosLanguage,
+        outputDirectory: generatedOldTemplateDirectory.absolute.path,
+      );
+    }
 
-    // // Create new
-    // await MigrateUtils.createFromTemplates(
-    //   globals.fs.path.join(Cache.flutterRoot!, 'bin'),
-    //   flutterProject.manifest.appName,
-    //   outputDirectory: generatedNewTemplateDirectory.absolute.path
-    // );
+    if (stringArg('new-app-directory') == null) {
+      // Create new
+      await MigrateUtils.createFromTemplates(
+        globals.fs.path.join(Cache.flutterRoot!, 'bin'),
+        name: name,
+        androidLanguage: androidLanguage,
+        iosLanguage: iosLanguage,
+        outputDirectory: generatedNewTemplateDirectory.absolute.path
+      );
+    }
 
     // Generate diffs
     List<FileSystemEntity> generatedOldFiles = generatedOldTemplateDirectory.listSync(recursive: true);
@@ -225,11 +221,5 @@ class MigrateCommand extends FlutterCommand {
       );
     }
     return const FlutterCommandResult(ExitStatus.success);
-  }
-
-  void parseParameters() {
-    // String name = flutterProject.manifest.appName;
-    String androidLanguage;
-    String iosLanguage;
   }
 }

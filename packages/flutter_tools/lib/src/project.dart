@@ -314,34 +314,26 @@ class FlutterProject {
       return;
     }
     await refreshPluginsList(this, iosPlatform: iosPlatform, macOSPlatform: macOSPlatform);
-    List<String> platformsForMigrateConfig = <String>['root'];
     if (androidPlatform) {
       await android.ensureReadyForPlatformSpecificTooling(deprecationBehavior: deprecationBehavior);
-      platformsForMigrateConfig.add('android');
     }
     if (iosPlatform) {
       await ios.ensureReadyForPlatformSpecificTooling();
-      platformsForMigrateConfig.add('ios');
     }
     if (linuxPlatform) {
       await linux.ensureReadyForPlatformSpecificTooling();
-      platformsForMigrateConfig.add('linux');
     }
     if (macOSPlatform) {
       await macos.ensureReadyForPlatformSpecificTooling();
-      platformsForMigrateConfig.add('macos');
     }
     if (windowsPlatform) {
       await windows.ensureReadyForPlatformSpecificTooling();
-      platformsForMigrateConfig.add('windows');
     }
     if (webPlatform) {
       await web.ensureReadyForPlatformSpecificTooling();
-      platformsForMigrateConfig.add('web');
     }
     if (winUwpPlatform) {
       await windowsUwp.ensureReadyForPlatformSpecificTooling();
-      platformsForMigrateConfig.add('winUwp');
     }
     await injectPlugins(
       this,
@@ -353,7 +345,6 @@ class FlutterProject {
       webPlatform: webPlatform,
       winUwpPlatform: winUwpPlatform,
     );
-    // MigrateConfig.parseOrCreateMigrateConfigs(platforms: platformsForMigrateConfig);
   }
 
   void checkForDeprecation({DeprecationBehavior deprecationBehavior = DeprecationBehavior.none}) {
@@ -561,9 +552,14 @@ class AndroidProject extends FlutterProjectPlatform {
   }
 
   void checkForDeprecation({DeprecationBehavior deprecationBehavior = DeprecationBehavior.none}) {
+    if (deprecationBehavior == DeprecationBehavior.none) {
+      return;
+    }
     final AndroidEmbeddingVersionResult result = computeEmbeddingVersion();
-    if (result.version == AndroidEmbeddingVersion.v1) {
-      globals.printStatus(
+    if (result.version != AndroidEmbeddingVersion.v1) {
+      return;
+    }
+    globals.printStatus(
 '''
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Warning
@@ -582,21 +578,15 @@ The detected reason was:
 
   ${result.reason}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-'''
+''');
+    if (deprecationBehavior == DeprecationBehavior.ignore) {
+      BuildEvent('deprecated-v1-android-embedding-ignored', type: 'gradle', flutterUsage: globals.flutterUsage).send();
+    } else { // DeprecationBehavior.exit
+      BuildEvent('deprecated-v1-android-embedding-failed', type: 'gradle', flutterUsage: globals.flutterUsage).send();
+      throwToolExit(
+        'Build failed due to use of deprecated Android v1 embedding.',
+        exitCode: 1,
       );
-      switch (deprecationBehavior) {
-        case DeprecationBehavior.none:
-          break;
-        case DeprecationBehavior.ignore:
-          BuildEvent('deprecated-v1-android-embedding-ignored', type: 'gradle', flutterUsage: globals.flutterUsage).send();
-          break;
-        case DeprecationBehavior.exit:
-          BuildEvent('deprecated-v1-android-embedding-failed', type: 'gradle', flutterUsage: globals.flutterUsage).send();
-          throwToolExit(
-            'Build failed due to use of deprecated Android v1 embedding.',
-            exitCode: 1,
-          );
-      }
     }
   }
 

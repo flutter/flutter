@@ -106,7 +106,13 @@ class MigrateUtils {
     checkForErrors(result);
   }
 
-  static Future<String> createFromTemplates(String flutterBinPath, String name, {String? outputDirectory, List<String> platforms = const <String>[]}) async {
+  static Future<String> createFromTemplates(String flutterBinPath, {
+    required String name,
+    required String androidLanguage,
+    required String iosLanguage,
+    String? outputDirectory,
+    List<String> platforms = const <String>[],
+  }) async {
      List<String> cmdArgs = ['create', '--project-name', name];
     if (outputDirectory != null) {
       cmdArgs.add(outputDirectory);
@@ -126,7 +132,7 @@ class MigrateUtils {
     print('  git Merging');
     List<String> cmdArgs = ['merge-file', '-p', current, ancestor, other];
     ProcessResult result = await Process.run('git', cmdArgs);
-    checkForErrors(result, allowedExitCodes: <int>[1]);
+    checkForErrors(result, allowedExitCodes: <int>[-1]);
     return MergeResult(result);
   }
 
@@ -148,7 +154,8 @@ class MigrateUtils {
   }
 
   static checkForErrors(ProcessResult result, {List<int> allowedExitCodes = const <int>[]}) {
-    if (result.exitCode != 0 && !allowedExitCodes.contains(result.exitCode)) {
+    // -1 in allowed exit codes means all exit codes are valid.
+    if ((result.exitCode != 0 && !allowedExitCodes.contains(result.exitCode)) && !allowedExitCodes.contains(-1)) {
       globals.printError('Git command encountered an error. Stdout:');
       globals.printStatus(result.stdout as String);
       globals.printError('Stderr:');
