@@ -93,22 +93,19 @@ void main() {
     testWithoutContext('Flutter macOS desktop help string', () {
       expect(flutterMacOSDesktopFeature.generateHelpMessage(),
       'Enable or disable beta-quality support for desktop on macOS. '
-      'This setting will take effect on the master, dev, beta, and stable channels. '
-      'Newer beta versions are available on the beta channel.');
+      'This setting will take effect on the master, dev, beta, and stable channels.');
     });
 
     testWithoutContext('Flutter Linux desktop help string', () {
       expect(flutterLinuxDesktopFeature.generateHelpMessage(),
       'Enable or disable beta-quality support for desktop on Linux. '
-      'This setting will take effect on the master, dev, beta, and stable channels. '
-      'Newer beta versions are available on the beta channel.');
+      'This setting will take effect on the master, dev, beta, and stable channels.');
     });
 
     testWithoutContext('Flutter Windows desktop help string', () {
       expect(flutterWindowsDesktopFeature.generateHelpMessage(),
       'Enable or disable beta-quality support for desktop on Windows. '
-      'This setting will take effect on the master, dev, beta, and stable channels. '
-      'Newer beta versions are available on the beta channel.');
+      'This setting will take effect on the master, dev, beta, and stable channels.');
     });
 
     testWithoutContext('help string on multiple channels', () {
