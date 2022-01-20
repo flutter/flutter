@@ -71,7 +71,7 @@ class MockRuntimeController : public RuntimeController {
   MOCK_METHOD3(LoadDartDeferredLibraryError,
                void(intptr_t, const std::string, bool));
   MOCK_CONST_METHOD0(GetDartVM, DartVM*());
-  MOCK_METHOD1(NotifyIdle, bool(int64_t));
+  MOCK_METHOD1(NotifyIdle, bool(fml::TimePoint));
 };
 
 std::unique_ptr<PlatformMessage> MakePlatformMessage(

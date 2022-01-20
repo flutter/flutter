@@ -34,7 +34,7 @@ class Animator final {
     virtual void OnAnimatorBeginFrame(fml::TimePoint frame_target_time,
                                       uint64_t frame_number) = 0;
 
-    virtual void OnAnimatorNotifyIdle(int64_t deadline) = 0;
+    virtual void OnAnimatorNotifyIdle(fml::TimePoint deadline) = 0;
 
     virtual void OnAnimatorDraw(
         std::shared_ptr<Pipeline<flutter::LayerTree>> pipeline,
