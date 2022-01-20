@@ -518,15 +518,17 @@ static void SendFakeTouchEvent(FlutterEngine* engine,
     FML_DCHECK(RasterTaskRunner->RunsTasksOnCurrentThread());
     // Get callback on raster thread and jump back to platform thread.
     platformTaskRunner->PostTask([weakSelf]() {
-      fml::scoped_nsobject<FlutterViewController> flutterViewController(
-          [(FlutterViewController*)weakSelf.get() retain]);
-      if (flutterViewController) {
-        if (flutterViewController.get()->_splashScreenView) {
-          [flutterViewController removeSplashScreenView:^{
+      if (weakSelf) {
+        fml::scoped_nsobject<FlutterViewController> flutterViewController(
+            [(FlutterViewController*)weakSelf.get() retain]);
+        if (flutterViewController) {
+          if (flutterViewController.get()->_splashScreenView) {
+            [flutterViewController removeSplashScreenView:^{
+              [flutterViewController callViewRenderedCallback];
+            }];
+          } else {
             [flutterViewController callViewRenderedCallback];
-          }];
-        } else {
-          [flutterViewController callViewRenderedCallback];
+          }
         }
       }
     });
