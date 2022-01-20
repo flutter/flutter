@@ -1016,6 +1016,18 @@ void main() {
     lines = painter.computeLineMetrics();
     expect(lines.length, 1);
   }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/62819
+
+  test('TextPainter paragraph is null test', () {
+    final TextPainter painter = TextPainter()
+      ..textDirection = TextDirection.ltr;
+
+    const String text = 'A';
+    painter.text = const TextSpan(text: text, style: TextStyle(height: 1.0));
+    painter.layout();
+
+    painter.markNeedsLayout();
+    painter.getPositionForOffset(Offset.zero);
+  }, skip: kIsWeb && !isCanvasKit);
 }
 
 class MockCanvas extends Fake implements Canvas {

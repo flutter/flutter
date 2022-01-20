@@ -198,6 +198,8 @@ class TextPainter {
 
   bool get _debugNeedsLayout => _paragraph == null;
 
+  bool _needsLayout = true;
+
   /// Marks this text painter's layout information as dirty and removes cached
   /// information.
   ///
@@ -205,7 +207,7 @@ class TextPainter {
   /// layout changes in engine. In most cases, updating text painter properties
   /// in framework will automatically invoke this method.
   void markNeedsLayout() {
-    _paragraph = null;
+    _needsLayout = true;
     _lineMetricsCache = null;
     _previousCaretPosition = null;
     _previousCaretPrototype = null;
@@ -641,9 +643,12 @@ class TextPainter {
     assert(textDirection != null, 'TextPainter.textDirection must be set to a non-null value before using the TextPainter.');
     // Return early if the current layout information is not outdated, even if
     // _needsPaint is true (in which case _paragraph will be rebuilt in paint).
-    if (_paragraph != null && minWidth == _lastMinWidth && maxWidth == _lastMaxWidth)
+    if(_needsLayout) {
+      _paragraph = null;
+    } else if (_paragraph != null && minWidth == _lastMinWidth && maxWidth == _lastMaxWidth) {
       return;
-
+    }
+    _needsLayout = false;
     if (_rebuildParagraphForPaint || _paragraph == null)
       _createParagraph();
     _lastMinWidth = minWidth;
