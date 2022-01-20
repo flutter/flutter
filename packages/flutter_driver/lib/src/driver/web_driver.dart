@@ -122,6 +122,8 @@ class WebFlutterDriver extends FlutterDriver {
     try {
       data = await _connection.sendCommand("window.\$flutterDriver('${jsonEncode(serialized)}')", command.timeout);
 
+      // The returned data is expected to be a string. If it's null or anything
+      // other than a string, something's wrong.
       if (data is! String) {
         throw _createMalformedExtensionResponseError(data);
       }
