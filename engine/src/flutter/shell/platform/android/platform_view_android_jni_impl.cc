@@ -121,6 +121,7 @@ static jmethodID g_mutators_stack_init_method = nullptr;
 static jmethodID g_mutators_stack_push_transform_method = nullptr;
 static jmethodID g_mutators_stack_push_cliprect_method = nullptr;
 static jmethodID g_mutators_stack_push_cliprrect_method = nullptr;
+static jmethodID g_mutators_stack_push_opacity_method = nullptr;
 
 // Called By Java
 static jlong AttachJNI(JNIEnv* env, jclass clazz, jobject flutterJNI) {
@@ -1019,6 +1020,14 @@ bool PlatformViewAndroid::Register(JNIEnv* env) {
     return false;
   }
 
+  g_mutators_stack_push_opacity_method =
+      env->GetMethodID(g_mutators_stack_class->obj(), "pushOpacity", "(F)V");
+  if (g_mutators_stack_push_opacity_method == nullptr) {
+    FML_LOG(ERROR)
+        << "Could not locate FlutterMutatorsStack.pushOpacity method";
+    return false;
+  }
+
   g_on_display_platform_view_method =
       env->GetMethodID(g_flutter_jni_class->obj(), "onDisplayPlatformView",
                        "(IIIIIIILio/flutter/embedding/engine/mutatorsstack/"
@@ -1453,10 +1462,15 @@ void PlatformViewAndroidJNIImpl::FlutterViewOnDisplayPlatformView(
             (int)rect.bottom(), radiisArray.obj());
         break;
       }
+      case opacity: {
+        float opacity = (*iter)->GetAlphaFloat();
+        env->CallVoidMethod(mutatorsStack, g_mutators_stack_push_opacity_method,
+                            opacity);
+        break;
+      }
       // TODO(cyanglaz): Implement other mutators.
       // https://github.com/flutter/flutter/issues/58426
       case clip_path:
-      case opacity:
         break;
     }
     ++iter;

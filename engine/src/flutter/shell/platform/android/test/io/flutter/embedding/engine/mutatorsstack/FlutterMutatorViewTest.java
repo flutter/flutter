@@ -1,10 +1,13 @@
 package io.flutter.embedding.engine.mutatorsstack;
 
+import static android.view.View.LAYER_TYPE_HARDWARE;
 import static android.view.View.OnFocusChangeListener;
 import static junit.framework.TestCase.*;
 import static org.mockito.Mockito.*;
 
+import android.graphics.Canvas;
 import android.graphics.Matrix;
+import android.graphics.Paint;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -249,5 +252,21 @@ public class FlutterMutatorViewTest {
 
     view.unsetOnDescendantFocusChangeListener();
     verify(viewTreeObserver, times(1)).removeOnGlobalFocusChangeListener(activeFocusListener);
+  }
+
+  @Test
+  public void draw_opacityApplied() {
+    final FlutterMutatorView view = new FlutterMutatorView(RuntimeEnvironment.systemContext);
+    final FlutterMutatorView spy = spy(view);
+
+    final FlutterMutatorsStack mutatorsStack = new FlutterMutatorsStack();
+    mutatorsStack.pushOpacity(.3f);
+
+    spy.readyToDisplay(mutatorsStack, /*left=*/ 1, /*top=*/ 2, /*width=*/ 0, /*height=*/ 0);
+    spy.draw(new Canvas());
+    verify(spy)
+        .setLayerType(
+            intThat((Integer layerType) -> layerType == LAYER_TYPE_HARDWARE),
+            argThat((Paint paint) -> paint.getAlpha() == (int) (.3f * 255)));
   }
 }

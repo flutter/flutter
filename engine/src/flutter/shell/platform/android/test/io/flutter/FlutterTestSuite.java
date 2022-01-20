@@ -24,6 +24,7 @@ import io.flutter.embedding.engine.deferredcomponents.PlayStoreDeferredComponent
 import io.flutter.embedding.engine.loader.ApplicationInfoLoaderTest;
 import io.flutter.embedding.engine.loader.FlutterLoaderTest;
 import io.flutter.embedding.engine.mutatorsstack.FlutterMutatorViewTest;
+import io.flutter.embedding.engine.mutatorsstack.FlutterMutatorsStackTest;
 import io.flutter.embedding.engine.plugins.shim.ShimPluginRegistryTest;
 import io.flutter.embedding.engine.renderer.FlutterRendererTest;
 import io.flutter.embedding.engine.systemchannels.DeferredComponentChannelTest;
@@ -73,6 +74,7 @@ import test.io.flutter.embedding.engine.PluginComponentTest;
   FlutterJNITest.class,
   FlutterLaunchTests.class,
   FlutterLoaderTest.class,
+  FlutterMutatorsStackTest.class,
   FlutterMutatorViewTest.class,
   FlutterShellArgsTest.class,
   FlutterRendererTest.class,
