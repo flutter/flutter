@@ -101,11 +101,10 @@ void main() {
   });
 
   // testWithoutContext a specific file outside the current directory
-  testWithoutContext('passing one file throws', () async {
+  testWithoutContext('passing one file', () async {
     await runCommand(
       arguments: <String>['analyze', '--no-pub', libMain.path],
-      exitMessageContains: 'is not a directory',
-      exitCode: 1,
+      statusTextContains: <String>['No issues found!']
     );
   });
 
