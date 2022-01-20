@@ -1381,15 +1381,6 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     return result;
   }
 
-  bool get _showHighlight {
-    switch (_focusHighlightMode) {
-      case FocusHighlightMode.touch:
-        return false;
-      case FocusHighlightMode.traditional:
-        return _hasPrimaryFocus;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
@@ -1452,12 +1443,6 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     Widget result = DefaultTextStyle(
       style: _enabled ? _textStyle! : _textStyle!.copyWith(color: Theme.of(context).disabledColor),
       child: Container(
-        decoration: _showHighlight
-            ? BoxDecoration(
-                color: widget.focusColor ?? Theme.of(context).focusColor,
-                borderRadius: const BorderRadius.all(Radius.circular(4.0)),
-              )
-            : null,
         padding: padding.resolve(Directionality.of(context)),
         height: widget.isDense ? _denseButtonHeight : null,
         child: Row(
@@ -1531,6 +1516,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
           canRequestFocus: _enabled,
           focusNode: focusNode,
           autofocus: widget.autofocus,
+          focusColor: widget.focusColor ?? Theme.of(context).focusColor,
           enableFeedback: false,
           child: result,
         ),

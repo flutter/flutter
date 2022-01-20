@@ -2395,13 +2395,13 @@ void main() {
     final UniqueKey buttonKey = UniqueKey();
     final FocusNode focusNode = FocusNode(debugLabel: 'DropdownButton');
     await tester.pumpWidget(buildFrame(buttonKey: buttonKey, onChanged: onChanged, focusNode: focusNode, autofocus: true));
-    await tester.pump(); // Pump a frame for autofocus to take effect.
+    await tester.pumpAndSettle(); // Pump a frame for autofocus to take effect.
     expect(focusNode.hasPrimaryFocus, isTrue);
-    final Finder buttonFinder = find.byKey(buttonKey);
-    expect(buttonFinder, paints ..rrect(rrect: const RRect.fromLTRBXY(0.0, 0.0, 104.0, 48.0, 4.0, 4.0), color: const Color(0x1f000000)));
+    expect(find.byType(Material), paints ..rect(rect: const Rect.fromLTRB(348.0, 276.0, 452.0, 324.0), color: const Color(0x1f000000)));
 
     await tester.pumpWidget(buildFrame(buttonKey: buttonKey, onChanged: onChanged, focusNode: focusNode, focusColor: const Color(0xff00ff00)));
-    expect(buttonFinder, paints ..rrect(rrect: const RRect.fromLTRBXY(0.0, 0.0, 104.0, 48.0, 4.0, 4.0), color: const Color(0xff00ff00)));
+    await tester.pumpAndSettle(); // Pump a frame for autofocus to take effect.
+    expect(find.byType(Material), paints ..rect(rect: const Rect.fromLTRB(348.0, 276.0, 452.0, 324.0), color: const Color(0x1f00ff00)));
   });
 
   testWidgets('DropdownButtonFormField can be focused, and has focusColor', (WidgetTester tester) async {
@@ -2409,13 +2409,13 @@ void main() {
     final UniqueKey buttonKey = UniqueKey();
     final FocusNode focusNode = FocusNode(debugLabel: 'DropdownButtonFormField');
     await tester.pumpWidget(buildFrame(isFormField: true, buttonKey: buttonKey, onChanged: onChanged, focusNode: focusNode, autofocus: true));
-    await tester.pump(); // Pump a frame for autofocus to take effect.
+    await tester.pumpAndSettle(); // Pump a frame for autofocus to take effect.
     expect(focusNode.hasPrimaryFocus, isTrue);
-    final Finder buttonFinder = find.descendant(of: find.byKey(buttonKey), matching: find.byType(InputDecorator));
-    expect(buttonFinder, paints ..rrect(rrect: const RRect.fromLTRBXY(0.0, 12.0, 800.0, 60.0, 4.0, 4.0), color: const Color(0x1f000000)));
+    expect(find.byType(Material), paints ..rect(rect: const Rect.fromLTRB(0.0, 264.0, 800.0, 336.0), color: const Color(0x1f000000)));
 
     await tester.pumpWidget(buildFrame(isFormField: true, buttonKey: buttonKey, onChanged: onChanged, focusNode: focusNode, focusColor: const Color(0xff00ff00)));
-    expect(buttonFinder, paints ..rrect(rrect: const RRect.fromLTRBXY(0.0, 12.0, 800.0, 60.0, 4.0, 4.0), color: const Color(0xff00ff00)));
+    await tester.pumpAndSettle(); // Pump a frame for autofocus to take effect.
+    expect(find.byType(Material), paints ..rect(rect: const Rect.fromLTRB(0.0, 264.0, 800.0, 336.0), color: const Color(0x1f00ff00)));
   });
 
   testWidgets("DropdownButton won't be focused if not enabled", (WidgetTester tester) async {
