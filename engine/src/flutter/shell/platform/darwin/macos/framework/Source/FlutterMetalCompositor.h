@@ -7,13 +7,16 @@
 
 #include "flutter/fml/macros.h"
 #include "flutter/shell/platform/darwin/macos/framework/Source/FlutterCompositor.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterPlatformViewController.h"
 
 namespace flutter {
 
 class FlutterMetalCompositor : public FlutterCompositor {
  public:
-  explicit FlutterMetalCompositor(FlutterViewController* view_controller,
-                                  id<MTLDevice> mtl_device);
+  explicit FlutterMetalCompositor(
+      FlutterViewController* view_controller,
+      FlutterPlatformViewController* platform_views_controller,
+      id<MTLDevice> mtl_device);
 
   virtual ~FlutterMetalCompositor() = default;
 
@@ -42,7 +45,12 @@ class FlutterMetalCompositor : public FlutterCompositor {
   bool Present(const FlutterLayer** layers, size_t layers_count) override;
 
  private:
+  // Presents the platform view layer represented by `layer`. `layer_index` is
+  // used to position the layer in the z-axis.
+  void PresentPlatformView(const FlutterLayer* layer, size_t layer_index);
+
   const id<MTLDevice> mtl_device_;
+  const FlutterPlatformViewController* platform_views_controller_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(FlutterMetalCompositor);
 };

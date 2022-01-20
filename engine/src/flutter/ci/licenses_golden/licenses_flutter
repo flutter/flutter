@@ -1227,6 +1227,7 @@ FILE: ../../../flutter/shell/platform/darwin/macos/framework/Headers/FlutterAppD
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Headers/FlutterDartProject.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Headers/FlutterEngine.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Headers/FlutterMacOS.h
+FILE: ../../../flutter/shell/platform/darwin/macos/framework/Headers/FlutterPlatformViews.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Headers/FlutterPluginMacOS.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Headers/FlutterPluginRegistrarMacOS.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Headers/FlutterViewController.h
@@ -1288,6 +1289,9 @@ FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterOpenG
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterPlatformNodeDelegateMac.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterPlatformNodeDelegateMac.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterPlatformNodeDelegateMacTest.mm
+FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterPlatformViewController.h
+FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterPlatformViewController.mm
+FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterPlatformViewControllerTest.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterRenderer.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterRenderingBackend.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterRenderingBackend.mm
@@ -1316,6 +1320,8 @@ FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/KeyCodeMap.m
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/KeyCodeMap_Internal.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/MacOSGLContextSwitch.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/MacOSGLContextSwitch.mm
+FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/TestFlutterPlatformView.h
+FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/TestFlutterPlatformView.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/fixtures/flutter_desktop_test.dart
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/module.modulemap
 FILE: ../../../flutter/shell/platform/embedder/assets/EmbedderInfo.plist

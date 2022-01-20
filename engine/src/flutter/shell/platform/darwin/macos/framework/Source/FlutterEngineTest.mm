@@ -343,7 +343,8 @@ TEST_F(FlutterEngineTest, NativeCallbacks) {
   ASSERT_TRUE(latch_called);
 }
 
-TEST(FlutterEngine, Compositor) {
+// TODO: Enable after https://github.com/flutter/flutter/issues/96668 is fixed.
+TEST(FlutterEngine, DISABLED_Compositor) {
   NSString* fixtures = @(flutter::testing::GetFixturesPath());
   FlutterDartProject* project = [[FlutterDartProject alloc]
       initWithAssetsPath:fixtures

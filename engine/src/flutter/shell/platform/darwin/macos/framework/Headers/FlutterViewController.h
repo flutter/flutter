@@ -6,6 +6,7 @@
 
 #import "FlutterEngine.h"
 #import "FlutterMacros.h"
+#import "FlutterPlatformViews.h"
 #import "FlutterPluginRegistrarMacOS.h"
 
 /**

@@ -10,6 +10,7 @@
 
 #include "flutter/shell/platform/common/accessibility_bridge.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterCompositor.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterPlatformViewController.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterRenderer.h"
 
 @interface FlutterEngine ()
@@ -69,6 +70,8 @@
  * Unregisters an external texture with the given id. Returns YES on success.
  */
 - (BOOL)unregisterTextureWithID:(int64_t)textureID;
+
+- (nonnull FlutterPlatformViewController*)platformViewController;
 
 // Accessibility API.
 

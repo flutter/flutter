@@ -40,6 +40,7 @@ _flutter_framework_headers = [
   "framework/Headers/FlutterDartProject.h",
   "framework/Headers/FlutterEngine.h",
   "framework/Headers/FlutterMacOS.h",
+  "framework/Headers/FlutterPlatformViews.h",
   "framework/Headers/FlutterPluginMacOS.h",
   "framework/Headers/FlutterPluginRegistrarMacOS.h",
   "framework/Headers/FlutterViewController.h",
@@ -95,6 +96,8 @@ source_set("flutter_framework_source") {
     "framework/Source/FlutterOpenGLRenderer.mm",
     "framework/Source/FlutterPlatformNodeDelegateMac.h",
     "framework/Source/FlutterPlatformNodeDelegateMac.mm",
+    "framework/Source/FlutterPlatformViewController.h",
+    "framework/Source/FlutterPlatformViewController.mm",
     "framework/Source/FlutterRenderer.h",
     "framework/Source/FlutterRenderingBackend.h",
     "framework/Source/FlutterRenderingBackend.mm",
@@ -186,11 +189,14 @@ executable("flutter_desktop_darwin_unittests") {
     "framework/Source/FlutterMetalSurfaceManagerTest.mm",
     "framework/Source/FlutterOpenGLRendererTest.mm",
     "framework/Source/FlutterPlatformNodeDelegateMacTest.mm",
+    "framework/Source/FlutterPlatformViewControllerTest.mm",
     "framework/Source/FlutterTextInputPluginTest.mm",
     "framework/Source/FlutterTextInputSemanticsObjectTest.mm",
     "framework/Source/FlutterViewControllerTest.mm",
     "framework/Source/FlutterViewControllerTestUtils.h",
     "framework/Source/FlutterViewControllerTestUtils.mm",
+    "framework/Source/TestFlutterPlatformView.h",
+    "framework/Source/TestFlutterPlatformView.mm",
   ]
 
   cflags_objcc = flutter_cflags_objcc_arc

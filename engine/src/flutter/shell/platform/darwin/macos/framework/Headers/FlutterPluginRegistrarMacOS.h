@@ -7,6 +7,7 @@
 #import "FlutterBinaryMessenger.h"
 #import "FlutterChannels.h"
 #import "FlutterMacros.h"
+#import "FlutterPlatformViews.h"
 #import "FlutterPluginMacOS.h"
 #import "FlutterTexture.h"
 
@@ -47,6 +48,18 @@ FLUTTER_DARWIN_EXPORT
  */
 - (void)addMethodCallDelegate:(nonnull id<FlutterPlugin>)delegate
                       channel:(nonnull FlutterMethodChannel*)channel;
+
+/**
+ * Registers a `FlutterPlatformViewFactory` for creation of platform views.
+ *
+ * Plugins expose `NSView` for embedding in Flutter apps by registering a view factory.
+ *
+ * @param factory The view factory that will be registered.
+ * @param factoryId A unique identifier for the factory, the Dart code of the Flutter app can use
+ *   this identifier to request creation of a `NSView` by the registered factory.
+ */
+- (void)registerViewFactory:(nonnull NSObject<FlutterPlatformViewFactory>*)factory
+                     withId:(nonnull NSString*)factoryId;
 
 @end
 
