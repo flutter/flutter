@@ -883,7 +883,7 @@ Future<void> _runFrameworkTests() async {
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'gen_keycodes'));
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'benchmarks', 'test_apps', 'stocks'));
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'), tests: <String>[path.join('test', 'src', 'real_tests')], options: soundNullSafetyOptions);
-    await _runFlutterTest(path.join(flutterRoot, 'packages', 'integration_test'));
+    await _runFlutterTest(path.join(flutterRoot, 'packages', 'integration_test'), options: <String>['--enable-vmservice']);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_goldens'), options: soundNullSafetyOptions);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'), options: soundNullSafetyOptions);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'), options: soundNullSafetyOptions);
