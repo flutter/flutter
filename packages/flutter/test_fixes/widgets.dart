@@ -177,4 +177,8 @@ void main() {
   final OverscrollIndicatorNotification notification = OverscrollIndicatorNotification(leading: true);
   final OverscrollIndicatorNotification notification = OverscrollIndicatorNotification(error: '');
   notification.disallowGlow();
+
+  // Changes made in
+  RawScrollbar rawScrollbar = RawScrollbar(isAlwaysShown: true);
+  nowShowing = rawScrollbar.isAlwaysShown;
 }

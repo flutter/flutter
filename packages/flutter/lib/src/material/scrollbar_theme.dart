@@ -151,7 +151,6 @@ class ScrollbarThemeData with Diagnosticable {
     MaterialStateProperty<double?>? thickness,
     MaterialStateProperty<bool?>? trackVisibility,
     bool? showTrackOnHover,
-    bool? isAlwaysShown,
     bool? interactive,
     Radius? radius,
     MaterialStateProperty<Color?>? thumbColor,
@@ -160,6 +159,11 @@ class ScrollbarThemeData with Diagnosticable {
     double? crossAxisMargin,
     double? mainAxisMargin,
     double? minThumbLength,
+    @Deprecated(
+      'Use thumbVisibility instead. '
+      'This feature was deprecated after v2.9.0-1.0.pre.',
+    )
+    bool? isAlwaysShown,
   }) {
     return ScrollbarThemeData(
       thumbVisibility: thumbVisibility ?? this.thumbVisibility,
