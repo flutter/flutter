@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 # Copyright 2014 The Flutter Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -14,14 +14,14 @@
 
 set -e
 
-FLUTTER_ROOT="$(dirname "$(dirname "$(dirname "${BASH_SOURCE[0]}")")")"
+FLUTTER_ROOT="$(dirname "$(dirname "$(dirname "$0")")")"
 
 DART_SDK_PATH="$FLUTTER_ROOT/bin/cache/dart-sdk"
 DART_SDK_PATH_OLD="$DART_SDK_PATH.old"
 ENGINE_STAMP="$FLUTTER_ROOT/bin/cache/engine-dart-sdk.stamp"
-ENGINE_VERSION=`cat "$FLUTTER_ROOT/bin/internal/engine.version"`
+ENGINE_VERSION=$(cat "$FLUTTER_ROOT/bin/internal/engine.version")
 
-if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != `cat "$ENGINE_STAMP"` ]; then
+if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != "$(cat "$ENGINE_STAMP")" ]; then
   command -v curl > /dev/null 2>&1 || {
     >&2 echo
     >&2 echo 'Missing "curl" tool. Unable to download Dart SDK.'
@@ -111,7 +111,7 @@ if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != `cat "$ENGINE_STAMP"` ]; t
 
   # Conditionally set verbose flag for LUCI
   verbose_curl=""
-  if [[ -n "$LUCI_CI" ]]; then
+  if [ -n "$LUCI_CI" ]; then
     verbose_curl="--verbose"
   fi
 

@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 # Copyright 2014 The Flutter Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -31,10 +31,10 @@ unset CDPATH
 #
 # The function is enclosed in a subshell to avoid changing the working directory
 # of the caller.
-function follow_links() (
+follow_links() (
   cd -P "$(dirname -- "$1")"
   file="$PWD/$(basename -- "$1")"
-  while [[ -h "$file" ]]; do
+  while [ -h "$file" ]; do
     cd -P "$(dirname -- "$file")"
     file="$(readlink -- "$file")"
     cd -P "$(dirname -- "$file")"
@@ -43,16 +43,16 @@ function follow_links() (
   echo "$file"
 )
 
-PROG_NAME="$(follow_links "${BASH_SOURCE[0]}")"
+PROG_NAME="$(follow_links "$0")"
 BIN_DIR="$(cd "${PROG_NAME%/*}" ; pwd -P)"
 OS="$(uname -s)"
 
 # If we're on Windows, invoke the batch script instead to get proper locking.
-if [[ $OS =~ MINGW.* || $OS =~ CYGWIN.* ]]; then
-  exec "${BIN_DIR}/dart.bat" "$@"
+if expr "$OS" : "[MINGW.*|CYGWIN.*]" > /dev/null; then
+  exec "${PROG_NAME}.bat" "$@"
 fi
 
-# To define `shared::execute()` function
-source "$BIN_DIR/internal/shared.sh"
+# To define `shared_execute()` function
+. "$BIN_DIR/internal/shared.sh"
 
-shared::execute "$@"
+shared_execute "$@"
