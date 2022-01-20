@@ -14,7 +14,7 @@ import 'bitfield.dart' as bitfield;
 const int kMaxUnsignedSMI = -1;
 
 /// The dart:html implementation of [bitfield.Bitfield].
-class BitField<T extends dynamic> implements bitfield.BitField<T> {
+class BitField<T extends Enum> implements bitfield.BitField<T> {
   /// The dart:html implementation of [bitfield.Bitfield].
   // Can remove when we have metaclasses.
   // ignore: avoid_unused_constructor_parameters

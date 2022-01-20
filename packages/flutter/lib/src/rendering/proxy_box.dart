@@ -2386,12 +2386,13 @@ class RenderTransform extends RenderProxyBox {
       if (filterQuality == null) {
         final Offset? childOffset = MatrixUtils.getAsTranslation(transform);
         if (childOffset == null) {
+          final ContainerLayer? oldLayer = layer;
           layer = context.pushTransform(
             needsCompositing,
             offset,
             transform,
             super.paint,
-            oldLayer: layer is TransformLayer ? layer as TransformLayer? : null,
+            oldLayer: oldLayer is TransformLayer ? oldLayer : null,
           );
         } else {
           super.paint(context, offset + childOffset);
@@ -2644,15 +2645,16 @@ class RenderFittedBox extends RenderProxyBox {
 
   TransformLayer? _paintChildWithTransform(PaintingContext context, Offset offset) {
     final Offset? childOffset = MatrixUtils.getAsTranslation(_transform!);
-    if (childOffset == null)
+    if (childOffset == null) {
+      final ContainerLayer? oldLayer = layer;
       return context.pushTransform(
         needsCompositing,
         offset,
         _transform!,
         super.paint,
-        oldLayer: layer is TransformLayer ? layer! as TransformLayer : null,
+        oldLayer: oldLayer is TransformLayer ? oldLayer : null,
       );
-    else
+    } else
       super.paint(context, offset + childOffset);
     return null;
   }

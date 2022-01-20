@@ -17,7 +17,7 @@ const int kMaxUnsignedSMI = bitfield.kMaxUnsignedSMI;
 /// Only the first 62 values of the enum can be used as indices.
 ///
 /// When compiling to JavaScript, this class is not supported.
-abstract class BitField<T extends dynamic> {
+abstract class BitField<T extends Enum> {
   /// Creates a bit field of all zeros.
   ///
   /// The given length must be at most 62.

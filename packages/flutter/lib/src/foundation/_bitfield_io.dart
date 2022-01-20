@@ -8,7 +8,7 @@ import 'bitfield.dart' as bitfield;
 const int kMaxUnsignedSMI = 0x3FFFFFFFFFFFFFFF; // ignore: avoid_js_rounded_ints, (VM-only code)
 
 /// The dart:io implementation of [bitfield.Bitfield].
-class BitField<T extends dynamic> implements bitfield.BitField<T> {
+class BitField<T extends Enum> implements bitfield.BitField<T> {
   /// The dart:io implementation of [bitfield.Bitfield()].
   BitField(this._length)
     : assert(_length <= _smiBits),
@@ -28,14 +28,14 @@ class BitField<T extends dynamic> implements bitfield.BitField<T> {
 
   @override
   bool operator [](T index) {
-    final int _index = index.index as int;
+    final int _index = index.index;
     assert(_index < _length);
     return (_bits & 1 << _index) > 0;
   }
 
   @override
   void operator []=(T index, bool value) {
-    final int _index = index.index as int;
+    final int _index = index.index;
     assert(_index < _length);
     if (value)
       _bits = _bits | (1 << _index);

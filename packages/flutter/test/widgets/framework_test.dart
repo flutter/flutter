@@ -1652,7 +1652,7 @@ In order for an element to have a valid renderObject, it must be active, which m
 Instead, this element is in the _ElementLifecycle.defunct state.
 If you called this method from a State object, consider guarding it with State.mounted.
 The findRenderObject() method was called for the following element:
-  StatefulElement#00000(DEFUNCT)'''),
+  StatefulElement<StatefulWidget>#00000(DEFUNCT)'''),
       )),
     );
   });
