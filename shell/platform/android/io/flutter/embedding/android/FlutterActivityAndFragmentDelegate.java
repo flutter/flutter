@@ -74,7 +74,7 @@ import java.util.Arrays;
   // to this FlutterActivityAndFragmentDelegate.
   @NonNull private Host host;
   @Nullable private FlutterEngine flutterEngine;
-  @Nullable private FlutterView flutterView;
+  @VisibleForTesting @Nullable FlutterView flutterView;
   @Nullable private PlatformPlugin platformPlugin;
   @VisibleForTesting @Nullable OnPreDrawListener activePreDrawListener;
   private boolean isFlutterEngineFromHost;
@@ -388,6 +388,12 @@ import java.util.Arrays;
     Log.v(TAG, "onStart()");
     ensureAlive();
     doInitialFlutterViewRun();
+    // This is a workaround for a bug on some OnePlus phones. The visibility of the application
+    // window is still true after locking the screen on some OnePlus phones, and shows a black
+    // screen when unlocked. We can work around this by changing the visibility of FlutterView in
+    // onStart and onStop.
+    // See https://github.com/flutter/flutter/issues/93276
+    flutterView.setVisibility(View.VISIBLE);
   }
 
   /**
@@ -574,6 +580,12 @@ import java.util.Arrays;
     Log.v(TAG, "onStop()");
     ensureAlive();
     flutterEngine.getLifecycleChannel().appIsPaused();
+    // This is a workaround for a bug on some OnePlus phones. The visibility of the application
+    // window is still true after locking the screen on some OnePlus phones, and shows a black
+    // screen when unlocked. We can work around this by changing the visibility of FlutterView in
+    // onStart and onStop.
+    // See https://github.com/flutter/flutter/issues/93276
+    flutterView.setVisibility(View.GONE);
   }
 
   /**
