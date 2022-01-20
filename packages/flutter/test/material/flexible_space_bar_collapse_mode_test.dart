@@ -23,7 +23,6 @@ void main() {
                 expandedHeight: 1000,
                 pinned: true,
                 flexibleSpace: FlexibleSpaceBar(
-                  nonePinBoundary: 0,
                   background: Container(
                     key: appbarContainerKey,
                   ),
