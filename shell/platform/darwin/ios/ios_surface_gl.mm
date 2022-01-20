@@ -86,7 +86,7 @@ bool IOSSurfaceGL::GLContextClearCurrent() {
 }
 
 // |GPUSurfaceGLDelegate|
-bool IOSSurfaceGL::GLContextPresent(uint32_t fbo_id) {
+bool IOSSurfaceGL::GLContextPresent(uint32_t fbo_id, const std::optional<SkIRect>& damage) {
   TRACE_EVENT0("flutter", "IOSSurfaceGL::GLContextPresent");
   return IsValid() && render_target_->PresentRenderBuffer();
 }

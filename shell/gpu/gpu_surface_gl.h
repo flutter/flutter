@@ -60,7 +60,7 @@ class GPUSurfaceGL : public Surface {
       const SkISize& untransformed_size,
       const SkMatrix& root_surface_transformation);
 
-  bool PresentSurface(SkCanvas* canvas);
+  bool PresentSurface(const SurfaceFrame& frame, SkCanvas* canvas);
 
   GPUSurfaceGLDelegate* delegate_;
   sk_sp<GrDirectContext> context_;
