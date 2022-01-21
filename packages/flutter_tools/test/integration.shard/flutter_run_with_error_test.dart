@@ -18,14 +18,14 @@ import 'test_utils.dart';
 
 void main() {
   Directory tempDir;
-  final ProjectWithEarlyError _project = ProjectWithEarlyError();
-  const String _exceptionStart = '══╡ EXCEPTION CAUGHT BY WIDGETS LIBRARY ╞══════════════════';
-  FlutterRunTestDriver _flutter;
+  final ProjectWithEarlyError project = ProjectWithEarlyError();
+  const String exceptionStart = '══╡ EXCEPTION CAUGHT BY WIDGETS LIBRARY ╞══════════════════';
+  FlutterRunTestDriver flutter;
 
   setUp(() async {
     tempDir = createResolvedTempDirectorySync('run_test.');
-    await _project.setUpIn(tempDir);
-    _flutter = FlutterRunTestDriver(tempDir);
+    await project.setUpIn(tempDir);
+    flutter = FlutterRunTestDriver(tempDir);
   });
 
   tearDown(() async {
@@ -75,23 +75,23 @@ void main() {
 
     await process.exitCode;
 
-    expect(stdout.toString(), contains(_exceptionStart));
+    expect(stdout.toString(), contains(exceptionStart));
   });
 
   testWithoutContext('flutter run in machine mode does not print an error', () async {
     final StringBuffer stdout = StringBuffer();
 
-    await _flutter.run(
+    await flutter.run(
       startPaused: true,
       withDebugger: true,
       structuredErrors: true,
     );
-    await _flutter.resume();
+    await flutter.resume();
 
     final Completer<void> completer = Completer<void>();
 
     await Future<void>(() async {
-      _flutter.stdout.listen((String line) {
+      flutter.stdout.listen((String line) {
         stdout.writeln(line);
       });
       await completer.future;
@@ -99,8 +99,8 @@ void main() {
       // We don't expect to see any output but want to write to stdout anyway.
       completer.complete();
     });
-    await _flutter.stop();
+    await flutter.stop();
 
-    expect(stdout.toString(), isNot(contains(_exceptionStart)));
+    expect(stdout.toString(), isNot(contains(exceptionStart)));
   });
 }

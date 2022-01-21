@@ -177,12 +177,12 @@ class GalleryTransitionTest {
 }
 
 int _countMissedTransitions(Map<String, List<int>> transitions) {
-  const int _kTransitionBudget = 100000; // µs
+  const int kTransitionBudget = 100000; // µs
   int count = 0;
   transitions.forEach((String demoName, List<int> durations) {
     final int longestDuration = durations.reduce(math.max);
-    if (longestDuration > _kTransitionBudget) {
-      print('$demoName missed transition time budget ($longestDuration µs > $_kTransitionBudget µs)');
+    if (longestDuration > kTransitionBudget) {
+      print('$demoName missed transition time budget ($longestDuration µs > $kTransitionBudget µs)');
       count++;
     }
   });

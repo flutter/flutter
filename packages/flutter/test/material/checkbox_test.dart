@@ -1081,7 +1081,7 @@ void main() {
     }
     const double splashRadius = 24.0;
     TestGesture gesture;
-    bool? _value = false;
+    bool? value = false;
 
     Widget buildTristateCheckbox() {
       return MaterialApp(
@@ -1089,11 +1089,11 @@ void main() {
           body: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
               return Checkbox(
-                value: _value,
+                value: value,
                 tristate: true,
-                onChanged: (bool? value) {
+                onChanged: (bool? v) {
                   setState(() {
-                    _value = value;
+                    value = v;
                   });
                 },
                 overlayColor: MaterialStateProperty.resolveWith(getOverlayColor),
@@ -1110,7 +1110,7 @@ void main() {
     gesture = await tester.press(find.byType(Checkbox));
     await tester.pumpAndSettle();
 
-    expect(_value, false);
+    expect(value, false);
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
       paints
@@ -1126,7 +1126,7 @@ void main() {
     gesture = await tester.press(find.byType(Checkbox));
     await tester.pumpAndSettle();
 
-    expect(_value, true);
+    expect(value, true);
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
       paints
@@ -1142,7 +1142,7 @@ void main() {
     gesture = await tester.press(find.byType(Checkbox));
     await tester.pumpAndSettle();
 
-    expect(_value, null);
+    expect(value, null);
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
       paints
@@ -1158,7 +1158,7 @@ void main() {
     gesture = await tester.press(find.byType(Checkbox));
     await tester.pumpAndSettle();
 
-    expect(_value, false);
+    expect(value, false);
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
       paints

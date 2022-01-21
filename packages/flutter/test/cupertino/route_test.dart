@@ -1543,7 +1543,7 @@ void main() {
   });
 
   testWidgets('showCupertinoModalPopup transparent barrier color is transparent', (WidgetTester tester) async {
-    const Color _kTransparentColor = Color(0x00000000);
+    const Color kTransparentColor = Color(0x00000000);
 
     await tester.pumpWidget(CupertinoApp(
       home: CupertinoPageScaffold(
@@ -1553,7 +1553,7 @@ void main() {
               await showCupertinoModalPopup<void>(
                 context: context,
                 builder: (BuildContext context) => const SizedBox(),
-                barrierColor: _kTransparentColor,
+                barrierColor: kTransparentColor,
               );
             },
             child: const Text('tap'),

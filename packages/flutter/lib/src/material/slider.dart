@@ -659,19 +659,19 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     // the default shapes and text styles are aligned to the Material
     // Guidelines.
 
-    const double _defaultTrackHeight = 4;
-    const SliderTrackShape _defaultTrackShape = RoundedRectSliderTrackShape();
-    const SliderTickMarkShape _defaultTickMarkShape = RoundSliderTickMarkShape();
-    const SliderComponentShape _defaultOverlayShape = RoundSliderOverlayShape();
-    const SliderComponentShape _defaultThumbShape = RoundSliderThumbShape();
-    const SliderComponentShape _defaultValueIndicatorShape = RectangularSliderValueIndicatorShape();
-    const ShowValueIndicator _defaultShowValueIndicator = ShowValueIndicator.onlyForDiscrete;
+    const double defaultTrackHeight = 4;
+    const SliderTrackShape defaultTrackShape = RoundedRectSliderTrackShape();
+    const SliderTickMarkShape defaultTickMarkShape = RoundSliderTickMarkShape();
+    const SliderComponentShape defaultOverlayShape = RoundSliderOverlayShape();
+    const SliderComponentShape defaultThumbShape = RoundSliderThumbShape();
+    const SliderComponentShape defaultValueIndicatorShape = RectangularSliderValueIndicatorShape();
+    const ShowValueIndicator defaultShowValueIndicator = ShowValueIndicator.onlyForDiscrete;
 
     // The value indicator's color is not the same as the thumb and active track
     // (which can be defined by activeColor) if the
     // RectangularSliderValueIndicatorShape is used. In all other cases, the
     // value indicator is assumed to be the same as the active color.
-    final SliderComponentShape valueIndicatorShape = sliderTheme.valueIndicatorShape ?? _defaultValueIndicatorShape;
+    final SliderComponentShape valueIndicatorShape = sliderTheme.valueIndicatorShape ?? defaultValueIndicatorShape;
     final Color valueIndicatorColor;
     if (valueIndicatorShape is RectangularSliderValueIndicatorShape) {
       valueIndicatorColor = sliderTheme.valueIndicatorColor ?? Color.alphaBlend(theme.colorScheme.onSurface.withOpacity(0.60), theme.colorScheme.surface.withOpacity(0.90));
@@ -680,7 +680,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     }
 
     sliderTheme = sliderTheme.copyWith(
-      trackHeight: sliderTheme.trackHeight ?? _defaultTrackHeight,
+      trackHeight: sliderTheme.trackHeight ?? defaultTrackHeight,
       activeTrackColor: widget.activeColor ?? sliderTheme.activeTrackColor ?? theme.colorScheme.primary,
       inactiveTrackColor: widget.inactiveColor ?? sliderTheme.inactiveTrackColor ?? theme.colorScheme.primary.withOpacity(0.24),
       disabledActiveTrackColor: sliderTheme.disabledActiveTrackColor ?? theme.colorScheme.onSurface.withOpacity(0.32),
@@ -693,12 +693,12 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       disabledThumbColor: sliderTheme.disabledThumbColor ?? Color.alphaBlend(theme.colorScheme.onSurface.withOpacity(.38), theme.colorScheme.surface),
       overlayColor: widget.activeColor?.withOpacity(0.12) ?? sliderTheme.overlayColor ?? theme.colorScheme.primary.withOpacity(0.12),
       valueIndicatorColor: valueIndicatorColor,
-      trackShape: sliderTheme.trackShape ?? _defaultTrackShape,
-      tickMarkShape: sliderTheme.tickMarkShape ?? _defaultTickMarkShape,
-      thumbShape: sliderTheme.thumbShape ?? _defaultThumbShape,
-      overlayShape: sliderTheme.overlayShape ?? _defaultOverlayShape,
+      trackShape: sliderTheme.trackShape ?? defaultTrackShape,
+      tickMarkShape: sliderTheme.tickMarkShape ?? defaultTickMarkShape,
+      thumbShape: sliderTheme.thumbShape ?? defaultThumbShape,
+      overlayShape: sliderTheme.overlayShape ?? defaultOverlayShape,
       valueIndicatorShape: valueIndicatorShape,
-      showValueIndicator: sliderTheme.showValueIndicator ?? _defaultShowValueIndicator,
+      showValueIndicator: sliderTheme.showValueIndicator ?? defaultShowValueIndicator,
       valueIndicatorTextStyle: sliderTheme.valueIndicatorTextStyle ?? theme.textTheme.bodyText1!.copyWith(
         color: theme.colorScheme.onPrimary,
       ),

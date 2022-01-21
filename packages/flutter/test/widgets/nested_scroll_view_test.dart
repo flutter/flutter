@@ -470,14 +470,14 @@ void main() {
 
   testWidgets('NestedScrollView and internal scrolling', (WidgetTester tester) async {
     debugDisableShadows = false;
-    const List<String> _tabs = <String>['Hello', 'World'];
+    const List<String> tabs = <String>['Hello', 'World'];
     int buildCount = 0;
     await tester.pumpWidget(
       MaterialApp(home: Material(child:
         // THE FOLLOWING SECTION IS FROM THE NestedScrollView DOCUMENTATION
         // (EXCEPT FOR THE CHANGES TO THE buildCount COUNTER)
         DefaultTabController(
-          length: _tabs.length, // This is the number of tabs.
+          length: tabs.length, // This is the number of tabs.
           child: NestedScrollView(
             dragStartBehavior: DragStartBehavior.down,
             headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
@@ -510,7 +510,7 @@ void main() {
                     bottom: TabBar(
                       // These are the widgets to put in each tab in the tab
                       // bar.
-                      tabs: _tabs.map<Widget>((String name) => Tab(text: name)).toList(),
+                      tabs: tabs.map<Widget>((String name) => Tab(text: name)).toList(),
                       dragStartBehavior: DragStartBehavior.down,
                     ),
                   ),
@@ -520,7 +520,7 @@ void main() {
             body: TabBarView(
               dragStartBehavior: DragStartBehavior.down,
               // These are the contents of the tab views, below the tabs.
-              children: _tabs.map<Widget>((String name) {
+              children: tabs.map<Widget>((String name) {
                 return SafeArea(
                   top: false,
                   bottom: false,

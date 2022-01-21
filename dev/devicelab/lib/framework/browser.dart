@@ -351,7 +351,7 @@ class BlinkTraceSummary {
         averageBeginFrameTime: _computeAverageDuration(frames.map((BlinkFrame frame) => frame.beginFrame).whereType<BlinkTraceEvent>().toList()),
         averageUpdateLifecyclePhasesTime: _computeAverageDuration(frames.map((BlinkFrame frame) => frame.updateAllLifecyclePhases).whereType<BlinkTraceEvent>().toList()),
       );
-    } catch (_, __) {
+    } catch (_) {
       final io.File traceFile = io.File('./chrome-trace.json');
       io.stderr.writeln('Failed to interpret the Chrome trace contents. The trace was saved in ${traceFile.path}');
       traceFile.writeAsStringSync(const JsonEncoder.withIndent('  ').convert(traceJson));

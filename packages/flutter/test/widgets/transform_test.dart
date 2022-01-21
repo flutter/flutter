@@ -341,7 +341,7 @@ void main() {
 
   testWidgets('Translated child into translated box - hit test', (WidgetTester tester) async {
     final GlobalKey key1 = GlobalKey();
-    bool _pointerDown = false;
+    bool pointerDown = false;
     await tester.pumpWidget(
       Transform.translate(
         offset: const Offset(100.0, 50.0),
@@ -349,7 +349,7 @@ void main() {
           offset: const Offset(1000.0, 1000.0),
           child: Listener(
             onPointerDown: (PointerDownEvent event) {
-              _pointerDown = true;
+              pointerDown = true;
             },
             child: Container(
               key: key1,
@@ -359,9 +359,9 @@ void main() {
         ),
       ),
     );
-    expect(_pointerDown, isFalse);
+    expect(pointerDown, isFalse);
     await tester.tap(find.byKey(key1));
-    expect(_pointerDown, isTrue);
+    expect(pointerDown, isTrue);
   });
 
   Widget _generateTransform(bool needsCompositing, double angle) {
@@ -588,9 +588,9 @@ void main() {
   });
 
   testWidgets("Transform.scale() scales widget uniformly with 'scale' parameter", (WidgetTester tester) async {
-    const double _scale = 1.5;
-    const double _height = 100;
-    const double _width = 150;
+    const double scale = 1.5;
+    const double height = 100;
+    const double width = 150;
     await tester.pumpWidget(Directionality(
         textDirection: TextDirection.ltr,
         child: SizedBox(
@@ -598,26 +598,26 @@ void main() {
           width: 400,
           child: Center(
             child: Transform.scale(
-              scale: _scale,
+              scale: scale,
               child: Container(
-                height: _height,
-                width: _width,
+                height: height,
+                width: width,
                 decoration: const BoxDecoration(),
               ),
             ),
           ),
         )));
 
-    const Size _target = Size(_width * _scale, _height * _scale);
+    const Size target = Size(width * scale, height * scale);
 
-    expect(tester.getBottomRight(find.byType(Container)), _target.bottomRight(tester.getTopLeft(find.byType(Container))));
+    expect(tester.getBottomRight(find.byType(Container)), target.bottomRight(tester.getTopLeft(find.byType(Container))));
   });
 
   testWidgets("Transform.scale() scales widget according to 'scaleX' and 'scaleY'", (WidgetTester tester) async {
-    const double _scaleX = 1.5;
-    const double _scaleY = 1.2;
-    const double _height = 100;
-    const double _width = 150;
+    const double scaleX = 1.5;
+    const double scaleY = 1.2;
+    const double height = 100;
+    const double width = 150;
     await tester.pumpWidget(Directionality(
         textDirection: TextDirection.ltr,
         child: SizedBox(
@@ -625,20 +625,20 @@ void main() {
           width: 400,
           child: Center(
             child: Transform.scale(
-              scaleX: _scaleX,
-              scaleY: _scaleY,
+              scaleX: scaleX,
+              scaleY: scaleY,
               child: Container(
-                height: _height,
-                width: _width,
+                height: height,
+                width: width,
                 decoration: const BoxDecoration(),
               ),
             ),
           ),
         )));
 
-    const Size _target = Size(_width * _scaleX, _height * _scaleY);
+    const Size target = Size(width * scaleX, height * scaleY);
 
-    expect(tester.getBottomRight(find.byType(Container)), _target.bottomRight(tester.getTopLeft(find.byType(Container))));
+    expect(tester.getBottomRight(find.byType(Container)), target.bottomRight(tester.getTopLeft(find.byType(Container))));
   });
 }
 

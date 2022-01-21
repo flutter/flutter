@@ -16,9 +16,9 @@ MouseTracker get _mouseTracker => RendererBinding.instance!.mouseTracker;
 typedef SimpleAnnotationFinder = Iterable<TestAnnotationEntry> Function(Offset offset);
 
 void main() {
-  final TestMouseTrackerFlutterBinding _binding = TestMouseTrackerFlutterBinding();
+  final TestMouseTrackerFlutterBinding binding = TestMouseTrackerFlutterBinding();
   void _setUpMouseAnnotationFinder(SimpleAnnotationFinder annotationFinder) {
-    _binding.setHitTest((BoxHitTestResult result, Offset position) {
+    binding.setHitTest((BoxHitTestResult result, Offset position) {
       for (final TestAnnotationEntry entry in annotationFinder(position)) {
         result.addWithRawTransform(
           transform: entry.transform,
@@ -70,7 +70,7 @@ void main() {
   }
 
   setUp(() {
-    _binding.postFrameCallbacks.clear();
+    binding.postFrameCallbacks.clear();
   });
 
   final Matrix4 translate10by20 = Matrix4.translationValues(10, 20, 0);
@@ -270,10 +270,10 @@ void main() {
 
     // Adding an annotation should trigger Enter event.
     isInHitRegion = true;
-    _binding.scheduleMouseTrackerPostFrameCheck();
-    expect(_binding.postFrameCallbacks, hasLength(1));
+    binding.scheduleMouseTrackerPostFrameCheck();
+    expect(binding.postFrameCallbacks, hasLength(1));
 
-    _binding.flushPostFrameCallbacks(Duration.zero);
+    binding.flushPostFrameCallbacks(Duration.zero);
     expect(events, _equalToEventsOnCriticalFields(<BaseEventMatcher>[
       EventMatcher<PointerEnterEvent>(const PointerEnterEvent(position: Offset(0, 100)).transformed(translate10by20)),
     ]));
@@ -281,14 +281,14 @@ void main() {
 
     // Removing an annotation should trigger events.
     isInHitRegion = false;
-    _binding.scheduleMouseTrackerPostFrameCheck();
-    expect(_binding.postFrameCallbacks, hasLength(1));
+    binding.scheduleMouseTrackerPostFrameCheck();
+    expect(binding.postFrameCallbacks, hasLength(1));
 
-    _binding.flushPostFrameCallbacks(Duration.zero);
+    binding.flushPostFrameCallbacks(Duration.zero);
     expect(events, _equalToEventsOnCriticalFields(<BaseEventMatcher>[
       EventMatcher<PointerExitEvent>(const PointerExitEvent(position: Offset(0.0, 100.0)).transformed(translate10by20)),
     ]));
-    expect(_binding.postFrameCallbacks, hasLength(0));
+    expect(binding.postFrameCallbacks, hasLength(0));
   });
 
   test('should correctly handle when the annotation moves in or out of the pointer', () {
@@ -316,29 +316,29 @@ void main() {
 
     // During a frame, the annotation moves into the pointer.
     isInHitRegion = true;
-    expect(_binding.postFrameCallbacks, hasLength(0));
-    _binding.scheduleMouseTrackerPostFrameCheck();
-    expect(_binding.postFrameCallbacks, hasLength(1));
+    expect(binding.postFrameCallbacks, hasLength(0));
+    binding.scheduleMouseTrackerPostFrameCheck();
+    expect(binding.postFrameCallbacks, hasLength(1));
 
-    _binding.flushPostFrameCallbacks(Duration.zero);
+    binding.flushPostFrameCallbacks(Duration.zero);
     expect(events, _equalToEventsOnCriticalFields(<BaseEventMatcher>[
       EventMatcher<PointerEnterEvent>(const PointerEnterEvent(position: Offset(0.0, 100.0)).transformed(translate10by20)),
     ]));
     events.clear();
 
-    expect(_binding.postFrameCallbacks, hasLength(0));
+    expect(binding.postFrameCallbacks, hasLength(0));
 
     // During a frame, the annotation moves out of the pointer.
     isInHitRegion = false;
-    expect(_binding.postFrameCallbacks, hasLength(0));
-    _binding.scheduleMouseTrackerPostFrameCheck();
-    expect(_binding.postFrameCallbacks, hasLength(1));
+    expect(binding.postFrameCallbacks, hasLength(0));
+    binding.scheduleMouseTrackerPostFrameCheck();
+    expect(binding.postFrameCallbacks, hasLength(1));
 
-    _binding.flushPostFrameCallbacks(Duration.zero);
+    binding.flushPostFrameCallbacks(Duration.zero);
     expect(events, _equalToEventsOnCriticalFields(<BaseEventMatcher>[
       EventMatcher<PointerExitEvent>(const PointerExitEvent(position: Offset(0.0, 100.0)).transformed(translate10by20)),
     ]));
-    expect(_binding.postFrameCallbacks, hasLength(0));
+    expect(binding.postFrameCallbacks, hasLength(0));
   });
 
   test('should correctly handle when the pointer is added or removed on the annotation', () {
@@ -363,7 +363,7 @@ void main() {
       _pointerData(PointerChange.add, const Offset(0.0, 100.0)),
     ]));
 
-    expect(_binding.postFrameCallbacks, hasLength(0));
+    expect(binding.postFrameCallbacks, hasLength(0));
     expect(events, _equalToEventsOnCriticalFields(<BaseEventMatcher>[
       EventMatcher<PointerEnterEvent>(const PointerEnterEvent(position: Offset(0.0, 100.0)).transformed(translate10by20)),
     ]));
@@ -373,7 +373,7 @@ void main() {
     ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.remove, const Offset(0.0, 100.0)),
     ]));
-    expect(_binding.postFrameCallbacks, hasLength(0));
+    expect(binding.postFrameCallbacks, hasLength(0));
     expect(events, _equalToEventsOnCriticalFields(<BaseEventMatcher>[
       EventMatcher<PointerExitEvent>(const PointerExitEvent(position: Offset(0.0, 100.0)).transformed(translate10by20)),
     ]));
@@ -399,7 +399,7 @@ void main() {
     ]));
     addTearDown(() => dispatchRemoveDevice());
 
-    expect(_binding.postFrameCallbacks, hasLength(0));
+    expect(binding.postFrameCallbacks, hasLength(0));
     events.clear();
 
     // Moves the mouse into the region. Should trigger Enter.
@@ -407,7 +407,7 @@ void main() {
     ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.hover, const Offset(0.0, 100.0)),
     ]));
-    expect(_binding.postFrameCallbacks, hasLength(0));
+    expect(binding.postFrameCallbacks, hasLength(0));
     expect(events, _equalToEventsOnCriticalFields(<BaseEventMatcher>[
       EventMatcher<PointerEnterEvent>(const PointerEnterEvent(position: Offset(0.0, 100.0)).transformed(translate10by20)),
       EventMatcher<PointerHoverEvent>(const PointerHoverEvent(position: Offset(0.0, 100.0)).transformed(translate10by20)),
@@ -419,7 +419,7 @@ void main() {
     ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.hover, const Offset(200.0, 100.0)),
     ]));
-    expect(_binding.postFrameCallbacks, hasLength(0));
+    expect(binding.postFrameCallbacks, hasLength(0));
     expect(events, _equalToEventsOnCriticalFields(<BaseEventMatcher>[
       EventMatcher<PointerExitEvent>(const PointerExitEvent(position: Offset(200.0, 100.0)).transformed(translate10by20)),
     ]));
@@ -435,7 +435,7 @@ void main() {
     ]));
     expect(_mouseTracker.mouseIsConnected, isFalse);
 
-    expect(_binding.postFrameCallbacks, hasLength(0));
+    expect(binding.postFrameCallbacks, hasLength(0));
   });
 
   test('should not flip out if not all mouse events are listened to', () {

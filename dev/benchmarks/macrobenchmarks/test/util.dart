@@ -38,9 +38,9 @@ void macroPerfTestMultiPageE2E(
       ControlCallback? body,
       ControlCallback? setup,
     }) {
-  final WidgetsBinding _binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
-  assert(_binding is IntegrationTestWidgetsFlutterBinding);
-  final IntegrationTestWidgetsFlutterBinding binding = _binding as IntegrationTestWidgetsFlutterBinding;
+  final WidgetsBinding widgetsBinding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  assert(widgetsBinding is IntegrationTestWidgetsFlutterBinding);
+  final IntegrationTestWidgetsFlutterBinding binding = widgetsBinding as IntegrationTestWidgetsFlutterBinding;
   binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.benchmarkLive;
 
   testWidgets(testName, (WidgetTester tester) async {
