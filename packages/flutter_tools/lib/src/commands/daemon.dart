@@ -254,12 +254,14 @@ abstract class Domain {
   final Map<String, CommandHandlerWithBinary> _handlersWithBinary = <String, CommandHandlerWithBinary>{};
 
   void registerHandler(String name, CommandHandler handler) {
+    assert(!_handlers.containsKey(name));
     assert(!_handlersWithBinary.containsKey(name));
     _handlers[name] = handler;
   }
 
   void registerHandlerWithBinary(String name, CommandHandlerWithBinary handler) {
     assert(!_handlers.containsKey(name));
+    assert(!_handlersWithBinary.containsKey(name));
     _handlersWithBinary[name] = handler;
   }
 
