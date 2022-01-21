@@ -3139,7 +3139,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       cursor: widget.mouseCursor ?? SystemMouseCursors.text,
       child: Actions(
         actions: _actions,
-        child: _UndoRedo(
+        child: UndoRedo(
           controller: widget.controller,
           onChanged: (TextEditingValue value) {
             userUpdateTextEditingValue(value, SelectionChangedCause.keyboard);
@@ -4164,24 +4164,42 @@ class _CopySelectionAction extends ContextAction<CopySelectionTextIntent> {
 
 typedef _TextEditingValueCallback = void Function(TextEditingValue value);
 
-// TODO(justinmc): Make visibleForTesting and test.
-class _UndoRedo extends StatefulWidget {
-  const _UndoRedo({
+/// Provides undo/redo capabilities for text editing.
+///
+/// Listens to [controller] as a [ValueNotifier] and saves relevant values for
+/// undoing/redoing. The cadence at which values are saved is a best
+/// approximation of the native behaviors of a hardware keyboard on Flutter's
+/// desktop platforms, as there are subtle differences between each of these
+/// platforms.
+///
+/// Listens for keyboard undo/redo shortcuts depending on the platform. Calls
+/// [onChanged] when a shortcut is received that would change the state of these
+/// [controller].
+@visibleForTesting
+class UndoRedo extends StatefulWidget {
+  /// Creates an instance of [UndoRedo].
+  const UndoRedo({
     Key? key,
     required this.child,
     required this.controller,
     required this.onChanged,
   }) : super(key: key);
 
+  /// The child widget of [UndoRedo].
   final Widget child;
+
+  /// The [ValueNotifier] to save the state of over time.
   final TextEditingController controller;
+
+  /// Called when an undo or redo is received, even if the state would be the
+  /// same.
   final _TextEditingValueCallback onChanged;
 
   @override
   _UndoRedoState createState() => _UndoRedoState();
 }
 
-class _UndoRedoState extends State<_UndoRedo> {
+class _UndoRedoState extends State<UndoRedo> {
   final UndoStack<TextEditingValue> _stack = UndoStack<TextEditingValue>();
 
   void _undo(UndoTextIntent intent) {
@@ -4193,12 +4211,8 @@ class _UndoRedoState extends State<_UndoRedo> {
   }
 
   void _update(TextEditingValue? nextValue) {
-    // TODO(justinmc): Problem. There is an empty/invalid state that gets queued,
-    // and then a null. Shouldn't mess with both.
-    // Change UndoStack to not return a null state. Should always return the
-    // current state from the list if the list isn't empty.
     if (nextValue == null) {
-      return widget.onChanged(TextEditingValue.empty);
+      return;
     }
     if (nextValue.text == widget.controller.text) {
       return;
@@ -4210,10 +4224,10 @@ class _UndoRedoState extends State<_UndoRedo> {
   }
 
   void _push() {
-    if (widget.controller.text.isEmpty || widget.controller.text == _stack.currentValue?.text) {
+    if (widget.controller.value == TextEditingValue.empty
+        || widget.controller.text == _stack.currentValue?.text) {
       return;
     }
-    print('justin push ${widget.controller.value}');
     _stack.push(widget.controller.value);
   }
 
@@ -4252,60 +4266,68 @@ class UndoStack<T> {
 
   final List<T> _list = <T>[];
 
-  // The index after the next item that will be given in the event of an undo,
-  // or zero if none.
-  int _index = 0;
+  // The index of the current value, or null if the list is emtpy.
+  late int _index;
 
   /// Returns the current value of the stack.
-  T? get currentValue => _index == 0 ? null : _list[_index - 1];
+  T? get currentValue => _list.isEmpty ? null : _list[_index];
 
   /// Add a new state change to the stack.
   ///
   /// Pushing identical objects will not create multiple entries.
-  void push(T element) {
-    assert(_index <= _list.length && _index >= 0);
+  void push(T value) {
+    if (_list.isEmpty) {
+      _index = 0;
+      _list.add(value);
+      return;
+    }
 
-    if (element == currentValue) {
+    assert(_index < _list.length && _index >= 0);
+
+    if (value == currentValue) {
       return;
     }
 
     // If anything has been undone in this stack, remove those irrelevant states
     // before adding the new one.
-    if (_index != _list.length) {
-      _list.removeRange(_index, _list.length);
+    if (_index != null && _index != _list.length - 1) {
+      _list.removeRange(_index + 1, _list.length);
     }
-    _list.add(element);
-    _index = _list.length;
+    _list.add(value);
+    _index = _list.length - 1;
   }
 
   /// Returns the previous state.
   ///
-  /// If all saved states have already been undone, or if there is only one
-  /// saved state, returns null.
+  /// If the _list is empty, returns null.
   T? undo() {
-    assert(_index <= _list.length && _index >= 0);
-
-    if (_index == 1) {
-      _index = 0;
-    }
-    if (_index == 0) {
+    if (_list.isEmpty) {
       return null;
     }
 
-    _index--;
-    return _list[_index - 1];
+    assert(_index < _list.length && _index >= 0);
+
+    if (_index != 0) {
+      _index = _index - 1;
+    }
+
+    return _list[_index];
   }
 
-  /// Returns the state that was last undone.
+  /// Returns the state that was last undone, or if none, the current state.
   ///
-  /// If none, returns null.
+  /// If the _list is empty, returns null.
   T? redo() {
-    assert(_index <= _list.length && _index >= 0);
-
-    if (_index == _list.length) {
+    if (_list.isEmpty) {
       return null;
     }
 
-    return _list[_index++];
+    assert(_index < _list.length && _index >= 0);
+
+    if (_index < _list.length - 1) {
+      _index = _index + 1;
+    }
+
+    return _list[_index];
   }
 }

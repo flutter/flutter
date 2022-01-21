@@ -105,7 +105,6 @@ void main() {
     expect(tester.testTextInput.setClientArgs!['inputAction'], equals(serializedActionName));
   }
 
-  /*
   // Regression test for https://github.com/flutter/flutter/issues/34538.
   testWidgets('RTL arabic correct caret placement after trailing whitespace', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
@@ -9960,7 +9959,6 @@ void main() {
       isNot(contains(matchesMethodCall('TextInput.requestAutofill'))),
     );
   });
-  */
 
   group('UndoStack', () {
     test('undo and redo', () {
@@ -9970,41 +9968,25 @@ void main() {
       expect(undoStack.redo(), isNull);
 
       undoStack.push('one');
-      expect(undoStack.redo(), isNull);
-      expect(undoStack.undo(), isNull);
+      expect(undoStack.undo(), 'one');
+      expect(undoStack.undo(), 'one');
       expect(undoStack.redo(), 'one');
-      expect(undoStack.redo(), isNull);
-      expect(undoStack.undo(), isNull);
+      expect(undoStack.redo(), 'one');
 
-      undoStack.push('one');
       undoStack.push('one two');
-      expect(undoStack.redo(), isNull);
+      expect(undoStack.redo(), 'one two');
       expect(undoStack.undo(), 'one');
       expect(undoStack.redo(), 'one two');
-      expect(undoStack.redo(), isNull);
-      expect(undoStack.undo(), 'one');
-      expect(undoStack.undo(), isNull);
-      expect(undoStack.redo(), 'one');
-      expect(undoStack.redo(), 'one two');
-      expect(undoStack.redo(), isNull);
-      expect(undoStack.undo(), 'one');
-      expect(undoStack.undo(), isNull);
 
-      undoStack.push('one');
-      undoStack.push('one two');
       undoStack.push('one two four');
-      expect(undoStack.redo(), isNull);
+      expect(undoStack.redo(), 'one two four');
       expect(undoStack.undo(), 'one two');
       undoStack.push('one two three');
-      expect(undoStack.redo(), isNull);
+      expect(undoStack.redo(), 'one two three');
       expect(undoStack.undo(), 'one two');
       expect(undoStack.undo(), 'one');
       expect(undoStack.redo(), 'one two');
       expect(undoStack.redo(), 'one two three');
-      expect(undoStack.redo(), isNull);
-      expect(undoStack.undo(), 'one two');
-      expect(undoStack.undo(), 'one');
-      expect(undoStack.undo(), isNull);
     });
 
     test('duplicate pushes are ignored', () {
@@ -10014,13 +9996,319 @@ void main() {
       expect(undoStack.redo(), isNull);
 
       undoStack.push('one');
-      undoStack.push('one');
-      expect(undoStack.redo(), isNull);
-      expect(undoStack.undo(), isNull);
-      expect(undoStack.redo(), 'one');
-      expect(undoStack.redo(), isNull);
-      expect(undoStack.undo(), isNull);
+      undoStack.push('one two');
+      undoStack.push('one two');
+      expect(undoStack.redo(), 'one two');
+      expect(undoStack.undo(), 'one');
     });
+  });
+
+  group('UndoRedo', () {
+    Future<void> sendUndoRedo(WidgetTester tester, [bool redo = false]) {
+      return sendKeys(
+        tester,
+        <LogicalKeyboardKey>[
+          LogicalKeyboardKey.keyZ,
+        ],
+        shortcutModifier: true,
+        shift: redo,
+        targetPlatform: defaultTargetPlatform,
+      );
+    }
+
+    Future<void> sendUndo(WidgetTester tester) => sendUndoRedo(tester);
+    Future<void> sendRedo(WidgetTester tester) => sendUndoRedo(tester, true);
+
+    testWidgets('inside EditableText', (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController();
+      final FocusNode focusNode = FocusNode();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: EditableText(
+            controller: controller,
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+            cursorOpacityAnimates: true,
+            autofillHints: null,
+          ),
+        ),
+      );
+
+      expect(
+        controller.value,
+        TextEditingValue.empty,
+      );
+
+      // Undo/redo have no effect on an empty field that has never been edited.
+      await sendUndo(tester);
+      expect(
+        controller.value,
+        TextEditingValue.empty,
+      );
+      await sendRedo(tester);
+      expect(
+        controller.value,
+        TextEditingValue.empty,
+      );
+
+      await tester.pump();
+      expect(
+        controller.value,
+        TextEditingValue.empty,
+      );
+
+      focusNode.requestFocus();
+      expect(
+        controller.value,
+        TextEditingValue.empty,
+      );
+      await tester.pump();
+      expect(
+        controller.value,
+        const TextEditingValue(
+          selection: TextSelection.collapsed(offset: 0),
+        ),
+      );
+
+      // Undo/redo still have no effect. The field is focused and the value has
+      // changed, but the text remains empty.
+      await sendUndo(tester);
+      expect(
+        controller.value,
+        const TextEditingValue(
+          selection: TextSelection.collapsed(offset: 0),
+        ),
+      );
+      await sendRedo(tester);
+      expect(
+        controller.value,
+        const TextEditingValue(
+          selection: TextSelection.collapsed(offset: 0),
+        ),
+      );
+
+      await tester.enterText(find.byType(EditableText), '1');
+      expect(
+        controller.value,
+        const TextEditingValue(
+          text: '1',
+          selection: TextSelection.collapsed(offset: 1),
+        ),
+      );
+
+      // Can undo/redo a single insertion.
+      await sendUndo(tester);
+      expect(
+        controller.value,
+        const TextEditingValue(
+          selection: TextSelection.collapsed(offset: 0),
+        ),
+      );
+      await sendUndo(tester);
+      expect(
+        controller.value,
+        const TextEditingValue(
+          selection: TextSelection.collapsed(offset: 0),
+        ),
+      );
+
+      await sendRedo(tester);
+      expect(
+        controller.value,
+        const TextEditingValue(
+          text: '1',
+          selection: TextSelection.collapsed(offset: 1),
+        ),
+      );
+      await sendRedo(tester);
+      expect(
+        controller.value,
+        const TextEditingValue(
+          text: '1',
+          selection: TextSelection.collapsed(offset: 1),
+        ),
+      );
+
+      // And can undo/redo multiple insertions.
+      await tester.enterText(find.byType(EditableText), '13');
+      expect(
+        controller.value,
+        const TextEditingValue(
+          text: '13',
+          selection: TextSelection.collapsed(offset: 2),
+        ),
+      );
+      await sendRedo(tester);
+      expect(
+        controller.value,
+        const TextEditingValue(
+          text: '13',
+          selection: TextSelection.collapsed(offset: 2),
+        ),
+      );
+      await sendUndo(tester);
+      expect(
+        controller.value,
+        const TextEditingValue(
+          text: '1',
+          selection: TextSelection.collapsed(offset: 1),
+        ),
+      );
+      await sendUndo(tester);
+      expect(
+        controller.value,
+        const TextEditingValue(
+          selection: TextSelection.collapsed(offset: 0),
+        ),
+      );
+      await sendRedo(tester);
+      expect(
+        controller.value,
+        const TextEditingValue(
+          text: '1',
+          selection: TextSelection.collapsed(offset: 1),
+        ),
+      );
+      await sendRedo(tester);
+      expect(
+        controller.value,
+        const TextEditingValue(
+          text: '13',
+          selection: TextSelection.collapsed(offset: 2),
+        ),
+      );
+
+      // Can change the middle of the stack timeline.
+      await sendUndo(tester);
+      expect(
+        controller.value,
+        const TextEditingValue(
+          text: '1',
+          selection: TextSelection.collapsed(offset: 1),
+        ),
+      );
+      await tester.enterText(find.byType(EditableText), '12');
+      await sendRedo(tester);
+      expect(
+        controller.value,
+        const TextEditingValue(
+          text: '12',
+          selection: TextSelection.collapsed(offset: 2),
+        ),
+      );
+      await sendRedo(tester);
+      expect(
+        controller.value,
+        const TextEditingValue(
+          text: '12',
+          selection: TextSelection.collapsed(offset: 2),
+        ),
+      );
+      await sendUndo(tester);
+      expect(
+        controller.value,
+        const TextEditingValue(
+          text: '1',
+          selection: TextSelection.collapsed(offset: 1),
+        ),
+      );
+      await sendUndo(tester);
+      expect(
+        controller.value,
+        const TextEditingValue(
+          selection: TextSelection.collapsed(offset: 0),
+        ),
+      );
+      await sendRedo(tester);
+      expect(
+        controller.value,
+        const TextEditingValue(
+          text: '1',
+          selection: TextSelection.collapsed(offset: 1),
+        ),
+      );
+      await sendRedo(tester);
+      expect(
+        controller.value,
+        const TextEditingValue(
+          text: '12',
+          selection: TextSelection.collapsed(offset: 2),
+        ),
+      );
+    // On web, these keyboard shortcuts are handled by the browser.
+    }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
+
+    testWidgets('inside EditableText, autofocus', (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: EditableText(
+            autofocus: true,
+            controller: controller,
+            focusNode: FocusNode(),
+            style: textStyle,
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+            cursorOpacityAnimates: true,
+            autofillHints: null,
+          ),
+        ),
+      );
+
+      expect(
+        controller.value,
+        const TextEditingValue(
+          selection: TextSelection.collapsed(offset: 0),
+        ),
+      );
+      await tester.pump();
+      expect(
+        controller.value,
+        const TextEditingValue(
+          selection: TextSelection.collapsed(offset: 0),
+        ),
+      );
+      await tester.enterText(find.byType(EditableText), '1');
+      expect(
+        controller.value,
+        const TextEditingValue(
+          text: '1',
+          selection: TextSelection.collapsed(offset: 1),
+        ),
+      );
+      await sendUndo(tester);
+      expect(
+        controller.value,
+        const TextEditingValue(
+          selection: TextSelection.collapsed(offset: 0),
+        ),
+      );
+      await sendUndo(tester);
+      expect(
+        controller.value,
+        const TextEditingValue(
+          selection: TextSelection.collapsed(offset: 0),
+        ),
+      );
+      await sendRedo(tester);
+      expect(
+        controller.value,
+        const TextEditingValue(
+          text: '1',
+          selection: TextSelection.collapsed(offset: 1),
+        ),
+      );
+      await sendRedo(tester);
+      expect(
+        controller.value,
+        const TextEditingValue(
+          text: '1',
+          selection: TextSelection.collapsed(offset: 1),
+        ),
+      );
+    }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
   });
 }
 
