@@ -353,9 +353,6 @@ targets:
   - name: Linux flutter_plugins
     recipe: flutter/flutter_drone
     timeout: 60
-    enabled_branches:
-      - main
-      - master
     properties:
       shard: flutter_plugins
       subshard: analyze
