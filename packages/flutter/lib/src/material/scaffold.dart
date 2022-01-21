@@ -1988,7 +1988,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   /// appropriate [IconButton], and handles the edge-swipe gesture, to show the
   /// drawer.
   ///
-  /// To close the drawer once it is open, use [Navigator.pop].
+  /// To close the drawer, use either [ScaffoldState.closeEndDrawer] or
+  /// [Navigator.pop].
   ///
   /// See [Scaffold.of] for information about how to obtain the [ScaffoldState].
   void openDrawer() {
@@ -2006,7 +2007,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   /// appropriate [IconButton], and handles the edge-swipe gesture, to show the
   /// drawer.
   ///
-  /// To close the end side drawer once it is open, use [Navigator.pop].
+  /// To close the drawer, use either [ScaffoldState.closeEndDrawer] or
+  /// [Navigator.pop].
   ///
   /// See [Scaffold.of] for information about how to obtain the [ScaffoldState].
   void openEndDrawer() {
@@ -2307,14 +2309,18 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     }
   }
 
-  /// Close Drawer if opened if it is currently opened.
+  /// Closes [Scaffold.drawer] if it is currently opened.
+  ///
+  /// See [Scaffold.of] for information about how to obtain the [ScaffoldState].
   void closeDrawer() {
    if (hasDrawer && isDrawerOpen) {
      _drawerKey.currentState!.close();
    }
   }
 
-  /// Closes the EndDrawer if it is currently opened.
+  /// Closes [Scaffold.endDrawer] if it is currently opened.
+  ///
+  /// See [Scaffold.of] for information about how to obtain the [ScaffoldState].
   void closeEndDrawer() {
     if (hasEndDrawer && isEndDrawerOpen) {
       _endDrawerKey.currentState!.close();
