@@ -641,6 +641,7 @@ class GitTagVersion {
         _runGit('git fetch ${globals.flutterGit} --tags -f', processUtils, workingDirectory);
       }
     }
+    // find all tags attached to the given [gitRef]
     final List<String> tags = _runGit(
       'git tag --points-at $gitRef', processUtils, workingDirectory).trim().split('\n');
 
