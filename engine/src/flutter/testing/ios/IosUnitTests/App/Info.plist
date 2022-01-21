@@ -44,6 +44,8 @@
                         </dict>
 		</dict>
 	</dict>
+	<key>FLTLeakDartVM</key>
+	<false/>
 	<key>UIRequiredDeviceCapabilities</key>
 	<array>
 		<string>armv7</string>

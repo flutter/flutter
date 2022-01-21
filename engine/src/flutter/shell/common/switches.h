@@ -215,6 +215,11 @@ DEF_SWITCH(EnableSkParagraph,
            "enable-skparagraph",
            "Selects the SkParagraph implementation of the text layout engine.")
 
+DEF_SWITCH(LeakVM,
+           "leak-vm",
+           "When the last shell shuts down, the shared VM is leaked by default "
+           "(the leak_vm in VM settings is true). To clean up the leak VM, set "
+           "this value to false.")
 DEF_SWITCHES_END
 
 void PrintUsage(const std::string& executable_name);
