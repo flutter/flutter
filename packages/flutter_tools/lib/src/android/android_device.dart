@@ -244,7 +244,6 @@ class AndroidDevice extends Device {
 
   AdbLogReader? _logReader;
   AdbLogReader? _pastLogReader;
-  AndroidDevicePortForwarder? _portForwarder;
 
   List<String> adbCommandForDevice(List<String> args) {
     return <String>[_androidSdk.adbPath!, '-s', id, ...args];
@@ -845,7 +844,6 @@ class AndroidDevice extends Device {
   Future<void> dispose() async {
     _logReader?._stop();
     _pastLogReader?._stop();
-    await _portForwarder?.dispose();
   }
 }
 

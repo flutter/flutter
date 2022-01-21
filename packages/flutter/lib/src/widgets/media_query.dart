@@ -67,6 +67,8 @@ enum Orientation {
 /// For example, by using the viewPadding property, padding would defer to the
 /// iPhone "safe area" regardless of whether a keyboard is showing.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=ceCo8U0XHqw}
+///
 /// The viewInsets and viewPadding are independent values, they're
 /// measured from the edges of the MediaQuery widget's bounds. Together they
 /// inform the [padding] property. The bounds of the top level MediaQuery
