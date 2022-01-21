@@ -16,22 +16,6 @@ namespace flutter {
 
 void TestMetalSurfaceImpl::Init(const TestMetalContext::TextureInfo& texture_info,
                                 const SkISize& surface_size) {
-  auto texture_descriptor = fml::scoped_nsobject{
-      [[MTLTextureDescriptor texture2DDescriptorWithPixelFormat:MTLPixelFormatBGRA8Unorm
-                                                          width:surface_size.width()
-                                                         height:surface_size.height()
-                                                      mipmapped:NO] retain]};
-
-  // The most pessimistic option and disables all optimizations but allows tests
-  // the most flexible access to the surface. They may read and write to the
-  // surface from shaders or use as a pixel view.
-  texture_descriptor.get().usage = MTLTextureUsageUnknown;
-
-  if (!texture_descriptor) {
-    FML_LOG(ERROR) << "Invalid texture descriptor.";
-    return;
-  }
-
   id<MTLTexture> texture = (__bridge id<MTLTexture>)texture_info.texture;
 
   GrMtlTextureInfo skia_texture_info;
