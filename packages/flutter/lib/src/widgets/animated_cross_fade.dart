@@ -208,9 +208,13 @@ class AnimatedCrossFade extends StatefulWidget {
   /// result in the widgets jumping about when the cross-fade state is changed.
   final AnimatedCrossFadeBuilder layoutBuilder;
 
-  /// Whether to exclude focus from the bottom child widget.
+  /// When true, this is equivalent to wrapping bottom widget with an [ExcludeFocus]
+  /// widget while it is on the bottom of the crosss-fade stack.
   ///
-  /// Defaults to true.
+  /// Defaults to true, when it is false, the bottom widget in the crosss-fade stack can 
+  /// remain in focus until the top widget requests focus, this is useful for when 
+  /// animating between different [TextField]s so the keyboard remain open during the
+  /// cross-fade animation.
   final bool excludeBottomFocus;
 
   /// The default layout algorithm used by [AnimatedCrossFade].
