@@ -1876,10 +1876,10 @@ void main() {
     }, skip: isBrowser, variant: KeySimulatorTransitModeVariant.all()); // https://github.com/flutter/flutter/issues/35347
 
     testWidgets('Focus traversal inside a horizontal scrollable applies ensure visible padding.', (WidgetTester tester) async {
-      tester.binding.focusManager.defaultEnsureVisiblePadding = const EdgeInsets.all(50.0);
+      tester.binding.focusManager.defaultScrollRevealPadding = const EdgeInsets.all(50.0);
 
       addTearDown(() {
-        tester.binding.focusManager.defaultEnsureVisiblePadding = EdgeInsets.zero;
+        tester.binding.focusManager.defaultScrollRevealPadding = EdgeInsets.zero;
       });
 
       const double minScrollExtent = 0.0;
