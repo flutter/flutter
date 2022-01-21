@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:pub_semver/pub_semver.dart';
 import 'package:yaml/yaml.dart';
 
 import 'base/common.dart';
@@ -15,6 +16,7 @@ class Plugin {
     required this.platforms,
     required this.defaultPackagePlatforms,
     required this.pluginDartClassPlatforms,
+    this.flutterConstraint,
     required this.dependencies,
     required this.isDirectDependency,
     this.implementsPackage,
@@ -58,6 +60,7 @@ class Plugin {
     String name,
     String path,
     YamlMap? pluginYaml,
+    VersionConstraint? flutterConstraint,
     List<String> dependencies, {
     required FileSystem fileSystem,
     Set<String>? appDependencies,
@@ -71,6 +74,7 @@ class Plugin {
         name,
         path,
         pluginYaml,
+        flutterConstraint,
         dependencies,
         fileSystem,
         appDependencies != null && appDependencies.contains(name),
@@ -80,6 +84,7 @@ class Plugin {
       name,
       path,
       pluginYaml,
+      flutterConstraint,
       dependencies,
       fileSystem,
       appDependencies != null && appDependencies.contains(name),
@@ -90,6 +95,7 @@ class Plugin {
     String name,
     String path,
     YamlMap pluginYaml,
+    VersionConstraint? flutterConstraint,
     List<String> dependencies,
     FileSystem fileSystem,
     bool isDirectDependency,
@@ -165,6 +171,7 @@ class Plugin {
       platforms: platforms,
       defaultPackagePlatforms: defaultPackages,
       pluginDartClassPlatforms: dartPluginClasses,
+      flutterConstraint: flutterConstraint,
       dependencies: dependencies,
       isDirectDependency: isDirectDependency,
       implementsPackage: pluginYaml['implements'] != null ? pluginYaml['implements'] as String : '',
@@ -175,6 +182,7 @@ class Plugin {
     String name,
     String path,
     dynamic pluginYaml,
+    VersionConstraint? flutterConstraint,
     List<String> dependencies,
     FileSystem fileSystem,
     bool isDirectDependency,
@@ -207,6 +215,7 @@ class Plugin {
       platforms: platforms,
       defaultPackagePlatforms: <String, String>{},
       pluginDartClassPlatforms: <String, String>{},
+      flutterConstraint: flutterConstraint,
       dependencies: dependencies,
       isDirectDependency: isDirectDependency,
     );
@@ -370,6 +379,9 @@ class Plugin {
   /// The name of the interface package that this plugin implements.
   /// If [null], this plugin doesn't implement an interface.
   final String? implementsPackage;
+
+  /// The required version of Flutter, if specified.
+  final VersionConstraint? flutterConstraint;
 
   /// The name of the packages this plugin depends on.
   final List<String> dependencies;

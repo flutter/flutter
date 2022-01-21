@@ -240,58 +240,17 @@ void main() {
         'xcresult parser: Unrecognized top level json format.');
   });
 
-  testWithoutContext('error: fail to parse actions map', () async {
+  testWithoutContext('error: fail to parse issue map', () async {
     final XCResultGenerator generator = _setupGenerator(resultJson: '{}');
 
     final XCResult result = await generator.generate();
     expect(result.issues.length, 0);
     expect(result.parseSuccess, false);
     expect(result.parsingErrorMessage,
-        'xcresult parser: Failed to parse the actions map.');
+        'xcresult parser: Failed to parse the issues map.');
   });
 
-  testWithoutContext('error: empty actions map', () async {
-    final XCResultGenerator generator =
-        _setupGenerator(resultJson: kSampleResultJsonEmptyActionsMap);
-
-    final XCResult result = await generator.generate();
-    expect(result.issues.length, 0);
-    expect(result.parseSuccess, false);
-    expect(result.parsingErrorMessage,
-        'xcresult parser: Failed to parse the actions map.');
-  });
-
-  testWithoutContext('error: empty actions map', () async {
-    final XCResultGenerator generator = _setupGenerator(resultJson: kSampleResultJsonEmptyActionsMap);
-
-    final XCResult result = await generator.generate();
-    expect(result.issues.length, 0);
-    expect(result.parseSuccess, false);
-    expect(result.parsingErrorMessage,
-        'xcresult parser: Failed to parse the actions map.');
-  });
-
-  testWithoutContext('error: empty actions map', () async {
-    final XCResultGenerator generator = _setupGenerator(resultJson: kSampleResultJsonInvalidActionMap);
-
-    final XCResult result = await generator.generate();
-    expect(result.issues.length, 0);
-    expect(result.parseSuccess, false);
-    expect(result.parsingErrorMessage,
-        'xcresult parser: Failed to parse the first action map.');
-  });
-
-  testWithoutContext('error: empty actions map', () async {
-    final XCResultGenerator generator = _setupGenerator(resultJson: kSampleResultJsonInvalidBuildResultMap);
-
-    final XCResult result = await generator.generate();
-    expect(result.issues.length, 0);
-    expect(result.parseSuccess, false);
-    expect(result.parsingErrorMessage,
-        'xcresult parser: Failed to parse the buildResult map.');
-  });
-
-  testWithoutContext('error: empty actions map', () async {
+  testWithoutContext('error: invalid issue map', () async {
     final XCResultGenerator generator = _setupGenerator(resultJson: kSampleResultJsonInvalidIssuesMap);
 
     final XCResult result = await generator.generate();

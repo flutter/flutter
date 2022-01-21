@@ -67,6 +67,8 @@ enum Orientation {
 /// For example, by using the viewPadding property, padding would defer to the
 /// iPhone "safe area" regardless of whether a keyboard is showing.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=ceCo8U0XHqw}
+///
 /// The viewInsets and viewPadding are independent values, they're
 /// measured from the edges of the MediaQuery widget's bounds. Together they
 /// inform the [padding] property. The bounds of the top level MediaQuery
@@ -105,7 +107,8 @@ class MediaQueryData {
     this.disableAnimations = false,
     this.boldText = false,
     this.navigationMode = NavigationMode.traditional,
-    this.gestureSettings = const DeviceGestureSettings(touchSlop: kTouchSlop)
+    this.gestureSettings = const DeviceGestureSettings(touchSlop: kTouchSlop),
+    this.displayFeatures = const <ui.DisplayFeature>[],
   }) : assert(size != null),
        assert(devicePixelRatio != null),
        assert(textScaleFactor != null),
@@ -121,7 +124,8 @@ class MediaQueryData {
        assert(disableAnimations != null),
        assert(boldText != null),
        assert(navigationMode != null),
-       assert(gestureSettings != null);
+       assert(gestureSettings != null),
+       assert(displayFeatures != null);
 
   /// Creates data for a media query based on the given window.
   ///
@@ -146,7 +150,8 @@ class MediaQueryData {
       highContrast = window.accessibilityFeatures.highContrast,
       alwaysUse24HourFormat = window.alwaysUse24HourFormat,
       navigationMode = NavigationMode.traditional,
-      gestureSettings = DeviceGestureSettings.fromWindow(window);
+      gestureSettings = DeviceGestureSettings.fromWindow(window),
+      displayFeatures = window.displayFeatures;
 
   /// The size of the media in logical pixels (e.g, the size of the screen).
   ///
@@ -351,6 +356,17 @@ class MediaQueryData {
   /// gesture behavior over the framework constants.
   final DeviceGestureSettings gestureSettings;
 
+  /// {@macro dart.ui.ViewConfiguration.displayFeatures}
+  ///
+  /// See also:
+  ///
+  ///  * [dart:ui.DisplayFeatureType], which lists the different types of
+  ///  display features and explains the differences between them.
+  ///  * [dart:ui.DisplayFeatureState], which lists the possible states for
+  ///  folding features ([dart:ui.DisplayFeatureType.fold] and
+  ///  [dart:ui.DisplayFeatureType.hinge]).
+  final List<ui.DisplayFeature> displayFeatures;
+
   /// The orientation of the media (e.g., whether the device is in landscape or
   /// portrait mode).
   Orientation get orientation {
@@ -376,6 +392,7 @@ class MediaQueryData {
     bool? boldText,
     NavigationMode? navigationMode,
     DeviceGestureSettings? gestureSettings,
+    List<ui.DisplayFeature>? displayFeatures,
   }) {
     return MediaQueryData(
       size: size ?? this.size,
@@ -394,6 +411,7 @@ class MediaQueryData {
       boldText: boldText ?? this.boldText,
       navigationMode: navigationMode ?? this.navigationMode,
       gestureSettings: gestureSettings ?? this.gestureSettings,
+      displayFeatures: displayFeatures ?? this.displayFeatures,
     );
   }
 
@@ -445,6 +463,7 @@ class MediaQueryData {
       accessibleNavigation: accessibleNavigation,
       boldText: boldText,
       gestureSettings: gestureSettings,
+      displayFeatures: displayFeatures,
     );
   }
 
@@ -494,6 +513,7 @@ class MediaQueryData {
       accessibleNavigation: accessibleNavigation,
       boldText: boldText,
       gestureSettings: gestureSettings,
+      displayFeatures: displayFeatures,
     );
   }
 
@@ -543,6 +563,7 @@ class MediaQueryData {
       accessibleNavigation: accessibleNavigation,
       boldText: boldText,
       gestureSettings: gestureSettings,
+      displayFeatures: displayFeatures,
     );
   }
 
@@ -565,7 +586,8 @@ class MediaQueryData {
         && other.accessibleNavigation == accessibleNavigation
         && other.boldText == boldText
         && other.navigationMode == navigationMode
-        && other.gestureSettings == gestureSettings;
+        && other.gestureSettings == gestureSettings
+        && listEquals(other.displayFeatures, displayFeatures);
   }
 
   @override
@@ -586,6 +608,7 @@ class MediaQueryData {
       boldText,
       navigationMode,
       gestureSettings,
+      hashList(displayFeatures),
     );
   }
 
@@ -607,6 +630,7 @@ class MediaQueryData {
       'boldText: $boldText',
       'navigationMode: ${navigationMode.name}',
       'gestureSettings: $gestureSettings',
+      'displayFeatures: $displayFeatures',
     ];
     return '${objectRuntimeType(this, 'MediaQueryData')}(${properties.join(', ')})';
   }

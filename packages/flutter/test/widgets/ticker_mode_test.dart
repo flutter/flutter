@@ -258,9 +258,7 @@ class _TickingWidgetState extends State<_TickingWidget> with SingleTickerProvide
 }
 
 class _MultiTickingWidget extends StatefulWidget {
-  const _MultiTickingWidget({Key? key, this.onTick}) : super(key: key);
-
-  final VoidCallback? onTick;
+  const _MultiTickingWidget({Key? key}) : super(key: key);
 
   @override
   State<_MultiTickingWidget> createState() => _MultiTickingWidgetState();
@@ -274,7 +272,6 @@ class _MultiTickingWidgetState extends State<_MultiTickingWidget> with TickerPro
   void initState() {
     super.initState();
     ticker = createTicker((Duration _) {
-      widget.onTick?.call();
     })..start();
   }
 

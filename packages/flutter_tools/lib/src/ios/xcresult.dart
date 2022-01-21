@@ -78,31 +78,8 @@ class XCResult {
   /// Parse the `resultJson` and stores useful informations in the returned `XCResult`.
   factory XCResult({required Map<String, Object?> resultJson, List<XCResultIssueDiscarder> issueDiscarders = const <XCResultIssueDiscarder>[]}) {
     final List<XCResultIssue> issues = <XCResultIssue>[];
-    final Object? actionsMap = resultJson['actions'];
-    if (actionsMap == null || actionsMap is! Map<String, Object?>) {
-      return XCResult.failed(
-          errorMessage: 'xcresult parser: Failed to parse the actions map.');
-    }
-    final Object? actionValueList = actionsMap['_values'];
-    if (actionValueList == null ||
-        actionValueList is! List<Object?> ||
-        actionValueList.isEmpty) {
-      return XCResult.failed(
-          errorMessage: 'xcresult parser: Failed to parse the actions map.');
-    }
-    final Object? actionMap = actionValueList.first;
-    if (actionMap == null || actionMap is! Map<String, Object?>) {
-      return XCResult.failed(
-          errorMessage:
-              'xcresult parser: Failed to parse the first action map.');
-    }
-    final Object? buildResultMap = actionMap['buildResult'];
-    if (buildResultMap == null || buildResultMap is! Map<String, Object?>) {
-      return XCResult.failed(
-          errorMessage:
-              'xcresult parser: Failed to parse the buildResult map.');
-    }
-    final Object? issuesMap = buildResultMap['issues'];
+
+    final Object? issuesMap = resultJson['issues'];
     if (issuesMap == null || issuesMap is! Map<String, Object?>) {
       return XCResult.failed(
           errorMessage: 'xcresult parser: Failed to parse the issues map.');
