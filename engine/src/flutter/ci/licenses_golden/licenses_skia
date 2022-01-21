@@ -1,4 +1,4 @@
-Signature: fcd922e5cf981dbed7e3adc12a40908f
+Signature: 1e4cf3f9fc41411892353d4c6bb73073
 
 UNUSED LICENSES:
 
@@ -1902,7 +1902,7 @@ FILE: ../../../third_party/skia/include/gpu/vk/GrVkTypes.h
 FILE: ../../../third_party/skia/include/ports/SkFontMgr_FontConfigInterface.h
 FILE: ../../../third_party/skia/include/ports/SkImageGeneratorCG.h
 FILE: ../../../third_party/skia/include/ports/SkImageGeneratorWIC.h
-FILE: ../../../third_party/skia/include/private/GrSingleOwner.h
+FILE: ../../../third_party/skia/include/private/SingleOwner.h
 FILE: ../../../third_party/skia/include/private/SkBitmaskEnum.h
 FILE: ../../../third_party/skia/include/private/SkEncodedInfo.h
 FILE: ../../../third_party/skia/include/private/SkSLIRNode.h
