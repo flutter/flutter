@@ -21,26 +21,26 @@ import '../../src/fakes.dart' show FakeFlutterVersion;
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
-    FileSystem fileSystem;
-    BufferLogger logger;
-    FakeProcessManager processManager;
-    UpgradeCommand command;
-    CommandRunner<void> runner;
-    FlutterVersion flutterVersion;
+  FileSystem fileSystem;
+  BufferLogger logger;
+  FakeProcessManager processManager;
+  UpgradeCommand command;
+  CommandRunner<void> runner;
+  FlutterVersion flutterVersion;
 
-    setUpAll(() {
-      Cache.disableLocking();
-    });
+  setUpAll(() {
+    Cache.disableLocking();
+  });
 
-    setUp(() {
-      fileSystem = MemoryFileSystem.test();
-      logger = BufferLogger.test();
-      processManager = FakeProcessManager.empty();
-      command = UpgradeCommand(
-        verboseHelp: false,
-      );
-      runner = createTestCommandRunner(command);
-    });
+  setUp(() {
+    fileSystem = MemoryFileSystem.test();
+    logger = BufferLogger.test();
+    processManager = FakeProcessManager.empty();
+    command = UpgradeCommand(
+      verboseHelp: false,
+    );
+    runner = createTestCommandRunner(command);
+  });
 
   testUsingContext('can auto-migrate a user from dev to beta', () async {
     const String startingTag = '3.0.0-1.2.pre';

@@ -28,7 +28,6 @@ const Map<String, String> kObsoleteBranches = <String, String>{
 enum Channel {
   // TODO(fujino): update to main https://github.com/flutter/flutter/issues/95041
   master,
-  dev, // TODO delete?
   beta,
   stable,
 }
