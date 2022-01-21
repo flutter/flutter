@@ -1,4 +1,4 @@
-Signature: 47ecf83c28174c790821ca40029d4f73
+Signature: 8fe8cf68488e80b3b8ef147b6e010220
 
 UNUSED LICENSES:
 
@@ -9205,8 +9205,6 @@ FILE: ../../../third_party/dart/runtime/.clang-tidy
 FILE: ../../../third_party/dart/runtime/CPPLINT.cfg
 FILE: ../../../third_party/dart/runtime/bin/ffi_test/clobber_arm.S
 FILE: ../../../third_party/dart/runtime/bin/ffi_test/clobber_arm64.S
-FILE: ../../../third_party/dart/runtime/bin/ffi_test/clobber_riscv32.S
-FILE: ../../../third_party/dart/runtime/bin/ffi_test/clobber_riscv64.S
 FILE: ../../../third_party/dart/runtime/bin/ffi_test/clobber_x64.S
 FILE: ../../../third_party/dart/runtime/bin/ffi_test/clobber_x64_win.S
 FILE: ../../../third_party/dart/runtime/bin/ffi_test/clobber_x86.S
@@ -9820,34 +9818,18 @@ FILE: ../../../third_party/dart/runtime/bin/virtual_memory.h
 FILE: ../../../third_party/dart/runtime/bin/virtual_memory_fuchsia.cc
 FILE: ../../../third_party/dart/runtime/bin/virtual_memory_posix.cc
 FILE: ../../../third_party/dart/runtime/bin/virtual_memory_win.cc
-FILE: ../../../third_party/dart/runtime/vm/code_patcher_riscv.cc
-FILE: ../../../third_party/dart/runtime/vm/code_patcher_riscv_test.cc
-FILE: ../../../third_party/dart/runtime/vm/compiler/asm_intrinsifier_riscv.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/asm_intrinsifier_test.cc
-FILE: ../../../third_party/dart/runtime/vm/compiler/backend/flow_graph_compiler_riscv.cc
-FILE: ../../../third_party/dart/runtime/vm/compiler/backend/il_riscv.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/compiler_timings.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/compiler_timings.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/range.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/relocation_test.cc
-FILE: ../../../third_party/dart/runtime/vm/compiler/stub_code_compiler_riscv.cc
-FILE: ../../../third_party/dart/runtime/vm/cpu_riscv.cc
-FILE: ../../../third_party/dart/runtime/vm/cpu_riscv.h
-FILE: ../../../third_party/dart/runtime/vm/debugger_riscv.cc
 FILE: ../../../third_party/dart/runtime/vm/heap/safepoint_test.cc
-FILE: ../../../third_party/dart/runtime/vm/instructions_riscv.cc
-FILE: ../../../third_party/dart/runtime/vm/instructions_riscv.h
-FILE: ../../../third_party/dart/runtime/vm/instructions_riscv_test.cc
 FILE: ../../../third_party/dart/runtime/vm/message_snapshot.cc
 FILE: ../../../third_party/dart/runtime/vm/message_snapshot.h
 FILE: ../../../third_party/dart/runtime/vm/object_graph_copy.cc
 FILE: ../../../third_party/dart/runtime/vm/object_graph_copy.h
-FILE: ../../../third_party/dart/runtime/vm/object_riscv_test.cc
 FILE: ../../../third_party/dart/runtime/vm/pending_deopts.cc
 FILE: ../../../third_party/dart/runtime/vm/pending_deopts.h
-FILE: ../../../third_party/dart/runtime/vm/runtime_entry_riscv.cc
-FILE: ../../../third_party/dart/runtime/vm/stack_frame_riscv.h
-FILE: ../../../third_party/dart/runtime/vm/stub_code_riscv_test.cc
 FILE: ../../../third_party/dart/runtime/vm/thread_interrupter_android_arm.S
 FILE: ../../../third_party/dart/runtime/vm/virtual_memory_compressed.cc
 FILE: ../../../third_party/dart/runtime/vm/virtual_memory_compressed.h
@@ -10749,10 +10731,6 @@ FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/repositories/unlin
 FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/repositories/vm.dart
 FILE: ../../../third_party/dart/runtime/platform/allocation.h
 FILE: ../../../third_party/dart/runtime/platform/growable_array.h
-FILE: ../../../third_party/dart/runtime/vm/compiler/assembler/assembler_riscv.cc
-FILE: ../../../third_party/dart/runtime/vm/compiler/assembler/assembler_riscv.h
-FILE: ../../../third_party/dart/runtime/vm/compiler/assembler/assembler_riscv_test.cc
-FILE: ../../../third_party/dart/runtime/vm/compiler/assembler/disassembler_riscv.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/locations_helpers.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/locations_helpers_arm.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/locations_helpers_test.cc
@@ -10762,8 +10740,6 @@ FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/kernel_binary_flowg
 FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/prologue_builder.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/prologue_builder.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/jit/jit_call_specializer.h
-FILE: ../../../third_party/dart/runtime/vm/constants_riscv.cc
-FILE: ../../../third_party/dart/runtime/vm/constants_riscv.h
 FILE: ../../../third_party/dart/runtime/vm/constants_x86.h
 FILE: ../../../third_party/dart/runtime/vm/debugger_api_impl_test.h
 FILE: ../../../third_party/dart/runtime/vm/dwarf.cc
@@ -10787,8 +10763,6 @@ FILE: ../../../third_party/dart/runtime/vm/malloc_hooks_test.cc
 FILE: ../../../third_party/dart/runtime/vm/malloc_hooks_unsupported.cc
 FILE: ../../../third_party/dart/runtime/vm/malloc_hooks_x64.cc
 FILE: ../../../third_party/dart/runtime/vm/mixin_test.cc
-FILE: ../../../third_party/dart/runtime/vm/simulator_riscv.cc
-FILE: ../../../third_party/dart/runtime/vm/simulator_riscv.h
 FILE: ../../../third_party/dart/runtime/vm/stack_trace.cc
 FILE: ../../../third_party/dart/runtime/vm/stack_trace.h
 FILE: ../../../third_party/dart/runtime/vm/timeline_android.cc
@@ -12146,41 +12120,6 @@ FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/bigint_patch.dart
 Copyright 2009 The Go Authors. All rights reserved.
 Use of this source code is governed by a BSD-style
 license that can be found in the LICENSE file
-====================================================================================================
-
-====================================================================================================
-LIBRARY: dart
-ORIGIN: ../../../third_party/dart/sdk/lib/ffi/c_type.dart + ../../../third_party/dart/LICENSE
-TYPE: LicenseType.bsd
-FILE: ../../../third_party/dart/sdk/lib/ffi/c_type.dart
-----------------------------------------------------------------------------------------------------
-Copyright (c) 2022, the Dart project authors.  Please see the AUTHORS file
-for details. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-    * Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above
-      copyright notice, this list of conditions and the following
-      disclaimer in the documentation and/or other materials provided
-      with the distribution.
-    * Neither the name of Google LLC nor the names of its
-      contributors may be used to endorse or promote products derived
-      from this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ====================================================================================================
 
 ====================================================================================================
@@ -25818,4 +25757,4 @@ freely, subject to the following restrictions:
    misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
 ====================================================================================================
-Total license count: 410
+Total license count: 409
