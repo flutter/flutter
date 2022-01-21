@@ -84,7 +84,7 @@ class CupertinoScrollbar extends RawScrollbar {
     ScrollbarOrientation? scrollbarOrientation,
     @Deprecated(
       'Use thumbVisibility instead. '
-      'This feature was deprecated after v2.6.0-12.0.pre.',
+      'This feature was deprecated after v2.9.0-1.0.pre.',
     )
     bool? isAlwaysShown,
   }) : assert(thickness != null),

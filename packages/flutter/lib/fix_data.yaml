@@ -14,7 +14,7 @@
 
 version: 1
 transforms:
-  # Changes made in
+  # Changes made in https://github.com/flutter/flutter/pull/96957
   - title: "Migrate to 'thumbVisibility'"
     date: 2022-01-20
     element:
@@ -25,7 +25,7 @@ transforms:
       - kind: 'rename'
         newName: 'thumbVisibility'
 
-  # Changes made in
+  # Changes made in https://github.com/flutter/flutter/pull/96957
   - title: "Migrate to 'thumbVisibility'"
     date: 2022-01-20
     element:
@@ -37,7 +37,7 @@ transforms:
         oldName: 'isAlwaysShown'
         newName: 'thumbVisibility'
 
-  # Changes made in
+  # Changes made in https://github.com/flutter/flutter/pull/96957
   - title: "Migrate to 'thumbVisibility'"
     date: 2022-01-20
     element:
@@ -48,7 +48,7 @@ transforms:
       - kind: 'rename'
         newName: 'thumbVisibility'
 
-  # Changes made in
+  # Changes made in https://github.com/flutter/flutter/pull/96957
   - title: "Migrate to 'thumbVisibility'"
     date: 2022-01-20
     element:
@@ -60,7 +60,7 @@ transforms:
         oldName: 'isAlwaysShown'
         newName: 'thumbVisibility'
 
-  # Changes made in
+  # Changes made in https://github.com/flutter/flutter/pull/96957
   - title: "Migrate to 'thumbVisibility'"
     date: 2022-01-20
     element:
@@ -71,7 +71,7 @@ transforms:
       - kind: 'rename'
         newName: 'thumbVisibility'
 
-  # Changes made in
+  # Changes made in https://github.com/flutter/flutter/pull/96957
   - title: "Migrate to 'thumbVisibility'"
     date: 2022-01-20
     element:
@@ -83,7 +83,7 @@ transforms:
         oldName: 'isAlwaysShown'
         newName: 'thumbVisibility'
 
-  # Changes made in
+  # Changes made in https://github.com/flutter/flutter/pull/96957
   - title: "Migrate to 'thumbVisibility'"
     date: 2022-01-20
     element:
@@ -95,7 +95,7 @@ transforms:
         oldName: 'isAlwaysShown'
         newName: 'thumbVisibility'
 
-  # Changes made in
+  # Changes made in https://github.com/flutter/flutter/pull/96957
   - title: "Migrate to 'thumbVisibility'"
     date: 2022-01-20
     element:
@@ -106,7 +106,7 @@ transforms:
       - kind: 'rename'
         newName: 'thumbVisibility'
 
-  # Changes made in
+  # Changes made in https://github.com/flutter/flutter/pull/96957
   - title: "Migrate to 'thumbVisibility'"
     date: 2022-01-20
     element:

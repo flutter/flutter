@@ -522,7 +522,7 @@ void main() {
   // Changes made in https://github.com/flutter/flutter/pull/96115
   Icon icon = Icons.pie_chart_outlined;
 
-  // Changes made in
+  // Changes made in https://github.com/flutter/flutter/pull/96957
   Scrollbar scrollbar = Scrollbar(isAlwaysShown: true);
   bool nowShowing = scrollbar.isAlwaysShown;
   ScrollbarThemeData scrollbarTheme = ScrollbarThemeData(isAlwaysShown: nowShowing);
