@@ -160,6 +160,13 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle) {
   NSNumber* enableSkParagraph = [mainBundle objectForInfoDictionaryKey:@"FLTEnableSkParagraph"];
   settings.enable_skparagraph = (enableSkParagraph != nil) ? enableSkParagraph.boolValue : false;
 
+  // Leak Dart VM settings, set whether leave or clean up the VM after the last shell shuts down.
+  NSNumber* leakDartVM = [mainBundle objectForInfoDictionaryKey:@"FLTLeakDartVM"];
+  // It will change the default leak_vm value in settings only if the key exists.
+  if (leakDartVM != nil) {
+    settings.leak_vm = leakDartVM.boolValue;
+  }
+
 #if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
   // There are no ownership concerns here as all mappings are owned by the
   // embedder and not the engine.
