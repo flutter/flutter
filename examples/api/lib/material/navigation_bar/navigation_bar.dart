@@ -1,0 +1,67 @@
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Flutter Demo',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: const Material(child: Center(child: NavigationExample())),
+    );
+  }
+}
+
+class NavigationExample extends StatefulWidget {
+  const NavigationExample({Key? key}) : super(key: key);
+
+  @override
+  State<NavigationExample> createState() => _NavigationExampleState();
+}
+
+class _NavigationExampleState extends State<NavigationExample> {
+  int _currentPageIndex = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    Widget _buildBody() {
+      return const [
+        Center(child: Text('Page 1')),
+        Center(child: Text('Page 2')),
+        Center(child: Text('Page 3')),
+      ][_currentPageIndex];
+    }
+
+    return Scaffold(
+        bottomNavigationBar: NavigationBar(
+            onDestinationSelected: (int index) {
+              setState(() {
+                _currentPageIndex = index;
+              });
+            },
+            selectedIndex: _currentPageIndex,
+            destinations: const [
+              NavigationDestination(
+                icon: Icon(Icons.explore),
+                label: 'Explore',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.commute),
+                label: 'Commute',
+              ),
+              NavigationDestination(
+                selectedIcon: Icon(Icons.bookmark),
+                icon: Icon(Icons.bookmark_border),
+                label: 'Saved',
+              ),
+            ]),
+        body: _buildBody());
+  }
+}
