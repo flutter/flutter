@@ -2216,6 +2216,7 @@ targets:
     scheduler: luci
 
   - name: Linux deferred components
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/96403
     recipe: flutter/deferred_components
     properties:
       dependencies: >-
