@@ -1102,7 +1102,7 @@ class RawScrollbar extends StatefulWidget {
   ///      SizedBox(
   ///        height: 200,
   ///        child: CupertinoScrollbar(
-  ///          isAlwaysShown: true,
+  ///          thumbVisibility: true,
   ///          controller: _controllerTwo,
   ///          child: SingleChildScrollView(
   ///            controller: _controllerTwo,
