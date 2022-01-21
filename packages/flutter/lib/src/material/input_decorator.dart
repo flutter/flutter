@@ -2619,7 +2619,7 @@ class InputDecoration {
   ///
   /// Note that if you specify this style it will override the default behavior
   /// of [InputDecoration] that changes the color of the label to the
-  /// [InputDecoration.errorStyle] color or [ThemeData.errorColor].
+  /// [InputDecoration.errorStyle] color or [ColorScheme.error].
   ///
   /// {@tool dartpad}
   /// It's possible to override the label style for just the error state, or
@@ -2649,7 +2649,7 @@ class InputDecoration {
   ///
   /// Note that if you specify this style it will override the default behavior
   /// of [InputDecoration] that changes the color of the label to the
-  /// [InputDecoration.errorStyle] color or [ThemeData.errorColor].
+  /// [InputDecoration.errorStyle] color or [ColorScheme.error].
   ///
   /// {@tool dartpad}
   /// It's possible to override the label style for just the error state, or

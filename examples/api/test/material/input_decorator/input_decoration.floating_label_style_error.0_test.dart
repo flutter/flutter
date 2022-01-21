@@ -17,6 +17,6 @@ void main() {
     await tester.pumpAndSettle();
 
     final AnimatedDefaultTextStyle label = tester.firstWidget(find.ancestor(of: find.text('Name'), matching: find.byType(AnimatedDefaultTextStyle)));
-    expect(label.style.color, theme.data.errorColor);
+    expect(label.style.color, theme.data.colorScheme.error);
   });
 }
