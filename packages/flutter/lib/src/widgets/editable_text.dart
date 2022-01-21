@@ -30,6 +30,7 @@ import 'scroll_configuration.dart';
 import 'scroll_controller.dart';
 import 'scroll_physics.dart';
 import 'scrollable.dart';
+import 'shortcuts.dart';
 import 'text.dart';
 import 'text_editing_intents.dart';
 import 'text_selection.dart';
@@ -3138,91 +3139,97 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       cursor: widget.mouseCursor ?? SystemMouseCursors.text,
       child: Actions(
         actions: _actions,
-        child: Focus(
-          focusNode: widget.focusNode,
-          includeSemantics: false,
-          debugLabel: 'EditableText',
-          child: Scrollable(
-            excludeFromSemantics: true,
-            axisDirection: _isMultiline ? AxisDirection.down : AxisDirection.right,
-            controller: _scrollController,
-            physics: widget.scrollPhysics,
-            dragStartBehavior: widget.dragStartBehavior,
-            restorationId: widget.restorationId,
-            // If a ScrollBehavior is not provided, only apply scrollbars when
-            // multiline. The overscroll indicator should not be applied in
-            // either case, glowing or stretching.
-            scrollBehavior: widget.scrollBehavior ?? ScrollConfiguration.of(context).copyWith(
-              scrollbars: _isMultiline,
-              overscroll: false,
-            ),
-            viewportBuilder: (BuildContext context, ViewportOffset offset) {
-              return CompositedTransformTarget(
-                link: _toolbarLayerLink,
-                child: Semantics(
-                  onCopy: _semanticsOnCopy(controls),
-                  onCut: _semanticsOnCut(controls),
-                  onPaste: _semanticsOnPaste(controls),
-                  child: _ScribbleFocusable(
-                    focusNode: widget.focusNode,
-                    editableKey: _editableKey,
-                    enabled: widget.scribbleEnabled,
-                    updateSelectionRects: () {
-                      _openInputConnection();
-                      _updateSelectionRects(force: true);
-                    },
-                    child: _Editable(
-                      key: _editableKey,
-                      startHandleLayerLink: _startHandleLayerLink,
-                      endHandleLayerLink: _endHandleLayerLink,
-                      inlineSpan: buildTextSpan(),
-                      value: _value,
-                      cursorColor: _cursorColor,
-                      backgroundCursorColor: widget.backgroundCursorColor,
-                      showCursor: EditableText.debugDeterministicCursor
-                          ? ValueNotifier<bool>(widget.showCursor)
-                          : _cursorVisibilityNotifier,
-                      forceLine: widget.forceLine,
-                      readOnly: widget.readOnly,
-                      hasFocus: _hasFocus,
-                      maxLines: widget.maxLines,
-                      minLines: widget.minLines,
-                      expands: widget.expands,
-                      strutStyle: widget.strutStyle,
-                      selectionColor: widget.selectionColor,
-                      textScaleFactor: widget.textScaleFactor ?? MediaQuery.textScaleFactorOf(context),
-                      textAlign: widget.textAlign,
-                      textDirection: _textDirection,
-                      locale: widget.locale,
-                      textHeightBehavior: widget.textHeightBehavior ?? DefaultTextHeightBehavior.of(context),
-                      textWidthBasis: widget.textWidthBasis,
-                      obscuringCharacter: widget.obscuringCharacter,
-                      obscureText: widget.obscureText,
-                      autocorrect: widget.autocorrect,
-                      smartDashesType: widget.smartDashesType,
-                      smartQuotesType: widget.smartQuotesType,
-                      enableSuggestions: widget.enableSuggestions,
-                      offset: offset,
-                      onCaretChanged: _handleCaretChanged,
-                      rendererIgnoresPointer: widget.rendererIgnoresPointer,
-                      cursorWidth: widget.cursorWidth,
-                      cursorHeight: widget.cursorHeight,
-                      cursorRadius: widget.cursorRadius,
-                      cursorOffset: widget.cursorOffset ?? Offset.zero,
-                      selectionHeightStyle: widget.selectionHeightStyle,
-                      selectionWidthStyle: widget.selectionWidthStyle,
-                      paintCursorAboveText: widget.paintCursorAboveText,
-                      enableInteractiveSelection: widget.enableInteractiveSelection && (!widget.readOnly || !widget.obscureText),
-                      textSelectionDelegate: this,
-                      devicePixelRatio: _devicePixelRatio,
-                      promptRectRange: _currentPromptRectRange,
-                      promptRectColor: widget.autocorrectionTextRectColor,
-                      clipBehavior: widget.clipBehavior,
+        child: _UndoRedo(
+          controller: widget.controller,
+          onChanged: (TextEditingValue value) {
+            userUpdateTextEditingValue(value, SelectionChangedCause.keyboard);
+          },
+          child: Focus(
+            focusNode: widget.focusNode,
+            includeSemantics: false,
+            debugLabel: 'EditableText',
+            child: Scrollable(
+              excludeFromSemantics: true,
+              axisDirection: _isMultiline ? AxisDirection.down : AxisDirection.right,
+              controller: _scrollController,
+              physics: widget.scrollPhysics,
+              dragStartBehavior: widget.dragStartBehavior,
+              restorationId: widget.restorationId,
+              // If a ScrollBehavior is not provided, only apply scrollbars when
+              // multiline. The overscroll indicator should not be applied in
+              // either case, glowing or stretching.
+              scrollBehavior: widget.scrollBehavior ?? ScrollConfiguration.of(context).copyWith(
+                scrollbars: _isMultiline,
+                overscroll: false,
+              ),
+              viewportBuilder: (BuildContext context, ViewportOffset offset) {
+                return CompositedTransformTarget(
+                  link: _toolbarLayerLink,
+                  child: Semantics(
+                    onCopy: _semanticsOnCopy(controls),
+                    onCut: _semanticsOnCut(controls),
+                    onPaste: _semanticsOnPaste(controls),
+                    child: _ScribbleFocusable(
+                      focusNode: widget.focusNode,
+                      editableKey: _editableKey,
+                      enabled: widget.scribbleEnabled,
+                      updateSelectionRects: () {
+                        _openInputConnection();
+                        _updateSelectionRects(force: true);
+                      },
+                      child: _Editable(
+                        key: _editableKey,
+                        startHandleLayerLink: _startHandleLayerLink,
+                        endHandleLayerLink: _endHandleLayerLink,
+                        inlineSpan: buildTextSpan(),
+                        value: _value,
+                        cursorColor: _cursorColor,
+                        backgroundCursorColor: widget.backgroundCursorColor,
+                        showCursor: EditableText.debugDeterministicCursor
+                            ? ValueNotifier<bool>(widget.showCursor)
+                            : _cursorVisibilityNotifier,
+                        forceLine: widget.forceLine,
+                        readOnly: widget.readOnly,
+                        hasFocus: _hasFocus,
+                        maxLines: widget.maxLines,
+                        minLines: widget.minLines,
+                        expands: widget.expands,
+                        strutStyle: widget.strutStyle,
+                        selectionColor: widget.selectionColor,
+                        textScaleFactor: widget.textScaleFactor ?? MediaQuery.textScaleFactorOf(context),
+                        textAlign: widget.textAlign,
+                        textDirection: _textDirection,
+                        locale: widget.locale,
+                        textHeightBehavior: widget.textHeightBehavior ?? DefaultTextHeightBehavior.of(context),
+                        textWidthBasis: widget.textWidthBasis,
+                        obscuringCharacter: widget.obscuringCharacter,
+                        obscureText: widget.obscureText,
+                        autocorrect: widget.autocorrect,
+                        smartDashesType: widget.smartDashesType,
+                        smartQuotesType: widget.smartQuotesType,
+                        enableSuggestions: widget.enableSuggestions,
+                        offset: offset,
+                        onCaretChanged: _handleCaretChanged,
+                        rendererIgnoresPointer: widget.rendererIgnoresPointer,
+                        cursorWidth: widget.cursorWidth,
+                        cursorHeight: widget.cursorHeight,
+                        cursorRadius: widget.cursorRadius,
+                        cursorOffset: widget.cursorOffset ?? Offset.zero,
+                        selectionHeightStyle: widget.selectionHeightStyle,
+                        selectionWidthStyle: widget.selectionWidthStyle,
+                        paintCursorAboveText: widget.paintCursorAboveText,
+                        enableInteractiveSelection: widget.enableInteractiveSelection && (!widget.readOnly || !widget.obscureText),
+                        textSelectionDelegate: this,
+                        devicePixelRatio: _devicePixelRatio,
+                        promptRectRange: _currentPromptRectRange,
+                        promptRectColor: widget.autocorrectionTextRectColor,
+                        clipBehavior: widget.clipBehavior,
+                      ),
                     ),
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           ),
         ),
       ),
@@ -4153,4 +4160,152 @@ class _CopySelectionAction extends ContextAction<CopySelectionTextIntent> {
 
   @override
   bool get isActionEnabled => state._value.selection.isValid && !state._value.selection.isCollapsed;
+}
+
+typedef _TextEditingValueCallback = void Function(TextEditingValue value);
+
+// TODO(justinmc): Make visibleForTesting and test.
+class _UndoRedo extends StatefulWidget {
+  const _UndoRedo({
+    Key? key,
+    required this.child,
+    required this.controller,
+    required this.onChanged,
+  }) : super(key: key);
+
+  final Widget child;
+  final TextEditingController controller;
+  final _TextEditingValueCallback onChanged;
+
+  @override
+  _UndoRedoState createState() => _UndoRedoState();
+}
+
+class _UndoRedoState extends State<_UndoRedo> {
+  final UndoStack<TextEditingValue> _stack = UndoStack<TextEditingValue>();
+
+  void _undo(UndoTextIntent intent) {
+    _update(_stack.undo());
+  }
+
+  void _redo(RedoTextIntent intent) {
+    _update(_stack.redo());
+  }
+
+  void _update(TextEditingValue? nextValue) {
+    // TODO(justinmc): Problem. There is an empty/invalid state that gets queued,
+    // and then a null. Shouldn't mess with both.
+    // Change UndoStack to not return a null state. Should always return the
+    // current state from the list if the list isn't empty.
+    if (nextValue == null) {
+      return widget.onChanged(TextEditingValue.empty);
+    }
+    if (nextValue.text == widget.controller.text) {
+      return;
+    }
+    widget.onChanged(widget.controller.value.copyWith(
+      text: nextValue.text,
+      selection: nextValue.selection,
+    ));
+  }
+
+  void _push() {
+    if (widget.controller.text.isEmpty || widget.controller.text == _stack.currentValue?.text) {
+      return;
+    }
+    print('justin push ${widget.controller.value}');
+    _stack.push(widget.controller.value);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _push();
+    // TODO(justinmc): Update this if controller changes.
+    widget.controller.addListener(_push);
+  }
+
+  @override
+  void dispose() {
+    widget.controller.removeListener(_push);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Actions(
+      actions: <Type, Action<Intent>> {
+        UndoTextIntent: CallbackAction<UndoTextIntent>(onInvoke: _undo),
+        RedoTextIntent: CallbackAction<RedoTextIntent>(onInvoke: _redo),
+      },
+      child: widget.child,
+    );
+  }
+}
+
+/// A data structure representing a chronological list of states that can be
+/// undone and redone.
+@visibleForTesting
+class UndoStack<T> {
+  /// Creates an instance of [UndoStack].
+  UndoStack();
+
+  final List<T> _list = <T>[];
+
+  // The index after the next item that will be given in the event of an undo,
+  // or zero if none.
+  int _index = 0;
+
+  /// Returns the current value of the stack.
+  T? get currentValue => _index == 0 ? null : _list[_index - 1];
+
+  /// Add a new state change to the stack.
+  ///
+  /// Pushing identical objects will not create multiple entries.
+  void push(T element) {
+    assert(_index <= _list.length && _index >= 0);
+
+    if (element == currentValue) {
+      return;
+    }
+
+    // If anything has been undone in this stack, remove those irrelevant states
+    // before adding the new one.
+    if (_index != _list.length) {
+      _list.removeRange(_index, _list.length);
+    }
+    _list.add(element);
+    _index = _list.length;
+  }
+
+  /// Returns the previous state.
+  ///
+  /// If all saved states have already been undone, or if there is only one
+  /// saved state, returns null.
+  T? undo() {
+    assert(_index <= _list.length && _index >= 0);
+
+    if (_index == 1) {
+      _index = 0;
+    }
+    if (_index == 0) {
+      return null;
+    }
+
+    _index--;
+    return _list[_index - 1];
+  }
+
+  /// Returns the state that was last undone.
+  ///
+  /// If none, returns null.
+  T? redo() {
+    assert(_index <= _list.length && _index >= 0);
+
+    if (_index == _list.length) {
+      return null;
+    }
+
+    return _list[_index++];
+  }
 }

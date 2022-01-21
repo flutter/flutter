@@ -105,6 +105,7 @@ void main() {
     expect(tester.testTextInput.setClientArgs!['inputAction'], equals(serializedActionName));
   }
 
+  /*
   // Regression test for https://github.com/flutter/flutter/issues/34538.
   testWidgets('RTL arabic correct caret placement after trailing whitespace', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
@@ -9958,6 +9959,68 @@ void main() {
       tester.testTextInput.log,
       isNot(contains(matchesMethodCall('TextInput.requestAutofill'))),
     );
+  });
+  */
+
+  group('UndoStack', () {
+    test('undo and redo', () {
+      final UndoStack<String> undoStack = UndoStack<String>();
+
+      expect(undoStack.undo(), isNull);
+      expect(undoStack.redo(), isNull);
+
+      undoStack.push('one');
+      expect(undoStack.redo(), isNull);
+      expect(undoStack.undo(), isNull);
+      expect(undoStack.redo(), 'one');
+      expect(undoStack.redo(), isNull);
+      expect(undoStack.undo(), isNull);
+
+      undoStack.push('one');
+      undoStack.push('one two');
+      expect(undoStack.redo(), isNull);
+      expect(undoStack.undo(), 'one');
+      expect(undoStack.redo(), 'one two');
+      expect(undoStack.redo(), isNull);
+      expect(undoStack.undo(), 'one');
+      expect(undoStack.undo(), isNull);
+      expect(undoStack.redo(), 'one');
+      expect(undoStack.redo(), 'one two');
+      expect(undoStack.redo(), isNull);
+      expect(undoStack.undo(), 'one');
+      expect(undoStack.undo(), isNull);
+
+      undoStack.push('one');
+      undoStack.push('one two');
+      undoStack.push('one two four');
+      expect(undoStack.redo(), isNull);
+      expect(undoStack.undo(), 'one two');
+      undoStack.push('one two three');
+      expect(undoStack.redo(), isNull);
+      expect(undoStack.undo(), 'one two');
+      expect(undoStack.undo(), 'one');
+      expect(undoStack.redo(), 'one two');
+      expect(undoStack.redo(), 'one two three');
+      expect(undoStack.redo(), isNull);
+      expect(undoStack.undo(), 'one two');
+      expect(undoStack.undo(), 'one');
+      expect(undoStack.undo(), isNull);
+    });
+
+    test('duplicate pushes are ignored', () {
+      final UndoStack<String> undoStack = UndoStack<String>();
+
+      expect(undoStack.undo(), isNull);
+      expect(undoStack.redo(), isNull);
+
+      undoStack.push('one');
+      undoStack.push('one');
+      expect(undoStack.redo(), isNull);
+      expect(undoStack.undo(), isNull);
+      expect(undoStack.redo(), 'one');
+      expect(undoStack.redo(), isNull);
+      expect(undoStack.undo(), isNull);
+    });
   });
 }
 
