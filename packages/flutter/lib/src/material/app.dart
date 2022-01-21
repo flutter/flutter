@@ -57,6 +57,11 @@ enum ThemeMode {
 /// adding material-design specific functionality, such as [AnimatedTheme] and
 /// [GridPaper].
 ///
+/// [MaterialApp] configures its [WidgetsApp.textStyle] with an ugly red/yellow
+/// text style that's intended to warn the developer that their app hasn't defined
+/// a default text style. Typically the app's [Scaffold] builds a [Material] widget
+/// whose default [Material.textStyle] defines the text style for the entire scaffold.
+///
 /// The [MaterialApp] configures the top-level [Navigator] to search for routes
 /// in the following order:
 ///
@@ -145,6 +150,28 @@ enum ThemeMode {
 /// ```
 /// {@end-tool}
 ///
+/// ## Troubleshooting
+///
+/// ### Why is my app's text red with yellow underlines?
+///
+/// [Text] widgets that lack a [Material] ancestor will be rendered with an ugly
+/// red/yellow text style.
+///
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/material_app_unspecified_textstyle.png)
+///
+/// The typical fix is to give the widget a [Scaffold] ancestor. The [Scaffold] creates
+/// a [Material] widget that defines its default text style.
+///
+/// ```dart
+/// MaterialApp(
+///   title: 'Material App',
+///   home: Scaffold(
+///     body: Center(
+///       child: Text('Hello World'),
+///     ),
+///   ),
+/// )
+/// ```
 /// See also:
 ///
 ///  * [Scaffold], which provides standard app elements like an [AppBar] and a [Drawer].
