@@ -1102,7 +1102,6 @@ void main() {
       scrollDirection: Axis.horizontal,
     ));
     expect(dismissedItems, isEmpty);
-    expect(reportedDismissUpdateProgress, 0.0);
 
     // Unsuccessful dismiss, fractional progress reported
     await dragItem(tester, 0, gestureDirection: AxisDirection.right, amount: 20);
