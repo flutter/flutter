@@ -30,7 +30,7 @@ struct VulkanImage {
   VulkanImage(VulkanImage&&) = default;
   VulkanImage& operator=(VulkanImage&&) = default;
 
-  VkBufferCollectionImageCreateInfoFUCHSIAX vk_collection_image_create_info;
+  VkBufferCollectionImageCreateInfoFUCHSIA vk_collection_image_create_info;
   VkImageCreateInfo vk_image_create_info;
   VkMemoryRequirements vk_memory_requirements;
   vulkan::VulkanHandle<VkImage> vk_image;
@@ -169,7 +169,7 @@ class VulkanSurface final : public SurfaceProducerSurface {
   uint32_t buffer_id_ = 0;
   fuchsia::ui::composition::BufferCollectionImportToken import_token_;
   uint32_t image_id_ = 0;
-  vulkan::VulkanHandle<VkBufferCollectionFUCHSIAX> collection_;
+  vulkan::VulkanHandle<VkBufferCollectionFUCHSIA> collection_;
   zx::event acquire_event_;
   vulkan::VulkanHandle<VkSemaphore> acquire_semaphore_;
   std::unique_ptr<vulkan::VulkanCommandBuffer> command_buffer_;

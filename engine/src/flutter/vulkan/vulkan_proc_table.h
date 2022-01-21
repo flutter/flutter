@@ -120,10 +120,10 @@ class VulkanProcTable : public fml::RefCountedThreadSafe<VulkanProcTable> {
   DEFINE_PROC(ImportSemaphoreZirconHandleFUCHSIA);
   DEFINE_PROC(GetSemaphoreZirconHandleFUCHSIA);
   DEFINE_PROC(GetMemoryZirconHandleFUCHSIA);
-  DEFINE_PROC(CreateBufferCollectionFUCHSIAX);
-  DEFINE_PROC(DestroyBufferCollectionFUCHSIAX);
-  DEFINE_PROC(SetBufferCollectionConstraintsFUCHSIAX);
-  DEFINE_PROC(GetBufferCollectionPropertiesFUCHSIAX);
+  DEFINE_PROC(CreateBufferCollectionFUCHSIA);
+  DEFINE_PROC(DestroyBufferCollectionFUCHSIA);
+  DEFINE_PROC(SetBufferCollectionImageConstraintsFUCHSIA);
+  DEFINE_PROC(GetBufferCollectionPropertiesFUCHSIA);
 #endif  // OS_FUCHSIA
 #endif  // TEST_VULKAN_PROCS
 
