@@ -885,7 +885,7 @@ class RawScrollbar extends StatefulWidget {
     this.crossAxisMargin = 0.0,
     @Deprecated(
       'Use thumbVisibility instead. '
-      'This feature was deprecated after v2.6.0-12.0.pre.',
+      'This feature was deprecated after v2.9.0-1.0.pre.',
     )
     this.isAlwaysShown,
   }) : assert(child != null),
