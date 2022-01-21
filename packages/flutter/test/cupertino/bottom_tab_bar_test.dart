@@ -5,6 +5,8 @@
 import 'dart:typed_data';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -567,5 +569,38 @@ Future<void> main() async {
     final BoxDecoration boxDecorationHiddenBorder =
         decoratedBoxHiddenBorder.decoration as BoxDecoration;
     expect(boxDecorationHiddenBorder.border, isNull);
+  });
+
+  testWidgets('Hoveing over Bar item updates cursor to clickable', (WidgetTester tester) async {
+    await pumpWidgetWithBoilerplate(tester, MediaQuery(
+      data: const MediaQueryData(),
+      child: CupertinoTabBar(
+        items: <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
+            label: 'Tab 1',
+          ),
+          BottomNavigationBarItem(
+            icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
+            label: 'Tab 2',
+          ),
+        ],
+      ),
+    ));
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: const Offset(10, 10));
+    addTearDown(gesture.removePointer);
+    await tester.pump();
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+
+    // Hovering over the first tab should show a hover cursor.
+    final Offset tabItem = tester.getCenter(find.text('Tab 1'));
+    await gesture.moveTo(tabItem);
+    await tester.pump();
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
+    );
   });
 }
