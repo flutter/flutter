@@ -1,4 +1,4 @@
-Signature: 6c2aa5d34c2967274721a4eb43201b90
+Signature: 53ec58d5ec0997cbc969d2ef545e284b
 
 UNUSED LICENSES:
 
@@ -2489,7 +2489,6 @@ FILE: ../../../third_party/skia/experimental/graphite/src/Texture.h
 FILE: ../../../third_party/skia/experimental/graphite/src/TextureInfo.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/TextureProxy.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/TextureProxy.h
-FILE: ../../../third_party/skia/experimental/graphite/src/Uniform.h
 FILE: ../../../third_party/skia/experimental/graphite/src/UniformCache.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/UniformCache.h
 FILE: ../../../third_party/skia/experimental/graphite/src/UniformManager.cpp
@@ -2560,6 +2559,7 @@ FILE: ../../../third_party/skia/src/core/SkCustomMeshPriv.cpp
 FILE: ../../../third_party/skia/src/core/SkCustomMeshPriv.h
 FILE: ../../../third_party/skia/src/core/SkMatrixInvert.cpp
 FILE: ../../../third_party/skia/src/core/SkMatrixInvert.h
+FILE: ../../../third_party/skia/src/core/SkUniform.h
 FILE: ../../../third_party/skia/src/core/SkVMBlitter.h
 FILE: ../../../third_party/skia/src/core/SkYUVAInfoLocation.h
 FILE: ../../../third_party/skia/src/effects/SkBlenders.cpp
@@ -6052,7 +6052,10 @@ FILE: ../../../third_party/skia/src/core/SkDebugUtils.h
 FILE: ../../../third_party/skia/src/core/SkKeyHelpers.cpp
 FILE: ../../../third_party/skia/src/core/SkKeyHelpers.h
 FILE: ../../../third_party/skia/src/core/SkPaintParamsKey.cpp
+FILE: ../../../third_party/skia/src/core/SkSLTypeShared.h
 FILE: ../../../third_party/skia/src/core/SkShaderCodeDictionary.cpp
+FILE: ../../../third_party/skia/src/core/SkUniformData.cpp
+FILE: ../../../third_party/skia/src/core/SkUniformData.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2022 Google LLC
 
