@@ -675,7 +675,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
 
   /// Animates the position such that the given object is as visible as possible
   /// by just scrolling this position.
-  /// 
+  ///
   /// The [padding] is used to add extra space around the [object] when revealing it.
   /// For example, `EdgeInsets.only(bottom: 16.0)` will ensure an additional 16 pixels
   /// of space are visible below the [object].

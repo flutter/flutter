@@ -761,10 +761,10 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
 
   /// Returns the amount of additional space to reveal around the attached widget
   /// when focused inside a scrolling container.
-  /// 
+  ///
   /// For example, a value of `EdgeInsets.all(16.0)` ensures 16 pixels of
   /// the adjacent widget are visible when this node receives focus.
-  /// 
+  ///
   /// By default, this returns [FocusManager.defaultScrollRevealPadding] from the
   /// associated [FocusManager], or [EdgeInsets.zero].
   EdgeInsets get scrollRevealPadding => _manager?.defaultScrollRevealPadding ?? EdgeInsets.zero;
@@ -1722,10 +1722,10 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
 
   /// The default amount of additonal space to reveal when a widget is focused
   /// inside a scrolling container.
-  /// 
-  /// Defaults to [EdgeInsets.zero], which does not add any additional space 
+  ///
+  /// Defaults to [EdgeInsets.zero], which does not add any additional space
   /// when widgets are revealed.
-  /// 
+  ///
   /// For example, a value of `EdgeInsets.all(16.0)` ensures 16 pixels of
   /// the adjacent widget are visible when focusing a widget inside of a
   /// scrolling container.

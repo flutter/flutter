@@ -311,8 +311,8 @@ class Scrollable extends StatefulWidget {
 
   /// Scrolls the scrollables that enclose the given context so as to make the
   /// given context visible.
-  /// 
-  /// The [padding] is used to add extra space around the [context]'s 
+  ///
+  /// The [padding] is used to add extra space around the [context]'s
   /// associated widget when revealing it. For example, `EdgeInsets.only(bottom: 16.0)`
   /// will ensure an additional 16 pixels of space are visible below the widget.
   static Future<void> ensureVisible(
