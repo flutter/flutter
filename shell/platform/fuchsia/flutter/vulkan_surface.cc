@@ -4,6 +4,7 @@
 
 #include "vulkan_surface.h"
 
+#include <fuchsia/sysmem/cpp/fidl.h>
 #include <lib/async/default.h>
 #include <lib/ui/scenic/cpp/commands.h>
 
@@ -15,6 +16,8 @@
 #include "third_party/skia/include/gpu/GrBackendSemaphore.h"
 #include "third_party/skia/include/gpu/GrBackendSurface.h"
 #include "third_party/skia/include/gpu/GrDirectContext.h"
+#include "vulkan/vulkan_core.h"
+#include "vulkan/vulkan_fuchsia.h"
 
 #define LOG_AND_RETURN(cond, msg) \
   if (cond) {                     \
@@ -33,6 +36,11 @@ constexpr VkImageCreateFlags kVulkanImageCreateFlags = 0;
 constexpr VkImageUsageFlags kVkImageUsage =
     VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT |
     VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+const VkSysmemColorSpaceFUCHSIA kSrgbColorSpace = {
+    .sType = VK_STRUCTURE_TYPE_SYSMEM_COLOR_SPACE_FUCHSIA,
+    .pNext = nullptr,
+    .colorSpace = static_cast<uint32_t>(fuchsia::sysmem::ColorSpaceType::SRGB),
+};
 
 }  // namespace
 
@@ -45,7 +53,7 @@ bool VulkanSurface::CreateVulkanImage(vulkan::VulkanProvider& vulkan_provider,
   FML_CHECK(out_vulkan_image != nullptr);
 
   out_vulkan_image->vk_collection_image_create_info = {
-      .sType = VK_STRUCTURE_TYPE_BUFFER_COLLECTION_IMAGE_CREATE_INFO_FUCHSIAX,
+      .sType = VK_STRUCTURE_TYPE_BUFFER_COLLECTION_IMAGE_CREATE_INFO_FUCHSIA,
       .pNext = nullptr,
       .collection = collection_,
       .index = 0,
@@ -70,10 +78,42 @@ bool VulkanSurface::CreateVulkanImage(vulkan::VulkanProvider& vulkan_provider,
       .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
   };
 
+  const VkImageFormatConstraintsInfoFUCHSIA format_constraints = {
+      .sType = VK_STRUCTURE_TYPE_IMAGE_FORMAT_CONSTRAINTS_INFO_FUCHSIA,
+      .pNext = nullptr,
+      .imageCreateInfo = out_vulkan_image->vk_image_create_info,
+      .requiredFormatFeatures = VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT,
+      .flags = {},
+      .sysmemPixelFormat = {},
+      .colorSpaceCount = 1,
+      .pColorSpaces = &kSrgbColorSpace,
+  };
+
+  const VkImageConstraintsInfoFUCHSIA image_constraints = {
+      .sType = VK_STRUCTURE_TYPE_IMAGE_CONSTRAINTS_INFO_FUCHSIA,
+      .pNext = nullptr,
+      .formatConstraintsCount = 1,
+      .pFormatConstraints = &format_constraints,
+      .bufferCollectionConstraints =
+          {
+              .sType =
+                  VK_STRUCTURE_TYPE_BUFFER_COLLECTION_CONSTRAINTS_INFO_FUCHSIA,
+              .pNext = nullptr,
+              .minBufferCount = 1,
+              // Using the default value 0 means that we don't have any other
+              // constraints except for the minimum buffer count.
+              .maxBufferCount = 0,
+              .minBufferCountForCamping = 0,
+              .minBufferCountForDedicatedSlack = 0,
+              .minBufferCountForSharedSlack = 0,
+          },
+      .flags = {},
+  };
+
   if (VK_CALL_LOG_ERROR(
-          vulkan_provider.vk().SetBufferCollectionConstraintsFUCHSIAX(
-              vulkan_provider.vk_device(), collection_,
-              &out_vulkan_image->vk_image_create_info)) != VK_SUCCESS) {
+          vulkan_provider.vk().SetBufferCollectionImageConstraintsFUCHSIA(
+              vulkan_provider.vk_device(), collection_, &image_constraints)) !=
+      VK_SUCCESS) {
     return false;
   }
 
@@ -278,22 +318,22 @@ bool VulkanSurface::AllocateDeviceMemory(
         });
   }
 
-  VkBufferCollectionCreateInfoFUCHSIAX import_info{
-      .sType = VK_STRUCTURE_TYPE_BUFFER_COLLECTION_CREATE_INFO_FUCHSIAX,
+  VkBufferCollectionCreateInfoFUCHSIA import_info{
+      .sType = VK_STRUCTURE_TYPE_BUFFER_COLLECTION_CREATE_INFO_FUCHSIA,
       .pNext = nullptr,
       .collectionToken = vulkan_token.Unbind().TakeChannel().release(),
   };
-  VkBufferCollectionFUCHSIAX collection;
-  if (VK_CALL_LOG_ERROR(vulkan_provider_.vk().CreateBufferCollectionFUCHSIAX(
+  VkBufferCollectionFUCHSIA collection;
+  if (VK_CALL_LOG_ERROR(vulkan_provider_.vk().CreateBufferCollectionFUCHSIA(
           vulkan_provider_.vk_device(), &import_info, nullptr, &collection)) !=
       VK_SUCCESS) {
     return false;
   }
 
-  collection_ = vulkan::VulkanHandle<VkBufferCollectionFUCHSIAX_T*>{
-      collection, [&vulkan_provider = vulkan_provider_](
-                      VkBufferCollectionFUCHSIAX collection) {
-        vulkan_provider.vk().DestroyBufferCollectionFUCHSIAX(
+  collection_ = vulkan::VulkanHandle<VkBufferCollectionFUCHSIA_T*>{
+      collection, [&vulkan_provider =
+                       vulkan_provider_](VkBufferCollectionFUCHSIA collection) {
+        vulkan_provider.vk().DestroyBufferCollectionFUCHSIA(
             vulkan_provider.vk_device(), collection, nullptr);
       }};
 
@@ -306,17 +346,17 @@ bool VulkanSurface::AllocateDeviceMemory(
       vulkan_image_.vk_memory_requirements;
   VkImageCreateInfo& image_create_info = vulkan_image_.vk_image_create_info;
 
-  VkBufferCollectionPropertiesFUCHSIAX properties{
-      .sType = VK_STRUCTURE_TYPE_BUFFER_COLLECTION_PROPERTIES_FUCHSIAX};
+  VkBufferCollectionPropertiesFUCHSIA properties{
+      .sType = VK_STRUCTURE_TYPE_BUFFER_COLLECTION_PROPERTIES_FUCHSIA};
   if (VK_CALL_LOG_ERROR(
-          vulkan_provider_.vk().GetBufferCollectionPropertiesFUCHSIAX(
+          vulkan_provider_.vk().GetBufferCollectionPropertiesFUCHSIA(
               vulkan_provider_.vk_device(), collection_, &properties)) !=
       VK_SUCCESS) {
     return false;
   }
 
-  VkImportMemoryBufferCollectionFUCHSIAX import_memory_info = {
-      .sType = VK_STRUCTURE_TYPE_IMPORT_MEMORY_BUFFER_COLLECTION_FUCHSIAX,
+  VkImportMemoryBufferCollectionFUCHSIA import_memory_info = {
+      .sType = VK_STRUCTURE_TYPE_IMPORT_MEMORY_BUFFER_COLLECTION_FUCHSIA,
       .pNext = nullptr,
       .collection = collection_,
       .index = 0,
