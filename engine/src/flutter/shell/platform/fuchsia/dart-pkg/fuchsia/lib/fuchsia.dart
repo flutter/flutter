@@ -65,3 +65,24 @@ void exit(int returnCode) {
   _setReturnCode(returnCode);
   Isolate.current.kill(priority: Isolate.immediate);
 }
+
+// ignore: always_declare_return_types, prefer_generic_function_type_aliases
+typedef _ListStringArgFunction(List<String> args);
+
+// This function is used as the entry point for code in the dart runner and is
+// not meant to be called directly outside of that context. The code will invoke
+// the given main entry point and pass the args if the function takes args. This
+// function is needed because without it the snapshot compiler will tree shake
+// the function away unless the user marks it as being an entry point.
+//
+// The code does not catch any exceptions since this is handled in the dart
+// runner calling code.
+@pragma('vm:entry-point')
+void _runUserMainForDartRunner(Function userMainFunction,
+                   List<String> args) {
+  if (userMainFunction is _ListStringArgFunction) {
+    (userMainFunction as dynamic)(args);
+  } else {
+    userMainFunction();
+  }
+}
