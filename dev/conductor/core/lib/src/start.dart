@@ -48,7 +48,7 @@ class StartCommand extends Command<void> {
     argParser.addOption(
       kReleaseOption,
       help: 'The target release channel for the release.',
-      allowed: <String>['stable', 'beta', 'dev'],
+      allowed: kBaseReleaseChannels,
     );
     argParser.addOption(
       kFrameworkUpstreamOption,
@@ -93,7 +93,7 @@ class StartCommand extends Command<void> {
       kIncrementOption,
       help: 'Specifies which part of the x.y.z version number to increment. Required.',
       valueHelp: 'level',
-      allowed: <String>['y', 'z', 'm', 'n'],
+      allowed: kReleaseIncrements,
       allowedHelp: <String, String>{
         'y': 'Indicates the first dev release after a beta release.',
         'z': 'Indicates a hotfix to a stable release.',
@@ -235,7 +235,7 @@ class StartContext extends Context {
   }) : git = Git(processManager),
   engine = EngineRepository(
     checkouts,
-    initialRef: candidateBranch,
+    initialRef: 'upstream/$candidateBranch',
     upstreamRemote: Remote(
       name: RemoteName.upstream,
       url: engineUpstream,
@@ -246,7 +246,7 @@ class StartContext extends Context {
     ),
   ), framework = FrameworkRepository(
     checkouts,
-    initialRef: candidateBranch,
+    initialRef: 'upstream/$candidateBranch',
     upstreamRemote: Remote(
       name: RemoteName.upstream,
       url: frameworkUpstream,

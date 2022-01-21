@@ -111,11 +111,11 @@ typedef LocaleResolutionCallback = Locale? Function(Locale? locale, Iterable<Loc
 /// To summarize, the main matching priority is:
 ///
 ///  1. [Locale.languageCode], [Locale.scriptCode], and [Locale.countryCode]
-///  1. [Locale.languageCode] and [Locale.scriptCode] only
-///  1. [Locale.languageCode] and [Locale.countryCode] only
-///  1. [Locale.languageCode] only (with caveats, see above)
-///  1. [Locale.countryCode] only when all [preferredLocales] fail to match
-///  1. Returns the first element of [supportedLocales] as a fallback
+///  2. [Locale.languageCode] and [Locale.scriptCode] only
+///  3. [Locale.languageCode] and [Locale.countryCode] only
+///  4. [Locale.languageCode] only (with caveats, see above)
+///  5. [Locale.countryCode] only when all [preferredLocales] fail to match
+///  6. Returns the first element of [supportedLocales] as a fallback
 ///
 /// This algorithm does not take language distance (how similar languages are to each other)
 /// into account, and will not handle edge cases such as resolving `de` to `fr` rather than `zh`
@@ -885,7 +885,7 @@ class WidgetsApp extends StatefulWidget {
   /// `[const Locale('en', 'US')]`.
   ///
   /// The order of the list matters. The default locale resolution algorithm,
-  /// `basicLocaleListResolution`, attempts to match by the following priority:
+  /// [basicLocaleListResolution], attempts to match by the following priority:
   ///
   ///  1. [Locale.languageCode], [Locale.scriptCode], and [Locale.countryCode]
   ///  2. [Locale.languageCode] and [Locale.scriptCode] only
@@ -899,7 +899,7 @@ class WidgetsApp extends StatefulWidget {
   ///
   /// The default locale resolution algorithm can be overridden by providing a
   /// value for [localeListResolutionCallback]. The provided
-  /// `basicLocaleListResolution` is optimized for speed and does not implement
+  /// [basicLocaleListResolution] is optimized for speed and does not implement
   /// a full algorithm (such as the one defined in
   /// [Unicode TR35](https://unicode.org/reports/tr35/#LanguageMatching)) that
   /// takes distances between languages into account.
@@ -1472,10 +1472,12 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
   // of a particular LocalizationsDelegate.type is loaded so the
   // localizationsDelegate parameter can be used to override
   // WidgetsLocalizations.delegate.
-  Iterable<LocalizationsDelegate<dynamic>> get _localizationsDelegates sync* {
-    if (widget.localizationsDelegates != null)
-      yield* widget.localizationsDelegates!;
-    yield DefaultWidgetsLocalizations.delegate;
+  Iterable<LocalizationsDelegate<dynamic>> get _localizationsDelegates {
+    return <LocalizationsDelegate<dynamic>>[
+      if (widget.localizationsDelegates != null)
+        ...widget.localizationsDelegates!,
+      DefaultWidgetsLocalizations.delegate,
+    ];
   }
 
   // BUILDER
@@ -1493,35 +1495,37 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       if (unsupportedTypes.isEmpty)
         return true;
 
-      // Currently the Cupertino library only provides english localizations.
-      // Remove this when https://github.com/flutter/flutter/issues/23847
-      // is fixed.
-      if (listEquals(unsupportedTypes.map((Type type) => type.toString()).toList(), <String>['CupertinoLocalizations']))
-        return true;
-
-      final StringBuffer message = StringBuffer();
-      message.writeln('\u2550' * 8);
-      message.writeln(
-        "Warning: This application's locale, $appLocale, is not supported by all of its\n"
-        'localization delegates.',
-      );
-      for (final Type unsupportedType in unsupportedTypes) {
-        // Currently the Cupertino library only provides english localizations.
-        // Remove this when https://github.com/flutter/flutter/issues/23847
-        // is fixed.
-        if (unsupportedType.toString() == 'CupertinoLocalizations')
-          continue;
-        message.writeln(
-          '> A $unsupportedType delegate that supports the $appLocale locale was not found.',
-        );
-      }
-      message.writeln(
-        'See https://flutter.dev/tutorials/internationalization/ for more\n'
-        "information about configuring an app's locale, supportedLocales,\n"
-        'and localizationsDelegates parameters.',
-      );
-      message.writeln('\u2550' * 8);
-      debugPrint(message.toString());
+      FlutterError.reportError(FlutterErrorDetails(
+        exception: "Warning: This application's locale, $appLocale, is not supported by all of its localization delegates.",
+        library: 'widgets',
+        informationCollector: () => <DiagnosticsNode>[
+          for (final Type unsupportedType in unsupportedTypes)
+            ErrorDescription(
+              '• A $unsupportedType delegate that supports the $appLocale locale was not found.',
+            ),
+          ErrorSpacer(),
+          if (unsupportedTypes.length == 1 && unsupportedTypes.single.toString() == 'CupertinoLocalizations')
+            // We previously explicitly avoided checking for this class so it's not uncommon for applications
+            // to have omitted importing the required delegate.
+            ...<DiagnosticsNode>[
+              ErrorHint(
+                'If the application is built using GlobalMaterialLocalizations.delegate, consider using '
+                'GlobalMaterialLocalizations.delegates (plural) instead, as that will automatically declare '
+                'the appropriate Cupertino localizations.'
+              ),
+              ErrorSpacer(),
+            ],
+          ErrorHint(
+            'The declared supported locales for this app are: ${widget.supportedLocales.join(", ")}'
+          ),
+          ErrorSpacer(),
+          ErrorDescription(
+            'See https://flutter.dev/tutorials/internationalization/ for more '
+            "information about configuring an app's locale, supportedLocales, "
+            'and localizationsDelegates parameters.',
+          ),
+        ],
+      ));
       return true;
     }());
     return true;

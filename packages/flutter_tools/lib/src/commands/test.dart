@@ -415,7 +415,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         );
       }
       if (integrationTestDevice.platformType == PlatformType.web) {
-        // TODO(jiahaog): Support web. https://github.com/flutter/flutter/pull/74236
+        // TODO(jiahaog): Support web. https://github.com/flutter/flutter/issues/66264
         throwToolExit('Web devices are not supported for integration tests yet.');
       }
 

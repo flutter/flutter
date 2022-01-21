@@ -282,6 +282,31 @@ void main() {
           mockLogger.errorText,
           matches('^$red' r'\[ (?: {0,2}\+[0-9]{1,4} ms|       )\] ' '${bold}Helpless!$resetBold$resetColor' r'\n$'));
     });
+
+    testWithoutContext('printBox', () {
+      final BufferLogger mockLogger = BufferLogger(
+        terminal: AnsiTerminal(
+          stdio:  FakeStdio(),
+          platform: FakePlatform(stdoutSupportsAnsi: true),
+        ),
+        outputPreferences: OutputPreferences.test(showColor: true),
+      );
+      final VerboseLogger verboseLogger = VerboseLogger(
+        mockLogger, stopwatchFactory: FakeStopwatchFactory(stopwatch: fakeStopWatch),
+      );
+
+      verboseLogger.printBox('This is the box message', title: 'Sample title');
+
+      expect(
+        mockLogger.statusText,
+        contains('[        ] \x1B[1m\x1B[22m\n'
+            '\x1B[1m           ┌─ Sample title ──────────┐\x1B[22m\n'
+            '\x1B[1m           │ This is the box message │\x1B[22m\n'
+            '\x1B[1m           └─────────────────────────┘\x1B[22m\n'
+            '\x1B[1m           \x1B[22m\n'
+        ),
+      );
+    });
   });
 
   testWithoutContext('Logger does not throw when stdio write throws synchronously', () async {
@@ -927,6 +952,184 @@ void main() {
       expect(outputStderr().first, isEmpty);
       expect(lines[0], equals(''));
     });
+
+    testWithoutContext('Stdout printBox puts content inside a box', () {
+      final Logger logger = StdoutLogger(
+        terminal: AnsiTerminal(
+          stdio: fakeStdio,
+          platform: FakePlatform(),
+        ),
+        stdio: fakeStdio,
+        outputPreferences: OutputPreferences.test(showColor: true),
+      );
+      logger.printBox('Hello world', title: 'Test title');
+      final String stdout = fakeStdio.writtenToStdout.join('');
+      expect(stdout,
+        contains(
+          '\n'
+          '┌─ Test title ┐\n'
+          '│ Hello world │\n'
+          '└─────────────┘\n'
+        ),
+      );
+    });
+
+    testWithoutContext('Stdout printBox does not require title', () {
+      final Logger logger = StdoutLogger(
+        terminal: AnsiTerminal(
+          stdio: fakeStdio,
+          platform: FakePlatform(),
+        ),
+        stdio: fakeStdio,
+        outputPreferences: OutputPreferences.test(showColor: true),
+      );
+      logger.printBox('Hello world');
+      final String stdout = fakeStdio.writtenToStdout.join('');
+      expect(stdout,
+        contains(
+          '\n'
+          '┌─────────────┐\n'
+          '│ Hello world │\n'
+          '└─────────────┘\n'
+        ),
+      );
+    });
+
+    testWithoutContext('Stdout printBox handles new lines', () {
+      final Logger logger = StdoutLogger(
+        terminal: AnsiTerminal(
+          stdio: fakeStdio,
+          platform: FakePlatform(),
+        ),
+        stdio: fakeStdio,
+        outputPreferences: OutputPreferences.test(showColor: true),
+      );
+      logger.printBox('Hello world\nThis is a new line', title: 'Test title');
+      final String stdout = fakeStdio.writtenToStdout.join('');
+      expect(stdout,
+        contains(
+          '\n'
+          '┌─ Test title ───────┐\n'
+          '│ Hello world        │\n'
+          '│ This is a new line │\n'
+          '└────────────────────┘\n'
+        ),
+      );
+    });
+
+    testWithoutContext('Stdout printBox handles content with ANSI escape characters', () {
+      final Logger logger = StdoutLogger(
+        terminal: AnsiTerminal(
+          stdio: fakeStdio,
+          platform: FakePlatform(),
+        ),
+        stdio: fakeStdio,
+        outputPreferences: OutputPreferences.test(showColor: true),
+      );
+      const String bold = '\u001B[1m';
+      const String clear = '\u001B[2J\u001B[H';
+      logger.printBox('${bold}Hello world$clear', title: 'Test title');
+      final String stdout = fakeStdio.writtenToStdout.join('');
+      expect(stdout,
+        contains(
+          '\n'
+          '┌─ Test title ┐\n'
+          '│ ${bold}Hello world$clear │\n'
+          '└─────────────┘\n'
+        ),
+      );
+    });
+
+    testWithoutContext('Stdout printBox handles column limit', () {
+      const int columnLimit = 14;
+      final Logger logger = StdoutLogger(
+        terminal: AnsiTerminal(
+          stdio: fakeStdio,
+          platform: FakePlatform(),
+        ),
+        stdio: fakeStdio,
+        outputPreferences: OutputPreferences.test(showColor: true, wrapColumn: columnLimit),
+      );
+      logger.printBox('This line is longer than $columnLimit characters', title: 'Test');
+      final String stdout = fakeStdio.writtenToStdout.join('');
+      final List<String> stdoutLines = stdout.split('\n');
+
+      expect(stdoutLines.length, greaterThan(1));
+      expect(stdoutLines[1].length, equals(columnLimit));
+      expect(stdout,
+        contains(
+          '\n'
+          '┌─ Test ─────┐\n'
+          '│ This line  │\n'
+          '│ is longer  │\n'
+          '│ than 14    │\n'
+          '│ characters │\n'
+          '└────────────┘\n'
+        ),
+      );
+    });
+
+    testWithoutContext('Stdout printBox handles column limit and respects new lines', () {
+      const int columnLimit = 14;
+      final Logger logger = StdoutLogger(
+        terminal: AnsiTerminal(
+          stdio: fakeStdio,
+          platform: FakePlatform(),
+        ),
+        stdio: fakeStdio,
+        outputPreferences: OutputPreferences.test(showColor: true, wrapColumn: columnLimit),
+      );
+      logger.printBox('This\nline is longer than\n\n$columnLimit characters', title: 'Test');
+      final String stdout = fakeStdio.writtenToStdout.join('');
+      final List<String> stdoutLines = stdout.split('\n');
+
+      expect(stdoutLines.length, greaterThan(1));
+      expect(stdoutLines[1].length, equals(columnLimit));
+      expect(stdout,
+        contains(
+          '\n'
+          '┌─ Test ─────┐\n'
+          '│ This       │\n'
+          '│ line is    │\n'
+          '│ longer     │\n'
+          '│ than       │\n'
+          '│            │\n'
+          '│ 14         │\n'
+          '│ characters │\n'
+          '└────────────┘\n'
+        ),
+      );
+    });
+
+    testWithoutContext('Stdout printBox breaks long words that exceed the column limit', () {
+      const int columnLimit = 14;
+      final Logger logger = StdoutLogger(
+        terminal: AnsiTerminal(
+          stdio: fakeStdio,
+          platform: FakePlatform(),
+        ),
+        stdio: fakeStdio,
+        outputPreferences: OutputPreferences.test(showColor: true, wrapColumn: columnLimit),
+      );
+      logger.printBox('Thiswordislongerthan${columnLimit}characters', title: 'Test');
+      final String stdout = fakeStdio.writtenToStdout.join('');
+      final List<String> stdoutLines = stdout.split('\n');
+
+      expect(stdoutLines.length, greaterThan(1));
+      expect(stdoutLines[1].length, equals(columnLimit));
+      expect(stdout,
+        contains(
+          '\n'
+          '┌─ Test ─────┐\n'
+          '│ Thiswordis │\n'
+          '│ longerthan │\n'
+          '│ 14characte │\n'
+          '│ rs         │\n'
+          '└────────────┘\n'
+        ),
+      );
+    });
+
 
     testWithoutContext('Stdout startProgress on non-color terminal', () async {
       final FakeStopwatch fakeStopwatch = FakeStopwatch();

@@ -336,6 +336,9 @@ abstract class CreateBase extends FlutterCommand {
     String iosLanguage,
     String flutterRoot,
     String dartSdkVersionBounds,
+    String agpVersion,
+    String kotlinVersion,
+    String gradleVersion,
     bool withPluginHook = false,
     bool ios = false,
     bool android = false,
@@ -398,6 +401,9 @@ abstract class CreateBase extends FlutterCommand {
       'year': DateTime.now().year,
       'dartSdkVersionBounds': dartSdkVersionBounds,
       'implementationTests': implementationTests,
+      'agpVersion': agpVersion,
+      'kotlinVersion': kotlinVersion,
+      'gradleVersion': gradleVersion,
     };
   }
 

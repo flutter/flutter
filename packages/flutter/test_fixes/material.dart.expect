@@ -492,6 +492,9 @@ void main() {
   colorScheme.primaryContainer; // Removing field reference not supported.
   colorScheme.secondaryContainer;
 
+  // Changes made in https://github.com/flutter/flutter/pull/96115
+  Icon icon = Icons.pie_chart_outline;
+
   // Changes made in https://github.com/flutter/flutter/pull/94156
   ThemeData themeData = ThemeData();
   themeData = ThemeData(colorScheme: ColorScheme.fromSwatch().copyWith(error: Colors.red));

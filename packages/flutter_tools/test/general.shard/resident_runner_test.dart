@@ -923,10 +923,10 @@ void main() {
         jsonResponse: vm_service.VM.parse(<String, Object>{}).toJson(),
       ),
       const FakeVmServiceRequest(
-        method: 'setExceptionPauseMode',
+        method: 'setIsolatePauseMode',
         args: <String, String>{
           'isolateId': '1',
-          'mode': 'None',
+          'exceptionPauseMode': 'None',
         }
       ),
       const FakeVmServiceRequest(

@@ -7,6 +7,24 @@ import 'package:conductor_core/src/version.dart';
 import './common.dart';
 
 void main() {
+  group('Version.fromString()', () {
+    test('parses commits past a tagged stable', () {
+      const String versionString = '2.8.0-1-g2ef5ad67fe';
+      final Version version;
+      try {
+        version = Version.fromString(versionString);
+      } on Exception catch (exception) {
+        fail('Failed parsing "$versionString" with:\n$exception');
+      }
+      expect(version.x, 2);
+      expect(version.y, 8);
+      expect(version.z, 0);
+      expect(version.m, isNull);
+      expect(version.n, isNull);
+      expect(version.commits, 1);
+      expect(version.type, VersionType.gitDescribe);
+    });
+  });
   group('Version.increment()', () {
     test('throws exception on nonsensical `level`', () {
       final List<String> levels = <String>['f', '0', 'xyz'];

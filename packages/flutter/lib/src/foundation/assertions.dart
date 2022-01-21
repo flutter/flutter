@@ -248,6 +248,7 @@ abstract class _ErrorDiagnostic extends DiagnosticsProperty<List<Object>> {
 ///    problem that was detected.
 ///  * [ErrorHint], which provides specific, non-obvious advice that may be
 ///    applicable.
+///  * [ErrorSpacer], which renders as a blank line.
 ///  * [FlutterError], which is the most common place to use an
 ///    [ErrorDescription].
 class ErrorDescription extends _ErrorDiagnostic {
@@ -323,6 +324,7 @@ class ErrorSummary extends _ErrorDiagnostic {
 ///  * [ErrorDescription], which provides an explanation of the problem and its
 ///    cause, any information that may help track down the problem, background
 ///    information, etc.
+///  * [ErrorSpacer], which renders as a blank line.
 ///  * [FlutterError], which is the most common place to use an [ErrorHint].
 class ErrorHint extends _ErrorDiagnostic {
   /// A lint enforces that this constructor can only be called with a string
@@ -516,14 +518,52 @@ class FlutterErrorDetails with Diagnosticable {
   /// This won't be called if [stack] is null.
   final IterableFilter<String>? stackFilter;
 
-  /// A callback which, when called with a [StringBuffer] will write to that buffer
-  /// information that could help with debugging the problem.
+  /// A callback which will provide information that could help with debugging
+  /// the problem.
   ///
-  /// Information collector callbacks can be expensive, so the generated information
-  /// should be cached, rather than the callback being called multiple times.
+  /// Information collector callbacks can be expensive, so the generated
+  /// information should be cached by the caller, rather than the callback being
+  /// called multiple times.
   ///
-  /// The text written to the information argument may contain newlines but should
-  /// not end with a newline.
+  /// The callback is expected to return an iterable of [DiagnosticsNode] objects,
+  /// typically implemented using `sync*` and `yield`.
+  ///
+  /// {@tool snippet}
+  /// In this example, the information collector returns two pieces of information,
+  /// one broadly-applicable statement regarding how the error happened, and one
+  /// giving a specific piece of information that may be useful in some cases but
+  /// may also be irrelevant most of the time (an argument to the method).
+  ///
+  /// ```dart
+  /// void climbElevator(int pid) {
+  ///   try {
+  ///     // ...
+  ///   } catch (error, stack) {
+  ///     FlutterError.reportError(FlutterErrorDetails(
+  ///       exception: error,
+  ///       stack: stack,
+  ///       informationCollector: () => <DiagnosticsNode>[
+  ///         ErrorDescription('This happened while climbing the space elevator.'),
+  ///         ErrorHint('The process ID is: $pid'),
+  ///       ],
+  ///     ));
+  ///   }
+  /// }
+  /// ```
+  /// {@end-tool}
+  ///
+  /// The following classes may be of particular use:
+  ///
+  ///  * [ErrorDescription], for information that is broadly applicable to the
+  ///    situation being described.
+  ///  * [ErrorHint], for specific information that may not always be applicable
+  ///    but can be helpful in certain situations.
+  ///  * [DiagnosticsStackTrace], for reporting stack traces.
+  ///  * [ErrorSpacer], for adding spaces (a blank line) between other items.
+  ///
+  /// For objects that implement [Diagnosticable] one may consider providing
+  /// additional information by yielding the output of the object's
+  /// [Diagnosticable.toDiagnosticsNode] method.
   final InformationCollector? informationCollector;
 
   /// Whether this error should be ignored by the default error reporting

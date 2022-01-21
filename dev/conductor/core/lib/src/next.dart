@@ -4,8 +4,10 @@
 
 import 'package:args/command_runner.dart';
 import 'package:file/file.dart' show File;
+import 'package:meta/meta.dart' show visibleForTesting;
 
 import 'context.dart';
+import 'git.dart';
 import 'globals.dart';
 import 'proto/conductor_state.pb.dart' as pb;
 import 'proto/conductor_state.pbenum.dart';
@@ -46,7 +48,7 @@ class NextCommand extends Command<void> {
   String get description => 'Proceed to the next release phase.';
 
   @override
-  Future<void> run() async {
+  Future<void> run() {
     final File stateFile = checkouts.fileSystem.file(argResults![kStateOption]);
     if (!stateFile.existsSync()) {
       throw ConductorException(
@@ -55,7 +57,7 @@ class NextCommand extends Command<void> {
     }
     final pb.ConductorState state = state_import.readStateFromFile(stateFile);
 
-    await NextContext(
+    return NextContext(
       autoAccept: argResults![kYesFlag] as bool,
       checkouts: checkouts,
       force: argResults![kForceFlag] as bool,
@@ -99,22 +101,6 @@ class NextContext extends Context {
             upstreamRemote: upstream,
             previousCheckoutLocation: state.engine.checkoutPath,
         );
-        // check if the candidate branch is enabled in .ci.yaml
-        final CiYaml engineCiYaml = await engine.ciYaml;
-        if (!engineCiYaml.enabledBranches.contains(state.engine.candidateBranch)) {
-          engineCiYaml.enableBranch(state.engine.candidateBranch);
-          // commit
-          final String revision = await engine.commit(
-              'add branch ${state.engine.candidateBranch} to enabled_branches in .ci.yaml',
-              addFirst: true,
-          );
-          // append to list of cherrypicks so we know a PR is required
-          state.engine.cherrypicks.add(pb.Cherrypick(
-                  appliedRevision: revision,
-                  state: pb.CherrypickState.COMPLETED,
-          ));
-        }
-
         if (!state_import.requiresEnginePR(state)) {
           stdio.printStatus(
               'This release has no engine cherrypicks. No Engine PR is necessary.\n',
@@ -152,13 +138,7 @@ class NextContext extends Context {
           }
         }
 
-        await engine.pushRef(
-            fromRef: 'HEAD',
-            // Explicitly create new branch
-            toRef: 'refs/heads/${state.engine.workingBranch}',
-            remote: state.engine.mirror.name,
-        );
-
+        await pushWorkingBranch(engine, state.engine);
         break;
       case pb.ReleasePhase.CODESIGN_ENGINE_BINARIES:
         stdio.printStatus(<String>[
@@ -217,21 +197,6 @@ class NextContext extends Context {
           previousCheckoutLocation: state.framework.checkoutPath,
         );
 
-        // Check if the current candidate branch is enabled
-        if (!(await framework.ciYaml).enabledBranches.contains(state.framework.candidateBranch)) {
-          (await framework.ciYaml).enableBranch(state.framework.candidateBranch);
-          // commit
-          final String revision = await framework.commit(
-              'add branch ${state.framework.candidateBranch} to enabled_branches in .ci.yaml',
-              addFirst: true,
-          );
-          // append to list of cherrypicks so we know a PR is required
-          state.framework.cherrypicks.add(pb.Cherrypick(
-                  appliedRevision: revision,
-                  state: pb.CherrypickState.COMPLETED,
-          ));
-        }
-
         stdio.printStatus('Rolling new engine hash $engineRevision to framework checkout...');
         final bool needsCommit = await framework.updateEngineRevision(engineRevision);
         if (needsCommit) {
@@ -285,12 +250,7 @@ class NextContext extends Context {
           }
         }
 
-        await framework.pushRef(
-          fromRef: 'HEAD',
-          // Explicitly create new branch
-          toRef: 'refs/heads/${state.framework.workingBranch}',
-          remote: state.framework.mirror.name,
-        );
+        await pushWorkingBranch(framework, state.framework);
         break;
       case pb.ReleasePhase.PUBLISH_VERSION:
         stdio.printStatus('Please ensure that you have merged your framework PR and that');
@@ -333,29 +293,37 @@ class NextContext extends Context {
             previousCheckoutLocation: state.framework.checkoutPath,
         );
         final String headRevision = await framework.reverseParse('HEAD');
-        if (autoAccept == false) {
-          // dryRun: true means print out git command
-          await framework.pushRef(
+        final List<String> releaseRefs = <String>[state.releaseChannel];
+        if (kSynchronizeDevWithBeta && state.releaseChannel == 'beta') {
+          releaseRefs.add('dev');
+        }
+        for (final String releaseRef in releaseRefs) {
+          if (autoAccept == false) {
+            // dryRun: true means print out git command
+            await framework.pushRef(
               fromRef: headRevision,
-              toRef: state.releaseChannel,
+              toRef: releaseRef,
               remote: state.framework.upstream.url,
               force: force,
               dryRun: true,
-          );
+            );
 
-          final bool response = await prompt('Are you ready to publish this release?');
-          if (!response) {
-            stdio.printError('Aborting command.');
-            updateState(state, stdio.logs);
-            return;
+            final bool response = await prompt(
+              'Are you ready to publish version ${state.releaseVersion} to $releaseRef?',
+            );
+            if (!response) {
+              stdio.printError('Aborting command.');
+              updateState(state, stdio.logs);
+              return;
+            }
           }
-        }
-        await framework.pushRef(
+          await framework.pushRef(
             fromRef: headRevision,
-            toRef: state.releaseChannel,
+            toRef: releaseRef,
             remote: state.framework.upstream.url,
             force: force,
-        );
+          );
+        }
         break;
       case pb.ReleasePhase.VERIFY_RELEASE:
         stdio.printStatus(
@@ -380,5 +348,38 @@ class NextContext extends Context {
     stdio.printStatus(state_import.phaseInstructions(state));
 
     updateState(state, stdio.logs);
+  }
+
+  /// Push the working branch to the user's mirror.
+  ///
+  /// [repository] represents the actual Git repository on disk, and is used to
+  /// call `git push`, while [pbRepository] represents the user-specified
+  /// configuration for the repository, and is used to read the name of the
+  /// working branch and the mirror's remote name.
+  ///
+  /// May throw either a [ConductorException] if the user already has a branch
+  /// of the same name on their mirror, or a [GitException] for any other
+  /// failures from the underlying git process call.
+  @visibleForTesting
+  Future<void> pushWorkingBranch(Repository repository, pb.Repository pbRepository) async {
+    try {
+      await repository.pushRef(
+          fromRef: 'HEAD',
+          // Explicitly create new branch
+          toRef: 'refs/heads/${pbRepository.workingBranch}',
+          remote: pbRepository.mirror.name,
+          force: force,
+      );
+    } on GitException catch (exception) {
+      if (exception.type == GitExceptionType.PushRejected && force == false) {
+        throw ConductorException(
+          'Push failed because the working branch named '
+          '${pbRepository.workingBranch} already exists on your mirror. '
+          'Re-run this command with --force to overwrite the remote branch.\n'
+          '${exception.message}',
+        );
+      }
+      rethrow;
+    }
   }
 }

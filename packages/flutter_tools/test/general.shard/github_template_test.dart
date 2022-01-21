@@ -308,4 +308,7 @@ class FakeError extends Error {
   StackTrace get stackTrace => StackTrace.fromString('''
 #0      _File.open.<anonymous closure> (dart:io/file_impl.dart:366:9)
 #1      _rootRunUnary (dart:async/zone.dart:1141:38)''');
+
+  @override
+  String toString() => 'PII to ignore';
 }

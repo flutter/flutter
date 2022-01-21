@@ -519,6 +519,9 @@ void main() {
   colorScheme.primaryVariant;
   colorScheme.secondaryVariant;
 
+  // Changes made in https://github.com/flutter/flutter/pull/96115
+  Icon icon = Icons.pie_chart_outlined;
+
   // Changes mades in https://github.com/flutter/flutter/pull/94156
   ThemeData themeData = ThemeData();
   themeData = ThemeData(errorColor: Colors.red);
@@ -557,7 +560,7 @@ void main() {
   themeData = themeData.copyWith(backgroundColor: Colors.grey, colorScheme: ColorScheme.light(), primarySwatch: Colors.blue);
   themeData.backgroundColor;
 
-  // Changes mades in https://github.com/flutter/flutter/pull/94156 TODO: REMOVE
+  // Changes mades in https://github.com/flutter/flutter/pull/94156
   ThemeData themeData = ThemeData();
   themeData = ThemeData(backgroundColor: Colors.grey, errorColor: Colors.red);
   themeData = ThemeData.raw(backgroundColor: Colors.grey, errorColor: Colors.red);

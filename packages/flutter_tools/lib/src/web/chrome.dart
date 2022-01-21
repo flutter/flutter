@@ -266,11 +266,13 @@ class ChromiumLauncher {
       // only required for flutter_test --platform=chrome and not flutter run.
       bool hitGlibcBug = false;
       bool shouldRetry = false;
+      final List<String> errors = <String>[];
       await process.stderr
         .transform(utf8.decoder)
         .transform(const LineSplitter())
         .map((String line) {
-          _logger.printTrace('[CHROME]:$line');
+          _logger.printTrace('[CHROME]: $line');
+          errors.add('[CHROME]:$line');
           if (line.contains(_kGlibcError)) {
             hitGlibcBug = true;
             shouldRetry = true;
@@ -287,7 +289,8 @@ class ChromiumLauncher {
             return '';
           }
           if (retry >= kMaxRetries) {
-            _logger.printTrace('Failed to launch browser after $kMaxRetries tries. Command used to launch it: ${args.join(' ')}');
+            errors.forEach(_logger.printError);
+            _logger.printError('Failed to launch browser after $kMaxRetries tries. Command used to launch it: ${args.join(' ')}');
             throw ToolExit(
               'Failed to launch browser. Make sure you are using an up-to-date '
               'Chrome or Edge. Otherwise, consider using -d web-server instead '
@@ -395,7 +398,8 @@ class ChromiumLauncher {
     // connection is valid.
     if (!skipCheck) {
       try {
-        await chrome.chromeConnection.getTabs();
+        await chrome.chromeConnection.getTab(
+          (ChromeTab tab) => true, retryFor: const Duration(seconds: 2));
       } on Exception catch (error, stackTrace) {
         _logger.printError('$error', stackTrace: stackTrace);
         await chrome.close();

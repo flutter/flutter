@@ -204,6 +204,7 @@ Future<T> runInContext<T>(
           platform: globals.platform,
           featureFlags: featureFlags,
         ),
+        fuchsiaSdk: globals.fuchsiaSdk,
         operatingSystemUtils: globals.os,
         terminal: globals.terminal,
         customDevicesConfig: globals.customDevicesConfig,
