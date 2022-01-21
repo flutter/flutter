@@ -507,7 +507,7 @@ void main() {
   });
 
   testWidgets('Custom tooltip margin', (WidgetTester tester) async {
-    const double _customMarginValue = 10.0;
+    const double customMarginValue = 10.0;
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(
       Directionality(
@@ -520,7 +520,7 @@ void main() {
                   key: key,
                   message: tooltipText,
                   padding: EdgeInsets.zero,
-                  margin: const EdgeInsets.all(_customMarginValue),
+                  margin: const EdgeInsets.all(customMarginValue),
                   child: const SizedBox(
                     width: 0.0,
                     height: 0.0,
@@ -539,29 +539,29 @@ void main() {
       _findTooltipContainer(tooltipText),
     );
     final Offset topLeftTooltipContentInGlobal = tester.getTopLeft(find.text(tooltipText));
-    expect(topLeftTooltipContentInGlobal.dx, topLeftTipInGlobal.dx + _customMarginValue);
-    expect(topLeftTooltipContentInGlobal.dy, topLeftTipInGlobal.dy + _customMarginValue);
+    expect(topLeftTooltipContentInGlobal.dx, topLeftTipInGlobal.dx + customMarginValue);
+    expect(topLeftTooltipContentInGlobal.dy, topLeftTipInGlobal.dy + customMarginValue);
 
     final Offset topRightTipInGlobal = tester.getTopRight(
       _findTooltipContainer(tooltipText),
     );
     final Offset topRightTooltipContentInGlobal = tester.getTopRight(find.text(tooltipText));
-    expect(topRightTooltipContentInGlobal.dx, topRightTipInGlobal.dx - _customMarginValue);
-    expect(topRightTooltipContentInGlobal.dy, topRightTipInGlobal.dy + _customMarginValue);
+    expect(topRightTooltipContentInGlobal.dx, topRightTipInGlobal.dx - customMarginValue);
+    expect(topRightTooltipContentInGlobal.dy, topRightTipInGlobal.dy + customMarginValue);
 
     final Offset bottomLeftTipInGlobal = tester.getBottomLeft(
       _findTooltipContainer(tooltipText),
     );
     final Offset bottomLeftTooltipContentInGlobal = tester.getBottomLeft(find.text(tooltipText));
-    expect(bottomLeftTooltipContentInGlobal.dx, bottomLeftTipInGlobal.dx + _customMarginValue);
-    expect(bottomLeftTooltipContentInGlobal.dy, bottomLeftTipInGlobal.dy - _customMarginValue);
+    expect(bottomLeftTooltipContentInGlobal.dx, bottomLeftTipInGlobal.dx + customMarginValue);
+    expect(bottomLeftTooltipContentInGlobal.dy, bottomLeftTipInGlobal.dy - customMarginValue);
 
     final Offset bottomRightTipInGlobal = tester.getBottomRight(
       _findTooltipContainer(tooltipText),
     );
     final Offset bottomRightTooltipContentInGlobal = tester.getBottomRight(find.text(tooltipText));
-    expect(bottomRightTooltipContentInGlobal.dx, bottomRightTipInGlobal.dx - _customMarginValue);
-    expect(bottomRightTooltipContentInGlobal.dy, bottomRightTipInGlobal.dy - _customMarginValue);
+    expect(bottomRightTooltipContentInGlobal.dx, bottomRightTipInGlobal.dx - customMarginValue);
+    expect(bottomRightTooltipContentInGlobal.dy, bottomRightTipInGlobal.dy - customMarginValue);
   });
 
   testWidgets('Default tooltip message textStyle - light', (WidgetTester tester) async {

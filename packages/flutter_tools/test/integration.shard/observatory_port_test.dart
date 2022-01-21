@@ -44,11 +44,11 @@ Future<void> waitForObservatoryMessage(Process process, int port) async {
 
 void main() {
   Directory tempDir;
-  final BasicProject _project = BasicProject();
+  final BasicProject project = BasicProject();
 
   setUp(() async {
     tempDir = createResolvedTempDirectorySync('run_test.');
-    await _project.setUpIn(tempDir);
+    await project.setUpIn(tempDir);
   });
 
   tearDown(() async {

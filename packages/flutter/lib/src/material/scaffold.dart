@@ -2253,22 +2253,22 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
       // will not be added to the Scaffold's appbar and the bottom sheet will not
       // support drag or swipe to dismiss.
       final AnimationController animationController = BottomSheet.createAnimationController(this)..value = 1.0;
-      LocalHistoryEntry? _persistentSheetHistoryEntry;
+      LocalHistoryEntry? persistentSheetHistoryEntry;
       bool _persistentBottomSheetExtentChanged(DraggableScrollableNotification notification) {
         if (notification.extent > notification.initialExtent) {
-          if (_persistentSheetHistoryEntry == null) {
-            _persistentSheetHistoryEntry = LocalHistoryEntry(onRemove: () {
+          if (persistentSheetHistoryEntry == null) {
+            persistentSheetHistoryEntry = LocalHistoryEntry(onRemove: () {
               if (notification.extent > notification.initialExtent) {
                 DraggableScrollableActuator.reset(notification.context);
               }
               showBodyScrim(false, 0.0);
               _floatingActionButtonVisibilityValue = 1.0;
-              _persistentSheetHistoryEntry = null;
+              persistentSheetHistoryEntry = null;
             });
-            ModalRoute.of(context)!.addLocalHistoryEntry(_persistentSheetHistoryEntry!);
+            ModalRoute.of(context)!.addLocalHistoryEntry(persistentSheetHistoryEntry!);
           }
-        } else if (_persistentSheetHistoryEntry != null) {
-          ModalRoute.of(context)!.removeLocalHistoryEntry(_persistentSheetHistoryEntry!);
+        } else if (persistentSheetHistoryEntry != null) {
+          ModalRoute.of(context)!.removeLocalHistoryEntry(persistentSheetHistoryEntry!);
         }
         return false;
       }
@@ -2557,9 +2557,9 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   // top. We implement this by looking up the  primary scroll controller and
   // scrolling it to the top when tapped.
   void _handleStatusBarTap() {
-    final ScrollController? _primaryScrollController = PrimaryScrollController.of(context);
-    if (_primaryScrollController != null && _primaryScrollController.hasClients) {
-      _primaryScrollController.animateTo(
+    final ScrollController? primaryScrollController = PrimaryScrollController.of(context);
+    if (primaryScrollController != null && primaryScrollController.hasClients) {
+      primaryScrollController.animateTo(
         0.0,
         duration: const Duration(milliseconds: 300),
         curve: Curves.linear, // TODO(ianh): Use a more appropriate curve.
@@ -2635,14 +2635,14 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   void didChangeDependencies() {
     // Using maybeOf is valid here since both the Scaffold and ScaffoldMessenger
     // are currently available for managing SnackBars.
-    final ScaffoldMessengerState? _currentScaffoldMessenger = ScaffoldMessenger.maybeOf(context);
+    final ScaffoldMessengerState? currentScaffoldMessenger = ScaffoldMessenger.maybeOf(context);
     // If our ScaffoldMessenger has changed, unregister with the old one first.
     if (_scaffoldMessenger != null &&
-      (_currentScaffoldMessenger == null || _scaffoldMessenger != _currentScaffoldMessenger)) {
+      (currentScaffoldMessenger == null || _scaffoldMessenger != currentScaffoldMessenger)) {
       _scaffoldMessenger?._unregister(this);
     }
     // Register with the current ScaffoldMessenger, if there is one.
-    _scaffoldMessenger = _currentScaffoldMessenger;
+    _scaffoldMessenger = currentScaffoldMessenger;
     _scaffoldMessenger?._register(this);
 
     // TODO(Piinks): Remove old SnackBar API after migrating ScaffoldMessenger
@@ -3064,7 +3064,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     );
 
     // extendBody locked when keyboard is open
-    final bool _extendBody = minInsets.bottom <= 0 && widget.extendBody;
+    final bool extendBody = minInsets.bottom <= 0 && widget.extendBody;
 
     return _ScaffoldScope(
       hasDrawer: hasDrawer,
@@ -3075,7 +3075,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
           child: AnimatedBuilder(animation: _floatingActionButtonMoveController, builder: (BuildContext context, Widget? child) {
             return CustomMultiChildLayout(
               delegate: _ScaffoldLayout(
-                extendBody: _extendBody,
+                extendBody: extendBody,
                 extendBodyBehindAppBar: widget.extendBodyBehindAppBar,
                 minInsets: minInsets,
                 minViewPadding: minViewPadding,
