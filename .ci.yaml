@@ -3893,7 +3893,7 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Windows tool_integration_tests_1_5
+  - name: Windows tool_integration_tests_1_6
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -3907,7 +3907,7 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: tool_integration_tests
-      subshard: "1_5"
+      subshard: "1_6"
       tags: >
         ["framework","hostonly","shard"]
     scheduler: luci
@@ -3917,7 +3917,7 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Windows tool_integration_tests_2_5
+  - name: Windows tool_integration_tests_2_6
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -3931,7 +3931,7 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: tool_integration_tests
-      subshard: "2_5"
+      subshard: "2_6"
       tags: >
         ["framework","hostonly","shard"]
     scheduler: luci
@@ -3941,7 +3941,7 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Windows tool_integration_tests_3_5
+  - name: Windows tool_integration_tests_3_6
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -3955,7 +3955,7 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: tool_integration_tests
-      subshard: "3_5"
+      subshard: "3_6"
       tags: >
         ["framework","hostonly","shard"]
     scheduler: luci
@@ -3965,7 +3965,7 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Windows tool_integration_tests_4_5
+  - name: Windows tool_integration_tests_4_6
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -3979,7 +3979,7 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: tool_integration_tests
-      subshard: "4_5"
+      subshard: "4_6"
       tags: >
         ["framework","hostonly","shard"]
     scheduler: luci
@@ -3989,7 +3989,7 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Windows tool_integration_tests_5_5
+  - name: Windows tool_integration_tests_5_6
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -4003,7 +4003,31 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: tool_integration_tests
-      subshard: "5_5"
+      subshard: "5_6"
+      tags: >
+        ["framework","hostonly","shard"]
+    scheduler: luci
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+
+  - name: Windows tool_integration_tests_6_6
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "open_jdk"},
+          {"dependency": "goldctl"},
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      shard: tool_integration_tests
+      subshard: "6_6"
       tags: >
         ["framework","hostonly","shard"]
     scheduler: luci
