@@ -100,11 +100,27 @@ void main() {
     );
   });
 
-  // testWithoutContext a specific file outside the current directory
-  testWithoutContext('passing one file', () async {
+  testWithoutContext('passing one file works', () async {
     await runCommand(
       arguments: <String>['analyze', '--no-pub', libMain.path],
       statusTextContains: <String>['No issues found!']
+    );
+  });
+
+  testWithoutContext('passing more than one file with errors', () async {
+    final File secondFile = fileSystem.file(fileSystem.path.join(projectPath, 'lib', 'second.dart'))
+      ..createSync(recursive: true)
+      ..writeAsStringSync(r'''import 'package:flutter/material.dart''');
+    await runCommand(
+        arguments: <String>['analyze', '--no-pub', libMain.path, secondFile.path],
+        statusTextContains: <String>[
+          'Analyzing 2 items',
+          'info $analyzerSeparator Unused import',
+          "error $analyzerSeparator Expected to find ';'",
+          'error $analyzerSeparator Unterminated string literal'
+        ],
+        exitMessageContains: '3 issues found',
+        exitCode: 1
     );
   });
 
