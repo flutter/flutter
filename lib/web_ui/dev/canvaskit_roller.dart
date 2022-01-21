@@ -56,6 +56,7 @@ data:
     'create',
     '--tag=version:$canvaskitVersion',
     '--pkg-def=cipd.yaml',
+    '--preserve-writable',
     '--json-output=result.json',
   ], workingDirectory: canvaskitDirectory.path);
 
