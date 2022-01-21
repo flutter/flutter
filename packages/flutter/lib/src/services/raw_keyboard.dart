@@ -650,7 +650,11 @@ class RawKeyboard {
     _cachedKeyEventHandler = handler;
     _cachedKeyMessageHandler = handler == null ?
       null :
-      (KeyMessage message) => handler(message.rawEvent);
+      (KeyMessage message) {
+        if (message.rawEvent != null)
+          return handler(message.rawEvent!);
+        return false;
+      };
     ServicesBinding.instance!.keyEventManager.keyMessageHandler = _cachedKeyMessageHandler;
   }
 
