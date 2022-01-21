@@ -38,7 +38,7 @@ transforms:
 
   # Changes made in https://github.com/flutter/flutter/pull/95870/
   - title: "Remove 'toggleableActiveColor'"
-    date: 2022-01-03
+    date: 2022-01-21
     element:
       uris: [ 'material.dart' ]
       constructor: ''
@@ -190,39 +190,6 @@ transforms:
     changes:
       - kind: 'removeParameter'
         name: 'primaryColorBrightness'
-
-  # Changes made in TBD
-  - title: "Remove 'toggleableActiveColor'"
-    date: 2021-11-11
-    element:
-      uris: [ 'material.dart' ]
-      method: 'copyWith'
-      inClass: 'ThemeData'
-    changes:
-      - kind: 'removeParameter'
-        name: 'toggleableActiveColor'
-
-  # Changes made in TBD
-  - title: "Remove 'toggleableActiveColor'"
-    date: 2021-11-11
-    element:
-      uris: [ 'material.dart' ]
-      constructor: 'raw'
-      inClass: 'ThemeData'
-    changes:
-      - kind: 'removeParameter'
-        name: 'toggleableActiveColor'
-
-  # Changes made in TBD
-  - title: "Remove 'toggleableActiveColor'"
-    date: 2021-11-11
-    element:
-      uris: [ 'material.dart' ]
-      constructor: ''
-      inClass: 'ThemeData'
-    changes:
-      - kind: 'removeParameter'
-        name: 'toggleableActiveColor'
 
   # Changes made in https://github.com/flutter/flutter/pull/86198
   - title: "Migrate to 'backgroundColor'"
