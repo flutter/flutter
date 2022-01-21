@@ -39,6 +39,17 @@ FLUTTER_ASSERT_ARC
       [FlutterDartProject domainNetworkPolicy:appTransportSecurity]);
 }
 
+- (void)testLeakDartVMSettingsAreCorrectlyParsed {
+  // The FLTLeakDartVM's value is defined in Info.plist
+  NSBundle* mainBundle = [NSBundle mainBundle];
+  NSNumber* leakDartVM = [mainBundle objectForInfoDictionaryKey:@"FLTLeakDartVM"];
+  XCTAssertEqual(leakDartVM.boolValue, NO);
+
+  auto settings = FLTDefaultSettingsForBundle();
+  // Check settings.leak_vm value is same as the value defined in Info.plist.
+  XCTAssertEqual(settings.leak_vm, NO);
+}
+
 - (void)testEmptySettingsAreCorrect {
   XCTAssertFalse([FlutterDartProject allowsArbitraryLoads:[[NSDictionary alloc] init]]);
   XCTAssertEqualObjects(@"", [FlutterDartProject domainNetworkPolicy:[[NSDictionary alloc] init]]);

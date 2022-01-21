@@ -207,6 +207,10 @@ struct Settings {
   // shells in the platform (via their embedding APIs) should cooperate to make
   // sure this flag is never set if they want the VM to shutdown and free all
   // associated resources.
+  // It can be customized by application, more detail:
+  // https://github.com/flutter/flutter/issues/95903
+  // TODO(eggfly): Should it be set to false by default?
+  // https://github.com/flutter/flutter/issues/96843
   bool leak_vm = true;
 
   // Engine settings
