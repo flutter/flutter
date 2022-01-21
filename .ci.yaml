@@ -3498,6 +3498,7 @@ targets:
 
   - name: Mac_ios native_ui_tests_ios
     recipe: devicelab/devicelab_drone
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/95193
     presubmit: false
     timeout: 60
     properties:
