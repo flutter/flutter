@@ -35,6 +35,7 @@
 #include "third_party/tonic/dart_microtask_queue.h"
 #include "third_party/tonic/dart_state.h"
 #include "third_party/tonic/logging/dart_error.h"
+#include "third_party/tonic/logging/dart_invoke.h"
 
 #include "builtin_libraries.h"
 #include "logging.h"
@@ -402,13 +403,6 @@ bool DartComponentControllerV2::RunDartMain() {
   Dart_EnterScope();
 
   // TODO(fxb/88383): Support argument passing.
-  // Note: Even though we do not support argument passing via the cml files
-  // at this time, we still need to create an argument list and pass it off
-  // to the invocation of main below. If we do not do this dart will look for
-  // a function with the signature `void main()` but existing dart components
-  // that run in the dart runner are written with main functions that have the
-  // signature `void main(List<String> args)`. In order to ensure that these
-  // components do not break we need to have this stub argument list.
   Dart_Handle corelib = Dart_LookupLibrary(ToDart("dart:core"));
   Dart_Handle string_type =
       Dart_GetNonNullableType(corelib, ToDart("String"), 0, NULL);
@@ -422,14 +416,27 @@ bool DartComponentControllerV2::RunDartMain() {
     return false;
   }
 
-  Dart_Handle argv[] = {
-      dart_arguments,
-  };
+  Dart_Handle user_main = Dart_GetField(Dart_RootLibrary(), ToDart("main"));
 
-  Dart_Handle main_result =
-      Dart_Invoke(Dart_RootLibrary() /* target */, ToDart("main") /* name */,
-                  dart_utils::ArraySize(argv) /* number_of_arguments */,
-                  argv /* arguments */);
+  if (Dart_IsError(user_main)) {
+    FX_LOGF(ERROR, LOG_TAG,
+            "Failed to locate user_main in the root library: %s",
+            Dart_GetError(user_main));
+    Dart_ExitScope();
+    return false;
+  }
+
+  Dart_Handle fuchsia_lib = Dart_LookupLibrary(tonic::ToDart("dart:fuchsia"));
+
+  if (Dart_IsError(fuchsia_lib)) {
+    FX_LOGF(ERROR, LOG_TAG, "Failed to locate dart:fuchsia: %s",
+            Dart_GetError(fuchsia_lib));
+    Dart_ExitScope();
+    return false;
+  }
+
+  Dart_Handle main_result = tonic::DartInvokeField(
+      fuchsia_lib, "_runUserMainForDartRunner", {user_main, dart_arguments});
 
   if (Dart_IsError(main_result)) {
     auto dart_state = tonic::DartState::Current();
