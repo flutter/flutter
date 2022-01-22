@@ -17,7 +17,7 @@
 @end
 
 @implementation TestFlutterPlatformViewFactory
-- (NSView*)createWithviewIdentifier:(int64_t)viewId arguments:(nullable id)args {
+- (NSView*)createWithViewIdentifier:(int64_t)viewId arguments:(nullable id)args {
   return [[TestFlutterPlatformView alloc] initWithFrame:CGRectZero];
 }
 

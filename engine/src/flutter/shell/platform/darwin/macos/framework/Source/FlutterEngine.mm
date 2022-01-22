@@ -18,7 +18,7 @@
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterPlatformViewController.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterRenderingBackend.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterViewController_Internal.h"
-#import "flutter/shell/platform/embedder/embedder.h"
+#include "flutter/shell/platform/embedder/embedder.h"
 
 /**
  * Constructs and returns a FlutterLocale struct corresponding to |locale|, which must outlive
@@ -99,7 +99,7 @@ static FlutterLocale FlutterLocaleFromNSLocale(NSLocale* locale) {
 /**
  * Creates a platform view channel and sets up the method handler.
  */
-- (void)setupPlatformViewChannel;
+- (void)setUpPlatformViewChannel;
 
 @end
 
@@ -239,7 +239,7 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
                            object:nil];
 
   _platformViewController = [[FlutterPlatformViewController alloc] init];
-  [self setupPlatformViewChannel];
+  [self setUpPlatformViewChannel];
 
   return self;
 }
@@ -656,7 +656,7 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
   _engine = nullptr;
 }
 
-- (void)setupPlatformViewChannel {
+- (void)setUpPlatformViewChannel {
   _platformViewsChannel =
       [FlutterMethodChannel methodChannelWithName:@"flutter/platform_views"
                                   binaryMessenger:self.binaryMessenger

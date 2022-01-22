@@ -44,7 +44,7 @@
     return;
   }
 
-  NSView* platform_view = [factory createWithviewIdentifier:viewId arguments:nil];
+  NSView* platform_view = [factory createWithViewIdentifier:viewId arguments:nil];
   _platformViews[viewId] = platform_view;
   result(nil);
 }

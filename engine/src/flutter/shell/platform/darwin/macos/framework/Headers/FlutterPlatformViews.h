@@ -26,7 +26,7 @@
  * the Dart code, this will be null. Otherwise this will be the value sent from the Dart code as
  * decoded by `createArgsCodec`.
  */
-- (nonnull NSView*)createWithviewIdentifier:(int64_t)viewId arguments:(nullable id)args;
+- (nonnull NSView*)createWithViewIdentifier:(int64_t)viewId arguments:(nullable id)args;
 
 /**
  * Returns the `FlutterMessageCodec` for decoding the args parameter of `createWithFrame`.
