@@ -338,8 +338,7 @@ void main() {
         ),
       );
     }
-    const RoundedRectangleBorder border1 =
-    RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(5)));
+    const RoundedRectangleBorder border1 = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(5)));
     const BorderSide side1 = BorderSide(
       color: Color(0xfff44336),
     );
@@ -357,8 +356,7 @@ void main() {
           inner: RRect.fromLTRBR(12.0, 12.0, 28.0, 28.0, const Radius.circular(4)),
         ),
     );
-    const RoundedRectangleBorder border2 =
-    RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(5)));
+    const RoundedRectangleBorder border2 = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(5)));
     const BorderSide side2 = BorderSide(
       width: 4.0,
       color: Color(0xff424242),
