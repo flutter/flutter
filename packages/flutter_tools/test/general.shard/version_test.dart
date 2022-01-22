@@ -134,7 +134,7 @@ void main() {
         expect(flutterVersion.getVersionString(redactUnknownBranches: true), '$channel/1234abcd');
         expect(flutterVersion.getBranchName(redactUnknownBranches: true), channel);
 
-        _expectVersionMessage('', testLogger);
+        expect(testLogger.statusText, isEmpty);
         expect(processManager.hasRemainingExpectations, isFalse);
       }, overrides: <Type, Generator>{
         FlutterVersion: () => FlutterVersion(clock: _testClock),
@@ -160,7 +160,7 @@ void main() {
           latestFlutterCommitDate: getChannelOutOfDateVersion(),
         ).run();
 
-        _expectVersionMessage('', logger);
+        expect(logger.statusText, isEmpty);
       });
 
       testWithoutContext('does not ping server when version stamp is up-to-date', () async {
@@ -181,7 +181,7 @@ void main() {
           latestFlutterCommitDate: getChannelUpToDateVersion(),
         ).run();
 
-        _expectVersionMessage(newVersionAvailableMessage(), logger);
+        expect(logger.statusText, contains('A new version of Flutter is available!'));
         expect(cache.setVersionStamp, true);
       });
 
@@ -204,7 +204,7 @@ void main() {
           latestFlutterCommitDate: getChannelUpToDateVersion(),
         ).run();
 
-        _expectVersionMessage('', logger);
+        expect(logger.statusText, isEmpty);
       });
 
       testWithoutContext('pings server when version stamp is missing', () async {
@@ -221,7 +221,7 @@ void main() {
           latestFlutterCommitDate: getChannelUpToDateVersion(),
         ).run();
 
-        _expectVersionMessage(newVersionAvailableMessage(), logger);
+        expect(logger.statusText, contains('A new version of Flutter is available!'));
         expect(cache.setVersionStamp, true);
       });
 
@@ -243,7 +243,7 @@ void main() {
           latestFlutterCommitDate: getChannelUpToDateVersion(),
         ).run();
 
-        _expectVersionMessage(newVersionAvailableMessage(), logger);
+        expect(logger.statusText, contains('A new version of Flutter is available!'));
       });
 
       testWithoutContext('does not print warning when unable to connect to server if not out of date', () async {
@@ -260,7 +260,7 @@ void main() {
           // latestFlutterCommitDate defaults to null because we failed to get remote version
         ).run();
 
-        _expectVersionMessage('', logger);
+        expect(logger.statusText, isEmpty);
       });
 
       testWithoutContext('prints warning when unable to connect to server if really out of date', () async {
@@ -281,7 +281,8 @@ void main() {
           // latestFlutterCommitDate defaults to null because we failed to get remote version
         ).run();
 
-        _expectVersionMessage(versionOutOfDateMessage(_testClock.now().difference(getChannelOutOfDateVersion())), logger);
+        final Duration frameworkAge = _testClock.now().difference(getChannelOutOfDateVersion());
+        expect(logger.statusText, contains('WARNING: your installation of Flutter is ${frameworkAge.inDays} days old.'));
       });
 
       group('$VersionCheckStamp for $channel', () {
@@ -591,11 +592,6 @@ void main() {
       'FLUTTER_GIT_URL': 'https://githubmirror.com/flutter.git',
     }),
   });
-}
-
-void _expectVersionMessage(String message, BufferLogger logger) {
-  expect(logger.statusText.trim(), message.trim());
-  logger.clear();
 }
 
 class FakeCache extends Fake implements Cache {

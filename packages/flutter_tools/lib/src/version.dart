@@ -879,7 +879,7 @@ class VersionFreshnessValidator {
     final String updateMessage;
     switch (remoteVersionStatus) {
       case VersionCheckResult.newVersionAvailable:
-        updateMessage = newVersionAvailableMessage();
+        updateMessage = _newVersionAvailableMessage;
         break;
       case VersionCheckResult.versionIsCurrent:
       case VersionCheckResult.unknown:
@@ -887,7 +887,7 @@ class VersionFreshnessValidator {
         break;
     }
 
-    logger.printStatus(updateMessage, emphasis: true);
+    logger.printBox(updateMessage);
     await Future.wait<void>(<Future<void>>[
       stamp.store(
         newTimeWarningWasPrinted: now,
@@ -900,26 +900,13 @@ class VersionFreshnessValidator {
 
 @visibleForTesting
 String versionOutOfDateMessage(Duration frameworkAge) {
-  String warning = 'WARNING: your installation of Flutter is ${frameworkAge.inDays} days old.';
-  // Append enough spaces to match the message box width.
-  warning += ' ' * (74 - warning.length);
-
   return '''
-╔════════════════════════════════════════════════════════════════════════════╗
-║ $warning ║
-║                                                                            ║
-║ To update to the latest version, run "flutter upgrade".                    ║
-╚════════════════════════════════════════════════════════════════════════════╝
-''';
+WARNING: your installation of Flutter is ${frameworkAge.inDays} days old.
+
+To update to the latest version, run "flutter upgrade".''';
 }
 
-@visibleForTesting
-String newVersionAvailableMessage() {
-  return '''
-╔════════════════════════════════════════════════════════════════════════════╗
-║ A new version of Flutter is available!                                     ║
-║                                                                            ║
-║ To update to the latest version, run "flutter upgrade".                    ║
-╚════════════════════════════════════════════════════════════════════════════╝
-''';
-}
+const String _newVersionAvailableMessage = '''
+A new version of Flutter is available!
+
+To update to the latest version, run "flutter upgrade".''';
