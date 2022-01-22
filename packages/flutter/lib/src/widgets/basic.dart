@@ -6185,7 +6185,7 @@ class Listener extends SingleChildRenderObjectWidget {
 ///
 ///  * [Listener], a similar widget that tracks pointer events when the pointer
 ///    has buttons pressed.
-class MouseRegion extends StatefulWidget {
+class MouseRegion extends SingleChildRenderObjectWidget {
   /// Creates a widget that forwards mouse events to callbacks.
   ///
   /// By default, all callbacks are empty, [cursor] is [MouseCursor.defer], and
@@ -6197,10 +6197,10 @@ class MouseRegion extends StatefulWidget {
     this.onHover,
     this.cursor = MouseCursor.defer,
     this.opaque = true,
-    this.child,
+    Widget? child,
   }) : assert(cursor != null),
        assert(opaque != null),
-       super(key: key);
+       super(key: key, child: child);
 
   /// Triggered when a mouse pointer has entered this widget.
   ///
@@ -6347,13 +6347,26 @@ class MouseRegion extends StatefulWidget {
   /// This defaults to true.
   final bool opaque;
 
-  /// The widget below this widget in the tree.
-  ///
-  /// {@macro flutter.widgets.ProxyWidget.child}
-  final Widget? child;
+  @override
+  RenderMouseRegion createRenderObject(BuildContext context) {
+    return RenderMouseRegion(
+      onEnter: onEnter,
+      onHover: onHover,
+      onExit: onExit,
+      cursor: cursor,
+      opaque: opaque,
+    );
+  }
 
   @override
-  State<MouseRegion> createState() => _MouseRegionState();
+  void updateRenderObject(BuildContext context, RenderMouseRegion renderObject) {
+    renderObject
+      ..onEnter = onEnter
+      ..onHover = onHover
+      ..onExit = onExit
+      ..cursor = cursor
+      ..opaque = opaque;
+  }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -6368,51 +6381,6 @@ class MouseRegion extends StatefulWidget {
     properties.add(IterableProperty<String>('listeners', listeners, ifEmpty: '<none>'));
     properties.add(DiagnosticsProperty<MouseCursor>('cursor', cursor, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('opaque', opaque, defaultValue: true));
-  }
-}
-
-class _MouseRegionState extends State<MouseRegion> {
-  void handleExit(PointerExitEvent event) {
-    if (widget.onExit != null && mounted)
-      widget.onExit!(event);
-  }
-
-  PointerExitEventListener? getHandleExit() {
-    return widget.onExit == null ? null : handleExit;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return _RawMouseRegion(this);
-  }
-}
-
-class _RawMouseRegion extends SingleChildRenderObjectWidget {
-  _RawMouseRegion(this.owner) : super(child: owner.widget.child);
-
-  final _MouseRegionState owner;
-
-  @override
-  RenderMouseRegion createRenderObject(BuildContext context) {
-    final MouseRegion widget = owner.widget;
-    return RenderMouseRegion(
-      onEnter: widget.onEnter,
-      onHover: widget.onHover,
-      onExit: owner.getHandleExit(),
-      cursor: widget.cursor,
-      opaque: widget.opaque,
-    );
-  }
-
-  @override
-  void updateRenderObject(BuildContext context, RenderMouseRegion renderObject) {
-    final MouseRegion widget = owner.widget;
-    renderObject
-      ..onEnter = widget.onEnter
-      ..onHover = widget.onHover
-      ..onExit = owner.getHandleExit()
-      ..cursor = widget.cursor
-      ..opaque = widget.opaque;
   }
 }
 

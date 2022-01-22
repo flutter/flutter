@@ -232,8 +232,8 @@ class ChangeNotifier implements Listenable {
   void removeListener(VoidCallback listener) {
     assert(_debugAssertNotDisposed());
     for (int i = 0; i < _count; i++) {
-      final VoidCallback? _listener = _listeners[i];
-      if (_listener == listener) {
+      final VoidCallback? listenerAtIndex = _listeners[i];
+      if (listenerAtIndex == listener) {
         if (_notificationCallStackDepth > 0) {
           // We don't resize the list during notifyListeners iterations
           // but we set to null, the listeners we want to remove. We will

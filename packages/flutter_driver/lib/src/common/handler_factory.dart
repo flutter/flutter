@@ -361,23 +361,23 @@ mixin CommandHandlerFactory {
     )));
   }
 
-  Future<Result> _scroll(Command command, WidgetController _prober, CreateFinderFactory finderFactory) async {
+  Future<Result> _scroll(Command command, WidgetController prober, CreateFinderFactory finderFactory) async {
     final Scroll scrollCommand = command as Scroll;
     final Finder target = await waitForElement(finderFactory.createFinder(scrollCommand.finder));
     final int totalMoves = scrollCommand.duration.inMicroseconds * scrollCommand.frequency ~/ Duration.microsecondsPerSecond;
     final Offset delta = Offset(scrollCommand.dx, scrollCommand.dy) / totalMoves.toDouble();
     final Duration pause = scrollCommand.duration ~/ totalMoves;
-    final Offset startLocation = _prober.getCenter(target);
+    final Offset startLocation = prober.getCenter(target);
     Offset currentLocation = startLocation;
     final TestPointer pointer = TestPointer();
-    _prober.binding.handlePointerEvent(pointer.down(startLocation));
+    prober.binding.handlePointerEvent(pointer.down(startLocation));
     await Future<void>.value(); // so that down and move don't happen in the same microtask
     for (int moves = 0; moves < totalMoves; moves += 1) {
       currentLocation = currentLocation + delta;
-      _prober.binding.handlePointerEvent(pointer.move(currentLocation));
+      prober.binding.handlePointerEvent(pointer.move(currentLocation));
       await Future<void>.delayed(pause);
     }
-    _prober.binding.handlePointerEvent(pointer.up());
+    prober.binding.handlePointerEvent(pointer.up());
 
     return Result.empty;
   }
