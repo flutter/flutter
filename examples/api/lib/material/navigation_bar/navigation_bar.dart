@@ -1,3 +1,9 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+// Flutter code sample for NavigationBar
+
 import 'package:flutter/material.dart';
 
 void main() {
@@ -34,14 +40,17 @@ class _NavigationExampleState extends State<NavigationExample> {
     Widget _buildBody() {
       return [
         Container(
-          color: Colors.red,
-          alignment: Alignment.center, child: Text('Page 1')),
+            color: Colors.red,
+            alignment: Alignment.center,
+            child: Text('Page 1')),
         Container(
-          color: Colors.green,
-          alignment: Alignment.center, child: Text('Page 2')),
+            color: Colors.green,
+            alignment: Alignment.center,
+            child: Text('Page 2')),
         Container(
-          color: Colors.blue,
-          alignment: Alignment.center, child: Text('Page 3')),
+            color: Colors.blue,
+            alignment: Alignment.center,
+            child: Text('Page 3')),
       ][_currentPageIndex];
     }
 
