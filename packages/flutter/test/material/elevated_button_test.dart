@@ -1418,6 +1418,85 @@ void main() {
     expect(tester.getSize(find.widgetWithText(ElevatedButton, '200x200')), const Size(200, 200));
     expect(tester.getSize(find.widgetWithText(ElevatedButton, '200,200')), const Size(200, 200));
   });
+
+  testWidgets('ElevatedButton changes mouse cursor when hovered', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.forbidden,
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              enabledMouseCursor: SystemMouseCursors.text,
+              disabledMouseCursor: SystemMouseCursors.grab,
+            ),
+            onPressed: () {},
+            child: const Text('button'),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: Offset.zero);
+    addTearDown(gesture.removePointer);
+
+    await tester.pump();
+
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+
+    // Test cursor when disabled
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.forbidden,
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              enabledMouseCursor: SystemMouseCursors.text,
+              disabledMouseCursor: SystemMouseCursors.grab,
+            ),
+            onPressed: null,
+            child: const Text('button'),
+          ),
+        ),
+      ),
+    );
+
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.grab);
+
+    // Test default cursor
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.forbidden,
+          child: ElevatedButton(
+            onPressed: () {},
+            child: const Text('button'),
+          ),
+        ),
+      ),
+    );
+
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+
+    // Test default cursor when disabled
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.forbidden,
+          child: ElevatedButton(
+            onPressed: null,
+            child: Text('button'),
+          ),
+        ),
+      ),
+    );
+
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+  });
 }
 
 TextStyle _iconStyle(WidgetTester tester, IconData icon) {

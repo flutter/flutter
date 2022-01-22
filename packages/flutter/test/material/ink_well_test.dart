@@ -292,6 +292,40 @@ void main() {
     );
   });
 
+  testWidgets('ink well changes color on pressed with overlayColor', (WidgetTester tester) async {
+    const Color pressedColor = Color(0xffdd00ff);
+
+    await tester.pumpWidget(Material(
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: Container(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: 100,
+            height: 100,
+            child: InkWell(
+              splashFactory: NoSplash.splashFactory,
+              overlayColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+                if (states.contains(MaterialState.pressed)) {
+                  return pressedColor;
+                }
+                return const Color(0xffbadbad); // Shouldn't happen.
+              }),
+              onTap: () { },
+            ),
+          ),
+        ),
+      ),
+    ));
+    await tester.pumpAndSettle();
+    final TestGesture gesture = await tester.startGesture(tester.getRect(find.byType(InkWell)).center);
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    expect(inkFeatures, paints..rect(rect: const Rect.fromLTRB(0, 0, 100, 100), color: pressedColor.withAlpha(0)));
+    await tester.pumpAndSettle(); // Let the press highlight animation finish.
+    expect(inkFeatures, paints..rect(rect: const Rect.fromLTRB(0, 0, 100, 100), color: pressedColor));
+    await gesture.up();
+  });
+
   testWidgets('ink response splashColor matches splashColor parameter', (WidgetTester tester) async {
     FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTouch;
     final FocusNode focusNode = FocusNode(debugLabel: 'Ink Focus');

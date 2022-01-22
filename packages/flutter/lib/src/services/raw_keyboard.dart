@@ -300,6 +300,7 @@ abstract class RawKeyEvent with Diagnosticable {
         key: key ?? '',
         location: message['location'] as int? ?? 0,
         metaState: message['metaState'] as int? ?? 0,
+        keyCode: message['keyCode'] as int? ?? 0,
       );
     }
 
@@ -649,7 +650,11 @@ class RawKeyboard {
     _cachedKeyEventHandler = handler;
     _cachedKeyMessageHandler = handler == null ?
       null :
-      (KeyMessage message) => handler(message.rawEvent);
+      (KeyMessage message) {
+        if (message.rawEvent != null)
+          return handler(message.rawEvent!);
+        return false;
+      };
     ServicesBinding.instance!.keyEventManager.keyMessageHandler = _cachedKeyMessageHandler;
   }
 

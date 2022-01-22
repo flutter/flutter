@@ -70,6 +70,35 @@ class TallSliderTickMarkShape extends SliderTickMarkShape {
   }
 }
 
+class _StateDependentMouseCursor extends MaterialStateMouseCursor {
+  const _StateDependentMouseCursor({
+    this.disabled = SystemMouseCursors.none,
+    this.dragged = SystemMouseCursors.none,
+    this.hovered = SystemMouseCursors.none,
+  });
+
+  final MouseCursor disabled;
+  final MouseCursor hovered;
+  final MouseCursor dragged;
+
+  @override
+  MouseCursor resolve(Set<MaterialState> states) {
+    if (states.contains(MaterialState.disabled)) {
+      return disabled;
+    }
+    if (states.contains(MaterialState.dragged)) {
+      return dragged;
+    }
+    if (states.contains(MaterialState.hovered)) {
+      return hovered;
+    }
+    return SystemMouseCursors.none;
+  }
+
+  @override
+  String get debugDescription => '_StateDependentMouseCursor';
+}
+
 void main() {
   testWidgets('Slider can move when tapped (LTR)', (WidgetTester tester) async {
     final Key sliderKey = UniqueKey();
@@ -2519,6 +2548,57 @@ void main() {
     );
 
     expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+  });
+
+  testWidgets('Slider MaterialStateMouseCursor resolves correctly', (WidgetTester tester) async {
+    const MouseCursor disabledCursor = SystemMouseCursors.basic;
+    const MouseCursor hoveredCursor = SystemMouseCursors.grab;
+    const MouseCursor draggedCursor = SystemMouseCursors.move;
+
+    Widget buildFrame({ required bool enabled }) {
+      return MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Material(
+            child: Center(
+              child: MouseRegion(
+                cursor: SystemMouseCursors.forbidden,
+                child: Slider(
+                  mouseCursor: const _StateDependentMouseCursor(
+                    disabled: disabledCursor,
+                    hovered: hoveredCursor,
+                    dragged: draggedCursor,
+                  ),
+                  value: 0.5,
+                  onChanged: enabled ? (double newValue) { } : null,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: Offset.zero);
+    addTearDown(gesture.removePointer);
+
+    await tester.pumpWidget(buildFrame(enabled: false));
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), disabledCursor);
+
+    await tester.pumpWidget(buildFrame(enabled: true));
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.none);
+
+    await gesture.moveTo(tester.getCenter(find.byType(Slider))); // start hover
+    await tester.pumpAndSettle();
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), hoveredCursor);
+
+    await tester.timedDrag(
+      find.byType(Slider),
+      const Offset(20.0, 0.0),
+      const Duration(milliseconds: 100),
+    );
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.move);
   });
 
   testWidgets('Slider implements debugFillProperties', (WidgetTester tester) async {
