@@ -151,6 +151,9 @@ void main() {
       );
     }
 
+    await buildFrame();
+    expect(tester.widget<IconButton>(find.byType(IconButton)).splashRadius, Material.defaultSplashRadius);
+    
     await buildFrame(splashRadius: 50);
     expect(tester.widget<IconButton>(find.byType(IconButton)).splashRadius, 50);
   });
