@@ -29,11 +29,18 @@ class SelectableTextController {
 
   late _TextSpanEditingController _textSpanEditingController;
 
+  /// The selected text's range.
+  late TextSelection selection = _textSpanEditingController.selection;
+
+  /// Whether the is a valid selection ([selection.start] less than [selection.end]).
+  bool get hasSelection => !selection.isCollapsed;
+
   /// Select a range of text.
+  ///
+  /// Notice that [SelectableText.onSelectionChanged] won't be called.
   void setSelection(int start, int end) {
     assert(start <= end);
-
-    final TextSelection selection = TextSelection(
+    selection = TextSelection(
       baseOffset: start,
       extentOffset: end,
     );
@@ -448,6 +455,7 @@ class SelectableText extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.onSelectionChanged}
   final SelectionChangedCallback? onSelectionChanged;
 
+  /// Controls this widget.
   final SelectableTextController? controller;
 
   @override
@@ -551,8 +559,6 @@ class _SelectableTextState extends State<SelectableText> implements TextSelectio
     });
   }
 
-  TextSelection? _lastSeenTextSelection;
-
   void _handleSelectionChanged(TextSelection selection, SelectionChangedCause? cause) {
     final bool willShowSelectionHandles = _shouldShowSelectionHandles(cause);
     if (willShowSelectionHandles != _showSelectionHandles) {
@@ -560,12 +566,9 @@ class _SelectableTextState extends State<SelectableText> implements TextSelectio
         _showSelectionHandles = willShowSelectionHandles;
       });
     }
-    // TODO(chunhtai): The selection may be the same. We should remove this
-    // check once this is fixed https://github.com/flutter/flutter/issues/76349.
-    if (widget.onSelectionChanged != null && _lastSeenTextSelection != selection) {
-      widget.onSelectionChanged!(selection, cause);
-    }
-    _lastSeenTextSelection = selection;
+
+    widget.controller?.selection = selection;
+    widget.onSelectionChanged?.call(selection, cause);
 
     switch (Theme.of(context).platform) {
       case TargetPlatform.iOS:
