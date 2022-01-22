@@ -6,7 +6,7 @@ import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'dart:ui' show Offset, Rect, SemanticsAction, SemanticsFlag,
-       TextDirection;
+       TextDirection, StringAttribute;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart' show MatrixUtils, TransformProperty;
@@ -16,7 +16,7 @@ import 'package:vector_math/vector_math_64.dart';
 import 'binding.dart' show SemanticsBinding;
 import 'semantics_event.dart';
 
-export 'dart:ui' show SemanticsAction;
+export 'dart:ui' show SemanticsAction, StringAttribute, SpellOutStringAttribute, LocaleStringAttribute;
 export 'semantics_event.dart';
 
 /// Signature for a function that is called for each [SemanticsNode].
@@ -170,6 +170,142 @@ class CustomSemanticsAction {
   }
 }
 
+/// A string that carries a list of [StringAttribute]s.
+@immutable
+class AttributedString {
+  /// Creates a attributed string.
+  ///
+  /// The [TextRange] in the [attributes] must be inside the length of the
+  /// [string].
+  ///
+  /// The [attributes] must not be changed after the attributed string is
+  /// created.
+  AttributedString(
+    this.string, {
+    this.attributes = const <StringAttribute>[],
+  }) : assert(string.isNotEmpty || attributes.isEmpty),
+       assert(() {
+        for (final StringAttribute attribute in attributes) {
+          assert(
+            string.length >= attribute.range.start &&
+            string.length >= attribute.range.end,
+            'The range in $attribute is outside of the string $string',
+          );
+        }
+        return true;
+      }());
+
+  /// The plain string stored in the attributed string.
+  final String string;
+
+  /// The attributes this string carries.
+  ///
+  /// The list must not be modified after this string is created.
+  final List<StringAttribute> attributes;
+
+  /// Returns a new [AttributedString] by concatenate the operands
+  ///
+  /// The string attribute list of the returned [AttributedString] will contains
+  /// the string attributes from both operands with updated text ranges.
+  AttributedString operator +(AttributedString other) {
+    if (string.isEmpty) {
+      return other;
+    }
+    if (other.string.isEmpty) {
+      return this;
+    }
+
+    // None of the strings is empty.
+    final String newString = string + other.string;
+    final List<StringAttribute> newAttributes = List<StringAttribute>.of(attributes);
+    if (other.attributes.isNotEmpty) {
+      final int offset = string.length;
+      for (final StringAttribute attribute in other.attributes) {
+        final TextRange newRange = TextRange(
+          start: attribute.range.start + offset,
+          end: attribute.range.end + offset,
+        );
+        final StringAttribute adjustedAttribute = attribute.copy(range: newRange);
+        newAttributes.add(adjustedAttribute);
+      }
+    }
+    return AttributedString(newString, attributes: newAttributes);
+  }
+
+  /// Two [AttributedString]s are equal if their string and attributes are.
+  @override
+  bool operator ==(Object other) {
+    return other.runtimeType == runtimeType
+        && other is AttributedString
+        && other.string == string
+        && listEquals<StringAttribute>(other.attributes, attributes);
+  }
+
+  @override
+  int get hashCode {
+    return ui.hashValues(
+      string,
+      attributes,
+    );
+  }
+
+  @override
+  String toString() {
+    return "${objectRuntimeType(this, 'AttributedString')}('$string', attributes: $attributes)";
+  }
+}
+
+/// A [DiagnosticsProperty] for [AttributedString]s, which shows a string
+/// when there are no attributes, and more details otherwise.
+class AttributedStringProperty extends DiagnosticsProperty<AttributedString> {
+  /// Create a diagnostics property for an [AttributedString] object.
+  ///
+  /// Such properties are used with [SemanticsData] objects.
+  AttributedStringProperty(
+    String name,
+    AttributedString? value, {
+    bool showName = true,
+    this.showWhenEmpty = false,
+    Object? defaultValue = kNoDefaultValue,
+    DiagnosticLevel level = DiagnosticLevel.info,
+    String? description,
+  }) : assert(showName != null),
+       assert(level != null),
+       super(
+         name,
+         value,
+         showName: showName,
+         defaultValue: defaultValue,
+         level: level,
+         description: description,
+       );
+
+  /// Whether to show the property when the [value] is an [AttributedString]
+  /// whose [AttributedString.string] is the empty string.
+  ///
+  /// This overrides [defaultValue].
+  final bool showWhenEmpty;
+
+  @override
+  bool get isInteresting => super.isInteresting && (showWhenEmpty || (value != null && value!.string.isNotEmpty));
+
+  @override
+  String valueToString({TextTreeConfiguration? parentConfiguration}) {
+    if (value == null)
+      return 'null';
+    String text = value!.string;
+    if (parentConfiguration != null &&
+        !parentConfiguration.lineBreakProperties) {
+      // This follows a similar pattern to StringProperty.
+      text = text.replaceAll('\n', r'\n');
+    }
+    if (value!.attributes.isEmpty) {
+      return '"$text"';
+    }
+    return '"$text" ${value!.attributes}'; // the attributes will be in square brackets since they're a list
+  }
+}
+
 /// Summary information about a [SemanticsNode] object.
 ///
 /// A semantics node might [SemanticsNode.mergeAllDescendantsIntoThisNode],
@@ -185,14 +321,14 @@ class SemanticsData with Diagnosticable {
   /// The [flags], [actions], [label], and [Rect] arguments must not be null.
   ///
   /// If [label] is not empty, then [textDirection] must also not be null.
-  const SemanticsData({
+  SemanticsData({
     required this.flags,
     required this.actions,
-    required this.label,
-    required this.increasedValue,
-    required this.value,
-    required this.decreasedValue,
-    required this.hint,
+    required this.attributedLabel,
+    required this.attributedValue,
+    required this.attributedIncreasedValue,
+    required this.attributedDecreasedValue,
+    required this.attributedHint,
     required this.textDirection,
     required this.rect,
     required this.elevation,
@@ -211,16 +347,16 @@ class SemanticsData with Diagnosticable {
     this.customSemanticsActionIds,
   }) : assert(flags != null),
        assert(actions != null),
-       assert(label != null),
-       assert(value != null),
-       assert(decreasedValue != null),
-       assert(increasedValue != null),
-       assert(hint != null),
-       assert(label == '' || textDirection != null, 'A SemanticsData object with label "$label" had a null textDirection.'),
-       assert(value == '' || textDirection != null, 'A SemanticsData object with value "$value" had a null textDirection.'),
-       assert(hint == '' || textDirection != null, 'A SemanticsData object with hint "$hint" had a null textDirection.'),
-       assert(decreasedValue == '' || textDirection != null, 'A SemanticsData object with decreasedValue "$decreasedValue" had a null textDirection.'),
-       assert(increasedValue == '' || textDirection != null, 'A SemanticsData object with increasedValue "$increasedValue" had a null textDirection.'),
+       assert(attributedLabel != null),
+       assert(attributedValue != null),
+       assert(attributedDecreasedValue != null),
+       assert(attributedIncreasedValue != null),
+       assert(attributedHint != null),
+       assert(attributedLabel.string == '' || textDirection != null, 'A SemanticsData object with label "${attributedLabel.string}" had a null textDirection.'),
+       assert(attributedValue.string == '' || textDirection != null, 'A SemanticsData object with value "${attributedValue.string}" had a null textDirection.'),
+       assert(attributedDecreasedValue.string == '' || textDirection != null, 'A SemanticsData object with decreasedValue "${attributedDecreasedValue.string}" had a null textDirection.'),
+       assert(attributedIncreasedValue.string == '' || textDirection != null, 'A SemanticsData object with increasedValue "${attributedIncreasedValue.string}" had a null textDirection.'),
+       assert(attributedHint.string == '' || textDirection != null, 'A SemanticsData object with hint "${attributedHint.string}" had a null textDirection.'),
        assert(rect != null);
 
   /// A bit field of [SemanticsFlag]s that apply to this node.
@@ -229,35 +365,85 @@ class SemanticsData with Diagnosticable {
   /// A bit field of [SemanticsAction]s that apply to this node.
   final int actions;
 
-  /// A textual description of this node.
+  /// A textual description for the current label of the node.
   ///
   /// The reading direction is given by [textDirection].
-  final String label;
+  ///
+  /// This exposes the raw text of the [attributedLabel].
+  String get label => attributedLabel.string;
+
+  /// A textual description for the current label of the node in
+  /// [AttributedString] format.
+  ///
+  /// The reading direction is given by [textDirection].
+  ///
+  /// See also [label], which exposes just the raw text.
+  final AttributedString attributedLabel;
 
   /// A textual description for the current value of the node.
   ///
   /// The reading direction is given by [textDirection].
-  final String value;
+  ///
+  /// This exposes the raw text of the [attributedValue].
+  String get value => attributedValue.string;
+
+  /// A textual description for the current value of the node in
+  /// [AttributedString] format.
+  ///
+  /// The reading direction is given by [textDirection].
+  ///
+  /// See also [value], which exposes just the raw text.
+  final AttributedString attributedValue;
 
   /// The value that [value] will become after performing a
   /// [SemanticsAction.increase] action.
   ///
   /// The reading direction is given by [textDirection].
-  final String increasedValue;
+  ///
+  /// This exposes the raw text of the [attributedIncreasedValue].
+  String get increasedValue => attributedIncreasedValue.string;
+
+  /// The value that [value] will become after performing a
+  /// [SemanticsAction.increase] action in [AttributedString] format.
+  ///
+  /// The reading direction is given by [textDirection].
+  ///
+  /// See also [increasedValue], which exposes just the raw text.
+  final AttributedString attributedIncreasedValue;
 
   /// The value that [value] will become after performing a
   /// [SemanticsAction.decrease] action.
   ///
   /// The reading direction is given by [textDirection].
-  final String decreasedValue;
+  ///
+  /// This exposes the raw text of the [attributedDecreasedValue].
+  String get decreasedValue => attributedDecreasedValue.string;
+
+  /// The value that [value] will become after performing a
+  /// [SemanticsAction.decrease] action in [AttributedString] format.
+  ///
+  /// The reading direction is given by [textDirection].
+  ///
+  /// See also [decreasedValue], which exposes just the raw text.
+  final AttributedString attributedDecreasedValue;
 
   /// A brief description of the result of performing an action on this node.
   ///
   /// The reading direction is given by [textDirection].
-  final String hint;
+  ///
+  /// This exposes the raw text of the [attributedHint].
+  String get hint => attributedHint.string;
 
-  /// The reading direction for the text in [label], [value], [hint],
-  /// [increasedValue], and [decreasedValue].
+  /// A brief description of the result of performing an action on this node
+  /// in [AttributedString] format.
+  ///
+  /// The reading direction is given by [textDirection].
+  ///
+  /// See also [hint], which exposes just the raw text.
+  final AttributedString attributedHint;
+
+  /// The reading direction for the text in [label], [value],
+  /// [increasedValue], [decreasedValue], and [hint].
   final TextDirection? textDirection;
 
   /// The currently selected text (or the position of the cursor) within [value]
@@ -409,11 +595,11 @@ class SemanticsData with Diagnosticable {
           describeEnum(flag),
     ];
     properties.add(IterableProperty<String>('flags', flagSummary, ifEmpty: null));
-    properties.add(StringProperty('label', label, defaultValue: ''));
-    properties.add(StringProperty('value', value, defaultValue: ''));
-    properties.add(StringProperty('increasedValue', increasedValue, defaultValue: ''));
-    properties.add(StringProperty('decreasedValue', decreasedValue, defaultValue: ''));
-    properties.add(StringProperty('hint', hint, defaultValue: ''));
+    properties.add(AttributedStringProperty('label', attributedLabel));
+    properties.add(AttributedStringProperty('value', attributedValue));
+    properties.add(AttributedStringProperty('increasedValue', attributedIncreasedValue));
+    properties.add(AttributedStringProperty('decreasedValue', attributedDecreasedValue));
+    properties.add(AttributedStringProperty('hint', attributedHint));
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     if (textSelection?.isValid == true)
       properties.add(MessageProperty('textSelection', '[${textSelection!.start}, ${textSelection!.end}]'));
@@ -432,11 +618,11 @@ class SemanticsData with Diagnosticable {
     return other is SemanticsData
         && other.flags == flags
         && other.actions == actions
-        && other.label == label
-        && other.value == value
-        && other.increasedValue == increasedValue
-        && other.decreasedValue == decreasedValue
-        && other.hint == hint
+        && other.attributedLabel == attributedLabel
+        && other.attributedValue == attributedValue
+        && other.attributedIncreasedValue == attributedIncreasedValue
+        && other.attributedDecreasedValue == attributedDecreasedValue
+        && other.attributedHint == attributedHint
         && other.textDirection == textDirection
         && other.rect == rect
         && setEquals(other.tags, tags)
@@ -461,11 +647,11 @@ class SemanticsData with Diagnosticable {
       ui.hashValues(
         flags,
         actions,
-        label,
-        value,
-        increasedValue,
-        decreasedValue,
-        hint,
+        attributedLabel,
+        attributedValue,
+        attributedIncreasedValue,
+        attributedDecreasedValue,
+        attributedHint,
         textDirection,
         rect,
         tags,
@@ -610,10 +796,15 @@ class SemanticsProperties extends DiagnosticableTree {
     this.maxValueLength,
     this.currentValueLength,
     this.label,
+    this.attributedLabel,
     this.value,
+    this.attributedValue,
     this.increasedValue,
+    this.attributedIncreasedValue,
     this.decreasedValue,
+    this.attributedDecreasedValue,
     this.hint,
+    this.attributedHint,
     this.hintOverrides,
     this.textDirection,
     this.sortKey,
@@ -639,7 +830,11 @@ class SemanticsProperties extends DiagnosticableTree {
     this.onDidLoseAccessibilityFocus,
     this.onDismiss,
     this.customSemanticsActions,
-  });
+  }) : assert(label == null || attributedLabel == null, 'Only one of label or attributedLabel should be provided'),
+       assert(value == null || attributedValue == null, 'Only one of value or attributedValue should be provided'),
+       assert(increasedValue == null || attributedIncreasedValue == null, 'Only one of increasedValue or attributedIncreasedValue should be provided'),
+       assert(decreasedValue == null || attributedDecreasedValue == null, 'Only one of decreasedValue or attributedDecreasedValue should be provided'),
+       assert(hint == null || attributedHint == null, 'Only one of hint or attributedHint should be provided');
 
   /// If non-null, indicates that this subtree represents something that can be
   /// in an enabled or disabled state.
@@ -846,48 +1041,131 @@ class SemanticsProperties extends DiagnosticableTree {
   /// If a label is provided, there must either by an ambient [Directionality]
   /// or an explicit [textDirection] should be provided.
   ///
+  /// Callers must not provide both [label] and [attributedLabel]. One or both
+  /// must be null.
+  ///
   /// See also:
   ///
   ///  * [SemanticsConfiguration.label] for a description of how this is exposed
   ///    in TalkBack and VoiceOver.
+  ///  * [attributedLabel] for an [AttributedString] version of this property.
   final String? label;
+
+  /// Provides an [AttributedString] version of textual description of the widget.
+  ///
+  /// If a [attributedLabel] is provided, there must either by an ambient
+  /// [Directionality] or an explicit [textDirection] should be provided.
+  ///
+  /// Callers must not provide both [label] and [attributedLabel]. One or both
+  /// must be null.
+  ///
+  /// See also:
+  ///
+  ///  * [SemanticsConfiguration.attributedLabel] for a description of how this
+  ///    is exposed in TalkBack and VoiceOver.
+  ///  * [label] for a plain string version of this property.
+  final AttributedString? attributedLabel;
 
   /// Provides a textual description of the value of the widget.
   ///
   /// If a value is provided, there must either by an ambient [Directionality]
   /// or an explicit [textDirection] should be provided.
   ///
+  /// Callers must not provide both [value] and [attributedValue], One or both
+  /// must be null.
+  ///
   /// See also:
   ///
   ///  * [SemanticsConfiguration.value] for a description of how this is exposed
   ///    in TalkBack and VoiceOver.
+  ///  * [attributedLabel] for an [AttributedString] version of this property.
   final String? value;
 
-  /// The value that [value] will become after a [SemanticsAction.increase]
-  /// action has been performed on this widget.
+  /// Provides an [AttributedString] version of textual description of the value
+  /// of the widget.
+  ///
+  /// If a [attributedValue] is provided, there must either by an ambient
+  /// [Directionality] or an explicit [textDirection] should be provided.
+  ///
+  /// Callers must not provide both [value] and [attributedValue], One or both
+  /// must be null.
+  ///
+  /// See also:
+  ///
+  ///  * [SemanticsConfiguration.attributedValue] for a description of how this
+  ///    is exposed in TalkBack and VoiceOver.
+  ///  * [value] for a plain string version of this property.
+  final AttributedString? attributedValue;
+
+  /// The value that [value] or [attributedValue] will become after a
+  /// [SemanticsAction.increase] action has been performed on this widget.
   ///
   /// If a value is provided, [onIncrease] must also be set and there must
   /// either be an ambient [Directionality] or an explicit [textDirection]
   /// must be provided.
   ///
+  /// Callers must not provide both [increasedValue] and
+  /// [attributedIncreasedValue], One or both must be null.
+  ///
   /// See also:
   ///
   ///  * [SemanticsConfiguration.increasedValue] for a description of how this
   ///    is exposed in TalkBack and VoiceOver.
+  ///  * [attributedIncreasedValue] for an [AttributedString] version of this
+  ///    property.
   final String? increasedValue;
 
-  /// The value that [value] will become after a [SemanticsAction.decrease]
-  /// action has been performed on this widget.
+  /// The [AttributedString] that [value] or [attributedValue] will become after
+  /// a [SemanticsAction.increase] action has been performed on this widget.
+  ///
+  /// If a [attributedIncreasedValue] is provided, [onIncrease] must also be set
+  /// and there must either be an ambient [Directionality] or an explicit
+  /// [textDirection] must be provided.
+  ///
+  /// Callers must not provide both [increasedValue] and
+  /// [attributedIncreasedValue], One or both must be null.
+  ///
+  /// See also:
+  ///
+  ///  * [SemanticsConfiguration.attributedIncreasedValue] for a description of
+  ///    how this is exposed in TalkBack and VoiceOver.
+  ///  * [increasedValue] for a plain string version of this property.
+  final AttributedString? attributedIncreasedValue;
+
+  /// The value that [value] or [attributedValue] will become after a
+  /// [SemanticsAction.decrease] action has been performed on this widget.
   ///
   /// If a value is provided, [onDecrease] must also be set and there must
   /// either be an ambient [Directionality] or an explicit [textDirection]
   /// must be provided.
   ///
+  /// Callers must not provide both [decreasedValue] and
+  /// [attributedDecreasedValue], One or both must be null.
+  ///
   /// See also:
   ///
   ///  * [SemanticsConfiguration.decreasedValue] for a description of how this
   ///    is exposed in TalkBack and VoiceOver.
+  ///  * [attributedDecreasedValue] for an [AttributedString] version of this
+  ///    property.
   final String? decreasedValue;
+
+  /// The [AttributedString] that [value] or [attributedValue] will become after
+  /// a [SemanticsAction.decrease] action has been performed on this widget.
+  ///
+  /// If a [attributedDecreasedValue] is provided, [onDecrease] must also be set
+  /// and there must either be an ambient [Directionality] or an explicit
+  /// [textDirection] must be provided.
+  ///
+  /// Callers must not provide both [decreasedValue] and
+  /// [attributedDecreasedValue], One or both must be null/// provided.
+  ///
+  /// See also:
+  ///
+  ///  * [SemanticsConfiguration.attributedDecreasedValue] for a description of
+  ///    how this is exposed in TalkBack and VoiceOver.
+  ///  * [decreasedValue] for a plain string version of this property.
+  final AttributedString? attributedDecreasedValue;
 
   /// Provides a brief textual description of the result of an action performed
   /// on the widget.
@@ -895,11 +1173,31 @@ class SemanticsProperties extends DiagnosticableTree {
   /// If a hint is provided, there must either be an ambient [Directionality]
   /// or an explicit [textDirection] should be provided.
   ///
+  /// Callers must not provide both [hint] and [attributedHint], One or both
+  /// must be null.
+  ///
   /// See also:
   ///
   ///  * [SemanticsConfiguration.hint] for a description of how this is exposed
   ///    in TalkBack and VoiceOver.
+  ///  * [attributedHint] for an [AttributedString] version of this property.
   final String? hint;
+
+  /// Provides an [AttributedString] version of brief textual description of the
+  /// result of an action performed on the widget.
+  ///
+  /// If a [attributedHint] is provided, there must either by an ambient
+  /// [Directionality] or an explicit [textDirection] should be provided.
+  ///
+  /// Callers must not provide both [hint] and [attributedHint], One or both
+  /// must be null.
+  ///
+  /// See also:
+  ///
+  ///  * [SemanticsConfiguration.attributedHint] for a description of how this
+  ///    is exposed in TalkBack and VoiceOver.
+  ///  * [hint] for a plain string version of this property.
+  final AttributedString? attributedHint;
 
   /// Provides hint values which override the default hints on supported
   /// platforms.
@@ -911,8 +1209,8 @@ class SemanticsProperties extends DiagnosticableTree {
   /// On iOS, these are always ignored and the default [hint] is used instead.
   final SemanticsHintOverrides? hintOverrides;
 
-  /// The reading direction of the [label], [value], [hint], [increasedValue],
-  /// and [decreasedValue].
+  /// The reading direction of the [label], [value], [increasedValue],
+  /// [decreasedValue], and [hint].
   ///
   /// Defaults to the ambient [Directionality].
   final TextDirection? textDirection;
@@ -1182,12 +1480,19 @@ class SemanticsProperties extends DiagnosticableTree {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<bool>('checked', checked, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('selected', selected, defaultValue: null));
-    properties.add(StringProperty('label', label, defaultValue: ''));
-    properties.add(StringProperty('value', value));
-    properties.add(StringProperty('hint', hint));
+    properties.add(StringProperty('label', label, defaultValue: null));
+    properties.add(AttributedStringProperty('attributedLabel', attributedLabel, defaultValue: null));
+    properties.add(StringProperty('value', value, defaultValue: null));
+    properties.add(AttributedStringProperty('attributedValue', attributedValue, defaultValue: null));
+    properties.add(StringProperty('increasedValue', value, defaultValue: null));
+    properties.add(AttributedStringProperty('attributedIncreasedValue', attributedIncreasedValue, defaultValue: null));
+    properties.add(StringProperty('decreasedValue', value, defaultValue: null));
+    properties.add(AttributedStringProperty('attributedDecreasedValue', attributedDecreasedValue, defaultValue: null));
+    properties.add(StringProperty('hint', hint, defaultValue: null));
+    properties.add(AttributedStringProperty('attributedHint', attributedHint, defaultValue: null));
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     properties.add(DiagnosticsProperty<SemanticsSortKey>('sortKey', sortKey, defaultValue: null));
-    properties.add(DiagnosticsProperty<SemanticsHintOverrides>('hintOverrides', hintOverrides));
+    properties.add(DiagnosticsProperty<SemanticsHintOverrides>('hintOverrides', hintOverrides, defaultValue: null));
   }
 
   @override
@@ -1434,7 +1739,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       }
       assert(!newChildren.any((SemanticsNode node) => node.isMergedIntoParent) || isPartOfNodeMerging);
 
-      _debugPreviousSnapshot = List<SemanticsNode>.from(newChildren);
+      _debugPreviousSnapshot = List<SemanticsNode>.of(newChildren);
 
       SemanticsNode ancestor = this;
       while (ancestor.parent is SemanticsNode)
@@ -1607,26 +1912,26 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   }
 
   bool _isDifferentFromCurrentSemanticAnnotation(SemanticsConfiguration config) {
-    return _label != config.label ||
-        _hint != config.hint ||
-        _elevation != config.elevation ||
-        _thickness != config.thickness ||
-        _decreasedValue != config.decreasedValue ||
-        _value != config.value ||
-        _increasedValue != config.increasedValue ||
-        _flags != config._flags ||
-        _textDirection != config.textDirection ||
-        _sortKey != config._sortKey ||
-        _textSelection != config._textSelection ||
-        _scrollPosition != config._scrollPosition ||
-        _scrollExtentMax != config._scrollExtentMax ||
-        _scrollExtentMin != config._scrollExtentMin ||
-        _actionsAsBits != config._actionsAsBits ||
-        indexInParent != config.indexInParent ||
-        platformViewId != config.platformViewId ||
-        _maxValueLength != config._maxValueLength ||
-        _currentValueLength != config._currentValueLength ||
-        _mergeAllDescendantsIntoThisNode != config.isMergingSemanticsOfDescendants;
+    return _attributedLabel != config.attributedLabel
+        || _attributedHint != config.attributedHint
+        || _elevation != config.elevation
+        || _thickness != config.thickness
+        || _attributedValue != config.attributedValue
+        || _attributedIncreasedValue != config.attributedIncreasedValue
+        || _attributedDecreasedValue != config.attributedDecreasedValue
+        || _flags != config._flags
+        || _textDirection != config.textDirection
+        || _sortKey != config._sortKey
+        || _textSelection != config._textSelection
+        || _scrollPosition != config._scrollPosition
+        || _scrollExtentMax != config._scrollExtentMax
+        || _scrollExtentMin != config._scrollExtentMin
+        || _actionsAsBits != config._actionsAsBits
+        || indexInParent != config.indexInParent
+        || platformViewId != config.platformViewId
+        || _maxValueLength != config._maxValueLength
+        || _currentValueLength != config._currentValueLength
+        || _mergeAllDescendantsIntoThisNode != config.isMergingSemanticsOfDescendants;
   }
 
   // TAGS, LABELS, ACTIONS
@@ -1653,24 +1958,33 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   /// A textual description of this node.
   ///
   /// The reading direction is given by [textDirection].
-  String get label => _label;
-  String _label = _kEmptyConfig.label;
+  ///
+  /// This exposes the raw text of the [attributedLabel].
+  String get label => _attributedLabel.string;
+
+  /// A textual description of this node in [AttributedString] format.
+  ///
+  /// The reading direction is given by [textDirection].
+  ///
+  /// See also [label], which exposes just the raw text.
+  AttributedString get attributedLabel => _attributedLabel;
+  AttributedString _attributedLabel = _kEmptyConfig.attributedLabel;
 
   /// A textual description for the current value of the node.
   ///
   /// The reading direction is given by [textDirection].
-  String get value => _value;
-  String _value = _kEmptyConfig.value;
-
-  /// The value that [value] will have after a [SemanticsAction.decrease] action
-  /// has been performed.
   ///
-  /// This property is only valid if the [SemanticsAction.decrease] action is
-  /// available on this node.
+  /// This exposes the raw text of the [attributedValue].
+  String get value => _attributedValue.string;
+
+  /// A textual description for the current value of the node in
+  /// [AttributedString] format.
   ///
   /// The reading direction is given by [textDirection].
-  String get decreasedValue => _decreasedValue;
-  String _decreasedValue = _kEmptyConfig.decreasedValue;
+  ///
+  /// See also [value], which exposes just the raw text.
+  AttributedString get attributedValue => _attributedValue;
+  AttributedString _attributedValue = _kEmptyConfig.attributedValue;
 
   /// The value that [value] will have after a [SemanticsAction.increase] action
   /// has been performed.
@@ -1679,14 +1993,60 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   /// available on this node.
   ///
   /// The reading direction is given by [textDirection].
-  String get increasedValue => _increasedValue;
-  String _increasedValue = _kEmptyConfig.increasedValue;
+  ///
+  /// This exposes the raw text of the [attributedIncreasedValue].
+  String get increasedValue => _attributedIncreasedValue.string;
+
+  /// The value in [AttributedString] format that [value] or [attributedValue]
+  /// will have after a [SemanticsAction.increase] action has been performed.
+  ///
+  /// This property is only valid if the [SemanticsAction.increase] action is
+  /// available on this node.
+  ///
+  /// The reading direction is given by [textDirection].
+  ///
+  /// See also [increasedValue], which exposes just the raw text.
+  AttributedString get attributedIncreasedValue => _attributedIncreasedValue;
+  AttributedString _attributedIncreasedValue = _kEmptyConfig.attributedIncreasedValue;
+
+  /// The value that [value] will have after a [SemanticsAction.decrease] action
+  /// has been performed.
+  ///
+  /// This property is only valid if the [SemanticsAction.decrease] action is
+  /// available on this node.
+  ///
+  /// The reading direction is given by [textDirection].
+  ///
+  /// This exposes the raw text of the [attributedDecreasedValue].
+  String get decreasedValue => _attributedDecreasedValue.string;
+
+  /// The value in [AttributedString] format that [value] or [attributedValue]
+  /// will have after a [SemanticsAction.decrease] action has been performed.
+  ///
+  /// This property is only valid if the [SemanticsAction.decrease] action is
+  /// available on this node.
+  ///
+  /// The reading direction is given by [textDirection].
+  ///
+  /// See also [decreasedValue], which exposes just the raw text.
+  AttributedString get attributedDecreasedValue => _attributedDecreasedValue;
+  AttributedString _attributedDecreasedValue = _kEmptyConfig.attributedDecreasedValue;
 
   /// A brief description of the result of performing an action on this node.
   ///
   /// The reading direction is given by [textDirection].
-  String get hint => _hint;
-  String _hint = _kEmptyConfig.hint;
+  ///
+  /// This exposes the raw text of the [attributedHint].
+  String get hint => _attributedHint.string;
+
+  /// A brief description of the result of performing an action on this node
+  /// in [AttributedString] format.
+  ///
+  /// The reading direction is given by [textDirection].
+  ///
+  /// See also [hint], which exposes just the raw text.
+  AttributedString get attributedHint => _attributedHint;
+  AttributedString _attributedHint = _kEmptyConfig.attributedHint;
 
   /// The elevation along the z-axis at which the [rect] of this [SemanticsNode]
   /// is located above its parent.
@@ -1891,19 +2251,19 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       'SemanticsNodes with children must not specify a platformViewId.',
     );
 
-    _label = config.label;
-    _decreasedValue = config.decreasedValue;
-    _value = config.value;
-    _increasedValue = config.increasedValue;
-    _hint = config.hint;
+    _attributedLabel = config.attributedLabel;
+    _attributedValue = config.attributedValue;
+    _attributedIncreasedValue = config.attributedIncreasedValue;
+    _attributedDecreasedValue = config.attributedDecreasedValue;
+    _attributedHint = config.attributedHint;
     _hintOverrides = config.hintOverrides;
     _elevation = config.elevation;
     _thickness = config.thickness;
     _flags = config._flags;
     _textDirection = config.textDirection;
     _sortKey = config.sortKey;
-    _actions = Map<SemanticsAction, SemanticsActionHandler>.from(config._actions);
-    _customSemanticsActions = Map<CustomSemanticsAction, VoidCallback>.from(config._customSemanticsActions);
+    _actions = Map<SemanticsAction, SemanticsActionHandler>.of(config._actions);
+    _customSemanticsActions = Map<CustomSemanticsAction, VoidCallback>.of(config._customSemanticsActions);
     _actionsAsBits = config._actionsAsBits;
     _textSelection = config._textSelection;
     _isMultiline = config.isMultiline;
@@ -1920,11 +2280,11 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     _replaceChildren(childrenInInversePaintOrder ?? const <SemanticsNode>[]);
 
     assert(
-      !_canPerformAction(SemanticsAction.increase) || (_value == '') == (_increasedValue == ''),
+      !_canPerformAction(SemanticsAction.increase) || (value == '') == (increasedValue == ''),
       'A SemanticsNode with action "increase" needs to be annotated with either both "value" and "increasedValue" or neither',
     );
     assert(
-      !_canPerformAction(SemanticsAction.decrease) || (_value == '') == (_decreasedValue == ''),
+      !_canPerformAction(SemanticsAction.decrease) || (value == '') == (decreasedValue == ''),
       'A SemanticsNode with action "increase" needs to be annotated with either both "value" and "decreasedValue" or neither',
     );
   }
@@ -1938,13 +2298,13 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   SemanticsData getSemanticsData() {
     int flags = _flags;
     int actions = _actionsAsBits;
-    String label = _label;
-    String hint = _hint;
-    String value = _value;
-    String increasedValue = _increasedValue;
-    String decreasedValue = _decreasedValue;
+    AttributedString attributedLabel = _attributedLabel;
+    AttributedString attributedValue = _attributedValue;
+    AttributedString attributedIncreasedValue = _attributedIncreasedValue;
+    AttributedString attributedDecreasedValue = _attributedDecreasedValue;
+    AttributedString attributedHint = _attributedHint;
     TextDirection? textDirection = _textDirection;
-    Set<SemanticsTag>? mergedTags = tags == null ? null : Set<SemanticsTag>.from(tags!);
+    Set<SemanticsTag>? mergedTags = tags == null ? null : Set<SemanticsTag>.of(tags!);
     TextSelection? textSelection = _textSelection;
     int? scrollChildCount = _scrollChildCount;
     int? scrollIndex = _scrollIndex;
@@ -1991,12 +2351,12 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
         platformViewId ??= node._platformViewId;
         maxValueLength ??= node._maxValueLength;
         currentValueLength ??= node._currentValueLength;
-        if (value == '' || value == null)
-          value = node._value;
-        if (increasedValue == '' || increasedValue == null)
-          increasedValue = node._increasedValue;
-        if (decreasedValue == '' || decreasedValue == null)
-          decreasedValue = node._decreasedValue;
+        if (attributedValue == null || attributedValue.string == '')
+          attributedValue = node._attributedValue;
+        if (attributedIncreasedValue == null || attributedIncreasedValue.string == '')
+          attributedIncreasedValue = node._attributedIncreasedValue;
+        if (attributedDecreasedValue == null || attributedDecreasedValue.string == '')
+          attributedDecreasedValue = node._attributedDecreasedValue;
         if (node.tags != null) {
           mergedTags ??= <SemanticsTag>{};
           mergedTags!.addAll(node.tags!);
@@ -2019,16 +2379,16 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
             customSemanticsActionIds.add(CustomSemanticsAction.getIdentifier(action));
           }
         }
-        label = _concatStrings(
-          thisString: label,
+        attributedLabel = _concatAttributedString(
+          thisAttributedString: attributedLabel,
           thisTextDirection: textDirection,
-          otherString: node._label,
+          otherAttributedString: node._attributedLabel,
           otherTextDirection: node._textDirection,
         );
-        hint = _concatStrings(
-          thisString: hint,
+        attributedHint = _concatAttributedString(
+          thisAttributedString: attributedHint,
           thisTextDirection: textDirection,
-          otherString: node._hint,
+          otherAttributedString: node._attributedHint,
           otherTextDirection: node._textDirection,
         );
 
@@ -2041,11 +2401,11 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     return SemanticsData(
       flags: flags,
       actions: actions,
-      label: label,
-      value: value,
-      increasedValue: increasedValue,
-      decreasedValue: decreasedValue,
-      hint: hint,
+      attributedLabel: attributedLabel,
+      attributedValue: attributedValue,
+      attributedIncreasedValue: attributedIncreasedValue,
+      attributedDecreasedValue: attributedDecreasedValue,
+      attributedHint: attributedHint,
       textDirection: textDirection,
       rect: rect,
       transform: transform,
@@ -2108,11 +2468,16 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       flags: data.flags,
       actions: data.actions,
       rect: data.rect,
-      label: data.label,
-      value: data.value,
-      decreasedValue: data.decreasedValue,
-      increasedValue: data.increasedValue,
-      hint: data.hint,
+      label: data.attributedLabel.string,
+      labelAttributes: data.attributedLabel.attributes,
+      value: data.attributedValue.string,
+      valueAttributes: data.attributedValue.attributes,
+      increasedValue: data.attributedIncreasedValue.string,
+      increasedValueAttributes: data.attributedIncreasedValue.attributes,
+      decreasedValue: data.attributedDecreasedValue.string,
+      decreasedValueAttributes: data.attributedDecreasedValue.attributes,
+      hint: data.attributedHint.string,
+      hintAttributes: data.attributedHint.attributes,
       textDirection: data.textDirection,
       textSelectionBase: data.textSelection != null ? data.textSelection!.baseOffset : -1,
       textSelectionExtent: data.textSelection != null ? data.textSelection!.extentOffset : -1,
@@ -2246,11 +2611,11 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     properties.add(IterableProperty<String>('flags', flags, ifEmpty: null));
     properties.add(FlagProperty('isInvisible', value: isInvisible, ifTrue: 'invisible'));
     properties.add(FlagProperty('isHidden', value: hasFlag(SemanticsFlag.isHidden), ifTrue: 'HIDDEN'));
-    properties.add(StringProperty('label', _label, defaultValue: ''));
-    properties.add(StringProperty('value', _value, defaultValue: ''));
-    properties.add(StringProperty('increasedValue', _increasedValue, defaultValue: ''));
-    properties.add(StringProperty('decreasedValue', _decreasedValue, defaultValue: ''));
-    properties.add(StringProperty('hint', _hint, defaultValue: ''));
+    properties.add(AttributedStringProperty('label', _attributedLabel));
+    properties.add(AttributedStringProperty('value', _attributedValue));
+    properties.add(AttributedStringProperty('increasedValue', _attributedIncreasedValue));
+    properties.add(AttributedStringProperty('decreasedValue', _attributedDecreasedValue));
+    properties.add(AttributedStringProperty('hint', _attributedHint));
     properties.add(EnumProperty<TextDirection>('textDirection', _textDirection, defaultValue: null));
     properties.add(DiagnosticsProperty<SemanticsSortKey>('sortKey', sortKey, defaultValue: null));
     if (_textSelection?.isValid == true)
@@ -3018,8 +3383,9 @@ class SemanticsConfiguration {
   /// This is a request to increase the value represented by the widget. For
   /// example, this action might be recognized by a slider control.
   ///
-  /// If a [value] is set, [increasedValue] must also be provided and
-  /// [onIncrease] must ensure that [value] will be set to [increasedValue].
+  /// If [this.value] is set, [increasedValue] must also be provided and
+  /// [onIncrease] must ensure that [this.value] will be set to
+  /// [increasedValue].
   ///
   /// VoiceOver users on iOS can trigger this action by swiping up with one
   /// finger. TalkBack users on Android can trigger this action by pressing the
@@ -3036,8 +3402,9 @@ class SemanticsConfiguration {
   /// This is a request to decrease the value represented by the widget. For
   /// example, this action might be recognized by a slider control.
   ///
-  /// If a [value] is set, [decreasedValue] must also be provided and
-  /// [onDecrease] must ensure that [value] will be set to [decreasedValue].
+  /// If [this.value] is set, [decreasedValue] must also be provided and
+  /// [onDecrease] must ensure that [this.value] will be set to
+  /// [decreasedValue].
   ///
   /// VoiceOver users on iOS can trigger this action by swiping down with one
   /// finger. TalkBack users on Android can trigger this action by pressing the
@@ -3414,86 +3781,198 @@ class SemanticsConfiguration {
 
   /// A textual description of the owning [RenderObject].
   ///
-  /// On iOS this is used for the `accessibilityLabel` property defined in the
-  /// `UIAccessibility` Protocol. On Android it is concatenated together with
-  /// [value] and [hint] in the following order: [value], [label], [hint].
-  /// The concatenated value is then used as the `Text` description.
-  ///
-  /// The reading direction is given by [textDirection].
-  String get label => _label;
-  String _label = '';
-  set label(String label) {
-    assert(label != null);
-    _label = label;
-    _hasBeenAnnotated = true;
-  }
-
-  /// A textual description for the current value of the owning [RenderObject].
-  ///
-  /// On iOS this is used for the `accessibilityValue` property defined in the
-  /// `UIAccessibility` Protocol. On Android it is concatenated together with
-  /// [label] and [hint] in the following order: [value], [label], [hint].
-  /// The concatenated value is then used as the `Text` description.
+  /// Setting this attribute will override the [attributedLabel].
   ///
   /// The reading direction is given by [textDirection].
   ///
   /// See also:
   ///
-  ///  * [decreasedValue], describes what [value] will be after performing
-  ///    [SemanticsAction.decrease].
-  ///  * [increasedValue], describes what [value] will be after performing
-  ///    [SemanticsAction.increase].
-  String get value => _value;
-  String _value = '';
-  set value(String value) {
-    assert(value != null);
-    _value = value;
+  ///  * [attributedLabel], which is the [AttributedString] of this property.
+  String get label => _attributedLabel.string;
+  set label(String label) {
+    assert(label != null);
+    _attributedLabel = AttributedString(label);
     _hasBeenAnnotated = true;
   }
 
-  /// The value that [value] will have after performing a
-  /// [SemanticsAction.decrease] action.
+  /// A textual description of the owning [RenderObject] in [AttributedString]
+  /// format.
   ///
-  /// This must be set if a handler for [SemanticsAction.decrease] is provided
-  /// and [value] is set.
+  /// On iOS this is used for the `accessibilityAttributedLabel` property
+  /// defined in the `UIAccessibility` Protocol. On Android it is concatenated
+  /// together with [attributedValue] and [attributedHint] in the following
+  /// order: [attributedValue], [attributedLabel], [attributedHint]. The
+  /// concatenated value is then used as the `Text` description.
   ///
   /// The reading direction is given by [textDirection].
-  String get decreasedValue => _decreasedValue;
-  String _decreasedValue = '';
-  set decreasedValue(String decreasedValue) {
-    assert(decreasedValue != null);
-    _decreasedValue = decreasedValue;
+  ///
+  /// See also:
+  ///
+  ///  * [label], which is the raw text of this property.
+  AttributedString get attributedLabel => _attributedLabel;
+  AttributedString _attributedLabel = AttributedString('');
+  set attributedLabel(AttributedString attributedLabel) {
+    _attributedLabel = attributedLabel;
+    _hasBeenAnnotated = true;
+  }
+
+  /// A textual description for the current value of the owning [RenderObject].
+  ///
+  /// Setting this attribute will override the [attributedValue].
+  ///
+  /// The reading direction is given by [textDirection].
+  ///
+  /// See also:
+  ///
+  ///  * [attributedValue], which is the [AttributedString] of this property.
+  ///  * [increasedValue] and [attributedIncreasedValue], which describe what
+  ///    [value] will be after performing [SemanticsAction.increase].
+  ///  * [decreasedValue] and [attributedDecreasedValue], which describe what
+  ///    [value] will be after performing [SemanticsAction.decrease].
+  String get value => _attributedValue.string;
+  set value(String value) {
+    assert(value != null);
+    _attributedValue = AttributedString(value);
+    _hasBeenAnnotated = true;
+  }
+
+  /// A textual description for the current value of the owning [RenderObject]
+  /// in [AttributedString] format.
+  ///
+  /// On iOS this is used for the `accessibilityAttributedValue` property
+  /// defined in the `UIAccessibility` Protocol. On Android it is concatenated
+  /// together with [attributedLabel] and [attributedHint] in the following
+  /// order: [attributedValue], [attributedLabel], [attributedHint]. The
+  /// concatenated value is then used as the `Text` description.
+  ///
+  /// The reading direction is given by [textDirection].
+  ///
+  /// See also:
+  ///
+  ///  * [value], which is the raw text of this property.
+  ///  * [attributedIncreasedValue], which describes what [value] will be after
+  ///    performing [SemanticsAction.increase].
+  ///  * [attributedDecreasedValue], which describes what [value] will be after
+  ///    performing [SemanticsAction.decrease].
+  AttributedString get attributedValue => _attributedValue;
+  AttributedString _attributedValue = AttributedString('');
+  set attributedValue(AttributedString attributedValue) {
+    _attributedValue = attributedValue;
     _hasBeenAnnotated = true;
   }
 
   /// The value that [value] will have after performing a
   /// [SemanticsAction.increase] action.
   ///
-  /// This must be set if a handler for [SemanticsAction.increase] is provided
-  /// and [value] is set.
+  /// Setting this attribute will override the [attributedIncreasedValue].
+  ///
+  /// One of the [attributedIncreasedValue] or [increasedValue] must be set if
+  /// a handler for [SemanticsAction.increase] is provided and one of the
+  /// [value] or [attributedValue] is set.
   ///
   /// The reading direction is given by [textDirection].
-  String get increasedValue => _increasedValue;
-  String _increasedValue = '';
+  ///
+  /// See also:
+  ///
+  ///  * [attributedIncreasedValue], which is the [AttributedString] of this property.
+  String get increasedValue => _attributedIncreasedValue.string;
   set increasedValue(String increasedValue) {
     assert(increasedValue != null);
-    _increasedValue = increasedValue;
+    _attributedIncreasedValue = AttributedString(increasedValue);
+    _hasBeenAnnotated = true;
+  }
+
+  /// The value that [value] will have after performing a
+  /// [SemanticsAction.increase] action in [AttributedString] format.
+  ///
+  /// One of the [attributedIncreasedValue] or [increasedValue] must be set if
+  /// a handler for [SemanticsAction.increase] is provided and one of the
+  /// [value] or [attributedValue] is set.
+  ///
+  /// The reading direction is given by [textDirection].
+  ///
+  /// See also:
+  ///
+  ///  * [increasedValue], which is the raw text of this property.
+  AttributedString get attributedIncreasedValue => _attributedIncreasedValue;
+  AttributedString _attributedIncreasedValue = AttributedString('');
+  set attributedIncreasedValue(AttributedString attributedIncreasedValue) {
+    _attributedIncreasedValue = attributedIncreasedValue;
+    _hasBeenAnnotated = true;
+  }
+
+  /// The value that [value] will have after performing a
+  /// [SemanticsAction.decrease] action.
+  ///
+  /// Setting this attribute will override the [attributedDecreasedValue].
+  ///
+  /// One of the [attributedDecreasedValue] or [decreasedValue] must be set if
+  /// a handler for [SemanticsAction.decrease] is provided and one of the
+  /// [value] or [attributedValue] is set.
+  ///
+  /// The reading direction is given by [textDirection].
+  ///
+  ///  * [attributedDecreasedValue], which is the [AttributedString] of this property.
+  String get decreasedValue => _attributedDecreasedValue.string;
+  set decreasedValue(String decreasedValue) {
+    assert(decreasedValue != null);
+    _attributedDecreasedValue = AttributedString(decreasedValue);
+    _hasBeenAnnotated = true;
+  }
+
+  /// The value that [value] will have after performing a
+  /// [SemanticsAction.decrease] action in [AttributedString] format.
+  ///
+  /// One of the [attributedDecreasedValue] or [decreasedValue] must be set if
+  /// a handler for [SemanticsAction.decrease] is provided and one of the
+  /// [value] or [attributedValue] is set.
+  ///
+  /// The reading direction is given by [textDirection].
+  ///
+  /// See also:
+  ///
+  ///  * [decreasedValue], which is the raw text of this property.
+  AttributedString get attributedDecreasedValue => _attributedDecreasedValue;
+  AttributedString _attributedDecreasedValue = AttributedString('');
+  set attributedDecreasedValue(AttributedString attributedDecreasedValue) {
+    _attributedDecreasedValue = attributedDecreasedValue;
     _hasBeenAnnotated = true;
   }
 
   /// A brief description of the result of performing an action on this node.
   ///
-  /// On iOS this is used for the `accessibilityHint` property defined in the
-  /// `UIAccessibility` Protocol. On Android it is concatenated together with
-  /// [label] and [value] in the following order: [value], [label], [hint].
-  /// The concatenated value is then used as the `Text` description.
+  /// Setting this attribute will override the [attributedHint].
   ///
   /// The reading direction is given by [textDirection].
-  String get hint => _hint;
-  String _hint = '';
+  ///
+  /// See also:
+  ///
+  ///  * [attributedHint], which is the [AttributedString] of this property.
+  String get hint => _attributedHint.string;
   set hint(String hint) {
     assert(hint != null);
-    _hint = hint;
+    _attributedHint = AttributedString(hint);
+    _hasBeenAnnotated = true;
+  }
+
+  /// A brief description of the result of performing an action on this node in
+  /// [AttributedString] format.
+  ///
+  /// On iOS this is used for the `accessibilityAttributedHint` property
+  /// defined in the `UIAccessibility` Protocol. On Android it is concatenated
+  /// together with [attributedLabel] and [attributedValue] in the following
+  /// order: [attributedValue], [attributedLabel], [attributedHint]. The
+  /// concatenated value is then used as the `Text` description.
+  ///
+  /// The reading direction is given by [textDirection].
+  ///
+  /// See also:
+  ///
+  ///  * [hint], which is the raw text of this property.
+  AttributedString get attributedHint => _attributedHint;
+  AttributedString _attributedHint = AttributedString('');
+  set attributedHint(AttributedString attributedHint) {
+    _attributedHint = attributedHint;
     _hasBeenAnnotated = true;
   }
 
@@ -3743,11 +4222,11 @@ class SemanticsConfiguration {
     _setFlag(SemanticsFlag.isReadOnly, value);
   }
 
-  /// Whether the [value] should be obscured.
+  /// Whether [this.value] should be obscured.
   ///
   /// This option is usually set in combination with [isTextField] to indicate
   /// that the text field contains a password (or other sensitive information).
-  /// Doing so instructs screen readers to not read out the [value].
+  /// Doing so instructs screen readers to not read out [this.value].
   bool get isObscured => _hasFlag(SemanticsFlag.isObscured);
   set isObscured(bool value) {
     _setFlag(SemanticsFlag.isObscured, value);
@@ -3774,8 +4253,8 @@ class SemanticsConfiguration {
     _setFlag(SemanticsFlag.hasImplicitScrolling, value);
   }
 
-  /// The currently selected text (or the position of the cursor) within [value]
-  /// if this node represents a text field.
+  /// The currently selected text (or the position of the cursor) within
+  /// [this.value] if this node represents a text field.
   TextSelection? get textSelection => _textSelection;
   TextSelection? _textSelection;
   set textSelection(TextSelection? value) {
@@ -3903,7 +4382,7 @@ class SemanticsConfiguration {
     if (_currentValueLength != null && other._currentValueLength != null) {
       return false;
     }
-    if (_value != null && _value.isNotEmpty && other._value != null && other._value.isNotEmpty)
+    if (_attributedValue != null && _attributedValue.string.isNotEmpty && other._attributedValue != null && other._attributedValue.string.isNotEmpty)
       return false;
     return true;
   }
@@ -3943,22 +4422,22 @@ class SemanticsConfiguration {
 
     textDirection ??= child.textDirection;
     _sortKey ??= child._sortKey;
-    _label = _concatStrings(
-      thisString: _label,
+    _attributedLabel = _concatAttributedString(
+      thisAttributedString: _attributedLabel,
       thisTextDirection: textDirection,
-      otherString: child._label,
+      otherAttributedString: child._attributedLabel,
       otherTextDirection: child.textDirection,
     );
-    if (_decreasedValue == '' || _decreasedValue == null)
-      _decreasedValue = child._decreasedValue;
-    if (_value == '' || _value == null)
-      _value = child._value;
-    if (_increasedValue == '' || _increasedValue == null)
-      _increasedValue = child._increasedValue;
-    _hint = _concatStrings(
-      thisString: _hint,
+    if (_attributedValue == null || _attributedValue.string == '')
+      _attributedValue = child._attributedValue;
+    if (_attributedIncreasedValue == null || _attributedIncreasedValue.string == '')
+      _attributedIncreasedValue = child._attributedIncreasedValue;
+    if (_attributedDecreasedValue == null || _attributedDecreasedValue.string == '')
+      _attributedDecreasedValue = child._attributedDecreasedValue;
+    _attributedHint = _concatAttributedString(
+      thisAttributedString: _attributedHint,
       thisTextDirection: textDirection,
-      otherString: child._hint,
+      otherAttributedString: child._attributedHint,
       otherTextDirection: child.textDirection,
     );
 
@@ -3977,11 +4456,11 @@ class SemanticsConfiguration {
       .._isMergingSemanticsOfDescendants = _isMergingSemanticsOfDescendants
       .._textDirection = _textDirection
       .._sortKey = _sortKey
-      .._label = _label
-      .._increasedValue = _increasedValue
-      .._value = _value
-      .._decreasedValue = _decreasedValue
-      .._hint = _hint
+      .._attributedLabel = _attributedLabel
+      .._attributedIncreasedValue = _attributedIncreasedValue
+      .._attributedValue = _attributedValue
+      .._attributedDecreasedValue = _attributedDecreasedValue
+      .._attributedHint = _attributedHint
       .._hintOverrides = _hintOverrides
       .._elevation = _elevation
       .._thickness = _thickness
@@ -4020,28 +4499,28 @@ enum DebugSemanticsDumpOrder {
   traversalOrder,
 }
 
-String _concatStrings({
-  required String thisString,
-  required String otherString,
+AttributedString _concatAttributedString({
+  required AttributedString thisAttributedString,
+  required AttributedString otherAttributedString,
   required TextDirection? thisTextDirection,
   required TextDirection? otherTextDirection,
 }) {
-  if (otherString.isEmpty)
-    return thisString;
-  String nestedLabel = otherString;
+  if (otherAttributedString.string.isEmpty)
+    return thisAttributedString;
   if (thisTextDirection != otherTextDirection && otherTextDirection != null) {
     switch (otherTextDirection) {
       case TextDirection.rtl:
-        nestedLabel = '${Unicode.RLE}$nestedLabel${Unicode.PDF}';
+        otherAttributedString = AttributedString(Unicode.RLE) + otherAttributedString + AttributedString(Unicode.PDF);
         break;
       case TextDirection.ltr:
-        nestedLabel = '${Unicode.LRE}$nestedLabel${Unicode.PDF}';
+        otherAttributedString = AttributedString(Unicode.LRE) + otherAttributedString + AttributedString(Unicode.PDF);
         break;
     }
   }
-  if (thisString.isEmpty)
-    return nestedLabel;
-  return '$thisString\n$nestedLabel';
+  if (thisAttributedString.string.isEmpty)
+    return otherAttributedString;
+
+  return thisAttributedString + AttributedString('\n') + otherAttributedString;
 }
 
 /// Base class for all sort keys for [SemanticsProperties.sortKey] accessibility

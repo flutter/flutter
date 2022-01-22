@@ -3,14 +3,149 @@
 // found in the LICENSE file.
 
 
-import 'dart:convert' show utf8;
 import 'dart:convert' show jsonDecode;
 
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'text_input_utils.dart';
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+
+  group('TextSelection', () {
+    test('The invalid selection is a singleton', () {
+      const TextSelection invalidSelection1 = TextSelection(
+        baseOffset: -1,
+        extentOffset: 0,
+        isDirectional: true,
+      );
+      const TextSelection invalidSelection2 = TextSelection(baseOffset: 123,
+        extentOffset: -1,
+        affinity: TextAffinity.upstream,
+      );
+      expect(invalidSelection1, invalidSelection2);
+      expect(invalidSelection1.hashCode, invalidSelection2.hashCode);
+    });
+
+    test('TextAffinity does not affect equivalence when the selection is not collapsed', () {
+      const TextSelection selection1 = TextSelection(
+        baseOffset: 1,
+        extentOffset: 2,
+      );
+      const TextSelection selection2 = TextSelection(
+        baseOffset: 1,
+        extentOffset: 2,
+        affinity: TextAffinity.upstream,
+      );
+      expect(selection1, selection2);
+      expect(selection1.hashCode, selection2.hashCode);
+    });
+  });
+
+  group('TextEditingValue', () {
+    group('replaced', () {
+      const String testText = 'From a false proposition, anything follows.';
+
+      test('selection deletion', () {
+        const TextSelection selection = TextSelection(baseOffset: 5, extentOffset: 13);
+        expect(
+          const TextEditingValue(text: testText, selection: selection).replaced(selection, ''),
+          const TextEditingValue(text:  'From proposition, anything follows.', selection: TextSelection.collapsed(offset: 5)),
+        );
+      });
+
+      test('reversed selection deletion', () {
+        const TextSelection selection = TextSelection(baseOffset: 13, extentOffset: 5);
+        expect(
+          const TextEditingValue(text: testText, selection: selection).replaced(selection, ''),
+          const TextEditingValue(text:  'From proposition, anything follows.', selection: TextSelection.collapsed(offset: 5)),
+        );
+      });
+
+      test('insert', () {
+        const TextSelection selection = TextSelection.collapsed(offset: 5);
+        expect(
+          const TextEditingValue(text: testText, selection: selection).replaced(selection, 'AA'),
+          const TextEditingValue(
+            text:  'From AAa false proposition, anything follows.',
+            // The caret moves to the end of the text inserted.
+            selection: TextSelection.collapsed(offset: 7),
+          ),
+        );
+      });
+
+      test('replace before selection', () {
+        const TextSelection selection = TextSelection(baseOffset: 13, extentOffset: 5);
+        expect(
+          // From |a false |proposition, anything follows.
+          // Replace the first whitespace with "AA".
+          const TextEditingValue(text: testText, selection: selection).replaced(const TextRange(start: 4, end: 5), 'AA'),
+          const TextEditingValue(text:  'FromAAa false proposition, anything follows.', selection: TextSelection(baseOffset: 14, extentOffset: 6)),
+        );
+      });
+
+      test('replace after selection', () {
+        const TextSelection selection = TextSelection(baseOffset: 13, extentOffset: 5);
+        expect(
+          // From |a false |proposition, anything follows.
+          // replace the first "p" with "AA".
+          const TextEditingValue(text: testText, selection: selection).replaced(const TextRange(start: 13, end: 14), 'AA'),
+          const TextEditingValue(text:  'From a false AAroposition, anything follows.', selection: selection),
+        );
+      });
+
+      test('replace inside selection - start boundary', () {
+        const TextSelection selection = TextSelection(baseOffset: 13, extentOffset: 5);
+        expect(
+          // From |a false |proposition, anything follows.
+          // replace the first "a" with "AA".
+          const TextEditingValue(text: testText, selection: selection).replaced(const TextRange(start: 5, end: 6), 'AA'),
+          const TextEditingValue(text:  'From AA false proposition, anything follows.', selection: TextSelection(baseOffset: 14, extentOffset: 5)),
+        );
+      });
+
+      test('replace inside selection - end boundary', () {
+        const TextSelection selection = TextSelection(baseOffset: 13, extentOffset: 5);
+        expect(
+          // From |a false |proposition, anything follows.
+          // replace the second whitespace with "AA".
+          const TextEditingValue(text: testText, selection: selection).replaced(const TextRange(start: 12, end: 13), 'AA'),
+          const TextEditingValue(text:  'From a falseAAproposition, anything follows.', selection: TextSelection(baseOffset: 14, extentOffset: 5)),
+        );
+      });
+
+      test('delete after selection', () {
+        const TextSelection selection = TextSelection(baseOffset: 13, extentOffset: 5);
+        expect(
+          // From |a false |proposition, anything follows.
+          // Delete the first "p".
+          const TextEditingValue(text: testText, selection: selection).replaced(const TextRange(start: 13, end: 14), ''),
+          const TextEditingValue(text:  'From a false roposition, anything follows.', selection: selection),
+        );
+      });
+
+      test('delete inside selection - start boundary', () {
+        const TextSelection selection = TextSelection(baseOffset: 13, extentOffset: 5);
+        expect(
+          // From |a false |proposition, anything follows.
+          // Delete the first "a".
+          const TextEditingValue(text: testText, selection: selection).replaced(const TextRange(start: 5, end: 6), ''),
+          const TextEditingValue(text:  'From  false proposition, anything follows.', selection: TextSelection(baseOffset: 12, extentOffset: 5)),
+        );
+      });
+
+      test('delete inside selection - end boundary', () {
+        const TextSelection selection = TextSelection(baseOffset: 13, extentOffset: 5);
+        expect(
+          // From |a false |proposition, anything follows.
+          // Delete the second whitespace.
+          const TextEditingValue(text: testText, selection: selection).replaced(const TextRange(start: 12, end: 13), ''),
+          const TextEditingValue(text:  'From a falseproposition, anything follows.', selection: TextSelection(baseOffset: 12, extentOffset: 5)),
+        );
+      });
+    });
+  });
 
   group('TextInput message channels', () {
     late FakeTextChannel fakeTextChannel;
@@ -32,7 +167,7 @@ void main() {
         MethodCall('TextInput.setClient', <dynamic>[1, client.configuration.toJson()]),
       ]);
 
-      fakeTextChannel.incoming!(const MethodCall('TextInputClient.requestExistingInputState', null));
+      fakeTextChannel.incoming!(const MethodCall('TextInputClient.requestExistingInputState'));
 
       expect(fakeTextChannel.outgoingCalls.length, 3);
       fakeTextChannel.validateOutgoingMethodCalls(<MethodCall>[
@@ -51,7 +186,7 @@ void main() {
         MethodCall('TextInput.setClient', <dynamic>[1, client.configuration.toJson()]),
       ]);
 
-      fakeTextChannel.incoming!(const MethodCall('TextInputClient.requestExistingInputState', null));
+      fakeTextChannel.incoming!(const MethodCall('TextInputClient.requestExistingInputState'));
 
       expect(fakeTextChannel.outgoingCalls.length, 3);
       fakeTextChannel.validateOutgoingMethodCalls(<MethodCall>[
@@ -86,6 +221,7 @@ void main() {
       expect(configuration.inputType, TextInputType.text);
       expect(configuration.readOnly, false);
       expect(configuration.obscureText, false);
+      expect(configuration.enableDeltaModel, false);
       expect(configuration.autocorrect, true);
       expect(configuration.actionLabel, null);
       expect(configuration.textCapitalization, TextCapitalization.none);
@@ -94,7 +230,6 @@ void main() {
 
     test('text serializes to JSON', () async {
       const TextInputConfiguration configuration = TextInputConfiguration(
-        inputType: TextInputType.text,
         readOnly: true,
         obscureText: true,
         autocorrect: false,
@@ -154,6 +289,7 @@ void main() {
       expect(TextInputType.visiblePassword.toString(), 'TextInputType(name: TextInputType.visiblePassword, signed: null, decimal: null)');
       expect(TextInputType.name.toString(), 'TextInputType(name: TextInputType.name, signed: null, decimal: null)');
       expect(TextInputType.streetAddress.toString(), 'TextInputType(name: TextInputType.address, signed: null, decimal: null)');
+      expect(TextInputType.none.toString(), 'TextInputType(name: TextInputType.none, signed: null, decimal: null)');
 
       expect(text == number, false);
       expect(number == number2, true);
@@ -181,6 +317,7 @@ void main() {
       expect(TextInputType.visiblePassword.index, 7);
       expect(TextInputType.name.index, 8);
       expect(TextInputType.streetAddress.index, 9);
+      expect(TextInputType.none.index, 10);
 
       expect(TextEditingValue.empty.toString(),
           'TextEditingValue(text: \u2524\u251C, selection: ${const TextSelection.collapsed(offset: -1)}, composing: ${TextRange.empty})');
@@ -431,61 +568,4 @@ class FakeTextInputClient implements TextInputClient {
   }
 
   TextInputConfiguration get configuration => const TextInputConfiguration();
-}
-
-class FakeTextChannel implements MethodChannel {
-  FakeTextChannel(this.outgoing) : assert(outgoing != null);
-
-  Future<dynamic> Function(MethodCall) outgoing;
-  Future<void> Function(MethodCall)? incoming;
-
-  List<MethodCall> outgoingCalls = <MethodCall>[];
-
-  @override
-  BinaryMessenger get binaryMessenger => throw UnimplementedError();
-
-  @override
-  MethodCodec get codec => const JSONMethodCodec();
-
-  @override
-  Future<List<T>> invokeListMethod<T>(String method, [dynamic arguments]) => throw UnimplementedError();
-
-  @override
-  Future<Map<K, V>> invokeMapMethod<K, V>(String method, [dynamic arguments]) => throw UnimplementedError();
-
-  @override
-  Future<T> invokeMethod<T>(String method, [dynamic arguments]) async {
-    final MethodCall call = MethodCall(method, arguments);
-    outgoingCalls.add(call);
-    return await outgoing(call) as T;
-  }
-
-  @override
-  String get name => 'flutter/textinput';
-
-  @override
-  void setMethodCallHandler(Future<void> Function(MethodCall call)? handler) => incoming = handler;
-
-  void validateOutgoingMethodCalls(List<MethodCall> calls) {
-    expect(outgoingCalls.length, calls.length);
-    bool hasError = false;
-    for (int i = 0; i < calls.length; i++) {
-      final ByteData outgoingData = codec.encodeMethodCall(outgoingCalls[i]);
-      final ByteData expectedData = codec.encodeMethodCall(calls[i]);
-      final String outgoingString = utf8.decode(outgoingData.buffer.asUint8List());
-      final String expectedString = utf8.decode(expectedData.buffer.asUint8List());
-
-      if (outgoingString != expectedString) {
-        print(
-          'Index $i did not match:\n'
-          '  actual:   $outgoingString\n'
-          '  expected: $expectedString',
-        );
-        hasError = true;
-      }
-    }
-    if (hasError) {
-      fail('Calls did not match.');
-    }
-  }
 }

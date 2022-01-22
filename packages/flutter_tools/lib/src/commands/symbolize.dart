@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 import 'dart:typed_data';
 
@@ -24,8 +22,8 @@ import '../runner/flutter_command.dart';
 /// over stdout.
 class SymbolizeCommand extends FlutterCommand {
   SymbolizeCommand({
-    @required Stdio stdio,
-    @required FileSystem fileSystem,
+    required Stdio stdio,
+    required FileSystem fileSystem,
     DwarfSymbolizationService dwarfSymbolizationService = const DwarfSymbolizationService(),
   }) : _stdio = stdio,
        _fileSystem = fileSystem,
@@ -60,17 +58,20 @@ class SymbolizeCommand extends FlutterCommand {
   String get name => 'symbolize';
 
   @override
+  final String category = FlutterCommandCategory.tools;
+
+  @override
   bool get shouldUpdateCache => false;
 
   @override
   Future<void> validateCommand() {
-    if (!argResults.wasParsed('debug-info')) {
+    if (argResults?.wasParsed('debug-info') != true) {
       throwToolExit('"--debug-info" is required to symbolize stack traces.');
     }
-    if (!_fileSystem.isFileSync(stringArg('debug-info'))) {
+    if (!_fileSystem.isFileSync(stringArg('debug-info')!)) {
       throwToolExit('${stringArg('debug-info')} does not exist.');
     }
-    if (argResults.wasParsed('input') && !_fileSystem.isFileSync(stringArg('input'))) {
+    if (argResults?.wasParsed('input') == true && !_fileSystem.isFileSync(stringArg('input')!)) {
       throwToolExit('${stringArg('input')} does not exist.');
     }
     return super.validateCommand();
@@ -82,12 +83,12 @@ class SymbolizeCommand extends FlutterCommand {
     IOSink output;
 
     // Configure output to either specified file or stdout.
-    if (argResults.wasParsed('output')) {
+    if (argResults?.wasParsed('output') == true) {
       final File outputFile = _fileSystem.file(stringArg('output'));
       if (!outputFile.parent.existsSync()) {
         outputFile.parent.createSync(recursive: true);
       }
-       output = outputFile.openWrite();
+      output = outputFile.openWrite();
     } else {
       final StreamController<List<int>> outputController = StreamController<List<int>>();
       outputController
@@ -98,7 +99,7 @@ class SymbolizeCommand extends FlutterCommand {
     }
 
     // Configure input from either specified file or stdin.
-    if (argResults.wasParsed('input')) {
+    if (argResults?.wasParsed('input') == true) {
       input = _fileSystem.file(stringArg('input')).openRead();
     } else {
       input = _stdio.stdin;
@@ -118,7 +119,7 @@ class SymbolizeCommand extends FlutterCommand {
 typedef SymbolsTransformer = StreamTransformer<String, String> Function(Uint8List);
 
 StreamTransformer<String, String> _defaultTransformer(Uint8List symbols) {
-  final Dwarf dwarf = Dwarf.fromBytes(symbols);
+  final Dwarf? dwarf = Dwarf.fromBytes(symbols);
   if (dwarf == null) {
     throwToolExit('Failed to decode symbols file');
   }
@@ -134,7 +135,7 @@ StreamTransformer<String, String> _testTransformer(Uint8List buffer) {
     handleDone: (EventSink<String> sink) {
       sink.close();
     },
-    handleError: (dynamic error, StackTrace stackTrace, EventSink<String> sink) {
+    handleError: (Object error, StackTrace stackTrace, EventSink<String> sink) {
       sink.addError(error, stackTrace);
     }
   );
@@ -164,12 +165,12 @@ class DwarfSymbolizationService {
   /// Throws a [ToolExit] if the symbols cannot be parsed or the stack trace
   /// cannot be decoded.
   Future<void> decode({
-    @required Stream<List<int>> input,
-    @required IOSink output,
-    @required Uint8List symbols,
+    required Stream<List<int>> input,
+    required IOSink output,
+    required Uint8List symbols,
   }) async {
     final Completer<void> onDone = Completer<void>();
-    StreamSubscription<void> subscription;
+    StreamSubscription<void>? subscription;
     subscription = input
       .cast<List<int>>()
       .transform(const Utf8Decoder())
@@ -179,7 +180,7 @@ class DwarfSymbolizationService {
         try {
           output.writeln(line);
         } on Exception catch(e, s) {
-          subscription.cancel().whenComplete(() {
+          subscription?.cancel().whenComplete(() {
             if (!onDone.isCompleted) {
               onDone.completeError(e, s);
             }

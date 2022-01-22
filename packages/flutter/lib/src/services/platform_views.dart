@@ -179,6 +179,24 @@ class PlatformViewsService {
     return controller;
   }
 
+  /// Whether the render surface of the Android `FlutterView` should be converted to a `FlutterImageView`.
+  ///
+  /// When adding platform views using
+  /// [Hybrid Composition](https://flutter.dev/docs/development/platform-integration/platform-views),
+  /// the engine converts the render surface to a `FlutterImageView` to improve
+  /// animation synchronization between Flutter widgets and the Android platform
+  /// views. On Android versions < 10, this can have some performance issues.
+  /// This flag allows disabling this conversion.
+  ///
+  /// Defaults to true.
+  static Future<void> synchronizeToNativeViewHierarchy(bool yes) {
+    assert(defaultTargetPlatform == TargetPlatform.android);
+    return SystemChannels.platform_views.invokeMethod<void>(
+      'synchronizeToNativeViewHierarchy',
+      yes,
+    );
+  }
+
   // TODO(amirh): reference the iOS plugin API for registering a UIView factory once it lands.
   /// This is work in progress, not yet ready to be used, and requires a custom engine build. Creates a controller for a new iOS UIView.
   ///
@@ -504,8 +522,8 @@ class _AndroidMotionEventConverter {
       <int, AndroidPointerProperties>{};
   final Set<int> usedAndroidPointerIds = <int>{};
 
+  PointTransformer get pointTransformer => _pointTransformer;
   late PointTransformer _pointTransformer;
-
   set pointTransformer(PointTransformer transformer) {
     assert(transformer != null);
     _pointTransformer = transformer;
@@ -540,20 +558,24 @@ class _AndroidMotionEventConverter {
     );
   }
 
-  void handlePointerUpEvent(PointerUpEvent event) {
-    pointerPositions.remove(event.pointer);
-    usedAndroidPointerIds.remove(pointerProperties[event.pointer]!.id);
-    pointerProperties.remove(event.pointer);
+  void _remove(int pointer) {
+    pointerPositions.remove(pointer);
+    usedAndroidPointerIds.remove(pointerProperties[pointer]!.id);
+    pointerProperties.remove(pointer);
     if (pointerProperties.isEmpty) {
       downTimeMillis = null;
     }
   }
 
+  void handlePointerUpEvent(PointerUpEvent event) {
+    _remove(event.pointer);
+  }
+
   void handlePointerCancelEvent(PointerCancelEvent event) {
-    pointerPositions.clear();
-    pointerProperties.clear();
-    usedAndroidPointerIds.clear();
-    downTimeMillis = null;
+    // The pointer cancel event is handled like pointer up. Normally,
+    // the difference is that pointer cancel doesn't perform any action,
+    // but in this case neither up or cancel perform any action.
+    _remove(event.pointer);
   }
 
   AndroidMotionEvent? toAndroidMotionEvent(PointerEvent event) {
@@ -768,13 +790,6 @@ abstract class AndroidViewController extends PlatformViewController {
   /// disposed.
   int? get textureId;
 
-  /// The unique identifier of the Android view controlled by this controller.
-  @Deprecated(
-    'Call `controller.viewId` instead. '
-    'This feature was deprecated after v1.20.0-2.0.pre.',
-  )
-  int get id => viewId;
-
   /// Sends an Android [MotionEvent](https://developer.android.com/reference/android/view/MotionEvent)
   /// to the view.
   ///
@@ -791,10 +806,12 @@ abstract class AndroidViewController extends PlatformViewController {
     );
   }
 
-  /// Converts a given point from the global coordinate system in logical pixels to the local coordinate system for this box.
+  /// Converts a given point from the global coordinate system in logical pixels
+  /// to the local coordinate system for this box.
   ///
   /// This is required to convert a [PointerEvent] to an [AndroidMotionEvent].
   /// It is typically provided by using [RenderBox.globalToLocal].
+  PointTransformer get pointTransformer => _motionEventConverter._pointTransformer;
   set pointTransformer(PointTransformer transformer) {
     assert(transformer != null);
     _motionEventConverter._pointTransformer = transformer;
@@ -1124,18 +1141,17 @@ class UiKitViewController {
   }
 }
 
-/// An interface for a controlling a single platform view.
+/// An interface for controlling a single platform view.
 ///
 /// Used by [PlatformViewSurface] to interface with the platform view it embeds.
 abstract class PlatformViewController {
-
   /// The viewId associated with this controller.
   ///
-  /// The viewId should always be unique and non-negative. And it must not be null.
+  /// The viewId should always be unique and non-negative.
   ///
   /// See also:
   ///
-  ///  * [PlatformViewsRegistry], which is a helper for managing platform view ids.
+  ///  * [PlatformViewsRegistry], which is a helper for managing platform view IDs.
   int get viewId;
 
   /// Dispatches the `event` to the platform view.

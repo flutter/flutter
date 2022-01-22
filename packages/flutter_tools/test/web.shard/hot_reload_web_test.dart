@@ -31,19 +31,18 @@ void main() {
   });
 
   testWithoutContext('hot restart works without error', () async {
-    await flutter.run(chrome: true, additionalCommandArgs: <String>['--verbose']);
+    await flutter.run(chrome: true, additionalCommandArgs: <String>['--verbose', '--web-renderer=html']);
     await flutter.hotRestart();
   });
 
   testWithoutContext('newly added code executes during hot restart', () async {
     final Completer<void> completer = Completer<void>();
     final StreamSubscription<String> subscription = flutter.stdout.listen((String line) {
-      print(line);
       if (line.contains('(((((RELOAD WORKED)))))')) {
         completer.complete();
       }
     });
-    await flutter.run(chrome: true, additionalCommandArgs: <String>['--verbose']);
+    await flutter.run(chrome: true, additionalCommandArgs: <String>['--verbose', '--web-renderer=html']);
     project.uncommentHotReloadPrint();
     try {
       await flutter.hotRestart();
@@ -56,7 +55,6 @@ void main() {
   testWithoutContext('newly added code executes during hot restart - canvaskit', () async {
     final Completer<void> completer = Completer<void>();
     final StreamSubscription<String> subscription = flutter.stdout.listen((String line) {
-      print(line);
       if (line.contains('(((((RELOAD WORKED)))))')) {
         completer.complete();
       }
@@ -70,5 +68,5 @@ void main() {
     } finally {
       await subscription.cancel();
     }
-  });
+  }, skip: true); // Skipping for https://github.com/flutter/flutter/issues/85043.
 }

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:fake_async/fake_async.dart';
@@ -14,7 +12,6 @@ import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:meta/meta.dart';
 import 'package:test/fake.dart';
 
 import '../src/common.dart';
@@ -69,6 +66,33 @@ void main() {
       expect(logger.traceText, contains('Ignored error discovering Nexus 5X'));
       await expectDevice('0553790d0a4e726f', <Device>[device1]);
       expect(logger.traceText, contains('Ignored error discovering 0553790d0a4e726f'));
+    });
+
+    testWithoutContext('getDeviceById exact matcher with well known ID', () async {
+      final FakeDevice device1 = FakeDevice('Windows', 'windows');
+      final FakeDevice device2 = FakeDevice('Nexus 5X', '01abfc49119c410e');
+      final FakeDevice device3 = FakeDevice('iPod touch', '82564b38861a9a5');
+      final List<Device> devices = <Device>[device1, device2, device3];
+      final BufferLogger logger = BufferLogger.test();
+
+      // Because the well known ID will match, no other device discovery will run.
+      final DeviceManager deviceManager = TestDeviceManager(
+        devices,
+        deviceDiscoveryOverrides: <DeviceDiscovery>[
+          ThrowingPollingDeviceDiscovery(),
+          LongPollingDeviceDiscovery(),
+        ],
+        logger: logger,
+        terminal: Terminal.test(),
+        wellKnownId: 'windows',
+      );
+
+      Future<void> expectDevice(String id, List<Device> expected) async {
+        deviceManager.specifiedDeviceId = id;
+        expect(await deviceManager.getDevicesById(id), expected);
+      }
+      await expectDevice('windows', <Device>[device1]);
+      expect(logger.traceText, isEmpty);
     });
 
     testWithoutContext('getDeviceById prefix matcher', () async {
@@ -454,42 +478,47 @@ void main() {
   });
 
   testWithoutContext('computeDartVmFlags handles various combinations of Dart VM flags and null_assertions', () {
-    expect(computeDartVmFlags(DebuggingOptions.enabled(BuildInfo.debug, dartFlags: null)), '');
+    expect(computeDartVmFlags(DebuggingOptions.enabled(BuildInfo.debug)), '');
     expect(computeDartVmFlags(DebuggingOptions.enabled(BuildInfo.debug, dartFlags: '--foo')), '--foo');
-    expect(computeDartVmFlags(DebuggingOptions.enabled(BuildInfo.debug, dartFlags: '', nullAssertions: true)), '--null_assertions');
+    expect(computeDartVmFlags(DebuggingOptions.enabled(BuildInfo.debug, nullAssertions: true)), '--null_assertions');
     expect(computeDartVmFlags(DebuggingOptions.enabled(BuildInfo.debug, dartFlags: '--foo', nullAssertions: true)), '--foo,--null_assertions');
   });
 }
 
 class TestDeviceManager extends DeviceManager {
-    TestDeviceManager(List<Device> allDevices, {
-    List<DeviceDiscovery> deviceDiscoveryOverrides,
-    @required Logger logger,
-    @required Terminal terminal,
-  }) : super(logger: logger, terminal: terminal, userMessages: UserMessages()) {
-    _fakeDeviceDiscoverer = FakePollingDeviceDiscovery();
-    _deviceDiscoverers = <DeviceDiscovery>[
-      _fakeDeviceDiscoverer,
-      if (deviceDiscoveryOverrides != null)
-        ...deviceDiscoveryOverrides
-    ];
+  TestDeviceManager(
+    List<Device> allDevices, {
+    List<DeviceDiscovery>? deviceDiscoveryOverrides,
+    required Logger logger,
+    required Terminal terminal,
+    String? wellKnownId,
+  }) : _fakeDeviceDiscoverer = FakePollingDeviceDiscovery(),
+       _deviceDiscoverers = <DeviceDiscovery>[],
+       super(logger: logger, terminal: terminal, userMessages: UserMessages()) {
+    if (wellKnownId != null) {
+      _fakeDeviceDiscoverer.wellKnownIds.add(wellKnownId);
+    }
+    _deviceDiscoverers.add(_fakeDeviceDiscoverer);
+    if (deviceDiscoveryOverrides != null) {
+      _deviceDiscoverers.addAll(deviceDiscoveryOverrides);
+    }
     resetDevices(allDevices);
   }
   @override
   List<DeviceDiscovery> get deviceDiscoverers => _deviceDiscoverers;
-  List<DeviceDiscovery> _deviceDiscoverers;
-  FakePollingDeviceDiscovery _fakeDeviceDiscoverer;
+  final List<DeviceDiscovery> _deviceDiscoverers;
+  final FakePollingDeviceDiscovery _fakeDeviceDiscoverer;
 
   void resetDevices(List<Device> allDevices) {
     _fakeDeviceDiscoverer.setDevices(allDevices);
   }
 
-  bool isAlwaysSupportedOverride;
+  bool? isAlwaysSupportedOverride;
 
   @override
-  bool isDeviceSupportedForProject(Device device, FlutterProject flutterProject) {
+  bool isDeviceSupportedForProject(Device device, FlutterProject? flutterProject) {
     if (isAlwaysSupportedOverride != null) {
-      return isAlwaysSupportedOverride;
+      return isAlwaysSupportedOverride!;
     }
     return super.isDeviceSupportedForProject(device, flutterProject);
   }
@@ -511,13 +540,16 @@ class MockDeviceDiscovery extends Fake implements DeviceDiscovery {
   }
 
   @override
-  Future<List<Device>> discoverDevices({Duration timeout}) async {
+  Future<List<Device>> discoverDevices({Duration? timeout}) async {
     discoverDevicesCalled += 1;
     return deviceValues;
   }
+
+  @override
+  List<String> get wellKnownIds => <String>[];
 }
 
-class FakeFlutterProject extends Fake implements FlutterProject {}
+class FakeFlutterProject extends Fake implements FlutterProject { }
 
 class LongPollingDeviceDiscovery extends PollingDeviceDiscovery {
   LongPollingDeviceDiscovery() : super('forever');
@@ -525,18 +557,18 @@ class LongPollingDeviceDiscovery extends PollingDeviceDiscovery {
   final Completer<List<Device>> _completer = Completer<List<Device>>();
 
   @override
-  Future<List<Device>> pollingGetDevices({ Duration timeout }) async {
+  Future<List<Device>> pollingGetDevices({ Duration? timeout }) async {
     return _completer.future;
   }
 
   @override
   Future<void> stopPolling() async {
-    _completer.complete();
+    _completer.complete(<Device>[]);
   }
 
   @override
   Future<void> dispose() async {
-    _completer.complete();
+    _completer.complete(<Device>[]);
   }
 
   @override
@@ -544,13 +576,16 @@ class LongPollingDeviceDiscovery extends PollingDeviceDiscovery {
 
   @override
   bool get canListAnything => true;
+
+  @override
+  final List<String> wellKnownIds = <String>[];
 }
 
 class ThrowingPollingDeviceDiscovery extends PollingDeviceDiscovery {
   ThrowingPollingDeviceDiscovery() : super('throw');
 
   @override
-  Future<List<Device>> pollingGetDevices({ Duration timeout }) async {
+  Future<List<Device>> pollingGetDevices({ Duration? timeout }) async {
     throw const ProcessException('fake-discovery', <String>[]);
   }
 
@@ -559,6 +594,9 @@ class ThrowingPollingDeviceDiscovery extends PollingDeviceDiscovery {
 
   @override
   bool get canListAnything => true;
+
+  @override
+  List<String> get wellKnownIds => <String>[];
 }
 
 class FakeTerminal extends Fake implements Terminal {
@@ -573,15 +611,15 @@ class FakeTerminal extends Fake implements Terminal {
     _nextResult = result;
   }
 
-  List<String> _nextPrompt;
-  String _nextResult;
+  List<String>? _nextPrompt;
+  late String _nextResult;
 
   @override
   Future<String> promptForCharInput(
     List<String> acceptedCharacters, {
-    Logger logger,
-    String prompt,
-    int defaultChoiceIndex,
+    Logger? logger,
+    String? prompt,
+    int? defaultChoiceIndex,
     bool displayAcceptedCharacters = true,
   }) async {
     expect(acceptedCharacters, _nextPrompt);

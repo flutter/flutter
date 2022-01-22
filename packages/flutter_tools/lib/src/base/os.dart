@@ -184,20 +184,22 @@ class _PosixUtils extends OperatingSystemUtils {
 
   @override
   void chmod(FileSystemEntity entity, String mode) {
+    // Errors here are silently ignored (except when tracing).
     try {
       final ProcessResult result = _processManager.runSync(
         <String>['chmod', mode, entity.path],
       );
       if (result.exitCode != 0) {
         _logger.printTrace(
-          'Error trying to run chmod on ${entity.absolute.path}'
-          '\nstdout: ${result.stdout}'
-          '\nstderr: ${result.stderr}',
+          'Error trying to run "chmod $mode ${entity.path}":\n'
+          '  exit code: ${result.exitCode}\n'
+          '  stdout: ${result.stdout.toString().trimRight()}\n'
+          '  stderr: ${result.stderr.toString().trimRight()}'
         );
       }
     } on ProcessException catch (error) {
       _logger.printTrace(
-        'Error trying to run chmod on ${entity.absolute.path}: $error',
+        'Error trying to run "chmod $mode ${entity.path}": $error',
       );
     }
   }
@@ -268,20 +270,22 @@ class _PosixUtils extends OperatingSystemUtils {
   @override
   HostPlatform get hostPlatform {
     if (_hostPlatform == null) {
-      final RunResult hostPlatformCheck =
-          _processUtils.runSync(<String>['uname', '-m']);
+      final RunResult hostPlatformCheck = _processUtils.runSync(<String>['uname', '-m']);
       // On x64 stdout is "uname -m: x86_64"
       // On arm64 stdout is "uname -m: aarch64, arm64_v8a"
       if (hostPlatformCheck.exitCode != 0) {
-        _logger.printError(
-          'Error trying to run uname -m'
-          '\nstdout: ${hostPlatformCheck.stdout}'
-          '\nstderr: ${hostPlatformCheck.stderr}',
-        );
         _hostPlatform = HostPlatform.linux_x64;
+        _logger.printError(
+          'Encountered an error trying to run "uname -m":\n'
+          '  exit code: ${hostPlatformCheck.exitCode}\n'
+          '  stdout: ${hostPlatformCheck.stdout.trimRight()}\n'
+          '  stderr: ${hostPlatformCheck.stderr.trimRight()}\n'
+          'Assuming host platform is ${getNameForHostPlatform(_hostPlatform!)}.',
+        );
       } else if (hostPlatformCheck.stdout.trim().endsWith('x86_64')) {
         _hostPlatform = HostPlatform.linux_x64;
       } else {
+        // We default to ARM if it's not x86_64 and we did not get an error.
         _hostPlatform = HostPlatform.linux_arm64;
       }
     }
@@ -426,6 +430,46 @@ class _MacOSUtils extends _PosixUtils {
       }
     }
     return _hostPlatform!;
+  }
+
+  // unzip, then rsync
+  @override
+  void unzip(File file, Directory targetDirectory) {
+    if (!_processManager.canRun('unzip')) {
+      // unzip is not available. this error message is modeled after the download
+      // error in bin/internal/update_dart_sdk.sh
+      throwToolExit('Missing "unzip" tool. Unable to extract ${file.path}.\nConsider running "brew install unzip".');
+    }
+    if (_processManager.canRun('rsync')) {
+      final Directory tempDirectory = _fileSystem.systemTempDirectory.createTempSync('flutter_${file.basename}.');
+      try {
+        // Unzip to a temporary directory.
+        _processUtils.runSync(
+          <String>['unzip', '-o', '-q', file.path, '-d', tempDirectory.path],
+          throwOnError: true,
+          verboseExceptions: true,
+        );
+        for (final FileSystemEntity unzippedFile in tempDirectory.listSync(followLinks: false)) {
+          // rsync --delete the unzipped files so files removed from the archive are also removed from the target.
+          // Add the '-8' parameter to avoid mangling filenames with encodings that do not match the current locale.
+          _processUtils.runSync(
+            <String>['rsync', '-8', '-av', '--delete', unzippedFile.path, targetDirectory.path],
+            throwOnError: true,
+            verboseExceptions: true,
+          );
+        }
+      } finally {
+        tempDirectory.deleteSync(recursive: true);
+      }
+    } else {
+      // Fall back to just unzipping.
+      _logger.printTrace('Unable to find rsync, falling back to direct unzipping.');
+      _processUtils.runSync(
+        <String>['unzip', '-o', '-q', file.path, '-d', targetDirectory.path],
+        throwOnError: true,
+        verboseExceptions: true,
+      );
+    }
   }
 }
 

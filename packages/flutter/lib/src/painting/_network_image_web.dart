@@ -59,12 +59,10 @@ class NetworkImage
   InformationCollector? _imageStreamInformationCollector(image_provider.NetworkImage key) {
     InformationCollector? collector;
     assert(() {
-      collector = () {
-        return <DiagnosticsNode>[
-          DiagnosticsProperty<image_provider.ImageProvider>('Image provider', this),
-          DiagnosticsProperty<NetworkImage>('Image key', key as NetworkImage),
-        ];
-      };
+      collector = () => <DiagnosticsNode>[
+        DiagnosticsProperty<image_provider.ImageProvider>('Image provider', this),
+        DiagnosticsProperty<NetworkImage>('Image key', key as NetworkImage),
+      ];
       return true;
     }());
     return collector;
@@ -86,7 +84,7 @@ class NetworkImage
     final Uri resolved = Uri.base.resolve(key.url);
     // This API only exists in the web engine implementation and is not
     // contained in the analyzer summary for Flutter.
-    return ui.webOnlyInstantiateImageCodecFromUrl(// ignore: undefined_function
+    return ui.webOnlyInstantiateImageCodecFromUrl(// ignore: undefined_function, avoid_dynamic_calls
       resolved,
       chunkCallback: (int bytes, int total) {
         chunkEvents.add(ImageChunkEvent(cumulativeBytesLoaded: bytes, expectedTotalBytes: total));

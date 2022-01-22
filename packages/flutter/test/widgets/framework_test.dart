@@ -1084,7 +1084,7 @@ void main() {
     expect(tabController.index, 0);
 
     // switch tabs 0 -> 1
-    setState((){
+    setState(() {
       tabController.index = 1;
     });
 
@@ -1093,7 +1093,7 @@ void main() {
     expect(tabController.index, 1);
 
     // rebuild TabBarView that only have the 1st page with GlobalKey 'key1'
-    setState((){
+    setState(() {
       tabBarViewCnt = 1;
       tabController = TabController(length: tabBarViewCnt, vsync: const TestVSync());
     });
@@ -1523,6 +1523,7 @@ void main() {
     await tester.pumpWidget(Container());
     final dynamic exception = tester.takeException();
     expect(
+      // ignore: avoid_dynamic_calls
       exception.message,
       equalsIgnoringHashCodes(
         'Tried to build dirty widget in the wrong build scope.\n'
@@ -1584,7 +1585,7 @@ void main() {
     // occur.
     expect(() => element.state, throwsA(isA<TypeError>()));
     expect(() => element.widget, throwsA(isA<TypeError>()));
-  }, skip: kIsWeb);
+  });
 
   testWidgets('Deactivate and activate are called correctly', (WidgetTester tester) async {
     final List<String> states = <String>[];
@@ -1618,6 +1619,57 @@ void main() {
     expect(states, <String>['deactivate', 'activate', 'didUpdateWidget', 'build']);
     await pumpWidget(Container());
     expect(states, <String>['deactivate', 'dispose']);
+  });
+
+  testWidgets('RenderObjectElement.unmount disposes of its renderObject', (WidgetTester tester) async {
+    await tester.pumpWidget(const Placeholder());
+    final RenderObjectElement element = tester.allElements.whereType<RenderObjectElement>().first;
+    final RenderObject renderObject = element.renderObject;
+    expect(renderObject.debugDisposed, false);
+
+    await tester.pumpWidget(Container());
+
+    expect(() => element.renderObject, throwsAssertionError);
+    expect(renderObject.debugDisposed, true);
+  });
+
+  testWidgets('Getting the render object of an unmounted element throws', (WidgetTester tester) async {
+    await tester.pumpWidget(const _StatefulLeaf());
+    final StatefulElement element = tester.element<StatefulElement>(find.byType(_StatefulLeaf));
+    expect(element.state, isA<State<_StatefulLeaf>>());
+    expect(element.widget, isA<_StatefulLeaf>());
+    // Replace the widget tree to unmount the element.
+    await tester.pumpWidget(Container());
+
+  expect(
+    () => element.findRenderObject(),
+    throwsA(isA<FlutterError>().having(
+      (FlutterError error) => error.message,
+      'message',
+      equalsIgnoringHashCodes('''
+Cannot get renderObject of inactive element.
+In order for an element to have a valid renderObject, it must be active, which means it is part of the tree.
+Instead, this element is in the _ElementLifecycle.defunct state.
+If you called this method from a State object, consider guarding it with State.mounted.
+The findRenderObject() method was called for the following element:
+  StatefulElement#00000(DEFUNCT)'''),
+      )),
+    );
+  });
+
+  testWidgets('Elements use the identity hashCode', (WidgetTester tester) async {
+    final StatefulElement statefulElement = StatefulElement(const _StatefulLeaf());
+    expect(statefulElement.hashCode, identityHashCode(statefulElement));
+
+    final StatelessElement statelessElement = StatelessElement(const Placeholder());
+
+    expect(statelessElement.hashCode, identityHashCode(statelessElement));
+
+    final InheritedElement inheritedElement = InheritedElement(
+      const Directionality(textDirection: TextDirection.ltr, child: Placeholder()),
+    );
+
+    expect(inheritedElement.hashCode, identityHashCode(inheritedElement));
   });
 }
 

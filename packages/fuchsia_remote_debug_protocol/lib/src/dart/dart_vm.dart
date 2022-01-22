@@ -46,7 +46,6 @@ Future<vms.VmService> _waitAndConnect(
       final vms.VmService service = vms.VmService(
         controller.stream,
         socket.add,
-        log: null,
         disposeHandler: () => socket.close(),
         streamClosed: streamClosedCompleter.future
       );
@@ -55,6 +54,8 @@ Future<vms.VmService> _waitAndConnect(
       await service.getVersion();
       return service;
     } catch (e) {
+      // We should not be catching all errors arbitrarily here, this might hide real errors.
+      // TODO(ianh): Determine which exceptions to catch here.
       await socket.close();
       if (attempts > 5) {
         _log.warning('It is taking an unusually long time to connect to the VM...');
@@ -210,7 +211,7 @@ class FlutterView {
 /// This is a wrapper class for the `@Isolate` RPC object.
 ///
 /// See:
-/// https://github.com/dart-lang/sdk/blob/master/runtime/vm/service/service.md#isolate
+/// https://github.com/dart-lang/sdk/blob/main/runtime/vm/service/service.md#isolate
 ///
 /// This class contains information about the Isolate like its name and ID, as
 /// well as a reference to the parent DartVM on which it is running.

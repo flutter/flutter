@@ -13,18 +13,19 @@ import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/fuchsia/amber_ctl.dart';
 import 'package:flutter_tools/src/fuchsia/application_package.dart';
-import 'package:flutter_tools/src/fuchsia/fuchsia_dev_finder.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_device.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_ffx.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_kernel_compiler.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_pm.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_sdk.dart';
+import 'package:flutter_tools/src/fuchsia/pkgctl.dart';
+import 'package:flutter_tools/src/fuchsia/session_control.dart';
 import 'package:flutter_tools/src/fuchsia/tiles_ctl.dart';
-import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:meta/meta.dart';
 import 'package:test/fake.dart';
@@ -41,7 +42,8 @@ void main() {
     FakeFuchsiaSdk fuchsiaSdk;
     Artifacts artifacts;
     FakeProcessManager fakeSuccessfulProcessManager;
-    FakeProcessManager fakeFailedProcessManager;
+    FakeProcessManager fakeFailedProcessManagerForHostAddress;
+    FakeProcessManager fakeSuccessfulProcessManagerWithSession;
     File sshConfig;
 
     setUp(() {
@@ -73,17 +75,30 @@ void main() {
         ).createSync();
       }
       fakeSuccessfulProcessManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <String>['ssh', '-F', '/ssh_config', '123', 'which session_control'],
+          exitCode: 1,
+        ),
         FakeCommand(
           command: <String>['ssh', '-F', sshConfig.absolute.path, '123', r'echo $SSH_CONNECTION'],
           stdout: 'fe80::8c6c:2fff:fe3d:c5e1%ethp0003 50666 fe80::5054:ff:fe63:5e7a%ethp0003 22',
         ),
       ]);
-      fakeFailedProcessManager = FakeProcessManager.list(<FakeCommand>[
+      fakeFailedProcessManagerForHostAddress = FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
           command: <String>['ssh', '-F', sshConfig.absolute.path, '123', r'echo $SSH_CONNECTION'],
-          stdout: '',
-          stderr: '',
+          stdout: 'fe80::8c6c:2fff:fe3d:c5e1%ethp0003 50666 fe80::5054:ff:fe63:5e7a%ethp0003 22',
           exitCode: 1,
+        ),
+      ]);
+      fakeSuccessfulProcessManagerWithSession = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <String>['ssh', '-F', '/ssh_config', '123', 'which session_control'],
+          stdout: '/bin/session_control',
+        ),
+        FakeCommand(
+          command: <String>['ssh', '-F', sshConfig.absolute.path, '123', r'echo $SSH_CONNECTION'],
+          stdout: 'fe80::8c6c:2fff:fe3d:c5e1%ethp0003 50666 fe80::5054:ff:fe63:5e7a%ethp0003 22',
         ),
       ]);
     });
@@ -134,6 +149,21 @@ void main() {
       OperatingSystemUtils: () => osUtils,
     });
 
+    testUsingContext('start prebuilt in release mode with session', () async {
+      final LaunchResult launchResult =
+      await setupAndStartApp(prebuilt: true, mode: BuildMode.release);
+      expect(launchResult.started, isTrue);
+      expect(launchResult.hasObservatory, isFalse);
+    }, overrides: <Type, Generator>{
+      Artifacts: () => artifacts,
+      FileSystem: () => memoryFileSystem,
+      ProcessManager: () => fakeSuccessfulProcessManagerWithSession,
+      FuchsiaDeviceTools: () => fuchsiaDeviceTools,
+      FuchsiaArtifacts: () => FuchsiaArtifacts(sshConfig: sshConfig),
+      FuchsiaSdk: () => fuchsiaSdk,
+      OperatingSystemUtils: () => osUtils,
+    });
+
     testUsingContext('start and stop prebuilt in release mode', () async {
       const String appName = 'app_name';
       final FuchsiaDevice device = FuchsiaDeviceWithFakeDiscovery('123');
@@ -161,6 +191,33 @@ void main() {
       OperatingSystemUtils: () => osUtils,
     });
 
+    testUsingContext('start and stop prebuilt in release mode with session', () async {
+      const String appName = 'app_name';
+      final FuchsiaDevice device = FuchsiaDeviceWithFakeDiscovery('123');
+      globals.fs.directory('fuchsia').createSync(recursive: true);
+      final File pubspecFile = globals.fs.file('pubspec.yaml')..createSync();
+      pubspecFile.writeAsStringSync('name: $appName');
+      final File far = globals.fs.file('app_name-0.far')..createSync();
+
+      final FuchsiaApp app = FuchsiaApp.fromPrebuiltApp(far);
+      final DebuggingOptions debuggingOptions =
+      DebuggingOptions.disabled(const BuildInfo(BuildMode.release, null, treeShakeIcons: false));
+      final LaunchResult launchResult = await device.startApp(app,
+          prebuiltApplication: true,
+          debuggingOptions: debuggingOptions);
+      expect(launchResult.started, isTrue);
+      expect(launchResult.hasObservatory, isFalse);
+      expect(await device.stopApp(app), isTrue);
+    }, overrides: <Type, Generator>{
+      Artifacts: () => artifacts,
+      FileSystem: () => memoryFileSystem,
+      ProcessManager: () => fakeSuccessfulProcessManagerWithSession,
+      FuchsiaDeviceTools: () => fuchsiaDeviceTools,
+      FuchsiaArtifacts: () => FuchsiaArtifacts(sshConfig: sshConfig),
+      FuchsiaSdk: () => fuchsiaSdk,
+      OperatingSystemUtils: () => osUtils,
+    });
+
     testUsingContext('start prebuilt in debug mode', () async {
       final LaunchResult launchResult =
           await setupAndStartApp(prebuilt: true, mode: BuildMode.debug);
@@ -170,6 +227,21 @@ void main() {
       Artifacts: () => artifacts,
       FileSystem: () => memoryFileSystem,
       ProcessManager: () => fakeSuccessfulProcessManager,
+      FuchsiaDeviceTools: () => fuchsiaDeviceTools,
+      FuchsiaArtifacts: () => FuchsiaArtifacts(sshConfig: sshConfig),
+      FuchsiaSdk: () => fuchsiaSdk,
+      OperatingSystemUtils: () => osUtils,
+    });
+
+    testUsingContext('start prebuilt in debug mode with session', () async {
+      final LaunchResult launchResult =
+      await setupAndStartApp(prebuilt: true, mode: BuildMode.debug);
+      expect(launchResult.started, isTrue);
+      expect(launchResult.hasObservatory, isTrue);
+    }, overrides: <Type, Generator>{
+      Artifacts: () => artifacts,
+      FileSystem: () => memoryFileSystem,
+      ProcessManager: () => fakeSuccessfulProcessManagerWithSession,
       FuchsiaDeviceTools: () => fuchsiaDeviceTools,
       FuchsiaArtifacts: () => FuchsiaArtifacts(sshConfig: sshConfig),
       FuchsiaSdk: () => fuchsiaSdk,
@@ -186,6 +258,10 @@ void main() {
       FileSystem: () => memoryFileSystem,
       ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
             const FakeCommand(
+              command: <String>['ssh', '-F', '/ssh_config', '123', 'which session_control'],
+              exitCode: 1,
+            ),
+            const FakeCommand(
               command: <String>[
                 'Artifact.genSnapshot.TargetPlatform.fuchsia_arm64.release',
                 '--deterministic',
@@ -199,6 +275,39 @@ void main() {
               stdout: 'fe80::8c6c:2fff:fe3d:c5e1%ethp0003 50666 fe80::5054:ff:fe63:5e7a%ethp0003 22',
             ),
           ]),
+      FuchsiaDeviceTools: () => fuchsiaDeviceTools,
+      FuchsiaArtifacts: () => FuchsiaArtifacts(sshConfig: sshConfig),
+      FuchsiaSdk: () => fuchsiaSdk,
+      OperatingSystemUtils: () => osUtils,
+    });
+
+    testUsingContext('start buildable in release mode with session', () async {
+      final LaunchResult launchResult =
+      await setupAndStartApp(prebuilt: false, mode: BuildMode.release);
+      expect(launchResult.started, isTrue);
+      expect(launchResult.hasObservatory, isFalse);
+    }, overrides: <Type, Generator>{
+      Artifacts: () => artifacts,
+      FileSystem: () => memoryFileSystem,
+      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <String>['ssh', '-F', '/ssh_config', '123', 'which session_control'],
+          stdout: '/bin/session_control',
+        ),
+        const FakeCommand(
+          command: <String>[
+            'Artifact.genSnapshot.TargetPlatform.fuchsia_arm64.release',
+            '--deterministic',
+            '--snapshot_kind=app-aot-elf',
+            '--elf=build/fuchsia/elf.aotsnapshot',
+            'build/fuchsia/app_name.dil'
+          ],
+        ),
+        FakeCommand(
+          command: <String>['ssh', '-F', sshConfig.absolute.path, '123', r'echo $SSH_CONNECTION'],
+          stdout: 'fe80::8c6c:2fff:fe3d:c5e1%ethp0003 50666 fe80::5054:ff:fe63:5e7a%ethp0003 22',
+        ),
+      ]),
       FuchsiaDeviceTools: () => fuchsiaDeviceTools,
       FuchsiaArtifacts: () => FuchsiaArtifacts(sshConfig: sshConfig),
       FuchsiaSdk: () => fuchsiaSdk,
@@ -220,6 +329,21 @@ void main() {
       OperatingSystemUtils: () => osUtils,
     });
 
+    testUsingContext('start buildable in debug mode with session', () async {
+      final LaunchResult launchResult =
+      await setupAndStartApp(prebuilt: false, mode: BuildMode.debug);
+      expect(launchResult.started, isTrue);
+      expect(launchResult.hasObservatory, isTrue);
+    }, overrides: <Type, Generator>{
+      Artifacts: () => artifacts,
+      FileSystem: () => memoryFileSystem,
+      ProcessManager: () => fakeSuccessfulProcessManagerWithSession,
+      FuchsiaDeviceTools: () => fuchsiaDeviceTools,
+      FuchsiaArtifacts: () => FuchsiaArtifacts(sshConfig: sshConfig),
+      FuchsiaSdk: () => fuchsiaSdk,
+      OperatingSystemUtils: () => osUtils,
+    });
+
     testUsingContext('fail when cant get ssh config', () async {
       expect(() async =>
           setupAndStartApp(prebuilt: true, mode: BuildMode.release),
@@ -229,22 +353,22 @@ void main() {
       Artifacts: () => artifacts,
       FileSystem: () => memoryFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
-      FuchsiaDeviceTools: () => fuchsiaDeviceTools,
-      FuchsiaArtifacts: () => FuchsiaArtifacts(sshConfig: null),
+      FuchsiaArtifacts: () => FuchsiaArtifacts(),
       OperatingSystemUtils: () => osUtils,
     });
 
     testUsingContext('fail when cant get host address', () async {
       expect(() async =>
-        setupAndStartApp(prebuilt: true, mode: BuildMode.release),
+          FuchsiaDeviceWithFakeDiscovery('123').hostAddress,
           throwsToolExit(message: 'Failed to get local address, aborting.'));
     }, overrides: <Type, Generator>{
       Artifacts: () => artifacts,
       FileSystem: () => memoryFileSystem,
-      ProcessManager: () => fakeFailedProcessManager,
+      ProcessManager: () => fakeFailedProcessManagerForHostAddress,
       FuchsiaDeviceTools: () => fuchsiaDeviceTools,
       FuchsiaArtifacts: () => FuchsiaArtifacts(sshConfig: sshConfig),
       OperatingSystemUtils: () => osUtils,
+      Platform: () => FakePlatform(),
     });
 
     testUsingContext('fail with correct LaunchResult when pm fails', () async {
@@ -262,7 +386,8 @@ void main() {
       OperatingSystemUtils: () => osUtils,
     });
 
-    testUsingContext('fail with correct LaunchResult when amber fails', () async {
+    testUsingContext('fail with correct LaunchResult when pkgctl fails',
+        () async {
       final LaunchResult launchResult =
           await setupAndStartApp(prebuilt: true, mode: BuildMode.release);
       expect(launchResult.started, isFalse);
@@ -271,7 +396,7 @@ void main() {
       Artifacts: () => artifacts,
       FileSystem: () => memoryFileSystem,
       ProcessManager: () => fakeSuccessfulProcessManager,
-      FuchsiaDeviceTools: () => FakeFuchsiaDeviceTools(amber: FailingAmberCtl()),
+      FuchsiaDeviceTools: () => FakeFuchsiaDeviceTools(pkgctl: FailingPkgctl()),
       FuchsiaArtifacts: () => FuchsiaArtifacts(sshConfig: sshConfig),
       FuchsiaSdk: () => fuchsiaSdk,
       OperatingSystemUtils: () => osUtils,
@@ -287,6 +412,21 @@ void main() {
       FileSystem: () => memoryFileSystem,
       ProcessManager: () => fakeSuccessfulProcessManager,
       FuchsiaDeviceTools: () => FakeFuchsiaDeviceTools(tiles: FailingTilesCtl()),
+      FuchsiaArtifacts: () => FuchsiaArtifacts(sshConfig: sshConfig),
+      FuchsiaSdk: () => fuchsiaSdk,
+      OperatingSystemUtils: () => osUtils,
+    });
+
+    testUsingContext('fail with correct LaunchResult when tiles fails with session', () async {
+      final LaunchResult launchResult =
+      await setupAndStartApp(prebuilt: true, mode: BuildMode.release);
+      expect(launchResult.started, isFalse);
+      expect(launchResult.hasObservatory, isFalse);
+    }, overrides: <Type, Generator>{
+      Artifacts: () => artifacts,
+      FileSystem: () => memoryFileSystem,
+      ProcessManager: () => fakeSuccessfulProcessManagerWithSession,
+      FuchsiaDeviceTools: () => FakeFuchsiaDeviceTools(sessionControl: FailingFuchsiaSessionControl()),
       FuchsiaArtifacts: () => FuchsiaArtifacts(sshConfig: sshConfig),
       FuchsiaSdk: () => fuchsiaSdk,
       OperatingSystemUtils: () => osUtils,
@@ -336,66 +476,40 @@ class FakeFuchsiaIsolateDiscoveryProtocol implements FuchsiaIsolateDiscoveryProt
   void dispose() {}
 }
 
-class FakeFuchsiaAmberCtl implements FuchsiaAmberCtl {
+class FakeFuchsiaPkgctl implements FuchsiaPkgctl {
   @override
-  Future<bool> addSrc(FuchsiaDevice device, FuchsiaPackageServer server) async {
+  Future<bool> addRepo(
+      FuchsiaDevice device, FuchsiaPackageServer server) async {
     return true;
   }
 
   @override
-  Future<bool> rmSrc(FuchsiaDevice device, FuchsiaPackageServer server) async {
+  Future<bool> resolve(
+      FuchsiaDevice device, String serverName, String packageName) async {
     return true;
   }
 
   @override
-  Future<bool> getUp(FuchsiaDevice device, String packageName) async {
-    return true;
-  }
-
-  @override
-  Future<bool> addRepoCfg(FuchsiaDevice device, FuchsiaPackageServer server) async {
-    return true;
-  }
-
-  @override
-  Future<bool> pkgCtlResolve(FuchsiaDevice device, FuchsiaPackageServer server, String packageName) async {
-    return true;
-  }
-
-  @override
-  Future<bool> pkgCtlRepoRemove(FuchsiaDevice device, FuchsiaPackageServer server) async {
+  Future<bool> rmRepo(FuchsiaDevice device, FuchsiaPackageServer server) async {
     return true;
   }
 }
 
-class FailingAmberCtl implements FuchsiaAmberCtl {
+class FailingPkgctl implements FuchsiaPkgctl {
   @override
-  Future<bool> addSrc(FuchsiaDevice device, FuchsiaPackageServer server) async {
+  Future<bool> addRepo(
+      FuchsiaDevice device, FuchsiaPackageServer server) async {
     return false;
   }
 
   @override
-  Future<bool> rmSrc(FuchsiaDevice device, FuchsiaPackageServer server) async {
+  Future<bool> resolve(
+      FuchsiaDevice device, String serverName, String packageName) async {
     return false;
   }
 
   @override
-  Future<bool> getUp(FuchsiaDevice device, String packageName) async {
-    return false;
-  }
-
-  @override
-  Future<bool> addRepoCfg(FuchsiaDevice device, FuchsiaPackageServer server) async {
-    return false;
-  }
-
-  @override
-  Future<bool> pkgCtlResolve(FuchsiaDevice device, FuchsiaPackageServer server, String packageName) async {
-    return false;
-  }
-
-  @override
-  Future<bool> pkgCtlRepoRemove(FuchsiaDevice device, FuchsiaPackageServer server) async {
+  Future<bool> rmRepo(FuchsiaDevice device, FuchsiaPackageServer server) async {
     return false;
   }
 }
@@ -475,18 +589,37 @@ class FailingTilesCtl implements FuchsiaTilesCtl {
   }
 }
 
+class FakeFuchsiaSessionControl implements FuchsiaSessionControl {
+  @override
+  Future<bool> add(FuchsiaDevice device, String url) async {
+    return true;
+  }
+}
+
+class FailingFuchsiaSessionControl implements FuchsiaSessionControl {
+  @override
+  Future<bool> add(FuchsiaDevice device, String url) async {
+    return false;
+  }
+}
+
 class FakeFuchsiaDeviceTools implements FuchsiaDeviceTools {
   FakeFuchsiaDeviceTools({
-    FuchsiaAmberCtl amber,
+    FuchsiaPkgctl pkgctl,
     FuchsiaTilesCtl tiles,
-  }) : amberCtl = amber ?? FakeFuchsiaAmberCtl(),
-       tilesCtl = tiles ?? FakeFuchsiaTilesCtl();
+    FuchsiaSessionControl sessionControl,
+  })  : pkgctl = pkgctl ?? FakeFuchsiaPkgctl(),
+        tilesCtl = tiles ?? FakeFuchsiaTilesCtl(),
+        sessionControl = sessionControl ?? FakeFuchsiaSessionControl();
 
   @override
-  final FuchsiaAmberCtl amberCtl;
+  final FuchsiaPkgctl pkgctl;
 
   @override
   final FuchsiaTilesCtl tilesCtl;
+
+  @override
+  final FuchsiaSessionControl sessionControl;
 }
 
 class FakeFuchsiaPM implements FuchsiaPM {
@@ -612,18 +745,6 @@ class FailingKernelCompiler implements FuchsiaKernelCompiler {
   }
 }
 
-class FakeFuchsiaDevFinder implements FuchsiaDevFinder {
-  @override
-  Future<List<String>> list({ Duration timeout }) async {
-    return <String>['192.168.11.999 scare-cable-device-finder'];
-  }
-
-  @override
-  Future<String> resolve(String deviceName) async {
-    return '192.168.11.999';
-  }
-}
-
 class FakeFuchsiaFfx implements FuchsiaFfx {
   @override
   Future<List<String>> list({Duration timeout}) async {
@@ -640,11 +761,9 @@ class FakeFuchsiaSdk extends Fake implements FuchsiaSdk {
   FakeFuchsiaSdk({
     FuchsiaPM pm,
     FuchsiaKernelCompiler compiler,
-    FuchsiaDevFinder devFinder,
     FuchsiaFfx ffx,
   }) : fuchsiaPM = pm ?? FakeFuchsiaPM(),
        fuchsiaKernelCompiler = compiler ?? FakeFuchsiaKernelCompiler(),
-       fuchsiaDevFinder = devFinder ?? FakeFuchsiaDevFinder(),
        fuchsiaFfx = ffx ?? FakeFuchsiaFfx();
 
   @override
@@ -652,9 +771,6 @@ class FakeFuchsiaSdk extends Fake implements FuchsiaSdk {
 
   @override
   final FuchsiaKernelCompiler fuchsiaKernelCompiler;
-
-  @override
-  final FuchsiaDevFinder fuchsiaDevFinder;
 
   @override
   final FuchsiaFfx fuchsiaFfx;

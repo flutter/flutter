@@ -18,11 +18,11 @@ import '../base/version.dart';
 import '../build_info.dart';
 import '../ios/xcodeproj.dart';
 
-Version get xcodeRequiredVersion => Version(12, 0, 1, text: '12.0.1');
+Version get xcodeRequiredVersion => Version(12, 3, null, text: '12.3');
 
 /// Diverging this number from the minimum required version will provide a doctor
 /// warning, not error, that users should upgrade Xcode.
-Version get xcodeRecommendedVersion => xcodeRequiredVersion;
+Version get xcodeRecommendedVersion => Version(13, null, null, text: '13');
 
 /// SDK name passed to `xcrun --sdk`. Corresponds to undocumented Xcode
 /// SUPPORTED_PLATFORMS values.
@@ -198,10 +198,10 @@ class Xcode {
   }
 }
 
-EnvironmentType? environmentTypeFromSdkroot(Directory sdkroot) {
+EnvironmentType? environmentTypeFromSdkroot(String sdkroot, FileSystem fileSystem) {
   assert(sdkroot != null);
   // iPhoneSimulator.sdk or iPhoneOS.sdk
-  final String sdkName = sdkroot.basename.toLowerCase();
+  final String sdkName = fileSystem.path.basename(sdkroot).toLowerCase();
   if (sdkName.contains('iphone')) {
     return sdkName.contains('simulator') ? EnvironmentType.simulator : EnvironmentType.physical;
   }

@@ -16,6 +16,23 @@ String _wrapString(String input) {
   return wrapString(input, prefix: '  /// ');
 }
 
+final List<MaskConstant> _maskConstants = <MaskConstant>[
+  kValueMask,
+  kPlaneMask,
+  kUnicodePlane,
+  kUnprintablePlane,
+  kFlutterPlane,
+  kStartOfPlatformPlanes,
+  kAndroidPlane,
+  kFuchsiaPlane,
+  kIosPlane,
+  kMacosPlane,
+  kGtkPlane,
+  kWindowsPlane,
+  kWebPlane,
+  kGlfwPlane,
+];
+
 class SynonymKeyInfo {
   SynonymKeyInfo(this.keys, this.name);
 
@@ -26,7 +43,6 @@ class SynonymKeyInfo {
   // It won't end up being the same value because it'll be in the pseudo-key
   // plane.
   LogicalKeyEntry get primaryKey => keys[0];
-  int get value => (primaryKey.value & ~kVariationMask) + kSynonymPlane;
   String get constantName => upperCamelToLowerCamel(name);
 }
 
@@ -37,39 +53,36 @@ class KeyboardKeysCodeGenerator extends BaseCodeGenerator {
 
   /// Gets the generated definitions of PhysicalKeyboardKeys.
   String get _physicalDefinitions {
-    final StringBuffer definitions = StringBuffer();
+    final OutputLines<int> lines = OutputLines<int>('Physical Key Definition');
     for (final PhysicalKeyEntry entry in keyData.entries) {
       final String firstComment = _wrapString('Represents the location of the '
         '"${entry.commentName}" key on a generalized keyboard.');
       final String otherComments = _wrapString('See the function '
-        '[KeyEvent.physical] for more information.');
-      definitions.write('''
-
+        '[RawKeyEvent.physicalKey] for more information.');
+      lines.add(entry.usbHidCode, '''
 $firstComment  ///
-$otherComments  static const PhysicalKeyboardKey ${entry.constantName} = PhysicalKeyboardKey(${toHex(entry.usbHidCode, digits: 8)});
+$otherComments  static const PhysicalKeyboardKey ${entry.constantName} = PhysicalKeyboardKey(${toHex(entry.usbHidCode)});
 ''');
     }
-    return definitions.toString();
+    return lines.sortedJoin().trimRight();
   }
 
   String get _physicalDebugNames {
-    final StringBuffer result = StringBuffer();
+    final OutputLines<int> lines = OutputLines<int>('Physical debug names');
     for (final PhysicalKeyEntry entry in keyData.entries) {
-      result.write('''
-      ${toHex(entry.usbHidCode, digits: 8)}: '${entry.commentName}',
-''');
+      lines.add(entry.usbHidCode, '''
+      ${toHex(entry.usbHidCode)}: '${entry.commentName}',''');
     }
-    return result.toString();
+    return lines.sortedJoin().trimRight();
   }
 
   /// Gets the generated definitions of LogicalKeyboardKeys.
   String get _logicalDefinitions {
-    final StringBuffer definitions = StringBuffer();
+    final OutputLines<int> lines = OutputLines<int>('Logical debug names');
     void printKey(int flutterId, String constantName, String commentName, {String? otherComments}) {
       final String firstComment = _wrapString('Represents the logical "$commentName" key on the keyboard.');
-      otherComments ??= _wrapString('See the function [KeyEvent.logical] for more information.');
-      definitions.write('''
-
+      otherComments ??= _wrapString('See the function [RawKeyEvent.logicalKey] for more information.');
+      lines.add(flutterId, '''
 $firstComment  ///
 $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardKey(${toHex(flutterId, digits: 11)});
 ''');
@@ -80,67 +93,71 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
         entry.value,
         entry.constantName,
         entry.commentName,
+        otherComments: _otherComments(entry.name),
       );
     }
-    for (final SynonymKeyInfo synonymInfo in synonyms) {
-      // Use the first item in the synonyms as a template for the ID to use.
-      // It won't end up being the same value because it'll be in the pseudo-key
-      // plane.
-      final Set<String> unionNames = synonymInfo.keys.map(
+    return lines.sortedJoin().trimRight();
+  }
+
+  String? _otherComments(String name) {
+    if (synonyms.containsKey(name)) {
+      final Set<String> unionNames = synonyms[name]!.keys.map(
         (LogicalKeyEntry entry) => entry.constantName).toSet();
-      printKey(synonymInfo.value, synonymInfo.constantName, PhysicalKeyEntry.getCommentName(synonymInfo.name),
-          otherComments: _wrapString('This key represents the union of the keys '
+      return _wrapString('This key represents the union of the keys '
               '$unionNames when comparing keys. This key will never be generated '
-              'directly, its main use is in defining key maps.'));
+              'directly, its main use is in defining key maps.');
     }
-    return definitions.toString();
+    return null;
   }
 
   String get _logicalSynonyms {
     final StringBuffer result = StringBuffer();
-    for (final SynonymKeyInfo synonymInfo in synonyms) {
+    for (final SynonymKeyInfo synonymInfo in synonyms.values) {
       for (final LogicalKeyEntry key in synonymInfo.keys) {
-        final String synonymName = upperCamelToLowerCamel(synonymInfo.name);
-        result.writeln('    ${key.constantName}: $synonymName,');
+        final LogicalKeyEntry synonym = logicalData.entryByName(synonymInfo.name);
+        result.writeln('    ${key.constantName}: ${synonym.constantName},');
       }
     }
     return result.toString();
   }
 
   String get _logicalKeyLabels {
-    final StringBuffer result = StringBuffer();
+    final OutputLines<int> lines = OutputLines<int>('Logical key labels');
     for (final LogicalKeyEntry entry in logicalData.entries) {
-      result.write('''
-    ${toHex(entry.value, digits: 11)}: '${entry.commentName}',
-''');
+      lines.add(entry.value, '''
+    ${toHex(entry.value, digits: 11)}: '${entry.commentName}',''');
     }
-    for (final SynonymKeyInfo synonymInfo in synonyms) {
-      result.write('''
-    ${toHex(synonymInfo.value)}: '${synonymInfo.name}',
-''');
-    }
-    return result.toString();
+    return lines.sortedJoin().trimRight();
   }
 
   /// This generates the map of USB HID codes to physical keys.
   String get _predefinedHidCodeMap {
-    final StringBuffer scanCodeMap = StringBuffer();
+    final OutputLines<int> lines = OutputLines<int>('Physical key map');
     for (final PhysicalKeyEntry entry in keyData.entries) {
-      scanCodeMap.writeln('    ${toHex(entry.usbHidCode)}: ${entry.constantName},');
+      lines.add(entry.usbHidCode, '    ${toHex(entry.usbHidCode)}: ${entry.constantName},');
     }
-    return scanCodeMap.toString().trimRight();
+    return lines.sortedJoin().trimRight();
   }
 
   /// This generates the map of Flutter key codes to logical keys.
   String get _predefinedKeyCodeMap {
-    final StringBuffer keyCodeMap = StringBuffer();
+    final OutputLines<int> lines = OutputLines<int>('Logical key map');
     for (final LogicalKeyEntry entry in logicalData.entries) {
-      keyCodeMap.writeln('    ${toHex(entry.value, digits: 11)}: ${entry.constantName},');
+      lines.add(entry.value, '    ${toHex(entry.value, digits: 11)}: ${entry.constantName},');
     }
-    for (final SynonymKeyInfo synonymInfo in synonyms) {
-      keyCodeMap.writeln('    ${toHex(synonymInfo.value, digits: 11)}: ${synonymInfo.constantName},');
+    return lines.sortedJoin().trimRight();
+  }
+
+  String get _maskConstantVariables {
+    final OutputLines<int> lines = OutputLines<int>('Mask constants', checkDuplicate: false);
+    for (final MaskConstant constant in _maskConstants) {
+      lines.add(constant.value, '''
+${_wrapString(constant.description)}  ///
+  /// This is used by platform-specific code to generate Flutter key codes.
+  static const int ${constant.lowerCamelName} = ${toHex(constant.value, digits: 11)};
+''');
     }
-    return keyCodeMap.toString().trimRight();
+    return lines.join().trimRight();
   }
 
   @override
@@ -156,17 +173,21 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
       'PHYSICAL_KEY_MAP': _predefinedHidCodeMap,
       'PHYSICAL_KEY_DEFINITIONS': _physicalDefinitions,
       'PHYSICAL_KEY_DEBUG_NAMES': _physicalDebugNames,
+      'MASK_CONSTANTS': _maskConstantVariables,
     };
   }
 
-  late final List<SynonymKeyInfo> synonyms = LogicalKeyData.synonyms.entries.map(
-    (MapEntry<String, List<String>> synonymDefinition) {
+  late final Map<String, SynonymKeyInfo> synonyms = Map<String, SynonymKeyInfo>.fromEntries(
+    LogicalKeyData.synonyms.entries.map((MapEntry<String, List<String>> synonymDefinition) {
       final List<LogicalKeyEntry> entries = synonymDefinition.value.map(
         (String name) => logicalData.entryByName(name)).toList();
-      return SynonymKeyInfo(
-        entries,
+      return MapEntry<String, SynonymKeyInfo>(
         synonymDefinition.key,
+        SynonymKeyInfo(
+          entries,
+          synonymDefinition.key,
+        ),
       );
-    }
-  ).toList();
+    }),
+  );
 }

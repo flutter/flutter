@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/flutter_manifest.dart';
-import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:yaml/yaml.dart';
 
 import 'common.dart';
@@ -19,18 +19,19 @@ void validatePubspecForPlugin({
 }) {
   final FlutterManifest manifest =
       FlutterManifest.createFromPath('$projectDir/pubspec.yaml', fileSystem: globals.fs, logger: globals.logger)!;
-  final YamlMap platformsMap = YamlMap.wrap(manifest.supportedPlatforms!);
+  final YamlMap platformMaps = YamlMap.wrap(manifest.supportedPlatforms!);
   for (final String platform in expectedPlatforms) {
-    expect(platformsMap[platform], isNotNull);
-    expect(platformsMap[platform]['pluginClass'], pluginClass);
+    expect(platformMaps[platform], isNotNull);
+    final YamlMap platformMap = platformMaps[platform]! as YamlMap;
+    expect(platformMap['pluginClass'], pluginClass);
     if (platform == 'android') {
-      expect(platformsMap[platform]['package'], androidIdentifier);
+      expect(platformMap['package'], androidIdentifier);
     }
     if (platform == 'web') {
-      expect(platformsMap[platform]['fileName'], webFileName);
+      expect(platformMap['fileName'], webFileName);
     }
   }
   for (final String platform in unexpectedPlatforms) {
-    expect(platformsMap[platform], isNull);
+    expect(platformMaps[platform], isNull);
   }
 }

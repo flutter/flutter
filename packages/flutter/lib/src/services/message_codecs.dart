@@ -123,10 +123,10 @@ class JSONMethodCodec implements MethodCodec {
   const JSONMethodCodec();
 
   @override
-  ByteData encodeMethodCall(MethodCall call) {
+  ByteData encodeMethodCall(MethodCall methodCall) {
     return const JSONMessageCodec().encodeMessage(<String, Object?>{
-      'method': call.method,
-      'args': call.arguments,
+      'method': methodCall.method,
+      'args': methodCall.arguments,
     })!;
   }
 
@@ -154,7 +154,7 @@ class JSONMethodCodec implements MethodCodec {
         && (decoded[1] == null || decoded[1] is String))
       throw PlatformException(
         code: decoded[0] as String,
-        message: decoded[1] as String,
+        message: decoded[1] as String?,
         details: decoded[2],
       );
     if (decoded.length == 4
@@ -163,9 +163,9 @@ class JSONMethodCodec implements MethodCodec {
         && (decoded[3] == null || decoded[3] is String))
       throw PlatformException(
         code: decoded[0] as String,
-        message: decoded[1] as String,
+        message: decoded[1] as String?,
         details: decoded[2],
-        stacktrace: decoded[3] as String,
+        stacktrace: decoded[3] as String?,
       );
     throw FormatException('Invalid envelope: $decoded');
   }
@@ -274,12 +274,13 @@ class StandardMessageCodec implements MessageCodec<Object?> {
   // * Strings are encoded using their UTF-8 representation. First the length
   //   of that in bytes is encoded using the expanding format, then follows the
   //   UTF-8 encoding itself.
-  // * Uint8Lists, Int32Lists, Int64Lists, and Float64Lists are encoded by first
-  //   encoding the list's element count in the expanding format, then the
-  //   smallest number of zero bytes needed to align the position in the full
-  //   message with a multiple of the number of bytes per element, then the
-  //   encoding of the list elements themselves, end-to-end with no additional
-  //   type information, using two's complement or IEEE 754 as applicable.
+  // * Uint8Lists, Int32Lists, Int64Lists, Float32Lists, and Float64Lists are
+  //   encoded by first encoding the list's element count in the expanding
+  //   format, then the smallest number of zero bytes needed to align the
+  //   position in the full message with a multiple of the number of bytes per
+  //   element, then the encoding of the list elements themselves, end-to-end
+  //   with no additional type information, using two's complement or IEEE 754
+  //   as applicable.
   // * Lists are encoded by first encoding their length in the expanding format,
   //   then follows the recursive encoding of each element value, including the
   //   type byte (Lists are assumed to be heterogeneous).
@@ -303,6 +304,7 @@ class StandardMessageCodec implements MessageCodec<Object?> {
   static const int _valueFloat64List = 11;
   static const int _valueList = 12;
   static const int _valueMap = 13;
+  static const int _valueFloat32List = 14;
 
   @override
   ByteData? encodeMessage(Object? message) {
@@ -346,7 +348,8 @@ class StandardMessageCodec implements MessageCodec<Object?> {
   ///  * Float64List = 11
   ///  * List = 12
   ///  * Map = 13
-  ///  * Reserved for future expansion: 14..127
+  ///  * Float32List = 14
+  ///  * Reserved for future expansion: 15..127
   ///
   /// The codec can be extended by overriding this method, calling super
   /// for values that the extension does not handle. Type discriminators
@@ -373,7 +376,7 @@ class StandardMessageCodec implements MessageCodec<Object?> {
                                    // decoding because we use tags to detect the type of value.
       buffer.putUint8(_valueFloat64);
       buffer.putFloat64(value);
-    } else if (value is int) {
+    } else if (value is int) { // ignore: avoid_double_and_int_checks, JS code always goes through the `double` path above
       if (-0x7fffffff - 1 <= value && value <= 0x7fffffff) {
         buffer.putUint8(_valueInt32);
         buffer.putInt32(value);
@@ -398,6 +401,10 @@ class StandardMessageCodec implements MessageCodec<Object?> {
       buffer.putUint8(_valueInt64List);
       writeSize(buffer, value.length);
       buffer.putInt64List(value);
+    } else if (value is Float32List) {
+      buffer.putUint8(_valueFloat32List);
+      writeSize(buffer, value.length);
+      buffer.putFloat32List(value);
     } else if (value is Float64List) {
       buffer.putUint8(_valueFloat64List);
       writeSize(buffer, value.length);
@@ -463,12 +470,15 @@ class StandardMessageCodec implements MessageCodec<Object?> {
       case _valueInt64List:
         final int length = readSize(buffer);
         return buffer.getInt64List(length);
+      case _valueFloat32List:
+        final int length = readSize(buffer);
+        return buffer.getFloat32List(length);
       case _valueFloat64List:
         final int length = readSize(buffer);
         return buffer.getFloat64List(length);
       case _valueList:
         final int length = readSize(buffer);
-        final List<Object?> result = List<Object?>.filled(length, null, growable: false);
+        final List<Object?> result = List<Object?>.filled(length, null);
         for (int i = 0; i < length; i++)
           result[i] = readValue(buffer);
         return result;
@@ -545,10 +555,10 @@ class StandardMethodCodec implements MethodCodec {
   final StandardMessageCodec messageCodec;
 
   @override
-  ByteData encodeMethodCall(MethodCall call) {
+  ByteData encodeMethodCall(MethodCall methodCall) {
     final WriteBuffer buffer = WriteBuffer();
-    messageCodec.writeValue(buffer, call.method);
-    messageCodec.writeValue(buffer, call.arguments);
+    messageCodec.writeValue(buffer, methodCall.method);
+    messageCodec.writeValue(buffer, methodCall.arguments);
     return buffer.done();
   }
 

@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -62,7 +66,7 @@ void main() {
         )).style;
       }
 
-      final List<bool> _isSelected = <bool>[false, true];
+      final List<bool> isSelected = <bool>[false, true];
       final ThemeData theme = ThemeData();
       await tester.pumpWidget(
         Material(
@@ -72,10 +76,10 @@ void main() {
                 child: ToggleButtons(
                   onPressed: (int index) {
                     setState(() {
-                      _isSelected[index] = !_isSelected[index];
+                      isSelected[index] = !isSelected[index];
                     });
                   },
-                  isSelected: _isSelected,
+                  isSelected: isSelected,
                   children: const <Widget>[
                     Text('First child'),
                     Text('Second child'),
@@ -87,8 +91,8 @@ void main() {
         ),
       );
 
-      expect(_isSelected[0], isFalse);
-      expect(_isSelected[1], isTrue);
+      expect(isSelected[0], isFalse);
+      expect(isSelected[1], isTrue);
       expect(
         buttonTextStyle('First child').color,
         theme.colorScheme.onSurface.withOpacity(0.87),
@@ -101,8 +105,8 @@ void main() {
       await tester.tap(find.text('Second child'));
       await tester.pumpAndSettle();
 
-      expect(_isSelected[0], isFalse);
-      expect(_isSelected[1], isFalse);
+      expect(isSelected[0], isFalse);
+      expect(isSelected[1], isFalse);
       expect(
         buttonTextStyle('First child').color,
         theme.colorScheme.onSurface.withOpacity(0.87),
@@ -123,14 +127,14 @@ void main() {
           matching: find.byType(DefaultTextStyle),
         )).style;
       }
-      final List<bool> _isSelected = <bool>[false, true];
+      final List<bool> isSelected = <bool>[false, true];
       final ThemeData theme = ThemeData();
 
       await tester.pumpWidget(
         Material(
           child: boilerplate(
             child: ToggleButtons(
-              isSelected: _isSelected,
+              isSelected: isSelected,
               children: const <Widget>[
                 Text('First child'),
                 Text('Second child'),
@@ -140,8 +144,8 @@ void main() {
         ),
       );
 
-      expect(_isSelected[0], isFalse);
-      expect(_isSelected[1], isTrue);
+      expect(isSelected[0], isFalse);
+      expect(isSelected[1], isTrue);
       expect(
         buttonTextStyle('First child').color,
         theme.colorScheme.onSurface.withOpacity(0.38),
@@ -155,8 +159,8 @@ void main() {
       await tester.pumpAndSettle();
 
       // Nothing should change
-      expect(_isSelected[0], isFalse);
-      expect(_isSelected[1], isTrue);
+      expect(isSelected[0], isFalse);
+      expect(isSelected[1], isTrue);
       expect(
         buttonTextStyle('First child').color,
         theme.colorScheme.onSurface.withOpacity(0.38),
@@ -616,7 +620,6 @@ void main() {
         child: boilerplate(
           child: ToggleButtons(
             isSelected: const <bool>[true],
-            onPressed: null,
             children: <Widget>[
               Row(children: const <Widget>[
                 Text('First child'),
@@ -663,6 +666,124 @@ void main() {
     ));
     expect(material.color, customFillColor);
     expect(material.type, MaterialType.button);
+  });
+
+  testWidgets('Custom button fillColor - Non MaterialState', (WidgetTester tester) async {
+    Material buttonColor(String text) {
+      return tester.widget<Material>(
+        find.descendant(
+          of: find.byType(RawMaterialButton),
+          matching: find.widgetWithText(Material, text),
+        ),
+      );
+    }
+
+    final ThemeData theme = ThemeData();
+    const Color selectedFillColor = Colors.yellow;
+
+    await tester.pumpWidget(
+      Material(
+        child: boilerplate(
+          child: ToggleButtons(
+            fillColor: selectedFillColor,
+            isSelected: const <bool>[false, true],
+            onPressed: (int index) {},
+            children: const <Widget>[
+              Text('First child'),
+              Text('Second child'),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(buttonColor('First child').color, theme.colorScheme.surface.withOpacity(0.0));
+    expect(buttonColor('Second child').color, selectedFillColor);
+
+    await tester.pumpWidget(
+      Material(
+        child: boilerplate(
+          child: ToggleButtons(
+            fillColor: selectedFillColor,
+            isSelected: const <bool>[false, true],
+            children: const <Widget>[
+              Text('First child'),
+              Text('Second child'),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(buttonColor('First child').color, theme.colorScheme.surface.withOpacity(0.0));
+    expect(buttonColor('Second child').color, theme.colorScheme.surface.withOpacity(0.0));
+  });
+
+  testWidgets('Custom button fillColor - MaterialState', (WidgetTester tester) async {
+    Material buttonColor(String text) {
+      return tester.widget<Material>(
+        find.descendant(
+          of: find.byType(RawMaterialButton),
+          matching: find.widgetWithText(Material, text),
+        ),
+      );
+    }
+
+    const Color selectedFillColor = Colors.orange;
+    const Color defaultFillColor = Colors.blue;
+
+    Color getFillColor(Set<MaterialState> states) {
+      if (states.contains(MaterialState.selected)) {
+        return selectedFillColor;
+      }
+      return defaultFillColor;
+    }
+
+    await tester.pumpWidget(
+      Material(
+        child: boilerplate(
+          child: ToggleButtons(
+            fillColor: MaterialStateColor.resolveWith(getFillColor),
+            isSelected: const <bool>[false, true],
+            onPressed: (int index) {},
+            children: const <Widget>[
+              Text('First child'),
+              Text('Second child'),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(buttonColor('First child').color, defaultFillColor);
+    expect(buttonColor('Second child').color, selectedFillColor);
+
+    // disabled
+    await tester.pumpWidget(
+      Material(
+        child: boilerplate(
+          child: ToggleButtons(
+            fillColor: MaterialStateColor.resolveWith(getFillColor),
+            isSelected: const <bool>[false, true],
+            children: const <Widget>[
+              Text('First child'),
+              Text('Second child'),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(buttonColor('First child').color, defaultFillColor);
+    expect(buttonColor('Second child').color, defaultFillColor);
   });
 
   testWidgets('Default InkWell colors - unselected', (WidgetTester tester) async {
@@ -1368,7 +1489,6 @@ void main() {
           child: boilerplate(
             child: ToggleButtons(
               direction: Axis.vertical,
-              verticalDirection: VerticalDirection.down,
               isSelected: const <bool>[false, true, false],
               onPressed: (int index) {},
               children: const <Widget>[
@@ -1470,6 +1590,96 @@ void main() {
       expect(tester.getCenter(find.text('First child')), const Offset(400.0, 349.0));
     },
   );
+
+  testWidgets('Tap target size is configurable by ThemeData.materialTapTargetSize', (WidgetTester tester) async {
+    Widget buildFrame(MaterialTapTargetSize tapTargetSize, Key key) {
+      return Theme(
+        data: ThemeData(materialTapTargetSize: tapTargetSize),
+        child: Material(
+          child: boilerplate(
+            child: ToggleButtons(
+              key: key,
+              constraints: const BoxConstraints(minWidth: 32.0, minHeight: 32.0),
+              isSelected: const <bool>[false, true, false],
+              onPressed: (int index) {},
+              children: const <Widget>[
+                Text('First'),
+                Text('Second'),
+                Text('Third'),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    final Key key1 = UniqueKey();
+    await tester.pumpWidget(buildFrame(MaterialTapTargetSize.padded, key1));
+    expect(tester.getSize(find.byKey(key1)), const Size(228.0, 48.0));
+
+    final Key key2 = UniqueKey();
+    await tester.pumpWidget(buildFrame(MaterialTapTargetSize.shrinkWrap, key2));
+    expect(tester.getSize(find.byKey(key2)), const Size(228.0, 34.0));
+  });
+
+  testWidgets('Tap target size is configurable', (WidgetTester tester) async {
+    Widget buildFrame(MaterialTapTargetSize tapTargetSize, Key key) {
+      return Material(
+        child: boilerplate(
+          child: ToggleButtons(
+            key: key,
+            tapTargetSize: tapTargetSize,
+            constraints: const BoxConstraints(minWidth: 32.0, minHeight: 32.0),
+            isSelected: const <bool>[false, true, false],
+            onPressed: (int index) {},
+            children: const <Widget>[
+              Text('First'),
+              Text('Second'),
+              Text('Third'),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final Key key1 = UniqueKey();
+    await tester.pumpWidget(buildFrame(MaterialTapTargetSize.padded, key1));
+    expect(tester.getSize(find.byKey(key1)), const Size(228.0, 48.0));
+
+    final Key key2 = UniqueKey();
+    await tester.pumpWidget(buildFrame(MaterialTapTargetSize.shrinkWrap, key2));
+    expect(tester.getSize(find.byKey(key2)), const Size(228.0, 34.0));
+  });
+
+  testWidgets('Tap target size is configurable for vertical axis', (WidgetTester tester) async {
+    Widget buildFrame(MaterialTapTargetSize tapTargetSize, Key key) {
+      return Material(
+        child: boilerplate(
+          child: ToggleButtons(
+            key: key,
+            tapTargetSize: tapTargetSize,
+            constraints: const BoxConstraints(minWidth: 32.0, minHeight: 32.0),
+            direction: Axis.vertical,
+            isSelected: const <bool>[false, true, false],
+            onPressed: (int index) {},
+            children: const <Widget>[
+              Text('1'),
+              Text('2'),
+              Text('3'),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final Key key1 = UniqueKey();
+    await tester.pumpWidget(buildFrame(MaterialTapTargetSize.padded, key1));
+    expect(tester.getSize(find.byKey(key1)), const Size(48.0, 100.0));
+
+    final Key key2 = UniqueKey();
+    await tester.pumpWidget(buildFrame(MaterialTapTargetSize.shrinkWrap, key2));
+    expect(tester.getSize(find.byKey(key2)), const Size(34.0, 100.0));
+  });
 
   // Regression test for https://github.com/flutter/flutter/issues/73725
   testWidgets('Border radius paint test when there is only one button', (WidgetTester tester) async {

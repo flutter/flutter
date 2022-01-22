@@ -47,9 +47,6 @@ abstract class FeatureFlags {
   /// Whether fast single widget reloads are enabled.
   bool get isSingleWidgetReloadEnabled => false;
 
-  /// Whether the CFE experimental invalidation strategy is enabled.
-  bool get isExperimentalInvalidationStrategyEnabled => true;
-
   /// Whether the windows UWP embedding is enabled.
   bool get isWindowsUwpEnabled => false;
 
@@ -71,7 +68,6 @@ const List<Feature> allFeatures = <Feature>[
   flutterIOSFeature,
   flutterFuchsiaFeature,
   flutterCustomDevicesFeature,
-  experimentalInvalidationStrategy,
 ];
 
 /// The [Feature] for flutter web.
@@ -105,19 +101,15 @@ const Feature flutterMacOSDesktopFeature = Feature(
   extraHelpText: 'Newer beta versions are available on the beta channel.',
   master: FeatureChannelSetting(
     available: true,
-    enabledByDefault: false,
   ),
   dev: FeatureChannelSetting(
     available: true,
-    enabledByDefault: false,
   ),
   beta: FeatureChannelSetting(
     available: true,
-    enabledByDefault: false,
   ),
   stable: FeatureChannelSetting(
     available: true,
-    enabledByDefault: false,
   ),
 );
 
@@ -129,19 +121,15 @@ const Feature flutterLinuxDesktopFeature = Feature(
   extraHelpText: 'Newer beta versions are available on the beta channel.',
   master: FeatureChannelSetting(
     available: true,
-    enabledByDefault: false,
   ),
   dev: FeatureChannelSetting(
     available: true,
-    enabledByDefault: false,
   ),
   beta: FeatureChannelSetting(
     available: true,
-    enabledByDefault: false,
   ),
   stable: FeatureChannelSetting(
     available: true,
-    enabledByDefault: false,
   ),
 );
 
@@ -153,19 +141,15 @@ const Feature flutterWindowsDesktopFeature = Feature(
   extraHelpText: 'Newer beta versions are available on the beta channel.',
   master: FeatureChannelSetting(
     available: true,
-    enabledByDefault: false,
   ),
   dev: FeatureChannelSetting(
     available: true,
-    enabledByDefault: false,
   ),
   beta: FeatureChannelSetting(
     available: true,
-    enabledByDefault: false,
   ),
   stable: FeatureChannelSetting(
     available: true,
-    enabledByDefault: false,
   ),
 );
 
@@ -221,7 +205,6 @@ const Feature flutterFuchsiaFeature = Feature(
   environmentOverride: 'FLUTTER_FUCHSIA',
   master: FeatureChannelSetting(
     available: true,
-    enabledByDefault: false,
   ),
 );
 
@@ -231,19 +214,9 @@ const Feature flutterCustomDevicesFeature = Feature(
   environmentOverride: 'FLUTTER_CUSTOM_DEVICES',
   master: FeatureChannelSetting(
     available: true,
-    enabledByDefault: false,
   ),
   dev: FeatureChannelSetting(
     available: true,
-    enabledByDefault: false,
-  ),
-  beta: FeatureChannelSetting(
-    available: false,
-    enabledByDefault: false,
-  ),
-  stable: FeatureChannelSetting(
-    available: false,
-    enabledByDefault: false,
   )
 );
 
@@ -258,38 +231,9 @@ const Feature singleWidgetReload = Feature(
   ),
   dev: FeatureChannelSetting(
     available: true,
-    enabledByDefault: false,
   ),
   beta: FeatureChannelSetting(
     available: true,
-    enabledByDefault: false,
-  ),
-  stable: FeatureChannelSetting(
-    available: false,
-    enabledByDefault: false,
-  ),
-);
-
-/// The CFE experimental invalidation strategy.
-const Feature experimentalInvalidationStrategy = Feature(
-  name: 'Hot reload optimization that reduces incremental artifact size',
-  configSetting: 'experimental-invalidation-strategy',
-  environmentOverride: 'FLUTTER_CFE_EXPERIMENTAL_INVALIDATION',
-  master: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: true,
-  ),
-  dev: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: true,
-  ),
-  beta: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: true,
-  ),
-  stable: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: true,
   ),
 );
 
@@ -299,11 +243,9 @@ const Feature windowsUwpEmbedding = Feature(
   configSetting: 'enable-windows-uwp-desktop',
   master: FeatureChannelSetting(
     available: true,
-    enabledByDefault: false,
   ),
   dev: FeatureChannelSetting(
     available: true,
-    enabledByDefault: false,
   ),
 );
 

@@ -167,9 +167,10 @@ List<String> buildModeOptions(BuildMode mode, List<String> dartDefines) {
   switch (mode) {
     case BuildMode.debug:
       return <String>[
-        '-Ddart.vm.profile=false',
-        // This allows the CLI to override the value of this define for unit
+        // These checks allow the CLI to override the value of this define for unit
         // testing the framework.
+        if (!dartDefines.any((String define) => define.startsWith('dart.vm.profile')))
+          '-Ddart.vm.profile=false',
         if (!dartDefines.any((String define) => define.startsWith('dart.vm.product')))
           '-Ddart.vm.product=false',
         '--enable-asserts',
@@ -196,7 +197,7 @@ class KernelCompiler {
     required ProcessManager processManager,
     required Artifacts artifacts,
     required List<String> fileSystemRoots,
-    required String fileSystemScheme,
+    String? fileSystemScheme,
     @visibleForTesting StdoutHandler? stdoutHandler,
   }) : _logger = logger,
        _fileSystem = fileSystem,
@@ -210,7 +211,7 @@ class KernelCompiler {
   final Artifacts _artifacts;
   final ProcessManager _processManager;
   final Logger _logger;
-  final String _fileSystemScheme;
+  final String? _fileSystemScheme;
   final List<String> _fileSystemRoots;
   final StdoutHandler _stdoutHandler;
 
@@ -450,7 +451,7 @@ abstract class ResidentCompiler {
     String librariesSpec,
   }) = DefaultResidentCompiler;
 
-  // TODO(jonahwilliams): find a better way to configure additional file system
+  // TODO(zanderso): find a better way to configure additional file system
   // roots from the runner.
   // See: https://github.com/flutter/flutter/issues/50494
   void addFileSystemRoot(String root);
@@ -462,14 +463,19 @@ abstract class ResidentCompiler {
   /// point that is used for recompilation.
   /// Binary file name is returned if compilation was successful, otherwise
   /// null is returned.
+  ///
+  /// If [checkDartPluginRegistry] is true, it is the caller's responsibility
+  /// to ensure that the generated registrant file has been updated such that
+  /// it is wrapping [mainUri].
   Future<CompilerOutput?> recompile(
     Uri mainUri,
     List<Uri>? invalidatedFiles, {
     required String outputPath,
     required PackageConfig packageConfig,
-    required String projectRootPath,
     required FileSystem fs,
+    String? projectRootPath,
     bool suppressErrors = false,
+    bool checkDartPluginRegistry = false,
   });
 
   Future<CompilerOutput?> compileExpression(
@@ -542,7 +548,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
     this.testCompilation = false,
     this.trackWidgetCreation = true,
     this.packagesPath,
-    this.fileSystemRoots = const <String>[],
+    List<String> fileSystemRoots = const <String>[],
     this.fileSystemScheme,
     this.initializeFromDill,
     this.targetModel = TargetModel.flutter,
@@ -560,7 +566,9 @@ class DefaultResidentCompiler implements ResidentCompiler {
        _platform = platform,
        dartDefines = dartDefines ?? const <String>[],
        // This is a URI, not a file path, so the forward slash is correct even on Windows.
-       sdkRoot = sdkRoot.endsWith('/') ? sdkRoot : '$sdkRoot/';
+       sdkRoot = sdkRoot.endsWith('/') ? sdkRoot : '$sdkRoot/',
+       // Make a copy, we might need to modify it later.
+       fileSystemRoots = List<String>.from(fileSystemRoots);
 
   final Logger _logger;
   final ProcessManager _processManager;
@@ -608,6 +616,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
     required String outputPath,
     required PackageConfig packageConfig,
     bool suppressErrors = false,
+    bool checkDartPluginRegistry = false,
     String? projectRootPath,
     FileSystem? fs,
   }) async {
@@ -616,7 +625,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
       _controller.stream.listen(_handleCompilationRequest);
     }
     // `generated_main.dart` contains the Dart plugin registry.
-    if (projectRootPath != null && fs != null) {
+    if (checkDartPluginRegistry && projectRootPath != null && fs != null) {
       final File generatedMainDart = fs.file(
         fs.path.join(
           projectRootPath,
@@ -706,7 +715,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
       if (testCompilation)
         '--no-print-incremental-dependencies',
       '--target=$targetModel',
-      // TODO(jonahwilliams): remove once this becomes the default behavior
+      // TODO(zanderso): remove once this becomes the default behavior
       // in the frontend_server.
       // https://github.com/flutter/flutter/issues/52693
       '--debugger-module-names',
@@ -900,7 +909,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
 
   Future<CompilerOutput?> _reject() async {
     if (!_compileRequestNeedsConfirmation) {
-      return Future<CompilerOutput?>.value(null);
+      return Future<CompilerOutput?>.value();
     }
     _stdoutHandler.reset(expectSources: false);
     _server?.stdin.writeln('reject');

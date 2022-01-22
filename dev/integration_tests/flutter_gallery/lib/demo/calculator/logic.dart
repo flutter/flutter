@@ -136,7 +136,7 @@ class CalcExpression {
   /// in the calculator's display panel.
   @override
   String toString() {
-    final StringBuffer buffer = StringBuffer('');
+    final StringBuffer buffer = StringBuffer();
     buffer.writeAll(_list);
     return buffer.toString();
   }
@@ -257,8 +257,6 @@ class CalcExpression {
       case ExpressionState.NumberWithPoint:
       case ExpressionState.Result:
         return appendOperation(Operation.Subtraction);
-      default:
-        return null;
     }
   }
 

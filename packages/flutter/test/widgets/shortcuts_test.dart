@@ -103,6 +103,7 @@ Widget activatorTester(
       if (hasSecond)
         TestIntent2: TestAction(onInvoke: (Intent intent) {
           onInvoke2(intent);
+	  return null;
         }),
     },
     child: Shortcuts(
@@ -435,7 +436,60 @@ void main() {
       invoked = 0;
 
       expect(RawKeyboard.instance.keysPressed, isEmpty);
-    });
+    }, variant: KeySimulatorTransitModeVariant.all());
+
+    testWidgets('handles repeated events', (WidgetTester tester) async {
+      int invoked = 0;
+      await tester.pumpWidget(activatorTester(
+        const SingleActivator(
+          LogicalKeyboardKey.keyC,
+          control: true,
+        ),
+        (Intent intent) { invoked += 1; },
+      ));
+      await tester.pump();
+
+      // LCtrl -> KeyC: Accept
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      expect(invoked, 0);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyC);
+      expect(invoked, 1);
+      await tester.sendKeyRepeatEvent(LogicalKeyboardKey.keyC);
+      expect(invoked, 2);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyC);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      expect(invoked, 2);
+      invoked = 0;
+
+      expect(RawKeyboard.instance.keysPressed, isEmpty);
+    }, variant: KeySimulatorTransitModeVariant.all());
+
+    testWidgets('rejects repeated events if requested', (WidgetTester tester) async {
+      int invoked = 0;
+      await tester.pumpWidget(activatorTester(
+        const SingleActivator(
+          LogicalKeyboardKey.keyC,
+          control: true,
+          includeRepeats: false,
+        ),
+        (Intent intent) { invoked += 1; },
+      ));
+      await tester.pump();
+
+      // LCtrl -> KeyC: Accept
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      expect(invoked, 0);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyC);
+      expect(invoked, 1);
+      await tester.sendKeyRepeatEvent(LogicalKeyboardKey.keyC);
+      expect(invoked, 1);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyC);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      expect(invoked, 1);
+      invoked = 0;
+
+      expect(RawKeyboard.instance.keysPressed, isEmpty);
+    }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgets('handles Shift-Ctrl-C', (WidgetTester tester) async {
       int invoked = 0;
@@ -487,8 +541,8 @@ void main() {
       expect(RawKeyboard.instance.keysPressed, isEmpty);
     });
 
-    test('diagnostics.', () {
-      {
+    group('diagnostics.', () {
+      test('single key', () {
         final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
         const SingleActivator(
@@ -501,9 +555,26 @@ void main() {
 
         expect(description.length, equals(1));
         expect(description[0], equals('keys: Key A'));
-      }
+      });
 
-      {
+      test('no repeats', () {
+        final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+
+        const SingleActivator(
+          LogicalKeyboardKey.keyA,
+          includeRepeats: false,
+        ).debugFillProperties(builder);
+
+        final List<String> description = builder.properties.where((DiagnosticsNode node) {
+          return !node.isFiltered(DiagnosticLevel.info);
+        }).map((DiagnosticsNode node) => node.toString()).toList();
+
+        expect(description.length, equals(2));
+        expect(description[0], equals('keys: Key A'));
+        expect(description[1], equals('excluding repeats'));
+      });
+
+      test('combination', () {
         final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
         const SingleActivator(
@@ -520,7 +591,7 @@ void main() {
 
         expect(description.length, equals(1));
         expect(description[0], equals('keys: Control + Alt + Meta + Shift + Key A'));
-      }
+      });
     });
   });
 
@@ -1075,6 +1146,208 @@ void main() {
       await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
       expect(invoked, 1);
       invoked = 0;
+    }, variant: KeySimulatorTransitModeVariant.all());
+
+    testWidgets('handles repeated events', (WidgetTester tester) async {
+      int invoked = 0;
+      await tester.pumpWidget(activatorTester(
+        const CharacterActivator('?'),
+        (Intent intent) { invoked += 1; },
+      ));
+      await tester.pump();
+
+      // Press KeyC: Accepted by DumbLogicalActivator
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.slash, character: '?');
+      expect(invoked, 1);
+      await tester.sendKeyRepeatEvent(LogicalKeyboardKey.slash, character: '?');
+      expect(invoked, 2);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.slash);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+      expect(invoked, 2);
+      invoked = 0;
+    }, variant: KeySimulatorTransitModeVariant.all());
+  });
+
+  group('CallbackShortcuts', () {
+    testWidgets('trigger on key events', (WidgetTester tester) async {
+      int invokedA = 0;
+      int invokedB = 0;
+      await tester.pumpWidget(
+        CallbackShortcuts(
+          bindings: <ShortcutActivator, VoidCallback>{
+            const SingleActivator(LogicalKeyboardKey.keyA): () {
+              invokedA += 1;
+            },
+            const SingleActivator(LogicalKeyboardKey.keyB): () {
+              invokedB += 1;
+            },
+          },
+          child: const Focus(
+            autofocus: true,
+            child: Placeholder(),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyA);
+      await tester.pump();
+      expect(invokedA, equals(1));
+      expect(invokedB, equals(0));
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyA);
+      expect(invokedA, equals(1));
+      expect(invokedB, equals(0));
+      invokedA = 0;
+      invokedB = 0;
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyB);
+      expect(invokedA, equals(0));
+      expect(invokedB, equals(1));
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyB);
+      expect(invokedA, equals(0));
+      expect(invokedB, equals(1));
+    });
+
+    testWidgets('nested CallbackShortcuts stop propagation', (WidgetTester tester) async {
+      int invokedOuter = 0;
+      int invokedInner = 0;
+      await tester.pumpWidget(
+        CallbackShortcuts(
+          bindings: <ShortcutActivator, VoidCallback>{
+            const SingleActivator(LogicalKeyboardKey.keyA): () {
+              invokedOuter += 1;
+            },
+          },
+          child: CallbackShortcuts(
+            bindings: <ShortcutActivator, VoidCallback>{
+              const SingleActivator(LogicalKeyboardKey.keyA): () {
+                invokedInner += 1;
+              },
+            },
+            child: const Focus(
+              autofocus: true,
+              child: Placeholder(),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyA);
+      expect(invokedOuter, equals(0));
+      expect(invokedInner, equals(1));
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyA);
+      expect(invokedOuter, equals(0));
+      expect(invokedInner, equals(1));
+    });
+
+    testWidgets('non-overlapping nested CallbackShortcuts fire appropriately', (WidgetTester tester) async {
+      int invokedOuter = 0;
+      int invokedInner = 0;
+      await tester.pumpWidget(
+        CallbackShortcuts(
+          bindings: <ShortcutActivator, VoidCallback>{
+            const CharacterActivator('b'): () {
+              invokedOuter += 1;
+            },
+          },
+          child: CallbackShortcuts(
+            bindings: <ShortcutActivator, VoidCallback>{
+              const CharacterActivator('a'): () {
+                invokedInner += 1;
+              },
+            },
+            child: const Focus(
+              autofocus: true,
+              child: Placeholder(),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyA);
+      expect(invokedOuter, equals(0));
+      expect(invokedInner, equals(1));
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyB);
+      expect(invokedOuter, equals(1));
+      expect(invokedInner, equals(1));
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyA);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyB);
+      expect(invokedOuter, equals(1));
+      expect(invokedInner, equals(1));
+    });
+
+    testWidgets('Works correctly with Shortcuts too', (WidgetTester tester) async {
+      int invokedCallbackA = 0;
+      int invokedCallbackB = 0;
+      int invokedActionA = 0;
+      int invokedActionB = 0;
+
+      void clear() {
+        invokedCallbackA = 0;
+        invokedCallbackB = 0;
+        invokedActionA = 0;
+        invokedActionB = 0;
+      }
+
+      await tester.pumpWidget(
+        Actions(
+          actions: <Type, Action<Intent>>{
+            TestIntent: TestAction(
+              onInvoke: (Intent intent) {
+                invokedActionA += 1;
+                return true;
+              },
+            ),
+            TestIntent2: TestAction(
+              onInvoke: (Intent intent) {
+                invokedActionB += 1;
+                return true;
+              },
+            ),
+          },
+          child: CallbackShortcuts(
+            bindings: <ShortcutActivator, VoidCallback>{
+              const CharacterActivator('b'): () {
+                invokedCallbackB += 1;
+              },
+            },
+            child: Shortcuts(
+              shortcuts: <LogicalKeySet, Intent>{
+                LogicalKeySet(LogicalKeyboardKey.keyA): const TestIntent(),
+                LogicalKeySet(LogicalKeyboardKey.keyB): const TestIntent2(),
+              },
+              child: CallbackShortcuts(
+                bindings: <ShortcutActivator, VoidCallback>{
+                  const CharacterActivator('a'): () {
+                    invokedCallbackA += 1;
+                  },
+                },
+                child: const Focus(
+                  autofocus: true,
+                  child: Placeholder(),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyA);
+      expect(invokedCallbackA, equals(1));
+      expect(invokedCallbackB, equals(0));
+      expect(invokedActionA, equals(0));
+      expect(invokedActionB, equals(0));
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyA);
+      clear();
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyB);
+      expect(invokedCallbackA, equals(0));
+      expect(invokedCallbackB, equals(0));
+      expect(invokedActionA, equals(0));
+      expect(invokedActionB, equals(1));
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyB);
     });
   });
 }

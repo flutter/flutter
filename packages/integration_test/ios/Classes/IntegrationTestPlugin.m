@@ -4,17 +4,25 @@
 
 #import "IntegrationTestPlugin.h"
 
+@import UIKit;
+
 static NSString *const kIntegrationTestPluginChannel = @"plugins.flutter.io/integration_test";
 static NSString *const kMethodTestFinished = @"allTestsFinished";
+static NSString *const kMethodScreenshot = @"captureScreenshot";
+static NSString *const kMethodConvertSurfaceToImage = @"convertFlutterSurfaceToImage";
+static NSString *const kMethodRevertImage = @"revertFlutterImage";
 
 @interface IntegrationTestPlugin ()
 
 @property(nonatomic, readwrite) NSDictionary<NSString *, NSString *> *testResults;
 
+- (instancetype)init NS_DESIGNATED_INITIALIZER;
+
 @end
 
 @implementation IntegrationTestPlugin {
   NSDictionary<NSString *, NSString *> *_testResults;
+  NSMutableDictionary<NSString *, UIImage *> *_capturedScreenshotsByName;
 }
 
 + (IntegrationTestPlugin *)instance {
@@ -27,7 +35,13 @@ static NSString *const kMethodTestFinished = @"allTestsFinished";
 }
 
 - (instancetype)initForRegistration {
-  return [super init];
+  return [self init];
+}
+
+- (instancetype)init {
+  self = [super init];
+  _capturedScreenshotsByName = [NSMutableDictionary new];
+  return self;
 }
 
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar> *)registrar {
@@ -39,20 +53,55 @@ static NSString *const kMethodTestFinished = @"allTestsFinished";
 
 - (void)setupChannels:(id<FlutterBinaryMessenger>)binaryMessenger {
   FlutterMethodChannel *channel =
-      [FlutterMethodChannel methodChannelWithName:kIntegrationTestPluginChannel
-                                  binaryMessenger:binaryMessenger];
+  [FlutterMethodChannel methodChannelWithName:kIntegrationTestPluginChannel
+                              binaryMessenger:binaryMessenger];
   [channel setMethodCallHandler:^(FlutterMethodCall *call, FlutterResult result) {
     [self handleMethodCall:call result:result];
   }];
 }
 
 - (void)handleMethodCall:(FlutterMethodCall *)call result:(FlutterResult)result {
-  if ([kMethodTestFinished isEqual:call.method]) {
+  if ([call.method isEqualToString:kMethodTestFinished]) {
     self.testResults = call.arguments[@"results"];
+    result(nil);
+  } else if ([call.method isEqualToString:kMethodScreenshot]) {
+    // If running as a native Xcode test, attach to test.
+    UIImage *screenshot = [self capturePngScreenshot];
+    NSString *name = call.arguments[@"name"];
+    _capturedScreenshotsByName[name] = screenshot;
+
+    // Also pass back along the channel for the driver to handle.
+    NSData *pngData = UIImagePNGRepresentation(screenshot);
+    result([FlutterStandardTypedData typedDataWithBytes:pngData]);
+  } else if ([call.method isEqualToString:kMethodConvertSurfaceToImage]
+             || [call.method isEqualToString:kMethodRevertImage]) {
+    // Android only, no-op on iOS.
     result(nil);
   } else {
     result(FlutterMethodNotImplemented);
   }
+}
+
+- (UIImage *)capturePngScreenshot {
+  UIWindow *window = [UIApplication.sharedApplication.windows
+                      filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"keyWindow = YES"]].firstObject;
+  CGRect screenshotBounds = window.bounds;
+  UIImage *image;
+
+  if (@available(iOS 10, *)) {
+    UIGraphicsImageRenderer *renderer = [[UIGraphicsImageRenderer alloc] initWithBounds:screenshotBounds];
+
+    image = [renderer imageWithActions:^(UIGraphicsImageRendererContext *rendererContext) {
+      [window drawViewHierarchyInRect:screenshotBounds afterScreenUpdates:YES];
+    }];
+  } else {
+    UIGraphicsBeginImageContextWithOptions(screenshotBounds.size, NO, UIScreen.mainScreen.scale);
+    [window drawViewHierarchyInRect:screenshotBounds afterScreenUpdates:YES];
+    image = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+  }
+
+  return image;
 }
 
 @end

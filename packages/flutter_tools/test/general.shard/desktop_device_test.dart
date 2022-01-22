@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:file/memory.dart';
@@ -18,7 +16,6 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/device_port_forwarder.dart';
 import 'package:flutter_tools/src/project.dart';
 
-import 'package:meta/meta.dart';
 import 'package:test/fake.dart';
 
 import '../src/common.dart';
@@ -50,8 +47,8 @@ void main() {
     testWithoutContext('Install checks always return true', () async {
       final FakeDesktopDevice device = setUpDesktopDevice();
 
-      expect(await device.isAppInstalled(null), true);
-      expect(await device.isLatestBuildInstalled(null), true);
+      expect(await device.isAppInstalled(FakeApplicationPackage()), true);
+      expect(await device.isLatestBuildInstalled(FakeApplicationPackage()), true);
       expect(device.category, Category.desktop);
     });
 
@@ -89,7 +86,7 @@ void main() {
         ),
       ]);
       final FakeDesktopDevice device = setUpDesktopDevice(processManager: processManager, fileSystem: fileSystem);
-      final String executableName = device.executablePathForDevice(null, BuildMode.debug);
+      final String? executableName = device.executablePathForDevice(FakeApplicationPackage(), BuildMode.debug);
       fileSystem.file(executableName).writeAsStringSync('\n');
       final FakeApplicationPackage package = FakeApplicationPackage();
       final LaunchResult result = await device.startApp(
@@ -147,26 +144,25 @@ void main() {
         completer: completer,
         environment: const <String, String>{
           'FLUTTER_ENGINE_SWITCH_1': 'enable-dart-profiling=true',
-          'FLUTTER_ENGINE_SWITCH_2': 'enable-background-compilation=true',
-          'FLUTTER_ENGINE_SWITCH_3': 'trace-startup=true',
-          'FLUTTER_ENGINE_SWITCH_4': 'enable-software-rendering=true',
-          'FLUTTER_ENGINE_SWITCH_5': 'skia-deterministic-rendering=true',
-          'FLUTTER_ENGINE_SWITCH_6': 'trace-skia=true',
-          'FLUTTER_ENGINE_SWITCH_7': 'trace-allowlist=foo,bar',
-          'FLUTTER_ENGINE_SWITCH_8': 'trace-skia-allowlist=skia.a,skia.b',
-          'FLUTTER_ENGINE_SWITCH_9': 'trace-systrace=true',
-          'FLUTTER_ENGINE_SWITCH_10': 'endless-trace-buffer=true',
-          'FLUTTER_ENGINE_SWITCH_11': 'dump-skp-on-shader-compilation=true',
-          'FLUTTER_ENGINE_SWITCH_12': 'cache-sksl=true',
-          'FLUTTER_ENGINE_SWITCH_13': 'purge-persistent-cache=true',
-          'FLUTTER_ENGINE_SWITCH_14': 'enable-checked-mode=true',
-          'FLUTTER_ENGINE_SWITCH_15': 'verify-entry-points=true',
-          'FLUTTER_ENGINE_SWITCH_16': 'start-paused=true',
-          'FLUTTER_ENGINE_SWITCH_17': 'disable-service-auth-codes=true',
-          'FLUTTER_ENGINE_SWITCH_18': 'dart-flags=--null_assertions',
-          'FLUTTER_ENGINE_SWITCH_19': 'use-test-fonts=true',
-          'FLUTTER_ENGINE_SWITCH_20': 'verbose-logging=true',
-          'FLUTTER_ENGINE_SWITCHES': '20'
+          'FLUTTER_ENGINE_SWITCH_2': 'trace-startup=true',
+          'FLUTTER_ENGINE_SWITCH_3': 'enable-software-rendering=true',
+          'FLUTTER_ENGINE_SWITCH_4': 'skia-deterministic-rendering=true',
+          'FLUTTER_ENGINE_SWITCH_5': 'trace-skia=true',
+          'FLUTTER_ENGINE_SWITCH_6': 'trace-allowlist=foo,bar',
+          'FLUTTER_ENGINE_SWITCH_7': 'trace-skia-allowlist=skia.a,skia.b',
+          'FLUTTER_ENGINE_SWITCH_8': 'trace-systrace=true',
+          'FLUTTER_ENGINE_SWITCH_9': 'endless-trace-buffer=true',
+          'FLUTTER_ENGINE_SWITCH_10': 'dump-skp-on-shader-compilation=true',
+          'FLUTTER_ENGINE_SWITCH_11': 'cache-sksl=true',
+          'FLUTTER_ENGINE_SWITCH_12': 'purge-persistent-cache=true',
+          'FLUTTER_ENGINE_SWITCH_13': 'enable-checked-mode=true',
+          'FLUTTER_ENGINE_SWITCH_14': 'verify-entry-points=true',
+          'FLUTTER_ENGINE_SWITCH_15': 'start-paused=true',
+          'FLUTTER_ENGINE_SWITCH_16': 'disable-service-auth-codes=true',
+          'FLUTTER_ENGINE_SWITCH_17': 'dart-flags=--null_assertions',
+          'FLUTTER_ENGINE_SWITCH_18': 'use-test-fonts=true',
+          'FLUTTER_ENGINE_SWITCH_19': 'verbose-logging=true',
+          'FLUTTER_ENGINE_SWITCHES': '19'
         }
       ),
     ]);
@@ -182,7 +178,6 @@ void main() {
         BuildInfo.debug,
         startPaused: true,
         disableServiceAuthCodes: true,
-        dartFlags: '',
         enableSoftwareRendering: true,
         skiaDeterministicRendering: true,
         traceSkia: true,
@@ -211,11 +206,10 @@ void main() {
         completer: completer,
         environment: const <String, String>{
           'FLUTTER_ENGINE_SWITCH_1': 'enable-dart-profiling=true',
-          'FLUTTER_ENGINE_SWITCH_2': 'enable-background-compilation=true',
-          'FLUTTER_ENGINE_SWITCH_3': 'trace-startup=true',
-          'FLUTTER_ENGINE_SWITCH_4': 'trace-allowlist=foo,bar',
-          'FLUTTER_ENGINE_SWITCH_5': 'cache-sksl=true',
-          'FLUTTER_ENGINE_SWITCHES': '5'
+          'FLUTTER_ENGINE_SWITCH_2': 'trace-startup=true',
+          'FLUTTER_ENGINE_SWITCH_3': 'trace-allowlist=foo,bar',
+          'FLUTTER_ENGINE_SWITCH_4': 'cache-sksl=true',
+          'FLUTTER_ENGINE_SWITCHES': '4'
         }
       ),
     ]);
@@ -249,7 +243,7 @@ void main() {
   testWithoutContext('createDevFSWriter returns a LocalDevFSWriter', () {
     final FakeDesktopDevice device = setUpDesktopDevice();
 
-    expect(device.createDevFSWriter(null, ''), isA<LocalDevFSWriter>());
+    expect(device.createDevFSWriter(FakeApplicationPackage(), ''), isA<LocalDevFSWriter>());
   });
 
   testWithoutContext('startApp supports dartEntrypointArgs', () async {
@@ -258,7 +252,7 @@ void main() {
       FakeCommand(
         command: const <String>['debug', 'arg1', 'arg2'],
         stdout: 'Observatory listening on http://127.0.0.1/0\n',
-        completer: completer
+        completer: completer,
       ),
     ]);
     final FakeDesktopDevice device = setUpDesktopDevice(processManager: processManager);
@@ -268,19 +262,51 @@ void main() {
       prebuiltApplication: true,
       debuggingOptions: DebuggingOptions.enabled(
         BuildInfo.debug,
-        dartEntrypointArgs: <String>['arg1', 'arg2']
+        dartEntrypointArgs: <String>['arg1', 'arg2'],
       ),
     );
 
     expect(result.started, true);
   });
+
+  testWithoutContext('Device logger captures all output', () async {
+    final Completer<void> exitCompleter = Completer<void>();
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      FakeCommand(
+        command: const <String>['debug', 'arg1', 'arg2'],
+        exitCode: -1,
+        stderr: 'Oops\n',
+        completer: exitCompleter,
+        outputFollowsExit: true,
+      ),
+    ]);
+    final FakeDesktopDevice device = setUpDesktopDevice(
+      processManager: processManager,
+    );
+    unawaited(Future<void>(() {
+      exitCompleter.complete();
+    }));
+
+    // Start looking for 'Oops' in the stream before starting the app.
+    expect(device.getLogReader().logLines, emits('Oops'));
+
+    final FakeApplicationPackage package = FakeApplicationPackage();
+    await device.startApp(
+      package,
+      prebuiltApplication: true,
+      debuggingOptions: DebuggingOptions.enabled(
+        BuildInfo.debug,
+        dartEntrypointArgs: <String>['arg1', 'arg2'],
+      ),
+    );
+  });
 }
 
 FakeDesktopDevice setUpDesktopDevice({
-  FileSystem fileSystem,
-  Logger logger,
-  ProcessManager processManager,
-  OperatingSystemUtils operatingSystemUtils,
+  FileSystem? fileSystem,
+  Logger? logger,
+  ProcessManager? processManager,
+  OperatingSystemUtils? operatingSystemUtils,
   bool nullExecutablePathForDevice = false,
 }) {
   return FakeDesktopDevice(
@@ -295,11 +321,11 @@ FakeDesktopDevice setUpDesktopDevice({
 /// A trivial subclass of DesktopDevice for testing the shared functionality.
 class FakeDesktopDevice extends DesktopDevice {
   FakeDesktopDevice({
-    @required ProcessManager processManager,
-    @required Logger logger,
-    @required FileSystem fileSystem,
-    @required OperatingSystemUtils operatingSystemUtils,
-    this.nullExecutablePathForDevice,
+    required ProcessManager processManager,
+    required Logger logger,
+    required FileSystem fileSystem,
+    required OperatingSystemUtils operatingSystemUtils,
+    this.nullExecutablePathForDevice = false,
   }) : super(
       'dummy',
       platformType: PlatformType.linux,
@@ -311,10 +337,10 @@ class FakeDesktopDevice extends DesktopDevice {
   );
 
   /// The [mainPath] last passed to [buildForDevice].
-  String lastBuiltMainPath;
+  String? lastBuiltMainPath;
 
   /// The [buildInfo] last passed to [buildForDevice].
-  BuildInfo lastBuildInfo;
+  BuildInfo? lastBuildInfo;
 
   final bool nullExecutablePathForDevice;
 
@@ -333,8 +359,8 @@ class FakeDesktopDevice extends DesktopDevice {
   @override
   Future<void> buildForDevice(
     ApplicationPackage package, {
-    String mainPath,
-    BuildInfo buildInfo,
+    String? mainPath,
+    BuildInfo? buildInfo,
   }) async {
     lastBuiltMainPath = mainPath;
     lastBuildInfo = buildInfo;
@@ -342,7 +368,7 @@ class FakeDesktopDevice extends DesktopDevice {
 
   // Dummy implementation that just returns the build mode name.
   @override
-  String executablePathForDevice(ApplicationPackage package, BuildMode buildMode) {
+  String? executablePathForDevice(ApplicationPackage package, BuildMode buildMode) {
     if (nullExecutablePathForDevice) {
       return null;
     }
@@ -350,7 +376,7 @@ class FakeDesktopDevice extends DesktopDevice {
   }
 }
 
-class FakeApplicationPackage extends Fake implements ApplicationPackage {}
+class FakeApplicationPackage extends Fake implements ApplicationPackage { }
 class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
   @override
   String get name => 'Example';

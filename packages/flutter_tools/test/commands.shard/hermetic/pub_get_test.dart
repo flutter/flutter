@@ -77,7 +77,7 @@ void main() {
     FileSystem: () => fileSystem,
   });
 
-  testUsingContext('pub get skips example directory if it dooes not contain a pubspec.yaml', () async {
+  testUsingContext("pub get skips example directory if it doesn't contain a pubspec.yaml", () async {
     fileSystem.currentDirectory.childFile('pubspec.yaml').createSync();
     fileSystem.currentDirectory.childDirectory('example').createSync(recursive: true);
 
@@ -113,6 +113,8 @@ class FakePub extends Fake implements Pub {
     bool generateSyntheticPackage = false,
     String flutterRootOverride,
     bool checkUpToDate = false,
+    bool shouldSkipThirdPartyGenerator = true,
+    bool printProgress = true,
   }) async {
     fileSystem.currentDirectory
       .childDirectory('.dart_tool')

@@ -402,20 +402,21 @@ void main() {
     expect(lastSelection, 'lemur');
   });
 
-  testWidgets('keyboard navigation of the options properly highlights the option', (WidgetTester tester) async {
-
-    void checkOptionHighlight(String label, Color? color) {
-      final RenderBox renderBox = tester.renderObject<RenderBox>(find.ancestor(matching: find.byType(Container), of: find.text(label)));
-      if (color != null) {
-        // Check to see that the container is painted with the highlighted background color.
-        expect(renderBox, paints..rect(color: color));
-      } else {
-        // There should only be a paragraph painted.
-        expect(renderBox, paintsExactlyCountTimes(const Symbol('drawRect'), 0));
-        expect(renderBox, paints..paragraph());
-      }
+  // Ensures that the option with the given label has a given background color
+  // if given, or no background if color is null.
+  void checkOptionHighlight(WidgetTester tester, String label, Color? color) {
+    final RenderBox renderBox = tester.renderObject<RenderBox>(find.ancestor(matching: find.byType(Container), of: find.text(label)));
+    if (color != null) {
+      // Check to see that the container is painted with the highlighted background color.
+      expect(renderBox, paints..rect(color: color));
+    } else {
+      // There should only be a paragraph painted.
+      expect(renderBox, paintsExactlyCountTimes(const Symbol('drawRect'), 0));
+      expect(renderBox, paints..paragraph());
     }
+  }
 
+  testWidgets('keyboard navigation of the options properly highlights the option', (WidgetTester tester) async {
     const Color highlightColor = Color(0xFF112233);
     await tester.pumpWidget(
       MaterialApp(
@@ -442,15 +443,68 @@ void main() {
     expect(list.semanticChildCount, 2);
 
     // Initially the first option should be highlighted
-    checkOptionHighlight('chameleon', highlightColor);
-    checkOptionHighlight('elephant', null);
+    checkOptionHighlight(tester, 'chameleon', highlightColor);
+    checkOptionHighlight(tester, 'elephant', null);
 
     // Move the selection down
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     await tester.pump();
 
     // Highlight should be moved to the second item
-    checkOptionHighlight('chameleon', null);
-    checkOptionHighlight('elephant', highlightColor);
+    checkOptionHighlight(tester, 'chameleon', null);
+    checkOptionHighlight(tester, 'elephant', highlightColor);
+  });
+
+  testWidgets('keyboard navigation keeps the highlighted option scrolled into view', (WidgetTester tester) async {
+    const Color highlightColor = Color(0xFF112233);
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.light().copyWith(
+          focusColor: highlightColor,
+        ),
+        home: Scaffold(
+          body: Autocomplete<String>(
+            optionsBuilder: (TextEditingValue textEditingValue) {
+              return kOptions.where((String option) {
+                return option.contains(textEditingValue.text.toLowerCase());
+              });
+            },
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(TextFormField));
+    await tester.enterText(find.byType(TextFormField), 'e');
+    await tester.pump();
+    expect(find.byType(ListView), findsOneWidget);
+    final ListView list = find.byType(ListView).evaluate().first.widget as ListView;
+    expect(list.semanticChildCount, 6);
+
+    // Highlighted item should be at the top
+    expect(tester.getTopLeft(find.text('chameleon')).dy, equals(64.0));
+    checkOptionHighlight(tester, 'chameleon', highlightColor);
+
+    // Move down the list of options
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+
+    // First item should have scrolled off the top, and not be selected.
+    expect(find.text('chameleon'), findsNothing);
+
+    // Highlighted item 'lemur' should be centered in the options popup
+    expect(tester.getTopLeft(find.text('mouse')).dy, equals(187.0));
+    checkOptionHighlight(tester, 'mouse', highlightColor);
+
+    // The other items on screen should not be selected.
+    checkOptionHighlight(tester, 'goose', null);
+    checkOptionHighlight(tester, 'lemur', null);
+    checkOptionHighlight(tester, 'northern white rhinoceros', null);
   });
 }

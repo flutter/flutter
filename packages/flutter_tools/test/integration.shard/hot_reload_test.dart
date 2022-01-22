@@ -108,8 +108,14 @@ void main() {
     await flutter.resume(); // we start paused so we can set up our TICK 1 listener before the app starts
     unawaited(sawTick1.future.timeout(
       const Duration(seconds: 5),
-      onTimeout: () { print('The test app is taking longer than expected to print its synchronization line...'); },
+      onTimeout: () {
+        // This print is useful for people debugging this test. Normally we would avoid printing in
+        // a test but this is an exception because it's useful ambient information.
+        // ignore: avoid_print
+        print('The test app is taking longer than expected to print its synchronization line...');
+      },
     ));
+    printOnFailure('waiting for synchronization line...');
     await sawTick1.future; // after this, app is in steady state
     await flutter.addBreakpoint(
       project.scheduledBreakpointUri,
@@ -126,19 +132,19 @@ void main() {
     );
     bool reloaded = false;
     final Future<void> reloadFuture = flutter.hotReload().then((void value) { reloaded = true; });
-    print('waiting for pause...');
+    printOnFailure('waiting for pause...');
     isolate = await flutter.waitForPause();
     expect(isolate.pauseEvent.kind, equals(EventKind.kPauseBreakpoint));
-    print('waiting for debugger message...');
+    printOnFailure('waiting for debugger message...');
     await sawDebuggerPausedMessage.future;
     expect(reloaded, isFalse);
-    print('waiting for resume...');
+    printOnFailure('waiting for resume...');
     await flutter.resume();
-    print('waiting for reload future...');
+    printOnFailure('waiting for reload future...');
     await reloadFuture;
     expect(reloaded, isTrue);
     reloaded = false;
-    print('subscription cancel...');
+    printOnFailure('subscription cancel...');
     await subscription.cancel();
   });
 
@@ -148,7 +154,7 @@ void main() {
     final Completer<void> sawDebuggerPausedMessage2 = Completer<void>();
     final StreamSubscription<String> subscription = flutter.stdout.listen(
       (String line) {
-        print('[LOG]:"$line"');
+        printOnFailure('[LOG]:"$line"');
         if (line.contains('(((TICK 1)))')) {
           expect(sawTick1.isCompleted, isFalse);
           sawTick1.complete();
@@ -190,6 +196,6 @@ bool _isHotReloadCompletionEvent(Map<String, dynamic> event) {
   return event != null &&
       event['event'] == 'app.progress' &&
       event['params'] != null &&
-      event['params']['progressId'] == 'hot.reload' &&
-      event['params']['finished'] == true;
+      (event['params'] as Map<String, dynamic>)['progressId'] == 'hot.reload' &&
+      (event['params'] as Map<String, dynamic>)['finished'] == true;
 }

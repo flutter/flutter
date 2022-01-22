@@ -62,7 +62,7 @@ class Registrar extends BinaryMessenger {
   /// compiling for the web.
   void registerMessageHandler() {
     // The `ui.webOnlySetPluginHandler` function below is only defined in the Web dart:ui.
-    // ignore: undefined_function
+    // ignore: undefined_function, avoid_dynamic_calls
     ui.webOnlySetPluginHandler(handleFrameworkMessage);
   }
 

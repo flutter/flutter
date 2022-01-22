@@ -11,7 +11,7 @@ import '../rendering/src/sector_layout.dart';
 RenderBoxToRenderSectorAdapter initCircle() {
   return RenderBoxToRenderSectorAdapter(
     innerRadius: 25.0,
-    child: RenderSectorRing(padding: 0.0),
+    child: RenderSectorRing(),
   );
 }
 
@@ -90,6 +90,13 @@ class SectorAppState extends State<SectorApp> {
     });
   }
 
+  void recursivelyDisposeChildren(RenderObject parent) {
+    parent.visitChildren((RenderObject child) {
+      recursivelyDisposeChildren(child);
+      child.dispose();
+    });
+  }
+
   Widget buildBody() {
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -107,7 +114,12 @@ class SectorAppState extends State<SectorApp> {
                       Container(
                         padding: const EdgeInsets.all(4.0),
                         margin: const EdgeInsets.only(right: 10.0),
-                        child: WidgetToRenderBoxAdapter(renderBox: sectorAddIcon),
+                        child: WidgetToRenderBoxAdapter(
+                          renderBox: sectorAddIcon,
+                          onUnmount: () {
+                            recursivelyDisposeChildren(sectorAddIcon);
+                          },
+                        ),
                       ),
                       const Text('ADD SECTOR'),
                     ],
@@ -122,7 +134,12 @@ class SectorAppState extends State<SectorApp> {
                       Container(
                         padding: const EdgeInsets.all(4.0),
                         margin: const EdgeInsets.only(right: 10.0),
-                        child: WidgetToRenderBoxAdapter(renderBox: sectorRemoveIcon),
+                        child: WidgetToRenderBoxAdapter(
+                          renderBox: sectorRemoveIcon,
+                          onUnmount: () {
+                            recursivelyDisposeChildren(sectorRemoveIcon);
+                          },
+                        ),
                       ),
                       const Text('REMOVE SECTOR'),
                     ],
@@ -142,6 +159,9 @@ class SectorAppState extends State<SectorApp> {
             child: WidgetToRenderBoxAdapter(
               renderBox: sectors,
               onBuild: doUpdates,
+              onUnmount: () {
+                recursivelyDisposeChildren(sectors);
+              },
             ),
           ),
         ),

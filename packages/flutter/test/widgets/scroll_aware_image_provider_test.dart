@@ -368,7 +368,7 @@ void main() {
     expect(imageCache!.currentSize, 0);
 
     // Occupy the only slot in the cache with another image.
-    final TestImageProvider testImageProvider2 = TestImageProvider(testImage);
+    final TestImageProvider testImageProvider2 = TestImageProvider(testImage.clone());
     testImageProvider2.complete();
     await precacheImage(testImageProvider2, context.context!);
     expect(imageCache!.containsKey(testImageProvider), false);

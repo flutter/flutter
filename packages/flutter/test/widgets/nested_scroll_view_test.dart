@@ -470,14 +470,14 @@ void main() {
 
   testWidgets('NestedScrollView and internal scrolling', (WidgetTester tester) async {
     debugDisableShadows = false;
-    const List<String> _tabs = <String>['Hello', 'World'];
+    const List<String> tabs = <String>['Hello', 'World'];
     int buildCount = 0;
     await tester.pumpWidget(
       MaterialApp(home: Material(child:
         // THE FOLLOWING SECTION IS FROM THE NestedScrollView DOCUMENTATION
         // (EXCEPT FOR THE CHANGES TO THE buildCount COUNTER)
         DefaultTabController(
-          length: _tabs.length, // This is the number of tabs.
+          length: tabs.length, // This is the number of tabs.
           child: NestedScrollView(
             dragStartBehavior: DragStartBehavior.down,
             headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
@@ -510,7 +510,7 @@ void main() {
                     bottom: TabBar(
                       // These are the widgets to put in each tab in the tab
                       // bar.
-                      tabs: _tabs.map<Widget>((String name) => Tab(text: name)).toList(),
+                      tabs: tabs.map<Widget>((String name) => Tab(text: name)).toList(),
                       dragStartBehavior: DragStartBehavior.down,
                     ),
                   ),
@@ -520,7 +520,7 @@ void main() {
             body: TabBarView(
               dragStartBehavior: DragStartBehavior.down,
               // These are the contents of the tab views, below the tabs.
-              children: _tabs.map<Widget>((String name) {
+              children: tabs.map<Widget>((String name) {
                 return SafeArea(
                   top: false,
                   bottom: false,
@@ -2443,6 +2443,115 @@ void main() {
     //Trigger `_updatePosition()`.
     await tester.pumpWidget(buildFrame(physics: const _CustomPhysics()));
     expect(position.pixels, 0.0);
+  });
+
+  testWidgets("NestedScrollView doesn't crash due to precision error", (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/63825
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: NestedScrollView(
+          floatHeaderSlivers: true,
+          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) => <Widget>[
+            const SliverAppBar(
+              expandedHeight: 250.0,
+            ),
+          ],
+          body: CustomScrollView(
+            physics: const BouncingScrollPhysics(),
+            slivers: <Widget>[
+              SliverPadding(
+                padding: const EdgeInsets.all(8.0),
+                sliver: SliverFixedExtentList(
+                  itemExtent: 48.0,
+                  delegate: SliverChildBuilderDelegate(
+                    (BuildContext context, int index) {
+                      return ListTile(
+                        title: Text('Item $index'),
+                      );
+                    },
+                    childCount: 30,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ));
+
+    // Scroll to bottom
+    await tester.fling(find.text('Item 3'), const Offset(0.0, -250.0), 10000.0);
+    await tester.pumpAndSettle();
+
+    // Fling down for AppBar to show
+    await tester.drag(find.text('Item 29'), const Offset(0.0, 250 - 133.7981622869321));
+
+    // Fling up to trigger ballistic activity
+    await tester.fling(find.text('Item 25'), const Offset(0.0, -50.0), 4000.0);
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets('NestedScrollViewCoordinator.pointerScroll dispatches correct scroll notifications', (WidgetTester tester) async {
+    int scrollEnded = 0;
+    int scrollStarted = 0;
+    bool isScrolled = false;
+
+    await tester.pumpWidget(MaterialApp(
+      home: NotificationListener<ScrollNotification>(
+        onNotification: (ScrollNotification notification) {
+          if (notification is ScrollStartNotification) {
+            scrollStarted += 1;
+          } else if (notification is ScrollEndNotification) {
+            scrollEnded += 1;
+          }
+          return false;
+        },
+        child: Scaffold(
+          body: NestedScrollView(
+            headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+              isScrolled = innerBoxIsScrolled;
+              return <Widget>[
+                const SliverAppBar(
+                  expandedHeight: 250.0,
+                ),
+              ];
+            },
+            body: CustomScrollView(
+              physics: const BouncingScrollPhysics(),
+              slivers: <Widget>[
+                SliverPadding(
+                  padding: const EdgeInsets.all(8.0),
+                  sliver: SliverFixedExtentList(
+                    itemExtent: 48.0,
+                    delegate: SliverChildBuilderDelegate(
+                          (BuildContext context, int index) {
+                        return ListTile(
+                          title: Text('Item $index'),
+                        );
+                      },
+                      childCount: 30,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    final Offset scrollEventLocation = tester.getCenter(find.byType(NestedScrollView));
+    final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+    // Create a hover event so that |testPointer| has a location when generating the scroll.
+    testPointer.hover(scrollEventLocation);
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 300.0)));
+    await tester.pumpAndSettle();
+
+    expect(isScrolled, isTrue);
+    // There should have been a notification for each nested position (2).
+    expect(scrollStarted, 2);
+    expect(scrollEnded, 2);
   });
 }
 

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
@@ -27,7 +25,7 @@ Future<void> main() async {
 
     section('Find Java');
 
-    final String javaHome = await findJavaHome();
+    final String? javaHome = await findJavaHome();
     if (javaHome == null)
       return TaskResult.failure('Could not find Java');
     print('\nUsing JAVA_HOME=$javaHome');
@@ -77,7 +75,7 @@ Future<void> main() async {
       content = await pubspec.readAsString();
       content = content.replaceFirst(
         '${platformLineSep}dependencies:$platformLineSep',
-        '${platformLineSep}dependencies:$platformLineSep  device_info: 0.4.1$platformLineSep  package_info: 0.4.0+9$platformLineSep',
+        '${platformLineSep}dependencies:$platformLineSep  device_info: 2.0.3$platformLineSep  package_info: 2.0.2$platformLineSep',
       );
       await pubspec.writeAsString(content, flush: true);
       await inDirectory(projectDir, () async {
@@ -325,9 +323,9 @@ Future<void> main() async {
         final File apkFile = File(releaseHostApk);
         final Archive apk = ZipDecoder().decodeBytes(apkFile.readAsBytesSync());
         // Shouldn't be missing since we already checked it exists above.
-        final ArchiveFile noticesFile = apk.findFile('assets/flutter_assets/NOTICES.Z');
+        final ArchiveFile? noticesFile = apk.findFile('assets/flutter_assets/NOTICES.Z');
 
-        final Uint8List licenseData = noticesFile.content as Uint8List;
+        final Uint8List licenseData = noticesFile?.content as Uint8List;
         if (licenseData == null) {
           return TaskResult.failure('Invalid license file.');
         }

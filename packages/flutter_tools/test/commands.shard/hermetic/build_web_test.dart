@@ -14,9 +14,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
 import 'package:flutter_tools/src/commands/build_web.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
-import 'package:flutter_tools/src/web/compile.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -27,7 +25,6 @@ import '../../src/test_flutter_command_runner.dart';
 void main() {
   FileSystem fileSystem;
   final Platform fakePlatform = FakePlatform(
-    operatingSystem: 'linux',
     environment: <String, String>{
       'FLUTTER_ROOT': '/'
     }
@@ -50,18 +47,12 @@ void main() {
 
   testUsingContext('Refuses to build for web when missing index.html', () async {
     fileSystem.file(fileSystem.path.join('web', 'index.html')).deleteSync();
-    final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+    final CommandRunner<void> runner = createTestCommandRunner(BuildCommand());
 
-    expect(buildWeb(
-      project,
-      fileSystem.path.join('lib', 'main.dart'),
-      BuildInfo.debug,
-      false,
-      null,
-      true,
-      true,
-      null,
-    ), throwsToolExit());
+    expect(
+      () => runner.run(<String>['build', 'web', '--no-pub']),
+      throwsToolExit(message: 'Missing index.html.')
+    );
   }, overrides: <Type, Generator>{
     Platform: () => fakePlatform,
     FileSystem: () => fileSystem,
@@ -91,7 +82,7 @@ void main() {
   }, overrides: <Type, Generator>{
     Platform: () => fakePlatform,
     FileSystem: () => fileSystem,
-    FeatureFlags: () => TestFeatureFlags(isWebEnabled: false),
+    FeatureFlags: () => TestFeatureFlags(),
     ProcessManager: () => FakeProcessManager.any(),
   });
 
@@ -120,7 +111,6 @@ void main() {
         'DartObfuscation': 'false',
         'TrackWidgetCreation': 'false',
         'TreeShakeIcons': 'false',
-        'baseHref': null,
       });
     }),
   });
@@ -130,7 +120,7 @@ void main() {
   }, overrides: <Type, Generator>{
     Platform: () => fakePlatform,
     FileSystem: () => fileSystem,
-    FeatureFlags: () => TestFeatureFlags(isWebEnabled: false),
+    FeatureFlags: () => TestFeatureFlags(),
     ProcessManager: () => FakeProcessManager.any(),
   });
 

@@ -32,77 +32,30 @@ const double _kScrollbarCrossAxisMargin = 3.0;
 /// To add a scrollbar to a [ScrollView], simply wrap the scroll view widget in
 /// a [CupertinoScrollbar] widget.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=DbkIQSvwnZc}
+///
 /// {@macro flutter.widgets.Scrollbar}
 ///
 /// When dragging a [CupertinoScrollbar] thumb, the thickness and radius will
 /// animate from [thickness] and [radius] to [thicknessWhileDragging] and
 /// [radiusWhileDragging], respectively.
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold}
+/// {@tool dartpad}
 /// This sample shows a [CupertinoScrollbar] that fades in and out of view as scrolling occurs.
 /// The scrollbar will fade into view as the user scrolls, and fade out when scrolling stops.
 /// The `thickness` of the scrollbar will animate from 6 pixels to the `thicknessWhileDragging` of 10
 /// when it is dragged by the user. The `radius` of the scrollbar thumb corners will animate from 34
 /// to the `radiusWhileDragging` of 0 when the scrollbar is being dragged by the user.
 ///
-/// ```dart imports
-/// import 'package:flutter/cupertino.dart';
-/// ```
-///
-/// ```dart
-/// @override
-/// Widget build(BuildContext context) {
-///   return CupertinoScrollbar(
-///     thickness: 6.0,
-///     thicknessWhileDragging: 10.0,
-///     radius: const Radius.circular(34.0),
-///     radiusWhileDragging: Radius.zero,
-///     child: ListView.builder(
-///       itemCount: 120,
-///       itemBuilder: (BuildContext context, int index) {
-///         return Center(
-///           child: Text('item $index'),
-///         );
-///       },
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/cupertino/scrollbar/cupertino_scrollbar.0.dart **
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold}
+/// {@tool dartpad}
 /// When `isAlwaysShown` is true, the scrollbar thumb will remain visible without the
 /// fade animation. This requires that a [ScrollController] is provided to controller,
 /// or that the [PrimaryScrollController] is available.
 ///
-/// ```dart imports
-/// import 'package:flutter/cupertino.dart';
-/// ```
-///
-/// ```dart
-/// final ScrollController _controllerOne = ScrollController();
-///
-/// @override
-/// Widget build(BuildContext context) {
-///   return CupertinoScrollbar(
-///     thickness: 6.0,
-///     thicknessWhileDragging: 10.0,
-///     radius: const Radius.circular(34.0),
-///     radiusWhileDragging: Radius.zero,
-///     controller: _controllerOne,
-///     isAlwaysShown: true,
-///     child: ListView.builder(
-///       controller: _controllerOne,
-///       itemCount: 120,
-///       itemBuilder: (BuildContext context, int index) {
-///         return Center(
-///           child: Text('item $index'),
-///         );
-///       },
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/cupertino/scrollbar/cupertino_scrollbar.1.dart **
 /// {@end-tool}
 ///
 /// See also:

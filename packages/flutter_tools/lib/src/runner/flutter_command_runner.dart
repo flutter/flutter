@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:completion/completion.dart';
@@ -45,14 +43,12 @@ class FlutterCommandRunner extends CommandRunner<void> {
     argParser.addFlag('prefixed-errors',
         negatable: false,
         help: 'Causes lines sent to stderr to be prefixed with "ERROR:".',
-        hide: !verboseHelp,
-        defaultsTo: false);
+        hide: !verboseHelp);
     argParser.addFlag('quiet',
         negatable: false,
         hide: !verboseHelp,
         help: 'Reduce the amount of output from some commands.');
     argParser.addFlag('wrap',
-        negatable: true,
         hide: !verboseHelp,
         help: 'Toggles output word wrapping, regardless of whether or not the output is a terminal.',
         defaultsTo: true);
@@ -60,8 +56,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
         hide: !verboseHelp,
         help: 'Sets the output wrap column. If not set, uses the width of the terminal. No '
               'wrapping occurs if not writing to a terminal. Use "--no-wrap" to turn off wrapping '
-              'when connected to a terminal.',
-        defaultsTo: null);
+              'when connected to a terminal.');
     argParser.addOption('device-id',
         abbr: 'd',
         help: 'Target device id or name (prefixes allowed).');
@@ -73,12 +68,10 @@ class FlutterCommandRunner extends CommandRunner<void> {
         hide: !verboseHelp,
         help: 'When used with the "--version" flag, outputs the information using JSON.');
     argParser.addFlag('color',
-        negatable: true,
         hide: !verboseHelp,
         help: 'Whether to use terminal colors (requires support for ANSI escape sequences).',
         defaultsTo: true);
     argParser.addFlag('version-check',
-        negatable: true,
         defaultsTo: true,
         hide: !verboseHelp,
         help: 'Allow Flutter to check for updates when this command runs.');
@@ -158,12 +151,12 @@ class FlutterCommandRunner extends CommandRunner<void> {
         usageException(error.message);
       }
 
-      Command<void> command = commands[error.commands.first];
+      Command<void>? command = commands[error.commands.first];
       for (final String commandName in error.commands.skip(1)) {
-        command = command.subcommands[commandName];
+        command = command?.subcommands[commandName];
       }
 
-      command.usageException(error.message);
+      command!.usageException(error.message);
     }
   }
 
@@ -171,8 +164,12 @@ class FlutterCommandRunner extends CommandRunner<void> {
   Future<void> run(Iterable<String> args) {
     // Have an invocation of 'build' print out it's sub-commands.
     // TODO(ianh): Move this to the Build command itself somehow.
-    if (args.length == 1 && args.first == 'build') {
-      args = <String>['build', '-h'];
+    if (args.length == 1) {
+      if (args.first == 'build') {
+        args = <String>['build', '-h'];
+      } else if (args.first == 'custom-devices') {
+        args = <String>['custom-devices', '-h'];
+      }
     }
 
     return super.run(args);
@@ -180,12 +177,12 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
   @override
   Future<void> runCommand(ArgResults topLevelResults) async {
-    final Map<Type, dynamic> contextOverrides = <Type, dynamic>{};
+    final Map<Type, Object?> contextOverrides = <Type, Object?>{};
 
     // Don't set wrapColumns unless the user said to: if it's set, then all
     // wrapping will occur at this width explicitly, and won't adapt if the
     // terminal size changes during a run.
-    int wrapColumn;
+    int? wrapColumn;
     if (topLevelResults.wasParsed('wrap-column')) {
       try {
         wrapColumn = int.parse(topLevelResults['wrap-column'] as String);
@@ -204,53 +201,53 @@ class FlutterCommandRunner extends CommandRunner<void> {
         : globals.stdio.terminalColumns != null && topLevelResults['wrap'] as bool;
     contextOverrides[OutputPreferences] = OutputPreferences(
       wrapText: useWrapping,
-      showColor: topLevelResults['color'] as bool,
+      showColor: topLevelResults['color'] as bool?,
       wrapColumn: wrapColumn,
     );
 
-    if (topLevelResults['show-test-device'] as bool ||
+    if ((topLevelResults['show-test-device'] as bool?) == true ||
         topLevelResults['device-id'] == FlutterTesterDevices.kTesterDeviceId) {
       FlutterTesterDevices.showFlutterTesterDevice = true;
     }
-    if (topLevelResults['show-web-server-device'] as bool ||
+    if ((topLevelResults['show-web-server-device'] as bool?) == true  ||
         topLevelResults['device-id'] == WebServerDevice.kWebServerDeviceId) {
       WebServerDevice.showWebServerDevice = true;
     }
 
     // Set up the tooling configuration.
-    final EngineBuildPaths engineBuildPaths = await globals.localEngineLocator.findEnginePath(
-      topLevelResults['local-engine-src-path'] as String,
-      topLevelResults['local-engine'] as String,
-      topLevelResults['packages'] as String,
+    final EngineBuildPaths? engineBuildPaths = await globals.localEngineLocator?.findEnginePath(
+      topLevelResults['local-engine-src-path'] as String?,
+      topLevelResults['local-engine'] as String?,
+      topLevelResults['packages'] as String?,
     );
     if (engineBuildPaths != null) {
-      contextOverrides.addAll(<Type, dynamic>{
+      contextOverrides.addAll(<Type, Object?>{
         Artifacts: Artifacts.getLocalEngine(engineBuildPaths),
       });
     }
 
     await context.run<void>(
-      overrides: contextOverrides.map<Type, Generator>((Type type, dynamic value) {
+      overrides: contextOverrides.map<Type, Generator>((Type type, Object? value) {
         return MapEntry<Type, Generator>(type, () => value);
       }),
       body: () async {
-        globals.logger.quiet = topLevelResults['quiet'] as bool;
+        globals.logger.quiet = (topLevelResults['quiet'] as bool?) == true;
 
         if (globals.platform.environment['FLUTTER_ALREADY_LOCKED'] != 'true') {
           await globals.cache.lock();
         }
 
-        if (topLevelResults['suppress-analytics'] as bool) {
+        if ((topLevelResults['suppress-analytics'] as bool?) == true) {
           globals.flutterUsage.suppressAnalytics = true;
         }
 
         globals.flutterVersion.ensureVersionFile();
-        final bool machineFlag = topLevelResults['machine'] as bool;
+        final bool machineFlag = topLevelResults['machine'] as bool? ?? false;
         final bool ci = await globals.botDetector.isRunningOnBot;
         final bool redirectedCompletion = !globals.stdio.hasTerminal &&
             (topLevelResults.command?.name ?? '').endsWith('-completion');
         final bool isMachine = machineFlag || ci || redirectedCompletion;
-        final bool versionCheckFlag = topLevelResults['version-check'] as bool;
+        final bool versionCheckFlag = topLevelResults['version-check'] as bool? ?? false;
         final bool explicitVersionCheckPassed = topLevelResults.wasParsed('version-check') && versionCheckFlag;
 
         if (topLevelResults.command?.name != 'upgrade' &&
@@ -259,16 +256,16 @@ class FlutterCommandRunner extends CommandRunner<void> {
         }
 
         // See if the user specified a specific device.
-        globals.deviceManager.specifiedDeviceId = topLevelResults['device-id'] as String;
+        globals.deviceManager?.specifiedDeviceId = topLevelResults['device-id'] as String?;
 
-        if (topLevelResults['version'] as bool) {
+        if ((topLevelResults['version'] as bool?) == true) {
           globals.flutterUsage.sendCommand('version');
           globals.flutterVersion.fetchTagsAndUpdate();
           String status;
           if (machineFlag) {
             final Map<String, Object> jsonOut = globals.flutterVersion.toJson();
             if (jsonOut != null) {
-              jsonOut['flutterRoot'] = Cache.flutterRoot;
+              jsonOut['flutterRoot'] = Cache.flutterRoot!;
             }
             status = const JsonEncoder.withIndent('  ').convert(jsonOut);
           } else {
@@ -288,7 +285,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
   /// Get the root directories of the repo - the directories containing Dart packages.
   List<String> getRepoRoots() {
-    final String root = globals.fs.path.absolute(Cache.flutterRoot);
+    final String root = globals.fs.path.absolute(Cache.flutterRoot!);
     // not bin, and not the root
     return <String>['dev', 'examples', 'packages'].map<String>((String item) {
       return globals.fs.path.join(root, item);
@@ -307,7 +304,6 @@ class FlutterCommandRunner extends CommandRunner<void> {
     if (globals.fs.isFileSync(globals.fs.path.join(rootPath, '.dartignore'))) {
       return <String>[];
     }
-
 
     final List<String> projectPaths = globals.fs.directory(rootPath)
       .listSync(followLinks: false)

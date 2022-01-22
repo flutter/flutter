@@ -16,8 +16,9 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/flutter_cache.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:meta/meta.dart';
-import 'package:mockito/mockito.dart';
+import 'package:test/fake.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -78,17 +79,24 @@ void main() {
     });
 
     testWithoutContext('should not throw when lock is acquired', () async {
+      final String oldRoot = Cache.flutterRoot;
       Cache.flutterRoot = '';
-      final FileSystem fileSystem = MemoryFileSystem.test();
-      final Cache cache = Cache.test(fileSystem: fileSystem, processManager: FakeProcessManager.any());
-      fileSystem.file(fileSystem.path.join('bin', 'cache', 'lockfile'))
-        .createSync(recursive: true);
+      try {
+        final FileSystem fileSystem = MemoryFileSystem.test();
+        final Cache cache = Cache.test(
+            fileSystem: fileSystem, processManager: FakeProcessManager.any());
+        fileSystem.file(fileSystem.path.join('bin', 'cache', 'lockfile'))
+            .createSync(recursive: true);
 
-      await cache.lock();
+        await cache.lock();
 
-      expect(cache.checkLockAcquired, returnsNormally);
-      expect(cache.releaseLock, returnsNormally);
-    }, skip: true); // TODO(jonahwilliams): implement support for lock so this can be tested with the memory file system.
+        expect(cache.checkLockAcquired, returnsNormally);
+        expect(cache.releaseLock, returnsNormally);
+      } finally {
+        Cache.flutterRoot = oldRoot;
+      }
+      // TODO(zanderso): implement support for lock so this can be tested with the memory file system.
+    }, skip: true); // https://github.com/flutter/flutter/issues/87923
 
     testWithoutContext('throws tool exit when lockfile open fails', () async {
       final FileSystem fileSystem = MemoryFileSystem.test();
@@ -97,7 +105,8 @@ void main() {
         .createSync(recursive: true);
 
       expect(() async => cache.lock(), throwsToolExit());
-    }, skip: true); // TODO(jonahwilliams): implement support for lock so this can be tested with the memory file system.
+      // TODO(zanderso): implement support for lock so this can be tested with the memory file system.
+    }, skip: true); // https://github.com/flutter/flutter/issues/87923
 
     testWithoutContext('should not throw when FLUTTER_ALREADY_LOCKED is set', () {
      final Cache cache = Cache.test(
@@ -115,36 +124,36 @@ void main() {
     testWithoutContext('Continues on failed stamp file update', () async {
       final FileSystem fileSystem = MemoryFileSystem.test();
       final BufferLogger logger = BufferLogger.test();
-      final Cache mockCache = MockCache();
       final Directory artifactDir = fileSystem.systemTempDirectory.createTempSync('flutter_cache_test_artifact.');
       final Directory downloadDir = fileSystem.systemTempDirectory.createTempSync('flutter_cache_test_download.');
+      final Cache cache = FakeSecondaryCache()
+        ..version = 'asdasd'
+        ..artifactDirectory = artifactDir
+        ..downloadDir = downloadDir
+        ..onSetStamp = (String name, String version) {
+          throw const FileSystemException('stamp write failed');
+        };
 
-      when(mockCache.getVersionFor(any)).thenReturn('asdasd');
-      when(mockCache.getArtifactDirectory(any)).thenReturn(artifactDir);
-      when(mockCache.getDownloadDir()).thenReturn(downloadDir);
-      when(mockCache.setStampFor(any, any)).thenAnswer((_) {
-        throw const FileSystemException('stamp write failed');
-      });
-      final FakeSimpleArtifact artifact = FakeSimpleArtifact(mockCache);
+      final FakeSimpleArtifact artifact = FakeSimpleArtifact(cache);
       await artifact.update(FakeArtifactUpdater(), logger, fileSystem, FakeOperatingSystemUtils());
 
-      expect(logger.errorText, contains('stamp write failed'));
+      expect(logger.warningText, contains('stamp write failed'));
     });
 
     testWithoutContext('Continues on missing version file', () async {
       final FileSystem fileSystem = MemoryFileSystem.test();
       final BufferLogger logger = BufferLogger.test();
-      final Cache mockCache = MockCache();
       final Directory artifactDir = fileSystem.systemTempDirectory.createTempSync('flutter_cache_test_artifact.');
       final Directory downloadDir = fileSystem.systemTempDirectory.createTempSync('flutter_cache_test_download.');
+      final Cache cache = FakeSecondaryCache()
+        ..version = null // version is missing.
+        ..artifactDirectory = artifactDir
+        ..downloadDir = downloadDir;
 
-      when(mockCache.getVersionFor(any)).thenReturn(null); // version is missing.
-      when(mockCache.getArtifactDirectory(any)).thenReturn(artifactDir);
-      when(mockCache.getDownloadDir()).thenReturn(downloadDir);
-      final FakeSimpleArtifact artifact = FakeSimpleArtifact(mockCache);
+      final FakeSimpleArtifact artifact = FakeSimpleArtifact(cache);
       await artifact.update(FakeArtifactUpdater(), logger, fileSystem, FakeOperatingSystemUtils());
 
-      expect(logger.errorText, contains('No known version for the artifact name "fake"'));
+      expect(logger.warningText, contains('No known version for the artifact name "fake"'));
     });
 
     testWithoutContext('Gradle wrapper should not be up to date, if some cached artifact is not available', () {
@@ -159,7 +168,11 @@ void main() {
 
     testWithoutContext('Gradle wrapper will delete .properties/NOTICES if they exist', () async {
       final FileSystem fileSystem = MemoryFileSystem.test();
-      final Cache cache = Cache.test(fileSystem: fileSystem, processManager: FakeProcessManager.any());
+      final Directory artifactDir = fileSystem.systemTempDirectory.createTempSync('flutter_cache_test_artifact.');
+      final FakeSecondaryCache cache = FakeSecondaryCache()
+        ..artifactDirectory = artifactDir
+        ..version = '123456';
+
       final OperatingSystemUtils operatingSystemUtils = OperatingSystemUtils(
         processManager: FakeProcessManager.any(),
         platform: FakePlatform(),
@@ -167,10 +180,9 @@ void main() {
         fileSystem: fileSystem,
       );
       final GradleWrapper gradleWrapper = GradleWrapper(cache);
-      final Directory directory = cache.getCacheDir(fileSystem.path.join('artifacts', 'gradle_wrapper'));
-      final File propertiesFile = fileSystem.file(fileSystem.path.join(directory.path, 'gradle', 'wrapper', 'gradle-wrapper.properties'))
+      final File propertiesFile = fileSystem.file(fileSystem.path.join(artifactDir.path, 'gradle', 'wrapper', 'gradle-wrapper.properties'))
         ..createSync(recursive: true);
-      final File noticeFile = fileSystem.file(fileSystem.path.join(directory.path, 'NOTICE'))
+      final File noticeFile = fileSystem.file(fileSystem.path.join(artifactDir.path, 'NOTICE'))
         ..createSync(recursive: true);
 
       await gradleWrapper.updateInner(FakeArtifactUpdater(), fileSystem, operatingSystemUtils);
@@ -192,9 +204,9 @@ void main() {
     });
 
     testWithoutContext('should not be up to date, if some cached artifact is not', () async {
-      final CachedArtifact artifact1 = FakeSecondayCachedArtifact()
+      final CachedArtifact artifact1 = FakeSecondaryCachedArtifact()
         ..upToDate = true;
-      final CachedArtifact artifact2 = FakeSecondayCachedArtifact()
+      final CachedArtifact artifact2 = FakeSecondaryCachedArtifact()
         ..upToDate = false;
       final FileSystem fileSystem = MemoryFileSystem.test();
 
@@ -208,9 +220,9 @@ void main() {
     });
 
     testWithoutContext('should be up to date, if all cached artifacts are', () async {
-      final FakeSecondayCachedArtifact artifact1 = FakeSecondayCachedArtifact()
+      final FakeSecondaryCachedArtifact artifact1 = FakeSecondaryCachedArtifact()
         ..upToDate = true;
-      final FakeSecondayCachedArtifact artifact2 = FakeSecondayCachedArtifact()
+      final FakeSecondaryCachedArtifact artifact2 = FakeSecondaryCachedArtifact()
         ..upToDate = true;
       final FileSystem fileSystem = MemoryFileSystem.test();
       final Cache cache = Cache.test(
@@ -223,9 +235,9 @@ void main() {
     });
 
     testWithoutContext('should update cached artifacts which are not up to date', () async {
-      final FakeSecondayCachedArtifact artifact1 = FakeSecondayCachedArtifact()
+      final FakeSecondaryCachedArtifact artifact1 = FakeSecondaryCachedArtifact()
         ..upToDate = true;
-      final FakeSecondayCachedArtifact artifact2 = FakeSecondayCachedArtifact()
+      final FakeSecondaryCachedArtifact artifact2 = FakeSecondaryCachedArtifact()
         ..upToDate = false;
       final FileSystem fileSystem = MemoryFileSystem.test();
 
@@ -269,9 +281,9 @@ void main() {
 
     testWithoutContext('failed storage.googleapis.com download shows China warning', () async {
       final InternetAddress address = (await InternetAddress.lookup('storage.googleapis.com')).first;
-      final FakeSecondayCachedArtifact artifact1 = FakeSecondayCachedArtifact()
+      final FakeSecondaryCachedArtifact artifact1 = FakeSecondaryCachedArtifact()
         ..upToDate = false;
-      final FakeSecondayCachedArtifact artifact2 = FakeSecondayCachedArtifact()
+      final FakeSecondaryCachedArtifact artifact2 = FakeSecondaryCachedArtifact()
         ..upToDate = false
         ..updateException = SocketException(
         'Connection reset by peer',
@@ -317,13 +329,12 @@ void main() {
 
   testWithoutContext('EngineCachedArtifact makes binary dirs readable and executable by all', () async {
     final FakeOperatingSystemUtils operatingSystemUtils = FakeOperatingSystemUtils();
-    final MockCache cache = MockCache();
     final FileSystem fileSystem = MemoryFileSystem.test();
     final Directory artifactDir = fileSystem.systemTempDirectory.createTempSync('flutter_cache_test_artifact.');
     final Directory downloadDir = fileSystem.systemTempDirectory.createTempSync('flutter_cache_test_download.');
-
-    when(cache.getArtifactDirectory(any)).thenReturn(artifactDir);
-    when(cache.getDownloadDir()).thenReturn(downloadDir);
+    final FakeSecondaryCache cache = FakeSecondaryCache()
+      ..artifactDirectory = artifactDir
+      ..downloadDir = downloadDir;
     artifactDir.childDirectory('bin_dir').createSync();
     artifactDir.childFile('unused_url_path').createSync();
 
@@ -347,13 +358,13 @@ void main() {
 
   testWithoutContext('EngineCachedArtifact removes unzipped FlutterMacOS.framework before replacing', () async {
     final OperatingSystemUtils operatingSystemUtils = FakeOperatingSystemUtils();
-    final MockCache cache = MockCache();
     final FileSystem fileSystem = MemoryFileSystem.test();
     final Directory artifactDir = fileSystem.systemTempDirectory.createTempSync('flutter_cache_test_artifact.');
     final Directory downloadDir = fileSystem.systemTempDirectory.createTempSync('flutter_cache_test_download.');
+    final FakeSecondaryCache cache = FakeSecondaryCache()
+      ..artifactDirectory = artifactDir
+      ..downloadDir = downloadDir;
 
-    when(cache.getArtifactDirectory(any)).thenReturn(artifactDir);
-    when(cache.getDownloadDir()).thenReturn(downloadDir);
     final Directory binDir = artifactDir.childDirectory('bin_dir')..createSync();
     binDir.childFile('FlutterMacOS.framework.zip').createSync();
     final Directory unzippedFramework = binDir.childDirectory('FlutterMacOS.framework');
@@ -430,28 +441,27 @@ void main() {
 
   testWithoutContext('FlutterRunnerDebugSymbols downloads Flutter runner debug symbols', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final Cache cache = Cache.test(
-      fileSystem: fileSystem,
-      processManager: FakeProcessManager.any(),
-    );
+    final Cache cache = FakeSecondaryCache()
+      ..version = '123456';
+
     final FakeVersionedPackageResolver packageResolver = FakeVersionedPackageResolver();
     final FlutterRunnerDebugSymbols flutterRunnerDebugSymbols = FlutterRunnerDebugSymbols(
       cache,
       packageResolver: packageResolver,
-      platform: FakePlatform(operatingSystem: 'linux'),
+      platform: FakePlatform(),
     );
 
     await flutterRunnerDebugSymbols.updateInner(FakeArtifactUpdater(), fileSystem, FakeOperatingSystemUtils());
 
     expect(packageResolver.resolved, <List<String>>[
-      <String>['fuchsia-debug-symbols-x64', null],
-      <String>['fuchsia-debug-symbols-arm64', null],
+      <String>['fuchsia-debug-symbols-x64', '123456'],
+      <String>['fuchsia-debug-symbols-arm64', '123456'],
     ]);
   });
 
   testWithoutContext('FontSubset in universal artifacts', () {
     final Cache cache = Cache.test(processManager: FakeProcessManager.any());
-    final FontSubsetArtifacts artifacts = FontSubsetArtifacts(cache, platform: FakePlatform(operatingSystem: 'linux'));
+    final FontSubsetArtifacts artifacts = FontSubsetArtifacts(cache, platform: FakePlatform());
 
     expect(artifacts.developmentArtifact, DevelopmentArtifact.universal);
   });
@@ -459,8 +469,8 @@ void main() {
   testWithoutContext('FontSubset artifacts on x64 linux', () {
     fakeProcessManager.addCommand(unameCommandForX64);
 
-    final Cache cache = createCache(FakePlatform(operatingSystem: 'linux'));
-    final FontSubsetArtifacts artifacts = FontSubsetArtifacts(cache, platform: FakePlatform(operatingSystem: 'linux'));
+    final Cache cache = createCache(FakePlatform());
+    final FontSubsetArtifacts artifacts = FontSubsetArtifacts(cache, platform: FakePlatform());
     cache.includeAllPlatforms = false;
 
     expect(artifacts.getBinaryDirs(), <List<String>>[<String>['linux-x64', 'linux-x64/font-subset.zip']]);
@@ -469,8 +479,8 @@ void main() {
   testWithoutContext('FontSubset artifacts on arm64 linux', () {
     fakeProcessManager.addCommand(unameCommandForArm64);
 
-    final Cache cache = createCache(FakePlatform(operatingSystem: 'linux'));
-    final FontSubsetArtifacts artifacts = FontSubsetArtifacts(cache, platform: FakePlatform(operatingSystem: 'linux'));
+    final Cache cache = createCache(FakePlatform());
+    final FontSubsetArtifacts artifacts = FontSubsetArtifacts(cache, platform: FakePlatform());
     cache.includeAllPlatforms = false;
 
     expect(artifacts.getBinaryDirs(), <List<String>>[<String>['linux-arm64', 'linux-arm64/font-subset.zip']]);
@@ -549,7 +559,7 @@ void main() {
 
   testWithoutContext('macOS desktop artifacts ignore filtering when requested', () {
     final Cache cache = Cache.test(processManager: FakeProcessManager.any());
-    final MacOSEngineArtifacts artifacts = MacOSEngineArtifacts(cache, platform: FakePlatform(operatingSystem: 'linux'));
+    final MacOSEngineArtifacts artifacts = MacOSEngineArtifacts(cache, platform: FakePlatform());
     cache.includeAllPlatforms = false;
     cache.platformOverrideArtifacts = <String>{'macos'};
 
@@ -560,7 +570,7 @@ void main() {
     final Cache cache = Cache.test(processManager: FakeProcessManager.any());
     final WindowsEngineArtifacts artifacts = WindowsEngineArtifacts(
       cache,
-      platform: FakePlatform(operatingSystem: 'linux'),
+      platform: FakePlatform(),
     );
     cache.includeAllPlatforms = false;
     cache.platformOverrideArtifacts = <String>{'windows'};
@@ -598,7 +608,7 @@ void main() {
   testWithoutContext('Linux desktop artifacts ignore filtering when requested', () {
     fakeProcessManager.addCommand(unameCommandForX64);
 
-    final Cache cache = createCache(FakePlatform(operatingSystem: 'linux'));
+    final Cache cache = createCache(FakePlatform());
     final LinuxEngineArtifacts artifacts = LinuxEngineArtifacts(
       cache,
       platform: FakePlatform(operatingSystem: 'macos'),
@@ -612,10 +622,10 @@ void main() {
   testWithoutContext('Linux desktop artifacts for x64 include profile and release artifacts', () {
       fakeProcessManager.addCommand(unameCommandForX64);
 
-      final Cache cache = createCache(FakePlatform(operatingSystem: 'linux'));
+      final Cache cache = createCache(FakePlatform());
       final LinuxEngineArtifacts artifacts = LinuxEngineArtifacts(
         cache,
-        platform: FakePlatform(operatingSystem: 'linux'),
+        platform: FakePlatform(),
       );
 
       expect(artifacts.getBinaryDirs(), <List<String>>[
@@ -628,10 +638,10 @@ void main() {
   testWithoutContext('Linux desktop artifacts for arm64 include profile and release artifacts', () {
       fakeProcessManager.addCommand(unameCommandForArm64);
 
-      final Cache cache = createCache(FakePlatform(operatingSystem: 'linux'));
+      final Cache cache = createCache(FakePlatform());
       final LinuxEngineArtifacts artifacts = LinuxEngineArtifacts(
         cache,
-        platform: FakePlatform(operatingSystem: 'linux'),
+        platform: FakePlatform(),
       );
 
       expect(artifacts.getBinaryDirs(), <List<String>>[
@@ -715,26 +725,104 @@ void main() {
 
     cache.clearStampFiles();
 
-    expect(logger.errorText, contains('Failed to delete some stamp files'));
+    expect(logger.warningText, contains('Failed to delete some stamp files'));
   });
 
-  testWithoutContext('FlutterWebSdk deletes previous directory contents', () {
+  testWithoutContext('FlutterWebSdk fetches web artifacts and deletes previous directory contents', () async {
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+    final Directory internalDir = fileSystem.currentDirectory
+      .childDirectory('cache')
+      .childDirectory('bin')
+      .childDirectory('internal');
+    final File canvasKitVersionFile = internalDir.childFile('canvaskit.version');
+    canvasKitVersionFile.createSync(recursive: true);
+    canvasKitVersionFile.writeAsStringSync('abcdefg');
+
+    final File engineVersionFile = internalDir.childFile('engine.version');
+    engineVersionFile.createSync(recursive: true);
+    engineVersionFile.writeAsStringSync('hijklmnop');
+
     final Cache cache = Cache.test(processManager: FakeProcessManager.any(), fileSystem: fileSystem);
     final Directory webCacheDirectory = cache.getWebSdkDirectory();
     final FakeArtifactUpdater artifactUpdater = FakeArtifactUpdater();
-    final FlutterWebSdk webSdk = FlutterWebSdk(cache, platform: FakePlatform(operatingSystem: 'linux'));
+    final FlutterWebSdk webSdk = FlutterWebSdk(cache, platform: FakePlatform());
 
+    final List<String> messages = <String>[];
+    final List<String> downloads = <String>[];
+    final List<String> locations = <String>[];
     artifactUpdater.onDownloadZipArchive = (String message, Uri uri, Directory location) {
+      messages.add(message);
+      downloads.add(uri.toString());
+      locations.add(location.path);
       location.createSync(recursive: true);
       location.childFile('foo').createSync();
     };
     webCacheDirectory.childFile('bar').createSync(recursive: true);
 
-    webSdk.updateInner(artifactUpdater, fileSystem, FakeOperatingSystemUtils());
+    await webSdk.updateInner(artifactUpdater, fileSystem, FakeOperatingSystemUtils());
+
+    expect(messages, <String>[
+      'Downloading Web SDK...',
+      'Downloading CanvasKit...',
+    ]);
+
+    expect(downloads, <String>[
+      'https://storage.googleapis.com/flutter_infra_release/flutter/hijklmnop/flutter-web-sdk-linux-x64.zip',
+      'https://chrome-infra-packages.appspot.com/dl/flutter/web/canvaskit_bundle/+/abcdefg',
+    ]);
+
+    expect(locations, <String>[
+      'cache/bin/cache/flutter_web_sdk',
+      'cache/bin/cache/flutter_web_sdk',
+    ]);
 
     expect(webCacheDirectory.childFile('foo'), exists);
     expect(webCacheDirectory.childFile('bar'), isNot(exists));
+  });
+
+  testWithoutContext('FlutterWebSdk CanvasKit URL can be overridden via FLUTTER_STORAGE_BASE_URL', () async {
+    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+    final Directory internalDir = fileSystem.currentDirectory
+      .childDirectory('cache')
+      .childDirectory('bin')
+      .childDirectory('internal');
+    final File canvasKitVersionFile = internalDir.childFile('canvaskit.version');
+    canvasKitVersionFile.createSync(recursive: true);
+    canvasKitVersionFile.writeAsStringSync('abcdefg');
+
+    final File engineVersionFile = internalDir.childFile('engine.version');
+    engineVersionFile.createSync(recursive: true);
+    engineVersionFile.writeAsStringSync('hijklmnop');
+
+    final Cache cache = Cache.test(
+      processManager: FakeProcessManager.any(),
+      fileSystem: fileSystem,
+      platform: FakePlatform(
+        environment: <String, String>{
+          'FLUTTER_STORAGE_BASE_URL': 'https://flutter.storage.com/override'
+        },
+      ),
+    );
+    final Directory webCacheDirectory = cache.getWebSdkDirectory();
+    final FakeArtifactUpdater artifactUpdater = FakeArtifactUpdater();
+    final FlutterWebSdk webSdk = FlutterWebSdk(cache, platform: FakePlatform());
+
+    final List<String> downloads = <String>[];
+    final List<String> locations = <String>[];
+    artifactUpdater.onDownloadZipArchive = (String message, Uri uri, Directory location) {
+      downloads.add(uri.toString());
+      locations.add(location.path);
+      location.createSync(recursive: true);
+      location.childFile('foo').createSync();
+    };
+    webCacheDirectory.childFile('bar').createSync(recursive: true);
+
+    await webSdk.updateInner(artifactUpdater, fileSystem, FakeOperatingSystemUtils());
+
+    expect(downloads, <String>[
+      'https://flutter.storage.com/override/flutter_infra_release/flutter/hijklmnop/flutter-web-sdk-linux-x64.zip',
+      'https://flutter.storage.com/override/flutter_infra_release/cipd/flutter/web/canvaskit_bundle/+/abcdefg'
+    ]);
   });
 
   testWithoutContext('FlutterWebSdk uses tryToDelete to handle directory edge cases', () async {
@@ -743,7 +831,7 @@ void main() {
     final Cache cache = Cache.test(processManager: FakeProcessManager.any(), fileSystem: fileSystem);
     final Directory webCacheDirectory = cache.getWebSdkDirectory();
     final FakeArtifactUpdater artifactUpdater = FakeArtifactUpdater();
-    final FlutterWebSdk webSdk = FlutterWebSdk(cache, platform: FakePlatform(operatingSystem: 'linux'));
+    final FlutterWebSdk webSdk = FlutterWebSdk(cache, platform: FakePlatform());
 
     artifactUpdater.onDownloadZipArchive = (String message, Uri uri, Directory location) {
       location.createSync(recursive: true);
@@ -855,6 +943,21 @@ void main() {
     expect(pub.calledGet, 1);
   });
 
+  testUsingContext('Check current DevTools version', () async {
+    final String currentDevToolsVersion = globals.cache.devToolsVersion;
+    final RegExp devToolsVersionFormat = RegExp(r'\d+\.\d+\.\d+(?:-\S+)?');
+    expect(devToolsVersionFormat.allMatches(currentDevToolsVersion).length, 1,);
+  });
+
+  // Check that the build number matches the format documented here:
+  // https://dart.dev/get-dart#release-channels
+  testUsingContext('Check current Dart SDK build number', () async {
+    final String currentDartSdkVersion = globals.cache.dartSdkBuild;
+    final RegExp dartSdkVersionFormat = RegExp(r'\d+\.\d+\.\d+(?:-\S+)?');
+
+    expect(dartSdkVersionFormat.allMatches(currentDartSdkVersion).length, 1,);
+  });
+
   group('AndroidMavenArtifacts', () {
     MemoryFileSystem memoryFileSystem;
     Cache cache;
@@ -870,27 +973,32 @@ void main() {
     });
 
     testWithoutContext('AndroidMavenArtifacts has a specified development artifact', () async {
-      final AndroidMavenArtifacts mavenArtifacts = AndroidMavenArtifacts(cache, platform: FakePlatform(operatingSystem: 'linux'));
+      final AndroidMavenArtifacts mavenArtifacts = AndroidMavenArtifacts(cache, platform: FakePlatform());
       expect(mavenArtifacts.developmentArtifact, DevelopmentArtifact.androidMaven);
     });
 
     testUsingContext('AndroidMavenArtifacts can invoke Gradle resolve dependencies if Android SDK is present', () async {
+      final String oldRoot = Cache.flutterRoot;
       Cache.flutterRoot = '';
-      final AndroidMavenArtifacts mavenArtifacts = AndroidMavenArtifacts(cache, platform: FakePlatform(operatingSystem: 'linux'));
-      expect(await mavenArtifacts.isUpToDate(memoryFileSystem), isFalse);
+      try {
+        final AndroidMavenArtifacts mavenArtifacts = AndroidMavenArtifacts(cache, platform: FakePlatform());
+        expect(await mavenArtifacts.isUpToDate(memoryFileSystem), isFalse);
 
-      final Directory gradleWrapperDir = cache.getArtifactDirectory('gradle_wrapper')..createSync(recursive: true);
-      gradleWrapperDir.childFile('gradlew').writeAsStringSync('irrelevant');
-      gradleWrapperDir.childFile('gradlew.bat').writeAsStringSync('irrelevant');
+        final Directory gradleWrapperDir = cache.getArtifactDirectory('gradle_wrapper')..createSync(recursive: true);
+        gradleWrapperDir.childFile('gradlew').writeAsStringSync('irrelevant');
+        gradleWrapperDir.childFile('gradlew.bat').writeAsStringSync('irrelevant');
 
-      await mavenArtifacts.update(FakeArtifactUpdater(), BufferLogger.test(), memoryFileSystem, FakeOperatingSystemUtils());
+        await mavenArtifacts.update(FakeArtifactUpdater(), BufferLogger.test(), memoryFileSystem, FakeOperatingSystemUtils());
 
-      expect(await mavenArtifacts.isUpToDate(memoryFileSystem), isFalse);
-      expect(fakeAndroidSdk.reinitialized, true);
+        expect(await mavenArtifacts.isUpToDate(memoryFileSystem), isFalse);
+        expect(fakeAndroidSdk.reinitialized, true);
+      } finally {
+        Cache.flutterRoot = oldRoot;
+      }
     }, overrides: <Type, Generator>{
       Cache: () => cache,
       FileSystem: () => memoryFileSystem,
-      Platform: () => FakePlatform(operatingSystem: 'linux'),
+      Platform: () => FakePlatform(),
       ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(command: <String>[
           '/cache/bin/cache/flutter_gradle_wrapper.rand0/gradlew',
@@ -905,7 +1013,7 @@ void main() {
     });
 
     testUsingContext('AndroidMavenArtifacts is a no-op if the Android SDK is absent', () async {
-      final AndroidMavenArtifacts mavenArtifacts = AndroidMavenArtifacts(cache, platform: FakePlatform(operatingSystem: 'linux'));
+      final AndroidMavenArtifacts mavenArtifacts = AndroidMavenArtifacts(cache, platform: FakePlatform());
       expect(await mavenArtifacts.isUpToDate(memoryFileSystem), isFalse);
 
       await mavenArtifacts.update(FakeArtifactUpdater(), BufferLogger.test(), memoryFileSystem, FakeOperatingSystemUtils());
@@ -968,7 +1076,7 @@ class FakeDownloadedArtifact extends CachedArtifact {
   Future<void> updateInner(ArtifactUpdater artifactUpdater, FileSystem fileSystem, OperatingSystemUtils operatingSystemUtils) async { }
 }
 
-class FakeSecondayCachedArtifact extends Fake implements CachedArtifact {
+class FakeSecondaryCachedArtifact extends Fake implements CachedArtifact {
   bool upToDate = false;
   bool didUpdate = false;
   Exception updateException;
@@ -995,7 +1103,40 @@ class FakeIosUsbArtifacts extends Fake implements IosUsbArtifacts {
   @override
   String stampName = 'ios-usb';
 }
-class MockCache extends Mock implements Cache {}
+
+class FakeSecondaryCache extends Fake implements Cache {
+  Directory downloadDir;
+  Directory artifactDirectory;
+  String version;
+  void Function(String artifactName, String version) onSetStamp;
+
+  @override
+  String get storageBaseUrl => 'https://storage.googleapis.com';
+
+  @override
+  Directory getDownloadDir() => artifactDirectory;
+
+  @override
+  Directory getArtifactDirectory(String name) => artifactDirectory;
+
+  @override
+  Directory getCacheDir(String name, { bool shouldCreate = true }) {
+    return artifactDirectory.childDirectory(name);
+  }
+
+  @override
+  File getLicenseFile() {
+    return artifactDirectory.childFile('LICENSE');
+  }
+
+  @override
+  String getVersionFor(String artifactName) => version;
+
+  @override
+  void setStampFor(String artifactName, String version) {
+    onSetStamp(artifactName, version);
+  }
+}
 
 class FakeVersionedPackageResolver extends Fake implements VersionedPackageResolver {
   final List<List<String>> resolved = <List<String>>[];
@@ -1011,7 +1152,18 @@ class FakePub extends Fake implements Pub {
   int calledGet = 0;
 
   @override
-  Future<void> get({PubContext context, String directory, bool skipIfAbsent = false, bool upgrade = false, bool offline = false, bool generateSyntheticPackage = false, String flutterRootOverride, bool checkUpToDate = false}) async {
+  Future<void> get({
+    PubContext context,
+    String directory,
+    bool skipIfAbsent = false,
+    bool upgrade = false,
+    bool offline = false,
+    bool generateSyntheticPackage = false,
+    String flutterRootOverride,
+    bool checkUpToDate = false,
+    bool shouldSkipThirdPartyGenerator = true,
+    bool printProgress = true,
+  }) async {
     calledGet += 1;
   }
 }

@@ -33,7 +33,7 @@ typedef ServiceExtensionCallback = Future<Map<String, dynamic>> Function(Map<Str
 /// To use this class in an `on` clause of a mixin, inherit from it and implement
 /// [initInstances()]. The mixin is guaranteed to only be constructed once in
 /// the lifetime of the app (more precisely, it will assert if constructed twice
-/// in checked mode).
+/// in debug mode).
 ///
 /// The top-most layer used to write the application will have a concrete class
 /// that inherits from [BindingBase] and uses all the various [BindingBase]
@@ -67,6 +67,13 @@ abstract class BindingBase {
 
   static bool _debugInitialized = false;
   static bool _debugServiceExtensionsRegistered = false;
+
+  /// Additional configuration used by the framework during hot reload.
+  ///
+  /// See also:
+  ///
+  ///  * [DebugReassembleConfig], which describes the configuration.
+  static DebugReassembleConfig? debugReassembleConfig;
 
   /// The main window to which this binding is bound.
   ///
@@ -155,7 +162,7 @@ abstract class BindingBase {
   ///
   /// See also:
   ///
-  ///  * <https://github.com/dart-lang/sdk/blob/master/runtime/vm/service/service.md#rpcs-requests-and-responses>
+  ///  * <https://github.com/dart-lang/sdk/blob/main/runtime/vm/service/service.md#rpcs-requests-and-responses>
   @protected
   @mustCallSuper
   void initServiceExtensions() {
@@ -291,7 +298,7 @@ abstract class BindingBase {
   /// The [Future] returned by the `callback` argument is returned by [lockEvents].
   @protected
   Future<void> lockEvents(Future<void> Function() callback) {
-    developer.Timeline.startSync('Lock events');
+    final developer.TimelineTask timelineTask = developer.TimelineTask()..start('Lock events');
 
     assert(callback != null);
     _lockCount += 1;
@@ -300,7 +307,7 @@ abstract class BindingBase {
     future.whenComplete(() {
       _lockCount -= 1;
       if (!locked) {
-        developer.Timeline.finishSync();
+        timelineTask.finish();
         unlocked();
       }
     });
@@ -590,34 +597,27 @@ abstract class BindingBase {
         return Future<void>.delayed(Duration.zero);
       });
 
-      Object? caughtException;
-      StackTrace? caughtStack;
       late Map<String, dynamic> result;
       try {
         result = await callback(parameters);
       } catch (exception, stack) {
-        caughtException = exception;
-        caughtStack = stack;
-      }
-      if (caughtException == null) {
-        result['type'] = '_extensionType';
-        result['method'] = method;
-        return developer.ServiceExtensionResponse.result(json.encode(result));
-      } else {
         FlutterError.reportError(FlutterErrorDetails(
-          exception: caughtException,
-          stack: caughtStack,
+          exception: exception,
+          stack: stack,
           context: ErrorDescription('during a service extension callback for "$method"'),
         ));
         return developer.ServiceExtensionResponse.error(
           developer.ServiceExtensionResponse.extensionError,
           json.encode(<String, String>{
-            'exception': caughtException.toString(),
-            'stack': caughtStack.toString(),
+            'exception': exception.toString(),
+            'stack': stack.toString(),
             'method': method,
           }),
         );
       }
+      result['type'] = '_extensionType';
+      result['method'] = method;
+      return developer.ServiceExtensionResponse.result(json.encode(result));
     });
   }
 
@@ -628,4 +628,24 @@ abstract class BindingBase {
 /// Terminate the Flutter application.
 Future<void> _exitApplication() async {
   exit(0);
+}
+
+/// Additional configuration used for hot reload reassemble optimizations.
+///
+/// Do not extend, implement, or mixin this class. This may only be instantiated
+/// in debug mode.
+class DebugReassembleConfig {
+  /// Create a new [DebugReassembleConfig].
+  ///
+  /// Throws a [FlutterError] if this is called in profile or release mode.
+  DebugReassembleConfig({
+    this.widgetName,
+  }) {
+    if (!kDebugMode) {
+      throw FlutterError('Cannot instantiate DebugReassembleConfig in profile or release mode.');
+    }
+  }
+
+  /// The name of the widget that was modified, or `null` if the change was elsewhere.
+  final String? widgetName;
 }

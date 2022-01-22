@@ -66,7 +66,7 @@ class ResampleFlagVariant extends TestVariant<TestScenario> {
   @override
   final Set<TestScenario> values = Set<TestScenario>.from(TestScenario.values);
 
-  TestScenario currentValue;
+  late TestScenario currentValue;
   bool get resample {
     switch(currentValue) {
       case TestScenario.resampleOn90Hz:
@@ -76,7 +76,6 @@ class ResampleFlagVariant extends TestVariant<TestScenario> {
       case TestScenario.resampleOff59Hz:
         return false;
     }
-    throw ArgumentError;
   }
   double get frequency {
     switch(currentValue) {
@@ -87,10 +86,9 @@ class ResampleFlagVariant extends TestVariant<TestScenario> {
       case TestScenario.resampleOff59Hz:
         return 59.0;
     }
-    throw ArgumentError;
   }
 
-  Map<String, dynamic> result;
+  Map<String, dynamic>? result;
 
   @override
   String describeValue(TestScenario value) {
@@ -104,7 +102,6 @@ class ResampleFlagVariant extends TestVariant<TestScenario> {
       case TestScenario.resampleOff59Hz:
         return 'resample off with 59Hz input';
     }
-    throw ArgumentError;
   }
 
   @override
@@ -118,14 +115,14 @@ class ResampleFlagVariant extends TestVariant<TestScenario> {
   @override
   Future<void> tearDown(TestScenario value, bool memento) async {
     binding.resamplingEnabled = memento;
-    binding.reportData[describeValue(value)] = result;
+    binding.reportData![describeValue(value)] = result;
   }
 }
 
 Future<void> main() async {
-  final WidgetsBinding _binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
-  assert(_binding is IntegrationTestWidgetsFlutterBinding);
-  final IntegrationTestWidgetsFlutterBinding binding = _binding as IntegrationTestWidgetsFlutterBinding;
+  final WidgetsBinding widgetsBinding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  assert(widgetsBinding is IntegrationTestWidgetsFlutterBinding);
+  final IntegrationTestWidgetsFlutterBinding binding = widgetsBinding as IntegrationTestWidgetsFlutterBinding;
   binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.benchmarkLive;
   binding.reportData ??= <String, dynamic>{};
   final ResampleFlagVariant variant = ResampleFlagVariant(binding);
@@ -134,16 +131,16 @@ Future<void> main() async {
     await tester.pumpAndSettle();
     final Finder scrollerFinder = find.byKey(const ValueKey<String>('complex-scroll'));
     final ListView scroller = tester.widget<ListView>(scrollerFinder);
-    final ScrollController controller = scroller.controller;
+    final ScrollController? controller = scroller.controller;
     final List<int> frameTimestamp = <int>[];
     final List<double> scrollOffset = <double>[];
     final List<Duration> delays = <Duration>[];
     binding.addPersistentFrameCallback((Duration timeStamp) {
-      if (controller.hasClients) {
+      if (controller?.hasClients == true) {
         // This if is necessary because by the end of the test the widget tree
         // is destroyed.
         frameTimestamp.add(timeStamp.inMicroseconds);
-        scrollOffset.add(controller.offset);
+        scrollOffset.add(controller!.offset);
       }
     });
 

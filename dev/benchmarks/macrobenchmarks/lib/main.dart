@@ -19,6 +19,7 @@ import 'src/heavy_grid_view.dart';
 import 'src/large_image_changer.dart';
 import 'src/large_images.dart';
 import 'src/multi_widget_construction.dart';
+import 'src/opacity_peephole.dart';
 import 'src/picture_cache.dart';
 import 'src/post_backdrop_filter.dart';
 import 'src/simple_animation.dart';
@@ -31,7 +32,7 @@ const String kMacrobenchmarks = 'Macrobenchmarks';
 void main() => runApp(const MacrobenchmarksApp());
 
 class MacrobenchmarksApp extends StatelessWidget {
-  const MacrobenchmarksApp({Key key, this.initialRoute = '/'}) : super(key: key);
+  const MacrobenchmarksApp({Key? key, this.initialRoute = '/'}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -60,6 +61,8 @@ class MacrobenchmarksApp extends StatelessWidget {
         kStackSizeRouteName: (BuildContext context) => const StackSizePage(),
         kAnimationWithMicrotasksRouteName: (BuildContext context) => const AnimationWithMicrotasks(),
         kAnimatedImageRouteName: (BuildContext context) => const AnimatedImagePage(),
+        kOpacityPeepholeRouteName: (BuildContext context) => const OpacityPeepholePage(),
+        ...opacityPeepholeRoutes,
       },
     );
   }
@@ -68,7 +71,7 @@ class MacrobenchmarksApp extends StatelessWidget {
 }
 
 class HomePage extends StatelessWidget {
-  const HomePage({Key key}) : super(key: key);
+  const HomePage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -208,6 +211,13 @@ class HomePage extends StatelessWidget {
             child: const Text('Animated Image'),
             onPressed: () {
               Navigator.pushNamed(context, kAnimatedImageRouteName);
+            },
+          ),
+          ElevatedButton(
+            key: const Key(kOpacityPeepholeRouteName),
+            child: const Text('Opacity Peephole tests'),
+            onPressed: () {
+              Navigator.pushNamed(context, kOpacityPeepholeRouteName);
             },
           ),
         ],

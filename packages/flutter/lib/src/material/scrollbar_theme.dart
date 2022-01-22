@@ -32,6 +32,7 @@ class ScrollbarThemeData with Diagnosticable {
   /// Creates a theme that can be used for [ThemeData.scrollbarTheme].
   const ScrollbarThemeData({
     this.thickness,
+    this.trackVisibility,
     this.showTrackOnHover,
     this.isAlwaysShown,
     this.radius,
@@ -50,6 +51,10 @@ class ScrollbarThemeData with Diagnosticable {
   /// Resolves in the following states:
   ///  * [MaterialState.hovered] on web and desktop platforms.
   final MaterialStateProperty<double?>? thickness;
+
+  /// Overrides the default value of [Scrollbar.trackVisibility] in all
+  /// descendant [Scrollbar] widgets.
+  final MaterialStateProperty<bool?>? trackVisibility;
 
   /// Overrides the default value of [Scrollbar.showTrackOnHover] in all
   /// descendant [Scrollbar] widgets.
@@ -122,6 +127,7 @@ class ScrollbarThemeData with Diagnosticable {
   /// new values.
   ScrollbarThemeData copyWith({
     MaterialStateProperty<double?>? thickness,
+    MaterialStateProperty<bool?>? trackVisibility,
     bool? showTrackOnHover,
     bool? isAlwaysShown,
     bool? interactive,
@@ -135,6 +141,7 @@ class ScrollbarThemeData with Diagnosticable {
   }) {
     return ScrollbarThemeData(
       thickness: thickness ?? this.thickness,
+      trackVisibility: trackVisibility ?? this.trackVisibility,
       showTrackOnHover: showTrackOnHover ?? this.showTrackOnHover,
       isAlwaysShown: isAlwaysShown ?? this.isAlwaysShown,
       interactive: interactive ?? this.interactive,
@@ -157,9 +164,10 @@ class ScrollbarThemeData with Diagnosticable {
     assert(t != null);
     return ScrollbarThemeData(
       thickness: _lerpProperties<double?>(a?.thickness, b?.thickness, t, lerpDouble),
-      showTrackOnHover: t < 0.5 ? a?.showTrackOnHover : b?.showTrackOnHover,
-      isAlwaysShown: t < 0.5 ? a?.isAlwaysShown : b?.isAlwaysShown,
-      interactive: t < 0.5 ? a?.interactive : b?.interactive,
+      trackVisibility: _lerpProperties<bool?>(a?.trackVisibility, b?.trackVisibility, t, _lerpBool),
+      showTrackOnHover: _lerpBool(a?.showTrackOnHover, b?.showTrackOnHover, t),
+      isAlwaysShown: _lerpBool(a?.isAlwaysShown, b?.isAlwaysShown, t),
+      interactive: _lerpBool(a?.interactive, b?.interactive, t),
       radius: Radius.lerp(a?.radius, b?.radius, t),
       thumbColor: _lerpProperties<Color?>(a?.thumbColor, b?.thumbColor, t, Color.lerp),
       trackColor: _lerpProperties<Color?>(a?.trackColor, b?.trackColor, t, Color.lerp),
@@ -174,6 +182,7 @@ class ScrollbarThemeData with Diagnosticable {
   int get hashCode {
     return hashValues(
       thickness,
+      trackVisibility,
       showTrackOnHover,
       isAlwaysShown,
       interactive,
@@ -195,6 +204,7 @@ class ScrollbarThemeData with Diagnosticable {
       return false;
     return other is ScrollbarThemeData
       && other.thickness == thickness
+      && other.trackVisibility == trackVisibility
       && other.showTrackOnHover == showTrackOnHover
       && other.isAlwaysShown == isAlwaysShown
       && other.interactive == interactive
@@ -211,6 +221,7 @@ class ScrollbarThemeData with Diagnosticable {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<MaterialStateProperty<double?>>('thickness', thickness, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<bool?>>('trackVisibility', trackVisibility, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('showTrackOnHover', showTrackOnHover, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('isAlwaysShown', isAlwaysShown, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('interactive', interactive, defaultValue: null));
@@ -228,7 +239,7 @@ class ScrollbarThemeData with Diagnosticable {
     MaterialStateProperty<T>? b,
     double t,
     T Function(T?, T?, double) lerpFunction,
-    ) {
+  ) {
     // Avoid creating a _LerpProperties object for a common case.
     if (a == null && b == null)
       return null;
@@ -251,6 +262,8 @@ class _LerpProperties<T> implements MaterialStateProperty<T> {
     return lerpFunction(resolvedA, resolvedB, t);
   }
 }
+
+bool? _lerpBool(bool? a, bool? b, double t) => t < 0.5 ? a : b;
 
 /// Applies a scrollbar theme to descendant [Scrollbar] widgets.
 ///

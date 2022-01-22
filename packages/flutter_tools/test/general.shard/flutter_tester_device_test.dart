@@ -34,7 +34,6 @@ void main() {
     fileSystem = MemoryFileSystem.test();
     // Not Windows.
     platform = FakePlatform(
-      operatingSystem: 'linux',
       environment: <String, String>{},
     );
     processManager = FakeProcessManager.any();
@@ -52,9 +51,66 @@ void main() {
       dartEntrypointArgs: dartEntrypointArgs,
     );
 
+  testUsingContext('runs in Rosetta on arm64 Mac', () async {
+    final FakeProcessManager processManager = FakeProcessManager.empty();
+    final FlutterTesterTestDevice device = TestFlutterTesterDevice(
+      platform: FakePlatform(operatingSystem: 'macos'),
+      fileSystem: fileSystem,
+      processManager: processManager,
+      enableObservatory: false,
+      dartEntrypointArgs: const <String>[],
+    );
+    processManager.addCommands(<FakeCommand>[
+      const FakeCommand(
+        command: <String>[
+          'which',
+          'sysctl',
+        ],
+      ),
+      const FakeCommand(
+        command: <String>[
+          'sysctl',
+          'hw.optional.arm64',
+        ],
+        stdout: 'hw.optional.arm64: 1',
+      ),
+      FakeCommand(command: const <String>[
+        '/usr/bin/arch',
+        '-x86_64',
+        '/',
+        '--disable-observatory',
+        '--ipv6',
+        '--enable-checked-mode',
+        '--verify-entry-points',
+        '--enable-software-rendering',
+        '--skia-deterministic-rendering',
+        '--enable-dart-profiling',
+        '--non-interactive',
+        '--use-test-fonts',
+        '--packages=.dart_tool/package_config.json',
+        'example.dill',
+      ], environment: <String, String>{
+        'FLUTTER_TEST': 'true',
+        'FONTCONFIG_FILE': device.fontConfigManager.fontConfigFile.path,
+        'SERVER_PORT': '0',
+        'APP_NAME': '',
+      }),
+    ]);
+    await device.start('example.dill');
+    expect(processManager.hasRemainingExpectations, isFalse);
+  });
+
   group('The FLUTTER_TEST environment variable is passed to the test process', () {
     setUp(() {
-      processManager = FakeProcessManager.empty();
+      processManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <String>[
+            'uname',
+            '-m',
+          ],
+          stdout: 'x86_64',
+        ),
+      ]);
       device = createDevice();
 
       fileSystem
@@ -130,6 +186,13 @@ void main() {
       processManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>[
+            'uname',
+            '-m',
+          ],
+          stdout: 'x86_64',
+        ),
+        const FakeCommand(
+          command: <String>[
             '/',
             '--disable-observatory',
             '--ipv6',
@@ -147,7 +210,6 @@ void main() {
           ],
           stdout: 'success',
           stderr: 'failure',
-          exitCode: 0,
         )
       ]);
       device = createDevice(dartEntrypointArgs: <String>['--foo', '--bar']);
@@ -165,6 +227,13 @@ void main() {
       processManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>[
+            'uname',
+            '-m',
+          ],
+          stdout: 'x86_64',
+        ),
+        const FakeCommand(
+          command: <String>[
             '/',
             '--observatory-port=0',
             '--ipv6',
@@ -180,7 +249,6 @@ void main() {
           ],
           stdout: 'Observatory listening on http://localhost:1234',
           stderr: 'failure',
-          exitCode: 0,
         )
       ]);
       device = createDevice(enableObservatory: true);
@@ -220,11 +288,7 @@ class TestFlutterTesterDevice extends FlutterTesterTestDevice {
         treeShakeIcons: false,
         packagesPath: '.dart_tool/package_config.json',
       ),
-      startPaused: false,
-      enableDds: true,
-      disableServiceAuthCodes: false,
       hostVmServicePort: 1234,
-      nullAssertions: false,
       dartEntrypointArgs: dartEntrypointArgs,
     ),
     enableObservatory: enableObservatory,

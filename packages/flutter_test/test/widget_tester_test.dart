@@ -40,7 +40,7 @@ void main() {
 
     testWidgets('respects the skip flag', (WidgetTester tester) async {
       final Completer<void> completer = Completer<void>();
-      final Future<void> future = expectLater(null, FakeMatcher(completer), skip: 'testing skip');
+      final Future<void> future = expectLater(null, FakeMatcher(completer), skip: 'testing skip'); // [intended] API testing
       bool completed = false;
       future.then<void>((_) {
         completed = true;
@@ -55,7 +55,7 @@ void main() {
     testWidgets('should be skipped', (WidgetTester tester) async {
       expect(false, true);
     });
-  }, skip: true);
+  }, skip: true); // [intended] API testing
 
   group('findsOneWidget', () {
     testWidgets('finds exactly one widget', (WidgetTester tester) async {
@@ -508,11 +508,9 @@ void main() {
           // Typically PointerAddedEvent is not used in testers, but for records
           // captured on a device it is usually what start a gesture.
           PointerAddedEvent(
-            timeStamp: Duration.zero,
             position: location,
           ),
           PointerDownEvent(
-            timeStamp: Duration.zero,
             position: location,
             buttons: kSecondaryMouseButton,
             pointer: 1,
@@ -697,7 +695,10 @@ void main() {
       if (debugDefaultTargetPlatformOverride == null) {
         expect(tester.testDescription, equals('variant tests have descriptions with details'));
       } else {
-        expect(tester.testDescription, equals('variant tests have descriptions with details ($debugDefaultTargetPlatformOverride)'));
+        expect(
+          tester.testDescription,
+          equals('variant tests have descriptions with details (variant: $debugDefaultTargetPlatformOverride)'),
+        );
       }
     }, variant: TargetPlatformVariant(TargetPlatform.values.toSet()));
   });
@@ -706,11 +707,11 @@ void main() {
     int numberOfVariationsRun = 0;
     TargetPlatform? origTargetPlatform;
 
-    setUpAll((){
+    setUpAll(() {
       origTargetPlatform = debugDefaultTargetPlatformOverride;
     });
 
-    tearDownAll((){
+    tearDownAll(() {
       expect(debugDefaultTargetPlatformOverride, equals(origTargetPlatform));
     });
 
@@ -808,11 +809,9 @@ class _SingleTickerTestState extends State<_SingleTickerTest> with SingleTickerP
 
 class _AlwaysAnimating extends StatefulWidget {
   const _AlwaysAnimating({
-    this.child,
     required this.onPaint,
   });
 
-  final Widget? child;
   final VoidCallback onPaint;
 
   @override
@@ -845,7 +844,6 @@ class _AlwaysAnimatingState extends State<_AlwaysAnimating> with SingleTickerPro
       builder: (BuildContext context, Widget? child) {
         return CustomPaint(
           painter: _AlwaysRepaint(widget.onPaint),
-          child: widget.child,
         );
       },
     );

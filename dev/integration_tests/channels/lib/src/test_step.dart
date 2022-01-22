@@ -44,13 +44,10 @@ class TestStepResult {
         return const TestStepResult('Executing', nothing, TestStatus.pending);
       case ConnectionState.done:
         if (snapshot.hasData) {
-          return snapshot.data;
-        } else {
-          final TestStepResult result = snapshot.error as TestStepResult;
-          return result;
+          return snapshot.data!;
         }
-        break;
-      default:
+        return snapshot.error! as TestStepResult;
+      case ConnectionState.active:
         throw 'Unsupported state ${snapshot.connectionState}';
     }
   }

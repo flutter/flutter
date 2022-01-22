@@ -144,6 +144,108 @@ void main() {
       return context.pushOpacity(offset, 100, painter, oldLayer: oldLayer as OpacityLayer?);
     });
   });
+
+  test('RenderObject.dispose sets debugDisposed to true', () {
+    final TestRenderObject renderObject = TestRenderObject();
+    expect(renderObject.debugDisposed, false);
+    renderObject.dispose();
+    expect(renderObject.debugDisposed, true);
+    expect(renderObject.toStringShort(), contains('DISPOSED'));
+  });
+
+  test('Leader layer can switch to a different render object within one frame', () {
+    List<FlutterErrorDetails?>? caughtErrors;
+    renderer.onErrors = () {
+      caughtErrors = renderer.takeAllFlutterErrorDetails().toList();
+    };
+
+    final LayerLink layerLink = LayerLink();
+    // renderObject1 paints the leader layer first.
+    final LeaderLayerRenderObject renderObject1 = LeaderLayerRenderObject();
+    renderObject1.layerLink = layerLink;
+    renderObject1.attach(renderer.pipelineOwner);
+    final OffsetLayer rootLayer1 = OffsetLayer();
+    rootLayer1.attach(renderObject1);
+    renderObject1.scheduleInitialPaint(rootLayer1);
+    renderObject1.layout(const BoxConstraints.tightForFinite());
+
+    final LeaderLayerRenderObject renderObject2 = LeaderLayerRenderObject();
+    final OffsetLayer rootLayer2 = OffsetLayer();
+    rootLayer2.attach(renderObject2);
+    renderObject2.attach(renderer.pipelineOwner);
+    renderObject2.scheduleInitialPaint(rootLayer2);
+    renderObject2.layout(const BoxConstraints.tightForFinite());
+    renderer.pumpCompleteFrame();
+
+    // Swap the layer link to renderObject2 in the same frame
+    renderObject1.layerLink = null;
+    renderObject1.markNeedsPaint();
+    renderObject2.layerLink = layerLink;
+    renderObject2.markNeedsPaint();
+    renderer.pumpCompleteFrame();
+
+    // Swap the layer link to renderObject1 in the same frame
+    renderObject1.layerLink = layerLink;
+    renderObject1.markNeedsPaint();
+    renderObject2.layerLink = null;
+    renderObject2.markNeedsPaint();
+    renderer.pumpCompleteFrame();
+
+    renderer.onErrors = null;
+    expect(caughtErrors, isNull);
+  });
+
+  test('Leader layer append to two render objects does crash', () {
+    List<FlutterErrorDetails?>? caughtErrors;
+    renderer.onErrors = () {
+      caughtErrors = renderer.takeAllFlutterErrorDetails().toList();
+    };
+    final LayerLink layerLink = LayerLink();
+    // renderObject1 paints the leader layer first.
+    final LeaderLayerRenderObject renderObject1 = LeaderLayerRenderObject();
+    renderObject1.layerLink = layerLink;
+    renderObject1.attach(renderer.pipelineOwner);
+    final OffsetLayer rootLayer1 = OffsetLayer();
+    rootLayer1.attach(renderObject1);
+    renderObject1.scheduleInitialPaint(rootLayer1);
+    renderObject1.layout(const BoxConstraints.tightForFinite());
+
+    final LeaderLayerRenderObject renderObject2 = LeaderLayerRenderObject();
+    renderObject2.layerLink = layerLink;
+    final OffsetLayer rootLayer2 = OffsetLayer();
+    rootLayer2.attach(renderObject2);
+    renderObject2.attach(renderer.pipelineOwner);
+    renderObject2.scheduleInitialPaint(rootLayer2);
+    renderObject2.layout(const BoxConstraints.tightForFinite());
+    renderer.pumpCompleteFrame();
+
+    renderer.onErrors = null;
+    expect(caughtErrors!.isNotEmpty, isTrue);
+  });
+
+  test('RenderObject.dispose null the layer on repaint boundaries', () {
+    final TestRenderObject renderObject = TestRenderObject(allowPaintBounds: true);
+    // Force a layer to get set.
+    renderObject.isRepaintBoundary = true;
+    PaintingContext.repaintCompositedChild(renderObject, debugAlsoPaintedParent: true);
+    expect(renderObject.debugLayer, isA<OffsetLayer>());
+
+    // Dispose with repaint boundary still being true.
+    renderObject.dispose();
+    expect(renderObject.debugLayer, null);
+  });
+
+  test('RenderObject.dispose nulls the layer on non-repaint boundaries', () {
+    final TestRenderObject renderObject = TestRenderObject(allowPaintBounds: true);
+    // Force a layer to get set.
+    renderObject.isRepaintBoundary = true;
+    PaintingContext.repaintCompositedChild(renderObject, debugAlsoPaintedParent: true);
+
+    // Dispose with repaint boundary being false.
+    renderObject.isRepaintBoundary = false;
+    renderObject.dispose();
+    expect(renderObject.debugLayer, null);
+  });
 }
 
 // Tests the create-update cycle by pumping two frames. The first frame has no
@@ -188,12 +290,19 @@ class _TestCustomLayerBox extends RenderBox {
 class TestParentData extends ParentData with ContainerParentDataMixin<RenderBox> { }
 
 class TestRenderObject extends RenderObject {
+  TestRenderObject({this.allowPaintBounds = false});
+
+  final bool allowPaintBounds;
+
+  @override
+  bool isRepaintBoundary = false;
+
   @override
   void debugAssertDoesMeetConstraints() { }
 
   @override
   Rect get paintBounds {
-    assert(false); // The test shouldn't call this.
+    assert(allowPaintBounds); // For some tests, this should not get called.
     return Rect.zero;
   }
 
@@ -214,6 +323,39 @@ class TestRenderObject extends RenderObject {
     config.isSemanticBoundary = true;
     describeSemanticsConfigurationCallCount++;
   }
+}
+
+class LeaderLayerRenderObject extends RenderObject {
+  LeaderLayerRenderObject();
+
+  LayerLink? layerLink;
+
+  @override
+  bool isRepaintBoundary = true;
+
+  @override
+  void debugAssertDoesMeetConstraints() { }
+
+  @override
+  Rect get paintBounds {
+    return Rect.zero;
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (layerLink != null) {
+      context.pushLayer(LeaderLayer(link: layerLink!), super.paint, offset);
+    }
+  }
+
+  @override
+  void performLayout() { }
+
+  @override
+  void performResize() { }
+
+  @override
+  Rect get semanticBounds => const Rect.fromLTWH(0.0, 0.0, 10.0, 20.0);
 }
 
 class TestThrowingRenderObject extends RenderObject {

@@ -19,7 +19,7 @@ import '../compile.dart';
 import '../convert.dart';
 import '../dart/language_version.dart';
 import '../device.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../project.dart';
 import '../test/test_wrapper.dart';
 
@@ -345,7 +345,6 @@ class FlutterPlatform extends PlatformPlugin {
     return controller.suite;
   }
 
-  @override
   StreamChannel<dynamic> loadChannel(String path, SuitePlatform platform) {
     if (_testCount > 0) {
       // Fail if there will be a port conflict.
@@ -451,6 +450,15 @@ class FlutterPlatform extends PlatformPlugin {
       String mainDart;
       if (precompiledDillPath != null) {
         mainDart = precompiledDillPath;
+        // When start paused is specified, it means that the user is likely
+        // running this with a debugger attached. Initialize the resident
+        // compiler in this case.
+        if (debuggingOptions.startPaused) {
+          compiler ??= TestCompiler(debuggingOptions.buildInfo, flutterProject, precompiledDillPath: precompiledDillPath);
+          final Uri testUri = globals.fs.file(testPath).uri;
+          // Trigger a compilation to initialize the resident compiler.
+          unawaited(compiler.compile(testUri));
+        }
       } else if (precompiledDillFiles != null) {
         mainDart = precompiledDillFiles[testPath];
       } else {

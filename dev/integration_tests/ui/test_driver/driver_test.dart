@@ -23,7 +23,7 @@ void main() {
 
     test('waitFor should find text "present"', () async {
       await driver.waitFor(presentText);
-    });
+    }, timeout: Timeout.none);
 
     test('waitForAbsent should time out waiting for text "present" to disappear', () async {
       await expectLater(
@@ -34,7 +34,7 @@ void main() {
           contains('Timeout while executing waitForAbsent'),
         )),
       );
-    });
+    }, timeout: Timeout.none);
 
     test('waitForAbsent should resolve when text "present" disappears', () async {
       // Begin waiting for it to disappear
@@ -50,7 +50,7 @@ void main() {
 
       // Ensure waitForAbsent resolves
       await whenWaitForAbsentResolves.future;
-    });
+    }, timeout: Timeout.none);
 
     test('waitFor times out waiting for "present" to reappear', () async {
       await expectLater(
@@ -61,7 +61,7 @@ void main() {
           contains('Timeout while executing waitFor'),
         )),
       );
-    });
+    }, timeout: Timeout.none);
 
     test('waitFor should resolve when text "present" reappears', () async {
       // Begin waiting for it to reappear
@@ -77,11 +77,11 @@ void main() {
 
       // Ensure waitFor resolves
       await whenWaitForResolves.future;
-    });
+    }, timeout: Timeout.none);
 
     test('waitForAbsent resolves immediately when the element does not exist', () async {
       await driver.waitForAbsent(find.text('that does not exist'));
-    });
+    }, timeout: Timeout.none);
 
     test('uses hit test to determine tappable elements', () async {
       final SerializableFinder a = find.byValueKey('a');
@@ -97,7 +97,7 @@ void main() {
       // Close it again
       await driver.tap(a);
       await driver.waitForAbsent(menu);
-    });
+    }, timeout: Timeout.none);
 
     test('enters text in a text field', () async {
       final SerializableFinder textField = find.byValueKey('enter-text-field');
@@ -106,6 +106,6 @@ void main() {
       await driver.waitFor(find.text('Hello!'));
       await driver.enterText('World!');
       await driver.waitFor(find.text('World!'));
-    });
+    }, timeout: Timeout.none);
   });
 }

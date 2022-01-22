@@ -89,8 +89,9 @@ class CupertinoTabView extends StatefulWidget {
   ///
   /// When a named route is pushed with [Navigator.pushNamed] inside this tab view,
   /// the route name is looked up in this map. If the name is present,
-  /// the associated [WidgetBuilder] is used to construct a [CupertinoPageRoute]
-  /// that performs an appropriate transition to the new route.
+  /// the associated [widgets.WidgetBuilder] is used to construct a
+  /// [CupertinoPageRoute] that performs an appropriate transition to the new
+  /// route.
   ///
   /// If the tab view only has one page, then you can specify it using [builder] instead.
   ///
@@ -158,7 +159,7 @@ class _CupertinoTabViewState extends State<CupertinoTabView> {
 
   void _updateObservers() {
     _navigatorObservers =
-        List<NavigatorObserver>.from(widget.navigatorObservers)
+        List<NavigatorObserver>.of(widget.navigatorObservers)
           ..add(_heroController);
   }
 

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:io';
 
 import 'package:flutter_devicelab/framework/framework.dart';
@@ -18,6 +16,46 @@ Future<void> main() async {
 
     final Directory tempDir = Directory.systemTemp.createTempSync('flutter_plugin_test.');
     try {
+      section('Lint integration_test');
+
+      await inDirectory(tempDir, () async {
+        // Relative to this script.
+        final String flutterRoot = path.dirname(path.dirname(path.dirname(path.dirname(path.dirname(path.fromUri(Platform.script))))));
+        print('Flutter root at $flutterRoot');
+        final String integrationTestPackage = path.join(flutterRoot, 'packages', 'integration_test');
+        final String iosintegrationTestPodspec = path.join(integrationTestPackage, 'ios', 'integration_test.podspec');
+
+        await exec(
+          'pod',
+          <String>[
+            'lib',
+            'lint',
+            iosintegrationTestPodspec,
+            '--configuration=Debug', // Release targets unsupported arm64 simulators. Use Debug to only build against targeted x86_64 simulator devices.
+            '--use-libraries',
+            '--verbose',
+          ],
+          environment: <String, String>{
+            'LANG': 'en_US.UTF-8',
+          },
+        );
+
+        final String macosintegrationTestPodspec = path.join(integrationTestPackage, 'integration_test_macos', 'macos', 'integration_test_macos.podspec');
+        await exec(
+          'pod',
+          <String>[
+            'lib',
+            'lint',
+            macosintegrationTestPodspec,
+            '--configuration=Debug', // Release targets unsupported arm64 Apple Silicon. Use Debug to only build against targeted x86_64 macOS.
+            '--verbose',
+          ],
+          environment: <String, String>{
+            'LANG': 'en_US.UTF-8',
+          },
+        );
+      });
+
       section('Create Objective-C plugin');
 
       const String objcPluginName = 'test_plugin_objc';
@@ -361,7 +399,7 @@ Future<void> main() async {
 
       final File podfileLockFile = File(path.join(swiftAppPath, 'ios', 'Podfile.lock'));
       final String podfileLockOutput = podfileLockFile.readAsStringSync();
-      if (!podfileLockOutput.contains(':path: ".symlinks/plugins/url_launcher/ios"')
+      if (!podfileLockOutput.contains(':path: ".symlinks/plugins/url_launcher_ios/ios"')
         || !podfileLockOutput.contains(':path: Flutter')
           // test_plugin_objc no longer supports iOS, shouldn't be present.
         || podfileLockOutput.contains(':path: ".symlinks/plugins/test_plugin_objc/ios"')
@@ -379,7 +417,7 @@ Future<void> main() async {
 
       checkDirectoryExists(path.join(
         pluginSymlinks,
-        'url_launcher',
+        'url_launcher_ios',
         'ios',
       ));
 
@@ -409,7 +447,7 @@ void _validateIosPodfile(String appPath) {
 
   final File podfileLockFile = File(path.join(appPath, 'ios', 'Podfile.lock'));
   final String podfileLockOutput = podfileLockFile.readAsStringSync();
-  if (!podfileLockOutput.contains(':path: ".symlinks/plugins/url_launcher/ios"')
+  if (!podfileLockOutput.contains(':path: ".symlinks/plugins/url_launcher_ios/ios"')
     || !podfileLockOutput.contains(':path: Flutter')
     || !podfileLockOutput.contains(':path: ".symlinks/plugins/test_plugin_objc/ios"')
     || !podfileLockOutput.contains(':path: ".symlinks/plugins/test_plugin_swift/ios"')
@@ -441,7 +479,7 @@ void _validateIosPodfile(String appPath) {
 
   checkDirectoryExists(path.join(
     pluginSymlinks,
-    'url_launcher',
+    'url_launcher_ios',
     'ios',
   ));
 
@@ -461,6 +499,13 @@ void _validateIosPodfile(String appPath) {
     'test_plugin_swift',
     'ios',
   ));
+
+  // Make sure no Xcode build settings are leaking derived data/build directory into the ios directory.
+  checkDirectoryNotExists(path.join(
+    appPath,
+    'ios',
+    'build',
+  ));
 }
 
 void _validateMacOSPodfile(String appPath) {
@@ -471,7 +516,7 @@ void _validateMacOSPodfile(String appPath) {
   if (!podfileLockOutput.contains(':path: Flutter/ephemeral\n')
       || !podfileLockOutput.contains(':path: Flutter/ephemeral/.symlinks/plugins/url_launcher_macos/macos')
       || !podfileLockOutput.contains(':path: Flutter/ephemeral/.symlinks/plugins/test_plugin_swift/macos')
-      || podfileLockOutput.contains('url_launcher/')) {
+      || podfileLockOutput.contains('url_launcher_ios/')) {
     print(podfileLockOutput);
     throw TaskResult.failure('macOS Podfile.lock does not contain expected pods');
   }
@@ -501,7 +546,7 @@ void _validateMacOSPodfile(String appPath) {
 
   checkDirectoryNotExists(path.join(
     pluginSymlinks,
-    'url_launcher',
+    'url_launcher_ios',
   ));
 
   checkDirectoryExists(path.join(

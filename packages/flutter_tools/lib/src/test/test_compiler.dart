@@ -13,7 +13,8 @@ import '../base/file_system.dart';
 import '../build_info.dart';
 import '../bundle.dart';
 import '../compile.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../flutter_plugins.dart';
+import '../globals.dart' as globals;
 import '../project.dart';
 
 /// A request to the [TestCompiler] for recompilation.
@@ -36,10 +37,14 @@ class TestCompiler {
   /// extension.
   ///
   /// [flutterProject] is the project for which we are running tests.
+  ///
+  /// If [precompiledDillPath] is passed, it will be used to initialize the
+  /// compiler.
   TestCompiler(
     this.buildInfo,
     this.flutterProject,
-  ) : testFilePath = globals.fs.path.join(
+    { String precompiledDillPath }
+  ) : testFilePath = precompiledDillPath ?? globals.fs.path.join(
         flutterProject.directory.path,
         getBuildDirectory(),
         'test_cache',
@@ -47,7 +52,8 @@ class TestCompiler {
           trackWidgetCreation: buildInfo.trackWidgetCreation,
           dartDefines: buildInfo.dartDefines,
           extraFrontEndOptions: buildInfo.extraFrontEndOptions,
-        )) {
+        )),
+       shouldCopyDillFile = precompiledDillPath == null {
     // Compiler maintains and updates single incremental dill file.
     // Incremental compilation requests done for each test copy that file away
     // for independent execution.
@@ -66,6 +72,7 @@ class TestCompiler {
   final FlutterProject flutterProject;
   final BuildInfo buildInfo;
   final String testFilePath;
+  final bool shouldCopyDillFile;
 
 
   ResidentCompiler compiler;
@@ -74,7 +81,7 @@ class TestCompiler {
   Future<String> compile(Uri mainDart) {
     final Completer<String> completer = Completer<String>();
     if (compilerController.isClosed) {
-      return null;
+      return Future<String>.value();
     }
     compilerController.add(CompilationRequest(mainDart, completer));
     return completer.future;
@@ -112,6 +119,8 @@ class TestCompiler {
       platform: globals.platform,
       testCompilation: true,
       fileSystem: globals.fs,
+      fileSystemRoots: buildInfo.fileSystemRoots,
+      fileSystemScheme: buildInfo.fileSystemScheme,
     );
     return residentCompiler;
   }
@@ -135,12 +144,29 @@ class TestCompiler {
         compiler = await createCompiler();
         firstCompile = true;
       }
+
+      final List<Uri> invalidatedRegistrantFiles = <Uri>[];
+      if (flutterProject != null) {
+        // Update the generated registrant to use the test target's main.
+        final String mainUriString = buildInfo.packageConfig.toPackageUri(request.mainUri)?.toString()
+          ?? request.mainUri.toString();
+        await generateMainDartWithPluginRegistrant(
+          flutterProject,
+          buildInfo.packageConfig,
+          mainUriString,
+          globals.fs.file(request.mainUri),
+          throwOnPluginPubspecError: false,
+        );
+        invalidatedRegistrantFiles.add(flutterProject.dartPluginRegistrant.absolute.uri);
+      }
+
       final CompilerOutput compilerOutput = await compiler.recompile(
         request.mainUri,
-        <Uri>[request.mainUri],
+        <Uri>[request.mainUri, ...invalidatedRegistrantFiles],
         outputPath: outputDill.path,
         packageConfig: buildInfo.packageConfig,
-        projectRootPath: flutterProject.directory.absolute.path,
+        projectRootPath: flutterProject?.directory?.absolute?.path,
+        checkDartPluginRegistry: true,
         fs: globals.fs,
       );
       final String outputPath = compilerOutput?.outputFilename;
@@ -149,28 +175,32 @@ class TestCompiler {
       // errors, pass [null] upwards to the consumer and shutdown the
       // compiler to avoid reusing compiler that might have gotten into
       // a weird state.
-      final String path = request.mainUri.toFilePath(windows: globals.platform.isWindows);
       if (outputPath == null || compilerOutput.errorCount > 0) {
         request.result.complete(null);
         await _shutdown();
       } else {
-        final File outputFile = globals.fs.file(outputPath);
-        final File kernelReadyToRun = await outputFile.copy('$path.dill');
-        final File testCache = globals.fs.file(testFilePath);
-        if (firstCompile || !testCache.existsSync() || (testCache.lengthSync() < outputFile.lengthSync())) {
-          // The idea is to keep the cache file up-to-date and include as
-          // much as possible in an effort to re-use as many packages as
-          // possible.
-          if (!testCache.parent.existsSync()) {
-            testCache.parent.createSync(recursive: true);
+        if (shouldCopyDillFile) {
+          final String path = request.mainUri.toFilePath(windows: globals.platform.isWindows);
+          final File outputFile = globals.fs.file(outputPath);
+          final File kernelReadyToRun = await outputFile.copy('$path.dill');
+          final File testCache = globals.fs.file(testFilePath);
+          if (firstCompile || !testCache.existsSync() || (testCache.lengthSync() < outputFile.lengthSync())) {
+            // The idea is to keep the cache file up-to-date and include as
+            // much as possible in an effort to re-use as many packages as
+            // possible.
+            if (!testCache.parent.existsSync()) {
+              testCache.parent.createSync(recursive: true);
+            }
+            await outputFile.copy(testFilePath);
           }
-          await outputFile.copy(testFilePath);
+          request.result.complete(kernelReadyToRun.path);
+        } else {
+          request.result.complete(outputPath);
         }
-        request.result.complete(kernelReadyToRun.path);
         compiler.accept();
         compiler.reset();
       }
-      globals.printTrace('Compiling $path took ${compilerTime.elapsedMilliseconds}ms');
+      globals.printTrace('Compiling ${request.mainUri} took ${compilerTime.elapsedMilliseconds}ms');
       // Only remove now when we finished processing the element
       compilationQueue.removeAt(0);
     }

@@ -289,20 +289,26 @@ class FakeStdio extends Stdio {
 }
 
 class FakePlistParser implements PlistParser {
-  final Map<String, dynamic> _underlyingValues = <String, String>{};
+  FakePlistParser([Map<String, Object>? underlyingValues]):
+    _underlyingValues = underlyingValues ?? <String, Object>{};
 
-  void setProperty(String key, dynamic value) {
+  final Map<String, Object> _underlyingValues;
+
+  void setProperty(String key, Object value) {
     _underlyingValues[key] = value;
   }
 
   @override
-  Map<String, dynamic> parseFile(String plistFilePath) {
+  String? plistXmlContent(String plistFilePath) => throw UnimplementedError();
+
+  @override
+  Map<String, Object> parseFile(String plistFilePath) {
     return _underlyingValues;
   }
 
   @override
-  String getValueFromFile(String plistFilePath, String key) {
-    return _underlyingValues[key] as String;
+  String? getStringValueFromFile(String plistFilePath, String key) {
+    return _underlyingValues[key] as String?;
   }
 }
 
@@ -320,6 +326,7 @@ class FakeFlutterVersion implements FlutterVersion {
   FakeFlutterVersion({
     this.channel = 'unknown',
     this.dartSdkVersion = '12',
+    this.devToolsVersion = '2.8.0',
     this.engineRevision = 'abcdefghijklmnopqrstuvwxyz',
     this.engineRevisionShort = 'abcde',
     this.repositoryUrl = 'https://github.com/flutter/flutter.git',
@@ -339,6 +346,9 @@ class FakeFlutterVersion implements FlutterVersion {
 
   @override
   final String channel;
+
+  @override
+  final String devToolsVersion;
 
   @override
   final String dartSdkVersion;
@@ -415,7 +425,6 @@ class TestFeatureFlags implements FeatureFlags {
     this.isIOSEnabled = true,
     this.isFuchsiaEnabled = false,
     this.areCustomDevicesEnabled = false,
-    this.isExperimentalInvalidationStrategyEnabled = false,
     this.isWindowsUwpEnabled = false,
   });
 
@@ -447,9 +456,6 @@ class TestFeatureFlags implements FeatureFlags {
   final bool areCustomDevicesEnabled;
 
   @override
-  final bool isExperimentalInvalidationStrategyEnabled;
-
-  @override
   final bool isWindowsUwpEnabled;
 
   @override
@@ -473,8 +479,6 @@ class TestFeatureFlags implements FeatureFlags {
         return isFuchsiaEnabled;
       case flutterCustomDevicesFeature:
         return areCustomDevicesEnabled;
-      case experimentalInvalidationStrategy:
-        return isExperimentalInvalidationStrategyEnabled;
       case windowsUwpEmbedding:
         return isWindowsUwpEnabled;
     }
@@ -534,4 +538,57 @@ class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
 
   @override
   Future<int> findFreePort({bool ipv6 = false}) async => 12345;
+}
+
+class FakeStopwatch implements Stopwatch {
+  @override
+  bool get isRunning => _isRunning;
+  bool _isRunning = false;
+
+  @override
+  void start() => _isRunning = true;
+
+  @override
+  void stop() => _isRunning = false;
+
+  @override
+  Duration elapsed = Duration.zero;
+
+  @override
+  int get elapsedMicroseconds => elapsed.inMicroseconds;
+
+  @override
+  int get elapsedMilliseconds => elapsed.inMilliseconds;
+
+  @override
+  int get elapsedTicks => elapsed.inMilliseconds;
+
+  @override
+  int get frequency => 1000;
+
+  @override
+  void reset() {
+    _isRunning = false;
+    elapsed = Duration.zero;
+  }
+
+  @override
+  String toString() => '$runtimeType $elapsed $isRunning';
+}
+
+class FakeStopwatchFactory implements StopwatchFactory {
+  FakeStopwatchFactory({
+    Stopwatch? stopwatch,
+    Map<String, Stopwatch>? stopwatches
+  }) : stopwatches = <String, Stopwatch>{
+         if (stopwatches != null) ...stopwatches,
+         if (stopwatch != null) '': stopwatch,
+       };
+
+  Map<String, Stopwatch> stopwatches;
+
+  @override
+  Stopwatch createStopwatch([String name = '']) {
+    return stopwatches[name] ?? FakeStopwatch();
+  }
 }

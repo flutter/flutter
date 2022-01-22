@@ -218,6 +218,11 @@ void main() {
         ]),
       );
     });
+
+    test('synchronizeToNativeViewHierarchy', () async {
+      await PlatformViewsService.synchronizeToNativeViewHierarchy(false);
+      expect(viewsController.synchronizeToNativeViewHierarchy, false);
+    });
   });
 
   group('iOS', () {

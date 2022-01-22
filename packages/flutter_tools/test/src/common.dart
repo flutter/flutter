@@ -10,7 +10,7 @@ import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path; // flutter_ignore: package_path_import
 import 'package:test_api/test_api.dart' as test_package show test; // ignore: deprecated_member_use
@@ -27,6 +27,9 @@ void tryToDelete(Directory directory) {
       directory.deleteSync(recursive: true);
     }
   } on FileSystemException catch (error) {
+    // We print this so that it's visible in the logs, to get an idea of how
+    // common this problem is, and if any patterns are ever noticed by anyone.
+    // ignore: avoid_print
     print('Failed to delete ${directory.path}: $error');
   }
 }
@@ -124,6 +127,15 @@ Future<void> expectToolExitLater(Future<dynamic> future, Matcher messageMatcher)
   }
 }
 
+Future<void> expectReturnsNormallyLater(Future<dynamic> future) async {
+  try {
+    await future;
+  // Catch all exceptions to give a better test failure message.
+  } catch (e, trace) { // ignore: avoid_catches_without_on_clauses
+    fail('Expected to run with no exceptions, got $e\n$trace');
+  }
+}
+
 Matcher containsIgnoringWhitespace(String toSearch) {
   return predicate(
     (String source) {
@@ -139,7 +151,6 @@ Matcher containsIgnoringWhitespace(String toSearch) {
 @isTest
 void test(String description, FutureOr<void> Function() body, {
   String? testOn,
-  Timeout? timeout,
   dynamic skip,
   List<String>? tags,
   Map<String, dynamic>? onPlatform,
@@ -151,14 +162,17 @@ void test(String description, FutureOr<void> Function() body, {
       addTearDown(() async {
         await globals.localFileSystem.dispose();
       });
+
       return body();
     },
-    timeout: timeout,
     skip: skip,
     tags: tags,
     onPlatform: onPlatform,
     retry: retry,
     testOn: testOn,
+    // We don't support "timeout"; see ../../dart_test.yaml which
+    // configures all tests to have a 15 minute timeout which should
+    // definitely be enough.
   );
 }
 
@@ -173,24 +187,25 @@ void test(String description, FutureOr<void> Function() body, {
 @isTest
 void testWithoutContext(String description, FutureOr<void> Function() body, {
   String? testOn,
-  Timeout? timeout,
   dynamic skip,
   List<String>? tags,
   Map<String, dynamic>? onPlatform,
   int? retry,
-  }) {
+}) {
   return test(
     description, () async {
       return runZoned(body, zoneValues: <Object, Object>{
         contextKey: const _NoContext(),
       });
     },
-    timeout: timeout,
     skip: skip,
     tags: tags,
     onPlatform: onPlatform,
     retry: retry,
     testOn: testOn,
+    // We don't support "timeout"; see ../../dart_test.yaml which
+    // configures all tests to have a 15 minute timeout which should
+    // definitely be enough.
   );
 }
 
@@ -244,6 +259,8 @@ class _NoContext implements AppContext {
 /// ```
 class FileExceptionHandler {
   final Map<String, Map<FileSystemOp, FileSystemException>> _contextErrors = <String, Map<FileSystemOp, FileSystemException>>{};
+  final Map<FileSystemOp, FileSystemException> _tempErrors = <FileSystemOp, FileSystemException>{};
+  static final RegExp _tempDirectoryEnd = RegExp('rand[0-9]+');
 
   /// Add an exception that will be thrown whenever the file system attached to this
   /// handler performs the [operation] on the [entity].
@@ -253,8 +270,18 @@ class FileExceptionHandler {
     _contextErrors[path]![operation] = exception;
   }
 
-  // Tear-off this method and pass it to the memory filesystem `opHandle` parameter.
+  void addTempError(FileSystemOp operation, FileSystemException exception) {
+    _tempErrors[operation] = exception;
+  }
+
+  /// Tear-off this method and pass it to the memory filesystem `opHandle` parameter.
   void opHandle(String path, FileSystemOp operation) {
+    if (path.startsWith('.tmp_') || _tempDirectoryEnd.firstMatch(path) != null) {
+      final FileSystemException? exception = _tempErrors[operation];
+      if (exception != null) {
+        throw exception;
+      }
+    }
     final Map<FileSystemOp, FileSystemException>? exceptions = _contextErrors[path];
     if (exceptions == null) {
       return;

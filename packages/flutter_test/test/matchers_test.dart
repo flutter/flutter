@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// flutter_ignore_for_file: golden_tag (see analyze.dart)
+
 import 'dart:typed_data';
 import 'dart:ui';
 
@@ -352,13 +354,26 @@ void main() {
     });
 
     group('matches', () {
-
       testWidgets('if comparator succeeds', (WidgetTester tester) async {
         await tester.pumpWidget(boilerplate(const Text('hello')));
         final Finder finder = find.byType(Text);
         await expectLater(finder, matchesGoldenFile('foo.png'));
         expect(comparator.invocation, _ComparatorInvocation.compare);
         expect(comparator.imageBytes, hasLength(greaterThan(0)));
+        expect(comparator.golden, Uri.parse('foo.png'));
+      });
+
+      testWidgets('list of integers', (WidgetTester tester) async {
+        await expectLater(<int>[1, 2], matchesGoldenFile('foo.png'));
+        expect(comparator.invocation, _ComparatorInvocation.compare);
+        expect(comparator.imageBytes, equals(<int>[1, 2]));
+        expect(comparator.golden, Uri.parse('foo.png'));
+      });
+
+      testWidgets('future list of integers', (WidgetTester tester) async {
+        await expectLater(Future<List<int>>.value(<int>[1, 2]), matchesGoldenFile('foo.png'));
+        expect(comparator.invocation, _ComparatorInvocation.compare);
+        expect(comparator.imageBytes, equals(<int>[1, 2]));
         expect(comparator.golden, Uri.parse('foo.png'));
       });
     });
@@ -546,11 +561,11 @@ void main() {
       final SemanticsData data = SemanticsData(
         flags: flags,
         actions: actions,
-        label: 'a',
-        increasedValue: 'b',
-        value: 'c',
-        decreasedValue: 'd',
-        hint: 'e',
+        attributedLabel: AttributedString('a'),
+        attributedIncreasedValue: AttributedString('b'),
+        attributedValue: AttributedString('c'),
+        attributedDecreasedValue: AttributedString('d'),
+        attributedHint: AttributedString('e'),
         textDirection: TextDirection.ltr,
         rect: const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
         elevation: 3.0,
@@ -688,7 +703,7 @@ class _FakeComparator implements GoldenFileComparator {
       case _ComparatorBehavior.returnFalse:
         return Future<bool>.value(false);
       case _ComparatorBehavior.throwTestFailure:
-        throw TestFailure('fake message');
+        fail('fake message');
     }
   }
 

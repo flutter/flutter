@@ -455,6 +455,9 @@ void main() {
       <String>[
       ],
     );
+    await tester.pumpWidget(Container());
+    expect(routes.isEmpty, isTrue);
+    results.clear();
   });
 
   group('PageRouteObserver', () {
@@ -518,6 +521,33 @@ void main() {
 
       expect(pageRouteAware.didPushCount, 2);
       expect(pageRouteAware.didPopCount, 0);
+    });
+
+    test('releases reference to route when unsubscribed', () {
+      final RouteObserver<PageRoute<dynamic>> observer = RouteObserver<PageRoute<dynamic>>();
+      final MockRouteAware pageRouteAware = MockRouteAware();
+      final MockRouteAware page2RouteAware = MockRouteAware();
+      final MockPageRoute pageRoute = MockPageRoute();
+      final MockPageRoute nextPageRoute = MockPageRoute();
+      observer.subscribe(pageRouteAware, pageRoute);
+      observer.subscribe(pageRouteAware, nextPageRoute);
+      observer.subscribe(page2RouteAware, pageRoute);
+      observer.subscribe(page2RouteAware, nextPageRoute);
+      expect(pageRouteAware.didPushCount, 2);
+      expect(page2RouteAware.didPushCount, 2);
+
+      expect(observer.debugObservingRoute(pageRoute), true);
+      expect(observer.debugObservingRoute(nextPageRoute), true);
+
+      observer.unsubscribe(pageRouteAware);
+
+      expect(observer.debugObservingRoute(pageRoute), true);
+      expect(observer.debugObservingRoute(nextPageRoute), true);
+
+      observer.unsubscribe(page2RouteAware);
+
+      expect(observer.debugObservingRoute(pageRoute), false);
+      expect(observer.debugObservingRoute(nextPageRoute), false);
     });
   });
 
@@ -1354,9 +1384,9 @@ void main() {
         ),
       ));
 
-      final CurveTween _defaultBarrierTween = CurveTween(curve: Curves.ease);
+      final CurveTween defaultBarrierTween = CurveTween(curve: Curves.ease);
       int _getExpectedBarrierTweenAlphaValue(double t) {
-        return Color.getAlphaFromOpacity(_defaultBarrierTween.transform(t));
+        return Color.getAlphaFromOpacity(defaultBarrierTween.transform(t));
       }
 
       await tester.tap(find.text('X'));
@@ -1417,9 +1447,9 @@ void main() {
         ),
       ));
 
-      final CurveTween _customBarrierTween = CurveTween(curve: Curves.linear);
+      final CurveTween customBarrierTween = CurveTween(curve: Curves.linear);
       int _getExpectedBarrierTweenAlphaValue(double t) {
-        return Color.getAlphaFromOpacity(_customBarrierTween.transform(t));
+        return Color.getAlphaFromOpacity(customBarrierTween.transform(t));
       }
 
       await tester.tap(find.text('X'));
@@ -1480,9 +1510,9 @@ void main() {
         ),
       ));
 
-      final CurveTween _defaultBarrierTween = CurveTween(curve: Curves.ease);
+      final CurveTween defaultBarrierTween = CurveTween(curve: Curves.ease);
       int _getExpectedBarrierTweenAlphaValue(double t) {
-        return Color.getAlphaFromOpacity(_defaultBarrierTween.transform(t));
+        return Color.getAlphaFromOpacity(defaultBarrierTween.transform(t));
       }
 
       await tester.tap(find.text('X'));
@@ -1701,7 +1731,6 @@ void main() {
       state.addLocalHistory();
       // Waits for modal route to update its internal state;
       await tester.pump();
-
       // Pumps a new widget to dispose WidgetWithLocalHistory. This should cause
       // it to remove the local history entry from modal route during
       // finalizeTree.
@@ -1709,6 +1738,25 @@ void main() {
         home: Text('dummy'),
       ));
       // Waits for modal route to update its internal state;
+      await tester.pump();
+      expect(tester.takeException(), null);
+    });
+
+    testWidgets('child with no local history can be disposed', (WidgetTester tester) async {
+      await tester.pumpWidget(const MaterialApp(
+        home: WidgetWithNoLocalHistory(),
+      ));
+
+      final WidgetWithNoLocalHistoryState state = tester.state(find.byType(WidgetWithNoLocalHistory));
+      state.addLocalHistory();
+      // Waits for modal route to update its internal state;
+      await tester.pump();
+      // Pumps a new widget to dispose WidgetWithNoLocalHistory. This should cause
+      // it to remove the local history entry from modal route during
+      // finalizeTree.
+      await tester.pumpWidget(const MaterialApp(
+        home: Text('dummy'),
+      ));
       await tester.pump();
       expect(tester.takeException(), null);
     });
@@ -1958,6 +2006,33 @@ class WidgetWithLocalHistoryState extends State<WidgetWithLocalHistory> {
     final ModalRoute<dynamic> route = ModalRoute.of(context)!;
     _localHistory = LocalHistoryEntry();
     route.addLocalHistoryEntry(_localHistory);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _localHistory.remove();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return const Text('dummy');
+  }
+}
+
+class WidgetWithNoLocalHistory extends StatefulWidget {
+  const WidgetWithNoLocalHistory({Key? key}) : super(key: key);
+
+  @override
+  WidgetWithNoLocalHistoryState createState() => WidgetWithNoLocalHistoryState();
+}
+
+class WidgetWithNoLocalHistoryState extends State<WidgetWithNoLocalHistory> {
+  late LocalHistoryEntry _localHistory;
+
+  void addLocalHistory() {
+    _localHistory = LocalHistoryEntry();
+    // Not calling `route.addLocalHistoryEntry` here.
   }
 
   @override

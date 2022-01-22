@@ -18,7 +18,8 @@ import 'viewport_offset.dart';
 
 // Trims the specified edges of the given `Rect` [original], so that they do not
 // exceed the given values.
-Rect? _trim(Rect? original, {
+Rect? _trim(
+  Rect? original, {
   double top = -double.infinity,
   double right = double.infinity,
   double bottom = double.infinity,
@@ -497,23 +498,10 @@ class FloatingHeaderSnapConfiguration {
   /// Creates an object that specifies how a floating header is to be "snapped"
   /// (animated) into or out of view.
   FloatingHeaderSnapConfiguration({
-    @Deprecated(
-      'Specify SliverPersistentHeaderDelegate.vsync instead. '
-      'This feature was deprecated after v1.19.0.',
-    )
-    this.vsync,
     this.curve = Curves.ease,
     this.duration = const Duration(milliseconds: 300),
   }) : assert(curve != null),
        assert(duration != null);
-
-  /// The [TickerProvider] for the [AnimationController] that causes a floating
-  /// header to snap in or out of view.
-  @Deprecated(
-    'Specify SliverPersistentHeaderDelegate.vsync instead. '
-    'This feature was deprecated after v1.19.0.',
-  )
-  final TickerProvider? vsync;
 
   /// The snap animation curve.
   final Curve curve;
@@ -636,12 +624,12 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
 
     final AnimationController effectiveController =
       _controller ??= AnimationController(vsync: vsync!, duration: duration)
-                        ..addListener(() {
-      if (_effectiveScrollOffset == _animation.value)
-        return;
-      _effectiveScrollOffset = _animation.value;
-      markNeedsLayout();
-    });
+        ..addListener(() {
+            if (_effectiveScrollOffset == _animation.value)
+              return;
+            _effectiveScrollOffset = _animation.value;
+            markNeedsLayout();
+          });
 
     _animation = effectiveController.drive(
       Tween<double>(
@@ -652,6 +640,7 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
   }
 
   /// Update the last known ScrollDirection when scrolling began.
+  // ignore: use_setters_to_change_properties, (API predates enforcing the lint)
   void updateScrollStartDirection(ScrollDirection direction) {
     _lastStartedScrollDirection = direction;
   }

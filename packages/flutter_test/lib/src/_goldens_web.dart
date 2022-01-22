@@ -6,8 +6,7 @@ import 'dart:convert';
 import 'dart:html' as html;
 import 'dart:typed_data';
 
-// ignore: deprecated_member_use
-import 'package:test_api/test_api.dart' as test_package show TestFailure;
+import 'package:test_api/expect.dart' show fail;
 
 import 'goldens.dart';
 
@@ -18,7 +17,7 @@ class LocalFileComparator extends GoldenFileComparator {
     throw UnsupportedError('LocalFileComparator is not supported on the web.');
   }
 
-   @override
+  @override
   Future<void> update(Uri golden, Uint8List imageBytes) {
     throw UnsupportedError('LocalFileComparator is not supported on the web.');
   }
@@ -72,9 +71,8 @@ class DefaultWebGoldenComparator extends WebGoldenComparator {
     final String response = request.response as String;
     if (response == 'true') {
       return true;
-    } else {
-      throw test_package.TestFailure(response);
     }
+    fail(response);
   }
 
   @override

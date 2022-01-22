@@ -23,6 +23,8 @@ const Duration _kScrollbarTimeToFade = Duration(milliseconds: 600);
 /// To add a scrollbar to a [ScrollView], wrap the scroll view
 /// widget in a [Scrollbar] widget.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=DbkIQSvwnZc}
+///
 /// {@macro flutter.widgets.Scrollbar}
 ///
 /// Dynamically changes to an iOS style scrollbar that looks like
@@ -34,53 +36,19 @@ const Duration _kScrollbarTimeToFade = Duration(milliseconds: 600);
 /// [showTrackOnHover]. The thickness of the track and scrollbar thumb will
 /// become larger when hovering, unless overridden by [hoverThickness].
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold}
+/// {@tool dartpad}
 /// This sample shows a [Scrollbar] that executes a fade animation as scrolling occurs.
 /// The Scrollbar will fade into view as the user scrolls, and fade out when scrolling stops.
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return Scrollbar(
-///     child: GridView.builder(
-///       itemCount: 120,
-///       gridDelegate:
-///         const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
-///       itemBuilder: (BuildContext context, int index) {
-///         return Center(
-///           child: Text('item $index'),
-///         );
-///       },
-///     ),
-///   );
-/// }
-/// ```
+///
+/// ** See code in examples/api/lib/material/scrollbar/scrollbar.0.dart **
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold}
+/// {@tool dartpad}
 /// When isAlwaysShown is true, the scrollbar thumb will remain visible without the
 /// fade animation. This requires that a ScrollController is provided to controller,
 /// or that the PrimaryScrollController is available.
-/// ```dart
-/// final ScrollController _controllerOne = ScrollController();
 ///
-/// @override
-/// Widget build(BuildContext context) {
-///   return Scrollbar(
-///     controller: _controllerOne,
-///     isAlwaysShown: true,
-///     child: GridView.builder(
-///       controller: _controllerOne,
-///       itemCount: 120,
-///       gridDelegate:
-///         const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
-///       itemBuilder: (BuildContext context, int index) {
-///         return Center(
-///           child: Text('item $index'),
-///         );
-///       },
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/material/scrollbar/scrollbar.1.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -91,7 +59,7 @@ const Duration _kScrollbarTimeToFade = Duration(milliseconds: 600);
 ///  * [CupertinoScrollbar], an iOS style scrollbar.
 ///  * [ListView], which displays a linear, scrollable list of children.
 ///  * [GridView], which displays a 2 dimensional, scrollable array of children.
-class Scrollbar extends StatefulWidget {
+class Scrollbar extends StatelessWidget {
   /// Creates a material design scrollbar that by default will connect to the
   /// closest Scrollable descendant of [child].
   ///
@@ -111,6 +79,7 @@ class Scrollbar extends StatefulWidget {
     required this.child,
     this.controller,
     this.isAlwaysShown,
+    this.trackVisibility,
     this.showTrackOnHover,
     this.hoverThickness,
     this.thickness,
@@ -129,11 +98,26 @@ class Scrollbar extends StatefulWidget {
   /// {@macro flutter.widgets.Scrollbar.isAlwaysShown}
   final bool? isAlwaysShown;
 
+  /// Controls the track visibility.
+  ///
+  /// If this property is null, then [ScrollbarThemeData.trackVisibility] of
+  /// [ThemeData.scrollbarTheme] is used. If that is also null, the default value
+  /// is false.
+  ///
+  /// If the track visibility is related to the scrollbar's material state,
+  /// use the global [ScrollbarThemeData.trackVisibility] or override the
+  /// sub-tree's theme data.
+  ///
+  /// [showTrackOnHover] can be replaced by this and will be deprecated.
+  final bool? trackVisibility;
+
   /// Controls if the track will show on hover and remain, including during drag.
   ///
   /// If this property is null, then [ScrollbarThemeData.showTrackOnHover] of
   /// [ThemeData.scrollbarTheme] is used. If that is also null, the default value
   /// is false.
+  ///
+  /// This will be deprecated, and [trackVisibility] is recommended.
   final bool? showTrackOnHover;
 
   /// The thickness of the scrollbar when a hover state is active and
@@ -170,38 +154,32 @@ class Scrollbar extends StatefulWidget {
   final ScrollbarOrientation? scrollbarOrientation;
 
   @override
-  State<Scrollbar> createState() => _ScrollbarState();
-}
-
-class _ScrollbarState extends State<Scrollbar> {
-  bool get _useCupertinoScrollbar => Theme.of(context).platform == TargetPlatform.iOS;
-
-  @override
   Widget build(BuildContext context) {
-    if (_useCupertinoScrollbar) {
+    if (Theme.of(context).platform == TargetPlatform.iOS) {
       return CupertinoScrollbar(
-        isAlwaysShown: widget.isAlwaysShown ?? false,
-        thickness: widget.thickness ?? CupertinoScrollbar.defaultThickness,
-        thicknessWhileDragging: widget.thickness ?? CupertinoScrollbar.defaultThicknessWhileDragging,
-        radius: widget.radius ?? CupertinoScrollbar.defaultRadius,
-        radiusWhileDragging: widget.radius ?? CupertinoScrollbar.defaultRadiusWhileDragging,
-        controller: widget.controller,
-        notificationPredicate: widget.notificationPredicate,
-        scrollbarOrientation: widget.scrollbarOrientation,
-        child: widget.child,
+        isAlwaysShown: isAlwaysShown ?? false,
+        thickness: thickness ?? CupertinoScrollbar.defaultThickness,
+        thicknessWhileDragging: thickness ?? CupertinoScrollbar.defaultThicknessWhileDragging,
+        radius: radius ?? CupertinoScrollbar.defaultRadius,
+        radiusWhileDragging: radius ?? CupertinoScrollbar.defaultRadiusWhileDragging,
+        controller: controller,
+        notificationPredicate: notificationPredicate,
+        scrollbarOrientation: scrollbarOrientation,
+        child: child,
       );
     }
     return _MaterialScrollbar(
-      controller: widget.controller,
-      isAlwaysShown: widget.isAlwaysShown,
-      showTrackOnHover: widget.showTrackOnHover,
-      hoverThickness: widget.hoverThickness,
-      thickness: widget.thickness,
-      radius: widget.radius,
-      notificationPredicate: widget.notificationPredicate,
-      interactive: widget.interactive,
-      scrollbarOrientation: widget.scrollbarOrientation,
-      child: widget.child,
+      controller: controller,
+      isAlwaysShown: isAlwaysShown,
+      trackVisibility: trackVisibility,
+      showTrackOnHover: showTrackOnHover,
+      hoverThickness: hoverThickness,
+      thickness: thickness,
+      radius: radius,
+      notificationPredicate: notificationPredicate,
+      interactive: interactive,
+      scrollbarOrientation: scrollbarOrientation,
+      child: child,
     );
   }
 }
@@ -212,6 +190,7 @@ class _MaterialScrollbar extends RawScrollbar {
     required Widget child,
     ScrollController? controller,
     bool? isAlwaysShown,
+    this.trackVisibility,
     this.showTrackOnHover,
     this.hoverThickness,
     double? thickness,
@@ -234,6 +213,7 @@ class _MaterialScrollbar extends RawScrollbar {
          scrollbarOrientation: scrollbarOrientation,
        );
 
+  final bool? trackVisibility;
   final bool? showTrackOnHover;
   final double? hoverThickness;
 
@@ -257,6 +237,13 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
   bool get enableGestures => widget.interactive ?? _scrollbarTheme.interactive ?? !_useAndroidScrollbar;
 
   bool get _showTrackOnHover => widget.showTrackOnHover ?? _scrollbarTheme.showTrackOnHover ?? false;
+
+  MaterialStateProperty<bool> get _trackVisibility => MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+    if (states.contains(MaterialState.hovered) && _showTrackOnHover) {
+      return true;
+    }
+    return widget.trackVisibility ?? _scrollbarTheme.trackVisibility?.resolve(states) ?? false;
+  });
 
   Set<MaterialState> get _states => <MaterialState>{
     if (_dragIsActive) MaterialState.dragged,
@@ -292,7 +279,7 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
 
       // If the track is visible, the thumb color hover animation is ignored and
       // changes immediately.
-      if (states.contains(MaterialState.hovered) && _showTrackOnHover)
+      if (_trackVisibility.resolve(states))
         return _scrollbarTheme.thumbColor?.resolve(states) ?? hoverColor;
 
       return Color.lerp(
@@ -307,7 +294,7 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
     final Color onSurface = _colorScheme.onSurface;
     final Brightness brightness = _colorScheme.brightness;
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.hovered) && _showTrackOnHover) {
+      if (_trackVisibility.resolve(states)) {
         return _scrollbarTheme.trackColor?.resolve(states)
           ?? (brightness == Brightness.light
             ? onSurface.withOpacity(0.03)
@@ -321,7 +308,7 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
     final Color onSurface = _colorScheme.onSurface;
     final Brightness brightness = _colorScheme.brightness;
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.hovered) && _showTrackOnHover) {
+      if (_trackVisibility.resolve(states)) {
         return _scrollbarTheme.trackBorderColor?.resolve(states)
           ?? (brightness == Brightness.light
             ? onSurface.withOpacity(0.1)
@@ -333,7 +320,7 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
 
   MaterialStateProperty<double> get _thickness {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.hovered) && _showTrackOnHover)
+      if (states.contains(MaterialState.hovered) && _trackVisibility.resolve(states))
         return widget.hoverThickness
           ?? _scrollbarTheme.thickness?.resolve(states)
           ?? _kScrollbarThicknessWithTrack;
@@ -389,7 +376,8 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
       ..mainAxisMargin = _scrollbarTheme.mainAxisMargin ?? 0.0
       ..minLength = _scrollbarTheme.minThumbLength ?? _kScrollbarMinLength
       ..padding = MediaQuery.of(context).padding
-      ..scrollbarOrientation = widget.scrollbarOrientation;
+      ..scrollbarOrientation = widget.scrollbarOrientation
+      ..ignorePointer = !enableGestures;
   }
 
   @override

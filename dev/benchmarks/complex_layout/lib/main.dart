@@ -14,12 +14,12 @@ void main() {
 enum ScrollMode { complex, tile }
 
 class ComplexLayoutApp extends StatefulWidget {
-  const ComplexLayoutApp({Key key}) : super(key: key);
+  const ComplexLayoutApp({Key? key}) : super(key: key);
 
   @override
   ComplexLayoutAppState createState() => ComplexLayoutAppState();
 
-  static ComplexLayoutAppState of(BuildContext context) => context.findAncestorStateOfType<ComplexLayoutAppState>();
+  static ComplexLayoutAppState? of(BuildContext context) => context.findAncestorStateOfType<ComplexLayoutAppState>();
 }
 
 class ComplexLayoutAppState extends State<ComplexLayoutApp> {
@@ -55,7 +55,7 @@ class ComplexLayoutAppState extends State<ComplexLayoutApp> {
 }
 
 class TileScrollLayout extends StatelessWidget {
-  const TileScrollLayout({ Key key }) : super(key: key);
+  const TileScrollLayout({ Key? key }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -81,12 +81,12 @@ class TileScrollLayout extends StatelessWidget {
 }
 
 class ComplexLayout extends StatefulWidget {
-  const ComplexLayout({ Key key }) : super(key: key);
+  const ComplexLayout({ Key? key }) : super(key: key);
 
   @override
   ComplexLayoutState createState() => ComplexLayoutState();
 
-  static ComplexLayoutState of(BuildContext context) => context.findAncestorStateOfType<ComplexLayoutState>();
+  static ComplexLayoutState? of(BuildContext context) => context.findAncestorStateOfType<ComplexLayoutState>();
 }
 
 class ComplexLayoutState extends State<ComplexLayout> {
@@ -129,7 +129,7 @@ class ComplexLayoutState extends State<ComplexLayout> {
 }
 
 class TopBarMenu extends StatelessWidget {
-  const TopBarMenu({Key key}) : super(key: key);
+  const TopBarMenu({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -182,7 +182,7 @@ class TopBarMenu extends StatelessWidget {
 }
 
 class MenuItemWithIcon extends StatelessWidget {
-  const MenuItemWithIcon(this.icon, this.title, this.subtitle, {Key key}) : super(key: key);
+  const MenuItemWithIcon(this.icon, this.title, this.subtitle, {Key? key}) : super(key: key);
 
   final IconData icon;
   final String title;
@@ -204,7 +204,7 @@ class MenuItemWithIcon extends StatelessWidget {
 }
 
 class FancyImageItem extends StatelessWidget {
-  const FancyImageItem(this.index, {Key key}) : super(key: key);
+  const FancyImageItem(this.index, {Key? key}) : super(key: key);
 
   final int index;
 
@@ -228,7 +228,7 @@ class FancyImageItem extends StatelessWidget {
 }
 
 class FancyGalleryItem extends StatelessWidget {
-  const FancyGalleryItem(this.index, {Key key}) : super(key: key);
+  const FancyGalleryItem(this.index, {Key? key}) : super(key: key);
 
   final int index;
   @override
@@ -250,7 +250,7 @@ class FancyGalleryItem extends StatelessWidget {
 }
 
 class InfoBar extends StatelessWidget {
-  const InfoBar({Key key}) : super(key: key);
+  const InfoBar({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -268,7 +268,7 @@ class InfoBar extends StatelessWidget {
 }
 
 class IconBar extends StatelessWidget {
-  const IconBar({Key key}) : super(key: key);
+  const IconBar({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -287,7 +287,7 @@ class IconBar extends StatelessWidget {
 }
 
 class IconWithText extends StatelessWidget {
-  const IconWithText(this.icon, this.title, {Key key}) : super(key: key);
+  const IconWithText(this.icon, this.title, {Key? key}) : super(key: key);
 
   final IconData icon;
   final String title;
@@ -308,7 +308,7 @@ class IconWithText extends StatelessWidget {
 }
 
 class MiniIconWithText extends StatelessWidget {
-  const MiniIconWithText(this.icon, this.title, {Key key}) : super(key: key);
+  const MiniIconWithText(this.icon, this.title, {Key? key}) : super(key: key);
 
   final IconData icon;
   final String title;
@@ -337,7 +337,7 @@ class MiniIconWithText extends StatelessWidget {
 }
 
 class FatDivider extends StatelessWidget {
-  const FatDivider({Key key}) : super(key: key);
+  const FatDivider({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -349,7 +349,7 @@ class FatDivider extends StatelessWidget {
 }
 
 class UserHeader extends StatelessWidget {
-  const UserHeader(this.userName, {Key key}) : super(key: key);
+  const UserHeader(this.userName, {Key? key}) : super(key: key);
 
   final String userName;
 
@@ -370,7 +370,6 @@ class UserHeader extends StatelessWidget {
           ),
           Expanded(
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
                 RichText(text: TextSpan(
@@ -384,7 +383,7 @@ class UserHeader extends StatelessWidget {
                 Row(
                   children: <Widget>[
                     Text('Yesterday at 11:55 • ', style: Theme.of(context).textTheme.caption),
-                    Icon(Icons.people, size: 16.0, color: Theme.of(context).textTheme.caption.color),
+                    Icon(Icons.people, size: 16.0, color: Theme.of(context).textTheme.caption!.color),
                   ],
                 ),
               ],
@@ -398,7 +397,7 @@ class UserHeader extends StatelessWidget {
 }
 
 class ItemDescription extends StatelessWidget {
-  const ItemDescription({Key key}) : super(key: key);
+  const ItemDescription({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -410,7 +409,7 @@ class ItemDescription extends StatelessWidget {
 }
 
 class ItemImageBox extends StatelessWidget {
-  const ItemImageBox({Key key}) : super(key: key);
+  const ItemImageBox({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -491,7 +490,7 @@ class ItemImageBox extends StatelessWidget {
 }
 
 class ItemGalleryBox extends StatelessWidget {
-  const ItemGalleryBox(this.index, {Key key}) : super(key: key);
+  const ItemGalleryBox(this.index, {Key? key}) : super(key: key);
 
   final int index;
 
@@ -521,7 +520,7 @@ class ItemGalleryBox extends StatelessWidget {
                               child: Container(
                                 color: Theme.of(context).primaryColor,
                                 child: Center(
-                                  child: Text(tabName, style: Theme.of(context).textTheme.headline5.copyWith(color: Colors.white)),
+                                  child: Text(tabName, style: Theme.of(context).textTheme.headline5!.copyWith(color: Colors.white)),
                                 ),
                               ),
                             ),
@@ -560,7 +559,7 @@ class ItemGalleryBox extends StatelessWidget {
 }
 
 class BottomBar extends StatelessWidget {
-  const BottomBar({Key key}) : super(key: key);
+  const BottomBar({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -569,7 +568,6 @@ class BottomBar extends StatelessWidget {
         border: Border(
           top: BorderSide(
             color: Theme.of(context).dividerColor,
-            width: 1.0,
           ),
         ),
       ),
@@ -588,7 +586,7 @@ class BottomBar extends StatelessWidget {
 }
 
 class BottomBarButton extends StatelessWidget {
-  const BottomBarButton(this.icon, this.title, {Key key}) : super(key: key);
+  const BottomBarButton(this.icon, this.title, {Key? key}) : super(key: key);
 
   final IconData icon;
   final String title;
@@ -611,19 +609,19 @@ class BottomBarButton extends StatelessWidget {
 }
 
 class GalleryDrawer extends StatelessWidget {
-  const GalleryDrawer({ Key key }) : super(key: key);
+  const GalleryDrawer({ Key? key }) : super(key: key);
 
   void _changeTheme(BuildContext context, bool value) {
-    ComplexLayoutApp.of(context).lightTheme = value;
+    ComplexLayoutApp.of(context)?.lightTheme = value;
   }
 
   void _changeScrollMode(BuildContext context, ScrollMode mode) {
-    ComplexLayoutApp.of(context).scrollMode = mode;
+    ComplexLayoutApp.of(context)?.scrollMode = mode;
   }
 
   @override
   Widget build(BuildContext context) {
-    final ScrollMode currentMode = ComplexLayoutApp.of(context).scrollMode;
+    final ScrollMode currentMode = ComplexLayoutApp.of(context)!.scrollMode;
     return Drawer(
       // Note: for real apps, see the Gallery material Drawer demo. More
       // typically, a drawer would have a fixed header with a scrolling body
@@ -646,22 +644,22 @@ class GalleryDrawer extends StatelessWidget {
             leading: const Icon(Icons.brightness_5),
             title: const Text('Light'),
             onTap: () { _changeTheme(context, true); },
-            selected: ComplexLayoutApp.of(context).lightTheme,
+            selected: ComplexLayoutApp.of(context)!.lightTheme,
             trailing: Radio<bool>(
               value: true,
-              groupValue: ComplexLayoutApp.of(context).lightTheme,
-              onChanged: (bool value) { _changeTheme(context, value); },
+              groupValue: ComplexLayoutApp.of(context)!.lightTheme,
+              onChanged: (bool? value) { _changeTheme(context, value!); },
             ),
           ),
           ListTile(
             leading: const Icon(Icons.brightness_7),
             title: const Text('Dark'),
             onTap: () { _changeTheme(context, false); },
-            selected: !ComplexLayoutApp.of(context).lightTheme,
+            selected: !ComplexLayoutApp.of(context)!.lightTheme,
             trailing: Radio<bool>(
               value: false,
-              groupValue: ComplexLayoutApp.of(context).lightTheme,
-              onChanged: (bool value) { _changeTheme(context, value); },
+              groupValue: ComplexLayoutApp.of(context)!.lightTheme,
+              onChanged: (bool? value) { _changeTheme(context, value!); },
             ),
           ),
           const Divider(),
@@ -669,10 +667,10 @@ class GalleryDrawer extends StatelessWidget {
             leading: const Icon(Icons.hourglass_empty),
             title: const Text('Animate Slowly'),
             selected: timeDilation != 1.0,
-            onTap: () { ComplexLayoutApp.of(context).toggleAnimationSpeed(); },
+            onTap: () { ComplexLayoutApp.of(context)!.toggleAnimationSpeed(); },
             trailing: Checkbox(
               value: timeDilation != 1.0,
-              onChanged: (bool value) { ComplexLayoutApp.of(context).toggleAnimationSpeed(); },
+              onChanged: (bool? value) { ComplexLayoutApp.of(context)!.toggleAnimationSpeed(); },
             ),
           ),
         ],
@@ -682,7 +680,7 @@ class GalleryDrawer extends StatelessWidget {
 }
 
 class FancyDrawerHeader extends StatelessWidget {
-  const FancyDrawerHeader({Key key}) : super(key: key);
+  const FancyDrawerHeader({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

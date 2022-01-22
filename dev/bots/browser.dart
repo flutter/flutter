@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:io' as io;
 
 import 'package:flutter_devicelab/framework/browser.dart';
-import 'package:meta/meta.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:shelf_static/shelf_static.dart';
@@ -21,13 +20,13 @@ import 'package:shelf_static/shelf_static.dart';
 /// request to "/test-result" containing result data as plain text body of the
 /// request. This function has no opinion about what that string contains.
 Future<String> evalTestAppInChrome({
-  @required String appUrl,
-  @required String appDirectory,
+  required String appUrl,
+  required String appDirectory,
   int serverPort = 8080,
   int browserDebugPort = 8081,
 }) async {
-  io.HttpServer server;
-  Chrome chrome;
+  io.HttpServer? server;
+  Chrome? chrome;
   try {
     final Completer<String> resultCompleter = Completer<String>();
     server = await io.HttpServer.bind('localhost', serverPort);
@@ -63,13 +62,13 @@ class AppServer {
   AppServer._(this._server, this.chrome, this.onChromeError);
 
   static Future<AppServer> start({
-    @required String appUrl,
-    @required String appDirectory,
-    @required String cacheControl,
+    required String appUrl,
+    required String appDirectory,
+    required String cacheControl,
     int serverPort = 8080,
     int browserDebugPort = 8081,
     bool headless = true,
-    List<Handler> additionalRequestHandlers,
+    List<Handler>? additionalRequestHandlers,
   }) async {
     io.HttpServer server;
     Chrome chrome;
@@ -95,8 +94,6 @@ class AppServer {
       debugPort: browserDebugPort,
       url: appUrl,
       userDataDirectory: userDataDirectory.path,
-      windowHeight: 1024,
-      windowWidth: 1024,
     ), onError: chromeErrorCompleter.complete);
     return AppServer._(server, chrome, chromeErrorCompleter.future);
   }
@@ -106,7 +103,7 @@ class AppServer {
   final Chrome chrome;
 
   Future<void> stop() async {
-    chrome?.stop();
-    await _server?.close();
+    chrome.stop();
+    await _server.close();
   }
 }

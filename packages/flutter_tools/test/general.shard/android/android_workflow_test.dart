@@ -6,6 +6,7 @@
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
+import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -39,7 +40,7 @@ void main() {
   testWithoutContext('AndroidWorkflow handles a null AndroidSDK', () {
     final AndroidWorkflow androidWorkflow = AndroidWorkflow(
       featureFlags: TestFeatureFlags(),
-      androidSdk: null,
+      androidSdk: null, // ignore: avoid_redundant_argument_values
       operatingSystemUtils: FakeOperatingSystemUtils(),
     );
 
@@ -73,6 +74,55 @@ void main() {
     );
 
     expect(androidWorkflow.appliesToHostPlatform, false);
+    expect(androidWorkflow.canLaunchDevices, false);
+    expect(androidWorkflow.canListDevices, false);
+    expect(androidWorkflow.canListEmulators, false);
+  });
+
+  testWithoutContext('AndroidWorkflow is disabled if feature is disabled', () {
+    final FakeAndroidSdk androidSdk = FakeAndroidSdk();
+    androidSdk.adbPath = 'path/to/adb';
+    final AndroidWorkflow androidWorkflow = AndroidWorkflow(
+      featureFlags: TestFeatureFlags(isAndroidEnabled: false),
+      androidSdk: androidSdk,
+      operatingSystemUtils: FakeOperatingSystemUtils(),
+    );
+
+    expect(androidWorkflow.appliesToHostPlatform, false);
+    expect(androidWorkflow.canLaunchDevices, false);
+    expect(androidWorkflow.canListDevices, false);
+    expect(androidWorkflow.canListEmulators, false);
+  });
+
+  testWithoutContext('AndroidWorkflow cannot list emulators if emulatorPath is null', () {
+    final FakeAndroidSdk androidSdk = FakeAndroidSdk();
+    androidSdk.adbPath = 'path/to/adb';
+    final AndroidWorkflow androidWorkflow = AndroidWorkflow(
+      featureFlags: TestFeatureFlags(),
+      androidSdk: androidSdk,
+      operatingSystemUtils: FakeOperatingSystemUtils(),
+    );
+
+    expect(androidWorkflow.appliesToHostPlatform, true);
+    expect(androidWorkflow.canLaunchDevices, true);
+    expect(androidWorkflow.canListDevices, true);
+    expect(androidWorkflow.canListEmulators, false);
+  });
+
+  testWithoutContext('AndroidWorkflow can list emulators', () {
+    final FakeAndroidSdk androidSdk = FakeAndroidSdk();
+    androidSdk.adbPath = 'path/to/adb';
+    androidSdk.emulatorPath = 'path/to/emulator';
+    final AndroidWorkflow androidWorkflow = AndroidWorkflow(
+      featureFlags: TestFeatureFlags(),
+      androidSdk: androidSdk,
+      operatingSystemUtils: FakeOperatingSystemUtils(),
+    );
+
+    expect(androidWorkflow.appliesToHostPlatform, true);
+    expect(androidWorkflow.canLaunchDevices, true);
+    expect(androidWorkflow.canListDevices, true);
+    expect(androidWorkflow.canListEmulators, true);
   });
 
   testWithoutContext('licensesAccepted returns LicensesAccepted.unknown if cannot find sdkmanager', () async {
@@ -86,7 +136,7 @@ void main() {
       stdio: stdio,
       logger: BufferLogger.test(),
       userMessages: UserMessages(),
-      androidStudio: null,
+      androidStudio: FakeAndroidStudio(),
       operatingSystemUtils: FakeOperatingSystemUtils(),
     );
     final LicensesAccepted licenseStatus = await licenseValidator.licensesAccepted;
@@ -105,7 +155,7 @@ void main() {
       stdio: stdio,
       logger: BufferLogger.test(),
       userMessages: UserMessages(),
-      androidStudio: null,
+      androidStudio: FakeAndroidStudio(),
       operatingSystemUtils: FakeOperatingSystemUtils(),
     );
     final LicensesAccepted licenseStatus = await licenseValidator.licensesAccepted;
@@ -129,7 +179,7 @@ void main() {
       stdio: stdio,
       logger: BufferLogger.test(),
       userMessages: UserMessages(),
-      androidStudio: null,
+      androidStudio: FakeAndroidStudio(),
       operatingSystemUtils: FakeOperatingSystemUtils(),
     );
     final LicensesAccepted result = await licenseValidator.licensesAccepted;
@@ -158,7 +208,7 @@ All SDK package licenses accepted.
       stdio: stdio,
       logger: BufferLogger.test(),
       userMessages: UserMessages(),
-      androidStudio: null,
+      androidStudio: FakeAndroidStudio(),
       operatingSystemUtils: FakeOperatingSystemUtils(),
     );
     final LicensesAccepted result = await licenseValidator.licensesAccepted;
@@ -188,7 +238,7 @@ Review licenses that have not been accepted (y/N)?
       stdio: stdio,
       logger: BufferLogger.test(),
       userMessages: UserMessages(),
-      androidStudio: null,
+      androidStudio: FakeAndroidStudio(),
       operatingSystemUtils: FakeOperatingSystemUtils(),
     );
     final LicensesAccepted result = await licenseValidator.licensesAccepted;
@@ -218,7 +268,7 @@ Review licenses that have not been accepted (y/N)?
       stdio: stdio,
       logger: BufferLogger.test(),
       userMessages: UserMessages(),
-      androidStudio: null,
+      androidStudio: FakeAndroidStudio(),
       operatingSystemUtils: FakeOperatingSystemUtils(),
     );
     final LicensesAccepted result = await licenseValidator.licensesAccepted;
@@ -233,7 +283,7 @@ Review licenses that have not been accepted (y/N)?
       command: <String>[
         '/foo/bar/sdkmanager',
         '--licenses',
-      ], stdout: '',
+      ],
     ));
 
     final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator(
@@ -244,7 +294,7 @@ Review licenses that have not been accepted (y/N)?
       stdio: stdio,
       logger: BufferLogger.test(),
       userMessages: UserMessages(),
-      androidStudio: null,
+      androidStudio: FakeAndroidStudio(),
       operatingSystemUtils: FakeOperatingSystemUtils(),
     );
 
@@ -263,7 +313,7 @@ Review licenses that have not been accepted (y/N)?
       stdio: stdio,
       logger: BufferLogger.test(),
       userMessages: UserMessages(),
-      androidStudio: null,
+      androidStudio: FakeAndroidStudio(),
       operatingSystemUtils: FakeOperatingSystemUtils(),
     );
 
@@ -282,7 +332,7 @@ Review licenses that have not been accepted (y/N)?
       stdio: stdio,
       logger: BufferLogger.test(),
       userMessages: UserMessages(),
-      androidStudio: null,
+      androidStudio: FakeAndroidStudio(),
       operatingSystemUtils: FakeOperatingSystemUtils(),
     );
 
@@ -293,9 +343,10 @@ Review licenses that have not been accepted (y/N)?
     sdk
       ..licensesAvailable = true
       ..platformToolsAvailable = false
-      ..cmdlineToolsAvailable = true;
+      ..cmdlineToolsAvailable = true
+      ..directory = fileSystem.directory('/foo/bar');
     final ValidationResult validationResult = await AndroidValidator(
-      androidStudio: null,
+      androidStudio: FakeAndroidStudio(),
       androidSdk: sdk,
       fileSystem: fileSystem,
       logger: logger,
@@ -305,10 +356,14 @@ Review licenses that have not been accepted (y/N)?
     ).validate();
 
     expect(validationResult.type, ValidationType.partial);
-    expect(
-      validationResult.messages.map((ValidationMessage message) => message.message),
-      contains(contains(UserMessages().androidSdkLicenseOnly(kAndroidHome))),
-    );
+
+    final ValidationMessage sdkMessage = validationResult.messages.first;
+    expect(sdkMessage.type, ValidationMessageType.information);
+    expect(sdkMessage.message, 'Android SDK at /foo/bar');
+
+    final ValidationMessage licenseMessage = validationResult.messages.last;
+    expect(licenseMessage.type, ValidationMessageType.hint);
+    expect(licenseMessage.message, UserMessages().androidSdkLicenseOnly(kAndroidHome));
   });
 
   testWithoutContext('detects minimum required SDK and buildtools', () async {
@@ -332,14 +387,13 @@ Review licenses that have not been accepted (y/N)?
       ..latestVersion = sdkVersion;
 
     final String errorMessage = UserMessages().androidSdkBuildToolsOutdated(
-      sdk.sdkManagerPath,
       kAndroidSdkMinVersion,
       kAndroidSdkBuildToolsMinVersion.toString(),
       FakePlatform(),
     );
 
     final AndroidValidator androidValidator = AndroidValidator(
-      androidStudio: null,
+      androidStudio: null, // ignore: avoid_redundant_argument_values
       androidSdk: sdk,
       fileSystem: fileSystem,
       logger: logger,
@@ -383,10 +437,11 @@ Review licenses that have not been accepted (y/N)?
     sdk
       ..licensesAvailable = true
       ..platformToolsAvailable = true
-      ..cmdlineToolsAvailable = false;
+      ..cmdlineToolsAvailable = false
+      ..directory = fileSystem.directory('/foo/bar');
 
     final AndroidValidator androidValidator = AndroidValidator(
-      androidStudio: null,
+      androidStudio: null, // ignore: avoid_redundant_argument_values
       androidSdk: sdk,
       fileSystem: fileSystem,
       logger: logger,
@@ -399,10 +454,14 @@ Review licenses that have not been accepted (y/N)?
 
     final ValidationResult validationResult = await androidValidator.validate();
     expect(validationResult.type, ValidationType.missing);
-    expect(
-      validationResult.messages.last.message,
-      errorMessage,
-    );
+
+    final ValidationMessage sdkMessage = validationResult.messages.first;
+    expect(sdkMessage.type, ValidationMessageType.information);
+    expect(sdkMessage.message, 'Android SDK at /foo/bar');
+
+    final ValidationMessage cmdlineMessage = validationResult.messages.last;
+    expect(cmdlineMessage.type, ValidationMessageType.error);
+    expect(cmdlineMessage.message, errorMessage);
   });
 
   testWithoutContext('detects minimum required java version', () async {
@@ -431,7 +490,7 @@ Review licenses that have not been accepted (y/N)?
 
     final ValidationResult validationResult = await AndroidValidator(
       androidSdk: sdk,
-      androidStudio: null,
+      androidStudio: null, // ignore: avoid_redundant_argument_values
       fileSystem: fileSystem,
       logger: logger,
       platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me', 'JAVA_HOME': 'home/java'},
@@ -453,8 +512,8 @@ Review licenses that have not been accepted (y/N)?
 
   testWithoutContext('Mentions `flutter config --android-sdk if user has no AndroidSdk`', () async {
     final ValidationResult validationResult = await AndroidValidator(
-      androidSdk: null,
-      androidStudio: null,
+      androidSdk: null, // ignore: avoid_redundant_argument_values
+      androidStudio: null, // ignore: avoid_redundant_argument_values
       fileSystem: fileSystem,
       logger: logger,
       platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me', 'JAVA_HOME': 'home/java'},
@@ -497,6 +556,9 @@ class FakeAndroidSdk extends Fake implements AndroidSdk {
   AndroidSdkVersion latestVersion;
 
   @override
+  String emulatorPath;
+
+  @override
   List<String> validateSdkWellFormed() => <String>[];
 
   @override
@@ -529,4 +591,9 @@ class CustomFakeOperatingSystemUtils extends Fake implements OperatingSystemUtil
 
   @override
   HostPlatform get hostPlatform => _hostPlatform;
+}
+
+class FakeAndroidStudio extends Fake implements AndroidStudio {
+  @override
+  String get javaPath => 'java';
 }

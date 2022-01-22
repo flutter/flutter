@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
+
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -9,7 +13,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets("BackdropFilter's cull rect does not shrink", (WidgetTester tester) async {
-    tester.binding.addTime(const Duration(seconds: 15));
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -47,7 +50,6 @@ void main() {
   });
 
   testWidgets('BackdropFilter blendMode on saveLayer', (WidgetTester tester) async {
-    tester.binding.addTime(const Duration(seconds: 15));
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(

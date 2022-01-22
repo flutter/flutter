@@ -4,6 +4,12 @@
 
 // @dart = 2.8
 
+// TODO(gspencergoog): Remove this tag once this test's state leaks/test
+// dependencies have been fixed.
+// https://github.com/flutter/flutter/issues/85160
+// Fails with "flutter test --test-randomize-ordering-seed=20210722"
+@Tags(<String>['no-shuffle'])
+
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -14,7 +20,7 @@ import 'package:flutter_tools/src/bundle_builder.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_bundle.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:meta/meta.dart';
 import 'package:test/fake.dart';
@@ -83,8 +89,7 @@ void main() {
     globals.fs.file('lib/main.dart').createSync(recursive: true);
     globals.fs.file('pubspec.yaml').createSync(recursive: true);
     globals.fs.file('.packages').createSync(recursive: true);
-    final CommandRunner<void> runner = createTestCommandRunner(BuildBundleCommand()
-        ..bundleBuilder = FakeBundleBuilder());
+    final CommandRunner<void> runner = createTestCommandRunner(BuildBundleCommand(bundleBuilder: FakeBundleBuilder()));
 
     expect(() => runner.run(<String>[
       'bundle',
@@ -94,15 +99,14 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
-    FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: false),
+    FeatureFlags: () => TestFeatureFlags(),
   });
 
   testUsingContext('bundle fails to build for Linux if feature is disabled', () async {
     globals.fs.file('lib/main.dart').createSync(recursive: true);
     globals.fs.file('pubspec.yaml').createSync();
     globals.fs.file('.packages').createSync();
-    final CommandRunner<void> runner = createTestCommandRunner(BuildBundleCommand()
-        ..bundleBuilder = FakeBundleBuilder());
+    final CommandRunner<void> runner = createTestCommandRunner(BuildBundleCommand(bundleBuilder: FakeBundleBuilder()));
 
     expect(() => runner.run(<String>[
       'bundle',
@@ -112,15 +116,14 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
-    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: false),
+    FeatureFlags: () => TestFeatureFlags(),
   });
 
   testUsingContext('bundle fails to build for macOS if feature is disabled', () async {
     globals.fs.file('lib/main.dart').createSync(recursive: true);
     globals.fs.file('pubspec.yaml').createSync();
     globals.fs.file('.packages').createSync();
-    final CommandRunner<void> runner = createTestCommandRunner(BuildBundleCommand()
-        ..bundleBuilder = FakeBundleBuilder());
+    final CommandRunner<void> runner = createTestCommandRunner(BuildBundleCommand(bundleBuilder: FakeBundleBuilder()));
 
     expect(() => runner.run(<String>[
       'bundle',
@@ -130,15 +133,14 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
-    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: false),
+    FeatureFlags: () => TestFeatureFlags(),
   });
 
   testUsingContext('bundle --tree-shake-icons fails', () async {
     globals.fs.file('lib/main.dart').createSync(recursive: true);
     globals.fs.file('pubspec.yaml').createSync();
     globals.fs.file('.packages').createSync();
-    final CommandRunner<void> runner = createTestCommandRunner(BuildBundleCommand()
-      ..bundleBuilder = FakeBundleBuilder());
+    final CommandRunner<void> runner = createTestCommandRunner(BuildBundleCommand(bundleBuilder: FakeBundleBuilder()));
 
     expect(() => runner.run(<String>[
       'bundle',
@@ -155,8 +157,7 @@ void main() {
     globals.fs.file('lib/main.dart').createSync(recursive: true);
     globals.fs.file('pubspec.yaml').createSync();
     globals.fs.file('.packages').createSync();
-    final CommandRunner<void> runner = createTestCommandRunner(BuildBundleCommand()
-        ..bundleBuilder = FakeBundleBuilder());
+    final CommandRunner<void> runner = createTestCommandRunner(BuildBundleCommand(bundleBuilder: FakeBundleBuilder()));
 
     await runner.run(<String>[
       'bundle',
@@ -173,8 +174,7 @@ void main() {
     globals.fs.file('lib/main.dart').createSync(recursive: true);
     globals.fs.file('pubspec.yaml').createSync();
     globals.fs.file('.packages').createSync();
-    final CommandRunner<void> runner = createTestCommandRunner(BuildBundleCommand()
-        ..bundleBuilder = FakeBundleBuilder());
+    final CommandRunner<void> runner = createTestCommandRunner(BuildBundleCommand(bundleBuilder: FakeBundleBuilder()));
 
     await runner.run(<String>[
       'bundle',
@@ -191,8 +191,7 @@ void main() {
     globals.fs.file('lib/main.dart').createSync(recursive: true);
     globals.fs.file('pubspec.yaml').createSync();
     globals.fs.file('.packages').createSync();
-    final CommandRunner<void> runner = createTestCommandRunner(BuildBundleCommand()
-        ..bundleBuilder = FakeBundleBuilder());
+    final CommandRunner<void> runner = createTestCommandRunner(BuildBundleCommand(bundleBuilder: FakeBundleBuilder()));
 
     await runner.run(<String>[
       'bundle',

@@ -127,8 +127,9 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          ButtonBar(
-            mainAxisSize: MainAxisSize.min,
+          const SizedBox(height: 2),
+          OverflowBar(
+            spacing: 8,
             children: <Widget>[
               ElevatedButton(
                 style: style,
@@ -143,8 +144,9 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
               ),
             ],
           ),
-          ButtonBar(
-            mainAxisSize: MainAxisSize.min,
+          const SizedBox(height: 16),
+          OverflowBar(
+            spacing: 8,
             children: <Widget>[
               ElevatedButton.icon(
                 style: style,
@@ -174,8 +176,9 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          ButtonBar(
-            mainAxisSize: MainAxisSize.min,
+          const SizedBox(height: 2),
+          OverflowBar(
+            spacing: 8,
             children: <Widget>[
               TextButton(
                 style: style,
@@ -190,8 +193,8 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
               ),
             ],
           ),
-          ButtonBar(
-            mainAxisSize: MainAxisSize.min,
+          OverflowBar(
+            spacing: 8,
             children: <Widget>[
               TextButton.icon(
                 style: style,
@@ -221,8 +224,9 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          ButtonBar(
-            mainAxisSize: MainAxisSize.min,
+          const SizedBox(height: 2),
+          OverflowBar(
+            spacing: 8,
             children: <Widget>[
               OutlinedButton(
                 style: style,
@@ -238,8 +242,9 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
               ),
             ],
           ),
-          ButtonBar(
-            mainAxisSize: MainAxisSize.min,
+          const SizedBox(height: 16),
+          OverflowBar(
+            spacing: 8,
             children: <Widget>[
               OutlinedButton.icon(
                 style: style,
@@ -270,7 +275,6 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
     return Padding(
       padding: const EdgeInsets.all(24.0),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
           ListTile(
             title: const Text('Simple dropdown:'),

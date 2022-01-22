@@ -247,7 +247,7 @@ class FlutterManifest {
         DeferredComponent(
           name: component['name'] as String,
           libraries: component['libraries'] == null ?
-              <String>[] : component['libraries'].cast<String>() as List<String>,
+              <String>[] : (component['libraries'] as List<dynamic>).cast<String>(),
           assets: assetsUri,
         )
       );
@@ -339,11 +339,11 @@ class FlutterManifest {
       final YamlList? fontFiles = fontFamily['fonts'] as YamlList?;
       final String? familyName = fontFamily['family'] as String?;
       if (familyName == null) {
-        _logger.printError('Warning: Missing family name for font.', emphasis: true);
+        _logger.printWarning('Warning: Missing family name for font.', emphasis: true);
         continue;
       }
       if (fontFiles == null) {
-        _logger.printError('Warning: No fonts specified for font $familyName', emphasis: true);
+        _logger.printWarning('Warning: No fonts specified for font $familyName', emphasis: true);
         continue;
       }
 
@@ -351,7 +351,7 @@ class FlutterManifest {
       for (final Map<Object?, Object?> fontFile in fontFiles.cast<Map<Object?, Object?>>()) {
         final String? asset = fontFile['asset'] as String?;
         if (asset == null) {
-          _logger.printError('Warning: Missing asset in fonts for $familyName', emphasis: true);
+          _logger.printWarning('Warning: Missing asset in fonts for $familyName', emphasis: true);
           continue;
         }
 
@@ -571,6 +571,7 @@ void _validateFlutter(YamlMap? yaml, List<String> errors) {
 void _validateListType<T>(YamlList yamlList, List<String> errors, String context, String typeAlias) {
   for (int i = 0; i < yamlList.length; i++) {
     if (yamlList[i] is! T) {
+      // ignore: avoid_dynamic_calls
       errors.add('Expected $context to be a list of $typeAlias, but element $i was a ${yamlList[i].runtimeType}');
     }
   }
@@ -584,6 +585,7 @@ void _validateDeferredComponents(MapEntry<Object?, Object?> kvp, List<String> er
     for (int i = 0; i < yamlList.length; i++) {
       final Object? valueMap = yamlList[i];
       if (valueMap is! YamlMap) {
+        // ignore: avoid_dynamic_calls
         errors.add('Expected the $i element in "${kvp.key}" to be a map, but got ${yamlList[i]} (${yamlList[i].runtimeType}).');
         continue;
       }

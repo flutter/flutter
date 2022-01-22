@@ -13,7 +13,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/config.dart';
-import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:test/fake.dart';
@@ -52,13 +52,14 @@ void main() {
 
       expect(testLogger.statusText, isNotEmpty);
       final dynamic jsonObject = json.decode(testLogger.statusText);
-      expect(jsonObject, isMap);
+      expect(jsonObject, const TypeMatcher<Map<String, dynamic>>());
+      if (jsonObject is Map<String, dynamic>) {
+        expect(jsonObject.containsKey('android-studio-dir'), true);
+        expect(jsonObject['android-studio-dir'], isNotNull);
 
-      expect(jsonObject.containsKey('android-studio-dir'), true);
-      expect(jsonObject['android-studio-dir'], isNotNull);
-
-      expect(jsonObject.containsKey('android-sdk'), true);
-      expect(jsonObject['android-sdk'], isNotNull);
+        expect(jsonObject.containsKey('android-sdk'), true);
+        expect(jsonObject['android-sdk'], isNotNull);
+      }
       verifyNoAnalytics();
     }, overrides: <Type, Generator>{
       AndroidStudio: () => fakeAndroidStudio,

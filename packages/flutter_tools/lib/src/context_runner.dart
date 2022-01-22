@@ -172,6 +172,11 @@ Future<T> runInContext<T>(
         logger: globals.logger,
         platform: globals.platform,
       ),
+      CustomDevicesConfig: () => CustomDevicesConfig(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        platform: globals.platform
+      ),
       CrashReporter: () => CrashReporter(
         fileSystem: globals.fs,
         logger: globals.logger,
@@ -191,7 +196,6 @@ Future<T> runInContext<T>(
         artifacts: globals.artifacts,
         flutterVersion: globals.flutterVersion,
         androidWorkflow: androidWorkflow,
-        config: globals.config,
         fuchsiaWorkflow: fuchsiaWorkflow,
         xcDevice: globals.xcdevice,
         userMessages: globals.userMessages,
@@ -200,13 +204,10 @@ Future<T> runInContext<T>(
           platform: globals.platform,
           featureFlags: featureFlags,
         ),
+        fuchsiaSdk: globals.fuchsiaSdk,
         operatingSystemUtils: globals.os,
         terminal: globals.terminal,
-        customDevicesConfig: CustomDevicesConfig(
-          fileSystem: globals.fs,
-          logger: globals.logger,
-          platform: globals.platform
-        ),
+        customDevicesConfig: globals.customDevicesConfig,
         uwptool: UwpTool(
           artifacts: globals.artifacts,
           logger: globals.logger,
@@ -215,10 +216,8 @@ Future<T> runInContext<T>(
       ),
       DevtoolsLauncher: () => DevtoolsServerLauncher(
         processManager: globals.processManager,
-        pubExecutable: globals.artifacts.getHostArtifact(HostArtifact.pubExecutable).path,
+        dartExecutable: globals.artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
         logger: globals.logger,
-        platform: globals.platform,
-        persistentToolState: globals.persistentToolState,
       ),
       Doctor: () => Doctor(logger: globals.logger),
       DoctorValidatorsProvider: () => DoctorValidatorsProvider.defaultInstance,
@@ -234,7 +233,7 @@ Future<T> runInContext<T>(
         config: globals.config,
         platform: globals.platform,
       ),
-      FlutterVersion: () => FlutterVersion(clock: const SystemClock()),
+      FlutterVersion: () => FlutterVersion(),
       FuchsiaArtifacts: () => FuchsiaArtifacts.find(),
       FuchsiaDeviceTools: () => FuchsiaDeviceTools(),
       FuchsiaSdk: () => FuchsiaSdk(),

@@ -12,7 +12,7 @@ environment:
   # dependency on precisely how Cirrus is detected by our tools.
   BOT: "true"
 
-gcp_credentials: ENCRYPTED[1917385f09764ac58515f6fee14ed58688afc808849b244969d41d0b082061eecd0a4c8ba801f00833877a12b51f8bb5]
+gcp_credentials: ENCRYPTED[!cc769765170bebc37e0556e2da5915ca64ee37f4ec8c966ec147e2f59578b476c99e457eafce4e2f8b1a4e305f7096b8!]
 
 # LINUX SHARDS
 task:
@@ -115,10 +115,10 @@ task:
         MEMORY: 10G
         SHOULD_UPDATE_PACKAGES: "FALSE"
       script:
-        - (cd packages/flutter_tools; pub get)
-        - (cd packages/flutter_tools/test/data/asset_test/main; pub get)
-        - (cd packages/flutter_tools/test/data/asset_test/font; pub get)
-        - (cd dev/bots; pub get)
+        - (cd packages/flutter_tools; dart __deprecated_pub get)
+        - (cd packages/flutter_tools/test/data/asset_test/main; dart __deprecated_pub get)
+        - (cd packages/flutter_tools/test/data/asset_test/font; dart __deprecated_pub get)
+        - (cd dev/bots; dart __deprecated_pub get)
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: tool_tests-commands-linux
@@ -131,27 +131,31 @@ task:
         MEMORY: 10G
         SHOULD_UPDATE_PACKAGES: "FALSE"
       script:
-        - (cd packages/flutter_tools; pub get)
-        - (cd dev/bots; pub get)
+        - (cd packages/flutter_tools; dart __deprecated_pub get)
+        - (cd dev/bots; dart __deprecated_pub get)
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: docs-linux # linux-only
       environment:
         CPU: 4
-        MEMORY: 8G
+        MEMORY: 12G
       only_if: "$CIRRUS_PR != ''"
       script:
         - ./dev/bots/docs.sh
 
     - name: customer_testing-linux
       only_if: "$CIRRUS_PR != ''"
-      # environment:
+      environment:
         # Empirically, this shard runs fine at 1 CPU and 4G RAM as of October 2019. We will probably
         # want to grow this container when we invite people to add their tests in large numbers.
+        SHOULD_UPDATE_PACKAGES: "FALSE"
       script:
-        - rm -rf bin/cache/pkg/tests
-        - git clone https://github.com/flutter/tests.git bin/cache/pkg/tests
-        - dart --enable-asserts dev/customer_testing/run_tests.dart --skip-on-fetch-failure --skip-template bin/cache/pkg/tests/registry/*.test
+        # Cirrus doesn't give us the master branch, so we have to fetch it for ourselves,
+        # otherwise we won't be able to figure out how old or new our current branch is.
+        - git config user.email "cirrus-bot@invalid"
+        - git fetch origin master:master
+        # The actual logic is in a shell script so that it can be shared between CIs.
+        - (cd dev/customer_testing/; ./ci.sh)
 
     - name: web_smoke_test
       only_if: "changesInclude('.cirrus.yml', 'examples/hello_world/**' ,'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'packages/flutter_web_plugins/**', 'bin/**') && $CIRRUS_PR != ''"
@@ -164,7 +168,7 @@ task:
         - flutter config --enable-web
         - git clone https://github.com/flutter/web_installers.git
         - cd web_installers/packages/web_drivers/
-        - pub get
+        - dart __deprecated_pub get
         - dart lib/web_driver_installer.dart chromedriver --install-only
         - chromedriver/chromedriver --port=4444 &
         - sleep 1

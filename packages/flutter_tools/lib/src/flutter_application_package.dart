@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import 'android/android_sdk.dart';
@@ -16,7 +13,7 @@ import 'base/process.dart';
 import 'base/user_messages.dart';
 import 'build_info.dart';
 import 'fuchsia/application_package.dart';
-import 'globals_null_migrated.dart' as globals;
+import 'globals.dart' as globals;
 import 'ios/application_package.dart';
 import 'linux/application_package.dart';
 import 'macos/application_package.dart';
@@ -28,11 +25,11 @@ import 'windows/application_package.dart';
 /// A package factory that supports all Flutter target platforms.
 class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
   FlutterApplicationPackageFactory({
-    @required AndroidSdk androidSdk,
-    @required ProcessManager processManager,
-    @required Logger logger,
-    @required UserMessages userMessages,
-    @required FileSystem fileSystem,
+    required AndroidSdk androidSdk,
+    required ProcessManager processManager,
+    required Logger logger,
+    required UserMessages userMessages,
+    required FileSystem fileSystem,
   }) : _androidSdk = androidSdk,
        _processManager = processManager,
        _logger = logger,
@@ -49,10 +46,10 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
   final FileSystem _fileSystem;
 
   @override
-  Future<ApplicationPackage> getPackageForPlatform(
+  Future<ApplicationPackage?> getPackageForPlatform(
     TargetPlatform platform, {
-    BuildInfo buildInfo,
-    File applicationBinary,
+    BuildInfo? buildInfo,
+    File? applicationBinary,
   }) async {
     switch (platform) {
       case TargetPlatform.android:
@@ -111,7 +108,5 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
       case TargetPlatform.windows_uwp_x64:
         return BuildableUwpApp(project: FlutterProject.current().windowsUwp);
     }
-    assert(platform != null);
-    return null;
   }
 }

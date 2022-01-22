@@ -7,9 +7,6 @@ import 'dart:convert' show json;
 import 'dart:html' as html;
 import 'dart:math' as math;
 
-import 'package:macrobenchmarks/src/web/bench_text_layout.dart';
-import 'package:macrobenchmarks/src/web/bench_text_out_of_picture_bounds.dart';
-
 import 'src/web/bench_build_image.dart';
 import 'src/web/bench_build_material_checkbox.dart';
 import 'src/web/bench_card_infinite_scroll.dart';
@@ -18,6 +15,7 @@ import 'src/web/bench_clipped_out_pictures.dart';
 import 'src/web/bench_default_target_platform.dart';
 import 'src/web/bench_draw_rect.dart';
 import 'src/web/bench_dynamic_clip_on_static_picture.dart';
+import 'src/web/bench_image_decoding.dart';
 import 'src/web/bench_mouse_region_grid_hover.dart';
 import 'src/web/bench_mouse_region_grid_scroll.dart';
 import 'src/web/bench_mouse_region_mixed_grid_hover.dart';
@@ -25,13 +23,14 @@ import 'src/web/bench_pageview_scroll_linethrough.dart';
 import 'src/web/bench_paths.dart';
 import 'src/web/bench_picture_recording.dart';
 import 'src/web/bench_simple_lazy_text_scroll.dart';
+import 'src/web/bench_text_layout.dart';
 import 'src/web/bench_text_out_of_picture_bounds.dart';
 import 'src/web/bench_wrapbox_scroll.dart';
 import 'src/web/recorder.dart';
 
 typedef RecorderFactory = Recorder Function();
 
-const bool isCanvasKit = bool.fromEnvironment('FLUTTER_WEB_USE_SKIA', defaultValue: false);
+const bool isCanvasKit = bool.fromEnvironment('FLUTTER_WEB_USE_SKIA');
 
 /// List of all benchmarks that run in the devicelab.
 ///
@@ -64,15 +63,17 @@ final Map<String, RecorderFactory> benchmarks = <String, RecorderFactory>{
     BenchTextLayout.canvasKitBenchmarkName: () => BenchTextLayout.canvasKit(),
     BenchBuildColorsGrid.canvasKitBenchmarkName: () => BenchBuildColorsGrid.canvasKit(),
     BenchTextCachedLayout.canvasKitBenchmarkName: () => BenchTextCachedLayout.canvasKit(),
+
+    // The HTML renderer does not decode frame-by-frame. It just drops an <img>
+    // element and lets it animate automatically with no feedback to the
+    // framework. So this benchmark only makes sense in CanvasKit.
+    BenchImageDecoding.benchmarkName: () => BenchImageDecoding(),
   },
 
   // HTML-only benchmarks
   if (!isCanvasKit) ...<String, RecorderFactory>{
-    BenchTextLayout.domBenchmarkName: () => BenchTextLayout.dom(),
     BenchTextLayout.canvasBenchmarkName: () => BenchTextLayout.canvas(),
-    BenchTextCachedLayout.domBenchmarkName: () => BenchTextCachedLayout.dom(),
     BenchTextCachedLayout.canvasBenchmarkName: () => BenchTextCachedLayout.canvas(),
-    BenchBuildColorsGrid.domBenchmarkName: () => BenchBuildColorsGrid.dom(),
     BenchBuildColorsGrid.canvasBenchmarkName: () => BenchBuildColorsGrid.canvas(),
   },
 };
@@ -93,7 +94,7 @@ Future<void> main() async {
 }
 
 Future<void> _runBenchmark(String benchmarkName) async {
-  final RecorderFactory recorderFactory = benchmarks[benchmarkName];
+  final RecorderFactory? recorderFactory = benchmarks[benchmarkName];
 
   if (recorderFactory == null) {
     _fallbackToManual('Benchmark $benchmarkName not found.');
@@ -145,7 +146,7 @@ Future<void> _runBenchmark(String benchmarkName) async {
 }
 
 void _fallbackToManual(String error) {
-  html.document.body.appendHtml('''
+  html.document.body!.appendHtml('''
     <div id="manual-panel">
       <h3>$error</h3>
 
@@ -163,9 +164,9 @@ void _fallbackToManual(String error) {
   ''', validator: html.NodeValidatorBuilder()..allowHtml5()..allowInlineStyles());
 
   for (final String benchmarkName in benchmarks.keys) {
-    final html.Element button = html.document.querySelector('#$benchmarkName');
+    final html.Element button = html.document.querySelector('#$benchmarkName')!;
     button.addEventListener('click', (_) {
-      final html.Element manualPanel = html.document.querySelector('#manual-panel');
+      final html.Element? manualPanel = html.document.querySelector('#manual-panel');
       manualPanel?.remove();
       _runBenchmark(benchmarkName);
     });
@@ -174,14 +175,14 @@ void _fallbackToManual(String error) {
 
 /// Visualizes results on the Web page for manual inspection.
 void _printResultsToScreen(Profile profile) {
-  html.document.body.remove();
+  html.document.body!.remove();
   html.document.body = html.BodyElement();
-  html.document.body.appendHtml('<h2>${profile.name}</h2>');
+  html.document.body!.appendHtml('<h2>${profile.name}</h2>');
 
   profile.scoreData.forEach((String scoreKey, Timeseries timeseries) {
-    html.document.body.appendHtml('<h2>$scoreKey</h2>');
-    html.document.body.appendHtml('<pre>${timeseries.computeStats()}</pre>');
-    html.document.body.append(TimeseriesVisualization(timeseries).render());
+    html.document.body!.appendHtml('<h2>$scoreKey</h2>');
+    html.document.body!.appendHtml('<pre>${timeseries.computeStats()}</pre>');
+    html.document.body!.append(TimeseriesVisualization(timeseries).render());
   });
 }
 
@@ -190,7 +191,7 @@ class TimeseriesVisualization {
   TimeseriesVisualization(this._timeseries) {
     _stats = _timeseries.computeStats();
     _canvas = html.CanvasElement();
-    _screenWidth = html.window.screen.width;
+    _screenWidth = html.window.screen!.width!;
     _canvas.width = _screenWidth;
     _canvas.height = (_kCanvasHeight * html.window.devicePixelRatio).round();
     _canvas.style
@@ -211,13 +212,13 @@ class TimeseriesVisualization {
   static const double _kCanvasHeight = 200;
 
   final Timeseries _timeseries;
-  TimeseriesStats _stats;
-  html.CanvasElement _canvas;
-  html.CanvasRenderingContext2D _ctx;
-  int _screenWidth;
+  late TimeseriesStats _stats;
+  late html.CanvasElement _canvas;
+  late html.CanvasRenderingContext2D _ctx;
+  late int _screenWidth;
 
   // Used to normalize benchmark values to chart height.
-  double _maxValueChartRange;
+  late double _maxValueChartRange;
 
   /// Converts a sample value to vertical canvas coordinates.
   ///
@@ -300,7 +301,7 @@ class LocalBenchmarkServerClient {
   /// This happens when you run benchmarks using plain `flutter run` rather than
   /// devicelab test harness. The test harness spins up a special server that
   /// provides API for automatically picking the next benchmark to run.
-  bool isInManualMode;
+  bool isInManualMode = false;
 
   /// Asks the local server for the name of the next benchmark to run.
   ///
@@ -323,7 +324,7 @@ class LocalBenchmarkServerClient {
     }
 
     isInManualMode = false;
-    return request.responseText;
+    return request.responseText!;
   }
 
   void _checkNotManualMode() {
@@ -405,11 +406,11 @@ class LocalBenchmarkServerClient {
   /// crash on 404, which we use to detect `flutter run`.
   Future<html.HttpRequest> _requestXhr(
     String url, {
-    String method,
-    bool withCredentials,
-    String responseType,
-    String mimeType,
-    Map<String, String> requestHeaders,
+    String? method,
+    bool? withCredentials,
+    String? responseType,
+    String? mimeType,
+    Map<String, String>? requestHeaders,
     dynamic sendData,
   }) {
     final Completer<html.HttpRequest> completer = Completer<html.HttpRequest>();

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:convert';
 import 'dart:io';
 
@@ -60,7 +58,7 @@ Future<double> findCostsForFile(File file) async {
       total += deprecationCost;
     if (line.contains(legacyDeprecationPattern))
       total += legacyDeprecationCost;
-    if (isTest && line.contains('skip:'))
+    if (isTest && line.contains('skip:') && !line.contains('[intended]'))
       total += skipCost;
     if (isDart && isOptingOutOfNullSafety(line))
       total += fileNullSafetyMigrationCost;
@@ -71,23 +69,23 @@ Future<double> findCostsForFile(File file) async {
 }
 
 bool isOptingOutOfNullSafety(String line) {
-  final RegExpMatch match = dartVersionPattern.firstMatch(line);
+  final RegExpMatch? match = dartVersionPattern.firstMatch(line);
   if (match == null) {
     return false;
   }
   assert(match.groupCount == 2);
-  return Version(int.parse(match.group(1)), int.parse(match.group(2)), 0) < firstNullSafeDartVersion;
+  return Version(int.parse(match.group(1)!), int.parse(match.group(2)!), 0) < firstNullSafeDartVersion;
 }
 
 bool packageIsNullSafe(File file) {
   assert(path.basename(file.path) == 'pubspec.yaml');
   final Pubspec pubspec = Pubspec.parse(file.readAsStringSync());
-  final VersionConstraint constraint = pubspec.environment == null ? null : pubspec.environment['sdk'];
+  final VersionConstraint? constraint = pubspec.environment == null ? null : pubspec.environment!['sdk'];
   final bool hasConstraint = constraint != null && !constraint.isAny && !constraint.isEmpty;
   return hasConstraint &&
       constraint is VersionRange &&
       constraint.min != null &&
-      Version(constraint.min.major, constraint.min.minor, 0) >= firstNullSafeDartVersion;
+      Version(constraint.min!.major, constraint.min!.minor, 0) >= firstNullSafeDartVersion;
 }
 
 Future<int> findGlobalsForFile(File file) async {

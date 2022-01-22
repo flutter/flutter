@@ -20,5 +20,5 @@ Future<void> main() async {
     await summary.writeTimelineToFile(fileName, pretty: true);
 
     await driver.close();
-  });
+  }, timeout: Timeout.none);
 }

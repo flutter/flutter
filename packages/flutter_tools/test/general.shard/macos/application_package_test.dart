@@ -12,8 +12,10 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/utils.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/macos/application_package.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
@@ -98,7 +100,7 @@ group('PrebuiltMacOSApp', () {
       final PrebuiltMacOSApp macosApp = MacOSApp.fromPrebuiltApp(fileSystem.file('bundle.app')) as PrebuiltMacOSApp;
 
       expect(logger.errorText, isEmpty);
-      expect(macosApp.bundleDir.path, 'bundle.app');
+      expect(macosApp.uncompressedBundle.path, 'bundle.app');
       expect(macosApp.id, 'fooBundleId');
       expect(macosApp.bundleName, 'bundle.app');
     }, overrides: overrides);
@@ -150,9 +152,17 @@ group('PrebuiltMacOSApp', () {
       final PrebuiltMacOSApp macosApp = MacOSApp.fromPrebuiltApp(fileSystem.file('app.zip')) as PrebuiltMacOSApp;
 
       expect(logger.errorText, isEmpty);
-      expect(macosApp.bundleDir.path, endsWith('bundle.app'));
+      expect(macosApp.uncompressedBundle.path, endsWith('bundle.app'));
       expect(macosApp.id, 'fooBundleId');
       expect(macosApp.bundleName, endsWith('bundle.app'));
+    }, overrides: overrides);
+
+    testUsingContext('Success with project', () {
+      final MacOSApp macosApp = MacOSApp.fromMacOSProject(FlutterProject.fromDirectory(globals.fs.currentDirectory).macos);
+
+      expect(logger.errorText, isEmpty);
+      expect(macosApp.id, 'com.example.placeholder');
+      expect(macosApp.name, 'macOS');
     }, overrides: overrides);
   });
 }

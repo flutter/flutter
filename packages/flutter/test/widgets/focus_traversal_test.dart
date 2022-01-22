@@ -1372,7 +1372,6 @@ void main() {
             child: FocusScope(
               debugLabel: 'Scope',
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -1678,7 +1677,7 @@ void main() {
       expect(Focus.of(lowerLeftKey.currentContext!).hasPrimaryFocus, isTrue);
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
       expect(Focus.of(upperLeftKey.currentContext!).hasPrimaryFocus, isTrue);
-    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/35347
+    }, skip: isBrowser, variant: KeySimulatorTransitModeVariant.all()); // https://github.com/flutter/flutter/issues/35347
 
     testWidgets('Focus traversal inside a vertical scrollable scrolls to stay visible.', (WidgetTester tester) async {
       final List<int> items = List<int>.generate(11, (int index) => index).toList();
@@ -1693,7 +1692,6 @@ void main() {
               Focus(focusNode: topNode, child: Container(height: 100)),
               Expanded(
                 child: ListView(
-                  scrollDirection: Axis.vertical,
                   controller: controller,
                   children: items.map<Widget>((int item) {
                     return Focus(
@@ -1776,7 +1774,7 @@ void main() {
       await tester.pump();
       expect(topNode.hasPrimaryFocus, isTrue);
       expect(controller.offset, equals(0.0));
-    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/35347
+    }, skip: isBrowser, variant: KeySimulatorTransitModeVariant.all()); // https://github.com/flutter/flutter/issues/35347
 
     testWidgets('Focus traversal inside a horizontal scrollable scrolls to stay visible.', (WidgetTester tester) async {
       final List<int> items = List<int>.generate(11, (int index) => index).toList();
@@ -1874,7 +1872,7 @@ void main() {
       await tester.pump();
       expect(leftNode.hasPrimaryFocus, isTrue);
       expect(controller.offset, equals(0.0));
-    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/35347
+    }, skip: isBrowser, variant: KeySimulatorTransitModeVariant.all()); // https://github.com/flutter/flutter/issues/35347
 
     testWidgets('Arrow focus traversal actions can be re-enabled for text fields.', (WidgetTester tester) async {
       final GlobalKey upperLeftKey = GlobalKey(debugLabel: 'upperLeftKey');
@@ -1997,10 +1995,10 @@ void main() {
       expect(focusNodeUpperLeft.hasPrimaryFocus, isTrue);
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
       expect(focusNodeUpperLeft.hasPrimaryFocus, isTrue);
-    });
+    }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgets('Focus traversal does not break when no focusable is available on a MaterialApp', (WidgetTester tester) async {
-      final List<RawKeyEvent> events = <RawKeyEvent>[];
+      final List<Object> events = <Object>[];
 
       await tester.pumpWidget(MaterialApp(home: Container()));
 
@@ -2013,6 +2011,14 @@ void main() {
       await tester.idle();
 
       expect(events.length, 2);
+    }, variant: KeySimulatorTransitModeVariant.all());
+
+    testWidgets('Focus traversal does not throw when no focusable is available in a group', (WidgetTester tester) async {
+      await tester.pumpWidget(const MaterialApp(home: Scaffold(body: ListTile(title: Text('title')))));
+      final FocusNode? initialFocus = primaryFocus;
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pump();
+      expect(primaryFocus, equals(initialFocus));
     });
 
     testWidgets('Focus traversal does not break when no focusable is available on a WidgetsApp', (WidgetTester tester) async {
@@ -2039,7 +2045,7 @@ void main() {
       await tester.idle();
 
       expect(events.length, 2);
-    });
+    }, variant: KeySimulatorTransitModeVariant.all());
   });
   group(FocusTraversalGroup, () {
     testWidgets("Focus traversal group doesn't introduce a Semantics node", (WidgetTester tester) async {
@@ -2048,6 +2054,7 @@ void main() {
       final TestSemantics expectedSemantics = TestSemantics.root();
       expect(semantics, hasSemantics(expectedSemantics));
     });
+
     testWidgets("Descendants of FocusTraversalGroup aren't focusable if descendantsAreFocusable is false.", (WidgetTester tester) async {
       final GlobalKey key1 = GlobalKey(debugLabel: '1');
       final GlobalKey key2 = GlobalKey(debugLabel: '2');
@@ -2086,6 +2093,78 @@ void main() {
       expect(containerNode.hasFocus, isFalse);
       expect(unfocusableNode.hasFocus, isFalse);
     });
+
+    testWidgets("Descendants of FocusTraversalGroup aren't traversable if descendantsAreTraversable is false.", (WidgetTester tester) async {
+      final FocusNode node1 = FocusNode();
+      final FocusNode node2 = FocusNode();
+
+      await tester.pumpWidget(
+        FocusTraversalGroup(
+          descendantsAreTraversable: false,
+          child: Column(
+            children: <Widget>[
+              Focus(
+                focusNode: node1,
+                child: Container(),
+              ),
+              Focus(
+                focusNode: node2,
+                child: Container(),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      node1.requestFocus();
+      await tester.pump();
+
+      expect(node1.hasPrimaryFocus, isTrue);
+      expect(node2.hasPrimaryFocus, isFalse);
+
+      expect(primaryFocus!.nextFocus(), isFalse);
+      await tester.pump();
+
+      expect(node1.hasPrimaryFocus, isTrue);
+      expect(node2.hasPrimaryFocus, isFalse);
+    });
+
+    testWidgets("FocusTraversalGroup with skipTraversal for all descendents set to true doesn't cause an exception.", (WidgetTester tester) async {
+      final FocusNode node1 = FocusNode();
+      final FocusNode node2 = FocusNode();
+
+      await tester.pumpWidget(
+        FocusTraversalGroup(
+          child: Column(
+            children: <Widget>[
+              Focus(
+                skipTraversal: true,
+                focusNode: node1,
+                child: Container(),
+              ),
+              Focus(
+                skipTraversal: true,
+                focusNode: node2,
+                child: Container(),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      node1.requestFocus();
+      await tester.pump();
+
+      expect(node1.hasPrimaryFocus, isTrue);
+      expect(node2.hasPrimaryFocus, isFalse);
+
+      expect(primaryFocus!.nextFocus(), isFalse);
+      await tester.pump();
+
+      expect(node1.hasPrimaryFocus, isTrue);
+      expect(node2.hasPrimaryFocus, isFalse);
+    });
+
     testWidgets("Nested FocusTraversalGroup with unfocusable children doesn't assert.", (WidgetTester tester) async {
       final GlobalKey key1 = GlobalKey(debugLabel: '1');
       final GlobalKey key2 = GlobalKey(debugLabel: '2');
@@ -2134,6 +2213,7 @@ void main() {
       expect(containerNode.hasFocus, isFalse);
       expect(unfocusableNode.hasFocus, isFalse);
     });
+
     testWidgets("Empty FocusTraversalGroup doesn't cause an exception.", (WidgetTester tester) async {
       final GlobalKey key = GlobalKey(debugLabel: 'Test Key');
       final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
@@ -2163,6 +2243,7 @@ void main() {
       expect(primaryFocus, equals(focusNode));
     });
   });
+
   group(RawKeyboardListener, () {
     testWidgets('Raw keyboard listener introduces a Semantics node by default', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
@@ -2189,6 +2270,7 @@ void main() {
         ignoreTransform: true,
       ));
     });
+
     testWidgets("Raw keyboard listener doesn't introduce a Semantics node when specified", (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       final FocusNode focusNode = FocusNode();
@@ -2199,6 +2281,63 @@ void main() {
               child: Container(),
           ),
       );
+      final TestSemantics expectedSemantics = TestSemantics.root();
+      expect(semantics, hasSemantics(expectedSemantics));
+    });
+  });
+
+  group(ExcludeFocusTraversal, () {
+    testWidgets("Descendants aren't traversable", (WidgetTester tester) async {
+      final FocusNode node1 = FocusNode(debugLabel: 'node 1');
+      final FocusNode node2 = FocusNode(debugLabel: 'node 2');
+      final FocusNode node3 = FocusNode(debugLabel: 'node 3');
+      final FocusNode node4 = FocusNode(debugLabel: 'node 4');
+
+      await tester.pumpWidget(
+        FocusTraversalGroup(
+          child: Column(
+            children: <Widget>[
+              Focus(
+                autofocus: true,
+                focusNode: node1,
+                child: Container(),
+              ),
+              ExcludeFocusTraversal(
+                child: Focus(
+                  focusNode: node2,
+                  child: Focus(
+                    focusNode: node3,
+                    child: Container(),
+                  ),
+                ),
+              ),
+              Focus(
+                focusNode: node4,
+                child: Container(),
+              ),
+            ],
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(node1.hasPrimaryFocus, isTrue);
+      expect(node2.hasPrimaryFocus, isFalse);
+      expect(node3.hasPrimaryFocus, isFalse);
+      expect(node4.hasPrimaryFocus, isFalse);
+
+      node1.nextFocus();
+      await tester.pump();
+
+      expect(node1.hasPrimaryFocus, isFalse);
+      expect(node2.hasPrimaryFocus, isFalse);
+      expect(node3.hasPrimaryFocus, isFalse);
+      expect(node4.hasPrimaryFocus, isTrue);
+    });
+
+    testWidgets("Doesn't introduce a Semantics node", (WidgetTester tester) async {
+      final SemanticsTester semantics = SemanticsTester(tester);
+      await tester.pumpWidget(ExcludeFocusTraversal(child: Container()));
       final TestSemantics expectedSemantics = TestSemantics.root();
       expect(semantics, hasSemantics(expectedSemantics));
     });

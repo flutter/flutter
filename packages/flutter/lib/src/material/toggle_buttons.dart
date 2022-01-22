@@ -9,8 +9,10 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button.dart';
+import 'color_scheme.dart';
 import 'constants.dart';
 import 'debug.dart';
+import 'material_state.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 import 'toggle_buttons_theme.dart';
@@ -170,6 +172,7 @@ class ToggleButtons extends StatelessWidget {
     required this.isSelected,
     this.onPressed,
     this.mouseCursor,
+    this.tapTargetSize,
     this.textStyle,
     this.constraints,
     this.color,
@@ -229,6 +232,15 @@ class ToggleButtons extends StatelessWidget {
   /// {@macro flutter.material.RawMaterialButton.mouseCursor}
   final MouseCursor? mouseCursor;
 
+  /// Configures the minimum size of the area within which the buttons may
+  /// be pressed.
+  ///
+  /// If the [tapTargetSize] is larger than [constraints], the buttons will
+  /// include a transparent margin that responds to taps.
+  ///
+  /// Defaults to [ThemeData.materialTapTargetSize].
+  final MaterialTapTargetSize? tapTargetSize;
+
   /// The [TextStyle] to apply to any text in these toggle buttons.
   ///
   /// [TextStyle.color] will be ignored and substituted by [color],
@@ -284,6 +296,13 @@ class ToggleButtons extends StatelessWidget {
   /// ToggleButtonTheme.of(context).fillColor is used. If
   /// [ToggleButtonsThemeData.fillColor] is also null, then
   /// the fill color is null.
+  ///
+  /// If fillColor is a [MaterialStateProperty<Color>], then [MaterialStateProperty.resolve]
+  /// is used for the following [MaterialState]s:
+  ///
+  ///  * [MaterialState.disabled]
+  ///  * [MaterialState.selected]
+  ///
   final Color? fillColor;
 
   /// The color to use for filling the button when the button has input focus.
@@ -654,7 +673,7 @@ class ToggleButtons extends StatelessWidget {
         color: color,
         selectedColor: selectedColor,
         disabledColor: disabledColor,
-        fillColor: fillColor ?? toggleButtonsTheme.fillColor,
+        fillColor: fillColor,
         focusColor: focusColor ?? toggleButtonsTheme.focusColor,
         highlightColor: highlightColor ?? toggleButtonsTheme.highlightColor,
         hoverColor: hoverColor ?? toggleButtonsTheme.hoverColor,
@@ -677,7 +696,7 @@ class ToggleButtons extends StatelessWidget {
       );
     });
 
-    return direction == Axis.horizontal
+    final Widget result = direction == Axis.horizontal
       ? IntrinsicHeight(
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -693,6 +712,18 @@ class ToggleButtons extends StatelessWidget {
           children: buttons,
         ),
       );
+
+    final MaterialTapTargetSize resolvedTapTargetSize = tapTargetSize ?? theme.materialTapTargetSize;
+    switch (resolvedTapTargetSize) {
+      case MaterialTapTargetSize.padded:
+        return _InputPadding(
+          minSize: const Size(kMinInteractiveDimension, kMinInteractiveDimension),
+          direction: direction,
+          child: result,
+        );
+      case MaterialTapTargetSize.shrinkWrap:
+        return result;
+    }
   }
 
   @override
@@ -852,23 +883,39 @@ class _ToggleButton extends StatelessWidget {
   /// The button's label, which is usually an [Icon] or a [Text] widget.
   final Widget child;
 
+  Color _resolveColor(Set<MaterialState> states, MaterialStateProperty<Color?> widgetColor,
+  MaterialStateProperty<Color?> themeColor, MaterialStateProperty<Color> defaultColor) {
+    return widgetColor.resolve(states)
+      ?? themeColor.resolve(states)
+      ?? defaultColor.resolve(states);
+  }
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     final Color currentColor;
-    final Color currentFillColor;
     Color? currentFocusColor;
     Color? currentHoverColor;
     Color? currentSplashColor;
     final ThemeData theme = Theme.of(context);
     final ToggleButtonsThemeData toggleButtonsTheme = ToggleButtonsTheme.of(context);
 
+    final Set<MaterialState> states = <MaterialState>{
+        if (selected && onPressed != null) MaterialState.selected,
+        if (onPressed == null) MaterialState.disabled,
+    };
+
+    final Color currentFillColor = _resolveColor(
+      states,
+      _ResolveFillColor(fillColor),
+      _ResolveFillColor(toggleButtonsTheme.fillColor),
+      _DefaultFillColor(theme.colorScheme),
+    );
+
     if (onPressed != null && selected) {
       currentColor = selectedColor
         ?? toggleButtonsTheme.selectedColor
         ?? theme.colorScheme.primary;
-      currentFillColor = fillColor
-        ?? theme.colorScheme.primary.withOpacity(0.12);
       currentFocusColor = focusColor
         ?? toggleButtonsTheme.focusColor
         ?? theme.colorScheme.primary.withOpacity(0.12);
@@ -882,7 +929,6 @@ class _ToggleButton extends StatelessWidget {
       currentColor = color
         ?? toggleButtonsTheme.color
         ?? theme.colorScheme.onSurface.withOpacity(0.87);
-      currentFillColor = theme.colorScheme.surface.withOpacity(0.0);
       currentFocusColor = focusColor
         ?? toggleButtonsTheme.focusColor
         ?? theme.colorScheme.onSurface.withOpacity(0.12);
@@ -896,7 +942,6 @@ class _ToggleButton extends StatelessWidget {
       currentColor = disabledColor
         ?? toggleButtonsTheme.disabledColor
         ?? theme.colorScheme.onSurface.withOpacity(0.38);
-      currentFillColor = theme.colorScheme.surface.withOpacity(0.0);
     }
 
     final TextStyle currentTextStyle = textStyle ?? toggleButtonsTheme.textStyle ?? theme.textTheme.bodyText2!;
@@ -948,6 +993,36 @@ class _ToggleButton extends StatelessWidget {
       ifTrue: 'Button is selected',
       ifFalse: 'Button is unselected',
     ));
+  }
+}
+
+@immutable
+class _ResolveFillColor extends MaterialStateProperty<Color?> with Diagnosticable {
+  _ResolveFillColor(this.primary);
+
+  final Color? primary;
+
+  @override
+  Color? resolve(Set<MaterialState> states) {
+    if (primary is MaterialStateProperty<Color>) {
+      return MaterialStateProperty.resolveAs<Color?>(primary, states);
+    }
+    return states.contains(MaterialState.selected) ? primary : null;
+  }
+}
+
+@immutable
+class _DefaultFillColor extends MaterialStateProperty<Color> with Diagnosticable {
+  _DefaultFillColor(this.colorScheme);
+
+  final ColorScheme colorScheme;
+
+  @override
+  Color resolve(Set<MaterialState> states) {
+    if (states.contains(MaterialState.selected)) {
+      return colorScheme.primary.withOpacity(0.12);
+    }
+    return colorScheme.surface.withOpacity(0.0);
   }
 }
 
@@ -1495,5 +1570,143 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
           break;
       }
     }
+  }
+}
+
+/// A widget to pad the area around a [ToggleButtons]'s children.
+///
+/// This widget is based on a similar one used in [ButtonStyleButton] but it
+/// only redirects taps along one axis to ensure the correct button is tapped
+/// within the [ToggleButtons].
+///
+/// This ensures that a widget takes up at least as much space as the minSize
+/// parameter to ensure adequate tap target size, while keeping the widget
+/// visually smaller to the user.
+class _InputPadding extends SingleChildRenderObjectWidget {
+  const _InputPadding({
+    Key? key,
+    Widget? child,
+    required this.minSize,
+    required this.direction,
+  }) : super(key: key, child: child);
+
+  final Size minSize;
+  final Axis direction;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return _RenderInputPadding(minSize, direction);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, covariant _RenderInputPadding renderObject) {
+    renderObject.minSize = minSize;
+    renderObject.direction = direction;
+  }
+}
+
+class _RenderInputPadding extends RenderShiftedBox {
+  _RenderInputPadding(this._minSize, this._direction, [RenderBox? child]) : super(child);
+
+  Size get minSize => _minSize;
+  Size _minSize;
+  set minSize(Size value) {
+    if (_minSize == value)
+      return;
+    _minSize = value;
+    markNeedsLayout();
+  }
+
+  Axis get direction => _direction;
+  Axis _direction;
+  set direction(Axis value) {
+    if (_direction == value)
+      return;
+    _direction = value;
+    markNeedsLayout();
+  }
+
+  @override
+  double computeMinIntrinsicWidth(double height) {
+    if (child != null)
+      return math.max(child!.getMinIntrinsicWidth(height), minSize.width);
+    return 0.0;
+  }
+
+  @override
+  double computeMinIntrinsicHeight(double width) {
+    if (child != null)
+      return math.max(child!.getMinIntrinsicHeight(width), minSize.height);
+    return 0.0;
+  }
+
+  @override
+  double computeMaxIntrinsicWidth(double height) {
+    if (child != null)
+      return math.max(child!.getMaxIntrinsicWidth(height), minSize.width);
+    return 0.0;
+  }
+
+  @override
+  double computeMaxIntrinsicHeight(double width) {
+    if (child != null)
+      return math.max(child!.getMaxIntrinsicHeight(width), minSize.height);
+    return 0.0;
+  }
+
+  Size _computeSize({required BoxConstraints constraints, required ChildLayouter layoutChild}) {
+    if (child != null) {
+      final Size childSize = layoutChild(child!, constraints);
+      final double height = math.max(childSize.width, minSize.width);
+      final double width = math.max(childSize.height, minSize.height);
+      return constraints.constrain(Size(height, width));
+    }
+    return Size.zero;
+  }
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    return _computeSize(
+      constraints: constraints,
+      layoutChild: ChildLayoutHelper.dryLayoutChild,
+    );
+  }
+
+  @override
+  void performLayout() {
+    size = _computeSize(
+      constraints: constraints,
+      layoutChild: ChildLayoutHelper.layoutChild,
+    );
+    if (child != null) {
+      final BoxParentData childParentData = child!.parentData! as BoxParentData;
+      childParentData.offset = Alignment.center.alongOffset(size - child!.size as Offset);
+    }
+  }
+
+  @override
+  bool hitTest(BoxHitTestResult result, { required Offset position }) {
+    // The super.hitTest() method also checks hitTestChildren(). We don't
+    // want that in this case because we've padded around the children per
+    // tapTargetSize.
+    if (!size.contains(position)) {
+      return false;
+    }
+
+    // Only adjust one axis to ensure the correct button is tapped.
+    Offset center;
+    if (direction == Axis.horizontal) {
+      center = Offset(position.dx, child!.size.height / 2);
+    } else {
+      center = Offset(child!.size.width / 2, position.dy);
+    }
+    return result.addWithRawTransform(
+      transform: MatrixUtils.forceToPoint(center),
+      position: center,
+      hitTest: (BoxHitTestResult result, Offset position) {
+        assert(position == center);
+        return child!.hitTest(result, position: center);
+      },
+    );
   }
 }

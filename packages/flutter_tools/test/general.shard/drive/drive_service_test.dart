@@ -69,6 +69,7 @@ final vm_service.Isolate fakePausedIsolate = vm_service.Isolate(
         tokenPos: 0,
         script: vm_service.ScriptRef(id: 'test-script', uri: 'foo.dart'),
       ),
+      enabled: true,
       resolved: true,
     ),
   ],
@@ -337,9 +338,7 @@ void main() {
       'data': <String, Object>{'A': 'B'}
     });
   }, overrides: <Type, Generator>{
-    FlutterVersion: () => FakeFlutterVersion(
-      engineRevision: 'abcdefghijklmnopqrstuvwxyz',
-    )
+    FlutterVersion: () => FakeFlutterVersion()
   });
 
   testWithoutContext('Can connect to existing application and stop it during cleanup', () async {
@@ -507,8 +506,11 @@ class FakeApplicationPackageFactory extends Fake implements ApplicationPackageFa
   }) async => applicationPackage;
 }
 
-class FakeApplicationPackage extends Fake implements ApplicationPackage {}
+class FakeApplicationPackage extends Fake implements ApplicationPackage { }
 
+// Unfortunately Device, despite not being immutable, has an `operator ==`.
+// Until we fix that, we have to also ignore related lints here.
+// ignore: avoid_implementing_value_types
 class FakeDevice extends Fake implements Device {
   FakeDevice(this.result, {this.supportsFlutterExit = true});
 
@@ -517,6 +519,8 @@ class FakeDevice extends Fake implements Device {
   bool didUninstallApp = false;
   bool didDispose = false;
   bool failOnce = false;
+  @override
+  final PlatformType platformType = PlatformType.web;
 
   @override
   String get name => 'test';
@@ -581,11 +585,11 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
 
   @override
   Future<void> startDartDevelopmentService(
-    Uri observatoryUri,
+    Uri observatoryUri, {
+    @required Logger logger,
     int hostPort,
     bool ipv6,
-    bool disableServiceAuthCodes, {
-    @required Logger logger,
+    bool disableServiceAuthCodes,
   }) async {
     started = true;
   }

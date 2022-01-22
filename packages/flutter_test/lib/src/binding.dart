@@ -13,9 +13,9 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_test/flutter_test.dart' show TestWindow;
 import 'package:stack_trace/stack_trace.dart' as stack_trace;
-import 'package:test_api/test_api.dart' as test_package; // ignore: deprecated_member_use
+import 'package:test_api/expect.dart' show fail;
+import 'package:test_api/test_api.dart' as test_package show Timeout; // ignore: deprecated_member_use
 import 'package:vector_math/vector_math_64.dart';
 
 import '_binding_io.dart' if (dart.library.html) '_binding_web.dart' as binding;
@@ -27,6 +27,7 @@ import 'test_async_utils.dart';
 import 'test_default_binary_messenger.dart';
 import 'test_exception_reporter.dart';
 import 'test_text_input.dart';
+import 'window.dart';
 
 /// Phases that can be reached by [WidgetTester.pumpWidget] and
 /// [TestWidgetsFlutterBinding.pump].
@@ -119,6 +120,20 @@ mixin TestDefaultBinaryMessengerBinding on BindingBase, ServicesBinding {
 /// that actually needs to make a network call should provide its own
 /// `HttpClient` to the code making the call, so that it can appropriately mock
 /// or fake responses.
+///
+/// ### Coordinate spaces
+///
+/// [TestWidgetsFlutterBinding] might be run on devices of different screen
+/// sizes, while the testing widget is still told the same size to ensure
+/// consistent results. Consequently, code that deals with positions (such as
+/// pointer events or painting) must distinguish between two coordinate spaces:
+///
+///  * The _local coordinate space_ is the one used by the testing widget
+///    (typically an 800 by 600 window, but can be altered by [setSurfaceSize]).
+///  * The _global coordinate space_ is the one used by the device.
+///
+/// Positions can be transformed between coordinate spaces with [localToGlobal]
+/// and [globalToLocal].
 abstract class TestWidgetsFlutterBinding extends BindingBase
   with SchedulerBinding,
        ServicesBinding,
@@ -224,45 +239,28 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   @protected
   bool get registerTestTextInput => true;
 
-  /// Increase the timeout for the current test by the given duration.
+  /// This method has no effect.
   ///
-  /// This only matters if the test has an `initialTimeout` set on
-  /// [testWidgets], and the test is running via `flutter test`. By default,
-  /// tests do not have such a timeout. Tests run using `flutter run` never time
-  /// out even if one is specified.
+  /// This method was previously used to change the timeout of the test. However,
+  /// in practice having short timeouts was found to be nothing but trouble,
+  /// primarily being a cause flakes rather than helping debug tests.
   ///
-  /// This method has no effect on the timeout specified via `timeout` on
-  /// [testWidgets]. That timeout is implemented by the `test` package.
-  ///
-  /// By default, each [pump] and [WidgetTester.pumpWidget] call increases the
-  /// timeout by a hundred milliseconds, and each [matchesGoldenFile]
-  /// expectation increases it by a minute. If there is no timeout in the first
-  /// place, this has no effect.
-  ///
-  /// The granularity of timeouts is coarse: the time is checked once per
-  /// second, and only when the test is not executing. It is therefore possible
-  /// for a timeout to be exceeded by hundreds of milliseconds and for the test
-  /// to still succeed. If precise timing is required, it should be implemented
-  /// as a part of the test rather than relying on this mechanism.
-  ///
-  /// See also:
-  ///
-  ///  * [testWidgets], on which a timeout can be set using the `timeout`
-  ///    argument.
-  ///  * [defaultTestTimeout], the maximum that the timeout can reach.
-  ///    (That timeout is implemented by the `test` package.)
-  // See AutomatedTestWidgetsFlutterBinding.addTime for an actual implementation.
-  void addTime(Duration duration);
+  /// For this reason, this method has been deprecated.
+  @Deprecated(
+    'This method has no effect. '
+    'This feature was deprecated after v2.6.0-1.0.pre.'
+  )
+  void addTime(Duration duration) { }
 
   /// Delay for `duration` of time.
   ///
   /// In the automated test environment ([AutomatedTestWidgetsFlutterBinding],
   /// typically used in `flutter test`), this advances the fake [clock] for the
-  /// period and also increases timeout (see [addTime]).
+  /// period.
   ///
   /// In the live test environment ([LiveTestWidgetsFlutterBinding], typically
   /// used for `flutter run` and for [e2e](https://pub.dev/packages/e2e)), it is
-  /// equivalent as [Future.delayed].
+  /// equivalent to [Future.delayed].
   Future<void> delayed(Duration duration);
 
   /// Creates and initializes the binding. This function is
@@ -310,15 +308,12 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// The number of outstanding microtasks in the queue.
   int get microtaskCount;
 
-  /// The default maximum test timeout for tests when using this binding.
+  /// The default test timeout for tests when using this binding.
   ///
-  /// This controls the default for the `timeout` argument on `testWidgets`. It
+  /// This controls the default for the `timeout` argument on [testWidgets]. It
   /// is 10 minutes for [AutomatedTestWidgetsFlutterBinding] (tests running
   /// using `flutter test`), and unlimited for tests using
   /// [LiveTestWidgetsFlutterBinding] (tests running using `flutter run`).
-  ///
-  /// This is the maximum that the timeout controlled by `initialTimeout` on
-  /// [testWidgets] can reach when augmented using [addTime].
   test_package.Timeout get defaultTestTimeout;
 
   /// The current time.
@@ -365,12 +360,14 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// this method again. Attempts to do otherwise will result in a
   /// [TestFailure] error being thrown.
   ///
-  /// The `additionalTime` argument is used by the
-  /// [AutomatedTestWidgetsFlutterBinding] implementation to increase the
-  /// current timeout, if any. See [AutomatedTestWidgetsFlutterBinding.addTime]
-  /// for details.
+  /// The `additionalTime` argument was previously used with
+  /// [AutomatedTestWidgetsFlutterBinding.addTime] but now has no effect.
   Future<T?> runAsync<T>(
     Future<T> Function() callback, {
+    @Deprecated(
+      'This parameter has no effect. '
+      'This feature was deprecated after v2.6.0-1.0.pre.'
+    )
     Duration additionalTime = const Duration(milliseconds: 1000),
   });
 
@@ -447,14 +444,16 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     });
   }
 
-  /// Convert the given point from the global coordinate system (as used by
-  /// pointer events from the device) to the coordinate system used by the
-  /// tests (an 800 by 600 window).
+  /// Convert the given point from the global coordinate space to the local
+  /// one.
+  ///
+  /// For definitions for coordinate spaces, see [TestWidgetsFlutterBinding].
   Offset globalToLocal(Offset point) => point;
 
-  /// Convert the given point from the coordinate system used by the tests (an
-  /// 800 by 600 window) to the global coordinate system (as used by pointer
-  /// events from the device).
+  /// Convert the given point from the local coordinate space to the global
+  /// one.
+  ///
+  /// For definitions for coordinate spaces, see [TestWidgetsFlutterBinding].
   Offset localToGlobal(Offset point) => point;
 
   /// The source of the current pointer event.
@@ -462,15 +461,34 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// The [pointerEventSource] is set as the `source` parameter of
   /// [handlePointerEventForSource] and can be used in the immediate enclosing
   /// [dispatchEvent].
+  ///
+  /// When [handlePointerEvent] is called directly, [pointerEventSource]
+  /// is [TestBindingEventSource.device].
   TestBindingEventSource get pointerEventSource => _pointerEventSource;
   TestBindingEventSource _pointerEventSource = TestBindingEventSource.device;
 
   /// Dispatch an event to the targets found by a hit test on its position,
   /// and remember its source as [pointerEventSource].
   ///
-  /// This method sets [pointerEventSource] to `source`, runs
+  /// This method sets [pointerEventSource] to `source`, forwards the call to
   /// [handlePointerEvent], then resets [pointerEventSource] to the previous
   /// value.
+  ///
+  /// If `source` is [TestBindingEventSource.device], then the `event` is based
+  /// in the global coordinate space (for definitions for coordinate spaces,
+  /// see [TestWidgetsFlutterBinding]) and the event is likely triggered by the
+  /// user physically interacting with the screen during a live test on a real
+  /// device (see [LiveTestWidgetsFlutterBinding]).
+  ///
+  /// If `source` is [TestBindingEventSource.test], then the `event` is based
+  /// in the local coordinate space and the event is likely triggered by
+  /// programmatically simulated pointer events, such as:
+  ///
+  ///  * [WidgetController.tap] and alike methods, as well as directly using
+  ///    [TestGesture]. They are usually used in
+  ///    [AutomatedTestWidgetsFlutterBinding] but sometimes in live tests too.
+  ///  * [WidgetController.timedDrag] and alike methods. They are usually used
+  ///    in macrobenchmarks.
   void handlePointerEventForSource(
     PointerEvent event, {
     TestBindingEventSource source = TestBindingEventSource.device,
@@ -482,7 +500,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// to the previous value.
   @protected
   void withPointerEventSource(TestBindingEventSource source, VoidCallback task) {
-    final TestBindingEventSource previousSource = source;
+    final TestBindingEventSource previousSource = _pointerEventSource;
     _pointerEventSource = source;
     try {
       task();
@@ -586,10 +604,16 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// The `description` is used by the [LiveTestWidgetsFlutterBinding] to
   /// show a label on the screen during the test. The description comes from
   /// the value passed to [testWidgets]. It must not be null.
-  ///
-  /// The `timeout` argument sets the initial timeout, if any. It can
-  /// be increased with [addTime]. By default there is no timeout.
-  Future<void> runTest(Future<void> Function() testBody, VoidCallback invariantTester, { String description = '', Duration? timeout });
+  Future<void> runTest(
+    Future<void> Function() testBody,
+    VoidCallback invariantTester, {
+    String description = '',
+    @Deprecated(
+      'This parameter has no effect. Use the `timeout` parameter on `testWidgets` instead. '
+      'This feature was deprecated after v2.6.0-1.0.pre.'
+    )
+    Duration? timeout,
+  });
 
   /// This is called during test execution before and after the body has been
   /// executed.
@@ -632,26 +656,25 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   Future<void> _runTest(
     Future<void> Function() testBody,
     VoidCallback invariantTester,
-    String description, {
-    Future<void>? timeout,
-  }) {
+    String description,
+  ) {
     assert(description != null);
     assert(inTest);
     _oldExceptionHandler = FlutterError.onError;
     _oldStackTraceDemangler = FlutterError.demangleStackTrace;
-    int _exceptionCount = 0; // number of un-taken exceptions
+    int exceptionCount = 0; // number of un-taken exceptions
     FlutterError.onError = (FlutterErrorDetails details) {
       if (_pendingExceptionDetails != null) {
         debugPrint = debugPrintOverride; // just in case the test overrides it -- otherwise we won't see the errors!
-        if (_exceptionCount == 0) {
-          _exceptionCount = 2;
+        if (exceptionCount == 0) {
+          exceptionCount = 2;
           FlutterError.dumpErrorToConsole(_pendingExceptionDetails!, forceReport: true);
         } else {
-          _exceptionCount += 1;
+          exceptionCount += 1;
         }
         FlutterError.dumpErrorToConsole(details, forceReport: true);
         _pendingExceptionDetails = FlutterErrorDetails(
-          exception: 'Multiple exceptions ($_exceptionCount) were detected during the running of the current test, and at least one was unexpected.',
+          exception: 'Multiple exceptions ($exceptionCount) were detected during the running of the current test, and at least one was unexpected.',
           library: 'Flutter test framework',
         );
       } else {
@@ -720,8 +743,10 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       DiagnosticsNode treeDump;
       try {
         treeDump = renderViewElement?.toDiagnosticsNode() ?? DiagnosticsNode.message('<no tree>');
-        // TODO(jacobr): this is a hack to make sure the tree can safely be fully dumped.
-        // Potentially everything is good enough without this case.
+        // We try to stringify the tree dump here (though we immediately discard the result) because
+        // we want to make sure that if it can't be serialised, we replace it with a message that
+        // says the tree could not be serialised. Otherwise, the real exception might get obscured
+        // by side-effects of the underlying issues causing the tree dumping code to flail.
         treeDump.toStringDeep();
       } catch (exception) {
         treeDump = DiagnosticsNode.message('<additional error caught while dumping tree: $exception>', level: DiagnosticLevel.error);
@@ -759,7 +784,6 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     final Zone testZone = _parentZone!.fork(specification: errorHandlingZoneSpecification);
     testZone.runBinary<Future<void>, Future<void> Function(), VoidCallback>(_runTestBody, testBody, invariantTester)
       .whenComplete(testCompletionHandler);
-    timeout?.catchError(handleUncaughtError);
     return testCompleter.future;
   }
 
@@ -828,6 +852,9 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     assert(debugAssertAllSchedulerVarsUnset(
       'The value of a scheduler debug variable was changed by the test.',
     ));
+    assert(debugAssertAllServicesVarsUnset(
+      'The value of a services debug variable was changed by the test.',
+    ));
   }
 
   void _verifyAutoUpdateGoldensUnset(bool valueBeforeTest) {
@@ -894,6 +921,10 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     // tests.
     // ignore: invalid_use_of_visible_for_testing_member
     RawKeyboard.instance.clearKeysPressed();
+    // ignore: invalid_use_of_visible_for_testing_member
+    HardwareKeyboard.instance.clearState();
+    // ignore: invalid_use_of_visible_for_testing_member
+    keyEventManager.clearState();
     assert(!RendererBinding.instance!.mouseTracker.mouseIsConnected,
         'The MouseTracker thinks that there is still a mouse connected, which indicates that a '
         'test has not removed the mouse pointer which it added. Call removePointer on the '
@@ -909,8 +940,8 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
 /// This binding controls time, allowing tests to verify long
 /// animation sequences without having to execute them in real time.
 ///
-/// This class assumes it is always run in checked mode (since tests are always
-/// run in checked mode).
+/// This class assumes it is always run in debug mode (since tests are always
+/// run in debug mode).
 class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   @override
   void initInstances() {
@@ -934,9 +965,9 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   @override
   bool get disableShadows => true;
 
-  /// The value of [defaultTestTimeout] can be set to `None` to enable debugging flutter tests where
-  /// we would not want to timeout the test. This is expected to be used by test tooling which
-  /// can detect debug mode.
+  /// The value of [defaultTestTimeout] can be set to `None` to enable debugging
+  /// flutter tests where we would not want to timeout the test. This is
+  /// expected to be used by test tooling which can detect debug mode.
   @override
   test_package.Timeout defaultTestTimeout = const test_package.Timeout(Duration(minutes: 10));
 
@@ -977,11 +1008,11 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     assert(() {
       if (_pendingAsyncTasks == null)
         return true;
-      throw test_package.TestFailure(
-          'Reentrant call to runAsync() denied.\n'
-          'runAsync() was called, then before its future completed, it '
-          'was called again. You must wait for the first returned future '
-          'to complete before calling runAsync() again.'
+      fail(
+        'Reentrant call to runAsync() denied.\n'
+        'runAsync() was called, then before its future completed, it '
+        'was called again. You must wait for the first returned future '
+        'to complete before calling runAsync() again.'
       );
     }());
 
@@ -1120,37 +1151,9 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     }
   }
 
-  Duration? _timeout;
-  Stopwatch? _timeoutStopwatch;
-  Timer? _timeoutTimer;
-  Completer<void>? _timeoutCompleter;
-
-  void _checkTimeout(Timer timer) {
-    assert(_timeoutTimer == timer);
-    assert(_timeout != null);
-    assert(_timeoutCompleter != null);
-    assert(_timeoutStopwatch != null);
-    if (_timeoutStopwatch!.elapsed > _timeout!) {
-      _timeoutCompleter!.completeError(
-        TimeoutException(
-          'The test exceeded the timeout. It may have hung.\n'
-          'Consider using "tester.binding.addTime" to increase the timeout before expensive operations.',
-          _timeout,
-        ),
-      );
-    }
-  }
-
-  @override
-  void addTime(Duration duration) {
-    if (_timeout != null)
-      _timeout = _timeout! + duration;
-  }
-
   @override
   Future<void> delayed(Duration duration) {
     assert(_currentFakeAsync != null);
-    addTime(duration);
     _currentFakeAsync!.elapse(duration);
     return Future<void>.value();
   }
@@ -1160,6 +1163,10 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     Future<void> Function() testBody,
     VoidCallback invariantTester, {
     String description = '',
+    @Deprecated(
+      'This parameter has no effect. Use the `timeout` parameter on `testWidgets` instead. '
+      'This feature was deprecated after v2.6.0-1.0.pre.'
+    )
     Duration? timeout,
   }) {
     assert(description != null);
@@ -1167,21 +1174,14 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     assert(_currentFakeAsync == null);
     assert(_clock == null);
 
-    _timeout = timeout;
-    if (_timeout != null) {
-      _timeoutStopwatch = Stopwatch()..start();
-      _timeoutTimer = Timer.periodic(const Duration(seconds: 1), _checkTimeout);
-      _timeoutCompleter = Completer<void>();
-    }
-
     final FakeAsync fakeAsync = FakeAsync();
     _currentFakeAsync = fakeAsync; // reset in postTest
-    _clock = fakeAsync.getClock(DateTime.utc(2015, 1, 1));
+    _clock = fakeAsync.getClock(DateTime.utc(2015));
     late Future<void> testBodyResult;
     fakeAsync.run((FakeAsync localFakeAsync) {
       assert(fakeAsync == _currentFakeAsync);
       assert(fakeAsync == localFakeAsync);
-      testBodyResult = _runTest(testBody, invariantTester, description, timeout: _timeoutCompleter?.future);
+      testBodyResult = _runTest(testBody, invariantTester, description);
       assert(inTest);
     });
 
@@ -1244,11 +1244,6 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     assert(_clock != null);
     _clock = null;
     _currentFakeAsync = null;
-    _timeoutCompleter = null;
-    _timeoutTimer?.cancel();
-    _timeoutTimer = null;
-    _timeoutStopwatch = null;
-    _timeout = null;
   }
 }
 
@@ -1396,6 +1391,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   Completer<void>? _pendingFrame;
   bool _expectingFrame = false;
+  bool _expectingFrameToReassemble = false;
   bool _viewNeedsPaint = false;
   bool _runningAsyncTasks = false;
 
@@ -1411,12 +1407,6 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   ///
   /// See [LiveTestWidgetsFlutterBindingFramePolicy].
   LiveTestWidgetsFlutterBindingFramePolicy framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fadePointers;
-
-  @override
-  void addTime(Duration duration) {
-    // We don't support timeouts on the LiveTestWidgetsFlutterBinding.
-    // See runTest().
-  }
 
   @override
   Future<void> delayed(Duration duration) {
@@ -1437,12 +1427,19 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     super.scheduleForcedFrame();
   }
 
+  @override
+  Future<void> reassembleApplication() {
+    _expectingFrameToReassemble = true;
+    return super.reassembleApplication();
+  }
+
   bool? _doDrawThisFrame;
 
   @override
   void handleBeginFrame(Duration? rawTimeStamp) {
     assert(_doDrawThisFrame == null);
     if (_expectingFrame ||
+        _expectingFrameToReassemble ||
         (framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.fullyLive) ||
         (framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.benchmarkLive) ||
         (framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.benchmark) ||
@@ -1461,6 +1458,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
       super.handleDrawFrame();
     _doDrawThisFrame = null;
     _viewNeedsPaint = false;
+    _expectingFrameToReassemble = false;
     if (_expectingFrame) { // set during pump
       assert(_pendingFrame != null);
       _pendingFrame!.complete(); // unlocks the test API
@@ -1497,11 +1495,15 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   /// Events dispatched by [TestGesture] are not affected by this.
   HitTestDispatcher? deviceEventDispatcher;
 
-
   /// Dispatch an event to the targets found by a hit test on its position.
   ///
-  /// Apart from forwarding the event to [GestureBinding.dispatchEvent],
-  /// This also paint all events that's down on the screen.
+  /// If the [pointerEventSource] is [TestBindingEventSource.test], then
+  /// the event is forwarded to [GestureBinding.dispatchEvent] as usual;
+  /// additionally, down pointers are painted on the screen.
+  ///
+  /// If the [pointerEventSource] is [TestBindingEventSource.device], then
+  /// the event, after being transformed to the local coordinate system, is
+  /// forwarded to [deviceEventDispatcher].
   @override
   void handlePointerEvent(PointerEvent event) {
     switch (pointerEventSource) {
@@ -1523,8 +1525,12 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
         break;
       case TestBindingEventSource.device:
         if (deviceEventDispatcher != null) {
+          // The pointer events received with this source has a global position
+          // (see [handlePointerEventForSource]). Transform it to the local
+          // coordinate space used by the testing widgets.
+          final PointerEvent localEvent = event.copyWith(position: globalToLocal(event.position));
           withPointerEventSource(TestBindingEventSource.device,
-            () => super.handlePointerEvent(event)
+            () => super.handlePointerEvent(localEvent)
           );
         }
         break;
@@ -1538,9 +1544,10 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
         super.dispatchEvent(event, hitTestResult);
         break;
       case TestBindingEventSource.device:
-        assert(hitTestResult != null);
+        assert(hitTestResult != null || event is PointerAddedEvent || event is PointerRemovedEvent);
         assert(deviceEventDispatcher != null);
-        deviceEventDispatcher!.dispatchEvent(event, hitTestResult!);
+        if (hitTestResult != null)
+          deviceEventDispatcher!.dispatchEvent(event, hitTestResult);
         break;
     }
   }
@@ -1578,15 +1585,13 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     assert(() {
       if (!_runningAsyncTasks)
         return true;
-      throw test_package.TestFailure(
-          'Reentrant call to runAsync() denied.\n'
-          'runAsync() was called, then before its future completed, it '
-          'was called again. You must wait for the first returned future '
-          'to complete before calling runAsync() again.'
+      fail(
+        'Reentrant call to runAsync() denied.\n'
+        'runAsync() was called, then before its future completed, it '
+        'was called again. You must wait for the first returned future '
+        'to complete before calling runAsync() again.'
       );
     }());
-
-    addTime(additionalTime); // doesn't do anything since we don't actually track the timeout, but just for correctness...
 
     _runningAsyncTasks = true;
     try {
@@ -1605,15 +1610,20 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   }
 
   @override
-  Future<void> runTest(Future<void> Function() testBody, VoidCallback invariantTester, { String description = '', Duration? timeout }) async {
+  Future<void> runTest(
+    Future<void> Function() testBody,
+    VoidCallback invariantTester, {
+    String description = '',
+    @Deprecated(
+      'This parameter has no effect. Use the `timeout` parameter on `testWidgets` instead. '
+      'This feature was deprecated after v2.6.0-1.0.pre.'
+    )
+    Duration? timeout,
+  }) {
     assert(description != null);
     assert(!inTest);
     _inTest = true;
     _liveTestRenderView._setDescription(description);
-    // We drop the timeout on the floor in `flutter run` mode.
-    // We could support it, but we'd have to automatically add the entire duration of pumps
-    // and timers and so on, since those operate in real time when using this binding, but
-    // the timeouts expect them to happen near-instantaneously.
     return _runTest(testBody, invariantTester, description);
   }
 
@@ -1773,15 +1783,6 @@ class _LiveTestRenderView extends RenderView {
     _label!.text = TextSpan(text: value, style: _labelStyle);
     _label!.layout();
     onNeedPaint();
-  }
-
-  @override
-  bool hitTest(HitTestResult result, { required Offset position }) {
-    final Matrix4 transform = configuration.toHitTestMatrix();
-    final double det = transform.invert();
-    assert(det != 0.0);
-    position = MatrixUtils.transformPoint(transform, position);
-    return super.hitTest(result, position: position);
   }
 
   @override

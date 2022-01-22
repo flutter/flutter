@@ -1,0 +1,50 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+def localProperties = new Properties()
+def localPropertiesFile = rootProject.file('local.properties')
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.withReader('UTF-8') { reader ->
+        localProperties.load(reader)
+    }
+}
+
+def flutterVersionCode = localProperties.getProperty('flutter.versionCode')
+if (flutterVersionCode == null) {
+    flutterVersionCode = '1'
+}
+
+def flutterVersionName = localProperties.getProperty('flutter.versionName')
+if (flutterVersionName == null) {
+    flutterVersionName = '1.0'
+}
+
+apply plugin: "com.android.dynamic-feature"
+
+android {
+    compileSdkVersion 31
+
+    sourceSets {
+        applicationVariants.all { variant ->
+            main.assets.srcDirs += "${project.buildDir}/intermediates/flutter/${variant.name}/deferred_assets"
+            main.jniLibs.srcDirs += "${project.buildDir}/intermediates/flutter/${variant.name}/deferred_libs"
+        }
+    }
+
+    defaultConfig {
+        minSdkVersion 16
+        targetSdkVersion 31
+        versionCode flutterVersionCode.toInteger()
+        versionName flutterVersionName
+    }
+
+    compileOptions {
+        sourceCompatibility 1.8
+        targetCompatibility 1.8
+    }
+}
+
+dependencies {
+    implementation project(":app")
+}

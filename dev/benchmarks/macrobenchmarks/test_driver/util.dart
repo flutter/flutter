@@ -6,8 +6,6 @@ import 'package:flutter_driver/flutter_driver.dart';
 import 'package:macrobenchmarks/common.dart';
 import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
-const Duration kTimeout = Duration(seconds: 30);
-
 typedef DriverTestCallBack = Future<void> Function(FlutterDriver driver);
 
 Future<void> runDriverTestForRoute(String routeName, DriverTestCallBack body) async {
@@ -34,16 +32,15 @@ Future<void> runDriverTestForRoute(String routeName, DriverTestCallBack body) as
 }
 
 void macroPerfTest(
-    String testName,
-    String routeName,
-    { Duration pageDelay,
-      Duration duration = const Duration(seconds: 3),
-      Duration timeout = kTimeout,
-      Future<void> Function(FlutterDriver driver) driverOps,
-      Future<void> Function(FlutterDriver driver) setupOps,
-    }) {
+  String testName,
+  String routeName, {
+  Duration? pageDelay,
+  Duration duration = const Duration(seconds: 3),
+  Future<void> Function(FlutterDriver driver)? driverOps,
+  Future<void> Function(FlutterDriver driver)? setupOps,
+}) {
   test(testName, () async {
-    Timeline timeline;
+    late Timeline timeline;
     await runDriverTestForRoute(routeName, (FlutterDriver driver) async {
       if (pageDelay != null) {
         // Wait for the page to load
@@ -51,7 +48,7 @@ void macroPerfTest(
       }
 
       if (setupOps != null) {
-      await setupOps(driver);
+        await setupOps(driver);
       }
 
       timeline = await driver.traceAction(() async {
@@ -67,5 +64,5 @@ void macroPerfTest(
 
     final TimelineSummary summary = TimelineSummary.summarize(timeline);
     await summary.writeTimelineToFile(testName, pretty: true);
-  }, timeout: Timeout(timeout));
+  }, timeout: Timeout.none);
 }

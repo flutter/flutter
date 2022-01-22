@@ -62,8 +62,12 @@ abstract class AssetBundle {
   /// If the `cache` argument is set to false, then the data will not be
   /// cached, and reading the data may bypass the cache. This is useful if the
   /// caller is going to be doing its own caching. (It might not be cached if
-  /// it's set to true either, that depends on the asset bundle
-  /// implementation.)
+  /// it's set to true either, depending on the asset bundle implementation.)
+  ///
+  /// The function expects the stored string to be UTF-8-encoded as
+  /// [Utf8Codec] will be used for decoding the string. If the string is
+  /// larger than 50 KB, the decoding process is delegated to an
+  /// isolate to avoid jank on the main thread.
   Future<String> loadString(String key, { bool cache = true }) async {
     final ByteData data = await load(key);
     if (data == null)
@@ -94,6 +98,9 @@ abstract class AssetBundle {
   /// loaded, the cache will be reread from the asset bundle.
   void evict(String key) { }
 
+  /// If this is a caching asset bundle, clear all cached data.
+  void clear() { }
+
   @override
   String toString() => '${describeIdentity(this)}()';
 }
@@ -103,7 +110,7 @@ abstract class AssetBundle {
 /// This asset bundle does not cache any resources, though the underlying
 /// network stack may implement some level of caching itself.
 class NetworkAssetBundle extends AssetBundle {
-  /// Creates an network asset bundle that resolves asset keys as URLs relative
+  /// Creates a network asset bundle that resolves asset keys as URLs relative
   /// to the given base URL.
   NetworkAssetBundle(Uri baseUrl)
     : _baseUrl = baseUrl,
@@ -210,6 +217,12 @@ abstract class CachingAssetBundle extends AssetBundle {
   void evict(String key) {
     _stringCache.remove(key);
     _structuredDataCache.remove(key);
+  }
+
+  @override
+  void clear() {
+    _stringCache.clear();
+    _structuredDataCache.clear();
   }
 }
 

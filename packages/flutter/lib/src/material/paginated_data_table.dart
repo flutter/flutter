@@ -7,7 +7,6 @@ import 'dart:math' as math;
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/widgets.dart';
 
-import 'button_bar.dart';
 import 'card.dart';
 import 'constants.dart';
 import 'data_table.dart';
@@ -372,17 +371,8 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     // HEADER
     final List<Widget> headerWidgets = <Widget>[];
-    double startPadding = 24.0;
     if (_selectedRowCount == 0 && widget.header != null) {
       headerWidgets.add(Expanded(child: widget.header!));
-      if (widget.header is ButtonBar) {
-        // We adjust the padding when a button bar is present, because the
-        // ButtonBar introduces 2 pixels of outside padding, plus 2 pixels
-        // around each button on each side, and the button itself will have 8
-        // pixels internally on each side, yet we want the left edge of the
-        // inside of the button to line up with the 24.0 left inset.
-        startPadding = 12.0;
-      }
     } else if (widget.header != null) {
       headerWidgets.add(Expanded(
         child: Text(localizations.selectedRowCountTitle(_selectedRowCount)),
@@ -426,7 +416,6 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
                 value: widget.rowsPerPage,
                 onChanged: widget.onRowsPerPageChanged,
                 style: footerTextStyle,
-                iconSize: 24.0,
               ),
             ),
           ),
@@ -477,11 +466,11 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
     ]);
 
     // CARD
-    return LayoutBuilder(
-      builder: (BuildContext context, BoxConstraints constraints) {
-        return Card(
-          semanticContainer: false,
-          child: Column(
+    return Card(
+      semanticContainer: false,
+      child: LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+          return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
               if (headerWidgets.isNotEmpty)
@@ -501,7 +490,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
                         height: 64.0,
                         color: _selectedRowCount > 0 ? themeData.secondaryHeaderColor : null,
                         child: Padding(
-                          padding: EdgeInsetsDirectional.only(start: startPadding, end: 14.0),
+                          padding: const EdgeInsetsDirectional.only(start: 24, end: 14.0),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: headerWidgets,
@@ -558,9 +547,9 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
                 ),
               ),
             ],
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 }

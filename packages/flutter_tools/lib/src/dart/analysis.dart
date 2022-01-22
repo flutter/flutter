@@ -79,7 +79,7 @@ class AnalysisServer {
     final Stream<String> errorStream = _process!.stderr
         .transform<String>(utf8.decoder)
         .transform<String>(const LineSplitter());
-    errorStream.listen(_logger.printError);
+    errorStream.listen(_handleError);
 
     final Stream<String> inStream = _process!.stdout
         .transform<String>(utf8.decoder)
@@ -92,6 +92,28 @@ class AnalysisServer {
 
     _sendCommand('analysis.setAnalysisRoots',
         <String, dynamic>{'included': directories, 'excluded': <String>[]});
+  }
+
+  final List<String> _logs = <String>[];
+
+  /// Aggregated STDOUT and STDERR logs from the server.
+  ///
+  /// This can be surfaced to the user if the server crashes. If [tail] is null,
+  /// returns all logs, else only the last [tail] lines.
+  String getLogs([int? tail]) {
+    if (tail == null) {
+      return _logs.join('\n');
+    }
+    // Since List doesn't implement a .tail() method, we reverse it then use
+    // .take()
+    final Iterable<String> reversedLogs = _logs.reversed;
+    final List<String> firstTailLogs = reversedLogs.take(tail).toList();
+    return firstTailLogs.reversed.join('\n');
+  }
+
+  void _handleError(String message) {
+    _logs.add('[stderr] $message');
+    _logger.printError(message);
   }
 
   bool get didServerErrorOccur => _didServerErrorOccur;
@@ -113,6 +135,7 @@ class AnalysisServer {
   }
 
   void _handleServerResponse(String line) {
+    _logs.add('[stdout] $line');
     _logger.printTrace('<== $line');
 
     final dynamic response = json.decode(line);
@@ -150,7 +173,7 @@ class AnalysisServer {
   void _handleStatus(Map<String, dynamic> statusInfo) {
     // {"event":"server.status","params":{"analysis":{"isAnalyzing":true}}}
     if (statusInfo['analysis'] != null && !_analyzingController.isClosed) {
-      final bool isAnalyzing = statusInfo['analysis']['isAnalyzing'] as bool;
+      final bool isAnalyzing = (statusInfo['analysis'] as Map<String, dynamic>)['isAnalyzing'] as bool;
       _analyzingController.add(isAnalyzing);
     }
   }
@@ -293,15 +316,16 @@ class WrittenError {
   ///      "hasFix":false
   ///  }
   static WrittenError fromJson(Map<String, dynamic> json) {
+    final Map<String, dynamic> location = json['location'] as Map<String, dynamic>;
     return WrittenError._(
       severity: json['severity'] as String,
       type: json['type'] as String,
       message: json['message'] as String,
       code: json['code'] as String,
-      file: json['location']['file'] as String,
-      startLine: json['location']['startLine'] as int,
-      startColumn: json['location']['startColumn'] as int,
-      offset: json['location']['offset'] as int,
+      file: location['file'] as String,
+      startLine: location['startLine'] as int,
+      startColumn: location['startColumn'] as int,
+      offset: location['offset'] as int,
     );
   }
 

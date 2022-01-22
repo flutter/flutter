@@ -134,11 +134,11 @@ class AnimationSheetBuilder {
   /// The returned widget wraps `child` in a box with a fixed size specified by
   /// [frameSize]. The `key` is also applied to the returned widget.
   ///
-  /// The `recording` defaults to true, which means the painted result of each
-  /// frame will be stored and later available for [display]. If `recording` is
-  /// false, then frames are not recorded. This is useful during the setup phase
-  /// that shouldn't be recorded; if the target widget isn't wrapped in [record]
-  /// during the setup phase, the states will be lost when it starts recording.
+  /// The frame is only recorded if the `recording` argument is true, or during
+  /// a procedure that is wrapped within [recording]. In either case, the
+  /// painted result of each frame will be stored and later available for
+  /// [display]. If neither condition is met, the frames are not recorded, which
+  /// is useful during setup phases.
   ///
   /// The `child` must not be null.
   ///
@@ -274,7 +274,10 @@ class AnimationSheetBuilder {
   ///
   /// An example of using this method can be found at [AnimationSheetBuilder].
   Future<ui.Image> collate(int cellsPerRow) async {
-    return _collateFrames(await _frames, frameSize, cellsPerRow);
+    final List<ui.Image> frames = await _frames;
+    assert(frames.isNotEmpty,
+      'No frames are collected. Have you forgot to set `recording` to true?');
+    return _collateFrames(frames, frameSize, cellsPerRow);
   }
 
   /// Returns the smallest size that can contain all recorded frames.
@@ -460,7 +463,7 @@ class _CellSheet extends StatelessWidget {
   final List<Widget> children;
 
   @override
-  Widget build(BuildContext _context) {
+  Widget build(BuildContext context) {
     return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
       final double rowWidth = constraints.biggest.width;
       final int cellsPerRow = (rowWidth / cellSize.width).floor();

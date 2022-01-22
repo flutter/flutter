@@ -2,24 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-
-import 'package:flutter_devicelab/framework/utils.dart';
-import 'package:path/path.dart' as path;
-
-/// Launches a new Flutter process.
-Future<Process> startFlutter({
-  List<String> options = const <String>[],
-  bool canFail = false,
-  Map<String, String> environment,
-}) {
-  final List<String> args = flutterCommandArgs('run', options);
-  return startProcess(path.join(flutterDirectory.path, 'bin', 'flutter'), args, environment: environment);
-}
 
 /// Reades through the print commands from [process] waiting for the magic phase
 /// that contains microbenchmarks results as defined in

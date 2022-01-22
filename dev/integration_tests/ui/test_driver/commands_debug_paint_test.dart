@@ -18,5 +18,5 @@ void main() {
 
   test('check that we are painting in debugPaintSize mode', () async {
     expect(await driver.requestData('status'), 'log: paint debugPaintSize');
-  });
+  }, timeout: Timeout.none);
 }

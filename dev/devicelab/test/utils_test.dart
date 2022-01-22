@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_devicelab/framework/utils.dart';
 
 import 'common.dart';
@@ -38,8 +36,8 @@ void main() {
 
   group('engine environment declarations', () {
     test('localEngine', () {
-      expect(localEngine, null);
-      expect(localEngineSrcPath, null);
+      expect(localEngineFromEnv, null);
+      expect(localEngineSrcPathFromEnv, null);
     });
   });
 }

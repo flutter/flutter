@@ -186,8 +186,8 @@ class BorderSide {
     }
   }
 
-  /// Whether the two given [BorderSide]s can be merged using [new
-  /// BorderSide.merge].
+  /// Whether the two given [BorderSide]s can be merged using
+  /// [BorderSide.merge].
   ///
   /// Two sides can be merged if one or both are zero-width with
   /// [BorderStyle.none], or if they both have the same color and style.
@@ -246,7 +246,6 @@ class BorderSide {
     return BorderSide(
       color: Color.lerp(colorA, colorB, t)!,
       width: width,
-      style: BorderStyle.solid,
     );
   }
 

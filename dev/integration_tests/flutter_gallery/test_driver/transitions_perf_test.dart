@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.9
-
 import 'dart:convert' show JsonEncoder, json;
 
 import 'package:file/file.dart';
@@ -27,8 +25,8 @@ List<String> _allDemos = <String>[];
 /// it into a histogram, and saves to a JSON file.
 Future<void> saveDurationsHistogram(List<Map<String, dynamic>> events, String outputPath) async {
   final Map<String, List<int>> durations = <String, List<int>>{};
-  Map<String, dynamic> startEvent;
-  int frameStart;
+  Map<String, dynamic>? startEvent;
+  int? frameStart;
 
   // Save the duration of the first frame after each 'Start Transition' event.
   for (final Map<String, dynamic> event in events) {
@@ -39,14 +37,14 @@ Future<void> saveDurationsHistogram(List<Map<String, dynamic>> events, String ou
     } else if (startEvent != null && eventName == 'Frame') {
       final String phase = event['ph'] as String;
       final int timestamp = event['ts'] as int;
-      if (phase == 'B') {
+      if (phase == 'B' || phase == 'b') {
         assert(frameStart == null);
         frameStart = timestamp;
       } else {
-        assert(phase == 'E');
-        final String routeName = startEvent['args']['to'] as String;
+        assert(phase == 'E' || phase == 'e');
+        final String routeName = (startEvent['args'] as Map<String, dynamic>)['to'] as String;
         durations[routeName] ??= <int>[];
-        durations[routeName].add(timestamp - frameStart);
+        durations[routeName]!.add(timestamp - frameStart!);
         startEvent = null;
         frameStart = null;
       }
@@ -81,7 +79,7 @@ Future<void> saveDurationsHistogram(List<Map<String, dynamic>> events, String ou
         continue;
 
       final String routeName = eventName == 'Start Transition'
-        ? eventIter.current['args']['to'] as String
+        ? (eventIter.current['args'] as Map<String, dynamic>)['to'] as String
         : '';
 
       if (eventName == lastEventName && routeName == lastRouteName) {
@@ -105,7 +103,7 @@ Future<void> saveDurationsHistogram(List<Map<String, dynamic>> events, String ou
 /// home screen twice.
 Future<void> runDemos(List<String> demos, FlutterDriver driver) async {
   final SerializableFinder demoList = find.byValueKey('GalleryDemoList');
-  String currentDemoCategory;
+  String? currentDemoCategory;
 
   for (final String demo in demos) {
     if (kSkippedDemos.contains(demo))
@@ -132,7 +130,6 @@ Future<void> runDemos(List<String> demos, FlutterDriver driver) async {
     await driver.scrollUntilVisible(demoList, demoItem,
       dyScroll: -48.0,
       alignment: 0.5,
-      timeout: const Duration(seconds: 30),
     );
 
     for (int i = 0; i < 2; i += 1) {
@@ -158,7 +155,7 @@ void main([List<String> args = const <String>[]]) {
   final bool withSemantics = args.contains('--with_semantics');
   final bool hybrid = args.contains('--hybrid');
   group('flutter gallery transitions', () {
-    FlutterDriver driver;
+    late FlutterDriver driver;
     setUpAll(() async {
       driver = await FlutterDriver.connect();
 
@@ -176,7 +173,6 @@ void main([List<String> args = const <String>[]]) {
     });
 
     tearDownAll(() async {
-      if (driver != null)
         await driver.close();
     });
 
@@ -184,7 +180,10 @@ void main([List<String> args = const <String>[]]) {
       // Assert that we can use semantics related finders in profile mode.
       final int id = await driver.getSemanticsId(find.bySemanticsLabel('Material'));
       expect(id, greaterThan(-1));
-    }, skip: !withSemantics);
+    },
+        skip: !withSemantics, // [intended] test only makes sense when semantics are turned on.
+        timeout: Timeout.none,
+    );
 
     test('all demos', () async {
       // Collect timeline data for just a limited set of demos to avoid OOMs.
@@ -199,6 +198,7 @@ void main([List<String> args = const <String>[]]) {
         streams: const <TimelineStream>[
           TimelineStream.dart,
           TimelineStream.embedder,
+          TimelineStream.gc,
         ],
       );
 
@@ -220,6 +220,6 @@ void main([List<String> args = const <String>[]]) {
         await runDemos(unprofiledDemos.toList(), driver);
       }
 
-    }, timeout: const Timeout(Duration(minutes: 5)));
+    }, timeout: Timeout.none);
   });
 }

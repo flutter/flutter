@@ -129,7 +129,6 @@ String generateMainModule({
   required bool nativeNullAssertions,
   String bootstrapModule = 'main_module.bootstrap',
 }) {
-  // TODO(jonahwilliams): fix typo in dwds and update.
   return '''
 /* ENTRYPOINT_EXTENTION_MARKER */
 // Create the main module loaded below.
@@ -193,7 +192,7 @@ String generateTestEntrypoint({
   Future<void> main() async {
     ui.debugEmulateFlutterTesterEnvironment = true;
     await ui.webOnlyInitializePlatform();
-    webGoldenComparator = DefaultWebGoldenComparator(Uri.parse('$absolutePath'));
+    webGoldenComparator = DefaultWebGoldenComparator(Uri.parse('${Uri.file(absolutePath)}'));
     (ui.window as dynamic).debugOverrideDevicePixelRatio(3.0);
     (ui.window as dynamic).webOnlyDebugPhysicalSizeOverride = const ui.Size(2400, 1800);
 

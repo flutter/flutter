@@ -32,7 +32,7 @@ class UnpublishException implements Exception {
   UnpublishException(this.message, [this.result]);
 
   final String message;
-  final ProcessResult result;
+  final ProcessResult? result;
   int get exitCode => result?.exitCode ?? -1;
 
   @override
@@ -41,7 +41,7 @@ class UnpublishException implements Exception {
     if (message != null) {
       output += ': $message';
     }
-    final String stderr = result?.stderr as String ?? '';
+    final String stderr = result?.stderr as String? ?? '';
     if (stderr.isNotEmpty) {
       output += ':\n$stderr';
     }
@@ -60,10 +60,9 @@ String getChannelName(Channel channel) {
     case Channel.stable:
       return 'stable';
   }
-  return null;
 }
 
-Channel fromChannelName(String name) {
+Channel fromChannelName(String? name) {
   switch (name) {
     case 'beta':
       return Channel.beta;
@@ -87,7 +86,6 @@ String getPublishedPlatform(PublishedPlatform platform) {
     case PublishedPlatform.windows:
       return 'windows';
   }
-  return null;
 }
 
 PublishedPlatform fromPublishedPlatform(String name) {
@@ -135,10 +133,10 @@ class ProcessRunner {
 
   /// Sets the default directory used when `workingDirectory` is not specified
   /// to [runProcess].
-  final Directory defaultWorkingDirectory;
+  final Directory? defaultWorkingDirectory;
 
   /// The environment to run processes with.
-  Map<String, String> environment;
+  late Map<String, String> environment;
 
   /// Run the command and arguments in `commandLine` as a sub-process from
   /// `workingDirectory` if set, or the [defaultWorkingDirectory] if not. Uses
@@ -148,7 +146,7 @@ class ProcessRunner {
   /// command completes with a non-zero exit code.
   Future<String> runProcess(
     List<String> commandLine, {
-    Directory workingDirectory,
+    Directory? workingDirectory,
     bool failOk = false,
   }) async {
     workingDirectory ??= defaultWorkingDirectory ?? Directory.current;
@@ -158,7 +156,7 @@ class ProcessRunner {
     final List<int> output = <int>[];
     final Completer<void> stdoutComplete = Completer<void>();
     final Completer<void> stderrComplete = Completer<void>();
-    Process process;
+    late Process process;
     Future<int> allComplete() async {
       await stderrComplete.future;
       await stdoutComplete.future;
@@ -221,12 +219,12 @@ class ArchiveUnpublisher {
     this.channels,
     this.platform, {
     this.confirmed = false,
-    ProcessManager processManager,
+    ProcessManager? processManager,
     bool subprocessOutput = true,
   })  : assert(revisionsBeingRemoved.length == 40),
         metadataGsPath = '$gsReleaseFolder/${getMetadataFilename(platform)}',
         _processRunner = ProcessRunner(
-          processManager: processManager,
+          processManager: processManager ?? const LocalProcessManager(),
           subprocessOutput: subprocessOutput,
         );
 
@@ -249,13 +247,13 @@ class ArchiveUnpublisher {
     final Map<Channel, Map<String, String>> paths = await _getArchivePaths(releases);
     releases.removeWhere((Map<String, String> value) => revisionsBeingRemoved.contains(value['hash']) && channels.contains(fromChannelName(value['channel'])));
     releases.sort((Map<String, String> a, Map<String, String> b) {
-      final DateTime aDate = DateTime.parse(a['release_date']);
-      final DateTime bDate = DateTime.parse(b['release_date']);
+      final DateTime aDate = DateTime.parse(a['release_date']!);
+      final DateTime bDate = DateTime.parse(b['release_date']!);
       return bDate.compareTo(aDate);
     });
     jsonData['releases'] = releases;
     for (final Channel channel in channels) {
-      if (!revisionsBeingRemoved.contains(jsonData['current_release'][getChannelName(channel)])) {
+      if (!revisionsBeingRemoved.contains((jsonData['current_release'] as Map<String, dynamic>)[getChannelName(channel)])) {
         // Don't replace the current release if it's not one of the revisions we're removing.
         continue;
       }
@@ -263,7 +261,7 @@ class ArchiveUnpublisher {
       if (replacementRelease == null) {
         throw UnpublishException('Unable to find previous release for channel ${getChannelName(channel)}.');
       }
-      jsonData['current_release'][getChannelName(channel)] = replacementRelease['hash'];
+      (jsonData['current_release'] as Map<String, dynamic>)[getChannelName(channel)] = replacementRelease['hash'];
       print(
         '${confirmed ? 'Reverting' : 'Would revert'} current ${getChannelName(channel)} '
         '${getPublishedPlatform(platform)} release to ${replacementRelease['hash']} (version ${replacementRelease['version']}).'
@@ -277,12 +275,12 @@ class ArchiveUnpublisher {
     final Set<String> hashes = <String>{};
     final Map<Channel, Map<String, String>> paths = <Channel, Map<String, String>>{};
     for (final Map<String, String> revision in releases) {
-      final String hash = revision['hash'];
+      final String hash = revision['hash']!;
       final Channel channel = fromChannelName(revision['channel']);
       hashes.add(hash);
       if (revisionsBeingRemoved.contains(hash) && channels.contains(channel)) {
         paths[channel] ??= <String, String>{};
-        paths[channel][hash] = revision['archive'];
+        paths[channel]![hash] = revision['archive']!;
       }
     }
     final Set<String> missingRevisions = revisionsBeingRemoved.difference(hashes.intersection(revisionsBeingRemoved));
@@ -330,7 +328,7 @@ class ArchiveUnpublisher {
 
   Future<String> _runGsUtil(
     List<String> args, {
-    Directory workingDirectory,
+    Directory? workingDirectory,
     bool failOk = false,
     bool confirm = false,
   }) async {
@@ -351,7 +349,7 @@ class ArchiveUnpublisher {
     final List<String> files = <String>[];
     print('${confirmed ? 'Removing' : 'Would remove'} the following release archives:');
     for (final Channel channel in paths.keys) {
-      final Map<String, String> hashes = paths[channel];
+      final Map<String, String> hashes = paths[channel]!;
       for (final String hash in hashes.keys) {
         final String file = '$gsReleaseFolder/${hashes[hash]}';
         files.add(file);
@@ -367,7 +365,7 @@ class ArchiveUnpublisher {
     // We often don't have permission to overwrite, but
     // we have permission to remove, so that's what we do first.
     await _runGsUtil(<String>['rm', dest], failOk: true, confirm: confirmed);
-    String mimeType;
+    String? mimeType;
     if (dest.endsWith('.tar.xz')) {
       mimeType = 'application/x-gtar';
     }
@@ -403,7 +401,6 @@ Future<void> main(List<String> rawArguments) async {
   final ArgParser argParser = ArgParser();
   argParser.addOption(
     'temp_dir',
-    defaultsTo: null,
     help: 'A location where temporary files may be written. Defaults to a '
         'directory in the system temp folder. If a temp_dir is not '
         'specified, then by default a generated temporary directory will be '
@@ -433,7 +430,6 @@ Future<void> main(List<String> rawArguments) async {
   );
   argParser.addFlag(
     'confirm',
-    defaultsTo: false,
     help: 'If set, will actually remove the archive from Google Cloud Storage '
         'upon successful execution of this script. Published archives will be '
         'removed from this directory: $baseUrl$releaseFolder.  This option '
@@ -442,7 +438,6 @@ Future<void> main(List<String> rawArguments) async {
   );
   argParser.addFlag(
     'help',
-    defaultsTo: false,
     negatable: false,
     help: 'Print help for this command.',
   );
@@ -497,8 +492,8 @@ Future<void> main(List<String> rawArguments) async {
   final List<String> platformOptions = platformArg.isNotEmpty ? platformArg : allowedPlatformNames;
   final List<PublishedPlatform> platforms = platformOptions.map<PublishedPlatform>((String value) => fromPublishedPlatform(value)).toList();
   int exitCode = 0;
-  String message;
-  String stack;
+  late String message;
+  late String stack;
   try {
     for (final PublishedPlatform platform in platforms) {
       final ArchiveUnpublisher publisher = ArchiveUnpublisher(

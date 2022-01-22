@@ -34,11 +34,20 @@ String snakeCase(String str, [ String sep = '_' ]) {
       (Match m) => '${m.start == 0 ? '' : sep}${m[0]!.toLowerCase()}');
 }
 
-String toTitleCase(String str) {
+/// Converts `fooBar` to `FooBar`.
+///
+/// This uses [toBeginningOfSentenceCase](https://pub.dev/documentation/intl/latest/intl/toBeginningOfSentenceCase.html),
+/// with the input and return value of non-nullable.
+String sentenceCase(String str, [String? locale]) {
   if (str.isEmpty) {
     return str;
   }
-  return str.substring(0, 1).toUpperCase() + str.substring(1);
+  return toBeginningOfSentenceCase(str, locale)!;
+}
+
+/// Converts `foo_bar` to `Foo Bar`.
+String snakeCaseToTitleCase(String snakeCaseString) {
+  return snakeCaseString.split('_').map(camelCase).map(sentenceCase).join(' ');
 }
 
 /// Return the plural of the given word (`cat(s)`).
@@ -442,4 +451,20 @@ String interpolateString(String toInterpolate, Map<String, String> replacementVa
 /// ```
 List<String> interpolateStringList(List<String> toInterpolate, Map<String, String> replacementValues) {
   return toInterpolate.map((String s) => interpolateString(s, replacementValues)).toList();
+}
+
+/// Returns the first line-based match for [regExp] in [file].
+///
+/// Assumes UTF8 encoding.
+Match? firstMatchInFile(File file, RegExp regExp) {
+  if (!file.existsSync()) {
+    return null;
+  }
+  for (final String line in file.readAsLinesSync()) {
+    final Match? match = regExp.firstMatch(line);
+    if (match != null) {
+      return match;
+    }
+  }
+  return null;
 }

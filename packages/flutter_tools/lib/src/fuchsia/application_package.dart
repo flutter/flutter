@@ -2,21 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'package:meta/meta.dart';
-
 import '../application_package.dart';
 import '../base/file_system.dart';
 import '../build_info.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../project.dart';
 
 abstract class FuchsiaApp extends ApplicationPackage {
-  FuchsiaApp({@required String projectBundleId}) : super(id: projectBundleId);
+  FuchsiaApp({required String projectBundleId}) : super(id: projectBundleId);
 
   /// Creates a new [FuchsiaApp] from a fuchsia sub project.
-  factory FuchsiaApp.fromFuchsiaProject(FuchsiaProject project) {
+  static FuchsiaApp? fromFuchsiaProject(FuchsiaProject project) {
     if (!project.existsSync()) {
       // If the project doesn't exist at all the current hint to run flutter
       // create is accurate.
@@ -30,14 +26,14 @@ abstract class FuchsiaApp extends ApplicationPackage {
   /// Creates a new [FuchsiaApp] from an existing .far archive.
   ///
   /// [applicationBinary] is the path to the .far archive.
-  factory FuchsiaApp.fromPrebuiltApp(FileSystemEntity applicationBinary) {
+  static FuchsiaApp? fromPrebuiltApp(FileSystemEntity applicationBinary) {
     final FileSystemEntityType entityType = globals.fs.typeSync(applicationBinary.path);
     if (entityType != FileSystemEntityType.file) {
       globals.printError('File "${applicationBinary.path}" does not exist or is not a .far file. Use far archive.');
       return null;
     }
     return PrebuiltFuchsiaApp(
-      farArchive: applicationBinary.path,
+      applicationPackage: applicationBinary,
     );
   }
 
@@ -48,31 +44,31 @@ abstract class FuchsiaApp extends ApplicationPackage {
   File farArchive(BuildMode buildMode);
 }
 
-class PrebuiltFuchsiaApp extends FuchsiaApp {
+class PrebuiltFuchsiaApp extends FuchsiaApp implements PrebuiltApplicationPackage {
   PrebuiltFuchsiaApp({
-    @required String farArchive,
-  }) : _farArchive = farArchive,
-       // TODO(zra): Extract the archive and extract the id from meta/package.
-       super(projectBundleId: farArchive);
-
-  final String _farArchive;
+    required this.applicationPackage,
+  }) : // TODO(zanderso): Extract the archive and extract the id from meta/package.
+       super(projectBundleId: applicationPackage.path);
 
   @override
-  File farArchive(BuildMode buildMode) => globals.fs.file(_farArchive);
+  File farArchive(BuildMode buildMode) => globals.fs.file(applicationPackage);
 
   @override
-  String get name => _farArchive;
+  String get name => applicationPackage.path;
+
+  @override
+  final FileSystemEntity applicationPackage;
 }
 
 class BuildableFuchsiaApp extends FuchsiaApp {
-  BuildableFuchsiaApp({this.project}) :
+  BuildableFuchsiaApp({required this.project}) :
       super(projectBundleId: project.project.manifest.appName);
 
   final FuchsiaProject project;
 
   @override
   File farArchive(BuildMode buildMode) {
-    // TODO(zra): Distinguish among build modes.
+    // TODO(zanderso): Distinguish among build modes.
     final String outDir = getFuchsiaBuildDirectory();
     final String pkgDir = globals.fs.path.join(outDir, 'pkg');
     final String appName = project.project.manifest.appName;

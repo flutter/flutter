@@ -2,10 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'package:meta/meta.dart';
-
 import '../base/analyze_size.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -13,7 +9,7 @@ import '../base/logger.dart';
 import '../base/project_migrator.dart';
 import '../build_info.dart';
 import '../convert.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../ios/xcode_build_settings.dart';
 import '../ios/xcodeproj.dart';
 import '../project.dart';
@@ -25,17 +21,17 @@ import 'migrations/remove_macos_framework_link_and_embedding_migration.dart';
 final RegExp _anyOutput = RegExp('.*');
 
 /// Builds the macOS project through xcodebuild.
-// TODO(jonahwilliams): refactor to share code with the existing iOS code.
+// TODO(zanderso): refactor to share code with the existing iOS code.
 Future<void> buildMacOS({
-  FlutterProject flutterProject,
-  BuildInfo buildInfo,
-  String targetOverride,
-  @required bool verboseLogging,
-  SizeAnalyzer sizeAnalyzer,
+  required FlutterProject flutterProject,
+  required BuildInfo buildInfo,
+  String? targetOverride,
+  required bool verboseLogging,
+  SizeAnalyzer? sizeAnalyzer,
 }) async {
   if (!flutterProject.macos.xcodeWorkspace.existsSync()) {
     throwToolExit('No macOS desktop project configured. '
-      'See https://flutter.dev/desktop#add-desktop-support-to-an-existing-flutter-app '
+      'See https://docs.flutter.dev/desktop#add-desktop-support-to-an-existing-flutter-app '
       'to learn about adding macOS support to a project.');
   }
 
@@ -77,16 +73,16 @@ Future<void> buildMacOS({
   // If the standard project exists, specify it to getInfo to handle the case where there are
   // other Xcode projects in the macos/ directory. Otherwise pass no name, which will work
   // regardless of the project name so long as there is exactly one project.
-  final String xcodeProjectName = xcodeProject.existsSync() ? xcodeProject.basename : null;
-  final XcodeProjectInfo projectInfo = await globals.xcodeProjectInterpreter.getInfo(
+  final String? xcodeProjectName = xcodeProject.existsSync() ? xcodeProject.basename : null;
+  final XcodeProjectInfo projectInfo = await globals.xcodeProjectInterpreter!.getInfo(
     xcodeProject.parent.path,
     projectFilename: xcodeProjectName,
   );
-  final String scheme = projectInfo.schemeFor(buildInfo);
+  final String? scheme = projectInfo.schemeFor(buildInfo);
   if (scheme == null) {
     projectInfo.reportFlavorNotFoundAndExit();
   }
-  final String configuration = projectInfo.buildConfigurationFor(buildInfo, scheme);
+  final String? configuration = projectInfo.buildConfigurationFor(buildInfo, scheme);
   if (configuration == null) {
     throwToolExit('Unable to find expected configuration in Xcode project.');
   }
@@ -141,7 +137,7 @@ Future<void> buildMacOS({
       .firstWhere((Directory directory) {
       return globals.fs.path.extension(directory.path) == '.app';
     });
-    final Map<String, Object> output = await sizeAnalyzer.analyzeAotSnapshot(
+    final Map<String, Object?> output = await sizeAnalyzer.analyzeAotSnapshot(
       aotSnapshot: aotSnapshot,
       precompilerTrace: precompilerTrace,
       outputDirectory: appDirectory,

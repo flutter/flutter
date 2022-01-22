@@ -7,6 +7,53 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  // Regression test for https://github.com/flutter/flutter/issues/88191
+  testWidgets('Do not crash when dragging with two fingers simultaneously', (WidgetTester tester) async {
+    final List<int> items = List<int>.generate(3, (int index) => index);
+    void handleReorder(int fromIndex, int toIndex) {
+      if (toIndex > fromIndex) {
+        toIndex -= 1;
+      }
+      items.insert(toIndex, items.removeAt(fromIndex));
+    }
+
+    await tester.pumpWidget(MaterialApp(
+      home: ReorderableList(
+        itemBuilder: (BuildContext context, int index) {
+          return ReorderableDragStartListener(
+            index: index,
+            key: ValueKey<int>(items[index]),
+            child: SizedBox(
+              height: 100,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text('item ${items[index]}'),
+                ],
+              ),
+            ),
+          );
+        },
+        itemCount: items.length,
+        onReorder: handleReorder,
+      ),
+    ));
+
+    final TestGesture drag1 = await tester.startGesture(tester.getCenter(find.text('item 0')));
+    final TestGesture drag2 = await tester.startGesture(tester.getCenter(find.text('item 0')));
+    await tester.pump(kLongPressTimeout);
+
+    await drag1.moveBy(const Offset(0, 100));
+    await drag2.moveBy(const Offset(0, 100));
+    await tester.pumpAndSettle();
+
+    await drag1.up();
+    await drag2.up();
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('negative itemCount should assert', (WidgetTester tester) async {
     final List<int> items = <int>[1, 2, 3];
     await tester.pumpWidget(MaterialApp(
@@ -268,6 +315,158 @@ void main() {
     expect(getItemFadeTransition(), findsNothing);
   });
 
+  testWidgets('ReorderableList supports items with nested list views without throwing layout exception.', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        builder: (BuildContext context, Widget? child) {
+          return MediaQuery(
+            // Ensure there is always a top padding to simulate a phone with
+            // safe area at the top. If the nested list doesn't have the
+            // padding removed before it is put into the overlay it will
+            // overflow the layout by the top padding.
+            data: MediaQuery.of(context).copyWith(padding: const EdgeInsets.only(top: 50)),
+            child: child!,
+          );
+        },
+        home: Scaffold(
+          appBar: AppBar(title: const Text('Nested Lists')),
+          body: ReorderableList(
+            itemCount: 10,
+            itemBuilder: (BuildContext context, int index) {
+              return ReorderableDragStartListener(
+                index: index,
+                key: ValueKey<int>(index),
+                child: Column(
+                  children: <Widget>[
+                    ListView(
+                      shrinkWrap: true,
+                      physics: const ClampingScrollPhysics(),
+                      children: const <Widget>[
+                        Text('Other data'),
+                        Text('Other data'),
+                        Text('Other data'),
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            },
+            onReorder: (int oldIndex, int newIndex) {},
+          ),
+        ),
+      ),
+    );
+
+    // Start gesture on first item
+    final TestGesture drag = await tester.startGesture(tester.getCenter(find.byKey(const ValueKey<int>(0))));
+    await tester.pump(kPressTimeout);
+
+    // Drag enough for move to start
+    await drag.moveBy(const Offset(0, 50));
+    await tester.pumpAndSettle();
+
+    // There shouldn't be a layout overflow exception.
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('ReorderableList supports items with nested list views without throwing layout exception.', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/83224.
+    await tester.pumpWidget(
+      MaterialApp(
+        builder: (BuildContext context, Widget? child) {
+          return MediaQuery(
+            // Ensure there is always a top padding to simulate a phone with
+            // safe area at the top. If the nested list doesn't have the
+            // padding removed before it is put into the overlay it will
+            // overflow the layout by the top padding.
+            data: MediaQuery.of(context).copyWith(padding: const EdgeInsets.only(top: 50)),
+            child: child!,
+          );
+        },
+        home: Scaffold(
+          appBar: AppBar(title: const Text('Nested Lists')),
+          body: ReorderableList(
+            itemCount: 10,
+            itemBuilder: (BuildContext context, int index) {
+              return ReorderableDragStartListener(
+                index: index,
+                key: ValueKey<int>(index),
+                child: Column(
+                  children: <Widget>[
+                    ListView(
+                      shrinkWrap: true,
+                      physics: const ClampingScrollPhysics(),
+                      children: const <Widget>[
+                        Text('Other data'),
+                        Text('Other data'),
+                        Text('Other data'),
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            },
+            onReorder: (int oldIndex, int newIndex) {},
+          ),
+        ),
+      ),
+    );
+
+    // Start gesture on first item.
+    final TestGesture drag = await tester.startGesture(tester.getCenter(find.byKey(const ValueKey<int>(0))));
+    await tester.pump(kPressTimeout);
+
+    // Drag enough for move to start.
+    await drag.moveBy(const Offset(0, 50));
+    await tester.pumpAndSettle();
+
+    // There shouldn't be a layout overflow exception.
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('SliverReorderableList - properly animates the drop at starting position in a reversed list', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/84625
+    final List<int> items = List<int>.generate(8, (int index) => index);
+
+    Future<void> pressDragRelease(Offset start, Offset delta) async {
+      final TestGesture drag = await tester.startGesture(start);
+      await tester.pump(kPressTimeout);
+      await drag.moveBy(delta);
+      await tester.pumpAndSettle();
+      await drag.up();
+      await tester.pump();
+    }
+
+    // The TestList is 800x600 SliverReorderableList with 8 items 800x100 each.
+    // Each item has a text widget with 'item $index' that can be moved by a
+    // press and drag gesture. For this test we are reversing the order so
+    // the first item is at the bottom.
+    await tester.pumpWidget(TestList(items: items, reverse: true));
+
+    expect(tester.getTopLeft(find.text('item 0')), const Offset(0, 500));
+    expect(tester.getTopLeft(find.text('item 1')), const Offset(0, 400));
+
+    // Drag item 0 downwards off the edge and let it snap back. It should
+    // smoothly animate back up.
+    await pressDragRelease(tester.getCenter(find.text('item 0')), const Offset(0, 50));
+    expect(tester.getTopLeft(find.text('item 0')), const Offset(0, 550));
+    expect(tester.getTopLeft(find.text('item 1')), const Offset(0, 400));
+
+    // After the first several frames we should be moving closer to the final position,
+    // not further away as was the case with the original bug.
+    await tester.pump(const Duration(milliseconds: 10));
+    expect(tester.getTopLeft(find.text('item 0')).dy, lessThan(550));
+
+    // Sample the middle (don't use exact values as it depends on the internal
+    // curve being used).
+    await tester.pump(const Duration(milliseconds: 125));
+    expect(tester.getTopLeft(find.text('item 0')).dy, lessThan(550));
+
+    // Wait for it to finish, it should be back to the original position
+    await tester.pumpAndSettle();
+    expect(tester.getTopLeft(find.text('item 0')), const Offset(0, 500));
+  });
+
   testWidgets('ReorderableList asserts on both non-null itemExtent and prototypeItem', (WidgetTester tester) async {
     final List<int> numbers = <int>[0,1,2];
     expect(() => ReorderableList(
@@ -442,7 +641,7 @@ void main() {
       expect(items, orderedEquals(<int>[1, 0, 2, 3, 4]));
     });
 
-    testWidgets('It should allow the item to be dragged when enabled is true', (WidgetTester tester) async {
+    testWidgets('It should not allow the item to be dragged when enabled is false', (WidgetTester tester) async {
       const int itemCount = 5;
       int onReorderCallCount = 0;
       final List<int> items = List<int>.generate(itemCount, (int index) => index);
@@ -480,7 +679,7 @@ void main() {
       await tester.pump(kLongPressTimeout);
 
       // Drag enough to move down the first item
-      await drag.moveBy(const Offset(0, 150));
+      await drag.moveBy(const Offset(0, 50));
       await tester.pump();
       await drag.up();
       await tester.pumpAndSettle();
@@ -538,7 +737,7 @@ void main() {
       expect(items, orderedEquals(<int>[1, 0, 2, 3, 4]));
     });
 
-    testWidgets('It should allow the item to be dragged when enabled is true', (WidgetTester tester) async {
+    testWidgets('It should not allow the item to be dragged when enabled is false', (WidgetTester tester) async {
       const int itemCount = 5;
       int onReorderCallCount = 0;
       final List<int> items = List<int>.generate(itemCount, (int index) => index);
@@ -594,12 +793,14 @@ class TestList extends StatefulWidget {
     this.iconColor,
     this.proxyDecorator,
     required this.items,
+    this.reverse = false,
   }) : super(key: key);
 
   final List<int> items;
   final Color? textColor;
   final Color? iconColor;
   final ReorderItemProxyDecorator? proxyDecorator;
+  final bool reverse;
 
   @override
   State<TestList> createState() => _TestListState();
@@ -618,6 +819,7 @@ class _TestListState extends State<TestList> {
               builder: (BuildContext outerContext, StateSetter setState) {
                 final List<int> items = widget.items;
                 return CustomScrollView(
+                  reverse: widget.reverse,
                   slivers: <Widget>[
                     SliverReorderableList(
                       itemBuilder: (BuildContext context, int index) {

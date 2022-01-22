@@ -5,11 +5,13 @@
 // @dart = 2.8
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/bundle.dart';
 import 'package:flutter_tools/src/bundle_builder.dart';
-import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 
 import '../src/common.dart';
@@ -116,5 +118,42 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
+  });
+
+  testWithoutContext('--flutter-widget-cache and --enable-experiment are removed from getDefaultCachedKernelPath hash', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final Config config = Config.test();
+
+    expect(getDefaultCachedKernelPath(
+      trackWidgetCreation: true,
+      dartDefines: <String>[],
+      extraFrontEndOptions: <String>['--enable-experiment=foo', '--flutter-widget-cache'],
+      fileSystem: fileSystem,
+      config: config,
+    ), 'build/cache.dill.track.dill');
+
+    expect(getDefaultCachedKernelPath(
+      trackWidgetCreation: true,
+      dartDefines: <String>['foo=bar'],
+      extraFrontEndOptions: <String>['--enable-experiment=foo', '--flutter-widget-cache'],
+      fileSystem: fileSystem,
+      config: config,
+    ), 'build/06ad47d8e64bd28de537b62ff85357c4.cache.dill.track.dill');
+
+    expect(getDefaultCachedKernelPath(
+      trackWidgetCreation: false,
+      dartDefines: <String>[],
+      extraFrontEndOptions: <String>['--enable-experiment=foo', '--flutter-widget-cache'],
+      fileSystem: fileSystem,
+      config: config,
+    ), 'build/cache.dill');
+
+    expect(getDefaultCachedKernelPath(
+      trackWidgetCreation: true,
+      dartDefines: <String>[],
+      extraFrontEndOptions: <String>['--enable-experiment=foo', '--flutter-widget-cache', '--foo=bar'],
+      fileSystem: fileSystem,
+      config: config,
+    ), 'build/95b595cca01caa5f0ca0a690339dd7f6.cache.dill.track.dill');
   });
 }

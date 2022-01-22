@@ -35,8 +35,8 @@ void main() {
         .childDirectory('.dart_tool')
         .childFile('package_config.json')
         .readAsStringSync());
-    final dynamic collection = jsonContent['packages']
-        .firstWhere((dynamic e) => e['name'] == 'collection');
+    final Map<String, dynamic> collection = ((jsonContent as Map<String, dynamic>)['packages'] as Iterable<dynamic>)
+        .firstWhere((dynamic entry) => (entry as Map<String, dynamic>)['name'] == 'collection') as Map<String, dynamic>;
     expect(
       Uri.parse(collection['rootUri'] as String).isAbsolute,
       isTrue,

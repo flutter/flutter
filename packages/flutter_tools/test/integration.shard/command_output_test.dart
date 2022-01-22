@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:convert';
 
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -81,7 +79,7 @@ void main() {
     ]);
 
     // contains all of the experiments in features.dart
-    expect(result.stdout.split('\n'), containsAll(<Matcher>[
+    expect((result.stdout as String).split('\n'), containsAll(<Matcher>[
       for (final Feature feature in allFeatures)
         contains(feature.configSetting),
     ]));
@@ -138,11 +136,11 @@ void main() {
       '--machine',
     ]);
 
-    final Map<String, Object> versionInfo = json.decode(result.stdout
+    final Map<String, Object?> versionInfo = json.decode(result.stdout
       .toString()
       .replaceAll('Building flutter tool...', '')
       .replaceAll('Waiting for another flutter command to release the startup lock...', '')
-      .trim()) as Map<String, Object>;
+      .trim()) as Map<String, Object?>;
 
     expect(versionInfo, containsPair('flutterRoot', isNotNull));
   });
@@ -246,5 +244,20 @@ void main() {
       'Oops; flutter has exited unexpectedly: "Bad state: test crash please ignore.".\n'
       'A crash report has been written to',
     ));
+  });
+
+  testWithoutContext('flutter supports trailing args', () async {
+    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
+    final String helloWorld = fileSystem.path.join(getFlutterRoot(), 'examples', 'hello_world');
+    final ProcessResult result = await processManager.run(<String>[
+      flutterBin,
+      'test',
+      'test/hello_test.dart',
+      '-r',
+      'json',
+    ], workingDirectory: helloWorld);
+
+    expect(result.exitCode, 0);
+    expect(result.stderr, isEmpty);
   });
 }

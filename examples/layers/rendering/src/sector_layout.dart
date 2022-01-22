@@ -455,7 +455,6 @@ class RenderSectorSlice extends RenderSectorWithChildren {
 }
 
 class RenderBoxToRenderSectorAdapter extends RenderBox with RenderObjectWithChildMixin<RenderSector> {
-
   RenderBoxToRenderSectorAdapter({ double innerRadius = 0.0, RenderSector? child })
     : _innerRadius = innerRadius {
     this.child = child;
@@ -567,7 +566,6 @@ class RenderBoxToRenderSectorAdapter extends RenderBox with RenderObjectWithChil
     result.add(BoxHitTestEntry(this, position));
     return true;
   }
-
 }
 
 class RenderSolidColor extends RenderDecoratedSector {

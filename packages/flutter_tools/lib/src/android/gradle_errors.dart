@@ -7,10 +7,12 @@ import 'package:meta/meta.dart';
 import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/process.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../base/terminal.dart';
+import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
 import 'android_studio.dart';
+import 'multidex.dart';
 
 typedef GradleErrorTest = bool Function(String);
 
@@ -31,7 +33,7 @@ class GradleHandledError {
     required String line,
     required FlutterProject project,
     required bool usesAndroidX,
-    required bool shouldBuildPluginAsAar,
+    required bool multidexEnabled,
   }) handler;
 
   /// The [BuildEvent] label is named gradle-[eventLabel].
@@ -46,8 +48,6 @@ enum GradleBuildStatus {
   exit,
   /// The tool can retry the exact same build.
   retry,
-  /// The tool can build the plugins as AAR and retry the build.
-  retryWithAarPlugins,
 }
 
 /// Returns a simple test function that evaluates to `true` if at least one of
@@ -74,8 +74,107 @@ final List<GradleHandledError> gradleErrors = <GradleHandledError>[
   minSdkVersion,
   transformInputIssue,
   lockFileDepMissing,
-  androidXFailureHandler, // Keep last since the pattern is broader.
+  multidexErrorHandler,
+  incompatibleKotlinVersionHandler,
+  minCompileSdkVersionHandler,
 ];
+
+const String _boxTitle = 'Flutter Fix';
+
+// Multidex error message.
+@visibleForTesting
+final GradleHandledError multidexErrorHandler = GradleHandledError(
+  test: _lineMatcher(const <String>[
+    'com.android.builder.dexing.DexArchiveMergerException: Error while merging dex archives:',
+    'The number of method references in a .dex file cannot exceed 64K.',
+  ]),
+  handler: ({
+    required String line,
+    required FlutterProject project,
+    required bool usesAndroidX,
+    required bool multidexEnabled,
+  }) async {
+    globals.printStatus('${globals.logger.terminal.warningMark} App requires Multidex support', emphasis: true);
+    if (multidexEnabled) {
+      globals.printStatus(
+        'Multidex support is required for your android app to build since the number of methods has exceeded 64k. '
+        "You may pass the --no-multidex flag to skip Flutter's multidex support to use a manual solution.\n",
+        indent: 4,
+      );
+      if (!androidManifestHasNameVariable(project.directory)) {
+        globals.printStatus(
+          r'Your `android/app/src/main/AndroidManifest.xml` does not contain `android:name="${applicationName}"` '
+          'under the `application` element. This may be due to creating your project with an old version of Flutter. '
+          'Add the `android:name="\${applicationName}"` attribute to your AndroidManifest.xml to enable Flutter\'s multidex support:\n',
+          indent: 4,
+        );
+        globals.printStatus(r'''
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+  ...
+  <application
+    ...
+    android:name=''',
+          indent: 8,
+          newline: false,
+          color: TerminalColor.grey,
+        );
+        globals.printStatus(r'"${applicationName}"', color: TerminalColor.green, newline: true);
+        globals.printStatus(r'''
+    ...>
+''',
+          indent: 8,
+          color: TerminalColor.grey,
+        );
+
+        globals.printStatus(
+          'You may also roll your own multidex support by following the guide at: https://developer.android.com/studio/build/multidex\n',
+          indent: 4,
+        );
+        return GradleBuildStatus.exit;
+      }
+      if (!multiDexApplicationExists(project.directory)) {
+        globals.printStatus(
+          'Flutter tool can add multidex support. The following file will be added by flutter:\n',
+          indent: 4,
+        );
+        globals.printStatus(
+          'android/app/src/main/java/io/flutter/app/FlutterMultiDexApplication.java\n',
+          indent: 8,
+        );
+        String selection = 'n';
+        // Default to 'no' if no interactive terminal.
+        try {
+          selection = await globals.terminal.promptForCharInput(
+            <String>['y', 'n'],
+            logger: globals.logger,
+            prompt: 'Do you want to continue with adding multidex support for Android?',
+            defaultChoiceIndex: 0,
+          );
+        } on StateError catch(e) {
+          globals.printError(
+            e.message,
+            indent: 0,
+          );
+        }
+        if (selection == 'y') {
+          ensureMultiDexApplicationExists(project.directory);
+          globals.printStatus(
+            'Multidex enabled. Retrying build.\n',
+            indent: 0,
+          );
+          return GradleBuildStatus.retry;
+        }
+      }
+    } else {
+      globals.printBox(
+        'Flutter multidex handling is disabled. If you wish to let the tool configure multidex, use the --mutidex flag.',
+        title: _boxTitle,
+      );
+    }
+    return GradleBuildStatus.exit;
+  },
+  eventLabel: 'multidex-error',
+);
 
 // Permission defined error message.
 @visibleForTesting
@@ -87,13 +186,13 @@ final GradleHandledError permissionDeniedErrorHandler = GradleHandledError(
     required String line,
     required FlutterProject project,
     required bool usesAndroidX,
-    required bool shouldBuildPluginAsAar,
+    required bool multidexEnabled,
   }) async {
-    globals.printStatus('${globals.logger.terminal.warningMark} Gradle does not have execution permission.', emphasis: true);
-    globals.printStatus(
+    globals.printBox(
+      '${globals.logger.terminal.warningMark} Gradle does not have execution permission.\n'
       'You should change the ownership of the project directory to your user, '
       'or move the project to a directory with execute permissions.',
-      indent: 4
+      title: _boxTitle,
     );
     return GradleBuildStatus.exit;
   },
@@ -124,7 +223,7 @@ final GradleHandledError networkErrorHandler = GradleHandledError(
     required String line,
     required FlutterProject project,
     required bool usesAndroidX,
-    required bool shouldBuildPluginAsAar,
+    required bool multidexEnabled,
   }) async {
     globals.printError(
       '${globals.logger.terminal.warningMark} Gradle threw an error while downloading artifacts from the network. '
@@ -154,99 +253,17 @@ final GradleHandledError r8FailureHandler = GradleHandledError(
     required String line,
     required FlutterProject project,
     required bool usesAndroidX,
-    required bool shouldBuildPluginAsAar,
+    required bool multidexEnabled,
   }) async {
-    globals.printStatus('${globals.logger.terminal.warningMark} The shrinker may have failed to optimize the Java bytecode.', emphasis: true);
-    globals.printStatus('To disable the shrinker, pass the `--no-shrink` flag to this command.', indent: 4);
-    globals.printStatus('To learn more, see: https://developer.android.com/studio/build/shrink-code', indent: 4);
+    globals.printBox(
+      '${globals.logger.terminal.warningMark} The shrinker may have failed to optimize the Java bytecode.\n'
+      'To disable the shrinker, pass the `--no-shrink` flag to this command.\n'
+      'To learn more, see: https://developer.android.com/studio/build/shrink-code',
+      title: _boxTitle,
+    );
     return GradleBuildStatus.exit;
   },
   eventLabel: 'r8',
-);
-
-// AndroidX failure.
-//
-// This regex is intentionally broad. AndroidX errors can manifest in multiple
-// different ways and each one depends on the specific code config and
-// filesystem paths of the project. Throwing the broadest net possible here to
-// catch all known and likely cases.
-//
-// Example stack traces:
-// https://github.com/flutter/flutter/issues/27226 "AAPT: error: resource android:attr/fontVariationSettings not found."
-// https://github.com/flutter/flutter/issues/27106 "Android resource linking failed|Daemon: AAPT2|error: failed linking references"
-// https://github.com/flutter/flutter/issues/27493 "error: cannot find symbol import androidx.annotation.NonNull;"
-// https://github.com/flutter/flutter/issues/23995 "error: package android.support.annotation does not exist import android.support.annotation.NonNull;"
-final RegExp _androidXFailureRegex = RegExp(r'(AAPT|androidx|android\.support)');
-
-final RegExp androidXPluginWarningRegex = RegExp(r'\*{57}'
-  r"|WARNING: This version of (\w+) will break your Android build if it or its dependencies aren't compatible with AndroidX."
-  r'|See https://goo.gl/CP92wY for more information on the problem and how to fix it.'
-  r'|This warning prints for all Android build failures. The real root cause of the error may be unrelated.');
-
-@visibleForTesting
-final GradleHandledError androidXFailureHandler = GradleHandledError(
-  test: (String line) {
-    return !androidXPluginWarningRegex.hasMatch(line) &&
-           _androidXFailureRegex.hasMatch(line);
-  },
-  handler: ({
-    required String line,
-    required FlutterProject project,
-    required bool usesAndroidX,
-    required bool shouldBuildPluginAsAar,
-  }) async {
-    final bool hasPlugins = project.flutterPluginsFile.existsSync();
-    if (!hasPlugins) {
-      // If the app doesn't use any plugin, then it's unclear where
-      // the incompatibility is coming from.
-      BuildEvent(
-        'gradle-android-x-failure',
-        type: 'gradle',
-        eventError: 'app-not-using-plugins',
-        flutterUsage: globals.flutterUsage,
-      ).send();
-    }
-    if (hasPlugins && !usesAndroidX) {
-      // If the app isn't using AndroidX, then the app is likely using
-      // a plugin already migrated to AndroidX.
-      globals.printStatus(
-        'AndroidX incompatibilities may have caused this build to fail. '
-        'Please migrate your app to AndroidX. See https://goo.gl/CP92wY .'
-      );
-      BuildEvent(
-        'gradle-android-x-failure',
-        type: 'gradle',
-        eventError: 'app-not-using-androidx',
-        flutterUsage: globals.flutterUsage,
-      ).send();
-    }
-    if (hasPlugins && usesAndroidX && shouldBuildPluginAsAar) {
-      // This is a dependency conflict instead of an AndroidX failure since
-      // by this point the app is using AndroidX, the plugins are built as
-      // AARs, Jetifier translated Support libraries for AndroidX equivalents.
-      BuildEvent(
-        'gradle-android-x-failure',
-        type: 'gradle',
-        eventError: 'using-jetifier',
-        flutterUsage: globals.flutterUsage,
-      ).send();
-    }
-    if (hasPlugins && usesAndroidX && !shouldBuildPluginAsAar) {
-      globals.printStatus(
-        'The build failed likely due to AndroidX incompatibilities in a plugin. '
-        'The tool is about to try using Jetifier to solve the incompatibility.'
-      );
-      BuildEvent(
-        'gradle-android-x-failure',
-        type: 'gradle',
-        eventError: 'not-using-jetifier',
-        flutterUsage: globals.flutterUsage,
-      ).send();
-      return GradleBuildStatus.retryWithAarPlugins;
-    }
-    return GradleBuildStatus.exit;
-  },
-  eventLabel: 'android-x',
 );
 
 /// Handle Gradle error thrown when Gradle needs to download additional
@@ -261,7 +278,7 @@ final GradleHandledError licenseNotAcceptedHandler = GradleHandledError(
     required String line,
     required FlutterProject project,
     required bool usesAndroidX,
-    required bool shouldBuildPluginAsAar,
+    required bool multidexEnabled,
   }) async {
     const String licenseNotAcceptedMatcher =
       r'You have not accepted the license agreements of the following SDK components:\s*\[(.+)\]';
@@ -269,12 +286,13 @@ final GradleHandledError licenseNotAcceptedHandler = GradleHandledError(
     final RegExp licenseFailure = RegExp(licenseNotAcceptedMatcher, multiLine: true);
     assert(licenseFailure != null);
     final Match? licenseMatch = licenseFailure.firstMatch(line);
-    globals.printStatus(
+    globals.printBox(
       '${globals.logger.terminal.warningMark} Unable to download needed Android SDK components, as the '
-      'following licenses have not been accepted:\n'
+      'following licenses have not been accepted: '
       '${licenseMatch?.group(1)}\n\n'
       'To resolve this, please run the following command in a Terminal:\n'
-      'flutter doctor --android-licenses'
+      'flutter doctor --android-licenses',
+      title: _boxTitle,
     );
     return GradleBuildStatus.exit;
   },
@@ -295,7 +313,7 @@ final GradleHandledError flavorUndefinedHandler = GradleHandledError(
     required String line,
     required FlutterProject project,
     required bool usesAndroidX,
-    required bool shouldBuildPluginAsAar,
+    required bool multidexEnabled,
   }) async {
     final RunResult tasksRunResult = await globals.processUtils.run(
       <String>[
@@ -333,21 +351,23 @@ final GradleHandledError flavorUndefinedHandler = GradleHandledError(
         }
       }
     }
-    globals.printStatus(
-      '\n${globals.logger.terminal.warningMark}  Gradle project does not define a task suitable '
-      'for the requested build.'
-    );
+    final String errorMessage = '${globals.logger.terminal.warningMark}  Gradle project does not define a task suitable for the requested build.';
+    final File buildGradle = project.directory.childDirectory('android').childDirectory('app').childFile('build.gradle');
     if (productFlavors.isEmpty) {
-      globals.printStatus(
-        'The android/app/build.gradle file does not define '
+      globals.printBox(
+        '$errorMessage\n\n'
+        'The ${buildGradle.absolute.path} file does not define '
         'any custom product flavors. '
-        'You cannot use the --flavor option.'
+        'You cannot use the --flavor option.',
+        title: _boxTitle,
       );
     } else {
-      globals.printStatus(
-        'The android/app/build.gradle file defines product '
-        'flavors: ${productFlavors.join(', ')} '
-        'You must specify a --flavor option to select one of them.'
+      globals.printBox(
+        '$errorMessage\n\n'
+        'The ${buildGradle.absolute.path} file defines product '
+        'flavors: ${productFlavors.join(', ')}. '
+        'You must specify a --flavor option to select one of them.',
+        title: _boxTitle,
       );
     }
     return GradleBuildStatus.exit;
@@ -368,7 +388,7 @@ final GradleHandledError minSdkVersion = GradleHandledError(
     required String line,
     required FlutterProject project,
     required bool usesAndroidX,
-    required bool shouldBuildPluginAsAar,
+    required bool multidexEnabled,
   }) async {
     final File gradleFile = project.directory
         .childDirectory('android')
@@ -378,7 +398,7 @@ final GradleHandledError minSdkVersion = GradleHandledError(
     final Match? minSdkVersionMatch = _minSdkVersionPattern.firstMatch(line);
     assert(minSdkVersionMatch?.groupCount == 3);
 
-    final String bold = globals.logger.terminal.bolden(
+    final String textInBold = globals.logger.terminal.bolden(
       'Fix this issue by adding the following to the file ${gradleFile.path}:\n'
       'android {\n'
       '  defaultConfig {\n'
@@ -386,12 +406,12 @@ final GradleHandledError minSdkVersion = GradleHandledError(
       '  }\n'
       '}\n'
     );
-    globals.printStatus(
-      '\n'
+    globals.printBox(
       'The plugin ${minSdkVersionMatch?.group(3)} requires a higher Android SDK version.\n'
-      '$bold\n'
+      '$textInBold\n'
       "Note that your app won't be available to users running Android SDKs below ${minSdkVersionMatch?.group(2)}.\n"
-      'Alternatively, try to find a version of this plugin that supports these lower versions of the Android SDK.'
+      'Alternatively, try to find a version of this plugin that supports these lower versions of the Android SDK.',
+      title: _boxTitle,
     );
     return GradleBuildStatus.exit;
   },
@@ -409,13 +429,13 @@ final GradleHandledError transformInputIssue = GradleHandledError(
     required String line,
     required FlutterProject project,
     required bool usesAndroidX,
-    required bool shouldBuildPluginAsAar,
+    required bool multidexEnabled,
   }) async {
     final File gradleFile = project.directory
         .childDirectory('android')
         .childDirectory('app')
         .childFile('build.gradle');
-    final String bold = globals.logger.terminal.bolden(
+    final String textInBold = globals.logger.terminal.bolden(
       'Fix this issue by adding the following to the file ${gradleFile.path}:\n'
       'android {\n'
       '  lintOptions {\n'
@@ -423,10 +443,10 @@ final GradleHandledError transformInputIssue = GradleHandledError(
       '  }\n'
       '}'
     );
-    globals.printStatus(
-      '\n'
+    globals.printBox(
       'This issue appears to be https://github.com/flutter/flutter/issues/58247.\n'
-      '$bold'
+      '$textInBold',
+      title: _boxTitle,
     );
     return GradleBuildStatus.exit;
   },
@@ -443,21 +463,77 @@ final GradleHandledError lockFileDepMissing = GradleHandledError(
     required String line,
     required FlutterProject project,
     required bool usesAndroidX,
-    required bool shouldBuildPluginAsAar,
+    required bool multidexEnabled,
   }) async {
     final File gradleFile = project.directory
         .childDirectory('android')
         .childFile('build.gradle');
-    final String bold = globals.logger.terminal.bolden(
+    final String textInBold = globals.logger.terminal.bolden(
       'To regenerate the lockfiles run: `./gradlew :generateLockfiles` in ${gradleFile.path}\n'
-      'To remove dependency locking, remove the `dependencyLocking` from ${gradleFile.path}\n'
+      'To remove dependency locking, remove the `dependencyLocking` from ${gradleFile.path}'
     );
-    globals.printStatus(
-      '\n'
+    globals.printBox(
       'You need to update the lockfile, or disable Gradle dependency locking.\n'
-      '$bold'
+      '$textInBold',
+      title: _boxTitle,
     );
     return GradleBuildStatus.exit;
   },
   eventLabel: 'lock-dep-issue',
+);
+
+@visibleForTesting
+final GradleHandledError incompatibleKotlinVersionHandler = GradleHandledError(
+  test: _lineMatcher(const <String>[
+    'Module was compiled with an incompatible version of Kotlin',
+  ]),
+  handler: ({
+    required String line,
+    required FlutterProject project,
+    required bool usesAndroidX,
+    required bool multidexEnabled,
+  }) async {
+    final File gradleFile = project.directory
+        .childDirectory('android')
+        .childFile('build.gradle');
+    globals.printBox(
+      '${globals.logger.terminal.warningMark} Your project requires a newer version of the Kotlin Gradle plugin.\n'
+      'Find the latest version on https://kotlinlang.org/docs/gradle.html#plugin-and-versions, then update ${gradleFile.path}:\n'
+      "ext.kotlin_version = '<latest-version>'",
+      title: _boxTitle,
+    );
+    return GradleBuildStatus.exit;
+  },
+  eventLabel: 'incompatible-kotlin-version',
+);
+
+final RegExp _minCompileSdkVersionPattern = RegExp(r'The minCompileSdk \(([0-9]+)\) specified in a');
+
+@visibleForTesting
+final GradleHandledError minCompileSdkVersionHandler = GradleHandledError(
+  test: _minCompileSdkVersionPattern.hasMatch,
+  handler: ({
+    required String line,
+    required FlutterProject project,
+    required bool usesAndroidX,
+    required bool multidexEnabled,
+  }) async {
+    final Match? minSdkVersionMatch = _minCompileSdkVersionPattern.firstMatch(line);
+    assert(minSdkVersionMatch?.groupCount == 1);
+
+    final File gradleFile = project.directory
+        .childDirectory('android')
+        .childDirectory('app')
+        .childFile('build.gradle');
+    globals.printBox(
+      '${globals.logger.terminal.warningMark} Your project requires a higher compileSdkVersion.\n'
+      'Fix this issue by bumping the compileSdkVersion in ${gradleFile.path}:\n'
+      'android {\n'
+      '  compileSdkVersion ${minSdkVersionMatch?.group(1)}\n'
+      '}',
+      title: _boxTitle,
+    );
+    return GradleBuildStatus.exit;
+  },
+  eventLabel: 'min-compile-sdk-version',
 );

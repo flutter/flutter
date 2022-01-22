@@ -443,17 +443,16 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
       registerServiceExtension(
         name: 'fastReassemble',
         callback: (Map<String, Object> params) async {
+          // This mirrors the implementation of the 'reassemble' callback registration
+          // in lib/src/foundation/binding.dart, but with the extra binding config used
+          // to skip some reassemble work.
           final String? className = params['className'] as String?;
-          void markElementsDirty(Element element) {
-            if (element.widget.runtimeType.toString() == className) {
-              element.markNeedsBuild();
-            }
-            element.visitChildElements(markElementsDirty);
+          BindingBase.debugReassembleConfig = DebugReassembleConfig(widgetName: className);
+          try {
+            await reassembleApplication();
+          } finally {
+            BindingBase.debugReassembleConfig = null;
           }
-          if (renderViewElement != null) {
-            markElementsDirty(renderViewElement!);
-          }
-          await endOfFrame;
           return <String, String>{'type': 'Success'};
         },
       );
@@ -502,7 +501,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
 
   Future<void> _forceRebuild() {
     if (renderViewElement != null) {
-      buildOwner!.reassemble(renderViewElement!);
+      buildOwner!.reassemble(renderViewElement!, null);
       return endOfFrame;
     }
     return Future<void>.value();
@@ -636,7 +635,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   /// [SystemChannels.navigation].
   @protected
   Future<void> handlePopRoute() async {
-    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.from(_observers)) {
+    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
       if (await observer.didPopRoute())
         return;
     }
@@ -656,14 +655,14 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   @protected
   @mustCallSuper
   Future<void> handlePushRoute(String route) async {
-    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.from(_observers)) {
+    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
       if (await observer.didPushRoute(route))
         return;
     }
   }
 
   Future<void> _handlePushRouteInformation(Map<dynamic, dynamic> routeArguments) async {
-    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.from(_observers)) {
+    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
       if (
         await observer.didPushRouteInformation(
           RouteInformation(
@@ -860,6 +859,11 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
       firstFrameCallback = (List<FrameTiming> timings) {
         assert(sendFramesToEngine);
         if (!kReleaseMode) {
+          // Change the current user tag back to the default tag. At this point,
+          // the user tag should be set to "AppStartUp" (originally set in the
+          // engine), so we need to change it back to the default tag to mark
+          // the end of app start up for CPU profiles.
+          developer.UserTag.defaultTag.makeCurrent();
           developer.Timeline.instantSync('Rasterized first useful frame');
           developer.postEvent('Flutter.FirstFrame', <String, dynamic>{});
         }
@@ -956,8 +960,9 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
       return true;
     }());
 
-    if (renderViewElement != null)
-      buildOwner!.reassemble(renderViewElement!);
+    if (renderViewElement != null) {
+      buildOwner!.reassemble(renderViewElement!, BindingBase.debugReassembleConfig);
+    }
     return super.performReassemble();
   }
 

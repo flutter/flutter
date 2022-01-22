@@ -164,8 +164,8 @@ void main() {
     expect(ButtonStyle.lerp(null, null, 0.5), null);
     expect(ButtonStyle.lerp(null, null, 1), null);
 
-    const BorderSide blackSide = BorderSide(width: 1, color: Color(0xFF000000));
-    const BorderSide whiteSide = BorderSide(width: 1, color: Color(0xFFFFFFFF));
+    const BorderSide blackSide = BorderSide();
+    const BorderSide whiteSide = BorderSide(color: Color(0xFFFFFFFF));
     const BorderSide emptyBlackSide = BorderSide(width: 0, color: Color(0x00000000));
 
     final ButtonStyle blackStyle = ButtonStyle(side: MaterialStateProperty.all<BorderSide>(blackSide));

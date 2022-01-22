@@ -37,7 +37,7 @@ void main() {
       final String foundLicense = await driver.getText(find.byValueKey('FlutterLicense'));
       expect(foundPackage, equals('flutter'));
       expect(foundLicense, equals(license));
-    });
+    }, timeout: Timeout.none);
 
     test('engine license', () async {
       await driver.waitFor(find.byValueKey('Header'));
@@ -46,6 +46,6 @@ void main() {
       expect(foundPackage, equals('engine'));
       // The engine has the same license, but with a different Copyright date.
       expect(foundLicense, contains(license.replaceFirst('2014', '2013')));
-    });
+    }, timeout: Timeout.none);
   });
 }

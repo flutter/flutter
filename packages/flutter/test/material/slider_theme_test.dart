@@ -4,6 +4,7 @@
 
 import 'dart:ui' show window;
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -57,6 +58,7 @@ void main() {
       rangeValueIndicatorShape: PaddleRangeSliderValueIndicatorShape(),
       showValueIndicator: ShowValueIndicator.always,
       valueIndicatorTextStyle: TextStyle(color: Colors.black),
+      mouseCursor: MaterialStateMouseCursor.clickable,
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -90,6 +92,7 @@ void main() {
       "rangeValueIndicatorShape: Instance of 'PaddleRangeSliderValueIndicatorShape'",
       'showValueIndicator: always',
       'valueIndicatorTextStyle: TextStyle(inherit: true, color: Color(0xff000000))',
+      'mouseCursor: MaterialStateMouseCursor(clickable)'
     ]);
   });
 
@@ -1136,17 +1139,13 @@ void main() {
         ..rrect(rrect: RRect.fromLTRBAndCorners(
           24.0, 298.0, 24.0, 302.0,
           topLeft: const Radius.circular(2.0),
-          topRight: Radius.zero,
-          bottomRight: Radius.zero,
           bottomLeft: const Radius.circular(2.0),
         ))
         ..rect(rect: const Rect.fromLTRB(24.0, 297.0, 24.0, 303.0))
         ..rrect(rrect: RRect.fromLTRBAndCorners(
           24.0, 298.0, 776.0, 302.0,
-          topLeft: Radius.zero,
           topRight: const Radius.circular(2.0),
           bottomRight: const Radius.circular(2.0),
-          bottomLeft: Radius.zero,
         ))
         ..circle(x: 24.0, y: 300.0)
         ..shadow(elevation: 1.0)
@@ -1218,6 +1217,69 @@ void main() {
 
     await gesture.up();
   });
+
+  testWidgets('activeTrackRadius is taken into account when painting the border of the active track', (WidgetTester tester) async {
+    await tester.pumpWidget(_buildApp(
+      ThemeData().sliderTheme.copyWith(
+        trackShape: const RoundedRectSliderTrackShapeWithCustomAdditionalActiveTrackHeight(
+          additionalActiveTrackHeight: 10.0
+        )
+      )
+    ));
+    await tester.pumpAndSettle();
+    final Offset center = tester.getCenter(find.byType(Slider));
+    await tester.startGesture(center);
+    expect(
+      find.byType(Slider),
+      paints
+        ..rrect(rrect: RRect.fromLTRBAndCorners(
+          24.0, 293.0, 24.0, 307.0,
+          topLeft: const Radius.circular(7.0),
+          bottomLeft: const Radius.circular(7.0),
+        ))
+        ..rrect(rrect: RRect.fromLTRBAndCorners(
+          24.0, 298.0, 776.0, 302.0,
+          topRight: const Radius.circular(2.0),
+          bottomRight: const Radius.circular(2.0),
+        )),
+    );
+  });
+
+  testWidgets('The mouse cursor is themeable', (WidgetTester tester) async {
+    await tester.pumpWidget(_buildApp(
+      ThemeData().sliderTheme.copyWith(
+        mouseCursor: MaterialStateProperty.all(SystemMouseCursors.text),
+      )
+    ));
+
+    await tester.pumpAndSettle();
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    addTearDown(gesture.removePointer);
+    await gesture.moveTo(tester.getCenter(find.byType(Slider)));
+    await tester.pumpAndSettle();
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+  });
+}
+
+class RoundedRectSliderTrackShapeWithCustomAdditionalActiveTrackHeight extends RoundedRectSliderTrackShape {
+  const RoundedRectSliderTrackShapeWithCustomAdditionalActiveTrackHeight({required this.additionalActiveTrackHeight});
+  final double additionalActiveTrackHeight;
+  @override
+  void paint(
+    PaintingContext context,
+    Offset offset, {
+    required RenderBox parentBox,
+    required SliderThemeData sliderTheme,
+    required Animation<double> enableAnimation,
+    required TextDirection textDirection,
+    required Offset thumbCenter,
+    bool isDiscrete = false,
+    bool isEnabled = false,
+    double additionalActiveTrackHeight = 2.0,
+  }) {
+    super.paint(context, offset, parentBox: parentBox, sliderTheme: sliderTheme, enableAnimation: enableAnimation, textDirection: textDirection, thumbCenter: thumbCenter, additionalActiveTrackHeight: this.additionalActiveTrackHeight);
+  }
 }
 
 Widget _buildApp(

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
@@ -20,7 +18,9 @@ import 'package:path/path.dart' as path;
 /// adding Flutter to an existing iOS app.
 Future<void> main() async {
   await task(() async {
-    String simulatorDeviceId;
+    // this variable cannot be `late`, as we reference it in the `finally` block
+    // which may execute before this field has been initialized
+    String? simulatorDeviceId;
     section('Create Flutter module project');
 
     final Directory tempDir = Directory.systemTemp.createTempSync('flutter_module_test.');
@@ -152,14 +152,28 @@ Future<void> main() async {
         await flutter('clean');
       });
 
+      // Make a fake Dart-only plugin, since there are no existing examples.
+      section('Create local plugin');
+
+      const String dartPluginName = 'dartplugin';
+      await _createFakeDartPlugin(dartPluginName, tempDir);
+
       section('Add plugins');
 
       final File pubspec = File(path.join(projectDir.path, 'pubspec.yaml'));
       String content = await pubspec.readAsString();
       content = content.replaceFirst(
         '\ndependencies:\n',
-        // One dynamic framework, one static framework, and one that does not support iOS.
-        '\ndependencies:\n  device_info: 0.4.2+4\n  google_sign_in: 4.5.1\n  android_alarm_manager: 0.4.5+11\n',
+        // One dynamic framework, one static framework, one Dart-only,
+        // and one that does not support iOS.
+        '''
+dependencies:
+  device_info: 2.0.3
+  google_sign_in: 4.5.1
+  android_alarm_manager: 0.4.5+11
+  $dartPluginName:
+    path: ../$dartPluginName
+''',
       );
       await pubspec.writeAsString(content, flush: true);
       await inDirectory(projectDir, () async {
@@ -191,7 +205,8 @@ Future<void> main() async {
         || !podfileLockOutput.contains(':path: Flutter/FlutterPluginRegistrant')
         || !podfileLockOutput.contains(':path: ".symlinks/plugins/device_info/ios"')
         || !podfileLockOutput.contains(':path: ".symlinks/plugins/google_sign_in/ios"')
-        || podfileLockOutput.contains('android_alarm_manager')) {
+        || podfileLockOutput.contains('android_alarm_manager')
+        || podfileLockOutput.contains(dartPluginName)) {
         print(podfileLockOutput);
         return TaskResult.failure('Building ephemeral host app Podfile.lock does not contain expected pods');
       }
@@ -204,6 +219,9 @@ Future<void> main() async {
 
       // Android-only, no embedded framework.
       checkDirectoryNotExists(path.join(ephemeralIOSHostApp.path, 'Frameworks', 'android_alarm_manager.framework'));
+
+      // Dart-only, no embedded framework.
+      checkDirectoryNotExists(path.join(ephemeralIOSHostApp.path, 'Frameworks', '$dartPluginName.framework'));
 
       section('Clean and pub get module');
 
@@ -243,7 +261,8 @@ Future<void> main() async {
             || !hostPodfileLockOutput.contains(':path: "../hello/.ios/Flutter/FlutterPluginRegistrant"')
             || !hostPodfileLockOutput.contains(':path: "../hello/.ios/.symlinks/plugins/device_info/ios"')
             || !hostPodfileLockOutput.contains(':path: "../hello/.ios/.symlinks/plugins/google_sign_in/ios"')
-            || hostPodfileLockOutput.contains('android_alarm_manager')) {
+            || hostPodfileLockOutput.contains('android_alarm_manager')
+            || hostPodfileLockOutput.contains(dartPluginName)) {
           print(hostPodfileLockOutput);
           throw TaskResult.failure('Building host app Podfile.lock does not contain expected pods');
         }
@@ -360,21 +379,24 @@ Future<void> main() async {
         );
 
         if (testResultExit != 0) {
-          // Zip the test results to the artifacts directory for upload.
-          await inDirectory(resultBundleTemp, () {
-            final String zipPath = path.join(hostAgent.dumpDirectory.path,
-                'module_test_ios-objc-${DateTime.now().toLocal().toIso8601String()}.zip');
-            return exec(
-              'zip',
-              <String>[
-                '-r',
-                '-9',
-                zipPath,
-                'result.xcresult',
-              ],
-              canFail: true, // Best effort to get the logs.
-            );
-          });
+          final Directory? dumpDirectory = hostAgent.dumpDirectory;
+          if (dumpDirectory != null) {
+            // Zip the test results to the artifacts directory for upload.
+            await inDirectory(resultBundleTemp, () {
+              final String zipPath = path.join(dumpDirectory.path,
+                  'module_test_ios-objc-${DateTime.now().toLocal().toIso8601String()}.zip');
+              return exec(
+                'zip',
+                <String>[
+                  '-r',
+                  '-9',
+                  zipPath,
+                  'result.xcresult',
+                ],
+                canFail: true, // Best effort to get the logs.
+              );
+            });
+          }
 
           throw TaskResult.failure('Platform unit tests failed');
         }
@@ -497,4 +519,47 @@ Future<bool> _isAppAotBuild(Directory app) async {
   );
 
   return symbolTable.contains('kDartIsolateSnapshotInstructions');
+}
+
+Future<void> _createFakeDartPlugin(String name, Directory parent) async {
+  // Start from a standard plugin template.
+  await inDirectory(parent, () async {
+    await flutter(
+      'create',
+      options: <String>[
+        '--org',
+        'io.flutter.devicelab',
+        '--template=plugin',
+        '--platforms=ios',
+        name,
+      ],
+    );
+  });
+
+  final String pluginDir = path.join(parent.path, name);
+
+  // Convert the metadata to Dart-only.
+  final String dartPluginClass = 'DartClassFor$name';
+  final File pubspec = File(path.join(pluginDir, 'pubspec.yaml'));
+  String content = await pubspec.readAsString();
+  content = content.replaceAll(
+    RegExp(r' pluginClass: .*?\n'),
+    ' dartPluginClass: $dartPluginClass\n',
+  );
+  await pubspec.writeAsString(content, flush: true);
+
+  // Add the Dart registration hook that the build will generate a call to.
+  final File dartCode = File(path.join(pluginDir, 'lib', '$name.dart'));
+  content = await dartCode.readAsString();
+  content = '''
+$content
+
+class $dartPluginClass {
+  static void registerWith() {}
+}
+''';
+  await dartCode.writeAsString(content, flush: true);
+
+  // Remove the native plugin code.
+  await Directory(path.join(pluginDir, 'ios')).delete(recursive: true);
 }

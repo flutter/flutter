@@ -280,22 +280,22 @@ class _SemanticsDebuggerPainter extends CustomPainter {
     if (isAdjustable)
       annotations.add('adjustable');
 
-    assert(data.label != null);
+    assert(data.attributedLabel != null);
     final String message;
-    if (data.label.isEmpty) {
+    if (data.attributedLabel.string.isEmpty) {
       message = annotations.join('; ');
     } else {
       final String label;
       if (data.textDirection == null) {
-        label = '${Unicode.FSI}${data.label}${Unicode.PDI}';
+        label = '${Unicode.FSI}${data.attributedLabel.string}${Unicode.PDI}';
         annotations.insert(0, 'MISSING TEXT DIRECTION');
       } else {
         switch (data.textDirection!) {
           case TextDirection.rtl:
-            label = '${Unicode.RLI}${data.label}${Unicode.PDF}';
+            label = '${Unicode.RLI}${data.attributedLabel.string}${Unicode.PDF}';
             break;
           case TextDirection.ltr:
-            label = data.label;
+            label = data.attributedLabel.string;
             break;
         }
       }
