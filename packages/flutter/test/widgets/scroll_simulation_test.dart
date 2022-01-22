@@ -23,4 +23,45 @@ void main() {
     checkInitialConditions(75.0, 614.2093);
     checkInitialConditions(5469.0, 182.114534);
   });
+
+  test('PageScrollSimulation', () {
+    void checkSimulation(double position, double target, double duration) {
+      final double delta = target - position;
+      final PageScrollSimulation simulation = PageScrollSimulation(position: position, target: target, duration: duration);
+      late double lastX;
+      late double lastDx;
+      void expectX(double t, dynamic expectedValue) {
+        final double x = simulation.x(t);
+        expect(x, expectedValue);
+        lastX = x;
+      }
+      void expectDx(double t, dynamic expectedValue) {
+        final double dx = simulation.dx(t);
+        expect(dx, expectedValue);
+        lastDx = dx;
+      }
+
+      // verify start values
+      expectX(0.0, position);
+      expectDx(0.0, moreOrLessEquals(5 * delta));
+      expect(simulation.isDone(0.0), false);
+
+      // verify intermediate values change monotonically
+      for (double t = 0.01; t < duration; t += 1) {
+        expectX(t, target > position ? greaterThan(lastX) : lessThan(lastX));
+        expectDx(t, target > position ? lessThan(lastDx) : greaterThan(lastDx));
+        expect(simulation.isDone(t), false);
+      }
+
+      // verify end values
+      expectX(duration, target);
+      expectDx(duration, 0.0);
+      expect(simulation.isDone(duration), true);
+    }
+
+    checkSimulation(0, 500, 1000);
+    checkSimulation(0, -500, 1000);
+    checkSimulation(1000, 5000, 100);
+    checkSimulation(100, -5000, 100);
+  });
 }
