@@ -35,7 +35,7 @@ import 'tooltip.dart';
 ///
 /// {@tool dartpad}
 /// This example shows a [NavigationBar] as it is used within a [Scaffold]
-/// widget. The [NavigationBar] has three [NavigationDestination] widgets,
+/// widget. The [NavigationBar] has three [NavigationDestination] widgets
 /// and the [selectedIndex] is set to index 0. The `onDestinationSelected` callback
 /// changes the selected item's index and displays a corresponding widget in the body of the [Scaffold].
 ///
