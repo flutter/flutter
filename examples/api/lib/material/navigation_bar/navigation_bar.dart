@@ -32,10 +32,16 @@ class _NavigationExampleState extends State<NavigationExample> {
   @override
   Widget build(BuildContext context) {
     Widget _buildBody() {
-      return const [
-        Center(child: Text('Page 1')),
-        Center(child: Text('Page 2')),
-        Center(child: Text('Page 3')),
+      return [
+        Container(
+          color: Colors.red,
+          alignment: Alignment.center, child: Text('Page 1')),
+        Container(
+          color: Colors.green,
+          alignment: Alignment.center, child: Text('Page 2')),
+        Container(
+          color: Colors.blue,
+          alignment: Alignment.center, child: Text('Page 3')),
       ][_currentPageIndex];
     }
 
