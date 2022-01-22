@@ -38,19 +38,19 @@ class _NavigationExampleState extends State<NavigationExample> {
   @override
   Widget build(BuildContext context) {
     Widget _buildBody() {
-      return [
+      return <Widget>[
         Container(
             color: Colors.red,
             alignment: Alignment.center,
-            child: Text('Page 1')),
+            child: const Text('Page 1')),
         Container(
             color: Colors.green,
             alignment: Alignment.center,
-            child: Text('Page 2')),
+            child: const Text('Page 2')),
         Container(
             color: Colors.blue,
             alignment: Alignment.center,
-            child: Text('Page 3')),
+            child: const Text('Page 3')),
       ][_currentPageIndex];
     }
 
@@ -62,7 +62,7 @@ class _NavigationExampleState extends State<NavigationExample> {
               });
             },
             selectedIndex: _currentPageIndex,
-            destinations: const [
+            destinations: const <Widget>[
               NavigationDestination(
                 icon: Icon(Icons.explore),
                 label: 'Explore',
