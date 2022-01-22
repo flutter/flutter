@@ -31,6 +31,9 @@
 
   <title>{{projectName}}</title>
   <link rel="manifest" href="manifest.json">
+  <link rel="preload" href="main.dart.js" as="script">
+  <link rel="preload" href="https://unpkg.com/canvaskit-wasm@0.30.0/bin/canvaskit.js" as="script">
+  <link rel="preload" href="https://unpkg.com/canvaskit-wasm@0.30.0/bin/canvaskit.wasm" as="fetch" crossorigin="anonymous">
 </head>
 <body>
   <!-- This script installs service_worker.js to provide PWA functionality to
