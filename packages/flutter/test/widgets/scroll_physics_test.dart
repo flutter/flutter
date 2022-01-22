@@ -117,7 +117,7 @@ void main() {
     // velocity depends on a ratio of velocity / pageDelta, and because they are not affected by
     // https://github.com/flutter/flutter/issues/11599
 
-    // TODO(nt4f04uNd): remove this test, because it is artifitial, in favor of a real one.
+    // TODO(nt4f04uNd): remove this test, because it is artificial, in favor of a real one.
     // Scroll simulations surely should be allowed to modify the speed they receive in whatever way they want.
     // The proper fix for the original bug https://github.com/flutter/flutter/issues/24715
     // would be to ensure this is not called too often https://github.com/flutter/flutter/issues/11599

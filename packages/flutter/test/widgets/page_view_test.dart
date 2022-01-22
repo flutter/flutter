@@ -1128,7 +1128,7 @@ void main() {
     const double expectedMinFlingVelocity = 400.0;
     const int maxExpectedFrames = 41; // expected frames with _kMaxSettleDuration
 
-    /// Creates a page view, drags/flings it with specified parameters.
+    /// Creates a page view and drags/flings it with specified parameters.
     ///
     /// When `flingVelocity` is not null, uses [WidgetTester.fling]
     /// otherwise uses [WidgetTester.drag].
@@ -1256,11 +1256,11 @@ void main() {
     });
 
     testWidgets('fling has max settle duration, which decreases when user drags faster', (WidgetTester tester) async {
-      // The duration depends on the drag `offset` and `velocity`
+      // The duration depends on the fling `offset` and `velocity`
 
       // For offset 200.0
 
-      // Drag very slowly
+      // Fling very slowly
       int frames = await testPageViewPhysics(
         tester,
         flingVelocity: 500.0,
@@ -1268,7 +1268,7 @@ void main() {
         expectedFrames: maxExpectedFrames,
         expectedEndValue: 800.0,
       );
-      // Drag about as fast to start going faster
+      // Fling about as fast to start going faster
       frames = await testPageViewPhysics(
         tester,
         flingVelocity: 3000.0,
@@ -1295,7 +1295,7 @@ void main() {
 
       // For offset 400.0
 
-      // Drag very slowly
+      // Fling very slowly
       frames = await testPageViewPhysics(
         tester,
         flingVelocity: 500.0,
@@ -1303,7 +1303,7 @@ void main() {
         expectedFrames: maxExpectedFrames,
         expectedEndValue: 800.0,
       );
-      // Drag about as fast to start going faster
+      // Fling about as fast to start going faster
       frames = await testPageViewPhysics(
         tester,
         flingVelocity: 2650.0,
