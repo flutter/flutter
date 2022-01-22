@@ -1097,7 +1097,7 @@ class PopupMenuButton<T> extends StatefulWidget {
 
   /// The splash radius.
   ///
-  /// If null, default splash radius of [Material.defaultSplashRadius] is used.
+  /// If this property is null, the default splash radius is [Material.defaultSplashRadius].
   final double? splashRadius;
 
   @override
