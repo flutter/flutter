@@ -379,4 +379,70 @@ void main() {
     expect(find.text('drawer'), findsNothing);
     expect(find.text('endDrawer'), findsOneWidget);
   });
+
+  testWidgets('ScaffoldState close drawer', (WidgetTester tester) async {
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          key: scaffoldKey,
+          drawer: const Text('Drawer'),
+          body: Container(),
+        ),
+      ),
+    );
+
+    expect(find.text('Drawer'), findsNothing);
+
+    scaffoldKey.currentState!.openDrawer();
+    await tester.pumpAndSettle();
+    expect(find.text('Drawer'), findsOneWidget);
+
+    scaffoldKey.currentState!.closeDrawer();
+    await tester.pumpAndSettle();
+    expect(find.text('Drawer'), findsNothing);
+  });
+
+  testWidgets('ScaffoldState close drawer do not crash if drawer is already closed', (WidgetTester tester) async {
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          key: scaffoldKey,
+          drawer: const Text('Drawer'),
+          body: Container(),
+        ),
+      ),
+    );
+
+    expect(find.text('Drawer'), findsNothing);
+
+    scaffoldKey.currentState!.closeDrawer();
+    await tester.pumpAndSettle();
+    expect(find.text('Drawer'), findsNothing);
+  });
+
+
+  testWidgets('ScaffoldState close end drawer', (WidgetTester tester) async {
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          key: scaffoldKey,
+          endDrawer: const Text('endDrawer'),
+          body: Container(),
+        ),
+      ),
+    );
+
+    expect(find.text('endDrawer'), findsNothing);
+
+    scaffoldKey.currentState!.openEndDrawer();
+    await tester.pumpAndSettle();
+    expect(find.text('endDrawer'), findsOneWidget);
+
+    scaffoldKey.currentState!.closeEndDrawer();
+    await tester.pumpAndSettle();
+    expect(find.text('endDrawer'), findsNothing);
+  });
 }

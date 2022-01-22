@@ -1590,7 +1590,8 @@ class Scaffold extends StatefulWidget {
   ///
   /// To open the drawer, use the [ScaffoldState.openDrawer] function.
   ///
-  /// To close the drawer, use [Navigator.pop].
+  /// To close the drawer, use either [ScaffoldState.closeDrawer] or
+  /// [Navigator.pop].
   ///
   /// {@tool dartpad}
   /// To disable the drawer edge swipe, set the
@@ -1613,7 +1614,8 @@ class Scaffold extends StatefulWidget {
   ///
   /// To open the drawer, use the [ScaffoldState.openEndDrawer] function.
   ///
-  /// To close the drawer, use [Navigator.pop].
+  /// To close the drawer, use either [ScaffoldState.closeEndDrawer] or
+  /// [Navigator.pop].
   ///
   /// {@tool dartpad}
   /// To disable the drawer edge swipe, set the
@@ -1986,7 +1988,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   /// appropriate [IconButton], and handles the edge-swipe gesture, to show the
   /// drawer.
   ///
-  /// To close the drawer once it is open, use [Navigator.pop].
+  /// To close the drawer, use either [ScaffoldState.closeEndDrawer] or
+  /// [Navigator.pop].
   ///
   /// See [Scaffold.of] for information about how to obtain the [ScaffoldState].
   void openDrawer() {
@@ -2004,7 +2007,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   /// appropriate [IconButton], and handles the edge-swipe gesture, to show the
   /// drawer.
   ///
-  /// To close the end side drawer once it is open, use [Navigator.pop].
+  /// To close the drawer, use either [ScaffoldState.closeEndDrawer] or
+  /// [Navigator.pop].
   ///
   /// See [Scaffold.of] for information about how to obtain the [ScaffoldState].
   void openEndDrawer() {
@@ -2302,6 +2306,24 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
         });
         return true;
       }());
+    }
+  }
+
+  /// Closes [Scaffold.drawer] if it is currently opened.
+  ///
+  /// See [Scaffold.of] for information about how to obtain the [ScaffoldState].
+  void closeDrawer() {
+   if (hasDrawer && isDrawerOpen) {
+     _drawerKey.currentState!.close();
+   }
+  }
+
+  /// Closes [Scaffold.endDrawer] if it is currently opened.
+  ///
+  /// See [Scaffold.of] for information about how to obtain the [ScaffoldState].
+  void closeEndDrawer() {
+    if (hasEndDrawer && isEndDrawerOpen) {
+      _endDrawerKey.currentState!.close();
     }
   }
 
