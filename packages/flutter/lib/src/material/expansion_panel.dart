@@ -255,14 +255,14 @@ class ExpansionPanelList extends StatefulWidget {
   /// is null, then [ThemeData.dividerColor] is used.
   final Color? dividerColor;
 
-  /// The color of the icon.
+  /// The color of the arrow icon when the panel is collapsed.
   ///
   /// Defaults to [Colors.black54] when the theme's
   /// [ThemeData.brightness] is [Brightness.light] and to
   /// [Colors.white60] when it is [Brightness.dark].
   final Color? iconColor;
 
-  /// The color of the icon when panel is expanded.
+  /// The color of the arrow icon when the panel is expanded.
   ///
   /// Defaults to [Colors.black54] when the theme's
   /// [ThemeData.brightness] is [Brightness.light] and to

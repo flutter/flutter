@@ -1543,13 +1543,13 @@ void main() {
       ),
     );
 
-    IconButton iconButton = tester.widget(find.byType(IconButton).at(0));
+    IconButton iconButton = tester.widget(find.byType(IconButton).first);
     expect(iconButton.color, iconColor);
 
-    await tester.tap(find.byType(ExpandIcon).at(0));
+    await tester.tap(find.byType(ExpandIcon).first);
     await tester.pumpAndSettle();
 
-    iconButton = tester.widget(find.byType(IconButton).at(0));
+    iconButton = tester.widget(find.byType(IconButton).first);
     expect(iconButton.color, expandedIconColor);
   });
 
@@ -1581,13 +1581,13 @@ void main() {
       ),
     );
 
-    IconButton iconButton = tester.widget(find.byType(IconButton).at(0));
+    IconButton iconButton = tester.widget(find.byType(IconButton));
     expect(iconButton.color, iconColor);
 
-    await tester.tap(find.byType(ExpandIcon).at(0));
+    await tester.tap(find.byType(ExpandIcon));
     await tester.pumpAndSettle();
 
-    iconButton = tester.widget(find.byType(IconButton).at(0));
+    iconButton = tester.widget(find.byType(IconButton));
     expect(iconButton.color, expandedIconColor);
   });
 }
