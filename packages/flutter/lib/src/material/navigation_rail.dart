@@ -660,17 +660,38 @@ class _RailDestination extends StatelessWidget {
       selected: selected,
       child: Stack(
         children: <Widget>[
-          Material(
-            type: MaterialType.transparency,
-            child: InkResponse(
-              onTap: onTap,
+          // Material(
+          //   color: Color(0xFFF542DA),
+          //   type: MaterialType.transparency,
+          //   child: InkResponse(
+          //     onTap: onTap,
+          //     onHover: (_) {},
+          //     focusColor: Color(0xFFF542DA),//Color(0xFF4E53BB),
+          //     highlightShape: BoxShape.rectangle,
+          //     borderRadius: BorderRadius.all(Radius.circular(minWidth / 2.0)),
+          //     containedInkWell: true,
+          //     splashColor: colors.primary.withOpacity(0.12),
+          //     hoverColor: colors.primary.withOpacity(0.04),
+          //     child: content,
+          //   ),
+          // ),
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+            child:MouseRegion(
+              cursor: SystemMouseCursors.click,
               onHover: (_) {},
-              highlightShape: BoxShape.rectangle,
-              borderRadius: BorderRadius.all(Radius.circular(minWidth / 2.0)),
-              containedInkWell: true,
-              splashColor: colors.primary.withOpacity(0.12),
-              hoverColor: colors.primary.withOpacity(0.04),
-              child: content,
+              child: GestureDetector(
+                onTap: onTap,
+                child :Container(
+                  height: 56,
+                  //color: selected ? Color(0xFFF542DA) : null,
+                  child: content,
+                  decoration: BoxDecoration(
+                    color: selected ? Color(0xFF4E53BB) : null,
+                    borderRadius: BorderRadius.circular(20)
+                  ),
+                ),
+              )
             ),
           ),
           Semantics(
