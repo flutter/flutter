@@ -51,8 +51,10 @@ void main() {
     );
 
     binary = environment.outputDir
-        .childDirectory('FlutterMacOS.framework')
-        .childFile('FlutterMacOS');
+      .childDirectory('FlutterMacOS.framework')
+      .childDirectory('Versions')
+      .childDirectory('A')
+      .childFile('FlutterMacOS');
 
     copyFrameworkCommand = FakeCommand(
       command: <String>[
@@ -109,7 +111,7 @@ void main() {
       throwsA(isException.having(
         (Exception exception) => exception.toString(),
         'description',
-        contains('FlutterMacOS.framework/FlutterMacOS does not exist, cannot thin'),
+        contains('FlutterMacOS.framework/Versions/A/FlutterMacOS does not exist, cannot thin'),
       )),
     );
   }, overrides: <Type, Generator>{
@@ -155,7 +157,7 @@ void main() {
 
     await const DebugUnpackMacOS().build(environment);
 
-    expect(logger.traceText, contains('Skipping lipo for non-fat file /FlutterMacOS.framework/FlutterMacOS'));
+    expect(logger.traceText, contains('Skipping lipo for non-fat file /FlutterMacOS.framework/Versions/A/FlutterMacOS'));
   });
 
   testUsingContext('thins fat framework', () async {
