@@ -56,7 +56,7 @@ class AnalyzeOnce extends AnalyzeBase {
         final FileSystemEntityType type = fileSystem.typeSync(item);
 
         if (type == FileSystemEntityType.notFound) {
-          throwToolExit("'$type' does not exist");
+          throwToolExit("'$item' does not exist");
         }
       }
     }

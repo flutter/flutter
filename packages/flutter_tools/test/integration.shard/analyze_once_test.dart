@@ -157,6 +157,14 @@ void main() {
     );
   });
 
+  testWithoutContext('file not found', () async {
+    await runCommand(
+        arguments: <String>['analyze', '--no-pub', 'not_found.abc'],
+        exitMessageContains: "not_found.abc' does not exist",
+        exitCode: 1
+    );
+  });
+
   // Analyze in the current directory - no arguments
   testWithoutContext('working directory with errors', () async {
     // Break the code to produce the "Avoid empty else" hint
