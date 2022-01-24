@@ -143,7 +143,7 @@ void main() {
       });
 
       testWithoutContext('prints nothing when Flutter installation looks out-of-date but is actually up-to-date', () async {
-        final FakeFlutterVersion flutterVersion = FakeFlutterVersion(channel);
+        final FakeFlutterVersion flutterVersion = FakeFlutterVersion(channel: channel);
         final BufferLogger logger = BufferLogger.test();
         final VersionCheckStamp stamp = VersionCheckStamp(
           lastTimeVersionWasChecked: _stampOutOfDate,
@@ -164,7 +164,7 @@ void main() {
       });
 
       testWithoutContext('does not ping server when version stamp is up-to-date', () async {
-        final FakeFlutterVersion flutterVersion = FakeFlutterVersion(channel);
+        final FakeFlutterVersion flutterVersion = FakeFlutterVersion(channel: channel);
         final BufferLogger logger = BufferLogger.test();
         final VersionCheckStamp stamp = VersionCheckStamp(
           lastTimeVersionWasChecked: _stampUpToDate,
@@ -186,7 +186,7 @@ void main() {
       });
 
       testWithoutContext('does not print warning if printed recently', () async {
-        final FakeFlutterVersion flutterVersion = FakeFlutterVersion(channel);
+        final FakeFlutterVersion flutterVersion = FakeFlutterVersion(channel: channel);
         final BufferLogger logger = BufferLogger.test();
         final VersionCheckStamp stamp = VersionCheckStamp(
           lastTimeVersionWasChecked: _stampUpToDate,
@@ -208,7 +208,7 @@ void main() {
       });
 
       testWithoutContext('pings server when version stamp is missing', () async {
-        final FakeFlutterVersion flutterVersion = FakeFlutterVersion(channel);
+        final FakeFlutterVersion flutterVersion = FakeFlutterVersion(channel: channel);
         final BufferLogger logger = BufferLogger.test();
         cache.versionStamp = '{}';
 
@@ -226,7 +226,7 @@ void main() {
       });
 
       testWithoutContext('pings server when version stamp is out-of-date', () async {
-        final FakeFlutterVersion flutterVersion = FakeFlutterVersion(channel);
+        final FakeFlutterVersion flutterVersion = FakeFlutterVersion(channel: channel);
         final BufferLogger logger = BufferLogger.test();
         final VersionCheckStamp stamp = VersionCheckStamp(
           lastTimeVersionWasChecked: _stampOutOfDate,
@@ -247,7 +247,7 @@ void main() {
       });
 
       testWithoutContext('does not print warning when unable to connect to server if not out of date', () async {
-        final FakeFlutterVersion flutterVersion = FakeFlutterVersion(channel);
+        final FakeFlutterVersion flutterVersion = FakeFlutterVersion(channel: channel);
         final BufferLogger logger = BufferLogger.test();
         cache.versionStamp = '{}';
 
@@ -264,7 +264,7 @@ void main() {
       });
 
       testWithoutContext('prints warning when unable to connect to server if really out of date', () async {
-        final FakeFlutterVersion flutterVersion = FakeFlutterVersion(channel);
+        final FakeFlutterVersion flutterVersion = FakeFlutterVersion(channel: channel);
         final BufferLogger logger = BufferLogger.test();
         final VersionCheckStamp stamp = VersionCheckStamp(
           lastTimeVersionWasChecked: _stampOutOfDate,
@@ -329,6 +329,109 @@ void main() {
       });
     });
   }
+
+    group('verifyStandardRemote', () {
+      const String flutterStandardUrlDotGit = 'https://github.com/flutter/flutter.git';
+      const String flutterNonStandardUrlDotGit = 'https://githubmirror.com/flutter/flutter.git';
+      const String flutterStandardSshUrl = 'git@github.com:flutter/flutter';
+
+      testUsingContext('throws toolExit if repository url is null', () async {
+        final FakeFlutterVersion flutterVersion = FakeFlutterVersion(
+          // repositoryUrl defaults to null
+        );
+        try {
+          flutterVersion.verifyStandardRemote();
+          fail('Expect VersionCheckError');
+        } on VersionCheckError catch (error) {
+          expect(
+            error.message,
+            contains('The tool could not determine the remote upstream which is being tracked by the SDK.'),
+          );
+        }
+      });
+
+      testUsingContext('does not throw toolExit at standard remote url with FLUTTER_GIT_URL unset', () async {
+        final FakeFlutterVersion flutterVersion = FakeFlutterVersion(
+          repositoryUrl: flutterStandardUrlDotGit,
+        );
+        expect(() => flutterVersion.verifyStandardRemote(), returnsNormally);
+      });
+
+      testUsingContext('throws toolExit at non-standard remote url with FLUTTER_GIT_URL unset', () async {
+        final FakeFlutterVersion flutterVersion = FakeFlutterVersion(
+          repositoryUrl: flutterNonStandardUrlDotGit,
+        );
+        try {
+          flutterVersion.verifyStandardRemote();
+          fail('Expect VersionCheckError');
+        } on VersionCheckError catch (error) {
+          expect(
+            error.message,
+            contains(
+              'The Flutter SDK is tracking a non-standard remote '
+              '"$flutterNonStandardUrlDotGit".\n'
+              'Set the environment variable "FLUTTER_GIT_URL" to '
+              '"$flutterNonStandardUrlDotGit". '
+              'If this is intentional, it is recommended to use "git" directly to '
+              'manage the SDK.'
+            ),
+          );
+        }
+      });
+
+      testUsingContext('does not throw toolExit at non-standard remote url with FLUTTER_GIT_URL set', () async {
+        final FakeFlutterVersion flutterVersion = FakeFlutterVersion(
+          repositoryUrl: flutterNonStandardUrlDotGit,
+        );
+        expect(() => flutterVersion.verifyStandardRemote(), returnsNormally);
+      }, overrides: <Type, Generator> {
+        Platform: () => FakePlatform(environment: <String, String> {
+          'FLUTTER_GIT_URL': flutterNonStandardUrlDotGit,
+        }),
+      });
+
+      testUsingContext('throws toolExit at remote url and FLUTTER_GIT_URL set to different urls', () async {
+        final FakeFlutterVersion flutterVersion = FakeFlutterVersion(
+          repositoryUrl: flutterNonStandardUrlDotGit,
+        );
+        try {
+          flutterVersion.verifyStandardRemote();
+          fail('Expect VersionCheckError');
+        } on VersionCheckError catch (error) {
+          expect(
+            error.message,
+            contains(
+              'The Flutter SDK is tracking "$flutterNonStandardUrlDotGit" but '
+              '"FLUTTER_GIT_URL" is set to "$flutterStandardUrlDotGit".\n'
+              'Either remove "FLUTTER_GIT_URL" from the environment or set it to '
+              '"$flutterNonStandardUrlDotGit". '
+              'If this is intentional, it is recommended to use "git" directly to '
+              'manage the SDK.'
+            ),
+          );
+        }
+      }, overrides: <Type, Generator> {
+        Platform: () => FakePlatform(environment: <String, String> {
+          'FLUTTER_GIT_URL': flutterStandardUrlDotGit,
+        }),
+      });
+
+      testUsingContext('exempts standard ssh url from check with FLUTTER_GIT_URL unset', () async {
+        final FakeFlutterVersion flutterVersion = FakeFlutterVersion(
+          repositoryUrl: flutterStandardSshUrl,
+        );
+        expect(() => flutterVersion.verifyStandardRemote(), returnsNormally);
+      });
+
+      testUsingContext('stripDotGit removes ".git" suffix if any', () async {
+        expect(stripDotGit('https://github.com/flutter/flutter.git'), 'https://github.com/flutter/flutter');
+        expect(stripDotGit('https://github.com/flutter/flutter'), 'https://github.com/flutter/flutter');
+        expect(stripDotGit('git@github.com:flutter/flutter.git'), 'git@github.com:flutter/flutter');
+        expect(stripDotGit('git@github.com:flutter/flutter'), 'git@github.com:flutter/flutter');
+        expect(stripDotGit('https://githubmirror.com/flutter/flutter.git.git'), 'https://githubmirror.com/flutter/flutter.git');
+        expect(stripDotGit('https://githubmirror.com/flutter/flutter.gitgit'), 'https://githubmirror.com/flutter/flutter.gitgit');
+      });
+    });
 
   testUsingContext('version handles unknown branch', () async {
     processManager.addCommands(<FakeCommand>[
@@ -627,8 +730,11 @@ class FakeCache extends Fake implements Cache {
 }
 
 class FakeFlutterVersion extends Fake implements FlutterVersion {
-  FakeFlutterVersion(this.channel);
+  FakeFlutterVersion({this.channel, this.repositoryUrl});
 
   @override
   final String channel;
+
+  @override
+  final String repositoryUrl;
 }
