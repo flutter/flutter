@@ -4,9 +4,6 @@
 
 import 'dart:io' as io;
 import 'package:image/image.dart';
-import 'package:path/path.dart' as path;
-
-import 'package:yaml/yaml.dart';
 
 /// How to compares pixels within the image.
 ///
@@ -189,89 +186,3 @@ class ImageDiff {
 String getPrintableDiffFilesInfo(double diffRate, double maxRate) =>
     '(${(diffRate * 100).toStringAsFixed(4)}% of pixels were different. '
     'Maximum allowed rate is: ${(maxRate * 100).toStringAsFixed(4)}%).';
-
-/// Downloads the repository that stores the golden files.
-///
-/// Reads the url of the repo and `commit no` to sync to, from
-/// `goldens_lock.yaml`.
-class GoldensRepoFetcher {
-  final io.Directory _webUiGoldensRepositoryDirectory;
-  final String _lockFilePath;
-
-  /// Constructor that takes directory to download the repository and
-  /// file with goldens repo information.
-  GoldensRepoFetcher(this._webUiGoldensRepositoryDirectory, this._lockFilePath);
-
-  /// Fetches golden files from github.com/flutter/goldens, cloning the
-  /// repository if necessary.
-  ///
-  /// The repository is cloned into web_ui/.dart_tool.
-  Future<void> fetch() async {
-    final io.File lockFile = io.File(path.join(_lockFilePath));
-    final YamlMap lock = loadYaml(lockFile.readAsStringSync()) as YamlMap;
-    final String repository = lock['repository'] as String;
-    final String revision = lock['revision'] as String;
-
-    final String? localRevision = await _getLocalRevision();
-    if (localRevision == revision) {
-      return;
-    }
-
-    print('Fetching $repository@$revision');
-
-    if (!_webUiGoldensRepositoryDirectory.existsSync()) {
-      _webUiGoldensRepositoryDirectory.createSync(recursive: true);
-      await _runGit(
-        <String>['init'],
-        _webUiGoldensRepositoryDirectory.path,
-      );
-
-      await _runGit(
-        <String>['remote', 'add', 'origin', repository],
-        _webUiGoldensRepositoryDirectory.path,
-      );
-    }
-
-    await _runGit(
-      <String>['fetch', 'origin', 'main'],
-      _webUiGoldensRepositoryDirectory.path,
-    );
-    await _runGit(
-      <String>['checkout', revision],
-      _webUiGoldensRepositoryDirectory.path,
-    );
-  }
-
-  Future<String?> _getLocalRevision() async {
-    final io.File head = io.File(
-        path.join(_webUiGoldensRepositoryDirectory.path, '.git', 'HEAD'));
-
-    if (!head.existsSync()) {
-      return null;
-    }
-
-    return head.readAsStringSync().trim();
-  }
-
-  /// Runs `git` with given arguments.
-  Future<void> _runGit(
-    List<String> arguments,
-    String workingDirectory,
-  ) async {
-    final io.Process process = await io.Process.start(
-      'git',
-      arguments,
-      workingDirectory: workingDirectory,
-      // Running the process in a system shell for Windows. Otherwise
-      // the process is not able to get Dart from path.
-      runInShell: io.Platform.isWindows,
-      mode: io.ProcessStartMode.inheritStdio,
-    );
-    final int exitCode = await process.exitCode;
-    if (exitCode != 0) {
-      throw Exception('Git command failed with arguments $arguments on '
-          'workingDirectory: $workingDirectory resulting with exitCode: '
-          '$exitCode');
-    }
-  }
-}

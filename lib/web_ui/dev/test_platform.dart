@@ -357,22 +357,6 @@ class BrowserPlatform extends PlatformPlugin {
       write = true;
     }
 
-    String goldensDirectory;
-    if (filename.startsWith('__local__')) {
-      filename = filename.substring('__local__/'.length);
-      goldensDirectory = p.join(
-        env.environment.webUiRootDir.path,
-        'test',
-        'golden_files',
-      );
-    } else {
-      goldensDirectory = p.join(
-        env.environment.webUiGoldensRepositoryDirectory.path,
-        'engine',
-        'web',
-      );
-    }
-
     final Rectangle<num> regionAsRectange = Rectangle<num>(
       region['x'] as num,
       region['y'] as num,
@@ -391,9 +375,6 @@ class BrowserPlatform extends PlatformPlugin {
       maxDiffRateFailure,
       skiaClient,
       isCanvaskitTest: isCanvaskitTest,
-      goldensDirectory: goldensDirectory,
-      filenameSuffix: _screenshotManager!.filenameSuffix,
-      write: write,
     );
   }
 
