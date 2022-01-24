@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "flutter/shell/platform/common/json_message_codec.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/embedder/test_utils/key_codes.h"
 #include "flutter/shell/platform/windows/flutter_windows_engine.h"
@@ -16,6 +17,8 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "rapidjson/stringbuffer.h"
+#include "rapidjson/writer.h"
 
 #include <functional>
 #include <vector>
@@ -188,6 +191,36 @@ class TestFlutterWindowsView : public FlutterWindowsView {
     key_state_.Set(key, pressed, toggled_on);
   }
 
+  void HandleMessage(const char* channel,
+                     const char* method,
+                     const char* args) {
+    rapidjson::Document args_doc;
+    args_doc.Parse(args);
+    assert(!args_doc.HasParseError());
+
+    rapidjson::Document message_doc(rapidjson::kObjectType);
+    auto& allocator = message_doc.GetAllocator();
+    message_doc.AddMember("method", rapidjson::Value(method, allocator),
+                          allocator);
+    message_doc.AddMember("args", args_doc, allocator);
+
+    rapidjson::StringBuffer buffer;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+    message_doc.Accept(writer);
+
+    std::unique_ptr<std::vector<uint8_t>> data =
+        JsonMessageCodec::GetInstance().EncodeMessage(message_doc);
+    FlutterPlatformMessageResponseHandle response_handle;
+    const FlutterPlatformMessage message = {
+        sizeof(FlutterPlatformMessage),  // struct_size
+        channel,                         // channel
+        data->data(),                    // message
+        data->size(),                    // message_size
+        &response_handle,                // response_handle
+    };
+    GetEngine()->HandlePlatformMessage(&message);
+  }
+
  protected:
   std::unique_ptr<KeyboardHandlerBase> CreateKeyboardKeyHandler(
       BinaryMessenger* messenger,
@@ -204,14 +237,16 @@ class TestFlutterWindowsView : public FlutterWindowsView {
 typedef enum {
   kKeyCallOnKey,
   kKeyCallOnText,
+  kKeyCallTextMethodCall,
 } KeyCallType;
 
 typedef struct {
   KeyCallType type;
 
   // Only one of the following fields should be assigned.
-  FlutterKeyEvent key_event;
-  std::u16string text;
+  FlutterKeyEvent key_event;     // For kKeyCallOnKey
+  std::u16string text;           // For kKeyCallOnText
+  std::string text_method_call;  // For kKeyCallTextMethodCall
 } KeyCall;
 
 static std::vector<KeyCall> key_calls;
@@ -255,6 +290,8 @@ class KeyboardTester {
         }));
     window_ = std::make_unique<MockKeyboardManagerWin32Delegate>(view_.get());
   }
+
+  TestFlutterWindowsView& GetView() { return *view_; }
 
   void SetKeyState(uint32_t key, bool pressed, bool toggled_on) {
     view_->SetKeyState(key, pressed, toggled_on);
@@ -322,6 +359,16 @@ class KeyboardTester {
         std::make_shared<MockKeyResponseController>();
     key_response_controller->SetEmbedderResponse(
         std::move(embedder_callback_handler));
+    key_response_controller->SetTextInputResponse(
+        [](std::unique_ptr<rapidjson::Document> document) {
+          rapidjson::StringBuffer buffer;
+          rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+          document->Accept(writer);
+          key_calls.push_back(KeyCall{
+              .type = kKeyCallTextMethodCall,
+              .text_method_call = buffer.GetString(),
+          });
+        });
 
     MockEmbedderApiForKeyboard(modifier, key_response_controller);
 
@@ -355,6 +402,7 @@ constexpr uint64_t kScanCodeShiftLeft = 0x2a;
 constexpr uint64_t kScanCodeShiftRight = 0x36;
 constexpr uint64_t kScanCodeBracketLeft = 0x1a;
 constexpr uint64_t kScanCodeArrowLeft = 0x4b;
+constexpr uint64_t kScanCodeEnter = 0x1c;
 
 constexpr uint64_t kVirtualDigit1 = 0x31;
 constexpr uint64_t kVirtualKeyA = 0x41;
@@ -378,6 +426,10 @@ constexpr bool kNotSynthesized = false;
 #define EXPECT_CALL_IS_TEXT(_key_call, u16_string) \
   EXPECT_EQ(_key_call.type, kKeyCallOnText);       \
   EXPECT_EQ(_key_call.text, u16_string);
+
+#define EXPECT_CALL_IS_TEXT_METHOD_CALL(_key_call, json_string) \
+  EXPECT_EQ(_key_call.type, kKeyCallTextMethodCall);            \
+  EXPECT_STREQ(_key_call.text_method_call.c_str(), json_string);
 
 TEST(KeyboardTest, LowerCaseAHandled) {
   KeyboardTester tester;
@@ -1746,6 +1798,33 @@ TEST(KeyboardTest, SlowFrameworkResponse) {
   EXPECT_EQ(tester.InjectPendingEvents('a'), 2);
   EXPECT_EQ(key_calls.size(), 1);
   EXPECT_CALL_IS_TEXT(key_calls[0], u"a");
+  clear_key_calls();
+}
+
+TEST(KeyboardTest, TextInputSubmit) {
+  KeyboardTester tester;
+  tester.Responding(false);
+
+  // US Keyboard layout
+
+  tester.GetView().HandleMessage(
+      "flutter/textinput", "TextInput.setClient",
+      R"|([108, {"inputAction": "TextInputAction.none"}])|");
+
+  // Press Enter
+  tester.InjectMessages(
+      1, WmKeyDownInfo{VK_RETURN, kScanCodeEnter, kNotExtended, kWasUp}.Build(
+             kWmResultZero));
+
+  EXPECT_EQ(key_calls.size(), 2);
+  EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeDown, kPhysicalEnter,
+                       kLogicalEnter, "", kNotSynthesized);
+  EXPECT_CALL_IS_TEXT_METHOD_CALL(
+      key_calls[1],
+      "{"
+      R"|("method":"TextInputClient.performAction",)|"
+      R"|("args":[108,"TextInputAction.none"])|"
+      "}");
   clear_key_calls();
 }
 

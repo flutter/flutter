@@ -381,7 +381,7 @@ void FlutterWindowsView::SendKey(int key,
                                  KeyEventCallback callback) {
   keyboard_key_handler_->KeyboardHook(
       key, scancode, action, character, extended, was_down,
-      [&, callback = std::move(callback)](bool handled) {
+      [=, callback = std::move(callback)](bool handled) {
         if (!handled) {
           text_input_plugin_->KeyboardHook(key, scancode, action, character,
                                            extended, was_down);
