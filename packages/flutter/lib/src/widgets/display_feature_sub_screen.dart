@@ -87,9 +87,9 @@ class DisplayFeatureSubScreen extends StatelessWidget {
     final MediaQueryData mediaQuery = MediaQuery.of(context);
     final Size parentSize = mediaQuery.size;
     final Rect wantedBounds = Offset.zero & parentSize;
-    final Offset _anchorPoint = _finiteOffset(anchorPoint ?? _fallbackAnchorPoint(context));
+    final Offset resolvedAnchorPoint = _finiteOffset(anchorPoint ?? _fallbackAnchorPoint(context));
     final Iterable<Rect> subScreens = _subScreensInBounds(wantedBounds, _avoidBounds(mediaQuery));
-    final Rect closestSubScreen = _closestToAnchorPoint(subScreens, _anchorPoint);
+    final Rect closestSubScreen = _closestToAnchorPoint(subScreens, resolvedAnchorPoint);
 
     return Padding(
       padding: EdgeInsets.only(
