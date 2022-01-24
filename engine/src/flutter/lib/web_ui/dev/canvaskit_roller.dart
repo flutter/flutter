@@ -47,6 +47,7 @@ Future<void> main(List<String> args) async {
   await cipdConfigFile.writeAsString('''
 package: flutter/web/canvaskit_bundle
 description: A build of CanvasKit bundled with Flutter Web apps
+preserve_writable: true
 data:
   - dir: canvaskit
 ''');
@@ -56,7 +57,6 @@ data:
     'create',
     '--tag=version:$canvaskitVersion',
     '--pkg-def=cipd.yaml',
-    '--preserve-writable',
     '--json-output=result.json',
   ], workingDirectory: canvaskitDirectory.path);
 
