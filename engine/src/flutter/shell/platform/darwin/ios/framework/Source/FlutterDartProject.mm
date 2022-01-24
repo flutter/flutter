@@ -158,7 +158,7 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle) {
 
   // SkParagraph text layout library
   NSNumber* enableSkParagraph = [mainBundle objectForInfoDictionaryKey:@"FLTEnableSkParagraph"];
-  settings.enable_skparagraph = (enableSkParagraph != nil) ? enableSkParagraph.boolValue : false;
+  settings.enable_skparagraph = (enableSkParagraph != nil) ? enableSkParagraph.boolValue : true;
 
   // Leak Dart VM settings, set whether leave or clean up the VM after the last shell shuts down.
   NSNumber* leakDartVM = [mainBundle objectForInfoDictionaryKey:@"FLTLeakDartVM"];
