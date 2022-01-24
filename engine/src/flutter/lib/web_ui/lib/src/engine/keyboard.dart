@@ -10,20 +10,13 @@ import '../engine.dart'  show registerHotRestartListener;
 import 'platform_dispatcher.dart';
 import 'services.dart';
 
-/// After a keydown is received, this is the duration we wait for a repeat event
-/// before we decide to synthesize a keyup event.
-///
-/// On Linux and Windows, the typical ranges for keyboard repeat delay go up to
-/// 1000ms. On Mac, the range goes up to 2000ms.
-const Duration _keydownCancelDuration = Duration(milliseconds: 1000);
-
 /// Provides keyboard bindings, such as the `flutter/keyevent` channel.
 class Keyboard {
   /// Initializes the [Keyboard] singleton.
   ///
   /// Use the [instance] getter to get the singleton after calling this method.
-  static void initialize() {
-    _instance ??= Keyboard._();
+  static void initialize({bool onMacOs = false}) {
+    _instance ??= Keyboard._(onMacOs);
   }
 
   /// The [Keyboard] singleton.
@@ -39,7 +32,7 @@ class Keyboard {
   html.EventListener? _keydownListener;
   html.EventListener? _keyupListener;
 
-  Keyboard._() {
+  Keyboard._(this._onMacOs) {
     _keydownListener = (html.Event event) {
       _handleHtmlEvent(event);
     };
@@ -79,6 +72,20 @@ class Keyboard {
   /// Initializing with `0x0` which means no meta keys are pressed.
   int _lastMetaState = 0x0;
 
+  bool _onMacOs;
+
+  // When the user enters a browser/system shortcut (e.g. `cmd+alt+i`) on macOS,
+  // the browser doesn't send a keyup for it. This puts the framework in a
+  // corrupt state because it thinks the key was never released.
+  //
+  // To avoid this, we rely on the fact that browsers send repeat events
+  // while the key is held down by the user. If we don't receive a repeat
+  // event within a specific duration ([_kKeydownCancelDurationMac]) we assume
+  // the user has released the key and we synthesize a keyup event.
+  bool _shouldDoKeyGuard() {
+    return _onMacOs;
+  }
+
   void _handleHtmlEvent(html.Event event) {
     if (event is! html.KeyboardEvent) {
       return;
@@ -88,21 +95,13 @@ class Keyboard {
     final String timerKey = keyboardEvent.code!;
 
     // Don't handle synthesizing a keyup event for modifier keys
-    if (!_isModifierKey(event)) {
-      // When the user enters a browser/system shortcut (e.g. `cmd+alt+i`) the
-      // browser doesn't send a keyup for it. This puts the framework in a
-      // corrupt state because it thinks the key was never released.
-      //
-      // To avoid this, we rely on the fact that browsers send repeat events
-      // while the key is held down by the user. If we don't receive a repeat
-      // event within a specific duration ([_keydownCancelDuration]) we assume
-      // the user has released the key and we synthesize a keyup event.
+    if (!_isModifierKey(event) && _shouldDoKeyGuard()) {
       _keydownTimers[timerKey]?.cancel();
 
       // Only keys affected by modifiers, require synthesizing
       // because the browser always sends a keyup event otherwise
       if (event.type == 'keydown' && _isAffectedByModifiers(event)) {
-        _keydownTimers[timerKey] = Timer(_keydownCancelDuration, () {
+        _keydownTimers[timerKey] = Timer(_kKeydownCancelDurationMac, () {
           _keydownTimers.remove(timerKey);
           _synthesizeKeyup(event);
         });
@@ -161,6 +160,13 @@ class Keyboard {
     EnginePlatformDispatcher.instance.invokeOnPlatformMessage('flutter/keyevent',
         _messageCodec.encodeMessage(eventData), _noopCallback);
   }
+
+  /// After a keydown is received, this is the duration we wait for a repeat event
+  /// before we decide to synthesize a keyup event.
+  ///
+  /// This value is only for macOS, where the keyboard repeat delay goes up to
+  /// 2000ms.
+  static const Duration _kKeydownCancelDurationMac = Duration(milliseconds: 2000);
 }
 
 const int _modifierNone = 0x00;

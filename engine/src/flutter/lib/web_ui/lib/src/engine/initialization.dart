@@ -6,6 +6,7 @@ import 'dart:developer' as developer;
 import 'dart:html' as html;
 import 'dart:typed_data';
 
+import 'package:ui/src/engine/browser_detection.dart';
 import 'package:ui/src/engine/embedder.dart';
 import 'package:ui/src/engine/keyboard.dart';
 import 'package:ui/src/engine/mouse_cursor.dart';
@@ -143,7 +144,7 @@ void initializeEngine() {
     }
   };
 
-  Keyboard.initialize();
+  Keyboard.initialize(onMacOs: operatingSystem == OperatingSystem.macOs);
   MouseCursor.initialize();
 }
 
