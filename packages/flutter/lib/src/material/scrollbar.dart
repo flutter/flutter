@@ -27,26 +27,30 @@ const Duration _kScrollbarTimeToFade = Duration(milliseconds: 600);
 ///
 /// {@macro flutter.widgets.Scrollbar}
 ///
-/// Dynamically changes to an iOS style scrollbar that looks like
-/// [CupertinoScrollbar] on the iOS platform.
+/// Dynamically changes to a [CupertinoScrollbar], an iOS style scrollbar, by
+/// default on the iOS platform.
 ///
-/// The color of the Scrollbar will change when dragged. A hover animation is
-/// also triggered when used on web and desktop platforms. A scrollbar track
-/// can also been drawn when triggered by a hover event, which is controlled by
-/// [showTrackOnHover]. The thickness of the track and scrollbar thumb will
-/// become larger when hovering, unless overridden by [hoverThickness].
+/// The color of the Scrollbar thumb will change when [MaterialState.dragged],
+/// or [MaterialState.hovered] on desktop and web platforms. These stateful
+/// color choices can be changed using [ScrollbarThemeData.thumbColor].
+///
+/// A scrollbar track can been drawn when triggered by a hover event, which is
+/// controlled by [showTrackOnHover]. The thickness of the track and scrollbar
+/// thumb will become larger when hovering, unless overridden by
+/// [hoverThickness].
 ///
 /// {@tool dartpad}
-/// This sample shows a [Scrollbar] that executes a fade animation as scrolling occurs.
-/// The Scrollbar will fade into view as the user scrolls, and fade out when scrolling stops.
+/// This sample shows a [Scrollbar] that executes a fade animation as scrolling
+/// occurs. The Scrollbar will fade into view as the user scrolls, and fade out
+/// when scrolling stops.
 ///
 /// ** See code in examples/api/lib/material/scrollbar/scrollbar.0.dart **
 /// {@end-tool}
 ///
 /// {@tool dartpad}
-/// When isAlwaysShown is true, the scrollbar thumb will remain visible without the
-/// fade animation. This requires that a ScrollController is provided to controller,
-/// or that the PrimaryScrollController is available.
+/// When [thumbVisibility] is true, the scrollbar thumb will remain visible
+/// without the fade animation. This requires that a [ScrollController] is
+/// provided to controller, or that the [PrimaryScrollController] is available.
 ///
 /// ** See code in examples/api/lib/material/scrollbar/scrollbar.1.dart **
 /// {@end-tool}
@@ -78,7 +82,7 @@ class Scrollbar extends StatelessWidget {
     Key? key,
     required this.child,
     this.controller,
-    this.isAlwaysShown,
+    this.thumbVisibility,
     this.trackVisibility,
     this.showTrackOnHover,
     this.hoverThickness,
@@ -87,7 +91,17 @@ class Scrollbar extends StatelessWidget {
     this.notificationPredicate,
     this.interactive,
     this.scrollbarOrientation,
-  }) : super(key: key);
+    @Deprecated(
+      'Use thumbVisibility instead. '
+      'This feature was deprecated after v2.9.0-1.0.pre.',
+    )
+    this.isAlwaysShown,
+  }) : assert(
+         thumbVisibility == null || isAlwaysShown == null,
+         'Scrollbar thumb appearance should only be controlled with thumbVisibility, '
+         'isAlwaysShown is deprecated.'
+       ),
+       super(key: key);
 
   /// {@macro flutter.widgets.Scrollbar.child}
   final Widget child;
@@ -95,7 +109,27 @@ class Scrollbar extends StatelessWidget {
   /// {@macro flutter.widgets.Scrollbar.controller}
   final ScrollController? controller;
 
+  /// {@macro flutter.widgets.Scrollbar.thumbVisibility}
+  ///
+  /// If this property is null, then [ScrollbarThemeData.thumbVisibility] of
+  /// [ThemeData.scrollbarTheme] is used. If that is also null, the default value
+  /// is false.
+  ///
+  /// If the thumb visibility is related to the scrollbar's material state,
+  /// use the global [ScrollbarThemeData.thumbVisibility] or override the
+  /// sub-tree's theme data.
+  ///
+  /// Replaces deprecated [isAlwaysShown].
+  final bool? thumbVisibility;
+
   /// {@macro flutter.widgets.Scrollbar.isAlwaysShown}
+  ///
+  /// To show the scrollbar thumb based on a [MaterialState], use
+  /// [ScrollbarThemeData.thumbVisibility].
+  @Deprecated(
+    'Use thumbVisibility instead. '
+    'This feature was deprecated after v2.9.0-1.0.pre.',
+  )
   final bool? isAlwaysShown;
 
   /// Controls the track visibility.
@@ -157,7 +191,7 @@ class Scrollbar extends StatelessWidget {
   Widget build(BuildContext context) {
     if (Theme.of(context).platform == TargetPlatform.iOS) {
       return CupertinoScrollbar(
-        isAlwaysShown: isAlwaysShown ?? false,
+        thumbVisibility: isAlwaysShown ?? thumbVisibility ?? false,
         thickness: thickness ?? CupertinoScrollbar.defaultThickness,
         thicknessWhileDragging: thickness ?? CupertinoScrollbar.defaultThicknessWhileDragging,
         radius: radius ?? CupertinoScrollbar.defaultRadius,
@@ -170,7 +204,7 @@ class Scrollbar extends StatelessWidget {
     }
     return _MaterialScrollbar(
       controller: controller,
-      isAlwaysShown: isAlwaysShown,
+      thumbVisibility: isAlwaysShown ?? thumbVisibility,
       trackVisibility: trackVisibility,
       showTrackOnHover: showTrackOnHover,
       hoverThickness: hoverThickness,
@@ -189,7 +223,7 @@ class _MaterialScrollbar extends RawScrollbar {
     Key? key,
     required Widget child,
     ScrollController? controller,
-    bool? isAlwaysShown,
+    bool? thumbVisibility,
     this.trackVisibility,
     this.showTrackOnHover,
     this.hoverThickness,
@@ -202,7 +236,7 @@ class _MaterialScrollbar extends RawScrollbar {
          key: key,
          child: child,
          controller: controller,
-         isAlwaysShown: isAlwaysShown,
+         thumbVisibility: thumbVisibility,
          thickness: thickness,
          radius: radius,
          fadeDuration: _kScrollbarFadeDuration,
@@ -231,7 +265,7 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
   late bool _useAndroidScrollbar;
 
   @override
-  bool get showScrollbar => widget.isAlwaysShown ?? _scrollbarTheme.isAlwaysShown ?? false;
+  bool get showScrollbar => widget.thumbVisibility ?? _scrollbarTheme.thumbVisibility?.resolve(_states) ?? _scrollbarTheme.isAlwaysShown ?? false;
 
   @override
   bool get enableGestures => widget.interactive ?? _scrollbarTheme.interactive ?? !_useAndroidScrollbar;
