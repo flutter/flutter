@@ -2311,6 +2311,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
     final TextStyle style = widget.style;
     newConnection
+      ..show()
       ..setStyle(
         fontFamily: style.fontFamily,
         fontSize: style.fontSize,
