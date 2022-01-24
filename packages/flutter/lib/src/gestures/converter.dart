@@ -15,14 +15,13 @@ import 'events.dart';
 int _synthesiseDownButtons(int buttons, PointerDeviceKind kind) {
   switch (kind) {
     case PointerDeviceKind.mouse:
+    case PointerDeviceKind.trackpad:
       return buttons;
     case PointerDeviceKind.touch:
     case PointerDeviceKind.stylus:
     case PointerDeviceKind.invertedStylus:
       return buttons == 0 ? kPrimaryButton : buttons;
     case PointerDeviceKind.unknown:
-    default: // ignore: no_default_cases, to allow adding new device types to [PointerDeviceKind]
-             // TODO(moffatman): Remove after landing https://github.com/flutter/flutter/issues/23604
       // We have no information about the device but we know we never want
       // buttons to be 0 when the pointer is down.
       return buttons == 0 ? kPrimaryButton : buttons;
