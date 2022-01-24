@@ -335,7 +335,7 @@ void testMain() {
     });
 
     testFakeAsync(
-      'synthesize keyup when shortcut is handled by the system',
+      'On macOS, synthesize keyup when shortcut is handled by the system',
       (FakeAsync async) {
         // This can happen when the user clicks `cmd+alt+i` to open devtools. Here
         // is the sequence we receive from the browser in such case:
@@ -344,7 +344,7 @@ void testMain() {
         //
         // There's no `keyup(i)`. The web engine is expected to synthesize a
         // `keyup(i)` event.
-        Keyboard.initialize();
+        Keyboard.initialize(onMacOs: true);
 
         final List<Map<String, dynamic>> messages = <Map<String, dynamic>>[];
         ui.window.onPlatformMessage = (String channel, ByteData? data,
@@ -465,9 +465,9 @@ void testMain() {
     );
 
     testFakeAsync(
-      'do not synthesize keyup when we receive repeat events',
+      'On macOS, do not synthesize keyup when we receive repeat events',
       (FakeAsync async) {
-        Keyboard.initialize();
+        Keyboard.initialize(onMacOs: true);
 
         final List<Map<String, dynamic>> messages = <Map<String, dynamic>>[];
         ui.window.onPlatformMessage = (String channel, ByteData? data,
@@ -547,7 +547,7 @@ void testMain() {
     );
 
     testFakeAsync(
-      'do not synthesize keyup when keys are not affected by meta modifiers',
+      'On macOS, do not synthesize keyup when keys are not affected by meta modifiers',
       (FakeAsync async) {
         Keyboard.initialize();
 
@@ -578,8 +578,8 @@ void testMain() {
       },
     );
 
-    testFakeAsync('do not synthesize keyup for meta keys', (FakeAsync async) {
-      Keyboard.initialize();
+    testFakeAsync('On macOS, do not synthesize keyup for meta keys', (FakeAsync async) {
+      Keyboard.initialize(onMacOs: true);
 
       final List<Map<String, dynamic>> messages = <Map<String, dynamic>>[];
       ui.window.onPlatformMessage = (String channel, ByteData? data,
@@ -639,6 +639,67 @@ void testMain() {
 
       Keyboard.instance!.dispose();
     });
+
+    testFakeAsync(
+      'On non-macOS, do not synthesize keyup for shortcuts',
+      (FakeAsync async) {
+        Keyboard.initialize(onMacOs: false);
+
+        final List<Map<String, dynamic>> messages = <Map<String, dynamic>>[];
+        ui.window.onPlatformMessage = (String channel, ByteData? data,
+            ui.PlatformMessageResponseCallback? callback) {
+          messages.add(const JSONMessageCodec().decodeMessage(data) as Map<String, dynamic>);
+        };
+
+        dispatchKeyboardEvent(
+          'keydown',
+          key: 'Meta',
+          code: 'MetaLeft',
+          location: 1,
+          isMetaPressed: true,
+        );
+        dispatchKeyboardEvent(
+          'keydown',
+          key: 'Alt',
+          code: 'AltLeft',
+          location: 1,
+          isMetaPressed: true,
+          isAltPressed: true,
+        );
+        dispatchKeyboardEvent(
+          'keydown',
+          key: 'i',
+          code: 'KeyI',
+          isMetaPressed: true,
+          isAltPressed: true,
+        );
+        async.elapse(const Duration(milliseconds: 10));
+        dispatchKeyboardEvent(
+          'keyup',
+          key: 'Meta',
+          code: 'MetaLeft',
+          location: 1,
+          isAltPressed: true,
+        );
+        dispatchKeyboardEvent(
+          'keyup',
+          key: 'Alt',
+          code: 'AltLeft',
+          location: 1,
+        );
+        // Notice no `keyup` for "i".
+
+        expect(messages, hasLength(5));
+        messages.clear();
+
+        // Never synthesize keyup events.
+        async.elapse(const Duration(seconds: 3));
+        expect(messages, isEmpty);
+
+        Keyboard.instance!.dispose();
+      },
+    );
+
   });
 }
 
