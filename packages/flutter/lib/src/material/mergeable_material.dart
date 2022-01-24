@@ -151,14 +151,13 @@ class _AnimationTuple {
     required this.startAnimation,
     required this.endAnimation,
     required this.gapAnimation,
-    this.gapStart = 0.0,
   });
 
   final AnimationController controller;
   final CurvedAnimation startAnimation;
   final CurvedAnimation endAnimation;
   final CurvedAnimation gapAnimation;
-  double gapStart;
+  double gapStart = 0.0;
 }
 
 class _MergeableMaterialState extends State<MergeableMaterial> with TickerProviderStateMixin {

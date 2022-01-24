@@ -1087,12 +1087,12 @@ class _BackButtonListenerState extends State<BackButtonListener> {
 
   @override
   void didUpdateWidget(covariant BackButtonListener oldWidget) {
+    super.didUpdateWidget(oldWidget);
     if (oldWidget.onBackButtonPressed != widget.onBackButtonPressed) {
       dispatcher?.removeCallback(oldWidget.onBackButtonPressed);
       dispatcher?.addCallback(widget.onBackButtonPressed);
       dispatcher?.takePriority();
     }
-    super.didUpdateWidget(oldWidget);
   }
 
   @override
