@@ -308,7 +308,8 @@ public class FlutterLoader {
 
       shellArgs.add("--prefetched-default-font-manager");
 
-      if (metaData != null && metaData.getBoolean(ENABLE_SKPARAGRAPH_META_DATA_KEY)) {
+      if (metaData == null || metaData.getBoolean(ENABLE_SKPARAGRAPH_META_DATA_KEY, true)) {
+
         shellArgs.add("--enable-skparagraph");
       }
 
