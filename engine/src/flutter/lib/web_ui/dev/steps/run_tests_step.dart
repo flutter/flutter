@@ -86,9 +86,6 @@ class RunTestsStep implements PipelineStep {
     // Separate screenshot tests from unit-tests. Screenshot tests must run
     // one at a time. Otherwise, they will end up screenshotting each other.
     // This is not an issue for unit-tests.
-    final FilePath failureSmokeTestPath = FilePath.fromWebUi(
-      'test/golden_tests/golden_failure_smoke_test.dart',
-    );
     final List<FilePath> screenshotTestFiles = <FilePath>[];
     final List<FilePath> unitTestFiles = <FilePath>[];
 
@@ -97,37 +94,16 @@ class RunTestsStep implements PipelineStep {
         // Not a test file at all. Skip.
         continue;
       }
-      if (testFilePath == failureSmokeTestPath) {
-        // A smoke test that fails on purpose. Skip.
-        continue;
-      }
 
-      // All files under test/golden_tests are considered golden tests.
-      final bool isUnderGoldenTestsDirectory =
-          pathlib.split(testFilePath.relativeToWebUi).contains('golden_tests');
       // Any file whose name ends with "_golden_test.dart" is run as a golden test.
       final bool isGoldenTestFile = pathlib
           .basename(testFilePath.relativeToWebUi)
           .endsWith('_golden_test.dart');
-      if (isUnderGoldenTestsDirectory || isGoldenTestFile) {
+      if (isGoldenTestFile) {
         screenshotTestFiles.add(testFilePath);
       } else {
         unitTestFiles.add(testFilePath);
       }
-    }
-
-    // This test returns a non-zero exit code on purpose. Run it separately.
-    if (testFiles.contains(failureSmokeTestPath)) {
-      await _runTestBatch(
-        testFiles: <FilePath>[failureSmokeTestPath],
-        browserEnvironment: _browserEnvironment,
-        concurrency: 1,
-        expectFailure: true,
-        isDebug: isDebug,
-        doUpdateScreenshotGoldens: doUpdateScreenshotGoldens,
-        skiaClient: skiaClient,
-        overridePathToCanvasKit: overridePathToCanvasKit,
-      );
     }
 
     // Run non-screenshot tests with high concurrency.
