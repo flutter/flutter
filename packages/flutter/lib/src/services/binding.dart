@@ -172,9 +172,9 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
 
   // This is run in another isolate created by _addLicenses above.
   static List<LicenseEntry> _parseLicenses(String rawLicenses) {
-    final String _licenseSeparator = '\n${'-' * 80}\n';
+    final String licenseSeparator = '\n${'-' * 80}\n';
     final List<LicenseEntry> result = <LicenseEntry>[];
-    final List<String> licenses = rawLicenses.split(_licenseSeparator);
+    final List<String> licenses = rawLicenses.split(licenseSeparator);
     for (final String license in licenses) {
       final int split = license.indexOf('\n\n');
       if (split >= 0) {

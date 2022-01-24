@@ -340,7 +340,9 @@ class ImageStream with Diagnosticable {
     if (_listeners != null) {
       final List<ImageStreamListener> initialListeners = _listeners!;
       _listeners = null;
+      _completer!._addingInitialListeners = true;
       initialListeners.forEach(_completer!.addListener);
+      _completer!._addingInitialListeners = false;
     }
   }
 
@@ -489,6 +491,15 @@ abstract class ImageStreamCompleter with Diagnosticable {
   /// if all [keepAlive] handles get disposed.
   bool _hadAtLeastOneListener = false;
 
+  /// Whether the future listeners added to this completer are initial listeners.
+  ///
+  /// This can be set to true when an [ImageStream] adds its initial listeners to
+  /// this completer. This ultimately controls the synchronousCall parameter for
+  /// the listener callbacks. When adding cached listeners to a completer,
+  /// [_addingInitialListeners] can be set to false to indicate to the listeners
+  /// that they are being called asynchronously.
+  bool _addingInitialListeners = false;
+
   /// Adds a listener callback that is called whenever a new concrete [ImageInfo]
   /// object is available or an error is reported. If a concrete image is
   /// already available, or if an error has been already reported, this object
@@ -504,7 +515,7 @@ abstract class ImageStreamCompleter with Diagnosticable {
     _listeners.add(listener);
     if (_currentImage != null) {
       try {
-        listener.onImage(_currentImage!.clone(), true);
+        listener.onImage(_currentImage!.clone(), !_addingInitialListeners);
       } catch (exception, stack) {
         reportError(
           context: ErrorDescription('by a synchronously-called image listener'),

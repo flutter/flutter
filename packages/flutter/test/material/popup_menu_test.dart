@@ -2042,7 +2042,7 @@ void main() {
 
     const double statusBarHeight = 24.0;
     final PopupMenuItem<int> firstItem = choices[0];
-    int _selectedValue = choices[0].value!;
+    int selectedValue = choices[0].value!;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -2061,10 +2061,10 @@ void main() {
                   PopupMenuButton<int>(
                     onSelected: (int result) {
                       setState(() {
-                        _selectedValue = result;
+                        selectedValue = result;
                       });
                     },
-                    initialValue: _selectedValue,
+                    initialValue: selectedValue,
                     itemBuilder: (BuildContext context) {
                       return choices;
                     },

@@ -353,9 +353,6 @@ targets:
   - name: Linux flutter_plugins
     recipe: flutter/flutter_drone
     timeout: 60
-    enabled_branches:
-      - main
-      - master
     properties:
       shard: flutter_plugins
       subshard: analyze
@@ -1787,7 +1784,6 @@ targets:
     scheduler: luci
 
   - name: Linux_android flutter_gallery__back_button_memory
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/94036
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2220,6 +2216,7 @@ targets:
     scheduler: luci
 
   - name: Linux deferred components
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/96403
     recipe: flutter/deferred_components
     properties:
       dependencies: >-
@@ -3501,6 +3498,7 @@ targets:
 
   - name: Mac_ios native_ui_tests_ios
     recipe: devicelab/devicelab_drone
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/95193
     presubmit: false
     timeout: 60
     properties:
