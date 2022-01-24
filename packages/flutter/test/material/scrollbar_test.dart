@@ -160,54 +160,52 @@ void main() {
   });
 
   testWidgets('When thumbVisibility is true, must pass a controller or find PrimaryScrollController', (WidgetTester tester) async {
-      Widget viewWithScroll() {
-        return _buildBoilerplate(
-          child: Theme(
-            data: ThemeData(),
-            child: const Scrollbar(
-              thumbVisibility: true,
-              child: SingleChildScrollView(
-                child: SizedBox(
-                  width: 4000.0,
-                  height: 4000.0,
-                ),
+    Widget viewWithScroll() {
+      return _buildBoilerplate(
+        child: Theme(
+          data: ThemeData(),
+          child: const Scrollbar(
+            thumbVisibility: true,
+            child: SingleChildScrollView(
+              child: SizedBox(
+                width: 4000.0,
+                height: 4000.0,
               ),
             ),
           ),
-        );
-      }
+        ),
+      );
+    }
 
-      await tester.pumpWidget(viewWithScroll());
-      final AssertionError exception = tester.takeException() as AssertionError;
-      expect(exception, isAssertionError);
-    },
-  );
+    await tester.pumpWidget(viewWithScroll());
+    final AssertionError exception = tester.takeException() as AssertionError;
+    expect(exception, isAssertionError);
+  });
 
   testWidgets('When thumbVisibility is true, must pass a controller that is attached to a scroll view or find PrimaryScrollController', (WidgetTester tester) async {
-      final ScrollController controller = ScrollController();
-      Widget viewWithScroll() {
-        return _buildBoilerplate(
-          child: Theme(
-            data: ThemeData(),
-            child: Scrollbar(
-              thumbVisibility: true,
-              controller: controller,
-              child: const SingleChildScrollView(
-                child: SizedBox(
-                  width: 4000.0,
-                  height: 4000.0,
-                ),
+    final ScrollController controller = ScrollController();
+    Widget viewWithScroll() {
+      return _buildBoilerplate(
+        child: Theme(
+          data: ThemeData(),
+          child: Scrollbar(
+            thumbVisibility: true,
+            controller: controller,
+            child: const SingleChildScrollView(
+              child: SizedBox(
+                width: 4000.0,
+                height: 4000.0,
               ),
             ),
           ),
-        );
-      }
+        ),
+      );
+    }
 
-      await tester.pumpWidget(viewWithScroll());
-      final AssertionError exception = tester.takeException() as AssertionError;
-      expect(exception, isAssertionError);
-    },
-  );
+    await tester.pumpWidget(viewWithScroll());
+    final AssertionError exception = tester.takeException() as AssertionError;
+    expect(exception, isAssertionError);
+  });
 
   testWidgets('On first render with thumbVisibility: true, the thumb shows', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
