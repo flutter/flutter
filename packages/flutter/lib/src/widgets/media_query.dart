@@ -6,7 +6,6 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 import 'dart:ui' show Brightness;
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 
@@ -585,7 +584,8 @@ class MediaQueryData {
   ///  position the child to match the selected sub-screen.
   MediaQueryData removeDisplayFeatures(Rect subScreen) {
     assert(subScreen.left >= 0.0 && subScreen.top >= 0.0 &&
-        subScreen.right <= size.width && subScreen.bottom <= size.height);
+        subScreen.right <= size.width && subScreen.bottom <= size.height,
+        "'subScreen' argument cannot be outside the bounds of the screen");
     if (subScreen.size == size && subScreen.topLeft == Offset.zero)
       return this;
     final double rightInset = size.width - subScreen.right;

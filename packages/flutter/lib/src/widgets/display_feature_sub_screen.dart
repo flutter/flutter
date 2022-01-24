@@ -3,12 +3,12 @@
 // found in the LICENSE file.
 
 import 'dart:ui' show DisplayFeature;
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
+import 'debug.dart';
 import 'framework.dart';
 import 'media_query.dart';
 
@@ -16,22 +16,24 @@ import 'media_query.dart';
 /// splits the screen into sub-screens.
 ///
 /// A [DisplayFeature] splits the screen into sub-screens if
-///  - it obstructs the screen, meaning the area it occupies is not 0. Display
-///  features of type [DisplayFeatureType.fold] can have height 0 or width 0 and
-///  not be obstructing the screen.
-///  - it is at least as tall as the screen, producing a left and right
-///  sub-screen or
-///  - it is at least as wide as the screen, producing a top and bottom
-///  sub-screen
+///
+///   * it obstructs the screen, meaning the area it occupies is not 0. Display
+///     features of type [DisplayFeatureType.fold] can have height 0 or width 0
+///     and not be obstructing the screen.
+///   * it is at least as tall as the screen, producing a left and right
+///     sub-screen or
+///   * it is at least as wide as the screen, producing a top and bottom
+///     sub-screen
 ///
 /// After determining the sub-screens, the closest one to [anchorPoint] is used
 /// to render the [child].
 ///
 /// If no [anchorPoint] is provided, then [Directionality] is used:
-///  * for [TextDirection.ltr], [anchorPoint] is `Offset.zero`, which will cause
-///  the [child] to appear in the top-left sub-screen.
-///  * for [TextDirection.rtl], [anchorPoint] is `Offset(double.maxFinite, 0)`,
-///  which will cause the [child] to appear in the top-right sub-screen.
+///
+///   * for [TextDirection.ltr], [anchorPoint] is `Offset.zero`, which will
+///     cause the [child] to appear in the top-left sub-screen.
+///   * for [TextDirection.rtl], [anchorPoint] is `Offset(double.maxFinite, 0)`,
+///     which will cause the [child] to appear in the top-right sub-screen.
 ///
 /// If no [anchorPoint] is provided, and there is no [Directionality] ancestor
 /// widget in the tree, then the widget throws during build.
@@ -77,15 +79,17 @@ class DisplayFeatureSubScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    assert(anchorPoint!=null || debugCheckHasDirectionality(
+        context,
+        why: 'to determine which sub-screen DisplayFeatureSubScreen uses',
+        alternative: "Alternatively, consider specifying the 'anchorPoint' argument on the DisplayFeatureSubScreen",
+    ));
     final MediaQueryData mediaQuery = MediaQuery.of(context);
     final Size parentSize = mediaQuery.size;
     final Rect wantedBounds = Offset.zero & parentSize;
-    final Offset _anchorPoint =
-        _finiteOffset(anchorPoint ?? _fallbackAnchorPoint(context));
-    final Iterable<Rect> subScreens =
-        _subScreensInBounds(wantedBounds, _avoidBounds(mediaQuery));
-    final Rect closestSubScreen =
-        _closestToAnchorPoint(subScreens, _anchorPoint);
+    final Offset _anchorPoint = _finiteOffset(anchorPoint ?? _fallbackAnchorPoint(context));
+    final Iterable<Rect> subScreens = _subScreensInBounds(wantedBounds, _avoidBounds(mediaQuery));
+    final Rect closestSubScreen = _closestToAnchorPoint(subScreens, _anchorPoint);
 
     return Padding(
       padding: EdgeInsets.only(
@@ -117,8 +121,7 @@ class DisplayFeatureSubScreen extends StatelessWidget {
   }
 
   /// Returns the closest sub-screen to the [anchorPoint]
-  static Rect _closestToAnchorPoint(
-      Iterable<Rect> subScreens, Offset anchorPoint) {
+  static Rect _closestToAnchorPoint(Iterable<Rect> subScreens, Offset anchorPoint) {
     return subScreens.fold(subScreens.first,
         (Rect previousValue, Rect element) {
       final double previousDistance =
@@ -175,8 +178,7 @@ class DisplayFeatureSubScreen extends StatelessWidget {
 
   /// Returns sub-screens resulted by dividing [wantedBounds] along items of
   /// [avoidBounds] that are at least as high or as wide.
-  static Iterable<Rect> _subScreensInBounds(
-      Rect wantedBounds, Iterable<Rect> avoidBounds) {
+  static Iterable<Rect> _subScreensInBounds(Rect wantedBounds, Iterable<Rect> avoidBounds) {
     Iterable<Rect> subScreens = <Rect>[wantedBounds];
     for (final Rect bounds in avoidBounds) {
       subScreens = subScreens.expand((Rect screen) {
