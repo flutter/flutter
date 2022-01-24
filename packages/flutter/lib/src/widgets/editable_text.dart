@@ -4359,7 +4359,7 @@ class UndoStack<T> {
   }
 }
 
-/// A function that can be, or has been, throttled with the throttle function.
+/// A function that can be throttled with the throttle function.
 @visibleForTesting
 typedef Throttleable<T> = void Function(T currentArg);
 
@@ -4370,7 +4370,7 @@ typedef Throttled<T> = Timer Function(T currentArg);
 /// Returns a _Throttled that will call through to the given function only a
 /// maximum of once per duration.
 ///
-/// Only works for functions that take exactly one argument.
+/// Only works for functions that take exactly one argument and return void.
 @visibleForTesting
 Throttled<T> throttle<T>({
   required Duration duration,
