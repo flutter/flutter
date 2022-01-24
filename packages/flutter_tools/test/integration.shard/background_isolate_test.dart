@@ -50,7 +50,7 @@ void main() {
 
     project.updateTestIsolatePhrase(newBackgroundMessage);
     await flutter.hotRestart();
-    await sawBackgroundMessage.future;
+    await sawNewBackgroundMessage.future;
     // Wait a tiny amount of time in case we did not kill the background isolate.
     await Future<void>.delayed(const Duration(milliseconds: 10));
     await subscription.cancel();
