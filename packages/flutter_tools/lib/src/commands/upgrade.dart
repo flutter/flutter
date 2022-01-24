@@ -272,7 +272,7 @@ class UpgradeCommandRunner {
     // At this point the current checkout should be on HEAD of a branch having
     // an upstream. Check whether this upstream is "standard".
     try {
-      localVersion.verifyStandardRemote();
+      VersionUpstreamValidator(version: localVersion).run();
     } on VersionCheckError catch (error) {
       throwToolExit(
         'Unable to upgrade Flutter: '

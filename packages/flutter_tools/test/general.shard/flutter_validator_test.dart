@@ -246,8 +246,4 @@ class FakeThrowingFlutterVersion extends FakeFlutterVersion {
   String get frameworkCommitDate {
     throw VersionCheckError('version error');
   }
-  @override
-  void verifyStandardRemote() {
-    throw VersionCheckError('Non standard remote error');
-  }
 }

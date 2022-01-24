@@ -389,9 +389,6 @@ class FakeFlutterVersion implements FlutterVersion {
   }
 
   @override
-  void verifyStandardRemote() {}
-
-  @override
   Future<void> checkFlutterVersionFreshness() async {
     _didCheckFlutterVersionFreshness = true;
   }
