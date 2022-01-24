@@ -748,32 +748,17 @@ class ClampingScrollPhysics extends ScrollPhysics {
   @override
   Simulation? createBallisticSimulation(ScrollMetrics position, double velocity) {
     final Tolerance tolerance = this.tolerance;
-    if (position.outOfRange) {
-      double? end;
-      if (position.pixels > position.maxScrollExtent)
-        end = position.maxScrollExtent;
-      if (position.pixels < position.minScrollExtent)
-        end = position.minScrollExtent;
-      assert(end != null);
-      return ScrollSpringSimulation(
-        spring,
-        position.pixels,
-        end!,
-        math.min(0.0, velocity),
+    if (velocity.abs() >= tolerance.velocity || position.outOfRange) {
+      return ClampingScrollSimulation(
+        spring: spring,
+        position: position.pixels,
+        velocity: velocity,
+        leadingExtent: position.minScrollExtent,
+        trailingExtent: position.maxScrollExtent,
         tolerance: tolerance,
       );
     }
-    if (velocity.abs() < tolerance.velocity)
-      return null;
-    if (velocity > 0.0 && position.pixels >= position.maxScrollExtent)
-      return null;
-    if (velocity < 0.0 && position.pixels <= position.minScrollExtent)
-      return null;
-    return ClampingScrollSimulation(
-      position: position.pixels,
-      velocity: velocity,
-      tolerance: tolerance,
-    );
+    return null;
   }
 }
 

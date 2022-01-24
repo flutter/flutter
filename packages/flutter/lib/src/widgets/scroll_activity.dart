@@ -550,11 +550,12 @@ class BallisticScrollActivity extends ScrollActivity {
 
   @override
   void applyNewDimensions() {
-    // delegate.goBallistic(velocity);
     final ScrollPosition? position = _scrollPosition;
     if (position != null && _simulation is ScrollSimulationMixin){
       final ScrollSimulationMixin simulation = _simulation as ScrollSimulationMixin;
       simulation.applyNewDimensions(position,velocity);
+    } else {
+      delegate.goBallistic(velocity);
     }
   }
 
