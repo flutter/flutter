@@ -2118,8 +2118,8 @@ class LayerLink {
     assert((){
       if (_leader != null) {
         _debugPreviousLeaders ??= <LeaderLayer>{};
-        _debugPreviousLeaders!.add(_leader!);
         _debugScheduleLeadersCleanUpCheck();
+        return _debugPreviousLeaders!.add(_leader!);
       }
       return true;
     }());
@@ -2127,14 +2127,10 @@ class LayerLink {
   }
 
   void _unregisterLeader(LeaderLayer leader) {
-    assert(_leader != null);
     if (_leader == leader) {
       _leader = null;
     } else {
-      assert((){
-        _debugPreviousLeaders!.remove(leader);
-        return true;
-      }());
+      assert(_debugPreviousLeaders!.remove(leader));
     }
   }
 

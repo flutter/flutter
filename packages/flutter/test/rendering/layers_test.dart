@@ -176,6 +176,19 @@ void main() {
     expect(leaderLayer.link, link2);
   });
 
+  test('layer link attach/detach order should not crash app.', () {
+    renderer;
+    final LayerLink link = LayerLink();
+    final LeaderLayer leaderLayer1 = LeaderLayer(link: link);
+    final LeaderLayer leaderLayer2 = LeaderLayer(link: link);
+    final RenderView view = RenderView(configuration: const ViewConfiguration(), window: window);
+    leaderLayer1.attach(view);
+    leaderLayer2.attach(view);
+    leaderLayer2.detach();
+    leaderLayer1.detach();
+    expect(link.leader, isNull);
+  });
+
   test('leader layers not dirty when connected to follower layer', () {
     final ContainerLayer root = ContainerLayer()..attach(Object());
 
