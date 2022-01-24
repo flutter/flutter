@@ -237,15 +237,12 @@ class MockAccessibilityBridgeNoWindow : public AccessibilityBridgeIos {
                                     CGPointMake(0, scrollPosition * effectivelyScale)));
 }
 
-- (void)testVerticalFlutterScrollableSemanticsObjectNoWindow {
+- (void)testVerticalFlutterScrollableSemanticsObjectNoWindowDoesNotCrash {
   fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(
       new flutter::MockAccessibilityBridgeNoWindow());
   fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
 
   float transformScale = 0.5f;
-  float screenScale =
-      [UIScreen mainScreen].scale;  // Flutter view without window uses [UIScreen mainScreen];
-  float effectivelyScale = transformScale / screenScale;
   float x = 10;
   float y = 10;
   float w = 100;
@@ -265,28 +262,7 @@ class MockAccessibilityBridgeNoWindow : public AccessibilityBridgeIos {
       [[FlutterScrollableSemanticsObject alloc] initWithBridge:bridge uid:0];
   [scrollable setSemanticsNode:&node];
   [scrollable accessibilityBridgeDidFinishUpdate];
-  UIScrollView* scrollView = [scrollable nativeAccessibility];
-
-  CGRect actualFrame = scrollView.frame;
-  CGRect expectedFrame = CGRectMake(x * effectivelyScale, y * effectivelyScale,
-                                    w * effectivelyScale, h * effectivelyScale);
-  XCTAssertTrue(CGRectEqualToRect(actualFrame, expectedFrame),
-                @"Scroll view %@ frame is %@, expected %@", scrollView,
-                NSStringFromCGRect(actualFrame), NSStringFromCGRect(expectedFrame));
-
-  CGSize actualContentSize = scrollView.contentSize;
-  CGSize expectedContentSize =
-      CGSizeMake(w * effectivelyScale, (h + scrollExtentMax) * effectivelyScale);
-  XCTAssertTrue(CGSizeEqualToSize(actualContentSize, expectedContentSize),
-                @"Scroll view %@ size is %@, expected %@", scrollView,
-                NSStringFromCGSize(actualContentSize), NSStringFromCGSize(expectedContentSize));
-
-  CGPoint actualContentOffset = scrollView.contentOffset;
-  CGPoint expectedContentOffset = CGPointMake(0, scrollPosition * effectivelyScale);
-  XCTAssertTrue(CGPointEqualToPoint(actualContentOffset, expectedContentOffset),
-                @"Scroll view %@ offset is %@, expected %@", scrollView,
-                NSStringFromCGPoint(actualContentOffset),
-                NSStringFromCGPoint(expectedContentOffset));
+  XCTAssertNoThrow([scrollable accessibilityBridgeDidFinishUpdate]);
 }
 
 - (void)testHorizontalFlutterScrollableSemanticsObject {
