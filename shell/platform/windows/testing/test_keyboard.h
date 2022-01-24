@@ -16,9 +16,13 @@
 
 #include "gtest/gtest.h"
 
+struct _FlutterPlatformMessageResponseHandle {
+  FlutterDesktopBinaryReply callback;
+  void* user_data;
+};
+
 namespace flutter {
 namespace testing {
-
 ::testing::AssertionResult _EventEquals(const char* expr_event,
                                         const char* expr_expected,
                                         const FlutterKeyEvent& event,
@@ -48,10 +52,14 @@ class MockKeyResponseController {
   using EmbedderCallbackHandler =
       std::function<void(const FlutterKeyEvent*, ResponseCallback)>;
   using ChannelCallbackHandler = std::function<void(ResponseCallback)>;
+  using TextInputCallbackHandler =
+      std::function<void(std::unique_ptr<rapidjson::Document>)>;
 
   MockKeyResponseController()
       : channel_response_(ChannelRespondFalse),
-        embedder_response_(EmbedderRespondFalse) {}
+        embedder_response_(EmbedderRespondFalse),
+        text_input_response_(
+            [](std::unique_ptr<rapidjson::Document> document) {}) {}
 
   void SetChannelResponse(ChannelCallbackHandler handler) {
     channel_response_ = std::move(handler);
@@ -59,6 +67,10 @@ class MockKeyResponseController {
 
   void SetEmbedderResponse(EmbedderCallbackHandler handler) {
     embedder_response_ = std::move(handler);
+  }
+
+  void SetTextInputResponse(TextInputCallbackHandler handler) {
+    text_input_response_ = std::move(handler);
   }
 
   void HandleChannelMessage(ResponseCallback callback) {
@@ -70,9 +82,14 @@ class MockKeyResponseController {
     embedder_response_(event, std::move(callback));
   }
 
+  void HandleTextInputMessage(std::unique_ptr<rapidjson::Document> document) {
+    text_input_response_(std::move(document));
+  }
+
  private:
   EmbedderCallbackHandler embedder_response_;
   ChannelCallbackHandler channel_response_;
+  TextInputCallbackHandler text_input_response_;
 
   static void ChannelRespondFalse(ResponseCallback callback) {
     callback(false);
