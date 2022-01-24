@@ -513,6 +513,7 @@ void main() {
     expect(inkWellBorder(), roundedShape);
 
     // Cursor updates when hovering disabled ListTile
+    await tester.pumpWidget(buildFrame(enabled: false));
     final Offset listTile = tester.getCenter(find.byKey(titleKey));
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();

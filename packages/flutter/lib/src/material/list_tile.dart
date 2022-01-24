@@ -141,8 +141,6 @@ class ListTileThemeData with Diagnosticable {
   /// Overrides the default value of [ListTile.enableFeedback].
   final bool? enableFeedback;
 
-  /// {@macro flutter.material.ListTile.mouseCursor}
-  ///
   /// If specified, overrides the default value of [ListTile.mouseCursor].
   final MaterialStateProperty<MouseCursor?>? mouseCursor;
 
@@ -445,12 +443,6 @@ class ListTileTheme extends InheritedTheme {
   /// [ListTileThemeData.enableFeedback] property instead.
   bool? get enableFeedback => _data != null ? _data!.enableFeedback : _enableFeedback;
 
-  /// Overrides the default value of [ListTile.mouseCursor].
-  ///
-  /// This property is obsolete: please use the [data]
-  /// [ListTileThemeData.mouseCursor] property instead.
-  MaterialStateProperty<MouseCursor?>? get mouseCursor => _data != null ? _data!.mouseCursor : _mouseCursor;
-
   /// The [data] property of the closest instance of this class that
   /// encloses the given context.
   ///
@@ -483,7 +475,6 @@ class ListTileTheme extends InheritedTheme {
     Color? tileColor,
     Color? selectedTileColor,
     bool? enableFeedback,
-    MaterialStateProperty<MouseCursor?>? mouseCursor,
     double? horizontalTitleGap,
     double? minVerticalPadding,
     double? minLeadingWidth,
@@ -506,7 +497,6 @@ class ListTileTheme extends InheritedTheme {
             tileColor: tileColor ?? parent.tileColor,
             selectedTileColor: selectedTileColor ?? parent.selectedTileColor,
             enableFeedback: enableFeedback ?? parent.enableFeedback,
-            mouseCursor: mouseCursor ?? parent.mouseCursor,
             horizontalTitleGap: horizontalTitleGap ?? parent.horizontalTitleGap,
             minVerticalPadding: minVerticalPadding ?? parent.minVerticalPadding,
             minLeadingWidth: minLeadingWidth ?? parent.minLeadingWidth,
@@ -531,7 +521,6 @@ class ListTileTheme extends InheritedTheme {
         tileColor: tileColor,
         selectedTileColor: selectedTileColor,
         enableFeedback: enableFeedback,
-        mouseCursor: mouseCursor,
         horizontalTitleGap: horizontalTitleGap,
         minVerticalPadding: minVerticalPadding,
         minLeadingWidth: minLeadingWidth,
@@ -1243,8 +1232,8 @@ class ListTile extends StatelessWidget {
     };
 
     final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor?>(mouseCursor, states)
-    ?? tileTheme.mouseCursor?.resolve(states)
-    ?? MaterialStateMouseCursor.clickable.resolve(states);
+      ?? tileTheme.mouseCursor?.resolve(states)
+      ?? MaterialStateMouseCursor.clickable.resolve(states);
 
     return InkWell(
       customBorder: shape ?? tileTheme.shape,
