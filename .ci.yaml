@@ -353,9 +353,6 @@ targets:
   - name: Linux flutter_plugins
     recipe: flutter/flutter_drone
     timeout: 60
-    enabled_branches:
-      - main
-      - master
     properties:
       shard: flutter_plugins
       subshard: analyze
@@ -1787,7 +1784,6 @@ targets:
     scheduler: luci
 
   - name: Linux_android flutter_gallery__back_button_memory
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/94036
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2220,6 +2216,7 @@ targets:
     scheduler: luci
 
   - name: Linux deferred components
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/96403
     recipe: flutter/deferred_components
     properties:
       dependencies: >-
@@ -3501,6 +3498,7 @@ targets:
 
   - name: Mac_ios native_ui_tests_ios
     recipe: devicelab/devicelab_drone
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/95193
     presubmit: false
     timeout: 60
     properties:
@@ -3904,128 +3902,7 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Windows tool_integration_tests_1_5
-    recipe: flutter/flutter_drone
-    timeout: 60
-    properties:
-      add_recipes_cq: "true"
-      dependencies: >-
-        [
-          {"dependency": "android_sdk", "version": "version:29.0"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
-          {"dependency": "open_jdk"},
-          {"dependency": "goldctl"},
-          {"dependency": "vs_build", "version": "version:vs2019"}
-        ]
-      shard: tool_integration_tests
-      subshard: "1_5"
-      tags: >
-        ["framework","hostonly","shard"]
-    scheduler: luci
-    runIf:
-      - dev/**
-      - packages/flutter_tools/**
-      - bin/**
-      - .ci.yaml
-
-  - name: Windows tool_integration_tests_2_5
-    recipe: flutter/flutter_drone
-    timeout: 60
-    properties:
-      add_recipes_cq: "true"
-      dependencies: >-
-        [
-          {"dependency": "android_sdk", "version": "version:29.0"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
-          {"dependency": "open_jdk"},
-          {"dependency": "goldctl"},
-          {"dependency": "vs_build", "version": "version:vs2019"}
-        ]
-      shard: tool_integration_tests
-      subshard: "2_5"
-      tags: >
-        ["framework","hostonly","shard"]
-    scheduler: luci
-    runIf:
-      - dev/**
-      - packages/flutter_tools/**
-      - bin/**
-      - .ci.yaml
-
-  - name: Windows tool_integration_tests_3_5
-    recipe: flutter/flutter_drone
-    timeout: 60
-    properties:
-      add_recipes_cq: "true"
-      dependencies: >-
-        [
-          {"dependency": "android_sdk", "version": "version:29.0"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
-          {"dependency": "open_jdk"},
-          {"dependency": "goldctl"},
-          {"dependency": "vs_build", "version": "version:vs2019"}
-        ]
-      shard: tool_integration_tests
-      subshard: "3_5"
-      tags: >
-        ["framework","hostonly","shard"]
-    scheduler: luci
-    runIf:
-      - dev/**
-      - packages/flutter_tools/**
-      - bin/**
-      - .ci.yaml
-
-  - name: Windows tool_integration_tests_4_5
-    recipe: flutter/flutter_drone
-    timeout: 60
-    properties:
-      add_recipes_cq: "true"
-      dependencies: >-
-        [
-          {"dependency": "android_sdk", "version": "version:29.0"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
-          {"dependency": "open_jdk"},
-          {"dependency": "goldctl"},
-          {"dependency": "vs_build", "version": "version:vs2019"}
-        ]
-      shard: tool_integration_tests
-      subshard: "4_5"
-      tags: >
-        ["framework","hostonly","shard"]
-    scheduler: luci
-    runIf:
-      - dev/**
-      - packages/flutter_tools/**
-      - bin/**
-      - .ci.yaml
-
-  - name: Windows tool_integration_tests_5_5
-    recipe: flutter/flutter_drone
-    timeout: 60
-    properties:
-      add_recipes_cq: "true"
-      dependencies: >-
-        [
-          {"dependency": "android_sdk", "version": "version:29.0"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
-          {"dependency": "open_jdk"},
-          {"dependency": "goldctl"},
-          {"dependency": "vs_build", "version": "version:vs2019"}
-        ]
-      shard: tool_integration_tests
-      subshard: "5_5"
-      tags: >
-        ["framework","hostonly","shard"]
-    scheduler: luci
-    runIf:
-      - dev/**
-      - packages/flutter_tools/**
-      - bin/**
-      - .ci.yaml
-
   - name: Windows tool_integration_tests_1_6
-    bringup: true # TODO(fujino): https://github.com/flutter/flutter/issues/96544
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -4050,7 +3927,6 @@ targets:
       - .ci.yaml
 
   - name: Windows tool_integration_tests_2_6
-    bringup: true # TODO(fujino): https://github.com/flutter/flutter/issues/96544
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -4075,7 +3951,6 @@ targets:
       - .ci.yaml
 
   - name: Windows tool_integration_tests_3_6
-    bringup: true # TODO(fujino): https://github.com/flutter/flutter/issues/96544
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -4100,7 +3975,6 @@ targets:
       - .ci.yaml
 
   - name: Windows tool_integration_tests_4_6
-    bringup: true # TODO(fujino): https://github.com/flutter/flutter/issues/96544
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -4125,7 +3999,6 @@ targets:
       - .ci.yaml
 
   - name: Windows tool_integration_tests_5_6
-    bringup: true # TODO(fujino): https://github.com/flutter/flutter/issues/96544
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -4150,7 +4023,6 @@ targets:
       - .ci.yaml
 
   - name: Windows tool_integration_tests_6_6
-    bringup: true # TODO(fujino): https://github.com/flutter/flutter/issues/96544
     recipe: flutter/flutter_drone
     timeout: 60
     properties:

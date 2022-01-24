@@ -17,10 +17,10 @@ const CupertinoDynamicColor _kScrollbarColor = CupertinoDynamicColor.withBrightn
 );
 
 void main() {
-  const Duration _kScrollbarTimeToFade = Duration(milliseconds: 1200);
-  const Duration _kScrollbarFadeDuration = Duration(milliseconds: 250);
-  const Duration _kScrollbarResizeDuration = Duration(milliseconds: 100);
-  const Duration _kLongPressDuration = Duration(milliseconds: 100);
+  const Duration kScrollbarTimeToFade = Duration(milliseconds: 1200);
+  const Duration kScrollbarFadeDuration = Duration(milliseconds: 250);
+  const Duration kScrollbarResizeDuration = Duration(milliseconds: 100);
+  const Duration kLongPressDuration = Duration(milliseconds: 100);
 
   testWidgets('Scrollbar never goes away until finger lift', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -51,8 +51,8 @@ void main() {
     ));
 
     await gesture.up();
-    await tester.pump(_kScrollbarTimeToFade);
-    await tester.pump(_kScrollbarFadeDuration * 0.5);
+    await tester.pump(kScrollbarTimeToFade);
+    await tester.pump(kScrollbarFadeDuration * 0.5);
 
     // Opacity going down now.
     expect(find.byType(CupertinoScrollbar), paints..rrect(
@@ -143,9 +143,9 @@ void main() {
     // Long press on the scrollbar thumb and expect a vibration after it resizes.
     expect(hapticFeedbackCalls, 0);
     final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(796.0, 50.0));
-    await tester.pump(_kLongPressDuration);
+    await tester.pump(kLongPressDuration);
     expect(hapticFeedbackCalls, 0);
-    await tester.pump(_kScrollbarResizeDuration);
+    await tester.pump(kScrollbarResizeDuration);
     // Allow the haptic feedback some slack.
     await tester.pump(const Duration(milliseconds: 1));
     expect(hapticFeedbackCalls, 1);
@@ -165,8 +165,8 @@ void main() {
     ));
 
     // Let the thumb fade out so all timers have resolved.
-    await tester.pump(_kScrollbarTimeToFade);
-    await tester.pump(_kScrollbarFadeDuration);
+    await tester.pump(kScrollbarTimeToFade);
+    await tester.pump(kScrollbarFadeDuration);
   });
 
   testWidgets('Scrollbar thumb can be dragged with long press - reverse', (WidgetTester tester) async {
@@ -217,9 +217,9 @@ void main() {
     // Long press on the scrollbar thumb and expect a vibration after it resizes.
     expect(hapticFeedbackCalls, 0);
     final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(796.0, 550.0));
-    await tester.pump(_kLongPressDuration);
+    await tester.pump(kLongPressDuration);
     expect(hapticFeedbackCalls, 0);
-    await tester.pump(_kScrollbarResizeDuration);
+    await tester.pump(kScrollbarResizeDuration);
     // Allow the haptic feedback some slack.
     await tester.pump(const Duration(milliseconds: 1));
     expect(hapticFeedbackCalls, 1);
@@ -239,8 +239,8 @@ void main() {
     ));
 
     // Let the thumb fade out so all timers have resolved.
-    await tester.pump(_kScrollbarTimeToFade);
-    await tester.pump(_kScrollbarFadeDuration);
+    await tester.pump(kScrollbarTimeToFade);
+    await tester.pump(kScrollbarFadeDuration);
   });
 
   testWidgets('Scrollbar changes thickness and radius when dragged', (WidgetTester tester) async {
@@ -294,7 +294,7 @@ void main() {
 
     // Long press on the scrollbar thumb and expect it to grow
     final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(780.0, 50.0));
-    await tester.pump(_kLongPressDuration);
+    await tester.pump(kLongPressDuration);
     expect(find.byType(CupertinoScrollbar), paints..rrect(
       rrect: RRect.fromRectAndRadius(
         Rect.fromLTWH(
@@ -306,7 +306,7 @@ void main() {
         const Radius.circular(radius),
       ),
     ));
-    await tester.pump(_kScrollbarResizeDuration ~/ 2);
+    await tester.pump(kScrollbarResizeDuration ~/ 2);
     const double midpointThickness = (thickness + thicknessWhileDragging) / 2;
     const double midpointRadius = (radius + radiusWhileDragging) / 2;
     expect(find.byType(CupertinoScrollbar), paints..rrect(
@@ -320,7 +320,7 @@ void main() {
         const Radius.circular(midpointRadius),
       ),
     ));
-    await tester.pump(_kScrollbarResizeDuration ~/ 2);
+    await tester.pump(kScrollbarResizeDuration ~/ 2);
     expect(find.byType(CupertinoScrollbar), paints..rrect(
       rrect: RRect.fromRectAndRadius(
         Rect.fromLTWH(
@@ -336,8 +336,8 @@ void main() {
     // Let the thumb fade out so all timers have resolved.
     await dragScrollbarGesture.up();
     await tester.pumpAndSettle();
-    await tester.pump(_kScrollbarTimeToFade);
-    await tester.pump(_kScrollbarFadeDuration);
+    await tester.pump(kScrollbarTimeToFade);
+    await tester.pump(kScrollbarFadeDuration);
   });
 
   testWidgets('When thumbVisibility is true, must pass a controller or find PrimaryScrollController', (WidgetTester tester) async {
@@ -791,7 +791,7 @@ void main() {
       expect(find.byType(CupertinoScrollbar), paints..rrect());
 
       // Wait for the timer delay to expire.
-      await tester.pump(const Duration(milliseconds: 600)); // _kScrollbarTimeToFade
+      await tester.pump(const Duration(milliseconds: 600)); // kScrollbarTimeToFade
       await tester.pumpAndSettle();
       // Scrollbar thumb is showing after scroll finishes and timer ends.
       expect(find.byType(CupertinoScrollbar), paints..rrect());
@@ -901,9 +901,9 @@ void main() {
     // Long press on the scrollbar thumb and expect a vibration after it resizes.
     expect(hapticFeedbackCalls, 0);
     final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(50.0, 596.0));
-    await tester.pump(_kLongPressDuration);
+    await tester.pump(kLongPressDuration);
     expect(hapticFeedbackCalls, 0);
-    await tester.pump(_kScrollbarResizeDuration);
+    await tester.pump(kScrollbarResizeDuration);
     // Allow the haptic feedback some slack.
     await tester.pump(const Duration(milliseconds: 1));
     expect(hapticFeedbackCalls, 1);
@@ -923,8 +923,8 @@ void main() {
     ));
 
     // Let the thumb fade out so all timers have resolved.
-    await tester.pump(_kScrollbarTimeToFade);
-    await tester.pump(_kScrollbarFadeDuration);
+    await tester.pump(kScrollbarTimeToFade);
+    await tester.pump(kScrollbarFadeDuration);
   });
 
   testWidgets('Scrollbar thumb can be dragged with long press - horizontal axis, reverse', (WidgetTester tester) async {
@@ -975,9 +975,9 @@ void main() {
     // Long press on the scrollbar thumb and expect a vibration after it resizes.
     expect(hapticFeedbackCalls, 0);
     final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(750.0, 596.0));
-    await tester.pump(_kLongPressDuration);
+    await tester.pump(kLongPressDuration);
     expect(hapticFeedbackCalls, 0);
-    await tester.pump(_kScrollbarResizeDuration);
+    await tester.pump(kScrollbarResizeDuration);
     // Allow the haptic feedback some slack.
     await tester.pump(const Duration(milliseconds: 1));
     expect(hapticFeedbackCalls, 1);
@@ -997,8 +997,8 @@ void main() {
     ));
 
     // Let the thumb fade out so all timers have resolved.
-    await tester.pump(_kScrollbarTimeToFade);
-    await tester.pump(_kScrollbarFadeDuration);
+    await tester.pump(kScrollbarTimeToFade);
+    await tester.pump(kScrollbarFadeDuration);
   });
 
   testWidgets('Tapping the track area pages the Scroll View', (WidgetTester tester) async {
@@ -1132,8 +1132,8 @@ void main() {
         ),
     );
     final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(796.0, 50.0));
-    await tester.pump(_kLongPressDuration);
-    await tester.pump(_kScrollbarResizeDuration);
+    await tester.pump(kLongPressDuration);
+    await tester.pump(kScrollbarResizeDuration);
 
     // Drag the thumb down to scroll down.
     await dragScrollbarGesture.moveBy(const Offset(0.0, scrollAmount));
