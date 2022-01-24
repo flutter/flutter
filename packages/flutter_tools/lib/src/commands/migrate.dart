@@ -10,19 +10,20 @@ import '../build_info.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../runner/flutter_command.dart';
-import '../migrate/migrate_utils.dart';
 import '../migrate/migrate_config.dart';
+import '../migrate/migrate_manifest.dart';
+import '../migrate/migrate_utils.dart';
 import '../cache.dart';
-
-List<String> blacklist = <String>[
-  '.dart_tool'
-];
 
 class MigrateCommand extends FlutterCommand {
   MigrateCommand({
     bool verbose = false,
   }) : _verbose = verbose {
     requiresPubspecYaml();
+    argParser.addFlag('apply',
+      negatable: false,
+      help: "",
+    );
     argParser.addFlag('delete-temp-directories',
       negatable: true,
       help: "",
@@ -57,6 +58,21 @@ class MigrateCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+
+    if (boolArg('apply')) {
+      print('Applying migration');
+      Directory workingDir = FlutterProject.current().directory.childDirectory('migrate_working_dir');
+
+      File manifestFile = MigrateManifest.getManifestFileFromDirectory(workingDir);
+      MigrateManifest manifest = MigrateManifest.fromFile(manifestFile);
+      print(manifest.conflictFiles);
+      for (String localPath in manifest.conflictFiles) {
+        if (!conflictsResolved(workingDir.childFile(localPath).readAsStringSync())) {
+          print('Conflict still remaining');
+        }
+      }
+      return const FlutterCommandResult(ExitStatus.success);
+    }
     final FlutterProject flutterProject = FlutterProject.current();
 
     print('HERE');
@@ -149,7 +165,7 @@ class MigrateCommand extends FlutterCommand {
       if (newTemplateFile.existsSync()) {
         DiffResult diff = await MigrateUtils.diffFiles(oldTemplateFile, newTemplateFile);
         diffMap[localPath] = diff;
-        print(diff.diff);
+        // print(diff.diff);
       } else {
         print('else');
         // Current file has no new template counterpart, which is equivalent to a deletion.
@@ -159,6 +175,7 @@ class MigrateCommand extends FlutterCommand {
     }
 
     // Check for any new files that were added in the new template
+    Map<String, File> additionalFiles = <String, File>{};
     for (FileSystemEntity entity in generatedNewFiles) {
       print(entity.path);
       if (entity is! File) {
@@ -177,13 +194,14 @@ class MigrateCommand extends FlutterCommand {
       }
       print('  Addition');
       diffMap[localPath] = DiffResult.addition();
+      additionalFiles[localPath] = newTemplateFile;
     }
 
     // for each file
     List<FileSystemEntity> currentFiles = flutterProject.directory.listSync(recursive: true);
     String projectRootPath = flutterProject.directory.absolute.path;
-    List<MergeResult> mergeResults = <MergeResult>[];
-    List<File> deletedFiles = <File>[];
+    Map<String, MergeResult> mergeResults = <String, MergeResult>{};
+    Map<String, File> deletedFiles = <String, File>{};
     for (FileSystemEntity entity in currentFiles) {
       if (entity is! File) {
         continue;
@@ -209,7 +227,7 @@ class MigrateCommand extends FlutterCommand {
         if (diffMap.containsKey(localPath) && diffMap[localPath]!.isDeletion) { // File is deleted in new template
           print('    DELETING');
           // currentFile.deleteSync();
-          deletedFiles.add(currentFile);
+          deletedFiles[localPath] = currentFile;
         }
         continue;
       }
@@ -222,15 +240,37 @@ class MigrateCommand extends FlutterCommand {
         );
         print('Merged with ${result.exitCode} conflicts');
         // print(result.mergedContents);
-        mergeResults.add(result);
+        mergeResults[localPath] = result;
         continue;
       }
       print('  File unhandled');
     }
 
-    // deletedFiles
-    // mergeResults
+/////////////////////////////////////////////
 
+    // create temp working directory
+    Directory workingDir = FlutterProject.current().directory.childDirectory('migrate_working_dir');
+
+    for (String localPath in mergeResults.keys) {
+      MergeResult result = mergeResults[localPath]!;
+      File file = workingDir.childFile(localPath);
+      file.createSync(recursive: true);
+      file.writeAsStringSync(result.mergedContents, flush: true);
+      print('  Wrote merged file $localPath');
+    }
+
+    for (String localPath in additionalFiles.keys) {
+      File additionalFile = additionalFiles[localPath]!;
+      File file = workingDir.childFile(localPath);
+      file.createSync(recursive: true);
+      file.writeAsStringSync(additionalFile.readAsStringSync(), flush: true);
+      print('  Wrote Additional file $localPath');
+    }
+
+    MigrateManifest manifest = MigrateManifest(migrateRootDir: workingDir, mergeResults: mergeResults, additionalFiles: additionalFiles, deletedFiles: deletedFiles);
+    manifest.writeFile();
+
+////////////////////////////////////////////////
 
     print('::::GENERATED FOLDERS::::::');
     print(generatedOldTemplateDirectory.path);
@@ -253,5 +293,12 @@ class MigrateCommand extends FlutterCommand {
       );
     }
     return const FlutterCommandResult(ExitStatus.success);
+  }
+
+  bool conflictsResolved(String contents) {
+    if (contents.contains('>>>>>>>') || contents.contains('=======') || contents.contains('<<<<<<<')) {
+      return false;
+    }
+    return true;
   }
 }

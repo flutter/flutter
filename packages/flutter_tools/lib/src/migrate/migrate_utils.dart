@@ -225,6 +225,8 @@ class MergeResult {
     hasConflict = result.exitCode != 0,
     exitCode = result.exitCode;
 
+  MergeResult.explicit({required this.mergedContents, required this.hasConflict, required this.exitCode});
+
   String mergedContents;
   bool hasConflict;
   int exitCode;
