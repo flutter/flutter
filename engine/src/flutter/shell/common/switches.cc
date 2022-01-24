@@ -411,8 +411,9 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
   settings.use_test_fonts =
       command_line.HasOption(FlagForSwitch(Switch::UseTestFonts));
 
-  settings.enable_skparagraph =
-      command_line.HasOption(FlagForSwitch(Switch::EnableSkParagraph));
+  std::string enable_skparagraph = command_line.GetOptionValueWithDefault(
+      FlagForSwitch(Switch::EnableSkParagraph), "");
+  settings.enable_skparagraph = enable_skparagraph != "false";
 
   settings.prefetched_default_font_manager = command_line.HasOption(
       FlagForSwitch(Switch::PrefetchedDefaultFontManager));
