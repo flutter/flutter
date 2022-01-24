@@ -424,7 +424,7 @@ void main() {
   });
 
   group('CupertinoPickerDefaultSelectionOverlay', () {
-    testWidgets('should be used directional decoration', (WidgetTester tester) async {
+    testWidgets('should be using directional decoration', (WidgetTester tester) async {
       await tester.pumpWidget(
         CupertinoApp(
           theme: const CupertinoThemeData(brightness: Brightness.light),
