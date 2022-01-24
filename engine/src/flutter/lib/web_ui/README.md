@@ -184,12 +184,6 @@ If you have questions, contact the Flutter Web team on Flutter Discord on the
 web. Versions are not automatically updated whenever a new release is available.
 Instead, we update this file manually once in a while.
 
-`goldens_lock.yaml` refers to a revision in the https://github.com/flutter/goldens
-repo. Screenshot tests are compared with the golden files at that revision.
-When making engine changes that affect screenshots, first submit a PR to
-flutter/goldens updating the screenshots. Then update this file pointing to
-the new revision.
-
 `canvaskit_lock.yaml` locks the version of CanvasKit for tests and production
 use.
 

@@ -60,13 +60,6 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
             '.dart_tool/goldens. Use this option to bulk-update all screenshots, '
             'for example, when a new browser version affects pixels.',
       )
-      ..addFlag(
-        'skip-goldens-repo-fetch',
-        defaultsTo: false,
-        help: 'If set reuses the existig flutter/goldens repo clone. Use this '
-            'to avoid overwriting local changes when iterating on golden '
-            'tests. This is off by default.',
-      )
       ..addOption(
         'browser',
         defaultsTo: 'chrome',
@@ -126,9 +119,6 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
   /// ".dart_tool/goldens".
   bool get doUpdateScreenshotGoldens => boolArg('update-screenshot-goldens');
 
-  /// Whether to fetch the goldens repo prior to running tests.
-  bool get skipGoldensRepoFetch => boolArg('skip-goldens-repo-fetch');
-
   /// Path to a CanvasKit build. Overrides the default CanvasKit.
   String? get overridePathToCanvasKit => argResults!['canvaskit-path'] as String?;
 
@@ -140,10 +130,7 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
 
     final Pipeline testPipeline = Pipeline(steps: <PipelineStep>[
       if (isWatchMode) ClearTerminalScreenStep(),
-      CompileTestsStep(
-        skipGoldensRepoFetch: skipGoldensRepoFetch,
-        testFiles: testFiles,
-      ),
+      CompileTestsStep(testFiles: testFiles),
       RunTestsStep(
         browserName: browserName,
         testFiles: testFiles,
