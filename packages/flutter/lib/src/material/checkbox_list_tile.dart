@@ -137,6 +137,7 @@ class CheckboxListTile extends StatelessWidget {
     this.contentPadding,
     this.tristate = false,
     this.shape,
+    this.checkboxShape,
     this.selectedTileColor,
     this.side,
     this.visualDensity,
@@ -256,6 +257,13 @@ class CheckboxListTile extends StatelessWidget {
   /// {@macro flutter.material.ListTile.shape}
   final ShapeBorder? shape;
 
+  /// {@macro flutter.material.checkbox.shape}
+  ///
+  /// If this property is null then [CheckboxThemeData.shape] of [ThemeData.checkboxTheme]
+  /// is used. If that's null then the shape will be a [RoundedRectangleBorder]
+  /// with a circular corner radius of 1.0.
+  final OutlinedBorder? checkboxShape;
+
   /// If non-null, defines the background color when [CheckboxListTile.selected] is true.
   final Color? selectedTileColor;
 
@@ -308,6 +316,7 @@ class CheckboxListTile extends StatelessWidget {
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       autofocus: autofocus,
       tristate: tristate,
+      shape: checkboxShape,
       side: side,
     );
     Widget? leading, trailing;
