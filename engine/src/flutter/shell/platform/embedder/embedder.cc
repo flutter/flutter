@@ -558,6 +558,7 @@ static sk_sp<SkSurface> MakeSkSurfaceFromBackingStore(
     if (captures->destruction_callback) {
       captures->destruction_callback(captures->user_data);
     }
+    delete captures;
   };
 
   auto surface = SkSurface::MakeRasterDirectReleaseProc(
@@ -565,7 +566,7 @@ static sk_sp<SkSurface> MakeSkSurfaceFromBackingStore(
       const_cast<void*>(software->allocation),  // pixels
       software->row_bytes,                      // row bytes
       release_proc,                             // release proc
-      captures.release()                        // release context
+      captures.get()                            // get context
   );
 
   if (!surface) {
@@ -575,6 +576,9 @@ static sk_sp<SkSurface> MakeSkSurfaceFromBackingStore(
       software->destruction_callback(software->user_data);
     }
     return nullptr;
+  }
+  if (surface) {
+    captures.release();  // Skia has assumed ownership of the struct.
   }
   return surface;
 }
