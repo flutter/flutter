@@ -10072,6 +10072,9 @@ void main() {
         ),
       );
 
+      // Wait for the throttling.
+      await tester.pump(const Duration(milliseconds: 500));
+
       // Undo/redo still have no effect. The field is focused and the value has
       // changed, but the text remains empty.
       await sendUndo(tester);
@@ -10097,6 +10100,7 @@ void main() {
           selection: TextSelection.collapsed(offset: 1),
         ),
       );
+      await tester.pump(const Duration(milliseconds: 500));
 
       // Can undo/redo a single insertion.
       await sendUndo(tester);
@@ -10140,6 +10144,7 @@ void main() {
           selection: TextSelection.collapsed(offset: 2),
         ),
       );
+      await tester.pump(const Duration(milliseconds: 500));
       await sendRedo(tester);
       expect(
         controller.value,
@@ -10190,6 +10195,7 @@ void main() {
         ),
       );
       await tester.enterText(find.byType(EditableText), '12');
+      await tester.pump(const Duration(milliseconds: 500));
       await sendRedo(tester);
       expect(
         controller.value,
@@ -10270,7 +10276,10 @@ void main() {
           selection: TextSelection.collapsed(offset: 0),
         ),
       );
+      // Wait for the throttling.
+      await tester.pump(const Duration(milliseconds: 500));
       await tester.enterText(find.byType(EditableText), '1');
+      await tester.pump(const Duration(milliseconds: 500));
       expect(
         controller.value,
         const TextEditingValue(
@@ -10309,6 +10318,92 @@ void main() {
         ),
       );
     }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
+  });
+
+  group('throttle', () {
+    test('trailing edge', () async {
+      void incrementLength(TextEditingController controller) {
+        controller.text += 'a';
+      }
+      final TextEditingController controller = TextEditingController(text: '');
+
+      final Throttleable<TextEditingController> incrementThrottled = throttle(
+        duration: const Duration(milliseconds: 100),
+        function: incrementLength,
+      );
+
+      // Calling directly has no throttling.
+      expect(controller.text.length, 0);
+      incrementLength(controller);
+      expect(controller.text.length, 1);
+      incrementLength(controller);
+      expect(controller.text.length, 2);
+      incrementLength(controller);
+      expect(controller.text.length, 3);
+
+      // Calling the throttled function only calls once per duration.
+      incrementThrottled(controller);
+      expect(controller.text.length, 3);
+      incrementThrottled(controller);
+      expect(controller.text.length, 3);
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+      expect(controller.text.length, 4);
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+      expect(controller.text.length, 4);
+      incrementThrottled(controller);
+      expect(controller.text.length, 4);
+      incrementThrottled(controller);
+      expect(controller.text.length, 4);
+      await Future<void>.delayed(const Duration(milliseconds: 99));
+      expect(controller.text.length, 4);
+      await Future<void>.delayed(const Duration(milliseconds: 1));
+      expect(controller.text.length, 5);
+    });
+
+    test('leading edge', () async {
+      void incrementLength(TextEditingController controller) {
+        controller.text += 'a';
+      }
+      final TextEditingController controller = TextEditingController(text: '');
+
+      final Throttleable<TextEditingController> incrementThrottled = throttle(
+        duration: const Duration(milliseconds: 100),
+        function: incrementLength,
+        leadingEdge: true,
+      );
+
+      // Calling directly has no throttling.
+      expect(controller.text.length, 0);
+      incrementLength(controller);
+      expect(controller.text.length, 1);
+      incrementLength(controller);
+      expect(controller.text.length, 2);
+      incrementLength(controller);
+      expect(controller.text.length, 3);
+
+      // Calling the throttled function only calls once per duration, but it
+      // calls immediately synchronously.
+      incrementThrottled(controller);
+      expect(controller.text.length, 4);
+      incrementThrottled(controller);
+      expect(controller.text.length, 4);
+      incrementThrottled(controller);
+      expect(controller.text.length, 4);
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+      expect(controller.text.length, 5);
+      incrementThrottled(controller);
+      expect(controller.text.length, 6);
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+      expect(controller.text.length, 6);
+      incrementThrottled(controller);
+      expect(controller.text.length, 7);
+      incrementThrottled(controller);
+      expect(controller.text.length, 7);
+      await Future<void>.delayed(const Duration(milliseconds: 90));
+      expect(controller.text.length, 7);
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+      expect(controller.text.length, 8);
+    });
   });
 }
 

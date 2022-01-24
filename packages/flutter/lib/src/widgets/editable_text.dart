@@ -4162,7 +4162,9 @@ class _CopySelectionAction extends ContextAction<CopySelectionTextIntent> {
   bool get isActionEnabled => state._value.selection.isValid && !state._value.selection.isCollapsed;
 }
 
-typedef _TextEditingValueCallback = void Function(TextEditingValue value);
+/// A void function that takes a [TextEditingValue].
+@visibleForTesting
+typedef TextEditingValueCallback = void Function(TextEditingValue value);
 
 /// Provides undo/redo capabilities for text editing.
 ///
@@ -4193,14 +4195,18 @@ class UndoRedo extends StatefulWidget {
 
   /// Called when an undo or redo is received, even if the state would be the
   /// same.
-  final _TextEditingValueCallback onChanged;
+  final TextEditingValueCallback onChanged;
 
   @override
-  _UndoRedoState createState() => _UndoRedoState();
+  UndoRedoState createState() => UndoRedoState();
 }
 
-class _UndoRedoState extends State<UndoRedo> {
+/// State for [UndoRedo].
+@visibleForTesting
+class UndoRedoState extends State<UndoRedo> {
   final UndoStack<TextEditingValue> _stack = UndoStack<TextEditingValue>();
+  late final Throttled<TextEditingValue> _throttledPush;
+  Timer? _throttleTimer;
 
   void _undo(UndoTextIntent intent) {
     _update(_stack.undo());
@@ -4228,20 +4234,36 @@ class _UndoRedoState extends State<UndoRedo> {
         || widget.controller.text == _stack.currentValue?.text) {
       return;
     }
-    _stack.push(widget.controller.value);
+
+    _throttleTimer = _throttledPush(widget.controller.value);
   }
 
   @override
   void initState() {
     super.initState();
+    _throttledPush = throttle<TextEditingValue>(
+      // This duration was chosen as a best fit for the behavior of Mac, Linux,
+      // and Windows undo/redo state save durations.
+      duration: const Duration(milliseconds: 500),
+      function: _stack.push,
+    );
     _push();
-    // TODO(justinmc): Update this if controller changes.
     widget.controller.addListener(_push);
+  }
+
+  @override
+  void didUpdateWidget(UndoRedo oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.controller != oldWidget.controller) {
+      oldWidget.controller.removeListener(_push);
+      widget.controller.addListener(_push);
+    }
   }
 
   @override
   void dispose() {
     widget.controller.removeListener(_push);
+    _throttleTimer?.cancel();
     super.dispose();
   }
 
@@ -4330,4 +4352,52 @@ class UndoStack<T> {
 
     return _list[_index];
   }
+
+  @override
+  String toString() {
+    return 'UndoStack $_list';
+  }
+}
+
+/// A function that can be, or has been, throttled with the throttle function.
+@visibleForTesting
+typedef Throttleable<T> = void Function(T currentArg);
+
+/// A function that has been throttled by [throttle].
+@visibleForTesting
+typedef Throttled<T> = Timer Function(T currentArg);
+
+/// Returns a _Throttled that will call through to the given function only a
+/// maximum of once per duration.
+///
+/// Only works for functions that take exactly one argument.
+@visibleForTesting
+Throttled<T> throttle<T>({
+  required Duration duration,
+  required Throttleable<T> function,
+  // If true, calls at the start of the timer.
+  bool leadingEdge = false,
+}) {
+  Timer? timer;
+  bool calledDuringTimer = false;
+  late T arg;
+
+  return (T currentArg) {
+    arg = currentArg;
+    if (timer != null) {
+      calledDuringTimer = true;
+      return timer!;
+    }
+    if (leadingEdge) {
+      function(arg);
+    }
+    calledDuringTimer = false;
+    timer = Timer(duration, () {
+      if (!leadingEdge || calledDuringTimer) {
+        function(arg);
+      }
+      timer = null;
+    });
+    return timer!;
+  };
 }
