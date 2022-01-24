@@ -14,6 +14,110 @@
 
 version: 1
 transforms:
+  # Changes made in https://github.com/flutter/flutter/pull/96957
+  - title: "Migrate to 'thumbVisibility'"
+    date: 2022-01-20
+    element:
+      uris: [ 'cupertino.dart' ]
+      field: 'isAlwaysShown'
+      inClass: 'CupertinoScrollbar'
+    changes:
+      - kind: 'rename'
+        newName: 'thumbVisibility'
+
+  # Changes made in https://github.com/flutter/flutter/pull/96957
+  - title: "Migrate to 'thumbVisibility'"
+    date: 2022-01-20
+    element:
+      uris: [ 'cupertino.dart' ]
+      constructor: ''
+      inClass: 'CupertinoScrollbar'
+    changes:
+      - kind: 'renameParameter'
+        oldName: 'isAlwaysShown'
+        newName: 'thumbVisibility'
+
+  # Changes made in https://github.com/flutter/flutter/pull/96957
+  - title: "Migrate to 'thumbVisibility'"
+    date: 2022-01-20
+    element:
+      uris: [ 'material.dart' ]
+      field: 'isAlwaysShown'
+      inClass: 'Scrollbar'
+    changes:
+      - kind: 'rename'
+        newName: 'thumbVisibility'
+
+  # Changes made in https://github.com/flutter/flutter/pull/96957
+  - title: "Migrate to 'thumbVisibility'"
+    date: 2022-01-20
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'Scrollbar'
+    changes:
+      - kind: 'renameParameter'
+        oldName: 'isAlwaysShown'
+        newName: 'thumbVisibility'
+
+  # Changes made in https://github.com/flutter/flutter/pull/96957
+  - title: "Migrate to 'thumbVisibility'"
+    date: 2022-01-20
+    element:
+      uris: [ 'material.dart' ]
+      field: 'isAlwaysShown'
+      inClass: 'ScrollbarThemeData'
+    changes:
+      - kind: 'rename'
+        newName: 'thumbVisibility'
+
+  # Changes made in https://github.com/flutter/flutter/pull/96957
+  - title: "Migrate to 'thumbVisibility'"
+    date: 2022-01-20
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ScrollbarThemeData'
+    changes:
+      - kind: 'renameParameter'
+        oldName: 'isAlwaysShown'
+        newName: 'thumbVisibility'
+
+  # Changes made in https://github.com/flutter/flutter/pull/96957
+  - title: "Migrate to 'thumbVisibility'"
+    date: 2022-01-20
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'ScrollbarThemeData'
+    changes:
+      - kind: 'renameParameter'
+        oldName: 'isAlwaysShown'
+        newName: 'thumbVisibility'
+
+  # Changes made in https://github.com/flutter/flutter/pull/96957
+  - title: "Migrate to 'thumbVisibility'"
+    date: 2022-01-20
+    element:
+      uris: [ 'material.dart', 'widgets.dart', 'cupertino.dart' ]
+      field: 'isAlwaysShown'
+      inClass: 'RawScrollbar'
+    changes:
+      - kind: 'rename'
+        newName: 'thumbVisibility'
+
+  # Changes made in https://github.com/flutter/flutter/pull/96957
+  - title: "Migrate to 'thumbVisibility'"
+    date: 2022-01-20
+    element:
+      uris: [ 'material.dart', 'widgets.dart', 'cupertino.dart' ]
+      constructor: ''
+      inClass: 'RawScrollbar'
+    changes:
+      - kind: 'renameParameter'
+        oldName: 'isAlwaysShown'
+        newName: 'thumbVisibility'
+
   # Changes made in https://github.com/flutter/flutter/pull/96115
   - title: "Migrate 'Icons.pie_chart_outlined' to 'Icons.pie_chart_outline'"
     date: 2022-01-04
