@@ -7,7 +7,6 @@
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
@@ -51,7 +50,6 @@ final Platform notMacosPlatform = FakePlatform(
 void main() {
   FileSystem fileSystem;
   TestUsage usage;
-  BufferLogger logger;
   FakeProcessManager fakeProcessManager;
 
   setUpAll(() {
@@ -61,7 +59,6 @@ void main() {
   setUp(() {
     fileSystem = MemoryFileSystem.test();
     usage = TestUsage();
-    logger = BufferLogger.test();
     fakeProcessManager = FakeProcessManager.empty();
   });
 
@@ -292,6 +289,9 @@ void main() {
     expect(actualIpaPlistContents, expectedIpaPlistContents);
 
     expect(testLogger.statusText, contains('build/ios/archive/Runner.xcarchive'));
+    expect(testLogger.statusText, contains('Building App Store IPA'));
+    expect(testLogger.statusText, contains('Built IPA to /build/ios/ipa'));
+    expect(testLogger.statusText, contains('To upload to the App Store'));
     expect(fakeProcessManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -330,6 +330,10 @@ void main() {
     expect(actualIpaPlistContents, expectedIpaPlistContents);
 
     expect(testLogger.statusText, contains('build/ios/archive/Runner.xcarchive'));
+    expect(testLogger.statusText, contains('Building ad-hoc IPA'));
+    expect(testLogger.statusText, contains('Built IPA to /build/ios/ipa'));
+    // Don't instruct how to upload to the App Store.
+    expect(testLogger.statusText, isNot(contains('To upload')));
     expect(fakeProcessManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -446,13 +450,12 @@ void main() {
       ],
     );
 
-    expect(logger.statusText, contains('Built IPA to $outputPath.'));
+    expect(testLogger.statusText, contains('Built IPA to $outputPath.'));
     expect(fakeProcessManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => fakeProcessManager,
     Platform: () => macosPlatform,
-    Logger: () => logger,
     XcodeProjectInterpreter: () =>
         FakeXcodeProjectInterpreterWithBuildSettings(),
   });

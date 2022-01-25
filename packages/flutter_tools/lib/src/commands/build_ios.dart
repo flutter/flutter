@@ -154,11 +154,13 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     final BuildableIOSApp app = await buildableIOSApp;
     Status? status;
     RunResult? result;
-    final String outputPath = globals.fs.path.absolute(app.ipaOutputPath);
+    final String relativeOutputPath = app.ipaOutputPath;
+    final String absoluteOutputPath = globals.fs.path.absolute(relativeOutputPath);
     final String archivePath = globals.fs.path.absolute(app.archiveBundleOutputPath);
+    final String? exportMethod = stringArg('export-method');
+    final bool isAppStoreUpload = exportMethod  == 'app-store';
     try {
-      final String? method = stringArg('export-method');
-      final String? ipaType = method == 'app-store' ? 'App Store' : method;
+      final String? ipaType = isAppStoreUpload ? 'App Store' : exportMethod;
       status = globals.logger.startProgress('Building $ipaType IPA...');
 
       final String exportOptions = exportOptionsPlist ?? _createExportPlist().path;
@@ -175,7 +177,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
           '-archivePath',
           archivePath,
           '-exportPath',
-          outputPath,
+          absoluteOutputPath,
           '-exportOptionsPlist',
           globals.fs.path.absolute(exportOptions),
         ],
@@ -202,7 +204,23 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
       throwToolExit(null);
     }
 
-    globals.printStatus('Built IPA to $outputPath.');
+    globals.printStatus('Built IPA to $absoluteOutputPath.');
+
+    if (isAppStoreUpload) {
+      globals.printStatus('To upload to the App Store either:');
+      globals.printStatus(
+        '1. Drag and drop the "$relativeOutputPath/*.ipa" bundle into the Apple Transport macOS app https://apps.apple.com/us/app/transporter/id1450874784',
+        indent: 4,
+      );
+      globals.printStatus(
+        '2. Run "xcrun altool --upload-app --type ios -f $relativeOutputPath/*.ipa --apiKey your_api_key --apiIssuer your_issuer_id".',
+        indent: 4,
+      );
+      globals.printStatus(
+        'See "man altool" for details about how to authenticate with the App Store Connect API key.',
+        indent: 7,
+      );
+    }
 
     return FlutterCommandResult.success();
   }
