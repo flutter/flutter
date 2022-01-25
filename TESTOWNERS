@@ -236,3 +236,4 @@
 # skp_generator @Hixie
 # test_ownership @keyonghan
 # verify_binaries_codesigned @christopherfujino @flutter/releases
+# google_test @renyou

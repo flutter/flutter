@@ -4184,3 +4184,11 @@ targets:
         ["devicelab","android","windows"]
       task_name: windows_chrome_dev_mode
     scheduler: luci
+
+  - name: google_test
+    bringup: true
+    presubmit: false
+    scheduler: google_internal
+    properties:
+      tags: >
+          ["framework","hostonly","shard"]
