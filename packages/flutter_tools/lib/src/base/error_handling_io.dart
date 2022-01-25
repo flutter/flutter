@@ -12,6 +12,7 @@ import 'package:path/path.dart' as p; // flutter_ignore: package_path_import
 import 'package:process/process.dart';
 
 import 'common.dart' show throwToolExit;
+import 'file_system.dart';
 import 'platform.dart';
 
 // The Flutter tool hits file system and process errors that only the end-user can address.
@@ -150,6 +151,13 @@ class ErrorHandlingFileSystem extends ForwardingFileSystem {
   set currentDirectory(dynamic path) {
     _cachedPath = null;
     delegate.currentDirectory = path;
+  }
+
+  void deletePreviousTempDirs() {
+    // this is not relevant with test file systems
+    if (delegate is LocalFileSystem) {
+      (delegate as LocalFileSystem).deletePreviousTempDirs();
+    }
   }
 
   @override

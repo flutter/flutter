@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'base/common.dart';
+import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
 import 'cache.dart';
 
@@ -50,8 +51,8 @@ class _DefaultPreRunValidator implements PreRunValidator {
   // Delete any temp dirs created by previous tool invocations
   void _deletePreviousToolTempDirs() {
     // this is not relevant with test file systems
-    if (fileSystem is LocalFileSystem) {
-      (fileSystem as LocalFileSystem).deletePreviousTempDirs();
+    if (fileSystem is ErrorHandlingFileSystem) {
+      (fileSystem as ErrorHandlingFileSystem).deletePreviousTempDirs();
     }
   }
 }
