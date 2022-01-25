@@ -214,7 +214,6 @@ bool DartComponentControllerV2::CreateAndBindNamespace() {
 
 bool DartComponentControllerV2::SetUpFromKernel() {
   dart_utils::MappedResource manifest;
-
   if (!dart_utils::MappedResource::LoadFromNamespace(
           namespace_, data_path_ + "/app.dilplist", manifest)) {
     return false;
@@ -225,10 +224,14 @@ bool DartComponentControllerV2::SetUpFromKernel() {
           isolate_snapshot_data_)) {
     return false;
   }
+  if (!dart_utils::MappedResource::LoadFromNamespace(
+          nullptr, "/pkg/data/isolate_core_snapshot_instructions.bin",
+          isolate_snapshot_instructions_, true /* executable */)) {
+    return false;
+  }
 
-  // The core snapshot does not separate instructions from data.
   if (!CreateIsolate(isolate_snapshot_data_.address(),
-                     nullptr /* isolate_snapshot_instructions */)) {
+                     isolate_snapshot_instructions_.address())) {
     return false;
   }
 
@@ -293,16 +296,16 @@ bool DartComponentControllerV2::SetUpFromAppSnapshot() {
       return false;
     }
   } else {
-    // TODO(fxb/91200): This code path was broken for over a year and is
-    // probably not used.
     if (!dart_utils::MappedResource::LoadFromNamespace(
             namespace_, data_path_ + "/isolate_snapshot_data.bin",
             isolate_snapshot_data_)) {
       return false;
     }
-    isolate_data = isolate_snapshot_data_.address();
-    // We don't separate instructions from data in 'core' snapshots.
-    isolate_instructions = nullptr;
+    if (!dart_utils::MappedResource::LoadFromNamespace(
+            namespace_, data_path_ + "/isolate_snapshot_instructions.bin",
+            isolate_snapshot_instructions_, true /* executable */)) {
+      return false;
+    }
   }
   return CreateIsolate(isolate_data, isolate_instructions);
 #endif  // defined(AOT_RUNTIME)
