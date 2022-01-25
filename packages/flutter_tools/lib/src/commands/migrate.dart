@@ -20,7 +20,12 @@ class MigrateCommand extends FlutterCommand {
     bool verbose = false,
   }) : _verbose = verbose {
     requiresPubspecYaml();
+    // TODO move these to subcomands instead of flags.
     argParser.addFlag('apply',
+      negatable: false,
+      help: "",
+    );
+    argParser.addFlag('abandon',
       negatable: false,
       help: "",
     );
@@ -59,22 +64,75 @@ class MigrateCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
 
+    Directory workingDir = FlutterProject.current().directory.childDirectory('migrate_working_dir');
     if (boolArg('apply')) {
-      print('Applying migration');
-      Directory workingDir = FlutterProject.current().directory.childDirectory('migrate_working_dir');
+      if (!workingDir.existsSync()) {
+        print('No migration in progress. Please run `flutter migrate` first.');
+        return const FlutterCommandResult(ExitStatus.fail);
+      }
 
       File manifestFile = MigrateManifest.getManifestFileFromDirectory(workingDir);
       MigrateManifest manifest = MigrateManifest.fromFile(manifestFile);
       print(manifest.conflictFiles);
+      List<String> remainingConflicts = <String>[];
       for (String localPath in manifest.conflictFiles) {
         if (!conflictsResolved(workingDir.childFile(localPath).readAsStringSync())) {
-          print('Conflict still remaining');
+          remainingConflicts.add(localPath);
         }
       }
+      if (remainingConflicts.isNotEmpty) {
+        print('Unable to apply migration. The following files in the migration working directory still have unresolved conflicts:');
+        for (String localPath in remainingConflicts) {
+          print('  - $localPath');
+        }
+        return const FlutterCommandResult(ExitStatus.fail);
+      }
+
+      print('Applying migration.');
+      List<String> allFilesToCopy = <String>[];
+      allFilesToCopy.addAll(manifest.mergedFiles);
+      allFilesToCopy.addAll(manifest.conflictFiles);
+      allFilesToCopy.addAll(manifest.additionalFiles);
+      if (allFilesToCopy.isNotEmpty) {
+        print('Modifying ${allFilesToCopy.length} files.');
+      }
+      if (manifest.deletedFiles.isNotEmpty) {
+        print('Deleting ${allFilesToCopy.length} files.');
+      }
+
+      for (String localPath in allFilesToCopy) {
+        File workingFile = workingDir.childFile(localPath);
+        File targetFile = FlutterProject.current().directory.childFile(localPath);
+        if (!workingFile.existsSync()) {
+          continue;
+        }
+
+        if (targetFile.existsSync()) {
+          targetFile.createSync(recursive: true);
+        }
+        targetFile.writeAsStringSync(workingFile.readAsStringSync(), flush: true);
+      }
+      for (String localPath in manifest.deletedFiles) {
+        File targetFile = FlutterProject.current().directory.childFile(localPath);
+        targetFile.deleteSync();
+      }
+      // allFilesToCopy.addAll(manifest.Files);
       return const FlutterCommandResult(ExitStatus.success);
     }
-    final FlutterProject flutterProject = FlutterProject.current();
+    if (boolArg('abandon')) {
+      if (!workingDir.existsSync()) {
+        print('No migration in progress. Start a new migration with `flutter migrate`');
+      }
+      workingDir.deleteSync(recursive: true);
+      return const FlutterCommandResult(ExitStatus.success);
+    }
 
+    if (workingDir.existsSync()) {
+      print('Old migration already in progress. Resolve merge conflicts and run `flutter migrate --apply` to accept changes.');
+      print('Pending migration files exist in `<your_project_root_dir>/migrate_working_dir`');
+      print('You may also abandon the existing migration and start a new one with `flutter migrate --abandon`');
+    }
+    final FlutterProject flutterProject = FlutterProject.current();
     print('HERE');
 
     List<MigrateConfig> configs = await MigrateConfig.parseOrCreateMigrateConfigs();
@@ -108,7 +166,7 @@ class MigrateCommand extends FlutterCommand {
     await MigrateUtils.gitInit(generatedNewTemplateDirectory.absolute.path);
 
     // /var/folders/md/gm0zgfcj07vcsj6jkh_mp_wh00ff02/T/generatedOldTemplate.XmklMKhV
-// /var/folders/md/gm0zgfcj07vcsj6jkh_mp_wh00ff02/T/generatedNewTemplate.r9TzOOvh
+    // /var/folders/md/gm0zgfcj07vcsj6jkh_mp_wh00ff02/T/generatedNewTemplate.r9TzOOvh
     // Directory generatedOldTemplateDirectory = globals.fs.directory('/var/folders/md/gm0zgfcj07vcsj6jkh_mp_wh00ff02/T/generatedOldTemplate.j8Tto95k');
     // Directory generatedNewTemplateDirectory = globals.fs.directory('/var/folders/md/gm0zgfcj07vcsj6jkh_mp_wh00ff02/T/generateNewTemplate.0f4evU9N');
     // Directory oldFlutterRoot = globals.fs.directory();
@@ -249,7 +307,7 @@ class MigrateCommand extends FlutterCommand {
 /////////////////////////////////////////////
 
     // create temp working directory
-    Directory workingDir = FlutterProject.current().directory.childDirectory('migrate_working_dir');
+    // Directory workingDir = FlutterProject.current().directory.childDirectory('migrate_working_dir');
 
     for (String localPath in mergeResults.keys) {
       MergeResult result = mergeResults[localPath]!;
