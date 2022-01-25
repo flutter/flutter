@@ -122,12 +122,15 @@ void main() {
     expect(events[2].delta, Offset(15.0 / ui.window.devicePixelRatio, 0.0));
     expect(events[3].timeStamp, currentTestFrameTime() + kSamplingOffset);
     expect(events[3], isA<PointerUpEvent>());
+
+    GestureBinding.instance!.resamplingEnabled = false;
   });
 
   testWidgets('An event with system startup timestamp canceled the down event successfully', (WidgetTester tester) async {
     assert(WidgetsBinding.instance == binding);
     Duration currentTestFrameTime() => SchedulerBinding.instance!.currentSystemFrameTimeStamp;
     void requestFrame() => SchedulerBinding.instance!.scheduleFrameCallback((_) {});
+
     GestureBinding.instance!.resamplingEnabled = true;
 
     // Send a down event
@@ -169,6 +172,7 @@ void main() {
     assert(WidgetsBinding.instance == binding);
     Duration currentTestFrameTime() => SchedulerBinding.instance!.currentSystemFrameTimeStamp;
     void requestFrame() => SchedulerBinding.instance!.scheduleFrameCallback((_) {});
+
     GestureBinding.instance!.resamplingEnabled = true;
 
     // Send a down event
