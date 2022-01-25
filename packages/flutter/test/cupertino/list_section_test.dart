@@ -130,10 +130,10 @@ void main() {
         child: MediaQuery(
           data: const MediaQueryData(),
           child: CupertinoListSection(
+            backgroundColor: backgroundColor,
             children: const <Widget>[
               CupertinoListTile(title: Text('CupertinoListTile')),
             ],
-            backgroundColor: backgroundColor,
           ),
         ),
       ),
@@ -149,10 +149,10 @@ void main() {
       CupertinoApp(
         home: Center(
           child: CupertinoListSection(
+            clipBehavior: Clip.antiAlias,
             children: const <Widget>[
               CupertinoListTile(title: Text('CupertinoListTile')),
             ],
-            clipBehavior: Clip.antiAlias,
           ),
         ),
       ),

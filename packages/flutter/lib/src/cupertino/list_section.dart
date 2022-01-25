@@ -135,14 +135,8 @@ enum _CupertinoListSectionType { base, insetGrouped }
 /// `leading`, `title`, `additionalInfo` and `trailing` widgets.
 ///
 /// ```dart
-/// class MyStatefulWidget extends StatefulWidget {
+/// class MyStatefulWidget extends StatelessWidget {
 ///   const MyStatefulWidget({Key? key}) : super(key: key);
-///
-///   @override
-///   _MyStatefulWidgetState createState() => _MyStatefulWidgetState();
-/// }
-///
-/// class _MyStatefulWidgetState extends State<MyStatefulWidget> {
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
@@ -194,14 +188,9 @@ enum _CupertinoListSectionType { base, insetGrouped }
 /// `trailing` widgets.
 ///
 /// ```dart
-/// class MyStatefulWidget extends StatefulWidget {
+/// class MyStatefulWidget extends StatelessWidget {
 ///   const MyStatefulWidget({Key? key}) : super(key: key);
 ///
-///   @override
-///   _MyStatefulWidgetState createState() => _MyStatefulWidgetState();
-/// }
-///
-/// class _MyStatefulWidgetState extends State<MyStatefulWidget> {
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return CupertinoPageScaffold(
@@ -252,7 +241,7 @@ enum _CupertinoListSectionType { base, insetGrouped }
 ///    [CupertinoListSection].
 ///  * [CupertinoFormSection], an iOS-style form section.
 class CupertinoListSection extends StatelessWidget {
-  /// Creates a section that mimicks standard iOS forms.
+  /// Creates a section that mimics standard iOS forms.
   ///
   /// The base constructor for [CupertinoListSection] constructs an
   /// edge-to-edge style section which includes an iOS-style header, the dividers
@@ -466,7 +455,6 @@ class CupertinoListSection extends StatelessWidget {
     Widget? _header;
     if (header != null) {
       _header = DefaultTextStyle(
-        child: header!,
         style: CupertinoTheme.of(context).textTheme.textStyle.merge(
               _type == _CupertinoListSectionType.base
                   ? TextStyle(
@@ -476,13 +464,13 @@ class CupertinoListSection extends StatelessWidget {
                   : const TextStyle(
                       fontSize: 20.0, fontWeight: FontWeight.bold),
             ),
+        child: header!,
       );
     }
 
     Widget? _footer;
     if (footer != null) {
       _footer = DefaultTextStyle(
-        child: footer!,
         style: _type == _CupertinoListSectionType.base
             ? CupertinoTheme.of(context).textTheme.textStyle.merge(TextStyle(
                   fontSize: 13.0,
@@ -490,6 +478,7 @@ class CupertinoListSection extends StatelessWidget {
                       _kHeaderFooterColor, context),
                 ))
             : CupertinoTheme.of(context).textTheme.textStyle,
+        child: footer!,
       );
     }
 
@@ -565,7 +554,7 @@ class CupertinoListSection extends StatelessWidget {
                   : ClipRRect(
                       borderRadius: childrenGroupBorderRadius,
                       clipBehavior: clipBehavior,
-                      child: decoratedChildrenGroup!,
+                      child: decoratedChildrenGroup,
                     ),
             ),
           if (_footer != null)
@@ -776,7 +765,7 @@ class CupertinoFormSection extends StatelessWidget {
             ),
             child: Padding(
               padding: _kFormDefaultHeaderMargin,
-              child: header!,
+              child: header,
             ));
 
     final Widget? _footer = footer == null
@@ -788,27 +777,27 @@ class CupertinoFormSection extends StatelessWidget {
             ),
             child: Padding(
               padding: _kFormDefaultFooterMargin,
-              child: footer!,
+              child: footer,
             ));
 
     return _type == _CupertinoListSectionType.base
         ? CupertinoListSection(
-            children: children,
             header: _header,
             footer: _footer,
             margin: margin,
             backgroundColor: backgroundColor,
             decoration: decoration,
             clipBehavior: clipBehavior,
-            hasLeading: false)
+            hasLeading: false,
+            children: children)
         : CupertinoListSection.insetGrouped(
-            children: children,
             header: _header,
             footer: _footer,
             margin: margin,
             backgroundColor: backgroundColor,
             decoration: decoration,
             clipBehavior: clipBehavior,
-            hasLeading: false);
+            hasLeading: false,
+            children: children);
   }
 }

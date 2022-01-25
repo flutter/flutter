@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -216,9 +218,12 @@ class CupertinoListTile extends StatefulWidget {
   final Widget? trailing;
 
   /// The [onTap] function is called when a user taps on [CupertinoListTile]. If
-  /// left `null`, the [CupertinoListTile] will not show any visual information
-  /// when tapped.
-  final Future<void> Function()? onTap;
+  /// left `null`, the [CupertinoListTile] will not react on taps. If this is a
+  /// `Future<void> Function()`, then the [CupertinoListTile] remains activated
+  /// until the returned future is awaited. This is according to iOS behaviour.
+  /// However, if this function is a `void Function()`, then the tile is active
+  /// only for the duration of invocation.
+  final FutureOr<void> Function()? onTap;
 
   /// The [backgroundColor] of the tile in normal state. Once the tile is
   /// tapped, the background color switches to [backgroundColorActivated]. It is
@@ -240,7 +245,7 @@ class CupertinoListTile extends StatefulWidget {
   final double leadingToTitle;
 
   @override
-  _CupertinoListTileState createState() => _CupertinoListTileState();
+  State<CupertinoListTile> createState() => _CupertinoListTileState();
 }
 
 class _CupertinoListTileState extends State<CupertinoListTile> {
@@ -278,9 +283,9 @@ class _CupertinoListTileState extends State<CupertinoListTile> {
         : null;
 
     final Widget title = DefaultTextStyle(
-      child: widget.title,
       style: titleTextStyle,
       maxLines: 1,
+      child: widget.title,
     );
 
     EdgeInsetsGeometry? padding = widget.padding;
@@ -298,18 +303,18 @@ class _CupertinoListTileState extends State<CupertinoListTile> {
     Widget? subtitle;
     if (widget.subtitle != null) {
       subtitle = DefaultTextStyle(
-        child: widget.subtitle!,
         style: subtitleTextStyle,
         maxLines: 1,
+        child: widget.subtitle!,
       );
     }
 
     Widget? additionalInfo;
     if (widget.additionalInfo != null) {
       additionalInfo = DefaultTextStyle(
-        child: widget.additionalInfo!,
         style: additionalInfoTextStyle!,
         maxLines: 1,
+        child: widget.additionalInfo!,
       );
     }
 
@@ -338,15 +343,13 @@ class _CupertinoListTileState extends State<CupertinoListTile> {
       child: Padding(
         padding: padding,
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
             if (widget.leading != null) ...<Widget>[
               SizedBox(
                 width: widget.leadingSize,
                 height: widget.leadingSize,
                 child: Center(
-                  child: widget.leading!,
+                  child: widget.leading,
                 ),
               ),
               SizedBox(width: widget.leadingToTitle),
