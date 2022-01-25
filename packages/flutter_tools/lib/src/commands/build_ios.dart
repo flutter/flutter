@@ -66,12 +66,17 @@ class BuildIOSCommand extends _BuildIOSSubCommand {
 class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
   BuildIOSArchiveCommand({required bool verboseHelp})
       : super(verboseHelp: verboseHelp) {
+    argParser.addFlag(
+      'app-store',
+      defaultsTo: true,
+      help:
+          'Export as an IPA to be uploaded to the App Store. Use --no-app-store to export as ad-hoc for local testing.',
+    );
     argParser.addOption(
       'export-options-plist',
       valueHelp: 'ExportOptions.plist',
-      // TODO(jmagman): Update help text with link to Flutter docs.
       help:
-          'Optionally export an IPA with these options. See "xcodebuild -h" for available exportOptionsPlist keys.',
+          'Export an IPA with these options. See "xcodebuild -h" for available exportOptionsPlist keys.',
     );
   }
 
@@ -99,14 +104,16 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
   String? get exportOptionsPlist => stringArg('export-options-plist');
 
   @override
-  Directory _outputAppDirectory(String xcodeResultOutput) => globals.fs
-      .directory(xcodeResultOutput)
-      .childDirectory('Products')
-      .childDirectory('Applications');
-
-  @override
-  Future<FlutterCommandResult> runCommand() async {
+  Future<void> validateCommand() async {
     final String? exportOptions = exportOptionsPlist;
+    if (exportOptions != null && argResults?.wasParsed('app-store') == true) {
+      final String flag = boolArg('app-store') ? 'app-store' : 'no-app-store';
+      throwToolExit(
+        '"--export-options-plist" is not compatible with "--$flag". Either use "--export-options-plist" and '
+        'a plist describing how the IPA should be exported by Xcode, or use "--app-store" to create a new plist.\n'
+        'See "xcodebuild -h" for available exportOptionsPlist keys.'
+      );
+    }
     if (exportOptions != null) {
       final FileSystemEntityType type = globals.fs.typeSync(exportOptions);
       if (type == FileSystemEntityType.notFound) {
@@ -117,13 +124,20 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
             '"$exportOptions" is not a file. See "xcodebuild -h" for available keys.');
       }
     }
+    return super.validateCommand();
+  }
+
+  @override
+  Directory _outputAppDirectory(String xcodeResultOutput) => globals.fs
+      .directory(xcodeResultOutput)
+      .childDirectory('Products')
+      .childDirectory('Applications');
+
+  @override
+  Future<FlutterCommandResult> runCommand() async {
     final FlutterCommandResult xcarchiveResult = await super.runCommand();
     final BuildInfo buildInfo = await getBuildInfo();
     displayNullSafetyMode(buildInfo);
-
-    if (exportOptions == null) {
-      return xcarchiveResult;
-    }
 
     // xcarchive failed or not at expected location.
     if (xcarchiveResult.exitStatus != ExitStatus.success) {
@@ -136,8 +150,12 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     Status? status;
     RunResult? result;
     final String outputPath = globals.fs.path.absolute(app.ipaOutputPath);
+    final String archivePath = globals.fs.path.absolute(app.archiveBundleOutputPath);
     try {
-      status = globals.logger.startProgress('Building IPA...');
+      final String ipaType = boolArg('app-store') ? 'App Store' : 'ad-hoc development';
+      status = globals.logger.startProgress('Building $ipaType IPA...');
+
+      final String exportOptions = exportOptionsPlist ?? _createExportPlist().path;
 
       result = await globals.processUtils.run(
         <String>[
@@ -149,7 +167,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
             '-allowProvisioningUpdates',
           ],
           '-archivePath',
-          globals.fs.path.absolute(app.archiveBundleOutputPath),
+          archivePath,
           '-exportPath',
           outputPath,
           '-exportOptionsPlist',
@@ -171,12 +189,46 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
       LineSplitter.split(result.stderr)
           .where((String line) => line.contains('error: '))
           .forEach(errorMessage.writeln);
-      throwToolExit('Encountered error while building IPA:\n$errorMessage');
+
+      globals.printError('Encountered error while creating the IPA:');
+      globals.printError(errorMessage.toString());
+      globals.printError('Try distributing the app in Xcode: "open $archivePath"');
+      throwToolExit(null);
     }
 
     globals.printStatus('Built IPA to $outputPath.');
 
     return FlutterCommandResult.success();
+  }
+
+  File _createExportPlist() {
+    // Create the plist to be passed into xcodebuild -exportOptionsPlist.
+    final StringBuffer plistContents = StringBuffer('''
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+    <dict>
+        <key>method</key>
+''');
+
+    // Export for upload to the App Store, or ad-hoc for local development.
+    final String method = boolArg('app-store') ? 'app-store' : 'development';
+    plistContents.write('''
+        <string>$method</string>
+    ''');
+    // Bitcode is off by default in Flutter iOS apps.
+    plistContents.write('''
+    <key>uploadBitcode</key>
+        <false/>
+    </dict>
+</plist>
+''');
+
+    final File tempPlist = globals.fs.systemTempDirectory
+        .createTempSync('flutter_build_ios.').childFile('ExportOptions.plist');
+    tempPlist.writeAsStringSync(plistContents.toString());
+
+    return tempPlist;
   }
 }
 
