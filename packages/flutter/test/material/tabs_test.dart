@@ -4380,8 +4380,8 @@ void main() {
   });
 
   testWidgets('splashBorderRadius is passed to InkWell.borderRadius', (WidgetTester tester) async {
-    const Color _hoverColor = Color(0xfff44336);
-    const double _radius = 20;
+    const Color hoverColor = Color(0xfff44336);
+    const double radius = 20;
     await tester.pumpWidget(
       boilerplate(
         child: DefaultTabController(
@@ -4390,12 +4390,12 @@ void main() {
             overlayColor: MaterialStateProperty.resolveWith<Color>(
               (Set<MaterialState> states) {
                 if (states.contains(MaterialState.hovered)) {
-                  return _hoverColor;
+                  return hoverColor;
                 }
                 return Colors.black54;
               },
             ),
-            splashBorderRadius: BorderRadius.circular(_radius),
+            splashBorderRadius: BorderRadius.circular(radius),
             tabs: const <Widget>[
               Tab(
                 child: Text(''),
@@ -4413,10 +4413,10 @@ void main() {
     expect(
       object,
       paints..rrect(
-        color: _hoverColor,
+        color: hoverColor,
         rrect: RRect.fromRectAndRadius(
           tester.getRect(find.byType(InkWell)),
-          const Radius.circular(_radius)
+          const Radius.circular(radius)
         ),
       ),
     );
