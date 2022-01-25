@@ -90,7 +90,7 @@ class _MatrixTransformPart extends _TransformPart {
 
   @override
   Matrix4 multiply(Matrix4 rhs) {
-    return matrix * rhs as Matrix4;
+    return matrix.multiplied(rhs);
   }
 }
 
