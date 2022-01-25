@@ -296,7 +296,8 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
     // In this case, we don't want to trigger the refresh indicator.
     return ((notification is ScrollStartNotification && notification.dragDetails != null)
             || (notification is ScrollUpdateNotification && notification.dragDetails != null && widget.triggerMode == RefreshIndicatorTriggerMode.anywhere))
-      && notification.metrics.extentBefore == 0.0
+      && (( notification.metrics.axisDirection == AxisDirection.up && notification.metrics.extentAfter == 0.0)
+            || (notification.metrics.axisDirection == AxisDirection.down && notification.metrics.extentBefore == 0.0))
       && _mode == null
       && _start(notification.metrics.axisDirection);
   }
@@ -313,10 +314,8 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
     bool? indicatorAtTopNow;
     switch (notification.metrics.axisDirection) {
       case AxisDirection.down:
-        indicatorAtTopNow = true;
-        break;
       case AxisDirection.up:
-        indicatorAtTopNow = false;
+        indicatorAtTopNow = true;
         break;
       case AxisDirection.left:
       case AxisDirection.right:
@@ -343,7 +342,11 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
       }
     } else if (notification is OverscrollNotification) {
       if (_mode == _RefreshIndicatorMode.drag || _mode == _RefreshIndicatorMode.armed) {
-        _dragOffset = _dragOffset! - notification.overscroll;
+        if (notification.metrics.axisDirection == AxisDirection.down) {
+          _dragOffset = _dragOffset! - notification.overscroll;
+        } else if (notification.metrics.axisDirection == AxisDirection.up) {
+          _dragOffset = _dragOffset! + notification.overscroll;
+        }
         _checkDragOffset(notification.metrics.viewportDimension);
       }
     } else if (notification is ScrollEndNotification) {
@@ -382,10 +385,8 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
     assert(_dragOffset == null);
     switch (direction) {
       case AxisDirection.down:
-        _isIndicatorAtTop = true;
-        break;
       case AxisDirection.up:
-        _isIndicatorAtTop = false;
+        _isIndicatorAtTop = true;
         break;
       case AxisDirection.left:
       case AxisDirection.right:

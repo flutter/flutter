@@ -115,7 +115,7 @@ void main() {
       ),
     );
 
-    await tester.fling(find.text('X'), const Offset(0.0, -300.0), 1000.0);
+    await tester.fling(find.text('X'), const Offset(0.0, 600.0), 1000.0);
     await tester.pump();
     await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
     await tester.pump(const Duration(seconds: 1)); // finish the indicator settle animation
@@ -169,11 +169,11 @@ void main() {
       ),
     );
 
-    await tester.fling(find.text('X'), const Offset(0.0, -300.0), 1000.0);
+    await tester.fling(find.text('X'), const Offset(0.0, 600.0), 1000.0);
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
     await tester.pump(const Duration(seconds: 1));
-    expect(tester.getCenter(find.byType(RefreshProgressIndicator)).dy, greaterThan(300.0));
+    expect(tester.getCenter(find.byType(RefreshProgressIndicator)).dy, lessThan(300.0));
   });
 
   testWidgets('RefreshIndicator - no movement', (WidgetTester tester) async {
@@ -641,11 +641,11 @@ void main() {
 
     scrollController.jumpTo(50.0);
 
-    await tester.fling(find.text('X'), const Offset(0.0, -300.0), 1000.0);
+    await tester.fling(find.text('X'), const Offset(0.0, 600.0), 1000.0);
     await tester.pump();
     await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
     await tester.pump(const Duration(seconds: 1)); // finish the indicator settle animation
-    expect(tester.getCenter(find.byType(RefreshProgressIndicator)).dy, greaterThan(300.0));
+    expect(tester.getCenter(find.byType(RefreshProgressIndicator)).dy, lessThan(300.0));
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/71936
@@ -817,7 +817,7 @@ void main() {
       ),
     );
 
-    await tester.fling(find.text('X'), const Offset(0.0, -300.0), 1000.0);
+    await tester.fling(find.text('X'), const Offset(0.0, 600.0), 1000.0);
     await tester.pump();
     expect(tester.widget<RefreshProgressIndicator>(find.byType(RefreshProgressIndicator)).valueColor!.value, primaryColor);
   });
@@ -857,7 +857,7 @@ void main() {
       ),
     );
 
-    await tester.fling(find.text('X'), const Offset(0.0, -300.0), 1000.0);
+    await tester.fling(find.text('X'), const Offset(0.0, 600.0), 1000.0);
     await tester.pump();
     expect(tester.widget<RefreshProgressIndicator>(find.byType(RefreshProgressIndicator)).valueColor!.value, refreshIndicatorColor.withOpacity(1.0));
 
