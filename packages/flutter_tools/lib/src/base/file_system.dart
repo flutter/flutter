@@ -187,6 +187,12 @@ class LocalFileSystem extends local_fs.LocalFileSystem {
   void deletePreviousTempDirs() {
     final List<FileSystemEntity> tempEntities = super.systemTempDirectory.listSync();
 
+    if (_systemTemp != null) {
+      throw StateError(
+        'Tried to delete temp directories created by the Flutter tool after the '
+        'current invocation created a temp directory at ${_systemTemp!.path}');
+    }
+
     for (final FileSystemEntity entity in tempEntities) {
       if (entity is Directory) {
         if (entity.path.contains(r'flutter_tools.')) {
