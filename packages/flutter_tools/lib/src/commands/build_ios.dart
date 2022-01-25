@@ -110,16 +110,22 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
   String? get exportOptionsPlist => stringArg('export-options-plist');
 
   @override
+  Directory _outputAppDirectory(String xcodeResultOutput) => globals.fs
+      .directory(xcodeResultOutput)
+      .childDirectory('Products')
+      .childDirectory('Applications');
+
+  @override
   Future<void> validateCommand() async {
     final String? exportOptions = exportOptionsPlist;
-    if (exportOptions != null && argResults?.wasParsed('export-method') == true) {
-      throwToolExit(
-        '"--export-options-plist" is not compatible with "--export-method". Either use "--export-options-plist" and '
-        'a plist describing how the IPA should be exported by Xcode, or use "--export-method" to create a new plist.\n'
-        'See "xcodebuild -h" for available exportOptionsPlist keys.'
-      );
-    }
     if (exportOptions != null) {
+      if (argResults?.wasParsed('export-method') == true) {
+        throwToolExit(
+          '"--export-options-plist" is not compatible with "--export-method". Either use "--export-options-plist" and '
+          'a plist describing how the IPA should be exported by Xcode, or use "--export-method" to create a new plist.\n'
+          'See "xcodebuild -h" for available exportOptionsPlist keys.'
+        );
+      }
       final FileSystemEntityType type = globals.fs.typeSync(exportOptions);
       if (type == FileSystemEntityType.notFound) {
         throwToolExit(
@@ -131,12 +137,6 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     }
     return super.validateCommand();
   }
-
-  @override
-  Directory _outputAppDirectory(String xcodeResultOutput) => globals.fs
-      .directory(xcodeResultOutput)
-      .childDirectory('Products')
-      .childDirectory('Applications');
 
   @override
   Future<FlutterCommandResult> runCommand() async {
