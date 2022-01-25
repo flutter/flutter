@@ -218,8 +218,8 @@ class ClampingScrollSimulation extends Simulation with ScrollSimulationMixin {
     this.spring,
     this.friction = 0.015,
     Tolerance tolerance = Tolerance.defaultTolerance,
-  })  : assert(_flingVelocityPenetration(0.0) == _initialVelocityPenetration),
-        super(tolerance: tolerance) {
+  }) : assert(_flingVelocityPenetration(0.0) == _initialVelocityPenetration),
+       super(tolerance: tolerance) {
     _duration = _flingDuration(velocity);
     _distance = (velocity * _duration / _initialVelocityPenetration).abs();
     _updateSpringTime(position, velocity);
@@ -267,8 +267,7 @@ class ClampingScrollSimulation extends Simulation with ScrollSimulationMixin {
     final double scaledFriction = friction * _decelerationForFriction(0.84);
 
     // See getSplineDeceleration().
-    final double deceleration =
-        math.log(0.35 * velocity.abs() / scaledFriction);
+    final double deceleration = math.log(0.35 * velocity.abs() / scaledFriction);
 
     return math.exp(deceleration / (_kDecelerationRate - 1.0));
   }
@@ -291,9 +290,7 @@ class ClampingScrollSimulation extends Simulation with ScrollSimulationMixin {
   static const double _initialVelocityPenetration = 3.065;
 
   static double _flingDistancePenetration(double t) {
-    return (1.2 * t * t * t) -
-        (3.27 * t * t) +
-        (_initialVelocityPenetration * t);
+    return (1.2 * t * t * t) - (3.27 * t * t) + (_initialVelocityPenetration * t);
   }
 
   // The derivative of the _flingDistancePenetration() function.
@@ -304,8 +301,7 @@ class ClampingScrollSimulation extends Simulation with ScrollSimulationMixin {
   @override
   double x(double time) {
     final double t = (time / _duration).clamp(0.0, 1.0);
-    final double x =
-        position + _distance * _flingDistancePenetration(t) * velocity.sign;
+    final double x = position + _distance * _flingDistancePenetration(t) * velocity.sign;
     if (_springSimulation != null) {
       return _springSimulation!.x(time);
     } else {
@@ -316,8 +312,7 @@ class ClampingScrollSimulation extends Simulation with ScrollSimulationMixin {
   @override
   double dx(double time) {
     final double t = (time / _duration).clamp(0.0, 1.0);
-    final double dx =
-        _distance * _flingVelocityPenetration(t) * velocity.sign / _duration;
+    final double dx = _distance * _flingVelocityPenetration(t) * velocity.sign / _duration;
     if (_springSimulation != null) {
       return _springSimulation!.dx(time);
     } else {
