@@ -510,7 +510,7 @@ class _CupertinoTextSelectionToolbarItems extends RenderObjectWidget {
 }
 
 // The custom RenderObjectElement that helps paginate the menu items.
-class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
+class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement<_CupertinoTextSelectionToolbarItems> {
   _CupertinoTextSelectionToolbarItemsElement(
     _CupertinoTextSelectionToolbarItems widget,
   ) : super(widget);
@@ -521,9 +521,6 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
   // We keep a set of forgotten children to avoid O(n^2) work walking _children
   // repeatedly to remove children.
   final Set<Element> _forgottenChildren = HashSet<Element>();
-
-  @override
-  _CupertinoTextSelectionToolbarItems get widget => super.widget as _CupertinoTextSelectionToolbarItems;
 
   @override
   _RenderCupertinoTextSelectionToolbarItems get renderObject => super.renderObject as _RenderCupertinoTextSelectionToolbarItems;

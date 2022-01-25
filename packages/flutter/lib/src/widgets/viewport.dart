@@ -207,15 +207,12 @@ class Viewport extends MultiChildRenderObjectWidget {
   }
 }
 
-class _ViewportElement extends MultiChildRenderObjectElement {
+class _ViewportElement extends MultiChildRenderObjectElement<Viewport> {
   /// Creates an element that uses the given widget as its configuration.
   _ViewportElement(Viewport widget) : super(widget);
 
   bool _doingMountOrUpdate = false;
   int? _centerSlotIndex;
-
-  @override
-  Viewport get widget => super.widget as Viewport;
 
   @override
   RenderViewport get renderObject => super.renderObject as RenderViewport;
@@ -231,7 +228,7 @@ class _ViewportElement extends MultiChildRenderObjectElement {
   }
 
   @override
-  void update(MultiChildRenderObjectWidget newWidget) {
+  void update(Viewport newWidget) {
     assert(!_doingMountOrUpdate);
     _doingMountOrUpdate = true;
     super.update(newWidget);

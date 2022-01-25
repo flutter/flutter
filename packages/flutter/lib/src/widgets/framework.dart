@@ -383,16 +383,6 @@ abstract class Widget extends DiagnosticableTree {
     return oldWidget.runtimeType == newWidget.runtimeType
         && oldWidget.key == newWidget.key;
   }
-
-  // Return a numeric encoding of the specific `Widget` concrete subtype.
-  // This is used in `Element.updateChild` to determine if a hot reload modified the
-  // superclass of a mounted element's configuration. The encoding of each `Widget`
-  // must match the corresponding `Element` encoding in `Element._debugConcreteSubtype`.
-  static int _debugConcreteSubtype(Widget widget) {
-    return widget is StatefulWidget ? 1 :
-           widget is StatelessWidget ? 2 :
-           0;
-  }
 }
 
 /// A cache of inherited elements with an optional parent cache.
@@ -3153,16 +3143,23 @@ class BuildOwner {
 ///    element.
 ///  * At this point, the element is considered "defunct" and will not be
 ///    incorporated into the tree in the future.
-abstract class Element extends DiagnosticableTree implements BuildContext {
+@optionalTypeArgs
+abstract class Element<W extends Widget> extends DiagnosticableTree implements BuildContext {
   /// Creates an element that uses the given widget as its configuration.
   ///
   /// Typically called by an override of [Widget.createElement].
-  Element(Widget widget)
+  Element(W widget)
     : assert(widget != null),
       _widget = widget;
 
   Element? _parent;
   DebugReassembleConfig? _debugReassembleConfig;
+
+  /// During hot reload the underlying type of a widget can be changed by developers,
+  /// which can lead to trying to update StatelessWidgets in a StatefulElement class.
+  bool _debugCanAssignWidgetType(Widget widget) {
+    return widget is W;
+  }
 
   /// Compare two widgets for equality.
   ///
@@ -3221,20 +3218,10 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     return 0;
   }
 
-  // Return a numeric encoding of the specific `Element` concrete subtype.
-  // This is used in `Element.updateChild` to determine if a hot reload modified the
-  // superclass of a mounted element's configuration. The encoding of each `Element`
-  // must match the corresponding `Widget` encoding in `Widget._debugConcreteSubtype`.
-  static int _debugConcreteSubtype(Element element) {
-    return element is StatefulElement ? 1 :
-           element is StatelessElement ? 2 :
-           0;
-  }
-
   /// The configuration for this element.
   @override
-  Widget get widget => _widget!;
-  Widget? _widget;
+  W get widget => _widget!;
+  W? _widget;
 
   /// Returns true if the Element is defunct.
   ///
@@ -3284,7 +3271,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   @mustCallSuper
   @protected
   void reassemble() {
-    if (_debugShouldReassemble(_debugReassembleConfig, _widget)) {
+    if (_debugShouldReassemble(_debugReassembleConfig, this)) {
       markNeedsBuild();
       _debugReassembleConfig = null;
     }
@@ -3500,16 +3487,14 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       // returns false which prevents us from trying to update the existing element
       // incorrectly.
       //
-      // For the case where the widget becomes Stateful, we also need to avoid
-      // accessing `StatelessElement.widget` as the cast on the getter will
-      // cause a type error to be thrown. Here we avoid that by short-circuiting
-      // the `Widget.canUpdate` check once `hasSameSuperclass` is false.
+      // Because the underlying storage is typed based on the type of the widget when
+      // it was created, changing the type leads to _widget containing an incorrect type.
+      // This will cause a type error to be thrown when accessing the field.
       assert(() {
-        final int oldElementClass = Element._debugConcreteSubtype(child);
-        final int newWidgetClass = Widget._debugConcreteSubtype(newWidget);
-        hasSameSuperclass = oldElementClass == newWidgetClass;
+        hasSameSuperclass = child._debugCanAssignWidgetType(newWidget);
         return true;
       }());
+
       if (hasSameSuperclass && child.widget == newWidget) {
         // We don't insert a timeline event here, because otherwise it's
         // confusing that widgets that "don't update" (because they didn't
@@ -3644,7 +3629,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   ///
   /// This function is called only during the "active" lifecycle state.
   @mustCallSuper
-  void update(covariant Widget newWidget) {
+  void update(covariant W newWidget) {
     // This code is hot when hot reloading, so we try to
     // only call _AssertionError._evaluateAssertion once.
     assert(
@@ -4745,9 +4730,10 @@ typedef TransitionBuilder = Widget Function(BuildContext context, Widget? child)
 /// [RenderObject]s indirectly by creating other [Element]s.
 ///
 /// Contrast with [RenderObjectElement].
-abstract class ComponentElement extends Element {
+@optionalTypeArgs
+abstract class ComponentElement<W extends Widget> extends Element<W> {
   /// Creates an element that uses the given widget as its configuration.
-  ComponentElement(Widget widget) : super(widget);
+  ComponentElement(W widget) : super(widget);
 
   Element? _child;
 
@@ -4850,18 +4836,16 @@ abstract class ComponentElement extends Element {
 }
 
 /// An [Element] that uses a [StatelessWidget] as its configuration.
-class StatelessElement extends ComponentElement {
+@optionalTypeArgs
+class StatelessElement<W extends StatelessWidget> extends ComponentElement<W> {
   /// Creates an element that uses the given widget as its configuration.
-  StatelessElement(StatelessWidget widget) : super(widget);
-
-  @override
-  StatelessWidget get widget => super.widget as StatelessWidget;
+  StatelessElement(W widget) : super(widget);
 
   @override
   Widget build() => widget.build(this);
 
   @override
-  void update(StatelessWidget newWidget) {
+  void update(W newWidget) {
     super.update(newWidget);
     assert(widget == newWidget);
     _dirty = true;
@@ -4870,9 +4854,10 @@ class StatelessElement extends ComponentElement {
 }
 
 /// An [Element] that uses a [StatefulWidget] as its configuration.
-class StatefulElement extends ComponentElement {
+@optionalTypeArgs
+class StatefulElement<W extends StatefulWidget> extends ComponentElement<W> {
   /// Creates an element that uses the given widget as its configuration.
-  StatefulElement(StatefulWidget widget)
+  StatefulElement(W widget)
       : _state = widget.createState(),
         super(widget) {
     assert(() {
@@ -4913,9 +4898,9 @@ class StatefulElement extends ComponentElement {
 
   @override
   void reassemble() {
-    if (_debugShouldReassemble(_debugReassembleConfig, _widget)) {
+   if (_debugShouldReassemble(_debugReassembleConfig, this)) {
       state.reassemble();
-    }
+   }
     super.reassemble();
   }
 
@@ -4963,7 +4948,7 @@ class StatefulElement extends ComponentElement {
   }
 
   @override
-  void update(StatefulWidget newWidget) {
+  void update(W newWidget) {
     super.update(newWidget);
     assert(widget == newWidget);
     final StatefulWidget oldWidget = state._widget!;
@@ -4971,7 +4956,7 @@ class StatefulElement extends ComponentElement {
     // let authors call setState from within didUpdateWidget without triggering
     // asserts.
     _dirty = true;
-    state._widget = widget as StatefulWidget;
+    state._widget = widget;
     try {
       _debugSetAllowIgnoredCallsToMarkNeedsBuild(true);
       final Object? debugCheckForReturnedFuture = state.didUpdateWidget(oldWidget) as dynamic;
@@ -5120,18 +5105,16 @@ class StatefulElement extends ComponentElement {
 }
 
 /// An [Element] that uses a [ProxyWidget] as its configuration.
-abstract class ProxyElement extends ComponentElement {
+@optionalTypeArgs
+abstract class ProxyElement<W extends ProxyWidget> extends ComponentElement<W> {
   /// Initializes fields for subclasses.
-  ProxyElement(ProxyWidget widget) : super(widget);
-
-  @override
-  ProxyWidget get widget => super.widget as ProxyWidget;
+  ProxyElement(W widget) : super(widget);
 
   @override
   Widget build() => widget.child;
 
   @override
-  void update(ProxyWidget newWidget) {
+  void update(W newWidget) {
     final ProxyWidget oldWidget = widget;
     assert(widget != null);
     assert(widget != newWidget);
@@ -5162,12 +5145,10 @@ abstract class ProxyElement extends ComponentElement {
 }
 
 /// An [Element] that uses a [ParentDataWidget] as its configuration.
-class ParentDataElement<T extends ParentData> extends ProxyElement {
+@optionalTypeArgs
+class ParentDataElement<T extends ParentData> extends ProxyElement<ParentDataWidget<T>> {
   /// Creates an element that uses the given widget as its configuration.
   ParentDataElement(ParentDataWidget<T> widget) : super(widget);
-
-  @override
-  ParentDataWidget<T> get widget => super.widget as ParentDataWidget<T>;
 
   void _applyParentData(ParentDataWidget<T> widget) {
     void applyParentDataToChild(Element child) {
@@ -5227,12 +5208,10 @@ class ParentDataElement<T extends ParentData> extends ProxyElement {
 }
 
 /// An [Element] that uses an [InheritedWidget] as its configuration.
-class InheritedElement extends ProxyElement {
+@optionalTypeArgs
+class InheritedElement<W extends InheritedWidget> extends ProxyElement<W> {
   /// Creates an element that uses the given widget as its configuration.
-  InheritedElement(InheritedWidget widget) : super(widget);
-
-  @override
-  InheritedWidget get widget => super.widget as InheritedWidget;
+  InheritedElement(W widget) : super(widget);
 
   final Map<Element, Object?> _dependents = HashMap<Element, Object?>();
 
@@ -5567,12 +5546,10 @@ class InheritedElement extends ProxyElement {
 /// expose them in its implementation of the [visitChildren] method. This method
 /// is used by many of the framework's internal mechanisms, and so should be
 /// fast. It is also used by the test framework and [debugDumpApp].
-abstract class RenderObjectElement extends Element {
+@optionalTypeArgs
+abstract class RenderObjectElement<W extends RenderObjectWidget> extends Element<W> {
   /// Creates an element that uses the given widget as its configuration.
-  RenderObjectElement(RenderObjectWidget widget) : super(widget);
-
-  @override
-  RenderObjectWidget get widget => super.widget as RenderObjectWidget;
+  RenderObjectElement(W widget) : super(widget);
 
   /// The underlying [RenderObject] for this element.
   ///
@@ -5667,7 +5644,7 @@ abstract class RenderObjectElement extends Element {
   }
 
   @override
-  void update(covariant RenderObjectWidget newWidget) {
+  void update(covariant W newWidget) {
     super.update(newWidget);
     assert(widget == newWidget);
     assert(() {
@@ -6219,9 +6196,10 @@ abstract class RenderObjectElement extends Element {
 ///
 /// Only root elements may have their owner set explicitly. All other
 /// elements inherit their owner from their parent.
-abstract class RootRenderObjectElement extends RenderObjectElement {
+@optionalTypeArgs
+abstract class RootRenderObjectElement<W extends RenderObjectWidget> extends RenderObjectElement<W> {
   /// Initializes fields for subclasses.
-  RootRenderObjectElement(RenderObjectWidget widget) : super(widget);
+  RootRenderObjectElement(W widget) : super(widget);
 
   /// Set the owner of the element. The owner will be propagated to all the
   /// descendants of this element.
@@ -6248,9 +6226,10 @@ abstract class RootRenderObjectElement extends RenderObjectElement {
 }
 
 /// An [Element] that uses a [LeafRenderObjectWidget] as its configuration.
-class LeafRenderObjectElement extends RenderObjectElement {
+@optionalTypeArgs
+class LeafRenderObjectElement<W extends LeafRenderObjectWidget> extends RenderObjectElement<W> {
   /// Creates an element that uses the given widget as its configuration.
-  LeafRenderObjectElement(LeafRenderObjectWidget widget) : super(widget);
+  LeafRenderObjectElement(W widget) : super(widget);
 
   @override
   void forgetChild(Element child) {
@@ -6286,12 +6265,10 @@ class LeafRenderObjectElement extends RenderObjectElement {
 /// This element subclass can be used for RenderObjectWidgets whose
 /// RenderObjects use the [RenderObjectWithChildMixin] mixin. Such widgets are
 /// expected to inherit from [SingleChildRenderObjectWidget].
-class SingleChildRenderObjectElement extends RenderObjectElement {
+@optionalTypeArgs
+class SingleChildRenderObjectElement<W extends SingleChildRenderObjectWidget> extends RenderObjectElement<W> {
   /// Creates an element that uses the given widget as its configuration.
-  SingleChildRenderObjectElement(SingleChildRenderObjectWidget widget) : super(widget);
-
-  @override
-  SingleChildRenderObjectWidget get widget => super.widget as SingleChildRenderObjectWidget;
+  SingleChildRenderObjectElement(W widget) : super(widget);
 
   Element? _child;
 
@@ -6315,7 +6292,7 @@ class SingleChildRenderObjectElement extends RenderObjectElement {
   }
 
   @override
-  void update(SingleChildRenderObjectWidget newWidget) {
+  void update(W newWidget) {
     super.update(newWidget);
     assert(widget == newWidget);
     _child = updateChild(_child, widget.child, null);
@@ -6358,14 +6335,12 @@ class SingleChildRenderObjectElement extends RenderObjectElement {
 ///   [MultiChildRenderObjectElement].
 /// * [RenderObjectElement.updateChildren], which discusses why [IndexedSlot]
 ///   is used for the slots of the children.
-class MultiChildRenderObjectElement extends RenderObjectElement {
+@optionalTypeArgs
+class MultiChildRenderObjectElement<W extends MultiChildRenderObjectWidget> extends RenderObjectElement<W> {
   /// Creates an element that uses the given widget as its configuration.
-  MultiChildRenderObjectElement(MultiChildRenderObjectWidget widget)
+  MultiChildRenderObjectElement(W widget)
     : assert(!debugChildrenHaveDuplicateKeys(widget, widget.children)),
       super(widget);
-
-  @override
-  MultiChildRenderObjectWidget get widget => super.widget as MultiChildRenderObjectWidget;
 
   @override
   ContainerRenderObjectMixin<RenderObject, ContainerParentDataMixin<RenderObject>> get renderObject {
@@ -6468,7 +6443,7 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
   }
 
   @override
-  void update(MultiChildRenderObjectWidget newWidget) {
+  void update(W newWidget) {
     super.update(newWidget);
     assert(widget == newWidget);
     assert(!debugChildrenHaveDuplicateKeys(widget, widget.children));
@@ -6570,6 +6545,10 @@ class _NullWidget extends Widget {
 
 // Whether a [DebugReassembleConfig] indicates that an element holding [widget] can skip
 // a reassemble.
-bool _debugShouldReassemble(DebugReassembleConfig? config, Widget? widget) {
-  return config == null || config.widgetName == null || widget?.runtimeType.toString() == config.widgetName;
+bool _debugShouldReassemble(DebugReassembleConfig? config, Element element) {
+  try {
+    return config == null || config.widgetName == null || element.widget.runtimeType.toString() == config.widgetName;
+  } on TypeError {
+    return true;
+  }
 }

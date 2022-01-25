@@ -814,12 +814,9 @@ class _ListWheelScrollViewState extends State<ListWheelScrollView> {
 }
 
 /// Element that supports building children lazily for [ListWheelViewport].
-class ListWheelElement extends RenderObjectElement implements ListWheelChildManager {
+class ListWheelElement extends RenderObjectElement<ListWheelViewport> implements ListWheelChildManager {
   /// Creates an element that lazily builds children for the given widget.
   ListWheelElement(ListWheelViewport widget) : super(widget);
-
-  @override
-  ListWheelViewport get widget => super.widget as ListWheelViewport;
 
   @override
   RenderListWheelViewport get renderObject => super.renderObject as RenderListWheelViewport;

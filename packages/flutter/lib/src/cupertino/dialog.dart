@@ -906,7 +906,7 @@ class _CupertinoDialogRenderWidget extends RenderObjectWidget {
   }
 }
 
-class _CupertinoDialogRenderElement extends RenderObjectElement {
+class _CupertinoDialogRenderElement extends RenderObjectElement<_CupertinoDialogRenderWidget> {
   _CupertinoDialogRenderElement(_CupertinoDialogRenderWidget widget, {this.allowMoveRenderObjectChild = false}) : super(widget);
 
   // Whether to allow overridden method moveRenderObjectChild call or default to super.
@@ -915,9 +915,6 @@ class _CupertinoDialogRenderElement extends RenderObjectElement {
 
   Element? _contentElement;
   Element? _actionsElement;
-
-  @override
-  _CupertinoDialogRenderWidget get widget => super.widget as _CupertinoDialogRenderWidget;
 
   @override
   _RenderCupertinoDialog get renderObject => super.renderObject as _RenderCupertinoDialog;
@@ -955,7 +952,7 @@ class _CupertinoDialogRenderElement extends RenderObjectElement {
   }
 
   @override
-  void update(RenderObjectWidget newWidget) {
+  void update(_CupertinoDialogRenderWidget newWidget) {
     super.update(newWidget);
     _contentElement = updateChild(_contentElement, widget.contentSection, _AlertDialogSections.contentSection);
     _actionsElement = updateChild(_actionsElement, widget.actionsSection, _AlertDialogSections.actionsSection);

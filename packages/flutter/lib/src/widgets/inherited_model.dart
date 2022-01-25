@@ -180,12 +180,9 @@ abstract class InheritedModel<T> extends InheritedWidget {
 }
 
 /// An [Element] that uses a [InheritedModel] as its configuration.
-class InheritedModelElement<T> extends InheritedElement {
+class InheritedModelElement<T> extends InheritedElement<InheritedModel<T>> {
   /// Creates an element that uses the given widget as its configuration.
   InheritedModelElement(InheritedModel<T> widget) : super(widget);
-
-  @override
-  InheritedModel<T> get widget => super.widget as InheritedModel<T>;
 
   @override
   void updateDependencies(Element dependent, Object? aspect) {

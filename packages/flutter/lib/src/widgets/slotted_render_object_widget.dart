@@ -185,14 +185,12 @@ mixin SlottedContainerRenderObjectMixin<S> on RenderBox {
 }
 
 /// Element used by the [SlottedMultiChildRenderObjectWidgetMixin].
-class SlottedRenderObjectElement<S> extends RenderObjectElement {
+@optionalTypeArgs
+class SlottedRenderObjectElement<S> extends RenderObjectElement<SlottedMultiChildRenderObjectWidgetMixin<S>> {
   /// Creates an element that uses the given widget as its configuration.
   SlottedRenderObjectElement(SlottedMultiChildRenderObjectWidgetMixin<S> widget) : super(widget);
 
   final Map<S, Element> _slotToChild = <S, Element>{};
-
-  @override
-  SlottedMultiChildRenderObjectWidgetMixin<S> get widget => super.widget as SlottedMultiChildRenderObjectWidgetMixin<S>;
 
   @override
   SlottedContainerRenderObjectMixin<S> get renderObject => super.renderObject as SlottedContainerRenderObjectMixin<S>;
