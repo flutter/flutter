@@ -268,22 +268,22 @@ void main() {
 
   testWidgets('finds multiple subtypes', (WidgetTester tester) async {
     await tester.pumpWidget(_boilerplate(Row(children: <Widget>[
-      Column(children: <Widget>[
+      Column(children: const <Widget>[
         Text('Hello'),
         Text('World'),
       ]),
       Column(children: <Widget>[
         Image(image: FileImage(File('test'))),
       ]),
-      PopUpMenuButton<int>(
+      PopupMenuButton<int>(
           itemBuilder: (BuildContext context) => <PopupMenuItem<int>>[
                 const PopupMenuItem<int>(value: 1, child: Text('one')),
               ]),
-      PopUpMenuButton<double>(
+      PopupMenuButton<double>(
           itemBuilder: (BuildContext context) => <PopupMenuItem<double>>[
                 const PopupMenuItem<double>(value: 3.14, child: Text('pi')),
               ]),
-      PopUpMenuButton<String>(
+      PopupMenuButton<String>(
           itemBuilder: (BuildContext context) => <PopupMenuItem<String>>[
                 const PopupMenuItem<String>(value: '2', child: Text('two')),
               ]),
