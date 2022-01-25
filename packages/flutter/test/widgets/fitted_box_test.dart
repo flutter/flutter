@@ -444,7 +444,7 @@ void main() {
 
   testWidgets('Big child into small fitted box - hit testing', (WidgetTester tester) async {
     final GlobalKey key1 = GlobalKey();
-    bool _pointerDown = false;
+    bool pointerDown = false;
     await tester.pumpWidget(
       Center(
         child: SizedBox(
@@ -457,7 +457,7 @@ void main() {
               height: 1000.0,
               child: Listener(
                 onPointerDown: (PointerDownEvent event) {
-                  _pointerDown = true;
+                  pointerDown = true;
                 },
                 child: Container(
                   key: key1,
@@ -469,9 +469,9 @@ void main() {
         ),
       ),
     );
-    expect(_pointerDown, isFalse);
+    expect(pointerDown, isFalse);
     await tester.tap(find.byKey(key1));
-    expect(_pointerDown, isTrue);
+    expect(pointerDown, isTrue);
   });
 
   testWidgets('Can set and update clipBehavior', (WidgetTester tester) async {

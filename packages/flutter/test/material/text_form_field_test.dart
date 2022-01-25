@@ -343,14 +343,14 @@ void main() {
   });
 
   testWidgets('onFieldSubmit callbacks are called', (WidgetTester tester) async {
-    bool _called = false;
+    bool called = false;
 
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
           child: Center(
             child: TextFormField(
-              onFieldSubmitted: (String value) { _called = true; },
+              onFieldSubmitted: (String value) { called = true; },
             ),
           ),
         ),
@@ -360,19 +360,19 @@ void main() {
     await tester.showKeyboard(find.byType(TextField));
     await tester.testTextInput.receiveAction(TextInputAction.done);
     await tester.pump();
-    expect(_called, true);
+    expect(called, true);
   });
 
   testWidgets('onChanged callbacks are called', (WidgetTester tester) async {
-    late String _value;
+    late String value;
 
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
           child: Center(
             child: TextFormField(
-              onChanged: (String value) {
-                _value = value;
+              onChanged: (String v) {
+                value = v;
               },
             ),
           ),
@@ -382,11 +382,11 @@ void main() {
 
     await tester.enterText(find.byType(TextField), 'Soup');
     await tester.pump();
-    expect(_value, 'Soup');
+    expect(value, 'Soup');
   });
 
   testWidgets('autovalidateMode is passed to super', (WidgetTester tester) async {
-    int _validateCalled = 0;
+    int validateCalled = 0;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -395,7 +395,7 @@ void main() {
             child: TextFormField(
               autovalidateMode: AutovalidateMode.always,
               validator: (String? value) {
-                _validateCalled++;
+                validateCalled++;
                 return null;
               },
             ),
@@ -404,14 +404,14 @@ void main() {
       ),
     );
 
-    expect(_validateCalled, 1);
+    expect(validateCalled, 1);
     await tester.enterText(find.byType(TextField), 'a');
     await tester.pump();
-    expect(_validateCalled, 2);
+    expect(validateCalled, 2);
   });
 
   testWidgets('validate is called if widget is enabled', (WidgetTester tester) async {
-    int _validateCalled = 0;
+    int validateCalled = 0;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -421,7 +421,7 @@ void main() {
               enabled: true,
               autovalidateMode: AutovalidateMode.always,
               validator: (String? value) {
-                _validateCalled += 1;
+                validateCalled += 1;
                 return null;
               },
             ),
@@ -430,10 +430,10 @@ void main() {
       ),
     );
 
-    expect(_validateCalled, 1);
+    expect(validateCalled, 1);
     await tester.enterText(find.byType(TextField), 'a');
     await tester.pump();
-    expect(_validateCalled, 2);
+    expect(validateCalled, 2);
   });
 
 
@@ -669,7 +669,7 @@ void main() {
   });
 
   testWidgets('onChanged callbacks value and FormFieldState.value are sync', (WidgetTester tester) async {
-    bool _called = false;
+    bool called = false;
 
     late FormFieldState<String> state;
 
@@ -679,7 +679,7 @@ void main() {
           child: Center(
             child: TextFormField(
               onChanged: (String value) {
-                _called = true;
+                called = true;
                 expect(value, state.value);
               },
             ),
@@ -692,7 +692,7 @@ void main() {
 
     await tester.enterText(find.byType(TextField), 'Soup');
 
-    expect(_called, true);
+    expect(called, true);
   });
 
   testWidgets('autofillHints is passed to super', (WidgetTester tester) async {
@@ -713,7 +713,7 @@ void main() {
   });
 
   testWidgets('autovalidateMode is passed to super', (WidgetTester tester) async {
-    int _validateCalled = 0;
+    int validateCalled = 0;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -722,7 +722,7 @@ void main() {
             body: TextFormField(
               autovalidateMode: AutovalidateMode.onUserInteraction,
               validator: (String? value) {
-                _validateCalled++;
+                validateCalled++;
                 return null;
               },
             ),
@@ -731,10 +731,10 @@ void main() {
       ),
     );
 
-    expect(_validateCalled, 0);
+    expect(validateCalled, 0);
     await tester.enterText(find.byType(TextField), 'a');
     await tester.pump();
-    expect(_validateCalled, 1);
+    expect(validateCalled, 1);
   });
 
   testWidgets('textSelectionControls is passed to super', (WidgetTester tester) async {

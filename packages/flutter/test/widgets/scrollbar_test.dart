@@ -1304,6 +1304,44 @@ void main() {
     );
   });
 
+  testWidgets('RawScrollbar.thumbVisibility asserts that a ScrollPosition is attached', (WidgetTester tester) async {
+    final FlutterExceptionHandler? handler = FlutterError.onError;
+    FlutterErrorDetails? error;
+    FlutterError.onError = (FlutterErrorDetails details) {
+      error = details;
+    };
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: RawScrollbar(
+            thumbVisibility: true,
+            controller: ScrollController(),
+            thumbColor: const Color(0x11111111),
+            child: const SingleChildScrollView(
+              child: SizedBox(
+                height: 1000.0,
+                width: 50.0,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(error, isNotNull);
+    final AssertionError exception = error!.exception as AssertionError;
+    expect(
+      exception.message,
+      contains("The Scrollbar's ScrollController has no ScrollPosition attached."),
+    );
+
+    FlutterError.onError = handler;
+  });
+
   testWidgets('RawScrollbar.isAlwaysShown asserts that a ScrollPosition is attached', (WidgetTester tester) async {
     final FlutterExceptionHandler? handler = FlutterError.onError;
     FlutterErrorDetails? error;
