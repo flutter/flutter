@@ -11,17 +11,18 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   group('image', () {
     testWidgets('finds Image widgets', (WidgetTester tester) async {
-      await tester.pumpWidget(_boilerplate(
-          Image(image: FileImage(File('test')))
-      ));
+      await tester
+          .pumpWidget(_boilerplate(Image(image: FileImage(File('test')))));
       expect(find.image(FileImage(File('test'))), findsOneWidget);
     });
 
     testWidgets('finds Button widgets with Image', (WidgetTester tester) async {
-      await tester.pumpWidget(_boilerplate(
-          ElevatedButton(onPressed: null, child: Image(image: FileImage(File('test'))),)
-      ));
-      expect(find.widgetWithImage(ElevatedButton, FileImage(File('test'))), findsOneWidget);
+      await tester.pumpWidget(_boilerplate(ElevatedButton(
+        onPressed: null,
+        child: Image(image: FileImage(File('test'))),
+      )));
+      expect(find.widgetWithImage(ElevatedButton, FileImage(File('test'))),
+          findsOneWidget);
     });
   });
 
@@ -34,9 +35,10 @@ void main() {
     });
 
     testWidgets('finds Text.rich widgets', (WidgetTester tester) async {
-      await tester.pumpWidget(_boilerplate(
-        const Text.rich(
-          TextSpan(text: 't', children: <TextSpan>[
+      await tester.pumpWidget(_boilerplate(const Text.rich(
+        TextSpan(
+          text: 't',
+          children: <TextSpan>[
             TextSpan(text: 'e'),
             TextSpan(text: 'st'),
           ],
@@ -137,15 +139,16 @@ void main() {
     });
 
     testWidgets('finds Text.rich widgets', (WidgetTester tester) async {
-      await tester.pumpWidget(_boilerplate(
-          const Text.rich(
-            TextSpan(text: 'this', children: <TextSpan>[
-              TextSpan(text: 'is'),
-              TextSpan(text: 'a'),
-              TextSpan(text: 'test'),
-            ],
-            ),
-          )));
+      await tester.pumpWidget(_boilerplate(const Text.rich(
+        TextSpan(
+          text: 'this',
+          children: <TextSpan>[
+            TextSpan(text: 'is'),
+            TextSpan(text: 'a'),
+            TextSpan(text: 'test'),
+          ],
+        ),
+      )));
 
       expect(find.textContaining(RegExp(r'isatest')), findsOneWidget);
       expect(find.textContaining('isatest'), findsOneWidget);
@@ -166,11 +169,13 @@ void main() {
   });
 
   group('semantics', () {
-    testWidgets('Throws StateError if semantics are not enabled', (WidgetTester tester) async {
+    testWidgets('Throws StateError if semantics are not enabled',
+        (WidgetTester tester) async {
       expect(() => find.bySemanticsLabel('Add'), throwsStateError);
     }, semanticsEnabled: false);
 
-    testWidgets('finds Semantically labeled widgets', (WidgetTester tester) async {
+    testWidgets('finds Semantically labeled widgets',
+        (WidgetTester tester) async {
       final SemanticsHandle semanticsHandle = tester.ensureSemantics();
       await tester.pumpWidget(_boilerplate(
         Semantics(
@@ -186,7 +191,8 @@ void main() {
       semanticsHandle.dispose();
     });
 
-    testWidgets('finds Semantically labeled widgets by RegExp', (WidgetTester tester) async {
+    testWidgets('finds Semantically labeled widgets by RegExp',
+        (WidgetTester tester) async {
       final SemanticsHandle semanticsHandle = tester.ensureSemantics();
       await tester.pumpWidget(_boilerplate(
         Semantics(
@@ -202,18 +208,19 @@ void main() {
       semanticsHandle.dispose();
     });
 
-    testWidgets('finds Semantically labeled widgets without explicit Semantics', (WidgetTester tester) async {
+    testWidgets('finds Semantically labeled widgets without explicit Semantics',
+        (WidgetTester tester) async {
       final SemanticsHandle semanticsHandle = tester.ensureSemantics();
-      await tester.pumpWidget(_boilerplate(
-        const SimpleCustomSemanticsWidget('Foo')
-      ));
+      await tester
+          .pumpWidget(_boilerplate(const SimpleCustomSemanticsWidget('Foo')));
       expect(find.bySemanticsLabel('Foo'), findsOneWidget);
       semanticsHandle.dispose();
     });
   });
 
   group('hitTestable', () {
-    testWidgets('excludes non-hit-testable widgets', (WidgetTester tester) async {
+    testWidgets('excludes non-hit-testable widgets',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         _boilerplate(IndexedStack(
           sizing: StackFit.expand,
@@ -221,13 +228,13 @@ void main() {
             GestureDetector(
               key: const ValueKey<int>(0),
               behavior: HitTestBehavior.opaque,
-              onTap: () { },
+              onTap: () {},
               child: const SizedBox.expand(),
             ),
             GestureDetector(
               key: const ValueKey<int>(1),
               behavior: HitTestBehavior.opaque,
-              onTap: () { },
+              onTap: () {},
               child: const SizedBox.expand(),
             ),
           ],
@@ -258,12 +265,51 @@ void main() {
     // candidates, it should find 1 instead of 2. If the _LastFinder wasn't
     // correctly chained after the descendant's candidates, the last element
     // with a Text widget would have been 2.
-    final Text text = find.descendant(
-      of: find.byKey(key1),
-      matching: find.byType(Text),
-    ).last.evaluate().single.widget as Text;
+    final Text text = find
+        .descendant(
+          of: find.byKey(key1),
+          matching: find.byType(Text),
+        )
+        .last
+        .evaluate()
+        .single
+        .widget as Text;
 
     expect(text.data, '1');
+  });
+
+  testWidgets('finds multiple subtypes', (WidgetTester tester) async {
+    await tester.pumpWidget(_boilerplate(
+      Row(children: <Widget>[
+        Column(children: const <Widget>[
+          Text('Hello'),
+          Text('World'),
+        ]),
+        Column(children: <Widget>[
+          Image(image: FileImage(File('test'))),
+        ]),
+        Column(children: const <Widget>[
+          SimpleGenericWidget<int>(child: Text('one')),
+          SimpleGenericWidget<double>(child: Text('pi')),
+          SimpleGenericWidget<String>(child: Text('two')),
+        ]),
+      ]),
+    ));
+
+    expect(find.bySubtype<Row>(), findsOneWidget);
+    expect(find.bySubtype<Column>(), findsNWidgets(3));
+    // Finds both rows and columns.
+    expect(find.bySubtype<Flex>(), findsNWidgets(4));
+
+    // Finds only the requested generic subtypes.
+    expect(find.bySubtype<SimpleGenericWidget<int>>(), findsOneWidget);
+    expect(find.bySubtype<SimpleGenericWidget<num>>(), findsNWidgets(2));
+    expect(find.bySubtype<SimpleGenericWidget<Object>>(), findsNWidgets(3));
+
+    // Finds all widgets.
+    final int totalWidgetCount =
+        find.byWidgetPredicate((_) => true).evaluate().length;
+    expect(find.bySubtype<Widget>(), findsNWidgets(totalWidgetCount));
   });
 }
 
@@ -280,7 +326,8 @@ class SimpleCustomSemanticsWidget extends LeafRenderObjectWidget {
   final String label;
 
   @override
-  RenderObject createRenderObject(BuildContext context) => SimpleCustomSemanticsRenderObject(label);
+  RenderObject createRenderObject(BuildContext context) =>
+      SimpleCustomSemanticsRenderObject(label);
 }
 
 class SimpleCustomSemanticsRenderObject extends RenderBox {
@@ -299,6 +346,21 @@ class SimpleCustomSemanticsRenderObject extends RenderBox {
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
-    config..label = label..textDirection = TextDirection.ltr;
+    config
+      ..label = label
+      ..textDirection = TextDirection.ltr;
+  }
+}
+
+class SimpleGenericWidget<T> extends StatelessWidget {
+  const SimpleGenericWidget({required Widget child, Key? key})
+      : _child = child,
+        super(key: key);
+
+  final Widget _child;
+
+  @override
+  Widget build(BuildContext context) {
+    return _child;
   }
 }
