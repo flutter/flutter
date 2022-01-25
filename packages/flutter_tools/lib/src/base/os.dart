@@ -540,7 +540,7 @@ class _WindowsUtils extends OperatingSystemUtils {
       }
 
       final File destFile = _fileSystem.file(
-        _fileSystem.path.normalize(
+        _fileSystem.path.canonicalize(
           _fileSystem.path.join(
             targetDirectory.path,
             archiveFile.name,
@@ -552,10 +552,16 @@ class _WindowsUtils extends OperatingSystemUtils {
       // extract to.
       //
       // See https://snyk.io/research/zip-slip-vulnerability for more context.
-      if (!destFile.absolute.path.startsWith(targetDirectory.absolute.path)) {
+      final String destinationFileCanonicalPath = _fileSystem.path.canonicalize(
+        destFile.path,
+      );
+      final String targetDirectoryCanonicalPath = _fileSystem.path.canonicalize(
+        targetDirectory.path,
+      );
+      if (!destinationFileCanonicalPath.startsWith(targetDirectoryCanonicalPath)) {
         throw StateError(
-          'Tried to extract the file ${destFile.absolute.path} outside of the '
-          'target directory ${targetDirectory.absolute.path}',
+          'Tried to extract the file $destinationFileCanonicalPath outside of the '
+          'target directory $targetDirectoryCanonicalPath',
         );
       }
 
