@@ -237,6 +237,7 @@ class DriveCommand extends RunCommandBase {
       ? null
       : _fileSystem.file(stringArg('use-application-binary'));
 
+    bool screenshotTaken = false;
     try {
       if (stringArg('use-existing-app') == null) {
         await driverService.start(
@@ -285,6 +286,11 @@ class DriveCommand extends RunCommandBase {
         androidEmulator: boolArg('android-emulator'),
         profileMemory: stringArg('profile-memory'),
       );
+      if (testResult != 0 && screenshot != null) {
+        // Take a screenshot while the app is still running.
+        await _takeScreenshot(device);
+        screenshotTaken = true;
+      }
 
       if (boolArg('keep-app-running') ?? (argResults['use-existing-app'] != null)) {
         _logger.printStatus('Leaving the application running.');
@@ -298,8 +304,9 @@ class DriveCommand extends RunCommandBase {
         throwToolExit(null);
       }
     } on Exception catch(_) {
-      // On exceptions, including ToolExit, take a screenshot on the device.
-      if (screenshot != null) {
+      // On exceptions, including ToolExit, take a screenshot on the device
+      // unless a screenshot was already taken on test failure.
+      if (!screenshotTaken && screenshot != null) {
         await _takeScreenshot(device);
       }
       rethrow;
