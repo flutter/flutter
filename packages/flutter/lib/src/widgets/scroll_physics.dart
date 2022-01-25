@@ -750,6 +750,10 @@ class ClampingScrollPhysics extends ScrollPhysics {
   @override
   Simulation? createBallisticSimulation(ScrollMetrics position, double velocity) {
     final Tolerance tolerance = this.tolerance;
+    if (velocity > 0.0 && position.pixels == position.maxScrollExtent)
+      return null;
+    if (velocity < 0.0 && position.pixels == position.minScrollExtent)
+      return null;
     if (velocity.abs() >= tolerance.velocity || position.outOfRange) {
       return ClampingScrollSimulation(
         spring: spring,
