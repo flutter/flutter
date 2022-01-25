@@ -48,7 +48,7 @@ void main() {
     });
 
     testUsingContext('throws on unknown tag, official branch,  noforce', () async {
-      final FakeFlutterVersion flutterVersion = FakeFlutterVersion(channel: 'dev');
+      final FakeFlutterVersion flutterVersion = FakeFlutterVersion(channel: 'beta');
       const String upstreamRevision = '';
       final FakeFlutterVersion latestVersion = FakeFlutterVersion(frameworkRevision: upstreamRevision);
       fakeCommandRunner.remoteVersion = latestVersion;
@@ -68,7 +68,7 @@ void main() {
     });
 
     testUsingContext('throws tool exit with uncommitted changes', () async {
-      final FakeFlutterVersion flutterVersion = FakeFlutterVersion(channel: 'dev');
+      final FakeFlutterVersion flutterVersion = FakeFlutterVersion(channel: 'beta');
       const String upstreamRevision = '';
       final FakeFlutterVersion latestVersion = FakeFlutterVersion(frameworkRevision: upstreamRevision);
       fakeCommandRunner.remoteVersion = latestVersion;
@@ -88,10 +88,10 @@ void main() {
       Platform: () => fakePlatform,
     });
 
-    testUsingContext("Doesn't continue on known tag, dev branch, no force, already up-to-date", () async {
+    testUsingContext("Doesn't continue on known tag, beta branch, no force, already up-to-date", () async {
       const String revision = 'abc123';
       final FakeFlutterVersion latestVersion = FakeFlutterVersion(frameworkRevision: revision);
-      final FakeFlutterVersion flutterVersion = FakeFlutterVersion(channel: 'dev', frameworkRevision: revision);
+      final FakeFlutterVersion flutterVersion = FakeFlutterVersion(channel: 'beta', frameworkRevision: revision);
       fakeCommandRunner.alreadyUpToDate = true;
       fakeCommandRunner.remoteVersion = latestVersion;
 
@@ -118,7 +118,7 @@ void main() {
       const String upstreamVersion = '4.5.6';
 
       final FakeFlutterVersion flutterVersion = FakeFlutterVersion(
-        channel: 'dev',
+        channel: 'beta',
         frameworkRevision: revision,
         frameworkRevisionShort: revision,
         frameworkVersion: version,
@@ -246,7 +246,7 @@ void main() {
 
       testUsingContext('throws toolExit if repository url is null', () async {
         final FakeFlutterVersion flutterVersion = FakeFlutterVersion(
-          channel: 'dev',
+          channel: 'beta',
           repositoryUrl: null,
         );
 
@@ -265,7 +265,7 @@ void main() {
 
       testUsingContext('does not throw toolExit at standard remote url with FLUTTER_GIT_URL unset', () async {
         final FakeFlutterVersion flutterVersion = FakeFlutterVersion(
-          channel: 'dev',
+          channel: 'beta',
         );
         expect(() => realCommandRunner.verifyStandardRemote(flutterVersion), returnsNormally);
         expect(processManager, hasNoRemainingExpectations);
@@ -276,7 +276,7 @@ void main() {
 
       testUsingContext('throws toolExit at non-standard remote url with FLUTTER_GIT_URL unset', () async {
         final FakeFlutterVersion flutterVersion = FakeFlutterVersion(
-          channel: 'dev',
+          channel: 'beta',
           repositoryUrl: flutterNonStandardUrlDotGit,
         );
 
@@ -300,7 +300,7 @@ void main() {
 
       testUsingContext('does not throw toolExit at non-standard remote url with FLUTTER_GIT_URL set', () async {
         final FakeFlutterVersion flutterVersion = FakeFlutterVersion(
-          channel: 'dev',
+          channel: 'beta',
           repositoryUrl: flutterNonStandardUrlDotGit,
         );
 
@@ -315,7 +315,7 @@ void main() {
 
       testUsingContext('throws toolExit at remote url and FLUTTER_GIT_URL set to different urls', () async {
         final FakeFlutterVersion flutterVersion = FakeFlutterVersion(
-          channel: 'dev',
+          channel: 'beta',
           repositoryUrl: flutterNonStandardUrlDotGit,
         );
 
@@ -342,7 +342,7 @@ void main() {
 
       testUsingContext('exempts standard ssh url from check with FLUTTER_GIT_URL unset', () async {
         final FakeFlutterVersion flutterVersion = FakeFlutterVersion(
-          channel: 'dev',
+          channel: 'beta',
           repositoryUrl: flutterStandardSshUrl,
         );
 
@@ -413,7 +413,7 @@ void main() {
       const String upstreamVersion = '4.5.6';
 
       final FakeFlutterVersion flutterVersion = FakeFlutterVersion(
-        channel: 'dev',
+        channel: 'beta',
         frameworkRevision: revision,
         frameworkVersion: version,
       );
@@ -474,7 +474,7 @@ void main() {
 
       testUsingContext('does not throw on unknown tag, official branch, force', () async {
         fakeCommandRunner.remoteVersion = FakeFlutterVersion(frameworkRevision: null);
-        final FakeFlutterVersion flutterVersion = FakeFlutterVersion(channel: 'dev');
+        final FakeFlutterVersion flutterVersion = FakeFlutterVersion(channel: 'beta');
 
         final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
           force: true,
@@ -492,7 +492,7 @@ void main() {
       });
 
       testUsingContext('does not throw tool exit with uncommitted changes and force', () async {
-        final FakeFlutterVersion flutterVersion = FakeFlutterVersion(channel: 'dev');
+        final FakeFlutterVersion flutterVersion = FakeFlutterVersion(channel: 'beta');
         fakeCommandRunner.remoteVersion = FakeFlutterVersion(frameworkRevision: null);
         fakeCommandRunner.willHaveUncommittedChanges = true;
 
@@ -511,8 +511,8 @@ void main() {
         Platform: () => fakePlatform,
       });
 
-      testUsingContext("Doesn't throw on known tag, dev branch, no force", () async {
-        final FakeFlutterVersion flutterVersion = FakeFlutterVersion(channel: 'dev');
+      testUsingContext("Doesn't throw on known tag, beta branch, no force", () async {
+        final FakeFlutterVersion flutterVersion = FakeFlutterVersion(channel: 'beta');
         fakeCommandRunner.remoteVersion = FakeFlutterVersion(frameworkRevision: null);
 
         final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
