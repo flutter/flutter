@@ -55,7 +55,7 @@ void main() {
     await Future<void>.delayed(const Duration(milliseconds: 10));
     await subscription.cancel();
     await flutter.stop();
-  }, skip: true); // Flake: https://github.com/flutter/flutter/issues/96677
+  });
 
   testWithoutContext('Hot reload updates background isolates', () async {
     final RepeatingBackgroundProject project = RepeatingBackgroundProject();
