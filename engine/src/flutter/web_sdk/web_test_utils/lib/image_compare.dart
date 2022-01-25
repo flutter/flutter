@@ -40,6 +40,7 @@ Future<String> compareImage(
 
   final String screenshotPath = _getFullScreenshotPath(filename);
   final File screenshotFile = File(screenshotPath);
+  await screenshotFile.create(recursive: true);
   await screenshotFile.writeAsBytes(encodePng(screenshot), flush: true);
 
   if (_isLuci) {
@@ -59,9 +60,12 @@ Future<String> compareImage(
 
   if (golden == null) {
     // This is a new screenshot that doesn't have an existing golden.
-    return 'No golden was found for "$filename". If this is a new screenshot'
-        'test, please take a look at the generated screenshot:\n\n'
-        '* file://$screenshotPath\n';
+
+    // At the moment, we don't support local screenshot testing because we use
+    // Skia Gold to handle our screenshots and diffing. In the future, we might
+    // implement local screenshot testing if there's a need.
+    print('Screenshot generated: file://$screenshotPath');
+    return 'OK';
   }
 
   // Compare screenshots.
