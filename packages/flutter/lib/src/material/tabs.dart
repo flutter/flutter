@@ -644,6 +644,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     this.onTap,
     this.physics,
     this.splashFactory,
+    this.splashBorderRadius,
   }) : assert(tabs != null),
        assert(isScrollable != null),
        assert(dragStartBehavior != null),
