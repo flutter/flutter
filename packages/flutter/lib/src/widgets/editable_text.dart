@@ -3536,14 +3536,14 @@ class _ScribbleFocusableState extends State<_ScribbleFocusable> implements Scrib
 
   @override
   bool isInScribbleRect(Rect rect) {
-    final Rect _bounds = bounds;
+    final Rect calculatedBounds = bounds;
     if (renderEditable?.readOnly ?? false)
       return false;
-    if (_bounds == Rect.zero)
+    if (calculatedBounds == Rect.zero)
       return false;
-    if (!_bounds.overlaps(rect))
+    if (!calculatedBounds.overlaps(rect))
       return false;
-    final Rect intersection = _bounds.intersect(rect);
+    final Rect intersection = calculatedBounds.intersect(rect);
     final HitTestResult result = HitTestResult();
     WidgetsBinding.instance?.hitTest(result, intersection.center);
     return result.path.any((HitTestEntry entry) => entry.target == renderEditable);
