@@ -661,6 +661,9 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
   @override
   AxisDirection get axisDirection => _outerPosition!.axisDirection;
 
+  @override
+  ScrollPosition get scrollPosition => _outerPosition!;
+
   static IdleScrollActivity _createIdleScrollActivity(_NestedScrollPosition position) {
     return IdleScrollActivity(position);
   }
@@ -1190,6 +1193,9 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
 
   @override
   AxisDirection get axisDirection => context.axisDirection;
+
+  @override
+  ScrollPosition get scrollPosition => this;
 
   @override
   void absorb(ScrollPosition other) {

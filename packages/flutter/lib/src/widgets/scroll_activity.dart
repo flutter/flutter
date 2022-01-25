@@ -31,6 +31,9 @@ abstract class ScrollActivityDelegate {
   /// The direction in which the scroll view scrolls.
   AxisDirection get axisDirection;
 
+  /// The current scrollPosition in which the scroll view scrolls.
+  ScrollPosition get scrollPosition;
+
   /// Update the scroll position to the given pixel value.
   ///
   /// Returns the overscroll, if any. See [ScrollPosition.setPixels] for more
@@ -550,18 +553,13 @@ class BallisticScrollActivity extends ScrollActivity {
 
   @override
   void applyNewDimensions() {
-    final ScrollPosition? position = _scrollPosition;
-    if (position != null && _simulation is ScrollSimulationMixin){
-      final ScrollSimulationMixin simulation = _simulation as ScrollSimulationMixin;
+    final ScrollPosition position = delegate.scrollPosition;
+    final dynamic simulation = _simulation;
+    if (position != null && simulation is ScrollSimulationMixin){
       simulation.applyNewDimensions(position,velocity);
     } else {
       delegate.goBallistic(velocity);
     }
-  }
-
-  ScrollPosition? get _scrollPosition {
-    final Object position = delegate;
-    return position is ScrollPosition ? position : null;
   }
 
   void _tick() {

@@ -77,6 +77,9 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   AxisDirection get axisDirection => context.axisDirection;
 
   @override
+  ScrollPosition get scrollPosition => this;
+
+  @override
   double setPixels(double newPixels) {
     assert(activity!.isScrolling);
     return super.setPixels(newPixels);
