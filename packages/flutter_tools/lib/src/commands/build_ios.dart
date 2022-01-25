@@ -87,7 +87,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
   final List<String> aliases = <String>['xcarchive'];
 
   @override
-  final String description = 'Build an iOS archive bundle (Mac OS X host only).';
+  final String description = 'Build an iOS archive bundle and IPA for distribution (Mac OS X host only).';
 
   @override
   final XcodeBuildAction xcodeBuildAction = XcodeBuildAction.archive;
