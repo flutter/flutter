@@ -66,11 +66,17 @@ class BuildIOSCommand extends _BuildIOSSubCommand {
 class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
   BuildIOSArchiveCommand({required bool verboseHelp})
       : super(verboseHelp: verboseHelp) {
-    argParser.addFlag(
-      'app-store',
-      defaultsTo: true,
-      help:
-          'Export as an IPA to be uploaded to the App Store. Use --no-app-store to export as ad-hoc for local testing.',
+    argParser.addOption(
+      'export-method',
+      defaultsTo: 'app-store',
+      allowed: <String>['app-store', 'ad-hoc', 'development'],
+      help: 'Specify how the IPA will be distributed.',
+      allowedHelp: <String, String>{
+        'app-store': 'Upload to the App Store.',
+        'ad-hoc': 'Distribute to designated devices that do not need to be registered with the Apple developer account. '
+                  'Requires a distribution certificate.',
+        'development': 'Distribute only to development devices registered with the Apple developer account.',
+      },
     );
     argParser.addOption(
       'export-options-plist',
@@ -106,11 +112,10 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
   @override
   Future<void> validateCommand() async {
     final String? exportOptions = exportOptionsPlist;
-    if (exportOptions != null && argResults?.wasParsed('app-store') == true) {
-      final String flag = boolArg('app-store') ? 'app-store' : 'no-app-store';
+    if (exportOptions != null && argResults?.wasParsed('export-method') == true) {
       throwToolExit(
-        '"--export-options-plist" is not compatible with "--$flag". Either use "--export-options-plist" and '
-        'a plist describing how the IPA should be exported by Xcode, or use "--app-store" to create a new plist.\n'
+        '"--export-options-plist" is not compatible with "--export-method". Either use "--export-options-plist" and '
+        'a plist describing how the IPA should be exported by Xcode, or use "--export-method" to create a new plist.\n'
         'See "xcodebuild -h" for available exportOptionsPlist keys.'
       );
     }
@@ -152,7 +157,8 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     final String outputPath = globals.fs.path.absolute(app.ipaOutputPath);
     final String archivePath = globals.fs.path.absolute(app.archiveBundleOutputPath);
     try {
-      final String ipaType = boolArg('app-store') ? 'App Store' : 'ad-hoc development';
+      final String? method = stringArg('export-method');
+      final String? ipaType = method == 'app-store' ? 'App Store' : method;
       status = globals.logger.startProgress('Building $ipaType IPA...');
 
       final String exportOptions = exportOptionsPlist ?? _createExportPlist().path;
@@ -211,10 +217,8 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
         <key>method</key>
 ''');
 
-    // Export for upload to the App Store, or ad-hoc for local development.
-    final String method = boolArg('app-store') ? 'app-store' : 'development';
     plistContents.write('''
-        <string>$method</string>
+        <string>${stringArg('export-method')}</string>
     ''');
     // Bitcode is off by default in Flutter iOS apps.
     plistContents.write('''

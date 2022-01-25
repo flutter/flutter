@@ -238,7 +238,7 @@ void main() {
         FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
-  testUsingContext('ipa build fails when --export-options-plist and --app-store are used together', () async {
+  testUsingContext('ipa build fails when --export-options-plist and --export-method are used together', () async {
     final BuildCommand command = BuildCommand();
     _createMinimalMockProjectFiles();
 
@@ -248,33 +248,11 @@ void main() {
         'ipa',
         '--export-options-plist',
         'ExportOptions.plist',
-        '--app-store',
+        '--export-method',
+        'app-store',
         '--no-pub',
       ]),
-      contains('--export-options-plist is not compatible with --app-store'),
-    );
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => FakeProcessManager.any(),
-    Platform: () => macosPlatform,
-    XcodeProjectInterpreter: () =>
-        FakeXcodeProjectInterpreterWithBuildSettings(),
-  });
-
-  testUsingContext('ipa build fails when --export-options-plist and --no-app-store are used together', () async {
-    final BuildCommand command = BuildCommand();
-    _createMinimalMockProjectFiles();
-
-    await expectToolExitLater(
-      createTestCommandRunner(command).run(<String>[
-        'build',
-        'ipa',
-        '--export-options-plist',
-        'ExportOptions.plist',
-        '--no-app-store',
-        '--no-pub',
-      ]),
-      contains('--export-options-plist is not compatible with --no-app-store'),
+      contains('"--export-options-plist" is not compatible with "--export-method"'),
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -322,7 +300,7 @@ void main() {
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
-  testUsingContext('ipa build invokes xcodebuild and archives for ad-hoc local development', () async {
+  testUsingContext('ipa build invokes xcodebuild and archives for ad-hoc distribution', () async {
     final BuildCommand command = BuildCommand();
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
@@ -332,7 +310,7 @@ void main() {
     _createMinimalMockProjectFiles();
 
     await createTestCommandRunner(command).run(
-        const <String>['build', 'ipa', '--no-pub', '--no-app-store']
+        const <String>['build', 'ipa', '--no-pub', '--export-method', 'ad-hoc']
     );
 
     const String expectedIpaPlistContents = '''
