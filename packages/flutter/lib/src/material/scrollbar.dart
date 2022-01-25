@@ -54,9 +54,8 @@ const Duration _kScrollbarTimeToFade = Duration(milliseconds: 600);
 /// drawn when triggered by a hover event, or based on any [MaterialState] by
 /// using [ScrollbarTheme.trackVisibility].
 ///
-/// The [thickness] of the track and scrollbar thumb will increase by default
-/// in response to [MaterialState.hovered], this can be controlled using
-/// [ScrollbarThemeData.thickness] to respond to any [MaterialState].
+/// The [thickness] of the track and scrollbar thumb can be changed dynamically
+/// in response to [MaterialState]s using [ScrollbarThemeData.thickness].
 ///
 /// See also:
 ///
