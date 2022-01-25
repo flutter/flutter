@@ -1062,7 +1062,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(scrollbarTheme: ScrollbarThemeData(
-          isAlwaysShown: true,
+          thumbVisibility: MaterialStateProperty.resolveWith((Set<MaterialState> states) => true),
           trackVisibility: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
             return states.contains(MaterialState.hovered);
           }),
