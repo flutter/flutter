@@ -7,6 +7,7 @@
 
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterBinaryMessenger.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
+#import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformPlugin.h"
 #import "flutter/shell/platform/darwin/ios/platform_view_ios.h"
 
@@ -46,6 +47,34 @@
 
   XCTAssertEqual(called, true);
   XCTAssertEqual(value, true);
+}
+
+- (void)testPopSystemNavigator {
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"test" project:nil];
+  [engine runWithEntrypoint:nil];
+  FlutterViewController* flutterViewController =
+      [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
+  UINavigationController* navigationController =
+      [[UINavigationController alloc] initWithRootViewController:flutterViewController];
+  UITabBarController* tabBarController = [[UITabBarController alloc] init];
+  tabBarController.viewControllers = @[ navigationController ];
+  std::unique_ptr<fml::WeakPtrFactory<FlutterEngine>> _weakFactory =
+      std::make_unique<fml::WeakPtrFactory<FlutterEngine>>(engine);
+  FlutterPlatformPlugin* plugin =
+      [[FlutterPlatformPlugin alloc] initWithEngine:_weakFactory->GetWeakPtr()];
+
+  id navigationControllerMock = OCMPartialMock(navigationController);
+  OCMStub([navigationControllerMock popViewControllerAnimated:YES]);
+  // Set some string to the pasteboard.
+  __block bool calledSet = false;
+  FlutterResult resultSet = ^(id result) {
+    calledSet = true;
+  };
+  FlutterMethodCall* methodCallSet =
+      [FlutterMethodCall methodCallWithMethodName:@"SystemNavigator.pop" arguments:@(YES)];
+  [plugin handleMethodCall:methodCallSet result:resultSet];
+  XCTAssertEqual(calledSet, true);
+  OCMVerify([navigationControllerMock popViewControllerAnimated:YES]);
 }
 
 @end
