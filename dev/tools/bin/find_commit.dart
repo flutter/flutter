@@ -77,7 +77,6 @@ String git(String workingDirectory, List<String> arguments) {
   final ProcessResult result = Process.runSync('git', arguments, workingDirectory: workingDirectory);
   if (result.exitCode != 0 || '${result.stderr}'.isNotEmpty)
     throw ProcessException('git', arguments, '${result.stdout}${result.stderr}', result.exitCode);
-  log('zzz[${result.stdout}]');
   return '${result.stdout}';
 }
 
