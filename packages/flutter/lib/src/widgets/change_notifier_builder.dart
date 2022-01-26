@@ -1,3 +1,7 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:flutter/widgets.dart';
 
 import 'basic.dart';
@@ -131,10 +135,14 @@ class _ChangeNotifierBuilderState<T extends ChangeNotifier> extends State<Change
     if (widget.listenCondition != null) {
       // Rebuilding only if the listening condition evaluates to true
       if (widget.listenCondition!()) {
-        setState(() {});
+        setState(() {
+          // The listenable's state is our build state, and it changed already.
+        });
       }
     } else {
-      setState(() {});
+      setState(() {
+        // The listenable's state is our build state, and it changed already.
+      });
     }
   }
 
