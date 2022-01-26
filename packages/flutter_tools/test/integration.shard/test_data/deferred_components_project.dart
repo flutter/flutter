@@ -176,6 +176,7 @@ class BasicDeferredComponentsConfig extends DeferredComponentsConfig {
 
   android {
       compileSdkVersion flutter.compileSdkVersion
+      ndkVersion flutter.ndkVersion
 
       sourceSets {
           main.java.srcDirs += 'src/main/kotlin'
