@@ -280,11 +280,9 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   @override
-  bool isPointerPanZoomAllowed(PointerPanZoomStartEvent event) => true;
-
-  @override
   void addAllowedPointerPanZoom(PointerPanZoomStartEvent event) {
     super.addAllowedPointerPanZoom(event);
+    startTrackingPointer(event.pointer, event.transform);
     _velocityTrackers[event.pointer] = velocityTrackerBuilder(event);
     if (_state == _DragState.ready) {
       _state = _DragState.possible;

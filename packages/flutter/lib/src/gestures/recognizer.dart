@@ -192,7 +192,9 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
 
   /// Checks whether or not a pointer pan/zoom is allowed to be tracked by this recognizer.
   @protected
-  bool isPointerPanZoomAllowed(PointerPanZoomStartEvent event) => false;
+  bool isPointerPanZoomAllowed(PointerPanZoomStartEvent event) {
+    return _supportedDevices == null || _supportedDevices!.contains(event.kind);
+  }
 
   /// For a given pointer ID, returns the device kind associated with it.
   ///
@@ -302,12 +304,6 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
   @override
   @protected
   void addAllowedPointer(PointerDownEvent event) {
-    startTrackingPointer(event.pointer, event.transform);
-  }
-
-  @override
-  @protected
-  void addAllowedPointerPanZoom(PointerPanZoomStartEvent event) {
     startTrackingPointer(event.pointer, event.transform);
   }
 
