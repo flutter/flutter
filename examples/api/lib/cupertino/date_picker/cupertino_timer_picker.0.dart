@@ -11,37 +11,41 @@ void main() => runApp(const MyApp());
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'CupertinoTimerPicker Sample';
 
   @override
   Widget build(BuildContext context) {
     return const CupertinoApp(
       title: _title,
-      home: MyStatelessWidget(),
+      home: CupertinoTimerPickerSample(),
     );
   }
 }
 
-class MyStatelessWidget extends StatefulWidget {
-  const MyStatelessWidget({Key? key}) : super(key: key);
+class CupertinoTimerPickerSample extends StatefulWidget {
+  const CupertinoTimerPickerSample({Key? key}) : super(key: key);
 
   @override
-  State<MyStatelessWidget> createState() => _MyStatelessWidgetState();
+  State<CupertinoTimerPickerSample> createState() => _CupertinoTimerPickerSampleState();
 }
 
-class _MyStatelessWidgetState extends State<MyStatelessWidget> {
-  Duration duration = const Duration(hours: 1, minutes: 23, seconds: 42);
+class _CupertinoTimerPickerSampleState extends State<CupertinoTimerPickerSample> {
+  Duration duration = const Duration(hours: 1, minutes: 23);
 
+  // This shows a CupertinoModalPopup with a reasonable fixed height which hosts CupertinoTimerPicker.
   void _showDialog(Widget child) {
     showCupertinoModalPopup<void>(
       context: context,
       builder: (BuildContext context) => Container(
         height: 216,
         padding: const EdgeInsets.only(top: 6.0),
+        // The Bottom margin is provided to align the popup above the system navigation bar.
         margin: EdgeInsets.only(
           bottom: MediaQuery.of(context).viewInsets.bottom,
         ),
+        // Provide a background color for the popup.
         color: CupertinoColors.systemBackground.resolveFrom(context),
+        // Use a SafeArea widget to avoid system overlaps.
         child: SafeArea(
           top: false,
           child: child,
@@ -66,14 +70,19 @@ class _MyStatelessWidgetState extends State<MyStatelessWidget> {
                 children: <Widget>[
                   const Text('Timer'),
                   CupertinoButton(
+                    // Display a CupertinoTimerPicker with hour/minute mode.
                     onPressed: () => _showDialog(
                       CupertinoTimerPicker(
+                        mode: CupertinoTimerPickerMode.hm,
                         initialTimerDuration: duration,
+                        // This is called when the user changes the timer duration.
                         onTimerDurationChanged: (Duration newDuration) {
                           setState(() => duration = newDuration);
                         },
                       ),
                     ),
+                    // In this example, the timer value is formatted manually. You can use intl package
+                    // to format the value based on user's locale settings.
                     child: Text('$duration',
                       style: const TextStyle(
                         fontSize: 22.0,
@@ -90,6 +99,7 @@ class _MyStatelessWidgetState extends State<MyStatelessWidget> {
   }
 }
 
+// This class simply decorates a row of widgets.
 class _TimerPickerItem extends StatelessWidget {
   const _TimerPickerItem({required this.children});
 

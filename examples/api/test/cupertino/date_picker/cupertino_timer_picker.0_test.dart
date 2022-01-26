@@ -13,14 +13,13 @@ void main() {
       const example.MyApp(),
     );
 
-    // Open the timer picker.
-    await tester.tap(find.text('1:23:42.000000'));
+    // Launch the timer picker.
+    await tester.tap(find.text('1:23:00.000000'));
     await tester.pumpAndSettle();
 
-    // Drag hour, minute, and second hand to change the time.
+    // Drag hour, minute to change the time.
     await tester.drag(find.text('1'), _kRowOffset, touchSlopY: 0, warnIfMissed: false); // see top of file
     await tester.drag(find.text('23'), _kRowOffset, touchSlopY: 0, warnIfMissed: false); // see top of file
-    await tester.drag(find.text('42'), _kRowOffset, touchSlopY: 0, warnIfMissed: false); // see top of file
 
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
@@ -29,6 +28,6 @@ void main() {
     await tester.tapAt(const Offset(1.0, 1.0));
     await tester.pumpAndSettle();
 
-    expect(find.text('3:25:44.000000'), findsOneWidget);
+    expect(find.text('3:25:00.000000'), findsOneWidget);
   });
 }
