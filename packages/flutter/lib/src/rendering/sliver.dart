@@ -870,7 +870,7 @@ class SliverHitTestResult extends HitTestResult {
 ///
 /// The coordinate system used by this hit test entry is relative to the
 /// [AxisDirection] of the target sliver.
-class SliverHitTestEntry extends HitTestEntry {
+class SliverHitTestEntry extends HitTestEntry<RenderSliver> {
   /// Creates a sliver hit test entry.
   ///
   /// The [mainAxisPosition] and [crossAxisPosition] arguments must not be null.
@@ -881,9 +881,6 @@ class SliverHitTestEntry extends HitTestEntry {
   }) : assert(mainAxisPosition != null),
        assert(crossAxisPosition != null),
        super(target);
-
-  @override
-  RenderSliver get target => super.target as RenderSliver;
 
   /// The distance in the [AxisDirection] from the edge of the sliver's painted
   /// area (as given by the [SliverConstraints.scrollOffset]) to the hit point.
