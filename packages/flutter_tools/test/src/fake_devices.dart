@@ -168,6 +168,14 @@ class FakePollingDeviceDiscovery extends PollingDeviceDiscovery {
     devices.forEach(addDevice);
   }
 
+  bool discoverDevicesCalled = false;
+
+  @override
+  Future<List<Device>> discoverDevices({Duration? timeout}) {
+    discoverDevicesCalled = true;
+    return super.discoverDevices(timeout: timeout);
+  }
+
   @override
   Stream<Device> get onAdded => _onAddedController.stream;
 
