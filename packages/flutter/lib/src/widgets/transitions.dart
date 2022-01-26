@@ -18,8 +18,13 @@ export 'package:flutter/rendering.dart' show RelativeRect;
 /// {@youtube 560 315 https://www.youtube.com/watch?v=LKKgYpC-EPQ}
 ///
 /// [AnimatedWidget] is most commonly used with [Animation] objects, which are
-/// [Listenable], but it can be used with any [Listenable], including
-/// [ChangeNotifier] and [ValueNotifier].
+/// [Listenable].
+///
+/// [AnimatedWidget] can be used with any [Listenable] so it can also work with
+/// [ChangeNotifier] and [ValueNotifier]. In this case however, it would be
+/// better using more specialized widgets, such as:
+///  - [ChangeNotifierBuilder] for [ChangeNotifier]
+///  - [ValueListenableBuilder] for [ValueNotifier]
 ///
 /// [AnimatedWidget] is most useful for widgets that are otherwise stateless. To
 /// use [AnimatedWidget], simply subclass it and implement the build function.
