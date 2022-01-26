@@ -1364,6 +1364,12 @@ abstract class FlutterCommand extends Command<void> {
 
     if (devices.isEmpty && deviceManager.hasSpecifiedDeviceId) {
       globals.printStatus(userMessages.flutterNoMatchingDevice(deviceManager.specifiedDeviceId!));
+      final List<Device> allDevices = await deviceManager.getAllConnectedDevices();
+      if (allDevices.isNotEmpty) {
+        globals.printStatus('');
+        globals.printStatus('The following devices were found:');
+        await Device.printDevices(allDevices, globals.logger);
+      }
       return null;
     } else if (devices.isEmpty) {
       if (deviceManager.hasSpecifiedAllDevices) {

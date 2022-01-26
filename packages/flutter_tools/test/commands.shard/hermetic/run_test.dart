@@ -195,6 +195,33 @@ void main() {
         Cache: () => Cache.test(processManager: FakeProcessManager.any()),
       });
 
+      testUsingContext('exits and lists available devices when specified device not found', () async {
+        final RunCommand command = RunCommand();
+        final FakeDevice device = FakeDevice(isLocalEmulator: true);
+        mockDeviceManager
+          ..devices = <Device>[device]
+          ..hasSpecifiedDeviceId = true;
+
+        await expectLater(
+              () => createTestCommandRunner(command).run(<String>[
+            'run',
+            '-d',
+            'invalid-device-id',
+            '--no-pub',
+            '--no-hot',
+          ]),
+          throwsToolExit(),
+        );
+        expect(testLogger.statusText, contains("No supported devices found with name or id matching 'invalid-device-id'"));
+        expect(testLogger.statusText, contains('The following devices were found:'));
+        expect(testLogger.statusText, contains('FakeDevice (mobile) • fake_device • ios •  (simulator)'));
+      }, overrides: <Type, Generator>{
+        DeviceManager: () => mockDeviceManager,
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+      });
+
       testUsingContext('fails when targeted device is not Android with --device-user', () async {
         fs.file('pubspec.yaml').createSync();
         fs.file('.packages').writeAsStringSync('\n');
@@ -642,6 +669,9 @@ class FakeDeviceManager extends Fake implements DeviceManager {
   Future<List<Device>> findTargetDevices(FlutterProject flutterProject, {Duration timeout}) async {
     return targetDevices;
   }
+
+  @override
+  Future<List<Device>> getAllConnectedDevices() async => devices;
 }
 
 class FakeAndroidSdk extends Fake implements AndroidSdk {
