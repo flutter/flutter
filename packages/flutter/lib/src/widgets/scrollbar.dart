@@ -898,7 +898,7 @@ class RawScrollbar extends StatefulWidget {
          'isAlwaysShown is deprecated.'
        ),
        assert(
-         !(thumbVisibility == false && trackVisibility == true),
+         !((thumbVisibility == false || isAlwaysShown == false) && trackVisibility == true),
          'A scrollbar track cannot be drawn without a scrollbar thumb.'
        ),
        assert(minThumbLength != null),
@@ -1220,12 +1220,18 @@ class RawScrollbar extends StatefulWidget {
   /// [MaterialState]s by using [ScrollbarThemeData.trackVisibility].
   final bool? trackVisibility;
 
-  /// The color of the scrollbar thumb.
+  /// The color of the scrollbar track.
+  ///
+  /// The scrollbar track will only be visible when [trackVisibility] and
+  /// [thumbVisibility] are true.
   ///
   /// If null, defaults to Color(0x08000000).
   final Color? trackColor;
 
-  /// The color of the scrollbar thumb.
+  /// The color of the scrollbar track's border.
+  ///
+  /// The scrollbar track will only be visible when [trackVisibility] and
+  /// [thumbVisibility] are true.
   ///
   /// If null, defaults to Color(0x1a000000).
   final Color? trackBorderColor;
