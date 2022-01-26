@@ -89,6 +89,7 @@ class MigrateCommand extends FlutterCommand {
       }
 
       print('Applying migration.');
+      // Copy files from working dir to project root
       List<String> allFilesToCopy = <String>[];
       allFilesToCopy.addAll(manifest.mergedFiles);
       allFilesToCopy.addAll(manifest.conflictFiles);
@@ -99,7 +100,6 @@ class MigrateCommand extends FlutterCommand {
       if (manifest.deletedFiles.isNotEmpty) {
         print('Deleting ${allFilesToCopy.length} files.');
       }
-
       for (String localPath in allFilesToCopy) {
         File workingFile = workingDir.childFile(localPath);
         File targetFile = FlutterProject.current().directory.childFile(localPath);
@@ -112,16 +112,28 @@ class MigrateCommand extends FlutterCommand {
         }
         targetFile.writeAsStringSync(workingFile.readAsStringSync(), flush: true);
       }
+      // Delete files slated for deletion.
       for (String localPath in manifest.deletedFiles) {
         File targetFile = FlutterProject.current().directory.childFile(localPath);
         targetFile.deleteSync();
       }
-      // allFilesToCopy.addAll(manifest.Files);
+
+      // Update the migrate config files to reflect latest migration.
+      List<MigrateConfig> configs = await MigrateConfig.parseOrCreateMigrateConfigs();
+      String currentGitHash = await MigrateUtils.getGitHash(Cache.flutterRoot!);
+      for (MigrateConfig config in configs) {
+        config.lastMigrateVersion = currentGitHash;
+        config.writeFile(projectDirectory: FlutterProject.current().directory);
+      }
+
+      // Clean up the working directory
+      workingDir.deleteSync(recursive: true);
       return const FlutterCommandResult(ExitStatus.success);
     }
     if (boolArg('abandon')) {
       if (!workingDir.existsSync()) {
         print('No migration in progress. Start a new migration with `flutter migrate`');
+        return const FlutterCommandResult(ExitStatus.fail);
       }
       workingDir.deleteSync(recursive: true);
       return const FlutterCommandResult(ExitStatus.success);
@@ -133,17 +145,24 @@ class MigrateCommand extends FlutterCommand {
       print('You may also abandon the existing migration and start a new one with `flutter migrate --abandon`');
     }
     final FlutterProject flutterProject = FlutterProject.current();
-    print('HERE');
 
     List<MigrateConfig> configs = await MigrateConfig.parseOrCreateMigrateConfigs();
 
     String rootBaseRevision = '';
-    // Map<
-    // for (MigrateConfig config in configs) {
-    //   if (config.platform == 'root') {
-    //     rootBaseRevision = config.lastMigrateVersion!;
-    //   }
-    // }
+    String fallbackRevision = await MigrateConfig.getFallbackLastMigrateVersion();
+    Map<String, List<MigrateConfig>> revisionToConfigs = <String, List<MigrateConfig>>{};
+    Set<String> revisions = Set<String>();
+    for (MigrateConfig config in configs) {
+      String effectiveRevision = config.lastMigrateVersion! == '' ? fallbackRevision : config.lastMigrateVersion!;
+      if (config.platform == 'root') {
+        rootBaseRevision = effectiveRevision;
+      }
+      revisions.add(effectiveRevision);
+      if (revisionToConfigs[effectiveRevision] == null) {
+        revisionToConfigs[effectiveRevision] = <MigrateConfig>[];
+      }
+      revisionToConfigs[effectiveRevision]!.add(config);
+    }
 
     String revision = '18116933e77adc82f80866c928266a5b4f1ed645';
 
@@ -178,15 +197,25 @@ class MigrateCommand extends FlutterCommand {
     String iosLanguage = FlutterProject.current().ios.isSwift ? 'swift' : 'objc';
     // // Clone old flutter
     if (stringArg('old-app-directory') == null) {
-      oldFlutterRoot = await MigrateUtils.createTempDirectory('oldFlutter');
-      await MigrateUtils.cloneFlutter(revision, oldFlutterRoot.absolute.path);
-      await MigrateUtils.createFromTemplates(
-        oldFlutterRoot.childDirectory('bin').absolute.path,
-        name: name,
-        androidLanguage: androidLanguage,
-        iosLanguage: iosLanguage,
-        outputDirectory: generatedOldTemplateDirectory.absolute.path,
-      );
+      Map<String, Directory> revisionToFlutterSdkDir = <String, Directory>{};
+      for (String revision in revisions) {
+        Directory sdkDir = await MigrateUtils.createTempDirectory('flutter_$revision');
+        revisionToFlutterSdkDir[revision] = sdkDir;
+        List<String> platforms = <String>[];
+        for (MigrateConfig config in revisionToConfigs) {
+          platforms.add(config.platform);
+        }
+        platforms.remove('root'); // Root does not need to be listed and is not a valid platform
+        await MigrateUtils.cloneFlutter(revision, sdkDir.absolute.path);
+        await MigrateUtils.createFromTemplates(
+          sdkDir.childDirectory('bin').absolute.path,
+          name: name,
+          androidLanguage: androidLanguage,
+          iosLanguage: iosLanguage,
+          outputDirectory: generatedOldTemplateDirectory.absolute.path,
+          platforms: platforms,
+        );
+      }
     }
 
     if (stringArg('new-app-directory') == null) {

@@ -13,6 +13,7 @@ import '../base/logger.dart';
 import '../base/platform.dart';
 import '../globals.dart' as globals;
 import '../migrate/migrate_utils.dart';
+import '../flutter_project_metadata.dart';
 import '../project.dart';
 import '../cache.dart';
 
@@ -168,7 +169,7 @@ $unmanagedFilesString
     print('  IN MIGRATE CONFIG GEN');
     print('  platforms: $platforms');
     String createVersion = '';
-    String lastMigrateVersion = await findLastMigrateVersion(createVersion);
+    String lastMigrateVersion = '';
 
     List<MigrateConfig> configs = <MigrateConfig>[];
     for (String platform in platforms) {
@@ -193,18 +194,14 @@ $unmanagedFilesString
     return configs;
   }
 
-  static Future<String> findLastMigrateVersion(String createVersion) async {
-    Directory dartToolDirectory = FlutterProject.current().dartTool;
-    if (dartToolDirectory.existsSync()) {
-      File versionFile = dartToolDirectory.childFile('version');
-      if (versionFile.existsSync()) {
-        String tag = versionFile.readAsStringSync().trim();
-        // Convert tag to git hash
-        return tag;
+  static Future<String> getFallbackLastMigrateVersion() async {
+    // Use the .metadata file if it exists.
+    File metadataFile = FlutterProject.current().directory.childFile('.metadata');
+    if (metadataFile.existsSync()) {
+      FlutterProjectMetadata metadata = FlutterProjectMetadata(metadataFile, globals.logger);
+      if (metadata.versionRevision != null) {
+        return metadata.versionRevision!;
       }
-    }
-    if (createVersion != '') {
-      return createVersion;
     }
     return MigrateUtils.getGitHash(Cache.flutterRoot!);
   }
