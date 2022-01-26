@@ -10,7 +10,7 @@
 
 import 'dart:io';
 
-const bool debugLogging = false;
+const bool debugLogging = true;
 
 void log(String message) {
   if (debugLogging)
