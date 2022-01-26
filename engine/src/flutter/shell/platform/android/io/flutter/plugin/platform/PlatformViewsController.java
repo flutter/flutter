@@ -122,6 +122,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
   private final PlatformViewsChannel.PlatformViewsHandler channelHandler =
       new PlatformViewsChannel.PlatformViewsHandler() {
 
+        @TargetApi(Build.VERSION_CODES.KITKAT)
         @Override
         public void createAndroidViewForPlatformView(
             @NonNull PlatformViewsChannel.PlatformViewCreationRequest request) {
@@ -149,6 +150,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
           }
 
           final PlatformView platformView = factory.create(context, request.viewId, createParams);
+          platformView.getView().setLayoutDirection(request.direction);
           platformViews.put(request.viewId, platformView);
         }
 
@@ -328,13 +330,20 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
           }
 
           ensureValidAndroidVersion(Build.VERSION_CODES.KITKAT_WATCH);
-          View view = vdControllers.get(viewId).getView();
-          if (view == null) {
-            throw new IllegalStateException(
-                "Sending touch to an unknown view with id: " + direction);
+          final PlatformView platformView = platformViews.get(viewId);
+          if (platformView != null) {
+            platformView.getView().setLayoutDirection(direction);
+            return;
           }
-
-          view.setLayoutDirection(direction);
+          VirtualDisplayController controller = vdControllers.get(viewId);
+          if (controller == null) {
+            throw new IllegalStateException(
+                "Trying to set direction: "
+                    + direction
+                    + " to an unknown platform view with id: "
+                    + viewId);
+          }
+          controller.getView().setLayoutDirection(direction);
         }
 
         @Override

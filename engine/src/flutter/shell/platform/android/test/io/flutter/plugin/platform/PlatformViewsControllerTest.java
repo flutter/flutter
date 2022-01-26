@@ -389,6 +389,40 @@ public class PlatformViewsControllerTest {
 
   @Test
   @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void setPlatformViewDirection__throwIfPlatformViewNotFound() {
+    PlatformViewsController platformViewsController = new PlatformViewsController();
+
+    int platformViewId = 0;
+    assertNull(platformViewsController.getPlatformViewById(platformViewId));
+
+    PlatformViewFactory viewFactory = mock(PlatformViewFactory.class);
+    PlatformView platformView = mock(PlatformView.class);
+    final View androidView = mock(View.class);
+    when(platformView.getView()).thenReturn(androidView);
+    when(viewFactory.create(any(), eq(platformViewId), any())).thenReturn(platformView);
+    platformViewsController.getRegistry().registerViewFactory("testType", viewFactory);
+
+    FlutterJNI jni = new FlutterJNI();
+    attach(jni, platformViewsController);
+
+    verify(androidView, never()).setLayoutDirection(anyInt());
+
+    // Simulate create call from the framework.
+    createPlatformView(jni, platformViewsController, platformViewId, "testType", /* hybrid=*/ true);
+    assertEquals(ShadowFlutterJNI.getResponses().size(), 1);
+
+    // Simulate set direction call from the framework.
+    setLayoutDirection(jni, platformViewsController, platformViewId, 1);
+    verify(androidView, times(1)).setLayoutDirection(1);
+
+    // The limit value of reply message will be equal to 2 if the layout direction is set
+    // successfully, otherwise it will be much more than 2 due to the reply message contains
+    // an error message wrapped with exception detail information.
+    assertEquals(ShadowFlutterJNI.getResponses().get(0).limit(), 2);
+  }
+
+  @Test
+  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
   public void disposeAndroidView__hybridComposition() {
     PlatformViewsController platformViewsController = new PlatformViewsController();
 
@@ -826,6 +860,25 @@ public class PlatformViewsControllerTest {
 
     final MethodCall platformCreateMethodCall =
         new MethodCall("create", platformViewCreateArguments);
+
+    jni.handlePlatformMessage(
+        "flutter/platform_views",
+        encodeMethodCall(platformCreateMethodCall),
+        /*replyId=*/ 0,
+        /*messageData=*/ 0);
+  }
+
+  private static void setLayoutDirection(
+      FlutterJNI jni,
+      PlatformViewsController platformViewsController,
+      int platformViewId,
+      int direction) {
+    final Map<String, Object> platformViewCreateArguments = new HashMap<>();
+    platformViewCreateArguments.put("id", platformViewId);
+    platformViewCreateArguments.put("direction", direction);
+
+    final MethodCall platformCreateMethodCall =
+        new MethodCall("setDirection", platformViewCreateArguments);
 
     jni.handlePlatformMessage(
         "flutter/platform_views",
