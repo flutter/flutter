@@ -14,6 +14,7 @@ import android.widget.FrameLayout;
 import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 import io.flutter.Log;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.renderer.FlutterUiDisplayListener;
@@ -28,7 +29,7 @@ import io.flutter.embedding.engine.renderer.FlutterUiDisplayListener;
   @Nullable private SplashScreen splashScreen;
   @Nullable private FlutterView flutterView;
   @Nullable private View splashScreenView;
-  @Nullable private Bundle splashScreenState;
+  @VisibleForTesting @Nullable /* package */ Bundle splashScreenState;
   @Nullable private String transitioningIsolateId;
   @Nullable private String previousCompletedSplashIsolate;
 
@@ -99,6 +100,10 @@ import io.flutter.embedding.engine.renderer.FlutterUiDisplayListener;
 
   @Override
   protected void onRestoreInstanceState(Parcelable state) {
+    if (!(state instanceof SavedState)) {
+      super.onRestoreInstanceState(state);
+      return;
+    }
     SavedState savedState = (SavedState) state;
     super.onRestoreInstanceState(savedState.getSuperState());
     previousCompletedSplashIsolate = savedState.previousCompletedSplashIsolate;

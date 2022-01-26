@@ -955,6 +955,14 @@ public class FlutterViewTest {
     assertEquals(null, flutterView.findViewByAccessibilityIdTraversal(accessibilityViewId));
   }
 
+  @Test
+  public void flutterSplashView_itDoesNotCrashOnRestoreInstanceState() {
+    final FlutterSplashView splashView = new FlutterSplashView(RuntimeEnvironment.application);
+    splashView.onRestoreInstanceState(View.BaseSavedState.EMPTY_STATE);
+    // It should not crash and "splashScreenState" should be null.
+    assertEquals(null, splashView.splashScreenState);
+  }
+
   public void ViewportMetrics_initializedPhysicalTouchSlop() {
     FlutterView flutterView = new FlutterView(RuntimeEnvironment.application);
     FlutterEngine flutterEngine =
