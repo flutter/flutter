@@ -26,6 +26,7 @@ class Commit {
   static String formatArgument = '--format="%H %cI"';
 
   static Commit parse(String line) {
+    log('fff[$line]');
     final int space = line.indexOf(' ');
     return Commit(line.substring(0, space), DateTime.parse(line.substring(space+1, line.length).trimRight()));
   }
