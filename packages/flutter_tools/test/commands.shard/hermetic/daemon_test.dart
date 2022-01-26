@@ -13,8 +13,10 @@
 import 'dart:async';
 
 import 'package:fake_async/fake_async.dart';
+import 'package:file/src/interface/file.dart';
 import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/android/android_workflow.dart';
+import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/utils.dart';
@@ -27,6 +29,7 @@ import 'package:flutter_tools/src/fuchsia/fuchsia_workflow.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/ios_workflow.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
+import 'package:flutter_tools/src/vmservice.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
@@ -49,18 +52,18 @@ Future<T> _runFakeAsync<T>(Future<T> Function(FakeAsync time) f) async {
   });
 }
 
-class FakeDaemonStreams extends DaemonStreams {
-  final StreamController<Map<String, dynamic>> inputs = StreamController<Map<String, dynamic>>();
-  final StreamController<Map<String, dynamic>> outputs = StreamController<Map<String, dynamic>>();
+class FakeDaemonStreams implements DaemonStreams {
+  final StreamController<DaemonMessage> inputs = StreamController<DaemonMessage>();
+  final StreamController<DaemonMessage> outputs = StreamController<DaemonMessage>();
 
   @override
-  Stream<Map<String, dynamic>> get inputStream {
+  Stream<DaemonMessage> get inputStream {
     return inputs.stream;
   }
 
   @override
-  void send(Map<String, dynamic> message) {
-    outputs.add(message);
+  void send(Map<String, dynamic> message, [ List<int> binary ]) {
+    outputs.add(DaemonMessage(message, binary != null ? Stream<List<int>>.value(binary) : null));
   }
 
   @override
@@ -102,11 +105,11 @@ void main() {
         daemonConnection,
         notifyingLogger: notifyingLogger,
       );
-      daemonStreams.inputs.add(<String, dynamic>{'id': 0, 'method': 'daemon.version'});
-      final Map<String, dynamic> response = await daemonStreams.outputs.stream.firstWhere(_notEvent);
-      expect(response['id'], 0);
-      expect(response['result'], isNotEmpty);
-      expect(response['result'], isA<String>());
+      daemonStreams.inputs.add(DaemonMessage(<String, dynamic>{'id': 0, 'method': 'daemon.version'}));
+      final DaemonMessage response = await daemonStreams.outputs.stream.firstWhere(_notEvent);
+      expect(response.data['id'], 0);
+      expect(response.data['result'], isNotEmpty);
+      expect(response.data['result'], isA<String>());
     });
 
     testUsingContext('daemon.getSupportedPlatforms command should succeed', () async {
@@ -117,12 +120,16 @@ void main() {
       // Use the flutter_gallery project which has a known set of supported platforms.
       final String projectPath = globals.fs.path.join(getFlutterRoot(), 'dev', 'integration_tests', 'flutter_gallery');
 
-      daemonStreams.inputs.add(<String, dynamic>{'id': 0, 'method': 'daemon.getSupportedPlatforms', 'params': <String, Object>{'projectRoot': projectPath}});
-      final Map<String, dynamic> response = await daemonStreams.outputs.stream.firstWhere(_notEvent);
+      daemonStreams.inputs.add(DaemonMessage(<String, dynamic>{
+        'id': 0,
+        'method': 'daemon.getSupportedPlatforms',
+        'params': <String, Object>{'projectRoot': projectPath},
+      }));
+      final DaemonMessage response = await daemonStreams.outputs.stream.firstWhere(_notEvent);
 
-      expect(response['id'], 0);
-      expect(response['result'], isNotEmpty);
-      expect((response['result'] as Map<String, dynamic>)['platforms'], <String>{'macos'});
+      expect(response.data['id'], 0);
+      expect(response.data['result'], isNotEmpty);
+      expect((response.data['result'] as Map<String, dynamic>)['platforms'], <String>{'macos'});
     }, overrides: <Type, Generator>{
       // Disable Android/iOS and enable macOS to make sure result is consistent and defaults are tested off.
       FeatureFlags: () => TestFeatureFlags(isAndroidEnabled: false, isIOSEnabled: false, isMacOSEnabled: true),
@@ -134,12 +141,12 @@ void main() {
         notifyingLogger: notifyingLogger,
       );
       globals.printError('daemon.logMessage test');
-      final Map<String, dynamic> response = await daemonStreams.outputs.stream.firstWhere((Map<String, dynamic> map) {
-        return map['event'] == 'daemon.logMessage' && (map['params'] as Map<String, dynamic>)['level'] == 'error';
+      final DaemonMessage response = await daemonStreams.outputs.stream.firstWhere((DaemonMessage message) {
+        return message.data['event'] == 'daemon.logMessage' && (message.data['params'] as Map<String, dynamic>)['level'] == 'error';
       });
-      expect(response['id'], isNull);
-      expect(response['event'], 'daemon.logMessage');
-      final Map<String, String> logMessage = castStringKeyedMap(response['params']).cast<String, String>();
+      expect(response.data['id'], isNull);
+      expect(response.data['event'], 'daemon.logMessage');
+      final Map<String, String> logMessage = castStringKeyedMap(response.data['params']).cast<String, String>();
       expect(logMessage['level'], 'error');
       expect(logMessage['message'], 'daemon.logMessage test');
     }, overrides: <Type, Generator>{
@@ -152,12 +159,12 @@ void main() {
         notifyingLogger: notifyingLogger,
       );
       globals.printWarning('daemon.logMessage test');
-      final Map<String, dynamic> response = await daemonStreams.outputs.stream.firstWhere((Map<String, dynamic> map) {
-        return map['event'] == 'daemon.logMessage' && (map['params'] as Map<String, dynamic>)['level'] == 'warning';
+      final DaemonMessage response = await daemonStreams.outputs.stream.firstWhere((DaemonMessage message) {
+        return message.data['event'] == 'daemon.logMessage' && (message.data['params'] as Map<String, dynamic>)['level'] == 'warning';
       });
-      expect(response['id'], isNull);
-      expect(response['event'], 'daemon.logMessage');
-      final Map<String, String> logMessage = castStringKeyedMap(response['params']).cast<String, String>();
+      expect(response.data['id'], isNull);
+      expect(response.data['event'], 'daemon.logMessage');
+      final Map<String, String> logMessage = castStringKeyedMap(response.data['params']).cast<String, String>();
       expect(logMessage['level'], 'warning');
       expect(logMessage['message'], 'daemon.logMessage test');
     }, overrides: <Type, Generator>{
@@ -201,7 +208,7 @@ void main() {
         daemonConnection,
         notifyingLogger: notifyingLogger,
       );
-      daemonStreams.inputs.add(<String, dynamic>{'id': 0, 'method': 'daemon.shutdown'});
+      daemonStreams.inputs.add(DaemonMessage(<String, dynamic>{'id': 0, 'method': 'daemon.shutdown'}));
       return daemon.onExit.then<void>((int code) async {
         await daemonStreams.inputs.close();
         expect(code, 0);
@@ -214,10 +221,10 @@ void main() {
         notifyingLogger: notifyingLogger,
       );
 
-      daemonStreams.inputs.add(<String, dynamic>{'id': 0, 'method': 'app.restart'});
-      final Map<String, dynamic> response = await daemonStreams.outputs.stream.firstWhere(_notEvent);
-      expect(response['id'], 0);
-      expect(response['error'], contains('appId is required'));
+      daemonStreams.inputs.add(DaemonMessage(<String, dynamic>{'id': 0, 'method': 'app.restart'}));
+      final DaemonMessage response = await daemonStreams.outputs.stream.firstWhere(_notEvent);
+      expect(response.data['id'], 0);
+      expect(response.data['error'], contains('appId is required'));
     });
 
     testUsingContext('ext.flutter.debugPaint via service extension without an appId should report an error', () async {
@@ -226,16 +233,16 @@ void main() {
         notifyingLogger: notifyingLogger,
       );
 
-      daemonStreams.inputs.add(<String, dynamic>{
+      daemonStreams.inputs.add(DaemonMessage(<String, dynamic>{
         'id': 0,
         'method': 'app.callServiceExtension',
         'params': <String, String>{
           'methodName': 'ext.flutter.debugPaint',
         },
-      });
-      final Map<String, dynamic> response = await daemonStreams.outputs.stream.firstWhere(_notEvent);
-      expect(response['id'], 0);
-      expect(response['error'], contains('appId is required'));
+      }));
+      final DaemonMessage response = await daemonStreams.outputs.stream.firstWhere(_notEvent);
+      expect(response.data['id'], 0);
+      expect(response.data['error'], contains('appId is required'));
     });
 
     testUsingContext('app.stop without appId should report an error', () async {
@@ -244,10 +251,10 @@ void main() {
         notifyingLogger: notifyingLogger,
       );
 
-      daemonStreams.inputs.add(<String, dynamic>{'id': 0, 'method': 'app.stop'});
-      final Map<String, dynamic> response = await daemonStreams.outputs.stream.firstWhere(_notEvent);
-      expect(response['id'], 0);
-      expect(response['error'], contains('appId is required'));
+      daemonStreams.inputs.add(DaemonMessage(<String, dynamic>{'id': 0, 'method': 'app.stop'}));
+      final DaemonMessage response = await daemonStreams.outputs.stream.firstWhere(_notEvent);
+      expect(response.data['id'], 0);
+      expect(response.data['error'], contains('appId is required'));
     });
 
     testUsingContext('device.getDevices should respond with list', () async {
@@ -255,10 +262,10 @@ void main() {
         daemonConnection,
         notifyingLogger: notifyingLogger,
       );
-      daemonStreams.inputs.add(<String, dynamic>{'id': 0, 'method': 'device.getDevices'});
-      final Map<String, dynamic> response = await daemonStreams.outputs.stream.firstWhere(_notEvent);
-      expect(response['id'], 0);
-      expect(response['result'], isList);
+      daemonStreams.inputs.add(DaemonMessage(<String, dynamic>{'id': 0, 'method': 'device.getDevices'}));
+      final DaemonMessage response = await daemonStreams.outputs.stream.firstWhere(_notEvent);
+      expect(response.data['id'], 0);
+      expect(response.data['result'], isList);
     });
 
     testUsingContext('device.getDevices reports available devices', () async {
@@ -269,10 +276,10 @@ void main() {
       final FakePollingDeviceDiscovery discoverer = FakePollingDeviceDiscovery();
       daemon.deviceDomain.addDeviceDiscoverer(discoverer);
       discoverer.addDevice(FakeAndroidDevice());
-      daemonStreams.inputs.add(<String, dynamic>{'id': 0, 'method': 'device.getDevices'});
-      final Map<String, dynamic> response = await daemonStreams.outputs.stream.firstWhere(_notEvent);
-      expect(response['id'], 0);
-      final dynamic result = response['result'];
+      daemonStreams.inputs.add(DaemonMessage(<String, dynamic>{'id': 0, 'method': 'device.getDevices'}));
+      final DaemonMessage response = await daemonStreams.outputs.stream.firstWhere(_notEvent);
+      expect(response.data['id'], 0);
+      final dynamic result = response.data['result'];
       expect(result, isList);
       expect(result, isNotEmpty);
     });
@@ -287,11 +294,11 @@ void main() {
       daemon.deviceDomain.addDeviceDiscoverer(discoverer);
       discoverer.addDevice(FakeAndroidDevice());
 
-      return daemonStreams.outputs.stream.skipWhile(_isConnectedEvent).first.then<void>((Map<String, dynamic> response) async {
-        expect(response['event'], 'device.added');
-        expect(response['params'], isMap);
+      return daemonStreams.outputs.stream.skipWhile(_isConnectedEvent).first.then<void>((DaemonMessage response) async {
+        expect(response.data['event'], 'device.added');
+        expect(response.data['params'], isMap);
 
-        final Map<String, dynamic> params = castStringKeyedMap(response['params']);
+        final Map<String, dynamic> params = castStringKeyedMap(response.data['params']);
         expect(params['platform'], isNotEmpty); // the fake device has a platform of 'android-arm'
       });
     }, overrides: <Type, Generator>{
@@ -300,16 +307,185 @@ void main() {
       FuchsiaWorkflow: () => FakeFuchsiaWorkflow(),
     });
 
+    testUsingContext('device.discoverDevices should respond with list', () async {
+      daemon = Daemon(
+        daemonConnection,
+        notifyingLogger: notifyingLogger,
+      );
+      daemonStreams.inputs.add(DaemonMessage(<String, dynamic>{'id': 0, 'method': 'device.discoverDevices'}));
+      final DaemonMessage response = await daemonStreams.outputs.stream.firstWhere(_notEvent);
+      expect(response.data['id'], 0);
+      expect(response.data['result'], isList);
+    });
+
+    testUsingContext('device.discoverDevices reports available devices', () async {
+      daemon = Daemon(
+        daemonConnection,
+        notifyingLogger: notifyingLogger,
+      );
+      final FakePollingDeviceDiscovery discoverer = FakePollingDeviceDiscovery();
+      daemon.deviceDomain.addDeviceDiscoverer(discoverer);
+      discoverer.addDevice(FakeAndroidDevice());
+      daemonStreams.inputs.add(DaemonMessage(<String, dynamic>{'id': 0, 'method': 'device.discoverDevices'}));
+      final DaemonMessage response = await daemonStreams.outputs.stream.firstWhere(_notEvent);
+      expect(response.data['id'], 0);
+      final dynamic result = response.data['result'];
+      expect(result, isList);
+      expect(result, isNotEmpty);
+      expect(discoverer.discoverDevicesCalled, true);
+    });
+
+    testUsingContext('device.supportsRuntimeMode returns correct value', () async {
+      daemon = Daemon(
+        daemonConnection,
+        notifyingLogger: notifyingLogger,
+      );
+      final FakePollingDeviceDiscovery discoverer = FakePollingDeviceDiscovery();
+      daemon.deviceDomain.addDeviceDiscoverer(discoverer);
+      final FakeAndroidDevice device = FakeAndroidDevice();
+      discoverer.addDevice(device);
+      daemonStreams.inputs.add(DaemonMessage(<String, dynamic>{
+        'id': 0,
+        'method': 'device.supportsRuntimeMode',
+        'params': <String, dynamic>{
+          'deviceId': 'device',
+          'buildMode': 'profile',
+        },
+      }));
+      final DaemonMessage response = await daemonStreams.outputs.stream.firstWhere(_notEvent);
+      expect(response.data['id'], 0);
+      final dynamic result = response.data['result'];
+      expect(result, true);
+      expect(device.supportsRuntimeModeCalledBuildMode, BuildMode.profile);
+    });
+
+    testUsingContext('device.logReader.start and .stop starts and stops log reader', () async {
+      daemon = Daemon(
+        daemonConnection,
+        notifyingLogger: notifyingLogger,
+      );
+      final FakePollingDeviceDiscovery discoverer = FakePollingDeviceDiscovery();
+      daemon.deviceDomain.addDeviceDiscoverer(discoverer);
+      final FakeAndroidDevice device = FakeAndroidDevice();
+      discoverer.addDevice(device);
+      final FakeDeviceLogReader logReader = FakeDeviceLogReader();
+      device.logReader = logReader;
+      daemonStreams.inputs.add(DaemonMessage(<String, dynamic>{
+        'id': 0,
+        'method': 'device.logReader.start',
+        'params': <String, dynamic>{
+          'deviceId': 'device',
+        },
+      }));
+      final Stream<DaemonMessage> broadcastOutput = daemonStreams.outputs.stream.asBroadcastStream();
+      final DaemonMessage firstResponse = await broadcastOutput.firstWhere(_notEvent);
+      expect(firstResponse.data['id'], 0);
+      final String logReaderId = firstResponse.data['result'] as String;
+      expect(logReaderId, isNotNull);
+
+      // Try sending logs.
+      logReader.logLinesController.add('Sample log line');
+      final DaemonMessage logEvent = await broadcastOutput.firstWhere(
+        (DaemonMessage message) => message.data['event'] != null && message.data['event'] != 'device.added',
+      );
+      expect(logEvent.data['params'], 'Sample log line');
+
+      // Now try to stop the log reader.
+      expect(logReader.disposeCalled, false);
+      daemonStreams.inputs.add(DaemonMessage(<String, dynamic>{
+        'id': 1,
+        'method': 'device.logReader.stop',
+        'params': <String, dynamic>{
+          'id': logReaderId,
+        },
+      }));
+      final DaemonMessage stopResponse = await broadcastOutput.firstWhere(_notEvent);
+      expect(stopResponse.data['id'], 1);
+      expect(logReader.disposeCalled, true);
+    });
+
+    group('device.startApp and .stopApp', () {
+      FakeApplicationPackageFactory applicationPackageFactory;
+      setUp(() {
+        applicationPackageFactory = FakeApplicationPackageFactory();
+      });
+
+      testUsingContext('device.startApp and .stopApp starts and stops an app', () async {
+        daemon = Daemon(
+          daemonConnection,
+          notifyingLogger: notifyingLogger,
+        );
+        final FakePollingDeviceDiscovery discoverer = FakePollingDeviceDiscovery();
+        daemon.deviceDomain.addDeviceDiscoverer(discoverer);
+        final FakeAndroidDevice device = FakeAndroidDevice();
+        discoverer.addDevice(device);
+        final Stream<DaemonMessage> broadcastOutput = daemonStreams.outputs.stream.asBroadcastStream();
+
+        // First upload the application package.
+        final FakeApplicationPackage applicationPackage = FakeApplicationPackage();
+        applicationPackageFactory.applicationPackage = applicationPackage;
+        daemonStreams.inputs.add(DaemonMessage(<String, dynamic>{
+          'id': 0,
+          'method': 'device.uploadApplicationPackage',
+          'params': <String, dynamic>{
+            'targetPlatform': 'android',
+            'applicationBinary': 'test_file',
+          },
+        }));
+        final DaemonMessage applicationPackageIdResponse = await broadcastOutput.firstWhere(_notEvent);
+        expect(applicationPackageIdResponse.data['id'], 0);
+        expect(applicationPackageFactory.applicationBinaryRequested.basename, 'test_file');
+        expect(applicationPackageFactory.platformRequested, TargetPlatform.android);
+        final String applicationPackageId = applicationPackageIdResponse.data['result'] as String;
+
+        // Try starting the app.
+        final Uri observatoryUri = Uri.parse('http://127.0.0.1:12345/observatory');
+        device.launchResult = LaunchResult.succeeded(observatoryUri: observatoryUri);
+        daemonStreams.inputs.add(DaemonMessage(<String, dynamic>{
+          'id': 1,
+          'method': 'device.startApp',
+          'params': <String, dynamic>{
+            'deviceId': 'device',
+            'applicationPackageId': applicationPackageId,
+            'debuggingOptions': DebuggingOptions.enabled(BuildInfo.debug).toJson(),
+          },
+        }));
+        final DaemonMessage startAppResponse = await broadcastOutput.firstWhere(_notEvent);
+        expect(startAppResponse.data['id'], 1);
+        expect(device.startAppPackage, applicationPackage);
+        final Map<String, dynamic> startAppResult = startAppResponse.data['result'] as Map<String, dynamic>;
+        expect(startAppResult['started'], true);
+        expect(startAppResult['observatoryUri'], observatoryUri.toString());
+
+        // Try stopping the app.
+        daemonStreams.inputs.add(DaemonMessage(<String, dynamic>{
+          'id': 2,
+          'method': 'device.stopApp',
+          'params': <String, dynamic>{
+            'deviceId': 'device',
+            'applicationPackageId': applicationPackageId,
+          },
+        }));
+        final DaemonMessage stopAppResponse = await broadcastOutput.firstWhere(_notEvent);
+        expect(stopAppResponse.data['id'], 2);
+        expect(device.stopAppPackage, applicationPackage);
+        final bool stopAppResult = stopAppResponse.data['result'] as bool;
+        expect(stopAppResult, true);
+      }, overrides: <Type, Generator>{
+        ApplicationPackageFactory: () => applicationPackageFactory,
+      });
+    });
+
     testUsingContext('emulator.launch without an emulatorId should report an error', () async {
       daemon = Daemon(
         daemonConnection,
         notifyingLogger: notifyingLogger,
       );
 
-      daemonStreams.inputs.add(<String, dynamic>{'id': 0, 'method': 'emulator.launch'});
-      final Map<String, dynamic> response = await daemonStreams.outputs.stream.firstWhere(_notEvent);
-      expect(response['id'], 0);
-      expect(response['error'], contains('emulatorId is required'));
+      daemonStreams.inputs.add(DaemonMessage(<String, dynamic>{'id': 0, 'method': 'emulator.launch'}));
+      final DaemonMessage response = await daemonStreams.outputs.stream.firstWhere(_notEvent);
+      expect(response.data['id'], 0);
+      expect(response.data['error'], contains('emulatorId is required'));
     });
 
     testUsingContext('emulator.launch coldboot parameter must be boolean', () async {
@@ -318,10 +494,10 @@ void main() {
         notifyingLogger: notifyingLogger,
       );
       final Map<String, dynamic> params = <String, dynamic>{'emulatorId': 'device', 'coldBoot': 1};
-      daemonStreams.inputs.add(<String, dynamic>{'id': 0, 'method': 'emulator.launch', 'params': params});
-      final Map<String, dynamic> response = await daemonStreams.outputs.stream.firstWhere(_notEvent);
-      expect(response['id'], 0);
-      expect(response['error'], contains('coldBoot is not a bool'));
+      daemonStreams.inputs.add(DaemonMessage(<String, dynamic>{'id': 0, 'method': 'emulator.launch', 'params': params}));
+      final DaemonMessage response = await daemonStreams.outputs.stream.firstWhere(_notEvent);
+      expect(response.data['id'], 0);
+      expect(response.data['error'], contains('coldBoot is not a bool'));
     });
 
     testUsingContext('emulator.getEmulators should respond with list', () async {
@@ -329,10 +505,10 @@ void main() {
         daemonConnection,
         notifyingLogger: notifyingLogger,
       );
-      daemonStreams.inputs.add(<String, dynamic>{'id': 0, 'method': 'emulator.getEmulators'});
-      final Map<String, dynamic> response = await daemonStreams.outputs.stream.firstWhere(_notEvent);
-      expect(response['id'], 0);
-      expect(response['result'], isList);
+      daemonStreams.inputs.add(DaemonMessage(<String, dynamic>{'id': 0, 'method': 'emulator.getEmulators'}));
+      final DaemonMessage response = await daemonStreams.outputs.stream.firstWhere(_notEvent);
+      expect(response.data['id'], 0);
+      expect(response.data['result'], isList);
     });
 
     testUsingContext('daemon can send exposeUrl requests to the client', () async {
@@ -346,10 +522,10 @@ void main() {
 
       // Respond to any requests from the daemon to expose a URL.
       unawaited(daemonStreams.outputs.stream
-        .firstWhere((Map<String, dynamic> request) => request['method'] == 'app.exposeUrl')
-        .then((Map<String, dynamic> request) {
-          expect((request['params'] as Map<String, dynamic>)['url'], equals(originalUrl));
-          daemonStreams.inputs.add(<String, dynamic>{'id': request['id'], 'result': <String, dynamic>{'url': mappedUrl}});
+        .firstWhere((DaemonMessage request) => request.data['method'] == 'app.exposeUrl')
+        .then((DaemonMessage request) {
+          expect((request.data['params'] as Map<String, dynamic>)['url'], equals(originalUrl));
+          daemonStreams.inputs.add(DaemonMessage(<String, dynamic>{'id': request.data['id'], 'result': <String, dynamic>{'url': mappedUrl}}));
         })
       );
 
@@ -363,9 +539,9 @@ void main() {
         notifyingLogger: notifyingLogger,
       );
 
-      daemonStreams.inputs.add(<String, dynamic>{'id': 0, 'method': 'devtools.serve'});
-      final Map<String, dynamic> response = await daemonStreams.outputs.stream.firstWhere((Map<String, dynamic> response) => response['id'] == 0);
-      final Map<String, dynamic> result = response['result'] as Map<String, dynamic>;
+      daemonStreams.inputs.add(DaemonMessage(<String, dynamic>{'id': 0, 'method': 'devtools.serve'}));
+      final DaemonMessage response = await daemonStreams.outputs.stream.firstWhere((DaemonMessage response) => response.data['id'] == 0);
+      final Map<String, dynamic> result = response.data['result'] as Map<String, dynamic>;
       expect(result, isNotEmpty);
       expect(result['host'], '127.0.0.1');
       expect(result['port'], 1234);
@@ -379,9 +555,9 @@ void main() {
         notifyingLogger: notifyingLogger,
       );
 
-      daemonStreams.inputs.add(<String, dynamic>{'id': 0, 'method': 'devtools.serve'});
-      final Map<String, dynamic> response = await daemonStreams.outputs.stream.firstWhere((Map<String, dynamic> response) => response['id'] == 0);
-      final Map<String, dynamic> result = response['result'] as Map<String, dynamic>;
+      daemonStreams.inputs.add(DaemonMessage(<String, dynamic>{'id': 0, 'method': 'devtools.serve'}));
+      final DaemonMessage response = await daemonStreams.outputs.stream.firstWhere((DaemonMessage response) => response.data['id'] == 0);
+      final Map<String, dynamic> result = response.data['result'] as Map<String, dynamic>;
       expect(result, isNotEmpty);
       expect(result['host'], null);
       expect(result['port'], null);
@@ -507,9 +683,9 @@ void main() {
   });
 }
 
-bool _notEvent(Map<String, dynamic> map) => map['event'] == null;
+bool _notEvent(DaemonMessage message) => message.data['event'] == null;
 
-bool _isConnectedEvent(Map<String, dynamic> map) => map['event'] == 'daemon.connected';
+bool _isConnectedEvent(DaemonMessage message) => message.data['event'] == 'daemon.connected';
 
 class FakeFuchsiaWorkflow extends Fake implements FuchsiaWorkflow {
   FakeFuchsiaWorkflow({ this.canListDevices = true });
@@ -559,6 +735,94 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
 
   @override
   final bool ephemeral = false;
+
+  @override
+  Future<String> get sdkNameAndVersion async => 'Android 12';
+
+  @override
+  bool get supportsHotReload => true;
+
+  @override
+  bool get supportsHotRestart => true;
+
+  @override
+  bool get supportsScreenshot => true;
+
+  @override
+  bool get supportsFastStart => true;
+
+  @override
+  bool get supportsFlutterExit => true;
+
+  @override
+  Future<bool> get supportsHardwareRendering async => true;
+
+  @override
+  bool get supportsStartPaused => true;
+
+  BuildMode supportsRuntimeModeCalledBuildMode;
+  @override
+  Future<bool> supportsRuntimeMode(BuildMode buildMode) async {
+    supportsRuntimeModeCalledBuildMode = buildMode;
+    return true;
+  }
+
+  DeviceLogReader logReader;
+  @override
+  FutureOr<DeviceLogReader> getLogReader({
+    covariant ApplicationPackage app,
+    bool includePastLogs = false,
+  }) => logReader;
+
+  ApplicationPackage startAppPackage;
+  LaunchResult launchResult;
+  @override
+  Future<LaunchResult> startApp(
+    ApplicationPackage package, {
+    String mainPath,
+    String route,
+    DebuggingOptions debuggingOptions,
+    Map<String, Object> platformArgs = const <String, Object>{},
+    bool prebuiltApplication = false,
+    bool ipv6 = false,
+    String userIdentifier,
+  }) async {
+    startAppPackage = package;
+    return launchResult;
+  }
+
+  ApplicationPackage stopAppPackage;
+  @override
+  Future<bool> stopApp(
+    ApplicationPackage app, {
+    String userIdentifier,
+  }) async {
+    stopAppPackage = app;
+    return true;
+  }
+}
+
+class FakeDeviceLogReader implements DeviceLogReader {
+  final StreamController<String> logLinesController = StreamController<String>();
+  bool disposeCalled = false;
+
+  @override
+  int appPid;
+
+  @override
+  FlutterVmService connectedVMService;
+
+  @override
+  void dispose() {
+    disposeCalled = true;
+  }
+
+  @override
+  Stream<String> get logLines => logLinesController.stream;
+
+  @override
+  String get name => 'device';
+
 }
 
 class FakeDevtoolsLauncher extends Fake implements DevtoolsLauncher {
@@ -572,3 +836,18 @@ class FakeDevtoolsLauncher extends Fake implements DevtoolsLauncher {
   @override
   Future<void> close() async {}
 }
+
+class FakeApplicationPackageFactory implements ApplicationPackageFactory {
+  TargetPlatform platformRequested;
+  File applicationBinaryRequested;
+  ApplicationPackage applicationPackage;
+
+  @override
+  Future<ApplicationPackage> getPackageForPlatform(TargetPlatform platform, {BuildInfo buildInfo, File applicationBinary}) async {
+    platformRequested = platform;
+    applicationBinaryRequested = applicationBinary;
+    return applicationPackage;
+  }
+}
+
+class FakeApplicationPackage extends Fake implements ApplicationPackage {}
