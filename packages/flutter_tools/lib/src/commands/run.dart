@@ -559,7 +559,7 @@ class RunCommand extends RunCommandBase {
       }
       final Daemon daemon = Daemon(
         DaemonConnection(
-          daemonStreams: StdioDaemonStreams(globals.stdio),
+          daemonStreams: DaemonStreams.fromStdio(globals.stdio, logger: globals.logger),
           logger: globals.logger,
         ),
         notifyingLogger: (globals.logger is NotifyingLogger)
