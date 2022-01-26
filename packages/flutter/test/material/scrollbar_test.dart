@@ -1058,6 +1058,140 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.linux }),
   );
 
+  testWidgets('ScrollbarThemeData.thickness replaces hoverThickness', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(scrollbarTheme: ScrollbarThemeData(
+          thumbVisibility: MaterialStateProperty.resolveWith((Set<MaterialState> states) => true),
+          trackVisibility: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+            return states.contains(MaterialState.hovered);
+          }),
+          thickness: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+            if (states.contains(MaterialState.hovered))
+              return 40.0;
+            // Default thickness
+            return 8.0;
+          }),
+        )),
+        home: const SingleChildScrollView(
+          child: SizedBox(width: 4000.0, height: 4000.0),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(
+      find.byType(Scrollbar),
+      paints..rrect(
+        rrect: RRect.fromRectAndRadius(
+          getStartingThumbRect(isAndroid: false),
+          _kDefaultThumbRadius,
+        ),
+        color: _kDefaultIdleThumbColor,
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: ui.PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    addTearDown(gesture.removePointer);
+    await gesture.moveTo(const Offset(794.0, 5.0));
+    await tester.pump();
+
+    expect(
+      find.byType(Scrollbar),
+      paints
+        ..rect(
+          rect: const Rect.fromLTRB(756.0, 0.0, 800.0, 600.0),
+          color: const Color(0x08000000),
+        )
+        ..line(
+          p1: const Offset(756.0, 0.0),
+          p2: const Offset(756.0, 600.0),
+          strokeWidth: 1.0,
+          color: _kDefaultIdleThumbColor,
+        )
+        ..rrect(
+          rrect: RRect.fromRectAndRadius(
+            // Scrollbar thumb is larger
+            const Rect.fromLTRB(758.0, 0.0, 798.0, 90.0),
+            _kDefaultThumbRadius,
+          ),
+          // Hover color
+          color: const Color(0x80000000),
+        ),
+    );
+  },
+    variant: const TargetPlatformVariant(<TargetPlatform>{
+      TargetPlatform.linux,
+      TargetPlatform.macOS,
+      TargetPlatform.windows,
+    }),
+  );
+
+  testWidgets('ScrollbarThemeData.trackVisibility replaces showTrackOnHover', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(scrollbarTheme: ScrollbarThemeData(
+          isAlwaysShown: true,
+          trackVisibility: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+            if (states.contains(MaterialState.hovered))
+              return true;
+            return false;
+          }),
+        )),
+        home: const SingleChildScrollView(
+          child: SizedBox(width: 4000.0, height: 4000.0),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(
+      find.byType(Scrollbar),
+      paints..rrect(
+        rrect: RRect.fromRectAndRadius(
+          getStartingThumbRect(isAndroid: false),
+          _kDefaultThumbRadius,
+        ),
+        color: _kDefaultIdleThumbColor,
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: ui.PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    addTearDown(gesture.removePointer);
+    await gesture.moveTo(const Offset(794.0, 5.0));
+    await tester.pump();
+
+    expect(
+      find.byType(Scrollbar),
+      paints
+        ..rect(
+          rect: const Rect.fromLTRB(784.0, 0.0, 800.0, 600.0),
+          color: const Color(0x08000000),
+        )
+        ..line(
+          p1: const Offset(784.0, 0.0),
+          p2: const Offset(784.0, 600.0),
+          strokeWidth: 1.0,
+          color: _kDefaultIdleThumbColor,
+        )
+        ..rrect(
+          rrect: RRect.fromRectAndRadius(
+            // Scrollbar thumb is larger
+            const Rect.fromLTRB(786.0, 0.0, 798.0, 90.0),
+            _kDefaultThumbRadius,
+          ),
+          // Hover color
+          color: const Color(0x80000000),
+        ),
+    );
+  },
+    variant: const TargetPlatformVariant(<TargetPlatform>{
+      TargetPlatform.linux,
+      TargetPlatform.macOS,
+      TargetPlatform.windows,
+    }),
+  );
+
   testWidgets('Scrollbar showTrackOnHover', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(

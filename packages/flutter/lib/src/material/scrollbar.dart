@@ -34,11 +34,6 @@ const Duration _kScrollbarTimeToFade = Duration(milliseconds: 600);
 /// or [MaterialState.hovered] on desktop and web platforms. These stateful
 /// color choices can be changed using [ScrollbarThemeData.thumbColor].
 ///
-/// A scrollbar track can been drawn when triggered by a hover event, which is
-/// controlled by [showTrackOnHover]. The thickness of the track and scrollbar
-/// thumb will become larger when hovering, unless overridden by
-/// [hoverThickness].
-///
 /// {@tool dartpad}
 /// This sample shows a [Scrollbar] that executes a fade animation as scrolling
 /// occurs. The Scrollbar will fade into view as the user scrolls, and fade out
@@ -54,6 +49,13 @@ const Duration _kScrollbarTimeToFade = Duration(milliseconds: 600);
 ///
 /// ** See code in examples/api/lib/material/scrollbar/scrollbar.1.dart **
 /// {@end-tool}
+///
+/// A scrollbar track can be added using [trackVisibility]. This can also be
+/// drawn when triggered by a hover event, or based on any [MaterialState] by
+/// using [ScrollbarThemeData.trackVisibility].
+///
+/// The [thickness] of the track and scrollbar thumb can be changed dynamically
+/// in response to [MaterialState]s using [ScrollbarThemeData.thickness].
 ///
 /// See also:
 ///
@@ -84,8 +86,6 @@ class Scrollbar extends StatelessWidget {
     this.controller,
     this.thumbVisibility,
     this.trackVisibility,
-    this.showTrackOnHover,
-    this.hoverThickness,
     this.thickness,
     this.radius,
     this.notificationPredicate,
@@ -96,6 +96,16 @@ class Scrollbar extends StatelessWidget {
       'This feature was deprecated after v2.9.0-1.0.pre.',
     )
     this.isAlwaysShown,
+    @Deprecated(
+      'Use ScrollbarThemeData.trackVisibility to resolve based on the current state instead. '
+      'This feature was deprecated after v2.9.0-1.0.pre.',
+    )
+    this.showTrackOnHover,
+    @Deprecated(
+      'Use ScrollbarThemeData.thickness to resolve based on the current state instead. '
+      'This feature was deprecated after v2.9.0-1.0.pre.',
+    )
+    this.hoverThickness,
   }) : assert(
          thumbVisibility == null || isAlwaysShown == null,
          'Scrollbar thumb appearance should only be controlled with thumbVisibility, '
@@ -142,7 +152,7 @@ class Scrollbar extends StatelessWidget {
   /// use the global [ScrollbarThemeData.trackVisibility] or override the
   /// sub-tree's theme data.
   ///
-  /// [showTrackOnHover] can be replaced by this and will be deprecated.
+  /// Replaces deprecated [showTrackOnHover].
   final bool? trackVisibility;
 
   /// Controls if the track will show on hover and remain, including during drag.
@@ -151,7 +161,12 @@ class Scrollbar extends StatelessWidget {
   /// [ThemeData.scrollbarTheme] is used. If that is also null, the default value
   /// is false.
   ///
-  /// This will be deprecated, and [trackVisibility] is recommended.
+  /// This is deprecated, [trackVisibility] or [ScrollbarThemeData.trackVisibility]
+  /// should be used instead.
+  @Deprecated(
+    'Use ScrollbarThemeData.trackVisibility to resolve based on the current state instead. '
+    'This feature was deprecated after v2.9.0-1.0.pre.',
+  )
   final bool? showTrackOnHover;
 
   /// The thickness of the scrollbar when a hover state is active and
@@ -160,6 +175,13 @@ class Scrollbar extends StatelessWidget {
   /// If this property is null, then [ScrollbarThemeData.thickness] of
   /// [ThemeData.scrollbarTheme] is used to resolve a thickness. If that is also
   /// null, the default value is 12.0 pixels.
+  ///
+  /// This is deprecated, use [ScrollbarThemeData.thickness] to resolve based on
+  /// the current state instead.
+  @Deprecated(
+    'Use ScrollbarThemeData.thickness to resolve based on the current state instead. '
+    'This feature was deprecated after v2.9.0-1.0.pre.',
+  )
   final double? hoverThickness;
 
   /// The thickness of the scrollbar in the cross axis of the scrollable.
