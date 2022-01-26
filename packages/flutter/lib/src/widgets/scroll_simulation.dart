@@ -115,8 +115,10 @@ class BouncingScrollSimulation extends Simulation with ScrollSimulationMixin {
   // But will not affect [_frictionSimulation].
   void _updateSpringTime(double currentPixel, double velocity) {
     if (currentPixel < leadingExtent) {
+      _springSimulation = _underscrollSimulation(currentPixel, velocity);
       _springTime = double.negativeInfinity;
     } else if (currentPixel > trailingExtent) {
+      _springSimulation = _overscrollSimulation(currentPixel, velocity);
       _springTime = double.negativeInfinity;
     } else {
       final double finalX = _frictionSimulation!.finalX;
@@ -124,16 +126,14 @@ class BouncingScrollSimulation extends Simulation with ScrollSimulationMixin {
         _springTime = _frictionSimulation!.timeAtX(trailingExtent);
         _springSimulation = _overscrollSimulation(
           trailingExtent,
-          math.min(
-              _frictionSimulation!.dx(_springTime), maxSpringTransferVelocity),
+          math.min(_frictionSimulation!.dx(_springTime), maxSpringTransferVelocity),
         );
         assert(_springTime.isFinite);
       } else if (velocity < 0.0 && finalX < leadingExtent) {
         _springTime = _frictionSimulation!.timeAtX(leadingExtent);
         _springSimulation = _underscrollSimulation(
           leadingExtent,
-          math.min(
-              _frictionSimulation!.dx(_springTime), maxSpringTransferVelocity),
+          math.min(_frictionSimulation!.dx(_springTime), maxSpringTransferVelocity),
         );
         assert(_springTime.isFinite);
       } else {
