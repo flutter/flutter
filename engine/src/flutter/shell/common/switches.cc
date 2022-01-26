@@ -300,6 +300,9 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
   settings.trace_startup =
       command_line.HasOption(FlagForSwitch(Switch::TraceStartup));
 
+  settings.enable_serial_gc =
+      command_line.HasOption(FlagForSwitch(Switch::EnableSerialGC));
+
 #if !FLUTTER_RELEASE
   settings.trace_skia = true;
 

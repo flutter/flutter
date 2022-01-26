@@ -34,6 +34,7 @@ tests = [
   "platform_view_test.dart",
   "plugin_utilities_test.dart",
   "semantics_test.dart",
+  "serial_gc_test.dart",
   "spirv_exception_test.dart",
   "task_order_test.dart",
   "text_test.dart",
