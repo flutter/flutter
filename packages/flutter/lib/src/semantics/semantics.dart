@@ -1511,7 +1511,7 @@ void debugResetSemanticsIdCounter() {
 /// (i.e., during [PipelineOwner.flushSemantics]), which happens after
 /// compositing. The semantics tree is then uploaded into the engine for use
 /// by assistive technology.
-class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
+class SemanticsNode extends AbstractNode<SemanticsNode> with DiagnosticableTreeMixin {
   /// Creates a semantic node.
   ///
   /// Each semantic node has a unique identifier that is assigned when the node
@@ -1847,9 +1847,6 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
 
   @override
   SemanticsOwner? get owner => super.owner as SemanticsOwner?;
-
-  @override
-  SemanticsNode? get parent => super.parent as SemanticsNode?;
 
   @override
   void redepthChildren() {

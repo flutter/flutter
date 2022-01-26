@@ -135,7 +135,7 @@ class AnnotationResult<T> {
 ///
 ///  * [RenderView.compositeFrame], which implements this recomposition protocol
 ///    for painting [RenderObject] trees on the display.
-abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
+abstract class Layer extends AbstractNode<Layer> with DiagnosticableTreeMixin {
   /// If asserts are enabled, returns whether [dispose] has
   /// been called since the last time any retained resources were created.
   ///
@@ -388,7 +388,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   Layer? _previousSibling;
 
   @override
-  void dropChild(AbstractNode child) {
+  void dropChild(Layer child) {
     if (!alwaysNeedsAddToScene) {
       markNeedsAddToScene();
     }
@@ -396,7 +396,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   }
 
   @override
-  void adoptChild(AbstractNode child) {
+  void adoptChild(Layer child) {
     if (!alwaysNeedsAddToScene) {
       markNeedsAddToScene();
     }

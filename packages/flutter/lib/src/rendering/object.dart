@@ -1234,7 +1234,7 @@ class PipelineOwner {
 /// [RenderObject.markNeedsLayout] so that if a parent has queried the intrinsic
 /// or baseline information, it gets marked dirty whenever the child's geometry
 /// changes.
-abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin implements HitTestTarget {
+abstract class RenderObject extends AbstractNode<RenderObject> with DiagnosticableTreeMixin implements HitTestTarget {
   /// Initializes internal fields for subclasses.
   RenderObject() {
     _needsCompositing = isRepaintBoundary || alwaysNeedsCompositing;
@@ -1476,7 +1476,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
           result = true;
           break;
         }
-        node = node.parent! as RenderObject;
+        node = node.parent!;
       }
       return true;
     }());
@@ -1577,7 +1577,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     while (node != _relayoutBoundary) {
       assert(node._relayoutBoundary == _relayoutBoundary);
       assert(node.parent != null);
-      node = node.parent! as RenderObject;
+      node = node.parent!;
       if ((!node._needsLayout) && (!node._debugDoingThisLayout))
         return false;
     }
@@ -1659,7 +1659,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   void markParentNeedsLayout() {
     _needsLayout = true;
     assert(this.parent != null);
-    final RenderObject parent = this.parent! as RenderObject;
+    final RenderObject parent = this.parent!;
     if (!_doingThisLayoutWithCallback) {
       parent.markNeedsLayout();
     } else {
@@ -1818,7 +1818,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     if (!parentUsesSize || sizedByParent || constraints.isTight || parent is! RenderObject) {
       relayoutBoundary = this;
     } else {
-      relayoutBoundary = (parent! as RenderObject)._relayoutBoundary;
+      relayoutBoundary = parent!._relayoutBoundary;
     }
     assert(() {
       _debugCanParentUseSize = parentUsesSize;
@@ -2155,7 +2155,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       return;
     _needsCompositingBitsUpdate = true;
     if (parent is RenderObject) {
-      final RenderObject parent = this.parent! as RenderObject;
+      final RenderObject parent = this.parent!;
       if (parent._needsCompositingBitsUpdate)
         return;
       if (!isRepaintBoundary && !parent.isRepaintBoundary) {
@@ -2268,7 +2268,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
         owner!.requestVisualUpdate();
       }
     } else if (parent is RenderObject) {
-      final RenderObject parent = this.parent! as RenderObject;
+      final RenderObject parent = this.parent!;
       parent.markNeedsPaint();
       assert(parent == this.parent);
     } else {
@@ -2387,7 +2387,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     assert(() {
       if (_needsCompositingBitsUpdate) {
         if (parent is RenderObject) {
-          final RenderObject parent = this.parent! as RenderObject;
+          final RenderObject parent = this.parent!;
           bool visitedByParent = false;
           parent.visitChildren((RenderObject child) {
             if (child == this) {
@@ -2523,7 +2523,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
         ancestor = rootNode;
     }
     final List<RenderObject> renderers = <RenderObject>[];
-    for (RenderObject renderer = this; renderer != ancestor; renderer = renderer.parent! as RenderObject) {
+    for (RenderObject renderer = this; renderer != ancestor; renderer = renderer.parent!) {
       renderers.add(renderer);
       assert(renderer.parent != null); // Failed to find ancestor in parent chain.
     }
@@ -2648,7 +2648,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     if (_semantics != null && !_semantics!.isMergedIntoParent) {
       _semantics!.sendEvent(semanticsEvent);
     } else if (parent != null) {
-      final RenderObject renderParent = parent! as RenderObject;
+      final RenderObject renderParent = parent!;
       renderParent.sendSemanticsEvent(semanticsEvent);
     }
   }
@@ -2729,7 +2729,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
         break;
       node._needsSemanticsUpdate = true;
 
-      node = node.parent! as RenderObject;
+      node = node.parent!;
       isEffectiveSemanticsBoundary = node._semanticsConfiguration.isSemanticBoundary;
       if (isEffectiveSemanticsBoundary && node._semantics == null) {
         // We have reached a semantics boundary that doesn't own a semantics node.
@@ -2942,9 +2942,9 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       }
       if (_relayoutBoundary != null && _relayoutBoundary != this) {
         int count = 1;
-        RenderObject? target = parent as RenderObject?;
+        RenderObject? target = parent;
         while (target != null && target != _relayoutBoundary) {
-          target = target.parent as RenderObject?;
+          target = target.parent;
           count += 1;
         }
         header += ' relayoutBoundary=up$count';
@@ -3064,7 +3064,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     Curve curve = Curves.ease,
   }) {
     if (parent is RenderObject) {
-      final RenderObject renderParent = parent! as RenderObject;
+      final RenderObject renderParent = parent!;
       renderParent.showOnScreen(
         descendant: descendant ?? this,
         rect: rect,
@@ -3991,12 +3991,12 @@ class _SemanticsGeometry {
     assert(transform != null);
     assert(clipRectTransform != null);
     assert(clipRectTransform.isIdentity());
-    RenderObject intermediateParent = child.parent! as RenderObject;
+    RenderObject intermediateParent = child.parent!;
     assert(intermediateParent != null);
     while (intermediateParent != ancestor) {
       intermediateParent.applyPaintTransform(child, transform);
-      intermediateParent = intermediateParent.parent! as RenderObject;
-      child = child.parent! as RenderObject;
+      intermediateParent = intermediateParent.parent!;
+      child = child.parent!;
       assert(intermediateParent != null);
     }
     ancestor.applyPaintTransform(child, transform);
