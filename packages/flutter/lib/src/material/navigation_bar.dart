@@ -39,7 +39,7 @@ import 'tooltip.dart';
 /// and the [selectedIndex] is set to index 0. The `onDestinationSelected` callback
 /// changes the selected item's index and displays a corresponding widget in the body of the [Scaffold].
 ///
-/// ** See code in examples/api/lib/material/navigation_bar.dart **
+/// ** See code in examples/api/lib/material/navigation_bar/navigation_bar.dart **
 /// {@end-tool}
 /// See also:
 ///
