@@ -683,7 +683,7 @@ Information about project "Runner":
 
     setUp(() {
       fs = MemoryFileSystem.test();
-      localIosArtifacts = Artifacts.test(localEngine: 'out/ios_profile_arm');
+      localIosArtifacts = Artifacts.test(localEngine: 'out/ios_profile_arm64');
       macOS = FakePlatform(operatingSystem: 'macos');
       fs.file(xcodebuild).createSync(recursive: true);
     });
@@ -744,6 +744,7 @@ Build settings for action build and target plugin2:
 
         final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
         expect(config.readAsStringSync(), contains('EXCLUDED_ARCHS[sdk=iphonesimulator*]=i386\n'));
+        expect(config.readAsStringSync(), contains('EXCLUDED_ARCHS[sdk=iphoneos*]=armv7\n'));
         expect(fakeProcessManager, hasNoRemainingExpectations);
       }, overrides: <Type, Generator>{
         Artifacts: () => localIosArtifacts,
@@ -788,6 +789,7 @@ Build settings for action build and target plugin2:
 
         final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
         expect(config.readAsStringSync(), contains('EXCLUDED_ARCHS[sdk=iphonesimulator*]=i386 arm64\n'));
+        expect(config.readAsStringSync(), contains('EXCLUDED_ARCHS[sdk=iphoneos*]=armv7\n'));
         expect(fakeProcessManager, hasNoRemainingExpectations);
       }, overrides: <Type, Generator>{
         Artifacts: () => localIosArtifacts,
@@ -844,6 +846,7 @@ Build settings for action build and target plugin2:
 
         final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
         expect(config.readAsStringSync(), contains('EXCLUDED_ARCHS[sdk=iphonesimulator*]=i386 arm64\n'));
+        expect(config.readAsStringSync(), contains('EXCLUDED_ARCHS[sdk=iphoneos*]=armv7\n'));
         expect(fakeProcessManager, hasNoRemainingExpectations);
       }, overrides: <Type, Generator>{
         Artifacts: () => localIosArtifacts,
@@ -863,27 +866,15 @@ Build settings for action build and target plugin2:
       });
     }
 
-    testUsingOsxContext('sets ARCHS=armv7 when armv7 local iOS engine is set', () async {
+    testUsingOsxContext('exits when armv7 local engine is set', () async {
+      localIosArtifacts = Artifacts.test(localEngine: 'out/ios_profile_arm');
       const BuildInfo buildInfo = BuildInfo.debug;
       final FlutterProject project = FlutterProject.fromDirectoryTest(fs.directory('path/to/project'));
-      await updateGeneratedXcodeProperties(
-        project: project,
-        buildInfo: buildInfo,
-      );
-
-      final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
-      expect(config.existsSync(), isTrue);
-
-      final String contents = config.readAsStringSync();
-      expect(contents.contains('ARCHS=armv7'), isTrue);
-      expect(contents.contains('EXCLUDED_ARCHS[sdk=iphonesimulator*]=i386'), isTrue);
-
-      final File buildPhaseScript = fs.file('path/to/project/ios/Flutter/flutter_export_environment.sh');
-      expect(buildPhaseScript.existsSync(), isTrue);
-
-      final String buildPhaseScriptContents = buildPhaseScript.readAsStringSync();
-      expect(buildPhaseScriptContents.contains('ARCHS=armv7'), isTrue);
-      expect(buildPhaseScriptContents.contains('EXCLUDED_ARCHS'), isFalse);
+      await expectLater(() =>
+        updateGeneratedXcodeProperties(
+          project: project,
+          buildInfo: buildInfo,
+        ), throwsToolExit(message: '32-bit iOS local engine binaries are not supported.'));
     });
 
     testUsingContext('sets ARCHS=arm64 when arm64 local host engine is set', () async {
@@ -950,6 +941,7 @@ Build settings for action build and target plugin2:
 
       final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
       expect(config.readAsStringSync(), contains('EXCLUDED_ARCHS[sdk=iphonesimulator*]=i386\n'));
+      expect(config.readAsStringSync(), contains('EXCLUDED_ARCHS[sdk=iphoneos*]=armv7\n'));
 
       final File buildPhaseScript = fs.file('path/to/project/ios/Flutter/flutter_export_environment.sh');
       expect(buildPhaseScript.readAsStringSync(), isNot(contains('EXCLUDED_ARCHS')));
@@ -1045,35 +1037,6 @@ Build settings for action build and target plugin2:
         expect(buildPhaseScriptContents.contains('ARCHS=arm64'), isTrue);
       }, overrides: <Type, Generator>{
         Artifacts: () => Artifacts.test(localEngine: 'out/ios_debug_sim_arm64'),
-        Platform: () => macOS,
-        FileSystem: () => fs,
-        ProcessManager: () => FakeProcessManager.any(),
-      });
-    });
-
-    group('armv7 local engine', () {
-      Artifacts localArtifacts;
-
-      setUp(() {
-        localArtifacts = Artifacts.test(localEngine: 'out/ios_profile');
-      });
-
-      testUsingContext('sets ARCHS=armv7 when armv7 local engine is set', () async {
-        const BuildInfo buildInfo = BuildInfo.debug;
-
-        final FlutterProject project = FlutterProject.fromDirectoryTest(fs.directory('path/to/project'));
-        await updateGeneratedXcodeProperties(
-          project: project,
-          buildInfo: buildInfo,
-        );
-
-        final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
-        expect(config.existsSync(), isTrue);
-
-        final String contents = config.readAsStringSync();
-        expect(contents.contains('ARCHS=arm64'), isTrue);
-      }, overrides: <Type, Generator>{
-        Artifacts: () => localArtifacts,
         Platform: () => macOS,
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),

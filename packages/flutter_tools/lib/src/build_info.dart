@@ -542,7 +542,7 @@ enum TargetPlatform {
 //
 // TODO(cbracken): split TargetPlatform.ios into ios_armv7, ios_arm64.
 enum DarwinArch {
-  armv7,
+  armv7, // Deprecated. Used to display 32-bit unsupported devices.
   arm64,
   x86_64,
 }
@@ -918,8 +918,6 @@ const String kFileSystemRoots = 'FileSystemRoots';
 ///
 /// This is expected to be a space-delimited list of architectures. If not
 /// provided, defaults to arm64.
-///
-/// The other supported value is armv7, the 32-bit iOS architecture.
 const String kIosArchs = 'IosArchs';
 
 /// The define to control what macOS architectures are built for.
