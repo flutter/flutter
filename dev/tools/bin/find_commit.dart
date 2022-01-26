@@ -78,6 +78,7 @@ String findCommit({
 }
 
 String git(String workingDirectory, List<String> arguments) {
+  log('gggg[$arguments]');
   final ProcessResult result = Process.runSync(
     'git',
     arguments,
