@@ -63,7 +63,7 @@ class _RefreshIndicatorExampleState extends State<RefreshIndicatorExample> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          // Callback that shows refresh indicator.
+          // Show refresh indicator programmatically on button tap.
           _refreshIndicatorKey.currentState?.show();
         },
         icon: const Icon(Icons.refresh),
