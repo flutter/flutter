@@ -113,6 +113,25 @@ exit(0);
       expect(logger.hadWarningOutput, isTrue);
     });
   });
+
+  testWithoutContext('Dart SDK target arch matches host arch', () async {
+    if (platform.isWindows) {
+      return;
+    }
+    final ProcessResult dartResult = await const LocalProcessManager().run(
+      <String>[dart, '--version'],
+    );
+    // Parse 'arch' out of a string like '... "os_arch"\n'.
+    final String dartTargetArch = (dartResult.stdout as String)
+      .trim().split(' ').last.replaceAll('"', '').split('_')[1];
+    final ProcessResult unameResult = await const LocalProcessManager().run(
+      <String>['uname', '-m'],
+    );
+    final String unameArch = (unameResult.stdout as String)
+      .trim().replaceAll('aarch64', 'arm64')
+             .replaceAll('x86_64', 'x64');
+    expect(dartTargetArch, equals(unameArch));
+  });
 }
 
 class FakeArtifactUpdater extends Fake implements ArtifactUpdater {
