@@ -25,9 +25,9 @@ void main() {
     );
 
     // An event should have been dispatched when resampling successfully.
-    PointerEvent? resamplingEvent;
+    final List<PointerEvent> events = <PointerEvent>[];
     GestureBinding.instance!.pointerRouter.addGlobalRoute((PointerEvent event) {
-      resamplingEvent = event;
+      events.add(event);
     });
 
     GestureBinding.instance!.resamplingEnabled = true;
@@ -39,7 +39,7 @@ void main() {
     // Send a cancel event with since epoch timebase to flush the ongoing event.
     requestFrame();
     await tester.pump(const Duration(milliseconds: 20));
-    resamplingEvent = null;
+    events.clear();
     final ui.PointerDataPacket sinceEpochPacket = ui.PointerDataPacket(
       data: <ui.PointerData>[
         ui.PointerData(
@@ -49,10 +49,10 @@ void main() {
     );
     ui.window.onPointerDataPacket!(sinceEpochPacket);
 
-    // Flush failed, meanwhile the resampling timer will not be canceled.
+    // Flush failed, no events will be distributed, meanwhile the timer has not yet been cancelled.
     requestFrame();
     await tester.pump(const Duration(milliseconds: 100));
-    expect(resamplingEvent == null , true);
+    expect(events.isEmpty , true);
 
     // Stop resampling, cancel the resampling timer.
     GestureBinding.instance!.resamplingEnabled = false;
@@ -68,6 +68,7 @@ void main() {
     // Send a cancel event with system startup timebase to flush the ongoing event.
     requestFrame();
     await tester.pump(const Duration(milliseconds: 20));
+    events.clear();
     final Duration timeStamp = systemUpTime + const Duration(milliseconds: 40);
     final ui.PointerDataPacket systemUpPacket = ui.PointerDataPacket(
       data: <ui.PointerData>[
@@ -81,7 +82,8 @@ void main() {
     // Flush successfully, and a resampling event has been dispatched.
     requestFrame();
     await tester.pump(const Duration(milliseconds: 100));
-    expect(resamplingEvent != null && resamplingEvent!.timeStamp.inMicroseconds > timeStamp.inMicroseconds, true);
+    expect(events.length == 1, true);
+    expect(events[0].timeStamp.inMicroseconds >= timeStamp.inMicroseconds, true);
 
     GestureBinding.instance!.resamplingEnabled = false;
   });
