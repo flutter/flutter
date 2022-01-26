@@ -113,9 +113,9 @@ void main() {
   );
   testWidgets('can change keyboard type', (WidgetTester tester) async {
       await tester.pumpWidget(
-        CupertinoApp(
-          home: Center(
-            child: CupertinoSearchTextField(
+        const CupertinoApp(
+          home: const Center(
+            child: const CupertinoSearchTextField(
               keyboardType: TextInputType.text
             ),
           ),
