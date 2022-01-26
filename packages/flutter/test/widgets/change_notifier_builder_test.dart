@@ -36,7 +36,7 @@ void main() {
   });
 
   testWidgets('Widget builds with initial value', (WidgetTester tester) async {
-    IntegerChangeNotifier notifier = IntegerChangeNotifier(10);
+    final IntegerChangeNotifier notifier = IntegerChangeNotifier(10);
 
     await tester.pumpWidget(builderForChangeNotifier(
       changeNotifier: notifier,
