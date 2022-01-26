@@ -65,7 +65,6 @@ void main() {
           command: <String>['git', 'branch', '-r'],
           stdout: 'origin/beta\n'
               'origin/master\n'
-              'origin/dev\n'
               'origin/stable\n',
         ),
       );
@@ -89,7 +88,6 @@ void main() {
           stdout: 'origin/beta\n'
               'origin/master\n'
               'origin/dependabot/bundler\n'
-              'origin/dev\n'
               'origin/v1.4.5-hotfixes\n'
               'origin/stable\n',
         ),
@@ -142,10 +140,8 @@ void main() {
       fakeProcessManager.addCommand(
         const FakeCommand(
           command: <String>['git', 'branch', '-r'],
-          stdout: 'origin/dev\n'
-              'origin/beta\n'
+          stdout: 'origin/beta\n'
               'origin/stable\n'
-              'upstream/dev\n'
               'upstream/beta\n'
               'upstream/stable\n',
         ),
@@ -165,7 +161,7 @@ void main() {
         .where((String line) => line?.isNotEmpty == true)
         .skip(1); // remove `Flutter channels:` line
 
-      expect(rows, <String>['dev', 'beta', 'stable', 'Currently not on an official channel.']);
+      expect(rows, <String>['beta', 'stable', 'Currently not on an official channel.']);
     }, overrides: <Type, Generator>{
       ProcessManager: () => fakeProcessManager,
       FileSystem: () => MemoryFileSystem.test(),

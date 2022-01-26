@@ -153,7 +153,7 @@ class TestRenderingFlutterBinding extends BindingBase with SchedulerBinding, Ser
   }
 }
 
-late final TestRenderingFlutterBinding _renderer = TestRenderingFlutterBinding();
+final TestRenderingFlutterBinding _renderer = TestRenderingFlutterBinding();
 TestRenderingFlutterBinding get renderer => _renderer;
 
 

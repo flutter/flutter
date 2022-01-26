@@ -463,7 +463,7 @@ class _CellSheet extends StatelessWidget {
   final List<Widget> children;
 
   @override
-  Widget build(BuildContext _context) {
+  Widget build(BuildContext context) {
     return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
       final double rowWidth = constraints.biggest.width;
       final int cellsPerRow = (rowWidth / cellSize.width).floor();

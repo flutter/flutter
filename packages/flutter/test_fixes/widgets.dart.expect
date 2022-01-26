@@ -177,4 +177,8 @@ void main() {
   final OverscrollIndicatorNotification notification = OverscrollIndicatorNotification(leading: true);
   final OverscrollIndicatorNotification notification = OverscrollIndicatorNotification(error: '');
   notification.disallowIndicator();
+
+  // Changes made in https://github.com/flutter/flutter/pull/96957
+  RawScrollbar rawScrollbar = RawScrollbar(thumbVisibility: true);
+  nowShowing = rawScrollbar.thumbVisibility;
 }

@@ -1855,7 +1855,7 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
     /// gets closer to 2 the label padding is linearly interpolated from 8px to 4px.
     /// Once the widget has a text scaling of 2 or higher than the label padding
     /// remains 4px.
-    final EdgeInsetsGeometry _defaultLabelPadding = EdgeInsets.lerp(
+    final EdgeInsetsGeometry defaultLabelPadding = EdgeInsets.lerp(
       const EdgeInsets.symmetric(horizontal: 8.0),
       const EdgeInsets.symmetric(horizontal: 4.0),
       (MediaQuery.of(context).textScaleFactor - 1.0).clamp(0.0, 1.0),
@@ -1905,7 +1905,7 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
     final EdgeInsetsGeometry labelPadding = widget.labelPadding
       ?? chipTheme.labelPadding
       ?? theme.chipTheme.labelPadding
-      ?? _defaultLabelPadding;
+      ?? defaultLabelPadding;
 
     final TextStyle effectiveLabelStyle = labelStyle.merge(widget.labelStyle);
     final Color? resolvedLabelColor = MaterialStateProperty.resolveAs<Color?>(effectiveLabelStyle.color, materialStates);

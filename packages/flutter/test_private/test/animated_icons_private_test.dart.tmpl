@@ -187,9 +187,9 @@ void main() {
       );
       painter.paint(mockCanvas, size);
       mockCanvas.verifyCallsInOrder(<MockCall>[
-        MockCall('scale', <dynamic>[1.0, 1.0]),
         MockCall('rotate', <dynamic>[math.pi]),
         MockCall('translate', <dynamic>[-48.0, -48.0]),
+        MockCall('scale', <dynamic>[1.0, 1.0]),
         MockCall.any('drawPath'),
       ]);
     });

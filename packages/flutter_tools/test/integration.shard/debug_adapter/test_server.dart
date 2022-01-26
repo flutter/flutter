@@ -131,8 +131,8 @@ class OutOfProcessDapTestServer extends DapTestServer {
       ...?additionalArgs,
     ];
 
-    final Process _process = await Process.start(executable, args);
+    final Process process = await Process.start(executable, args);
 
-    return OutOfProcessDapTestServer._(_process, logger);
+    return OutOfProcessDapTestServer._(process, logger);
   }
 }
