@@ -49,7 +49,7 @@ void main() {
     );
     ui.window.onPointerDataPacket!(sinceEpochPacket);
 
-    // Flush failed, no events will be distributed, meanwhile the timer has not yet been cancelled.
+    // Flush failed, no events dispatched, the timer has not yet been canceled.
     requestFrame();
     await tester.pump(const Duration(milliseconds: 100));
     expect(events.isEmpty , true);
