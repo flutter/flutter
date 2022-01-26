@@ -16,14 +16,15 @@ void main() {
     final Duration systemUpTime = currentTestFrameTime();
 
     final ui.PointerDataPacket packet = ui.PointerDataPacket(
-        data: <ui.PointerData>[
-          ui.PointerData(
-            change: ui.PointerChange.down,
-            timeStamp: systemUpTime + const Duration(milliseconds: 20),
-          ),
-        ]);
+      data: <ui.PointerData>[
+        ui.PointerData(
+          change: ui.PointerChange.down,
+          timeStamp: systemUpTime + const Duration(milliseconds: 20),
+        ),
+      ],
+    );
 
-    // If resampling successfully, an event should have been dispatched.
+    // An event should have been dispatched when resampling successfully.
     PointerEvent? resamplingEvent;
     GestureBinding.instance!.pointerRouter.addGlobalRoute((PointerEvent event) {
       resamplingEvent = event;
@@ -39,12 +40,14 @@ void main() {
     requestFrame();
     await tester.pump(const Duration(milliseconds: 20));
     resamplingEvent = null;
-    ui.window.onPointerDataPacket!(ui.PointerDataPacket(
+    final ui.PointerDataPacket sinceEpochPacket = ui.PointerDataPacket(
       data: <ui.PointerData>[
         ui.PointerData(
           timeStamp: Duration(microseconds: DateTime.now().microsecondsSinceEpoch),
         ),
-      ],),);
+      ],
+    );
+    ui.window.onPointerDataPacket!(sinceEpochPacket);
 
     // Flush failed, meanwhile the resampling timer will not be canceled.
     requestFrame();
@@ -66,12 +69,14 @@ void main() {
     requestFrame();
     await tester.pump(const Duration(milliseconds: 20));
     final Duration timeStamp = systemUpTime + const Duration(milliseconds: 40);
-    ui.window.onPointerDataPacket!(ui.PointerDataPacket(
+    final ui.PointerDataPacket systemUpPacket = ui.PointerDataPacket(
       data: <ui.PointerData>[
         ui.PointerData(
           timeStamp: timeStamp,
         ),
-      ],),);
+      ],
+    );
+    ui.window.onPointerDataPacket!(systemUpPacket);
 
     // Flush successfully, and a resampling event has been dispatched.
     requestFrame();
