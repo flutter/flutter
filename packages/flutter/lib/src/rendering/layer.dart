@@ -1300,18 +1300,18 @@ class ClipRectLayer extends ContainerLayer {
   /// The [clipRect] argument must not be null before the compositing phase of
   /// the pipeline.
   ///
-  /// The [clipBehavior] argument must not be null. If [clipBehavior] is
-  /// [Clip.none], no clipping will be applied.
+  /// The [clipBehavior] argument must not be null, and must not be [Clip.none].
   ClipRectLayer({
     Rect? clipRect,
     Clip clipBehavior = Clip.hardEdge,
   }) : _clipRect = clipRect,
        _clipBehavior = clipBehavior,
-       assert(clipBehavior != null);
+       assert(clipBehavior != null),
+       assert(clipBehavior != Clip.none);
 
   /// The rectangle to clip in the parent's coordinate system.
   ///
-  /// The scene must be explicitly re-composited after this property is changed
+  /// The scene must be explicitly recomposited after this property is changed
   /// (as described at [Layer]).
   Rect? get clipRect => _clipRect;
   Rect? _clipRect;
@@ -1325,7 +1325,7 @@ class ClipRectLayer extends ContainerLayer {
   /// {@template flutter.rendering.ClipRectLayer.clipBehavior}
   /// Controls how to clip.
   ///
-  /// Must not be set to null. If set to [Clip.none], no clipping is applied.
+  /// Must not be set to null or [Clip.none].
   /// {@endtemplate}
   ///
   /// Defaults to [Clip.hardEdge].
@@ -1333,6 +1333,7 @@ class ClipRectLayer extends ContainerLayer {
   Clip _clipBehavior;
   set clipBehavior(Clip value) {
     assert(value != null);
+    assert(value != Clip.none);
     if (value != _clipBehavior) {
       _clipBehavior = value;
       markNeedsAddToScene();
@@ -1350,7 +1351,7 @@ class ClipRectLayer extends ContainerLayer {
   void addToScene(ui.SceneBuilder builder) {
     assert(clipRect != null);
     assert(clipBehavior != null);
-    bool enabled = true && clipBehavior != Clip.none;
+    bool enabled = true;
     assert(() {
       enabled = !debugDisableClipLayers;
       return true;
@@ -1386,18 +1387,18 @@ class ClipRRectLayer extends ContainerLayer {
   /// Creates a layer with a rounded-rectangular clip.
   ///
   /// The [clipRRect] and [clipBehavior] properties must be non-null before the
-  /// compositing phase of the pipeline. If [clipBehavior] is [Clip.none], no
-  /// clipping will be applied.
+  /// compositing phase of the pipeline.
   ClipRRectLayer({
     RRect? clipRRect,
     Clip clipBehavior = Clip.antiAlias,
   }) : _clipRRect = clipRRect,
        _clipBehavior = clipBehavior,
-       assert(clipBehavior != null);
+       assert(clipBehavior != null),
+       assert(clipBehavior != Clip.none);
 
   /// The rounded-rect to clip in the parent's coordinate system.
   ///
-  /// The scene must be explicitly re-composited after this property is changed
+  /// The scene must be explicitly recomposited after this property is changed
   /// (as described at [Layer]).
   RRect? get clipRRect => _clipRRect;
   RRect? _clipRRect;
@@ -1415,6 +1416,7 @@ class ClipRRectLayer extends ContainerLayer {
   Clip _clipBehavior;
   set clipBehavior(Clip value) {
     assert(value != null);
+    assert(value != Clip.none);
     if (value != _clipBehavior) {
       _clipBehavior = value;
       markNeedsAddToScene();
@@ -1432,7 +1434,7 @@ class ClipRRectLayer extends ContainerLayer {
   void addToScene(ui.SceneBuilder builder) {
     assert(clipRRect != null);
     assert(clipBehavior != null);
-    bool enabled = true && clipBehavior != Clip.none;
+    bool enabled = true;
     assert(() {
       enabled = !debugDisableClipLayers;
       return true;
@@ -1468,18 +1470,18 @@ class ClipPathLayer extends ContainerLayer {
   /// Creates a layer with a path-based clip.
   ///
   /// The [clipPath] and [clipBehavior] properties must be non-null before the
-  /// compositing phase of the pipeline. If [clipBehavior] is [Clip.none], no
-  /// clipping will be applied.
+  /// compositing phase of the pipeline.
   ClipPathLayer({
     Path? clipPath,
     Clip clipBehavior = Clip.antiAlias,
   }) : _clipPath = clipPath,
        _clipBehavior = clipBehavior,
-       assert(clipBehavior != null);
+       assert(clipBehavior != null),
+       assert(clipBehavior != Clip.none);
 
   /// The path to clip in the parent's coordinate system.
   ///
-  /// The scene must be explicitly re-composited after this property is changed
+  /// The scene must be explicitly recomposited after this property is changed
   /// (as described at [Layer]).
   Path? get clipPath => _clipPath;
   Path? _clipPath;
@@ -1497,6 +1499,7 @@ class ClipPathLayer extends ContainerLayer {
   Clip _clipBehavior;
   set clipBehavior(Clip value) {
     assert(value != null);
+    assert(value != Clip.none);
     if (value != _clipBehavior) {
       _clipBehavior = value;
       markNeedsAddToScene();
@@ -1514,7 +1517,7 @@ class ClipPathLayer extends ContainerLayer {
   void addToScene(ui.SceneBuilder builder) {
     assert(clipPath != null);
     assert(clipBehavior != null);
-    bool enabled = true && clipBehavior != Clip.none;
+    bool enabled = true;
     assert(() {
       enabled = !debugDisableClipLayers;
       return true;
