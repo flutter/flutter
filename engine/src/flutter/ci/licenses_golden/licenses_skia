@@ -1,4 +1,4 @@
-Signature: 81145e2e6da6dc6b5408dbed3d979706
+Signature: aa5920da23478d0062dbd0206817fa29
 
 UNUSED LICENSES:
 
@@ -6060,6 +6060,7 @@ FILE: ../../../third_party/skia/src/core/SkSLTypeShared.h
 FILE: ../../../third_party/skia/src/core/SkShaderCodeDictionary.cpp
 FILE: ../../../third_party/skia/src/core/SkUniformData.cpp
 FILE: ../../../third_party/skia/src/core/SkUniformData.h
+FILE: ../../../third_party/skia/src/sksl/analysis/SkSLFinalizationChecks.cpp
 ----------------------------------------------------------------------------------------------------
 Copyright 2022 Google LLC
 
