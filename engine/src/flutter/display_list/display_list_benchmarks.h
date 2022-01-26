@@ -60,6 +60,10 @@ void BM_DrawRRect(benchmark::State& state,
                   BackendType backend_type,
                   unsigned attributes,
                   SkRRect::Type type);
+void BM_DrawDRRect(benchmark::State& state,
+                   BackendType backend_type,
+                   unsigned attributes,
+                   SkRRect::Type type);
 void BM_DrawPath(benchmark::State& state,
                  BackendType backend_type,
                  unsigned attributes,
@@ -283,6 +287,35 @@ void BM_SaveLayer(benchmark::State& state,
       ->Unit(benchmark::kMillisecond);                                  \
                                                                         \
   BENCHMARK_CAPTURE(BM_DrawRRect, Complex/BACKEND,                      \
+                    BackendType::k##BACKEND##_Backend,                  \
+                    ATTRIBUTES,                                         \
+                    SkRRect::Type::kComplex_Type)                       \
+      ->RangeMultiplier(2)                                              \
+      ->Range(16, 2048)                                                 \
+      ->UseRealTime()                                                   \
+      ->Unit(benchmark::kMillisecond);
+
+// DrawDRRect
+#define DRAW_DRRECT_BENCHMARKS(BACKEND, ATTRIBUTES)                     \
+  BENCHMARK_CAPTURE(BM_DrawDRRect, Symmetric/BACKEND,                   \
+                    BackendType::k##BACKEND##_Backend,                  \
+                    ATTRIBUTES,                                         \
+                    SkRRect::Type::kSimple_Type)                        \
+      ->RangeMultiplier(2)                                              \
+      ->Range(16, 2048)                                                 \
+      ->UseRealTime()                                                   \
+      ->Unit(benchmark::kMillisecond);                                  \
+                                                                        \
+  BENCHMARK_CAPTURE(BM_DrawDRRect, NinePatch/BACKEND,                   \
+                    BackendType::k##BACKEND##_Backend,                  \
+                    ATTRIBUTES,                                         \
+                    SkRRect::Type::kNinePatch_Type)                     \
+      ->RangeMultiplier(2)                                              \
+      ->Range(16, 2048)                                                 \
+      ->UseRealTime()                                                   \
+      ->Unit(benchmark::kMillisecond);                                  \
+                                                                        \
+  BENCHMARK_CAPTURE(BM_DrawDRRect, Complex/BACKEND,                     \
                     BackendType::k##BACKEND##_Backend,                  \
                     ATTRIBUTES,                                         \
                     SkRRect::Type::kComplex_Type)                       \
@@ -518,6 +551,7 @@ void BM_SaveLayer(benchmark::State& state,
   DRAW_ARC_BENCHMARKS(BACKEND, ATTRIBUTES)                               \
   DRAW_PATH_BENCHMARKS(BACKEND, ATTRIBUTES)                              \
   DRAW_RRECT_BENCHMARKS(BACKEND, ATTRIBUTES)                             \
+  DRAW_DRRECT_BENCHMARKS(BACKEND, ATTRIBUTES)                            \
   DRAW_TEXT_BLOB_BENCHMARKS(BACKEND, ATTRIBUTES)
 
 // Applies fill style and antialiasing
@@ -528,6 +562,7 @@ void BM_SaveLayer(benchmark::State& state,
   DRAW_ARC_BENCHMARKS(BACKEND, ATTRIBUTES)                               \
   DRAW_PATH_BENCHMARKS(BACKEND, ATTRIBUTES)                              \
   DRAW_RRECT_BENCHMARKS(BACKEND, ATTRIBUTES)                             \
+  DRAW_DRRECT_BENCHMARKS(BACKEND, ATTRIBUTES)                            \
   DRAW_TEXT_BLOB_BENCHMARKS(BACKEND, ATTRIBUTES)
 
 // Applies antialiasing
