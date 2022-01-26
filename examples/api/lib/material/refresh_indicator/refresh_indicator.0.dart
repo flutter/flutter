@@ -11,25 +11,27 @@ void main() => runApp(const MyApp());
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'RefreshIndicator Sample';
 
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
       title: _title,
-      home: MyStatefulWidget(),
+      home: RefreshIndicatorExample(title: _title),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({Key? key}) : super(key: key);
+class RefreshIndicatorExample extends StatefulWidget {
+  const RefreshIndicatorExample({Key? key, required this.title}) : super(key: key);
+
+  final String title;
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<RefreshIndicatorExample> createState() => _RefreshIndicatorExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _RefreshIndicatorExampleState extends State<RefreshIndicatorExample> {
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
     GlobalKey<RefreshIndicatorState>();
 
@@ -37,12 +39,15 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Flutter Code Sample'),
+        title: Text(widget.title),
       ),
       body: RefreshIndicator(
         key: _refreshIndicatorKey,
+        color: Colors.white,
+        backgroundColor: Colors.blue,
+        strokeWidth: 4.0,
         onRefresh: () async {
-          // Add the code to be executed during refresh
+          // Replace this delay with the code to be executed during refresh
           // and return a Future when code finishs execution.
           return Future<void>.delayed(const Duration(seconds: 3));
         },
