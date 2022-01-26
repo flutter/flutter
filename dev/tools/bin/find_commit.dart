@@ -45,7 +45,6 @@ String findCommit({
   final Commit anchor;
   if (primaryBranch == primaryTrunk) {
     log('on $primaryTrunk, using last commit as anchor');
-    log("zzz@$(git(primaryRepoDirectory, <String>['log', Commit.formatArgument, '--max-count=1', primaryBranch, '--']))@");
     anchor = Commit.parse(git(primaryRepoDirectory, <String>['log', Commit.formatArgument, '--max-count=1', primaryBranch, '--']));
   } else {
     final List<Commit> branchCommits = Commit.parseList(git(primaryRepoDirectory, <String>['log', Commit.formatArgument, primaryBranch, '--']));
@@ -77,6 +76,7 @@ String git(String workingDirectory, List<String> arguments) {
   final ProcessResult result = Process.runSync('git', arguments, workingDirectory: workingDirectory);
   if (result.exitCode != 0 || '${result.stderr}'.isNotEmpty)
     throw ProcessException('git', arguments, '${result.stdout}${result.stderr}', result.exitCode);
+  log('zzz[${result.stdout}]');
   return '${result.stdout}';
 }
 
