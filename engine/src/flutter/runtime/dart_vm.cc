@@ -59,6 +59,16 @@ static const char* kDartLanguageArgs[] = {
 
 static const char* kDartPrecompilationArgs[] = {"--precompilation"};
 
+static const char* kSerialGCArgs[] = {
+    // clang-format off
+    "--concurrent_mark=false",
+    "--concurrent_sweep=false",
+    "--compactor_tasks=1",
+    "--scavenger_tasks=0",
+    "--marker_tasks=0",
+    // clang-format on
+};
+
 FML_ALLOW_UNUSED_TYPE
 static const char* kDartWriteProtectCodeArgs[] = {
     "--no_write_protect_code",
@@ -356,6 +366,13 @@ DartVM::DartVM(std::shared_ptr<const DartVMData> vm_data,
 
   if (enable_asserts) {
     PushBackAll(&args, kDartAssertArgs, fml::size(kDartAssertArgs));
+  }
+
+  // On low power devices with lesser number of cores, using concurrent
+  // marking or sweeping causes contention for the UI thread leading to
+  // Jank, this option can be used to turn off all concurrent GC activities.
+  if (settings_.enable_serial_gc) {
+    PushBackAll(&args, kSerialGCArgs, fml::size(kSerialGCArgs));
   }
 
   if (settings_.start_paused) {

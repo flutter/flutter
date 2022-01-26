@@ -45,6 +45,7 @@ std::string Settings::ToString() const {
   stream << "endless_trace_buffer: " << endless_trace_buffer << std::endl;
   stream << "enable_dart_profiling: " << enable_dart_profiling << std::endl;
   stream << "disable_dart_asserts: " << disable_dart_asserts << std::endl;
+  stream << "enable_serial_gc: " << enable_serial_gc << std::endl;
   stream << "enable_observatory: " << enable_observatory << std::endl;
   stream << "enable_observatory_publication: " << enable_observatory_publication
          << std::endl;
