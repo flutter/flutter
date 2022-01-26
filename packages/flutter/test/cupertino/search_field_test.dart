@@ -28,7 +28,7 @@ void main() {
 
       expect(
         decoration.borderRadius,
-        BorderRadius.circular(9),
+        const BorderRadius.all(Radius.circular(9)),
       );
     },
   );
@@ -576,5 +576,21 @@ void main() {
 
     final CupertinoTextField textField = tester.widget(find.byType(CupertinoTextField));
     expect(textField.textInputAction, TextInputAction.search);
+  });
+
+  testWidgets('autofocus:true gives focus to the widget', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoSearchTextField(
+            focusNode: focusNode,
+            autofocus: true,
+          ),
+        ),
+      ),
+    );
+
+    expect(focusNode.hasFocus, isTrue);
   });
 }

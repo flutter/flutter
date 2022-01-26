@@ -33,8 +33,7 @@ typedef PaintRangeValueIndicator = void Function(PaintingContext context, Offset
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=ufb4gIPDmEs}
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold}
-///
+/// {@tool dartpad}
 /// ![A range slider widget, consisting of 5 divisions and showing the default
 /// value indicator.](https://flutter.github.io/assets-for-api-docs/assets/material/range_slider.png)
 ///
@@ -42,28 +41,7 @@ typedef PaintRangeValueIndicator = void Function(PaintingContext context, Offset
 /// divisions, from 0 to 100. This means are values are split between 0, 20, 40,
 /// 60, 80, and 100. The range values are initialized with 40 and 80 in this demo.
 ///
-/// ```dart
-/// RangeValues _currentRangeValues = const RangeValues(40, 80);
-///
-/// @override
-/// Widget build(BuildContext context) {
-///   return RangeSlider(
-///     values: _currentRangeValues,
-///     min: 0,
-///     max: 100,
-///     divisions: 5,
-///     labels: RangeLabels(
-///       _currentRangeValues.start.round().toString(),
-///       _currentRangeValues.end.round().toString(),
-///     ),
-///     onChanged: (RangeValues values) {
-///       setState(() {
-///         _currentRangeValues = values;
-///       });
-///     },
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/material/range_slider/range_slider.0.dart **
 /// {@end-tool}
 ///
 /// A range slider can be used to select from either a continuous or a discrete
@@ -583,20 +561,20 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
     // the default shapes and text styles are aligned to the Material
     // Guidelines.
 
-    const double _defaultTrackHeight = 4;
-    const RangeSliderTrackShape _defaultTrackShape = RoundedRectRangeSliderTrackShape();
-    const RangeSliderTickMarkShape _defaultTickMarkShape = RoundRangeSliderTickMarkShape();
-    const SliderComponentShape _defaultOverlayShape = RoundSliderOverlayShape();
-    const RangeSliderThumbShape _defaultThumbShape = RoundRangeSliderThumbShape();
-    const RangeSliderValueIndicatorShape _defaultValueIndicatorShape = RectangularRangeSliderValueIndicatorShape();
-    const ShowValueIndicator _defaultShowValueIndicator = ShowValueIndicator.onlyForDiscrete;
-    const double _defaultMinThumbSeparation = 8;
+    const double defaultTrackHeight = 4;
+    const RangeSliderTrackShape defaultTrackShape = RoundedRectRangeSliderTrackShape();
+    const RangeSliderTickMarkShape defaultTickMarkShape = RoundRangeSliderTickMarkShape();
+    const SliderComponentShape defaultOverlayShape = RoundSliderOverlayShape();
+    const RangeSliderThumbShape defaultThumbShape = RoundRangeSliderThumbShape();
+    const RangeSliderValueIndicatorShape defaultValueIndicatorShape = RectangularRangeSliderValueIndicatorShape();
+    const ShowValueIndicator defaultShowValueIndicator = ShowValueIndicator.onlyForDiscrete;
+    const double defaultMinThumbSeparation = 8;
 
     // The value indicator's color is not the same as the thumb and active track
     // (which can be defined by activeColor) if the
     // RectangularSliderValueIndicatorShape is used. In all other cases, the
     // value indicator is assumed to be the same as the active color.
-    final RangeSliderValueIndicatorShape valueIndicatorShape = sliderTheme.rangeValueIndicatorShape ?? _defaultValueIndicatorShape;
+    final RangeSliderValueIndicatorShape valueIndicatorShape = sliderTheme.rangeValueIndicatorShape ?? defaultValueIndicatorShape;
     final Color valueIndicatorColor;
     if (valueIndicatorShape is RectangularRangeSliderValueIndicatorShape) {
       valueIndicatorColor = sliderTheme.valueIndicatorColor ?? Color.alphaBlend(theme.colorScheme.onSurface.withOpacity(0.60), theme.colorScheme.surface.withOpacity(0.90));
@@ -605,7 +583,7 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
     }
 
     sliderTheme = sliderTheme.copyWith(
-      trackHeight: sliderTheme.trackHeight ?? _defaultTrackHeight,
+      trackHeight: sliderTheme.trackHeight ?? defaultTrackHeight,
       activeTrackColor: widget.activeColor ?? sliderTheme.activeTrackColor ?? theme.colorScheme.primary,
       inactiveTrackColor: widget.inactiveColor ?? sliderTheme.inactiveTrackColor ?? theme.colorScheme.primary.withOpacity(0.24),
       disabledActiveTrackColor: sliderTheme.disabledActiveTrackColor ?? theme.colorScheme.onSurface.withOpacity(0.32),
@@ -619,16 +597,16 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
       disabledThumbColor: sliderTheme.disabledThumbColor ?? Color.alphaBlend(theme.colorScheme.onSurface.withOpacity(.38), theme.colorScheme.surface),
       overlayColor: widget.activeColor?.withOpacity(0.12) ?? sliderTheme.overlayColor ?? theme.colorScheme.primary.withOpacity(0.12),
       valueIndicatorColor: valueIndicatorColor,
-      rangeTrackShape: sliderTheme.rangeTrackShape ?? _defaultTrackShape,
-      rangeTickMarkShape: sliderTheme.rangeTickMarkShape ?? _defaultTickMarkShape,
-      rangeThumbShape: sliderTheme.rangeThumbShape ?? _defaultThumbShape,
-      overlayShape: sliderTheme.overlayShape ?? _defaultOverlayShape,
+      rangeTrackShape: sliderTheme.rangeTrackShape ?? defaultTrackShape,
+      rangeTickMarkShape: sliderTheme.rangeTickMarkShape ?? defaultTickMarkShape,
+      rangeThumbShape: sliderTheme.rangeThumbShape ?? defaultThumbShape,
+      overlayShape: sliderTheme.overlayShape ?? defaultOverlayShape,
       rangeValueIndicatorShape: valueIndicatorShape,
-      showValueIndicator: sliderTheme.showValueIndicator ?? _defaultShowValueIndicator,
+      showValueIndicator: sliderTheme.showValueIndicator ?? defaultShowValueIndicator,
       valueIndicatorTextStyle: sliderTheme.valueIndicatorTextStyle ?? theme.textTheme.bodyText1!.copyWith(
         color: theme.colorScheme.onPrimary,
       ),
-      minThumbSeparation: sliderTheme.minThumbSeparation ?? _defaultMinThumbSeparation,
+      minThumbSeparation: sliderTheme.minThumbSeparation ?? defaultMinThumbSeparation,
       thumbSelector: sliderTheme.thumbSelector ?? _defaultRangeThumbSelector,
     );
 
@@ -836,7 +814,6 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
   // (0,0).
   Rect get _trackRect => _sliderTheme.rangeTrackShape!.getPreferredRect(
     parentBox: this,
-    offset: Offset.zero,
     sliderTheme: _sliderTheme,
     isDiscrete: false,
   );

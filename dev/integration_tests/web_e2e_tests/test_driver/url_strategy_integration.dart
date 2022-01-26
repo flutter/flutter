@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:html' as html;
 import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
@@ -27,6 +28,9 @@ void main() {
     app.main();
     await tester.pumpAndSettle();
 
+    // checking whether the previously set strategy is properly preserved
+    expect(urlStrategy, strategy);
+
     expect(strategy.getPath(), '/');
 
     final NavigatorState navigator = app.navKey.currentState!;
@@ -44,7 +48,8 @@ void main() {
 class TestUrlStrategy extends UrlStrategy {
   /// Creates a instance of [TestUrlStrategy] with an empty string as the
   /// path.
-  factory TestUrlStrategy() => TestUrlStrategy.fromEntry(const TestHistoryEntry(null, null, ''));
+  factory TestUrlStrategy() =>
+      TestUrlStrategy.fromEntry(const TestHistoryEntry(null, null, ''));
 
   /// Creates an instance of [TestUrlStrategy] and populates it with a list
   /// that has [initialEntry] as the only item.

@@ -1,0 +1,4 @@
+# This is a Gradle generated file for dependency locking.
+# Manual edits can break the build and are not advised.
+# This file is expected to be part of source control.
+com.android.tools.build:aapt2:4.1.3-6503028

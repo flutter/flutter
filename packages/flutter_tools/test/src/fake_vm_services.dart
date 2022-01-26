@@ -2,14 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/vmservice.dart';
-import 'package:meta/meta.dart';
 import 'package:test_api/test_api.dart' hide test; // ignore: deprecated_member_use
 import 'package:vm_service/vm_service.dart' as vm_service;
 
@@ -19,9 +16,9 @@ export 'package:test_api/test_api.dart' hide test, isInstanceOf; // ignore: depr
 /// and response structure.
 class FakeVmServiceHost {
   FakeVmServiceHost({
-    @required List<VmServiceExpectation> requests,
-    Uri httpAddress,
-    Uri wsAddress,
+    required List<VmServiceExpectation> requests,
+    Uri? httpAddress,
+    Uri? wsAddress,
   }) : _requests = requests {
     _vmService = FlutterVmService(vm_service.VmService(
       _input.stream,
@@ -29,14 +26,14 @@ class FakeVmServiceHost {
     ), httpAddress: httpAddress, wsAddress: wsAddress);
     _applyStreamListen();
     _output.stream.listen((String data) {
-      final Map<String, Object> request = json.decode(data) as Map<String, Object>;
+      final Map<String, Object?> request = json.decode(data) as Map<String, Object?>;
       if (_requests.isEmpty) {
         throw Exception('Unexpected request: $request');
       }
       final FakeVmServiceRequest fakeRequest = _requests.removeAt(0) as FakeVmServiceRequest;
-      expect(request, isA<Map<String, Object>>()
-        .having((Map<String, Object> request) => request['method'], 'method', fakeRequest.method)
-        .having((Map<String, Object> request) => request['params'], 'args', fakeRequest.args)
+      expect(request, isA<Map<String, Object?>>()
+        .having((Map<String, Object?> request) => request['method'], 'method', fakeRequest.method)
+        .having((Map<String, Object?> request) => request['params'], 'args', fakeRequest.args)
       );
       if (fakeRequest.close) {
         unawaited(_vmService.dispose());
@@ -44,17 +41,18 @@ class FakeVmServiceHost {
         return;
       }
       if (fakeRequest.errorCode == null) {
-        _input.add(json.encode(<String, Object>{
+        _input.add(json.encode(<String, Object?>{
           'jsonrpc': '2.0',
           'id': request['id'],
           'result': fakeRequest.jsonResponse ?? <String, Object>{'type': 'Success'},
         }));
       } else {
-        _input.add(json.encode(<String, Object>{
+        _input.add(json.encode(<String, Object?>{
           'jsonrpc': '2.0',
           'id': request['id'],
-          'error': <String, Object>{
+          'error': <String, Object?>{
             'code': fakeRequest.errorCode,
+            'message': 'error',
           }
         }));
       }
@@ -67,7 +65,7 @@ class FakeVmServiceHost {
   final StreamController<String> _output = StreamController<String>();
 
   FlutterVmService get vmService => _vmService;
-  FlutterVmService _vmService;
+  late final FlutterVmService _vmService;
 
 
   bool get hasRemainingExpectations => _requests.isNotEmpty;
@@ -95,7 +93,7 @@ abstract class VmServiceExpectation {
 
 class FakeVmServiceRequest implements VmServiceExpectation {
   const FakeVmServiceRequest({
-    @required this.method,
+    required this.method,
     this.args = const <String, Object>{},
     this.jsonResponse,
     this.errorCode,
@@ -109,9 +107,9 @@ class FakeVmServiceRequest implements VmServiceExpectation {
 
   /// If non-null, the error code for a [vm_service.RPCError] in place of a
   /// standard response.
-  final int errorCode;
-  final Map<String, Object> args;
-  final Map<String, Object> jsonResponse;
+  final int? errorCode;
+  final Map<String, Object>? args;
+  final Map<String, Object?>? jsonResponse;
 
   @override
   bool get isRequest => true;
@@ -119,8 +117,8 @@ class FakeVmServiceRequest implements VmServiceExpectation {
 
 class FakeVmServiceStreamResponse implements VmServiceExpectation {
   const FakeVmServiceStreamResponse({
-    @required this.event,
-    @required this.streamId,
+    required this.event,
+    required this.streamId,
   });
 
   final vm_service.Event event;

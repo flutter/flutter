@@ -249,7 +249,7 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
         if (pressure > startPressure) {
           _state = _ForceState.started;
           resolve(GestureDisposition.accepted);
-        } else if (event.delta.distanceSquared > computeHitSlop(event.kind)) {
+        } else if (event.delta.distanceSquared > computeHitSlop(event.kind, gestureSettings)) {
           resolve(GestureDisposition.rejected);
         }
       }

@@ -20,9 +20,9 @@ import '../build_info.dart';
 import '../dart/package_map.dart';
 import '../device.dart';
 import '../drive/drive_service.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../resident_runner.dart';
-import '../runner/flutter_command.dart' show FlutterCommandResult, FlutterOptions;
+import '../runner/flutter_command.dart' show FlutterCommandCategory, FlutterCommandResult, FlutterOptions;
 import '../web/web_device.dart';
 import 'run.dart';
 
@@ -65,6 +65,7 @@ class DriveCommand extends RunCommandBase {
     // to prevent a local network permission dialog on iOS 14+,
     // which cannot be accepted or dismissed in a CI environment.
     addPublishPort(enabledByDefault: false, verboseHelp: verboseHelp);
+    addMultidexOption();
     argParser
       ..addFlag('keep-app-running',
         defaultsTo: null,
@@ -173,6 +174,9 @@ class DriveCommand extends RunCommandBase {
   final String description = 'Run integration tests for the project on an attached device or emulator.';
 
   @override
+  String get category => FlutterCommandCategory.project;
+
+  @override
   final List<String> aliases = <String>['driver'];
 
   String get userIdentifier => stringArg(FlutterOptions.kDeviceUser);
@@ -233,66 +237,81 @@ class DriveCommand extends RunCommandBase {
       ? null
       : _fileSystem.file(stringArg('use-application-binary'));
 
-    if (stringArg('use-existing-app') == null) {
-      await driverService.start(
-        buildInfo,
-        device,
-        debuggingOptions,
-        ipv6,
-        applicationBinary: applicationBinary,
-        route: route,
-        userIdentifier: userIdentifier,
-        mainPath: targetFile,
-        platformArgs: <String, Object>{
-          if (traceStartup)
-            'trace-startup': traceStartup,
-          if (web)
-            '--no-launch-chrome': true,
+    bool screenshotTaken = false;
+    try {
+      if (stringArg('use-existing-app') == null) {
+        await driverService.start(
+          buildInfo,
+          device,
+          debuggingOptions,
+          ipv6,
+          applicationBinary: applicationBinary,
+          route: route,
+          userIdentifier: userIdentifier,
+          mainPath: targetFile,
+          platformArgs: <String, Object>{
+            if (traceStartup)
+              'trace-startup': traceStartup,
+            if (web)
+              '--no-launch-chrome': true,
+            if (boolArg('multidex'))
+              'multidex': true,
+          }
+        );
+      } else {
+        final Uri uri = Uri.tryParse(stringArg('use-existing-app'));
+        if (uri == null) {
+          throwToolExit('Invalid VM Service URI: ${stringArg('use-existing-app')}');
         }
-      );
-    } else {
-      final Uri uri = Uri.tryParse(stringArg('use-existing-app'));
-      if (uri == null) {
-        throwToolExit('Invalid VM Service URI: ${stringArg('use-existing-app')}');
+        await driverService.reuseApplication(
+          uri,
+          device,
+          debuggingOptions,
+          ipv6,
+        );
       }
-      await driverService.reuseApplication(
-        uri,
-        device,
-        debuggingOptions,
-        ipv6,
+
+      final int testResult = await driverService.startTest(
+        testFile,
+        stringsArg('test-arguments'),
+        <String, String>{},
+        packageConfig,
+        chromeBinary: stringArg('chrome-binary'),
+        headless: boolArg('headless'),
+        browserDimension: stringArg('browser-dimension').split(','),
+        browserName: stringArg('browser-name'),
+        driverPort: stringArg('driver-port') != null
+          ? int.tryParse(stringArg('driver-port'))
+          : null,
+        androidEmulator: boolArg('android-emulator'),
+        profileMemory: stringArg('profile-memory'),
       );
+      if (testResult != 0 && screenshot != null) {
+        // Take a screenshot while the app is still running.
+        await _takeScreenshot(device);
+        screenshotTaken = true;
+      }
+
+      if (boolArg('keep-app-running') ?? (argResults['use-existing-app'] != null)) {
+        _logger.printStatus('Leaving the application running.');
+      } else {
+        final File skslFile = stringArg('write-sksl-on-exit') != null
+          ? _fileSystem.file(stringArg('write-sksl-on-exit'))
+          : null;
+        await driverService.stop(userIdentifier: userIdentifier, writeSkslOnExit: skslFile);
+      }
+      if (testResult != 0) {
+        throwToolExit(null);
+      }
+    } on Exception catch(_) {
+      // On exceptions, including ToolExit, take a screenshot on the device
+      // unless a screenshot was already taken on test failure.
+      if (!screenshotTaken && screenshot != null) {
+        await _takeScreenshot(device);
+      }
+      rethrow;
     }
 
-    final int testResult = await driverService.startTest(
-      testFile,
-      stringsArg('test-arguments'),
-      <String, String>{},
-      packageConfig,
-      chromeBinary: stringArg('chrome-binary'),
-      headless: boolArg('headless'),
-      browserDimension: stringArg('browser-dimension').split(','),
-      browserName: stringArg('browser-name'),
-      driverPort: stringArg('driver-port') != null
-        ? int.tryParse(stringArg('driver-port'))
-        : null,
-      androidEmulator: boolArg('android-emulator'),
-      profileMemory: stringArg('profile-memory'),
-    );
-    if (testResult != 0 && screenshot != null) {
-      await takeScreenshot(device, screenshot, _fileSystem, _logger, _fsUtils);
-    }
-
-    if (boolArg('keep-app-running') ?? (argResults['use-existing-app'] != null)) {
-      _logger.printStatus('Leaving the application running.');
-    } else {
-      final File skslFile = stringArg('write-sksl-on-exit') != null
-        ? _fileSystem.file(stringArg('write-sksl-on-exit'))
-        : null;
-      await driverService.stop(userIdentifier: userIdentifier, writeSkslOnExit: skslFile);
-    }
-    if (testResult != 0) {
-      throwToolExit(null);
-    }
     return FlutterCommandResult.success();
   }
 
@@ -338,27 +357,20 @@ class DriveCommand extends RunCommandBase {
       <String>[packageDir, 'test_driver', ...parts.skip(1)]));
     return '${pathWithNoExtension}_test${_fileSystem.path.extension(appFile)}';
   }
-}
 
-@visibleForTesting
-Future<void> takeScreenshot(
-  Device device,
-  String screenshotPath,
-  FileSystem fileSystem,
-  Logger logger,
-  FileSystemUtils fileSystemUtils,
-) async {
-  try {
-    final Directory outputDirectory = fileSystem.directory(screenshotPath);
-    outputDirectory.createSync(recursive: true);
-    final File outputFile = fileSystemUtils.getUniqueFile(
-      outputDirectory,
-      'drive',
-      'png',
-    );
-    await device.takeScreenshot(outputFile);
-    logger.printStatus('Screenshot written to ${outputFile.path}');
-  } on Exception catch (error) {
-    logger.printError('Error taking screenshot: $error');
+  Future<void> _takeScreenshot(Device device) async {
+    try {
+      final Directory outputDirectory = _fileSystem.directory(screenshot)
+        ..createSync(recursive: true);
+      final File outputFile = _fsUtils.getUniqueFile(
+        outputDirectory,
+        'drive',
+        'png',
+      );
+      await device.takeScreenshot(outputFile);
+      _logger.printStatus('Screenshot written to ${outputFile.path}');
+    } on Exception catch (error) {
+      _logger.printError('Error taking screenshot: $error');
+    }
   }
 }

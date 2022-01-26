@@ -249,7 +249,7 @@ class AsyncSnapshot<T> {
     if (hasData)
       return data!;
     if (hasError)
-      throw error!;
+      Error.throwWithStackTrace(error!, stackTrace!);
     throw StateError('Snapshot has neither data nor error');
   }
 
@@ -366,117 +366,14 @@ typedef AsyncWidgetBuilder<T> = Widget Function(BuildContext context, AsyncSnaps
 /// as the builder will always be called before the stream listener has a chance
 /// to be processed.
 ///
-/// {@tool dartpad --template=stateful_widget_material}
-///
+/// {@tool dartpad}
 /// This sample shows a [StreamBuilder] that listens to a Stream that emits bids
 /// for an auction. Every time the StreamBuilder receives a bid from the Stream,
 /// it will display the price of the bid below an icon. If the Stream emits an
 /// error, the error is displayed below an error icon. When the Stream finishes
 /// emitting bids, the final price is displayed.
 ///
-/// ```dart
-/// final Stream<int> _bids = (() async* {
-///   await Future<void>.delayed(const Duration(seconds: 1));
-///   yield 1;
-///   await Future<void>.delayed(const Duration(seconds: 1));
-/// })();
-///
-/// @override
-/// Widget build(BuildContext context) {
-///   return DefaultTextStyle(
-///     style: Theme.of(context).textTheme.headline2!,
-///     textAlign: TextAlign.center,
-///     child: Container(
-///       alignment: FractionalOffset.center,
-///       color: Colors.white,
-///       child: StreamBuilder<int>(
-///         stream: _bids,
-///         builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
-///           List<Widget> children;
-///           if (snapshot.hasError) {
-///             children = <Widget>[
-///               const Icon(
-///                 Icons.error_outline,
-///                 color: Colors.red,
-///                 size: 60,
-///               ),
-///               Padding(
-///                 padding: const EdgeInsets.only(top: 16),
-///                 child: Text('Error: ${snapshot.error}'),
-///               ),
-///               Padding(
-///                 padding: const EdgeInsets.only(top: 8),
-///                 child: Text('Stack trace: ${snapshot.stackTrace}'),
-///               ),
-///             ];
-///           } else {
-///             switch (snapshot.connectionState) {
-///               case ConnectionState.none:
-///                 children = const <Widget>[
-///                   Icon(
-///                     Icons.info,
-///                     color: Colors.blue,
-///                     size: 60,
-///                   ),
-///                   Padding(
-///                     padding: EdgeInsets.only(top: 16),
-///                     child: Text('Select a lot'),
-///                   )
-///                 ];
-///                 break;
-///               case ConnectionState.waiting:
-///                 children = const <Widget>[
-///                   SizedBox(
-///                     child: CircularProgressIndicator(),
-///                     width: 60,
-///                     height: 60,
-///                   ),
-///                   Padding(
-///                     padding: EdgeInsets.only(top: 16),
-///                     child: Text('Awaiting bids...'),
-///                   )
-///                 ];
-///                 break;
-///               case ConnectionState.active:
-///                 children = <Widget>[
-///                   const Icon(
-///                     Icons.check_circle_outline,
-///                     color: Colors.green,
-///                     size: 60,
-///                   ),
-///                   Padding(
-///                     padding: const EdgeInsets.only(top: 16),
-///                     child: Text('\$${snapshot.data}'),
-///                   )
-///                 ];
-///                 break;
-///               case ConnectionState.done:
-///                 children = <Widget>[
-///                   const Icon(
-///                     Icons.info,
-///                     color: Colors.blue,
-///                     size: 60,
-///                   ),
-///                   Padding(
-///                     padding: const EdgeInsets.only(top: 16),
-///                     child: Text('\$${snapshot.data} (closed)'),
-///                   )
-///                 ];
-///                 break;
-///             }
-///           }
-///
-///           return Column(
-///             mainAxisAlignment: MainAxisAlignment.center,
-///             crossAxisAlignment: CrossAxisAlignment.center,
-///             children: children,
-///           );
-///         },
-///       ),
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/widgets/async/stream_builder.0.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -609,78 +506,14 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
 /// `future?.asStream()`, except that snapshots with `ConnectionState.active`
 /// may appear for the latter, depending on how the stream is implemented.
 ///
-/// {@tool dartpad --template=stateful_widget_material}
-///
+/// {@tool dartpad}
 /// This sample shows a [FutureBuilder] that displays a loading spinner while it
 /// loads data. It displays a success icon and text if the [Future] completes
 /// with a result, or an error icon and text if the [Future] completes with an
 /// error. Assume the `_calculation` field is set by pressing a button elsewhere
 /// in the UI.
 ///
-/// ```dart
-/// final Future<String> _calculation = Future<String>.delayed(
-///   const Duration(seconds: 2),
-///   () => 'Data Loaded',
-/// );
-///
-/// @override
-/// Widget build(BuildContext context) {
-///   return DefaultTextStyle(
-///     style: Theme.of(context).textTheme.headline2!,
-///     textAlign: TextAlign.center,
-///     child: FutureBuilder<String>(
-///       future: _calculation, // a previously-obtained Future<String> or null
-///       builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
-///         List<Widget> children;
-///         if (snapshot.hasData) {
-///           children = <Widget>[
-///             const Icon(
-///               Icons.check_circle_outline,
-///               color: Colors.green,
-///               size: 60,
-///             ),
-///             Padding(
-///               padding: const EdgeInsets.only(top: 16),
-///               child: Text('Result: ${snapshot.data}'),
-///             )
-///           ];
-///         } else if (snapshot.hasError) {
-///           children = <Widget>[
-///             const Icon(
-///               Icons.error_outline,
-///               color: Colors.red,
-///               size: 60,
-///             ),
-///             Padding(
-///               padding: const EdgeInsets.only(top: 16),
-///               child: Text('Error: ${snapshot.error}'),
-///             )
-///           ];
-///         } else {
-///           children = const <Widget>[
-///             SizedBox(
-///               child: CircularProgressIndicator(),
-///               width: 60,
-///               height: 60,
-///             ),
-///             Padding(
-///               padding: EdgeInsets.only(top: 16),
-///               child: Text('Awaiting result...'),
-///             )
-///           ];
-///         }
-///         return Center(
-///           child: Column(
-///             mainAxisAlignment: MainAxisAlignment.center,
-///             crossAxisAlignment: CrossAxisAlignment.center,
-///             children: children,
-///           ),
-///         );
-///       },
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/widgets/async/future_builder.0.dart **
 /// {@end-tool}
 // TODO(ianh): remove unreachable code above once https://github.com/dart-lang/sdk/issues/35520 is fixed
 class FutureBuilder<T> extends StatefulWidget {

@@ -47,7 +47,7 @@ To run `prepare_package.dart` locally:
 
 - Make sure the `depot_tools` is in your `PATH`. If you're on Windows, you also need
   an environment variable called `DEPOT_TOOLS` with the path to `depot_tools` as value.
-- Run `gsutil.py config` (or `python %DEPOT_TOOLS%\gsutil.py` on Windows) to
+- Run `gsutil.py config` (or `python3 %DEPOT_TOOLS%\gsutil.py` on Windows) to
   authenticate with your auth token.
 - Create a local temp directory. `cd` into it.
 - Run `dart [path to your normal Flutter repo]/dev/bots/prepare_package.dart
@@ -95,6 +95,7 @@ The typical cycle for editing a recipe is:
 4. Run `led get-builder 'luci.flutter.prod:BUILDER_NAME' | led edit -p 'revision="GIT_HASH"' | led edit-recipe-bundle | led launch`, where `BUILDER_NAME` is the builder name (e.g. `Linux Engine`), and
    `GIT_HASH` is the hash to build (which is important for the engine but not
    for the framework).
+   * If `led` fails, ensure that your `depot_tools` checkout is up to date.
 5. To submit a CL, you need a local branch first (`git checkout -b [some branch name]`).
 6. Upload the patch (`git commit`, `git cl upload`), and open the outputted URL to the CL.
 7. Use "Find owners" to get reviewers for the CL

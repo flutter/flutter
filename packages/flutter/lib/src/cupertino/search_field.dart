@@ -97,7 +97,7 @@ class CupertinoSearchTextField extends StatefulWidget {
   // TODO(DanielEdrisian): Localize the 'Search' placeholder.
   ///
   /// The [style] and [placeholderStyle] properties allow changing the style of
-  /// the text and placeholder of the textfield. [placeholderStyle] defaults
+  /// the text and placeholder of the text field. [placeholderStyle] defaults
   /// to the gray [CupertinoColors.secondaryLabel] iOS color.
   ///
   /// To set the text field's background color and border radius, pass a
@@ -152,6 +152,7 @@ class CupertinoSearchTextField extends StatefulWidget {
     this.onSuffixTap,
     this.restorationId,
     this.focusNode,
+    this.autofocus = false,
     this.onTap,
     this.autocorrect = true,
     this.enabled,
@@ -199,7 +200,7 @@ class CupertinoSearchTextField extends StatefulWidget {
   /// Defaults to 'Search' localized in each supported language.
   final String? placeholder;
 
-  /// Sets the style of the placeholder of the textfield.
+  /// Sets the style of the placeholder of the text field.
   ///
   /// Defaults to the gray [CupertinoColors.secondaryLabel] iOS color.
   final TextStyle? placeholderStyle;
@@ -292,6 +293,9 @@ class CupertinoSearchTextField extends StatefulWidget {
 
   /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode? focusNode;
+
+  /// {@macro flutter.widgets.editableText.autofocus}
+  final bool autofocus;
 
   /// {@macro flutter.material.textfield.onTap}
   final VoidCallback? onTap;
@@ -436,6 +440,7 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
       onChanged: widget.onChanged,
       onSubmitted: widget.onSubmitted,
       focusNode: widget.focusNode,
+      autofocus: widget.autofocus,
       autocorrect: widget.autocorrect,
       textInputAction: TextInputAction.search,
     );

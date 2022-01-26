@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This is a CLI library; we use prints as part of the interface.
+// ignore_for_file: avoid_print
+
 import 'dart:async';
 import 'dart:io';
 
@@ -103,8 +106,10 @@ Future<void> integrationDriver(
       try {
         ok = await onScreenshot(screenshotName, screenshotBytes.cast<int>());
       } catch (exception) {
-        throw StateError('Screenshot failure:\n'
-            'onScreenshot("$screenshotName", <bytes>) threw an exception: $exception');
+        throw StateError(
+          'Screenshot failure:\n'
+          'onScreenshot("$screenshotName", <bytes>) threw an exception: $exception',
+        );
       }
       if (!ok) {
         failures.add(screenshotName);

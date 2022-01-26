@@ -43,8 +43,7 @@ enum OverflowBarAlignment {
 /// If the layout overflows, then children's order within their
 /// column is specified by [overflowDirection] instead.
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold_center}
-///
+/// {@tool dartpad}
 /// This example defines a simple approximation of a dialog
 /// layout, where the layout of the dialog's action buttons are
 /// defined by an [OverflowBar]. The content is wrapped in a
@@ -52,46 +51,7 @@ enum OverflowBarAlignment {
 /// action buttons will still be accessible by scrolling,
 /// no matter how much vertical space is available.
 ///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return Container(
-///     alignment: Alignment.center,
-///     padding: const EdgeInsets.all(16),
-///     color: Colors.black.withOpacity(0.15),
-///     child: Material(
-///       color: Colors.white,
-///       elevation: 24,
-///       shape: const RoundedRectangleBorder(
-///         borderRadius: BorderRadius.all(Radius.circular(4))
-///       ),
-///       child: Padding(
-///         padding: const EdgeInsets.all(8),
-///         child: SingleChildScrollView(
-///           child: Column(
-///             mainAxisSize: MainAxisSize.min,
-///             crossAxisAlignment: CrossAxisAlignment.stretch,
-///             children: <Widget>[
-///               const SizedBox(height: 128, child: Placeholder()),
-///               Align(
-///                 alignment: AlignmentDirectional.centerEnd,
-///                 child: OverflowBar(
-///                   spacing: 8,
-///                   overflowAlignment: OverflowBarAlignment.end,
-///                   children: <Widget>[
-///                     TextButton(child: const Text('Cancel'), onPressed: () { }),
-///                     TextButton(child: const Text('Really Really Cancel'), onPressed: () { }),
-///                     OutlinedButton(child: const Text('OK'), onPressed: () { }),
-///                   ],
-///                 ),
-///               ),
-///             ],
-///           ),
-///         ),
-///       ),
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/widgets/overflow_bar/overflow_bar.0.dart **
 /// {@end-tool}
 class OverflowBar extends MultiChildRenderObjectWidget {
   /// Constructs an OverflowBar.

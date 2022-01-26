@@ -18,13 +18,14 @@ void main() {
     const MethodChannel firstFrameChannel = MethodChannel('flutter/service_worker');
     binding.defaultBinaryMessenger.setMockMethodCallHandler(firstFrameChannel, (MethodCall methodCall) async {
       completer.complete();
+      return null;
     });
 
     binding.handleBeginFrame(Duration.zero);
     binding.handleDrawFrame();
 
     await expectLater(completer.future, completes);
-  }, skip: !kIsWeb);
+  }, skip: !kIsWeb); // [intended] the test is only makes sense on the web.
 }
 
 class TestRenderBinding extends BindingBase

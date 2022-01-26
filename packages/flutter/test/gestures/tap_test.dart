@@ -2,12 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(gspencergoog): Remove this tag once this test's state leaks/test
-// dependencies have been fixed.
-// https://github.com/flutter/flutter/issues/85160
-// Fails with "flutter test --test-randomize-ordering-seed=1000"
-@Tags(<String>['no-shuffle'])
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -118,6 +112,84 @@ void main() {
     expect(tapRecognized, isFalse);
 
     tester.route(up1);
+    expect(tapRecognized, isTrue);
+    GestureBinding.instance!.gestureArena.sweep(1);
+    expect(tapRecognized, isTrue);
+
+    tap.dispose();
+  });
+
+  testGesture('Should recognize tap for supported devices only', (GestureTester tester) {
+    final TapGestureRecognizer tap = TapGestureRecognizer(
+      supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.mouse, PointerDeviceKind.stylus },
+    );
+
+    bool tapRecognized = false;
+    tap.onTap = () {
+      tapRecognized = true;
+    };
+    const PointerDownEvent touchDown = PointerDownEvent(
+      pointer: 1,
+      position: Offset(10.0, 10.0),
+    );
+    const PointerUpEvent touchUp = PointerUpEvent(
+      pointer: 1,
+      position: Offset(11.0, 9.0),
+    );
+
+    tap.addPointer(touchDown);
+    tester.closeArena(1);
+    expect(tapRecognized, isFalse);
+    tester.route(touchDown);
+    expect(tapRecognized, isFalse);
+
+    tester.route(touchUp);
+    expect(tapRecognized, isFalse);
+    GestureBinding.instance!.gestureArena.sweep(1);
+    expect(tapRecognized, isFalse);
+
+    const PointerDownEvent mouseDown = PointerDownEvent(
+      kind: PointerDeviceKind.mouse,
+      pointer: 1,
+      position: Offset(10.0, 10.0),
+    );
+    const PointerUpEvent mouseUp = PointerUpEvent(
+      kind: PointerDeviceKind.mouse,
+      pointer: 1,
+      position: Offset(11.0, 9.0),
+    );
+
+    tap.addPointer(mouseDown);
+    tester.closeArena(1);
+    expect(tapRecognized, isFalse);
+    tester.route(mouseDown);
+    expect(tapRecognized, isFalse);
+
+    tester.route(mouseUp);
+    expect(tapRecognized, isTrue);
+    GestureBinding.instance!.gestureArena.sweep(1);
+    expect(tapRecognized, isTrue);
+
+    tapRecognized = false;
+
+    const PointerDownEvent stylusDown = PointerDownEvent(
+      kind: PointerDeviceKind.stylus,
+      pointer: 1,
+      position: Offset(10.0, 10.0),
+    );
+    const PointerUpEvent stylusUp = PointerUpEvent(
+      kind: PointerDeviceKind.stylus,
+      pointer: 1,
+      position: Offset(11.0, 9.0),
+    );
+
+    tap.addPointer(stylusDown);
+    tester.closeArena(1);
+    expect(tapRecognized, isFalse);
+    tester.route(stylusDown);
+    expect(tapRecognized, isFalse);
+
+    tester.route(stylusUp);
     expect(tapRecognized, isTrue);
     GestureBinding.instance!.gestureArena.sweep(1);
     expect(tapRecognized, isTrue);
@@ -838,11 +910,11 @@ void main() {
     });
 
     tearDown(() {
-      recognized.clear();
       primary.dispose();
       primary2.dispose();
       secondary.dispose();
       tertiary.dispose();
+      recognized.clear();
     });
 
     testGesture('A primary tap recognizer does not form competition with a secondary tap recognizer', (GestureTester tester) {
@@ -1026,7 +1098,7 @@ void main() {
     final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer()
       ..onStart = (_) {};
 
-    final TestPointer pointer1 = TestPointer(1);
+    final TestPointer pointer1 = TestPointer();
 
     final PointerDownEvent down = pointer1.down(Offset.zero);
     drag.addPointer(down);

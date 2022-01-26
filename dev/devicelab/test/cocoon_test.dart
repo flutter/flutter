@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -15,7 +16,7 @@ import 'package:http/testing.dart';
 import 'common.dart';
 
 void main() {
-  late ProcessResult _processResult;
+  late ProcessResult processResult;
   ProcessResult runSyncStub(String executable, List<String> args,
           {Map<String, String>? environment,
           bool includeParentEnvironment = true,
@@ -23,7 +24,7 @@ void main() {
           Encoding? stderrEncoding,
           Encoding? stdoutEncoding,
           String? workingDirectory}) =>
-      _processResult;
+      processResult;
 
   // Expected test values.
   const String commitSha = 'a4952838bf288a81d8ea11edfd4b4cd649fa94cc';
@@ -44,7 +45,7 @@ void main() {
     });
 
     test('returns expected commit sha', () {
-      _processResult = ProcessResult(1, 0, commitSha, '');
+      processResult = ProcessResult(1, 0, commitSha, '');
       cocoon = Cocoon(
         serviceAccountTokenPath: serviceAccountTokenPath,
         fs: fs,
@@ -56,7 +57,7 @@ void main() {
     });
 
     test('throws exception on git cli errors', () {
-      _processResult = ProcessResult(1, 1, '', '');
+      processResult = ProcessResult(1, 1, '', '');
       cocoon = Cocoon(
         serviceAccountTokenPath: serviceAccountTokenPath,
         fs: fs,
@@ -68,7 +69,7 @@ void main() {
     });
 
     test('writes expected update task json', () async {
-      _processResult = ProcessResult(1, 0, commitSha, '');
+      processResult = ProcessResult(1, 0, commitSha, '');
       final TaskResult result = TaskResult.fromJson(<String, dynamic>{
         'success': true,
         'data': <String, dynamic>{
@@ -104,7 +105,7 @@ void main() {
     });
 
     test('uploads metrics sends expected post body', () async {
-      _processResult = ProcessResult(1, 0, commitSha, '');
+      processResult = ProcessResult(1, 0, commitSha, '');
       const String uploadMetricsRequestWithSpaces =
           '{"CommitBranch":"master","CommitSha":"a4952838bf288a81d8ea11edfd4b4cd649fa94cc","BuilderName":"builder a b c","NewStatus":"Succeeded","ResultData":{},"BenchmarkScoreKeys":[],"TestFlaky":false}';
       final MockClient client = MockClient((Request request) async {
@@ -131,11 +132,11 @@ void main() {
           '"ResultData":{},'
           '"BenchmarkScoreKeys":[]}';
       fs.file(resultsPath).writeAsStringSync(updateTaskJson);
-      await cocoon.sendResultsPath(resultsPath: resultsPath);
+      await cocoon.sendTaskStatus(resultsPath: resultsPath);
     });
 
     test('uploads expected update task payload from results file', () async {
-      _processResult = ProcessResult(1, 0, commitSha, '');
+      processResult = ProcessResult(1, 0, commitSha, '');
       cocoon = Cocoon(
         fs: fs,
         httpClient: mockClient,
@@ -153,7 +154,141 @@ void main() {
           '"ResultData":{"i":0.0,"j":0.0,"not_a_metric":"something"},'
           '"BenchmarkScoreKeys":["i","j"]}';
       fs.file(resultsPath).writeAsStringSync(updateTaskJson);
-      await cocoon.sendResultsPath(resultsPath: resultsPath);
+      await cocoon.sendTaskStatus(resultsPath: resultsPath);
+    });
+
+    test('Verify retries for task result upload', () async {
+      int requestCount = 0;
+      mockClient = MockClient((Request request) async {
+        requestCount++;
+        if (requestCount == 1) {
+          return Response('{}', 500);
+        } else {
+          return Response('{}', 200);
+        }
+      });
+
+      processResult = ProcessResult(1, 0, commitSha, '');
+      cocoon = Cocoon(
+        fs: fs,
+        httpClient: mockClient,
+        processRunSync: runSyncStub,
+        serviceAccountTokenPath: serviceAccountTokenPath,
+        requestRetryLimit: 3,
+      );
+
+      const String resultsPath = 'results.json';
+      const String updateTaskJson = '{'
+          '"CommitBranch":"master",'
+          '"CommitSha":"$commitSha",'
+          '"BuilderName":"builderAbc",'
+          '"NewStatus":"Succeeded",'
+          '"ResultData":{"i":0.0,"j":0.0,"not_a_metric":"something"},'
+          '"BenchmarkScoreKeys":["i","j"]}';
+      fs.file(resultsPath).writeAsStringSync(updateTaskJson);
+      await cocoon.sendTaskStatus(resultsPath: resultsPath);
+    });
+
+    test('Verify timeout and retry for task result upload', () async {
+      int requestCount = 0;
+      const int timeoutValue = 2;
+      mockClient = MockClient((Request request) async {
+        requestCount++;
+        if (requestCount == 1) {
+          await Future<void>.delayed(const Duration(seconds: timeoutValue + 2));
+          throw Exception('Should not reach this, because timeout should trigger');
+        } else {
+          return Response('{}', 200);
+        }
+      });
+
+      processResult = ProcessResult(1, 0, commitSha, '');
+      cocoon = Cocoon(
+        fs: fs,
+        httpClient: mockClient,
+        processRunSync: runSyncStub,
+        serviceAccountTokenPath: serviceAccountTokenPath,
+        requestRetryLimit: 2,
+        requestTimeoutLimit: timeoutValue,
+      );
+
+      const String resultsPath = 'results.json';
+      const String updateTaskJson = '{'
+          '"CommitBranch":"master",'
+          '"CommitSha":"$commitSha",'
+          '"BuilderName":"builderAbc",'
+          '"NewStatus":"Succeeded",'
+          '"ResultData":{"i":0.0,"j":0.0,"not_a_metric":"something"},'
+          '"BenchmarkScoreKeys":["i","j"]}';
+      fs.file(resultsPath).writeAsStringSync(updateTaskJson);
+      await cocoon.sendTaskStatus(resultsPath: resultsPath);
+    });
+
+    test('Verify timeout does not trigger for result upload', () async {
+      int requestCount = 0;
+      const int timeoutValue = 2;
+      mockClient = MockClient((Request request) async {
+        requestCount++;
+        if (requestCount == 1) {
+          await Future<void>.delayed(const Duration(seconds: timeoutValue - 1));
+          return Response('{}', 200);
+        } else {
+          throw Exception('This iteration should not be reached, since timeout should not happen.');
+        }
+      });
+
+      processResult = ProcessResult(1, 0, commitSha, '');
+      cocoon = Cocoon(
+        fs: fs,
+        httpClient: mockClient,
+        processRunSync: runSyncStub,
+        serviceAccountTokenPath: serviceAccountTokenPath,
+        requestRetryLimit: 2,
+        requestTimeoutLimit: timeoutValue,
+      );
+
+      const String resultsPath = 'results.json';
+      const String updateTaskJson = '{'
+          '"CommitBranch":"master",'
+          '"CommitSha":"$commitSha",'
+          '"BuilderName":"builderAbc",'
+          '"NewStatus":"Succeeded",'
+          '"ResultData":{"i":0.0,"j":0.0,"not_a_metric":"something"},'
+          '"BenchmarkScoreKeys":["i","j"]}';
+      fs.file(resultsPath).writeAsStringSync(updateTaskJson);
+      await cocoon.sendTaskStatus(resultsPath: resultsPath);
+    });
+
+    test('Verify failure without retries for task result upload', () async {
+      int requestCount = 0;
+      mockClient = MockClient((Request request) async {
+        requestCount++;
+        if (requestCount == 1) {
+          return Response('{}', 500);
+        } else {
+          return Response('{}', 200);
+        }
+      });
+
+      processResult = ProcessResult(1, 0, commitSha, '');
+      cocoon = Cocoon(
+        fs: fs,
+        httpClient: mockClient,
+        processRunSync: runSyncStub,
+        serviceAccountTokenPath: serviceAccountTokenPath,
+        requestRetryLimit: 0,
+      );
+
+      const String resultsPath = 'results.json';
+      const String updateTaskJson = '{'
+          '"CommitBranch":"master",'
+          '"CommitSha":"$commitSha",'
+          '"BuilderName":"builderAbc",'
+          '"NewStatus":"Succeeded",'
+          '"ResultData":{"i":0.0,"j":0.0,"not_a_metric":"something"},'
+          '"BenchmarkScoreKeys":["i","j"]}';
+      fs.file(resultsPath).writeAsStringSync(updateTaskJson);
+      expect(() => cocoon.sendTaskStatus(resultsPath: resultsPath), throwsA(isA<ClientException>()));
     });
 
     test('throws client exception on non-200 responses', () async {
@@ -175,12 +310,11 @@ void main() {
           '"ResultData":{"i":0.0,"j":0.0,"not_a_metric":"something"},'
           '"BenchmarkScoreKeys":["i","j"]}';
       fs.file(resultsPath).writeAsStringSync(updateTaskJson);
-      expect(() => cocoon.sendResultsPath(resultsPath: resultsPath),
-          throwsA(isA<ClientException>()));
+      expect(() => cocoon.sendTaskStatus(resultsPath: resultsPath), throwsA(isA<ClientException>()));
     });
 
     test('does not upload results on non-supported branches', () async {
-      // Any network failure would cause the upoad to fail
+      // Any network failure would cause the upload to fail
       mockClient = MockClient((Request request) async => Response('', 500));
 
       cocoon = Cocoon(
@@ -201,7 +335,32 @@ void main() {
       fs.file(resultsPath).writeAsStringSync(updateTaskJson);
 
       // This will fail if it decided to upload results
-      await cocoon.sendResultsPath(resultsPath: resultsPath);
+      await cocoon.sendTaskStatus(resultsPath: resultsPath);
+    });
+
+    test('does not update for staging test', () async {
+      // Any network failure would cause the upload to fail
+      mockClient = MockClient((Request request) async => Response('', 500));
+
+      cocoon = Cocoon(
+        serviceAccountTokenPath: serviceAccountTokenPath,
+        fs: fs,
+        httpClient: mockClient,
+        requestRetryLimit: 0,
+      );
+
+      const String resultsPath = 'results.json';
+      const String updateTaskJson = '{'
+          '"CommitBranch":"master",'
+          '"CommitSha":"$commitSha",'
+          '"BuilderName":"builderAbc",'
+          '"NewStatus":"Succeeded",'
+          '"ResultData":{"i":0.0,"j":0.0,"not_a_metric":"something"},'
+          '"BenchmarkScoreKeys":["i","j"]}';
+      fs.file(resultsPath).writeAsStringSync(updateTaskJson);
+
+      // This will fail if it decided to upload results
+      await cocoon.sendTaskStatus(resultsPath: resultsPath, builderBucket: 'staging');
     });
   });
 

@@ -36,7 +36,6 @@ void main() {
     final FlutterTesterApp app = FlutterTesterApp.fromCurrentDirectory(fileSystem);
 
     expect(app.name, 'my_project');
-    expect(app.packagesFile.path, fileSystem.path.join(projectPath, '.packages'));
   });
 
   group('FlutterTesterDevices', () {
@@ -82,7 +81,7 @@ void main() {
     TestBuildSystem buildSystem;
 
     final Map<Type, Generator> startOverrides = <Type, Generator>{
-      Platform: () => FakePlatform(operatingSystem: 'linux'),
+      Platform: () => FakePlatform(),
       FileSystem: () => fileSystem,
       ProcessManager: () => fakeProcessManager,
       Artifacts: () => Artifacts.test(),
@@ -96,7 +95,6 @@ void main() {
         fileSystem: fileSystem,
         processManager: fakeProcessManager,
         artifacts: Artifacts.test(),
-        buildDirectory: 'build',
         logger: BufferLogger.test(),
         flutterVersion: FakeFlutterVersion(),
         operatingSystemUtils: FakeOperatingSystemUtils(),

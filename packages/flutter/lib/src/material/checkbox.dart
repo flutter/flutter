@@ -25,42 +25,14 @@ import 'toggleable.dart';
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_center}
-///
+/// {@tool dartpad}
 /// This example shows how you can override the default theme of
 /// of a [Checkbox] with a [MaterialStateProperty].
 /// In this example, the checkbox's color will be `Colors.blue` when the [Checkbox]
 /// is being pressed, hovered, or focused. Otherwise, the checkbox's color will
 /// be `Colors.red`.
 ///
-/// ```dart
-/// bool isChecked = false;
-///
-/// @override
-/// Widget build(BuildContext context) {
-///   Color getColor(Set<MaterialState> states) {
-///     const Set<MaterialState> interactiveStates = <MaterialState>{
-///       MaterialState.pressed,
-///       MaterialState.hovered,
-///       MaterialState.focused,
-///     };
-///     if (states.any(interactiveStates.contains)) {
-///       return Colors.blue;
-///     }
-///     return Colors.red;
-///   }
-///   return Checkbox(
-///     checkColor: Colors.white,
-///     fillColor: MaterialStateProperty.resolveWith(getColor),
-///     value: isChecked,
-///     onChanged: (bool? value) {
-///       setState(() {
-///         isChecked = value!;
-///       });
-///     },
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/material/checkbox/checkbox.0.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -138,9 +110,9 @@ class Checkbox extends StatefulWidget {
   /// ```dart
   /// Checkbox(
   ///   value: _throwShotAway,
-  ///   onChanged: (bool newValue) {
+  ///   onChanged: (bool? newValue) {
   ///     setState(() {
-  ///       _throwShotAway = newValue;
+  ///       _throwShotAway = newValue!;
   ///     });
   ///   },
   /// )
@@ -189,6 +161,25 @@ class Checkbox extends StatefulWidget {
   ///  * [MaterialState.hovered].
   ///  * [MaterialState.focused].
   ///  * [MaterialState.disabled].
+  ///
+  /// {@tool snippet}
+  /// This example resolves the [fillColor] based on the current [MaterialState]
+  /// of the [Checkbox], providing a different [Color] when it is
+  /// [MaterialState.disabled].
+  ///
+  /// ```dart
+  /// Checkbox(
+  ///   value: true,
+  ///   onChanged: (_){},
+  ///   fillColor: MaterialStateProperty.resolveWith<Color>((states) {
+  ///     if (states.contains(MaterialState.disabled)) {
+  ///       return Colors.orange.withOpacity(.32);
+  ///     }
+  ///     return Colors.orange;
+  ///   })
+  /// )
+  /// ```
+  /// {@end-tool}
   /// {@endtemplate}
   ///
   /// If null, then the value of [activeColor] is used in the selected
@@ -329,8 +320,9 @@ class Checkbox extends StatefulWidget {
   /// compatibility.
   /// {@endtemplate}
   ///
-  /// If this property is null then [CheckboxThemeData.side] of [ThemeData.checkboxTheme]
-  /// is used. If that's null then the side will be width 2.
+  /// If this property is null, then [CheckboxThemeData.side] of
+  /// [ThemeData.checkboxTheme] is used. If that is also null, then the side
+  /// will be width 2.
   final BorderSide? side;
 
   /// The width of a checkbox widget.

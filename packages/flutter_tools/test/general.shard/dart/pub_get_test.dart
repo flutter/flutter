@@ -8,6 +8,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart' show ProcessException;
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -26,7 +27,7 @@ void main() {
     final FakeProcessManager processManager = FakeProcessManager.empty();
     final BufferLogger logger = BufferLogger.test();
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
-    processManager.excludedExecutables.add('bin/cache/dart-sdk/bin/pub');
+    processManager.excludedExecutables.add('bin/cache/dart-sdk/bin/dart');
 
     fileSystem.file('pubspec.yaml').createSync();
 
@@ -35,9 +36,7 @@ void main() {
       logger: logger,
       processManager: processManager,
       usage: TestUsage(),
-      platform: FakePlatform(
-        environment: const <String, String>{},
-      ),
+      platform: FakePlatform(),
       botDetector: const BotDetectorAlwaysNo(),
     );
 
@@ -51,7 +50,8 @@ void main() {
     testWithoutContext('does not skip pub get the parameter is false', () async {
       final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(command: <String>[
-          'bin/cache/dart-sdk/bin/pub',
+          'bin/cache/dart-sdk/bin/dart',
+          '__deprecated_pub',
           '--verbosity=warning',
           'get',
           '--no-precompile',
@@ -80,9 +80,7 @@ void main() {
         logger: logger,
         processManager: processManager,
         usage: TestUsage(),
-        platform: FakePlatform(
-          environment: const <String, String>{},
-        ),
+        platform: FakePlatform(),
         botDetector: const BotDetectorAlwaysNo(),
       );
 
@@ -99,7 +97,8 @@ void main() {
     testWithoutContext('does not skip pub get if package_config.json has "generator": "pub"', () async {
       final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(command: <String>[
-          'bin/cache/dart-sdk/bin/pub',
+          'bin/cache/dart-sdk/bin/dart',
+          '__deprecated_pub',
           '--verbosity=warning',
           'get',
           '--no-precompile',
@@ -129,9 +128,7 @@ void main() {
         logger: logger,
         processManager: processManager,
         usage: TestUsage(),
-        platform: FakePlatform(
-          environment: const <String, String>{},
-        ),
+        platform: FakePlatform(),
         botDetector: const BotDetectorAlwaysNo(),
       );
 
@@ -147,7 +144,8 @@ void main() {
     testWithoutContext('does not skip pub get if package_config.json has "generator": "pub"', () async {
       final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(command: <String>[
-          'bin/cache/dart-sdk/bin/pub',
+          'bin/cache/dart-sdk/bin/dart',
+          '__deprecated_pub',
           '--verbosity=warning',
           'get',
           '--no-precompile',
@@ -177,9 +175,7 @@ void main() {
         logger: logger,
         processManager: processManager,
         usage: TestUsage(),
-        platform: FakePlatform(
-          environment: const <String, String>{},
-        ),
+        platform: FakePlatform(),
         botDetector: const BotDetectorAlwaysNo(),
       );
 
@@ -209,9 +205,7 @@ void main() {
         logger: logger,
         processManager: processManager,
         usage: TestUsage(),
-        platform: FakePlatform(
-          environment: const <String, String>{},
-        ),
+        platform: FakePlatform(),
         botDetector: const BotDetectorAlwaysNo(),
       );
 
@@ -244,9 +238,7 @@ void main() {
       logger: logger,
       processManager: processManager,
       usage: TestUsage(),
-      platform: FakePlatform(
-        environment: const <String, String>{},
-      ),
+      platform: FakePlatform(),
       botDetector: const BotDetectorAlwaysNo(),
     );
 
@@ -262,10 +254,11 @@ void main() {
     'but the current framework version is not the same as the last version', () async {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(command: <String>[
-        'bin/cache/dart-sdk/bin/pub',
-        '--verbosity=warning',
-        'get',
-        '--no-precompile',
+          'bin/cache/dart-sdk/bin/dart',
+          '__deprecated_pub',
+          '--verbosity=warning',
+          'get',
+          '--no-precompile',
       ])
     ]);
     final BufferLogger logger = BufferLogger.test();
@@ -282,9 +275,7 @@ void main() {
       logger: logger,
       processManager: processManager,
       usage: TestUsage(),
-      platform: FakePlatform(
-        environment: const <String, String>{},
-      ),
+      platform: FakePlatform(),
       botDetector: const BotDetectorAlwaysNo(),
     );
 
@@ -301,10 +292,11 @@ void main() {
     'but the current framework version does not exist yet', () async {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(command: <String>[
-        'bin/cache/dart-sdk/bin/pub',
-        '--verbosity=warning',
-        'get',
-        '--no-precompile',
+           'bin/cache/dart-sdk/bin/dart',
+          '__deprecated_pub',
+          '--verbosity=warning',
+          'get',
+          '--no-precompile',
       ])
     ]);
     final BufferLogger logger = BufferLogger.test();
@@ -320,9 +312,7 @@ void main() {
       logger: logger,
       processManager: processManager,
       usage: TestUsage(),
-      platform: FakePlatform(
-        environment: const <String, String>{},
-      ),
+      platform: FakePlatform(),
       botDetector: const BotDetectorAlwaysNo(),
     );
 
@@ -339,10 +329,11 @@ void main() {
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(command: const <String>[
-        'bin/cache/dart-sdk/bin/pub',
-        '--verbosity=warning',
-        'get',
-        '--no-precompile',
+          'bin/cache/dart-sdk/bin/dart',
+          '__deprecated_pub',
+          '--verbosity=warning',
+          'get',
+          '--no-precompile',
       ], onRun: () {
         fileSystem.file('.dart_tool/package_config.json').createSync(recursive: true);
       })
@@ -358,9 +349,7 @@ void main() {
       logger: logger,
       processManager: processManager,
       usage: TestUsage(),
-      platform: FakePlatform(
-        environment: const <String, String>{},
-      ),
+      platform: FakePlatform(),
       botDetector: const BotDetectorAlwaysNo(),
     );
 
@@ -377,10 +366,11 @@ void main() {
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(command: <String>[
-        'bin/cache/dart-sdk/bin/pub',
-        '--verbosity=warning',
-        'get',
-        '--no-precompile',
+          'bin/cache/dart-sdk/bin/dart',
+          '__deprecated_pub',
+          '--verbosity=warning',
+          'get',
+          '--no-precompile',
       ]),
     ]);
     final BufferLogger logger = BufferLogger.test();
@@ -395,9 +385,7 @@ void main() {
       logger: logger,
       processManager: processManager,
       usage: TestUsage(),
-      platform: FakePlatform(
-        environment: const <String, String>{},
-      ),
+      platform: FakePlatform(),
       botDetector: const BotDetectorAlwaysNo(),
     );
 
@@ -413,10 +401,11 @@ void main() {
   testWithoutContext('checkUpToDate does not skip pub get if the package config is older that the pubspec', () async {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(command: <String>[
-        'bin/cache/dart-sdk/bin/pub',
-        '--verbosity=warning',
-        'get',
-        '--no-precompile',
+          'bin/cache/dart-sdk/bin/dart',
+          '__deprecated_pub',
+          '--verbosity=warning',
+          'get',
+          '--no-precompile',
       ])
     ]);
     final BufferLogger logger = BufferLogger.test();
@@ -434,9 +423,7 @@ void main() {
       logger: logger,
       processManager: processManager,
       usage: TestUsage(),
-      platform: FakePlatform(
-        environment: const <String, String>{},
-      ),
+      platform: FakePlatform(),
       botDetector: const BotDetectorAlwaysNo(),
     );
 
@@ -452,10 +439,11 @@ void main() {
   testWithoutContext('checkUpToDate does not skip pub get if the pubspec.lock is older that the pubspec', () async {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(command: <String>[
-        'bin/cache/dart-sdk/bin/pub',
-        '--verbosity=warning',
-        'get',
-        '--no-precompile',
+          'bin/cache/dart-sdk/bin/dart',
+          '__deprecated_pub',
+          '--verbosity=warning',
+          'get',
+          '--no-precompile',
       ])
     ]);
     final BufferLogger logger = BufferLogger.test();
@@ -475,9 +463,7 @@ void main() {
       logger: logger,
       processManager: processManager,
       usage: TestUsage(),
-      platform: FakePlatform(
-        environment: const <String, String>{},
-      ),
+      platform: FakePlatform(),
       botDetector: const BotDetectorAlwaysNo(),
     );
 
@@ -495,10 +481,11 @@ void main() {
 
     const FakeCommand pubGetCommand = FakeCommand(
       command: <String>[
-        'bin/cache/dart-sdk/bin/pub',
-        '--verbosity=warning',
-        'get',
-        '--no-precompile',
+          'bin/cache/dart-sdk/bin/dart',
+          '__deprecated_pub',
+          '--verbosity=warning',
+          'get',
+          '--no-precompile',
       ],
       exitCode: 69,
       environment: <String, String>{'FLUTTER_ROOT': '', 'PUB_ENVIRONMENT': 'flutter_cli:flutter_tests'},
@@ -522,9 +509,7 @@ void main() {
       logger: logger,
       processManager: processManager,
       usage: TestUsage(),
-      platform: FakePlatform(
-        environment: const <String, String>{},
-      ),
+      platform: FakePlatform(),
       botDetector: const BotDetectorAlwaysNo(),
     );
 
@@ -584,6 +569,52 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
+  testWithoutContext('pub get offline does not retry', () async {
+    String? error;
+
+    const FakeCommand pubGetCommand = FakeCommand(
+      command: <String>[
+          'bin/cache/dart-sdk/bin/dart',
+          '__deprecated_pub',
+          '--verbosity=warning',
+          'get',
+          '--no-precompile',
+          '--offline',
+      ],
+      exitCode: 69,
+      environment: <String, String>{'FLUTTER_ROOT': '', 'PUB_ENVIRONMENT': 'flutter_cli:flutter_tests'},
+    );
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      pubGetCommand,
+    ]);
+    final BufferLogger logger = BufferLogger.test();
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final Pub pub = Pub(
+      fileSystem: fileSystem,
+      logger: logger,
+      processManager: processManager,
+      usage: TestUsage(),
+      platform: FakePlatform(),
+      botDetector: const BotDetectorAlwaysNo(),
+    );
+
+    FakeAsync().run((FakeAsync time) {
+      expect(logger.statusText, '');
+      pub.get(context: PubContext.flutterTests, offline: true).then((void value) {
+        error = 'test completed unexpectedly';
+      }, onError: (dynamic thrownError) {
+        error = 'test failed unexpectedly: $thrownError';
+      });
+      time.elapse(const Duration(milliseconds: 500));
+      expect(logger.statusText,
+        'Running "flutter pub get" in /...\n'
+      );
+    });
+    expect(logger.errorText, isEmpty);
+    expect(error, 'test failed unexpectedly: Exception: pub get failed (69; no message)');
+    expect(processManager, hasNoRemainingExpectations);
+  });
+
   testWithoutContext('pub get 66 shows message from pub', () async {
     final BufferLogger logger = BufferLogger.test();
     final FileSystem fileSystem = MemoryFileSystem.test();
@@ -591,7 +622,8 @@ void main() {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
         command: <String>[
-          'bin/cache/dart-sdk/bin/pub',
+          'bin/cache/dart-sdk/bin/dart',
+          '__deprecated_pub',
           '--verbosity=warning',
           'get',
           '--no-precompile',
@@ -604,7 +636,7 @@ void main() {
     ]);
 
     final Pub pub = Pub(
-      platform: FakePlatform(environment: const <String, String>{}),
+      platform: FakePlatform(),
       fileSystem: fileSystem,
       logger: logger,
       usage: TestUsage(),
@@ -629,6 +661,68 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
+  testWithoutContext('pub get shows working directory on process exception', () async {
+    final BufferLogger logger = BufferLogger.test();
+    final FileSystem fileSystem = MemoryFileSystem.test();
+
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      FakeCommand(
+        command: const <String>[
+          'bin/cache/dart-sdk/bin/dart',
+          '__deprecated_pub',
+          '--verbosity=warning',
+          'get',
+          '--no-precompile',
+        ],
+        onRun: () {
+          throw const ProcessException(
+            'bin/cache/dart-sdk/bin/dart',
+            <String>[
+              '__deprecated_pub',
+              '--verbosity=warning',
+              'get',
+              '--no-precompile',
+            ],
+            'message',
+            1,
+          );
+        },
+        exitCode: 66,
+        stderr: 'err1\nerr2\nerr3\n',
+        stdout: 'out1\nout2\nout3\n',
+        environment: const <String, String>{'FLUTTER_ROOT': '', 'PUB_ENVIRONMENT': 'flutter_cli:flutter_tests'},
+      ),
+    ]);
+
+    final Pub pub = Pub(
+      platform: FakePlatform(),
+      fileSystem: fileSystem,
+      logger: logger,
+      usage: TestUsage(),
+      botDetector: const BotDetectorAlwaysNo(),
+      processManager: processManager,
+    );
+    await expectLater(
+      () => pub.get(context: PubContext.flutterTests),
+      throwsA(
+        isA<ProcessException>().having(
+          (ProcessException error) => error.message,
+          'message',
+          contains('Working directory: "/"'),
+        ).having(
+          (ProcessException error) => error.message,
+          'message',
+          contains('"PUB_ENVIRONMENT": "flutter_cli:flutter_tests"'),
+        ),
+      ),
+    );
+    expect(logger.statusText,
+      'Running "flutter pub get" in /...\n'
+    );
+    expect(logger.errorText, isEmpty);
+    expect(processManager, hasNoRemainingExpectations);
+  });
+
   testWithoutContext('pub cache in root is used', () async {
     String? error;
     final FileSystem fileSystem = MemoryFileSystem.test();
@@ -636,7 +730,8 @@ void main() {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: const <String>[
-          'bin/cache/dart-sdk/bin/pub',
+          'bin/cache/dart-sdk/bin/dart',
+          '__deprecated_pub',
           '--verbosity=warning',
           'get',
           '--no-precompile',
@@ -651,7 +746,7 @@ void main() {
     ]);
 
     final Pub pub = Pub(
-      platform: FakePlatform(environment: const <String, String>{}),
+      platform: FakePlatform(),
       usage: TestUsage(),
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
@@ -677,7 +772,8 @@ void main() {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
         command: <String>[
-          'bin/cache/dart-sdk/bin/pub',
+          'bin/cache/dart-sdk/bin/dart',
+          '__deprecated_pub',
           '--verbosity=warning',
           'get',
           '--no-precompile',
@@ -799,7 +895,8 @@ void main() {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
         command: <String>[
-          'bin/cache/dart-sdk/bin/pub',
+          'bin/cache/dart-sdk/bin/dart',
+          '__deprecated_pub',
           '--verbosity=warning',
           'get',
           '--no-precompile',
@@ -840,7 +937,8 @@ void main() {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
         command: <String>[
-          'bin/cache/dart-sdk/bin/pub',
+          'bin/cache/dart-sdk/bin/dart',
+          '__deprecated_pub',
           '--verbosity=warning',
           'get',
           '--no-precompile',
@@ -882,7 +980,8 @@ void main() {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: const <String>[
-          'bin/cache/dart-sdk/bin/pub',
+          'bin/cache/dart-sdk/bin/dart',
+          '__deprecated_pub',
           '--verbosity=warning',
           'get',
           '--no-precompile',
@@ -894,7 +993,8 @@ void main() {
       ),
       const FakeCommand(
         command: <String>[
-          'bin/cache/dart-sdk/bin/pub',
+          'bin/cache/dart-sdk/bin/dart',
+          '__deprecated_pub',
           '--verbosity=warning',
           'get',
           '--no-precompile',
@@ -902,7 +1002,8 @@ void main() {
       ),
       FakeCommand(
         command: const <String>[
-          'bin/cache/dart-sdk/bin/pub',
+          'bin/cache/dart-sdk/bin/dart',
+          '__deprecated_pub',
           '--verbosity=warning',
           'get',
           '--no-precompile',
@@ -914,7 +1015,8 @@ void main() {
       ),
       const FakeCommand(
         command: <String>[
-          'bin/cache/dart-sdk/bin/pub',
+          'bin/cache/dart-sdk/bin/dart',
+          '__deprecated_pub',
           '--verbosity=warning',
           'get',
           '--no-precompile',
@@ -927,7 +1029,6 @@ void main() {
       logger: logger,
       processManager: processManager,
       platform: FakePlatform(
-        operatingSystem: 'linux', // so that the command executed is consistent
         environment: <String, String>{},
       ),
       botDetector: const BotDetectorAlwaysNo()

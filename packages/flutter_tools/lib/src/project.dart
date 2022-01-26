@@ -18,8 +18,9 @@ import 'cmake_project.dart';
 import 'features.dart';
 import 'flutter_manifest.dart';
 import 'flutter_plugins.dart';
-import 'globals_null_migrated.dart' as globals;
+import 'globals.dart' as globals;
 import 'platform_plugins.dart';
+import 'reporting/reporting.dart';
 import 'template.dart';
 import 'xcode_project.dart';
 
@@ -163,36 +164,28 @@ class FlutterProject {
   }
 
   /// The iOS sub project of this project.
-  IosProject? _ios;
-  IosProject get ios => _ios ??= IosProject.fromFlutter(this);
+  late final IosProject ios = IosProject.fromFlutter(this);
 
   /// The Android sub project of this project.
-  AndroidProject? _android;
-  AndroidProject get android => _android ??= AndroidProject._(this);
+  late final AndroidProject android = AndroidProject._(this);
 
   /// The web sub project of this project.
-  WebProject? _web;
-  WebProject get web => _web ??= WebProject._(this);
+  late final WebProject web = WebProject._(this);
 
   /// The MacOS sub project of this project.
-  MacOSProject? _macos;
-  MacOSProject get macos => _macos ??= MacOSProject.fromFlutter(this);
+  late final MacOSProject macos = MacOSProject.fromFlutter(this);
 
   /// The Linux sub project of this project.
-  LinuxProject? _linux;
-  LinuxProject get linux => _linux ??= LinuxProject.fromFlutter(this);
+  late final LinuxProject linux = LinuxProject.fromFlutter(this);
 
   /// The Windows sub project of this project.
-  WindowsProject? _windows;
-  WindowsProject get windows => _windows ??= WindowsProject.fromFlutter(this);
+  late final WindowsProject windows = WindowsProject.fromFlutter(this);
 
   /// The Windows UWP sub project of this project.
-  WindowsUwpProject? _windowUwp;
-  WindowsUwpProject get windowsUwp => _windowUwp ??= WindowsUwpProject.fromFlutter(this);
+  late final WindowsUwpProject windowsUwp = WindowsUwpProject.fromFlutter(this);
 
   /// The Fuchsia sub project of this project.
-  FuchsiaProject? _fuchsia;
-  FuchsiaProject get fuchsia => _fuchsia ??= FuchsiaProject._(this);
+  late final FuchsiaProject fuchsia = FuchsiaProject._(this);
 
   /// The `pubspec.yaml` file of this project.
   File get pubspecFile => directory.childFile('pubspec.yaml');
@@ -226,6 +219,11 @@ class FlutterProject {
     .childDirectory('build')
     .childDirectory('generated')
     .childDirectory(manifest.appName);
+
+  /// The generated Dart plugin registrant for non-web platforms.
+  File get dartPluginRegistrant => dartTool
+    .childDirectory('flutter_build')
+    .childFile('generated_main.dart');
 
   /// The example sub-project of this project.
   FlutterProject get example => FlutterProject(
@@ -285,7 +283,7 @@ class FlutterProject {
   /// registrants for app and module projects only.
   ///
   /// Will not create project platform directories if they do not already exist.
-  Future<void> regeneratePlatformSpecificTooling() async {
+  Future<void> regeneratePlatformSpecificTooling({DeprecationBehavior deprecationBehavior = DeprecationBehavior.none}) async {
     return ensureReadyForPlatformSpecificTooling(
       androidPlatform: android.existsSync(),
       iosPlatform: ios.existsSync(),
@@ -296,6 +294,7 @@ class FlutterProject {
       windowsPlatform: featureFlags.isWindowsEnabled && windows.existsSync(),
       webPlatform: featureFlags.isWebEnabled && web.existsSync(),
       winUwpPlatform: featureFlags.isWindowsUwpEnabled && windowsUwp.existsSync(),
+      deprecationBehavior: deprecationBehavior,
     );
   }
 
@@ -309,13 +308,14 @@ class FlutterProject {
     bool windowsPlatform = false,
     bool webPlatform = false,
     bool winUwpPlatform = false,
+    DeprecationBehavior deprecationBehavior = DeprecationBehavior.none,
   }) async {
-    if (!directory.existsSync() || hasExampleApp || isPlugin) {
+    if (!directory.existsSync() || isPlugin) {
       return;
     }
     await refreshPluginsList(this, iosPlatform: iosPlatform, macOSPlatform: macOSPlatform);
     if (androidPlatform) {
-      await android.ensureReadyForPlatformSpecificTooling();
+      await android.ensureReadyForPlatformSpecificTooling(deprecationBehavior: deprecationBehavior);
     }
     if (iosPlatform) {
       await ios.ensureReadyForPlatformSpecificTooling();
@@ -347,6 +347,12 @@ class FlutterProject {
     );
   }
 
+  void checkForDeprecation({DeprecationBehavior deprecationBehavior = DeprecationBehavior.none}) {
+    if (android.existsSync()) {
+      android.checkForDeprecation(deprecationBehavior: deprecationBehavior);
+    }
+  }
+
   /// Returns a json encoded string containing the [appName], [version], and [buildNumber] that is used to generate version.json
   String getVersionInfo()  {
     final String? buildName = manifest.buildName;
@@ -357,6 +363,7 @@ class FlutterProject {
         'version': buildName,
       if (buildNumber != null)
         'build_number': buildNumber,
+      'package_name': manifest.appName,
     };
     return jsonEncode(versionFileJson);
   }
@@ -410,12 +417,14 @@ class AndroidProject extends FlutterProjectPlatform {
   /// True if the parent Flutter project is a module.
   bool get isModule => parent.isModule;
 
+  /// True if the parent Flutter project is a plugin.
+  bool get isPlugin => parent.isPlugin;
+
   /// True if the Flutter project is using the AndroidX support library.
   bool get usesAndroidX => parent.usesAndroidX;
 
   /// Returns true if the current version of the Gradle plugin is supported.
-  bool get isSupportedVersion => _isSupportedVersion ??= _computeSupportedVersion();
-  bool? _isSupportedVersion;
+  late final bool isSupportedVersion = _computeSupportedVersion();
 
   bool _computeSupportedVersion() {
     final FileSystem fileSystem = hostAppGradleRoot.fileSystem;
@@ -481,24 +490,7 @@ class AndroidProject extends FlutterProjectPlatform {
     return parent.directory.childDirectory('build');
   }
 
-  Future<void> ensureReadyForPlatformSpecificTooling() async {
-    if (getEmbeddingVersion() == AndroidEmbeddingVersion.v1) {
-      globals.printStatus(
-"""
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Warning
-──────────────────────────────────────────────────────────────────────────────
-Your Flutter application is created using an older version of the Android
-embedding. It's being deprecated in favor of Android embedding v2. Follow the
-steps at
-
-https://flutter.dev/go/android-project-migration
-
-to migrate your project.
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-"""
-      );
-    }
+  Future<void> ensureReadyForPlatformSpecificTooling({DeprecationBehavior deprecationBehavior = DeprecationBehavior.none}) async {
     if (isModule && _shouldRegenerateFromTemplate()) {
       await _regenerateLibrary();
       // Add ephemeral host app, if an editable host app does not already exist.
@@ -551,20 +543,74 @@ to migrate your project.
         'projectName': parent.manifest.appName,
         'androidIdentifier': androidIdentifier,
         'androidX': usesAndroidX,
+        'agpVersion': gradle.templateAndroidGradlePluginVersion,
+        'kotlinVersion': gradle.templateKotlinGradlePluginVersion,
+        'gradleVersion': gradle.templateDefaultGradleVersion,
       },
       printStatusWhenWriting: false,
-      overwriteExisting: true,
     );
   }
 
+  void checkForDeprecation({DeprecationBehavior deprecationBehavior = DeprecationBehavior.none}) {
+    if (deprecationBehavior == DeprecationBehavior.none) {
+      return;
+    }
+
+    final AndroidEmbeddingVersionResult result = computeEmbeddingVersion();
+    if (result.version != AndroidEmbeddingVersion.v1) {
+      return;
+    }
+
+    globals.printStatus(
+'''
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Warning
+──────────────────────────────────────────────────────────────────────────────
+Your Flutter application is created using an older version of the Android
+embedding. It is being deprecated in favor of Android embedding v2. Follow the
+steps at
+
+https://flutter.dev/go/android-project-migration
+
+to migrate your project. You may also pass the --ignore-deprecation flag to
+ignore this check and continue with the deprecated v1 embedding. However,
+the v1 Android embedding will be removed in future versions of Flutter.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+The detected reason was:
+
+  ${result.reason}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+''');
+    if (deprecationBehavior == DeprecationBehavior.ignore) {
+      BuildEvent('deprecated-v1-android-embedding-ignored', type: 'gradle', flutterUsage: globals.flutterUsage).send();
+    } else { // DeprecationBehavior.exit
+        BuildEvent('deprecated-v1-android-embedding-failed', type: 'gradle', flutterUsage: globals.flutterUsage).send();
+        throwToolExit(
+          'Build failed due to use of deprecated Android v1 embedding.',
+          exitCode: 1,
+        );
+    }
+  }
+
   AndroidEmbeddingVersion getEmbeddingVersion() {
+    return computeEmbeddingVersion().version;
+  }
+
+  AndroidEmbeddingVersionResult computeEmbeddingVersion() {
     if (isModule) {
       // A module type's Android project is used in add-to-app scenarios and
       // only supports the V2 embedding.
-      return AndroidEmbeddingVersion.v2;
+      return AndroidEmbeddingVersionResult(AndroidEmbeddingVersion.v2, 'Is add-to-app module');
+    }
+    if (isPlugin) {
+      // Plugins do not use an appManifest, so we stop here.
+      //
+      // TODO(garyq): This method does not currently check for code references to
+      // the v1 embedding, we should check for this once removal is further along.
+      return AndroidEmbeddingVersionResult(AndroidEmbeddingVersion.v2, 'Is plugin');
     }
     if (appManifestFile == null || !appManifestFile.existsSync()) {
-      return AndroidEmbeddingVersion.v1;
+      return AndroidEmbeddingVersionResult(AndroidEmbeddingVersion.v1, 'No `${appManifestFile.absolute.path}` file');
     }
     XmlDocument document;
     try {
@@ -576,19 +622,25 @@ to migrate your project.
       throwToolExit('Error reading $appManifestFile even though it exists. '
                     'Please ensure that you have read permission to this file and try again.');
     }
+    for (final XmlElement application in document.findAllElements('application')) {
+      final String? applicationName = application.getAttribute('android:name');
+      if (applicationName == 'io.flutter.app.FlutterApplication') {
+        return AndroidEmbeddingVersionResult(AndroidEmbeddingVersion.v1, '${appManifestFile.absolute.path} uses `android:name="io.flutter.app.FutterApplication"`');
+      }
+    }
     for (final XmlElement metaData in document.findAllElements('meta-data')) {
       final String? name = metaData.getAttribute('android:name');
       if (name == 'flutterEmbedding') {
         final String? embeddingVersionString = metaData.getAttribute('android:value');
         if (embeddingVersionString == '1') {
-          return AndroidEmbeddingVersion.v1;
+          return AndroidEmbeddingVersionResult(AndroidEmbeddingVersion.v1, '${appManifestFile.absolute.path} `<meta-data android:name="flutterEmbedding"` has value 1');
         }
         if (embeddingVersionString == '2') {
-          return AndroidEmbeddingVersion.v2;
+          return AndroidEmbeddingVersionResult(AndroidEmbeddingVersion.v2, '${appManifestFile.absolute.path} `<meta-data android:name="flutterEmbedding"` has value 2');
         }
       }
     }
-    return AndroidEmbeddingVersion.v1;
+    return AndroidEmbeddingVersionResult(AndroidEmbeddingVersion.v1, 'No `<meta-data android:name="flutterEmbedding" android:value="2"/>` in ${appManifestFile.absolute.path}');
   }
 }
 
@@ -598,6 +650,29 @@ enum AndroidEmbeddingVersion {
   v1,
   /// V2 APIs based on io.flutter.embedding.android.FlutterActivity.
   v2,
+}
+
+/// Data class that holds the results of checking for embedding version.
+///
+/// This class includes the reason why a particular embedding was selected.
+class AndroidEmbeddingVersionResult {
+  AndroidEmbeddingVersionResult(this.version, this.reason);
+
+  /// The embedding version.
+  AndroidEmbeddingVersion version;
+
+  /// The reason why the embedding version was selected.
+  String reason;
+}
+
+// What the tool should do when encountering deprecated API in applications.
+enum DeprecationBehavior {
+  // The command being run does not care about deprecation status.
+  none,
+  // The command should continue and ignore the deprecation warning.
+  ignore,
+  // The command should exit the tool.
+  exit,
 }
 
 /// Represents the web sub-project of a Flutter project.

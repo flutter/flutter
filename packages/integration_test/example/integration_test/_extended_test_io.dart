@@ -25,6 +25,24 @@ void main() {
     // Build our app.
     app.main();
 
+    // Pump a frame.
+    await tester.pumpAndSettle();
+
+    // Verify that platform version is retrieved.
+    expect(
+      find.byWidgetPredicate(
+        (Widget widget) =>
+            widget is Text &&
+            widget.data!.startsWith('Platform: ${Platform.operatingSystem}'),
+      ),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('verify screenshot', (WidgetTester tester) async {
+    // Build our app.
+    app.main();
+
     // On Android, this is required prior to taking the screenshot.
     await binding.convertFlutterSurfaceToImage();
 
@@ -39,15 +57,5 @@ void main() {
     expect(secondPng.isNotEmpty, isTrue);
 
     expect(listEquals(firstPng, secondPng), isTrue);
-
-    // Verify that platform version is retrieved.
-    expect(
-      find.byWidgetPredicate(
-        (Widget widget) =>
-            widget is Text &&
-            widget.data!.startsWith('Platform: ${Platform.operatingSystem}'),
-      ),
-      findsOneWidget,
-    );
   });
 }

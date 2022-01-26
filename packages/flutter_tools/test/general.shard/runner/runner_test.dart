@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' as io;
+import 'package:flutter_tools/src/base/net.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -22,6 +23,7 @@ import 'package:flutter_tools/src/runner/flutter_command.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fake_http_client.dart';
 
 const String kCustomBugInstructions = 'These are instructions to report with a custom bug tracker.';
 
@@ -96,6 +98,7 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
       Usage: () => CrashingUsage(),
       Artifacts: () => Artifacts.test(),
+      HttpClientFactory: () => () => FakeHttpClient.any()
     });
 
     // This Completer completes when CrashingFlutterCommand.runCommand
@@ -138,9 +141,20 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
       CrashReporter: () => WaitingCrashReporter(commandCompleter.future),
       Artifacts: () => Artifacts.test(),
+      HttpClientFactory: () => () => FakeHttpClient.any()
     });
 
     testUsingContext('create local report', () async {
+      // Since crash reporting calls the doctor, which checks for the devtools
+      // version file in the cache, write a version file to the memory fs.
+      Cache.flutterRoot = '/path/to/flutter';
+      final Directory devtoolsDir = globals.fs.directory(
+        '${Cache.flutterRoot}/bin/cache/dart-sdk/bin/resources/devtools',
+      )..createSync(recursive: true);
+      devtoolsDir.childFile('version.json').writeAsStringSync(
+        '{"version": "1.2.3"}',
+      );
+
       final Completer<void> completer = Completer<void>();
       // runner.run() asynchronously calls the exit function set above, so we
       // catch it in a zone.
@@ -179,26 +193,25 @@ void main() {
       expect(logContents, contains('String: an exception % --'));
       expect(logContents, contains('CrashingFlutterCommand.runCommand'));
       expect(logContents, contains('[✓] Flutter'));
-      print(globals.crashReporter.runtimeType);
 
       final CrashDetails sentDetails = (globals.crashReporter as WaitingCrashReporter)._details;
       expect(sentDetails.command, 'flutter crash');
       expect(sentDetails.error, 'an exception % --');
       expect(sentDetails.stackTrace.toString(), contains('CrashingFlutterCommand.runCommand'));
-      expect(sentDetails.doctorText, contains('[✓] Flutter'));
+      expect(await sentDetails.doctorText.text, contains('[✓] Flutter'));
     }, overrides: <Type, Generator>{
       Platform: () => FakePlatform(
         environment: <String, String>{
           'FLUTTER_ANALYTICS_LOG_FILE': 'test',
           'FLUTTER_ROOT': '/',
-        },
-        operatingSystem: 'linux'
+        }
       ),
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
       UserMessages: () => CustomBugInstructions(),
       Artifacts: () => Artifacts.test(),
-      CrashReporter: () => WaitingCrashReporter(Future<void>.value())
+      CrashReporter: () => WaitingCrashReporter(Future<void>.value()),
+      HttpClientFactory: () => () => FakeHttpClient.any()
     });
   });
 }

@@ -86,33 +86,7 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
   @override
   void onSingleTapUp(TapUpDetails details) {
     editableText.hideToolbar();
-    if (delegate.selectionEnabled) {
-      switch (Theme.of(_state.context).platform) {
-        case TargetPlatform.iOS:
-        case TargetPlatform.macOS:
-          switch (details.kind) {
-            case PointerDeviceKind.mouse:
-            case PointerDeviceKind.stylus:
-            case PointerDeviceKind.invertedStylus:
-              // Precise devices should place the cursor at a precise position.
-              renderEditable.selectPosition(cause: SelectionChangedCause.tap);
-              break;
-            case PointerDeviceKind.touch:
-            case PointerDeviceKind.unknown:
-              // On macOS/iOS/iPadOS a touch tap places the cursor at the edge
-              // of the word.
-              renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
-              break;
-          }
-          break;
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-        case TargetPlatform.linux:
-        case TargetPlatform.windows:
-          renderEditable.selectPosition(cause: SelectionChangedCause.tap);
-          break;
-      }
-    }
+    super.onSingleTapUp(details);
     _state._requestKeyboard();
     _state.widget.onTap?.call();
   }
@@ -168,6 +142,13 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 /// To integrate the [TextField] into a [Form] with other [FormField] widgets,
 /// consider using [TextFormField].
 ///
+/// {@template flutter.material.textfield.wantKeepAlive}
+/// When the widget has focus, it will prevent itself from disposing via its
+/// underlying [EditableText]'s [AutomaticKeepAliveClientMixin.wantKeepAlive] in
+/// order to avoid losing the selection. Removing the focus will allow it to be
+/// disposed.
+/// {@endtemplate}
+///
 /// Remember to call [TextEditingController.dispose] of the [TextEditingController]
 /// when it is no longer needed. This will ensure we discard any resources used
 /// by the object.
@@ -196,54 +177,11 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 /// callback. This callback is applied to the text field's current value when
 /// the user finishes editing.
 ///
-/// {@tool dartpad --template=stateful_widget_material}
-///
+/// {@tool dartpad}
 /// This sample shows how to get a value from a TextField via the [onSubmitted]
 /// callback.
 ///
-/// ```dart
-/// late TextEditingController _controller;
-///
-/// @override
-/// void initState() {
-///   super.initState();
-///   _controller = TextEditingController();
-/// }
-///
-/// @override
-/// void dispose() {
-///   _controller.dispose();
-///   super.dispose();
-/// }
-///
-/// @override
-/// Widget build(BuildContext context) {
-///   return Scaffold(
-///     body: Center(
-///       child: TextField(
-///         controller: _controller,
-///         onSubmitted: (String value) async {
-///           await showDialog<void>(
-///             context: context,
-///             builder: (BuildContext context) {
-///               return AlertDialog(
-///                 title: const Text('Thanks!'),
-///                 content: Text ('You typed "$value", which has length ${value.characters.length}.'),
-///                 actions: <Widget>[
-///                   TextButton(
-///                     onPressed: () { Navigator.pop(context); },
-///                     child: const Text('OK'),
-///                   ),
-///                 ],
-///               );
-///             },
-///           );
-///         },
-///       ),
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/material/text_field/text_field.1.dart **
 /// {@end-tool}
 ///
 /// For most applications the [onSubmitted] callback will be sufficient for
@@ -381,14 +319,15 @@ class TextField extends StatefulWidget {
     this.keyboardAppearance,
     this.scrollPadding = const EdgeInsets.all(20.0),
     this.dragStartBehavior = DragStartBehavior.start,
-    this.enableInteractiveSelection = true,
+    bool? enableInteractiveSelection,
     this.selectionControls,
     this.onTap,
     this.mouseCursor,
     this.buildCounter,
     this.scrollController,
     this.scrollPhysics,
-    this.autofillHints,
+    this.autofillHints = const <String>[],
+    this.clipBehavior = Clip.hardEdge,
     this.restorationId,
     this.enableIMEPersonalizedLearning = true,
   }) : assert(textAlign != null),
@@ -400,7 +339,6 @@ class TextField extends StatefulWidget {
        smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
        smartQuotesType = smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
        assert(enableSuggestions != null),
-       assert(enableInteractiveSelection != null),
        assert(maxLengthEnforced != null),
        assert(
          maxLengthEnforced || maxLengthEnforcement == null,
@@ -430,19 +368,34 @@ class TextField extends StatefulWidget {
          !identical(keyboardType, TextInputType.text),
          'Use keyboardType TextInputType.multiline when using TextInputAction.newline on a multiline TextField.',
        ),
+       assert(clipBehavior != null),
        assert(enableIMEPersonalizedLearning != null),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
-       toolbarOptions = toolbarOptions ?? (obscureText ?
-         const ToolbarOptions(
-           selectAll: true,
-           paste: true,
-         ) :
-         const ToolbarOptions(
-           copy: true,
-           cut: true,
-           selectAll: true,
-           paste: true,
-         )),
+       enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText),
+       toolbarOptions = toolbarOptions ??
+           (obscureText
+               ? (readOnly
+                   // No point in even offering "Select All" in a read-only obscured
+                   // field.
+                   ? const ToolbarOptions()
+                   // Writable, but obscured.
+                   : const ToolbarOptions(
+                       selectAll: true,
+                       paste: true,
+                     ))
+               : (readOnly
+                   // Read-only, not obscured.
+                   ? const ToolbarOptions(
+                       selectAll: true,
+                       copy: true,
+                     )
+                   // Writable, not obscured.
+                   : const ToolbarOptions(
+                       copy: true,
+                       cut: true,
+                       selectAll: true,
+                       paste: true,
+                     ))),
        super(key: key);
 
   /// Controls the text being edited.
@@ -703,7 +656,7 @@ class TextField extends StatefulWidget {
   ///
   /// This setting is only honored on iOS devices.
   ///
-  /// If unset, defaults to the brightness of [ThemeData.primaryColorBrightness].
+  /// If unset, defaults to [ThemeData.brightness].
   final Brightness? keyboardAppearance;
 
   /// {@macro flutter.widgets.editableText.scrollPadding}
@@ -804,6 +757,11 @@ class TextField extends StatefulWidget {
   /// {@macro flutter.services.AutofillConfiguration.autofillHints}
   final Iterable<String>? autofillHints;
 
+  /// {@macro flutter.material.Material.clipBehavior}
+  ///
+  /// Defaults to [Clip.hardEdge].
+  final Clip clipBehavior;
+
   /// {@template flutter.material.textfield.restorationId}
   /// Restoration ID to save and restore the state of the text field.
   ///
@@ -866,11 +824,12 @@ class TextField extends StatefulWidget {
     properties.add(DiagnosticsProperty<TextSelectionControls>('selectionControls', selectionControls, defaultValue: null));
     properties.add(DiagnosticsProperty<ScrollController>('scrollController', scrollController, defaultValue: null));
     properties.add(DiagnosticsProperty<ScrollPhysics>('scrollPhysics', scrollPhysics, defaultValue: null));
+    properties.add(DiagnosticsProperty<Clip>('clipBehavior', clipBehavior, defaultValue: Clip.hardEdge));
     properties.add(DiagnosticsProperty<bool>('enableIMEPersonalizedLearning', enableIMEPersonalizedLearning, defaultValue: true));
   }
 }
 
-class _TextFieldState extends State<TextField> with RestorationMixin implements TextSelectionGestureDetectorBuilderDelegate {
+class _TextFieldState extends State<TextField> with RestorationMixin implements TextSelectionGestureDetectorBuilderDelegate, AutofillClient {
   RestorableTextEditingController? _controller;
   TextEditingController get _effectiveController => widget.controller ?? _controller!.value;
 
@@ -985,6 +944,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       _createLocalController();
     }
     _effectiveFocusNode.canRequestFocus = _isEnabled;
+    _effectiveFocusNode.addListener(_handleFocusChanged);
   }
 
   bool get _canRequestFocus {
@@ -1013,7 +973,14 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       _controller!.dispose();
       _controller = null;
     }
+
+    if (widget.focusNode != oldWidget.focusNode) {
+      (oldWidget.focusNode ?? _focusNode)?.removeListener(_handleFocusChanged);
+      (widget.focusNode ?? _focusNode)?.addListener(_handleFocusChanged);
+    }
+
     _effectiveFocusNode.canRequestFocus = _canRequestFocus;
+
     if (_effectiveFocusNode.hasFocus && widget.readOnly != oldWidget.readOnly && _isEnabled) {
       if(_effectiveController.selection.isCollapsed) {
         _showSelectionHandles = !widget.readOnly;
@@ -1048,6 +1015,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
 
   @override
   void dispose() {
+    _effectiveFocusNode.removeListener(_handleFocusChanged);
     _focusNode?.dispose();
     _controller?.dispose();
     super.dispose();
@@ -1083,6 +1051,13 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     return false;
   }
 
+  void _handleFocusChanged() {
+    setState(() {
+      // Rebuild the widget on focus change to show/hide the text selection
+      // highlight.
+    });
+  }
+
   void _handleSelectionChanged(TextSelection selection, SelectionChangedCause? cause) {
     final bool willShowSelectionHandles = _shouldShowSelectionHandles(cause);
     if (willShowSelectionHandles != _showSelectionHandles) {
@@ -1094,15 +1069,19 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     switch (Theme.of(context).platform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
-        if (cause == SelectionChangedCause.longPress) {
-          _editableText?.bringIntoView(selection.base);
+        if (cause == SelectionChangedCause.longPress
+            || cause == SelectionChangedCause.drag) {
+          _editableText?.bringIntoView(selection.extent);
         }
         return;
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
-        // Do nothing.
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.android:
+        if (cause == SelectionChangedCause.drag) {
+          _editableText?.bringIntoView(selection.extent);
+        }
+        return;
     }
   }
 
@@ -1121,6 +1100,29 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     }
   }
 
+  // AutofillClient implementation start.
+  @override
+  String get autofillId => _editableText!.autofillId;
+
+  @override
+  void autofill(TextEditingValue newEditingValue) => _editableText!.autofill(newEditingValue);
+
+  @override
+  TextInputConfiguration get textInputConfiguration {
+    final List<String>? autofillHints = widget.autofillHints?.toList(growable: false);
+    final AutofillConfiguration autofillConfiguration = autofillHints != null
+      ? AutofillConfiguration(
+          uniqueIdentifier: autofillId,
+          autofillHints: autofillHints,
+          currentEditingValue: _effectiveController.value,
+          hintText: (widget.decoration ?? const InputDecoration()).hintText,
+        )
+      : AutofillConfiguration.disabled;
+
+    return _editableText!.textInputConfiguration.copyWith(autofillConfiguration: autofillConfiguration);
+  }
+  // AutofillClient implementation end.
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
@@ -1135,7 +1137,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     final ThemeData theme = Theme.of(context);
     final TextSelectionThemeData selectionTheme = TextSelectionTheme.of(context);
     final TextStyle style = theme.textTheme.subtitle1!.merge(widget.style);
-    final Brightness keyboardAppearance = widget.keyboardAppearance ?? theme.primaryColorBrightness;
+    final Brightness keyboardAppearance = widget.keyboardAppearance ?? theme.brightness;
     final TextEditingController controller = _effectiveController;
     final FocusNode focusNode = _effectiveFocusNode;
     final List<TextInputFormatter> formatters = <TextInputFormatter>[
@@ -1182,8 +1184,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
         cursorRadius ??= const Radius.circular(2.0);
         cursorOffset = Offset(iOSHorizontalOffset / MediaQuery.of(context).devicePixelRatio, 0);
         handleDidGainAccessibilityFocus = () {
-          // macOS automatically activated the TextField when it receives
-          // accessibility focus.
+          // Automatically activate the TextField when it receives accessibility focus.
           if (!_effectiveFocusNode.hasFocus && _effectiveFocusNode.canRequestFocus) {
             _effectiveFocusNode.requestFocus();
           }
@@ -1201,6 +1202,14 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
         break;
 
       case TargetPlatform.linux:
+        forcePressEnabled = false;
+        textSelectionControls ??= desktopTextSelectionControls;
+        paintCursorAboveText = false;
+        cursorOpacityAnimates = false;
+        cursorColor ??= selectionTheme.cursorColor ?? theme.colorScheme.primary;
+        selectionColor = selectionTheme.selectionColor ?? theme.colorScheme.primary.withOpacity(0.40);
+        break;
+
       case TargetPlatform.windows:
         forcePressEnabled = false;
         textSelectionControls ??= desktopTextSelectionControls;
@@ -1208,6 +1217,12 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
         cursorOpacityAnimates = false;
         cursorColor ??= selectionTheme.cursorColor ?? theme.colorScheme.primary;
         selectionColor = selectionTheme.selectionColor ?? theme.colorScheme.primary.withOpacity(0.40);
+        handleDidGainAccessibilityFocus = () {
+          // Automatically activate the TextField when it receives accessibility focus.
+          if (!_effectiveFocusNode.hasFocus && _effectiveFocusNode.canRequestFocus) {
+            _effectiveFocusNode.requestFocus();
+          }
+        };
         break;
     }
 
@@ -1239,7 +1254,8 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
           maxLines: widget.maxLines,
           minLines: widget.minLines,
           expands: widget.expands,
-          selectionColor: selectionColor,
+          // Only show the selection highlight when the text field is focused.
+          selectionColor: focusNode.hasFocus ? selectionColor : null,
           selectionControls: widget.selectionEnabled ? textSelectionControls : null,
           onChanged: widget.onChanged,
           onSelectionChanged: _handleSelectionChanged,
@@ -1266,8 +1282,9 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
           dragStartBehavior: widget.dragStartBehavior,
           scrollController: widget.scrollController,
           scrollPhysics: widget.scrollPhysics,
-          autofillHints: widget.autofillHints,
+          autofillClient: this,
           autocorrectionTextRectColor: autocorrectionTextRectColor,
+          clipBehavior: widget.clipBehavior,
           restorationId: 'editable',
           enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
         ),

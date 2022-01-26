@@ -100,58 +100,11 @@ class _PreferredAppBarSize extends Size {
 /// to false. In that case a null leading widget will result in the middle/title widget
 /// stretching to start.
 ///
-/// {@tool dartpad --template=stateless_widget_material}
-///
+/// {@tool dartpad}
 /// This sample shows an [AppBar] with two simple actions. The first action
 /// opens a [SnackBar], while the second action navigates to a new page.
 ///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return Scaffold(
-///     appBar: AppBar(
-///       title: const Text('AppBar Demo'),
-///       actions: <Widget>[
-///         IconButton(
-///           icon: const Icon(Icons.add_alert),
-///           tooltip: 'Show Snackbar',
-///           onPressed: () {
-///             ScaffoldMessenger.of(context).showSnackBar(
-///               const SnackBar(content: Text('This is a snackbar'))
-///             );
-///           },
-///         ),
-///         IconButton(
-///           icon: const Icon(Icons.navigate_next),
-///           tooltip: 'Go to the next page',
-///           onPressed: () {
-///             Navigator.push(context, MaterialPageRoute<void>(
-///               builder: (BuildContext context) {
-///                 return Scaffold(
-///                   appBar: AppBar(
-///                     title: const Text('Next page'),
-///                   ),
-///                   body: const Center(
-///                     child: Text(
-///                       'This is the next page',
-///                       style: TextStyle(fontSize: 24),
-///                     ),
-///                   ),
-///                 );
-///               },
-///             ));
-///           },
-///         ),
-///       ],
-///     ),
-///     body: const Center(
-///       child: Text(
-///         'This is the home page',
-///         style: TextStyle(fontSize: 24),
-///       ),
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/material/app_bar/app_bar.0.dart **
 /// {@end-tool}
 ///
 /// ## Troubleshooting
@@ -171,31 +124,10 @@ class _PreferredAppBarSize extends Size {
 /// [ColorScheme.primary].  to remedy the problem, override
 /// [TextButton.style]:
 ///
-/// {@tool dartpad --template=stateless_widget_material}
+/// {@tool dartpad}
 ///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   final ButtonStyle style = TextButton.styleFrom(
-///     primary: Theme.of(context).colorScheme.onPrimary
-///   );
-///   return Scaffold(
-///     appBar: AppBar(
-///       actions: <Widget>[
-///         TextButton(
-///           style: style,
-///           onPressed: () {},
-///           child: const Text('Action 1'),
-///         ),
-///         TextButton(
-///           style: style,
-///           onPressed: () {},
-///           child: const Text('Action 2'),
-///         )
-///       ],
-///     ),
-///   );
-/// }
-/// ```
+///
+/// ** See code in examples/api/lib/material/app_bar/app_bar.1.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -543,7 +475,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// This property is deprecated, please use [systemOverlayStyle] instead.
   ///
   /// Determines the brightness of the [SystemUiOverlayStyle]: for
-  /// [Brightness.dark], [SystemUiOverlayStyle.light] is used and fo
+  /// [Brightness.dark], [SystemUiOverlayStyle.light] is used and for
   /// [Brightness.light], [SystemUiOverlayStyle.dark] is used.
   ///
   /// If this value is null then [AppBarTheme.brightness] is used
@@ -1079,7 +1011,6 @@ class _AppBarState extends State<AppBar> {
     if (widget.primary) {
       appBar = SafeArea(
         bottom: false,
-        top: true,
         child: appBar,
       );
     }
@@ -1116,7 +1047,7 @@ class _AppBarState extends State<AppBar> {
       ? _systemOverlayStyleForBrightness(
           widget.brightness
           ?? appBarTheme.brightness
-          ?? theme.primaryColorBrightness,
+          ?? ThemeData.estimateBrightnessForColor(backgroundColor),
         )
       : widget.systemOverlayStyle
         ?? appBarTheme.systemOverlayStyle
@@ -1380,114 +1311,11 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 /// ```
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateful_widget_material}
+/// {@tool dartpad}
 /// This sample shows a [SliverAppBar] and it's behavior when using the
 /// [pinned], [snap] and [floating] parameters.
 ///
-/// ```dart
-/// bool _pinned = true;
-/// bool _snap = false;
-/// bool _floating = false;
-///
-/// // [SliverAppBar]s are typically used in [CustomScrollView.slivers], which in
-/// // turn can be placed in a [Scaffold.body].
-/// @override
-/// Widget build(BuildContext context) {
-///   return Scaffold(
-///     body: CustomScrollView(
-///       slivers: <Widget>[
-///         SliverAppBar(
-///           pinned: _pinned,
-///           snap: _snap,
-///           floating: _floating,
-///           expandedHeight: 160.0,
-///           flexibleSpace: const FlexibleSpaceBar(
-///             title: Text('SliverAppBar'),
-///             background: FlutterLogo(),
-///           ),
-///         ),
-///         const SliverToBoxAdapter(
-///           child: SizedBox(
-///             height: 20,
-///             child: Center(
-///               child: const Text('Scroll to see the SliverAppBar in effect.'),
-///             ),
-///           ),
-///         ),
-///         SliverList(
-///          delegate: SliverChildBuilderDelegate(
-///            (BuildContext context, int index) {
-///              return Container(
-///                color: index.isOdd ? Colors.white : Colors.black12,
-///                height: 100.0,
-///                child: Center(
-///                  child: Text('$index', textScaleFactor: 5),
-///                ),
-///              );
-///            },
-///            childCount: 20,
-///          ),
-///        ),
-///       ],
-///     ),
-///     bottomNavigationBar: BottomAppBar(
-///       child: Padding(
-///         padding: const EdgeInsets.all(8),
-///         child: OverflowBar(
-///           alignment: MainAxisAlignment.spaceEvenly,
-///           children: <Widget>[
-///             Row(
-///               mainAxisSize: MainAxisSize.min,
-///               children: <Widget>[
-///                 const Text('pinned'),
-///                 Switch(
-///                   onChanged: (bool val) {
-///                     setState(() {
-///                       _pinned = val;
-///                     });
-///                   },
-///                   value: _pinned,
-///                 ),
-///               ],
-///             ),
-///             Row(
-///               mainAxisSize: MainAxisSize.min,
-///               children: <Widget>[
-///                 const Text('snap'),
-///                 Switch(
-///                   onChanged: (bool val) {
-///                     setState(() {
-///                       _snap = val;
-///                       // Snapping only applies when the app bar is floating.
-///                       _floating = _floating || _snap;
-///                     });
-///                   },
-///                   value: _snap,
-///                 ),
-///               ],
-///             ),
-///             Row(
-///               mainAxisSize: MainAxisSize.min,
-///               children: <Widget>[
-///                 const Text('floating'),
-///                 Switch(
-///                   onChanged: (bool val) {
-///                     setState(() {
-///                       _floating = val;
-///                       _snap = _snap && _floating;
-///                     });
-///                   },
-///                   value: _floating,
-///                 ),
-///               ],
-///             ),
-///           ],
-///         ),
-///       ),
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/material/app_bar/sliver_app_bar.1.dart **
 /// {@end-tool}
 ///
 /// ## Animated Examples
@@ -1572,6 +1400,10 @@ class SliverAppBar extends StatefulWidget {
     this.shape,
     this.toolbarHeight = kToolbarHeight,
     this.leadingWidth,
+    @Deprecated(
+      'This property is obsolete and is false by default. '
+      'This feature was deprecated after v2.4.0-0.0.pre.',
+    )
     this.backwardsCompatibility,
     this.toolbarTextStyle,
     this.titleTextStyle,
@@ -1832,6 +1664,10 @@ class SliverAppBar extends StatefulWidget {
   /// {@macro flutter.material.appbar.backwardsCompatibility}
   ///
   /// This property is used to configure an [AppBar].
+  @Deprecated(
+    'This property is obsolete and is false by default. '
+    'This feature was deprecated after v2.4.0-0.0.pre.',
+  )
   final bool? backwardsCompatibility;
 
   /// {@macro flutter.material.appbar.toolbarTextStyle}

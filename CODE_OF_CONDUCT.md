@@ -1,7 +1,10 @@
+<!-- when updating this file also update https://github.com/flutter/.github/blob/main/CODE_OF_CONDUCT.md -->
+
 # Code of conduct
 
-We expect Flutter's contributors to act professionally and respectfully, and
-we expect our social spaces to be safe and dignified environments.
+The Flutter project expects Flutter's contributors to act professionally
+and respectfully. Flutter contributors are expected to maintain the safety
+and dignity of Flutter's social environments (such as GitHub and Discord).
 
 Specifically:
 
@@ -11,10 +14,11 @@ Specifically:
 
 Should you experience anything that makes you feel unwelcome in Flutter's
 community, please contact [conduct@flutter.dev](mailto:conduct@flutter.dev)
-or, if you prefer, directly contact someone on the team, for instance
-[Hixie](mailto:ian@hixie.ch) or [Tim](mailto:timsneath@google.com). We will
-not tolerate harassment from anyone in Flutter's community, even outside
-of Flutter's public communication channels.
+or, if you prefer, directly contact someone on the project, for instance
+[Hixie](mailto:ian@hixie.ch) or [Tim](mailto:timsneath@google.com).
+
+The Flutter project will not tolerate harassment in Flutter's
+community, even outside of Flutter's public communication channels.
 
 ## Conflict resolution
 
@@ -25,7 +29,7 @@ together, try to understand each other's points of view, and work to
 find a design that addresses everyone's concerns.
 
 This is usually sufficient to resolve issues. If you cannot come to an
-agreement, ask for the advice of a more senior member of the team.
+agreement, ask for the advice of a more senior member of the project.
 
 Be wary of agreement by attrition, where one person argues a point
 repeatedly until other participants give up in the interests of moving

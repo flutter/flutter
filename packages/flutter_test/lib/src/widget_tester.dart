@@ -59,7 +59,7 @@ export 'package:test_api/test_api.dart' hide
 /// Signature for callback to [testWidgets] and [benchmarkWidgets].
 typedef WidgetTesterCallback = Future<void> Function(WidgetTester widgetTester);
 
-// Return the last element that satisifes `test`, or return null if not found.
+// Return the last element that satisfies `test`, or return null if not found.
 E? _lastWhereOrNull<E>(Iterable<E> list, bool Function(E) test) {
   late E result;
   bool foundMatching = false;
@@ -82,23 +82,13 @@ E? _lastWhereOrNull<E>(Iterable<E> list, bool Function(E) test) {
 /// The callback can be asynchronous (using `async`/`await` or
 /// using explicit [Future]s).
 ///
-/// There are two kinds of timeouts that can be specified. The `timeout`
-/// argument specifies the backstop timeout implemented by the `test` package.
-/// If set, it should be relatively large (minutes). It defaults to ten minutes
-/// for tests run by `flutter test`, and is unlimited for tests run by `flutter
-/// run`; specifically, it defaults to
-/// [TestWidgetsFlutterBinding.defaultTestTimeout].
-///
-/// The `initialTimeout` argument specifies the timeout implemented by the
-/// `flutter_test` package itself. If set, it may be relatively small (seconds),
-/// as it is automatically increased for some expensive operations, and can also
-/// be manually increased by calling
-/// [AutomatedTestWidgetsFlutterBinding.addTime]. The effective maximum value of
-/// this timeout (even after calling `addTime`) is the one specified by the
-/// `timeout` argument.
-///
-/// In general, timeouts are race conditions and cause flakes, so best practice
-/// is to avoid the use of timeouts in tests.
+/// The `timeout` argument specifies the backstop timeout implemented by the
+/// `test` package. If set, it should be relatively large (minutes). It defaults
+/// to ten minutes for tests run by `flutter test`, and is unlimited for tests
+/// run by `flutter run`; specifically, it defaults to
+/// [TestWidgetsFlutterBinding.defaultTestTimeout]. (The `initialTimeout`
+/// parameter has no effect. It was previously used with
+/// [TestWidgetsFlutterBinding.addTime] but that feature was removed.)
 ///
 /// If the `semanticsEnabled` parameter is set to `true`,
 /// [WidgetTester.ensureSemantics] will have been called before the tester is
@@ -138,6 +128,10 @@ void testWidgets(
   WidgetTesterCallback callback, {
   bool? skip,
   test_package.Timeout? timeout,
+  @Deprecated(
+    'This parameter has no effect. Use `timeout` instead. '
+    'This feature was deprecated after v2.6.0-1.0.pre.'
+  )
   Duration? initialTimeout,
   bool semanticsEnabled = true,
   TestVariant<Object?> variant = const DefaultTestVariant(),
@@ -393,15 +387,15 @@ const String kDebugWarning = '''
 /// passed to the `callback`, and that handle will automatically be disposed
 /// after the callback is finished.
 ///
-/// Benchmarks must not be run in checked mode, because the performance is not
+/// Benchmarks must not be run in debug mode, because the performance is not
 /// representative. To avoid this, this function will print a big message if it
-/// is run in checked mode. Unit tests of this method pass `mayRunWithAsserts`,
+/// is run in debug mode. Unit tests of this method pass `mayRunWithAsserts`,
 /// but it should not be used for actual benchmarking.
 ///
 /// Example:
 ///
 ///     main() async {
-///       assert(false); // fail in checked mode
+///       assert(false); // fail in debug mode
 ///       await benchmarkWidgets((WidgetTester tester) async {
 ///         await tester.pumpWidget(MyWidget());
 ///         final Stopwatch timer = Stopwatch()..start();
@@ -422,7 +416,7 @@ Future<void> benchmarkWidgets(
   assert(() {
     if (mayRunWithAsserts)
       return true;
-    print(kDebugWarning);
+    debugPrint(kDebugWarning);
     return true;
   }());
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
@@ -626,7 +620,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     assert(() {
       final TestWidgetsFlutterBinding widgetsBinding = binding;
       return widgetsBinding is LiveTestWidgetsFlutterBinding &&
-              widgetsBinding.framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.benchmark;
+             widgetsBinding.framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.benchmark;
     }());
 
     dynamic caughtException;
@@ -638,7 +632,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     await idle();
 
     if (caughtException != null) {
-      throw caughtException as Object;
+      throw caughtException as Object; // ignore: only_throw_errors, rethrowing caught exception.
     }
   }
 
@@ -656,10 +650,12 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
       final WidgetsBinding binding = this.binding;
       if (binding is LiveTestWidgetsFlutterBinding &&
           binding.framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.benchmark) {
-        throw 'When using LiveTestWidgetsFlutterBindingFramePolicy.benchmark, '
-              'hasScheduledFrame is never set to true. This means that pumpAndSettle() '
-              'cannot be used, because it has no way to know if the application has '
-              'stopped registering new frames.';
+        test_package.fail(
+          'When using LiveTestWidgetsFlutterBindingFramePolicy.benchmark, '
+          'hasScheduledFrame is never set to true. This means that pumpAndSettle() '
+          'cannot be used, because it has no way to know if the application has '
+          'stopped registering new frames.',
+        );
       }
       return true;
     }());
@@ -847,9 +843,10 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
 
         final Widget widget = element.widget;
         if (widget is Tooltip) {
-          final Iterable<Element> matches = find.byTooltip(widget.message).evaluate();
+          final String message = widget.message ?? widget.richMessage!.toPlainText();
+          final Iterable<Element> matches = find.byTooltip(message).evaluate();
           if (matches.length == 1) {
-            printToConsole("  find.byTooltip('${widget.message}')");
+            printToConsole("  find.byTooltip('$message')");
             continue;
           }
         }

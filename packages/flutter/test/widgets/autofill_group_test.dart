@@ -25,7 +25,7 @@ void main() {
               client1,
               AutofillGroup(
                 key: innerKey,
-                child: Column(children: const <Widget>[client2, TextField()]),
+                child: Column(children: const <Widget>[client2, TextField(autofillHints: null)]),
               ),
             ]),
           ),
@@ -36,23 +36,19 @@ void main() {
     final AutofillGroupState innerState = tester.state<AutofillGroupState>(find.byKey(innerKey));
     final AutofillGroupState outerState = tester.state<AutofillGroupState>(find.byKey(outerKey));
 
-    final EditableTextState clientState1 = tester.state<EditableTextState>(
-      find.descendant(of: find.byWidget(client1), matching: find.byType(EditableText)),
-    );
-    final EditableTextState clientState2 = tester.state<EditableTextState>(
-      find.descendant(of: find.byWidget(client2), matching: find.byType(EditableText)),
-    );
+    final State<TextField> clientState1 = tester.state<State<TextField>>(find.byWidget(client1));
+    final State<TextField> clientState2 = tester.state<State<TextField>>(find.byWidget(client2));
 
-    expect(outerState.autofillClients, <EditableTextState>[clientState1]);
-    // The second TextField doesn't have autofill enabled.
-    expect(innerState.autofillClients, <EditableTextState>[clientState2]);
+    expect(outerState.autofillClients.toList(), <State<TextField>>[clientState1]);
+    // The second TextField in the AutofillGroup doesn't have autofill enabled.
+    expect(innerState.autofillClients.toList(), <State<TextField>>[clientState2]);
   });
 
   testWidgets('new clients can be added & removed to a scope', (WidgetTester tester) async {
     const Key scopeKey = Key('scope');
 
     const TextField client1 = TextField(autofillHints: <String>['1']);
-    TextField client2 = const TextField(autofillHints: <String>[]);
+    TextField client2 = const TextField(autofillHints: null);
 
     late StateSetter setState;
 
@@ -74,14 +70,10 @@ void main() {
 
     final AutofillGroupState scopeState = tester.state<AutofillGroupState>(find.byKey(scopeKey));
 
-    final EditableTextState clientState1 = tester.state<EditableTextState>(
-      find.descendant(of: find.byWidget(client1), matching: find.byType(EditableText)),
-    );
-    final EditableTextState clientState2 = tester.state<EditableTextState>(
-      find.descendant(of: find.byWidget(client2), matching: find.byType(EditableText)),
-    );
+    final State<TextField> clientState1 = tester.state<State<TextField>>(find.byWidget(client1));
+    final State<TextField> clientState2 = tester.state<State<TextField>>(find.byWidget(client2));
 
-    expect(scopeState.autofillClients, <EditableTextState>[clientState1]);
+    expect(scopeState.autofillClients.toList(), <State<TextField>>[clientState1]);
 
     // Add to scope.
     setState(() { client2 = const TextField(autofillHints: <String>['2']); });
@@ -93,11 +85,11 @@ void main() {
     expect(scopeState.autofillClients.length, 2);
 
     // Remove from scope again.
-    setState(() { client2 = const TextField(autofillHints: <String>[]); });
+    setState(() { client2 = const TextField(autofillHints: null); });
 
     await tester.pump();
 
-    expect(scopeState.autofillClients, <EditableTextState>[clientState1]);
+    expect(scopeState.autofillClients, <State<TextField>>[clientState1]);
   });
 
   testWidgets('AutofillGroup has the right clients after reparenting', (WidgetTester tester) async {
@@ -131,16 +123,9 @@ void main() {
     final AutofillGroupState innerState = tester.state<AutofillGroupState>(find.byKey(innerKey));
     final AutofillGroupState outerState = tester.state<AutofillGroupState>(find.byKey(outerKey));
 
-    final EditableTextState clientState1 = tester.state<EditableTextState>(
-      find.descendant(of: find.byWidget(client1), matching: find.byType(EditableText)),
-    );
-    final EditableTextState clientState2 = tester.state<EditableTextState>(
-      find.descendant(of: find.byWidget(client2), matching: find.byType(EditableText)),
-    );
-
-    final EditableTextState clientState3 = tester.state<EditableTextState>(
-      find.descendant(of: find.byKey(keyClient3), matching: find.byType(EditableText)),
-    );
+    final State<TextField> clientState1 = tester.state<State<TextField>>(find.byWidget(client1));
+    final State<TextField> clientState2 = tester.state<State<TextField>>(find.byWidget(client2));
+    final State<TextField> clientState3 = tester.state<State<TextField>>(find.byKey(keyClient3));
 
     await tester.pumpWidget(
       MaterialApp(
@@ -163,7 +148,7 @@ void main() {
     expect(outerState.autofillClients.length, 2);
     expect(outerState.autofillClients, contains(clientState1));
     expect(outerState.autofillClients, contains(clientState3));
-    expect(innerState.autofillClients, <EditableTextState>[clientState2]);
+    expect(innerState.autofillClients, <State<TextField>>[clientState2]);
   });
 
   testWidgets('disposing AutofillGroups', (WidgetTester tester) async {
@@ -176,13 +161,11 @@ void main() {
     List<Widget> children = const <Widget> [
       AutofillGroup(
         key: group1,
-        onDisposeAction: AutofillContextAction.commit,
         child: AutofillGroup(child: placeholder),
       ),
       AutofillGroup(key: group2, onDisposeAction: AutofillContextAction.cancel, child: placeholder),
       AutofillGroup(
         key: group3,
-        onDisposeAction: AutofillContextAction.commit,
         child: AutofillGroup(child: placeholder),
       ),
     ];
@@ -213,7 +196,6 @@ void main() {
         AutofillGroup(key: group2, onDisposeAction: AutofillContextAction.cancel, child: placeholder),
         AutofillGroup(
           key: group3,
-          onDisposeAction: AutofillContextAction.commit,
           child: AutofillGroup(child: placeholder),
         ),
       ];
@@ -233,7 +215,6 @@ void main() {
       children = const <Widget> [
         AutofillGroup(
           key: group3,
-          onDisposeAction: AutofillContextAction.commit,
           child: AutofillGroup(child: placeholder),
         ),
       ];
@@ -253,7 +234,6 @@ void main() {
       children = const <Widget> [
         AutofillGroup(
           key: group3,
-          onDisposeAction: AutofillContextAction.commit,
           child: placeholder,
         ),
       ];
@@ -270,8 +250,7 @@ void main() {
 
     // Remove the topmosts group group3. Should commit.
     setState(() {
-      children = const <Widget> [
-      ];
+      children = const <Widget> [];
     });
 
     await tester.pump();

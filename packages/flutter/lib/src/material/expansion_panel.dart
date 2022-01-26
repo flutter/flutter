@@ -58,6 +58,8 @@ typedef ExpansionPanelHeaderBuilder = Widget Function(BuildContext context, bool
 /// expanded or collapsed. The body of the panel is only visible when it is
 /// expanded.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=2aJZzRMziJc}
+///
 /// Expansion panels are only intended to be used as children for
 /// [ExpansionPanelList].
 ///
@@ -147,76 +149,10 @@ class ExpansionPanelRadio extends ExpansionPanel {
 /// Note that [expansionCallback] behaves differently for [ExpansionPanelList]
 /// and [ExpansionPanelList.radio].
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold}
-///
+/// {@tool dartpad}
 /// Here is a simple example of how to implement ExpansionPanelList.
 ///
-/// ```dart preamble
-/// // stores ExpansionPanel state information
-/// class Item {
-///   Item({
-///     required this.expandedValue,
-///     required this.headerValue,
-///     this.isExpanded = false,
-///   });
-///
-///   String expandedValue;
-///   String headerValue;
-///   bool isExpanded;
-/// }
-///
-/// List<Item> generateItems(int numberOfItems) {
-///   return List<Item>.generate(numberOfItems, (int index) {
-///     return Item(
-///       headerValue: 'Panel $index',
-///       expandedValue: 'This is item number $index',
-///     );
-///   });
-/// }
-/// ```
-///
-/// ```dart
-/// final List<Item> _data = generateItems(8);
-///
-/// @override
-/// Widget build(BuildContext context) {
-///   return SingleChildScrollView(
-///     child: Container(
-///       child: _buildPanel(),
-///     ),
-///   );
-/// }
-///
-/// Widget _buildPanel() {
-///   return ExpansionPanelList(
-///     expansionCallback: (int index, bool isExpanded) {
-///       setState(() {
-///         _data[index].isExpanded = !isExpanded;
-///       });
-///     },
-///     children: _data.map<ExpansionPanel>((Item item) {
-///       return ExpansionPanel(
-///         headerBuilder: (BuildContext context, bool isExpanded) {
-///           return ListTile(
-///             title: Text(item.headerValue),
-///           );
-///         },
-///         body: ListTile(
-///           title: Text(item.expandedValue),
-///           subtitle: const Text('To delete this panel, tap the trash can icon'),
-///           trailing: const Icon(Icons.delete),
-///           onTap: () {
-///             setState(() {
-///               _data.removeWhere((Item currentItem) => item == currentItem);
-///             });
-///           }
-///         ),
-///         isExpanded: item.isExpanded,
-///       );
-///     }).toList(),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/material/expansion_panel/expansion_panel_list.0.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -251,73 +187,10 @@ class ExpansionPanelList extends StatefulWidget {
   /// arguments must not be null. The [children] objects must be instances
   /// of [ExpansionPanelRadio].
   ///
-  /// {@tool dartpad --template=stateful_widget_scaffold}
-  ///
+  /// {@tool dartpad}
   /// Here is a simple example of how to implement ExpansionPanelList.radio.
   ///
-  /// ```dart preamble
-  /// // stores ExpansionPanel state information
-  /// class Item {
-  ///   Item({
-  ///     required this.id,
-  ///     required this.expandedValue,
-  ///     required this.headerValue,
-  ///   });
-  ///
-  ///   int id;
-  ///   String expandedValue;
-  ///   String headerValue;
-  /// }
-  ///
-  /// List<Item> generateItems(int numberOfItems) {
-  ///   return List<Item>.generate(numberOfItems, (int index) {
-  ///     return Item(
-  ///       id: index,
-  ///       headerValue: 'Panel $index',
-  ///       expandedValue: 'This is item number $index',
-  ///     );
-  ///   });
-  /// }
-  /// ```
-  ///
-  /// ```dart
-  /// final List<Item> _data = generateItems(8);
-  ///
-  /// @override
-  /// Widget build(BuildContext context) {
-  ///   return SingleChildScrollView(
-  ///     child: Container(
-  ///       child: _buildPanel(),
-  ///     ),
-  ///   );
-  /// }
-  ///
-  /// Widget _buildPanel() {
-  ///   return ExpansionPanelList.radio(
-  ///     initialOpenPanelValue: 2,
-  ///     children: _data.map<ExpansionPanelRadio>((Item item) {
-  ///       return ExpansionPanelRadio(
-  ///         value: item.id,
-  ///         headerBuilder: (BuildContext context, bool isExpanded) {
-  ///           return ListTile(
-  ///             title: Text(item.headerValue),
-  ///           );
-  ///         },
-  ///         body: ListTile(
-  ///           title: Text(item.expandedValue),
-  ///           subtitle: const Text('To delete this panel, tap the trash can icon'),
-  ///           trailing: const Icon(Icons.delete),
-  ///           onTap: () {
-  ///             setState(() {
-  ///               _data.removeWhere((Item currentItem) => item == currentItem);
-  ///             });
-  ///           }
-  ///         )
-  ///       );
-  ///     }).toList(),
-  ///   );
-  /// }
-  /// ```
+  /// ** See code in examples/api/lib/material/expansion_panel/expansion_panel_list.expansion_panel_list_radio.0.dart **
   /// {@end-tool}
   const ExpansionPanelList.radio({
     Key? key,

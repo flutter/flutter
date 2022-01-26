@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -23,7 +27,7 @@ void main() {
           home: Container(
             decoration: BoxDecoration(
               color: const Color.fromARGB(255, 128, 128, 128),
-              border: Border.all(color: const Color.fromARGB(255, 0, 0, 0)),
+              border: Border.all(),
             ),
             child: Center(
               child: Container(
@@ -68,7 +72,8 @@ void main() {
       animationSheet.collate(6),
       matchesGoldenFile('LiveBinding.press.animation.png'),
     );
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/42767
+    // Currently skipped due to daily flake: https://github.com/flutter/flutter/issues/87588
+  }, skip: true); // Typically skip: isBrowser https://github.com/flutter/flutter/issues/42767
 
   testWidgets('Should show event indicator for pointer events with setSurfaceSize', (WidgetTester tester) async {
     final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(frameSize: const Size(200, 200), allLayers: true);
@@ -80,7 +85,7 @@ void main() {
           home: Container(
             decoration: BoxDecoration(
               color: const Color.fromARGB(255, 128, 128, 128),
-              border: Border.all(color: const Color.fromARGB(255, 0, 0, 0)),
+              border: Border.all(),
             ),
             child: Center(
               child: Container(

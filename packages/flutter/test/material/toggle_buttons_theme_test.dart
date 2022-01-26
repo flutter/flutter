@@ -416,7 +416,6 @@ void main() {
             data: ToggleButtonsThemeData(fillColor: MaterialStateColor.resolveWith(getColor)),
             child: ToggleButtons(
               isSelected: const <bool>[true, false],
-              onPressed: null,
               children: const <Widget>[
                 Text('First child'),
                 Text('Second child'),

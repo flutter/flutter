@@ -73,19 +73,67 @@ void main() {
     );
   });
 
+  test('analyze.dart - verifyGoldenTags', () async {
+    final String result = await capture(() => verifyGoldenTags(testRootPath, minimumMatches: 6), exitCode: 1);
+    const String noTag = 'Files containing golden tests must be '
+        'tagged using `@Tags(...)` at the top of the file before import statements.';
+    const String missingTag = 'Files containing golden tests must be '
+        "tagged with 'reduced-test-set'.";
+    String lines = <String>[
+        'test/analyze-test-input/root/packages/foo/golden_missing_tag.dart: $missingTag',
+        'test/analyze-test-input/root/packages/foo/golden_no_tag.dart: $noTag',
+      ]
+      .map((String line) {
+        return line
+          .replaceAll('/', Platform.isWindows ? r'\' : '/');
+      })
+      .join('\n');
+
+    try {
+      expect(
+        result,
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
+        '$lines\n'
+        'See: https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter\n'
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
+      );
+    } catch (_) {
+      // This list of files may come up in one order or the other.
+      lines = <String>[
+        'test/analyze-test-input/root/packages/foo/golden_no_tag.dart: $noTag',
+        'test/analyze-test-input/root/packages/foo/golden_missing_tag.dart: $missingTag',
+      ]
+      .map((String line) {
+        return line
+          .replaceAll('/', Platform.isWindows ? r'\' : '/');
+      })
+      .join('\n');
+      expect(
+        result,
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
+        '$lines\n'
+        'See: https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter\n'
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
+      );
+    }
+  });
+
   test('analyze.dart - verifyNoMissingLicense', () async {
     final String result = await capture(() => verifyNoMissingLicense(testRootPath, checkMinimums: false), exitCode: 1);
-    final String lines = 'test/analyze-test-input/root/packages/foo/foo.dart'
+    final String file = 'test/analyze-test-input/root/packages/foo/foo.dart'
       .replaceAll('/', Platform.isWindows ? r'\' : '/');
     expect(result,
       '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
-      'The following 1 file does not have the right license header:\n'
-      '$lines\n'
+      'The following file does not have the right license header for dart files:\n'
+      '  $file\n'
       'The expected license header is:\n'
       '// Copyright 2014 The Flutter Authors. All rights reserved.\n'
       '// Use of this source code is governed by a BSD-style license that can be\n'
       '// found in the LICENSE file.\n'
       '...followed by a blank line.\n'
+      '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
+      '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
+      'License check failed.\n'
       '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
     );
   });
@@ -111,9 +159,7 @@ void main() {
       legacyBinaries: <Hash256>{const Hash256(0x39A050CD69434936, 0, 0, 0)},
     ), exitCode: Platform.isWindows ? 0 : 1);
     if (!Platform.isWindows) {
-      // The output starts with the call to git ls-files, the details of which
-      // change from run to run, so we only check the trailing end of the output.
-      expect(result, endsWith('\n'
+      expect(result,
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
         'test/analyze-test-input/root/packages/foo/serviceaccount.enc:0: file is not valid UTF-8\n'
         'All files in this repository must be UTF-8. In particular, images and other binaries\n'
@@ -122,7 +168,7 @@ void main() {
         'to which you need access, you should consider how to fetch it from another repository;\n'
         'for example, the "assets-for-api-docs" repository is used for images in API docs.\n'
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
-      ));
+      );
     }
   });
 
@@ -148,6 +194,16 @@ void main() {
         const Hash256(0xA8100AE6AA1940D0, 0xB663BB31CD466142, 0xEBBDBD5187131B92, 0xD93818987832EB89), // sha256("\xff")
         const Hash256(0x155644D3F13D98BF, 0, 0, 0),
       },
-    ), exitCode: 0);
+    ));
+  });
+
+  test('analyze.dart - verifyNullInitializedDebugExpensiveFields', () async {
+    final String result = await capture(() => verifyNullInitializedDebugExpensiveFields(
+      testRootPath,
+      minimumMatches: 1,
+    ), exitCode: 1);
+
+    expect(result, contains('L15'));
+    expect(result, isNot(contains('L12')));
   });
 }

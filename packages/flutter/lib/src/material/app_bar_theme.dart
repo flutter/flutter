@@ -228,6 +228,10 @@ class AppBarTheme with Diagnosticable {
   /// new values.
   AppBarTheme copyWith({
     IconThemeData? actionsIconTheme,
+    @Deprecated(
+      'This property is no longer used, please use systemOverlayStyle instead. '
+      'This feature was deprecated after v2.4.0-0.0.pre.',
+    )
     Brightness? brightness,
     Color? color,
     Color? backgroundColor,
@@ -236,6 +240,10 @@ class AppBarTheme with Diagnosticable {
     Color? shadowColor,
     ShapeBorder? shape,
     IconThemeData? iconTheme,
+    @Deprecated(
+      'This property is no longer used, please use toolbarTextStyle and titleTextStyle instead. '
+      'This feature was deprecated after v2.4.0-0.0.pre.',
+    )
     TextTheme? textTheme,
     bool? centerTitle,
     double? titleSpacing,
@@ -243,6 +251,10 @@ class AppBarTheme with Diagnosticable {
     TextStyle? toolbarTextStyle,
     TextStyle? titleTextStyle,
     SystemUiOverlayStyle? systemOverlayStyle,
+    @Deprecated(
+      'This property is obsolete and is false by default. '
+      'This feature was deprecated after v2.4.0-0.0.pre.',
+    )
     bool? backwardsCompatibility,
   }) {
     assert(

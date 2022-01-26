@@ -7,9 +7,10 @@ import 'dart:convert' show json, utf8, LineSplitter, JsonEncoder;
 import 'dart:io' as io;
 import 'dart:math' as math;
 
-import 'package:flutter_devicelab/common.dart';
 import 'package:path/path.dart' as path;
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart';
+
+import '../common.dart';
 
 /// The number of samples used to extract metrics, such as noise, means,
 /// max/min values.
@@ -350,7 +351,7 @@ class BlinkTraceSummary {
         averageBeginFrameTime: _computeAverageDuration(frames.map((BlinkFrame frame) => frame.beginFrame).whereType<BlinkTraceEvent>().toList()),
         averageUpdateLifecyclePhasesTime: _computeAverageDuration(frames.map((BlinkFrame frame) => frame.updateAllLifecyclePhases).whereType<BlinkTraceEvent>().toList()),
       );
-    } catch (_, __) {
+    } catch (_) {
       final io.File traceFile = io.File('./chrome-trace.json');
       io.stderr.writeln('Failed to interpret the Chrome trace contents. The trace was saved in ${traceFile.path}');
       traceFile.writeAsStringSync(const JsonEncoder.withIndent('  ').convert(traceJson));

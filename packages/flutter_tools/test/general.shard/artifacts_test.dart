@@ -25,7 +25,7 @@ void main() {
       fileSystem = MemoryFileSystem.test();
       final Directory cacheRoot = fileSystem.directory('root')
         ..createSync();
-      platform = FakePlatform(operatingSystem: 'linux');
+      platform = FakePlatform();
       cache = Cache(
         rootOverride: cacheRoot,
         fileSystem: fileSystem,
@@ -129,6 +129,10 @@ void main() {
         artifacts.getArtifactPath(Artifact.windowsUwpDesktopPath, platform: TargetPlatform.windows_uwp_x64, mode: BuildMode.release),
         fileSystem.path.join('root', 'bin', 'cache', 'artifacts', 'engine', 'windows-uwp-x64-release'),
       );
+      expect(
+        artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
+        fileSystem.path.join('root', 'bin', 'cache', 'dart-sdk', 'bin', 'snapshots', 'frontend_server.dart.snapshot')
+      );
     });
 
     testWithoutContext('precompiled web artifact paths are correct', () {
@@ -192,7 +196,7 @@ void main() {
       fileSystem = MemoryFileSystem.test();
       final Directory cacheRoot = fileSystem.directory('root')
         ..createSync();
-      platform = FakePlatform(operatingSystem: 'linux');
+      platform = FakePlatform();
       cache = Cache(
         rootOverride: cacheRoot,
         fileSystem: fileSystem,
@@ -293,6 +297,11 @@ void main() {
       expect(
         artifacts.getHostArtifact(HostArtifact.engineDartSdkPath).path,
         fileSystem.path.join('/out', 'host_debug_unopt', 'dart-sdk'),
+      );
+      expect(
+        artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
+        fileSystem.path.join('/out', 'host_debug_unopt', 'dart-sdk', 'bin',
+          'snapshots', 'frontend_server.dart.snapshot')
       );
     });
 

@@ -93,7 +93,8 @@ void main() {
     final IOSApp iosApp = PrebuiltIOSApp(
       projectBundleId: 'app',
       bundleName: 'Runner',
-      bundleDir: MemoryFileSystem.test().directory('bundle'),
+      uncompressedBundle: MemoryFileSystem.test().directory('bundle'),
+      applicationPackage: MemoryFileSystem.test().directory('bundle'),
     );
 
     device.portForwarder = devicePortForwarder;
@@ -116,7 +117,8 @@ void main() {
     final IOSApp iosApp = PrebuiltIOSApp(
       projectBundleId: 'app',
       bundleName: 'Runner',
-      bundleDir: fileSystem.currentDirectory,
+      uncompressedBundle: fileSystem.currentDirectory,
+      applicationPackage: fileSystem.currentDirectory,
     );
     final FakeDeviceLogReader deviceLogReader = FakeDeviceLogReader();
 
@@ -153,7 +155,8 @@ void main() {
     final IOSApp iosApp = PrebuiltIOSApp(
       projectBundleId: 'app',
       bundleName: 'Runner',
-      bundleDir: fileSystem.currentDirectory,
+      uncompressedBundle: fileSystem.currentDirectory,
+      applicationPackage: fileSystem.currentDirectory,
     );
     final FakeDeviceLogReader deviceLogReader = FakeDeviceLogReader();
 
@@ -191,7 +194,8 @@ void main() {
     final IOSApp iosApp = PrebuiltIOSApp(
       projectBundleId: 'app',
       bundleName: 'Runner',
-      bundleDir: fileSystem.currentDirectory,
+      uncompressedBundle: fileSystem.currentDirectory,
+      applicationPackage: fileSystem.currentDirectory,
     );
     final FakeDeviceLogReader deviceLogReader = FakeDeviceLogReader();
 
@@ -230,7 +234,8 @@ void main() {
     final IOSApp iosApp = PrebuiltIOSApp(
       projectBundleId: 'app',
       bundleName: 'Runner',
-      bundleDir: fileSystem.currentDirectory,
+      uncompressedBundle: fileSystem.currentDirectory,
+      applicationPackage: fileSystem.currentDirectory,
     );
 
     final LaunchResult launchResult = await device.startApp(iosApp,
@@ -296,7 +301,8 @@ void main() {
     final IOSApp iosApp = PrebuiltIOSApp(
       projectBundleId: 'app',
       bundleName: 'Runner',
-      bundleDir: fileSystem.currentDirectory,
+      uncompressedBundle: fileSystem.currentDirectory,
+      applicationPackage: fileSystem.currentDirectory,
     );
     final FakeDeviceLogReader deviceLogReader = FakeDeviceLogReader();
 
@@ -379,7 +385,7 @@ IOSDevice setUpIOSDevice({
       cache: cache,
     ),
     cpuArchitecture: DarwinArch.arm64,
-    interfaceType: IOSDeviceInterface.usb,
+    interfaceType: IOSDeviceConnectionInterface.usb,
   );
 }
 

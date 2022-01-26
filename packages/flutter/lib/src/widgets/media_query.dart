@@ -7,6 +7,7 @@ import 'dart:ui' as ui;
 import 'dart:ui' show Brightness;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 
 import 'basic.dart';
 import 'binding.dart';
@@ -66,6 +67,8 @@ enum Orientation {
 /// For example, by using the viewPadding property, padding would defer to the
 /// iPhone "safe area" regardless of whether a keyboard is showing.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=ceCo8U0XHqw}
+///
 /// The viewInsets and viewPadding are independent values, they're
 /// measured from the edges of the MediaQuery widget's bounds. Together they
 /// inform the [padding] property. The bounds of the top level MediaQuery
@@ -104,6 +107,8 @@ class MediaQueryData {
     this.disableAnimations = false,
     this.boldText = false,
     this.navigationMode = NavigationMode.traditional,
+    this.gestureSettings = const DeviceGestureSettings(touchSlop: kTouchSlop),
+    this.displayFeatures = const <ui.DisplayFeature>[],
   }) : assert(size != null),
        assert(devicePixelRatio != null),
        assert(textScaleFactor != null),
@@ -118,7 +123,9 @@ class MediaQueryData {
        assert(highContrast != null),
        assert(disableAnimations != null),
        assert(boldText != null),
-       assert(navigationMode != null);
+       assert(navigationMode != null),
+       assert(gestureSettings != null),
+       assert(displayFeatures != null);
 
   /// Creates data for a media query based on the given window.
   ///
@@ -142,7 +149,9 @@ class MediaQueryData {
       boldText = window.accessibilityFeatures.boldText,
       highContrast = window.accessibilityFeatures.highContrast,
       alwaysUse24HourFormat = window.alwaysUse24HourFormat,
-      navigationMode = NavigationMode.traditional;
+      navigationMode = NavigationMode.traditional,
+      gestureSettings = DeviceGestureSettings.fromWindow(window),
+      displayFeatures = window.displayFeatures;
 
   /// The size of the media in logical pixels (e.g, the size of the screen).
   ///
@@ -251,8 +260,7 @@ class MediaQueryData {
   /// This property is currently only expected to be set to a non-default value
   /// on Android starting with version Q.
   ///
-  /// {@tool dartpad --template=stateful_widget_material}
-  ///
+  /// {@tool dartpad}
   /// For apps that might be deployed on Android Q devices with full gesture
   /// navigation enabled, use [systemGestureInsets] with [Padding]
   /// to avoid having the left and right edges of the [Slider] from appearing
@@ -261,31 +269,7 @@ class MediaQueryData {
   /// By default, [Slider]s expand to fill the available width. So, we pad the
   /// left and right sides.
   ///
-  /// ```dart
-  /// double _currentValue = 0.2;
-  ///
-  /// @override
-  /// Widget build(BuildContext context) {
-  ///   final EdgeInsets systemGestureInsets = MediaQuery.of(context).systemGestureInsets;
-  ///   return Scaffold(
-  ///     appBar: AppBar(title: const Text('Pad Slider to avoid systemGestureInsets')),
-  ///     body: Padding(
-  ///       padding: EdgeInsets.only( // only left and right padding are needed here
-  ///         left: systemGestureInsets.left,
-  ///         right: systemGestureInsets.right,
-  ///       ),
-  ///       child: Slider(
-  ///         value: _currentValue,
-  ///         onChanged: (double newValue) {
-  ///           setState(() {
-  ///             _currentValue = newValue;
-  ///           });
-  ///         },
-  ///       ),
-  ///     ),
-  ///   );
-  /// }
-  /// ```
+  /// ** See code in examples/api/lib/widgets/media_query/media_query_data.system_gesture_insets.0.dart **
   /// {@end-tool}
   final EdgeInsets systemGestureInsets;
 
@@ -365,6 +349,24 @@ class MediaQueryData {
   /// a widget subtree for those widgets sensitive to it.
   final NavigationMode navigationMode;
 
+  /// The gesture settings for the view this media query is derived from.
+  ///
+  /// This contains platform specific configuration for gesture behavior,
+  /// such as touch slop. These settings should be favored for configuring
+  /// gesture behavior over the framework constants.
+  final DeviceGestureSettings gestureSettings;
+
+  /// {@macro dart.ui.ViewConfiguration.displayFeatures}
+  ///
+  /// See also:
+  ///
+  ///  * [dart:ui.DisplayFeatureType], which lists the different types of
+  ///  display features and explains the differences between them.
+  ///  * [dart:ui.DisplayFeatureState], which lists the possible states for
+  ///  folding features ([dart:ui.DisplayFeatureType.fold] and
+  ///  [dart:ui.DisplayFeatureType.hinge]).
+  final List<ui.DisplayFeature> displayFeatures;
+
   /// The orientation of the media (e.g., whether the device is in landscape or
   /// portrait mode).
   Orientation get orientation {
@@ -389,6 +391,8 @@ class MediaQueryData {
     bool? accessibleNavigation,
     bool? boldText,
     NavigationMode? navigationMode,
+    DeviceGestureSettings? gestureSettings,
+    List<ui.DisplayFeature>? displayFeatures,
   }) {
     return MediaQueryData(
       size: size ?? this.size,
@@ -406,6 +410,8 @@ class MediaQueryData {
       accessibleNavigation: accessibleNavigation ?? this.accessibleNavigation,
       boldText: boldText ?? this.boldText,
       navigationMode: navigationMode ?? this.navigationMode,
+      gestureSettings: gestureSettings ?? this.gestureSettings,
+      displayFeatures: displayFeatures ?? this.displayFeatures,
     );
   }
 
@@ -456,6 +462,8 @@ class MediaQueryData {
       invertColors: invertColors,
       accessibleNavigation: accessibleNavigation,
       boldText: boldText,
+      gestureSettings: gestureSettings,
+      displayFeatures: displayFeatures,
     );
   }
 
@@ -504,6 +512,8 @@ class MediaQueryData {
       invertColors: invertColors,
       accessibleNavigation: accessibleNavigation,
       boldText: boldText,
+      gestureSettings: gestureSettings,
+      displayFeatures: displayFeatures,
     );
   }
 
@@ -552,6 +562,8 @@ class MediaQueryData {
       invertColors: invertColors,
       accessibleNavigation: accessibleNavigation,
       boldText: boldText,
+      gestureSettings: gestureSettings,
+      displayFeatures: displayFeatures,
     );
   }
 
@@ -573,7 +585,9 @@ class MediaQueryData {
         && other.invertColors == invertColors
         && other.accessibleNavigation == accessibleNavigation
         && other.boldText == boldText
-        && other.navigationMode == navigationMode;
+        && other.navigationMode == navigationMode
+        && other.gestureSettings == gestureSettings
+        && listEquals(other.displayFeatures, displayFeatures);
   }
 
   @override
@@ -593,6 +607,8 @@ class MediaQueryData {
       accessibleNavigation,
       boldText,
       navigationMode,
+      gestureSettings,
+      hashList(displayFeatures),
     );
   }
 
@@ -612,7 +628,9 @@ class MediaQueryData {
       'disableAnimations: $disableAnimations',
       'invertColors: $invertColors',
       'boldText: $boldText',
-      'navigationMode: ${describeEnum(navigationMode)}',
+      'navigationMode: ${navigationMode.name}',
+      'gestureSettings: $gestureSettings',
+      'displayFeatures: $displayFeatures',
     ];
     return '${objectRuntimeType(this, 'MediaQueryData')}(${properties.join(', ')})';
   }

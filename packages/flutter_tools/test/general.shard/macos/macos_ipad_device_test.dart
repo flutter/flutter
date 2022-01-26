@@ -26,7 +26,7 @@ void main() {
       MacOSDesignedForIPadDevices.allowDiscovery = false;
     });
 
-    testWithoutContext('does not support non-macOS plaforms', () async {
+    testWithoutContext('does not support non-macOS platforms', () async {
       MacOSDesignedForIPadDevices.allowDiscovery = true;
       final MacOSDesignedForIPadDevices discoverer = MacOSDesignedForIPadDevices(
         platform: FakePlatform(operatingSystem: 'windows'),
@@ -136,7 +136,7 @@ void main() {
      expect(await device.stopApp(null), isFalse);
 
     await expectLater(() => device.startApp(null, debuggingOptions: null), throwsA(isA<UnimplementedError>()));
-    await expectLater(() => device.buildForDevice(null), throwsA(isA<UnimplementedError>()));
+    await expectLater(() => device.buildForDevice(null, buildInfo: BuildInfo.debug), throwsA(isA<UnimplementedError>()));
     expect(device.executablePathForDevice(null, null), null);
   });
 }

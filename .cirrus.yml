@@ -12,7 +12,7 @@ environment:
   # dependency on precisely how Cirrus is detected by our tools.
   BOT: "true"
 
-gcp_credentials: ENCRYPTED[!0e63b52bd7e4fda1cd7b7bf2b4fe515a27fadbeaced01f5ad8b699b81d3611ed64c5d3271bcd8426dd914ef41cba48a0!]
+gcp_credentials: ENCRYPTED[!cc769765170bebc37e0556e2da5915ca64ee37f4ec8c966ec147e2f59578b476c99e457eafce4e2f8b1a4e305f7096b8!]
 
 # LINUX SHARDS
 task:
@@ -67,16 +67,15 @@ task:
       - date
       - which flutter
   matrix:
-    # TODO(flutter): https://github.com/flutter/flutter/issues/87517 analyze linux is only failing on Cirrus due to an unknown snippets issue
-    # - name: analyze-linux # linux-only
-    #   only_if: "$CIRRUS_PR != ''"
-    #   environment:
-    #     # Empirically, the analyze-linux shard runs surprisingly fast (under 15 minutes) with just 1
-    #     # CPU.  We noticed OOM failures with 6GB 4/2020, so we increased the memory.
-    #     CPU: 1
-    #     MEMORY: 8G
-    #   script:
-    #     - dart --enable-asserts ./dev/bots/analyze.dart
+    - name: analyze-linux # linux-only
+      only_if: "$CIRRUS_PR != ''"
+      environment:
+        # Empirically, the analyze-linux shard runs surprisingly fast (under 15 minutes) with just 1
+        # CPU.  We noticed OOM failures with 6GB 4/2020, so we increased the memory.
+        CPU: 1
+        MEMORY: 8G
+      script:
+        - dart --enable-asserts ./dev/bots/analyze.dart
 
     - name: framework_tests-widgets-linux
       only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/**') && $CIRRUS_PR != ''"
@@ -116,10 +115,10 @@ task:
         MEMORY: 10G
         SHOULD_UPDATE_PACKAGES: "FALSE"
       script:
-        - (cd packages/flutter_tools; pub get)
-        - (cd packages/flutter_tools/test/data/asset_test/main; pub get)
-        - (cd packages/flutter_tools/test/data/asset_test/font; pub get)
-        - (cd dev/bots; pub get)
+        - (cd packages/flutter_tools; dart __deprecated_pub get)
+        - (cd packages/flutter_tools/test/data/asset_test/main; dart __deprecated_pub get)
+        - (cd packages/flutter_tools/test/data/asset_test/font; dart __deprecated_pub get)
+        - (cd dev/bots; dart __deprecated_pub get)
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: tool_tests-commands-linux
@@ -132,14 +131,14 @@ task:
         MEMORY: 10G
         SHOULD_UPDATE_PACKAGES: "FALSE"
       script:
-        - (cd packages/flutter_tools; pub get)
-        - (cd dev/bots; pub get)
+        - (cd packages/flutter_tools; dart __deprecated_pub get)
+        - (cd dev/bots; dart __deprecated_pub get)
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: docs-linux # linux-only
       environment:
         CPU: 4
-        MEMORY: 8G
+        MEMORY: 12G
       only_if: "$CIRRUS_PR != ''"
       script:
         - ./dev/bots/docs.sh
@@ -169,7 +168,7 @@ task:
         - flutter config --enable-web
         - git clone https://github.com/flutter/web_installers.git
         - cd web_installers/packages/web_drivers/
-        - pub get
+        - dart __deprecated_pub get
         - dart lib/web_driver_installer.dart chromedriver --install-only
         - chromedriver/chromedriver --port=4444 &
         - sleep 1

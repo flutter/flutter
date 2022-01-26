@@ -438,7 +438,6 @@ void main() {
                   itemBuilderCalled = true;
                   return <PopupMenuEntry<int>>[
                     PopupMenuItem<int>(
-                      enabled: true,
                       value: 1,
                       child: Text('Tap me please!', key: childKey),
                     ),
@@ -557,9 +556,9 @@ void main() {
     testWidgets('PopupMenuButton fails when given both child and icon', (WidgetTester tester) async {
       expect(() {
         PopupMenuButton<int>(
-            child: const Text('heyo'),
             icon: const Icon(Icons.view_carousel),
             itemBuilder: simplePopupMenuItemBuilder,
+            child: const Text('heyo'),
         );
       }, throwsAssertionError);
     });
@@ -1700,8 +1699,8 @@ void main() {
     expect(() {
       PopupMenuButton<int>(
         itemBuilder: (BuildContext context) => <PopupMenuItem<int>>[],
-        child: Container(),
         icon: const Icon(Icons.error),
+        child: Container(),
       );
     }, throwsAssertionError);
   });
@@ -2043,7 +2042,7 @@ void main() {
 
     const double statusBarHeight = 24.0;
     final PopupMenuItem<int> firstItem = choices[0];
-    int _selectedValue = choices[0].value!;
+    int selectedValue = choices[0].value!;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -2062,10 +2061,10 @@ void main() {
                   PopupMenuButton<int>(
                     onSelected: (int result) {
                       setState(() {
-                        _selectedValue = result;
+                        selectedValue = result;
                       });
                     },
-                    initialValue: _selectedValue,
+                    initialValue: selectedValue,
                     itemBuilder: (BuildContext context) {
                       return choices;
                     },

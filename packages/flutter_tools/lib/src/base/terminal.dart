@@ -111,6 +111,7 @@ abstract class Terminal {
 
   String clearScreen();
 
+  bool get singleCharMode;
   set singleCharMode(bool value);
 
   /// Return keystrokes from the console.
@@ -270,6 +271,14 @@ class AnsiTerminal implements Terminal {
   String clearScreen() => supportsColor ? clear : '\n\n';
 
   @override
+  bool get singleCharMode {
+    if (!_stdio.stdinHasTerminal) {
+      return false;
+    }
+    final io.Stdin stdin = _stdio.stdin as io.Stdin;
+    return stdin.lineMode && stdin.echoMode;
+  }
+  @override
   set singleCharMode(bool value) {
     if (!_stdio.stdinHasTerminal) {
       return;
@@ -365,6 +374,8 @@ class _TestTerminal implements Terminal {
     throw UnsupportedError('promptForCharInput not supported in the test terminal.');
   }
 
+  @override
+  bool get singleCharMode => false;
   @override
   set singleCharMode(bool value) { }
 

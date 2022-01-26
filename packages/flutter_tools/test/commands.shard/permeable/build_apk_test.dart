@@ -11,7 +11,7 @@ import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_apk.dart';
-import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:test/fake.dart';
@@ -129,7 +129,7 @@ void main() {
 
     group('AndroidSdk', () {
       testUsingContext('throws throwsToolExit if AndroidSdk is null', () async {
-        final String projectPath = await createProject(tempDir, arguments: <String>['--no-pub', '--template=app']);
+        final String projectPath = await createProject(tempDir, arguments: <String>['--no-pub', '--template=app', '--platform=android']);
 
         await expectLater(
           () => runBuildApkCommand(
@@ -150,13 +150,14 @@ void main() {
     });
 
     testUsingContext('shrinking is enabled by default on release mode', () async {
-      final String projectPath = await createProject(tempDir, arguments: <String>['--no-pub', '--template=app']);
+      final String projectPath = await createProject(tempDir, arguments: <String>['--no-pub', '--template=app', '--platform=android']);
       processManager.addCommand(FakeCommand(
         command: <String>[
           gradlew,
           '-q',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
+          '-Pbase-application-name=android.app.Application',
           '-Pdart-obfuscation=false',
           '-Ptrack-widget-creation=true',
           '-Ptree-shake-icons=true',
@@ -179,13 +180,14 @@ void main() {
     });
 
     testUsingContext('--split-debug-info is enabled when an output directory is provided', () async {
-      final String projectPath = await createProject(tempDir, arguments: <String>['--no-pub', '--template=app']);
+      final String projectPath = await createProject(tempDir, arguments: <String>['--no-pub', '--template=app', '--platform=android']);
       processManager.addCommand(FakeCommand(
         command: <String>[
           gradlew,
           '-q',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
+          '-Pbase-application-name=android.app.Application',
           '-Pdart-obfuscation=false',
           '-Psplit-debug-info=${tempDir.path}',
           '-Ptrack-widget-creation=true',
@@ -209,13 +211,14 @@ void main() {
     });
 
     testUsingContext('--extra-front-end-options are provided to gradle project', () async {
-      final String projectPath = await createProject(tempDir, arguments: <String>['--no-pub', '--template=app']);
+      final String projectPath = await createProject(tempDir, arguments: <String>['--no-pub', '--template=app', '--platform=android']);
       processManager.addCommand(FakeCommand(
         command: <String>[
           gradlew,
           '-q',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
+          '-Pbase-application-name=android.app.Application',
           '-Pdart-obfuscation=false',
           '-Pextra-front-end-options=foo,bar',
           '-Ptrack-widget-creation=true',
@@ -239,13 +242,14 @@ void main() {
     });
 
     testUsingContext('shrinking is disabled when --no-shrink is passed', () async {
-      final String projectPath = await createProject(tempDir, arguments: <String>['--no-pub', '--template=app']);
+      final String projectPath = await createProject(tempDir, arguments: <String>['--no-pub', '--template=app', '--platform=android']);
       processManager.addCommand(FakeCommand(
         command: <String>[
           gradlew,
           '-q',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
+          '-Pbase-application-name=android.app.Application',
           '-Pdart-obfuscation=false',
           '-Ptrack-widget-creation=true',
           '-Ptree-shake-icons=true',
@@ -271,7 +275,7 @@ void main() {
     });
 
     testUsingContext('guides the user when the shrinker fails', () async {
-      final String projectPath = await createProject(tempDir, arguments: <String>['--no-pub', '--template=app']);
+      final String projectPath = await createProject(tempDir, arguments: <String>['--no-pub', '--template=app', '--platform=android']);
       const String r8StdoutWarning =
         "Execution failed for task ':app:transformClassesAndResourcesWithR8ForStageInternal'.\n"
         '> com.android.tools.r8.CompilationFailedException: Compilation failed to complete';
@@ -281,6 +285,7 @@ void main() {
           '-q',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
+          '-Pbase-application-name=android.app.Application',
           '-Pdart-obfuscation=false',
           '-Ptrack-widget-creation=true',
           '-Ptree-shake-icons=true',
@@ -322,7 +327,7 @@ void main() {
     });
 
     testUsingContext("reports when the app isn't using AndroidX", () async {
-      final String projectPath = await createProject(tempDir, arguments: <String>['--no-pub', '--template=app']);
+      final String projectPath = await createProject(tempDir, arguments: <String>['--no-pub', '--template=app', '--platform=android']);
       // Simulate a non-androidx project.
       tempDir
         .childDirectory('flutter_project')
@@ -335,12 +340,12 @@ void main() {
           '-q',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
+          '-Pbase-application-name=android.app.Application',
           '-Pdart-obfuscation=false',
           '-Ptrack-widget-creation=true',
           '-Ptree-shake-icons=true',
           'assembleRelease',
         ],
-        exitCode: 0,
       ));
 
       // The command throws a [ToolExit] because it expects an APK in the file system.
@@ -375,19 +380,19 @@ void main() {
     });
 
     testUsingContext('reports when the app is using AndroidX', () async {
-      final String projectPath = await createProject(tempDir, arguments: <String>['--no-pub', '--template=app']);
+      final String projectPath = await createProject(tempDir, arguments: <String>['--no-pub', '--template=app', '--platform=android']);
       processManager.addCommand(FakeCommand(
         command: <String>[
           gradlew,
           '-q',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
+          '-Pbase-application-name=android.app.Application',
           '-Pdart-obfuscation=false',
           '-Ptrack-widget-creation=true',
           '-Ptree-shake-icons=true',
           'assembleRelease',
         ],
-        exitCode: 0,
       ));
 
       // The command throws a [ToolExit] because it expects an APK in the file system.

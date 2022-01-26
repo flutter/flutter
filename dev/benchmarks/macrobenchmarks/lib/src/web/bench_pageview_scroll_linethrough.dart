@@ -113,7 +113,7 @@ class _CustomPainter extends CustomPainter {
 
       _textPainter.text = span;
 
-      _textPainter.layout(minWidth: 0, maxWidth: width);
+      _textPainter.layout(maxWidth: width);
       _linePainter.style = PaintingStyle.fill;
       canvas.drawRect(
           Rect.fromLTWH(xPosition, yPosition - viewPadding, width, height),
