@@ -18,11 +18,6 @@ TEST(CountDownLatchTest, CanWaitOnZero) {
   latch.Wait();
 }
 
-#if OS_FUCHSIA
-#define CanWait DISABLED_CanWait
-#else
-#define CanWait CanWait
-#endif
 TEST(CountDownLatchTest, CanWait) {
   fml::Thread thread("test_thread");
   const size_t count = 100;
