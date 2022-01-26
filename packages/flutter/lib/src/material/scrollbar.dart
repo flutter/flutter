@@ -142,7 +142,7 @@ class Scrollbar extends StatelessWidget {
   )
   final bool? isAlwaysShown;
 
-  /// Controls the track visibility.
+  /// {@macro flutter.widgets.Scrollbar.trackVisibility}
   ///
   /// If this property is null, then [ScrollbarThemeData.trackVisibility] of
   /// [ThemeData.scrollbarTheme] is used. If that is also null, the default value
