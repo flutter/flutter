@@ -26,6 +26,18 @@ namespace flutter {
 // implements the window delegate. The |OnKey| and |OnText| results are
 // passed to those of |WindowWin32|'s, and consequently, those of
 // |FlutterWindowsView|'s.
+//
+// ## Terminology
+//
+// The keyboard system follows the following terminology instead of the
+// inconsistent/incomplete one used by Win32:
+//
+//  * Message: An invocation of |WndProc|, which consists of an
+//    action, an lparam, and a wparam.
+//  * Action: The type of a message.
+//  * Session: One to three messages that should be processed together, such
+//    as a key down message followed by char messages.
+//  * Event: A FlutterKeyEvent/ui.KeyData sent to the framework.
 class KeyboardManagerWin32 {
  public:
   // Define how the keyboard manager accesses Win32 system calls (to allow
@@ -92,30 +104,40 @@ class KeyboardManagerWin32 {
                      LPARAM const lparam);
 
  private:
+  struct Win32Message {
+    UINT const action;
+    WPARAM const wparam;
+    LPARAM const lparam;
+
+    bool IsHighSurrogate() const { return IS_HIGH_SURROGATE(wparam); }
+
+    bool IsLowSurrogate() const { return IS_LOW_SURROGATE(wparam); }
+
+    bool IsGeneralKeyDown() const {
+      return action == WM_KEYDOWN || action == WM_SYSKEYDOWN;
+    }
+  };
+
   struct PendingEvent {
-    uint32_t key;
+    WPARAM key;
     uint8_t scancode;
-    uint32_t action;
+    UINT action;
     char32_t character;
     bool extended;
     bool was_down;
 
+    std::vector<Win32Message> session;
+
     // A value calculated out of critical event information that can be used
     // to identify redispatched events.
-    uint64_t hash;
+    uint64_t Hash() const { return ComputeEventHash(*this); }
   };
 
   using OnKeyCallback =
       std::function<void(std::unique_ptr<PendingEvent>, bool)>;
 
   // Returns true if it's a new event, or false if it's a redispatched event.
-  bool OnKey(int key,
-             int scancode,
-             int action,
-             char32_t character,
-             bool extended,
-             bool was_down,
-             OnKeyCallback callback);
+  bool OnKey(std::unique_ptr<PendingEvent> event, OnKeyCallback callback);
 
   void HandleOnKeyResult(std::unique_ptr<PendingEvent> event,
                          bool handled,
@@ -141,9 +163,8 @@ class KeyboardManagerWin32 {
 
   WindowDelegate* window_delegate_;
 
-  // Keeps track of the last key code produced by a WM_KEYDOWN or WM_SYSKEYDOWN
-  // message.
-  int keycode_for_char_message_ = 0;
+  // Keeps track of all messages during the current session.
+  std::vector<Win32Message> current_session_;
 
   std::map<uint16_t, std::u16string> text_for_scancode_on_redispatch_;
 
