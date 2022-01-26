@@ -34,7 +34,6 @@ class ScrollbarThemeData with Diagnosticable {
     this.thumbVisibility,
     this.thickness,
     this.trackVisibility,
-    this.showTrackOnHover,
     this.radius,
     this.thumbColor,
     this.trackColor,
@@ -48,6 +47,11 @@ class ScrollbarThemeData with Diagnosticable {
       'This feature was deprecated after v2.9.0-1.0.pre.',
     )
     this.isAlwaysShown,
+    @Deprecated(
+      'Use ScrollbarThemeData.trackVisibility to resolve based on the current state instead. '
+      'This feature was deprecated after v2.9.0-1.0.pre.',
+    )
+    this.showTrackOnHover,
   }) : assert(
          isAlwaysShown == null || thumbVisibility == null,
          'Scrollbar thumb appearance should only be controlled with thumbVisibility, '
@@ -73,6 +77,10 @@ class ScrollbarThemeData with Diagnosticable {
 
   /// Overrides the default value of [Scrollbar.showTrackOnHover] in all
   /// descendant [Scrollbar] widgets.
+  @Deprecated(
+    'Use ScrollbarThemeData.trackVisibility to resolve based on the current state instead. '
+    'This feature was deprecated after v2.9.0-1.0.pre.',
+  )
   final bool? showTrackOnHover;
 
   /// Overrides the default value of [Scrollbar.isAlwaysShown] in all
