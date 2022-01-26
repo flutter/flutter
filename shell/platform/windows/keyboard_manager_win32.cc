@@ -93,7 +93,7 @@ static bool IsKeyDownShiftRight(int virtual_key, bool was_down) {
 }
 
 // Returns if a character sent by Win32 is a dead key.
-static bool _IsDeadKey(uint32_t ch) {
+static bool IsDeadKey(uint32_t ch) {
   return (ch & kDeadKeyCharMask) != 0;
 }
 
@@ -181,7 +181,7 @@ bool KeyboardManagerWin32::RemoveRedispatchedEvent(
     const PendingEvent& incoming) {
   for (auto iter = pending_redispatches_.begin();
        iter != pending_redispatches_.end(); ++iter) {
-    if ((*iter)->hash == incoming.hash) {
+    if ((*iter)->Hash() == incoming.Hash()) {
       pending_redispatches_.erase(iter);
       return true;
     }
@@ -189,41 +189,25 @@ bool KeyboardManagerWin32::RemoveRedispatchedEvent(
   return false;
 }
 
-bool KeyboardManagerWin32::OnKey(int key,
-                                 int scancode,
-                                 int action,
-                                 char32_t character,
-                                 bool extended,
-                                 bool was_down,
+bool KeyboardManagerWin32::OnKey(std::unique_ptr<PendingEvent> event,
                                  OnKeyCallback callback) {
-  std::unique_ptr<PendingEvent> incoming =
-      std::make_unique<PendingEvent>(PendingEvent{
-          .key = static_cast<uint32_t>(key),
-          .scancode = static_cast<uint8_t>(scancode),
-          .action = static_cast<uint32_t>(action),
-          .character = character,
-          .extended = extended,
-          .was_down = was_down,
-      });
-  incoming->hash = ComputeEventHash(*incoming);
-
-  if (RemoveRedispatchedEvent(*incoming)) {
+  if (RemoveRedispatchedEvent(*event)) {
     return false;
   }
 
-  if (IsKeyDownAltRight(action, key, extended)) {
+  if (IsKeyDownAltRight(event->action, event->key, event->extended)) {
     if (last_key_is_ctrl_left_down) {
       should_synthesize_ctrl_left_up = true;
     }
   }
-  if (IsKeyDownCtrlLeft(action, key)) {
+  if (IsKeyDownCtrlLeft(event->action, event->key)) {
     last_key_is_ctrl_left_down = true;
-    ctrl_left_scancode = scancode;
+    ctrl_left_scancode = event->scancode;
     should_synthesize_ctrl_left_up = false;
   } else {
     last_key_is_ctrl_left_down = false;
   }
-  if (IsKeyUpAltRight(action, key, extended)) {
+  if (IsKeyUpAltRight(event->action, event->key, event->extended)) {
     if (should_synthesize_ctrl_left_up) {
       should_synthesize_ctrl_left_up = false;
       PendingEvent ctrl_left_up{
@@ -236,8 +220,10 @@ bool KeyboardManagerWin32::OnKey(int key,
     }
   }
 
-  window_delegate_->OnKey(key, scancode, action, character, extended, was_down,
-                          [this, event = incoming.release(),
+  const PendingEvent clone = *event;
+  window_delegate_->OnKey(clone.key, clone.scancode, clone.action,
+                          clone.character, clone.extended, clone.was_down,
+                          [this, event = event.release(),
                            callback = std::move(callback)](bool handled) {
                             callback(std::unique_ptr<PendingEvent>(event),
                                      handled);
@@ -261,7 +247,7 @@ void KeyboardManagerWin32::HandleOnKeyResult(
   // |SendInput|.
   const bool is_syskey =
       event->action == WM_SYSKEYDOWN || event->action == WM_SYSKEYUP;
-  const bool real_handled = handled || _IsDeadKey(event->character) ||
+  const bool real_handled = handled || IsDeadKey(event->character) ||
                             is_syskey ||
                             IsKeyDownShiftRight(event->key, event->was_down);
 
@@ -284,93 +270,101 @@ void KeyboardManagerWin32::HandleOnKeyResult(
   RedispatchEvent(std::move(event));
 }
 
-bool KeyboardManagerWin32::HandleMessage(UINT const message,
+bool KeyboardManagerWin32::HandleMessage(UINT const action,
                                          WPARAM const wparam,
                                          LPARAM const lparam) {
-  switch (message) {
+  switch (action) {
     case WM_DEADCHAR:
     case WM_SYSDEADCHAR:
     case WM_CHAR:
     case WM_SYSCHAR: {
-      static wchar_t s_pending_high_surrogate = 0;
+      const Win32Message message =
+          Win32Message{.action = action, .wparam = wparam, .lparam = lparam};
+      current_session_.push_back(message);
 
-      wchar_t character = static_cast<wchar_t>(wparam);
       std::u16string text;
       char32_t code_point;
-      if (IS_HIGH_SURROGATE(character)) {
-        // Save to send later with the trailing surrogate.
-        s_pending_high_surrogate = character;
+      if (message.IsHighSurrogate()) {
+        // A high surrogate is always followed by a low surrogate.  Process the
+        // session later and consider this message as handled.
         return true;
-      } else if (IS_LOW_SURROGATE(character) && s_pending_high_surrogate != 0) {
-        text.push_back(s_pending_high_surrogate);
-        text.push_back(character);
-        // Merge the surrogate pairs for the key event.
+      } else if (message.IsLowSurrogate()) {
+        const Win32Message* last_message =
+            current_session_.size() <= 1
+                ? nullptr
+                : &current_session_[current_session_.size() - 2];
+        if (last_message == nullptr || !last_message->IsHighSurrogate()) {
+          return false;
+        }
+        // A low surrogate always follows a high surrogate, marking the end of
+        // a char session. Process the session after the if clause.
+        text.push_back(static_cast<wchar_t>(last_message->wparam));
+        text.push_back(static_cast<wchar_t>(message.wparam));
         code_point =
-            CodePointFromSurrogatePair(s_pending_high_surrogate, character);
-        s_pending_high_surrogate = 0;
+            CodePointFromSurrogatePair(last_message->wparam, message.wparam);
       } else {
-        text.push_back(character);
-        code_point = character;
+        // A non-surrogate character always appears alone. Process the session
+        // after the if clause.
+        text.push_back(static_cast<wchar_t>(message.wparam));
+        code_point = static_cast<wchar_t>(message.wparam);
       }
 
-      const unsigned int scancode = (lparam >> 16) & 0xff;
-
-      // All key presses that generate a character should be sent from
-      // WM_CHAR. In order to send the full key press information, the keycode
-      // is persisted in keycode_for_char_message_ obtained from WM_KEYDOWN.
-      //
-      // A high surrogate is always followed by a low surrogate, while a
-      // non-surrogate character always appears alone. Filter out high
-      // surrogates so that it's the low surrogate message that triggers
-      // the onKey, asks if the framework handles it (which can only be done
-      // once), and calls OnText during the redispatched messages.
-      if (keycode_for_char_message_ != 0 && !IS_HIGH_SURROGATE(character)) {
+      // If this char message is preceded by a key down message, then dispatch
+      // the key down message as a key down event first, and only dispatch the
+      // OnText if the key down event is not handled.
+      if (current_session_.front().IsGeneralKeyDown()) {
+        const Win32Message first_message = current_session_.front();
+        current_session_.clear();
+        const uint8_t scancode = (lparam >> 16) & 0xff;
+        const uint16_t key_code = first_message.wparam;
         const bool extended = ((lparam >> 24) & 0x01) == 0x01;
         const bool was_down = lparam & 0x40000000;
         // Certain key combinations yield control characters as WM_CHAR's
         // lParam. For example, 0x01 for Ctrl-A. Filter these characters. See
         // https://docs.microsoft.com/en-us/windows/win32/learnwin32/accelerator-tables
-        char32_t event_character;
-        if (message == WM_DEADCHAR || message == WM_SYSDEADCHAR) {
+        char32_t character;
+        if (action == WM_DEADCHAR || action == WM_SYSDEADCHAR) {
           // Mask the resulting char with kDeadKeyCharMask anyway, because in
           // rare cases the bit is *not* set (US INTL Shift-6 circumflex, see
           // https://github.com/flutter/flutter/issues/92654 .)
-          event_character =
-              window_delegate_->Win32MapVkToChar(keycode_for_char_message_) |
-              kDeadKeyCharMask;
+          character =
+              window_delegate_->Win32MapVkToChar(key_code) | kDeadKeyCharMask;
         } else {
-          event_character = IsPrintable(code_point) ? code_point : 0;
+          character = IsPrintable(code_point) ? code_point : 0;
         }
-        bool is_new_event =
-            OnKey(keycode_for_char_message_, scancode,
-                  message == WM_SYSCHAR ? WM_SYSKEYDOWN : WM_KEYDOWN,
-                  event_character, extended, was_down,
-                  [this, message, text](std::unique_ptr<PendingEvent> event,
-                                        bool handled) {
-                    HandleOnKeyResult(std::move(event), handled, message, text);
-                  });
-        if (!is_new_event) {
-          break;
-        }
-        keycode_for_char_message_ = 0;
-
+        auto event = std::make_unique<PendingEvent>(PendingEvent{
+            .key = key_code,
+            .scancode = scancode,
+            .action = static_cast<UINT>(action == WM_SYSCHAR ? WM_SYSKEYDOWN
+                                                             : WM_KEYDOWN),
+            .character = character,
+            .extended = extended,
+            .was_down = was_down,
+            .session = std::move(current_session_),
+        });
+        const bool is_unmet_event = OnKey(
+            std::move(event),
+            [this, char_action = action, text](
+                std::unique_ptr<PendingEvent> event, bool handled) {
+              HandleOnKeyResult(std::move(event), handled, char_action, text);
+            });
+        const bool is_syskey = action == WM_SYSCHAR;
         // For system characters, always pass them to the default WndProc so
         // that system keys like the ALT-TAB are processed correctly.
-        if (message == WM_SYSCHAR) {
-          break;
-        }
-        return true;
+        return is_unmet_event && !is_syskey;
       }
 
-      // Of the messages handled here, only WM_CHAR should be treated as
-      // characters. WM_SYS*CHAR are not part of text input, and WM_DEADCHAR
-      // will be incorporated into a later WM_CHAR with the full character.
-      // Also filter out:
-      // - Lead surrogates, which like dead keys will be send once combined.
-      // - ASCII control characters, which are sent as WM_CHAR events for all
-      //   control key shortcuts.
-      if (message == WM_CHAR && s_pending_high_surrogate == 0 &&
-          IsPrintable(character)) {
+      // If the charcter session is not preceded by a key down message, dispatch
+      // the OnText immediately.
+
+      // Only WM_CHAR should be treated as characters. WM_SYS*CHAR are not part
+      // of text input, and WM_DEADCHAR will be incorporated into a later
+      // WM_CHAR with the full character.
+      //
+      // Also filter out ASCII control characters, which are sent as WM_CHAR
+      // events for all control key shortcuts.
+      current_session_.clear();
+      if (action == WM_CHAR && IsPrintable(wparam)) {
         window_delegate_->OnText(text);
       }
       return true;
@@ -380,8 +374,11 @@ bool KeyboardManagerWin32::HandleMessage(UINT const message,
     case WM_SYSKEYDOWN:
     case WM_KEYUP:
     case WM_SYSKEYUP: {
+      current_session_.clear();
+      current_session_.push_back(
+          Win32Message{.action = action, .wparam = wparam, .lparam = lparam});
       const bool is_keydown_message =
-          (message == WM_KEYDOWN || message == WM_SYSKEYDOWN);
+          (action == WM_KEYDOWN || action == WM_SYSKEYDOWN);
       // Check if this key produces a character. If so, the key press should
       // be sent with the character produced at WM_CHAR. Store the produced
       // keycode (it's not accessible from WM_CHAR) to be used in WM_CHAR.
@@ -397,30 +394,36 @@ bool KeyboardManagerWin32::HandleMessage(UINT const message,
            next_key_message == WM_SYSDEADCHAR || next_key_message == WM_CHAR ||
            next_key_message == WM_SYSCHAR);
       if (character > 0 && is_keydown_message && has_wm_char) {
-        keycode_for_char_message_ = wparam;
+        // This key down message has following char events. Process later,
+        // because the character for the OnKey should be decided by the char
+        // events. Consider this event as handled.
         return true;
       }
-      unsigned int keyCode(wparam);
+
+      // Resolve session: A non-char key event.
       const uint8_t scancode = (lparam >> 16) & 0xff;
       const bool extended = ((lparam >> 24) & 0x01) == 0x01;
       // If the key is a modifier, get its side.
-      keyCode = ResolveKeyCode(keyCode, extended, scancode);
+      const uint16_t key_code = ResolveKeyCode(wparam, extended, scancode);
       const bool was_down = lparam & 0x40000000;
-      bool is_syskey = message == WM_SYSKEYDOWN || message == WM_SYSKEYUP;
-      bool is_new_event = OnKey(
-          keyCode, scancode, message, 0, extended, was_down,
+      auto event = std::make_unique<PendingEvent>(PendingEvent{
+          .key = key_code,
+          .scancode = scancode,
+          .action = action,
+          .character = 0,
+          .extended = extended,
+          .was_down = was_down,
+          .session = std::move(current_session_),
+      });
+      const bool is_unmet_event = OnKey(
+          std::move(event),
           [this](std::unique_ptr<PendingEvent> event, bool handled) {
             HandleOnKeyResult(std::move(event), handled, 0, std::u16string());
           });
-      if (!is_new_event) {
-        break;
-      }
+      const bool is_syskey = action == WM_SYSKEYDOWN || action == WM_SYSKEYUP;
       // For system keys, always pass them to the default WndProc so that keys
       // like the ALT-TAB or Kanji switches are processed correctly.
-      if (is_syskey) {
-        break;
-      }
-      return true;
+      return is_unmet_event && !is_syskey;
     }
     default:
       assert(false);
