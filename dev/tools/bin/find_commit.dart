@@ -23,7 +23,7 @@ class Commit {
   final String hash;
   final DateTime timestamp;
 
-  static String formatArgument = '--format="%H %cI"';
+  static String formatArgument = '--pretty="format:%H %cI"';
 
   static Commit parse(String line) {
     log('fff[$line]');
