@@ -335,6 +335,86 @@ void BM_DrawRRect(benchmark::State& state,
   canvas_provider->Snapshot(filename);
 }
 
+// Draws a series of "DR" rects of the requested width across
+// the canvas and repeats until `kRRectsToDraw` rects have been drawn.
+//
+// A "DR" rect is a shape consisting of the difference between two
+// rounded rects.
+//
+// Half the drawn DR rects will not have an integral offset.
+void BM_DrawDRRect(benchmark::State& state,
+                   BackendType backend_type,
+                   unsigned attributes,
+                   SkRRect::Type type) {
+  auto canvas_provider = CreateCanvasProvider(backend_type);
+  DisplayListBuilder builder;
+  builder.setAttributesFromPaint(GetPaintForRun(attributes),
+                                 DisplayListOpFlags::kDrawDRRectFlags);
+  AnnotateAttributes(attributes, state, DisplayListOpFlags::kDrawDRRectFlags);
+
+  size_t length = state.range(0);
+  size_t canvas_size = length * 2;
+  canvas_provider->InitializeSurface(canvas_size, canvas_size);
+  auto canvas = canvas_provider->GetSurface()->getCanvas();
+
+  SkVector radii[4];
+  switch (type) {
+    case SkRRect::Type::kSimple_Type:
+      radii[0] = SkVector::Make(5.0f, 5.0f);
+      radii[1] = SkVector::Make(5.0f, 5.0f);
+      radii[2] = SkVector::Make(5.0f, 5.0f);
+      radii[3] = SkVector::Make(5.0f, 5.0f);
+      break;
+    case SkRRect::Type::kNinePatch_Type:
+      radii[0] = SkVector::Make(5.0f, 7.0f);
+      radii[1] = SkVector::Make(3.0f, 7.0f);
+      radii[2] = SkVector::Make(3.0f, 4.0f);
+      radii[3] = SkVector::Make(5.0f, 4.0f);
+      break;
+    case SkRRect::Type::kComplex_Type:
+      radii[0] = SkVector::Make(5.0f, 4.0f);
+      radii[1] = SkVector::Make(4.0f, 5.0f);
+      radii[2] = SkVector::Make(3.0f, 6.0f);
+      radii[3] = SkVector::Make(8.0f, 7.0f);
+      break;
+    default:
+      break;
+  }
+
+  const SkScalar offset = 0.5f;
+  const SkScalar multiplier = length / 16.0f;
+  SkRRect rrect, rrect_2;
+
+  SkVector set_radii[4];
+  for (size_t i = 0; i < 4; i++) {
+    set_radii[i] = radii[i] * multiplier;
+  }
+  rrect.setRectRadii(SkRect::MakeLTRB(0, 0, length, length), set_radii);
+
+  for (size_t i = 0; i < kRRectsToDraw; i++) {
+    rrect.inset(0.1f * length, 0.1f * length, &rrect_2);
+    builder.drawDRRect(rrect, rrect_2);
+    rrect.offset(offset, offset);
+    if (rrect.rect().right() > canvas_size) {
+      rrect.offset(-canvas_size, 0);
+    }
+    if (rrect.rect().bottom() > canvas_size) {
+      rrect.offset(0, -canvas_size);
+    }
+  }
+  auto display_list = builder.Build();
+
+  // We only want to time the actual rasterization.
+  for (auto _ : state) {
+    display_list->RenderTo(canvas);
+    canvas_provider->GetSurface()->flushAndSubmit(true);
+  }
+
+  auto filename = canvas_provider->BackendName() + "-DrawDRRect-" +
+                  std::to_string(state.range(0)) + ".png";
+  canvas_provider->Snapshot(filename);
+}
+
 void BM_DrawArc(benchmark::State& state,
                 BackendType backend_type,
                 unsigned attributes) {
