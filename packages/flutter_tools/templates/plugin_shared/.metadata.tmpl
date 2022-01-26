@@ -7,4 +7,9 @@ version:
   revision: {{flutterRevision}}
   channel: {{flutterChannel}}
 
+{{#withFfiPluginHook}}
+project_type: plugin_ffi
+{{/withFfiPluginHook}}
+{{#withPlatformChannelPluginHook}}
 project_type: plugin
+{{/withPlatformChannelPluginHook}}
