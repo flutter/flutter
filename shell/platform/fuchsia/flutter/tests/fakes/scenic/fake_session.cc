@@ -108,7 +108,7 @@ void FakeSession::Present(uint64_t presentation_time,
   ApplyCommands();
 
   PresentHandler present_handler =
-      present_handler_ ? present_handler_ : [](auto... args) -> auto {
+      present_handler_ ? present_handler_ : [](auto... args) -> auto{
     return fuchsia::images::PresentationInfo{};
   };
 
@@ -124,7 +124,7 @@ void FakeSession::Present2(fuchsia::ui::scenic::Present2Args args,
   ApplyCommands();
 
   Present2Handler present2_handler =
-      present2_handler_ ? present2_handler_ : [](auto args) -> auto {
+      present2_handler_ ? present2_handler_ : [](auto args) -> auto{
     return fuchsia::scenic::scheduling::FuturePresentationTimes{
         .future_presentations = {},
         .remaining_presents_in_flight_allowed = 1,
@@ -142,7 +142,7 @@ void FakeSession::RequestPresentationTimes(
     RequestPresentationTimesCallback callback) {
   RequestPresentationTimesHandler request_presentation_times_handler =
       request_presentation_times_handler_ ? request_presentation_times_handler_
-                                          : [](auto args) -> auto {
+                                          : [](auto args) -> auto{
     return fuchsia::scenic::scheduling::FuturePresentationTimes{
         .future_presentations = {},
         .remaining_presents_in_flight_allowed = 1,
@@ -521,10 +521,6 @@ void FakeSession::ApplyCreateResourceCmd(
     case fuchsia::ui::gfx::ResourceArgs::Tag::kImage3:
       ApplyCreateImage3(resource_id, std::move(command.resource.image3()));
       break;
-    case fuchsia::ui::gfx::ResourceArgs::Tag::kImagePipe:
-      ApplyCreateImagePipe(resource_id,
-                           std::move(command.resource.image_pipe()));
-      break;
     case fuchsia::ui::gfx::ResourceArgs::Tag::kImagePipe2:
       ApplyCreateImagePipe2(resource_id,
                             std::move(command.resource.image_pipe2()));
@@ -600,9 +596,6 @@ void FakeSession::ApplyCreateResourceCmd(
     case fuchsia::ui::gfx::ResourceArgs::Tag::kDisplayCompositor:
       NotImplemented_("CreateDisplayCompositorResource");
       break;
-    case fuchsia::ui::gfx::ResourceArgs::Tag::kImagePipeCompositor:
-      NotImplemented_("CreateImagePipeCompositorResource");
-      break;
     case fuchsia::ui::gfx::ResourceArgs::Tag::kLayerStack:
       NotImplemented_("CreateLayerStackResource");
       break;
@@ -615,6 +608,8 @@ void FakeSession::ApplyCreateResourceCmd(
     case fuchsia::ui::gfx::ResourceArgs::Tag::Invalid:
       FML_LOG(FATAL) << "FakeSession found Invalid CreateResource command";
       break;
+    default:
+      FML_UNREACHABLE();
   }
 }
 
@@ -1015,21 +1010,6 @@ void FakeSession::ApplyCreateImage3(FakeResourceId id,
                    .buffer_collection_index = args.buffer_collection_index,
                    .width = args.width,
                    .height = args.height,
-               },
-       }});
-}
-
-void FakeSession::ApplyCreateImagePipe(FakeResourceId id,
-                                       fuchsia::ui::gfx::ImagePipeArgs args) {
-  zx_koid_t image_pipe_request_koid =
-      GetKoid(args.image_pipe_request.channel().get());
-  AddResource(
-      {.id = id,
-       .state = FakeImageState{
-           .image_def =
-               FakeImageState::ImagePipeDef{
-                   .image_pipe_request = {std::move(args.image_pipe_request),
-                                          image_pipe_request_koid},
                },
        }});
 }
