@@ -96,13 +96,9 @@ template("_fuchsia_fidl_library") {
 
     library_name_slashes = string_replace(library_name, ".", "/")
 
-    inputs = [
-      invoker.meta,
-    ]
+    inputs = [ invoker.meta ]
 
-    outputs = [
-      "$target_gen_dir/$library_name_slashes/cpp/tables.c",
-    ]
+    outputs = [ "$target_gen_dir/$library_name_slashes/cpp/tables.c" ]
 
     args = [
       "--fidlc-bin",
@@ -117,7 +113,8 @@ template("_fuchsia_fidl_library") {
       rebase_path("$target_gen_dir/$library_name_slashes/cpp/tables.c"),
     ]
 
-    if (!defined(invoker.only_generate_tables) || !invoker.only_generate_tables) {
+    if (!defined(invoker.only_generate_tables) ||
+        !invoker.only_generate_tables) {
       outputs += [
         "$target_gen_dir/$library_name_slashes/cpp/fidl.h",
         "$target_gen_dir/$library_name_slashes/cpp/fidl.cc",
@@ -137,9 +134,7 @@ template("_fuchsia_fidl_library") {
 
     sources = get_target_outputs(":$fidl_gen_target_name")
 
-    deps = [
-      ":$fidl_gen_target_name",
-    ]
+    deps = [ ":$fidl_gen_target_name" ]
 
     public_deps = _deps
   }
@@ -246,19 +241,28 @@ template("fuchsia_sdk") {
 
     part_meta_json = read_file(part_meta_rebased, "json")
 
-    # Check if `part.type` is in `invoker.enabled_parts`.
-    if (invoker.enabled_parts + [part.type] - [part.type] != invoker.enabled_parts) {
+    # Check if the part is using `part.element_type` or `part.type`.
+    part_type = ""
+    if (defined(part.element_type)) {
+      part_type = part.element_type
+    } else if (defined(part.type)) {
+      part_type = part.type
+    }
+
+    # Check if the part type is in `invoker.enabled_parts`.
+    if (invoker.enabled_parts + [ part_type ] - [ part_type ] !=
+        invoker.enabled_parts) {
       subtarget_name = part_meta_json.name
 
-      if (part.type == "cc_source_library") {
+      if (part_type == "cc_source_library") {
         _fuchsia_cc_source_library(subtarget_name) {
           meta = part_meta_rebased
         }
-      } else if (part.type == "sysroot") {
+      } else if (part_type == "sysroot") {
         _fuchsia_sysroot(subtarget_name) {
           meta = part_meta_rebased
         }
-      } else if (part.type == "fidl_library") {
+      } else if (part_type == "fidl_library") {
         _fuchsia_fidl_library(subtarget_name) {
           meta = part_meta_rebased
 
@@ -266,7 +270,7 @@ template("fuchsia_sdk") {
           # option is available.
           only_generate_tables = subtarget_name == "zx"
         }
-      } else if (part.type == "cc_prebuilt_library") {
+      } else if (part_type == "cc_prebuilt_library") {
         _fuchsia_cc_prebuilt_library(subtarget_name) {
           meta = part_meta_rebased
         }
@@ -289,9 +293,7 @@ template("fuchsia_repo") {
     pm_binary = rebase_path("$_fuchsia_sdk_path/tools/pm")
     repo_directory = invoker.repo
 
-    inputs = [
-      pm_binary,
-    ]
+    inputs = [ pm_binary ]
 
     archive_flags = []
 
@@ -305,9 +307,7 @@ template("fuchsia_repo") {
       ]
     }
 
-    outputs = [
-      repo_directory,
-    ]
+    outputs = [ repo_directory ]
 
     args = [
              "--pm-bin",
