@@ -3139,7 +3139,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       cursor: widget.mouseCursor ?? SystemMouseCursors.text,
       child: Actions(
         actions: _actions,
-        child: UndoRedo(
+        child: TextEditingHistory(
           controller: widget.controller,
           onChanged: (TextEditingValue value) {
             userUpdateTextEditingValue(value, SelectionChangedCause.keyboard);
@@ -4174,20 +4174,19 @@ typedef TextEditingValueCallback = void Function(TextEditingValue value);
 /// desktop platforms, as there are subtle differences between each of these
 /// platforms.
 ///
-/// Listens for keyboard undo/redo shortcuts depending on the platform. Calls
-/// [onChanged] when a shortcut is received that would change the state of these
-/// [controller].
+/// Listens to keyboard undo/redo shortcuts and calls [onChanged] when a
+/// shortcut is triggered that would affect the state of the [controller].
 @visibleForTesting
-class UndoRedo extends StatefulWidget {
-  /// Creates an instance of [UndoRedo].
-  const UndoRedo({
+class TextEditingHistory extends StatefulWidget {
+  /// Creates an instance of [TextEditingHistory].
+  const TextEditingHistory({
     Key? key,
     required this.child,
     required this.controller,
     required this.onChanged,
   }) : super(key: key);
 
-  /// The child widget of [UndoRedo].
+  /// The child widget of [TextEditingHistory].
   final Widget child;
 
   /// The [ValueNotifier] to save the state of over time.
@@ -4198,15 +4197,19 @@ class UndoRedo extends StatefulWidget {
   final TextEditingValueCallback onChanged;
 
   @override
-  UndoRedoState createState() => UndoRedoState();
+  State<TextEditingHistory> createState() => _TextEditingHistoryState();
 }
 
-/// State for [UndoRedo].
-@visibleForTesting
-class UndoRedoState extends State<UndoRedo> {
+// State for [TextEditingHistory].
+class _TextEditingHistoryState extends State<TextEditingHistory> {
   final UndoStack<TextEditingValue> _stack = UndoStack<TextEditingValue>();
   late final Throttled<TextEditingValue> _throttledPush;
   Timer? _throttleTimer;
+
+  // This duration was chosen as a best fit for the behavior of Mac, Linux,
+  // and Windows undo/redo state save durations, but it is not perfect for any
+  // of them.
+  static const Duration _kThrottleDuration = Duration(milliseconds: 500);
 
   void _undo(UndoTextIntent intent) {
     _update(_stack.undo());
@@ -4242,9 +4245,7 @@ class UndoRedoState extends State<UndoRedo> {
   void initState() {
     super.initState();
     _throttledPush = throttle<TextEditingValue>(
-      // This duration was chosen as a best fit for the behavior of Mac, Linux,
-      // and Windows undo/redo state save durations.
-      duration: const Duration(milliseconds: 500),
+      duration: _kThrottleDuration,
       function: _stack.push,
     );
     _push();
@@ -4252,7 +4253,7 @@ class UndoRedoState extends State<UndoRedo> {
   }
 
   @override
-  void didUpdateWidget(UndoRedo oldWidget) {
+  void didUpdateWidget(TextEditingHistory oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.controller != oldWidget.controller) {
       oldWidget.controller.removeListener(_push);
@@ -4271,8 +4272,8 @@ class UndoRedoState extends State<UndoRedo> {
   Widget build(BuildContext context) {
     return Actions(
       actions: <Type, Action<Intent>> {
-        UndoTextIntent: CallbackAction<UndoTextIntent>(onInvoke: _undo),
-        RedoTextIntent: CallbackAction<RedoTextIntent>(onInvoke: _redo),
+        UndoTextIntent: Action<UndoTextIntent>.overridable(context: context, defaultAction: CallbackAction<UndoTextIntent>(onInvoke: _undo)),
+        RedoTextIntent: Action<RedoTextIntent>.overridable(context: context, defaultAction: CallbackAction<RedoTextIntent>(onInvoke: _redo)),
       },
       child: widget.child,
     );
