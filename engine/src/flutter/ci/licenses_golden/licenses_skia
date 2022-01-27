@@ -1,4 +1,4 @@
-Signature: eb5796ed5cfdd71b38ebfe51b56ec8f1
+Signature: 22f7aae2f6ce296f6530830f0b11b286
 
 UNUSED LICENSES:
 
@@ -6049,6 +6049,7 @@ FILE: ../../../third_party/skia/experimental/graphite/src/Sampler.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/Sampler.h
 FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlSampler.h
 FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlSampler.mm
+FILE: ../../../third_party/skia/gm/bug12866.cpp
 FILE: ../../../third_party/skia/include/private/SkPaintParamsKey.h
 FILE: ../../../third_party/skia/include/private/SkShaderCodeDictionary.h
 FILE: ../../../third_party/skia/include/private/SkUniquePaintParamsID.h
