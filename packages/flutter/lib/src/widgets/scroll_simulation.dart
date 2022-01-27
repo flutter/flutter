@@ -52,42 +52,7 @@ class BouncingScrollSimulation extends Simulation with ScrollSimulationMixin {
        assert(leadingExtent <= trailingExtent),
        assert(spring != null),
        super(tolerance: tolerance) {
-    if (position < leadingExtent) {
-      _springSimulation = _underscrollSimulation(position, velocity);
-      _springTime = double.negativeInfinity;
-    } else if (position > trailingExtent) {
-      _springSimulation = _overscrollSimulation(position, velocity);
-      _springTime = double.negativeInfinity;
-    } else {
-      // Taken from UIScrollView.decelerationRate (.normal = 0.998)
-      // 0.998^1000 = ~0.135
-      _frictionSimulation = FrictionSimulation(0.135, position, velocity);
-      final double finalX = _frictionSimulation!.finalX;
-      if (velocity > 0.0 && finalX > trailingExtent) {
-        _springTime = _frictionSimulation!.timeAtX(trailingExtent);
-        _springSimulation = _overscrollSimulation(
-          trailingExtent,
-          math.min(
-            _frictionSimulation!.dx(_springTime),
-            maxSpringTransferVelocity,
-          ),
-        );
-        assert(_springTime.isFinite);
-      } else if (velocity < 0.0 && finalX < leadingExtent) {
-        _springTime = _frictionSimulation!.timeAtX(leadingExtent);
-        _springSimulation = _underscrollSimulation(
-          leadingExtent,
-          math.min(
-            _frictionSimulation!.dx(_springTime),
-            maxSpringTransferVelocity,
-          ),
-        );
-        assert(_springTime.isFinite);
-      } else {
-        _springTime = double.infinity;
-      }
-    }
-    assert(_springTime != null);
+    _updateSimulation(position, velocity, true);
   }
 
   /// The maximum velocity that can be transferred from the inertia of a ballistic
@@ -113,7 +78,7 @@ class BouncingScrollSimulation extends Simulation with ScrollSimulationMixin {
   // This method will update the springTime to correct value when list performLayout.
   // And it will instantiation ScrollSpringSimulation.
   // But will not affect [_frictionSimulation].
-  void _updateSpringTime(double currentPixel, double velocity) {
+  void _updateSimulation(double currentPixel, double velocity, bool updateFriction) {
     if (currentPixel < leadingExtent) {
       _springSimulation = _underscrollSimulation(currentPixel, velocity);
       _springTime = double.negativeInfinity;
@@ -121,6 +86,11 @@ class BouncingScrollSimulation extends Simulation with ScrollSimulationMixin {
       _springSimulation = _overscrollSimulation(currentPixel, velocity);
       _springTime = double.negativeInfinity;
     } else {
+      // Taken from UIScrollView.decelerationRate (.normal = 0.998)
+      // 0.998^1000 = ~0.135
+      if (updateFriction){
+        _frictionSimulation = FrictionSimulation(0.135, currentPixel, velocity);
+      }
       final double finalX = _frictionSimulation!.finalX;
       if (velocity > 0.0 && finalX > trailingExtent) {
         _springTime = _frictionSimulation!.timeAtX(trailingExtent);
@@ -165,18 +135,21 @@ class BouncingScrollSimulation extends Simulation with ScrollSimulationMixin {
 
   @override
   void applyNewDimensions(ScrollPosition newScrollPosition, double velocity) {
-    if (leadingExtent != newScrollPosition.minScrollExtent) {
+    // updateSimulation when range change.
+    if (leadingExtent != newScrollPosition.minScrollExtent ||
+        trailingExtent != newScrollPosition.maxScrollExtent) {
       leadingExtent = newScrollPosition.minScrollExtent;
+      trailingExtent = newScrollPosition.maxScrollExtent;
+
+      // updateSimulation when final position out of range.
       if (_frictionSimulation != null &&
           _frictionSimulation!.finalX < leadingExtent) {
-        _updateSpringTime(newScrollPosition.pixels, velocity);
-      }
-    }
-    if (trailingExtent != newScrollPosition.maxScrollExtent) {
-      trailingExtent = newScrollPosition.maxScrollExtent;
-      if (_frictionSimulation != null &&
+        _updateSimulation(newScrollPosition.pixels, velocity, false);
+      } else if (_frictionSimulation != null &&
           _frictionSimulation!.finalX > trailingExtent) {
-        _updateSpringTime(newScrollPosition.pixels, velocity);
+        _updateSimulation(newScrollPosition.pixels, velocity, false);
+      } else if (){
+
       }
     }
   }
@@ -222,7 +195,7 @@ class ClampingScrollSimulation extends Simulation with ScrollSimulationMixin {
        super(tolerance: tolerance) {
     _duration = _flingDuration(velocity);
     _distance = (velocity * _duration / _initialVelocityPenetration).abs();
-    _updateSpringTime(position, velocity);
+    _updateSpringSimulation(position, velocity);
   }
 
   /// The spring used to return [x] to either [leadingExtent] or [trailingExtent].
@@ -331,18 +304,17 @@ class ClampingScrollSimulation extends Simulation with ScrollSimulationMixin {
 
   @override
   void applyNewDimensions(ScrollPosition newScrollPosition, double velocity) {
-    if (leadingExtent != newScrollPosition.minScrollExtent) {
+    if (leadingExtent != newScrollPosition.minScrollExtent ||
+        trailingExtent != newScrollPosition.maxScrollExtent) {
       leadingExtent = newScrollPosition.minScrollExtent;
-    }
-    if (trailingExtent != newScrollPosition.maxScrollExtent) {
       trailingExtent = newScrollPosition.maxScrollExtent;
+      _updateSpringSimulation(newScrollPosition.pixels, velocity);
     }
-    _updateSpringTime(newScrollPosition.pixels, velocity);
   }
 
   // This method will update the springTime to correct value when list performLayout.
   // And it will instantiation ScrollSpringSimulation.
-  void _updateSpringTime(double currentPixel, double velocity) {
+  void _updateSpringSimulation(double currentPixel, double velocity) {
     if (leadingExtent != null && trailingExtent != null) {
       double? end;
       if (currentPixel > trailingExtent!) {
