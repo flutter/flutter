@@ -860,6 +860,7 @@ abstract class TransitionDelegate<T> {
       // Secondly, verifies the order of results matches the newPageRouteHistory
       // and contains all the exiting routes.
       int indexOfNextRouteInNewHistory = 0;
+
       for (final _RouteEntry routeEntry in resultsToVerify.cast<_RouteEntry>()) {
         assert(routeEntry != null);
         assert(!routeEntry.isWaitingForEnteringDecision && !routeEntry.isWaitingForExitingDecision);
