@@ -135,6 +135,12 @@ abstract class CreateBase extends FlutterCommand {
           'This is only intended to enable testing of the tool itself.',
       hide: !verboseHelp,
     );
+    argParser.addOption(
+      'initial-create-revision',
+      defaultsTo: null,
+      help: 'The revision to store in .migrate_config.',
+      hide: !verboseHelp,
+    );
   }
 
   /// The output directory of the command.
@@ -547,7 +553,6 @@ abstract class CreateBase extends FlutterCommand {
     if (templateContext['android'] == true) {
       gradle.updateLocalProperties(project: project, requireAndroidSdk: false);
     }
-    print('GENERATING MIGRATECONFIG');
     List<String> platformsForMigrateConfig = <String>['root'];
     if (templateContext['android'] == true) platformsForMigrateConfig.add('android');
     if (templateContext['ios'] == true) platformsForMigrateConfig.add('ios');
@@ -556,7 +561,13 @@ abstract class CreateBase extends FlutterCommand {
     if (templateContext['windows'] == true) platformsForMigrateConfig.add('windows');
     if (templateContext['winuwp'] == true) platformsForMigrateConfig.add('windowsUwp');
     if (templateContext['fuchsia'] == true) platformsForMigrateConfig.add('fuchisa');
-    await MigrateConfig.parseOrCreateMigrateConfigs(platforms: platformsForMigrateConfig, projectDirectory: directory);
+    await MigrateConfig.parseOrCreateMigrateConfigs(
+        platforms: platformsForMigrateConfig,
+        projectDirectory: directory,
+        create: true,
+        currentRevision: stringArg('initial-create-revision') ?? globals.flutterVersion.frameworkRevision,
+        createRevision: globals.flutterVersion.frameworkRevision,
+      );
     return generatedCount;
   }
 

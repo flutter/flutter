@@ -39,7 +39,6 @@ import 'src/commands/ide_config.dart';
 import 'src/commands/install.dart';
 import 'src/commands/logs.dart';
 import 'src/commands/make_host_app_editable.dart';
-import 'src/commands/migrate.dart';
 import 'src/commands/packages.dart';
 import 'src/commands/precache.dart';
 import 'src/commands/run.dart';
@@ -184,7 +183,6 @@ List<FlutterCommand> generateCommands({
   InstallCommand(),
   LogsCommand(),
   MakeHostAppEditableCommand(),
-  MigrateCommand(verbose: verbose),
   PackagesCommand(),
   PrecacheCommand(
     verboseHelp: verboseHelp,
