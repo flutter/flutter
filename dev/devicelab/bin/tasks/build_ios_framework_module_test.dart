@@ -115,7 +115,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
     outputPath,
     'Debug',
     'Flutter.xcframework',
-    'ios-arm64_armv7',
+    'ios-arm64',
     'Flutter.framework',
     'Flutter',
   ));
@@ -124,7 +124,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
     outputPath,
     'Debug',
     'App.xcframework',
-    'ios-arm64_armv7',
+    'ios-arm64',
     'App.framework',
     'App',
   );
@@ -134,7 +134,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
     outputPath,
     'Debug',
     'App.xcframework',
-    'ios-arm64_armv7',
+    'ios-arm64',
     'App.framework',
     'Info.plist',
   ));
@@ -181,7 +181,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
       outputPath,
       mode,
       'App.xcframework',
-      'ios-arm64_armv7',
+      'ios-arm64',
       'App.framework',
       'App',
     );
@@ -198,7 +198,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
       outputPath,
       mode,
       'App.xcframework',
-      'ios-arm64_armv7',
+      'ios-arm64',
       'App.framework',
       'flutter_assets',
       'vm_snapshot_data',
@@ -230,7 +230,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
       outputPath,
       mode,
       'Flutter.xcframework',
-      'ios-arm64_armv7',
+      'ios-arm64',
       'Flutter.framework',
       'Flutter',
     );
@@ -264,7 +264,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
       outputPath,
       mode,
       'connectivity.xcframework',
-      'ios-arm64_armv7',
+      'ios-arm64',
       'connectivity.framework',
       'connectivity',
     );
@@ -277,7 +277,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
       outputPath,
       mode,
       'Reachability.xcframework',
-      'ios-arm64_armv7',
+      'ios-arm64',
       'Reachability.framework',
       'Reachability',
     );
@@ -289,7 +289,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
       outputPath,
       mode,
       'connectivity.xcframework',
-      'ios-arm64_armv7',
+      'ios-arm64',
       'connectivity.framework',
       'Headers',
       'FLTConnectivityPlugin.h',
@@ -300,7 +300,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
         outputPath,
         mode,
         'connectivity.xcframework',
-        'ios-arm64_armv7',
+        'ios-arm64',
         'dSYMs',
         'connectivity.framework.dSYM',
       ));
@@ -333,7 +333,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
     outputPath,
     'Release',
     'connectivity.xcframework',
-    'ios-arm64_armv7',
+    'ios-arm64',
     'BCSymbolMaps',
   ));
 
@@ -347,7 +347,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
       outputPath,
       mode,
       'FlutterPluginRegistrant.xcframework',
-      'ios-arm64_armv7',
+      'ios-arm64',
       'FlutterPluginRegistrant.framework',
       'FlutterPluginRegistrant',
     );
@@ -357,7 +357,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
       outputPath,
       mode,
       'FlutterPluginRegistrant.xcframework',
-      'ios-arm64_armv7',
+      'ios-arm64',
       'FlutterPluginRegistrant.framework',
       'Headers',
       'GeneratedPluginRegistrant.h',
