@@ -74,12 +74,6 @@ class Animator final {
   void ScheduleSecondaryVsyncCallback(uintptr_t id,
                                       const fml::closure& callback);
 
-  void Start();
-
-  void Stop();
-
-  void SetDimensionChangePending();
-
   // Enqueue |trace_flow_id| into |trace_flow_ids_|.  The flow event will be
   // ended at either the next frame, or the next vsync interval with no active
   // active rendering.
@@ -112,11 +106,9 @@ class Animator final {
   std::shared_ptr<LayerTreePipeline> layer_tree_pipeline_;
   fml::Semaphore pending_frame_semaphore_;
   LayerTreePipeline::ProducerContinuation producer_continuation_;
-  bool paused_ = true;
   bool regenerate_layer_tree_ = false;
   bool frame_scheduled_ = false;
   int notify_idle_task_id_ = 0;
-  bool dimension_change_pending_ = false;
   SkISize last_layer_tree_size_ = {0, 0};
   std::deque<uint64_t> trace_flow_ids_;
   bool has_rendered_ = false;

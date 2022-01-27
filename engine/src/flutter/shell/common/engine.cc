@@ -50,8 +50,6 @@ Engine::Engine(
       settings_(std::move(settings)),
       animator_(std::move(animator)),
       runtime_controller_(std::move(runtime_controller)),
-      activity_running_(true),
-      have_surface_(false),
       font_collection_(font_collection),
       image_decoder_(task_runners, image_decoder_task_runner, io_manager),
       task_runners_(std::move(task_runners)),
@@ -280,30 +278,11 @@ tonic::DartErrorHandleType Engine::GetUIIsolateLastError() {
   return runtime_controller_->GetLastError();
 }
 
-void Engine::OnOutputSurfaceCreated() {
-  have_surface_ = true;
-  ScheduleFrame();
-}
-
-void Engine::OnOutputSurfaceDestroyed() {
-  have_surface_ = false;
-  StopAnimator();
-}
-
 void Engine::SetViewportMetrics(const ViewportMetrics& metrics) {
-  bool dimensions_changed =
-      viewport_metrics_.physical_height != metrics.physical_height ||
-      viewport_metrics_.physical_width != metrics.physical_width ||
-      viewport_metrics_.device_pixel_ratio != metrics.device_pixel_ratio;
   viewport_metrics_ = metrics;
   runtime_controller_->SetViewportMetrics(viewport_metrics_);
   if (animator_) {
-    if (dimensions_changed) {
-      animator_->SetDimensionChangePending();
-    }
-    if (have_surface_) {
-      ScheduleFrame();
-    }
+    ScheduleFrame();
   }
 }
 
@@ -339,20 +318,12 @@ bool Engine::HandleLifecyclePlatformMessage(PlatformMessage* message) {
   const auto& data = message->data();
   std::string state(reinterpret_cast<const char*>(data.GetMapping()),
                     data.GetSize());
-  if (state == "AppLifecycleState.paused" ||
-      state == "AppLifecycleState.detached") {
-    activity_running_ = false;
-    StopAnimator();
-  } else if (state == "AppLifecycleState.resumed" ||
-             state == "AppLifecycleState.inactive") {
-    activity_running_ = true;
-    StartAnimatorIfPossible();
-  }
 
   // Always schedule a frame when the app does become active as per API
   // recommendation
   // https://developer.apple.com/documentation/uikit/uiapplicationdelegate/1622956-applicationdidbecomeactive?language=objc
-  if (state == "AppLifecycleState.resumed" && have_surface_) {
+  if (state == "AppLifecycleState.resumed" ||
+      state == "AppLifecycleState.inactive") {
     ScheduleFrame();
   }
   runtime_controller_->SetLifecycleState(state);
@@ -455,16 +426,6 @@ void Engine::SetAccessibilityFeatures(int32_t flags) {
   runtime_controller_->SetAccessibilityFeatures(flags);
 }
 
-void Engine::StopAnimator() {
-  animator_->Stop();
-}
-
-void Engine::StartAnimatorIfPossible() {
-  if (activity_running_ && have_surface_) {
-    animator_->Start();
-  }
-}
-
 std::string Engine::DefaultRouteName() {
   if (!initial_route_.empty()) {
     return initial_route_;
@@ -473,7 +434,6 @@ std::string Engine::DefaultRouteName() {
 }
 
 void Engine::ScheduleFrame(bool regenerate_layer_tree) {
-  StartAnimatorIfPossible();
   animator_->RequestFrame(regenerate_layer_tree);
 }
 
