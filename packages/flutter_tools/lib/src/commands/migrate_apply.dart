@@ -53,9 +53,8 @@ class MigrateApplyCommand extends FlutterCommand {
       return const FlutterCommandResult(ExitStatus.fail);
     }
 
-    File manifestFile = MigrateManifest.getManifestFileFromDirectory(workingDir);
-    MigrateManifest manifest = MigrateManifest.fromFile(manifestFile);
-    print(manifest.conflictFiles);
+    final File manifestFile = MigrateManifest.getManifestFileFromDirectory(workingDir);
+    final MigrateManifest manifest = MigrateManifest.fromFile(manifestFile);
     List<String> remainingConflicts = <String>[];
     for (String localPath in manifest.conflictFiles) {
       if (!conflictsResolved(workingDir.childFile(localPath).readAsStringSync())) {
@@ -72,7 +71,7 @@ class MigrateApplyCommand extends FlutterCommand {
 
     print('Applying migration.');
     // Copy files from working dir to project root
-    List<String> allFilesToCopy = <String>[];
+    final List<String> allFilesToCopy = <String>[];
     allFilesToCopy.addAll(manifest.mergedFiles);
     allFilesToCopy.addAll(manifest.conflictFiles);
     allFilesToCopy.addAll(manifest.additionalFiles);
@@ -83,8 +82,8 @@ class MigrateApplyCommand extends FlutterCommand {
       print('Deleting ${allFilesToCopy.length} files.');
     }
     for (String localPath in allFilesToCopy) {
-      File workingFile = workingDir.childFile(localPath);
-      File targetFile = FlutterProject.current().directory.childFile(localPath);
+      final File workingFile = workingDir.childFile(localPath);
+      final File targetFile = FlutterProject.current().directory.childFile(localPath);
       if (!workingFile.existsSync()) {
         continue;
       }
@@ -96,13 +95,13 @@ class MigrateApplyCommand extends FlutterCommand {
     }
     // Delete files slated for deletion.
     for (String localPath in manifest.deletedFiles) {
-      File targetFile = FlutterProject.current().directory.childFile(localPath);
+      final File targetFile = FlutterProject.current().directory.childFile(localPath);
       targetFile.deleteSync();
     }
 
     // Update the migrate config files to reflect latest migration.
-    List<MigrateConfig> configs = await MigrateConfig.parseOrCreateMigrateConfigs();
-    String currentGitHash = await MigrateUtils.getGitHash(Cache.flutterRoot!);
+    final List<MigrateConfig> configs = await MigrateConfig.parseOrCreateMigrateConfigs();
+    final String currentGitHash = await MigrateUtils.getGitHash(Cache.flutterRoot!);
     for (MigrateConfig config in configs) {
       config.lastMigrateVersion = currentGitHash;
       config.writeFile(projectDirectory: FlutterProject.current().directory);

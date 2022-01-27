@@ -5,14 +5,10 @@
 import 'package:meta/meta.dart';
 
 import '../base/file_system.dart';
-import '../base/logger.dart';
 import '../build_info.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../runner/flutter_command.dart';
-import '../migrate/migrate_config.dart';
-import '../migrate/migrate_manifest.dart';
-import '../migrate/migrate_utils.dart';
 import '../cache.dart';
 import 'migrate_abandon.dart';
 import 'migrate_apply.dart';
@@ -27,38 +23,6 @@ class MigrateCommand extends FlutterCommand {
     addSubcommand(MigrateAbandonCommand(verbose: verbose));
     addSubcommand(MigrateApplyCommand(verbose: verbose));
     addSubcommand(MigrateStartCommand(verbose: verbose));
-    requiresPubspecYaml();
-    // TODO move these to subcomands instead of flags.
-    argParser.addFlag('apply',
-      negatable: false,
-      help: "",
-    );
-    argParser.addFlag('abandon',
-      negatable: false,
-      help: "",
-    );
-    argParser.addFlag('delete-temp-directories',
-      negatable: true,
-      help: "",
-    );
-    argParser.addOption(
-      'old-app-directory',
-      help: '',
-      defaultsTo: null,
-      valueHelp: 'path',
-    );
-    argParser.addOption(
-      'new-app-directory',
-      help: '',
-      defaultsTo: null,
-      valueHelp: 'path',
-    );
-    argParser.addOption(
-      'base-revision',
-      help: '',
-      defaultsTo: null,
-      valueHelp: '',
-    );
   }
 
   final bool _verbose;

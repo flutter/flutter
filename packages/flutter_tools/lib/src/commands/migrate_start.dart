@@ -29,6 +29,7 @@ class MigrateStartCommand extends FlutterCommand {
     argParser.addFlag(
       'delete-temp-directories',
       negatable: true,
+      defaultsTo: true,
       help: "",
     );
     argParser.addOption(
@@ -67,7 +68,7 @@ class MigrateStartCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    Directory workingDir = FlutterProject.current().directory.childDirectory(kDefaultMigrateWorkingDirectoryName);
+    final Directory workingDir = FlutterProject.current().directory.childDirectory(kDefaultMigrateWorkingDirectoryName);
     if (workingDir.existsSync()) {
       print('Old migration already in progress. Pending migration files exist in `<your_project_root_dir>/$kDefaultMigrateWorkingDirectoryName`');
       print('Resolve merge conflicts and accept changes with by running:\n');
@@ -79,16 +80,15 @@ class MigrateStartCommand extends FlutterCommand {
     }
     final FlutterProject flutterProject = FlutterProject.current();
 
-    List<MigrateConfig> configs = await MigrateConfig.parseOrCreateMigrateConfigs();
+    final List<MigrateConfig> configs = await MigrateConfig.parseOrCreateMigrateConfigs();
 
     String rootBaseRevision = '';
-    String fallbackRevision = await MigrateConfig.getFallbackLastMigrateVersion();
+    final String fallbackRevision = await MigrateConfig.getFallbackLastMigrateVersion();
     Map<String, List<MigrateConfig>> revisionToConfigs = <String, List<MigrateConfig>>{};
     Set<String> revisions = Set<String>();
     for (MigrateConfig config in configs) {
-      print(config.lastMigrateVersion);
-      print(fallbackRevision);
       String effectiveRevision = config.lastMigrateVersion == null ? fallbackRevision : config.lastMigrateVersion!;
+      print('effectiveRevision: $effectiveRevision');
       if (config.platform == 'root') {
         rootBaseRevision = effectiveRevision;
       }
@@ -99,44 +99,37 @@ class MigrateStartCommand extends FlutterCommand {
       revisionToConfigs[effectiveRevision]!.add(config);
     }
 
-    String revision = '18116933e77adc82f80866c928266a5b4f1ed645';
-
     // Generate the old templates
     Directory generatedOldTemplateDirectory;
     Directory generatedNewTemplateDirectory;
-    if (stringArg('old-app-directory') != null) {
+
+    final bool customOldAppDir = stringArg('old-app-directory') != null;
+    final bool customNewAppDir = stringArg('new-app-directory') != null;
+    if (customOldAppDir) {
       generatedOldTemplateDirectory = globals.fs.directory(stringArg('old-app-directory')!);
     } else {
       generatedOldTemplateDirectory = await MigrateUtils.createTempDirectory('generatedOldTemplate');
     }
-    if (stringArg('new-app-directory') != null) {
+    if (customNewAppDir) {
       generatedNewTemplateDirectory = globals.fs.directory(stringArg('new-app-directory')!);
     } else {
       generatedNewTemplateDirectory = await MigrateUtils.createTempDirectory('generatedNewTemplate');
     }
-    Directory oldFlutterRoot;
 
     await MigrateUtils.gitInit(generatedOldTemplateDirectory.absolute.path);
     await MigrateUtils.gitInit(generatedNewTemplateDirectory.absolute.path);
 
-    // /var/folders/md/gm0zgfcj07vcsj6jkh_mp_wh00ff02/T/generatedOldTemplate.XmklMKhV
-    // /var/folders/md/gm0zgfcj07vcsj6jkh_mp_wh00ff02/T/generatedNewTemplate.r9TzOOvh
-    // Directory generatedOldTemplateDirectory = globals.fs.directory('/var/folders/md/gm0zgfcj07vcsj6jkh_mp_wh00ff02/T/generatedOldTemplate.j8Tto95k');
-    // Directory generatedNewTemplateDirectory = globals.fs.directory('/var/folders/md/gm0zgfcj07vcsj6jkh_mp_wh00ff02/T/generateNewTemplate.0f4evU9N');
-    // Directory oldFlutterRoot = globals.fs.directory();
-
-
     // // Create old
-    String name = flutterProject.manifest.appName;
-    String androidLanguage = FlutterProject.current().android.isKotlin ? 'kotlin' : 'java';
-    String iosLanguage = FlutterProject.current().ios.isSwift ? 'swift' : 'objc';
+    final String name = flutterProject.manifest.appName;
+    final String androidLanguage = FlutterProject.current().android.isKotlin ? 'kotlin' : 'java';
+    final String iosLanguage = FlutterProject.current().ios.isSwift ? 'swift' : 'objc';
     // // Clone old flutter
     if (stringArg('old-app-directory') == null) {
-      Map<String, Directory> revisionToFlutterSdkDir = <String, Directory>{};
+      final Map<String, Directory> revisionToFlutterSdkDir = <String, Directory>{};
       for (String revision in revisions) {
-        Directory sdkDir = await MigrateUtils.createTempDirectory('flutter_$revision');
+        final Directory sdkDir = await MigrateUtils.createTempDirectory('flutter_$revision');
         revisionToFlutterSdkDir[revision] = sdkDir;
-        List<String> platforms = <String>[];
+        final List<String> platforms = <String>[];
         for (MigrateConfig config in revisionToConfigs[revision]!) {
           platforms.add(config.platform!);
         }
@@ -165,31 +158,30 @@ class MigrateStartCommand extends FlutterCommand {
     }
 
     // Generate diffs
-    List<FileSystemEntity> generatedOldFiles = generatedOldTemplateDirectory.listSync(recursive: true);
-    List<FileSystemEntity> generatedNewFiles = generatedNewTemplateDirectory.listSync(recursive: true);
+    final List<FileSystemEntity> generatedOldFiles = generatedOldTemplateDirectory.listSync(recursive: true);
+    final List<FileSystemEntity> generatedNewFiles = generatedNewTemplateDirectory.listSync(recursive: true);
 
-    Map<String, DiffResult> diffMap = <String, DiffResult>{};
+    final Map<String, DiffResult> diffMap = <String, DiffResult>{};
     for (FileSystemEntity entity in generatedOldFiles) {
       // print(entity.path);
       if (entity is! File) {
         continue;
       }
-      File oldTemplateFile = (entity as File).absolute;
+      final File oldTemplateFile = (entity as File).absolute;
       if (!oldTemplateFile.path.startsWith(generatedOldTemplateDirectory.absolute.path)) {
         continue;
       }
-      String localPath = oldTemplateFile.path.replaceFirst(generatedOldTemplateDirectory.absolute.path + globals.fs.path.separator, '');
+      final String localPath = oldTemplateFile.path.replaceFirst(generatedOldTemplateDirectory.absolute.path + globals.fs.path.separator, '');
       if (await MigrateUtils.isGitIgnored(oldTemplateFile.absolute.path, generatedOldTemplateDirectory.absolute.path)) {
         diffMap[localPath] = DiffResult.ignored();
       }
-      File newTemplateFile = generatedNewTemplateDirectory.childFile(localPath);
+      final File newTemplateFile = generatedNewTemplateDirectory.childFile(localPath);
       // print('  Comparing to new template: ${newTemplateFile.path}');
       if (newTemplateFile.existsSync()) {
         DiffResult diff = await MigrateUtils.diffFiles(oldTemplateFile, newTemplateFile);
         diffMap[localPath] = diff;
         // print(diff.diff);
       } else {
-        // print('else');
         // Current file has no new template counterpart, which is equivalent to a deletion.
         // This could also indicate a renaming if there is an addition with equivalent contents.
         diffMap[localPath] = DiffResult.deletion();
@@ -199,11 +191,10 @@ class MigrateStartCommand extends FlutterCommand {
     // Check for any new files that were added in the new template
     Map<String, File> additionalFiles = <String, File>{};
     for (FileSystemEntity entity in generatedNewFiles) {
-      print(entity.path);
       if (entity is! File) {
         continue;
       }
-      File newTemplateFile = (entity as File).absolute;
+      final File newTemplateFile = (entity as File).absolute;
       if (!newTemplateFile.path.startsWith(generatedNewTemplateDirectory.absolute.path)) {
         continue;
       }
@@ -214,33 +205,32 @@ class MigrateStartCommand extends FlutterCommand {
       if (await MigrateUtils.isGitIgnored(newTemplateFile.absolute.path, generatedNewTemplateDirectory.absolute.path)) {
         diffMap[localPath] = DiffResult.ignored();
       }
-      // print('  Addition');
       diffMap[localPath] = DiffResult.addition();
       additionalFiles[localPath] = newTemplateFile;
     }
 
     // for each file
-    List<FileSystemEntity> currentFiles = flutterProject.directory.listSync(recursive: true);
-    String projectRootPath = flutterProject.directory.absolute.path;
-    Map<String, MergeResult> mergeResults = <String, MergeResult>{};
-    Map<String, File> deletedFiles = <String, File>{};
+    final List<FileSystemEntity> currentFiles = flutterProject.directory.listSync(recursive: true);
+    final String projectRootPath = flutterProject.directory.absolute.path;
+    final Map<String, MergeResult> mergeResults = <String, MergeResult>{};
+    final Map<String, File> deletedFiles = <String, File>{};
     for (FileSystemEntity entity in currentFiles) {
       if (entity is! File) {
         continue;
       }
-      File currentFile = (entity as File).absolute;
+      final File currentFile = (entity as File).absolute;
       // print('Checking ${currentFile.path}');
       if (!currentFile.path.startsWith(projectRootPath)) {
         continue; // Not a project file.
       }
       // Diff the current file against the old generated template
-      String localPath = currentFile.path.replaceFirst(projectRootPath + globals.fs.path.separator, '');
+      final String localPath = currentFile.path.replaceFirst(projectRootPath + globals.fs.path.separator, '');
       if (diffMap.containsKey(localPath) && diffMap[localPath]!.isIgnored || await MigrateUtils.isGitIgnored(currentFile.path, flutterProject.directory.absolute.path)) {
         // print('  File git ignored');
         continue;
       }
-      File oldTemplateFile = generatedOldTemplateDirectory.childFile(localPath);
-      DiffResult userDiff = await MigrateUtils.diffFiles(oldTemplateFile, currentFile);
+      final File oldTemplateFile = generatedOldTemplateDirectory.childFile(localPath);
+      final DiffResult userDiff = await MigrateUtils.diffFiles(oldTemplateFile, currentFile);
 
       if (userDiff.exitCode == 0) {
         // Current file unchanged by user
@@ -254,7 +244,7 @@ class MigrateStartCommand extends FlutterCommand {
       }
 
       if (diffMap.containsKey(localPath)) {
-        MergeResult result = await MigrateUtils.gitMergeFile(
+        final MergeResult result = await MigrateUtils.gitMergeFile(
           ancestor: globals.fs.path.join(generatedOldTemplateDirectory.path, localPath),
           current: currentFile.path,
           other: globals.fs.path.join(generatedNewTemplateDirectory.path, localPath),
@@ -267,50 +257,38 @@ class MigrateStartCommand extends FlutterCommand {
       print('  File unhandled');
     }
 
-/////////////////////////////////////////////
-
-    // create temp working directory
-    // Directory workingDir = FlutterProject.current().directory.childDirectory('migrate_working_dir');
-
+    // Write files in working dir
     for (String localPath in mergeResults.keys) {
-      MergeResult result = mergeResults[localPath]!;
-      File file = workingDir.childFile(localPath);
+      final MergeResult result = mergeResults[localPath]!;
+      final File file = workingDir.childFile(localPath);
       file.createSync(recursive: true);
       file.writeAsStringSync(result.mergedContents, flush: true);
       print('  Wrote merged file $localPath');
     }
 
     for (String localPath in additionalFiles.keys) {
-      File additionalFile = additionalFiles[localPath]!;
-      File file = workingDir.childFile(localPath);
+      final File additionalFile = additionalFiles[localPath]!;
+      final File file = workingDir.childFile(localPath);
       file.createSync(recursive: true);
       file.writeAsStringSync(additionalFile.readAsStringSync(), flush: true);
       print('  Wrote Additional file $localPath');
     }
 
-    MigrateManifest manifest = MigrateManifest(migrateRootDir: workingDir, mergeResults: mergeResults, additionalFiles: additionalFiles, deletedFiles: deletedFiles);
+    final MigrateManifest manifest = MigrateManifest(migrateRootDir: workingDir, mergeResults: mergeResults, additionalFiles: additionalFiles, deletedFiles: deletedFiles);
     manifest.writeFile();
 
-////////////////////////////////////////////////
-
-    print('::::GENERATED FOLDERS::::::');
-    print(generatedOldTemplateDirectory.path);
-    print(generatedNewTemplateDirectory.path);
-    // print(oldFlutterRoot.path);
-    print('::::GENERATED FOLDERS::::::');
-
     if (boolArg('delete-temp-directories')) {
-
+      List<Directory> directoriesToDelete = <Directory>[];
+      // Don't delete user-provided directories
+      if (!customOldAppDir) {
+        directoriesToDelete.add(generatedOldTemplateDirectory);
+      }
+      if (!customNewAppDir) {
+        directoriesToDelete.add(generatedNewTemplateDirectory);
+      }
       MigrateUtils.deleteTempDirectories(
-        paths: <String>[
-
-        ],
-        directories: <Directory>[
-          generatedOldTemplateDirectory,
-          generatedNewTemplateDirectory,
-          // tempDir,
-          // oldFlutterRoot,
-        ],
+        paths: <String>[],
+        directories: directoriesToDelete,
       );
     }
     return const FlutterCommandResult(ExitStatus.success);

@@ -6,20 +6,26 @@ import 'package:meta/meta.dart';
 import 'package:yaml/yaml.dart';
 
 import '../base/file_system.dart';
+import '../base/common.dart';
 import '../base/logger.dart';
 import '../globals.dart' as globals;
 import '../migrate/migrate_config.dart';
 import '../migrate/migrate_manifest.dart';
 import '../migrate/migrate_utils.dart';
 
+/// Represents the mamifest file that tracks the contents of the current
+/// migration working directory.
+///
+/// This manifest file is created with the results of a `flutter migrate start` run
+/// but does not make use of all of the data.
 class MigrateManifest {
   MigrateManifest({required this.migrateRootDir, required Map<String, MergeResult> mergeResults, required Map<String, File> additionalFiles, required Map<String, File> deletedFiles}) :
     _mergeResults = mergeResults, _additionalFiles = additionalFiles, _deletedFiles = deletedFiles;
 
   MigrateManifest.fromFile(File manifestFile) : migrateRootDir = manifestFile.parent, _mergeResults = <String, MergeResult>{}, _additionalFiles = <String, File>{}, _deletedFiles = <String, File>{} {
-    YamlMap map = loadYaml(manifestFile.readAsStringSync());
+    final YamlMap map = loadYaml(manifestFile.readAsStringSync());
     if (!validateYaml(map)) {
-      // throw due to unvalid manifest
+      throwToolExit('Invalid .migrate_manifest file in the migrate working directory. Fix the manifest or abandon the migration and try again.', exitCode: 1);
     }
     // We can fill the maps with partially dummy data as not all properties are used by the manifest.
     if (map['mergedFiles'] != null) {
@@ -76,10 +82,12 @@ class MigrateManifest {
     return workingDir.childFile('.migrateManifest.yaml');
   }
 
+  /// Verifies the input yaml file contains all of the required properties.
   bool validateYaml(YamlMap map) {
     return map.containsKey('mergedFiles') && map.containsKey('conflictFiles') && map.containsKey('newFiles') && map.containsKey('deletedFiles');
   }
 
+  /// Writes the manifest yaml file in the working directory.
   void writeFile() {
     String mergedFileManifestContents = '';
     String conflictFilesManifestContents = '';
@@ -103,8 +111,8 @@ class MigrateManifest {
       deletedFileManifestContents += '  - $localPath\n';
     }
 
-    String migrateManifestContents = 'mergedFiles:\n${mergedFileManifestContents}conflictFiles:\n${conflictFilesManifestContents}newFiles:\n${newFileManifestContents}deletedFiles:\n${deletedFileManifestContents}';
-    File migrateManifest = getManifestFileFromDirectory(migrateRootDir);
+    final String migrateManifestContents = 'mergedFiles:\n${mergedFileManifestContents}conflictFiles:\n${conflictFilesManifestContents}newFiles:\n${newFileManifestContents}deletedFiles:\n${deletedFileManifestContents}';
+    final File migrateManifest = getManifestFileFromDirectory(migrateRootDir);
     migrateManifest.createSync(recursive: true);
     migrateManifest.writeAsStringSync(migrateManifestContents, flush: true);
   }
