@@ -171,10 +171,6 @@ FakeImage ImageFromState(FakeImageState* image, FakeResourceCache& cache) {
               .width = image_def.width,
               .height = image_def.height,
           };
-        } else if constexpr (std::is_same_v<T, FakeImageState::ImagePipeDef>) {
-          snapshot.image_def = FakeImage::ImagePipeDef{
-              .image_pipe_request = image_def.image_pipe_request.koid,
-          };
         } else if constexpr (std::is_same_v<T, FakeImageState::ImagePipe2Def>) {
           snapshot.image_def = FakeImage::ImagePipe2Def{
               .image_pipe_request = image_def.image_pipe_request.koid,

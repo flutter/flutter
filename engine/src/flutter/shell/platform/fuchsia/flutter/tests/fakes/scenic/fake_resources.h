@@ -298,14 +298,6 @@ struct FakeImageT {
     uint32_t height{};
   };
 
-  struct ImagePipeDef {
-    bool operator==(const ImagePipeDef& other) const;
-
-    typename S::template HandleT<
-        fidl::InterfaceRequest<fuchsia::images::ImagePipe>>
-        image_pipe_request{};
-  };
-
   struct ImagePipe2Def {
     bool operator==(const ImagePipe2Def& other) const;
 
@@ -316,8 +308,7 @@ struct FakeImageT {
 
   bool operator==(const FakeImageT& other) const;
 
-  std::variant<ImageDef, Image2Def, Image3Def, ImagePipeDef, ImagePipe2Def>
-      image_def;
+  std::variant<ImageDef, Image2Def, Image3Def, ImagePipe2Def> image_def;
   std::shared_ptr<typename S::ResourceT> memory;
 };
 using FakeImageState = FakeImageT<StateT>;
@@ -506,14 +497,6 @@ bool FakeImageT<S>::Image3Def::operator==(
              import_token, other.import_token) &&
          buffer_collection_index == other.buffer_collection_index &&
          width == other.width && height == other.height;
-}
-
-template <typename S>
-bool FakeImageT<S>::ImagePipeDef::operator==(
-    const FakeImageT<S>::ImagePipeDef& other) const {
-  return S::template HandlesAreEqual<
-      fidl::InterfaceRequest<fuchsia::images::ImagePipe>>(
-      image_pipe_request, other.image_pipe_request);
 }
 
 template <typename S>

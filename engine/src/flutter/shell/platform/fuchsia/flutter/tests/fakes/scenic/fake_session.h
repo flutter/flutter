@@ -191,8 +191,6 @@ class FakeSession : public fuchsia::ui::scenic::testing::Session_TestBase {
   void ApplyCreateImage(FakeResourceId id, fuchsia::ui::gfx::ImageArgs args);
   void ApplyCreateImage2(FakeResourceId id, fuchsia::ui::gfx::ImageArgs2 args);
   void ApplyCreateImage3(FakeResourceId id, fuchsia::ui::gfx::ImageArgs3 args);
-  void ApplyCreateImagePipe(FakeResourceId id,
-                            fuchsia::ui::gfx::ImagePipeArgs args);
   void ApplyCreateImagePipe2(FakeResourceId id,
                              fuchsia::ui::gfx::ImagePipe2Args args);
   void ApplyCreateRectangle(FakeResourceId id,
