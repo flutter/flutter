@@ -5,7 +5,7 @@
 import 'basic.dart';
 import 'framework.dart';
 
-/// Builds a [Widget] when given a concrete value of a [ChangeNotifier].
+/// Builds a [Widget] when a [ChangeNotifier] notifies its listeners.
 ///
 /// If the `child` parameter provided to the [ChangeNotifierBuilder] is not
 /// null, the same `child` widget is passed back to this
@@ -16,14 +16,24 @@ import 'framework.dart';
 ///
 ///  * [ChangeNotifierBuilder], a widget which invokes this builder each time
 ///    a [ChangeNotifier] changes value.
-typedef ChangeNotifierWidgetBuilder<T> = Widget Function(BuildContext context, Widget? child);
+typedef ChangeNotifierWidgetBuilder = Widget Function(BuildContext context, Widget? child);
+
+/// The listening condition for a [ChangeNotifierBuilder].
+///
+/// This callback can be used to determine under which conditions the
+/// [ChangeNotifierBuilder] has to listen for changes on its [ChangeNotifier].
+/// For example, if this callback always returned false, the
+/// [ChangeNotifierBuilder] would never listen to the [ChangeNotifier].
+///
+/// By default, this is null so the [builder] is always called whenever the
+/// [changeNotifier] notifies its listeners.
+typedef ChangeNotifierListenCondition = bool Function();
 
 /// A widget whose content stays synced with a [ChangeNotifier].
 ///
-/// Given a [ChangeNotifier] and a [builder] which builds widgets from
-/// subtypes of `ChangeNotifier`, this class will automatically register itself
-/// as a listener of the [ChangeNotifier] and call the [builder] whenever
-/// listeners are notified.
+/// Given a [ChangeNotifier] and a [builder], this class will automatically
+/// register itself as a listener of the [ChangeNotifier] and call the [builder]
+/// whenever listeners are notified.
 ///
 /// An [AnimatedBuilder] could be used instead of this widget but it doesn't
 /// have a [listenCondition] callback and it's not specialized to only listen to
@@ -32,8 +42,8 @@ typedef ChangeNotifierWidgetBuilder<T> = Widget Function(BuildContext context, W
 /// ## Performance optimizations
 ///
 /// If your [builder] function contains a subtree that does not depend on the
-/// value of the [ChangeNotifier], it's more efficient to build that subtree
-/// once instead of rebuilding it on every listener notification.
+/// [ChangeNotifier]'s status, it's more efficient to build that subtree once
+/// instead of rebuilding it on every listener notification.
 ///
 /// If you pass the pre-built subtree as the [child] parameter, the
 /// [ChangeNotifierBuilder] will pass it back to your [builder] function so
@@ -49,8 +59,8 @@ typedef ChangeNotifierWidgetBuilder<T> = Widget Function(BuildContext context, W
 ///    coming from its descendant widgets rather than a [ValueListenable] that
 ///    you have a direct reference to.
 ///  * [ValueListenableBuilder], which can trigger rebuilds from a
-///  [ValueNotifier].
-class ChangeNotifierBuilder<T extends ChangeNotifier> extends StatefulWidget {
+///    [ValueNotifier].
+class ChangeNotifierBuilder extends StatefulWidget {
   /// Creates a widget that rebuilds whenever the given change notifier notifies
   /// its listeners.
   ///
@@ -70,14 +80,14 @@ class ChangeNotifierBuilder<T extends ChangeNotifier> extends StatefulWidget {
   }) : super(key: key);
 
   /// The [ChangeNotifier] whose value you depend on in order to build.
-  final T changeNotifier;
+  final ChangeNotifier changeNotifier;
 
   /// A [ChangeNotifierWidgetBuilder] which builds a widget depending on the
   /// [changeNotifier]'s status.
   ///
   /// Can incorporate a [changeNotifier]-independent widget subtree
   /// from the [child] parameter into the returned widget tree.
-  final ChangeNotifierWidgetBuilder<T> builder;
+  final ChangeNotifierWidgetBuilder builder;
 
   /// The listening condition for the [builder].
   ///
@@ -85,9 +95,9 @@ class ChangeNotifierBuilder<T extends ChangeNotifier> extends StatefulWidget {
   /// [builder] function has to be invoked. For example, if this callback
   /// returned false, the [builder] would never be called.
   ///
-  /// By default, this is null so the [builder] il always called whenever the
+  /// By default, this is null so the [builder] is always called whenever the
   /// [changeNotifier] notifies its listeners.
-  final bool Function()? listenCondition;
+  final ChangeNotifierListenCondition? listenCondition;
 
   /// The child widget to pass to the [builder].
   ///
@@ -104,10 +114,10 @@ class ChangeNotifierBuilder<T extends ChangeNotifier> extends StatefulWidget {
   final Widget? child;
 
   @override
-  State<ChangeNotifierBuilder<T>> createState() => _ChangeNotifierBuilderState<T>();
+  State<ChangeNotifierBuilder> createState() => _ChangeNotifierBuilderState();
 }
 
-class _ChangeNotifierBuilderState<T extends ChangeNotifier> extends State<ChangeNotifierBuilder<T>> {
+class _ChangeNotifierBuilderState extends State<ChangeNotifierBuilder> {
   @override
   void initState() {
     super.initState();
@@ -115,7 +125,7 @@ class _ChangeNotifierBuilderState<T extends ChangeNotifier> extends State<Change
   }
 
   @override
-  void didUpdateWidget(covariant ChangeNotifierBuilder<T> oldWidget) {
+  void didUpdateWidget(covariant ChangeNotifierBuilder oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.changeNotifier != oldWidget.changeNotifier) {
       oldWidget.changeNotifier.removeListener(_handleChange);

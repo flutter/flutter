@@ -16,7 +16,7 @@ void main() {
   }) {
     return Directionality(
       textDirection: TextDirection.ltr,
-      child: ChangeNotifierBuilder<IntegerChangeNotifier>(
+      child: ChangeNotifierBuilder(
         changeNotifier: changeNotifier,
         listenCondition: listenCondition,
         builder: (BuildContext context, Widget? child) {
