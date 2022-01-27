@@ -1,4 +1,4 @@
-Signature: b643518b93c707fdbf4876118d1401b4
+Signature: bd338c6b1d6afb707bc79f300deb2d0a
 
 UNUSED LICENSES:
 
@@ -227,8 +227,8 @@ LIBRARY: fuchsia-vulkan
 LIBRARY: khronos
 LIBRARY: libwebp
 LIBRARY: pkg
-LIBRARY: vulkan
 LIBRARY: vulkan-deps
+LIBRARY: vulkan-headers
 LIBRARY: wuffs
 ORIGIN: ../../../flutter/third_party/txt/LICENSE
 TYPE: LicenseType.apache
@@ -1258,19 +1258,28 @@ FILE: ../../../third_party/pkg/quiver/lib/src/time/duration_unit_constants.dart
 FILE: ../../../third_party/pkg/quiver/lib/src/time/util.dart
 FILE: ../../../third_party/pkg/quiver/lib/strings.dart
 FILE: ../../../third_party/pkg/quiver/lib/time.dart
-FILE: ../../../third_party/vulkan/include/vulkan/vk_platform.h
-FILE: ../../../third_party/vulkan/include/vulkan/vulkan.h
-FILE: ../../../third_party/vulkan/include/vulkan/vulkan_android.h
-FILE: ../../../third_party/vulkan/include/vulkan/vulkan_core.h
-FILE: ../../../third_party/vulkan/include/vulkan/vulkan_fuchsia.h
-FILE: ../../../third_party/vulkan/include/vulkan/vulkan_ios.h
-FILE: ../../../third_party/vulkan/include/vulkan/vulkan_macos.h
-FILE: ../../../third_party/vulkan/include/vulkan/vulkan_vi.h
-FILE: ../../../third_party/vulkan/include/vulkan/vulkan_wayland.h
-FILE: ../../../third_party/vulkan/include/vulkan/vulkan_win32.h
-FILE: ../../../third_party/vulkan/include/vulkan/vulkan_xcb.h
-FILE: ../../../third_party/vulkan/include/vulkan/vulkan_xlib.h
-FILE: ../../../third_party/vulkan/include/vulkan/vulkan_xlib_xrandr.h
+FILE: ../../../third_party/vulkan-headers/cmake/cmake_uninstall.cmake.in
+FILE: ../../../third_party/vulkan-headers/include/vulkan/vk_icd.h
+FILE: ../../../third_party/vulkan-headers/include/vulkan/vk_layer.h
+FILE: ../../../third_party/vulkan-headers/include/vulkan/vk_platform.h
+FILE: ../../../third_party/vulkan-headers/include/vulkan/vk_sdk_platform.h
+FILE: ../../../third_party/vulkan-headers/include/vulkan/vulkan.h
+FILE: ../../../third_party/vulkan-headers/include/vulkan/vulkan.hpp
+FILE: ../../../third_party/vulkan-headers/include/vulkan/vulkan_android.h
+FILE: ../../../third_party/vulkan-headers/include/vulkan/vulkan_core.h
+FILE: ../../../third_party/vulkan-headers/include/vulkan/vulkan_fuchsia.h
+FILE: ../../../third_party/vulkan-headers/include/vulkan/vulkan_ggp.h
+FILE: ../../../third_party/vulkan-headers/include/vulkan/vulkan_ios.h
+FILE: ../../../third_party/vulkan-headers/include/vulkan/vulkan_macos.h
+FILE: ../../../third_party/vulkan-headers/include/vulkan/vulkan_metal.h
+FILE: ../../../third_party/vulkan-headers/include/vulkan/vulkan_vi.h
+FILE: ../../../third_party/vulkan-headers/include/vulkan/vulkan_wayland.h
+FILE: ../../../third_party/vulkan-headers/include/vulkan/vulkan_win32.h
+FILE: ../../../third_party/vulkan-headers/include/vulkan/vulkan_xcb.h
+FILE: ../../../third_party/vulkan-headers/include/vulkan/vulkan_xlib.h
+FILE: ../../../third_party/vulkan-headers/include/vulkan/vulkan_xlib_xrandr.h
+FILE: ../../../third_party/vulkan-headers/registry/validusage.json
+FILE: ../../../third_party/vulkan-headers/registry/vk.xml
 FILE: ../../../third_party/wuffs/release/c/wuffs-v0.2.c
 FILE: ../../../third_party/wuffs/release/c/wuffs-v0.3.c
 ----------------------------------------------------------------------------------------------------
