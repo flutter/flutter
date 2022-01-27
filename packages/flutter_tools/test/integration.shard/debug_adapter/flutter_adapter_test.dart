@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:dds/src/dap/protocol_generated.dart';
@@ -18,8 +16,8 @@ import 'test_client.dart';
 import 'test_support.dart';
 
 void main() {
-  Directory tempDir;
-  /*late*/ DapTestSession dap;
+  late Directory tempDir;
+  late DapTestSession dap;
   final String relativeMainPath = 'lib${fileSystem.path.separator}main.dart';
 
   setUpAll(() {
@@ -119,7 +117,7 @@ void main() {
     await project.setUpIn(tempDir);
 
     // Launch the app and wait for it to print "topLevelFunction".
-    await Future.wait(<Future<Object>>[
+    await Future.wait(<Future<void>>[
       dap.client.outputEvents.firstWhere((OutputEventBody output) => output.output.startsWith('topLevelFunction')),
       dap.client.start(
         launch: () => dap.client.launch(
@@ -156,7 +154,7 @@ void main() {
     await project.setUpIn(tempDir);
 
     // Launch the app and wait for it to print "topLevelFunction".
-    await Future.wait(<Future<Object>>[
+    await Future.wait(<Future<void>>[
       dap.client.outputEvents.firstWhere((OutputEventBody output) => output.output.startsWith('topLevelFunction')),
       dap.client.start(
         launch: () => dap.client.launch(
@@ -193,10 +191,10 @@ void main() {
     await project.setUpIn(tempDir);
 
     // Launch the app and wait for it to stop at an exception.
-    int originalThreadId, newThreadId;
-    await Future.wait(<Future<Object>>[
+    late int originalThreadId, newThreadId;
+    await Future.wait(<Future<void>>[
       // Capture the thread ID of the stopped thread.
-      dap.client.stoppedEvents.first.then((StoppedEventBody event) => originalThreadId = event.threadId),
+      dap.client.stoppedEvents.first.then((StoppedEventBody event) => originalThreadId = event.threadId!),
       dap.client.start(
         exceptionPauseMode: 'All', // Ensure we stop on all exceptions
         launch: () => dap.client.launch(
@@ -208,9 +206,9 @@ void main() {
 
     // Hot restart, ensuring it completes and capturing the ID of the new thread
     // to pause.
-    await Future.wait(<Future<Object>>[
+    await Future.wait(<Future<void>>[
       // Capture the thread ID of the newly stopped thread.
-      dap.client.stoppedEvents.first.then((StoppedEventBody event) => newThreadId = event.threadId),
+      dap.client.stoppedEvents.first.then((StoppedEventBody event) => newThreadId = event.threadId!),
       dap.client.hotRestart(),
     ], eagerError: true);
 
@@ -230,11 +228,11 @@ void main() {
     // extension loads, as we'll need that to call it later.
     final Future<String> isolateIdForDebugPaint = dap.client
         .serviceExtensionAdded(debugPaintRpc)
-        .then((Map<String, Object/*?*/> body) => body['isolateId'] as String);
+        .then((Map<String, Object?> body) => body['isolateId']! as String);
 
     // Launch the app and wait for it to print "topLevelFunction" so we know
     // it's up and running.
-    await Future.wait(<Future<Object>>[
+    await Future.wait(<Future<void>>[
       dap.client.outputEvents.firstWhere((OutputEventBody output) =>
           output.output.startsWith('topLevelFunction')),
       dap.client.start(
@@ -247,15 +245,15 @@ void main() {
 
     // Capture the next relevant state-change event (which should occur as a
     // result of the call below).
-    final Future<Map<String, Object/*?*/>> stateChangeEventFuture =
+    final Future<Map<String, Object?>> stateChangeEventFuture =
         dap.client.serviceExtensionStateChanged(debugPaintRpc);
 
     // Enable debug paint to trigger the state change.
     await dap.client.custom(
       'callService',
-      <String, Object/*?*/>{
+      <String, Object?>{
         'method': debugPaintRpc,
-        'params': <String, Object/*?*/>{
+        'params': <String, Object?>{
           'enabled': true,
           'isolateId': await isolateIdForDebugPaint,
         },
@@ -263,7 +261,7 @@ void main() {
     );
 
     // Ensure the event occurred, and its value was as expected.
-    final Map<String, Object/*?*/> stateChangeEvent = await stateChangeEventFuture;
+    final Map<String, Object?> stateChangeEvent = await stateChangeEventFuture;
     expect(stateChangeEvent['value'], 'true'); // extension state change values are always strings
 
     await dap.client.terminate();
@@ -273,7 +271,7 @@ void main() {
 /// Extracts the output from a set of [OutputEventBody], removing any
 /// adjacent duplicates and combining into a single string.
 String _uniqueOutputLines(List<OutputEventBody> outputEvents) {
-  String/*?*/ lastItem;
+  String? lastItem;
   return outputEvents
       .map((OutputEventBody e) => e.output)
       .where((String output) {
