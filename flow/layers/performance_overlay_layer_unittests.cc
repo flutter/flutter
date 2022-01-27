@@ -10,11 +10,7 @@
 #include "flutter/flow/flow_test_utils.h"
 #include "flutter/flow/raster_cache.h"
 #include "flutter/flow/testing/layer_test.h"
-#include "flutter/flow/testing/mock_layer.h"
-#include "flutter/fml/build_config.h"
-#include "flutter/fml/macros.h"
 #include "flutter/testing/mock_canvas.h"
-#include "gtest/gtest.h"
 #include "third_party/skia/include/core/SkData.h"
 #include "third_party/skia/include/core/SkSerialProcs.h"
 #include "third_party/skia/include/core/SkSurface.h"
@@ -49,7 +45,7 @@ static void TestPerformanceOverlayLayerGold(int refresh_rate) {
   std::string golden_file_path = GetGoldenFilePath(refresh_rate, false);
   std::string new_golden_file_path = GetGoldenFilePath(refresh_rate, true);
 
-  flutter::Stopwatch mock_stopwatch(
+  FixedRefreshRateStopwatch mock_stopwatch(
       fml::RefreshRateToFrameBudget(refresh_rate));
   for (int i = 0; i < size(kMockedTimes); ++i) {
     mock_stopwatch.SetLapTime(

@@ -15,16 +15,25 @@ namespace flutter {
 static const size_t kMaxSamples = 120;
 static const size_t kMaxFrameMarkers = 8;
 
-Stopwatch::Stopwatch(fml::Milliseconds frame_budget)
-    : start_(fml::TimePoint::Now()), current_sample_(0) {
+Stopwatch::Stopwatch(const RefreshRateUpdater& updater)
+    : refresh_rate_updater_(updater),
+      start_(fml::TimePoint::Now()),
+      current_sample_(0) {
   const fml::TimeDelta delta = fml::TimeDelta::Zero();
   laps_.resize(kMaxSamples, delta);
   cache_dirty_ = true;
   prev_drawn_sample_index_ = 0;
-  frame_budget_ = frame_budget;
 }
 
 Stopwatch::~Stopwatch() = default;
+
+FixedRefreshRateStopwatch::FixedRefreshRateStopwatch(
+    fml::Milliseconds frame_budget)
+    : Stopwatch(fixed_delegate_), fixed_delegate_(frame_budget) {}
+
+FixedRefreshRateUpdater::FixedRefreshRateUpdater(
+    fml::Milliseconds fixed_frame_budget)
+    : fixed_frame_budget_(fixed_frame_budget) {}
 
 void Stopwatch::Start() {
   start_ = fml::TimePoint::Now();
@@ -45,7 +54,7 @@ const fml::TimeDelta& Stopwatch::LastLap() const {
 }
 
 double Stopwatch::UnitFrameInterval(double raster_time_ms) const {
-  return raster_time_ms / frame_budget_.count();
+  return raster_time_ms / GetFrameBudget().count();
 }
 
 double Stopwatch::UnitHeight(double raster_time_ms,
@@ -101,7 +110,7 @@ void Stopwatch::InitVisualizeSurface(const SkRect& rect) const {
 
   // Scale the graph to show frame times up to those that are 3 times the frame
   // time.
-  const double one_frame_ms = frame_budget_.count();
+  const double one_frame_ms = GetFrameBudget().count();
   const double max_interval = one_frame_ms * 3.0;
   const double max_unit_interval = UnitFrameInterval(max_interval);
 
@@ -151,7 +160,7 @@ void Stopwatch::Visualize(SkCanvas* canvas, const SkRect& rect) const {
 
   // Scale the graph to show frame times up to those that are 3 times the frame
   // time.
-  const double one_frame_ms = frame_budget_.count();
+  const double one_frame_ms = GetFrameBudget().count();
   const double max_interval = one_frame_ms * 3.0;
   const double max_unit_interval = UnitFrameInterval(max_interval);
 
@@ -228,6 +237,10 @@ void Stopwatch::Visualize(SkCanvas* canvas, const SkRect& rect) const {
   visualize_cache_surface_->draw(canvas, rect.x(), rect.y());
 }
 
+fml::Milliseconds Stopwatch::GetFrameBudget() const {
+  return refresh_rate_updater_.GetFrameBudget();
+}
+
 CounterValues::CounterValues() : current_sample_(kMaxSamples - 1) {
   values_.resize(kMaxSamples, 0);
 }
@@ -300,10 +313,6 @@ void CounterValues::Visualize(SkCanvas* canvas, const SkRect& rect) const {
   canvas->drawRect(marker_rect, paint);
 }
 
-int64_t CounterValues::GetCurrentValue() const {
-  return values_[current_sample_];
-}
-
 int64_t CounterValues::GetMaxValue() const {
   auto max = std::numeric_limits<int64_t>::min();
   for (size_t i = 0; i < kMaxSamples; ++i) {
@@ -318,6 +327,10 @@ int64_t CounterValues::GetMinValue() const {
     min = std::min<int64_t>(min, values_[i]);
   }
   return min;
+}
+
+fml::Milliseconds FixedRefreshRateUpdater::GetFrameBudget() const {
+  return fixed_frame_budget_;
 }
 
 }  // namespace flutter

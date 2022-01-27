@@ -66,8 +66,8 @@ void MockRasterCache::AddMockPicture(int width, int height) {
 }
 
 PrerollContextHolder GetSamplePrerollContextHolder() {
-  Stopwatch raster_time;
-  Stopwatch ui_time;
+  FixedRefreshRateStopwatch raster_time;
+  FixedRefreshRateStopwatch ui_time;
   MutatorsStack mutators_stack;
   TextureRegistry texture_registry;
   sk_sp<SkColorSpace> srgb = SkColorSpace::MakeSRGB();

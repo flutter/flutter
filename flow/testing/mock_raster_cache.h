@@ -74,8 +74,8 @@ class MockRasterCache : public RasterCache {
   MockCanvas mock_canvas_;
   SkColorSpace* color_space_ = mock_canvas_.imageInfo().colorSpace();
   MutatorsStack mutators_stack_;
-  Stopwatch raster_time_;
-  Stopwatch ui_time_;
+  FixedRefreshRateStopwatch raster_time_;
+  FixedRefreshRateStopwatch ui_time_;
   TextureRegistry texture_registry_;
   PrerollContext preroll_context_ = {
       nullptr,           /* raster_cache */
