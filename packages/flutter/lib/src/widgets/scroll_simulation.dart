@@ -76,8 +76,8 @@ class BouncingScrollSimulation extends Simulation with ScrollSimulationMixin {
   double _timeOffset = 0.0;
 
   // This method will update the springTime to correct value when list performLayout.
-  // And it will instantiation ScrollSpringSimulation.
-  // But will not affect [_frictionSimulation].
+  // It will re-instantiate ScrollSpringSimulation.
+  // It will re-instantiate [_frictionSimulation] when [updateFriction] is true.
   void _updateSimulation(double currentPixel, double velocity, bool updateFriction) {
     if (currentPixel < leadingExtent) {
       _springSimulation = _underscrollSimulation(currentPixel, velocity);
@@ -310,8 +310,8 @@ class ClampingScrollSimulation extends Simulation with ScrollSimulationMixin {
     }
   }
 
-  // This method will update the springTime to correct value when list performLayout.
-  // And it will instantiation ScrollSpringSimulation.
+  // This method will update the springSimulation.
+  // It only work if it goes beyond the boundary in the first place.
   void _updateSpringSimulation(double currentPixel, double velocity) {
     if (leadingExtent != null && trailingExtent != null) {
       double? end;
