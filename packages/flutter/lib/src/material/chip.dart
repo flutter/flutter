@@ -251,7 +251,7 @@ abstract class DeletableChipAttributes {
   ///
   /// Defaults to true.
   @Deprecated(
-    'Set deleteButtonTooltipMessage of this Chip as an empty string instead. '
+    'Migrate to deleteButtonTooltipMessage. '
     'This feature was deprecated after v2.10.0-0.3.pre.'
   )
   bool get useDeleteButtonTooltip;
@@ -575,7 +575,7 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
     this.elevation,
     this.shadowColor,
     @Deprecated(
-      'Set deleteButtonTooltipMessage of this Chip as an empty string instead. '
+      'Migrate to deleteButtonTooltipMessage. '
       'This feature was deprecated after v2.10.0-0.3.pre.'
     )
     this.useDeleteButtonTooltip = true,
@@ -625,7 +625,7 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
   final Color? shadowColor;
   @override
   @Deprecated(
-    'Set deleteButtonTooltipMessage of this Chip as an empty string instead. '
+    'Migrate to deleteButtonTooltipMessage. '
     'This feature was deprecated after v2.10.0-0.3.pre.'
   )
   final bool useDeleteButtonTooltip;
@@ -755,7 +755,7 @@ class InputChip extends StatelessWidget
     this.checkmarkColor,
     this.avatarBorder = const CircleBorder(),
     @Deprecated(
-      'Set deleteButtonTooltipMessage of this Chip as an empty string instead. '
+      'Migrate to deleteButtonTooltipMessage. '
       'This feature was deprecated after v2.10.0-0.3.pre.'
     )
     this.useDeleteButtonTooltip = true,
@@ -832,7 +832,7 @@ class InputChip extends StatelessWidget
   final ShapeBorder avatarBorder;
   @override
   @Deprecated(
-    'Set deleteButtonTooltipMessage of this Chip as an empty string instead. '
+    'Migrate to deleteButtonTooltipMessage. '
     'This feature was deprecated after v2.10.0-0.3.pre.'
   )
   final bool useDeleteButtonTooltip;
@@ -1512,7 +1512,7 @@ class RawChip extends StatefulWidget
     this.checkmarkColor,
     this.avatarBorder = const CircleBorder(),
     @Deprecated(
-      'Set deleteButtonTooltipMessage of this Chip as an empty string instead. '
+      'Migrate to deleteButtonTooltipMessage. '
       'This feature was deprecated after v2.10.0-0.3.pre.'
     )
     this.useDeleteButtonTooltip = true,
@@ -1590,7 +1590,7 @@ class RawChip extends StatefulWidget
   final ShapeBorder avatarBorder;
   @override
   @Deprecated(
-    'Set deleteButtonTooltipMessage of this Chip as an empty string instead. '
+    'Migrate to deleteButtonTooltipMessage. '
     'This feature was deprecated after v2.10.0-0.3.pre.'
   )
   final bool useDeleteButtonTooltip;
