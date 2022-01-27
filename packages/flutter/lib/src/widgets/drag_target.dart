@@ -489,8 +489,8 @@ class LongPressDraggable<T extends Object> extends Draggable<T> {
   @override
   DelayedMultiDragGestureRecognizer createRecognizer(GestureMultiDragStartCallback onStart) {
     return DelayedMultiDragGestureRecognizer(
-        delay: delay,
-        supportedDevices: supportedDevices,
+      delay: delay,
+      supportedDevices: supportedDevices,
     )..onStart = (Offset position) {
       final Drag? result = onStart(position);
       if (result != null && hapticFeedbackOnStart)
@@ -505,6 +505,14 @@ class _DraggableState<T extends Object> extends State<Draggable<T>> {
   void initState() {
     super.initState();
     _recognizer = widget.createRecognizer(_startDrag);
+  }
+
+  @override
+  void didUpdateWidget(covariant Draggable<T> oldWidget) {
+    if (widget.supportedDevices != oldWidget.supportedDevices) {
+      _recognizer = widget.createRecognizer(_startDrag);
+    }
+    super.didUpdateWidget(oldWidget);
   }
 
   @override

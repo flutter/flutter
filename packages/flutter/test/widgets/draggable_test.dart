@@ -3113,30 +3113,34 @@ void main() {
     int dragStartedCount = 0;
     int moveCount = 0;
 
-    await tester.pumpWidget(MaterialApp(
-      home: Column(
-        children: <Widget>[
-          Draggable<int>(
-            data: 1,
-            feedback: const Text('Dragging'),
-            onDragStarted: () {
-              ++dragStartedCount;
-            },
-            // Block all input devices from dragging
-            supportedDevices: const <PointerDeviceKind>{},
-            child: const Text('Source'),
-          ),
-          DragTarget<int>(
-            builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
-              return const SizedBox(height: 100.0, child: Text('Target'));
-            },
-            onMove: (_) => moveCount++,
-            onAccept: accepted.add,
-            onAcceptWithDetails: acceptedDetails.add,
-          ),
-        ],
-      ),
-    ));
+    Widget _buildTest(Set<PointerDeviceKind> supportedDevices) {
+      return MaterialApp(
+        home: Column(
+          children: <Widget>[
+            Draggable<int>(
+              data: 1,
+              feedback: const Text('Dragging'),
+              onDragStarted: () {
+                ++dragStartedCount;
+              },
+              supportedDevices: supportedDevices,
+              child: const Text('Source'),
+            ),
+            DragTarget<int>(
+              builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
+                return const SizedBox(height: 100.0, child: Text('Target'));
+              },
+              onMove: (_) => moveCount++,
+              onAccept: accepted.add,
+              onAcceptWithDetails: acceptedDetails.add,
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Block all input devices from dragging
+    await tester.pumpWidget(_buildTest(const <PointerDeviceKind>{}));
 
     expect(accepted, isEmpty);
     expect(acceptedDetails, isEmpty);
@@ -3147,7 +3151,7 @@ void main() {
     expect(moveCount, 0);
 
     final Offset firstLocation = tester.getCenter(find.text('Source'));
-    await tester.startGesture(firstLocation, pointer: 7);
+    final TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
     await tester.pump();
 
     expect(accepted, isEmpty);
@@ -3156,6 +3160,22 @@ void main() {
     expect(find.text('Dragging'), findsNothing);
     expect(find.text('Target'), findsOneWidget);
     expect(dragStartedCount, 0);
+    expect(moveCount, 0);
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    // Update to allow touch
+    await tester.pumpWidget(_buildTest(const <PointerDeviceKind>{ PointerDeviceKind.touch }));
+    await tester.startGesture(firstLocation, pointer: 7);
+    await tester.pump();
+
+    expect(accepted, isEmpty);
+    expect(acceptedDetails, isEmpty);
+    expect(find.text('Source'), findsOneWidget);
+    expect(find.text('Dragging'), findsOneWidget);
+    expect(find.text('Target'), findsOneWidget);
+    expect(dragStartedCount, 1);
     expect(moveCount, 0);
   });
 
