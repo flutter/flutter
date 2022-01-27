@@ -385,23 +385,6 @@ void ShellTest::DestroyShell(std::unique_ptr<Shell> shell,
   latch.Wait();
 }
 
-bool ShellTest::IsAnimatorRunning(Shell* shell) {
-  fml::AutoResetWaitableEvent latch;
-  bool running = false;
-  if (!shell) {
-    return running;
-  }
-  fml::TaskRunner::RunNowOrPostTask(
-      shell->GetTaskRunners().GetUITaskRunner(), [shell, &running, &latch]() {
-        if (shell && shell->engine_ && shell->engine_->animator_) {
-          running = !shell->engine_->animator_->paused_;
-        }
-        latch.Signal();
-      });
-  latch.Wait();
-  return running;
-}
-
 size_t ShellTest::GetLiveTrackedPathCount(
     std::shared_ptr<VolatilePathTracker> tracker) {
   return std::count_if(
