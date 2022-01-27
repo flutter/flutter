@@ -519,6 +519,20 @@ TaskFunction createOpacityPeepholeFadeTransitionTextPerfE2ETest() {
   ).run;
 }
 
+TaskFunction createOpacityPeepholeGridOfAlphaSaveLayersPerfE2ETest() {
+  return PerfTest.e2e(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test/opacity_peephole_grid_of_alpha_savelayers_perf_e2e.dart',
+  ).run;
+}
+
+TaskFunction createOpacityPeepholeColOfAlphaSaveLayerRowsPerfE2ETest() {
+  return PerfTest.e2e(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test/opacity_peephole_col_of_alpha_savelayer_rows_perf_e2e.dart',
+  ).run;
+}
+
 Map<String, dynamic> _average(List<Map<String, dynamic>> results, int iterations) {
   final Map<String, dynamic> tally = <String, dynamic>{};
   for (final Map<String, dynamic> item in results) {

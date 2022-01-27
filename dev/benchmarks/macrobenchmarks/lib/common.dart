@@ -32,6 +32,9 @@ const String kOpacityPeepholeGridOfOpacityRouteName = '$kOpacityPeepholeRouteNam
 const String kOpacityPeepholeOpacityOfGridRouteName = '$kOpacityPeepholeRouteName/opacity_of_grid';
 const String kOpacityPeepholeOpacityOfColOfRowsRouteName = '$kOpacityPeepholeRouteName/opacity_of_col_of_rows';
 const String kOpacityPeepholeFadeTransitionTextRouteName = '$kOpacityPeepholeRouteName/fade_transition_text';
+const String kOpacityPeepholeGridOfRectsWithAlphaRouteName = '$kOpacityPeepholeRouteName/grid_of_rects_with_alpha';
+const String kOpacityPeepholeGridOfAlphaSaveLayerRectsRouteName = '$kOpacityPeepholeRouteName/grid_of_alpha_savelayer_rects';
+const String kOpacityPeepholeColumnOfAlphaSaveLayerRowsOfRectsRouteName = '$kOpacityPeepholeRouteName/column_of_alpha_save_layer_rows_of_rects';
 
 const String kScrollableName = '/macrobenchmark_listview';
 const String kOpacityScrollableName = '$kOpacityPeepholeRouteName/listview';

@@ -2282,6 +2282,28 @@ targets:
       task_name: opacity_peephole_fade_transition_text_perf__e2e_summary
     scheduler: luci
 
+  - name: Linux_android opacity_peephole_grid_of_alpha_savelayers_perf__e2e_summary
+    bringup: true
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux"]
+      task_name: opacity_peephole_grid_of_alpha_savelayers_perf__e2e_summary
+    scheduler: luci
+
+  - name: Linux_android opacity_peephole_col_of_alpha_savelayer_rows_perf__e2e_summary
+    bringup: true
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux"]
+      task_name: opacity_peephole_col_of_alpha_savelayer_rows_perf__e2e_summary
+    scheduler: luci
+
   - name: Mac build_aar_module_test
     recipe: devicelab/devicelab_drone
     timeout: 60
