@@ -21,6 +21,10 @@ import '../../src/fake_process_manager.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 class FakeXcodeProjectInterpreterWithBuildSettings extends FakeXcodeProjectInterpreter {
+  FakeXcodeProjectInterpreterWithBuildSettings({ this.overrides = const <String, String>{} });
+
+  final Map<String, String> overrides;
+
   @override
   Future<Map<String, String>> getBuildSettings(
       String projectPath, {
@@ -28,6 +32,7 @@ class FakeXcodeProjectInterpreterWithBuildSettings extends FakeXcodeProjectInter
         Duration timeout = const Duration(minutes: 1),
       }) async {
     return <String, String>{
+      ...overrides,
       'PRODUCT_BUNDLE_IDENTIFIER': 'io.flutter.someProject',
       'DEVELOPMENT_TEAM': 'abc',
     };
@@ -340,6 +345,41 @@ void main() {
     ProcessManager: () => fakeProcessManager,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+  });
+
+  testUsingContext('ipa build invokes xcodebuild and archives with bitcode on', () async {
+    final BuildCommand command = BuildCommand();
+    fakeProcessManager.addCommands(<FakeCommand>[
+      xattrCommand,
+      _setUpFakeXcodeBuildHandler(),
+      _exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
+    ]);
+    _createMinimalMockProjectFiles();
+
+    await createTestCommandRunner(command).run(
+        const <String>['build', 'ipa', '--no-pub',]
+    );
+
+    const String expectedIpaPlistContents = '''
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+    <dict>
+        <key>method</key>
+        <string>app-store</string>
+    </dict>
+</plist>
+''';
+
+    final String actualIpaPlistContents = fileSystem.file(_exportOptionsPlist).readAsStringSync();
+    expect(actualIpaPlistContents, expectedIpaPlistContents);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => fakeProcessManager,
+    Platform: () => macosPlatform,
+    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(
+      overrides: <String, String>{'ENABLE_BITCODE': 'YES'},
+    ),
   });
 
   testUsingContext('ipa build invokes xcode build with verbosity', () async {

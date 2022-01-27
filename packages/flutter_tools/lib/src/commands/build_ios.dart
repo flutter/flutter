@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:file/file.dart';
+import 'package:meta/meta.dart';
 
 import '../base/analyze_size.dart';
 import '../base/common.dart';
@@ -156,14 +157,18 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     RunResult? result;
     final String relativeOutputPath = app.ipaOutputPath;
     final String absoluteOutputPath = globals.fs.path.absolute(relativeOutputPath);
-    final String archivePath = globals.fs.path.absolute(app.archiveBundleOutputPath);
-    final String? exportMethod = stringArg('export-method');
+    final String absoluteArchivePath = globals.fs.path.absolute(app.archiveBundleOutputPath);
+    final String exportMethod = stringArg('export-method')!;
     final bool isAppStoreUpload = exportMethod  == 'app-store';
+    File? generatedExportPlist;
     try {
-      final String? ipaType = isAppStoreUpload ? 'App Store' : exportMethod;
-      status = globals.logger.startProgress('Building $ipaType IPA...');
-
-      final String exportOptions = exportOptionsPlist ?? _createExportPlist().path;
+      final String exportMethodDisplayName = isAppStoreUpload ? 'App Store' : exportMethod;
+      status = globals.logger.startProgress('Building $exportMethodDisplayName IPA...');
+      String? exportOptions = exportOptionsPlist;
+      if (exportOptions == null) {
+        generatedExportPlist = _createExportPlist();
+        exportOptions = generatedExportPlist.path;
+      }
 
       result = await globals.processUtils.run(
         <String>[
@@ -175,7 +180,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
             '-allowProvisioningUpdates',
           ],
           '-archivePath',
-          archivePath,
+          absoluteArchivePath,
           '-exportPath',
           absoluteOutputPath,
           '-exportOptionsPlist',
@@ -183,6 +188,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
         ],
       );
     } finally {
+      generatedExportPlist?.deleteSync();
       status?.stop();
     }
 
@@ -200,7 +206,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
 
       globals.printError('Encountered error while creating the IPA:');
       globals.printError(errorMessage.toString());
-      globals.printError('Try distributing the app in Xcode: "open $archivePath"');
+      globals.printError('Try distributing the app in Xcode: "open $absoluteArchivePath"');
       throwToolExit(null);
     }
 
@@ -238,13 +244,20 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     plistContents.write('''
         <string>${stringArg('export-method')}</string>
     ''');
-    // Bitcode is off by default in Flutter iOS apps.
-    plistContents.write('''
+    if (xcodeBuildResult?.xcodeBuildExecution?.buildSettings['ENABLE_BITCODE'] != 'YES') {
+      // Bitcode is off by default in Flutter iOS apps.
+      plistContents.write('''
     <key>uploadBitcode</key>
         <false/>
     </dict>
 </plist>
 ''');
+    } else {
+      plistContents.write('''
+</dict>
+</plist>
+''');
+    }
 
     final File tempPlist = globals.fs.systemTempDirectory
         .createTempSync('flutter_build_ios.').childFile('ExportOptions.plist');
@@ -282,6 +295,10 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
   };
 
   XcodeBuildAction get xcodeBuildAction;
+
+  /// The result of the Xcode build command. Null until it finishes.
+  @protected
+  XcodeBuildResult? xcodeBuildResult;
   EnvironmentType get environmentType;
   bool get configOnly;
   bool get shouldCodesign;
@@ -345,6 +362,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
       buildAction: xcodeBuildAction,
       deviceID: globals.deviceManager?.specifiedDeviceId,
     );
+    xcodeBuildResult = result;
 
     if (!result.success) {
       await diagnoseXcodeBuildFailure(result, globals.flutterUsage, globals.logger);
