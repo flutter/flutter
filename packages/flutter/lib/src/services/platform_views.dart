@@ -653,6 +653,8 @@ class _AndroidMotionEventConverter {
         toolType = AndroidPointerProperties.kToolTypeEraser;
         break;
       case PointerDeviceKind.unknown:
+      // ignore: no_default_cases, to allow adding new device types to [PointerDeviceKind].
+      default:
         toolType = AndroidPointerProperties.kToolTypeUnknown;
         break;
     }

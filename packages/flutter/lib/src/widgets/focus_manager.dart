@@ -1649,6 +1649,8 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
         break;
       case PointerDeviceKind.mouse:
       case PointerDeviceKind.unknown:
+      // ignore: no_default_cases, to allow adding new device types to [PointerDeviceKind].
+      default:
         _lastInteractionWasTouch = false;
         expectedMode = FocusHighlightMode.traditional;
         break;

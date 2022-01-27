@@ -668,6 +668,8 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
       case PointerDeviceKind.stylus:
       case PointerDeviceKind.invertedStylus:
       case PointerDeviceKind.unknown:
+      // ignore: no_default_cases, to allow adding new device types to [PointerDeviceKind].
+      default:
         return interactiveRect.contains(position);
     }
   }
@@ -700,6 +702,8 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
       case PointerDeviceKind.stylus:
       case PointerDeviceKind.invertedStylus:
       case PointerDeviceKind.unknown:
+      // ignore: no_default_cases, to allow adding new device types to [PointerDeviceKind].
+      default:
         return _thumbRect!.contains(position);
     }
   }
@@ -1791,6 +1795,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
                   case PointerDeviceKind.invertedStylus:
                   case PointerDeviceKind.unknown:
                   case PointerDeviceKind.touch:
+                  // ignore: no_default_cases, to allow adding new device types to [PointerDeviceKind].
+                  default:
                     break;
                 }
               },
@@ -1804,6 +1810,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
                   case PointerDeviceKind.invertedStylus:
                   case PointerDeviceKind.unknown:
                   case PointerDeviceKind.touch:
+                  // ignore: no_default_cases, to allow adding new device types to [PointerDeviceKind].
+                  default:
                     break;
                 }
               },
