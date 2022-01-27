@@ -111,7 +111,15 @@ template("sdk_targets") {
     if (part_meta != "version_history.json") {
       subtarget_name = part_meta_json.name
 
-      if (part.type == target_type) {
+      # Check if the part is using `part.element_type` or `part.type`.
+      part_type = ""
+      if (defined(part.element_type)) {
+        part_type = part.element_type
+      } else if (defined(part.type)) {
+        part_type = part.type
+      }
+
+      if (part_type == target_type) {
         if (target_type == "dart_library") {
           _fuchsia_dart_library(subtarget_name) {
             meta = part_meta_json
