@@ -2479,6 +2479,63 @@ void main() {
     // The 8.0 pixels is [_kMenuScreenPadding].
     expect(popupMenu, const Offset(8.0, 50.0));
   });
+
+  testWidgets('PopupMenuButton custom splash radius', (WidgetTester tester) async {
+    Future<void> buildFrameWithoutChild({double? splashRadius}) {
+      return tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: PopupMenuButton<String>(
+                splashRadius: splashRadius,
+                itemBuilder: (_) => <PopupMenuEntry<String>>[
+                  const PopupMenuItem<String>(
+                    value: 'value',
+                    child: Text('child'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    Future<void> buildFrameWithChild({double? splashRadius}) {
+      return tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: PopupMenuButton<String>(
+                splashRadius: splashRadius,
+                child: const Text('An item'),
+                itemBuilder: (_) => <PopupMenuEntry<String>>[
+                  const PopupMenuDivider()
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+
+    await buildFrameWithoutChild();
+    expect(tester.widget<InkResponse>(find.byType(InkResponse)).radius,
+        Material.defaultSplashRadius);
+    await buildFrameWithChild();
+    expect(tester.widget<InkWell>(find.byType(InkWell)).radius, null);
+
+
+    const double testSplashRadius = 50;
+
+    await buildFrameWithoutChild(splashRadius: testSplashRadius);
+    expect(tester.widget<InkResponse>(find.byType(InkResponse)).radius,
+        testSplashRadius);
+    await buildFrameWithChild(splashRadius: testSplashRadius);
+    expect(tester.widget<InkWell>(find.byType(InkWell)).radius,
+        testSplashRadius);
+  });
 }
 
 class TestApp extends StatefulWidget {

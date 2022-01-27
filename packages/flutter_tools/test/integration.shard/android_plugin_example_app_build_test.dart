@@ -9,33 +9,43 @@ import '../src/common.dart';
 import 'test_utils.dart';
 
 void main() {
-  late Directory tempDir;
+  late Directory tempDirPluginMethodChannels;
+  late Directory tempDirPluginFfi;
 
   setUp(() async {
-    tempDir = createResolvedTempDirectorySync('flutter_plugin_test.');
+    tempDirPluginMethodChannels = createResolvedTempDirectorySync('flutter_plugin_test.');
+    tempDirPluginFfi =
+        createResolvedTempDirectorySync('flutter_ffi_plugin_test.');
   });
 
   tearDown(() async {
-    tryToDelete(tempDir);
+    tryToDelete(tempDirPluginMethodChannels);
+    tryToDelete(tempDirPluginFfi);
   });
 
-  test('plugin example can be built using current Flutter Gradle plugin', () async {
+  Future<void> testPlugin({
+    required String template,
+    required Directory tempDir,
+  }) async {
     final String flutterBin = fileSystem.path.join(
       getFlutterRoot(),
       'bin',
       'flutter',
     );
 
+    final String testName = '${template}_test';
+
     processManager.runSync(<String>[
       flutterBin,
       ...getLocalEngineArguments(),
       'create',
-      '--template=plugin',
+      '--template=$template',
       '--platforms=android',
-      'plugin_test',
+      testName,
     ], workingDirectory: tempDir.path);
 
-    final Directory exampleAppDir = tempDir.childDirectory('plugin_test').childDirectory('example');
+    final Directory exampleAppDir =
+        tempDir.childDirectory(testName).childDirectory('example');
 
     final File buildGradleFile = exampleAppDir.childDirectory('android').childFile('build.gradle');
     expect(buildGradleFile, exists);
@@ -67,6 +77,11 @@ void main() {
       'app-release.apk',
     ));
     expect(exampleApk, exists);
+
+    if (template == 'plugin_ffi') {
+      // Does not support AGP 3.3.0.
+      return;
+    }
 
     // Clean
     processManager.runSync(<String>[
@@ -101,5 +116,21 @@ android.enableR8=true''');
       '--target-platform=android-arm',
     ], workingDirectory: exampleAppDir.path);
     expect(exampleApk, exists);
+  }
+
+  test('plugin example can be built using current Flutter Gradle plugin',
+      () async {
+    await testPlugin(
+      template: 'plugin',
+      tempDir: tempDirPluginMethodChannels,
+    );
+  });
+
+  test('FFI plugin example can be built using current Flutter Gradle plugin',
+      () async {
+    await testPlugin(
+      template: 'plugin_ffi',
+      tempDir: tempDirPluginFfi,
+    );
   });
 }
