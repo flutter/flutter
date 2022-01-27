@@ -14,12 +14,13 @@
 #include "flutter/shell/platform/android/android_external_texture_gl.h"
 #include "flutter/shell/platform/android/android_surface_gl.h"
 #include "flutter/shell/platform/android/android_surface_software.h"
-#include "flutter/shell/platform/android/context/android_context.h"
 #include "flutter/shell/platform/android/external_view_embedder/external_view_embedder.h"
-#include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
-#include "flutter/shell/platform/android/platform_message_response_android.h"
 #include "flutter/shell/platform/android/surface/android_surface.h"
 #include "flutter/shell/platform/android/surface/snapshot_surface_producer.h"
+
+#include "flutter/shell/platform/android/context/android_context.h"
+#include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
+#include "flutter/shell/platform/android/platform_message_response_android.h"
 #include "flutter/shell/platform/android/vsync_waiter_android.h"
 
 namespace flutter {
@@ -254,8 +255,7 @@ std::unique_ptr<Surface> PlatformViewAndroid::CreateRenderingSurface() {
 std::shared_ptr<ExternalViewEmbedder>
 PlatformViewAndroid::CreateExternalViewEmbedder() {
   return std::make_shared<AndroidExternalViewEmbedder>(
-      *android_context_, jni_facade_, surface_factory_,
-      std::move(task_runners_));
+      *android_context_, jni_facade_, surface_factory_);
 }
 
 // |PlatformView|
