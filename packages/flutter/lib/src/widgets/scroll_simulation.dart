@@ -148,8 +148,6 @@ class BouncingScrollSimulation extends Simulation with ScrollSimulationMixin {
       } else if (_frictionSimulation != null &&
           _frictionSimulation!.finalX > trailingExtent) {
         _updateSimulation(newScrollPosition.pixels, velocity, false);
-      } else if (){
-
       }
     }
   }
