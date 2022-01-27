@@ -19,7 +19,6 @@ class LayerTreeTest : public CanvasTest {
  public:
   LayerTreeTest()
       : layer_tree_(SkISize::Make(64, 64), 1.0f),
-        compositor_context_(fml::kDefaultFrameBudget),
         root_transform_(SkMatrix::Translate(1.0f, 1.0f)),
         scoped_frame_(compositor_context_.AcquireFrame(nullptr,
                                                        &mock_canvas(),

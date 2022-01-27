@@ -136,8 +136,8 @@ class LayerTestBase : public CanvasTestBase<BaseT> {
     paint_context_.raster_cache = raster_cache_.get();
   }
 
-  Stopwatch raster_time_;
-  Stopwatch ui_time_;
+  FixedRefreshRateStopwatch raster_time_;
+  FixedRefreshRateStopwatch ui_time_;
   MutatorsStack mutators_stack_;
   TextureRegistry texture_registry_;
 
