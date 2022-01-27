@@ -2248,8 +2248,8 @@ TEST_F(ShellTest, OnServiceProtocolEstimateRasterCacheMemoryWorks) {
         auto* compositor_context = shell->GetRasterizer()->compositor_context();
         auto& raster_cache = compositor_context->raster_cache();
 
-        Stopwatch raster_time;
-        Stopwatch ui_time;
+        FixedRefreshRateStopwatch raster_time;
+        FixedRefreshRateStopwatch ui_time;
         MutatorsStack mutators_stack;
         TextureRegistry texture_registry;
         PrerollContext preroll_context = {

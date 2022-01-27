@@ -138,8 +138,9 @@ class CompositorContext {
     FML_DISALLOW_COPY_AND_ASSIGN(ScopedFrame);
   };
 
-  explicit CompositorContext(
-      fml::Milliseconds frame_budget = fml::kDefaultFrameBudget);
+  CompositorContext();
+
+  explicit CompositorContext(Stopwatch::RefreshRateUpdater& updater);
 
   virtual ~CompositorContext();
 
@@ -172,6 +173,9 @@ class CompositorContext {
   Counter frame_count_;
   Stopwatch raster_time_;
   Stopwatch ui_time_;
+
+  /// Only used by default constructor of `CompositorContext`.
+  FixedRefreshRateUpdater fixed_refresh_rate_updater_;
 
   void BeginFrame(ScopedFrame& frame, bool enable_instrumentation);
 

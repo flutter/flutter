@@ -78,6 +78,7 @@ FILE: ../../../flutter/flow/frame_timings_recorder_unittests.cc
 FILE: ../../../flutter/flow/gl_context_switch_unittests.cc
 FILE: ../../../flutter/flow/instrumentation.cc
 FILE: ../../../flutter/flow/instrumentation.h
+FILE: ../../../flutter/flow/instrumentation_unittests.cc
 FILE: ../../../flutter/flow/layers/backdrop_filter_layer.cc
 FILE: ../../../flutter/flow/layers/backdrop_filter_layer.h
 FILE: ../../../flutter/flow/layers/backdrop_filter_layer_unittests.cc
