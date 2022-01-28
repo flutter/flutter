@@ -668,8 +668,8 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
       case PointerDeviceKind.stylus:
       case PointerDeviceKind.invertedStylus:
       case PointerDeviceKind.unknown:
-      // ignore: no_default_cases, to allow adding new device types to [PointerDeviceKind].
-      default:
+      default: // ignore: no_default_cases, to allow adding new device types to [PointerDeviceKind]
+               // as part of https://github.com/flutter/flutter/issues/23604
         return interactiveRect.contains(position);
     }
   }
@@ -702,8 +702,8 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
       case PointerDeviceKind.stylus:
       case PointerDeviceKind.invertedStylus:
       case PointerDeviceKind.unknown:
-      // ignore: no_default_cases, to allow adding new device types to [PointerDeviceKind].
-      default:
+      default: // ignore: no_default_cases, to allow adding new device types to [PointerDeviceKind]
+               // as part of https://github.com/flutter/flutter/issues/23604
         return _thumbRect!.contains(position);
     }
   }
@@ -1795,8 +1795,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
                   case PointerDeviceKind.invertedStylus:
                   case PointerDeviceKind.unknown:
                   case PointerDeviceKind.touch:
-                  // ignore: no_default_cases, to allow adding new device types to [PointerDeviceKind].
-                  default:
+                  default: // ignore: no_default_cases, to allow adding new device types to [PointerDeviceKind]
+                           // as part of https://github.com/flutter/flutter/issues/23604
                     break;
                 }
               },
@@ -1810,8 +1810,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
                   case PointerDeviceKind.invertedStylus:
                   case PointerDeviceKind.unknown:
                   case PointerDeviceKind.touch:
-                  // ignore: no_default_cases, to allow adding new device types to [PointerDeviceKind].
-                  default:
+                  default: // ignore: no_default_cases, to allow adding new device types to [PointerDeviceKind]
+                           // as part of https://github.com/flutter/flutter/issues/23604
                     break;
                 }
               },

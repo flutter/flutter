@@ -1145,8 +1145,8 @@ class TextSelectionGestureDetectorBuilder {
               break;
             case PointerDeviceKind.touch:
             case PointerDeviceKind.unknown:
-            // ignore: no_default_cases, to allow adding new device types to [PointerDeviceKind].
-            default:
+            default: // ignore: no_default_cases, to allow adding new device types to [PointerDeviceKind]
+                     // as part of https://github.com/flutter/flutter/issues/23604
               // On macOS/iOS/iPadOS a touch tap places the cursor at the edge
               // of the word.
               renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
