@@ -1,4 +1,4 @@
-Signature: bd338c6b1d6afb707bc79f300deb2d0a
+Signature: 461fd1d9c0aea197fa4a4a090ff7b396
 
 UNUSED LICENSES:
 
@@ -12162,6 +12162,7 @@ LIBRARY: dart
 ORIGIN: ../../../third_party/dart/sdk/lib/_internal/vm/lib/hash_factories.dart + ../../../third_party/dart/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/hash_factories.dart
+FILE: ../../../third_party/dart/sdk/lib/ffi/c_type.dart
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2022, the Dart project authors.  Please see the AUTHORS file
 for details. All rights reserved.
