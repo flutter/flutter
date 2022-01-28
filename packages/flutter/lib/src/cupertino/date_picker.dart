@@ -1496,6 +1496,12 @@ enum CupertinoTimerPickerMode {
 /// provides more space than it needs, the picker will position itself according
 /// to its [alignment] property.
 ///
+/// {@tool dartpad}
+/// This example shows a [CupertinoTimerPicker] that returns a countdown duration.
+///
+/// ** See code in examples/api/lib/cupertino/date_picker/cupertino_timer_picker.0.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [CupertinoDatePicker], the class that implements different display modes
