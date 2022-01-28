@@ -388,7 +388,7 @@ class ThemeData with Diagnosticable {
       'No longer used by the framework, please remove any reference to it. '
       'For more information, consult the migration guide at '
       'https://flutter.dev/docs/release/breaking-changes/toggleable-active-color#migration-guide. '
-      'This feature was deprecated after 2.10.0-0.2.pre',
+      'This feature was deprecated after 2.10.0-0.3.pre',
     )
     Color? toggleableActiveColor,
   }) {
@@ -808,7 +808,7 @@ class ThemeData with Diagnosticable {
       'No longer used by the framework, please remove any reference to it. '
       'For more information, consult the migration guide at '
       'https://flutter.dev/docs/release/breaking-changes/toggleable-active-color#migration-guide. '
-      'This feature was deprecated after 2.10.0-0.2.pre',
+      'This feature was deprecated after 2.10.0-0.3.pre',
     )
     required this.toggleableActiveColor,
   }) : // GENERAL CONFIGURATION
@@ -1560,7 +1560,7 @@ class ThemeData with Diagnosticable {
     'No longer used by the framework, please remove any reference to it. '
     'For more information, consult the migration guide at '
     'https://flutter.dev/docs/release/breaking-changes/toggleable-active-color#migration-guide. '
-    'This feature was deprecated after 2.10.0-0.2.pre',
+    'This feature was deprecated after 2.10.0-0.3.pre',
   )
   final Color toggleableActiveColor;
 
@@ -1715,7 +1715,7 @@ class ThemeData with Diagnosticable {
       'No longer used by the framework, please remove any reference to it. '
       'For more information, consult the migration guide at '
       'https://flutter.dev/docs/release/breaking-changes/toggleable-active-color#migration-guide. '
-      'This feature was deprecated after 2.10.0-0.2.pre',
+      'This feature was deprecated after 2.10.0-0.3.pre',
     )
     Color? toggleableActiveColor,
   }) {
