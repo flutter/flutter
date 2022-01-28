@@ -26,6 +26,7 @@ import 'tooltip.dart';
 // late dynamic _selection;
 // late BuildContext context;
 // void setState(VoidCallback fn) { }
+// enum Menu { itemOne, itemTwo, itemThree, itemFour }
 
 const Duration _kMenuDuration = Duration(milliseconds: 300);
 const double _kMenuCloseIntervalEnd = 2.0 / 3.0;
