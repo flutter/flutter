@@ -735,7 +735,7 @@ class TextInputConfiguration {
       'enableIMEPersonalizedLearning': enableIMEPersonalizedLearning,
       if (autofill != null) 'autofill': autofill,
       'enableDeltaModel' : enableDeltaModel,
-      'contentCommitMimeTypes': contentCommitMimeTypes
+      'contentCommitMimeTypes': contentCommitMimeTypes,
     };
   }
 }
@@ -1126,7 +1126,7 @@ abstract class TextInputClient {
   /// Requests that this client perform the given action.
   void performAction(TextInputAction action);
 
-  /// Notify client about new content insertion from Android keyboard
+  /// Notify client about new content insertion from Android keyboard.
   void commitContent(Map<String, dynamic> content);
 
   /// Request from the input method that this client perform the given private
