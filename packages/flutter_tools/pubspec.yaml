@@ -13,7 +13,7 @@ dependencies:
   dds: 2.1.6+3
   dwds: 11.5.1
   completion: 1.0.0
-  coverage: 1.0.3
+  coverage: 1.1.0
   crypto: 3.0.1
   file: 6.1.2
   flutter_template_images: 4.0.0
