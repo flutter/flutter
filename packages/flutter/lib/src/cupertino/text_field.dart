@@ -346,7 +346,7 @@ class CupertinoTextField extends StatefulWidget {
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
        enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText),
        contentCommitMimeTypes = contentCommitMimeTypes.isEmpty
-            ? onContentCommitted == null ? <String>[] : <String>[
+            ? onContentCommitted == null ? const <String>[] : const <String>[
           'image/png',
           'image/bmp',
           'image/jpg',

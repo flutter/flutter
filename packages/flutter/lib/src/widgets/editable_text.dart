@@ -595,7 +595,7 @@ class EditableText extends StatefulWidget {
            : inputFormatters,
        showCursor = showCursor ?? !readOnly,
        contentCommitMimeTypes = contentCommitMimeTypes.isEmpty
-            ? onContentCommitted == null ? <String>[] : <String>[
+            ? onContentCommitted == null ? const <String>[] : const <String>[
           'image/png',
           'image/bmp',
           'image/jpg',
