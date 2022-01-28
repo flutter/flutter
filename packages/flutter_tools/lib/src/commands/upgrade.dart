@@ -29,7 +29,7 @@ class UpgradeCommand extends FlutterCommand {
       ..addFlag(
         'force',
         abbr: 'f',
-        help: 'Force upgrade the Flutter branch, potentially discarding local changes.',
+        help: 'Force upgrade the flutter branch, potentially discarding local changes.',
         negatable: false,
       )
       ..addFlag(
