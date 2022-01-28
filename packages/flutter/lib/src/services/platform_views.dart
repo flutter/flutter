@@ -654,7 +654,7 @@ class _AndroidMotionEventConverter {
         break;
       case PointerDeviceKind.unknown:
       default: // ignore: no_default_cases, to allow adding new device types to [PointerDeviceKind]
-               // as part of https://github.com/flutter/flutter/issues/23604
+               // TODO(moffatman): Remove after landing https://github.com/flutter/flutter/issues/23604
         toolType = AndroidPointerProperties.kToolTypeUnknown;
         break;
     }
