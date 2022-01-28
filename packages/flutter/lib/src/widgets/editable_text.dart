@@ -1381,45 +1381,7 @@ class EditableText extends StatefulWidget {
   /// [AutofillClient]. This property may override [autofillHints].
   final AutofillClient? autofillClient;
 
-  /// Used when a user inserts image-based content through the device keyboard
-  /// on Android only.
-  ///
-  /// The passed list of strings will determine which MIME types are allowed to
-  /// be inserted via the device keyboard
-  ///
-  /// This example shows how to limit your keyboard commits to specific file types
-  /// `TextField`.
-  ///
-  /// ```dart
-  /// final TextEditingController _controller = TextEditingController();
-  ///
-  /// @override
-  /// void dispose() {
-  ///   _controller.dispose();
-  ///   super.dispose();
-  /// }
-  ///
-  /// @override
-  /// Widget build(BuildContext context) {
-  ///   return Scaffold(
-  ///     body: Column(
-  ///       mainAxisAlignment: MainAxisAlignment.center,
-  ///       children: <Widget>[
-  ///         const Text('Here's a text field that supports inserting gif content:'),
-  ///         TextField(
-  ///           controller: _controller,
-  ///           contentCommitMimeTypes: ['image/gif', 'image/png'],
-  ///           onContentCommitted: (CommittedContent data) async {
-  ///             ...
-  ///           },
-  ///         ),
-  ///       ],
-  ///     ),
-  ///   );
-  /// }
-  /// ```
-  /// {@end-tool}
-  /// {@endtemplate}
+  /// {@macro flutter.services.TextInputConfiguration.contentCommitMimeTypes}
   final List<String> contentCommitMimeTypes;
 
   /// {@macro flutter.material.Material.clipBehavior}
@@ -3994,16 +3956,19 @@ class _CopySelectionAction extends ContextAction<CopySelectionTextIntent> {
   bool get isActionEnabled => state._value.selection.isValid && !state._value.selection.isCollapsed;
 }
 
-/// A class to return data for the `onContentCommitted` callback on text fields,
-/// which is when image content is inserted into the text field. The class holds
+/// A class representing data for the `onContentCommitted` callback on text fields.
+/// 
+/// This will be used when content is inserted into a text field. The class holds
 /// information for the mime type, URI (location), and bytedata for the inserted
 /// content.
 @immutable
 class CommittedContent {
-  /// Creates a [CommittedContent] class. Any parameters can be null.
+  /// Creates an object to represent content that is committed from a text field
+  /// 
+  /// Any parameters can be null.
   const CommittedContent({this.mimeType, this.uri, this.data});
 
-  /// mime type of inserted content
+  /// Mime type of inserted content
   final String? mimeType;
 
   /// URI (location) of inserted content
@@ -4014,6 +3979,10 @@ class CommittedContent {
 
   /// Convenience getter to check if bytedata is available for the inserted content
   bool get hasData => data != null && data!.isNotEmpty;
+
+  CommittedContent({Map<String, dynamic>? data}) {
+    // ...
+  }
 
   /// Converts Map received from Flutter Engine into the Dart class
   static CommittedContent fromMap(Map<String, dynamic>? data) {
