@@ -886,16 +886,13 @@ class BoxHitTestResult extends HitTestResult {
 }
 
 /// A hit test entry used by [RenderBox].
-class BoxHitTestEntry extends HitTestEntry {
+class BoxHitTestEntry extends HitTestEntry<RenderBox> {
   /// Creates a box hit test entry.
   ///
   /// The [localPosition] argument must not be null.
   BoxHitTestEntry(RenderBox target, this.localPosition)
     : assert(localPosition != null),
       super(target);
-
-  @override
-  RenderBox get target => super.target as RenderBox;
 
   /// The position of the hit test in the local coordinates of [target].
   final Offset localPosition;

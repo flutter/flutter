@@ -985,6 +985,7 @@ class PopupMenuButton<T> extends StatefulWidget {
     this.elevation,
     this.padding = const EdgeInsets.all(8.0),
     this.child,
+    this.splashRadius,
     this.icon,
     this.iconSize,
     this.offset = Offset.zero,
@@ -1034,6 +1035,11 @@ class PopupMenuButton<T> extends StatefulWidget {
   /// this button appears as the trailing element of a list item, it's useful to be able
   /// to set the padding to zero.
   final EdgeInsetsGeometry padding;
+
+  /// The splash radius.
+  ///
+  /// If null, default splash radius of [InkWell] or [IconButton] is used.
+  final double? splashRadius;
 
   /// If provided, [child] is the widget used for this button
   /// and the button will utilize an [InkWell] for taps.
@@ -1169,6 +1175,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
         child: InkWell(
           onTap: widget.enabled ? showButtonMenu : null,
           canRequestFocus: _canRequestFocus,
+          radius: widget.splashRadius,
           enableFeedback: enableFeedback,
           child: widget.child,
         ),
@@ -1177,6 +1184,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
     return IconButton(
       icon: widget.icon ?? Icon(Icons.adaptive.more),
       padding: widget.padding,
+      splashRadius: widget.splashRadius,
       iconSize: widget.iconSize ?? 24.0,
       tooltip: widget.tooltip ?? MaterialLocalizations.of(context).showMenuTooltip,
       onPressed: widget.enabled ? showButtonMenu : null,

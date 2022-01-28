@@ -494,4 +494,13 @@ void main() {
 
   // Changes made in https://github.com/flutter/flutter/pull/96115
   Icon icon = Icons.pie_chart_outline;
+
+  // Changes made in https://github.com/flutter/flutter/pull/96957
+  Scrollbar scrollbar = Scrollbar(thumbVisibility: true);
+  bool nowShowing = scrollbar.thumbVisibility;
+  ScrollbarThemeData scrollbarTheme = ScrollbarThemeData(thumbVisibility: nowShowing);
+  scrollbarTheme.copyWith(thumbVisibility: nowShowing);
+  scrollbarTheme.thumbVisibility;
+  RawScrollbar rawScrollbar = RawScrollbar(thumbVisibility: true);
+  nowShowing = rawScrollbar.thumbVisibility;
 }

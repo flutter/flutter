@@ -1326,7 +1326,7 @@ abstract class RouteInformationProvider extends ValueListenable<RouteInformation
   /// For more information on how [Router] determines a navigation event, see
   /// the "URL updates for web applications" section in the [Router]
   /// documentation.
-  void routerReportsNewRouteInformation(RouteInformation routeInformation, {required RouteInformationReportingType type}) {}
+  void routerReportsNewRouteInformation(RouteInformation routeInformation, {RouteInformationReportingType type = RouteInformationReportingType.none}) {}
 }
 
 /// The route information provider that propagates the platform route information changes.
@@ -1349,7 +1349,7 @@ class PlatformRouteInformationProvider extends RouteInformationProvider with Wid
   }) : _value = initialRouteInformation;
 
   @override
-  void routerReportsNewRouteInformation(RouteInformation routeInformation, {required RouteInformationReportingType type}) {
+  void routerReportsNewRouteInformation(RouteInformation routeInformation, {RouteInformationReportingType type = RouteInformationReportingType.none}) {
     final bool replace =
       type == RouteInformationReportingType.neglect ||
       (type == RouteInformationReportingType.none &&

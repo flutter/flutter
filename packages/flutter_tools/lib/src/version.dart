@@ -16,11 +16,18 @@ import 'globals.dart' as globals;
 
 const String _unknownFrameworkVersion = '0.0.0-unknown';
 
+/// This maps old branch names to the names of branches that replaced them.
+///
+/// For example, in 2021 we deprecated the "dev" channel and transitioned "dev"
+/// users to the "beta" channel.
+const Map<String, String> kObsoleteBranches = <String, String>{
+  'dev': 'beta',
+};
+
 /// The names of each channel/branch in order of increasing stability.
 enum Channel {
   // TODO(fujino): update to main https://github.com/flutter/flutter/issues/95041
   master,
-  dev,
   beta,
   stable,
 }
@@ -28,7 +35,6 @@ enum Channel {
 // Beware: Keep order in accordance with stability
 const Set<String> kOfficialChannels = <String>{
   globals.kDefaultFrameworkChannel,
-  'dev',
   'beta',
   'stable',
 };
@@ -320,7 +326,7 @@ class FlutterVersion {
     }();
     if (redactUnknownBranches || _branch!.isEmpty) {
       // Only return the branch names we know about; arbitrary branch names might contain PII.
-      if (!kOfficialChannels.contains(_branch)) {
+      if (!kOfficialChannels.contains(_branch) && !kObsoleteBranches.containsKey(_branch)) {
         return '[user-branch]';
       }
     }
@@ -634,6 +640,7 @@ class GitTagVersion {
         _runGit('git fetch ${globals.flutterGit} --tags -f', processUtils, workingDirectory);
       }
     }
+    // find all tags attached to the given [gitRef]
     final List<String> tags = _runGit(
       'git tag --points-at $gitRef', processUtils, workingDirectory).trim().split('\n');
 
