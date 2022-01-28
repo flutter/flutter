@@ -177,6 +177,9 @@ FILE: ../../../flutter/fml/dart/dart_converter.h
 FILE: ../../../flutter/fml/delayed_task.cc
 FILE: ../../../flutter/fml/delayed_task.h
 FILE: ../../../flutter/fml/eintr_wrapper.h
+FILE: ../../../flutter/fml/endianness.cc
+FILE: ../../../flutter/fml/endianness.h
+FILE: ../../../flutter/fml/endianness_unittests.cc
 FILE: ../../../flutter/fml/file.cc
 FILE: ../../../flutter/fml/file.h
 FILE: ../../../flutter/fml/file_unittest.cc
