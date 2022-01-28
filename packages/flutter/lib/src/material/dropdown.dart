@@ -927,16 +927,14 @@ class DropdownButton<T> extends StatefulWidget {
     this.enableFeedback,
     this.alignment = AlignmentDirectional.centerStart,
     this.borderRadius,
-    required InputDecoration? inputDecoration,
+    required InputDecoration inputDecoration,
     required bool isEmpty,
     required bool isFocused,
-    // When adding new arguments, consider adding similar arguments to
-    // DropdownButtonFormField.
   }) : assert(items == null || items.isEmpty || value == null ||
               items.where((DropdownMenuItem<T> item) {
                 return item.value == value;
               }).length == 1,
-                "There should be exactly one item with [DropdownButton]'s value: "
+                "There should be exactly one item with [DropdownButtonFormField]'s value: "
                 '$value. \n'
                 'Either zero or 2 or more [DropdownMenuItem]s were detected '
                 'with the same value',
