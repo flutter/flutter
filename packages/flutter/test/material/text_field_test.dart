@@ -9179,38 +9179,6 @@ void main() {
     expect(right.opacity.value, equals(1.0));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgets('iPad Scribble selection change shows selection handles', (WidgetTester tester) async {
-    const String testText = 'lorem ipsum';
-    final TextEditingController controller = TextEditingController(text: testText);
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: TextField(
-            controller: controller,
-          ),
-        ),
-      ),
-    );
-
-    await tester.showKeyboard(find.byType(EditableText));
-    await tester.testTextInput.startScribbleInteraction();
-    tester.testTextInput.updateEditingValue(const TextEditingValue(
-      text: testText,
-      selection: TextSelection(baseOffset: 2, extentOffset: 7),
-    ));
-    await tester.pumpAndSettle();
-
-    final List<FadeTransition> transitions =
-      find.byType(FadeTransition).evaluate().map((Element e) => e.widget).cast<FadeTransition>().toList();
-    expect(transitions.length, 2);
-    final FadeTransition left = transitions[0];
-    final FadeTransition right = transitions[1];
-
-    expect(left.opacity.value, equals(1.0));
-    expect(right.opacity.value, equals(1.0));
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
-
   testWidgets('Tap shows handles but not toolbar', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
       text: 'abc def ghi',
