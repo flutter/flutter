@@ -369,7 +369,7 @@ void main() {
             (ByteData? _) {},
       );
 
-      expect(client.latestMethodCall, 'commitContent');
+      expect(client.latestMethodCall, 'performAction');
     });
 
     test('TextInputClient performPrivateCommand method is called', () async {
