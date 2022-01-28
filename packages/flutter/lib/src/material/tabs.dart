@@ -857,10 +857,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
 
   /// Defines the clipping radius of splashes that extend outside the bounds of the tab.
   ///
-  /// If this property is null, it is interpreted as [BorderRadius.zero].
-  ///
-  /// For example, to match the `borderRadius` of [BoxDecoration] provided as
-  /// `indicator` to [TabBar].
+  /// For example, to match the [BoxDecoration.borderRadius] provided as [indicator].
   ///
   /// If this property is null, it is interpreted as [BorderRadius.zero].
   final BorderRadius? splashBorderRadius;
