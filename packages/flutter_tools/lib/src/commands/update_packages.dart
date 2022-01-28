@@ -249,12 +249,7 @@ class UpdatePackagesCommand extends FlutterCommand {
     bool needsUpdate = false;
     globals.printStatus('Verifying pubspecs...');
     for (final Directory directory in packages) {
-      PubspecYaml pubspec;
-      try {
-        pubspec = PubspecYaml(directory);
-      } on String catch (message) {
-        throwToolExit(message);
-      }
+      final PubspecYaml pubspec = PubspecYaml(directory);
       globals.printTrace('Reading pubspec.yaml from ${directory.path}');
       if (pubspec.checksum.value == null) {
         // If the checksum is invalid or missing, we can just ask them run to run
@@ -310,12 +305,7 @@ class UpdatePackagesCommand extends FlutterCommand {
       if (doUpgrade) {
         globals.printTrace('Reading pubspec.yaml from: ${directory.path}');
       }
-      PubspecYaml pubspec;
-      try {
-        pubspec = PubspecYaml(directory); // this parses the pubspec.yaml
-      } on String catch (message) {
-        throwToolExit(message);
-      }
+      final PubspecYaml pubspec = PubspecYaml(directory); // this parses the pubspec.yaml
       pubspecs.add(pubspec); // remember it for later
       for (final PubspecDependency dependency in pubspec.allDependencies) {
         if (allDependencies.containsKey(dependency.name)) {
@@ -774,7 +764,7 @@ class PubspecYaml {
               // First, make sure it's a unique dependency. Listing dependencies
               // twice doesn't make sense.
               if (masterDependencies.containsKey(dependency.name)) {
-                throw Exception('$filename contains two dependencies on ${dependency.name}.');
+                throwToolExit('$filename contains two dependencies on ${dependency.name}.');
               }
               masterDependencies[dependency.name] = dependency;
             } else {
@@ -1306,7 +1296,7 @@ class PubspecDependency extends PubspecLine {
       _kind = DependencyKind.git;
       return false;
     } else {
-      throw Exception('Could not parse additional details for dependency $name; line was: "$line"');
+      throwToolExit('Could not parse additional details for dependency $name; line was: "$line"');
     }
     _lockIsOverride = lockIsOverride;
     _lockLine = line;
