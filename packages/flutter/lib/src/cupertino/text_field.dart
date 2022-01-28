@@ -904,7 +904,6 @@ class CupertinoTextField extends StatefulWidget {
           'image/jpeg',
           'image/webp'
         ]));
-    }
   }
 }
 

@@ -855,7 +855,6 @@ class TextField extends StatefulWidget {
           'image/jpeg',
           'image/webp'
         ]));
-    }
   }
 }
 
