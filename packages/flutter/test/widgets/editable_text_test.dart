@@ -10354,9 +10354,9 @@ void main() {
       expect(controller.text.length, 4);
       incrementThrottled(controller);
       expect(controller.text.length, 4);
-      await Future<void>.delayed(const Duration(milliseconds: 99));
+      await Future<void>.delayed(const Duration(milliseconds: 90));
       expect(controller.text.length, 4);
-      await Future<void>.delayed(const Duration(milliseconds: 1));
+      await Future<void>.delayed(const Duration(milliseconds: 10));
       expect(controller.text.length, 5);
     });
 
