@@ -503,4 +503,25 @@ void main() {
   scrollbarTheme.thumbVisibility;
   RawScrollbar rawScrollbar = RawScrollbar(thumbVisibility: true);
   nowShowing = rawScrollbar.thumbVisibility;
+
+  // Changes made in https://github.com/flutter/flutter/pull/96174
+  Chip chip = Chip();
+  chip = Chip(deleteButtonTooltipMessage: '');
+  chip = Chip();
+  chip = Chip(deleteButtonTooltipMessage: 'Delete Tooltip');
+  chip.deleteButtonTooltipMessage;
+
+  // Changes made in https://github.com/flutter/flutter/pull/96174
+  InputChip inputChip = InputChip();
+  inputChip = InputChip(deleteButtonTooltipMessage: '');
+  inputChip = InputChip();
+  inputChip = InputChip(deleteButtonTooltipMessage: 'Delete Tooltip');
+  inputChip.deleteButtonTooltipMessage;
+
+  // Changes made in https://github.com/flutter/flutter/pull/96174
+  RawChip rawChip = Rawchip();
+  rawChip = RawChip(deleteButtonTooltipMessage: '');
+  rawChip = RawChip();
+  rawChip = RawChip(deleteButtonTooltipMessage: 'Delete Tooltip');
+  rawChip.deleteButtonTooltipMessage;
 }
