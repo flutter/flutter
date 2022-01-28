@@ -395,6 +395,53 @@ abstract class Widget extends DiagnosticableTree {
   }
 }
 
+/// A cache of inherited elements with an optional parent cache.
+///
+/// When looking up an inherited element, this will look through parent
+/// caches until the element is found or the end is reached. When an element
+/// is found, it is cached at the first element where the search began.
+///
+/// The intention of this cache is to speed up the initial build of widget
+/// trees that contain a significant number of inherited widgets by deferring
+/// expensive map allocations until they are needed, and by only allocating
+/// in the "closest" hash map.
+///
+/// This will not cache `null` results if an inherited element is not found.
+@visibleForTesting
+class InheritedTreeCache {
+  /// Create a new [InheritedTreeCache] with an optional parent.
+  InheritedTreeCache([this._parent]);
+
+  final InheritedTreeCache? _parent;
+  final HashMap<Type, InheritedElement> _current = HashMap<Type, InheritedElement>();
+
+  /// Place the [element] in the cache under [type].
+  void operator []=(Type type, InheritedElement element) {
+    _current[type] = element;
+  }
+
+  /// Find the nearest [InheritedElement] of type [type], or `null` if it
+  /// cannot be found.
+  ///
+  /// This operation will also cache the inherited element to improve the
+  /// speed of future lookups.
+  InheritedElement? operator[](Type type) {
+    InheritedElement? potential = _current[type];
+    if (potential != null) {
+      return potential;
+    }
+    potential =  _parent?._lookupWithoutCaching(type);
+    if (potential != null) {
+      _current[type] = potential;
+    }
+    return potential;
+  }
+
+  InheritedElement? _lookupWithoutCaching(Type type) {
+    return _current[type] ?? _parent?._lookupWithoutCaching(type);
+  }
+}
+
 /// A widget that does not require mutable state.
 ///
 /// A stateless widget is a widget that describes part of the user interface by
@@ -438,14 +485,6 @@ abstract class Widget extends DiagnosticableTree {
 ///  * Use `const` widgets where possible, and provide a `const` constructor for
 ///    the widget so that users of the widget can also do so.
 ///
-///  * When trying to create a reusable piece of UI, prefer using a widget
-///    rather than a helper method. For example, if there was a function used to
-///    build a widget, a [State.setState] call would require Flutter to entirely
-///    rebuild the returned wrapping widget. If a [Widget] was used instead,
-///    Flutter would be able to efficiently re-render only those parts that
-///    really need to be updated. Even better, if the created widget is `const`,
-///    Flutter would short-circuit most of the rebuild work.
-///
 ///  * Consider refactoring the stateless widget into a stateful widget so that
 ///    it can use some of the techniques described at [StatefulWidget], such as
 ///    caching common parts of subtrees and using [GlobalKey]s when changing the
@@ -459,6 +498,20 @@ abstract class Widget extends DiagnosticableTree {
 ///    part of the build function that builds the inner-most widget into its own
 ///    widget, so that only the inner-most widget needs to be rebuilt when the
 ///    theme changes.
+/// {@template flutter.flutter.widgets.framework.prefer_const_over_helper}
+///  * When trying to create a reusable piece of UI, prefer using a widget
+///    rather than a helper method. For example, if there was a function used to
+///    build a widget, a [State.setState] call would require Flutter to entirely
+///    rebuild the returned wrapping widget. If a [Widget] was used instead,
+///    Flutter would be able to efficiently re-render only those parts that
+///    really need to be updated. Even better, if the created widget is `const`,
+///    Flutter would short-circuit most of the rebuild work.
+/// {@endtemplate}
+///
+/// This video gives more explainations on why `const` constructors are important
+/// and why a [Widget] is better than a helper method.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=IOyq-eTRhvo}
 ///
 /// {@tool snippet}
 ///
@@ -650,23 +703,15 @@ abstract class StatelessWidget extends Widget {
 ///    this ideal, the more efficient it will be.)
 ///
 ///  * If a subtree does not change, cache the widget that represents that
-///    subtree and re-use it each time it can be used. It is massively more
-///    efficient for a widget to be re-used than for a new (but
-///    identically-configured) widget to be created. Factoring out the stateful
-///    part into a widget that takes a child argument is a common way of doing
-///    this. Another caching strategy consists of assigning a widget to a
-///    `final` state variable which can be used in the build method.
+///    subtree and re-use it each time it can be used. To do this, simply assign
+///    a widget to a `final` state variable and re-use it in the build method. It
+///    is massively more efficient for a widget to be re-used than for a new (but
+///    identically-configured) widget to be created. Another caching stragegy
+///    consists in extracting the mutable part of the widget into a [StatefulWidget]
+///    which accepts a child parameter.
 ///
 ///  * Use `const` widgets where possible. (This is equivalent to caching a
 ///    widget and re-using it.)
-///
-///  * When trying to create a reusable piece of UI, prefer using a widget
-///    rather than a helper method. For example, if there was a function used to
-///    build a widget, a [State.setState] call would require Flutter to entirely
-///    rebuild the returned wrapping widget. If a [Widget] was used instead,
-///    Flutter would be able to efficiently re-render only those parts that
-///    really need to be updated. Even better, if the created widget is `const`,
-///    Flutter would short-circuit most of the rebuild work.
 ///
 ///  * Avoid changing the depth of any created subtrees or changing the type of
 ///    any widgets in the subtree. For example, rather than returning either the
@@ -684,11 +729,18 @@ abstract class StatelessWidget extends Widget {
 ///    [KeyedSubtree] widget may be useful for this purpose if no other widget
 ///    can conveniently be assigned the key.)
 ///
+/// {@macro flutter.flutter.widgets.framework.prefer_const_over_helper}
+///
+/// This video gives more explainations on why `const` constructors are important
+/// and why a [Widget] is better than a helper method.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=IOyq-eTRhvo}
+///
 /// {@tool snippet}
 ///
 /// This is a skeleton of a stateful widget subclass called `YellowBird`.
 ///
-/// In this example. the [State] has no actual state. State is normally
+/// In this example, the [State] has no actual state. State is normally
 /// represented as private member fields. Also, normally widgets have more
 /// constructor arguments, each of which corresponds to a `final` property.
 ///
@@ -2065,6 +2117,8 @@ typedef ElementVisitor = void Function(Element element);
 /// the methods on this class should not be cached beyond the execution of a
 /// single synchronous function.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=rIaaH87z1-g}
+///
 /// [BuildContext] objects are actually [Element] objects. The [BuildContext]
 /// interface is used to discourage direct manipulation of [Element] objects.
 abstract class BuildContext {
@@ -2879,7 +2933,7 @@ class BuildOwner {
   void _debugVerifyIllFatedPopulation() {
     assert(() {
       Map<GlobalKey, Set<Element>>? duplicates;
-      for (final Element element in _debugIllFatedElements!) {
+      for (final Element element in _debugIllFatedElements ?? const <Element>{}) {
         if (element._lifecycleState != _ElementLifecycle.defunct) {
           assert(element != null);
           assert(element.widget != null);
@@ -3130,29 +3184,8 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// in a build method if it is known that they will not change.
   @nonVirtual
   @override
-  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes, hash_and_equals
   bool operator ==(Object other) => identical(this, other);
-
-  // Custom implementation of hash code optimized for the ".of" pattern used
-  // with `InheritedWidgets`.
-  //
-  // `Element.dependOnInheritedWidgetOfExactType` relies heavily on hash-based
-  // `Set` look-ups, putting this getter on the performance critical path.
-  //
-  // The value is designed to fit within the SMI representation. This makes
-  // the cached value use less memory (one field and no extra heap objects) and
-  // cheap to compare (no indirection).
-  //
-  // See also:
-  //
-  //  * https://dart.dev/articles/dart-vm/numeric-computation, which
-  //    explains how numbers are represented in Dart.
-  @nonVirtual
-  @override
-  // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  int get hashCode => _cachedHash;
-  final int _cachedHash = _nextHashCode = (_nextHashCode + 1) % 0xffffff;
-  static int _nextHashCode = 1;
 
   /// Information set by parent to define where this child fits in its parent's
   /// child list.
@@ -3951,7 +3984,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       // implementation to decide whether to rebuild based on whether we had
       // dependencies here.
     }
-    _inheritedWidgets = null;
+    _inheritedLookup = null;
     _lifecycleState = _ElementLifecycle.inactive;
   }
 
@@ -4143,7 +4176,8 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     return null;
   }
 
-  Map<Type, InheritedElement>? _inheritedWidgets;
+  InheritedTreeCache? _inheritedLookup;
+
   Set<InheritedElement>? _dependencies;
   bool _hadUnsatisfiedDependencies = false;
 
@@ -4180,7 +4214,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   @override
   T? dependOnInheritedWidgetOfExactType<T extends InheritedWidget>({Object? aspect}) {
     assert(_debugCheckStateIsActiveForAncestorLookup());
-    final InheritedElement? ancestor = _inheritedWidgets == null ? null : _inheritedWidgets![T];
+    final InheritedElement? ancestor = _inheritedLookup?[T];
     if (ancestor != null) {
       return dependOnInheritedElement(ancestor, aspect: aspect) as T;
     }
@@ -4191,13 +4225,13 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   @override
   InheritedElement? getElementForInheritedWidgetOfExactType<T extends InheritedWidget>() {
     assert(_debugCheckStateIsActiveForAncestorLookup());
-    final InheritedElement? ancestor = _inheritedWidgets == null ? null : _inheritedWidgets![T];
+    final InheritedElement? ancestor = _inheritedLookup?[T];
     return ancestor;
   }
 
   void _updateInheritance() {
     assert(_lifecycleState == _ElementLifecycle.active);
-    _inheritedWidgets = _parent?._inheritedWidgets;
+    _inheritedLookup = _parent?._inheritedLookup;
   }
 
   @override
@@ -5205,12 +5239,8 @@ class InheritedElement extends ProxyElement {
   @override
   void _updateInheritance() {
     assert(_lifecycleState == _ElementLifecycle.active);
-    final Map<Type, InheritedElement>? incomingWidgets = _parent?._inheritedWidgets;
-    if (incomingWidgets != null)
-      _inheritedWidgets = HashMap<Type, InheritedElement>.of(incomingWidgets);
-    else
-      _inheritedWidgets = HashMap<Type, InheritedElement>();
-    _inheritedWidgets![widget.runtimeType] = this;
+    _inheritedLookup = InheritedTreeCache(_parent?._inheritedLookup)
+      ..[widget.runtimeType] = this;
   }
 
   @override

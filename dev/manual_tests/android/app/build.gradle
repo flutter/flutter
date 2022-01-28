@@ -45,15 +45,11 @@ android {
         main.java.srcDirs += 'src/main/kotlin'
     }
 
-    lintOptions {
-        disable 'InvalidPackage'
-    }
-
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId "com.example.manual_tests"
-        minSdkVersion flutter.minSdkVersion
-        targetSdkVersion flutter.targetSdkVersion
+        applicationId "dev.flutter.manual_tests"
+        minSdkVersion localProperties.getProperty('flutter.minSdkVersion') ?: flutter.minSdkVersion
+        targetSdkVersion localProperties.getProperty('flutter.targetSdkVersion') ?: flutter.targetSdkVersion
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
     }

@@ -220,4 +220,10 @@ void main() {
   OverscrollIndicatorNotification notification = OverscrollIndicatorNotification(leading: true);
   notification = OverscrollIndicatorNotification(error: '');
   notification.disallowGlow();
+
+  // Changes made in https://github.com/flutter/flutter/pull/96957
+  CupertinoScrollbar scrollbar = CupertinoScrollbar(isAlwaysShown: true);
+  bool nowShowing = scrollbar.isAlwaysShown;
+  RawScrollbar rawScrollbar = RawScrollbar(isAlwaysShown: true);
+  nowShowing = rawScrollbar.isAlwaysShown;
 }

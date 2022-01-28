@@ -50,7 +50,7 @@ android {
         applicationId "com.example.abstract_method_smoke_test"
         minSdkVersion 21
         targetSdkVersion flutter.targetSdkVersion
-        versionCode flutterVersionCode.toInteger()
+        targetSdkVersion localProperties.getProperty('flutter.targetSdkVersion') ?: flutter.targetSdkVersion
         versionName flutterVersionName
     }
 

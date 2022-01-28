@@ -54,6 +54,21 @@ RenderParagraph _iconRenderObject(WidgetTester tester, IconData icon) {
 }
 
 void main() {
+  test('TabBarTheme copyWith, ==, hashCode, defaults', () {
+    expect(const TabBarTheme(), const TabBarTheme().copyWith());
+    expect(const TabBarTheme().hashCode, const TabBarTheme().copyWith().hashCode);
+
+    expect(const TabBarTheme().indicator, null);
+    expect(const TabBarTheme().indicatorSize, null);
+    expect(const TabBarTheme().labelColor, null);
+    expect(const TabBarTheme().labelPadding, null);
+    expect(const TabBarTheme().labelStyle, null);
+    expect(const TabBarTheme().unselectedLabelColor, null);
+    expect(const TabBarTheme().unselectedLabelStyle, null);
+    expect(const TabBarTheme().overlayColor, null);
+    expect(const TabBarTheme().splashFactory, null);
+  });
+
   testWidgets('Tab bar defaults - label style and selected/unselected label colors', (WidgetTester tester) async {
     // tests for the default label color and label styles when tabBarTheme and tabBar do not provide any
     await tester.pumpWidget(_withTheme(null));

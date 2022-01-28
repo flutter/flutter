@@ -27,8 +27,8 @@ android {
     }
 
     defaultConfig {
-        minSdkVersion flutter.minSdkVersion
-        targetSdkVersion flutter.targetSdkVersion
+        minSdkVersion localProperties.getProperty('flutter.minSdkVersion') ?: flutter.minSdkVersion
+        targetSdkVersion localProperties.getProperty('flutter.targetSdkVersion') ?: flutter.targetSdkVersion
         versionCode 1
         versionName "1.0"
     }

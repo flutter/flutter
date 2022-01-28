@@ -519,6 +519,20 @@ TaskFunction createOpacityPeepholeFadeTransitionTextPerfE2ETest() {
   ).run;
 }
 
+TaskFunction createOpacityPeepholeGridOfAlphaSaveLayersPerfE2ETest() {
+  return PerfTest.e2e(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test/opacity_peephole_grid_of_alpha_savelayers_perf_e2e.dart',
+  ).run;
+}
+
+TaskFunction createOpacityPeepholeColOfAlphaSaveLayerRowsPerfE2ETest() {
+  return PerfTest.e2e(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test/opacity_peephole_col_of_alpha_savelayer_rows_perf_e2e.dart',
+  ).run;
+}
+
 Map<String, dynamic> _average(List<Map<String, dynamic>> results, int iterations) {
   final Map<String, dynamic> tally = <String, dynamic>{};
   for (final Map<String, dynamic> item in results) {
@@ -847,12 +861,14 @@ class PerfTest {
       final Device device = await devices.workingDevice;
       await device.unlock();
       final String deviceId = device.deviceId;
+      final String? localEngine = localEngineFromEnv;
+      final String? localEngineSrcPath = localEngineSrcPathFromEnv;
 
       await flutter('drive', options: <String>[
         if (localEngine != null)
-          ...<String>['--local-engine', localEngine!],
+          ...<String>['--local-engine', localEngine],
         if (localEngineSrcPath != null)
-          ...<String>['--local-engine-src-path', localEngineSrcPath!],
+          ...<String>['--local-engine-src-path', localEngineSrcPath],
         '--no-dds',
         '--no-android-gradle-daemon',
         '-v',
@@ -1028,15 +1044,16 @@ class PerfTestWithSkSL extends PerfTest {
     if (File(_vmserviceFileName).existsSync()) {
       File(_vmserviceFileName).deleteSync();
     }
-
+    final String? localEngine = localEngineFromEnv;
+    final String? localEngineSrcPath = localEngineSrcPathFromEnv;
     _runProcess = await startProcess(
       _flutterPath,
       <String>[
         'run',
         if (localEngine != null)
-          ...<String>['--local-engine', localEngine!],
+          ...<String>['--local-engine', localEngine],
         if (localEngineSrcPath != null)
-          ...<String>['--local-engine-src-path', localEngineSrcPath!],
+          ...<String>['--local-engine-src-path', localEngineSrcPath],
         '--no-dds',
         if (deviceOperatingSystem == DeviceOperatingSystem.ios)
           ...<String>[
