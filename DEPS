@@ -74,6 +74,11 @@ vars = {
   # Checkout Linux dependencies only when building on Linux.
   'download_linux_deps': 'host_os == "linux"',
 
+  # Downloads the fuchsia SDK as listed in .fuchsia_sdk_version. This variable
+  # is currently only used for the Fuchsia LSC process and is not intended for
+  # local development.
+  'download_fuchsia_sdk': False,
+
   # An LLVM backend needs LLVM binaries and headers. To avoid build time
   # increases we can use prebuilts. We don't want to download this on every
   # CQ/CI bot nor do we want the average Dart developer to incur that cost.
@@ -598,7 +603,7 @@ deps = {
         'version': 'OCj2VuVM1Sn0RL9v4BAB3HgWsqL-2gFJ0K_AqyoYc_gC'
        }
      ],
-     'condition': 'host_os == "mac"',
+     'condition': 'host_os == "mac" and not download_fuchsia_sdk',
      'dep_type': 'cipd',
    },
    'src/fuchsia/sdk/linux': {
@@ -608,7 +613,7 @@ deps = {
         'version': 'uVt9IOhg0QAYFxhFt2f8NXSZ819CivnCR7-QX40796QC'
        }
      ],
-     'condition': 'host_os == "linux"',
+     'condition': 'host_os == "linux" and not download_fuchsia_sdk',
      'dep_type': 'cipd',
    },
 
@@ -710,6 +715,19 @@ hooks = [
       'python3',
       'src/flutter/tools/download_dart_sdk.py',
       '--fail-loudly',
+    ]
+  },
+  {
+    'name': 'Download Fuchsia SDK',
+    'pattern': '.',
+    'condition': 'download_fuchsia_sdk',
+    'action': [
+      'python3',
+      'src/flutter/tools/download_fuchsia_sdk.py',
+      '--fail-loudly',
+      '--verbose',
+      '--host-os',
+      Var('host_os'),
     ]
   },
   {
