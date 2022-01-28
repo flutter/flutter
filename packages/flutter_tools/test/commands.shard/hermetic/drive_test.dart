@@ -107,7 +107,9 @@ void main() {
       throwsToolExit(),
     );
 
-    expect(logger.statusText, contains('Screenshot written to drive_screenshots/drive_01.png'));
+    // Takes the screenshot before the application would be killed (if --keep-app-running not passed).
+    expect(logger.statusText, contains('Screenshot written to drive_screenshots/drive_01.png\n'
+        'Leaving the application running.'));
     expect(logger.statusText, isNot(contains('drive_02.png')));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,

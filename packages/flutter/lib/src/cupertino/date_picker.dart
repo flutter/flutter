@@ -64,9 +64,9 @@ void _animateColumnControllerToItem(FixedExtentScrollController controller, int 
   );
 }
 
-const Widget _leftSelectionOverlay = CupertinoPickerDefaultSelectionOverlay(capRightEdge: false);
-const Widget _centerSelectionOverlay = CupertinoPickerDefaultSelectionOverlay(capLeftEdge: false, capRightEdge: false);
-const Widget _rightSelectionOverlay = CupertinoPickerDefaultSelectionOverlay(capLeftEdge: false);
+const Widget _startSelectionOverlay = CupertinoPickerDefaultSelectionOverlay(capEndEdge: false);
+const Widget _centerSelectionOverlay = CupertinoPickerDefaultSelectionOverlay(capStartEdge: false, capEndEdge: false);
+const Widget _endSelectionOverlay = CupertinoPickerDefaultSelectionOverlay(capStartEdge: false);
 
 // Lays out the date picker based on how much space each single column needs.
 //
@@ -1013,14 +1013,14 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
       Widget selectionOverlay = _centerSelectionOverlay;
       if (i == 0) {
         offAxisFraction = -_kMaximumOffAxisFraction * textDirectionFactor;
-        selectionOverlay = _leftSelectionOverlay;
+        selectionOverlay = _startSelectionOverlay;
       } else if (i >= 2 || columnWidths.length == 2)
         offAxisFraction = _kMaximumOffAxisFraction * textDirectionFactor;
 
       EdgeInsets padding = const EdgeInsets.only(right: _kDatePickerPadSize);
       if (i == columnWidths.length - 1) {
         padding = padding.flipped;
-        selectionOverlay = _rightSelectionOverlay;
+        selectionOverlay = _endSelectionOverlay;
       }
       if (textDirectionFactor == -1)
         padding = padding.flipped;
@@ -1404,9 +1404,9 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
 
       Widget selectionOverlay = _centerSelectionOverlay;
       if (i == 0)
-        selectionOverlay = _leftSelectionOverlay;
+        selectionOverlay = _startSelectionOverlay;
       else if (i == columnWidths.length - 1)
-        selectionOverlay = _rightSelectionOverlay;
+        selectionOverlay = _endSelectionOverlay;
 
       pickers.add(LayoutId(
         id: i,
@@ -1495,6 +1495,12 @@ enum CupertinoTimerPickerMode {
 /// of [CupertinoTimerPickerMode.hms], which is 330 x 216. If the parent widget
 /// provides more space than it needs, the picker will position itself according
 /// to its [alignment] property.
+///
+/// {@tool dartpad}
+/// This example shows a [CupertinoTimerPicker] that returns a countdown duration.
+///
+/// ** See code in examples/api/lib/cupertino/date_picker/cupertino_timer_picker.0.dart **
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -2035,14 +2041,14 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
                       start: hourColumnStartPadding,
                       end: pickerColumnWidth - hourColumnStartPadding - hourLabelContentWidth,
                   ),
-                  _leftSelectionOverlay,
+                  _startSelectionOverlay,
               ),
               _buildMinuteColumn(
                   EdgeInsetsDirectional.only(
                       start: pickerColumnWidth - minuteColumnEndPadding - minuteLabelContentWidth,
                       end: minuteColumnEndPadding,
                   ),
-                  _rightSelectionOverlay,
+                  _endSelectionOverlay,
               ),
             ];
             break;
@@ -2064,14 +2070,14 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
                       start: minuteColumnStartPadding,
                       end: pickerColumnWidth - minuteColumnStartPadding - minuteLabelContentWidth,
                   ),
-                  _leftSelectionOverlay,
+                  _startSelectionOverlay,
               ),
               _buildSecondColumn(
                   EdgeInsetsDirectional.only(
                       start: pickerColumnWidth - secondColumnEndPadding - minuteLabelContentWidth,
                       end: secondColumnEndPadding,
                   ),
-                  _rightSelectionOverlay,
+                  _endSelectionOverlay,
               ),
             ];
             break;
@@ -2089,7 +2095,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
                       start: _kTimerPickerMinHorizontalPadding,
                       end: math.max(hourColumnEndPadding, 0),
                   ),
-                  _leftSelectionOverlay,
+                  _startSelectionOverlay,
               ),
               _buildMinuteColumn(
                   EdgeInsetsDirectional.only(
@@ -2103,7 +2109,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
                       start: math.max(secondColumnStartPadding, 0),
                       end: _kTimerPickerMinHorizontalPadding,
                   ),
-                  _rightSelectionOverlay,
+                  _endSelectionOverlay,
               ),
             ];
             break;

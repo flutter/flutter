@@ -30,7 +30,7 @@ void main() {
   });
 }
 {{/withPluginHook}}
-{{#withPluginHook}}
+{{#withPlatformChannelPluginHook}}
 void main() {
   testWidgets('Verify Platform version', (WidgetTester tester) async {
     // Build our app and trigger a frame.
@@ -46,4 +46,4 @@ void main() {
     );
   });
 }
-{{/withPluginHook}}
+{{/withPlatformChannelPluginHook}}

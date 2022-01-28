@@ -446,7 +446,7 @@ void main() {
 
   testWidgets('DropdownButtonFormField with autovalidation test', (WidgetTester tester) async {
     String? value = 'one';
-    int _validateCalled = 0;
+    int validateCalled = 0;
 
     await tester.pumpWidget(
       StatefulBuilder(
@@ -471,7 +471,7 @@ void main() {
                   });
                 },
                 validator: (String? currentValue) {
-                  _validateCalled++;
+                  validateCalled++;
                   return currentValue == null ? 'Must select value' : null;
                 },
                 autovalidateMode: AutovalidateMode.always,
@@ -482,13 +482,13 @@ void main() {
       ),
     );
 
-    expect(_validateCalled, 1);
+    expect(validateCalled, 1);
     expect(value, equals('one'));
     await tester.tap(find.text('one'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('three').last);
     await tester.pump();
-    expect(_validateCalled, 2);
+    expect(validateCalled, 2);
     await tester.pumpAndSettle();
     expect(value, equals('three'));
   });
@@ -1050,7 +1050,7 @@ void main() {
   });
 
   testWidgets('autovalidateMode is passed to super', (WidgetTester tester) async {
-    int _validateCalled = 0;
+    int validateCalled = 0;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1066,7 +1066,7 @@ void main() {
               }).toList(),
               onChanged: onChanged,
               validator: (String? value) {
-                _validateCalled++;
+                validateCalled++;
                 return null;
               },
             ),
@@ -1075,7 +1075,7 @@ void main() {
       ),
     );
 
-    expect(_validateCalled, 1);
+    expect(validateCalled, 1);
   });
 
   testWidgets('DropdownButtonFormField - Custom button alignment', (WidgetTester tester) async {

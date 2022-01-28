@@ -5,7 +5,12 @@ homepage:
 
 environment:
   sdk: {{dartSdkVersionBounds}}
+{{#withPlatformChannelPluginHook}}
   flutter: ">=2.5.0"
+{{/withPlatformChannelPluginHook}}
+{{#withFfiPluginHook}}
+  flutter: ">={{minFrameworkVersionFfiPlugin}}"
+{{/withFfiPluginHook}}
 
 dependencies:
   flutter:
@@ -16,6 +21,9 @@ dependencies:
 {{/web}}
 
 dev_dependencies:
+{{#withFfiPluginHook}}
+  ffigen: ^4.1.2
+{{/withFfiPluginHook}}
   flutter_test:
     sdk: flutter
   flutter_lints: ^1.0.0
@@ -26,9 +34,52 @@ dev_dependencies:
 # The following section is specific to Flutter.
 flutter:
   # This section identifies this Flutter project as a plugin project.
-  # The 'pluginClass' and Android 'package' identifiers should not ordinarily
-  # be modified. They are used by the tooling to maintain consistency when
+  # The 'pluginClass' specifies the class (in Java, Kotlin, Swift, Objective-C, etc.)
+  # which should be registered in the plugin registry. This is required for
+  # using method channels.
+  # The Android 'package' specifies package in which the registered class is.
+  # This is required for using method channels on Android.
+  # The 'ffiPlugin' specifies that native code should be built and bundled.
+  # This is required for using `dart:ffi`.
+  # All these are used by the tooling to maintain consistency when
   # adding or updating assets for this project.
+{{#withFfiPluginHook}}
+  #
+  # Please refer to README.md for a detailed explanation.
+  plugin:
+    platforms:
+{{#no_platforms}}
+    # This FFI plugin project was generated without specifying any
+    # platforms with the `--platform` argument. If you see the `some_platform` map below, remove it and
+    # then add platforms following the instruction here:
+    # https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin-platforms
+    # -------------------
+      some_platform:
+        ffiPlugin: true
+    # -------------------
+{{/no_platforms}}
+{{#android}}
+      android:
+        ffiPlugin: true
+{{/android}}
+{{#ios}}
+      ios:
+        ffiPlugin: true
+{{/ios}}
+{{#linux}}
+      linux:
+        ffiPlugin: true
+{{/linux}}
+{{#macos}}
+      macos:
+        ffiPlugin: true
+{{/macos}}
+{{#windows}}
+      windows:
+        ffiPlugin: true
+{{/windows}}
+{{/withFfiPluginHook}}
+{{#withPlatformChannelPluginHook}}
   plugin:
     platforms:
 {{#no_platforms}}
@@ -67,6 +118,7 @@ flutter:
         pluginClass: {{pluginDartClass}}Web
         fileName: {{projectName}}_web.dart
 {{/web}}
+{{/withPlatformChannelPluginHook}}
 
   # To add assets to your plugin package, add an assets section, like this:
   # assets:

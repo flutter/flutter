@@ -71,6 +71,12 @@ enum RefreshIndicatorTriggerMode {
 ///
 /// The trigger mode is configured by [RefreshIndicator.triggerMode].
 ///
+/// {@tool dartpad}
+/// This example shows how [RefreshIndicator] can be triggered in different ways.
+///
+/// ** See code in examples/api/lib/material/refresh_indicator/refresh_indicator.0.dart **
+/// {@end-tool}
+///
 /// ## Troubleshooting
 ///
 /// ### Refresh indicator does not show up

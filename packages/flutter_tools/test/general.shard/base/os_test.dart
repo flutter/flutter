@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:archive/archive.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
@@ -495,6 +496,33 @@ void main() {
         processManager: fakeProcessManager,
       );
       expect(utils.name, 'Pretty Name');
+    });
+
+    // See https://snyk.io/research/zip-slip-vulnerability for more context
+    testWithoutContext('Windows validates paths when unzipping', () {
+      // on POSIX systems we use the `unzip` binary, which will fail to extract
+      // files with paths outside the target directory
+      final OperatingSystemUtils utils = createOSUtils(FakePlatform(operatingSystem: 'windows'));
+      final MemoryFileSystem fs = MemoryFileSystem.test();
+      final File fakeZipFile = fs.file('archive.zip');
+      final Directory targetDirectory = fs.directory('output')..createSync(recursive: true);
+      const String content = 'hello, world!';
+      final Archive archive = Archive()..addFile(
+        // This file would be extracted outside of the target extraction dir
+        ArchiveFile(r'..\..\..\Target File.txt', content.length, content.codeUnits),
+      );
+      final List<int> zipData = ZipEncoder().encode(archive)!;
+      fakeZipFile.writeAsBytesSync(zipData);
+      expect(
+        () => utils.unzip(fakeZipFile, targetDirectory),
+        throwsA(
+          isA<StateError>().having(
+            (StateError error) => error.message,
+            'correct error message',
+            contains('Tried to extract the file '),
+          ),
+        ),
+      );
     });
   });
 
