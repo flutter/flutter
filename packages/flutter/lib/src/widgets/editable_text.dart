@@ -3980,10 +3980,6 @@ class CommittedContent {
   /// Convenience getter to check if bytedata is available for the inserted content
   bool get hasData => data != null && data!.isNotEmpty;
 
-  CommittedContent({Map<String, dynamic>? data}) {
-    // ...
-  }
-
   /// Converts Map received from Flutter Engine into the Dart class
   static CommittedContent fromMap(Map<String, dynamic>? data) {
     if (data == null || data.isEmpty)
