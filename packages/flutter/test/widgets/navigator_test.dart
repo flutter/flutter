@@ -2644,6 +2644,42 @@ void main() {
       expect(find.text('initial'), findsOneWidget);
     });
 
+    testWidgets('can handle duplicate page key if update before transition finishes', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/97363.
+      final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
+      final List<TestPage> myPages1 = <TestPage>[
+        const TestPage(key: ValueKey<String>('1'), name:'initial'),
+      ];
+      final List<TestPage> myPages2 = <TestPage>[
+        const TestPage(key: ValueKey<String>('2'), name:'second'),
+      ];
+
+      bool onPopPage(Route<dynamic> route, dynamic result) => false;
+
+      await tester.pumpWidget(
+        buildNavigator(pages: myPages1, onPopPage: onPopPage, key: navigator),
+      );
+      await tester.pump();
+      expect(find.text('initial'), findsOneWidget);
+      // Update multiple times without waiting for pop to finish to leave
+      // multiple popping route entries in route stack with the same page key.
+      await tester.pumpWidget(
+        buildNavigator(pages: myPages2, onPopPage: onPopPage, key: navigator),
+      );
+      await tester.pump();
+      await tester.pumpWidget(
+        buildNavigator(pages: myPages1, onPopPage: onPopPage, key: navigator),
+      );
+      await tester.pump();
+      await tester.pumpWidget(
+        buildNavigator(pages: myPages2, onPopPage: onPopPage, key: navigator),
+      );
+
+      await tester.pumpAndSettle();
+      expect(find.text('second'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
     testWidgets('throw if onPopPage callback is not provided', (WidgetTester tester) async {
       final List<TestPage> myPages = <TestPage>[
         const TestPage(key: ValueKey<String>('1'), name:'initial'),
