@@ -1,4 +1,4 @@
-Signature: 9949e029a3406eaa174ea0dd844423b6
+Signature: 6cb0abb7e9f3d567841200aa4032ff07
 
 UNUSED LICENSES:
 
@@ -2294,6 +2294,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.mediastreams/media_format.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.mediastreams/video_format.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.power.profile/profile.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/keyboard.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.thermal/client_state.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.composition/allocator.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.composition/flatland.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.composition/screenshot.fidl
