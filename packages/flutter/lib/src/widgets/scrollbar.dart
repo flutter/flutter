@@ -875,6 +875,9 @@ class RawScrollbar extends StatefulWidget {
     this.thumbColor,
     this.minThumbLength = _kMinThumbExtent,
     this.minOverscrollLength,
+    this.trackVisibility,
+    this.trackColor,
+    this.trackBorderColor,
     this.fadeDuration = _kScrollbarFadeDuration,
     this.timeToFade = _kScrollbarTimeToFade,
     this.pressDuration = Duration.zero,
@@ -893,6 +896,10 @@ class RawScrollbar extends StatefulWidget {
          thumbVisibility == null || isAlwaysShown == null,
          'Scrollbar thumb appearance should only be controlled with thumbVisibility, '
          'isAlwaysShown is deprecated.'
+       ),
+       assert(
+         !((thumbVisibility == false || isAlwaysShown == false) && trackVisibility == true),
+         'A scrollbar track cannot be drawn without a scrollbar thumb.'
        ),
        assert(minThumbLength != null),
        assert(minThumbLength >= 0),
@@ -1199,6 +1206,36 @@ class RawScrollbar extends StatefulWidget {
   /// When null, it will default to the value of [minThumbLength].
   final double? minOverscrollLength;
 
+  /// {@template flutter.widgets.Scrollbar.trackVisibility}
+  /// Indicates that the scrollbar track should be visible.
+  ///
+  /// When true, the scrollbar track will always be visible so long as the thumb
+  /// is visible. If the scrollbar thumb is not visible, the track will not be
+  /// visible either.
+  ///
+  /// Defaults to false when null.
+  /// {@endtemplate}
+  ///
+  /// Subclass [Scrollbar] can hide and show the scrollbar thumb in response to
+  /// [MaterialState]s by using [ScrollbarThemeData.trackVisibility].
+  final bool? trackVisibility;
+
+  /// The color of the scrollbar track.
+  ///
+  /// The scrollbar track will only be visible when [trackVisibility] and
+  /// [thumbVisibility] are true.
+  ///
+  /// If null, defaults to Color(0x08000000).
+  final Color? trackColor;
+
+  /// The color of the scrollbar track's border.
+  ///
+  /// The scrollbar track will only be visible when [trackVisibility] and
+  /// [thumbVisibility] are true.
+  ///
+  /// If null, defaults to Color(0x1a000000).
+  final Color? trackBorderColor;
+
   /// The [Duration] of the fade animation.
   ///
   /// Cannot be null, defaults to a [Duration] of 300 milliseconds.
@@ -1303,6 +1340,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   ///   * [RawScrollbar.isAlwaysShown], which overrides the default behavior.
   @protected
   bool get showScrollbar => widget.isAlwaysShown ?? widget.thumbVisibility ?? false;
+
+  bool get _showTrack => showScrollbar && (widget.trackVisibility ?? false);
 
   /// Overridable getter to indicate is gestures should be enabled on the
   /// scrollbar.
@@ -1470,6 +1509,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   void updateScrollbarPainter() {
     scrollbarPainter
       ..color = widget.thumbColor ?? const Color(0x66BCBCBC)
+      ..trackColor = _showTrack ? const Color(0x08000000) : const Color(0x00000000)
+      ..trackBorderColor = _showTrack ? const Color(0x1a000000) : const Color(0x00000000)
       ..textDirection = Directionality.of(context)
       ..thickness = widget.thickness ?? _kScrollbarThickness
       ..radius = widget.radius
