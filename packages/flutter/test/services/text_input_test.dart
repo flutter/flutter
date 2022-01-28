@@ -358,7 +358,7 @@ void main() {
       final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
         'args': <dynamic>[
           1,
-          "TextInputAction.commitContent",
+          'TextInputAction.commitContent',
           jsonDecode('{"mimeType": "image/gif", "data": "010101000", "uri": "content://com.google.android.inputmethod.latin.fileprovider/test.gif"}'),
         ],
         'method': 'TextInputClient.performAction',
