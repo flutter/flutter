@@ -3957,14 +3957,14 @@ class _CopySelectionAction extends ContextAction<CopySelectionTextIntent> {
 }
 
 /// A class representing data for the `onContentCommitted` callback on text fields.
-/// 
+///
 /// This will be used when content is inserted into a text field. The class holds
 /// information for the mime type, URI (location), and bytedata for the inserted
 /// content.
 @immutable
 class CommittedContent {
   /// Creates an object to represent content that is committed from a text field
-  /// 
+  ///
   /// Any parameters can be null.
   const CommittedContent({this.mimeType, this.uri, this.data});
 

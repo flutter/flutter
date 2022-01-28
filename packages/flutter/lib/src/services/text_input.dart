@@ -618,9 +618,9 @@ class TextInputConfiguration {
   /// The passed list of strings will determine which MIME types are allowed to
   /// be inserted via the device keyboard. If no `onContentCommitted` callback
   /// is provided, this field will be ignored.
-  /// 
+  ///
   /// Defaults to ['image/png', 'image/bmp', 'image/jpg', 'image/tiff', 'image/gif', 'image/jpeg', 'image/webp']
-  /// 
+  ///
   /// This example shows how to limit your keyboard commits to specific file types
   /// using the `TextField` widget.
   ///
