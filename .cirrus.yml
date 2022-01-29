@@ -18,7 +18,7 @@ gcp_credentials: ENCRYPTED[!cc769765170bebc37e0556e2da5915ca64ee37f4ec8c966ec147
 task:
   gke_container:
     dockerfile: "dev/ci/docker_linux/Dockerfile"
-    builder_image_name: docker-builder # gce vm image
+    builder_image_name: docker-builder-linux # gce vm image
     builder_image_project: flutter-cirrus
     cluster_name: test-cluster
     zone: us-central1-a
