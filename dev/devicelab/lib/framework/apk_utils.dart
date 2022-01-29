@@ -349,8 +349,7 @@ android {
       path.join(parent.path, 'hello', 'pubspec.yaml')
     );
     final String contents = pubspec.readAsStringSync();
-    final String newContents = contents.replaceFirst(r'^flutter:$', '''
-flutter:
+    final String newContents = contents.replaceFirst(RegExp(r'^flutter:$', multiLine: true), '''flutter:
   assets:
     - lib/gallery/example_code.dart''');
     pubspec.writeAsStringSync(newContents);
