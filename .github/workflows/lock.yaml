@@ -2,6 +2,11 @@
 
 name: 'Lock Threads'
 
+# By specifying the access of one of the scopes, all of those that are not
+# specified are set to 'none'.
+permissions:
+  issues: write
+
 on:
   schedule:
     - cron: '0 * * * *'
