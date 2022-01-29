@@ -39,8 +39,8 @@ abstract class SpellCheckerControls {
 abstract class MisspelledWordsHandler {
     /// Responsible for rebuilding the TextSpan with the TextStyle changed for all 
     /// of the misspelled words.
-    TextSpan buildWithMisspelledWordsIndicated(List<SpellCheckerSuggestionSpan> spellCheckerSuggestionSpan, 
-        TextEditingValue value);
+    TextSpan buildWithMisspelledWordsIndicated(List<SpellCheckerSuggestionSpan> spellCheckerSuggestionSpans, 
+        TextEditingValue value, TextStyle style);
 
     /// Responsible for defining the behavior of overriding/merging the TestStyle 
     /// specified for a particular TextSpan with the style used to indicate

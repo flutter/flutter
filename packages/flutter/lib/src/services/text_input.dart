@@ -1277,11 +1277,11 @@ class TextInputConnection {
     TextInput._instance._requestAutofill();
   }
 
-    /// Requests that spell checking be initiated on the specified text.
-    void initiateSpellChecking(Locale locale, String text) {
-      assert(attached);
-      TextInput._instance.initiateSpellChecking(locale, text);
-    }
+  /// Requests that spell checking be initiated on the specified text.
+  void initiateSpellChecking(Locale locale, String text) {
+    assert(attached);
+    TextInput._instance.initiateSpellChecking(locale, text);
+  }
 
 
   /// Requests that the text input control update itself according to the new
@@ -1829,10 +1829,20 @@ class TextInput {
   void initiateSpellChecking(Locale locale, String text) {
     assert(locale != null);
     assert(text != null);
-    _channel.invokeMethod<void>(
-      'TextInput.initiateSpellChecking',
-      <String>[ locale.toLanguageTag(), text ],
+    Future<List<String>> successResults = 
+      _channel.invokeMethod<void>(
+        'TextInput.initiateSpellChecking',
+        <String>[ locale.toLanguageTag(), text ],
     );
+
+    // TODO(camillesimon): break down results
+    List<SpellCheckerSuggestionSpan> results = List<SpellCheckerSuggestionSpan>[];
+    successResults.forEach((String result) {
+      List<String> resultParsed = result.split(".");
+      results.add(SpellCheckerSuggestionSpan)(start: resultParsed[0],
+                                        )
+    })
+    _currentConnection!._client.updateSpellCheckerResults(results);
   }
 
   void _setEditableSizeAndTransform(Map<String, dynamic> args) {
