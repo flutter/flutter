@@ -161,8 +161,6 @@ class CompositorContext {
 
   TextureRegistry& texture_registry() { return texture_registry_; }
 
-  const Counter& frame_count() const { return frame_count_; }
-
   const Stopwatch& raster_time() const { return raster_time_; }
 
   Stopwatch& ui_time() { return ui_time_; }
@@ -170,7 +168,6 @@ class CompositorContext {
  private:
   RasterCache raster_cache_;
   TextureRegistry texture_registry_;
-  Counter frame_count_;
   Stopwatch raster_time_;
   Stopwatch ui_time_;
 

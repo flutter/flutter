@@ -89,43 +89,6 @@ class FixedRefreshRateStopwatch : public Stopwatch {
   FixedRefreshRateUpdater fixed_delegate_;
 };
 
-class Counter {
- public:
-  Counter() : count_(0) {}
-
-  size_t count() const { return count_; }
-
-  void Reset(size_t count = 0) { count_ = count; }
-
-  void Increment(size_t count = 1) { count_ += count; }
-
- private:
-  size_t count_;
-
-  FML_DISALLOW_COPY_AND_ASSIGN(Counter);
-};
-
-class CounterValues {
- public:
-  CounterValues();
-
-  ~CounterValues();
-
-  void Add(int64_t value);
-
-  void Visualize(SkCanvas* canvas, const SkRect& rect) const;
-
-  int64_t GetMaxValue() const;
-
-  int64_t GetMinValue() const;
-
- private:
-  std::vector<int64_t> values_;
-  size_t current_sample_;
-
-  FML_DISALLOW_COPY_AND_ASSIGN(CounterValues);
-};
-
 }  // namespace flutter
 
 #endif  // FLUTTER_FLOW_INSTRUMENTATION_H_
