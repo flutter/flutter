@@ -55,7 +55,6 @@ CompositorContext::~CompositorContext() = default;
 void CompositorContext::BeginFrame(ScopedFrame& frame,
                                    bool enable_instrumentation) {
   if (enable_instrumentation) {
-    frame_count_.Increment();
     raster_time_.Start();
   }
 }
