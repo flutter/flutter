@@ -2310,30 +2310,13 @@ TEST_F(ShellTest, DiscardLayerTreeOnResize) {
   SkISize expected_size = SkISize::Make(400, 200);
 
   fml::AutoResetWaitableEvent end_frame_latch;
-  std::shared_ptr<ShellTestExternalViewEmbedder> external_view_embedder;
-  fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger_ref;
   auto end_frame_callback =
       [&](bool should_merge_thread,
           fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) {
-        if (!raster_thread_merger_ref) {
-          raster_thread_merger_ref = raster_thread_merger;
-        }
-        if (should_merge_thread) {
-          // TODO(cyanglaz): This test used external_view_embedder so we need to
-          // merge the threads here. However, the scenario it is testing is
-          // unrelated to platform views. We should consider to update this test
-          // so it doesn't require external_view_embedder.
-          // https://github.com/flutter/flutter/issues/69895
-          raster_thread_merger->MergeWithLease(10);
-          external_view_embedder->UpdatePostPrerollResult(
-              PostPrerollResult::kSuccess);
-        }
         end_frame_latch.Signal();
       };
-
-  external_view_embedder = std::make_shared<ShellTestExternalViewEmbedder>(
-      std::move(end_frame_callback), PostPrerollResult::kResubmitFrame, true);
-
+  auto external_view_embedder = std::make_shared<ShellTestExternalViewEmbedder>(
+      std::move(end_frame_callback), PostPrerollResult::kSuccess, false);
   std::unique_ptr<Shell> shell = CreateShell(
       settings, GetTaskRunnersForFixture(), false, external_view_embedder);
 
@@ -2355,21 +2338,14 @@ TEST_F(ShellTest, DiscardLayerTreeOnResize) {
 
   PumpOneFrame(shell.get(), static_cast<double>(wrong_size.width()),
                static_cast<double>(wrong_size.height()));
-
   end_frame_latch.Wait();
-
+  // Wrong size, no frames are submitted.
   ASSERT_EQ(0, external_view_embedder->GetSubmittedFrameCount());
 
-  // Threads will be merged at the end of this frame.
   PumpOneFrame(shell.get(), static_cast<double>(expected_size.width()),
                static_cast<double>(expected_size.height()));
-
   end_frame_latch.Wait();
-  ASSERT_TRUE(raster_thread_merger_ref->IsMerged());
-
-  end_frame_latch.Wait();
-  // 2 frames are submitted because `kResubmitFrame`, but only the 2nd frame
-  // should be submitted with `external_view_embedder`, hence the below check.
+  // Expected size, 1 frame submitted.
   ASSERT_EQ(1, external_view_embedder->GetSubmittedFrameCount());
   ASSERT_EQ(expected_size, external_view_embedder->GetLastSubmittedFrameSize());
 
