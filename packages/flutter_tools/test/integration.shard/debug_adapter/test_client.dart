@@ -63,6 +63,11 @@ class DapTestClient {
   /// Returns a stream of the string output from [OutputEventBody] events.
   Stream<String> get output => outputEvents.map((OutputEventBody output) => output.output);
 
+  /// Returns a stream of the string output from [OutputEventBody] events with the category 'stdout'.
+  Stream<String> get stdoutOutput => outputEvents
+      .where((OutputEventBody output) => output.category == 'stdout')
+      .map((OutputEventBody output) => output.output);
+
   /// Sends a custom request to the server and waits for a response.
   Future<Response> custom(String name, [Object? args]) async {
     return sendRequest(args, overrideCommand: name);
