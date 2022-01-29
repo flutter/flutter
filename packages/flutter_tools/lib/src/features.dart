@@ -53,7 +53,7 @@ abstract class FeatureFlags {
   /// Whether a particular feature is enabled for the current channel.
   ///
   /// Prefer using one of the specific getters above instead of this API.
-  bool isEnabled(Feature feature) => false;
+  bool isEnabled(Feature feature);
 }
 
 /// All current Flutter feature flags.
@@ -138,18 +138,21 @@ const Feature flutterWindowsDesktopFeature = Feature(
   name: 'beta-quality support for desktop on Windows',
   configSetting: 'enable-windows-desktop',
   environmentOverride: 'FLUTTER_WINDOWS',
-  extraHelpText: 'Newer beta versions are available on the beta channel.',
   master: FeatureChannelSetting(
     available: true,
+    enabledByDefault: true,
   ),
   dev: FeatureChannelSetting(
     available: true,
+    enabledByDefault: true,
   ),
   beta: FeatureChannelSetting(
     available: true,
+    enabledByDefault: true,
   ),
   stable: FeatureChannelSetting(
     available: true,
+    enabledByDefault: true,
   ),
 );
 
