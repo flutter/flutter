@@ -349,7 +349,8 @@ android {
       path.join(parent.path, 'hello', 'pubspec.yaml')
     );
     final String contents = pubspec.readAsStringSync();
-    final String newContents = contents.replaceFirst(RegExp(r'^flutter:$', multiLine: true), '''
+    final String newContents = contents.replaceFirst('${platformLineSep}flutter:$platformLineSep', '''
+
 flutter:
   assets:
     - lib/gallery/example_code.dart
