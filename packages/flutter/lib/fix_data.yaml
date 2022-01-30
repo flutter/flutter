@@ -9,6 +9,9 @@
 # from other fixes. In a comment, include a link to the PR where the change
 # requiring the fix was made.
 
+# Every fix must be tested. See the flutter/packages/flutter/test_fixes/README.md
+# file for instructions on testing these data driven fixes.
+
 # For documentation about this file format, see
 # https://dart.dev/go/data-driven-fixes.
 
