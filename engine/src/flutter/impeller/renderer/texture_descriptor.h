@@ -13,7 +13,7 @@
 namespace impeller {
 
 struct TextureDescriptor {
-  TextureType type = TextureType::k2D;
+  TextureType type = TextureType::kTexture2D;
   PixelFormat format = PixelFormat::kUnknown;
   ISize size;
   size_t mip_count = 1u;  // Size::MipCount is usually appropriate.
