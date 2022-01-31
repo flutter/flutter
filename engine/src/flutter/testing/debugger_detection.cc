@@ -15,9 +15,9 @@
 #include <unistd.h>
 #endif  // FML_OS_MACOSX
 
-#if OS_WIN
+#if FML_OS_WIN
 #include <windows.h>
-#endif  // OS_WIN
+#endif  // FML_OS_WIN
 
 namespace flutter {
 namespace testing {
@@ -54,7 +54,7 @@ DebuggerStatus GetDebuggerStatus() {
   return ((info.kp_proc.p_flag & P_TRACED) != 0) ? DebuggerStatus::kAttached
                                                  : DebuggerStatus::kDontKnow;
 
-#elif OS_WIN
+#elif FML_OS_WIN
   return ::IsDebuggerPresent() ? DebuggerStatus::kAttached
                                : DebuggerStatus::kDontKnow;
 

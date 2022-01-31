@@ -11,7 +11,7 @@
 
 #if defined(FML_OS_ANDROID)
 #include <android/log.h>
-#elif defined(OS_IOS)
+#elif defined(FML_OS_IOS)
 #include <syslog.h>
 #elif defined(OS_FUCHSIA)
 #include <lib/syslog/global.h>
@@ -94,7 +94,7 @@ LogMessage::~LogMessage() {
       break;
   }
   __android_log_write(priority, "flutter", stream_.str().c_str());
-#elif defined(OS_IOS)
+#elif defined(FML_OS_IOS)
   syslog(LOG_ALERT, "%s", stream_.str().c_str());
 #elif defined(OS_FUCHSIA)
   fx_log_severity_t fx_severity;

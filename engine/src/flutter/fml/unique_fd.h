@@ -8,20 +8,20 @@
 #include "flutter/fml/build_config.h"
 #include "flutter/fml/unique_object.h"
 
-#if OS_WIN
+#if FML_OS_WIN
 #include <windows.h>
 #include <map>
 #include <mutex>
 #include <optional>
-#else  // OS_WIN
+#else  // FML_OS_WIN
 #include <dirent.h>
 #include <unistd.h>
-#endif  // OS_WIN
+#endif  // FML_OS_WIN
 
 namespace fml {
 namespace internal {
 
-#if OS_WIN
+#if FML_OS_WIN
 
 namespace os_win {
 
@@ -69,7 +69,7 @@ struct UniqueFDTraits {
 
 }  // namespace os_win
 
-#else  // OS_WIN
+#else  // FML_OS_WIN
 
 namespace os_unix {
 
@@ -87,20 +87,20 @@ struct UniqueDirTraits {
 
 }  // namespace os_unix
 
-#endif  // OS_WIN
+#endif  // FML_OS_WIN
 
 }  // namespace internal
 
-#if OS_WIN
+#if FML_OS_WIN
 
 using UniqueFD = UniqueObject<HANDLE, internal::os_win::UniqueFDTraits>;
 
-#else  // OS_WIN
+#else  // FML_OS_WIN
 
 using UniqueFD = UniqueObject<int, internal::os_unix::UniqueFDTraits>;
 using UniqueDir = UniqueObject<DIR*, internal::os_unix::UniqueDirTraits>;
 
-#endif  // OS_WIN
+#endif  // FML_OS_WIN
 
 }  // namespace fml
 

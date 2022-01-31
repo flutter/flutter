@@ -8,7 +8,7 @@
 
 #ifdef FML_OS_MACOSX
 #define VULKAN_SO_PATH "libvk_swiftshader.dylib"
-#elif OS_WIN
+#elif FML_OS_WIN
 #define VULKAN_SO_PATH "vk_swiftshader.dll"
 #else
 #define VULKAN_SO_PATH "libvk_swiftshader.so"

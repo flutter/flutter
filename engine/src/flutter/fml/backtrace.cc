@@ -11,7 +11,7 @@
 #include <csignal>
 #include <sstream>
 
-#if OS_WIN
+#if FML_OS_WIN
 #include <crtdbg.h>
 #include <debugapi.h>
 #endif
@@ -132,7 +132,7 @@ static void ToggleSignalHandlers(bool set) {
 }
 
 void InstallCrashHandler() {
-#if OS_WIN
+#if FML_OS_WIN
   if (!IsDebuggerPresent()) {
     _CrtSetReportMode(_CRT_ASSERT, _CRTDBG_MODE_FILE | _CRTDBG_MODE_DEBUG);
     _CrtSetReportFile(_CRT_ASSERT, _CRTDBG_FILE_STDERR);

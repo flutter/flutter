@@ -19,11 +19,11 @@ std::string JoinPaths(std::initializer_list<std::string> components) {
     i++;
     stream << component;
     if (i != size) {
-#if OS_WIN
+#if FML_OS_WIN
       stream << "\\";
-#else   // OS_WIN
+#else   // FML_OS_WIN
       stream << "/";
-#endif  // OS_WIN
+#endif  // FML_OS_WIN
     }
   }
   return stream.str();

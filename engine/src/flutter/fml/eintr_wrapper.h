@@ -9,7 +9,7 @@
 
 #include "flutter/fml/build_config.h"
 
-#if defined(OS_WIN)
+#if defined(FML_OS_WIN)
 
 // Windows has no concept of EINTR.
 #define FML_HANDLE_EINTR(x) (x)
@@ -38,6 +38,6 @@
     eintr_wrapper_result;                                 \
   })
 
-#endif  // defined(OS_WIN)
+#endif  // defined(FML_OS_WIN)
 
 #endif  // FLUTTER_FML_EINTR_WRAPPER_H_

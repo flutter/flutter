@@ -20,11 +20,11 @@
 #include "third_party/dart/runtime/include/dart_native_api.h"
 
 #if !defined(FLUTTER_NO_EXPORT)
-#if OS_WIN
+#if FML_OS_WIN
 #define FLUTTER_EXPORT __declspec(dllexport)
-#else  // OS_WIN
+#else  // FML_OS_WIN
 #define FLUTTER_EXPORT __attribute__((visibility("default")))
-#endif  // OS_WIN
+#endif  // FML_OS_WIN
 #endif  // !FLUTTER_NO_EXPORT
 
 extern "C" {
@@ -95,7 +95,7 @@ static FlutterEngineResult LogEmbedderError(FlutterEngineResult code,
                                             const char* function,
                                             const char* file,
                                             int line) {
-#if OS_WIN
+#if FML_OS_WIN
   constexpr char kSeparator = '\\';
 #else
   constexpr char kSeparator = '/';
@@ -183,18 +183,18 @@ static bool IsRendererValid(const FlutterRendererConfig* config) {
   return false;
 }
 
-#if FML_OS_LINUX || OS_WIN
+#if FML_OS_LINUX || FML_OS_WIN
 static void* DefaultGLProcResolver(const char* name) {
   static fml::RefPtr<fml::NativeLibrary> proc_library =
 #if FML_OS_LINUX
       fml::NativeLibrary::CreateForCurrentProcess();
-#elif OS_WIN  // FML_OS_LINUX
+#elif FML_OS_WIN  // FML_OS_LINUX
       fml::NativeLibrary::Create("opengl32.dll");
-#endif        // OS_WIN
+#endif            // FML_OS_WIN
   return static_cast<void*>(
       const_cast<uint8_t*>(proc_library->ResolveSymbol(name)));
 }
-#endif  // FML_OS_LINUX || OS_WIN
+#endif  // FML_OS_LINUX || FML_OS_WIN
 
 static flutter::Shell::CreateCallback<flutter::PlatformView>
 InferOpenGLPlatformViewCreationCallback(
@@ -284,7 +284,7 @@ InferOpenGLPlatformViewCreationCallback(
       return ptr(user_data, gl_proc_name);
     };
   } else {
-#if FML_OS_LINUX || OS_WIN
+#if FML_OS_LINUX || FML_OS_WIN
     gl_proc_resolver = DefaultGLProcResolver;
 #endif
   }

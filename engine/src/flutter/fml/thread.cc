@@ -13,7 +13,7 @@
 #include "flutter/fml/message_loop.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 
-#if defined(OS_WIN)
+#if defined(FML_OS_WIN)
 #include <windows.h>
 #elif defined(OS_FUCHSIA)
 #include <lib/zx/thread.h>
@@ -55,7 +55,7 @@ void Thread::Join() {
   thread_->join();
 }
 
-#if defined(OS_WIN)
+#if defined(FML_OS_WIN)
 // The information on how to set the thread name comes from
 // a MSDN article: http://msdn2.microsoft.com/en-us/library/xcb2z8hs.aspx
 const DWORD kVCThreadNameException = 0x406D1388;
@@ -75,7 +75,7 @@ void Thread::SetCurrentThreadName(const std::string& name) {
   pthread_setname_np(name.c_str());
 #elif defined(FML_OS_LINUX) || defined(FML_OS_ANDROID)
   pthread_setname_np(pthread_self(), name.c_str());
-#elif defined(OS_WIN)
+#elif defined(FML_OS_WIN)
   THREADNAME_INFO info;
   info.dwType = 0x1000;
   info.szName = name.c_str();

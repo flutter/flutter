@@ -4,8 +4,8 @@
 
 // This file adds defines about the platform we're currently building on.
 //  Operating System:
-//    OS_WIN / FML_OS_MACOSX / FML_OS_LINUX / FML_OS_POSIX (MACOSX or LINUX) /
-//    FML_OS_NACL (NACL_SFI or NACL_NONSFI) / FML_OS_NACL_SFI /
+//    FML_OS_WIN / FML_OS_MACOSX / FML_OS_LINUX / FML_OS_POSIX (MACOSX or LINUX)
+//    / FML_OS_NACL (NACL_SFI or NACL_NONSFI) / FML_OS_NACL_SFI /
 //    FML_OS_NACL_NONSFI
 //  Compiler:
 //    COMPILER_MSVC / COMPILER_GCC
@@ -27,7 +27,7 @@
 #include <TargetConditionals.h>
 #define FML_OS_MACOSX 1
 #if defined(TARGET_OS_IPHONE) && TARGET_OS_IPHONE
-#define OS_IOS 1
+#define FML_OS_IOS 1
 #endif  // defined(TARGET_OS_IPHONE) && TARGET_OS_IPHONE
 #elif defined(__linux__)
 #define FML_OS_LINUX 1
@@ -38,7 +38,7 @@
 #define LIBC_GLIBC 1
 #endif
 #elif defined(_WIN32)
-#define OS_WIN 1
+#define FML_OS_WIN 1
 #elif defined(__FreeBSD__)
 #define FML_OS_FREEBSD 1
 #elif defined(__OpenBSD__)
@@ -51,10 +51,10 @@
 #error Please add support for your platform in flutter/fml/build_config.h
 #endif
 
-// For access to standard BSD features, use OS_BSD instead of a
+// For access to standard BSD features, use FML_OS_BSD instead of a
 // more specific macro.
 #if defined(FML_OS_FREEBSD) || defined(FML_OS_OPENBSD)
-#define OS_BSD 1
+#define FML_OS_BSD 1
 #endif
 
 // For access to standard POSIXish features, use FML_OS_POSIX instead of a
