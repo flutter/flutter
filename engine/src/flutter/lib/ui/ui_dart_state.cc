@@ -11,7 +11,7 @@
 #include "third_party/tonic/converter/dart_converter.h"
 #include "third_party/tonic/dart_message_handler.h"
 
-#if defined(OS_ANDROID)
+#if defined(FML_OS_ANDROID)
 #include <android/log.h>
 #elif defined(OS_IOS)
 extern "C" {
@@ -216,7 +216,7 @@ void UIDartState::LogMessage(const std::string& tag,
     log_message_callback_(tag, message);
   } else {
     // Fall back to previous behavior if unspecified.
-#if defined(OS_ANDROID)
+#if defined(FML_OS_ANDROID)
     __android_log_print(ANDROID_LOG_INFO, tag.c_str(), "%.*s",
                         (int)message.size(), message.c_str());
 #elif defined(OS_IOS)

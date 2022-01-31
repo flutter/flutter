@@ -1028,9 +1028,9 @@ TEST_F(EmbedderTest, VerifyB143464703WithSoftwareBackend) {
 
   // TODO(https://github.com/flutter/flutter/issues/53784): enable this on all
   // platforms.
-#if !defined(OS_LINUX)
+#if !defined(FML_OS_LINUX)
   GTEST_SKIP() << "Skipping golden tests on non-Linux OSes";
-#endif  // OS_LINUX
+#endif  // FML_OS_LINUX
   ASSERT_TRUE(
       ImageMatchesFixture("verifyb143464703_soft_noxform.png", rendered_scene));
 }

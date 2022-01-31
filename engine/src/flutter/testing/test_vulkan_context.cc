@@ -6,7 +6,7 @@
 
 #include "flutter/vulkan/vulkan_proc_table.h"
 
-#ifdef OS_MACOSX
+#ifdef FML_OS_MACOSX
 #define VULKAN_SO_PATH "libvk_swiftshader.dylib"
 #elif OS_WIN
 #define VULKAN_SO_PATH "vk_swiftshader.dll"

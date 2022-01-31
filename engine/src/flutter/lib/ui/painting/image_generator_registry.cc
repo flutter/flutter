@@ -8,7 +8,7 @@
 #include "third_party/skia/include/codec/SkCodec.h"
 #include "third_party/skia/include/core/SkImageGenerator.h"
 #include "third_party/skia/src/codec/SkCodecImageGenerator.h"
-#ifdef OS_MACOSX
+#ifdef FML_OS_MACOSX
 #include "third_party/skia/include/ports/SkImageGeneratorCG.h"
 #elif OS_WIN
 #include "third_party/skia/include/ports/SkImageGeneratorWIC.h"
@@ -24,7 +24,7 @@ ImageGeneratorRegistry::ImageGeneratorRegistry() : weak_factory_(this) {
       0);
 
   // todo(bdero): https://github.com/flutter/flutter/issues/82603
-#ifdef OS_MACOSX
+#ifdef FML_OS_MACOSX
   AddFactory(
       [](sk_sp<SkData> buffer) {
         auto generator = SkImageGeneratorCG::MakeFromEncodedCG(buffer);

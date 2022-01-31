@@ -13,13 +13,13 @@
 #include "flutter/shell/platform/android/surface/android_native_window.h"
 #include "third_party/skia/include/core/SkMatrix.h"
 
-#if OS_ANDROID
+#if FML_OS_ANDROID
 #include "flutter/fml/platform/android/scoped_java_ref.h"
 #endif
 
 namespace flutter {
 
-#if OS_ANDROID
+#if FML_OS_ANDROID
 using JavaLocalRef = fml::jni::ScopedJavaLocalRef<jobject>;
 #else
 using JavaLocalRef = std::nullptr_t;

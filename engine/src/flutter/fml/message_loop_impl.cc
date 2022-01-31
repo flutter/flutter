@@ -13,13 +13,13 @@
 #include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
 
-#if OS_MACOSX
+#if FML_OS_MACOSX
 #include "flutter/fml/platform/darwin/message_loop_darwin.h"
-#elif OS_ANDROID
+#elif FML_OS_ANDROID
 #include "flutter/fml/platform/android/message_loop_android.h"
 #elif OS_FUCHSIA
 #include "flutter/fml/platform/fuchsia/message_loop_fuchsia.h"
-#elif OS_LINUX
+#elif FML_OS_LINUX
 #include "flutter/fml/platform/linux/message_loop_linux.h"
 #elif OS_WIN
 #include "flutter/fml/platform/win/message_loop_win.h"
@@ -28,13 +28,13 @@
 namespace fml {
 
 fml::RefPtr<MessageLoopImpl> MessageLoopImpl::Create() {
-#if OS_MACOSX
+#if FML_OS_MACOSX
   return fml::MakeRefCounted<MessageLoopDarwin>();
-#elif OS_ANDROID
+#elif FML_OS_ANDROID
   return fml::MakeRefCounted<MessageLoopAndroid>();
 #elif OS_FUCHSIA
   return fml::MakeRefCounted<MessageLoopFuchsia>();
-#elif OS_LINUX
+#elif FML_OS_LINUX
   return fml::MakeRefCounted<MessageLoopLinux>();
 #elif OS_WIN
   return fml::MakeRefCounted<MessageLoopWin>();

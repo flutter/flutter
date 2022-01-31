@@ -49,7 +49,7 @@ constexpr T ByteSwap(T n) {
 ///         The given value must be an integral type of size 1, 2, 4, or 8.
 template <typename T, class = std::enable_if_t<std::is_integral_v<T>>>
 constexpr T BigEndianToArch(T n) {
-#if ARCH_CPU_LITTLE_ENDIAN
+#if FML_ARCH_CPU_LITTLE_ENDIAN
   return ByteSwap<T>(n);
 #else
   return n;
@@ -61,7 +61,7 @@ constexpr T BigEndianToArch(T n) {
 ///         The given value must be an integral type of size 1, 2, 4, or 8.
 template <typename T, class = std::enable_if_t<std::is_integral_v<T>>>
 constexpr T LittleEndianToArch(T n) {
-#if !ARCH_CPU_LITTLE_ENDIAN
+#if !FML_ARCH_CPU_LITTLE_ENDIAN
   return ByteSwap<T>(n);
 #else
   return n;

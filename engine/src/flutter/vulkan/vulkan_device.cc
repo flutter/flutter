@@ -60,7 +60,7 @@ VulkanDevice::VulkanDevice(VulkanProcTable& p_vk,
   };
 
   const char* extensions[] = {
-#if OS_ANDROID
+#if FML_OS_ANDROID
     VK_KHR_SWAPCHAIN_EXTENSION_NAME,
 #endif
 #if OS_FUCHSIA
@@ -185,7 +185,7 @@ uint32_t VulkanDevice::GetGraphicsQueueIndex() const {
 bool VulkanDevice::GetSurfaceCapabilities(
     const VulkanSurface& surface,
     VkSurfaceCapabilitiesKHR* capabilities) const {
-#if OS_ANDROID
+#if FML_OS_ANDROID
   if (!surface.IsValid() || capabilities == nullptr) {
     return false;
   }
@@ -274,7 +274,7 @@ std::vector<VkQueueFamilyProperties> VulkanDevice::GetQueueFamilyProperties()
 int VulkanDevice::ChooseSurfaceFormat(const VulkanSurface& surface,
                                       std::vector<VkFormat> desired_formats,
                                       VkSurfaceFormatKHR* format) const {
-#if OS_ANDROID
+#if FML_OS_ANDROID
   if (!surface.IsValid() || format == nullptr) {
     return -1;
   }

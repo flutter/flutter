@@ -14,9 +14,9 @@ AndroidNativeWindow::AndroidNativeWindow(Handle window)
 
 AndroidNativeWindow::~AndroidNativeWindow() {
   if (window_ != nullptr) {
-#if OS_ANDROID
+#if FML_OS_ANDROID
     ANativeWindow_release(window_);
-#endif  // OS_ANDROID
+#endif  // FML_OS_ANDROID
     window_ = nullptr;
   }
 }
@@ -30,13 +30,13 @@ AndroidNativeWindow::Handle AndroidNativeWindow::handle() const {
 }
 
 SkISize AndroidNativeWindow::GetSize() const {
-#if OS_ANDROID
+#if FML_OS_ANDROID
   return window_ == nullptr ? SkISize::Make(0, 0)
                             : SkISize::Make(ANativeWindow_getWidth(window_),
                                             ANativeWindow_getHeight(window_));
-#else   // OS_ANDROID
+#else   // FML_OS_ANDROID
   return SkISize::Make(0, 0);
-#endif  // OS_ANDROID
+#endif  // FML_OS_ANDROID
 }
 
 }  // namespace flutter

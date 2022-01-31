@@ -16,7 +16,7 @@ TEST(EndiannessTest, ByteSwap) {
 }
 
 TEST(EndiannessTest, BigEndianToArch) {
-#if ARCH_CPU_LITTLE_ENDIAN
+#if FML_ARCH_CPU_LITTLE_ENDIAN
   uint32_t expected = 0x44332211;
 #else
   uint32_t expected = 0x11223344;
@@ -25,7 +25,7 @@ TEST(EndiannessTest, BigEndianToArch) {
 }
 
 TEST(EndiannessTest, LittleEndianToArch) {
-#if ARCH_CPU_LITTLE_ENDIAN
+#if FML_ARCH_CPU_LITTLE_ENDIAN
   uint32_t expected = 0x11223344;
 #else
   uint32_t expected = 0x44332211;
