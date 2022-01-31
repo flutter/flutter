@@ -74,10 +74,11 @@ vars = {
   # Checkout Linux dependencies only when building on Linux.
   'download_linux_deps': 'host_os == "linux"',
 
-  # Downloads the fuchsia SDK as listed in .fuchsia_sdk_version. This variable
+  # Downloads the fuchsia SDK as listed in fuchsia_sdk_path var. This variable
   # is currently only used for the Fuchsia LSC process and is not intended for
   # local development.
   'download_fuchsia_sdk': False,
+  'fuchsia_sdk_path': '',
 
   # An LLVM backend needs LLVM binaries and headers. To avoid build time
   # increases we can use prebuilts. We don't want to download this on every
@@ -728,6 +729,8 @@ hooks = [
       '--verbose',
       '--host-os',
       Var('host_os'),
+      '--fuchsia-sdk-path',
+      Var('fuchsia_sdk_path'),
     ]
   },
   {
