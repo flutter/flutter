@@ -1346,8 +1346,14 @@ class ProxyDomain extends Domain {
     try {
       socket = await Socket.connect(InternetAddress.loopbackIPv4, targetPort);
     } on SocketException {
-      // If connecting to ipv4 loopback fails, try ipv6.
-      socket = await Socket.connect(InternetAddress.loopbackIPv6, targetPort);
+      globals.logger.printTrace('Connecting to localhost:$targetPort failed with IPv4');
+    }
+
+    try {
+      // If connecting to IPv4 loopback interface fails, try IPv6.
+      socket ??= await Socket.connect(InternetAddress.loopbackIPv6, targetPort);
+    } on SocketException {
+      globals.logger.printError('Connecting to localhost:$targetPort failed');
     }
 
     if (socket == null) {

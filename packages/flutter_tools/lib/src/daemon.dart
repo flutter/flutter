@@ -196,7 +196,9 @@ class DaemonStreams {
     }).onError((Object error, StackTrace stackTrace) {
       logger.printError('Socket error: $error');
       logger.printTrace('$stackTrace');
-      throw error; // ignore: throw_only_errors
+      // Propagate the error to the streams.
+      inputStreamController.addError(error, stackTrace);
+      unawaited(outputStreamController.close());
     });
     return DaemonStreams(inputStreamController.stream, outputStreamController.sink, logger: logger);
   }
