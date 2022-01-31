@@ -15,7 +15,7 @@ bool Allocator::RequiresExplicitHostSynchronization(StorageMode mode) {
     return false;
   }
 
-#if FML_OS_IOS
+#if OS_IOS
   // StorageMode::kHostVisible is MTLStorageModeShared already.
   return false;
 #else   // OS_IOS
