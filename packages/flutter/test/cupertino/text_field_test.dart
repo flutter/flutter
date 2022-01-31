@@ -5121,7 +5121,7 @@ void main() {
     expect(controller.selection.baseOffset, 23);
     expect(controller.selection.extentOffset, 8);
 
-    // Continue to move passed the original base, which will cause the selection
+    // Continue to move past the original base, which will cause the selection
     // to invert back to the original orientation.
     await gesture.moveTo(textOffsetToPosition(tester, 9));
     await tester.pumpAndSettle();
@@ -5135,9 +5135,19 @@ void main() {
     expect(controller.selection.baseOffset, 8);
     expect(controller.selection.extentOffset, 24);
 
+    // Releasing the shift key has no effect; the selection continues as the
+    // mouse continues to move.
     await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
     expect(controller.selection.baseOffset, 8);
     expect(controller.selection.extentOffset, 24);
+    await gesture.moveTo(textOffsetToPosition(tester, 26));
+    await tester.pumpAndSettle();
+    expect(controller.selection.baseOffset, 8);
+    expect(controller.selection.extentOffset, 26);
+
+    await gesture.up();
+    expect(controller.selection.baseOffset, 8);
+    expect(controller.selection.extentOffset, 26);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('can shift + tap + drag to select with a keyboard (non-Apple platforms)', (WidgetTester tester) async {
@@ -5209,7 +5219,7 @@ void main() {
     expect(controller.selection.baseOffset, 8);
     expect(controller.selection.extentOffset, 8);
 
-    // Continue to move passed the original base.
+    // Continue to move past the original base.
     await gesture.moveTo(textOffsetToPosition(tester, 9));
     await tester.pumpAndSettle();
     expect(controller.selection.baseOffset, 8);
@@ -5222,9 +5232,19 @@ void main() {
     expect(controller.selection.baseOffset, 8);
     expect(controller.selection.extentOffset, 24);
 
+    // Releasing the shift key has no effect; the selection continues as the
+    // mouse continues to move.
     await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
     expect(controller.selection.baseOffset, 8);
     expect(controller.selection.extentOffset, 24);
+    await gesture.moveTo(textOffsetToPosition(tester, 26));
+    await tester.pumpAndSettle();
+    expect(controller.selection.baseOffset, 8);
+    expect(controller.selection.extentOffset, 26);
+
+    await gesture.up();
+    expect(controller.selection.baseOffset, 8);
+    expect(controller.selection.extentOffset, 26);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.linux,  TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.windows }));
 
   testWidgets('can shift + tap + drag to select with a keyboard, reversed (Apple platforms)', (WidgetTester tester) async {
@@ -5295,7 +5315,7 @@ void main() {
     expect(controller.selection.baseOffset, 8);
     expect(controller.selection.extentOffset, 23);
 
-    // Continue to move passed the original base, which will cause the selection
+    // Continue to move past the original base, which will cause the selection
     // to invert back to the original orientation.
     await gesture.moveTo(textOffsetToPosition(tester, 22));
     await tester.pumpAndSettle();
@@ -5309,9 +5329,19 @@ void main() {
     expect(controller.selection.baseOffset, 23);
     expect(controller.selection.extentOffset, 16);
 
+    // Releasing the shift key has no effect; the selection continues as the
+    // mouse continues to move.
     await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
     expect(controller.selection.baseOffset, 23);
     expect(controller.selection.extentOffset, 16);
+    await gesture.moveTo(textOffsetToPosition(tester, 14));
+    await tester.pumpAndSettle();
+    expect(controller.selection.baseOffset, 23);
+    expect(controller.selection.extentOffset, 14);
+
+    await gesture.up();
+    expect(controller.selection.baseOffset, 23);
+    expect(controller.selection.extentOffset, 14);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('can shift + tap + drag to select with a keyboard, reversed (non-Apple platforms)', (WidgetTester tester) async {
@@ -5383,7 +5413,7 @@ void main() {
     expect(controller.selection.baseOffset, 23);
     expect(controller.selection.extentOffset, 23);
 
-    // Continue to move passed the original base.
+    // Continue to move past the original base.
     await gesture.moveTo(textOffsetToPosition(tester, 22));
     await tester.pumpAndSettle();
     expect(controller.selection.baseOffset, 23);
@@ -5396,8 +5426,18 @@ void main() {
     expect(controller.selection.baseOffset, 23);
     expect(controller.selection.extentOffset, 16);
 
+    // Releasing the shift key has no effect; the selection continues as the
+    // mouse continues to move.
     await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
     expect(controller.selection.baseOffset, 23);
     expect(controller.selection.extentOffset, 16);
+    await gesture.moveTo(textOffsetToPosition(tester, 14));
+    await tester.pumpAndSettle();
+    expect(controller.selection.baseOffset, 23);
+    expect(controller.selection.extentOffset, 14);
+
+    await gesture.up();
+    expect(controller.selection.baseOffset, 23);
+    expect(controller.selection.extentOffset, 14);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.linux,  TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.windows }));
 }
