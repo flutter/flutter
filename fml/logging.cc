@@ -9,7 +9,7 @@
 #include "flutter/fml/log_settings.h"
 #include "flutter/fml/logging.h"
 
-#if defined(OS_ANDROID)
+#if defined(FML_OS_ANDROID)
 #include <android/log.h>
 #elif defined(OS_IOS)
 #include <syslog.h>
@@ -76,7 +76,7 @@ LogMessage::~LogMessage() {
   stream_ << std::endl;
 #endif
 
-#if defined(OS_ANDROID)
+#if defined(FML_OS_ANDROID)
   android_LogPriority priority =
       (severity_ < 0) ? ANDROID_LOG_VERBOSE : ANDROID_LOG_UNKNOWN;
   switch (severity_) {

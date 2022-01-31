@@ -10,11 +10,11 @@
 #include "flutter/fml/build_config.h"
 #include "flutter/fml/logging.h"
 
-#if OS_ANDROID
+#if FML_OS_ANDROID
 #ifndef VK_USE_PLATFORM_ANDROID_KHR
 #define VK_USE_PLATFORM_ANDROID_KHR 1
 #endif  // VK_USE_PLATFORM_ANDROID_KHR
-#endif  // OS_ANDROID
+#endif  // FML_OS_ANDROID
 
 #if OS_FUCHSIA
 #ifndef VK_USE_PLATFORM_MAGMA_KHR

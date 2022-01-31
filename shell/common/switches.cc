@@ -79,7 +79,7 @@ static const std::string gAllowedDartFlags[] = {
 // Define symbols for the ICU data that is linked into the Flutter library on
 // Android.  This is a workaround for crashes seen when doing dynamic lookups
 // of the engine's own symbols on some older versions of Android.
-#if OS_ANDROID
+#if FML_OS_ANDROID
 extern uint8_t _binary_icudtl_dat_start[];
 extern uint8_t _binary_icudtl_dat_end[];
 
@@ -401,7 +401,7 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
       command_line.GetOptionValue(FlagForSwitch(Switch::ICUNativeLibPath),
                                   &native_lib_path);
 
-#if OS_ANDROID
+#if FML_OS_ANDROID
       settings.icu_mapper = GetICUStaticMapping;
 #else
       settings.icu_mapper = [icu_symbol_prefix, native_lib_path] {

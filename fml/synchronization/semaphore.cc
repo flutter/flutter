@@ -7,7 +7,7 @@
 #include "flutter/fml/build_config.h"
 #include "flutter/fml/logging.h"
 
-#if OS_MACOSX
+#if FML_OS_MACOSX
 #include <dispatch/dispatch.h>
 
 namespace fml {
