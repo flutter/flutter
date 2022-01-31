@@ -11,20 +11,20 @@
 #include "flutter/fml/memory/ref_counted.h"
 #include "third_party/skia/include/core/SkSize.h"
 
-#if OS_ANDROID
+#if FML_OS_ANDROID
 #include <android/native_window.h>
-#endif  // OS_ANDROID
+#endif  // FML_OS_ANDROID
 
 namespace flutter {
 
 class AndroidNativeWindow
     : public fml::RefCountedThreadSafe<AndroidNativeWindow> {
  public:
-#if OS_ANDROID
+#if FML_OS_ANDROID
   using Handle = ANativeWindow*;
-#else   // OS_ANDROID
+#else   // FML_OS_ANDROID
   using Handle = std::nullptr_t;
-#endif  // OS_ANDROID
+#endif  // FML_OS_ANDROID
 
   bool IsValid() const;
 

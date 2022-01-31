@@ -27,9 +27,9 @@
 #include "third_party/dart/runtime/include/bin/dart_io_api.h"
 #include "third_party/dart/runtime/include/dart_api.h"
 
-#if defined(OS_POSIX)
+#if defined(FML_OS_POSIX)
 #include <signal.h>
-#endif  // defined(OS_POSIX)
+#endif  // defined(FML_OS_POSIX)
 
 namespace flutter {
 
@@ -169,12 +169,12 @@ class ScriptCompletionTaskObserver {
 // mutator thread in the main isolate in this process (threads spawned by the VM
 // know about this limitation and automatically have this signal unblocked).
 static void UnblockSIGPROF() {
-#if defined(OS_POSIX)
+#if defined(FML_OS_POSIX)
   sigset_t set;
   sigemptyset(&set);
   sigaddset(&set, SIGPROF);
   pthread_sigmask(SIG_UNBLOCK, &set, NULL);
-#endif  // defined(OS_POSIX)
+#endif  // defined(FML_OS_POSIX)
 }
 
 int RunTester(const flutter::Settings& settings,

@@ -71,9 +71,9 @@ void Thread::SetCurrentThreadName(const std::string& name) {
   if (name == "") {
     return;
   }
-#if defined(OS_MACOSX)
+#if defined(FML_OS_MACOSX)
   pthread_setname_np(name.c_str());
-#elif defined(OS_LINUX) || defined(OS_ANDROID)
+#elif defined(FML_OS_LINUX) || defined(FML_OS_ANDROID)
   pthread_setname_np(pthread_self(), name.c_str());
 #elif defined(OS_WIN)
   THREADNAME_INFO info;
