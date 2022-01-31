@@ -424,6 +424,20 @@ class _HtmlElementViewController extends PlatformViewController {
   }
 
   @override
+  void addOnPlatformViewCreatedListener(PlatformViewCreatedCallback listener) {
+  }
+
+  @override
+  void removeOnPlatformViewCreatedListener(PlatformViewCreatedCallback listener) {
+  }
+
+  @override
+  Future<void> setSize(Size size) async {}
+
+  @override
+  Future<void> setOffset(Offset off) async {}
+
+  @override
   Future<void> dispose() async {
     if (_initialized) {
       await SystemChannels.platform_views.invokeMethod<void>('dispose', viewId);
@@ -848,7 +862,7 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
 
   @override
   Widget build(BuildContext context) {
-    if (!_platformViewCreated) {
+    if (!_platformViewCreated && _controller is! TextureAndroidViewController) {
       return const SizedBox.expand();
     }
     _surface ??= widget._surfaceFactory(context, _controller!);
@@ -924,9 +938,9 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
 
 /// Integrates a platform view with Flutter's compositor, touch, and semantics subsystems.
 ///
-/// The compositor integration is done by adding a [PlatformViewLayer] to the layer tree. [PlatformViewSurface]
-/// isn't supported on all platforms (e.g on Android platform views can be composited by using a [TextureLayer] or
-/// [AndroidViewSurface]).
+/// The compositor integration is done by adding a [PlatformViewLayer] or a [TextureLayer]
+/// to the layer tree.
+///
 /// Custom Flutter embedders can support [PlatformViewLayer]s by implementing a SystemCompositor.
 ///
 /// The widget fills all available space, the parent of this object must provide bounded layout
@@ -936,9 +950,8 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
 ///
 /// See also:
 ///
-///  * [AndroidView] which embeds an Android platform view in the widget hierarchy using a [TextureLayer].
+///  * [AndroidView] which embeds an Android platform view in the widget hierarchy.
 ///  * [UiKitView] which embeds an iOS platform view in the widget hierarchy.
-// TODO(amirh): Link to the embedder's system compositor documentation once available.
 class PlatformViewSurface extends LeafRenderObjectWidget {
 
   /// Construct a `PlatformViewSurface`.

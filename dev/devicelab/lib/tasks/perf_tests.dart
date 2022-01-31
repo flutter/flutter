@@ -1477,7 +1477,7 @@ class MemoryTest {
     print('launching $project$test on device...');
     await flutter('run', options: <String>[
       '--verbose',
-      '--release',
+      // '--release',
       '--no-resident',
       '-d', device!.deviceId,
       test,

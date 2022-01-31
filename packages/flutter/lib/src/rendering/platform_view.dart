@@ -6,6 +6,7 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 
@@ -607,14 +608,10 @@ class _PlatformViewGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 }
 
-/// A render object for embedding a platform view.
-///
-/// [PlatformViewRenderBox] presents a platform view by adding a [PlatformViewLayer] layer,
-/// integrates it with the gesture arenas system and adds relevant semantic nodes to the semantics tree.
+/// A render object for embedding a platform view onto the widget tree.
+/// This is the render object of [PlatformViewSurface].
 class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
   /// Creating a render object for a [PlatformViewSurface].
-  ///
-  /// The `controller` parameter must not be null.
   PlatformViewRenderBox({
     required PlatformViewController controller,
     required PlatformViewHitTestBehavior hitTestBehavior,
@@ -625,6 +622,30 @@ class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
         _controller = controller {
     this.hitTestBehavior = hitTestBehavior;
     updateGestureRecognizers(gestureRecognizers);
+    controller.addOnPlatformViewCreatedListener(_onPlatformViewCreated);
+    _setOffset();
+  }
+
+  bool _useTextureLayer() {
+    return _controller is TextureAndroidViewController;
+  }
+
+  // Sets the offset of the underlaying platform view on the platform side.
+  // When a PlatformViewLayer is used, the offset can be inferred from the
+  // transform stack provided by the layer tree.
+  void _setOffset() {
+    if (!_useTextureLayer()) {
+      // If a platform view layer is used, the offset is set by the external view embedder
+      // in the engine via JNI.
+      // TODO(egarciad): Eliminate this case.
+      return;
+    }
+    SchedulerBinding.instance!.addPostFrameCallback((_) {
+      if (!_isDisposed) {
+        _controller.setOffset(localToGlobal(Offset.zero));
+        _setOffset();
+      }
+    });
   }
 
   /// The controller for this render object.
@@ -639,11 +660,15 @@ class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
       return;
     }
     final bool needsSemanticsUpdate = _controller.viewId != controller.viewId;
+
+    _controller.removeOnPlatformViewCreatedListener(_onPlatformViewCreated);
+    controller.addOnPlatformViewCreatedListener(_onPlatformViewCreated);
     _controller = controller;
     markNeedsPaint();
     if (needsSemanticsUpdate) {
       markNeedsSemanticsUpdate();
     }
+    _sizePlatformView();
   }
 
   /// {@macro  flutter.rendering.RenderAndroidView.updateGestureRecognizers}
@@ -668,17 +693,108 @@ class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
     return constraints.biggest;
   }
 
+  _PlatformViewState _state = _PlatformViewState.uninitialized;
+
+  // Whether this render object has been disposed.
+  bool _isDisposed = false;
+
+  // The size of the buffer set in the embedding.
+  Size? _currentTextureBufferSize;
+
+  // Clips the [TextureLayer] since the texture layer is only resized when
+  // the new requested size is smaller than the current size.
+  // This clip layer ensures that this render object has the intended size from
+  // a consumer perspective.
+  final LayerHandle<ClipRectLayer> _clipRectLayer = LayerHandle<ClipRectLayer>();
+
+  @override
+  void performResize() {
+    super.performResize();
+    _sizePlatformView();
+  }
+
+  Future<void> _sizePlatformView() async {
+    if (_controller is! TextureAndroidViewController) {
+      // This isn't relevant when a PlatformViewLayer is used because the
+      // size of the platform view is set by the external view embedder via JNI in the engine.
+      // This case should be ultimately removed since the goal is to only have
+      // an instance of TextureAndroidViewController.
+      return;
+    }
+
+    if (_state == _PlatformViewState.resizing || size.isEmpty) {
+      return;
+    }
+
+    _state = _PlatformViewState.resizing;
+
+    markNeedsPaint();
+
+    Size targetSize;
+    do {
+      targetSize = size;
+      await _controller.setSize(targetSize);
+      // The buffer size is only resized if the current buffer size is smaller
+      // than the new size of this render object.
+      // TODO(egarciad): get this value from the platform channel response.
+      if (_currentTextureBufferSize == null ||
+          targetSize.width > _currentTextureBufferSize!.width ||
+          targetSize.height > _currentTextureBufferSize!.height) {
+        _currentTextureBufferSize = targetSize;
+      }
+      // We've resized the platform view to targetSize, but it is possible that
+      // while we were resizing the render object's size was changed again.
+      // In that case we will resize the platform view again.
+    } while (size != targetSize);
+
+    _state = _PlatformViewState.ready;
+    markNeedsPaint();
+  }
+
+  void _onPlatformViewCreated(int id) {
+    markNeedsSemanticsUpdate();
+  }
+
   @override
   void paint(PaintingContext context, Offset offset) {
-    assert(_controller.viewId != null);
-    context.addLayer(PlatformViewLayer(
-      rect: offset & size,
-      viewId: _controller.viewId,
+    if (_useTextureLayer()) {
+      _clipRectLayer.layer = context.pushClipRect(
+        true,
+        offset,
+        offset & size,
+        _paintTexture,
+        oldLayer: _clipRectLayer.layer,
+      );
+    } else {
+      assert(_controller.viewId != null);
+      context.addLayer(PlatformViewLayer(
+        rect: offset & size,
+        viewId: _controller.viewId,
+      ));
+    }
+  }
+
+  void _paintTexture(PaintingContext context, Offset offset) {
+    final int? textureId = (_controller as TextureAndroidViewController).textureId;
+    if (textureId == null) {
+      return;
+    }
+    context.addLayer(TextureLayer(
+      rect: offset & _currentTextureBufferSize!,
+      textureId: textureId,
     ));
   }
 
   @override
-  void describeSemanticsConfiguration (SemanticsConfiguration config) {
+  void dispose() {
+    _isDisposed = true;
+    _clipRectLayer.layer = null;
+    super.dispose();
+  }
+
+
+  @override
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
     assert(_controller.viewId != null);
     config.isSemanticBoundary = true;

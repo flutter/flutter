@@ -43,6 +43,18 @@ class FakePlatformViewController extends PlatformViewController {
   Future<void> clearFocus() async {
     focusCleared = true;
   }
+
+  @override
+  Future<void> setSize(Size size) async {}
+
+  @override 
+  Future<void> setOffset(Offset off) async {}
+
+  @override
+  void addOnPlatformViewCreatedListener(PlatformViewCreatedCallback listener) {}
+
+  @override
+  void removeOnPlatformViewCreatedListener(PlatformViewCreatedCallback listener) {}
 }
 
 class FakeAndroidViewController implements AndroidViewController {
@@ -84,6 +96,11 @@ class FakeAndroidViewController implements AndroidViewController {
 
   @override
   Future<void> setSize(Size size) {
+    throw UnimplementedError();
+  }
+
+  @override 
+  Future<void> setOffset(Offset off) {
     throw UnimplementedError();
   }
 
