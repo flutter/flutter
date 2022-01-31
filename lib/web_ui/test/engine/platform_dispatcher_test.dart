@@ -111,5 +111,39 @@ void testMain() {
       root.style.fontSize = null;
       expect(findBrowserTextScaleFactor(), 1.0);
     });
+
+    test(
+        'calls onTextScaleFactorChanged when the <html> element\'s font-size changes',
+        () async {
+      final html.Element root = html.document.documentElement!;
+      final String oldFontSize = root.style.fontSize;
+      final ui.VoidCallback? oldCallback = ui.PlatformDispatcher.instance.onTextScaleFactorChanged;
+
+      addTearDown(() {
+        root.style.fontSize = oldFontSize;
+        ui.PlatformDispatcher.instance.onTextScaleFactorChanged = oldCallback;
+      });
+
+      root.style.fontSize = '16px';
+
+      bool isCalled = false;
+      ui.PlatformDispatcher.instance.onTextScaleFactorChanged = () {
+        isCalled = true;
+      };
+
+      root.style.fontSize = '20px';
+      await Future<void>.delayed(Duration.zero);
+      expect(root.style.fontSize, '20px');
+      expect(isCalled, isTrue);
+      expect(ui.PlatformDispatcher.instance.textScaleFactor, findBrowserTextScaleFactor());
+
+      isCalled = false;
+
+      root.style.fontSize = '16px';
+      await Future<void>.delayed(Duration.zero);
+      expect(root.style.fontSize, '16px');
+      expect(isCalled, isTrue);
+      expect(ui.PlatformDispatcher.instance.textScaleFactor, findBrowserTextScaleFactor());
+    });
   });
 }
