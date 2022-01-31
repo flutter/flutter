@@ -792,6 +792,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
         SystemChannels.navigation,
         (MethodCall methodCall) async {
           log.add(methodCall);
+	  return null;
         }
       );
     final RouteInformationProvider provider = PlatformRouteInformationProvider(
@@ -801,14 +802,14 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
     );
 
     log.clear();
-    provider.routerReportsNewRouteInformation(const RouteInformation(location: 'a', state: true), type: RouteInformationReportingType.none);
+    provider.routerReportsNewRouteInformation(const RouteInformation(location: 'a', state: true));
     // Implicit reporting pushes new history entry if the location changes.
     expect(log, <Object>[
       isMethodCall('selectMultiEntryHistory', arguments: null),
       isMethodCall('routeInformationUpdated', arguments: <String, dynamic>{ 'location': 'a', 'state': true, 'replace': false }),
     ]);
     log.clear();
-    provider.routerReportsNewRouteInformation(const RouteInformation(location: 'a', state: false), type: RouteInformationReportingType.none);
+    provider.routerReportsNewRouteInformation(const RouteInformation(location: 'a', state: false));
     // Since the location is the same, the provider sends replaces message.
     expect(log, <Object>[
       isMethodCall('selectMultiEntryHistory', arguments: null),
@@ -1391,7 +1392,7 @@ class SimpleRouteInformationProvider extends RouteInformationProvider with Chang
   }
 
   @override
-  void routerReportsNewRouteInformation(RouteInformation routeInformation, {required RouteInformationReportingType type}) {
+  void routerReportsNewRouteInformation(RouteInformation routeInformation, {RouteInformationReportingType type = RouteInformationReportingType.none}) {
     _value = routeInformation;
     onRouterReport?.call(routeInformation, type);
   }

@@ -45,7 +45,7 @@ do
     fi
     # Timeout if expected log not found
     current_time=$(date +%s)
-    if [[ $((current_time - run_start_time_seconds)) -ge 150 ]]; then
+    if [[ $((current_time - run_start_time_seconds)) -ge 300 ]]; then
         echo "Failure: Timed out, deferred component did not load."
         pkill -P $$
         exit 1

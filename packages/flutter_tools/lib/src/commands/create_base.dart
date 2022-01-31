@@ -5,6 +5,7 @@
 // @dart = 2.8
 
 import 'package:meta/meta.dart';
+import 'package:pub_semver/pub_semver.dart';
 import 'package:uuid/uuid.dart';
 
 import '../android/android.dart' as android_common;
@@ -110,7 +111,7 @@ abstract class CreateBase extends FlutterCommand {
       abbr: 'i',
       defaultsTo: 'swift',
       allowed: <String>['objc', 'swift'],
-      help: 'The language to use for iOS-specific code, either ObjectiveC (legacy) or Swift (recommended).'
+      help: 'The language to use for iOS-specific code, either Objective-C (legacy) or Swift (recommended).'
     );
     argParser.addOption(
       'android-language',
@@ -336,7 +337,11 @@ abstract class CreateBase extends FlutterCommand {
     String iosLanguage,
     String flutterRoot,
     String dartSdkVersionBounds,
-    bool withPluginHook = false,
+    String agpVersion,
+    String kotlinVersion,
+    String gradleVersion,
+    bool withPlatformChannelPluginHook = false,
+    bool withFfiPluginHook = false,
     bool ios = false,
     bool android = false,
     bool web = false,
@@ -363,6 +368,12 @@ abstract class CreateBase extends FlutterCommand {
     // https://developer.gnome.org/gio/stable/GApplication.html#g-application-id-is-valid
     final String linuxIdentifier = androidIdentifier;
 
+    // TODO(dacoharkes): Replace with hardcoded version in template when Flutter 2.11 is released.
+    final Version ffiPluginStableRelease = Version(2, 11, 0);
+    final String minFrameworkVersionFfiPlugin = Version.parse(globals.flutterVersion.frameworkVersion) < ffiPluginStableRelease
+        ? globals.flutterVersion.frameworkVersion
+        : ffiPluginStableRelease.toString();
+
     return <String, Object>{
       'organization': organization,
       'projectName': projectName,
@@ -381,13 +392,16 @@ abstract class CreateBase extends FlutterCommand {
       'pluginClassCapitalSnakeCase': pluginClassCapitalSnakeCase,
       'pluginDartClass': pluginDartClass,
       'pluginProjectUUID': const Uuid().v4().toUpperCase(),
-      'withPluginHook': withPluginHook,
+      'withFfiPluginHook': withFfiPluginHook,
+      'withPlatformChannelPluginHook': withPlatformChannelPluginHook,
+      'withPluginHook': withFfiPluginHook || withPlatformChannelPluginHook,
       'androidLanguage': androidLanguage,
       'iosLanguage': iosLanguage,
       'hasIosDevelopmentTeam': iosDevelopmentTeam != null && iosDevelopmentTeam.isNotEmpty,
       'iosDevelopmentTeam': iosDevelopmentTeam ?? '',
       'flutterRevision': globals.flutterVersion.frameworkRevision,
       'flutterChannel': globals.flutterVersion.channel,
+      'minFrameworkVersionFfiPlugin': minFrameworkVersionFfiPlugin,
       'ios': ios,
       'android': android,
       'web': web,
@@ -398,6 +412,9 @@ abstract class CreateBase extends FlutterCommand {
       'year': DateTime.now().year,
       'dartSdkVersionBounds': dartSdkVersionBounds,
       'implementationTests': implementationTests,
+      'agpVersion': agpVersion,
+      'kotlinVersion': kotlinVersion,
+      'gradleVersion': gradleVersion,
     };
   }
 
@@ -462,7 +479,7 @@ abstract class CreateBase extends FlutterCommand {
   /// If `overwrite` is true, overwrites existing files, `overwrite` defaults to `false`.
   @protected
   Future<int> generateApp(
-    String templateName,
+    List<String> templateNames,
     Directory directory,
     Map<String, Object> templateContext, {
     bool overwrite = false,
@@ -471,7 +488,7 @@ abstract class CreateBase extends FlutterCommand {
   }) async {
     int generatedCount = 0;
     generatedCount += await renderMerged(
-      <String>[templateName, 'app_shared'],
+      <String>[...templateNames, 'app_shared'],
       directory,
       templateContext,
       overwrite: overwrite,

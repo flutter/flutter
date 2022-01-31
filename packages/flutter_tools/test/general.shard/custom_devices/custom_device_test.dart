@@ -587,6 +587,54 @@ void main() {
 
     expect(await device.targetPlatform, TargetPlatform.linux_x64);
   });
+
+  testWithoutContext('CustomDeviceLogReader cancels subscriptions before closing logLines stream', () async {
+    final CustomDeviceLogReader logReader = CustomDeviceLogReader('testname');
+
+    final Iterable<List<int>> lines = Iterable<List<int>>.generate(5, (int _) => utf8.encode('test'));
+
+    logReader.listenToProcessOutput(
+      FakeProcess(
+        exitCode: Future<int>.value(0),
+        stdout: Stream<List<int>>.fromIterable(lines),
+        stderr: Stream<List<int>>.fromIterable(lines),
+      ),
+    );
+
+    final List<MyFakeStreamSubscription<String>> subscriptions = <MyFakeStreamSubscription<String>>[];
+    bool logLinesStreamDone = false;
+    logReader.logLines.listen((_) {}, onDone: () {
+      expect(subscriptions, everyElement((MyFakeStreamSubscription<String> s) => s.canceled));
+      logLinesStreamDone = true;
+    });
+
+    logReader.subscriptions.replaceRange(
+      0,
+      logReader.subscriptions.length,
+      logReader.subscriptions.map(
+        (StreamSubscription<String> e) => MyFakeStreamSubscription<String>(e)
+      ),
+    );
+
+    subscriptions.addAll(logReader.subscriptions.cast());
+
+    await logReader.dispose();
+
+    expect(logLinesStreamDone, true);
+  });
+}
+
+class MyFakeStreamSubscription<T> extends Fake implements StreamSubscription<T> {
+  MyFakeStreamSubscription(this.parent);
+
+  StreamSubscription<T> parent;
+  bool canceled = false;
+
+  @override
+  Future<void> cancel() {
+    canceled = true;
+    return parent.cancel();
+  }
 }
 
 class FakeBundleBuilder extends Fake implements BundleBuilder {

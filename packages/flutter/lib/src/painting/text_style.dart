@@ -1378,7 +1378,7 @@ class TextStyle with Diagnosticable {
     if (decoration != null || decorationColor != null || decorationStyle != null || decorationThickness != null) {
       final List<String> decorationDescription = <String>[];
       if (decorationStyle != null)
-        decorationDescription.add(describeEnum(decorationStyle!));
+        decorationDescription.add(decorationStyle!.name);
 
       // Hide decorationColor from the default text view as it is shown in the
       // terse decoration summary as well.

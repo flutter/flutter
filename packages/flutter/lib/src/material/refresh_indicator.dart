@@ -60,6 +60,8 @@ enum RefreshIndicatorTriggerMode {
 
 /// A widget that supports the Material "swipe to refresh" idiom.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=ORApMlzwMdM}
+///
 /// When the child's [Scrollable] descendant overscrolls, an animated circular
 /// progress indicator is faded into view. When the scroll ends, if the
 /// indicator has been dragged far enough for it to become completely opaque,
@@ -68,6 +70,12 @@ enum RefreshIndicatorTriggerMode {
 /// indicator disappears after the callback's [Future] has completed.
 ///
 /// The trigger mode is configured by [RefreshIndicator.triggerMode].
+///
+/// {@tool dartpad}
+/// This example shows how [RefreshIndicator] can be triggered in different ways.
+///
+/// ** See code in examples/api/lib/material/refresh_indicator/refresh_indicator.0.dart **
+/// {@end-tool}
 ///
 /// ## Troubleshooting
 ///

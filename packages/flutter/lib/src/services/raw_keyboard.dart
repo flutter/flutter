@@ -280,11 +280,15 @@ abstract class RawKeyEvent with Diagnosticable {
   const RawKeyEvent({
     required this.data,
     this.character,
+    this.repeat = false,
   });
 
   /// Creates a concrete [RawKeyEvent] class from a message in the form received
   /// on the [SystemChannels.keyEvent] channel.
-  factory RawKeyEvent.fromMessage(Map<String, dynamic> message) {
+  ///
+  /// [RawKeyEvent.repeat] will be derived from the current keyboard state,
+  /// instead of using the message information.
+  factory RawKeyEvent.fromMessage(Map<String, Object?> message) {
     String? character;
     RawKeyEventData _dataFromWeb() {
       final String? key = message['key'] as String?;
@@ -296,6 +300,7 @@ abstract class RawKeyEvent with Diagnosticable {
         key: key ?? '',
         location: message['location'] as int? ?? 0,
         metaState: message['metaState'] as int? ?? 0,
+        keyCode: message['keyCode'] as int? ?? 0,
       );
     }
 
@@ -303,7 +308,7 @@ abstract class RawKeyEvent with Diagnosticable {
     if (kIsWeb) {
       data = _dataFromWeb();
     } else {
-      final String keymap = message['keymap'] as String;
+      final String keymap = message['keymap']! as String;
       switch (keymap) {
         case 'android':
           data = RawKeyEventDataAndroid(
@@ -388,10 +393,11 @@ abstract class RawKeyEvent with Diagnosticable {
           throw FlutterError('Unknown keymap for key events: $keymap');
       }
     }
-    final String type = message['type'] as String;
+    final bool repeat = RawKeyboard.instance.physicalKeysPressed.contains(data.physicalKey);
+    final String type = message['type']! as String;
     switch (type) {
       case 'keydown':
-        return RawKeyDownEvent(data: data, character: character);
+        return RawKeyDownEvent(data: data, character: character, repeat: repeat);
       case 'keyup':
         return RawKeyUpEvent(data: data);
       default:
@@ -504,6 +510,15 @@ abstract class RawKeyEvent with Diagnosticable {
   /// input.
   final String? character;
 
+  /// Whether this is a repeated down event.
+  ///
+  /// When a key is held down, the systems usually fire a down event and then
+  /// a series of repeated down events. The [repeat] is false for the
+  /// first event and true for the following events.
+  ///
+  /// The [repeat] attribute is always false for [RawKeyUpEvent]s.
+  final bool repeat;
+
   /// Platform-specific information about the key event.
   final RawKeyEventData data;
 
@@ -512,6 +527,8 @@ abstract class RawKeyEvent with Diagnosticable {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<LogicalKeyboardKey>('logicalKey', logicalKey));
     properties.add(DiagnosticsProperty<PhysicalKeyboardKey>('physicalKey', physicalKey));
+    if (this is RawKeyDownEvent)
+      properties.add(DiagnosticsProperty<bool>('repeat', repeat));
   }
 }
 
@@ -525,7 +542,8 @@ class RawKeyDownEvent extends RawKeyEvent {
   const RawKeyDownEvent({
     required RawKeyEventData data,
     String? character,
-  }) : super(data: data, character: character);
+    bool repeat = false,
+  }) : super(data: data, character: character, repeat: repeat);
 }
 
 /// The user has released a key on the keyboard.
@@ -538,7 +556,7 @@ class RawKeyUpEvent extends RawKeyEvent {
   const RawKeyUpEvent({
     required RawKeyEventData data,
     String? character,
-  }) : super(data: data, character: character);
+  }) : super(data: data, character: character, repeat: false);
 }
 
 /// A callback type used by [RawKeyboard.keyEventHandler] to send key events to
@@ -632,7 +650,11 @@ class RawKeyboard {
     _cachedKeyEventHandler = handler;
     _cachedKeyMessageHandler = handler == null ?
       null :
-      (KeyMessage message) => handler(message.rawEvent);
+      (KeyMessage message) {
+        if (message.rawEvent != null)
+          return handler(message.rawEvent!);
+        return false;
+      };
     ServicesBinding.instance!.keyEventManager.keyMessageHandler = _cachedKeyMessageHandler;
   }
 
@@ -672,7 +694,7 @@ class RawKeyboard {
       '${event.data}',
     );
     // Send the event to passive listeners.
-    for (final ValueChanged<RawKeyEvent> listener in List<ValueChanged<RawKeyEvent>>.from(_listeners)) {
+    for (final ValueChanged<RawKeyEvent> listener in List<ValueChanged<RawKeyEvent>>.of(_listeners)) {
       try {
         if (_listeners.contains(listener)) {
           listener(event);
@@ -680,9 +702,9 @@ class RawKeyboard {
       } catch (exception, stack) {
         InformationCollector? collector;
         assert(() {
-          collector = () sync* {
-            yield DiagnosticsProperty<RawKeyEvent>('Event', event);
-          };
+          collector = () => <DiagnosticsNode>[
+            DiagnosticsProperty<RawKeyEvent>('Event', event),
+          ];
           return true;
         }());
         FlutterError.reportError(FlutterErrorDetails(

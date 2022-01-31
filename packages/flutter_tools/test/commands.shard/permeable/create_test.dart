@@ -1366,84 +1366,6 @@ void main() {
     ProcessManager: () => fakeProcessManager,
   });
 
-  testUsingContext('UIViewControllerBasedStatusBarAppearance is YES for objc iOS project.', () async {
-    Cache.flutterRoot = '../..';
-
-    final CreateCommand command = CreateCommand();
-    final CommandRunner<void> runner = createTestCommandRunner(command);
-
-    await runner.run(<String>['create', '--template=app', '--no-pub', '--org', 'com.foo.bar','--ios-language=objc', '--project-name=my_project', projectDir.path]);
-
-    final String plistPath = globals.fs.path.join('ios', 'Runner', 'Info.plist');
-    final File plistFile = globals.fs.file(globals.fs.path.join(projectDir.path, plistPath));
-    expect(plistFile, exists);
-    final bool viewControllerBasedStatusBarAppearance = _getBooleanValueFromPlist(plistFile: plistFile, key: 'UIViewControllerBasedStatusBarAppearance');
-    expect(viewControllerBasedStatusBarAppearance, true);
-  });
-
-  testUsingContext('UIViewControllerBasedStatusBarAppearance is YES for objc swift project.', () async {
-    Cache.flutterRoot = '../..';
-
-    final CreateCommand command = CreateCommand();
-    final CommandRunner<void> runner = createTestCommandRunner(command);
-
-    await runner.run(<String>['create', '--template=app', '--no-pub', '--org', 'com.foo.bar','--ios-language=swift', '--project-name=my_project', projectDir.path]);
-
-    final String plistPath = globals.fs.path.join('ios', 'Runner', 'Info.plist');
-    final File plistFile = globals.fs.file(globals.fs.path.join(projectDir.path, plistPath));
-    expect(plistFile, exists);
-    final bool viewControllerBasedStatusBarAppearance = _getBooleanValueFromPlist(plistFile: plistFile, key: 'UIViewControllerBasedStatusBarAppearance');
-    expect(viewControllerBasedStatusBarAppearance, true);
-  });
-
-  testUsingContext('UIViewControllerBasedStatusBarAppearance is YES for objc iOS module.', () async {
-    Cache.flutterRoot = '../..';
-
-    final CreateCommand command = CreateCommand();
-    final CommandRunner<void> runner = createTestCommandRunner(command);
-
-    await runner.run(<String>['create', '--template=module', '--org', 'com.foo.bar','--ios-language=objc', '--project-name=my_project', projectDir.path]);
-
-    final String plistPath = globals.fs.path.join('.ios', 'Runner', 'Info.plist');
-    final File plistFile = globals.fs.file(globals.fs.path.join(projectDir.path, plistPath));
-    expect(plistFile, exists);
-    final bool viewControllerBasedStatusBarAppearance = _getBooleanValueFromPlist(plistFile: plistFile, key: 'UIViewControllerBasedStatusBarAppearance');
-    expect(viewControllerBasedStatusBarAppearance, true);
-  }, overrides: <Type, Generator>{
-    Pub: () => Pub(
-      fileSystem: globals.fs,
-      logger: globals.logger,
-      processManager: globals.processManager,
-      usage: globals.flutterUsage,
-      botDetector: globals.botDetector,
-      platform: globals.platform,
-    ),
-  });
-
-  testUsingContext('UIViewControllerBasedStatusBarAppearance is YES for swift iOS module.', () async {
-    Cache.flutterRoot = '../..';
-
-    final CreateCommand command = CreateCommand();
-    final CommandRunner<void> runner = createTestCommandRunner(command);
-
-    await runner.run(<String>['create', '--template=module', '--org', 'com.foo.bar','--ios-language=swift', '--project-name=my_project', projectDir.path]);
-
-    final String plistPath = globals.fs.path.join('.ios', 'Runner', 'Info.plist');
-    final File plistFile = globals.fs.file(globals.fs.path.join(projectDir.path, plistPath));
-    expect(plistFile, exists);
-    final bool viewControllerBasedStatusBarAppearance = _getBooleanValueFromPlist(plistFile: plistFile, key: 'UIViewControllerBasedStatusBarAppearance');
-    expect(viewControllerBasedStatusBarAppearance, true);
-  }, overrides: <Type, Generator>{
-    Pub: () => Pub(
-      fileSystem: globals.fs,
-      logger: globals.logger,
-      processManager: globals.processManager,
-      usage: globals.flutterUsage,
-      botDetector: globals.botDetector,
-      platform: globals.platform,
-    ),
-  });
-
   testUsingContext('display name is Title Case for objc iOS project.', () async {
     Cache.flutterRoot = '../..';
 
@@ -2570,6 +2492,7 @@ void main() {
     final String buildContent = await globals.fs.file('${projectDir.path}/android/app/build.gradle').readAsString();
 
     expect(buildContent.contains('compileSdkVersion flutter.compileSdkVersion'), true);
+    expect(buildContent.contains('ndkVersion flutter.ndkVersion'), true);
     expect(buildContent.contains('targetSdkVersion flutter.targetSdkVersion'), true);
   });
 
@@ -2839,6 +2762,104 @@ void main() {
       platform: globals.platform,
     ),
   });
+
+  testUsingContext('create an FFI plugin with ios, then add macos', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    await runner.run(<String>['create', '--no-pub', '--template=plugin_ffi', '--platform=ios', projectDir.path]);
+    expect(projectDir.childDirectory('src'), exists);
+    expect(projectDir.childDirectory('ios'), exists);
+    expect(projectDir.childDirectory('example').childDirectory('ios'), exists);
+    validatePubspecForPlugin(
+      projectDir: projectDir.absolute.path,
+      expectedPlatforms: const <String>[
+        'ios',
+      ],
+      ffiPlugin: true,
+      unexpectedPlatforms: <String>['some_platform'],
+    );
+
+    await runner.run(<String>['create', '--no-pub', '--template=plugin_ffi', '--platform=macos', projectDir.path]);
+    expect(projectDir.childDirectory('macos'), exists);
+    expect(
+        projectDir.childDirectory('example').childDirectory('macos'), exists);
+    expect(projectDir.childDirectory('ios'), exists);
+    expect(projectDir.childDirectory('example').childDirectory('ios'), exists);
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+  });
+
+  testUsingContext('FFI plugins error android language', () async {
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    final List<String> args = <String>[
+      'create',
+      '--no-pub',
+      '--template=plugin_ffi',
+      '-a',
+      'kotlin',
+      '--platforms=android',
+      projectDir.path,
+    ];
+
+    await expectLater(
+      runner.run(args),
+      throwsToolExit(message: 'The "android-language" option is not supported with the plugin_ffi template: the language will always be C or C++.'),
+    );
+  });
+
+  testUsingContext('FFI plugins error ios language', () async {
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    final List<String> args = <String>[
+      'create',
+      '--no-pub',
+      '--template=plugin_ffi',
+      '--ios-language',
+      'swift',
+      '--platforms=ios',
+      projectDir.path,
+    ];
+
+    await expectLater(
+      runner.run(args),
+      throwsToolExit(message: 'The "ios-language" option is not supported with the plugin_ffi template: the language will always be C or C++.'),
+    );
+  });
+
+  testUsingContext('FFI plugins error web platform', () async {
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    final List<String> args = <String>[
+      'create',
+      '--no-pub',
+      '--template=plugin_ffi',
+      '--platforms=web',
+      projectDir.path,
+    ];
+
+    await expectLater(
+      runner.run(args),
+      throwsToolExit(message: 'The web platform is not supported in plugin_ffi template.'),
+    );
+  });
+
+  testUsingContext('should show warning when disabled platforms are selected while creating an FFI plugin', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', '--template=plugin_ffi', '--platforms=android,ios,windows,macos,linux', projectDir.path]);
+    await runner.run(<String>['create', '--no-pub', '--template=plugin_ffi', projectDir.path]);
+    expect(logger.statusText, contains(_kDisabledPlatformRequestedMessage));
+
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(),
+    Logger: () => logger,
+  });
 }
 
 Future<void> _createProject(
@@ -3053,11 +3074,4 @@ String _getStringValueFromPlist({File plistFile, String key}) {
   final int keyIndex = plist.indexOf('<key>$key</key>');
   assert(keyIndex > 0);
   return plist[keyIndex+1].replaceAll('<string>', '').replaceAll('</string>', '');
-}
-
-bool _getBooleanValueFromPlist({File plistFile, String key}) {
-  final List<String> plist = plistFile.readAsLinesSync().map((String line) => line.trim()).toList();
-  final int keyIndex = plist.indexOf('<key>$key</key>');
-  assert(keyIndex > 0);
-  return plist[keyIndex+1].replaceAll('<', '').replaceAll('/>', '') == 'true';
 }

@@ -47,6 +47,7 @@ const Set<String> kCorePackageAllowList = <String>{
   'js',
   'logging',
   'matcher',
+  'material_color_utilities',
   'meta',
   'mime',
   'node_preamble',

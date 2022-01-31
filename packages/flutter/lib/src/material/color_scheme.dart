@@ -4,19 +4,51 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
+import 'package:material_color_utilities/material_color_utilities.dart';
 
 import 'colors.dart';
 import 'theme_data.dart';
 
-/// A set of colors based on the
+/// A set of 25 colors based on the
 /// [Material spec](https://m3.material.io/styles/color/the-color-system/color-roles)
 /// that can be used to configure the color properties of most components.
 ///
-/// The [Theme] has a color scheme, [ThemeData.colorScheme], which is constructed
-/// with [ColorScheme.fromSwatch].
+/// The main accent color groups in the scheme are [primary], [secondary],
+/// and [tertiary].
+///
+/// * Primary colors are used for key components across the UI, such as the FAB,
+///   prominent buttons, and active states.
+///
+/// * Secondary colors are used for less prominent components in the UI, such as
+///   filter chips, while expanding the opportunity for color expression.
+///
+/// * Tertiary colors are used for contrasting accents that can be used to
+///   balance primary and secondary colors or bring heightened attention to
+///   an element, such as an input field. The tertiary colors are left
+///   for makers to use at their discretion and are intended to support
+///   broader color expression in products.
+///
+/// The remaining colors of the scheme are comprised of neutral colors used for
+/// backgrounds and surfaces, as well as specific colors for errors, dividers
+/// and shadows.
+///
+/// Many of the colors have matching 'on' colors, which are used for drawing
+/// content on top of the matching color. For example, if something is using
+/// [primary] for a background color, [onPrimary] would be used to paint text
+/// and icons on top of it. For this reason, the 'on' colors should have a
+/// contrast ratio with their matching colors of at least 4.5:1 in order to
+/// be readable.
+///
+/// The [Theme] has a color scheme, [ThemeData.colorScheme], which can either be
+/// passed in as a parameter to the constructor or by using 'brightness' and
+/// 'colorSchemeSeed' parameters (which are used to generate a scheme with
+/// [ColorScheme.fromSeed]).
 @immutable
 class ColorScheme with Diagnosticable {
-  /// Create a ColorScheme instance.
+  /// Create a ColorScheme instance from the given colors.
+  ///
+  /// [ColorScheme.fromSeed] can be used as a simpler way to create a full
+  /// color scheme derived from a single seed color.
   ///
   /// For the color parameters that are nullable, it is still recommended
   /// that applications provide values for them. They are only nullable due
@@ -24,9 +56,25 @@ class ColorScheme with Diagnosticable {
   ///
   /// If a color is not provided, the closest fallback color from the given
   /// colors will be used for it (e.g. [primaryContainer] will default
-  /// to [primary]). Material 3 makes use of these colors for many component
-  /// defaults, so for the best results the application should supply colors
-  /// for all the parameters.
+  /// to [primary]). Material Design 3 makes use of these colors for many
+  /// component defaults, so for the best results the application should
+  /// supply colors for all the parameters. An easy way to ensure this is to
+  /// use [ColorScheme.fromSeed] to generate a full set of colors.
+  ///
+  /// During the migration to Material Design 3, if an app's
+  /// [ThemeData.useMaterial3] is false, then components will only
+  /// use the following colors for defaults:
+  ///
+  /// * [primary]
+  /// * [onPrimary]
+  /// * [secondary]
+  /// * [onSecondary]
+  /// * [error]
+  /// * [onError]
+  /// * [background]
+  /// * [onBackground]
+  /// * [surface]
+  /// * [onSurface]
   const ColorScheme({
     required this.brightness,
     required this.primary,
@@ -96,6 +144,100 @@ class ColorScheme with Diagnosticable {
        _inversePrimary = inversePrimary,
        _primaryVariant = primaryVariant,
        _secondaryVariant = secondaryVariant;
+
+  /// Generate a [ColorScheme] derived from the given `seedColor`.
+  ///
+  /// Using the seedColor as a starting point, a set of tonal palettes are
+  /// constructed. These tonal palettes are based on the Material 3 Color
+  /// system and provide all the needed colors for a [ColorScheme]. These
+  /// colors are designed to work well together and meet contrast
+  /// requirements for accessibility.
+  ///
+  /// If any of the optional color parameters are non-null they will be
+  /// used in place of the generated colors for that field in the resulting
+  /// color scheme. This allows apps to override specific colors for their
+  /// needs.
+  ///
+  /// Given the nature of the algorithm, the seedColor may not wind up as
+  /// one of the ColorScheme colors.
+  ///
+  /// See also:
+  ///
+  ///  * <https://m3.material.io/styles/color/the-color-system/color-roles>, the
+  ///    Material 3 Color system specification.
+  ///  * <https://pub.dev/packages/material_color_utilities>, the package
+  ///    used to generate the tonal palettes needed for the scheme.
+  factory ColorScheme.fromSeed({
+    required Color seedColor,
+    Brightness brightness = Brightness.light,
+    Color? primary,
+    Color? onPrimary,
+    Color? primaryContainer,
+    Color? onPrimaryContainer,
+    Color? secondary,
+    Color? onSecondary,
+    Color? secondaryContainer,
+    Color? onSecondaryContainer,
+    Color? tertiary,
+    Color? onTertiary,
+    Color? tertiaryContainer,
+    Color? onTertiaryContainer,
+    Color? error,
+    Color? onError,
+    Color? errorContainer,
+    Color? onErrorContainer,
+    Color? outline,
+    Color? background,
+    Color? onBackground,
+    Color? surface,
+    Color? onSurface,
+    Color? surfaceVariant,
+    Color? onSurfaceVariant,
+    Color? inverseSurface,
+    Color? onInverseSurface,
+    Color? inversePrimary,
+    Color? shadow,
+  }) {
+    final Scheme scheme;
+    switch (brightness) {
+      case Brightness.light:
+        scheme = Scheme.light(seedColor.value);
+        break;
+      case Brightness.dark:
+        scheme = Scheme.dark(seedColor.value);
+        break;
+    }
+    return ColorScheme(
+      primary: primary ?? Color(scheme.primary),
+      onPrimary: onPrimary ?? Color(scheme.onPrimary),
+      primaryContainer: primaryContainer ?? Color(scheme.primaryContainer),
+      onPrimaryContainer: onPrimaryContainer ?? Color(scheme.onPrimaryContainer),
+      secondary: secondary ?? Color(scheme.secondary),
+      onSecondary: onSecondary ?? Color(scheme.onSecondary),
+      secondaryContainer: secondaryContainer ?? Color(scheme.secondaryContainer),
+      onSecondaryContainer: onSecondaryContainer ?? Color(scheme.onSecondaryContainer),
+      tertiary: tertiary ?? Color(scheme.tertiary),
+      onTertiary: onTertiary ?? Color(scheme.onTertiary),
+      tertiaryContainer: tertiaryContainer ?? Color(scheme.tertiaryContainer),
+      onTertiaryContainer: onTertiaryContainer ?? Color(scheme.onTertiaryContainer),
+      error: error ?? Color(scheme.error),
+      onError: onError ?? Color(scheme.onError),
+      errorContainer: errorContainer ?? Color(scheme.errorContainer),
+      onErrorContainer: onErrorContainer ?? Color(scheme.onErrorContainer),
+      outline: outline ?? Color(scheme.outline),
+      background: background ?? Color(scheme.background),
+      onBackground: onBackground ?? Color(scheme.onBackground),
+      surface: surface ?? Color(scheme.surface),
+      onSurface: onSurface ?? Color(scheme.onSurface),
+      surfaceVariant: surfaceVariant ?? Color(scheme.surfaceVariant),
+      onSurfaceVariant: onSurfaceVariant ?? Color(scheme.onSurfaceVariant),
+      inverseSurface: inverseSurface ?? Color(scheme.inverseSurface),
+      onInverseSurface: onInverseSurface ?? Color(scheme.inverseOnSurface),
+      inversePrimary: inversePrimary ?? Color(scheme.inversePrimary),
+      shadow: shadow ?? Color(scheme.shadow),
+      brightness: brightness,
+    );
+  }
 
   /// Create a ColorScheme based on a purple primary color that matches the
   /// [baseline Material color scheme](https://material.io/design/color/the-color-system.html#color-theme-creation).

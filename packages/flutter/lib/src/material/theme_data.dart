@@ -200,12 +200,29 @@ enum MaterialTapTargetSize {
 class ThemeData with Diagnosticable {
   /// Create a [ThemeData] that's used to configure a [Theme].
   ///
-  /// Typically, only the [brightness], [primaryColor], or [primarySwatch] are
-  /// specified. That pair of values are used to construct the [colorScheme].
-  ///
   /// The [colorScheme] and [textTheme] are used by the Material components to
   /// compute default values for visual properties. The API documentation for
   /// each component widget explains exactly how the defaults are computed.
+  ///
+  /// When providing a [ColorScheme], apps can either provide one directly
+  /// with the [colorScheme] parameter, or have one generated for them by
+  /// using the [colorSchemeSeed] and [brightness] parameters. A generated
+  /// color scheme will be based on the tones of [colorSchemeSeed] and all of
+  /// its contrasting color will meet accessibility guidelines for readability.
+  /// (See [ColorScheme.fromSeed] for more details.)
+  ///
+  /// If the app wants to customize a generated color scheme, it can use
+  /// [ColorScheme.fromSeed] directly and then [ColorScheme.copyWith] on the
+  /// result to override any colors that need to be replaced. The result of
+  /// this can be used as the [colorScheme] directly.
+  ///
+  /// For historical reasons, instead of using a [colorSchemeSeed] or
+  /// [colorScheme], you can provide either a [primaryColor] or [primarySwatch]
+  /// to construct the [colorScheme], but the results will not be as complete
+  /// as when using generation from a seed color.
+  ///
+  /// If [colorSchemeSeed] is non-null then [colorScheme], [primaryColor] and
+  /// [primarySwatch] must all be null.
   ///
   /// The [textTheme] [TextStyle] colors are black if the color scheme's
   /// brightness is [Brightness.light], and white for [Brightness.dark].
@@ -219,6 +236,7 @@ class ThemeData with Diagnosticable {
   ///  * [ThemeData.from], which creates a ThemeData from a [ColorScheme].
   ///  * [ThemeData.light], which creates a light blue theme.
   ///  * [ThemeData.dark], which creates dark theme with a teal secondary [ColorScheme] color.
+  ///  * [ColorScheme.fromSeed], which is used to create a [ColorScheme] from a seed color.
   factory ThemeData({
     // GENERAL CONFIGURATION
     AndroidOverscrollIndicator? androidOverscrollIndicator,
@@ -234,9 +252,10 @@ class ThemeData with Diagnosticable {
     bool? useMaterial3,
     // COLOR
     // [colorScheme] is the preferred way to configure colors. The other color
-    // properties (as well as brightness, primaryColorBrightness, and primarySwatch)
+    // properties (as well as primaryColorBrightness, and primarySwatch)
     // will gradually be phased out, see https://github.com/flutter/flutter/issues/91772.
     ColorScheme? colorScheme,
+    Color? colorSchemeSeed,
     Brightness? brightness,
     MaterialColor? primarySwatch,
     Color? primaryColor,
@@ -368,7 +387,6 @@ class ThemeData with Diagnosticable {
     Brightness? primaryColorBrightness,
   }) {
     // GENERAL CONFIGURATION
-    applyElevationOverlayColor ??= false;
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
     inputDecorationTheme ??= const InputDecorationTheme();
     platform ??= defaultTargetPlatform;
@@ -392,14 +410,41 @@ class ThemeData with Diagnosticable {
 
     // COLOR
     assert(colorScheme?.brightness == null || brightness == null || colorScheme!.brightness == brightness);
-    final Brightness _brightness = brightness ?? colorScheme?.brightness ?? Brightness.light;
-    final bool isDark = _brightness == Brightness.dark;
+    assert(colorSchemeSeed == null || colorScheme == null);
+    assert(colorSchemeSeed == null || primarySwatch == null);
+    assert(colorSchemeSeed == null || primaryColor == null);
+    final Brightness effectiveBrightness = brightness ?? colorScheme?.brightness ?? Brightness.light;
+    final bool isDark = effectiveBrightness == Brightness.dark;
+    if (colorSchemeSeed != null) {
+      colorScheme = ColorScheme.fromSeed(seedColor: colorSchemeSeed, brightness: effectiveBrightness);
+
+      // For surfaces that use primary color in light themes and surface color in dark
+      final Color primarySurfaceColor = isDark ? colorScheme.surface : colorScheme.primary;
+      final Color onPrimarySurfaceColor = isDark ? colorScheme.onSurface : colorScheme.onPrimary;
+
+      // Default some of the color settings to values from the color scheme
+      primaryColor = primarySurfaceColor;
+      primaryColorBrightness = ThemeData.estimateBrightnessForColor(primarySurfaceColor);
+      canvasColor ??= colorScheme.background;
+      accentColor ??= colorScheme.secondary;
+      accentColorBrightness ??= ThemeData.estimateBrightnessForColor(colorScheme.secondary);
+      scaffoldBackgroundColor ??= colorScheme.background;
+      bottomAppBarColor ??= colorScheme.surface;
+      cardColor ??= colorScheme.surface;
+      dividerColor ??= colorScheme.outline;
+      backgroundColor ??= colorScheme.background;
+      dialogBackgroundColor ??= colorScheme.background;
+      indicatorColor ??= onPrimarySurfaceColor;
+      errorColor ??= colorScheme.error;
+      applyElevationOverlayColor ??= isDark;
+    }
+    applyElevationOverlayColor ??= false;
     primarySwatch ??= Colors.blue;
     primaryColor ??= isDark ? Colors.grey[900]! : primarySwatch;
-    final Brightness _primaryColorBrightness = estimateBrightnessForColor(primaryColor);
+    final Brightness estimatedPrimaryColorBrightness = estimateBrightnessForColor(primaryColor);
     primaryColorLight ??= isDark ? Colors.grey[500]! : primarySwatch[100]!;
     primaryColorDark ??= isDark ? Colors.black : primarySwatch[700]!;
-    final bool primaryIsDark = _primaryColorBrightness == Brightness.dark;
+    final bool primaryIsDark = estimatedPrimaryColorBrightness == Brightness.dark;
     toggleableActiveColor ??= isDark ? Colors.tealAccent[200]! : (accentColor ?? primarySwatch[600]!);
     accentColor ??= isDark ? Colors.tealAccent[200]! : primarySwatch[500]!;
     accentColorBrightness ??= estimateBrightnessForColor(accentColor);
@@ -421,7 +466,7 @@ class ThemeData with Diagnosticable {
       cardColor: cardColor,
       backgroundColor: backgroundColor,
       errorColor: errorColor,
-      brightness: _brightness,
+      brightness: effectiveBrightness,
     );
     selectedRowColor ??= Colors.grey[100]!;
     unselectedWidgetColor ??= isDark ? Colors.white70 : Colors.black54;
@@ -472,11 +517,7 @@ class ThemeData with Diagnosticable {
     bottomSheetTheme ??= const BottomSheetThemeData();
     buttonBarTheme ??= const ButtonBarThemeData();
     cardTheme ??= const CardTheme();
-    chipTheme ??= ChipThemeData.fromDefaults(
-      secondaryColor: isDark ? Colors.tealAccent[200]! : primaryColor,
-      brightness: colorScheme.brightness,
-      labelStyle: textTheme.bodyText1!,
-    );
+    chipTheme ??= const ChipThemeData();
     checkboxTheme ??= const CheckboxThemeData();
     dataTableTheme ??= const DataTableThemeData();
     dialogTheme ??= const DialogTheme();
@@ -510,7 +551,7 @@ class ThemeData with Diagnosticable {
     accentIconTheme ??= accentIsDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black);
     buttonColor ??= isDark ? primarySwatch[600]! : Colors.grey[300]!;
     fixTextFieldOutlineLabel ??= true;
-    primaryColorBrightness = _primaryColorBrightness;
+    primaryColorBrightness = estimatedPrimaryColorBrightness;
 
     return ThemeData.raw(
       // GENERAL CONFIGURATION
@@ -1093,10 +1134,6 @@ class ThemeData with Diagnosticable {
   /// start using new colors, typography and other features of Material 3.
   /// If false, they will use the Material 2 look and feel.
   ///
-  /// Currently no components have been migrated to support Material 3.
-  /// As they are updated to include Material 3 support this documentation
-  /// will be modified to indicate exactly what widgets this flag will affect.
-  ///
   /// During the migration to Material 3, turning this on may yield
   /// inconsistent look and feel in your app. Some components will be migrated
   /// before others and typography changes will be coming in stages.
@@ -1106,6 +1143,10 @@ class ThemeData with Diagnosticable {
   /// that change has landed on stable, we will deprecate this flag and remove
   /// all uses of it. Everything will use the Material 3 look and feel at
   /// that point.
+  ///
+  /// Components that have been migrated to Material 3 are:
+  ///
+  ///   * [FloatingActionButton]
   ///
   /// See also:
   ///

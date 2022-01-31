@@ -809,13 +809,13 @@ class _CallbackHookProvider<T> {
         stack: stack,
         library: 'widget library',
         context: ErrorDescription('while invoking the callback for $runtimeType'),
-        informationCollector: () sync* {
-          yield DiagnosticsProperty<_CallbackHookProvider<T>>(
+        informationCollector: () => <DiagnosticsNode>[
+          DiagnosticsProperty<_CallbackHookProvider<T>>(
             'The $runtimeType that invoked the callback was',
             this,
             style: DiagnosticsTreeStyle.errorProperty,
-          );
-        },
+          ),
+        ],
       ));
       return defaultValue;
     }
@@ -1087,12 +1087,12 @@ class _BackButtonListenerState extends State<BackButtonListener> {
 
   @override
   void didUpdateWidget(covariant BackButtonListener oldWidget) {
+    super.didUpdateWidget(oldWidget);
     if (oldWidget.onBackButtonPressed != widget.onBackButtonPressed) {
       dispatcher?.removeCallback(oldWidget.onBackButtonPressed);
       dispatcher?.addCallback(widget.onBackButtonPressed);
       dispatcher?.takePriority();
     }
-    super.didUpdateWidget(oldWidget);
   }
 
   @override
@@ -1326,7 +1326,7 @@ abstract class RouteInformationProvider extends ValueListenable<RouteInformation
   /// For more information on how [Router] determines a navigation event, see
   /// the "URL updates for web applications" section in the [Router]
   /// documentation.
-  void routerReportsNewRouteInformation(RouteInformation routeInformation, {required RouteInformationReportingType type}) {}
+  void routerReportsNewRouteInformation(RouteInformation routeInformation, {RouteInformationReportingType type = RouteInformationReportingType.none}) {}
 }
 
 /// The route information provider that propagates the platform route information changes.
@@ -1349,7 +1349,7 @@ class PlatformRouteInformationProvider extends RouteInformationProvider with Wid
   }) : _value = initialRouteInformation;
 
   @override
-  void routerReportsNewRouteInformation(RouteInformation routeInformation, {required RouteInformationReportingType type}) {
+  void routerReportsNewRouteInformation(RouteInformation routeInformation, {RouteInformationReportingType type = RouteInformationReportingType.none}) {
     final bool replace =
       type == RouteInformationReportingType.neglect ||
       (type == RouteInformationReportingType.none &&

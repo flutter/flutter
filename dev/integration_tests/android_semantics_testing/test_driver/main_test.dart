@@ -11,6 +11,14 @@ import 'package:path/path.dart' as path;
 import 'package:pub_semver/pub_semver.dart';
 import 'package:test/test.dart' hide isInstanceOf;
 
+// The accessibility focus actions are added when a semantics node receives or
+// lose accessibility focus. This test ignores these actions since it is hard to
+// predict which node has the accessibility focus after a screen changes.
+const List<AndroidSemanticsAction> ignoredAccessibilityFocusActions = <AndroidSemanticsAction>[
+  AndroidSemanticsAction.accessibilityFocus,
+  AndroidSemanticsAction.clearAccessibilityFocus,
+];
+
 String adbPath() {
   final String androidHome = io.Platform.environment['ANDROID_HOME'] ?? io.Platform.environment['ANDROID_SDK_ROOT'];
   if (androidHome == null) {
@@ -27,11 +35,6 @@ void main() {
       final int id = await driver.getSemanticsId(finder);
       final String data = await driver.requestData('getSemanticsNode#$id');
       return AndroidSemanticsNode.deserialize(data);
-    }
-
-    Future<void> sendSemanticsFocus(SerializableFinder finder) async {
-      final int id = await driver.getSemanticsId(finder);
-      await driver.requestData('sendSemanticsFocus#$id');
     }
 
     // The version of TalkBack running on the device.
@@ -153,10 +156,6 @@ void main() {
           matching: find.byType('Semantics'),
           firstMatchOnly: true,
         );
-        // Make sure the focus is on the back button.
-        await sendSemanticsFocus(find.byValueKey(backButtonKeyValue));
-        await Future<void>.delayed(const Duration(milliseconds: 500));
-
         expect(
           await getSemantics(normalTextField),
           hasAndroidSemantics(
@@ -166,9 +165,10 @@ void main() {
             isFocused: false,
             isPassword: false,
             actions: <AndroidSemanticsAction>[
-              AndroidSemanticsAction.accessibilityFocus,
               AndroidSemanticsAction.click,
             ],
+            // We can't predict the a11y focus when the screen changes.
+            ignoredActions: ignoredAccessibilityFocusActions
           ),
         );
 

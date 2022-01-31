@@ -103,6 +103,20 @@ class DevelopmentArtifact {
 ///
 /// This does not provide any artifacts by default. See [FlutterCache] for the default
 /// artifact set.
+///
+/// ## Artifact mirrors
+///
+/// Some environments cannot reach the Google Cloud Storage buckets and CIPD due
+/// to regional or corporate policies.
+///
+/// To enable Flutter users in these environments, the Flutter tool supports
+/// custom artifact mirrors that the administrators of such environments may
+/// provide. To use an artifact mirror, the user defines the
+/// `FLUTTER_STORAGE_BASE_URL` environment variable that points to the mirror.
+/// Flutter tool reads this variable and uses it instead of the default URLs.
+///
+/// For more details on specific URLs used to download artifacts, see
+/// [storageBaseUrl] and [cipdBaseUrl].
 class Cache {
   /// [rootOverride] is configurable for testing.
   /// [artifacts] is configurable for testing.
@@ -139,7 +153,7 @@ class Cache {
     platform ??= FakePlatform(environment: <String, String>{});
     logger ??= BufferLogger.test();
     return Cache(
-      rootOverride: rootOverride ??= fileSystem.directory('cache'),
+      rootOverride: rootOverride ?? fileSystem.directory('cache'),
       artifacts: artifacts ?? <ArtifactSet>[],
       logger: logger,
       fileSystem: fileSystem,
@@ -179,11 +193,16 @@ class Cache {
       tempStorage: getDownloadDir(),
       platform: _platform,
       httpClient: HttpClient(),
+      allowedBaseUrls: <String>[
+        storageBaseUrl,
+        cipdBaseUrl,
+      ],
     );
   }
 
   static const List<String> _hostsBlockedInChina = <String> [
     'storage.googleapis.com',
+    'chrome-infra-packages.appspot.com',
   ];
 
   // Initialized by FlutterCommandRunner on startup.
@@ -431,6 +450,17 @@ class Cache {
   }
   String? _engineRevision;
 
+  /// The base for URLs that store Flutter engine artifacts that are fetched
+  /// during the installation of the Flutter SDK.
+  ///
+  /// By default the base URL is https://storage.googleapis.com. However, if
+  /// `FLUTTER_STORAGE_BASE_URL` environment variable is provided, the
+  /// environment variable value is returned instead.
+  ///
+  /// See also:
+  ///
+  ///  * [cipdBaseUrl], which determines how CIPD artifacts are fetched.
+  ///  * [Cache] class-level dartdocs that explain how artifact mirrors work.
   String get storageBaseUrl {
     final String? overrideUrl = _platform.environment['FLUTTER_STORAGE_BASE_URL'];
     if (overrideUrl == null) {
@@ -446,6 +476,25 @@ class Cache {
     return overrideUrl;
   }
 
+  /// The base for URLs that store Flutter engine artifacts in CIPD.
+  ///
+  /// For some platforms, such as Web and Fuchsia, CIPD artifacts are fetched
+  /// during the installation of the Flutter SDK, in addition to those fetched
+  /// from [storageBaseUrl].
+  ///
+  /// By default the base URL is https://chrome-infra-packages.appspot.com/dl.
+  /// However, if `FLUTTER_STORAGE_BASE_URL` environment variable is provided,
+  /// then the following value is used:
+  ///
+  ///     FLUTTER_STORAGE_BASE_URL/flutter_infra_release/cipd
+  ///
+  /// See also:
+  ///
+  ///  * [storageBaseUrl], which determines how engine artifacts stored in the
+  ///    Google Cloud Storage buckets are fetched.
+  ///  * https://chromium.googlesource.com/infra/luci/luci-go/+/refs/heads/main/cipd,
+  ///    which contains information about CIPD.
+  ///  * [Cache] class-level dartdocs that explain how artifact mirrors work.
   String get cipdBaseUrl {
     final String? overrideUrl = _platform.environment['FLUTTER_STORAGE_BASE_URL'];
     if (overrideUrl == null) {
@@ -925,12 +974,14 @@ class ArtifactUpdater {
     required Directory tempStorage,
     required HttpClient httpClient,
     required Platform platform,
+    required List<String> allowedBaseUrls,
   }) : _operatingSystemUtils = operatingSystemUtils,
        _httpClient = httpClient,
        _logger = logger,
        _fileSystem = fileSystem,
        _tempStorage = tempStorage,
-       _platform = platform;
+       _platform = platform,
+       _allowedBaseUrls = allowedBaseUrls;
 
   /// The number of times the artifact updater will repeat the artifact download loop.
   static const int _kRetryCount = 2;
@@ -941,6 +992,13 @@ class ArtifactUpdater {
   final Directory _tempStorage;
   final HttpClient _httpClient;
   final Platform _platform;
+
+  /// Artifacts should only be downloaded from URLs that use one of these
+  /// prefixes.
+  ///
+  /// [ArtifactUpdater] will issue a warning if an attempt to download from a
+  /// non-compliant URL is made.
+  final List<String> _allowedBaseUrls;
 
   /// Keep track of the files we've downloaded for this execution so we
   /// can delete them after completion. We don't delete them right after
@@ -994,7 +1052,7 @@ class ArtifactUpdater {
         if (tempFile.existsSync()) {
           tempFile.deleteSync();
         }
-        await _download(url, tempFile);
+        await _download(url, tempFile, status);
 
         if (!tempFile.existsSync()) {
           throw Exception('Did not find downloaded file ${tempFile.path}');
@@ -1077,7 +1135,26 @@ class ArtifactUpdater {
   ///
   /// See also:
   ///   * https://cloud.google.com/storage/docs/xml-api/reference-headers#xgooghash
-  Future<void> _download(Uri url, File file) async {
+  Future<void> _download(Uri url, File file, Status status) async {
+    final bool isAllowedUrl = _allowedBaseUrls.any((String baseUrl) => url.toString().startsWith(baseUrl));
+
+    // In tests make this a hard failure.
+    assert(
+      isAllowedUrl,
+      'URL not allowed: $url\n'
+      'Allowed URLs must be based on one of: ${_allowedBaseUrls.join(', ')}',
+    );
+
+    // In production, issue a warning but allow the download to proceed.
+    if (!isAllowedUrl) {
+      status.pause();
+      _logger.printWarning(
+        'Downloading an artifact that may not be reachable in some environments (e.g. firewalled environments): $url\n'
+        'This should not have happened. This is likely a Flutter SDK bug. Please file an issue at https://github.com/flutter/flutter/issues/new?template=1_activation.md'
+      );
+      status.resume();
+    }
+
     final HttpClientRequest request = await _httpClient.getUrl(url);
     final HttpClientResponse response = await request.close();
     if (response.statusCode != HttpStatus.ok) {

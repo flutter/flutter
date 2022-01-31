@@ -100,8 +100,8 @@ void main() {
 
       center = tester.getCenter(title);
       size = tester.getSize(title);
-      expect(center.dx, greaterThan(400 - size.width / 2.0), reason: 'on ${describeEnum(platform)}');
-      expect(center.dx, lessThan(400 + size.width / 2.0), reason: 'on ${describeEnum(platform)}');
+      expect(center.dx, greaterThan(400 - size.width / 2.0), reason: 'on ${platform.name}');
+      expect(center.dx, lessThan(400 + size.width / 2.0), reason: 'on ${platform.name}');
 
       // One action is still centered.
 
@@ -121,8 +121,8 @@ void main() {
 
       center = tester.getCenter(title);
       size = tester.getSize(title);
-      expect(center.dx, greaterThan(400 - size.width / 2.0), reason: 'on ${describeEnum(platform)}');
-      expect(center.dx, lessThan(400 + size.width / 2.0), reason: 'on ${describeEnum(platform)}');
+      expect(center.dx, greaterThan(400 - size.width / 2.0), reason: 'on ${platform.name}');
+      expect(center.dx, lessThan(400 + size.width / 2.0), reason: 'on ${platform.name}');
 
       // Two actions is left aligned again.
 
@@ -143,7 +143,7 @@ void main() {
 
       center = tester.getCenter(title);
       size = tester.getSize(title);
-      expect(center.dx, lessThan(400 - size.width / 2.0), reason: 'on ${describeEnum(platform)}');
+      expect(center.dx, lessThan(400 - size.width / 2.0), reason: 'on ${platform.name}');
     }
   });
 

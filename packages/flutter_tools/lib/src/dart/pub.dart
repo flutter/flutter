@@ -101,7 +101,7 @@ abstract class Pub {
     bool upgrade = false,
     bool offline = false,
     bool generateSyntheticPackage = false,
-    String flutterRootOverride,
+    String? flutterRootOverride,
     bool checkUpToDate = false,
     bool shouldSkipThirdPartyGenerator = true,
     bool printProgress = true,
@@ -135,7 +135,7 @@ abstract class Pub {
   /// stdout/stderr stream of pub to the corresponding streams of this process.
   Future<void> interactively(
     List<String> arguments, {
-    String directory,
+    String? directory,
     required io.Stdio stdio,
     bool touchesPackageConfig = false,
     bool generateSyntheticPackage = false,
