@@ -100,15 +100,15 @@ enum class StoreAction {
 };
 
 enum class TextureType {
-  k2D,
-  k2DMultisample,
+  kTexture2D,
+  kTexture2DMultisample,
 };
 
 constexpr bool IsMultisampleCapable(TextureType type) {
   switch (type) {
-    case TextureType::k2D:
+    case TextureType::kTexture2D:
       return false;
-    case TextureType::k2DMultisample:
+    case TextureType::kTexture2DMultisample:
       return true;
   }
   return false;

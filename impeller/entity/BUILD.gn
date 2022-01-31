@@ -33,9 +33,8 @@ impeller_component("entity") {
     "entity_pass_delegate.h",
   ]
 
-  deps = [ ":entity_shaders" ]
-
   public_deps = [
+    ":entity_shaders",
     "../archivist",
     "../image",
     "../renderer",

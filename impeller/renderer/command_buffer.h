@@ -25,7 +25,14 @@ class RenderTarget;
 ///             `RenderPass` describes the configuration of the various
 ///             attachments when the command is submitted.
 ///
-///             A command buffer is only meant to be used on a single thread.
+///             A command buffer is only meant to be used on a single thread. If
+///             a frame workload needs to be encoded from multiple threads,
+///             setup and record into multiple command buffers. The order of
+///             submission of commands encoded in multiple command buffers can
+///             be controlled via either the order in which the command buffers
+///             were created, or, using the `ReserveSpotInQueue` command which
+///             allows for encoding commands for submission in an order that is
+///             different from the encoding order.
 ///
 class CommandBuffer {
  public:
