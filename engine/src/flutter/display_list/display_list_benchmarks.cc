@@ -80,6 +80,7 @@ constexpr size_t kRectsToDraw = 5000;
 constexpr size_t kOvalsToDraw = 1000;
 constexpr size_t kCirclesToDraw = 5000;
 constexpr size_t kRRectsToDraw = 5000;
+constexpr size_t kDRRectsToDraw = 2000;
 constexpr size_t kArcSweepSetsToDraw = 1000;
 constexpr size_t kImagesToDraw = 500;
 constexpr size_t kFixedCanvasSize = 1024;
@@ -104,6 +105,7 @@ void BM_DrawLine(benchmark::State& state,
   canvas_provider->InitializeSurface(length, length);
   auto canvas = canvas_provider->GetSurface()->getCanvas();
 
+  state.counters["DrawCallCount"] = kLinesToDraw;
   for (size_t i = 0; i < kLinesToDraw; i++) {
     builder.drawLine(SkPoint::Make(i % length, 0),
                      SkPoint::Make(length - i % length, length));
@@ -145,6 +147,7 @@ void BM_DrawRect(benchmark::State& state,
   const SkScalar offset = 0.5f;
   SkRect rect = SkRect::MakeLTRB(0, 0, length, length);
 
+  state.counters["DrawCallCount"] = kRectsToDraw;
   for (size_t i = 0; i < kRectsToDraw; i++) {
     builder.drawRect(rect);
     rect.offset(offset, offset);
@@ -190,6 +193,7 @@ void BM_DrawOval(benchmark::State& state,
   SkRect rect = SkRect::MakeXYWH(0, 0, length * 1.5f, length);
   const SkScalar offset = 0.5f;
 
+  state.counters["DrawCallCount"] = kOvalsToDraw;
   for (size_t i = 0; i < kOvalsToDraw; i++) {
     builder.drawOval(rect);
     rect.offset(offset, offset);
@@ -236,6 +240,7 @@ void BM_DrawCircle(benchmark::State& state,
 
   SkPoint center = SkPoint::Make(radius, radius);
 
+  state.counters["DrawCallCount"] = kCirclesToDraw;
   for (size_t i = 0; i < kCirclesToDraw; i++) {
     builder.drawCircle(center, radius);
     center.offset(offset, offset);
@@ -312,6 +317,7 @@ void BM_DrawRRect(benchmark::State& state,
   }
   rrect.setRectRadii(SkRect::MakeLTRB(0, 0, length, length), set_radii);
 
+  state.counters["DrawCallCount"] = kRRectsToDraw;
   for (size_t i = 0; i < kRRectsToDraw; i++) {
     builder.drawRRect(rrect);
     rrect.offset(offset, offset);
@@ -391,7 +397,8 @@ void BM_DrawDRRect(benchmark::State& state,
   }
   rrect.setRectRadii(SkRect::MakeLTRB(0, 0, length, length), set_radii);
 
-  for (size_t i = 0; i < kRRectsToDraw; i++) {
+  state.counters["DrawCallCount"] = kDRRectsToDraw;
+  for (size_t i = 0; i < kDRRectsToDraw; i++) {
     rrect.inset(0.1f * length, 0.1f * length, &rrect_2);
     builder.drawDRRect(rrect, rrect_2);
     rrect.offset(offset, offset);
@@ -439,6 +446,7 @@ void BM_DrawArc(benchmark::State& state,
 
   SkRect bounds = SkRect::MakeLTRB(0, 0, length, length);
 
+  state.counters["DrawCallCount"] = kArcSweepSetsToDraw * segment_sweeps.size();
   for (size_t i = 0; i < kArcSweepSetsToDraw; i++) {
     for (SkScalar sweep : segment_sweeps) {
       builder.drawArc(bounds, starting_angle, sweep, false);
@@ -652,6 +660,7 @@ void BM_DrawPath(benchmark::State& state,
   MultiplyPath(path, type, center, 20, state.range(0), radius);
 
   state.counters["VerbCount"] = path.countVerbs();
+  state.counters["DrawCallCount"] = 1;
 
   builder.drawPath(path);
   auto display_list = builder.Build();
@@ -787,6 +796,7 @@ void BM_DrawVertices(benchmark::State& state,
   std::vector<SkPoint> center_points =
       GetPolygonPoints(disc_count, center, radius / 4.0f);
 
+  state.counters["DrawCallCount"] = center_points.size();
   for (SkPoint p : center_points) {
     sk_sp<SkVertices> vertices =
         GetTestVertices(p, radius, 50, mode, vertex_count);
@@ -895,6 +905,7 @@ void BM_DrawPoints(benchmark::State& state,
   size_t point_count = state.range(0);
   state.SetComplexityN(point_count);
   state.counters["PointCount"] = point_count;
+  state.counters["DrawCallCount"] = 1;
 
   std::vector<SkPoint> points =
       GetTestPoints(point_count, SkISize::Make(length, length));
@@ -959,6 +970,7 @@ void BM_DrawImage(benchmark::State& state,
   SkScalar offset = 0.5f;
   SkPoint dst = SkPoint::Make(0, 0);
 
+  state.counters["DrawCallCount"] = kImagesToDraw;
   for (size_t i = 0; i < kImagesToDraw; i++) {
     image = upload_bitmap ? ImageFromBitmapWithNewID(bitmap)
                           : offscreen->makeImageSnapshot();
@@ -1041,6 +1053,7 @@ void BM_DrawImageRect(benchmark::State& state,
   SkRect dst =
       SkRect::MakeXYWH(0.0f, 0.0f, bitmap_size * 0.75f, bitmap_size * 0.75f);
 
+  state.counters["DrawCallCount"] = kImagesToDraw;
   for (size_t i = 0; i < kImagesToDraw; i++) {
     image = upload_bitmap ? ImageFromBitmapWithNewID(bitmap)
                           : offscreen->makeImageSnapshot();
@@ -1124,6 +1137,7 @@ void BM_DrawImageNine(benchmark::State& state,
   SkRect dst =
       SkRect::MakeXYWH(0.0f, 0.0f, bitmap_size * 0.75f, bitmap_size * 0.75f);
 
+  state.counters["DrawCallCount"] = kImagesToDraw;
   for (size_t i = 0; i < kImagesToDraw; i++) {
     image = upload_bitmap ? ImageFromBitmapWithNewID(bitmap)
                           : offscreen->makeImageSnapshot();
@@ -1206,6 +1220,8 @@ void BM_DrawTextBlob(benchmark::State& state,
 
   auto blob = blob_builder.make();
 
+  state.counters["DrawCallCount"] = 1;
+  state.counters["GlyphCount"] = glyph_runs * fragment_length;
   builder.drawTextBlob(blob, 0.0f, 0.0f);
 
   auto display_list = builder.Build();
@@ -1266,6 +1282,7 @@ void BM_DrawShadow(benchmark::State& state,
   }
 
   float elevation = state.range(0);
+  state.counters["DrawCallCount"] = 1;
 
   // We can hardcode dpr to 1.0f as we're varying elevation, and dpr is only
   // ever used in conjunction with elevation.
@@ -1312,6 +1329,7 @@ void BM_SaveLayer(benchmark::State& state,
   SkRect rect2 =
       SkRect::MakeLTRB(0.25f * length, 0.25f * length, length, length);
 
+  state.counters["DrawCallCount_Varies"] = save_layer_calls * save_depth;
   for (size_t i = 0; i < save_layer_calls; i++) {
     for (size_t j = 0; j < save_depth; j++) {
       builder.saveLayer(nullptr, false);
