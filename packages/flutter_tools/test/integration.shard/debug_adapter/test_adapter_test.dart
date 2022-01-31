@@ -135,7 +135,7 @@ final List<Object> _testsProjectExpectedOutput = <Object>[
 /// A helper that verifies a full set of expected test results for the
 /// [TestsProject] script.
 void _expectStandardTestsProjectResults(TestEvents events) {
-  // Check we recieved all expected test events passed through from
+  // Check we received all expected test events passed through from
   // package:test.
   final List<Object> eventNames =
       events.testNotifications.map((Map<String, Object?> e) => e['type']!).toList();
