@@ -122,7 +122,7 @@ TEST(FrameTimingsRecorderTest, RecordRasterTimesWithCache) {
 }
 
 // Windows and Fuchsia don't allow testing with killed by signal.
-#if !defined(OS_FUCHSIA) && !defined(OS_WIN) && \
+#if !defined(OS_FUCHSIA) && !defined(FML_OS_WIN) && \
     (FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG)
 
 TEST(FrameTimingsRecorderTest, ThrowWhenRecordBuildBeforeVsync) {

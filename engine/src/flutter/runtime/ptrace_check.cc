@@ -33,7 +33,7 @@
 
 // Being extra careful and adding additional landmines that will prevent
 // compilation of this TU in an incorrect runtime mode.
-static_assert(OS_IOS, "This translation unit is iOS specific.");
+static_assert(FML_OS_IOS, "This translation unit is iOS specific.");
 static_assert(FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG,
               "This translation unit must only be compiled in the debug "
               "runtime mode as it "

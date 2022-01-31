@@ -228,7 +228,7 @@ TEST(FileTest, CanStopVisitEarly) {
   ASSERT_TRUE(fml::UnlinkDirectory(dir.fd(), "a"));
 }
 
-#if OS_WIN
+#if FML_OS_WIN
 #define AtomicWriteTest DISABLED_AtomicWriteTest
 #else
 #define AtomicWriteTest AtomicWriteTest

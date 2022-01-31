@@ -82,7 +82,7 @@ class FileMapping final : public Mapping {
   uint8_t* mapping_ = nullptr;
   uint8_t* mutable_mapping_ = nullptr;
 
-#if OS_WIN
+#if FML_OS_WIN
   fml::UniqueFD mapping_handle_;
 #endif
 

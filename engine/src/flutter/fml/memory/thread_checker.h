@@ -12,7 +12,7 @@
 #include "flutter/fml/logging.h"
 #include "flutter/fml/macros.h"
 
-#if defined(OS_WIN)
+#if defined(FML_OS_WIN)
 #include <windows.h>
 #else
 #include <pthread.h>
@@ -30,7 +30,7 @@ namespace fml {
 // there's a small space cost to having even an empty class. )
 class ThreadChecker final {
  public:
-#if defined(OS_WIN)
+#if defined(FML_OS_WIN)
   ThreadChecker() : self_(GetCurrentThreadId()) {}
   ~ThreadChecker() {}
 

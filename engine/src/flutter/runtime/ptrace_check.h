@@ -10,8 +10,8 @@
 
 namespace flutter {
 
-#define TRACING_CHECKS_NECESSARY    \
-  OS_IOS && !TARGET_OS_SIMULATOR && \
+#define TRACING_CHECKS_NECESSARY        \
+  FML_OS_IOS && !TARGET_OS_SIMULATOR && \
       (FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG)
 
 enum class TracingResult {

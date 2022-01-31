@@ -59,7 +59,7 @@ class PlatformSemaphore {
 
 }  // namespace fml
 
-#elif OS_WIN
+#elif FML_OS_WIN
 #include <windows.h>
 
 namespace fml {

@@ -13,7 +13,7 @@
 
 #if defined(FML_OS_ANDROID)
 #include <android/log.h>
-#elif defined(OS_IOS)
+#elif defined(FML_OS_IOS)
 extern "C" {
 // Cannot import the syslog.h header directly because of macro collision.
 extern void syslog(int, const char*, ...);
@@ -219,7 +219,7 @@ void UIDartState::LogMessage(const std::string& tag,
 #if defined(FML_OS_ANDROID)
     __android_log_print(ANDROID_LOG_INFO, tag.c_str(), "%.*s",
                         (int)message.size(), message.c_str());
-#elif defined(OS_IOS)
+#elif defined(FML_OS_IOS)
     std::stringstream stream;
     if (tag.size() > 0) {
       stream << tag << ": ";
