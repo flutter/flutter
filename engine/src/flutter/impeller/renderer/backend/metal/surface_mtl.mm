@@ -37,7 +37,7 @@ std::unique_ptr<Surface> SurfaceMTL::WrapCurrentMetalLayerDrawable(
   }
 
   TextureDescriptor color0_tex_desc;
-  color0_tex_desc.type = TextureType::k2DMultisample;
+  color0_tex_desc.type = TextureType::kTexture2DMultisample;
   color0_tex_desc.sample_count = SampleCount::kCount4;
   color0_tex_desc.format = color_format;
   color0_tex_desc.size = {
@@ -69,7 +69,7 @@ std::unique_ptr<Surface> SurfaceMTL::WrapCurrentMetalLayerDrawable(
       color0_resolve_tex_desc, current_drawable.texture);
 
   TextureDescriptor stencil0_tex;
-  stencil0_tex.type = TextureType::k2DMultisample;
+  stencil0_tex.type = TextureType::kTexture2DMultisample;
   stencil0_tex.sample_count = SampleCount::kCount4;
   stencil0_tex.format = PixelFormat::kDefaultStencil;
   stencil0_tex.size = color0_tex_desc.size;

@@ -275,9 +275,9 @@ constexpr MTLClearColor ToMTLClearColor(const Color& color) {
 
 constexpr MTLTextureType ToMTLTextureType(TextureType type) {
   switch (type) {
-    case TextureType::k2D:
+    case TextureType::kTexture2D:
       return MTLTextureType2D;
-    case TextureType::k2DMultisample:
+    case TextureType::kTexture2DMultisample:
       return MTLTextureType2DMultisample;
   }
   return MTLTextureType2D;
