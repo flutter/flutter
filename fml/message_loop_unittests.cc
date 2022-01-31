@@ -18,7 +18,7 @@
 #include "gtest/gtest.h"
 
 #define TIMESENSITIVE(x) TimeSensitiveTest_##x
-#if OS_WIN
+#if FML_OS_WIN
 #define PLATFORM_SPECIFIC_CAPTURE(...) [ __VA_ARGS__, count ]
 #else
 #define PLATFORM_SPECIFIC_CAPTURE(...) [__VA_ARGS__]

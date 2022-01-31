@@ -12,20 +12,20 @@
 #include "flutter/fml/memory/ref_counted.h"
 #include "flutter/fml/memory/ref_ptr.h"
 
-#if defined(OS_WIN)
+#if defined(FML_OS_WIN)
 #include <windows.h>
-#endif  // defined(OS_WIN)
+#endif  // defined(FML_OS_WIN)
 
 namespace fml {
 class NativeLibrary : public fml::RefCountedThreadSafe<NativeLibrary> {
  public:
-#if OS_WIN
+#if FML_OS_WIN
   using Handle = HMODULE;
   using SymbolHandle = FARPROC;
-#else   // OS_WIN
+#else   // FML_OS_WIN
   using Handle = void*;
   using SymbolHandle = void*;
-#endif  // OS_WIN
+#endif  // FML_OS_WIN
 
   static fml::RefPtr<NativeLibrary> Create(const char* path);
 

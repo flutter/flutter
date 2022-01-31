@@ -10,7 +10,7 @@
 #include "third_party/skia/src/codec/SkCodecImageGenerator.h"
 #ifdef FML_OS_MACOSX
 #include "third_party/skia/include/ports/SkImageGeneratorCG.h"
-#elif OS_WIN
+#elif FML_OS_WIN
 #include "third_party/skia/include/ports/SkImageGeneratorWIC.h"
 #endif
 
@@ -32,7 +32,7 @@ ImageGeneratorRegistry::ImageGeneratorRegistry() : weak_factory_(this) {
             std::move(generator));
       },
       0);
-#elif OS_WIN
+#elif FML_OS_WIN
   AddFactory(
       [](sk_sp<SkData> buffer) {
         auto generator = SkImageGeneratorWIC::MakeFromEncodedWIC(buffer);
