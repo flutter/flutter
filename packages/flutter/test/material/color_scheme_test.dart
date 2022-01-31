@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_color_utilities/material_color_utilities.dart';
 
 void main() {
   test('light scheme matches the spec', () {
@@ -296,4 +297,72 @@ void main() {
   },
     skip: isBrowser, // https://github.com/flutter/flutter/issues/44115
   );
+
+  test('can generate a light scheme from a CorePalette', () {
+    final List<int> ints = List<int>.generate(CorePalette.size * TonalPalette.commonSize, (int i) => i);
+    final CorePalette corePalette = CorePalette.fromList(ints);
+    final ColorScheme scheme = ColorScheme.fromCorePalette(palette: corePalette);
+    expect(scheme.primary, const Color(0x00000004));
+    expect(scheme.onPrimary, const Color(0x0000000c));
+    expect(scheme.primaryContainer, const Color(0x00000009));
+    expect(scheme.onPrimaryContainer, const Color(0x00000001));
+    expect(scheme.secondary, const Color(0x00000011));
+    expect(scheme.onSecondary, const Color(0x00000019));
+    expect(scheme.secondaryContainer, const Color(0x00000016));
+    expect(scheme.onSecondaryContainer, const Color(0x0000000e));
+    expect(scheme.tertiary, const Color(0x0000001e));
+    expect(scheme.onTertiary, const Color(0x00000026));
+    expect(scheme.tertiaryContainer, const Color(0x00000023));
+    expect(scheme.onTertiaryContainer, const Color(0x0000001b));
+    expect(scheme.error, const Color(0xffba1b1b));
+    expect(scheme.onError, const Color(0xffffffff));
+    expect(scheme.errorContainer, const Color(0xffffdad4));
+    expect(scheme.onErrorContainer, const Color(0xff410001));
+    expect(scheme.outline, const Color(0x00000039));
+    expect(scheme.background, const Color(0x00000032));
+    expect(scheme.onBackground, const Color(0x00000028));
+    expect(scheme.surface, const Color(0x00000032));
+    expect(scheme.onSurface, const Color(0x00000028));
+    expect(scheme.surfaceVariant, const Color(0x0000003d));
+    expect(scheme.onSurfaceVariant, const Color(0x00000037));
+    expect(scheme.inverseSurface, const Color(0x00000029));
+    expect(scheme.onInverseSurface, const Color(0x00000031));
+    expect(scheme.inversePrimary, const Color(0x00000008));
+    expect(scheme.shadow, const Color(0x00000027));
+    expect(scheme.brightness, Brightness.light);
+  });
+
+  test('can generate a dark scheme from a CorePalette', () {
+    final List<int> ints = List<int>.generate(CorePalette.size * TonalPalette.commonSize, (int i) => i);
+    final CorePalette corePalette = CorePalette.fromList(ints);
+    final ColorScheme scheme = ColorScheme.fromCorePalette(palette: corePalette, brightness: Brightness.dark);
+    expect(scheme.primary, const Color(0x00000008));
+    expect(scheme.onPrimary, const Color(0x00000002));
+    expect(scheme.primaryContainer, const Color(0x00000003));
+    expect(scheme.onPrimaryContainer, const Color(0x00000009));
+    expect(scheme.secondary, const Color(0x00000015));
+    expect(scheme.onSecondary, const Color(0x0000000f));
+    expect(scheme.secondaryContainer, const Color(0x00000010));
+    expect(scheme.onSecondaryContainer, const Color(0x00000016));
+    expect(scheme.tertiary, const Color(0x00000022));
+    expect(scheme.onTertiary, const Color(0x0000001c));
+    expect(scheme.tertiaryContainer, const Color(0x0000001d));
+    expect(scheme.onTertiaryContainer, const Color(0x00000023));
+    expect(scheme.error, const Color(0xffffb4a9));
+    expect(scheme.onError, const Color(0xff680003));
+    expect(scheme.errorContainer, const Color(0xff930006));
+    expect(scheme.onErrorContainer, const Color(0xffffb4a9));
+    expect(scheme.outline, const Color(0x0000003a));
+    expect(scheme.background, const Color(0x00000028));
+    expect(scheme.onBackground, const Color(0x00000030));
+    expect(scheme.surface, const Color(0x00000028));
+    expect(scheme.onSurface, const Color(0x00000030));
+    expect(scheme.surfaceVariant, const Color(0x00000037));
+    expect(scheme.onSurfaceVariant, const Color(0x0000003c));
+    expect(scheme.inverseSurface, const Color(0x00000030));
+    expect(scheme.onInverseSurface, const Color(0x00000029));
+    expect(scheme.inversePrimary, const Color(0x00000004));
+    expect(scheme.shadow, const Color(0x00000027));
+    expect(scheme.brightness, Brightness.dark);
+  });
 }

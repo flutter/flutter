@@ -239,6 +239,65 @@ class ColorScheme with Diagnosticable {
     );
   }
 
+  /// Create a [ColorScheme] from the given `palette`.
+  ///
+  /// Use this constructor to create a [ColorScheme] from the dynamic colors 
+  /// obtained from the Android OS. See the [dynamic_color](https://pub.dev/packages/dynamic_color)
+  /// package for more information.
+  ///
+  /// See also:
+  ///
+  ///  * <https://pub.dev/packages/dynamic_color>, the package used
+  ///    to obtain dynamic colors from the Android OS.
+  ///  * <https://m3.material.io/styles/color/the-color-system/color-roles>, the
+  ///    Material 3 Color system specification.
+  ///  * <https://pub.dev/packages/material_color_utilities>, the package
+  ///    used to convert a `CorePalette` to a [ColorScheme].
+  factory ColorScheme.fromCorePalette({
+    required CorePalette palette, 
+    Brightness brightness = Brightness.light,
+  }) {
+    final Scheme scheme;
+    switch (brightness) {
+      case Brightness.light:
+        scheme = Scheme.lightFromCorePalette(palette);
+        break;
+      case Brightness.dark:
+        scheme = Scheme.darkFromCorePalette(palette);
+        break;
+    }
+    return ColorScheme(
+      primary: Color(scheme.primary),
+      onPrimary: Color(scheme.onPrimary),
+      primaryContainer: Color(scheme.primaryContainer),
+      onPrimaryContainer: Color(scheme.onPrimaryContainer),
+      secondary: Color(scheme.secondary),
+      onSecondary: Color(scheme.onSecondary),
+      secondaryContainer: Color(scheme.secondaryContainer),
+      onSecondaryContainer: Color(scheme.onSecondaryContainer),
+      tertiary: Color(scheme.tertiary),
+      onTertiary: Color(scheme.onTertiary),
+      tertiaryContainer: Color(scheme.tertiaryContainer),
+      onTertiaryContainer: Color(scheme.onTertiaryContainer),
+      error: Color(scheme.error),
+      onError: Color(scheme.onError),
+      errorContainer: Color(scheme.errorContainer),
+      onErrorContainer: Color(scheme.onErrorContainer),
+      outline: Color(scheme.outline),
+      background: Color(scheme.background),
+      onBackground: Color(scheme.onBackground),
+      surface: Color(scheme.surface),
+      onSurface: Color(scheme.onSurface),
+      surfaceVariant: Color(scheme.surfaceVariant),
+      onSurfaceVariant: Color(scheme.onSurfaceVariant),
+      inverseSurface: Color(scheme.inverseSurface),
+      onInverseSurface: Color(scheme.inverseOnSurface),
+      inversePrimary: Color(scheme.inversePrimary),
+      shadow: Color(scheme.shadow),
+      brightness: brightness,
+    );
+  }
+
   /// Create a ColorScheme based on a purple primary color that matches the
   /// [baseline Material color scheme](https://material.io/design/color/the-color-system.html#color-theme-creation).
   const ColorScheme.light({
