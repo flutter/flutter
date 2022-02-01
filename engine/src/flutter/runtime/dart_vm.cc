@@ -49,11 +49,12 @@ extern const uint8_t* observatory_assets_archive;
 namespace flutter {
 
 // Arguments passed to the Dart VM in all configurations.
-static const char* kDartLanguageArgs[] = {
+static const char* kDartAllConfigsArgs[] = {
     // clang-format off
     "--enable_mirrors=false",
     "--background_compilation",
     "--lazy_async_stacks",
+    "--mark_when_idle",
     // clang-format on
 };
 
@@ -323,7 +324,7 @@ DartVM::DartVM(std::shared_ptr<const DartVMData> vm_data,
     args.push_back(profiler_flag);
   }
 
-  PushBackAll(&args, kDartLanguageArgs, fml::size(kDartLanguageArgs));
+  PushBackAll(&args, kDartAllConfigsArgs, fml::size(kDartAllConfigsArgs));
 
   if (IsRunningPrecompiledCode()) {
     PushBackAll(&args, kDartPrecompilationArgs,
