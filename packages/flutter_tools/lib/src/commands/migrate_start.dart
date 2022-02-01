@@ -75,7 +75,7 @@ class MigrateStartCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    bool migrationResult = await generateMigration(
+    MigrateResult? migrateResult = await generateMigration(
       verbose: true,
       baseAppDirectory: stringArg('base-app-directory'),
       targetAppDirectory: stringArg('target-app-directory'),
@@ -83,6 +83,9 @@ class MigrateStartCommand extends FlutterCommand {
       targetRevision: stringArg('target-revision'),
       deleteTempDirectories: boolArg('delete-temp-directories'),
     );
+    if (migrateResult == null) {
+      return const FlutterCommandResult(ExitStatus.fail);
+    }
     return const FlutterCommandResult(ExitStatus.success);
   }
 }

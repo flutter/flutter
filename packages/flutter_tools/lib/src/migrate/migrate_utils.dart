@@ -92,12 +92,17 @@ class MigrateUtils {
     return result.stdout;
   }
 
-  static Future<MergeResult> gitMergeFile({required String ancestor, required String current, required String other}) async {
+  static Future<MergeResult> gitMergeFile({
+    required String ancestor,
+    required String current,
+    required String other,
+    required String localPath
+  }) async {
     print('  git Merging');
     List<String> cmdArgs = ['merge-file', '-p', current, ancestor, other];
     final ProcessResult result = await Process.run('git', cmdArgs);
     checkForErrors(result, allowedExitCodes: <int>[-1]);
-    return MergeResult(result);
+    return MergeResult(result, localPath);
   }
 
   static Future<String> getGitHash(String projectPath, [String tag = 'HEAD']) async {
@@ -186,18 +191,21 @@ class DiffResult {
 
 /// Data class to hold the 
 class MergeResult {
-  MergeResult(ProcessResult result) :
+  MergeResult(ProcessResult result, String localPath) :
     mergedContents = result.stdout as String,
     hasConflict = result.exitCode != 0,
-    exitCode = result.exitCode;
+    exitCode = result.exitCode,
+    localPath = localPath;
 
   MergeResult.explicit({
     required this.mergedContents,
     required this.hasConflict,
-    required this.exitCode
+    required this.exitCode,
+    required this.localPath,
   });
 
   String mergedContents;
   bool hasConflict;
   int exitCode;
+  String localPath;
 }

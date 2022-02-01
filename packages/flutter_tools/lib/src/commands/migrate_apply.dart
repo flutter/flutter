@@ -74,7 +74,7 @@ class MigrateApplyCommand extends FlutterCommand {
     final List<String> allFilesToCopy = <String>[];
     allFilesToCopy.addAll(manifest.mergedFiles);
     allFilesToCopy.addAll(manifest.conflictFiles);
-    allFilesToCopy.addAll(manifest.additionalFiles);
+    allFilesToCopy.addAll(manifest.addedFiles);
     if (allFilesToCopy.isNotEmpty) {
       print('Modifying ${allFilesToCopy.length} files.');
     }

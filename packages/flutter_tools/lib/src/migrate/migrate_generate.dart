@@ -15,11 +15,30 @@ import 'migrate_config.dart';
 import 'migrate_manifest.dart';
 import 'migrate_utils.dart';
 
-class MigrateResult {
-  
+class FilePendingMigration {
+  FilePendingMigration(this.localPath, this.file);
+  String localPath;
+  File file;
 }
 
-Future<bool> generateMigration({
+class MigrateResult {
+  MigrateResult({
+    required this.mergeResults,
+    required this.addedFiles,
+    required this.deletedFiles});
+
+  MigrateResult.empty()
+    : mergeResults = <MergeResult>[],
+      addedFiles = <FilePendingMigration>[],
+      deletedFiles = <FilePendingMigration>[];
+
+
+  List<MergeResult> mergeResults;
+  List<FilePendingMigration> addedFiles;
+  List<FilePendingMigration> deletedFiles;
+}
+
+Future<MigrateResult?> generateMigration({
     bool verbose = false,
     String? baseAppDirectory,
     String? targetAppDirectory,
@@ -35,7 +54,7 @@ Future<bool> generateMigration({
     print('Pending migration files exist in `<your_project_root_dir>/$kDefaultMigrateWorkingDirectoryName`\n');
     print('You may also abandon the existing migration and start a new one with:\n');
     print('    \$ flutter migrate abandon');
-    return false;
+    return null;
   }
   final FlutterProject flutterProject = FlutterProject.current();
 
@@ -154,8 +173,10 @@ Future<bool> generateMigration({
     }
   }
 
+  MigrateResult migrateResult = MigrateResult.empty();
+
   // Check for any new files that were added in the new template
-  Map<String, File> additionalFiles = <String, File>{};
+  // Map<String, File> additionalFiles = <String, File>{};
   for (FileSystemEntity entity in generatedTargetFiles) {
     if (entity is! File) {
       continue;
@@ -172,20 +193,20 @@ Future<bool> generateMigration({
       diffMap[localPath] = DiffResult.ignored();
     }
     diffMap[localPath] = DiffResult.addition();
-    additionalFiles[localPath] = newTemplateFile;
+    migrateResult.addedFiles.add(FilePendingMigration(localPath, newTemplateFile));
+    // additionalFiles[localPath] = newTemplateFile;
   }
 
   // for each file
   final List<FileSystemEntity> currentFiles = flutterProject.directory.listSync(recursive: true);
   final String projectRootPath = flutterProject.directory.absolute.path;
-  final Map<String, MergeResult> mergeResults = <String, MergeResult>{};
-  final Map<String, File> deletedFiles = <String, File>{};
+  // final Map<String, MergeResult> mergeResults = <String, MergeResult>{};
+  // final Map<String, File> deletedFiles = <String, File>{};
   for (FileSystemEntity entity in currentFiles) {
     if (entity is! File) {
       continue;
     }
     final File currentFile = (entity as File).absolute;
-    // print('Checking ${currentFile.path}');
     if (!currentFile.path.startsWith(projectRootPath)) {
       continue; // Not a project file.
     }
@@ -200,11 +221,10 @@ Future<bool> generateMigration({
 
     if (userDiff.exitCode == 0) {
       // Current file unchanged by user
-      // print('  File unchanged');
-      if (diffMap.containsKey(localPath) && diffMap[localPath]!.isDeletion) { // File is deleted in new template
-        // print('    DELETING');
-        // currentFile.deleteSync();
-        deletedFiles[localPath] = currentFile;
+      if (diffMap.containsKey(localPath) && diffMap[localPath]!.isDeletion) {
+        // File is deleted in new template
+        migrateResult.deletedFiles.add(FilePendingMigration(localPath, currentFile));
+        // deletedFiles[localPath] = currentFile;
       }
       continue;
     }
@@ -214,33 +234,32 @@ Future<bool> generateMigration({
         ancestor: globals.fs.path.join(generatedBaseTemplateDirectory.path, localPath),
         current: currentFile.path,
         other: globals.fs.path.join(generatedTargetTemplateDirectory.path, localPath),
+        localPath: localPath,
       );
       print('Merged ${currentFile.path} with ${result.exitCode} conflicts');
-      // print(result.mergedContents);
-      mergeResults[localPath] = result;
+      migrateResult.mergeResults.add(result);
+      // mergeResults[localPath] = result;
       continue;
     }
-    print('  File unhandled');
   }
 
   // Write files in working dir
-  for (String localPath in mergeResults.keys) {
-    final MergeResult result = mergeResults[localPath]!;
-    final File file = workingDir.childFile(localPath);
+  for (MergeResult result in migrateResult.mergeResults) {
+    final File file = workingDir.childFile(result.localPath);
     file.createSync(recursive: true);
     file.writeAsStringSync(result.mergedContents, flush: true);
-    print('  Wrote merged file $localPath');
   }
 
-  for (String localPath in additionalFiles.keys) {
-    final File additionalFile = additionalFiles[localPath]!;
-    final File file = workingDir.childFile(localPath);
+  for (FilePendingMigration addedFile in migrateResult.addedFiles) {
+    final File file = workingDir.childFile(addedFile.localPath);
     file.createSync(recursive: true);
-    file.writeAsStringSync(additionalFile.readAsStringSync(), flush: true);
-    print('  Wrote Additional file $localPath');
+    file.writeAsStringSync(addedFile.file.readAsStringSync(), flush: true);
   }
 
-  final MigrateManifest manifest = MigrateManifest(migrateRootDir: workingDir, mergeResults: mergeResults, additionalFiles: additionalFiles, deletedFiles: deletedFiles);
+  final MigrateManifest manifest = MigrateManifest(
+    migrateRootDir: workingDir,
+    migrateResult: migrateResult,
+  );
   manifest.writeFile();
 
   if (deleteTempDirectories) {
@@ -257,6 +276,6 @@ Future<bool> generateMigration({
       directories: directoriesToDelete,
     );
   }
-  return true;
+  return migrateResult;
 }
 
