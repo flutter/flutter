@@ -1042,6 +1042,8 @@ public class FlutterActivityAndFragmentDelegateTest {
     when(fakeMessageBuilder.setPlatformBrightness(any(SettingsChannel.PlatformBrightness.class)))
         .thenReturn(fakeMessageBuilder);
     when(fakeMessageBuilder.setTextScaleFactor(any(Float.class))).thenReturn(fakeMessageBuilder);
+    when(fakeMessageBuilder.setBrieflyShowPassword(any(Boolean.class)))
+        .thenReturn(fakeMessageBuilder);
     when(fakeMessageBuilder.setUse24HourFormat(any(Boolean.class))).thenReturn(fakeMessageBuilder);
     when(fakeSettingsChannel.startMessage()).thenReturn(fakeMessageBuilder);
 

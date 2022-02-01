@@ -13,6 +13,7 @@ public class SettingsChannel {
 
   public static final String CHANNEL_NAME = "flutter/settings";
   private static final String TEXT_SCALE_FACTOR = "textScaleFactor";
+  private static final String BRIEFLY_SHOW_PASSWORD = "brieflyShowPassword";
   private static final String ALWAYS_USE_24_HOUR_FORMAT = "alwaysUse24HourFormat";
   private static final String PLATFORM_BRIGHTNESS = "platformBrightness";
 
@@ -38,6 +39,12 @@ public class SettingsChannel {
     @NonNull
     public MessageBuilder setTextScaleFactor(float textScaleFactor) {
       message.put(TEXT_SCALE_FACTOR, textScaleFactor);
+      return this;
+    }
+
+    @NonNull
+    public MessageBuilder setBrieflyShowPassword(@NonNull boolean brieflyShowPassword) {
+      message.put(BRIEFLY_SHOW_PASSWORD, brieflyShowPassword);
       return this;
     }
 

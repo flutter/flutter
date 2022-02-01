@@ -425,6 +425,15 @@ class SingletonFlutterWindow extends FlutterWindow {
   ///    observe when this value changes.
   double get textScaleFactor => platformDispatcher.textScaleFactor;
 
+  /// Whether briefly displaying the characters as you type in obscured text
+  /// fields is enabled in system settings.
+  ///
+  /// See also:
+  ///
+  ///  * [EditableText.obscureText], which when set to true hides the text in
+  ///    the text field.
+  bool get brieflyShowPassword => platformDispatcher.brieflyShowPassword;
+
   /// The setting indicating whether time should always be shown in the 24-hour
   /// format.
   ///
