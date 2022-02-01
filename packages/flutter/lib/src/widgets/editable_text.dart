@@ -12,6 +12,7 @@ import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/material/spell_check.dart';
 
 import 'actions.dart';
 import 'autofill.dart';
@@ -162,7 +163,7 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   ///
   /// By default makes text in composing range appear as underlined. Descendants
   /// can override this method to customize appearance of text.
-  TextSpan buildTextSpan({required BuildContext context, TextStyle? style , required bool withComposing}) {
+  TextSpan buildTextSpan({required BuildContext context, TextStyle? style , required bool withComposing, List<SpellCheckerSuggestionSpan>? spellCheckerResults}) {
     assert(!value.composing.isValid || !withComposing || value.isComposingRangeValid);
     // If the composing range is out of range for the current text, ignore it to
     // preserve the tree integrity, otherwise in release mode a RangeError will
@@ -170,19 +171,25 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
     if (!value.isComposingRangeValid || !withComposing) {
       return TextSpan(style: style, text: text);
     }
-    final TextStyle composingStyle = style?.merge(const TextStyle(decoration: TextDecoration.underline))
-        ?? const TextStyle(decoration: TextDecoration.underline);
-    return TextSpan(
-      style: style,
-      children: <TextSpan>[
-        TextSpan(text: value.composing.textBefore(value.text)),
-        TextSpan(
-          style: composingStyle,
-          text: value.composing.textInside(value.text),
-        ),
-        TextSpan(text: value.composing.textAfter(value.text)),
-      ],
-    );
+
+    if (spellCheckerResults != null) {
+      return buildWithMisspelledWordsIndicated(value, spellCheckerResults, style);
+    }
+    else {
+      final TextStyle composingStyle = style?.merge(const TextStyle(decoration: TextDecoration.underline))
+          ?? const TextStyle(decoration: TextDecoration.underline);
+      return TextSpan(
+        style: style,
+        children: <TextSpan>[
+          TextSpan(text: value.composing.textBefore(value.text)),
+          TextSpan(
+            style: composingStyle,
+            text: value.composing.textInside(value.text),
+          ),
+          TextSpan(text: value.composing.textAfter(value.text)),
+        ],
+      );
+    }
   }
 
   /// The currently selected [text].
@@ -2872,7 +2879,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// Returns `false` if a toolbar couldn't be shown, such as when the toolbar
   /// is already shown, or when no text selection currently exists.
   @override
-  bool showToolbar() {
+  bool showToolbar(ToolbarType toolbarType) {
     // Web is using native dom elements to enable clipboard functionality of the
     // toolbar: copy, paste, select, cut. It might also provide additional
     // functionality depending on the browser (such as translate). Due to this
@@ -2885,7 +2892,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       return false;
     }
 
-    _selectionOverlay!.showToolbar();
+    _selectionOverlay!.showToolbar(toolbarType);
     return true;
   }
 
@@ -2906,7 +2913,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (_selectionOverlay!.toolbarIsVisible) {
       hideToolbar();
     } else {
-      showToolbar();
+      showToolbar(ToolbarType.copyPasteControls);
     }
   }
 
@@ -2938,6 +2945,14 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     setState(() {
       _placeholderLocation = -1;
     });
+  }
+
+  // Tracks spell check results for the current text input.
+  List<SpellCheckerSuggestionSpan>? spellCheckerResults;
+
+  @override
+  void updateSpellCheckerResults(List<SpellCheckerSuggestionSpan> spellCheckerResults) {
+
   }
 
   @override
@@ -3274,6 +3289,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       context: context,
       style: widget.style,
       withComposing: !widget.readOnly && _hasFocus,
+      spellCheckerResults: spellCheckerResults,
     );
   }
 }

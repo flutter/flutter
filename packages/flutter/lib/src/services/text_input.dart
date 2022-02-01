@@ -1126,6 +1126,9 @@ abstract class TextInputClient {
 
   /// Requests that the client remove the text placeholder.
   void removeTextPlaceholder() {}
+
+  // Updates spell hcecker results.
+  void updateSpellCheckerResults(List<SpellCheckerSuggestionSpan> spellCheckerResults);
 }
 
 /// An interface to receive focus from the engine.
