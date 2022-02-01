@@ -2312,6 +2312,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
     final TextStyle style = widget.style;
     newConnection
+      ..show()
       ..setStyle(
         fontFamily: style.fontFamily,
         fontSize: style.fontSize,
@@ -2693,6 +2694,72 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     updateKeepAlive();
   }
 
+  String _cachedText = '';
+  Rect? _cachedFirstRect;
+  Size _cachedSize = Size.zero;
+  int _cachedPlaceholder = -1;
+  TextStyle? _cachedTextStyle;
+
+  void _updateSelectionRects({bool force = false}) {
+    if (!widget.scribbleEnabled)
+      return;
+    if (defaultTargetPlatform != TargetPlatform.iOS)
+      return;
+    // This is to avoid sending selection rects on non-iPad devices.
+    if (WidgetsBinding.instance!.window.physicalSize.shortestSide < _kIPadWidth)
+      return;
+
+    final String text = renderEditable.text?.toPlainText(includeSemanticsLabels: false) ?? '';
+    final List<Rect> firstSelectionBoxes = renderEditable.getBoxesForSelection(const TextSelection(baseOffset: 0, extentOffset: 1));
+    final Rect? firstRect = firstSelectionBoxes.isNotEmpty ? firstSelectionBoxes.first : null;
+    final ScrollDirection scrollDirection = _scrollController.position.userScrollDirection;
+    final Size size = renderEditable.size;
+    final bool textChanged = text != _cachedText;
+    final bool textStyleChanged = _cachedTextStyle != widget.style;
+    final bool firstRectChanged = _cachedFirstRect != firstRect;
+    final bool sizeChanged = _cachedSize != size;
+    final bool placeholderChanged = _cachedPlaceholder != _placeholderLocation;
+    if (scrollDirection == ScrollDirection.idle && (force || textChanged || textStyleChanged || firstRectChanged || sizeChanged || placeholderChanged)) {
+      _cachedText = text;
+      _cachedFirstRect = firstRect;
+      _cachedTextStyle = widget.style;
+      _cachedSize = size;
+      _cachedPlaceholder = _placeholderLocation;
+      bool belowRenderEditableBottom = false;
+      final List<SelectionRect> rects = List<SelectionRect?>.generate(
+        _cachedText.characters.length,
+        (int i) {
+          if (belowRenderEditableBottom)
+            return null;
+
+          final int offset = _cachedText.characters.getRange(0, i).string.length;
+          final List<Rect> boxes = renderEditable.getBoxesForSelection(TextSelection(baseOffset: offset, extentOffset: offset + _cachedText.characters.characterAt(i).string.length));
+          if (boxes.isEmpty)
+            return null;
+
+          final SelectionRect selectionRect = SelectionRect(
+            bounds: boxes.first,
+            position: offset,
+          );
+          if (renderEditable.paintBounds.bottom < selectionRect.bounds.top) {
+            belowRenderEditableBottom = true;
+            return null;
+          }
+          return selectionRect;
+        },
+      ).where((SelectionRect? selectionRect) {
+        if (selectionRect == null)
+          return false;
+        if (renderEditable.paintBounds.right < selectionRect.bounds.left || selectionRect.bounds.right < renderEditable.paintBounds.left)
+          return false;
+        if (renderEditable.paintBounds.bottom < selectionRect.bounds.top || selectionRect.bounds.bottom < renderEditable.paintBounds.top)
+          return false;
+        return true;
+      }).map<SelectionRect>((SelectionRect? selectionRect) => selectionRect!).toList();
+      _textInputConnection!.setSelectionRects(rects);
+    }
+  }
+
   void _updateSizeAndTransform() {
     if (_hasInputConnection) {
       final Size size = renderEditable.size;
@@ -3046,53 +3113,62 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                   onCopy: _semanticsOnCopy(controls),
                   onCut: _semanticsOnCut(controls),
                   onPaste: _semanticsOnPaste(controls),
-                  child: _Editable(
-                    key: _editableKey,
-                    startHandleLayerLink: _startHandleLayerLink,
-                    endHandleLayerLink: _endHandleLayerLink,
-                    inlineSpan: buildTextSpan(),
-                    value: _value,
-                    cursorColor: _cursorColor,
-                    backgroundCursorColor: widget.backgroundCursorColor,
-                    showCursor: EditableText.debugDeterministicCursor
-                        ? ValueNotifier<bool>(widget.showCursor)
-                        : _cursorVisibilityNotifier,
-                    forceLine: widget.forceLine,
-                    readOnly: widget.readOnly,
-                    hasFocus: _hasFocus,
-                    maxLines: widget.maxLines,
-                    minLines: widget.minLines,
-                    expands: widget.expands,
-                    strutStyle: widget.strutStyle,
-                    selectionColor: widget.selectionColor,
-                    textScaleFactor: widget.textScaleFactor ?? MediaQuery.textScaleFactorOf(context),
-                    textAlign: widget.textAlign,
-                    textDirection: _textDirection,
-                    locale: widget.locale,
-                    textHeightBehavior: widget.textHeightBehavior ?? DefaultTextHeightBehavior.of(context),
-                    textWidthBasis: widget.textWidthBasis,
-                    obscuringCharacter: widget.obscuringCharacter,
-                    obscureText: widget.obscureText,
-                    autocorrect: widget.autocorrect,
-                    smartDashesType: widget.smartDashesType,
-                    smartQuotesType: widget.smartQuotesType,
-                    enableSuggestions: widget.enableSuggestions,
-                    offset: offset,
-                    onCaretChanged: _handleCaretChanged,
-                    rendererIgnoresPointer: widget.rendererIgnoresPointer,
-                    cursorWidth: widget.cursorWidth,
-                    cursorHeight: widget.cursorHeight,
-                    cursorRadius: widget.cursorRadius,
-                    cursorOffset: widget.cursorOffset ?? Offset.zero,
-                    selectionHeightStyle: widget.selectionHeightStyle,
-                    selectionWidthStyle: widget.selectionWidthStyle,
-                    paintCursorAboveText: widget.paintCursorAboveText,
-                    enableInteractiveSelection: widget.enableInteractiveSelection && (!widget.readOnly || !widget.obscureText),
-                    textSelectionDelegate: this,
-                    devicePixelRatio: _devicePixelRatio,
-                    promptRectRange: _currentPromptRectRange,
-                    promptRectColor: widget.autocorrectionTextRectColor,
-                    clipBehavior: widget.clipBehavior,
+                  child: _ScribbleFocusable(
+                    focusNode: widget.focusNode,
+                    editableKey: _editableKey,
+                    enabled: widget.scribbleEnabled,
+                    updateSelectionRects: () {
+                      _openInputConnection();
+                      _updateSelectionRects(force: true);
+                    },
+                    child: _Editable(
+                      key: _editableKey,
+                      startHandleLayerLink: _startHandleLayerLink,
+                      endHandleLayerLink: _endHandleLayerLink,
+                      inlineSpan: buildTextSpan(),
+                      value: _value,
+                      cursorColor: _cursorColor,
+                      backgroundCursorColor: widget.backgroundCursorColor,
+                      showCursor: EditableText.debugDeterministicCursor
+                          ? ValueNotifier<bool>(widget.showCursor)
+                          : _cursorVisibilityNotifier,
+                      forceLine: widget.forceLine,
+                      readOnly: widget.readOnly,
+                      hasFocus: _hasFocus,
+                      maxLines: widget.maxLines,
+                      minLines: widget.minLines,
+                      expands: widget.expands,
+                      strutStyle: widget.strutStyle,
+                      selectionColor: widget.selectionColor,
+                      textScaleFactor: widget.textScaleFactor ?? MediaQuery.textScaleFactorOf(context),
+                      textAlign: widget.textAlign,
+                      textDirection: _textDirection,
+                      locale: widget.locale,
+                      textHeightBehavior: widget.textHeightBehavior ?? DefaultTextHeightBehavior.of(context),
+                      textWidthBasis: widget.textWidthBasis,
+                      obscuringCharacter: widget.obscuringCharacter,
+                      obscureText: widget.obscureText,
+                      autocorrect: widget.autocorrect,
+                      smartDashesType: widget.smartDashesType,
+                      smartQuotesType: widget.smartQuotesType,
+                      enableSuggestions: widget.enableSuggestions,
+                      offset: offset,
+                      onCaretChanged: _handleCaretChanged,
+                      rendererIgnoresPointer: widget.rendererIgnoresPointer,
+                      cursorWidth: widget.cursorWidth,
+                      cursorHeight: widget.cursorHeight,
+                      cursorRadius: widget.cursorRadius,
+                      cursorOffset: widget.cursorOffset ?? Offset.zero,
+                      selectionHeightStyle: widget.selectionHeightStyle,
+                      selectionWidthStyle: widget.selectionWidthStyle,
+                      paintCursorAboveText: widget.paintCursorAboveText,
+                      enableInteractiveSelection: widget.enableInteractiveSelection && (!widget.readOnly || !widget.obscureText),
+                      textSelectionDelegate: this,
+                      devicePixelRatio: _devicePixelRatio,
+                      promptRectRange: _currentPromptRectRange,
+                      promptRectColor: widget.autocorrectionTextRectColor,
+                      clipBehavior: widget.clipBehavior,
+                    ),
                   ),
                 ),
               );
@@ -3324,6 +3400,142 @@ class _Editable extends MultiChildRenderObjectWidget {
       ..promptRectColor = promptRectColor
       ..clipBehavior = clipBehavior
       ..setPromptRectRange(promptRectRange);
+  }
+}
+
+class _ScribbleFocusable extends StatefulWidget {
+  const _ScribbleFocusable({
+    Key? key,
+    required this.child,
+    required this.focusNode,
+    required this.editableKey,
+    required this.updateSelectionRects,
+    required this.enabled,
+  }): super(key: key);
+
+  final Widget child;
+  final FocusNode focusNode;
+  final GlobalKey editableKey;
+  final VoidCallback updateSelectionRects;
+  final bool enabled;
+
+  @override
+  _ScribbleFocusableState createState() => _ScribbleFocusableState();
+}
+
+class _ScribbleFocusableState extends State<_ScribbleFocusable> implements ScribbleClient {
+  _ScribbleFocusableState(): _elementIdentifier = (_nextElementIdentifier++).toString();
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.enabled) {
+      TextInput.registerScribbleElement(elementIdentifier, this);
+    }
+  }
+
+  @override
+  void didUpdateWidget(_ScribbleFocusable oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!oldWidget.enabled && widget.enabled) {
+      TextInput.registerScribbleElement(elementIdentifier, this);
+    }
+
+    if (oldWidget.enabled && !widget.enabled) {
+      TextInput.unregisterScribbleElement(elementIdentifier);
+    }
+  }
+
+  @override
+  void dispose() {
+    TextInput.unregisterScribbleElement(elementIdentifier);
+    super.dispose();
+  }
+
+  RenderEditable? get renderEditable => widget.editableKey.currentContext?.findRenderObject() as RenderEditable?;
+
+  static int _nextElementIdentifier = 1;
+  final String _elementIdentifier;
+
+  @override
+  String get elementIdentifier => _elementIdentifier;
+
+  @override
+  void onScribbleFocus(Offset offset) {
+    widget.focusNode.requestFocus();
+    renderEditable?.selectPositionAt(from: offset, cause: SelectionChangedCause.scribble);
+    widget.updateSelectionRects();
+  }
+
+  @override
+  bool isInScribbleRect(Rect rect) {
+    final Rect calculatedBounds = bounds;
+    if (renderEditable?.readOnly ?? false)
+      return false;
+    if (calculatedBounds == Rect.zero)
+      return false;
+    if (!calculatedBounds.overlaps(rect))
+      return false;
+    final Rect intersection = calculatedBounds.intersect(rect);
+    final HitTestResult result = HitTestResult();
+    WidgetsBinding.instance?.hitTest(result, intersection.center);
+    return result.path.any((HitTestEntry entry) => entry.target == renderEditable);
+  }
+
+  @override
+  Rect get bounds {
+    final RenderBox? box = context.findRenderObject() as RenderBox?;
+    if (box == null || !mounted || !box.attached)
+      return Rect.zero;
+    final Matrix4 transform = box.getTransformTo(null);
+    return MatrixUtils.transformRect(transform, Rect.fromLTWH(0, 0, box.size.width, box.size.height));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return widget.child;
+  }
+}
+
+class _ScribblePlaceholder extends WidgetSpan {
+  const _ScribblePlaceholder({
+    required Widget child,
+    ui.PlaceholderAlignment alignment = ui.PlaceholderAlignment.bottom,
+    TextBaseline? baseline,
+    TextStyle? style,
+    required this.size,
+  }) : assert(child != null),
+       assert(baseline != null || !(
+         identical(alignment, ui.PlaceholderAlignment.aboveBaseline) ||
+         identical(alignment, ui.PlaceholderAlignment.belowBaseline) ||
+         identical(alignment, ui.PlaceholderAlignment.baseline)
+       )),
+       super(
+         alignment: alignment,
+         baseline: baseline,
+         style: style,
+         child: child,
+       );
+
+  /// The size of the span, used in place of adding a placeholder size to the [TextPainter].
+  final Size size;
+
+  @override
+  void build(ui.ParagraphBuilder builder, { double textScaleFactor = 1.0, List<PlaceholderDimensions>? dimensions }) {
+    assert(debugAssertIsValid());
+    final bool hasStyle = style != null;
+    if (hasStyle) {
+      builder.pushStyle(style!.getTextStyle(textScaleFactor: textScaleFactor));
+    }
+    builder.addPlaceholder(
+      size.width,
+      size.height,
+      alignment,
+      scale: textScaleFactor,
+    );
+    if (hasStyle) {
+      builder.pop();
+    }
   }
 }
 

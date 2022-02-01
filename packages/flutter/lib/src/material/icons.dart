@@ -699,16 +699,16 @@ class Icons {
   static const IconData sixty_fps_select_outlined = IconData(0xee1b, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">6_ft_apart</i> &#x2014; material icon named "6 ft apart".
-  static const IconData six__ft_apart = IconData(0xe02a, fontFamily: 'MaterialIcons');
+  static const IconData six_ft_apart = IconData(0xe02a, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">6_ft_apart</i> &#x2014; material icon named "6 ft apart" (sharp).
-  static const IconData six__ft_apart_sharp = IconData(0xe72a, fontFamily: 'MaterialIcons');
+  static const IconData six_ft_apart_sharp = IconData(0xe72a, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">6_ft_apart</i> &#x2014; material icon named "6 ft apart" (round).
-  static const IconData six__ft_apart_rounded = IconData(0xf509, fontFamily: 'MaterialIcons');
+  static const IconData six_ft_apart_rounded = IconData(0xf509, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">6_ft_apart</i> &#x2014; material icon named "6 ft apart" (outlined).
-  static const IconData six__ft_apart_outlined = IconData(0xee1c, fontFamily: 'MaterialIcons');
+  static const IconData six_ft_apart_outlined = IconData(0xee1c, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">6k</i> &#x2014; material icon named "6k".
   static const IconData six_k = IconData(0xe02b, fontFamily: 'MaterialIcons');
@@ -4803,13 +4803,13 @@ class Icons {
   static const IconData class_ = IconData(0xe165, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">class</i> &#x2014; material icon named "class" (sharp).
-  static const IconData class__sharp = IconData(0xe862, fontFamily: 'MaterialIcons');
+  static const IconData class_sharp = IconData(0xe862, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">class</i> &#x2014; material icon named "class" (round).
-  static const IconData class__rounded = IconData(0xf641, fontFamily: 'MaterialIcons');
+  static const IconData class_rounded = IconData(0xf641, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">class</i> &#x2014; material icon named "class" (outlined).
-  static const IconData class__outlined = IconData(0xef54, fontFamily: 'MaterialIcons');
+  static const IconData class_outlined = IconData(0xef54, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">clean_hands</i> &#x2014; material icon named "clean hands".
   static const IconData clean_hands = IconData(0xe166, fontFamily: 'MaterialIcons');

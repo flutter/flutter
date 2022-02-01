@@ -12,7 +12,7 @@
 
 # Last manual update 2021-09-24 (changing this comment will re-build image)
 
-FROM debian:bullseye
+FROM debian@sha256:4c25ffa6ef572cf0d57da8c634769a08ae94529f7de5be5587ec8ce7b9b50f9c
 MAINTAINER Flutter Developers <flutter-dev@googlegroups.com>
 
 RUN apt-get update -y && \
@@ -101,7 +101,7 @@ ENV PATH="/usr/bin:${PATH}"
 RUN dpkg-query -L nodejs
 # Install Firebase
 # This is why we need nodejs installed.
-RUN /usr/bin/npm --verbose install -g firebase-tools
+RUN /usr/bin/npm --verbose install -g firebase-tools@10.1.2
 
 # Install golang more recent than in repo (necessary for dashing to build)
 RUN curl 'https://dl.google.com/go/go1.13.3.linux-amd64.tar.gz' | tar xvz

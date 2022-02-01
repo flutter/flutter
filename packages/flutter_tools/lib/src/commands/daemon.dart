@@ -11,6 +11,7 @@ import 'package:meta/meta.dart';
 import 'package:uuid/uuid.dart';
 
 import '../android/android_workflow.dart';
+import '../application_package.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -18,6 +19,7 @@ import '../base/logger.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
+import '../convert.dart';
 import '../daemon.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
@@ -85,7 +87,7 @@ class DaemonCommand extends FlutterCommand {
     globals.printStatus('Starting device daemon...');
     final Daemon daemon = Daemon(
       DaemonConnection(
-        daemonStreams: StdioDaemonStreams(globals.stdio),
+        daemonStreams: DaemonStreams.fromStdio(globals.stdio, logger: globals.logger),
         logger: globals.logger,
       ),
       notifyingLogger: asLogger<NotifyingLogger>(globals.logger),
@@ -128,7 +130,7 @@ class _DaemonServer {
         });
         final Daemon daemon = Daemon(
           DaemonConnection(
-            daemonStreams: TcpDaemonStreams(socket, logger: logger),
+            daemonStreams: DaemonStreams.fromSocket(socket, logger: logger),
             logger: logger,
           ),
           notifyingLogger: notifyingLogger,
@@ -145,6 +147,7 @@ class _DaemonServer {
 }
 
 typedef CommandHandler = Future<dynamic> Function(Map<String, dynamic> args);
+typedef CommandHandlerWithBinary = Future<dynamic> Function(Map<String, dynamic> args, Stream<List<int>> binary);
 
 class Daemon {
   Daemon(
@@ -158,6 +161,7 @@ class Daemon {
     _registerDomain(deviceDomain = DeviceDomain(this));
     _registerDomain(emulatorDomain = EmulatorDomain(this));
     _registerDomain(devToolsDomain = DevToolsDomain(this));
+    _registerDomain(proxyDomain = ProxyDomain(this));
 
     // Start listening.
     _commandSubscription = connection.incomingCommands.listen(
@@ -178,7 +182,8 @@ class Daemon {
   DeviceDomain deviceDomain;
   EmulatorDomain emulatorDomain;
   DevToolsDomain devToolsDomain;
-  StreamSubscription<Map<String, dynamic>> _commandSubscription;
+  ProxyDomain proxyDomain;
+  StreamSubscription<DaemonMessage> _commandSubscription;
 
   final NotifyingLogger notifyingLogger;
   final bool logToStdout;
@@ -192,11 +197,11 @@ class Daemon {
 
   Future<int> get onExit => _onExitCompleter.future;
 
-  void _handleRequest(Map<String, dynamic> request) {
+  void _handleRequest(DaemonMessage request) {
     // {id, method, params}
 
     // [id] is an opaque type to us.
-    final dynamic id = request['id'];
+    final dynamic id = request.data['id'];
 
     if (id == null) {
       globals.stdio.stderrWrite('no id for request: $request\n');
@@ -204,7 +209,7 @@ class Daemon {
     }
 
     try {
-      final String method = request['method'] as String;
+      final String method = request.data['method'] as String;
       assert(method != null);
       if (!method.contains('.')) {
         throw 'method not understood: $method';
@@ -216,7 +221,7 @@ class Daemon {
         throw 'no domain for method: $method';
       }
 
-      _domainMap[prefix].handleCommand(name, id, castStringKeyedMap(request['params']) ?? const <String, dynamic>{});
+      _domainMap[prefix].handleCommand(name, id, castStringKeyedMap(request.data['params']) ?? const <String, dynamic>{}, request.binary);
     } on Exception catch (error, trace) {
       connection.sendErrorResponse(id, _toJsonable(error), trace);
     }
@@ -246,18 +251,29 @@ abstract class Domain {
   final Daemon daemon;
   final String name;
   final Map<String, CommandHandler> _handlers = <String, CommandHandler>{};
+  final Map<String, CommandHandlerWithBinary> _handlersWithBinary = <String, CommandHandlerWithBinary>{};
 
   void registerHandler(String name, CommandHandler handler) {
+    assert(!_handlers.containsKey(name));
+    assert(!_handlersWithBinary.containsKey(name));
     _handlers[name] = handler;
+  }
+
+  void registerHandlerWithBinary(String name, CommandHandlerWithBinary handler) {
+    assert(!_handlers.containsKey(name));
+    assert(!_handlersWithBinary.containsKey(name));
+    _handlersWithBinary[name] = handler;
   }
 
   @override
   String toString() => name;
 
-  void handleCommand(String command, dynamic id, Map<String, dynamic> args) {
+  void handleCommand(String command, dynamic id, Map<String, dynamic> args, Stream<List<int>> binary) {
     Future<dynamic>.sync(() {
       if (_handlers.containsKey(command)) {
         return _handlers[command](args);
+      } else if (_handlersWithBinary.containsKey(command)) {
+        return _handlersWithBinary[command](args, binary);
       }
       throw 'command not understood: $name.$command';
     }).then<dynamic>((dynamic result) {
@@ -267,8 +283,8 @@ abstract class Domain {
     });
   }
 
-  void sendEvent(String name, [ dynamic args ]) {
-    daemon.connection.sendEvent(name, _toJsonable(args));
+  void sendEvent(String name, [ dynamic args, List<int> binary ]) {
+    daemon.connection.sendEvent(name, _toJsonable(args), binary);
   }
 
   String _getStringArg(Map<String, dynamic> args, String name, { bool required = false }) {
@@ -794,15 +810,28 @@ typedef _DeviceEventHandler = void Function(Device device);
 class DeviceDomain extends Domain {
   DeviceDomain(Daemon daemon) : super(daemon, 'device') {
     registerHandler('getDevices', getDevices);
+    registerHandler('discoverDevices', discoverDevices);
     registerHandler('enable', enable);
     registerHandler('disable', disable);
     registerHandler('forward', forward);
     registerHandler('unforward', unforward);
+    registerHandler('supportsRuntimeMode', supportsRuntimeMode);
+    registerHandler('uploadApplicationPackage', uploadApplicationPackage);
+    registerHandler('logReader.start', startLogReader);
+    registerHandler('logReader.stop', stopLogReader);
+    registerHandler('startApp', startApp);
+    registerHandler('stopApp', stopApp);
+    registerHandler('takeScreenshot', takeScreenshot);
 
     // Use the device manager discovery so that client provided device types
     // are usable via the daemon protocol.
     globals.deviceManager.deviceDiscoverers.forEach(addDeviceDiscoverer);
   }
+
+  /// An incrementing number used to generate unique ids.
+  int _id = 0;
+  final Map<String, ApplicationPackage> _applicationPackages = <String, ApplicationPackage>{};
+  final Map<String, DeviceLogReader> _logReaders = <String, DeviceLogReader>{};
 
   void addDeviceDiscoverer(DeviceDiscovery discoverer) {
     if (!discoverer.supportsPlatform) {
@@ -839,6 +868,15 @@ class DeviceDomain extends Domain {
     return <Map<String, dynamic>>[
       for (final PollingDeviceDiscovery discoverer in _discoverers)
         for (final Device device in await discoverer.devices)
+          await _deviceToMap(device),
+    ];
+  }
+
+  /// Return a list of the current devices, discarding existing cache of devices.
+  Future<List<Map<String, dynamic>>> discoverDevices([ Map<String, dynamic> args ]) async {
+    return <Map<String, dynamic>>[
+      for (final PollingDeviceDiscovery discoverer in _discoverers)
+        for (final Device device in await discoverer.discoverDevices())
           await _deviceToMap(device),
     ];
   }
@@ -885,6 +923,118 @@ class DeviceDomain extends Domain {
     }
 
     return device.portForwarder.unforward(ForwardedPort(hostPort, devicePort));
+  }
+
+  /// Returns whether a device supports runtime mode.
+  Future<bool> supportsRuntimeMode(Map<String, dynamic> args) async {
+    final String deviceId = _getStringArg(args, 'deviceId', required: true);
+    final Device device = await daemon.deviceDomain._getDevice(deviceId);
+    if (device == null) {
+      throw "device '$deviceId' not found";
+    }
+    final String buildMode = _getStringArg(args, 'buildMode', required: true);
+    return await device.supportsRuntimeMode(getBuildModeForName(buildMode));
+  }
+
+  /// Creates an application package from a file in the temp directory.
+  Future<String> uploadApplicationPackage(Map<String, dynamic> args) async {
+    final TargetPlatform targetPlatform = getTargetPlatformForName(_getStringArg(args, 'targetPlatform', required: true));
+    final File applicationBinary = daemon.proxyDomain.tempDirectory.childFile(_getStringArg(args, 'applicationBinary', required: true));
+    final ApplicationPackage applicationPackage = await ApplicationPackageFactory.instance.getPackageForPlatform(
+      targetPlatform,
+      applicationBinary: applicationBinary,
+    );
+    final String id = 'application_package_${_id++}';
+    _applicationPackages[id] = applicationPackage;
+    return id;
+  }
+
+  /// Starts the log reader on the device.
+  Future<String> startLogReader(Map<String, dynamic> args) async {
+    final String deviceId = _getStringArg(args, 'deviceId', required: true);
+    final Device device = await daemon.deviceDomain._getDevice(deviceId);
+    if (device == null) {
+      throw "device '$deviceId' not found";
+    }
+    final String applicationPackageId = _getStringArg(args, 'applicationPackageId');
+    final ApplicationPackage applicationPackage = applicationPackageId != null ? _applicationPackages[applicationPackageId] : null;
+    final String id = '${deviceId}_${_id++}';
+
+    final DeviceLogReader logReader = await device.getLogReader(app: applicationPackage);
+    logReader.logLines.listen((String log) => sendEvent('device.logReader.logLines.$id', log));
+
+    _logReaders[id] = logReader;
+
+    return id;
+  }
+
+  /// Stops a log reader that was previously started.
+  Future<void> stopLogReader(Map<String, dynamic> args) async {
+    final String id = _getStringArg(args, 'id', required: true);
+    _logReaders.remove(id)?.dispose();
+  }
+
+  /// Starts an app on a device.
+  Future<Map<String, dynamic>> startApp(Map<String, dynamic> args) async {
+    final String deviceId = _getStringArg(args, 'deviceId', required: true);
+    final Device device = await daemon.deviceDomain._getDevice(deviceId);
+    if (device == null) {
+      throw "device '$deviceId' not found";
+    }
+    final String applicationPackageId = _getStringArg(args, 'applicationPackageId', required: true);
+    final ApplicationPackage applicationPackage = _applicationPackages[applicationPackageId];
+
+    final LaunchResult result = await device.startApp(
+      applicationPackage,
+      debuggingOptions: DebuggingOptions.fromJson(
+        castStringKeyedMap(args['debuggingOptions']),
+        // We are using prebuilts, build info does not matter here.
+        BuildInfo.debug,
+      ),
+      mainPath: _getStringArg(args, 'mainPath'),
+      route: _getStringArg(args, 'route'),
+      platformArgs: castStringKeyedMap(args['platformArgs']),
+      prebuiltApplication: _getBoolArg(args, 'prebuiltApplication'),
+      ipv6: _getBoolArg(args, 'ipv6'),
+      userIdentifier: _getStringArg(args, 'userIdentifier'),
+    );
+    return <String, dynamic>{
+      'started': result.started,
+      'observatoryUri': result.observatoryUri?.toString(),
+    };
+  }
+
+  /// Stops an app.
+  Future<bool> stopApp(Map<String, dynamic> args) async {
+    final String deviceId = _getStringArg(args, 'deviceId', required: true);
+    final Device device = await daemon.deviceDomain._getDevice(deviceId);
+    if (device == null) {
+      throw "device '$deviceId' not found";
+    }
+    final String applicationPackageId = _getStringArg(args, 'applicationPackageId', required: true);
+    final ApplicationPackage applicationPackage = _applicationPackages[applicationPackageId];
+    return device.stopApp(
+      applicationPackage,
+      userIdentifier: _getStringArg(args, 'userIdentifier'),
+    );
+  }
+
+  /// Takes a screenshot.
+  Future<String> takeScreenshot(Map<String, dynamic> args) async {
+    final String deviceId = _getStringArg(args, 'deviceId', required: true);
+    final Device device = await daemon.deviceDomain._getDevice(deviceId);
+    if (device == null) {
+      throw "device '$deviceId' not found";
+    }
+    final String tempFileName = 'screenshot_${_id++}';
+    final File tempFile = daemon.proxyDomain.tempDirectory.childFile(tempFileName);
+    await device.takeScreenshot(tempFile);
+    if (await tempFile.exists()) {
+      final String imageBase64 = base64.encode(await tempFile.readAsBytes());
+      return imageBase64;
+    } else {
+      return null;
+    }
   }
 
   @override
@@ -939,6 +1089,16 @@ Future<Map<String, dynamic>> _deviceToMap(Device device) async {
     'platformType': device.platformType?.toString(),
     'ephemeral': device.ephemeral,
     'emulatorId': await device.emulatorId,
+    'sdk': await device.sdkNameAndVersion,
+    'capabilities': <String, Object>{
+      'hotReload': device.supportsHotReload,
+      'hotRestart': device.supportsHotRestart,
+      'screenshot': device.supportsScreenshot,
+      'fastStart': device.supportsFastStart,
+      'flutterExit': device.supportsFlutterExit,
+      'hardwareRendering': await device.supportsHardwareRendering,
+      'startPaused': device.supportsStartPaused,
+    }
   };
 }
 
@@ -1157,6 +1317,75 @@ class EmulatorDomain extends Domain {
   }
 }
 
+class ProxyDomain extends Domain {
+  ProxyDomain(Daemon daemon) : super(daemon, 'proxy') {
+    registerHandlerWithBinary('writeTempFile', writeTempFile);
+    registerHandler('connect', connect);
+    registerHandler('disconnect', disconnect);
+    registerHandlerWithBinary('write', write);
+  }
+
+  final Map<String, Socket> _forwardedConnections = <String, Socket>{};
+  int _id = 0;
+
+  /// Writes to a file in a local temporary directory.
+  Future<void> writeTempFile(Map<String, dynamic> args, Stream<List<int>> binary) async {
+    final String path = _getStringArg(args, 'path', required: true);
+    final File file = tempDirectory.childFile(path);
+    await file.parent.create(recursive: true);
+    await file.openWrite().addStream(binary);
+  }
+
+  /// Opens a connection to a local port, and returns the connection id.
+  Future<String> connect(Map<String, dynamic> args) async {
+    final int targetPort = _getIntArg(args, 'port', required: true);
+    final String id = 'portForwarder_${targetPort}_${_id++}';
+    final Socket socket = await Socket.connect('127.0.0.1', targetPort);
+    _forwardedConnections[id] = socket;
+    socket.listen((List<int> data) {
+      sendEvent('proxy.data.$id', null, data);
+    });
+    unawaited(socket.done.then((dynamic _) {
+      sendEvent('proxy.disconnected.$id');
+    }));
+    return id;
+  }
+
+  /// Disconnects from a previously established connection.
+  Future<bool> disconnect(Map<String, dynamic> args) async {
+    final String id = _getStringArg(args, 'id', required: true);
+    if (_forwardedConnections.containsKey(id)) {
+      await _forwardedConnections.remove(id)?.close();
+      return true;
+    }
+    return false;
+  }
+
+  /// Writes to a previously established connection.
+  Future<bool> write(Map<String, dynamic> args, Stream<List<int>> binary) async {
+    final String id = _getStringArg(args, 'id', required: true);
+    if (_forwardedConnections.containsKey(id)) {
+      final StreamSubscription<List<int>> subscription = binary.listen(_forwardedConnections[id].add);
+      await subscription.asFuture<void>();
+      await subscription.cancel();
+      return true;
+    }
+    return false;
+  }
+
+  @override
+  Future<void> dispose() async {
+    for (final Socket connection in _forwardedConnections.values) {
+      await connection.close();
+    }
+    await _tempDirectory?.delete(recursive: true);
+  }
+
+
+  Directory _tempDirectory;
+  Directory get tempDirectory => _tempDirectory ??= globals.fs.systemTempDirectory.createTempSync('flutter_tool_daemon.');
+}
+
 /// A [Logger] which sends log messages to a listening daemon client.
 ///
 /// This class can either:
@@ -1232,11 +1461,11 @@ class AppRunLogger extends DelegatingLogger {
   }
 
   @override
-  void sendEvent(String name, [Map<String, dynamic> args]) {
+  void sendEvent(String name, [Map<String, dynamic> args, List<int> binary]) {
     if (domain == null) {
       printStatus('event sent after app closed: $name');
     } else {
-      domain.sendEvent(name, args);
+      domain.sendEvent(name, args, binary);
     }
   }
 

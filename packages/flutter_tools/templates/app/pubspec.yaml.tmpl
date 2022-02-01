@@ -4,7 +4,7 @@ description: {{description}}
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
-{{^withPluginHook}}
+{{^withPlatformChannelPluginHook}}
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
@@ -17,7 +17,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 version: 1.0.0+1
-{{/withPluginHook}}
+{{/withPlatformChannelPluginHook}}
 
 environment:
   sdk: {{dartSdkVersionBounds}}

@@ -1087,6 +1087,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
         if (_hasFocus) MaterialState.focused,
       },
     );
+
     return _ParentInkResponseProvider(
       state: this,
       child: Actions(

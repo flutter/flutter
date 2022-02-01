@@ -793,7 +793,7 @@ void main() {
     expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
   });
 
-  testWidgets('disabled IconButton has forbidden mouse cursor', (WidgetTester tester) async {
+  testWidgets('disabled IconButton has basic mouse cursor', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Material(
         child: Directionality(
@@ -814,7 +814,7 @@ void main() {
 
     await tester.pump();
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.forbidden);
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 
   testWidgets('IconButton.mouseCursor overrides implicit setting of mouse cursor', (WidgetTester tester) async {
