@@ -1774,6 +1774,13 @@ class TextInput {
       case 'TextInputClient.removeTextPlaceholder':
         _currentConnection!._client.removeTextPlaceholder();
         break;
+      case 'TextInputClient.updateSpellCheckerResults':
+        List<SpellCheckerSuggestionSpan> spellCheckerSuggestionSpans = List<SpellCheckerSuggestionSpan>[];
+        results.forEach((String result) {
+          List<String> resultParsed = result.split(".");
+          results.add(SpellCheckerSuggestionSpan(int.parse(resultParsed[0]), int.parse(resultParsed[1]), resultParsed.sublist(2).split(".")));
+        });
+        _currentConnection!._client.updateSpellCheckerResults(results);
       default:
         throw MissingPluginException();
     }
@@ -1829,18 +1836,10 @@ class TextInput {
   void initiateSpellChecking(Locale locale, String text) {
     assert(locale != null);
     assert(text != null);
-    Future<List<String>> results = 
-      _channel.invokeMethod<void>(
+    _channel.invokeMethod<void>(
         'TextInput.initiateSpellChecking',
         <String>[ locale.toLanguageTag(), text ],
     );
-
-    List<SpellCheckerSuggestionSpan> spellCheckerSuggestionSpans = List<SpellCheckerSuggestionSpan>[];
-    results.forEach((String result) {
-      List<String> resultParsed = result.split(".");
-      results.add(SpellCheckerSuggestionSpan(int.parse(resultParsed[0]), int.parse(resultParsed[1]), resultParsed.sublist(2).split(".")));
-    });
-    _currentConnection!._client.updateSpellCheckerResults(results);
   }
 
   void _setEditableSizeAndTransform(Map<String, dynamic> args) {
