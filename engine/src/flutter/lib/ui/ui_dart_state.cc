@@ -79,10 +79,6 @@ const std::string& UIDartState::GetAdvisoryScriptURI() const {
   return context_.advisory_script_uri;
 }
 
-const std::string& UIDartState::GetAdvisoryScriptEntrypoint() const {
-  return context_.advisory_script_entrypoint;
-}
-
 void UIDartState::DidSetIsolate() {
   main_port_ = Dart_GetMainPortId();
   std::ostringstream debug_name;
@@ -167,13 +163,6 @@ void UIDartState::AddOrRemoveTaskObserver(bool add) {
 
 fml::WeakPtr<SnapshotDelegate> UIDartState::GetSnapshotDelegate() const {
   return context_.snapshot_delegate;
-}
-
-fml::WeakPtr<GrDirectContext> UIDartState::GetResourceContext() const {
-  if (!context_.io_manager) {
-    return {};
-  }
-  return context_.io_manager->GetResourceContext();
 }
 
 fml::WeakPtr<ImageDecoder> UIDartState::GetImageDecoder() const {

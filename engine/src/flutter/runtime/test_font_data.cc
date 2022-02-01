@@ -1390,10 +1390,6 @@ std::vector<std::unique_ptr<SkStreamAsset>> GetTestFontData() {
   return data;
 }
 
-std::string GetTestFontFamilyName() {
-  return "Ahem";
-}
-
 std::vector<std::string> GetTestFontFamilyNames() {
   std::vector<std::string> names = {"Ahem", "Cough"};
   return names;

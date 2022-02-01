@@ -11,11 +11,6 @@
 namespace flutter {
 namespace testing {
 
-class GLContextSwitchTest : public ::testing::Test {
- public:
-  GLContextSwitchTest();
-};
-
 //------------------------------------------------------------------------------
 /// The renderer context used for testing
 class TestSwitchableGLContext : public SwitchableGLContext {

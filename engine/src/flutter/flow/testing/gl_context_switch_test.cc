@@ -11,8 +11,6 @@ namespace testing {
 
 FML_THREAD_LOCAL fml::ThreadLocalUniquePtr<int> current_context;
 
-GLContextSwitchTest::GLContextSwitchTest() = default;
-
 TestSwitchableGLContext::TestSwitchableGLContext(int context)
     : context_(context){};
 
