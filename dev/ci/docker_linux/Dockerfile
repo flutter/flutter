@@ -115,6 +115,3 @@ RUN apt-get install -y --no-install-recommends \
 	xvfb && \
   apt-get upgrade -y --no-install-recommends && \
   apt-get clean
-
-RUN bundle config set system 'true' && \
-  bundle install --system
