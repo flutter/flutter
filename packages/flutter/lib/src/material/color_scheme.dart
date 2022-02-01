@@ -241,7 +241,7 @@ class ColorScheme with Diagnosticable {
 
   /// Create a [ColorScheme] from the given `palette`.
   ///
-  /// Use this constructor to create a [ColorScheme] from the dynamic colors
+  /// Use this constructor to create a [ColorScheme] from the dynamic colors 
   /// obtained from the Android OS. See the [dynamic_color](https://pub.dev/packages/dynamic_color)
   /// package for more information.
   ///
@@ -254,7 +254,7 @@ class ColorScheme with Diagnosticable {
   ///  * <https://pub.dev/packages/material_color_utilities>, the package
   ///    used to convert a `CorePalette` to a [ColorScheme].
   factory ColorScheme.fromCorePalette({
-    required CorePalette palette,
+    required CorePalette palette, 
     Brightness brightness = Brightness.light,
   }) {
     final Scheme scheme;
