@@ -120,8 +120,6 @@ class UIDartState : public tonic::DartState {
 
   fml::WeakPtr<SnapshotDelegate> GetSnapshotDelegate() const;
 
-  fml::WeakPtr<GrDirectContext> GetResourceContext() const;
-
   fml::WeakPtr<ImageDecoder> GetImageDecoder() const;
 
   fml::WeakPtr<ImageGeneratorRegistry> GetImageGeneratorRegistry() const;
@@ -174,8 +172,6 @@ class UIDartState : public tonic::DartState {
       std::unique_ptr<PlatformConfiguration> platform_configuration);
 
   const std::string& GetAdvisoryScriptURI() const;
-
-  const std::string& GetAdvisoryScriptEntrypoint() const;
 
  private:
   void DidSetIsolate() override;
