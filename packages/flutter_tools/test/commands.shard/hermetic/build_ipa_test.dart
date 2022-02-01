@@ -132,21 +132,33 @@ void main() {
     );
   }
 
-  FakeCommand _exportArchiveCommand({ String exportOptionsPlist =  '/ExportOptions.plist'}) => FakeCommand(
-    command: <String>[
-      'xcrun',
-      'xcodebuild',
-      '-exportArchive',
-      '-allowProvisioningDeviceRegistration',
-      '-allowProvisioningUpdates',
-      '-archivePath',
-      '/build/ios/archive/Runner.xcarchive',
-      '-exportPath',
-      '/build/ios/ipa',
-      '-exportOptionsPlist',
-      exportOptionsPlist,
-    ],
-  );
+  FakeCommand _exportArchiveCommand({
+    String exportOptionsPlist =  '/ExportOptions.plist',
+    File cachePlist,
+  }) {
+    return FakeCommand(
+      command: <String>[
+        'xcrun',
+        'xcodebuild',
+        '-exportArchive',
+        '-allowProvisioningDeviceRegistration',
+        '-allowProvisioningUpdates',
+        '-archivePath',
+        '/build/ios/archive/Runner.xcarchive',
+        '-exportPath',
+        '/build/ios/ipa',
+        '-exportOptionsPlist',
+        exportOptionsPlist,
+      ],
+      onRun: () {
+        // exportOptionsPlist will be cleaned up within the command.
+        // Save it somewhere else so test expectations can be run on it.
+        if (cachePlist != null) {
+          cachePlist.writeAsStringSync(fileSystem.file(_exportOptionsPlist).readAsStringSync());
+        }
+      }
+    );
+  }
 
   testUsingContext('ipa build fails when there is no ios project', () async {
     final BuildCommand command = BuildCommand();
@@ -265,11 +277,12 @@ void main() {
   });
 
   testUsingContext('ipa build invokes xcodebuild and archives for app store', () async {
+    final File cachedExportOptionsPlist = fileSystem.file('/CachedExportOptions.plist');
     final BuildCommand command = BuildCommand();
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
       _setUpFakeXcodeBuildHandler(),
-      _exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
+      _exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist, cachePlist: cachedExportOptionsPlist),
     ]);
     _createMinimalMockProjectFiles();
 
@@ -290,7 +303,7 @@ void main() {
 </plist>
 ''';
 
-    final String actualIpaPlistContents = fileSystem.file(_exportOptionsPlist).readAsStringSync();
+    final String actualIpaPlistContents = fileSystem.file(cachedExportOptionsPlist).readAsStringSync();
     expect(actualIpaPlistContents, expectedIpaPlistContents);
 
     expect(testLogger.statusText, contains('build/ios/archive/Runner.xcarchive'));
@@ -306,11 +319,12 @@ void main() {
   });
 
   testUsingContext('ipa build invokes xcodebuild and archives for ad-hoc distribution', () async {
+    final File cachedExportOptionsPlist = fileSystem.file('/CachedExportOptions.plist');
     final BuildCommand command = BuildCommand();
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
       _setUpFakeXcodeBuildHandler(),
-      _exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
+      _exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist, cachePlist: cachedExportOptionsPlist),
     ]);
     _createMinimalMockProjectFiles();
 
@@ -331,7 +345,7 @@ void main() {
 </plist>
 ''';
 
-    final String actualIpaPlistContents = fileSystem.file(_exportOptionsPlist).readAsStringSync();
+    final String actualIpaPlistContents = fileSystem.file(cachedExportOptionsPlist).readAsStringSync();
     expect(actualIpaPlistContents, expectedIpaPlistContents);
 
     expect(testLogger.statusText, contains('build/ios/archive/Runner.xcarchive'));
@@ -348,11 +362,12 @@ void main() {
   });
 
   testUsingContext('ipa build invokes xcodebuild and archives with bitcode on', () async {
+    final File cachedExportOptionsPlist = fileSystem.file('/CachedExportOptions.plist');
     final BuildCommand command = BuildCommand();
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
       _setUpFakeXcodeBuildHandler(),
-      _exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
+      _exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist, cachePlist: cachedExportOptionsPlist),
     ]);
     _createMinimalMockProjectFiles();
 
@@ -371,7 +386,7 @@ void main() {
 </plist>
 ''';
 
-    final String actualIpaPlistContents = fileSystem.file(_exportOptionsPlist).readAsStringSync();
+    final String actualIpaPlistContents = fileSystem.file(cachedExportOptionsPlist).readAsStringSync();
     expect(actualIpaPlistContents, expectedIpaPlistContents);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
