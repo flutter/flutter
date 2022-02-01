@@ -161,6 +161,8 @@ bool ParagraphSkia::DidExceedMaxLines() {
 }
 
 void ParagraphSkia::Layout(double width) {
+  line_metrics_.reset();
+  line_metrics_styles_.clear();
   paragraph_->layout(width);
 }
 
