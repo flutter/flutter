@@ -364,7 +364,7 @@ void main() {
       expect(filtered, <Device>[]);
     });
 
-    testWithoutContext('Does not remove an unsupported for project device if FlutterProject is null', () async {
+    testWithoutContext('Retains devices unsupported by the project if FlutterProject is null', () async {
       final List<Device> devices = <Device>[
         unsupported,
         unsupportedForProject,
@@ -397,7 +397,7 @@ void main() {
       expect(filtered, <Device>[]);
     });
 
-    testWithoutContext('Removes unsupported for project devices from --all', () async {
+    testWithoutContext('Removes devices unsupported by the project from --all', () async {
       final List<Device> devices = <Device>[
         nonEphemeralOne,
         nonEphemeralTwo,
