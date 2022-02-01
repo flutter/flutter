@@ -204,11 +204,16 @@ class Stepper extends StatefulWidget {
     this.controlsBuilder,
     this.elevation,
     this.margin,
+    this.connectorStyle,
   }) : assert(steps != null),
        assert(type != null),
        assert(currentStep != null),
        assert(0 <= currentStep && currentStep < steps.length),
        super(key: key);
+
+  
+
+  final ConnectorStyle? connectorStyle;
 
   /// The steps of the stepper whose titles, subtitles, icons always get shown.
   ///
@@ -352,11 +357,26 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     return Theme.of(context).brightness == Brightness.dark;
   }
 
-  Widget _buildLine(bool visible) {
+  Widget _buildLine(bool visible, int index) {
+
+     final ConnectorStyle? widgetStyle = widget.connectorStyle;
+    final ConnectorStyle defaultStyle = ConnectorStyle._defaultStyle(context);
+
+    effectiveValue(Function(ConnectorStyle? style) getProperty) {
+      final widgetValue = getProperty(widgetStyle);
+      final defaultValue = getProperty(defaultStyle);
+      return widgetValue ?? defaultValue;
+    }
+
+    final Color? activeColor = effectiveValue((style) => style?.activeColor);
+    final Color? inactiveColor =
+        effectiveValue((style) => style?.inactiveColor);
+    final double? width = effectiveValue((style) => style?.width);
+
     return Container(
-      width: visible ? 1.0 : 0.0,
+      width: visible ? width : 0.0,
       height: 16.0,
-      color: Colors.grey.shade400,
+      color: widget.steps[index].isActive ? activeColor : inactiveColor,
     );
   }
 
@@ -604,9 +624,9 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
             children: <Widget>[
               // Line parts are always added in order for the ink splash to
               // flood the tips of the connector lines.
-              _buildLine(!_isFirst(index)),
+              _buildLine(!_isFirst(index), index),
               _buildIcon(index),
-              _buildLine(!_isLast(index)),
+              _buildLine(!_isLast(index), index),
             ],
           ),
           Expanded(
@@ -621,24 +641,43 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
   }
 
   Widget _buildVerticalBody(int index) {
+
+    final ConnectorStyle? widgetStyle = widget.connectorStyle;
+    final ConnectorStyle defaultStyle = ConnectorStyle._defaultStyle(context);
+
+    effectiveValue(Function(ConnectorStyle? style) getProperty) {
+      final widgetValue = getProperty(widgetStyle);
+      final defaultValue = getProperty(defaultStyle);
+      return widgetValue ?? defaultValue;
+    }
+
+    final Color? activeColor = effectiveValue((style) => style?.activeColor);
+    final Color? inactiveColor =
+        effectiveValue((style) => style?.inactiveColor);
+    final double? width = effectiveValue((style) => style?.width);
+
+
     return Stack(
       children: <Widget>[
-        PositionedDirectional(
-          start: 24.0,
-          top: 0.0,
-          bottom: 0.0,
-          child: SizedBox(
-            width: 24.0,
-            child: Center(
-              child: SizedBox(
-                width: _isLast(index) ? 0.0 : 1.0,
-                child: Container(
-                  color: Colors.grey.shade400,
+        if (!_isLast(index))
+          PositionedDirectional(
+            start: 24.0,
+            top: 0.0,
+            bottom: 0.0,
+            child: SizedBox(
+              width: 24.0,
+              child: Center(
+                child: SizedBox(
+                  width: width,
+                  child: Container(
+                    color: widget.steps[index + 1].isActive
+                            ? activeColor
+                            : inactiveColor,
+                  ),
                 ),
               ),
             ),
           ),
-        ),
         AnimatedCrossFade(
           firstChild: Container(height: 0.0),
           secondChild: Container(
@@ -696,6 +735,21 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
   }
 
   Widget _buildHorizontal() {
+
+    final ConnectorStyle? widgetStyle = widget.connectorStyle;
+    final ConnectorStyle defaultStyle = ConnectorStyle._defaultStyle(context);
+
+    effectiveValue(Function(ConnectorStyle? style) getProperty) {
+      final widgetValue = getProperty(widgetStyle);
+      final defaultValue = getProperty(defaultStyle);
+      return widgetValue ?? defaultValue;
+    }
+
+    final Color? activeColor = effectiveValue((style) => style?.activeColor);
+    final Color? inactiveColor =
+        effectiveValue((style) => style?.inactiveColor);
+    final double? height = effectiveValue((style) => style?.height);
+
     final List<Widget> children = <Widget>[
       for (int i = 0; i < widget.steps.length; i += 1) ...<Widget>[
         InkResponse(
@@ -722,8 +776,10 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
           Expanded(
             child: Container(
               margin: const EdgeInsets.symmetric(horizontal: 8.0),
-              height: 1.0,
-              color: Colors.grey.shade400,
+              height: height,
+              color: (widget.steps[i + 1].isActive)
+                    ? activeColor
+                    : inactiveColor,
             ),
           ),
       ],
@@ -824,6 +880,50 @@ class _TrianglePainter extends CustomPainter {
     canvas.drawPath(
       Path()..addPolygon(points, true),
       Paint()..color = color,
+    );
+  }
+}
+
+
+class ConnectorStyle {
+  final Color? activeColor;
+  final Color? inactiveColor;
+
+  /// This will apply only if [StepperType == StepperType.horizontal]
+  final double? height;
+
+  /// This will apply only if [StepperType == StepperType.vertical]
+  final double? width;
+
+   ConnectorStyle({
+    this.activeColor,
+    this.inactiveColor,
+    this.height,
+    this.width,
+  });
+
+  static ConnectorStyle _styleForm({
+    Color? activeColor,
+    Color? inactiveColor,
+    double? height,
+    double? width,
+  }) {
+    return ConnectorStyle(
+      activeColor: activeColor,
+      inactiveColor: inactiveColor,
+      height: height,
+      width: width,
+    );
+  }
+
+  static ConnectorStyle _defaultStyle(BuildContext context) {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+
+    return _styleForm(
+      activeColor: colorScheme.primary,
+      inactiveColor: Colors.grey.shade400,
+      height: 4,
+      width: 3,
     );
   }
 }

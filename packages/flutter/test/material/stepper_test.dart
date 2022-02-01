@@ -933,6 +933,69 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
     }
   });
 
+
+  testWidgets('Stepper Connector style', (WidgetTester tester) async {
+
+    int _currentIndex = 0;
+
+    for(final StepperType type in StepperType.values) {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return
+                  Stepper(
+              currentStep: _currentIndex,
+            type: StepperType.horizontal,
+            onStepContinue: () {
+              setState(() {
+                if (_currentIndex < 2) {
+                  _currentIndex++;
+                }
+              });
+            },
+            onStepCancel: () {
+              setState(() {
+                if (_currentIndex > 0) {
+                  _currentIndex--;
+                }
+              });
+            },
+            onStepTapped: (index) {
+              setState(() {
+                _currentIndex = index;
+              });
+            },
+              connectorStyle: ConnectorStyle(),
+            steps: [
+              Step(
+                isActive: _currentIndex >= 0,
+                title: Container(),
+                content: const Text('STEP 1'),
+              ),
+              Step(
+                isActive: _currentIndex >= 1,
+                title: Container(),
+                content: const Text('STEP 2'),
+              ),
+              Step(
+                isActive: _currentIndex >= 2,
+                title: Container(),
+                content: const Text('STEP 3'),
+              ),
+            ],
+          )
+;
+              },
+            ),
+          ),
+        ),
+      );
+    }
+  });
+
+
   testWidgets('Stepper horizontal size test', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/pull/77732
     Widget buildFrame({ bool isActive = true, Brightness? brightness }) {
