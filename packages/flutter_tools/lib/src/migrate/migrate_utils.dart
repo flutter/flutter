@@ -142,6 +142,8 @@ class MigrateUtils {
 
 }
 
+/// Tracks the output of a git diff command or any special cases such as addition of a new
+/// file or deletion of an existing file.
 class DiffResult {
   DiffResult(ProcessResult result, this.outputPath) :
     diff = result.stdout as String,
@@ -182,13 +184,18 @@ class DiffResult {
   final int exitCode;
 }
 
+/// Data class to hold the 
 class MergeResult {
   MergeResult(ProcessResult result) :
     mergedContents = result.stdout as String,
     hasConflict = result.exitCode != 0,
     exitCode = result.exitCode;
 
-  MergeResult.explicit({required this.mergedContents, required this.hasConflict, required this.exitCode});
+  MergeResult.explicit({
+    required this.mergedContents,
+    required this.hasConflict,
+    required this.exitCode
+  });
 
   String mergedContents;
   bool hasConflict;

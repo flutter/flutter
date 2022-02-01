@@ -34,7 +34,7 @@ class MigrateApplyCommand extends FlutterCommand {
   final String name = 'apply';
 
   @override
-  final String description = '';
+  final String description = 'Accepts the changes produced by `\$ flutter migrate start` and copies the changed files into your project files. All merge conflicts should be resolved before apply will complete successfully. If conflicts still exist, this command will print the remaining conflicted files.';
 
   @override
   String get category => FlutterCommandCategory.project;
