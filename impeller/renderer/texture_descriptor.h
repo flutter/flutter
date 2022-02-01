@@ -12,6 +12,10 @@
 
 namespace impeller {
 
+//------------------------------------------------------------------------------
+/// @brief      A lightweight object that describes the attributes of a texture
+///             that can then used used an allocator to create that texture.
+///
 struct TextureDescriptor {
   TextureType type = TextureType::kTexture2D;
   PixelFormat format = PixelFormat::kUnknown;
