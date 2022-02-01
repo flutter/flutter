@@ -53,10 +53,8 @@ class MigrateUtils {
   static Future<void> cloneFlutter(String revision, String destination) async {
     // Use https url instead of ssh to avoid need to setup ssh on git.
     List<String> cmdArgs = ['clone', 'https://github.com/flutter/flutter.git', destination];
-    print('Cloning old revision flutter');
     ProcessResult result = await Process.run('git', cmdArgs);
     checkForErrors(result);
-    print('Done Cloning old revision flutter to $destination');
 
     cmdArgs.clear();
     cmdArgs = <String>['reset', '--hard', revision];
@@ -85,10 +83,8 @@ class MigrateUtils {
     if (outputDirectory != null) {
       cmdArgs.add(outputDirectory);
     }
-    print('CREATING');
     final ProcessResult result = await Process.run('./flutter', cmdArgs, workingDirectory: flutterBinPath);
     checkForErrors(result);
-    print('CREATING DONE: $outputDirectory');
     return result.stdout;
   }
 
@@ -98,7 +94,6 @@ class MigrateUtils {
     required String other,
     required String localPath
   }) async {
-    print('  git Merging');
     List<String> cmdArgs = ['merge-file', '-p', current, ancestor, other];
     final ProcessResult result = await Process.run('git', cmdArgs);
     checkForErrors(result, allowedExitCodes: <int>[-1]);

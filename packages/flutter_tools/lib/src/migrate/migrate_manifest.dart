@@ -9,8 +9,8 @@ import '../base/file_system.dart';
 import '../base/common.dart';
 import '../base/logger.dart';
 import '../globals.dart' as globals;
+import '../migrate/migrate_compute.dart';
 import '../migrate/migrate_config.dart';
-import '../migrate/migrate_generate.dart';
 import '../migrate/migrate_manifest.dart';
 import '../migrate/migrate_utils.dart';
 
@@ -56,9 +56,6 @@ class MigrateManifest {
 
   final Directory migrateRootDir;
   final MigrateResult migrateResult;
-  // final Map<String, MergeResult> _mergeResults;
-  // final Map<String, File> _addedFiles;
-  // final Map<String, File> _deletedFiles;
 
   List<String> get conflictFiles {
     List<String> output = <String>[];

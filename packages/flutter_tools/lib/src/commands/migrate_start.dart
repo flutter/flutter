@@ -9,8 +9,8 @@ import '../base/logger.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../runner/flutter_command.dart';
+import '../migrate/migrate_compute.dart';
 import '../migrate/migrate_config.dart';
-import '../migrate/migrate_generate.dart';
 import '../migrate/migrate_manifest.dart';
 import '../migrate/migrate_utils.dart';
 import '../cache.dart';
@@ -75,8 +75,8 @@ class MigrateStartCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    MigrateResult? migrateResult = await generateMigration(
-      verbose: true,
+    MigrateResult? migrateResult = await computeMigration(
+      verbose: _verbose,
       baseAppDirectory: stringArg('base-app-directory'),
       targetAppDirectory: stringArg('target-app-directory'),
       baseRevision: stringArg('base-revision'),
@@ -86,6 +86,14 @@ class MigrateStartCommand extends FlutterCommand {
     if (migrateResult == null) {
       return const FlutterCommandResult(ExitStatus.fail);
     }
+
+    await writeWorkingDir(migrateResult, verbose: _verbose);
+
+    MigrateUtils.deleteTempDirectories(
+      paths: <String>[],
+      directories: migrateResult.tempDirectories,
+    );
+
     return const FlutterCommandResult(ExitStatus.success);
   }
 }
