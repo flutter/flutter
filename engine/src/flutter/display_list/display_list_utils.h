@@ -564,7 +564,7 @@ class DisplayListBoundsCalculator final
 
   static constexpr SkScalar kMinStrokeWidth = 0.01;
 
-  skstd::optional<SkBlendMode> blend_mode_ = SkBlendMode::kSrcOver;
+  std::optional<SkBlendMode> blend_mode_ = SkBlendMode::kSrcOver;
   sk_sp<SkColorFilter> color_filter_;
 
   SkScalar half_stroke_width_ = kMinStrokeWidth;
