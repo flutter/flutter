@@ -16,6 +16,7 @@ import 'basic.dart';
 import 'binding.dart';
 import 'constants.dart';
 import 'container.dart';
+import 'contextual_menu.dart';
 import 'editable_text.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
@@ -431,10 +432,14 @@ class TextSelectionOverlay {
 
   /// Shows the toolbar by inserting it into the [context]'s overlay.
   void showToolbar() {
+    showContextualMenu(context);
+
+    /*
     assert(_toolbar == null);
     _toolbar = OverlayEntry(builder: _buildToolbar);
     Overlay.of(context, rootOverlay: true, debugRequiredFor: debugRequiredFor)!.insert(_toolbar!);
     _toolbarController.forward(from: 0.0);
+    */
   }
 
   /// Updates the overlay after the selection has changed.
