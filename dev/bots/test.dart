@@ -850,8 +850,8 @@ Future<void> _runFrameworkTests() async {
 
   Future<void> runPrivateTests() async {
     final List<String> args = <String>[
-      'run',
       '--sound-null-safety',
+      'run',
       'test_private.dart',
     ];
     final Map<String, String> environment = <String, String>{
