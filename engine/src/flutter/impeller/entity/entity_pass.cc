@@ -4,6 +4,7 @@
 
 #include "impeller/entity/entity_pass.h"
 
+#include "flutter/fml/trace_event.h"
 #include "impeller/entity/content_context.h"
 #include "impeller/geometry/path_builder.h"
 #include "impeller/renderer/command_buffer.h"
@@ -99,6 +100,8 @@ EntityPass* EntityPass::AddSubpass(std::unique_ptr<EntityPass> pass) {
 
 bool EntityPass::Render(ContentContext& renderer,
                         RenderPass& parent_pass) const {
+  TRACE_EVENT0("impeller", "EntityPass::Render");
+
   for (const auto& entity : entities_) {
     if (!entity.Render(renderer, parent_pass)) {
       return false;
