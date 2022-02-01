@@ -15,7 +15,7 @@ namespace impeller {
 std::unique_ptr<Surface> SurfaceMTL::WrapCurrentMetalLayerDrawable(
     std::shared_ptr<Context> context,
     CAMetalLayer* layer) {
-  TRACE_EVENT0("flutter", __FUNCTION__);
+  TRACE_EVENT0("impeller", "SurfaceMTL::WrapCurrentMetalLayerDrawable");
 
   if (context == nullptr || !context->IsValid() || layer == nil) {
     return nullptr;

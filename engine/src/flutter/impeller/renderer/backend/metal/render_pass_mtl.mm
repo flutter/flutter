@@ -6,6 +6,7 @@
 
 #include "flutter/fml/closure.h"
 #include "flutter/fml/logging.h"
+#include "flutter/fml/trace_event.h"
 #include "impeller/base/base.h"
 #include "impeller/renderer/backend/metal/device_buffer_mtl.h"
 #include "impeller/renderer/backend/metal/formats_mtl.h"
@@ -156,6 +157,7 @@ void RenderPassMTL::SetLabel(std::string label) {
 }
 
 bool RenderPassMTL::EncodeCommands(Allocator& transients_allocator) const {
+  TRACE_EVENT0("impeller", "RenderPassMTL::EncodeCommands");
   if (!IsValid()) {
     return false;
   }

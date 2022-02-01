@@ -4,6 +4,7 @@
 
 #include "impeller/display_list/display_list_dispatcher.h"
 
+#include "flutter/fml/trace_event.h"
 #include "impeller/geometry/path_builder.h"
 
 namespace impeller {
@@ -73,11 +74,13 @@ void DisplayListDispatcher::setStrokeJoin(SkPaint::Join join) {
 
 // |flutter::Dispatcher|
 void DisplayListDispatcher::setShader(sk_sp<SkShader> shader) {
+  // Needs https://github.com/flutter/flutter/issues/95434
   UNIMPLEMENTED;
 }
 
 // |flutter::Dispatcher|
 void DisplayListDispatcher::setColorFilter(sk_sp<SkColorFilter> filter) {
+  // Needs https://github.com/flutter/flutter/issues/95434
   UNIMPLEMENTED;
 }
 
@@ -93,16 +96,19 @@ void DisplayListDispatcher::setBlendMode(SkBlendMode mode) {
 
 // |flutter::Dispatcher|
 void DisplayListDispatcher::setBlender(sk_sp<SkBlender> blender) {
+  // Needs https://github.com/flutter/flutter/issues/95434
   UNIMPLEMENTED;
 }
 
 // |flutter::Dispatcher|
 void DisplayListDispatcher::setPathEffect(sk_sp<SkPathEffect> effect) {
+  // Needs https://github.com/flutter/flutter/issues/95434
   UNIMPLEMENTED;
 }
 
 // |flutter::Dispatcher|
 void DisplayListDispatcher::setMaskFilter(sk_sp<SkMaskFilter> filter) {
+  // Needs https://github.com/flutter/flutter/issues/95434
   UNIMPLEMENTED;
 }
 
@@ -396,6 +402,7 @@ void DisplayListDispatcher::drawPoints(SkCanvas::PointMode mode,
 // |flutter::Dispatcher|
 void DisplayListDispatcher::drawVertices(const sk_sp<SkVertices> vertices,
                                          SkBlendMode mode) {
+  // Needs https://github.com/flutter/flutter/issues/95434
   UNIMPLEMENTED;
 }
 
@@ -404,6 +411,7 @@ void DisplayListDispatcher::drawImage(const sk_sp<SkImage> image,
                                       const SkPoint point,
                                       const SkSamplingOptions& sampling,
                                       bool render_with_attributes) {
+  // Needs https://github.com/flutter/flutter/issues/95434
   UNIMPLEMENTED;
 }
 
@@ -415,6 +423,7 @@ void DisplayListDispatcher::drawImageRect(
     const SkSamplingOptions& sampling,
     bool render_with_attributes,
     SkCanvas::SrcRectConstraint constraint) {
+  // Needs https://github.com/flutter/flutter/issues/95434
   UNIMPLEMENTED;
 }
 
@@ -424,6 +433,7 @@ void DisplayListDispatcher::drawImageNine(const sk_sp<SkImage> image,
                                           const SkRect& dst,
                                           SkFilterMode filter,
                                           bool render_with_attributes) {
+  // Needs https://github.com/flutter/flutter/issues/95434
   UNIMPLEMENTED;
 }
 
@@ -433,6 +443,7 @@ void DisplayListDispatcher::drawImageLattice(const sk_sp<SkImage> image,
                                              const SkRect& dst,
                                              SkFilterMode filter,
                                              bool render_with_attributes) {
+  // Needs https://github.com/flutter/flutter/issues/95434
   UNIMPLEMENTED;
 }
 
@@ -446,6 +457,7 @@ void DisplayListDispatcher::drawAtlas(const sk_sp<SkImage> atlas,
                                       const SkSamplingOptions& sampling,
                                       const SkRect* cull_rect,
                                       bool render_with_attributes) {
+  // Needs https://github.com/flutter/flutter/issues/95434
   UNIMPLEMENTED;
 }
 
@@ -453,6 +465,7 @@ void DisplayListDispatcher::drawAtlas(const sk_sp<SkImage> atlas,
 void DisplayListDispatcher::drawPicture(const sk_sp<SkPicture> picture,
                                         const SkMatrix* matrix,
                                         bool render_with_attributes) {
+  // Needs https://github.com/flutter/flutter/issues/95434
   UNIMPLEMENTED;
 }
 
@@ -466,7 +479,17 @@ void DisplayListDispatcher::drawDisplayList(
 void DisplayListDispatcher::drawTextBlob(const sk_sp<SkTextBlob> blob,
                                          SkScalar x,
                                          SkScalar y) {
-  UNIMPLEMENTED;
+  if (!blob) {
+    return;
+  }
+
+  auto bounds = blob->bounds();
+  bounds.fLeft += x;
+  bounds.fTop += y;
+
+  impeller::Paint paint;
+  paint.color = impeller::Color::Random().WithAlpha(0.2);
+  canvas_.DrawRect(ToRect(bounds), paint);
 }
 
 // |flutter::Dispatcher|
@@ -479,6 +502,7 @@ void DisplayListDispatcher::drawShadow(const SkPath& path,
 }
 
 Picture DisplayListDispatcher::EndRecordingAsPicture() {
+  TRACE_EVENT0("impeller", "DisplayListDispatcher::EndRecordingAsPicture");
   return canvas_.EndRecordingAsPicture();
 }
 
