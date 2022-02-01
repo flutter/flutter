@@ -1,4 +1,4 @@
-Signature: 84fd49e7f3ca0c7d6ed901d3a380b489
+Signature: d132e7981cf5d58ba145a2cd8be6c8b5
 
 UNUSED LICENSES:
 
@@ -2334,7 +2334,6 @@ FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/span.h
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/tuple.h
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_component_cpp_testing/internal/errors.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_component_cpp_testing/internal/local_component_runner.cc
-FILE: ../../../fuchsia/sdk/linux/pkg/sys_component_cpp_testing/internal/mock_runner.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_component_cpp_testing/internal/realm.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_component_cpp_testing/realm_builder.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_component_cpp_testing/realm_builder_types.cc
