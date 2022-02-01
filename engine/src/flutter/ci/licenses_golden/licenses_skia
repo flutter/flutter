@@ -1,4 +1,4 @@
-Signature: 8f47b5a120cd472150dee7990c64e21d
+Signature: 0d3784d45bced769e323ea9b7abcf37d
 
 UNUSED LICENSES:
 
@@ -6107,8 +6107,8 @@ FILE: ../../../third_party/skia/experimental/sorttoy/sorttypes.h
 FILE: ../../../third_party/skia/gm/batchedconvexpaths.cpp
 FILE: ../../../third_party/skia/gm/destcolor.cpp
 FILE: ../../../third_party/skia/gm/dsl_processor_test.cpp
-FILE: ../../../third_party/skia/include/core/SkStringView.h
 FILE: ../../../third_party/skia/include/private/SkSLProgramKind.h
+FILE: ../../../third_party/skia/include/private/SkStringView.h
 FILE: ../../../third_party/skia/include/private/SkTOptional.h
 FILE: ../../../third_party/skia/include/private/chromium/SkChromeRemoteGlyphCache.h
 FILE: ../../../third_party/skia/include/sksl/DSLBlock.h
