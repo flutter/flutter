@@ -87,18 +87,6 @@ TEST_F(ShellTest, VSyncTargetTime) {
     RunEngine(shell.get(), std::move(configuration));
   });
   platform_task.wait();
-
-  // schedule a frame to trigger window.onBeginFrame
-  fml::TaskRunner::RunNowOrPostTask(shell->GetTaskRunners().GetUITaskRunner(),
-                                    [engine = shell->GetEngine()]() {
-                                      if (engine) {
-                                        // this implies we can re-use the last
-                                        // frame to trigger begin frame rather
-                                        // than re-generating the layer tree.
-                                        engine->ScheduleFrame(true);
-                                      }
-                                    });
-
   on_target_time_latch.Wait();
   const auto vsync_waiter_target_time =
       ConstantFiringVsyncWaiter::frame_target_time;

@@ -279,11 +279,8 @@ tonic::DartErrorHandleType Engine::GetUIIsolateLastError() {
 }
 
 void Engine::SetViewportMetrics(const ViewportMetrics& metrics) {
-  viewport_metrics_ = metrics;
-  runtime_controller_->SetViewportMetrics(viewport_metrics_);
-  if (animator_) {
-    ScheduleFrame();
-  }
+  runtime_controller_->SetViewportMetrics(metrics);
+  ScheduleFrame();
 }
 
 void Engine::DispatchPlatformMessage(std::unique_ptr<PlatformMessage> message) {
@@ -398,8 +395,7 @@ void Engine::HandleSettingsPlatformMessage(PlatformMessage* message) {
   const auto& data = message->data();
   std::string jsonData(reinterpret_cast<const char*>(data.GetMapping()),
                        data.GetSize());
-  if (runtime_controller_->SetUserSettingsData(std::move(jsonData)) &&
-      have_surface_) {
+  if (runtime_controller_->SetUserSettingsData(std::move(jsonData))) {
     ScheduleFrame();
   }
 }
