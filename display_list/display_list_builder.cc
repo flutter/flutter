@@ -187,7 +187,7 @@ void DisplayListBuilder::setAttributesFromPaint(
     setColor(paint.getColor());
   }
   if (flags.applies_blend()) {
-    skstd::optional<SkBlendMode> mode_optional = paint.asBlendMode();
+    std::optional<SkBlendMode> mode_optional = paint.asBlendMode();
     if (mode_optional) {
       setBlendMode(mode_optional.value());
     } else {
