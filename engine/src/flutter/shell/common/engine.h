@@ -931,10 +931,7 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   std::string last_entry_point_library_;
   std::vector<std::string> last_entry_point_args_;
   std::string initial_route_;
-  ViewportMetrics viewport_metrics_;
   std::shared_ptr<AssetManager> asset_manager_;
-  bool activity_running_;
-  bool have_surface_;
   std::shared_ptr<FontCollection> font_collection_;
   ImageDecoder image_decoder_;
   ImageGeneratorRegistry image_generator_registry_;
