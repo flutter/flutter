@@ -37,22 +37,20 @@ class _NavigationExampleState extends State<NavigationExample> {
 
   @override
   Widget build(BuildContext context) {
-    Widget _buildBody() {
-      return <Widget>[
-        Container(
-            color: Colors.red,
-            alignment: Alignment.center,
-            child: const Text('Page 1')),
-        Container(
-            color: Colors.green,
-            alignment: Alignment.center,
-            child: const Text('Page 2')),
-        Container(
-            color: Colors.blue,
-            alignment: Alignment.center,
-            child: const Text('Page 3')),
-      ][_currentPageIndex];
-    }
+    final List<Widget> buildBody = <Widget>[
+      Container(
+          color: Colors.red,
+          alignment: Alignment.center,
+          child: const Text('Page 1')),
+      Container(
+          color: Colors.green,
+          alignment: Alignment.center,
+          child: const Text('Page 2')),
+      Container(
+          color: Colors.blue,
+          alignment: Alignment.center,
+          child: const Text('Page 3')),
+    ];
 
     return Scaffold(
         bottomNavigationBar: NavigationBar(
@@ -77,6 +75,6 @@ class _NavigationExampleState extends State<NavigationExample> {
                 label: 'Saved',
               ),
             ]),
-        body: _buildBody());
+        body: buildBody.elementAt(_currentPageIndex));
   }
 }
