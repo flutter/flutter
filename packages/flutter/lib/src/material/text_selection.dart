@@ -11,6 +11,7 @@ import 'package:flutter/src/widgets/spell_check.dart';
 
 import 'debug.dart';
 import 'material_localizations.dart';
+import 'spell_check.dart';
 import 'text_selection_theme.dart';
 import 'text_selection_toolbar.dart';
 import 'text_selection_toolbar_text_button.dart';
@@ -57,19 +58,7 @@ class MaterialTextSelectionControls extends TextSelectionControls {
             handleSelectAll: canSelectAll(delegate) ? () => handleSelectAll(delegate) : null,
           );
       case ToolbarType.spellCheckerSuggestionsControls:
-          //TODO(camillesimon): Change to call in spell_check.dart for suggestions toolbar.
-          return _TextSelectionControlsToolbar(
-            globalEditableRegion: globalEditableRegion,
-            textLineHeight: textLineHeight,
-            selectionMidpoint: selectionMidpoint,
-            endpoints: endpoints,
-            delegate: delegate,
-            clipboardStatus: clipboardStatus,
-            handleCut: canCut(delegate) ? () => handleCut(delegate, clipboardStatus) : null,
-            handleCopy: canCopy(delegate) ? () => handleCopy(delegate, clipboardStatus) : null,
-            handlePaste: canPaste(delegate) ? () => handlePaste(delegate) : null,
-            handleSelectAll: canSelectAll(delegate) ? () => handleSelectAll(delegate) : null,
-          );
+          return buildSpellCheckerSuggestionsToolbar(spellCheckerSuggestionSpans: spellCheckerSuggestionSpans);
     }
   }
 

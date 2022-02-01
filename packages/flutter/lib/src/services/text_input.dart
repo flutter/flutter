@@ -1829,19 +1829,17 @@ class TextInput {
   void initiateSpellChecking(Locale locale, String text) {
     assert(locale != null);
     assert(text != null);
-    Future<List<String>> successResults = 
+    Future<List<String>> results = 
       _channel.invokeMethod<void>(
         'TextInput.initiateSpellChecking',
         <String>[ locale.toLanguageTag(), text ],
     );
 
-    // TODO(camillesimon): break down results
-    List<SpellCheckerSuggestionSpan> results = List<SpellCheckerSuggestionSpan>[];
-    successResults.forEach((String result) {
+    List<SpellCheckerSuggestionSpan> spellCheckerSuggestionSpans = List<SpellCheckerSuggestionSpan>[];
+    results.forEach((String result) {
       List<String> resultParsed = result.split(".");
-      results.add(SpellCheckerSuggestionSpan)(start: resultParsed[0],
-                                        )
-    })
+      results.add(SpellCheckerSuggestionSpan(int.parse(resultParsed[0]), int.parse(resultParsed[1]), resultParsed.sublist(2).split(".")));
+    });
     _currentConnection!._client.updateSpellCheckerResults(results);
   }
 

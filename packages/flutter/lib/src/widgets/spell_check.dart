@@ -30,7 +30,7 @@ class SpellCheckerSuggestionSpan {
 /// abstract class as the toolbar shown may differ between platforms.
 abstract class SpellCheckerControls {
     /// Responsible for causing the SpellCheckerSuggestionsToolbar to appear.
-    Widget showSpellCheckerSuggestions(List<SpellCheckerSuggestionSpan> 
+    Widget buildSpellCheckerSuggestionsToolbar(List<SpellCheckerSuggestionSpan> 
       spellCheckerSuggestionSpans);
 }
 

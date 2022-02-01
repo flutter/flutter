@@ -12,9 +12,10 @@ class MaterialSpellCheckerControls extends SpellCheckerControls{
     /// (1) _TextFieldSelectionGestureDetectorBuilder [material/text_field.dart]
     /// (2) EditableTextState [editable_text.dart]
     /// (3) MaterialTextSelectionControls [material/text_selection.dart]
-    Widget showSpellCheckerSuggestions(
+    Widget buildSpellCheckerSuggestionsToolbar(
         List<SpellCheckerSuggestionSpan> spellCheckerSuggestionSpans) {
-            //TODO(camillesimon): Show suggestions toolbar here.
+            //TODO(camillesimon): build spell checker suggestion toolbar here
+            return null;
         }
 }
 /// Provides logic for indicating misspelled words for Android.

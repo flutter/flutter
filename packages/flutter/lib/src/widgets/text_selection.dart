@@ -436,6 +436,16 @@ class TextSelectionOverlay {
   void showToolbar(ToolbarType toolbarType, List<SpellCheckerSuggestionSpan>?
     spellCheckerSuggestionSpans) {
     assert(_toolbar == null);
+    if (toolbarType == ToolbarType.spellCheckerSuggestionsControls) {
+        console.log("**SHOW spell checker suggestions toolbar**");
+        spellCheckerSuggestionSpans.forEach((SpellCheckerSuggestionSpan scsSpan) {
+            console.log(scsSpan.int.toString() + '_' + scsSpan.end.toString());
+            scsSpan.replacementSuggestions.forEach((String suggestion) {
+                console.log(suggestion);
+            });
+        });
+        return;
+    }
     _toolbar = OverlayEntry(builder: (BuildContext context) => _buildToolbar(context, toolbarType, spellCheckerSuggestionSpans));
     Overlay.of(context, rootOverlay: true, debugRequiredFor: debugRequiredFor)!.insert(_toolbar!);
     _toolbarController.forward(from: 0.0);
@@ -500,6 +510,9 @@ class TextSelectionOverlay {
   /// To hide the whole overlay, see [hide].
   void hideToolbar(ToolbarType toolbarType) {
     //TODO(camillesimon): Add logic to hide specific toolbar.
+    if (toolbarType == ToolbarType.spellCheckerSuggestionsControls) {
+      console.log("**HIDE spell checker suggestions toolbar**");
+    }
     assert(_toolbar != null);
     _toolbarController.stop();
     _toolbar?.remove();
