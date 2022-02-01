@@ -826,6 +826,16 @@ class PlatformDispatcher {
     _onTextScaleFactorChangedZone = Zone.current;
   }
 
+  /// Whether briefly displaying the characters as you type in obscured text
+  /// fields is enabled in system settings.
+  ///
+  /// See also:
+  ///
+  ///  * [EditableText.obscureText], which when set to true hides the text in
+  ///    the text field.
+  bool get brieflyShowPassword => _brieflyShowPassword;
+  bool _brieflyShowPassword = true;
+
   /// The setting indicating the current brightness mode of the host platform.
   /// If the platform has no preference, [platformBrightness] defaults to
   /// [Brightness.light].
@@ -857,6 +867,11 @@ class PlatformDispatcher {
 
     final double textScaleFactor = (data['textScaleFactor'] as num).toDouble();
     final bool alwaysUse24HourFormat = data['alwaysUse24HourFormat'] as bool;
+    // This field is optional.
+    final bool? brieflyShowPassword = data['brieflyShowPassword'] as bool?;
+    if (brieflyShowPassword != null) {
+      _brieflyShowPassword = brieflyShowPassword;
+    }
     final Brightness platformBrightness =
     data['platformBrightness'] as String == 'dark' ? Brightness.dark : Brightness.light;
     final PlatformConfiguration previousConfiguration = configuration;
