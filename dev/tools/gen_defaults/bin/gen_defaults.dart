@@ -19,11 +19,55 @@ import 'dart:io';
 
 import 'package:gen_defaults/fab_template.dart';
 
-Future<void> main(List<String> args) async {
-  const String tokensDB = 'dev/tools/gen_defaults/data/material-tokens.json';
-  final Map<String, dynamic> tokens = jsonDecode(File(tokensDB).readAsStringSync()) as Map<String, dynamic>;
+Map<String, dynamic> _readTokenFile(String fileName) {
+  return jsonDecode(File('dev/tools/gen_defaults/data/$fileName').readAsStringSync()) as Map<String, dynamic>;
+}
 
+Future<void> main(List<String> args) async {
   const String materialLib = 'packages/flutter/lib/src/material';
+  const List<String> tokenFiles = <String>[
+    'assist_chip.json',
+    'banner.json',
+    'color_dark.json',
+    'color_light.json',
+    'dialog.json',
+    'elevation.json',
+    'fab_extended_primary.json',
+    'fab_extended_secondary.json',
+    'fab_extended_surface.json',
+    'fab_large_primary.json',
+    'fab_large_secondary.json',
+    'fab_large_surface.json',
+    'fab_primary.json',
+    'fab_secondary.json',
+    'fab_small_primary.json',
+    'fab_small_secondary.json',
+    'fab_small_surface.json',
+    'fab_surface.json',
+    'filter_chip.json',
+    'input_chip.json',
+    'motion.json',
+    'navigation_bar.json',
+    'palette.json',
+    'shape.json',
+    'slider.json',
+    'state.json',
+    'suggestion_chip.json',
+    'text_style.json',
+    'top_app_bar_large.json',
+    'top_app_bar_medium.json',
+    'top_app_bar_small.json',
+    'typeface.json',
+  ];
+
+  final Map<String, dynamic> tokens = <String, dynamic>{};
+  // Special case the light and dark color schemes.
+  tokens['colorsLight'] = _readTokenFile('color_light.json');
+  tokens['colorsDark'] = _readTokenFile('color_dark.json');
+
+  for (final String tokenFile in tokenFiles) {
+    tokens.addAll(_readTokenFile(tokenFile));
+  }
 
   FABTemplate('$materialLib/floating_action_button.dart', tokens).updateFile();
 }
