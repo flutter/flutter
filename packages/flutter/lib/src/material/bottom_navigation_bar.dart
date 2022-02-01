@@ -318,7 +318,6 @@ class BottomNavigationBar extends StatefulWidget {
   /// [MaterialStateProperty.resolve] is used for the following [MaterialState]s:
   ///
   ///  * [MaterialState.selected].
-  /// {@endtemplate}
   ///
   /// If null, then the value of [BottomNavigationBarThemeData.mouseCursor] is used. If
   /// that is also null, then [MaterialStateMouseCursor.clickable] is used.
