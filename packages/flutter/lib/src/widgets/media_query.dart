@@ -575,13 +575,14 @@ class MediaQueryData {
   /// Returns unmodified [MediaQueryData] if the sub-screen coincides with the
   /// available screen space.
   ///
-  /// Throws if the given sub-screen is outside the available screen space.
+  /// Asserts in debug mode, if the given sub-screen is outside the available
+  /// screen space.
   ///
   /// See also:
   ///
   ///  * [DisplayFeatureSubScreen], which removes the display features that
-  ///  split the screen, from the [MediaQuery] and adds a [Padding] widget to
-  ///  position the child to match the selected sub-screen.
+  ///    split the screen, from the [MediaQuery] and adds a [Padding] widget to
+  ///    position the child to match the selected sub-screen.
   MediaQueryData removeDisplayFeatures(Rect subScreen) {
     assert(subScreen.left >= 0.0 && subScreen.top >= 0.0 &&
         subScreen.right <= size.width && subScreen.bottom <= size.height,
@@ -609,8 +610,9 @@ class MediaQueryData {
         right: math.max(0.0, viewInsets.right - rightInset),
         bottom: math.max(0.0, viewInsets.bottom - bottomInset),
       ),
-      displayFeatures: displayFeatures.where((ui.DisplayFeature displayFeature) =>
-          subScreen.overlaps(displayFeature.bounds)).toList(),
+      displayFeatures: displayFeatures.where(
+        (ui.DisplayFeature displayFeature) => subScreen.overlaps(displayFeature.bounds)
+      ).toList(),
     );
   }
 
