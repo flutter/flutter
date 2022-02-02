@@ -179,6 +179,7 @@ void main() {
     final FakeDevice nonEphemeralOne = FakeDevice('nonEphemeralOne', 'nonEphemeralOne', ephemeral: false);
     final FakeDevice nonEphemeralTwo = FakeDevice('nonEphemeralTwo', 'nonEphemeralTwo', ephemeral: false);
     final FakeDevice unsupported = FakeDevice('unsupported', 'unsupported', isSupported: false);
+    final FakeDevice unsupportedForProject = FakeDevice('unsupportedForProject', 'unsupportedForProject', isSupportedForProject: false);
     final FakeDevice webDevice = FakeDevice('webby', 'webby')
       ..targetPlatform = Future<TargetPlatform>.value(TargetPlatform.web_javascript);
     final FakeDevice fuchsiaDevice = FakeDevice('fuchsiay', 'fuchsiay')
@@ -190,6 +191,7 @@ void main() {
         nonEphemeralOne,
         nonEphemeralTwo,
         unsupported,
+        unsupportedForProject,
       ];
 
       final DeviceManager deviceManager = TestDeviceManager(
@@ -327,9 +329,29 @@ void main() {
       );
     });
 
-    testWithoutContext('Removes a single unsupported device', () async {
+    testWithoutContext('Unsupported devices listed in all connected devices', () async {
       final List<Device> devices = <Device>[
         unsupported,
+        unsupportedForProject,
+      ];
+
+      final DeviceManager deviceManager = TestDeviceManager(
+        devices,
+        logger: BufferLogger.test(),
+        terminal: Terminal.test(),
+      );
+      final List<Device> filtered = await deviceManager.getAllConnectedDevices();
+
+      expect(filtered, <Device>[
+        unsupported,
+        unsupportedForProject,
+      ]);
+    });
+
+    testWithoutContext('Removes a unsupported devices', () async {
+      final List<Device> devices = <Device>[
+        unsupported,
+        unsupportedForProject,
       ];
 
       final DeviceManager deviceManager = TestDeviceManager(
@@ -342,9 +364,10 @@ void main() {
       expect(filtered, <Device>[]);
     });
 
-    testWithoutContext('Does not remove an unsupported device if FlutterProject is null', () async {
+    testWithoutContext('Retains devices unsupported by the project if FlutterProject is null', () async {
       final List<Device> devices = <Device>[
         unsupported,
+        unsupportedForProject,
       ];
 
       final DeviceManager deviceManager = TestDeviceManager(
@@ -354,7 +377,7 @@ void main() {
       );
       final List<Device> filtered = await deviceManager.findTargetDevices(null);
 
-      expect(filtered, <Device>[unsupported]);
+      expect(filtered, <Device>[unsupportedForProject]);
     });
 
     testWithoutContext('Removes web and fuchsia from --all', () async {
@@ -374,11 +397,12 @@ void main() {
       expect(filtered, <Device>[]);
     });
 
-    testWithoutContext('Removes unsupported devices from --all', () async {
+    testWithoutContext('Removes devices unsupported by the project from --all', () async {
       final List<Device> devices = <Device>[
         nonEphemeralOne,
         nonEphemeralTwo,
         unsupported,
+        unsupportedForProject,
       ];
       final DeviceManager deviceManager = TestDeviceManager(
         devices,
@@ -398,18 +422,19 @@ void main() {
     testWithoutContext('uses DeviceManager.isDeviceSupportedForProject instead of device.isSupportedForProject', () async {
       final List<Device> devices = <Device>[
         unsupported,
+        unsupportedForProject,
       ];
       final TestDeviceManager deviceManager = TestDeviceManager(
         devices,
         logger: BufferLogger.test(),
         terminal: Terminal.test(),
       );
-      deviceManager.isAlwaysSupportedOverride = true;
+      deviceManager.isAlwaysSupportedForProjectOverride = true;
 
       final List<Device> filtered = await deviceManager.findTargetDevices(FakeFlutterProject());
 
       expect(filtered, <Device>[
-        unsupported,
+        unsupportedForProject,
       ]);
     });
 
@@ -513,12 +538,12 @@ class TestDeviceManager extends DeviceManager {
     _fakeDeviceDiscoverer.setDevices(allDevices);
   }
 
-  bool? isAlwaysSupportedOverride;
+  bool? isAlwaysSupportedForProjectOverride;
 
   @override
   bool isDeviceSupportedForProject(Device device, FlutterProject? flutterProject) {
-    if (isAlwaysSupportedOverride != null) {
-      return isAlwaysSupportedOverride!;
+    if (isAlwaysSupportedForProjectOverride != null) {
+      return isAlwaysSupportedForProjectOverride!;
     }
     return super.isDeviceSupportedForProject(device, flutterProject);
   }
