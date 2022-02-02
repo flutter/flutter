@@ -111,6 +111,11 @@ typedef struct WmCharInfo {
 
   uint16_t repeat_count = 1;
 
+  // The 25th bit of the LParam.
+  //
+  // Some messages are sent with bit25 set. Its meaning is yet unknown.
+  bool bit25 = 0;
+
   Win32Message Build(LRESULT expected_result = kWmResultDontCheck,
                      HWND hWnd = NULL);
 } WmCharInfo;
