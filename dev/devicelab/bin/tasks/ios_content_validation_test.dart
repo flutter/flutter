@@ -19,8 +19,6 @@ Future<void> main() async {
         await inDirectory(flutterProject.rootPath, () async {
           await flutter('build', options: <String>[
             'xcarchive',
-            '--export-method',
-            'development',
           ]);
         });
 
