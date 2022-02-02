@@ -195,7 +195,7 @@ class ProxiedDevice extends Device {
   _ProxiedPortForwarder get proxiedPortForwarder => _proxiedPortForwarder ??= _ProxiedPortForwarder(connection, logger: _logger);
 
   @override
-  DevicePortForwarder get portForwarder => throw UnimplementedError;
+  DevicePortForwarder get portForwarder => throw UnimplementedError();
 
   @override
   void clearLogs() => throw UnimplementedError();

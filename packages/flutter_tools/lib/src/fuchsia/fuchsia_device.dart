@@ -536,16 +536,16 @@ class FuchsiaDevice extends Device {
   @override
   Future<void> takeScreenshot(File outputFile) async {
     if (outputFile.basename.split('.').last != 'ppm') {
-      throw '${outputFile.path} must be a .ppm file';
+      throw Exception('${outputFile.path} must be a .ppm file');
     }
     final RunResult screencapResult = await shell('screencap > /tmp/screenshot.ppm');
     if (screencapResult.exitCode != 0) {
-      throw 'Could not take a screenshot on device $name:\n$screencapResult';
+      throw Exception('Could not take a screenshot on device $name:\n$screencapResult');
     }
     try {
       final RunResult scpResult = await scp('/tmp/screenshot.ppm', outputFile.path);
       if (scpResult.exitCode != 0) {
-        throw 'Failed to copy screenshot from device:\n$scpResult';
+        throw Exception('Failed to copy screenshot from device:\n$scpResult');
       }
     } finally {
       try {

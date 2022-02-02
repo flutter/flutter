@@ -76,7 +76,7 @@ class DapTestClient {
   /// Returns a Future that completes with the next [event] event.
   Future<Event> event(String event) => _eventController.stream.firstWhere(
       (Event e) => e.event == event,
-      orElse: () => throw 'Did not receive $event event before stream closed');
+      orElse: () => throw Exception('Did not receive $event event before stream closed'));
 
   /// Returns a stream for [event] events.
   Stream<Event> events(String event) {
@@ -190,13 +190,13 @@ class DapTestClient {
   /// event for [extension].
   Future<Map<String, Object?>> serviceExtensionAdded(String extension) => serviceExtensionAddedEvents.firstWhere(
       (Map<String, Object?> body) => body['extensionRPC'] == extension,
-      orElse: () => throw 'Did not receive $extension extension added event before stream closed');
+      orElse: () => throw Exception('Did not receive $extension extension added event before stream closed'));
 
   /// Returns a Future that completes with the next serviceExtensionStateChanged
   /// event for [extension].
   Future<Map<String, Object?>> serviceExtensionStateChanged(String extension) => serviceExtensionStateChangedEvents.firstWhere(
       (Map<String, Object?> body) => body['extension'] == extension,
-      orElse: () => throw 'Did not receive $extension extension state changed event before stream closed');
+      orElse: () => throw Exception('Did not receive $extension extension state changed event before stream closed'));
 
   /// Initializes the debug adapter and launches [program]/[cwd] or calls the
   /// custom [launch] method.

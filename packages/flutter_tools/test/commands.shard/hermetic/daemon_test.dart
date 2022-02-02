@@ -660,7 +660,7 @@ void main() {
       bool isRunning = false;
       Future<int> f(int ret) async {
         if (isRunning) {
-          throw 'Functions ran concurrently!';
+          throw Exception('Functions ran concurrently!');
         }
         isRunning = true;
         await Future<void>.delayed(debounceDuration * 2);

@@ -482,7 +482,7 @@ abstract class FlutterTestDriver {
         timeoutExpired = true;
         _debugPrint(messages.toString());
       }
-      throw error;
+      throw error; // ignore: only_throw_errors
     }).whenComplete(() => subscription.cancel());
   }
 }
@@ -753,7 +753,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
   }
 
   void _throwErrorResponse(String message) {
-    throw '$message\n\n$_lastResponse\n\n${_errorBuffer.toString()}'.trim();
+    throw Exception('$message\n\n$_lastResponse\n\n${_errorBuffer.toString()}'.trim());
   }
 
   final bool spawnDdsInstance;
