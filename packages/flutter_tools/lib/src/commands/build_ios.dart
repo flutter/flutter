@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:file/file.dart';
-import 'package:meta/meta.dart';
 
 import '../base/analyze_size.dart';
 import '../base/common.dart';
@@ -68,22 +67,11 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
   BuildIOSArchiveCommand({required bool verboseHelp})
       : super(verboseHelp: verboseHelp) {
     argParser.addOption(
-      'export-method',
-      defaultsTo: 'app-store',
-      allowed: <String>['app-store', 'ad-hoc', 'development'],
-      help: 'Specify how the IPA will be distributed.',
-      allowedHelp: <String, String>{
-        'app-store': 'Upload to the App Store.',
-        'ad-hoc': 'Distribute to designated devices that do not need to be registered with the Apple developer account. '
-                  'Requires a distribution certificate.',
-        'development': 'Distribute only to development devices registered with the Apple developer account.',
-      },
-    );
-    argParser.addOption(
       'export-options-plist',
       valueHelp: 'ExportOptions.plist',
+      // TODO(jmagman): Update help text with link to Flutter docs.
       help:
-          'Export an IPA with these options. See "xcodebuild -h" for available exportOptionsPlist keys.',
+          'Optionally export an IPA with these options. See "xcodebuild -h" for available exportOptionsPlist keys.',
     );
   }
 
@@ -94,7 +82,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
   final List<String> aliases = <String>['xcarchive'];
 
   @override
-  final String description = 'Build an iOS archive bundle and IPA for distribution (Mac OS X host only).';
+  final String description = 'Build an iOS archive bundle (Mac OS X host only).';
 
   @override
   final XcodeBuildAction xcodeBuildAction = XcodeBuildAction.archive;
@@ -117,16 +105,9 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
       .childDirectory('Applications');
 
   @override
-  Future<void> validateCommand() async {
+  Future<FlutterCommandResult> runCommand() async {
     final String? exportOptions = exportOptionsPlist;
     if (exportOptions != null) {
-      if (argResults?.wasParsed('export-method') == true) {
-        throwToolExit(
-          '"--export-options-plist" is not compatible with "--export-method". Either use "--export-options-plist" and '
-          'a plist describing how the IPA should be exported by Xcode, or use "--export-method" to create a new plist.\n'
-          'See "xcodebuild -h" for available exportOptionsPlist keys.'
-        );
-      }
       final FileSystemEntityType type = globals.fs.typeSync(exportOptions);
       if (type == FileSystemEntityType.notFound) {
         throwToolExit(
@@ -136,14 +117,13 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
             '"$exportOptions" is not a file. See "xcodebuild -h" for available keys.');
       }
     }
-    return super.validateCommand();
-  }
-
-  @override
-  Future<FlutterCommandResult> runCommand() async {
     final FlutterCommandResult xcarchiveResult = await super.runCommand();
     final BuildInfo buildInfo = await getBuildInfo();
     displayNullSafetyMode(buildInfo);
+
+    if (exportOptions == null) {
+      return xcarchiveResult;
+    }
 
     // xcarchive failed or not at expected location.
     if (xcarchiveResult.exitStatus != ExitStatus.success) {
@@ -155,20 +135,9 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     final BuildableIOSApp app = await buildableIOSApp;
     Status? status;
     RunResult? result;
-    final String relativeOutputPath = app.ipaOutputPath;
-    final String absoluteOutputPath = globals.fs.path.absolute(relativeOutputPath);
-    final String absoluteArchivePath = globals.fs.path.absolute(app.archiveBundleOutputPath);
-    final String exportMethod = stringArg('export-method')!;
-    final bool isAppStoreUpload = exportMethod  == 'app-store';
-    File? generatedExportPlist;
+    final String outputPath = globals.fs.path.absolute(app.ipaOutputPath);
     try {
-      final String exportMethodDisplayName = isAppStoreUpload ? 'App Store' : exportMethod;
-      status = globals.logger.startProgress('Building $exportMethodDisplayName IPA...');
-      String? exportOptions = exportOptionsPlist;
-      if (exportOptions == null) {
-        generatedExportPlist = _createExportPlist();
-        exportOptions = generatedExportPlist.path;
-      }
+      status = globals.logger.startProgress('Building IPA...');
 
       result = await globals.processUtils.run(
         <String>[
@@ -180,15 +149,14 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
             '-allowProvisioningUpdates',
           ],
           '-archivePath',
-          absoluteArchivePath,
+          globals.fs.path.absolute(app.archiveBundleOutputPath),
           '-exportPath',
-          absoluteOutputPath,
+          outputPath,
           '-exportOptionsPlist',
           globals.fs.path.absolute(exportOptions),
         ],
       );
     } finally {
-      generatedExportPlist?.deleteSync();
       status?.stop();
     }
 
@@ -203,67 +171,12 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
       LineSplitter.split(result.stderr)
           .where((String line) => line.contains('error: '))
           .forEach(errorMessage.writeln);
-
-      globals.printError('Encountered error while creating the IPA:');
-      globals.printError(errorMessage.toString());
-      globals.printError('Try distributing the app in Xcode: "open $absoluteArchivePath"');
-      throwToolExit(null);
+      throwToolExit('Encountered error while building IPA:\n$errorMessage');
     }
 
-    globals.printStatus('Built IPA to $absoluteOutputPath.');
-
-    if (isAppStoreUpload) {
-      globals.printStatus('To upload to the App Store either:');
-      globals.printStatus(
-        '1. Drag and drop the "$relativeOutputPath/*.ipa" bundle into the Apple Transport macOS app https://apps.apple.com/us/app/transporter/id1450874784',
-        indent: 4,
-      );
-      globals.printStatus(
-        '2. Run "xcrun altool --upload-app --type ios -f $relativeOutputPath/*.ipa --apiKey your_api_key --apiIssuer your_issuer_id".',
-        indent: 4,
-      );
-      globals.printStatus(
-        'See "man altool" for details about how to authenticate with the App Store Connect API key.',
-        indent: 7,
-      );
-    }
+    globals.printStatus('Built IPA to $outputPath.');
 
     return FlutterCommandResult.success();
-  }
-
-  File _createExportPlist() {
-    // Create the plist to be passed into xcodebuild -exportOptionsPlist.
-    final StringBuffer plistContents = StringBuffer('''
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-    <dict>
-        <key>method</key>
-''');
-
-    plistContents.write('''
-        <string>${stringArg('export-method')}</string>
-    ''');
-    if (xcodeBuildResult?.xcodeBuildExecution?.buildSettings['ENABLE_BITCODE'] != 'YES') {
-      // Bitcode is off by default in Flutter iOS apps.
-      plistContents.write('''
-    <key>uploadBitcode</key>
-        <false/>
-    </dict>
-</plist>
-''');
-    } else {
-      plistContents.write('''
-</dict>
-</plist>
-''');
-    }
-
-    final File tempPlist = globals.fs.systemTempDirectory
-        .createTempSync('flutter_build_ios.').childFile('ExportOptions.plist');
-    tempPlist.writeAsStringSync(plistContents.toString());
-
-    return tempPlist;
   }
 }
 
@@ -295,10 +208,6 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
   };
 
   XcodeBuildAction get xcodeBuildAction;
-
-  /// The result of the Xcode build command. Null until it finishes.
-  @protected
-  XcodeBuildResult? xcodeBuildResult;
   EnvironmentType get environmentType;
   bool get configOnly;
   bool get shouldCodesign;
@@ -362,7 +271,6 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
       buildAction: xcodeBuildAction,
       deviceID: globals.deviceManager?.specifiedDeviceId,
     );
-    xcodeBuildResult = result;
 
     if (!result.success) {
       await diagnoseXcodeBuildFailure(result, globals.flutterUsage, globals.logger);
