@@ -254,7 +254,8 @@ abstract class DeviceManager {
       await refreshAllConnectedDevices(timeout: timeout);
     }
 
-    List<Device> devices = await getDevices();
+    List<Device> devices = (await getDevices())
+        .where((Device device) => device.isSupported()).toList();
 
     // Always remove web and fuchsia devices from `--all`. This setting
     // currently requires devices to share a frontend_server and resident
