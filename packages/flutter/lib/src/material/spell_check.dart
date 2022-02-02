@@ -37,7 +37,6 @@ class MaterialMisspelledWordsHandler extends MisspelledWordsHandler {
         scssSpans_consumed_index = 0;
         text_consumed_index = 0;
         return TextSpan(
-            style: style,
             children: <TextSpan>[
                 TextSpan(children: buildSubtreesWithMisspelledWordsIndicated(spellCheckerSuggestionSpans, value.composing.textBefore(value.text), style)),
                 TextSpan(children: buildSubtreesWithMisspelledWordsIndicated(spellCheckerSuggestionSpans, value.composing.textInside(value.text), style?.merge(const TextStyle(decoration: TextDecoration.underline)
@@ -81,9 +80,7 @@ class MaterialMisspelledWordsHandler extends MisspelledWordsHandler {
                     // print("-------------------------------------------------CASE 2--------------------------------------------------");
                     end_index = (currScssSpan.end - text_consumed_index) < text.length ? (currScssSpan.end - text_consumed_index) : text.length;
                     // print("END INDEX: " + end_index.toString());
-                    tsTreeChildren.add(TextSpan(style: const TextStyle(decoration: TextDecoration.underline,
-                                    decorationColor: Colors.red,
-                                    decorationStyle: TextDecorationStyle.wavy,),//overrideTextSpanStyle(style),
+                    tsTreeChildren.add(TextSpan(style: overrideTextSpanStyle(style),
                                                 text: text.substring((currScssSpan.start-text_consumed_index), end_index + 1)));
                     // print("TEXT ADDED: |" + text.substring((currScssSpan.start-text_consumed_index), end_index + 1)+ "|");
                     text_pointer = (currScssSpan.end-text_consumed_index) + 1;
@@ -117,9 +114,10 @@ class MaterialMisspelledWordsHandler extends MisspelledWordsHandler {
     /// indicate misspelled words (straight red underline for Android).
     /// Will be used in buildWithMisspelledWordsIndicated(...) method above.
     TextStyle overrideTextSpanStyle(TextStyle? currentTextStyle) {
-        return currentTextStyle?.merge(const TextStyle(decoration: TextDecoration.underline))
-            ?? const TextStyle(decoration: TextDecoration.underline,
+        TextStyle misspelledStyle = TextStyle(decoration: TextDecoration.underline,
                                 decorationColor: Colors.red,
-                                decorationStyle: TextDecorationStyle.wavy,);
+                                decorationStyle: TextDecorationStyle.wavy);
+        return currentTextStyle?.merge(misspelledStyle)
+            ?? misspelledStyle;
     }
 }
