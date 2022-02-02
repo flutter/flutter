@@ -44,6 +44,7 @@ enum class EmbedderTestContextType {
   kSoftwareContext,
   kOpenGLContext,
   kMetalContext,
+  kVulkanContext,
 };
 
 class EmbedderTestContext {
@@ -104,6 +105,12 @@ class EmbedderTestContext {
   friend class EmbedderConfigBuilder;
 
   using NextSceneCallback = std::function<void(sk_sp<SkImage> image)>;
+
+#ifdef SHELL_ENABLE_VULKAN
+  // The TestVulkanContext destructor must be called _after_ the compositor is
+  // freed.
+  fml::RefPtr<TestVulkanContext> vulkan_context_ = nullptr;
+#endif
 
   std::string assets_path_;
   ELFAOTSymbols aot_symbols_;

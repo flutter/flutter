@@ -2,19 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "tests/embedder_test_context.h"
 #define FML_USED_ON_EMBEDDER
 
 #include <string>
 #include <vector>
 
-#include "embedder.h"
-#include "embedder_engine.h"
+#include "vulkan/vulkan.h"
+
 #include "flutter/flow/raster_cache.h"
 #include "flutter/fml/file.h"
 #include "flutter/fml/make_copyable.h"
 #include "flutter/fml/mapping.h"
 #include "flutter/fml/message_loop.h"
 #include "flutter/fml/message_loop_task_queues.h"
+#include "flutter/fml/native_library.h"
 #include "flutter/fml/paths.h"
 #include "flutter/fml/synchronization/count_down_latch.h"
 #include "flutter/fml/synchronization/waitable_event.h"
@@ -29,7 +31,6 @@
 #include "flutter/shell/platform/embedder/tests/embedder_unittests_util.h"
 #include "flutter/testing/assertions_skia.h"
 #include "flutter/testing/test_gl_surface.h"
-#include "flutter/testing/test_vulkan_context.h"
 #include "flutter/testing/testing.h"
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/src/gpu/gl/GrGLDefines.h"
@@ -40,14 +41,9 @@ namespace testing {
 
 using EmbedderTest = testing::EmbedderTest;
 
-//------------------------------------------------------------------------------
-/// This is a sanity check to ensure Swiftshader Vulkan is working. Once Vulkan
-/// support lands in the embedder API, it'll be tested via a new
-/// EmbedderTestContext type/config.
-///
-TEST_F(EmbedderTest, CanInitializeTestVulkanContext) {
-  TestVulkanContext ctx;
-  ASSERT_TRUE(ctx.IsValid());
+TEST_F(EmbedderTest, CanGetVulkanEmbedderContext) {
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kVulkanContext);
+  EmbedderConfigBuilder builder(context);
 }
 
 TEST_F(EmbedderTest, CanCreateOpenGLRenderingEngine) {
@@ -1238,13 +1234,14 @@ TEST_F(EmbedderTest, CanRenderSceneWithoutCustomCompositorWithTransformation) {
       "scene_without_custom_compositor_with_xform.png", rendered_scene));
 }
 
-TEST_F(EmbedderTest, CanRenderGradientWithoutCompositor) {
-  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
+TEST_P(EmbedderTestMultiBackend, CanRenderGradientWithoutCompositor) {
+  EmbedderTestContextType backend = GetParam();
+  auto& context = GetEmbedderContext(backend);
 
   EmbedderConfigBuilder builder(context);
 
   builder.SetDartEntrypoint("render_gradient");
-  builder.SetOpenGLRendererConfig(SkISize::Make(800, 600));
+  builder.SetRendererConfig(backend, SkISize::Make(800, 600));
 
   auto rendered_scene = context.GetNextSceneImage();
 
@@ -1260,7 +1257,8 @@ TEST_F(EmbedderTest, CanRenderGradientWithoutCompositor) {
   ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
             kSuccess);
 
-  ASSERT_TRUE(ImageMatchesFixture("gradient.png", rendered_scene));
+  ASSERT_TRUE(ImageMatchesFixture(
+      FixtureNameForBackend(backend, "gradient.png"), rendered_scene));
 }
 
 TEST_F(EmbedderTest, CanRenderGradientWithoutCompositorWithXform) {
@@ -1296,16 +1294,16 @@ TEST_F(EmbedderTest, CanRenderGradientWithoutCompositorWithXform) {
   ASSERT_TRUE(ImageMatchesFixture("gradient_xform.png", rendered_scene));
 }
 
-TEST_F(EmbedderTest, CanRenderGradientWithCompositor) {
-  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
+TEST_P(EmbedderTestMultiBackend, CanRenderGradientWithCompositor) {
+  EmbedderTestContextType backend = GetParam();
+  auto& context = GetEmbedderContext(backend);
 
   EmbedderConfigBuilder builder(context);
 
   builder.SetDartEntrypoint("render_gradient");
-  builder.SetOpenGLRendererConfig(SkISize::Make(800, 600));
+  builder.SetRendererConfig(backend, SkISize::Make(800, 600));
   builder.SetCompositor();
-  builder.SetRenderTargetType(
-      EmbedderTestBackingStoreProducer::RenderTargetType::kOpenGLFramebuffer);
+  builder.SetRenderTargetType(GetRenderTargetFromBackend(backend, true));
 
   auto rendered_scene = context.GetNextSceneImage();
 
@@ -1321,7 +1319,8 @@ TEST_F(EmbedderTest, CanRenderGradientWithCompositor) {
   ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
             kSuccess);
 
-  ASSERT_TRUE(ImageMatchesFixture("gradient.png", rendered_scene));
+  ASSERT_TRUE(ImageMatchesFixture(
+      FixtureNameForBackend(backend, "gradient.png"), rendered_scene));
 }
 
 TEST_F(EmbedderTest, CanRenderGradientWithCompositorWithXform) {
@@ -1361,16 +1360,17 @@ TEST_F(EmbedderTest, CanRenderGradientWithCompositorWithXform) {
   ASSERT_TRUE(ImageMatchesFixture("gradient_xform.png", rendered_scene));
 }
 
-TEST_F(EmbedderTest, CanRenderGradientWithCompositorOnNonRootLayer) {
-  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
+TEST_P(EmbedderTestMultiBackend,
+       CanRenderGradientWithCompositorOnNonRootLayer) {
+  EmbedderTestContextType backend = GetParam();
+  auto& context = GetEmbedderContext(backend);
 
   EmbedderConfigBuilder builder(context);
 
   builder.SetDartEntrypoint("render_gradient_on_non_root_backing_store");
-  builder.SetOpenGLRendererConfig(SkISize::Make(800, 600));
+  builder.SetRendererConfig(backend, SkISize::Make(800, 600));
   builder.SetCompositor();
-  builder.SetRenderTargetType(
-      EmbedderTestBackingStoreProducer::RenderTargetType::kOpenGLFramebuffer);
+  builder.SetRenderTargetType(GetRenderTargetFromBackend(backend, true));
 
   context.GetCompositor().SetNextPresentCallback(
       [&](const FlutterLayer** layers, size_t layers_count) {
@@ -1379,9 +1379,8 @@ TEST_F(EmbedderTest, CanRenderGradientWithCompositorOnNonRootLayer) {
         // Layer Root
         {
           FlutterBackingStore backing_store = *layers[0]->backing_store;
-          backing_store.type = kFlutterBackingStoreTypeOpenGL;
           backing_store.did_update = true;
-          backing_store.open_gl.type = kFlutterOpenGLTargetTypeFramebuffer;
+          ConfigureBackingStore(backing_store, backend, true);
 
           FlutterLayer layer = {};
           layer.struct_size = sizeof(layer);
@@ -1412,9 +1411,8 @@ TEST_F(EmbedderTest, CanRenderGradientWithCompositorOnNonRootLayer) {
         // Layer 2
         {
           FlutterBackingStore backing_store = *layers[2]->backing_store;
-          backing_store.type = kFlutterBackingStoreTypeOpenGL;
           backing_store.did_update = true;
-          backing_store.open_gl.type = kFlutterOpenGLTargetTypeFramebuffer;
+          ConfigureBackingStore(backing_store, backend, true);
 
           FlutterLayer layer = {};
           layer.struct_size = sizeof(layer);
@@ -1463,7 +1461,8 @@ TEST_F(EmbedderTest, CanRenderGradientWithCompositorOnNonRootLayer) {
   ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
             kSuccess);
 
-  ASSERT_TRUE(ImageMatchesFixture("gradient.png", rendered_scene));
+  ASSERT_TRUE(ImageMatchesFixture(
+      FixtureNameForBackend(backend, "gradient.png"), rendered_scene));
 }
 
 TEST_F(EmbedderTest, CanRenderGradientWithCompositorOnNonRootLayerWithXform) {
@@ -1738,7 +1737,7 @@ TEST_F(EmbedderTest, CanCreateEmbedderWithCustomRenderTaskRunner) {
 /// Asserts that the render task runner can be the same as the platform task
 /// runner.
 ///
-TEST_F(EmbedderTest,
+TEST_P(EmbedderTestMultiBackend,
        CanCreateEmbedderWithCustomRenderTaskRunnerTheSameAsPlatformTaskRunner) {
   // A new thread needs to be created for the platform thread because the test
   // can't wait for assertions to be completed on the same thread that services
@@ -1760,10 +1759,10 @@ TEST_F(EmbedderTest,
       });
 
   platform_task_runner->PostTask([&]() {
-    EmbedderConfigBuilder builder(
-        GetEmbedderContext(EmbedderTestContextType::kOpenGLContext));
+    EmbedderTestContextType backend = GetParam();
+    EmbedderConfigBuilder builder(GetEmbedderContext(backend));
     builder.SetDartEntrypoint("can_render_scene_without_custom_compositor");
-    builder.SetOpenGLRendererConfig(SkISize::Make(800, 600));
+    builder.SetRendererConfig(backend, SkISize::Make(800, 600));
     builder.SetRenderTaskRunner(
         &common_task_runner.GetFlutterTaskRunnerDescription());
     builder.SetPlatformTaskRunner(
@@ -1813,17 +1812,17 @@ TEST_F(EmbedderTest,
   }
 }
 
-TEST_F(EmbedderTest,
+TEST_P(EmbedderTestMultiBackend,
        CompositorMustBeAbleToRenderKnownScenePixelRatioOnSurface) {
-  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
+  EmbedderTestContextType backend = GetParam();
+  auto& context = GetEmbedderContext(backend);
 
   EmbedderConfigBuilder builder(context);
-  builder.SetOpenGLRendererConfig(SkISize::Make(800, 600));
+  builder.SetRendererConfig(backend, SkISize::Make(800, 600));
   builder.SetCompositor();
   builder.SetDartEntrypoint("can_display_platform_view_with_pixel_ratio");
 
-  builder.SetRenderTargetType(
-      EmbedderTestBackingStoreProducer::RenderTargetType::kOpenGLTexture);
+  builder.SetRenderTargetType(GetRenderTargetFromBackend(backend, false));
 
   fml::CountDownLatch latch(1);
 
@@ -1836,9 +1835,8 @@ TEST_F(EmbedderTest,
         // Layer 0 (Root)
         {
           FlutterBackingStore backing_store = *layers[0]->backing_store;
-          backing_store.type = kFlutterBackingStoreTypeOpenGL;
           backing_store.did_update = true;
-          backing_store.open_gl.type = kFlutterOpenGLTargetTypeTexture;
+          ConfigureBackingStore(backing_store, backend, false);
 
           FlutterLayer layer = {};
           layer.struct_size = sizeof(layer);
@@ -1869,9 +1867,8 @@ TEST_F(EmbedderTest,
         // Layer 2
         {
           FlutterBackingStore backing_store = *layers[2]->backing_store;
-          backing_store.type = kFlutterBackingStoreTypeOpenGL;
           backing_store.did_update = true;
-          backing_store.open_gl.type = kFlutterOpenGLTargetTypeTexture;
+          ConfigureBackingStore(backing_store, backend, false);
 
           FlutterLayer layer = {};
           layer.struct_size = sizeof(layer);
@@ -1900,7 +1897,8 @@ TEST_F(EmbedderTest,
 
   latch.Wait();
 
-  ASSERT_TRUE(ImageMatchesFixture("dpr_noxform.png", rendered_scene));
+  ASSERT_TRUE(ImageMatchesFixture(
+      FixtureNameForBackend(backend, "dpr_noxform.png"), rendered_scene));
 }
 
 TEST_F(
@@ -2084,16 +2082,16 @@ TEST_F(EmbedderTest,
   FlutterEngineShutdown(engine.release());
 }
 
-TEST_F(EmbedderTest, PlatformViewMutatorsAreValid) {
-  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
+TEST_P(EmbedderTestMultiBackend, PlatformViewMutatorsAreValid) {
+  EmbedderTestContextType backend = GetParam();
+  auto& context = GetEmbedderContext(backend);
 
   EmbedderConfigBuilder builder(context);
-  builder.SetOpenGLRendererConfig(SkISize::Make(800, 600));
+  builder.SetRendererConfig(backend, SkISize::Make(800, 600));
   builder.SetCompositor();
   builder.SetDartEntrypoint("platform_view_mutators");
 
-  builder.SetRenderTargetType(
-      EmbedderTestBackingStoreProducer::RenderTargetType::kOpenGLTexture);
+  builder.SetRenderTargetType(GetRenderTargetFromBackend(backend, false));
 
   fml::CountDownLatch latch(1);
   context.GetCompositor().SetNextPresentCallback(
@@ -2103,9 +2101,8 @@ TEST_F(EmbedderTest, PlatformViewMutatorsAreValid) {
         // Layer 0 (Root)
         {
           FlutterBackingStore backing_store = *layers[0]->backing_store;
-          backing_store.type = kFlutterBackingStoreTypeOpenGL;
           backing_store.did_update = true;
-          backing_store.open_gl.type = kFlutterOpenGLTargetTypeTexture;
+          ConfigureBackingStore(backing_store, backend, false);
 
           FlutterLayer layer = {};
           layer.struct_size = sizeof(layer);
@@ -3690,6 +3687,12 @@ TEST_F(EmbedderTest, ExternalTextureGLRefreshedTooOften) {
 
   EXPECT_TRUE(resolve_called);
 }
+
+INSTANTIATE_TEST_SUITE_P(
+    EmbedderTestGlVk,
+    EmbedderTestMultiBackend,
+    ::testing::Values(EmbedderTestContextType::kOpenGLContext,
+                      EmbedderTestContextType::kVulkanContext));
 
 }  // namespace testing
 }  // namespace flutter

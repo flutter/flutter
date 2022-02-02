@@ -18,10 +18,20 @@ class VulkanSurface;
 
 class VulkanDevice {
  public:
+  /// @brief  Create a new VkDevice with a resolved VkQueue suitable for
+  ///         rendering with Skia.
+  ///
   VulkanDevice(VulkanProcTable& vk,
                VulkanHandle<VkPhysicalDevice> physical_device,
                bool enable_validation_layers);
 
+  /// @brief  Wrap an existing VkDevice and VkQueue.
+  ///
+  VulkanDevice(VulkanProcTable& vk,
+               VulkanHandle<VkPhysicalDevice> physical_device,
+               VulkanHandle<VkDevice> device,
+               uint32_t queue_family_index,
+               VulkanHandle<VkQueue> queue);
   ~VulkanDevice();
 
   bool IsValid() const;
@@ -72,8 +82,8 @@ class VulkanDevice {
   VulkanHandle<VkCommandPool> command_pool_;
   uint32_t graphics_queue_index_;
   bool valid_;
-  bool enable_validation_layers_;
 
+  bool InitializeCommandPool();
   std::vector<VkQueueFamilyProperties> GetQueueFamilyProperties() const;
 
   FML_DISALLOW_COPY_AND_ASSIGN(VulkanDevice);

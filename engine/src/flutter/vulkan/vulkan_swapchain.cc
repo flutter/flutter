@@ -350,7 +350,7 @@ VulkanSwapchain::AcquireResult VulkanSwapchain::AcquireSurface() {
 
   // ---------------------------------------------------------------------------
   // Step 2:
-  // Put semaphores in unsignaled state.
+  // Put fences in an unsignaled state.
   // ---------------------------------------------------------------------------
   if (!backbuffer->ResetFences()) {
     FML_DLOG(INFO) << "Could not reset fences.";

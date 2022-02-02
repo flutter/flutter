@@ -35,8 +35,7 @@ VulkanDevice::VulkanDevice(VulkanProcTable& p_vk,
     : vk(p_vk),
       physical_device_(std::move(physical_device)),
       graphics_queue_index_(std::numeric_limits<uint32_t>::max()),
-      valid_(false),
-      enable_validation_layers_(enable_validation_layers) {
+      valid_(false) {
   if (!physical_device_ || !vk.AreInstanceProcsSetup()) {
     return;
   }
@@ -74,7 +73,7 @@ VulkanDevice::VulkanDevice(VulkanProcTable& p_vk,
   };
 
   auto enabled_layers =
-      DeviceLayersToEnable(vk, physical_device_, enable_validation_layers_);
+      DeviceLayersToEnable(vk, physical_device_, enable_validation_layers);
 
   const char* layers[enabled_layers.size()];
 
@@ -122,6 +121,36 @@ VulkanDevice::VulkanDevice(VulkanProcTable& p_vk,
 
   queue_ = VulkanHandle<VkQueue>(queue);
 
+  if (!InitializeCommandPool()) {
+    return;
+  }
+
+  valid_ = true;
+}
+
+VulkanDevice::VulkanDevice(VulkanProcTable& p_vk,
+                           VulkanHandle<VkPhysicalDevice> physical_device,
+                           VulkanHandle<VkDevice> device,
+                           uint32_t queue_family_index,
+                           VulkanHandle<VkQueue> queue)
+    : vk(p_vk),
+      physical_device_(std::move(physical_device)),
+      device_(std::move(device)),
+      queue_(std::move(queue)),
+      graphics_queue_index_(queue_family_index),
+      valid_(false) {
+  if (!physical_device_ || !vk.AreInstanceProcsSetup()) {
+    return;
+  }
+
+  if (!InitializeCommandPool()) {
+    return;
+  }
+
+  valid_ = true;
+}
+
+bool VulkanDevice::InitializeCommandPool() {
   const VkCommandPoolCreateInfo command_pool_create_info = {
       .sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
       .pNext = nullptr,
@@ -134,7 +163,7 @@ VulkanDevice::VulkanDevice(VulkanProcTable& p_vk,
                                              nullptr, &command_pool)) !=
       VK_SUCCESS) {
     FML_DLOG(INFO) << "Could not create the command pool.";
-    return;
+    return false;
   }
 
   command_pool_ = VulkanHandle<VkCommandPool>{
@@ -142,7 +171,7 @@ VulkanDevice::VulkanDevice(VulkanProcTable& p_vk,
         vk.DestroyCommandPool(device_, pool, nullptr);
       }};
 
-  valid_ = true;
+  return true;
 }
 
 VulkanDevice::~VulkanDevice() {
