@@ -50,16 +50,17 @@ class FlutterAttachRequestArguments
   static FlutterAttachRequestArguments fromJson(Map<String, Object?> obj) =>
       FlutterAttachRequestArguments.fromMap(obj);
 
-  /// If noDebug is true we still skip attaching to the VM Service (allowing only a subset of functionality like hot reload).
+  /// If noDebug is true we skip attaching to the VM Service (allowing only a subset of functionality like hot reload).
   ///
   /// Unlike Dart's attach, we support noDebug for Flutter's attach because we
-  /// do not _require_ a VM Service connection because we can run "flutter attach".
+  /// do not _require_ a VM Service connection because we can run "flutter attach"
+  /// that can discover the VM Service from the device.
   final bool? noDebug;
 
   /// Arguments to be passed to the tool that will run [program] (for example, the VM or Flutter tool).
   final List<String>? toolArgs;
 
-    /// An optional tool to run instead of "flutter".
+  /// An optional tool to run instead of "flutter".
   ///
   /// In combination with [customToolReplacesArgs] allows invoking a custom
   /// tool instead of "flutter" to launch scripts/tests. The custom tool must be
