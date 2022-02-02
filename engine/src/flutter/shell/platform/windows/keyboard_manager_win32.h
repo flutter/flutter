@@ -75,17 +75,17 @@ class KeyboardManagerWin32 {
     // Used to process key messages.
     virtual uint32_t Win32MapVkToChar(uint32_t virtual_key) = 0;
 
-    // Win32's |SendInput|.
+    // Win32's |SendMessage|.
     //
-    // Used to synthesize key events.
-    virtual UINT Win32DispatchEvent(UINT cInputs,
-                                    LPINPUT pInputs,
-                                    int cbSize) = 0;
+    // Used to synthesize key messages.
+    virtual UINT Win32DispatchMessage(UINT Msg,
+                                      WPARAM wParam,
+                                      LPARAM lParam) = 0;
   };
 
   using KeyEventCallback = WindowDelegate::KeyEventCallback;
 
-  KeyboardManagerWin32(WindowDelegate* delegate);
+  explicit KeyboardManagerWin32(WindowDelegate* delegate);
 
   // Processes Win32 messages related to keyboard and text.
   //
@@ -103,11 +103,11 @@ class KeyboardManagerWin32 {
                      WPARAM const wparam,
                      LPARAM const lparam);
 
- private:
+ protected:
   struct Win32Message {
-    UINT const action;
-    WPARAM const wparam;
-    LPARAM const lparam;
+    UINT action;
+    WPARAM wparam;
+    LPARAM lparam;
 
     bool IsHighSurrogate() const { return IS_HIGH_SURROGATE(wparam); }
 
@@ -127,22 +127,35 @@ class KeyboardManagerWin32 {
     bool was_down;
 
     std::vector<Win32Message> session;
-
-    // A value calculated out of critical event information that can be used
-    // to identify redispatched events.
-    uint64_t Hash() const { return ComputeEventHash(*this); }
   };
 
+  virtual void RedispatchEvent(std::unique_ptr<PendingEvent> event);
+
+ private:
   using OnKeyCallback =
       std::function<void(std::unique_ptr<PendingEvent>, bool)>;
 
-  // Returns true if it's a new event, or false if it's a redispatched event.
-  bool OnKey(std::unique_ptr<PendingEvent> event, OnKeyCallback callback);
+  struct PendingText {
+    bool ready;
+    std::u16string content;
+  };
 
+  // Returns true if it's a new event, or false if it's a redispatched event.
+  void OnKey(std::unique_ptr<PendingEvent> event, OnKeyCallback callback);
+
+  // From `pending_texts_`, pop all front elements that are ready, dispatch
+  // them to |OnText|, and remove them.
+  void DispatchReadyTexts();
+
+  // Handle the result of |OnKey|, which might dispatch the text result to
+  // |OnText|.
+  //
+  // The `pending_text` is either a valid iterator of `pending_texts`, or its
+  // end(). In the latter case, this OnKey message does not contain a text.
   void HandleOnKeyResult(std::unique_ptr<PendingEvent> event,
                          bool handled,
                          int char_action,
-                         std::u16string text);
+                         std::list<PendingText>::iterator pending_text);
 
   // Returns the type of the next WM message.
   //
@@ -152,21 +165,19 @@ class KeyboardManagerWin32 {
   // If there's no message, returns 0.
   UINT PeekNextMessageType(UINT wMsgFilterMin, UINT wMsgFilterMax);
 
-  void DispatchEvent(const PendingEvent& event);
-
   // Find an event in the redispatch list that matches the given one.
   //
   // If an matching event is found, removes the matching event from the
   // redispatch list, and returns true. Otherwise, returns false;
-  bool RemoveRedispatchedEvent(const PendingEvent& incoming);
-  void RedispatchEvent(std::unique_ptr<PendingEvent> event);
+  bool RemoveRedispatchedMessage(UINT action, WPARAM wparam, LPARAM lparam);
 
   WindowDelegate* window_delegate_;
 
   // Keeps track of all messages during the current session.
+  //
+  // At the end of a session, it is moved to the `PendingEvent`, which is
+  // passed to `OnKey`.
   std::vector<Win32Message> current_session_;
-
-  std::map<uint16_t, std::u16string> text_for_scancode_on_redispatch_;
 
   // Whether the last event is a CtrlLeft key down.
   //
@@ -183,9 +194,17 @@ class KeyboardManagerWin32 {
   // This is used to resolve a corner case described in |IsKeyDownAltRight|.
   bool should_synthesize_ctrl_left_up;
 
-  // The queue of key events that have been redispatched to the system but have
+  // A queue of potential texts derived from char messages.
+  //
+  // The text might or might not be ready when they're added, and they might
+  // become ready or removed later. `DispatchReadyTexts` is used to dispatch all
+  // ready texts from the front to `OnText`. This queue is used to ensure
+  // they're dispatched in their arrival order.
+  std::list<PendingText> pending_texts_;
+
+  // The queue of messages that have been redispatched to the system but have
   // not yet been received for a second time.
-  std::deque<std::unique_ptr<PendingEvent>> pending_redispatches_;
+  std::deque<Win32Message> pending_redispatches_;
 
   // Calculate a hash based on event data for fast comparison for a redispatched
   // event.

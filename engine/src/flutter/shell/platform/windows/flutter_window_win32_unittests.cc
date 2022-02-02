@@ -93,13 +93,9 @@ class SpyTextInputPlugin : public TextInputPlugin,
   std::unique_ptr<TextInputPlugin> real_implementation_;
 };
 
-class MockFlutterWindowWin32 : public FlutterWindowWin32,
-                               public MockMessageQueue {
+class MockFlutterWindowWin32 : public FlutterWindowWin32 {
  public:
-  MockFlutterWindowWin32(WPARAM virtual_key = 0, bool is_printable = true)
-      : virtual_key_(virtual_key),
-        is_printable_(is_printable),
-        FlutterWindowWin32(800, 600) {
+  MockFlutterWindowWin32() : FlutterWindowWin32(800, 600) {
     ON_CALL(*this, GetDpiScale())
         .WillByDefault(Return(this->FlutterWindowWin32::GetDpiScale()));
   }
@@ -111,25 +107,6 @@ class MockFlutterWindowWin32 : public FlutterWindowWin32,
 
   // Wrapper for GetCurrentDPI() which is a protected method.
   UINT GetDpi() { return GetCurrentDPI(); }
-
-  // Simulates a WindowProc message from the OS.
-  LRESULT InjectWindowMessage(UINT const message,
-                              WPARAM const wparam,
-                              LPARAM const lparam) {
-    return Win32SendMessage(message, wparam, lparam);
-  }
-
-  void InjectMessages(int count, Win32Message message1, ...) {
-    Win32Message messages[count];
-    messages[0] = message1;
-    va_list args;
-    va_start(args, message1);
-    for (int i = 1; i < count; i += 1) {
-      messages[i] = va_arg(args, Win32Message);
-    }
-    va_end(args);
-    InjectMessageList(count, messages);
-  }
 
   MOCK_METHOD1(OnDpiScale, void(unsigned int));
   MOCK_METHOD2(OnResize, void(unsigned int, unsigned int));
@@ -147,17 +124,11 @@ class MockFlutterWindowWin32 : public FlutterWindowWin32,
   MOCK_METHOD0(IsVisible, bool());
   MOCK_METHOD1(UpdateCursorRect, void(const Rect&));
   MOCK_METHOD0(OnResetImeComposing, void());
+  MOCK_METHOD3(Win32DispatchMessage, UINT(UINT, WPARAM, LPARAM));
+  MOCK_METHOD4(Win32PeekMessage, BOOL(LPMSG, UINT, UINT, UINT));
+  MOCK_METHOD1(Win32MapVkToChar, uint32_t(uint32_t));
 
  protected:
-  // |KeyboardManagerWin32::WindowDelegate|
-  BOOL Win32PeekMessage(LPMSG lpMsg,
-                        UINT wMsgFilterMin,
-                        UINT wMsgFilterMax,
-                        UINT wRemoveMsg) override {
-    return MockMessageQueue::Win32PeekMessage(lpMsg, wMsgFilterMin,
-                                              wMsgFilterMax, wRemoveMsg);
-  }
-
   // |KeyboardManagerWin32::WindowDelegate|
   LRESULT Win32DefWindowProc(HWND hWnd,
                              UINT Msg,
@@ -165,52 +136,6 @@ class MockFlutterWindowWin32 : public FlutterWindowWin32,
                              LPARAM lParam) override {
     return kWmResultDefault;
   }
-
-  // |KeyboardManagerWin32::WindowDelegate|
-  UINT Win32DispatchEvent(UINT cInputs, LPINPUT pInputs, int cbSize) override {
-    for (UINT input_idx = 0; input_idx < cInputs; input_idx += 1) {
-      SendInput(pInputs[input_idx].ki);
-    }
-    return 1;
-  }
-
-  // |MockMessageQueue|
-  LRESULT Win32SendMessage(UINT const message,
-                           WPARAM const wparam,
-                           LPARAM const lparam) override {
-    return HandleMessage(message, wparam, lparam);
-  }
-
- private:
-  UINT SendInput(KEYBDINPUT kbdinput) {
-    // Simulate the event loop by just sending the event sent to
-    // "SendInput" directly to the window.
-    const bool is_key_up = kbdinput.dwFlags & KEYEVENTF_KEYUP;
-    const UINT message = is_key_up ? WM_KEYUP : WM_KEYDOWN;
-
-    const LPARAM lparam = CreateKeyEventLparam(
-        kbdinput.wScan, kbdinput.dwFlags & KEYEVENTF_EXTENDEDKEY, is_key_up);
-    // Windows would normally fill in the virtual key code for us, so we
-    // simulate it for the test with the key we know is in the test. The
-    // KBDINPUT we're passed doesn't have it filled in (on purpose, so that
-    // Windows will fill it in).
-    //
-    // TODO(dkwingsmt): Don't check the message results for redispatched
-    // messages for now, because making them work takes non-trivial rework
-    // to our current structure. https://github.com/flutter/flutter/issues/87843
-    // If this is resolved, change them to kWmResultDefault.
-    pending_responds_.push_back(
-        Win32Message{message, virtual_key_, lparam, kWmResultDontCheck});
-    if (is_printable_ && (kbdinput.dwFlags & KEYEVENTF_KEYUP) == 0) {
-      pending_responds_.push_back(
-          Win32Message{WM_CHAR, virtual_key_, lparam, kWmResultDontCheck});
-    }
-    return 1;
-  }
-
-  std::vector<Win32Message> pending_responds_;
-  WPARAM virtual_key_;
-  bool is_printable_;
 };
 
 class MockWindowBindingHandlerDelegate : public WindowBindingHandlerDelegate {
