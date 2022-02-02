@@ -65,10 +65,11 @@ Future<MigrateResult?> computeMigration({
   }
   final FlutterProject flutterProject = FlutterProject.current();
 
-  final List<MigrateConfig> configs = await MigrateConfig.parseOrCreateMigrateConfigs();
+  final List<MigrateConfig> configs = await MigrateConfig.parseOrCreateMigrateConfigs(create: true);
 
-  String rootBaseRevision = '';
+  // TODO: implement no-base-revision migrate in case no fallback can be found.
   final String fallbackRevision = await MigrateConfig.getFallbackLastMigrateVersion();
+  String rootBaseRevision = '';
   Map<String, List<MigrateConfig>> revisionToConfigs = <String, List<MigrateConfig>>{};
   Set<String> revisions = Set<String>();
   if (baseRevision == null) {
@@ -89,7 +90,12 @@ Future<MigrateResult?> computeMigration({
   // Reorder such that the root revision is created first.
   revisions.remove(rootBaseRevision);
   List<String> revisionsList = List<String>.from(revisions);
-  revisionsList.insert(0, rootBaseRevision);
+  if (rootBaseRevision != '') {
+    revisionsList.insert(0, rootBaseRevision);
+  }
+
+  print('falback: $fallbackRevision');
+  print('$revisionsList');
 
   // Extract the files/paths that should be ignored by the migrate tool.
   // These paths are absolute paths.
@@ -267,13 +273,19 @@ Future<MigrateResult?> computeMigration({
     }
   }
 
-  List<Directory> directoriesToDelete = <Directory>[];
-  // Don't delete user-provided directories
-  if (!customBaseAppDir) {
-    migrateResult.tempDirectories.add(generatedBaseTemplateDirectory);
-  }
-  if (!customTargetAppDir) {
-    migrateResult.tempDirectories.add(generatedTargetTemplateDirectory);
+  if (deleteTempDirectories) {
+    List<Directory> directoriesToDelete = <Directory>[];
+    // Don't delete user-provided directories
+    if (!customBaseAppDir) {
+      migrateResult.tempDirectories.add(generatedBaseTemplateDirectory);
+    }
+    if (!customTargetAppDir) {
+      migrateResult.tempDirectories.add(generatedTargetTemplateDirectory);
+    }
+    // MigrateUtils.deleteTempDirectories(
+    //   paths: <String>[],
+    //   directories: directoriesToDelete,
+    // );
   }
   return migrateResult;
 }

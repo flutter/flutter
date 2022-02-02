@@ -46,7 +46,11 @@ class MigrateConfig {
     platform = yamlRoot['platform'];
     createVersion = yamlRoot['createVersion'];
     lastMigrateVersion = yamlRoot['lastMigrateVersion'];
-    unmanagedFiles = List<String>.from(yamlRoot['unmanagedFiles']);
+    if (yamlRoot['unmanagedFiles'] != null) {
+      unmanagedFiles = List<String>.from(yamlRoot['unmanagedFiles']);
+    } else {
+      unmanagedFiles = <String>[];
+    }
   }
   static const String kFileName = '.migrate_config';
 
@@ -137,8 +141,7 @@ $unmanagedFilesString
     return yamlRoot.keys.contains('platform') &&
     yamlRoot.keys.contains('createVersion') &&
     yamlRoot.keys.contains('lastMigrateVersion') &&
-    yamlRoot.keys.contains('unmanagedFiles') &&
-    yamlRoot['unmanagedFiles'] is YamlList;
+    yamlRoot.keys.contains('unmanagedFiles');
   }
 
   static List<String> getSupportedPlatforms({bool includeRoot = false}) {
@@ -170,7 +173,7 @@ $unmanagedFilesString
     return platforms;
   }
 
-  static Future<List<MigrateConfig>> parseOrCreateMigrateConfigs({List<String>? platforms, Directory? projectDirectory}) async {
+  static Future<List<MigrateConfig>> parseOrCreateMigrateConfigs({List<String>? platforms, Directory? projectDirectory, bool create = true}) async {
     if (platforms == null) {
       platforms = getSupportedPlatforms(includeRoot: true);
     }
@@ -188,7 +191,9 @@ $unmanagedFilesString
           lastMigrateVersion: '',
           unmanagedFiles: <String>[],
         );
-        newConfig.writeFile(projectDirectory: projectDirectory);
+        if (create) {
+          newConfig.writeFile(projectDirectory: projectDirectory);
+        }
         configs.add(newConfig);
       }
     }
