@@ -98,39 +98,11 @@ class DaemonInputStreamConverter {
 
   // Processes a single chunk received in the input stream.
   void _processChunk(List<int> chunk) {
-    const int LF = 10; // The '\n' character
 
     int start = 0;
     while (start < chunk.length) {
       if (state == _InputStreamParseState.json) {
-        // Search for newline character.
-        final int indexOfNewLine = chunk.indexOf(LF, start);
-        if (indexOfNewLine < 0) {
-          bytesBuilder.add(chunk.sublist(start));
-          start = chunk.length;
-        } else {
-          bytesBuilder.add(chunk.sublist(start, indexOfNewLine + 1));
-          start = indexOfNewLine + 1;
-
-          // Process chunk here
-          final Uint8List combinedChunk = bytesBuilder.takeBytes();
-          String jsonString = utf8.decode(combinedChunk).trim();
-          if (jsonString.startsWith('[{') && jsonString.endsWith('}]')) {
-            jsonString = jsonString.substring(1, jsonString.length - 1);
-            final Map<String, Object?>? value = castStringKeyedMap(json.decode(jsonString));
-            if (value != null) {
-              // Check if we need to consume another binary blob.
-              if (value[_binaryLengthKey] != null) {
-                remainingBinaryLength = value[_binaryLengthKey]! as int;
-                currentBinaryStream = StreamController<List<int>>();
-                state = _InputStreamParseState.binary;
-                _controller.add(DaemonMessage(value, currentBinaryStream.stream));
-              } else {
-                _controller.add(DaemonMessage(value));
-              }
-            }
-          }
-        }
+        start += _processChunkInJsonMode(chunk, start);
       } else if (state == _InputStreamParseState.binary) {
         final int bytesSent = _addBinaryChunk(chunk, start, remainingBinaryLength);
         start += bytesSent;
@@ -144,6 +116,41 @@ class DaemonInputStreamConverter {
         }
       }
     }
+  }
+
+  /// Processes a chunk in JSON mode, and returns the number of bytes processed.
+  int _processChunkInJsonMode(List<int> chunk, int start) {
+    const int LF = 10; // The '\n' character
+
+    // Search for newline character.
+    final int indexOfNewLine = chunk.indexOf(LF, start);
+    if (indexOfNewLine < 0) {
+      bytesBuilder.add(chunk.sublist(start));
+      return chunk.length - start;
+    }
+
+    bytesBuilder.add(chunk.sublist(start, indexOfNewLine + 1));
+
+    // Process chunk here
+    final Uint8List combinedChunk = bytesBuilder.takeBytes();
+    String jsonString = utf8.decode(combinedChunk).trim();
+    if (jsonString.startsWith('[{') && jsonString.endsWith('}]')) {
+      jsonString = jsonString.substring(1, jsonString.length - 1);
+      final Map<String, Object?>? value = castStringKeyedMap(json.decode(jsonString));
+      if (value != null) {
+        // Check if we need to consume another binary blob.
+        if (value[_binaryLengthKey] != null) {
+          remainingBinaryLength = value[_binaryLengthKey]! as int;
+          currentBinaryStream = StreamController<List<int>>();
+          state = _InputStreamParseState.binary;
+          _controller.add(DaemonMessage(value, currentBinaryStream.stream));
+        } else {
+          _controller.add(DaemonMessage(value));
+        }
+      }
+    }
+
+    return indexOfNewLine + 1 - start;
   }
 
   int _addBinaryChunk(List<int> chunk, int start, int maximumSizeToRead) {
@@ -169,6 +176,32 @@ class DaemonStreams {
     _outputSink = outputSink,
     inputStream = DaemonInputStreamConverter(rawInputStream).convertedStream,
     _logger = logger;
+
+  /// Creates a [DaemonStreams] that uses stdin and stdout as the underlying streams.
+  DaemonStreams.fromStdio(Stdio stdio, { required Logger logger })
+    : this(stdio.stdin, stdio.stdout, logger: logger);
+
+  /// Creates a [DaemonStreams] that uses [Socket] as the underlying streams.
+  DaemonStreams.fromSocket(Socket socket, { required Logger logger })
+    : this(socket, socket, logger: logger);
+
+  /// Connects to a server and creates a [DaemonStreams] from the connection as the underlying streams.
+  factory DaemonStreams.connect(String host, int port, { required Logger logger }) {
+    final Future<Socket> socketFuture = Socket.connect(host, port);
+    final StreamController<List<int>> inputStreamController = StreamController<List<int>>();
+    final StreamController<List<int>> outputStreamController = StreamController<List<int>>();
+    socketFuture.then((Socket socket) {
+      inputStreamController.addStream(socket);
+      socket.addStream(outputStreamController.stream);
+    }).onError((Object error, StackTrace stackTrace) {
+      logger.printError('Socket error: $error');
+      logger.printTrace('$stackTrace');
+      // Propagate the error to the streams.
+      inputStreamController.addError(error, stackTrace);
+      unawaited(outputStreamController.close());
+    });
+    return DaemonStreams(inputStreamController.stream, outputStreamController.sink, logger: logger);
+  }
 
   final StreamSink<List<int>> _outputSink;
   final Logger _logger;
@@ -196,28 +229,6 @@ class DaemonStreams {
   /// Cleans up any resources used.
   Future<void> dispose() async {
     unawaited(_outputSink.close());
-  }
-
-  /// Creates a [DaemonStreams] that uses stdin and stdout as the underlying streams.
-  static DaemonStreams fromStdio(Stdio stdio, { required Logger logger }) {
-    return DaemonStreams(stdio.stdin, stdio.stdout, logger: logger);
-  }
-
-  /// Creates a [DaemonStreams] that uses [Socket] as the underlying streams.
-  static DaemonStreams fromSocket(Socket socket, { required Logger logger }) {
-    return DaemonStreams(socket, socket, logger: logger);
-  }
-
-  /// Connects to a server and creates a [DaemonStreams] from the connection as the underlying streams.
-  static DaemonStreams connect(String host, int port, { required Logger logger }) {
-    final Future<Socket> socketFuture = Socket.connect(host, port);
-    final StreamController<List<int>> inputStreamController = StreamController<List<int>>();
-    final StreamController<List<int>> outputStreamController = StreamController<List<int>>();
-    socketFuture.then((Socket socket) {
-      inputStreamController.addStream(socket);
-      socket.addStream(outputStreamController.stream);
-    });
-    return DaemonStreams(inputStreamController.stream, outputStreamController.sink, logger: logger);
   }
 }
 
