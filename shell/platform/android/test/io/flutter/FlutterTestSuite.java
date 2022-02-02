@@ -26,6 +26,7 @@ import io.flutter.embedding.engine.loader.FlutterLoaderTest;
 import io.flutter.embedding.engine.mutatorsstack.FlutterMutatorViewTest;
 import io.flutter.embedding.engine.plugins.shim.ShimPluginRegistryTest;
 import io.flutter.embedding.engine.renderer.FlutterRendererTest;
+import io.flutter.embedding.engine.systemchannels.AccessibilityChannelTest;
 import io.flutter.embedding.engine.systemchannels.DeferredComponentChannelTest;
 import io.flutter.embedding.engine.systemchannels.KeyEventChannelTest;
 import io.flutter.embedding.engine.systemchannels.PlatformChannelTest;
@@ -56,6 +57,7 @@ import test.io.flutter.embedding.engine.PluginComponentTest;
 @RunWith(Suite.class)
 @SuiteClasses({
   AccessibilityBridgeTest.class,
+  AccessibilityChannelTest.class,
   ApplicationInfoLoaderTest.class,
   BinaryCodecTest.class,
   DartExecutorTest.class,
