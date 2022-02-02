@@ -37,6 +37,7 @@
                 "fuchsia.fonts.Provider",
                 "fuchsia.intl.PropertyProvider",
                 "fuchsia.logger.LogSink",  // Copied from syslog/client.shard.cml.
+                "fuchsia.memorypressure.Provider",
                 "fuchsia.net.name.Lookup",
                 "fuchsia.posix.socket.Provider",
                 "fuchsia.sysmem.Allocator",
