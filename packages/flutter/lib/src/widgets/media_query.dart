@@ -567,6 +567,55 @@ class MediaQueryData {
     );
   }
 
+  /// Creates a copy of this media query data by removing [displayFeatures] that
+  /// are completely outside the given sub-screen and adjusting the [padding],
+  /// [viewInsets] and [viewPadding] to be zero on the sides that are not
+  /// included in the sub-screen.
+  ///
+  /// Returns unmodified [MediaQueryData] if the sub-screen coincides with the
+  /// available screen space.
+  ///
+  /// Asserts in debug mode, if the given sub-screen is outside the available
+  /// screen space.
+  ///
+  /// See also:
+  ///
+  ///  * [DisplayFeatureSubScreen], which removes the display features that
+  ///    split the screen, from the [MediaQuery] and adds a [Padding] widget to
+  ///    position the child to match the selected sub-screen.
+  MediaQueryData removeDisplayFeatures(Rect subScreen) {
+    assert(subScreen.left >= 0.0 && subScreen.top >= 0.0 &&
+        subScreen.right <= size.width && subScreen.bottom <= size.height,
+        "'subScreen' argument cannot be outside the bounds of the screen");
+    if (subScreen.size == size && subScreen.topLeft == Offset.zero)
+      return this;
+    final double rightInset = size.width - subScreen.right;
+    final double bottomInset = size.height - subScreen.bottom;
+    return copyWith(
+      padding: EdgeInsets.only(
+        left: math.max(0.0, padding.left - subScreen.left),
+        top: math.max(0.0, padding.top - subScreen.top),
+        right: math.max(0.0, padding.right - rightInset),
+        bottom: math.max(0.0, padding.bottom - bottomInset),
+      ),
+      viewPadding: EdgeInsets.only(
+        left: math.max(0.0, viewPadding.left - subScreen.left),
+        top: math.max(0.0, viewPadding.top - subScreen.top),
+        right: math.max(0.0, viewPadding.right - rightInset),
+        bottom: math.max(0.0, viewPadding.bottom - bottomInset),
+      ),
+      viewInsets: EdgeInsets.only(
+        left: math.max(0.0, viewInsets.left - subScreen.left),
+        top: math.max(0.0, viewInsets.top - subScreen.top),
+        right: math.max(0.0, viewInsets.right - rightInset),
+        bottom: math.max(0.0, viewInsets.bottom - bottomInset),
+      ),
+      displayFeatures: displayFeatures.where(
+        (ui.DisplayFeature displayFeature) => subScreen.overlaps(displayFeature.bounds)
+      ).toList(),
+    );
+  }
+
   @override
   bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
