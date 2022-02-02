@@ -557,6 +557,19 @@ void main() {
       ]);
   });
 
+  testWithoutContext('macOS desktop artifacts include all gen_snapshot binaries', () {
+    final Cache cache = Cache.test(processManager: FakeProcessManager.any());
+    final MacOSEngineArtifacts artifacts = MacOSEngineArtifacts(cache, platform: FakePlatform());
+    cache.includeAllPlatforms = false;
+    cache.platformOverrideArtifacts = <String>{'macos'};
+
+    expect(artifacts.getBinaryDirs(), containsAll(<List<String>>[
+      <String>['darwin-x64', 'darwin-x64/gen_snapshot.zip'],
+      <String>['darwin-x64-profile', 'darwin-x64-profile/gen_snapshot.zip'],
+      <String>['darwin-x64-release', 'darwin-x64-release/gen_snapshot.zip'],
+    ]));
+  });
+
   testWithoutContext('macOS desktop artifacts ignore filtering when requested', () {
     final Cache cache = Cache.test(processManager: FakeProcessManager.any());
     final MacOSEngineArtifacts artifacts = MacOSEngineArtifacts(cache, platform: FakePlatform());
