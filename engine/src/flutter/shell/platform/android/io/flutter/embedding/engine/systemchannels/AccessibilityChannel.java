@@ -2,6 +2,7 @@ package io.flutter.embedding.engine.systemchannels;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 import io.flutter.Log;
 import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.embedding.engine.dart.DartExecutor;
@@ -23,7 +24,8 @@ public class AccessibilityChannel {
   @NonNull public final FlutterJNI flutterJNI;
   @Nullable private AccessibilityMessageHandler handler;
 
-  private final BasicMessageChannel.MessageHandler<Object> parsingMessageHandler =
+  @VisibleForTesting
+  final BasicMessageChannel.MessageHandler<Object> parsingMessageHandler =
       new BasicMessageChannel.MessageHandler<Object>() {
         @Override
         public void onMessage(
@@ -31,6 +33,7 @@ public class AccessibilityChannel {
           // If there is no handler to respond to this message then we don't need to
           // parse it. Return.
           if (handler == null) {
+            reply.reply(null);
             return;
           }
 
