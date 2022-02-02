@@ -43,8 +43,9 @@ source_set("gpu_surface_vulkan") {
     "gpu_surface_vulkan_delegate.cc",
     "gpu_surface_vulkan_delegate.h",
   ]
-
-  deps = gpu_common_deps + [ "//flutter/vulkan" ]
+  deps = [ "//flutter/shell/platform/embedder:embedder_headers" ]
+  deps += gpu_common_deps
+  public_deps = [ "//flutter/vulkan" ]
 }
 
 source_set("gpu_surface_metal") {

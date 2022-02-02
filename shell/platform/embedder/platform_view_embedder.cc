@@ -49,6 +49,19 @@ PlatformViewEmbedder::PlatformViewEmbedder(
       platform_dispatch_table_(platform_dispatch_table) {}
 #endif
 
+#ifdef SHELL_ENABLE_VULKAN
+PlatformViewEmbedder::PlatformViewEmbedder(
+    PlatformView::Delegate& delegate,
+    flutter::TaskRunners task_runners,
+    std::unique_ptr<EmbedderSurfaceVulkan> embedder_surface,
+    PlatformDispatchTable platform_dispatch_table,
+    std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder)
+    : PlatformView(delegate, std::move(task_runners)),
+      external_view_embedder_(external_view_embedder),
+      embedder_surface_(std::move(embedder_surface)),
+      platform_dispatch_table_(platform_dispatch_table) {}
+#endif
+
 PlatformViewEmbedder::~PlatformViewEmbedder() = default;
 
 void PlatformViewEmbedder::UpdateSemantics(
