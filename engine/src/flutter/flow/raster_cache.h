@@ -9,6 +9,7 @@
 #include <unordered_map>
 
 #include "flutter/display_list/display_list.h"
+#include "flutter/display_list/display_list_complexity.h"
 #include "flutter/flow/raster_cache_key.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/memory/weak_ptr.h"

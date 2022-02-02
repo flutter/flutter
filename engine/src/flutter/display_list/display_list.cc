@@ -32,9 +32,9 @@ DisplayList::DisplayList()
 
 DisplayList::DisplayList(uint8_t* ptr,
                          size_t byte_count,
-                         int op_count,
+                         unsigned int op_count,
                          size_t nested_byte_count,
-                         int nested_op_count,
+                         unsigned int nested_op_count,
                          const SkRect& cull_rect,
                          bool can_apply_group_opacity)
     : storage_(ptr),

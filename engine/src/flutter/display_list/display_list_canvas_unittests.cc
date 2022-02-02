@@ -1732,7 +1732,8 @@ class CanvasCompareTester {
       // of the embedded calls in the display list and so the op counts
       // will not be equal between the two.
       if (!testP.is_draw_display_list()) {
-        EXPECT_EQ(display_list->op_count(), sk_picture->approximateOpCount())
+        EXPECT_EQ(static_cast<int>(display_list->op_count()),
+                  sk_picture->approximateOpCount())
             << info;
       }
 
