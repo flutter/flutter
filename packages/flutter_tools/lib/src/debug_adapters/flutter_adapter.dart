@@ -93,9 +93,9 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
   /// etc.) will still be available.
   ///
   /// debug/noDebug here refers to the DAP "debug" mode and not the Flutter
-    // debug mode (vs Profile/Release). It is possible for the user to "Run"
-    // from VS Code (eg. not want to hit breakpoints/etc.) but still be running
-    // a debug build.
+  /// debug mode (vs Profile/Release). It is possible for the user to "Run"
+  /// from VS Code (eg. not want to hit breakpoints/etc.) but still be running
+  /// a debug build.
   bool debug = false;
 
   /// Called by [attachRequest] to request that we actually connect to the app to be debugged.
