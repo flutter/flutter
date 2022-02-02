@@ -17,6 +17,7 @@ import 'dart:ui' show
 import 'package:flutter/foundation.dart';
 import 'package:flutter/src/widgets/text_selection.dart' show ToolbarType;
 import 'package:vector_math/vector_math_64.dart' show Matrix4;
+import 'package:flutter/src/widgets/spell_check.dart';
 
 import '../../services.dart' show Clipboard;
 import 'autofill.dart';
@@ -1114,7 +1115,7 @@ abstract class TextInputClient {
   /// Requests that the client show the editing toolbar, for example when the
   /// platform changes the selection through a non-flutter method such as
   /// scribble.
-  void showToolbar(ToolbarType toolbarType) {}
+  void showToolbar(ToolbarType toolbarType);
 
   /// Requests that the client add a text placeholder to reserve visual space
   /// in the text.
@@ -1778,12 +1779,14 @@ class TextInput {
         _currentConnection!._client.removeTextPlaceholder();
         break;
       case 'TextInputClient.updateSpellCheckerResults':
-        List<SpellCheckerSuggestionSpan> spellCheckerSuggestionSpans = List<SpellCheckerSuggestionSpan>[];
+        List<String> results = args[1].cast<String>();
+        List<SpellCheckerSuggestionSpan> spellCheckerSuggestionSpans = <SpellCheckerSuggestionSpan>[];
         results.forEach((String result) {
           List<String> resultParsed = result.split(".");
-          results.add(SpellCheckerSuggestionSpan(int.parse(resultParsed[0]), int.parse(resultParsed[1]), resultParsed.sublist(2).split(".")));
+          spellCheckerSuggestionSpans.add(SpellCheckerSuggestionSpan(int.parse(resultParsed[0]), int.parse(resultParsed[1]), resultParsed[2].split(",")));
         });
-        _currentConnection!._client.updateSpellCheckerResults(results);
+        _currentConnection!._client.updateSpellCheckerResults(spellCheckerSuggestionSpans);
+        break;
       default:
         throw MissingPluginException();
     }

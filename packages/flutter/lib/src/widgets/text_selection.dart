@@ -435,15 +435,18 @@ class TextSelectionOverlay {
   /// Shows the toolbar by inserting it into the [context]'s overlay.
   void showToolbar(ToolbarType toolbarType, List<SpellCheckerSuggestionSpan>?
     spellCheckerSuggestionSpans) {
+    print("CAMILLE_showing_toolbar_2");
     assert(_toolbar == null);
     if (toolbarType == ToolbarType.spellCheckerSuggestionsControls) {
-        console.log("**SHOW spell checker suggestions toolbar**");
+      if (spellCheckerSuggestionSpans != null) {
+        print("**SHOW spell checker suggestions toolbar**");
         spellCheckerSuggestionSpans.forEach((SpellCheckerSuggestionSpan scsSpan) {
-            console.log(scsSpan.int.toString() + '_' + scsSpan.end.toString());
+            print(scsSpan.start.toString() + '_' + scsSpan.end.toString());
             scsSpan.replacementSuggestions.forEach((String suggestion) {
-                console.log(suggestion);
+                print(suggestion);
             });
         });
+      }
         return;
     }
     _toolbar = OverlayEntry(builder: (BuildContext context) => _buildToolbar(context, toolbarType, spellCheckerSuggestionSpans));
@@ -511,7 +514,8 @@ class TextSelectionOverlay {
   void hideToolbar(ToolbarType toolbarType) {
     //TODO(camillesimon): Add logic to hide specific toolbar.
     if (toolbarType == ToolbarType.spellCheckerSuggestionsControls) {
-      console.log("**HIDE spell checker suggestions toolbar**");
+      print("**HIDE spell checker suggestions toolbar**");
+      return;
     }
     assert(_toolbar != null);
     _toolbarController.stop();
@@ -1175,6 +1179,7 @@ class TextSelectionGestureDetectorBuilder {
           }
           break;
         case TargetPlatform.android:
+          break;
         case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
         case TargetPlatform.windows:

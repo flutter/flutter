@@ -7,19 +7,22 @@ import 'package:flutter/widgets.dart';
 class SpellCheckerSuggestionSpan {
     /// The index representing the start of a span including all correctly spelled
     /// or all misspelled words.
-    int? start;
+    late int start;
 
     /// The index representing the end of this span.
-    int? end;
+    late int end;
 
     /// The list of replacements returned from the spell checker for the word
     /// if it was misspelled.
-    List<String>? replacementSuggestions;
+    late List<String> replacementSuggestions;
 
     /// Responsible for making a SpellCheckerSuggestionSpan object from information
     /// received from the engine.
     SpellCheckerSuggestionSpan(int 
             start, int end, List<String> replacementSuggestions) {
+        assert(start != null);
+        assert(end != null);
+        assert(replacementSuggestions != null);
         this.start = start;
         this.end = end;
         this.replacementSuggestions = replacementSuggestions;
@@ -40,12 +43,12 @@ abstract class MisspelledWordsHandler {
     /// Responsible for rebuilding the TextSpan with the TextStyle changed for all 
     /// of the misspelled words.
     TextSpan buildWithMisspelledWordsIndicated(List<SpellCheckerSuggestionSpan> spellCheckerSuggestionSpans, 
-        TextEditingValue value, TextStyle style);
+        TextEditingValue value, TextStyle? style);
 
     /// Responsible for defining the behavior of overriding/merging the TestStyle 
     /// specified for a particular TextSpan with the style used to indicate
     /// misspelled words.
-    TextStyle overrideTextSpanStyle(TextStyle currentTextStyle);
+    TextStyle overrideTextSpanStyle(TextStyle? currentTextStyle);
 }
 
 

@@ -24,7 +24,7 @@ const double _kToolbarContentDistanceBelow = _kHandleSize - 2.0;
 const double _kToolbarContentDistance = 8.0;
 
 /// Android Material styled text selection controls.
-class MaterialTextSelectionControls extends TextSelectionControls {
+class MaterialTextSelectionControls extends TextSelectionControls with MaterialSpellCheckerControls {
   /// Returns the size of the Material handle.
   @override
   Size getHandleSize(double textLineHeight) => const Size(_kHandleSize, _kHandleSize);
@@ -58,7 +58,7 @@ class MaterialTextSelectionControls extends TextSelectionControls {
             handleSelectAll: canSelectAll(delegate) ? () => handleSelectAll(delegate) : null,
           );
       case ToolbarType.spellCheckerSuggestionsControls:
-          return buildSpellCheckerSuggestionsToolbar(spellCheckerSuggestionSpans: spellCheckerSuggestionSpans);
+          return buildSpellCheckerSuggestionsToolbar(spellCheckerSuggestionSpans!);
     }
   }
 

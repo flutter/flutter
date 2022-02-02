@@ -12,7 +12,7 @@ import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/material/spell_check.dart';
+import 'package:flutter/src/material/spell_check.dart';
 
 import 'actions.dart';
 import 'autofill.dart';
@@ -31,6 +31,7 @@ import 'scroll_configuration.dart';
 import 'scroll_controller.dart';
 import 'scroll_physics.dart';
 import 'scrollable.dart';
+import 'spell_check.dart';
 import 'text.dart';
 import 'text_editing_intents.dart';
 import 'text_selection.dart';
@@ -108,7 +109,7 @@ const double _kIPadWidth = 1488.0;
 ///  * [EditableText], which is a raw region of editable text that can be
 ///    controlled with a [TextEditingController].
 ///  * Learn how to use a [TextEditingController] in one of our [cookbook recipes](https://flutter.dev/docs/cookbook/forms/text-field-changes#2-use-a-texteditingcontroller).
-class TextEditingController extends ValueNotifier<TextEditingValue> {
+class TextEditingController extends ValueNotifier<TextEditingValue> with MaterialMisspelledWordsHandler {
   /// Creates a controller for an editable text field.
   ///
   /// This constructor treats a null [text] argument as if it were the empty
@@ -163,7 +164,7 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   ///
   /// By default makes text in composing range appear as underlined. Descendants
   /// can override this method to customize appearance of text.
-  TextSpan buildTextSpan({required BuildContext context, TextStyle? style , required bool withComposing, List<SpellCheckerSuggestionSpan>? spellCheckerResults}) {
+  TextSpan buildTextSpan({required BuildContext context, TextStyle? style , required bool withComposing, List<SpellCheckerSuggestionSpan>? spellCheckerSuggestionSpans}) {
     assert(!value.composing.isValid || !withComposing || value.isComposingRangeValid);
     // If the composing range is out of range for the current text, ignore it to
     // preserve the tree integrity, otherwise in release mode a RangeError will
@@ -172,8 +173,8 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
       return TextSpan(style: style, text: text);
     }
 
-    if (spellCheckerResults != null) {
-      return buildWithMisspelledWordsIndicated(value, spellCheckerResults, style);
+    if (spellCheckerSuggestionSpans != null) {
+      return buildWithMisspelledWordsIndicated(spellCheckerSuggestionSpans, value, style);
     }
     else {
       final TextStyle composingStyle = style?.merge(const TextStyle(decoration: TextDecoration.underline))
@@ -1656,7 +1657,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     Clipboard.setData(ClipboardData(text: selection.textInside(text)));
     if (cause == SelectionChangedCause.toolbar) {
       bringIntoView(textEditingValue.selection.extent);
-      hideToolbar(false);
+      hideToolbar(ToolbarType.copyPasteControls, false);
 
       switch (defaultTargetPlatform) {
         case TargetPlatform.iOS:
@@ -1695,7 +1696,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _replaceText(ReplaceTextIntent(textEditingValue, '', selection, cause));
     if (cause == SelectionChangedCause.toolbar) {
       bringIntoView(textEditingValue.selection.extent);
-      hideToolbar();
+      hideToolbar(ToolbarType.copyPasteControls);
     }
   }
 
@@ -1720,7 +1721,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _replaceText(ReplaceTextIntent(textEditingValue, data.text!, selection, cause));
     if (cause == SelectionChangedCause.toolbar) {
       bringIntoView(textEditingValue.selection.extent);
-      hideToolbar();
+      hideToolbar(ToolbarType.copyPasteControls);
     }
   }
 
@@ -1926,7 +1927,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       // `selection` is the only change.
       _handleSelectionChanged(value.selection, (_textInputConnection?.scribbleInProgress ?? false) ? SelectionChangedCause.scribble : SelectionChangedCause.keyboard);
     } else {
-      hideToolbar();
+      hideToolbar(ToolbarType.copyPasteControls);
       _currentPromptRectRange = null;
 
       if (_hasInputConnection) {
@@ -2546,6 +2547,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           value,
           (TextEditingValue newValue, TextInputFormatter formatter) => formatter.formatEditUpdate(_value, newValue),
         ) ?? value;
+        Locale? localeForSpellChecking = widget.locale ?? Localizations.maybeLocaleOf(context);
+        _textInputConnection!.initiateSpellChecking(localeForSpellChecking as Locale, value.text);
       } catch (exception, stack) {
         FlutterError.reportError(FlutterErrorDetails(
           exception: exception,
@@ -2884,6 +2887,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     // toolbar: copy, paste, select, cut. It might also provide additional
     // functionality depending on the browser (such as translate). Due to this
     // we should not show a Flutter toolbar for the editable text elements.
+    print("BESTIEBESTIBESTIEBFABESTIEBESTIBESTIEBFABESTIEBESTIBESTIEBFABESTIEBESTIBESTIEBFABESTIEBESTIBESTIEBFABESTIEBESTIBESTIEBFABESTIEBESTIBESTIEBFABESTIEBESTIBESTIEBFABESTIEBESTIBESTIEBFA");
     if (kIsWeb) {
       return false;
     }
@@ -2891,19 +2895,21 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (_selectionOverlay == null || _selectionOverlay!.toolbarIsVisible) {
       return false;
     }
-
-    _selectionOverlay!.showToolbar(toolbarType);
+    print(toolbarType);
+    print(_spellCheckerResults?.length);
+    _selectionOverlay!.showToolbar(toolbarType, _spellCheckerResults);
     return true;
   }
 
   @override
-  void hideToolbar([bool hideHandles = true]) {
+  void hideToolbar(ToolbarType toolbarType, [bool hideHandles = true]) {
     if (hideHandles) {
       // Hide the handles and the toolbar.
       _selectionOverlay?.hide();
     } else if (_selectionOverlay?.toolbarIsVisible ?? false) {
+      print(toolbarType.toString());
       // Hide only the toolbar but not the handles.
-      _selectionOverlay?.hideToolbar();
+      _selectionOverlay?.hideToolbar(toolbarType);
     }
   }
 
@@ -2911,7 +2917,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   void toggleToolbar() {
     assert(_selectionOverlay != null);
     if (_selectionOverlay!.toolbarIsVisible) {
-      hideToolbar();
+      hideToolbar(ToolbarType.copyPasteControls);
     } else {
       showToolbar(ToolbarType.copyPasteControls);
     }
@@ -2948,11 +2954,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   // Tracks spell check results for the current text input.
-  List<SpellCheckerSuggestionSpan>? spellCheckerResults;
+  List<SpellCheckerSuggestionSpan>? _spellCheckerResults;
 
   @override
   void updateSpellCheckerResults(List<SpellCheckerSuggestionSpan> spellCheckerResults) {
-
+    _spellCheckerResults = spellCheckerResults;
+    print(_spellCheckerResults?.length);
+    print("HUH");
   }
 
   @override
@@ -3289,7 +3297,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       context: context,
       style: widget.style,
       withComposing: !widget.readOnly && _hasFocus,
-      spellCheckerResults: spellCheckerResults,
+      spellCheckerSuggestionSpans: _spellCheckerResults,
     );
   }
 }
