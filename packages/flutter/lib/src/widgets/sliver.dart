@@ -107,7 +107,7 @@ int _kDefaultSemanticIndexCallback(Widget _, int localIndex) => localIndex;
 ///    [AutomaticKeepAliveClientMixin.wantKeepAlive] getter and calling
 ///    [AutomaticKeepAliveClientMixin.updateKeepAlive].
 ///
-/// ## Using more than one delegate in a viewport
+/// ## Using more than one delegate in a [Viewport]
 ///
 /// If multiple delegates are used in a single scroll view, the first child of
 /// each delegate will always be laid out, even if it extends beyond the
@@ -795,6 +795,14 @@ abstract class SliverMultiBoxAdaptorWidget extends SliverWithKeepAliveWidget {
   ///
   /// The children are constructed lazily using this delegate to avoid creating
   /// more children than are visible through the [Viewport].
+  ///
+  /// ## Using more than one delegate in a [Viewport]
+  ///
+  /// If multiple delegates are used in a single scroll view, the first child of
+  /// each delegate will always be laid out, even if it extends beyond the
+  /// currently viewable area. This is because at least one child is required in
+  /// order to [estimateMaxScrollOffset] for the whole scroll view, as it uses the
+  /// currently built children to estimate the remaining children's extent.
   ///
   /// See also:
   ///
