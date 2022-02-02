@@ -70,6 +70,16 @@ inline bool operator==(const FlutterMetalTexture& a,
   return a.texture_id == b.texture_id && a.texture == b.texture;
 }
 
+inline bool operator==(const FlutterVulkanImage& a,
+                       const FlutterVulkanImage& b) {
+  return a.image == b.image && a.format == b.format;
+}
+
+inline bool operator==(const FlutterVulkanBackingStore& a,
+                       const FlutterVulkanBackingStore& b) {
+  return a.image == b.image;
+}
+
 inline bool operator==(const FlutterMetalBackingStore& a,
                        const FlutterMetalBackingStore& b) {
   return a.texture == b.texture;
@@ -112,6 +122,8 @@ inline bool operator==(const FlutterBackingStore& a,
       return a.software == b.software;
     case kFlutterBackingStoreTypeMetal:
       return a.metal == b.metal;
+    case kFlutterBackingStoreTypeVulkan:
+      return a.vulkan == b.vulkan;
   }
 
   return false;
@@ -230,6 +242,8 @@ inline std::string FlutterBackingStoreTypeToString(
       return "kFlutterBackingStoreTypeSoftware";
     case kFlutterBackingStoreTypeMetal:
       return "kFlutterBackingStoreTypeMetal";
+    case kFlutterBackingStoreTypeVulkan:
+      return "kFlutterBackingStoreTypeVulkan";
   }
   return "Unknown";
 }
@@ -256,6 +270,13 @@ inline std::ostream& operator<<(std::ostream& out,
              << item.texture_id << std::dec << " Handle: 0x" << std::hex
              << item.texture;
 }
+
+inline std::ostream& operator<<(std::ostream& out,
+                                const FlutterVulkanImage& item) {
+  return out << "(FlutterVulkanTexture) Image Handle: " << std::hex
+             << item.image << std::dec << " Format: " << item.format;
+}
+
 inline std::string FlutterPlatformViewMutationTypeToString(
     FlutterPlatformViewMutationType type) {
   switch (type) {
@@ -348,6 +369,11 @@ inline std::ostream& operator<<(std::ostream& out,
 }
 
 inline std::ostream& operator<<(std::ostream& out,
+                                const FlutterVulkanBackingStore& item) {
+  return out << "(FlutterVulkanBackingStore) Image: " << item.image;
+}
+
+inline std::ostream& operator<<(std::ostream& out,
                                 const FlutterBackingStore& backing_store) {
   out << "(FlutterBackingStore) Struct size: " << backing_store.struct_size
       << " User Data: " << backing_store.user_data
@@ -365,6 +391,10 @@ inline std::ostream& operator<<(std::ostream& out,
 
     case kFlutterBackingStoreTypeMetal:
       out << backing_store.metal;
+      break;
+
+    case kFlutterBackingStoreTypeVulkan:
+      out << backing_store.vulkan;
       break;
   }
 

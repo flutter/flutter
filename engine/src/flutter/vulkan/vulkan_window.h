@@ -36,8 +36,7 @@ class VulkanWindow {
   ///             GrDirectContext.
   ///
   VulkanWindow(fml::RefPtr<VulkanProcTable> proc_table,
-               std::unique_ptr<VulkanNativeSurface> native_surface,
-               bool render_to_surface);
+               std::unique_ptr<VulkanNativeSurface> native_surface);
 
   //------------------------------------------------------------------------------
   /// @brief      Construct a VulkanWindow. Let reuse an existing
@@ -45,8 +44,7 @@ class VulkanWindow {
   ///
   VulkanWindow(const sk_sp<GrDirectContext>& context,
                fml::RefPtr<VulkanProcTable> proc_table,
-               std::unique_ptr<VulkanNativeSurface> native_surface,
-               bool render_to_surface);
+               std::unique_ptr<VulkanNativeSurface> native_surface);
 
   ~VulkanWindow();
 

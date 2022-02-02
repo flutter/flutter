@@ -48,6 +48,12 @@ class VulkanProcTable : public fml::RefCountedThreadSafe<VulkanProcTable> {
     T proc_;
   };
 
+  VulkanProcTable();
+  explicit VulkanProcTable(const char* so_path);
+  explicit VulkanProcTable(
+      std::function<void*(VkInstance, const char*)> get_instance_proc_addr);
+  ~VulkanProcTable();
+
   bool HasAcquiredMandatoryProcAddresses() const;
 
   bool IsValid() const;
@@ -61,6 +67,8 @@ class VulkanProcTable : public fml::RefCountedThreadSafe<VulkanProcTable> {
   bool SetupDeviceProcAddresses(const VulkanHandle<VkDevice>& device);
 
   GrVkGetProc CreateSkiaGetProc() const;
+
+  std::function<void*(VkInstance, const char*)> GetInstanceProcAddr = nullptr;
 
 #define DEFINE_PROC(name) Proc<PFN_vk##name> name;
 
@@ -98,7 +106,6 @@ class VulkanProcTable : public fml::RefCountedThreadSafe<VulkanProcTable> {
   DEFINE_PROC(GetDeviceProcAddr);
   DEFINE_PROC(GetDeviceQueue);
   DEFINE_PROC(GetImageMemoryRequirements);
-  DEFINE_PROC(GetInstanceProcAddr);
   DEFINE_PROC(GetPhysicalDeviceFeatures);
   DEFINE_PROC(GetPhysicalDeviceQueueFamilyProperties);
   DEFINE_PROC(QueueSubmit);
@@ -135,10 +142,8 @@ class VulkanProcTable : public fml::RefCountedThreadSafe<VulkanProcTable> {
   VulkanHandle<VkInstance> instance_;
   VulkanHandle<VkDevice> device_;
 
-  VulkanProcTable();
-  explicit VulkanProcTable(const char* path);
-  ~VulkanProcTable();
   bool OpenLibraryHandle(const char* path);
+  bool SetupGetInstanceProcAddress();
   bool SetupLoaderProcAddresses();
   bool CloseLibraryHandle();
   PFN_vkVoidFunction AcquireProc(

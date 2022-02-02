@@ -9,7 +9,6 @@
 
 #include <future>
 
-#include "embedder.h"
 #include "flutter/fml/mapping.h"
 #include "flutter/fml/message_loop.h"
 #include "flutter/fml/paths.h"
@@ -25,6 +24,40 @@ sk_sp<SkSurface> CreateRenderSurface(const FlutterLayer& layer,
                                      GrDirectContext* context);
 
 bool RasterImagesAreSame(sk_sp<SkImage> a, sk_sp<SkImage> b);
+
+/// @brief      Prepends a prefix to the name which is unique to the test
+///             context type. This is useful for tests that use
+///             EmbedderTestMultiBackend and require different fixtures per
+///             backend. For OpenGL, the name remains unchanged.
+/// @param[in]  backend  The test context type used to determine the prepended
+///                      prefix (e.g. `vk_[name]` for Vulkan).
+/// @param[in]  name     The name of the fixture without any special prefixes.
+std::string FixtureNameForBackend(EmbedderTestContextType backend,
+                                  const std::string& name);
+
+/// @brief      Resolves a render target type for a given backend description.
+///             This is useful for tests that use EmbedderTestMultiBackend.
+/// @param[in]  backend             The test context type to resolve the render
+///                                 target for.
+/// @param[in]  opengl_framebuffer  Ignored for all non-OpenGL backends. Flutter
+///                                 supports rendering to both OpenGL textures
+///                                 and framebuffers. When false, the OpenGL
+///                                 texture render target type is returned.
+EmbedderTestBackingStoreProducer::RenderTargetType GetRenderTargetFromBackend(
+    EmbedderTestContextType backend,
+    bool opengl_framebuffer);
+
+/// @brief      Configures per-backend properties for a given backing store.
+/// @param[in]  backing_store       The backing store to configure.
+/// @param[in]  backend             The test context type used to decide which
+///                                 backend the backing store will be used with.
+/// @param[in]  opengl_framebuffer  Ignored for all non-OpenGL backends. Flutter
+///                                 supports rendering to both OpenGL textures
+///                                 and framebuffers. When false, the backing
+///                                 store is configured to be an OpenGL texture.
+void ConfigureBackingStore(FlutterBackingStore& backing_store,
+                           EmbedderTestContextType backend,
+                           bool opengl_framebuffer);
 
 bool WriteImageToDisk(const fml::UniqueFD& directory,
                       const std::string& name,

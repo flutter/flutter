@@ -5,68 +5,77 @@
 #include "flutter/shell/gpu/gpu_surface_vulkan.h"
 
 #include "flutter/fml/logging.h"
+#include "fml/trace_event.h"
+#include "include/core/SkSize.h"
+#include "third_party/swiftshader/include/vulkan/vulkan_core.h"
 
 namespace flutter {
 
-GPUSurfaceVulkan::GPUSurfaceVulkan(
-    GPUSurfaceVulkanDelegate* delegate,
-    std::unique_ptr<vulkan::VulkanNativeSurface> native_surface,
-    bool render_to_surface)
-    : GPUSurfaceVulkan(/*context=*/nullptr,
-                       delegate,
-                       std::move(native_surface),
-                       render_to_surface) {}
-
-GPUSurfaceVulkan::GPUSurfaceVulkan(
-    const sk_sp<GrDirectContext>& context,
-    GPUSurfaceVulkanDelegate* delegate,
-    std::unique_ptr<vulkan::VulkanNativeSurface> native_surface,
-    bool render_to_surface)
-    : window_(context,
-              delegate->vk(),
-              std::move(native_surface),
-              render_to_surface),
+GPUSurfaceVulkan::GPUSurfaceVulkan(GPUSurfaceVulkanDelegate* delegate,
+                                   const sk_sp<GrDirectContext>& skia_context,
+                                   bool render_to_surface)
+    : delegate_(delegate),
+      skia_context_(skia_context),
       render_to_surface_(render_to_surface),
       weak_factory_(this) {}
 
 GPUSurfaceVulkan::~GPUSurfaceVulkan() = default;
 
 bool GPUSurfaceVulkan::IsValid() {
-  return window_.IsValid();
+  return skia_context_ != nullptr;
 }
 
 std::unique_ptr<SurfaceFrame> GPUSurfaceVulkan::AcquireFrame(
-    const SkISize& size) {
-  SurfaceFrame::FramebufferInfo framebuffer_info;
-  framebuffer_info.supports_readback = true;
+    const SkISize& frame_size) {
+  if (!IsValid()) {
+    FML_LOG(ERROR) << "Vulkan surface was invalid.";
+    return nullptr;
+  }
 
-  // TODO(38466): Refactor GPU surface APIs take into account the fact that an
-  // external view embedder may want to render to the root surface.
+  if (frame_size.isEmpty()) {
+    FML_LOG(ERROR) << "Vulkan surface was asked for an empty frame.";
+    return nullptr;
+  }
+
   if (!render_to_surface_) {
     return std::make_unique<SurfaceFrame>(
-        nullptr, std::move(framebuffer_info),
+        nullptr, SurfaceFrame::FramebufferInfo(),
         [](const SurfaceFrame& surface_frame, SkCanvas* canvas) {
           return true;
         });
   }
 
-  auto surface = window_.AcquireSurface();
-
-  if (surface == nullptr) {
+  FlutterVulkanImage image = delegate_->AcquireImage(frame_size);
+  if (!image.image) {
+    FML_LOG(ERROR) << "Invalid VkImage given by the embedder.";
     return nullptr;
   }
 
-  SurfaceFrame::SubmitCallback callback =
-      [weak_this = weak_factory_.GetWeakPtr()](const SurfaceFrame&,
-                                               SkCanvas* canvas) -> bool {
-    // Frames are only ever acquired on the raster thread. This is also the
-    // thread on which the weak pointer factory is collected (as this instance
-    // is owned by the rasterizer). So this use of weak pointers is safe.
-    if (canvas == nullptr || !weak_this) {
+  sk_sp<SkSurface> surface = CreateSurfaceFromVulkanImage(
+      reinterpret_cast<VkImage>(image.image),
+      static_cast<VkFormat>(image.format), frame_size);
+  if (!surface) {
+    FML_LOG(ERROR) << "Could not create the SkSurface from the Vulkan image.";
+    return nullptr;
+  }
+
+  SurfaceFrame::SubmitCallback callback = [image = image, delegate = delegate_](
+                                              const SurfaceFrame&,
+                                              SkCanvas* canvas) -> bool {
+    TRACE_EVENT0("flutter", "GPUSurfaceVulkan::PresentImage");
+    if (canvas == nullptr) {
+      FML_DLOG(ERROR) << "Canvas not available.";
       return false;
     }
-    return weak_this->window_.SwapBuffers();
+
+    canvas->flush();
+
+    return delegate->PresentImage(reinterpret_cast<VkImage>(image.image),
+                                  static_cast<VkFormat>(image.format));
   };
+
+  SurfaceFrame::FramebufferInfo framebuffer_info{.supports_readback = true};
+
   return std::make_unique<SurfaceFrame>(
       std::move(surface), std::move(framebuffer_info), std::move(callback));
 }
@@ -80,7 +89,54 @@ SkMatrix GPUSurfaceVulkan::GetRootTransformation() const {
 }
 
 GrDirectContext* GPUSurfaceVulkan::GetContext() {
-  return window_.GetSkiaGrContext();
+  return skia_context_.get();
+}
+
+sk_sp<SkSurface> GPUSurfaceVulkan::CreateSurfaceFromVulkanImage(
+    const VkImage image,
+    const VkFormat format,
+    const SkISize& size) {
+  GrVkImageInfo image_info = {
+      .fImage = image,
+      .fImageTiling = VK_IMAGE_TILING_OPTIMAL,
+      .fImageLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+      .fFormat = format,
+      .fImageUsageFlags = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT |
+                          VK_IMAGE_USAGE_TRANSFER_SRC_BIT |
+                          VK_IMAGE_USAGE_TRANSFER_DST_BIT |
+                          VK_IMAGE_USAGE_SAMPLED_BIT,
+      .fSampleCount = 1,
+      .fLevelCount = 1,
+  };
+  GrBackendTexture backend_texture(size.width(),   //
+                                   size.height(),  //
+                                   image_info      //
+  );
+
+  SkSurfaceProps surface_properties(0, kUnknown_SkPixelGeometry);
+
+  return SkSurface::MakeFromBackendTexture(
+      skia_context_.get(),          // context
+      backend_texture,              // back-end texture
+      kTopLeft_GrSurfaceOrigin,     // surface origin
+      1,                            // sample count
+      ColorTypeFromFormat(format),  // color type
+      SkColorSpace::MakeSRGB(),     // color space
+      &surface_properties           // surface properties
+  );
+}
+
+SkColorType GPUSurfaceVulkan::ColorTypeFromFormat(const VkFormat format) {
+  switch (format) {
+    case VK_FORMAT_R8G8B8A8_UNORM:
+    case VK_FORMAT_R8G8B8A8_SRGB:
+      return SkColorType::kRGBA_8888_SkColorType;
+    case VK_FORMAT_B8G8R8A8_UNORM:
+    case VK_FORMAT_B8G8R8A8_SRGB:
+      return SkColorType::kBGRA_8888_SkColorType;
+    default:
+      return SkColorType::kUnknown_SkColorType;
+  }
 }
 
 }  // namespace flutter

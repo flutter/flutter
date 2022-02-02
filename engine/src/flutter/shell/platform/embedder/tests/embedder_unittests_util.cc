@@ -6,6 +6,7 @@
 
 #include <limits>
 
+#include "flutter/shell/platform/embedder/tests/embedder_test_backingstore_producer.h"
 #include "flutter/shell/platform/embedder/tests/embedder_unittests_util.h"
 
 namespace flutter {
@@ -67,6 +68,61 @@ bool RasterImagesAreSame(sk_sp<SkImage> a, sk_sp<SkImage> b) {
   sk_sp<SkData> normalized_b = NormalizeImage(b);
 
   return normalized_a->equals(normalized_b.get());
+}
+
+std::string FixtureNameForBackend(EmbedderTestContextType backend,
+                                  const std::string& name) {
+  switch (backend) {
+    case EmbedderTestContextType::kVulkanContext:
+      return "vk_" + name;
+    default:
+      return name;
+  }
+}
+
+EmbedderTestBackingStoreProducer::RenderTargetType GetRenderTargetFromBackend(
+    EmbedderTestContextType backend,
+    bool opengl_framebuffer) {
+  switch (backend) {
+    case EmbedderTestContextType::kVulkanContext:
+      return EmbedderTestBackingStoreProducer::RenderTargetType::kVulkanImage;
+    case EmbedderTestContextType::kOpenGLContext:
+      if (opengl_framebuffer) {
+        return EmbedderTestBackingStoreProducer::RenderTargetType::
+            kOpenGLFramebuffer;
+      }
+      return EmbedderTestBackingStoreProducer::RenderTargetType::kOpenGLTexture;
+    case EmbedderTestContextType::kMetalContext:
+      return EmbedderTestBackingStoreProducer::RenderTargetType::kMetalTexture;
+    case EmbedderTestContextType::kSoftwareContext:
+      return EmbedderTestBackingStoreProducer::RenderTargetType::
+          kSoftwareBuffer;
+  }
+}
+
+void ConfigureBackingStore(FlutterBackingStore& backing_store,
+                           EmbedderTestContextType backend,
+                           bool opengl_framebuffer) {
+  switch (backend) {
+    case EmbedderTestContextType::kVulkanContext:
+      backing_store.type = kFlutterBackingStoreTypeVulkan;
+      break;
+    case EmbedderTestContextType::kOpenGLContext:
+      if (opengl_framebuffer) {
+        backing_store.type = kFlutterBackingStoreTypeOpenGL;
+        backing_store.open_gl.type = kFlutterOpenGLTargetTypeFramebuffer;
+      } else {
+        backing_store.type = kFlutterBackingStoreTypeOpenGL;
+        backing_store.open_gl.type = kFlutterOpenGLTargetTypeTexture;
+      }
+      break;
+    case EmbedderTestContextType::kMetalContext:
+      backing_store.type = kFlutterBackingStoreTypeMetal;
+      break;
+    case EmbedderTestContextType::kSoftwareContext:
+      backing_store.type = kFlutterBackingStoreTypeSoftware;
+      break;
+  }
 }
 
 bool WriteImageToDisk(const fml::UniqueFD& directory,

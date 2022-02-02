@@ -1365,6 +1365,8 @@ FILE: ../../../flutter/shell/platform/embedder/embedder_surface_metal.h
 FILE: ../../../flutter/shell/platform/embedder/embedder_surface_metal.mm
 FILE: ../../../flutter/shell/platform/embedder/embedder_surface_software.cc
 FILE: ../../../flutter/shell/platform/embedder/embedder_surface_software.h
+FILE: ../../../flutter/shell/platform/embedder/embedder_surface_vulkan.cc
+FILE: ../../../flutter/shell/platform/embedder/embedder_surface_vulkan.h
 FILE: ../../../flutter/shell/platform/embedder/embedder_task_runner.cc
 FILE: ../../../flutter/shell/platform/embedder/embedder_task_runner.h
 FILE: ../../../flutter/shell/platform/embedder/embedder_thread_host.cc
@@ -1387,6 +1389,8 @@ FILE: ../../../flutter/shell/platform/embedder/fixtures/scene_without_custom_com
 FILE: ../../../flutter/shell/platform/embedder/fixtures/snapshot_large_scene.png
 FILE: ../../../flutter/shell/platform/embedder/fixtures/verifyb143464703.png
 FILE: ../../../flutter/shell/platform/embedder/fixtures/verifyb143464703_soft_noxform.png
+FILE: ../../../flutter/shell/platform/embedder/fixtures/vk_dpr_noxform.png
+FILE: ../../../flutter/shell/platform/embedder/fixtures/vk_gradient.png
 FILE: ../../../flutter/shell/platform/embedder/platform_view_embedder.cc
 FILE: ../../../flutter/shell/platform/embedder/platform_view_embedder.h
 FILE: ../../../flutter/shell/platform/embedder/test_utils/key_codes.h

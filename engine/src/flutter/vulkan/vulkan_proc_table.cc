@@ -16,10 +16,18 @@ namespace vulkan {
 
 VulkanProcTable::VulkanProcTable() : VulkanProcTable("libvulkan.so"){};
 
-VulkanProcTable::VulkanProcTable(const char* path)
+VulkanProcTable::VulkanProcTable(const char* so_path)
     : handle_(nullptr), acquired_mandatory_proc_addresses_(false) {
-  acquired_mandatory_proc_addresses_ =
-      OpenLibraryHandle(path) && SetupLoaderProcAddresses();
+  acquired_mandatory_proc_addresses_ = OpenLibraryHandle(so_path) &&
+                                       SetupGetInstanceProcAddress() &&
+                                       SetupLoaderProcAddresses();
+}
+
+VulkanProcTable::VulkanProcTable(
+    std::function<void*(VkInstance, const char*)> get_instance_proc_addr)
+    : handle_(nullptr), acquired_mandatory_proc_addresses_(false) {
+  GetInstanceProcAddr = get_instance_proc_addr;
+  acquired_mandatory_proc_addresses_ = SetupLoaderProcAddresses();
 }
 
 VulkanProcTable::~VulkanProcTable() {
@@ -42,24 +50,27 @@ bool VulkanProcTable::AreDeviceProcsSetup() const {
   return device_;
 }
 
-bool VulkanProcTable::SetupLoaderProcAddresses() {
+bool VulkanProcTable::SetupGetInstanceProcAddress() {
   if (!handle_) {
     return true;
   }
 
-  GetInstanceProcAddr =
+  GetInstanceProcAddr = reinterpret_cast<void* (*)(VkInstance, const char*)>(
 #if VULKAN_LINK_STATICALLY
-      GetInstanceProcAddr = &vkGetInstanceProcAddr;
+      &vkGetInstanceProcAddr
 #else   // VULKAN_LINK_STATICALLY
-      reinterpret_cast<PFN_vkGetInstanceProcAddr>(const_cast<uint8_t*>(
-          handle_->ResolveSymbol("vkGetInstanceProcAddr")));
+      const_cast<uint8_t*>(handle_->ResolveSymbol("vkGetInstanceProcAddr"))
 #endif  // VULKAN_LINK_STATICALLY
-
+  );
   if (!GetInstanceProcAddr) {
     FML_DLOG(WARNING) << "Could not acquire vkGetInstanceProcAddr.";
     return false;
   }
 
+  return true;
+}
+
+bool VulkanProcTable::SetupLoaderProcAddresses() {
   VulkanHandle<VkInstance> null_instance(VK_NULL_HANDLE, nullptr);
 
   ACQUIRE_PROC(CreateInstance, null_instance);
@@ -157,7 +168,11 @@ bool VulkanProcTable::OpenLibraryHandle(const char* path) {
 #else   // VULKAN_LINK_STATICALLY
   handle_ = fml::NativeLibrary::Create(path);
 #endif  // VULKAN_LINK_STATICALLY
-  return !!handle_;
+  if (!handle_) {
+    FML_DLOG(WARNING) << "Could not open Vulkan library handle: " << path;
+    return false;
+  }
+  return true;
 }
 
 bool VulkanProcTable::CloseLibraryHandle() {
@@ -173,7 +188,8 @@ PFN_vkVoidFunction VulkanProcTable::AcquireProc(
   }
 
   // A VK_NULL_HANDLE as the instance is an acceptable parameter.
-  return GetInstanceProcAddr(instance, proc_name);
+  return reinterpret_cast<PFN_vkVoidFunction>(
+      GetInstanceProcAddr(instance, proc_name));
 }
 
 PFN_vkVoidFunction VulkanProcTable::AcquireProc(

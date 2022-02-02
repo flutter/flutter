@@ -76,6 +76,7 @@ typedef enum {
   /// iOS version >= 10.0 (device), 13.0 (simulator)
   /// macOS version >= 10.14
   kMetal,
+  kVulkan,
 } FlutterRendererType;
 
 /// Additional accessibility features that may be enabled by the platform.
@@ -494,7 +495,7 @@ typedef struct {
   size_t struct_size;
   /// Embedder provided unique identifier to the texture buffer. Given that the
   /// `texture` handle is passed to the engine to render to, the texture buffer
-  /// is itseld owned by the embedder. This `texture_id` is then also given to
+  /// is itself owned by the embedder. This `texture_id` is then also given to
   /// the embedder in the present callback.
   int64_t texture_id;
   /// Handle to the MTLTexture that is owned by the embedder. Engine will render
@@ -541,6 +542,104 @@ typedef struct {
   FlutterMetalTextureFrameCallback external_texture_frame_callback;
 } FlutterMetalRendererConfig;
 
+/// Alias for VkInstance.
+typedef void* FlutterVulkanInstanceHandle;
+
+/// Alias for VkPhysicalDevice.
+typedef void* FlutterVulkanPhysicalDeviceHandle;
+
+/// Alias for VkDevice.
+typedef void* FlutterVulkanDeviceHandle;
+
+/// Alias for VkQueue.
+typedef void* FlutterVulkanQueueHandle;
+
+/// Alias for VkImage.
+typedef uint64_t FlutterVulkanImageHandle;
+
+typedef struct {
+  /// The size of this struct. Must be sizeof(FlutterVulkanImage).
+  size_t struct_size;
+  /// Handle to the VkImage that is owned by the embedder. The engine will
+  /// bind this image for writing the frame.
+  FlutterVulkanImageHandle image;
+  /// The VkFormat of the image (for example: VK_FORMAT_R8G8B8A8_UNORM).
+  uint32_t format;
+} FlutterVulkanImage;
+
+/// Callback to fetch a Vulkan function pointer for a given instance. Normally,
+/// this should return the results of vkGetInstanceProcAddr.
+typedef void* (*FlutterVulkanInstanceProcAddressCallback)(
+    void* /* user data */,
+    FlutterVulkanInstanceHandle /* instance */,
+    const char* /* name */);
+
+/// Callback for when a VkImage is requested.
+typedef FlutterVulkanImage (*FlutterVulkanImageCallback)(
+    void* /* user data */,
+    const FlutterFrameInfo* /* frame info */);
+
+/// Callback for when a VkImage has been written to and is ready for use by the
+/// embedder.
+typedef bool (*FlutterVulkanPresentCallback)(
+    void* /* user data */,
+    const FlutterVulkanImage* /* image */);
+
+typedef struct {
+  /// The size of this struct. Must be sizeof(FlutterVulkanRendererConfig).
+  size_t struct_size;
+
+  /// The Vulkan API version. This should match the value set in
+  /// VkApplicationInfo::apiVersion when the VkInstance was created.
+  uint32_t version;
+  /// VkInstance handle. Must not be destroyed before `FlutterEngineShutdown` is
+  /// called.
+  FlutterVulkanInstanceHandle instance;
+  /// VkPhysicalDevice handle.
+  FlutterVulkanPhysicalDeviceHandle physical_device;
+  /// VkDevice handle. Must not be destroyed before `FlutterEngineShutdown` is
+  /// called.
+  FlutterVulkanDeviceHandle device;
+  /// The queue family index of the VkQueue supplied in the next field.
+  uint32_t queue_family_index;
+  /// VkQueue handle.
+  FlutterVulkanQueueHandle queue;
+  /// The number of instance extensions available for enumerating in the next
+  /// field.
+  size_t enabled_instance_extension_count;
+  /// Array of enabled instance extension names. This should match the names
+  /// passed to `VkInstanceCreateInfo.ppEnabledExtensionNames` when the instance
+  /// was created, but any subset of enabled instance extensions may be
+  /// specified.
+  /// This field is optional; `nullptr` may be specified.
+  /// This memory is only accessed during the call to FlutterEngineInitialize.
+  const char** enabled_instance_extensions;
+  /// The number of device extensions available for enumerating in the next
+  /// field.
+  size_t enabled_device_extension_count;
+  /// Array of enabled logical device extension names. This should match the
+  /// names passed to `VkDeviceCreateInfo.ppEnabledExtensionNames` when the
+  /// logical device was created, but any subset of enabled logical device
+  /// extensions may be specified.
+  /// This field is optional; `nullptr` may be specified.
+  /// This memory is only accessed during the call to FlutterEngineInitialize.
+  /// For example: VK_KHR_GET_MEMORY_REQUIREMENTS_2_EXTENSION_NAME
+  const char** enabled_device_extensions;
+  /// The callback invoked when resolving Vulkan function pointers.
+  FlutterVulkanInstanceProcAddressCallback get_instance_proc_address_callback;
+  /// The callback invoked when the engine requests a VkImage from the embedder
+  /// for rendering the next frame.
+  /// Not used if a FlutterCompositor is supplied in FlutterProjectArgs.
+  FlutterVulkanImageCallback get_next_image_callback;
+  /// The callback invoked when a VkImage has been written to and is ready for
+  /// use by the embedder. Prior to calling this callback, the engine performs
+  /// a host sync, and so the VkImage can be used in a pipeline by the embedder
+  /// without any additional synchronization.
+  /// Not used if a FlutterCompositor is supplied in FlutterProjectArgs.
+  FlutterVulkanPresentCallback present_image_callback;
+
+} FlutterVulkanRendererConfig;
+
 typedef struct {
   /// The size of this struct. Must be sizeof(FlutterSoftwareRendererConfig).
   size_t struct_size;
@@ -557,6 +656,7 @@ typedef struct {
     FlutterOpenGLRendererConfig open_gl;
     FlutterSoftwareRendererConfig software;
     FlutterMetalRendererConfig metal;
+    FlutterVulkanRendererConfig vulkan;
   };
 } FlutterRendererConfig;
 
@@ -989,6 +1089,25 @@ typedef struct {
   };
 } FlutterMetalBackingStore;
 
+typedef struct {
+  /// The size of this struct. Must be sizeof(FlutterVulkanBackingStore).
+  size_t struct_size;
+  /// The image that the layer will be rendered to. This image must already be
+  /// available for the engine to bind for writing when it's given to the engine
+  /// via the backing store creation callback. The engine will perform a host
+  /// sync for all layers prior to calling the compositor present callback, and
+  /// so the written layer images can be freely bound by the embedder without
+  /// any additional synchronization.
+  const FlutterVulkanImage* image;
+  /// A baton that is not interpreted by the engine in any way. It will be given
+  /// back to the embedder in the destruction callback below. Embedder resources
+  /// may be associated with this baton.
+  void* user_data;
+  /// The callback invoked by the engine when it no longer needs this backing
+  /// store.
+  VoidCallback destruction_callback;
+} FlutterVulkanBackingStore;
+
 typedef enum {
   /// Indicates that the Flutter application requested that an opacity be
   /// applied to the platform view.
@@ -1048,6 +1167,8 @@ typedef enum {
   kFlutterBackingStoreTypeSoftware,
   /// Specifies a Metal backing store. This is backed by a Metal texture.
   kFlutterBackingStoreTypeMetal,
+  /// Specifies a Vulkan backing store. This is backed by a Vulkan VkImage.
+  kFlutterBackingStoreTypeVulkan,
 } FlutterBackingStoreType;
 
 typedef struct {
@@ -1069,6 +1190,8 @@ typedef struct {
     FlutterSoftwareBackingStore software;
     // The description of the Metal backing store.
     FlutterMetalBackingStore metal;
+    // The description of the Vulkan backing store.
+    FlutterVulkanBackingStore vulkan;
   };
 } FlutterBackingStore;
 

@@ -23,6 +23,10 @@
 #include "flutter/shell/platform/embedder/embedder_surface_metal.h"
 #endif
 
+#ifdef SHELL_ENABLE_VULKAN
+#include "flutter/shell/platform/embedder/embedder_surface_vulkan.h"
+#endif
+
 namespace flutter {
 
 class PlatformViewEmbedder final : public PlatformView {
@@ -75,6 +79,16 @@ class PlatformViewEmbedder final : public PlatformView {
       PlatformView::Delegate& delegate,
       flutter::TaskRunners task_runners,
       std::unique_ptr<EmbedderSurfaceMetal> embedder_surface,
+      PlatformDispatchTable platform_dispatch_table,
+      std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder);
+#endif
+
+#ifdef SHELL_ENABLE_VULKAN
+  // Creates a platform view that sets up an Vulkan rasterizer.
+  PlatformViewEmbedder(
+      PlatformView::Delegate& delegate,
+      flutter::TaskRunners task_runners,
+      std::unique_ptr<EmbedderSurfaceVulkan> embedder_surface,
       PlatformDispatchTable platform_dispatch_table,
       std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder);
 #endif

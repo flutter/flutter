@@ -5,29 +5,44 @@
 #ifndef FLUTTER_TESTING_TEST_VULKAN_CONTEXT_H_
 #define FLUTTER_TESTING_TEST_VULKAN_CONTEXT_H_
 
+#include "flutter/fml/macros.h"
+#include "flutter/fml/memory/ref_ptr.h"
+#include "flutter/testing/test_vulkan_image.h"
 #include "flutter/vulkan/vulkan_application.h"
 #include "flutter/vulkan/vulkan_device.h"
 #include "flutter/vulkan/vulkan_proc_table.h"
 
-namespace flutter {
+#include "third_party/skia/include/core/SkSize.h"
+#include "third_party/skia/include/gpu/GrDirectContext.h"
 
-/// @brief  Utility class to create a Vulkan device context, a corresponding
-///         Skia context, and device resources.
-class TestVulkanContext {
+namespace flutter {
+namespace testing {
+
+class TestVulkanContext : public fml::RefCountedThreadSafe<TestVulkanContext> {
  public:
   TestVulkanContext();
   ~TestVulkanContext();
-  bool IsValid();
+
+  std::optional<TestVulkanImage> CreateImage(const SkISize& size) const;
+
+  sk_sp<GrDirectContext> GetGrDirectContext() const;
 
  private:
-  bool valid_ = false;
   fml::RefPtr<vulkan::VulkanProcTable> vk_;
   std::unique_ptr<vulkan::VulkanApplication> application_;
-  std::unique_ptr<vulkan::VulkanDevice> logical_device_;
+  std::unique_ptr<vulkan::VulkanDevice> device_;
 
+  sk_sp<GrDirectContext> context_;
+
+  friend class EmbedderTestContextVulkan;
+  friend class EmbedderConfigBuilder;
+
+  FML_FRIEND_MAKE_REF_COUNTED(TestVulkanContext);
+  FML_FRIEND_REF_COUNTED_THREAD_SAFE(TestVulkanContext);
   FML_DISALLOW_COPY_AND_ASSIGN(TestVulkanContext);
 };
 
+}  // namespace testing
 }  // namespace flutter
 
 #endif  // FLUTTER_TESTING_TEST_VULKAN_CONTEXT_H_

@@ -12,6 +12,7 @@
 #include "flutter/shell/platform/embedder/tests/embedder_test_context.h"
 #include "flutter/testing/testing.h"
 #include "flutter/testing/thread_test.h"
+#include "gtest/gtest.h"
 
 namespace flutter {
 namespace testing {
@@ -30,6 +31,10 @@ class EmbedderTest : public ThreadTest {
 
   FML_DISALLOW_COPY_AND_ASSIGN(EmbedderTest);
 };
+
+class EmbedderTestMultiBackend
+    : public EmbedderTest,
+      public ::testing::WithParamInterface<EmbedderTestContextType> {};
 
 }  // namespace testing
 }  // namespace flutter

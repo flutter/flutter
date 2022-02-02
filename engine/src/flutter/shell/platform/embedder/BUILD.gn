@@ -109,6 +109,13 @@ template("embedder_source_set") {
       deps += [ "//flutter/shell/platform/darwin/graphics" ]
     }
 
+    if (embedder_enable_vulkan) {
+      sources += [
+        "embedder_surface_vulkan.cc",
+        "embedder_surface_vulkan.h",
+      ]
+    }
+
     public_deps = [ ":embedder_headers" ]
 
     public_configs += [
@@ -168,6 +175,8 @@ test_fixtures("fixtures") {
     "fixtures/dpr_noxform.png",
     "fixtures/dpr_xform.png",
     "fixtures/gradient.png",
+    "fixtures/vk_dpr_noxform.png",
+    "fixtures/vk_gradient.png",
     "fixtures/gradient_metal.png",
     "fixtures/external_texture_metal.png",
     "fixtures/gradient_xform.png",
@@ -250,6 +259,13 @@ if (enable_unittests) {
     }
 
     if (test_enable_vulkan) {
+      sources += [
+        "tests/embedder_test_compositor_vulkan.cc",
+        "tests/embedder_test_compositor_vulkan.h",
+        "tests/embedder_test_context_vulkan.cc",
+        "tests/embedder_test_context_vulkan.h",
+      ]
+
       deps += [
         "//flutter/testing:vulkan",
         "//flutter/vulkan",
