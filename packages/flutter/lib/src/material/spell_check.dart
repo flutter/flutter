@@ -30,6 +30,7 @@ class MaterialMisspelledWordsHandler extends MisspelledWordsHandler {
     /// See call in EditableTextState [editable_text.dart]
     TextSpan buildWithMisspelledWordsIndicated(List<SpellCheckerSuggestionSpan> spellCheckerSuggestionSpans, 
         TextEditingValue value, TextStyle? style) {
+        scssSpans_consumed_index = 0;
         return TextSpan(
             style: style,
             children: <TextSpan>[
@@ -42,38 +43,51 @@ class MaterialMisspelledWordsHandler extends MisspelledWordsHandler {
     }
 
     List<TextSpan> buildSubtreesWithMisspelledWordsIndicated(List<SpellCheckerSuggestionSpan> spellCheckerSuggestionSpans, String text, TextStyle? style) {
+        print("-------------------------------------------------START--------------------------------------------------");
+        print(text);
+        print(scssSpans_consumed_index.toString());
+        print(spellCheckerSuggestionSpans.length.toString());
         List<TextSpan> tsTreeChildren = <TextSpan>[];
         int text_pointer = 0;
+
         if (scssSpans_consumed_index < spellCheckerSuggestionSpans.length) {
-        int scss_pointer = scssSpans_consumed_index;
-        SpellCheckerSuggestionSpan currScssSpan = spellCheckerSuggestionSpans[scss_pointer];
-        int span_pointer = currScssSpan.start;
+            int scss_pointer = scssSpans_consumed_index;
+            SpellCheckerSuggestionSpan currScssSpan = spellCheckerSuggestionSpans[scss_pointer];
+            int span_pointer = currScssSpan.start;
 
-        while (text_pointer < text.length && scss_pointer < spellCheckerSuggestionSpans.length && currScssSpan.start < text.length) {
-            int end_index;
-            currScssSpan = spellCheckerSuggestionSpans[scss_pointer];
-             if (currScssSpan.start > text_pointer) {
-                 end_index = currScssSpan.start < text.length ? currScssSpan.start : text.length;
-                tsTreeChildren.add(TextSpan(style: style,
-                                            text: text.substring(text_pointer, currScssSpan.start)));
-                text_pointer = currScssSpan.start + 1;
-             }
-             else {
-                 print("misspelled :(");
-                end_index = currScssSpan.end < text.length ? currScssSpan.end : text.length;
-                tsTreeChildren.add(TextSpan(style: const TextStyle(decoration: TextDecoration.underline,
-                                decorationColor: Colors.red,
-                                decorationStyle: TextDecorationStyle.wavy,),//overrideTextSpanStyle(style),
-                                            text: text.substring(currScssSpan.start, end_index)));
-                text_pointer = currScssSpan.end + 1;
-                scss_pointer += 1;
-             }
-        }
+            while (text_pointer < text.length && scss_pointer < spellCheckerSuggestionSpans.length && currScssSpan.start < text.length) {
+                print(text_pointer.toString());
+                print(scss_pointer.toString());
+                int end_index;
+                currScssSpan = spellCheckerSuggestionSpans[scss_pointer];
+                if (currScssSpan.start > text_pointer) {
+                    print("-------------------------------------------------CASE 1--------------------------------------------------");
+                    end_index = currScssSpan.start < text.length ? currScssSpan.start : text.length;
+                    print(end_index.toString());
+                    tsTreeChildren.add(TextSpan(style: style,
+                                                text: text.substring(text_pointer, currScssSpan.start)));
+                    print(text.substring(text_pointer, currScssSpan.start));
+                    text_pointer = currScssSpan.start + 1;
+                }
+                else {
+                    print("-------------------------------------------------CASE 2--------------------------------------------------");
+                    end_index = currScssSpan.end < text.length ? currScssSpan.end : text.length;
+                    print(end_index.toString());
+                    tsTreeChildren.add(TextSpan(style: const TextStyle(decoration: TextDecoration.underline,
+                                    decorationColor: Colors.red,
+                                    decorationStyle: TextDecorationStyle.wavy,),//overrideTextSpanStyle(style),
+                                                text: text.substring(currScssSpan.start, end_index + 1)));
+                    print(text.substring(currScssSpan.start, end_index + 1));
+                    text_pointer = currScssSpan.end + 1;
+                    scss_pointer += 1;
+                }
+                print("--------------------------------------------------------------------------------------------------------------");
+            }
 
-        scssSpans_consumed_index = scss_pointer;
-        print("woohoo!");
-        return tsTreeChildren;
+            scssSpans_consumed_index = scss_pointer;
+            return tsTreeChildren;
         } else {
+            print("-------------------------------------------------NO MORE SUGGESTIONS--------------------------------------------------");
             return <TextSpan>[TextSpan(text: text, style: style)];
         }
     }

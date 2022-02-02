@@ -1128,7 +1128,8 @@ abstract class TextInputClient {
   /// Requests that the client remove the text placeholder.
   void removeTextPlaceholder() {}
 
-  // Updates spell hcecker results.
+  // Updates spell hcecker results. 
+  //TODO(camillesimon): Passing text for testing. Eventually solve issue.
   void updateSpellCheckerResults(List<SpellCheckerSuggestionSpan> spellCheckerResults);
 }
 
@@ -1780,11 +1781,15 @@ class TextInput {
         break;
       case 'TextInputClient.updateSpellCheckerResults':
         List<String> results = args[1].cast<String>();
+        print("************************************************************************");
+        print(results);
+        print("************************************************************************");
         List<SpellCheckerSuggestionSpan> spellCheckerSuggestionSpans = <SpellCheckerSuggestionSpan>[];
         results.forEach((String result) {
           List<String> resultParsed = result.split(".");
           spellCheckerSuggestionSpans.add(SpellCheckerSuggestionSpan(int.parse(resultParsed[0]), int.parse(resultParsed[1]), resultParsed[2].split(",")));
         });
+        // TODO(camillesimon): Passing text for testing purposes. Eventually solve issue.
         _currentConnection!._client.updateSpellCheckerResults(spellCheckerSuggestionSpans);
         break;
       default:

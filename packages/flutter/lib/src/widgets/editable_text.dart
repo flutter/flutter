@@ -2887,7 +2887,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     // toolbar: copy, paste, select, cut. It might also provide additional
     // functionality depending on the browser (such as translate). Due to this
     // we should not show a Flutter toolbar for the editable text elements.
-    print("BESTIEBESTIBESTIEBFABESTIEBESTIBESTIEBFABESTIEBESTIBESTIEBFABESTIEBESTIBESTIEBFABESTIEBESTIBESTIEBFABESTIEBESTIBESTIEBFABESTIEBESTIBESTIEBFABESTIEBESTIBESTIEBFABESTIEBESTIBESTIEBFA");
     if (kIsWeb) {
       return false;
     }
@@ -2895,8 +2894,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (_selectionOverlay == null || _selectionOverlay!.toolbarIsVisible) {
       return false;
     }
-    print(toolbarType);
-    print(_spellCheckerResults?.length);
     _selectionOverlay!.showToolbar(toolbarType, _spellCheckerResults);
     return true;
   }
@@ -2907,7 +2904,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       // Hide the handles and the toolbar.
       _selectionOverlay?.hide();
     } else if (_selectionOverlay?.toolbarIsVisible ?? false) {
-      print(toolbarType.toString());
       // Hide only the toolbar but not the handles.
       _selectionOverlay?.hideToolbar(toolbarType);
     }
@@ -2956,11 +2952,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   // Tracks spell check results for the current text input.
   List<SpellCheckerSuggestionSpan>? _spellCheckerResults;
 
+  //TODO(camillesimon): Passing text for testing. Eventually solve issue.
+  String? _spellCheckedText;
+
   @override
   void updateSpellCheckerResults(List<SpellCheckerSuggestionSpan> spellCheckerResults) {
     _spellCheckerResults = spellCheckerResults;
-    print(_spellCheckerResults?.length);
-    print("HUH");
   }
 
   @override
