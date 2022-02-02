@@ -16,8 +16,8 @@ import 'media_query.dart';
 /// Positions [child] such that it avoids overlapping any [DisplayFeature] that
 /// splits the screen into sub-screens.
 ///
-/// A [DisplayFeature] splits the screen into sub-screens both these conditions
-/// are met:
+/// A [DisplayFeature] splits the screen into sub-screens when both these
+/// conditions are met:
 ///
 ///   * it obstructs the screen, meaning the area it occupies is not 0. Display
 ///     features of type [DisplayFeatureType.fold] can have height 0 or width 0
