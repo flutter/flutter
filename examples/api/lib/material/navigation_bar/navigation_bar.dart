@@ -15,13 +15,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: const Material(child: Center(child: NavigationExample())),
-    );
+    return const MaterialApp(home: NavigationExample());
   }
 }
 
@@ -33,48 +27,51 @@ class NavigationExample extends StatefulWidget {
 }
 
 class _NavigationExampleState extends State<NavigationExample> {
-  int _currentPageIndex = 0;
+  int currentPageIndex = 0;
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> buildBody = <Widget>[
-      Container(
+    return Scaffold(
+      bottomNavigationBar: NavigationBar(
+        onDestinationSelected: (int index) {
+          setState(() {
+            currentPageIndex = index;
+          });
+        },
+        selectedIndex: currentPageIndex,
+        destinations: const <Widget>[
+          NavigationDestination(
+            icon: Icon(Icons.explore),
+            label: 'Explore',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.commute),
+            label: 'Commute',
+          ),
+          NavigationDestination(
+            selectedIcon: Icon(Icons.bookmark),
+            icon: Icon(Icons.bookmark_border),
+            label: 'Saved',
+          ),
+        ],
+      ),
+      body: <Widget>[
+        Container(
           color: Colors.red,
           alignment: Alignment.center,
-          child: const Text('Page 1')),
-      Container(
+          child: const Text('Page 1'),
+        ),
+        Container(
           color: Colors.green,
           alignment: Alignment.center,
-          child: const Text('Page 2')),
-      Container(
+          child: const Text('Page 2'),
+        ),
+        Container(
           color: Colors.blue,
           alignment: Alignment.center,
-          child: const Text('Page 3')),
-    ];
-
-    return Scaffold(
-        bottomNavigationBar: NavigationBar(
-            onDestinationSelected: (int index) {
-              setState(() {
-                _currentPageIndex = index;
-              });
-            },
-            selectedIndex: _currentPageIndex,
-            destinations: const <Widget>[
-              NavigationDestination(
-                icon: Icon(Icons.explore),
-                label: 'Explore',
-              ),
-              NavigationDestination(
-                icon: Icon(Icons.commute),
-                label: 'Commute',
-              ),
-              NavigationDestination(
-                selectedIcon: Icon(Icons.bookmark),
-                icon: Icon(Icons.bookmark_border),
-                label: 'Saved',
-              ),
-            ]),
-        body: buildBody.elementAt(_currentPageIndex));
+          child: const Text('Page 3'),
+        ),
+      ][currentPageIndex],
+    );
   }
 }
