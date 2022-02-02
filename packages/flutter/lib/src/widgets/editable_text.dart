@@ -3032,11 +3032,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     return _CollapsedSelectionBoundary(mixedBoundary, intent.forward);
   }
 
-  _TextBoundary _extendingLinebreak(ExtendSelectionToLineBreakIntent intent) {
-    return _linebreak(intent, intent.continuesAtWrap);
-  }
-
-  _TextBoundary _linebreak(DirectionalTextEditingIntent intent, [bool continuesAtWrap = false]) {
+  _TextBoundary _linebreak(DirectionalTextEditingIntent intent) {
     final _TextBoundary atomicTextBoundary;
     final _TextBoundary boundary;
 
@@ -3046,7 +3042,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     } else {
       final TextEditingValue textEditingValue = _textEditingValueforTextLayoutMetrics;
       atomicTextBoundary = _CharacterBoundary(textEditingValue);
-      boundary = _LineBreak(renderEditable, textEditingValue, continuesAtWrap);
+      boundary = _LineBreak(renderEditable, textEditingValue);
     }
 
     // The _MixedBoundary is to make sure we don't leave invalid code units in
@@ -3142,7 +3138,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     // Extend/Move Selection
     ExtendSelectionByCharacterIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionByCharacterIntent>(this, false, _characterBoundary,)),
     ExtendSelectionToNextWordBoundaryIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionToNextWordBoundaryIntent>(this, true, _nextWordBoundary)),
-    ExtendSelectionToLineBreakIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionToLineBreakIntent>(this, true, _extendingLinebreak)),
+    ExtendSelectionToLineBreakIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionToLineBreakIntent>(this, true, _linebreak)),
     ExpandSelectionToLineBreakIntent: _makeOverridable(CallbackAction<ExpandSelectionToLineBreakIntent>(onInvoke: _expandSelectionToLinebreak)),
     ExpandSelectionToDocumentBoundaryIntent: _makeOverridable(CallbackAction<ExpandSelectionToDocumentBoundaryIntent>(onInvoke: _expandSelectionToDocumentBoundary)),
     ExtendSelectionVerticallyToAdjacentLineIntent: _makeOverridable(_adjacentLineAction),
@@ -3793,57 +3789,25 @@ class _LineBreak extends _TextBoundary {
   const _LineBreak(
     this.textLayout,
     this.textEditingValue,
-    [this.continuesAtWrap = false]
   );
 
-  static const int NEWLINE_CODE_UNIT = 10;
-
   final TextLayoutMetrics textLayout;
-
-  final bool continuesAtWrap;
 
   @override
   final TextEditingValue textEditingValue;
 
   @override
   TextPosition getLeadingTextBoundaryAt(TextPosition position) {
-    final TextPosition start = TextPosition(
-      offset: textLayout.getLineAtOffset(position).start,
-    );
-
-    if (!continuesAtWrap || start != position || start.offset == 0
-        || textEditingValue.text.codeUnitAt(position.offset - 1) == NEWLINE_CODE_UNIT) {
-      return start;
-    }
-    // If continuesAtWrap is true and the position is at a wordwrap, then return
-    // the beginning of the previous line.
     return TextPosition(
-      offset: textLayout.getLineAtOffset(TextPosition(
-      affinity: TextAffinity.upstream,
-        offset: position.offset,
-      )).start,
+      offset: textLayout.getLineAtOffset(position).start,
     );
   }
 
   @override
   TextPosition getTrailingTextBoundaryAt(TextPosition position) {
-    final TextPosition end = TextPosition(
+    return TextPosition(
       offset: textLayout.getLineAtOffset(position).end,
       affinity: TextAffinity.upstream,
-    );
-    if (!continuesAtWrap || end != position
-        || end.offset == textEditingValue.text.length
-        || textEditingValue.text.codeUnitAt(position.offset) == NEWLINE_CODE_UNIT) {
-      return end;
-    }
-
-    // If continuesAtWrap is true and the position is at a wordwrap, then return
-    // the end of the next line.
-    return TextPosition(
-      affinity: TextAffinity.upstream,
-      offset: textLayout.getLineAtOffset(TextPosition(
-        offset: position.offset,
-      )).end,
     );
   }
 }
@@ -4008,11 +3972,38 @@ class _DeleteTextAction<T extends DirectionalTextEditingIntent> extends ContextA
 }
 
 class _UpdateTextSelectionAction<T extends DirectionalCaretMovementIntent> extends ContextAction<T> {
-  _UpdateTextSelectionAction(this.state, this.ignoreNonCollapsedSelection, this.getTextBoundariesForIntent);
+  _UpdateTextSelectionAction(
+    this.state,
+    this.ignoreNonCollapsedSelection,
+    this.getTextBoundariesForIntent,
+  );
 
   final EditableTextState state;
   final bool ignoreNonCollapsedSelection;
   final _TextBoundary Function(T intent) getTextBoundariesForIntent;
+
+  static const int NEWLINE_CODE_UNIT = 10;
+
+  // Returns true iff the given position is at a wordwrap boundary in the
+  // upstream position.
+  bool _isAtWordwrapUpstream(TextPosition position) {
+    final TextPosition end = TextPosition(
+      offset: state.renderEditable.getLineAtOffset(position).end,
+      affinity: TextAffinity.upstream,
+    );
+    return end == position && end.offset != state.textEditingValue.text.length
+        && state.textEditingValue.text.codeUnitAt(position.offset) != NEWLINE_CODE_UNIT;
+  }
+
+  // Returns true iff the given position at a wordwrap boundary in the
+  // downstream position.
+  bool _isAtWordwrapDownstream(TextPosition position) {
+    final TextPosition start = TextPosition(
+      offset: state.renderEditable.getLineAtOffset(position).start,
+    );
+    return start == position && start.offset != 0
+        && state.textEditingValue.text.codeUnitAt(position.offset - 1) != NEWLINE_CODE_UNIT;
+  }
 
   @override
   Object? invoke(T intent, [BuildContext? context]) {
@@ -4049,7 +4040,23 @@ class _UpdateTextSelectionAction<T extends DirectionalCaretMovementIntent> exten
       );
     }
 
-    final TextPosition extent = textBoundarySelection.extent;
+    TextPosition extent = textBoundarySelection.extent;
+
+    // If continuesAtWrap is true extent and is at the relevant wordwrap, then
+    // move it just to the other side of the wordwrap.
+    if (intent.continuesAtWrap) {
+      if (intent.forward && _isAtWordwrapUpstream(extent)) {
+        extent = TextPosition(
+          offset: extent.offset,
+        );
+      } else if (!intent.forward && _isAtWordwrapDownstream(extent)) {
+        extent = TextPosition(
+          offset: extent.offset,
+          affinity: TextAffinity.upstream,
+        );
+      }
+    }
+
     final TextPosition newExtent = intent.forward
       ? textBoundary.getTrailingTextBoundaryAt(extent)
       : textBoundary.getLeadingTextBoundaryAt(extent);

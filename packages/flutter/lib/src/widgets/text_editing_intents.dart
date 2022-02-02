@@ -69,6 +69,7 @@ abstract class DirectionalCaretMovementIntent extends DirectionalTextEditingInte
     this.collapseSelection,
     [
       this.collapseAtReversal = false,
+      this.continuesAtWrap = false,
     ]
   ) : assert(!collapseSelection || !collapseAtReversal),
       super(forward);
@@ -94,6 +95,14 @@ abstract class DirectionalCaretMovementIntent extends DirectionalTextEditingInte
   ///
   /// Cannot be true when collapseSelection is true.
   final bool collapseAtReversal;
+
+  /// Whether or not to continue to the next line at a wordwrap.
+  ///
+  /// If true, when an [Intent] to go to the beginning/end of a wordwrapped line
+  /// is received and the selection is already at the beginning/end of the line,
+  /// then the selection will be moved to the next/previous line.  If false, the
+  /// selection will remain at the wordwrap.
+  final bool continuesAtWrap;
 }
 
 /// Extends, or moves the current selection from the current
@@ -186,17 +195,9 @@ class ExtendSelectionToLineBreakIntent extends DirectionalCaretMovementIntent {
     required bool forward,
     required bool collapseSelection,
     bool collapseAtReversal = false,
-    this.continuesAtWrap = false,
+    bool continuesAtWrap = false,
   }) : assert(!collapseSelection || !collapseAtReversal),
-       super(forward, collapseSelection, collapseAtReversal);
-
-  /// Whether or not to continue to the next line at a wordwrap.
-  ///
-  /// If true, when an [Intent] to go to the beginning/end of a wordwrapped line
-  /// is received and the selection is already at the beginning/end of the line,
-  /// then the selection will be moved to the next/previous line.  If false, the
-  /// selection will remain at the wordwrap.
-  final bool continuesAtWrap;
+       super(forward, collapseSelection, collapseAtReversal, continuesAtWrap);
 }
 
 /// Extends, or moves the current selection from the current
