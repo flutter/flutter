@@ -179,7 +179,7 @@ class DisplayList : public SkRefCnt {
            (nested ? nested_byte_count_ : 0);
   }
 
-  int op_count(bool nested = false) const {
+  unsigned int op_count(bool nested = false) const {
     return op_count_ + (nested ? nested_op_count_ : 0);
   }
 
@@ -203,18 +203,18 @@ class DisplayList : public SkRefCnt {
  private:
   DisplayList(uint8_t* ptr,
               size_t byte_count,
-              int op_count,
+              unsigned int op_count,
               size_t nested_byte_count,
-              int nested_op_count,
+              unsigned int nested_op_count,
               const SkRect& cull_rect,
               bool can_apply_group_opacity);
 
   std::unique_ptr<uint8_t, SkFunctionWrapper<void(void*), sk_free>> storage_;
   size_t byte_count_;
-  int op_count_;
+  unsigned int op_count_;
 
   size_t nested_byte_count_;
-  int nested_op_count_;
+  unsigned int nested_op_count_;
 
   uint32_t unique_id_;
   SkRect bounds_;

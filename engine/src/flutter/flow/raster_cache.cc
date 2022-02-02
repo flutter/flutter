@@ -86,9 +86,11 @@ static bool IsPictureWorthRasterizing(SkPicture* picture,
   return picture->approximateOpCount(true) > 5;
 }
 
-static bool IsDisplayListWorthRasterizing(DisplayList* display_list,
-                                          bool will_change,
-                                          bool is_complex) {
+static bool IsDisplayListWorthRasterizing(
+    DisplayList* display_list,
+    bool will_change,
+    bool is_complex,
+    DisplayListComplexityCalculator* complexity_calculator) {
   if (will_change) {
     // If the display list is going to change in the future, there is no point
     // in doing to extra work to rasterize.
@@ -109,7 +111,8 @@ static bool IsDisplayListWorthRasterizing(DisplayList* display_list,
 
   // TODO(abarth): We should find a better heuristic here that lets us avoid
   // wasting memory on trivial layers that are easy to re-rasterize every frame.
-  return display_list->op_count(true) > 5;
+  int complexity_score = complexity_calculator->compute(display_list);
+  return complexity_calculator->should_be_cached(complexity_score);
 }
 
 /// @note Procedure doesn't copy all closures.
@@ -273,7 +276,13 @@ bool RasterCache::Prepare(PrerollContext* context,
     return false;
   }
 
-  if (!IsDisplayListWorthRasterizing(display_list, will_change, is_complex)) {
+  DisplayListComplexityCalculator* complexity_calculator =
+      context->gr_context ? DisplayListComplexityCalculator::GetForBackend(
+                                context->gr_context->backend())
+                          : DisplayListComplexityCalculator::GetForSoftware();
+
+  if (!IsDisplayListWorthRasterizing(display_list, will_change, is_complex,
+                                     complexity_calculator)) {
     // We only deal with display lists that are worthy of rasterization.
     return false;
   }

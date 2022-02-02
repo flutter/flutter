@@ -213,7 +213,7 @@ static sk_sp<SkTextBlob> TestBlob2 = MakeTextBlob("TestBlob2");
 typedef const std::function<void(DisplayListBuilder&)> DlInvoker;
 
 struct DisplayListInvocation {
-  int op_count_;
+  unsigned int op_count_;
   size_t byte_count_;
 
   // in some cases, running the sequence through an SkCanvas will result
@@ -226,7 +226,8 @@ struct DisplayListInvocation {
   bool supports_group_opacity_ = false;
 
   bool sk_version_matches() {
-    return (op_count_ == sk_op_count_ && byte_count_ == sk_byte_count_);
+    return (static_cast<int>(op_count_) == sk_op_count_ &&
+            byte_count_ == sk_byte_count_);
   }
 
   // A negative sk_op_count means "do not test this op".
@@ -240,7 +241,7 @@ struct DisplayListInvocation {
 
   bool supports_group_opacity() { return supports_group_opacity_; }
 
-  int op_count() { return op_count_; }
+  unsigned int op_count() { return op_count_; }
   // byte count for the individual ops, no DisplayList overhead
   size_t raw_byte_count() { return byte_count_; }
   // byte count for the ops with DisplayList overhead, comparable
@@ -797,7 +798,8 @@ TEST(DisplayList, SingleOpDisplayListsRecapturedViaSkCanvasAreEqual) {
       dl->RenderTo(&recorder);
       sk_sp<DisplayList> sk_copy = recorder.Build();
       auto desc = group.op_name + "[variant " + std::to_string(i + 1) + "]";
-      EXPECT_EQ(sk_copy->op_count(false), group.variants[i].sk_op_count())
+      EXPECT_EQ(static_cast<int>(sk_copy->op_count(false)),
+                group.variants[i].sk_op_count())
           << desc;
       EXPECT_EQ(sk_copy->bytes(false), group.variants[i].sk_byte_count())
           << desc;
@@ -861,8 +863,8 @@ TEST(DisplayList, FullRotationsAreNop) {
   sk_sp<DisplayList> dl = builder.Build();
   ASSERT_EQ(dl->bytes(false), sizeof(DisplayList));
   ASSERT_EQ(dl->bytes(true), sizeof(DisplayList));
-  ASSERT_EQ(dl->op_count(false), 0);
-  ASSERT_EQ(dl->op_count(true), 0);
+  ASSERT_EQ(dl->op_count(false), 0u);
+  ASSERT_EQ(dl->op_count(true), 0u);
 }
 
 TEST(DisplayList, AllBlendModeNops) {
@@ -872,13 +874,13 @@ TEST(DisplayList, AllBlendModeNops) {
   sk_sp<DisplayList> dl = builder.Build();
   ASSERT_EQ(dl->bytes(false), sizeof(DisplayList));
   ASSERT_EQ(dl->bytes(true), sizeof(DisplayList));
-  ASSERT_EQ(dl->op_count(false), 0);
-  ASSERT_EQ(dl->op_count(true), 0);
+  ASSERT_EQ(dl->op_count(false), 0u);
+  ASSERT_EQ(dl->op_count(true), 0u);
 }
 
 static sk_sp<DisplayList> Build(size_t g_index, size_t v_index) {
   DisplayListBuilder builder;
-  int op_count = 0;
+  unsigned int op_count = 0;
   size_t byte_count = 0;
   for (size_t i = 0; i < allGroups.size(); i++) {
     DisplayListInvocationGroup& group = allGroups[i];
@@ -1128,18 +1130,20 @@ TEST(DisplayList, NestedOpCountMetricsSameAsSkPicture) {
   outer_builder.drawDisplayList(builder.Build());
 
   auto display_list = outer_builder.Build();
-  ASSERT_EQ(display_list->op_count(), 1);
-  ASSERT_EQ(display_list->op_count(true), 36);
+  ASSERT_EQ(display_list->op_count(), 1u);
+  ASSERT_EQ(display_list->op_count(true), 36u);
 
-  ASSERT_EQ(picture->approximateOpCount(), display_list->op_count());
-  ASSERT_EQ(picture->approximateOpCount(true), display_list->op_count(true));
+  ASSERT_EQ(picture->approximateOpCount(),
+            static_cast<int>(display_list->op_count()));
+  ASSERT_EQ(picture->approximateOpCount(true),
+            static_cast<int>(display_list->op_count(true)));
 
   DisplayListCanvasRecorder dl_recorder(SkRect::MakeWH(150, 100));
   picture->playback(&dl_recorder);
 
   auto sk_display_list = dl_recorder.Build();
-  ASSERT_EQ(display_list->op_count(), 1);
-  ASSERT_EQ(display_list->op_count(true), 36);
+  ASSERT_EQ(display_list->op_count(), 1u);
+  ASSERT_EQ(display_list->op_count(true), 36u);
 }
 
 class AttributeRefTester {
@@ -1375,7 +1379,7 @@ TEST(DisplayList, SetMaskBlurSigmaZeroResetsMaskFilter) {
   EXPECT_EQ(builder.getMaskFilter(), nullptr);
   builder.drawRect({30, 30, 40, 40});
   sk_sp<DisplayList> display_list = builder.Build();
-  ASSERT_EQ(display_list->op_count(), 2);
+  ASSERT_EQ(display_list->op_count(), 2u);
   ASSERT_EQ(display_list->bytes(), sizeof(DisplayList) + 8u + 24u + 8u + 24u);
 }
 
@@ -1387,7 +1391,7 @@ TEST(DisplayList, SetMaskFilterNullResetsMaskFilter) {
   EXPECT_EQ(builder.getMaskFilter(), nullptr);
   builder.drawRect({30, 30, 40, 40});
   sk_sp<DisplayList> display_list = builder.Build();
-  ASSERT_EQ(display_list->op_count(), 2);
+  ASSERT_EQ(display_list->op_count(), 2u);
   ASSERT_EQ(display_list->bytes(), sizeof(DisplayList) + 8u + 24u + 8u + 24u);
 }
 
