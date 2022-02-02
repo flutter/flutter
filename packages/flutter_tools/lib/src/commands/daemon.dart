@@ -212,13 +212,13 @@ class Daemon {
       final String method = request.data['method'] as String;
       assert(method != null);
       if (!method.contains('.')) {
-        throw 'method not understood: $method';
+        throw DaemonException('method not understood: $method');
       }
 
       final String prefix = method.substring(0, method.indexOf('.'));
       final String name = method.substring(method.indexOf('.') + 1);
       if (_domainMap[prefix] == null) {
-        throw 'no domain for method: $method';
+        throw DaemonException('no domain for method: $method');
       }
 
       _domainMap[prefix].handleCommand(name, id, castStringKeyedMap(request.data['params']) ?? const <String, dynamic>{}, request.binary);
@@ -275,7 +275,7 @@ abstract class Domain {
       } else if (_handlersWithBinary.containsKey(command)) {
         return _handlersWithBinary[command](args, binary);
       }
-      throw 'command not understood: $name.$command';
+      throw DaemonException('command not understood: $name.$command');
     }).then<dynamic>((dynamic result) {
       daemon.connection.sendResponse(id, _toJsonable(result));
     }).catchError((Object error, StackTrace stackTrace) {
@@ -289,33 +289,33 @@ abstract class Domain {
 
   String _getStringArg(Map<String, dynamic> args, String name, { bool required = false }) {
     if (required && !args.containsKey(name)) {
-      throw '$name is required';
+      throw DaemonException('$name is required');
     }
     final dynamic val = args[name];
     if (val != null && val is! String) {
-      throw '$name is not a String';
+      throw DaemonException('$name is not a String');
     }
     return val as String;
   }
 
   bool _getBoolArg(Map<String, dynamic> args, String name, { bool required = false }) {
     if (required && !args.containsKey(name)) {
-      throw '$name is required';
+      throw DaemonException('$name is required');
     }
     final dynamic val = args[name];
     if (val != null && val is! bool) {
-      throw '$name is not a bool';
+      throw DaemonException('$name is not a bool');
     }
     return val as bool;
   }
 
   int _getIntArg(Map<String, dynamic> args, String name, { bool required = false }) {
     if (required && !args.containsKey(name)) {
-      throw '$name is required';
+      throw DaemonException('$name is required');
     }
     final dynamic val = args[name];
     if (val != null && val is! int) {
-      throw '$name is not an int';
+      throw DaemonException('$name is not an int');
     }
     return val as int;
   }
@@ -670,7 +670,7 @@ class AppDomain extends Domain {
 
     final AppInstance app = _getApp(appId);
     if (app == null) {
-      throw "app '$appId' not found";
+      throw DaemonException("app '$appId' not found");
     }
 
     return _queueAndDebounceReloadAction(
@@ -728,7 +728,7 @@ class AppDomain extends Domain {
 
     final AppInstance app = _getApp(appId);
     if (app == null) {
-      throw "app '$appId' not found";
+      throw DaemonException("app '$appId' not found");
     }
     final FlutterDevice device = app.runner.flutterDevices.first;
     final List<FlutterView> views = await device.vmService.getFlutterViews();
@@ -741,7 +741,7 @@ class AppDomain extends Domain {
           .first.uiIsolate.id
       );
     if (result == null) {
-      throw 'method not available: $methodName';
+      throw DaemonException('method not available: $methodName');
     }
 
     if (result.containsKey('error')) {
@@ -756,7 +756,7 @@ class AppDomain extends Domain {
 
     final AppInstance app = _getApp(appId);
     if (app == null) {
-      throw "app '$appId' not found";
+      throw DaemonException("app '$appId' not found");
     }
 
     return app.stop().then<bool>(
@@ -775,7 +775,7 @@ class AppDomain extends Domain {
 
     final AppInstance app = _getApp(appId);
     if (app == null) {
-      throw "app '$appId' not found";
+      throw DaemonException("app '$appId' not found");
     }
 
     return app.detach().then<bool>(
@@ -903,7 +903,7 @@ class DeviceDomain extends Domain {
 
     final Device device = await daemon.deviceDomain._getDevice(deviceId);
     if (device == null) {
-      throw "device '$deviceId' not found";
+      throw DaemonException("device '$deviceId' not found");
     }
 
     hostPort = await device.portForwarder.forward(devicePort, hostPort: hostPort);
@@ -919,7 +919,7 @@ class DeviceDomain extends Domain {
 
     final Device device = await daemon.deviceDomain._getDevice(deviceId);
     if (device == null) {
-      throw "device '$deviceId' not found";
+      throw DaemonException("device '$deviceId' not found");
     }
 
     return device.portForwarder.unforward(ForwardedPort(hostPort, devicePort));
@@ -930,7 +930,7 @@ class DeviceDomain extends Domain {
     final String deviceId = _getStringArg(args, 'deviceId', required: true);
     final Device device = await daemon.deviceDomain._getDevice(deviceId);
     if (device == null) {
-      throw "device '$deviceId' not found";
+      throw DaemonException("device '$deviceId' not found");
     }
     final String buildMode = _getStringArg(args, 'buildMode', required: true);
     return await device.supportsRuntimeMode(getBuildModeForName(buildMode));
@@ -954,7 +954,7 @@ class DeviceDomain extends Domain {
     final String deviceId = _getStringArg(args, 'deviceId', required: true);
     final Device device = await daemon.deviceDomain._getDevice(deviceId);
     if (device == null) {
-      throw "device '$deviceId' not found";
+      throw DaemonException("device '$deviceId' not found");
     }
     final String applicationPackageId = _getStringArg(args, 'applicationPackageId');
     final ApplicationPackage applicationPackage = applicationPackageId != null ? _applicationPackages[applicationPackageId] : null;
@@ -979,7 +979,7 @@ class DeviceDomain extends Domain {
     final String deviceId = _getStringArg(args, 'deviceId', required: true);
     final Device device = await daemon.deviceDomain._getDevice(deviceId);
     if (device == null) {
-      throw "device '$deviceId' not found";
+      throw DaemonException("device '$deviceId' not found");
     }
     final String applicationPackageId = _getStringArg(args, 'applicationPackageId', required: true);
     final ApplicationPackage applicationPackage = _applicationPackages[applicationPackageId];
@@ -1009,7 +1009,7 @@ class DeviceDomain extends Domain {
     final String deviceId = _getStringArg(args, 'deviceId', required: true);
     final Device device = await daemon.deviceDomain._getDevice(deviceId);
     if (device == null) {
-      throw "device '$deviceId' not found";
+      throw DaemonException("device '$deviceId' not found");
     }
     final String applicationPackageId = _getStringArg(args, 'applicationPackageId', required: true);
     final ApplicationPackage applicationPackage = _applicationPackages[applicationPackageId];
@@ -1024,7 +1024,7 @@ class DeviceDomain extends Domain {
     final String deviceId = _getStringArg(args, 'deviceId', required: true);
     final Device device = await daemon.deviceDomain._getDevice(deviceId);
     if (device == null) {
-      throw "device '$deviceId' not found";
+      throw DaemonException("device '$deviceId' not found");
     }
     final String tempFileName = 'screenshot_${_id++}';
     final File tempFile = daemon.proxyDomain.tempDirectory.childFile(tempFileName);
@@ -1298,9 +1298,9 @@ class EmulatorDomain extends Domain {
     final List<Emulator> matches =
         await emulators.getEmulatorsMatching(emulatorId);
     if (matches.isEmpty) {
-      throw "emulator '$emulatorId' not found";
+      throw DaemonException("emulator '$emulatorId' not found");
     } else if (matches.length > 1) {
-      throw "multiple emulators match '$emulatorId'";
+      throw DaemonException("multiple emulators match '$emulatorId'");
     } else {
       await matches.first.launch(coldBoot: coldBoot);
     }
@@ -1555,4 +1555,14 @@ class DebounceOperationQueue<T, K> {
 
     return completer.future;
   }
+}
+
+/// Specialized exception for returning errors to the daemon client.
+class DaemonException implements Exception {
+  DaemonException(this.message);
+
+  final String message;
+
+  @override
+  String toString() => message;
 }
