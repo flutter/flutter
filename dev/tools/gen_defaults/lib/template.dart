@@ -66,17 +66,18 @@ abstract class TokenTemplate {
   }
 
   String elevation(String tokenName) {
-    final String elevationName = '$tokenName.elevation';
-    final Map<String, dynamic> elevationValue = tokens[tokens[elevationName]!]! as Map<String, dynamic>;
-    return elevationValue['value']!.toString();
+    return tokens[tokens[tokenName]!]!.toString();
   }
 
   String shape(String tokenName) {
     // TODO(darrenaustin): handle more than just rounded rectangle shapes
-    final String shapeToken = tokens[tokenName]! as String;
-    final Map<String, dynamic> shape = tokens[shapeToken]! as Map<String, dynamic>;
-    final Map<String, dynamic> shapeValue = shape['value']! as Map<String, dynamic>;
-    return 'const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(${shapeValue['value']!})))';
+    final Map<String, dynamic> shape = tokens[tokens[tokenName]!]! as Map<String, dynamic>;
+    return 'const RoundedRectangleBorder(borderRadius: '
+        'BorderRadius.only('
+          'topLeft: Radius.circular(${shape['topLeft']}), '
+          'topRight: Radius.circular(${shape['topRight']}), '
+          'bottomLeft: Radius.circular(${shape['bottomLeft']}), '
+          'bottomRight: Radius.circular(${shape['bottomRight']})))';
   }
 
   String value(String tokenName) {
@@ -85,7 +86,7 @@ abstract class TokenTemplate {
   }
 
   String textStyle(String tokenName) {
-    final String fontName = '$tokenName.font';
+    final String fontName = '$tokenName.text-style';
     return tokens[fontName]!.toString();
   }
 }

@@ -97,6 +97,21 @@ static final String tokenBar = 'bar';
       tempDir.deleteSync(recursive: true);
     }
   });
+
+  test('Templates can get proper shapes from given data', () {
+    const Map<String, dynamic> tokens = <String, dynamic>{
+      'foo.shape': 'shape.large',
+      'shape.large': <String, dynamic>{
+        'family': 'SHAPE_FAMILY_ROUNDED_CORNERS',
+        'topLeft': 1.0,
+        'topRight': 2.0,
+        'bottomLeft': 3.0,
+        'bottomRight': 4.0,
+      }
+    };
+    final TestTemplate template = TestTemplate('foobar.dart', tokens);
+    expect(template.shape('foo.shape'), 'const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(1.0), topRight: Radius.circular(2.0), bottomLeft: Radius.circular(3.0), bottomRight: Radius.circular(4.0)))');
+  });
 }
 
 class TestTemplate extends TokenTemplate {

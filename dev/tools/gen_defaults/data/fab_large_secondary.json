@@ -1,0 +1,28 @@
+{
+  "version": "v0_76",
+
+  "md.comp.fab.secondary.large.container.color": "secondaryContainer",
+  "md.comp.fab.secondary.large.container.elevation": "md.sys.elevation.level3",
+  "md.comp.fab.secondary.large.container.height": 96.0,
+  "md.comp.fab.secondary.large.container.shadow-color": "shadow",
+  "md.comp.fab.secondary.large.container.shape": "md.sys.shape.corner.extra-large",
+  "md.comp.fab.secondary.large.container.width": 96.0,
+  "md.comp.fab.secondary.large.focus.container.elevation": "md.sys.elevation.level3",
+  "md.comp.fab.secondary.large.focus.icon.color": "onSecondaryContainer",
+  "md.comp.fab.secondary.large.focus.state-layer.color": "onSecondaryContainer",
+  "md.comp.fab.secondary.large.focus.state-layer.opacity": "md.sys.state.focus.state-layer-opacity",
+  "md.comp.fab.secondary.large.hover.container.elevation": "md.sys.elevation.level4",
+  "md.comp.fab.secondary.large.hover.icon.color": "onSecondaryContainer",
+  "md.comp.fab.secondary.large.hover.state-layer.color": "onSecondaryContainer",
+  "md.comp.fab.secondary.large.hover.state-layer.opacity": "md.sys.state.hover.state-layer-opacity",
+  "md.comp.fab.secondary.large.icon.color": "onSecondaryContainer",
+  "md.comp.fab.secondary.large.icon.size": 36.0,
+  "md.comp.fab.secondary.large.lowered.container.elevation": "md.sys.elevation.level1",
+  "md.comp.fab.secondary.large.lowered.focus.container.elevation": "md.sys.elevation.level1",
+  "md.comp.fab.secondary.large.lowered.hover.container.elevation": "md.sys.elevation.level2",
+  "md.comp.fab.secondary.large.lowered.pressed.container.elevation": "md.sys.elevation.level1",
+  "md.comp.fab.secondary.large.pressed.container.elevation": "md.sys.elevation.level3",
+  "md.comp.fab.secondary.large.pressed.icon.color": "onSecondaryContainer",
+  "md.comp.fab.secondary.large.pressed.state-layer.color": "onSecondaryContainer",
+  "md.comp.fab.secondary.large.pressed.state-layer.opacity": "md.sys.state.pressed.state-layer-opacity"
+}
