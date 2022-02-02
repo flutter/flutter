@@ -10,7 +10,6 @@ import 'dart:typed_data';
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_test/flutter_test.dart';
 
 import 'package:microbenchmarks/common.dart';
 
@@ -51,7 +50,9 @@ List<Object?> _makeTestBuffer(int size) {
 }
 
 Future<double> _runBasicStandardSmall(
-    BasicMessageChannel<Object?> basicStandard, int count) async {
+  BasicMessageChannel<Object?> basicStandard,
+  int count,
+) async {
   final Stopwatch watch = Stopwatch();
   watch.start();
   for (int i = 0; i < count; ++i) {
@@ -65,27 +66,38 @@ class _Counter {
   int count = 0;
 }
 
-void _runBasicStandardParallelRecurse(BasicMessageChannel<Object?> basicStandard,
-    _Counter counter, int count, Completer<int> completer, Object? payload) {
+void _runBasicStandardParallelRecurse(
+  BasicMessageChannel<Object?> basicStandard,
+  _Counter counter,
+  int count,
+  Completer<int> completer,
+  Object? payload,
+) {
   counter.count += 1;
   if (counter.count == count) {
     completer.complete(counter.count);
   } else if (counter.count < count) {
-    basicStandard.send(payload).then((Object? result){
-      _runBasicStandardParallelRecurse(basicStandard, counter, count, completer, payload);
+    basicStandard.send(payload).then((Object? result) {
+      _runBasicStandardParallelRecurse(
+          basicStandard, counter, count, completer, payload);
     });
   }
 }
 
 Future<double> _runBasicStandardParallel(
-    BasicMessageChannel<Object?> basicStandard, int count, Object? payload, int parallel) async {
+  BasicMessageChannel<Object?> basicStandard,
+  int count,
+  Object? payload,
+  int parallel,
+) async {
   final Stopwatch watch = Stopwatch();
   final Completer<int> completer = Completer<int>();
   final _Counter counter = _Counter();
   watch.start();
-  for( int i = 0; i < parallel; ++i) {
-    basicStandard.send(payload).then((Object? result){
-      _runBasicStandardParallelRecurse(basicStandard, counter, count, completer, payload);
+  for (int i = 0; i < parallel; ++i) {
+    basicStandard.send(payload).then((Object? result) {
+      _runBasicStandardParallelRecurse(
+          basicStandard, counter, count, completer, payload);
     });
   }
   await completer.future;
@@ -94,9 +106,10 @@ Future<double> _runBasicStandardParallel(
 }
 
 Future<double> _runBasicStandardLarge(
-    BasicMessageChannel<Object?> basicStandard,
-    List<Object?> largeBuffer,
-    int count) async {
+  BasicMessageChannel<Object?> basicStandard,
+  List<Object?> largeBuffer,
+  int count,
+) async {
   int size = 0;
   final Stopwatch watch = Stopwatch();
   watch.start();
@@ -117,8 +130,11 @@ Future<double> _runBasicStandardLarge(
   return watch.elapsedMicroseconds / count;
 }
 
-Future<double> _runBasicBinary(BasicMessageChannel<ByteData> basicBinary,
-    ByteData buffer, int count) async {
+Future<double> _runBasicBinary(
+  BasicMessageChannel<ByteData> basicBinary,
+  ByteData buffer,
+  int count,
+) async {
   int size = 0;
   final Stopwatch watch = Stopwatch();
   watch.start();
@@ -137,12 +153,14 @@ Future<double> _runBasicBinary(BasicMessageChannel<ByteData> basicBinary,
   return watch.elapsedMicroseconds / count;
 }
 
-Future<void> _runTest({required Future<double> Function(int) test,
-    required BasicMessageChannel<Object?> resetChannel,
-    required BenchmarkResultPrinter printer,
-    required String description,
-    required String name,
-    required int numMessages}) async {
+Future<void> _runTest({
+  required Future<double> Function(int) test,
+  required BasicMessageChannel<Object?> resetChannel,
+  required BenchmarkResultPrinter printer,
+  required String description,
+  required String name,
+  required int numMessages,
+}) async {
   resetChannel.send(true);
   // Prime test.
   await test(1);
@@ -224,7 +242,8 @@ Future<void> _runTests() async {
     test: (int x) => _runBasicStandardParallel(basicStandard, x, 1234, 3),
     resetChannel: resetChannel,
     printer: printer,
-    description: 'BasicMessageChannel/StandardMessageCodec/Flutter->Host/SmallParallel3',
+    description:
+        'BasicMessageChannel/StandardMessageCodec/Flutter->Host/SmallParallel3',
     name: 'platform_channel_basic_standard_2host_small_parallel_3',
     numMessages: numMessages,
   );
@@ -239,15 +258,18 @@ Future<void> _runTests() async {
       test: (int x) => _runBasicStandardSmall(backgroundStandard, x),
       resetChannel: resetChannel,
       printer: printer,
-      description: 'BasicMessageChannel/StandardMessageCodec/Flutter->Host (background)/Small',
+      description:
+          'BasicMessageChannel/StandardMessageCodec/Flutter->Host (background)/Small',
       name: 'platform_channel_basic_standard_2hostbackground_small',
       numMessages: numMessages,
     );
     await _runTest(
-      test: (int x) => _runBasicStandardParallel(backgroundStandard, x, 1234, 3),
+      test: (int x) =>
+          _runBasicStandardParallel(backgroundStandard, x, 1234, 3),
       resetChannel: resetChannel,
       printer: printer,
-      description: 'BasicMessageChannel/StandardMessageCodec/Flutter->Host (background)/SmallParallel3',
+      description:
+          'BasicMessageChannel/StandardMessageCodec/Flutter->Host (background)/SmallParallel3',
       name: 'platform_channel_basic_standard_2hostbackground_small_parallel_3',
       numMessages: numMessages,
     );
