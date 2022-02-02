@@ -235,7 +235,7 @@ class DisplayFeatureSubScreen extends StatelessWidget {
         } else {
           newSubScreens.add(screen);
         }
-      };
+      }
       subScreens = newSubScreens;
     }
     return subScreens;
