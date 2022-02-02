@@ -1299,7 +1299,7 @@ class TextSelectionGestureDetectorBuilder {
       || kind == PointerDeviceKind.touch
       || kind == PointerDeviceKind.stylus;
 
-    if (_isShiftPressed && renderEditable.selection?.baseOffset != null) {
+    if (_isShiftPressed && renderEditable.selection != null && renderEditable.selection!.isValid) {
       _isShiftTapping = true;
       switch (defaultTargetPlatform) {
         case TargetPlatform.iOS:
