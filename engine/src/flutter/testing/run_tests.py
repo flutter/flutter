@@ -403,12 +403,12 @@ def RunDartTests(build_dir, filter, verbose_dart_snapshot):
   # Before running Dart tests, make sure to run just that target (NOT the whole engine)
   EnsureDebugUnoptSkyPackagesAreBuilt()
 
-  # Now that we have the Sky packages at the hardcoded location, run `pub get`.
+  # Now that we have the Sky packages at the hardcoded location, run `dart pub get`.
   RunEngineExecutable(
     build_dir,
-    os.path.join('dart-sdk', 'bin', 'pub'),
+    os.path.join('dart-sdk', 'bin', 'dart'),
     None,
-    flags=['get', '--offline'],
+    flags=['pub', 'get', '--offline'],
     cwd=dart_tests_dir,
   )
 
