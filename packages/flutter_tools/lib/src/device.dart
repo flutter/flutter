@@ -39,15 +39,11 @@ class Category {
   String toString() => value;
 
   static Category? fromString(String category) {
-    switch (category) {
-      case 'web':
-        return web;
-      case 'desktop':
-        return desktop;
-      case 'mobile':
-        return mobile;
-    }
-    return null;
+    return <String, Category>{
+      'web': web,
+      'desktop': desktop,
+      'mobile': mobile,
+    }[category];
   }
 }
 
@@ -70,25 +66,16 @@ class PlatformType {
   String toString() => value;
 
   static PlatformType? fromString(String platformType) {
-    switch (platformType) {
-      case 'web':
-        return web;
-      case 'android':
-        return android;
-      case 'ios':
-        return ios;
-      case 'linux':
-        return linux;
-      case 'macos':
-        return macos;
-      case 'windows':
-        return windows;
-      case 'fuchsia':
-        return fuchsia;
-      case 'custom':
-        return custom;
-    }
-    return null;
+    return <String, PlatformType>{
+      'web': web,
+      'android': android,
+      'ios': ios,
+      'linux': linux,
+      'macos': macos,
+      'windows': windows,
+      'fuchsia': fuchsia,
+      'custom': custom,
+    }[platformType];
   }
 }
 

@@ -1340,12 +1340,38 @@ class ProxyDomain extends Domain {
   Future<String> connect(Map<String, dynamic> args) async {
     final int targetPort = _getIntArg(args, 'port', required: true);
     final String id = 'portForwarder_${targetPort}_${_id++}';
-    final Socket socket = await Socket.connect('127.0.0.1', targetPort);
+
+    Socket socket;
+
+    try {
+      socket = await Socket.connect(InternetAddress.loopbackIPv4, targetPort);
+    } on SocketException {
+      globals.logger.printTrace('Connecting to localhost:$targetPort failed with IPv4');
+    }
+
+    try {
+      // If connecting to IPv4 loopback interface fails, try IPv6.
+      socket ??= await Socket.connect(InternetAddress.loopbackIPv6, targetPort);
+    } on SocketException {
+      globals.logger.printError('Connecting to localhost:$targetPort failed');
+    }
+
+    if (socket == null) {
+      throw Exception('Failed to connect to the port');
+    }
+
     _forwardedConnections[id] = socket;
     socket.listen((List<int> data) {
       sendEvent('proxy.data.$id', null, data);
+    }, onError: (dynamic error, StackTrace stackTrace) {
+      // Socket error, probably disconnected.
+      globals.logger.printTrace('Socket error: $error, $stackTrace');
     });
-    unawaited(socket.done.then((dynamic _) {
+
+    unawaited(socket.done.catchError((dynamic error, StackTrace stackTrace) {
+      // Socket error, probably disconnected.
+      globals.logger.printTrace('Socket error: $error, $stackTrace');
+    }).then((dynamic _) {
       sendEvent('proxy.disconnected.$id');
     }));
     return id;
@@ -1376,7 +1402,7 @@ class ProxyDomain extends Domain {
   @override
   Future<void> dispose() async {
     for (final Socket connection in _forwardedConnections.values) {
-      await connection.close();
+      connection.destroy();
     }
     await _tempDirectory?.delete(recursive: true);
   }
