@@ -361,6 +361,49 @@ void main() {
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
+  testUsingContext('ipa build invokes xcodebuild and archives for enterprise distribution', () async {
+    final File cachedExportOptionsPlist = fileSystem.file('/CachedExportOptions.plist');
+    final BuildCommand command = BuildCommand();
+    fakeProcessManager.addCommands(<FakeCommand>[
+      xattrCommand,
+      _setUpFakeXcodeBuildHandler(),
+      _exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist, cachePlist: cachedExportOptionsPlist),
+    ]);
+    _createMinimalMockProjectFiles();
+
+    await createTestCommandRunner(command).run(
+        const <String>['build', 'ipa', '--no-pub', '--export-method', 'enterprise']
+    );
+
+    const String expectedIpaPlistContents = '''
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+    <dict>
+        <key>method</key>
+        <string>enterprise</string>
+        <key>uploadBitcode</key>
+        <false/>
+    </dict>
+</plist>
+''';
+
+    final String actualIpaPlistContents = fileSystem.file(cachedExportOptionsPlist).readAsStringSync();
+    expect(actualIpaPlistContents, expectedIpaPlistContents);
+
+    expect(testLogger.statusText, contains('build/ios/archive/Runner.xcarchive'));
+    expect(testLogger.statusText, contains('Building enterprise IPA'));
+    expect(testLogger.statusText, contains('Built IPA to /build/ios/ipa'));
+    // Don't instruct how to upload to the App Store.
+    expect(testLogger.statusText, isNot(contains('To upload')));
+    expect(fakeProcessManager, hasNoRemainingExpectations);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => fakeProcessManager,
+    Platform: () => macosPlatform,
+    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+  });
+
   testUsingContext('ipa build invokes xcodebuild and archives with bitcode on', () async {
     final File cachedExportOptionsPlist = fileSystem.file('/CachedExportOptions.plist');
     final BuildCommand command = BuildCommand();
