@@ -801,8 +801,9 @@ abstract class SliverMultiBoxAdaptorWidget extends SliverWithKeepAliveWidget {
   /// If multiple delegates are used in a single scroll view, the first child of
   /// each delegate will always be laid out, even if it extends beyond the
   /// currently viewable area. This is because at least one child is required in
-  /// order to [estimateMaxScrollOffset] for the whole scroll view, as it uses the
-  /// currently built children to estimate the remaining children's extent.
+  /// order to estimate the max scroll offset for the whole scroll view, as it
+  /// uses the currently built children to estimate the remaining children's
+  /// extent.
   ///
   /// See also:
   ///
