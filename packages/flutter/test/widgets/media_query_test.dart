@@ -760,4 +760,158 @@ void main() {
     expect(settingsA, equals(settingsC));
     expect(settingsA, isNot(settingsB));
   });
+
+  testWidgets('MediaQuery.removeDisplayFeatures removes specified display features and padding', (WidgetTester tester) async {
+    const Size size = Size(82.0, 40.0);
+    const double devicePixelRatio = 2.0;
+    const double textScaleFactor = 1.2;
+    const EdgeInsets padding = EdgeInsets.only(top: 1.0, right: 2.0, left: 3.0, bottom: 4.0);
+    const EdgeInsets viewPadding = EdgeInsets.only(top: 6.0, right: 8.0, left: 10.0, bottom: 12.0);
+    const EdgeInsets viewInsets = EdgeInsets.only(top: 5.0, right: 6.0, left: 7.0, bottom: 8.0);
+    const List<DisplayFeature> displayFeatures = <DisplayFeature>[
+      DisplayFeature(
+        bounds: Rect.fromLTRB(40, 0, 42, 40),
+        type: DisplayFeatureType.hinge,
+        state: DisplayFeatureState.postureFlat,
+      ),
+      DisplayFeature(
+        bounds: Rect.fromLTRB(70, 10, 74, 14),
+        type: DisplayFeatureType.cutout,
+        state: DisplayFeatureState.unknown,
+      ),
+    ];
+
+    // A section of the screen that intersects no display feature or padding area
+    const Rect subScreen = Rect.fromLTRB(20, 10, 40, 20);
+
+    late MediaQueryData subScreenMediaQuery;
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(
+          size: size,
+          devicePixelRatio: devicePixelRatio,
+          textScaleFactor: textScaleFactor,
+          padding: padding,
+          viewPadding: viewPadding,
+          viewInsets: viewInsets,
+          alwaysUse24HourFormat: true,
+          accessibleNavigation: true,
+          invertColors: true,
+          disableAnimations: true,
+          boldText: true,
+          highContrast: true,
+          displayFeatures: displayFeatures,
+        ),
+        child: Builder(
+          builder: (BuildContext context) {
+            return MediaQuery(
+              data: MediaQuery.of(context).removeDisplayFeatures(subScreen),
+              child: Builder(
+                builder: (BuildContext context) {
+                  subScreenMediaQuery = MediaQuery.of(context);
+                  return Container();
+                },
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(subScreenMediaQuery.size, size);
+    expect(subScreenMediaQuery.devicePixelRatio, devicePixelRatio);
+    expect(subScreenMediaQuery.textScaleFactor, textScaleFactor);
+    expect(subScreenMediaQuery.padding, EdgeInsets.zero);
+    expect(subScreenMediaQuery.viewPadding, EdgeInsets.zero);
+    expect(subScreenMediaQuery.viewInsets, EdgeInsets.zero);
+    expect(subScreenMediaQuery.alwaysUse24HourFormat, true);
+    expect(subScreenMediaQuery.accessibleNavigation, true);
+    expect(subScreenMediaQuery.invertColors, true);
+    expect(subScreenMediaQuery.disableAnimations, true);
+    expect(subScreenMediaQuery.boldText, true);
+    expect(subScreenMediaQuery.highContrast, true);
+    expect(subScreenMediaQuery.displayFeatures, isEmpty);
+  });
+
+  testWidgets('MediaQuery.removePadding only removes specified display features and padding', (WidgetTester tester) async {
+    const Size size = Size(82.0, 40.0);
+    const double devicePixelRatio = 2.0;
+    const double textScaleFactor = 1.2;
+    const EdgeInsets padding = EdgeInsets.only(top: 1.0, right: 2.0, left: 3.0, bottom: 4.0);
+    const EdgeInsets viewPadding = EdgeInsets.only(top: 6.0, right: 8.0, left: 46.0, bottom: 12.0);
+    const EdgeInsets viewInsets = EdgeInsets.only(top: 5.0, right: 6.0, left: 7.0, bottom: 8.0);
+    const DisplayFeature cutoutDisplayFeature = DisplayFeature(
+      bounds: Rect.fromLTRB(70, 10, 74, 14),
+      type: DisplayFeatureType.cutout,
+      state: DisplayFeatureState.unknown,
+    );
+    const List<DisplayFeature> displayFeatures = <DisplayFeature>[
+      DisplayFeature(
+        bounds: Rect.fromLTRB(40, 0, 42, 40),
+        type: DisplayFeatureType.hinge,
+        state: DisplayFeatureState.postureFlat,
+      ),
+      cutoutDisplayFeature,
+    ];
+
+    // A section of the screen that does contain display features and padding
+    const Rect subScreen = Rect.fromLTRB(42, 0, 82, 40);
+
+    late MediaQueryData subScreenMediaQuery;
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(
+          size: size,
+          devicePixelRatio: devicePixelRatio,
+          textScaleFactor: textScaleFactor,
+          padding: padding,
+          viewPadding: viewPadding,
+          viewInsets: viewInsets,
+          alwaysUse24HourFormat: true,
+          accessibleNavigation: true,
+          invertColors: true,
+          disableAnimations: true,
+          boldText: true,
+          highContrast: true,
+          displayFeatures: displayFeatures,
+        ),
+        child: Builder(
+          builder: (BuildContext context) {
+            return MediaQuery(
+              data: MediaQuery.of(context).removeDisplayFeatures(subScreen),
+              child: Builder(
+                builder: (BuildContext context) {
+                  subScreenMediaQuery = MediaQuery.of(context);
+                  return Container();
+                },
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(subScreenMediaQuery.size, size);
+    expect(subScreenMediaQuery.devicePixelRatio, devicePixelRatio);
+    expect(subScreenMediaQuery.textScaleFactor, textScaleFactor);
+    expect(
+      subScreenMediaQuery.padding,
+      const EdgeInsets.only(top: 1.0, right: 2.0, bottom: 4.0),
+    );
+    expect(
+      subScreenMediaQuery.viewPadding,
+      const EdgeInsets.only(top: 6.0, left:4.0, right: 8.0, bottom: 12.0),
+    );
+    expect(
+      subScreenMediaQuery.viewInsets,
+      const EdgeInsets.only(top: 5.0, right: 6.0, bottom: 8.0),
+    );
+    expect(subScreenMediaQuery.alwaysUse24HourFormat, true);
+    expect(subScreenMediaQuery.accessibleNavigation, true);
+    expect(subScreenMediaQuery.invertColors, true);
+    expect(subScreenMediaQuery.disableAnimations, true);
+    expect(subScreenMediaQuery.boldText, true);
+    expect(subScreenMediaQuery.highContrast, true);
+    expect(subScreenMediaQuery.displayFeatures, <DisplayFeature>[cutoutDisplayFeature]);
+  });
 }
