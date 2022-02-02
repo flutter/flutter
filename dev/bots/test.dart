@@ -852,7 +852,7 @@ Future<void> _runFrameworkTests() async {
     final List<String> args = <String>[
       '--sound-null-safety',
       'run',
-      'test_private.dart',
+      'bin/test_private.dart',
     ];
     final Map<String, String> environment = <String, String>{
       'FLUTTER_ROOT': flutterRoot,
