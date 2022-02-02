@@ -52,6 +52,8 @@ FILE: ../../../flutter/display_list/display_list_canvas_dispatcher.h
 FILE: ../../../flutter/display_list/display_list_canvas_recorder.cc
 FILE: ../../../flutter/display_list/display_list_canvas_recorder.h
 FILE: ../../../flutter/display_list/display_list_canvas_unittests.cc
+FILE: ../../../flutter/display_list/display_list_complexity.cc
+FILE: ../../../flutter/display_list/display_list_complexity.h
 FILE: ../../../flutter/display_list/display_list_dispatcher.cc
 FILE: ../../../flutter/display_list/display_list_dispatcher.h
 FILE: ../../../flutter/display_list/display_list_flags.cc
