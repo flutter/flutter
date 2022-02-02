@@ -465,7 +465,7 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
   String toString() => '$name device discovery';
 }
 
-/// A device is a physical hardware that can run a flutter application.
+/// A device is a physical hardware that can run a Flutter application.
 ///
 /// This may correspond to a connected iOS or Android device, or represent
 /// the host operating system in the case of Flutter Desktop.
@@ -622,7 +622,7 @@ abstract class Device {
   /// Whether this device implements support for hot restart.
   bool get supportsHotRestart => true;
 
-  /// Whether flutter applications running on this device can be terminated
+  /// Whether Flutter applications running on this device can be terminated
   /// from the VM Service.
   bool get supportsFlutterExit => true;
 
