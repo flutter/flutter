@@ -40,26 +40,30 @@ class MigrateUtils {
     List<String> cmdArgs = ['-c', '$gitCmd'];
     final ProcessResult result = await Process.run('bash', cmdArgs);
 
-    checkForErrors(result, allowedExitCodes: <int>[1]); // diff exits with 1 if diffs are found.
+    checkForErrors(result, allowedExitCodes: <int>[1], commandDescription: 'git ${cmdArgs.join(' ')}'); // diff exits with 1 if diffs are found.
     return DiffResult(result, outputPath);
   }
 
   static Future<void> gitApply({required File diff, required String workingDirectory}) async {
     List<String> cmdArgs = ['apply', diff.absolute.path];
     final ProcessResult result = await Process.run('git', cmdArgs, workingDirectory: workingDirectory);
-    checkForErrors(result);
+    checkForErrors(result, commandDescription: 'git ${cmdArgs.join(' ')}');
   }
 
-  static Future<void> cloneFlutter(String revision, String destination) async {
+  // Clones a copy of the flutter repo into the destination directory. Returns false if unsucessful.
+  static Future<bool> cloneFlutter(String revision, String destination) async {
     // Use https url instead of ssh to avoid need to setup ssh on git.
     List<String> cmdArgs = ['clone', 'https://github.com/flutter/flutter.git', destination];
     ProcessResult result = await Process.run('git', cmdArgs);
-    checkForErrors(result);
+    checkForErrors(result, commandDescription: 'git ${cmdArgs.join(' ')}');
 
     cmdArgs.clear();
     cmdArgs = <String>['reset', '--hard', revision];
     result = await Process.run('git', cmdArgs, workingDirectory: destination);
-    checkForErrors(result);
+    if (checkForErrors(result, commandDescription: 'git ${cmdArgs.join(' ')}', exit: false)) {
+      return false;
+    }
+    return true;
   }
 
   static Future<String> createFromTemplates(String flutterBinPath, {
@@ -84,7 +88,7 @@ class MigrateUtils {
       cmdArgs.add(outputDirectory);
     }
     final ProcessResult result = await Process.run('./flutter', cmdArgs, workingDirectory: flutterBinPath);
-    checkForErrors(result);
+    checkForErrors(result, commandDescription: 'git ${cmdArgs.join(' ')}');
     return result.stdout;
   }
 
@@ -96,27 +100,27 @@ class MigrateUtils {
   }) async {
     List<String> cmdArgs = ['merge-file', '-p', current, ancestor, other];
     final ProcessResult result = await Process.run('git', cmdArgs);
-    checkForErrors(result, allowedExitCodes: <int>[-1]);
+    checkForErrors(result, allowedExitCodes: <int>[-1], commandDescription: 'git ${cmdArgs.join(' ')}');
     return MergeResult(result, localPath);
   }
 
   static Future<String> getGitHash(String projectPath, [String tag = 'HEAD']) async {
     List<String> cmdArgs = ['rev-parse', tag];
     ProcessResult result = await Process.run('git', cmdArgs, workingDirectory: projectPath);
-    checkForErrors(result);
+    checkForErrors(result, commandDescription: 'git ${cmdArgs.join(' ')}');
     return result.stdout;
   }
 
  static Future<void> gitInit(String workingDirectory) async {
     List<String> cmdArgs = ['init'];
     final ProcessResult result = await Process.run('git', cmdArgs, workingDirectory: workingDirectory);
-    checkForErrors(result, allowedExitCodes: <int>[0]);
+    checkForErrors(result, allowedExitCodes: <int>[0], commandDescription: 'git ${cmdArgs.join(' ')}');
  }
 
   static Future<bool> isGitIgnored(String filePath, String workingDirectory) async {
     List<String> cmdArgs = ['check-ignore', filePath];
     final ProcessResult result = await Process.run('git', cmdArgs, workingDirectory: workingDirectory);
-    checkForErrors(result, allowedExitCodes: <int>[0, 1, 128]);
+    checkForErrors(result, allowedExitCodes: <int>[0, 1, 128], commandDescription: 'git ${cmdArgs.join(' ')}');
     return result.exitCode == 0;
   }
 
@@ -129,15 +133,24 @@ class MigrateUtils {
     }
   }
 
-  static checkForErrors(ProcessResult result, {List<int> allowedExitCodes = const <int>[]}) {
+  static bool checkForErrors(ProcessResult result, {List<int> allowedExitCodes = const <int>[], String? commandDescription, bool exit = true}) {
     // -1 in allowed exit codes means all exit codes are valid.
     if ((result.exitCode != 0 && !allowedExitCodes.contains(result.exitCode)) && !allowedExitCodes.contains(-1)) {
-      globals.printError('Git command encountered an error. Stdout:');
-      globals.printStatus(result.stdout as String);
+      globals.printError('Git command encountered an error.');
+      if (commandDescription != null) {
+        globals.printError('Command:');
+        globals.printError(commandDescription, indent: 2);
+      }
+      globals.printError('Stdout:');
+      globals.printStatus(result.stdout as String, indent: 2);
       globals.printError('Stderr:');
-      globals.printError(result.stderr as String);
-      throwToolExit('Git command failed with exit code ${result.exitCode}', exitCode: result.exitCode);
+      globals.printError(result.stderr as String, indent: 2);
+      if (exit) {
+        throwToolExit('Git command failed with exit code ${result.exitCode}', exitCode: result.exitCode);
+      }
+      return false;
     }
+    return true;
   } 
 
 }

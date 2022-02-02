@@ -136,18 +136,47 @@ Future<MigrateResult?> computeMigration({
   final String name = flutterProject.manifest.appName;
   final String androidLanguage = FlutterProject.current().android.isKotlin ? 'kotlin' : 'java';
   final String iosLanguage = FlutterProject.current().ios.isSwift ? 'swift' : 'objc';
+
+  Directory targetFlutterBinDirectory = globals.fs.directory(globals.fs.path.join(Cache.flutterRoot!, 'bin'));
   // Clone base flutter
   if (baseAppDirectory == null) {
     final Map<String, Directory> revisionToFlutterSdkDir = <String, Directory>{};
     for (String revision in revisionsList) {
-      final Directory sdkDir = await MigrateUtils.createTempDirectory('flutter_$revision');
+      Directory sdkDir = await MigrateUtils.createTempDirectory('flutter_$revision')!;
       revisionToFlutterSdkDir[revision] = sdkDir;
       final List<String> platforms = <String>[];
       for (MigrateConfig config in revisionToConfigs[revision]!) {
         platforms.add(config.platform!);
       }
       platforms.remove('root'); // Root does not need to be listed and is not a valid platform
-      await MigrateUtils.cloneFlutter(revision, sdkDir.absolute.path);
+
+      // In the case of the revision being invalid or not a hash of the master branch,
+      // we want to fallback in the following order:
+      //   - parsed revision
+      //   - fallback revision
+      //   - target revision (currently installed flutter)
+      List<String> revisionsToTry = <String>[revision];
+      if (revision != fallbackRevision) {
+        revisionsToTry.add(fallbackRevision);
+      }
+      bool sdkAvailable = false;
+      int index = 0;
+      do {
+        if (index < revisionsToTry.length) {
+          final String activeRevision = revisionsToTry[index++];
+          if (activeRevision != revision && revisionToFlutterSdkDir.containsKey(activeRevision)) {
+            sdkDir = revisionToFlutterSdkDir[activeRevision]!;
+            revisionToFlutterSdkDir[revision] = sdkDir;
+            sdkAvailable = true;
+          } else {
+            sdkAvailable = await MigrateUtils.cloneFlutter(activeRevision, sdkDir.absolute.path);
+          }
+        } else {
+          // fallback to just using the modern target version of flutter.
+          sdkDir = targetFlutterBinDirectory;
+          sdkAvailable = true;
+        }
+      } while (!sdkAvailable);
       await MigrateUtils.createFromTemplates(
         sdkDir.childDirectory('bin').absolute.path,
         name: name,
@@ -162,13 +191,15 @@ Future<MigrateResult?> computeMigration({
   if (targetAppDirectory == null) {
     // Create target
     await MigrateUtils.createFromTemplates(
-      globals.fs.path.join(Cache.flutterRoot!, 'bin'),
+      targetFlutterBinDirectory.path,
       name: name,
       androidLanguage: androidLanguage,
       iosLanguage: iosLanguage,
       outputDirectory: generatedTargetTemplateDirectory.absolute.path
     );
   }
+
+  await MigrateUtils.gitInit(flutterProject.directory.absolute.path);
 
   // Generate diffs
   final List<FileSystemEntity> generatedBaseFiles = generatedBaseTemplateDirectory.listSync(recursive: true);
