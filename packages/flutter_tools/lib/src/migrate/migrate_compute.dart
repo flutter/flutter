@@ -282,10 +282,6 @@ Future<MigrateResult?> computeMigration({
     if (!customTargetAppDir) {
       migrateResult.tempDirectories.add(generatedTargetTemplateDirectory);
     }
-    // MigrateUtils.deleteTempDirectories(
-    //   paths: <String>[],
-    //   directories: directoriesToDelete,
-    // );
   }
   return migrateResult;
 }
@@ -303,7 +299,11 @@ Future<void> writeWorkingDir(MigrateResult migrateResult, {bool verbose = false}
   for (FilePendingMigration addedFile in migrateResult.addedFiles) {
     final File file = workingDir.childFile(addedFile.localPath);
     file.createSync(recursive: true);
-    file.writeAsStringSync(addedFile.file.readAsStringSync(), flush: true);
+    try {
+      file.writeAsStringSync(addedFile.file.readAsStringSync(), flush: true);
+    } on FileSystemException {
+      file.writeAsBytesSync(addedFile.file.readAsBytesSync(), flush: true);
+    }
   }
 
   final MigrateManifest manifest = MigrateManifest(
