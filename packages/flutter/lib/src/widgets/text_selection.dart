@@ -435,16 +435,18 @@ class TextSelectionOverlay {
   /// Shows the toolbar by inserting it into the [context]'s overlay.
   void showToolbar(ToolbarType toolbarType, List<SpellCheckerSuggestionSpan>?
     spellCheckerSuggestionSpans) {
-    print("CAMILLE_showing_toolbar_2");
     assert(_toolbar == null);
     if (toolbarType == ToolbarType.spellCheckerSuggestionsControls) {
       if (spellCheckerSuggestionSpans != null) {
-        print("**SHOW spell checker suggestions toolbar**");
+        print("**------------------------SHOW spell checker suggestions toolbar------------------------**");
         spellCheckerSuggestionSpans.forEach((SpellCheckerSuggestionSpan scsSpan) {
-            print(scsSpan.start.toString() + '_' + scsSpan.end.toString());
+            print("............");
+            print("Misspelled word range: " + scsSpan.start.toString() + '-' + scsSpan.end.toString());
+            print("Misspelled word suggestions: ");
             scsSpan.replacementSuggestions.forEach((String suggestion) {
                 print(suggestion);
             });
+            print("............");
         });
       }
         return;
