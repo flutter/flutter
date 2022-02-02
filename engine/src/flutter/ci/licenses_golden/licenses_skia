@@ -1,4 +1,4 @@
-Signature: 0d3784d45bced769e323ea9b7abcf37d
+Signature: 670fa992f85f3b002ed64b47eda31a4d
 
 UNUSED LICENSES:
 
@@ -6039,6 +6039,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 LIBRARY: skia
 ORIGIN: ../../../third_party/skia/experimental/graphite/src/mtl/MtlSampler.h + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
+FILE: ../../../third_party/skia/experimental/graphite/src/GlobalCache.cpp
+FILE: ../../../third_party/skia/experimental/graphite/src/GlobalCache.h
 FILE: ../../../third_party/skia/experimental/graphite/src/Log.h
 FILE: ../../../third_party/skia/experimental/graphite/src/PaintParams.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/PaintParams.h
