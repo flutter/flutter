@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 
 import 'debug.dart';
 import 'desktop_text_selection.dart';
@@ -1229,6 +1230,17 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     Widget child = RepaintBoundary(
       child: UnmanagedRestorationScope(
         bucket: bucket,
+        child: ContextualMenuConfiguration(
+          buildMenu: (BuildContext context) {
+            return Center(
+              child: Container(
+                width: 100.0,
+                height: 100.0,
+                color: const Color(0xff00ffaa),
+                child: const Text('hi'),
+              ),
+            );
+          },
         child: EditableText(
           key: editableTextKey,
           readOnly: widget.readOnly || !_isEnabled,
@@ -1287,6 +1299,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
           clipBehavior: widget.clipBehavior,
           restorationId: 'editable',
           enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
+        ),
         ),
       ),
     );
