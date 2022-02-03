@@ -1,4 +1,4 @@
-Signature: 4a3f9063b56c783e9cf630efaf91298f
+Signature: 2fdfe7af93f8e0e7d74c8a24bbfd2422
 
 UNUSED LICENSES:
 
@@ -873,9 +873,9 @@ FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.ex
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian10-Clang-x86_64-Debug-SK_CPU_LIMIT_SSE41.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian10-Clang-x86_64-Debug-SafeStack.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian10-Clang-x86_64-Debug-SwiftShader_MSAN.json
+FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian10-Clang-x86_64-Debug-SwiftShader_TSAN.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian10-Clang-x86_64-Debug-TSAN.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian10-Clang-x86_64-Debug-Tidy.json
-FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian10-Clang-x86_64-Debug-Vulkan_TSAN.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian10-Clang-x86_64-Debug-Wuffs.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian10-Clang-x86_64-Release-ANGLE.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian10-Clang-x86_64-Release-ASAN.json
