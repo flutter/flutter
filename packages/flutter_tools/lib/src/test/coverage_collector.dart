@@ -33,9 +33,9 @@ class CoverageCollector extends TestWatcher {
   }
 
   void _logMessage(String line, { bool error = false }) {
-    if (!verbose) {
+/*    if (!verbose) {
       return;
-    }
+    }*/
     if (error) {
       globals.printError(line);
     } else {
