@@ -180,6 +180,7 @@ struct FakeTransform {
 
   std::vector<std::shared_ptr<FakeTransform>> children;
   std::shared_ptr<FakeContent> content;
+  size_t num_hit_regions;
 };
 
 struct FakeGraph {

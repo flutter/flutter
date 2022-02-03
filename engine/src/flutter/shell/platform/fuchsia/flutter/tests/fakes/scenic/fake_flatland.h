@@ -298,6 +298,11 @@ class FakeFlatland
   void ReleaseImage(fuchsia::ui::composition::ContentId image_id) override;
 
   // |fuchsia::ui::composition::Flatland|
+  void SetHitRegions(
+      fuchsia::ui::composition::TransformId transform_id,
+      std::vector<fuchsia::ui::composition::HitRegion> regions) override;
+
+  // |fuchsia::ui::composition::Flatland|
   void Clear() override;
 
   // |fuchsia::ui::composition::Flatland|
