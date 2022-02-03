@@ -279,6 +279,8 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   late final _AutocompleteCallbackAction<AutocompleteNextOptionIntent> _nextOptionAction;
   Iterable<T> _options = Iterable<T>.empty();
   T? _selection;
+  bool _hidden = false;
+  String _lastText = '';
   final ValueNotifier<int> _highlightedOptionIndex = ValueNotifier<int>(0);
 
   static const Map<ShortcutActivator, Intent> _shortcuts = <ShortcutActivator, Intent>{
@@ -291,13 +293,14 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
 
   // True iff the state indicates that the options should be visible.
   bool get _shouldShowOptions {
-    return _focusNode.hasFocus && _selection == null && _options.isNotEmpty;
+    return !_hidden && _focusNode.hasFocus && _selection == null && _options.isNotEmpty;
   }
 
   // Called when _textEditingController changes.
   Future<void> _onChangedField() async {
+    final TextEditingValue value = _textEditingController.value;
     final Iterable<T> options = await widget.optionsBuilder(
-      _textEditingController.value,
+      value,
     );
     _options = options;
     _updateHighlight(_highlightedOptionIndex.value);
@@ -305,20 +308,38 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
         && _textEditingController.text != widget.displayStringForOption(_selection!)) {
       _selection = null;
     }
+    if(_hidden && value.text != _lastText) {
+      _hidden = false;
+      _lastText = value.text;
+    }
     _updateOverlay();
   }
 
   // Called when the field's FocusNode changes.
   void _onChangedFocus() {
+    _hidden = !_focusNode.hasFocus;
     _updateOverlay();
   }
 
   // Called from fieldViewBuilder when the user submits the field.
   void _onFieldSubmitted() {
-    if (_options.isEmpty) {
+    if (_options.isEmpty || _hidden) {
       return;
     }
     _select(_options.elementAt(_highlightedOptionIndex.value));
+  }
+
+  KeyEventResult _onKeyEvent(FocusNode focusNode, KeyEvent event){
+    if(!_hidden && event.logicalKey == LogicalKeyboardKey.escape){
+      _hidden = true;
+      _updateOverlay();
+      return KeyEventResult.handled;
+    } else if (_hidden && (event.logicalKey == LogicalKeyboardKey.arrowUp || event.logicalKey == LogicalKeyboardKey.arrowDown)){
+      _hidden = false;
+      _updateOverlay();
+      return KeyEventResult.handled;
+    }
+    return KeyEventResult.ignored;
   }
 
   // Select the given option and update the widget.
@@ -423,6 +444,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
       _focusNode = current;
     }
     _focusNode.addListener(_onChangedFocus);
+    _focusNode.onKeyEvent = _onKeyEvent;
   }
 
   @override
@@ -432,6 +454,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     _textEditingController.addListener(_onChangedField);
     _focusNode = widget.focusNode ?? FocusNode();
     _focusNode.addListener(_onChangedFocus);
+    _focusNode.onKeyEvent = _onKeyEvent;
     _previousOptionAction = _AutocompleteCallbackAction<AutocompletePreviousOptionIntent>(onInvoke: _highlightPreviousOption);
     _nextOptionAction = _AutocompleteCallbackAction<AutocompleteNextOptionIntent>(onInvoke: _highlightNextOption);
     _actionMap = <Type, Action<Intent>> {
