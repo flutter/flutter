@@ -10003,7 +10003,7 @@ void main() {
     });
   });
 
-  group('UndoRedo', () {
+  group('TextEditingHistory', () {
     Future<void> sendUndoRedo(WidgetTester tester, [bool redo = false]) {
       return sendKeys(
         tester,

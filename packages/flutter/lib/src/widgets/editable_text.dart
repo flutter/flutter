@@ -3139,9 +3139,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       cursor: widget.mouseCursor ?? SystemMouseCursors.text,
       child: Actions(
         actions: _actions,
-        child: TextEditingHistory(
+        child: _TextEditingHistory(
           controller: widget.controller,
-          onChanged: (TextEditingValue value) {
+          onTriggered: (TextEditingValue value) {
             userUpdateTextEditingValue(value, SelectionChangedCause.keyboard);
           },
           child: Focus(
@@ -4174,34 +4174,38 @@ typedef TextEditingValueCallback = void Function(TextEditingValue value);
 /// desktop platforms, as there are subtle differences between each of these
 /// platforms.
 ///
-/// Listens to keyboard undo/redo shortcuts and calls [onChanged] when a
+/// Listens to keyboard undo/redo shortcuts and calls [onTriggered] when a
 /// shortcut is triggered that would affect the state of the [controller].
-@visibleForTesting
-class TextEditingHistory extends StatefulWidget {
-  /// Creates an instance of [TextEditingHistory].
-  const TextEditingHistory({
+class _TextEditingHistory extends StatefulWidget {
+  /// Creates an instance of [_TextEditingHistory].
+  const _TextEditingHistory({
     Key? key,
     required this.child,
     required this.controller,
-    required this.onChanged,
+    required this.onTriggered,
   }) : super(key: key);
 
-  /// The child widget of [TextEditingHistory].
+  /// The child widget of [_TextEditingHistory].
   final Widget child;
 
-  /// The [ValueNotifier] to save the state of over time.
+  /// The [TextEditingController] to save the state of over time.
   final TextEditingController controller;
 
-  /// Called when an undo or redo is received, even if the state would be the
-  /// same.
-  final TextEditingValueCallback onChanged;
+  /// Called when an undo or redo is received.
+  ///
+  /// If the state would still be the same before and after the undo/redo, this
+  /// will still be called. For example, receiving a redo when there is nothing
+  /// to redo will call this method with no change to the controller.
+  ///
+  /// It is NOT called when the controller is changed for reasons other than
+  /// undo/redo.
+  final TextEditingValueCallback onTriggered;
 
   @override
-  State<TextEditingHistory> createState() => _TextEditingHistoryState();
+  State<_TextEditingHistory> createState() => _TextEditingHistoryState();
 }
 
-// State for [TextEditingHistory].
-class _TextEditingHistoryState extends State<TextEditingHistory> {
+class _TextEditingHistoryState extends State<_TextEditingHistory> {
   final UndoStack<TextEditingValue> _stack = UndoStack<TextEditingValue>();
   late final Throttled<TextEditingValue> _throttledPush;
   Timer? _throttleTimer;
@@ -4226,7 +4230,7 @@ class _TextEditingHistoryState extends State<TextEditingHistory> {
     if (nextValue.text == widget.controller.text) {
       return;
     }
-    widget.onChanged(widget.controller.value.copyWith(
+    widget.onTriggered(widget.controller.value.copyWith(
       text: nextValue.text,
       selection: nextValue.selection,
     ));
@@ -4253,9 +4257,10 @@ class _TextEditingHistoryState extends State<TextEditingHistory> {
   }
 
   @override
-  void didUpdateWidget(TextEditingHistory oldWidget) {
+  void didUpdateWidget(_TextEditingHistory oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.controller != oldWidget.controller) {
+      _stack.clear();
       oldWidget.controller.removeListener(_push);
       widget.controller.addListener(_push);
     }
@@ -4322,7 +4327,7 @@ class UndoStack<T> {
 
   /// Returns the previous state.
   ///
-  /// If the _list is empty, returns null.
+  /// If the stack is empty, returns null.
   T? undo() {
     if (_list.isEmpty) {
       return null;
@@ -4334,7 +4339,7 @@ class UndoStack<T> {
       _index = _index - 1;
     }
 
-    return _list[_index];
+    return currentValue;
   }
 
   /// Returns the state that was last undone, or if none, the current state.
@@ -4351,7 +4356,12 @@ class UndoStack<T> {
       _index = _index + 1;
     }
 
-    return _list[_index];
+    return currentValue;
+  }
+
+  /// Remove everything from the stack.
+  void clear() {
+    _list.clear();
   }
 
   @override
