@@ -82,7 +82,10 @@ group("flutter") {
 
   # Ensure the example for a sample embedder compiles.
   if (build_embedder_examples) {
-    public_deps += [ "//flutter/examples/glfw" ]
+    public_deps += [
+      "//flutter/examples/glfw",
+      "//flutter/examples/vulkan_glfw",
+    ]
   }
 
   # If enbaled, compile the SDK / snapshot.

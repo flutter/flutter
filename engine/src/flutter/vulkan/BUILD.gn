@@ -6,7 +6,7 @@ import("//build/fuchsia/sdk.gni")
 
 config("vulkan_config") {
   include_dirs = []
-  defines = []
+  defines = [ "VULKAN_HPP_NO_EXCEPTIONS=1" ]
   if (is_fuchsia) {
     include_dirs += [ "//third_party/fuchsia-vulkan/include" ]
     defines += [ "VK_USE_PLATFORM_FUCHSIA=1" ]
