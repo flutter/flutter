@@ -644,6 +644,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     this.onTap,
     this.physics,
     this.splashFactory,
+    this.splashBorderRadius,
   }) : assert(tabs != null),
        assert(isScrollable != null),
        assert(dragStartBehavior != null),
@@ -720,6 +721,11 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// occupied by the tab in the tab bar. If [indicatorSize] is
   /// [TabBarIndicatorSize.label], then the tab's bounds are only as wide as
   /// the tab widget itself.
+  ///
+  /// See also:
+  ///
+  ///  * [splashBorderRadius], which defines the clipping radius of the splash
+  ///    and is generally used with [BoxDecoration.borderRadius].
   final Decoration? indicator;
 
   /// Whether this tab bar should automatically adjust the [indicatorColor].
@@ -848,6 +854,22 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// )
   /// ```
   final InteractiveInkFeatureFactory? splashFactory;
+
+  /// Defines the clipping radius of splashes that extend outside the bounds of the tab.
+  ///
+  /// This can be useful to match the [BoxDecoration.borderRadius] provided as [indicator].
+  /// ```dart
+  /// TabBar(
+  ///   indicator: BoxDecoration(
+  ///     borderRadius: BorderRadius.circular(40),
+  ///   ),
+  ///   splashBorderRadius: BorderRadius.circular(40),
+  ///   ...
+  /// )
+  /// ```
+  ///
+  /// If this property is null, it is interpreted as [BorderRadius.zero].
+  final BorderRadius? splashBorderRadius;
 
   /// A size whose height depends on if the tabs have both icons and text.
   ///
@@ -1206,6 +1228,7 @@ class _TabBarState extends State<TabBar> {
         enableFeedback: widget.enableFeedback ?? true,
         overlayColor: widget.overlayColor ?? tabBarTheme.overlayColor,
         splashFactory: widget.splashFactory ?? tabBarTheme.splashFactory,
+        borderRadius: widget.splashBorderRadius,
         child: Padding(
           padding: EdgeInsets.only(bottom: widget.indicatorWeight),
           child: Stack(
