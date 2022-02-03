@@ -658,7 +658,7 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
   EdgeInsets padding;
 
   // List of rectangles that we should avoid overlapping. Unusable screen area.
-  final List<Rect> avoidBounds;
+  final Set<Rect> avoidBounds;
 
   // We put the child wherever position specifies, so long as it will fit within
   // the specified parent size padded (inset) by 8. If necessary, we adjust the
@@ -712,11 +712,12 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
     }
     final Offset wantedPosition = Offset(x,y);
     final Offset originCenter = position.toRect(Offset.zero & size).center;
-    final Rect screen = _closestScreen(_screens(size), originCenter);
-    return _fitInsideScreen(screen, childSize, wantedPosition);
+    final Iterable<Rect> subScreens = _subScreensInBounds(Offset.zero & size, avoidBounds);
+    final Rect subScreen = _closestScreen(subScreens, originCenter);
+    return _fitInsideScreen(subScreen, childSize, wantedPosition);
   }
 
-  Rect _closestScreen(List<Rect> screens, Offset point) {
+  Rect _closestScreen(Iterable<Rect> screens, Offset point) {
     Rect closest = screens.first;
     for (final Rect screen in screens) {
       if ((screen.center - point).distance < (closest.center - point).distance) {
@@ -743,41 +744,60 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
     return Offset(x,y);
   }
 
-  /// Takes [avoidBounds] and the screen size and returns the areas of the screen
-  /// which are not split by any display feature.
-  /// If the device has a hinge, this returns the 2 screens
-  List<Rect> _screens(Size size) {
-    Iterable<Rect> areas = <Rect>[Rect.fromLTWH(0, 0, size.width, size.height)];
+  /// Returns sub-screens resulted by dividing [wantedBounds] along items of
+  /// [avoidBounds] that are at least as high or as wide.
+  static Iterable<Rect> _subScreensInBounds(Rect wantedBounds, Iterable<Rect> avoidBounds) {
+    Iterable<Rect> subScreens = <Rect>[wantedBounds];
     for (final Rect bounds in avoidBounds) {
-      areas = areas.expand((Rect area) sync* {
-        if (area.top >= bounds.top
-            && area.bottom <= bounds.bottom) {
-          // Display feature splits the area vertically
-          if (area.left < bounds.left) {
-            // There is a smaller area, left of the display feature
-            yield Rect.fromLTWH(area.left, area.top, bounds.left - area.left, area.height);
+      final List<Rect> newSubScreens = <Rect>[];
+      for (final Rect screen in subScreens) {
+        if (screen.top >= bounds.top && screen.bottom <= bounds.bottom) {
+          // Display feature splits the screen vertically
+          if (screen.left < bounds.left) {
+            // There is a smaller sub-screen, left of the display feature
+            newSubScreens.add(Rect.fromLTWH(
+              screen.left,
+              screen.top,
+              bounds.left - screen.left,
+              screen.height,
+            ));
           }
-          if (area.right > bounds.right) {
-            // There is a smaller area, right of the display feature
-            yield Rect.fromLTWH(bounds.right, area.top, area.right - bounds.right, area.height);
+          if (screen.right > bounds.right) {
+            // There is a smaller sub-screen, right of the display feature
+            newSubScreens.add(Rect.fromLTWH(
+              bounds.right,
+              screen.top,
+              screen.right - bounds.right,
+              screen.height,
+            ));
           }
-        } else if (area.left >= bounds.left
-            && area.right <= bounds.right) {
-          // Display feature splits the area horizontally
-          if (area.top < bounds.top) {
-            // There is a smaller area, above the display feature
-            yield Rect.fromLTWH(area.left, area.top, area.width, bounds.top - area.top);
+        } else if (screen.left >= bounds.left && screen.right <= bounds.right) {
+          // Display feature splits the sub-screen horizontally
+          if (screen.top < bounds.top) {
+            // There is a smaller sub-screen, above the display feature
+            newSubScreens.add(Rect.fromLTWH(
+              screen.left,
+              screen.top,
+              screen.width,
+              bounds.top - screen.top,
+            ));
           }
-          if (area.bottom > bounds.bottom) {
-            // There is a smaller area, below the display feature
-            yield Rect.fromLTWH(area.left, bounds.bottom, area.width, area.bottom - bounds.bottom);
+          if (screen.bottom > bounds.bottom) {
+            // There is a smaller sub-screen, below the display feature
+            newSubScreens.add(Rect.fromLTWH(
+              screen.left,
+              bounds.bottom,
+              screen.width,
+              screen.bottom - bounds.bottom,
+            ));
           }
         } else {
-          yield area;
+          newSubScreens.add(screen);
         }
-      });
+      }
+      subScreens = newSubScreens;
     }
-    return areas.toList();
+    return subScreens;
   }
 
 
@@ -793,7 +813,7 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
       || textDirection != oldDelegate.textDirection
       || !listEquals(itemSizes, oldDelegate.itemSizes)
       || padding != oldDelegate.padding
-      || !listEquals(avoidBounds, oldDelegate.avoidBounds);
+      || !setEquals(avoidBounds, oldDelegate.avoidBounds);
   }
 }
 
@@ -875,7 +895,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
               selectedItemIndex,
               Directionality.of(context),
               mediaQuery.padding,
-              _displayFeaturesInNavigator(context),
+              _avoidBounds(mediaQuery),
             ),
             child: capturedThemes.wrap(menu),
           );
@@ -884,23 +904,10 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
     );
   }
 
-  List<Rect> _displayFeaturesInNavigator(BuildContext context) {
-    Rect? rootRect;
-    final RenderObject? renderObject = navigator?.context.findRenderObject();
-    final Vector3? translation = renderObject?.getTransformTo(null).getTranslation();
-    if (translation != null) {
-      rootRect = renderObject?.paintBounds.shift(Offset(translation.x, translation.y));
-    }
-    if (rootRect == null) {
-      return MediaQuery.of(context).displayFeatures
-          .map<Rect>((final DisplayFeature displayFeature) => displayFeature.bounds)
-          .toList();
-    } else {
-      return MediaQuery.of(context).displayFeatures
-          .where((final DisplayFeature displayFeature) => displayFeature.bounds.overlaps(rootRect!))
-          .map<Rect>((final DisplayFeature displayFeature) => displayFeature.bounds.shift(-rootRect!.topLeft))
-          .toList();
-    }
+  Set<Rect> _avoidBounds(MediaQueryData mediaQuery) {
+    return mediaQuery.displayFeatures
+        .map<Rect>((final DisplayFeature displayFeature) => displayFeature.bounds)
+        .toSet();
   }
 }
 
