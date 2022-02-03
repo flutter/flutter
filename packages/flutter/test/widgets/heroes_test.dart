@@ -728,7 +728,14 @@ Future<void> main() async {
 
   testWidgets('Hero pop transition interrupted by a push', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(routes: routes),
+      MaterialApp(
+        routes: routes,
+        theme: ThemeData(pageTransitionsTheme: const PageTransitionsTheme(
+          builders: <TargetPlatform, PageTransitionsBuilder>{
+            TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
+          },
+        )),
+      ),
     );
 
     // Pushes MaterialPageRoute '/two'.
