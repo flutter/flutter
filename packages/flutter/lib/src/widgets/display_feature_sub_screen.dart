@@ -28,7 +28,7 @@ import 'media_query.dart';
 ///
 /// {@template flutter.widgets.DisplayFeatureSubScreen}
 /// After determining the sub-screens, the closest one to [anchorPoint] is used
-/// to render the [child].
+/// to render the content.
 ///
 /// If no [anchorPoint] is provided, then [Directionality] is used:
 ///
