@@ -567,27 +567,15 @@ class TextSelectionOverlay {
 
     return Directionality(
       textDirection: Directionality.of(this.context),
-      child: FadeTransition(
-        opacity: _toolbarOpacity,
-        child: CompositedTransformFollower(
-          link: toolbarLayerLink,
-          showWhenUnlinked: false,
-          offset: -editingRegion.topLeft,
-          child: Builder(
-            builder: (BuildContext context) {
-              return selectionControls!.buildToolbar(
-                context,
-                editingRegion,
-                renderObject.preferredLineHeight,
-                midpoint,
-                endpoints,
-                selectionDelegate!,
-                clipboardStatus!,
-                renderObject.lastSecondaryTapDownPosition,
-              );
-            },
-          ),
-        ),
+      child: _TextSelectionToolbarOverlay(
+        layerLink: toolbarLayerLink,
+        editingRegion: editingRegion,
+        selectionControls: selectionControls,
+        renderObject: renderObject,
+        midpoint: midpoint,
+        endpoints: endpoints,
+        selectionDelegate: selectionDelegate,
+        clipboardStatus: clipboardStatus,
       ),
     );
   }
@@ -607,6 +595,101 @@ class TextSelectionOverlay {
       SelectionChangedCause.drag,
     );
     selectionDelegate!.bringIntoView(textPosition);
+  }
+}
+
+/// This widget represents a text selection toolbar.
+class _TextSelectionToolbarOverlay extends StatefulWidget {
+  const _TextSelectionToolbarOverlay({
+    Key? key,
+    required this.layerLink,
+    required this.editingRegion,
+    required this.selectionControls,
+    required this.renderObject,
+    required this.midpoint,
+    required this.endpoints,
+    required this.selectionDelegate,
+    required this.clipboardStatus,
+  }) : super(key: key);
+
+  final LayerLink layerLink;
+  final Rect editingRegion;
+  final TextSelectionControls? selectionControls;
+  final RenderEditable renderObject;
+  final Offset midpoint;
+  final List<TextSelectionPoint> endpoints;
+  final TextSelectionDelegate? selectionDelegate;
+  final ClipboardStatusNotifier? clipboardStatus;
+
+  @override
+  _TextSelectionToolbarOverlayState createState() => _TextSelectionToolbarOverlayState();
+
+  ValueListenable<bool> get _visibility {
+    return ValueNotifier<bool>(renderObject.selectionStartInViewport.value || renderObject.selectionEndInViewport.value);
+  }
+}
+
+class _TextSelectionToolbarOverlayState extends State<_TextSelectionToolbarOverlay> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  Animation<double> get _opacity => _controller.view;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _controller = AnimationController(duration: TextSelectionOverlay.fadeDuration, vsync: this);
+
+    _handleVisibilityChanged();
+    widget._visibility.addListener(_handleVisibilityChanged);
+  }
+
+  @override
+  void didUpdateWidget(_TextSelectionToolbarOverlay oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    oldWidget._visibility.removeListener(_handleVisibilityChanged);
+    _handleVisibilityChanged();
+    widget._visibility.addListener(_handleVisibilityChanged);
+  }
+
+  @override
+  void dispose() {
+    widget._visibility.removeListener(_handleVisibilityChanged);
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _handleVisibilityChanged() {
+    if (widget._visibility.value) {
+      _controller.forward();
+    } else {
+      _controller.reverse();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _opacity,
+      child: CompositedTransformFollower(
+        link: widget.layerLink,
+        showWhenUnlinked: false,
+        offset: -widget.editingRegion.topLeft,
+        child: Builder(
+          builder: (BuildContext context) {
+            return widget.selectionControls!.buildToolbar(
+              context,
+              widget.editingRegion,
+              widget.renderObject.preferredLineHeight,
+              widget.midpoint,
+              widget.endpoints,
+              widget.selectionDelegate!,
+              widget.clipboardStatus!,
+              widget.renderObject.lastSecondaryTapDownPosition,
+            );
+          },
+        ),
+      ),
+    );
   }
 }
 
