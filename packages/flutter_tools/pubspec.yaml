@@ -34,7 +34,7 @@ dependencies:
   yaml: 3.1.0
   native_stack_traces: 0.4.5
   shelf: 1.1.4
-  vm_snapshot_analysis: 0.7.0
+  vm_snapshot_analysis: 0.7.1
   uuid: 3.0.5
   web_socket_channel: 2.1.0
   stream_channel: 2.1.0
@@ -104,4 +104,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: 3ec0
+# PUBSPEC CHECKSUM: 1ac1
