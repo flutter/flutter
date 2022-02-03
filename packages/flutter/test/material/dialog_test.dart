@@ -1929,6 +1929,7 @@ void main() {
             return MediaQuery(
               // Display has a vertical hinge down the middle
               data: const MediaQueryData(
+                size: Size(800, 600),
                 displayFeatures: <DisplayFeature>[
                   DisplayFeature(
                     bounds: Rect.fromLTRB(390, 0, 410, 600),
@@ -1966,6 +1967,7 @@ void main() {
             return MediaQuery(
               // Display has a vertical hinge down the middle
               data: const MediaQueryData(
+                size: Size(800, 600),
                 displayFeatures: <DisplayFeature>[
                   DisplayFeature(
                     bounds: Rect.fromLTRB(390, 0, 410, 600),
@@ -2005,6 +2007,7 @@ void main() {
             return MediaQuery(
               // Display has a vertical hinge down the middle
               data: const MediaQueryData(
+                size: Size(800, 600),
                 displayFeatures: <DisplayFeature>[
                   DisplayFeature(
                     bounds: Rect.fromLTRB(390, 0, 410, 600),

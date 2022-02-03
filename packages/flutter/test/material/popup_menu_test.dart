@@ -860,6 +860,7 @@ void main() {
       MaterialApp(
         home: MediaQuery(
           data: const MediaQueryData(
+            size: Size(800, 600),
             displayFeatures: <DisplayFeature>[
               // A 20-pixel wide vertical display feature, similar to a foldable
               // with a visible hinge. Splits the display into two "virtual screens"
