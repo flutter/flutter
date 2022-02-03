@@ -70,6 +70,7 @@ std::shared_ptr<FakeTransform> CloneFakeTransform(
                            .children = CloneFakeTransformVector(
                                transform->children, transform_cache),
                            .content = CloneFakeContent(transform->content),
+                           .num_hit_regions = transform->num_hit_regions,
                        }));
   FML_CHECK(success);
 
@@ -132,7 +133,8 @@ bool FakeImage::operator==(const FakeImage& other) const {
 bool FakeTransform::operator==(const FakeTransform& other) const {
   return id == other.id && translation == other.translation &&
          clip_bounds == other.clip_bounds && orientation == other.orientation &&
-         children == other.children && content == other.content;
+         children == other.children && content == other.content &&
+         num_hit_regions == other.num_hit_regions;
 }
 
 bool FakeGraph::operator==(const FakeGraph& other) const {
