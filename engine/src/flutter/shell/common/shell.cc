@@ -869,6 +869,11 @@ void Shell::OnPlatformViewDestroyed() {
   fml::TaskRunner::RunNowOrPostTask(task_runners_.GetRasterTaskRunner(),
                                     raster_task);
   latch.Wait();
+  // On Android, the external view embedder posts a task to the platform thread,
+  // and waits until it completes.
+  // As a result, the platform thread must not be blocked prior to calling
+  // this method.
+  rasterizer_->TeardownExternalViewEmbedder();
 }
 
 // |PlatformView::Delegate|
