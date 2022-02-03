@@ -14,7 +14,8 @@ import 'device_port_forwarder.dart';
 class ProtocolDiscovery {
   ProtocolDiscovery._(
     this.logReader,
-    this.serviceName, {
+    this.serviceName,
+    this.servicePrefixRegExp, {
     this.portForwarder,
     required this.throttleDuration,
     this.hostPort,
@@ -39,9 +40,11 @@ class ProtocolDiscovery {
     required Logger logger,
   }) {
     const String kObservatoryService = 'Observatory';
+    const String kServicePrefixRegExp = '(?:Observatory|Dart VM Service)';
     return ProtocolDiscovery._(
       logReader,
       kObservatoryService,
+      kServicePrefixRegExp,
       portForwarder: portForwarder,
       throttleDuration: throttleDuration ?? const Duration(milliseconds: 200),
       hostPort: hostPort,
@@ -53,6 +56,7 @@ class ProtocolDiscovery {
 
   final DeviceLogReader logReader;
   final String serviceName;
+  final String servicePrefixRegExp;
   final DevicePortForwarder? portForwarder;
   final int? hostPort;
   final int? devicePort;
@@ -104,7 +108,7 @@ class ProtocolDiscovery {
   }
 
   Match? _getPatternMatch(String line) {
-    final RegExp r = RegExp(RegExp.escape(serviceName) + r' listening on ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)');
+    final RegExp r = RegExp(servicePrefixRegExp + r' listening on ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)');
     return r.firstMatch(line);
   }
 

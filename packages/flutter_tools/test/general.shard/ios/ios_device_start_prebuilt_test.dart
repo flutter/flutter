@@ -128,7 +128,7 @@ void main() {
     // Start writing messages to the log reader.
     Timer.run(() {
       deviceLogReader.addLine('Foo');
-      deviceLogReader.addLine('Observatory listening on http://127.0.0.1:456');
+      deviceLogReader.addLine('Dart VM Service listening on http://127.0.0.1:456');
     });
 
     final LaunchResult launchResult = await device.startApp(iosApp,
@@ -166,7 +166,7 @@ void main() {
     // Start writing messages to the log reader.
     Timer.run(() {
       deviceLogReader.addLine('Foo');
-      deviceLogReader.addLine('Observatory listening on http://127.0.0.1:456');
+      deviceLogReader.addLine('Dart VM Service listening on http://127.0.0.1:456');
     });
 
     final LaunchResult launchResult = await device.startApp(iosApp,
@@ -206,7 +206,7 @@ void main() {
     Timer.run(() async {
       await Future<void>.delayed(const Duration(milliseconds: 1));
       deviceLogReader.addLine('Foo');
-      deviceLogReader.addLine('Observatory listening on http://127.0.0.1:456');
+      deviceLogReader.addLine('Dart VM Service listening on http://127.0.0.1:456');
     });
 
     final LaunchResult launchResult = await device.startApp(iosApp,
@@ -311,7 +311,7 @@ void main() {
 
     // Start writing messages to the log reader.
     Timer.run(() {
-      deviceLogReader.addLine('Observatory listening on http://127.0.0.1:1234');
+      deviceLogReader.addLine('Dart VM Service listening on http://127.0.0.1:1234');
     });
 
     final LaunchResult launchResult = await device.startApp(iosApp,

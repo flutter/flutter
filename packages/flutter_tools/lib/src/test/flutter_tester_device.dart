@@ -294,7 +294,7 @@ class FlutterTesterTestDevice extends TestDevice {
     @required Process process,
     @required Future<void> Function(Uri uri) reportObservatoryUri,
   }) {
-    const String observatoryString = 'Observatory listening on ';
+    const String observatoryString = 'Dart VM Service listening on ';
     for (final Stream<List<int>> stream in <Stream<List<int>>>[
       process.stderr,
       process.stdout,

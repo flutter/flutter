@@ -247,7 +247,7 @@ void main() {
             '--packages=.dart_tool/package_config.json',
             'example.dill'
           ],
-          stdout: 'Observatory listening on http://localhost:1234',
+          stdout: 'Dart VM Service listening on http://localhost:1234',
           stderr: 'failure',
         )
       ]);

@@ -313,7 +313,7 @@ class IOSDeployDebugger {
 
         // (lldb)     run
         // success
-        // 2020-09-15 13:42:25.185474-0700 Runner[477:181141] flutter: Observatory listening on http://127.0.0.1:57782/
+        // 2020-09-15 13:42:25.185474-0700 Runner[477:181141] flutter: Dart VM Service listening on http://127.0.0.1:57782/
         if (_lldbRun.hasMatch(line)) {
           _logger.printTrace(line);
           _debuggerState = _IOSDeployDebuggerState.launching;

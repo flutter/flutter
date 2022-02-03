@@ -495,7 +495,7 @@ void main() {
           ..addCommand(const FakeCommand(
             command:  <String>['tail', '-n', '0', '-F', 'system.log'],
             stdout: '''
-Dec 20 17:04:32 md32-11-vm1 My Super Awesome App[88374]: flutter: Observatory listening on http://127.0.0.1:64213/1Uoeu523990=/
+Dec 20 17:04:32 md32-11-vm1 My Super Awesome App[88374]: flutter: Dart VM Service listening on http://127.0.0.1:64213/1Uoeu523990=/
 Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
           ))
           ..addCommand(const FakeCommand(
@@ -514,7 +514,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
 
         final List<String> lines = await logReader.logLines.toList();
         expect(lines, <String>[
-          'flutter: Observatory listening on http://127.0.0.1:64213/1Uoeu523990=/',
+          'flutter: Dart VM Service listening on http://127.0.0.1:64213/1Uoeu523990=/',
         ]);
         expect(fakeProcessManager.hasRemainingExpectations, isFalse);
       }, overrides: <Type, Generator>{
@@ -529,7 +529,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
           ..addCommand(const FakeCommand(
             command:  <String>['tail', '-n', '0', '-F', 'system.log'],
             stdout: '''
-2017-09-13 15:26:57.228948-0700  localhost My Super Awesome App[37195]: (Flutter) Observatory listening on http://127.0.0.1:57701/
+2017-09-13 15:26:57.228948-0700  localhost My Super Awesome App[37195]: (Flutter) Dart VM Service listening on http://127.0.0.1:57701/
 2017-09-13 15:26:57.228948-0700  localhost My Super Awesome App[37195]: (Flutter) ))))))))))
 2017-09-13 15:26:57.228948-0700  localhost My Super Awesome App[37195]: (Flutter) #0      Object.noSuchMethod (dart:core-patch/dart:core/object_patch.dart:46)'''
           ))
@@ -549,7 +549,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
 
         final List<String> lines = await logReader.logLines.toList();
         expect(lines, <String>[
-          'Observatory listening on http://127.0.0.1:57701/',
+          'Dart VM Service listening on http://127.0.0.1:57701/',
           '))))))))))',
           '#0      Object.noSuchMethod (dart:core-patch/dart:core/object_patch.dart:46)',
         ]);
