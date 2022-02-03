@@ -47,7 +47,7 @@ TEST_F(AiksTest, CanRenderColoredRect) {
                       .AddRect(Rect::MakeXYWH(100.0, 100.0, 100.0, 100.0))
                       .TakePath(),
                   paint);
-  // ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
 TEST_F(AiksTest, CanRenderImage) {
@@ -83,7 +83,7 @@ TEST_F(AiksTest, CanRenderStrokes) {
   paint.style = Paint::Style::kStroke;
   canvas.DrawPath(PathBuilder{}.AddLine({200, 100}, {800, 100}).TakePath(),
                   paint);
-  // ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
 TEST_F(AiksTest, CanRenderCurvedStrokes) {

@@ -36,6 +36,8 @@ TEST_F(RendererTest, CanCreateBoxPrimitive) {
   ASSERT_TRUE(context);
   using BoxPipelineBuilder = PipelineBuilder<VS, FS>;
   auto desc = BoxPipelineBuilder::MakeDefaultPipelineDescriptor(*context);
+  ASSERT_TRUE(desc.has_value());
+  desc->SetSampleCount(SampleCount::kCount4);
   auto box_pipeline =
       context->GetPipelineLibrary()->GetRenderPipeline(std::move(desc)).get();
   ASSERT_TRUE(box_pipeline);
@@ -89,7 +91,7 @@ TEST_F(RendererTest, CanCreateBoxPrimitive) {
     }
     return true;
   };
-  // OpenPlaygroundHere(callback);
+  OpenPlaygroundHere(callback);
 }
 
 TEST_F(RendererTest, CanRenderMultiplePrimitives) {
@@ -159,7 +161,7 @@ TEST_F(RendererTest, CanRenderMultiplePrimitives) {
 
     return true;
   };
-  // OpenPlaygroundHere(callback);
+  OpenPlaygroundHere(callback);
 }
 
 TEST_F(RendererTest, CanRenderToTexture) {

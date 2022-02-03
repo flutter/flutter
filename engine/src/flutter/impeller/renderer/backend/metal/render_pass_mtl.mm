@@ -409,7 +409,12 @@ bool RenderPassMTL::EncodeCommands(Allocator& allocator,
     if (target_sample_count !=
         command.pipeline->GetDescriptor().GetSampleCount()) {
       VALIDATION_LOG << "Pipeline for command and the render target disagree "
-                        "on sample counts.";
+                        "on sample counts (target was "
+                     << static_cast<uint64_t>(target_sample_count)
+                     << " but pipeline wanted "
+                     << static_cast<uint64_t>(
+                            command.pipeline->GetDescriptor().GetSampleCount())
+                     << ").";
       return false;
     }
 
