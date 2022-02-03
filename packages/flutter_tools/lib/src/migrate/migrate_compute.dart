@@ -64,10 +64,11 @@ Future<MigrateResult?> computeMigration({
     return null;
   }
   final FlutterProject flutterProject = FlutterProject.current();
+  Status statusTicker = logger.startProgress('Computing migration');
 
   final List<MigrateConfig> configs = await MigrateConfig.parseOrCreateMigrateConfigs(create: false);
 
-  // TODO: implement no-base-revision migrate in case no fallback can be found.
+  if (verbose) logger.printStatus('Parsing .migrate_config files');
   final String fallbackRevision = await MigrateConfig.getFallbackLastMigrateVersion();
   String rootBaseRevision = '';
   Map<String, List<MigrateConfig>> revisionToConfigs = <String, List<MigrateConfig>>{};
@@ -93,9 +94,11 @@ Future<MigrateResult?> computeMigration({
   if (rootBaseRevision != '') {
     revisionsList.insert(0, rootBaseRevision);
   }
+  if (verbose) logger.printStatus('Potential base revisions: $revisionsList');
 
   // Extract the files/paths that should be ignored by the migrate tool.
   // These paths are absolute paths.
+  if (verbose) logger.printStatus('Parsing unmanagedFiles.');
   List<String> unmanagedFiles = <String>[];
   List<String> unmanagedDirectories = <String>[];
   for (MigrateConfig config in configs) {
@@ -136,6 +139,7 @@ Future<MigrateResult?> computeMigration({
 
   Directory targetFlutterDirectory = globals.fs.directory(Cache.flutterRoot!);
   // Clone base flutter
+  if (verbose) logger.printStatus('Creating base app.');
   if (baseAppDirectory == null) {
     final Map<String, Directory> revisionToFlutterSdkDir = <String, Directory>{};
     for (String revision in revisionsList) {
@@ -176,6 +180,7 @@ Future<MigrateResult?> computeMigration({
           sdkAvailable = true;
         }
       } while (!sdkAvailable);
+      if (verbose) logger.printStatus('SDK cloned for revision $revision in ${sdkDir.path}');
       await MigrateUtils.createFromTemplates(
         sdkDir.childDirectory('bin').absolute.path,
         name: name,
@@ -184,11 +189,13 @@ Future<MigrateResult?> computeMigration({
         outputDirectory: generatedBaseTemplateDirectory.absolute.path,
         platforms: platforms,
       );
+      if (verbose) logger.printStatus('Creating base app for platforms $platforms with $revision SDK.');
     }
   }
 
   if (targetAppDirectory == null) {
     // Create target
+    if (verbose) logger.printStatus('Creating target app.');
     await MigrateUtils.createFromTemplates(
       targetFlutterDirectory.childDirectory('bin').absolute.path,
       name: name,
@@ -201,9 +208,10 @@ Future<MigrateResult?> computeMigration({
   await MigrateUtils.gitInit(flutterProject.directory.absolute.path);
 
   // Generate diffs
+  if (verbose) logger.printStatus('Diffing base app and target app.');
   final List<FileSystemEntity> generatedBaseFiles = generatedBaseTemplateDirectory.listSync(recursive: true);
   final List<FileSystemEntity> generatedTargetFiles = generatedTargetTemplateDirectory.listSync(recursive: true);
-
+  int modifiedFilesCount = 0;
   final Map<String, DiffResult> diffMap = <String, DiffResult>{};
   for (FileSystemEntity entity in generatedBaseFiles) {
     if (entity is! File) {
@@ -221,12 +229,17 @@ Future<MigrateResult?> computeMigration({
     if (targetTemplateFile.existsSync()) {
       DiffResult diff = await MigrateUtils.diffFiles(oldTemplateFile, targetTemplateFile);
       diffMap[localPath] = diff;
+      if (verbose && diff.diff != '') {
+        logger.printStatus('  Found ${diff.exitCode} changes in $localPath ');
+        modifiedFilesCount++;
+      }
     } else {
       // Current file has no new template counterpart, which is equivalent to a deletion.
       // This could also indicate a renaming if there is an addition with equivalent contents.
       diffMap[localPath] = DiffResult.deletion();
     }
   }
+  if (verbose) logger.printStatus('$modifiedFilesCount files were modified between base and target apps.');
 
   MigrateResult migrateResult = MigrateResult.empty();
 
@@ -249,6 +262,7 @@ Future<MigrateResult?> computeMigration({
     diffMap[localPath] = DiffResult.addition();
     migrateResult.addedFiles.add(FilePendingMigration(localPath, targetTemplateFile));
   }
+  if (verbose) logger.printStatus('${migrateResult.addedFiles.length} files were newly added in the target app.');
 
   // for each file
   final List<FileSystemEntity> currentFiles = flutterProject.directory.listSync(recursive: true);
@@ -322,6 +336,7 @@ Future<MigrateResult?> computeMigration({
         localPath: localPath,
       );
       migrateResult.mergeResults.add(result);
+      if (verbose) logger.printStatus('$localPath was merged.');
       continue;
     }
   }
@@ -339,6 +354,7 @@ Future<MigrateResult?> computeMigration({
   return migrateResult;
 }
 
+/// Writes the files into the working directory for the developer to review and resolve any conflicts.
 Future<void> writeWorkingDir(MigrateResult migrateResult, {bool verbose = false}) async {
   final Directory workingDir = FlutterProject.current().directory.childDirectory(kDefaultMigrateWorkingDirectoryName);
   if (verbose) globals.logger.printStatus('Writing migrate working directory at `${workingDir.path}`');
@@ -368,5 +384,7 @@ Future<void> writeWorkingDir(MigrateResult migrateResult, {bool verbose = false}
     migrateResult: migrateResult,
   );
   manifest.writeFile();
+
+  globals.logger.printBox('Working directory created at `${workingDir.path}`');
 }
 

@@ -50,19 +50,16 @@ class MigrateUtils {
   // Clones a copy of the flutter repo into the destination directory. Returns false if unsucessful.
   static Future<bool> cloneFlutter(String revision, String destination) async {
     // Use https url instead of ssh to avoid need to setup ssh on git.
-    print('   TRYING revision $revision');
     List<String> cmdArgs = ['clone', 'https://github.com/flutter/flutter.git', destination];
     ProcessResult result = await Process.run('git', cmdArgs);
-    checkForErrors(result, commandDescription: 'git ${cmdArgs.join(' ')}');
+    checkForErrors(result, commandDescription: 'git ${cmdArgs.join(' ')}', silent: true);
 
     cmdArgs.clear();
     cmdArgs = <String>['reset', '--hard', revision];
     result = await Process.run('git', cmdArgs, workingDirectory: destination);
-    if (!checkForErrors(result, commandDescription: 'git ${cmdArgs.join(' ')}', exit: false)) {
-      print('    failed${result.exitCode}: ${result.stdout}');
+    if (!checkForErrors(result, commandDescription: 'git ${cmdArgs.join(' ')}', exit: false, silent: true)) {
       return false;
     }
-    print('    success ${result.stdout}');
     return true;
   }
 
