@@ -4378,6 +4378,50 @@ void main() {
     expect(tester.widget<InkWell>(find.byType(InkWell)).splashFactory, splashFactory);
     expect(tester.widget<InkWell>(find.byType(InkWell)).overlayColor, overlayColor);
   });
+
+  testWidgets('splashBorderRadius is passed to InkWell.borderRadius', (WidgetTester tester) async {
+    const Color hoverColor = Color(0xfff44336);
+    const double radius = 20;
+    await tester.pumpWidget(
+      boilerplate(
+        child: DefaultTabController(
+          length: 1,
+          child: TabBar(
+            overlayColor: MaterialStateProperty.resolveWith<Color>(
+              (Set<MaterialState> states) {
+                if (states.contains(MaterialState.hovered)) {
+                  return hoverColor;
+                }
+                return Colors.black54;
+              },
+            ),
+            splashBorderRadius: BorderRadius.circular(radius),
+            tabs: const <Widget>[
+              Tab(
+                child: Text(''),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.moveTo(tester.getCenter(find.byType(Tab)));
+    await tester.pumpAndSettle();
+    final RenderObject object = tester.allRenderObjects.firstWhere((RenderObject element) => element.runtimeType.toString() == '_RenderInkFeatures');
+    expect(
+      object,
+      paints..rrect(
+        color: hoverColor,
+        rrect: RRect.fromRectAndRadius(
+          tester.getRect(find.byType(InkWell)),
+          const Radius.circular(radius)
+        ),
+      ),
+    );
+    gesture.removePointer();
+  });
 }
 
 class KeepAliveInk extends StatefulWidget {
