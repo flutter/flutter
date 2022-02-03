@@ -33,9 +33,9 @@ import 'media_query.dart';
 /// If no [anchorPoint] is provided, then [Directionality] is used:
 ///
 ///   * for [TextDirection.ltr], [anchorPoint] is `Offset.zero`, which will
-///     cause the [child] to appear in the top-left sub-screen.
+///     cause the content to appear in the top-left sub-screen.
 ///   * for [TextDirection.rtl], [anchorPoint] is `Offset(double.maxFinite, 0)`,
-///     which will cause the [child] to appear in the top-right sub-screen.
+///     which will cause the content to appear in the top-right sub-screen.
 ///
 /// If no [anchorPoint] is provided, and there is no [Directionality] ancestor
 /// widget in the tree, then the widget asserts during build in debug mode.
