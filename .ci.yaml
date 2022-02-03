@@ -2283,7 +2283,6 @@ targets:
     scheduler: luci
 
   - name: Linux_android opacity_peephole_grid_of_alpha_savelayers_perf__e2e_summary
-    bringup: true
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
