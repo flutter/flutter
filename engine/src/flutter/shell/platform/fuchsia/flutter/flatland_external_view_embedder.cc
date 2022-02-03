@@ -272,6 +272,14 @@ void FlatlandExternalViewEmbedder::SubmitFrame(
             flatland_layers_[flatland_layer_index].transform_id);
         child_transforms_.emplace_back(
             flatland_layers_[flatland_layer_index].transform_id);
+
+        // Attach full-screen hit testing shield.
+        flatland_->flatland()->SetHitRegions(
+            flatland_layers_[flatland_layer_index].transform_id,
+            {{{0, 0, std::numeric_limits<float>::max(),
+               std::numeric_limits<float>::max()},
+              fuchsia::ui::composition::HitTestInteraction::
+                  SEMANTICALLY_INVISIBLE}});
       }
 
       // Reset for the next pass:
