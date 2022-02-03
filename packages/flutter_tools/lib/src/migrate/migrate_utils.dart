@@ -44,12 +44,6 @@ class MigrateUtils {
     return DiffResult(result, outputPath);
   }
 
-  static Future<void> gitApply({required File diff, required String workingDirectory}) async {
-    List<String> cmdArgs = ['apply', diff.absolute.path];
-    final ProcessResult result = await Process.run('git', cmdArgs, workingDirectory: workingDirectory);
-    checkForErrors(result, commandDescription: 'git ${cmdArgs.join(' ')}');
-  }
-
   // Clones a copy of the flutter repo into the destination directory. Returns false if unsucessful.
   static Future<bool> cloneFlutter(String revision, String destination) async {
     // Use https url instead of ssh to avoid need to setup ssh on git.

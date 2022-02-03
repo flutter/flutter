@@ -65,7 +65,7 @@ Future<MigrateResult?> computeMigration({
   }
   final FlutterProject flutterProject = FlutterProject.current();
 
-  final List<MigrateConfig> configs = await MigrateConfig.parseOrCreateMigrateConfigs(create: true);
+  final List<MigrateConfig> configs = await MigrateConfig.parseOrCreateMigrateConfigs(create: false);
 
   // TODO: implement no-base-revision migrate in case no fallback can be found.
   final String fallbackRevision = await MigrateConfig.getFallbackLastMigrateVersion();
