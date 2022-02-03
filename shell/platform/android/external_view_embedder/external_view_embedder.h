@@ -7,6 +7,7 @@
 
 #include <unordered_map>
 
+#include "flutter/common/task_runners.h"
 #include "flutter/flow/embedded_views.h"
 #include "flutter/flow/rtree.h"
 #include "flutter/shell/platform/android/context/android_context.h"
@@ -32,7 +33,8 @@ class AndroidExternalViewEmbedder final : public ExternalViewEmbedder {
   AndroidExternalViewEmbedder(
       const AndroidContext& android_context,
       std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
-      std::shared_ptr<AndroidSurfaceFactory> surface_factory);
+      std::shared_ptr<AndroidSurfaceFactory> surface_factory,
+      TaskRunners task_runners);
 
   // |ExternalViewEmbedder|
   void PrerollCompositeEmbeddedView(
@@ -99,6 +101,9 @@ class AndroidExternalViewEmbedder final : public ExternalViewEmbedder {
   // Holds surfaces. Allows to recycle surfaces or allocate new ones.
   const std::unique_ptr<SurfacePool> surface_pool_;
 
+  // The task runners.
+  const TaskRunners task_runners_;
+
   // The size of the root canvas.
   SkISize frame_size_;
 
@@ -125,6 +130,11 @@ class AndroidExternalViewEmbedder final : public ExternalViewEmbedder {
 
   // The number of platform views in the previous frame.
   int64_t previous_frame_view_count_;
+
+  // Destroys the surfaces created from the surface factory.
+  // This method schedules a task on the platform thread, and waits for
+  // the task until it completes.
+  void DestroySurfaces();
 
   // Resets the state.
   void Reset();
