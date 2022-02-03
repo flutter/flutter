@@ -294,7 +294,6 @@ class FlutterTesterTestDevice extends TestDevice {
     @required Process process,
     @required Future<void> Function(Uri uri) reportObservatoryUri,
   }) {
-    const String observatoryString = 'Dart VM Service listening on ';
     final RegExp messageRegExp = RegExp(
         r'(?:Observatory|Dart VM Service) listening on ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)'
       );
@@ -310,7 +309,7 @@ class FlutterTesterTestDevice extends TestDevice {
             (String line) async {
           logger.printTrace('test $id: Shell: $line');
 
-          final match = messageRegExp.firstMatch(line);
+          final Match match = messageRegExp.firstMatch(line);
           if (match != null) {
             try {
               final Uri uri = Uri.parse(match[1]);
