@@ -12,8 +12,8 @@ import '../globals.dart' as globals;
 import '../project.dart';
 import '../cache.dart';
 
+/// Utility class that contains static methods that wrap git operations.
 class MigrateUtils {
-
   MigrateUtils();
 
   static Future<Directory> createTempDirectory(String name) async {
@@ -149,7 +149,14 @@ class MigrateUtils {
       return false;
     }
     return true;
-  } 
+  }
+
+  static bool conflictsResolved(String contents) {
+    if (contents.contains('>>>>>>>') || contents.contains('=======') || contents.contains('<<<<<<<')) {
+      return false;
+    }
+    return true;
+  }
 
 }
 

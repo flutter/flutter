@@ -57,7 +57,7 @@ class MigrateApplyCommand extends FlutterCommand {
     final MigrateManifest manifest = MigrateManifest.fromFile(manifestFile);
     List<String> remainingConflicts = <String>[];
     for (String localPath in manifest.conflictFiles) {
-      if (!conflictsResolved(workingDir.childFile(localPath).readAsStringSync())) {
+      if (!MigrateUtils.conflictsResolved(workingDir.childFile(localPath).readAsStringSync())) {
         remainingConflicts.add(localPath);
       }
     }
@@ -114,12 +114,5 @@ class MigrateApplyCommand extends FlutterCommand {
     // Clean up the working directory
     workingDir.deleteSync(recursive: true);
     return const FlutterCommandResult(ExitStatus.success);
-  }
-
-  bool conflictsResolved(String contents) {
-    if (contents.contains('>>>>>>>') || contents.contains('=======') || contents.contains('<<<<<<<')) {
-      return false;
-    }
-    return true;
   }
 }

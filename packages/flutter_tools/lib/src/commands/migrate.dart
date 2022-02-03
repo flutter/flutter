@@ -13,6 +13,7 @@ import '../cache.dart';
 import 'migrate_abandon.dart';
 import 'migrate_apply.dart';
 import 'migrate_start.dart';
+import 'migrate_status.dart';
 
 const String kDefaultMigrateWorkingDirectoryName = 'migrate_working_dir';
 
@@ -23,6 +24,7 @@ class MigrateCommand extends FlutterCommand {
     addSubcommand(MigrateAbandonCommand(verbose: verbose));
     addSubcommand(MigrateApplyCommand(verbose: verbose));
     addSubcommand(MigrateStartCommand(verbose: verbose));
+    addSubcommand(MigrateStatusCommand(verbose: verbose));
   }
 
   final bool _verbose;

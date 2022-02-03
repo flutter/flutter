@@ -15,6 +15,7 @@ import '../migrate/migrate_utils.dart';
 import '../cache.dart';
 import 'migrate.dart';
 
+/// Abandons the existing migration.
 class MigrateAbandonCommand extends FlutterCommand {
   MigrateAbandonCommand({
     bool verbose = false,
@@ -34,7 +35,7 @@ class MigrateAbandonCommand extends FlutterCommand {
   final String name = 'abandon';
 
   @override
-  final String description = 'Deletes the current migration working directory';
+  final String description = 'Deletes the current active migration working directory.';
 
   @override
   String get category => FlutterCommandCategory.project;
