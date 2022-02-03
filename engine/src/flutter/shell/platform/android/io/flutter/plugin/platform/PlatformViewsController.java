@@ -508,6 +508,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
    */
   public void detachFromView() {
     destroyOverlaySurfaces();
+    removeOverlaySurfaces();
     this.flutterView = null;
     flutterViewConvertedToImageView = false;
 
@@ -970,17 +971,26 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
    * Destroys the overlay surfaces and removes them from the view hierarchy.
    *
    * <p>This method is used only internally by {@code FlutterJNI}.
-   *
-   * <p>This member is not intended for public use, and is only visible for testing.
    */
   public void destroyOverlaySurfaces() {
     for (int i = 0; i < overlayLayerViews.size(); i++) {
-      FlutterImageView overlayView = overlayLayerViews.valueAt(i);
+      final FlutterImageView overlayView = overlayLayerViews.valueAt(i);
       overlayView.detachFromRenderer();
       overlayView.closeImageReader();
-      if (flutterView != null) {
-        flutterView.removeView(overlayView);
-      }
+      // Don't remove overlayView from the view hierarchy since this method can
+      // be called while the Android framework is iterating over the array of views.
+      // See ViewGroup#dispatchDetachedFromWindow(), and
+      // https://github.com/flutter/flutter/issues/97679.
+    }
+  }
+
+  private void removeOverlaySurfaces() {
+    if (flutterView == null) {
+      Log.e(TAG, "removeOverlaySurfaces called while flutter view is null");
+      return;
+    }
+    for (int i = 0; i < overlayLayerViews.size(); i++) {
+      flutterView.removeView(overlayLayerViews.valueAt(i));
     }
     overlayLayerViews.clear();
   }
