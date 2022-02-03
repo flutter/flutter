@@ -100,9 +100,9 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
   bool get debug {
     final DartCommonLaunchAttachRequestArguments args = this.args;
     if (args is FlutterLaunchRequestArguments) {
-    // Invert DAP's noDebug flag, treating it as false (so _do_ debug) if not
-    // provided.
-    return !(args.noDebug ?? false);
+      // Invert DAP's noDebug flag, treating it as false (so _do_ debug) if not
+      // provided.
+      return !(args.noDebug ?? false);
     }
 
     // Otherwise (attach), always debug.
