@@ -386,5 +386,7 @@ Future<void> writeWorkingDir(MigrateResult migrateResult, {bool verbose = false}
   manifest.writeFile();
 
   globals.logger.printBox('Working directory created at `${workingDir.path}`');
+
+  checkAndPrintMigrateStatus(manifest, workingDir);
 }
 

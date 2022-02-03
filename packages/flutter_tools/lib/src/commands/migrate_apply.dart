@@ -14,7 +14,6 @@ import '../migrate/migrate_manifest.dart';
 import '../migrate/migrate_utils.dart';
 import '../cache.dart';
 import 'migrate.dart';
-import 'migrate_status.dart';
 
 class MigrateApplyCommand extends FlutterCommand {
   MigrateApplyCommand({
