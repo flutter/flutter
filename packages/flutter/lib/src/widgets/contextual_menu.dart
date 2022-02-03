@@ -1,69 +1,49 @@
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
-import 'container.dart';
 import 'framework.dart';
+import 'gesture_detector.dart';
 import 'inherited_theme.dart';
 import 'navigator.dart';
+import 'overlay.dart';
 import 'routes.dart';
-import 'text.dart';
 
 const Duration _kContextualMenuDuration = Duration.zero;
 
+late OverlayEntry _menuOverlayEntry;
+
 // TODO(justinmc): Document. Maybe return Future<T>.
 /// Shows a [ContextualMenu] at the given location.
-void showContextualMenu(BuildContext context) {
-  final NavigatorState navigator = Navigator.of(context);
-  final _ContextualMenuRoute toolbarRoute = _ContextualMenuRoute(
-    capturedThemes: InheritedTheme.capture(from: context, to: navigator.context),
-    // TODO(justinmc): Should I create a default menu here if no ContextualMenuConfiguration?
-    contextualMenuConfiguration: ContextualMenuConfiguration.of(context),
+void showContextualMenu(BuildContext context, [Widget? debugRequiredFor]) {
+  // TODO(justinmc): Should I create a default menu here if no ContextualMenuConfiguration?
+  final OverlayState? overlayState = Overlay.of(
+    context,
+    rootOverlay: true,
+    debugRequiredFor: debugRequiredFor,
   );
-  // TODO(justinmc): I think for mobile we would need a way to show this that's
-  // not a separate route, because it's still possible to tap things behind the
-  // contextual menu, unlike desktop.
-  navigator.push(toolbarRoute);
-}
-
-class _ContextualMenuRoute extends PopupRoute<void> {
-  _ContextualMenuRoute({
-    required this.capturedThemes,
-    required this.contextualMenuConfiguration,
-  });
-
-  final CapturedThemes capturedThemes;
-  final ContextualMenuConfiguration contextualMenuConfiguration;
-  //final List<_MenuItem<T>> items;
-
-  @override
-  Duration get transitionDuration => _kContextualMenuDuration;
-
-  @override
-  bool get barrierDismissible => true;
-
-  @override
-  Color? get barrierColor => null;
-
-  // TODO(justinmc): Maybe pass this through from implementer. Like:
-  // MaterialLocalizations.of(context).modalBarrierDismissLabel;
-  @override
-  final String? barrierLabel = null;
-
-  @override
-  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-
-    return capturedThemes.wrap(
-      contextualMenuConfiguration.buildMenu(context),
-    );
-  }
-
-  /*
-  void _dismiss() {
-    if (isActive) {
-      navigator?.removeRoute(this);
-    }
-  }
-  */
+  final ContextualMenuConfiguration contextualMenuConfiguration =
+    ContextualMenuConfiguration.of(context);
+  final CapturedThemes capturedThemes = InheritedTheme.capture(
+    from: context,
+    to: Navigator.of(context).context,
+  );
+  _menuOverlayEntry = OverlayEntry(
+    builder: (BuildContext context) {
+      return GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: _menuOverlayEntry.remove,
+        onSecondaryTap: _menuOverlayEntry.remove,
+        // TODO(justinmc): I'm using this to block taps on the menu from being
+        // received by the above barrier. Is there a less weird way?
+        child: GestureDetector(
+          onTap: () {},
+          onSecondaryTap: () {},
+          child: capturedThemes.wrap(contextualMenuConfiguration.buildMenu(context)),
+        ),
+      );
+    },
+  );
+  overlayState!.insert(_menuOverlayEntry);
 }
 
 typedef ContextualMenuBuilder = Widget Function(BuildContext);
