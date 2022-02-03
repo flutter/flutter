@@ -151,8 +151,8 @@ class OverlayEntry extends ChangeNotifier {
       return;
 
     overlay._entries.remove(this);
-    if (SchedulerBinding.instance!.schedulerPhase == SchedulerPhase.persistentCallbacks) {
-      SchedulerBinding.instance!.addPostFrameCallback((Duration duration) {
+    if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
+      SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
         overlay._markDirty();
       });
     } else {

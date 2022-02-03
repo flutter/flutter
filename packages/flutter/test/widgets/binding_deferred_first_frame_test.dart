@@ -14,7 +14,7 @@ const String _loading = 'Loading...';
 
 void main() {
   testWidgets('deferFirstFrame/allowFirstFrame stops sending frames to engine', (WidgetTester tester) async {
-    expect(RendererBinding.instance!.sendFramesToEngine, isTrue);
+    expect(RendererBinding.instance.sendFramesToEngine, isTrue);
 
     final Completer<void> completer = Completer<void>();
     await tester.pumpWidget(
@@ -30,28 +30,28 @@ void main() {
 
     expect(find.text(_loading), findsOneWidget);
     expect(find.text(_actualContent), findsNothing);
-    expect(RendererBinding.instance!.sendFramesToEngine, isFalse);
+    expect(RendererBinding.instance.sendFramesToEngine, isFalse);
 
     await tester.pump();
     expect(find.text(_loading), findsOneWidget);
     expect(find.text(_actualContent), findsNothing);
-    expect(RendererBinding.instance!.sendFramesToEngine, isFalse);
+    expect(RendererBinding.instance.sendFramesToEngine, isFalse);
     expect(state.doneLoading, isFalse);
 
     // Complete the future to start sending frames.
     completer.complete();
     await tester.idle();
     expect(state.doneLoading, isTrue);
-    expect(RendererBinding.instance!.sendFramesToEngine, isTrue);
+    expect(RendererBinding.instance.sendFramesToEngine, isTrue);
 
     await tester.pump();
     expect(find.text(_loading), findsNothing);
     expect(find.text(_actualContent), findsOneWidget);
-    expect(RendererBinding.instance!.sendFramesToEngine, isTrue);
+    expect(RendererBinding.instance.sendFramesToEngine, isTrue);
   });
 
   testWidgets('Two widgets can defer frames', (WidgetTester tester) async {
-    expect(RendererBinding.instance!.sendFramesToEngine, isTrue);
+    expect(RendererBinding.instance.sendFramesToEngine, isTrue);
 
     final Completer<void> completer1 = Completer<void>();
     final Completer<void> completer2 = Completer<void>();
@@ -74,7 +74,7 @@ void main() {
     );
     expect(find.text(_loading), findsNWidgets(2));
     expect(find.text(_actualContent), findsNothing);
-    expect(RendererBinding.instance!.sendFramesToEngine, isFalse);
+    expect(RendererBinding.instance.sendFramesToEngine, isFalse);
 
     completer1.complete();
     completer2.complete();
@@ -83,7 +83,7 @@ void main() {
     await tester.pump();
     expect(find.text(_loading), findsNothing);
     expect(find.text(_actualContent), findsNWidgets(2));
-    expect(RendererBinding.instance!.sendFramesToEngine, isTrue);
+    expect(RendererBinding.instance.sendFramesToEngine, isTrue);
   });
 }
 
@@ -102,11 +102,11 @@ class _DeferringWidgetState extends State<_DeferringWidget> {
   @override
   void initState() {
     super.initState();
-    RendererBinding.instance!.deferFirstFrame();
+    RendererBinding.instance.deferFirstFrame();
     widget.loader.then((_) {
       setState(() {
         doneLoading = true;
-        RendererBinding.instance!.allowFirstFrame();
+        RendererBinding.instance.allowFirstFrame();
       });
     });
   }
