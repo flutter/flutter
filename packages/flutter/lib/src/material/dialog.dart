@@ -1012,8 +1012,10 @@ Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> a
 /// `screen` value exceeds the number of screens available, the last screen is
 /// used.
 ///
-/// The [anchorPoint] argument is used to pick the closest area without
-/// [DisplayFeature]s, where the dialog will be rendered.
+/// [DisplayFeatureSubScreen] is used for displaying this route on only one
+/// sub-screen.
+///
+/// {@macro flutter.widgets.DisplayFeatureSubScreen}
 ///
 /// If the application has multiple [Navigator] objects, it may be necessary to
 /// call `Navigator.of(context, rootNavigator: true).pop(result)` to close the
@@ -1130,8 +1132,10 @@ Future<T?> showDialog<T>({
 /// `screen` value exceeds the number of screens available, the last screen is
 /// used.
 ///
-/// The [anchorPoint] argument is used to pick the closest area without
-/// [DisplayFeature]s, where the dialog will be rendered.
+/// [DisplayFeatureSubScreen] is used for displaying this route on only one
+/// sub-screen.
+///
+/// {@macro flutter.widgets.DisplayFeatureSubScreen}
 ///
 /// See also:
 ///

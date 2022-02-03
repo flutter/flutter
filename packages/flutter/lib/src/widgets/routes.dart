@@ -1866,8 +1866,10 @@ abstract class RouteAware {
 /// The `settings` argument define the settings for this route. See
 /// [RouteSettings] for details.
 ///
-/// The [anchorPoint] argument is used to pick the closest area without
-/// [DisplayFeature]s, where the dialog will be rendered.
+/// [DisplayFeatureSubScreen] is used for displaying this route on only one
+/// sub-screen.
+///
+/// {@macro flutter.widgets.DisplayFeatureSubScreen}
 ///
 /// See also:
 ///
@@ -1884,7 +1886,7 @@ class RawDialogRoute<T> extends PopupRoute<T> {
     Duration transitionDuration = const Duration(milliseconds: 200),
     RouteTransitionsBuilder? transitionBuilder,
     RouteSettings? settings,
-    Offset? anchorPoint,
+    this.anchorPoint,
   }) : assert(barrierDismissible != null),
        _pageBuilder = pageBuilder,
        _barrierDismissible = barrierDismissible,
@@ -1892,7 +1894,6 @@ class RawDialogRoute<T> extends PopupRoute<T> {
        _barrierColor = barrierColor,
        _transitionDuration = transitionDuration,
        _transitionBuilder = transitionBuilder,
-       _anchorPoint = anchorPoint,
        super(settings: settings);
 
   final RoutePageBuilder _pageBuilder;
@@ -1915,7 +1916,8 @@ class RawDialogRoute<T> extends PopupRoute<T> {
 
   final RouteTransitionsBuilder? _transitionBuilder;
 
-  final Offset? _anchorPoint;
+  /// {@macro flutter.widgets.DisplayFeatureSubScreen.anchorPoint}
+  final Offset? anchorPoint;
 
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
@@ -1923,7 +1925,7 @@ class RawDialogRoute<T> extends PopupRoute<T> {
       scopesRoute: true,
       explicitChildNodes: true,
       child: DisplayFeatureSubScreen(
-        anchorPoint: _anchorPoint,
+        anchorPoint: anchorPoint,
         child: _pageBuilder(context, animation, secondaryAnimation),
       ),
     );
@@ -1990,6 +1992,11 @@ class RawDialogRoute<T> extends PopupRoute<T> {
 ///
 /// The `routeSettings` will be used in the construction of the dialog's route.
 /// See [RouteSettings] for more details.
+///
+/// [DisplayFeatureSubScreen] is used for displaying this route on only one
+/// sub-screen.
+///
+/// {@macro flutter.widgets.DisplayFeatureSubScreen}
 ///
 /// Returns a [Future] that resolves to the value (if any) that was passed to
 /// [Navigator.pop] when the dialog was closed.

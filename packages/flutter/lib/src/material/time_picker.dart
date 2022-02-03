@@ -2365,8 +2365,10 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
 /// [hourLabelText], [minuteLabelText] and [confirmText] can be provided to
 /// override the default values.
 ///
-/// The [anchorPoint] argument is used to pick the closest area without
-/// [DisplayFeature]s, where the dialog will be rendered.
+/// [DisplayFeatureSubScreen] is used for displaying this route on only one
+/// sub-screen.
+///
+/// {@macro flutter.widgets.DisplayFeatureSubScreen}
 ///
 /// By default, the time picker gets its colors from the overall theme's
 /// [ColorScheme]. The time picker can be further customized by providing a

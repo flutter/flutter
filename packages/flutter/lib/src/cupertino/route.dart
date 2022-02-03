@@ -999,9 +999,10 @@ class _CupertinoEdgeShadowPainter extends BoxPainter {
 /// The `routeSettings` argument is used to provide [RouteSettings] to the
 /// created Route.
 ///
-/// The [anchorPoint] argument is used to pick the closest area without
-/// [DisplayFeature]s, where the popup will be rendered. If this is null, the
-/// closest [Directionality] widget is used.
+/// [DisplayFeatureSubScreen] is used for displaying this route on only one
+/// sub-screen.
+///
+/// {@macro flutter.widgets.DisplayFeatureSubScreen}
 ///
 /// See also:
 ///
@@ -1061,9 +1062,7 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
 
   late Tween<Offset> _offsetTween;
 
-  /// Used to pick the closest area without [DisplayFeature]s, where the popup
-  /// will be rendered. If this is null, the closest [Directionality] widget is
-  /// used.
+  /// {@macro flutter.widgets.DisplayFeatureSubScreen.anchorPoint}
   final Offset? anchorPoint;
 
   @override
@@ -1140,6 +1139,11 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
 /// [StatefulBuilder] or a custom [StatefulWidget] if the widget needs to
 /// update dynamically.
 ///
+/// [DisplayFeatureSubScreen] is used for displaying this route on only one
+/// sub-screen.
+///
+/// {@macro flutter.widgets.DisplayFeatureSubScreen}
+///
 /// Returns a `Future` that resolves to the value that was passed to
 /// [Navigator.pop] when the popup was closed.
 ///
@@ -1176,6 +1180,7 @@ Future<T?> showCupertinoModalPopup<T>({
   bool useRootNavigator = true,
   bool? semanticsDismissible,
   RouteSettings? routeSettings,
+  Offset? anchorPoint,
 }) {
   assert(useRootNavigator != null);
   return Navigator.of(context, rootNavigator: useRootNavigator).push(
@@ -1186,6 +1191,7 @@ Future<T?> showCupertinoModalPopup<T>({
       barrierDismissible: barrierDismissible,
       semanticsDismissible: semanticsDismissible,
       settings: routeSettings,
+      anchorPoint: anchorPoint,
     ),
   );
 }
@@ -1236,8 +1242,10 @@ Widget _buildCupertinoDialogTransitions(BuildContext context, Animation<double> 
 /// By default, `useRootNavigator` is `true` and the dialog route created by
 /// this method is pushed to the root navigator.
 ///
-/// The [anchorPoint] argument is used to pick the closest area without
-/// [DisplayFeature]s, where the dialog will be rendered.
+/// [DisplayFeatureSubScreen] is used for displaying this route on only one
+/// sub-screen.
+///
+/// {@macro flutter.widgets.DisplayFeatureSubScreen}
 ///
 /// If the application has multiple [Navigator] objects, it may be necessary to
 /// call `Navigator.of(context, rootNavigator: true).pop(result)` to close the
@@ -1323,8 +1331,10 @@ Future<T?> showCupertinoDialog<T>({
 /// The `settings` argument define the settings for this route. See
 /// [RouteSettings] for details.
 ///
-/// The [anchorPoint] argument is used to pick the closest area without
-/// [DisplayFeature]s, where the dialog will be rendered.
+/// [DisplayFeatureSubScreen] is used for displaying this route on only one
+/// sub-screen.
+///
+/// {@macro flutter.widgets.DisplayFeatureSubScreen}
 ///
 /// See also:
 ///

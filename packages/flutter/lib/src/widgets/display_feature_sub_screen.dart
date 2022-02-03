@@ -26,6 +26,7 @@ import 'media_query.dart';
 ///     sub-screen or it is at least as wide as the screen, producing a top and
 ///     bottom sub-screen
 ///
+/// {@template flutter.widgets.DisplayFeatureSubScreen}
 /// After determining the sub-screens, the closest one to [anchorPoint] is used
 /// to render the [child].
 ///
@@ -38,6 +39,7 @@ import 'media_query.dart';
 ///
 /// If no [anchorPoint] is provided, and there is no [Directionality] ancestor
 /// widget in the tree, then the widget asserts during build in debug mode.
+/// {@endtemplate}
 ///
 /// Similarly to [SafeArea], this widget assumes there is no added padding
 /// between it and the first [MediaQuery] ancestor. The [child] is wrapped in a
@@ -58,6 +60,7 @@ class DisplayFeatureSubScreen extends StatelessWidget {
     required this.child,
   }) : super(key: key);
 
+  /// {@template flutter.widgets.DisplayFeatureSubScreen.anchorPoint}
   /// The anchor point used to pick the closest sub-screen.
   ///
   /// If the anchor point sits inside one of these sub-screens, then that
@@ -75,6 +78,7 @@ class DisplayFeatureSubScreen extends StatelessWidget {
   ///   * for [TextDirection.rtl], [anchorPoint] is
   ///     `Offset(double.maxFinite, 0)`, which will cause the top-right
   ///     sub-screen to be picked.
+  /// {@endtemplate}
   final Offset? anchorPoint;
 
   /// The widget below this widget in the tree.

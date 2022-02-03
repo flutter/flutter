@@ -650,8 +650,10 @@ class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
 /// sheet. This is particularly useful in the case that a user wants to observe
 /// [PopupRoute]s within a [NavigatorObserver].
 ///
-/// The [anchorPoint] argument is used to pick the closest area without
-/// [DisplayFeature]s, where the dialog will be rendered.
+/// [DisplayFeatureSubScreen] is used for displaying this route on only one
+/// sub-screen.
+///
+/// {@macro flutter.widgets.DisplayFeatureSubScreen}
 ///
 /// Returns a `Future` that resolves to the value (if any) that was passed to
 /// [Navigator.pop] when the modal bottom sheet was closed.
