@@ -996,6 +996,26 @@ void main() {
         ui.Rect.zero);
     expect(caretOffset.dx, painter.width);
   }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/87545
+
+  test('TextPainter line metrics update after layout', () {
+    final TextPainter painter = TextPainter()
+      ..textDirection = TextDirection.ltr;
+
+    const String text = 'word1 word2 word3';
+    painter.text = const TextSpan(
+      text: text,
+    );
+
+    painter.layout(maxWidth: 80);
+
+    List<ui.LineMetrics> lines = painter.computeLineMetrics();
+    expect(lines.length, 3);
+
+    painter.layout(maxWidth: 1000);
+
+    lines = painter.computeLineMetrics();
+    expect(lines.length, 1);
+  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/62819
 }
 
 class MockCanvas extends Fake implements Canvas {
