@@ -91,7 +91,11 @@ class MigrateApplyCommand extends FlutterCommand {
       if (targetFile.existsSync()) {
         targetFile.createSync(recursive: true);
       }
-      targetFile.writeAsStringSync(workingFile.readAsStringSync(), flush: true);
+      try {
+        targetFile.writeAsStringSync(workingFile.readAsStringSync(), flush: true);
+      } on FileSystemException {
+        targetFile.writeAsBytesSync(workingFile.readAsBytesSync(), flush: true);
+      }
     }
     // Delete files slated for deletion.
     for (String localPath in manifest.deletedFiles) {

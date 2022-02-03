@@ -137,7 +137,7 @@ Future<MigrateResult?> computeMigration({
   final String androidLanguage = FlutterProject.current().android.isKotlin ? 'kotlin' : 'java';
   final String iosLanguage = FlutterProject.current().ios.isSwift ? 'swift' : 'objc';
 
-  Directory targetFlutterBinDirectory = globals.fs.directory(globals.fs.path.join(Cache.flutterRoot!, 'bin'));
+  Directory targetFlutterDirectory = globals.fs.directory(Cache.flutterRoot!);
   // Clone base flutter
   if (baseAppDirectory == null) {
     final Map<String, Directory> revisionToFlutterSdkDir = <String, Directory>{};
@@ -173,7 +173,7 @@ Future<MigrateResult?> computeMigration({
           }
         } else {
           // fallback to just using the modern target version of flutter.
-          sdkDir = targetFlutterBinDirectory;
+          sdkDir = targetFlutterDirectory;
           sdkAvailable = true;
         }
       } while (!sdkAvailable);
@@ -191,7 +191,7 @@ Future<MigrateResult?> computeMigration({
   if (targetAppDirectory == null) {
     // Create target
     await MigrateUtils.createFromTemplates(
-      targetFlutterBinDirectory.path,
+      targetFlutterDirectory.childDirectory('bin').absolute.path,
       name: name,
       androidLanguage: androidLanguage,
       iosLanguage: iosLanguage,
@@ -222,6 +222,7 @@ Future<MigrateResult?> computeMigration({
     if (targetTemplateFile.existsSync()) {
       DiffResult diff = await MigrateUtils.diffFiles(oldTemplateFile, targetTemplateFile);
       diffMap[localPath] = diff;
+      if (diff.exitCode != 0) print('Diff: ${diff.exitCode} $localPath');
     } else {
       // Current file has no new template counterpart, which is equivalent to a deletion.
       // This could also indicate a renaming if there is an addition with equivalent contents.
@@ -285,9 +286,32 @@ Future<MigrateResult?> computeMigration({
 
     if (userDiff.exitCode == 0) {
       // Current file unchanged by user
-      if (diffMap.containsKey(localPath) && diffMap[localPath]!.isDeletion) {
-        // File is deleted in new template
-        migrateResult.deletedFiles.add(FilePendingMigration(localPath, currentFile));
+      if (diffMap.containsKey(localPath)) {
+        if (diffMap[localPath]!.isDeletion) {
+          // File is deleted in new template
+          migrateResult.deletedFiles.add(FilePendingMigration(localPath, currentFile));
+        }
+        if (diffMap[localPath]!.exitCode != 0) {
+          // Accept the target version wholesale
+          MergeResult result;
+          try {
+            result = MergeResult.explicit(
+              mergedString: generatedTargetTemplateDirectory.childFile(localPath).readAsStringSync(),
+              hasConflict: false,
+              exitCode: 0,
+              localPath: localPath,
+            );
+          } on FileSystemException {
+            result = MergeResult.explicit(
+              mergedBytes: generatedTargetTemplateDirectory.childFile(localPath).readAsBytesSync(),
+              hasConflict: false,
+              exitCode: 0,
+              localPath: localPath,
+            );
+          }
+          migrateResult.mergeResults.add(result);
+          continue;
+        }
       }
       continue;
     }
@@ -324,7 +348,11 @@ Future<void> writeWorkingDir(MigrateResult migrateResult, {bool verbose = false}
   for (MergeResult result in migrateResult.mergeResults) {
     final File file = workingDir.childFile(result.localPath);
     file.createSync(recursive: true);
-    file.writeAsStringSync(result.mergedContents, flush: true);
+    if (result.mergedString != null) {
+      file.writeAsStringSync(result.mergedString!, flush: true);
+    } else {
+      file.writeAsBytesSync(result.mergedBytes!, flush: true);
+    }
   }
 
   for (FilePendingMigration addedFile in migrateResult.addedFiles) {

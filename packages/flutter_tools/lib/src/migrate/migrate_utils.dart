@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -47,6 +48,7 @@ class MigrateUtils {
   // Clones a copy of the flutter repo into the destination directory. Returns false if unsucessful.
   static Future<bool> cloneFlutter(String revision, String destination) async {
     // Use https url instead of ssh to avoid need to setup ssh on git.
+    print('   TRYING revision $revision');
     List<String> cmdArgs = ['clone', 'https://github.com/flutter/flutter.git', destination];
     ProcessResult result = await Process.run('git', cmdArgs);
     checkForErrors(result, commandDescription: 'git ${cmdArgs.join(' ')}');
@@ -54,9 +56,11 @@ class MigrateUtils {
     cmdArgs.clear();
     cmdArgs = <String>['reset', '--hard', revision];
     result = await Process.run('git', cmdArgs, workingDirectory: destination);
-    if (checkForErrors(result, commandDescription: 'git ${cmdArgs.join(' ')}', exit: false)) {
+    if (!checkForErrors(result, commandDescription: 'git ${cmdArgs.join(' ')}', exit: false)) {
+      print('    failed${result.exitCode}: ${result.stdout}');
       return false;
     }
+    print('    success ${result.stdout}');
     return true;
   }
 
@@ -194,19 +198,21 @@ class DiffResult {
 /// Data class to hold the 
 class MergeResult {
   MergeResult(ProcessResult result, String localPath) :
-    mergedContents = result.stdout as String,
+    mergedString = result.stdout as String,
     hasConflict = result.exitCode != 0,
     exitCode = result.exitCode,
     localPath = localPath;
 
   MergeResult.explicit({
-    required this.mergedContents,
+    this.mergedString,
+    this.mergedBytes,
     required this.hasConflict,
     required this.exitCode,
     required this.localPath,
-  });
+  }) : assert(mergedString == null && mergedBytes != null || mergedString != null && mergedBytes == null);
 
-  String mergedContents;
+  String? mergedString;
+  Uint8List? mergedBytes;
   bool hasConflict;
   int exitCode;
   String localPath;

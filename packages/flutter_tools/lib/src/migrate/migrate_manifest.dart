@@ -34,12 +34,12 @@ class MigrateManifest {
     // We can fill the maps with partially dummy data as not all properties are used by the manifest.
     if (map['mergedFiles'] != null) {
       for (String localPath in map['mergedFiles']) {
-        migrateResult.mergeResults.add(MergeResult.explicit(mergedContents: '', hasConflict: false, exitCode: 0, localPath: localPath));
+        migrateResult.mergeResults.add(MergeResult.explicit(mergedString: '', hasConflict: false, exitCode: 0, localPath: localPath));
       }
     }
     if (map['conflictFiles'] != null) {
       for (String localPath in map['conflictFiles']) {
-        migrateResult.mergeResults.add(MergeResult.explicit(mergedContents: '', hasConflict: true, exitCode: 1, localPath: localPath));
+        migrateResult.mergeResults.add(MergeResult.explicit(mergedString: '', hasConflict: true, exitCode: 1, localPath: localPath));
       }
     }
     if (map['newFiles'] != null) {

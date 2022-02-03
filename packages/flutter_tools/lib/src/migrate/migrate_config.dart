@@ -187,8 +187,8 @@ $unmanagedFilesString
         // No config found, creating empty config.
         MigrateConfig newConfig = MigrateConfig(
           platform: platform,
-          createVersion: '',
-          lastMigrateVersion: '',
+          createVersion: null,
+          lastMigrateVersion: null,
           unmanagedFiles: <String>[],
         );
         if (create) {
