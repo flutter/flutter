@@ -4325,9 +4325,12 @@ class UndoStack<T> {
     _index = _list.length - 1;
   }
 
-  /// Returns the previous state.
+  /// Returns the current value after an undo operation.
   ///
-  /// If the stack is empty, returns null.
+  /// An undo operation moves the current value to the previously pushed value,
+  /// if any.
+  ///
+  /// Iff the stack is completely empty, then returns null.
   T? undo() {
     if (_list.isEmpty) {
       return null;
@@ -4342,9 +4345,12 @@ class UndoStack<T> {
     return currentValue;
   }
 
-  /// Returns the state that was last undone, or if none, the current state.
+  /// Returns the current value after a redo operation.
   ///
-  /// If the _list is empty, returns null.
+  /// A redo operation moves the current value to the value that was last
+  /// undone, if any.
+  ///
+  /// Iff the stack is completely empty, then returns null.
   T? redo() {
     if (_list.isEmpty) {
       return null;
@@ -4362,6 +4368,7 @@ class UndoStack<T> {
   /// Remove everything from the stack.
   void clear() {
     _list.clear();
+    _index = -1;
   }
 
   @override
