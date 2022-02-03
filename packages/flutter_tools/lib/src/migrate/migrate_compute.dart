@@ -94,9 +94,6 @@ Future<MigrateResult?> computeMigration({
     revisionsList.insert(0, rootBaseRevision);
   }
 
-  print('falback: $fallbackRevision');
-  print('$revisionsList');
-
   // Extract the files/paths that should be ignored by the migrate tool.
   // These paths are absolute paths.
   List<String> unmanagedFiles = <String>[];
@@ -121,12 +118,12 @@ Future<MigrateResult?> computeMigration({
   if (customBaseAppDir) {
     generatedBaseTemplateDirectory = globals.fs.directory(baseAppDirectory!);
   } else {
-    generatedBaseTemplateDirectory = await MigrateUtils.createTempDirectory('generatedOldTemplate');
+    generatedBaseTemplateDirectory = await MigrateUtils.createTempDirectory('generatedBaseTemplate');
   }
   if (customTargetAppDir) {
     generatedTargetTemplateDirectory = globals.fs.directory(targetAppDirectory!);
   } else {
-    generatedTargetTemplateDirectory = await MigrateUtils.createTempDirectory('generatedNewTemplate');
+    generatedTargetTemplateDirectory = await MigrateUtils.createTempDirectory('generatedTargetTemplate');
   }
 
   await MigrateUtils.gitInit(generatedBaseTemplateDirectory.absolute.path);
@@ -142,8 +139,6 @@ Future<MigrateResult?> computeMigration({
   if (baseAppDirectory == null) {
     final Map<String, Directory> revisionToFlutterSdkDir = <String, Directory>{};
     for (String revision in revisionsList) {
-      Directory sdkDir = await MigrateUtils.createTempDirectory('flutter_$revision')!;
-      revisionToFlutterSdkDir[revision] = sdkDir;
       final List<String> platforms = <String>[];
       for (MigrateConfig config in revisionToConfigs[revision]!) {
         platforms.add(config.platform!);
@@ -155,6 +150,7 @@ Future<MigrateResult?> computeMigration({
       //   - parsed revision
       //   - fallback revision
       //   - target revision (currently installed flutter)
+      late Directory sdkDir;
       List<String> revisionsToTry = <String>[revision];
       if (revision != fallbackRevision) {
         revisionsToTry.add(fallbackRevision);
@@ -169,11 +165,14 @@ Future<MigrateResult?> computeMigration({
             revisionToFlutterSdkDir[revision] = sdkDir;
             sdkAvailable = true;
           } else {
+            sdkDir = await MigrateUtils.createTempDirectory('flutter_$activeRevision')!;
             sdkAvailable = await MigrateUtils.cloneFlutter(activeRevision, sdkDir.absolute.path);
+            revisionToFlutterSdkDir[revision] = sdkDir;
           }
         } else {
           // fallback to just using the modern target version of flutter.
           sdkDir = targetFlutterDirectory;
+          revisionToFlutterSdkDir[revision] = sdkDir;
           sdkAvailable = true;
         }
       } while (!sdkAvailable);
@@ -222,7 +221,6 @@ Future<MigrateResult?> computeMigration({
     if (targetTemplateFile.existsSync()) {
       DiffResult diff = await MigrateUtils.diffFiles(oldTemplateFile, targetTemplateFile);
       diffMap[localPath] = diff;
-      if (diff.exitCode != 0) print('Diff: ${diff.exitCode} $localPath');
     } else {
       // Current file has no new template counterpart, which is equivalent to a deletion.
       // This could also indicate a renaming if there is an addition with equivalent contents.

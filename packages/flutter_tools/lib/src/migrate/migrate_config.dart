@@ -26,7 +26,6 @@ import '../cache.dart';
 /// Each platform contains its own .migrate_config file because flutter create can be
 /// used to add support for new platforms, so the base create version may not always be the same.
 class MigrateConfig {
-
   /// Creates a MigrateConfig by explicitly providing all values.
   MigrateConfig({
     required this.platform,

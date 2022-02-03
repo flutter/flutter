@@ -53,6 +53,11 @@ class MigrateApplyCommand extends FlutterCommand {
       return const FlutterCommandResult(ExitStatus.fail);
     }
 
+    if (await MigrateUtils.hasUncommitedChanges(workingDir.path)) {
+      globals.logger.printStatus('There are uncommited changes in your project. Please commit, abandon, or stash your changes before using `flutter migrate apply`');
+      return const FlutterCommandResult(ExitStatus.fail);
+    }
+
     final File manifestFile = MigrateManifest.getManifestFileFromDirectory(workingDir);
     final MigrateManifest manifest = MigrateManifest.fromFile(manifestFile);
     List<String> remainingConflicts = <String>[];
@@ -113,6 +118,8 @@ class MigrateApplyCommand extends FlutterCommand {
 
     // Clean up the working directory
     workingDir.deleteSync(recursive: true);
+
+    globals.logger.printStatus('Migration complete. You may use `git status`, `git diff` and `git restore <file>` to continue working with the migrated files.');
     return const FlutterCommandResult(ExitStatus.success);
   }
 }

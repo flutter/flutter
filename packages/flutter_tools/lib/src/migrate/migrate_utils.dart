@@ -19,7 +19,9 @@ class MigrateUtils {
   static Future<Directory> createTempDirectory(String name) async {
     ProcessResult result = await Process.run('mktemp', ['-d', '-t', name]);
     checkForErrors(result);
-    return globals.fs.directory((result.stdout as String).trim());
+    final Directory dir = globals.fs.directory((result.stdout as String).trim());
+    dir.createSync(recursive: true);
+    return dir;
   }
 
   static Future<DiffResult> diffFiles(File one, File two, {String? outputPath}) async {
@@ -109,11 +111,21 @@ class MigrateUtils {
     return result.stdout;
   }
 
- static Future<void> gitInit(String workingDirectory) async {
+  static Future<void> gitInit(String workingDirectory) async {
     List<String> cmdArgs = ['init'];
     final ProcessResult result = await Process.run('git', cmdArgs, workingDirectory: workingDirectory);
     checkForErrors(result, allowedExitCodes: <int>[0], commandDescription: 'git ${cmdArgs.join(' ')}');
- }
+  }
+
+  static Future<bool> hasUncommitedChanges(String workingDirectory) async {
+    List<String> cmdArgs = ['diff', '--quiet', 'HEAD'];
+    final ProcessResult result = await Process.run('git', cmdArgs, workingDirectory: workingDirectory);
+    checkForErrors(result, allowedExitCodes: <int>[-1], commandDescription: 'git ${cmdArgs.join(' ')}');
+    if (result.exitCode == 0) {
+      return false;
+    }
+    return true;
+  }
 
   static Future<bool> isGitIgnored(String filePath, String workingDirectory) async {
     List<String> cmdArgs = ['check-ignore', filePath];
@@ -131,18 +143,20 @@ class MigrateUtils {
     }
   }
 
-  static bool checkForErrors(ProcessResult result, {List<int> allowedExitCodes = const <int>[], String? commandDescription, bool exit = true}) {
+  static bool checkForErrors(ProcessResult result, {List<int> allowedExitCodes = const <int>[], String? commandDescription, bool exit = true, bool silent = false}) {
     // -1 in allowed exit codes means all exit codes are valid.
     if ((result.exitCode != 0 && !allowedExitCodes.contains(result.exitCode)) && !allowedExitCodes.contains(-1)) {
-      globals.printError('Git command encountered an error.');
-      if (commandDescription != null) {
-        globals.printError('Command:');
-        globals.printError(commandDescription, indent: 2);
+      if (!silent) {
+        globals.printError('Git command encountered an error.');
+        if (commandDescription != null) {
+          globals.printError('Command:');
+          globals.printError(commandDescription, indent: 2);
+        }
+        globals.printError('Stdout:');
+        globals.printStatus(result.stdout as String, indent: 2);
+        globals.printError('Stderr:');
+        globals.printError(result.stderr as String, indent: 2);
       }
-      globals.printError('Stdout:');
-      globals.printStatus(result.stdout as String, indent: 2);
-      globals.printError('Stderr:');
-      globals.printError(result.stderr as String, indent: 2);
       if (exit) {
         throwToolExit('Git command failed with exit code ${result.exitCode}', exitCode: result.exitCode);
       }
