@@ -278,7 +278,6 @@ class TextSelectionOverlay {
       'Usually the Navigator created by WidgetsApp provides the overlay. Perhaps your '
       'app content was created above the Navigator with the WidgetsApp builder parameter.',
     );
-    _toolbarController = AnimationController(duration: fadeDuration, vsync: overlay!);
   }
 
   /// The context in which the selection handles should appear.
@@ -358,9 +357,6 @@ class TextSelectionOverlay {
   /// Controls the fade-in and fade-out animations for the toolbar and handles.
   static const Duration fadeDuration = Duration(milliseconds: 150);
 
-  late final AnimationController _toolbarController;
-  Animation<double> get _toolbarOpacity => _toolbarController.view;
-
   /// Retrieve current value.
   @visibleForTesting
   TextEditingValue get value => _value;
@@ -434,7 +430,6 @@ class TextSelectionOverlay {
     assert(_toolbar == null);
     _toolbar = OverlayEntry(builder: _buildToolbar);
     Overlay.of(context, rootOverlay: true, debugRequiredFor: debugRequiredFor)!.insert(_toolbar!);
-    _toolbarController.forward(from: 0.0);
   }
 
   /// Updates the overlay after the selection has changed.
@@ -496,7 +491,6 @@ class TextSelectionOverlay {
   /// To hide the whole overlay, see [hide].
   void hideToolbar() {
     assert(_toolbar != null);
-    _toolbarController.stop();
     _toolbar?.remove();
     _toolbar = null;
   }
@@ -504,7 +498,6 @@ class TextSelectionOverlay {
   /// Final cleanup.
   void dispose() {
     hide();
-    _toolbarController.dispose();
   }
 
   Widget _buildHandle(BuildContext context, _TextSelectionHandlePosition position) {
