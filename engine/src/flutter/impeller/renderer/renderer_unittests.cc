@@ -101,6 +101,8 @@ TEST_F(RendererTest, CanRenderMultiplePrimitives) {
   ASSERT_TRUE(context);
   using BoxPipelineBuilder = PipelineBuilder<VS, FS>;
   auto desc = BoxPipelineBuilder::MakeDefaultPipelineDescriptor(*context);
+  ASSERT_TRUE(desc.has_value());
+  desc->SetSampleCount(SampleCount::kCount4);
   auto box_pipeline =
       context->GetPipelineLibrary()->GetRenderPipeline(std::move(desc)).get();
   ASSERT_TRUE(box_pipeline);
