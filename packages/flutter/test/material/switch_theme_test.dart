@@ -419,6 +419,49 @@ void main() {
       reason: 'Active pressed Switch should have overlay color: $activePressedOverlayColor',
     );
   });
+
+  testWidgets('Local SwitchTheme can override global SwitchTheme', (WidgetTester tester) async {
+    const Color globalThemeThumbColor = Color(0xfffffff1);
+    const Color globalThemeTrackColor = Color(0xfffffff2);
+    const Color localThemeThumbColor = Color(0xffff0000);
+    const Color localThemeTrackColor = Color(0xffff0000);
+
+    Widget buildSwitch({bool selected = false, bool autofocus = false}) {
+      return MaterialApp(
+        theme: ThemeData(
+          switchTheme: SwitchThemeData(
+            thumbColor: MaterialStateProperty.all<Color>(globalThemeThumbColor),
+            trackColor: MaterialStateProperty.all<Color>(globalThemeTrackColor),
+          ),
+        ),
+        home: Scaffold(
+          body: SwitchTheme(
+            data: SwitchThemeData(
+              thumbColor: MaterialStateProperty.all<Color>(localThemeThumbColor),
+              trackColor: MaterialStateProperty.all<Color>(localThemeTrackColor),
+            ),
+            child: Switch(
+              value: selected,
+              onChanged: (bool value) {},
+              autofocus: autofocus,
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildSwitch(selected: true));
+    await tester.pumpAndSettle();
+    expect(
+      _getSwitchMaterial(tester),
+      paints
+        ..rrect(color: localThemeTrackColor)
+        ..circle()
+        ..circle()
+        ..circle()
+        ..circle(color: localThemeThumbColor),
+    );
+  });
 }
 
 Future<void> _pointGestureToSwitch(WidgetTester tester) async {
