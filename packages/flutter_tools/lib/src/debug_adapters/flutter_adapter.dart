@@ -83,27 +83,37 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
   @override
   bool get terminateOnVmServiceClose => false;
 
-  /// Whether or not the user requested to debug (via noDebug).
-  ///
-  /// This field is always `false` until a launchRequest or attachRequest has been
-  /// received and is then set according to the noDebug value.
-  ///
-  /// If `false`, we will not connect to the VM Service and some functionality
-  /// will not be available. Functionality provided via the daemon (hot reload
-  /// etc.) will still be available.
+  /// Whether or not the user requested debugging be enabled.
   ///
   /// debug/noDebug here refers to the DAP "debug" mode and not the Flutter
-  /// debug mode (vs Profile/Release). It is possible for the user to "Run"
-  /// from VS Code (eg. not want to hit breakpoints/etc.) but still be running
-  /// a debug build.
-  bool debug = false;
+  /// debug mode (vs Profile/Release). It is provided by the client editor based
+  /// on whether a user chooses to "Run" or "Debug" their app.
+  ///
+  /// This is always enabled for attach requests, but can be disabled for launch
+  /// requests via DAP's `noDebug` flag. If `noDebug` is not provided, will
+  /// default to debugging.
+  ///
+  /// When not debugging, we will not connect to the VM Service so some
+  /// functionality (breakpoints, evaluation, etc.) will not be available.
+  /// Functionality provided via the daemon (hot reload/restart) will still be
+  /// available.
+  bool get debug {
+    final DartCommonLaunchAttachRequestArguments args = this.args;
+    if (args is FlutterLaunchRequestArguments) {
+    // Invert DAP's noDebug flag, treating it as false (so _do_ debug) if not
+    // provided.
+    return !(args.noDebug ?? false);
+    }
+
+    // Otherwise (attach), always debug.
+    return true;
+  }
 
   /// Called by [attachRequest] to request that we actually connect to the app to be debugged.
   @override
   Future<void> attachImpl() async {
     final FlutterAttachRequestArguments args = this.args as FlutterAttachRequestArguments;
 
-    debug = !(args.noDebug ?? false);
     final String? vmServiceUri = args.vmServiceUri;
     final List<String> toolArgs = <String>[
       'attach',
@@ -201,7 +211,6 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
   Future<void> launchImpl() async {
     final FlutterLaunchRequestArguments args = this.args as FlutterLaunchRequestArguments;
 
-    debug = !(args.noDebug ?? false);
     final List<String> toolArgs = <String>[
       'run',
       '--machine',

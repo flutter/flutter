@@ -13,7 +13,6 @@ class FlutterAttachRequestArguments
     extends DartCommonLaunchAttachRequestArguments
     implements AttachRequestArguments {
   FlutterAttachRequestArguments({
-    this.noDebug,
     this.toolArgs,
     this.customTool,
     this.customToolReplacesArgs,
@@ -40,8 +39,7 @@ class FlutterAttachRequestArguments
         );
 
   FlutterAttachRequestArguments.fromMap(Map<String, Object?> obj)
-      : noDebug = obj['noDebug'] as bool?,
-        toolArgs = (obj['toolArgs'] as List<Object?>?)?.cast<String>(),
+      : toolArgs = (obj['toolArgs'] as List<Object?>?)?.cast<String>(),
         customTool = obj['customTool'] as String?,
         customToolReplacesArgs = obj['customToolReplacesArgs'] as int?,
         vmServiceUri = obj['vmServiceUri'] as String?,
@@ -49,13 +47,6 @@ class FlutterAttachRequestArguments
 
   static FlutterAttachRequestArguments fromJson(Map<String, Object?> obj) =>
       FlutterAttachRequestArguments.fromMap(obj);
-
-  /// If noDebug is true we skip attaching to the VM Service (allowing only a subset of functionality like hot reload).
-  ///
-  /// Unlike Dart's attach, we support noDebug for Flutter's attach because we
-  /// do not _require_ a VM Service connection because we can run "flutter attach"
-  /// that can discover the VM Service from the device.
-  final bool? noDebug;
 
   /// Arguments to be passed to the tool that will run [program] (for example, the VM or Flutter tool).
   final List<String>? toolArgs;
@@ -84,7 +75,6 @@ class FlutterAttachRequestArguments
   @override
   Map<String, Object?> toJson() => <String, Object?>{
         ...super.toJson(),
-        if (noDebug != null) 'noDebug': noDebug,
         if (toolArgs != null) 'toolArgs': toolArgs,
         if (customTool != null) 'customTool': customTool,
         if (customToolReplacesArgs != null)

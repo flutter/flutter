@@ -174,7 +174,6 @@ class DapTestClient {
     List<String>? toolArgs,
     String? vmServiceUri,
     String? cwd,
-    bool? noDebug,
     List<String>? additionalProjectPaths,
     bool? debugSdkLibraries,
     bool? debugExternalPackageLibraries,
@@ -184,7 +183,6 @@ class DapTestClient {
     return sendRequest(
       FlutterAttachRequestArguments(
         cwd: cwd,
-        noDebug: noDebug,
         toolArgs: toolArgs,
         vmServiceUri: vmServiceUri,
         additionalProjectPaths: additionalProjectPaths,
