@@ -319,6 +319,33 @@ void main() {
 
       expect(() => cache.storageBaseUrl, throwsToolExit());
     });
+
+    testWithoutContext('PubDependencies should be registered as web based', () async {
+      final BufferLogger logger = BufferLogger.test();
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      final FakePlatform platform = FakePlatform(operatingSystem: 'macos');
+      final FakeOperatingSystemUtils osUtils = FakeOperatingSystemUtils();
+
+      final PubDependencies pubDependencies = PubDependencies(
+        flutterRoot: () => '',
+        logger: logger,
+        pub: () => FakePub(),
+      );
+
+      final FlutterCache flutterCache = FlutterCache(
+          logger: logger,
+          fileSystem: fileSystem,
+          platform: platform,
+          osUtils: osUtils
+      );
+      final List <ArtifactSet> artifactSet = flutterCache.getArtifactSet();
+      assert(artifactSet.map((e) => e.name).toList().contains(pubDependencies.name), true);
+      for(final ArtifactSet artifact in artifactSet) {
+        if(artifact.name == pubDependencies.name){
+          assert(artifact.developmentArtifact.name == DevelopmentArtifact.web.name, true);
+        }
+      }
+    });
   });
 
   testWithoutContext('flattenNameSubdirs', () {
@@ -1071,19 +1098,6 @@ class FakeSimpleArtifact extends CachedArtifact {
     cache,
     DevelopmentArtifact.universal,
   );
-
-  @override
-  Future<void> updateInner(ArtifactUpdater artifactUpdater, FileSystem fileSystem, OperatingSystemUtils operatingSystemUtils) async { }
-}
-
-class FakeDownloadedArtifact extends CachedArtifact {
-  FakeDownloadedArtifact(this.downloadedFile, Cache cache) : super(
-    'fake',
-    cache,
-    DevelopmentArtifact.universal,
-  );
-
-  final File downloadedFile;
 
   @override
   Future<void> updateInner(ArtifactUpdater artifactUpdater, FileSystem fileSystem, OperatingSystemUtils operatingSystemUtils) async { }

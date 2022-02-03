@@ -184,6 +184,8 @@ class Cache {
     _artifacts.add(artifactSet);
   }
 
+  List<ArtifactSet> getArtifactSet() => _artifacts;
+
   /// This has to be lazy because it requires FLUTTER_ROOT to be initialized.
   ArtifactUpdater _createUpdater() {
     return ArtifactUpdater(
