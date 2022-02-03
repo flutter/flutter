@@ -410,7 +410,7 @@ class _RenderPostFrameCallbacker extends RenderProxyBox {
   @override
   void paint(PaintingContext context, Offset offset) {
     if (callback != null) {
-      SchedulerBinding.instance!.addPostFrameCallback((Duration duration) {
+      SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
         callback!(duration);
         markNeedsPaint();
       });

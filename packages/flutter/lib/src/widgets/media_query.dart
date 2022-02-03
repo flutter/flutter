@@ -1049,7 +1049,7 @@ class _MediaQueryFromWindowState extends State<_MediaQueryFromWindow> with Widge
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance!.addObserver(this);
+    WidgetsBinding.instance.addObserver(this);
   }
 
   // ACCESSIBILITY
@@ -1093,7 +1093,7 @@ class _MediaQueryFromWindowState extends State<_MediaQueryFromWindow> with Widge
 
   @override
   Widget build(BuildContext context) {
-    MediaQueryData data = MediaQueryData.fromWindow(WidgetsBinding.instance!.window);
+    MediaQueryData data = MediaQueryData.fromWindow(WidgetsBinding.instance.window);
     if (!kReleaseMode) {
       data = data.copyWith(platformBrightness: debugBrightnessOverride);
     }
@@ -1105,7 +1105,7 @@ class _MediaQueryFromWindowState extends State<_MediaQueryFromWindow> with Widge
 
   @override
   void dispose() {
-    WidgetsBinding.instance!.removeObserver(this);
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 }

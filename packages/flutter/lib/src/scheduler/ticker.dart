@@ -113,9 +113,9 @@ class Ticker {
       return false;
     if (muted)
       return false;
-    if (SchedulerBinding.instance!.framesEnabled)
+    if (SchedulerBinding.instance.framesEnabled)
       return true;
-    if (SchedulerBinding.instance!.schedulerPhase != SchedulerPhase.idle)
+    if (SchedulerBinding.instance.schedulerPhase != SchedulerPhase.idle)
       return true; // for example, we might be in a warm-up frame or forced frame
     return false;
   }
@@ -161,9 +161,9 @@ class Ticker {
     if (shouldScheduleTick) {
       scheduleTick();
     }
-    if (SchedulerBinding.instance!.schedulerPhase.index > SchedulerPhase.idle.index &&
-        SchedulerBinding.instance!.schedulerPhase.index < SchedulerPhase.postFrameCallbacks.index)
-      _startTime = SchedulerBinding.instance!.currentFrameTimeStamp;
+    if (SchedulerBinding.instance.schedulerPhase.index > SchedulerPhase.idle.index &&
+        SchedulerBinding.instance.schedulerPhase.index < SchedulerPhase.postFrameCallbacks.index)
+      _startTime = SchedulerBinding.instance.currentFrameTimeStamp;
     return _future!;
   }
 
@@ -250,7 +250,7 @@ class Ticker {
   void scheduleTick({ bool rescheduling = false }) {
     assert(!scheduled);
     assert(shouldScheduleTick);
-    _animationId = SchedulerBinding.instance!.scheduleFrameCallback(_tick, rescheduling: rescheduling);
+    _animationId = SchedulerBinding.instance.scheduleFrameCallback(_tick, rescheduling: rescheduling);
   }
 
   /// Cancels the frame callback that was requested by [scheduleTick], if any.
@@ -262,7 +262,7 @@ class Ticker {
   @protected
   void unscheduleTick() {
     if (scheduled) {
-      SchedulerBinding.instance!.cancelFrameCallbackWithId(_animationId!);
+      SchedulerBinding.instance.cancelFrameCallbackWithId(_animationId!);
       _animationId = null;
     }
     assert(!shouldScheduleTick);
