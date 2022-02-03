@@ -4,6 +4,8 @@
 
 #include "flutter/shell/platform/android/external_view_embedder/external_view_embedder.h"
 
+#include "flutter/fml/synchronization/waitable_event.h"
+#include "flutter/fml/task_runner.h"
 #include "flutter/fml/trace_event.h"
 #include "flutter/shell/platform/android/surface/android_surface.h"
 
@@ -12,12 +14,14 @@ namespace flutter {
 AndroidExternalViewEmbedder::AndroidExternalViewEmbedder(
     const AndroidContext& android_context,
     std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
-    std::shared_ptr<AndroidSurfaceFactory> surface_factory)
+    std::shared_ptr<AndroidSurfaceFactory> surface_factory,
+    TaskRunners task_runners)
     : ExternalViewEmbedder(),
       android_context_(android_context),
       jni_facade_(jni_facade),
       surface_factory_(surface_factory),
-      surface_pool_(std::make_unique<SurfacePool>()) {}
+      surface_pool_(std::make_unique<SurfacePool>()),
+      task_runners_(task_runners) {}
 
 // |ExternalViewEmbedder|
 void AndroidExternalViewEmbedder::PrerollCompositeEmbeddedView(
@@ -264,8 +268,8 @@ void AndroidExternalViewEmbedder::BeginFrame(
 
   // The surface size changed. Therefore, destroy existing surfaces as
   // the existing surfaces in the pool can't be recycled.
-  if (frame_size_ != frame_size && raster_thread_merger->IsOnPlatformThread()) {
-    surface_pool_->DestroyLayers(jni_facade_);
+  if (frame_size_ != frame_size) {
+    DestroySurfaces();
   }
   surface_pool_->SetFrameSize(frame_size);
   // JNI method must be called on the platform thread.
@@ -300,7 +304,18 @@ bool AndroidExternalViewEmbedder::SupportsDynamicThreadMerging() {
 
 // |ExternalViewEmbedder|
 void AndroidExternalViewEmbedder::Teardown() {
-  surface_pool_->DestroyLayers(jni_facade_);
+  DestroySurfaces();
+}
+
+// |ExternalViewEmbedder|
+void AndroidExternalViewEmbedder::DestroySurfaces() {
+  fml::AutoResetWaitableEvent latch;
+  fml::TaskRunner::RunNowOrPostTask(task_runners_.GetPlatformTaskRunner(),
+                                    [&]() {
+                                      surface_pool_->DestroyLayers(jni_facade_);
+                                      latch.Signal();
+                                    });
+  latch.Wait();
 }
 
 }  // namespace flutter

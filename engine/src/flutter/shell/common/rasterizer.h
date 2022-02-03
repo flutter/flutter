@@ -142,6 +142,13 @@ class Rasterizer final : public SnapshotDelegate,
   void Teardown();
 
   //----------------------------------------------------------------------------
+  /// @brief      Releases any resource used by the external view embedder.
+  ///             For example, overlay surfaces or Android views.
+  ///             On Android, this method post a task to the platform thread,
+  ///             and waits until it completes.
+  void TeardownExternalViewEmbedder();
+
+  //----------------------------------------------------------------------------
   /// @brief      Notifies the rasterizer that there is a low memory situation
   ///             and it must purge as many unnecessary resources as possible.
   ///             Currently, the Skia context associated with onscreen rendering

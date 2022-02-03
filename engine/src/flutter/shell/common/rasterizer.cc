@@ -79,6 +79,12 @@ void Rasterizer::Setup(std::unique_ptr<Surface> surface) {
   }
 }
 
+void Rasterizer::TeardownExternalViewEmbedder() {
+  if (external_view_embedder_) {
+    external_view_embedder_->Teardown();
+  }
+}
+
 void Rasterizer::Teardown() {
   auto context_switch =
       surface_ ? surface_->MakeRenderContextCurrent() : nullptr;
@@ -94,10 +100,6 @@ void Rasterizer::Teardown() {
     FML_DCHECK(raster_thread_merger_->IsEnabled());
     raster_thread_merger_->UnMergeNowIfLastOne();
     raster_thread_merger_->SetMergeUnmergeCallback(nullptr);
-  }
-
-  if (external_view_embedder_) {
-    external_view_embedder_->Teardown();
   }
 }
 
