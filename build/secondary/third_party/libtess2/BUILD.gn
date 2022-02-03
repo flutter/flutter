@@ -7,6 +7,9 @@ source_set("libtess2") {
 
   include_dirs = [ "//third_party/libtess2/Include/" ]
 
+  configs -= [ "//build/config/compiler:chromium_code" ]
+  configs += [ "//build/config/compiler:no_chromium_code" ]
+
   sources = [
     "//third_party/libtess2/Source/bucketalloc.c",
     "//third_party/libtess2/Source/bucketalloc.h",
