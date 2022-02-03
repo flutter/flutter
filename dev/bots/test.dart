@@ -701,6 +701,7 @@ Future<void> _runFrameworkTests() async {
       await _runFlutterTest(
         path.join(flutterRoot, 'dev', 'integration_tests', 'flutter_gallery'),
         options: <String>[trackWidgetCreationOption],
+        fatalWarnings: false, // until we've migrated video_player
       );
     }
     // Run release mode tests (see packages/flutter/test_release/README.md)

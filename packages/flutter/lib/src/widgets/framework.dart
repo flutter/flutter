@@ -165,7 +165,7 @@ abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
   /// constructor.
   const GlobalKey.constructor() : super.empty();
 
-  Element? get _currentElement => WidgetsBinding.instance!.buildOwner!._globalKeyRegistry[this];
+  Element? get _currentElement => WidgetsBinding.instance.buildOwner!._globalKeyRegistry[this];
 
   /// The build context in which the widget with this key builds.
   ///

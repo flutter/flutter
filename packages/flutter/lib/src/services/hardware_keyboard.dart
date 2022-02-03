@@ -387,7 +387,7 @@ typedef KeyEventCallback = bool Function(KeyEvent event);
 class HardwareKeyboard {
   /// Provides convenient access to the current [HardwareKeyboard] singleton from
   /// the [ServicesBinding] instance.
-  static HardwareKeyboard get instance => ServicesBinding.instance!.keyboard;
+  static HardwareKeyboard get instance => ServicesBinding.instance.keyboard;
 
   final Map<PhysicalKeyboardKey, LogicalKeyboardKey> _pressedKeys = <PhysicalKeyboardKey, LogicalKeyboardKey>{};
 
@@ -889,7 +889,7 @@ class KeyEventManager {
     final Set<PhysicalKeyboardKey> physicalKeysPressed = _hardwareKeyboard.physicalKeysPressed;
     final KeyEvent? mainEvent;
     final LogicalKeyboardKey? recordedLogicalMain = _hardwareKeyboard.lookUpLayout(physicalKey);
-    final Duration timeStamp = ServicesBinding.instance!.currentSystemFrameTimeStamp;
+    final Duration timeStamp = ServicesBinding.instance.currentSystemFrameTimeStamp;
     final String? character = rawEvent.character == '' ? null : rawEvent.character;
     if (rawEvent is RawKeyDownEvent) {
       if (recordedLogicalMain == null) {

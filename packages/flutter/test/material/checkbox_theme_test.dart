@@ -145,7 +145,7 @@ void main() {
     await tester.pumpWidget(buildCheckbox());
     await _pointGestureToCheckbox(tester);
     await tester.pumpAndSettle();
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
     expect(_getCheckboxMaterial(tester), paints..circle(color: hoverOverlayColor));
 
     // Checkbox with focus.
@@ -244,7 +244,7 @@ void main() {
     await tester.pumpWidget(buildCheckbox());
     await _pointGestureToCheckbox(tester);
     await tester.pumpAndSettle();
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
     expect(_getCheckboxMaterial(tester), paints..circle(color: hoverColor));
 
     // Checkbox with focus.

@@ -12,7 +12,7 @@ import '../rendering/mock_canvas.dart';
 import '../rendering/rendering_tester.dart';
 
 void main() {
-  TestRenderingFlutterBinding(); // initializes the imageCache
+  TestRenderingFlutterBinding.ensureInitialized();
 
   test('ShapeDecoration constructor', () {
     const Color colorR = Color(0xffff0000);

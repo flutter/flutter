@@ -642,7 +642,7 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
     item.dragging = true;
     item.rebuild();
     _dragStartTransitionComplete = false;
-    SchedulerBinding.instance!.addPostFrameCallback((Duration duration) {
+    SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
       _dragStartTransitionComplete = true;
     });
 

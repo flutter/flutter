@@ -881,7 +881,7 @@ class HeroController extends NavigatorObserver {
         // going to end up, and the `to` route will go back onstage.
         to.offstage = to.animation!.value == 0.0;
 
-        WidgetsBinding.instance!.addPostFrameCallback((Duration value) {
+        WidgetsBinding.instance.addPostFrameCallback((Duration value) {
           _startHeroTransition(from, to, animation, flightType, isUserGestureTransition);
         });
       }

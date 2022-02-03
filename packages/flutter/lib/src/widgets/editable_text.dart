@@ -1769,7 +1769,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
     if (!_didAutoFocus && widget.autofocus) {
       _didAutoFocus = true;
-      SchedulerBinding.instance!.addPostFrameCallback((_) {
+      SchedulerBinding.instance.addPostFrameCallback((_) {
         if (mounted && renderEditable.hasSize) {
           FocusScope.of(context).autofocus(widget.focusNode);
         }
@@ -1866,7 +1866,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _selectionOverlay?.dispose();
     _selectionOverlay = null;
     widget.focusNode.removeListener(_handleFocusChanged);
-    WidgetsBinding.instance!.removeObserver(this);
+    WidgetsBinding.instance.removeObserver(this);
     _clipboardStatus?.removeListener(_onChangedClipboardStatus);
     _clipboardStatus?.dispose();
     super.dispose();
@@ -2455,7 +2455,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       return;
     }
     _showCaretOnScreenScheduled = true;
-    SchedulerBinding.instance!.addPostFrameCallback((Duration _) {
+    SchedulerBinding.instance.addPostFrameCallback((Duration _) {
       _showCaretOnScreenScheduled = false;
       if (_currentCaretRect == null || !_scrollController.hasClients) {
         return;
@@ -2508,15 +2508,15 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   void didChangeMetrics() {
-    if (_lastBottomViewInset != WidgetsBinding.instance!.window.viewInsets.bottom) {
-      SchedulerBinding.instance!.addPostFrameCallback((Duration _) {
+    if (_lastBottomViewInset != WidgetsBinding.instance.window.viewInsets.bottom) {
+      SchedulerBinding.instance.addPostFrameCallback((Duration _) {
         _selectionOverlay?.updateForScroll();
       });
-      if (_lastBottomViewInset < WidgetsBinding.instance!.window.viewInsets.bottom) {
+      if (_lastBottomViewInset < WidgetsBinding.instance.window.viewInsets.bottom) {
         _scheduleShowCaretOnScreen();
       }
     }
-    _lastBottomViewInset = WidgetsBinding.instance!.window.viewInsets.bottom;
+    _lastBottomViewInset = WidgetsBinding.instance.window.viewInsets.bottom;
   }
 
   @pragma('vm:notify-debugger-on-exception')
@@ -2692,8 +2692,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _updateOrDisposeSelectionOverlayIfNeeded();
     if (_hasFocus) {
       // Listen for changing viewInsets, which indicates keyboard showing up.
-      WidgetsBinding.instance!.addObserver(this);
-      _lastBottomViewInset = WidgetsBinding.instance!.window.viewInsets.bottom;
+      WidgetsBinding.instance.addObserver(this);
+      _lastBottomViewInset = WidgetsBinding.instance.window.viewInsets.bottom;
       if (!widget.readOnly) {
         _scheduleShowCaretOnScreen();
       }
@@ -2707,7 +2707,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _cachedSize = Size.zero;
       _cachedPlaceholder = -1;
     } else {
-      WidgetsBinding.instance!.removeObserver(this);
+      WidgetsBinding.instance.removeObserver(this);
       setState(() { _currentPromptRectRange = null; });
     }
     updateKeepAlive();
@@ -2725,7 +2725,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (defaultTargetPlatform != TargetPlatform.iOS)
       return;
     // This is to avoid sending selection rects on non-iPad devices.
-    if (WidgetsBinding.instance!.window.physicalSize.shortestSide < _kIPadWidth)
+    if (WidgetsBinding.instance.window.physicalSize.shortestSide < _kIPadWidth)
       return;
 
     final String text = renderEditable.text?.toPlainText(includeSemanticsLabels: false) ?? '';
@@ -2785,8 +2785,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       final Matrix4 transform = renderEditable.getTransformTo(null);
       _textInputConnection!.setEditableSizeAndTransform(size, transform);
       _updateSelectionRects();
-      SchedulerBinding.instance!
-          .addPostFrameCallback((Duration _) => _updateSizeAndTransform());
+      SchedulerBinding.instance.addPostFrameCallback((Duration _) => _updateSizeAndTransform());
     } else if (_placeholderLocation != -1) {
       removeTextPlaceholder();
     }
@@ -2810,8 +2809,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       }
       assert(composingRect != null);
       _textInputConnection!.setComposingRect(composingRect);
-      SchedulerBinding.instance!
-          .addPostFrameCallback((Duration _) => _updateComposingRectIfNeeded());
+      SchedulerBinding.instance.addPostFrameCallback((Duration _) => _updateComposingRectIfNeeded());
     }
   }
 
@@ -2823,8 +2821,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         final Rect caretRect = renderEditable.getLocalRectForCaret(currentTextPosition);
         _textInputConnection!.setCaretRect(caretRect);
       }
-      SchedulerBinding.instance!
-          .addPostFrameCallback((Duration _) => _updateCaretRectIfNeeded());
+      SchedulerBinding.instance.addPostFrameCallback((Duration _) => _updateCaretRectIfNeeded());
     }
   }
 
@@ -3549,7 +3546,7 @@ class _ScribbleFocusableState extends State<_ScribbleFocusable> implements Scrib
       return false;
     final Rect intersection = calculatedBounds.intersect(rect);
     final HitTestResult result = HitTestResult();
-    WidgetsBinding.instance?.hitTest(result, intersection.center);
+    WidgetsBinding.instance.hitTest(result, intersection.center);
     return result.path.any((HitTestEntry entry) => entry.target == renderEditable);
   }
 

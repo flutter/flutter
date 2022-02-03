@@ -101,15 +101,15 @@ void main() {
       ),
     );
 
-    SchedulerBinding.instance!.debugAssertNoTransientCallbacks('Building a list with a scrollbar triggered an animation.');
+    SchedulerBinding.instance.debugAssertNoTransientCallbacks('Building a list with a scrollbar triggered an animation.');
     await tester.tap(find.byType(ListView));
-    SchedulerBinding.instance!.debugAssertNoTransientCallbacks('Tapping a block with a scrollbar triggered an animation.');
+    SchedulerBinding.instance.debugAssertNoTransientCallbacks('Tapping a block with a scrollbar triggered an animation.');
     await tester.pump(const Duration(milliseconds: 200));
     await tester.pump(const Duration(milliseconds: 200));
     await tester.pump(const Duration(milliseconds: 200));
     await tester.pump(const Duration(milliseconds: 200));
     await tester.drag(find.byType(ListView), const Offset(0.0, -10.0));
-    expect(SchedulerBinding.instance!.transientCallbackCount, greaterThan(0));
+    expect(SchedulerBinding.instance.transientCallbackCount, greaterThan(0));
     await tester.pump(const Duration(milliseconds: 200));
     await tester.pump(const Duration(milliseconds: 200));
     await tester.pump(const Duration(milliseconds: 200));

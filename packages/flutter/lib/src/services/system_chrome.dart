@@ -498,7 +498,7 @@ class SystemChrome {
   /// [SystemUiMode.leanBack].
   ///
   static Future<void> setSystemUIChangeCallback(SystemUiChangeCallback? callback) async {
-    ServicesBinding.instance!.setSystemUiChangeCallback(callback);
+    ServicesBinding.instance.setSystemUiChangeCallback(callback);
     // Skip setting up the listener if there is no callback.
     if (callback != null) {
       await SystemChannels.platform.invokeMethod<void>(
