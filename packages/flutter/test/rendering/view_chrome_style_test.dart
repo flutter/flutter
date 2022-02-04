@@ -16,11 +16,11 @@ void main() {
     const double deviceWidth = 480.0;
     const double devicePixelRatio = 2.0;
 
-    void setupTestDevice() {
+    void setupTestDevice({ double bottomPadding = navigationBarHeight * devicePixelRatio }) {
       final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
-      const FakeWindowPadding padding = FakeWindowPadding(
+      final FakeWindowPadding padding = FakeWindowPadding(
         top: statusBarHeight * devicePixelRatio,
-        bottom: navigationBarHeight * devicePixelRatio,
+        bottom: bottomPadding,
       );
 
       binding.window
@@ -227,6 +227,28 @@ void main() {
         },
         variant: TargetPlatformVariant.only(TargetPlatform.android),
       );
+
+      testWidgets('systemNavigationBarColor is not set when there is no window padding', (WidgetTester tester) async {
+        setupTestDevice(bottomPadding: 0);
+        await tester.pumpWidget(const Align(
+          alignment: Alignment.bottomCenter,
+          child: AnnotatedRegion<SystemUiOverlayStyle>(
+            value: SystemUiOverlayStyle(
+              systemNavigationBarColor: Colors.blue,
+            ),
+            child: SizedBox(
+              width: 100,
+              height: 100
+            ),
+          ),
+        ));
+        await tester.pumpAndSettle();
+
+        expect(
+          SystemChrome.latestStyle?.systemNavigationBarColor,
+          null,
+        );
+      }, variant: TargetPlatformVariant.only(TargetPlatform.android));
     });
   });
 }
