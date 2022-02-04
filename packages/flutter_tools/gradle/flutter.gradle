@@ -459,7 +459,7 @@ class FlutterPlugin implements Plugin<Project> {
 
             getPluginList().each { plugin ->
                 Project pluginProject = project.rootProject.findProject(plugin.key)
-                if (!pluginProject) {
+                if (pluginProject == null) {
                     return
                 }
                 pluginProject.afterEvaluate {
