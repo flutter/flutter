@@ -759,7 +759,7 @@ class _ListWheelScrollViewState extends State<ListWheelScrollView> {
     super.didUpdateWidget(oldWidget);
     if (widget.controller != null && widget.controller != scrollController) {
       final ScrollController? oldScrollController = scrollController;
-      SchedulerBinding.instance!.addPostFrameCallback((_) {
+      SchedulerBinding.instance.addPostFrameCallback((_) {
         oldScrollController!.dispose();
       });
       scrollController = widget.controller;

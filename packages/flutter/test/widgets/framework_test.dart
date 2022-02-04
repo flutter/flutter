@@ -1544,11 +1544,11 @@ void main() {
   });
 
   testWidgets('Can create BuildOwner that does not interfere with pointer router or raw key event handler', (WidgetTester tester) async {
-    final int pointerRouterCount = GestureBinding.instance!.pointerRouter.debugGlobalRouteCount;
+    final int pointerRouterCount = GestureBinding.instance.pointerRouter.debugGlobalRouteCount;
     final RawKeyEventHandler? rawKeyEventHandler = RawKeyboard.instance.keyEventHandler;
     expect(rawKeyEventHandler, isNotNull);
     BuildOwner(focusManager: FocusManager());
-    expect(GestureBinding.instance!.pointerRouter.debugGlobalRouteCount, pointerRouterCount);
+    expect(GestureBinding.instance.pointerRouter.debugGlobalRouteCount, pointerRouterCount);
     expect(RawKeyboard.instance.keyEventHandler, same(rawKeyEventHandler));
   });
 

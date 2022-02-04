@@ -22,6 +22,7 @@ dependencies:
 
 dev_dependencies:
 {{#withFfiPluginHook}}
+  ffi: ^1.1.2
   ffigen: ^4.1.2
 {{/withFfiPluginHook}}
   flutter_test:
@@ -111,7 +112,7 @@ flutter:
 {{/macos}}
 {{#windows}}
       windows:
-        pluginClass: {{pluginClass}}
+        pluginClass: {{pluginClass}}CApi
 {{/windows}}
 {{#web}}
       web:

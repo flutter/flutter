@@ -1398,7 +1398,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   bool _debugScheduleCheckHasValidScrollPosition() {
     if (!showScrollbar)
       return true;
-    WidgetsBinding.instance!.addPostFrameCallback((Duration duration) {
+    WidgetsBinding.instance.addPostFrameCallback((Duration duration) {
       assert(_debugCheckHasValidScrollPosition());
     });
     return true;

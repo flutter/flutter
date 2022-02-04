@@ -2261,7 +2261,6 @@ targets:
     scheduler: luci
 
   - name: Linux_android opacity_peephole_grid_of_opacity_perf__e2e_summary
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/95859
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60

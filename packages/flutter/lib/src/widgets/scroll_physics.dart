@@ -224,7 +224,7 @@ class ScrollPhysics {
     assert(metrics != null);
     assert(context != null);
     if (parent == null) {
-      final double maxPhysicalPixels = WidgetsBinding.instance!.window.physicalSize.longestSide;
+      final double maxPhysicalPixels = WidgetsBinding.instance.window.physicalSize.longestSide;
       return velocity.abs() > maxPhysicalPixels;
     }
     return parent!.recommendDeferredLoading(velocity, metrics, context);
@@ -356,8 +356,8 @@ class ScrollPhysics {
   static final Tolerance _kDefaultTolerance = Tolerance(
     // TODO(ianh): Handle the case of the device pixel ratio changing.
     // TODO(ianh): Get this from the local MediaQuery not dart:ui's window object.
-    velocity: 1.0 / (0.050 * WidgetsBinding.instance!.window.devicePixelRatio), // logical pixels per second
-    distance: 1.0 / WidgetsBinding.instance!.window.devicePixelRatio, // logical pixels
+    velocity: 1.0 / (0.050 * WidgetsBinding.instance.window.devicePixelRatio), // logical pixels per second
+    distance: 1.0 / WidgetsBinding.instance.window.devicePixelRatio, // logical pixels
   );
 
   /// The tolerance to use for ballistic simulations.
