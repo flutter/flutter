@@ -16,7 +16,7 @@ class MaterialSpellCheckerControls extends SpellCheckerControls{
     Widget buildSpellCheckerSuggestionsToolbar(
         List<SpellCheckerSuggestionSpan> spellCheckerSuggestionSpans) {
             //TODO(camillesimon): build spell checker suggestion toolbar here
-            // print("mama I made it!");
+            print("mama I made it!");
             return SizedBox.shrink();
         }
 }

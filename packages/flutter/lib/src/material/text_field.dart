@@ -86,21 +86,23 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
   @override
   void onSingleTapUp(TapUpDetails details) {
     editableText.hideToolbar(ToolbarType.copyPasteControls);
-    // editableText.showToolbar(ToolbarType.spellCheckerSuggestionsControls);
+    editableText.showToolbar(ToolbarType.spellCheckerSuggestionsControls);
     super.onSingleTapUp(details);
     _state._requestKeyboard();
     _state.widget.onTap?.call();
   }
 
-  // @override
-  // void onTapDown(TapDownDetails details) {
-  //   // editableText.hideToolbar(ToolbarType.spellCheckerSuggestionsControls);
-  // }
+  @override
+  void onTapDown(TapDownDetails details) {
+    editableText.hideToolbar(ToolbarType.spellCheckerSuggestionsControls);
+    super.onTapDown(details);
+  }
 
-  // @override
-  // void onDoubleTapDown(TapDownDetails details) {
-  //   // editableText.hideToolbar(ToolbarType.spellCheckerSuggestionsControls);
-  // }
+  @override
+  void onDoubleTapDown(TapDownDetails details) {
+    editableText.hideToolbar(ToolbarType.spellCheckerSuggestionsControls);
+    super.onDoubleTapDown(details);
+  }
 
   @override
   void onSingleLongTapStart(LongPressStartDetails details) {
