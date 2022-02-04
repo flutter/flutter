@@ -18,10 +18,8 @@ class ShellProcess {
         .transform(utf8.decoder)
         .transform(const LineSplitter())
         .listen((String line) {
-      const String observatoryUriPrefix = 'Observatory listening on ';
-      if (line.startsWith(observatoryUriPrefix)) {
-        print(line);
-        final Uri uri = Uri.parse(line.substring(observatoryUriPrefix.length));
+      final uri = _extractVMServiceUri(line);
+      if (uri != null) {
         _observatoryUriCompleter.complete(uri);
       }
     });
@@ -33,6 +31,17 @@ class ShellProcess {
 
   Future<Uri> waitForObservatory() async {
     return _observatoryUriCompleter.future;
+  }
+
+  Uri? _extractVMServiceUri(String str) {
+    final listeningMessageRegExp = RegExp(
+      r'(?:Observatory|Dart VM Service) listening on ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)',
+    );
+    final match = listeningMessageRegExp.firstMatch(str);
+    if (match != null) {
+      return Uri.parse(match[1]!);
+    }
+    return null;
   }
 }
 
