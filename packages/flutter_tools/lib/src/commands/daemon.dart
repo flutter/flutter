@@ -1430,6 +1430,9 @@ class ProxyDomain extends Domain {
     for (final Socket connection in _forwardedConnections.values) {
       connection.destroy();
     }
+    // We deliberately not clean up the tempDirectory here. The application package files that
+    // are transferred into this directory through ProxiedDevices are left in the directory
+    // to be reused on any subsequent runs.
   }
 
   Directory _tempDirectory;
