@@ -92,7 +92,7 @@ task clean(type: Delete) {
     final Directory pluginExampleAppDir =
         pluginAppDir.childDirectory('example');
 
-    // Run flutter build apk to build plugin example project.
+    // Add android support to the plugin's example app.
     final ProcessResult addAndroidResult = processManager.runSync(<String>[
       flutterBin,
       ...getLocalEngineArguments(),
