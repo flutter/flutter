@@ -237,7 +237,25 @@ void DisplayListBuilder::restore() {
     layer_stack_.pop_back();
     current_layer_ = &layer_stack_.back();
     Push<RestoreOp>(0, 1);
-    if (!layer_info.has_layer) {
+    if (layer_info.has_layer) {
+      if (layer_info.is_group_opacity_compatible()) {
+        // We are now going to go back and modify the matching saveLayer
+        // call to add the option indicating it can distribute an opacity
+        // value to its children.
+        //
+        // Note that this operation cannot and does not change the size
+        // or structure of the SaveLayerOp record. It only sets an option
+        // flag on an existing field.
+        //
+        // Note that these kinds of modification operations on data already
+        // in the DisplayList are only allowed *during* the build phase.
+        // Once built, the DisplayList records must remain read only to
+        // ensure consistency of rendering and |Equals()| behavior.
+        SaveLayerOp* op = reinterpret_cast<SaveLayerOp*>(
+            storage_.get() + layer_info.save_layer_offset);
+        op->options = op->options.with_can_distribute_opacity();
+      }
+    } else {
       // For regular save() ops there was no protecting layer so we have to
       // accumulate the values into the enclosing layer.
       if (layer_info.cannot_inherit_opacity) {
@@ -249,13 +267,24 @@ void DisplayListBuilder::restore() {
   }
 }
 void DisplayListBuilder::saveLayer(const SkRect* bounds,
-                                   bool restore_with_paint) {
+                                   const SaveLayerOptions in_options) {
+  SaveLayerOptions options = in_options.without_optimizations();
+  size_t save_layer_offset = used_;
   bounds  //
-      ? Push<SaveLayerBoundsOp>(0, 1, *bounds, restore_with_paint)
-      : Push<SaveLayerOp>(0, 1, restore_with_paint);
-  CheckLayerOpacityCompatibility(restore_with_paint);
-  layer_stack_.emplace_back(true);
+      ? Push<SaveLayerBoundsOp>(0, 1, *bounds, options)
+      : Push<SaveLayerOp>(0, 1, options);
+  CheckLayerOpacityCompatibility(options.renders_with_attributes());
+  layer_stack_.emplace_back(save_layer_offset, true);
   current_layer_ = &layer_stack_.back();
+  if (options.renders_with_attributes()) {
+    // |current_opacity_compatibility_| does not take an ImageFilter into
+    // account because an individual primitive with an ImageFilter can apply
+    // opacity on top of it. But, if the layer is applying the ImageFilter
+    // then it cannot pass the opacity on.
+    if (!current_opacity_compatibility_ || current_image_filter_ != nullptr) {
+      UpdateLayerOpacityCompatibility(false);
+    }
+  }
 }
 
 void DisplayListBuilder::translate(SkScalar tx, SkScalar ty) {
@@ -455,6 +484,8 @@ void DisplayListBuilder::drawVertices(const sk_sp<SkVertices> vertices,
   Push<DrawVerticesOp>(0, 1, std::move(vertices), mode);
   // DrawVertices applies its colors to the paint so we have no way
   // of controlling opacity using the current paint attributes.
+  // Although, examination of the |mode| might find some predictable
+  // cases.
   UpdateLayerOpacityCompatibility(false);
 }
 

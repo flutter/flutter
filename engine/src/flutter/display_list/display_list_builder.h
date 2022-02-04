@@ -153,7 +153,17 @@ class DisplayListBuilder final : public virtual Dispatcher,
   sk_sp<SkImageFilter> getImageFilter() const { return current_image_filter_; }
 
   void save() override;
-  void saveLayer(const SkRect* bounds, bool restore_with_paint) override;
+  // Only the |renders_with_attributes()| option will be accepted here. Any
+  // other flags will be ignored and calculated anew as the DisplayList is
+  // built. Alternatively, use the |saveLayer(SkRect, bool)| method.
+  void saveLayer(const SkRect* bounds, const SaveLayerOptions options) override;
+  // Convenience method with just a boolean to indicate whether the saveLayer
+  // should apply the rendering attributes.
+  void saveLayer(const SkRect* bounds, bool renders_with_attributes) {
+    saveLayer(bounds, renders_with_attributes
+                          ? SaveLayerOptions::kWithAttributes
+                          : SaveLayerOptions::kNoAttributes);
+  }
   void restore() override;
   int getSaveCount() { return layer_stack_.size(); }
 
@@ -271,10 +281,19 @@ class DisplayListBuilder final : public virtual Dispatcher,
   }
 
   struct LayerInfo {
-    LayerInfo(bool has_layer = false)
-        : has_layer(has_layer),
+    LayerInfo(size_t save_layer_offset = 0, bool has_layer = false)
+        : save_layer_offset(save_layer_offset),
+          has_layer(has_layer),
           cannot_inherit_opacity(false),
           has_compatible_op(false) {}
+
+    // The offset into the memory buffer where the saveLayer DLOp record
+    // for this saveLayer() call is placed. This may be needed if the
+    // eventual restore() call has discovered important information about
+    // the records inside the saveLayer that may impact how the saveLayer
+    // is handled (e.g., |cannot_inherit_opacity| == false).
+    // This offset is only valid if |has_layer| is true.
+    size_t save_layer_offset;
 
     bool has_layer;
     bool cannot_inherit_opacity;
