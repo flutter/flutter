@@ -291,7 +291,7 @@ class BorderRadius extends BorderRadiusGeometry {
 
   /// Creates a border radius where all radii are [Radius.circular(radius)].
   const BorderRadius.circular(double radius) : this.all(
-    Radius.circular(radius),
+    const Radius.circular(radius),
   );
 
   /// Creates a vertically symmetric border radius where the top and bottom
@@ -532,7 +532,7 @@ class BorderRadiusDirectional extends BorderRadiusGeometry {
 
   /// Creates a border radius where all radii are [Radius.circular(radius)].
   const BorderRadiusDirectional.circular(double radius) : this.all(
-    Radius.circular(radius),
+    const Radius.circular(radius),
   );
 
   /// Creates a vertically symmetric border radius where the top and bottom
