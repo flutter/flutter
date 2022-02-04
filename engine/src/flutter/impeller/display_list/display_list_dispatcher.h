@@ -75,7 +75,8 @@ class DisplayListDispatcher final : public flutter::Dispatcher {
   void save() override;
 
   // |flutter::Dispatcher|
-  void saveLayer(const SkRect* bounds, bool restore_with_paint) override;
+  void saveLayer(const SkRect* bounds,
+                 const flutter::SaveLayerOptions options) override;
 
   // |flutter::Dispatcher|
   void restore() override;
