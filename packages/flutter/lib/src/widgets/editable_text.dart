@@ -173,11 +173,11 @@ class TextEditingController extends ValueNotifier<TextEditingValue> with Materia
       return TextSpan(style: style, text: text);
     }
 
-    if (spellCheckerSuggestionSpans != null ) {
-      // print("------------------------------------^^^^CORRECT CASE^^^^------------------------------------");
-      return buildWithMisspelledWordsIndicated(spellCheckerSuggestionSpans, value, style);
-    }
-    else {
+    // if (spellCheckerSuggestionSpans != null ) {
+    //   // print("------------------------------------^^^^CORRECT CASE^^^^------------------------------------");
+    //   return buildWithMisspelledWordsIndicated(spellCheckerSuggestionSpans, value, style);
+    // }
+    // else {
       final TextStyle composingStyle = style?.merge(const TextStyle(decoration: TextDecoration.underline))
           ?? const TextStyle(decoration: TextDecoration.underline);
       return TextSpan(
@@ -191,7 +191,7 @@ class TextEditingController extends ValueNotifier<TextEditingValue> with Materia
           TextSpan(text: value.composing.textAfter(value.text)),
         ],
       );
-    }
+    // }
   }
 
   /// The currently selected [text].
