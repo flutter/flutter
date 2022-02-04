@@ -278,7 +278,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     SystemUiOverlayStyle? lowerOverlayStyle;
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
-        // If there is no bottom view inset, then there is no navigation bar
+        // If there is no bottom view padding, then there is no navigation bar
         // and the hit test can be skipped.
         if (_window.viewPadding.bottom == 0.0) {
           break;
