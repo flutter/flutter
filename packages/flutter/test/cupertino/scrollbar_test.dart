@@ -97,6 +97,29 @@ void main() {
     ));
   });
 
+  testWidgets('Scrollbar overriding default color', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: MediaQueryData(),
+          child: CupertinoScrollbar(
+            color: Color(0x00FF0000),
+            child: SingleChildScrollView(child: SizedBox(width: 4000.0, height: 4000.0)),
+          ),
+        ),
+      ),
+    );
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(SingleChildScrollView)));
+    await gesture.moveBy(const Offset(0.0, -10.0));
+    await tester.pump();
+    // Scrollbar fully showing
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.byType(CupertinoScrollbar), paints..rrect(
+      color: const Color(0x00FF0000),
+    ));
+  });
+
   testWidgets('Scrollbar thumb can be dragged with long press', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(

@@ -80,6 +80,7 @@ class CupertinoScrollbar extends RawScrollbar {
     this.thicknessWhileDragging = defaultThicknessWhileDragging,
     Radius radius = defaultRadius,
     this.radiusWhileDragging = defaultRadiusWhileDragging,
+    this.color,
     ScrollNotificationPredicate? notificationPredicate,
     ScrollbarOrientation? scrollbarOrientation,
     @Deprecated(
@@ -105,6 +106,7 @@ class CupertinoScrollbar extends RawScrollbar {
          thumbVisibility: isAlwaysShown ?? thumbVisibility ?? false,
          thickness: thickness,
          radius: radius,
+         thumbColor: color,
          fadeDuration: _kScrollbarFadeDuration,
          timeToFade: _kScrollbarTimeToFade,
          pressDuration: const Duration(milliseconds: 100),
@@ -141,6 +143,9 @@ class CupertinoScrollbar extends RawScrollbar {
   /// dragging the scrollbar.
   final Radius radiusWhileDragging;
 
+  /// The scrollbar color that overrides the default color
+  final Color? color;
+
   @override
   RawScrollbarState<CupertinoScrollbar> createState() => _CupertinoScrollbarState();
 }
@@ -154,6 +159,10 @@ class _CupertinoScrollbarState extends RawScrollbarState<CupertinoScrollbar> {
 
   Radius get _radius {
     return Radius.lerp(widget.radius, widget.radiusWhileDragging, _thicknessAnimationController.value)!;
+  }
+
+  Color get _color {
+    return widget.color ?? CupertinoDynamicColor.resolve(_kScrollbarColor, context);
   }
 
   @override
@@ -171,7 +180,7 @@ class _CupertinoScrollbarState extends RawScrollbarState<CupertinoScrollbar> {
   @override
   void updateScrollbarPainter() {
     scrollbarPainter
-      ..color = CupertinoDynamicColor.resolve(_kScrollbarColor, context)
+      ..color = _color
       ..textDirection = Directionality.of(context)
       ..thickness = _thickness
       ..mainAxisMargin = _kScrollbarMainAxisMargin
