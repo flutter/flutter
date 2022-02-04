@@ -1272,16 +1272,16 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
   // If window.defaultRouteName isn't '/', we should assume it was set
   // intentionally via `setInitialRoute`, and should override whatever is in
   // [widget.initialRoute].
-  String get _initialRouteName => WidgetsBinding.instance!.window.defaultRouteName != Navigator.defaultRouteName
-    ? WidgetsBinding.instance!.window.defaultRouteName
-    : widget.initialRoute ?? WidgetsBinding.instance!.window.defaultRouteName;
+  String get _initialRouteName => WidgetsBinding.instance.window.defaultRouteName != Navigator.defaultRouteName
+    ? WidgetsBinding.instance.window.defaultRouteName
+    : widget.initialRoute ?? WidgetsBinding.instance.window.defaultRouteName;
 
   @override
   void initState() {
     super.initState();
     _updateRouting();
-    _locale = _resolveLocales(WidgetsBinding.instance!.window.locales, widget.supportedLocales);
-    WidgetsBinding.instance!.addObserver(this);
+    _locale = _resolveLocales(WidgetsBinding.instance.window.locales, widget.supportedLocales);
+    WidgetsBinding.instance.addObserver(this);
   }
 
   @override
@@ -1292,7 +1292,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
 
   @override
   void dispose() {
-    WidgetsBinding.instance!.removeObserver(this);
+    WidgetsBinding.instance.removeObserver(this);
     _defaultRouteInformationProvider?.dispose();
     super.dispose();
   }

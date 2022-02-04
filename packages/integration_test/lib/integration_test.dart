@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:developer' as developer;
+import 'dart:io' show SocketException, WebSocket, HttpClient;
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -12,7 +13,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart' as vm;
-import 'package:vm_service/vm_service_io.dart' as vm_io;
 
 import '_callback_io.dart' if (dart.library.html) '_callback_web.dart' as driver_actions;
 import '_extension_io.dart' if (dart.library.html) '_extension_web.dart';
@@ -133,16 +133,30 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
   @override
   List<Failure> get failureMethodsDetails => results.values.whereType<Failure>().toList();
 
-  /// Similar to [WidgetsFlutterBinding.ensureInitialized].
+  @override
+  void initInstances() {
+    super.initInstances();
+    _instance = this;
+  }
+
+  /// The singleton instance of this object.
   ///
+  /// Provides access to the features exposed by this class. The binding must
+  /// be initialized before using this getter; this is typically done by calling
+  /// [IntegrationTestWidgetsFlutterBinding.ensureInitialized].
+  static IntegrationTestWidgetsFlutterBinding get instance => BindingBase.checkInstance(_instance);
+  static IntegrationTestWidgetsFlutterBinding? _instance;
+
   /// Returns an instance of the [IntegrationTestWidgetsFlutterBinding], creating and
   /// initializing it if necessary.
-  static WidgetsBinding ensureInitialized() {
-    if (WidgetsBinding.instance == null) {
+  ///
+  /// See also:
+  ///
+  ///  * [WidgetsFlutterBinding.ensureInitialized], the equivalent in the widgets framework.
+  static IntegrationTestWidgetsFlutterBinding ensureInitialized() {
+    if (_instance == null)
       IntegrationTestWidgetsFlutterBinding();
-    }
-    assert(WidgetsBinding.instance is IntegrationTestWidgetsFlutterBinding);
-    return WidgetsBinding.instance!;
+    return _instance!;
   }
 
   /// Test results that will be populated after the tests have completed.
@@ -235,6 +249,7 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
   Future<void> enableTimeline({
     List<String> streams = const <String>['all'],
     @visibleForTesting vm.VmService? vmService,
+    @visibleForTesting HttpClient? httpClient,
   }) async {
     assert(streams != null);
     assert(streams.isNotEmpty);
@@ -244,9 +259,18 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
     if (_vmService == null) {
       final developer.ServiceProtocolInfo info = await developer.Service.getInfo();
       assert(info.serverUri != null);
-      _vmService = await vm_io.vmServiceConnectUri(
-        'ws://localhost:${info.serverUri!.port}${info.serverUri!.path}ws',
-      );
+      final String address = 'ws://localhost:${info.serverUri!.port}${info.serverUri!.path}ws';
+      try {
+        _vmService = await _vmServiceConnectUri(address, httpClient: httpClient);
+      } on SocketException catch(e, s) {
+        throw StateError(
+          'Failed to connect to VM Service at $address.\n'
+          'This may happen if DDS is enabled. If this test was launched via '
+          '`flutter drive`, try adding `--no-dds`.\n'
+          'The original exception was:\n'
+          '$e\n$s',
+        );
+      }
     }
     await _vmService!.setVMTimelineFlags(streams);
   }
@@ -446,4 +470,30 @@ class _GarbageCollectionInfo {
 
   final int oldCount;
   final int newCount;
+}
+
+// Connect to the given uri and return a new [VmService] instance.
+//
+// Copied from vm_service_io so that we can pass a custom [HttpClient] for
+// testing. Currently, the WebSocket API reuses an HttpClient that
+// is created before the test can change the HttpOverrides.
+Future<vm.VmService> _vmServiceConnectUri(
+  String wsUri, {
+  HttpClient? httpClient,
+}) async {
+  final WebSocket socket = await WebSocket.connect(wsUri, customClient: httpClient);
+  final StreamController<dynamic> controller = StreamController<dynamic>();
+  final Completer<void> streamClosedCompleter = Completer<void>();
+
+  socket.listen(
+    (dynamic data) => controller.add(data),
+    onDone: () => streamClosedCompleter.complete(),
+  );
+
+  return vm.VmService(
+    controller.stream,
+    (String message) => socket.add(message),
+    disposeHandler: () => socket.close(),
+    streamClosed: streamClosedCompleter.future,
+  );
 }

@@ -275,10 +275,10 @@ String _regenerateIconsFile(
     String fontFamily,
     bool enforceSafetyChecks,
   ) {
-  final List<_Icon> newIcons = tokenPairMap.entries
-      .map((MapEntry<String, String> entry) => _Icon(entry, fontFamily))
+  final List<Icon> newIcons = tokenPairMap.entries
+      .map((MapEntry<String, String> entry) => Icon(entry, fontFamily))
       .toList();
-  newIcons.sort((_Icon a, _Icon b) => a._compareTo(b));
+  newIcons.sort((Icon a, Icon b) => a._compareTo(b));
 
   final StringBuffer buf = StringBuffer();
   bool generating = false;
@@ -296,13 +296,13 @@ String _regenerateIconsFile(
         // Automatically finds and generates all icon declarations.
         for (final String style in <String>['', '_outlined', '_rounded', '_sharp']) {
           try {
-            final _Icon agnosticIcon = newIcons.firstWhere(
-                (_Icon icon) => icon.id == '${ids[0]}$style',
+            final Icon agnosticIcon = newIcons.firstWhere(
+                (Icon icon) => icon.id == '${ids[0]}$style',
                 orElse: () => throw ids[0]);
-            final _Icon iOSIcon = newIcons.firstWhere(
-                (_Icon icon) => icon.id == '${ids[1]}$style',
+            final Icon iOSIcon = newIcons.firstWhere(
+                (Icon icon) => icon.id == '${ids[1]}$style',
                 orElse: () => throw ids[1]);
-            platformAdaptiveDeclarations.add(_Icon.platformAdaptiveDeclaration('$flutterId$style', agnosticIcon, iOSIcon),
+            platformAdaptiveDeclarations.add(Icon.platformAdaptiveDeclaration('$flutterId$style', agnosticIcon, iOSIcon),
             );
           } catch (e) {
             if (style == '') {
@@ -327,7 +327,7 @@ String _regenerateIconsFile(
     // Generate for Icons
     if (line.contains(_beginGeneratedMark)) {
       generating = true;
-      final String iconDeclarationsString = newIcons.map((_Icon icon) => icon.fullDeclaration).join();
+      final String iconDeclarationsString = newIcons.map((Icon icon) => icon.fullDeclaration).join();
       buf.write(iconDeclarationsString);
     } else if (line.contains(_endGeneratedMark)) {
       generating = false;
@@ -388,9 +388,9 @@ void _regenerateCodepointsFile(File oldCodepointsFile, Map<String, String> newTo
   oldCodepointsFile.writeAsStringSync(buf.toString());
 }
 
-class _Icon {
+class Icon {
   // Parse tokenPair (e.g. {"6_ft_apart_outlined": "e004"}).
-  _Icon(MapEntry<String, String> tokenPair, this.fontFamily) {
+  Icon(MapEntry<String, String> tokenPair, this.fontFamily) {
     id = tokenPair.key;
     hexCodepoint = tokenPair.value;
 
@@ -463,7 +463,7 @@ class _Icon {
   $declaration
 ''';
 
-  static String platformAdaptiveDeclaration(String fullFlutterId, _Icon agnosticIcon, _Icon iOSIcon) => '''
+  static String platformAdaptiveDeclaration(String fullFlutterId, Icon agnosticIcon, Icon iOSIcon) => '''
 
   /// Platform-adaptive icon for ${agnosticIcon.dartDoc} and ${iOSIcon.dartDoc}.;
   IconData get $fullFlutterId => !_isCupertino() ? Icons.${agnosticIcon.flutterId} : Icons.${iOSIcon.flutterId};
@@ -473,7 +473,7 @@ class _Icon {
   String toString() => id;
 
   /// Analogous to [String.compareTo]
-  int _compareTo(_Icon b) {
+  int _compareTo(Icon b) {
     if (shortId == b.shortId) {
       // Sort a regular icon before its variants.
       return id.length - b.id.length;
@@ -501,7 +501,7 @@ class _Icon {
     String flutterId = id;
     // Exact identifier rewrites.
     for (final MapEntry<String, String> rewritePair in identifierExactRewrites.entries) {
-      final String shortId = _Icon._generateShortId(id);
+      final String shortId = Icon._generateShortId(id);
       if (shortId == rewritePair.key) {
         flutterId = id.replaceFirst(
           rewritePair.key,
@@ -518,6 +518,10 @@ class _Icon {
         );
       }
     }
+
+    // Prevent double underscores.
+    flutterId = flutterId.replaceAll('__', '_');
+
     return flutterId;
   }
 }

@@ -48,17 +48,15 @@ class AnalyzeOnce extends AnalyzeBase {
     final String currentDirectory =
         (workingDirectory ?? fileSystem.currentDirectory).path;
 
-    // find directories from argResults.rest
-    final Set<String> directories = Set<String>.of(argResults.rest
+    // find directories or files from argResults.rest
+    final Set<String> items = Set<String>.of(argResults.rest
         .map<String>((String path) => fileSystem.path.canonicalize(path)));
-    if (directories.isNotEmpty) {
-      for (final String directory in directories) {
-        final FileSystemEntityType type = fileSystem.typeSync(directory);
+    if (items.isNotEmpty) {
+      for (final String item in items) {
+        final FileSystemEntityType type = fileSystem.typeSync(item);
 
         if (type == FileSystemEntityType.notFound) {
-          throwToolExit("'$directory' does not exist");
-        } else if (type != FileSystemEntityType.directory) {
-          throwToolExit("'$directory' is not a directory");
+          throwToolExit("'$item' does not exist");
         }
       }
     }
@@ -67,17 +65,17 @@ class AnalyzeOnce extends AnalyzeBase {
       // check for conflicting dependencies
       final PackageDependencyTracker dependencies = PackageDependencyTracker();
       dependencies.checkForConflictingDependencies(repoPackages, dependencies);
-      directories.addAll(repoRoots);
+      items.addAll(repoRoots);
       if (argResults.wasParsed('current-package') && (argResults['current-package'] as bool)) {
-        directories.add(currentDirectory);
+        items.add(currentDirectory);
       }
     } else {
-      if (argResults['current-package'] as bool) {
-        directories.add(currentDirectory);
+      if ((argResults['current-package'] as bool) && items.isEmpty) {
+        items.add(currentDirectory);
       }
     }
 
-    if (directories.isEmpty) {
+    if (items.isEmpty) {
       throwToolExit('Nothing to analyze.', exitCode: 0);
     }
 
@@ -86,7 +84,7 @@ class AnalyzeOnce extends AnalyzeBase {
 
     final AnalysisServer server = AnalysisServer(
       sdkPath,
-      directories.toList(),
+      items.toList(),
       fileSystem: fileSystem,
       platform: platform,
       logger: logger,
@@ -133,9 +131,9 @@ class AnalyzeOnce extends AnalyzeBase {
 
       // collect results
       timer = Stopwatch()..start();
-      final String message = directories.length > 1
-          ? '${directories.length} ${directories.length == 1 ? 'directory' : 'directories'}'
-          : fileSystem.path.basename(directories.first);
+      final String message = items.length > 1
+          ? '${items.length} ${items.length == 1 ? 'item' : 'items'}'
+          : fileSystem.path.basename(items.first);
       progress = argResults['preamble'] == true
           ? logger.startProgress(
             'Analyzing $message...',

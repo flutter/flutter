@@ -6,9 +6,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  final TestWidgetsFlutterBinding binding =
-    TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
-  const double _kOpenScale = 1.1;
+  final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
+  const double kOpenScale = 1.1;
+
   Widget _getChild() {
     return Container(
       width: 300.0,
@@ -120,7 +120,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 500));
       decoyChildRect = tester.getRect(_findDecoyChild(child));
       expect(childRect, isNot(equals(decoyChildRect)));
-      expect(decoyChildRect.width, childRect.width * _kOpenScale);
+      expect(decoyChildRect.width, childRect.width * kOpenScale);
 
       // Then the CupertinoContextMenu opens.
       await tester.pumpAndSettle();
@@ -185,7 +185,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 500));
       decoyChildRect = tester.getRect(_findDecoyChild(child));
       expect(childRect, isNot(equals(decoyChildRect)));
-      expect(decoyChildRect.width, childRect.width * _kOpenScale);
+      expect(decoyChildRect.width, childRect.width * kOpenScale);
 
       // Then the CupertinoContextMenu opens.
       await tester.pumpAndSettle();
