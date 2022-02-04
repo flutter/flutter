@@ -192,7 +192,7 @@ class SlottedRenderObjectElement<S> extends RenderObjectElement {
   final Map<S, Element> _slotToChild = <S, Element>{};
 
   @override
-  SlottedMultiChildRenderObjectWidgetMixin<S> get widget => super.widget as SlottedMultiChildRenderObjectWidgetMixin<S>;
+  SlottedMultiChildRenderObjectWidgetMixin<S> get typedWidget => super.widget as SlottedMultiChildRenderObjectWidgetMixin<S>;
 
   @override
   SlottedContainerRenderObjectMixin<S> get renderObject => super.renderObject as SlottedContainerRenderObjectMixin<S>;
@@ -228,13 +228,13 @@ class SlottedRenderObjectElement<S> extends RenderObjectElement {
 
   void _updateChildren() {
     assert(() {
-      _debugPreviousSlots ??= widget.slots.toList();
-      return listEquals(_debugPreviousSlots, widget.slots.toList());
+      _debugPreviousSlots ??= typedWidget.slots.toList();
+      return listEquals(_debugPreviousSlots, typedWidget.slots.toList());
     }(), '${widget.runtimeType}.slots must not change.');
-    assert(widget.slots.toSet().length == widget.slots.length, 'slots must be unique');
+    assert(typedWidget.slots.toSet().length == typedWidget.slots.length, 'slots must be unique');
 
-    for (final S slot in widget.slots) {
-      _updateChild(widget.childForSlot(slot), slot);
+    for (final S slot in typedWidget.slots) {
+      _updateChild(typedWidget.childForSlot(slot), slot);
     }
   }
 

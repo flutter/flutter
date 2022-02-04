@@ -274,36 +274,35 @@ class _CupertinoTextFormFieldRowState extends FormFieldState<String> {
   TextEditingController? _controller;
 
   TextEditingController? get _effectiveController =>
-      widget.controller ?? _controller;
+      typedWidget.controller ?? _controller;
 
-  @override
-  CupertinoTextFormFieldRow get widget =>
+  CupertinoTextFormFieldRow get typedWidget =>
       super.widget as CupertinoTextFormFieldRow;
 
   @override
   void initState() {
     super.initState();
-    if (widget.controller == null) {
+    if (typedWidget.controller == null) {
       _controller = TextEditingController(text: widget.initialValue);
     } else {
-      widget.controller!.addListener(_handleControllerChanged);
+      typedWidget.controller!.addListener(_handleControllerChanged);
     }
   }
 
   @override
   void didUpdateWidget(CupertinoTextFormFieldRow oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.controller != oldWidget.controller) {
+    if (typedWidget.controller != oldWidget.controller) {
       oldWidget.controller?.removeListener(_handleControllerChanged);
-      widget.controller?.addListener(_handleControllerChanged);
+      typedWidget.controller?.addListener(_handleControllerChanged);
 
-      if (oldWidget.controller != null && widget.controller == null) {
+      if (oldWidget.controller != null && typedWidget.controller == null) {
         _controller =
             TextEditingController.fromValue(oldWidget.controller!.value);
       }
 
-      if (widget.controller != null) {
-        setValue(widget.controller!.text);
+      if (typedWidget.controller != null) {
+        setValue(typedWidget.controller!.text);
         if (oldWidget.controller == null) {
           _controller = null;
         }
@@ -313,7 +312,7 @@ class _CupertinoTextFormFieldRowState extends FormFieldState<String> {
 
   @override
   void dispose() {
-    widget.controller?.removeListener(_handleControllerChanged);
+    typedWidget.controller?.removeListener(_handleControllerChanged);
     super.dispose();
   }
 

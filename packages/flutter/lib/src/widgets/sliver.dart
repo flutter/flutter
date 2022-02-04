@@ -1127,14 +1127,14 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
   final bool _replaceMovedChildren;
 
   @override
-  SliverMultiBoxAdaptorWidget get widget => super.widget as SliverMultiBoxAdaptorWidget;
+  SliverMultiBoxAdaptorWidget get typedWidget => super.widget as SliverMultiBoxAdaptorWidget;
 
   @override
   RenderSliverMultiBoxAdaptor get renderObject => super.renderObject as RenderSliverMultiBoxAdaptor;
 
   @override
   void update(covariant SliverMultiBoxAdaptorWidget newWidget) {
-    final SliverMultiBoxAdaptorWidget oldWidget = widget;
+    final SliverMultiBoxAdaptorWidget oldWidget = typedWidget;
     super.update(newWidget);
     final SliverChildDelegate newDelegate = newWidget.delegate;
     final SliverChildDelegate oldDelegate = oldWidget.delegate;
@@ -1181,7 +1181,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
       }
       for (final int index in _childElements.keys.toList()) {
         final Key? key = _childElements[index]!.widget.key;
-        final int? newIndex = key == null ? null : widget.delegate.findIndexByKey(key);
+        final int? newIndex = key == null ? null : typedWidget.delegate.findIndexByKey(key);
         final SliverMultiBoxAdaptorParentData? childParentData =
           _childElements[index]!.renderObject?.parentData as SliverMultiBoxAdaptorParentData?;
 
@@ -1229,7 +1229,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
   }
 
   Widget? _build(int index) {
-    return widget.delegate.build(this, index);
+    return typedWidget.delegate.build(this, index);
   }
 
   @override
@@ -1321,7 +1321,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
     final int? childCount = estimatedChildCount;
     if (childCount == null)
       return double.infinity;
-    return widget.estimateMaxScrollOffset(
+    return typedWidget.estimateMaxScrollOffset(
       constraints,
       firstIndex!,
       lastIndex!,
@@ -1345,7 +1345,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
   /// See also:
   ///
   ///  * [SliverChildDelegate.estimatedChildCount], to which this getter defers.
-  int? get estimatedChildCount => widget.delegate.estimatedChildCount;
+  int? get estimatedChildCount => typedWidget.delegate.estimatedChildCount;
 
   @override
   int get childCount {
@@ -1369,7 +1369,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
           hi = max;
         } else {
           throw FlutterError(
-            'Could not find the number of children in ${widget.delegate}.\n'
+            'Could not find the number of children in ${typedWidget.delegate}.\n'
             "The childCount getter was called (implying that the delegate's builder returned null "
             'for a positive index), but even building the child with index $hi (the maximum '
             'possible integer) did not return null. Consider implementing childCount to avoid '
@@ -1400,7 +1400,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
     assert(debugAssertChildListLocked());
     final int firstIndex = _childElements.firstKey() ?? 0;
     final int lastIndex = _childElements.lastKey() ?? 0;
-    widget.delegate.didFinishLayout(firstIndex, lastIndex);
+    typedWidget.delegate.didFinishLayout(firstIndex, lastIndex);
   }
 
   int? _currentlyUpdatingChildIndex;
@@ -1695,11 +1695,11 @@ class _SliverOffstageElement extends SingleChildRenderObjectElement {
   _SliverOffstageElement(SliverOffstage widget) : super(widget);
 
   @override
-  SliverOffstage get widget => super.widget as SliverOffstage;
+  SliverOffstage get typedWidget => super.widget as SliverOffstage;
 
   @override
   void debugVisitOnstageChildren(ElementVisitor visitor) {
-    if (!widget.offstage)
+    if (!typedWidget.offstage)
       super.debugVisitOnstageChildren(visitor);
   }
 }

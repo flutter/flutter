@@ -1585,7 +1585,10 @@ void main() {
     // https://github.com/flutter/flutter/issues/79605 for examples why this may
     // occur.
     expect(() => element.state, throwsA(isA<TypeError>()));
-    expect(() => element.widget, throwsA(isA<TypeError>()));
+
+    // Instead of nulling out widget, we replace it with a const null widget that
+    // throws on most methods. This reduces the cost of null checking the getter.
+    expect(element.widget.runtimeType.toString(), '_NullWidget');
   });
 
   testWidgets('LayerLink can be swapped between parent and child container layers', (WidgetTester tester) async {

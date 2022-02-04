@@ -255,7 +255,7 @@ class _SliverPersistentHeaderElement extends RenderObjectElement {
   final bool floating;
 
   @override
-  _SliverPersistentHeaderRenderObjectWidget get widget => super.widget as _SliverPersistentHeaderRenderObjectWidget;
+  _SliverPersistentHeaderRenderObjectWidget get typedWidget => super.widget as _SliverPersistentHeaderRenderObjectWidget;
 
   @override
   _RenderSliverPersistentHeaderForWidgetsMixin get renderObject => super.renderObject as _RenderSliverPersistentHeaderForWidgetsMixin;
@@ -274,7 +274,7 @@ class _SliverPersistentHeaderElement extends RenderObjectElement {
 
   @override
   void update(_SliverPersistentHeaderRenderObjectWidget newWidget) {
-    final _SliverPersistentHeaderRenderObjectWidget oldWidget = widget;
+    final _SliverPersistentHeaderRenderObjectWidget oldWidget = typedWidget;
     super.update(newWidget);
     final SliverPersistentHeaderDelegate newDelegate = newWidget.delegate;
     final SliverPersistentHeaderDelegate oldDelegate = oldWidget.delegate;
@@ -296,12 +296,12 @@ class _SliverPersistentHeaderElement extends RenderObjectElement {
       child = updateChild(
         child,
         floating
-          ? _FloatingHeader(child: widget.delegate.build(
+          ? _FloatingHeader(child: typedWidget.delegate.build(
             this,
             shrinkOffset,
             overlapsContent
           ))
-          : widget.delegate.build(this, shrinkOffset, overlapsContent),
+          : typedWidget.delegate.build(this, shrinkOffset, overlapsContent),
         null,
       );
     });
@@ -371,10 +371,10 @@ mixin _RenderSliverPersistentHeaderForWidgetsMixin on RenderSliverPersistentHead
   _SliverPersistentHeaderElement? _element;
 
   @override
-  double get minExtent => _element!.widget.delegate.minExtent;
+  double get minExtent => _element!.typedWidget.delegate.minExtent;
 
   @override
-  double get maxExtent => _element!.widget.delegate.maxExtent;
+  double get maxExtent => _element!.typedWidget.delegate.maxExtent;
 
   @override
   void updateChild(double shrinkOffset, bool overlapsContent) {

@@ -1139,7 +1139,7 @@ class RenderObjectToWidgetElement<T extends RenderObject> extends RootRenderObje
   RenderObjectToWidgetElement(RenderObjectToWidgetAdapter<T> widget) : super(widget);
 
   @override
-  RenderObjectToWidgetAdapter<T> get widget => super.widget as RenderObjectToWidgetAdapter<T>;
+  RenderObjectToWidgetAdapter<T> get typedWidget => super.widget as RenderObjectToWidgetAdapter<T>;
 
   Element? _child;
 
@@ -1193,7 +1193,7 @@ class RenderObjectToWidgetElement<T extends RenderObject> extends RootRenderObje
   @pragma('vm:notify-debugger-on-exception')
   void _rebuild() {
     try {
-      _child = updateChild(_child, widget.child, _rootChildSlot);
+      _child = updateChild(_child, typedWidget.child, _rootChildSlot);
     } catch (exception, stack) {
       final FlutterErrorDetails details = FlutterErrorDetails(
         exception: exception,
