@@ -299,7 +299,7 @@ class CupertinoTextField extends StatefulWidget {
     this.clipBehavior = Clip.hardEdge,
     this.restorationId,
     this.enableIMEPersonalizedLearning = true,
-    List<String> contentCommitMimeTypes = const <String>[],
+    this.contentCommitMimeTypes = const <String>[],
   }) : assert(textAlign != null),
        assert(readOnly != null),
        assert(autofocus != null),
@@ -345,16 +345,6 @@ class CupertinoTextField extends StatefulWidget {
        assert(contentCommitMimeTypes != null),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
        enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText),
-       contentCommitMimeTypes = contentCommitMimeTypes.isEmpty
-            ? onContentCommitted == null ? const <String>[] : const <String>[
-          'image/png',
-          'image/bmp',
-          'image/jpg',
-          'image/tiff',
-          'image/gif',
-          'image/jpeg',
-          'image/webp'
-       ] : contentCommitMimeTypes,
        toolbarOptions = toolbarOptions ??
            (obscureText
                ? (readOnly
