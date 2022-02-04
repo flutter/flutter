@@ -1430,7 +1430,6 @@ class ProxyDomain extends Domain {
     for (final Socket connection in _forwardedConnections.values) {
       connection.destroy();
     }
-    // await _tempDirectory?.delete(recursive: true);
   }
 
   Directory _tempDirectory;

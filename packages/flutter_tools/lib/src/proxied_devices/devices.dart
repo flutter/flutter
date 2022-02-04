@@ -314,6 +314,10 @@ class ProxiedDevice extends Device {
 
     if (rollingHashResultJson == null) {
       // Either file not found on the remote end, or deltaFileTransfer is set to false, transfer the file directly.
+      if (_deltaFileTransfer) {
+        _logger.printTrace('Delta file transfer is enabled but file is not found on the remote end, do a full transfer.');
+      }
+
       await connection.sendRequest('proxy.writeTempFile', args, await binary.readAsBytes());
     } else {
       final BlockHashes rollingHashResult = BlockHashes.fromJson(rollingHashResultJson);
