@@ -1,6 +1,8 @@
+import 'dart:ui' show Offset;
+
 import 'framework.dart';
 
-typedef ContextualMenuBuilder = Widget Function(BuildContext);
+typedef ContextualMenuBuilder = Widget Function(BuildContext, Offset);
 
 // TODO(justinmc): Figure out all the platforms and nested packages.
 // Should a CupertinoTextField on Android show the iOS toolbar?? It seems to now

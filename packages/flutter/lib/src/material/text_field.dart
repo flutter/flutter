@@ -1230,9 +1230,19 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     Widget child = RepaintBoundary(
       child: UnmanagedRestorationScope(
         bucket: bucket,
-        // TODO(justinmc): This couldn't be overridden by users.
+        // TODO(justinmc): This can't be overridden by users.
+        // TODO(justinmc): Make this
         child: ContextualMenuConfiguration(
-          buildMenu: (BuildContext context) {
+          // TODO(justinmc): Can't just pass anchor b/c Material needs to know
+          // bottom and top anchor.
+          buildMenu: (BuildContext context, Offset anchor) {
+            return CupertinoDesktopTextSelectionToolbar(
+              anchor: anchor,
+              children: const <Widget>[
+                // TODO(justinmc): Should expose the buttons.
+                const Text('hello'),
+              ],
+            );
             return Center(
               child: Container(
                 width: 100.0,

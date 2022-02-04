@@ -218,7 +218,7 @@ class _CupertinoDesktopTextSelectionControlsToolbarState extends State<_Cupertin
       return const SizedBox(width: 0.0, height: 0.0);
     }
 
-    return _CupertinoDesktopTextSelectionToolbar(
+    return CupertinoDesktopTextSelectionToolbar(
       anchor: widget.lastSecondaryTapDownPosition ?? midpointAnchor,
       children: items,
     );
@@ -239,9 +239,9 @@ class _CupertinoDesktopTextSelectionControlsToolbarState extends State<_Cupertin
 ///    build a Mac-style toolbar.
 ///  * [TextSelectionToolbar], which is similar, but builds an Android-style
 ///    toolbar.
-class _CupertinoDesktopTextSelectionToolbar extends StatelessWidget {
+class CupertinoDesktopTextSelectionToolbar extends StatelessWidget {
   /// Creates an instance of CupertinoTextSelectionToolbar.
-  const _CupertinoDesktopTextSelectionToolbar({
+  const CupertinoDesktopTextSelectionToolbar({
     Key? key,
     required this.anchor,
     required this.children,

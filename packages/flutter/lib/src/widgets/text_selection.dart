@@ -439,6 +439,7 @@ class TextSelectionOverlay {
     _contextualMenuController?.dispose();
     _contextualMenuController = _ContextualMenuController(
       context: context,
+      anchor: renderObject.lastSecondaryTapDownPosition!,
     );
 
     /*
@@ -1797,18 +1798,23 @@ enum ClipboardStatus {
 
 // TODO(justinmc): Should maybe be public and in contextual_menu.dart.
 class _ContextualMenuController {
+  // TODO(justinmc): Pass in the anchor, and pass it through to buildMenu.
+  // What other fields would I need to pass in to buildMenu? There are a ton on
+  // buildToolbar...
+  // Also, create an update method.
   _ContextualMenuController({
     // TODO(justinmc): Accept these or just BuildContext?
     required BuildContext context,
+    required Offset anchor,
     Widget? debugRequiredFor
   }) {
-    _insert(context, debugRequiredFor);
+    _insert(context, anchor, debugRequiredFor);
   }
 
   OverlayEntry? _menuOverlayEntry;
 
   // Insert the ContextualMenu into the given OverlayState.
-  void _insert(BuildContext context, [Widget? debugRequiredFor]) {
+  void _insert(BuildContext context, Offset anchor, [Widget? debugRequiredFor]) {
     final OverlayState? overlayState = Overlay.of(
       context,
       rootOverlay: true,
@@ -1833,7 +1839,7 @@ class _ContextualMenuController {
           child: GestureDetector(
             onTap: () {},
             onSecondaryTap: () {},
-            child: capturedThemes.wrap(contextualMenuConfiguration.buildMenu(context)),
+            child: capturedThemes.wrap(contextualMenuConfiguration.buildMenu(context, anchor)),
           ),
         );
       },
