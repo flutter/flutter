@@ -1,4 +1,4 @@
-Signature: 126eb7e49e10d25af5bfc25794d82c17
+Signature: 57cf8b8d3ce7ba3c4b861b9a4c5779a8
 
 UNUSED LICENSES:
 
@@ -1111,6 +1111,9 @@ FILE: ../../../third_party/skia/modules/canvaskit/skp.js
 FILE: ../../../third_party/skia/modules/canvaskit/util.js
 FILE: ../../../third_party/skia/modules/canvaskit/wasm_tools/gms.html
 FILE: ../../../third_party/skia/modules/canvaskit/wasm_tools/viewer.html
+FILE: ../../../third_party/skia/modules/particles/BUILD.bazel
+FILE: ../../../third_party/skia/modules/particles/include/BUILD.bazel
+FILE: ../../../third_party/skia/modules/particles/src/BUILD.bazel
 FILE: ../../../third_party/skia/modules/pathkit/chaining.js
 FILE: ../../../third_party/skia/modules/pathkit/externs.js
 FILE: ../../../third_party/skia/modules/pathkit/helper.js
@@ -6104,6 +6107,8 @@ FILE: ../../../third_party/skia/experimental/graphite/src/GlobalCache.h
 FILE: ../../../third_party/skia/experimental/graphite/src/Log.h
 FILE: ../../../third_party/skia/experimental/graphite/src/PaintParams.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/PaintParams.h
+FILE: ../../../third_party/skia/experimental/graphite/src/RecorderPriv.cpp
+FILE: ../../../third_party/skia/experimental/graphite/src/RecorderPriv.h
 FILE: ../../../third_party/skia/experimental/graphite/src/Resource.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/Resource.h
 FILE: ../../../third_party/skia/experimental/graphite/src/ResourceCache.cpp
