@@ -974,7 +974,10 @@ void main() {
         },
       ),
     );
-    expect(SystemChrome.latestStyle, SystemUiOverlayStyle.light);
+    expect(SystemChrome.latestStyle, const SystemUiOverlayStyle(
+      statusBarIconBrightness: Brightness.light,
+      statusBarBrightness: Brightness.dark,
+    ));
   });
 
   testWidgets('NavBar draws a dark system bar for a light background', (WidgetTester tester) async {
@@ -994,7 +997,10 @@ void main() {
         },
       ),
     );
-    expect(SystemChrome.latestStyle, SystemUiOverlayStyle.dark);
+    expect(SystemChrome.latestStyle, const SystemUiOverlayStyle(
+      statusBarIconBrightness: Brightness.dark,
+      statusBarBrightness: Brightness.light,
+    ));
   });
 
   testWidgets('CupertinoNavigationBarBackButton shows an error when manually added outside a route', (WidgetTester tester) async {
