@@ -508,6 +508,27 @@ void main() {
     expect(computeDartVmFlags(DebuggingOptions.enabled(BuildInfo.debug, nullAssertions: true)), '--null_assertions');
     expect(computeDartVmFlags(DebuggingOptions.enabled(BuildInfo.debug, dartFlags: '--foo', nullAssertions: true)), '--foo,--null_assertions');
   });
+
+  group('JSON encode DebuggingOptions', () {
+    testWithoutContext('can preserve the original options', () {
+      final DebuggingOptions original = DebuggingOptions.enabled(
+        BuildInfo.debug,
+        startPaused: true,
+        disableServiceAuthCodes: true,
+        enableDds: false,
+        dartEntrypointArgs: <String>['a', 'b'],
+        dartFlags: 'c',
+        deviceVmServicePort: 1234,
+      );
+      final DebuggingOptions deserialized = DebuggingOptions.fromJson(original.toJson(), BuildInfo.debug);
+      expect(deserialized.startPaused, original.startPaused);
+      expect(deserialized.disableServiceAuthCodes, original.disableServiceAuthCodes);
+      expect(deserialized.enableDds, original.enableDds);
+      expect(deserialized.dartEntrypointArgs, original.dartEntrypointArgs);
+      expect(deserialized.dartFlags, original.dartFlags);
+      expect(deserialized.deviceVmServicePort, original.deviceVmServicePort);
+    });
+  });
 }
 
 class TestDeviceManager extends DeviceManager {
