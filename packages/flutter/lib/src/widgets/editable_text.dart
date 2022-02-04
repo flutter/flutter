@@ -1750,6 +1750,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     widget.controller.addListener(_didChangeTextEditingValue);
     widget.focusNode.addListener(_handleFocusChanged);
     _scrollController.addListener(_updateSelectionOverlayForScroll);
+    WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
+      _scrollController.position.isScrollingNotifier.addListener(_updateSelectionOverlayForScrollStop);
+    });
     _cursorVisibilityNotifier.value = widget.showCursor;
   }
 
@@ -2377,7 +2380,30 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   void _updateSelectionOverlayForScroll() {
+    // While we are scrolling text the toolbar should be hidden.
+    // When we stop scrolling, the toolbar should be visible if the selected text
+    // is within the viewport.
+    // Android: While we are scrolling text the selection handles should be visible
+    // until the selected text has left the viewport.
+    // iOS: While we are scrolling text the selection handles should be hidden.
+    if (_selectionOverlay!.toolbarIsVisible) {
+      _selectionOverlay!.hideToolbar();
+      if (defaultTargetPlatform == TargetPlatform.iOS) {
+        _selectionOverlay!.hideHandles();
+      }
+    }
     _selectionOverlay?.updateForScroll();
+  }
+
+  void _updateSelectionOverlayForScrollStop() {
+    if (!_scrollController.position.isScrollingNotifier.value) {
+      if (!_value.selection.isCollapsed && (renderEditable.selectionStartInViewport.value || renderEditable.selectionEndInViewport.value)) {
+        showToolbar();
+        if (defaultTargetPlatform == TargetPlatform.iOS) {
+          _selectionOverlay!.showHandles();
+        }
+      }
+    }
   }
 
   @pragma('vm:notify-debugger-on-exception')
