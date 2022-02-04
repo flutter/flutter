@@ -346,7 +346,7 @@ void main() {
     );
 
     final List<PointerEvent> events = <PointerEvent>[];
-    _binding!.callback = events.add;
+    binding.callback = events.add;
 
     ui.window.onPointerDataPacket?.call(packet);
     expect(events.length, 3);
