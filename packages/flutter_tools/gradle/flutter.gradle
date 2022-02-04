@@ -515,10 +515,12 @@ class FlutterPlugin implements Plugin<Project> {
     /** Gets the list of plugins that support the Android platform. */
     private Properties getPluginList() {
         Map meta = getDependenciesMetadata()
-        assert meta != null : 'Please run `flutter pub get` and run this command again'
+        Properties androidPlugins = new Properties()
+        if (meta == null) {
+            return androidPlugins
+        }
         assert meta.plugins instanceof Map
         assert meta.plugins.android instanceof List
-        Properties androidPlugins = new Properties()
 
         // This logic must be kept in sync with the logic in app_plugin_loader.gradle.
         meta.plugins.android.each { androidPlugin ->
@@ -559,7 +561,9 @@ class FlutterPlugin implements Plugin<Project> {
         // `plugin-b` depends on `plugin-c`.
         // `plugin-c` doesn't depend on anything.
         Map meta = getDependenciesMetadata()
-        assert meta != null : 'Please run `flutter pub get` and call this command again'
+        if (meta == null) {
+            return []
+        }
         assert meta.dependencyGraph instanceof List
         return meta.dependencyGraph
     }
