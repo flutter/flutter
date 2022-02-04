@@ -134,7 +134,7 @@ void main() {
     await _pointGestureToRadio(tester);
     await tester.pumpAndSettle();
     expect(_getRadioMaterial(tester), paints..circle(color: hoverOverlayColor));
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
 
     // Radio with focus.
     await tester.pumpWidget(buildRadio(autofocus: true));
@@ -228,7 +228,7 @@ void main() {
     await _pointGestureToRadio(tester);
     await tester.pumpAndSettle();
     expect(_getRadioMaterial(tester), paints..circle(color: hoverColor));
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
 
     // Radio with focus.
     await tester.pumpWidget(buildRadio(autofocus: true));

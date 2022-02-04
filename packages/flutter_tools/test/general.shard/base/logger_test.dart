@@ -1267,7 +1267,7 @@ void main() {
 /// A fake [Logger] that throws the [Invocation] for any method call.
 class FakeLogger implements Logger {
   @override
-  dynamic noSuchMethod(Invocation invocation) => throw invocation;
+  dynamic noSuchMethod(Invocation invocation) => throw invocation; // ignore: only_throw_errors
 }
 
 /// Returns the [Invocation] thrown from a call to [FakeLogger].
@@ -1309,14 +1309,14 @@ class FakeStdout extends Fake implements Stdout {
   @override
   void write(Object object) {
     if (syncError) {
-      throw 'Error!';
+      throw Exception('Error!');
     }
     Zone.current.runUnaryGuarded<void>((_) {
       if (completeWithError) {
         _completer.completeError(Exception('Some pipe error'));
       } else {
         _completer.complete();
-        throw 'Error!';
+        throw Exception('Error!');
       }
     }, null);
   }

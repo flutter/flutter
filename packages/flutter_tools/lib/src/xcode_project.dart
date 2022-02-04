@@ -118,7 +118,7 @@ class IosProject extends XcodeBasedProject {
   /// True, if the parent Flutter project is a module project.
   bool get isModule => parent.isModule;
 
-  /// Whether the flutter application has an iOS project.
+  /// Whether the Flutter application has an iOS project.
   bool get exists => hostAppRoot.existsSync();
 
   /// Put generated files here.

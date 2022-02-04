@@ -26,6 +26,7 @@ import 'tooltip.dart';
 // late dynamic _selection;
 // late BuildContext context;
 // void setState(VoidCallback fn) { }
+// enum Menu { itemOne, itemTwo, itemThree, itemFour }
 
 const Duration _kMenuDuration = Duration(milliseconds: 300);
 const double _kMenuCloseIntervalEnd = 2.0 / 3.0;
@@ -186,13 +187,13 @@ class _RenderMenuItem extends RenderShiftedBox {
 ///
 /// {@tool snippet}
 ///
-/// Here, a [Text] widget is used with a popup menu item. The `WhyFarther` type
+/// Here, a [Text] widget is used with a popup menu item. The `Menu` type
 /// is an enum, not shown here.
 ///
 /// ```dart
-/// const PopupMenuItem<WhyFarther>(
-///   value: WhyFarther.harder,
-///   child: Text('Working a lot harder'),
+/// const PopupMenuItem<Menu>(
+///   value: Menu.itemOne,
+///   child: Text('Item 1'),
 /// )
 /// ```
 /// {@end-tool}
@@ -933,36 +934,9 @@ typedef PopupMenuItemBuilder<T> = List<PopupMenuEntry<T>> Function(BuildContext 
 /// {@tool snippet}
 ///
 /// This example shows a menu with four items, selecting between an enum's
-/// values and setting a `_selection` field based on the selection.
+/// values and setting a `_selectedMenu` field based on the selection
 ///
-/// ```dart
-/// // This is the type used by the popup menu below.
-/// enum WhyFarther { harder, smarter, selfStarter, tradingCharter }
-///
-/// // This menu button widget updates a _selection field (of type WhyFarther,
-/// // not shown here).
-/// PopupMenuButton<WhyFarther>(
-///   onSelected: (WhyFarther result) { setState(() { _selection = result; }); },
-///   itemBuilder: (BuildContext context) => <PopupMenuEntry<WhyFarther>>[
-///     const PopupMenuItem<WhyFarther>(
-///       value: WhyFarther.harder,
-///       child: Text('Working a lot harder'),
-///     ),
-///     const PopupMenuItem<WhyFarther>(
-///       value: WhyFarther.smarter,
-///       child: Text('Being a lot smarter'),
-///     ),
-///     const PopupMenuItem<WhyFarther>(
-///       value: WhyFarther.selfStarter,
-///       child: Text('Being a self-starter'),
-///     ),
-///     const PopupMenuItem<WhyFarther>(
-///       value: WhyFarther.tradingCharter,
-///       child: Text('Placed in charge of trading charter'),
-///     ),
-///   ],
-/// )
-/// ```
+/// ** See code in examples/api/lib/material/popupmenu/popupmenu.0.dart **
 /// {@end-tool}
 ///
 /// See also:

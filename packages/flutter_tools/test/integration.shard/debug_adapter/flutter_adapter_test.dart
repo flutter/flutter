@@ -40,8 +40,8 @@ void main() {
 
     // Once the "topLevelFunction" output arrives, we can terminate the app.
     unawaited(
-      dap.client.outputEvents
-          .firstWhere((OutputEventBody output) => output.output.startsWith('topLevelFunction'))
+      dap.client.output
+          .firstWhere((String output) => output.startsWith('topLevelFunction'))
           .whenComplete(() => dap.client.terminate()),
     );
 
@@ -70,8 +70,8 @@ void main() {
 
     // Once the "topLevelFunction" output arrives, we can terminate the app.
     unawaited(
-      dap.client.outputEvents
-          .firstWhere((OutputEventBody output) => output.output.startsWith('topLevelFunction'))
+      dap.client.stdoutOutput
+          .firstWhere((String output) => output.startsWith('topLevelFunction'))
           .whenComplete(() => dap.client.terminate()),
     );
 
@@ -118,7 +118,7 @@ void main() {
 
     // Launch the app and wait for it to print "topLevelFunction".
     await Future.wait(<Future<void>>[
-      dap.client.outputEvents.firstWhere((OutputEventBody output) => output.output.startsWith('topLevelFunction')),
+      dap.client.stdoutOutput.firstWhere((String output) => output.startsWith('topLevelFunction')),
       dap.client.start(
         launch: () => dap.client.launch(
           cwd: project.dir.path,
@@ -130,7 +130,7 @@ void main() {
 
     // Capture the next two output events that we expect to be the Reload
     // notification and then topLevelFunction being printed again.
-    final Future<List<String>> outputEventsFuture = dap.client.output
+    final Future<List<String>> outputEventsFuture = dap.client.stdoutOutput
         // But skip any topLevelFunctions that come before the reload.
         .skipWhile((String output) => output.startsWith('topLevelFunction'))
         .take(2)
@@ -155,7 +155,7 @@ void main() {
 
     // Launch the app and wait for it to print "topLevelFunction".
     await Future.wait(<Future<void>>[
-      dap.client.outputEvents.firstWhere((OutputEventBody output) => output.output.startsWith('topLevelFunction')),
+      dap.client.stdoutOutput.firstWhere((String output) => output.startsWith('topLevelFunction')),
       dap.client.start(
         launch: () => dap.client.launch(
           cwd: project.dir.path,
@@ -167,7 +167,7 @@ void main() {
 
     // Capture the next two output events that we expect to be the Restart
     // notification and then topLevelFunction being printed again.
-    final Future<List<String>> outputEventsFuture = dap.client.output
+    final Future<List<String>> outputEventsFuture = dap.client.stdoutOutput
         // But skip any topLevelFunctions that come before the restart.
         .skipWhile((String output) => output.startsWith('topLevelFunction'))
         .take(2)
@@ -233,8 +233,7 @@ void main() {
     // Launch the app and wait for it to print "topLevelFunction" so we know
     // it's up and running.
     await Future.wait(<Future<void>>[
-      dap.client.outputEvents.firstWhere((OutputEventBody output) =>
-          output.output.startsWith('topLevelFunction')),
+      dap.client.stdoutOutput.firstWhere((String output) => output.startsWith('topLevelFunction')),
       dap.client.start(
         launch: () => dap.client.launch(
           cwd: project.dir.path,
