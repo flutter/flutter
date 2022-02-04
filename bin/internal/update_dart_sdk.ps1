@@ -56,6 +56,20 @@ $dartSdkZip = "$cachePath\$dartZipName"
 
 Try {
     Import-Module BitsTransfer
+    if ($httpProxy = ([System.Uri] $env:http_proxy))
+    {
+        $proxyUserInfo = $httpProxy.UserInfo.Split(":")
+        $proxyPass = ConvertTo-SecureString
+        $proxyUserInfo[1] -AsPlainText -Force
+        $proxyCredential = New-Object System.Management.Automation.PSCredential 
+        ($proxyUserInfo[0], $proxyPass)
+        Start-BitsTransfer -Source $dartSdkUrl -Destination $dartSdkZip - ProxyUsage Override -ProxyList
+        ($httpProxy.Host + ":" + $httpProxy.Port) -ProxyCredential $proxyCredential - ProxyAuthentication Basic    
+    }
+    else
+    {
+        Start-BitsTransfer -Source $dartSdkUrl -Destination $dartSdkZip
+    }
     $ProgressPreference = 'SilentlyContinue'
     Start-BitsTransfer -Source $dartSdkUrl -Destination $dartSdkZip -ErrorAction Stop
 }
