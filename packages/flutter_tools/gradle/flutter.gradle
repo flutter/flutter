@@ -515,7 +515,7 @@ class FlutterPlugin implements Plugin<Project> {
     /** Gets the list of plugins that support the Android platform. */
     private Properties getPluginList() {
         Map meta = getDependenciesMetadata()
-        assert meta != null : "Please run `flutter pub get` and run this command again"
+        assert meta != null : 'Please run `flutter pub get` and run this command again'
         assert meta.plugins instanceof Map
         assert meta.plugins.android instanceof List
         Properties androidPlugins = new Properties()
@@ -559,7 +559,7 @@ class FlutterPlugin implements Plugin<Project> {
         // `plugin-b` depends on `plugin-c`.
         // `plugin-c` doesn't depend on anything.
         Map meta = getDependenciesMetadata()
-        assert meta != null : "Please run `flutter pub get` and call this command again"
+        assert meta != null : 'Please run `flutter pub get` and call this command again'
         assert meta.dependencyGraph instanceof List
         return meta.dependencyGraph
     }
