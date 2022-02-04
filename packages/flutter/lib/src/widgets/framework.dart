@@ -4027,7 +4027,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     }
     // Release resources to reduce the severity of memory leaks caused by
     // defunct, but accidentally retained Elements.
-    _widget = const _NullWidget();
+    _widget = null;
     _dependencies = null;
     _lifecycleState = _ElementLifecycle.defunct;
   }
