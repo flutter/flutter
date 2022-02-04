@@ -91,12 +91,12 @@ Future<void> main(List<String> arguments) async {
     pubEnvironment['PUB_CACHE'] = pubCachePath;
   }
 
-  final String pubExecutable = '$flutterRoot/bin/cache/dart-sdk/bin/pub';
+  final String dartExecutable = '$flutterRoot/bin/cache/dart-sdk/bin/dart';
 
   // Run pub.
   ProcessWrapper process = ProcessWrapper(await Process.start(
-    pubExecutable,
-    <String>['get'],
+    dartExecutable,
+    <String>['pub', 'get'],
     workingDirectory: kDocsRoot,
     environment: pubEnvironment,
   ));
@@ -112,6 +112,7 @@ Future<void> main(List<String> arguments) async {
   cleanOutSnippets();
 
   final List<String> dartdocBaseArgs = <String>[
+    'pub',
     'global',
     'run',
     if (args['checked'] as bool) '-c',
@@ -120,8 +121,9 @@ Future<void> main(List<String> arguments) async {
 
   // Verify which version of snippets and dartdoc we're using.
   final ProcessResult snippetsResult = Process.runSync(
-    pubExecutable,
+    dartExecutable,
     <String>[
+      'pub',
       'global',
       'list',
     ],
@@ -216,10 +218,10 @@ Future<void> main(List<String> arguments) async {
   ];
 
   String quote(String arg) => arg.contains(' ') ? "'$arg'" : arg;
-  print('Executing: (cd $kDocsRoot ; $pubExecutable ${dartdocArgs.map<String>(quote).join(' ')})');
+  print('Executing: (cd $kDocsRoot ; $dartExecutable ${dartdocArgs.map<String>(quote).join(' ')})');
 
   process = ProcessWrapper(await Process.start(
-    pubExecutable,
+    dartExecutable,
     dartdocArgs,
     workingDirectory: kDocsRoot,
     environment: pubEnvironment,
