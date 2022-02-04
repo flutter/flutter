@@ -338,6 +338,37 @@ void main() {
       reason: 'Active pressed Radio should have overlay color: $activePressedOverlayColor',
     );
   });
+
+  testWidgets('Local RadioTheme can override global RadioTheme', (WidgetTester tester) async {
+    const Color globalThemeFillColor = Color(0xfffffff1);
+    const Color localThemeFillColor = Color(0xffff0000);
+
+    Widget buildRadio({required bool active}) {
+      return MaterialApp(
+        theme: ThemeData(
+          radioTheme: RadioThemeData(
+            fillColor: MaterialStateProperty.all<Color>(globalThemeFillColor),
+          ),
+        ),
+        home: Scaffold(
+          body: RadioTheme(
+            data: RadioThemeData(
+              fillColor: MaterialStateProperty.all<Color>(localThemeFillColor),
+            ),
+            child: Radio<int>(
+              value: active ? 1 : 0,
+              groupValue: 1,
+              onChanged: (_) { },
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildRadio(active: true));
+    await tester.pumpAndSettle();
+    expect(_getRadioMaterial(tester), paints..circle(color: localThemeFillColor));
+  });
 }
 
 Finder _findRadio() {
