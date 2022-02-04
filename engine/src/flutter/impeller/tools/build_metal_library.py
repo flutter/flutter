@@ -88,7 +88,9 @@ def Main():
     command += [
       # Embeds both sources and driver options in the output. This aids in
       # debugging but should be removed from release builds.
-      "-frecord-sources",
+      # TODO(chinmaygarde): Use -frecord-sources when CI upgrades to
+      # Xcode 13.
+      "-MO",
       # Assist the sampling profiler.
       "-gline-tables-only",
       "-g",
