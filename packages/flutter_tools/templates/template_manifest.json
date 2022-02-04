@@ -333,8 +333,10 @@
         "templates/plugin/README.md.tmpl",
         "templates/plugin/test/projectName_test.dart.tmpl",
         "templates/plugin/windows.tmpl/CMakeLists.txt.tmpl",
-        "templates/plugin/windows.tmpl/include/projectName.tmpl/pluginClassSnakeCase.h.tmpl",
+        "templates/plugin/windows.tmpl/include/projectName.tmpl/pluginClassSnakeCase_c_api.h.tmpl",
         "templates/plugin/windows.tmpl/pluginClassSnakeCase.cpp.tmpl",
+        "templates/plugin/windows.tmpl/pluginClassSnakeCase.h.tmpl",
+        "templates/plugin/windows.tmpl/pluginClassSnakeCase_c_api.cpp.tmpl",
         "templates/plugin/lib/projectName_web.dart.tmpl",
 
         "templates/plugin_ffi/android.tmpl/build.gradle.tmpl",
