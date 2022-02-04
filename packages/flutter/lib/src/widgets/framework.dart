@@ -5570,8 +5570,7 @@ abstract class RenderObjectElement extends Element {
   /// Creates an element that uses the given widget as its configuration.
   RenderObjectElement(RenderObjectWidget widget) : super(widget);
 
-  /// A typed override of [Element.widget].
-  RenderObjectWidget get typedWidget => super.widget as RenderObjectWidget;
+  RenderObjectWidget get _typedWidget => super.widget as RenderObjectWidget;
 
   /// The underlying [RenderObject] for this element.
   ///
@@ -5650,7 +5649,7 @@ abstract class RenderObjectElement extends Element {
       _debugDoingBuild = true;
       return true;
     }());
-    _renderObject = typedWidget.createRenderObject(this);
+    _renderObject = _typedWidget.createRenderObject(this);
     assert(!_renderObject!.debugDisposed!);
     assert(() {
       _debugDoingBuild = false;
@@ -5694,7 +5693,7 @@ abstract class RenderObjectElement extends Element {
       _debugDoingBuild = true;
       return true;
     }());
-    typedWidget.updateRenderObject(this, renderObject);
+    _typedWidget.updateRenderObject(this, renderObject);
     assert(() {
       _debugDoingBuild = false;
       return true;
@@ -5930,7 +5929,7 @@ abstract class RenderObjectElement extends Element {
       'A RenderObject was disposed prior to its owning element being unmounted: '
       '$renderObject',
     );
-    final RenderObjectWidget oldWidget = typedWidget;
+    final RenderObjectWidget oldWidget = _typedWidget;
     super.unmount();
     assert(
       !renderObject.attached,
@@ -5952,7 +5951,7 @@ abstract class RenderObjectElement extends Element {
             ErrorSummary('Incorrect use of ParentDataWidget.'),
             ...parentDataWidget._debugDescribeIncorrectParentDataType(
               parentData: renderObject.parentData,
-              parentDataCreator: _ancestorRenderObjectElement!.typedWidget,
+              parentDataCreator: _ancestorRenderObjectElement!._typedWidget,
               ownershipChain: ErrorDescription(debugGetCreatorChain(10)),
             ),
           ]);
@@ -6289,6 +6288,7 @@ class SingleChildRenderObjectElement extends RenderObjectElement {
   /// Creates an element that uses the given widget as its configuration.
   SingleChildRenderObjectElement(SingleChildRenderObjectWidget widget) : super(widget);
 
+  @override
   SingleChildRenderObjectWidget get _typedWidget => super.widget as SingleChildRenderObjectWidget;
 
   Element? _child;
@@ -6362,6 +6362,7 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
     : assert(!debugChildrenHaveDuplicateKeys(widget, widget.children)),
       super(widget);
 
+  @override
   MultiChildRenderObjectWidget get _typedWidget => super.widget as MultiChildRenderObjectWidget;
 
   @override

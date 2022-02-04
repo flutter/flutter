@@ -1693,12 +1693,11 @@ class SliverOffstage extends SingleChildRenderObjectWidget {
 class _SliverOffstageElement extends SingleChildRenderObjectElement {
   _SliverOffstageElement(SliverOffstage widget) : super(widget);
 
-  @override
-  SliverOffstage get typedWidget => super.widget as SliverOffstage;
+  SliverOffstage get _typedWidget => super.widget as SliverOffstage;
 
   @override
   void debugVisitOnstageChildren(ElementVisitor visitor) {
-    if (!typedWidget.offstage)
+    if (!_typedWidget.offstage)
       super.debugVisitOnstageChildren(visitor);
   }
 }
