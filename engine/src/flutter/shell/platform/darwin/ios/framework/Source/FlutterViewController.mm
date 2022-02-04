@@ -673,7 +673,9 @@ static void SendFakeTouchEvent(FlutterEngine* engine,
   fml::WeakPtr<FlutterViewController> weakSelf = [self getWeakPtr];
   FlutterSendKeyEvent sendEvent =
       ^(const FlutterKeyEvent& event, FlutterKeyEventCallback callback, void* userData) {
-        [weakSelf.get()->_engine.get() sendKeyEvent:event callback:callback userData:userData];
+        if (weakSelf) {
+          [weakSelf.get()->_engine.get() sendKeyEvent:event callback:callback userData:userData];
+        }
       };
   [self.keyboardManager addPrimaryResponder:[[[FlutterEmbedderKeyResponder alloc]
                                                 initWithSendEvent:sendEvent] autorelease]];
