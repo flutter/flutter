@@ -94,9 +94,9 @@ Future<void> main(List<String> arguments) async {
   final String dartExecutable = '$flutterRoot/bin/cache/dart-sdk/bin/dart';
 
   // Run pub.
-  ProcessWrapper process = ProcessWrapper(await Process.start(
-    dartExecutable,
-    <String>['pub', 'get'],
+  ProcessWrapper process = ProcessWrapper(await runPubProcess(
+    dartBinaryPath: dartExecutable,
+    arguments: <String>['get'],
     workingDirectory: kDocsRoot,
     environment: pubEnvironment,
   ));
@@ -112,7 +112,6 @@ Future<void> main(List<String> arguments) async {
   cleanOutSnippets();
 
   final List<String> dartdocBaseArgs = <String>[
-    'pub',
     'global',
     'run',
     if (args['checked'] as bool) '-c',
@@ -220,9 +219,9 @@ Future<void> main(List<String> arguments) async {
   String quote(String arg) => arg.contains(' ') ? "'$arg'" : arg;
   print('Executing: (cd $kDocsRoot ; $dartExecutable ${dartdocArgs.map<String>(quote).join(' ')})');
 
-  process = ProcessWrapper(await Process.start(
-    dartExecutable,
-    dartdocArgs,
+  process = ProcessWrapper(await runPubProcess(
+    dartBinaryPath: dartExecutable,
+    arguments: dartdocArgs,
     workingDirectory: kDocsRoot,
     environment: pubEnvironment,
   ));
@@ -466,7 +465,6 @@ void putRedirectInOldIndexLocation() {
   File('$kPublishRoot/flutter/index.html').writeAsStringSync(metaTag);
 }
 
-
 void writeSnippetsIndexFile() {
   final Directory snippetsDir = Directory(path.join(kPublishRoot, 'snippets'));
   if (snippetsDir.existsSync()) {
@@ -532,4 +530,19 @@ void printStream(Stream<List<int>> stream, { String prefix = '', List<Pattern> f
       if (!filter.any((Pattern pattern) => line.contains(pattern)))
         print('$prefix$line'.trim());
     });
+}
+
+Future<Process> runPubProcess({
+  required String dartBinaryPath,
+  required List<String> arguments,
+  String? workingDirectory,
+  Map<String, String>? environment,
+  @visibleForTesting
+  ProcessManager processManager = const LocalProcessManager(),
+}) {
+  return processManager.start(
+    <Object>[dartBinaryPath, 'pub', ...arguments],
+    workingDirectory: workingDirectory,
+    environment: environment,
+  );
 }
