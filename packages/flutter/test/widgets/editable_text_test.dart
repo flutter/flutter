@@ -7240,6 +7240,57 @@ void main() {
       );
   });
 
+  testWidgets(
+    'Autofill does not request focus',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/91354 .
+      final FocusNode focusNode1 = FocusNode();
+      final EditableText editableText1 = EditableText(
+        showSelectionHandles: true,
+        maxLines: 2,
+        controller: TextEditingController(),
+        focusNode: focusNode1,
+        cursorColor: Colors.red,
+        backgroundCursorColor: Colors.blue,
+        style: Typography.material2018().black.subtitle1!.copyWith(fontFamily: 'Roboto'),
+        keyboardType: TextInputType.text,
+      );
+
+      final FocusNode focusNode2 = FocusNode();
+      final EditableText editableText2 = EditableText(
+        showSelectionHandles: true,
+        maxLines: 2,
+        controller: TextEditingController(),
+        focusNode: focusNode2,
+        cursorColor: Colors.red,
+        backgroundCursorColor: Colors.blue,
+        style: Typography.material2018().black.subtitle1!.copyWith(fontFamily: 'Roboto'),
+        keyboardType: TextInputType.text,
+      );
+
+      await tester.pumpWidget(MaterialApp(
+        home: Center(
+          child: Column(
+            children: <Widget>[editableText1, editableText2],
+          ),
+        ),
+      ));
+
+      // editableText1 has the focus.
+      await tester.tap(find.byWidget(editableText1));
+      await tester.pumpAndSettle();
+
+      final EditableTextState state2 = tester.state<EditableTextState>(find.byWidget(editableText2));
+      // Update editableText2, should not request focus.
+      state2.updateEditingValue(
+        const TextEditingValue(text: 'password', selection: TextSelection.collapsed(offset: 8)),
+      );
+      await tester.pumpAndSettle();
+
+      expect(focusNode1.hasFocus, isTrue);
+      expect(focusNode2.hasFocus, isFalse);
+  });
+
   testWidgets('setEditingState is not called when text changes', (WidgetTester tester) async {
     // We shouldn't get a message here because this change is owned by the platform side.
     const String testText = 'flutter is the best!';
