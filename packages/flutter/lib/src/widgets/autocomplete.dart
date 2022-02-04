@@ -336,6 +336,8 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
       return KeyEventResult.handled;
     } else if (_hidden && _options.isNotEmpty && (event.logicalKey == LogicalKeyboardKey.arrowUp || event.logicalKey == LogicalKeyboardKey.arrowDown)){
       _hidden = false;
+      // This would reset the index when the options are re-shown
+      // _updateHighlight(0);
       _updateOverlay();
       return KeyEventResult.handled;
     }
