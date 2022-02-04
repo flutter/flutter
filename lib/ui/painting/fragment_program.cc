@@ -79,9 +79,8 @@ fml::RefPtr<FragmentShader> FragmentProgram::shader(
     uniform_floats[uniform_count + 2 * i] = image_shader->width();
     uniform_floats[uniform_count + 2 * i + 1] = image_shader->height();
   }
-  auto sk_shader =
-      runtime_effect_->makeShader(std::move(uniform_data), sk_samplers.data(),
-                                  sk_samplers.size(), nullptr, false);
+  auto sk_shader = runtime_effect_->makeShader(
+      std::move(uniform_data), sk_samplers.data(), sk_samplers.size());
   return FragmentShader::Create(shader, std::move(sk_shader));
 }
 
