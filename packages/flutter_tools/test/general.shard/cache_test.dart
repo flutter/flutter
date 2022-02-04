@@ -339,10 +339,12 @@ void main() {
           osUtils: osUtils
       );
       final List <ArtifactSet> artifactSet = flutterCache.getArtifactSet();
-      assert(artifactSet.map((e) => e.name).toList().contains(pubDependencies.name), true);
+      final List <String> nameList = artifactSet.map((ArtifactSet e) => e.name).toList();
+
+      expect(nameList.contains(pubDependencies.name), true);
       for(final ArtifactSet artifact in artifactSet) {
         if(artifact.name == pubDependencies.name){
-          assert(artifact.developmentArtifact.name == DevelopmentArtifact.web.name, true);
+          expect(artifact.developmentArtifact.name == DevelopmentArtifact.web.name, true);
         }
       }
     });
