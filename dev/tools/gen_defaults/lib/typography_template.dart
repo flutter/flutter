@@ -12,11 +12,11 @@ class TypographyTemplate extends TokenTemplate {
 // Generated version ${tokens["version"]}
 class _M3Typography {
   _M3Typography._();
-  
+
   ${_textTheme('englishLike', 'alphabetic')}
-  
+
   ${_textTheme('dense', 'ideographic')}
-  
+
   ${_textTheme('tall', 'alphabetic')}
 }
 ''';
