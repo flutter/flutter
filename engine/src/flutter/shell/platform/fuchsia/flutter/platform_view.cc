@@ -488,7 +488,7 @@ void PlatformView::HandlePlatformMessage(
     if (!already_errored) {
       FML_LOG(INFO)
           << "Platform view received message on channel '" << message->channel()
-          << "' with no registered handler. And empty response will be "
+          << "' with no registered handler. An empty response will be "
              "generated. Please implement the native message handler. This "
              "message will appear only once per channel.";
       unregistered_channels_.insert(channel);
