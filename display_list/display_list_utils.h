@@ -91,6 +91,73 @@ class IgnoreTransformDispatchHelper : public virtual Dispatcher {
   // clang-format on
 };
 
+class IgnoreDrawDispatchHelper : public virtual Dispatcher {
+ public:
+  void save() override {}
+  void saveLayer(const SkRect* bounds,
+                 const SaveLayerOptions options) override {}
+  void restore() override {}
+  void drawColor(SkColor color, SkBlendMode mode) override {}
+  void drawPaint() override {}
+  void drawLine(const SkPoint& p0, const SkPoint& p1) override {}
+  void drawRect(const SkRect& rect) override {}
+  void drawOval(const SkRect& bounds) override {}
+  void drawCircle(const SkPoint& center, SkScalar radius) override {}
+  void drawRRect(const SkRRect& rrect) override {}
+  void drawDRRect(const SkRRect& outer, const SkRRect& inner) override {}
+  void drawPath(const SkPath& path) override {}
+  void drawArc(const SkRect& oval_bounds,
+               SkScalar start_degrees,
+               SkScalar sweep_degrees,
+               bool use_center) override {}
+  void drawPoints(SkCanvas::PointMode mode,
+                  uint32_t count,
+                  const SkPoint points[]) override {}
+  void drawVertices(const sk_sp<SkVertices> vertices,
+                    SkBlendMode mode) override {}
+  void drawImage(const sk_sp<SkImage> image,
+                 const SkPoint point,
+                 const SkSamplingOptions& sampling,
+                 bool render_with_attributes) override {}
+  void drawImageRect(const sk_sp<SkImage> image,
+                     const SkRect& src,
+                     const SkRect& dst,
+                     const SkSamplingOptions& sampling,
+                     bool render_with_attributes,
+                     SkCanvas::SrcRectConstraint constraint) override {}
+  void drawImageNine(const sk_sp<SkImage> image,
+                     const SkIRect& center,
+                     const SkRect& dst,
+                     SkFilterMode filter,
+                     bool render_with_attributes) override {}
+  void drawImageLattice(const sk_sp<SkImage> image,
+                        const SkCanvas::Lattice& lattice,
+                        const SkRect& dst,
+                        SkFilterMode filter,
+                        bool render_with_attributes) override {}
+  void drawAtlas(const sk_sp<SkImage> atlas,
+                 const SkRSXform xform[],
+                 const SkRect tex[],
+                 const SkColor colors[],
+                 int count,
+                 SkBlendMode mode,
+                 const SkSamplingOptions& sampling,
+                 const SkRect* cull_rect,
+                 bool render_with_attributes) override {}
+  void drawPicture(const sk_sp<SkPicture> picture,
+                   const SkMatrix* matrix,
+                   bool render_with_attributes) override {}
+  void drawDisplayList(const sk_sp<DisplayList> display_list) override {}
+  void drawTextBlob(const sk_sp<SkTextBlob> blob,
+                    SkScalar x,
+                    SkScalar y) override {}
+  void drawShadow(const SkPath& path,
+                  const SkColor color,
+                  const SkScalar elevation,
+                  bool transparent_occluder,
+                  SkScalar dpr) override {}
+};
+
 // A utility class that will monitor the Dispatcher methods relating
 // to the rendering attributes and accumulate them into an SkPaint
 // which can be accessed at any time via paint().
@@ -122,11 +189,21 @@ class SkPaintDispatchHelper : public virtual Dispatcher {
   void setImageFilter(sk_sp<SkImageFilter> filter) override;
 
   const SkPaint& paint() { return paint_; }
+
+  /// Returns the current opacity attribute which is used to reduce
+  /// the alpha of all setColor calls encountered in the streeam
   SkScalar opacity() { return opacity_; }
+  /// Returns the combined opacity that includes both the current
+  /// opacity attribute and the alpha of the most recent color.
+  /// The most recently set color will have combined the two and
+  /// stored the combined value in the alpha of the paint.
+  SkScalar combined_opacity() { return paint_.getAlphaf(); }
+  /// Returns true iff the current opacity attribute is not opaque,
+  /// irrespective of the alpha of the current color
   bool has_opacity() { return opacity_ < SK_Scalar1; }
 
  protected:
-  void save_opacity(bool reset_and_restore);
+  void save_opacity(SkScalar opacity_for_children);
   void restore_opacity();
 
  private:
@@ -137,13 +214,18 @@ class SkPaintDispatchHelper : public virtual Dispatcher {
   sk_sp<SkColorFilter> makeColorFilter();
 
   struct SaveInfo {
-    SaveInfo(SkScalar opacity, bool restore_opacity)
-        : opacity(opacity), restore_opacity(restore_opacity) {}
+    SaveInfo(SkScalar opacity) : opacity(opacity) {}
 
     SkScalar opacity;
-    bool restore_opacity;
   };
   std::vector<SaveInfo> save_stack_;
+
+  void set_opacity(SkScalar opacity) {
+    if (opacity_ != opacity) {
+      opacity_ = opacity;
+      setColor(current_color_);
+    }
+  }
 
   SkColor current_color_;
   SkScalar opacity_;
@@ -324,7 +406,7 @@ class DisplayListBoundsCalculator final
   void setMaskBlurFilter(SkBlurStyle style, SkScalar sigma) override;
 
   void save() override;
-  void saveLayer(const SkRect* bounds, bool with_paint) override;
+  void saveLayer(const SkRect* bounds, const SaveLayerOptions options) override;
   void restore() override;
 
   void drawPaint() override;
