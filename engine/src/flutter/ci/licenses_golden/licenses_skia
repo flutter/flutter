@@ -1,4 +1,4 @@
-Signature: 2a1d5187498e8ba9e888afdb19722490
+Signature: 126eb7e49e10d25af5bfc25794d82c17
 
 UNUSED LICENSES:
 
@@ -6106,6 +6106,8 @@ FILE: ../../../third_party/skia/experimental/graphite/src/PaintParams.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/PaintParams.h
 FILE: ../../../third_party/skia/experimental/graphite/src/Resource.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/Resource.h
+FILE: ../../../third_party/skia/experimental/graphite/src/ResourceCache.cpp
+FILE: ../../../third_party/skia/experimental/graphite/src/ResourceCache.h
 FILE: ../../../third_party/skia/experimental/graphite/src/Sampler.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/Sampler.h
 FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlSampler.h
