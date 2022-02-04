@@ -48,17 +48,37 @@ if (host_os == "linux") {
   }
 }
 
+# Generates flutter_patched_sdk.zip for debug and profile runtime modes
+# and saves it in the zips_archive folder. For release runtime mode it
+# generates flutter_patched_sdk_product.zip and saves it to
+# zips_archive/flutter_patched_sdk_product/ folder.
 zip_bundle("flutter_patched_sdk") {
-  output = "flutter_patched_sdk.zip"
+  file_suffix = ""
+  path_prefix = ""
+  if (flutter_runtime_mode == "release") {
+    file_suffix = "_product"
+    path_prefix = "flutter_patched_sdk_product/"
+  }
+  output = "flutter_patched_sdk${file_suffix}.zip"
   deps = [ "//flutter/lib/snapshot:strong_platform" ]
   files = [
     {
       source = "$root_out_dir/flutter_patched_sdk/vm_outline_strong.dill"
-      destination = "vm_outline_strong.dill"
+      destination = "${path_prefix}vm_outline_strong.dill"
     },
     {
       source = "$root_out_dir/flutter_patched_sdk/platform_strong.dill"
-      destination = "platform_strong.dill"
+      destination = "${path_prefix}platform_strong.dill"
     },
   ]
+}
+
+# Flutter consumes the dart sdk as a prebuilt. Rather than regenerating
+# the zip file we are just copying the original file to the artifacts location.
+if (build_engine_artifacts && flutter_prebuilt_dart_sdk) {
+  copy("dart_sdk_archive") {
+    sources = [ prebuilt_dart_sdk_archive ]
+    outputs =
+        [ "$root_out_dir/zip_archives/dart-sdk-$prebuilt_dart_sdk_config" ]
+  }
 }

@@ -33,14 +33,6 @@ config("export_dynamic_symbols") {
 
 if (flutter_prebuilt_dart_sdk) {
   copy_trees("_copy_trees") {
-    # There is no prebuilt Dart SDK targeting Fuchsia, but we also don't need
-    # one, so even when the build is targeting Fuchsia, use the prebuilt
-    # Dart SDK for the host.
-    if (current_toolchain == host_toolchain || is_fuchsia) {
-      prebuilt_dart_sdk = host_prebuilt_dart_sdk
-    } else {
-      prebuilt_dart_sdk = target_prebuilt_dart_sdk
-    }
     sources = [
       {
         target = "copy_dart_sdk"
@@ -62,7 +54,7 @@ _build_engine_artifacts =
     (is_linux && !is_chromeos && current_cpu != "arm") || is_mac
 
 group("dart_sdk") {
-  if (_build_engine_artifacts) {
+  if (build_engine_artifacts) {
     if (flutter_prebuilt_dart_sdk) {
       public_deps = [ ":copy_dart_sdk" ]
     } else {
