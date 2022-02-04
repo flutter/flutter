@@ -214,8 +214,7 @@ class _ViewportElement extends MultiChildRenderObjectElement {
   bool _doingMountOrUpdate = false;
   int? _centerSlotIndex;
 
-  @override
-  Viewport get typedWidget => super.widget as Viewport;
+  Viewport get _typedWidget => super.widget as Viewport;
 
   @override
   RenderViewport get renderObject => super.renderObject as RenderViewport;
@@ -242,10 +241,10 @@ class _ViewportElement extends MultiChildRenderObjectElement {
 
   void _updateCenter() {
     // TODO(ianh): cache the keys to make this faster
-    if (typedWidget.center != null) {
+    if (_typedWidget.center != null) {
       int elementIndex = 0;
       for (final Element e in children) {
-        if (e.widget.key == typedWidget.center) {
+        if (e.widget.key == _typedWidget.center) {
           renderObject.center = e.renderObject as RenderSliver?;
           break;
         }

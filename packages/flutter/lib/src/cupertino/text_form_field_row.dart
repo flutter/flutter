@@ -274,35 +274,35 @@ class _CupertinoTextFormFieldRowState extends FormFieldState<String> {
   TextEditingController? _controller;
 
   TextEditingController? get _effectiveController =>
-      typedWidget.controller ?? _controller;
+      _typedWidget.controller ?? _controller;
 
-  CupertinoTextFormFieldRow get typedWidget =>
+  CupertinoTextFormFieldRow get _typedWidget =>
       super.widget as CupertinoTextFormFieldRow;
 
   @override
   void initState() {
     super.initState();
-    if (typedWidget.controller == null) {
+    if (_typedWidget.controller == null) {
       _controller = TextEditingController(text: widget.initialValue);
     } else {
-      typedWidget.controller!.addListener(_handleControllerChanged);
+      _typedWidget.controller!.addListener(_handleControllerChanged);
     }
   }
 
   @override
   void didUpdateWidget(CupertinoTextFormFieldRow oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (typedWidget.controller != oldWidget.controller) {
+    if (_typedWidget.controller != oldWidget.controller) {
       oldWidget.controller?.removeListener(_handleControllerChanged);
-      typedWidget.controller?.addListener(_handleControllerChanged);
+      _typedWidget.controller?.addListener(_handleControllerChanged);
 
-      if (oldWidget.controller != null && typedWidget.controller == null) {
+      if (oldWidget.controller != null && _typedWidget.controller == null) {
         _controller =
             TextEditingController.fromValue(oldWidget.controller!.value);
       }
 
-      if (typedWidget.controller != null) {
-        setValue(typedWidget.controller!.text);
+      if (_typedWidget.controller != null) {
+        setValue(_typedWidget.controller!.text);
         if (oldWidget.controller == null) {
           _controller = null;
         }
@@ -312,7 +312,7 @@ class _CupertinoTextFormFieldRowState extends FormFieldState<String> {
 
   @override
   void dispose() {
-    typedWidget.controller?.removeListener(_handleControllerChanged);
+    _typedWidget.controller?.removeListener(_handleControllerChanged);
     super.dispose();
   }
 

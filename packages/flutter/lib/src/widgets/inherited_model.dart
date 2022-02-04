@@ -184,8 +184,7 @@ class InheritedModelElement<T> extends InheritedElement {
   /// Creates an element that uses the given widget as its configuration.
   InheritedModelElement(InheritedModel<T> widget) : super(widget);
 
-  @override
-  InheritedModel<T> get typedWidget => super.widget as InheritedModel<T>;
+  InheritedModel<T> get _typedWidget => super.widget as InheritedModel<T>;
 
   @override
   void updateDependencies(Element dependent, Object? aspect) {
@@ -206,7 +205,7 @@ class InheritedModelElement<T> extends InheritedElement {
     final Set<T>? dependencies = getDependencies(dependent) as Set<T>?;
     if (dependencies == null)
       return;
-    if (dependencies.isEmpty || typedWidget.updateShouldNotifyDependent(oldWidget, dependencies))
+    if (dependencies.isEmpty || _typedWidget.updateShouldNotifyDependent(oldWidget, dependencies))
       dependent.didChangeDependencies();
   }
 }

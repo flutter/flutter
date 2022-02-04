@@ -284,8 +284,7 @@ class Table extends RenderObjectWidget {
 class _TableElement extends RenderObjectElement {
   _TableElement(Table widget) : super(widget);
 
-  @override
-  Table get typedWidget => super.widget as Table;
+  Table get _typedWidget => super.widget as Table;
 
   @override
   RenderTable get renderObject => super.renderObject as RenderTable;
@@ -300,7 +299,7 @@ class _TableElement extends RenderObjectElement {
     _doingMountOrUpdate = true;
     super.mount(parent, newSlot);
     int rowIndex = -1;
-    _children = typedWidget.children.map<_TableElementRow>((TableRow row) {
+    _children = _typedWidget.children.map<_TableElementRow>((TableRow row) {
       int columnIndex = 0;
       rowIndex += 1;
       return _TableElementRow(

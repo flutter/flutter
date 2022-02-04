@@ -254,8 +254,7 @@ class _SliverPersistentHeaderElement extends RenderObjectElement {
 
   final bool floating;
 
-  @override
-  _SliverPersistentHeaderRenderObjectWidget get typedWidget => super.widget as _SliverPersistentHeaderRenderObjectWidget;
+  _SliverPersistentHeaderRenderObjectWidget get _typedWidget => super.widget as _SliverPersistentHeaderRenderObjectWidget;
 
   @override
   _RenderSliverPersistentHeaderForWidgetsMixin get renderObject => super.renderObject as _RenderSliverPersistentHeaderForWidgetsMixin;
@@ -274,7 +273,7 @@ class _SliverPersistentHeaderElement extends RenderObjectElement {
 
   @override
   void update(_SliverPersistentHeaderRenderObjectWidget newWidget) {
-    final _SliverPersistentHeaderRenderObjectWidget oldWidget = typedWidget;
+    final _SliverPersistentHeaderRenderObjectWidget oldWidget = _typedWidget;
     super.update(newWidget);
     final SliverPersistentHeaderDelegate newDelegate = newWidget.delegate;
     final SliverPersistentHeaderDelegate oldDelegate = oldWidget.delegate;
@@ -296,12 +295,12 @@ class _SliverPersistentHeaderElement extends RenderObjectElement {
       child = updateChild(
         child,
         floating
-          ? _FloatingHeader(child: typedWidget.delegate.build(
+          ? _FloatingHeader(child: _typedWidget.delegate.build(
             this,
             shrinkOffset,
             overlapsContent
           ))
-          : typedWidget.delegate.build(this, shrinkOffset, overlapsContent),
+          : _typedWidget.delegate.build(this, shrinkOffset, overlapsContent),
         null,
       );
     });
@@ -371,10 +370,10 @@ mixin _RenderSliverPersistentHeaderForWidgetsMixin on RenderSliverPersistentHead
   _SliverPersistentHeaderElement? _element;
 
   @override
-  double get minExtent => _element!.typedWidget.delegate.minExtent;
+  double get minExtent => _element!._typedWidget.delegate.minExtent;
 
   @override
-  double get maxExtent => _element!.typedWidget.delegate.maxExtent;
+  double get maxExtent => _element!._typedWidget.delegate.maxExtent;
 
   @override
   void updateChild(double shrinkOffset, bool overlapsContent) {

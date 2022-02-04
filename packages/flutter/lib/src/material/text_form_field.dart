@@ -266,9 +266,9 @@ class TextFormField extends FormField<String> {
 class _TextFormFieldState extends FormFieldState<String> {
   RestorableTextEditingController? _controller;
 
-  TextEditingController get _effectiveController => typedWidget.controller ?? _controller!.value;
+  TextEditingController get _effectiveController => _typedWidget.controller ?? _controller!.value;
 
-  TextFormField get typedWidget => super.widget as TextFormField;
+  TextFormField get _typedWidget => super.widget as TextFormField;
 
   @override
   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
@@ -299,26 +299,26 @@ class _TextFormFieldState extends FormFieldState<String> {
   @override
   void initState() {
     super.initState();
-    if (typedWidget.controller == null) {
+    if (_typedWidget.controller == null) {
       _createLocalController(widget.initialValue != null ? TextEditingValue(text: widget.initialValue!) : null);
     } else {
-      typedWidget.controller!.addListener(_handleControllerChanged);
+      _typedWidget.controller!.addListener(_handleControllerChanged);
     }
   }
 
   @override
   void didUpdateWidget(TextFormField oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (typedWidget.controller != oldWidget.controller) {
+    if (_typedWidget.controller != oldWidget.controller) {
       oldWidget.controller?.removeListener(_handleControllerChanged);
-      typedWidget.controller?.addListener(_handleControllerChanged);
+      _typedWidget.controller?.addListener(_handleControllerChanged);
 
-      if (oldWidget.controller != null && typedWidget.controller == null) {
+      if (oldWidget.controller != null && _typedWidget.controller == null) {
         _createLocalController(oldWidget.controller!.value);
       }
 
-      if (typedWidget.controller != null) {
-        setValue(typedWidget.controller!.text);
+      if (_typedWidget.controller != null) {
+        setValue(_typedWidget.controller!.text);
         if (oldWidget.controller == null) {
           unregisterFromRestoration(_controller!);
           _controller!.dispose();
@@ -330,7 +330,7 @@ class _TextFormFieldState extends FormFieldState<String> {
 
   @override
   void dispose() {
-    typedWidget.controller?.removeListener(_handleControllerChanged);
+    _typedWidget.controller?.removeListener(_handleControllerChanged);
     _controller?.dispose();
     super.dispose();
   }
