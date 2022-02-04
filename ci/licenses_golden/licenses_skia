@@ -1,4 +1,4 @@
-Signature: 73ba5b22da9c360d875dbd21d1313de4
+Signature: 2a1d5187498e8ba9e888afdb19722490
 
 UNUSED LICENSES:
 
@@ -712,6 +712,7 @@ FILE: ../../../third_party/skia/experimental/docs/jsonbaseddoc.htm
 FILE: ../../../third_party/skia/experimental/docs/svgBackend.js
 FILE: ../../../third_party/skia/experimental/docs/svgbaseddoc.htm
 FILE: ../../../third_party/skia/experimental/docs/utilities.js
+FILE: ../../../third_party/skia/experimental/ffmpeg/BUILD.bazel
 FILE: ../../../third_party/skia/experimental/graphite/include/BUILD.bazel
 FILE: ../../../third_party/skia/experimental/graphite/include/mtl/BUILD.bazel
 FILE: ../../../third_party/skia/experimental/graphite/include/private/BUILD.bazel
@@ -1121,6 +1122,17 @@ FILE: ../../../third_party/skia/modules/pathkit/perf/effects.bench.js
 FILE: ../../../third_party/skia/modules/pathkit/perf/path.bench.js
 FILE: ../../../third_party/skia/modules/pathkit/perf/pathops.bench.js
 FILE: ../../../third_party/skia/modules/pathkit/perf/perfReporter.js
+FILE: ../../../third_party/skia/modules/skottie/BUILD.bazel
+FILE: ../../../third_party/skia/modules/skottie/fuzz/BUILD.bazel
+FILE: ../../../third_party/skia/modules/skottie/gm/BUILD.bazel
+FILE: ../../../third_party/skia/modules/skottie/include/BUILD.bazel
+FILE: ../../../third_party/skia/modules/skottie/src/BUILD.bazel
+FILE: ../../../third_party/skia/modules/skottie/src/animator/BUILD.bazel
+FILE: ../../../third_party/skia/modules/skottie/src/effects/BUILD.bazel
+FILE: ../../../third_party/skia/modules/skottie/src/layers/BUILD.bazel
+FILE: ../../../third_party/skia/modules/skottie/src/layers/shapelayer/BUILD.bazel
+FILE: ../../../third_party/skia/modules/skottie/src/text/BUILD.bazel
+FILE: ../../../third_party/skia/modules/skottie/utils/BUILD.bazel
 FILE: ../../../third_party/skia/modules/skparagraph/BUILD.bazel
 FILE: ../../../third_party/skia/modules/skparagraph/bench/BUILD.bazel
 FILE: ../../../third_party/skia/modules/skparagraph/gm/BUILD.bazel
@@ -1163,8 +1175,13 @@ FILE: ../../../third_party/skia/modules/skparagraph/test.html
 FILE: ../../../third_party/skia/modules/skparagraph/utils/BUILD.bazel
 FILE: ../../../third_party/skia/modules/skparagraph/utils/TestFontCollection.cpp
 FILE: ../../../third_party/skia/modules/skparagraph/utils/TestFontCollection.h
+FILE: ../../../third_party/skia/modules/skresources/BUILD.bazel
 FILE: ../../../third_party/skia/modules/skresources/include/BUILD.bazel
 FILE: ../../../third_party/skia/modules/skresources/src/BUILD.bazel
+FILE: ../../../third_party/skia/modules/sksg/BUILD.bazel
+FILE: ../../../third_party/skia/modules/sksg/include/BUILD.bazel
+FILE: ../../../third_party/skia/modules/sksg/samples/BUILD.bazel
+FILE: ../../../third_party/skia/modules/sksg/src/BUILD.bazel
 FILE: ../../../third_party/skia/modules/skshaper/BUILD.bazel
 FILE: ../../../third_party/skia/modules/skshaper/include/BUILD.bazel
 FILE: ../../../third_party/skia/modules/skshaper/src/BUILD.bazel
