@@ -11,6 +11,10 @@
 
 namespace flutter {
 
+const SaveLayerOptions SaveLayerOptions::kNoAttributes = SaveLayerOptions();
+const SaveLayerOptions SaveLayerOptions::kWithAttributes =
+    kNoAttributes.with_renders_with_attributes();
+
 const SkSamplingOptions DisplayList::NearestSampling =
     SkSamplingOptions(SkFilterMode::kNearest, SkMipmapMode::kNone);
 const SkSamplingOptions DisplayList::LinearSampling =

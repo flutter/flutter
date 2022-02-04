@@ -29,8 +29,10 @@ void main() {
       canvas.drawColor(const Color(0xff0000ff), BlendMode.srcOut);
       canvas.drawPaint(Paint()..imageFilter = ImageFilter.blur(sigmaX: 2, sigmaY: 3));
       canvas.saveLayer(null, Paint());
+      canvas.drawRect(const Rect.fromLTRB(10, 10, 20, 20), Paint());
       canvas.saveLayer(const Rect.fromLTWH(0, 0, 100, 100), Paint());
       canvas.drawRect(const Rect.fromLTRB(10, 10, 20, 20), Paint());
+      canvas.drawRect(const Rect.fromLTRB(15, 15, 25, 25), Paint());
       canvas.restore();
       canvas.restore();
       final Picture picture = recorder.endRecording();
