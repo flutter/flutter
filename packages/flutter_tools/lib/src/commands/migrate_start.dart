@@ -75,6 +75,12 @@ class MigrateStartCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    FlutterProject project = FlutterProject.current();
+    if (project.isModule || project.isPlugin) {
+      globals.logger.printError('Migrate tool only supports app projects. This project is a ${project.isModule ? 'module' : 'plugin'}');
+      return const FlutterCommandResult(ExitStatus.fail);
+    }
+
     MigrateResult? migrateResult = await computeMigration(
       verbose: _verbose,
       baseAppDirectory: stringArg('base-app-directory'),
