@@ -154,7 +154,6 @@ class KeyboardManagerWin32 {
   // end(). In the latter case, this OnKey message does not contain a text.
   void HandleOnKeyResult(std::unique_ptr<PendingEvent> event,
                          bool handled,
-                         int char_action,
                          std::list<PendingText>::iterator pending_text);
 
   // Returns the type of the next WM message.
