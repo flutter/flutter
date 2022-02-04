@@ -16,7 +16,7 @@ class MaterialSpellCheckerControls extends SpellCheckerControls{
     Widget buildSpellCheckerSuggestionsToolbar(
         List<SpellCheckerSuggestionSpan> spellCheckerSuggestionSpans) {
             //TODO(camillesimon): build spell checker suggestion toolbar here
-            print("mama I made it!");
+            // print("mama I made it!");
             return SizedBox.shrink();
         }
 }
@@ -32,7 +32,7 @@ class MaterialMisspelledWordsHandler extends MisspelledWordsHandler {
     TextSpan buildWithMisspelledWordsIndicated(List<SpellCheckerSuggestionSpan> spellCheckerSuggestionSpans, 
         TextEditingValue value, TextStyle? style) {
         // print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
-        // print(value.text);
+        // print("|" + value.text + "|");
         // print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
         scssSpans_consumed_index = 0;
         text_consumed_index = 0;
@@ -48,6 +48,7 @@ class MaterialMisspelledWordsHandler extends MisspelledWordsHandler {
 
     List<TextSpan> buildSubtreesWithMisspelledWordsIndicated(List<SpellCheckerSuggestionSpan> spellCheckerSuggestionSpans, String text, TextStyle? style) {
         // print("-------------------------------------------------START--------------------------------------------------");
+        // print("|" + text + "|");
         // print("SCSS CONSUMED IND: " + scssSpans_consumed_index.toString());
         // print("TEXT CONSUMED IND: " + text_consumed_index.toString());
         // print("SCS SPAN LENGTH: " + spellCheckerSuggestionSpans.length.toString());
@@ -72,24 +73,24 @@ class MaterialMisspelledWordsHandler extends MisspelledWordsHandler {
                     end_index = (currScssSpan.start-text_consumed_index) < text.length ? (currScssSpan.start-text_consumed_index) : text.length;
                     // print("END INDEX: " + end_index.toString());
                     tsTreeChildren.add(TextSpan(style: style,
-                                                text: text.substring(text_pointer, currScssSpan.start)));
-                    // print("TEXT ADDED: |" + text.substring(text_pointer, (currScssSpan.start-text_consumed_index)) + "|");
-                    text_pointer = (currScssSpan.start-text_consumed_index);
+                                                text: text.substring(text_pointer, end_index)));//currScssSpan.start)));
+                    // print("TEXT ADDED: |" + text.substring(text_pointer, end_index) + "|");
+                    text_pointer = end_index; //(currScssSpan.start-text_consumed_index);
                 }
                 else {
                     // print("-------------------------------------------------CASE 2--------------------------------------------------");
-                    end_index = (currScssSpan.end - text_consumed_index) < text.length ? (currScssSpan.end - text_consumed_index) : text.length;
+                    end_index = (currScssSpan.end - text_consumed_index + 1) < text.length ? (currScssSpan.end - text_consumed_index + 1) : text.length;
                     // print("END INDEX: " + end_index.toString());
                     tsTreeChildren.add(TextSpan(style: overrideTextSpanStyle(style),
-                                                text: text.substring((currScssSpan.start-text_consumed_index), end_index + 1)));
-                    // print("TEXT ADDED: |" + text.substring((currScssSpan.start-text_consumed_index), end_index + 1)+ "|");
-                    text_pointer = (currScssSpan.end-text_consumed_index) + 1;
+                                                text: text.substring((currScssSpan.start-text_consumed_index), end_index)));
+                    // print("TEXT ADDED: |" + text.substring((currScssSpan.start-text_consumed_index), end_index) + "|");
+                    text_pointer = end_index; // (currScssSpan.end-text_consumed_index) + 1;
                     scss_pointer += 1;
                 }
                 // print("--------------------------------------------------------------------------------------------------------------");
             }
 
-            text_consumed_index = text_pointer;
+            text_consumed_index = text_pointer + text_consumed_index;
 
             // Add remaining text
             if (text_pointer < text.length) {
@@ -97,7 +98,7 @@ class MaterialMisspelledWordsHandler extends MisspelledWordsHandler {
                 tsTreeChildren.add(TextSpan(style: style, text: text.substring(text_pointer, text.length)));
                 // print("TEXT POINTER: " + text_pointer.toString());
                 // print(" TEXT ADDED: |" + text.substring(text_pointer, text.length)+ "|");
-                text_consumed_index = text.length;
+                text_consumed_index = text.length + text_consumed_index;
             }
             scssSpans_consumed_index = scss_pointer;
             return tsTreeChildren;

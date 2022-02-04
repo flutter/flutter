@@ -173,7 +173,8 @@ class TextEditingController extends ValueNotifier<TextEditingValue> with Materia
       return TextSpan(style: style, text: text);
     }
 
-    if (spellCheckerSuggestionSpans != null) {
+    if (spellCheckerSuggestionSpans != null ) {
+      // print("------------------------------------^^^^CORRECT CASE^^^^------------------------------------");
       return buildWithMisspelledWordsIndicated(spellCheckerSuggestionSpans, value, style);
     }
     else {
@@ -3289,6 +3290,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       );
     }
 
+    // print("------------------------------***-------ABOUT TO REBUILD TEXT SPAN-------***------------------------------");
     // Read only mode should not paint text composing.
     return widget.controller.buildTextSpan(
       context: context,
