@@ -334,7 +334,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
       _hidden = true;
       _updateOverlay();
       return KeyEventResult.handled;
-    } else if (_hidden && (event.logicalKey == LogicalKeyboardKey.arrowUp || event.logicalKey == LogicalKeyboardKey.arrowDown)){
+    } else if (_hidden && _options.isNotEmpty && (event.logicalKey == LogicalKeyboardKey.arrowUp || event.logicalKey == LogicalKeyboardKey.arrowDown)){
       _hidden = false;
       _updateOverlay();
       return KeyEventResult.handled;
