@@ -275,7 +275,7 @@ class TestWindow implements ui.SingletonFlutterWindow {
   bool get brieflyShowPassword => _brieflyShowPasswordTestValue ?? platformDispatcher.brieflyShowPassword;
   bool? _brieflyShowPasswordTestValue;
   /// Hides the real [brieflyShowPassword] and reports the given
-  /// `brieflyShowPassword` instead.
+  /// `brieflyShowPasswordTestValue` instead.
   set brieflyShowPasswordTestValue(bool brieflyShowPasswordTestValue) { // ignore: avoid_setters_without_getters
     _brieflyShowPasswordTestValue = brieflyShowPasswordTestValue;
   }
