@@ -335,7 +335,7 @@ def RunJavaTests(filter, android_variant='android_debug_unopt'):
   build_dir = os.path.join(out_dir, android_variant, 'robolectric_tests', 'build')
   gradle_cache_dir = os.path.join(out_dir, android_variant, 'robolectric_tests', '.gradle')
 
-  test_class = filter if filter else 'io.flutter.FlutterTestSuite'
+  test_class = filter if filter else '*'
   command = [
     gradle_bin,
     '-Pflutter_jar=%s' % flutter_jar,

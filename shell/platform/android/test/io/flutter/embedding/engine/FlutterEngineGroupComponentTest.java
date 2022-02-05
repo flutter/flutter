@@ -19,6 +19,7 @@ import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.content.res.AssetManager;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.FlutterInjector;
 import io.flutter.embedding.engine.dart.DartExecutor.DartEntrypoint;
 import io.flutter.embedding.engine.loader.FlutterLoader;
@@ -32,14 +33,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 // It's a component test because it tests the FlutterEngineGroup its components such as the
 // FlutterEngine and the DartExecutor.
 @Config(manifest = Config.NONE)
-@RunWith(RobolectricTestRunner.class)
+@RunWith(AndroidJUnit4.class)
 public class FlutterEngineGroupComponentTest {
   @Mock FlutterJNI mockflutterJNI;
   @Mock FlutterLoader mockFlutterLoader;

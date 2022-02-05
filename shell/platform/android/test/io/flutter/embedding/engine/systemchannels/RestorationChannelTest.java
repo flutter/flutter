@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 
 import android.annotation.TargetApi;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import java.util.HashMap;
@@ -17,13 +18,12 @@ import org.json.JSONException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 @Config(
     manifest = Config.NONE,
     shadows = {})
-@RunWith(RobolectricTestRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TargetApi(24)
 public class RestorationChannelTest {
   @Test

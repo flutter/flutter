@@ -37,6 +37,7 @@ import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import androidx.core.util.Consumer;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.window.layout.FoldingFeature;
 import androidx.window.layout.WindowLayoutInfo;
 import io.flutter.TestUtils;
@@ -59,7 +60,6 @@ import org.mockito.Spy;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.robolectric.Robolectric;
-import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
@@ -68,7 +68,7 @@ import org.robolectric.annotation.Implements;
 import org.robolectric.shadows.ShadowDisplay;
 
 @Config(manifest = Config.NONE)
-@RunWith(RobolectricTestRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TargetApi(30)
 public class FlutterViewTest {
   @Mock FlutterJNI mockFlutterJni;

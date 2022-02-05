@@ -32,6 +32,7 @@ import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import com.ibm.icu.lang.UCharacter;
 import com.ibm.icu.lang.UProperty;
 import io.flutter.embedding.android.KeyboardManager;
@@ -50,7 +51,6 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
@@ -61,7 +61,7 @@ import org.robolectric.shadows.ShadowInputMethodManager;
 @Config(
     manifest = Config.NONE,
     shadows = {InputConnectionAdaptorTest.TestImm.class})
-@RunWith(RobolectricTestRunner.class)
+@RunWith(AndroidJUnit4.class)
 public class InputConnectionAdaptorTest {
   @Mock KeyboardManager mockKeyboardManager;
   // Verifies the method and arguments for a captured method call.

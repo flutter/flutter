@@ -11,6 +11,7 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.LocaleList;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.TestUtils;
 import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.embedding.engine.dart.DartExecutor;
@@ -22,11 +23,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 @Config(manifest = Config.NONE)
-@RunWith(RobolectricTestRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TargetApi(24) // LocaleList and scriptCode are API 24+.
 public class LocalizationPluginTest {
   // This test should be synced with the version for API 24.
