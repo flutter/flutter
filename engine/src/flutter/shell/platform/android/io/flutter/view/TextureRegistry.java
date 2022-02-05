@@ -19,7 +19,6 @@ public interface TextureRegistry {
    *
    * @return A SurfaceTextureEntry.
    */
-  @NonNull
   SurfaceTextureEntry createSurfaceTexture();
 
   /**
@@ -27,13 +26,11 @@ public interface TextureRegistry {
    *
    * @return A SurfaceTextureEntry.
    */
-  @NonNull
   SurfaceTextureEntry registerSurfaceTexture(@NonNull SurfaceTexture surfaceTexture);
 
   /** A registry entry for a managed SurfaceTexture. */
   interface SurfaceTextureEntry {
     /** @return The managed SurfaceTexture. */
-    @NonNull
     SurfaceTexture surfaceTexture();
 
     /** @return The identity of this SurfaceTexture. */

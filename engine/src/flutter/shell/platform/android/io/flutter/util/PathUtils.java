@@ -6,12 +6,10 @@ package io.flutter.util;
 
 import android.content.Context;
 import android.os.Build;
-import androidx.annotation.NonNull;
 import java.io.File;
 
 public final class PathUtils {
-  @NonNull
-  public static String getFilesDir(@NonNull Context applicationContext) {
+  public static String getFilesDir(Context applicationContext) {
     File filesDir = applicationContext.getFilesDir();
     if (filesDir == null) {
       filesDir = new File(getDataDirPath(applicationContext), "files");
@@ -19,8 +17,7 @@ public final class PathUtils {
     return filesDir.getPath();
   }
 
-  @NonNull
-  public static String getDataDirectory(@NonNull Context applicationContext) {
+  public static String getDataDirectory(Context applicationContext) {
     final String name = "flutter";
     File flutterDir = applicationContext.getDir(name, Context.MODE_PRIVATE);
     if (flutterDir == null) {
@@ -29,8 +26,7 @@ public final class PathUtils {
     return flutterDir.getPath();
   }
 
-  @NonNull
-  public static String getCacheDirectory(@NonNull Context applicationContext) {
+  public static String getCacheDirectory(Context applicationContext) {
     File cacheDir;
     if (Build.VERSION.SDK_INT >= 21) {
       cacheDir = applicationContext.getCodeCacheDir();

@@ -67,7 +67,7 @@ public class SurfaceTextureWrapper {
 
   // Called by native.
   @SuppressWarnings("unused")
-  public void getTransformMatrix(@NonNull float[] mtx) {
+  public void getTransformMatrix(float[] mtx) {
     surfaceTexture.getTransformMatrix(mtx);
   }
 }

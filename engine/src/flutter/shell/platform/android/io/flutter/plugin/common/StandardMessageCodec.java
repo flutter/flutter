@@ -4,8 +4,6 @@
 
 package io.flutter.plugin.common;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import io.flutter.BuildConfig;
 import io.flutter.Log;
 import java.io.ByteArrayOutputStream;
@@ -67,8 +65,7 @@ public class StandardMessageCodec implements MessageCodec<Object> {
   public static final StandardMessageCodec INSTANCE = new StandardMessageCodec();
 
   @Override
-  @Nullable
-  public ByteBuffer encodeMessage(@Nullable Object message) {
+  public ByteBuffer encodeMessage(Object message) {
     if (message == null) {
       return null;
     }
@@ -80,8 +77,7 @@ public class StandardMessageCodec implements MessageCodec<Object> {
   }
 
   @Override
-  @Nullable
-  public Object decodeMessage(@Nullable ByteBuffer message) {
+  public Object decodeMessage(ByteBuffer message) {
     if (message == null) {
       return null;
     }
@@ -115,7 +111,7 @@ public class StandardMessageCodec implements MessageCodec<Object> {
    * Writes an int representing a size to the specified stream. Uses an expanding code of 1 to 5
    * bytes to optimize for small values.
    */
-  protected static final void writeSize(@NonNull ByteArrayOutputStream stream, int value) {
+  protected static final void writeSize(ByteArrayOutputStream stream, int value) {
     if (BuildConfig.DEBUG && 0 > value) {
       Log.e(TAG, "Attempted to write a negative size.");
     }
@@ -131,7 +127,7 @@ public class StandardMessageCodec implements MessageCodec<Object> {
   }
 
   /** Writes the least significant two bytes of the specified int to the specified stream. */
-  protected static final void writeChar(@NonNull ByteArrayOutputStream stream, int value) {
+  protected static final void writeChar(ByteArrayOutputStream stream, int value) {
     if (LITTLE_ENDIAN) {
       stream.write(value);
       stream.write(value >>> 8);
@@ -142,7 +138,7 @@ public class StandardMessageCodec implements MessageCodec<Object> {
   }
 
   /** Writes the specified int as 4 bytes to the specified stream. */
-  protected static final void writeInt(@NonNull ByteArrayOutputStream stream, int value) {
+  protected static final void writeInt(ByteArrayOutputStream stream, int value) {
     if (LITTLE_ENDIAN) {
       stream.write(value);
       stream.write(value >>> 8);
@@ -157,7 +153,7 @@ public class StandardMessageCodec implements MessageCodec<Object> {
   }
 
   /** Writes the specified long as 8 bytes to the specified stream. */
-  protected static final void writeLong(@NonNull ByteArrayOutputStream stream, long value) {
+  protected static final void writeLong(ByteArrayOutputStream stream, long value) {
     if (LITTLE_ENDIAN) {
       stream.write((byte) value);
       stream.write((byte) (value >>> 8));
@@ -180,18 +176,17 @@ public class StandardMessageCodec implements MessageCodec<Object> {
   }
 
   /** Writes the specified double as 4 bytes to the specified stream */
-  protected static final void writeFloat(@NonNull ByteArrayOutputStream stream, float value) {
+  protected static final void writeFloat(ByteArrayOutputStream stream, float value) {
     writeInt(stream, Float.floatToIntBits(value));
   }
 
   /** Writes the specified double as 8 bytes to the specified stream. */
-  protected static final void writeDouble(@NonNull ByteArrayOutputStream stream, double value) {
+  protected static final void writeDouble(ByteArrayOutputStream stream, double value) {
     writeLong(stream, Double.doubleToLongBits(value));
   }
 
   /** Writes the length and then the actual bytes of the specified array to the specified stream. */
-  protected static final void writeBytes(
-      @NonNull ByteArrayOutputStream stream, @NonNull byte[] bytes) {
+  protected static final void writeBytes(ByteArrayOutputStream stream, byte[] bytes) {
     writeSize(stream, bytes.length);
     stream.write(bytes, 0, bytes.length);
   }
@@ -201,7 +196,7 @@ public class StandardMessageCodec implements MessageCodec<Object> {
    * aligned to a whole multiple of the specified alignment. An example usage with alignment = 8 is
    * to ensure doubles are word-aligned in the stream.
    */
-  protected static final void writeAlignment(@NonNull ByteArrayOutputStream stream, int alignment) {
+  protected static final void writeAlignment(ByteArrayOutputStream stream, int alignment) {
     final int mod = stream.size() % alignment;
     if (mod != 0) {
       for (int i = 0; i < alignment - mod; i++) {
@@ -217,7 +212,7 @@ public class StandardMessageCodec implements MessageCodec<Object> {
    * <p>Subclasses can extend the codec by overriding this method, calling super for values that the
    * extension does not handle.
    */
-  protected void writeValue(@NonNull ByteArrayOutputStream stream, @NonNull Object value) {
+  protected void writeValue(ByteArrayOutputStream stream, Object value) {
     if (value == null || value.equals(null)) {
       stream.write(NULL);
     } else if (value instanceof Boolean) {
@@ -299,7 +294,7 @@ public class StandardMessageCodec implements MessageCodec<Object> {
   }
 
   /** Reads an int representing a size as written by writeSize. */
-  protected static final int readSize(@NonNull ByteBuffer buffer) {
+  protected static final int readSize(ByteBuffer buffer) {
     if (!buffer.hasRemaining()) {
       throw new IllegalArgumentException("Message corrupted");
     }
@@ -314,8 +309,7 @@ public class StandardMessageCodec implements MessageCodec<Object> {
   }
 
   /** Reads a byte array as written by writeBytes. */
-  @NonNull
-  protected static final byte[] readBytes(@NonNull ByteBuffer buffer) {
+  protected static final byte[] readBytes(ByteBuffer buffer) {
     final int length = readSize(buffer);
     final byte[] bytes = new byte[length];
     buffer.get(bytes);
@@ -323,7 +317,7 @@ public class StandardMessageCodec implements MessageCodec<Object> {
   }
 
   /** Reads alignment padding bytes as written by writeAlignment. */
-  protected static final void readAlignment(@NonNull ByteBuffer buffer, int alignment) {
+  protected static final void readAlignment(ByteBuffer buffer, int alignment) {
     final int mod = buffer.position() % alignment;
     if (mod != 0) {
       buffer.position(buffer.position() + alignment - mod);
@@ -331,8 +325,7 @@ public class StandardMessageCodec implements MessageCodec<Object> {
   }
 
   /** Reads a value as written by writeValue. */
-  @NonNull
-  protected final Object readValue(@NonNull ByteBuffer buffer) {
+  protected final Object readValue(ByteBuffer buffer) {
     if (!buffer.hasRemaining()) {
       throw new IllegalArgumentException("Message corrupted");
     }
@@ -346,8 +339,7 @@ public class StandardMessageCodec implements MessageCodec<Object> {
    * <p>Subclasses may extend the codec by overriding this method, calling super for types that the
    * extension does not handle.
    */
-  @Nullable
-  protected Object readValueOfType(byte type, @NonNull ByteBuffer buffer) {
+  protected Object readValueOfType(byte type, ByteBuffer buffer) {
     final Object result;
     switch (type) {
       case NULL:

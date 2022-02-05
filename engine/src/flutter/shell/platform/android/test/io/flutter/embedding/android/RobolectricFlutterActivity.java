@@ -1,7 +1,6 @@
 package io.flutter.embedding.android;
 
 import android.content.Intent;
-import androidx.annotation.NonNull;
 import org.robolectric.Robolectric;
 import org.robolectric.android.controller.ActivityController;
 
@@ -15,8 +14,7 @@ public class RobolectricFlutterActivity {
    * Creates a {@code FlutterActivity} that is controlled by Robolectric, which otherwise can not be
    * done in a test outside of the io.flutter.embedding.android package.
    */
-  @NonNull
-  public static FlutterActivity createFlutterActivity(@NonNull Intent intent) {
+  public static FlutterActivity createFlutterActivity(Intent intent) {
     ActivityController<FlutterActivity> activityController =
         Robolectric.buildActivity(FlutterActivity.class, intent);
     FlutterActivity flutterActivity = activityController.get();
@@ -28,9 +26,8 @@ public class RobolectricFlutterActivity {
    * Returns a given {@code FlutterActivity}'s {@code BackgroundMode} for use by tests that do not
    * sit in the {@code io.flutter.embedding.android} package.
    */
-  @NonNull
   public static FlutterActivityLaunchConfigs.BackgroundMode getBackgroundMode(
-      @NonNull FlutterActivity activity) {
+      FlutterActivity activity) {
     return activity.getBackgroundMode();
   }
 }
