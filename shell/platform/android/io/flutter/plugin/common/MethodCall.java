@@ -4,6 +4,7 @@
 
 package io.flutter.plugin.common;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import io.flutter.BuildConfig;
 import java.util.Map;
@@ -27,9 +28,10 @@ public final class MethodCall {
    * Creates a {@link MethodCall} with the specified method name and arguments.
    *
    * @param method the method name String, not null.
-   * @param arguments the arguments, a value supported by the channel's message codec.
+   * @param arguments the arguments, a value supported by the channel's message codec. Possibly,
+   *     null.
    */
-  public MethodCall(String method, Object arguments) {
+  public MethodCall(@NonNull String method, @Nullable Object arguments) {
     if (BuildConfig.DEBUG && method == null) {
       throw new AssertionError("Parameter method must not be null.");
     }
@@ -44,6 +46,7 @@ public final class MethodCall {
    * @return the arguments with static type T
    */
   @SuppressWarnings("unchecked")
+  @Nullable
   public <T> T arguments() {
     return (T) arguments;
   }
@@ -62,7 +65,7 @@ public final class MethodCall {
    */
   @SuppressWarnings("unchecked")
   @Nullable
-  public <T> T argument(String key) {
+  public <T> T argument(@NonNull String key) {
     if (arguments == null) {
       return null;
     } else if (arguments instanceof Map) {
@@ -85,7 +88,7 @@ public final class MethodCall {
    * @throws ClassCastException if {@link #arguments} can be cast to neither {@link Map} nor {@link
    *     JSONObject}.
    */
-  public boolean hasArgument(String key) {
+  public boolean hasArgument(@NonNull String key) {
     if (arguments == null) {
       return false;
     } else if (arguments instanceof Map) {

@@ -110,6 +110,7 @@ public class LocalizationChannel {
      * The Flutter application would like to obtain the string resource of given {@code key} in
      * {@code locale}.
      */
-    String getStringResource(@NonNull String key, String locale);
+    @NonNull
+    String getStringResource(@NonNull String key, @NonNull String locale);
   }
 }
