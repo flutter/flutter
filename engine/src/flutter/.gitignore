@@ -133,3 +133,6 @@ app.*.symbols
 
 # Prebuilt binaries.
 /prebuilts/
+
+# DEPS'd in impeller
+/impeller/
