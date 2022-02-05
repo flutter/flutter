@@ -4359,7 +4359,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
 
   /// A short, textual description of this element.
   @override
-  String toStringShort() => _widget?.toStringShort() ?? '${describeIdentity(this)}(DEFUNCT)';
+  String toStringShort() =>_widget?.toStringShort() ?? '${describeIdentity(this)}(DEFUNCT)';
 
   @override
   DiagnosticsNode toDiagnosticsNode({ String? name, DiagnosticsTreeStyle? style }) {
@@ -4377,7 +4377,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     if (_lifecycleState != _ElementLifecycle.initial) {
       properties.add(ObjectFlagProperty<int>('depth', depth, ifNull: 'no depth'));
     }
-    properties.add(ObjectFlagProperty<Widget>('widget', _widget, ifNull: 'no widget'));
+    properties.add(ObjectFlagProperty<Widget>('widget',_widget, ifNull: 'no widget'));
     properties.add(DiagnosticsProperty<Key>('key', _widget?.key, showName: false, defaultValue: null, level: DiagnosticLevel.hidden));
     _widget?.debugFillProperties(properties);
     properties.add(FlagProperty('dirty', value: dirty, ifTrue: 'dirty'));
@@ -5421,19 +5421,24 @@ class InheritedElement extends ProxyElement {
 /// ### Specializing the getters
 ///
 /// [RenderObjectElement] objects spend much of their time acting as
-/// intermediaries between their [widget] and their [renderObject]. To make this
-/// more tractable, most [RenderObjectElement] subclasses override these getters
-/// so that they return the specific type that the element expects, e.g.:
+/// intermediaries between their [widget] and their [renderObject]. It is
+/// generally recommended against specializing the [widget] getter and
+/// instead casting at the various callsites to avoid adding overhead
+/// outside of this particular implementation. If the [widget] getter
+/// is widely used, a separte getter that specializes the Widget type
+/// should be used instead.
 ///
 /// ```dart
 /// class FooElement extends RenderObjectElement {
 ///
 ///   @override
-///   Foo get widget => super.widget as Foo;
-///
-///   @override
 ///   RenderFoo get renderObject => super.renderObject as RenderFoo;
 ///
+///   void _foo() {
+///     final Foo foo = widget as Foo;
+///   }
+///
+///   Foo get fooWidget => widget as Foo;
 ///   // ...
 /// }
 /// ```
@@ -5615,7 +5620,7 @@ abstract class RenderObjectElement extends Element {
             ErrorSummary('Incorrect use of ParentDataWidget.'),
             ErrorDescription('The following ParentDataWidgets are providing parent data to the same RenderObject:'),
             for (final ParentDataElement<ParentData> ancestor in badAncestors)
-              ErrorDescription('- ${ancestor.widget} (typically placed directly inside a ${(widget as ParentDataWidget<ParentData>).debugTypicalAncestorWidgetClass} widget)'),
+              ErrorDescription('- ${ancestor.widget} (typically placed directly inside a ${(ancestor.widget as ParentDataWidget<ParentData>).debugTypicalAncestorWidgetClass} widget)'),
             ErrorDescription('However, a RenderObject can only receive parent data from at most one ParentDataWidget.'),
             ErrorHint('Usually, this indicates that at least one of the offending ParentDataWidgets listed above is not placed directly inside a compatible ancestor widget.'),
             ErrorDescription('The ownership chain for the RenderObject that received the parent data was:\n  ${debugGetCreatorChain(10)}'),
@@ -5973,7 +5978,7 @@ abstract class RenderObjectElement extends Element {
     _ancestorRenderObjectElement?.insertRenderObjectChild(renderObject, newSlot);
     final ParentDataElement<ParentData>? parentDataElement = _findAncestorParentDataElement();
     if (parentDataElement != null)
-      _updateParentData(widget as ParentDataWidget<ParentData>);
+      _updateParentData(parentDataElement.widget as ParentDataWidget<ParentData>);
   }
 
   @override
