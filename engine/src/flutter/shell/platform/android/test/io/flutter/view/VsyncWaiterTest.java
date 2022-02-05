@@ -18,16 +18,16 @@ import android.annotation.TargetApi;
 import android.hardware.display.DisplayManager;
 import android.os.Looper;
 import android.view.Display;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.embedding.engine.FlutterJNI;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 @Config(manifest = Config.NONE)
-@RunWith(RobolectricTestRunner.class)
+@RunWith(AndroidJUnit4.class)
 public class VsyncWaiterTest {
   @Before
   public void setUp() {

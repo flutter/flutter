@@ -13,6 +13,7 @@ import android.annotation.TargetApi;
 import android.util.SparseArray;
 import android.view.InputDevice;
 import android.view.KeyEvent;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.common.JSONMessageCodec;
 import io.flutter.util.FakeKeyEvent;
@@ -26,7 +27,6 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
@@ -34,7 +34,7 @@ import org.robolectric.annotation.Resetter;
 import org.robolectric.shadow.api.Shadow;
 
 @Config(manifest = Config.NONE)
-@RunWith(RobolectricTestRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TargetApi(24)
 public class KeyEventChannelTest {
 

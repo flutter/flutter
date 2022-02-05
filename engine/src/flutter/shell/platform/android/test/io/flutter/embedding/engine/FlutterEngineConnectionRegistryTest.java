@@ -11,6 +11,7 @@ import android.content.Context;
 import android.content.Intent;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.Lifecycle;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.embedding.android.ExclusiveAppComponent;
 import io.flutter.embedding.engine.loader.FlutterLoader;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
@@ -21,12 +22,11 @@ import io.flutter.plugin.platform.PlatformViewsController;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 // Run with Robolectric so that Log calls don't crash.
 @Config(manifest = Config.NONE)
-@RunWith(RobolectricTestRunner.class)
+@RunWith(AndroidJUnit4.class)
 public class FlutterEngineConnectionRegistryTest {
   @Test
   public void itDoesNotRegisterTheSamePluginTwice() {

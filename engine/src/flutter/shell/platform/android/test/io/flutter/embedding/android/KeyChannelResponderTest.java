@@ -7,6 +7,7 @@ import static org.mockito.Mockito.doAnswer;
 import android.annotation.TargetApi;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.embedding.engine.systemchannels.KeyEventChannel;
 import io.flutter.embedding.engine.systemchannels.KeyEventChannel.EventResponseHandler;
 import io.flutter.embedding.engine.systemchannels.KeyEventChannel.FlutterKeyEvent;
@@ -15,11 +16,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 @Config(manifest = Config.NONE)
-@RunWith(RobolectricTestRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TargetApi(28)
 public class KeyChannelResponderTest {
 

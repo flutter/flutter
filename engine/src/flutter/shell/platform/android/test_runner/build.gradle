@@ -17,9 +17,15 @@ apply plugin: "com.android.library"
 
 rootProject.buildDir = project.property("build_dir")
 
+def availableProcessors = Runtime.runtime.availableProcessors() ?: 1
+
+println "=========================================="
+println "AVAILABLE PROCESSORS: $availableProcessors"
+println "=========================================="
 
 android {
   compileSdkVersion 31
+
   defaultConfig {
     minSdkVersion 16
   }
@@ -32,6 +38,17 @@ android {
   testOptions {
     unitTests {
       includeAndroidResources = true
+    }
+
+    unitTests.all {
+      jvmArgs "-Xmx8g" // Max JVM heap size is 8G/30G available in the CI bot.
+      maxHeapSize "8g"
+      maxParallelForks availableProcessors // The CI bot has 8 CPUs.
+      testLogging {
+        events "passed", "skipped", "failed", "standardOut", "standardError"
+        exceptionFormat "full"
+        showStackTraces true
+      }
     }
   }
 
@@ -46,6 +63,7 @@ android {
     testImplementation "com.ibm.icu:icu4j:69.1"
     testImplementation "org.robolectric:robolectric:4.7.3"
     testImplementation "junit:junit:4.13"
+    testImplementation "androidx.test.ext:junit:1.1.3"
 
     def mockitoVersion = "4.1.0"
     testImplementation "org.mockito:mockito-core:$mockitoVersion"
@@ -68,16 +86,6 @@ android {
           srcDirs = ["../test"]
        }
       }
-    }
-  }
-
-  testOptions.unitTests.all {
-    jvmArgs "-Xmx4g" // Max JVM heap size is 4G.
-
-    testLogging {
-      events "passed", "skipped", "failed", "standardOut", "standardError"
-      exceptionFormat "full"
-      showStackTraces true
     }
   }
 }

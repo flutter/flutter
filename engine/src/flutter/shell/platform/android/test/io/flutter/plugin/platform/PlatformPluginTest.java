@@ -25,6 +25,7 @@ import android.view.Window;
 import android.view.WindowInsetsController;
 import androidx.activity.OnBackPressedCallback;
 import androidx.fragment.app.FragmentActivity;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.embedding.engine.systemchannels.PlatformChannel;
 import io.flutter.embedding.engine.systemchannels.PlatformChannel.Brightness;
 import io.flutter.embedding.engine.systemchannels.PlatformChannel.ClipboardContentFormat;
@@ -35,12 +36,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
-import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 @Config(manifest = Config.NONE)
-@RunWith(RobolectricTestRunner.class)
+@RunWith(AndroidJUnit4.class)
 public class PlatformPluginTest {
   @Config(sdk = 16)
   @Test

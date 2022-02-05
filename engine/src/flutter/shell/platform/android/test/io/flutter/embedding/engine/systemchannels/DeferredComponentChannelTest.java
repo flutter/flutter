@@ -4,6 +4,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import android.content.res.AssetManager;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.deferredcomponents.DeferredComponentManager;
@@ -13,7 +14,6 @@ import java.util.HashMap;
 import java.util.Map;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 class TestDeferredComponentManager implements DeferredComponentManager {
@@ -50,7 +50,7 @@ class TestDeferredComponentManager implements DeferredComponentManager {
 }
 
 @Config(manifest = Config.NONE)
-@RunWith(RobolectricTestRunner.class)
+@RunWith(AndroidJUnit4.class)
 public class DeferredComponentChannelTest {
   @Test
   public void deferredComponentChannel_installCompletesResults() {
