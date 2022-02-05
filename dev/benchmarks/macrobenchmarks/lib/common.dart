@@ -22,6 +22,16 @@ const String kSimpleScrollRouteName = '/simple_scroll';
 const String kStackSizeRouteName = '/stack_size';
 const String kAnimationWithMicrotasksRouteName = '/animation_with_microtasks';
 const String kAnimatedImageRouteName = '/animated_image';
+const String kOpacityPeepholeRouteName = '/opacity_peephole';
+
+const String kOpacityPeepholeOneRectRouteName = '$kOpacityPeepholeRouteName/one_big_rect';
+const String kOpacityPeepholeColumnOfOpacityRouteName = '$kOpacityPeepholeRouteName/column_of_opacity';
+const String kOpacityPeepholeOpacityOfCachedChildRouteName = '$kOpacityPeepholeRouteName/opacity_of_cached_child';
+const String kOpacityPeepholeOpacityOfColumnRouteName = '$kOpacityPeepholeRouteName/opacity_of_column';
+const String kOpacityPeepholeGridOfOpacityRouteName = '$kOpacityPeepholeRouteName/grid_of_opacity';
+const String kOpacityPeepholeOpacityOfGridRouteName = '$kOpacityPeepholeRouteName/opacity_of_grid';
+const String kOpacityPeepholeOpacityOfColOfRowsRouteName = '$kOpacityPeepholeRouteName/opacity_of_col_of_rows';
+const String kOpacityPeepholeFadeTransitionTextRouteName = '$kOpacityPeepholeRouteName/fade_transition_text';
 
 const String kScrollableName = '/macrobenchmark_listview';
 

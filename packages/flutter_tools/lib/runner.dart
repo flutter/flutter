@@ -19,7 +19,7 @@ import 'src/base/logger.dart';
 import 'src/base/process.dart';
 import 'src/context_runner.dart';
 import 'src/doctor.dart';
-import 'src/globals_null_migrated.dart' as globals;
+import 'src/globals.dart' as globals;
 import 'src/reporting/crash_reporting.dart';
 import 'src/runner/flutter_command.dart';
 import 'src/runner/flutter_command_runner.dart';
@@ -39,7 +39,7 @@ Future<int> run(
     // Remove the verbose option; for help and doctor, users don't need to see
     // verbose logs.
     args = List<String>.of(args);
-    args.removeWhere((String option) => option == '-v' || option == '--verbose');
+    args.removeWhere((String option) => option == '-vv' || option == '-v' || option == '--verbose');
   }
 
   return runInContext<int>(() async {

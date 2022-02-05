@@ -2160,6 +2160,195 @@ void main() {
     expect(secondItem.padding, secondItemPadding);
     expect(thirdItem.padding, thirdItemPadding);
   });
+
+  testWidgets('NavigationRailDestination adds indicator by default when ThemeData.useMaterial3 is true', (WidgetTester tester) async {
+    await _pumpNavigationRail(
+      tester,
+      theme: ThemeData(useMaterial3: true),
+      navigationRail: NavigationRail(
+        labelType: NavigationRailLabelType.selected,
+        selectedIndex: 0,
+        destinations: const <NavigationRailDestination>[
+          NavigationRailDestination(
+            icon: Icon(Icons.favorite_border),
+            selectedIcon: Icon(Icons.favorite),
+            label: Text('Abc'),
+          ),
+          NavigationRailDestination(
+            icon: Icon(Icons.bookmark_border),
+            selectedIcon: Icon(Icons.bookmark),
+            label: Text('Def'),
+          ),
+          NavigationRailDestination(
+            icon: Icon(Icons.star_border),
+            selectedIcon: Icon(Icons.star),
+            label: Text('Ghi'),
+          ),
+        ],
+      ),
+    );
+
+    expect(find.byType(NavigationIndicator), findsWidgets);
+  });
+
+  testWidgets('NavigationRailDestination adds indicator when useIndicator is true', (WidgetTester tester) async {
+    await _pumpNavigationRail(
+      tester,
+      navigationRail: NavigationRail(
+        useIndicator: true,
+        labelType: NavigationRailLabelType.selected,
+        selectedIndex: 0,
+        destinations: const <NavigationRailDestination>[
+          NavigationRailDestination(
+            icon: Icon(Icons.favorite_border),
+            selectedIcon: Icon(Icons.favorite),
+            label: Text('Abc'),
+          ),
+          NavigationRailDestination(
+            icon: Icon(Icons.bookmark_border),
+            selectedIcon: Icon(Icons.bookmark),
+            label: Text('Def'),
+          ),
+          NavigationRailDestination(
+            icon: Icon(Icons.star_border),
+            selectedIcon: Icon(Icons.star),
+            label: Text('Ghi'),
+          ),
+        ],
+      ),
+    );
+
+    expect(find.byType(NavigationIndicator), findsWidgets);
+  });
+
+  testWidgets('NavigationRailDestination does not add indicator when useIndicator is false', (WidgetTester tester) async {
+    await _pumpNavigationRail(
+      tester,
+      navigationRail: NavigationRail(
+        useIndicator: false,
+        labelType: NavigationRailLabelType.selected,
+        selectedIndex: 0,
+        destinations: const <NavigationRailDestination>[
+          NavigationRailDestination(
+            icon: Icon(Icons.favorite_border),
+            selectedIcon: Icon(Icons.favorite),
+            label: Text('Abc'),
+          ),
+          NavigationRailDestination(
+            icon: Icon(Icons.bookmark_border),
+            selectedIcon: Icon(Icons.bookmark),
+            label: Text('Def'),
+          ),
+          NavigationRailDestination(
+            icon: Icon(Icons.star_border),
+            selectedIcon: Icon(Icons.star),
+            label: Text('Ghi'),
+          ),
+        ],
+      ),
+    );
+
+    expect(find.byType(NavigationIndicator), findsNothing);
+  });
+
+  testWidgets('NavigationRailDestination adds circular indicator when no labels are present', (WidgetTester tester) async {
+    await _pumpNavigationRail(
+      tester,
+      navigationRail: NavigationRail(
+        useIndicator: true,
+        labelType: NavigationRailLabelType.none,
+        selectedIndex: 0,
+        destinations: const <NavigationRailDestination>[
+          NavigationRailDestination(
+            icon: Icon(Icons.favorite_border),
+            selectedIcon: Icon(Icons.favorite),
+            label: Text('Abc'),
+          ),
+          NavigationRailDestination(
+            icon: Icon(Icons.bookmark_border),
+            selectedIcon: Icon(Icons.bookmark),
+            label: Text('Def'),
+          ),
+          NavigationRailDestination(
+            icon: Icon(Icons.star_border),
+            selectedIcon: Icon(Icons.star),
+            label: Text('Ghi'),
+          ),
+        ],
+      ),
+    );
+
+    final NavigationIndicator indicator = tester.widget<NavigationIndicator>(find.byType(NavigationIndicator).first);
+
+    expect(indicator.width, 56);
+    expect(indicator.height, 56);
+  });
+
+  testWidgets('NavigationRailDestination adds circular indicator when selected labels are present', (WidgetTester tester) async {
+    await _pumpNavigationRail(
+      tester,
+      navigationRail: NavigationRail(
+        useIndicator: true,
+        labelType: NavigationRailLabelType.selected,
+        selectedIndex: 0,
+        destinations: const <NavigationRailDestination>[
+          NavigationRailDestination(
+            icon: Icon(Icons.favorite_border),
+            selectedIcon: Icon(Icons.favorite),
+            label: Text('Abc'),
+          ),
+          NavigationRailDestination(
+            icon: Icon(Icons.bookmark_border),
+            selectedIcon: Icon(Icons.bookmark),
+            label: Text('Def'),
+          ),
+          NavigationRailDestination(
+            icon: Icon(Icons.star_border),
+            selectedIcon: Icon(Icons.star),
+            label: Text('Ghi'),
+          ),
+        ],
+      ),
+    );
+
+    final NavigationIndicator indicator = tester.widget<NavigationIndicator>(find.byType(NavigationIndicator).first);
+
+    expect(indicator.width, 56);
+    expect(indicator.height, 32);
+  });
+
+  testWidgets('NavigationRailDestination adds circular indicator when all labels are present', (WidgetTester tester) async {
+    await _pumpNavigationRail(
+      tester,
+      navigationRail: NavigationRail(
+        useIndicator: true,
+        labelType: NavigationRailLabelType.all,
+        selectedIndex: 0,
+        destinations: const <NavigationRailDestination>[
+          NavigationRailDestination(
+            icon: Icon(Icons.favorite_border),
+            selectedIcon: Icon(Icons.favorite),
+            label: Text('Abc'),
+          ),
+          NavigationRailDestination(
+            icon: Icon(Icons.bookmark_border),
+            selectedIcon: Icon(Icons.bookmark),
+            label: Text('Def'),
+          ),
+          NavigationRailDestination(
+            icon: Icon(Icons.star_border),
+            selectedIcon: Icon(Icons.star),
+            label: Text('Ghi'),
+          ),
+        ],
+      ),
+    );
+
+    final NavigationIndicator indicator = tester.widget<NavigationIndicator>(find.byType(NavigationIndicator).first);
+
+    expect(indicator.width, 56);
+    expect(indicator.height, 32);
+  });
 }
 
 TestSemantics _expectedSemantics() {
@@ -2243,9 +2432,11 @@ Future<void> _pumpNavigationRail(
   WidgetTester tester, {
   double textScaleFactor = 1.0,
   required NavigationRail navigationRail,
+  ThemeData? theme,
 }) async {
   await tester.pumpWidget(
     MaterialApp(
+      theme: theme,
       home: Builder(
         builder: (BuildContext context) {
           return MediaQuery(

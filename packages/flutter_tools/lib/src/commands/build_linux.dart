@@ -12,7 +12,7 @@ import '../base/os.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../features.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../linux/build_linux.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult;
@@ -23,7 +23,8 @@ class BuildLinuxCommand extends BuildSubCommand {
   BuildLinuxCommand({
     @required OperatingSystemUtils operatingSystemUtils,
     bool verboseHelp = false,
-  }) : _operatingSystemUtils = operatingSystemUtils {
+  }) : _operatingSystemUtils = operatingSystemUtils,
+       super(verboseHelp: verboseHelp) {
     addCommonDesktopBuildOptions(verboseHelp: verboseHelp);
     final String defaultTargetPlatform =
         (_operatingSystemUtils.hostPlatform == HostPlatform.linux_arm64) ?

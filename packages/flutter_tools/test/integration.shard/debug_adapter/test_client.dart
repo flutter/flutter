@@ -56,6 +56,10 @@ class DapTestClient {
   Stream<OutputEventBody> get outputEvents => events('output')
       .map((Event e) => OutputEventBody.fromJson(e.body! as Map<String, Object?>));
 
+  /// Returns a stream of [StoppedEventBody] events.
+  Stream<StoppedEventBody> get stoppedEvents => events('stopped')
+      .map((Event e) => StoppedEventBody.fromJson(e.body! as Map<String, Object?>));
+
   /// Returns a stream of the string output from [OutputEventBody] events.
   Stream<String> get output => outputEvents.map((OutputEventBody output) => output.output);
 
@@ -73,6 +77,16 @@ class DapTestClient {
   Stream<Event> events(String event) {
     return _eventController.stream.where((Event e) => e.event == event);
   }
+
+  /// Returns a stream of custom 'dart.serviceExtensionAdded' events.
+  Stream<Map<String, Object?>> get serviceExtensionAddedEvents =>
+      events('dart.serviceExtensionAdded')
+          .map((Event e) => e.body! as Map<String, Object?>);
+
+  /// Returns a stream of custom 'flutter.serviceExtensionStateChanged' events.
+  Stream<Map<String, Object?>> get serviceExtensionStateChangedEvents =>
+      events('flutter.serviceExtensionStateChanged')
+          .map((Event e) => e.body! as Map<String, Object?>);
 
   /// Returns a stream of 'dart.testNotification' custom events from the
   /// package:test JSON reporter.
@@ -167,15 +181,28 @@ class DapTestClient {
     return completer.future;
   }
 
+  /// Returns a Future that completes with the next serviceExtensionAdded
+  /// event for [extension].
+  Future<Map<String, Object?>> serviceExtensionAdded(String extension) => serviceExtensionAddedEvents.firstWhere(
+      (Map<String, Object?> body) => body['extensionRPC'] == extension,
+      orElse: () => throw 'Did not recieve $extension extension added event before stream closed');
+
+  /// Returns a Future that completes with the next serviceExtensionStateChanged
+  /// event for [extension].
+  Future<Map<String, Object?>> serviceExtensionStateChanged(String extension) => serviceExtensionStateChangedEvents.firstWhere(
+      (Map<String, Object?> body) => body['extension'] == extension,
+      orElse: () => throw 'Did not recieve $extension extension state changed event before stream closed');
+
   /// Initializes the debug adapter and launches [program]/[cwd] or calls the
   /// custom [launch] method.
   Future<void> start({
     String? program,
     String? cwd,
+    String exceptionPauseMode = 'None',
     Future<Object?> Function()? launch,
   }) {
     return Future.wait(<Future<Object?>>[
-      initialize(),
+      initialize(exceptionPauseMode: exceptionPauseMode),
       launch?.call() ?? this.launch(program: program, cwd: cwd),
     ], eagerError: true);
   }
@@ -201,7 +228,7 @@ class DapTestClient {
       } else {
         completer.completeError(message);
       }
-    } else if (message is Event) {
+    } else if (message is Event && !_eventController.isClosed) {
       _eventController.add(message);
 
       // When we see a terminated event, close the event stream so if any

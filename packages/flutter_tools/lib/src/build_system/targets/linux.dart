@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import '../../artifacts.dart';
 import '../../base/file_system.dart';
 import '../../build_info.dart';
@@ -49,7 +47,11 @@ class UnpackLinux extends Target {
 
   @override
   Future<void> build(Environment environment) async {
-    final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
+    final String? buildModeEnvironment = environment.defines[kBuildMode];
+    if (buildModeEnvironment == null) {
+      throw MissingDefineException(kBuildMode, name);
+    }
+    final BuildMode buildMode = getBuildModeForName(buildModeEnvironment);
     final String engineSourcePath = environment.artifacts
       .getArtifactPath(
         Artifact.linuxDesktopPath,
@@ -117,10 +119,11 @@ abstract class BundleLinuxAssets extends Target {
 
   @override
   Future<void> build(Environment environment) async {
-    if (environment.defines[kBuildMode] == null) {
+    final String? buildModeEnvironment = environment.defines[kBuildMode];
+    if (buildModeEnvironment == null) {
       throw MissingDefineException(kBuildMode, 'bundle_linux_assets');
     }
-    final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
+    final BuildMode buildMode = getBuildModeForName(buildModeEnvironment);
     final Directory outputDirectory = environment.outputDir
       .childDirectory('flutter_assets');
     if (!outputDirectory.existsSync()) {

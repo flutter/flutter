@@ -116,14 +116,14 @@ Future<void> testWithNewIOSSimulator(
 }
 
 /// Shuts down and deletes simulator with deviceId.
-Future<void> removeIOSimulator(String deviceId) async {
+Future<void> removeIOSimulator(String? deviceId) async {
   if (deviceId != null && deviceId != '') {
     await eval(
       'xcrun',
       <String>[
         'simctl',
         'shutdown',
-        deviceId
+        deviceId,
       ],
       canFail: true,
       workingDirectory: flutterDirectory.path,
@@ -133,20 +133,30 @@ Future<void> removeIOSimulator(String deviceId) async {
       <String>[
         'simctl',
         'delete',
-        deviceId],
+        deviceId,
+      ],
       canFail: true,
       workingDirectory: flutterDirectory.path,
     );
   }
 }
 
-Future<bool> runXcodeTests(String platformDirectory, String destination, String testName) async {
+Future<bool> runXcodeTests({
+  required String platformDirectory,
+  required String destination,
+  required String testName,
+  bool skipCodesign = false,
+}) async {
   final Map<String, String> environment = Platform.environment;
-  // If not running on CI, inject the Flutter team code signing properties.
-  final String developmentTeam = environment['FLUTTER_XCODE_DEVELOPMENT_TEAM'] ?? 'S8QB4VV633';
-  final String? codeSignStyle = environment['FLUTTER_XCODE_CODE_SIGN_STYLE'];
-  final String? provisioningProfile = environment['FLUTTER_XCODE_PROVISIONING_PROFILE_SPECIFIER'];
-
+  String? developmentTeam;
+  String? codeSignStyle;
+  String? provisioningProfile;
+  if (!skipCodesign) {
+    // If not running on CI, inject the Flutter team code signing properties.
+    developmentTeam = environment['FLUTTER_XCODE_DEVELOPMENT_TEAM'] ?? 'S8QB4VV633';
+    codeSignStyle = environment['FLUTTER_XCODE_CODE_SIGN_STYLE'];
+    provisioningProfile = environment['FLUTTER_XCODE_PROVISIONING_PROFILE_SPECIFIER'];
+  }
   final String resultBundleTemp = Directory.systemTemp.createTempSync('flutter_xcresult.').path;
   final String resultBundlePath = path.join(resultBundleTemp, 'result');
   final int testResultExit = await exec(
@@ -164,7 +174,8 @@ Future<bool> runXcodeTests(String platformDirectory, String destination, String 
       resultBundlePath,
       'test',
       'COMPILER_INDEX_STORE_ENABLE=NO',
-      'DEVELOPMENT_TEAM=$developmentTeam',
+      if (developmentTeam != null)
+        'DEVELOPMENT_TEAM=$developmentTeam',
       if (codeSignStyle != null)
         'CODE_SIGN_STYLE=$codeSignStyle',
       if (provisioningProfile != null)

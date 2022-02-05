@@ -21,7 +21,7 @@ import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/commands/create_base.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:process/process.dart';
@@ -147,6 +147,8 @@ void main() {
       projectDir,
       <String>['-t', 'skeleton', '-i', 'objc', '-a', 'java', '--implementation-tests'],
       <String>[
+        '.dart_tool/flutter_gen/pubspec.yaml',
+        '.dart_tool/flutter_gen/gen_l10n/app_localizations.dart',
         'analysis_options.yaml',
         'android/app/src/main/java/com/example/flutter_project/MainActivity.java',
         'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
@@ -1020,6 +1022,7 @@ void main() {
     expect(resourceFile, exists);
     final String contents = resourceFile.readAsStringSync();
     expect(contents, contains('"CompanyName", "com.foo.bar"'));
+    expect(contents, contains('"FileDescription", "flutter_project"'));
     expect(contents, contains('"ProductName", "flutter_project"'));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
@@ -1361,84 +1364,6 @@ void main() {
     FlutterVersion: () => fakeFlutterVersion,
     Platform: _kNoColorTerminalMacOSPlatform,
     ProcessManager: () => fakeProcessManager,
-  });
-
-  testUsingContext('UIViewControllerBasedStatusBarAppearance is YES for objc iOS project.', () async {
-    Cache.flutterRoot = '../..';
-
-    final CreateCommand command = CreateCommand();
-    final CommandRunner<void> runner = createTestCommandRunner(command);
-
-    await runner.run(<String>['create', '--template=app', '--no-pub', '--org', 'com.foo.bar','--ios-language=objc', '--project-name=my_project', projectDir.path]);
-
-    final String plistPath = globals.fs.path.join('ios', 'Runner', 'Info.plist');
-    final File plistFile = globals.fs.file(globals.fs.path.join(projectDir.path, plistPath));
-    expect(plistFile, exists);
-    final bool viewControllerBasedStatusBarAppearance = _getBooleanValueFromPlist(plistFile: plistFile, key: 'UIViewControllerBasedStatusBarAppearance');
-    expect(viewControllerBasedStatusBarAppearance, true);
-  });
-
-  testUsingContext('UIViewControllerBasedStatusBarAppearance is YES for objc swift project.', () async {
-    Cache.flutterRoot = '../..';
-
-    final CreateCommand command = CreateCommand();
-    final CommandRunner<void> runner = createTestCommandRunner(command);
-
-    await runner.run(<String>['create', '--template=app', '--no-pub', '--org', 'com.foo.bar','--ios-language=swift', '--project-name=my_project', projectDir.path]);
-
-    final String plistPath = globals.fs.path.join('ios', 'Runner', 'Info.plist');
-    final File plistFile = globals.fs.file(globals.fs.path.join(projectDir.path, plistPath));
-    expect(plistFile, exists);
-    final bool viewControllerBasedStatusBarAppearance = _getBooleanValueFromPlist(plistFile: plistFile, key: 'UIViewControllerBasedStatusBarAppearance');
-    expect(viewControllerBasedStatusBarAppearance, true);
-  });
-
-  testUsingContext('UIViewControllerBasedStatusBarAppearance is YES for objc iOS module.', () async {
-    Cache.flutterRoot = '../..';
-
-    final CreateCommand command = CreateCommand();
-    final CommandRunner<void> runner = createTestCommandRunner(command);
-
-    await runner.run(<String>['create', '--template=module', '--org', 'com.foo.bar','--ios-language=objc', '--project-name=my_project', projectDir.path]);
-
-    final String plistPath = globals.fs.path.join('.ios', 'Runner', 'Info.plist');
-    final File plistFile = globals.fs.file(globals.fs.path.join(projectDir.path, plistPath));
-    expect(plistFile, exists);
-    final bool viewControllerBasedStatusBarAppearance = _getBooleanValueFromPlist(plistFile: plistFile, key: 'UIViewControllerBasedStatusBarAppearance');
-    expect(viewControllerBasedStatusBarAppearance, true);
-  }, overrides: <Type, Generator>{
-    Pub: () => Pub(
-      fileSystem: globals.fs,
-      logger: globals.logger,
-      processManager: globals.processManager,
-      usage: globals.flutterUsage,
-      botDetector: globals.botDetector,
-      platform: globals.platform,
-    ),
-  });
-
-  testUsingContext('UIViewControllerBasedStatusBarAppearance is YES for swift iOS module.', () async {
-    Cache.flutterRoot = '../..';
-
-    final CreateCommand command = CreateCommand();
-    final CommandRunner<void> runner = createTestCommandRunner(command);
-
-    await runner.run(<String>['create', '--template=module', '--org', 'com.foo.bar','--ios-language=swift', '--project-name=my_project', projectDir.path]);
-
-    final String plistPath = globals.fs.path.join('.ios', 'Runner', 'Info.plist');
-    final File plistFile = globals.fs.file(globals.fs.path.join(projectDir.path, plistPath));
-    expect(plistFile, exists);
-    final bool viewControllerBasedStatusBarAppearance = _getBooleanValueFromPlist(plistFile: plistFile, key: 'UIViewControllerBasedStatusBarAppearance');
-    expect(viewControllerBasedStatusBarAppearance, true);
-  }, overrides: <Type, Generator>{
-    Pub: () => Pub(
-      fileSystem: globals.fs,
-      logger: globals.logger,
-      processManager: globals.processManager,
-      usage: globals.flutterUsage,
-      botDetector: globals.botDetector,
-      platform: globals.platform,
-    ),
   });
 
   testUsingContext('display name is Title Case for objc iOS project.', () async {
@@ -3050,11 +2975,4 @@ String _getStringValueFromPlist({File plistFile, String key}) {
   final int keyIndex = plist.indexOf('<key>$key</key>');
   assert(keyIndex > 0);
   return plist[keyIndex+1].replaceAll('<string>', '').replaceAll('</string>', '');
-}
-
-bool _getBooleanValueFromPlist({File plistFile, String key}) {
-  final List<String> plist = plistFile.readAsLinesSync().map((String line) => line.trim()).toList();
-  final int keyIndex = plist.indexOf('<key>$key</key>');
-  assert(keyIndex > 0);
-  return plist[keyIndex+1].replaceAll('<', '').replaceAll('/>', '') == 'true';
 }

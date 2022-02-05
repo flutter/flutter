@@ -437,7 +437,7 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
       return;
     if (listEquals(_entries, newEntriesList))
       return;
-    final LinkedHashSet<OverlayEntry> old = LinkedHashSet<OverlayEntry>.from(_entries);
+    final LinkedHashSet<OverlayEntry> old = LinkedHashSet<OverlayEntry>.of(_entries);
     for (final OverlayEntry entry in newEntriesList) {
       entry._overlay ??= this;
     }

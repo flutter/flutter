@@ -1159,6 +1159,18 @@ class _InkResponseState extends State<_InkResponseStateWidget>
 /// ancestor to the ink well). The [MaterialType.transparency] material
 /// kind can be used for this purpose.
 ///
+/// ### InkWell isn't clipping properly
+///
+/// If you want to clip an InkWell or any [Ink] widgets you need to keep in mind
+/// that the [Material] that the Ink will be printed on is responsible for clipping.
+/// This means you can't wrap the [Ink] widget in a clipping widget directly,
+/// since this will leave the [Material] not clipped (and by extension the printed
+/// [Ink] widgets as well).
+///
+/// An easy solution is to deliberately wrap the [Ink] widgets you want to clip
+/// in a [Material], and wrap that in a clipping widget instead. See [Ink] for
+/// an example.
+///
 /// ### The ink splashes don't track the size of an animated container
 /// If the size of an InkWell's [Material] ancestor changes while the InkWell's
 /// splashes are expanding, you may notice that the splashes aren't clipped

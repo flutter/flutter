@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'dart:collection';
 
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 
 /// A closure type used by the [TaskQueue].
 typedef TaskQueueClosure<T> = Future<T> Function();

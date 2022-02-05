@@ -15,7 +15,7 @@ import '../base/process.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../convert.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../ios/devices.dart';
 import '../ios/ios_deploy.dart';
 import '../ios/iproxy.dart';
@@ -415,7 +415,7 @@ class XCDevice {
         } else {
           cpuArchitecture = DarwinArch.arm64;
         }
-        _logger.printError(
+        _logger.printWarning(
           'Unknown architecture $architecture, defaulting to '
           '${getNameForDarwinArch(cpuArchitecture)}',
         );

@@ -13,24 +13,27 @@ void main() {
   group('repository', () {
     late FakePlatform platform;
     const String rootDir = '/';
+    late MemoryFileSystem fileSystem;
+    late FakeProcessManager processManager;
+    late TestStdio stdio;
 
     setUp(() {
       final String pathSeparator = const LocalPlatform().pathSeparator;
+      fileSystem = MemoryFileSystem.test();
       platform = FakePlatform(
         environment: <String, String>{
           'HOME': <String>['path', 'to', 'home'].join(pathSeparator),
         },
         pathSeparator: pathSeparator,
       );
+      processManager = FakeProcessManager.empty();
+      stdio = TestStdio();
     });
 
     test('canCherryPick returns true if git cherry-pick returns 0', () async {
       const String commit = 'abc123';
 
-      final TestStdio stdio = TestStdio();
-      final MemoryFileSystem fileSystem = MemoryFileSystem.test();
-      final FakeProcessManager processManager =
-          FakeProcessManager.list(<FakeCommand>[
+      processManager.addCommands(<FakeCommand>[
         FakeCommand(command: <String>[
           'git',
           'clone',
@@ -40,6 +43,11 @@ void main() {
           FrameworkRepository.defaultUpstream,
           fileSystem.path
               .join(rootDir, 'flutter_conductor_checkouts', 'framework'),
+        ]),
+        const FakeCommand(command: <String>[
+          'git',
+          'checkout',
+          FrameworkRepository.defaultBranch,
         ]),
         const FakeCommand(command: <String>[
           'git',
@@ -78,10 +86,7 @@ void main() {
     test('canCherryPick returns false if git cherry-pick returns non-zero', () async {
       const String commit = 'abc123';
 
-      final TestStdio stdio = TestStdio();
-      final MemoryFileSystem fileSystem = MemoryFileSystem.test();
-      final FakeProcessManager processManager =
-          FakeProcessManager.list(<FakeCommand>[
+      processManager.addCommands(<FakeCommand>[
         FakeCommand(command: <String>[
           'git',
           'clone',
@@ -91,6 +96,11 @@ void main() {
           FrameworkRepository.defaultUpstream,
           fileSystem.path
               .join(rootDir, 'flutter_conductor_checkouts', 'framework'),
+        ]),
+        const FakeCommand(command: <String>[
+          'git',
+          'checkout',
+          FrameworkRepository.defaultBranch,
         ]),
         const FakeCommand(command: <String>[
           'git',
@@ -133,10 +143,7 @@ void main() {
     test('cherryPick() applies the commit', () async {
       const String commit = 'abc123';
 
-      final TestStdio stdio = TestStdio();
-      final MemoryFileSystem fileSystem = MemoryFileSystem.test();
-      final FakeProcessManager processManager =
-          FakeProcessManager.list(<FakeCommand>[
+      processManager.addCommands(<FakeCommand>[
         FakeCommand(command: <String>[
           'git',
           'clone',
@@ -146,6 +153,11 @@ void main() {
           FrameworkRepository.defaultUpstream,
           fileSystem.path
               .join(rootDir, 'flutter_conductor_checkouts', 'framework'),
+        ]),
+        const FakeCommand(command: <String>[
+          'git',
+          'checkout',
+          FrameworkRepository.defaultBranch,
         ]),
         const FakeCommand(command: <String>[
           'git',
@@ -178,9 +190,6 @@ void main() {
     test('updateDartRevision() updates the DEPS file', () async {
       const String previousDartRevision = '171876a4e6cf56ee6da1f97d203926bd7afda7ef';
       const String nextDartRevision = 'f6c91128be6b77aef8351e1e3a9d07c85bc2e46e';
-      final TestStdio stdio = TestStdio();
-      final MemoryFileSystem fileSystem = MemoryFileSystem.test();
-      final FakeProcessManager processManager = FakeProcessManager.empty();
 
       final Checkouts checkouts = Checkouts(
         fileSystem: fileSystem,
@@ -200,9 +209,6 @@ void main() {
 
     test('updateDartRevision() throws exception on malformed DEPS file', () {
       const String nextDartRevision = 'f6c91128be6b77aef8351e1e3a9d07c85bc2e46e';
-      final TestStdio stdio = TestStdio();
-      final MemoryFileSystem fileSystem = MemoryFileSystem.test();
-      final FakeProcessManager processManager = FakeProcessManager.empty();
 
       final Checkouts checkouts = Checkouts(
         fileSystem: fileSystem,
@@ -227,9 +233,7 @@ vars = {
       const String commit1 = 'abc123';
       const String commit2 = 'def456';
       const String message = 'This is a commit message.';
-      final TestStdio stdio = TestStdio();
-      final MemoryFileSystem fileSystem = MemoryFileSystem.test();
-      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      processManager.addCommands(<FakeCommand>[
         FakeCommand(command: <String>[
           'git',
           'clone',
@@ -243,7 +247,7 @@ vars = {
         const FakeCommand(command: <String>[
           'git',
           'checkout',
-          'upstream/master',
+          EngineRepository.defaultBranch,
         ]),
         const FakeCommand(command: <String>[
           'git',
@@ -282,13 +286,11 @@ vars = {
       );
     });
 
-    test('commit() passes correct commit message', () {
+    test('commit() passes correct commit message', () async {
       const String commit1 = 'abc123';
       const String commit2 = 'def456';
       const String message = 'This is a commit message.';
-      final TestStdio stdio = TestStdio();
-      final MemoryFileSystem fileSystem = MemoryFileSystem.test();
-      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      processManager.addCommands(<FakeCommand>[
         FakeCommand(command: <String>[
           'git',
           'clone',
@@ -302,7 +304,7 @@ vars = {
         const FakeCommand(command: <String>[
           'git',
           'checkout',
-          'upstream/master',
+          EngineRepository.defaultBranch,
         ]),
         const FakeCommand(command: <String>[
           'git',
@@ -334,16 +336,15 @@ vars = {
       );
 
       final EngineRepository repo = EngineRepository(checkouts);
-      repo.commit(message);
+      await repo.commit(message);
+      expect(processManager.hasRemainingExpectations, false);
     });
 
     test('updateEngineRevision() returns false if newCommit is the same as version file', () async {
       const String commit1 = 'abc123';
       const String commit2 = 'def456';
-      final TestStdio stdio = TestStdio();
-      final MemoryFileSystem fileSystem = MemoryFileSystem.test();
       final File engineVersionFile = fileSystem.file('/engine.version')..writeAsStringSync(commit2);
-      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      processManager.addCommands(<FakeCommand>[
         FakeCommand(command: <String>[
           'git',
           'clone',
@@ -375,7 +376,6 @@ vars = {
     });
 
     test('CiYaml(file) will throw if file does not exist', () {
-      final MemoryFileSystem fileSystem = MemoryFileSystem.test();
       final File file = fileSystem.file('/non/existent/file.txt');
 
       expect(
@@ -386,10 +386,8 @@ vars = {
 
     test('ciYaml.enableBranch() will prepend the given branch to the yaml list of enabled_branches', () async {
       const String commit1 = 'abc123';
-      final TestStdio stdio = TestStdio();
-      final MemoryFileSystem fileSystem = MemoryFileSystem.test();
       final File ciYaml = fileSystem.file('/flutter_conductor_checkouts/framework/.ci.yaml');
-      final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      processManager.addCommands(<FakeCommand>[
         FakeCommand(
             command: <String>[
           'git',
@@ -407,12 +405,17 @@ vars = {
 # Friendly note
 
 enabled_branches:
-  - master
+  - ${FrameworkRepository.defaultBranch}
   - dev
   - beta
   - stable
 ''');
         }),
+        const FakeCommand(command: <String>[
+          'git',
+          'checkout',
+          FrameworkRepository.defaultBranch,
+        ]),
         const FakeCommand(command: <String>[
           'git',
           'rev-parse',
@@ -430,13 +433,13 @@ enabled_branches:
       final FrameworkRepository framework = FrameworkRepository(checkouts);
       expect(
         (await framework.ciYaml).enabledBranches,
-        <String>['master', 'dev', 'beta', 'stable'],
+        <String>[FrameworkRepository.defaultBranch, 'dev', 'beta', 'stable'],
       );
 
       (await framework.ciYaml).enableBranch('foo');
       expect(
         (await framework.ciYaml).enabledBranches,
-        <String>['foo', 'master', 'dev', 'beta', 'stable'],
+        <String>['foo', FrameworkRepository.defaultBranch, 'dev', 'beta', 'stable'],
       );
 
       expect(
@@ -446,7 +449,7 @@ enabled_branches:
 
 enabled_branches:
   - foo
-  - master
+  - ${FrameworkRepository.defaultBranch}
   - dev
   - beta
   - stable
@@ -456,10 +459,8 @@ enabled_branches:
 
     test('ciYaml.enableBranch() will throw if the input branch is already present in the yaml file', () {
       const String commit1 = 'abc123';
-      final TestStdio stdio = TestStdio();
-      final MemoryFileSystem fileSystem = MemoryFileSystem.test();
       final File ciYaml = fileSystem.file('/flutter_conductor_checkouts/framework/.ci.yaml');
-      final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      processManager.addCommands(<FakeCommand>[
         FakeCommand(
             command: <String>[
           'git',
@@ -475,12 +476,17 @@ enabled_branches:
           ciYaml.createSync(recursive: true);
           ciYaml.writeAsStringSync('''
 enabled_branches:
-  - master
+  - ${FrameworkRepository.defaultBranch}
   - dev
   - beta
   - stable
 ''');
         }),
+        const FakeCommand(command: <String>[
+          'git',
+          'checkout',
+          FrameworkRepository.defaultBranch,
+        ]),
         const FakeCommand(command: <String>[
           'git',
           'rev-parse',
@@ -497,9 +503,113 @@ enabled_branches:
 
       final FrameworkRepository framework = FrameworkRepository(checkouts);
       expect(
-        () async => (await framework.ciYaml).enableBranch('master'),
-        throwsExceptionWith('.ci.yaml already contains the branch master'),
+        () async => (await framework.ciYaml).enableBranch(FrameworkRepository.defaultBranch),
+        throwsExceptionWith('.ci.yaml already contains the branch ${FrameworkRepository.defaultBranch}'),
       );
+    });
+
+    test('framework repo set as localUpstream ensures requiredLocalBranches exist locally', () async {
+      const String commit = 'deadbeef';
+      const String candidateBranch = 'flutter-1.2-candidate.3';
+      bool createdCandidateBranch = false;
+      processManager.addCommands(<FakeCommand>[
+        FakeCommand(command: <String>[
+          'git',
+          'clone',
+          '--origin',
+          'upstream',
+          '--',
+          FrameworkRepository.defaultUpstream,
+          fileSystem.path.join(rootDir, 'flutter_conductor_checkouts', 'framework'),
+        ]),
+        FakeCommand(
+          command: const <String>['git', 'checkout', candidateBranch, '--'],
+          onRun: () => createdCandidateBranch = true,
+        ),
+        const FakeCommand(
+          command: <String>['git', 'checkout', 'stable', '--'],
+        ),
+        const FakeCommand(
+          command: <String>['git', 'checkout', 'beta', '--'],
+        ),
+        const FakeCommand(
+          command: <String>['git', 'checkout', 'dev', '--'],
+        ),
+        const FakeCommand(
+          command: <String>['git', 'checkout', FrameworkRepository.defaultBranch, '--'],
+        ),
+        const FakeCommand(
+          command: <String>['git', 'checkout', FrameworkRepository.defaultBranch],
+        ),
+        const FakeCommand(
+          command: <String>['git', 'rev-parse', 'HEAD'],
+          stdout: commit,
+        ),
+      ]);
+      final Checkouts checkouts = Checkouts(
+        fileSystem: fileSystem,
+        parentDirectory: fileSystem.directory(rootDir),
+        platform: platform,
+        processManager: processManager,
+        stdio: stdio,
+      );
+
+      final Repository repo = FrameworkRepository(
+        checkouts,
+        additionalRequiredLocalBranches: <String>[candidateBranch],
+        localUpstream: true,
+      );
+      // call this so that repo.lazilyInitialize() is called.
+      await repo.checkoutDirectory;
+
+      expect(processManager.hasRemainingExpectations, false);
+      expect(createdCandidateBranch, true);
+    });
+
+    test('engine repo set as localUpstream ensures requiredLocalBranches exist locally', () async {
+      const String commit = 'deadbeef';
+      const String candidateBranch = 'flutter-1.2-candidate.3';
+      bool createdCandidateBranch = false;
+      processManager.addCommands(<FakeCommand>[
+        FakeCommand(command: <String>[
+          'git',
+          'clone',
+          '--origin',
+          'upstream',
+          '--',
+          EngineRepository.defaultUpstream,
+          fileSystem.path.join(rootDir, 'flutter_conductor_checkouts', 'engine'),
+        ]),
+        FakeCommand(
+          command: const <String>['git', 'checkout', candidateBranch, '--'],
+          onRun: () => createdCandidateBranch = true,
+        ),
+        const FakeCommand(
+          command: <String>['git', 'checkout', EngineRepository.defaultBranch],
+        ),
+        const FakeCommand(
+          command: <String>['git', 'rev-parse', 'HEAD'],
+          stdout: commit,
+        ),
+      ]);
+      final Checkouts checkouts = Checkouts(
+        fileSystem: fileSystem,
+        parentDirectory: fileSystem.directory(rootDir),
+        platform: platform,
+        processManager: processManager,
+        stdio: stdio,
+      );
+
+      final Repository repo = EngineRepository(
+        checkouts,
+        additionalRequiredLocalBranches: <String>[candidateBranch],
+        localUpstream: true,
+      );
+      // call this so that repo.lazilyInitialize() is called.
+      await repo.checkoutDirectory;
+
+      expect(processManager.hasRemainingExpectations, false);
+      expect(createdCandidateBranch, true);
     });
   });
 }

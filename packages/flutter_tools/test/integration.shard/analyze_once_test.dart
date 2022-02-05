@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import '../src/common.dart';
@@ -12,12 +10,12 @@ import 'test_utils.dart';
 final String analyzerSeparator = platform.isWindows ? '-' : '•';
 
 void main() {
-  Directory tempDir;
-  String projectPath;
-  File libMain;
+  late Directory tempDir;
+  late String projectPath;
+  late File libMain;
 
   Future<void> runCommand({
-    List<String> arguments,
+    List<String> arguments = const <String>[],
     List<String> statusTextContains = const <String>[],
     List<String> errorTextContains = const <String>[],
     String exitMessageContains = '',

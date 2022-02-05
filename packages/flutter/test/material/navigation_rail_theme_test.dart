@@ -36,6 +36,7 @@ void main() {
     expect(_unselectedLabelStyle(tester).fontSize, 14.0);
     expect(_destinationsAlign(tester).alignment, Alignment.topCenter);
     expect(_labelType(tester), NavigationRailLabelType.none);
+    expect(find.byType(NavigationIndicator), findsNothing);
   });
 
   testWidgets('NavigationRailThemeData values are used when no NavigationRail properties are specified', (WidgetTester tester) async {
@@ -51,6 +52,8 @@ void main() {
     const double unselectedLabelFontSize = 11.0;
     const double groupAlignment = 0.0;
     const NavigationRailLabelType labelType = NavigationRailLabelType.all;
+    const bool useIndicator = true;
+    const Color indicatorColor = Color(0x00000004);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -73,6 +76,8 @@ void main() {
               unselectedLabelTextStyle: TextStyle(fontSize: unselectedLabelFontSize),
               groupAlignment: groupAlignment,
               labelType: labelType,
+              useIndicator: useIndicator,
+              indicatorColor: indicatorColor,
             ),
             child: NavigationRail(
               selectedIndex: 0,
@@ -95,6 +100,8 @@ void main() {
     expect(_unselectedLabelStyle(tester).fontSize, unselectedLabelFontSize);
     expect(_destinationsAlign(tester).alignment, Alignment.center);
     expect(_labelType(tester), labelType);
+    expect(find.byType(NavigationIndicator), findsWidgets);
+    expect(_indicatorDecoration(tester)?.color, indicatorColor);
   });
 
   testWidgets('NavigationRail values take priority over NavigationRailThemeData values when both properties are specified', (WidgetTester tester) async {
@@ -110,6 +117,8 @@ void main() {
     const double unselectedLabelFontSize = 11.0;
     const double groupAlignment = 0.0;
     const NavigationRailLabelType labelType = NavigationRailLabelType.all;
+    const bool useIndicator = true;
+    const Color indicatorColor = Color(0x00000004);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -132,6 +141,8 @@ void main() {
               unselectedLabelTextStyle: TextStyle(fontSize: 7.0),
               groupAlignment: 1.0,
               labelType: NavigationRailLabelType.selected,
+              useIndicator: false,
+              indicatorColor: Color(0x00000096),
             ),
             child: NavigationRail(
               selectedIndex: 0,
@@ -152,6 +163,8 @@ void main() {
               unselectedLabelTextStyle: const TextStyle(fontSize: unselectedLabelFontSize),
               groupAlignment: groupAlignment,
               labelType: labelType,
+              useIndicator: useIndicator,
+              indicatorColor: indicatorColor,
             ),
           ),
         ),
@@ -170,6 +183,8 @@ void main() {
     expect(_unselectedLabelStyle(tester).fontSize, unselectedLabelFontSize);
     expect(_destinationsAlign(tester).alignment, Alignment.center);
     expect(_labelType(tester), labelType);
+    expect(find.byType(NavigationIndicator), findsWidgets);
+    expect(_indicatorDecoration(tester)?.color, indicatorColor);
   });
 
   testWidgets('Default debugFillProperties', (WidgetTester tester) async {
@@ -195,6 +210,8 @@ void main() {
       unselectedLabelTextStyle: TextStyle(fontSize: 7.0),
       groupAlignment: 1.0,
       labelType: NavigationRailLabelType.selected,
+      useIndicator: true,
+      indicatorColor: Color(0x00000096),
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -215,7 +232,8 @@ void main() {
 
     expect(description[6], 'groupAlignment: 1.0');
     expect(description[7], 'labelType: NavigationRailLabelType.selected');
-
+    expect(description[8], 'useIndicator: true');
+    expect(description[9], 'indicatorColor: Color(0x00000096)');
   });
 }
 
@@ -242,6 +260,16 @@ Material _railMaterial(WidgetTester tester) {
       matching: find.byType(Material),
     ),
   );
+}
+
+
+BoxDecoration? _indicatorDecoration(WidgetTester tester) {
+  return tester.firstWidget<Container>(
+    find.descendant(
+      of: find.byType(NavigationIndicator),
+      matching: find.byType(Container),
+    ),
+  ).decoration as BoxDecoration?;
 }
 
 IconThemeData _selectedIconTheme(WidgetTester tester) {

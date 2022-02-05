@@ -2,13 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import '../base/common.dart';
 import '../base/utils.dart';
 import '../convert.dart';
 import '../device.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 
 class DevicesCommand extends FlutterCommand {
@@ -20,7 +18,6 @@ class DevicesCommand extends FlutterCommand {
     argParser.addOption(
       'timeout',
       abbr: 't',
-      defaultsTo: null,
       help: '(deprecated) This option has been replaced by "--${FlutterOptions.kDeviceTimeout}".',
       hide: !verboseHelp,
     );
@@ -37,9 +34,9 @@ class DevicesCommand extends FlutterCommand {
   final String category = FlutterCommandCategory.tools;
 
   @override
-  Duration get deviceDiscoveryTimeout {
-    if (argResults['timeout'] != null) {
-      final int timeoutSeconds = int.tryParse(stringArg('timeout'));
+  Duration? get deviceDiscoveryTimeout {
+    if (argResults?['timeout'] != null) {
+      final int? timeoutSeconds = int.tryParse(stringArg('timeout')!);
       if (timeoutSeconds == null) {
         throwToolExit('Could not parse -t/--timeout argument. It must be an integer.');
       }
@@ -50,22 +47,22 @@ class DevicesCommand extends FlutterCommand {
 
   @override
   Future<void> validateCommand() {
-    if (argResults['timeout'] != null) {
-      globals.printError('${globals.logger.terminal.warningMark} The "--timeout" argument is deprecated; use "--${FlutterOptions.kDeviceTimeout}" instead.');
+    if (argResults?['timeout'] != null) {
+      globals.printWarning('${globals.logger.terminal.warningMark} The "--timeout" argument is deprecated; use "--${FlutterOptions.kDeviceTimeout}" instead.');
     }
     return super.validateCommand();
   }
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    if (!globals.doctor.canListAnything) {
+    if (globals.doctor?.canListAnything != true) {
       throwToolExit(
         "Unable to locate a development device; please run 'flutter doctor' for "
         'information about installing additional components.',
         exitCode: 1);
     }
 
-    final List<Device> devices = await globals.deviceManager.refreshAllConnectedDevices(timeout: deviceDiscoveryTimeout);
+    final List<Device> devices = await globals.deviceManager?.refreshAllConnectedDevices(timeout: deviceDiscoveryTimeout) ?? <Device>[];
 
     if (boolArg('machine')) {
       await printDevicesAsJson(devices);
@@ -93,7 +90,7 @@ class DevicesCommand extends FlutterCommand {
   }
 
   Future<void> _printDiagnostics() async {
-    final List<String> diagnostics = await globals.deviceManager.getDeviceDiagnostics();
+    final List<String> diagnostics = await globals.deviceManager?.getDeviceDiagnostics() ?? <String>[];
     if (diagnostics.isNotEmpty) {
       globals.printStatus('');
       for (final String diagnostic in diagnostics) {

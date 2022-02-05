@@ -13,7 +13,7 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/targets/web.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
-import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/devfs_web.dart';
 import 'package:flutter_tools/src/web/compile.dart';
 import 'package:package_config/package_config.dart';
@@ -539,7 +539,21 @@ void main() {
     expect((await response.read().toList()).first, source.readAsBytesSync());
   }));
 
-  test('serves asset files files from in filesystem with unknown mime type and length > 12', () => testbed.run(() async {
+  test('serves asset files from in filesystem with known mime type and empty content', () => testbed.run(() async {
+    final File source = globals.fs.file(globals.fs.path.join('web', 'foo.js'))
+      ..createSync(recursive: true);
+
+    final Response response = await webAssetServer
+        .handleRequest(Request('GET', Uri.parse('http://foobar/foo.js')));
+
+    expect(response.headers, allOf(<Matcher>[
+      containsPair(HttpHeaders.contentLengthHeader, '0'),
+      containsPair(HttpHeaders.contentTypeHeader, 'application/javascript'),
+    ]));
+    expect((await response.read().toList()).first, source.readAsBytesSync());
+  }));
+
+  test('serves asset files files from in filesystem with unknown mime type', () => testbed.run(() async {
     final File source = globals.fs.file(globals.fs.path.join('build', 'flutter_assets', 'foo'))
       ..createSync(recursive: true)
       ..writeAsBytesSync(List<int>.filled(100, 0));
@@ -549,21 +563,6 @@ void main() {
 
     expect(response.headers, allOf(<Matcher>[
       containsPair(HttpHeaders.contentLengthHeader, '100'),
-      containsPair(HttpHeaders.contentTypeHeader, 'application/octet-stream'),
-    ]));
-    expect((await response.read().toList()).first, source.readAsBytesSync());
-  }));
-
-  test('serves asset files files from in filesystem with unknown mime type and length < 12', () => testbed.run(() async {
-    final File source = globals.fs.file(globals.fs.path.join('build', 'flutter_assets', 'foo'))
-      ..createSync(recursive: true)
-      ..writeAsBytesSync(<int>[1, 2, 3]);
-
-    final Response response = await webAssetServer
-      .handleRequest(Request('GET', Uri.parse('http://foobar/assets/foo')));
-
-    expect(response.headers, allOf(<Matcher>[
-      containsPair(HttpHeaders.contentLengthHeader, '3'),
       containsPair(HttpHeaders.contentTypeHeader, 'application/octet-stream'),
     ]));
     expect((await response.read().toList()).first, source.readAsBytesSync());
@@ -594,7 +593,7 @@ void main() {
 
     expect(response.headers, allOf(<Matcher>[
       containsPair(HttpHeaders.contentLengthHeader, '3'),
-      containsPair(HttpHeaders.contentTypeHeader, 'application/octet-stream'),
+      containsPair(HttpHeaders.contentTypeHeader, 'text/x-dart'),
     ]));
     expect((await response.read().toList()).first, source.readAsBytesSync());
   }));

@@ -16,7 +16,7 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../flutter_manifest.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../macos/cocoapod_utils.dart';
 import '../macos/xcode.dart';
 import '../project.dart';
@@ -32,6 +32,7 @@ import 'migrations/remove_framework_link_and_embedding_migration.dart';
 import 'migrations/xcode_build_system_migration.dart';
 import 'xcode_build_settings.dart';
 import 'xcodeproj.dart';
+import 'xcresult.dart';
 
 class IMobileDevice {
   IMobileDevice({
@@ -315,74 +316,97 @@ Future<XcodeBuildResult> buildXcodeProject({
 
   Status? buildSubStatus;
   Status? initialBuildStatus;
-  Directory? tempDir;
-
   File? scriptOutputPipeFile;
-  if (globals.logger.hasTerminal) {
-    tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_build_log_pipe.');
-    scriptOutputPipeFile = tempDir.childFile('pipe_to_stdout');
-    globals.os.makePipe(scriptOutputPipeFile.path);
+  RunResult? buildResult;
+  XCResult? xcResult;
 
-    Future<void> listenToScriptOutputLine() async {
-      final List<String> lines = await scriptOutputPipeFile!.readAsLines();
-      for (final String line in lines) {
-        if (line == 'done' || line == 'all done') {
-          buildSubStatus?.stop();
-          buildSubStatus = null;
-          if (line == 'all done') {
-            // Free pipe file.
-            tempDir?.deleteSync(recursive: true);
-            return;
+  final Directory tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_ios_build_temp_dir');
+  try {
+    if (globals.logger.hasTerminal) {
+      scriptOutputPipeFile = tempDir.childFile('pipe_to_stdout');
+      globals.os.makePipe(scriptOutputPipeFile.path);
+
+      Future<void> listenToScriptOutputLine() async {
+        final List<String> lines = await scriptOutputPipeFile!.readAsLines();
+        for (final String line in lines) {
+          if (line == 'done' || line == 'all done') {
+            buildSubStatus?.stop();
+            buildSubStatus = null;
+            if (line == 'all done') {
+              return;
+            }
+          } else {
+            initialBuildStatus?.cancel();
+            initialBuildStatus = null;
+            buildSubStatus = globals.logger.startProgress(
+              line,
+              progressIndicatorPadding: kDefaultStatusPadding - 7,
+            );
           }
-        } else {
-          initialBuildStatus?.cancel();
-          initialBuildStatus = null;
-          buildSubStatus = globals.logger.startProgress(
-            line,
-            progressIndicatorPadding: kDefaultStatusPadding - 7,
-          );
         }
+        await listenToScriptOutputLine();
       }
-      await listenToScriptOutputLine();
+
+      // Trigger the start of the pipe -> stdout loop. Ignore exceptions.
+      unawaited(listenToScriptOutputLine());
+
+      buildCommands.add('SCRIPT_OUTPUT_STREAM_FILE=${scriptOutputPipeFile.absolute.path}');
     }
 
-    // Trigger the start of the pipe -> stdout loop. Ignore exceptions.
-    unawaited(listenToScriptOutputLine());
-
-    buildCommands.add('SCRIPT_OUTPUT_STREAM_FILE=${scriptOutputPipeFile.absolute.path}');
-  }
-
-  // Don't log analytics for downstream Flutter commands.
-  // e.g. `flutter build bundle`.
-  buildCommands.add('FLUTTER_SUPPRESS_ANALYTICS=true');
-  buildCommands.add('COMPILER_INDEX_STORE_ENABLE=NO');
-  buildCommands.addAll(environmentVariablesAsXcodeBuildSettings(globals.platform));
-
-  if (buildAction == XcodeBuildAction.archive) {
     buildCommands.addAll(<String>[
-      '-archivePath',
-      globals.fs.path.absolute(app.archiveBundlePath),
-      'archive',
+      '-resultBundlePath',
+      tempDir.childFile(_kResultBundlePath).absolute.path,
+      '-resultBundleVersion',
+      _kResultBundleVersion
     ]);
+
+    // Don't log analytics for downstream Flutter commands.
+    // e.g. `flutter build bundle`.
+    buildCommands.add('FLUTTER_SUPPRESS_ANALYTICS=true');
+    buildCommands.add('COMPILER_INDEX_STORE_ENABLE=NO');
+    buildCommands.addAll(environmentVariablesAsXcodeBuildSettings(globals.platform));
+
+    if (buildAction == XcodeBuildAction.archive) {
+      buildCommands.addAll(<String>[
+        '-archivePath',
+        globals.fs.path.absolute(app.archiveBundlePath),
+        'archive',
+      ]);
+    }
+
+    final Stopwatch sw = Stopwatch()..start();
+    initialBuildStatus = globals.logger.startProgress('Running Xcode build...');
+
+    buildResult = await _runBuildWithRetries(buildCommands, app);
+
+    // Notifies listener that no more output is coming.
+    scriptOutputPipeFile?.writeAsStringSync('all done');
+    buildSubStatus?.stop();
+    buildSubStatus = null;
+    initialBuildStatus?.cancel();
+    initialBuildStatus = null;
+    globals.printStatus(
+      'Xcode ${xcodeBuildActionToString(buildAction)} done.'.padRight(kDefaultStatusPadding + 1)
+          + getElapsedAsSeconds(sw.elapsed).padLeft(5),
+    );
+    globals.flutterUsage.sendTiming(xcodeBuildActionToString(buildAction), 'xcode-ios', Duration(milliseconds: sw.elapsedMilliseconds));
+
+    if (tempDir.existsSync()) {
+      // Display additional warning and error message from xcresult bundle.
+      final Directory resultBundle = tempDir.childDirectory(_kResultBundlePath);
+      if (!resultBundle.existsSync()) {
+        globals.printTrace('The xcresult bundle are not generated. Displaying xcresult is disabled.');
+      } else {
+        // Discard unwanted errors. See: https://github.com/flutter/flutter/issues/95354
+        final XCResultIssueDiscarder warningDiscarder = XCResultIssueDiscarder(typeMatcher: XCResultIssueType.warning);
+        final XCResultIssueDiscarder dartBuildErrorDiscarder = XCResultIssueDiscarder(messageMatcher: RegExp(r'Command PhaseScriptExecution failed with a nonzero exit code'));
+        final XCResultGenerator xcResultGenerator = XCResultGenerator(resultPath: resultBundle.absolute.path, xcode: globals.xcode!, processUtils: globals.processUtils);
+        xcResult = await xcResultGenerator.generate(issueDiscarders: <XCResultIssueDiscarder>[warningDiscarder, dartBuildErrorDiscarder]);
+      }
+    }
+  } finally {
+    tempDir.deleteSync(recursive: true);
   }
-
-  final Stopwatch sw = Stopwatch()..start();
-  initialBuildStatus = globals.logger.startProgress('Running Xcode build...');
-
-  final RunResult? buildResult = await _runBuildWithRetries(buildCommands, app);
-
-  // Notifies listener that no more output is coming.
-  scriptOutputPipeFile?.writeAsStringSync('all done');
-  buildSubStatus?.stop();
-  buildSubStatus = null;
-  initialBuildStatus?.cancel();
-  initialBuildStatus = null;
-  globals.printStatus(
-    'Xcode ${xcodeBuildActionToString(buildAction)} done.'.padRight(kDefaultStatusPadding + 1)
-        + getElapsedAsSeconds(sw.elapsed).padLeft(5),
-  );
-  globals.flutterUsage.sendTiming(xcodeBuildActionToString(buildAction), 'xcode-ios', Duration(milliseconds: sw.elapsedMilliseconds));
-
   if (buildResult != null && buildResult.exitCode != 0) {
     globals.printStatus('Failed to build iOS app');
     if (buildResult.stderr.isNotEmpty) {
@@ -403,6 +427,7 @@ Future<XcodeBuildResult> buildXcodeProject({
         environmentType: environmentType,
         buildSettings: buildSettings,
       ),
+      xcResult: xcResult,
     );
   } else {
     String? outputDir;
@@ -466,6 +491,7 @@ Future<XcodeBuildResult> buildXcodeProject({
           environmentType: environmentType,
           buildSettings: buildSettings,
       ),
+      xcResult: xcResult,
     );
   }
 }
@@ -585,15 +611,18 @@ Future<void> diagnoseXcodeBuildFailure(XcodeBuildResult result, Usage flutterUsa
     logger.printError('  open ios/Runner.xcworkspace');
     return;
   }
-  if (result.stdout?.contains('Code Sign error') == true) {
-    logger.printError('');
-    logger.printError('It appears that there was a problem signing your application prior to installation on the device.');
-    logger.printError('');
-    logger.printError('Verify that the Bundle Identifier in your project is your signing id in Xcode');
-    logger.printError('  open ios/Runner.xcworkspace');
-    logger.printError('');
-    logger.printError("Also try selecting 'Product > Build' to fix the problem:");
+
+  // Handle xcresult errors.
+  final XCResult? xcResult = result.xcResult;
+  if (xcResult == null) {
     return;
+  }
+  if (!xcResult.parseSuccess) {
+    globals.printTrace('XCResult parsing error: ${xcResult.parsingErrorMessage}');
+    return;
+  }
+  for (final XCResultIssue issue in xcResult.issues) {
+    _handleXCResultIssue(issue: issue, logger: logger);
   }
 }
 
@@ -618,6 +647,7 @@ class XcodeBuildResult {
     this.stdout,
     this.stderr,
     this.xcodeBuildExecution,
+    this.xcResult
   });
 
   final bool success;
@@ -626,6 +656,10 @@ class XcodeBuildResult {
   final String? stderr;
   /// The invocation of the build that resulted in this result instance.
   final XcodeBuildExecution? xcodeBuildExecution;
+  /// Parsed information in xcresult bundle.
+  ///
+  /// Can be null if the bundle is not created during build.
+  final XCResult? xcResult;
 }
 
 /// Describes an invocation of a Xcode build command.
@@ -686,3 +720,38 @@ bool upgradePbxProjWithFlutterAssets(IosProject project, Logger logger) {
   xcodeProjectFile.writeAsStringSync(buffer.toString());
   return true;
 }
+
+void _handleXCResultIssue({required XCResultIssue issue, required Logger logger}) {
+  // Issue summary from xcresult.
+  final StringBuffer issueSummaryBuffer = StringBuffer();
+  issueSummaryBuffer.write(issue.subType ?? 'Unknown');
+  issueSummaryBuffer.write(' (Xcode): ');
+  issueSummaryBuffer.writeln(issue.message ?? '');
+  if (issue.location != null ) {
+    issueSummaryBuffer.writeln(issue.location);
+  }
+  final String issueSummary = issueSummaryBuffer.toString();
+
+  switch (issue.type) {
+    case XCResultIssueType.error:
+      logger.printError(issueSummary);
+      break;
+    case XCResultIssueType.warning:
+      logger.printWarning(issueSummary);
+      break;
+  }
+
+  // Add more custom output for flutter users.
+  if (issue.message != null && issue.message!.toLowerCase().contains('provisioning profile')) {
+    logger.printError('');
+    logger.printError('It appears that there was a problem signing your application prior to installation on the device.');
+    logger.printError('');
+    logger.printError('Verify that the Bundle Identifier in your project is your signing id in Xcode');
+    logger.printError('  open ios/Runner.xcworkspace');
+    logger.printError('');
+    logger.printError("Also try selecting 'Product > Build' to fix the problem:");
+  }
+}
+
+const String _kResultBundlePath = 'temporary_xcresult_bundle';
+const String _kResultBundleVersion = '3';

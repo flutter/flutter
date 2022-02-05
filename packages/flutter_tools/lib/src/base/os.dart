@@ -184,20 +184,22 @@ class _PosixUtils extends OperatingSystemUtils {
 
   @override
   void chmod(FileSystemEntity entity, String mode) {
+    // Errors here are silently ignored (except when tracing).
     try {
       final ProcessResult result = _processManager.runSync(
         <String>['chmod', mode, entity.path],
       );
       if (result.exitCode != 0) {
         _logger.printTrace(
-          'Error trying to run chmod on ${entity.absolute.path}'
-          '\nstdout: ${result.stdout}'
-          '\nstderr: ${result.stderr}',
+          'Error trying to run "chmod $mode ${entity.path}":\n'
+          '  exit code: ${result.exitCode}\n'
+          '  stdout: ${result.stdout.toString().trimRight()}\n'
+          '  stderr: ${result.stderr.toString().trimRight()}'
         );
       }
     } on ProcessException catch (error) {
       _logger.printTrace(
-        'Error trying to run chmod on ${entity.absolute.path}: $error',
+        'Error trying to run "chmod $mode ${entity.path}": $error',
       );
     }
   }
@@ -268,20 +270,22 @@ class _PosixUtils extends OperatingSystemUtils {
   @override
   HostPlatform get hostPlatform {
     if (_hostPlatform == null) {
-      final RunResult hostPlatformCheck =
-          _processUtils.runSync(<String>['uname', '-m']);
+      final RunResult hostPlatformCheck = _processUtils.runSync(<String>['uname', '-m']);
       // On x64 stdout is "uname -m: x86_64"
       // On arm64 stdout is "uname -m: aarch64, arm64_v8a"
       if (hostPlatformCheck.exitCode != 0) {
-        _logger.printError(
-          'Error trying to run uname -m'
-          '\nstdout: ${hostPlatformCheck.stdout}'
-          '\nstderr: ${hostPlatformCheck.stderr}',
-        );
         _hostPlatform = HostPlatform.linux_x64;
+        _logger.printError(
+          'Encountered an error trying to run "uname -m":\n'
+          '  exit code: ${hostPlatformCheck.exitCode}\n'
+          '  stdout: ${hostPlatformCheck.stdout.trimRight()}\n'
+          '  stderr: ${hostPlatformCheck.stderr.trimRight()}\n'
+          'Assuming host platform is ${getNameForHostPlatform(_hostPlatform!)}.',
+        );
       } else if (hostPlatformCheck.stdout.trim().endsWith('x86_64')) {
         _hostPlatform = HostPlatform.linux_x64;
       } else {
+        // We default to ARM if it's not x86_64 and we did not get an error.
         _hostPlatform = HostPlatform.linux_arm64;
       }
     }

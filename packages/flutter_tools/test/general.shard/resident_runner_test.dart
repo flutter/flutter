@@ -26,7 +26,7 @@ import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/device_port_forwarder.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/resident_devtools_handler.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
@@ -906,7 +906,7 @@ void main() {
     Usage: () => TestUsage(),
   }));
 
-  testUsingContext('ResidentRunner can remove breakpoints from paused isolate during hot restart', () => testbed.run(() async {
+  testUsingContext('ResidentRunner can remove breakpoints and exception-pause-mode from paused isolate during hot restart', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       listViews,
       listViews,
@@ -921,6 +921,13 @@ void main() {
       FakeVmServiceRequest(
         method: 'getVM',
         jsonResponse: vm_service.VM.parse(<String, Object>{}).toJson(),
+      ),
+      const FakeVmServiceRequest(
+        method: 'setIsolatePauseMode',
+        args: <String, String>{
+          'isolateId': '1',
+          'exceptionPauseMode': 'None',
+        }
       ),
       const FakeVmServiceRequest(
         method: 'removeBreakpoint',

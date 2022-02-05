@@ -26,14 +26,14 @@ class FakeVmServiceHost {
     ), httpAddress: httpAddress, wsAddress: wsAddress);
     _applyStreamListen();
     _output.stream.listen((String data) {
-      final Map<String, Object> request = json.decode(data) as Map<String, Object>;
+      final Map<String, Object?> request = json.decode(data) as Map<String, Object?>;
       if (_requests.isEmpty) {
         throw Exception('Unexpected request: $request');
       }
       final FakeVmServiceRequest fakeRequest = _requests.removeAt(0) as FakeVmServiceRequest;
-      expect(request, isA<Map<String, Object>>()
-        .having((Map<String, Object> request) => request['method'], 'method', fakeRequest.method)
-        .having((Map<String, Object> request) => request['params'], 'args', fakeRequest.args)
+      expect(request, isA<Map<String, Object?>>()
+        .having((Map<String, Object?> request) => request['method'], 'method', fakeRequest.method)
+        .having((Map<String, Object?> request) => request['params'], 'args', fakeRequest.args)
       );
       if (fakeRequest.close) {
         unawaited(_vmService.dispose());
@@ -52,6 +52,7 @@ class FakeVmServiceHost {
           'id': request['id'],
           'error': <String, Object?>{
             'code': fakeRequest.errorCode,
+            'message': 'error',
           }
         }));
       }
@@ -108,7 +109,7 @@ class FakeVmServiceRequest implements VmServiceExpectation {
   /// standard response.
   final int? errorCode;
   final Map<String, Object>? args;
-  final Map<String, Object>? jsonResponse;
+  final Map<String, Object?>? jsonResponse;
 
   @override
   bool get isRequest => true;

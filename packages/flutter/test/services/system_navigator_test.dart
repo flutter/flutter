@@ -20,6 +20,7 @@ void main() {
   test('System navigator control test - platform messages', () async {
     TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       log.add(methodCall);
+      return null;
     });
 
     await verify(() => SystemNavigator.pop(), <Object>[
@@ -32,6 +33,7 @@ void main() {
   test('System navigator control test - navigation messages', () async {
     TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.navigation, (MethodCall methodCall) async {
       log.add(methodCall);
+      return null;
     });
 
     await verify(() => SystemNavigator.selectSingleEntryHistory(), <Object>[

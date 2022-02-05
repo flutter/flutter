@@ -35,7 +35,7 @@ import '../compile.dart';
 import '../convert.dart';
 import '../dart/package_map.dart';
 import '../devfs.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../project.dart';
 import '../vmservice.dart';
 import '../web/bootstrap.dart';
@@ -198,18 +198,18 @@ class WebAssetServer implements AssetReader {
       address = (await InternetAddress.lookup(hostname)).first;
     }
     HttpServer httpServer;
-    dynamic lastError;
-    for (int i = 0; i < 5; i += 1) {
+    const int kMaxRetries = 4;
+    for (int i = 0; i <= kMaxRetries; i++) {
       try {
         httpServer = await HttpServer.bind(address, port ?? await globals.os.findFreePort());
         break;
-      } on SocketException catch (error) {
-        lastError = error;
+      } on SocketException catch (e, s) {
+        if (i >= kMaxRetries) {
+          globals.printError('Failed to bind web development server:\n$e', stackTrace: s);
+          throwToolExit('Failed to bind web development server:\n$e');
+        }
         await Future<void>.delayed(const Duration(milliseconds: 100));
       }
-    }
-    if (httpServer == null) {
-      throwToolExit('Failed to bind web development server:\n$lastError');
     }
 
     // Allow rendering in a iframe.
@@ -240,7 +240,11 @@ class WebAssetServer implements AssetReader {
         webBuildDirectory: getWebBuildDirectory(),
         basePath: server.basePath,
       );
-      shelf.serveRequests(httpServer, releaseAssetServer.handle);
+      runZonedGuarded(() {
+        shelf.serveRequests(httpServer, releaseAssetServer.handle);
+      }, (Object e, StackTrace s) {
+        globals.printTrace('Release asset server: error serving requests: $e:$s');
+      });
       return server;
     }
 
@@ -266,9 +270,8 @@ class WebAssetServer implements AssetReader {
       };
     }
 
-    logging.Logger.root.onRecord.listen((logging.LogRecord event) {
-      globals.printTrace('${event.loggerName}: ${event.message}');
-    });
+    logging.Logger.root.level = logging.Level.ALL;
+    logging.Logger.root.onRecord.listen(_log);
 
     // In debug builds, spin up DWDS and the full asset server.
     final Dwds dwds = await dwdsLauncher(
@@ -302,7 +305,11 @@ class WebAssetServer implements AssetReader {
         pipeline.addHandler(server.handleRequest);
     final shelf.Cascade cascade =
         shelf.Cascade().add(dwds.handler).add(dwdsHandler);
-    shelf.serveRequests(httpServer, cascade.handler);
+    runZonedGuarded(() {
+      shelf.serveRequests(httpServer, cascade.handler);
+    }, (Object e, StackTrace s) {
+      globals.printTrace('Dwds server: error serving requests: $e:$s');
+    });
     server.dwds = dwds;
     return server;
   }
@@ -448,14 +455,11 @@ class WebAssetServer implements AssetReader {
     // Attempt to determine the file's mime type. if this is not provided some
     // browsers will refuse to render images/show video etc. If the tool
     // cannot determine a mime type, fall back to application/octet-stream.
-    String mimeType;
-    if (length >= 12) {
-      mimeType = mime.lookupMimeType(
+    final String mimeType = mime.lookupMimeType(
         file.path,
-        headerBytes: await file.openRead(0, 12).first,
-      );
-    }
-    mimeType ??= _kDefaultMimeType;
+        headerBytes: await file.openRead(0, mime.defaultMagicNumbersMaxLength).first,
+    ) ?? _kDefaultMimeType;
+
     headers[HttpHeaders.contentLengthHeader] = length.toString();
     headers[HttpHeaders.contentTypeHeader] = mimeType;
     headers[HttpHeaders.etagHeader] = etag;
@@ -992,6 +996,17 @@ class ReleaseAssetServer {
     return shelf.Response.ok(file.readAsBytesSync(), headers: <String, String>{
       'Content-Type': 'text/html',
     });
+  }
+}
+
+void _log(logging.LogRecord event) {
+  final String error = event.error == null? '': 'Error: ${event.error}';
+  if (event.level >= logging.Level.SEVERE) {
+    globals.printError('${event.loggerName}: ${event.message}$error', stackTrace: event.stackTrace);
+  } else if (event.level == logging.Level.WARNING) {
+    globals.printWarning('${event.loggerName}: ${event.message}$error');
+  } else  {
+    globals.printTrace('${event.loggerName}: ${event.message}$error');
   }
 }
 

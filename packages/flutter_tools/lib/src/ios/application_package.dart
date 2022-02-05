@@ -5,7 +5,7 @@
 import '../application_package.dart';
 import '../base/file_system.dart';
 import '../build_info.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../xcode_project.dart';
 import 'plist_parser.dart';
 
@@ -56,7 +56,7 @@ abstract class IOSApp extends ApplicationPackage {
       globals.printError('Invalid prebuilt iOS app. Does not contain Info.plist.');
       return null;
     }
-    final String? id = globals.plistParser.getValueFromFile(
+    final String? id = globals.plistParser.getStringValueFromFile(
       plistPath,
       PlistParser.kCFBundleIdentifierKey,
     );
@@ -72,7 +72,7 @@ abstract class IOSApp extends ApplicationPackage {
     );
   }
 
-  static Future<IOSApp?> fromIosProject(IosProject project, BuildInfo buildInfo) async {
+  static Future<IOSApp?> fromIosProject(IosProject project, BuildInfo? buildInfo) async {
     if (!globals.platform.isMacOS) {
       return null;
     }
@@ -109,7 +109,7 @@ class BuildableIOSApp extends IOSApp {
     : _hostAppBundleName = hostAppBundleName,
       super(projectBundleId: projectBundleId);
 
-  static Future<BuildableIOSApp?> fromProject(IosProject project, BuildInfo buildInfo) async {
+  static Future<BuildableIOSApp?> fromProject(IosProject project, BuildInfo? buildInfo) async {
     final String? hostAppBundleName = await project.hostAppBundleName(buildInfo);
     final String? projectBundleId = await project.productBundleIdentifier(buildInfo);
     if (projectBundleId != null) {

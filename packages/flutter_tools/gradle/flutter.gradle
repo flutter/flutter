@@ -137,14 +137,16 @@ class FlutterPlugin implements Plugin<Project> {
         this.project = project
 
         def rootProject = project.rootProject
-        rootProject.tasks.register('generateLockfiles') {
-            rootProject.subprojects.each { subproject ->
-                def gradlew = (OperatingSystem.current().isWindows()) ?
-                    "${rootProject.projectDir}/gradlew.bat" : "${rootProject.projectDir}/gradlew"
-                rootProject.exec {
-                    workingDir rootProject.projectDir
-                    executable gradlew
-                    args ":${subproject.name}:dependencies", "--write-locks"
+        if (isFlutterAppProject()) {
+            rootProject.tasks.register('generateLockfiles') {
+                rootProject.subprojects.each { subproject ->
+                    def gradlew = (OperatingSystem.current().isWindows()) ?
+                        "${rootProject.projectDir}/gradlew.bat" : "${rootProject.projectDir}/gradlew"
+                    rootProject.exec {
+                        workingDir rootProject.projectDir
+                        executable gradlew
+                        args ":${subproject.name}:dependencies", "--write-locks"
+                    }
                 }
             }
         }
@@ -397,10 +399,38 @@ class FlutterPlugin implements Plugin<Project> {
               "io.flutter:flutter_embedding_$flutterBuildMode:$engineVersion"
             )
         }
+
         // Wait until the Android plugin loaded.
         pluginProject.afterEvaluate {
+            if (pluginProject.android.compileSdkVersion > project.android.compileSdkVersion) {
+                project.logger.quiet("Warning: The plugin ${pluginName} requires Android SDK version ${pluginProject.android.compileSdkVersion.substring(8)}.")
+            }
             project.android.buildTypes.all addEmbeddingDependencyToPlugin
         }
+    }
+
+     /** Prints error message and fix for any plugin compileSdkVersion that are higher than the project. */
+    private void detectLowCompileSdkVersion() {
+        project.afterEvaluate {
+            int projectCompileSdkVersion = project.android.compileSdkVersion.substring(8) as int
+            int maxPluginCompileSdkVersion = projectCompileSdkVersion
+            int numProcessedPlugins = getPluginList().size()
+
+            getPluginList().each { plugin ->
+                Project pluginProject = project.rootProject.findProject(plugin.key)
+                pluginProject.afterEvaluate {
+                    int pluginCompileSdkVersion = pluginProject.android.compileSdkVersion.substring(8) as int
+                    maxPluginCompileSdkVersion = Math.max(pluginCompileSdkVersion, maxPluginCompileSdkVersion)
+
+                    numProcessedPlugins--
+                    if (numProcessedPlugins == 0) {
+                        if (maxPluginCompileSdkVersion > projectCompileSdkVersion) {
+                            project.logger.error("One or more plugins require a higher Android SDK version.\nFix this issue by adding the following to ${project.projectDir}${File.separator}build.gradle:\nandroid {\n  compileSdkVersion ${maxPluginCompileSdkVersion}\n  ...\n}\n")
+                        }
+                    }
+                }
+            }
+        }  
     }
 
     /**
@@ -933,6 +963,7 @@ class FlutterPlugin implements Plugin<Project> {
                 }
             }
             configurePlugins()
+            detectLowCompileSdkVersion()
             return
         }
         // Flutter host module project (Add-to-app).
@@ -984,6 +1015,7 @@ class FlutterPlugin implements Plugin<Project> {
             }
         }
         configurePlugins()
+        detectLowCompileSdkVersion()
     }
 }
 

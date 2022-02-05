@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:typed_data';
+
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -41,29 +43,80 @@ void main() {
       throwsToolExit());
   });
 
-  testWithoutContext('Template.render replaces .img.tmpl files with files from the image source', () {
-    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
-    final Directory templateDir = fileSystem.directory('templates');
-    final Directory imageSourceDir = fileSystem.directory('template_images');
-    final Directory destination = fileSystem.directory('target');
+  group('renders template', () {
+    late Directory destination;
     const String imageName = 'some_image.png';
-    templateDir.childFile('$imageName.img.tmpl').createSync(recursive: true);
-    final File sourceImage = imageSourceDir.childFile(imageName);
-    sourceImage.createSync(recursive: true);
-    sourceImage.writeAsStringSync("Ceci n'est pas une pipe");
+    late File sourceImage;
+    late BufferLogger logger;
+    late Template template;
 
-    final Template template = Template(
-      templateDir,
-      imageSourceDir,
-      fileSystem: fileSystem,
-      logger: BufferLogger.test(),
-      templateRenderer: FakeTemplateRenderer(),
-    );
-    template.render(destination, <String, Object>{});
+    setUp(() {
+      final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+      final Directory templateDir = fileSystem.directory('templates');
+      final Directory imageSourceDir = fileSystem.directory('template_images');
+      destination = fileSystem.directory('target');
+      templateDir.childFile('$imageName.img.tmpl').createSync(recursive: true);
+      sourceImage = imageSourceDir.childFile(imageName);
+      sourceImage.createSync(recursive: true);
+      sourceImage.writeAsStringSync("Ceci n'est pas une pipe");
 
-    final File destinationImage = destination.childFile(imageName);
-    expect(destinationImage, exists);
-    expect(destinationImage.readAsBytesSync(), equals(sourceImage.readAsBytesSync()));
+      logger = BufferLogger.test();
+      template = Template(
+        templateDir,
+        imageSourceDir,
+        fileSystem: fileSystem,
+        logger: logger,
+        templateRenderer: FakeTemplateRenderer(),
+      );
+    });
+
+    testWithoutContext('overwrites .img.tmpl files with files from the image source', () {
+      expect(template.render(destination, <String, Object>{}), 1);
+
+      final File destinationImage = destination.childFile(imageName);
+      final Uint8List sourceImageBytes = sourceImage.readAsBytesSync();
+      expect(destinationImage, exists);
+      expect(destinationImage.readAsBytesSync(), equals(sourceImageBytes));
+
+      expect(logger.errorText, isEmpty);
+      expect(logger.statusText, contains('${destinationImage.path} (created)'));
+      logger.clear();
+
+      // Run it again to overwrite (returns 1 file updated).
+      expect(template.render(destination, <String, Object>{}), 1);
+
+      expect(destinationImage.readAsBytesSync(), equals(sourceImageBytes));
+      expect(logger.errorText, isEmpty);
+      expect(logger.statusText, contains('${destinationImage.path} (overwritten)'));
+    });
+
+    testWithoutContext('does not overwrite .img.tmpl files with files from the image source', () {
+      expect(template.render(destination, <String, Object>{}), 1);
+
+      final File destinationImage = destination.childFile(imageName);
+      expect(destinationImage, exists);
+
+      expect(logger.errorText, isEmpty);
+      expect(logger.statusText, contains('${destinationImage.path} (created)'));
+      logger.clear();
+
+      // Run it again, do not overwrite (returns 0 files updated).
+      expect(template.render(destination, <String, Object>{}, overwriteExisting: false), 0);
+
+      expect(destinationImage, exists);
+      expect(logger.errorText, isEmpty);
+      expect(logger.statusText, isEmpty);
+    });
+
+    testWithoutContext('can suppress file printing', () {
+      template.render(destination, <String, Object>{}, printStatusWhenWriting: false);
+
+      final File destinationImage = destination.childFile(imageName);
+      expect(destinationImage, exists);
+
+      expect(logger.errorText, isEmpty);
+      expect(logger.statusText, isEmpty);
+    });
   });
 }
 

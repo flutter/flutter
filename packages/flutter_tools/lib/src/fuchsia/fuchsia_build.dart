@@ -2,10 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'package:meta/meta.dart';
-
 import '../artifacts.dart';
 import '../asset.dart';
 import '../base/common.dart';
@@ -16,11 +12,10 @@ import '../build_info.dart';
 import '../bundle_builder.dart';
 import '../convert.dart';
 import '../devfs.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../project.dart';
 
 import 'fuchsia_pm.dart';
-import 'fuchsia_sdk.dart';
 
 Future<void> _timedBuildStep(String name, Future<void> Function() action) async {
   final Stopwatch sw = Stopwatch()..start();
@@ -45,12 +40,13 @@ Future<void> _validateCmxFile(FuchsiaProject fuchsiaProject) async {
 // 3. Using these manifests, use the Fuchsia SDK 'pm' tool to create the
 //    Fuchsia package.
 Future<void> buildFuchsia({
-  @required FuchsiaProject fuchsiaProject,
-  @required TargetPlatform targetPlatform,
-  @required String target, // E.g., lib/main.dart
+  required FuchsiaProject fuchsiaProject,
+  required TargetPlatform targetPlatform,
+  String? target, // E.g., lib/main.dart
   BuildInfo buildInfo = BuildInfo.debug,
   String runnerPackageSource = FuchsiaPackageServer.toolHost,
 }) async {
+  final String targetPath = target ??= 'lib/main.dart';
   await _validateCmxFile(fuchsiaProject);
   final Directory outDir = globals.fs.directory(getFuchsiaBuildDirectory());
   if (!outDir.existsSync()) {
@@ -58,18 +54,18 @@ Future<void> buildFuchsia({
   }
 
   await _timedBuildStep('fuchsia-kernel-compile',
-    () => fuchsiaSdk.fuchsiaKernelCompiler.build(
-      fuchsiaProject: fuchsiaProject, target: target, buildInfo: buildInfo));
+    () => globals.fuchsiaSdk!.fuchsiaKernelCompiler.build(
+      fuchsiaProject: fuchsiaProject, target: targetPath, buildInfo: buildInfo));
 
   if (buildInfo.usesAot) {
     await _timedBuildStep('fuchsia-gen-snapshot',
-      () => _genSnapshot(fuchsiaProject, target, buildInfo, targetPlatform));
+      () => _genSnapshot(fuchsiaProject, targetPath, buildInfo, targetPlatform));
   }
 
   await _timedBuildStep('fuchsia-build-assets',
-    () => _buildAssets(fuchsiaProject, target, buildInfo));
+    () => _buildAssets(fuchsiaProject, targetPath, buildInfo));
   await _timedBuildStep('fuchsia-build-package',
-    () => _buildPackage(fuchsiaProject, target, buildInfo, runnerPackageSource));
+    () => _buildPackage(fuchsiaProject, targetPath, buildInfo, runnerPackageSource));
 }
 
 Future<void> _genSnapshot(
@@ -84,7 +80,7 @@ Future<void> _genSnapshot(
 
   final String elf = globals.fs.path.join(outDir, 'elf.aotsnapshot');
 
-  final String genSnapshot = globals.artifacts.getArtifactPath(
+  final String genSnapshot = globals.artifacts!.getArtifactPath(
     Artifact.genSnapshot,
     platform: targetPlatform,
     mode: buildInfo.mode,
@@ -118,11 +114,15 @@ Future<void> _buildAssets(
   BuildInfo buildInfo,
 ) async {
   final String assetDir = getAssetBuildDirectory();
-  final AssetBundle assets = await buildAssets(
+  final AssetBundle? assets = await buildAssets(
     manifestPath: fuchsiaProject.project.pubspecFile.path,
     packagesPath: fuchsiaProject.project.packagesFile.path,
     assetDirPath: assetDir,
   );
+
+  if (assets == null) {
+    throwToolExit('Unable to find assets.', exitCode: 1);
+  }
 
   final Map<String, DevFSContent> assetEntries =
       Map<String, DevFSContent>.of(assets.entries);
@@ -144,7 +144,7 @@ Future<void> _buildAssets(
 }
 
 void _rewriteCmx(BuildMode mode, String runnerPackageSource, File src, File dst) {
-  final Map<String, dynamic> cmx = castStringKeyedMap(json.decode(src.readAsStringSync()));
+  final Map<String, Object?> cmx = castStringKeyedMap(json.decode(src.readAsStringSync())) ?? <String, Object?>{};
   // If the app author has already specified the runner in the cmx file, then
   // do not override it with something else.
   if (cmx.containsKey('runner')) {
@@ -167,7 +167,6 @@ void _rewriteCmx(BuildMode mode, String runnerPackageSource, File src, File dst)
       break;
     default:
       throwToolExit('Fuchsia does not support build mode "$mode"');
-      break;
   }
   cmx['runner'] = 'fuchsia-pkg://$runnerPackageSource/$runner#meta/$runner.cmx';
   dst.writeAsStringSync(json.encode(cmx));
@@ -214,7 +213,10 @@ Future<void> _buildPackage(
   manifestFile.writeAsStringSync('meta/package=$pkgDir/meta/package\n',
       mode: FileMode.append);
 
-  final FuchsiaPM fuchsiaPM = fuchsiaSdk.fuchsiaPM;
+  final FuchsiaPM? fuchsiaPM = globals.fuchsiaSdk?.fuchsiaPM;
+  if (fuchsiaPM == null) {
+    return;
+  }
   if (!await fuchsiaPM.init(pkgDir, appName)) {
     return;
   }

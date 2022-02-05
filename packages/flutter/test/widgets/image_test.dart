@@ -7,6 +7,7 @@
 @Tags(<String>['reduced-test-set'])
 
 import 'dart:async';
+import 'dart:io';
 import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
@@ -1956,6 +1957,22 @@ void main() {
       matchesGoldenFile('image_test.missing.2.png'),
     );
   }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/74935 (broken assets not being reported on web)
+
+  testWidgets('Image.file throws a non-implemented error on web', (WidgetTester tester) async {
+    const String expectedError =
+      'Image.file is not supported on Flutter Web. '
+      'Consider using either Image.asset or Image.network instead.';
+    final Uri uri = Uri.parse('/home/flutter/dash.png');
+    final File file = File.fromUri(uri);
+    expect(
+      () => Image.file(file),
+      kIsWeb
+        // Web does not support file access, expect AssertionError
+        ? throwsA(predicate((AssertionError e) => e.message == expectedError))
+        // AOT supports file access, expect constructor to succeed
+        : isNot(throwsA(anything)),
+    );
+  });
 }
 
 @immutable

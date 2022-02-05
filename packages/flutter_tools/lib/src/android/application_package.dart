@@ -204,9 +204,6 @@ class AndroidApk extends ApplicationPackage {
   }
 
   @override
-  File get packagesFile => file;
-
-  @override
   String get name => file.basename;
 }
 

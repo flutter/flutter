@@ -25,7 +25,8 @@ const String flutterRoot = r'C:\flutter';
 const String buildFilePath = r'C:\windows\CMakeLists.txt';
 const String buildUwpFilePath = r'C:\winuwp\CMakeLists.txt';
 const String visualStudioPath = r'C:\Program Files (x86)\Microsoft Visual Studio\2017\Community';
-const String cmakePath = visualStudioPath + r'\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe';
+const String _cmakePath = visualStudioPath + r'\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe';
+const String _defaultGenerator = 'Visual Studio 16 2019';
 
 final Platform windowsPlatform = FakePlatform(
   operatingSystem: 'windows',
@@ -45,7 +46,6 @@ void main() {
   FileSystem fileSystem;
 
   ProcessManager processManager;
-  FakeVisualStudio fakeVisualStudio;
   TestUsage usage;
 
   setUpAll(() {
@@ -56,7 +56,6 @@ void main() {
   setUp(() {
     fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
     Cache.flutterRoot = flutterRoot;
-    fakeVisualStudio = FakeVisualStudio();
     usage = TestUsage();
   });
 
@@ -83,10 +82,14 @@ void main() {
 
   // Returns the command matching the build_windows call to generate CMake
   // files.
-  FakeCommand cmakeGenerationCommand({void Function() onRun, bool winuwp = false}) {
+  FakeCommand cmakeGenerationCommand({
+    void Function() onRun,
+    bool winuwp = false,
+    String generator = _defaultGenerator,
+  }) {
     return FakeCommand(
       command: <String>[
-        cmakePath,
+        _cmakePath,
         '-S',
         fileSystem.path.dirname(winuwp ? buildUwpFilePath : buildFilePath),
         '-B',
@@ -95,7 +98,7 @@ void main() {
         else
           r'build\windows',
         '-G',
-        'Visual Studio 16 2019',
+        generator,
       ],
       onRun: onRun,
     );
@@ -110,7 +113,7 @@ void main() {
   }) {
     return FakeCommand(
       command: <String>[
-        cmakePath,
+        _cmakePath,
         '--build',
         if (winuwp)
           r'build\winuwp'
@@ -132,9 +135,9 @@ void main() {
     );
   }
 
-  testUsingContext('Windows build fails when there is no vcvars64.bat', () async {
+  testUsingContext('Windows build fails when there is no cmake path', () async {
     final BuildWindowsCommand command = BuildWindowsCommand()
-      ..visualStudioOverride = fakeVisualStudio;
+      ..visualStudioOverride = FakeVisualStudio(cmakePath: null);
     setUpMockProjectFilesForBuild();
 
     expect(createTestCommandRunner(command).run(
@@ -148,7 +151,7 @@ void main() {
   });
 
   testUsingContext('Windows build fails when there is no windows project', () async {
-    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio(cmakePath);
+    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
     final BuildWindowsCommand command = BuildWindowsCommand()
       ..visualStudioOverride = fakeVisualStudio;
     setUpMockCoreProjectFiles();
@@ -156,7 +159,7 @@ void main() {
     expect(createTestCommandRunner(command).run(
       const <String>['windows', '--no-pub']
     ), throwsToolExit(message: 'No Windows desktop project configured. See '
-      'https://flutter.dev/desktop#add-desktop-support-to-an-existing-flutter-app '
+      'https://docs.flutter.dev/desktop#add-desktop-support-to-an-existing-flutter-app '
       'to learn about adding Windows support to a project.'));
   }, overrides: <Type, Generator>{
     Platform: () => windowsPlatform,
@@ -166,7 +169,7 @@ void main() {
   });
 
   testUsingContext('Windows build fails on non windows platform', () async {
-    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio(cmakePath);
+    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
     final BuildWindowsCommand command = BuildWindowsCommand()
       ..visualStudioOverride = fakeVisualStudio;
     setUpMockProjectFilesForBuild();
@@ -182,7 +185,7 @@ void main() {
   });
 
   testUsingContext('Windows build fails when feature is disabled', () async {
-    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio(cmakePath);
+    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
     final BuildWindowsCommand command = BuildWindowsCommand()
       ..visualStudioOverride = fakeVisualStudio;
     setUpMockProjectFilesForBuild();
@@ -198,7 +201,7 @@ void main() {
   });
 
   testUsingContext('Windows build does not spew stdout to status logger', () async {
-    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio(cmakePath);
+    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
     final BuildWindowsCommand command = BuildWindowsCommand()
       ..visualStudioOverride = fakeVisualStudio;
     setUpMockProjectFilesForBuild();
@@ -223,7 +226,7 @@ void main() {
   });
 
   testUsingContext('Windows build extracts errors from stdout', () async {
-    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio(cmakePath);
+    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
     final BuildWindowsCommand command = BuildWindowsCommand()
       ..visualStudioOverride = fakeVisualStudio;
     setUpMockProjectFilesForBuild();
@@ -281,7 +284,7 @@ C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier 
   });
 
   testUsingContext('Windows verbose build sets VERBOSE_SCRIPT_LOGGING', () async {
-    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio(cmakePath);
+    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
     final BuildWindowsCommand command = BuildWindowsCommand()
       ..visualStudioOverride = fakeVisualStudio;
     setUpMockProjectFilesForBuild();
@@ -307,7 +310,7 @@ C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier 
   });
 
   testUsingContext('Windows build invokes build and writes generated files', () async {
-    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio(cmakePath);
+    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
     final BuildWindowsCommand command = BuildWindowsCommand()
       ..visualStudioOverride = fakeVisualStudio;
     setUpMockProjectFilesForBuild();
@@ -372,7 +375,7 @@ C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier 
   });
 
   testUsingContext('Windows profile build passes Profile configuration', () async {
-    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio(cmakePath);
+    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
     final BuildWindowsCommand command = BuildWindowsCommand()
       ..visualStudioOverride = fakeVisualStudio;
     setUpMockProjectFilesForBuild();
@@ -384,6 +387,29 @@ C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier 
 
     await createTestCommandRunner(command).run(
       const <String>['windows', '--profile', '--no-pub']
+    );
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+    Platform: () => windowsPlatform,
+    FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
+  });
+
+  testUsingContext('Windows build passes correct generator', () async {
+    const String generator = 'A different generator';
+    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio(
+      cmakeGenerator: generator);
+    final BuildWindowsCommand command = BuildWindowsCommand()
+      ..visualStudioOverride = fakeVisualStudio;
+    setUpMockProjectFilesForBuild();
+
+    processManager = FakeProcessManager.list(<FakeCommand>[
+      cmakeGenerationCommand(generator: generator),
+      buildCommand('Release'),
+    ]);
+
+    await createTestCommandRunner(command).run(
+      const <String>['windows', '--release', '--no-pub']
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -407,7 +433,7 @@ C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier 
   });
 
   testUsingContext('Performs code size analysis and sends analytics', () async {
-    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio(cmakePath);
+    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
     final BuildWindowsCommand command = BuildWindowsCommand()
       ..visualStudioOverride = fakeVisualStudio;
     setUpMockProjectFilesForBuild();
@@ -455,7 +481,7 @@ C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier 
   });
 
   testUsingContext('Windows build fails when there is no windows project', () async {
-    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio(cmakePath);
+    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
     final BuildWindowsUwpCommand command = BuildWindowsUwpCommand()
       ..visualStudioOverride = fakeVisualStudio;
     setUpMockCoreProjectFiles();
@@ -463,7 +489,7 @@ C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier 
     expect(createTestCommandRunner(command).run(
       const <String>['winuwp', '--no-pub']
     ), throwsToolExit(message: 'No Windows UWP desktop project configured. See '
-      'https://flutter.dev/desktop#add-desktop-support-to-an-existing-flutter-app '
+      'https://docs.flutter.dev/desktop#add-desktop-support-to-an-existing-flutter-app '
       'to learn about adding Windows support to a project.'));
   }, overrides: <Type, Generator>{
     Platform: () => windowsPlatform,
@@ -473,7 +499,7 @@ C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier 
   });
 
   testUsingContext('Windows build fails on non windows platform', () async {
-    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio(cmakePath);
+    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
     final BuildWindowsUwpCommand command = BuildWindowsUwpCommand()
       ..visualStudioOverride = fakeVisualStudio;
     setUpMockUwpFilesForBuild(0);
@@ -489,7 +515,7 @@ C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier 
   });
 
   testUsingContext('Windows UWP uild fails on non windows platform', () async {
-    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio(cmakePath);
+    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
     final BuildWindowsUwpCommand command = BuildWindowsUwpCommand()
       ..visualStudioOverride = fakeVisualStudio;
     setUpMockProjectFilesForBuild();
@@ -505,7 +531,7 @@ C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier 
   });
 
   testUsingContext('Windows UWP build fails when the project version is out of date', () async {
-    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio(cmakePath);
+    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
     final BuildWindowsUwpCommand command = BuildWindowsUwpCommand()
       ..visualStudioOverride = fakeVisualStudio;
     setUpMockUwpFilesForBuild(-1);
@@ -522,7 +548,7 @@ C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier 
   });
 
   testUsingContext('Windows UWP build fails when feature is disabled', () async {
-    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio(cmakePath);
+    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
     final BuildWindowsUwpCommand command = BuildWindowsUwpCommand()
       ..visualStudioOverride = fakeVisualStudio;
     setUpMockProjectFilesForBuild();
@@ -540,7 +566,7 @@ C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier 
   });
 
   testUsingContext('Windows UWP build completes successfully', () async {
-    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio(cmakePath);
+    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
     final BuildWindowsUwpCommand command = BuildWindowsUwpCommand()
       ..visualStudioOverride = fakeVisualStudio;
     setUpMockUwpFilesForBuild(0);
@@ -575,8 +601,14 @@ C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier 
 }
 
 class FakeVisualStudio extends Fake implements VisualStudio {
-  FakeVisualStudio([this.cmakePath]);
+  FakeVisualStudio({
+    this.cmakePath = _cmakePath,
+    this.cmakeGenerator = 'Visual Studio 16 2019',
+  });
 
   @override
   final String cmakePath;
+
+  @override
+  final String cmakeGenerator;
 }
