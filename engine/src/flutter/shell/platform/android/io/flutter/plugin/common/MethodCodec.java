@@ -4,6 +4,8 @@
 
 package io.flutter.plugin.common;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import java.nio.ByteBuffer;
 
 /**
@@ -23,7 +25,8 @@ public interface MethodCodec {
    * @return a {@link ByteBuffer} containing the encoding between position 0 and the current
    *     position.
    */
-  ByteBuffer encodeMethodCall(MethodCall methodCall);
+  @NonNull
+  ByteBuffer encodeMethodCall(@NonNull MethodCall methodCall);
 
   /**
    * Decodes a message call from binary.
@@ -32,7 +35,8 @@ public interface MethodCodec {
    * @return a {@link MethodCall} representation of the bytes between the given buffer's current
    *     position and its limit.
    */
-  MethodCall decodeMethodCall(ByteBuffer methodCall);
+  @NonNull
+  MethodCall decodeMethodCall(@NonNull ByteBuffer methodCall);
 
   /**
    * Encodes a successful result into a binary envelope message.
@@ -41,7 +45,8 @@ public interface MethodCodec {
    * @return a {@link ByteBuffer} containing the encoding between position 0 and the current
    *     position.
    */
-  ByteBuffer encodeSuccessEnvelope(Object result);
+  @NonNull
+  ByteBuffer encodeSuccessEnvelope(@Nullable Object result);
 
   /**
    * Encodes an error result into a binary envelope message.
@@ -53,7 +58,9 @@ public interface MethodCodec {
    * @return a {@link ByteBuffer} containing the encoding between position 0 and the current
    *     position.
    */
-  ByteBuffer encodeErrorEnvelope(String errorCode, String errorMessage, Object errorDetails);
+  @NonNull
+  ByteBuffer encodeErrorEnvelope(
+      @NonNull String errorCode, @Nullable String errorMessage, @Nullable Object errorDetails);
 
   /**
    * Encodes an error result into a binary envelope message with the native stacktrace.
@@ -66,8 +73,12 @@ public interface MethodCodec {
    * @return a {@link ByteBuffer} containing the encoding between position 0 and the current
    *     position.
    */
+  @NonNull
   ByteBuffer encodeErrorEnvelopeWithStacktrace(
-      String errorCode, String errorMessage, Object errorDetails, String errorStacktrace);
+      @NonNull String errorCode,
+      @Nullable String errorMessage,
+      @Nullable Object errorDetails,
+      @Nullable String errorStacktrace);
 
   /**
    * Decodes a result envelope from binary.
@@ -76,5 +87,6 @@ public interface MethodCodec {
    * @return the enveloped result Object.
    * @throws FlutterException if the envelope was an error envelope.
    */
-  Object decodeEnvelope(ByteBuffer envelope);
+  @NonNull
+  Object decodeEnvelope(@NonNull ByteBuffer envelope);
 }
