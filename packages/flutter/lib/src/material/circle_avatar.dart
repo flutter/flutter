@@ -68,13 +68,14 @@ class CircleAvatar extends StatelessWidget {
     this.onBackgroundImageError,
     this.onForegroundImageError,
     this.foregroundColor,
+    this.fit = BoxFit.cover,
     this.radius,
     this.minRadius,
     this.maxRadius,
-  }) : assert(radius == null || (minRadius == null && maxRadius == null)),
-       assert(backgroundImage != null || onBackgroundImageError == null),
-       assert(foregroundImage != null || onForegroundImageError== null),
-       super(key: key);
+  })  : assert(radius == null || (minRadius == null && maxRadius == null)),
+        assert(backgroundImage != null || onBackgroundImageError == null),
+        assert(foregroundImage != null || onForegroundImageError == null),
+        super(key: key);
 
   /// The widget below this widget in the tree.
   ///
@@ -119,6 +120,10 @@ class CircleAvatar extends StatelessWidget {
   /// An optional error callback for errors emitted when loading
   /// [foregroundImage].
   final ImageErrorListener? onForegroundImageError;
+
+  /// How to inscribe the child into the space allocated during layout.
+  /// The default is BoxFit.cover
+  final BoxFit fit;
 
   /// The size of the avatar, expressed as the radius (half the diameter).
   ///
@@ -227,12 +232,12 @@ class CircleAvatar extends StatelessWidget {
       decoration: BoxDecoration(
         color: effectiveBackgroundColor,
         image: backgroundImage != null
-          ? DecorationImage(
-              image: backgroundImage!,
-              onError: onBackgroundImageError,
-              fit: BoxFit.cover,
-            )
-          : null,
+            ? DecorationImage(
+                image: backgroundImage!,
+                onError: onBackgroundImageError,
+                fit: fit,
+              )
+            : null,
         shape: BoxShape.circle,
       ),
       foregroundDecoration: foregroundImage != null
@@ -240,7 +245,7 @@ class CircleAvatar extends StatelessWidget {
               image: DecorationImage(
                 image: foregroundImage!,
                 onError: onForegroundImageError,
-                fit: BoxFit.cover,
+                fit: fit,
               ),
               shape: BoxShape.circle,
             )
