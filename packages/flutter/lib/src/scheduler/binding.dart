@@ -818,11 +818,6 @@ mixin SchedulerBinding on BindingBase {
   /// Consider using [scheduleWarmUpFrame] instead if the goal is to update the
   /// rendering as soon as possible (e.g. at application startup).
   void scheduleForcedFrame() {
-    // TODO(chunhtai): Removes the if case once the issue is fixed
-    // https://github.com/flutter/flutter/issues/45131
-    if (!framesEnabled)
-      return;
-
     if (_hasScheduledFrame)
       return;
     assert(() {
