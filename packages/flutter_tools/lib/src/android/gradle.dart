@@ -422,7 +422,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
             // The expected wait times are: 100ms, 200ms, 400ms, and so on...
             final int waitTime = min(pow(2, retry).toInt() * 100, kMaxRetryTime.inMicroseconds);
             retry += 1;
-            _logger.printStatus('Retrying Gradle Build: #$retry, wait time: $waitTime');
+            _logger.printStatus('Retrying Gradle Build: #$retry, wait time: ${waitTime}ms');
             await Future<void>.delayed(Duration(milliseconds: waitTime));
             await buildGradleApp(
               project: project,

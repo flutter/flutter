@@ -215,8 +215,8 @@ void main() {
         message: 'Gradle task assembleRelease failed with exit code 1'
       ));
 
-      expect(logger.statusText, contains('Retrying Gradle Build: #1, wait time: 100'));
-      expect(logger.statusText, contains('Retrying Gradle Build: #2, wait time: 200'));
+      expect(logger.statusText, contains('Retrying Gradle Build: #1, wait time: 100ms'));
+      expect(logger.statusText, contains('Retrying Gradle Build: #2, wait time: 200ms'));
 
       expect(testFnCalled, equals(maxRetries + 1));
       expect(testUsage.events, contains(
