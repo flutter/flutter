@@ -855,16 +855,13 @@ public class FlutterView extends SurfaceView
 
   @Override
   @UiThread
-  public void setMessageHandler(@NonNull String channel, @NonNull BinaryMessageHandler handler) {
+  public void setMessageHandler(String channel, BinaryMessageHandler handler) {
     mNativeView.setMessageHandler(channel, handler);
   }
 
   @Override
   @UiThread
-  public void setMessageHandler(
-      @NonNull String channel,
-      @NonNull BinaryMessageHandler handler,
-      @NonNull TaskQueue taskQueue) {
+  public void setMessageHandler(String channel, BinaryMessageHandler handler, TaskQueue taskQueue) {
     mNativeView.setMessageHandler(channel, handler, taskQueue);
   }
 
@@ -874,14 +871,12 @@ public class FlutterView extends SurfaceView
   }
 
   @Override
-  @NonNull
   public TextureRegistry.SurfaceTextureEntry createSurfaceTexture() {
     final SurfaceTexture surfaceTexture = new SurfaceTexture(0);
     return registerSurfaceTexture(surfaceTexture);
   }
 
   @Override
-  @NonNull
   public TextureRegistry.SurfaceTextureEntry registerSurfaceTexture(
       @NonNull SurfaceTexture surfaceTexture) {
     surfaceTexture.detachFromGLContext();

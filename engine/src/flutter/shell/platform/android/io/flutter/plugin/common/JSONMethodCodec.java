@@ -4,8 +4,6 @@
 
 package io.flutter.plugin.common;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import java.nio.ByteBuffer;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -28,8 +26,7 @@ public final class JSONMethodCodec implements MethodCodec {
   private JSONMethodCodec() {}
 
   @Override
-  @NonNull
-  public ByteBuffer encodeMethodCall(@NonNull MethodCall methodCall) {
+  public ByteBuffer encodeMethodCall(MethodCall methodCall) {
     try {
       final JSONObject map = new JSONObject();
       map.put("method", methodCall.method);
@@ -41,8 +38,7 @@ public final class JSONMethodCodec implements MethodCodec {
   }
 
   @Override
-  @NonNull
-  public MethodCall decodeMethodCall(@NonNull ByteBuffer message) {
+  public MethodCall decodeMethodCall(ByteBuffer message) {
     try {
       final Object json = JSONMessageCodec.INSTANCE.decodeMessage(message);
       if (json instanceof JSONObject) {
@@ -60,15 +56,13 @@ public final class JSONMethodCodec implements MethodCodec {
   }
 
   @Override
-  @NonNull
-  public ByteBuffer encodeSuccessEnvelope(@Nullable Object result) {
+  public ByteBuffer encodeSuccessEnvelope(Object result) {
     return JSONMessageCodec.INSTANCE.encodeMessage(new JSONArray().put(JSONUtil.wrap(result)));
   }
 
   @Override
-  @NonNull
   public ByteBuffer encodeErrorEnvelope(
-      @NonNull String errorCode, @Nullable String errorMessage, @Nullable Object errorDetails) {
+      String errorCode, String errorMessage, Object errorDetails) {
     return JSONMessageCodec.INSTANCE.encodeMessage(
         new JSONArray()
             .put(errorCode)
@@ -77,12 +71,8 @@ public final class JSONMethodCodec implements MethodCodec {
   }
 
   @Override
-  @NonNull
   public ByteBuffer encodeErrorEnvelopeWithStacktrace(
-      @NonNull String errorCode,
-      @Nullable String errorMessage,
-      @Nullable Object errorDetails,
-      @Nullable String errorStacktrace) {
+      String errorCode, String errorMessage, Object errorDetails, String errorStacktrace) {
     return JSONMessageCodec.INSTANCE.encodeMessage(
         new JSONArray()
             .put(errorCode)
@@ -92,8 +82,7 @@ public final class JSONMethodCodec implements MethodCodec {
   }
 
   @Override
-  @NonNull
-  public Object decodeEnvelope(@NonNull ByteBuffer envelope) {
+  public Object decodeEnvelope(ByteBuffer envelope) {
     try {
       final Object json = JSONMessageCodec.INSTANCE.decodeMessage(envelope);
       if (json instanceof JSONArray) {

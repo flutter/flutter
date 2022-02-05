@@ -16,7 +16,6 @@ import android.view.Surface;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import io.flutter.view.TextureRegistry;
 
@@ -204,7 +203,6 @@ class VirtualDisplayController {
     presentation.getView().onInputConnectionUnlocked();
   }
 
-  @Nullable
   public View getView() {
     if (presentation == null) return null;
     PlatformView platformView = presentation.getView();

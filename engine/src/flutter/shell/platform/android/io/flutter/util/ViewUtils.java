@@ -9,7 +9,6 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.os.Build;
 import android.view.View;
-import androidx.annotation.Nullable;
 
 public final class ViewUtils {
   /**
@@ -18,8 +17,7 @@ public final class ViewUtils {
    * <p>This method will recursively traverse up the context chain if it is a {@link ContextWrapper}
    * until it finds the first instance of the base context that is an {@link Activity}.
    */
-  @Nullable
-  public static Activity getActivity(@Nullable Context context) {
+  public static Activity getActivity(Context context) {
     if (context == null) {
       return null;
     }

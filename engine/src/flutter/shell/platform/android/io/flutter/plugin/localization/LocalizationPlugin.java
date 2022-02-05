@@ -82,8 +82,7 @@ public class LocalizationPlugin {
    * <p>FlutterEngine must be non-null when this method is invoked.
    */
   @SuppressWarnings("deprecation")
-  @Nullable
-  public Locale resolveNativeLocale(@Nullable List<Locale> supportedLocales) {
+  public Locale resolveNativeLocale(List<Locale> supportedLocales) {
     if (supportedLocales == null || supportedLocales.isEmpty()) {
       return null;
     }
@@ -189,8 +188,7 @@ public class LocalizationPlugin {
   }
 
   @VisibleForTesting
-  @NonNull
-  public static Locale localeFromString(@NonNull String localeString) {
+  public static Locale localeFromString(String localeString) {
     // Use Locale.forLanguageTag if available (API 21+).
     if (false && Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
       return Locale.forLanguageTag(localeString);

@@ -2,7 +2,6 @@ package io.flutter.embedding.android;
 
 import android.util.LongSparseArray;
 import android.view.MotionEvent;
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import java.util.PriorityQueue;
 import java.util.concurrent.atomic.AtomicLong;
@@ -19,12 +18,10 @@ public final class MotionEventTracker {
       this.id = id;
     }
 
-    @NonNull
     public static MotionEventId from(long id) {
       return new MotionEventId(id);
     }
 
-    @NonNull
     public static MotionEventId createUnique() {
       return MotionEventId.from(ID_COUNTER.incrementAndGet());
     }
@@ -38,7 +35,6 @@ public final class MotionEventTracker {
   private final PriorityQueue<Long> unusedEvents;
   private static MotionEventTracker INSTANCE;
 
-  @NonNull
   public static MotionEventTracker getInstance() {
     if (INSTANCE == null) {
       INSTANCE = new MotionEventTracker();
@@ -52,8 +48,7 @@ public final class MotionEventTracker {
   }
 
   /** Tracks the event and returns a unique MotionEventId identifying the event. */
-  @NonNull
-  public MotionEventId track(@NonNull MotionEvent event) {
+  public MotionEventId track(MotionEvent event) {
     MotionEventId eventId = MotionEventId.createUnique();
     eventById.put(eventId.id, MotionEvent.obtain(event));
     unusedEvents.add(eventId.id);
@@ -66,7 +61,7 @@ public final class MotionEventTracker {
    * popped or discarded.
    */
   @Nullable
-  public MotionEvent pop(@NonNull MotionEventId eventId) {
+  public MotionEvent pop(MotionEventId eventId) {
     // remove all the older events.
     while (!unusedEvents.isEmpty() && unusedEvents.peek() < eventId.id) {
       eventById.remove(unusedEvents.poll());

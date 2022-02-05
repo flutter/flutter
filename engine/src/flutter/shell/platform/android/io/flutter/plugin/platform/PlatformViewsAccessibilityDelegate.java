@@ -5,7 +5,6 @@
 package io.flutter.plugin.platform;
 
 import android.view.View;
-import androidx.annotation.NonNull;
 import io.flutter.view.AccessibilityBridge;
 
 /** Facilitates interaction between the accessibility bridge and embedded platform views. */
@@ -14,11 +13,10 @@ public interface PlatformViewsAccessibilityDelegate {
    * Returns the root of the view hierarchy for the platform view with the requested id, or null if
    * there is no corresponding view.
    */
-  @NonNull
-  View getPlatformViewById(int id);
+  View getPlatformViewById(Integer id);
 
   /** Returns true if the platform view uses virtual displays. */
-  boolean usesVirtualDisplay(int id);
+  boolean usesVirtualDisplay(Integer id);
 
   /**
    * Attaches an accessibility bridge for this platform views accessibility delegate.
@@ -26,7 +24,7 @@ public interface PlatformViewsAccessibilityDelegate {
    * <p>Accessibility events originating in platform views belonging to this delegate will be
    * delegated to this accessibility bridge.
    */
-  void attachAccessibilityBridge(@NonNull AccessibilityBridge accessibilityBridge);
+  void attachAccessibilityBridge(AccessibilityBridge accessibilityBridge);
 
   /**
    * Detaches the current accessibility bridge.

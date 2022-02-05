@@ -79,9 +79,7 @@ public class KeyboardManager {
    *     dispatched to.
    */
   public KeyboardManager(
-      @NonNull View view,
-      @NonNull TextInputPlugin textInputPlugin,
-      @NonNull Responder[] responders) {
+      View view, @NonNull TextInputPlugin textInputPlugin, Responder[] responders) {
     this.view = view;
     this.textInputPlugin = textInputPlugin;
     this.responders = responders;
@@ -105,7 +103,7 @@ public class KeyboardManager {
    */
   interface Responder {
     interface OnKeyEventHandledCallback {
-      void onKeyEventHandled(boolean canHandleEvent);
+      void onKeyEventHandled(Boolean canHandleEvent);
     }
 
     /**
@@ -124,7 +122,7 @@ public class KeyboardManager {
       boolean isCalled = false;
 
       @Override
-      public void onKeyEventHandled(boolean canHandleEvent) {
+      public void onKeyEventHandled(Boolean canHandleEvent) {
         if (isCalled) {
           throw new IllegalStateException(
               "The onKeyEventHandledCallback should be called exactly once.");
@@ -142,7 +140,7 @@ public class KeyboardManager {
       this.keyEvent = keyEvent;
     }
 
-    final KeyEvent keyEvent;
+    @NonNull final KeyEvent keyEvent;
     int unrepliedCount = responders.length;
     boolean isEventHandled = false;
 
@@ -151,9 +149,9 @@ public class KeyboardManager {
     }
   }
 
-  protected final Responder[] responders;
-  private final HashSet<KeyEvent> redispatchedEvents = new HashSet<>();
-  private final TextInputPlugin textInputPlugin;
+  @NonNull protected final Responder[] responders;
+  @NonNull private final HashSet<KeyEvent> redispatchedEvents = new HashSet<>();
+  @NonNull private final TextInputPlugin textInputPlugin;
   private final View view;
 
   public boolean handleEvent(@NonNull KeyEvent keyEvent) {

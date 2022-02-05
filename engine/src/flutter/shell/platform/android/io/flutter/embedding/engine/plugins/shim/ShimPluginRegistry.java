@@ -48,8 +48,7 @@ public class ShimPluginRegistry implements PluginRegistry {
   }
 
   @Override
-  @NonNull
-  public Registrar registrarFor(@NonNull String pluginKey) {
+  public Registrar registrarFor(String pluginKey) {
     Log.v(TAG, "Creating plugin Registrar for '" + pluginKey + "'");
     if (pluginMap.containsKey(pluginKey)) {
       throw new IllegalStateException("Plugin key " + pluginKey + " is already in use");
@@ -61,13 +60,13 @@ public class ShimPluginRegistry implements PluginRegistry {
   }
 
   @Override
-  public boolean hasPlugin(@NonNull String pluginKey) {
+  public boolean hasPlugin(String pluginKey) {
     return pluginMap.containsKey(pluginKey);
   }
 
   @Override
   @SuppressWarnings("unchecked")
-  public <T> T valuePublishedByPlugin(@NonNull String pluginKey) {
+  public <T> T valuePublishedByPlugin(String pluginKey) {
     return (T) pluginMap.get(pluginKey);
   }
 

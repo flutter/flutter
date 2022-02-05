@@ -4,7 +4,6 @@
 
 package io.flutter.plugin.common;
 
-import androidx.annotation.Nullable;
 import java.nio.ByteBuffer;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -29,8 +28,7 @@ public final class JSONMessageCodec implements MessageCodec<Object> {
   private JSONMessageCodec() {}
 
   @Override
-  @Nullable
-  public ByteBuffer encodeMessage(@Nullable Object message) {
+  public ByteBuffer encodeMessage(Object message) {
     if (message == null) {
       return null;
     }
@@ -43,8 +41,7 @@ public final class JSONMessageCodec implements MessageCodec<Object> {
   }
 
   @Override
-  @Nullable
-  public Object decodeMessage(@Nullable ByteBuffer message) {
+  public Object decodeMessage(ByteBuffer message) {
     if (message == null) {
       return null;
     }
