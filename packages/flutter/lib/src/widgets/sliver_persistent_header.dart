@@ -254,8 +254,6 @@ class _SliverPersistentHeaderElement extends RenderObjectElement {
 
   final bool floating;
 
-  _SliverPersistentHeaderRenderObjectWidget get _typedWidget => super.widget as _SliverPersistentHeaderRenderObjectWidget;
-
   @override
   _RenderSliverPersistentHeaderForWidgetsMixin get renderObject => super.renderObject as _RenderSliverPersistentHeaderForWidgetsMixin;
 
@@ -273,7 +271,7 @@ class _SliverPersistentHeaderElement extends RenderObjectElement {
 
   @override
   void update(_SliverPersistentHeaderRenderObjectWidget newWidget) {
-    final _SliverPersistentHeaderRenderObjectWidget oldWidget = _typedWidget;
+    final _SliverPersistentHeaderRenderObjectWidget oldWidget = widget as _SliverPersistentHeaderRenderObjectWidget;
     super.update(newWidget);
     final SliverPersistentHeaderDelegate newDelegate = newWidget.delegate;
     final SliverPersistentHeaderDelegate oldDelegate = oldWidget.delegate;
@@ -292,15 +290,16 @@ class _SliverPersistentHeaderElement extends RenderObjectElement {
 
   void _build(double shrinkOffset, bool overlapsContent) {
     owner!.buildScope(this, () {
+      final _SliverPersistentHeaderRenderObjectWidget sliverPersistentHeaderRenderObjectWidget = widget as _SliverPersistentHeaderRenderObjectWidget;
       child = updateChild(
         child,
         floating
-          ? _FloatingHeader(child: _typedWidget.delegate.build(
+          ? _FloatingHeader(child: sliverPersistentHeaderRenderObjectWidget.delegate.build(
             this,
             shrinkOffset,
             overlapsContent
           ))
-          : _typedWidget.delegate.build(this, shrinkOffset, overlapsContent),
+          : sliverPersistentHeaderRenderObjectWidget.delegate.build(this, shrinkOffset, overlapsContent),
         null,
       );
     });
@@ -370,10 +369,10 @@ mixin _RenderSliverPersistentHeaderForWidgetsMixin on RenderSliverPersistentHead
   _SliverPersistentHeaderElement? _element;
 
   @override
-  double get minExtent => _element!._typedWidget.delegate.minExtent;
+  double get minExtent => (_element!.widget as _SliverPersistentHeaderRenderObjectWidget).delegate.minExtent;
 
   @override
-  double get maxExtent => _element!._typedWidget.delegate.maxExtent;
+  double get maxExtent => (_element!.widget as _SliverPersistentHeaderRenderObjectWidget).delegate.maxExtent;
 
   @override
   void updateChild(double shrinkOffset, bool overlapsContent) {

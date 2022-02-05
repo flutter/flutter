@@ -1666,13 +1666,12 @@ class DropdownButtonFormField<T> extends FormField<T> {
 
 class _DropdownButtonFormFieldState<T> extends FormFieldState<T> {
 
-  DropdownButtonFormField<T> get _typedWidget => super.widget as DropdownButtonFormField<T>;
-
   @override
   void didChange(T? value) {
     super.didChange(value);
-    assert(_typedWidget.onChanged != null);
-    _typedWidget.onChanged!(value);
+    final DropdownButtonFormField<T> dropdownButtonFormField = widget as DropdownButtonFormField<T>;
+    assert(dropdownButtonFormField.onChanged != null);
+    dropdownButtonFormField.onChanged!(value);
   }
 
   @override

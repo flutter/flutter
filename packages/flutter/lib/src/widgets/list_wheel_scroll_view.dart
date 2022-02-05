@@ -818,8 +818,6 @@ class ListWheelElement extends RenderObjectElement implements ListWheelChildMana
   /// Creates an element that lazily builds children for the given widget.
   ListWheelElement(ListWheelViewport widget) : super(widget);
 
-  ListWheelViewport get _typedWidget => super.widget as ListWheelViewport;
-
   @override
   RenderListWheelViewport get renderObject => super.renderObject as RenderListWheelViewport;
 
@@ -839,7 +837,7 @@ class ListWheelElement extends RenderObjectElement implements ListWheelChildMana
 
   @override
   void update(ListWheelViewport newWidget) {
-    final ListWheelViewport oldWidget = _typedWidget;
+    final ListWheelViewport oldWidget = widget as ListWheelViewport;
     super.update(newWidget);
     final ListWheelChildDelegate newDelegate = newWidget.childDelegate;
     final ListWheelChildDelegate oldDelegate = oldWidget.childDelegate;
@@ -851,7 +849,7 @@ class ListWheelElement extends RenderObjectElement implements ListWheelChildMana
   }
 
   @override
-  int? get childCount => _typedWidget.childDelegate.estimatedChildCount;
+  int? get childCount => (widget as ListWheelViewport).childDelegate.estimatedChildCount;
 
   @override
   void performRebuild() {
@@ -879,7 +877,7 @@ class ListWheelElement extends RenderObjectElement implements ListWheelChildMana
   /// will be cached. However when the element is rebuilt, the cache will be
   /// cleared.
   Widget? retrieveWidget(int index) {
-    return _childWidgets.putIfAbsent(index, () => _typedWidget.childDelegate.build(this, index));
+    return _childWidgets.putIfAbsent(index, () => (widget as ListWheelViewport).childDelegate.build(this, index));
   }
 
   @override

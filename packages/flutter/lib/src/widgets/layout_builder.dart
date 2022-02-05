@@ -57,8 +57,6 @@ abstract class ConstrainedLayoutBuilder<ConstraintType extends Constraints> exte
 class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderObjectElement {
   _LayoutBuilderElement(ConstrainedLayoutBuilder<ConstraintType> widget) : super(widget);
 
-  ConstrainedLayoutBuilder<ConstraintType> get _typedWidget => super.widget as ConstrainedLayoutBuilder<ConstraintType>;
-
   @override
   RenderConstrainedLayoutBuilder<ConstraintType, RenderObject> get renderObject => super.renderObject as RenderConstrainedLayoutBuilder<ConstraintType, RenderObject>;
 
@@ -118,7 +116,7 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
     void layoutCallback() {
       Widget built;
       try {
-        built = _typedWidget.builder(this, constraints);
+        built = (widget as ConstrainedLayoutBuilder<ConstraintType>).builder(this, constraints);
         debugWidgetBuilderValue(widget, built);
       } catch (e, stack) {
         built = ErrorWidget.builder(

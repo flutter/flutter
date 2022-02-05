@@ -3131,11 +3131,9 @@ class Offstage extends SingleChildRenderObjectWidget {
 class _OffstageElement extends SingleChildRenderObjectElement {
   _OffstageElement(Offstage widget) : super(widget);
 
-  Offstage get _typedWidget => super.widget as Offstage;
-
   @override
   void debugVisitOnstageChildren(ElementVisitor visitor) {
-    if (!_typedWidget.offstage)
+    if (!(widget as Offstage).offstage)
       super.debugVisitOnstageChildren(visitor);
   }
 }

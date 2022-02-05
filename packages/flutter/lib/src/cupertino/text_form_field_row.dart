@@ -274,35 +274,35 @@ class _CupertinoTextFormFieldRowState extends FormFieldState<String> {
   TextEditingController? _controller;
 
   TextEditingController? get _effectiveController =>
-      _typedWidget.controller ?? _controller;
+      _cupertinoTextFormFieldRow.controller ?? _controller;
 
-  CupertinoTextFormFieldRow get _typedWidget =>
+  CupertinoTextFormFieldRow get _cupertinoTextFormFieldRow =>
       super.widget as CupertinoTextFormFieldRow;
 
   @override
   void initState() {
     super.initState();
-    if (_typedWidget.controller == null) {
+    if (_cupertinoTextFormFieldRow.controller == null) {
       _controller = TextEditingController(text: widget.initialValue);
     } else {
-      _typedWidget.controller!.addListener(_handleControllerChanged);
+      _cupertinoTextFormFieldRow.controller!.addListener(_handleControllerChanged);
     }
   }
 
   @override
   void didUpdateWidget(CupertinoTextFormFieldRow oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (_typedWidget.controller != oldWidget.controller) {
+    if (_cupertinoTextFormFieldRow.controller != oldWidget.controller) {
       oldWidget.controller?.removeListener(_handleControllerChanged);
-      _typedWidget.controller?.addListener(_handleControllerChanged);
+      _cupertinoTextFormFieldRow.controller?.addListener(_handleControllerChanged);
 
-      if (oldWidget.controller != null && _typedWidget.controller == null) {
+      if (oldWidget.controller != null && _cupertinoTextFormFieldRow.controller == null) {
         _controller =
             TextEditingController.fromValue(oldWidget.controller!.value);
       }
 
-      if (_typedWidget.controller != null) {
-        setValue(_typedWidget.controller!.text);
+      if (_cupertinoTextFormFieldRow.controller != null) {
+        setValue(_cupertinoTextFormFieldRow.controller!.text);
         if (oldWidget.controller == null) {
           _controller = null;
         }
@@ -312,7 +312,7 @@ class _CupertinoTextFormFieldRowState extends FormFieldState<String> {
 
   @override
   void dispose() {
-    _typedWidget.controller?.removeListener(_handleControllerChanged);
+    _cupertinoTextFormFieldRow.controller?.removeListener(_handleControllerChanged);
     super.dispose();
   }
 
