@@ -158,12 +158,11 @@ class _CupertinoDesktopTextSelectionControlsToolbarState extends State<_Cupertin
     }
 
     assert(debugCheckHasMediaQuery(context));
-    final MediaQueryData mediaQuery = MediaQuery.of(context);
 
     final Offset midpointAnchor = Offset(
       clampDouble(widget.selectionMidpoint.dx - widget.globalEditableRegion.left,
-        mediaQuery.padding.left,
-        mediaQuery.size.width - mediaQuery.padding.right,
+        MediaQuery.paddingOf(context).left,
+        MediaQuery.widthOf(context) - MediaQuery.paddingOf(context).right,
       ),
       widget.selectionMidpoint.dy - widget.globalEditableRegion.top,
     );
@@ -171,7 +170,7 @@ class _CupertinoDesktopTextSelectionControlsToolbarState extends State<_Cupertin
     final List<Widget> items = <Widget>[];
     final CupertinoLocalizations localizations = CupertinoLocalizations.of(context);
     final Widget onePhysicalPixelVerticalDivider =
-        SizedBox(width: 1.0 / MediaQuery.of(context).devicePixelRatio);
+        SizedBox(width: 1.0 / MediaQuery.devicePixelRatioOf(context));
 
     void addToolbarButton(
       String text,

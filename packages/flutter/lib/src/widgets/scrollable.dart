@@ -461,7 +461,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
   late ScrollBehavior _configuration;
   ScrollPhysics? _physics;
   ScrollController? _fallbackScrollController;
-  MediaQueryData? _mediaQueryData;
+  DeviceGestureSettings? _mediaQueryGestureSettings;
 
   ScrollController get _effectiveScrollController => widget.controller ?? _fallbackScrollController!;
 
@@ -516,7 +516,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
 
   @override
   void didChangeDependencies() {
-    _mediaQueryData = MediaQuery.maybeOf(context);
+    _mediaQueryGestureSettings = MediaQuery.maybeGestureSettingsOf(context);
     _updatePosition();
     super.didChangeDependencies();
   }
@@ -635,7 +635,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
                   ..maxFlingVelocity = _physics?.maxFlingVelocity
                   ..velocityTrackerBuilder = _configuration.velocityTrackerBuilder(context)
                   ..dragStartBehavior = widget.dragStartBehavior
-                  ..gestureSettings = _mediaQueryData?.gestureSettings;
+                  ..gestureSettings = _mediaQueryGestureSettings;
               },
             ),
           };
@@ -656,7 +656,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
                   ..maxFlingVelocity = _physics?.maxFlingVelocity
                   ..velocityTrackerBuilder = _configuration.velocityTrackerBuilder(context)
                   ..dragStartBehavior = widget.dragStartBehavior
-                  ..gestureSettings = _mediaQueryData?.gestureSettings;
+                  ..gestureSettings = _mediaQueryGestureSettings;
               },
             ),
           };

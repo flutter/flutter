@@ -217,7 +217,7 @@ class Dialog extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final DialogTheme dialogTheme = DialogTheme.of(context);
-    final EdgeInsets effectivePadding = MediaQuery.of(context).viewInsets + (insetPadding ?? EdgeInsets.zero);
+    final EdgeInsets effectivePadding = MediaQuery.viewInsetsOf(context) + (insetPadding ?? EdgeInsets.zero);
     final DialogTheme defaults = theme.useMaterial3
       ? (_fullscreen ? _DialogFullscreenDefaultsM3(context) : _DialogDefaultsM3(context))
       : _DialogDefaultsM2(context);
@@ -642,7 +642,7 @@ class AlertDialog extends StatelessWidget {
 
     // The paddingScaleFactor is used to adjust the padding of Dialog's
     // children.
-    final double paddingScaleFactor = _paddingScaleFactor(MediaQuery.of(context).textScaleFactor);
+    final double paddingScaleFactor = _paddingScaleFactor(MediaQuery.textScaleFactorOf(context));
     final TextDirection? textDirection = Directionality.maybeOf(context);
 
     Widget? iconWidget;
@@ -1075,7 +1075,7 @@ class SimpleDialog extends StatelessWidget {
 
     // The paddingScaleFactor is used to adjust the padding of Dialog
     // children.
-    final double paddingScaleFactor = _paddingScaleFactor(MediaQuery.of(context).textScaleFactor);
+    final double paddingScaleFactor = _paddingScaleFactor(MediaQuery.textScaleFactorOf(context));
     final TextDirection? textDirection = Directionality.maybeOf(context);
 
     Widget? titleWidget;

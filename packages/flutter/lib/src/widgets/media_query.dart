@@ -12,6 +12,7 @@ import 'basic.dart';
 import 'binding.dart';
 import 'debug.dart';
 import 'framework.dart';
+import 'inherited_model.dart';
 
 // Examples can assume:
 // late BuildContext context;
@@ -23,6 +24,50 @@ enum Orientation {
 
   /// Wider than tall.
   landscape
+}
+
+/// A specific part of MediaQueryData to depend on
+enum MediaQueryAspect {
+  /// MediaQueryData.size
+  size,
+  /// MediaQueryData.size.width
+  width,
+  /// MediaQueryData.size.height
+  height,
+  /// MediaQueryData.orientation
+  orientation,
+  /// MediaQueryData.devicePixelRatio
+  devicePixelRatio,
+  /// MediaQueryData.textScaleFactor
+  textScaleFactor,
+  /// MediaQueryData.platformBrightness
+  platformBrightness,
+  /// MediaQueryData.padding
+  padding,
+  /// MediaQueryData.viewInsets
+  viewInsets,
+  /// MediaQueryData.systemGestureInsets
+  systemGestureInsets,
+  /// MediaQueryData.viewPadding
+  viewPadding,
+  /// MediaQueryData.alwaysUse24HourFormat
+  alwaysUse24HourFormat,
+  /// MediaQueryData.accessibleNavigation
+  accessibleNavigation,
+  /// MediaQueryData.invertColors
+  invertColors,
+  /// MediaQueryData.highContrast
+  highContrast,
+  /// MediaQueryData.disableAnimations
+  disableAnimations,
+  /// MediaQueryData.boldText
+  boldText,
+  /// MediaQueryData.navigationMode
+  navigationMode,
+  /// MediaQueryData.gestureSettings
+  gestureSettings,
+  /// MediaQueryData.displayFeatures
+  displayFeatures,
 }
 
 /// Information about a piece of media (e.g., a window).
@@ -178,6 +223,8 @@ class MediaQueryData {
   /// See also:
   ///
   ///  * [FlutterView.physicalSize], which returns the size in physical pixels.
+  ///  * [MediaQuery.sizeOf], a method to find and depend on the size defined
+  ///    for a [BuildContext].
   final Size size;
 
   /// The number of device pixels for each logical pixel. This number might not
@@ -192,7 +239,7 @@ class MediaQueryData {
   ///
   /// See also:
   ///
-  ///  * [MediaQuery.textScaleFactorOf], a convenience method which returns the
+  ///  * [MediaQuery.textScaleFactorOf], a method to find and depend on the
   ///    textScaleFactor defined for a [BuildContext].
   final double textScaleFactor;
 
@@ -203,6 +250,11 @@ class MediaQueryData {
   ///
   /// Not all platforms necessarily support a concept of brightness mode. Those
   /// platforms will report [Brightness.light] in this property.
+  ///
+  /// See also:
+  ///
+  ///  * [MediaQuery.platformBrightnessOf], a method to find and depend on the
+  ///    platformBrightness defined for a [BuildContext].
   final Brightness platformBrightness;
 
   /// The parts of the display that are completely obscured by system UI,
@@ -690,7 +742,7 @@ class MediaQueryData {
 ///  * [WidgetsApp] and [MaterialApp], which introduce a [MediaQuery] and keep
 ///    it up to date with the current screen metrics as they change.
 ///  * [MediaQueryData], the data structure that represents the metrics.
-class MediaQuery extends InheritedWidget {
+class MediaQuery extends InheritedModel<MediaQueryAspect> {
   /// Creates a widget that provides [MediaQueryData] to its descendants.
   ///
   /// The [data] and [child] arguments must not be null.
@@ -890,7 +942,11 @@ class MediaQuery extends InheritedWidget {
   static MediaQueryData of(BuildContext context) {
     assert(context != null);
     assert(debugCheckHasMediaQuery(context));
-    return context.dependOnInheritedWidgetOfExactType<MediaQuery>()!.data;
+    return _of(context);
+  }
+
+  static MediaQueryData _of(BuildContext context, [MediaQueryAspect? aspect]) {
+    return InheritedModel.inheritFrom<MediaQuery>(context, aspect: aspect)!.data;
   }
 
   /// The data from the closest instance of this class that encloses the given
@@ -922,23 +978,196 @@ class MediaQuery extends InheritedWidget {
   ///    instead of returning null.
   static MediaQueryData? maybeOf(BuildContext context) {
     assert(context != null);
-    return context.dependOnInheritedWidgetOfExactType<MediaQuery>()?.data;
+    return _maybeOf(context);
   }
 
-  /// Returns textScaleFactor for the nearest MediaQuery ancestor or 1.0, if
-  /// no such ancestor exists.
-  static double textScaleFactorOf(BuildContext context) {
-    return MediaQuery.maybeOf(context)?.textScaleFactor ?? 1.0;
+  static MediaQueryData? _maybeOf(BuildContext context, [MediaQueryAspect? aspect]) {
+    return InheritedModel.inheritFrom<MediaQuery>(context, aspect: aspect)?.data;
   }
+
+  /// Returns size for the nearest MediaQuery ancestor or
+  /// throws an exception, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [MediaQueryData.size] property of the ancestor [MediaQuery] changes.
+  static Size sizeOf(BuildContext context) => _of(context, MediaQueryAspect.size).size;
+  /// Returns size for the nearest MediaQuery ancestor or
+  /// null, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [MediaQueryData.size] property of the ancestor [MediaQuery] changes.
+  static Size? maybeSizeOf(BuildContext context) => _maybeOf(context, MediaQueryAspect.size)?.size;
+
+  /// Returns width for the nearest MediaQuery ancestor or
+  /// throws an exception, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the size.width property of the ancestor [MediaQuery] changes.
+  static double widthOf(BuildContext context) => _of(context, MediaQueryAspect.width).size.width;
+  /// Returns width for the nearest MediaQuery ancestor or
+  /// null, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the size.width property of the ancestor [MediaQuery] changes.
+  static double? maybeWidthOf(BuildContext context) => _maybeOf(context, MediaQueryAspect.width)?.size.width;
+
+  /// Returns height for the nearest MediaQuery ancestor or
+  /// throws an exception, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the size.height property of the ancestor [MediaQuery] changes.
+  static double heightOf(BuildContext context) => _of(context, MediaQueryAspect.height).size.height;
+  /// Returns height for the nearest MediaQuery ancestor or
+  /// null, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the size.height property of the ancestor [MediaQuery] changes.
+  static double? maybeHeightOf(BuildContext context) => _maybeOf(context, MediaQueryAspect.height)?.size.width;
+
+  /// Returns orientation for the nearest MediaQuery ancestor or
+  /// throws an exception, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [MediaQueryData.orientation] property of the ancestor [MediaQuery] changes.
+  static Orientation orientationOf(BuildContext context) => _of(context, MediaQueryAspect.orientation).orientation;
+  /// Returns orientation for the nearest MediaQuery ancestor or
+  /// null, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [MediaQueryData.orientation] property of the ancestor [MediaQuery] changes.
+  static Orientation? maybeOrientationOf(BuildContext context) => _maybeOf(context, MediaQueryAspect.orientation)?.orientation;
+
+  /// Returns devicePixelRatio for the nearest MediaQuery ancestor or
+  /// throws an exception, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [MediaQueryData.devicePixelRatio] property of the ancestor [MediaQuery] changes.
+  static double devicePixelRatioOf(BuildContext context) => _of(context, MediaQueryAspect.devicePixelRatio).devicePixelRatio;
+  /// Returns devicePixelRatio for the nearest MediaQuery ancestor or
+  /// null, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [MediaQueryData.devicePixelRatio] property of the ancestor [MediaQuery] changes.
+  static double? maybeDevicePixelRatioOf(BuildContext context) => _maybeOf(context, MediaQueryAspect.devicePixelRatio)?.devicePixelRatio;
+
+  /// Returns textScaleFactor for the nearest MediaQuery ancestor or
+  /// 1.0, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [MediaQueryData.textScaleFactor] property of the ancestor [MediaQuery] changes.
+  static double textScaleFactorOf(BuildContext context) => maybeTextScaleFactorOf(context) ?? 1.0;
+  /// Returns textScaleFactor for the nearest MediaQuery ancestor or
+  /// null, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [MediaQueryData.textScaleFactor] property of the ancestor [MediaQuery] changes.
+  static double? maybeTextScaleFactorOf(BuildContext context) => _maybeOf(context, MediaQueryAspect.textScaleFactor)?.textScaleFactor;
 
   /// Returns platformBrightness for the nearest MediaQuery ancestor or
   /// [Brightness.light], if no such ancestor exists.
   ///
   /// Use of this method will cause the given [context] to rebuild any time that
-  /// any property of the ancestor [MediaQuery] changes.
-  static Brightness platformBrightnessOf(BuildContext context) {
-    return MediaQuery.maybeOf(context)?.platformBrightness ?? Brightness.light;
-  }
+  /// the [MediaQueryData.platformBrightness] property of the ancestor
+  /// [MediaQuery] changes.
+  static Brightness platformBrightnessOf(BuildContext context) => maybePlatformBrightnessOf(context) ?? Brightness.light;
+  /// Returns platformBrightness for the nearest MediaQuery ancestor or
+  /// null, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [MediaQueryData.platformBrightness] property of the ancestor
+  /// [MediaQuery] changes.
+  static Brightness? maybePlatformBrightnessOf(BuildContext context) => _maybeOf(context, MediaQueryAspect.platformBrightness)?.platformBrightness;
+
+  /// Returns padding for the nearest MediaQuery ancestor or
+  /// throws an exception, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [MediaQueryData.padding] property of the ancestor [MediaQuery] changes.
+  static EdgeInsets paddingOf(BuildContext context) => _of(context, MediaQueryAspect.padding).padding;
+  /// Returns viewInsets for the nearest MediaQuery ancestor or
+  /// null, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [MediaQueryData.viewInsets] property of the ancestor [MediaQuery] changes.
+  static EdgeInsets? maybePaddingOf(BuildContext context) => _maybeOf(context, MediaQueryAspect.padding)?.padding;
+
+  /// Returns viewInsets for the nearest MediaQuery ancestor or
+  /// throws an exception, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [MediaQueryData.viewInsets] property of the ancestor [MediaQuery] changes.
+  static EdgeInsets viewInsetsOf(BuildContext context) => _of(context, MediaQueryAspect.viewInsets).viewInsets;
+  /// Returns viewInsets for the nearest MediaQuery ancestor or
+  /// null, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [MediaQueryData.viewInsets] property of the ancestor [MediaQuery] changes.
+  static EdgeInsets? maybeViewInsetsOf(BuildContext context) => _maybeOf(context, MediaQueryAspect.viewInsets)?.viewInsets;
+
+  /// Returns systemGestureInsets for the nearest MediaQuery ancestor or
+  /// throws an exception, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [MediaQueryData.systemGestureInsets] property of the ancestor [MediaQuery] changes.
+  static EdgeInsets systemGestureInsetsOf(BuildContext context) => _of(context, MediaQueryAspect.systemGestureInsets).systemGestureInsets;
+  /// Returns systemGestureInsets for the nearest MediaQuery ancestor or
+  /// null, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [MediaQueryData.systemGestureInsets] property of the ancestor [MediaQuery] changes.
+  static EdgeInsets? maybeSystemGestureInsetsOf(BuildContext context) => _maybeOf(context, MediaQueryAspect.systemGestureInsets)?.systemGestureInsets;
+
+  /// Returns viewPadding for the nearest MediaQuery ancestor or
+  /// throws an exception, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [MediaQueryData.viewPadding] property of the ancestor [MediaQuery] changes.
+  static EdgeInsets viewPaddingOf(BuildContext context) => _of(context, MediaQueryAspect.viewPadding).viewPadding;
+  /// Returns viewPadding for the nearest MediaQuery ancestor or
+  /// null, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [MediaQueryData.viewPadding] property of the ancestor [MediaQuery] changes.
+  static EdgeInsets? maybeViewPaddingOf(BuildContext context) => _maybeOf(context, MediaQueryAspect.viewPadding)?.viewPadding;
+
+  /// Returns alwaysUse for the nearest MediaQuery ancestor or
+  /// throws an exception, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [MediaQueryData.devicePixelRatio] property of the ancestor [MediaQuery] changes.
+  static bool alwaysUse24HourFormatOf(BuildContext context) => _of(context, MediaQueryAspect.alwaysUse24HourFormat).alwaysUse24HourFormat;
+  /// Returns alwaysUse24HourFormat for the nearest MediaQuery ancestor or
+  /// null, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [MediaQueryData.alwaysUse24HourFormat] property of the ancestor [MediaQuery] changes.
+  static bool? maybeAlwaysUse24HourFormatOf(BuildContext context) => _maybeOf(context, MediaQueryAspect.alwaysUse24HourFormat)?.alwaysUse24HourFormat;
+
+  /// Returns accessibleNavigationOf for the nearest MediaQuery ancestor or
+  /// throws an exception, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [MediaQueryData.accessibleNavigation] property of the ancestor [MediaQuery] changes.
+  static bool accessibleNavigationOf(BuildContext context) => _of(context, MediaQueryAspect.accessibleNavigation).accessibleNavigation;
+  /// Returns accessibleNavigation for the nearest MediaQuery ancestor or
+  /// null, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [MediaQueryData.accessibleNavigation] property of the ancestor [MediaQuery] changes.
+  static bool? maybeAccessibleNavigationOf(BuildContext context) => _maybeOf(context, MediaQueryAspect.accessibleNavigation)?.accessibleNavigation;
+
+  /// Returns invertColorsOf for the nearest MediaQuery ancestor or
+  /// throws an exception, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [MediaQueryData.invertColors] property of the ancestor [MediaQuery] changes.
+  static bool invertColorsOf(BuildContext context) => _of(context, MediaQueryAspect.invertColors).invertColors;
+  /// Returns invertColors for the nearest MediaQuery ancestor or
+  /// null, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [MediaQueryData.invertColors] property of the ancestor [MediaQuery] changes.
+  static bool? maybeInvertColorsOf(BuildContext context) => _maybeOf(context, MediaQueryAspect.invertColors)?.invertColors;
 
   /// Returns highContrast for the nearest MediaQuery ancestor or false, if no
   /// such ancestor exists.
@@ -947,15 +1176,89 @@ class MediaQuery extends InheritedWidget {
   ///
   ///  * [MediaQueryData.highContrast], which indicates the platform's
   ///    desire to increase contrast.
-  static bool highContrastOf(BuildContext context) {
-    return MediaQuery.maybeOf(context)?.highContrast ?? false;
-  }
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [MediaQueryData.highContrast] property of the ancestor [MediaQuery] changes.
+  static bool highContrastOf(BuildContext context) => maybeHighContrastOf(context) ?? false;
+  /// Returns highContrast for the nearest MediaQuery ancestor or
+  /// null, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [MediaQueryData.highContrast] property of the ancestor [MediaQuery] changes.
+  static bool? maybeHighContrastOf(BuildContext context) => _maybeOf(context, MediaQueryAspect.highContrast)?.highContrast;
 
+  /// Returns disableAnimations for the nearest MediaQuery ancestor or
+  /// [Brightness.light], if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [MediaQueryData.disableAnimations] property of the ancestor
+  /// [MediaQuery] changes.
+  static bool disableAnimationsOf(BuildContext context) => _of(context, MediaQueryAspect.disableAnimations).disableAnimations;
+  /// Returns disableAnimations for the nearest MediaQuery ancestor or
+  /// null, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [MediaQueryData.disableAnimations] property of the ancestor [MediaQuery] changes.
+  static bool? maybeDisableAnimationsOf(BuildContext context) => _maybeOf(context, MediaQueryAspect.disableAnimations)?.disableAnimations;
+
+
+  /// Returns boldTextOverride for the nearest MediaQuery ancestor or
+  /// throws an exception, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [MediaQueryData.boldText] property of the ancestor [MediaQuery] changes.
+  static bool boldTextOverrideOf(BuildContext context) => _of(context, MediaQueryAspect.boldText).boldText;
   /// Returns the boldText accessibility setting for the nearest MediaQuery
   /// ancestor, or false if no such ancestor exists.
-  static bool boldTextOverride(BuildContext context) {
-    return MediaQuery.maybeOf(context)?.boldText ?? false;
-  }
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [MediaQueryData.boldText] property of the ancestor [MediaQuery] changes.
+  static bool boldTextOverride(BuildContext context) => maybeBoldTextOverrideOf(context) ?? false;
+  /// Returns boldTextOverride for the nearest MediaQuery ancestor or
+  /// null, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [MediaQueryData.boldText] property of the ancestor [MediaQuery] changes.
+  static bool? maybeBoldTextOverrideOf(BuildContext context) => _maybeOf(context, MediaQueryAspect.boldText)?.boldText;
+
+  /// Returns navigationMode for the nearest MediaQuery ancestor or
+  /// throws an exception, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [MediaQueryData.navigationMode] property of the ancestor [MediaQuery] changes.
+  static NavigationMode navigationModeOf(BuildContext context) => _of(context, MediaQueryAspect.navigationMode).navigationMode;
+  /// Returns navigationMode for the nearest MediaQuery ancestor or
+  /// null, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [MediaQueryData.navigationMode] property of the ancestor [MediaQuery] changes.
+  static NavigationMode? maybeNavigationModeOf(BuildContext context) => _maybeOf(context, MediaQueryAspect.navigationMode)?.navigationMode;
+
+  /// Returns gestureSettings for the nearest MediaQuery ancestor or
+  /// throws an exception, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [MediaQueryData.gestureSettings] property of the ancestor [MediaQuery] changes.
+  static DeviceGestureSettings gestureSettingsOf(BuildContext context) => _of(context, MediaQueryAspect.gestureSettings).gestureSettings;
+  /// Returns gestureSettings for the nearest MediaQuery ancestor or
+  /// null, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [MediaQueryData.gestureSettings] property of the ancestor [MediaQuery] changes.
+  static DeviceGestureSettings? maybeGestureSettingsOf(BuildContext context) => _maybeOf(context, MediaQueryAspect.gestureSettings)?.gestureSettings;
+
+  /// Returns displayFeatures for the nearest MediaQuery ancestor or
+  /// throws an exception, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [MediaQueryData.displayFeatures] property of the ancestor [MediaQuery] changes.
+  static List<ui.DisplayFeature> displayFeaturesOf(BuildContext context) => _of(context, MediaQueryAspect.displayFeatures).displayFeatures;
+  /// Returns displayFeatures for the nearest MediaQuery ancestor or
+  /// null, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [MediaQueryData.displayFeatures] property of the ancestor [MediaQuery] changes.
+  static List<ui.DisplayFeature>? maybeDisplayFeaturesOf(BuildContext context) => _maybeOf(context, MediaQueryAspect.displayFeatures)?.displayFeatures;
 
   @override
   bool updateShouldNotify(MediaQuery oldWidget) => data != oldWidget.data;
@@ -965,6 +1268,29 @@ class MediaQuery extends InheritedWidget {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<MediaQueryData>('data', data, showName: false));
   }
+
+  @override
+  bool updateShouldNotifyDependent(MediaQuery oldWidget, Set<MediaQueryAspect> dependencies) {
+    return (data.size != oldWidget.data.size && dependencies.contains(MediaQueryAspect.size))
+        || (data.size.width != oldWidget.data.size.width && dependencies.contains(MediaQueryAspect.width))
+        || (data.size.height != oldWidget.data.size.height && dependencies.contains(MediaQueryAspect.height))
+        || (data.orientation != oldWidget.data.orientation && dependencies.contains(MediaQueryAspect.orientation))
+        || (data.devicePixelRatio != oldWidget.data.devicePixelRatio && dependencies.contains(MediaQueryAspect.devicePixelRatio))
+        || (data.textScaleFactor != oldWidget.data.textScaleFactor && dependencies.contains(MediaQueryAspect.textScaleFactor))
+        || (data.platformBrightness != oldWidget.data.platformBrightness && dependencies.contains(MediaQueryAspect.platformBrightness))
+        || (data.viewInsets != oldWidget.data.viewInsets && dependencies.contains(MediaQueryAspect.viewInsets))
+        || (data.systemGestureInsets != oldWidget.data.systemGestureInsets && dependencies.contains(MediaQueryAspect.systemGestureInsets))
+        || (data.viewPadding != oldWidget.data.viewPadding && dependencies.contains(MediaQueryAspect.viewPadding))
+        || (data.alwaysUse24HourFormat != oldWidget.data.alwaysUse24HourFormat && dependencies.contains(MediaQueryAspect.alwaysUse24HourFormat))
+        || (data.accessibleNavigation != oldWidget.data.accessibleNavigation && dependencies.contains(MediaQueryAspect.accessibleNavigation))
+        || (data.invertColors != oldWidget.data.invertColors && dependencies.contains(MediaQueryAspect.invertColors))
+        || (data.highContrast != oldWidget.data.highContrast && dependencies.contains(MediaQueryAspect.highContrast))
+        || (data.disableAnimations != oldWidget.data.disableAnimations && dependencies.contains(MediaQueryAspect.disableAnimations))
+        || (data.boldText != oldWidget.data.boldText && dependencies.contains(MediaQueryAspect.boldText))
+        || (data.navigationMode != oldWidget.data.navigationMode && dependencies.contains(MediaQueryAspect.navigationMode))
+        || (data.gestureSettings != oldWidget.data.gestureSettings && dependencies.contains(MediaQueryAspect.gestureSettings))
+        || (data.displayFeatures != oldWidget.data.displayFeatures && dependencies.contains(MediaQueryAspect.displayFeatures));
+  }
 }
 
 /// Describes the navigation mode to be set by a [MediaQuery] widget.
@@ -972,7 +1298,7 @@ class MediaQuery extends InheritedWidget {
 /// The different modes indicate the type of navigation to be used in a widget
 /// subtree for those widgets sensitive to it.
 ///
-/// Use `MediaQuery.of(context).navigationMode` to determine the navigation mode
+/// Use `MediaQuery.navigationModeOf(context)` to determine the navigation mode
 /// in effect for the given context. Use a [MediaQuery] widget to set the
 /// navigation mode for its descendant widgets.
 enum NavigationMode {

@@ -437,7 +437,7 @@ class _SnackBarState extends State<SnackBar> {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
-    final MediaQueryData mediaQueryData = MediaQuery.of(context);
+    final bool accessibleNavigation = MediaQuery.accessibleNavigationOf(context);
     assert(widget.animation != null);
     final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
@@ -556,7 +556,7 @@ class _SnackBarState extends State<SnackBar> {
       color: backgroundColor,
       child: Theme(
         data: inverseTheme,
-        child: mediaQueryData.accessibleNavigation
+        child: accessibleNavigation
             ? snackBar
             : FadeTransition(
                 opacity: fadeOutAnimation,
@@ -612,7 +612,7 @@ class _SnackBarState extends State<SnackBar> {
     );
 
     final Widget snackBarTransition;
-    if (mediaQueryData.accessibleNavigation) {
+    if (accessibleNavigation) {
       snackBarTransition = snackBar;
     } else if (isFloatingSnackBar) {
       snackBarTransition = FadeTransition(

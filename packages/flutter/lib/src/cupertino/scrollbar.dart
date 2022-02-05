@@ -171,7 +171,7 @@ class _CupertinoScrollbarState extends RawScrollbarState<CupertinoScrollbar> {
       ..mainAxisMargin = _kScrollbarMainAxisMargin
       ..crossAxisMargin = _kScrollbarCrossAxisMargin
       ..radius = _radius
-      ..padding = MediaQuery.of(context).padding
+      ..padding = MediaQuery.paddingOf(context)
       ..minLength = _kScrollbarMinLength
       ..minOverscrollLength = _kScrollbarMinOverscrollLength
       ..scrollbarOrientation = widget.scrollbarOrientation;

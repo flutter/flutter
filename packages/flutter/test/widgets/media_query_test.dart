@@ -5,7 +5,7 @@
 import 'dart:ui' show Brightness, DisplayFeature, DisplayFeatureState, DisplayFeatureType, GestureSettings, ViewConfiguration;
 
 import 'package:flutter/gestures.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -936,5 +936,95 @@ void main() {
 
     expect(MediaQueryData.fromWindow(tester.binding.window).gestureSettings.touchSlop, closeTo(33.33, 0.1)); // Repeating, of course
     tester.binding.window.viewConfigurationTestValue = null;
+  });
+
+  testWidgets('MediaQuery can be partially depended-on', (WidgetTester tester) async {
+    MediaQueryData data = const MediaQueryData(
+      size: Size(800, 600)
+    );
+
+    int widthBuildCount = 0;
+    int sizeBuildCount = 0;
+    int heightBuildCount = 0;
+
+    final Widget showWidth = Builder(
+      builder: (BuildContext context) {
+        widthBuildCount++;
+        return Text('width: ${MediaQuery.widthOf(context).toStringAsFixed(1)}');
+      }
+    );
+
+    final Widget showSize = Builder(
+      builder: (BuildContext context) {
+        sizeBuildCount++;
+        return Text('size: ${MediaQuery.sizeOf(context)}');
+      }
+    );
+
+    final Widget showHeight = Builder(
+      builder: (BuildContext context) {
+        heightBuildCount++;
+        return Text('height: ${MediaQuery.heightOf(context).toStringAsFixed(1)}');
+      }
+    );
+
+    final Widget page = StatefulBuilder(
+      builder: (BuildContext context, StateSetter setState) {
+        return MediaQuery(
+          data: data,
+          child: Center(
+            child: Column(
+              children: <Widget>[
+                showWidth,
+                showSize,
+                showHeight,
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      data = data.copyWith(size: Size(data.size.width + 100, data.size.height));
+                    });
+                  },
+                  child: const Text('Increase width by 100')
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      data = data.copyWith(size: Size(data.size.width, data.size.height + 100));
+                    });
+                  },
+                  child: const Text('Increase height by 100')
+                )
+              ]
+            )
+          )
+        );
+      },
+    );
+
+    await tester.pumpWidget(MaterialApp(home: page));
+    expect(find.text('width: 800.0'), findsOneWidget);
+    expect(find.text('size: Size(800.0, 600.0)'), findsOneWidget);
+    expect(find.text('height: 600.0'), findsOneWidget);
+    expect(widthBuildCount, 1);
+    expect(sizeBuildCount, 1);
+    expect(heightBuildCount, 1);
+
+    await tester.tap(find.text('Increase width by 100'));
+    await tester.pumpAndSettle();
+    expect(find.text('width: 900.0'), findsOneWidget);
+    expect(find.text('size: Size(900.0, 600.0)'), findsOneWidget);
+    expect(find.text('height: 600.0'), findsOneWidget);
+    expect(widthBuildCount, 2);
+    expect(sizeBuildCount, 2);
+    expect(heightBuildCount, 1);
+
+    await tester.tap(find.text('Increase height by 100'));
+    await tester.pumpAndSettle();
+    expect(find.text('width: 900.0'), findsOneWidget);
+    expect(find.text('size: Size(900.0, 700.0)'), findsOneWidget);
+    expect(find.text('height: 700.0'), findsOneWidget);
+    expect(widthBuildCount, 2);
+    expect(sizeBuildCount, 3);
+    expect(heightBuildCount, 2);
   });
 }

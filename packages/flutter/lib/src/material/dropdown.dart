@@ -1333,7 +1333,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   // Similarly, we don't reduce the height of the button so much that its icon
   // would be clipped.
   double get _denseButtonHeight {
-    final double textScaleFactor = MediaQuery.of(context).textScaleFactor;
+    final double textScaleFactor = MediaQuery.textScaleFactorOf(context);
     final double fontSize = _textStyle!.fontSize ?? Theme.of(context).textTheme.titleMedium!.fontSize!;
     final double scaledFontSize = textScaleFactor * fontSize;
     return math.max(scaledFontSize, math.max(widget.iconSize, _kDenseButtonHeight));
@@ -1369,7 +1369,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   bool get _enabled => widget.items != null && widget.items!.isNotEmpty && widget.onChanged != null;
 
   Orientation _getOrientation(BuildContext context) {
-    Orientation? result = MediaQuery.maybeOf(context)?.orientation;
+    Orientation? result = MediaQuery.maybeOrientationOf(context);
     if (result == null) {
       // If there's no MediaQuery, then use the window aspect to determine
       // orientation.

@@ -588,7 +588,7 @@ void main() {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
         dialogBuilder: (BuildContext context) {
-          dividerWidth = 1.0 / MediaQuery.of(context).devicePixelRatio;
+          dividerWidth = 1.0 / MediaQuery.devicePixelRatioOf(context);
           return CupertinoAlertDialog(
             title: const Text('The Title'),
             content: const Text('The message'),
@@ -633,7 +633,7 @@ void main() {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
         dialogBuilder: (BuildContext context) {
-          dividerThickness = 1.0 / MediaQuery.of(context).devicePixelRatio;
+          dividerThickness = 1.0 / MediaQuery.devicePixelRatioOf(context);
           return CupertinoAlertDialog(
             title: const Text('The Title'),
             content: const Text('The message'),
@@ -841,7 +841,7 @@ void main() {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
         dialogBuilder: (BuildContext context) {
-          dividerThickness = 1.0 / MediaQuery.of(context).devicePixelRatio;
+          dividerThickness = 1.0 / MediaQuery.devicePixelRatioOf(context);
           return CupertinoAlertDialog(
             title: const Text('The Title'),
             content: const Text('The message'),

@@ -132,9 +132,8 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
-    final MediaQueryData mediaQuery = MediaQuery.of(context);
 
-    final double paddingAbove = mediaQuery.padding.top + _kToolbarScreenPadding;
+    final double paddingAbove = MediaQuery.paddingOf(context).top + _kToolbarScreenPadding;
     final double toolbarHeightNeeded = paddingAbove
         + _kToolbarContentDistance
         + _kToolbarHeight;
@@ -480,7 +479,7 @@ class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSel
           onPressed: _handlePreviousPage,
           text: '◀',
         ),
-        dividerWidth: 1.0 / MediaQuery.of(context).devicePixelRatio,
+        dividerWidth: 1.0 / MediaQuery.devicePixelRatioOf(context),
         nextButton: CupertinoTextSelectionToolbarButton.text(
           onPressed: _handleNextPage,
           text: '▶',
