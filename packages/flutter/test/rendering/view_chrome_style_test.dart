@@ -18,7 +18,7 @@ void main() {
 
     void setupTestDevice({ double bottomPadding = navigationBarHeight * devicePixelRatio }) {
       final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
-      const FakeWindowPadding padding = FakeWindowPadding(
+      final FakeWindowPadding padding = FakeWindowPadding(
         top: statusBarHeight * devicePixelRatio,
         bottom: bottomPadding,
       );
