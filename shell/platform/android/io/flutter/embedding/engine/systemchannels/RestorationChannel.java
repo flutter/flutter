@@ -5,7 +5,6 @@
 package io.flutter.embedding.engine.systemchannels;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import io.flutter.Log;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.plugin.common.MethodCall;
@@ -73,13 +72,12 @@ public class RestorationChannel {
   private boolean frameworkHasRequestedData = false;
 
   /** Obtain the most current restoration data that the framework has provided. */
-  @Nullable
   public byte[] getRestorationData() {
     return restorationData;
   }
 
   /** Set the restoration data from which the framework will restore its state. */
-  public void setRestorationData(@NonNull byte[] data) {
+  public void setRestorationData(byte[] data) {
     engineHasProvidedData = true;
     if (pendingFrameworkRestorationChannelRequest != null) {
       // If their is a pending request from the framework, answer it.

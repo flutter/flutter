@@ -1,6 +1,5 @@
 package io.flutter.plugin.common;
 
-import androidx.annotation.Nullable;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -18,8 +17,7 @@ public class JSONUtil {
    * Convert the Json java representation to Java objects. Particularly used for converting
    * JSONArray and JSONObject to Lists and Maps.
    */
-  @Nullable
-  public static Object unwrap(@Nullable Object o) {
+  public static Object unwrap(Object o) {
     if (JSONObject.NULL.equals(o) || o == null) {
       return null;
     }
@@ -59,8 +57,7 @@ public class JSONUtil {
   }
 
   /** Backport of {@link JSONObject#wrap(Object)} for use on pre-KitKat systems. */
-  @Nullable
-  public static Object wrap(@Nullable Object o) {
+  public static Object wrap(Object o) {
     if (o == null) {
       return JSONObject.NULL;
     }

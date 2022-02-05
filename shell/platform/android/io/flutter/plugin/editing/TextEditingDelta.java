@@ -4,7 +4,6 @@
 
 package io.flutter.plugin.editing;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 import io.flutter.Log;
 import org.json.JSONException;
@@ -13,8 +12,8 @@ import org.json.JSONObject;
 /// A representation of the change that occured to an editing state, along with the resulting
 /// composing and selection regions.
 public final class TextEditingDelta {
-  private @NonNull CharSequence oldText;
-  private @NonNull CharSequence deltaText;
+  private CharSequence oldText;
+  private CharSequence deltaText;
   private int deltaStart;
   private int deltaEnd;
   private int newSelectionStart;
@@ -25,10 +24,10 @@ public final class TextEditingDelta {
   private static final String TAG = "TextEditingDelta";
 
   public TextEditingDelta(
-      @NonNull CharSequence oldEditable,
+      CharSequence oldEditable,
       int replacementDestinationStart,
       int replacementDestinationEnd,
-      @NonNull CharSequence replacementSource,
+      CharSequence replacementSource,
       int selectionStart,
       int selectionEnd,
       int composingStart,
@@ -47,7 +46,7 @@ public final class TextEditingDelta {
 
   // Non text update delta constructor.
   public TextEditingDelta(
-      @NonNull CharSequence oldText,
+      CharSequence oldText,
       int selectionStart,
       int selectionEnd,
       int composingStart,
@@ -61,13 +60,11 @@ public final class TextEditingDelta {
   }
 
   @VisibleForTesting
-  @NonNull
   public CharSequence getOldText() {
     return oldText;
   }
 
   @VisibleForTesting
-  @NonNull
   public CharSequence getDeltaText() {
     return deltaText;
   }
@@ -102,15 +99,13 @@ public final class TextEditingDelta {
     return newComposingEnd;
   }
 
-  private void setDeltas(
-      @NonNull CharSequence oldText, @NonNull CharSequence newText, int newStart, int newExtent) {
+  private void setDeltas(CharSequence oldText, CharSequence newText, int newStart, int newExtent) {
     this.oldText = oldText;
     deltaText = newText;
     deltaStart = newStart;
     deltaEnd = newExtent;
   }
 
-  @NonNull
   public JSONObject toJSON() {
     JSONObject delta = new JSONObject();
 

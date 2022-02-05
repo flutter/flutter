@@ -130,14 +130,12 @@ public class PlatformPlugin {
         }
       };
 
-  public PlatformPlugin(@NonNull Activity activity, @NonNull PlatformChannel platformChannel) {
+  public PlatformPlugin(Activity activity, PlatformChannel platformChannel) {
     this(activity, platformChannel, null);
   }
 
   public PlatformPlugin(
-      @NonNull Activity activity,
-      @NonNull PlatformChannel platformChannel,
-      @NonNull PlatformPluginDelegate delegate) {
+      Activity activity, PlatformChannel platformChannel, PlatformPluginDelegate delegate) {
     this.activity = activity;
     this.platformChannel = platformChannel;
     this.platformChannel.setPlatformMessageHandler(mPlatformMessageHandler);
@@ -155,7 +153,7 @@ public class PlatformPlugin {
     this.platformChannel.setPlatformMessageHandler(null);
   }
 
-  private void playSystemSound(@NonNull PlatformChannel.SoundType soundType) {
+  private void playSystemSound(PlatformChannel.SoundType soundType) {
     if (soundType == PlatformChannel.SoundType.CLICK) {
       View view = activity.getWindow().getDecorView();
       view.playSoundEffect(SoundEffectConstants.CLICK);
@@ -163,8 +161,7 @@ public class PlatformPlugin {
   }
 
   @VisibleForTesting
-  /* package */ void vibrateHapticFeedback(
-      @NonNull PlatformChannel.HapticFeedbackType feedbackType) {
+  /* package */ void vibrateHapticFeedback(PlatformChannel.HapticFeedbackType feedbackType) {
     View view = activity.getWindow().getDecorView();
     switch (feedbackType) {
       case STANDARD:

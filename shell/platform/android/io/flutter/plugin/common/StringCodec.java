@@ -4,7 +4,6 @@
 
 package io.flutter.plugin.common;
 
-import androidx.annotation.Nullable;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 
@@ -22,8 +21,7 @@ public final class StringCodec implements MessageCodec<String> {
   private StringCodec() {}
 
   @Override
-  @Nullable
-  public ByteBuffer encodeMessage(@Nullable String message) {
+  public ByteBuffer encodeMessage(String message) {
     if (message == null) {
       return null;
     }
@@ -35,8 +33,7 @@ public final class StringCodec implements MessageCodec<String> {
   }
 
   @Override
-  @Nullable
-  public String decodeMessage(@Nullable ByteBuffer message) {
+  public String decodeMessage(ByteBuffer message) {
     if (message == null) {
       return null;
     }

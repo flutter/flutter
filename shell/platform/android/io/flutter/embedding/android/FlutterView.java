@@ -876,7 +876,7 @@ public class FlutterView extends FrameLayout implements MouseCursorPlugin.MouseC
    * methods.
    */
   @Override
-  public boolean checkInputConnectionProxy(@NonNull View view) {
+  public boolean checkInputConnectionProxy(View view) {
     return flutterEngine != null
         ? flutterEngine.getPlatformViewsController().checkInputConnectionProxy(view)
         : super.checkInputConnectionProxy(view);
@@ -894,7 +894,7 @@ public class FlutterView extends FrameLayout implements MouseCursorPlugin.MouseC
    * previous {@code keyCode} to generate a unicode combined character.
    */
   @Override
-  public boolean dispatchKeyEvent(@NonNull KeyEvent event) {
+  public boolean dispatchKeyEvent(KeyEvent event) {
     if (event.getAction() == KeyEvent.ACTION_DOWN && event.getRepeatCount() == 0) {
       // Tell Android to start tracking this event.
       getKeyDispatcherState().startTracking(event, this);
@@ -1003,7 +1003,6 @@ public class FlutterView extends FrameLayout implements MouseCursorPlugin.MouseC
    * @return The view matching the accessibility id if any.
    */
   @SuppressLint("SoonBlockedPrivateApi")
-  @Nullable
   public View findViewByAccessibilityIdTraversal(int accessibilityId) {
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
       return findViewByAccessibilityIdRootedAtCurrentView(accessibilityId, this);
@@ -1350,7 +1349,7 @@ public class FlutterView extends FrameLayout implements MouseCursorPlugin.MouseC
         });
   }
 
-  public void attachOverlaySurfaceToRender(@NonNull FlutterImageView view) {
+  public void attachOverlaySurfaceToRender(FlutterImageView view) {
     if (flutterEngine != null) {
       view.attachToRenderer(flutterEngine.getRenderer());
     }
@@ -1451,13 +1450,13 @@ public class FlutterView extends FrameLayout implements MouseCursorPlugin.MouseC
   }
 
   @Override
-  public void onProvideAutofillVirtualStructure(@NonNull ViewStructure structure, int flags) {
+  public void onProvideAutofillVirtualStructure(ViewStructure structure, int flags) {
     super.onProvideAutofillVirtualStructure(structure, flags);
     textInputPlugin.onProvideAutofillVirtualStructure(structure, flags);
   }
 
   @Override
-  public void autofill(@NonNull SparseArray<AutofillValue> values) {
+  public void autofill(SparseArray<AutofillValue> values) {
     textInputPlugin.autofill(values);
   }
 
