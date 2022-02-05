@@ -3940,7 +3940,6 @@ class Vertices extends NativeFieldWrapperClass1 {
   ///
   /// If the [indices] parameter is provided, all values in the list must be
   /// valid index values for [positions].
-  ///
   /// e.g. The [indices] parameter for a simple triangle is [0,1,2].
   Vertices(
     VertexMode mode,
@@ -3974,22 +3973,31 @@ class Vertices extends NativeFieldWrapperClass1 {
 
   /// Creates a set of vertex data for use with [Canvas.drawVertices], directly
   /// using the encoding methods of [new Vertices].
+  /// Note that this constructor uses raw typed data lists,
+  /// so it runs faster than the [Vertices()] constructor
+  /// because it doesn't require any conversion from Dart lists.
   ///
   /// The [mode] parameter must not be null.
   ///
-  /// The [positions] list is interpreted as a list of repeated pairs of x,y
-  /// coordinates. It must not be null.
+  /// The [positions] parameter is a list of triangular mesh vertices and
+  /// is interpreted as a list of repeated pairs of x,y coordinates.
+  /// It must not be null.
   ///
   /// The [textureCoordinates] list is interpreted as a list of repeated pairs
   /// of x,y coordinates, and must be the same length of [positions] if it
   /// is not null.
+  /// The [textureCoordinates] parameter is used to cutout
+  /// the image set in the image shader.
+  /// The cut part is applied to the triangular mesh.
+  /// Note that the [textureCoordinates] are the coordinates on the image.
   ///
-  /// The [colors] list is interpreted as a list of RGBA encoded colors, similar
+  /// The [colors] list is interpreted as a list of ARGB encoded colors, similar
   /// to [Color.value]. It must be half length of [positions] if it is not
   /// null.
   ///
   /// If the [indices] list is provided, all values in the list must be
   /// valid index values for [positions].
+  /// e.g. The [indices] parameter for a simple triangle is [0,1,2].
   Vertices.raw(
     VertexMode mode,
     Float32List positions, {
@@ -4675,6 +4683,17 @@ class Canvas extends NativeFieldWrapperClass1 {
                    Float32List points) native 'Canvas_drawPoints';
 
   /// Draws the set of [Vertices] onto the canvas.
+  ///
+  /// The [blendMode] parameter is used to control how the colors in
+  /// the [vertices] are combined with the colors in the [paint].
+  /// If there are no colors specified in [vertices] then the [blendMode] has
+  /// no effect. If there are colors in the [vertices],
+  /// then the color taken from the [Shader] or [Color] in the [paint] is
+  /// blended with the colors specified in the [vertices] using
+  /// the [blendMode] parameter.
+  /// For purposes of this blending,
+  /// the colors from the [paint] are considered the source and the colors from
+  /// the [vertices] are considered the destination.
   ///
   /// All parameters must not be null.
   ///
