@@ -80,6 +80,9 @@ Future<int> runLint(ArgParser argParser, ArgResults argResults) async {
     if (!entity.path.endsWith('.java')) {
       continue;
     }
+    if (entity.path.endsWith('Test.java')) {
+      continue;
+    }
     projectXml.writeln('    <src file="${entity.path}" />');
   }
 

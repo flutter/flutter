@@ -121,6 +121,7 @@ public class MouseCursorPlugin {
      * <p>This is typically implemented by calling {@link android.view.PointerIcon#getSystemIcon}
      * with the context associated with this view.
      */
+    @NonNull
     public PointerIcon getSystemPointerIcon(int type);
 
     /**

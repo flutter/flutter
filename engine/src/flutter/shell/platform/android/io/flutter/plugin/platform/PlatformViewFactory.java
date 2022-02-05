@@ -5,13 +5,15 @@
 package io.flutter.plugin.platform;
 
 import android.content.Context;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import io.flutter.plugin.common.MessageCodec;
 
 public abstract class PlatformViewFactory {
   private final MessageCodec<Object> createArgsCodec;
 
   /** @param createArgsCodec the codec used to decode the args parameter of {@link #create}. */
-  public PlatformViewFactory(MessageCodec<Object> createArgsCodec) {
+  public PlatformViewFactory(@NonNull MessageCodec<Object> createArgsCodec) {
     this.createArgsCodec = createArgsCodec;
   }
 
@@ -25,9 +27,11 @@ public abstract class PlatformViewFactory {
    *     createArgsCodec argument passed to the constructor. This is null if createArgsCodec was
    *     null, or no arguments were sent from the Flutter app.
    */
-  public abstract PlatformView create(Context context, int viewId, Object args);
+  @NonNull
+  public abstract PlatformView create(@Nullable Context context, int viewId, @NonNull Object args);
 
   /** Returns the codec to be used for decoding the args parameter of {@link #create}. */
+  @NonNull
   public final MessageCodec<Object> getCreateArgsCodec() {
     return createArgsCodec;
   }

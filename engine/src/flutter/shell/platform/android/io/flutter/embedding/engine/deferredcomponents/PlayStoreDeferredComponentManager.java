@@ -66,7 +66,7 @@ public class PlayStoreDeferredComponentManager implements DeferredComponentManag
 
   private class FeatureInstallStateUpdatedListener implements SplitInstallStateUpdatedListener {
     @SuppressLint("DefaultLocale")
-    public void onStateUpdate(SplitInstallSessionState state) {
+    public void onStateUpdate(@NonNull SplitInstallSessionState state) {
       int sessionId = state.sessionId();
       if (sessionIdToName.get(sessionId) != null) {
         switch (state.status()) {
@@ -231,7 +231,7 @@ public class PlayStoreDeferredComponentManager implements DeferredComponentManag
     return true;
   }
 
-  public void setDeferredComponentChannel(DeferredComponentChannel channel) {
+  public void setDeferredComponentChannel(@NonNull DeferredComponentChannel channel) {
     this.channel = channel;
   }
 
@@ -288,7 +288,7 @@ public class PlayStoreDeferredComponentManager implements DeferredComponentManag
     }
   }
 
-  public void installDeferredComponent(int loadingUnitId, String componentName) {
+  public void installDeferredComponent(int loadingUnitId, @Nullable String componentName) {
     String resolvedComponentName =
         componentName != null ? componentName : loadingUnitIdToComponentNames.get(loadingUnitId);
     if (resolvedComponentName == null) {
@@ -357,7 +357,9 @@ public class PlayStoreDeferredComponentManager implements DeferredComponentManag
             });
   }
 
-  public String getDeferredComponentInstallState(int loadingUnitId, String componentName) {
+  @NonNull
+  public String getDeferredComponentInstallState(
+      int loadingUnitId, @Nullable String componentName) {
     String resolvedComponentName =
         componentName != null ? componentName : loadingUnitIdToComponentNames.get(loadingUnitId);
     if (resolvedComponentName == null) {
@@ -375,7 +377,7 @@ public class PlayStoreDeferredComponentManager implements DeferredComponentManag
     return sessionIdToState.get(sessionId);
   }
 
-  public void loadAssets(int loadingUnitId, String componentName) {
+  public void loadAssets(int loadingUnitId, @NonNull String componentName) {
     if (!verifyJNI()) {
       return;
     }
@@ -393,7 +395,7 @@ public class PlayStoreDeferredComponentManager implements DeferredComponentManag
     }
   }
 
-  public void loadDartLibrary(int loadingUnitId, String componentName) {
+  public void loadDartLibrary(int loadingUnitId, @NonNull String componentName) {
     if (!verifyJNI()) {
       return;
     }
@@ -478,7 +480,7 @@ public class PlayStoreDeferredComponentManager implements DeferredComponentManag
         loadingUnitId, searchPaths.toArray(new String[searchPaths.size()]));
   }
 
-  public boolean uninstallDeferredComponent(int loadingUnitId, String componentName) {
+  public boolean uninstallDeferredComponent(int loadingUnitId, @Nullable String componentName) {
     String resolvedComponentName =
         componentName != null ? componentName : loadingUnitIdToComponentNames.get(loadingUnitId);
     if (resolvedComponentName == null) {

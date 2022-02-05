@@ -7,10 +7,12 @@ package io.flutter.plugin.platform;
 import android.annotation.SuppressLint;
 import android.view.View;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 /** A handle to an Android view to be embedded in the Flutter hierarchy. */
 public interface PlatformView {
   /** Returns the Android view to be embedded in the Flutter hierarchy. */
+  @Nullable
   View getView();
 
   /**
