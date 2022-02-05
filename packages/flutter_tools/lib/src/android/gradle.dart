@@ -108,10 +108,8 @@ Iterable<String> _apkFilesFor(AndroidBuildInfo androidBuildInfo) {
   return <String>['app$flavorString-$buildType.apk'];
 }
 
-// The maximum number of Gradle retries.
-// When a build fails due to a network failure, this is the maximum number
-// of times that the build is re-attempted.
-const int kMaxGradleRetries = 10;
+// The maximum time to wait before the tool retries a Gradle build.
+const Duration kMaxRetryTime = Duration(seconds: 10);
 
 /// An implementation of the [AndroidBuilder] that delegates to gradle.
 class AndroidGradleBuilder implements AndroidBuilder {
@@ -219,7 +217,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
   /// * [target] is the target dart entry point. Typically, `lib/main.dart`.
   /// * If [isBuildingBundle] is `true`, then the output artifact is an `*.aab`,
   ///   otherwise the output artifact is an `*.apk`.
-  /// * [retries] is the max number of build retries in case one of the [GradleHandledError] handler
+  /// * [maxRetries] If not `null`, this is the max number of build retries in case a retry is triggered.
   Future<void> buildGradleApp({
     required FlutterProject project,
     required AndroidBuildInfo androidBuildInfo,
@@ -229,7 +227,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
     bool validateDeferredComponents = true,
     bool deferredComponentsEnabled = false,
     int retry = 0,
-    int maxRetries = kMaxGradleRetries,
+    @visibleForTesting int? maxRetries,
   }) async {
     assert(project != null);
     assert(androidBuildInfo != null);
@@ -417,12 +415,12 @@ class AndroidGradleBuilder implements AndroidBuilder {
         multidexEnabled: androidBuildInfo.multidexEnabled,
       );
 
-      if (retry < maxRetries) {
+      if (maxRetries == null || retry < maxRetries) {
         switch (status) {
           case GradleBuildStatus.retry:
             // Use binary exponential backoff before retriggering the build.
             // The expected wait times are: 100ms, 200ms, 400ms, and so on...
-            final int waitTime = pow(2, retry).toInt() * 100;
+            final int waitTime = min(pow(2, retry).toInt() * 100, kMaxRetryTime.inMicroseconds);
             retry += 1;
             _logger.printStatus('Retrying Gradle Build: #$retry, wait time: $waitTime');
             await Future<void>.delayed(Duration(milliseconds: waitTime));
@@ -439,7 +437,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
             BuildEvent(successEventLabel, type: 'gradle', flutterUsage: _usage).send();
             return;
           case GradleBuildStatus.exit:
-          // noop.
+            // Continue and throw tool exit.
         }
       }
       BuildEvent('gradle-${detectedGradleError?.eventLabel}-failure', type: 'gradle', flutterUsage: _usage).send();
