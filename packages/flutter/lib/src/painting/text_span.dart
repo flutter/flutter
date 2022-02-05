@@ -297,6 +297,7 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
       }
     }
     if (hasStyle)
+    print("-------------------------------------------POP!-----------------------------------------");
       builder.pop();
   }
 
