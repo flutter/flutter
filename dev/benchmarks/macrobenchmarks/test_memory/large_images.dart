@@ -10,8 +10,8 @@ import 'package:macrobenchmarks/main.dart';
 
 Future<void> endOfAnimation() async {
   do {
-    await SchedulerBinding.instance!.endOfFrame;
-  } while (SchedulerBinding.instance!.hasScheduledFrame);
+    await SchedulerBinding.instance.endOfFrame;
+  } while (SchedulerBinding.instance.hasScheduledFrame);
 }
 
 Future<void> main() async {

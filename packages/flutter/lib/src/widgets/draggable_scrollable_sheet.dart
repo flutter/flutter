@@ -677,7 +677,7 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
       // post frame callback so that `build` can update `_extent.availablePixels`
       // before this runs-we can't use the previous extent's available pixels as
       // it may have changed when the widget was updated.
-      WidgetsBinding.instance!.addPostFrameCallback((Duration timeStamp) {
+      WidgetsBinding.instance.addPostFrameCallback((Duration timeStamp) {
         _scrollController.position.goBallistic(0);
       });
     }

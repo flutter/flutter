@@ -329,9 +329,9 @@ void main() {
     addTearDown(gesture.removePointer);
     await gesture.moveTo(tester.getCenter(find.byKey(disabledPopupItemKey)));
     await tester.pumpAndSettle();
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.contextMenu);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.contextMenu);
     await gesture.down(tester.getCenter(find.byKey(enabledPopupItemKey)));
     await tester.pumpAndSettle();
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.alias);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.alias);
   });
 }

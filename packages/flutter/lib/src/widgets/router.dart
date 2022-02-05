@@ -525,7 +525,7 @@ class _RouterState<T> extends State<Router<T>> with RestorationMixin {
       return;
     assert(_currentIntentionToReport != null);
     _routeInformationReportingTaskScheduled = true;
-    SchedulerBinding.instance!.addPostFrameCallback(_reportRouteInformation);
+    SchedulerBinding.instance.addPostFrameCallback(_reportRouteInformation);
   }
 
   void _reportRouteInformation(Duration timestamp) {
@@ -967,7 +967,7 @@ class RootBackButtonDispatcher extends BackButtonDispatcher with WidgetsBindingO
   @override
   void addCallback(ValueGetter<Future<bool>> callback) {
     if (!hasCallbacks)
-      WidgetsBinding.instance!.addObserver(this);
+      WidgetsBinding.instance.addObserver(this);
     super.addCallback(callback);
   }
 
@@ -975,7 +975,7 @@ class RootBackButtonDispatcher extends BackButtonDispatcher with WidgetsBindingO
   void removeCallback(ValueGetter<Future<bool>> callback) {
     super.removeCallback(callback);
     if (!hasCallbacks)
-      WidgetsBinding.instance!.removeObserver(this);
+      WidgetsBinding.instance.removeObserver(this);
   }
 
   @override
@@ -1368,7 +1368,7 @@ class PlatformRouteInformationProvider extends RouteInformationProvider with Wid
   RouteInformation get value => _value;
   RouteInformation _value;
 
-  RouteInformation _valueInEngine = RouteInformation(location: WidgetsBinding.instance!.window.defaultRouteName);
+  RouteInformation _valueInEngine = RouteInformation(location: WidgetsBinding.instance.window.defaultRouteName);
 
   void _platformReportsNewRouteInformation(RouteInformation routeInformation) {
     if (_value == routeInformation)
@@ -1381,7 +1381,7 @@ class PlatformRouteInformationProvider extends RouteInformationProvider with Wid
   @override
   void addListener(VoidCallback listener) {
     if (!hasListeners)
-      WidgetsBinding.instance!.addObserver(this);
+      WidgetsBinding.instance.addObserver(this);
     super.addListener(listener);
   }
 
@@ -1389,7 +1389,7 @@ class PlatformRouteInformationProvider extends RouteInformationProvider with Wid
   void removeListener(VoidCallback listener) {
     super.removeListener(listener);
     if (!hasListeners)
-      WidgetsBinding.instance!.removeObserver(this);
+      WidgetsBinding.instance.removeObserver(this);
   }
 
   @override
@@ -1399,7 +1399,7 @@ class PlatformRouteInformationProvider extends RouteInformationProvider with Wid
     // is no longer being used, there's no listener, and so it will get garbage
     // collected.
     if (hasListeners)
-      WidgetsBinding.instance!.removeObserver(this);
+      WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
