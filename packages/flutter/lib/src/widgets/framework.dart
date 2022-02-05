@@ -4359,7 +4359,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
 
   /// A short, textual description of this element.
   @override
-  String toStringShort() =>_widget?.toStringShort() ?? '${describeIdentity(this)}(DEFUNCT)';
+  String toStringShort() => _widget?.toStringShort() ?? '${describeIdentity(this)}(DEFUNCT)';
 
   @override
   DiagnosticsNode toDiagnosticsNode({ String? name, DiagnosticsTreeStyle? style }) {
@@ -4377,7 +4377,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     if (_lifecycleState != _ElementLifecycle.initial) {
       properties.add(ObjectFlagProperty<int>('depth', depth, ifNull: 'no depth'));
     }
-    properties.add(ObjectFlagProperty<Widget>('widget',_widget, ifNull: 'no widget'));
+    properties.add(ObjectFlagProperty<Widget>('widget', _widget, ifNull: 'no widget'));
     properties.add(DiagnosticsProperty<Key>('key', _widget?.key, showName: false, defaultValue: null, level: DiagnosticLevel.hidden));
     _widget?.debugFillProperties(properties);
     properties.add(FlagProperty('dirty', value: dirty, ifTrue: 'dirty'));
