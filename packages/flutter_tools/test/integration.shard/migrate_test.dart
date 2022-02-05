@@ -8,9 +8,10 @@ import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/io.dart';
 
 import '../src/common.dart';
-import 'test_data/multidex_project.dart';
+import 'test_data/migrate_project.dart';
 import 'test_driver.dart';
 import 'test_utils.dart';
+
 
 void main() {
   Directory tempDir;
@@ -26,36 +27,29 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  testWithoutContext('simple build apk succeeds', () async {
-    final MultidexProject project = MultidexProject(true);
+  testWithoutContext('simple migrate start succeeds', () async {
+    // 9b2d32b605630f28625709ebd9d78ab3016b2bf6
+    // Flutter Stable 1.22.6
+    final MigrateProject project = MigrateProject('vanilla_app_1_22_6_stable');
     await project.setUpIn(tempDir);
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
-    final ProcessResult result = await processManager.run(<String>[
+    ProcessResult result = await processManager.run(<String>[
       flutterBin,
-      ...getLocalEngineArguments(),
-      'build',
-      'apk',
-      '--debug',
+      'migrate',
+      'start',
+      '--verbose',
     ], workingDirectory: tempDir.path);
 
+    print(result.stdout);
     expect(result.exitCode, 0);
-    expect(result.stdout.toString(), contains('app-debug.apk'));
-  });
+    expect(result.stdout.toString(), contains('Working directory created at'));
 
-  testWithoutContext('simple build apk without FlutterMultiDexApplication fails', () async {
-    final MultidexProject project = MultidexProject(false);
-    await project.setUpIn(tempDir);
-    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
-    final ProcessResult result = await processManager.run(<String>[
+    result = await processManager.run(<String>[
       flutterBin,
-      ...getLocalEngineArguments(),
-      'build',
-      'apk',
-      '--debug',
+      'migrate',
+      'apply',
+      '--verbose',
     ], workingDirectory: tempDir.path);
-
-    expect(result.stderr.toString(), contains('Cannot fit requested classes in a single dex file'));
-    expect(result.stderr.toString(), contains('The number of method references in a .dex file cannot exceed 64K.'));
     expect(result.exitCode, 1);
   });
 }
