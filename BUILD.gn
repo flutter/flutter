@@ -168,8 +168,10 @@ group("flutter") {
     }
 
     if (is_mac) {
-      public_deps +=
-          [ "//flutter/shell/platform/darwin:flutter_channels_unittests" ]
+      public_deps += [
+        "//flutter/impeller:impeller_unittests",
+        "//flutter/shell/platform/darwin:flutter_channels_unittests",
+      ]
     }
 
     if (!is_win && !is_fuchsia) {

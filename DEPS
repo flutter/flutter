@@ -109,6 +109,9 @@ allowed_hosts = [
 deps = {
   'src': 'https://github.com/flutter/buildroot.git' + '@' + '79643299bd052c53631b8b200bb582e8badb2708',
 
+  'src/flutter/impeller':
+  Var('github_git') + '/flutter/impeller' + '@' + '6bace472c39b838d11ff644e7303236928a1a8e7',
+
    # Fuchsia compatibility
    #
    # The dependencies in this section should match the layout in the Fuchsia gn

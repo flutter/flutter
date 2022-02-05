@@ -2168,8 +2168,23 @@ class _RepositoryFlutterDirectory extends _RepositoryDirectory {
       return _createLibDirectoryRoot(entry, this);
     if (entry.name == 'web_sdk')
       return _createWebSdkDirectoryRoot(entry, this);
+    if (entry.name == 'impeller')
+      return _createImpellerDirectory(entry, this);
     return super.createSubdirectory(entry);
   }
+}
+
+_RelativePathDenylistRepositoryDirectory _createImpellerDirectory(fs.Directory entry, _RepositoryDirectory parent) {
+  return _RelativePathDenylistRepositoryDirectory(
+    rootDir: entry,
+    denylist: <Pattern>[
+      // TODO(chinmaygarde): Remove stb.
+      // https://github.com/flutter/flutter/issues/97843
+      'third_party/stb',  // Currently only used for unit tests, and will be removed.
+    ],
+    parent: parent,
+    io: entry,
+  );
 }
 
 /// A specialized crawler for "github.com/flutter/engine/lib" directory.
