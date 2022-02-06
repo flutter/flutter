@@ -19,6 +19,8 @@ class Playground : public ::testing::Test {
 
   ~Playground();
 
+  static constexpr bool is_enabled() { return is_enabled_; }
+
   Point GetCursorPosition() const;
 
   ISize GetWindowSize() const;
@@ -31,6 +33,12 @@ class Playground : public ::testing::Test {
       const char* fixture_name) const;
 
  private:
+#if IMPELLER_ENABLE_PLAYGROUND
+  static const bool is_enabled_ = true;
+#else
+  static const bool is_enabled_ = false;
+#endif  // IMPELLER_ENABLE_PLAYGROUND
+
   Renderer renderer_;
   Point cursor_position_;
   ISize window_size_ = ISize{1024, 768};

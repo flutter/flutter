@@ -13,6 +13,10 @@ EntityPlayground::EntityPlayground() = default;
 EntityPlayground::~EntityPlayground() = default;
 
 bool EntityPlayground::OpenPlaygroundHere(Entity entity) {
+  if (!Playground::is_enabled()) {
+    return true;
+  }
+
   ContentContext context_context(GetContext());
   if (!context_context.IsValid()) {
     return false;
