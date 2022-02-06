@@ -122,7 +122,7 @@ class _WebSetLike<V> extends SetBase<V> {
     // Because this class only supports identity operation, if the set
     // contains the provided element it must be exactly that element.
     if (_javaScriptSet.has(element)) {
-      return element as V;
+      return _unsafeCast<V>(element);
     }
     return null;
   }
@@ -146,7 +146,7 @@ class _WebMapLike<K, V> extends MapBase<K, V> {
   final _JavaScriptMap _javascriptMap = _JavaScriptMap();
 
   @override
-  V? operator[](Object? key) => _javascriptMap.get(key) as V?;
+  V? operator[](Object? key) => _unsafeCast<V?>(_javascriptMap.get(key));
 
   @override
   void operator[]=(K key, V value) => _javascriptMap.set(key, value);
@@ -159,7 +159,7 @@ class _WebMapLike<K, V> extends MapBase<K, V> {
 
   @override
   V? remove(Object? key) {
-    final V? value = _javascriptMap.get(key) as V?;
+    final V? value = _unsafeCast<V?>(_javascriptMap.get(key));
     _javascriptMap.delete(key);
     return value;
   }
@@ -222,7 +222,7 @@ class _WebMapLikeIterator<T> extends Iterator<T> {
   late _JavaScriptIteratorValue _value;
 
   @override
-  T get current => _value.value as T;
+  T get current => _unsafeCast<T>(_value.value);
 
   @override
   bool moveNext() {
@@ -230,3 +230,8 @@ class _WebMapLikeIterator<T> extends Iterator<T> {
     return !_value.done;
   }
 }
+
+// Returns [any] assuming that the return type is [T].
+@pragma('dart2js:tryInline') // Required for next pragma to be effective.
+@pragma('dart2js:as:trust') // Omits `as T`.
+T _unsafeCast<T>(dynamic any) => any as T;

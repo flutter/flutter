@@ -14,11 +14,6 @@ import 'dart:collection';
 ///
 /// On Mobile and desktop this returns an identity [HashMap].
 Map<K, V> createIdentityMap<K, V>() {
-  // On mobile/desktop type objects are not necessarily canonicalized in the same
-  // way as on the web. Use a regular map for these.
-  if (K == Type) {
-    return HashMap<K, V>();
-  }
   return HashMap<K, V>.identity();
 }
 
@@ -32,10 +27,5 @@ Map<K, V> createIdentityMap<K, V>() {
 ///
 /// On Mobile and desktop this returns an identity [HashMap].
 Set<V> createIdentitySet<V>() {
-  // On mobile/desktop type objects are not necessarily canonicalized in the same
-  // way as on the web. Use a regular map for these.
-  if (V == Type) {
-    return HashSet<V>();
-  }
   return HashSet<V>.identity();
 }

@@ -413,7 +413,7 @@ class InheritedTreeCache {
   InheritedTreeCache([this._parent]);
 
   final InheritedTreeCache? _parent;
-  final Map<Type, InheritedElement> _current = createIdentityMap<Type, InheritedElement>();
+  final Map<Type, InheritedElement> _current = HashMap<Type, InheritedElement>();
 
   /// Place the [element] in the cache under [type].
   void operator []=(Type type, InheritedElement element) {
