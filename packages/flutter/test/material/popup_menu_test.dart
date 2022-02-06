@@ -1471,72 +1471,6 @@ void main() {
     expect(tester.widget<Container>(find.widgetWithText(Container, 'Item 3')).padding, const EdgeInsets.all(20));
   });
 
-testWidgets('PopupMenu custom padding', (WidgetTester tester) async {
-    final Key popupMenuButtonWithDefaultPaddingKey = UniqueKey();
-    final Key popupMenuButtonWithOverriddenPaddingKey = UniqueKey();
-
-    const EdgeInsets padding = EdgeInsets.zero;
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: Column(
-            children: <PopupMenuButton<String>>[
-              PopupMenuButton<String>(
-                key: popupMenuButtonWithDefaultPaddingKey,
-                child: const Text('button'),
-                onSelected: (String result) {},
-                itemBuilder: (BuildContext context) {
-                  return <PopupMenuEntry<String>>[
-                    const PopupMenuItem<String>(
-                      value: '0',
-                      child: Text('Item 0'),
-                    ),
-                  ];
-                },
-              ),
-              PopupMenuButton<String>(
-                menuPadding: padding,
-                key: popupMenuButtonWithOverriddenPaddingKey,
-                child: const Text('button'),
-                onSelected: (String result) {},
-                itemBuilder: (BuildContext context) {
-                  return <PopupMenuEntry<String>>[
-                    const PopupMenuItem<String>(
-                      value: '0',
-                      child: Text('Item 0'),
-                    ),
-                  ];
-                },
-              )
-            ],
-          ),
-        ),
-      ),
-    );
-
-    final Finder popupFinder = find.byType(SingleChildScrollView);
-    // Show the menu
-    await tester.tap(find.byKey(popupMenuButtonWithDefaultPaddingKey));
-    await tester.pumpAndSettle();
-
-    expect(tester.widget<SingleChildScrollView>(popupFinder).padding,
-      const EdgeInsets.symmetric(vertical: 8),
-      reason: 'The popup without explicit paddings should utilise the default ones.',);
-
-    // Close previous menu
-    await tester.tap(find.byKey(popupMenuButtonWithDefaultPaddingKey), warnIfMissed: false);
-    await tester.pumpAndSettle();
-
-    // Show the menu
-    await tester.tap(find.byKey(popupMenuButtonWithOverriddenPaddingKey));
-    await tester.pumpAndSettle();
-
-    expect(tester.widget<SingleChildScrollView>(popupFinder).padding,
-      padding,
-      reason: 'The popup should utilise explicitly set paddings.',);
-  });
-
   testWidgets('CheckedPopupMenuItem child height is a minimum, child is vertically centered', (WidgetTester tester) async {
     final Key popupMenuButtonKey = UniqueKey();
     final Type menuItemType = const CheckedPopupMenuItem<String>(child: Text('item')).runtimeType;
@@ -2049,7 +1983,7 @@ testWidgets('PopupMenu custom padding', (WidgetTester tester) async {
 
     await tester.pump();
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
 
     // Test default cursor
     await tester.pumpWidget(
@@ -2072,7 +2006,7 @@ testWidgets('PopupMenu custom padding', (WidgetTester tester) async {
       ),
     );
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
 
     // Test default cursor when disabled
     await tester.pumpWidget(
@@ -2096,7 +2030,7 @@ testWidgets('PopupMenu custom padding', (WidgetTester tester) async {
       ),
     );
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 
   testWidgets('PopupMenu in AppBar does not overlap with the status bar', (WidgetTester tester) async {
@@ -2108,7 +2042,7 @@ testWidgets('PopupMenu custom padding', (WidgetTester tester) async {
 
     const double statusBarHeight = 24.0;
     final PopupMenuItem<int> firstItem = choices[0];
-    int _selectedValue = choices[0].value!;
+    int selectedValue = choices[0].value!;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -2127,10 +2061,10 @@ testWidgets('PopupMenu custom padding', (WidgetTester tester) async {
                   PopupMenuButton<int>(
                     onSelected: (int result) {
                       setState(() {
-                        _selectedValue = result;
+                        selectedValue = result;
                       });
                     },
-                    initialValue: _selectedValue,
+                    initialValue: selectedValue,
                     itemBuilder: (BuildContext context) {
                       return choices;
                     },
@@ -2544,6 +2478,63 @@ testWidgets('PopupMenu custom padding', (WidgetTester tester) async {
     // The menu should be positioned directly next to the top of the button.
     // The 8.0 pixels is [_kMenuScreenPadding].
     expect(popupMenu, const Offset(8.0, 50.0));
+  });
+
+  testWidgets('PopupMenuButton custom splash radius', (WidgetTester tester) async {
+    Future<void> buildFrameWithoutChild({double? splashRadius}) {
+      return tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: PopupMenuButton<String>(
+                splashRadius: splashRadius,
+                itemBuilder: (_) => <PopupMenuEntry<String>>[
+                  const PopupMenuItem<String>(
+                    value: 'value',
+                    child: Text('child'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    Future<void> buildFrameWithChild({double? splashRadius}) {
+      return tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: PopupMenuButton<String>(
+                splashRadius: splashRadius,
+                child: const Text('An item'),
+                itemBuilder: (_) => <PopupMenuEntry<String>>[
+                  const PopupMenuDivider()
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+
+    await buildFrameWithoutChild();
+    expect(tester.widget<InkResponse>(find.byType(InkResponse)).radius,
+        Material.defaultSplashRadius);
+    await buildFrameWithChild();
+    expect(tester.widget<InkWell>(find.byType(InkWell)).radius, null);
+
+
+    const double testSplashRadius = 50;
+
+    await buildFrameWithoutChild(splashRadius: testSplashRadius);
+    expect(tester.widget<InkResponse>(find.byType(InkResponse)).radius,
+        testSplashRadius);
+    await buildFrameWithChild(splashRadius: testSplashRadius);
+    expect(tester.widget<InkWell>(find.byType(InkWell)).radius,
+        testSplashRadius);
   });
 }
 

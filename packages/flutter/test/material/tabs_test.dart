@@ -1318,8 +1318,8 @@ void main() {
 
   testWidgets('Can switch to non-neighboring tab in nested TabBarView without crashing', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/18756
-    final TabController _mainTabController = TabController(length: 4, vsync: const TestVSync());
-    final TabController _nestedTabController = TabController(length: 2, vsync: const TestVSync());
+    final TabController mainTabController = TabController(length: 4, vsync: const TestVSync());
+    final TabController nestedTabController = TabController(length: 2, vsync: const TestVSync());
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1327,7 +1327,7 @@ void main() {
           appBar: AppBar(
             title: const Text('Exception for Nested Tabs'),
             bottom: TabBar(
-              controller: _mainTabController,
+              controller: mainTabController,
               tabs: const <Widget>[
                 Tab(icon: Icon(Icons.add), text: 'A'),
                 Tab(icon: Icon(Icons.add), text: 'B'),
@@ -1337,10 +1337,10 @@ void main() {
             ),
           ),
           body: TabBarView(
-            controller: _mainTabController,
+            controller: mainTabController,
             children: <Widget>[
               Container(color: Colors.red),
-              _NestedTabBarContainer(tabController: _nestedTabController),
+              _NestedTabBarContainer(tabController: nestedTabController),
               Container(color: Colors.green),
               Container(color: Colors.indigo),
             ],
@@ -1350,14 +1350,14 @@ void main() {
     );
 
     // expect first tab to be selected
-    expect(_mainTabController.index, 0);
+    expect(mainTabController.index, 0);
 
     // tap on third tab
     await tester.tap(find.text('C'));
     await tester.pumpAndSettle();
 
     // expect third tab to be selected without exceptions
-    expect(_mainTabController.index, 2);
+    expect(mainTabController.index, 2);
   });
 
   testWidgets('TabBarView can warp when child is kept alive and contains ink', (WidgetTester tester) async {
@@ -2908,7 +2908,7 @@ void main() {
 
     await tester.pump();
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
 
     // Test default cursor
     await tester.pumpWidget(MaterialApp(home: DefaultTabController(
@@ -2923,7 +2923,7 @@ void main() {
         ),
       ),
     ));
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
   });
 
   testWidgets('TabController changes', (WidgetTester tester) async {
@@ -3568,19 +3568,19 @@ void main() {
   testWidgets('TabBar - updating to and from zero tabs', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/68962.
     final List<String> tabTitles = <String>[];
-    TabController _tabController = TabController(length: tabTitles.length, vsync: const TestVSync());
+    TabController tabController = TabController(length: tabTitles.length, vsync: const TestVSync());
 
     void _onTabAdd(StateSetter setState) {
       setState(() {
         tabTitles.add('Tab ${tabTitles.length + 1}');
-        _tabController = TabController(length: tabTitles.length, vsync: const TestVSync());
+        tabController = TabController(length: tabTitles.length, vsync: const TestVSync());
       });
     }
 
     void _onTabRemove(StateSetter setState) {
       setState(() {
         tabTitles.removeLast();
-        _tabController = TabController(length: tabTitles.length, vsync: const TestVSync());
+        tabController = TabController(length: tabTitles.length, vsync: const TestVSync());
       });
     }
 
@@ -3606,7 +3606,7 @@ void main() {
                   preferredSize: const Size.fromHeight(40.0),
                   child: Expanded(
                     child: TabBar(
-                      controller: _tabController,
+                      controller: tabController,
                       tabs: tabTitles
                         .map((String title) => Tab(text: title))
                         .toList(),
@@ -4377,6 +4377,50 @@ void main() {
     await tester.pumpAndSettle(); // theme animation
     expect(tester.widget<InkWell>(find.byType(InkWell)).splashFactory, splashFactory);
     expect(tester.widget<InkWell>(find.byType(InkWell)).overlayColor, overlayColor);
+  });
+
+  testWidgets('splashBorderRadius is passed to InkWell.borderRadius', (WidgetTester tester) async {
+    const Color hoverColor = Color(0xfff44336);
+    const double radius = 20;
+    await tester.pumpWidget(
+      boilerplate(
+        child: DefaultTabController(
+          length: 1,
+          child: TabBar(
+            overlayColor: MaterialStateProperty.resolveWith<Color>(
+              (Set<MaterialState> states) {
+                if (states.contains(MaterialState.hovered)) {
+                  return hoverColor;
+                }
+                return Colors.black54;
+              },
+            ),
+            splashBorderRadius: BorderRadius.circular(radius),
+            tabs: const <Widget>[
+              Tab(
+                child: Text(''),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.moveTo(tester.getCenter(find.byType(Tab)));
+    await tester.pumpAndSettle();
+    final RenderObject object = tester.allRenderObjects.firstWhere((RenderObject element) => element.runtimeType.toString() == '_RenderInkFeatures');
+    expect(
+      object,
+      paints..rrect(
+        color: hoverColor,
+        rrect: RRect.fromRectAndRadius(
+          tester.getRect(find.byType(InkWell)),
+          const Radius.circular(radius)
+        ),
+      ),
+    );
+    gesture.removePointer();
   });
 }
 

@@ -662,10 +662,15 @@ class ClipRect extends SingleChildRenderObjectWidget {
   /// If [clipper] is null, the clip will match the layout size and position of
   /// the child.
   ///
-  /// The [clipBehavior] argument must not be null or [Clip.none].
-  const ClipRect({ Key? key, this.clipper, this.clipBehavior = Clip.hardEdge, Widget? child })
-      : assert(clipBehavior != null),
-        super(key: key, child: child);
+  /// The [clipBehavior] argument must not be null. If [clipBehavior] is
+  /// [Clip.none], no clipping will be applied.
+  const ClipRect({
+    Key? key,
+    this.clipper,
+    this.clipBehavior = Clip.hardEdge,
+    Widget? child,
+  }) : assert(clipBehavior != null),
+       super(key: key, child: child);
 
   /// If non-null, determines which clip to use.
   final CustomClipper<Rect>? clipper;
@@ -677,13 +682,11 @@ class ClipRect extends SingleChildRenderObjectWidget {
 
   @override
   RenderClipRect createRenderObject(BuildContext context) {
-    assert(clipBehavior != Clip.none);
     return RenderClipRect(clipper: clipper, clipBehavior: clipBehavior);
   }
 
   @override
   void updateRenderObject(BuildContext context, RenderClipRect renderObject) {
-    assert(clipBehavior != Clip.none);
     renderObject
       ..clipper = clipper
       ..clipBehavior = clipBehavior;
@@ -723,7 +726,8 @@ class ClipRRect extends SingleChildRenderObjectWidget {
   ///
   /// If [clipper] is non-null, then [borderRadius] is ignored.
   ///
-  /// The [clipBehavior] argument must not be null or [Clip.none].
+  /// The [clipBehavior] argument must not be null. If [clipBehavior] is
+  /// [Clip.none], no clipping will be applied.
   const ClipRRect({
     Key? key,
     this.borderRadius = BorderRadius.zero,
@@ -752,13 +756,15 @@ class ClipRRect extends SingleChildRenderObjectWidget {
 
   @override
   RenderClipRRect createRenderObject(BuildContext context) {
-    assert(clipBehavior != Clip.none);
-    return RenderClipRRect(borderRadius: borderRadius!, clipper: clipper, clipBehavior: clipBehavior);
+    return RenderClipRRect(
+      borderRadius: borderRadius!,
+      clipper: clipper,
+      clipBehavior: clipBehavior,
+    );
   }
 
   @override
   void updateRenderObject(BuildContext context, RenderClipRRect renderObject) {
-    assert(clipBehavior != Clip.none);
     renderObject
       ..borderRadius = borderRadius!
       ..clipBehavior = clipBehavior
@@ -793,10 +799,15 @@ class ClipOval extends SingleChildRenderObjectWidget {
   /// If [clipper] is null, the oval will be inscribed into the layout size and
   /// position of the child.
   ///
-  /// The [clipBehavior] argument must not be null or [Clip.none].
-  const ClipOval({Key? key, this.clipper, this.clipBehavior = Clip.antiAlias, Widget? child})
-      : assert(clipBehavior != null),
-        super(key: key, child: child);
+  /// The [clipBehavior] argument must not be null. If [clipBehavior] is
+  /// [Clip.none], no clipping will be applied.
+  const ClipOval({
+    Key? key,
+    this.clipper,
+    this.clipBehavior = Clip.antiAlias,
+    Widget? child,
+  }) : assert(clipBehavior != null),
+       super(key: key, child: child);
 
   /// If non-null, determines which clip to use.
   ///
@@ -816,13 +827,11 @@ class ClipOval extends SingleChildRenderObjectWidget {
 
   @override
   RenderClipOval createRenderObject(BuildContext context) {
-    assert(clipBehavior != Clip.none);
     return RenderClipOval(clipper: clipper, clipBehavior: clipBehavior);
   }
 
   @override
   void updateRenderObject(BuildContext context, RenderClipOval renderObject) {
-    assert(clipBehavior != Clip.none);
     renderObject
       ..clipper = clipper
       ..clipBehavior = clipBehavior;
@@ -866,7 +875,8 @@ class ClipPath extends SingleChildRenderObjectWidget {
   /// consider using a [ClipRect], which can achieve the same effect more
   /// efficiently.
   ///
-  /// The [clipBehavior] argument must not be null or [Clip.none].
+  /// The [clipBehavior] argument must not be null. If [clipBehavior] is
+  /// [Clip.none], no clipping will be applied.
   const ClipPath({
     Key? key,
     this.clipper,
@@ -886,7 +896,6 @@ class ClipPath extends SingleChildRenderObjectWidget {
     Widget? child,
   }) {
     assert(clipBehavior != null);
-    assert(clipBehavior != Clip.none);
     assert(shape != null);
     return Builder(
       key: key,
@@ -917,13 +926,11 @@ class ClipPath extends SingleChildRenderObjectWidget {
 
   @override
   RenderClipPath createRenderObject(BuildContext context) {
-    assert(clipBehavior != Clip.none);
     return RenderClipPath(clipper: clipper, clipBehavior: clipBehavior);
   }
 
   @override
   void updateRenderObject(BuildContext context, RenderClipPath renderObject) {
-    assert(clipBehavior != Clip.none);
     renderObject
       ..clipper = clipper
       ..clipBehavior = clipBehavior;
@@ -1014,7 +1021,8 @@ class PhysicalModel extends SingleChildRenderObjectWidget {
       shape: shape,
       clipBehavior: clipBehavior,
       borderRadius: borderRadius,
-      elevation: elevation, color: color,
+      elevation: elevation,
+      color: color,
       shadowColor: shadowColor,
     );
   }
@@ -6185,7 +6193,7 @@ class Listener extends SingleChildRenderObjectWidget {
 ///
 ///  * [Listener], a similar widget that tracks pointer events when the pointer
 ///    has buttons pressed.
-class MouseRegion extends StatefulWidget {
+class MouseRegion extends SingleChildRenderObjectWidget {
   /// Creates a widget that forwards mouse events to callbacks.
   ///
   /// By default, all callbacks are empty, [cursor] is [MouseCursor.defer], and
@@ -6197,10 +6205,10 @@ class MouseRegion extends StatefulWidget {
     this.onHover,
     this.cursor = MouseCursor.defer,
     this.opaque = true,
-    this.child,
+    Widget? child,
   }) : assert(cursor != null),
        assert(opaque != null),
-       super(key: key);
+       super(key: key, child: child);
 
   /// Triggered when a mouse pointer has entered this widget.
   ///
@@ -6347,13 +6355,26 @@ class MouseRegion extends StatefulWidget {
   /// This defaults to true.
   final bool opaque;
 
-  /// The widget below this widget in the tree.
-  ///
-  /// {@macro flutter.widgets.ProxyWidget.child}
-  final Widget? child;
+  @override
+  RenderMouseRegion createRenderObject(BuildContext context) {
+    return RenderMouseRegion(
+      onEnter: onEnter,
+      onHover: onHover,
+      onExit: onExit,
+      cursor: cursor,
+      opaque: opaque,
+    );
+  }
 
   @override
-  State<MouseRegion> createState() => _MouseRegionState();
+  void updateRenderObject(BuildContext context, RenderMouseRegion renderObject) {
+    renderObject
+      ..onEnter = onEnter
+      ..onHover = onHover
+      ..onExit = onExit
+      ..cursor = cursor
+      ..opaque = opaque;
+  }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -6368,51 +6389,6 @@ class MouseRegion extends StatefulWidget {
     properties.add(IterableProperty<String>('listeners', listeners, ifEmpty: '<none>'));
     properties.add(DiagnosticsProperty<MouseCursor>('cursor', cursor, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('opaque', opaque, defaultValue: true));
-  }
-}
-
-class _MouseRegionState extends State<MouseRegion> {
-  void handleExit(PointerExitEvent event) {
-    if (widget.onExit != null && mounted)
-      widget.onExit!(event);
-  }
-
-  PointerExitEventListener? getHandleExit() {
-    return widget.onExit == null ? null : handleExit;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return _RawMouseRegion(this);
-  }
-}
-
-class _RawMouseRegion extends SingleChildRenderObjectWidget {
-  _RawMouseRegion(this.owner) : super(child: owner.widget.child);
-
-  final _MouseRegionState owner;
-
-  @override
-  RenderMouseRegion createRenderObject(BuildContext context) {
-    final MouseRegion widget = owner.widget;
-    return RenderMouseRegion(
-      onEnter: widget.onEnter,
-      onHover: widget.onHover,
-      onExit: owner.getHandleExit(),
-      cursor: widget.cursor,
-      opaque: widget.opaque,
-    );
-  }
-
-  @override
-  void updateRenderObject(BuildContext context, RenderMouseRegion renderObject) {
-    final MouseRegion widget = owner.widget;
-    renderObject
-      ..onEnter = widget.onEnter
-      ..onHover = widget.onHover
-      ..onExit = owner.getHandleExit()
-      ..cursor = widget.cursor
-      ..opaque = widget.opaque;
   }
 }
 

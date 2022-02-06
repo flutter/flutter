@@ -96,7 +96,7 @@ void main() {
     expect(flutterAssetsCallCount, 2);
 
     final ByteData message = const JSONMessageCodec().encodeMessage(<String, dynamic>{'type': 'memoryPressure'})!;
-    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage('flutter/system', message, (_) { });
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/system', message, (_) { });
 
     await rootBundle.loadString('test_asset');
     expect(flutterAssetsCallCount, 3);

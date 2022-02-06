@@ -1543,7 +1543,7 @@ void main() {
   });
 
   testWidgets('showCupertinoModalPopup transparent barrier color is transparent', (WidgetTester tester) async {
-    const Color _kTransparentColor = Color(0x00000000);
+    const Color kTransparentColor = Color(0x00000000);
 
     await tester.pumpWidget(CupertinoApp(
       home: CupertinoPageScaffold(
@@ -1553,7 +1553,7 @@ void main() {
               await showCupertinoModalPopup<void>(
                 context: context,
                 builder: (BuildContext context) => const SizedBox(),
-                barrierColor: _kTransparentColor,
+                barrierColor: kTransparentColor,
               );
             },
             child: const Text('tap'),
@@ -1974,7 +1974,7 @@ Widget buildNavigator({
   TransitionDelegate<dynamic>? transitionDelegate,
 }) {
   return MediaQuery(
-    data: MediaQueryData.fromWindow(WidgetsBinding.instance!.window),
+    data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
     child: Localizations(
       locale: const Locale('en', 'US'),
       delegates: const <LocalizationsDelegate<dynamic>>[

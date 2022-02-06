@@ -341,14 +341,14 @@ void main() {
   });
 
   testWidgets('Navigation bar does not grow with text scale factor', (WidgetTester tester) async {
-    const int _animationMilliseconds = 800;
+    const int animationMilliseconds = 800;
 
     Widget _widget({double textScaleFactor = 1}) {
       return _buildWidget(
         MediaQuery(
           data: MediaQueryData(textScaleFactor: textScaleFactor),
           child: NavigationBar(
-            animationDuration: const Duration(milliseconds: _animationMilliseconds),
+            animationDuration: const Duration(milliseconds: animationMilliseconds),
             destinations: const <NavigationDestination>[
               NavigationDestination(
                 icon: Icon(Icons.ac_unit),

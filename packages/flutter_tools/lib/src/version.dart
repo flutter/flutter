@@ -16,11 +16,18 @@ import 'globals.dart' as globals;
 
 const String _unknownFrameworkVersion = '0.0.0-unknown';
 
+/// This maps old branch names to the names of branches that replaced them.
+///
+/// For example, in 2021 we deprecated the "dev" channel and transitioned "dev"
+/// users to the "beta" channel.
+const Map<String, String> kObsoleteBranches = <String, String>{
+  'dev': 'beta',
+};
+
 /// The names of each channel/branch in order of increasing stability.
 enum Channel {
   // TODO(fujino): update to main https://github.com/flutter/flutter/issues/95041
   master,
-  dev,
   beta,
   stable,
 }
@@ -28,7 +35,6 @@ enum Channel {
 // Beware: Keep order in accordance with stability
 const Set<String> kOfficialChannels = <String>{
   globals.kDefaultFrameworkChannel,
-  'dev',
   'beta',
   'stable',
 };
@@ -88,7 +94,7 @@ class FlutterVersion {
 
   String? _repositoryUrl;
   String? get repositoryUrl {
-    final String _ = channel;
+    final String _ = channel; // ignore: no_leading_underscores_for_local_identifiers
     return _repositoryUrl;
   }
 
@@ -320,7 +326,7 @@ class FlutterVersion {
     }();
     if (redactUnknownBranches || _branch!.isEmpty) {
       // Only return the branch names we know about; arbitrary branch names might contain PII.
-      if (!kOfficialChannels.contains(_branch)) {
+      if (!kOfficialChannels.contains(_branch) && !kObsoleteBranches.containsKey(_branch)) {
         return '[user-branch]';
       }
     }
@@ -634,6 +640,7 @@ class GitTagVersion {
         _runGit('git fetch ${globals.flutterGit} --tags -f', processUtils, workingDirectory);
       }
     }
+    // find all tags attached to the given [gitRef]
     final List<String> tags = _runGit(
       'git tag --points-at $gitRef', processUtils, workingDirectory).trim().split('\n');
 
@@ -729,7 +736,9 @@ class GitTagVersion {
       return '$x.$y.$z+hotfix.${hotfix! + 1}.pre.$commits';
     }
     if (devPatch != null && devVersion != null) {
-      return '$x.$y.$z-${devVersion! + 1}.0.pre.$commits';
+      // The next published release this commit will appear in will be a beta
+      // release, thus increment [y].
+      return '$x.${y! + 1}.0-0.0.pre.$commits';
     }
     return '$x.$y.${z! + 1}-0.0.pre.$commits';
   }
@@ -879,7 +888,7 @@ class VersionFreshnessValidator {
     final String updateMessage;
     switch (remoteVersionStatus) {
       case VersionCheckResult.newVersionAvailable:
-        updateMessage = newVersionAvailableMessage();
+        updateMessage = _newVersionAvailableMessage;
         break;
       case VersionCheckResult.versionIsCurrent:
       case VersionCheckResult.unknown:
@@ -887,7 +896,7 @@ class VersionFreshnessValidator {
         break;
     }
 
-    logger.printStatus(updateMessage, emphasis: true);
+    logger.printBox(updateMessage);
     await Future.wait<void>(<Future<void>>[
       stamp.store(
         newTimeWarningWasPrinted: now,
@@ -900,26 +909,13 @@ class VersionFreshnessValidator {
 
 @visibleForTesting
 String versionOutOfDateMessage(Duration frameworkAge) {
-  String warning = 'WARNING: your installation of Flutter is ${frameworkAge.inDays} days old.';
-  // Append enough spaces to match the message box width.
-  warning += ' ' * (74 - warning.length);
-
   return '''
-╔════════════════════════════════════════════════════════════════════════════╗
-║ $warning ║
-║                                                                            ║
-║ To update to the latest version, run "flutter upgrade".                    ║
-╚════════════════════════════════════════════════════════════════════════════╝
-''';
+WARNING: your installation of Flutter is ${frameworkAge.inDays} days old.
+
+To update to the latest version, run "flutter upgrade".''';
 }
 
-@visibleForTesting
-String newVersionAvailableMessage() {
-  return '''
-╔════════════════════════════════════════════════════════════════════════════╗
-║ A new version of Flutter is available!                                     ║
-║                                                                            ║
-║ To update to the latest version, run "flutter upgrade".                    ║
-╚════════════════════════════════════════════════════════════════════════════╝
-''';
-}
+const String _newVersionAvailableMessage = '''
+A new version of Flutter is available!
+
+To update to the latest version, run "flutter upgrade".''';
