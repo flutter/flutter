@@ -5,6 +5,11 @@
 import("//build/compiled_action.gni")
 import("//flutter/common/config.gni")
 
+declare_args() {
+  # Whether playgrounds are enabled for unit tests.
+  impeller_enable_playground = false
+}
+
 template("impeller_component") {
   source_set(target_name) {
     forward_variables_from(invoker, "*")
