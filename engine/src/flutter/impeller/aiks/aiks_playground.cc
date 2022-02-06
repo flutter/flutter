@@ -13,6 +13,10 @@ AiksPlayground::AiksPlayground() = default;
 AiksPlayground::~AiksPlayground() = default;
 
 bool AiksPlayground::OpenPlaygroundHere(const Picture& picture) {
+  if (!Playground::is_enabled()) {
+    return true;
+  }
+
   AiksContext renderer(GetContext());
 
   if (!renderer.IsValid()) {

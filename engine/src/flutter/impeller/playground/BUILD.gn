@@ -21,10 +21,18 @@ impeller_component("playground") {
     "//third_party/glfw",
   ]
 
+  public_configs = [ ":playground_config" ]
+
   if (is_mac) {
     frameworks = [
       "AppKit.framework",
       "QuartzCore.framework",
     ]
+  }
+}
+
+config("playground_config") {
+  if (impeller_enable_playground) {
+    defines = [ "IMPELLER_ENABLE_PLAYGROUND" ]
   }
 }

@@ -81,6 +81,10 @@ void Playground::SetCursorPosition(Point pos) {
 }
 
 bool Playground::OpenPlaygroundHere(Renderer::RenderCallback render_callback) {
+  if (!is_enabled()) {
+    return true;
+  }
+
   if (!render_callback) {
     return true;
   }
