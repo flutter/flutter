@@ -173,8 +173,7 @@ class TextEditingController extends ValueNotifier<TextEditingValue> with Materia
       return TextSpan(style: style, text: text);
     }
 
-    if (spellCheckerSuggestionSpans != null ) {
-      // print("------------------------------------^^^^CORRECT CASE^^^^------------------------------------");
+    if (spellCheckerSuggestionSpans!.length > 0) {
       return buildWithMisspelledWordsIndicated(spellCheckerSuggestionSpans, value, style);
     }
     else {
