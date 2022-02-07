@@ -388,6 +388,7 @@ bool _needsCurlyBracketStringInterpolation(String messageString, String placehol
     // Examples:
     // "'The number of {hours} elapsed is: 44'" // no curly brackets.
     // "'哈{hours}哈'" // no curly brackets.
+    // "'#placeholder#placeholder#'" // no curly brackets
     // "'m#hours#m'" // curly brackets.
     // "'I have to work _#hours#_' sometimes." // curly brackets.
     final RegExp commonCaseRE =
@@ -405,6 +406,7 @@ bool _needsCurlyBracketStringInterpolation(String messageString, String placehol
     // "'hours elapsed: {hours}'"
     // "'Time elapsed: {hours}'" // no curly brackets
     // ' #placeholder#' // no curly brackets
+    // "'#placeholder#placeholder#'" // no curly brackets
     // 'm#placeholder#' // curly brackets
     final RegExp endOfString = RegExp('([^a-zA-Z_]?(\$(.*){)?[#{]$placeholder[#}])');
     return !endOfString.hasMatch(messageString);
