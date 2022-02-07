@@ -18,16 +18,18 @@ export 'dart:ui' show AppLifecycleState, VoidCallback, FrameTiming;
 /// Slows down animations by this factor to help in development.
 double get timeDilation => _timeDilation;
 double _timeDilation = 1.0;
-/// Setting the time dilation automatically calls [SchedulerBinding.resetEpoch]
-/// to ensure that time stamps seen by consumers of the scheduler binding are
-/// always increasing.
+/// If the [SchedulerBinding] has been initialized, setting the time dilation
+/// automatically calls [SchedulerBinding.resetEpoch] to ensure that time stamps
+/// seen by consumers of the scheduler binding are always increasing.
+///
+/// It is safe to set this before initializing the binding.
 set timeDilation(double value) {
   assert(value > 0.0);
   if (_timeDilation == value)
     return;
-  // We need to resetEpoch first so that we capture start of the epoch with the
-  // current time dilation.
-  SchedulerBinding.instance?.resetEpoch();
+  // If the binding has been created, we need to resetEpoch first so that we
+  // capture start of the epoch with the current time dilation.
+  SchedulerBinding._instance?.resetEpoch();
   _timeDilation = value;
 }
 
@@ -208,6 +210,14 @@ mixin SchedulerBinding on BindingBase {
     }
   }
 
+  /// The current [SchedulerBinding], if one has been created.
+  ///
+  /// Provides access to the features exposed by this mixin. The binding must
+  /// be initialized before using this getter; this is typically done by calling
+  /// [runApp] or [WidgetsFlutterBinding.ensureInitialized].
+  static SchedulerBinding get instance => BindingBase.checkInstance(_instance);
+  static SchedulerBinding? _instance;
+
   final List<TimingsCallback> _timingsCallbacks = <TimingsCallback>[];
 
   /// Add a [TimingsCallback] that receives [FrameTiming] sent from
@@ -279,7 +289,7 @@ mixin SchedulerBinding on BindingBase {
   @pragma('vm:notify-debugger-on-exception')
   void _executeTimingsCallbacks(List<FrameTiming> timings) {
     final List<TimingsCallback> clonedCallbacks =
-        List<TimingsCallback>.from(_timingsCallbacks);
+        List<TimingsCallback>.of(_timingsCallbacks);
     for (final TimingsCallback callback in clonedCallbacks) {
       try {
         if (_timingsCallbacks.contains(callback)) {
@@ -288,13 +298,13 @@ mixin SchedulerBinding on BindingBase {
       } catch (exception, stack) {
         InformationCollector? collector;
         assert(() {
-          collector = () sync* {
-            yield DiagnosticsProperty<TimingsCallback>(
+          collector = () => <DiagnosticsNode>[
+            DiagnosticsProperty<TimingsCallback>(
               'The TimingsCallback that gets executed was',
               callback,
               style: DiagnosticsTreeStyle.errorProperty,
-            );
-          };
+            ),
+          ];
           return true;
         }());
         FlutterError.reportError(FlutterErrorDetails(
@@ -306,10 +316,6 @@ mixin SchedulerBinding on BindingBase {
       }
     }
   }
-
-  /// The current [SchedulerBinding], if one has been created.
-  static SchedulerBinding? get instance => _instance;
-  static SchedulerBinding? _instance;
 
   @override
   void initServiceExtensions() {
@@ -467,13 +473,15 @@ mixin SchedulerBinding on BindingBase {
           stack: exceptionStack,
           library: 'scheduler library',
           context: ErrorDescription('during a task callback'),
-          informationCollector: (callbackStack == null) ? null : () sync* {
-            yield DiagnosticsStackTrace(
-              '\nThis exception was thrown in the context of a scheduler callback. '
-              'When the scheduler callback was _registered_ (as opposed to when the '
-              'exception was thrown), this was the stack',
-              callbackStack,
-            );
+          informationCollector: (callbackStack == null) ? null : () {
+            return <DiagnosticsNode>[
+              DiagnosticsStackTrace(
+                '\nThis exception was thrown in the context of a scheduler callback. '
+                'When the scheduler callback was _registered_ (as opposed to when the '
+                'exception was thrown), this was the stack',
+                callbackStack,
+              ),
+            ];
           },
         ));
       }
@@ -562,28 +570,25 @@ mixin SchedulerBinding on BindingBase {
         // even if the information collector is called after
         // the problem has been resolved.
         final int count = transientCallbackCount;
-        final Map<int, _FrameCallbackEntry> callbacks = Map<int, _FrameCallbackEntry>.from(_transientCallbacks);
+        final Map<int, _FrameCallbackEntry> callbacks = Map<int, _FrameCallbackEntry>.of(_transientCallbacks);
         FlutterError.reportError(FlutterErrorDetails(
           exception: reason,
           library: 'scheduler library',
-          informationCollector: () sync* {
-            if (count == 1) {
+          informationCollector: () => <DiagnosticsNode>[
+            if (count == 1)
               // TODO(jacobr): I have added an extra line break in this case.
-              yield ErrorDescription(
+              ErrorDescription(
                 'There was one transient callback left. '
                 'The stack trace for when it was registered is as follows:',
-              );
-            } else {
-              yield ErrorDescription(
+              )
+            else
+              ErrorDescription(
                 'There were $count transient callbacks left. '
                 'The stack traces for when they were registered are as follows:',
-              );
-            }
-            for (final int id in callbacks.keys) {
-              final _FrameCallbackEntry entry = callbacks[id]!;
-              yield DiagnosticsStackTrace('── callback $id ──', entry.debugStack, showSeparator: false);
-            }
-          },
+              ),
+            for (final int id in callbacks.keys)
+              DiagnosticsStackTrace('── callback $id ──', callbacks[id]!.debugStack, showSeparator: false),
+          ],
         ));
       }
       return true;
@@ -813,11 +818,6 @@ mixin SchedulerBinding on BindingBase {
   /// Consider using [scheduleWarmUpFrame] instead if the goal is to update the
   /// rendering as soon as possible (e.g. at application startup).
   void scheduleForcedFrame() {
-    // TODO(chunhtai): Removes the if case once the issue is fixed
-    // https://github.com/flutter/flutter/issues/45131
-    if (!framesEnabled)
-      return;
-
     if (_hasScheduledFrame)
       return;
     assert(() {
@@ -1084,7 +1084,7 @@ mixin SchedulerBinding on BindingBase {
       // POST-FRAME CALLBACKS
       _schedulerPhase = SchedulerPhase.postFrameCallbacks;
       final List<FrameCallback> localPostFrameCallbacks =
-          List<FrameCallback>.from(_postFrameCallbacks);
+          List<FrameCallback>.of(_postFrameCallbacks);
       _postFrameCallbacks.clear();
       for (final FrameCallback callback in localPostFrameCallbacks)
         _invokeFrameCallback(callback, _currentFrameTimeStamp!);
@@ -1149,13 +1149,15 @@ mixin SchedulerBinding on BindingBase {
         stack: exceptionStack,
         library: 'scheduler library',
         context: ErrorDescription('during a scheduler callback'),
-        informationCollector: (callbackStack == null) ? null : () sync* {
-          yield DiagnosticsStackTrace(
-            '\nThis exception was thrown in the context of a scheduler callback. '
-            'When the scheduler callback was _registered_ (as opposed to when the '
-            'exception was thrown), this was the stack',
-            callbackStack,
-          );
+        informationCollector: (callbackStack == null) ? null : () {
+          return <DiagnosticsNode>[
+            DiagnosticsStackTrace(
+              '\nThis exception was thrown in the context of a scheduler callback. '
+              'When the scheduler callback was _registered_ (as opposed to when the '
+              'exception was thrown), this was the stack',
+              callbackStack,
+            ),
+          ];
         },
       ));
     }

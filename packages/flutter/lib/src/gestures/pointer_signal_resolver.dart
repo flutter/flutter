@@ -30,7 +30,7 @@ bool _isSameEvent(PointerSignalEvent event1, PointerSignalEvent event2) {
 ///
 /// ```dart
 /// void handleSignalEvent(PointerSignalEvent event) {
-///   GestureBinding.instance!.pointerSignalResolver.register(event, (PointerSignalEvent event) {
+///   GestureBinding.instance.pointerSignalResolver.register(event, (PointerSignalEvent event) {
 ///     // handle the event...
 ///   });
 /// }
@@ -89,9 +89,9 @@ class PointerSignalResolver {
     } catch (exception, stack) {
       InformationCollector? collector;
       assert(() {
-        collector = () sync* {
-          yield DiagnosticsProperty<PointerSignalEvent>('Event', event, style: DiagnosticsTreeStyle.errorProperty);
-        };
+        collector = () => <DiagnosticsNode>[
+          DiagnosticsProperty<PointerSignalEvent>('Event', event, style: DiagnosticsTreeStyle.errorProperty),
+        ];
         return true;
       }());
       FlutterError.reportError(FlutterErrorDetails(

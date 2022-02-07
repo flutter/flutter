@@ -327,6 +327,49 @@ Future<void> main() async {
     expect(tester.getSize(find.byType(CupertinoTabBar)).height, 90.0);
   });
 
+  testWidgets('Set custom height', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/51704
+    const double tabBarHeight = 56.0;
+    final CupertinoTabBar tabBar = CupertinoTabBar(
+      height: tabBarHeight,
+      items: <BottomNavigationBarItem>[
+        BottomNavigationBarItem(
+          icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
+          label: 'Aka',
+        ),
+        BottomNavigationBarItem(
+          icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
+          label: 'Shiro',
+        ),
+      ],
+    );
+
+    // Verify height with no bottom padding.
+    await pumpWidgetWithBoilerplate(tester, MediaQuery(
+      data: const MediaQueryData(),
+      child: CupertinoTabScaffold(
+        tabBar: tabBar,
+        tabBuilder: (BuildContext context, int index) {
+          return const Placeholder();
+        },
+      ),
+    ));
+    expect(tester.getSize(find.byType(CupertinoTabBar)).height, tabBarHeight);
+
+    // Verify height with bottom padding.
+    const double bottomPadding = 40.0;
+    await pumpWidgetWithBoilerplate(tester, MediaQuery(
+      data: const MediaQueryData(padding: EdgeInsets.only(bottom: bottomPadding)),
+      child: CupertinoTabScaffold(
+        tabBar: tabBar,
+        tabBuilder: (BuildContext context, int index) {
+          return const Placeholder();
+        },
+      ),
+    ));
+    expect(tester.getSize(find.byType(CupertinoTabBar)).height, tabBarHeight + bottomPadding);
+  });
+
   testWidgets('Opaque background does not add blur effects', (WidgetTester tester) async {
     await pumpWidgetWithBoilerplate(tester, MediaQuery(
       data: const MediaQueryData(),

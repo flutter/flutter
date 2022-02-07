@@ -219,7 +219,7 @@ class HotRunner extends ResidentRunner {
         }
       }
     }
-    throw 'Failed to compile $expression';
+    throw Exception('Failed to compile $expression');
   }
 
   // Returns the exit code of the flutter tool process, like [run].
@@ -611,7 +611,8 @@ class HotRunner extends ResidentRunner {
             // new isolates, which will be configured by the editor as they are
             // started.
             final List<Future<void>> breakpointAndExceptionRemoval = <Future<void>>[
-              device.vmService.service.setExceptionPauseMode(isolate.id, 'None'),
+              device.vmService.service.setIsolatePauseMode(isolate.id,
+                exceptionPauseMode: vm_service.ExceptionPauseMode.kNone),
               for (final vm_service.Breakpoint breakpoint in isolate.breakpoints)
                 device.vmService.service.removeBreakpoint(isolate.id, breakpoint.id)
             ];

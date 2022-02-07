@@ -16,6 +16,37 @@ Future<String> fileType(String pathToBinary) {
   return eval('file', <String>[pathToBinary]);
 }
 
+Future<String?> minPhoneOSVersion(String pathToBinary) async {
+  final String loadCommands = await eval('otool', <String>[
+    '-l',
+    '-arch',
+    'arm64',
+    pathToBinary,
+  ]);
+  if (!loadCommands.contains('LC_VERSION_MIN_IPHONEOS')) {
+    return null;
+  }
+
+  String? minVersion;
+  // Load command 7
+  // cmd LC_VERSION_MIN_IPHONEOS
+  // cmdsize 16
+  // version 9.0
+  // sdk 15.2
+  //  ...
+  final List<String> lines = LineSplitter.split(loadCommands).toList();
+  lines.asMap().forEach((int index, String line) {
+    if (line.contains('LC_VERSION_MIN_IPHONEOS') && lines.length - index - 1 > 3) {
+      final String versionLine = lines
+          .skip(index - 1)
+          .take(4).last;
+      final RegExp versionRegex = RegExp(r'\s*version\s*(\S*)');
+      minVersion = versionRegex.firstMatch(versionLine)?.group(1);
+    }
+  });
+  return minVersion;
+}
+
 Future<bool> containsBitcode(String pathToBinary) async {
   // See: https://stackoverflow.com/questions/32755775/how-to-check-a-static-library-is-built-contain-bitcode
   final String loadCommands = await eval('otool', <String>[
@@ -116,14 +147,14 @@ Future<void> testWithNewIOSSimulator(
 }
 
 /// Shuts down and deletes simulator with deviceId.
-Future<void> removeIOSimulator(String deviceId) async {
+Future<void> removeIOSimulator(String? deviceId) async {
   if (deviceId != null && deviceId != '') {
     await eval(
       'xcrun',
       <String>[
         'simctl',
         'shutdown',
-        deviceId
+        deviceId,
       ],
       canFail: true,
       workingDirectory: flutterDirectory.path,
@@ -133,7 +164,8 @@ Future<void> removeIOSimulator(String deviceId) async {
       <String>[
         'simctl',
         'delete',
-        deviceId],
+        deviceId,
+      ],
       canFail: true,
       workingDirectory: flutterDirectory.path,
     );

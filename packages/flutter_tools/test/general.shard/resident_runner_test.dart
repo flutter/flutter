@@ -923,10 +923,10 @@ void main() {
         jsonResponse: vm_service.VM.parse(<String, Object>{}).toJson(),
       ),
       const FakeVmServiceRequest(
-        method: 'setExceptionPauseMode',
+        method: 'setIsolatePauseMode',
         args: <String, String>{
           'isolateId': '1',
-          'mode': 'None',
+          'exceptionPauseMode': 'None',
         }
       ),
       const FakeVmServiceRequest(
@@ -2142,8 +2142,8 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
     success: true,
     invalidatedSourcesCount: 1,
   );
-  Object reportError;
-  Object runColdError;
+  Exception reportError;
+  Exception runColdError;
   int runHotCode = 0;
   int runColdCode = 0;
 

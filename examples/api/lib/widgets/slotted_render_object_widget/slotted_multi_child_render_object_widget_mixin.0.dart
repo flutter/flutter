@@ -94,13 +94,13 @@ class RenderDiagonal extends RenderBox with SlottedContainerRenderObjectMixin<Di
 
   // Returns children in hit test order.
   @override
-  Iterable<RenderBox> get children sync* {
-    if (_topLeft != null) {
-      yield _topLeft!;
-    }
-    if (_bottomRight != null) {
-      yield _bottomRight!;
-    }
+  Iterable<RenderBox> get children {
+    return <RenderBox>[
+      if (_topLeft != null)
+        _topLeft!,
+      if (_bottomRight != null)
+        _bottomRight!,
+    ];
   }
 
   // LAYOUT

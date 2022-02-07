@@ -128,6 +128,24 @@ class CommonFinders {
   /// nodes that are [Offstage] or that are from inactive [Route]s.
   Finder byKey(Key key, { bool skipOffstage = true }) => _KeyFinder(key, skipOffstage: skipOffstage);
 
+  /// Finds widgets by searching for widgets implementing a particular type.
+  ///
+  /// This matcher accepts subtypes. For example a
+  /// `bySubtype<StatefulWidget>()` will find any stateful widget.
+  ///
+  /// ## Sample code
+  ///
+  /// ```dart
+  /// expect(find.bySubtype<IconButton>(), findsOneWidget);
+  /// ```
+  ///
+  /// If the `skipOffstage` argument is true (the default), then this skips
+  /// nodes that are [Offstage] or that are from inactive [Route]s.
+  ///
+  /// See also:
+  /// * [byType], which does not do subtype tests.
+  Finder bySubtype<T extends Widget>({ bool skipOffstage = true }) => _WidgetSubtypeFinder<T>(skipOffstage: skipOffstage);
+
   /// Finds widgets by searching for widgets with a particular type.
   ///
   /// This does not do subclass tests, so for example
@@ -144,6 +162,9 @@ class CommonFinders {
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
+  ///
+  /// See also:
+  /// * [bySubtype], which allows subtype tests.
   Finder byType(Type type, { bool skipOffstage = true }) => _WidgetTypeFinder(type, skipOffstage: skipOffstage);
 
   /// Finds [Icon] widgets containing icon data equal to the `icon`
@@ -384,7 +405,7 @@ class CommonFinders {
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
   Finder bySemanticsLabel(Pattern label, { bool skipOffstage = true }) {
-    if (WidgetsBinding.instance!.pipelineOwner.semanticsOwner == null)
+    if (WidgetsBinding.instance.pipelineOwner.semanticsOwner == null)
       throw StateError('Semantics are not enabled. '
                        'Make sure to call tester.ensureSemantics() before using '
                        'this finder, and call dispose on its return value after.');
@@ -441,7 +462,7 @@ abstract class Finder {
   @protected
   Iterable<Element> get allCandidates {
     return collectAllElementsFrom(
-      WidgetsBinding.instance!.renderViewElement!,
+      WidgetsBinding.instance.renderViewElement!,
       skipOffstage: skipOffstage,
     );
   }
@@ -584,7 +605,7 @@ class _HitTestableFinder extends ChainedFinder {
       final RenderBox box = candidate.renderObject! as RenderBox;
       final Offset absoluteOffset = box.localToGlobal(alignment.alongSize(box.size));
       final HitTestResult hitResult = HitTestResult();
-      WidgetsBinding.instance!.hitTest(hitResult, absoluteOffset);
+      WidgetsBinding.instance.hitTest(hitResult, absoluteOffset);
       for (final HitTestEntry entry in hitResult.path) {
         if (entry.target == candidate.renderObject) {
           yield candidate;
@@ -710,6 +731,18 @@ class _KeyFinder extends MatchFinder {
   @override
   bool matches(Element candidate) {
     return candidate.widget.key == key;
+  }
+}
+
+class _WidgetSubtypeFinder<T extends Widget> extends MatchFinder {
+  _WidgetSubtypeFinder({ bool skipOffstage = true }) : super(skipOffstage: skipOffstage);
+
+  @override
+  String get description => 'is "$T"';
+
+  @override
+  bool matches(Element candidate) {
+    return candidate.widget is T;
   }
 }
 

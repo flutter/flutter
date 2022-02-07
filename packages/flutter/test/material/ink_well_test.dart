@@ -76,6 +76,26 @@ void main() {
     expect(log, equals(<String>['tap-down', 'tap-cancel']));
   });
 
+  testWidgets('InkWell only onTapDown enables gestures', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/96030
+    bool downTapped = false;
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: Material(
+        child: Center(
+          child: InkWell(
+            onTapDown: (TapDownDetails details) {
+              downTapped = true;
+            },
+          ),
+        ),
+      ),
+    ));
+
+    await tester.tap(find.byType(InkWell));
+    expect(downTapped, true);
+  });
+
   testWidgets('InkWell invokes activation actions when expected', (WidgetTester tester) async {
     final List<String> log = <String>[];
 
@@ -272,6 +292,40 @@ void main() {
     );
   });
 
+  testWidgets('ink well changes color on pressed with overlayColor', (WidgetTester tester) async {
+    const Color pressedColor = Color(0xffdd00ff);
+
+    await tester.pumpWidget(Material(
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: Container(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: 100,
+            height: 100,
+            child: InkWell(
+              splashFactory: NoSplash.splashFactory,
+              overlayColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+                if (states.contains(MaterialState.pressed)) {
+                  return pressedColor;
+                }
+                return const Color(0xffbadbad); // Shouldn't happen.
+              }),
+              onTap: () { },
+            ),
+          ),
+        ),
+      ),
+    ));
+    await tester.pumpAndSettle();
+    final TestGesture gesture = await tester.startGesture(tester.getRect(find.byType(InkWell)).center);
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    expect(inkFeatures, paints..rect(rect: const Rect.fromLTRB(0, 0, 100, 100), color: pressedColor.withAlpha(0)));
+    await tester.pumpAndSettle(); // Let the press highlight animation finish.
+    expect(inkFeatures, paints..rect(rect: const Rect.fromLTRB(0, 0, 100, 100), color: pressedColor));
+    await gesture.up();
+  });
+
   testWidgets('ink response splashColor matches splashColor parameter', (WidgetTester tester) async {
     FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTouch;
     final FocusNode focusNode = FocusNode(debugLabel: 'Ink Focus');
@@ -433,7 +487,7 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
 
     // Test default of InkWell()
     await tester.pumpWidget(
@@ -450,7 +504,7 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
 
     // Test disabled
     await tester.pumpWidget(
@@ -465,7 +519,7 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
 
     // Test default of InkResponse()
     await tester.pumpWidget(
@@ -482,7 +536,7 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
 
     // Test disabled
     await tester.pumpWidget(
@@ -497,7 +551,7 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 
   group('feedback', () {

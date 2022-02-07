@@ -26,6 +26,7 @@ import 'tooltip.dart';
 // late dynamic _selection;
 // late BuildContext context;
 // void setState(VoidCallback fn) { }
+// enum Menu { itemOne, itemTwo, itemThree, itemFour }
 
 const Duration _kMenuDuration = Duration(milliseconds: 300);
 const double _kMenuCloseIntervalEnd = 2.0 / 3.0;
@@ -186,13 +187,13 @@ class _RenderMenuItem extends RenderShiftedBox {
 ///
 /// {@tool snippet}
 ///
-/// Here, a [Text] widget is used with a popup menu item. The `WhyFarther` type
+/// Here, a [Text] widget is used with a popup menu item. The `Menu` type
 /// is an enum, not shown here.
 ///
 /// ```dart
-/// const PopupMenuItem<WhyFarther>(
-///   value: WhyFarther.harder,
-///   child: Text('Working a lot harder'),
+/// const PopupMenuItem<Menu>(
+///   value: Menu.itemOne,
+///   child: Text('Item 1'),
 /// )
 /// ```
 /// {@end-tool}
@@ -264,15 +265,20 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
   /// of [ThemeData.textTheme] is used.
   final TextStyle? textStyle;
 
+  /// {@template flutter.material.popupmenu.mouseCursor}
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// widget.
   ///
   /// If [mouseCursor] is a [MaterialStateProperty<MouseCursor>],
-  /// [MaterialStateProperty.resolve] is used for the following [MaterialState]:
+  /// [MaterialStateProperty.resolve] is used for the following [MaterialState]s:
   ///
+  ///  * [MaterialState.hovered].
+  ///  * [MaterialState.focused].
   ///  * [MaterialState.disabled].
+  /// {@endtemplate}
   ///
-  /// If this property is null, [MaterialStateMouseCursor.clickable] will be used.
+  /// If null, then the value of [PopupMenuThemeData.mouseCursor] is used. If
+  /// that is also null, then [MaterialStateMouseCursor.clickable] is used.
   final MouseCursor? mouseCursor;
 
   /// The widget below this widget in the tree.
@@ -355,12 +361,6 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
         child: item,
       );
     }
-    final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor>(
-      widget.mouseCursor ?? MaterialStateMouseCursor.clickable,
-      <MaterialState>{
-        if (!widget.enabled) MaterialState.disabled,
-      },
-    );
 
     return MergeSemantics(
       child: Semantics(
@@ -369,7 +369,7 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
         child: InkWell(
           onTap: widget.enabled ? handleTap : null,
           canRequestFocus: widget.enabled,
-          mouseCursor: effectiveMouseCursor,
+          mouseCursor: _EffectiveMouseCursor(widget.mouseCursor, popupMenuTheme.mouseCursor),
           child: item,
         ),
       ),
@@ -931,39 +931,11 @@ typedef PopupMenuItemBuilder<T> = List<PopupMenuEntry<T>> Function(BuildContext 
 /// If both are null, then a standard overflow icon is created (depending on the
 /// platform).
 ///
-/// {@tool snippet}
-///
+/// {@tool dartpad}
 /// This example shows a menu with four items, selecting between an enum's
-/// values and setting a `_selection` field based on the selection.
+/// values and setting a `_selectedMenu` field based on the selection
 ///
-/// ```dart
-/// // This is the type used by the popup menu below.
-/// enum WhyFarther { harder, smarter, selfStarter, tradingCharter }
-///
-/// // This menu button widget updates a _selection field (of type WhyFarther,
-/// // not shown here).
-/// PopupMenuButton<WhyFarther>(
-///   onSelected: (WhyFarther result) { setState(() { _selection = result; }); },
-///   itemBuilder: (BuildContext context) => <PopupMenuEntry<WhyFarther>>[
-///     const PopupMenuItem<WhyFarther>(
-///       value: WhyFarther.harder,
-///       child: Text('Working a lot harder'),
-///     ),
-///     const PopupMenuItem<WhyFarther>(
-///       value: WhyFarther.smarter,
-///       child: Text('Being a lot smarter'),
-///     ),
-///     const PopupMenuItem<WhyFarther>(
-///       value: WhyFarther.selfStarter,
-///       child: Text('Being a self-starter'),
-///     ),
-///     const PopupMenuItem<WhyFarther>(
-///       value: WhyFarther.tradingCharter,
-///       child: Text('Placed in charge of trading charter'),
-///     ),
-///   ],
-/// )
-/// ```
+/// ** See code in examples/api/lib/material/popupmenu/popupmenu.0.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -986,6 +958,7 @@ class PopupMenuButton<T> extends StatefulWidget {
     this.elevation,
     this.padding = const EdgeInsets.all(8.0),
     this.child,
+    this.splashRadius,
     this.icon,
     this.iconSize,
     this.offset = Offset.zero,
@@ -1035,6 +1008,11 @@ class PopupMenuButton<T> extends StatefulWidget {
   /// this button appears as the trailing element of a list item, it's useful to be able
   /// to set the padding to zero.
   final EdgeInsetsGeometry padding;
+
+  /// The splash radius.
+  ///
+  /// If null, default splash radius of [InkWell] or [IconButton] is used.
+  final double? splashRadius;
 
   /// If provided, [child] is the widget used for this button
   /// and the button will utilize an [InkWell] for taps.
@@ -1170,6 +1148,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
         child: InkWell(
           onTap: widget.enabled ? showButtonMenu : null,
           canRequestFocus: _canRequestFocus,
+          radius: widget.splashRadius,
           enableFeedback: enableFeedback,
           child: widget.child,
         ),
@@ -1178,10 +1157,31 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
     return IconButton(
       icon: widget.icon ?? Icon(Icons.adaptive.more),
       padding: widget.padding,
+      splashRadius: widget.splashRadius,
       iconSize: widget.iconSize ?? 24.0,
       tooltip: widget.tooltip ?? MaterialLocalizations.of(context).showMenuTooltip,
       onPressed: widget.enabled ? showButtonMenu : null,
       enableFeedback: enableFeedback,
     );
   }
+}
+
+// This MaterialStateProperty is passed along to the menu item's InkWell which
+// resolves the property against MaterialState.disabled, MaterialState.hovered,
+// MaterialState.focused.
+class _EffectiveMouseCursor extends MaterialStateMouseCursor {
+  const _EffectiveMouseCursor(this.widgetCursor, this.themeCursor);
+
+  final MouseCursor? widgetCursor;
+  final MaterialStateProperty<MouseCursor?>? themeCursor;
+
+  @override
+  MouseCursor resolve(Set<MaterialState> states) {
+    return MaterialStateProperty.resolveAs<MouseCursor?>(widgetCursor, states)
+      ?? themeCursor?.resolve(states)
+      ?? MaterialStateMouseCursor.clickable.resolve(states);
+  }
+
+  @override
+  String get debugDescription => 'MaterialStateMouseCursor(PopupMenuItemState)';
 }

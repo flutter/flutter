@@ -405,11 +405,11 @@ class MockPortForwarder extends DevicePortForwarder {
   }
 
   @override
-  List<ForwardedPort> get forwardedPorts => throw 'not implemented';
+  List<ForwardedPort> get forwardedPorts => throw UnimplementedError();
 
   @override
   Future<void> unforward(ForwardedPort forwardedPort) {
-    throw 'not implemented';
+    throw UnimplementedError();
   }
 
   @override

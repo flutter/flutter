@@ -56,6 +56,9 @@ class _InputBorderGap extends ChangeNotifier {
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes, this class is not used in collection
   int get hashCode => hashValues(start, extent);
+
+  @override
+  String toString() => describeIdentity(this);
 }
 
 // Used to interpolate between two InputBorders.
@@ -124,6 +127,9 @@ class _InputBorderPainter extends CustomPainter {
         || gap != oldPainter.gap
         || textDirection != oldPainter.textDirection;
   }
+
+  @override
+  String toString() => describeIdentity(this);
 }
 
 // An analog of AnimatedContainer, which can animate its shaped border, for
@@ -139,7 +145,6 @@ class _BorderContainer extends StatefulWidget {
     required this.fillColor,
     required this.hoverColor,
     required this.isHovering,
-    this.child,
   }) : assert(border != null),
        assert(gap != null),
        assert(fillColor != null),
@@ -151,7 +156,6 @@ class _BorderContainer extends StatefulWidget {
   final Color fillColor;
   final Color hoverColor;
   final bool isHovering;
-  final Widget? child;
 
   @override
   _BorderContainerState createState() => _BorderContainerState();
@@ -243,7 +247,6 @@ class _BorderContainerState extends State<_BorderContainer> with TickerProviderS
         hoverColorTween: _hoverColorTween,
         hoverAnimation: _hoverAnimation,
       ),
-      child: widget.child,
     );
   }
 }
@@ -717,29 +720,31 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
 
   // The returned list is ordered for hit testing.
   @override
-  Iterable<RenderBox> get children sync* {
-    if (icon != null)
-      yield icon!;
-    if (input != null)
-      yield input!;
-    if (prefixIcon != null)
-      yield prefixIcon!;
-    if (suffixIcon != null)
-      yield suffixIcon!;
-    if (prefix != null)
-      yield prefix!;
-    if (suffix != null)
-      yield suffix!;
-    if (label != null)
-      yield label!;
-    if (hint != null)
-      yield hint!;
-    if (helperError != null)
-      yield helperError!;
-    if (counter != null)
-      yield counter!;
-    if (container != null)
-      yield container!;
+  Iterable<RenderBox> get children {
+    return <RenderBox>[
+      if (icon != null)
+        icon!,
+      if (input != null)
+        input!,
+      if (prefixIcon != null)
+        prefixIcon!,
+      if (suffixIcon != null)
+        suffixIcon!,
+      if (prefix != null)
+        prefix!,
+      if (suffix != null)
+        suffix!,
+      if (label != null)
+        label!,
+      if (hint != null)
+        hint!,
+      if (helperError != null)
+        helperError!,
+      if (counter != null)
+        counter!,
+      if (container != null)
+        container!,
+    ];
   }
 
   _Decoration get decoration => _decoration;
@@ -2389,7 +2394,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 /// ** See code in examples/api/lib/material/input_decorator/input_decoration.3.dart **
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold}
+/// {@tool dartpad}
 /// This sample shows how to style a `TextField` with a prefixIcon that changes color
 /// based on the `MaterialState`. The color defaults to gray, be blue while focused
 /// and red if in an error state.
@@ -2397,7 +2402,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 /// ** See code in examples/api/lib/material/input_decorator/input_decoration.material_state.0.dart **
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold}
+/// {@tool dartpad}
 /// This sample shows how to style a `TextField` with a prefixIcon that changes color
 /// based on the `MaterialState` through the use of `ThemeData`. The color defaults
 /// to gray, be blue while focused and red if in an error state.
@@ -2598,28 +2603,65 @@ class InputDecoration {
   /// Only one of [label] and [labelText] can be specified.
   final String? labelText;
 
-  /// The style to use for the [labelText] when the label is on top of the
-  /// input field.
+  /// {@template flutter.material.inputDecoration.labelStyle}
+  /// The style to use for [InputDecoration.labelText] when the label is on top
+  /// of the input field.
   ///
   /// If [labelStyle] is a [MaterialStateTextStyle], then the effective
   /// text style can depend on the [MaterialState.focused] state, i.e.
   /// if the [TextField] is focused or not.
   ///
-  /// When the [labelText] is above (i.e., vertically adjacent to) the input
-  /// field, the text uses the [floatingLabelStyle] instead.
+  /// When the [InputDecoration.labelText] is above (i.e., vertically adjacent to)
+  /// the input field, the text uses the [floatingLabelStyle] instead.
   ///
   /// If null, defaults to a value derived from the base [TextStyle] for the
   /// input field and the current [Theme].
+  ///
+  /// Note that if you specify this style it will override the default behavior
+  /// of [InputDecoration] that changes the color of the label to the
+  /// [InputDecoration.errorStyle] color or [ThemeData.errorColor].
+  ///
+  /// {@tool dartpad}
+  /// It's possible to override the label style for just the error state, or
+  /// just the default state, or both.
+  ///
+  /// In this example the [labelStyle] is specified with a [MaterialStateProperty]
+  /// which resolves to a text style whose color depends on the decorator's
+  /// error state.
+  ///
+  /// ** See code in examples/api/lib/material/input_decorator/input_decoration.label_style_error.0.dart **
+  /// {@end-tool}
+  /// {@endtemplate}
   final TextStyle? labelStyle;
 
-  /// The style to use for the [labelText] when the label is above (i.e.,
-  /// vertically adjacent to) the input field.
+  /// {@template flutter.material.inputDecoration.floatingLabelStyle}
+  /// The style to use for [InputDecoration.labelText] when the label is
+  /// above (i.e., vertically adjacent to) the input field.
+  ///
+  /// When the [InputDecoration.labelText] is on top of the input field, the
+  /// text uses the [labelStyle] instead.
   ///
   /// If [floatingLabelStyle] is a [MaterialStateTextStyle], then the effective
   /// text style can depend on the [MaterialState.focused] state, i.e.
   /// if the [TextField] is focused or not.
   ///
   /// If null, defaults to [labelStyle].
+  ///
+  /// Note that if you specify this style it will override the default behavior
+  /// of [InputDecoration] that changes the color of the label to the
+  /// [InputDecoration.errorStyle] color or [ThemeData.errorColor].
+  ///
+  /// {@tool dartpad}
+  /// It's possible to override the label style for just the error state, or
+  /// just the default state, or both.
+  ///
+  /// In this example the [floatingLabelStyle] is specified with a
+  /// [MaterialStateProperty] which resolves to a text style whose color depends
+  /// on the decorator's error state.
+  ///
+  /// ** See code in examples/api/lib/material/input_decorator/input_decoration.floating_label_style_error.0.dart **
+  /// {@end-tool}
+  /// {@endtemplate}
   final TextStyle? floatingLabelStyle;
 
   /// Text that provides context about the [InputDecorator.child]'s value, such
@@ -2696,10 +2738,18 @@ class InputDecoration {
   /// [TextFormField.validator], if that is not null.
   final String? errorText;
 
-  /// The style to use for the [errorText].
+  /// {@template flutter.material.inputDecoration.errorStyle}
+  /// The style to use for the [InputDecoration.errorText].
   ///
   /// If null, defaults of a value derived from the base [TextStyle] for the
   /// input field and the current [Theme].
+  ///
+  /// By default the color of style will be used by the label of
+  /// [InputDecoration] if [InputDecoration.errorText] is not null. See
+  /// [InputDecoration.labelStyle] or [InputDecoration.floatingLabelStyle] for
+  /// an example of how to replicate this behavior if you have specified either
+  /// style.
+  /// {@endtemplate}
   final TextStyle? errorStyle;
 
 
@@ -3542,8 +3592,6 @@ class InputDecoration {
       fillColor,
       focusColor,
       hoverColor,
-      border,
-      enabled,
       prefixIcon,
       prefixIconColor,
       prefix,
@@ -3680,31 +3728,10 @@ class InputDecorationTheme with Diagnosticable {
        assert(filled != null),
        assert(alignLabelWithHint != null);
 
-  /// The style to use for [InputDecoration.labelText] when the label is on top
-  /// of the input field.
-  ///
-  /// When the [InputDecoration.labelText] is floating above the input field,
-  /// the text uses the [floatingLabelStyle] instead.
-  ///
-  /// If [labelStyle] is a [MaterialStateTextStyle], then the effective
-  /// text style can depend on the [MaterialState.focused] state, i.e.
-  /// if the [TextField] is focused or not.
-  ///
-  /// If null, defaults to a value derived from the base [TextStyle] for the
-  /// input field and the current [Theme].
+  /// {@macro flutter.material.inputDecoration.labelStyle}
   final TextStyle? labelStyle;
 
-  /// The style to use for [InputDecoration.labelText] when the label is
-  /// above (i.e., vertically adjacent to) the input field.
-  ///
-  /// When the [InputDecoration.labelText] is on top of the input field, the
-  /// text uses the [labelStyle] instead.
-  ///
-  /// If [floatingLabelStyle] is a [MaterialStateTextStyle], then the effective
-  /// text style can depend on the [MaterialState.focused] state, i.e.
-  /// if the [TextField] is focused or not.
-  ///
-  /// If null, defaults to [labelStyle].
+  /// {@macro flutter.material.inputDecoration.floatingLabelStyle}
   final TextStyle? floatingLabelStyle;
 
   /// The style to use for [InputDecoration.helperText].
@@ -3742,10 +3769,7 @@ class InputDecorationTheme with Diagnosticable {
   /// input field and the current [Theme].
   final TextStyle? hintStyle;
 
-  /// The style to use for the [InputDecoration.errorText].
-  ///
-  /// If null, defaults of a value derived from the base [TextStyle] for the
-  /// input field and the current [Theme].
+  /// {@macro flutter.material.inputDecoration.errorStyle}
   final TextStyle? errorStyle;
 
   /// The maximum number of lines the [InputDecoration.errorText] can occupy.

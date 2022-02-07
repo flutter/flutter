@@ -32,7 +32,7 @@ void main() {
   testWidgets('PointerEvent resampling on a widget', (WidgetTester tester) async {
     assert(WidgetsBinding.instance == binding);
     Duration currentTestFrameTime() => Duration(milliseconds: binding.clock.now().millisecondsSinceEpoch);
-    void requestFrame() => SchedulerBinding.instance!.scheduleFrameCallback((_) {});
+    void requestFrame() => SchedulerBinding.instance.scheduleFrameCallback((_) {});
     final Duration epoch = currentTestFrameTime();
     final ui.PointerDataPacket packet = ui.PointerDataPacket(
       data: <ui.PointerData>[
@@ -90,9 +90,9 @@ void main() {
       ),
     );
 
-    GestureBinding.instance!.resamplingEnabled = true;
+    GestureBinding.instance.resamplingEnabled = true;
     const Duration kSamplingOffset = Duration(milliseconds: -5);
-    GestureBinding.instance!.samplingOffset = kSamplingOffset;
+    GestureBinding.instance.samplingOffset = kSamplingOffset;
     ui.window.onPointerDataPacket!(packet);
     expect(events.length, 0);
 

@@ -151,6 +151,70 @@ void main() {
       expect(scope.traversalDescendants.contains(child2), isFalse);
     });
 
+    testWidgets('descendantsAreTraversable disables traversal for descendants.', (WidgetTester tester) async {
+      final BuildContext context = await setupWidget(tester);
+      final FocusScopeNode scope = FocusScopeNode(debugLabel: 'Scope');
+      final FocusAttachment scopeAttachment = scope.attach(context);
+      final FocusNode parent1 = FocusNode(debugLabel: 'Parent 1');
+      final FocusAttachment parent1Attachment = parent1.attach(context);
+      final FocusNode parent2 = FocusNode(debugLabel: 'Parent 2');
+      final FocusAttachment parent2Attachment = parent2.attach(context);
+      final FocusNode child1 = FocusNode(debugLabel: 'Child 1');
+      final FocusAttachment child1Attachment = child1.attach(context);
+      final FocusNode child2 = FocusNode(debugLabel: 'Child 2');
+      final FocusAttachment child2Attachment = child2.attach(context);
+
+      scopeAttachment.reparent(parent: tester.binding.focusManager.rootScope);
+      parent1Attachment.reparent(parent: scope);
+      parent2Attachment.reparent(parent: scope);
+      child1Attachment.reparent(parent: parent1);
+      child2Attachment.reparent(parent: parent2);
+
+      expect(scope.traversalDescendants, equals(<FocusNode>[child1, parent1, child2, parent2]));
+
+      parent2.descendantsAreTraversable = false;
+      expect(scope.traversalDescendants, equals(<FocusNode>[child1, parent1, parent2]));
+
+      parent1.descendantsAreTraversable = false;
+      expect(scope.traversalDescendants, equals(<FocusNode>[parent1, parent2]));
+
+      parent1.descendantsAreTraversable = true;
+      parent2.descendantsAreTraversable = true;
+      scope.descendantsAreTraversable = false;
+      expect(scope.traversalDescendants, equals(<FocusNode>[]));
+    });
+
+    testWidgets("canRequestFocus doesn't affect traversalChildren", (WidgetTester tester) async {
+      final BuildContext context = await setupWidget(tester);
+      final FocusScopeNode scope = FocusScopeNode(debugLabel: 'Scope');
+      final FocusAttachment scopeAttachment = scope.attach(context);
+      final FocusNode parent1 = FocusNode(debugLabel: 'Parent 1');
+      final FocusAttachment parent1Attachment = parent1.attach(context);
+      final FocusNode parent2 = FocusNode(debugLabel: 'Parent 2');
+      final FocusAttachment parent2Attachment = parent2.attach(context);
+      final FocusNode child1 = FocusNode(debugLabel: 'Child 1');
+      final FocusAttachment child1Attachment = child1.attach(context);
+      final FocusNode child2 = FocusNode(debugLabel: 'Child 2');
+      final FocusAttachment child2Attachment = child2.attach(context);
+      scopeAttachment.reparent(parent: tester.binding.focusManager.rootScope);
+      parent1Attachment.reparent(parent: scope);
+      parent2Attachment.reparent(parent: scope);
+      child1Attachment.reparent(parent: parent1);
+      child2Attachment.reparent(parent: parent2);
+      child1.requestFocus();
+      await tester.pump();
+
+      expect(tester.binding.focusManager.primaryFocus, equals(child1));
+      expect(scope.focusedChild, equals(child1));
+      expect(parent2.traversalChildren.contains(child2), isTrue);
+      expect(scope.traversalChildren.contains(parent2), isTrue);
+
+      parent2.canRequestFocus = false;
+      await tester.pump();
+      expect(parent2.traversalChildren.contains(child2), isTrue);
+      expect(scope.traversalChildren.contains(parent2), isFalse);
+    });
+
     testWidgets('implements debugFillProperties', (WidgetTester tester) async {
       final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
       FocusNode(
@@ -160,6 +224,7 @@ void main() {
       expect(description, <String>[
         'context: null',
         'descendantsAreFocusable: true',
+        'descendantsAreTraversable: true',
         'canRequestFocus: true',
         'hasFocus: false',
         'hasPrimaryFocus: false',
@@ -502,6 +567,8 @@ void main() {
       expect(scope.focusedChild, equals(child1));
       expect(scope.traversalDescendants.contains(child1), isTrue);
       expect(scope.traversalDescendants.contains(child2), isTrue);
+      expect(scope.traversalChildren.contains(parent1), isTrue);
+      expect(parent1.traversalChildren.contains(child2), isTrue);
 
       scope.canRequestFocus = false;
       await tester.pump();
@@ -512,6 +579,8 @@ void main() {
       expect(scope.focusedChild, equals(child1));
       expect(scope.traversalDescendants.contains(child1), isFalse);
       expect(scope.traversalDescendants.contains(child2), isFalse);
+      expect(scope.traversalChildren.contains(parent1), isFalse);
+      expect(parent1.traversalChildren.contains(child2), isFalse);
     });
 
     testWidgets("skipTraversal doesn't affect children.", (WidgetTester tester) async {
@@ -1049,7 +1118,7 @@ void main() {
 
     testWidgets('Mouse events change initial focus highlight mode on mobile.', (WidgetTester tester) async {
       expect(FocusManager.instance.highlightMode, equals(FocusHighlightMode.touch));
-      RendererBinding.instance!.initMouseTracker(); // Clear out the mouse state.
+      RendererBinding.instance.initMouseTracker(); // Clear out the mouse state.
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 0);
       addTearDown(gesture.removePointer);
       await gesture.moveTo(Offset.zero);
@@ -1058,7 +1127,7 @@ void main() {
 
     testWidgets('Mouse events change initial focus highlight mode on desktop.', (WidgetTester tester) async {
       expect(FocusManager.instance.highlightMode, equals(FocusHighlightMode.traditional));
-      RendererBinding.instance!.initMouseTracker(); // Clear out the mouse state.
+      RendererBinding.instance.initMouseTracker(); // Clear out the mouse state.
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 0);
       addTearDown(gesture.removePointer);
       await gesture.moveTo(Offset.zero);
@@ -1121,6 +1190,7 @@ void main() {
       expect(description, <String>[
         'context: null',
         'descendantsAreFocusable: true',
+        'descendantsAreTraversable: true',
         'canRequestFocus: true',
         'hasFocus: false',
         'hasPrimaryFocus: false',
