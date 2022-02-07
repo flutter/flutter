@@ -4191,14 +4191,14 @@ class _TextEditingHistory extends StatefulWidget {
   /// The [TextEditingController] to save the state of over time.
   final TextEditingController controller;
 
-  /// Called when an undo or redo is received.
+  /// Called when an undo or redo causes a state change.
   ///
   /// If the state would still be the same before and after the undo/redo, this
-  /// will still be called. For example, receiving a redo when there is nothing
-  /// to redo will call this method with no change to the controller.
+  /// will not be called. For example, receiving a redo when there is nothing
+  /// to redo will not call this method.
   ///
-  /// It is NOT called when the controller is changed for reasons other than
-  /// undo/redo.
+  /// It is also not called when the controller is changed for reasons other
+  /// than undo/redo.
   final TextEditingValueCallback onTriggered;
 
   @override
