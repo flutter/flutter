@@ -11,6 +11,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'rendering_tester.dart';
 
 void main() {
+  TestRenderingFlutterBinding.ensureInitialized();
+
   test('non-painted layers are detached', () {
     RenderObject boundary, inner;
     final RenderOpacity root = RenderOpacity(
@@ -176,7 +178,19 @@ void main() {
     expect(leaderLayer.link, link2);
   });
 
-  test('leader layers are always dirty when connected to follower layer', () {
+  test('layer link attach/detach order should not crash app.', () {
+    final LayerLink link = LayerLink();
+    final LeaderLayer leaderLayer1 = LeaderLayer(link: link);
+    final LeaderLayer leaderLayer2 = LeaderLayer(link: link);
+    final RenderView view = RenderView(configuration: const ViewConfiguration(), window: window);
+    leaderLayer1.attach(view);
+    leaderLayer2.attach(view);
+    leaderLayer2.detach();
+    leaderLayer1.detach();
+    expect(link.leader, isNull);
+  });
+
+  test('leader layers not dirty when connected to follower layer', () {
     final ContainerLayer root = ContainerLayer()..attach(Object());
 
     final LayerLink link = LayerLink();
@@ -190,7 +204,7 @@ void main() {
     followerLayer.debugMarkClean();
     leaderLayer.updateSubtreeNeedsAddToScene();
     followerLayer.updateSubtreeNeedsAddToScene();
-    expect(leaderLayer.debugSubtreeNeedsAddToScene, true);
+    expect(leaderLayer.debugSubtreeNeedsAddToScene, false);
   });
 
   test('leader layers are not dirty when all followers disconnects', () {
@@ -204,24 +218,24 @@ void main() {
     leaderLayer.updateSubtreeNeedsAddToScene();
     expect(leaderLayer.debugSubtreeNeedsAddToScene, false);
 
-    // Connecting a follower requires adding to scene.
+    // Connecting a follower does not require adding to scene
     final FollowerLayer follower1 = FollowerLayer(link: link);
     root.append(follower1);
     leaderLayer.debugMarkClean();
     leaderLayer.updateSubtreeNeedsAddToScene();
-    expect(leaderLayer.debugSubtreeNeedsAddToScene, true);
+    expect(leaderLayer.debugSubtreeNeedsAddToScene, false);
 
     final FollowerLayer follower2 = FollowerLayer(link: link);
     root.append(follower2);
     leaderLayer.debugMarkClean();
     leaderLayer.updateSubtreeNeedsAddToScene();
-    expect(leaderLayer.debugSubtreeNeedsAddToScene, true);
+    expect(leaderLayer.debugSubtreeNeedsAddToScene, false);
 
-    // Disconnecting one follower, still needs add to scene.
+    // Disconnecting one follower, still does not needs add to scene.
     follower2.remove();
     leaderLayer.debugMarkClean();
     leaderLayer.updateSubtreeNeedsAddToScene();
-    expect(leaderLayer.debugSubtreeNeedsAddToScene, true);
+    expect(leaderLayer.debugSubtreeNeedsAddToScene, false);
 
     // Disconnecting all followers goes back to not requiring add to scene.
     follower1.remove();

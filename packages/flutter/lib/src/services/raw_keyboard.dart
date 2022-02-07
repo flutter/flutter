@@ -300,6 +300,7 @@ abstract class RawKeyEvent with Diagnosticable {
         key: key ?? '',
         location: message['location'] as int? ?? 0,
         metaState: message['metaState'] as int? ?? 0,
+        keyCode: message['keyCode'] as int? ?? 0,
       );
     }
 
@@ -629,8 +630,8 @@ class RawKeyboard {
   /// common situation), then the exact value of [keyEventHandler] is a dummy
   /// callback and must not be invoked.
   RawKeyEventHandler? get keyEventHandler {
-    if (ServicesBinding.instance!.keyEventManager.keyMessageHandler != _cachedKeyMessageHandler) {
-      _cachedKeyMessageHandler = ServicesBinding.instance!.keyEventManager.keyMessageHandler;
+    if (ServicesBinding.instance.keyEventManager.keyMessageHandler != _cachedKeyMessageHandler) {
+      _cachedKeyMessageHandler = ServicesBinding.instance.keyEventManager.keyMessageHandler;
       _cachedKeyEventHandler = _cachedKeyMessageHandler == null ?
         null :
         (RawKeyEvent event) {
@@ -649,8 +650,12 @@ class RawKeyboard {
     _cachedKeyEventHandler = handler;
     _cachedKeyMessageHandler = handler == null ?
       null :
-      (KeyMessage message) => handler(message.rawEvent);
-    ServicesBinding.instance!.keyEventManager.keyMessageHandler = _cachedKeyMessageHandler;
+      (KeyMessage message) {
+        if (message.rawEvent != null)
+          return handler(message.rawEvent!);
+        return false;
+      };
+    ServicesBinding.instance.keyEventManager.keyMessageHandler = _cachedKeyMessageHandler;
   }
 
   /// Process a new [RawKeyEvent] by recording the state changes and

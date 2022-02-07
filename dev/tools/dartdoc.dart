@@ -91,12 +91,12 @@ Future<void> main(List<String> arguments) async {
     pubEnvironment['PUB_CACHE'] = pubCachePath;
   }
 
-  final String pubExecutable = '$flutterRoot/bin/cache/dart-sdk/bin/pub';
+  final String dartExecutable = '$flutterRoot/bin/cache/dart-sdk/bin/dart';
 
   // Run pub.
-  ProcessWrapper process = ProcessWrapper(await Process.start(
-    pubExecutable,
-    <String>['get'],
+  ProcessWrapper process = ProcessWrapper(await runPubProcess(
+    dartBinaryPath: dartExecutable,
+    arguments: <String>['get'],
     workingDirectory: kDocsRoot,
     environment: pubEnvironment,
   ));
@@ -120,8 +120,9 @@ Future<void> main(List<String> arguments) async {
 
   // Verify which version of snippets and dartdoc we're using.
   final ProcessResult snippetsResult = Process.runSync(
-    pubExecutable,
+    dartExecutable,
     <String>[
+      'pub',
       'global',
       'list',
     ],
@@ -216,11 +217,11 @@ Future<void> main(List<String> arguments) async {
   ];
 
   String quote(String arg) => arg.contains(' ') ? "'$arg'" : arg;
-  print('Executing: (cd $kDocsRoot ; $pubExecutable ${dartdocArgs.map<String>(quote).join(' ')})');
+  print('Executing: (cd $kDocsRoot ; $dartExecutable ${dartdocArgs.map<String>(quote).join(' ')})');
 
-  process = ProcessWrapper(await Process.start(
-    pubExecutable,
-    dartdocArgs,
+  process = ProcessWrapper(await runPubProcess(
+    dartBinaryPath: dartExecutable,
+    arguments: dartdocArgs,
     workingDirectory: kDocsRoot,
     environment: pubEnvironment,
   ));
@@ -464,7 +465,6 @@ void putRedirectInOldIndexLocation() {
   File('$kPublishRoot/flutter/index.html').writeAsStringSync(metaTag);
 }
 
-
 void writeSnippetsIndexFile() {
   final Directory snippetsDir = Directory(path.join(kPublishRoot, 'snippets'));
   if (snippetsDir.existsSync()) {
@@ -530,4 +530,19 @@ void printStream(Stream<List<int>> stream, { String prefix = '', List<Pattern> f
       if (!filter.any((Pattern pattern) => line.contains(pattern)))
         print('$prefix$line'.trim());
     });
+}
+
+Future<Process> runPubProcess({
+  required String dartBinaryPath,
+  required List<String> arguments,
+  String? workingDirectory,
+  Map<String, String>? environment,
+  @visibleForTesting
+  ProcessManager processManager = const LocalProcessManager(),
+}) {
+  return processManager.start(
+    <Object>[dartBinaryPath, 'pub', ...arguments],
+    workingDirectory: workingDirectory,
+    environment: environment,
+  );
 }

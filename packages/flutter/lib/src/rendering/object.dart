@@ -1114,6 +1114,8 @@ class PipelineOwner {
 /// The [RenderObject] class hierarchy is the core of the rendering
 /// library's reason for being.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=zmbmrw07qBc}
+///
 /// [RenderObject]s have a [parent], and have a slot called [parentData] in
 /// which the parent [RenderObject] can store child-specific data, for example,
 /// the child position. The [RenderObject] class also implements the basic
@@ -3298,8 +3300,8 @@ mixin ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType 
       // insert at the start (_firstChild)
       childParentData.nextSibling = _firstChild;
       if (_firstChild != null) {
-        final ParentDataType _firstChildParentData = _firstChild!.parentData! as ParentDataType;
-        _firstChildParentData.previousSibling = child;
+        final ParentDataType firstChildParentData = _firstChild!.parentData! as ParentDataType;
+        firstChildParentData.previousSibling = child;
       }
       _firstChild = child;
       _lastChild ??= child;
@@ -3529,12 +3531,12 @@ mixin RelayoutWhenSystemFontsChangeMixin on RenderObject {
   @override
   void attach(covariant PipelineOwner owner) {
     super.attach(owner);
-    PaintingBinding.instance!.systemFonts.addListener(systemFontsDidChange);
+    PaintingBinding.instance.systemFonts.addListener(systemFontsDidChange);
   }
 
   @override
   void detach() {
-    PaintingBinding.instance!.systemFonts.removeListener(systemFontsDidChange);
+    PaintingBinding.instance.systemFonts.removeListener(systemFontsDidChange);
     super.detach();
   }
 }

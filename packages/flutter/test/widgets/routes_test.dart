@@ -1384,9 +1384,9 @@ void main() {
         ),
       ));
 
-      final CurveTween _defaultBarrierTween = CurveTween(curve: Curves.ease);
+      final CurveTween defaultBarrierTween = CurveTween(curve: Curves.ease);
       int _getExpectedBarrierTweenAlphaValue(double t) {
-        return Color.getAlphaFromOpacity(_defaultBarrierTween.transform(t));
+        return Color.getAlphaFromOpacity(defaultBarrierTween.transform(t));
       }
 
       await tester.tap(find.text('X'));
@@ -1447,9 +1447,9 @@ void main() {
         ),
       ));
 
-      final CurveTween _customBarrierTween = CurveTween(curve: Curves.linear);
+      final CurveTween customBarrierTween = CurveTween(curve: Curves.linear);
       int _getExpectedBarrierTweenAlphaValue(double t) {
-        return Color.getAlphaFromOpacity(_customBarrierTween.transform(t));
+        return Color.getAlphaFromOpacity(customBarrierTween.transform(t));
       }
 
       await tester.tap(find.text('X'));
@@ -1510,9 +1510,9 @@ void main() {
         ),
       ));
 
-      final CurveTween _defaultBarrierTween = CurveTween(curve: Curves.ease);
+      final CurveTween defaultBarrierTween = CurveTween(curve: Curves.ease);
       int _getExpectedBarrierTweenAlphaValue(double t) {
-        return Color.getAlphaFromOpacity(_defaultBarrierTween.transform(t));
+        return Color.getAlphaFromOpacity(defaultBarrierTween.transform(t));
       }
 
       await tester.tap(find.text('X'));
@@ -2071,7 +2071,7 @@ Widget buildNavigator({
   TransitionDelegate<dynamic>? transitionDelegate,
 }) {
   return MediaQuery(
-    data: MediaQueryData.fromWindow(WidgetsBinding.instance!.window),
+    data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
     child: Localizations(
       locale: const Locale('en', 'US'),
       delegates: const <LocalizationsDelegate<dynamic>>[

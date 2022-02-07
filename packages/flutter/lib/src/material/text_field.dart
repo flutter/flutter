@@ -319,7 +319,7 @@ class TextField extends StatefulWidget {
     this.keyboardAppearance,
     this.scrollPadding = const EdgeInsets.all(20.0),
     this.dragStartBehavior = DragStartBehavior.start,
-    this.enableInteractiveSelection = true,
+    bool? enableInteractiveSelection,
     this.selectionControls,
     this.onTap,
     this.mouseCursor,
@@ -340,7 +340,6 @@ class TextField extends StatefulWidget {
        smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
        smartQuotesType = smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
        assert(enableSuggestions != null),
-       assert(enableInteractiveSelection != null),
        assert(maxLengthEnforced != null),
        assert(
          maxLengthEnforced || maxLengthEnforcement == null,
@@ -373,17 +372,31 @@ class TextField extends StatefulWidget {
        assert(clipBehavior != null),
        assert(enableIMEPersonalizedLearning != null),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
-       toolbarOptions = toolbarOptions ?? (obscureText ?
-         const ToolbarOptions(
-           selectAll: true,
-           paste: true,
-         ) :
-         const ToolbarOptions(
-           copy: true,
-           cut: true,
-           selectAll: true,
-           paste: true,
-         )),
+       enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText),
+       toolbarOptions = toolbarOptions ??
+           (obscureText
+               ? (readOnly
+                   // No point in even offering "Select All" in a read-only obscured
+                   // field.
+                   ? const ToolbarOptions()
+                   // Writable, but obscured.
+                   : const ToolbarOptions(
+                       selectAll: true,
+                       paste: true,
+                     ))
+               : (readOnly
+                   // Read-only, not obscured.
+                   ? const ToolbarOptions(
+                       selectAll: true,
+                       copy: true,
+                     )
+                   // Writable, not obscured.
+                   : const ToolbarOptions(
+                       copy: true,
+                       cut: true,
+                       selectAll: true,
+                       paste: true,
+                     ))),
        super(key: key);
 
   /// Controls the text being edited.

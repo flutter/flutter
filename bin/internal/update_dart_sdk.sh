@@ -71,7 +71,7 @@ if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != `cat "$ENGINE_STAMP"` ]; t
 
   case "$(uname -s)" in
     Darwin)
-      DART_ZIP_NAME="dart-sdk-darwin-x64.zip"
+      DART_ZIP_NAME="dart-sdk-darwin-${ARCH}.zip"
       IS_USER_EXECUTABLE="-perm +100"
       ;;
     Linux)

@@ -873,6 +873,11 @@ File findBundleFile(FlutterProject project, BuildInfo buildInfo, Logger logger, 
       getBundleDirectory(project)
         .childDirectory('${buildInfo.lowerCasedFlavor}${camelCase('_${buildInfo.modeName}')}')
         .childFile('app-${buildInfo.lowerCasedFlavor}-${buildInfo.modeName}.aab'));
+
+    // The Android Gradle plugin 4.1.0 does only lowercase the first character of flavor name.
+    fileCandidates.add(getBundleDirectory(project)
+        .childDirectory('${buildInfo.uncapitalizedFlavor}${camelCase('_${buildInfo.modeName}')}')
+        .childFile('app-${buildInfo.uncapitalizedFlavor}-${buildInfo.modeName}.aab'));
   }
   for (final File bundleFile in fileCandidates) {
     if (bundleFile.existsSync()) {

@@ -74,9 +74,9 @@ class _ShowABCFieldState extends State<ShowABCField> {
 
 void main() {
   testWidgets('InheritedModel basics', (WidgetTester tester) async {
-    int _a = 0;
-    int _b = 1;
-    int _c = 2;
+    int a = 0;
+    int b = 1;
+    int c = 2;
 
     final Widget abcPage = StatefulBuilder(
       builder: (BuildContext context, StateSetter setState) {
@@ -97,9 +97,9 @@ void main() {
           body: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
               return ABCModel(
-                a: _a,
-                b: _b,
-                c: _c,
+                a: a,
+                b: b,
+                c: c,
                 child: Center(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -114,7 +114,7 @@ void main() {
                           // Rebuilds the ABCModel which triggers a rebuild
                           // of showA because showA depends on the 'a' aspect
                           // of the ABCModel.
-                          setState(() { _a += 1; });
+                          setState(() { a += 1; });
                         },
                       ),
                       ElevatedButton(
@@ -123,7 +123,7 @@ void main() {
                           // Rebuilds the ABCModel which triggers a rebuild
                           // of showB because showB depends on the 'b' aspect
                           // of the ABCModel.
-                          setState(() { _b += 1; });
+                          setState(() { b += 1; });
                         },
                       ),
                       ElevatedButton(
@@ -132,7 +132,7 @@ void main() {
                           // Rebuilds the ABCModel which triggers a rebuild
                           // of showC because showC depends on the 'c' aspect
                           // of the ABCModel.
-                          setState(() { _c += 1; });
+                          setState(() { c += 1; });
                         },
                       ),
                     ],
@@ -206,9 +206,9 @@ void main() {
   });
 
   testWidgets('Inner InheritedModel shadows the outer one', (WidgetTester tester) async {
-    int _a = 0;
-    int _b = 1;
-    int _c = 2;
+    int a = 0;
+    int b = 1;
+    int c = 2;
 
     // Same as in abcPage in the "InheritedModel basics" test except:
     // there are two ABCModels and the inner model's "a" and "b"
@@ -234,12 +234,12 @@ void main() {
           body: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
               return ABCModel( // The "outer" model
-                a: _a,
-                b: _b,
-                c: _c,
+                a: a,
+                b: b,
+                c: c,
                 child: ABCModel( // The "inner" model
-                  a: 100 + _a,
-                  b: 100 + _b,
+                  a: 100 + a,
+                  b: 100 + b,
                   aspects: const <String>{'a'},
                   child: Center(
                     child: Column(
@@ -254,19 +254,19 @@ void main() {
                         ElevatedButton(
                           child: const Text('Increment a'),
                           onPressed: () {
-                            setState(() { _a += 1; });
+                            setState(() { a += 1; });
                           },
                         ),
                         ElevatedButton(
                           child: const Text('Increment b'),
                           onPressed: () {
-                            setState(() { _b += 1; });
+                            setState(() { b += 1; });
                           },
                         ),
                         ElevatedButton(
                           child: const Text('Increment c'),
                           onPressed: () {
-                            setState(() { _c += 1; });
+                            setState(() { c += 1; });
                           },
                         ),
                       ],
@@ -324,10 +324,10 @@ void main() {
   });
 
   testWidgets('InheritedModel inner models supported aspect change', (WidgetTester tester) async {
-    int _a = 0;
-    int _b = 1;
-    int _c = 2;
-    Set<String>? _innerModelAspects = <String>{'a'};
+    int a = 0;
+    int b = 1;
+    int c = 2;
+    Set<String>? innerModelAspects = <String>{'a'};
 
     // Same as in abcPage in the "Inner InheritedModel shadows the outer one"
     // test except: the "Add b aspect" changes adds 'b' to the set of
@@ -351,13 +351,13 @@ void main() {
           body: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
               return ABCModel( // The "outer" model
-                a: _a,
-                b: _b,
-                c: _c,
+                a: a,
+                b: b,
+                c: c,
                 child: ABCModel( // The "inner" model
-                  a: 100 + _a,
-                  b: 100 + _b,
-                  aspects: _innerModelAspects,
+                  a: 100 + a,
+                  b: 100 + b,
+                  aspects: innerModelAspects,
                   child: Center(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
@@ -371,19 +371,19 @@ void main() {
                         ElevatedButton(
                           child: const Text('Increment a'),
                           onPressed: () {
-                            setState(() { _a += 1; });
+                            setState(() { a += 1; });
                           },
                         ),
                         ElevatedButton(
                           child: const Text('Increment b'),
                           onPressed: () {
-                            setState(() { _b += 1; });
+                            setState(() { b += 1; });
                           },
                         ),
                         ElevatedButton(
                           child: const Text('Increment c'),
                           onPressed: () {
-                            setState(() { _c += 1; });
+                            setState(() { c += 1; });
                           },
                         ),
                         ElevatedButton(
@@ -405,14 +405,14 @@ void main() {
       },
     );
 
-    _innerModelAspects = <String>{'a'};
+    innerModelAspects = <String>{'a'};
     await tester.pumpWidget(MaterialApp(home: abcPage));
     expect(find.text('a: 100 [0]'), findsOneWidget); // showA depends on the inner model
     expect(find.text('b: 1 [0]'), findsOneWidget); // showB depends on the outer model
     expect(find.text('c: 2 [0]'), findsOneWidget);
     expect(find.text('a: 100 b: 101 c: null'), findsOneWidget); // inner model's a, b, c
 
-    _innerModelAspects = <String>{'a', 'b'};
+    innerModelAspects = <String>{'a', 'b'};
     await tester.tap(find.text('rebuild'));
     await tester.pumpAndSettle();
     expect(find.text('a: 100 [1]'), findsOneWidget); // rebuilt showA still depend on the inner model
@@ -447,7 +447,7 @@ void main() {
     expect(find.text('c: 3 [2]'), findsOneWidget); // rebuilt showC still depends on the outer model
     expect(find.text('a: 101 b: 102 c: null'), findsOneWidget);
 
-    _innerModelAspects = <String>{'a', 'b', 'c'};
+    innerModelAspects = <String>{'a', 'b', 'c'};
     await tester.tap(find.text('rebuild'));
     await tester.pumpAndSettle();
     expect(find.text('a: 101 [3]'), findsOneWidget); // rebuilt showA still depend on the inner model
@@ -456,7 +456,7 @@ void main() {
     expect(find.text('a: 101 b: 102 c: null'), findsOneWidget); // inner model's a, b, c
 
     // Now the inner model supports no aspects
-    _innerModelAspects = <String>{};
+    innerModelAspects = <String>{};
     await tester.tap(find.text('rebuild'));
     await tester.pumpAndSettle();
     expect(find.text('a: 1 [4]'), findsOneWidget); // rebuilt showA now depends on the outer model
@@ -465,7 +465,7 @@ void main() {
     expect(find.text('a: 101 b: 102 c: null'), findsOneWidget); // inner model's a, b, c
 
     // Now the inner model supports all aspects
-    _innerModelAspects = null;
+    innerModelAspects = null;
     await tester.tap(find.text('rebuild'));
     await tester.pumpAndSettle();
     expect(find.text('a: 101 [5]'), findsOneWidget); // rebuilt showA now depends on the inner model

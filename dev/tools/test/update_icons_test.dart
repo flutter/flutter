@@ -36,4 +36,8 @@ void main() {
       expect(testIsStable(codepointsC, codepointsA), true);
     });
   });
+
+  test('no double underscores', () {
+    expect(Icon.generateFlutterId('abc__123'), 'abc_123');
+  });
 }

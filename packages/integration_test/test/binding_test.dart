@@ -20,14 +20,12 @@ Future<void> main() async {
   Future<Map<String, dynamic>>? request;
 
   group('Test Integration binding', () {
-    final WidgetsBinding binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
-    assert(binding is IntegrationTestWidgetsFlutterBinding);
-    final IntegrationTestWidgetsFlutterBinding integrationBinding = binding as IntegrationTestWidgetsFlutterBinding;
+    final IntegrationTestWidgetsFlutterBinding binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
     FakeVM? fakeVM;
 
     setUp(() {
-      request = integrationBinding.callback(<String, String>{
+      request = binding.callback(<String, String>{
         'command': 'request_data',
       });
       fakeVM = FakeVM(
@@ -39,8 +37,8 @@ Future<void> main() async {
       runApp(const MaterialApp(
         home: Text('Test'),
       ));
-      expect(tester.binding, integrationBinding);
-      integrationBinding.reportData = <String, dynamic>{'answer': 42};
+      expect(tester.binding, binding);
+      binding.reportData = <String, dynamic>{'answer': 42};
     });
 
     testWidgets('hitTesting works when using setSurfaceSize', (WidgetTester tester) async {
@@ -102,26 +100,26 @@ Future<void> main() async {
     });
 
     testWidgets('Test traceAction', (WidgetTester tester) async {
-      await integrationBinding.enableTimeline(vmService: fakeVM);
-      await integrationBinding.traceAction(() async {});
-      expect(integrationBinding.reportData, isNotNull);
-      expect(integrationBinding.reportData!.containsKey('timeline'), true);
+      await binding.enableTimeline(vmService: fakeVM);
+      await binding.traceAction(() async {});
+      expect(binding.reportData, isNotNull);
+      expect(binding.reportData!.containsKey('timeline'), true);
       expect(
-        json.encode(integrationBinding.reportData!['timeline']),
+        json.encode(binding.reportData!['timeline']),
         json.encode(_kTimelines),
       );
     });
 
     group('defaultTestTimeout', () {
-      final Timeout originalTimeout = integrationBinding.defaultTestTimeout;
+      final Timeout originalTimeout = binding.defaultTestTimeout;
       tearDown(() {
-        integrationBinding.defaultTestTimeout = originalTimeout;
+        binding.defaultTestTimeout = originalTimeout;
       });
 
       test('can be configured', () {
         const Timeout newTimeout = Timeout(Duration(seconds: 17));
-        integrationBinding.defaultTestTimeout = newTimeout;
-        expect(integrationBinding.defaultTestTimeout, newTimeout);
+        binding.defaultTestTimeout = newTimeout;
+        expect(binding.defaultTestTimeout, newTimeout);
       });
     });
 

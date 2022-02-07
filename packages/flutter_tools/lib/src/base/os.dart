@@ -451,8 +451,9 @@ class _MacOSUtils extends _PosixUtils {
         );
         for (final FileSystemEntity unzippedFile in tempDirectory.listSync(followLinks: false)) {
           // rsync --delete the unzipped files so files removed from the archive are also removed from the target.
+          // Add the '-8' parameter to avoid mangling filenames with encodings that do not match the current locale.
           _processUtils.runSync(
-            <String>['rsync', '-av', '--delete', unzippedFile.path, targetDirectory.path],
+            <String>['rsync', '-8', '-av', '--delete', unzippedFile.path, targetDirectory.path],
             throwOnError: true,
             verboseExceptions: true,
           );
@@ -538,10 +539,32 @@ class _WindowsUtils extends OperatingSystemUtils {
         continue;
       }
 
-      final File destFile = _fileSystem.file(_fileSystem.path.join(
+      final File destFile = _fileSystem.file(
+        _fileSystem.path.canonicalize(
+          _fileSystem.path.join(
+            targetDirectory.path,
+            archiveFile.name,
+          ),
+        ),
+      );
+
+      // Validate that the destFile is within the targetDirectory we want to
+      // extract to.
+      //
+      // See https://snyk.io/research/zip-slip-vulnerability for more context.
+      final String destinationFileCanonicalPath = _fileSystem.path.canonicalize(
+        destFile.path,
+      );
+      final String targetDirectoryCanonicalPath = _fileSystem.path.canonicalize(
         targetDirectory.path,
-        archiveFile.name,
-      ));
+      );
+      if (!destinationFileCanonicalPath.startsWith(targetDirectoryCanonicalPath)) {
+        throw StateError(
+          'Tried to extract the file $destinationFileCanonicalPath outside of the '
+          'target directory $targetDirectoryCanonicalPath',
+        );
+      }
+
       if (!destFile.parent.existsSync()) {
         destFile.parent.createSync(recursive: true);
       }
