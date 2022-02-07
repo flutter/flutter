@@ -156,6 +156,18 @@ void main() {
         expectNotExists(project.ios.hostAppRoot.childDirectory('Flutter').childFile('Generated.xcconfig'));
         expectNotExists(project.android.hostAppGradleRoot.childFile('local.properties'));
       });
+      _testInMemory('works if there is an "example" folder', () async {
+        final FlutterProject project = await someProject();
+        // The presence of an "example" folder used to be used as an indicator
+        // that a project was a plugin, but shouldn't be as this creates false
+        // positives.
+        project.directory.childDirectory('example').createSync();
+        await project.regeneratePlatformSpecificTooling();
+        expectExists(project.ios.hostAppRoot.childDirectory('Runner').childFile('GeneratedPluginRegistrant.h'));
+        expectExists(androidPluginRegistrant(project.android.hostAppGradleRoot.childDirectory('app')));
+        expectExists(project.ios.hostAppRoot.childDirectory('Flutter').childFile('Generated.xcconfig'));
+        expectExists(project.android.hostAppGradleRoot.childFile('local.properties'));
+      });
       _testInMemory('injects plugins for iOS', () async {
         final FlutterProject project = await someProject();
         await project.regeneratePlatformSpecificTooling();
@@ -182,7 +194,7 @@ void main() {
         // v1 embedding, as opposed to having <meta-data
         // android:name="flutterEmbedding" android:value="2" />.
 
-        project.checkForDeprecation(deprecationBehavior: DeprecationBehavior.none);
+        project.checkForDeprecation(deprecationBehavior: DeprecationBehavior.ignore);
         expect(testLogger.statusText, contains('https://flutter.dev/go/android-project-migration'));
       });
       _testInMemory('Android project not on v2 embedding exits', () async {
@@ -197,6 +209,15 @@ void main() {
         );
         expect(testLogger.statusText, contains('https://flutter.dev/go/android-project-migration'));
         expect(testLogger.statusText, contains('No `<meta-data android:name="flutterEmbedding" android:value="2"/>` in '));
+      });
+      _testInMemory('Project not on v2 embedding does not warn if deprecation status is irrelevant', () async {
+        final FlutterProject project = await someProject();
+        // The default someProject with an empty <manifest> already indicates
+        // v1 embedding, as opposed to having <meta-data
+        // android:name="flutterEmbedding" android:value="2" />.
+
+        project.checkForDeprecation(deprecationBehavior: DeprecationBehavior.none);
+        expect(testLogger.statusText, isEmpty);
       });
       _testInMemory('Android project not on v2 embedding ignore continues', () async {
         final FlutterProject project = await someProject();
@@ -904,7 +925,7 @@ void transfer(FileSystemEntity entity, FileSystem target) {
   } else if (entity is File) {
     target.file(entity.absolute.path).writeAsBytesSync(entity.readAsBytesSync(), flush: true);
   } else {
-    throw 'Unsupported FileSystemEntity ${entity.runtimeType}';
+    throw Exception('Unsupported FileSystemEntity ${entity.runtimeType}');
   }
 }
 

@@ -39,7 +39,9 @@ void main() {
 
       // Bring up keyboard
       await driver.tap(textFieldFinder);
-      await driver.waitFor(keyboardVisibilityIndicatorFinder);
+
+      // TODO(jmagman): Remove timeout once flake has been diagnosed. https://github.com/flutter/flutter/issues/96787
+      await driver.waitFor(keyboardVisibilityIndicatorFinder, timeout: const Duration(seconds: 5));
 
       // Ensure that TextField is visible again
       await driver.waitFor(textFieldFinder);

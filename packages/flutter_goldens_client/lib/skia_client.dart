@@ -109,12 +109,24 @@ class SkiaGoldClient {
     }
   }
 
+  /// Signals if this client is initialized for uploading images to the Gold
+  /// service.
+  ///
+  /// Since Flutter framework tests are executed in parallel, and in random
+  /// order, this will signal is this instance of the Gold client has been
+  /// initialized.
+  bool _initialized = false;
+
   /// Executes the `imgtest init` command in the goldctl tool.
   ///
   /// The `imgtest` command collects and uploads test results to the Skia Gold
   /// backend, the `init` argument initializes the current test. Used by the
   /// [FlutterPostSubmitFileComparator].
   Future<void> imgtestInit() async {
+    // This client has already been intialized
+    if (_initialized)
+      return;
+
     final File keys = workDirectory.childFile('keys.json');
     final File failures = workDirectory.childFile('failures.json');
 
@@ -147,6 +159,7 @@ class SkiaGoldClient {
     final io.ProcessResult result = await process.run(imgtestInitCommand);
 
     if (result.exitCode != 0) {
+      _initialized = false;
       final StringBuffer buf = StringBuffer()
         ..writeln('Skia Gold imgtest init failed.')
         ..writeln('An error occurred when initializing golden file test with ')
@@ -157,6 +170,7 @@ class SkiaGoldClient {
         ..writeln('stderr: ${result.stderr}');
       throw Exception(buf.toString());
     }
+    _initialized = true;
   }
 
   /// Executes the `imgtest add` command in the goldctl tool.
@@ -204,12 +218,24 @@ class SkiaGoldClient {
     return true;
   }
 
+  /// Signals if this client is initialized for uploading tryjobs to the Gold
+  /// service.
+  ///
+  /// Since Flutter framework tests are executed in parallel, and in random
+  /// order, this will signal is this instance of the Gold client has been
+  /// initialized for tryjobs.
+  bool _tryjobInitialized = false;
+
   /// Executes the `imgtest init` command in the goldctl tool for tryjobs.
   ///
   /// The `imgtest` command collects and uploads test results to the Skia Gold
   /// backend, the `init` argument initializes the current tryjob. Used by the
   /// [FlutterPreSubmitFileComparator].
   Future<void> tryjobInit() async {
+    // This client has already been initialized
+    if (_tryjobInitialized)
+      return;
+
     final File keys = workDirectory.childFile('keys.json');
     final File failures = workDirectory.childFile('failures.json');
 
@@ -245,6 +271,7 @@ class SkiaGoldClient {
     final io.ProcessResult result = await process.run(imgtestInitCommand);
 
     if (result.exitCode != 0) {
+      _tryjobInitialized = false;
       final StringBuffer buf = StringBuffer()
         ..writeln('Skia Gold tryjobInit failure.')
         ..writeln('An error occurred when initializing golden file tryjob with ')
@@ -255,6 +282,7 @@ class SkiaGoldClient {
         ..writeln('stderr: ${result.stderr}');
       throw Exception(buf.toString());
     }
+    _tryjobInitialized = true;
   }
 
   /// Executes the `imgtest add` command in the goldctl tool for tryjobs.

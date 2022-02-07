@@ -6,7 +6,9 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
+import 'dart:typed_data';
 
+import 'package:archive/archive.dart';
 import 'package:file/file.dart' as fs;
 import 'package:file/local.dart';
 import 'package:path/path.dart' as path;
@@ -32,7 +34,6 @@ final String bat = Platform.isWindows ? '.bat' : '';
 final String flutterRoot = path.dirname(path.dirname(path.dirname(path.fromUri(Platform.script))));
 final String flutter = path.join(flutterRoot, 'bin', 'flutter$bat');
 final String dart = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'dart$exe');
-final String pub = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'pub$bat');
 final String pubCache = path.join(flutterRoot, '.pub-cache');
 final String toolRoot = path.join(flutterRoot, 'packages', 'flutter_tools');
 final String engineVersionFile = path.join(flutterRoot, 'bin', 'internal', 'engine.version');
@@ -338,7 +339,7 @@ Future<void> _runSmokeTests() async {
 }
 
 Future<void> _runGeneralToolTests() async {
-  await _pubRunTest(
+  await _dartRunTest(
     path.join(flutterRoot, 'packages', 'flutter_tools'),
     testPaths: <String>[path.join('test', 'general.shard')],
     enableFlutterToolAsserts: false,
@@ -350,7 +351,7 @@ Future<void> _runGeneralToolTests() async {
 }
 
 Future<void> _runCommandsToolTests() async {
-  await _pubRunTest(
+  await _dartRunTest(
     path.join(flutterRoot, 'packages', 'flutter_tools'),
     forceSingleCore: true,
     testPaths: <String>[path.join('test', 'commands.shard')],
@@ -358,7 +359,7 @@ Future<void> _runCommandsToolTests() async {
 }
 
 Future<void> _runWebToolTests() async {
-  await _pubRunTest(
+  await _dartRunTest(
     path.join(flutterRoot, 'packages', 'flutter_tools'),
     forceSingleCore: true,
     testPaths: <String>[path.join('test', 'web.shard')],
@@ -373,7 +374,7 @@ Future<void> _runIntegrationToolTests() async {
       .map<String>((FileSystemEntity entry) => path.relative(entry.path, from: toolsPath))
       .where((String testPath) => path.basename(testPath).endsWith('_test.dart')).toList();
 
-  await _pubRunTest(
+  await _dartRunTest(
     toolsPath,
     forceSingleCore: true,
     testPaths: _selectIndexOfTotalSubshard<String>(allTests),
@@ -428,6 +429,8 @@ Future<void> runForbiddenFromReleaseTests() async {
     '--snapshot', path.join(tempDirectory.path, 'snapshot.arm64-v8a.json'),
     '--package-config', path.join(flutterRoot, 'examples', 'hello_world', '.dart_tool', 'package_config.json'),
     '--forbidden-type', 'package:flutter/src/widgets/widget_inspector.dart::WidgetInspectorService',
+    '--forbidden-type', 'package:flutter/src/widgets/framework.dart::DebugCreator',
+    '--forbidden-type', 'package:flutter/src/foundation/print.dart::debugPrint',
   ];
   await runCommand(
     dart,
@@ -698,6 +701,7 @@ Future<void> _runFrameworkTests() async {
       await _runFlutterTest(
         path.join(flutterRoot, 'dev', 'integration_tests', 'flutter_gallery'),
         options: <String>[trackWidgetCreationOption],
+        fatalWarnings: false, // until we've migrated video_player
       );
     }
     // Run release mode tests (see packages/flutter/test_release/README.md)
@@ -705,6 +709,12 @@ Future<void> _runFrameworkTests() async {
       path.join(flutterRoot, 'packages', 'flutter'),
       options: <String>['--dart-define=dart.vm.product=true', ...soundNullSafetyOptions],
       tests: <String>['test_release${path.separator}'],
+    );
+    // Run profile mode tests (see packages/flutter/test_profile/README.md)
+    await _runFlutterTest(
+      path.join(flutterRoot, 'packages', 'flutter'),
+      options: <String>['--dart-define=dart.vm.product=false', '--dart-define=dart.vm.profile=true', ...soundNullSafetyOptions],
+      tests: <String>['test_profile${path.separator}'],
     );
   }
 
@@ -744,6 +754,89 @@ Future<void> _runFrameworkTests() async {
     await _runFlutterTest(path.join(flutterRoot, 'examples', 'layers'), options: soundNullSafetyOptions);
   }
 
+  Future<void> runTracingTests() async {
+    final String tracingDirectory = path.join(flutterRoot, 'dev', 'tracing_tests');
+
+    // run the tests for debug mode
+    await _runFlutterTest(tracingDirectory, options: <String>['--enable-vmservice']);
+
+    Future<List<String>> verifyTracingAppBuild({
+      required String modeArgument,
+      required String sourceFile,
+      required Set<String> allowed,
+      required Set<String> disallowed,
+    }) async {
+      await runCommand(
+        flutter,
+        <String>[
+          'build', 'appbundle', '--$modeArgument', path.join('lib', sourceFile),
+        ],
+        workingDirectory: tracingDirectory,
+      );
+      final Archive archive = ZipDecoder().decodeBytes(File(path.join(tracingDirectory, 'build', 'app', 'outputs', 'bundle', modeArgument, 'app-$modeArgument.aab')).readAsBytesSync());
+      final ArchiveFile libapp = archive.findFile('base/lib/arm64-v8a/libapp.so')!;
+      final Uint8List libappBytes = libapp.content as Uint8List; // bytes decompressed here
+      final String libappStrings = utf8.decode(libappBytes, allowMalformed: true);
+      await runCommand(flutter, <String>['clean'], workingDirectory: tracingDirectory);
+      final List<String> results = <String>[];
+      for (final String pattern in allowed) {
+        if (!libappStrings.contains(pattern)) {
+          results.add('When building with --$modeArgument, expected to find "$pattern" in libapp.so but could not find it.');
+        }
+      }
+      for (final String pattern in disallowed) {
+        if (libappStrings.contains(pattern)) {
+          results.add('When building with --$modeArgument, expected to not find "$pattern" in libapp.so but did find it.');
+        }
+      }
+      return results;
+    }
+
+    final List<String> results = <String>[];
+    results.addAll(await verifyTracingAppBuild(
+      modeArgument: 'profile',
+      sourceFile: 'control.dart', // this is the control, the other two below are the actual test
+      allowed: <String>{
+        'TIMELINE ARGUMENTS TEST CONTROL FILE',
+        'toTimelineArguments used in non-debug build', // we call toTimelineArguments directly to check the message does exist
+      },
+      disallowed: <String>{
+        'BUILT IN DEBUG MODE', 'BUILT IN RELEASE MODE',
+      },
+    ));
+    results.addAll(await verifyTracingAppBuild(
+      modeArgument: 'profile',
+      sourceFile: 'test.dart',
+      allowed: <String>{
+        'BUILT IN PROFILE MODE', 'RenderTest.performResize called', // controls
+        'BUILD', 'LAYOUT', 'PAINT', // we output these to the timeline in profile builds
+        // (LAYOUT and PAINT also exist because of NEEDS-LAYOUT and NEEDS-PAINT in RenderObject.toStringShort)
+      },
+      disallowed: <String>{
+        'BUILT IN DEBUG MODE', 'BUILT IN RELEASE MODE',
+        'TestWidget.debugFillProperties called', 'RenderTest.debugFillProperties called', // debug only
+        'toTimelineArguments used in non-debug build', // entire function should get dropped by tree shaker
+      },
+    ));
+    results.addAll(await verifyTracingAppBuild(
+      modeArgument: 'release',
+      sourceFile: 'test.dart',
+      allowed: <String>{
+        'BUILT IN RELEASE MODE', 'RenderTest.performResize called', // controls
+      },
+      disallowed: <String>{
+        'BUILT IN DEBUG MODE', 'BUILT IN PROFILE MODE',
+        'BUILD', 'LAYOUT', 'PAINT', // these are only used in Timeline.startSync calls that should not appear in release builds
+        'TestWidget.debugFillProperties called', 'RenderTest.debugFillProperties called', // debug only
+        'toTimelineArguments used in non-debug build', // not included in release builds
+      },
+    ));
+    if (results.isNotEmpty) {
+      print(results.join('\n'));
+      exit(1);
+    }
+  }
+
   Future<void> runFixTests() async {
     final List<String> args = <String>[
       'fix',
@@ -758,60 +851,45 @@ Future<void> _runFrameworkTests() async {
 
   Future<void> runPrivateTests() async {
     final List<String> args = <String>[
-      'run',
       '--sound-null-safety',
-      'test_private.dart',
+      'run',
+      'bin/test_private.dart',
     ];
-    final Map<String, String> pubEnvironment = <String, String>{
+    final Map<String, String> environment = <String, String>{
       'FLUTTER_ROOT': flutterRoot,
+      if (Directory(pubCache).existsSync())
+        'PUB_CACHE': pubCache,
     };
-    if (Directory(pubCache).existsSync()) {
-      pubEnvironment['PUB_CACHE'] = pubCache;
-    }
-
-    // If an existing env variable exists append to it, but only if
-    // it doesn't appear to already include enable-asserts.
-    String toolsArgs = Platform.environment['FLUTTER_TOOL_ARGS'] ?? '';
-    if (!toolsArgs.contains('--enable-asserts')) {
-      toolsArgs += ' --enable-asserts';
-    }
-    pubEnvironment['FLUTTER_TOOL_ARGS'] = toolsArgs.trim();
-    // The flutter_tool will originally have been snapshotted without asserts.
-    // We need to force it to be regenerated with them enabled.
-    deleteFile(path.join(flutterRoot, 'bin', 'cache', 'flutter_tools.snapshot'));
-    deleteFile(path.join(flutterRoot, 'bin', 'cache', 'flutter_tools.stamp'));
-
+    adjustEnvironmentToEnableFlutterAsserts(environment);
     await runCommand(
-      pub,
+      dart,
       args,
       workingDirectory: path.join(flutterRoot, 'packages', 'flutter', 'test_private'),
-      environment: pubEnvironment,
+      environment: environment,
     );
   }
 
   Future<void> runMisc() async {
     print('${green}Running package tests$reset for directories other than packages/flutter');
     await runExampleTests();
-    await _pubRunTest(path.join(flutterRoot, 'dev', 'bots'));
-    await _pubRunTest(path.join(flutterRoot, 'dev', 'devicelab'), ensurePrecompiledTool: false); // See https://github.com/flutter/flutter/issues/86209
-    await _pubRunTest(path.join(flutterRoot, 'dev', 'conductor', 'core'), forceSingleCore: true);
+    await _dartRunTest(path.join(flutterRoot, 'dev', 'bots'));
+    await _dartRunTest(path.join(flutterRoot, 'dev', 'devicelab'), ensurePrecompiledTool: false); // See https://github.com/flutter/flutter/issues/86209
+    await _dartRunTest(path.join(flutterRoot, 'dev', 'conductor', 'core'), forceSingleCore: true);
     // TODO(gspencergoog): Remove the exception for fatalWarnings once https://github.com/flutter/flutter/pull/91127 has landed.
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'android_semantics_testing'), fatalWarnings: false);
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'manual_tests'));
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'vitool'));
+    await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'gen_defaults'));
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'gen_keycodes'));
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'benchmarks', 'test_apps', 'stocks'));
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'), tests: <String>[path.join('test', 'src', 'real_tests')], options: soundNullSafetyOptions);
-    await _runFlutterTest(path.join(flutterRoot, 'packages', 'integration_test'));
+    await _runFlutterTest(path.join(flutterRoot, 'packages', 'integration_test'), options: <String>['--enable-vmservice']);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_goldens'), options: soundNullSafetyOptions);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'), options: soundNullSafetyOptions);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'), options: soundNullSafetyOptions);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'fuchsia_remote_debug_protocol'), options: soundNullSafetyOptions);
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'non_nullable'), options: mixedModeNullSafetyOptions);
-    await _runFlutterTest(
-      path.join(flutterRoot, 'dev', 'tracing_tests'),
-      options: <String>['--enable-vmservice'],
-    );
+    await runTracingTests();
     await runFixTests();
     await runPrivateTests();
     const String httpClientWarning =
@@ -1454,6 +1532,10 @@ Future<void> _runWebDebugTest(String target, {
 }) async {
   final String testAppDirectory = path.join(flutterRoot, 'dev', 'integration_tests', 'web');
   bool success = false;
+  final Map<String, String> environment = <String, String>{
+    'FLUTTER_WEB': 'true',
+  };
+  adjustEnvironmentToEnableFlutterAsserts(environment);
   final CommandResult result = await runCommand(
     flutter,
     <String>[
@@ -1483,9 +1565,7 @@ Future<void> _runWebDebugTest(String target, {
       }
     },
     workingDirectory: testAppDirectory,
-    environment: <String, String>{
-      'FLUTTER_WEB': 'true',
-    },
+    environment: environment,
   );
 
   if (success) {
@@ -1525,7 +1605,7 @@ Future<void> _runFlutterWebTest(String webRenderer, String workingDirectory, Lis
 // properly when overriding the local engine (for example, because some platform
 // dependent targets are only built on some engines).
 // See https://github.com/flutter/flutter/issues/72368
-Future<void> _pubRunTest(String workingDirectory, {
+Future<void> _dartRunTest(String workingDirectory, {
   List<String>? testPaths,
   bool enableFlutterToolAsserts = true,
   bool useBuildRunner = false,
@@ -1573,40 +1653,31 @@ Future<void> _pubRunTest(String workingDirectory, {
       for (final String testPath in testPaths)
         testPath,
   ];
-  final Map<String, String> pubEnvironment = <String, String>{
+  final Map<String, String> environment = <String, String>{
     'FLUTTER_ROOT': flutterRoot,
-    if (includeLocalEngineEnv) ...localEngineEnv,
+    if (includeLocalEngineEnv)
+      ...localEngineEnv,
+    if (Directory(pubCache).existsSync())
+      'PUB_CACHE': pubCache,
   };
-  if (Directory(pubCache).existsSync()) {
-    pubEnvironment['PUB_CACHE'] = pubCache;
-  }
   if (enableFlutterToolAsserts) {
-    // If an existing env variable exists append to it, but only if
-    // it doesn't appear to already include enable-asserts.
-    String toolsArgs = Platform.environment['FLUTTER_TOOL_ARGS'] ?? '';
-    if (!toolsArgs.contains('--enable-asserts'))
-      toolsArgs += ' --enable-asserts';
-    pubEnvironment['FLUTTER_TOOL_ARGS'] = toolsArgs.trim();
-    // The flutter_tool will originally have been snapshotted without asserts.
-    // We need to force it to be regenerated with them enabled.
-    deleteFile(path.join(flutterRoot, 'bin', 'cache', 'flutter_tools.snapshot'));
-    deleteFile(path.join(flutterRoot, 'bin', 'cache', 'flutter_tools.stamp'));
+    adjustEnvironmentToEnableFlutterAsserts(environment);
   }
   if (ensurePrecompiledTool) {
     // We rerun the `flutter` tool here just to make sure that it is compiled
     // before tests run, because the tests might time out if they have to rebuild
     // the tool themselves.
-    await runCommand(flutter, <String>['--version'], environment: pubEnvironment);
+    await runCommand(flutter, <String>['--version'], environment: environment);
   }
   if (useFlutterTestFormatter) {
     final FlutterCompactFormatter formatter = FlutterCompactFormatter();
     Stream<String> testOutput;
     try {
       testOutput = runAndGetStdout(
-        pub,
+        dart,
         args,
         workingDirectory: workingDirectory,
-        environment: pubEnvironment,
+        environment: environment,
       );
     } finally {
       formatter.finish();
@@ -1614,10 +1685,10 @@ Future<void> _pubRunTest(String workingDirectory, {
     await _processTestOutput(formatter, testOutput);
   } else {
     await runCommand(
-      pub,
+      dart,
       args,
       workingDirectory: workingDirectory,
-      environment: pubEnvironment,
+      environment: environment,
       removeLine: useBuildRunner ? (String line) => line.startsWith('[INFO]') : null,
     );
   }
@@ -1716,6 +1787,18 @@ Future<void> _runFlutterTest(String workingDirectory, {
       expectNonZeroExit: expectFailure,
     );
   }
+}
+
+/// This will force the next run of the Flutter tool (if it uses the provided
+/// environment) to have asserts enabled, by setting an environment variable.
+void adjustEnvironmentToEnableFlutterAsserts(Map<String, String> environment) {
+  // If an existing env variable exists append to it, but only if
+  // it doesn't appear to already include enable-asserts.
+  String toolsArgs = Platform.environment['FLUTTER_TOOL_ARGS'] ?? '';
+  if (!toolsArgs.contains('--enable-asserts')) {
+    toolsArgs += ' --enable-asserts';
+  }
+  environment['FLUTTER_TOOL_ARGS'] = toolsArgs.trim();
 }
 
 Map<String, String> _initGradleEnvironment() {

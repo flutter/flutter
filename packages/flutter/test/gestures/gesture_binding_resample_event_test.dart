@@ -116,8 +116,8 @@ void main() {
     const Duration samplingOffset = Duration(milliseconds: -5);
     const Duration frameInterval = Duration(microseconds: 16667);
 
-    GestureBinding.instance!.resamplingEnabled = true;
-    GestureBinding.instance!.samplingOffset = samplingOffset;
+    GestureBinding.instance.resamplingEnabled = true;
+    GestureBinding.instance.samplingOffset = samplingOffset;
 
     final List<PointerEvent> events = <PointerEvent>[];
     binding.callback = events.add;
@@ -179,6 +179,6 @@ void main() {
     // No more pointer events should have been dispatched.
     expect(events.length, 5);
 
-    GestureBinding.instance!.resamplingEnabled = false;
+    GestureBinding.instance.resamplingEnabled = false;
   });
 }

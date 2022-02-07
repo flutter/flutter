@@ -226,6 +226,7 @@ void main() {
 
         tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
           systemCalls.add(methodCall);
+          return null;
         });
 
         await tester.pumpWidget(
@@ -279,6 +280,7 @@ void main() {
 
         tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
           systemCalls.add(methodCall);
+          return null;
         });
 
         await tester.pumpWidget(
@@ -419,5 +421,29 @@ void main() {
         <int>[8, 6, 4, 2, 0],
       );
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  });
+
+  group('CupertinoPickerDefaultSelectionOverlay', () {
+    testWidgets('should be using directional decoration', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        CupertinoApp(
+          theme: const CupertinoThemeData(brightness: Brightness.light),
+          home: CupertinoPicker(
+            itemExtent: 15.0,
+            onSelectedItemChanged: (int i) {},
+            selectionOverlay: const CupertinoPickerDefaultSelectionOverlay(background: Color(0x12345678)),
+            children: const <Widget>[Text('1'), Text('1')],
+          ),
+        ),
+      );
+
+      final Finder selectionContainer = find.byType(Container);
+      final Container container = tester.firstWidget<Container>(selectionContainer);
+      final EdgeInsetsGeometry? margin = container.margin;
+      final BorderRadiusGeometry? borderRadius = (container.decoration as BoxDecoration?)?.borderRadius;
+
+      expect(margin, isA<EdgeInsetsDirectional>());
+      expect(borderRadius, isA<BorderRadiusDirectional>());
+    });
   });
 }

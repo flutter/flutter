@@ -132,11 +132,11 @@ class IdeConfigCommand extends FlutterCommand {
       }
 
       // Skip files we aren't interested in.
-      final RegExp _trackedIdeaFileRegExp = RegExp(
+      final RegExp trackedIdeaFileRegExp = RegExp(
         r'(\.name|modules.xml|vcs.xml)$',
       );
       final bool isATrackedIdeaFile = _hasDirectoryInPath(srcFile, '.idea') &&
-          (_trackedIdeaFileRegExp.hasMatch(relativePath) ||
+          (trackedIdeaFileRegExp.hasMatch(relativePath) ||
               _hasDirectoryInPath(srcFile, 'runConfigurations'));
       final bool isAnImlOutsideIdea = !isATrackedIdeaFile && srcFile.path.endsWith('.iml');
       if (!isATrackedIdeaFile && !isAnImlOutsideIdea) {
@@ -273,4 +273,6 @@ String? _validateFlutterDir(String dirPath, { String? flutterRoot }) {
     case FileSystemEntityType.notFound:
       return null;
   }
+  // In the case of any other [FileSystemEntityType]s, like the deprecated ones, return null.
+  return null;
 }

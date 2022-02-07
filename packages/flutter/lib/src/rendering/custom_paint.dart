@@ -1017,4 +1017,14 @@ class RenderCustomPaint extends RenderProxyBox {
 
     return newChild;
   }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(MessageProperty('painter', '$painter'));
+    properties.add(MessageProperty('foregroundPainter', '$foregroundPainter', level: foregroundPainter != null ? DiagnosticLevel.info : DiagnosticLevel.fine));
+    properties.add(DiagnosticsProperty<Size>('preferredSize', preferredSize, defaultValue: Size.zero));
+    properties.add(DiagnosticsProperty<bool>('isComplex', isComplex, defaultValue: false));
+    properties.add(DiagnosticsProperty<bool>('willChange', willChange, defaultValue: false));
+  }
 }

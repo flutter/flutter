@@ -448,7 +448,7 @@ class Localizations extends StatefulWidget {
     assert(context != null);
     final _LocalizationsScope? scope = context.dependOnInheritedWidgetOfExactType<_LocalizationsScope>();
     assert(scope != null, 'a Localizations ancestor was not found');
-    return List<LocalizationsDelegate<dynamic>>.from(scope!.localizationsState.widget.delegates);
+    return List<LocalizationsDelegate<dynamic>>.of(scope!.localizationsState.widget.delegates);
   }
 
   /// Returns the localized resources object of the given `type` for the widget
@@ -543,7 +543,7 @@ class _LocalizationsState extends State<Localizations> {
       // have finished loading. Until then the old locale will continue to be used.
       // - If we're running at app startup time then defer reporting the first
       // "useful" frame until after the async load has completed.
-      RendererBinding.instance!.deferFirstFrame();
+      RendererBinding.instance.deferFirstFrame();
       typeToResourcesFuture.then<void>((Map<Type, dynamic> value) {
         if (mounted) {
           setState(() {
@@ -551,7 +551,7 @@ class _LocalizationsState extends State<Localizations> {
             _locale = locale;
           });
         }
-        RendererBinding.instance!.allowFirstFrame();
+        RendererBinding.instance.allowFirstFrame();
       });
     }
   }

@@ -385,11 +385,11 @@ class _SnackBarState extends State<SnackBar> {
 
   @override
   void didUpdateWidget(SnackBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
     if (widget.animation != oldWidget.animation) {
       oldWidget.animation!.removeStatusListener(_onAnimationStatusChanged);
       widget.animation!.addStatusListener(_onAnimationStatusChanged);
     }
-    super.didUpdateWidget(oldWidget);
   }
 
   @override
@@ -612,7 +612,7 @@ class _SnackBarState extends State<SnackBar> {
 
     return Hero(
       tag: '<SnackBar Hero tag - ${widget.content}>',
-      child: ClipRect(child: snackBarTransition),
+      child: snackBarTransition,
     );
   }
 }

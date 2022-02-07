@@ -123,8 +123,8 @@ class _SegmentState<T> extends State<_Segment<T>> with TickerProviderStateMixin<
 
   @override
   void didUpdateWidget(_Segment<T> oldWidget) {
-    assert(oldWidget.key == widget.key);
     super.didUpdateWidget(oldWidget);
+    assert(oldWidget.key == widget.key);
 
     if (oldWidget.shouldScaleContent != widget.shouldScaleContent) {
       highlightPressScaleAnimation = highlightPressScaleController.drive(
@@ -213,8 +213,8 @@ class _SegmentSeparatorState extends State<_SegmentSeparator> with TickerProvide
 
   @override
   void didUpdateWidget(_SegmentSeparator oldWidget) {
-    assert(oldWidget.key == widget.key);
     super.didUpdateWidget(oldWidget);
+    assert(oldWidget.key == widget.key);
 
     if (oldWidget.highlighted != widget.highlighted) {
       separatorOpacityController.animateTo(

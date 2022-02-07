@@ -76,7 +76,8 @@ abstract class ChipAttributes {
 
   /// The style to be applied to the chip's label.
   ///
-  /// If null, the value of the [ChipTheme]'s [ChipThemeData.labelStyle] is used.
+  /// The default label style is [TextTheme.bodyText1] from the overall
+  /// theme's [ThemeData.textTheme].
   //
   /// This only has an effect on widgets that respect the [DefaultTextStyle],
   /// such as [Text].
@@ -236,19 +237,24 @@ abstract class DeletableChipAttributes {
   /// non-null.
   Color? get deleteIconColor;
 
+  /// The message to be used for the chip's delete button tooltip.
+  ///
+  /// If provided with an empty string, the tooltip of the delete button will be
+  /// disabled.
+  ///
+  /// If null, the default [MaterialLocalizations.deleteButtonTooltip] will be
+  /// used.
+  String? get deleteButtonTooltipMessage;
+
   /// Whether to use a tooltip on the chip's delete button showing the
   /// [deleteButtonTooltipMessage].
   ///
-  /// Must not be null. Defaults to true.
+  /// Defaults to true.
+  @Deprecated(
+    'Migrate to deleteButtonTooltipMessage. '
+    'This feature was deprecated after v2.10.0-0.3.pre.'
+  )
   bool get useDeleteButtonTooltip;
-
-  /// The message to be used for the chip's delete button tooltip.
-  ///
-  /// This will be shown only if [useDeleteButtonTooltip] is true.
-  ///
-  /// If not specified, the default [MaterialLocalizations.deleteButtonTooltip] will
-  /// be used.
-  String? get deleteButtonTooltipMessage;
 }
 
 /// An interface for material design chips that can have check marks.
@@ -556,7 +562,6 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
     this.deleteIcon,
     this.onDeleted,
     this.deleteIconColor,
-    this.useDeleteButtonTooltip = true,
     this.deleteButtonTooltipMessage,
     this.side,
     this.shape,
@@ -569,11 +574,15 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
     this.materialTapTargetSize,
     this.elevation,
     this.shadowColor,
+    @Deprecated(
+      'Migrate to deleteButtonTooltipMessage. '
+      'This feature was deprecated after v2.10.0-0.3.pre.'
+    )
+    this.useDeleteButtonTooltip = true,
   }) : assert(label != null),
        assert(autofocus != null),
        assert(clipBehavior != null),
        assert(elevation == null || elevation >= 0.0),
-       assert(useDeleteButtonTooltip != null),
        super(key: key);
 
   @override
@@ -607,8 +616,6 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
   @override
   final Color? deleteIconColor;
   @override
-  final bool useDeleteButtonTooltip;
-  @override
   final String? deleteButtonTooltipMessage;
   @override
   final MaterialTapTargetSize? materialTapTargetSize;
@@ -616,6 +623,12 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
   final double? elevation;
   @override
   final Color? shadowColor;
+  @override
+  @Deprecated(
+    'Migrate to deleteButtonTooltipMessage. '
+    'This feature was deprecated after v2.10.0-0.3.pre.'
+  )
+  final bool useDeleteButtonTooltip;
 
   @override
   Widget build(BuildContext context) {
@@ -720,7 +733,6 @@ class InputChip extends StatelessWidget
     this.deleteIcon,
     this.onDeleted,
     this.deleteIconColor,
-    this.useDeleteButtonTooltip = true,
     this.deleteButtonTooltipMessage,
     this.onPressed,
     this.pressElevation,
@@ -742,6 +754,11 @@ class InputChip extends StatelessWidget
     this.showCheckmark,
     this.checkmarkColor,
     this.avatarBorder = const CircleBorder(),
+    @Deprecated(
+      'Migrate to deleteButtonTooltipMessage. '
+      'This feature was deprecated after v2.10.0-0.3.pre.'
+    )
+    this.useDeleteButtonTooltip = true,
   }) : assert(selected != null),
        assert(isEnabled != null),
        assert(label != null),
@@ -749,7 +766,6 @@ class InputChip extends StatelessWidget
        assert(autofocus != null),
        assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0),
-       assert(useDeleteButtonTooltip != null),
        super(key: key);
 
   @override
@@ -772,8 +788,6 @@ class InputChip extends StatelessWidget
   final VoidCallback? onDeleted;
   @override
   final Color? deleteIconColor;
-  @override
-  final bool useDeleteButtonTooltip;
   @override
   final String? deleteButtonTooltipMessage;
   @override
@@ -816,6 +830,12 @@ class InputChip extends StatelessWidget
   final Color? checkmarkColor;
   @override
   final ShapeBorder avatarBorder;
+  @override
+  @Deprecated(
+    'Migrate to deleteButtonTooltipMessage. '
+    'This feature was deprecated after v2.10.0-0.3.pre.'
+  )
+  final bool useDeleteButtonTooltip;
 
   @override
   Widget build(BuildContext context) {
@@ -1075,9 +1095,9 @@ class ChoiceChip extends StatelessWidget
 ///   ];
 ///   final List<String> _filters = <String>[];
 ///
-///   Iterable<Widget> get actorWidgets sync* {
-///     for (final ActorFilterEntry actor in _cast) {
-///       yield Padding(
+///   Iterable<Widget> get actorWidgets {
+///     return _cast.map((ActorFilterEntry actor) {
+///       return Padding(
 ///         padding: const EdgeInsets.all(4.0),
 ///         child: FilterChip(
 ///           avatar: CircleAvatar(child: Text(actor.initials)),
@@ -1096,7 +1116,7 @@ class ChoiceChip extends StatelessWidget
 ///           },
 ///         ),
 ///       );
-///     }
+///     });
 ///   }
 ///
 ///   @override
@@ -1468,7 +1488,6 @@ class RawChip extends StatefulWidget
     Widget? deleteIcon,
     this.onDeleted,
     this.deleteIconColor,
-    this.useDeleteButtonTooltip = true,
     this.deleteButtonTooltipMessage,
     this.onPressed,
     this.onSelected,
@@ -1492,6 +1511,11 @@ class RawChip extends StatefulWidget
     this.showCheckmark = true,
     this.checkmarkColor,
     this.avatarBorder = const CircleBorder(),
+    @Deprecated(
+      'Migrate to deleteButtonTooltipMessage. '
+      'This feature was deprecated after v2.10.0-0.3.pre.'
+    )
+    this.useDeleteButtonTooltip = true,
   }) : assert(label != null),
        assert(isEnabled != null),
        assert(selected != null),
@@ -1499,7 +1523,6 @@ class RawChip extends StatefulWidget
        assert(autofocus != null),
        assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0),
-       assert(useDeleteButtonTooltip != null),
        deleteIcon = deleteIcon ?? _kDefaultDeleteIcon,
        super(key: key);
 
@@ -1517,8 +1540,6 @@ class RawChip extends StatefulWidget
   final VoidCallback? onDeleted;
   @override
   final Color? deleteIconColor;
-  @override
-  final bool useDeleteButtonTooltip;
   @override
   final String? deleteButtonTooltipMessage;
   @override
@@ -1567,6 +1588,12 @@ class RawChip extends StatefulWidget
   final Color? checkmarkColor;
   @override
   final ShapeBorder avatarBorder;
+  @override
+  @Deprecated(
+    'Migrate to deleteButtonTooltipMessage. '
+    'This feature was deprecated after v2.10.0-0.3.pre.'
+  )
+  final bool useDeleteButtonTooltip;
 
   /// If set, this indicates that the chip should be disabled if all of the
   /// tap callbacks ([onSelected], [onPressed]) are null.
@@ -1854,7 +1881,7 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
     /// gets closer to 2 the label padding is linearly interpolated from 8px to 4px.
     /// Once the widget has a text scaling of 2 or higher than the label padding
     /// remains 4px.
-    final EdgeInsetsGeometry _defaultLabelPadding = EdgeInsets.lerp(
+    final EdgeInsetsGeometry defaultLabelPadding = EdgeInsets.lerp(
       const EdgeInsets.symmetric(horizontal: 8.0),
       const EdgeInsets.symmetric(horizontal: 4.0),
       (MediaQuery.of(context).textScaleFactor - 1.0).clamp(0.0, 1.0),
@@ -1898,15 +1925,15 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
       ?? chipTheme.padding
       ?? theme.chipTheme.padding
       ?? chipDefaults.padding!;
-    final TextStyle? labelStyle = widget.labelStyle
-      ?? chipTheme.labelStyle
-      ?? theme.chipTheme.labelStyle;
+    final TextStyle labelStyle = chipTheme.labelStyle
+      ?? theme.chipTheme.labelStyle
+      ?? chipDefaults.labelStyle!;
     final EdgeInsetsGeometry labelPadding = widget.labelPadding
       ?? chipTheme.labelPadding
       ?? theme.chipTheme.labelPadding
-      ?? _defaultLabelPadding;
+      ?? defaultLabelPadding;
 
-    final TextStyle effectiveLabelStyle = chipDefaults.labelStyle!.merge(labelStyle);
+    final TextStyle effectiveLabelStyle = labelStyle.merge(widget.labelStyle);
     final Color? resolvedLabelColor = MaterialStateProperty.resolveAs<Color?>(effectiveLabelStyle.color, materialStates);
     final TextStyle resolvedLabelStyle = effectiveLabelStyle.copyWith(color: resolvedLabelColor);
 
@@ -2256,16 +2283,15 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
 
   // The returned list is ordered for hit testing.
   @override
-  Iterable<RenderBox> get children sync* {
-    if (avatar != null) {
-      yield avatar!;
-    }
-    if (label != null) {
-      yield label!;
-    }
-    if (deleteIcon != null) {
-      yield deleteIcon!;
-    }
+  Iterable<RenderBox> get children {
+    return <RenderBox>[
+      if (avatar != null)
+        avatar!,
+      if (label != null)
+        label!,
+      if (deleteIcon != null)
+        deleteIcon!,
+    ];
   }
 
   bool get isDrawingCheckmark => theme.showCheckmark && !checkmarkAnimation.isDismissed;

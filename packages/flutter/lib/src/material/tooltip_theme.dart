@@ -169,7 +169,7 @@ class TooltipThemeData with Diagnosticable {
       waitDuration,
       showDuration,
       triggerMode,
-      enableFeedback
+      enableFeedback,
     );
   }
 

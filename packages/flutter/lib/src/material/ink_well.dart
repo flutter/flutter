@@ -483,11 +483,12 @@ class InkResponse extends StatelessWidget {
   /// Defines the ink response focus, hover, and splash colors.
   ///
   /// This default null property can be used as an alternative to
-  /// [focusColor], [hoverColor], and [splashColor]. If non-null,
-  /// it is resolved against one of [MaterialState.focused],
-  /// [MaterialState.hovered], and [MaterialState.pressed]. It's
-  /// convenient to use when the parent widget can pass along its own
-  /// MaterialStateProperty value for the overlay color.
+  /// [focusColor], [hoverColor], [highlightColor], and
+  /// [splashColor]. If non-null, it is resolved against one of
+  /// [MaterialState.focused], [MaterialState.hovered], and
+  /// [MaterialState.pressed]. It's convenient to use when the parent
+  /// widget can pass along its own MaterialStateProperty value for
+  /// the overlay color.
   ///
   /// [MaterialState.pressed] triggers a ripple (an ink splash), per
   /// the current Material Design spec. The [overlayColor] doesn't map
@@ -799,19 +800,21 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   bool get wantKeepAlive => highlightsExist || (_splashes != null && _splashes!.isNotEmpty);
 
   Color getHighlightColorForType(_HighlightType type) {
+    const Set<MaterialState> pressed = <MaterialState>{MaterialState.pressed};
     const Set<MaterialState> focused = <MaterialState>{MaterialState.focused};
     const Set<MaterialState> hovered = <MaterialState>{MaterialState.hovered};
 
+    final ThemeData theme = Theme.of(context);
     switch (type) {
       // The pressed state triggers a ripple (ink splash), per the current
       // Material Design spec. A separate highlight is no longer used.
       // See https://material.io/design/interaction/states.html#pressed
       case _HighlightType.pressed:
-        return widget.highlightColor ?? Theme.of(context).highlightColor;
+        return widget.overlayColor?.resolve(pressed) ?? widget.highlightColor ?? theme.highlightColor;
       case _HighlightType.focus:
-        return widget.overlayColor?.resolve(focused) ?? widget.focusColor ?? Theme.of(context).focusColor;
+        return widget.overlayColor?.resolve(focused) ?? widget.focusColor ?? theme.focusColor;
       case _HighlightType.hover:
-        return widget.overlayColor?.resolve(hovered) ?? widget.hoverColor ?? Theme.of(context).hoverColor;
+        return widget.overlayColor?.resolve(hovered) ?? widget.hoverColor ?? theme.hoverColor;
     }
   }
 
@@ -1032,7 +1035,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   }
 
   bool _isWidgetEnabled(_InkResponseStateWidget widget) {
-    return widget.onTap != null || widget.onDoubleTap != null || widget.onLongPress != null;
+    return widget.onTap != null || widget.onDoubleTap != null || widget.onLongPress != null || widget.onTapDown != null;
   }
 
   bool get enabled => _isWidgetEnabled(widget);
@@ -1084,6 +1087,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
         if (_hasFocus) MaterialState.focused,
       },
     );
+
     return _ParentInkResponseProvider(
       state: this,
       child: Actions(
@@ -1158,6 +1162,18 @@ class _InkResponseState extends State<_InkResponseStateWidget>
 /// [Material] above the opaque widget but below the [InkWell] (as an
 /// ancestor to the ink well). The [MaterialType.transparency] material
 /// kind can be used for this purpose.
+///
+/// ### InkWell isn't clipping properly
+///
+/// If you want to clip an InkWell or any [Ink] widgets you need to keep in mind
+/// that the [Material] that the Ink will be printed on is responsible for clipping.
+/// This means you can't wrap the [Ink] widget in a clipping widget directly,
+/// since this will leave the [Material] not clipped (and by extension the printed
+/// [Ink] widgets as well).
+///
+/// An easy solution is to deliberately wrap the [Ink] widgets you want to clip
+/// in a [Material], and wrap that in a clipping widget instead. See [Ink] for
+/// an example.
 ///
 /// ### The ink splashes don't track the size of an animated container
 /// If the size of an InkWell's [Material] ancestor changes while the InkWell's

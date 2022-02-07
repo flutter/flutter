@@ -71,7 +71,7 @@ if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != `cat "$ENGINE_STAMP"` ]; t
 
   case "$(uname -s)" in
     Darwin)
-      DART_ZIP_NAME="dart-sdk-darwin-x64.zip"
+      DART_ZIP_NAME="dart-sdk-darwin-${ARCH}.zip"
       IS_USER_EXECUTABLE="-perm +100"
       ;;
     Linux)
@@ -116,6 +116,21 @@ if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != `cat "$ENGINE_STAMP"` ]; t
   fi
 
   curl ${verbose_curl} --retry 3 --continue-at - --location --output "$DART_SDK_ZIP" "$DART_SDK_URL" 2>&1 || {
+    curlExitCode=$?
+    # Handle range errors specially: retry again with disabled ranges (`--continue-at -` argument)
+    # When this could happen:
+    # - missing support of ranges in proxy servers
+    # - curl with broken handling of completed downloads
+    #   This is not a proper fix, but doesn't require any user input
+    # - mirror of flutter storage without support of ranges
+    #
+    # 33  HTTP range error. The range "command" didn't work.
+    # https://man7.org/linux/man-pages/man1/curl.1.html#EXIT_CODES
+    if [ $curlExitCode != 33 ]; then
+      return $curlExitCode
+    fi
+    curl ${verbose_curl} --retry 3 --location --output "$DART_SDK_ZIP" "$DART_SDK_URL" 2>&1
+  } || {
     >&2 echo
     >&2 echo "Failed to retrieve the Dart SDK from: $DART_SDK_URL"
     >&2 echo "If you're located in China, please see this page:"
