@@ -56,7 +56,6 @@ void main() {
           fileSystem: memoryFileSystem,
           processManager: FakeProcessManager.any(),
         );
-
         rootOverride.childDirectory('bin').childDirectory('internal').childFile('engine.version')
           ..createSync(recursive: true)
           ..writeAsStringSync(engineRevision);
