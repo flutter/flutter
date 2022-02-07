@@ -169,12 +169,17 @@ class TextEditingController extends ValueNotifier<TextEditingValue> with Materia
     // If the composing range is out of range for the current text, ignore it to
     // preserve the tree integrity, otherwise in release mode a RangeError will
     // be thrown and this EditableText will be built with a broken subtree.
+    // composing.isValid && composing.isNormalized && composing.end <= text.length;
+
     if (!value.isComposingRangeValid || !withComposing) {
+      if (spellCheckerSuggestionSpans != null && spellCheckerSuggestionSpans.length > 0) {
+        return buildWithMisspelledWordsIndicated(spellCheckerSuggestionSpans, value, style, true);
+      }
       return TextSpan(style: style, text: text);
     }
 
-    if (spellCheckerSuggestionSpans!.length > 0) {
-      return buildWithMisspelledWordsIndicated(spellCheckerSuggestionSpans, value, style);
+    if (spellCheckerSuggestionSpans != null && spellCheckerSuggestionSpans.length > 0) {
+      return buildWithMisspelledWordsIndicated(spellCheckerSuggestionSpans, value, style, false);
     }
     else {
       final TextStyle composingStyle = style?.merge(const TextStyle(decoration: TextDecoration.underline))
@@ -3289,7 +3294,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       );
     }
 
-    // print("------------------------------***-------ABOUT TO REBUILD TEXT SPAN-------***------------------------------");
     // Read only mode should not paint text composing.
     return widget.controller.buildTextSpan(
       context: context,
