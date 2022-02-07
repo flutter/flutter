@@ -37,6 +37,7 @@ class MaterialMisspelledWordsHandler extends MisspelledWordsHandler {
         scssSpans_consumed_index = 0;
         text_consumed_index = 0;
         return TextSpan(
+            style: style,
             children: <TextSpan>[
                 TextSpan(children: buildSubtreesWithMisspelledWordsIndicated(spellCheckerSuggestionSpans, value.composing.textBefore(value.text), style)),
                 TextSpan(children: buildSubtreesWithMisspelledWordsIndicated(spellCheckerSuggestionSpans, value.composing.textInside(value.text), style?.merge(const TextStyle(decoration: TextDecoration.underline)
