@@ -421,7 +421,16 @@ class DartIsolate : public UIDartState {
               bool is_root_isolate,
               const UIDartState::Context& context);
 
-  [[nodiscard]] bool Initialize(Dart_Isolate isolate);
+  //----------------------------------------------------------------------------
+  /// @brief      Initializes the given (current) isolate.
+  ///
+  /// @param[in]  dart_isolate  The current isolate that is to be initialized.
+  ///
+  /// @return     Whether the initialization succeeded. Irrespective of whether
+  ///             the initialization suceeded, the current isolate will still be
+  ///             active.
+  ///
+  [[nodiscard]] bool Initialize(Dart_Isolate dart_isolate);
 
   void SetMessageHandlingTaskRunner(fml::RefPtr<fml::TaskRunner> runner);
 

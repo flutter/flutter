@@ -64,6 +64,56 @@ void testCanLaunchSecondaryIsolate() {
   Isolate.spawn(secondaryIsolateMain, 'Hello from root isolate.', onExit: onExit.sendPort);
 }
 
+
+@pragma('vm:entry-point')
+void testIsolateStartupFailure() async {
+  Future mainTest(dynamic _) async {
+    Future testSuccessfullIsolateLaunch() async {
+      final onMessage = ReceivePort();
+      final onExit = ReceivePort();
+
+      final messages = StreamIterator<dynamic>(onMessage);
+      final exits = StreamIterator<dynamic>(onExit);
+
+      await Isolate.spawn((SendPort port) => port.send('good'),
+          onMessage.sendPort, onExit: onExit.sendPort);
+      if (!await messages.moveNext()) {
+        throw 'Failed to receive message';
+      }
+      if (messages.current != 'good') {
+        throw 'Failed to receive correct message';
+      }
+      if (!await exits.moveNext()) {
+        throw 'Failed to receive onExit';
+      }
+      messages.cancel();
+      exits.cancel();
+    }
+
+    Future testUnsuccessfullIsolateLaunch() async {
+      IsolateSpawnException? error;
+      try {
+        await Isolate.spawn((_) {}, null);
+      } on IsolateSpawnException catch (e) {
+        error = e;
+      }
+      if (error == null) {
+        throw 'Expected isolate spawn to fail.';
+      }
+    }
+
+    await testSuccessfullIsolateLaunch();
+    makeNextIsolateSpawnFail();
+    await testUnsuccessfullIsolateLaunch();
+    notifyNative();
+  }
+
+  // The root isolate will not run an eventloop, so we have to run the actual
+  // test in an isolate.
+  Isolate.spawn(mainTest, null);
+}
+void makeNextIsolateSpawnFail() native 'MakeNextIsolateSpawnFail';
+
 @pragma('vm:entry-point')
 void testCanReceiveArguments(List<String> args) {
   notifyResult(args.length == 1 && args[0] == 'arg1');
