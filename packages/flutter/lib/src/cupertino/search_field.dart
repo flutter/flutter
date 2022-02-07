@@ -266,10 +266,46 @@ class CupertinoSearchTextField extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.autocorrect}
   final bool autocorrect;
 
-  /// {@macro flutter.services.TextInputConfiguration.smartQuotesType}
+  /// Whether to allow the platform to automatically format quotes.
+  ///
+  /// This flag only affects iOS. It sets
+  /// [`UITextSmartQuotesType`](https://developer.apple.com/documentation/uikit/uitextsmartquotestype?language=objc)
+  /// in the engine. When true, it passes
+  /// [`UITextSmartQuotesTypeYes`](https://developer.apple.com/documentation/uikit/uitextsmartquotestype/uitextsmartquotestypeyes?language=objc),
+  /// and when false, it passes
+  /// [`UITextSmartQuotesTypeNo`](https://developer.apple.com/documentation/uikit/uitextsmartquotestype/uitextsmartquotestypeno?language=objc).
+  ///
+  /// As an example of what this does, a standard vertical double quote
+  /// character will be automatically replaced by a left or right double quote
+  /// depending on its position in a word.
+  ///
+  /// Defaults to true.
+  ///
+  /// See also:
+  ///
+  ///  * [smartDashesType]
+  ///  * <https://developer.apple.com/documentation/uikit/uitextinputtraits>
   final SmartQuotesType? smartQuotesType;
 
-  /// {@macro flutter.services.TextInputConfiguration.smartDashesType}
+  /// Whether to allow the platform to automatically format dashes.
+  ///
+  /// This flag only affects iOS versions 11 and above. It sets
+  /// [`UITextSmartDashesType`](https://developer.apple.com/documentation/uikit/uitextsmartdashestype?language=objc)
+  /// in the engine. When true, it passes
+  /// [`UITextSmartDashesTypeYes`](https://developer.apple.com/documentation/uikit/uitextsmartdashestype/uitextsmartdashestypeyes?language=objc),
+  /// and when false, it passes
+  /// [`UITextSmartDashesTypeNo`](https://developer.apple.com/documentation/uikit/uitextsmartdashestype/uitextsmartdashestypeno?language=objc).
+  ///
+  /// As an example of what this does, two consecutive hyphen characters will be
+  /// automatically replaced with one en dash, and three consecutive hyphens
+  /// will become one em dash.
+  ///
+  /// Defaults to true.
+  ///
+  /// See also:
+  ///
+  ///  * [smartQuotesType]
+  ///  * <https://developer.apple.com/documentation/uikit/uitextinputtraits>
   final SmartDashesType? smartDashesType;
 
   /// Disables the text field when false.
