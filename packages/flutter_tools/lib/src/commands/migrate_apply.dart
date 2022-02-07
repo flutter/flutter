@@ -4,6 +4,7 @@
 
 import 'package:meta/meta.dart';
 
+import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../globals.dart' as globals;
@@ -49,19 +50,17 @@ class MigrateApplyCommand extends FlutterCommand {
       workingDir = globals.fs.directory(stringArg('working-directory'));
     }
     if (!workingDir.existsSync()) {
-      print('No migration in progress. Please run `flutter migrate start` first.');
-      return const FlutterCommandResult(ExitStatus.fail);
+      throwToolExit('No migration in progress. Please run `flutter migrate start` first.');
     }
 
     final File manifestFile = MigrateManifest.getManifestFileFromDirectory(workingDir);
     final MigrateManifest manifest = MigrateManifest.fromFile(manifestFile);
     if (!checkAndPrintMigrateStatus(manifest, workingDir, warnConflict: true)) {
-      return const FlutterCommandResult(ExitStatus.fail);
+      throwToolExit('Conflicting files found.');
     }
 
     if (await MigrateUtils.hasUncommitedChanges(workingDir.path)) {
-      globals.logger.printWarning('There are uncommited changes in your project. Please commit, abandon, or stash your changes before trying again.');
-      return const FlutterCommandResult(ExitStatus.fail);
+      throwToolExit('There are uncommited changes in your project. Please commit, abandon, or stash your changes before trying again.');
     }
 
     print('Applying migration.');

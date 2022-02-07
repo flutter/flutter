@@ -158,7 +158,7 @@ bool checkAndPrintMigrateStatus(MigrateManifest manifest, Directory workingDir, 
   }
   if (remainingConflicts.isNotEmpty) {
     if (warnConflict) {
-      globals.printWarning('Unable to apply migration. The following files in the migration working directory still have unresolved conflicts:');
+      globals.printStatus('Unable to apply migration. The following files in the migration working directory still have unresolved conflicts:');
     } else {
       globals.printStatus('Merge conflicted files:');
     }
