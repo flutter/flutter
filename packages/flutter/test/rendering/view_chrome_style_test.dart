@@ -94,7 +94,7 @@ void main() {
         variant: TargetPlatformVariant.mobile(),
       );
 
-      testWidgets("statusBarColor isn't on desktop platforms",
+      testWidgets("statusBarColor isn't set on desktop platforms",
         (WidgetTester tester) async {
           setupTestDevice();
           const double moreThanHalfOfTheStatusBarHeight =
