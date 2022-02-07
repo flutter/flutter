@@ -310,8 +310,7 @@ void main() {
     await tester.pumpWidget(_withTheme(tabBarTheme));
 
     final Offset tabBar = tester.getCenter(
-      find.ancestor(of: find.text('tab 1'),
-      matching: find.byType(TabBar))
+      find.ancestor(of: find.text('tab 1'),matching: find.byType(TabBar)),
     );
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
