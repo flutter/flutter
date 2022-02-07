@@ -133,10 +133,10 @@ void main() {
         ),
       ],
     );
-    GestureBinding.instance!.resamplingEnabled = true;
+    GestureBinding.instance.resamplingEnabled = true;
     ui.window.onPointerDataPacket!(packet);
 
     // Expected to stop resampling, but the timer keeps active if _timer?.cancel() not be called.
-    GestureBinding.instance!.resamplingEnabled = false;
+    GestureBinding.instance.resamplingEnabled = false;
   });
 }
