@@ -14,12 +14,12 @@ import '../services/fake_platform_views.dart';
 import 'rendering_tester.dart';
 
 void main() {
+  TestRenderingFlutterBinding.ensureInitialized();
 
   group('PlatformViewRenderBox', () {
     late FakePlatformViewController fakePlatformViewController;
     late PlatformViewRenderBox platformViewRenderBox;
     setUp(() {
-      renderer; // Initialize bindings
       fakePlatformViewController = FakePlatformViewController(0);
       platformViewRenderBox = PlatformViewRenderBox(
         controller: fakePlatformViewController,
@@ -46,7 +46,7 @@ void main() {
         child: platformViewRenderBox,
       );
       int semanticsUpdateCount = 0;
-      final SemanticsHandle semanticsHandle = renderer.pipelineOwner.ensureSemantics(
+      final SemanticsHandle semanticsHandle = TestRenderingFlutterBinding.instance.pipelineOwner.ensureSemantics(
           listener: () {
             ++semanticsUpdateCount;
           },
@@ -103,7 +103,6 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/69431
   test('multi-finger touch test', () {
-    renderer; // Initialize bindings.
     final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
     viewsController.registerViewType('webview');
     final AndroidViewController viewController =
