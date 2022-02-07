@@ -4206,7 +4206,7 @@ class _TextEditingHistory extends StatefulWidget {
 }
 
 class _TextEditingHistoryState extends State<_TextEditingHistory> {
-  final UndoStack<TextEditingValue> _stack = UndoStack<TextEditingValue>();
+  final _UndoStack<TextEditingValue> _stack = _UndoStack<TextEditingValue>();
   late final Throttled<TextEditingValue> _throttledPush;
   Timer? _throttleTimer;
 
@@ -4237,8 +4237,7 @@ class _TextEditingHistoryState extends State<_TextEditingHistory> {
   }
 
   void _push() {
-    if (widget.controller.value == TextEditingValue.empty
-        || widget.controller.text == _stack.currentValue?.text) {
+    if (widget.controller.value == TextEditingValue.empty) {
       return;
     }
 
@@ -4287,10 +4286,9 @@ class _TextEditingHistoryState extends State<_TextEditingHistory> {
 
 /// A data structure representing a chronological list of states that can be
 /// undone and redone.
-@visibleForTesting
-class UndoStack<T> {
-  /// Creates an instance of [UndoStack].
-  UndoStack();
+class _UndoStack<T> {
+  /// Creates an instance of [_UndoStack].
+  _UndoStack();
 
   final List<T> _list = <T>[];
 
@@ -4373,7 +4371,7 @@ class UndoStack<T> {
 
   @override
   String toString() {
-    return 'UndoStack $_list';
+    return '_UndoStack $_list';
   }
 }
 

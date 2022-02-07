@@ -9960,49 +9960,6 @@ void main() {
     );
   });
 
-  group('UndoStack', () {
-    test('undo and redo', () {
-      final UndoStack<String> undoStack = UndoStack<String>();
-
-      expect(undoStack.undo(), isNull);
-      expect(undoStack.redo(), isNull);
-
-      undoStack.push('one');
-      expect(undoStack.undo(), 'one');
-      expect(undoStack.undo(), 'one');
-      expect(undoStack.redo(), 'one');
-      expect(undoStack.redo(), 'one');
-
-      undoStack.push('one two');
-      expect(undoStack.redo(), 'one two');
-      expect(undoStack.undo(), 'one');
-      expect(undoStack.redo(), 'one two');
-
-      undoStack.push('one two four');
-      expect(undoStack.redo(), 'one two four');
-      expect(undoStack.undo(), 'one two');
-      undoStack.push('one two three');
-      expect(undoStack.redo(), 'one two three');
-      expect(undoStack.undo(), 'one two');
-      expect(undoStack.undo(), 'one');
-      expect(undoStack.redo(), 'one two');
-      expect(undoStack.redo(), 'one two three');
-    });
-
-    test('duplicate pushes are ignored', () {
-      final UndoStack<String> undoStack = UndoStack<String>();
-
-      expect(undoStack.undo(), isNull);
-      expect(undoStack.redo(), isNull);
-
-      undoStack.push('one');
-      undoStack.push('one two');
-      undoStack.push('one two');
-      expect(undoStack.redo(), 'one two');
-      expect(undoStack.undo(), 'one');
-    });
-  });
-
   group('TextEditingHistory', () {
     Future<void> sendUndoRedo(WidgetTester tester, [bool redo = false]) {
       return sendKeys(
@@ -10241,6 +10198,137 @@ void main() {
         const TextEditingValue(
           text: '12',
           selection: TextSelection.collapsed(offset: 2),
+        ),
+      );
+    // On web, these keyboard shortcuts are handled by the browser.
+    }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
+
+    testWidgets('inside EditableText, duplicate changes', (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController();
+      final FocusNode focusNode = FocusNode();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: EditableText(
+            controller: controller,
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+            cursorOpacityAnimates: true,
+            autofillHints: null,
+          ),
+        ),
+      );
+
+      expect(
+        controller.value,
+        TextEditingValue.empty,
+      );
+
+      focusNode.requestFocus();
+      expect(
+        controller.value,
+        TextEditingValue.empty,
+      );
+      await tester.pump();
+      expect(
+        controller.value,
+        const TextEditingValue(
+          selection: TextSelection.collapsed(offset: 0),
+        ),
+      );
+
+      // Wait for the throttling.
+      await tester.pump(const Duration(milliseconds: 500));
+
+      await tester.enterText(find.byType(EditableText), '1');
+      expect(
+        controller.value,
+        const TextEditingValue(
+          text: '1',
+          selection: TextSelection.collapsed(offset: 1),
+        ),
+      );
+      await tester.pump(const Duration(milliseconds: 500));
+
+      // Can undo/redo a single insertion.
+      await sendUndo(tester);
+      expect(
+        controller.value,
+        const TextEditingValue(
+          selection: TextSelection.collapsed(offset: 0),
+        ),
+      );
+      await sendRedo(tester);
+      expect(
+        controller.value,
+        const TextEditingValue(
+          text: '1',
+          selection: TextSelection.collapsed(offset: 1),
+        ),
+      );
+
+      // Changes that result in the same state won't be saved on the undo stack.
+      await tester.enterText(find.byType(EditableText), '12');
+      expect(
+        controller.value,
+        const TextEditingValue(
+          text: '12',
+          selection: TextSelection.collapsed(offset: 2),
+        ),
+      );
+      await tester.enterText(find.byType(EditableText), '1');
+      expect(
+        controller.value,
+        const TextEditingValue(
+          text: '1',
+          selection: TextSelection.collapsed(offset: 1),
+        ),
+      );
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(
+        controller.value,
+        const TextEditingValue(
+          text: '1',
+          selection: TextSelection.collapsed(offset: 1),
+        ),
+      );
+      await sendRedo(tester);
+      expect(
+        controller.value,
+        const TextEditingValue(
+          text: '1',
+          selection: TextSelection.collapsed(offset: 1),
+        ),
+      );
+      await sendUndo(tester);
+      expect(
+        controller.value,
+        const TextEditingValue(
+          selection: TextSelection.collapsed(offset: 0),
+        ),
+      );
+      await sendUndo(tester);
+      expect(
+        controller.value,
+        const TextEditingValue(
+          selection: TextSelection.collapsed(offset: 0),
+        ),
+      );
+      await sendRedo(tester);
+      expect(
+        controller.value,
+        const TextEditingValue(
+          text: '1',
+          selection: TextSelection.collapsed(offset: 1),
+        ),
+      );
+      await sendRedo(tester);
+      expect(
+        controller.value,
+        const TextEditingValue(
+          text: '1',
+          selection: TextSelection.collapsed(offset: 1),
         ),
       );
     // On web, these keyboard shortcuts are handled by the browser.
