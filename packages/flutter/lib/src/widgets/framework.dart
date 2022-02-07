@@ -3232,6 +3232,13 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   }
 
   /// The configuration for this element.
+  ///
+  /// Avoid overriding this field on [Element] subtypes to provide a more
+  /// specific widget type (i.e. [StatelessElement] and [StatelessWidget]).
+  /// Instead, cast at any callsites where the more specific type is required.
+  /// This avoids significant cast overhead on the getter which is accessed
+  /// throughout the framework internals during the build phase - and for which
+  /// the more specific type information is not used.
   @override
   Widget get widget => _widget!;
   Widget? _widget;
@@ -4359,7 +4366,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
 
   /// A short, textual description of this element.
   @override
-  String toStringShort() =>_widget?.toStringShort() ?? '${describeIdentity(this)}(DEFUNCT)';
+  String toStringShort() => _widget?.toStringShort() ?? '${describeIdentity(this)}(DEFUNCT)';
 
   @override
   DiagnosticsNode toDiagnosticsNode({ String? name, DiagnosticsTreeStyle? style }) {
@@ -4377,7 +4384,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     if (_lifecycleState != _ElementLifecycle.initial) {
       properties.add(ObjectFlagProperty<int>('depth', depth, ifNull: 'no depth'));
     }
-    properties.add(ObjectFlagProperty<Widget>('widget',_widget, ifNull: 'no widget'));
+    properties.add(ObjectFlagProperty<Widget>('widget', _widget, ifNull: 'no widget'));
     properties.add(DiagnosticsProperty<Key>('key', _widget?.key, showName: false, defaultValue: null, level: DiagnosticLevel.hidden));
     _widget?.debugFillProperties(properties);
     properties.add(FlagProperty('dirty', value: dirty, ifTrue: 'dirty'));
@@ -5424,9 +5431,7 @@ class InheritedElement extends ProxyElement {
 /// intermediaries between their [widget] and their [renderObject]. It is
 /// generally recommended against specializing the [widget] getter and
 /// instead casting at the various callsites to avoid adding overhead
-/// outside of this particular implementation. If the [widget] getter
-/// is widely used, a separte getter that specializes the Widget type
-/// should be used instead.
+/// outside of this particular implementation.
 ///
 /// ```dart
 /// class FooElement extends RenderObjectElement {
@@ -5437,8 +5442,6 @@ class InheritedElement extends ProxyElement {
 ///   void _foo() {
 ///     final Foo foo = widget as Foo;
 ///   }
-///
-///   Foo get fooWidget => widget as Foo;
 ///   // ...
 /// }
 /// ```
