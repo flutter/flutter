@@ -709,20 +709,20 @@ class Typography with Diagnosticable {
   ///
   /// The font sizes, weights, and letter spacings in this version match the
   /// [2021 Material Design 3 specification](https://m3.material.io/styles/typography/overview).
-  static const TextTheme englishLike2021 =_M3Typography.englishLike;
+  static const TextTheme englishLike2021 = _M3Typography.englishLike;
 
   /// Defines text geometry for dense scripts, such as Chinese, Japanese
   /// and Korean.
   ///
   /// The Material Design 3 specification does not include 'dense' text themes,
   /// so this is just here to be consistent with the API.
-  static const TextTheme dense2021 =_M3Typography.dense;
+  static const TextTheme dense2021 = _M3Typography.dense;
 
   /// Defines text geometry for tall scripts, such as Farsi, Hindi, and Thai.
   ///
   /// The Material Design 3 specification does not include 'tall' text themes,
   /// so this is just here to be consistent with the API.
-  static const TextTheme tall2021 =_M3Typography.tall;
+  static const TextTheme tall2021 = _M3Typography.tall;
 }
 
 // BEGIN GENERATED TOKEN PROPERTIES
