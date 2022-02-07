@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button.dart';
@@ -9,6 +10,8 @@ import 'colors.dart';
 import 'icons.dart';
 import 'localizations.dart';
 import 'text_field.dart';
+
+export 'package:flutter/services.dart' show SmartQuotesType, SmartDashesType;
 
 /// A [CupertinoTextField] that mimics the look and behavior of UIKit's
 /// `UISearchTextField`.
@@ -117,6 +120,7 @@ class CupertinoSearchTextField extends StatefulWidget {
     this.restorationId,
     this.focusNode,
     this.smartQuotesType,
+    this.smartDashesType,
     this.autofocus = false,
     this.onTap,
     this.autocorrect = true,
@@ -265,6 +269,9 @@ class CupertinoSearchTextField extends StatefulWidget {
   /// {@macro flutter.services.TextInputConfiguration.smartQuotesType}
   final SmartQuotesType? smartQuotesType;
 
+  /// {@macro flutter.services.TextInputConfiguration.smartDashesType}
+  final SmartDashesType? smartDashesType;
+
   /// Disables the text field when false.
   ///
   /// Text fields in disabled states have a light grey background and don't
@@ -405,6 +412,7 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
       autofocus: widget.autofocus,
       autocorrect: widget.autocorrect,
       smartQuotesType: widget.smartQuotesType,
+      smartDashesType: widget.smartDashesType,
       textInputAction: TextInputAction.search,
     );
   }
