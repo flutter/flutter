@@ -295,7 +295,7 @@ class FlutterTesterTestDevice extends TestDevice {
     @required Future<void> Function(Uri uri) reportObservatoryUri,
   }) {
     final RegExp messageRegExp = RegExp(
-        r'(?:Observatory|Dart VM Service) listening on ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)'
+        r'(?:Observatory|The Dart VM Service is) listening on ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)'
       );
 
     for (final Stream<List<int>> stream in <Stream<List<int>>>[

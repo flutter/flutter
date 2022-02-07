@@ -40,7 +40,7 @@ class ProtocolDiscovery {
     required Logger logger,
   }) {
     const String kObservatoryService = 'Observatory';
-    const String kServicePrefixRegExp = '(?:Observatory|Dart VM Service)';
+    const String kServicePrefixRegExp = '(?:Observatory|The Dart VM Service is)';
     return ProtocolDiscovery._(
       logReader,
       kObservatoryService,

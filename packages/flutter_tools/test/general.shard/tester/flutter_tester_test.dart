@@ -154,7 +154,7 @@ void main() {
         completer: completer,
         stdout:
         '''
-Dart VM Service listening on $observatoryUri
+The Dart VM Service is listening on $observatoryUri
 Hello!
 ''',
       ));
