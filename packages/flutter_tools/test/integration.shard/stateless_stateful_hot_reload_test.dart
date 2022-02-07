@@ -17,33 +17,33 @@ import 'test_utils.dart';
 // stateful one and back.
 void main() {
   Directory tempDir;
-  final HotReloadProject project = HotReloadProject();
-  FlutterRunTestDriver flutter;
+  final HotReloadProject _project = HotReloadProject();
+  FlutterRunTestDriver _flutter;
 
   setUp(() async {
     tempDir = createResolvedTempDirectorySync('hot_reload_test.');
-    await project.setUpIn(tempDir);
-    flutter = FlutterRunTestDriver(tempDir);
+    await _project.setUpIn(tempDir);
+    _flutter = FlutterRunTestDriver(tempDir);
   });
 
   tearDown(() async {
-    await flutter?.stop();
+    await _flutter?.stop();
     tryToDelete(tempDir);
   });
 
   testWithoutContext('Can switch between stateless and stateful', () async {
-    await flutter.run();
-    await flutter.hotReload();
+    await _flutter.run();
+    await _flutter.hotReload();
     final StringBuffer stdout = StringBuffer();
-    final StreamSubscription<String> subscription = flutter.stdout.listen(stdout.writeln);
+    final StreamSubscription<String> subscription = _flutter.stdout.listen(stdout.writeln);
 
     // switch to stateful.
-    project.toggleState();
-    await flutter.hotReload();
+    _project.toggleState();
+    await _flutter.hotReload();
 
     // switch to stateless.
-    project.toggleState();
-    await flutter.hotReload();
+    _project.toggleState();
+    await _flutter.hotReload();
 
     final String logs = stdout.toString();
 

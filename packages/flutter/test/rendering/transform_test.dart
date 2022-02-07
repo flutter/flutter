@@ -14,8 +14,6 @@ Offset round(Offset value) {
 }
 
 void main() {
-  TestRenderingFlutterBinding.ensureInitialized();
-
   test('RenderTransform - identity', () {
     RenderBox inner;
     final RenderBox sizer = RenderTransform(

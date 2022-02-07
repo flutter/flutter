@@ -422,7 +422,6 @@ class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSel
 
   @override
   void didUpdateWidget(_CupertinoTextSelectionToolbarContent oldWidget) {
-    super.didUpdateWidget(oldWidget);
     // If the children are changing, the current page should be reset.
     if (widget.children != oldWidget.children) {
       _page = 0;
@@ -430,6 +429,7 @@ class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSel
       _controller.forward();
       _controller.removeStatusListener(_statusListener);
     }
+    super.didUpdateWidget(oldWidget);
   }
 
   @override

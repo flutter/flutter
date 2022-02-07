@@ -399,8 +399,8 @@ class TextSelectionOverlay {
     _handlesVisible = visible;
     // If we are in build state, it will be too late to update visibility.
     // We will need to schedule the build in next frame.
-    if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
-      SchedulerBinding.instance.addPostFrameCallback(_markNeedsBuild);
+    if (SchedulerBinding.instance!.schedulerPhase == SchedulerPhase.persistentCallbacks) {
+      SchedulerBinding.instance!.addPostFrameCallback(_markNeedsBuild);
     } else {
       _markNeedsBuild();
     }
@@ -450,8 +450,8 @@ class TextSelectionOverlay {
     if (_value == newValue)
       return;
     _value = newValue;
-    if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
-      SchedulerBinding.instance.addPostFrameCallback(_markNeedsBuild);
+    if (SchedulerBinding.instance!.schedulerPhase == SchedulerPhase.persistentCallbacks) {
+      SchedulerBinding.instance!.addPostFrameCallback(_markNeedsBuild);
     } else {
       _markNeedsBuild();
     }
@@ -946,65 +946,6 @@ class TextSelectionGestureDetectorBuilder {
         && renderEditable.selection!.end >= textPosition.offset;
   }
 
-  // Expand the selection to the given global position.
-  //
-  // Either base or extent will be moved to the last tapped position, whichever
-  // is closest. The selection will never shrink or pivot, only grow.
-  //
-  // See also:
-  //
-  //   * [_extendSelection], which is similar but pivots the selection around
-  //     the base.
-  void _expandSelection(Offset offset, SelectionChangedCause cause) {
-    assert(cause != null);
-    assert(offset != null);
-    assert(renderEditable.selection?.baseOffset != null);
-
-    final TextPosition tappedPosition = renderEditable.getPositionForPoint(offset);
-    final TextSelection selection = renderEditable.selection!;
-    final bool baseIsCloser =
-        (tappedPosition.offset - selection.baseOffset).abs()
-        < (tappedPosition.offset - selection.extentOffset).abs();
-    final TextSelection nextSelection = selection.copyWith(
-      baseOffset: baseIsCloser ? selection.extentOffset : selection.baseOffset,
-      extentOffset: tappedPosition.offset,
-    );
-
-    editableText.userUpdateTextEditingValue(
-      editableText.textEditingValue.copyWith(
-        selection: nextSelection,
-      ),
-      cause,
-    );
-  }
-
-  // Extend the selection to the given global position.
-  //
-  // Holds the base in place and moves the extent.
-  //
-  // See also:
-  //
-  //   * [_expandSelection], which is similar but always increases the size of
-  //     the selection.
-  void _extendSelection(Offset offset, SelectionChangedCause cause) {
-    assert(cause != null);
-    assert(offset != null);
-    assert(renderEditable.selection?.baseOffset != null);
-
-    final TextPosition tappedPosition = renderEditable.getPositionForPoint(offset);
-    final TextSelection selection = renderEditable.selection!;
-    final TextSelection nextSelection = selection.copyWith(
-      extentOffset: tappedPosition.offset,
-    );
-
-    editableText.userUpdateTextEditingValue(
-      editableText.textEditingValue.copyWith(
-        selection: nextSelection,
-      ),
-      cause,
-    );
-  }
-
   /// Whether to show the selection toolbar.
   ///
   /// It is based on the signal source when a [onTapDown] is called. This getter
@@ -1023,25 +964,8 @@ class TextSelectionGestureDetectorBuilder {
   @protected
   RenderEditable get renderEditable => editableText.renderEditable;
 
-  // The viewport offset pixels of the [RenderEditable] at the last drag start.
+  /// The viewport offset pixels of the [RenderEditable] at the last drag start.
   double _dragStartViewportOffset = 0.0;
-
-  // Returns true iff either shift key is currently down.
-  bool get _isShiftPressed {
-    return HardwareKeyboard.instance.logicalKeysPressed
-      .any(<LogicalKeyboardKey>{
-        LogicalKeyboardKey.shiftLeft,
-        LogicalKeyboardKey.shiftRight,
-      }.contains);
-  }
-
-  // True iff a tap + shift has been detected but the tap has not yet come up.
-  bool _isShiftTapping = false;
-
-  // For a shift + tap + drag gesture, the TextSelection at the point of the
-  // tap. Mac uses this value to reset to the original selection when an
-  // inversion of the base and offset happens.
-  TextSelection? _shiftTapDragSelection;
 
   /// Handler for [TextSelectionGestureDetector.onTapDown].
   ///
@@ -1062,23 +986,6 @@ class TextSelectionGestureDetectorBuilder {
     _shouldShowSelectionToolbar = kind == null
       || kind == PointerDeviceKind.touch
       || kind == PointerDeviceKind.stylus;
-
-    // Handle shift + click selection if needed.
-    if (_isShiftPressed && renderEditable.selection?.baseOffset != null) {
-      _isShiftTapping = true;
-      switch (defaultTargetPlatform) {
-        case TargetPlatform.iOS:
-        case TargetPlatform.macOS:
-          _expandSelection(details.globalPosition, SelectionChangedCause.tap);
-          break;
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-        case TargetPlatform.linux:
-        case TargetPlatform.windows:
-          _extendSelection(details.globalPosition, SelectionChangedCause.tap);
-          break;
-      }
-    }
   }
 
   /// Handler for [TextSelectionGestureDetector.onForcePressStart].
@@ -1136,39 +1043,8 @@ class TextSelectionGestureDetectorBuilder {
   ///    this callback.
   @protected
   void onSingleTapUp(TapUpDetails details) {
-    if (_isShiftTapping) {
-      _isShiftTapping = false;
-      return;
-    }
-
     if (delegate.selectionEnabled) {
-      switch (defaultTargetPlatform) {
-        case TargetPlatform.iOS:
-        case TargetPlatform.macOS:
-          switch (details.kind) {
-            case PointerDeviceKind.mouse:
-            case PointerDeviceKind.stylus:
-            case PointerDeviceKind.invertedStylus:
-              // Precise devices should place the cursor at a precise position.
-              renderEditable.selectPosition(cause: SelectionChangedCause.tap);
-              break;
-            case PointerDeviceKind.touch:
-            case PointerDeviceKind.unknown:
-            default: // ignore: no_default_cases, to allow adding new device types to [PointerDeviceKind]
-                     // TODO(moffatman): Remove after landing https://github.com/flutter/flutter/issues/23604
-              // On macOS/iOS/iPadOS a touch tap places the cursor at the edge
-              // of the word.
-              renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
-              break;
-          }
-          break;
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-        case TargetPlatform.linux:
-        case TargetPlatform.windows:
-          renderEditable.selectPosition(cause: SelectionChangedCause.tap);
-          break;
-      }
+      renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
     }
   }
 
@@ -1299,27 +1175,10 @@ class TextSelectionGestureDetectorBuilder {
       || kind == PointerDeviceKind.touch
       || kind == PointerDeviceKind.stylus;
 
-    if (_isShiftPressed && renderEditable.selection != null && renderEditable.selection!.isValid) {
-      _isShiftTapping = true;
-      switch (defaultTargetPlatform) {
-        case TargetPlatform.iOS:
-        case TargetPlatform.macOS:
-          _expandSelection(details.globalPosition, SelectionChangedCause.drag);
-          break;
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-        case TargetPlatform.linux:
-        case TargetPlatform.windows:
-          _extendSelection(details.globalPosition, SelectionChangedCause.drag);
-          break;
-      }
-      _shiftTapDragSelection = renderEditable.selection;
-    } else {
-      renderEditable.selectPositionAt(
-        from: details.globalPosition,
-        cause: SelectionChangedCause.drag,
-      );
-    }
+    renderEditable.selectPositionAt(
+      from: details.globalPosition,
+      cause: SelectionChangedCause.drag,
+    );
 
     _dragStartViewportOffset = renderEditable.offset.pixels;
   }
@@ -1338,77 +1197,28 @@ class TextSelectionGestureDetectorBuilder {
     if (!delegate.selectionEnabled)
       return;
 
-    if (!_isShiftTapping) {
-      // Adjust the drag start offset for possible viewport offset changes.
-      final Offset startOffset = renderEditable.maxLines == 1
-          ? Offset(renderEditable.offset.pixels - _dragStartViewportOffset, 0.0)
-          : Offset(0.0, renderEditable.offset.pixels - _dragStartViewportOffset);
+    // Adjust the drag start offset for possible viewport offset changes.
+    final Offset startOffset = renderEditable.maxLines == 1
+        ? Offset(renderEditable.offset.pixels - _dragStartViewportOffset, 0.0)
+        : Offset(0.0, renderEditable.offset.pixels - _dragStartViewportOffset);
 
-      return renderEditable.selectPositionAt(
-        from: startDetails.globalPosition - startOffset,
-        to: updateDetails.globalPosition,
-        cause: SelectionChangedCause.drag,
-      );
-    }
-
-    if (_shiftTapDragSelection!.isCollapsed
-        || (defaultTargetPlatform != TargetPlatform.iOS
-            && defaultTargetPlatform != TargetPlatform.macOS)) {
-      return _extendSelection(updateDetails.globalPosition, SelectionChangedCause.drag);
-    }
-
-    // If the drag inverts the selection, Mac and iOS revert to the initial
-    // selection.
-    final TextSelection selection = editableText.textEditingValue.selection;
-    final TextPosition nextExtent = renderEditable.getPositionForPoint(updateDetails.globalPosition);
-    final bool isShiftTapDragSelectionForward =
-        _shiftTapDragSelection!.baseOffset < _shiftTapDragSelection!.extentOffset;
-    final bool isInverted = isShiftTapDragSelectionForward
-        ? nextExtent.offset < _shiftTapDragSelection!.baseOffset
-        : nextExtent.offset > _shiftTapDragSelection!.baseOffset;
-    if (isInverted && selection.baseOffset == _shiftTapDragSelection!.baseOffset) {
-      editableText.userUpdateTextEditingValue(
-        editableText.textEditingValue.copyWith(
-          selection: TextSelection(
-            baseOffset: _shiftTapDragSelection!.extentOffset,
-            extentOffset: nextExtent.offset,
-          ),
-        ),
-        SelectionChangedCause.drag,
-      );
-    } else if (!isInverted
-        && nextExtent.offset != _shiftTapDragSelection!.baseOffset
-        && selection.baseOffset != _shiftTapDragSelection!.baseOffset) {
-      editableText.userUpdateTextEditingValue(
-        editableText.textEditingValue.copyWith(
-          selection: TextSelection(
-            baseOffset: _shiftTapDragSelection!.baseOffset,
-            extentOffset: nextExtent.offset,
-          ),
-        ),
-        SelectionChangedCause.drag,
-      );
-    } else {
-      _extendSelection(updateDetails.globalPosition, SelectionChangedCause.drag);
-    }
+    renderEditable.selectPositionAt(
+      from: startDetails.globalPosition - startOffset,
+      to: updateDetails.globalPosition,
+      cause: SelectionChangedCause.drag,
+    );
   }
 
   /// Handler for [TextSelectionGestureDetector.onDragSelectionEnd].
   ///
-  /// By default, it simply cleans up the state used for handling certain
-  /// built-in behaviors.
+  /// By default, it services as place holder to enable subclass override.
   ///
   /// See also:
   ///
   ///  * [TextSelectionGestureDetector.onDragSelectionEnd], which triggers this
   ///    callback.
   @protected
-  void onDragSelectionEnd(DragEndDetails details) {
-    if (_isShiftTapping) {
-      _isShiftTapping = false;
-      _shiftTapDragSelection = null;
-    }
-  }
+  void onDragSelectionEnd(DragEndDetails details) {/* Subclass should override this method if needed. */}
 
   /// Returns a [TextSelectionGestureDetector] configured with the handlers
   /// provided by this builder.
@@ -1805,7 +1615,7 @@ class ClipboardStatusNotifier extends ValueNotifier<ClipboardStatus> with Widget
   @override
   void addListener(VoidCallback listener) {
     if (!hasListeners) {
-      WidgetsBinding.instance.addObserver(this);
+      WidgetsBinding.instance!.addObserver(this);
     }
     if (value == ClipboardStatus.unknown) {
       update();
@@ -1817,7 +1627,7 @@ class ClipboardStatusNotifier extends ValueNotifier<ClipboardStatus> with Widget
   void removeListener(VoidCallback listener) {
     super.removeListener(listener);
     if (!hasListeners) {
-      WidgetsBinding.instance.removeObserver(this);
+      WidgetsBinding.instance!.removeObserver(this);
     }
   }
 
@@ -1837,7 +1647,7 @@ class ClipboardStatusNotifier extends ValueNotifier<ClipboardStatus> with Widget
   @override
   void dispose() {
     super.dispose();
-    WidgetsBinding.instance.removeObserver(this);
+    WidgetsBinding.instance!.removeObserver(this);
     _disposed = true;
   }
 }

@@ -260,7 +260,7 @@ flutter:
       ]),
       androidConsoleSocketFactory: (String host, int port) async {
         socketWasCreated = true;
-        throw Exception('Socket was created for non-emulator');
+        throw 'Socket was created for non-emulator';
       }
     );
 
@@ -279,7 +279,7 @@ flutter:
       ]),
       androidConsoleSocketFactory: (String host, int port) async {
         socketWasCreated = true;
-        throw Exception('Socket was created for emulator without port in ID');
+        throw 'Socket was created for emulator without port in ID';
       },
     );
 
@@ -664,7 +664,7 @@ class FakeWorkingAndroidConsoleSocket extends Fake implements Socket {
       // as part of the previous text to ensure both are handled.
       _controller.add('OK\n');
     } else {
-      throw Exception('Unexpected command $text');
+      throw 'Unexpected command $text';
     }
   }
 

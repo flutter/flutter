@@ -190,7 +190,6 @@ class Context {
     runSync(
       'rsync',
       <String>[
-        '-8', // Avoid mangling filenames with encodings that do not match the current locale.
         '-av',
         '--delete',
         '--filter',

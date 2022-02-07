@@ -714,7 +714,7 @@ void main() {
 
     await tester.pump();
 
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
 
     // Test default cursor
     await tester.pumpWidget(
@@ -736,7 +736,7 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
 
     // Test default cursor when disabled
     await tester.pumpWidget(
@@ -758,7 +758,7 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
 
     // Test cursor when tristate
     await tester.pumpWidget(
@@ -782,7 +782,7 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.grab);
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.grab);
 
     await tester.pumpAndSettle();
   });
@@ -1077,11 +1077,10 @@ void main() {
         }
         return inactivePressedOverlayColor;
       }
-      return null;
     }
     const double splashRadius = 24.0;
     TestGesture gesture;
-    bool? value = false;
+    bool? _value = false;
 
     Widget buildTristateCheckbox() {
       return MaterialApp(
@@ -1089,11 +1088,11 @@ void main() {
           body: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
               return Checkbox(
-                value: value,
+                value: _value,
                 tristate: true,
-                onChanged: (bool? v) {
+                onChanged: (bool? value) {
                   setState(() {
-                    value = v;
+                    _value = value;
                   });
                 },
                 overlayColor: MaterialStateProperty.resolveWith(getOverlayColor),
@@ -1110,7 +1109,7 @@ void main() {
     gesture = await tester.press(find.byType(Checkbox));
     await tester.pumpAndSettle();
 
-    expect(value, false);
+    expect(_value, false);
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
       paints
@@ -1126,7 +1125,7 @@ void main() {
     gesture = await tester.press(find.byType(Checkbox));
     await tester.pumpAndSettle();
 
-    expect(value, true);
+    expect(_value, true);
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
       paints
@@ -1142,7 +1141,7 @@ void main() {
     gesture = await tester.press(find.byType(Checkbox));
     await tester.pumpAndSettle();
 
-    expect(value, null);
+    expect(_value, null);
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
       paints
@@ -1158,7 +1157,7 @@ void main() {
     gesture = await tester.press(find.byType(Checkbox));
     await tester.pumpAndSettle();
 
-    expect(value, false);
+    expect(_value, false);
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
       paints

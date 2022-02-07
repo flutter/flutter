@@ -27,7 +27,7 @@ class TestBuildSystem implements BuildSystem {
 
   final List<BuildResult> _results;
   final BuildResult? _singleResult;
-  final Exception? _exception;
+  final Object? _exception;
   final void Function(Target target, Environment environment)? _onRun;
   int _nextResult = 0;
 

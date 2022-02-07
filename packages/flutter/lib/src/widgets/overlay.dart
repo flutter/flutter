@@ -151,8 +151,8 @@ class OverlayEntry extends ChangeNotifier {
       return;
 
     overlay._entries.remove(this);
-    if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
-      SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
+    if (SchedulerBinding.instance!.schedulerPhase == SchedulerPhase.persistentCallbacks) {
+      SchedulerBinding.instance!.addPostFrameCallback((Duration duration) {
         overlay._markDirty();
       });
     } else {
@@ -437,7 +437,7 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
       return;
     if (listEquals(_entries, newEntriesList))
       return;
-    final LinkedHashSet<OverlayEntry> old = LinkedHashSet<OverlayEntry>.of(_entries);
+    final LinkedHashSet<OverlayEntry> old = LinkedHashSet<OverlayEntry>.from(_entries);
     for (final OverlayEntry entry in newEntriesList) {
       entry._overlay ??= this;
     }

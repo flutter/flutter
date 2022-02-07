@@ -11,7 +11,7 @@ class TestDrag extends Drag {
 }
 
 void main() {
-  TestWidgetsFlutterBinding.ensureInitialized();
+  setUp(ensureGestureBinding);
 
   testGesture('Should recognize pan', (GestureTester tester) {
     final MultiTapGestureRecognizer tap = MultiTapGestureRecognizer(longTapDelay: kLongPressTimeout);

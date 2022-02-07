@@ -294,21 +294,16 @@ class FrameTimingSummarizer {
       };
 }
 
-/// Returns the 100*p-th percentile of [data].
-///
-/// [data] must be sorted in ascending order.
+// The following helper functions require data sorted
+
+// return the 100*p-th percentile of the data
 T _findPercentile<T>(List<T> data, double p) {
   assert(p >= 0 && p <= 1);
   return data[((data.length - 1) * p).round()];
 }
 
-/// Returns the number of elements in [data] that exceed [threshold].
-///
-/// [data] must be sorted in ascending order.
+// return the number of items in data that > threshold
 int _countExceed<T extends Comparable<T>>(List<T> data, T threshold) {
-  final int exceedsThresholdIndex = data.indexWhere((T datum) => datum.compareTo(threshold) > 0);
-  if (exceedsThresholdIndex == -1) {
-    return 0;
-  }
-  return data.length - exceedsThresholdIndex;
+  return data.length -
+      data.indexWhere((T datum) => datum.compareTo(threshold) > 0);
 }

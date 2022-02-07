@@ -26,7 +26,6 @@ enum VersionType {
   /// A master channel flutter version from git describe.
   ///
   /// Example: '1.2.3-4.0.pre-10-gabc123'.
-  /// Example: '1.2.3-10-gabc123'.
   gitDescribe,
 }
 
@@ -34,7 +33,7 @@ final Map<VersionType, RegExp> versionPatterns = <VersionType, RegExp>{
   VersionType.stable: RegExp(r'^(\d+)\.(\d+)\.(\d+)$'),
   VersionType.development: RegExp(r'^(\d+)\.(\d+)\.(\d+)-(\d+)\.(\d+)\.pre$'),
   VersionType.latest: RegExp(r'^(\d+)\.(\d+)\.(\d+)-(\d+)\.(\d+)\.pre\.(\d+)$'),
-  VersionType.gitDescribe: RegExp(r'^(\d+)\.(\d+)\.(\d+)-((\d+)\.(\d+)\.pre-)?(\d+)-g[a-f0-9]+$'),
+  VersionType.gitDescribe: RegExp(r'^(\d+)\.(\d+)\.(\d+)-(\d+)\.(\d+)\.pre-(\d+)-g[a-f0-9]+$'),
 };
 
 class Version {
@@ -64,8 +63,9 @@ class Version {
         assert(commits != null);
         break;
       case VersionType.gitDescribe:
-        assert(commits != null);
-        break;
+        throw ConductorException(
+          'VersionType.gitDescribe not supported! Use VersionType.latest instead.',
+        );
     }
   }
 
@@ -130,20 +130,19 @@ class Version {
     match = versionPatterns[VersionType.gitDescribe]!.firstMatch(versionString);
     if (match != null) {
       // parse latest
-      final int x = int.parse(match.group(1)!);
-      final int y = int.parse(match.group(2)!);
-      final int z = int.parse(match.group(3)!);
-      final int? m = int.tryParse(match.group(5) ?? '');
-      final int? n = int.tryParse(match.group(6) ?? '');
-      final int commits = int.parse(match.group(7)!);
+      final List<int> parts = match.groups(
+        <int>[1, 2, 3, 4, 5, 6],
+      ).map(
+        (String? s) => int.parse(s!),
+      ).toList();
       return Version(
-        x: x,
-        y: y,
-        z: z,
-        m: m,
-        n: n,
-        commits: commits,
-        type: VersionType.gitDescribe,
+        x: parts[0],
+        y: parts[1],
+        z: parts[2],
+        m: parts[3],
+        n: parts[4],
+        commits: parts[5],
+        type: VersionType.latest,
       );
     }
     throw Exception('${versionString.trim()} cannot be parsed');

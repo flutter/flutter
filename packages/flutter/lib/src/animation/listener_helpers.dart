@@ -137,17 +137,17 @@ mixin AnimationLocalListenersMixin {
   @protected
   @pragma('vm:notify-debugger-on-exception')
   void notifyListeners() {
-    final List<VoidCallback> localListeners = List<VoidCallback>.of(_listeners);
+    final List<VoidCallback> localListeners = List<VoidCallback>.from(_listeners);
     for (final VoidCallback listener in localListeners) {
       InformationCollector? collector;
       assert(() {
-        collector = () => <DiagnosticsNode>[
-          DiagnosticsProperty<AnimationLocalListenersMixin>(
+        collector = () sync* {
+          yield DiagnosticsProperty<AnimationLocalListenersMixin>(
             'The $runtimeType notifying listeners was',
             this,
             style: DiagnosticsTreeStyle.errorProperty,
-          ),
-        ];
+          );
+        };
         return true;
       }());
       try {
@@ -226,7 +226,7 @@ mixin AnimationLocalStatusListenersMixin {
   @protected
   @pragma('vm:notify-debugger-on-exception')
   void notifyStatusListeners(AnimationStatus status) {
-    final List<AnimationStatusListener> localListeners = List<AnimationStatusListener>.of(_statusListeners);
+    final List<AnimationStatusListener> localListeners = List<AnimationStatusListener>.from(_statusListeners);
     for (final AnimationStatusListener listener in localListeners) {
       try {
         if (_statusListeners.contains(listener))
@@ -234,13 +234,13 @@ mixin AnimationLocalStatusListenersMixin {
       } catch (exception, stack) {
         InformationCollector? collector;
         assert(() {
-          collector = () => <DiagnosticsNode>[
-            DiagnosticsProperty<AnimationLocalStatusListenersMixin>(
+          collector = () sync* {
+            yield DiagnosticsProperty<AnimationLocalStatusListenersMixin>(
               'The $runtimeType notifying status listeners was',
               this,
               style: DiagnosticsTreeStyle.errorProperty,
-            ),
-          ];
+            );
+          };
           return true;
         }());
         FlutterError.reportError(FlutterErrorDetails(

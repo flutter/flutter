@@ -127,10 +127,9 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
             ErrorDescription('building $widget'),
             e,
             stack,
-            informationCollector: () => <DiagnosticsNode>[
-              if (kDebugMode)
-                DiagnosticsDebugCreator(DebugCreator(this)),
-            ],
+            informationCollector: () sync* {
+              yield DiagnosticsDebugCreator(DebugCreator(this));
+            },
           ),
         );
       }
@@ -143,10 +142,9 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
             ErrorDescription('building $widget'),
             e,
             stack,
-            informationCollector: () => <DiagnosticsNode>[
-              if (kDebugMode)
-                DiagnosticsDebugCreator(DebugCreator(this)),
-            ],
+            informationCollector: () sync* {
+              yield DiagnosticsDebugCreator(DebugCreator(this));
+            },
           ),
         );
         _child = updateChild(null, built, slot);

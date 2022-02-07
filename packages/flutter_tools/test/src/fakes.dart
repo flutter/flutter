@@ -289,26 +289,20 @@ class FakeStdio extends Stdio {
 }
 
 class FakePlistParser implements PlistParser {
-  FakePlistParser([Map<String, Object>? underlyingValues]):
-    _underlyingValues = underlyingValues ?? <String, Object>{};
+  final Map<String, dynamic> _underlyingValues = <String, String>{};
 
-  final Map<String, Object> _underlyingValues;
-
-  void setProperty(String key, Object value) {
+  void setProperty(String key, dynamic value) {
     _underlyingValues[key] = value;
   }
 
   @override
-  String? plistXmlContent(String plistFilePath) => throw UnimplementedError();
-
-  @override
-  Map<String, Object> parseFile(String plistFilePath) {
+  Map<String, dynamic> parseFile(String plistFilePath) {
     return _underlyingValues;
   }
 
   @override
-  String? getStringValueFromFile(String plistFilePath, String key) {
-    return _underlyingValues[key] as String?;
+  String getValueFromFile(String plistFilePath, String key) {
+    return _underlyingValues[key] as String;
   }
 }
 

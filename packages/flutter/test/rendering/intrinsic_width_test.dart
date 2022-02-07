@@ -46,8 +46,6 @@ class RenderTestBox extends RenderBox {
 }
 
 void main() {
-  TestRenderingFlutterBinding.ensureInitialized();
-
   test('Shrink-wrapping width', () {
     final RenderBox child = RenderTestBox(const BoxConstraints(
       minWidth: 10.0,

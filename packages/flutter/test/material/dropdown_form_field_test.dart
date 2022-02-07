@@ -446,7 +446,7 @@ void main() {
 
   testWidgets('DropdownButtonFormField with autovalidation test', (WidgetTester tester) async {
     String? value = 'one';
-    int validateCalled = 0;
+    int _validateCalled = 0;
 
     await tester.pumpWidget(
       StatefulBuilder(
@@ -471,7 +471,7 @@ void main() {
                   });
                 },
                 validator: (String? currentValue) {
-                  validateCalled++;
+                  _validateCalled++;
                   return currentValue == null ? 'Must select value' : null;
                 },
                 autovalidateMode: AutovalidateMode.always,
@@ -482,13 +482,13 @@ void main() {
       ),
     );
 
-    expect(validateCalled, 1);
+    expect(_validateCalled, 1);
     expect(value, equals('one'));
     await tester.tap(find.text('one'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('three').last);
     await tester.pump();
-    expect(validateCalled, 2);
+    expect(_validateCalled, 2);
     await tester.pumpAndSettle();
     expect(value, equals('three'));
   });
@@ -577,26 +577,24 @@ void main() {
       TestApp(
         textDirection: TextDirection.ltr,
         child: Material(
-          child: Center(
-            child: DropdownButtonFormField<String>(
-              key: buttonKey,
-              value: value,
-              onChanged: onChanged,
-              items: menuItems.map<DropdownMenuItem<String>>((String item) {
-                return DropdownMenuItem<String>(
-                  key: ValueKey<String>(item),
-                  value: item,
-                  child: Text(item, key: ValueKey<String>('${item}Text')),
-                );
-              }).toList(),
-            ),
+          child: DropdownButtonFormField<String>(
+            key: buttonKey,
+            value: value,
+            onChanged: onChanged,
+            items: menuItems.map<DropdownMenuItem<String>>((String item) {
+              return DropdownMenuItem<String>(
+                key: ValueKey<String>(item),
+                value: item,
+                child: Text(item, key: ValueKey<String>('${item}Text')),
+              );
+            }).toList(),
           ),
         ),
       ),
     );
 
     final RenderBox box = tester.renderObject<RenderBox>(find.byType(dropdownButtonType));
-    expect(box.size.height, 48.0);
+    expect(box.size.height, 24.0);
   });
 
   testWidgets('DropdownButtonFormField - custom text style', (WidgetTester tester) async {
@@ -1052,7 +1050,7 @@ void main() {
   });
 
   testWidgets('autovalidateMode is passed to super', (WidgetTester tester) async {
-    int validateCalled = 0;
+    int _validateCalled = 0;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1068,7 +1066,7 @@ void main() {
               }).toList(),
               onChanged: onChanged,
               validator: (String? value) {
-                validateCalled++;
+                _validateCalled++;
                 return null;
               },
             ),
@@ -1077,7 +1075,7 @@ void main() {
       ),
     );
 
-    expect(validateCalled, 1);
+    expect(_validateCalled, 1);
   });
 
   testWidgets('DropdownButtonFormField - Custom button alignment', (WidgetTester tester) async {

@@ -89,7 +89,8 @@ void main() {
     globals.fs.file('lib/main.dart').createSync(recursive: true);
     globals.fs.file('pubspec.yaml').createSync(recursive: true);
     globals.fs.file('.packages').createSync(recursive: true);
-    final CommandRunner<void> runner = createTestCommandRunner(BuildBundleCommand(bundleBuilder: FakeBundleBuilder()));
+    final CommandRunner<void> runner = createTestCommandRunner(BuildBundleCommand()
+        ..bundleBuilder = FakeBundleBuilder());
 
     expect(() => runner.run(<String>[
       'bundle',
@@ -106,7 +107,8 @@ void main() {
     globals.fs.file('lib/main.dart').createSync(recursive: true);
     globals.fs.file('pubspec.yaml').createSync();
     globals.fs.file('.packages').createSync();
-    final CommandRunner<void> runner = createTestCommandRunner(BuildBundleCommand(bundleBuilder: FakeBundleBuilder()));
+    final CommandRunner<void> runner = createTestCommandRunner(BuildBundleCommand()
+        ..bundleBuilder = FakeBundleBuilder());
 
     expect(() => runner.run(<String>[
       'bundle',
@@ -123,7 +125,8 @@ void main() {
     globals.fs.file('lib/main.dart').createSync(recursive: true);
     globals.fs.file('pubspec.yaml').createSync();
     globals.fs.file('.packages').createSync();
-    final CommandRunner<void> runner = createTestCommandRunner(BuildBundleCommand(bundleBuilder: FakeBundleBuilder()));
+    final CommandRunner<void> runner = createTestCommandRunner(BuildBundleCommand()
+        ..bundleBuilder = FakeBundleBuilder());
 
     expect(() => runner.run(<String>[
       'bundle',
@@ -140,7 +143,8 @@ void main() {
     globals.fs.file('lib/main.dart').createSync(recursive: true);
     globals.fs.file('pubspec.yaml').createSync();
     globals.fs.file('.packages').createSync();
-    final CommandRunner<void> runner = createTestCommandRunner(BuildBundleCommand(bundleBuilder: FakeBundleBuilder()));
+    final CommandRunner<void> runner = createTestCommandRunner(BuildBundleCommand()
+      ..bundleBuilder = FakeBundleBuilder());
 
     expect(() => runner.run(<String>[
       'bundle',
@@ -157,7 +161,8 @@ void main() {
     globals.fs.file('lib/main.dart').createSync(recursive: true);
     globals.fs.file('pubspec.yaml').createSync();
     globals.fs.file('.packages').createSync();
-    final CommandRunner<void> runner = createTestCommandRunner(BuildBundleCommand(bundleBuilder: FakeBundleBuilder()));
+    final CommandRunner<void> runner = createTestCommandRunner(BuildBundleCommand()
+        ..bundleBuilder = FakeBundleBuilder());
 
     await runner.run(<String>[
       'bundle',
@@ -174,7 +179,8 @@ void main() {
     globals.fs.file('lib/main.dart').createSync(recursive: true);
     globals.fs.file('pubspec.yaml').createSync();
     globals.fs.file('.packages').createSync();
-    final CommandRunner<void> runner = createTestCommandRunner(BuildBundleCommand(bundleBuilder: FakeBundleBuilder()));
+    final CommandRunner<void> runner = createTestCommandRunner(BuildBundleCommand()
+        ..bundleBuilder = FakeBundleBuilder());
 
     await runner.run(<String>[
       'bundle',
@@ -191,7 +197,8 @@ void main() {
     globals.fs.file('lib/main.dart').createSync(recursive: true);
     globals.fs.file('pubspec.yaml').createSync();
     globals.fs.file('.packages').createSync();
-    final CommandRunner<void> runner = createTestCommandRunner(BuildBundleCommand(bundleBuilder: FakeBundleBuilder()));
+    final CommandRunner<void> runner = createTestCommandRunner(BuildBundleCommand()
+        ..bundleBuilder = FakeBundleBuilder());
 
     await runner.run(<String>[
       'bundle',

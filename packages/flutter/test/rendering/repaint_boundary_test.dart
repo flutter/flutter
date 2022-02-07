@@ -8,8 +8,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'rendering_tester.dart';
 
 void main() {
-  TestRenderingFlutterBinding.ensureInitialized();
-
   test('nested repaint boundaries - smoke test', () {
     RenderOpacity a, b, c;
     a = RenderOpacity(
@@ -41,11 +39,11 @@ void main() {
 
     repaintBoundary.markNeedsCompositingBitsUpdate();
 
-    TestRenderingFlutterBinding.instance.renderView.child = null;
+    renderer.renderView.child = null;
     final RenderPadding padding = RenderPadding(
       padding: const EdgeInsets.all(50),
     );
-    TestRenderingFlutterBinding.instance.renderView.child = padding;
+    renderer.renderView.child = padding;
     padding.child = repaintBoundary;
     pumpFrame(phase: EnginePhase.flushSemantics);
   });
@@ -85,7 +83,7 @@ void main() {
 
     late FlutterErrorDetails error;
     layout(opacity, phase: EnginePhase.flushSemantics, onErrors: () {
-      error = TestRenderingFlutterBinding.instance.takeFlutterErrorDetails()!;
+      error = renderer.takeFlutterErrorDetails()!;
     });
     expect('${error.exception}', contains('Attempted to set a layer to a repaint boundary render object.'));
   });

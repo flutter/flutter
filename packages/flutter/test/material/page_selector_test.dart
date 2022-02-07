@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 const Color kSelectedColor = Color(0xFF00FF00);
 const Color kUnselectedColor = Colors.transparent;
 
-Widget buildFrame(TabController tabController, { Color? color, Color? selectedColor, double indicatorSize = 12.0, BorderStyle? borderStyle }) {
+Widget buildFrame(TabController tabController, { Color? color, Color? selectedColor, double indicatorSize = 12.0 }) {
   return Localizations(
     locale: const Locale('en', 'US'),
     delegates: const <LocalizationsDelegate<dynamic>>[
@@ -31,7 +31,6 @@ Widget buildFrame(TabController tabController, { Color? color, Color? selectedCo
                     color: color,
                     selectedColor: selectedColor,
                     indicatorSize: indicatorSize,
-                    borderStyle: borderStyle,
                   ),
                   Flexible(
                     child: TabBarView(
@@ -226,46 +225,4 @@ void main() {
     expect(tester.getSize(find.byType(TabPageSelector)).height, 24.0);
   });
 
-    testWidgets('PageSelector circle border', (WidgetTester tester) async {
-    final TabController tabController = TabController(
-      vsync: const TestVSync(),
-      initialIndex: 1,
-      length: 3,
-    );
-
-    Iterable<TabPageSelectorIndicator> indicators;
-
-    // Default border
-    await tester.pumpWidget(buildFrame(tabController));
-    indicators = tester.widgetList(
-      find.descendant(
-        of: find.byType(TabPageSelector),
-        matching: find.byType(TabPageSelectorIndicator),
-      ),
-    );
-    for (final TabPageSelectorIndicator indicator in indicators)
-      expect(indicator.borderStyle, BorderStyle.solid);
-
-    // No border
-    await tester.pumpWidget(buildFrame(tabController, borderStyle: BorderStyle.none));
-    indicators = tester.widgetList(
-      find.descendant(
-        of: find.byType(TabPageSelector),
-        matching: find.byType(TabPageSelectorIndicator),
-      ),
-    );
-    for (final TabPageSelectorIndicator indicator in indicators)
-      expect(indicator.borderStyle, BorderStyle.none);
-
-    // Solid border
-    await tester.pumpWidget(buildFrame(tabController, borderStyle: BorderStyle.solid));
-    indicators = tester.widgetList(
-      find.descendant(
-        of: find.byType(TabPageSelector),
-        matching: find.byType(TabPageSelectorIndicator),
-      ),
-    );
-    for (final TabPageSelectorIndicator indicator in indicators)
-      expect(indicator.borderStyle, BorderStyle.solid);
-  });
 }

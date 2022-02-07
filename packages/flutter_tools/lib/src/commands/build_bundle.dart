@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import '../base/common.dart';
 import '../build_info.dart';
 import '../bundle.dart';
@@ -16,8 +18,8 @@ import 'build.dart';
 class BuildBundleCommand extends BuildSubCommand {
   BuildBundleCommand({
     bool verboseHelp = false,
-    BundleBuilder? bundleBuilder,
-  }) :  _bundleBuilder = bundleBuilder ?? BundleBuilder(), super(verboseHelp: verboseHelp) {
+    this.bundleBuilder,
+  }) : super(verboseHelp: verboseHelp) {
     usesTargetOption();
     usesFilesystemOptions(hide: !verboseHelp);
     usesBuildNumberOption();
@@ -52,14 +54,18 @@ class BuildBundleCommand extends BuildSubCommand {
       )
       ..addFlag(
         'tree-shake-icons',
+        negatable: true,
+        defaultsTo: false,
         hide: !verboseHelp,
         help: '(deprecated) Icon font tree shaking is not supported by this command.',
       );
     usesPubOption();
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
+
+    bundleBuilder ??= BundleBuilder();
   }
 
-  final BundleBuilder _bundleBuilder;
+  BundleBuilder bundleBuilder;
 
   @override
   final String name = 'bundle';
@@ -87,7 +93,7 @@ class BuildBundleCommand extends BuildSubCommand {
 
   @override
   Future<void> validateCommand() async {
-    if (boolArg('tree-shake-icons')) {
+    if (argResults['tree-shake-icons'] as bool) {
       throwToolExit('The "--tree-shake-icons" flag is deprecated for "build bundle" and will be removed in a future version of Flutter.');
     }
     return super.validateCommand();
@@ -95,7 +101,7 @@ class BuildBundleCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final String targetPlatform = stringArg('target-platform')!;
+    final String targetPlatform = stringArg('target-platform');
     final TargetPlatform platform = getTargetPlatformForName(targetPlatform);
     if (platform == null) {
       throwToolExit('Unknown platform: $targetPlatform');
@@ -135,7 +141,7 @@ class BuildBundleCommand extends BuildSubCommand {
     final BuildInfo buildInfo = await getBuildInfo();
     displayNullSafetyMode(buildInfo);
 
-    await _bundleBuilder.build(
+    await bundleBuilder.build(
       platform: platform,
       buildInfo: buildInfo,
       mainPath: targetFile,

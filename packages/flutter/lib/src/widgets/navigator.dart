@@ -2801,7 +2801,7 @@ class _RouteEntry extends RouteTransitionRecord {
   bool get hasPage => route.settings is Page;
 
   bool canUpdateFrom(Page<dynamic> page) {
-    if (!willBePresent)
+    if (currentState.index > _RouteLifecycle.idle.index)
       return false;
     if (!hasPage)
       return false;
@@ -3349,7 +3349,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
           // controller at the end of the build.
           if (newHeroController.navigator != null) {
             final NavigatorState previousOwner = newHeroController.navigator!;
-            ServicesBinding.instance.addPostFrameCallback((Duration timestamp) {
+            ServicesBinding.instance!.addPostFrameCallback((Duration timestamp) {
               // We only check if this navigator still owns the hero controller.
               if (_heroControllerFromScope == newHeroController) {
                 final bool hasHeroControllerOwnerShip = _heroControllerFromScope!._navigator == this;
@@ -3515,11 +3515,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   /// The overlay this navigator uses for its visual presentation.
   OverlayState? get overlay => _overlayKey.currentState;
 
-  Iterable<OverlayEntry> get _allRouteOverlayEntries {
-    return <OverlayEntry>[
-      for (final _RouteEntry entry in _history)
-        ...entry.route.overlayEntries,
-    ];
+  Iterable<OverlayEntry> get _allRouteOverlayEntries sync* {
+    for (final _RouteEntry entry in _history)
+      yield* entry.route.overlayEntries;
   }
 
   String? _lastAnnouncedRouteName;
@@ -3635,9 +3633,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     // Scans middle of the old entries and records the page key to old entry map.
     int oldEntriesBottomToScan = oldEntriesBottom;
     final Map<LocalKey, _RouteEntry> pageKeyToOldEntry = <LocalKey, _RouteEntry>{};
-    // This set contains entries that are transitioning out but are still in
-    // the route stack.
-    final Set<_RouteEntry> phantomEntries = <_RouteEntry>{};
     while (oldEntriesBottomToScan <= oldEntriesTop) {
       final _RouteEntry oldEntry = _history[oldEntriesBottomToScan];
       oldEntriesBottomToScan += 1;
@@ -3653,14 +3648,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       assert(oldEntry.hasPage);
 
       final Page<dynamic> page = oldEntry.route.settings as Page<dynamic>;
-
       if (page.key == null)
         continue;
 
-      if (!oldEntry.willBePresent) {
-        phantomEntries.add(oldEntry);
-        continue;
-      }
       assert(!pageKeyToOldEntry.containsKey(page.key));
       pageKeyToOldEntry[page.key!] = oldEntry;
     }
@@ -3711,21 +3701,21 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
             () => <_RouteEntry>[],
           );
         pagelessRoutes.add(potentialEntryToRemove);
-        if (previousOldPageRouteEntry!.isWaitingForExitingDecision && potentialEntryToRemove.willBePresent)
+        if (previousOldPageRouteEntry!.isWaitingForExitingDecision && potentialEntryToRemove.isPresent)
           potentialEntryToRemove.markNeedsExitingDecision();
         continue;
       }
 
       final Page<dynamic> potentialPageToRemove = potentialEntryToRemove.route.settings as Page<dynamic>;
       // Marks for transition delegate to remove if this old page does not have
-      // a key, was not taken during updating the middle of new page, or is
-      // already transitioning out.
-      if (potentialPageToRemove.key == null ||
-          pageKeyToOldEntry.containsKey(potentialPageToRemove.key) ||
-          phantomEntries.contains(potentialEntryToRemove)) {
+      // a key or was not taken during updating the middle of new page.
+      if (
+        potentialPageToRemove.key == null ||
+        pageKeyToOldEntry.containsKey(potentialPageToRemove.key)
+      ) {
         locationToExitingPageRoute[previousOldPageRouteEntry] = potentialEntryToRemove;
         // We only need a decision if it has not already been popped.
-        if (potentialEntryToRemove.willBePresent)
+        if (potentialEntryToRemove.isPresent)
           potentialEntryToRemove.markNeedsExitingDecision();
       }
       previousOldPageRouteEntry = potentialEntryToRemove;
@@ -5023,15 +5013,11 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     bool? wasDebugLocked;
     assert(() { wasDebugLocked = _debugLocked; _debugLocked = true; return true; }());
     assert(_history.where(_RouteEntry.isRoutePredicate(route)).length == 1);
-    final int index = _history.indexWhere(_RouteEntry.isRoutePredicate(route));
-    final _RouteEntry entry =  _history[index];
-    // For page-based route with zero transition, the finalizeRoute can be
-    // called on any life cycle above pop.
-    if (entry.hasPage && entry.currentState.index < _RouteLifecycle.pop.index) {
-      _observedRouteDeletions.add(_NavigatorPopObservation(route, _getRouteBefore(index - 1, _RouteEntry.willBePresentPredicate)?.route));
-    } else {
-      assert(entry.currentState == _RouteLifecycle.popping);
-    }
+    final _RouteEntry entry =  _history.firstWhere(_RouteEntry.isRoutePredicate(route));
+    // For page-based route, the didPop can be called on any life cycle above
+    // pop.
+    assert(entry.currentState == _RouteLifecycle.popping ||
+          (entry.hasPage && entry.currentState.index < _RouteLifecycle.pop.index));
     entry.finalize();
     // finalizeRoute can be called during _flushHistoryUpdates if a pop
     // finishes synchronously.
@@ -5120,7 +5106,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
 
   void _cancelActivePointers() {
     // TODO(abarth): This mechanism is far from perfect. See https://github.com/flutter/flutter/issues/4770
-    if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.idle) {
+    if (SchedulerBinding.instance!.schedulerPhase == SchedulerPhase.idle) {
       // If we're between frames (SchedulerPhase.idle) then absorb any
       // subsequent pointers from this frame. The absorbing flag will be
       // reset in the next frame, see build().
@@ -5131,7 +5117,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
         // to false on the next frame.
       });
     }
-    _activePointers.toList().forEach(WidgetsBinding.instance.cancelPointer);
+    _activePointers.toList().forEach(WidgetsBinding.instance!.cancelPointer);
   }
 
   @override
@@ -5178,7 +5164,7 @@ abstract class _RestorationInformation {
     required int restorationScopeId,
   }) = _NamedRestorationInformation;
   factory _RestorationInformation.anonymous({
-    required RestorableRouteBuilder<Object?> routeBuilder,
+    required RestorableRouteBuilder routeBuilder,
     required Object? arguments,
     required int restorationScopeId,
   }) = _AnonymousRestorationInformation;
@@ -5277,7 +5263,7 @@ class _AnonymousRestorationInformation extends _RestorationInformation {
 
   factory _AnonymousRestorationInformation.fromSerializableData(List<Object?> data) {
     assert(data.length > 1);
-    final RestorableRouteBuilder<Object?> routeBuilder = ui.PluginUtilities.getCallbackFromHandle(ui.CallbackHandle.fromRawHandle(data[1]! as int))! as RestorableRouteBuilder;
+    final RestorableRouteBuilder routeBuilder = ui.PluginUtilities.getCallbackFromHandle(ui.CallbackHandle.fromRawHandle(data[1]! as int))! as RestorableRouteBuilder;
     return _AnonymousRestorationInformation(
       restorationScopeId: data[0]! as int,
       routeBuilder: routeBuilder,
@@ -5304,7 +5290,7 @@ class _AnonymousRestorationInformation extends _RestorationInformation {
 
   @override
   final int restorationScopeId;
-  final RestorableRouteBuilder<Object?> routeBuilder;
+  final RestorableRouteBuilder routeBuilder;
   final Object? arguments;
 
   @override

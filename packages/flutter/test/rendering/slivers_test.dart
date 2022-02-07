@@ -10,8 +10,6 @@ import 'package:vector_math/vector_math_64.dart';
 import 'rendering_tester.dart';
 
 void main() {
-  TestRenderingFlutterBinding.ensureInitialized();
-
   test('RenderViewport basic test - no children', () {
     final RenderViewport root = RenderViewport(
       crossAxisDirection: AxisDirection.right,

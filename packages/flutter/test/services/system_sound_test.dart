@@ -14,7 +14,6 @@ void main() {
 
     TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       log.add(methodCall);
-      return null;
     });
 
     await SystemSound.play(SystemSoundType.click);

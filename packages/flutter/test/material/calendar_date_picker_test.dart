@@ -577,7 +577,17 @@ void main() {
         await tester.sendKeyEvent(LogicalKeyboardKey.space);
         await tester.pumpAndSettle();
 
-        // Should have selected Jan 19.
+        // Navigate out of the grid and to the OK button.
+        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+        await tester.pumpAndSettle();
+
+        // Activate OK.
+        await tester.sendKeyEvent(LogicalKeyboardKey.space);
+        await tester.pumpAndSettle();
+
+        // Should have selected Jan 18.
         expect(selectedDate, DateTime(2016, DateTime.january, 19));
       });
     });
@@ -649,7 +659,7 @@ void main() {
 
         // Prev/Next month buttons.
         expect(tester.getSemantics(previousMonthIcon), matchesSemantics(
-          label: 'Previous month',
+          label: 'Previous month December 2015',
           isButton: true,
           hasTapAction: true,
           isEnabled: true,
@@ -657,7 +667,7 @@ void main() {
           isFocusable: true,
         ));
         expect(tester.getSemantics(nextMonthIcon), matchesSemantics(
-          label: 'Next month',
+          label: 'Next month February 2016',
           isButton: true,
           hasTapAction: true,
           isEnabled: true,
@@ -840,7 +850,6 @@ void main() {
             hasTapAction: true,
             isSelected: year == 2016,
             isFocusable: true,
-            isButton: true,
           ));
         }
       });

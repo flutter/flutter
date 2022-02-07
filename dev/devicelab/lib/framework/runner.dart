@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:convert';
+// import 'dart:core' as core;
 import 'dart:io';
 
 import 'package:meta/meta.dart';
@@ -28,10 +29,6 @@ import 'utils.dart';
 Future<void> runTasks(
   List<String> taskNames, {
   bool exitOnFirstTestFailure = false,
-  // terminateStrayDartProcesses defaults to false so that tests don't have to specify it.
-  // It is set based on the --terminate-stray-dart-processes command line argument in
-  // normal execution, and that flag defaults to true.
-  bool terminateStrayDartProcesses = false,
   bool silent = false,
   String? deviceId,
   String? gitBranch,
@@ -53,7 +50,6 @@ Future<void> runTasks(
         deviceId: deviceId,
         localEngine: localEngine,
         localEngineSrcPath: localEngineSrcPath,
-        terminateStrayDartProcesses: terminateStrayDartProcesses,
         silent: silent,
         taskArgs: taskArgs,
         resultsPath: resultsPath,
@@ -62,17 +58,15 @@ Future<void> runTasks(
         isolateParams: isolateParams,
       );
 
+      section('Flaky status for "$taskName"');
       if (!result.succeeded) {
-        retry += 1;
+        retry++;
       } else {
-        section('Flaky status for "$taskName"');
         if (retry > 0) {
-          print('Total ${retry+1} executions: $retry failures and 1 false positive.');
+          print('Total ${retry+1} executions: $retry failures and 1 success');
           print('flaky: true');
-          // TODO(ianh): stop ignoring this failure. We should set exitCode=1, and quit
-          // if exitOnFirstTestFailure is true.
         } else {
-          print('Test passed on first attempt.');
+          print('Total ${retry+1} executions: 1 success');
           print('flaky: false');
         }
         break;
@@ -80,8 +74,7 @@ Future<void> runTasks(
     }
 
     if (!result.succeeded) {
-      section('Flaky status for "$taskName"');
-      print('Consistently failed across all $retry executions.');
+      print('Total $retry executions: 0 success');
       print('flaky: false');
       exitCode = 1;
       if (exitOnFirstTestFailure) {
@@ -99,7 +92,6 @@ Future<TaskResult> rerunTask(
   String? deviceId,
   String? localEngine,
   String? localEngineSrcPath,
-  bool terminateStrayDartProcesses = false,
   bool silent = false,
   List<String>? taskArgs,
   String? resultsPath,
@@ -113,7 +105,6 @@ Future<TaskResult> rerunTask(
     deviceId: deviceId,
     localEngine: localEngine,
     localEngineSrcPath: localEngineSrcPath,
-    terminateStrayDartProcesses: terminateStrayDartProcesses,
     silent: silent,
     taskArgs: taskArgs,
     isolateParams: isolateParams,
@@ -147,12 +138,11 @@ Future<TaskResult> rerunTask(
 /// [taskArgs] are passed to the task executable for additional configuration.
 Future<TaskResult> runTask(
   String taskName, {
-  bool terminateStrayDartProcesses = false,
   bool silent = false,
   String? localEngine,
   String? localEngineSrcPath,
   String? deviceId,
-  List<String>? taskArgs,
+  List<String> ?taskArgs,
   @visibleForTesting Map<String, String>? isolateParams,
 }) async {
   final String taskExecutable = 'bin/tasks/$taskName.dart';
@@ -208,26 +198,17 @@ Future<TaskResult> runTask(
 
   try {
     final ConnectionResult result = await _connectToRunnerIsolate(await uri.future);
-    print('[$taskName] Connected to VM server.');
-    isolateParams = isolateParams == null ? <String, String>{} : Map<String, String>.of(isolateParams);
-    isolateParams['runProcessCleanup'] = terminateStrayDartProcesses.toString();
     final Map<String, dynamic> taskResultJson = (await result.vmService.callServiceExtension(
       'ext.cocoonRunTask',
       args: isolateParams,
       isolateId: result.isolate.id,
     )).json!;
     final TaskResult taskResult = TaskResult.fromJson(taskResultJson);
-    final int exitCode = await runner.exitCode;
-    print('[$taskName] Process terminated with exit code $exitCode.');
+    await runner.exitCode;
     return taskResult;
-  } catch (error, stack) {
-    print('[$taskName] Task runner system failed with exception!\n$error\n$stack');
-    rethrow;
   } finally {
-    if (!runnerFinished) {
-      print('[$taskName] Terminating process...');
+    if (!runnerFinished)
       runner.kill(ProcessSignal.sigkill);
-    }
     await stdoutSub.cancel();
     await stderrSub.cancel();
   }

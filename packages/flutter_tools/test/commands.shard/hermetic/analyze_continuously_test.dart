@@ -6,7 +6,6 @@
 
 import 'dart:async';
 
-import 'package:fake_async/fake_async.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
@@ -175,6 +174,7 @@ void main() {
   });
 
   testUsingContext('Can run AnalysisService with customized cache location', () async {
+    final Completer<void> completer = Completer<void>();
     final StreamController<List<int>> stdin = StreamController<List<int>>();
     final FakeProcessManager processManager = FakeProcessManager.list(
       <FakeCommand>[
@@ -188,6 +188,7 @@ void main() {
             '--sdk',
             'HostArtifact.engineDartSdkPath',
           ],
+          completer: completer,
           stdin: IOSink(stdin.sink),
         ),
       ]);
@@ -211,11 +212,6 @@ void main() {
   });
 
   testUsingContext('Can run AnalysisService with customized cache location --watch', () async {
-    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
-    fileSystem.directory('directoryA').childFile('foo').createSync(recursive: true);
-
-    final BufferLogger logger = BufferLogger.test();
-
     final Completer<void> completer = Completer<void>();
     final StreamController<List<int>> stdin = StreamController<List<int>>();
     final FakeProcessManager processManager = FakeProcessManager.list(
@@ -230,12 +226,8 @@ void main() {
             '--sdk',
             'HostArtifact.engineDartSdkPath',
           ],
+          completer: completer,
           stdin: IOSink(stdin.sink),
-          stdout: '''
-{"event":"server.status","params":{"analysis":{"isAnalyzing":true}}}
-{"event":"analysis.errors","params":{"file":"/directoryA/foo","errors":[{"type":"TestError","message":"It's an error.","severity":"warning","code":"500","location":{"file":"/directoryA/foo","startLine": 100,"startColumn":5,"offset":0}}]}}
-{"event":"server.status","params":{"analysis":{"isAnalyzing":false}}}
-'''
         ),
       ]);
 
@@ -243,78 +235,17 @@ void main() {
     final AnalyzeCommand command = AnalyzeCommand(
       terminal: Terminal.test(),
       artifacts: artifacts,
-      logger: logger,
-      platform: FakePlatform(),
-      fileSystem: fileSystem,
-      processManager: processManager,
-    );
-
-    await FakeAsync().run((FakeAsync time) async {
-      final TestFlutterCommandRunner commandRunner = TestFlutterCommandRunner();
-      commandRunner.addCommand(command);
-      unawaited(commandRunner.run(<String>['analyze', '--watch']));
-
-      while (!logger.statusText.contains('analyzed 1 file')) {
-        time.flushMicrotasks();
-      }
-      completer.complete();
-      return completer.future;
-    });
-    expect(logger.statusText, contains("warning • It's an error • directoryA/foo:100:5 • 500"));
-    expect(logger.statusText, contains('1 issue found. (1 new)'));
-    expect(logger.errorText, isEmpty);
-    expect(processManager, hasNoRemainingExpectations);
-  });
-
-  testUsingContext('AnalysisService --watch skips errors from non-files', () async {
-    final BufferLogger logger = BufferLogger.test();
-    final Completer<void> completer = Completer<void>();
-    final StreamController<List<int>> stdin = StreamController<List<int>>();
-    final FakeProcessManager processManager = FakeProcessManager.list(
-        <FakeCommand>[
-          FakeCommand(
-              command: const <String>[
-                'HostArtifact.engineDartSdkPath/bin/dart',
-                '--disable-dart-dev',
-                'HostArtifact.engineDartSdkPath/bin/snapshots/analysis_server.dart.snapshot',
-                '--disable-server-feature-completion',
-                '--disable-server-feature-search',
-                '--sdk',
-                'HostArtifact.engineDartSdkPath',
-              ],
-              stdin: IOSink(stdin.sink),
-              stdout: '''
-{"event":"server.status","params":{"analysis":{"isAnalyzing":true}}}
-{"event":"analysis.errors","params":{"file":"/directoryA/bar","errors":[{"type":"TestError","message":"It's an error.","severity":"warning","code":"500","location":{"file":"/directoryA/bar","startLine":100,"startColumn":5,"offset":0}}]}}
-{"event":"server.status","params":{"analysis":{"isAnalyzing":false}}}
-'''
-          ),
-        ]);
-
-    final Artifacts artifacts = Artifacts.test();
-    final AnalyzeCommand command = AnalyzeCommand(
-      terminal: Terminal.test(),
-      artifacts: artifacts,
-      logger: logger,
+      logger: BufferLogger.test(),
       platform: FakePlatform(),
       fileSystem: MemoryFileSystem.test(),
       processManager: processManager,
     );
 
-    await FakeAsync().run((FakeAsync time) async {
-      final TestFlutterCommandRunner commandRunner = TestFlutterCommandRunner();
-      commandRunner.addCommand(command);
-      unawaited(commandRunner.run(<String>['analyze', '--watch']));
+    final TestFlutterCommandRunner commandRunner = TestFlutterCommandRunner();
+    commandRunner.addCommand(command);
+    unawaited(commandRunner.run(<String>['analyze', '--watch']));
+    await stdin.stream.first;
 
-      while (!logger.statusText.contains('analyzed 1 file')) {
-        time.flushMicrotasks();
-      }
-      completer.complete();
-      return completer.future;
-    });
-
-    expect(logger.statusText, contains('No issues found!'));
-    expect(logger.errorText, isEmpty);
     expect(processManager, hasNoRemainingExpectations);
   });
 }

@@ -5,7 +5,7 @@
 import 'dart:async';
 
 import '_isolates_io.dart'
-  if (dart.library.html) '_isolates_web.dart' as isolates;
+  if (dart.library.html) '_isolates_web.dart' as _isolates;
 
 /// Signature for the callback passed to [compute].
 ///
@@ -26,11 +26,9 @@ typedef ComputeCallback<Q, R> = FutureOr<R> Function(Q message);
 /// few milliseconds, consider [SchedulerBinding.scheduleTask] instead.
 ///
 /// {@template flutter.foundation.compute.types}
-/// The [compute] method accepts the following parameters:
+/// `Q` is the type of the message that kicks off the computation.
 ///
-///  * `Q` is the type of the message that kicks off the computation.
-///
-///  * `R` is the type of the value returned.
+/// `R` is the type of the value returned.
 /// {@endtemplate}
 ///
 /// The `callback` argument must be a top-level function, not a closure or an
@@ -46,13 +44,9 @@ typedef ComputeCallback<Q, R> = FutureOr<R> Function(Q message);
 /// [Timeline]. This is useful when profiling an application.
 typedef ComputeImpl = Future<R> Function<Q, R>(ComputeCallback<Q, R> callback, Q message, { String? debugLabel });
 
-/// A function that spawns an isolate and runs a callback on that isolate. This
-/// method should be used to execute parallel tasks that reduce the risk of
-/// skipping frames.
-///
-/// {@youtube 560 315 https://www.youtube.com/watch?v=5AxWC49ZMzs}
+/// A function that spawns an isolate and runs a callback on that isolate.
 ///
 /// See also:
 ///
 ///   * [ComputeImpl], for function parameters and usage details.
-const ComputeImpl compute = isolates.compute;
+const ComputeImpl compute = _isolates.compute;

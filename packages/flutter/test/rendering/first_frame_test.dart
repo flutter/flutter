@@ -18,7 +18,6 @@ void main() {
     const MethodChannel firstFrameChannel = MethodChannel('flutter/service_worker');
     binding.defaultBinaryMessenger.setMockMethodCallHandler(firstFrameChannel, (MethodCall methodCall) async {
       completer.complete();
-      return null;
     });
 
     binding.handleBeginFrame(Duration.zero);

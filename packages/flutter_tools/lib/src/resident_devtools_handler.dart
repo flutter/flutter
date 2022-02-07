@@ -60,10 +60,7 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
   bool launchedInBrowser = false;
 
   @override
-  DevToolsServerAddress get activeDevToolsServer {
-    assert(!_readyToAnnounce || _devToolsLauncher?.activeDevToolsServer != null);
-    return _devToolsLauncher?.activeDevToolsServer;
-  }
+  DevToolsServerAddress get activeDevToolsServer => _devToolsLauncher?.activeDevToolsServer;
 
   @override
   bool get readyToAnnounce => _readyToAnnounce;
@@ -75,7 +72,6 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
     Uri devToolsServerAddress,
     @required List<FlutterDevice> flutterDevices,
   }) async {
-    assert(!_readyToAnnounce);
     if (!_residentRunner.supportsServiceProtocol || _devToolsLauncher == null) {
       return;
     }
@@ -86,20 +82,14 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
       _served = true;
     }
     await _devToolsLauncher.ready;
-    // Do not attempt to print debugger list if the connection has failed or if we're shutting down.
-    if (_devToolsLauncher.activeDevToolsServer == null || _shutdown) {
-      assert(!_readyToAnnounce);
+    // Do not attempt to print debugger list if the connection has failed.
+    if (_devToolsLauncher.activeDevToolsServer == null) {
       return;
     }
     final List<FlutterDevice> devicesWithExtension = await _devicesWithExtensions(flutterDevices);
     await _maybeCallDevToolsUriServiceExtension(devicesWithExtension);
     await _callConnectedVmServiceUriExtension(devicesWithExtension);
-    if (_shutdown) {
-      // If we're shutting down, no point reporting the debugger list.
-      return;
-    }
     _readyToAnnounce = true;
-    assert(_devToolsLauncher.activeDevToolsServer != null);
     if (_residentRunner.reportedDebuggers) {
       // Since the DevTools only just became available, we haven't had a chance to
       // report their URLs yet. Do so now.
@@ -258,7 +248,6 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
       return;
     }
     _shutdown = true;
-    _readyToAnnounce = false;
     await _devToolsLauncher.close();
   }
 }

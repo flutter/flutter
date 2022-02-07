@@ -12,8 +12,6 @@
 
 @interface MainViewController ()
 
-@property (weak, nonatomic) UIButton* flutterViewWarmButton;
-
 @end
 
 
@@ -41,7 +39,7 @@
   [self addButton:@"Native iOS View" action:@selector(showNative)];
   [self addButton:@"Full Screen (Cold)" action:@selector(showFullScreenCold)];
   [self addButton:@"Full Screen (Warm)" action:@selector(showFullScreenWarm)];
-  self.flutterViewWarmButton = [self addButton:@"Flutter View (Warm)" action:@selector(showFlutterViewWarm)];
+  [self addButton:@"Flutter View (Warm)" action:@selector(showFlutterViewWarm)];
   [self addButton:@"Hybrid View (Warm)" action:@selector(showHybridView)];
   [self addButton:@"Dual Flutter View (Cold)" action:@selector(showDualView)];
 }
@@ -101,47 +99,26 @@
 }
 
 - (void)showFlutterViewWarm {
-  self.flutterViewWarmButton.backgroundColor = UIColor.redColor;
-  FlutterEngine *engine = [self engine];
-  FlutterBasicMessageChannel* messageChannel = [self reloadMessageChannel];
-  NSAssert(engine != nil, @"Engine is not nil.");
-  NSAssert(engine.navigationChannel != nil, @"Engine.navigationChannel is not nil.");
-  NSAssert(messageChannel != nil, @"messageChannel is not nil.");
-
-  [engine.navigationChannel invokeMethod:@"setInitialRoute"
+  [[self engine].navigationChannel invokeMethod:@"setInitialRoute"
                                       arguments:@"/"];
-  [messageChannel sendMessage:@"/"];
+  [[self reloadMessageChannel] sendMessage:@"/"];
 
 
   FlutterViewController *flutterViewController =
       [[FlutterViewController alloc] initWithEngine:[self engine]
                                             nibName:nil
                                              bundle:nil];
-  flutterViewController.view.accessibilityLabel = @"flutter view";
-  NSAssert(self.navigationController != nil, @"self.navigationController is not nil.");
   [self.navigationController pushViewController:flutterViewController
-                                       animated:NO];
-
-  if (self.navigationController.topViewController != flutterViewController) {
-    // For debugging:
-    // Some unknown issue happened caused `flutterViewController` not being pushed.
-    // We try to push an basic UIViewController to see if it would work.
-    UIViewController *viewController = [[UIViewController alloc] init];
-    viewController.view.backgroundColor = UIColor.blueColor;
-    [self.navigationController pushViewController:viewController
-                                         animated:NO];
-    NSAssert(self.navigationController.topViewController == viewController, @"self.navigationController.topViewController should be the basic view controller");
-  }
+                                       animated:YES];
 }
 
-- (UIButton *)addButton:(NSString *)title action:(SEL)action {
+- (void)addButton:(NSString *)title action:(SEL)action {
   UIButton *button = [UIButton buttonWithType:UIButtonTypeSystem];
   [button setTitle:title forState:UIControlStateNormal];
   [button addTarget:self
                 action:action
       forControlEvents:UIControlEventTouchUpInside];
   [_stackView addArrangedSubview:button];
-  return button;
 }
 
 @end

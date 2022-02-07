@@ -413,10 +413,10 @@ class ThemeData with Diagnosticable {
     assert(colorSchemeSeed == null || colorScheme == null);
     assert(colorSchemeSeed == null || primarySwatch == null);
     assert(colorSchemeSeed == null || primaryColor == null);
-    final Brightness effectiveBrightness = brightness ?? colorScheme?.brightness ?? Brightness.light;
-    final bool isDark = effectiveBrightness == Brightness.dark;
+    final Brightness _brightness = brightness ?? colorScheme?.brightness ?? Brightness.light;
+    final bool isDark = _brightness == Brightness.dark;
     if (colorSchemeSeed != null) {
-      colorScheme = ColorScheme.fromSeed(seedColor: colorSchemeSeed, brightness: effectiveBrightness);
+      colorScheme = ColorScheme.fromSeed(seedColor: colorSchemeSeed, brightness: _brightness);
 
       // For surfaces that use primary color in light themes and surface color in dark
       final Color primarySurfaceColor = isDark ? colorScheme.surface : colorScheme.primary;
@@ -441,10 +441,10 @@ class ThemeData with Diagnosticable {
     applyElevationOverlayColor ??= false;
     primarySwatch ??= Colors.blue;
     primaryColor ??= isDark ? Colors.grey[900]! : primarySwatch;
-    final Brightness estimatedPrimaryColorBrightness = estimateBrightnessForColor(primaryColor);
+    final Brightness _primaryColorBrightness = estimateBrightnessForColor(primaryColor);
     primaryColorLight ??= isDark ? Colors.grey[500]! : primarySwatch[100]!;
     primaryColorDark ??= isDark ? Colors.black : primarySwatch[700]!;
-    final bool primaryIsDark = estimatedPrimaryColorBrightness == Brightness.dark;
+    final bool primaryIsDark = _primaryColorBrightness == Brightness.dark;
     toggleableActiveColor ??= isDark ? Colors.tealAccent[200]! : (accentColor ?? primarySwatch[600]!);
     accentColor ??= isDark ? Colors.tealAccent[200]! : primarySwatch[500]!;
     accentColorBrightness ??= estimateBrightnessForColor(accentColor);
@@ -466,7 +466,7 @@ class ThemeData with Diagnosticable {
       cardColor: cardColor,
       backgroundColor: backgroundColor,
       errorColor: errorColor,
-      brightness: effectiveBrightness,
+      brightness: _brightness,
     );
     selectedRowColor ??= Colors.grey[100]!;
     unselectedWidgetColor ??= isDark ? Colors.white70 : Colors.black54;
@@ -551,7 +551,7 @@ class ThemeData with Diagnosticable {
     accentIconTheme ??= accentIsDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black);
     buttonColor ??= isDark ? primarySwatch[600]! : Colors.grey[300]!;
     fixTextFieldOutlineLabel ??= true;
-    primaryColorBrightness = estimatedPrimaryColorBrightness;
+    primaryColorBrightness = _primaryColorBrightness;
 
     return ThemeData.raw(
       // GENERAL CONFIGURATION
@@ -1134,6 +1134,10 @@ class ThemeData with Diagnosticable {
   /// start using new colors, typography and other features of Material 3.
   /// If false, they will use the Material 2 look and feel.
   ///
+  /// Currently no components have been migrated to support Material 3.
+  /// As they are updated to include Material 3 support this documentation
+  /// will be modified to indicate exactly what widgets this flag will affect.
+  ///
   /// During the migration to Material 3, turning this on may yield
   /// inconsistent look and feel in your app. Some components will be migrated
   /// before others and typography changes will be coming in stages.
@@ -1143,10 +1147,6 @@ class ThemeData with Diagnosticable {
   /// that change has landed on stable, we will deprecate this flag and remove
   /// all uses of it. Everything will use the Material 3 look and feel at
   /// that point.
-  ///
-  /// Components that have been migrated to Material 3 are:
-  ///
-  ///   * [FloatingActionButton]
   ///
   /// See also:
   ///
@@ -2592,7 +2592,7 @@ class VisualDensity with Diagnosticable {
   static VisualDensity lerp(VisualDensity a, VisualDensity b, double t) {
     return VisualDensity(
       horizontal: lerpDouble(a.horizontal, b.horizontal, t)!,
-      vertical: lerpDouble(a.vertical, b.vertical, t)!,
+      vertical: lerpDouble(a.horizontal, b.horizontal, t)!,
     );
   }
 

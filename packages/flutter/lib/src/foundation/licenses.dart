@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:meta/meta.dart' show visibleForTesting;
 
 /// Signature for callbacks passed to [LicenseRegistry.addLicense].
@@ -72,8 +70,8 @@ enum _LicenseEntryWithLineBreaksParserState {
 ///
 /// ```dart
 /// void initMyLibrary() {
-///   LicenseRegistry.addLicense(() => Stream<LicenseEntry>.value(
-///     const LicenseEntryWithLineBreaks(<String>['my_library'], '''
+///   LicenseRegistry.addLicense(() async* {
+///     yield const LicenseEntryWithLineBreaks(<String>['my_library'], '''
 /// Copyright 2016 The Sample Authors. All rights reserved.
 ///
 /// Redistribution and use in source and binary forms, with or without
@@ -100,9 +98,8 @@ enum _LicenseEntryWithLineBreaksParserState {
 /// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 /// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 /// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-/// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
-///     ),
-///   ));
+/// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''');
+///   });
 /// }
 /// ```
 /// {@end-tool}
@@ -142,7 +139,7 @@ class LicenseEntryWithLineBreaks extends LicenseEntry {
   final String text;
 
   @override
-  Iterable<LicenseParagraph> get paragraphs {
+  Iterable<LicenseParagraph> get paragraphs sync* {
     int lineStart = 0;
     int currentPosition = 0;
     int lastLineIndent = 0;
@@ -150,7 +147,6 @@ class LicenseEntryWithLineBreaks extends LicenseEntry {
     int? currentParagraphIndentation;
     _LicenseEntryWithLineBreaksParserState state = _LicenseEntryWithLineBreaksParserState.beforeParagraph;
     final List<String> lines = <String>[];
-    final List<LicenseParagraph> result = <LicenseParagraph>[];
 
     void addLine() {
       assert(lineStart < currentPosition);
@@ -186,7 +182,7 @@ class LicenseEntryWithLineBreaks extends LicenseEntry {
             case '\n':
             case '\f':
               if (lines.isNotEmpty) {
-                result.add(getParagraph());
+                yield getParagraph();
               }
               if (text[currentPosition] == '\r' && currentPosition < text.length - 1
                   && text[currentPosition + 1] == '\n') {
@@ -210,7 +206,7 @@ class LicenseEntryWithLineBreaks extends LicenseEntry {
             startParagraph:
             default:
               if (lines.isNotEmpty && currentLineIndent > lastLineIndent) {
-                result.add(getParagraph());
+                yield getParagraph();
                 currentParagraphIndentation = null;
               }
               // The following is a wild heuristic for guessing the indentation level.
@@ -235,7 +231,7 @@ class LicenseEntryWithLineBreaks extends LicenseEntry {
               break;
             case '\f':
               addLine();
-              result.add(getParagraph());
+              yield getParagraph();
               lastLineIndent = 0;
               currentLineIndent = 0;
               currentParagraphIndentation = null;
@@ -252,15 +248,14 @@ class LicenseEntryWithLineBreaks extends LicenseEntry {
     switch (state) {
       case _LicenseEntryWithLineBreaksParserState.beforeParagraph:
         if (lines.isNotEmpty) {
-          result.add(getParagraph());
+          yield getParagraph();
         }
         break;
       case _LicenseEntryWithLineBreaksParserState.inParagraph:
         addLine();
-        result.add(getParagraph());
+        yield getParagraph();
         break;
     }
-    return result;
   }
 }
 
@@ -312,19 +307,11 @@ class LicenseRegistry {
   /// Returns the licenses that have been registered.
   ///
   /// Generating the list of licenses is expensive.
-  static Stream<LicenseEntry> get licenses {
+  static Stream<LicenseEntry> get licenses async* {
     if (_collectors == null)
-      return const Stream<LicenseEntry>.empty();
-
-    late final StreamController<LicenseEntry> controller;
-    controller = StreamController<LicenseEntry>(
-      onListen: () async {
-        for (final LicenseEntryCollector collector in _collectors!)
-          await controller.addStream(collector());
-        await controller.close();
-      },
-    );
-    return controller.stream;
+      return;
+    for (final LicenseEntryCollector collector in _collectors!)
+      yield* collector();
   }
 
   /// Resets the internal state of [LicenseRegistry]. Intended for use in

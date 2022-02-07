@@ -466,11 +466,11 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
     ]);
 
     // CARD
-    return Card(
-      semanticContainer: false,
-      child: LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints constraints) {
-          return Column(
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        return Card(
+          semanticContainer: false,
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
               if (headerWidgets.isNotEmpty)
@@ -547,9 +547,9 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
                 ),
               ),
             ],
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 }

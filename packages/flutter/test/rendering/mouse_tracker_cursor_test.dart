@@ -16,8 +16,8 @@ typedef MethodCallHandler = Future<dynamic> Function(MethodCall call);
 typedef SimpleAnnotationFinder = Iterable<HitTestTarget> Function(Offset offset);
 
 void main() {
-  final TestMouseTrackerFlutterBinding binding = TestMouseTrackerFlutterBinding();
-  MethodCallHandler? methodCallHandler;
+  final TestMouseTrackerFlutterBinding _binding = TestMouseTrackerFlutterBinding();
+  MethodCallHandler? _methodCallHandler;
 
   // Only one of `logCursors` and `cursorHandler` should be specified.
   void _setUpMouseTracker({
@@ -26,14 +26,14 @@ void main() {
     MethodCallHandler? cursorHandler,
   }) {
     assert(logCursors == null || cursorHandler == null);
-    methodCallHandler = logCursors != null
+    _methodCallHandler = logCursors != null
       ? (MethodCall call) async {
         logCursors.add(_CursorUpdateDetails.wrap(call));
         return;
       }
       : cursorHandler;
 
-    binding.setHitTest((BoxHitTestResult result, Offset position) {
+    _binding.setHitTest((BoxHitTestResult result, Offset position) {
       for (final HitTestTarget target in annotationFinder(position)) {
         result.addWithRawTransform(
           transform: Matrix4.identity(),
@@ -55,17 +55,15 @@ void main() {
   }
 
   setUp(() {
-    binding.postFrameCallbacks.clear();
-    binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.mouseCursor, (MethodCall call) async {
-      if (methodCallHandler != null) {
-        return methodCallHandler!(call);
-      }
-      return null;
+    _binding.postFrameCallbacks.clear();
+    _binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.mouseCursor, (MethodCall call) async {
+      if (_methodCallHandler != null)
+        return _methodCallHandler!(call);
     });
   });
 
   tearDown(() {
-    binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.mouseCursor, null);
+    _binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.mouseCursor, null);
   });
 
   test('Should work on platforms that does not support mouse cursor', () async {
@@ -221,8 +219,8 @@ void main() {
 
     // Synthesize a new frame while changing annotation
     annotation = const TestAnnotationTarget(cursor: SystemMouseCursors.grabbing);
-    binding.scheduleMouseTrackerPostFrameCheck();
-    binding.flushPostFrameCallbacks(Duration.zero);
+    _binding.scheduleMouseTrackerPostFrameCheck();
+    _binding.flushPostFrameCallbacks(Duration.zero);
 
     expect(logCursors, <_CursorUpdateDetails>[
       _CursorUpdateDetails.activateSystemCursor(device: 0, kind: SystemMouseCursors.grabbing.kind),
@@ -231,7 +229,7 @@ void main() {
 
     // Synthesize a new frame without changing annotation
     annotation = const TestAnnotationTarget(cursor: SystemMouseCursors.grabbing);
-    binding.scheduleMouseTrackerPostFrameCheck();
+    _binding.scheduleMouseTrackerPostFrameCheck();
 
     expect(logCursors, <_CursorUpdateDetails>[]);
     logCursors.clear();

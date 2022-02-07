@@ -68,7 +68,7 @@ void main() {
       final File apkFile = fileSystem.file('app.apk')..createSync();
       final AndroidApk apk = AndroidApk(
         id: 'FlutterApp',
-        applicationPackage: apkFile,
+        file: apkFile,
         launchActivity: 'FlutterActivity',
         versionCode: 1,
       );
@@ -103,6 +103,7 @@ void main() {
           'android.intent.action.RUN',
           '-f',
           '0x20000000',
+          '--ez', 'enable-background-compilation', 'true',
           '--ez', 'enable-dart-profiling', 'true',
           'FlutterActivity',
         ],
@@ -133,7 +134,7 @@ void main() {
     final File apkFile = fileSystem.file('app.apk')..createSync();
     final AndroidApk apk = AndroidApk(
       id: 'FlutterApp',
-      applicationPackage: apkFile,
+      file: apkFile,
       launchActivity: 'FlutterActivity',
       versionCode: 1,
     );
@@ -171,7 +172,7 @@ void main() {
     final File apkFile = fileSystem.file('app.apk')..createSync();
     final AndroidApk apk = AndroidApk(
       id: 'FlutterApp',
-      applicationPackage: apkFile,
+      file: apkFile,
       launchActivity: 'FlutterActivity',
       versionCode: 1,
     );
@@ -230,6 +231,7 @@ void main() {
         '-f',
         '0x20000000',
         // The DebuggingOptions arguments go here.
+        '--ez', 'enable-background-compilation', 'true',
         '--ez', 'enable-dart-profiling', 'true',
         '--ez', 'enable-software-rendering', 'true',
         '--ez', 'skia-deterministic-rendering', 'true',

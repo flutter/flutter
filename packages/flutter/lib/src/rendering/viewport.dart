@@ -1718,40 +1718,37 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
   }
 
   @override
-  Iterable<RenderSliver> get childrenInPaintOrder {
-    final List<RenderSliver> children = <RenderSliver>[];
+  Iterable<RenderSliver> get childrenInPaintOrder sync* {
     if (firstChild == null)
-      return children;
+      return;
     RenderSliver? child = firstChild;
     while (child != center) {
-      children.add(child!);
+      yield child!;
       child = childAfter(child);
     }
     child = lastChild;
     while (true) {
-      children.add(child!);
+      yield child!;
       if (child == center)
-        return children;
+        return;
       child = childBefore(child);
     }
   }
 
   @override
-  Iterable<RenderSliver> get childrenInHitTestOrder {
-    final List<RenderSliver> children = <RenderSliver>[];
+  Iterable<RenderSliver> get childrenInHitTestOrder sync* {
     if (firstChild == null)
-      return children;
+      return;
     RenderSliver? child = center;
     while (child != null) {
-      children.add(child);
+      yield child;
       child = childAfter(child);
     }
     child = childBefore(center!);
     while (child != null) {
-      children.add(child);
+      yield child;
       child = childBefore(child);
     }
-    return children;
   }
 
   @override
@@ -2033,24 +2030,20 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
   String labelForChild(int index) => 'child $index';
 
   @override
-  Iterable<RenderSliver> get childrenInPaintOrder {
-    final List<RenderSliver> children = <RenderSliver>[];
+  Iterable<RenderSliver> get childrenInPaintOrder sync* {
     RenderSliver? child = lastChild;
     while (child != null) {
-      children.add(child);
+      yield child;
       child = childBefore(child);
     }
-    return children;
   }
 
   @override
-  Iterable<RenderSliver> get childrenInHitTestOrder {
-    final List<RenderSliver> children = <RenderSliver>[];
+  Iterable<RenderSliver> get childrenInHitTestOrder sync* {
     RenderSliver? child = firstChild;
     while (child != null) {
-      children.add(child);
+      yield child;
       child = childAfter(child);
     }
-    return children;
   }
 }

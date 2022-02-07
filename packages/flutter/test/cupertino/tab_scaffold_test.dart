@@ -8,7 +8,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../image_data.dart';
-import '../rendering/rendering_tester.dart' show TestCallbackPainter;
+import '../rendering/rendering_tester.dart';
 
 late List<int> selectedTabs;
 

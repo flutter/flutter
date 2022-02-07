@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 @import XCTest;
-@import os.log;
 
 static const CGFloat kStandardTimeOut = 60.0;
 
@@ -43,7 +42,7 @@ static const CGFloat kStandardTimeOut = 60.0;
     if (!newPageAppeared) {
         // Sometimes, the element doesn't respond to the tap, it seems an XCUITest race condition where the tap happened
         // too soon. Trying to tap the element again.
-        [self waitForAndTapElement:app.buttons[@"Full Screen (Warm)"]];
+        [self waitForAndTapElement:app.buttons[@"Full Screen (Warm))"]];
         newPageAppeared = [app.staticTexts[@"Button tapped 0 times."] waitForExistenceWithTimeout:kStandardTimeOut];
     }
     XCTAssertTrue(newPageAppeared);
@@ -62,13 +61,10 @@ static const CGFloat kStandardTimeOut = 60.0;
     [self waitForAndTapElement:app.buttons[@"Flutter View (Warm)"]];
     BOOL newPageAppeared = [app.staticTexts[@"Button tapped 0 times."] waitForExistenceWithTimeout:kStandardTimeOut];
     if (!newPageAppeared) {
-      // Sometimes, the element doesn't respond to the tap, it seems an XCUITest race condition where the tap happened
-      // too soon. Trying to tap the element again.
-      [self waitForAndTapElement:app.buttons[@"Flutter View (Warm)"]];
-      newPageAppeared = [app.staticTexts[@"Button tapped 0 times."] waitForExistenceWithTimeout:kStandardTimeOut];
-      if (!newPageAppeared) {
-        os_log(OS_LOG_DEFAULT, "%@", app.debugDescription);
-      }
+        // Sometimes, the element doesn't respond to the tap, it seems an XCUITest race condition where the tap happened
+        // too soon. Trying to tap the element again.
+        [self waitForAndTapElement:app.buttons[@"Flutter View (Warm)"]];
+        newPageAppeared = [app.staticTexts[@"Button tapped 0 times."] waitForExistenceWithTimeout:kStandardTimeOut];
     }
     XCTAssertTrue(newPageAppeared);
 

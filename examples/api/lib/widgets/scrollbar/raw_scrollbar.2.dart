@@ -39,7 +39,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
   Widget build(BuildContext context) {
     return RawScrollbar(
       controller: _controllerOne,
-      thumbVisibility: true,
+      isAlwaysShown: true,
       child: GridView.builder(
         controller: _controllerOne,
         itemCount: 120,

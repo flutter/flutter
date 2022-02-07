@@ -76,10 +76,7 @@ final List<GradleHandledError> gradleErrors = <GradleHandledError>[
   lockFileDepMissing,
   multidexErrorHandler,
   incompatibleKotlinVersionHandler,
-  minCompileSdkVersionHandler,
 ];
-
-const String _boxTitle = 'Flutter Fix';
 
 // Multidex error message.
 @visibleForTesting
@@ -166,9 +163,9 @@ final GradleHandledError multidexErrorHandler = GradleHandledError(
         }
       }
     } else {
-      globals.printBox(
+      globals.printStatus(
         'Flutter multidex handling is disabled. If you wish to let the tool configure multidex, use the --mutidex flag.',
-        title: _boxTitle,
+        indent: 4,
       );
     }
     return GradleBuildStatus.exit;
@@ -188,11 +185,11 @@ final GradleHandledError permissionDeniedErrorHandler = GradleHandledError(
     required bool usesAndroidX,
     required bool multidexEnabled,
   }) async {
-    globals.printBox(
-      '${globals.logger.terminal.warningMark} Gradle does not have execution permission.\n'
+    globals.printStatus('${globals.logger.terminal.warningMark} Gradle does not have execution permission.', emphasis: true);
+    globals.printStatus(
       'You should change the ownership of the project directory to your user, '
       'or move the project to a directory with execute permissions.',
-      title: _boxTitle,
+      indent: 4,
     );
     return GradleBuildStatus.exit;
   },
@@ -255,12 +252,9 @@ final GradleHandledError r8FailureHandler = GradleHandledError(
     required bool usesAndroidX,
     required bool multidexEnabled,
   }) async {
-    globals.printBox(
-      '${globals.logger.terminal.warningMark} The shrinker may have failed to optimize the Java bytecode.\n'
-      'To disable the shrinker, pass the `--no-shrink` flag to this command.\n'
-      'To learn more, see: https://developer.android.com/studio/build/shrink-code',
-      title: _boxTitle,
-    );
+    globals.printStatus('${globals.logger.terminal.warningMark} The shrinker may have failed to optimize the Java bytecode.', emphasis: true);
+    globals.printStatus('To disable the shrinker, pass the `--no-shrink` flag to this command.', indent: 4);
+    globals.printStatus('To learn more, see: https://developer.android.com/studio/build/shrink-code', indent: 4);
     return GradleBuildStatus.exit;
   },
   eventLabel: 'r8',
@@ -286,13 +280,12 @@ final GradleHandledError licenseNotAcceptedHandler = GradleHandledError(
     final RegExp licenseFailure = RegExp(licenseNotAcceptedMatcher, multiLine: true);
     assert(licenseFailure != null);
     final Match? licenseMatch = licenseFailure.firstMatch(line);
-    globals.printBox(
+    globals.printStatus(
       '${globals.logger.terminal.warningMark} Unable to download needed Android SDK components, as the '
-      'following licenses have not been accepted: '
+      'following licenses have not been accepted:\n'
       '${licenseMatch?.group(1)}\n\n'
       'To resolve this, please run the following command in a Terminal:\n'
-      'flutter doctor --android-licenses',
-      title: _boxTitle,
+      'flutter doctor --android-licenses'
     );
     return GradleBuildStatus.exit;
   },
@@ -351,23 +344,21 @@ final GradleHandledError flavorUndefinedHandler = GradleHandledError(
         }
       }
     }
-    final String errorMessage = '${globals.logger.terminal.warningMark}  Gradle project does not define a task suitable for the requested build.';
-    final File buildGradle = project.directory.childDirectory('android').childDirectory('app').childFile('build.gradle');
+    globals.printStatus(
+      '\n${globals.logger.terminal.warningMark}  Gradle project does not define a task suitable '
+      'for the requested build.'
+    );
     if (productFlavors.isEmpty) {
-      globals.printBox(
-        '$errorMessage\n\n'
-        'The ${buildGradle.absolute.path} file does not define '
+      globals.printStatus(
+        'The android/app/build.gradle file does not define '
         'any custom product flavors. '
-        'You cannot use the --flavor option.',
-        title: _boxTitle,
+        'You cannot use the --flavor option.'
       );
     } else {
-      globals.printBox(
-        '$errorMessage\n\n'
-        'The ${buildGradle.absolute.path} file defines product '
-        'flavors: ${productFlavors.join(', ')}. '
-        'You must specify a --flavor option to select one of them.',
-        title: _boxTitle,
+      globals.printStatus(
+        'The android/app/build.gradle file defines product '
+        'flavors: ${productFlavors.join(', ')} '
+        'You must specify a --flavor option to select one of them.'
       );
     }
     return GradleBuildStatus.exit;
@@ -398,7 +389,7 @@ final GradleHandledError minSdkVersion = GradleHandledError(
     final Match? minSdkVersionMatch = _minSdkVersionPattern.firstMatch(line);
     assert(minSdkVersionMatch?.groupCount == 3);
 
-    final String textInBold = globals.logger.terminal.bolden(
+    final String bold = globals.logger.terminal.bolden(
       'Fix this issue by adding the following to the file ${gradleFile.path}:\n'
       'android {\n'
       '  defaultConfig {\n'
@@ -406,12 +397,12 @@ final GradleHandledError minSdkVersion = GradleHandledError(
       '  }\n'
       '}\n'
     );
-    globals.printBox(
+    globals.printStatus(
+      '\n'
       'The plugin ${minSdkVersionMatch?.group(3)} requires a higher Android SDK version.\n'
-      '$textInBold\n'
+      '$bold\n'
       "Note that your app won't be available to users running Android SDKs below ${minSdkVersionMatch?.group(2)}.\n"
-      'Alternatively, try to find a version of this plugin that supports these lower versions of the Android SDK.',
-      title: _boxTitle,
+      'Alternatively, try to find a version of this plugin that supports these lower versions of the Android SDK.'
     );
     return GradleBuildStatus.exit;
   },
@@ -435,7 +426,7 @@ final GradleHandledError transformInputIssue = GradleHandledError(
         .childDirectory('android')
         .childDirectory('app')
         .childFile('build.gradle');
-    final String textInBold = globals.logger.terminal.bolden(
+    final String bold = globals.logger.terminal.bolden(
       'Fix this issue by adding the following to the file ${gradleFile.path}:\n'
       'android {\n'
       '  lintOptions {\n'
@@ -443,10 +434,10 @@ final GradleHandledError transformInputIssue = GradleHandledError(
       '  }\n'
       '}'
     );
-    globals.printBox(
+    globals.printStatus(
+      '\n'
       'This issue appears to be https://github.com/flutter/flutter/issues/58247.\n'
-      '$textInBold',
-      title: _boxTitle,
+      '$bold'
     );
     return GradleBuildStatus.exit;
   },
@@ -468,14 +459,14 @@ final GradleHandledError lockFileDepMissing = GradleHandledError(
     final File gradleFile = project.directory
         .childDirectory('android')
         .childFile('build.gradle');
-    final String textInBold = globals.logger.terminal.bolden(
+    final String bold = globals.logger.terminal.bolden(
       'To regenerate the lockfiles run: `./gradlew :generateLockfiles` in ${gradleFile.path}\n'
-      'To remove dependency locking, remove the `dependencyLocking` from ${gradleFile.path}'
+      'To remove dependency locking, remove the `dependencyLocking` from ${gradleFile.path}\n'
     );
-    globals.printBox(
+    globals.printStatus(
+      '\n'
       'You need to update the lockfile, or disable Gradle dependency locking.\n'
-      '$textInBold',
-      title: _boxTitle,
+      '$bold'
     );
     return GradleBuildStatus.exit;
   },
@@ -496,44 +487,17 @@ final GradleHandledError incompatibleKotlinVersionHandler = GradleHandledError(
     final File gradleFile = project.directory
         .childDirectory('android')
         .childFile('build.gradle');
-    globals.printBox(
-      '${globals.logger.terminal.warningMark} Your project requires a newer version of the Kotlin Gradle plugin.\n'
-      'Find the latest version on https://kotlinlang.org/docs/gradle.html#plugin-and-versions, then update ${gradleFile.path}:\n'
+    globals.printStatus(
+      '${globals.logger.terminal.warningMark} Your project requires a newer version of the Kotlin Gradle plugin.',
+      emphasis: true,
+    );
+    globals.printStatus(
+      'Find the latest version on https://kotlinlang.org/docs/gradle.html#plugin-and-versions, '
+      'then update ${gradleFile.path}:\n'
       "ext.kotlin_version = '<latest-version>'",
-      title: _boxTitle,
+      indent: 4,
     );
     return GradleBuildStatus.exit;
   },
   eventLabel: 'incompatible-kotlin-version',
-);
-
-final RegExp _minCompileSdkVersionPattern = RegExp(r'The minCompileSdk \(([0-9]+)\) specified in a');
-
-@visibleForTesting
-final GradleHandledError minCompileSdkVersionHandler = GradleHandledError(
-  test: _minCompileSdkVersionPattern.hasMatch,
-  handler: ({
-    required String line,
-    required FlutterProject project,
-    required bool usesAndroidX,
-    required bool multidexEnabled,
-  }) async {
-    final Match? minSdkVersionMatch = _minCompileSdkVersionPattern.firstMatch(line);
-    assert(minSdkVersionMatch?.groupCount == 1);
-
-    final File gradleFile = project.directory
-        .childDirectory('android')
-        .childDirectory('app')
-        .childFile('build.gradle');
-    globals.printBox(
-      '${globals.logger.terminal.warningMark} Your project requires a higher compileSdkVersion.\n'
-      'Fix this issue by bumping the compileSdkVersion in ${gradleFile.path}:\n'
-      'android {\n'
-      '  compileSdkVersion ${minSdkVersionMatch?.group(1)}\n'
-      '}',
-      title: _boxTitle,
-    );
-    return GradleBuildStatus.exit;
-  },
-  eventLabel: 'min-compile-sdk-version',
 );

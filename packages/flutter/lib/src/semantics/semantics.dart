@@ -217,7 +217,7 @@ class AttributedString {
 
     // None of the strings is empty.
     final String newString = string + other.string;
-    final List<StringAttribute> newAttributes = List<StringAttribute>.of(attributes);
+    final List<StringAttribute> newAttributes = List<StringAttribute>.from(attributes);
     if (other.attributes.isNotEmpty) {
       final int offset = string.length;
       for (final StringAttribute attribute in other.attributes) {
@@ -1739,7 +1739,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       }
       assert(!newChildren.any((SemanticsNode node) => node.isMergedIntoParent) || isPartOfNodeMerging);
 
-      _debugPreviousSnapshot = List<SemanticsNode>.of(newChildren);
+      _debugPreviousSnapshot = List<SemanticsNode>.from(newChildren);
 
       SemanticsNode ancestor = this;
       while (ancestor.parent is SemanticsNode)
@@ -2262,8 +2262,8 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     _flags = config._flags;
     _textDirection = config.textDirection;
     _sortKey = config.sortKey;
-    _actions = Map<SemanticsAction, SemanticsActionHandler>.of(config._actions);
-    _customSemanticsActions = Map<CustomSemanticsAction, VoidCallback>.of(config._customSemanticsActions);
+    _actions = Map<SemanticsAction, SemanticsActionHandler>.from(config._actions);
+    _customSemanticsActions = Map<CustomSemanticsAction, VoidCallback>.from(config._customSemanticsActions);
     _actionsAsBits = config._actionsAsBits;
     _textSelection = config._textSelection;
     _isMultiline = config.isMultiline;
@@ -2304,7 +2304,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     AttributedString attributedDecreasedValue = _attributedDecreasedValue;
     AttributedString attributedHint = _attributedHint;
     TextDirection? textDirection = _textDirection;
-    Set<SemanticsTag>? mergedTags = tags == null ? null : Set<SemanticsTag>.of(tags!);
+    Set<SemanticsTag>? mergedTags = tags == null ? null : Set<SemanticsTag>.from(tags!);
     TextSelection? textSelection = _textSelection;
     int? scrollChildCount = _scrollChildCount;
     int? scrollIndex = _scrollIndex;
@@ -3032,7 +3032,7 @@ class SemanticsOwner extends ChangeNotifier {
       }
     }
     visitedNodes.sort((SemanticsNode a, SemanticsNode b) => a.depth - b.depth);
-    final ui.SemanticsUpdateBuilder builder = SemanticsBinding.instance.createSemanticsUpdateBuilder();
+    final ui.SemanticsUpdateBuilder builder = SemanticsBinding.instance!.createSemanticsUpdateBuilder();
     for (final SemanticsNode node in visitedNodes) {
       assert(node.parent?._dirty != true); // could be null (no parent) or false (not dirty)
       // The _serialize() method marks the node as not dirty, and
@@ -3053,7 +3053,7 @@ class SemanticsOwner extends ChangeNotifier {
       final CustomSemanticsAction action = CustomSemanticsAction.getAction(actionId)!;
       builder.updateCustomAction(id: actionId, label: action.label, hint: action.hint, overrideId: action.action?.index ?? -1);
     }
-    SemanticsBinding.instance.window.updateSemantics(builder.build());
+    SemanticsBinding.instance!.window.updateSemantics(builder.build());
     notifyListeners();
   }
 

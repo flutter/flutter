@@ -289,11 +289,11 @@ void main() {
 
     const TextStyle titleTextStyle = TextStyle(
       fontSize: 20,
-      color: Colors.indigo,
+      color: Colors.black,
     );
     const TextStyle subtitleTextStyle = TextStyle(
       fontSize: 15,
-      color: Colors.indigo,
+      color: Colors.red,
     );
 
     await tester.pumpWidget(
@@ -315,7 +315,6 @@ void main() {
               headline6: titleTextStyle,
               subtitle2: subtitleTextStyle,
             ),
-            foregroundColor: Colors.indigo,
           ),
         ),
         home: const Center(

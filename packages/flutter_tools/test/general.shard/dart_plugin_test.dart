@@ -13,7 +13,6 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/plugins.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:package_config/package_config.dart';
-import 'package:pub_semver/pub_semver.dart';
 import 'package:test/fake.dart';
 import 'package:yaml/yaml.dart';
 
@@ -57,7 +56,6 @@ void main() {
                 },
               },
             }),
-            null,
             <String>[],
             fileSystem: fs,
             appDependencies: directDependencies,
@@ -73,7 +71,6 @@ void main() {
                 },
               },
             }),
-            null,
             <String>[],
             fileSystem: fs,
             appDependencies: directDependencies,
@@ -89,7 +86,6 @@ void main() {
                 },
               },
             }),
-            null,
             <String>[],
             fileSystem: fs,
             appDependencies: directDependencies,
@@ -108,7 +104,6 @@ void main() {
                 },
               },
             }),
-            null,
             <String>[],
             fileSystem: fs,
             appDependencies: directDependencies,
@@ -149,7 +144,6 @@ void main() {
                 },
               },
             }),
-            null,
             <String>[],
             fileSystem: fs,
             appDependencies: directDependencies,
@@ -172,9 +166,9 @@ void main() {
         );
       });
 
-      // See https://github.com/flutter/flutter/issues/87862 for details.
-      testWithoutContext('does not select inline implementation on desktop for '
-      'missing min Flutter SDK constraint', () async {
+      // See https://github.com/flutter/flutter/issues/87862 for why this is
+      // currently asserted even though it's not the desired behavior long term.
+      testWithoutContext('does not select inline implementation on desktop', () async {
         final Set<String> directDependencies = <String>{};
 
         final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(<Plugin>[
@@ -194,94 +188,12 @@ void main() {
                 },
               },
             }),
-            null,
             <String>[],
             fileSystem: fs,
             appDependencies: directDependencies,
           ),
         ]);
         expect(resolutions.length, equals(0));
-      });
-
-      // See https://github.com/flutter/flutter/issues/87862 for details.
-      testWithoutContext('does not select inline implementation on desktop for '
-      'min Flutter SDK constraint < 2.11', () async {
-        final Set<String> directDependencies = <String>{};
-
-        final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(<Plugin>[
-          Plugin.fromYaml(
-            'url_launcher',
-            '',
-            YamlMap.wrap(<String, dynamic>{
-              'platforms': <String, dynamic>{
-                'linux': <String, dynamic>{
-                  'dartPluginClass': 'UrlLauncherLinux',
-                },
-                'macos': <String, dynamic>{
-                  'dartPluginClass': 'UrlLauncherMacOS',
-                },
-                'windows': <String, dynamic>{
-                  'dartPluginClass': 'UrlLauncherWindows',
-                },
-              },
-            }),
-            VersionConstraint.parse('>=2.10.0'),
-            <String>[],
-            fileSystem: fs,
-            appDependencies: directDependencies,
-          ),
-        ]);
-        expect(resolutions.length, equals(0));
-      });
-
-      testWithoutContext('selects inline implementation on desktop for '
-      'min Flutter SDK requirement of at least 2.11', () async {
-        final Set<String> directDependencies = <String>{};
-
-        final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(<Plugin>[
-          Plugin.fromYaml(
-            'url_launcher',
-            '',
-            YamlMap.wrap(<String, dynamic>{
-              'platforms': <String, dynamic>{
-                'linux': <String, dynamic>{
-                  'dartPluginClass': 'UrlLauncherLinux',
-                },
-                'macos': <String, dynamic>{
-                  'dartPluginClass': 'UrlLauncherMacOS',
-                },
-                'windows': <String, dynamic>{
-                  'dartPluginClass': 'UrlLauncherWindows',
-                },
-              },
-            }),
-            VersionConstraint.parse('>=2.11.0'),
-            <String>[],
-            fileSystem: fs,
-            appDependencies: directDependencies,
-          ),
-        ]);
-        expect(resolutions.length, equals(3));
-        expect(
-          resolutions.map((PluginInterfaceResolution resolution) => resolution.toMap()),
-          containsAll(<Map<String, String>>[
-            <String, String>{
-              'pluginName': 'url_launcher',
-              'dartClass': 'UrlLauncherLinux',
-              'platform': 'linux',
-            },
-            <String, String>{
-              'pluginName': 'url_launcher',
-              'dartClass': 'UrlLauncherMacOS',
-              'platform': 'macos',
-            },
-            <String, String>{
-              'pluginName': 'url_launcher',
-              'dartClass': 'UrlLauncherWindows',
-              'platform': 'windows',
-            },
-          ])
-        );
       });
 
       testWithoutContext('selects default implementation', () async {
@@ -298,7 +210,6 @@ void main() {
                 },
               },
             }),
-            null,
             <String>[],
             fileSystem: fs,
             appDependencies: directDependencies,
@@ -314,7 +225,6 @@ void main() {
                 },
               },
             }),
-            null,
             <String>[],
             fileSystem: fs,
             appDependencies: directDependencies,
@@ -344,7 +254,6 @@ void main() {
                 },
               },
             }),
-            null,
             <String>[],
             fileSystem: fs,
             appDependencies: directDependencies,
@@ -360,7 +269,6 @@ void main() {
                 },
               },
             }),
-            null,
             <String>[],
             fileSystem: fs,
             appDependencies: directDependencies,
@@ -393,7 +301,6 @@ void main() {
                 },
               },
             }),
-            null,
             <String>[],
             fileSystem: fs,
             appDependencies: directDependencies,
@@ -409,7 +316,6 @@ void main() {
                 },
               },
             }),
-            null,
             <String>[],
             fileSystem: fs,
             appDependencies: directDependencies,
@@ -425,7 +331,6 @@ void main() {
                 },
               },
             }),
-            null,
             <String>[],
             fileSystem: fs,
             appDependencies: directDependencies,
@@ -458,7 +363,6 @@ void main() {
                 },
               },
             }),
-            null,
             <String>[],
             fileSystem: fs,
             appDependencies: directDependencies,
@@ -474,7 +378,6 @@ void main() {
                 },
               },
             }),
-            null,
             <String>[],
             fileSystem: fs,
             appDependencies: directDependencies,
@@ -490,7 +393,6 @@ void main() {
                 },
               },
             }),
-            null,
             <String>[],
             fileSystem: fs,
             appDependencies: directDependencies,
@@ -524,7 +426,6 @@ void main() {
                   },
                 },
               }),
-              null,
               <String>[],
               fileSystem: fs,
               appDependencies: directDependencies,
@@ -540,7 +441,6 @@ void main() {
                   },
                 },
               }),
-              null,
               <String>[],
               fileSystem: fs,
               appDependencies: directDependencies,
@@ -577,7 +477,6 @@ void main() {
                   },
                 },
               }),
-              null,
               <String>[],
               fileSystem: fs,
               appDependencies: directDependencies,
@@ -593,7 +492,6 @@ void main() {
                   },
                 },
               }),
-              null,
               <String>[],
               fileSystem: fs,
               appDependencies: directDependencies,
@@ -1103,7 +1001,6 @@ void dreamWithFlags() => run(interactive: false);
                 },
               },
             }),
-            null,
             <String>[],
             fileSystem: fs,
             appDependencies: directDependencies,

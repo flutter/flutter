@@ -32,7 +32,7 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
   if (!windowsProject.cmakeFile.existsSync()) {
     throwToolExit(
       'No Windows desktop project configured. See '
-      'https://docs.flutter.dev/desktop#add-desktop-support-to-an-existing-flutter-app '
+      'https://flutter.dev/desktop#add-desktop-support-to-an-existing-flutter-app '
       'to learn about adding Windows support to a project.');
   }
 
@@ -124,7 +124,7 @@ Future<void> buildWindowsUwp(WindowsUwpProject windowsProject, BuildInfo buildIn
   if (!windowsProject.existsSync()) {
     throwToolExit(
       'No Windows UWP desktop project configured. See '
-      'https://docs.flutter.dev/desktop#add-desktop-support-to-an-existing-flutter-app '
+      'https://flutter.dev/desktop#add-desktop-support-to-an-existing-flutter-app '
       'to learn about adding Windows support to a project.',
     );
   }

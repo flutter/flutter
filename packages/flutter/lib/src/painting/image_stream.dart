@@ -340,9 +340,7 @@ class ImageStream with Diagnosticable {
     if (_listeners != null) {
       final List<ImageStreamListener> initialListeners = _listeners!;
       _listeners = null;
-      _completer!._addingInitialListeners = true;
       initialListeners.forEach(_completer!.addListener);
-      _completer!._addingInitialListeners = false;
     }
   }
 
@@ -491,15 +489,6 @@ abstract class ImageStreamCompleter with Diagnosticable {
   /// if all [keepAlive] handles get disposed.
   bool _hadAtLeastOneListener = false;
 
-  /// Whether the future listeners added to this completer are initial listeners.
-  ///
-  /// This can be set to true when an [ImageStream] adds its initial listeners to
-  /// this completer. This ultimately controls the synchronousCall parameter for
-  /// the listener callbacks. When adding cached listeners to a completer,
-  /// [_addingInitialListeners] can be set to false to indicate to the listeners
-  /// that they are being called asynchronously.
-  bool _addingInitialListeners = false;
-
   /// Adds a listener callback that is called whenever a new concrete [ImageInfo]
   /// object is available or an error is reported. If a concrete image is
   /// already available, or if an error has been already reported, this object
@@ -515,7 +504,7 @@ abstract class ImageStreamCompleter with Diagnosticable {
     _listeners.add(listener);
     if (_currentImage != null) {
       try {
-        listener.onImage(_currentImage!.clone(), !_addingInitialListeners);
+        listener.onImage(_currentImage!.clone(), true);
       } catch (exception, stack) {
         reportError(
           context: ErrorDescription('by a synchronously-called image listener'),
@@ -582,8 +571,6 @@ abstract class ImageStreamCompleter with Diagnosticable {
   }
 
   bool _disposed = false;
-
-  @mustCallSuper
   void _maybeDispose() {
     if (!_hadAtLeastOneListener || _disposed || _listeners.isNotEmpty || _keepAliveHandles != 0) {
       return;
@@ -640,7 +627,7 @@ abstract class ImageStreamCompleter with Diagnosticable {
       return;
     // Make a copy to allow for concurrent modification.
     final List<ImageStreamListener> localListeners =
-        List<ImageStreamListener>.of(_listeners);
+        List<ImageStreamListener>.from(_listeners);
     for (final ImageStreamListener listener in localListeners) {
       try {
         listener.onImage(image.clone(), false);
@@ -864,7 +851,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
       );
     });
     if (chunkEvents != null) {
-      _chunkSubscription = chunkEvents.listen(reportImageChunkEvent,
+      chunkEvents.listen(reportImageChunkEvent,
         onError: (Object error, StackTrace stack) {
           reportError(
             context: ErrorDescription('loading an image'),
@@ -878,7 +865,6 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
     }
   }
 
-  StreamSubscription<ImageChunkEvent>? _chunkSubscription;
   ui.Codec? _codec;
   final double _scale;
   final InformationCollector? _informationCollector;
@@ -981,7 +967,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
       return;
     }
     _frameCallbackScheduled = true;
-    SchedulerBinding.instance.scheduleFrameCallback(_handleAppFrame);
+    SchedulerBinding.instance!.scheduleFrameCallback(_handleAppFrame);
   }
 
   void _emitFrame(ImageInfo imageInfo) {
@@ -1002,16 +988,6 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
     if (!hasListeners) {
       _timer?.cancel();
       _timer = null;
-    }
-  }
-
-  @override
-  void _maybeDispose() {
-    super._maybeDispose();
-    if (_disposed) {
-      _chunkSubscription?.onData(null);
-      _chunkSubscription?.cancel();
-      _chunkSubscription = null;
     }
   }
 }

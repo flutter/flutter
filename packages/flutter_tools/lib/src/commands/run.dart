@@ -14,7 +14,6 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
-import '../daemon.dart';
 import '../device.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
@@ -228,7 +227,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         webRunHeadless: featureFlags.isWebEnabled && boolArg('web-run-headless'),
         webBrowserDebugPort: browserDebugPort,
         webEnableExpressionEvaluation: featureFlags.isWebEnabled && boolArg('web-enable-expression-evaluation'),
-        webLaunchUrl: featureFlags.isWebEnabled ? stringArg('web-launch-url') : null,
         vmserviceOutFile: stringArg('vmservice-out-file'),
         fastStart: argParser.options.containsKey('fast-start')
           && boolArg('fast-start')
@@ -558,10 +556,8 @@ class RunCommand extends RunCommandBase {
         throwToolExit('"--machine" does not support "-d all".');
       }
       final Daemon daemon = Daemon(
-        DaemonConnection(
-          daemonStreams: DaemonStreams.fromStdio(globals.stdio, logger: globals.logger),
-          logger: globals.logger,
-        ),
+        stdinCommandStream,
+        stdoutCommandResponse,
         notifyingLogger: (globals.logger is NotifyingLogger)
           ? globals.logger as NotifyingLogger
           : NotifyingLogger(verbose: globals.logger.isVerbose, parent: globals.logger),

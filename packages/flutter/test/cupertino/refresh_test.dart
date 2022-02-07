@@ -177,7 +177,6 @@ void main() {
 
       tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
         platformCallLog.add(methodCall);
-        return null;
       });
 
       await tester.pumpWidget(

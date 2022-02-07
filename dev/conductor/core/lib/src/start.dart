@@ -235,7 +235,7 @@ class StartContext extends Context {
   }) : git = Git(processManager),
   engine = EngineRepository(
     checkouts,
-    initialRef: 'upstream/$candidateBranch',
+    initialRef: candidateBranch,
     upstreamRemote: Remote(
       name: RemoteName.upstream,
       url: engineUpstream,
@@ -246,7 +246,7 @@ class StartContext extends Context {
     ),
   ), framework = FrameworkRepository(
     checkouts,
-    initialRef: 'upstream/$candidateBranch',
+    initialRef: candidateBranch,
     upstreamRemote: Remote(
       name: RemoteName.upstream,
       url: frameworkUpstream,

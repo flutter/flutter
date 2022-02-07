@@ -51,8 +51,7 @@ class BackgroundProject extends Project {
 
   void updateTestIsolatePhrase(String message) {
     final String newMainContents = main.replaceFirst('Isolate thread', message);
-    writeFile(fileSystem.path.join(dir.path, 'lib', 'main.dart'), newMainContents,
-        writeFutureModifiedDate: true);
+    writeFile(fileSystem.path.join(dir.path, 'lib', 'main.dart'), newMainContents);
   }
 }
 

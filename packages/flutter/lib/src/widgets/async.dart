@@ -249,7 +249,7 @@ class AsyncSnapshot<T> {
     if (hasData)
       return data!;
     if (hasError)
-      Error.throwWithStackTrace(error!, stackTrace!);
+      throw error!; // ignore: only_throw_errors, since we're just propagating an existing error
     throw StateError('Snapshot has neither data nor error');
   }
 

@@ -9,8 +9,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'rendering_tester.dart';
 
 void main() {
-  TestRenderingFlutterBinding.ensureInitialized();
-
   test('Overconstrained flex', () {
     final RenderDecoratedBox box = RenderDecoratedBox(decoration: const BoxDecoration());
     final RenderFlex flex = RenderFlex(textDirection: TextDirection.ltr, children: <RenderBox>[box]);
@@ -410,7 +408,7 @@ void main() {
     box2ParentData.flex = 1;
     final List<dynamic> exceptions = <dynamic>[];
     layout(parent, onErrors: () {
-      exceptions.addAll(TestRenderingFlutterBinding.instance.takeAllFlutterExceptions());
+      exceptions.addAll(renderer.takeAllFlutterExceptions());
     });
     expect(exceptions, isNotEmpty);
     expect(exceptions.first, isFlutterError);
@@ -437,7 +435,7 @@ void main() {
     box2ParentData.fit = FlexFit.loose;
     final List<dynamic> exceptions = <dynamic>[];
     layout(parent, onErrors: () {
-      exceptions.addAll(TestRenderingFlutterBinding.instance.takeAllFlutterExceptions());
+      exceptions.addAll(renderer.takeAllFlutterExceptions());
     });
     expect(exceptions, isNotEmpty);
     expect(exceptions.first, isFlutterError);
@@ -645,7 +643,7 @@ void main() {
     // This forces a check for _hasOverflow
     expect(flex.toStringShort(), isNot(contains('OVERFLOWING')));
     layout(flex, phase: EnginePhase.paint, onErrors: () {
-      exceptions.addAll(TestRenderingFlutterBinding.instance.takeAllFlutterExceptions());
+      exceptions.addAll(renderer.takeAllFlutterExceptions());
     });
     // We expect the RenderFlex to throw during performLayout() for not having
     // a text direction, thus leaving it with a null overflow value. It'll then

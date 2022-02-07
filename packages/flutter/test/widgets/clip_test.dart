@@ -87,10 +87,6 @@ void main() {
     await tester.pumpWidget(const ClipRect(clipBehavior: Clip.antiAlias));
 
     expect(renderClip.clipBehavior, equals(Clip.antiAlias));
-
-    await tester.pumpWidget(const ClipRect(clipBehavior: Clip.none));
-
-    expect(renderClip.clipBehavior, equals(Clip.none));
   });
 
   test('ClipRRect constructs with the right default values', () {
@@ -109,10 +105,6 @@ void main() {
     await tester.pumpWidget(const ClipRRect(clipBehavior: Clip.hardEdge));
 
     expect(renderClip.clipBehavior, equals(Clip.hardEdge));
-
-    await tester.pumpWidget(const ClipRRect(clipBehavior: Clip.none));
-
-    expect(renderClip.clipBehavior, equals(Clip.none));
   });
 
   testWidgets('ClipOval updates clipBehavior in updateRenderObject', (WidgetTester tester) async {
@@ -125,10 +117,6 @@ void main() {
     await tester.pumpWidget(const ClipOval(clipBehavior: Clip.hardEdge));
 
     expect(renderClip.clipBehavior, equals(Clip.hardEdge));
-
-    await tester.pumpWidget(const ClipOval(clipBehavior: Clip.none));
-
-    expect(renderClip.clipBehavior, equals(Clip.none));
   });
 
   testWidgets('ClipPath updates clipBehavior in updateRenderObject', (WidgetTester tester) async {
@@ -141,10 +129,6 @@ void main() {
     await tester.pumpWidget(const ClipPath(clipBehavior: Clip.hardEdge));
 
     expect(renderClip.clipBehavior, equals(Clip.hardEdge));
-
-    await tester.pumpWidget(const ClipPath(clipBehavior: Clip.none));
-
-    expect(renderClip.clipBehavior, equals(Clip.none));
   });
 
   testWidgets('ClipPath', (WidgetTester tester) async {

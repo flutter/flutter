@@ -10,7 +10,7 @@ import 'gesture_tester.dart';
 class TestDrag extends Drag { }
 
 void main() {
-  TestWidgetsFlutterBinding.ensureInitialized();
+  setUp(ensureGestureBinding);
 
   testGesture('MultiDrag: moving before delay rejects', (GestureTester tester) {
     final DelayedMultiDragGestureRecognizer drag = DelayedMultiDragGestureRecognizer();

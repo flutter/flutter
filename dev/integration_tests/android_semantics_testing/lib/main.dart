@@ -39,6 +39,21 @@ Future<String> dataHandler(String message) async {
       completeSemantics();
     return completer.future;
   }
+  if (message.contains('sendSemanticsFocus')) {
+    final Completer<String> completer = Completer<String>();
+    final int id = int.tryParse(message.split('#')[1]) ?? 0;
+    Future<void> completeSemantics([Object _]) async {
+      final dynamic result = await kSemanticsChannel.invokeMethod<dynamic>('sendSemanticsFocus', <String, dynamic>{
+        'id': id,
+      });
+      completer.complete(json.encode(result));
+    }
+    if (SchedulerBinding.instance.hasScheduledFrame)
+      SchedulerBinding.instance.addPostFrameCallback(completeSemantics);
+    else
+      completeSemantics();
+    return completer.future;
+  }
   throw UnimplementedError();
 }
 

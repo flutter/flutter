@@ -455,11 +455,14 @@ class WebAssetServer implements AssetReader {
     // Attempt to determine the file's mime type. if this is not provided some
     // browsers will refuse to render images/show video etc. If the tool
     // cannot determine a mime type, fall back to application/octet-stream.
-    final String mimeType = mime.lookupMimeType(
+    String mimeType;
+    if (length >= 12) {
+      mimeType = mime.lookupMimeType(
         file.path,
-        headerBytes: await file.openRead(0, mime.defaultMagicNumbersMaxLength).first,
-    ) ?? _kDefaultMimeType;
-
+        headerBytes: await file.openRead(0, 12).first,
+      );
+    }
+    mimeType ??= _kDefaultMimeType;
     headers[HttpHeaders.contentLengthHeader] = length.toString();
     headers[HttpHeaders.contentTypeHeader] = mimeType;
     headers[HttpHeaders.etagHeader] = etag;

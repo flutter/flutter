@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:file/file.dart';
@@ -12,7 +14,7 @@ import 'test_driver.dart';
 import 'test_utils.dart';
 
 void main() {
-  late Directory tempDir;
+  Directory tempDir;
 
   setUp(() async {
     tempDir = createResolvedTempDirectorySync('hot_reload_test.');
@@ -50,11 +52,11 @@ void main() {
 
     project.updateTestIsolatePhrase(newBackgroundMessage);
     await flutter.hotRestart();
-    await sawNewBackgroundMessage.future;
+    await sawBackgroundMessage.future;
     // Wait a tiny amount of time in case we did not kill the background isolate.
     await Future<void>.delayed(const Duration(milliseconds: 10));
     await subscription.cancel();
-    await flutter.stop();
+    await flutter?.stop();
   });
 
   testWithoutContext('Hot reload updates background isolates', () async {
@@ -82,6 +84,6 @@ void main() {
     await flutter.hotReload();
     await sawNewBackgroundMessage.future;
     await subscription.cancel();
-    await flutter.stop();
+    await flutter?.stop();
   });
 }

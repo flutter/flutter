@@ -1204,58 +1204,6 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('Calling PersistentBottomSheetController.close does not crash when it is not the current bottom sheet', (WidgetTester tester) async {
-    // Regression test for https://github.com/flutter/flutter/issues/93717
-    PersistentBottomSheetController<void>? sheetController1;
-    await tester.pumpWidget(MaterialApp(
-      home: Scaffold(
-        body: Builder(builder: (BuildContext context) {
-          return SafeArea(
-            child: Column(
-              children: <Widget>[
-                ElevatedButton(
-                  child: const Text('show 1'),
-                  onPressed: () {
-                    sheetController1 = Scaffold.of(context).showBottomSheet<void>(
-                      (BuildContext context) => const Text('BottomSheet 1'),
-                    );
-                  },
-                ),
-                ElevatedButton(
-                  child: const Text('show 2'),
-                  onPressed: () {
-                    Scaffold.of(context).showBottomSheet<void>(
-                      (BuildContext context) => const Text('BottomSheet 2'),
-                    );
-                  },
-                ),
-                ElevatedButton(
-                  child: const Text('close 1'),
-                  onPressed: (){
-                    sheetController1!.close();
-                  },
-                ),
-              ],
-            ),
-          );
-        }),
-      ),
-    ));
-
-    await tester.tap(find.text('show 1'));
-    await tester.pumpAndSettle();
-    expect(find.text('BottomSheet 1'), findsOneWidget);
-
-    await tester.tap(find.text('show 2'));
-    await tester.pumpAndSettle();
-    expect(find.text('BottomSheet 2'), findsOneWidget);
-
-    // This will throw an assertion if regressed
-    await tester.tap(find.text('close 1'));
-    await tester.pumpAndSettle();
-    expect(find.text('BottomSheet 2'), findsOneWidget);
-  });
-
   group('constraints', () {
 
     testWidgets('No constraints by default for bottomSheet property', (WidgetTester tester) async {

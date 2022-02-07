@@ -3,10 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:math' as math;
 
 import 'package:dds/dap.dart' hide PidTracker, PackageConfigUtils;
-import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart' as vm;
 
 import '../base/file_system.dart';
@@ -50,11 +48,10 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
       parseAttachArgs = FlutterAttachRequestArguments.fromJson;
 
   /// A completer that completes when the app.started event has been received.
-  @visibleForTesting
-  final Completer<void> appStartedCompleter = Completer<void>();
+  final Completer<void> _appStartedCompleter = Completer<void>();
 
   /// Whether or not the app.started event has been received.
-  bool get _receivedAppStarted => appStartedCompleter.isCompleted;
+  bool get _receivedAppStarted => _appStartedCompleter.isCompleted;
 
   /// The VM Service URI received from the app.debugPort event.
   Uri? _vmServiceUri;
@@ -170,6 +167,7 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
   @override
   Future<void> launchImpl() async {
     final FlutterLaunchRequestArguments args = this.args as FlutterLaunchRequestArguments;
+    final String flutterToolPath = fileSystem.path.join(Cache.flutterRoot!, 'bin', platform.isWindows ? 'flutter.bat' : 'flutter');
 
     // "debug"/"noDebug" refers to the DAP "debug" mode and not the Flutter
     // debug mode (vs Profile/Release). It is possible for the user to "Run"
@@ -183,14 +181,6 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
       '--machine',
       if (debug) '--start-paused',
     ];
-
-    // Handle customTool and deletion of any arguments for it.
-    final String executable = args.customTool ?? fileSystem.path.join(Cache.flutterRoot!, 'bin', platform.isWindows ? 'flutter.bat' : 'flutter');
-    final int? removeArgs = args.customToolReplacesArgs;
-    if (args.customTool != null && removeArgs != null) {
-      toolArgs.removeRange(0, math.min(removeArgs, toolArgs.length));
-    }
-
     final List<String> processArgs = <String>[
       ...toolArgs,
       ...?args.toolArgs,
@@ -220,21 +210,9 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
       }
     }
 
-    await launchAsProcess(executable, processArgs);
-
-    // Delay responding until the app is launched and (optionally) the debugger
-    // is connected.
-    await appStartedCompleter.future;
-    if (debug) {
-      await debuggerInitialized;
-    }
-  }
-
-  @visibleForOverriding
-  Future<void> launchAsProcess(String executable, List<String> processArgs) async {
-    logger?.call('Spawning $executable with $processArgs in ${args.cwd}');
+    logger?.call('Spawning $flutterToolPath with $processArgs in ${args.cwd}');
     final Process process = await Process.start(
-      executable,
+      flutterToolPath,
       processArgs,
       workingDirectory: args.cwd,
     );
@@ -244,6 +222,13 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
     process.stdout.transform(ByteToLineTransformer()).listen(_handleStdout);
     process.stderr.listen(_handleStderr);
     unawaited(process.exitCode.then(_handleExitCode));
+
+    // Delay responding until the app is launched and (optionally) the debugger
+    // is connected.
+    await _appStartedCompleter.future;
+    if (debug) {
+      await debuggerInitialized;
+    }
   }
 
   /// restart is called by the client when the user invokes a restart (for example with the button on the debug toolbar).
@@ -322,7 +307,7 @@ class FlutterDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments
 
   /// Handles the app.started event from Flutter.
   void _handleAppStarted() {
-    appStartedCompleter.complete();
+    _appStartedCompleter.complete();
     _connectDebuggerIfReady();
   }
 

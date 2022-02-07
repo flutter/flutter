@@ -17,30 +17,30 @@ import 'test_utils.dart';
 const Duration requiredLifespan = Duration(seconds: 5);
 
 void main() {
-  final BasicProject project = BasicProject();
-  FlutterRunTestDriver flutter;
+  final BasicProject _project = BasicProject();
+  FlutterRunTestDriver _flutter;
   Directory tempDir;
 
   setUp(() async {
     tempDir = createResolvedTempDirectorySync('lifetime_test.');
-    await project.setUpIn(tempDir);
-    flutter = FlutterRunTestDriver(tempDir);
+    await _project.setUpIn(tempDir);
+    _flutter = FlutterRunTestDriver(tempDir);
   });
 
   tearDown(() async {
-    await flutter.stop();
+    await _flutter.stop();
     tryToDelete(tempDir);
   });
 
   testWithoutContext('flutter run does not terminate when a debugger is attached', () async {
-    await flutter.run(withDebugger: true);
+    await _flutter.run(withDebugger: true);
     await Future<void>.delayed(requiredLifespan);
-    expect(flutter.hasExited, equals(false));
+    expect(_flutter.hasExited, equals(false));
   });
 
   testWithoutContext('flutter run does not terminate when a debugger is attached and pause-on-exceptions', () async {
-    await flutter.run(withDebugger: true, pauseOnExceptions: true);
+    await _flutter.run(withDebugger: true, pauseOnExceptions: true);
     await Future<void>.delayed(requiredLifespan);
-    expect(flutter.hasExited, equals(false));
+    expect(_flutter.hasExited, equals(false));
   });
 }

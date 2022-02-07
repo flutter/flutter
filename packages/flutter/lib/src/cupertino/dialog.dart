@@ -1675,7 +1675,11 @@ class _ActionButtonParentDataWidget
 // ParentData applied to individual action buttons that report whether or not
 // that button is currently pressed by the user.
 class _ActionButtonParentData extends MultiChildLayoutParentData {
-  bool isPressed = false;
+  _ActionButtonParentData({
+    this.isPressed = false,
+  });
+
+  bool isPressed;
 }
 
 /// A button typically used in a [CupertinoAlertDialog].
@@ -2046,18 +2050,16 @@ class _RenderCupertinoDialogActions extends RenderBox
     markNeedsPaint();
   }
 
-  Iterable<RenderBox> get _pressedButtons {
-    final List<RenderBox> boxes = <RenderBox>[];
+  Iterable<RenderBox> get _pressedButtons sync* {
     RenderBox? currentChild = firstChild;
     while (currentChild != null) {
       assert(currentChild.parentData is _ActionButtonParentData);
       final _ActionButtonParentData parentData = currentChild.parentData! as _ActionButtonParentData;
       if (parentData.isPressed) {
-        boxes.add(currentChild);
+        yield currentChild;
       }
       currentChild = childAfter(currentChild);
     }
-    return boxes;
   }
 
   bool get _isButtonPressed {

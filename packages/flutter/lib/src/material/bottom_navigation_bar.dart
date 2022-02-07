@@ -14,7 +14,6 @@ import 'debug.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'material_localizations.dart';
-import 'material_state.dart';
 import 'theme.dart';
 import 'tooltip.dart';
 
@@ -312,20 +311,9 @@ class BottomNavigationBar extends StatefulWidget {
   final bool? showSelectedLabels;
 
   /// The cursor for a mouse pointer when it enters or is hovering over the
-  /// items.
+  /// tiles.
   ///
-  /// If [mouseCursor] is a [MaterialStateProperty<MouseCursor>],
-  /// [MaterialStateProperty.resolve] is used for the following [MaterialState]s:
-  ///
-  ///  * [MaterialState.selected].
-  ///
-  /// If null, then the value of [BottomNavigationBarThemeData.mouseCursor] is used. If
-  /// that is also null, then [MaterialStateMouseCursor.clickable] is used.
-  ///
-  /// See also:
-  ///
-  ///  * [MaterialStateMouseCursor], which can be used to create a [MouseCursor]
-  ///    that is also a [MaterialStateProperty<MouseCursor>].
+  /// If this property is null, [SystemMouseCursors.click] will be used.
   final MouseCursor? mouseCursor;
 
   /// Whether detected gestures should provide acoustic and/or haptic feedback.
@@ -953,17 +941,10 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
         );
         break;
     }
+    final MouseCursor effectiveMouseCursor = widget.mouseCursor ?? SystemMouseCursors.click;
 
     final List<Widget> tiles = <Widget>[];
     for (int i = 0; i < widget.items.length; i++) {
-      final Set<MaterialState> states = <MaterialState>{
-        if (i == widget.currentIndex) MaterialState.selected,
-      };
-
-      final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states)
-        ?? bottomTheme.mouseCursor?.resolve(states)
-        ?? MaterialStateMouseCursor.clickable.resolve(states);
-
       tiles.add(_BottomNavigationTile(
         _effectiveType,
         widget.items[i],

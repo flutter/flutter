@@ -641,7 +641,7 @@ void main() {
       expect(items, orderedEquals(<int>[1, 0, 2, 3, 4]));
     });
 
-    testWidgets('It should not allow the item to be dragged when enabled is false', (WidgetTester tester) async {
+    testWidgets('It should allow the item to be dragged when enabled is true', (WidgetTester tester) async {
       const int itemCount = 5;
       int onReorderCallCount = 0;
       final List<int> items = List<int>.generate(itemCount, (int index) => index);
@@ -679,7 +679,7 @@ void main() {
       await tester.pump(kLongPressTimeout);
 
       // Drag enough to move down the first item
-      await drag.moveBy(const Offset(0, 50));
+      await drag.moveBy(const Offset(0, 150));
       await tester.pump();
       await drag.up();
       await tester.pumpAndSettle();
@@ -737,7 +737,7 @@ void main() {
       expect(items, orderedEquals(<int>[1, 0, 2, 3, 4]));
     });
 
-    testWidgets('It should not allow the item to be dragged when enabled is false', (WidgetTester tester) async {
+    testWidgets('It should allow the item to be dragged when enabled is true', (WidgetTester tester) async {
       const int itemCount = 5;
       int onReorderCallCount = 0;
       final List<int> items = List<int>.generate(itemCount, (int index) => index);

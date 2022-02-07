@@ -43,7 +43,6 @@ class DigitInputState extends State<DigitInput> {
     onInvoke: (DeleteCharacterIntent intent) {
       // For simplicity we delete everything in the section.
       widget.controller.clear();
-      return null;
     },
   );
 
@@ -85,7 +84,7 @@ class _DeleteDigit extends Action<DeleteCharacterIntent> {
 
   final _SimpleUSPhoneNumberEntryState state;
   @override
-  void invoke(DeleteCharacterIntent intent) {
+  Object? invoke(DeleteCharacterIntent intent) {
     assert(callingAction != null);
     callingAction?.invoke(intent);
 

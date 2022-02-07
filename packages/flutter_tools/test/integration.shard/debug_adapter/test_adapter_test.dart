@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:dds/src/dap/protocol_generated.dart';
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -13,8 +15,8 @@ import 'test_client.dart';
 import 'test_support.dart';
 
 void main() {
-  late Directory tempDir;
-  late DapTestSession dap;
+  Directory tempDir;
+  /*late*/ DapTestSession dap;
 
   setUpAll(() {
     Cache.flutterRoot = getFlutterRoot();
@@ -105,8 +107,8 @@ void main() {
     );
 
     final List<Object> testsNames = outputEvents.testNotifications
-        .where((Map<String, Object?> e) => e['type'] == 'testStart')
-        .map((Map<String, Object?> e) => (e['test']! as Map<String, Object?>)['name']!)
+        .where((Map<String, Object>/*?*/ e) => e['type'] == 'testStart')
+        .map((Map<String, Object>/*?*/ e) => (e['test'] as Map<String, Object/*?*/>)['name'])
         .toList();
 
     expect(testsNames, contains('Flutter tests can pass'));
@@ -135,10 +137,10 @@ final List<Object> _testsProjectExpectedOutput = <Object>[
 /// A helper that verifies a full set of expected test results for the
 /// [TestsProject] script.
 void _expectStandardTestsProjectResults(TestEvents events) {
-  // Check we received all expected test events passed through from
+  // Check we recieved all expected test events passed through from
   // package:test.
   final List<Object> eventNames =
-      events.testNotifications.map((Map<String, Object?> e) => e['type']!).toList();
+      events.testNotifications.map((Map<String, Object/*?*/> e) => e['type']).toList();
 
   // start/done should always be first/last.
   expect(eventNames.first, equals('start'));

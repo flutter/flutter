@@ -8,8 +8,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'rendering_tester.dart';
 
 void main() {
-  TestRenderingFlutterBinding.ensureInitialized();
-
   test('RenderBaseline', () {
     RenderBaseline parent;
     RenderSizedBox child;

@@ -15,130 +15,130 @@ import 'test_driver.dart';
 import 'test_utils.dart';
 
 void batch1() {
-  final BasicProject project = BasicProject();
+  final BasicProject _project = BasicProject();
   Directory tempDir;
-  FlutterRunTestDriver flutter;
+  FlutterRunTestDriver _flutter;
 
   Future<void> initProject() async {
     tempDir = createResolvedTempDirectorySync('run_expression_eval_test.');
-    await project.setUpIn(tempDir);
-    flutter = FlutterRunTestDriver(tempDir);
+    await _project.setUpIn(tempDir);
+    _flutter = FlutterRunTestDriver(tempDir);
   }
 
   Future<void> cleanProject() async {
-    await flutter.stop();
+    await _flutter.stop();
     tryToDelete(tempDir);
   }
 
   Future<void> breakInBuildMethod(FlutterTestDriver flutter) async {
-    await flutter.breakAt(
-      project.buildMethodBreakpointUri,
-      project.buildMethodBreakpointLine,
+    await _flutter.breakAt(
+      _project.buildMethodBreakpointUri,
+      _project.buildMethodBreakpointLine,
     );
   }
 
   Future<void> breakInTopLevelFunction(FlutterTestDriver flutter) async {
-    await flutter.breakAt(
-      project.topLevelFunctionBreakpointUri,
-      project.topLevelFunctionBreakpointLine,
+    await _flutter.breakAt(
+      _project.topLevelFunctionBreakpointUri,
+      _project.topLevelFunctionBreakpointLine,
     );
   }
 
   testWithoutContext('flutter run expression evaluation - can evaluate trivial expressions in top level function', () async {
     await initProject();
-    await flutter.run(withDebugger: true);
-    await breakInTopLevelFunction(flutter);
-    await evaluateTrivialExpressions(flutter);
+    await _flutter.run(withDebugger: true);
+    await breakInTopLevelFunction(_flutter);
+    await evaluateTrivialExpressions(_flutter);
     await cleanProject();
   });
 
   testWithoutContext('flutter run expression evaluation - can evaluate trivial expressions in build method', () async {
     await initProject();
-    await flutter.run(withDebugger: true);
-    await breakInBuildMethod(flutter);
-    await evaluateTrivialExpressions(flutter);
+    await _flutter.run(withDebugger: true);
+    await breakInBuildMethod(_flutter);
+    await evaluateTrivialExpressions(_flutter);
     await cleanProject();
   });
 
   testWithoutContext('flutter run expression evaluation - can evaluate complex expressions in top level function', () async {
     await initProject();
-    await flutter.run(withDebugger: true);
-    await breakInTopLevelFunction(flutter);
-    await evaluateComplexExpressions(flutter);
+    await _flutter.run(withDebugger: true);
+    await breakInTopLevelFunction(_flutter);
+    await evaluateComplexExpressions(_flutter);
     await cleanProject();
   });
 
   testWithoutContext('flutter run expression evaluation - can evaluate complex expressions in build method', () async {
     await initProject();
-    await flutter.run(withDebugger: true);
-    await breakInBuildMethod(flutter);
-    await evaluateComplexExpressions(flutter);
+    await _flutter.run(withDebugger: true);
+    await breakInBuildMethod(_flutter);
+    await evaluateComplexExpressions(_flutter);
     await cleanProject();
   });
 
   testWithoutContext('flutter run expression evaluation - can evaluate expressions returning complex objects in top level function', () async {
     await initProject();
-    await flutter.run(withDebugger: true);
-    await breakInTopLevelFunction(flutter);
-    await evaluateComplexReturningExpressions(flutter);
+    await _flutter.run(withDebugger: true);
+    await breakInTopLevelFunction(_flutter);
+    await evaluateComplexReturningExpressions(_flutter);
     await cleanProject();
   });
 
   testWithoutContext('flutter run expression evaluation - can evaluate expressions returning complex objects in build method', () async {
     await initProject();
-    await flutter.run(withDebugger: true);
-    await breakInBuildMethod(flutter);
-    await evaluateComplexReturningExpressions(flutter);
+    await _flutter.run(withDebugger: true);
+    await breakInBuildMethod(_flutter);
+    await evaluateComplexReturningExpressions(_flutter);
     await cleanProject();
   });
 }
 
 void batch2() {
-  final TestsProject project = TestsProject();
+  final TestsProject _project = TestsProject();
   Directory tempDir;
-  FlutterTestTestDriver flutter;
+  FlutterTestTestDriver _flutter;
 
   Future<void> initProject() async {
     tempDir = createResolvedTempDirectorySync('test_expression_eval_test.');
-    await project.setUpIn(tempDir);
-    flutter = FlutterTestTestDriver(tempDir);
+    await _project.setUpIn(tempDir);
+    _flutter = FlutterTestTestDriver(tempDir);
   }
 
   Future<void> cleanProject() async {
-    await flutter?.waitForCompletion();
+    await _flutter?.waitForCompletion();
     tryToDelete(tempDir);
   }
 
   testWithoutContext('flutter test expression evaluation - can evaluate trivial expressions in a test', () async {
     await initProject();
-    await flutter.test(
+    await _flutter.test(
       withDebugger: true,
-      beforeStart: () => flutter.addBreakpoint(project.breakpointUri, project.breakpointLine),
+      beforeStart: () => _flutter.addBreakpoint(_project.breakpointUri, _project.breakpointLine),
     );
-    await flutter.waitForPause();
-    await evaluateTrivialExpressions(flutter);
+    await _flutter.waitForPause();
+    await evaluateTrivialExpressions(_flutter);
     await cleanProject();
   });
 
   testWithoutContext('flutter test expression evaluation - can evaluate complex expressions in a test', () async {
     await initProject();
-    await flutter.test(
+    await _flutter.test(
       withDebugger: true,
-      beforeStart: () => flutter.addBreakpoint(project.breakpointUri, project.breakpointLine),
+      beforeStart: () => _flutter.addBreakpoint(_project.breakpointUri, _project.breakpointLine),
     );
-    await flutter.waitForPause();
-    await evaluateComplexExpressions(flutter);
+    await _flutter.waitForPause();
+    await evaluateComplexExpressions(_flutter);
     await cleanProject();
   });
 
   testWithoutContext('flutter test expression evaluation - can evaluate expressions returning complex objects in a test', () async {
     await initProject();
-    await flutter.test(
+    await _flutter.test(
       withDebugger: true,
-      beforeStart: () => flutter.addBreakpoint(project.breakpointUri, project.breakpointLine),
+      beforeStart: () => _flutter.addBreakpoint(_project.breakpointUri, _project.breakpointLine),
     );
-    await flutter.waitForPause();
-    await evaluateComplexReturningExpressions(flutter);
+    await _flutter.waitForPause();
+    await evaluateComplexReturningExpressions(_flutter);
     await cleanProject();
   });
 }

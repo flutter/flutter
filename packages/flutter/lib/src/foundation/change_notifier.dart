@@ -232,8 +232,8 @@ class ChangeNotifier implements Listenable {
   void removeListener(VoidCallback listener) {
     assert(_debugAssertNotDisposed());
     for (int i = 0; i < _count; i++) {
-      final VoidCallback? listenerAtIndex = _listeners[i];
-      if (listenerAtIndex == listener) {
+      final VoidCallback? _listener = _listeners[i];
+      if (_listener == listener) {
         if (_notificationCallStackDepth > 0) {
           // We don't resize the list during notifyListeners iterations
           // but we set to null, the listeners we want to remove. We will
@@ -312,13 +312,13 @@ class ChangeNotifier implements Listenable {
           stack: stack,
           library: 'foundation library',
           context: ErrorDescription('while dispatching notifications for $runtimeType'),
-          informationCollector: () => <DiagnosticsNode>[
-            DiagnosticsProperty<ChangeNotifier>(
+          informationCollector: () sync* {
+            yield DiagnosticsProperty<ChangeNotifier>(
               'The $runtimeType sending notification was',
               this,
               style: DiagnosticsTreeStyle.errorProperty,
-            ),
-          ],
+            );
+          },
         ));
       }
     }

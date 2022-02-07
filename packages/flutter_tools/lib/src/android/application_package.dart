@@ -21,13 +21,13 @@ import 'android_sdk.dart';
 import 'gradle.dart';
 
 /// An application package created from an already built Android APK.
-class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackage {
+class AndroidApk extends ApplicationPackage {
   AndroidApk({
     required String id,
-    required this.applicationPackage,
+    required this.file,
     required this.versionCode,
     required this.launchActivity,
-  }) : assert(applicationPackage != null),
+  }) : assert(file != null),
        assert(launchActivity != null),
        super(id: id);
 
@@ -80,14 +80,14 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
 
     return AndroidApk(
       id: packageName,
-      applicationPackage: apk,
+      file: apk,
       versionCode: data.versionCode == null ? null : int.tryParse(data.versionCode!),
       launchActivity: '${data.packageName}/${data.launchableActivityName}',
     );
   }
 
-  @override
-  final FileSystemEntity applicationPackage;
+  /// Path to the actual apk file.
+  final File file;
 
   /// The path to the activity that should be launched.
   final String launchActivity;
@@ -197,14 +197,17 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
 
     return AndroidApk(
       id: packageId,
-      applicationPackage: apkFile,
+      file: apkFile,
       versionCode: null,
       launchActivity: launchActivity,
     );
   }
 
   @override
-  String get name => applicationPackage.basename;
+  File get packagesFile => file;
+
+  @override
+  String get name => file.basename;
 }
 
 abstract class _Entry {

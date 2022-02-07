@@ -153,7 +153,7 @@ void testUsingContext(
             print(error); // ignore: avoid_print
             print(stackTrace); // ignore: avoid_print
             _printBufferedErrors(context);
-            throw error; //ignore: only_throw_errors
+            throw error;
           });
         },
       );
@@ -348,10 +348,10 @@ class LocalFileSystemBlockingSetCurrentDirectory extends LocalFileSystem {
 
   @override
   set currentDirectory(dynamic value) {
-    throw Exception('globals.fs.currentDirectory should not be set on the local file system during '
+    throw 'globals.fs.currentDirectory should not be set on the local file system during '
           'tests as this can cause race conditions with concurrent tests. '
           'Consider using a MemoryFileSystem for testing if possible or refactor '
-          'code to not require setting globals.fs.currentDirectory.');
+          'code to not require setting globals.fs.currentDirectory.';
   }
 }
 

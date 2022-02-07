@@ -663,10 +663,12 @@ class RenderListWheelViewport
   /// by [childManager].
   @override
   void performLayout() {
-    // Apply the dimensions first in case it changes the scroll offset which
-    // determines what should be shown.
-    offset.applyViewportDimension(_viewportExtent);
-    offset.applyContentDimensions(_minEstimatedScrollExtent, _maxEstimatedScrollExtent);
+    final BoxConstraints childConstraints =
+      constraints.copyWith(
+        minHeight: _itemExtent,
+        maxHeight: _itemExtent,
+        minWidth: 0.0,
+      );
 
     // The height, in pixel, that children will be visible and might be laid out
     // and painted.
@@ -678,7 +680,7 @@ class RenderListWheelViewport
       visibleHeight *= 2;
 
     final double firstVisibleOffset =
-      offset.pixels + _itemExtent / 2 - visibleHeight / 2;
+        offset.pixels + _itemExtent / 2 - visibleHeight / 2;
     final double lastVisibleOffset = firstVisibleOffset + visibleHeight;
 
     // The index range that we want to spawn children. We find indexes that
@@ -719,11 +721,6 @@ class RenderListWheelViewport
         _destroyChild(firstChild!);
     }
 
-    final BoxConstraints childConstraints = constraints.copyWith(
-        minHeight: _itemExtent,
-        maxHeight: _itemExtent,
-        minWidth: 0.0,
-      );
     // If there is no child at this stage, we add the first one that is in
     // target range.
     if (childCount == 0) {
@@ -762,6 +759,8 @@ class RenderListWheelViewport
       _layoutChild(lastChild!, childConstraints, ++currentLastIndex);
     }
 
+    offset.applyViewportDimension(_viewportExtent);
+
     // Applying content dimensions bases on how the childManager builds widgets:
     // if it is available to provide a child just out of target range, then
     // we don't know whether there's a limit yet, and set the dimension to the
@@ -771,16 +770,16 @@ class RenderListWheelViewport
       ? _minEstimatedScrollExtent
       : indexToScrollOffset(targetFirstIndex);
     final double maxScrollExtent = childManager.childExistsAt(targetLastIndex + 1)
-      ? _maxEstimatedScrollExtent
-      : indexToScrollOffset(targetLastIndex);
+        ? _maxEstimatedScrollExtent
+        : indexToScrollOffset(targetLastIndex);
     offset.applyContentDimensions(minScrollExtent, maxScrollExtent);
   }
 
   bool _shouldClipAtCurrentOffset() {
     final double highestUntransformedPaintY =
-      _getUntransformedPaintingCoordinateY(0.0);
+        _getUntransformedPaintingCoordinateY(0.0);
     return highestUntransformedPaintY < 0.0
-      || size.height < highestUntransformedPaintY + _maxEstimatedScrollExtent + _itemExtent;
+        || size.height < highestUntransformedPaintY + _maxEstimatedScrollExtent + _itemExtent;
   }
 
   @override

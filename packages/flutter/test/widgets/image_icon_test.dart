@@ -10,10 +10,10 @@ import '../painting/mocks_for_image_cache.dart';
 
 
 void main() {
-  late ImageProvider image;
+  late ImageProvider _image;
 
   setUpAll(() async {
-    image = TestImageProvider(
+    _image = TestImageProvider(
       21,
       42,
       image: await createTestImage(width: 10, height: 10),
@@ -23,7 +23,7 @@ void main() {
   testWidgets('ImageIcon sizing - no theme, default size', (WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
-        child: ImageIcon(image),
+        child: ImageIcon(_image),
       ),
     );
 
@@ -37,12 +37,13 @@ void main() {
       Center(
         child: IconTheme(
           data: const IconThemeData(opacity: 0.5),
-          child: ImageIcon(image),
+          child: ImageIcon(_image),
         ),
       ),
     );
 
-    expect(tester.widget<Image>(find.byType(Image)).color!.alpha, equals(128));
+    final Image image = tester.widget(find.byType(Image));
+    expect(image.color!.alpha, equals(128));
   });
 
   testWidgets('ImageIcon sizing - no theme, explicit size', (WidgetTester tester) async {

@@ -13,7 +13,6 @@ void main() {
 
     TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       log.add(methodCall);
-      return null;
     });
 
     await HapticFeedback.vibrate();
@@ -28,7 +27,6 @@ void main() {
 
       TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
         log.add(methodCall);
-        return null;
       });
 
       await hapticFunction();

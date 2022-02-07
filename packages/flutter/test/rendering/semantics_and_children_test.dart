@@ -17,8 +17,6 @@ int countSemanticsChildren(RenderObject object) {
 }
 
 void main() {
-  TestRenderingFlutterBinding.ensureInitialized();
-
   test('RenderOpacity and children and semantics', () {
     final RenderOpacity box = RenderOpacity(
       child: RenderParagraph(

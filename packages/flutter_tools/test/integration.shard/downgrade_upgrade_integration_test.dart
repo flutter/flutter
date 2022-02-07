@@ -14,7 +14,7 @@ import '../src/common.dart';
 import 'test_utils.dart';
 
 const String _kInitialVersion = 'v1.9.1';
-const String _kBranch = 'beta';
+const String _kBranch = 'dev';
 
 final Stdio stdio = Stdio();
 final ProcessUtils processUtils = ProcessUtils(processManager: processManager, logger: StdoutLogger(

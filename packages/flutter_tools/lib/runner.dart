@@ -149,18 +149,11 @@ Future<int> _handleToolError(
     globals.printError('Oops; flutter has exited unexpectedly: "$error".');
 
     try {
-      final BufferLogger logger = BufferLogger(
-        terminal: globals.terminal,
-        outputPreferences: globals.outputPreferences,
-      );
-
-      final DoctorText doctorText = DoctorText(logger);
-
       final CrashDetails details = CrashDetails(
         command: _crashCommand(args),
         error: error,
         stackTrace: stackTrace,
-        doctorText: doctorText,
+        doctorText: await _doctorText(),
       );
       final File file = await _createLocalCrashReport(details);
       await globals.crashReporter.informUser(details, file);
@@ -206,7 +199,7 @@ Future<File> _createLocalCrashReport(CrashDetails details) async {
   buffer.writeln('```\n${details.stackTrace}```\n');
 
   buffer.writeln('## flutter doctor\n');
-  buffer.writeln('```\n${await details.doctorText.text}```');
+  buffer.writeln('```\n${details.doctorText}```');
 
   try {
     crashFile.writeAsStringSync(buffer.toString());
@@ -226,6 +219,22 @@ Future<File> _createLocalCrashReport(CrashDetails details) async {
   }
 
   return crashFile;
+}
+
+Future<String> _doctorText() async {
+  try {
+    final BufferLogger logger = BufferLogger(
+      terminal: globals.terminal,
+      outputPreferences: globals.outputPreferences,
+    );
+
+    final Doctor doctor = Doctor(logger: logger);
+    await doctor.diagnose(showColor: false);
+
+    return logger.statusText;
+  } on Exception catch (error, trace) {
+    return 'encountered exception: $error\n\n${trace.toString().trim()}\n';
+  }
 }
 
 Future<int> _exit(int code) async {

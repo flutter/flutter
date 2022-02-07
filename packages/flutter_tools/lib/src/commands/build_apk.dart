@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import '../android/android_builder.dart';
 import '../android/build_validation.dart';
 import '../android/gradle_utils.dart';
@@ -42,6 +44,7 @@ class BuildApkCommand extends BuildSubCommand {
               'To learn more, see: https://developer.android.com/studio/build/configure-apk-splits#configure-abi-split',
       )
       ..addMultiOption('target-platform',
+        splitCommas: true,
         defaultsTo: <String>['android-arm', 'android-arm64', 'android-x64'],
         allowed: <String>['android-arm', 'android-arm64', 'android-x86', 'android-x64'],
         help: 'The target platform for which the app is compiled.',
@@ -106,7 +109,7 @@ class BuildApkCommand extends BuildSubCommand {
     validateBuild(androidBuildInfo);
     displayNullSafetyMode(androidBuildInfo.buildInfo);
     globals.terminal.usesTerminalUi = true;
-    await androidBuilder?.buildApk(
+    await androidBuilder.buildApk(
       project: FlutterProject.current(),
       target: targetFile,
       androidBuildInfo: androidBuildInfo,

@@ -43,6 +43,7 @@ void main() {
     );
 
     state1.updateLastActiveVersion('abc', Channel.master);
+    state1.updateLastActiveVersion('def', Channel.dev);
     state1.updateLastActiveVersion('ghi', Channel.beta);
     state1.updateLastActiveVersion('jkl', Channel.stable);
 
@@ -52,6 +53,7 @@ void main() {
     );
 
     expect(state2.lastActiveVersion(Channel.master), 'abc');
+    expect(state2.lastActiveVersion(Channel.dev), 'def');
     expect(state2.lastActiveVersion(Channel.beta), 'ghi');
     expect(state2.lastActiveVersion(Channel.stable), 'jkl');
   });

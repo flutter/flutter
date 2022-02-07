@@ -2,10 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vector_math/vector_math_64.dart' show Vector3;
 
@@ -30,7 +28,6 @@ void main() {
     expect(themeData.showUnselectedLabels, null);
     expect(themeData.type, null);
     expect(themeData.landscapeLayout, null);
-    expect(themeData.mouseCursor, null);
 
     const BottomNavigationBarTheme theme = BottomNavigationBarTheme(data: BottomNavigationBarThemeData(), child: SizedBox());
     expect(theme.data.backgroundColor, null);
@@ -45,7 +42,6 @@ void main() {
     expect(theme.data.showUnselectedLabels, null);
     expect(theme.data.type, null);
     expect(themeData.landscapeLayout, null);
-    expect(themeData.mouseCursor, null);
   });
 
   testWidgets('Default BottomNavigationBarThemeData debugFillProperties', (WidgetTester tester) async {
@@ -74,7 +70,6 @@ void main() {
       showSelectedLabels: true,
       showUnselectedLabels: true,
       type: BottomNavigationBarType.fixed,
-      mouseCursor: MaterialStateMouseCursor.clickable,
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -98,7 +93,6 @@ void main() {
     expect(description[8], 'showSelectedLabels: true');
     expect(description[9], 'showUnselectedLabels: true');
     expect(description[10], 'type: BottomNavigationBarType.fixed');
-    expect(description[11], 'mouseCursor: MaterialStateMouseCursor(clickable)');
   });
 
   testWidgets('BottomNavigationBar is themeable', (WidgetTester tester) async {
@@ -114,7 +108,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
-          bottomNavigationBarTheme: BottomNavigationBarThemeData(
+          bottomNavigationBarTheme: const BottomNavigationBarThemeData(
             backgroundColor: backgroundColor,
             selectedItemColor: selectedItemColor,
             unselectedItemColor: unselectedItemColor,
@@ -126,12 +120,6 @@ void main() {
             type: BottomNavigationBarType.fixed,
             selectedLabelStyle: selectedTextStyle,
             unselectedLabelStyle: unselectedTextStyle,
-            mouseCursor: MaterialStateProperty.resolveWith<MouseCursor?>((Set<MaterialState> states) {
-              if (states.contains(MaterialState.selected)) {
-                return SystemMouseCursors.grab;
-              }
-              return SystemMouseCursors.move;
-            }),
           ),
         ),
         home: Scaffold(
@@ -178,24 +166,6 @@ void main() {
     expect(findFadeTransition, findsNothing);
     expect(_material(tester).elevation, equals(elevation));
     expect(_material(tester).color, equals(backgroundColor));
-
-    final Offset selectedBarItem = tester.getCenter(
-      find.ancestor(of: find.text('AC'),
-      matching: find.byType(Transform))
-    );
-    final Offset unselectedBarItem = tester.getCenter(
-      find.ancestor(of: find.text('Alarm'),
-      matching: find.byType(Transform))
-    );
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-    await gesture.addPointer();
-    addTearDown(gesture.removePointer);
-    await gesture.moveTo(selectedBarItem);
-    await tester.pumpAndSettle();
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.grab);
-    await gesture.moveTo(unselectedBarItem);
-    await tester.pumpAndSettle();
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.move);
   });
 
   testWidgets('BottomNavigationBar properties are taken over the theme values', (WidgetTester tester) async {
@@ -208,7 +178,6 @@ void main() {
     const TextStyle themeUnselectedTextStyle = TextStyle(fontSize: 21);
     const double themeElevation = 9.0;
     const BottomNavigationBarLandscapeLayout themeLandscapeLayout = BottomNavigationBarLandscapeLayout.centered;
-    const MaterialStateMouseCursor themeCursor = MaterialStateMouseCursor.clickable;
 
     const Color backgroundColor = Color(0xFF000004);
     const Color selectedItemColor = Color(0xFF000005);
@@ -219,7 +188,6 @@ void main() {
     const TextStyle unselectedTextStyle = TextStyle(fontSize: 26);
     const double elevation = 7.0;
     const BottomNavigationBarLandscapeLayout landscapeLayout = BottomNavigationBarLandscapeLayout.spread;
-    const MaterialStateMouseCursor cursor = MaterialStateMouseCursor.textable;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -237,7 +205,6 @@ void main() {
             selectedLabelStyle: themeSelectedTextStyle,
             unselectedLabelStyle: themeUnselectedTextStyle,
             landscapeLayout: themeLandscapeLayout,
-            mouseCursor: themeCursor,
           ),
         ),
         home: Scaffold(
@@ -254,7 +221,6 @@ void main() {
             selectedLabelStyle: selectedTextStyle,
             unselectedLabelStyle: unselectedTextStyle,
             landscapeLayout: landscapeLayout,
-            mouseCursor: cursor,
             items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(
                 icon: Icon(Icons.ac_unit),
@@ -297,17 +263,6 @@ void main() {
     expect(findFadeTransition, findsNothing);
     expect(_material(tester).elevation, equals(elevation));
     expect(_material(tester).color, equals(backgroundColor));
-
-    final Offset barItem = tester.getCenter(
-      find.ancestor(of: find.text('AC'),
-      matching: find.byType(Transform))
-    );
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-    await gesture.addPointer();
-    addTearDown(gesture.removePointer);
-    await gesture.moveTo(barItem);
-    await tester.pumpAndSettle();
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
   });
 
   testWidgets('BottomNavigationBarTheme can be used to hide all labels', (WidgetTester tester) async {

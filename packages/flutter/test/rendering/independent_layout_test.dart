@@ -32,8 +32,6 @@ class TestLayout {
 }
 
 void main() {
-  TestRenderingFlutterBinding.ensureInitialized();
-
   const ViewConfiguration testConfiguration = ViewConfiguration(
     size: Size(800.0, 600.0),
   );

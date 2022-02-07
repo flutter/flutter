@@ -220,8 +220,8 @@ void main() {
   });
 
   testWidgets('debugCheckHasScaffoldMessenger control test', (WidgetTester tester) async {
-    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-    final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
+    final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+    final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
     final SnackBar snackBar = SnackBar(
       content: const Text('Snack'),
       action: SnackBarAction(label: 'Test', onPressed: () {}),
@@ -231,11 +231,11 @@ void main() {
       child: MediaQuery(
         data: const MediaQueryData(),
         child: ScaffoldMessenger(
-          key: scaffoldMessengerKey,
+          key: _scaffoldMessengerKey,
           child: Builder(
             builder: (BuildContext context) {
               return Scaffold(
-                key: scaffoldKey,
+                key: _scaffoldKey,
                 body: Container(),
               );
             },
@@ -249,7 +249,7 @@ void main() {
       exceptions.add(details.exception);
     };
     // ScaffoldMessenger shows SnackBar.
-    scaffoldMessengerKey.currentState!.showSnackBar(snackBar);
+    _scaffoldMessengerKey.currentState!.showSnackBar(snackBar);
     await tester.pumpAndSettle();
 
     // Pump widget to rebuild without ScaffoldMessenger
@@ -258,7 +258,7 @@ void main() {
       child: MediaQuery(
         data: const MediaQueryData(),
         child: Scaffold(
-          key: scaffoldKey,
+          key: _scaffoldKey,
           body: Container(),
         ),
       ),

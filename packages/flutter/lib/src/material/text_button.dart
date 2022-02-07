@@ -244,7 +244,7 @@ class TextButton extends ButtonStyleButton {
   /// * `side` - null
   /// * `shape` - RoundedRectangleBorder(borderRadius: BorderRadius.circular(4))
   /// * `mouseCursor`
-  ///   * disabled - SystemMouseCursors.basic
+  ///   * disabled - SystemMouseCursors.forbidden
   ///   * others - SystemMouseCursors.click
   /// * `visualDensity` - theme.visualDensity
   /// * `tapTargetSize` - theme.materialTapTargetSize
@@ -288,7 +288,7 @@ class TextButton extends ButtonStyleButton {
       maximumSize: Size.infinite,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))),
       enabledMouseCursor: SystemMouseCursors.click,
-      disabledMouseCursor: SystemMouseCursors.basic,
+      disabledMouseCursor: SystemMouseCursors.forbidden,
       visualDensity: theme.visualDensity,
       tapTargetSize: theme.materialTapTargetSize,
       animationDuration: kThemeChangeDuration,

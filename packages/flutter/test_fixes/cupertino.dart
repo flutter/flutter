@@ -27,7 +27,7 @@ void main() {
   element.rootAncestorStateOfType(TypeMatcher<targetType>());
   element.ancestorRenderObjectOfType(TypeMatcher<targetType>());
 
-  // Changes made in https://github.com/flutter/flutter/pull/45941 and https://github.com/flutter/flutter/pull/83843
+  // Changes made in https://github.com/flutter/flutter/pull/45941
   final WidgetsBinding binding = WidgetsBinding.instance!;
   binding.deferFirstFrameReport();
   binding.allowFirstFrameReport();
@@ -220,10 +220,4 @@ void main() {
   OverscrollIndicatorNotification notification = OverscrollIndicatorNotification(leading: true);
   notification = OverscrollIndicatorNotification(error: '');
   notification.disallowGlow();
-
-  // Changes made in https://github.com/flutter/flutter/pull/96957
-  CupertinoScrollbar scrollbar = CupertinoScrollbar(isAlwaysShown: true);
-  bool nowShowing = scrollbar.isAlwaysShown;
-  RawScrollbar rawScrollbar = RawScrollbar(isAlwaysShown: true);
-  nowShowing = rawScrollbar.isAlwaysShown;
 }

@@ -43,8 +43,7 @@ void main() {
   testWithoutContext('IOSDevice.installApp calls ios-deploy correctly with USB', () async {
     final IOSApp iosApp = PrebuiltIOSApp(
       projectBundleId: 'app',
-      uncompressedBundle: fileSystem.currentDirectory,
-      applicationPackage: bundleDirectory,
+      bundleDir: fileSystem.currentDirectory,
     );
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(command: <String>[
@@ -74,8 +73,7 @@ void main() {
   testWithoutContext('IOSDevice.installApp calls ios-deploy correctly with network', () async {
     final IOSApp iosApp = PrebuiltIOSApp(
       projectBundleId: 'app',
-      uncompressedBundle: fileSystem.currentDirectory,
-      applicationPackage: bundleDirectory,
+      bundleDir: fileSystem.currentDirectory,
     );
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(command: <String>[
@@ -102,11 +100,7 @@ void main() {
   });
 
   testWithoutContext('IOSDevice.uninstallApp calls ios-deploy correctly', () async {
-    final IOSApp iosApp = PrebuiltIOSApp(
-      projectBundleId: 'app',
-      uncompressedBundle: bundleDirectory,
-      applicationPackage: bundleDirectory,
-    );
+    final IOSApp iosApp = PrebuiltIOSApp(projectBundleId: 'app', bundleDir: bundleDirectory);
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(command: <String>[
         iosDeployPath,
@@ -129,11 +123,7 @@ void main() {
 
   group('isAppInstalled', () {
     testWithoutContext('catches ProcessException from ios-deploy', () async {
-      final IOSApp iosApp = PrebuiltIOSApp(
-        projectBundleId: 'app',
-        uncompressedBundle: bundleDirectory,
-        applicationPackage: bundleDirectory,
-      );
+      final IOSApp iosApp = PrebuiltIOSApp(projectBundleId: 'app', bundleDir: bundleDirectory);
       final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
         FakeCommand(command: <String>[
           iosDeployPath,
@@ -157,11 +147,7 @@ void main() {
     });
 
     testWithoutContext('returns true when app is installed', () async {
-      final IOSApp iosApp = PrebuiltIOSApp(
-        projectBundleId: 'app',
-        uncompressedBundle: bundleDirectory,
-        applicationPackage: bundleDirectory,
-      );
+      final IOSApp iosApp = PrebuiltIOSApp(projectBundleId: 'app', bundleDir: bundleDirectory);
       final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
         FakeCommand(command: <String>[
           iosDeployPath,
@@ -185,11 +171,7 @@ void main() {
     });
 
     testWithoutContext('returns false when app is not installed', () async {
-      final IOSApp iosApp = PrebuiltIOSApp(
-        projectBundleId: 'app',
-        uncompressedBundle: bundleDirectory,
-        applicationPackage: bundleDirectory,
-      );
+      final IOSApp iosApp = PrebuiltIOSApp(projectBundleId: 'app', bundleDir: bundleDirectory);
       final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
         FakeCommand(command: <String>[
           iosDeployPath,
@@ -215,11 +197,7 @@ void main() {
     });
 
     testWithoutContext('returns false on command timeout or other error', () async {
-      final IOSApp iosApp = PrebuiltIOSApp(
-        projectBundleId: 'app',
-        uncompressedBundle: bundleDirectory,
-        applicationPackage: bundleDirectory,
-      );
+      final IOSApp iosApp = PrebuiltIOSApp(projectBundleId: 'app', bundleDir: bundleDirectory);
       const String stderr = '2020-03-26 17:48:43.484 ios-deploy[21518:5501783] [ !! ] Timed out waiting for device';
       final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
         FakeCommand(command: <String>[
@@ -250,8 +228,7 @@ void main() {
   testWithoutContext('IOSDevice.installApp catches ProcessException from ios-deploy', () async {
     final IOSApp iosApp = PrebuiltIOSApp(
       projectBundleId: 'app',
-      uncompressedBundle: fileSystem.currentDirectory,
-      applicationPackage: bundleDirectory,
+      bundleDir: fileSystem.currentDirectory,
     );
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(command: <String>[
@@ -273,11 +250,7 @@ void main() {
   });
 
   testWithoutContext('IOSDevice.uninstallApp catches ProcessException from ios-deploy', () async {
-    final IOSApp iosApp = PrebuiltIOSApp(
-      projectBundleId: 'app',
-      uncompressedBundle: bundleDirectory,
-      applicationPackage: bundleDirectory,
-    );
+    final IOSApp iosApp = PrebuiltIOSApp(projectBundleId: 'app', bundleDir: bundleDirectory);
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(command: <String>[
         iosDeployPath,

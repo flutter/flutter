@@ -647,7 +647,7 @@ class RenderTable extends RenderBox {
     // update our internal values
     _columns = columns;
     _rows = cells.length ~/ columns;
-    _children = List<RenderBox?>.of(cells);
+    _children = List<RenderBox?>.from(cells);
     assert(_children.length == rows * columns);
     markNeedsLayout();
   }
@@ -795,8 +795,6 @@ class RenderTable extends RenderBox {
   /// column, in row order, starting from the first row.
   ///
   /// This is a lazily-evaluated iterable.
-  // The following uses sync* because it is public API documented to return a
-  // lazy iterable.
   Iterable<RenderBox> column(int x) sync* {
     for (int y = 0; y < rows; y += 1) {
       final int xy = x + y * columns;
@@ -810,8 +808,6 @@ class RenderTable extends RenderBox {
   /// row, in column order, starting with the first column.
   ///
   /// This is a lazily-evaluated iterable.
-  // The following uses sync* because it is public API documented to return a
-  // lazy iterable.
   Iterable<RenderBox> row(int y) sync* {
     final int start = y * columns;
     final int end = (y + 1) * columns;

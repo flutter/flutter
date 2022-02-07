@@ -20,8 +20,8 @@ import '../src/context.dart';
 import '../src/fake_process_manager.dart';
 
 final SystemClock _testClock = SystemClock.fixed(DateTime(2015));
-final DateTime _stampUpToDate = _testClock.ago(VersionFreshnessValidator.checkAgeConsideredUpToDate ~/ 2);
-final DateTime _stampOutOfDate = _testClock.ago(VersionFreshnessValidator.checkAgeConsideredUpToDate * 2);
+final DateTime _stampUpToDate = _testClock.ago(checkAgeConsideredUpToDate ~/ 2);
+final DateTime _stampOutOfDate = _testClock.ago(checkAgeConsideredUpToDate * 2);
 
 void main() {
   FakeCache cache;
@@ -42,17 +42,17 @@ void main() {
 
   for (final String channel in kOfficialChannels) {
     DateTime getChannelUpToDateVersion() {
-      return _testClock.ago(VersionFreshnessValidator.versionAgeConsideredUpToDate(channel) ~/ 2);
+      return _testClock.ago(versionAgeConsideredUpToDate(channel) ~/ 2);
     }
 
     DateTime getChannelOutOfDateVersion() {
-      return _testClock.ago(VersionFreshnessValidator.versionAgeConsideredUpToDate(channel) * 2);
+      return _testClock.ago(versionAgeConsideredUpToDate(channel) * 2);
     }
 
     group('$FlutterVersion for $channel', () {
       setUpAll(() {
         Cache.disableLocking();
-        VersionFreshnessValidator.timeToPauseToLetUserReadTheMessage = Duration.zero;
+        timeToPauseToLetUserReadTheMessage = Duration.zero;
       });
 
       testUsingContext('prints nothing when Flutter installation looks fresh', () async {
@@ -134,7 +134,7 @@ void main() {
         expect(flutterVersion.getVersionString(redactUnknownBranches: true), '$channel/1234abcd');
         expect(flutterVersion.getBranchName(redactUnknownBranches: true), channel);
 
-        expect(testLogger.statusText, isEmpty);
+        _expectVersionMessage('', testLogger);
         expect(processManager.hasRemainingExpectations, isFalse);
       }, overrides: <Type, Generator>{
         FlutterVersion: () => FlutterVersion(clock: _testClock),
@@ -151,16 +151,16 @@ void main() {
         );
         cache.versionStamp = json.encode(stamp);
 
-        await VersionFreshnessValidator(
-          version: flutterVersion,
+        await checkVersionFreshness(
+          flutterVersion,
           cache: cache,
           clock: _testClock,
           logger: logger,
           localFrameworkCommitDate: getChannelOutOfDateVersion(),
           latestFlutterCommitDate: getChannelOutOfDateVersion(),
-        ).run();
+        );
 
-        expect(logger.statusText, isEmpty);
+        _expectVersionMessage('', logger);
       });
 
       testWithoutContext('does not ping server when version stamp is up-to-date', () async {
@@ -172,16 +172,16 @@ void main() {
         );
         cache.versionStamp = json.encode(stamp);
 
-        await VersionFreshnessValidator(
-          version: flutterVersion,
+        await checkVersionFreshness(
+          flutterVersion,
           cache: cache,
           clock: _testClock,
           logger: logger,
           localFrameworkCommitDate: getChannelOutOfDateVersion(),
           latestFlutterCommitDate: getChannelUpToDateVersion(),
-        ).run();
+        );
 
-        expect(logger.statusText, contains('A new version of Flutter is available!'));
+        _expectVersionMessage(newVersionAvailableMessage(), logger);
         expect(cache.setVersionStamp, true);
       });
 
@@ -195,16 +195,16 @@ void main() {
         );
         cache.versionStamp = json.encode(stamp);
 
-        await VersionFreshnessValidator(
-          version: flutterVersion,
+        await checkVersionFreshness(
+          flutterVersion,
           cache: cache,
           clock: _testClock,
           logger: logger,
           localFrameworkCommitDate: getChannelOutOfDateVersion(),
           latestFlutterCommitDate: getChannelUpToDateVersion(),
-        ).run();
+        );
 
-        expect(logger.statusText, isEmpty);
+        _expectVersionMessage('', logger);
       });
 
       testWithoutContext('pings server when version stamp is missing', () async {
@@ -212,16 +212,16 @@ void main() {
         final BufferLogger logger = BufferLogger.test();
         cache.versionStamp = '{}';
 
-        await VersionFreshnessValidator(
-          version: flutterVersion,
+        await checkVersionFreshness(
+          flutterVersion,
           cache: cache,
           clock: _testClock,
           logger: logger,
           localFrameworkCommitDate: getChannelOutOfDateVersion(),
           latestFlutterCommitDate: getChannelUpToDateVersion(),
-        ).run();
+        );
 
-        expect(logger.statusText, contains('A new version of Flutter is available!'));
+        _expectVersionMessage(newVersionAvailableMessage(), logger);
         expect(cache.setVersionStamp, true);
       });
 
@@ -234,16 +234,16 @@ void main() {
         );
         cache.versionStamp = json.encode(stamp);
 
-        await VersionFreshnessValidator(
-          version: flutterVersion,
+        await checkVersionFreshness(
+          flutterVersion,
           cache: cache,
           clock: _testClock,
           logger: logger,
           localFrameworkCommitDate: getChannelOutOfDateVersion(),
           latestFlutterCommitDate: getChannelUpToDateVersion(),
-        ).run();
+        );
 
-        expect(logger.statusText, contains('A new version of Flutter is available!'));
+        _expectVersionMessage(newVersionAvailableMessage(), logger);
       });
 
       testWithoutContext('does not print warning when unable to connect to server if not out of date', () async {
@@ -251,16 +251,16 @@ void main() {
         final BufferLogger logger = BufferLogger.test();
         cache.versionStamp = '{}';
 
-        await VersionFreshnessValidator(
-          version: flutterVersion,
+        await checkVersionFreshness(
+          flutterVersion,
           cache: cache,
           clock: _testClock,
           logger: logger,
           localFrameworkCommitDate: getChannelUpToDateVersion(),
-          // latestFlutterCommitDate defaults to null because we failed to get remote version
-        ).run();
+          latestFlutterCommitDate: null, // Failed to get remote version
+        );
 
-        expect(logger.statusText, isEmpty);
+        _expectVersionMessage('', logger);
       });
 
       testWithoutContext('prints warning when unable to connect to server if really out of date', () async {
@@ -272,17 +272,16 @@ void main() {
         );
         cache.versionStamp = json.encode(stamp);
 
-        await VersionFreshnessValidator(
-          version: flutterVersion,
+        await checkVersionFreshness(
+          flutterVersion,
           cache: cache,
           clock: _testClock,
           logger: logger,
           localFrameworkCommitDate: getChannelOutOfDateVersion(),
-          // latestFlutterCommitDate defaults to null because we failed to get remote version
-        ).run();
+          latestFlutterCommitDate: null, // Failed to get remote version
+        );
 
-        final Duration frameworkAge = _testClock.now().difference(getChannelOutOfDateVersion());
-        expect(logger.statusText, contains('WARNING: your installation of Flutter is ${frameworkAge.inDays} days old.'));
+        _expectVersionMessage(versionOutOfDateMessage(_testClock.now().difference(getChannelOutOfDateVersion())), logger);
       });
 
       group('$VersionCheckStamp for $channel', () {
@@ -372,7 +371,7 @@ void main() {
 
     // Master channel
     gitTagVersion = GitTagVersion.parse('1.2.3-4.5.pre-13-g$hash');
-    expect(gitTagVersion.frameworkVersionFor(hash), '1.3.0-0.0.pre.13');
+    expect(gitTagVersion.frameworkVersionFor(hash), '1.2.3-5.0.pre.13');
     expect(gitTagVersion.gitTag, '1.2.3-4.5.pre');
     expect(gitTagVersion.devVersion, 4);
     expect(gitTagVersion.devPatch, 5);
@@ -491,8 +490,8 @@ void main() {
       logger: BufferLogger.test(),
     );
     final GitTagVersion gitTagVersion = GitTagVersion.determine(processUtils, workingDirectory: '.');
-    // reported version should increment the y
-    expect(gitTagVersion.frameworkVersionFor(headRevision), '1.3.0-0.0.pre.12');
+    // reported version should increment the number after the dash
+    expect(gitTagVersion.frameworkVersionFor(headRevision), '1.2.3-3.0.pre.12');
   });
 
   testUsingContext('determine does not call fetch --tags', () {
@@ -592,6 +591,11 @@ void main() {
       'FLUTTER_GIT_URL': 'https://githubmirror.com/flutter.git',
     }),
   });
+}
+
+void _expectVersionMessage(String message, BufferLogger logger) {
+  expect(logger.statusText.trim(), message.trim());
+  logger.clear();
 }
 
 class FakeCache extends Fake implements Cache {

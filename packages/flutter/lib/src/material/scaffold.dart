@@ -1590,8 +1590,7 @@ class Scaffold extends StatefulWidget {
   ///
   /// To open the drawer, use the [ScaffoldState.openDrawer] function.
   ///
-  /// To close the drawer, use either [ScaffoldState.closeDrawer] or
-  /// [Navigator.pop].
+  /// To close the drawer, use [Navigator.pop].
   ///
   /// {@tool dartpad}
   /// To disable the drawer edge swipe, set the
@@ -1614,8 +1613,7 @@ class Scaffold extends StatefulWidget {
   ///
   /// To open the drawer, use the [ScaffoldState.openEndDrawer] function.
   ///
-  /// To close the drawer, use either [ScaffoldState.closeEndDrawer] or
-  /// [Navigator.pop].
+  /// To close the drawer, use [Navigator.pop].
   ///
   /// {@tool dartpad}
   /// To disable the drawer edge swipe, set the
@@ -1988,8 +1986,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   /// appropriate [IconButton], and handles the edge-swipe gesture, to show the
   /// drawer.
   ///
-  /// To close the drawer, use either [ScaffoldState.closeEndDrawer] or
-  /// [Navigator.pop].
+  /// To close the drawer once it is open, use [Navigator.pop].
   ///
   /// See [Scaffold.of] for information about how to obtain the [ScaffoldState].
   void openDrawer() {
@@ -2007,8 +2004,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   /// appropriate [IconButton], and handles the edge-swipe gesture, to show the
   /// drawer.
   ///
-  /// To close the drawer, use either [ScaffoldState.closeEndDrawer] or
-  /// [Navigator.pop].
+  /// To close the end side drawer once it is open, use [Navigator.pop].
   ///
   /// See [Scaffold.of] for information about how to obtain the [ScaffoldState].
   void openEndDrawer() {
@@ -2257,22 +2253,22 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
       // will not be added to the Scaffold's appbar and the bottom sheet will not
       // support drag or swipe to dismiss.
       final AnimationController animationController = BottomSheet.createAnimationController(this)..value = 1.0;
-      LocalHistoryEntry? persistentSheetHistoryEntry;
+      LocalHistoryEntry? _persistentSheetHistoryEntry;
       bool _persistentBottomSheetExtentChanged(DraggableScrollableNotification notification) {
         if (notification.extent > notification.initialExtent) {
-          if (persistentSheetHistoryEntry == null) {
-            persistentSheetHistoryEntry = LocalHistoryEntry(onRemove: () {
+          if (_persistentSheetHistoryEntry == null) {
+            _persistentSheetHistoryEntry = LocalHistoryEntry(onRemove: () {
               if (notification.extent > notification.initialExtent) {
                 DraggableScrollableActuator.reset(notification.context);
               }
               showBodyScrim(false, 0.0);
               _floatingActionButtonVisibilityValue = 1.0;
-              persistentSheetHistoryEntry = null;
+              _persistentSheetHistoryEntry = null;
             });
-            ModalRoute.of(context)!.addLocalHistoryEntry(persistentSheetHistoryEntry!);
+            ModalRoute.of(context)!.addLocalHistoryEntry(_persistentSheetHistoryEntry!);
           }
-        } else if (persistentSheetHistoryEntry != null) {
-          ModalRoute.of(context)!.removeLocalHistoryEntry(persistentSheetHistoryEntry!);
+        } else if (_persistentSheetHistoryEntry != null) {
+          ModalRoute.of(context)!.removeLocalHistoryEntry(_persistentSheetHistoryEntry!);
         }
         return false;
       }
@@ -2306,24 +2302,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
         });
         return true;
       }());
-    }
-  }
-
-  /// Closes [Scaffold.drawer] if it is currently opened.
-  ///
-  /// See [Scaffold.of] for information about how to obtain the [ScaffoldState].
-  void closeDrawer() {
-   if (hasDrawer && isDrawerOpen) {
-     _drawerKey.currentState!.close();
-   }
-  }
-
-  /// Closes [Scaffold.endDrawer] if it is currently opened.
-  ///
-  /// See [Scaffold.of] for information about how to obtain the [ScaffoldState].
-  void closeEndDrawer() {
-    if (hasEndDrawer && isEndDrawerOpen) {
-      _endDrawerKey.currentState!.close();
     }
   }
 
@@ -2382,7 +2360,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     final LocalHistoryEntry? entry = isPersistent
       ? null
       : LocalHistoryEntry(onRemove: () {
-          if (!removedEntry && _currentBottomSheet?._widget == bottomSheet) {
+          if (!removedEntry) {
             _removeCurrentBottomSheet();
           }
         });
@@ -2579,12 +2557,12 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   // top. We implement this by looking up the  primary scroll controller and
   // scrolling it to the top when tapped.
   void _handleStatusBarTap() {
-    final ScrollController? primaryScrollController = PrimaryScrollController.of(context);
-    if (primaryScrollController != null && primaryScrollController.hasClients) {
-      primaryScrollController.animateTo(
+    final ScrollController? _primaryScrollController = PrimaryScrollController.of(context);
+    if (_primaryScrollController != null && _primaryScrollController.hasClients) {
+      _primaryScrollController.animateTo(
         0.0,
-        duration: const Duration(milliseconds: 1000),
-        curve: Curves.easeOutCirc,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.linear, // TODO(ianh): Use a more appropriate curve.
       );
     }
   }
@@ -2618,7 +2596,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
 
   @override
   void didUpdateWidget(Scaffold oldWidget) {
-    super.didUpdateWidget(oldWidget);
     // Update the Floating Action Button Animator, and then schedule the Floating Action Button for repositioning.
     if (widget.floatingActionButtonAnimator != oldWidget.floatingActionButtonAnimator) {
       _floatingActionButtonAnimator = widget.floatingActionButtonAnimator ?? _kDefaultFloatingActionButtonAnimator;
@@ -2651,20 +2628,21 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
         _updatePersistentBottomSheet();
       }
     }
+    super.didUpdateWidget(oldWidget);
   }
 
   @override
   void didChangeDependencies() {
     // Using maybeOf is valid here since both the Scaffold and ScaffoldMessenger
     // are currently available for managing SnackBars.
-    final ScaffoldMessengerState? currentScaffoldMessenger = ScaffoldMessenger.maybeOf(context);
+    final ScaffoldMessengerState? _currentScaffoldMessenger = ScaffoldMessenger.maybeOf(context);
     // If our ScaffoldMessenger has changed, unregister with the old one first.
     if (_scaffoldMessenger != null &&
-      (currentScaffoldMessenger == null || _scaffoldMessenger != currentScaffoldMessenger)) {
+      (_currentScaffoldMessenger == null || _scaffoldMessenger != _currentScaffoldMessenger)) {
       _scaffoldMessenger?._unregister(this);
     }
     // Register with the current ScaffoldMessenger, if there is one.
-    _scaffoldMessenger = currentScaffoldMessenger;
+    _scaffoldMessenger = _currentScaffoldMessenger;
     _scaffoldMessenger?._register(this);
 
     // TODO(Piinks): Remove old SnackBar API after migrating ScaffoldMessenger
@@ -3086,7 +3064,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     );
 
     // extendBody locked when keyboard is open
-    final bool extendBody = minInsets.bottom <= 0 && widget.extendBody;
+    final bool _extendBody = minInsets.bottom <= 0 && widget.extendBody;
 
     return _ScaffoldScope(
       hasDrawer: hasDrawer,
@@ -3097,7 +3075,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
           child: AnimatedBuilder(animation: _floatingActionButtonMoveController, builder: (BuildContext context, Widget? child) {
             return CustomMultiChildLayout(
               delegate: _ScaffoldLayout(
-                extendBody: extendBody,
+                extendBody: _extendBody,
                 extendBodyBehindAppBar: widget.extendBodyBehindAppBar,
                 minInsets: minInsets,
                 minViewPadding: minViewPadding,

@@ -136,14 +136,14 @@ void main() {
   });
 
   testWidgets('onFieldSubmit callbacks are called', (WidgetTester tester) async {
-    bool called = false;
+    bool _called = false;
 
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
           child: CupertinoTextFormFieldRow(
             onFieldSubmitted: (String value) {
-              called = true;
+              _called = true;
             },
           ),
         ),
@@ -153,18 +153,18 @@ void main() {
     await tester.showKeyboard(find.byType(CupertinoTextField));
     await tester.testTextInput.receiveAction(TextInputAction.done);
     await tester.pump();
-    expect(called, true);
+    expect(_called, true);
   });
 
   testWidgets('onChanged callbacks are called', (WidgetTester tester) async {
-    late String value;
+    late String _value;
 
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
           child: CupertinoTextFormFieldRow(
-            onChanged: (String v) {
-              value = v;
+            onChanged: (String value) {
+              _value = value;
             },
           ),
         ),
@@ -173,11 +173,11 @@ void main() {
 
     await tester.enterText(find.byType(CupertinoTextField), 'Soup');
     await tester.pump();
-    expect(value, 'Soup');
+    expect(_value, 'Soup');
   });
 
   testWidgets('autovalidateMode is passed to super', (WidgetTester tester) async {
-    int validateCalled = 0;
+    int _validateCalled = 0;
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -185,7 +185,7 @@ void main() {
           child: CupertinoTextFormFieldRow(
             autovalidateMode: AutovalidateMode.always,
             validator: (String? value) {
-              validateCalled++;
+              _validateCalled++;
               return null;
             },
           ),
@@ -193,14 +193,14 @@ void main() {
       ),
     );
 
-    expect(validateCalled, 1);
+    expect(_validateCalled, 1);
     await tester.enterText(find.byType(CupertinoTextField), 'a');
     await tester.pump();
-    expect(validateCalled, 2);
+    expect(_validateCalled, 2);
   });
 
   testWidgets('validate is called if widget is enabled', (WidgetTester tester) async {
-    int validateCalled = 0;
+    int _validateCalled = 0;
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -209,7 +209,7 @@ void main() {
             enabled: true,
             autovalidateMode: AutovalidateMode.always,
             validator: (String? value) {
-              validateCalled += 1;
+              _validateCalled += 1;
               return null;
             },
           ),
@@ -217,10 +217,10 @@ void main() {
       ),
     );
 
-    expect(validateCalled, 1);
+    expect(_validateCalled, 1);
     await tester.enterText(find.byType(CupertinoTextField), 'a');
     await tester.pump();
-    expect(validateCalled, 2);
+    expect(_validateCalled, 2);
   });
 
   testWidgets('readonly text form field will hide cursor by default', (WidgetTester tester) async {
@@ -329,7 +329,7 @@ void main() {
   });
 
   testWidgets('onChanged callbacks value and FormFieldState.value are sync', (WidgetTester tester) async {
-    bool called = false;
+    bool _called = false;
 
     late FormFieldState<String> state;
 
@@ -338,7 +338,7 @@ void main() {
         home: Center(
           child: CupertinoTextFormFieldRow(
             onChanged: (String value) {
-              called = true;
+              _called = true;
               expect(value, state.value);
             },
           ),
@@ -351,7 +351,7 @@ void main() {
 
     await tester.enterText(find.byType(CupertinoTextField), 'Soup');
 
-    expect(called, true);
+    expect(_called, true);
   });
 
   testWidgets('autofillHints is passed to super', (WidgetTester tester) async {
@@ -371,7 +371,7 @@ void main() {
   });
 
   testWidgets('autovalidateMode is passed to super', (WidgetTester tester) async {
-    int validateCalled = 0;
+    int _validateCalled = 0;
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -379,7 +379,7 @@ void main() {
           child: CupertinoTextFormFieldRow(
             autovalidateMode: AutovalidateMode.onUserInteraction,
             validator: (String? value) {
-              validateCalled++;
+              _validateCalled++;
               return null;
             },
           ),
@@ -387,10 +387,10 @@ void main() {
       ),
     );
 
-    expect(validateCalled, 0);
+    expect(_validateCalled, 0);
     await tester.enterText(find.byType(CupertinoTextField), 'a');
     await tester.pump();
-    expect(validateCalled, 1);
+    expect(_validateCalled, 1);
   });
 
   testWidgets('AutovalidateMode.always mode shows error from the start', (WidgetTester tester) async {

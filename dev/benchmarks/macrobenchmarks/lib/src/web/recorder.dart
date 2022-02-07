@@ -1056,7 +1056,7 @@ double _computeAverage(String label, Iterable<double> values) {
 ///
 /// See also:
 ///
-///  * <https://en.wikipedia.org/wiki/Standard_deviation>
+/// * https://en.wikipedia.org/wiki/Standard_deviation
 double _computeStandardDeviationForPopulation(String label, Iterable<double> population) {
   if (population.isEmpty) {
     throw StateError('$label: attempted to compute the standard deviation of empty population.');
@@ -1108,32 +1108,12 @@ class _RecordingWidgetsBinding extends BindingBase
         SemanticsBinding,
         RendererBinding,
         WidgetsBinding {
-
-  @override
-  void initInstances() {
-    super.initInstances();
-    _instance = this;
-  }
-
-  /// The singleton instance of this object.
-  ///
-  /// Provides access to the features exposed by this class. The binding must
-  /// be initialized before using this getter; this is typically done by calling
-  /// [_RecordingWidgetsBinding.ensureInitialized].
-  static _RecordingWidgetsBinding get instance => BindingBase.checkInstance(_instance);
-  static _RecordingWidgetsBinding? _instance;
-
-  /// Returns an instance of the [_RecordingWidgetsBinding], creating and
-  /// initializing it if necessary.
-  ///
-  /// See also:
-  ///
-  ///  * [WidgetsFlutterBinding.ensureInitialized], the equivalent in the widgets framework.
+  /// Makes an instance of [_RecordingWidgetsBinding] the current binding.
   static _RecordingWidgetsBinding ensureInitialized() {
-    if (_instance == null) {
+    if (WidgetsBinding.instance == null) {
       _RecordingWidgetsBinding();
     }
-    return instance;
+    return WidgetsBinding.instance! as _RecordingWidgetsBinding;
   }
 
   FrameRecorder? _recorder;

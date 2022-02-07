@@ -13,15 +13,15 @@ import 'test_driver.dart';
 import 'test_utils.dart';
 
 void main() {
-  FlutterRunTestDriver flutterRun, flutterAttach;
-  final BasicProject project = BasicProject();
+  FlutterRunTestDriver _flutterRun, _flutterAttach;
+  final BasicProject _project = BasicProject();
   Directory tempDir;
 
   setUp(() async {
     tempDir = createResolvedTempDirectorySync('attach_test.');
-    await project.setUpIn(tempDir);
-    flutterRun = FlutterRunTestDriver(tempDir,    logPrefix: '   RUN  ');
-    flutterAttach = FlutterRunTestDriver(
+    await _project.setUpIn(tempDir);
+    _flutterRun = FlutterRunTestDriver(tempDir,    logPrefix: '   RUN  ');
+    _flutterAttach = FlutterRunTestDriver(
       tempDir,
       logPrefix: 'ATTACH  ',
       // Only one DDS instance can be connected to the VM service at a time.
@@ -32,74 +32,74 @@ void main() {
   });
 
   tearDown(() async {
-    await flutterAttach.detach();
-    await flutterRun.stop();
+    await _flutterAttach.detach();
+    await _flutterRun.stop();
     tryToDelete(tempDir);
   });
 
   testWithoutContext('can hot reload', () async {
-    await flutterRun.run(withDebugger: true);
-    await flutterAttach.attach(flutterRun.vmServicePort);
-    await flutterAttach.hotReload();
+    await _flutterRun.run(withDebugger: true);
+    await _flutterAttach.attach(_flutterRun.vmServicePort);
+    await _flutterAttach.hotReload();
   });
 
   testWithoutContext('can detach, reattach, hot reload', () async {
-    await flutterRun.run(withDebugger: true);
-    await flutterAttach.attach(flutterRun.vmServicePort);
-    await flutterAttach.detach();
-    await flutterAttach.attach(flutterRun.vmServicePort);
-    await flutterAttach.hotReload();
+    await _flutterRun.run(withDebugger: true);
+    await _flutterAttach.attach(_flutterRun.vmServicePort);
+    await _flutterAttach.detach();
+    await _flutterAttach.attach(_flutterRun.vmServicePort);
+    await _flutterAttach.hotReload();
   });
 
   testWithoutContext('killing process behaves the same as detach ', () async {
-    await flutterRun.run(withDebugger: true);
-    await flutterAttach.attach(flutterRun.vmServicePort);
-    await flutterAttach.quit();
-    flutterAttach = FlutterRunTestDriver(
+    await _flutterRun.run(withDebugger: true);
+    await _flutterAttach.attach(_flutterRun.vmServicePort);
+    await _flutterAttach.quit();
+    _flutterAttach = FlutterRunTestDriver(
       tempDir,
       logPrefix: 'ATTACH-2',
       spawnDdsInstance: false,
     );
-    await flutterAttach.attach(flutterRun.vmServicePort);
-    await flutterAttach.hotReload();
+    await _flutterAttach.attach(_flutterRun.vmServicePort);
+    await _flutterAttach.hotReload();
   });
 
   testWithoutContext('sets activeDevToolsServerAddress extension', () async {
-    await flutterRun.run(
+    await _flutterRun.run(
       startPaused: true,
       withDebugger: true,
       additionalCommandArgs: <String>['--devtools-server-address', 'http://127.0.0.1:9105'],
     );
-    await flutterRun.resume();
+    await _flutterRun.resume();
     await pollForServiceExtensionValue<String>(
-      testDriver: flutterRun,
+      testDriver: _flutterRun,
       extension: 'ext.flutter.activeDevToolsServerAddress',
       continuePollingValue: '',
       matches: equals('http://127.0.0.1:9105'),
     );
     await pollForServiceExtensionValue<String>(
-      testDriver: flutterRun,
+      testDriver: _flutterRun,
       extension: 'ext.flutter.connectedVmServiceUri',
       continuePollingValue: '',
       matches: isNotEmpty,
     );
 
-    final Response response = await flutterRun.callServiceExtension('ext.flutter.connectedVmServiceUri');
+    final Response response = await _flutterRun.callServiceExtension('ext.flutter.connectedVmServiceUri');
     final String vmServiceUri = response.json['value'] as String;
 
     // Attach with a different DevTools server address.
-    await flutterAttach.attach(
-      flutterRun.vmServicePort,
+    await _flutterAttach.attach(
+      _flutterRun.vmServicePort,
       additionalCommandArgs: <String>['--devtools-server-address', 'http://127.0.0.1:9110'],
     );
     await pollForServiceExtensionValue<String>(
-      testDriver: flutterAttach,
+      testDriver: _flutterAttach,
       extension: 'ext.flutter.activeDevToolsServerAddress',
       continuePollingValue: '',
       matches: equals('http://127.0.0.1:9110'),
     );
     await pollForServiceExtensionValue<String>(
-      testDriver: flutterRun,
+      testDriver: _flutterRun,
       extension: 'ext.flutter.connectedVmServiceUri',
       continuePollingValue: '',
       matches: equals(vmServiceUri),

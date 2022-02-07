@@ -21,11 +21,13 @@ class _TestSliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate
     this.key,
     required this.minExtent,
     required this.maxExtent,
+    this.child,
     this.vsync = const TestVSync(),
     this.showOnScreenConfiguration = const PersistentHeaderShowOnScreenConfiguration(),
   });
 
   final Key? key;
+  final Widget? child;
 
   @override
   final double maxExtent;
@@ -40,7 +42,7 @@ class _TestSliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate
   final PersistentHeaderShowOnScreenConfiguration showOnScreenConfiguration;
 
   @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) => SizedBox.expand(key: key);
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) => child ?? SizedBox.expand(key: key);
 
   @override
   bool shouldRebuild(_TestSliverPersistentHeaderDelegate oldDelegate) => true;

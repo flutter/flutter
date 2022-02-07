@@ -103,8 +103,8 @@ abstract class FlutterTestDriver {
     }
     _debugPrint('Spawning flutter $arguments in ${_projectFolder.path}');
 
-    const ProcessManager processManager = LocalProcessManager();
-    _process = await processManager.start(
+    const ProcessManager _processManager = LocalProcessManager();
+    _process = await _processManager.start(
       <String>[flutterBin]
         .followedBy(arguments)
         .toList(),
@@ -164,9 +164,9 @@ abstract class FlutterTestDriver {
 
     await waitForPause();
     if (pauseOnExceptions) {
-      await _vmService!.setIsolatePauseMode(
+      await _vmService!.setExceptionPauseMode(
         await _getFlutterIsolateId(),
-        exceptionPauseMode: ExceptionPauseMode.kUnhandled,
+        ExceptionPauseMode.kUnhandled,
       );
     }
   }
@@ -482,7 +482,7 @@ abstract class FlutterTestDriver {
         timeoutExpired = true;
         _debugPrint(messages.toString());
       }
-      throw error; // ignore: only_throw_errors
+      throw error;
     }).whenComplete(() => subscription.cancel());
   }
 }
@@ -753,15 +753,15 @@ class FlutterRunTestDriver extends FlutterTestDriver {
   }
 
   void _throwErrorResponse(String message) {
-    throw Exception('$message\n\n$_lastResponse\n\n${_errorBuffer.toString()}'.trim());
+    throw '$message\n\n$_lastResponse\n\n${_errorBuffer.toString()}'.trim();
   }
 
   final bool spawnDdsInstance;
 }
 
 class FlutterTestTestDriver extends FlutterTestDriver {
-  FlutterTestTestDriver(Directory projectFolder, {String? logPrefix})
-    : super(projectFolder, logPrefix: logPrefix);
+  FlutterTestTestDriver(Directory _projectFolder, {String? logPrefix})
+    : super(_projectFolder, logPrefix: logPrefix);
 
   Future<void> test({
     String testFile = 'test/test.dart',

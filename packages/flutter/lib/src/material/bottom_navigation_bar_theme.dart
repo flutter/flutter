@@ -8,7 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'bottom_navigation_bar.dart';
-import 'material_state.dart';
 import 'theme.dart';
 
 /// Defines default property values for descendant [BottomNavigationBar]
@@ -46,7 +45,6 @@ class BottomNavigationBarThemeData with Diagnosticable {
     this.type,
     this.enableFeedback,
     this.landscapeLayout,
-    this.mouseCursor,
   });
 
   /// The color of the [BottomNavigationBar] itself.
@@ -126,9 +124,6 @@ class BottomNavigationBarThemeData with Diagnosticable {
   /// If non-null, overrides the [BottomNavigationBar.landscapeLayout] property.
   final BottomNavigationBarLandscapeLayout? landscapeLayout;
 
-  /// If specified, overrides the default value of [BottomNavigationBar.mouseCursor].
-  final MaterialStateProperty<MouseCursor?>? mouseCursor;
-
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   BottomNavigationBarThemeData copyWith({
@@ -144,8 +139,7 @@ class BottomNavigationBarThemeData with Diagnosticable {
     bool? showUnselectedLabels,
     BottomNavigationBarType? type,
     bool? enableFeedback,
-    BottomNavigationBarLandscapeLayout? landscapeLayout,
-    MaterialStateProperty<MouseCursor?>? mouseCursor,
+    BottomNavigationBarLandscapeLayout? landscapeLayout
   }) {
     return BottomNavigationBarThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -161,7 +155,6 @@ class BottomNavigationBarThemeData with Diagnosticable {
       type: type ?? this.type,
       enableFeedback: enableFeedback ?? this.enableFeedback,
       landscapeLayout: landscapeLayout ?? this.landscapeLayout,
-      mouseCursor: mouseCursor ?? this.mouseCursor,
     );
   }
 
@@ -186,7 +179,6 @@ class BottomNavigationBarThemeData with Diagnosticable {
       type: t < 0.5 ? a?.type : b?.type,
       enableFeedback: t < 0.5 ? a?.enableFeedback : b?.enableFeedback,
       landscapeLayout: t < 0.5 ? a?.landscapeLayout : b?.landscapeLayout,
-      mouseCursor: t < 0.5 ? a?.mouseCursor : b?.mouseCursor,
     );
   }
 
@@ -206,7 +198,6 @@ class BottomNavigationBarThemeData with Diagnosticable {
       type,
       enableFeedback,
       landscapeLayout,
-      mouseCursor,
     );
   }
 
@@ -229,8 +220,7 @@ class BottomNavigationBarThemeData with Diagnosticable {
         && other.showUnselectedLabels == showUnselectedLabels
         && other.type == type
         && other.enableFeedback == enableFeedback
-        && other.landscapeLayout == landscapeLayout
-        && other.mouseCursor == mouseCursor;
+        && other.landscapeLayout == landscapeLayout;
   }
 
   @override
@@ -249,7 +239,6 @@ class BottomNavigationBarThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<BottomNavigationBarType>('type', type, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('enableFeedback', enableFeedback, defaultValue: null));
     properties.add(DiagnosticsProperty<BottomNavigationBarLandscapeLayout>('landscapeLayout', landscapeLayout, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>>('mouseCursor', mouseCursor, defaultValue: null));
   }
 }
 

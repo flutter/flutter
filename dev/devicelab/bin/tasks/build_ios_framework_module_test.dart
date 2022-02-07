@@ -66,7 +66,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
   String content = pubspec.readAsStringSync();
   content = content.replaceFirst(
     '\ndependencies:\n',
-    '\ndependencies:\n  package_info: 2.0.2\n  connectivity: 3.0.6\n',
+    '\ndependencies:\n  device_info: 0.4.1\n  package_info: 0.4.0+9\n  connectivity: 3.0.3\n',
   );
   pubspec.writeAsStringSync(content, flush: true);
   await inDirectory(projectDir, () async {
@@ -263,10 +263,10 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
     final String pluginFrameworkPath = path.join(
       outputPath,
       mode,
-      'connectivity.xcframework',
+      'device_info.xcframework',
       'ios-arm64_armv7',
-      'connectivity.framework',
-      'connectivity',
+      'device_info.framework',
+      'device_info',
     );
     await _checkBitcode(pluginFrameworkPath, mode);
     if (!await _linksOnFlutter(pluginFrameworkPath)) {
@@ -288,41 +288,41 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
     checkFileExists(path.join(
       outputPath,
       mode,
-      'connectivity.xcframework',
+      'device_info.xcframework',
       'ios-arm64_armv7',
-      'connectivity.framework',
+      'device_info.framework',
       'Headers',
-      'FLTConnectivityPlugin.h',
+      'DeviceInfoPlugin.h',
     ));
 
     if (mode != 'Debug') {
       checkDirectoryExists(path.join(
         outputPath,
         mode,
-        'connectivity.xcframework',
+        'device_info.xcframework',
         'ios-arm64_armv7',
         'dSYMs',
-        'connectivity.framework.dSYM',
+        'device_info.framework.dSYM',
       ));
     }
 
     final String simulatorFrameworkPath = path.join(
       outputPath,
       mode,
-      'connectivity.xcframework',
+      'device_info.xcframework',
       'ios-arm64_x86_64-simulator',
-      'connectivity.framework',
-      'connectivity',
+      'device_info.framework',
+      'device_info',
     );
 
     final String simulatorFrameworkHeaderPath = path.join(
       outputPath,
       mode,
-      'connectivity.xcframework',
+      'device_info.xcframework',
       'ios-arm64_x86_64-simulator',
-      'connectivity.framework',
+      'device_info.framework',
       'Headers',
-      'FLTConnectivityPlugin.h',
+      'DeviceInfoPlugin.h',
     );
 
     checkFileExists(simulatorFrameworkPath);
@@ -332,7 +332,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
   checkDirectoryExists(path.join(
     outputPath,
     'Release',
-    'connectivity.xcframework',
+    'device_info.xcframework',
     'ios-arm64_armv7',
     'BCSymbolMaps',
   ));
@@ -414,6 +414,12 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
       throw TaskResult.failure(
           'Unexpected FlutterPluginRegistrant.xcframework.');
     }
+
+    checkDirectoryExists(path.join(
+      cocoapodsOutputPath,
+      mode,
+      'device_info.xcframework',
+    ));
 
     checkDirectoryExists(path.join(
       cocoapodsOutputPath,

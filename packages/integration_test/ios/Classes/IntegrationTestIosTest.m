@@ -3,40 +3,61 @@
 // found in the LICENSE file.
 
 #import "IntegrationTestIosTest.h"
-
 #import "IntegrationTestPlugin.h"
-#import "FLTIntegrationTestRunner.h"
 
-#pragma mark - Deprecated
-
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-implementations"
+@interface IntegrationTestIosTest()
+@property (nonatomic) IntegrationTestPlugin *integrationTestPlugin;
+@end
 
 @implementation IntegrationTestIosTest
 
+- (instancetype)initWithScreenshotDelegate:(id<FLTIntegrationTestScreenshotDelegate>)delegate {
+  self = [super init];
+  _integrationTestPlugin = [IntegrationTestPlugin instance];
+  _integrationTestPlugin.screenshotDelegate = delegate;
+  return self;
+}
+
+- (instancetype)init {
+  return [self initWithScreenshotDelegate:nil];
+}
+
 - (BOOL)testIntegrationTest:(NSString **)testResult {
-  NSLog(@"==================== Test Results =====================");
+  IntegrationTestPlugin *integrationTestPlugin = self.integrationTestPlugin;
+
+  UIViewController *rootViewController =
+      [[[[UIApplication sharedApplication] delegate] window] rootViewController];
+  if (![rootViewController isKindOfClass:[FlutterViewController class]]) {
+    NSLog(@"expected FlutterViewController as rootViewController.");
+    return NO;
+  }
+  FlutterViewController *flutterViewController = (FlutterViewController *)rootViewController;
+  [integrationTestPlugin setupChannels:flutterViewController.engine.binaryMessenger];
+  while (!integrationTestPlugin.testResults) {
+    CFRunLoopRunInMode(kCFRunLoopDefaultMode, 1.f, NO);
+  }
+  NSDictionary<NSString *, NSString *> *testResults = integrationTestPlugin.testResults;
+  NSMutableArray<NSString *> *passedTests = [NSMutableArray array];
   NSMutableArray<NSString *> *failedTests = [NSMutableArray array];
-  NSMutableArray<NSString *> *testNames = [NSMutableArray array];
-  [[FLTIntegrationTestRunner new] testIntegrationTestWithResults:^(SEL testSelector, BOOL success, NSString *message) {
-    NSString *testName = NSStringFromSelector(testSelector);
-    [testNames addObject:testName];
-    if (success) {
-      NSLog(@"%@ passed.", testName);
+  NSLog(@"==================== Test Results =====================");
+  for (NSString *test in testResults.allKeys) {
+    NSString *result = testResults[test];
+    if ([result isEqualToString:@"success"]) {
+      NSLog(@"%@ passed.", test);
+      [passedTests addObject:test];
     } else {
-      NSLog(@"%@ failed: %@", testName, message);
-      [failedTests addObject:testName];
+      NSLog(@"%@ failed: %@", test, result);
+      [failedTests addObject:test];
     }
-  }];
+  }
   NSLog(@"================== Test Results End ====================");
   BOOL testPass = failedTests.count == 0;
-  if (!testPass && testResult != NULL) {
+  if (!testPass && testResult) {
     *testResult =
         [NSString stringWithFormat:@"Detected failed integration test(s) %@ among %@",
-                                   failedTests.description, testNames.description];
+                                   failedTests.description, testResults.allKeys.description];
   }
   return testPass;
 }
 
 @end
-#pragma clang diagnostic pop

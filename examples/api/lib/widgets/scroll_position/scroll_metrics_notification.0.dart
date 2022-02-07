@@ -41,7 +41,7 @@ class ScrollMetricsDemoState extends State<ScrollMetricsDemo> {
             return false;
           },
           child: Scrollbar(
-            thumbVisibility: true,
+            isAlwaysShown: true,
             child: SizedBox(
               height: windowSize,
               width: double.infinity,

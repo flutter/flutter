@@ -6,7 +6,6 @@ import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import '../application_package.dart';
-import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -129,17 +128,7 @@ abstract class ChromiumDevice extends Device {
   }) async {
     // See [ResidentWebRunner.run] in flutter_tools/lib/src/resident_web_runner.dart
     // for the web initialization and server logic.
-    String url;
-    if (debuggingOptions.webLaunchUrl != null) {
-      final RegExp pattern = RegExp(r'^((http)?:\/\/)[^\s]+');
-      if (pattern.hasMatch(debuggingOptions.webLaunchUrl!)) {
-        url = debuggingOptions.webLaunchUrl!;
-      } else {
-        throwToolExit('"${debuggingOptions.webLaunchUrl}" is not a vaild HTTP URL.');
-      }
-    } else {
-      url = platformArgs['uri']! as String;
-    }
+    final String url = platformArgs['uri']! as String;
     final bool launchChrome = platformArgs['no-launch-chrome'] != true;
     if (launchChrome) {
       _chrome = await chromeLauncher.launch(

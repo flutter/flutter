@@ -838,10 +838,8 @@ class RenderConstraintsTransformBox extends RenderAligningShiftedBox with DebugO
   @override
   String toStringShort() {
     String header = super.toStringShort();
-    if (!kReleaseMode) {
-      if (_isOverflowing)
-        header += ' OVERFLOWING';
-    }
+    if (_isOverflowing)
+      header += ' OVERFLOWING';
     return header;
   }
 }

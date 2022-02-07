@@ -38,20 +38,19 @@ abstract class HitTestTarget {
   HitTestTarget._();
 
   /// Override this method to receive events.
-  void handleEvent(PointerEvent event, HitTestEntry<HitTestTarget> entry);
+  void handleEvent(PointerEvent event, HitTestEntry entry);
 }
 
 /// Data collected during a hit test about a specific [HitTestTarget].
 ///
 /// Subclass this object to pass additional information from the hit test phase
 /// to the event propagation phase.
-@optionalTypeArgs
-class HitTestEntry<T extends HitTestTarget> {
+class HitTestEntry {
   /// Creates a hit test entry.
   HitTestEntry(this.target);
 
   /// The [HitTestTarget] encountered during the hit test.
-  final T target;
+  final HitTestTarget target;
 
   @override
   String toString() => '${describeIdentity(this)}($target)';
@@ -91,7 +90,7 @@ class _MatrixTransformPart extends _TransformPart {
 
   @override
   Matrix4 multiply(Matrix4 rhs) {
-    return matrix.multiplied(rhs);
+    return matrix * rhs as Matrix4;
   }
 }
 

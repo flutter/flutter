@@ -648,8 +648,7 @@ class TextPainter {
       _createParagraph();
     _lastMinWidth = minWidth;
     _lastMaxWidth = maxWidth;
-    // A change in layout invalidates the cached caret and line metrics as well.
-    _lineMetricsCache = null;
+    // A change in layout invalidates the cached caret metrics as well.
     _previousCaretPosition = null;
     _previousCaretPrototype = null;
     _layoutParagraph(minWidth, maxWidth);

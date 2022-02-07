@@ -1551,13 +1551,13 @@ void main() {
   });
 
   testWidgets('Dismissible.confirmDismiss defers to an AlertDialog', (WidgetTester tester) async {
-    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
     final List<int> dismissedItems = <int>[];
 
     // Dismiss is confirmed IFF confirmDismiss() returns true.
     Future<bool?> confirmDismiss (DismissDirection dismissDirection) async {
       return showDialog<bool>(
-        context: scaffoldKey.currentContext!,
+        context: _scaffoldKey.currentContext!,
         barrierDismissible: true, // showDialog() returns null if tapped outside the dialog
         builder: (BuildContext context) {
           return AlertDialog(
@@ -1602,7 +1602,7 @@ void main() {
         home: StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             return Scaffold(
-              key: scaffoldKey,
+              key: _scaffoldKey,
               body: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: ListView(

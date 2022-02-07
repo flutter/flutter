@@ -1003,9 +1003,9 @@ class CupertinoDynamicColor extends Color with Diagnosticable {
         }
     }
 
-    Element? debugContext;
+    Element? _debugContext;
     assert(() {
-      debugContext = context as Element;
+      _debugContext = context as Element;
       return true;
     }());
     return CupertinoDynamicColor._(
@@ -1018,7 +1018,7 @@ class CupertinoDynamicColor extends Color with Diagnosticable {
       darkElevatedColor,
       highContrastElevatedColor,
       darkHighContrastElevatedColor,
-      debugContext,
+      _debugContext,
       _debugLabel,
     );
   }

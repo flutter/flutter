@@ -917,12 +917,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
       testPlistParser.setProperty('CFBundleIdentifier', 'correct');
 
       final Directory mockDir = globals.fs.currentDirectory;
-      final IOSApp package = PrebuiltIOSApp(
-        projectBundleId: 'incorrect',
-        bundleName: 'name',
-        uncompressedBundle: mockDir,
-        applicationPackage: mockDir,
-      );
+      final IOSApp package = PrebuiltIOSApp(projectBundleId: 'incorrect', bundleName: 'name', bundleDir: mockDir);
 
       const BuildInfo mockInfo = BuildInfo(BuildMode.debug, 'flavor', treeShakeIcons: false);
       final DebuggingOptions mockOptions = DebuggingOptions.disabled(mockInfo);
@@ -945,12 +940,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
       );
 
       final Directory mockDir = globals.fs.currentDirectory;
-      final IOSApp package = PrebuiltIOSApp(
-        projectBundleId: 'incorrect',
-        bundleName: 'name',
-        uncompressedBundle: mockDir,
-        applicationPackage: mockDir,
-      );
+      final IOSApp package = PrebuiltIOSApp(projectBundleId: 'incorrect', bundleName: 'name', bundleDir: mockDir);
 
       const BuildInfo mockInfo = BuildInfo(BuildMode.debug, 'flavor', treeShakeIcons: false);
       final DebuggingOptions mockOptions = DebuggingOptions.disabled(mockInfo);
@@ -977,12 +967,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
       testPlistParser.setProperty('CFBundleIdentifier', 'correct');
 
       final Directory mockDir = globals.fs.currentDirectory;
-      final IOSApp package = PrebuiltIOSApp(
-        projectBundleId: 'correct',
-        bundleName: 'name',
-        uncompressedBundle: mockDir,
-        applicationPackage: mockDir,
-      );
+      final IOSApp package = PrebuiltIOSApp(projectBundleId: 'correct', bundleName: 'name', bundleDir: mockDir);
 
       const BuildInfo mockInfo = BuildInfo(BuildMode.debug, 'flavor', treeShakeIcons: false);
       final DebuggingOptions mockOptions = DebuggingOptions.enabled(mockInfo, enableSoftwareRendering: true);

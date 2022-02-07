@@ -236,6 +236,7 @@ class _DesktopTextSelectionToolbar extends StatelessWidget {
     Key? key,
     required this.anchor,
     required this.children,
+    this.toolbarBuilder = _defaultToolbarBuilder,
   }) : assert(children.length > 0),
        super(key: key);
 
@@ -249,6 +250,12 @@ class _DesktopTextSelectionToolbar extends StatelessWidget {
   ///   * [DesktopTextSelectionToolbarButton], which builds a default
   ///     Material-style desktop text selection toolbar text button.
   final List<Widget> children;
+
+  /// {@macro flutter.material.TextSelectionToolbar.toolbarBuilder}
+  ///
+  /// The given anchor and isAbove can be used to position an arrow, as in the
+  /// default toolbar.
+  final ToolbarBuilder toolbarBuilder;
 
   // Builds a desktop toolbar in the Material style.
   static Widget _defaultToolbarBuilder(BuildContext context, Widget child) {
@@ -283,7 +290,7 @@ class _DesktopTextSelectionToolbar extends StatelessWidget {
         delegate: DesktopTextSelectionToolbarLayoutDelegate(
           anchor: anchor - localAdjustment,
         ),
-        child: _defaultToolbarBuilder(context, Column(
+        child: toolbarBuilder(context, Column(
           mainAxisSize: MainAxisSize.min,
           children: children,
         )),

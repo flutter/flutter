@@ -27,7 +27,7 @@ Future<void> validateBitcode(BuildMode buildMode, TargetPlatform targetPlatform,
   final String? clangVersion = clangResult?.stdout.split('\n').first;
   final String? engineClangVersion = flutterFrameworkPath == null
       ? null
-      : globals.plistParser.getStringValueFromFile(
+      : globals.plistParser.getValueFromFile(
           globals.fs.path.join(flutterFrameworkPath, 'Info.plist'),
           'ClangVersion',
         );

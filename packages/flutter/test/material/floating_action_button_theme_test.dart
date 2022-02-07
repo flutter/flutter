@@ -33,8 +33,6 @@ void main() {
     expect(_getRawMaterialButton(tester).shape, const CircleBorder());
     expect(_getRawMaterialButton(tester).splashColor, ThemeData().splashColor);
     expect(_getRawMaterialButton(tester).constraints, const BoxConstraints.tightFor(width: 56.0, height: 56.0));
-    expect(_getIconSize(tester).width, 24.0);
-    expect(_getIconSize(tester).height, 24.0);
   });
 
   testWidgets('FloatingActionButtonThemeData values are used when no FloatingActionButton properties are specified', (WidgetTester tester) async {
@@ -140,7 +138,6 @@ void main() {
 
   testWidgets('FloatingActionButton.small uses custom constraints when specified in the theme', (WidgetTester tester) async {
     const BoxConstraints constraints = BoxConstraints.tightFor(width: 100.0, height: 100.0);
-    const double iconSize = 24.0;
 
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData().copyWith(
@@ -157,13 +154,10 @@ void main() {
     ));
 
     expect(_getRawMaterialButton(tester).constraints, constraints);
-    expect(_getIconSize(tester).width, iconSize);
-    expect(_getIconSize(tester).height, iconSize);
   });
 
   testWidgets('FloatingActionButton.large uses custom constraints when specified in the theme', (WidgetTester tester) async {
     const BoxConstraints constraints = BoxConstraints.tightFor(width: 100.0, height: 100.0);
-    const double iconSize = 36.0;
 
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData().copyWith(
@@ -180,8 +174,6 @@ void main() {
     ));
 
     expect(_getRawMaterialButton(tester).constraints, constraints);
-    expect(_getIconSize(tester).width, iconSize);
-    expect(_getIconSize(tester).height, iconSize);
   });
 
   testWidgets('FloatingActionButton.extended uses custom properties when specified in the theme', (WidgetTester tester) async {
@@ -279,7 +271,6 @@ void main() {
       highlightElevation: 43,
       shape: BeveledRectangleBorder(),
       enableFeedback: true,
-      iconSize: 42,
       sizeConstraints: BoxConstraints.tightFor(width: 100.0, height: 100.0),
       smallSizeConstraints: BoxConstraints.tightFor(width: 101.0, height: 101.0),
       largeSizeConstraints: BoxConstraints.tightFor(width: 102.0, height: 102.0),
@@ -307,7 +298,6 @@ void main() {
       'highlightElevation: 43.0',
       'shape: BeveledRectangleBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none), BorderRadius.zero)',
       'enableFeedback: true',
-      'iconSize: 42.0',
       'sizeConstraints: BoxConstraints(w=100.0, h=100.0)',
       'smallSizeConstraints: BoxConstraints(w=101.0, h=101.0)',
       'largeSizeConstraints: BoxConstraints(w=102.0, h=102.0)',
@@ -333,18 +323,6 @@ RichText _getRichText(WidgetTester tester) {
     find.descendant(
       of: find.byType(FloatingActionButton),
       matching: find.byType(RichText),
-    ),
-  );
-}
-
-SizedBox _getIconSize(WidgetTester tester) {
-  return tester.widget<SizedBox>(
-    find.descendant(
-      of: find.descendant(
-        of: find.byType(FloatingActionButton),
-        matching: find.byType(Icon),
-      ),
-      matching: find.byType(SizedBox),
     ),
   );
 }

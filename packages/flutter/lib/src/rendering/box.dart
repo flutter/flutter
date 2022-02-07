@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:developer' show Timeline;
 import 'dart:math' as math;
 import 'dart:ui' as ui show lerpDouble;
 
@@ -886,13 +885,16 @@ class BoxHitTestResult extends HitTestResult {
 }
 
 /// A hit test entry used by [RenderBox].
-class BoxHitTestEntry extends HitTestEntry<RenderBox> {
+class BoxHitTestEntry extends HitTestEntry {
   /// Creates a box hit test entry.
   ///
   /// The [localPosition] argument must not be null.
   BoxHitTestEntry(RenderBox target, this.localPosition)
     : assert(localPosition != null),
       super(target);
+
+  @override
+  RenderBox get target => super.target as RenderBox;
 
   /// The position of the hit test in the local coordinates of [target].
   final Offset localPosition;
@@ -1356,7 +1358,6 @@ abstract class RenderBox extends RenderObject {
   }
 
   Map<_IntrinsicDimensionsCacheEntry, double>? _cachedIntrinsicDimensions;
-  static int _debugIntrinsicsDepth = 0;
 
   double _computeIntrinsicDimension(_IntrinsicDimension dimension, double argument, double Function(double argument) computer) {
     assert(RenderObject.debugCheckingIntrinsics || !debugDoingThisResize); // performResize should not depend on anything except the incoming constraints
@@ -1369,38 +1370,11 @@ abstract class RenderBox extends RenderObject {
       return true;
     }());
     if (shouldCache) {
-      Map<String, String> debugTimelineArguments = timelineArgumentsIndicatingLandmarkEvent;
-      assert(() {
-        if (debugProfileLayoutsEnabled) {
-          debugTimelineArguments = toDiagnosticsNode().toTimelineArguments();
-        } else {
-          debugTimelineArguments = Map<String, String>.of(debugTimelineArguments);
-        }
-        debugTimelineArguments['intrinsics dimension'] = describeEnum(dimension);
-        debugTimelineArguments['intrinsics argument'] = '$argument';
-        return true;
-      }());
-      if (!kReleaseMode) {
-        if (debugProfileLayoutsEnabled || _debugIntrinsicsDepth == 0) {
-          Timeline.startSync(
-            '$runtimeType intrinsics',
-            arguments: debugTimelineArguments,
-          );
-        }
-        _debugIntrinsicsDepth += 1;
-      }
       _cachedIntrinsicDimensions ??= <_IntrinsicDimensionsCacheEntry, double>{};
-      final double result = _cachedIntrinsicDimensions!.putIfAbsent(
+      return _cachedIntrinsicDimensions!.putIfAbsent(
         _IntrinsicDimensionsCacheEntry(dimension, argument),
         () => computer(argument),
       );
-      if (!kReleaseMode) {
-        _debugIntrinsicsDepth -= 1;
-        if (debugProfileLayoutsEnabled || _debugIntrinsicsDepth == 0) {
-          Timeline.finishSync();
-        }
-      }
-      return result;
     }
     return computer(argument);
   }
@@ -1833,34 +1807,8 @@ abstract class RenderBox extends RenderObject {
       return true;
     }());
     if (shouldCache) {
-      Map<String, String> debugTimelineArguments = timelineArgumentsIndicatingLandmarkEvent;
-      assert(() {
-        if (debugProfileLayoutsEnabled) {
-          debugTimelineArguments = toDiagnosticsNode().toTimelineArguments();
-        } else {
-          debugTimelineArguments = Map<String, String>.of(debugTimelineArguments);
-        }
-        debugTimelineArguments['getDryLayout constraints'] = '$constraints';
-        return true;
-      }());
-      if (!kReleaseMode) {
-        if (debugProfileLayoutsEnabled || _debugIntrinsicsDepth == 0) {
-          Timeline.startSync(
-            '$runtimeType.getDryLayout',
-            arguments: debugTimelineArguments,
-          );
-        }
-        _debugIntrinsicsDepth += 1;
-      }
       _cachedDryLayoutSizes ??= <BoxConstraints, Size>{};
-      final Size result = _cachedDryLayoutSizes!.putIfAbsent(constraints, () => _computeDryLayout(constraints));
-      if (!kReleaseMode) {
-        _debugIntrinsicsDepth -= 1;
-        if (debugProfileLayoutsEnabled || _debugIntrinsicsDepth == 0) {
-          Timeline.finishSync();
-        }
-      }
-      return result;
+      return _cachedDryLayoutSizes!.putIfAbsent(constraints, () => _computeDryLayout(constraints));
     }
     return _computeDryLayout(constraints);
   }
@@ -1978,14 +1926,14 @@ abstract class RenderBox extends RenderObject {
   Size get size {
     assert(hasSize, 'RenderBox was not laid out: ${toString()}');
     assert(() {
-      final Size? size = _size;
-      if (size is _DebugSize) {
-        assert(size._owner == this);
+      final Size? _size = this._size;
+      if (_size is _DebugSize) {
+        assert(_size._owner == this);
         if (RenderObject.debugActiveLayout != null &&
             !RenderObject.debugActiveLayout!.debugDoingThisLayoutWithCallback) {
           assert(
             debugDoingThisResize || debugDoingThisLayout || _computingThisDryLayout ||
-              (RenderObject.debugActiveLayout == parent && size._canBeUsedByParent),
+              (RenderObject.debugActiveLayout == parent && _size._canBeUsedByParent),
             'RenderBox.size accessed beyond the scope of resize, layout, or '
             'permitted parent access. RenderBox can always access its own size, '
             'otherwise, the only object that is allowed to read RenderBox.size '
@@ -1994,7 +1942,7 @@ abstract class RenderBox extends RenderObject {
             "that child's layout().",
           );
         }
-        assert(size == _size);
+        assert(_size == this._size);
       }
       return true;
     }());

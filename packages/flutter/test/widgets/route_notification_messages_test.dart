@@ -57,7 +57,6 @@ void main() {
 
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.navigation, (MethodCall methodCall) async {
       log.add(methodCall);
-      return null;
     });
 
     await tester.pumpWidget(MaterialApp(
@@ -116,7 +115,6 @@ void main() {
     final List<MethodCall> log = <MethodCall>[];
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.navigation, (MethodCall methodCall) async {
       log.add(methodCall);
-      return null;
     });
 
     await tester.pumpWidget(Directionality(
@@ -167,7 +165,6 @@ void main() {
 
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.navigation, (MethodCall methodCall) async {
       log.add(methodCall);
-      return null;
     });
 
     await tester.pumpWidget(MaterialApp(
@@ -226,7 +223,6 @@ void main() {
     final List<MethodCall> log = <MethodCall>[];
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.navigation, (MethodCall methodCall) async {
       log.add(methodCall);
-      return null;
     });
 
     await tester.pumpWidget(MaterialApp(
@@ -270,7 +266,6 @@ void main() {
     final List<MethodCall> log = <MethodCall>[];
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.navigation, (MethodCall methodCall) async {
       log.add(methodCall);
-      return null;
     });
 
     final PlatformRouteInformationProvider provider = PlatformRouteInformationProvider(

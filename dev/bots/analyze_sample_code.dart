@@ -169,8 +169,8 @@ class _TaskQueueItem<T> {
   Future<void> run() async {
     try {
       _completer.complete(await _closure());
-    } catch (e, st) {
-      _completer.completeError(e, st);
+    } catch (e) {
+      _completer.completeError(e);
     } finally {
       onComplete?.call();
     }

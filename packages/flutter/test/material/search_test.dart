@@ -109,7 +109,7 @@ void main() {
 
     // Simulate system back button
     final ByteData message = const JSONMethodCodec().encodeMethodCall(const MethodCall('popRoute'));
-    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
+    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     await tester.pumpAndSettle();
 
     expect(selectedResults, <String?>[null]);
@@ -629,8 +629,7 @@ void main() {
                                 debugDefaultTargetPlatformOverride != TargetPlatform.macOS) SemanticsFlag.namesRoute,
                             ],
                             actions: <SemanticsAction>[
-                              if (debugDefaultTargetPlatformOverride == TargetPlatform.macOS ||
-                                debugDefaultTargetPlatformOverride == TargetPlatform.windows)
+                              if (debugDefaultTargetPlatformOverride == TargetPlatform.macOS)
                                 SemanticsAction.didGainAccessibilityFocus,
                               SemanticsAction.tap,
                               SemanticsAction.setSelection,
@@ -1020,6 +1019,14 @@ class _TestSearchDelegate extends SearchDelegate<String> {
 }
 
 class _TestEmptySearchDelegate extends SearchDelegate<String> {
+  _TestEmptySearchDelegate({
+    this.suggestions = 'Suggestions',
+    this.result = 'Result',
+  }) : super();
+
+  final String suggestions;
+  final String result;
+
   @override
   Widget? buildLeading(BuildContext context) => null;
 
@@ -1032,7 +1039,7 @@ class _TestEmptySearchDelegate extends SearchDelegate<String> {
       onPressed: () {
         showResults(context);
       },
-      child: const Text('Suggestions'),
+      child: Text(suggestions),
     );
   }
 
@@ -1049,7 +1056,7 @@ class _TestEmptySearchDelegate extends SearchDelegate<String> {
         tooltip: 'Close',
         icon: const Icon(Icons.arrow_back),
         onPressed: () {
-          close(context, 'Result');
+          close(context, result);
         },
       ),
     );

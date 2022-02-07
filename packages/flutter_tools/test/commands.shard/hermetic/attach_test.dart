@@ -599,18 +599,6 @@ class StreamLogger extends Logger {
   }
 
   @override
-  void printBox(
-    String message, {
-    String title,
-  }) {
-    if (title == null) {
-      _log('[stdout] $message');
-    } else {
-      _log('[stdout] $title: $message');
-    }
-  }
-
-  @override
   void printTrace(String message) {
     _log('[verbose] $message');
   }

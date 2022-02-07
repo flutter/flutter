@@ -108,7 +108,6 @@ import 'text_editing_intents.dart';
 ///                       setState(() {
 ///                         _counter++;
 ///                       });
-///                       return null;
 ///                     },
 ///                   ),
 ///                   DecrementCounterIntent: CallbackAction<DecrementCounterIntent>(
@@ -116,7 +115,6 @@ import 'text_editing_intents.dart';
 ///                       setState(() {
 ///                         _counter--;
 ///                       });
-///                       return null;
 ///                     },
 ///                   ),
 ///                 },
@@ -161,50 +159,47 @@ class DefaultTextEditingShortcuts extends Shortcuts {
 
   // These are shortcuts are shared between most platforms except macOS for it
   // uses different modifier keys as the line/word modifer.
-  static final Map<ShortcutActivator, Intent> _commonShortcuts = <ShortcutActivator, Intent>{
+  static const Map<ShortcutActivator, Intent> _commonShortcuts = <ShortcutActivator, Intent>{
     // Delete Shortcuts.
-    for (final bool pressShift in const <bool>[true, false])
-      ...<SingleActivator, Intent>{
-        SingleActivator(LogicalKeyboardKey.backspace, shift: pressShift): const DeleteCharacterIntent(forward: false),
-        SingleActivator(LogicalKeyboardKey.backspace, control: true, shift: pressShift): const DeleteToNextWordBoundaryIntent(forward: false),
-        SingleActivator(LogicalKeyboardKey.backspace, alt: true, shift: pressShift): const DeleteToLineBreakIntent(forward: false),
-        SingleActivator(LogicalKeyboardKey.delete, shift: pressShift): const DeleteCharacterIntent(forward: true),
-        SingleActivator(LogicalKeyboardKey.delete, control: true, shift: pressShift): const DeleteToNextWordBoundaryIntent(forward: true),
-        SingleActivator(LogicalKeyboardKey.delete, alt: true, shift: pressShift): const DeleteToLineBreakIntent(forward: true),
-      },
+    SingleActivator(LogicalKeyboardKey.backspace): DeleteCharacterIntent(forward: false),
+    SingleActivator(LogicalKeyboardKey.backspace, control: true): DeleteToNextWordBoundaryIntent(forward: false),
+    SingleActivator(LogicalKeyboardKey.backspace, alt: true): DeleteToLineBreakIntent(forward: false),
+    SingleActivator(LogicalKeyboardKey.delete): DeleteCharacterIntent(forward: true),
+    SingleActivator(LogicalKeyboardKey.delete, control: true): DeleteToNextWordBoundaryIntent(forward: true),
+    SingleActivator(LogicalKeyboardKey.delete, alt: true): DeleteToLineBreakIntent(forward: true),
 
     // Arrow: Move Selection.
-    const SingleActivator(LogicalKeyboardKey.arrowLeft): const ExtendSelectionByCharacterIntent(forward: false, collapseSelection: true),
-    const SingleActivator(LogicalKeyboardKey.arrowRight): const ExtendSelectionByCharacterIntent(forward: true, collapseSelection: true),
-    const SingleActivator(LogicalKeyboardKey.arrowUp): const ExtendSelectionVerticallyToAdjacentLineIntent(forward: false, collapseSelection: true),
-    const SingleActivator(LogicalKeyboardKey.arrowDown): const ExtendSelectionVerticallyToAdjacentLineIntent(forward: true, collapseSelection: true),
+    SingleActivator(LogicalKeyboardKey.arrowLeft): ExtendSelectionByCharacterIntent(forward: false, collapseSelection: true),
+    SingleActivator(LogicalKeyboardKey.arrowRight): ExtendSelectionByCharacterIntent(forward: true, collapseSelection: true),
+    SingleActivator(LogicalKeyboardKey.arrowUp): ExtendSelectionVerticallyToAdjacentLineIntent(forward: false, collapseSelection: true),
+    SingleActivator(LogicalKeyboardKey.arrowDown): ExtendSelectionVerticallyToAdjacentLineIntent(forward: true, collapseSelection: true),
 
     // Shift + Arrow: Extend Selection.
-    const SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true): const ExtendSelectionByCharacterIntent(forward: false, collapseSelection: false),
-    const SingleActivator(LogicalKeyboardKey.arrowRight, shift: true): const ExtendSelectionByCharacterIntent(forward: true, collapseSelection: false),
-    const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true): const ExtendSelectionVerticallyToAdjacentLineIntent(forward: false, collapseSelection: false),
-    const SingleActivator(LogicalKeyboardKey.arrowDown, shift: true): const ExtendSelectionVerticallyToAdjacentLineIntent(forward: true, collapseSelection: false),
+    SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true): ExtendSelectionByCharacterIntent(forward: false, collapseSelection: false),
+    SingleActivator(LogicalKeyboardKey.arrowRight, shift: true): ExtendSelectionByCharacterIntent(forward: true, collapseSelection: false),
+    SingleActivator(LogicalKeyboardKey.arrowUp, shift: true): ExtendSelectionVerticallyToAdjacentLineIntent(forward: false, collapseSelection: false),
+    SingleActivator(LogicalKeyboardKey.arrowDown, shift: true): ExtendSelectionVerticallyToAdjacentLineIntent(forward: true, collapseSelection: false),
 
-    const SingleActivator(LogicalKeyboardKey.arrowLeft, alt: true): const ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: true),
-    const SingleActivator(LogicalKeyboardKey.arrowRight, alt: true): const ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: true),
-    const SingleActivator(LogicalKeyboardKey.arrowUp, alt: true): const ExtendSelectionToDocumentBoundaryIntent(forward: false, collapseSelection: true),
-    const SingleActivator(LogicalKeyboardKey.arrowDown, alt: true): const ExtendSelectionToDocumentBoundaryIntent(forward: true, collapseSelection: true),
+    SingleActivator(LogicalKeyboardKey.arrowLeft, alt: true): ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: true),
+    SingleActivator(LogicalKeyboardKey.arrowRight, alt: true): ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: true),
+    SingleActivator(LogicalKeyboardKey.arrowUp, alt: true): ExtendSelectionToDocumentBoundaryIntent(forward: false, collapseSelection: true),
+    SingleActivator(LogicalKeyboardKey.arrowDown, alt: true): ExtendSelectionToDocumentBoundaryIntent(forward: true, collapseSelection: true),
 
-    const SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true, alt: true): const ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: false),
-    const SingleActivator(LogicalKeyboardKey.arrowRight, shift: true, alt: true): const ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: false),
-    const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true, alt: true): const ExtendSelectionToDocumentBoundaryIntent(forward: false, collapseSelection: false),
-    const SingleActivator(LogicalKeyboardKey.arrowDown, shift: true, alt: true): const ExtendSelectionToDocumentBoundaryIntent(forward: true, collapseSelection: false),
+    SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true, alt: true): ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: false),
+    SingleActivator(LogicalKeyboardKey.arrowRight, shift: true, alt: true): ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: false),
+    SingleActivator(LogicalKeyboardKey.arrowUp, shift: true, alt: true): ExtendSelectionToDocumentBoundaryIntent(forward: false, collapseSelection: false),
+    SingleActivator(LogicalKeyboardKey.arrowDown, shift: true, alt: true): ExtendSelectionToDocumentBoundaryIntent(forward: true, collapseSelection: false),
 
-    const SingleActivator(LogicalKeyboardKey.arrowLeft, control: true): const ExtendSelectionToNextWordBoundaryIntent(forward: false, collapseSelection: true),
-    const SingleActivator(LogicalKeyboardKey.arrowRight, control: true): const ExtendSelectionToNextWordBoundaryIntent(forward: true, collapseSelection: true),
+    SingleActivator(LogicalKeyboardKey.arrowLeft, control: true): ExtendSelectionToNextWordBoundaryIntent(forward: false, collapseSelection: true),
+    SingleActivator(LogicalKeyboardKey.arrowRight, control: true): ExtendSelectionToNextWordBoundaryIntent(forward: true, collapseSelection: true),
 
-    const SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true, control: true): const ExtendSelectionToNextWordBoundaryIntent(forward: false, collapseSelection: false),
-    const SingleActivator(LogicalKeyboardKey.arrowRight, shift: true, control: true): const ExtendSelectionToNextWordBoundaryIntent(forward: true, collapseSelection: false),
+    SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true, control: true): ExtendSelectionToNextWordBoundaryIntent(forward: false, collapseSelection: false),
+    SingleActivator(LogicalKeyboardKey.arrowRight, shift: true, control: true): ExtendSelectionToNextWordBoundaryIntent(forward: true, collapseSelection: false),
 
-    const SingleActivator(LogicalKeyboardKey.keyX, control: true): const CopySelectionTextIntent.cut(SelectionChangedCause.keyboard),
-    const SingleActivator(LogicalKeyboardKey.keyC, control: true): CopySelectionTextIntent.copy,
-    const SingleActivator(LogicalKeyboardKey.keyV, control: true): const PasteTextIntent(SelectionChangedCause.keyboard),
-    const SingleActivator(LogicalKeyboardKey.keyA, control: true): const SelectAllTextIntent(SelectionChangedCause.keyboard),
+    SingleActivator(LogicalKeyboardKey.keyX, control: true): CopySelectionTextIntent.cut(SelectionChangedCause.keyboard),
+    SingleActivator(LogicalKeyboardKey.keyC, control: true): CopySelectionTextIntent.copy,
+    SingleActivator(LogicalKeyboardKey.keyV, control: true): PasteTextIntent(SelectionChangedCause.keyboard),
+    SingleActivator(LogicalKeyboardKey.keyA, control: true): SelectAllTextIntent(SelectionChangedCause.keyboard),
   };
 
   // The following key combinations have no effect on text editing on this
@@ -215,17 +210,21 @@ class DefaultTextEditingShortcuts extends Shortcuts {
   //   * Meta + C
   //   * Meta + V
   //   * Meta + A
-  //   * Meta + shift? + arrow down
-  //   * Meta + shift? + arrow left
-  //   * Meta + shift? + arrow right
-  //   * Meta + shift? + arrow up
+  //   * Meta + arrow down
+  //   * Meta + arrow left
+  //   * Meta + arrow right
+  //   * Meta + arrow up
+  //   * Meta + shift + arrow down
+  //   * Meta + shift + arrow left
+  //   * Meta + shift + arrow right
+  //   * Meta + shift + arrow up
   //   * Shift + end
   //   * Shift + home
-  //   * Meta + shift? + delete
-  //   * Meta + shift? + backspace
-  static final Map<ShortcutActivator, Intent> _androidShortcuts = _commonShortcuts;
+  //   * Meta + delete
+  //   * Meta + backspace
+  static const Map<ShortcutActivator, Intent> _androidShortcuts = _commonShortcuts;
 
-  static final Map<ShortcutActivator, Intent> _fuchsiaShortcuts = _androidShortcuts;
+  static const Map<ShortcutActivator, Intent> _fuchsiaShortcuts = _androidShortcuts;
 
   // The following key combinations have no effect on text editing on this
   // platform:
@@ -235,96 +234,105 @@ class DefaultTextEditingShortcuts extends Shortcuts {
   //   * Meta + C
   //   * Meta + V
   //   * Meta + A
-  //   * Meta + shift? + arrow down
-  //   * Meta + shift? + arrow left
-  //   * Meta + shift? + arrow right
-  //   * Meta + shift? + arrow up
+  //   * Meta + arrow down
+  //   * Meta + arrow left
+  //   * Meta + arrow right
+  //   * Meta + arrow up
+  //   * Meta + shift + arrow down
+  //   * Meta + shift + arrow left
+  //   * Meta + shift + arrow right
+  //   * Meta + shift + arrow up
   //   * Shift + end
   //   * Shift + home
-  //   * Meta + shift? + delete
-  //   * Meta + shift? + backspace
-  static final Map<ShortcutActivator, Intent> _iOSShortcuts = _commonShortcuts;
+  //   * Meta + delete
+  //   * Meta + backspace
+  static const Map<ShortcutActivator, Intent> _iOSShortcuts = _commonShortcuts;
 
-  static final Map<ShortcutActivator, Intent> _linuxShortcuts = <ShortcutActivator, Intent>{
+  static const Map<ShortcutActivator, Intent> _linuxShortcuts = <ShortcutActivator, Intent>{
     ..._commonShortcuts,
-    const SingleActivator(LogicalKeyboardKey.home): const ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: true),
-    const SingleActivator(LogicalKeyboardKey.end): const ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: true),
-    const SingleActivator(LogicalKeyboardKey.home, shift: true): const ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: false),
-    const SingleActivator(LogicalKeyboardKey.end, shift: true): const ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: false),
+    SingleActivator(LogicalKeyboardKey.home): ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: true),
+    SingleActivator(LogicalKeyboardKey.end): ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: true),
+    SingleActivator(LogicalKeyboardKey.home, shift: true): ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: false),
+    SingleActivator(LogicalKeyboardKey.end, shift: true): ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: false),
     // The following key combinations have no effect on text editing on this
     // platform:
-    //   * Control + shift? + end
-    //   * Control + shift? + home
+    //   * Control + end
+    //   * Control + home
+    //   * Control + shift + end
+    //   * Control + shift + home
     //   * Meta + X
     //   * Meta + C
     //   * Meta + V
     //   * Meta + A
-    //   * Meta + shift? + arrow down
-    //   * Meta + shift? + arrow left
-    //   * Meta + shift? + arrow right
-    //   * Meta + shift? + arrow up
-    //   * Meta + shift? + delete
-    //   * Meta + shift? + backspace
+    //   * Meta + arrow down
+    //   * Meta + arrow left
+    //   * Meta + arrow right
+    //   * Meta + arrow up
+    //   * Meta + shift + arrow down
+    //   * Meta + shift + arrow left
+    //   * Meta + shift + arrow right
+    //   * Meta + shift + arrow up
+    //   * Meta + delete
+    //   * Meta + backspace
   };
 
   // macOS document shortcuts: https://support.apple.com/en-us/HT201236.
   // The macOS shortcuts uses different word/line modifiers than most other
   // platforms.
-  static final Map<ShortcutActivator, Intent> _macShortcuts = <ShortcutActivator, Intent>{
-    for (final bool pressShift in const <bool>[true, false])
-      ...<SingleActivator, Intent>{
-        SingleActivator(LogicalKeyboardKey.backspace, shift: pressShift): const DeleteCharacterIntent(forward: false),
-        SingleActivator(LogicalKeyboardKey.backspace, alt: true, shift: pressShift): const DeleteToNextWordBoundaryIntent(forward: false),
-        SingleActivator(LogicalKeyboardKey.backspace, meta: true, shift: pressShift): const DeleteToLineBreakIntent(forward: false),
-        SingleActivator(LogicalKeyboardKey.delete, shift: pressShift): const DeleteCharacterIntent(forward: true),
-        SingleActivator(LogicalKeyboardKey.delete, alt: true, shift: pressShift): const DeleteToNextWordBoundaryIntent(forward: true),
-        SingleActivator(LogicalKeyboardKey.delete, meta: true, shift: pressShift): const DeleteToLineBreakIntent(forward: true),
-      },
+  static const Map<ShortcutActivator, Intent> _macShortcuts = <ShortcutActivator, Intent>{
+    SingleActivator(LogicalKeyboardKey.backspace): DeleteCharacterIntent(forward: false),
+    SingleActivator(LogicalKeyboardKey.backspace, alt: true): DeleteToNextWordBoundaryIntent(forward: false),
+    SingleActivator(LogicalKeyboardKey.backspace, meta: true): DeleteToLineBreakIntent(forward: false),
+    SingleActivator(LogicalKeyboardKey.delete): DeleteCharacterIntent(forward: true),
+    SingleActivator(LogicalKeyboardKey.delete, alt: true): DeleteToNextWordBoundaryIntent(forward: true),
+    SingleActivator(LogicalKeyboardKey.delete, meta: true): DeleteToLineBreakIntent(forward: true),
 
-    const SingleActivator(LogicalKeyboardKey.arrowLeft): const ExtendSelectionByCharacterIntent(forward: false, collapseSelection: true),
-    const SingleActivator(LogicalKeyboardKey.arrowRight): const ExtendSelectionByCharacterIntent(forward: true, collapseSelection: true),
-    const SingleActivator(LogicalKeyboardKey.arrowUp): const ExtendSelectionVerticallyToAdjacentLineIntent(forward: false, collapseSelection: true),
-    const SingleActivator(LogicalKeyboardKey.arrowDown): const ExtendSelectionVerticallyToAdjacentLineIntent(forward: true, collapseSelection: true),
+    SingleActivator(LogicalKeyboardKey.arrowLeft): ExtendSelectionByCharacterIntent(forward: false, collapseSelection: true),
+    SingleActivator(LogicalKeyboardKey.arrowRight): ExtendSelectionByCharacterIntent(forward: true, collapseSelection: true),
+    SingleActivator(LogicalKeyboardKey.arrowUp): ExtendSelectionVerticallyToAdjacentLineIntent(forward: false, collapseSelection: true),
+    SingleActivator(LogicalKeyboardKey.arrowDown): ExtendSelectionVerticallyToAdjacentLineIntent(forward: true, collapseSelection: true),
 
     // Shift + Arrow: Extend Selection.
-    const SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true): const ExtendSelectionByCharacterIntent(forward: false, collapseSelection: false),
-    const SingleActivator(LogicalKeyboardKey.arrowRight, shift: true): const ExtendSelectionByCharacterIntent(forward: true, collapseSelection: false),
-    const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true): const ExtendSelectionVerticallyToAdjacentLineIntent(forward: false, collapseSelection: false),
-    const SingleActivator(LogicalKeyboardKey.arrowDown, shift: true): const ExtendSelectionVerticallyToAdjacentLineIntent(forward: true, collapseSelection: false),
+    SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true): ExtendSelectionByCharacterIntent(forward: false, collapseSelection: false),
+    SingleActivator(LogicalKeyboardKey.arrowRight, shift: true): ExtendSelectionByCharacterIntent(forward: true, collapseSelection: false),
+    SingleActivator(LogicalKeyboardKey.arrowUp, shift: true): ExtendSelectionVerticallyToAdjacentLineIntent(forward: false, collapseSelection: false),
+    SingleActivator(LogicalKeyboardKey.arrowDown, shift: true): ExtendSelectionVerticallyToAdjacentLineIntent(forward: true, collapseSelection: false),
 
-    const SingleActivator(LogicalKeyboardKey.arrowLeft, alt: true): const ExtendSelectionToNextWordBoundaryIntent(forward: false, collapseSelection: true),
-    const SingleActivator(LogicalKeyboardKey.arrowRight, alt: true): const ExtendSelectionToNextWordBoundaryIntent(forward: true, collapseSelection: true),
-    const SingleActivator(LogicalKeyboardKey.arrowUp, alt: true): const ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: true),
-    const SingleActivator(LogicalKeyboardKey.arrowDown, alt: true): const ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: true),
+    SingleActivator(LogicalKeyboardKey.arrowLeft, alt: true): ExtendSelectionToNextWordBoundaryIntent(forward: false, collapseSelection: true),
+    SingleActivator(LogicalKeyboardKey.arrowRight, alt: true): ExtendSelectionToNextWordBoundaryIntent(forward: true, collapseSelection: true),
+    SingleActivator(LogicalKeyboardKey.arrowUp, alt: true): ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: true),
+    SingleActivator(LogicalKeyboardKey.arrowDown, alt: true): ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: true),
 
-    const SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true, alt: true): const ExtendSelectionToNextWordBoundaryOrCaretLocationIntent(forward: false),
-    const SingleActivator(LogicalKeyboardKey.arrowRight, shift: true, alt: true): const ExtendSelectionToNextWordBoundaryOrCaretLocationIntent(forward: true),
-    const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true, alt: true): const ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: false, collapseAtReversal: true),
-    const SingleActivator(LogicalKeyboardKey.arrowDown, shift: true, alt: true): const ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: false, collapseAtReversal: true),
+    SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true, alt: true): ExtendSelectionToNextWordBoundaryOrCaretLocationIntent(forward: false),
+    SingleActivator(LogicalKeyboardKey.arrowRight, shift: true, alt: true): ExtendSelectionToNextWordBoundaryOrCaretLocationIntent(forward: true),
+    SingleActivator(LogicalKeyboardKey.arrowUp, shift: true, alt: true): ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: false, collapseAtReversal: true),
+    SingleActivator(LogicalKeyboardKey.arrowDown, shift: true, alt: true): ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: false, collapseAtReversal: true),
 
-    const SingleActivator(LogicalKeyboardKey.arrowLeft, meta: true): const ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: true),
-    const SingleActivator(LogicalKeyboardKey.arrowRight, meta: true): const ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: true),
-    const SingleActivator(LogicalKeyboardKey.arrowUp, meta: true): const ExtendSelectionToDocumentBoundaryIntent(forward: false, collapseSelection: true),
-    const SingleActivator(LogicalKeyboardKey.arrowDown, meta: true): const ExtendSelectionToDocumentBoundaryIntent(forward: true, collapseSelection: true),
+    SingleActivator(LogicalKeyboardKey.arrowLeft, meta: true): ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: true),
+    SingleActivator(LogicalKeyboardKey.arrowRight, meta: true): ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: true),
+    SingleActivator(LogicalKeyboardKey.arrowUp, meta: true): ExtendSelectionToDocumentBoundaryIntent(forward: false, collapseSelection: true),
+    SingleActivator(LogicalKeyboardKey.arrowDown, meta: true): ExtendSelectionToDocumentBoundaryIntent(forward: true, collapseSelection: true),
 
-    const SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true, meta: true): const ExpandSelectionToLineBreakIntent(forward: false),
-    const SingleActivator(LogicalKeyboardKey.arrowRight, shift: true, meta: true): const ExpandSelectionToLineBreakIntent(forward: true),
-    const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true, meta: true): const ExtendSelectionToDocumentBoundaryIntent(forward: false, collapseSelection: false),
-    const SingleActivator(LogicalKeyboardKey.arrowDown, shift: true, meta: true): const ExtendSelectionToDocumentBoundaryIntent(forward: true, collapseSelection: false),
+    SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true, meta: true): ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: false),
+    SingleActivator(LogicalKeyboardKey.arrowRight, shift: true, meta: true): ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: false),
+    SingleActivator(LogicalKeyboardKey.arrowUp, shift: true, meta: true): ExtendSelectionToDocumentBoundaryIntent(forward: false, collapseSelection: false),
+    SingleActivator(LogicalKeyboardKey.arrowDown, shift: true, meta: true): ExtendSelectionToDocumentBoundaryIntent(forward: true, collapseSelection: false),
 
-    const SingleActivator(LogicalKeyboardKey.home, shift: true): const ExtendSelectionToDocumentBoundaryIntent(forward: false, collapseSelection: false),
-    const SingleActivator(LogicalKeyboardKey.end, shift: true): const ExtendSelectionToDocumentBoundaryIntent(forward: true, collapseSelection: false),
+    SingleActivator(LogicalKeyboardKey.home, shift: true): ExtendSelectionToDocumentBoundaryIntent(forward: false, collapseSelection: false),
+    SingleActivator(LogicalKeyboardKey.end, shift: true): ExtendSelectionToDocumentBoundaryIntent(forward: true, collapseSelection: false),
 
-    const SingleActivator(LogicalKeyboardKey.keyX, meta: true): const CopySelectionTextIntent.cut(SelectionChangedCause.keyboard),
-    const SingleActivator(LogicalKeyboardKey.keyC, meta: true): CopySelectionTextIntent.copy,
-    const SingleActivator(LogicalKeyboardKey.keyV, meta: true): const PasteTextIntent(SelectionChangedCause.keyboard),
-    const SingleActivator(LogicalKeyboardKey.keyA, meta: true): const SelectAllTextIntent(SelectionChangedCause.keyboard),
+    SingleActivator(LogicalKeyboardKey.keyX, meta: true): CopySelectionTextIntent.cut(SelectionChangedCause.keyboard),
+    SingleActivator(LogicalKeyboardKey.keyC, meta: true): CopySelectionTextIntent.copy,
+    SingleActivator(LogicalKeyboardKey.keyV, meta: true): PasteTextIntent(SelectionChangedCause.keyboard),
+    SingleActivator(LogicalKeyboardKey.keyA, meta: true): SelectAllTextIntent(SelectionChangedCause.keyboard),
     // The following key combinations have no effect on text editing on this
     // platform:
     //   * End
     //   * Home
-    //   * Control + shift? + end
-    //   * Control + shift? + home
+    //   * Control + end
+    //   * Control + home
+    //   * Control + shift + end
+    //   * Control + shift + home
   };
 
   // The following key combinations have no effect on text editing on this
@@ -333,81 +341,82 @@ class DefaultTextEditingShortcuts extends Shortcuts {
   //   * Meta + C
   //   * Meta + V
   //   * Meta + A
-  //   * Meta + shift? + arrow down
-  //   * Meta + shift? + arrow left
-  //   * Meta + shift? + arrow right
-  //   * Meta + shift? + arrow up
+  //   * Meta + arrow down
+  //   * Meta + arrow left
+  //   * Meta + arrow right
+  //   * Meta + arrow up
+  //   * Meta + shift + arrow down
+  //   * Meta + shift + arrow left
+  //   * Meta + shift + arrow right
+  //   * Meta + shift + arrow up
   //   * Meta + delete
   //   * Meta + backspace
-  static final Map<ShortcutActivator, Intent> _windowsShortcuts = <ShortcutActivator, Intent>{
+  static const Map<ShortcutActivator, Intent> _windowsShortcuts = <ShortcutActivator, Intent>{
     ..._commonShortcuts,
-    const SingleActivator(LogicalKeyboardKey.home): const ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: true),
-    const SingleActivator(LogicalKeyboardKey.end): const ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: true),
-    const SingleActivator(LogicalKeyboardKey.home, shift: true): const ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: false),
-    const SingleActivator(LogicalKeyboardKey.end, shift: true): const ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: false),
-    const SingleActivator(LogicalKeyboardKey.home, control: true): const ExtendSelectionToDocumentBoundaryIntent(forward: false, collapseSelection: true),
-    const SingleActivator(LogicalKeyboardKey.end, control: true): const ExtendSelectionToDocumentBoundaryIntent(forward: true, collapseSelection: true),
-    const SingleActivator(LogicalKeyboardKey.home, shift: true, control: true): const ExtendSelectionToDocumentBoundaryIntent(forward: false, collapseSelection: false),
-    const SingleActivator(LogicalKeyboardKey.end, shift: true, control: true): const ExtendSelectionToDocumentBoundaryIntent(forward: true, collapseSelection: false),
+    SingleActivator(LogicalKeyboardKey.home): ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: true),
+    SingleActivator(LogicalKeyboardKey.end): ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: true),
+    SingleActivator(LogicalKeyboardKey.home, shift: true): ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: false),
+    SingleActivator(LogicalKeyboardKey.end, shift: true): ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: false),
+    SingleActivator(LogicalKeyboardKey.home, control: true): ExtendSelectionToDocumentBoundaryIntent(forward: false, collapseSelection: true),
+    SingleActivator(LogicalKeyboardKey.end, control: true): ExtendSelectionToDocumentBoundaryIntent(forward: true, collapseSelection: true),
+    SingleActivator(LogicalKeyboardKey.home, shift: true, control: true): ExtendSelectionToDocumentBoundaryIntent(forward: false, collapseSelection: false),
+    SingleActivator(LogicalKeyboardKey.end, shift: true, control: true): ExtendSelectionToDocumentBoundaryIntent(forward: true, collapseSelection: false),
   };
 
   // Web handles its text selection natively and doesn't use any of these
   // shortcuts in Flutter.
-  static final Map<ShortcutActivator, Intent> _webShortcuts = <ShortcutActivator, Intent>{
-    for (final bool pressShift in const <bool>[true, false])
-      ...<SingleActivator, Intent>{
-        SingleActivator(LogicalKeyboardKey.backspace, shift: pressShift): const DoNothingAndStopPropagationTextIntent(),
-        SingleActivator(LogicalKeyboardKey.delete, shift: pressShift): const DoNothingAndStopPropagationTextIntent(),
-        SingleActivator(LogicalKeyboardKey.backspace, alt: true, shift: pressShift): const DoNothingAndStopPropagationTextIntent(),
-        SingleActivator(LogicalKeyboardKey.delete, alt: true, shift: pressShift): const DoNothingAndStopPropagationTextIntent(),
-        SingleActivator(LogicalKeyboardKey.backspace, control: true, shift: pressShift): const DoNothingAndStopPropagationTextIntent(),
-        SingleActivator(LogicalKeyboardKey.delete, control: true, shift: pressShift): const DoNothingAndStopPropagationTextIntent(),
-        SingleActivator(LogicalKeyboardKey.backspace, meta: true, shift: pressShift): const DoNothingAndStopPropagationTextIntent(),
-        SingleActivator(LogicalKeyboardKey.delete, meta: true, shift: pressShift): const DoNothingAndStopPropagationTextIntent(),
-      },
-    const SingleActivator(LogicalKeyboardKey.arrowDown, alt: true): const DoNothingAndStopPropagationTextIntent(),
-    const SingleActivator(LogicalKeyboardKey.arrowLeft, alt: true): const DoNothingAndStopPropagationTextIntent(),
-    const SingleActivator(LogicalKeyboardKey.arrowRight, alt: true): const DoNothingAndStopPropagationTextIntent(),
-    const SingleActivator(LogicalKeyboardKey.arrowUp, alt: true): const DoNothingAndStopPropagationTextIntent(),
-    const SingleActivator(LogicalKeyboardKey.arrowDown, shift: true, alt: true): const DoNothingAndStopPropagationTextIntent(),
-    const SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true, alt: true): const DoNothingAndStopPropagationTextIntent(),
-    const SingleActivator(LogicalKeyboardKey.arrowRight, shift: true, alt: true): const DoNothingAndStopPropagationTextIntent(),
-    const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true, alt: true): const DoNothingAndStopPropagationTextIntent(),
-    const SingleActivator(LogicalKeyboardKey.arrowDown): const DoNothingAndStopPropagationTextIntent(),
-    const SingleActivator(LogicalKeyboardKey.arrowLeft): const DoNothingAndStopPropagationTextIntent(),
-    const SingleActivator(LogicalKeyboardKey.arrowRight): const DoNothingAndStopPropagationTextIntent(),
-    const SingleActivator(LogicalKeyboardKey.arrowUp): const DoNothingAndStopPropagationTextIntent(),
-    const SingleActivator(LogicalKeyboardKey.arrowLeft, control: true): const DoNothingAndStopPropagationTextIntent(),
-    const SingleActivator(LogicalKeyboardKey.arrowRight, control: true): const DoNothingAndStopPropagationTextIntent(),
-    const SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true, control: true): const DoNothingAndStopPropagationTextIntent(),
-    const SingleActivator(LogicalKeyboardKey.arrowRight, shift: true, control: true): const DoNothingAndStopPropagationTextIntent(),
-    const SingleActivator(LogicalKeyboardKey.end): const DoNothingAndStopPropagationTextIntent(),
-    const SingleActivator(LogicalKeyboardKey.home): const DoNothingAndStopPropagationTextIntent(),
-    const SingleActivator(LogicalKeyboardKey.arrowDown, meta: true): const DoNothingAndStopPropagationTextIntent(),
-    const SingleActivator(LogicalKeyboardKey.arrowLeft, meta: true): const DoNothingAndStopPropagationTextIntent(),
-    const SingleActivator(LogicalKeyboardKey.arrowRight, meta: true): const DoNothingAndStopPropagationTextIntent(),
-    const SingleActivator(LogicalKeyboardKey.arrowUp, meta: true): const DoNothingAndStopPropagationTextIntent(),
-    const SingleActivator(LogicalKeyboardKey.arrowDown, shift: true, meta: true): const DoNothingAndStopPropagationTextIntent(),
-    const SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true, meta: true): const DoNothingAndStopPropagationTextIntent(),
-    const SingleActivator(LogicalKeyboardKey.arrowRight, shift: true, meta: true): const DoNothingAndStopPropagationTextIntent(),
-    const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true, meta: true): const DoNothingAndStopPropagationTextIntent(),
-    const SingleActivator(LogicalKeyboardKey.arrowDown, shift: true): const DoNothingAndStopPropagationTextIntent(),
-    const SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true): const DoNothingAndStopPropagationTextIntent(),
-    const SingleActivator(LogicalKeyboardKey.arrowRight, shift: true): const DoNothingAndStopPropagationTextIntent(),
-    const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true): const DoNothingAndStopPropagationTextIntent(),
-    const SingleActivator(LogicalKeyboardKey.end, shift: true): const DoNothingAndStopPropagationTextIntent(),
-    const SingleActivator(LogicalKeyboardKey.home, shift: true): const DoNothingAndStopPropagationTextIntent(),
-    const SingleActivator(LogicalKeyboardKey.end, control: true): const DoNothingAndStopPropagationTextIntent(),
-    const SingleActivator(LogicalKeyboardKey.home, control: true): const DoNothingAndStopPropagationTextIntent(),
-    const SingleActivator(LogicalKeyboardKey.space): const DoNothingAndStopPropagationTextIntent(),
-    const SingleActivator(LogicalKeyboardKey.keyX, control: true): const DoNothingAndStopPropagationTextIntent(),
-    const SingleActivator(LogicalKeyboardKey.keyX, meta: true): const DoNothingAndStopPropagationTextIntent(),
-    const SingleActivator(LogicalKeyboardKey.keyC, control: true): const DoNothingAndStopPropagationTextIntent(),
-    const SingleActivator(LogicalKeyboardKey.keyC, meta: true): const DoNothingAndStopPropagationTextIntent(),
-    const SingleActivator(LogicalKeyboardKey.keyV, control: true): const DoNothingAndStopPropagationTextIntent(),
-    const SingleActivator(LogicalKeyboardKey.keyV, meta: true): const DoNothingAndStopPropagationTextIntent(),
-    const SingleActivator(LogicalKeyboardKey.keyA, control: true): const DoNothingAndStopPropagationTextIntent(),
-    const SingleActivator(LogicalKeyboardKey.keyA, meta: true): const DoNothingAndStopPropagationTextIntent(),
+  static const Map<ShortcutActivator, Intent> _webShortcuts = <ShortcutActivator, Intent>{
+    SingleActivator(LogicalKeyboardKey.backspace): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.delete): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.backspace, alt: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.delete, alt: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.backspace, control: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.delete, control: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.backspace, meta: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.delete, meta: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.arrowDown, alt: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.arrowLeft, alt: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.arrowRight, alt: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.arrowUp, alt: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.arrowDown, shift: true, alt: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true, alt: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.arrowRight, shift: true, alt: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.arrowUp, shift: true, alt: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.arrowDown): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.arrowLeft): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.arrowRight): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.arrowUp): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.arrowLeft, control: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.arrowRight, control: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true, control: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.arrowRight, shift: true, control: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.end): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.home): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.arrowDown, meta: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.arrowLeft, meta: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.arrowRight, meta: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.arrowUp, meta: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.arrowDown, shift: true, meta: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true, meta: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.arrowRight, shift: true, meta: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.arrowUp, shift: true, meta: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.arrowDown, shift: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.arrowRight, shift: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.arrowUp, shift: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.end, shift: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.home, shift: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.end, control: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.home, control: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.space): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.keyX, control: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.keyX, meta: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.keyC, control: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.keyC, meta: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.keyV, control: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.keyV, meta: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.keyA, control: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.keyA, meta: true): DoNothingAndStopPropagationTextIntent(),
   };
 
   static Map<ShortcutActivator, Intent> get _shortcuts {

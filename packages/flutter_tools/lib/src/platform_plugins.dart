@@ -10,11 +10,8 @@ import 'base/file_system.dart';
 /// Constant for 'pluginClass' key in plugin maps.
 const String kPluginClass = 'pluginClass';
 
-/// Constant for 'dartPluginClass' key in plugin maps.
+/// Constant for 'pluginClass' key in plugin maps.
 const String kDartPluginClass = 'dartPluginClass';
-
-/// Constant for 'ffiPlugin' key in plugin maps.
-const String kFfiPlugin = 'ffiPlugin';
 
 // Constant for 'defaultPackage' key in plugin maps.
 const String kDefaultPackage = 'default_package';
@@ -45,14 +42,9 @@ abstract class VariantPlatformPlugin {
 }
 
 abstract class NativeOrDartPlugin {
-  /// Determines whether the plugin has a Dart implementation.
-  bool hasDart();
-
-  /// Determines whether the plugin has a FFI implementation.
-  bool hasFfi();
-
-  /// Determines whether the plugin has a method channel implementation.
-  bool hasMethodChannel();
+  /// Determines whether the plugin has a native implementation or if it's a
+  /// Dart-only plugin.
+  bool isNative();
 }
 
 /// Contains parameters to template an Android plugin.
@@ -72,11 +64,9 @@ class AndroidPlugin extends PluginPlatform implements NativeOrDartPlugin {
     this.package,
     this.pluginClass,
     this.dartPluginClass,
-    bool? ffiPlugin,
     this.defaultPackage,
     required FileSystem fileSystem,
-  })  : _fileSystem = fileSystem,
-        ffiPlugin = ffiPlugin ?? false;
+  }) : _fileSystem = fileSystem;
 
   factory AndroidPlugin.fromYaml(String name, YamlMap yaml, String pluginPath, FileSystem fileSystem) {
     assert(validate(yaml));
@@ -85,7 +75,6 @@ class AndroidPlugin extends PluginPlatform implements NativeOrDartPlugin {
       package: yaml['package'] as String?,
       pluginClass: yaml[kPluginClass] as String?,
       dartPluginClass: yaml[kDartPluginClass] as String?,
-      ffiPlugin: yaml[kFfiPlugin] as bool?,
       defaultPackage: yaml[kDefaultPackage] as String?,
       pluginPath: pluginPath,
       fileSystem: fileSystem,
@@ -95,22 +84,15 @@ class AndroidPlugin extends PluginPlatform implements NativeOrDartPlugin {
   final FileSystem _fileSystem;
 
   @override
-  bool hasMethodChannel() => pluginClass != null;
-
-  @override
-  bool hasFfi() => ffiPlugin;
-
-  @override
-  bool hasDart() => dartPluginClass != null;
+  bool isNative() => pluginClass != null;
 
   static bool validate(YamlMap yaml) {
     if (yaml == null) {
       return false;
     }
-    return (yaml['package'] is String && yaml[kPluginClass] is String) ||
-        yaml[kDartPluginClass] is String ||
-        yaml[kFfiPlugin] == true ||
-        yaml[kDefaultPackage] is String;
+    return (yaml['package'] is String && yaml['pluginClass'] is String)||
+           yaml[kDartPluginClass] is String ||
+           yaml[kDefaultPackage] is String;
   }
 
   static const String kConfigKey = 'android';
@@ -127,9 +109,6 @@ class AndroidPlugin extends PluginPlatform implements NativeOrDartPlugin {
   /// The Dart plugin main class defined in pubspec.yaml, if any.
   final String? dartPluginClass;
 
-  /// Is FFI plugin defined in pubspec.yaml.
-  final bool ffiPlugin;
-
   /// The default implementation package defined in pubspec.yaml, if any.
   final String? defaultPackage;
 
@@ -143,7 +122,6 @@ class AndroidPlugin extends PluginPlatform implements NativeOrDartPlugin {
       if (package != null) 'package': package,
       if (pluginClass != null) 'class': pluginClass,
       if (dartPluginClass != null) kDartPluginClass : dartPluginClass,
-      if (ffiPlugin) kFfiPlugin: true,
       if (defaultPackage != null) kDefaultPackage : defaultPackage,
       // Mustache doesn't support complex types.
       'supportsEmbeddingV1': _supportedEmbeddings.contains('1'),
@@ -236,9 +214,8 @@ class IOSPlugin extends PluginPlatform implements NativeOrDartPlugin {
     required this.classPrefix,
     this.pluginClass,
     this.dartPluginClass,
-    bool? ffiPlugin,
     this.defaultPackage,
-  }) : ffiPlugin = ffiPlugin ?? false;
+  });
 
   factory IOSPlugin.fromYaml(String name, YamlMap yaml) {
     assert(validate(yaml)); // TODO(zanderso): https://github.com/flutter/flutter/issues/67241
@@ -247,7 +224,6 @@ class IOSPlugin extends PluginPlatform implements NativeOrDartPlugin {
       classPrefix: '',
       pluginClass: yaml[kPluginClass] as String?,
       dartPluginClass: yaml[kDartPluginClass] as String?,
-      ffiPlugin: yaml[kFfiPlugin] as bool?,
       defaultPackage: yaml[kDefaultPackage] as String?,
     );
   }
@@ -257,9 +233,8 @@ class IOSPlugin extends PluginPlatform implements NativeOrDartPlugin {
       return false;
     }
     return yaml[kPluginClass] is String ||
-        yaml[kDartPluginClass] is String ||
-        yaml[kFfiPlugin] == true ||
-        yaml[kDefaultPackage] is String;
+           yaml[kDartPluginClass] is String ||
+           yaml[kDefaultPackage] is String;
   }
 
   static const String kConfigKey = 'ios';
@@ -271,17 +246,10 @@ class IOSPlugin extends PluginPlatform implements NativeOrDartPlugin {
   final String classPrefix;
   final String? pluginClass;
   final String? dartPluginClass;
-  final bool ffiPlugin;
   final String? defaultPackage;
 
   @override
-  bool hasMethodChannel() => pluginClass != null;
-
-  @override
-  bool hasFfi() => ffiPlugin;
-
-  @override
-  bool hasDart() => dartPluginClass != null;
+  bool isNative() => pluginClass != null;
 
   @override
   Map<String, dynamic> toMap() {
@@ -290,7 +258,6 @@ class IOSPlugin extends PluginPlatform implements NativeOrDartPlugin {
       'prefix': classPrefix,
       if (pluginClass != null) 'class': pluginClass,
       if (dartPluginClass != null) kDartPluginClass : dartPluginClass,
-      if (ffiPlugin) kFfiPlugin: true,
       if (defaultPackage != null) kDefaultPackage : defaultPackage,
     };
   }
@@ -298,17 +265,15 @@ class IOSPlugin extends PluginPlatform implements NativeOrDartPlugin {
 
 /// Contains the parameters to template a macOS plugin.
 ///
-/// The [name] of the plugin is required. Either [dartPluginClass] or
-/// [pluginClass] or [ffiPlugin] are required.
+/// The [name] of the plugin is required. Either [dartPluginClass] or [pluginClass] are required.
 /// [pluginClass] will be the entry point to the plugin's native code.
 class MacOSPlugin extends PluginPlatform implements NativeOrDartPlugin {
   const MacOSPlugin({
     required this.name,
     this.pluginClass,
     this.dartPluginClass,
-    bool? ffiPlugin,
     this.defaultPackage,
-  }) : ffiPlugin = ffiPlugin ?? false;
+  });
 
   factory MacOSPlugin.fromYaml(String name, YamlMap yaml) {
     assert(validate(yaml));
@@ -321,7 +286,6 @@ class MacOSPlugin extends PluginPlatform implements NativeOrDartPlugin {
       name: name,
       pluginClass: pluginClass,
       dartPluginClass: yaml[kDartPluginClass] as String?,
-      ffiPlugin: yaml[kFfiPlugin] as bool?,
       defaultPackage: yaml[kDefaultPackage] as String?,
     );
   }
@@ -331,9 +295,8 @@ class MacOSPlugin extends PluginPlatform implements NativeOrDartPlugin {
       return false;
     }
     return yaml[kPluginClass] is String ||
-        yaml[kDartPluginClass] is String ||
-        yaml[kFfiPlugin] == true ||
-        yaml[kDefaultPackage] is String;
+           yaml[kDartPluginClass] is String ||
+           yaml[kDefaultPackage] is String;
   }
 
   static const String kConfigKey = 'macos';
@@ -341,26 +304,18 @@ class MacOSPlugin extends PluginPlatform implements NativeOrDartPlugin {
   final String name;
   final String? pluginClass;
   final String? dartPluginClass;
-  final bool ffiPlugin;
   final String? defaultPackage;
 
   @override
-  bool hasMethodChannel() => pluginClass != null;
-
-  @override
-  bool hasFfi() => ffiPlugin;
-
-  @override
-  bool hasDart() => dartPluginClass != null;
+  bool isNative() => pluginClass != null;
 
   @override
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'name': name,
       if (pluginClass != null) 'class': pluginClass,
-      if (dartPluginClass != null) kDartPluginClass: dartPluginClass,
-      if (ffiPlugin) kFfiPlugin: true,
-      if (defaultPackage != null) kDefaultPackage: defaultPackage,
+      if (dartPluginClass != null) kDartPluginClass : dartPluginClass,
+      if (defaultPackage != null) kDefaultPackage : defaultPackage,
     };
   }
 }
@@ -369,17 +324,14 @@ class MacOSPlugin extends PluginPlatform implements NativeOrDartPlugin {
 ///
 /// The [name] of the plugin is required. Either [dartPluginClass] or [pluginClass] are required.
 /// [pluginClass] will be the entry point to the plugin's native code.
-class WindowsPlugin extends PluginPlatform
-    implements NativeOrDartPlugin, VariantPlatformPlugin {
+class WindowsPlugin extends PluginPlatform implements NativeOrDartPlugin, VariantPlatformPlugin {
   const WindowsPlugin({
     required this.name,
     this.pluginClass,
     this.dartPluginClass,
-    bool? ffiPlugin,
     this.defaultPackage,
     this.variants = const <PluginPlatformVariant>{},
-  })  : ffiPlugin = ffiPlugin ?? false,
-        assert(pluginClass != null || dartPluginClass != null || defaultPackage != null);
+  }) : assert(pluginClass != null || dartPluginClass != null || defaultPackage != null);
 
   factory WindowsPlugin.fromYaml(String name, YamlMap yaml) {
     assert(validate(yaml));
@@ -411,7 +363,6 @@ class WindowsPlugin extends PluginPlatform
       name: name,
       pluginClass: pluginClass,
       dartPluginClass: yaml[kDartPluginClass] as String?,
-      ffiPlugin: yaml[kFfiPlugin] as bool?,
       defaultPackage: yaml[kDefaultPackage] as String?,
       variants: variants,
     );
@@ -423,9 +374,8 @@ class WindowsPlugin extends PluginPlatform
     }
 
     return yaml[kPluginClass] is String ||
-        yaml[kDartPluginClass] is String ||
-        yaml[kFfiPlugin] == true ||
-        yaml[kDefaultPackage] is String;
+           yaml[kDartPluginClass] is String ||
+           yaml[kDefaultPackage] is String;
   }
 
   static const String kConfigKey = 'windows';
@@ -433,7 +383,6 @@ class WindowsPlugin extends PluginPlatform
   final String name;
   final String? pluginClass;
   final String? dartPluginClass;
-  final bool ffiPlugin;
   final String? defaultPackage;
   final Set<PluginPlatformVariant> variants;
 
@@ -441,13 +390,7 @@ class WindowsPlugin extends PluginPlatform
   Set<PluginPlatformVariant> get supportedVariants => variants;
 
   @override
-  bool hasMethodChannel() => pluginClass != null;
-
-  @override
-  bool hasFfi() => ffiPlugin;
-
-  @override
-  bool hasDart() => dartPluginClass != null;
+  bool isNative() => pluginClass != null;
 
   @override
   Map<String, dynamic> toMap() {
@@ -456,7 +399,6 @@ class WindowsPlugin extends PluginPlatform
       if (pluginClass != null) 'class': pluginClass!,
       if (pluginClass != null) 'filename': _filenameForCppClass(pluginClass!),
       if (dartPluginClass != null) kDartPluginClass: dartPluginClass!,
-      if (ffiPlugin) kFfiPlugin: true,
       if (defaultPackage != null) kDefaultPackage: defaultPackage!,
     };
   }
@@ -471,10 +413,8 @@ class LinuxPlugin extends PluginPlatform implements NativeOrDartPlugin {
     required this.name,
     this.pluginClass,
     this.dartPluginClass,
-    bool? ffiPlugin,
     this.defaultPackage,
-  })  : ffiPlugin = ffiPlugin ?? false,
-        assert(pluginClass != null || dartPluginClass != null || ffiPlugin == true || defaultPackage != null);
+  }) : assert(pluginClass != null || dartPluginClass != null || defaultPackage != null);
 
   factory LinuxPlugin.fromYaml(String name, YamlMap yaml) {
     assert(validate(yaml));
@@ -487,7 +427,6 @@ class LinuxPlugin extends PluginPlatform implements NativeOrDartPlugin {
       name: name,
       pluginClass: pluginClass,
       dartPluginClass: yaml[kDartPluginClass] as String?,
-      ffiPlugin: yaml[kFfiPlugin] as bool?,
       defaultPackage: yaml[kDefaultPackage] as String?,
     );
   }
@@ -497,9 +436,8 @@ class LinuxPlugin extends PluginPlatform implements NativeOrDartPlugin {
       return false;
     }
     return yaml[kPluginClass] is String ||
-        yaml[kDartPluginClass] is String ||
-        yaml[kFfiPlugin] == true ||
-        yaml[kDefaultPackage] is String;
+           yaml[kDartPluginClass] is String ||
+           yaml[kDefaultPackage] is String;
   }
 
   static const String kConfigKey = 'linux';
@@ -507,17 +445,10 @@ class LinuxPlugin extends PluginPlatform implements NativeOrDartPlugin {
   final String name;
   final String? pluginClass;
   final String? dartPluginClass;
-  final bool ffiPlugin;
   final String? defaultPackage;
 
   @override
-  bool hasMethodChannel() => pluginClass != null;
-
-  @override
-  bool hasFfi() => ffiPlugin;
-
-  @override
-  bool hasDart() => dartPluginClass != null;
+  bool isNative() => pluginClass != null;
 
   @override
   Map<String, dynamic> toMap() {
@@ -526,7 +457,6 @@ class LinuxPlugin extends PluginPlatform implements NativeOrDartPlugin {
       if (pluginClass != null) 'class': pluginClass!,
       if (pluginClass != null) 'filename': _filenameForCppClass(pluginClass!),
       if (dartPluginClass != null) kDartPluginClass: dartPluginClass!,
-      if (ffiPlugin) kFfiPlugin: true,
       if (defaultPackage != null) kDefaultPackage: defaultPackage!,
     };
   }

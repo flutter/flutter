@@ -8,8 +8,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'rendering_tester.dart';
 
 void main() {
-  TestRenderingFlutterBinding.ensureInitialized();
-
   test('RenderAspectRatio: Intrinsic sizing 2.0', () {
     final RenderAspectRatio box = RenderAspectRatio(aspectRatio: 2.0);
 
@@ -112,7 +110,7 @@ void main() {
 
     final List<FlutterErrorDetails> errors = <FlutterErrorDetails>[];
     layout(box, onErrors: () {
-      errors.addAll(TestRenderingFlutterBinding.instance.takeAllFlutterErrorDetails());
+      errors.addAll(renderer.takeAllFlutterErrorDetails());
     });
     expect(errors, hasLength(2));
     expect(errors.first.exception, isFlutterError);

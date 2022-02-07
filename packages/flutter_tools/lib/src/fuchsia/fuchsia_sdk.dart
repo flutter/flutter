@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/platform.dart';
@@ -13,6 +14,9 @@ import '../globals.dart' as globals;
 import 'fuchsia_ffx.dart';
 import 'fuchsia_kernel_compiler.dart';
 import 'fuchsia_pm.dart';
+
+/// The [FuchsiaSdk] instance.
+FuchsiaSdk? get fuchsiaSdk => context.get<FuchsiaSdk>();
 
 /// Returns [true] if the current platform supports Fuchsia targets.
 bool isFuchsiaSupportedPlatform(Platform platform) {

@@ -152,11 +152,11 @@ class PathUrlStrategy extends HashUrlStrategy {
   /// The [PlatformLocation] parameter is useful for testing to mock out browser
   /// interactions.
   PathUrlStrategy([
-    PlatformLocation platformLocation = const BrowserPlatformLocation(),
+    PlatformLocation _platformLocation = const BrowserPlatformLocation(),
   ])  : _basePath = stripTrailingSlash(extractPathname(checkBaseHref(
-          platformLocation.getBaseHref(),
+          _platformLocation.getBaseHref(),
         ))),
-        super(platformLocation);
+        super(_platformLocation);
 
   final String _basePath;
 
