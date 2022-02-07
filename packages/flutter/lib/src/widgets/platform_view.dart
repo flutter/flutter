@@ -432,10 +432,14 @@ class _HtmlElementViewController extends PlatformViewController {
   }
 
   @override
-  Future<void> setSize(Size size) async {}
+  Future<Size> setSize(Size size) async {
+    throw UnsupportedError('setSize is not supported'); 
+  }
 
   @override
-  Future<void> setOffset(Offset off) async {}
+  Future<void> setOffset(Offset off) async {
+    throw UnsupportedError('setOffset is not supported'); 
+  }
 
   @override
   Future<void> dispose() async {

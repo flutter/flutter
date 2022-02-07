@@ -173,7 +173,7 @@ class RenderAndroidView extends RenderBox with _PlatformViewGestureMixin {
     _sizePlatformView();
   }
 
-  late Size _currentAndroidViewSize;
+  late Size _currentTextureBufferSize;
 
   Future<void> _sizePlatformView() async {
     // Android virtual displays cannot have a zero size.
@@ -189,8 +189,7 @@ class RenderAndroidView extends RenderBox with _PlatformViewGestureMixin {
     Size targetSize;
     do {
       targetSize = size;
-      await _viewController.setSize(targetSize);
-      _currentAndroidViewSize = targetSize;
+      _currentTextureBufferSize = await _viewController.setSize(targetSize);
       // We've resized the platform view to targetSize, but it is possible that
       // while we were resizing the render object's size was changed again.
       // In that case we will resize the platform view again.
@@ -205,21 +204,14 @@ class RenderAndroidView extends RenderBox with _PlatformViewGestureMixin {
     if (_viewController.textureId == null)
       return;
 
-    // Clip the texture if it's going to paint out of the bounds of the renter box
-    // (see comment in _paintTexture for an explanation of when this happens).
-    if ((size.width < _currentAndroidViewSize.width || size.height < _currentAndroidViewSize.height) && clipBehavior != Clip.none) {
-      _clipRectLayer.layer = context.pushClipRect(
-        true,
-        offset,
-        offset & size,
-        _paintTexture,
-        clipBehavior: clipBehavior,
-        oldLayer: _clipRectLayer.layer,
-      );
-      return;
-    }
-    _clipRectLayer.layer = null;
-    _paintTexture(context, offset);
+    _clipRectLayer.layer = context.pushClipRect(
+      true,
+      offset,
+      offset & size,
+      _paintTexture,
+      clipBehavior: clipBehavior,
+      oldLayer: _clipRectLayer.layer,
+    );
   }
 
   final LayerHandle<ClipRectLayer> _clipRectLayer = LayerHandle<ClipRectLayer>();
@@ -231,17 +223,8 @@ class RenderAndroidView extends RenderBox with _PlatformViewGestureMixin {
   }
 
   void _paintTexture(PaintingContext context, Offset offset) {
-    // As resizing the Android view happens asynchronously we don't know exactly when is a
-    // texture frame with the new size is ready for consumption.
-    // TextureLayer is unaware of the texture frame's size and always maps it to the
-    // specified rect. If the rect we provide has a different size from the current texture frame's
-    // size the texture frame will be scaled.
-    // To prevent unwanted scaling artifacts while resizing we freeze the texture frame, until
-    // we know that a frame with the new size is in the buffer.
-    // This guarantees that the size of the texture frame we're painting is always
-    // _currentAndroidViewSize.
     context.addLayer(TextureLayer(
-      rect: offset & _currentAndroidViewSize,
+      rect: offset & _currentTextureBufferSize,
       textureId: _viewController.textureId!,
       freeze: _state == _PlatformViewState.resizing,
     ));
@@ -634,15 +617,16 @@ class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
   // When a PlatformViewLayer is used, the offset can be inferred from the
   // transform stack provided by the layer tree.
   void _setOffset() {
-    if (!_useTextureLayer()) {
-      // If a platform view layer is used, the offset is set by the external view embedder
-      // in the engine via JNI.
-      // TODO(egarciad): Eliminate this case.
+    // If a platform view layer is used, the offset is set by the external view embedder
+    // in the engine via JNI.
+    // TODO(egarciad): Eliminate this case.
+    if (!_useTextureLayer())
       return;
-    }
+
     SchedulerBinding.instance!.addPostFrameCallback((_) {
       if (!_isDisposed) {
         _controller.setOffset(localToGlobal(Offset.zero));
+        // Schedule a new callback.
         _setOffset();
       }
     });
@@ -656,9 +640,8 @@ class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
     assert(controller != null);
     assert(controller.viewId != null && controller.viewId > -1);
 
-    if ( _controller == controller) {
+    if ( _controller == controller)
       return;
-    }
     final bool needsSemanticsUpdate = _controller.viewId != controller.viewId;
 
     _controller.removeOnPlatformViewCreatedListener(_onPlatformViewCreated);
@@ -699,7 +682,7 @@ class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
   bool _isDisposed = false;
 
   // The size of the buffer set in the embedding.
-  Size? _currentTextureBufferSize;
+  late Size _currentTextureBufferSize;
 
   // Clips the [TextureLayer] since the texture layer is only resized when
   // the new requested size is smaller than the current size.
@@ -714,17 +697,16 @@ class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
   }
 
   Future<void> _sizePlatformView() async {
-    if (_controller is! TextureAndroidViewController) {
-      // This isn't relevant when a PlatformViewLayer is used because the
-      // size of the platform view is set by the external view embedder via JNI in the engine.
-      // This case should be ultimately removed since the goal is to only have
-      // an instance of TextureAndroidViewController.
+    // This isn't relevant when a PlatformViewLayer is used because the
+    // size of the platform view is set by the external view embedder via JNI in the engine.
+    // This case should be ultimately removed since the goal is to only have
+    // an instance of TextureAndroidViewController.
+    // TODO(egarciad): Eliminate this case.
+    if (_controller is! TextureAndroidViewController)
       return;
-    }
 
-    if (_state == _PlatformViewState.resizing || size.isEmpty) {
+    if (_state == _PlatformViewState.resizing || size.isEmpty)
       return;
-    }
 
     _state = _PlatformViewState.resizing;
 
@@ -733,15 +715,9 @@ class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
     Size targetSize;
     do {
       targetSize = size;
-      await _controller.setSize(targetSize);
       // The buffer size is only resized if the current buffer size is smaller
       // than the new size of this render object.
-      // TODO(egarciad): get this value from the platform channel response.
-      if (_currentTextureBufferSize == null ||
-          targetSize.width > _currentTextureBufferSize!.width ||
-          targetSize.height > _currentTextureBufferSize!.height) {
-        _currentTextureBufferSize = targetSize;
-      }
+      _currentTextureBufferSize = await _controller.setSize(targetSize);
       // We've resized the platform view to targetSize, but it is possible that
       // while we were resizing the render object's size was changed again.
       // In that case we will resize the platform view again.
@@ -776,11 +752,10 @@ class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
 
   void _paintTexture(PaintingContext context, Offset offset) {
     final int? textureId = (_controller as TextureAndroidViewController).textureId;
-    if (textureId == null) {
+    if (textureId == null)
       return;
-    }
     context.addLayer(TextureLayer(
-      rect: offset & _currentTextureBufferSize!,
+      rect: offset & _currentTextureBufferSize,
       textureId: textureId,
     ));
   }

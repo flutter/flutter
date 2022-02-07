@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 
+import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui';
 
@@ -693,7 +694,6 @@ abstract class AndroidViewController extends PlatformViewController {
     required TextDirection layoutDirection,
     dynamic creationParams,
     MessageCodec<dynamic>? creationParamsCodec,
-    bool waitingForSize = false,
   })  : assert(viewId != null),
         assert(viewType != null),
         assert(layoutDirection != null),
@@ -702,9 +702,7 @@ abstract class AndroidViewController extends PlatformViewController {
         _layoutDirection = layoutDirection,
         _creationParams = creationParams,
         _creationParamsCodec = creationParamsCodec,
-        _state = waitingForSize
-            ? _AndroidViewState.waitingForSize
-            : _AndroidViewState.creating;
+        _state = _AndroidViewState.waitingForSize;
 
   /// Action code for when a primary pointer touched the screen.
   ///
@@ -786,12 +784,17 @@ abstract class AndroidViewController extends PlatformViewController {
   /// Throws an [AssertionError] if view was already disposed.
   Future<void> create() async {
     assert(_state != _AndroidViewState.disposed, 'trying to create a disposed Android view');
+    if (_state == _AndroidViewState.creating)
+      return;
 
-    await _sendCreateMessage();
-
-    _state = _AndroidViewState.created;
-    for (final PlatformViewCreatedCallback callback in _platformViewCreatedCallbacks) {
-      callback(viewId);
+    _state = _AndroidViewState.creating;
+    try {
+      await _sendCreateMessage();
+    } finally {
+      _state = _AndroidViewState.created;
+      for (final PlatformViewCreatedCallback callback in _platformViewCreatedCallbacks) {
+        callback(viewId);
+      }
     }
   }
 
@@ -859,7 +862,7 @@ abstract class AndroidViewController extends PlatformViewController {
 
     // If the view was not yet created we just update _layoutDirection and return, as the new
     // direction will be used in _create.
-    if (_state == _AndroidViewState.waitingForSize)
+    if (!isCreated)
       return;
 
     await SystemChannels.platform_views
@@ -983,7 +986,7 @@ class SurfaceAndroidViewController extends AndroidViewController {
   }
 
   @override
-  Future<void> setSize(Size size) {
+  Future<Size> setSize(Size size) {
     throw UnimplementedError('Not supported for $SurfaceAndroidViewController.');
   }
 
@@ -1007,7 +1010,6 @@ class TextureAndroidViewController extends AndroidViewController {
           layoutDirection: layoutDirection,
           creationParams: creationParams,
           creationParamsCodec: creationParamsCodec,
-          waitingForSize: true,
         );
 
   /// The texture entry id into which the Android view is rendered.
@@ -1020,21 +1022,29 @@ class TextureAndroidViewController extends AndroidViewController {
   @override
   int? get textureId => _textureId;
 
-  Size? _size;
+  /// The initial size of the platform view.
+  /// This is the size used when the platform view is created.
+  /// Once created, the platform view can change size when setSize is called.
+  final Completer<Size> _initSize = Completer<Size>();
 
+  /// The current offset of the platform view.
   Offset? _off;
 
   @override
-  Future<void> setSize(Size size) async {
+  Future<Size> setSize(Size size) async {
     assert(_state != _AndroidViewState.disposed, 'trying to size a disposed Android View. View id: $viewId');
     assert(!size.isEmpty);
 
-    if (_state == _AndroidViewState.waitingForSize) {
-      _size = size;
-      return create();
-    }
+    final bool isCreating = _state == _AndroidViewState.creating;
 
-    await SystemChannels.platform_views.invokeMethod<void>(
+    if (!_initSize.isCompleted)
+      _initSize.complete(size);
+
+    // When the platform view is being created, the size is sent in the create request.
+    if (isCreating)
+      return size;
+
+    final Map<String, dynamic>? meta = await SystemChannels.platform_views.invokeMethod<Map<String, dynamic>>(
       'resize',
       <String, dynamic>{
         'id': viewId,
@@ -1042,6 +1052,10 @@ class TextureAndroidViewController extends AndroidViewController {
         'height': size.height,
       },
     );
+    if (meta == null || !meta.containsKey('width') || !meta.containsKey('height'))
+      throw Exception('method channel `platform_views.resize` returned invalid data: $meta');
+
+    return Size(meta['width'] as double, meta['height'] as double);
   }
 
   @override
@@ -1060,31 +1074,16 @@ class TextureAndroidViewController extends AndroidViewController {
     );
   }
 
-  /// Creates the Android View.
-  ///
-  /// Call [setSize] prior to calling this method.
-  /// Otherwise, this method results in a noop.
-  ///
-  /// This should not be called before [AndroidViewController.setSize].
-  ///
-  /// Throws an [AssertionError] if view was already disposed.
-  @override
-  Future<void> create() async {
-    if (_size != null) {
-      await super.create();
-    }
-  }
-
   @override
   Future<void> _sendCreateMessage() async {
-    assert(_size != null);
-    assert(!_size!.isEmpty, 'trying to create $TextureAndroidViewController without setting a valid size.');
+    final Size size = await _initSize.future;
+    assert(!size.isEmpty, 'trying to create $TextureAndroidViewController without setting a valid size.');
 
     final Map<String, dynamic> args = <String, dynamic>{
       'id': viewId,
       'viewType': _viewType,
-      'width': _size!.width,
-      'height': _size!.height,
+      'width': size.width,
+      'height': size.height,
       'direction': AndroidViewController._getAndroidDirection(_layoutDirection),
     };
     if (_creationParams != null) {
@@ -1207,8 +1206,9 @@ abstract class PlatformViewController {
   ///
   /// `size` is the view's new size in logical pixel, it must be bigger than zero.
   ///
-  /// The first time a size is set triggers the creation of the Android view.
-  Future<void> setSize(Size size);
+  /// Returns the buffer size where the platform view pixels are written to, or the size of
+  /// the platform view in logical pixels.
+  Future<Size> setSize(Size size);
 
   /// Sets the offset of the platform view.
   ///

@@ -45,7 +45,9 @@ class FakePlatformViewController extends PlatformViewController {
   }
 
   @override
-  Future<void> setSize(Size size) async {}
+  Future<Size> setSize(Size size) async {
+    return size;
+  }
 
   @override 
   Future<void> setOffset(Offset off) async {}
@@ -95,7 +97,7 @@ class FakeAndroidViewController implements AndroidViewController {
   }
 
   @override
-  Future<void> setSize(Size size) {
+  Future<Size> setSize(Size size) {
     throw UnimplementedError();
   }
 
