@@ -2298,6 +2298,18 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         "type": "String"
       }
     }
+  },
+  "ten": "my job time: {ten}{period}",
+  "@ten": {
+    "description": "test ten",
+    "placeholders": {
+      "ten": {
+        "type": "String"
+      },
+      "period": {
+        "type": "String"
+      }
+    }
   }
 }
 ''';
@@ -2314,7 +2326,8 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
   "six": "{six}m",
   "seven": "hours elapsed: {seven}",
   "eight": " {eight}",
-  "nine": "m{nine}"
+  "nine": "m{nine}",
+  "ten": "my job time: {ten}{period}"
 }
 ''';
 
@@ -2346,6 +2359,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
       expect(localizationsFile, contains(r'$seven'));
       expect(localizationsFile, contains(r'$eight'));
       expect(localizationsFile, contains(r'$nine'));
+      expect(localizationsFile, contains(r'$ten$period'));
     });
 
     testWithoutContext('check for string interpolation rules - plurals', () {
