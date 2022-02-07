@@ -1781,9 +1781,6 @@ class TextInput {
         break;
       case 'TextInputClient.updateSpellCheckerResults':
         List<String> results = args[1].cast<String>();
-        // print("************************************************************************");
-        // print(results);
-        // print("************************************************************************");
         List<SpellCheckerSuggestionSpan> spellCheckerSuggestionSpans = <SpellCheckerSuggestionSpan>[];
         results.forEach((String result) {
           List<String> resultParsed = result.split(".");
