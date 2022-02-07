@@ -103,7 +103,7 @@ abstract class ValueListenable<T> extends Listenable {
 ///  * [ValueNotifier], which is a [ChangeNotifier] that wraps a single value.
 class ChangeNotifier implements Listenable {
   int _count = 0;
-  List<VoidCallback?> _listeners = List<VoidCallback?>.filled(0, null);
+  late List<VoidCallback?> _listeners;
   int _notificationCallStackDepth = 0;
   int _reentrantlyRemovedListeners = 0;
   bool _debugDisposed = false;
@@ -171,17 +171,15 @@ class ChangeNotifier implements Listenable {
   @override
   void addListener(VoidCallback listener) {
     assert(_debugAssertNotDisposed());
-    if (_count == _listeners.length) {
-      if (_count == 0) {
-        _listeners = List<VoidCallback?>.filled(1, null);
-      } else {
-        final List<VoidCallback?> newListeners =
-            List<VoidCallback?>.filled(_listeners.length * 2, null);
-        for (int i = 0; i < _count; i++) {
-          newListeners[i] = _listeners[i];
-        }
-        _listeners = newListeners;
+    if (_count == 0) {
+      _listeners = List<VoidCallback?>.filled(1, null);
+    } else if (_count == _listeners.length) {
+      final List<VoidCallback?> newListeners =
+          List<VoidCallback?>.filled(_listeners.length * 2, null);
+      for (int i = 0; i < _count; i++) {
+        newListeners[i] = _listeners[i];
       }
+      _listeners = newListeners;
     }
     _listeners[_count++] = listener;
   }
@@ -220,7 +218,7 @@ class ChangeNotifier implements Listenable {
   ///
   /// If the given listener is not registered, the call is ignored.
   ///
-  /// This method must not be called after [dispose] has been called.
+  /// This method returns immediately if [dispose] has been called.
   ///
   /// {@macro flutter.foundation.ChangeNotifier.addListener}
   ///
@@ -230,7 +228,8 @@ class ChangeNotifier implements Listenable {
   ///    changes.
   @override
   void removeListener(VoidCallback listener) {
-    assert(_debugAssertNotDisposed());
+    if (_debugDisposed)
+      return;
     for (int i = 0; i < _count; i++) {
       final VoidCallback? listenerAtIndex = _listeners[i];
       if (listenerAtIndex == listener) {
@@ -253,8 +252,7 @@ class ChangeNotifier implements Listenable {
 
   /// Discards any resources used by the object. After this is called, the
   /// object is not in a usable state and should be discarded (calls to
-  /// [addListener] and [removeListener] will throw after the object is
-  /// disposed).
+  /// [addListener] will throw after the object is disposed).
   ///
   /// This method should only be called by the object's owner.
   @mustCallSuper
@@ -264,6 +262,7 @@ class ChangeNotifier implements Listenable {
       _debugDisposed = true;
       return true;
     }());
+    _listeners = const <VoidCallback?>[];
   }
 
   /// Call all the registered listeners.
