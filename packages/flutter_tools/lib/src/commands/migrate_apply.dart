@@ -60,7 +60,7 @@ class MigrateApplyCommand extends FlutterCommand {
     }
 
     if (await MigrateUtils.hasUncommitedChanges(workingDir.path)) {
-      throwToolExit('There are uncommited changes in your project. Please commit, abandon, or stash your changes before trying again.');
+      throwToolExit('There are uncommitted changes in your project. Please commit, abandon, or stash your changes before trying again.');
     }
 
     print('Applying migration.');
@@ -82,7 +82,7 @@ class MigrateApplyCommand extends FlutterCommand {
         continue;
       }
 
-      if (targetFile.existsSync()) {
+      if (!targetFile.existsSync()) {
         targetFile.createSync(recursive: true);
       }
       try {
