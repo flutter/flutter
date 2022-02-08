@@ -7,6 +7,7 @@ import 'dart:collection';
 import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/widgets.dart';
@@ -3087,33 +3088,46 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
 
     // extendBody locked when keyboard is open
     final bool extendBody = minInsets.bottom <= 0 && widget.extendBody;
-
-    return _ScaffoldScope(
-      hasDrawer: hasDrawer,
-      geometryNotifier: _geometryNotifier,
-      child: ScrollNotificationObserver(
-        child: Material(
-          color: widget.backgroundColor ?? themeData.scaffoldBackgroundColor,
-          child: AnimatedBuilder(animation: _floatingActionButtonMoveController, builder: (BuildContext context, Widget? child) {
-            return CustomMultiChildLayout(
-              delegate: _ScaffoldLayout(
-                extendBody: extendBody,
-                extendBodyBehindAppBar: widget.extendBodyBehindAppBar,
-                minInsets: minInsets,
-                minViewPadding: minViewPadding,
-                currentFloatingActionButtonLocation: _floatingActionButtonLocation!,
-                floatingActionButtonMoveAnimationProgress: _floatingActionButtonMoveController.value,
-                floatingActionButtonMotionAnimator: _floatingActionButtonAnimator,
-                geometryNotifier: _geometryNotifier,
-                previousFloatingActionButtonLocation: _previousFloatingActionButtonLocation!,
-                textDirection: textDirection,
-                isSnackBarFloating: isSnackBarFloating,
-                extendBodyBehindMaterialBanner: extendBodyBehindMaterialBanner,
-                snackBarWidth: snackBarWidth,
-              ),
-              children: children,
-            );
-          }),
+    // TODO(justinmc): This is not the best place in the tree for this.
+    // TODO(justinmc): Something is wrong with the captured theme here, even
+    // though buildMenu gets theme info from the user's MaterialApp...
+    return ContextualMenuArea(
+      buildMenu: (BuildContext context, Offset anchor) {
+        return CupertinoDesktopTextSelectionToolbar(
+          anchor: anchor,
+          children: const <Widget>[
+            // TODO(justinmc): Should expose the buttons.
+            Text('hello'),
+          ],
+        );
+      },
+      child: _ScaffoldScope(
+        hasDrawer: hasDrawer,
+        geometryNotifier: _geometryNotifier,
+        child: ScrollNotificationObserver(
+          child: Material(
+            color: widget.backgroundColor ?? themeData.scaffoldBackgroundColor,
+            child: AnimatedBuilder(animation: _floatingActionButtonMoveController, builder: (BuildContext context, Widget? child) {
+              return CustomMultiChildLayout(
+                delegate: _ScaffoldLayout(
+                  extendBody: extendBody,
+                  extendBodyBehindAppBar: widget.extendBodyBehindAppBar,
+                  minInsets: minInsets,
+                  minViewPadding: minViewPadding,
+                  currentFloatingActionButtonLocation: _floatingActionButtonLocation!,
+                  floatingActionButtonMoveAnimationProgress: _floatingActionButtonMoveController.value,
+                  floatingActionButtonMotionAnimator: _floatingActionButtonAnimator,
+                  geometryNotifier: _geometryNotifier,
+                  previousFloatingActionButtonLocation: _previousFloatingActionButtonLocation!,
+                  textDirection: textDirection,
+                  isSnackBarFloating: isSnackBarFloating,
+                  extendBodyBehindMaterialBanner: extendBodyBehindMaterialBanner,
+                  snackBarWidth: snackBarWidth,
+                ),
+                children: children,
+              );
+            }),
+          ),
         ),
       ),
     );

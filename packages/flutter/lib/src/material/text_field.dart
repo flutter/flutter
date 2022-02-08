@@ -1231,25 +1231,17 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       child: UnmanagedRestorationScope(
         bucket: bucket,
         // TODO(justinmc): This can't be overridden by users.
-        // TODO(justinmc): Make this
-        child: ContextualMenuConfiguration(
-          // TODO(justinmc): Can't just pass anchor b/c Material needs to know
-          // bottom and top anchor.
+        // TODO(justinmc): Can't just pass anchor b/c Material needs to know
+        // bottom and top anchor.
+        // TODO(justinmc): Tie this into TextSelectionGestureDetectorBuilder.
+        child: ContextualMenuArea(
           buildMenu: (BuildContext context, Offset anchor) {
             return CupertinoDesktopTextSelectionToolbar(
               anchor: anchor,
               children: const <Widget>[
                 // TODO(justinmc): Should expose the buttons.
-                const Text('hello'),
+                Text('Copy and stuff'),
               ],
-            );
-            return Center(
-              child: Container(
-                width: 100.0,
-                height: 100.0,
-                color: const Color(0xff00ffaa),
-                child: const Text('hi'),
-              ),
             );
           },
           child: EditableText(

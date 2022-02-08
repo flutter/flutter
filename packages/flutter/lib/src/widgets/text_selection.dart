@@ -377,8 +377,6 @@ class TextSelectionOverlay {
   /// A copy/paste toolbar.
   OverlayEntry? _toolbar;
 
-  _ContextualMenuController? _contextualMenuController;
-
   TextSelection get _selection => _value.selection;
 
   /// Whether selection handles are visible.
@@ -436,11 +434,13 @@ class TextSelectionOverlay {
 
   /// Shows the toolbar by inserting it into the [context]'s overlay.
   void showToolbar() {
+    /*
     _contextualMenuController?.dispose();
     _contextualMenuController = _ContextualMenuController(
       context: context,
       anchor: renderObject.lastSecondaryTapDownPosition!,
     );
+    */
 
     /*
     assert(_toolbar == null);
@@ -490,8 +490,8 @@ class TextSelectionOverlay {
   bool get handlesAreVisible => _handles != null && handlesVisible;
 
   /// Whether the toolbar is currently visible.
-  //bool get toolbarIsVisible => _toolbar != null;
-  bool get toolbarIsVisible => _contextualMenuController?.isVisible ?? false;
+  bool get toolbarIsVisible => _toolbar != null;
+  //bool get toolbarIsVisible => _contextualMenuController?.isVisible ?? false;
 
   /// Hides the entire overlay including the toolbar and the handles.
   void hide() {
@@ -510,9 +510,11 @@ class TextSelectionOverlay {
   /// To hide the whole overlay, see [hide].
   void hideToolbar() {
     //assert(_toolbar != null);
+    /*
     assert(_contextualMenuController != null);
     _contextualMenuController!.dispose();
     _contextualMenuController = null;
+    */
     _toolbarController.stop();
     _toolbar?.remove();
     _toolbar = null;
@@ -1794,63 +1796,4 @@ enum ClipboardStatus {
 
   /// The content on the clipboard is not pasteable, such as when it is empty.
   notPasteable,
-}
-
-// TODO(justinmc): Should maybe be public and in contextual_menu.dart.
-class _ContextualMenuController {
-  // TODO(justinmc): Pass in the anchor, and pass it through to buildMenu.
-  // What other fields would I need to pass in to buildMenu? There are a ton on
-  // buildToolbar...
-  // Also, create an update method.
-  _ContextualMenuController({
-    // TODO(justinmc): Accept these or just BuildContext?
-    required BuildContext context,
-    required Offset anchor,
-    Widget? debugRequiredFor
-  }) {
-    _insert(context, anchor, debugRequiredFor);
-  }
-
-  OverlayEntry? _menuOverlayEntry;
-
-  // Insert the ContextualMenu into the given OverlayState.
-  void _insert(BuildContext context, Offset anchor, [Widget? debugRequiredFor]) {
-    final OverlayState? overlayState = Overlay.of(
-      context,
-      rootOverlay: true,
-      debugRequiredFor: debugRequiredFor,
-    );
-    // TODO(justinmc): Should I create a default menu here if no ContextualMenuConfiguration?
-    final ContextualMenuConfiguration contextualMenuConfiguration =
-      ContextualMenuConfiguration.of(context);
-    final CapturedThemes capturedThemes = InheritedTheme.capture(
-      from: context,
-      to: Navigator.of(context).context,
-    );
-
-    _menuOverlayEntry = OverlayEntry(
-      builder: (BuildContext context) {
-        return GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: dispose,
-          onSecondaryTap: dispose,
-          // TODO(justinmc): I'm using this to block taps on the menu from being
-          // received by the above barrier. Is there a less weird way?
-          child: GestureDetector(
-            onTap: () {},
-            onSecondaryTap: () {},
-            child: capturedThemes.wrap(contextualMenuConfiguration.buildMenu(context, anchor)),
-          ),
-        );
-      },
-    );
-    overlayState!.insert(_menuOverlayEntry!);
-  }
-
-  bool get isVisible => _menuOverlayEntry != null;
-
-  void dispose() {
-    _menuOverlayEntry?.remove();
-    _menuOverlayEntry = null;
-  }
 }
