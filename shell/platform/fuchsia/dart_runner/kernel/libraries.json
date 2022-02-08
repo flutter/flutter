@@ -29,7 +29,8 @@
         "uri": "../../../../../../third_party/dart/sdk/lib/collection/collection.dart",
         "patches": [
           "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/collection_patch.dart",
-          "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/compact_hash.dart"
+          "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/compact_hash.dart",
+          "../../../../../../third_party/dart/sdk/lib/_internal/vm/lib/hash_factories.dart"
         ]
       },
       "convert": {
