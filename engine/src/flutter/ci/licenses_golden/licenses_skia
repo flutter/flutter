@@ -1,4 +1,4 @@
-Signature: 47d14a4ed3c343b1f6a8ad29bbad2c93
+Signature: 5698dff91aaaf26d1d8ded2b6c28bae2
 
 UNUSED LICENSES:
 
@@ -6102,6 +6102,8 @@ ORIGIN: ../../../third_party/skia/experimental/graphite/src/mtl/MtlSampler.h + .
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/experimental/graphite/src/GlobalCache.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/GlobalCache.h
+FILE: ../../../third_party/skia/experimental/graphite/src/GraphiteResourceKey.cpp
+FILE: ../../../third_party/skia/experimental/graphite/src/GraphiteResourceKey.h
 FILE: ../../../third_party/skia/experimental/graphite/src/Log.h
 FILE: ../../../third_party/skia/experimental/graphite/src/PaintParams.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/PaintParams.h
@@ -6113,6 +6115,8 @@ FILE: ../../../third_party/skia/experimental/graphite/src/ResourceCache.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/ResourceCache.h
 FILE: ../../../third_party/skia/experimental/graphite/src/Sampler.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/Sampler.h
+FILE: ../../../third_party/skia/experimental/graphite/src/UploadTask.cpp
+FILE: ../../../third_party/skia/experimental/graphite/src/UploadTask.h
 FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlSampler.h
 FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlSampler.mm
 FILE: ../../../third_party/skia/gm/bug12866.cpp
