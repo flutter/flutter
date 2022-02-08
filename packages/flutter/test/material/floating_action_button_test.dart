@@ -897,11 +897,9 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: Material(
-          child: FloatingActionButton(
-            focusNode: focusNode,
-            onPressed: () { /* to make sure the button is enabled */ },
-          ),
+        child: FloatingActionButton(
+          focusNode: focusNode,
+          onPressed: () { /* to make sure the button is enabled */ },
         ),
       ),
     );
