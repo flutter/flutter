@@ -63,9 +63,6 @@ class _SliverPrototypeExtentListElement extends SliverMultiBoxAdaptorElement {
   _SliverPrototypeExtentListElement(SliverPrototypeExtentList widget) : super(widget);
 
   @override
-  SliverPrototypeExtentList get widget => super.widget as SliverPrototypeExtentList;
-
-  @override
   _RenderSliverPrototypeExtentList get renderObject => super.renderObject as _RenderSliverPrototypeExtentList;
 
   Element? _prototype;
@@ -113,14 +110,14 @@ class _SliverPrototypeExtentListElement extends SliverMultiBoxAdaptorElement {
   @override
   void mount(Element? parent, Object? newSlot) {
     super.mount(parent, newSlot);
-    _prototype = updateChild(_prototype, widget.prototypeItem, _prototypeSlot);
+    _prototype = updateChild(_prototype, (widget as SliverPrototypeExtentList).prototypeItem, _prototypeSlot);
   }
 
   @override
   void update(SliverPrototypeExtentList newWidget) {
     super.update(newWidget);
     assert(widget == newWidget);
-    _prototype = updateChild(_prototype, widget.prototypeItem, _prototypeSlot);
+    _prototype = updateChild(_prototype, (widget as SliverPrototypeExtentList).prototypeItem, _prototypeSlot);
   }
 }
 
