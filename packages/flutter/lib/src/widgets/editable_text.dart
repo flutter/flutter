@@ -2962,7 +2962,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   void updateSpellCheckerResults(List<SpellCheckerSuggestionSpan> spellCheckerResults) {
-    _spellCheckerResults = spellCheckerResults;
+    if (spellCheckerResults.length > 0) {
+      _spellCheckerResults = spellCheckerResults;
+    }
   }
 
   @override

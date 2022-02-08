@@ -436,21 +436,6 @@ class TextSelectionOverlay {
   void showToolbar(ToolbarType toolbarType, List<SpellCheckerSuggestionSpan>?
     spellCheckerSuggestionSpans) {
     assert(_toolbar == null);
-    if (toolbarType == ToolbarType.spellCheckerSuggestionsControls) {
-      if (spellCheckerSuggestionSpans != null) {
-        print("**------------------------SHOW spell checker suggestions toolbar------------------------**");
-        spellCheckerSuggestionSpans.forEach((SpellCheckerSuggestionSpan scsSpan) {
-            print("............");
-            print("Misspelled word range: " + scsSpan.start.toString() + '-' + scsSpan.end.toString());
-            print("Misspelled word suggestions: ");
-            scsSpan.replacementSuggestions.forEach((String suggestion) {
-                print(suggestion);
-            });
-            print("............");
-        });
-      }
-        return;
-    }
     _toolbar = OverlayEntry(builder: (BuildContext context) => _buildToolbar(context, toolbarType, spellCheckerSuggestionSpans));
     Overlay.of(context, rootOverlay: true, debugRequiredFor: debugRequiredFor)!.insert(_toolbar!);
     _toolbarController.forward(from: 0.0);

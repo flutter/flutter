@@ -2,7 +2,11 @@ import 'package:flutter/src/painting/text_span.dart';
 import 'package:flutter/src/painting/text_style.dart';
 import 'package:flutter/src/widgets/spell_check.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+
+import 'text_selection_toolbar.dart';
+import 'text_selection_toolbar_text_button.dart';
 
 /// Provides logic for displaying spell check suggestions for Android.
 class MaterialSpellCheckerControls extends SpellCheckerControls{
@@ -14,11 +18,202 @@ class MaterialSpellCheckerControls extends SpellCheckerControls{
     /// (2) EditableTextState [editable_text.dart]
     /// (3) MaterialTextSelectionControls [material/text_selection.dart]
     Widget buildSpellCheckerSuggestionsToolbar(
-        List<SpellCheckerSuggestionSpan> spellCheckerSuggestionSpans) {
-            //TODO(camillesimon): build spell checker suggestion toolbar here
-            return SizedBox.shrink();
-        }
+        TextSelectionDelegate delegate, List<TextSelectionPoint> endpoints, 
+        Rect globalEditableRegion, Offset selectionMidpoint, double textLineHeight, 
+        List<SpellCheckerSuggestionSpan>? spellCheckerSuggestionSpans) {
+            return _SpellCheckerSuggestionsToolbar(
+            delegate: delegate,
+            endpoints: endpoints,
+            globalEditableRegion: globalEditableRegion,
+            selectionMidpoint: selectionMidpoint,
+            textLineHeight: textLineHeight,
+            spellCheckerSuggestionSpans: spellCheckerSuggestionSpans,
+          );
+    }
 }
+
+// start of pasting
+class _SpellCheckerSuggestionsToolbarItemData {
+  const _SpellCheckerSuggestionsToolbarItemData({
+    required this.label,
+    required this.onPressed,
+  });
+
+  final String label;
+  final VoidCallback onPressed;
+}
+
+const double _kHandleSize = 22.0;
+
+// Padding between the toolbar and the anchor.
+const double _kToolbarContentDistanceBelow = _kHandleSize - 2.0;
+const double _kToolbarContentDistance = 8.0;
+
+// The highest level toolbar widget, built directly by buildToolbar.
+class _SpellCheckerSuggestionsToolbar extends StatefulWidget {
+  const _SpellCheckerSuggestionsToolbar({
+    Key? key,
+    required this.delegate,
+    required this.endpoints,
+    required this.globalEditableRegion,
+    // required this.handleSuggestionSelected,
+    required this.selectionMidpoint,
+    required this.textLineHeight,
+    required this.spellCheckerSuggestionSpans,
+  }) : super(key: key);
+
+  final TextSelectionDelegate delegate;
+  final List<TextSelectionPoint> endpoints;
+  final Rect globalEditableRegion;
+//   final VoidCallback? handleSuggestionSelected;
+  final Offset selectionMidpoint;
+  final double textLineHeight;
+  final List<SpellCheckerSuggestionSpan>? spellCheckerSuggestionSpans;
+
+  @override
+  _SpellCheckerSuggestionsToolbarState createState() => _SpellCheckerSuggestionsToolbarState();
+}
+
+class _SpellCheckerSuggestionsToolbarState extends State<_SpellCheckerSuggestionsToolbar> with TickerProviderStateMixin {
+//   void _onChangedClipboardStatus() {
+//     setState(() {
+//       // Inform the widget that the value of clipboardStatus has changed.
+//     });
+//   }
+
+  @override
+  void initState() {
+    super.initState();
+    // widget.clipboardStatus.addListener(_onChangedClipboardStatus);
+    // widget.clipboardStatus.update();
+  }
+
+  @override
+  void didUpdateWidget(_SpellCheckerSuggestionsToolbar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // if (widget.clipboardStatus != oldWidget.clipboardStatus) {
+    //   widget.clipboardStatus.addListener(_onChangedClipboardStatus);
+    //   oldWidget.clipboardStatus.removeListener(_onChangedClipboardStatus);
+    // }
+    // widget.clipboardStatus.update();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    // When used in an Overlay, it can happen that this is disposed after its
+    // creator has already disposed _clipboardStatus.
+    // if (!widget.clipboardStatus.disposed) {
+    //   widget.clipboardStatus.removeListener(_onChangedClipboardStatus);
+    // }
+  }
+
+  SpellCheckerSuggestionSpan? findSuggestions(int curr_index, List<SpellCheckerSuggestionSpan> spellCheckerSuggestionSpans) {
+    int left_index = 0;
+    int right_index = spellCheckerSuggestionSpans.length - 1;
+
+    while (left_index <= right_index) {
+        int mid_index = (left_index + (right_index - left_index) / 2).floor();
+
+        // Check if x is present at mid
+        if (spellCheckerSuggestionSpans[mid_index].start <= curr_index && spellCheckerSuggestionSpans[mid_index].end >= curr_index) {
+            return spellCheckerSuggestionSpans[mid_index];
+        }
+
+        // If x greater, ignore left half
+        if (spellCheckerSuggestionSpans[mid_index].start <= curr_index) {
+            left_index = left_index + 1;
+        }
+
+        // If x is smaller, ignore right half
+        else {
+            right_index = right_index - 1;
+        }
+    }
+
+    // if we reach here, then element was
+    // not present
+    return null;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // // If there are no buttons to be shown, don't render anything.
+    // if (widget.handleCut == null && widget.handleCopy == null
+    //     && widget.handlePaste == null && widget.handleSelectAll == null) {
+    //   return const SizedBox.shrink();
+    // }
+    // If the paste button is desired, don't render anything until the state of
+    // the clipboard is known, since it's used to determine if paste is shown.
+    // if (widget.handlePaste != null
+    //     && widget.clipboardStatus.value == ClipboardStatus.unknown) {
+    //   return const SizedBox.shrink();
+    // }
+
+    if (widget.spellCheckerSuggestionSpans == null || widget.spellCheckerSuggestionSpans!.length == 0) {
+        return const SizedBox.shrink();
+    }
+
+    // Calculate the positioning of the menu. It is placed above the selection
+    // if there is enough room, or otherwise below.
+    final TextSelectionPoint startTextSelectionPoint = widget.endpoints[0];
+    final TextSelectionPoint endTextSelectionPoint = widget.endpoints.length > 1
+      ? widget.endpoints[1]
+      : widget.endpoints[0];
+    final Offset anchorAbove = Offset(
+      widget.globalEditableRegion.left + widget.selectionMidpoint.dx,
+      widget.globalEditableRegion.top + startTextSelectionPoint.point.dy - widget.textLineHeight - _kToolbarContentDistance,
+    );
+    final Offset anchorBelow = Offset(
+      widget.globalEditableRegion.left + widget.selectionMidpoint.dx,
+      widget.globalEditableRegion.top + endTextSelectionPoint.point.dy + _kToolbarContentDistanceBelow,
+    );
+
+    // Determine which buttons will appear so that the order and total number is
+    // known. A button's position in the menu can slightly affect its
+    // appearance.
+    assert(debugCheckHasMaterialLocalizations(context));
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+
+    // Determine which suggestions to show
+    TextEditingValue value = widget.delegate.textEditingValue;
+    int cursorIndex = value.selection.baseOffset;
+
+    SpellCheckerSuggestionSpan? relevantSpan = findSuggestions(cursorIndex, widget.spellCheckerSuggestionSpans!);
+
+    if (relevantSpan == null) {
+        return const SizedBox.shrink();
+    }
+    final List<_SpellCheckerSuggestionsToolbarItemData> itemDatas = <_SpellCheckerSuggestionsToolbarItemData>[];
+
+    relevantSpan.replacementSuggestions.forEach((String suggestion) {
+        itemDatas.add(        
+            _SpellCheckerSuggestionsToolbarItemData(
+                label: suggestion,
+                onPressed: () => {},
+        ));
+    });
+
+    // If there is no option available, build an empty widget.
+    // if (itemDatas.isEmpty) {
+    //   return const SizedBox(width: 0.0, height: 0.0);
+    // }
+
+    return TextSelectionToolbar(
+      anchorAbove: anchorAbove,
+      anchorBelow: anchorBelow,
+      children: itemDatas.asMap().entries.map((MapEntry<int, _SpellCheckerSuggestionsToolbarItemData> entry) {
+        return TextSelectionToolbarTextButton(
+          padding: TextSelectionToolbarTextButton.getPadding(entry.key, itemDatas.length),
+        //   onPressed: entry.value.onPressed,
+          child: Text(entry.value.label),
+        );
+      }).toList(),
+    );
+  }
+}
+//end of pasting
+
 /// Provides logic for indicating misspelled words for Android.
 class MaterialMisspelledWordsHandler extends MisspelledWordsHandler {
     //TODO(camillesimon): add comments, clean up code

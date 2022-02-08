@@ -58,7 +58,7 @@ class MaterialTextSelectionControls extends TextSelectionControls with MaterialS
             handleSelectAll: canSelectAll(delegate) ? () => handleSelectAll(delegate) : null,
           );
       case ToolbarType.spellCheckerSuggestionsControls:
-          return buildSpellCheckerSuggestionsToolbar(spellCheckerSuggestionSpans!);
+          return buildSpellCheckerSuggestionsToolbar(delegate, endpoints, globalEditableRegion, selectionMidpoint, textLineHeight, spellCheckerSuggestionSpans);
     }
   }
 

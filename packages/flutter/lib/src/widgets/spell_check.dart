@@ -1,5 +1,6 @@
 import 'package:flutter/src/painting/text_span.dart';
 import 'package:flutter/src/painting/text_style.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 /// Provides representation for the results given by a spell checker for some
@@ -33,8 +34,9 @@ class SpellCheckerSuggestionSpan {
 /// abstract class as the toolbar shown may differ between platforms.
 abstract class SpellCheckerControls {
     /// Responsible for causing the SpellCheckerSuggestionsToolbar to appear.
-    Widget buildSpellCheckerSuggestionsToolbar(List<SpellCheckerSuggestionSpan> 
-      spellCheckerSuggestionSpans);
+    Widget buildSpellCheckerSuggestionsToolbar(TextSelectionDelegate delegate, List<TextSelectionPoint> endpoints, 
+        Rect globalEditableRegion, Offset selectionMidpoint, double textLineHeight, 
+        List<SpellCheckerSuggestionSpan>? spellCheckerSuggestionSpans);
 }
 
 /// Provides logic for indicating misspelled words. Implemented as an abstract

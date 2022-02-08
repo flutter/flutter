@@ -94,7 +94,7 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 
   @override
   void onTapDown(TapDownDetails details) {
-    editableText.hideToolbar(ToolbarType.spellCheckerSuggestionsControls);
+    // editableText.hideToolbar(ToolbarType.spellCheckerSuggestionsControls);
     super.onTapDown(details);
   }
 
