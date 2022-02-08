@@ -819,9 +819,6 @@ class ListWheelElement extends RenderObjectElement implements ListWheelChildMana
   ListWheelElement(ListWheelViewport widget) : super(widget);
 
   @override
-  ListWheelViewport get widget => super.widget as ListWheelViewport;
-
-  @override
   RenderListWheelViewport get renderObject => super.renderObject as RenderListWheelViewport;
 
   // We inflate widgets at two different times:
@@ -840,7 +837,7 @@ class ListWheelElement extends RenderObjectElement implements ListWheelChildMana
 
   @override
   void update(ListWheelViewport newWidget) {
-    final ListWheelViewport oldWidget = widget;
+    final ListWheelViewport oldWidget = widget as ListWheelViewport;
     super.update(newWidget);
     final ListWheelChildDelegate newDelegate = newWidget.childDelegate;
     final ListWheelChildDelegate oldDelegate = oldWidget.childDelegate;
@@ -852,7 +849,7 @@ class ListWheelElement extends RenderObjectElement implements ListWheelChildMana
   }
 
   @override
-  int? get childCount => widget.childDelegate.estimatedChildCount;
+  int? get childCount => (widget as ListWheelViewport).childDelegate.estimatedChildCount;
 
   @override
   void performRebuild() {
@@ -880,7 +877,7 @@ class ListWheelElement extends RenderObjectElement implements ListWheelChildMana
   /// will be cached. However when the element is rebuilt, the cache will be
   /// cleared.
   Widget? retrieveWidget(int index) {
-    return _childWidgets.putIfAbsent(index, () => widget.childDelegate.build(this, index));
+    return _childWidgets.putIfAbsent(index, () => (widget as ListWheelViewport).childDelegate.build(this, index));
   }
 
   @override
