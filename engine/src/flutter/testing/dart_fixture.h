@@ -29,6 +29,7 @@ class DartFixture {
   virtual Settings CreateSettingsForFixture();
 
   void AddNativeCallback(std::string name, Dart_NativeFunction callback);
+  void AddFfiNativeCallback(std::string name, void* callback_ptr);
 
  protected:
   void SetSnapshotsAndAssets(Settings& settings);

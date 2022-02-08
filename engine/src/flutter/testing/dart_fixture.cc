@@ -74,4 +74,8 @@ void DartFixture::AddNativeCallback(std::string name,
   native_resolver_->AddNativeCallback(std::move(name), callback);
 }
 
+void DartFixture::AddFfiNativeCallback(std::string name, void* callback_ptr) {
+  native_resolver_->AddFfiNativeCallback(std::move(name), callback_ptr);
+}
+
 }  // namespace flutter::testing
