@@ -91,7 +91,7 @@ void main() {
       'ts': timeStamp,
     };
 
-    Map<String, dynamic> vsyncCallback(int timeStamp, {String phase = 'B', int startTime = 2750850055428, int endTime = 2750866722095}) => <String, dynamic>{
+    Map<String, dynamic> vsyncCallback(int timeStamp, {String phase = 'B', String startTime = '2750850055428', String endTime = '2750866722095'}) => <String, dynamic>{
       'name': 'VsyncProcessCallback',
       'ph': phase,
       'ts': timeStamp,
@@ -766,10 +766,8 @@ void main() {
         int startTimeInNanoseconds = startTime;
         for (int i = 0; i < numberOfEvents; i ++) {
           final int randomMargin = margin >= 1 ? (-margin + Random().nextInt(margin*2)) : 0;
-          final int endTime = startTimeInNanoseconds
-                              + interval
-                              + randomMargin;
-          events.add(vsyncCallback(0, startTime: startTimeInNanoseconds, endTime: endTime));
+          final int endTime = startTimeInNanoseconds + interval + randomMargin;
+          events.add(vsyncCallback(0, startTime: startTimeInNanoseconds.toString(), endTime: endTime.toString()));
           startTimeInNanoseconds = endTime;
         }
         return events;
