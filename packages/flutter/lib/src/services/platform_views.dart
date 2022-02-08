@@ -1044,7 +1044,7 @@ class TextureAndroidViewController extends AndroidViewController {
     if (isCreating)
       return size;
 
-    final Map<String, dynamic>? meta = await SystemChannels.platform_views.invokeMethod<Map<String, dynamic>>(
+    final Map<Object?, Object?>? meta = await SystemChannels.platform_views.invokeMapMethod<Object?, Object?>(
       'resize',
       <String, dynamic>{
         'id': viewId,

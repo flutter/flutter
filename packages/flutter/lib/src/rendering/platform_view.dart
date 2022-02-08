@@ -173,7 +173,7 @@ class RenderAndroidView extends RenderBox with _PlatformViewGestureMixin {
     _sizePlatformView();
   }
 
-  late Size _currentTextureBufferSize;
+  Size? _currentTextureBufferSize;
 
   Future<void> _sizePlatformView() async {
     // Android virtual displays cannot have a zero size.
@@ -223,8 +223,11 @@ class RenderAndroidView extends RenderBox with _PlatformViewGestureMixin {
   }
 
   void _paintTexture(PaintingContext context, Offset offset) {
+    if (_currentTextureBufferSize == null)
+      return;
+
     context.addLayer(TextureLayer(
-      rect: offset & _currentTextureBufferSize,
+      rect: offset & _currentTextureBufferSize!,
       textureId: _viewController.textureId!,
       freeze: _state == _PlatformViewState.resizing,
     ));
@@ -682,7 +685,7 @@ class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
   bool _isDisposed = false;
 
   // The size of the buffer set in the embedding.
-  late Size _currentTextureBufferSize;
+  Size? _currentTextureBufferSize;
 
   // Clips the [TextureLayer] since the texture layer is only resized when
   // the new requested size is smaller than the current size.
@@ -752,10 +755,11 @@ class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
 
   void _paintTexture(PaintingContext context, Offset offset) {
     final int? textureId = (_controller as TextureAndroidViewController).textureId;
-    if (textureId == null)
+    if (textureId == null || _currentTextureBufferSize == null)
       return;
+
     context.addLayer(TextureLayer(
-      rect: offset & _currentTextureBufferSize,
+      rect: offset & _currentTextureBufferSize!,
       textureId: textureId,
     ));
   }
