@@ -4697,7 +4697,7 @@ void main() {
       // direction.
 
       final List<FadeTransition> transitions = find.descendant(
-        of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_TextSelectionHandleOverlay'),
+        of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_SelectionHandleOverlay'),
         matching: find.byType(FadeTransition),
       ).evaluate().map((Element e) => e.widget).cast<FadeTransition>().toList();
       expect(transitions.length, 2);
