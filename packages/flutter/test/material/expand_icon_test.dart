@@ -312,4 +312,23 @@ void main() {
     iconTheme = tester.firstWidget(find.byType(IconTheme).last);
     expect(iconTheme.data.color, equals(Colors.cyan));
   });
+
+  testWidgets('Expand Icon test', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+          body: ExpandIcon(
+        onPressed: (v) {},
+        iconData: Icons.hearing,
+      )),
+    ));
+
+    expect(find.byType(IconButton), findsOneWidget);
+    expect(find.byType(ExpandIcon), findsOneWidget);
+
+    expect(
+        find.ancestor(
+            of: find.byIcon(Icons.hearing),
+            matching: find.byWidgetPredicate((widget) => widget is IconButton)),
+        findsOneWidget);
+  });
 }
