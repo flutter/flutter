@@ -526,8 +526,7 @@ class TextSelectionOverlay {
         onSelectionHandleDragUpdate: _handleSelectionStartHandleDragUpdate,
         selectionControls: selectionControls,
         visibility: _effectiveStartHandleVisibility,
-        preferredLineHeight: renderObject.preferredLineHeight,
-        glyphHeight: _getStartGlyphHeight(),
+        preferredLineHeight: _getStartGlyphHeight() ?? renderObject.preferredLineHeight,
         dragStartBehavior: dragStartBehavior,
       );
     }
@@ -554,8 +553,7 @@ class TextSelectionOverlay {
         onSelectionHandleDragUpdate: _handleSelectionEndHandleDragUpdate,
         selectionControls: selectionControls,
         visibility: _effectiveEndHandleVisibility,
-        preferredLineHeight: renderObject.preferredLineHeight,
-        glyphHeight: _getEndGlyphHeight(),
+        preferredLineHeight: _getEndGlyphHeight() ?? renderObject.preferredLineHeight,
         dragStartBehavior: dragStartBehavior,
       );
     }
@@ -753,7 +751,6 @@ class _SelectionHandleOverlay extends StatefulWidget {
     required this.selectionControls,
     required this.visibility,
     required this.preferredLineHeight,
-    this.glyphHeight,
     this.dragStartBehavior = DragStartBehavior.start,
   }) : super(key: key);
 
@@ -764,7 +761,6 @@ class _SelectionHandleOverlay extends StatefulWidget {
   final TextSelectionControls selectionControls;
   final ValueListenable<bool> visibility;
   final double preferredLineHeight;
-  final double? glyphHeight;
   final TextSelectionHandleType type;
   final DragStartBehavior dragStartBehavior;
 
@@ -815,7 +811,7 @@ class _SelectionHandleOverlayState extends State<_SelectionHandleOverlay> with S
   Widget build(BuildContext context) {
     final Offset handleAnchor = widget.selectionControls.getHandleAnchor(
       widget.type,
-      widget.glyphHeight ?? widget.preferredLineHeight,
+      widget.preferredLineHeight,
     );
     final Size handleSize = widget.selectionControls.getHandleSize(
       widget.preferredLineHeight,
@@ -864,7 +860,7 @@ class _SelectionHandleOverlayState extends State<_SelectionHandleOverlay> with S
               child: widget.selectionControls.buildHandle(
                 context,
                 widget.type,
-                widget.glyphHeight ?? widget.preferredLineHeight,
+                widget.preferredLineHeight,
                 widget.onSelectionHandleTapped,
               ),
             ),
