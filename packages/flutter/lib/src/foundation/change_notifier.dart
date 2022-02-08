@@ -234,6 +234,11 @@ class ChangeNotifier implements Listenable {
   ///    changes.
   @override
   void removeListener(VoidCallback listener) {
+    // This method is allowed to be called on disposed instance for usability
+    // reason. Due to how our frame scheduling logic between render object and
+    // overlay, it is common that the owner of this instance would be disposed a
+    // frame earlier than the listeners. Allows calls to this method after it is
+    // disposed make it easier for listeners to properly clean up.
     for (int i = 0; i < _count; i++) {
       final VoidCallback? listenerAtIndex = _listeners[i];
       if (listenerAtIndex == listener) {
