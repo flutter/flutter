@@ -39,6 +39,7 @@ class ExpandIcon extends StatefulWidget {
     this.color,
     this.disabledColor,
     this.expandedColor,
+    this.iconData,
   }) : assert(isExpanded != null),
        assert(size != null),
        assert(padding != null),
@@ -95,6 +96,11 @@ class ExpandIcon extends StatefulWidget {
   /// Material Design specifications for [icons](https://material.io/design/iconography/system-icons.html#color)
   /// and for [dark theme](https://material.io/design/color/dark-theme.html#ui-application)
   final Color? expandedColor;
+
+  /// An optional [IconData] for the [IconButton].
+  ///
+  /// If not provided the [IconButton] will default to [Icons.expand_more].
+  final IconData? iconData;
 
   @override
   State<ExpandIcon> createState() => _ExpandIconState();
@@ -179,7 +185,7 @@ class _ExpandIconState extends State<ExpandIcon> with SingleTickerProviderStateM
         onPressed: widget.onPressed == null ? null : _handlePressed,
         icon: RotationTransition(
           turns: _iconTurns,
-          child: const Icon(Icons.expand_more),
+          child: const Icon(iconData ?? Icons.expand_more),
         ),
       ),
     );
