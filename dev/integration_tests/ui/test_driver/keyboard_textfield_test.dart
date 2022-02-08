@@ -24,7 +24,7 @@ void main() {
       final SerializableFinder listViewFinder = find.byValueKey(keys.kListView);
       final SerializableFinder textFieldFinder = find.byValueKey(keys.kDefaultTextField);
       final SerializableFinder offsetFinder = find.byValueKey(keys.kOffsetText);
-      final SerializableFinder keyboardVisibilityIndicatorFinder = find.text('keyboard visible');
+      final SerializableFinder keyboardVisibilityIndicatorFinder = find.byValueKey(keys.kKeyboardVisibleView);
 
       // Align TextField with bottom edge to ensure it would be covered when keyboard comes up.
       await driver.waitForAbsent(textFieldFinder);
