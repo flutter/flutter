@@ -261,14 +261,20 @@ class KernelCompiler {
     if (outputFilePath != null && !_fileSystem.isFileSync(outputFilePath)) {
       _fileSystem.file(outputFilePath).createSync(recursive: true);
     }
-    if (buildDir != null && checkDartPluginRegistry) {
-      // Check if there's a Dart plugin registrant.
-      // This is contained in the file `generated_main.dart` under `.dart_tools/flutter_build/`.
-      final File newMainDart = buildDir.parent.childFile('generated_main.dart');
-      if (newMainDart.existsSync()) {
-        mainUri = newMainDart.path;
-      }
-    }
+    // if (buildDir != null && checkDartPluginRegistry) {
+    //   // Check if there's a Dart plugin registrant.
+    //   // This is contained in the file `generated_main.dart` under `.dart_tools/flutter_build/`.
+    //   final File newMainDart = buildDir.parent.childFile('generated_main.dart');
+    //   if (newMainDart.existsSync()) {
+    //     mainUri = newMainDart.path;
+    //   }
+    // }
+
+    // Check if there's a Dart plugin registrant.
+    // This is contained in the file `generated_main.dart` under `.dart_tools/flutter_build/`.
+    final File? generatedMain = checkDartPluginRegistry
+        ? buildDir?.parent.childFile('generated_main.dart')
+        : null;
 
     final List<String> command = <String>[
       engineDartPath,
@@ -315,6 +321,10 @@ class KernelCompiler {
       if (platformDill != null) ...<String>[
         '--platform',
         platformDill,
+      ],
+      if (generatedMain != null && generatedMain.existsSync()) ...<String>[
+        '--source',
+        generatedMain.path,
       ],
       ...?extraFrontEndOptions,
       mainUri,
