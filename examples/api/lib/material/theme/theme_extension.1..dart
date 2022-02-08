@@ -36,6 +36,7 @@ class MyColors implements ThemeExtension {
     }
   }
 
+  // Optional
   @override
   bool operator ==(Object other) {
     return other is MyColors &&
@@ -43,6 +44,7 @@ class MyColors implements ThemeExtension {
         other.red == red;
   }
 
+  // Optional
   @override
   int get hashCode {
     return hashList(<Object?>[

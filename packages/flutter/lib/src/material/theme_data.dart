@@ -51,9 +51,9 @@ import 'typography.dart';
 
 export 'package:flutter/services.dart' show Brightness;
 
-/// An interface that defines custom additions to [ThemeData].
+/// An interface that defines custom additions to a [ThemeData] object.
 /// 
-/// Typically used to add custom colors. To use, subclass [ThemeExtension],
+/// Typically used for custom colors. To use, subclass [ThemeExtension],
 /// define a number of fields (e.g. [Color]s), and implement the [copyWith] and
 /// [lerp] methods. The latter will ensure smooth transitions of properties when
 /// switching themes.
