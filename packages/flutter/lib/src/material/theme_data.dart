@@ -51,6 +51,30 @@ import 'typography.dart';
 
 export 'package:flutter/services.dart' show Brightness;
 
+/// An interface that defines custom additions to [ThemeData].
+/// 
+/// Typically used to add custom colors. To use, subclass [ThemeExtension],
+/// define a number of fields (e.g. [Color]s), and implement the [copyWith] and
+/// [lerp] methods. The latter will ensure smooth transitions of properties when
+/// switching themes.
+/// 
+/// {@tool dartpad}
+/// This sample shows how to create and use a subclass of [ThemeExtension] that
+/// defines two colors.
+///
+/// ** See code in examples/api/lib/material/theme/theme_extension.1.dart **
+/// {@end-tool}
+abstract class ThemeExtension {
+  /// Creates a copy of this color scheme with the given fields
+  /// replaced by the non-null parameter values.
+  ThemeExtension copyWith();
+
+  /// Linearly interpolate with another [ThemeExtension] objects.
+  ///
+  /// {@macro dart.ui.shadow.lerp}
+  ThemeExtension lerp(ThemeExtension? other, double t);
+}
+
 // Deriving these values is black magic. The spec claims that pressed buttons
 // have a highlight of 0x66999999, but that's clearly wrong. The videos in the
 // spec show that buttons have a composited highlight of #E1E1E1 on a background
@@ -248,6 +272,7 @@ class ThemeData with Diagnosticable {
     TargetPlatform? platform,
     ScrollbarThemeData? scrollbarTheme,
     InteractiveInkFeatureFactory? splashFactory,
+    ThemeExtension? themeExtension,
     VisualDensity? visualDensity,
     bool? useMaterial3,
     // COLOR
@@ -564,6 +589,7 @@ class ThemeData with Diagnosticable {
       platform: platform,
       scrollbarTheme: scrollbarTheme,
       splashFactory: splashFactory,
+      themeExtension: themeExtension,
       visualDensity: visualDensity,
       useMaterial3: useMaterial3,
       // COLOR
@@ -666,6 +692,7 @@ class ThemeData with Diagnosticable {
     required this.platform,
     required this.scrollbarTheme,
     required this.splashFactory,
+    this.themeExtension,
     required this.visualDensity,
     required this.useMaterial3,
     // COLOR
@@ -1098,6 +1125,9 @@ class ThemeData with Diagnosticable {
   ///  * [InkRipple.splashFactory], which defines a splash that spreads out
   ///    more aggressively than the default.
   final InteractiveInkFeatureFactory splashFactory;
+
+  /// A set of arbitrary additions to this theme. 
+  final ThemeExtension? themeExtension;
 
   /// The density value for specifying the compactness of various UI components.
   ///
@@ -1563,6 +1593,7 @@ class ThemeData with Diagnosticable {
     TargetPlatform? platform,
     ScrollbarThemeData? scrollbarTheme,
     InteractiveInkFeatureFactory? splashFactory,
+    ThemeExtension? themeExtension,
     VisualDensity? visualDensity,
     bool? useMaterial3,
     // COLOR
@@ -1710,6 +1741,7 @@ class ThemeData with Diagnosticable {
       platform: platform ?? this.platform,
       scrollbarTheme: scrollbarTheme ?? this.scrollbarTheme,
       splashFactory: splashFactory ?? this.splashFactory,
+      themeExtension: themeExtension ?? this.themeExtension,
       visualDensity: visualDensity ?? this.visualDensity,
       useMaterial3: useMaterial3 ?? this.useMaterial3,
       // COLOR
@@ -1879,6 +1911,7 @@ class ThemeData with Diagnosticable {
       platform: t < 0.5 ? a.platform : b.platform,
       scrollbarTheme: ScrollbarThemeData.lerp(a.scrollbarTheme, b.scrollbarTheme, t),
       splashFactory: t < 0.5 ? a.splashFactory : b.splashFactory,
+      themeExtension: a.themeExtension?.lerp(b.themeExtension, t),
       visualDensity: VisualDensity.lerp(a.visualDensity, b.visualDensity, t),
       useMaterial3: t < 0.5 ? a.useMaterial3 : b.useMaterial3,
       // COLOR
@@ -1978,6 +2011,7 @@ class ThemeData with Diagnosticable {
         other.platform == platform &&
         other.scrollbarTheme == scrollbarTheme &&
         other.splashFactory == splashFactory &&
+        other.themeExtension == themeExtension &&
         other.visualDensity == visualDensity &&
         other.useMaterial3 == useMaterial3 &&
         // COLOR
@@ -2074,6 +2108,7 @@ class ThemeData with Diagnosticable {
       platform,
       scrollbarTheme,
       splashFactory,
+      themeExtension,
       visualDensity,
       useMaterial3,
       // COLOR
@@ -2170,6 +2205,7 @@ class ThemeData with Diagnosticable {
     properties.add(EnumProperty<TargetPlatform>('platform', platform, defaultValue: defaultTargetPlatform, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<ScrollbarThemeData>('scrollbarTheme', scrollbarTheme, defaultValue: defaultData.scrollbarTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<InteractiveInkFeatureFactory>('splashFactory', splashFactory, defaultValue: defaultData.splashFactory, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<ThemeExtension>('themeExtension', themeExtension, defaultValue: defaultData.themeExtension, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<VisualDensity>('visualDensity', visualDensity, defaultValue: defaultData.visualDensity, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<bool>('useMaterial3', useMaterial3, defaultValue: defaultData.useMaterial3, level: DiagnosticLevel.debug));
     // COLORS
