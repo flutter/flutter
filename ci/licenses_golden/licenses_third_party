@@ -1,4 +1,4 @@
-Signature: eed8b68ffef18cc4f6103756f44f7abf
+Signature: b10118afbb14d001048593fecf2e3d1a
 
 UNUSED LICENSES:
 
@@ -10084,6 +10084,7 @@ FILE: ../../../third_party/dart/benchmarks/Iterators/dart/data.dart
 FILE: ../../../third_party/dart/benchmarks/Iterators/dart2/Iterators.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/hash_factories.dart
 FILE: ../../../third_party/dart/sdk/lib/ffi/c_type.dart
+FILE: ../../../third_party/dart/sdk/lib/ffi/native_finalizer.dart
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2022, the Dart project authors.  Please see the AUTHORS file
 for details. All rights reserved.
