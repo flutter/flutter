@@ -526,7 +526,7 @@ class TextSelectionOverlay {
         onSelectionHandleDragUpdate: _handleSelectionStartHandleDragUpdate,
         selectionControls: selectionControls,
         visibility: _effectiveStartHandleVisibility,
-        preferredLineHeight: _getStartGlyphHeight() ?? renderObject.preferredLineHeight,
+        preferredLineHeight: _getStartGlyphHeight(),
         dragStartBehavior: dragStartBehavior,
       );
     }
@@ -553,7 +553,7 @@ class TextSelectionOverlay {
         onSelectionHandleDragUpdate: _handleSelectionEndHandleDragUpdate,
         selectionControls: selectionControls,
         visibility: _effectiveEndHandleVisibility,
-        preferredLineHeight: _getEndGlyphHeight() ?? renderObject.preferredLineHeight,
+        preferredLineHeight: _getEndGlyphHeight(),
         dragStartBehavior: dragStartBehavior,
       );
     }
@@ -562,7 +562,7 @@ class TextSelectionOverlay {
     );
   }
 
-  double? _getStartGlyphHeight() {
+  double _getStartGlyphHeight() {
     final InlineSpan span = renderObject.text!;
     final String prevText = span.toPlainText();
     final String currText = selectionDelegate.textEditingValue.text;
@@ -580,10 +580,10 @@ class TextSelectionOverlay {
       firstSelectedGraphemeExtent = selectedGraphemes.characters.first.length;
       startHandleRect = renderObject.getRectForComposingRange(TextRange(start: _selection.start, end: _selection.start + firstSelectedGraphemeExtent));
     }
-    return startHandleRect?.height;
+    return startHandleRect?.height ?? renderObject.preferredLineHeight;
   }
 
-  double? _getEndGlyphHeight() {
+  double _getEndGlyphHeight() {
     final InlineSpan span = renderObject.text!;
     final String prevText = span.toPlainText();
     final String currText = selectionDelegate.textEditingValue.text;
@@ -595,7 +595,7 @@ class TextSelectionOverlay {
       lastSelectedGraphemeExtent = selectedGraphemes.characters.last.length;
       endHandleRect = renderObject.getRectForComposingRange(TextRange(start: _selection.end - lastSelectedGraphemeExtent, end: _selection.end));
     }
-    return endHandleRect?.height;
+    return endHandleRect?.height ?? renderObject.preferredLineHeight;
   }
 
   late Offset _dragEndPosition;
