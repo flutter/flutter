@@ -103,7 +103,11 @@ abstract class ValueListenable<T> extends Listenable {
 ///  * [ValueNotifier], which is a [ChangeNotifier] that wraps a single value.
 class ChangeNotifier implements Listenable {
   int _count = 0;
-  late List<VoidCallback?> _listeners;
+  // The _listeners is intentionally set to a fixed length _GrowableList instead
+  // of const [] for performance reasons.
+  // See https://github.com/flutter/flutter/pull/71947/files#r545722476 for
+  // more details.
+  List<VoidCallback?> _listeners = List<VoidCallback?>.filled(0, null);
   int _notificationCallStackDepth = 0;
   int _reentrantlyRemovedListeners = 0;
   bool _debugDisposed = false;
@@ -171,15 +175,17 @@ class ChangeNotifier implements Listenable {
   @override
   void addListener(VoidCallback listener) {
     assert(_debugAssertNotDisposed());
-    if (_count == 0) {
-      _listeners = List<VoidCallback?>.filled(1, null);
-    } else if (_count == _listeners.length) {
-      final List<VoidCallback?> newListeners =
-          List<VoidCallback?>.filled(_listeners.length * 2, null);
-      for (int i = 0; i < _count; i++) {
-        newListeners[i] = _listeners[i];
+    if (_count == _listeners.length) {
+      if (_count == 0) {
+        _listeners = List<VoidCallback?>.filled(1, null);
+      } else {
+        final List<VoidCallback?> newListeners =
+        List<VoidCallback?>.filled(_listeners.length * 2, null);
+        for (int i = 0; i < _count; i++) {
+          newListeners[i] = _listeners[i];
+        }
+        _listeners = newListeners;
       }
-      _listeners = newListeners;
     }
     _listeners[_count++] = listener;
   }
@@ -228,8 +234,6 @@ class ChangeNotifier implements Listenable {
   ///    changes.
   @override
   void removeListener(VoidCallback listener) {
-    if (_debugDisposed)
-      return;
     for (int i = 0; i < _count; i++) {
       final VoidCallback? listenerAtIndex = _listeners[i];
       if (listenerAtIndex == listener) {
@@ -262,7 +266,8 @@ class ChangeNotifier implements Listenable {
       _debugDisposed = true;
       return true;
     }());
-    _listeners = const <VoidCallback?>[];
+    _listeners = List<VoidCallback?>.filled(0, null);
+    _count = 0;
   }
 
   /// Call all the registered listeners.
