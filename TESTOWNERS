@@ -113,6 +113,7 @@
 /dev/devicelab/bin/tasks/microbenchmarks.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/new_gallery__transition_perf.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/picture_cache_perf__timeline_summary.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/picture_cache_complexity_scoring_perf__timeline_summary.dart @flar @flutter/engine
 /dev/devicelab/bin/tasks/platform_channel_sample_test.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/platform_interaction_test.dart @stuartmorgan @flutter/plugin
 /dev/devicelab/bin/tasks/platform_view__start_up.dart @zanderso @flutter/engine

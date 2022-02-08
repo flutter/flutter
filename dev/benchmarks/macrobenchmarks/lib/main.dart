@@ -21,6 +21,7 @@ import 'src/large_images.dart';
 import 'src/multi_widget_construction.dart';
 import 'src/opacity_peephole.dart';
 import 'src/picture_cache.dart';
+import 'src/picture_cache_complexity_scoring.dart';
 import 'src/post_backdrop_filter.dart';
 import 'src/simple_animation.dart';
 import 'src/simple_scroll.dart';
@@ -47,6 +48,7 @@ class MacrobenchmarksApp extends StatelessWidget {
         kPostBackdropFilterRouteName: (BuildContext context) => const PostBackdropFilterPage(),
         kSimpleAnimationRouteName: (BuildContext context) => const SimpleAnimationPage(),
         kPictureCacheRouteName: (BuildContext context) => const PictureCachePage(),
+        kPictureCacheComplexityScoringRouteName: (BuildContext context) => const PictureCacheComplexityScoringPage(),
         kLargeImageChangerRouteName: (BuildContext context) => const LargeImageChangerPage(),
         kLargeImagesRouteName: (BuildContext context) => const LargeImagesPage(),
         kTextRouteName: (BuildContext context) => const TextPage(),
@@ -120,6 +122,13 @@ class HomePage extends StatelessWidget {
             child: const Text('Picture Cache'),
             onPressed: () {
               Navigator.pushNamed(context, kPictureCacheRouteName);
+            },
+          ),
+          ElevatedButton(
+            key: const Key(kPictureCacheComplexityScoringRouteName),
+            child: const Text('Picture Cache Complexity Scoring'),
+            onPressed: () {
+              Navigator.pushNamed(context, kPictureCacheComplexityScoringRouteName);
             },
           ),
           ElevatedButton(
