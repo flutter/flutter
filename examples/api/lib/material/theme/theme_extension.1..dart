@@ -82,13 +82,13 @@ class _MyAppState extends State<MyApp> {
       title: MyApp._title,
       theme: ThemeData.light().copyWith(
         themeExtension: const MyColors(
-          blue: Color(0xFF1E88E5), 
+          blue: Color(0xFF1E88E5),
           red: Color(0xFFE53935),
         ),
       ),
       darkTheme: ThemeData.dark().copyWith(
         themeExtension: const MyColors(
-          blue: Color(0xFF90CAF9), 
+          blue: Color(0xFF90CAF9),
           red: Color(0xFFEF9A9A),
         ),
       ),

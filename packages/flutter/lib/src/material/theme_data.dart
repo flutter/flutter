@@ -52,12 +52,12 @@ import 'typography.dart';
 export 'package:flutter/services.dart' show Brightness;
 
 /// An interface that defines custom additions to a [ThemeData] object.
-/// 
+///
 /// Typically used for custom colors. To use, subclass [ThemeExtension],
 /// define a number of fields (e.g. [Color]s), and implement the [copyWith] and
 /// [lerp] methods. The latter will ensure smooth transitions of properties when
 /// switching themes.
-/// 
+///
 /// {@tool dartpad}
 /// This sample shows how to create and use a subclass of [ThemeExtension] that
 /// defines two colors.
@@ -1126,7 +1126,14 @@ class ThemeData with Diagnosticable {
   ///    more aggressively than the default.
   final InteractiveInkFeatureFactory splashFactory;
 
-  /// A set of arbitrary additions to this theme. 
+  /// An object containing arbitrary additions to this theme.
+  /// 
+  /// {@tool dartpad}
+  /// This sample shows how to create and use a subclass of [ThemeExtension] that
+  /// defines two colors.
+  ///
+  /// ** See code in examples/api/lib/material/theme/theme_extension.1.dart **
+  /// {@end-tool}
   final ThemeExtension? themeExtension;
 
   /// The density value for specifying the compactness of various UI components.
