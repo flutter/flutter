@@ -166,9 +166,6 @@
 /dev/devicelab/bin/tasks/simple_animation_perf_ios.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/tiles_scroll_perf_ios__timeline_summary.dart @zanderso @flutter/engine
 
-## Mac iOS32 DeviceLab tests
-/dev/devicelab/bin/tasks/flutter_gallery__transition_perf_e2e_ios32.dart @zanderso @flutter/engine
-
 ## Host only DeviceLab tests
 /dev/devicelab/bin/tasks/build_aar_module_test.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/gradle_desugar_classes_test.dart @zanderso @flutter/tool
