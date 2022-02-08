@@ -12,6 +12,7 @@
 /dev/devicelab/bin/tasks/analyzer_benchmark.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/android_defines_test.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/android_obfuscate_test.dart @zanderso @flutter/tool
+/dev/devicelab/bin/tasks/android_picture_cache_complexity_scoring_perf__timeline_summary.dart @flar @flutter/engine
 /dev/devicelab/bin/tasks/android_stack_size_test.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/android_view_scroll_perf__timeline_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/animated_image_gc_perf.dart @zanderso @flutter/engine
@@ -113,7 +114,6 @@
 /dev/devicelab/bin/tasks/microbenchmarks.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/new_gallery__transition_perf.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/picture_cache_perf__timeline_summary.dart @zanderso @flutter/engine
-/dev/devicelab/bin/tasks/picture_cache_complexity_scoring_perf__timeline_summary.dart @flar @flutter/engine
 /dev/devicelab/bin/tasks/platform_channel_sample_test.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/platform_interaction_test.dart @stuartmorgan @flutter/plugin
 /dev/devicelab/bin/tasks/platform_view__start_up.dart @zanderso @flutter/engine
@@ -152,6 +152,7 @@
 /dev/devicelab/bin/tasks/ios_app_with_extensions_test.dart @jmagman @flutter/tool
 /dev/devicelab/bin/tasks/ios_content_validation_test.dart @jmagman @flutter/tool
 /dev/devicelab/bin/tasks/ios_defines_test.dart @zanderso @flutter/tool
+/dev/devicelab/bin/tasks/ios_picture_cache_complexity_scoring_perf__timeline_summary.dart @flar @flutter/engine
 /dev/devicelab/bin/tasks/ios_platform_view_tests.dart @stuartmorgan @flutter/plugin
 /dev/devicelab/bin/tasks/large_image_changer_perf_ios.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/macos_chrome_dev_mode.dart @zanderso @flutter/tool
