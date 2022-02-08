@@ -16,6 +16,10 @@ import 'migrate_config.dart';
 import 'migrate_manifest.dart';
 import 'migrate_utils.dart';
 
+const List<String> _skippedFiles = const <String>[
+  'lib/main.dart',
+];
+
 class FilePendingMigration {
   FilePendingMigration(this.localPath, this.file);
   String localPath;
@@ -290,7 +294,9 @@ Future<MigrateResult?> computeMigration({
     }
     // Diff the current file against the old generated template
     final String localPath = currentFile.path.replaceFirst(projectRootPath + globals.fs.path.separator, '');
-    if (diffMap.containsKey(localPath) && diffMap[localPath]!.isIgnored || await MigrateUtils.isGitIgnored(currentFile.path, flutterProject.directory.absolute.path)) {
+    if (diffMap.containsKey(localPath) && diffMap[localPath]!.isIgnored ||
+        await MigrateUtils.isGitIgnored(currentFile.path, flutterProject.directory.absolute.path) ||
+        _skippedFiles.contains(localPath)) {
       continue;
     }
     final File oldTemplateFile = generatedBaseTemplateDirectory.childFile(localPath);

@@ -188,7 +188,7 @@ $unmanagedFilesString
           platform: platform,
           createVersion: null,
           lastMigrateVersion: null,
-          unmanagedFiles: <String>[],
+          unmanagedFiles: platform == 'root' ? <String>['lib/main.dart'] : <String>[],
         );
         if (create) {
           newConfig.writeFile(projectDirectory: projectDirectory);
