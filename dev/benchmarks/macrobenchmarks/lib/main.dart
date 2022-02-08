@@ -126,7 +126,7 @@ class HomePage extends StatelessWidget {
           ),
           ElevatedButton(
             key: const Key(kPictureCacheComplexityScoringRouteName),
-            child: const Text('Picture Cache'),
+            child: const Text('Picture Cache Complexity Scoring'),
             onPressed: () {
               Navigator.pushNamed(context, kPictureCacheComplexityScoringRouteName);
             },
