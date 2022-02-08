@@ -23,8 +23,8 @@ jobs:
           process-only: 'issues'
           github-token: ${{ github.token }}
           # Number of days of inactivity before a closed issue is locked.
-          issue-lock-inactive-days: '14'
-          issue-lock-comment: >
+          issue-inactive-days: '14'
+          issue-comment: >
             This thread has been automatically locked since there has not been
             any recent activity after it was closed. If you are still experiencing a
             similar issue, please open a new bug, including the output of
