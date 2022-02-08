@@ -161,7 +161,6 @@ class FakeHttpClient implements HttpClient {
   }
 
   @override
-  // ignore: override_on_non_overriding_member
   Future<ConnectionTask> Function(Uri url, String? proxyHost, int? proxyPort)? connectionFactory;
 
   @override
@@ -352,7 +351,6 @@ class _FakeHttpClientRequest implements HttpClientRequest {
   }
 
   @override
-  // ignore: override_on_non_overriding_member
   Function(String line)? keyLog;
 
   @override
