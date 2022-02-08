@@ -227,8 +227,8 @@ class FakeFlatland
       fuchsia::ui::composition::Orientation orientation) override;
 
   // |fuchsia::ui::composition::Flatland|
-  void SetClipBounds(fuchsia::ui::composition::TransformId transform_id,
-                     fuchsia::math::Rect clip_bounds) override;
+  void SetClipBoundary(fuchsia::ui::composition::TransformId transform_id,
+                       std::unique_ptr<fuchsia::math::Rect> bounds) override;
 
   // TODO(fxbug.dev/89111): Re-enable once SDK rolls.
   //   // |fuchsia::ui::composition::Flatland|
