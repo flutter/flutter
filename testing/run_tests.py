@@ -233,6 +233,10 @@ def RunCCTests(build_dir, filter, coverage, capture_core_dump):
     RunEngineExecutable(build_dir, 'flutter_linux_unittests', filter, shuffle_flags, coverage=coverage)
     RunEngineExecutable(build_dir, 'flutter_glfw_unittests', filter, shuffle_flags, coverage=coverage)
 
+  # Impeller tests are only supported on macOS for now.
+  if IsMac():
+    RunEngineExecutable(build_dir, 'impeller_unittests', filter, shuffle_flags, coverage=coverage)
+
 
 def RunEngineBenchmarks(build_dir, filter):
   print("Running Engine Benchmarks.")
