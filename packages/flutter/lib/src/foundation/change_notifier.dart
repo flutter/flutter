@@ -103,7 +103,7 @@ abstract class ValueListenable<T> extends Listenable {
 ///  * [ValueNotifier], which is a [ChangeNotifier] that wraps a single value.
 class ChangeNotifier implements Listenable {
   int _count = 0;
-  // The _listeners is intentionally set to a fixed length _GrowableList instead
+  // The _listeners is intentionally set to a fixed-length _GrowableList instead
   // of const [] for performance reasons.
   // See https://github.com/flutter/flutter/pull/71947/files#r545722476 for
   // more details.
