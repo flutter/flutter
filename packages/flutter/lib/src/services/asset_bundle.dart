@@ -9,6 +9,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/scheduler.dart';
 
 import 'binding.dart';
 
@@ -230,10 +231,7 @@ abstract class CachingAssetBundle extends AssetBundle {
 class PlatformAssetBundle extends CachingAssetBundle {
   @override
   Future<ByteData> load(String key) async {
-    // Ensure that the image load occurs in the next event loop and not in
-    // the frame workload.
-    await Future<void>.delayed(Duration.zero);
-    return _load(key);
+    return SchedulerBinding.instance.scheduleAsyncTask(() =>_load(key), Priority.animation);
   }
 
   Future<ByteData> _load(String key) async {

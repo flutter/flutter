@@ -40,7 +40,7 @@ void main() {
     scheduler = TestSchedulerBinding();
   });
 
-  test('Tasks are executed in the right order', () {
+  test('Tasks are executed in the right order', () async {
     final TestStrategy strategy = TestStrategy();
     scheduler.schedulingStrategy = strategy.shouldRunTaskWithPriority;
     final List<int> input = <int>[2, 23, 23, 11, 0, 80, 3];
@@ -54,19 +54,19 @@ void main() {
 
     strategy.allowedPriority = 100;
     for (int i = 0; i < 3; i += 1)
-      expect(scheduler.handleEventLoopCallback(), isFalse);
+      expect(await scheduler.handleEventLoopCallback(), isFalse);
     expect(executedTasks.isEmpty, isTrue);
 
     strategy.allowedPriority = 50;
     for (int i = 0; i < 3; i += 1)
-      expect(scheduler.handleEventLoopCallback(), i == 0 ? isTrue : isFalse);
+      expect(await scheduler.handleEventLoopCallback(), i == 0 ? isTrue : isFalse);
     expect(executedTasks, hasLength(1));
     expect(executedTasks.single, equals(80));
     executedTasks.clear();
 
     strategy.allowedPriority = 20;
     for (int i = 0; i < 3; i += 1)
-      expect(scheduler.handleEventLoopCallback(), i < 2 ? isTrue : isFalse);
+      expect(await scheduler.handleEventLoopCallback(), i < 2 ? isTrue : isFalse);
     expect(executedTasks, hasLength(2));
     expect(executedTasks[0], equals(23));
     expect(executedTasks[1], equals(23));
@@ -77,7 +77,7 @@ void main() {
     scheduleAddingTask(5);
     scheduleAddingTask(97);
     for (int i = 0; i < 3; i += 1)
-      expect(scheduler.handleEventLoopCallback(), i < 2 ? isTrue : isFalse);
+      expect(await scheduler.handleEventLoopCallback(), i < 2 ? isTrue : isFalse);
     expect(executedTasks, hasLength(2));
     expect(executedTasks[0], equals(99));
     expect(executedTasks[1], equals(97));
@@ -85,7 +85,7 @@ void main() {
 
     strategy.allowedPriority = 10;
     for (int i = 0; i < 3; i += 1)
-      expect(scheduler.handleEventLoopCallback(), i < 2 ? isTrue : isFalse);
+      expect(await scheduler.handleEventLoopCallback(), i < 2 ? isTrue : isFalse);
     expect(executedTasks, hasLength(2));
     expect(executedTasks[0], equals(19));
     expect(executedTasks[1], equals(11));
@@ -93,7 +93,7 @@ void main() {
 
     strategy.allowedPriority = 1;
     for (int i = 0; i < 4; i += 1)
-      expect(scheduler.handleEventLoopCallback(), i < 3 ? isTrue : isFalse);
+      expect(await scheduler.handleEventLoopCallback(), i < 3 ? isTrue : isFalse);
     expect(executedTasks, hasLength(3));
     expect(executedTasks[0], equals(5));
     expect(executedTasks[1], equals(3));
@@ -101,7 +101,7 @@ void main() {
     executedTasks.clear();
 
     strategy.allowedPriority = 0;
-    expect(scheduler.handleEventLoopCallback(), isFalse);
+    expect(await scheduler.handleEventLoopCallback(), isFalse);
     expect(executedTasks, hasLength(1));
     expect(executedTasks[0], equals(0));
   });
@@ -137,7 +137,7 @@ void main() {
 
     // As events are locked, make scheduleTask execute after the test or it
     // will execute during following tests and risk failure.
-    addTearDown(() => scheduler.handleEventLoopCallback());
+    addTearDown(scheduler.handleEventLoopCallback);
   });
 
   test('Flutter.Frame event fired', () async {

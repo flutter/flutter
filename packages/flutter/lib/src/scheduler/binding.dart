@@ -47,6 +47,12 @@ typedef FrameCallback = void Function(Duration timeStamp);
 /// task does not return a value.
 typedef TaskCallback<T> = T Function();
 
+/// Signature for [SchedulerBinding.scheduleAsyncTask] callbacks.
+///
+/// The type argument `T` is the task's return value. Consider `void` if the
+/// task does not return a value.
+typedef AsyncTaskCallback<T> = Future<T> Function();
+
 /// Signature for the [SchedulerBinding.schedulingStrategy] callback. Called
 /// whenever the system needs to decide whether a task at a given
 /// priority needs to be run.
@@ -59,7 +65,15 @@ typedef TaskCallback<T> = T Function();
 ///  * [defaultSchedulingStrategy], the default [SchedulingStrategy] for [SchedulerBinding.schedulingStrategy].
 typedef SchedulingStrategy = bool Function({ required int priority, required SchedulerBinding scheduler });
 
-class _TaskEntry<T> {
+abstract class _BaseTask {
+  int get priority;
+
+  StackTrace get debugStack;
+
+  FutureOr<void> run();
+}
+
+class _TaskEntry<T> implements _BaseTask {
   _TaskEntry(this.task, this.priority, this.debugLabel, this.flow) {
     assert(() {
       debugStack = StackTrace.current;
@@ -67,13 +81,16 @@ class _TaskEntry<T> {
     }());
   }
   final TaskCallback<T> task;
+  @override
   final int priority;
   final String? debugLabel;
   final Flow? flow;
 
+  @override
   late StackTrace debugStack;
   final Completer<T> completer = Completer<T>();
 
+  @override
   void run() {
     if (!kReleaseMode) {
       Timeline.timeSync(
@@ -85,6 +102,33 @@ class _TaskEntry<T> {
       );
     } else {
       completer.complete(task());
+    }
+  }
+}
+
+class _AsyncTaskEntry<T> implements _BaseTask {
+  _AsyncTaskEntry(this.task, this.priority) {
+    assert(() {
+      debugStack = StackTrace.current;
+      return true;
+    }());
+  }
+
+  final AsyncTaskCallback<T> task;
+  @override
+  final int priority;
+
+  @override
+  late StackTrace debugStack;
+  final Completer<T> completer = Completer<T>();
+
+  @override
+  Future<void> run() async {
+    try {
+      final T result = await task();
+      completer.complete(result);
+    } catch (error, stackTrace) {
+      completer.completeError(error, stackTrace);
     }
   }
 }
@@ -371,10 +415,10 @@ mixin SchedulerBinding on BindingBase {
   /// Defaults to [defaultSchedulingStrategy].
   SchedulingStrategy schedulingStrategy = defaultSchedulingStrategy;
 
-  static int _taskSorter (_TaskEntry<dynamic> e1, _TaskEntry<dynamic> e2) {
+  static int _taskSorter (_BaseTask e1, _BaseTask e2) {
     return -e1.priority.compareTo(e2.priority);
   }
-  final PriorityQueue<_TaskEntry<dynamic>> _taskQueue = HeapPriorityQueue<_TaskEntry<dynamic>>(_taskSorter);
+  final PriorityQueue<_BaseTask> _taskQueue = HeapPriorityQueue<_BaseTask>(_taskSorter);
 
   /// Schedules the given `task` with the given `priority` and returns a
   /// [Future] that completes to the `task`'s eventual return value.
@@ -414,6 +458,28 @@ mixin SchedulerBinding on BindingBase {
     return entry.completer.future;
   }
 
+  /// Schedules the given `task` with the given `priority` and returns a
+  /// [Future] that completes to the `task`'s eventual return value.
+  ///
+  /// Like [scheduleTask] except that it handles async tasks.
+  ///
+  /// See also:
+  ///   * [scheduleTask] for a description of the priority system.
+  Future<T> scheduleAsyncTask<T>(
+    AsyncTaskCallback<T> task,
+    Priority priority,
+  ) {
+    final bool isFirstTask = _taskQueue.isEmpty;
+    final _AsyncTaskEntry<T> entry = _AsyncTaskEntry<T>(
+      task,
+      priority.value,
+    );
+    _taskQueue.add(entry);
+    if (isFirstTask && !locked)
+      _ensureEventLoopCallback();
+    return entry.completer.future;
+  }
+
   @override
   void unlocked() {
     super.unlocked();
@@ -436,9 +502,9 @@ mixin SchedulerBinding on BindingBase {
   }
 
   // Scheduled by _ensureEventLoopCallback.
-  void _runTasks() {
+  Future<void> _runTasks() async {
     _hasRequestedAnEventLoopCallback = false;
-    if (handleEventLoopCallback())
+    if (await handleEventLoopCallback())
       _ensureEventLoopCallback(); // runs next task when there's time
   }
 
@@ -454,14 +520,14 @@ mixin SchedulerBinding on BindingBase {
   /// Also returns false if there are no tasks remaining.
   @visibleForTesting
   @pragma('vm:notify-debugger-on-exception')
-  bool handleEventLoopCallback() {
+  Future<bool> handleEventLoopCallback() async {
     if (_taskQueue.isEmpty || locked)
       return false;
-    final _TaskEntry<dynamic> entry = _taskQueue.first;
+    final _BaseTask entry = _taskQueue.first;
     if (schedulingStrategy(priority: entry.priority, scheduler: this)) {
       try {
         _taskQueue.removeFirst();
-        entry.run();
+        await entry.run();
       } catch (exception, exceptionStack) {
         StackTrace? callbackStack;
         assert(() {

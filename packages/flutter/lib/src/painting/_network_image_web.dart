@@ -8,6 +8,7 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/scheduler.dart';
 
 import 'image_provider.dart' as image_provider;
 import 'image_stream.dart';
@@ -66,7 +67,7 @@ class NetworkImage
 
     return MultiFrameImageStreamCompleter(
       chunkEvents: chunkEvents.stream,
-      codec: _loadAsync(key, decode, chunkEvents),
+      codec: SchedulerBinding.instance.scheduleAsyncTask(() =>_loadAsync(key, decode, chunkEvents), Priority.animation),
       scale: key.scale,
       debugLabel: key.url,
       informationCollector: _imageStreamInformationCollector(key),
@@ -97,9 +98,6 @@ class NetworkImage
     StreamController<ImageChunkEvent> chunkEvents,
   ) async {
     assert(key == this);
-    // Ensure that the image load occurs in the next event loop and not in
-    // the frame workload.
-    await Future<void>.delayed(Duration.zero);
 
     final Uri resolved = Uri.base.resolve(key.url);
 
