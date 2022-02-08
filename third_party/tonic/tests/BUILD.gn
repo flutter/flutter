@@ -18,6 +18,7 @@ executable("tonic_unittests") {
     "dart_persistent_handle_unittest.cc",
     "dart_state_unittest.cc",
     "dart_weak_persistent_handle_unittest.cc",
+    "ffi_native_unittest.cc",
   ]
 
   public_deps = [

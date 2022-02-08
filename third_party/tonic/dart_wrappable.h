@@ -102,6 +102,11 @@ struct DartConverter<
     T*,
     typename std::enable_if<
         std::is_convertible<T*, const DartWrappable*>::value>::type> {
+  using FfiType = T*;
+  static constexpr const char* kFfiRepresentation = "Pointer";
+  static constexpr const char* kDartRepresentation = "Pointer";
+  static constexpr bool kAllowedInLeafCall = true;
+
   static Dart_Handle ToDart(DartWrappable* val) {
     if (!val) {
       return Dart_Null();
@@ -148,6 +153,12 @@ struct DartConverter<
     return static_cast<T*>(
         DartConverterWrappable::FromArguments(args, index, exception));
   }
+
+  static T* FromFfi(FfiType val) { return val; }
+  static FfiType ToFfi(T* val) { return val; }
+  static const char* GetFfiRepresentation() { return kFfiRepresentation; }
+  static const char* GetDartRepresentation() { return kDartRepresentation; }
+  static bool AllowedInLeafCall() { return kAllowedInLeafCall; }
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -157,27 +168,39 @@ struct DartConverter<
 
 template <template <typename T> class PTR, typename T>
 struct DartConverter<PTR<T>> {
-  static Dart_Handle ToDart(const PTR<T>& val) {
+  using NativeType = PTR<T>;
+  using FfiType = Dart_Handle;
+  static constexpr const char* kFfiRepresentation = "Handle";
+  static constexpr const char* kDartRepresentation = "Object";
+  static constexpr bool kAllowedInLeafCall = false;
+
+  static Dart_Handle ToDart(const NativeType& val) {
     return DartConverter<T*>::ToDart(val.get());
   }
 
-  static PTR<T> FromDart(Dart_Handle handle) {
-    return DartConverter<T*>::FromDart(handle);
+  static NativeType FromDart(Dart_Handle handle) {
+    return NativeType(DartConverter<T*>::FromDart(handle));
   }
 
-  static PTR<T> FromArguments(Dart_NativeArguments args,
-                              int index,
-                              Dart_Handle& exception,
-                              bool auto_scope = true) {
-    return PTR<T>(
+  static NativeType FromArguments(Dart_NativeArguments args,
+                                  int index,
+                                  Dart_Handle& exception,
+                                  bool auto_scope = true) {
+    return NativeType(
         DartConverter<T*>::FromArguments(args, index, exception, auto_scope));
   }
 
   static void SetReturnValue(Dart_NativeArguments args,
-                             const PTR<T>& val,
+                             const NativeType& val,
                              bool auto_scope = true) {
     DartConverter<T*>::SetReturnValue(args, val.get());
   }
+
+  static NativeType FromFfi(FfiType val) { return FromDart(val); }
+  static FfiType ToFfi(const NativeType& val) { return ToDart(val); }
+  static const char* GetFfiRepresentation() { return kFfiRepresentation; }
+  static const char* GetDartRepresentation() { return kDartRepresentation; }
+  static bool AllowedInLeafCall() { return kAllowedInLeafCall; }
 };
 
 template <typename T>
