@@ -5,7 +5,9 @@
 import 'package:flutter/widgets.dart';
 
 import 'checkbox.dart';
+import 'checkbox_theme.dart';
 import 'list_tile.dart';
+import 'material_state.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
@@ -27,7 +29,7 @@ import 'theme_data.dart';
 ///
 /// The [selected] property on this widget is similar to the [ListTile.selected]
 /// property. This tile's [activeColor] is used for the selected item's text color, or
-/// the theme's [ThemeData.toggleableActiveColor] if [activeColor] is null.
+/// the theme's [CheckboxThemeData.overlayColor] if [activeColor] is null.
 ///
 /// This widget does not coordinate the [selected] state and the [value] state; to have the list tile
 /// appear selected when the checkbox is checked, pass the same value to both.
@@ -331,9 +333,17 @@ class CheckboxListTile extends StatelessWidget {
         trailing = control;
         break;
     }
+    final ThemeData theme = Theme.of(context);
+    final CheckboxThemeData checkboxTheme = CheckboxTheme.of(context);
+      final Set<MaterialState> states = <MaterialState>{
+      if (selected) MaterialState.selected,
+    };
+    final Color effectiveActiveColor = activeColor
+      ?? checkboxTheme.overlayColor?.resolve(states)
+      ?? theme.toggleableActiveColor;
     return MergeSemantics(
       child: ListTileTheme.merge(
-        selectedColor: activeColor ?? Theme.of(context).toggleableActiveColor,
+        selectedColor: effectiveActiveColor,
         child: ListTile(
           leading: leading,
           title: title,
