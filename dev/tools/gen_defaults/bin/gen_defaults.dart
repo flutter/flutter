@@ -18,6 +18,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:gen_defaults/fab_template.dart';
+import 'package:gen_defaults/typography_template.dart';
 
 Map<String, dynamic> _readTokenFile(String fileName) {
   return jsonDecode(File('dev/tools/gen_defaults/data/$fileName').readAsStringSync()) as Map<String, dynamic>;
@@ -70,4 +71,5 @@ Future<void> main(List<String> args) async {
   }
 
   FABTemplate('$materialLib/floating_action_button.dart', tokens).updateFile();
+  TypographyTemplate('$materialLib/typography.dart', tokens).updateFile();
 }

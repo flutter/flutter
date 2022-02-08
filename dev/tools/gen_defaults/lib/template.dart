@@ -86,7 +86,6 @@ abstract class TokenTemplate {
   }
 
   String textStyle(String tokenName) {
-    final String fontName = '$tokenName.text-style';
-    return tokens[fontName]!.toString();
+    return tokens['$tokenName.text-style']!.toString();
   }
 }

@@ -495,7 +495,7 @@ class ThemeData with Diagnosticable {
     splashColor ??= isDark ? _kDarkThemeSplashColor : _kLightThemeSplashColor;
 
     // TYPOGRAPHY & ICONOGRAPHY
-    typography ??= Typography.material2014(platform: platform);
+    typography ??= useMaterial3 ? Typography.material2021(platform: platform) : Typography.material2014(platform: platform);
     TextTheme defaultTextTheme = isDark ? typography.white : typography.black;
     TextTheme defaultPrimaryTextTheme = primaryIsDark ? typography.white : typography.black;
     TextTheme defaultAccentTextTheme = accentIsDark ? typography.white : typography.black;
@@ -1133,6 +1133,9 @@ class ThemeData with Diagnosticable {
   /// If true, then components that have been migrated to Material 3 will
   /// start using new colors, typography and other features of Material 3.
   /// If false, they will use the Material 2 look and feel.
+  ///
+  /// If true, the default Typography will be [Typography.material2021],
+  /// otherwise it will default to [Typography.material2014].
   ///
   /// During the migration to Material 3, turning this on may yield
   /// inconsistent look and feel in your app. Some components will be migrated
