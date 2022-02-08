@@ -173,6 +173,9 @@ class FakeHttpClient implements HttpClient {
   bool Function(X509Certificate cert, String host, int port)? badCertificateCallback;
 
   @override
+  Function(String line)? keyLog;
+
+  @override
   void close({bool force = false}) { }
 
   @override
@@ -351,9 +354,6 @@ class _FakeHttpClientRequest implements HttpClientRequest {
   }
 
   @override
-  Function(String line)? keyLog;
-
-  @override
   Future<HttpClientResponse> close() async {
     final Completer<void> completer = Completer<void>();
     Timer.run(() {
@@ -521,4 +521,8 @@ class _FakeHttpHeaders extends HttpHeaders {
   String? value(String name) {
     return _backingData[name]?.join('; ');
   }
+}
+
+void main() {
+  FakeHttpClient.any();
 }
