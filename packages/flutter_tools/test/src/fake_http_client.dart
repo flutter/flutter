@@ -162,7 +162,7 @@ class FakeHttpClient implements HttpClient {
 
   @override
   // ignore: override_on_non_overriding_member
-  Future<ConnectionTask> Function(Uri url, String proxyHost, int proxyPort)? connectionFactory;
+  Future<ConnectionTask> Function(Uri url, String? proxyHost, int? proxyPort)? connectionFactory;
 
   @override
   Future<bool> Function(Uri url, String scheme, String realm)? authenticate;
