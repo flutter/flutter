@@ -6,6 +6,7 @@
 // machines.
 @Tags(<String>['reduced-test-set'])
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -67,6 +68,7 @@ void main() {
     expect(const TabBarTheme().unselectedLabelStyle, null);
     expect(const TabBarTheme().overlayColor, null);
     expect(const TabBarTheme().splashFactory, null);
+    expect(const TabBarTheme().mouseCursor, null);
   });
 
   testWidgets('Tab bar defaults - label style and selected/unselected label colors', (WidgetTester tester) async {
@@ -300,6 +302,22 @@ void main() {
       find.byKey(_painterKey),
       matchesGoldenFile('tab_bar_theme.tab_indicator_size_label.png'),
     );
+  });
+
+  testWidgets('Tab bar theme overrides tab mouse cursor', (WidgetTester tester) async {
+    const TabBarTheme tabBarTheme = TabBarTheme(mouseCursor: MaterialStateMouseCursor.textable);
+
+    await tester.pumpWidget(_withTheme(tabBarTheme));
+
+    final Offset tabBar = tester.getCenter(
+      find.ancestor(of: find.text('tab 1'),matching: find.byType(TabBar)),
+    );
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    addTearDown(gesture.removePointer);
+    await gesture.moveTo(tabBar);
+    await tester.pumpAndSettle();
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
   });
 
   testWidgets('Tab bar theme - custom tab indicator', (WidgetTester tester) async {
