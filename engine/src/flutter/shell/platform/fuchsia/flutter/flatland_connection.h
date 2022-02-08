@@ -80,15 +80,14 @@ class FlatlandConnection final {
   bool present_pending_ = false;
 
   // This struct contains state that is accessed from both from the UI thread
-  // (in AwaitVsync) and the raster thread (in OnNextFrameBegin). You should
-  // always lock mutex_ before touching anything in this struct
+  // (in AwaitVsync) and the raster thread (in OnNextFrameBegin and Present).
+  // You should always lock mutex_ before touching anything in this struct
   struct {
     std::mutex mutex_;
     FireCallbackCallback fire_callback_;
     bool fire_callback_pending_ = false;
+    bool first_present_called_ = false;
   } threadsafe_state_;
-
-  bool first_call_to_await_vsync_ = true;
 
   std::vector<zx::event> acquire_fences_;
   std::vector<zx::event> current_present_release_fences_;
