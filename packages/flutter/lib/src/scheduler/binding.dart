@@ -415,7 +415,7 @@ mixin SchedulerBinding on BindingBase {
   /// Defaults to [defaultSchedulingStrategy].
   SchedulingStrategy schedulingStrategy = defaultSchedulingStrategy;
 
-  static int _taskSorter (_BaseTask e1, _BaseTask e2) {
+  static int _taskSorter(_BaseTask e1, _BaseTask e2) {
     return -e1.priority.compareTo(e2.priority);
   }
   final PriorityQueue<_BaseTask> _taskQueue = HeapPriorityQueue<_BaseTask>(_taskSorter);
@@ -498,7 +498,15 @@ mixin SchedulerBinding on BindingBase {
     if (_hasRequestedAnEventLoopCallback)
       return;
     _hasRequestedAnEventLoopCallback = true;
-    Timer.run(_runTasks);
+    scheduleTasks(_runTasks);
+  }
+
+  /// Schedules tasks outside of the current event loop.
+  ///
+  /// By default this uses [Timer.run].
+  @protected
+  void scheduleTasks(void Function() callback) {
+    Timer.run(callback);
   }
 
   // Scheduled by _ensureEventLoopCallback.

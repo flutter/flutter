@@ -1031,7 +1031,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   Future<void> pump([ Duration? duration, EnginePhase newPhase = EnginePhase.sendSemanticsUpdate ]) {
-    return TestAsyncUtils.guard<void>(() {
+    return TestAsyncUtils.guard<void>(() async {
       assert(inTest);
       assert(_clock != null);
       if (duration != null)
@@ -1049,6 +1049,11 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
       _currentFakeAsync!.flushMicrotasks();
       return Future<void>.value();
     });
+  }
+
+  @override
+  void scheduleTasks(void Function() callback) {
+    callback();
   }
 
   @override
