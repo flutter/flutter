@@ -180,7 +180,7 @@ class ChangeNotifier implements Listenable {
         _listeners = List<VoidCallback?>.filled(1, null);
       } else {
         final List<VoidCallback?> newListeners =
-        List<VoidCallback?>.filled(_listeners.length * 2, null);
+            List<VoidCallback?>.filled(_listeners.length * 2, null);
         for (int i = 0; i < _count; i++) {
           newListeners[i] = _listeners[i];
         }
