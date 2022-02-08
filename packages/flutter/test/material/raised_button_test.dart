@@ -529,12 +529,10 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: Material(
-          child: Center(
-            child: RaisedButton(
-              onPressed: () { },
-              child: const Text('ABC'),
-            ),
+        child: Center(
+          child: RaisedButton(
+            onPressed: () { },
+            child: const Text('ABC'),
           ),
         ),
       ),
@@ -572,13 +570,11 @@ void main() {
         data: ThemeData(materialTapTargetSize: MaterialTapTargetSize.padded),
         child: Directionality(
           textDirection: TextDirection.ltr,
-          child: Material(
-            child: Center(
-              child: RaisedButton(
-                key: key1,
-                child: const SizedBox(width: 50.0, height: 8.0),
-                onPressed: () { },
-              ),
+          child: Center(
+            child: RaisedButton(
+              key: key1,
+              child: const SizedBox(width: 50.0, height: 8.0),
+              onPressed: () { },
             ),
           ),
         ),
@@ -593,13 +589,11 @@ void main() {
         data: ThemeData(materialTapTargetSize: MaterialTapTargetSize.shrinkWrap),
         child: Directionality(
           textDirection: TextDirection.ltr,
-          child: Material(
-            child: Center(
-              child: RaisedButton(
-                key: key2,
-                child: const SizedBox(width: 50.0, height: 8.0),
-                onPressed: () { },
-              ),
+          child: Center(
+            child: RaisedButton(
+              key: key2,
+              child: const SizedBox(width: 50.0, height: 8.0),
+              onPressed: () { },
             ),
           ),
         ),
@@ -613,10 +607,8 @@ void main() {
     await tester.pumpWidget(
       Directionality(
           textDirection: TextDirection.ltr,
-          child: Material(
-            child: RaisedButton(
-              onPressed: () { /* to make sure the button is enabled */ },
-            ),
+          child: RaisedButton(
+            onPressed: () { /* to make sure the button is enabled */ },
           ),
       ),
     );
@@ -696,17 +688,15 @@ void main() {
       // horizontal padding is applied correctly later on
       Directionality(
         textDirection: TextDirection.ltr,
-        child: Material(
-          child: Center(
-            child: RaisedButton.icon(
-              icon: const Icon(Icons.add),
-              padding: const EdgeInsets.fromLTRB(16, 5, 10, 12),
-              key: buttonKey,
-              onPressed: () {},
-              label: const Text(
-                'Hello',
-                key: labelKey,
-              ),
+        child: Center(
+          child: RaisedButton.icon(
+            icon: const Icon(Icons.add),
+            padding: const EdgeInsets.fromLTRB(16, 5, 10, 12),
+            key: buttonKey,
+            onPressed: () {},
+            label: const Text(
+              'Hello',
+              key: labelKey,
             ),
           ),
         ),
