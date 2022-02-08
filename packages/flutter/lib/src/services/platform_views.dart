@@ -1028,7 +1028,7 @@ class TextureAndroidViewController extends AndroidViewController {
   final Completer<Size> _initSize = Completer<Size>();
 
   /// The current offset of the platform view.
-  Offset? _off;
+  Offset _off = const Offset(0, 0);
 
   @override
   Future<Size> setSize(Size size) async {
@@ -1060,10 +1060,13 @@ class TextureAndroidViewController extends AndroidViewController {
 
   @override
   Future<void> setOffset(Offset off) async {
-    if (off == _off) {
+    if (off == _off)
       return;
-    }
+
     _off = off;
+    if (_state != _AndroidViewState.created)
+      return;
+
     await SystemChannels.platform_views.invokeMethod<void>(
       'offset',
       <String, dynamic>{
@@ -1082,6 +1085,8 @@ class TextureAndroidViewController extends AndroidViewController {
     final Map<String, dynamic> args = <String, dynamic>{
       'id': viewId,
       'viewType': _viewType,
+      'top': _off.dy,
+      'left': _off.dx,
       'width': size.width,
       'height': size.height,
       'direction': AndroidViewController._getAndroidDirection(_layoutDirection),
