@@ -4207,7 +4207,7 @@ class _TextEditingHistory extends StatefulWidget {
 
 class _TextEditingHistoryState extends State<_TextEditingHistory> {
   final _UndoStack<TextEditingValue> _stack = _UndoStack<TextEditingValue>();
-  late final Throttled<TextEditingValue> _throttledPush;
+  late final _Throttled<TextEditingValue> _throttledPush;
   Timer? _throttleTimer;
 
   // This duration was chosen as a best fit for the behavior of Mac, Linux,
@@ -4247,7 +4247,7 @@ class _TextEditingHistoryState extends State<_TextEditingHistory> {
   @override
   void initState() {
     super.initState();
-    _throttledPush = throttle<TextEditingValue>(
+    _throttledPush = _throttle<TextEditingValue>(
       duration: _kThrottleDuration,
       function: _stack.push,
     );
@@ -4376,21 +4376,18 @@ class _UndoStack<T> {
 }
 
 /// A function that can be throttled with the throttle function.
-@visibleForTesting
-typedef Throttleable<T> = void Function(T currentArg);
+typedef _Throttleable<T> = void Function(T currentArg);
 
-/// A function that has been throttled by [throttle].
-@visibleForTesting
-typedef Throttled<T> = Timer Function(T currentArg);
+/// A function that has been throttled by [_throttle].
+typedef _Throttled<T> = Timer Function(T currentArg);
 
 /// Returns a _Throttled that will call through to the given function only a
 /// maximum of once per duration.
 ///
 /// Only works for functions that take exactly one argument and return void.
-@visibleForTesting
-Throttled<T> throttle<T>({
+_Throttled<T> _throttle<T>({
   required Duration duration,
-  required Throttleable<T> function,
+  required _Throttleable<T> function,
   // If true, calls at the start of the timer.
   bool leadingEdge = false,
 }) {
