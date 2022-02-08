@@ -1,0 +1,795 @@
+{
+  "builders": [
+    {
+      "name": "Linux analyze",
+      "repo": "flutter",
+      "task_name": "linux_analyze",
+      "enabled": true
+    },
+    {
+      "name": "Linux build_aar_module_test",
+      "repo": "flutter",
+      "task_name": "linux_build_aar_module_test",
+      "enabled": true,
+      "run_if": ["dev/**", "packages/flutter_tools/**", "bin/**"]
+    },
+    {
+      "name": "Linux customer_testing",
+      "repo": "flutter",
+      "task_name": "linux_customer_testing",
+      "enabled": true
+    },
+    {
+      "name": "Linux build_tests_1_2",
+      "repo": "flutter",
+      "task_name": "linux_build_tests_1_2",
+      "enabled": true
+    },
+    {
+      "name": "Linux build_tests_2_2",
+      "repo": "flutter",
+      "task_name": "linux_build_tests_2_2",
+      "enabled": true
+    },
+    {
+      "name": "Linux docs",
+      "repo": "flutter",
+      "task_name": "linux_docs",
+      "enabled": true,
+      "run_if": [
+        "dev/",
+        "packages/flutter/",
+        "packages/flutter_test/",
+        "packages/flutter_drive/",
+        "packages/flutter_localizations/",
+        "bin/"
+      ]
+    },
+    {
+      "name": "Linux framework_tests_libraries",
+      "repo": "flutter",
+      "task_name": "linux_framework_tests_libraries",
+      "enabled": true,
+      "run_if": [
+        "dev/",
+        "packages/flutter/",
+        "packages/flutter_driver/",
+        "packages/integration_test/",
+        "packages/flutter_localizations/",
+        "packages/fuchsia_remote_debug_protocol/",
+        "packages/flutter_test/",
+        "packages/flutter_goldens/",
+        "packages/flutter_tools/lib/src/test/",
+        "bin/"
+      ]
+    },
+    {
+      "name": "Linux framework_tests_misc",
+      "repo": "flutter",
+      "task_name": "linux_framework_tests_misc",
+      "enabled": true,
+      "run_if": [
+        "dev/",
+        "packages/flutter/",
+        "packages/flutter_driver/",
+        "packages/integration_test/",
+        "packages/flutter_localizations/",
+        "packages/fuchsia_remote_debug_protocol/",
+        "packages/flutter_test/",
+        "packages/flutter_goldens/",
+        "packages/flutter_tools/lib/src/test/",
+        "bin/"
+      ]
+    },
+    {
+      "name": "Linux framework_tests_widgets",
+      "repo": "flutter",
+      "task_name": "linux_framework_tests_widgets",
+      "enabled": true,
+      "run_if": [
+        "dev/",
+        "packages/flutter/",
+        "packages/flutter_driver/",
+        "packages/integration_test/",
+        "packages/flutter_localizations/",
+        "packages/fuchsia_remote_debug_protocol/",
+        "packages/flutter_test/",
+        "packages/flutter_goldens/",
+        "packages/flutter_tools/lib/src/test/",
+        "bin/"
+      ]
+    },
+    {
+      "name": "Linux firebase_abstract_method_smoke_test",
+      "repo": "flutter",
+      "task_name": "linux_firebase_abstract_method_smoke_test",
+      "enabled": true
+    },
+    {
+      "name": "Linux firebase_android_embedding_v2_smoke_test",
+      "repo": "flutter",
+      "task_name": "linux_firebase_android_embedding_v2_smoke_test",
+      "enabled": true
+    },
+    {
+      "name": "Linux firebase_release_smoke_test",
+      "repo": "flutter",
+      "task_name": "linux_firebase_release_smoke_test",
+      "enabled": true
+    },
+    {
+      "name": "Linux fuchsia_precache",
+      "repo": "flutter",
+      "task_name": "linux_fuchsia_precache",
+      "enabled": true
+    },
+    {
+      "name": "Linux gradle_desugar_classes_test",
+      "repo": "flutter",
+      "task_name": "linux_gradle_desugar_classes_test",
+      "enabled": true,
+      "run_if": ["dev/**", "bin/**"]
+    },
+    {
+      "name": "Linux gradle_non_android_plugin_test",
+      "repo": "flutter",
+      "task_name": "linux_gradle_non_android_plugin_test",
+      "enabled": true,
+      "run_if": ["dev/**", "packages/flutter_tools/**", "bin/**"]
+    },
+    {
+      "name": "Linux gradle_plugin_bundle_test",
+      "repo": "flutter",
+      "task_name": "linux_gradle_plugin_bundle_test",
+      "enabled": true,
+      "run_if": ["dev/**", "bin/**"]
+    },
+    {
+      "name": "Linux gradle_plugin_fat_apk_test",
+      "repo": "flutter",
+      "task_name": "linux_gradle_plugin_fat_apk_test",
+      "enabled": true,
+      "run_if": ["dev/**", "bin/**"]
+    },
+    {
+      "name": "Linux gradle_plugin_light_apk_test",
+      "repo": "flutter",
+      "task_name": "linux_gradle_plugin_light_apk_test",
+      "enabled": true,
+      "run_if": ["dev/**", "bin/**"]
+    },
+    {
+      "name": "Linux module_host_with_custom_build_test",
+      "repo": "flutter",
+      "task_name": "linux_module_host_with_custom_build_test",
+      "enabled": true,
+      "run_if": ["dev/**", "packages/flutter_tools/**", "bin/**"]
+    },
+    {
+      "name": "Linux module_custom_host_app_name_test",
+      "repo": "flutter",
+      "task_name": "linux_module_custom_host_app_name_test",
+      "enabled": true,
+      "run_if": ["dev/**", "packages/flutter_tools/**", "bin/**"]
+    },
+    {
+      "name": "Linux module_test",
+      "repo": "flutter",
+      "task_name": "linux_module_test",
+      "enabled": true,
+      "run_if": ["dev/**", "packages/flutter_tools/**", "bin/**"]
+    },
+    {
+      "name": "Linux plugin_test",
+      "repo": "flutter",
+      "task_name": "linux_plugin_test",
+      "enabled": true,
+      "run_if": ["dev/**", "packages/flutter_tools/**", "bin/**"]
+    },
+    {
+      "name": "Linux tool_tests_general",
+      "repo": "flutter",
+      "task_name": "linux_tool_tests_general",
+      "enabled": true,
+      "run_if": ["dev/", "packages/flutter_tools/", "bin/"]
+    },
+    {
+      "name": "Linux tool_tests_commands",
+      "repo": "flutter",
+      "task_name": "linux_tool_tests_commands",
+      "enabled": true,
+      "run_if": ["dev/", "packages/flutter_tools/", "bin/"]
+    },
+    {
+      "name": "Linux tool_integration_tests_1_4",
+      "repo": "flutter",
+      "task_name": "linux_tool_integration_tests_1_4",
+      "enabled": true,
+      "run_if": ["dev/", "packages/flutter_tools/", "bin/"]
+    },
+    {
+      "name": "Linux tool_integration_tests_2_4",
+      "repo": "flutter",
+      "task_name": "linux_tool_integration_tests_2_4",
+      "enabled": true,
+      "run_if": ["dev/", "packages/flutter_tools/", "bin/"]
+    },
+    {
+      "name": "Linux tool_integration_tests_3_4",
+      "repo": "flutter",
+      "task_name": "linux_tool_integration_tests_3_4",
+      "enabled": true,
+      "run_if": ["dev/", "packages/flutter_tools/", "bin/"]
+    },
+    {
+      "name": "Linux tool_integration_tests_4_4",
+      "repo": "flutter",
+      "task_name": "linux_tool_integration_tests_4_4",
+      "enabled": true,
+      "run_if": ["dev/", "packages/flutter_tools/", "bin/"]
+    },
+    {
+      "name": "Linux validate_ci_config",
+      "repo": "flutter",
+      "task_name": "linux_validate_ci_config",
+      "enabled": true
+    },
+    {
+      "name": "Linux web_tool_tests",
+      "repo": "flutter",
+      "task_name": "linux_web_tool_tests",
+      "enabled": true,
+      "run_if": ["dev/", "packages/flutter_tools/", "bin/"]
+    },
+    {
+      "name": "Linux web_benchmarks_html",
+      "repo": "flutter",
+      "task_name": "linux_web_benchmarks_html",
+      "enabled": true,
+      "run_if": ["dev/**", "bin/**"]
+    },
+    {
+      "name": "Linux web_tests_0",
+      "repo": "flutter",
+      "task_name": "linux_web_tests_0",
+      "enabled": true,
+      "run_if": ["dev/", "packages/", "bin/"]
+    },
+    {
+      "name": "Linux web_tests_1",
+      "repo": "flutter",
+      "task_name": "linux_web_tests_1",
+      "enabled": true,
+      "run_if": ["dev/", "packages/", "bin/"]
+    },
+    {
+      "name": "Linux web_tests_2",
+      "repo": "flutter",
+      "task_name": "linux_web_tests_2",
+      "enabled": true,
+      "run_if": ["dev/", "packages/", "bin/"]
+    },
+    {
+      "name": "Linux web_tests_3",
+      "repo": "flutter",
+      "task_name": "linux_web_tests_3",
+      "enabled": true,
+      "run_if": ["dev/", "packages/", "bin/"]
+    },
+    {
+      "name": "Linux web_tests_4",
+      "repo": "flutter",
+      "task_name": "linux_web_tests_4",
+      "enabled": true,
+      "run_if": ["dev/", "packages/", "bin/"]
+    },
+    {
+      "name": "Linux web_tests_5",
+      "repo": "flutter",
+      "task_name": "linux_web_tests_5",
+      "enabled": true,
+      "run_if": ["dev/", "packages/", "bin/"]
+    },
+    {
+      "name": "Linux web_tests_6",
+      "repo": "flutter",
+      "task_name": "linux_web_tests_6",
+      "enabled": true,
+      "run_if": ["dev/", "packages/", "bin/"]
+    },
+    {
+      "name": "Linux web_tests_7_last",
+      "repo": "flutter",
+      "task_name": "linux_web_tests_7_last",
+      "enabled": true,
+      "run_if": ["dev/", "packages/", "bin/"]
+    },
+    {
+      "name": "Linux web_integration_tests",
+      "repo": "flutter",
+      "task_name": "linux_web_integration_tests",
+      "enabled": true,
+      "run_if": [
+        "dev/",
+        "packages/flutter/",
+        "packages/flutter_test/",
+        "packages/flutter_tools/",
+        "packages/flutter_web_plugins/",
+        "bin/"
+      ]
+    },
+    {
+      "name": "Linux web_long_running_tests_1_3",
+      "repo": "flutter",
+      "task_name": "web_long_running_tests_1_3",
+      "enabled": true,
+      "run_if": ["dev/", "packages/", "bin/"]
+    },
+    {
+      "name": "Linux web_long_running_tests_2_3",
+      "repo": "flutter",
+      "task_name": "web_long_running_tests_2_3",
+      "enabled": true,
+      "run_if": ["dev/", "packages/", "bin/"]
+    },
+    {
+      "name": "Linux web_long_running_tests_3_3",
+      "repo": "flutter",
+      "task_name": "web_long_running_tests_1_3",
+      "enabled": true,
+      "run_if": ["dev/", "packages/", "bin/"]
+    },
+    {
+      "name": "Linux web_e2e_test",
+      "repo": "flutter",
+      "task_name": "linux_web_e2e_test",
+      "enabled": true,
+      "run_if": [
+        "examples/hello_world/**",
+        "dev/**",
+        "packages/flutter/**",
+        "packages/flutter_driver/**",
+        "packages/flutter_test/**",
+        "packages/flutter_tools/lib/src/test/**",
+        "packages/flutter_web_plugins/**",
+        "bin/**"
+      ]
+    },
+    {
+      "name": "Linux web_smoke_test",
+      "repo": "flutter",
+      "task_name": "linux_web_smoke_test",
+      "enabled": true,
+      "run_if": [
+        "examples/hello_world/**",
+        "dev/**",
+        "packages/flutter/**",
+        "packages/flutter_driver/**",
+        "packages/flutter_test/**",
+        "packages/flutter_tools/lib/src/test/**",
+        "packages/flutter_web_plugins/**",
+        "bin/**"
+      ]
+    },
+    {
+      "name": "Linux flutter_plugins",
+      "repo": "flutter",
+      "task_name": "flutter_plugins",
+      "enabled": true
+    },
+    {
+      "name": "Mac build_aar_module_test",
+      "repo": "flutter",
+      "task_name": "mac_build_aar_module_test",
+      "enabled": true,
+      "run_if": ["dev/**", "packages/flutter_tools/**", "bin/**"]
+    },
+    {
+      "name": "Mac build_ios_framework_module_test",
+      "repo": "flutter",
+      "task_name": "mac_build_ios_framework_module_test",
+      "enabled": true,
+      "run_if": ["dev/**", "packages/flutter_tools/**", "bin/**"]
+    },
+    {
+      "name": "Mac build_tests_1_4",
+      "repo": "flutter",
+      "task_name": "mac_build_tests_1_4",
+      "enabled": true
+    },
+    {
+      "name": "Mac build_tests_2_4",
+      "repo": "flutter",
+      "task_name": "mac_build_tests_2_4",
+      "enabled": true
+    },
+    {
+      "name": "Mac build_tests_3_4",
+      "repo": "flutter",
+      "task_name": "mac_build_tests_3_4",
+      "enabled": true
+    },
+    {
+      "name": "Mac build_tests_4_4",
+      "repo": "flutter",
+      "task_name": "mac_build_tests_4_4",
+      "enabled": true
+    },
+    {
+      "name": "Mac customer_testing",
+      "repo": "flutter",
+      "task_name": "mac_customer_testing",
+      "enabled": true
+    },
+    {
+      "name": "Mac framework_tests_libraries",
+      "repo": "flutter",
+      "task_name": "mac_framework_tests_libraries",
+      "enabled": true,
+      "run_if": [
+        "dev/**",
+        "packages/flutter/**",
+        "packages/flutter_driver/**",
+        "packages/integration_test/**",
+        "packages/flutter_localizations/**",
+        "packages/fuchsia_remote_debug_protocol/**",
+        "packages/flutter_test/**",
+        "packages/flutter_goldens/**",
+        "packages/flutter_tools/lib/src/test/**",
+        "bin/**"
+      ]
+    },
+    {
+      "name": "Mac framework_tests_misc",
+      "repo": "flutter",
+      "task_name": "mac_framework_tests_misc",
+      "enabled": true,
+      "run_if": [
+        "dev/**",
+        "packages/flutter/**",
+        "packages/flutter_driver/**",
+        "packages/integration_test/**",
+        "packages/flutter_localizations/**",
+        "packages/fuchsia_remote_debug_protocol/**",
+        "packages/flutter_test/**",
+        "packages/flutter_goldens/**",
+        "packages/flutter_tools/lib/src/test/**",
+        "bin/**"
+      ]
+    },
+    {
+      "name": "Mac framework_tests_widgets",
+      "repo": "flutter",
+      "task_name": "mac_framework_tests_widgets",
+      "enabled": true,
+      "run_if": [
+        "dev/**",
+        "packages/flutter/**",
+        "packages/flutter_driver/**",
+        "packages/integration_test/**",
+        "packages/flutter_localizations/**",
+        "packages/fuchsia_remote_debug_protocol/**",
+        "packages/flutter_test/**",
+        "packages/flutter_goldens/**",
+        "packages/flutter_tools/lib/src/test/**",
+        "bin/**"
+      ]
+    },
+    {
+      "name": "Mac gradle_non_android_plugin_test",
+      "repo": "flutter",
+      "task_name": "mac_gradle_non_android_plugin_test",
+      "enabled": true,
+      "run_if": ["dev/**", "packages/flutter_tools/**", "bin/**"]
+    },
+    {
+      "name": "Mac gradle_plugin_bundle_test",
+      "repo": "flutter",
+      "task_name": "mac_gradle_plugin_bundle_test",
+      "enabled": true,
+      "run_if": ["dev/**", "bin/**"]
+    },
+    {
+      "name": "Mac gradle_plugin_fat_apk_test",
+      "repo": "flutter",
+      "task_name": "mac_gradle_plugin_fat_apk_test",
+      "enabled": true,
+      "run_if": ["dev/**", "bin/**"]
+    },
+    {
+      "name": "Mac gradle_plugin_light_apk_test",
+      "repo": "flutter",
+      "task_name": "mac_gradle_plugin_light_apk_test",
+      "enabled": true,
+      "run_if": ["dev/**", "bin/**"]
+    },
+    {
+      "name": "Mac module_custom_host_app_name_test",
+      "repo": "flutter",
+      "task_name": "mac_module_custom_host_app_name_test",
+      "enabled": true,
+      "run_if": ["dev/**", "packages/flutter_tools/**", "bin/**"]
+    },
+    {
+      "name": "Mac module_host_with_custom_build_test",
+      "repo": "flutter",
+      "task_name": "mac_module_host_with_custom_build_test",
+      "enabled": true,
+      "run_if": ["dev/**", "packages/flutter_tools/**", "bin/**"]
+    },
+    {
+      "name": "Mac module_test",
+      "repo": "flutter",
+      "task_name": "mac_module_test",
+      "enabled": true,
+      "run_if": ["dev/**", "packages/flutter_tools/**", "bin/**"]
+    },
+    {
+      "name": "Mac module_test_ios",
+      "repo": "flutter",
+      "task_name": "mac_module_test_ios",
+      "enabled": true,
+      "run_if": ["dev/**", "packages/flutter_tools/**", "bin/**"]
+    },
+    {
+      "name": "Mac plugin_lint_mac",
+      "repo": "flutter",
+      "task_name": "mac_plugin_lint_mac",
+      "enabled": true,
+      "run_if": ["dev/**", "bin/**"]
+    },
+    {
+      "name": "Mac plugin_test",
+      "repo": "flutter",
+      "task_name": "mac_plugin_lint_mac",
+      "enabled": true,
+      "run_if": ["dev/**", "packages/flutter_tools/**", "bin/**"]
+    },
+    {
+      "name": "Mac dart_plugin_registry_test",
+      "repo": "flutter",
+      "task_name": "dart_plugin_registry_test",
+      "enabled": false,
+      "run_if": ["dev/**", "packages/flutter_tools/**", "bin/**"]
+    },
+    {
+      "name": "Mac tool_tests_general",
+      "repo": "flutter",
+      "task_name": "mac_tool_tests_general",
+      "enabled": true,
+      "run_if": ["dev/**", "packages/flutter_tools/**", "bin/**"]
+    },
+    {
+      "name": "Mac tool_tests_commands",
+      "repo": "flutter",
+      "task_name": "tool_tests_commands",
+      "enabled": true,
+      "run_if": ["dev/**", "packages/flutter_tools/**", "bin/**"]
+    },
+    {
+      "name": "Mac tool_integration_tests_1_4",
+      "repo": "flutter",
+      "task_name": "mac_tool_integration_tests_1_4",
+      "enabled": true,
+      "run_if": ["dev/**", "packages/flutter_tools/**", "bin/**"]
+    },
+    {
+      "name": "Mac tool_integration_tests_2_4",
+      "repo": "flutter",
+      "task_name": "mac_tool_integration_tests_2_4",
+      "enabled": true,
+      "run_if": ["dev/**", "packages/flutter_tools/**", "bin/**"]
+    },
+    {
+      "name": "Mac tool_integration_tests_3_4",
+      "repo": "flutter",
+      "task_name": "mac_tool_integration_tests_3_4",
+      "enabled": true,
+      "run_if": ["dev/**", "packages/flutter_tools/**", "bin/**"]
+    },
+    {
+      "name": "Mac tool_integration_tests_4_4",
+      "repo": "flutter",
+      "task_name": "mac_tool_integration_tests_4_4",
+      "enabled": true,
+      "run_if": ["dev/**", "packages/flutter_tools/**", "bin/**"]
+    },
+    {
+      "name": "Mac web_tool_tests",
+      "repo": "flutter",
+      "task_name": "mac_web_tool_tests",
+      "enabled": true,
+      "run_if": ["dev/**", "packages/flutter_tools/**", "bin/**"]
+    },
+    {
+      "name": "Windows build_aar_module_test",
+      "repo": "flutter",
+      "task_name": "win_build_aar_module_test",
+      "enabled": true,
+      "run_if": ["dev/**", "packages/flutter_tools/**", "bin/**"]
+    },
+    {
+      "name": "Windows build_tests_1_3",
+      "repo": "flutter",
+      "task_name": "win_build_tests_1_3",
+      "enabled": false
+    },
+    {
+      "name": "Windows build_tests_2_3",
+      "repo": "flutter",
+      "task_name": "win_build_tests_2_3",
+      "enabled": true
+    },
+    {
+      "name": "Windows build_tests_3_3",
+      "repo": "flutter",
+      "task_name": "win_build_tests_3_3",
+      "enabled": true
+    },
+    {
+      "name": "Windows customer_testing",
+      "repo": "flutter",
+      "task_name": "win_customer_testing",
+      "enabled": true
+    },
+    {
+      "name": "Windows framework_tests_libraries",
+      "repo": "flutter",
+      "task_name": "win_framework_tests_libraries",
+      "enabled": true,
+      "run_if": [
+        "dev/",
+        "packages/flutter/",
+        "packages/flutter_driver/",
+        "packages/integration_test/",
+        "packages/flutter_localizations/",
+        "packages/fuchsia_remote_debug_protocol/",
+        "packages/flutter_test/",
+        "packages/flutter_goldens/",
+        "packages/flutter_tools/lib/src/test/",
+        "bin/"
+      ]
+    },
+    {
+      "name": "Windows framework_tests_misc",
+      "repo": "flutter",
+      "task_name": "framework_tests_misc",
+      "enabled": true,
+      "run_if": [
+        "dev/",
+        "packages/flutter/",
+        "packages/flutter_driver/",
+        "packages/integration_test/",
+        "packages/flutter_localizations/",
+        "packages/fuchsia_remote_debug_protocol/",
+        "packages/flutter_test/",
+        "packages/flutter_goldens/",
+        "packages/flutter_tools/lib/src/test/",
+        "bin/"
+      ]
+    },
+    {
+      "name": "Windows framework_tests_widgets",
+      "repo": "flutter",
+      "task_name": "framework_tests_widgets",
+      "enabled": true,
+      "run_if": [
+        "dev/",
+        "packages/flutter/",
+        "packages/flutter_driver/",
+        "packages/integration_test/",
+        "packages/flutter_localizations/",
+        "packages/fuchsia_remote_debug_protocol/",
+        "packages/flutter_test/",
+        "packages/flutter_goldens/",
+        "packages/flutter_tools/lib/src/test/",
+        "bin/"
+      ]
+    },
+    {
+      "name": "Windows gradle_non_android_plugin_test",
+      "repo": "flutter",
+      "task_name": "win_gradle_non_android_plugin_test",
+      "enabled": true,
+      "run_if": ["dev/**", "packages/flutter_tools/**", "bin/**"]
+    },
+    {
+      "name": "Windows gradle_plugin_bundle_test",
+      "repo": "flutter",
+      "task_name": "win_gradle_plugin_bundle_test",
+      "enabled": true,
+      "run_if": ["dev/**", "bin/**"]
+    },
+    {
+      "name": "Windows gradle_plugin_light_apk_test",
+      "repo": "flutter",
+      "task_name": "win_gradle_plugin_light_apk_test",
+      "enabled": false,
+      "run_if": ["dev/**", "bin/**"]
+    },
+    {
+      "name": "Windows module_custom_host_app_name_test",
+      "repo": "flutter",
+      "task_name": "win_module_custom_host_app_name_test",
+      "enabled": true,
+      "run_if": ["dev/**", "packages/flutter_tools/**", "bin/**"]
+    },
+    {
+      "name": "Windows module_test",
+      "repo": "flutter",
+      "task_name": "win_module_test",
+      "enabled": true,
+      "run_if": ["dev/**", "packages/flutter_tools/**", "bin/**"]
+    },
+    {
+      "name": "Windows module_host_with_custom_build_test",
+      "repo": "flutter",
+      "task_name": "win_module_host_with_custom_build_test",
+      "enabled": true,
+      "run_if": ["dev/**", "packages/flutter_tools/**", "bin/**"]
+    },
+    {
+      "name": "Windows plugin_test",
+      "repo": "flutter",
+      "task_name": "win_plugin_test",
+      "enabled": true,
+      "run_if": ["dev/**", "packages/flutter_tools/**", "bin/**"]
+    },
+    {
+      "name": "Windows tool_tests_general",
+      "repo": "flutter",
+      "task_name": "tool_tests_general",
+      "enabled": true,
+      "run_if": ["dev/**", "packages/flutter_tools/**", "bin/**"]
+    },
+    {
+      "name": "Windows tool_tests_commands",
+      "repo": "flutter",
+      "task_name": "tool_tests_commands",
+      "enabled": true,
+      "run_if": ["dev/**", "packages/flutter_tools/**", "bin/**"]
+    },
+    {
+      "name": "Windows tool_integration_tests_1_5",
+      "repo": "flutter",
+      "task_name": "win_tool_integration_tests_1_5",
+      "enabled": true,
+      "run_if": ["dev/**", "packages/flutter_tools/**", "bin/**"]
+    },
+    {
+      "name": "Windows tool_integration_tests_2_5",
+      "repo": "flutter",
+      "task_name": "win_tool_integration_tests_2_5",
+      "enabled": true,
+      "run_if": ["dev/**", "packages/flutter_tools/**", "bin/**"]
+    },
+    {
+      "name": "Windows tool_integration_tests_3_5",
+      "repo": "flutter",
+      "task_name": "win_tool_integration_tests_3_5",
+      "enabled": true,
+      "run_if": ["dev/**", "packages/flutter_tools/**", "bin/**"]
+    },
+    {
+      "name": "Windows tool_integration_tests_4_5",
+      "repo": "flutter",
+      "task_name": "win_tool_integration_tests_4_5",
+      "enabled": true,
+      "run_if": ["dev/**", "packages/flutter_tools/**", "bin/**"]
+    },
+    {
+      "name": "Windows tool_integration_tests_5_5",
+      "repo": "flutter",
+      "task_name": "win_tool_integration_tests_5_5",
+      "enabled": true,
+      "run_if": ["dev/**", "packages/flutter_tools/**", "bin/**"]
+    },
+    {
+      "name": "Windows web_tool_tests",
+      "repo": "flutter",
+      "task_name": "win_web_tool_tests",
+      "enabled": true,
+      "run_if": ["dev/**", "packages/flutter_tools/**", "bin/**"]
+    }
+  ]
+}
