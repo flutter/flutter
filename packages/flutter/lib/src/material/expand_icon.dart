@@ -99,7 +99,7 @@ class ExpandIcon extends StatefulWidget {
 
   /// An optional [IconData] for the [IconButton].
   ///
-  /// If not provided the [IconButton] will default to [Icons.expand_more].
+  /// If not provided, the [IconButton] will default to [Icons.expand_more].
   final IconData? iconData;
 
   @override
