@@ -176,6 +176,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     _restorationManager = null;
     resetGestureBinding();
     testTextInput.reset();
+    immediatelyScheduleTasks = true;
     if (registerTestTextInput)
       _testTextInput.register();
   }
@@ -216,6 +217,14 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// application testing, including working with real network responses.
   @protected
   bool get overrideHttpClient => true;
+
+  /// Whether tasks scheduled by [SchedulerBinding.scheduleTask] or
+  /// [SchedulerBinding.scheduleAsyncTask] are automatically run when
+  /// scheduled.
+  ///
+  /// If this value is false, then tasks must be executed by calling
+  /// [SchedulerBinding.handleEventLoopCallback].
+  bool immediatelyScheduleTasks = true;
 
   /// Determines whether the binding automatically registers [testTextInput] as
   /// a fake keyboard implementation.
@@ -1053,7 +1062,8 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   void scheduleTasks(void Function() callback) {
-    callback();
+    if (immediatelyScheduleTasks)
+      callback();
   }
 
   @override
