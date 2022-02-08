@@ -167,7 +167,7 @@ final GradleHandledError multidexErrorHandler = GradleHandledError(
       }
     } else {
       globals.printBox(
-        'Flutter multidex handling is disabled. If you wish to let the tool configure multidex, use the --mutidex flag.',
+        'Flutter multidex handling is disabled. If you wish to let the tool configure multidex, use the --multidex flag.',
         title: _boxTitle,
       );
     }
