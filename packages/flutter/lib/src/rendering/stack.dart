@@ -749,4 +749,20 @@ class RenderIndexedStack extends RenderStack {
     super.debugFillProperties(properties);
     properties.add(IntProperty('index', index));
   }
+
+  @override
+  List<DiagnosticsNode> debugDescribeChildren() {
+    final List<DiagnosticsNode> children = <DiagnosticsNode>[];
+    int i = 0;
+    RenderObject? child = firstChild;
+    while (child != null) {
+      children.add(child.toDiagnosticsNode(
+        name: 'child ${i + 1}',
+        style: i != index! ? DiagnosticsTreeStyle.offstage : null,
+      ));
+      child = (child.parentData! as StackParentData).nextSibling;
+      i += 1;
+    }
+    return children;
+  }
 }
