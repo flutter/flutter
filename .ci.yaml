@@ -109,28 +109,6 @@ platform_properties:
       os: Mac-12.0
       device_os: iOS-15.1
       xcode: 13a233
-  mac_ios32:
-    properties:
-      caches: >-
-          [
-            {"name":"builder_mac_devicelab","path":"builder"},
-            {"name":"chrome_and_driver","path":"chrome"},
-            {"name":"flutter_sdk","path":"flutter sdk"},
-            {"name":"gradle","path":"gradle"},
-            {"name":"openjdk","path":"java"},
-            {"name":"pub_cache","path":".pub-cache"},
-            {"name":"xcode_binary","path":"xcode_binary"},
-            {"name":"osx_sdk","path":"osx_sdk"}
-          ]
-      dependencies: >-
-        [
-          {"dependency": "xcode"},
-          {"dependency": "gems"},
-          {"dependency": "ios_signing"}
-        ]
-      os: Mac-12.0
-      device_os: iOS-9.3.6
-      xcode: 13a233
   windows:
     properties:
       caches: >-
@@ -3492,28 +3470,6 @@ targets:
       tags: >
         ["devicelab","ios","mac"]
       task_name: tiles_scroll_perf_ios__timeline_summary
-    scheduler: luci
-
-  - name: Mac_ios32 flutter_gallery__transition_perf_e2e_ios32
-    recipe: devicelab/devicelab_drone
-    bringup: true
-    presubmit: false
-    timeout: 90
-    properties:
-      tags: >
-        ["devicelab","ios32","mac"]
-      task_name: flutter_gallery__transition_perf_e2e_ios32
-    scheduler: luci
-
-  - name: Mac_ios32 native_ui_tests_ios
-    recipe: devicelab/devicelab_drone
-    bringup: true
-    presubmit: false
-    timeout: 90
-    properties:
-      tags: >
-        ["devicelab","ios32","mac"]
-      task_name: native_ui_tests_ios
     scheduler: luci
 
   - name: Mac_ios native_ui_tests_ios
