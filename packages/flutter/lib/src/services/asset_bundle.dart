@@ -230,6 +230,13 @@ abstract class CachingAssetBundle extends AssetBundle {
 class PlatformAssetBundle extends CachingAssetBundle {
   @override
   Future<ByteData> load(String key) async {
+    // Ensure that the image load occurs in the next event loop and not in
+    // the frame workload.
+    await Future<void>.delayed(Duration.zero);
+    return _load(key);
+  }
+
+  Future<ByteData> _load(String key) async {
     final Uint8List encoded = utf8.encoder.convert(Uri(path: Uri.encodeFull(key)).path);
     final ByteData? asset =
         await ServicesBinding.instance.defaultBinaryMessenger.send('flutter/assets', encoded.buffer.asByteData());

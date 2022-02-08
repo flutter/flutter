@@ -66,7 +66,7 @@ class NetworkImage
 
     return MultiFrameImageStreamCompleter(
       chunkEvents: chunkEvents.stream,
-      codec: _loadAsync(key as NetworkImage, decode, chunkEvents),
+      codec: _loadAsync(key, decode, chunkEvents),
       scale: key.scale,
       debugLabel: key.url,
       informationCollector: _imageStreamInformationCollector(key),
@@ -92,11 +92,14 @@ class NetworkImage
   // here is ignored and the web-only `ui.webOnlyInstantiateImageCodecFromUrl` will be used
   // directly in place of the typical `instantiateImageCodec` method.
   Future<ui.Codec> _loadAsync(
-    NetworkImage key,
+    image_provider.NetworkImage key,
     image_provider.DecoderCallback decode,
     StreamController<ImageChunkEvent> chunkEvents,
   ) async {
     assert(key == this);
+    // Ensure that the image load occurs in the next event loop and not in
+    // the frame workload.
+    await Future<void>.delayed(Duration.zero);
 
     final Uri resolved = Uri.base.resolve(key.url);
 
