@@ -111,28 +111,24 @@ class _SpellCheckerSuggestionsToolbarState extends State<_SpellCheckerSuggestion
   SpellCheckerSuggestionSpan? findSuggestions(int curr_index, List<SpellCheckerSuggestionSpan> spellCheckerSuggestionSpans) {
     int left_index = 0;
     int right_index = spellCheckerSuggestionSpans.length - 1;
+    int mid_index = 0;
 
     while (left_index <= right_index) {
-        int mid_index = (left_index + (right_index - left_index) / 2).floor();
+        mid_index = (left_index + (right_index - left_index) / 2).floor();
 
         // Check if x is present at mid
-        if (spellCheckerSuggestionSpans[mid_index].start <= curr_index && spellCheckerSuggestionSpans[mid_index].end >= curr_index) {
+        if (spellCheckerSuggestionSpans[mid_index].start <= curr_index && spellCheckerSuggestionSpans[mid_index].end + 1 >= curr_index) { 
             return spellCheckerSuggestionSpans[mid_index];
         }
 
-        // If x greater, ignore left half
         if (spellCheckerSuggestionSpans[mid_index].start <= curr_index) {
             left_index = left_index + 1;
         }
-
-        // If x is smaller, ignore right half
         else {
             right_index = right_index - 1;
         }
     }
 
-    // if we reach here, then element was
-    // not present
     return null;
   }
 
@@ -180,6 +176,10 @@ class _SpellCheckerSuggestionsToolbarState extends State<_SpellCheckerSuggestion
     int cursorIndex = value.selection.baseOffset;
 
     SpellCheckerSuggestionSpan? relevantSpan = findSuggestions(cursorIndex, widget.spellCheckerSuggestionSpans!);
+
+    print("*******************************************");
+    print(relevantSpan);
+    print("*******************************************");
 
     if (relevantSpan == null) {
         return const SizedBox.shrink();
