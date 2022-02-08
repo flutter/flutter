@@ -132,9 +132,9 @@ bool FakeImage::operator==(const FakeImage& other) const {
 
 bool FakeTransform::operator==(const FakeTransform& other) const {
   return id == other.id && translation == other.translation &&
-         clip_bounds == other.clip_bounds && orientation == other.orientation &&
-         children == other.children && content == other.content &&
-         num_hit_regions == other.num_hit_regions;
+         *clip_bounds == *other.clip_bounds &&
+         orientation == other.orientation && children == other.children &&
+         content == other.content && num_hit_regions == other.num_hit_regions;
 }
 
 bool FakeGraph::operator==(const FakeGraph& other) const {

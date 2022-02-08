@@ -165,17 +165,13 @@ struct FakeTransform {
   bool operator==(const FakeTransform& other) const;
 
   constexpr static fuchsia::math::Vec kDefaultTranslation{.x = 0, .y = 0};
-  constexpr static fuchsia::math::Rect kDefaultClipBounds{.x = 0,
-                                                          .y = 0,
-                                                          .width = 0,
-                                                          .height = 0};
   constexpr static fuchsia::ui::composition::Orientation kDefaultOrientation{
       fuchsia::ui::composition::Orientation::CCW_0_DEGREES};
 
   fuchsia::ui::composition::TransformId id{kInvalidTransformId};
 
   fuchsia::math::Vec translation{kDefaultTranslation};
-  fuchsia::math::Rect clip_bounds{kDefaultClipBounds};
+  std::optional<fuchsia::math::Rect> clip_bounds;
   fuchsia::ui::composition::Orientation orientation{kDefaultOrientation};
 
   std::vector<std::shared_ptr<FakeTransform>> children;
