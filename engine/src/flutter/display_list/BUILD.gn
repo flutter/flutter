@@ -55,49 +55,74 @@ fixtures_location("display_list_benchmarks_fixtures") {
   assets_dir = "$target_gen_dir/"
 }
 
-if (enable_unittests) {
-  executable("display_list_benchmarks") {
-    testonly = true
+source_set("display_list_benchmarks_source") {
+  testonly = true
 
-    sources = [
-      "display_list_benchmarks.cc",
-      "display_list_benchmarks.h",
+  sources = [
+    "display_list_benchmarks.cc",
+    "display_list_benchmarks.h",
+  ]
+
+  deps = [
+    ":display_list",
+    ":display_list_benchmarks_fixtures",
+    "//flutter/benchmarking",
+    "//flutter/common/graphics",
+    "//flutter/fml",
+    "//flutter/testing:skia",
+    "//flutter/testing:testing_lib",
+    "//third_party/dart/runtime:libdart_jit",  # for tracing
+    "//third_party/skia",
+  ]
+
+  defines = []
+
+  if (is_android) {
+    libs = [
+      "android",
+      "EGL",
+      "GLESv2",
+    ]
+  }
+
+  # We only do software benchmarks on non-mobile platforms
+  if (!is_android && !is_ios) {
+    sources += [
       "display_list_benchmarks_software.cc",
       "display_list_benchmarks_software.h",
     ]
-
-    deps = [
-      ":display_list",
-      ":display_list_benchmarks_fixtures",
-      "//flutter/benchmarking",
-      "//flutter/common/graphics",
-      "//flutter/fml",
-      "//flutter/testing:skia",
-      "//flutter/testing:testing_lib",
-      "//third_party/dart/runtime:libdart_jit",  # for tracing
-      "//third_party/skia",
-    ]
-
-    defines = [ "ENABLE_SOFTWARE_BENCHMARKS" ]
-
-    if (!is_fuchsia) {
-      defines += [ "ENABLE_OPENGL_BENCHMARKS" ]
-      sources += [
-        "display_list_benchmarks_gl.cc",
-        "display_list_benchmarks_gl.h",
-      ]
-      deps += [ "//flutter/testing:opengl" ]
-    }
-
-    if (is_mac) {
-      defines += [ "ENABLE_METAL_BENCHMARKS" ]
-      sources += [
-        "display_list_benchmarks_metal.cc",
-        "display_list_benchmarks_metal.h",
-      ]
-      deps += [ "//flutter/testing:metal" ]
-    }
+    defines += [ "ENABLE_SOFTWARE_BENCHMARKS" ]
   }
+
+  # iOS and Fuchsia don't support OpenGL
+  if (!is_fuchsia && !is_ios) {
+    defines += [ "ENABLE_OPENGL_BENCHMARKS" ]
+    sources += [
+      "display_list_benchmarks_gl.cc",
+      "display_list_benchmarks_gl.h",
+    ]
+    deps += [ "//flutter/testing:opengl" ]
+  }
+
+  if (is_mac || is_ios) {
+    defines += [ "ENABLE_METAL_BENCHMARKS" ]
+    sources += [
+      "display_list_benchmarks_metal.cc",
+      "display_list_benchmarks_metal.h",
+    ]
+    deps += [ "//flutter/testing:metal" ]
+  }
+
+  # Don't snapshot test results on mobile platforms
+  if (is_android || is_ios) {
+    defines += [ "BENCHMARKS_NO_SNAPSHOT" ]
+  }
+}
+
+executable("display_list_benchmarks") {
+  testonly = true
+
+  deps = [ ":display_list_benchmarks_source" ]
 }
 
 if (is_ios) {
@@ -116,29 +141,9 @@ if (is_ios) {
     ]
     ldflags =
         [ "-Wl,-install_name,@rpath/libios_display_list_benchmarks.dylib" ]
-    defines = [
-      "BENCHMARKS_NO_SNAPSHOT",
-      "ENABLE_METAL_BENCHMARKS",
-    ]
-    sources = [
-      "display_list_benchmarks.cc",
-      "display_list_benchmarks.h",
-      "display_list_benchmarks_metal.cc",
-      "display_list_benchmarks_metal.h",
-    ]
-
     deps = [
-      ":display_list",
-      ":display_list_benchmarks_fixtures",
+      ":display_list_benchmarks_source",
       "//flutter/benchmarking:benchmarking_library",
-      "//flutter/common/graphics",
-      "//flutter/fml",
-      "//flutter/testing:metal",
-      "//flutter/testing:skia",
-      "//flutter/testing:testing_lib",
-      "//third_party/benchmark",
-      "//third_party/dart/runtime:libdart_jit",  # for tracing
-      "//third_party/skia",
     ]
   }
 }
