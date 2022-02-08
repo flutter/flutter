@@ -1950,7 +1950,6 @@ void main() {
       find.byKey(key),
       matchesGoldenFile('image_test.missing.1.png'),
     );
-    await tester.pump(const Duration(seconds: 1));
     expect(tester.takeException().toString(), startsWith('Unable to load asset: '));
     await tester.pump();
     await expectLater(
