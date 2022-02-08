@@ -2086,6 +2086,7 @@ targets:
 
   - name: Linux_android picture_cache_complexity_scoring_perf__timeline_summary
     recipe: devicelab/devicelab_drone
+    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -3403,6 +3404,7 @@ targets:
 
   - name: Mac_ios picture_cache_complexity_scoring_perf__timeline_summary
     recipe: devicelab/devicelab_drone
+    bringup: true
     presubmit: false
     timeout: 60
     properties:
