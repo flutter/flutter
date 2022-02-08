@@ -2350,7 +2350,7 @@ void main() {
     expect(indicator.height, 32);
   });
 
-  testWidgets('NavigationRailDestination - [labelType]=none (default) has center aligned indicator', (WidgetTester tester) async {
+  testWidgets('NavigationRailDestination - [labelType]=none has center aligned indicator', (WidgetTester tester) async {
       // This is a regression test for
       // https://github.com/flutter/flutter/issues/97753
     await _pumpNavigationRail(
