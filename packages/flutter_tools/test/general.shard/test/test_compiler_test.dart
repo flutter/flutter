@@ -156,8 +156,8 @@ environment:
 
     expect(generatedMain, exists);
     expect(
-      generatedMain.readAsLinesSync(),
-      contains("import 'test/foo.dart' as entrypoint;")
+      generatedMain.readAsStringSync(),
+      contains('APlugin.registerWith();')
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,

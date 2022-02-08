@@ -1269,7 +1269,7 @@ flutter:
         .childDirectory('flutter_build')
         .childFile('generated_main.dart');
 
-    expect(generatedMain.readAsStringSync(), contains('custom_main.dart'));
+    expect(generatedMain.existsSync(), isTrue);
     expect(testLogger.errorText, isEmpty);
     expect(testLogger.statusText, isEmpty);
   }));
