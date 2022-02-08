@@ -22,7 +22,6 @@ import 'gesture_detector.dart';
 import 'overlay.dart';
 import 'ticker_provider.dart';
 import 'transitions.dart';
-import 'visibility.dart';
 
 export 'package:flutter/services.dart' show TextSelectionDelegate;
 
@@ -116,12 +115,12 @@ abstract class TextSelectionControls {
   /// interaction is allowed. As a counterexample, the default selection handle
   /// on iOS [cupertinoTextSelectionControls] does not call [onTap] at all,
   /// since its handles are not meant to be tapped.
-  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, [VoidCallback? onTap, double? startGlyphHeight, double? endGlyphHeight]);
+  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, [VoidCallback? onTap]);
 
   /// Get the anchor point of the handle relative to itself. The anchor point is
   /// the point that is aligned with a specific point in the text. A handle
   /// often visually "points to" that location.
-  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight, [double? startGlyphHeight, double? endGlyphHeight]);
+  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight);
 
   /// Builds a toolbar near a text selection.
   ///
@@ -274,6 +273,9 @@ class TextSelectionOverlay {
       'Usually the Navigator created by WidgetsApp provides the overlay. Perhaps your '
       'app content was created above the Navigator with the WidgetsApp builder parameter.',
     );
+    renderObject.selectionStartInViewport.addListener(_updateHandleVisibilities);
+    renderObject.selectionEndInViewport.addListener(_updateHandleVisibilities);
+    _updateHandleVisibilities();
     _toolbarController = AnimationController(duration: fadeDuration, vsync: overlay!);
   }
 
@@ -372,6 +374,13 @@ class TextSelectionOverlay {
 
   TextSelection get _selection => _value.selection;
 
+  final ValueNotifier<bool> _effectiveStartHandleVisibility = ValueNotifier<bool>(false);
+  final ValueNotifier<bool> _effectiveEndHandleVisibility = ValueNotifier<bool>(false);
+  void _updateHandleVisibilities() {
+    _effectiveStartHandleVisibility.value = _handlesVisible && renderObject.selectionStartInViewport.value;
+    _effectiveEndHandleVisibility.value = _handlesVisible && renderObject.selectionEndInViewport.value;
+  }
+
   /// Whether selection handles are visible.
   ///
   /// Set to false if you want to hide the handles. Use this property to show or
@@ -393,13 +402,7 @@ class TextSelectionOverlay {
     if (_handlesVisible == visible)
       return;
     _handlesVisible = visible;
-    // If we are in build state, it will be too late to update visibility.
-    // We will need to schedule the build in next frame.
-    if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
-      SchedulerBinding.instance.addPostFrameCallback(_markNeedsBuild);
-    } else {
-      _markNeedsBuild();
-    }
+    _updateHandleVisibilities();
   }
 
   /// Builds the handles by inserting them into the [context]'s overlay.
@@ -501,6 +504,8 @@ class TextSelectionOverlay {
   void dispose() {
     hide();
     _toolbarController.dispose();
+    renderObject.selectionStartInViewport.removeListener(_updateHandleVisibilities);
+    renderObject.selectionEndInViewport.removeListener(_updateHandleVisibilities);
   }
 
   Widget _buildStartHandle(BuildContext context) {
@@ -509,24 +514,21 @@ class TextSelectionOverlay {
     if (selectionControls == null)
       handle = Container();
     else {
-      handle = Visibility(
-        visible: handlesVisible,
-        child: _SelectionHandleOverlay(
-          type: _chooseType(
-            renderObject.textDirection,
-            TextSelectionHandleType.left,
-            TextSelectionHandleType.right,
-          ),
-          handleLayerLink: startHandleLayerLink,
-          onSelectionHandleTapped: onSelectionHandleTapped,
-          onSelectionHandleDragStart: _handleSelectionStartHandleDragStart,
-          onSelectionHandleDragUpdate: _handleSelectionStartHandleDragUpdate,
-          selectionControls: selectionControls,
-          visibility: renderObject.selectionStartInViewport,
-          preferredLineHeight: renderObject.preferredLineHeight,
-          glyphHeight: _getStartGlyphHeight(),
-          dragStartBehavior: dragStartBehavior,
-        )
+      handle = _SelectionHandleOverlay(
+        type: _chooseType(
+          renderObject.textDirection,
+          TextSelectionHandleType.left,
+          TextSelectionHandleType.right,
+        ),
+        handleLayerLink: startHandleLayerLink,
+        onSelectionHandleTapped: onSelectionHandleTapped,
+        onSelectionHandleDragStart: _handleSelectionStartHandleDragStart,
+        onSelectionHandleDragUpdate: _handleSelectionStartHandleDragUpdate,
+        selectionControls: selectionControls,
+        visibility: _effectiveStartHandleVisibility,
+        preferredLineHeight: renderObject.preferredLineHeight,
+        glyphHeight: _getStartGlyphHeight(),
+        dragStartBehavior: dragStartBehavior,
       );
     }
     return ExcludeSemantics(
@@ -540,24 +542,21 @@ class TextSelectionOverlay {
     if (_selection.isCollapsed || selectionControls == null)
       handle = Container(); // hide the second handle when collapsed
     else {
-      handle = Visibility(
-        visible: handlesVisible,
-        child: _SelectionHandleOverlay(
-          type: _chooseType(
-            renderObject.textDirection,
-            TextSelectionHandleType.right,
-            TextSelectionHandleType.left,
-          ),
-          handleLayerLink: endHandleLayerLink,
-          onSelectionHandleTapped: onSelectionHandleTapped,
-          onSelectionHandleDragStart: _handleSelectionEndHandleDragStart,
-          onSelectionHandleDragUpdate: _handleSelectionEndHandleDragUpdate,
-          selectionControls: selectionControls,
-          visibility: renderObject.selectionEndInViewport,
-          preferredLineHeight: renderObject.preferredLineHeight,
-          glyphHeight: _getEndGlyphHeight(),
-          dragStartBehavior: dragStartBehavior,
-        )
+      handle = _SelectionHandleOverlay(
+        type: _chooseType(
+          renderObject.textDirection,
+          TextSelectionHandleType.right,
+          TextSelectionHandleType.left,
+        ),
+        handleLayerLink: endHandleLayerLink,
+        onSelectionHandleTapped: onSelectionHandleTapped,
+        onSelectionHandleDragStart: _handleSelectionEndHandleDragStart,
+        onSelectionHandleDragUpdate: _handleSelectionEndHandleDragUpdate,
+        selectionControls: selectionControls,
+        visibility: _effectiveEndHandleVisibility,
+        preferredLineHeight: renderObject.preferredLineHeight,
+        glyphHeight: _getEndGlyphHeight(),
+        dragStartBehavior: dragStartBehavior,
       );
     }
     return ExcludeSemantics(
@@ -816,9 +815,7 @@ class _SelectionHandleOverlayState extends State<_SelectionHandleOverlay> with S
   Widget build(BuildContext context) {
     final Offset handleAnchor = widget.selectionControls.getHandleAnchor(
       widget.type,
-      widget.preferredLineHeight,
-      widget.glyphHeight,
-      widget.glyphHeight,
+      widget.glyphHeight ?? widget.preferredLineHeight,
     );
     final Size handleSize = widget.selectionControls.getHandleSize(
       widget.preferredLineHeight,
@@ -867,10 +864,8 @@ class _SelectionHandleOverlayState extends State<_SelectionHandleOverlay> with S
               child: widget.selectionControls.buildHandle(
                 context,
                 widget.type,
-                widget.preferredLineHeight,
+                widget.glyphHeight ?? widget.preferredLineHeight,
                 widget.onSelectionHandleTapped,
-                widget.glyphHeight,
-                widget.glyphHeight,
               ),
             ),
           ),
