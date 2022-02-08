@@ -182,7 +182,8 @@ void main() {
 [        ]   - .metadata
 [        ]   - pubspec.lock'''));
 
-    // Manually resolve conflics.
+    // Manually resolve conflics. The correct contents for resolution may change over time,
+    // but it shouldnt matter for this test.
     File metadataFile = tempDir.childFile('migrate_working_dir/.metadata');
     metadataFile.writeAsStringSync('''
 # This file tracks properties of this Flutter project.
@@ -377,6 +378,7 @@ sdks:
 ''', flush: true);
 
     // // Create an uncommitted change
+    File metadataOriginalFile = tempDir.childFile('.metadata');
     // File metadataOriginalFile = tempDir.childFile('migrate_working_dir/README.md');
     // String metadataOriginalContents = metadataOriginalFile.readAsStringSync();
     // metadataOriginalFile.writeAsStringSync('$metadataOriginalContents hello extra stuff', flush: true);
@@ -400,9 +402,84 @@ sdks:
       'apply',
       '--verbose',
     ], workingDirectory: tempDir.path);
-    print(result.stdout);
-    print(result.stderr);
     expect(result.exitCode, 0);
     expect(result.stdout.toString(), contains('Migration complete'));
+
+    expect(tempDir.childFile('.metadata').readAsStringSync(), contains('e96a72392696df66755ca246ff291dfc6ca6c4ad'));
+
+    expect(tempDir.childFile('macos/Runner.xcworkspace/contents.xcworkspacedata').existsSync(), true);
+    expect(tempDir.childFile('macos/Runner.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist').existsSync(), true);
+    expect(tempDir.childFile('macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_16.png').existsSync(), true);
+    expect(tempDir.childFile('macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_1024.png').existsSync(), true);
+    expect(tempDir.childFile('macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_256.png').existsSync(), true);
+    expect(tempDir.childFile('macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_64.png').existsSync(), true);
+    expect(tempDir.childFile('macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_512.png').existsSync(), true);
+    expect(tempDir.childFile('macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_128.png').existsSync(), true);
+    expect(tempDir.childFile('macos/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json').existsSync(), true);
+    expect(tempDir.childFile('macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_32.png').existsSync(), true);
+    expect(tempDir.childFile('macos/Runner/DebugProfile.entitlements').existsSync(), true);
+    expect(tempDir.childFile('macos/Runner/Base.lproj/MainMenu.xib').existsSync(), true);
+    expect(tempDir.childFile('macos/Runner/MainFlutterWindow.swift').existsSync(), true);
+    expect(tempDir.childFile('macos/Runner/Configs/AppInfo.xcconfig').existsSync(), true);
+    expect(tempDir.childFile('macos/Runner/Configs/Debug.xcconfig').existsSync(), true);
+    expect(tempDir.childFile('macos/Runner/Configs/Release.xcconfig').existsSync(), true);
+    expect(tempDir.childFile('macos/Runner/Configs/Warnings.xcconfig').existsSync(), true);
+    expect(tempDir.childFile('macos/Runner/AppDelegate.swift').existsSync(), true);
+    expect(tempDir.childFile('macos/Runner/Info.plist').existsSync(), true);
+    expect(tempDir.childFile('macos/Runner/Release.entitlements').existsSync(), true);
+    expect(tempDir.childFile('macos/Runner.xcodeproj/project.pbxproj').existsSync(), true);
+    expect(tempDir.childFile('macos/Runner.xcodeproj/project.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist').existsSync(), true);
+    expect(tempDir.childFile('macos/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme').existsSync(), true);
+    expect(tempDir.childFile('macos/Flutter/Flutter-Debug.xcconfig').existsSync(), true);
+    expect(tempDir.childFile('macos/Flutter/GeneratedPluginRegistrant.swift').existsSync(), true);
+    expect(tempDir.childFile('macos/Flutter/Flutter-Release.xcconfig').existsSync(), true);
+    expect(tempDir.childFile('macos/Flutter/ephemeral/flutter_export_environment.sh').existsSync(), true);
+    expect(tempDir.childFile('macos/Flutter/ephemeral/Flutter-Generated.xcconfig').existsSync(), true);
+    expect(tempDir.childFile('macos/.gitignore').existsSync(), true);
+    expect(tempDir.childFile('macos/.migrate_config').existsSync(), true);
+    expect(tempDir.childFile('web/index.html').existsSync(), true);
+    expect(tempDir.childFile('web/favicon.png').existsSync(), true);
+    expect(tempDir.childFile('web/icons/Icon-192.png').existsSync(), true);
+    expect(tempDir.childFile('web/icons/Icon-maskable-192.png').existsSync(), true);
+    expect(tempDir.childFile('web/icons/Icon-maskable-512.png').existsSync(), true);
+    expect(tempDir.childFile('web/icons/Icon-512.png').existsSync(), true);
+    expect(tempDir.childFile('web/manifest.json').existsSync(), true);
+    expect(tempDir.childFile('ios/.migrate_config').existsSync(), true);
+    expect(tempDir.childFile('linux/main.cc').existsSync(), true);
+    expect(tempDir.childFile('linux/CMakeLists.txt').existsSync(), true);
+    expect(tempDir.childFile('linux/my_application.h').existsSync(), true);
+    expect(tempDir.childFile('linux/my_application.cc').existsSync(), true);
+    expect(tempDir.childFile('linux/flutter/generated_plugin_registrant.cc').existsSync(), true);
+    expect(tempDir.childFile('linux/flutter/CMakeLists.txt').existsSync(), true);
+    expect(tempDir.childFile('linux/flutter/generated_plugins.cmake').existsSync(), true);
+    expect(tempDir.childFile('linux/flutter/generated_plugin_registrant.h').existsSync(), true);
+    expect(tempDir.childFile('linux/.gitignore').existsSync(), true);
+    expect(tempDir.childFile('linux/.migrate_config').existsSync(), true);
+    expect(tempDir.childFile('android/app/src/main/res/values-night/styles.xml').existsSync(), true);
+    expect(tempDir.childFile('android/app/src/main/res/drawable-v21/launch_background.xml').existsSync(), true);
+    expect(tempDir.childFile('android/.migrate_config').existsSync(), true);
+    expect(tempDir.childFile('.migrate_config').existsSync(), true);
+    expect(tempDir.childFile('analysis_options.yaml').existsSync(), true);
+    expect(tempDir.childFile('.dart_tool/package_config_subset').existsSync(), true);
+    expect(tempDir.childFile('.dart_tool/version').existsSync(), true);
+    expect(tempDir.childFile('windows/CMakeLists.txt').existsSync(), true);
+    expect(tempDir.childFile('windows/runner/flutter_window.cpp').existsSync(), true);
+    expect(tempDir.childFile('windows/runner/utils.h').existsSync(), true);
+    expect(tempDir.childFile('windows/runner/utils.cpp').existsSync(), true);
+    expect(tempDir.childFile('windows/runner/runner.exe.manifest').existsSync(), true);
+    expect(tempDir.childFile('windows/runner/CMakeLists.txt').existsSync(), true);
+    expect(tempDir.childFile('windows/runner/win32_window.h').existsSync(), true);
+    expect(tempDir.childFile('windows/runner/win32_window.cpp').existsSync(), true);
+    expect(tempDir.childFile('windows/runner/resources/app_icon.ico').existsSync(), true);
+    expect(tempDir.childFile('windows/runner/resource.h').existsSync(), true);
+    expect(tempDir.childFile('windows/runner/Runner.rc').existsSync(), true);
+    expect(tempDir.childFile('windows/runner/main.cpp').existsSync(), true);
+    expect(tempDir.childFile('windows/runner/flutter_window.h').existsSync(), true);
+    expect(tempDir.childFile('windows/flutter/generated_plugin_registrant.cc').existsSync(), true);
+    expect(tempDir.childFile('windows/flutter/CMakeLists.txt').existsSync(), true);
+    expect(tempDir.childFile('windows/flutter/generated_plugins.cmake').existsSync(), true);
+    expect(tempDir.childFile('windows/flutter/generated_plugin_registrant.h').existsSync(), true);
+    expect(tempDir.childFile('windows/.gitignore').existsSync(), true);
+    expect(tempDir.childFile('windows/.migrate_config').existsSync(), true);
   });
 }
