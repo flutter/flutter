@@ -416,7 +416,7 @@ class TextSelectionOverlay {
   void hide() => _selectionOverlay.hide();
 
   /// {@macro flutter.widgets.SelectionOverlay.hideToolbar}
-  void hideToolbar() => _selectionOverlay.hideHandles();
+  void hideToolbar() => _selectionOverlay.hideToolbar();
 
   /// {@macro flutter.widgets.SelectionOverlay.dispose}
   void dispose() {
@@ -561,13 +561,13 @@ class SelectionOverlay {
     this.debugRequiredFor,
     required TextSelectionHandleType startHandleType,
     required double lineHeightAtStart,
-    ValueListenable<bool>? startHandlesVisible,
+    this.startHandlesVisible,
     this.onStartHandleDragStart,
     this.onStartHandleDragUpdate,
     this.onStartHandleDragEnd,
     required TextSelectionHandleType endHandleType,
     required double lineHeightAtEnd,
-    ValueListenable<bool>? endHandlesVisible,
+    this.endHandlesVisible,
     this.onEndHandleDragStart,
     this.onEndHandleDragUpdate,
     this.onEndHandleDragEnd,
@@ -583,10 +583,8 @@ class SelectionOverlay {
     Offset? toolbarLocation,
   }) : _startHandleType = startHandleType,
        _lineHeightAtStart = lineHeightAtStart,
-       _startHandlesVisible = startHandlesVisible,
        _endHandleType = endHandleType,
        _lineHeightAtEnd = lineHeightAtEnd,
-       _endHandlesVisible = endHandlesVisible,
        _selectionEndPoints = selectionEndPoints,
        _toolbarLocation = toolbarLocation {
     final OverlayState? overlay = Overlay.of(context, rootOverlay: true);
@@ -597,12 +595,6 @@ class SelectionOverlay {
       'app content was created above the Navigator with the WidgetsApp builder parameter.',
     );
     _toolbarController = AnimationController(duration: fadeDuration, vsync: overlay!);
-    if (_startHandlesVisible == null) {
-      _defaultStartHandlesVisible = ValueNotifier<bool>(false);
-    }
-    if (_endHandlesVisible == null) {
-      _defaultEndHandlesVisible = ValueNotifier<bool>(false);
-    }
   }
 
   /// The context in which the selection handles should appear.
@@ -641,9 +633,9 @@ class SelectionOverlay {
   ///
   /// If the value changes, the start handle uses [FadeTransition] to transition
   /// itself on and off the screen.
-  ValueListenable<bool> get startHandlesVisible => _startHandlesVisible ?? _defaultStartHandlesVisible;
-  final ValueListenable<bool>? _startHandlesVisible;
-  late final ValueNotifier<bool> _defaultStartHandlesVisible;
+  ///
+  /// If this is null, the start selection handle will always be visible.
+  final ValueListenable<bool>? startHandlesVisible;
 
   /// Called when the users start dragging the start selection handles.
   final ValueChanged<DragStartDetails>? onStartHandleDragStart;
@@ -685,9 +677,9 @@ class SelectionOverlay {
   ///
   /// If the value changes, the end handle uses [FadeTransition] to transition
   /// itself on and off the screen.
-  ValueListenable<bool> get endHandlesVisible => _endHandlesVisible ?? _defaultEndHandlesVisible;
-  final ValueListenable<bool>? _endHandlesVisible;
-  late final ValueNotifier<bool> _defaultEndHandlesVisible;
+  ///
+  /// If this is null, the end selection handle will always be visible.
+  final ValueListenable<bool>? endHandlesVisible;
 
   /// Called when the users start dragging the end selection handles.
   final ValueChanged<DragStartDetails>? onEndHandleDragStart;
@@ -904,12 +896,6 @@ class SelectionOverlay {
   void dispose() {
     hide();
     _toolbarController.dispose();
-    if (_startHandlesVisible == null) {
-      _defaultStartHandlesVisible.dispose();
-    }
-    if (_endHandlesVisible == null) {
-      _defaultEndHandlesVisible.dispose();
-    }
   }
 
   Widget _buildStartHandle(BuildContext context) {
@@ -1027,7 +1013,7 @@ class _SelectionHandleOverlay extends StatefulWidget {
     this.onSelectionHandleDragUpdate,
     this.onSelectionHandleDragEnd,
     required this.selectionControls,
-    required this.visibility,
+    this.visibility,
     required this.preferredLineHeight,
     this.dragStartBehavior = DragStartBehavior.start,
   }) : super(key: key);
@@ -1038,7 +1024,7 @@ class _SelectionHandleOverlay extends StatefulWidget {
   final ValueChanged<DragUpdateDetails>? onSelectionHandleDragUpdate;
   final ValueChanged<DragEndDetails>? onSelectionHandleDragEnd;
   final TextSelectionControls selectionControls;
-  final ValueListenable<bool> visibility;
+  final ValueListenable<bool>? visibility;
   final double preferredLineHeight;
   final TextSelectionHandleType type;
   final DragStartBehavior dragStartBehavior;
@@ -1060,11 +1046,11 @@ class _SelectionHandleOverlayState extends State<_SelectionHandleOverlay> with S
     _controller = AnimationController(duration: SelectionOverlay.fadeDuration, vsync: this);
 
     _handleVisibilityChanged();
-    widget.visibility.addListener(_handleVisibilityChanged);
+    widget.visibility?.addListener(_handleVisibilityChanged);
   }
 
   void _handleVisibilityChanged() {
-    if (widget.visibility.value) {
+    if (widget.visibility?.value != false) {
       _controller.forward();
     } else {
       _controller.reverse();
@@ -1074,14 +1060,14 @@ class _SelectionHandleOverlayState extends State<_SelectionHandleOverlay> with S
   @override
   void didUpdateWidget(_SelectionHandleOverlay oldWidget) {
     super.didUpdateWidget(oldWidget);
-    oldWidget.visibility.removeListener(_handleVisibilityChanged);
+    oldWidget.visibility?.removeListener(_handleVisibilityChanged);
     _handleVisibilityChanged();
-    widget.visibility.addListener(_handleVisibilityChanged);
+    widget.visibility?.addListener(_handleVisibilityChanged);
   }
 
   @override
   void dispose() {
-    widget.visibility.removeListener(_handleVisibilityChanged);
+    widget.visibility?.removeListener(_handleVisibilityChanged);
     _controller.dispose();
     super.dispose();
   }
