@@ -1641,7 +1641,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// Copy current selection to [Clipboard].
   @override
   void copySelection(SelectionChangedCause cause) {
-    print('copy selection');
     final TextSelection selection = textEditingValue.selection;
     assert(selection != null);
     if (selection.isCollapsed || widget.obscureText) {
