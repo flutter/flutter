@@ -20,6 +20,7 @@ import '../base/os.dart';
 import '../base/platform.dart';
 import '../convert.dart';
 import '../device.dart';
+import '../globals.dart';
 import '../project.dart';
 import '../vmservice.dart';
 
@@ -294,10 +295,6 @@ class FlutterTesterTestDevice extends TestDevice {
     @required Process process,
     @required Future<void> Function(Uri uri) reportObservatoryUri,
   }) {
-    final RegExp messageRegExp = RegExp(
-        r'(?:Observatory|The Dart VM Service is) listening on ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)'
-      );
-
     for (final Stream<List<int>> stream in <Stream<List<int>>>[
       process.stderr,
       process.stdout,
@@ -309,7 +306,7 @@ class FlutterTesterTestDevice extends TestDevice {
             (String line) async {
           logger.printTrace('test $id: Shell: $line');
 
-          final Match match = messageRegExp.firstMatch(line);
+          final Match match = kVMServiceMessageRegExp.firstMatch(line);
           if (match != null) {
             try {
               final Uri uri = Uri.parse(match[1]);

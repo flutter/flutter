@@ -367,7 +367,7 @@ class FlutterDevice {
       return;
     }
     _loggingSubscription = logStream.listen((String line) {
-      if (!line.contains(RegExp('(Observatory|The Dart VM Service is) listening on http'))) {
+      if (!line.contains(globals.kVMServiceMessageRegExp)) {
         globals.printStatus(line, wrap: false);
       }
     });
