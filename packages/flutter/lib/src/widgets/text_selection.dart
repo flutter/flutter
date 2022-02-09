@@ -498,8 +498,9 @@ class TextSelectionOverlay {
   bool get handlesAreVisible => _handles != null && handlesVisible;
 
   /// Whether the toolbar is currently visible.
-  bool get toolbarIsVisible => _toolbar != null;
+  //bool get toolbarIsVisible => _toolbar != null;
   //bool get toolbarIsVisible => _contextualMenuController?.isVisible ?? false;
+  bool get toolbarIsVisible => _contextualMenuAreaState.contextualMenuIsVisible;
 
   /// Hides the entire overlay including the toolbar and the handles.
   void hide() {
@@ -523,6 +524,7 @@ class TextSelectionOverlay {
     _contextualMenuController!.dispose();
     _contextualMenuController = null;
     */
+    _contextualMenuAreaState.disposeContextualMenu();
     _toolbarController.stop();
     _toolbar?.remove();
     _toolbar = null;
