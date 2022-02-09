@@ -3611,6 +3611,72 @@ void main() {
     expect((findRenderEditable(tester).text! as TextSpan).text, expectedValue);
   });
 
+  testWidgets('password briefly shows last character when entered on mobile', (WidgetTester tester) async {
+    final bool debugDeterministicCursor = EditableText.debugDeterministicCursor;
+    EditableText.debugDeterministicCursor = false;
+    addTearDown(() {
+      EditableText.debugDeterministicCursor = debugDeterministicCursor;
+    });
+
+    await tester.pumpWidget(MaterialApp(
+      home: EditableText(
+        backgroundCursorColor: Colors.grey,
+        controller: controller,
+        obscureText: true,
+        focusNode: focusNode,
+        style: textStyle,
+        cursorColor: cursorColor,
+      ),
+    ));
+
+    await tester.enterText(find.byType(EditableText), 'AA');
+    await tester.pump();
+    await tester.enterText(find.byType(EditableText), 'AAA');
+    await tester.pump();
+
+    expect((findRenderEditable(tester).text! as TextSpan).text, '••A');
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 500));
+    expect((findRenderEditable(tester).text! as TextSpan).text, '•••');
+  });
+
+  testWidgets('password briefly does not show last character on Android if turned off', (WidgetTester tester) async {
+    final bool debugDeterministicCursor = EditableText.debugDeterministicCursor;
+    EditableText.debugDeterministicCursor = false;
+    addTearDown(() {
+      EditableText.debugDeterministicCursor = debugDeterministicCursor;
+    });
+
+    await tester.pumpWidget(MaterialApp(
+      home: EditableText(
+        backgroundCursorColor: Colors.grey,
+        controller: controller,
+        obscureText: true,
+        focusNode: focusNode,
+        style: textStyle,
+        cursorColor: cursorColor,
+      ),
+    ));
+
+    await tester.enterText(find.byType(EditableText), 'AA');
+    await tester.pump();
+    await tester.enterText(find.byType(EditableText), 'AAA');
+    await tester.pump();
+
+    tester.binding.window.brieflyShowPasswordTestValue = false;
+    addTearDown(() {
+      tester.binding.window.brieflyShowPasswordTestValue = true;
+    });
+    expect((findRenderEditable(tester).text! as TextSpan).text, '••A');
+    await tester.pump(const Duration(milliseconds: 500));
+    expect((findRenderEditable(tester).text! as TextSpan).text, '•••');
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 500));
+    expect((findRenderEditable(tester).text! as TextSpan).text, '•••');
+  });
+
   group('a11y copy/cut/paste', () {
     Future<void> _buildApp(MockTextSelectionControls controls, WidgetTester tester) {
       return tester.pumpWidget(MaterialApp(
