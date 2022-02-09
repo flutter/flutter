@@ -25,6 +25,14 @@ import '../profiler.dart';
 /// Entrypoint into the CanvasKit API.
 late CanvasKit canvasKit;
 
+/// Whether to use a CanvasKit implementation provided by a JavaScript
+/// `window.h5vcc.canvasKit` object.
+///
+/// Cobalt may use this object to expose a native implementation of the
+/// CanvasKit bindings. If this exists, use it instead of using the normal
+/// downloaded CanvasKit library.
+final bool useH5vccCanvasKit = h5vcc != null;
+
 /// Sets the [CanvasKit] object on `window` so we can use `@JS()` to bind to
 /// static APIs.
 ///
@@ -38,6 +46,18 @@ external set windowFlutterCanvasKit(CanvasKit? value);
 
 @JS('window.flutterCanvasKit')
 external CanvasKit? get windowFlutterCanvasKit;
+
+@JS('window.h5vcc')
+external H5vcc? get h5vcc;
+
+@JS('window.h5vcc')
+external set debugH5vccSetter(H5vcc? value);
+
+@JS()
+@anonymous
+abstract class H5vcc {
+  external CanvasKit? get canvasKit;
+}
 
 @JS()
 @anonymous
@@ -132,6 +152,15 @@ class CanvasKit {
     Object src,
     SkPartialImageInfo info,
   );
+
+  /// Gets a Skia surface from Cobalt's h5vcc object.
+  ///
+  /// This is only applicable when running on Cobalt and when using Cobalt's
+  /// h5vcc CanvasKit bindings.
+  ///
+  /// On Cobalt, this is the only way to get a Skia surface. Other CanvasKit
+  /// Make...Surface methods are not supported.
+  external SkSurface getH5vccSkSurface();
 }
 
 @JS('window.CanvasKitInit')
