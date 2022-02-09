@@ -1,4 +1,4 @@
-Signature: 8e0b192c05f31c716c6751d6dc7dbff6
+Signature: 55f59a707b3a2d0113ab083bac21ee45
 
 UNUSED LICENSES:
 
@@ -2844,7 +2844,6 @@ FILE: ../../../third_party/skia/gm/textblobrandomfont.cpp
 FILE: ../../../third_party/skia/gm/textblobtransforms.cpp
 FILE: ../../../third_party/skia/gm/textblobuseaftergpufree.cpp
 FILE: ../../../third_party/skia/gm/transparency.cpp
-FILE: ../../../third_party/skia/gm/xform.cpp
 FILE: ../../../third_party/skia/include/codec/SkAndroidCodec.h
 FILE: ../../../third_party/skia/include/codec/SkCodec.h
 FILE: ../../../third_party/skia/include/core/SkEncodedImageFormat.h
@@ -5473,11 +5472,6 @@ FILE: ../../../third_party/skia/docs/examples/Xor.cpp
 FILE: ../../../third_party/skia/docs/examples/incomplete.cpp
 FILE: ../../../third_party/skia/experimental/minimal_ios_mtl_skia_app/main.mm
 FILE: ../../../third_party/skia/experimental/sktext/editor/App.cpp
-FILE: ../../../third_party/skia/experimental/xform/SkShape.cpp
-FILE: ../../../third_party/skia/experimental/xform/SkShape.h
-FILE: ../../../third_party/skia/experimental/xform/SkXform.cpp
-FILE: ../../../third_party/skia/experimental/xform/SkXform.h
-FILE: ../../../third_party/skia/experimental/xform/XContext.cpp
 FILE: ../../../third_party/skia/gm/crbug_918512.cpp
 FILE: ../../../third_party/skia/gm/fp_sample_chaining.cpp
 FILE: ../../../third_party/skia/gm/fpcoordinateoverride.cpp
