@@ -1,4 +1,4 @@
-Signature: a771a41fa42c033b35324d8d9f775d79
+Signature: 8e0b192c05f31c716c6751d6dc7dbff6
 
 UNUSED LICENSES:
 
@@ -787,6 +787,7 @@ FILE: ../../../third_party/skia/experimental/wasm-skp-debugger/package.json
 FILE: ../../../third_party/skia/experimental/webgpu-bazel/example/index.html
 FILE: ../../../third_party/skia/experimental/webgpu-bazel/src/BUILD
 FILE: ../../../third_party/skia/gm/BUILD.bazel
+FILE: ../../../third_party/skia/gm/verifiers/BUILD.bazel
 FILE: ../../../third_party/skia/go.mod
 FILE: ../../../third_party/skia/go.sum
 FILE: ../../../third_party/skia/go_repositories.bzl
