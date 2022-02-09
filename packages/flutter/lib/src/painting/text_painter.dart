@@ -207,8 +207,7 @@ class TextPainter {
   /// layout changes in engine. In most cases, updating text painter properties
   /// in framework will automatically invoke this method.
   void markNeedsLayout() {
-    // _needsLayout = true;
-    _paragraph = null;
+    _needsLayout = true;
     _lineMetricsCache = null;
     _previousCaretPosition = null;
     _previousCaretPrototype = null;
@@ -646,10 +645,10 @@ class TextPainter {
     // _needsPaint is true (in which case _paragraph will be rebuilt in paint).
     if(_needsLayout) {
       _paragraph = null;
+      _needsLayout = false;
     } else if (_paragraph != null && minWidth == _lastMinWidth && maxWidth == _lastMaxWidth) {
       return;
     }
-    _needsLayout = false;
     if (_rebuildParagraphForPaint || _paragraph == null)
       _createParagraph();
     _lastMinWidth = minWidth;
