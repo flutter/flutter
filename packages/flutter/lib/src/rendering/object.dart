@@ -3300,8 +3300,8 @@ mixin ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType 
       // insert at the start (_firstChild)
       childParentData.nextSibling = _firstChild;
       if (_firstChild != null) {
-        final ParentDataType _firstChildParentData = _firstChild!.parentData! as ParentDataType;
-        _firstChildParentData.previousSibling = child;
+        final ParentDataType firstChildParentData = _firstChild!.parentData! as ParentDataType;
+        firstChildParentData.previousSibling = child;
       }
       _firstChild = child;
       _lastChild ??= child;
@@ -3531,12 +3531,12 @@ mixin RelayoutWhenSystemFontsChangeMixin on RenderObject {
   @override
   void attach(covariant PipelineOwner owner) {
     super.attach(owner);
-    PaintingBinding.instance!.systemFonts.addListener(systemFontsDidChange);
+    PaintingBinding.instance.systemFonts.addListener(systemFontsDidChange);
   }
 
   @override
   void detach() {
-    PaintingBinding.instance!.systemFonts.removeListener(systemFontsDidChange);
+    PaintingBinding.instance.systemFonts.removeListener(systemFontsDidChange);
     super.detach();
   }
 }

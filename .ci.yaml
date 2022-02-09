@@ -109,28 +109,6 @@ platform_properties:
       os: Mac-12.0
       device_os: iOS-15.1
       xcode: 13a233
-  mac_ios32:
-    properties:
-      caches: >-
-          [
-            {"name":"builder_mac_devicelab","path":"builder"},
-            {"name":"chrome_and_driver","path":"chrome"},
-            {"name":"flutter_sdk","path":"flutter sdk"},
-            {"name":"gradle","path":"gradle"},
-            {"name":"openjdk","path":"java"},
-            {"name":"pub_cache","path":".pub-cache"},
-            {"name":"xcode_binary","path":"xcode_binary"},
-            {"name":"osx_sdk","path":"osx_sdk"}
-          ]
-      dependencies: >-
-        [
-          {"dependency": "xcode"},
-          {"dependency": "gems"},
-          {"dependency": "ios_signing"}
-        ]
-      os: Mac-12.0
-      device_os: iOS-9.3.6
-      xcode: 13a233
   windows:
     properties:
       caches: >-
@@ -353,9 +331,6 @@ targets:
   - name: Linux flutter_plugins
     recipe: flutter/flutter_drone
     timeout: 60
-    enabled_branches:
-      - main
-      - master
     properties:
       shard: flutter_plugins
       subshard: analyze
@@ -385,7 +360,7 @@ targets:
       - packages/fuchsia_remote_debug_protocol/
       - packages/flutter_test/
       - packages/flutter_goldens/
-      - packages/flutter_tools/lib/src/test/
+      - packages/flutter_tools/
       - bin/
       - .ci.yaml
 
@@ -416,7 +391,7 @@ targets:
       - packages/fuchsia_remote_debug_protocol/
       - packages/flutter_test/
       - packages/flutter_goldens/
-      - packages/flutter_tools/lib/src/test/
+      - packages/flutter_tools/
       - bin/
       - .ci.yaml
 
@@ -442,7 +417,7 @@ targets:
       - packages/fuchsia_remote_debug_protocol/
       - packages/flutter_test/
       - packages/flutter_goldens/
-      - packages/flutter_tools/lib/src/test/
+      - packages/flutter_tools/
       - bin/
       - .ci.yaml
 
@@ -1787,7 +1762,6 @@ targets:
     scheduler: luci
 
   - name: Linux_android flutter_gallery__back_button_memory
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/94036
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2088,6 +2062,17 @@ targets:
       task_name: picture_cache_perf__timeline_summary
     scheduler: luci
 
+  - name: Linux_android android_picture_cache_complexity_scoring_perf__timeline_summary
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux"]
+      task_name: android_picture_cache_complexity_scoring_perf__timeline_summary
+    scheduler: luci
+
   - name: Linux_android platform_channels_benchmarks
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -2220,6 +2205,7 @@ targets:
     scheduler: luci
 
   - name: Linux deferred components
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/96403
     recipe: flutter/deferred_components
     properties:
       dependencies: >-
@@ -2234,7 +2220,6 @@ targets:
     scheduler: luci
 
   - name: Linux_android opacity_peephole_one_rect_perf__e2e_summary
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/95574
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2245,7 +2230,6 @@ targets:
     scheduler: luci
 
   - name: Linux_android opacity_peephole_col_of_rows_perf__e2e_summary
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/96072
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2256,7 +2240,6 @@ targets:
     scheduler: luci
 
   - name: Linux_android opacity_peephole_opacity_of_grid_perf__e2e_summary
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/95865
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2267,7 +2250,6 @@ targets:
     scheduler: luci
 
   - name: Linux_android opacity_peephole_grid_of_opacity_perf__e2e_summary
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/95859
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2278,7 +2260,6 @@ targets:
     scheduler: luci
 
   - name: Linux_android opacity_peephole_fade_transition_text_perf__e2e_summary
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/95863
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2286,6 +2267,26 @@ targets:
       tags: >
         ["devicelab","android","linux"]
       task_name: opacity_peephole_fade_transition_text_perf__e2e_summary
+    scheduler: luci
+
+  - name: Linux_android opacity_peephole_grid_of_alpha_savelayers_perf__e2e_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux"]
+      task_name: opacity_peephole_grid_of_alpha_savelayers_perf__e2e_summary
+    scheduler: luci
+
+  - name: Linux_android opacity_peephole_col_of_alpha_savelayer_rows_perf__e2e_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux"]
+      task_name: opacity_peephole_col_of_alpha_savelayer_rows_perf__e2e_summary
     scheduler: luci
 
   - name: Mac build_aar_module_test
@@ -2475,7 +2476,7 @@ targets:
       - packages/fuchsia_remote_debug_protocol/**
       - packages/flutter_test/**
       - packages/flutter_goldens/**
-      - packages/flutter_tools/lib/src/test/**
+      - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
 
@@ -2505,7 +2506,7 @@ targets:
       - packages/fuchsia_remote_debug_protocol/**
       - packages/flutter_test/**
       - packages/flutter_goldens/**
-      - packages/flutter_tools/lib/src/test/**
+      - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
 
@@ -2531,7 +2532,7 @@ targets:
       - packages/fuchsia_remote_debug_protocol/**
       - packages/flutter_test/**
       - packages/flutter_goldens/**
-      - packages/flutter_tools/lib/src/test/**
+      - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
 
@@ -2683,8 +2684,8 @@ targets:
       - .ci.yaml
 
   - name: Mac module_test_ios
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/96075
     recipe: devicelab/devicelab_drone
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/89175
     timeout: 60
     properties:
       caches: >-
@@ -2827,6 +2828,7 @@ targets:
       subshard: "1_4"
       tags: >
         ["framework","hostonly","shard"]
+      test_timeout_secs: "2700"
     scheduler: luci
     runIf:
       - dev/**
@@ -2852,6 +2854,7 @@ targets:
       subshard: "2_4"
       tags: >
         ["framework","hostonly","shard"]
+      test_timeout_secs: "2700"
     scheduler: luci
     runIf:
       - dev/**
@@ -2877,6 +2880,7 @@ targets:
       subshard: "3_4"
       tags: >
         ["framework","hostonly","shard"]
+      test_timeout_secs: "2700"
     scheduler: luci
     runIf:
       - dev/**
@@ -2902,6 +2906,7 @@ targets:
       subshard: "4_4"
       tags: >
         ["framework","hostonly","shard"]
+      test_timeout_secs: "2700"
     scheduler: luci
     runIf:
       - dev/**
@@ -3069,6 +3074,7 @@ targets:
     scheduler: luci
 
   - name: Mac_ios backdrop_filter_perf_ios__timeline_summary
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/97958
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -3285,6 +3291,7 @@ targets:
     scheduler: luci
 
   - name: Mac_ios integration_ui_ios_textfield
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/96787
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -3375,6 +3382,17 @@ targets:
       task_name: new_gallery_ios__transition_perf
     scheduler: luci
 
+  - name: Mac_ios ios_picture_cache_complexity_scoring_perf__timeline_summary
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","ios","mac"]
+      task_name: ios_picture_cache_complexity_scoring_perf__timeline_summary
+    scheduler: luci
+
   - name: Mac_ios platform_channel_sample_test_ios
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -3446,6 +3464,7 @@ targets:
     scheduler: luci
 
   - name: Mac_ios simple_animation_perf_ios
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/97961
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -3476,30 +3495,9 @@ targets:
       task_name: tiles_scroll_perf_ios__timeline_summary
     scheduler: luci
 
-  - name: Mac_ios32 flutter_gallery__transition_perf_e2e_ios32
-    recipe: devicelab/devicelab_drone
-    bringup: true
-    presubmit: false
-    timeout: 90
-    properties:
-      tags: >
-        ["devicelab","ios32","mac"]
-      task_name: flutter_gallery__transition_perf_e2e_ios32
-    scheduler: luci
-
-  - name: Mac_ios32 native_ui_tests_ios
-    recipe: devicelab/devicelab_drone
-    bringup: true
-    presubmit: false
-    timeout: 90
-    properties:
-      tags: >
-        ["devicelab","ios32","mac"]
-      task_name: native_ui_tests_ios
-    scheduler: luci
-
   - name: Mac_ios native_ui_tests_ios
     recipe: devicelab/devicelab_drone
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/95193
     presubmit: false
     timeout: 60
     properties:
@@ -3642,7 +3640,7 @@ targets:
       - packages/fuchsia_remote_debug_protocol/
       - packages/flutter_test/
       - packages/flutter_goldens/
-      - packages/flutter_tools/lib/src/test/
+      - packages/flutter_tools/
       - bin/
       - .ci.yaml
 
@@ -3671,7 +3669,7 @@ targets:
       - packages/fuchsia_remote_debug_protocol/
       - packages/flutter_test/
       - packages/flutter_goldens/
-      - packages/flutter_tools/lib/src/test/
+      - packages/flutter_tools/
       - bin/
       - .ci.yaml
 
@@ -3697,7 +3695,7 @@ targets:
       - packages/fuchsia_remote_debug_protocol/
       - packages/flutter_test/
       - packages/flutter_goldens/
-      - packages/flutter_tools/lib/src/test/
+      - packages/flutter_tools/
       - bin/
       - .ci.yaml
 
@@ -3745,6 +3743,7 @@ targets:
     scheduler: luci
 
   - name: Windows gradle_plugin_light_apk_test
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/97956
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -3786,6 +3785,7 @@ targets:
     scheduler: luci
 
   - name: Windows module_custom_host_app_name_test
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/96790
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -3830,6 +3830,7 @@ targets:
       - .ci.yaml
 
   - name: Windows module_test
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/96792
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -3901,128 +3902,7 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Windows tool_integration_tests_1_5
-    recipe: flutter/flutter_drone
-    timeout: 60
-    properties:
-      add_recipes_cq: "true"
-      dependencies: >-
-        [
-          {"dependency": "android_sdk", "version": "version:29.0"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
-          {"dependency": "open_jdk"},
-          {"dependency": "goldctl"},
-          {"dependency": "vs_build", "version": "version:vs2019"}
-        ]
-      shard: tool_integration_tests
-      subshard: "1_5"
-      tags: >
-        ["framework","hostonly","shard"]
-    scheduler: luci
-    runIf:
-      - dev/**
-      - packages/flutter_tools/**
-      - bin/**
-      - .ci.yaml
-
-  - name: Windows tool_integration_tests_2_5
-    recipe: flutter/flutter_drone
-    timeout: 60
-    properties:
-      add_recipes_cq: "true"
-      dependencies: >-
-        [
-          {"dependency": "android_sdk", "version": "version:29.0"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
-          {"dependency": "open_jdk"},
-          {"dependency": "goldctl"},
-          {"dependency": "vs_build", "version": "version:vs2019"}
-        ]
-      shard: tool_integration_tests
-      subshard: "2_5"
-      tags: >
-        ["framework","hostonly","shard"]
-    scheduler: luci
-    runIf:
-      - dev/**
-      - packages/flutter_tools/**
-      - bin/**
-      - .ci.yaml
-
-  - name: Windows tool_integration_tests_3_5
-    recipe: flutter/flutter_drone
-    timeout: 60
-    properties:
-      add_recipes_cq: "true"
-      dependencies: >-
-        [
-          {"dependency": "android_sdk", "version": "version:29.0"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
-          {"dependency": "open_jdk"},
-          {"dependency": "goldctl"},
-          {"dependency": "vs_build", "version": "version:vs2019"}
-        ]
-      shard: tool_integration_tests
-      subshard: "3_5"
-      tags: >
-        ["framework","hostonly","shard"]
-    scheduler: luci
-    runIf:
-      - dev/**
-      - packages/flutter_tools/**
-      - bin/**
-      - .ci.yaml
-
-  - name: Windows tool_integration_tests_4_5
-    recipe: flutter/flutter_drone
-    timeout: 60
-    properties:
-      add_recipes_cq: "true"
-      dependencies: >-
-        [
-          {"dependency": "android_sdk", "version": "version:29.0"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
-          {"dependency": "open_jdk"},
-          {"dependency": "goldctl"},
-          {"dependency": "vs_build", "version": "version:vs2019"}
-        ]
-      shard: tool_integration_tests
-      subshard: "4_5"
-      tags: >
-        ["framework","hostonly","shard"]
-    scheduler: luci
-    runIf:
-      - dev/**
-      - packages/flutter_tools/**
-      - bin/**
-      - .ci.yaml
-
-  - name: Windows tool_integration_tests_5_5
-    recipe: flutter/flutter_drone
-    timeout: 60
-    properties:
-      add_recipes_cq: "true"
-      dependencies: >-
-        [
-          {"dependency": "android_sdk", "version": "version:29.0"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
-          {"dependency": "open_jdk"},
-          {"dependency": "goldctl"},
-          {"dependency": "vs_build", "version": "version:vs2019"}
-        ]
-      shard: tool_integration_tests
-      subshard: "5_5"
-      tags: >
-        ["framework","hostonly","shard"]
-    scheduler: luci
-    runIf:
-      - dev/**
-      - packages/flutter_tools/**
-      - bin/**
-      - .ci.yaml
-
   - name: Windows tool_integration_tests_1_6
-    bringup: true # TODO(fujino): https://github.com/flutter/flutter/issues/96544
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -4039,6 +3919,7 @@ targets:
       subshard: "1_6"
       tags: >
         ["framework","hostonly","shard"]
+      test_timeout_secs: "2700"
     scheduler: luci
     runIf:
       - dev/**
@@ -4047,7 +3928,6 @@ targets:
       - .ci.yaml
 
   - name: Windows tool_integration_tests_2_6
-    bringup: true # TODO(fujino): https://github.com/flutter/flutter/issues/96544
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -4064,6 +3944,7 @@ targets:
       subshard: "2_6"
       tags: >
         ["framework","hostonly","shard"]
+      test_timeout_secs: "2700"
     scheduler: luci
     runIf:
       - dev/**
@@ -4072,7 +3953,6 @@ targets:
       - .ci.yaml
 
   - name: Windows tool_integration_tests_3_6
-    bringup: true # TODO(fujino): https://github.com/flutter/flutter/issues/96544
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -4089,6 +3969,7 @@ targets:
       subshard: "3_6"
       tags: >
         ["framework","hostonly","shard"]
+      test_timeout_secs: "2700"
     scheduler: luci
     runIf:
       - dev/**
@@ -4097,7 +3978,6 @@ targets:
       - .ci.yaml
 
   - name: Windows tool_integration_tests_4_6
-    bringup: true # TODO(fujino): https://github.com/flutter/flutter/issues/96544
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -4114,6 +3994,7 @@ targets:
       subshard: "4_6"
       tags: >
         ["framework","hostonly","shard"]
+      test_timeout_secs: "2700"
     scheduler: luci
     runIf:
       - dev/**
@@ -4122,7 +4003,6 @@ targets:
       - .ci.yaml
 
   - name: Windows tool_integration_tests_5_6
-    bringup: true # TODO(fujino): https://github.com/flutter/flutter/issues/96544
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -4139,6 +4019,7 @@ targets:
       subshard: "5_6"
       tags: >
         ["framework","hostonly","shard"]
+      test_timeout_secs: "2700"
     scheduler: luci
     runIf:
       - dev/**
@@ -4147,7 +4028,6 @@ targets:
       - .ci.yaml
 
   - name: Windows tool_integration_tests_6_6
-    bringup: true # TODO(fujino): https://github.com/flutter/flutter/issues/96544
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -4164,6 +4044,7 @@ targets:
       subshard: "6_6"
       tags: >
         ["framework","hostonly","shard"]
+      test_timeout_secs: "2700"
     scheduler: luci
     runIf:
       - dev/**
@@ -4256,6 +4137,7 @@ targets:
     scheduler: luci
 
   - name: Windows_android complex_layout_win__compile
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/96784
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -4312,3 +4194,11 @@ targets:
         ["devicelab","android","windows"]
       task_name: windows_chrome_dev_mode
     scheduler: luci
+
+  - name: google_test
+    bringup: true
+    presubmit: false
+    scheduler: google_internal
+    properties:
+      tags: >
+          ["framework","hostonly","shard"]

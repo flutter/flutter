@@ -14,6 +14,7 @@ import '../globals.dart' as globals;
 import '../persistent_tool_state.dart';
 import '../runner/flutter_command.dart';
 import '../version.dart';
+import 'channel.dart';
 
 // The official docs to install Flutter.
 const String _flutterInstallDocs = 'https://flutter.dev/docs/get-started/install';
@@ -48,7 +49,7 @@ class UpgradeCommand extends FlutterCommand {
       )
       ..addFlag(
         'verify-only',
-        help: 'Checks for any new flutter updates, without actually fetching them.',
+        help: 'Checks for any new Flutter updates, without actually fetching them.',
         negatable: false,
       );
   }
@@ -163,6 +164,7 @@ class UpgradeCommandRunner {
       );
     }
     recordState(flutterVersion);
+    await ChannelCommand.upgradeChannel(flutterVersion);
     globals.printStatus('Upgrading Flutter to ${upstreamVersion.frameworkVersion} from ${flutterVersion.frameworkVersion} in $workingDirectory...');
     await attemptReset(upstreamVersion.frameworkRevision);
     if (!testFlow) {

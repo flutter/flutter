@@ -26,6 +26,7 @@ import 'tooltip.dart';
 // late dynamic _selection;
 // late BuildContext context;
 // void setState(VoidCallback fn) { }
+// enum Menu { itemOne, itemTwo, itemThree, itemFour }
 
 const Duration _kMenuDuration = Duration(milliseconds: 300);
 const double _kMenuCloseIntervalEnd = 2.0 / 3.0;
@@ -186,13 +187,13 @@ class _RenderMenuItem extends RenderShiftedBox {
 ///
 /// {@tool snippet}
 ///
-/// Here, a [Text] widget is used with a popup menu item. The `WhyFarther` type
+/// Here, a [Text] widget is used with a popup menu item. The `Menu` type
 /// is an enum, not shown here.
 ///
 /// ```dart
-/// const PopupMenuItem<WhyFarther>(
-///   value: WhyFarther.harder,
-///   child: Text('Working a lot harder'),
+/// const PopupMenuItem<Menu>(
+///   value: Menu.itemOne,
+///   child: Text('Item 1'),
 /// )
 /// ```
 /// {@end-tool}
@@ -528,12 +529,10 @@ class _PopupMenu<T> extends StatelessWidget {
     Key? key,
     required this.route,
     required this.semanticLabel,
-    this.padding,
   }) : super(key: key);
 
   final _PopupMenuRoute<T> route;
   final String? semanticLabel;
-  final EdgeInsetsGeometry? padding;
 
   @override
   Widget build(BuildContext context) {
@@ -585,7 +584,9 @@ class _PopupMenu<T> extends StatelessWidget {
           explicitChildNodes: true,
           label: semanticLabel,
           child: SingleChildScrollView(
-            padding: padding,
+            padding: const EdgeInsets.symmetric(
+              vertical: _kMenuVerticalPadding,
+            ),
             child: ListBody(children: children),
           ),
         ),
@@ -727,7 +728,6 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
   _PopupMenuRoute({
     required this.position,
     required this.items,
-    this.padding,
     this.initialValue,
     this.elevation,
     required this.barrierLabel,
@@ -741,7 +741,6 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
   final List<PopupMenuEntry<T>> items;
   final List<Size?> itemSizes;
   final T? initialValue;
-  final EdgeInsetsGeometry? padding;
   final double? elevation;
   final String? semanticLabel;
   final ShapeBorder? shape;
@@ -780,7 +779,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
       }
     }
 
-    final Widget menu = _PopupMenu<T>(padding: padding, route: this, semanticLabel: semanticLabel);
+    final Widget menu = _PopupMenu<T>(route: this, semanticLabel: semanticLabel);
     final MediaQueryData mediaQuery = MediaQuery.of(context);
     return MediaQuery.removePadding(
       context: context,
@@ -852,11 +851,6 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
 /// label is not provided, it will default to
 /// [MaterialLocalizations.popupMenuLabel].
 ///
-/// The `padding` argument is used to add empty space around the outside
-/// of the popup menu. If this property is not provided, then [PopupMenuThemeData.padding]
-/// is used. If [PopupMenuThemeData.padding] is also null, then
-/// EdgeInsets.symmetric(vertical: 8.0) is used.
-///
 /// See also:
 ///
 ///  * [PopupMenuItem], a popup menu entry for a single value.
@@ -871,7 +865,6 @@ Future<T?> showMenu<T>({
   required RelativeRect position,
   required List<PopupMenuEntry<T>> items,
   T? initialValue,
-  EdgeInsetsGeometry? padding,
   double? elevation,
   String? semanticLabel,
   ShapeBorder? shape,
@@ -900,7 +893,6 @@ Future<T?> showMenu<T>({
     position: position,
     items: items,
     initialValue: initialValue,
-    padding: padding,
     elevation: elevation,
     semanticLabel: semanticLabel,
     barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
@@ -939,39 +931,11 @@ typedef PopupMenuItemBuilder<T> = List<PopupMenuEntry<T>> Function(BuildContext 
 /// If both are null, then a standard overflow icon is created (depending on the
 /// platform).
 ///
-/// {@tool snippet}
-///
+/// {@tool dartpad}
 /// This example shows a menu with four items, selecting between an enum's
-/// values and setting a `_selection` field based on the selection.
+/// values and setting a `_selectedMenu` field based on the selection
 ///
-/// ```dart
-/// // This is the type used by the popup menu below.
-/// enum WhyFarther { harder, smarter, selfStarter, tradingCharter }
-///
-/// // This menu button widget updates a _selection field (of type WhyFarther,
-/// // not shown here).
-/// PopupMenuButton<WhyFarther>(
-///   onSelected: (WhyFarther result) { setState(() { _selection = result; }); },
-///   itemBuilder: (BuildContext context) => <PopupMenuEntry<WhyFarther>>[
-///     const PopupMenuItem<WhyFarther>(
-///       value: WhyFarther.harder,
-///       child: Text('Working a lot harder'),
-///     ),
-///     const PopupMenuItem<WhyFarther>(
-///       value: WhyFarther.smarter,
-///       child: Text('Being a lot smarter'),
-///     ),
-///     const PopupMenuItem<WhyFarther>(
-///       value: WhyFarther.selfStarter,
-///       child: Text('Being a self-starter'),
-///     ),
-///     const PopupMenuItem<WhyFarther>(
-///       value: WhyFarther.tradingCharter,
-///       child: Text('Placed in charge of trading charter'),
-///     ),
-///   ],
-/// )
-/// ```
+/// ** See code in examples/api/lib/material/popupmenu/popupmenu.0.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -993,8 +957,8 @@ class PopupMenuButton<T> extends StatefulWidget {
     this.tooltip,
     this.elevation,
     this.padding = const EdgeInsets.all(8.0),
-    this.menuPadding,
     this.child,
+    this.splashRadius,
     this.icon,
     this.iconSize,
     this.offset = Offset.zero,
@@ -1045,6 +1009,11 @@ class PopupMenuButton<T> extends StatefulWidget {
   /// to set the padding to zero.
   final EdgeInsetsGeometry padding;
 
+  /// The splash radius.
+  ///
+  /// If null, default splash radius of [InkWell] or [IconButton] is used.
+  final double? splashRadius;
+
   /// If provided, [child] is the widget used for this button
   /// and the button will utilize an [InkWell] for taps.
   final Widget? child;
@@ -1087,14 +1056,6 @@ class PopupMenuButton<T> extends StatefulWidget {
   /// If [PopupMenuThemeData.color] is also null, then
   /// Theme.of(context).cardColor is used.
   final Color? color;
-
-  /// If provided, menu padding is used for empty space around the outside
-  /// of the popup menu.
-  ///
-  /// If this property is null, then [PopupMenuThemeData.padding] is used.
-  /// If [PopupMenuThemeData.padding] is also null, then
-  /// EdgeInsets.symmetric(vertical: 8.0) is used.
-  final EdgeInsetsGeometry? menuPadding;
 
   /// Whether detected gestures should provide acoustic and/or haptic feedback.
   ///
@@ -1139,11 +1100,6 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
       ),
       Offset.zero & overlay.size,
     );
-
-    final EdgeInsetsGeometry menuPadding = widget.menuPadding ??
-        popupMenuTheme.padding ??
-        const EdgeInsets.symmetric(vertical: _kMenuVerticalPadding);
-
     final List<PopupMenuEntry<T>> items = widget.itemBuilder(context);
     // Only show the menu if there is something to show
     if (items.isNotEmpty) {
@@ -1152,7 +1108,6 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
         elevation: widget.elevation ?? popupMenuTheme.elevation,
         items: items,
         initialValue: widget.initialValue,
-        padding: menuPadding,
         position: position,
         shape: widget.shape ?? popupMenuTheme.shape,
         color: widget.color ?? popupMenuTheme.color,
@@ -1193,6 +1148,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
         child: InkWell(
           onTap: widget.enabled ? showButtonMenu : null,
           canRequestFocus: _canRequestFocus,
+          radius: widget.splashRadius,
           enableFeedback: enableFeedback,
           child: widget.child,
         ),
@@ -1201,6 +1157,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
     return IconButton(
       icon: widget.icon ?? Icon(Icons.adaptive.more),
       padding: widget.padding,
+      splashRadius: widget.splashRadius,
       iconSize: widget.iconSize ?? 24.0,
       tooltip: widget.tooltip ?? MaterialLocalizations.of(context).showMenuTooltip,
       onPressed: widget.enabled ? showButtonMenu : null,

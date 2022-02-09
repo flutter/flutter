@@ -205,6 +205,8 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     const SingleActivator(LogicalKeyboardKey.keyC, control: true): CopySelectionTextIntent.copy,
     const SingleActivator(LogicalKeyboardKey.keyV, control: true): const PasteTextIntent(SelectionChangedCause.keyboard),
     const SingleActivator(LogicalKeyboardKey.keyA, control: true): const SelectAllTextIntent(SelectionChangedCause.keyboard),
+    const SingleActivator(LogicalKeyboardKey.keyZ, control: true): const UndoTextIntent(SelectionChangedCause.keyboard),
+    const SingleActivator(LogicalKeyboardKey.keyZ, shift: true, control: true): const RedoTextIntent(SelectionChangedCause.keyboard),
   };
 
   // The following key combinations have no effect on text editing on this
@@ -215,6 +217,7 @@ class DefaultTextEditingShortcuts extends Shortcuts {
   //   * Meta + C
   //   * Meta + V
   //   * Meta + A
+  //   * Meta + shift? + Z
   //   * Meta + shift? + arrow down
   //   * Meta + shift? + arrow left
   //   * Meta + shift? + arrow right
@@ -235,6 +238,7 @@ class DefaultTextEditingShortcuts extends Shortcuts {
   //   * Meta + C
   //   * Meta + V
   //   * Meta + A
+  //   * Meta + shift? + Z
   //   * Meta + shift? + arrow down
   //   * Meta + shift? + arrow left
   //   * Meta + shift? + arrow right
@@ -259,6 +263,7 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     //   * Meta + C
     //   * Meta + V
     //   * Meta + A
+    //   * Meta + shift? + Z
     //   * Meta + shift? + arrow down
     //   * Meta + shift? + arrow left
     //   * Meta + shift? + arrow right
@@ -319,12 +324,15 @@ class DefaultTextEditingShortcuts extends Shortcuts {
     const SingleActivator(LogicalKeyboardKey.keyC, meta: true): CopySelectionTextIntent.copy,
     const SingleActivator(LogicalKeyboardKey.keyV, meta: true): const PasteTextIntent(SelectionChangedCause.keyboard),
     const SingleActivator(LogicalKeyboardKey.keyA, meta: true): const SelectAllTextIntent(SelectionChangedCause.keyboard),
+    const SingleActivator(LogicalKeyboardKey.keyZ, meta: true): const UndoTextIntent(SelectionChangedCause.keyboard),
+    const SingleActivator(LogicalKeyboardKey.keyZ, shift: true, meta: true): const RedoTextIntent(SelectionChangedCause.keyboard),
     // The following key combinations have no effect on text editing on this
     // platform:
     //   * End
     //   * Home
     //   * Control + shift? + end
     //   * Control + shift? + home
+    //   * Control + shift? + Z
   };
 
   // The following key combinations have no effect on text editing on this

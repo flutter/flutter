@@ -231,6 +231,16 @@ class PasteTextIntent extends Intent {
   final SelectionChangedCause cause;
 }
 
+/// An [Intent] that represents a user interaction that attempts to go back to
+/// the previous editing state.
+class RedoTextIntent extends Intent {
+  /// Creates a [RedoTextIntent].
+  const RedoTextIntent(this.cause);
+
+  /// {@macro flutter.widgets.TextEditingIntents.cause}
+  final SelectionChangedCause cause;
+}
+
 /// An [Intent] that represents a user interaction that attempts to modify the
 /// current [TextEditingValue] in an input field.
 class ReplaceTextIntent extends Intent {
@@ -250,10 +260,20 @@ class ReplaceTextIntent extends Intent {
   final SelectionChangedCause cause;
 }
 
+/// An [Intent] that represents a user interaction that attempts to go back to
+/// the previous editing state.
+class UndoTextIntent extends Intent {
+  /// Creates an [UndoTextIntent].
+  const UndoTextIntent(this.cause);
+
+  /// {@macro flutter.widgets.TextEditingIntents.cause}
+  final SelectionChangedCause cause;
+}
+
 /// An [Intent] that represents a user interaction that attempts to change the
 /// selection in an input field.
 class UpdateSelectionIntent extends Intent {
-  /// Creates a [UpdateSelectionIntent].
+  /// Creates an [UpdateSelectionIntent].
   const UpdateSelectionIntent(this.currentTextEditingValue, this.newSelection, this.cause);
 
   /// The [TextEditingValue] that this [Intent]'s action should perform on.

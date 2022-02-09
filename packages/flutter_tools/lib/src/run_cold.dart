@@ -87,8 +87,8 @@ class ColdRunner extends ResidentRunner {
     if (debuggingEnabled) {
       try {
         await connectToServiceProtocol(allowExistingDdsInstance: false);
-      } on String catch (message) {
-        globals.printError(message);
+      } on Exception catch (exception) {
+        globals.printError(exception.toString());
         appFailedToStart();
         return 2;
       }
