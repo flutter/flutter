@@ -96,9 +96,9 @@ void AndroidImageGenerator::DoDecodeImage() {
 
   fml::jni::ScopedJavaGlobalRef<jobject>* bitmap =
       new fml::jni::ScopedJavaGlobalRef(
-          env, env->CallStaticObjectMethod(g_flutter_jni_class->obj(),
-                                           g_decode_image_method,
-                                           direct_buffer.obj(), (long)this));
+          env, env->CallStaticObjectMethod(
+                   g_flutter_jni_class->obj(), g_decode_image_method,
+                   direct_buffer.obj(), reinterpret_cast<long>(this)));
   FML_CHECK(fml::jni::CheckException(env));
 
   if (bitmap->is_null()) {
@@ -106,7 +106,7 @@ void AndroidImageGenerator::DoDecodeImage() {
   }
 
   AndroidBitmapInfo info;
-  int status;
+  [[maybe_unused]] int status;
   if ((status = AndroidBitmap_getInfo(env, bitmap->obj(), &info)) < 0) {
     FML_DLOG(ERROR) << "Failed to get bitmap info, status=" << status;
     return;

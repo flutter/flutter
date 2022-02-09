@@ -31,7 +31,7 @@
   if (event->character != nullptr) {
     size_t len = strlen(event->character);
     char* character = new char[len + 1];
-    strcpy(character, event->character);
+    strlcpy(character, event->character, sizeof(character));
     _data->character = character;
   }
   _callback = callback;

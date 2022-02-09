@@ -17,6 +17,8 @@
 #include "flutter/shell/platform/linux/testing/mock_renderer.h"
 
 // Checks sending a message without a response works.
+// MOCK_ENGINE_PROC is leaky by design
+// NOLINTBEGIN(clang-analyzer-core.StackAddressEscape)
 TEST(FlBasicMessageChannelTest, SendMessageWithoutResponse) {
   g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
 
@@ -58,6 +60,7 @@ TEST(FlBasicMessageChannelTest, SendMessageWithoutResponse) {
 
   EXPECT_TRUE(called);
 }
+// NOLINTEND(clang-analyzer-core.StackAddressEscape)
 
 // Called when the message response is received in the SendMessage test.
 static void echo_response_cb(GObject* object,

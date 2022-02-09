@@ -31,6 +31,9 @@
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/tonic/converter/dart_converter.h"
 
+// CREATE_NATIVE_ENTRY is leaky by design
+// NOLINTBEGIN(clang-analyzer-core.StackAddressEscape)
+
 namespace {
 
 static uint64_t NanosFromEpoch(int millis_from_now) {
@@ -1743,3 +1746,5 @@ TEST_F(EmbedderTest, VsyncCallbackPostedIntoFuture) {
 
 }  // namespace testing
 }  // namespace flutter
+
+// NOLINTEND(clang-analyzer-core.StackAddressEscape)

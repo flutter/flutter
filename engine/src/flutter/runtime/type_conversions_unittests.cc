@@ -8,6 +8,9 @@
 #include "flutter/testing/testing.h"
 #include "flutter/third_party/tonic/converter/dart_converter.h"
 
+// CREATE_NATIVE_ENTRY is leaky by design
+// NOLINTBEGIN(clang-analyzer-core.StackAddressEscape)
+
 namespace flutter {
 namespace testing {
 
@@ -172,3 +175,5 @@ TEST_F(TypeConversionsTest, CanConvertListOfFloatsToListOfDartDoubles) {
 
 }  // namespace testing
 }  // namespace flutter
+
+// NOLINTEND(clang-analyzer-core.StackAddressEscape)

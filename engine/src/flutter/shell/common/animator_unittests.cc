@@ -15,6 +15,9 @@
 #include "flutter/testing/testing.h"
 #include "gtest/gtest.h"
 
+// CREATE_NATIVE_ENTRY is leaky by design
+// NOLINTBEGIN(clang-analyzer-core.StackAddressEscape)
+
 namespace flutter {
 namespace testing {
 
@@ -183,3 +186,5 @@ TEST_F(ShellTest, AnimatorDoesNotNotifyIdleBeforeRender) {
 
 }  // namespace testing
 }  // namespace flutter
+
+// NOLINTEND(clang-analyzer-core.StackAddressEscape)

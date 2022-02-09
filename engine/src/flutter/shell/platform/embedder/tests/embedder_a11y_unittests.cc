@@ -16,6 +16,9 @@
 #include "flutter/shell/platform/embedder/tests/embedder_config_builder.h"
 #include "flutter/testing/testing.h"
 
+// CREATE_NATIVE_ENTRY is leaky by design
+// NOLINTBEGIN(clang-analyzer-core.StackAddressEscape)
+
 namespace flutter {
 namespace testing {
 
@@ -204,3 +207,5 @@ TEST_F(Embedder11yTest, A11yTreeIsConsistent) {
 
 }  // namespace testing
 }  // namespace flutter
+
+// NOLINTEND(clang-analyzer-core.StackAddressEscape)

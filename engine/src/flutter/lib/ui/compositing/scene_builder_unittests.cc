@@ -13,6 +13,9 @@
 #include "flutter/shell/common/thread_host.h"
 #include "flutter/testing/testing.h"
 
+// CREATE_NATIVE_ENTRY is leaky by design
+// NOLINTBEGIN(clang-analyzer-core.StackAddressEscape)
+
 namespace flutter {
 namespace testing {
 
@@ -156,3 +159,5 @@ TEST_F(ShellTest, EngineLayerDisposeReleasesReference) {
 
 }  // namespace testing
 }  // namespace flutter
+
+// NOLINTEND(clang-analyzer-core.StackAddressEscape)

@@ -952,6 +952,8 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
                              channel.UTF8String, flutter::CopyNSDataToMapping(message), response);
 
   _shell->GetPlatformView()->DispatchPlatformMessage(std::move(platformMessage));
+  // platformMessage takes ownership of response.
+  // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
 }
 
 - (NSObject<FlutterTaskQueue>*)makeBackgroundTaskQueue {

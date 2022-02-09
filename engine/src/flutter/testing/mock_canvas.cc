@@ -79,14 +79,12 @@ void MockCanvas::onDrawTextBlob(const SkTextBlob* text,
   // This duplicates existing logic in SkCanvas::onDrawPicture
   // that should probably be split out so it doesn't need to be here as well.
   SkRect storage;
-  const SkRect* bounds = nullptr;
   if (paint.canComputeFastBounds()) {
     storage = text->bounds().makeOffset(x, y);
     SkRect tmp;
     if (this->quickReject(paint.computeFastBounds(storage, &tmp))) {
       return;
     }
-    bounds = &storage;
   }
 
   draw_calls_.emplace_back(DrawCall{

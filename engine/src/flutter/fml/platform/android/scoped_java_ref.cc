@@ -13,13 +13,14 @@ namespace jni {
 static const int kDefaultLocalFrameCapacity = 16;
 
 ScopedJavaLocalFrame::ScopedJavaLocalFrame(JNIEnv* env) : env_(env) {
-  int failed = env_->PushLocalFrame(kDefaultLocalFrameCapacity);
+  [[maybe_unused]] int failed =
+      env_->PushLocalFrame(kDefaultLocalFrameCapacity);
   FML_DCHECK(!failed);
 }
 
 ScopedJavaLocalFrame::ScopedJavaLocalFrame(JNIEnv* env, int capacity)
     : env_(env) {
-  int failed = env_->PushLocalFrame(capacity);
+  [[maybe_unused]] int failed = env_->PushLocalFrame(capacity);
   FML_DCHECK(!failed);
 }
 
@@ -43,10 +44,12 @@ JNIEnv* JavaRef<jobject>::SetNewLocalRef(JNIEnv* env, jobject obj) {
   } else {
     FML_DCHECK(env == AttachCurrentThread());  // Is |env| on correct thread.
   }
-  if (obj)
+  if (obj) {
     obj = env->NewLocalRef(obj);
-  if (obj_)
+  }
+  if (obj_) {
     env->DeleteLocalRef(obj_);
+  }
   obj_ = obj;
   return env;
 }
@@ -57,10 +60,12 @@ void JavaRef<jobject>::SetNewGlobalRef(JNIEnv* env, jobject obj) {
   } else {
     FML_DCHECK(env == AttachCurrentThread());  // Is |env| on correct thread.
   }
-  if (obj)
+  if (obj) {
     obj = env->NewGlobalRef(obj);
-  if (obj_)
+  }
+  if (obj_) {
     env->DeleteGlobalRef(obj_);
+  }
   obj_ = obj;
 }
 

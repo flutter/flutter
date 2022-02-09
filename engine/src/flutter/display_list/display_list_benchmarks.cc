@@ -114,7 +114,7 @@ void BM_DrawLine(benchmark::State& state,
   auto display_list = builder.Build();
 
   // We only want to time the actual rasterization.
-  for (auto _ : state) {
+  for ([[maybe_unused]] auto _ : state) {
     display_list->RenderTo(canvas);
     canvas_provider->GetSurface()->flushAndSubmit(true);
   }
@@ -162,7 +162,7 @@ void BM_DrawRect(benchmark::State& state,
   auto display_list = builder.Build();
 
   // We only want to time the actual rasterization.
-  for (auto _ : state) {
+  for ([[maybe_unused]] auto _ : state) {
     display_list->RenderTo(canvas);
     canvas_provider->GetSurface()->flushAndSubmit(true);
   }
@@ -207,7 +207,7 @@ void BM_DrawOval(benchmark::State& state,
   auto display_list = builder.Build();
 
   // We only want to time the actual rasterization.
-  for (auto _ : state) {
+  for ([[maybe_unused]] auto _ : state) {
     display_list->RenderTo(canvas);
     canvas_provider->GetSurface()->flushAndSubmit(true);
   }
@@ -254,7 +254,7 @@ void BM_DrawCircle(benchmark::State& state,
   auto display_list = builder.Build();
 
   // We only want to time the actual rasterization.
-  for (auto _ : state) {
+  for ([[maybe_unused]] auto _ : state) {
     display_list->RenderTo(canvas);
     canvas_provider->GetSurface()->flushAndSubmit(true);
   }
@@ -331,7 +331,7 @@ void BM_DrawRRect(benchmark::State& state,
   auto display_list = builder.Build();
 
   // We only want to time the actual rasterization.
-  for (auto _ : state) {
+  for ([[maybe_unused]] auto _ : state) {
     display_list->RenderTo(canvas);
     canvas_provider->GetSurface()->flushAndSubmit(true);
   }
@@ -412,7 +412,7 @@ void BM_DrawDRRect(benchmark::State& state,
   auto display_list = builder.Build();
 
   // We only want to time the actual rasterization.
-  for (auto _ : state) {
+  for ([[maybe_unused]] auto _ : state) {
     display_list->RenderTo(canvas);
     canvas_provider->GetSurface()->flushAndSubmit(true);
   }
@@ -464,7 +464,7 @@ void BM_DrawArc(benchmark::State& state,
   auto display_list = builder.Build();
 
   // We only want to time the actual rasterization.
-  for (auto _ : state) {
+  for ([[maybe_unused]] auto _ : state) {
     display_list->RenderTo(canvas);
     canvas_provider->GetSurface()->flushAndSubmit(true);
   }
@@ -482,7 +482,7 @@ std::vector<SkPoint> GetPolygonPoints(size_t n, SkPoint center, SkScalar r) {
   float angle;
   float full_circle = 2.0f * M_PI;
   for (size_t i = 0; i < n; i++) {
-    angle = (full_circle / (float)n) * (float)i;
+    angle = (full_circle / static_cast<float>(n)) * static_cast<float>(i);
     x = center.x() + r * std::cosf(angle);
     y = center.y() + r * std::sinf(angle);
     points.push_back(SkPoint::Make(x, y));
@@ -666,7 +666,7 @@ void BM_DrawPath(benchmark::State& state,
   auto display_list = builder.Build();
 
   // We only want to time the actual rasterization.
-  for (auto _ : state) {
+  for ([[maybe_unused]] auto _ : state) {
     display_list->RenderTo(canvas);
     canvas_provider->GetSurface()->flushAndSubmit(true);
   }
@@ -709,12 +709,13 @@ sk_sp<SkVertices> GetTestVertices(SkPoint center,
       colors.push_back(SK_ColorCYAN);
       for (size_t i = 0; i <= outer_points.size(); i++) {
         vertices.push_back(outer_points[i % outer_points.size()]);
-        if (i % 3 == 0)
+        if (i % 3 == 0) {
           colors.push_back(SK_ColorRED);
-        else if (i % 3 == 1)
+        } else if (i % 3 == 1) {
           colors.push_back(SK_ColorGREEN);
-        else
+        } else {
           colors.push_back(SK_ColorBLUE);
+        }
       }
       break;
     case SkVertices::VertexMode::kTriangles_VertexMode:
@@ -810,7 +811,7 @@ void BM_DrawVertices(benchmark::State& state,
   auto display_list = builder.Build();
 
   // We only want to time the actual rasterization.
-  for (auto _ : state) {
+  for ([[maybe_unused]] auto _ : state) {
     display_list->RenderTo(canvas);
     canvas_provider->GetSurface()->flushAndSubmit(true);
   }
@@ -913,7 +914,7 @@ void BM_DrawPoints(benchmark::State& state,
 
   auto display_list = builder.Build();
 
-  for (auto _ : state) {
+  for ([[maybe_unused]] auto _ : state) {
     display_list->RenderTo(canvas);
     canvas_provider->GetSurface()->flushAndSubmit(true);
   }
@@ -987,7 +988,7 @@ void BM_DrawImage(benchmark::State& state,
 
   auto display_list = builder.Build();
 
-  for (auto _ : state) {
+  for ([[maybe_unused]] auto _ : state) {
     display_list->RenderTo(canvas);
     canvas_provider->GetSurface()->flushAndSubmit(true);
   }
@@ -1069,7 +1070,7 @@ void BM_DrawImageRect(benchmark::State& state,
 
   auto display_list = builder.Build();
 
-  for (auto _ : state) {
+  for ([[maybe_unused]] auto _ : state) {
     display_list->RenderTo(canvas);
     canvas_provider->GetSurface()->flushAndSubmit(true);
   }
@@ -1153,7 +1154,7 @@ void BM_DrawImageNine(benchmark::State& state,
 
   auto display_list = builder.Build();
 
-  for (auto _ : state) {
+  for ([[maybe_unused]] auto _ : state) {
     display_list->RenderTo(canvas);
     canvas_provider->GetSurface()->flushAndSubmit(true);
   }
@@ -1226,7 +1227,7 @@ void BM_DrawTextBlob(benchmark::State& state,
 
   auto display_list = builder.Build();
 
-  for (auto _ : state) {
+  for ([[maybe_unused]] auto _ : state) {
     display_list->RenderTo(canvas);
     canvas_provider->GetSurface()->flushAndSubmit(true);
   }
@@ -1290,7 +1291,7 @@ void BM_DrawShadow(benchmark::State& state,
   auto display_list = builder.Build();
 
   // We only want to time the actual rasterization.
-  for (auto _ : state) {
+  for ([[maybe_unused]] auto _ : state) {
     display_list->RenderTo(canvas);
     canvas_provider->GetSurface()->flushAndSubmit(true);
   }
@@ -1343,7 +1344,7 @@ void BM_SaveLayer(benchmark::State& state,
   auto display_list = builder.Build();
 
   // We only want to time the actual rasterization.
-  for (auto _ : state) {
+  for ([[maybe_unused]] auto _ : state) {
     display_list->RenderTo(canvas);
     canvas_provider->GetSurface()->flushAndSubmit(true);
   }

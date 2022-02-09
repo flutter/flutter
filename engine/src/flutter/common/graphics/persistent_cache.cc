@@ -191,6 +191,9 @@ sk_sp<SkData> ParseBase64(const std::string& input) {
 }
 
 size_t PersistentCache::PrecompileKnownSkSLs(GrDirectContext* context) const {
+  // clang-tidy has trouble reasoning about some of the complicated array and
+  // pointer-arithmetic code in rapidjson.
+  // NOLINTNEXTLINE(clang-analyzer-cplusplus.PlacementNew)
   auto known_sksls = LoadSkSLs();
   // A trace must be present even if no precompilations have been completed.
   FML_TRACE_EVENT("flutter", "PersistentCache::PrecompileKnownSkSLs", "count",

@@ -13,6 +13,9 @@
 #include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
 #include "flutter/testing/testing.h"
 
+// MOCK_ENGINE_PROC is leaky by design
+// NOLINTBEGIN(clang-analyzer-core.StackAddressEscape)
+
 @interface TestOpenGLEngine : FlutterEngine
 
 @property(nonatomic, readwrite) id<FlutterRenderer> renderer;
@@ -134,3 +137,5 @@ TEST(FlutterOpenGLRenderer, FBOReturnedByFlutterView) {
 }
 
 }  // namespace flutter::testing
+
+// NOLINTEND(clang-analyzer-core.StackAddressEscape)

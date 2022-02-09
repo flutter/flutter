@@ -52,7 +52,7 @@ JNIEnv* AttachCurrentThread() {
   } else {
     args.name = thread_name;
   }
-  jint ret = g_jvm->AttachCurrentThread(&env, &args);
+  [[maybe_unused]] jint ret = g_jvm->AttachCurrentThread(&env, &args);
   FML_DCHECK(JNI_OK == ret);
 
   FML_DCHECK(tls_jni_detach.get() == nullptr);
@@ -182,9 +182,10 @@ ScopedJavaLocalRef<jobjectArray> VectorToBufferArray(
       env->NewObjectArray(vector.size(), byte_buffer_clazz.obj(), NULL);
   ASSERT_NO_EXCEPTION();
   for (size_t i = 0; i < vector.size(); ++i) {
+    uint8_t* data = const_cast<uint8_t*>(vector[i].data());
     ScopedJavaLocalRef<jobject> item(
-        env,
-        env->NewDirectByteBuffer((void*)(vector[i].data()), vector[i].size()));
+        env, env->NewDirectByteBuffer(reinterpret_cast<void*>(data),
+                                      vector[i].size()));
     env->SetObjectArrayElement(java_array, i, item.obj());
   }
   return ScopedJavaLocalRef<jobjectArray>(env, java_array);
@@ -195,16 +196,18 @@ bool HasException(JNIEnv* env) {
 }
 
 bool ClearException(JNIEnv* env) {
-  if (!HasException(env))
+  if (!HasException(env)) {
     return false;
+  }
   env->ExceptionDescribe();
   env->ExceptionClear();
   return true;
 }
 
 bool CheckException(JNIEnv* env) {
-  if (!HasException(env))
+  if (!HasException(env)) {
     return true;
+  }
 
   jthrowable exception = env->ExceptionOccurred();
   env->ExceptionClear();

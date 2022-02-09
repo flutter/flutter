@@ -36,6 +36,9 @@
 #include "third_party/skia/src/gpu/gl/GrGLDefines.h"
 #include "third_party/tonic/converter/dart_converter.h"
 
+// CREATE_NATIVE_ENTRY is leaky by design
+// NOLINTBEGIN(clang-analyzer-core.StackAddressEscape)
+
 namespace flutter {
 namespace testing {
 
@@ -3696,3 +3699,5 @@ INSTANTIATE_TEST_SUITE_P(
 
 }  // namespace testing
 }  // namespace flutter
+
+// NOLINTEND(clang-analyzer-core.StackAddressEscape)

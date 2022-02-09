@@ -101,6 +101,7 @@ JsonMethodCodec::EncodeErrorEnvelopeInternal(
     const std::string& error_code,
     const std::string& error_message,
     const rapidjson::Document* error_details) const {
+  // NOLINTNEXTLINE(clang-analyzer-core.NullDereference)
   rapidjson::Document envelope(rapidjson::kArrayType);
   auto& allocator = envelope.GetAllocator();
   envelope.PushBack(rapidjson::Value(error_code, allocator), allocator);

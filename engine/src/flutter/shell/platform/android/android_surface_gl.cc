@@ -175,7 +175,7 @@ sk_sp<const GrGLInterface> AndroidSurfaceGL::GetGLInterface() const {
       EGLDisplay display = eglGetCurrentDisplay();
       EGLSurface draw_surface = eglGetCurrentSurface(EGL_DRAW);
       EGLSurface read_surface = eglGetCurrentSurface(EGL_READ);
-      EGLBoolean result =
+      [[maybe_unused]] EGLBoolean result =
           eglMakeCurrent(display, draw_surface, read_surface, new_context);
       FML_DCHECK(result == EGL_TRUE);
       result = eglMakeCurrent(display, draw_surface, read_surface, old_context);

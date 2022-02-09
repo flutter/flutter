@@ -5,6 +5,9 @@
 #include "flutter/shell/common/shell_test.h"
 #include "flutter/testing/testing.h"
 
+// CREATE_NATIVE_ENTRY is leaky by design
+// NOLINTBEGIN(clang-analyzer-core.StackAddressEscape)
+
 namespace flutter {
 namespace testing {
 
@@ -275,7 +278,9 @@ TEST_F(ShellTest, HandlesActualIphoneXsInputEvents) {
   // We don't use `constexpr int frame_time` here because MSVC doesn't handle
   // it well with lambda capture.
   UnitlessTime frame_time = 10000;
-  for (double base_latency_f = 0; base_latency_f < 1; base_latency_f += 0.1) {
+  double base_latency_f = 0.0;
+  for (int i = 0; i < 10; i++) {
+    base_latency_f += 0.1;
     // Everything is converted to int to avoid floating point error in
     // TestSimulatedInputEvents.
     UnitlessTime base_latency =
@@ -414,3 +419,5 @@ TEST_F(ShellTest, CanCorrectlySynthesizePointerPacket) {
 
 }  // namespace testing
 }  // namespace flutter
+
+// NOLINTEND(clang-analyzer-core.StackAddressEscape)

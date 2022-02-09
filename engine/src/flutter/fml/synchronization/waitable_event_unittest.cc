@@ -15,6 +15,9 @@
 #include "flutter/fml/macros.h"
 #include "gtest/gtest.h"
 
+// rand() is only used for tests in this file.
+// NOLINTBEGIN(clang-analyzer-security.insecureAPI.rand)
+
 namespace fml {
 namespace {
 
@@ -183,3 +186,5 @@ TEST(ManualResetWaitableEventTest, SignalMultiple) {
 
 }  // namespace
 }  // namespace fml
+
+// NOLINTEND(clang-analyzer-security.insecureAPI.rand)

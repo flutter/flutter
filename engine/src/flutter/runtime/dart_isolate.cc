@@ -1008,9 +1008,11 @@ Dart_Isolate DartIsolate::CreateDartIsolateGroup(
   {
     // Ownership of the isolate data objects has been transferred to the Dart
     // VM.
+    // NOLINTBEGIN(clang-analyzer-cplusplus.NewDeleteLeaks)
     std::shared_ptr<DartIsolate> embedder_isolate(*isolate_data);
     isolate_group_data.release();
     isolate_data.release();
+    // NOLINTEND(clang-analyzer-cplusplus.NewDeleteLeaks)
 
     success = InitializeIsolate(std::move(embedder_isolate), isolate, error);
   }

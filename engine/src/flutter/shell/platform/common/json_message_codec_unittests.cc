@@ -27,6 +27,7 @@ static void CheckEncodeDecode(const rapidjson::Document& value) {
 
 // Tests that a JSON document with various data types round-trips correctly.
 TEST(JsonMessageCodec, EncodeDecode) {
+  // NOLINTNEXTLINE(clang-analyzer-core.NullDereference)
   rapidjson::Document array(rapidjson::kArrayType);
   auto& allocator = array.GetAllocator();
 

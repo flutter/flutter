@@ -240,7 +240,7 @@ AndroidEGLSurface::AndroidEGLSurface(EGLSurface surface,
 }
 
 AndroidEGLSurface::~AndroidEGLSurface() {
-  auto result = eglDestroySurface(display_, surface_);
+  [[maybe_unused]] auto result = eglDestroySurface(display_, surface_);
   FML_DCHECK(result == EGL_TRUE);
 }
 
