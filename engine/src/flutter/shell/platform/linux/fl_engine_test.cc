@@ -11,6 +11,9 @@
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_json_message_codec.h"
 #include "flutter/shell/platform/linux/testing/fl_test.h"
 
+// MOCK_ENGINE_PROC is leaky by design
+// NOLINTBEGIN(clang-analyzer-core.StackAddressEscape)
+
 // Checks sending window metrics events works.
 TEST(FlEngineTest, WindowMetrics) {
   g_autoptr(FlEngine) engine = make_mock_engine();
@@ -315,3 +318,5 @@ TEST(FlEngineTest, DartEntrypointArgs) {
 
   EXPECT_TRUE(called);
 }
+
+// NOLINTEND(clang-analyzer-core.StackAddressEscape)

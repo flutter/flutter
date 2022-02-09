@@ -19,6 +19,9 @@
 #include "flutter/testing/assertions_skia.h"
 #include "flutter/testing/testing.h"
 
+// CREATE_NATIVE_ENTRY is leaky by design
+// NOLINTBEGIN(clang-analyzer-core.StackAddressEscape)
+
 namespace flutter {
 namespace testing {
 
@@ -483,3 +486,5 @@ TEST_F(EmbedderTest, ExternalTextureMetalRefreshedTooOften) {
 
 }  // namespace testing
 }  // namespace flutter
+
+// NOLINTEND(clang-analyzer-core.StackAddressEscape)

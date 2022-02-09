@@ -124,6 +124,7 @@ TEST(JsonMethodCodec, HandlesErrorEnvelopesWithNulls) {
 
 TEST(JsonMethodCodec, HandlesErrorEnvelopesWithDetails) {
   const JsonMethodCodec& codec = JsonMethodCodec::GetInstance();
+  // NOLINTNEXTLINE(clang-analyzer-core.NullDereference)
   rapidjson::Document details(rapidjson::kArrayType);
   auto& allocator = details.GetAllocator();
   details.PushBack("a", allocator);

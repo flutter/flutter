@@ -18,6 +18,9 @@
 #include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
 #include "flutter/testing/test_dart_native_resolver.h"
 
+// CREATE_NATIVE_ENTRY and MOCK_ENGINE_PROC are leaky by design
+// NOLINTBEGIN(clang-analyzer-core.StackAddressEscape)
+
 @interface FlutterEngine (Test)
 /**
  * The FlutterCompositor object currently in use by the FlutterEngine. This is
@@ -343,7 +346,7 @@ TEST_F(FlutterEngineTest, NativeCallbacks) {
   ASSERT_TRUE(latch_called);
 }
 
-// TODO: Enable after https://github.com/flutter/flutter/issues/96668 is fixed.
+// TODO(iskakaushik): Enable after https://github.com/flutter/flutter/issues/96668 is fixed.
 TEST(FlutterEngine, DISABLED_Compositor) {
   NSString* fixtures = @(flutter::testing::GetFixturesPath());
   FlutterDartProject* project = [[FlutterDartProject alloc]
@@ -475,3 +478,5 @@ TEST_F(FlutterEngineTest, MessengerCleanupConnectionWorks) {
 }
 
 }  // namespace flutter::testing
+
+// NOLINTEND(clang-analyzer-core.StackAddressEscape)

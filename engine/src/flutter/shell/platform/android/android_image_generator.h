@@ -38,12 +38,11 @@ class AndroidImageGenerator : public ImageGenerator {
   SkISize GetScaledDimensions(float desired_scale) override;
 
   // |ImageGenerator|
-  bool GetPixels(
-      const SkImageInfo& info,
-      void* pixels,
-      size_t row_bytes,
-      unsigned int frame_index = 0,
-      std::optional<unsigned int> prior_frame = std::nullopt) override;
+  bool GetPixels(const SkImageInfo& info,
+                 void* pixels,
+                 size_t row_bytes,
+                 unsigned int frame_index,
+                 std::optional<unsigned int> prior_frame) override;
 
   void DecodeImage();
 

@@ -22,7 +22,7 @@ IOSRenderTargetGL::IOSRenderTargetGL(fml::scoped_nsobject<CAEAGLLayer> layer,
     [layer_ setPresentsWithTransaction:YES];
   }
   auto context_switch = GLContextSwitch(std::make_unique<IOSSwitchableGLContext>(context_.get()));
-  bool context_current = context_switch.GetResult();
+  [[maybe_unused]] bool context_current = context_switch.GetResult();
 
   FML_DCHECK(context_current);
   FML_DCHECK(glGetError() == GL_NO_ERROR);
