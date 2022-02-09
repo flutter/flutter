@@ -920,12 +920,7 @@ void main() {
       gestureSettings: GestureSettings(physicalDoubleTapSlop: 100, physicalTouchSlop: 100),
     );
 
-    MediaQuery.enableDeviceGestureSettings = false;
-
-    expect(MediaQueryData.fromWindow(tester.binding.window).gestureSettings, const DeviceGestureSettings());
-
-    MediaQuery.enableDeviceGestureSettings = true;
-
     expect(MediaQueryData.fromWindow(tester.binding.window).gestureSettings.touchSlop, closeTo(33.33, 0.1)); // Repeating, of course
+    tester.binding.window.viewConfigurationTestValue = null;
   });
 }

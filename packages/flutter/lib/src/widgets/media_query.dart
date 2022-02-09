@@ -150,7 +150,7 @@ class MediaQueryData {
       highContrast = window.accessibilityFeatures.highContrast,
       alwaysUse24HourFormat = window.alwaysUse24HourFormat,
       navigationMode = NavigationMode.traditional,
-      gestureSettings = MediaQuery.enableDeviceGestureSettings ? DeviceGestureSettings.fromWindow(window) : const DeviceGestureSettings(),
+      gestureSettings = DeviceGestureSettings.fromWindow(window),
       displayFeatures = window.displayFeatures;
 
   /// The size of the media in logical pixels (e.g, the size of the screen).
@@ -876,10 +876,6 @@ class MediaQuery extends InheritedWidget {
       child: child,
     );
   }
-
-  /// If false, device gesture settings are not read from the window and left as their
-  /// default.
-  static bool enableDeviceGestureSettings = true;
 
   /// Contains information about the current media.
   ///
