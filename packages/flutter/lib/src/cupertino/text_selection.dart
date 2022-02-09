@@ -247,14 +247,8 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
 
   /// Builder for iOS text selection edges.
   @override
-  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, [VoidCallback? onTap, double? startGlyphHeight, double? endGlyphHeight]) {
+  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, [VoidCallback? onTap]) {
     // iOS selection handles do not respond to taps.
-
-    // We want a size that's a vertical line the height of the text plus a 18.0
-    // padding in every direction that will constitute the selection drag area.
-    startGlyphHeight = startGlyphHeight ?? textLineHeight;
-    endGlyphHeight = endGlyphHeight ?? textLineHeight;
-
     final Size desiredSize;
     final Widget handle;
 
@@ -267,14 +261,14 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
     // on top of the text selection endpoints.
     switch (type) {
       case TextSelectionHandleType.left:
-        desiredSize = getHandleSize(startGlyphHeight);
+        desiredSize = getHandleSize(textLineHeight);
         handle = SizedBox.fromSize(
           size: desiredSize,
           child: customPaint,
         );
         return handle;
       case TextSelectionHandleType.right:
-        desiredSize = getHandleSize(endGlyphHeight);
+        desiredSize = getHandleSize(textLineHeight);
         handle = SizedBox.fromSize(
           size: desiredSize,
           child: customPaint,
@@ -296,17 +290,14 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
   ///
   /// See [TextSelectionControls.getHandleAnchor].
   @override
-  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight, [double? startGlyphHeight, double? endGlyphHeight]) {
-    startGlyphHeight = startGlyphHeight ?? textLineHeight;
-    endGlyphHeight = endGlyphHeight ?? textLineHeight;
-
+  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
     final Size handleSize;
 
     switch (type) {
       // The circle is at the top for the left handle, and the anchor point is
       // all the way at the bottom of the line.
       case TextSelectionHandleType.left:
-        handleSize = getHandleSize(startGlyphHeight);
+        handleSize = getHandleSize(textLineHeight);
         return Offset(
           handleSize.width / 2,
           handleSize.height,
@@ -314,7 +305,7 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
       // The right handle is vertically flipped, and the anchor point is near
       // the top of the circle to give slight overlap.
       case TextSelectionHandleType.right:
-        handleSize = getHandleSize(endGlyphHeight);
+        handleSize = getHandleSize(textLineHeight);
         return Offset(
           handleSize.width / 2,
           handleSize.height - 2 * _kSelectionHandleRadius + _kSelectionHandleOverlap,
