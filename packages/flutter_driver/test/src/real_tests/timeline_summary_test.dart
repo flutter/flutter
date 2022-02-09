@@ -753,7 +753,7 @@ void main() {
 
     group('RefreshRateSummarizer tests', () {
 
-      const double _kCompareDelta = 0.01;
+      const double kCompareDelta = 0.01;
       RefreshRateSummary _summarize(List<Map<String, dynamic>> traceEvents) {
         final Timeline timeline = Timeline.fromJson(<String, dynamic>{
           'traceEvents': traceEvents,
@@ -784,7 +784,7 @@ void main() {
                                                                   margin: margin,
                                                                  );
         final RefreshRateSummary summary = _summarize(events);
-        expect(summary.percentageOf30HzFrames, closeTo(100, _kCompareDelta));
+        expect(summary.percentageOf30HzFrames, closeTo(100, kCompareDelta));
         expect(summary.percentageOf60HzFrames, 0);
         expect(summary.percentageOf90HzFrames, 0);
         expect(summary.percentageOf120HzFrames, 0);
@@ -804,7 +804,7 @@ void main() {
 
         final RefreshRateSummary summary = _summarize(events);
         expect(summary.percentageOf30HzFrames, 0);
-        expect(summary.percentageOf60HzFrames, closeTo(100, _kCompareDelta));
+        expect(summary.percentageOf60HzFrames, closeTo(100, kCompareDelta));
         expect(summary.percentageOf90HzFrames, 0);
         expect(summary.percentageOf120HzFrames, 0);
         expect(summary.framesWithIllegalRefreshRate, isEmpty);
@@ -824,7 +824,7 @@ void main() {
         final RefreshRateSummary summary = _summarize(events);
         expect(summary.percentageOf30HzFrames, 0);
         expect(summary.percentageOf60HzFrames, 0);
-        expect(summary.percentageOf90HzFrames, closeTo(100, _kCompareDelta));
+        expect(summary.percentageOf90HzFrames, closeTo(100, kCompareDelta));
         expect(summary.percentageOf120HzFrames, 0);
         expect(summary.framesWithIllegalRefreshRate, isEmpty);
       });
@@ -843,7 +843,7 @@ void main() {
         expect(summary.percentageOf30HzFrames, 0);
         expect(summary.percentageOf60HzFrames, 0);
         expect(summary.percentageOf90HzFrames, 0);
-        expect(summary.percentageOf120HzFrames, closeTo(100, _kCompareDelta));
+        expect(summary.percentageOf120HzFrames, closeTo(100, kCompareDelta));
         expect(summary.framesWithIllegalRefreshRate, isEmpty);
       });
 
@@ -861,7 +861,7 @@ void main() {
         expect(summary.percentageOf90HzFrames, 0);
         expect(summary.percentageOf120HzFrames, 0);
         expect(summary.framesWithIllegalRefreshRate, isNotEmpty);
-        expect(summary.framesWithIllegalRefreshRate.first, closeTo(100, _kCompareDelta));
+        expect(summary.framesWithIllegalRefreshRate.first, closeTo(100, kCompareDelta));
       });
 
       test('Mixed refresh rates.', () async {
@@ -910,10 +910,10 @@ void main() {
                                       ));
 
         final RefreshRateSummary summary  = _summarize(events);
-        expect(summary.percentageOf30HzFrames, closeTo(num30Hz, _kCompareDelta));
-        expect(summary.percentageOf60HzFrames, closeTo(num60Hz, _kCompareDelta));
-        expect(summary.percentageOf90HzFrames, closeTo(num90Hz, _kCompareDelta));
-        expect(summary.percentageOf120HzFrames, closeTo(num120Hz, _kCompareDelta));
+        expect(summary.percentageOf30HzFrames, closeTo(num30Hz, kCompareDelta));
+        expect(summary.percentageOf60HzFrames, closeTo(num60Hz, kCompareDelta));
+        expect(summary.percentageOf90HzFrames, closeTo(num90Hz, kCompareDelta));
+        expect(summary.percentageOf120HzFrames, closeTo(num120Hz, kCompareDelta));
         expect(summary.framesWithIllegalRefreshRate, isNotEmpty);
         expect(summary.framesWithIllegalRefreshRate.length, 10);
       });
