@@ -1370,14 +1370,15 @@ void main() {
     // Handle not shown.
     expect(controller.selection.isCollapsed, true);
     final Finder fadeFinder = find.byType(FadeTransition);
-    expect(fadeFinder, findsNothing);
+    FadeTransition handle = tester.widget(fadeFinder.at(0));
+    expect(handle.opacity.value, equals(0.0));
 
     // Tap on the text field to show the handle.
     await tester.tap(find.byType(TextField));
     await tester.pumpAndSettle();
     expect(controller.selection.isCollapsed, true);
     expect(fadeFinder, findsNWidgets(1));
-    final FadeTransition handle = tester.widget(fadeFinder.at(0));
+    handle = tester.widget(fadeFinder.at(0));
     expect(handle.opacity.value, equals(1.0));
 
     // Enter more text.
@@ -1388,7 +1389,8 @@ void main() {
 
     // Handle not shown.
     expect(controller.selection.isCollapsed, true);
-    expect(fadeFinder, findsNothing);
+    handle = tester.widget(fadeFinder.at(0));
+    expect(handle.opacity.value, equals(0.0));
   });
 
   testWidgets('selection handles are excluded from the semantics', (WidgetTester tester) async {

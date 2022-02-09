@@ -707,7 +707,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final Finder gestureDetector = find.descendant(
-      of: find.byType(Visibility),
+      of: find.byType(CompositedTransformFollower),
       matching: find.descendant(
         of: find.byType(FadeTransition),
         matching: find.byType(GestureDetector),
@@ -910,7 +910,7 @@ class FakeRenderEditable extends RenderEditable {
 
 class CustomTextSelectionControls extends TextSelectionControls {
   @override
-  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, [VoidCallback? onTap, double? startGlyphHeight, double? endGlyphHeight]) {
+  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, [VoidCallback? onTap]) {
     throw UnimplementedError();
   }
 
@@ -929,7 +929,7 @@ class CustomTextSelectionControls extends TextSelectionControls {
   }
 
   @override
-  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight, [double? startGlyphHeight, double? endGlyphHeight]) {
+  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
     throw UnimplementedError();
   }
 

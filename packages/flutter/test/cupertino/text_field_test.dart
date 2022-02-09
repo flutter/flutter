@@ -31,7 +31,7 @@ const bool isContextMenuProvidedByPlatform = isBrowser;
 
 class MockTextSelectionControls extends TextSelectionControls {
   @override
-  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, [VoidCallback? onTap, double? startGlyphHeight, double? endGlyphHeight]) {
+  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, [VoidCallback? onTap]) {
     throw UnimplementedError();
   }
 
@@ -50,7 +50,7 @@ class MockTextSelectionControls extends TextSelectionControls {
   }
 
   @override
-  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight, [double? startGlyphHeight, double? endGlyphHeight]) {
+  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
     throw UnimplementedError();
   }
 
