@@ -1,4 +1,4 @@
-Signature: 79c20c4a7afcc221a22b506504485aec
+Signature: 33f03659c6a442f7cabb224f6d879026
 
 UNUSED LICENSES:
 
@@ -487,7 +487,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.input/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.inspect/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.intl/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io2/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.kernel/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ldsvc/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.legacymetrics/meta.json
@@ -1228,7 +1227,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.input/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.inspect/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.intl/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io2/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.kernel/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ldsvc/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.legacymetrics/meta.json
@@ -1866,7 +1864,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.input/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.inspect/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.intl/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io2/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.kernel/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ldsvc/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.legacymetrics/meta.json
@@ -2278,8 +2275,8 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.input.virtualkeyboard/virtual_keyb
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.input/keymap.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.intl/calendar.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.intl/time_zones.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/inotify.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/rights-abilities.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io2/inotify.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.kernel/cpu-resource.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.lightsensor/calibrator.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.lightsensor/sensor.fidl
@@ -2742,7 +2739,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.power.statecontrol/reboot
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.input.report/consumer_control.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.input.report/device_ids.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.input/keys.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io2/locking.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/locking.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.kernel/debug-resource.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.kernel/hypervisor-resource.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.kernel/info-resource.fidl
@@ -3320,24 +3317,19 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.inspect/tree.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.intl/property_provider.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/connection-info.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/connection-options.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/connector.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/deprecated.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/directory-entry.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/directory-iterator.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/directory-watcher.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/directory2.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/file2.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/io.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/memory.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/node-attributes.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io2/connection-info.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io2/connection-options.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io2/connector.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io2/debuglog.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io2/deprecated.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io2/directory-entry.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io2/directory-iterator.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io2/directory-watcher.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io2/directory.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io2/file.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io2/io2.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io2/memory.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io2/node-attributes.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io2/node.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io2/pipe.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io2/posix-socket.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io2/rights-abilities.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/node2.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/pipe.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/socket.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.kernel/kernel-counter.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.kernel/kernel-debug.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.kernel/kernel-stats.fidl
