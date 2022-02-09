@@ -42,7 +42,7 @@ const Map<String, List<String>> _platformAdaptiveIdentifiers = <String, List<Str
 };
 
 // Rewrite certain Flutter IDs (numbers) using prefix matching.
-const Map<String, String> identifierPrefixRewrites = <String, String>{
+const Map<String, String> _identifierPrefixRewrites = <String, String>{
   '1': 'one_',
   '2': 'two_',
   '3': 'three_',
@@ -77,7 +77,7 @@ const Map<String, String> identifierPrefixRewrites = <String, String>{
 };
 
 // Rewrite certain Flutter IDs (reserved keywords) using exact matching.
-const Map<String, String> identifierExactRewrites = <String, String>{
+const Map<String, String> _identifierExactRewrites = <String, String>{
   'class': 'class_',
   'new': 'new_',
   'switch': 'switch_',
@@ -191,10 +191,10 @@ void main(List<String> args) {
   }
 
   final String newCodepointsString = newCodepointsFile.readAsStringSync();
-  final Map<String, String> newTokenPairMap = _stringToTokenPairMap(newCodepointsString);
+  final Map<String, String> newTokenPairMap = stringToTokenPairMap(newCodepointsString);
 
   final String oldCodepointsString = oldCodepointsFile.readAsStringSync();
-  final Map<String, String> oldTokenPairMap = _stringToTokenPairMap(oldCodepointsString);
+  final Map<String, String> oldTokenPairMap = stringToTokenPairMap(oldCodepointsString);
 
   stderr.writeln('Performing safety checks');
   final bool isSuperset = testIsSuperset(newTokenPairMap, oldTokenPairMap);
@@ -251,7 +251,7 @@ ArgResults _handleArguments(List<String> args) {
   return argParser.parse(args);
 }
 
-Map<String, String> _stringToTokenPairMap(String codepointData) {
+Map<String, String> stringToTokenPairMap(String codepointData) {
   final Iterable<String> cleanData = LineSplitter.split(codepointData)
       .map((String line) => line.trim())
       .where((String line) => line.isNotEmpty);
@@ -500,21 +500,21 @@ class Icon {
   static String generateFlutterId(String id) {
     String flutterId = id;
     // Exact identifier rewrites.
-    for (final MapEntry<String, String> rewritePair in identifierExactRewrites.entries) {
+    for (final MapEntry<String, String> rewritePair in _identifierExactRewrites.entries) {
       final String shortId = Icon._generateShortId(id);
       if (shortId == rewritePair.key) {
         flutterId = id.replaceFirst(
           rewritePair.key,
-          identifierExactRewrites[rewritePair.key]!,
+          _identifierExactRewrites[rewritePair.key]!,
         );
       }
     }
     // Prefix identifier rewrites.
-    for (final MapEntry<String, String> rewritePair in identifierPrefixRewrites.entries) {
+    for (final MapEntry<String, String> rewritePair in _identifierPrefixRewrites.entries) {
       if (id.startsWith(rewritePair.key)) {
         flutterId = id.replaceFirst(
           rewritePair.key,
-          identifierPrefixRewrites[rewritePair.key]!,
+          _identifierPrefixRewrites[rewritePair.key]!,
         );
       }
     }
