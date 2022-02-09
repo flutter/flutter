@@ -321,7 +321,7 @@ void main() {
     ]);
   });
 
-  testWidgets('The mouse cursor is themeable', (WidgetTester tester) async {
+  testWidgets('FloatingActionButton.mouseCursor uses FloatingActionButtonThemeData.mouseCursor when specified.', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData().copyWith(
         floatingActionButtonTheme: FloatingActionButtonThemeData(
