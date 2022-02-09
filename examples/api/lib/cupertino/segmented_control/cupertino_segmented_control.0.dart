@@ -42,7 +42,7 @@ class _SegmentedControlSampleState extends State<SegmentedControlSample> {
         middle: CupertinoSegmentedControl<Sky>(
           // Provide a horizontal padding around children.
           padding: const EdgeInsets.symmetric(horizontal: 12),
-          // This represent a currently selected segmented control. 
+          // This represent a currently selected segmented control.
           groupValue: _selectedSegment,
           // Callback that sets the selected segmented control.
           onValueChanged: (Sky value) {
