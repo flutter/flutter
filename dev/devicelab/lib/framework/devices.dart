@@ -505,7 +505,13 @@ class AndroidDevice extends Device {
   /// See: https://android.googlesource.com/platform/frameworks/base/+/master/core/java/android/os/PowerManagerInternal.java
   Future<String> _getWakefulness() async {
     final String powerInfo = await shellEval('dumpsys', <String>['power']);
-    final String wakefulness = grep('mWakefulness=', from: powerInfo).single.split('=')[1].trim();
+    // A motoG4 phone returns `mWakefulness=Awake`.
+    List<String> wakefulnessList = grep('mWakefulness=', from: powerInfo).toList();
+    // A Samsung phone returns `getWakefullnessLocked()=Awake`.
+    if (wakefulnessList.isEmpty) {
+      wakefulnessList = grep('getWakefullnessLocked()=', from: powerInfo).toList();
+    }
+    final String wakefulness = wakefulnessList.single.split('=')[1].trim();
     return wakefulness;
   }
 
