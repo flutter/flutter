@@ -41,7 +41,7 @@ class _SegmentedControlSampleState extends State<SegmentedControlSample> {
         // This Cupertino segmented control has enum as the type.
         middle: CupertinoSlidingSegmentedControl<Sky>(
           thumbColor: CupertinoColors.activeBlue,
-          // This represent a currently selected segmented control. 
+          // This represent a currently selected segmented control.
           groupValue: _selectedSegment,
           // Callback that sets the selected segmented control.
           onValueChanged: (Sky? value) {
