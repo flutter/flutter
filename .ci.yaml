@@ -2062,7 +2062,7 @@ targets:
       task_name: picture_cache_perf__timeline_summary
     scheduler: luci
 
-  - name: Linux_android picture_cache_complexity_scoring_perf__timeline_summary
+  - name: Linux_android android_picture_cache_complexity_scoring_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     bringup: true
     presubmit: false
@@ -2070,7 +2070,7 @@ targets:
     properties:
       tags: >
         ["devicelab","android","linux"]
-      task_name: picture_cache_complexity_scoring_perf__timeline_summary
+      task_name: android_picture_cache_complexity_scoring_perf__timeline_summary
     scheduler: luci
 
   - name: Linux_android platform_channels_benchmarks
@@ -3382,7 +3382,7 @@ targets:
       task_name: new_gallery_ios__transition_perf
     scheduler: luci
 
-  - name: Mac_ios picture_cache_complexity_scoring_perf__timeline_summary
+  - name: Mac_ios ios_picture_cache_complexity_scoring_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     bringup: true
     presubmit: false
@@ -3390,7 +3390,7 @@ targets:
     properties:
       tags: >
         ["devicelab","ios","mac"]
-      task_name: picture_cache_complexity_scoring_perf__timeline_summary
+      task_name: ios_picture_cache_complexity_scoring_perf__timeline_summary
     scheduler: luci
 
   - name: Mac_ios platform_channel_sample_test_ios
