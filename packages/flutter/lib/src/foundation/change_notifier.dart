@@ -107,7 +107,8 @@ class ChangeNotifier implements Listenable {
   // of const [] for performance reasons.
   // See https://github.com/flutter/flutter/pull/71947/files#r545722476 for
   // more details.
-  List<VoidCallback?> _listeners = List<VoidCallback?>.filled(0, null);
+  static final List<VoidCallback?> _emptyListeners = List<VoidCallback?>.filled(0, null);
+  List<VoidCallback?> _listeners = _emptyListeners;
   int _notificationCallStackDepth = 0;
   int _reentrantlyRemovedListeners = 0;
   bool _debugDisposed = false;
@@ -234,11 +235,11 @@ class ChangeNotifier implements Listenable {
   ///    changes.
   @override
   void removeListener(VoidCallback listener) {
-    // This method is allowed to be called on disposed instance for usability
-    // reason. Due to how our frame scheduling logic between render object and
-    // overlay, it is common that the owner of this instance would be disposed a
-    // frame earlier than the listeners. Allows calls to this method after it is
-    // disposed make it easier for listeners to properly clean up.
+    // This method is allowed to be called on disposed instances for usability
+    // reasons. Due to how our frame scheduling logic between render objects and
+    // overlays, it is common that the owner of this instance would be disposed a
+    // frame earlier than the listeners. Allowing calls to this method after it
+    // is disposed makes it easier for listeners to properly clean up.
     for (int i = 0; i < _count; i++) {
       final VoidCallback? listenerAtIndex = _listeners[i];
       if (listenerAtIndex == listener) {
@@ -271,7 +272,7 @@ class ChangeNotifier implements Listenable {
       _debugDisposed = true;
       return true;
     }());
-    _listeners = List<VoidCallback?>.filled(0, null);
+    _listeners = _emptyListeners;
     _count = 0;
   }
 
