@@ -3097,36 +3097,38 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
           anchor: anchor,
           children: const <Widget>[
             // TODO(justinmc): Should expose the buttons.
-            Text('hello'),
+            Text('Root menu!'),
           ],
         );
       },
-      child: _ScaffoldScope(
-        hasDrawer: hasDrawer,
-        geometryNotifier: _geometryNotifier,
-        child: ScrollNotificationObserver(
-          child: Material(
-            color: widget.backgroundColor ?? themeData.scaffoldBackgroundColor,
-            child: AnimatedBuilder(animation: _floatingActionButtonMoveController, builder: (BuildContext context, Widget? child) {
-              return CustomMultiChildLayout(
-                delegate: _ScaffoldLayout(
-                  extendBody: extendBody,
-                  extendBodyBehindAppBar: widget.extendBodyBehindAppBar,
-                  minInsets: minInsets,
-                  minViewPadding: minViewPadding,
-                  currentFloatingActionButtonLocation: _floatingActionButtonLocation!,
-                  floatingActionButtonMoveAnimationProgress: _floatingActionButtonMoveController.value,
-                  floatingActionButtonMotionAnimator: _floatingActionButtonAnimator,
-                  geometryNotifier: _geometryNotifier,
-                  previousFloatingActionButtonLocation: _previousFloatingActionButtonLocation!,
-                  textDirection: textDirection,
-                  isSnackBarFloating: isSnackBarFloating,
-                  extendBodyBehindMaterialBanner: extendBodyBehindMaterialBanner,
-                  snackBarWidth: snackBarWidth,
-                ),
-                children: children,
-              );
-            }),
+      child: _DesktopContextualMenuGestureDetector(
+        child: _ScaffoldScope(
+          hasDrawer: hasDrawer,
+          geometryNotifier: _geometryNotifier,
+          child: ScrollNotificationObserver(
+            child: Material(
+              color: widget.backgroundColor ?? themeData.scaffoldBackgroundColor,
+              child: AnimatedBuilder(animation: _floatingActionButtonMoveController, builder: (BuildContext context, Widget? child) {
+                return CustomMultiChildLayout(
+                  delegate: _ScaffoldLayout(
+                    extendBody: extendBody,
+                    extendBodyBehindAppBar: widget.extendBodyBehindAppBar,
+                    minInsets: minInsets,
+                    minViewPadding: minViewPadding,
+                    currentFloatingActionButtonLocation: _floatingActionButtonLocation!,
+                    floatingActionButtonMoveAnimationProgress: _floatingActionButtonMoveController.value,
+                    floatingActionButtonMotionAnimator: _floatingActionButtonAnimator,
+                    geometryNotifier: _geometryNotifier,
+                    previousFloatingActionButtonLocation: _previousFloatingActionButtonLocation!,
+                    textDirection: textDirection,
+                    isSnackBarFloating: isSnackBarFloating,
+                    extendBodyBehindMaterialBanner: extendBodyBehindMaterialBanner,
+                    snackBarWidth: snackBarWidth,
+                  ),
+                  children: children,
+                );
+              }),
+            ),
           ),
         ),
       ),
@@ -3392,5 +3394,55 @@ class _ScaffoldScope extends InheritedWidget {
   @override
   bool updateShouldNotify(_ScaffoldScope oldWidget) {
     return hasDrawer != oldWidget.hasDrawer;
+  }
+}
+
+class _DesktopContextualMenuGestureDetector extends StatefulWidget {
+  const _DesktopContextualMenuGestureDetector({
+    required this.child,
+    Key? key,
+  }) : super(key: key);
+
+  final Widget child;
+
+  @override
+  State<_DesktopContextualMenuGestureDetector> createState() => _DesktopContextualMenuGestureDetectorState();
+}
+
+class _DesktopContextualMenuGestureDetectorState extends State<_DesktopContextualMenuGestureDetector> {
+  void _onSecondaryTapUp(TapUpDetails details) {
+    _contextualMenuAreaState.showContextualMenu(details.globalPosition);
+  }
+
+  void _onTap() {
+    _contextualMenuAreaState.disposeContextualMenu();
+  }
+
+  ContextualMenuAreaState get _contextualMenuAreaState {
+    final ContextualMenuAreaState? state = ContextualMenuArea.of(context);
+    assert(state != null, 'No ContextualMenuArea found above in the Widget tree.');
+    return state!;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      // TODO(justinmc): Secondary tapping when the menu is open should fade out
+      // and then fade in to show again at the new location.
+      onSecondaryTapUp: _onSecondaryTapUp,
+      // TODO(justinmc): Ok to look this up in build?
+      onTap: _contextualMenuAreaState.contextualMenuIsVisible ? _onTap : null,
+      child: widget.child,
+    );
   }
 }

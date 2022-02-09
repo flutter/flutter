@@ -377,6 +377,12 @@ class TextSelectionOverlay {
   /// A copy/paste toolbar.
   OverlayEntry? _toolbar;
 
+  ContextualMenuAreaState get _contextualMenuAreaState {
+    final ContextualMenuAreaState? state = ContextualMenuArea.of(context);
+    assert(state != null, 'TextSelectionOverlay must be placed under a ContextualMenuArea in the Widget tree');
+    return state!;
+  }
+
   TextSelection get _selection => _value.selection;
 
   /// Whether selection handles are visible.
@@ -441,6 +447,8 @@ class TextSelectionOverlay {
       anchor: renderObject.lastSecondaryTapDownPosition!,
     );
     */
+    // TODO(justinmc): How did this originally position itself?
+    _contextualMenuAreaState.showContextualMenu(renderObject.lastSecondaryTapDownPosition!);
 
     /*
     assert(_toolbar == null);

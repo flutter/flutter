@@ -44,51 +44,48 @@ class ContextualMenuArea extends StatefulWidget {
   final ContextualMenuBuilder buildMenu;
   final Widget child;
 
+  // TODO(justinmc): Another option would be to return ContextualMenuController
+  // but make it so that it exists even when the overlay isn't shown.
+  /// Returns the nearest [ContextualMenuController] for the given
+  /// [BuildContext], if any.
+  static ContextualMenuAreaState? of(BuildContext context) {
+    return context.findAncestorStateOfType<ContextualMenuAreaState>();
+  }
+
   @override
-  State<ContextualMenuArea> createState() => _ContextualMenuAreaState();
+  State<ContextualMenuArea> createState() => ContextualMenuAreaState();
 }
 
-class _ContextualMenuAreaState extends State<ContextualMenuArea> {
+class ContextualMenuAreaState extends State<ContextualMenuArea> {
   ContextualMenuController? _contextualMenuController;
 
-  void _onSecondaryTapUp(TapUpDetails details) {
+  bool get contextualMenuIsVisible => _contextualMenuController != null;
+
+  // TODO(justinmc): This kills any existing menu then creates a new one. Is
+  // that ok? Do I ever need to move an existing menu?
+  void showContextualMenu(Offset anchor) {
     _contextualMenuController?.dispose();
     _contextualMenuController = ContextualMenuController(
-      anchor: details.globalPosition,
+      anchor: anchor,
       context: context,
       buildMenu: widget.buildMenu,
     );
   }
 
-  void _onTap() {
-    _disposeContextualMenu();
-  }
-
-  void _disposeContextualMenu() {
+  void disposeContextualMenu() {
     _contextualMenuController?.dispose();
     _contextualMenuController = null;
   }
 
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   void dispose() {
-    _disposeContextualMenu();
+    disposeContextualMenu();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      // TODO(justinmc): Secondary tapping when the menu is open should fade out
-      // and then fade in to show again at the new location.
-      onSecondaryTapUp: _onSecondaryTapUp,
-      onTap: _contextualMenuController == null ? null : _onTap,
-      child: widget.child,
-    );
+    return widget.child;
   }
 }
 
