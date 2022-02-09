@@ -507,6 +507,8 @@ class TextSelectionOverlay {
     hide();
     renderObject.selectionStartInViewport.removeListener(_updateHandleVisibilities);
     renderObject.selectionEndInViewport.removeListener(_updateHandleVisibilities);
+    renderObject.selectionStartInViewport.removeListener(_updateToolbarVisibility);
+    renderObject.selectionEndInViewport.removeListener(_updateToolbarVisibility);
   }
 
   Widget _buildStartHandle(BuildContext context) {
