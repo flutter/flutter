@@ -506,12 +506,9 @@ class AndroidDevice extends Device {
   Future<String> _getWakefulness() async {
     final String powerInfo = await shellEval('dumpsys', <String>['power']);
     // A motoG4 phone returns `mWakefulness=Awake`.
-    List<String> wakefulnessList = grep('mWakefulness=', from: powerInfo).toList();
     // A Samsung phone returns `getWakefullnessLocked()=Awake`.
-    if (wakefulnessList.isEmpty) {
-      wakefulnessList = grep('getWakefullnessLocked()=', from: powerInfo).toList();
-    }
-    final String wakefulness = wakefulnessList.single.split('=')[1].trim();
+    final RegExp wakefulnessRegexp = RegExp(r'.*(mWakefulness=|getWakefulnessLocked\(\)=).*');
+    final String wakefulness = grep(wakefulnessRegexp, from: powerInfo).single.split('=')[1].trim();
     return wakefulness;
   }
 

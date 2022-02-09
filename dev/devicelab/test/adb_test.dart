@@ -198,7 +198,7 @@ class FakeDevice extends AndroidDevice {
 
   static void pretendAwakeSamsung() {
     output = '''
-      getWakefullnessLocked()=Awake
+      getWakefulnessLocked()=Awake
     ''';
   }
 
