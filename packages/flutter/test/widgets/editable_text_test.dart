@@ -4709,14 +4709,14 @@ void main() {
       if (expectedRightVisibleBefore)
         expect(right.opacity.value, equals(1.0));
 
-      await tester.pump(TextSelectionOverlay.fadeDuration ~/ 2);
+      await tester.pump(SelectionOverlay.fadeDuration ~/ 2);
 
       if (expectedLeftVisible != expectedLeftVisibleBefore)
         expect(left.opacity.value, equals(0.5));
       if (expectedRightVisible != expectedRightVisibleBefore)
         expect(right.opacity.value, equals(0.5));
 
-      await tester.pump(TextSelectionOverlay.fadeDuration ~/ 2);
+      await tester.pump(SelectionOverlay.fadeDuration ~/ 2);
 
       if (expectedLeftVisible)
         expect(left.opacity.value, equals(1.0));
@@ -6515,14 +6515,14 @@ void main() {
       if (expectedRightVisibleBefore)
         expect(right.opacity.value, equals(1.0));
 
-      await tester.pump(TextSelectionOverlay.fadeDuration ~/ 2);
+      await tester.pump(SelectionOverlay.fadeDuration ~/ 2);
 
       if (expectedLeftVisible != expectedLeftVisibleBefore)
         expect(left.opacity.value, equals(0.5));
       if (expectedRightVisible != expectedRightVisibleBefore)
         expect(right.opacity.value, equals(0.5));
 
-      await tester.pump(TextSelectionOverlay.fadeDuration ~/ 2);
+      await tester.pump(SelectionOverlay.fadeDuration ~/ 2);
 
       if (expectedLeftVisible)
         expect(left.opacity.value, equals(1.0));
