@@ -7265,7 +7265,7 @@ void main() {
       await tester.pumpAndSettle();
 
       final EditableTextState state2 = tester.state<EditableTextState>(find.byWidget(editableText2));
-      // Update editableText2, should not request focus.
+      // Update editableText2 when it's not focused. It should not request focus.
       state2.updateEditingValue(
         const TextEditingValue(text: 'password', selection: TextSelection.collapsed(offset: 8)),
       );
