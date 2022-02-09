@@ -297,21 +297,6 @@ void main() {
     ...noColorTerminalOverride,
   });
 
-  testUsingContext('create --offline success', () async {
-    final String flutterBin = globals.fs.path.join(getFlutterRoot(), 'bin', globals.platform.isWindows ? 'flutter.bat' : 'flutter');
-    final ProcessResult exec = await Process.run(
-      flutterBin,
-      <String>[
-        'create',
-        '--offline',
-        'my_project'
-      ],
-      workingDirectory: tempDir.path,
-    );
-    expect(exec.exitCode, 0);
-    expect(exec.stdout.toString().contains('Running "flutter pub get" in flutter_tools'), false);
-  });
-
   testUsingContext('Will create an app project if non-empty non-project directory exists without .metadata', () async {
     await projectDir.absolute.childDirectory('blag').create(recursive: true);
     await projectDir.absolute.childDirectory('.idea').create(recursive: true);
