@@ -275,8 +275,10 @@ class TextSelectionOverlay {
     );
     renderObject.selectionStartInViewport.addListener(_updateHandleVisibilities);
     renderObject.selectionEndInViewport.addListener(_updateHandleVisibilities);
+    renderObject.selectionStartInViewport.addListener(_updateToolbarVisibility);
+    renderObject.selectionEndInViewport.addListener(_updateToolbarVisibility);
     _updateHandleVisibilities();
-    _toolbarController = AnimationController(duration: fadeDuration, vsync: overlay!);
+    _updateToolbarVisibility();
   }
 
   /// The context in which the selection handles should appear.
@@ -356,9 +358,6 @@ class TextSelectionOverlay {
   /// Controls the fade-in and fade-out animations for the toolbar and handles.
   static const Duration fadeDuration = Duration(milliseconds: 150);
 
-  late final AnimationController _toolbarController;
-  Animation<double> get _toolbarOpacity => _toolbarController.view;
-
   /// Retrieve current value.
   @visibleForTesting
   TextEditingValue get value => _value;
@@ -379,6 +378,11 @@ class TextSelectionOverlay {
   void _updateHandleVisibilities() {
     _effectiveStartHandleVisibility.value = _handlesVisible && renderObject.selectionStartInViewport.value;
     _effectiveEndHandleVisibility.value = _handlesVisible && renderObject.selectionEndInViewport.value;
+  }
+
+  final ValueNotifier<bool> _effectiveToolbarVisibility = ValueNotifier<bool>(false);
+  void _updateToolbarVisibility() {
+    _effectiveToolbarVisibility.value = renderObject.selectionStartInViewport.value || renderObject.selectionEndInViewport.value;
   }
 
   /// Whether selection handles are visible.
@@ -433,7 +437,6 @@ class TextSelectionOverlay {
     assert(_toolbar == null);
     _toolbar = OverlayEntry(builder: _buildToolbar);
     Overlay.of(context, rootOverlay: true, debugRequiredFor: debugRequiredFor)!.insert(_toolbar!);
-    _toolbarController.forward(from: 0.0);
   }
 
   /// Updates the overlay after the selection has changed.
@@ -495,7 +498,6 @@ class TextSelectionOverlay {
   /// To hide the whole overlay, see [hide].
   void hideToolbar() {
     assert(_toolbar != null);
-    _toolbarController.stop();
     _toolbar?.remove();
     _toolbar = null;
   }
@@ -503,7 +505,6 @@ class TextSelectionOverlay {
   /// Final cleanup.
   void dispose() {
     hide();
-    _toolbarController.dispose();
     renderObject.selectionStartInViewport.removeListener(_updateHandleVisibilities);
     renderObject.selectionEndInViewport.removeListener(_updateHandleVisibilities);
   }
@@ -686,27 +687,17 @@ class TextSelectionOverlay {
 
     return Directionality(
       textDirection: Directionality.of(this.context),
-      child: FadeTransition(
-        opacity: _toolbarOpacity,
-        child: CompositedTransformFollower(
-          link: toolbarLayerLink,
-          showWhenUnlinked: false,
-          offset: -editingRegion.topLeft,
-          child: Builder(
-            builder: (BuildContext context) {
-              return selectionControls!.buildToolbar(
-                context,
-                editingRegion,
-                renderObject.preferredLineHeight,
-                midpoint,
-                endpoints,
-                selectionDelegate,
-                clipboardStatus!,
-                renderObject.lastSecondaryTapDownPosition,
-              );
-            },
-          ),
-        ),
+      child: _SelectionToolbarOverlay(
+        preferredLineHeight: renderObject.preferredLineHeight,
+        lastSecondaryTapDownPosition: renderObject.lastSecondaryTapDownPosition,
+        layerLink: toolbarLayerLink,
+        editingRegion: editingRegion,
+        selectionControls: selectionControls,
+        midpoint: midpoint,
+        endpoints: endpoints,
+        visibility: _effectiveToolbarVisibility,
+        selectionDelegate: selectionDelegate,
+        clipboardStatus: clipboardStatus,
       ),
     );
   }
@@ -735,6 +726,101 @@ class TextSelectionOverlay {
       case TextDirection.rtl:
         return rtlType;
     }
+  }
+}
+
+/// This widget represents a text selection toolbar.
+class _SelectionToolbarOverlay extends StatefulWidget {
+  const _SelectionToolbarOverlay({
+    Key? key,
+    required this.preferredLineHeight,
+    required this.lastSecondaryTapDownPosition,
+    required this.layerLink,
+    required this.editingRegion,
+    required this.selectionControls,
+    required this.visibility,
+    required this.midpoint,
+    required this.endpoints,
+    required this.selectionDelegate,
+    required this.clipboardStatus,
+  }) : super(key: key);
+
+  final double preferredLineHeight;
+  final Offset? lastSecondaryTapDownPosition;
+  final LayerLink layerLink;
+  final Rect editingRegion;
+  final TextSelectionControls? selectionControls;
+  final ValueListenable<bool> visibility;
+  final Offset midpoint;
+  final List<TextSelectionPoint> endpoints;
+  final TextSelectionDelegate? selectionDelegate;
+  final ClipboardStatusNotifier? clipboardStatus;
+
+  @override
+  _SelectionToolbarOverlayState createState() => _SelectionToolbarOverlayState();
+}
+
+class _SelectionToolbarOverlayState extends State<_SelectionToolbarOverlay> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  Animation<double> get _opacity => _controller.view;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _controller = AnimationController(duration: TextSelectionOverlay.fadeDuration, vsync: this);
+
+    _handleVisibilityChanged();
+    widget.visibility.addListener(_handleVisibilityChanged);
+  }
+
+  @override
+  void didUpdateWidget(_SelectionToolbarOverlay oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    oldWidget.visibility.removeListener(_handleVisibilityChanged);
+    _handleVisibilityChanged();
+    widget.visibility.addListener(_handleVisibilityChanged);
+  }
+
+  @override
+  void dispose() {
+    widget.visibility.removeListener(_handleVisibilityChanged);
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _handleVisibilityChanged() {
+    if (widget.visibility.value) {
+      _controller.forward();
+    } else {
+      _controller.reverse();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _opacity,
+      child: CompositedTransformFollower(
+        link: widget.layerLink,
+        showWhenUnlinked: false,
+        offset: -widget.editingRegion.topLeft,
+        child: Builder(
+          builder: (BuildContext context) {
+            return widget.selectionControls!.buildToolbar(
+              context,
+              widget.editingRegion,
+              widget.preferredLineHeight,
+              widget.midpoint,
+              widget.endpoints,
+              widget.selectionDelegate!,
+              widget.clipboardStatus!,
+              widget.lastSecondaryTapDownPosition,
+            );
+          },
+        ),
+      ),
+    );
   }
 }
 
