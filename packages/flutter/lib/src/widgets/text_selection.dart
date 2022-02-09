@@ -925,8 +925,8 @@ class SelectionOverlay {
   Widget _buildEndHandle(BuildContext context) {
     final Widget handle;
     final TextSelectionControls? selectionControls = this.selectionControls;
-    if (selectionControls == null)
-      handle = Container(); // hide the second handle when collapsed
+    if (selectionControls == null || _startHandleType == TextSelectionHandleType.collapsed)
+      handle = Container(); // hide the second handle when collapsed.
     else {
       handle = _SelectionHandleOverlay(
         type: _endHandleType,
