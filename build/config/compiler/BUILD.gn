@@ -427,7 +427,16 @@ config("compiler") {
     }
   }
 
-  asmflags = cflags
+  # On non-Windows, the assembler is passed both cflags and asmflags.
+  # On Windows it is passed only asmflags. This is because for the
+  # Windows assembler, not all cflags are valid asmflags. They are
+  # for this config, though, so we can gate the assignment below to
+  # avoid duplicating flags to the other toolchains. Duplicating
+  # the flags can confuse goma, in particular flags that specify the
+  # target arch. See b/27730714.
+  if (is_win) {
+    asmflags = cflags
+  }
 }
 
 config("cxx_version_default") {
