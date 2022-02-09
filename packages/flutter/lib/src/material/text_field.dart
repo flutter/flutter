@@ -93,12 +93,6 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
   }
 
   @override
-  void onDoubleTapDown(TapDownDetails details) {
-    editableText.hideToolbar(ToolbarType.spellCheckerSuggestionsControls);
-    super.onDoubleTapDown(details);
-  }
-
-  @override
   void onSingleLongTapStart(LongPressStartDetails details) {
     if (delegate.selectionEnabled) {
       switch (Theme.of(_state.context).platform) {

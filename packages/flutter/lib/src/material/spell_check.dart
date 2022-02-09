@@ -81,32 +81,32 @@ class _SpellCheckerSuggestionsToolbarState extends State<_SpellCheckerSuggestion
 //     });
 //   }
 
-  @override
-  void initState() {
-    super.initState();
-    // widget.clipboardStatus.addListener(_onChangedClipboardStatus);
-    // widget.clipboardStatus.update();
-  }
+//   @override
+//   void initState() {
+//     super.initState();
+//     // widget.clipboardStatus.addListener(_onChangedClipboardStatus);
+//     // widget.clipboardStatus.update();
+//   }
 
-  @override
-  void didUpdateWidget(_SpellCheckerSuggestionsToolbar oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    // if (widget.clipboardStatus != oldWidget.clipboardStatus) {
-    //   widget.clipboardStatus.addListener(_onChangedClipboardStatus);
-    //   oldWidget.clipboardStatus.removeListener(_onChangedClipboardStatus);
-    // }
-    // widget.clipboardStatus.update();
-  }
+//   @override
+//   void didUpdateWidget(_SpellCheckerSuggestionsToolbar oldWidget) {
+//     super.didUpdateWidget(oldWidget);
+//     // if (widget.clipboardStatus != oldWidget.clipboardStatus) {
+//     //   widget.clipboardStatus.addListener(_onChangedClipboardStatus);
+//     //   oldWidget.clipboardStatus.removeListener(_onChangedClipboardStatus);
+//     // }
+//     // widget.clipboardStatus.update();
+//   }
 
-  @override
-  void dispose() {
-    super.dispose();
-    // When used in an Overlay, it can happen that this is disposed after its
-    // creator has already disposed _clipboardStatus.
-    // if (!widget.clipboardStatus.disposed) {
-    //   widget.clipboardStatus.removeListener(_onChangedClipboardStatus);
-    // }
-  }
+//   @override
+//   void dispose() {
+//     super.dispose();
+//     // When used in an Overlay, it can happen that this is disposed after its
+//     // creator has already disposed _clipboardStatus.
+//     // if (!widget.clipboardStatus.disposed) {
+//     //   widget.clipboardStatus.removeListener(_onChangedClipboardStatus);
+//     // }
+//   }
 
   SpellCheckerSuggestionSpan? findSuggestions(int curr_index, List<SpellCheckerSuggestionSpan> spellCheckerSuggestionSpans) {
     int left_index = 0;
@@ -176,10 +176,6 @@ class _SpellCheckerSuggestionsToolbarState extends State<_SpellCheckerSuggestion
     int cursorIndex = value.selection.baseOffset;
 
     SpellCheckerSuggestionSpan? relevantSpan = findSuggestions(cursorIndex, widget.spellCheckerSuggestionSpans!);
-
-    print("*******************************************");
-    print(relevantSpan);
-    print("*******************************************");
 
     if (relevantSpan == null) {
         return const SizedBox.shrink();

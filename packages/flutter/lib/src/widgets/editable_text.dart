@@ -2899,6 +2899,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (_selectionOverlay == null || _selectionOverlay!.toolbarIsVisible) {
       return false;
     }
+
     _selectionOverlay!.showToolbar(toolbarType, _spellCheckerResults);
     return true;
   }
@@ -2907,7 +2908,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   void hideToolbar(ToolbarType toolbarType, [bool hideHandles = true]) {
     if (hideHandles) {
       // Hide the handles and the toolbar.
-      _selectionOverlay?.hide();
+      _selectionOverlay?.hide(toolbarType);
     } else if (_selectionOverlay?.toolbarIsVisible ?? false) {
       // Hide only the toolbar but not the handles.
       _selectionOverlay?.hideToolbar(toolbarType);

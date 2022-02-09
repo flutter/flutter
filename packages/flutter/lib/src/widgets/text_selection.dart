@@ -432,10 +432,13 @@ class TextSelectionOverlay {
     }
   }
 
+  ToolbarType? visibleToolbarType;
+
   /// Shows the toolbar by inserting it into the [context]'s overlay.
   void showToolbar(ToolbarType toolbarType, List<SpellCheckerSuggestionSpan>?
     spellCheckerSuggestionSpans) {
     assert(_toolbar == null);
+    visibleToolbarType = toolbarType;
     _toolbar = OverlayEntry(builder: (BuildContext context) => _buildToolbar(context, toolbarType, spellCheckerSuggestionSpans));
     Overlay.of(context, rootOverlay: true, debugRequiredFor: debugRequiredFor)!.insert(_toolbar!);
     _toolbarController.forward(from: 0.0);
@@ -484,14 +487,14 @@ class TextSelectionOverlay {
   bool get toolbarIsVisible => _toolbar != null;
 
   /// Hides the entire overlay including the toolbar and the handles.
-  void hide() {
+  void hide(ToolbarType toolbarType) {
     if (_handles != null) {
       _handles![0].remove();
       _handles![1].remove();
       _handles = null;
     }
-    if (_toolbar != null) {
-      hideToolbar(ToolbarType.copyPasteControls);
+    if (_toolbar != null && toolbarType == visibleToolbarType) {
+      hideToolbar(toolbarType);
     }
   }
 
@@ -499,11 +502,6 @@ class TextSelectionOverlay {
   ///
   /// To hide the whole overlay, see [hide].
   void hideToolbar(ToolbarType toolbarType) {
-    //TODO(camillesimon): Add logic to hide specific toolbar.
-    if (toolbarType == ToolbarType.spellCheckerSuggestionsControls) {
-      print("**HIDE spell checker suggestions toolbar**");
-      return;
-    }
     assert(_toolbar != null);
     _toolbarController.stop();
     _toolbar?.remove();
@@ -512,7 +510,9 @@ class TextSelectionOverlay {
 
   /// Final cleanup.
   void dispose() {
-    hide();
+    if (visibleToolbarType != null){
+      hide(visibleToolbarType!);
+    }
     _toolbarController.dispose();
   }
 
@@ -1144,6 +1144,8 @@ class TextSelectionGestureDetectorBuilder {
       return;
     }
 
+    // editableText.showToolbar(ToolbarType.spellCheckerSuggestionsControls);
+
     if (delegate.selectionEnabled) {
       switch (defaultTargetPlatform) {
         case TargetPlatform.iOS:
@@ -1248,6 +1250,7 @@ class TextSelectionGestureDetectorBuilder {
         renderEditable.selectWord(cause: SelectionChangedCause.tap);
       }
       if (shouldShowSelectionToolbar) {
+        editableText.hideToolbar(ToolbarType.spellCheckerSuggestionsControls);
         editableText.hideToolbar(ToolbarType.copyPasteControls);
         editableText.showToolbar(ToolbarType.copyPasteControls);
       }
@@ -1281,6 +1284,7 @@ class TextSelectionGestureDetectorBuilder {
     if (delegate.selectionEnabled) {
       renderEditable.selectWord(cause: SelectionChangedCause.tap);
       if (shouldShowSelectionToolbar)
+        editableText.hideToolbar(ToolbarType.spellCheckerSuggestionsControls);
         editableText.showToolbar(ToolbarType.copyPasteControls);
     }
   }
