@@ -207,7 +207,8 @@ class TextPainter {
   /// layout changes in engine. In most cases, updating text painter properties
   /// in framework will automatically invoke this method.
   void markNeedsLayout() {
-    _needsLayout = true;
+    // _needsLayout = true;
+    _paragraph = null;
     _lineMetricsCache = null;
     _previousCaretPosition = null;
     _previousCaretPrototype = null;
