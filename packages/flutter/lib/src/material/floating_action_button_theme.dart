@@ -223,7 +223,7 @@ class FloatingActionButtonThemeData with Diagnosticable {
 
   @override
   int get hashCode {
-    return Object.hash(
+    return hashValues(
       foregroundColor,
       backgroundColor,
       focusColor,
@@ -243,7 +243,7 @@ class FloatingActionButtonThemeData with Diagnosticable {
       extendedSizeConstraints,
       extendedIconLabelSpacing,
       extendedPadding,
-      Object.hash(
+      hashValues(
         extendedTextStyle,
         mouseCursor,
       ),
