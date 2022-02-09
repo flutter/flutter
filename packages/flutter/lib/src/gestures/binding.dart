@@ -180,6 +180,7 @@ class _Resampler {
     }
     _resamplers.clear();
     _frameTime = Duration.zero;
+    _timer?.cancel();
   }
 
   void _onSampleTimeChanged() {
