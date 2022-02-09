@@ -119,6 +119,7 @@ void KeyEventHandler::KeyboardHook(GLFWwindow* window,
                                    int mods) {
   // TODO: Translate to a cross-platform key code system rather than passing
   // the native key code.
+  // NOLINTNEXTLINE(clang-analyzer-core.NullDereference)
   rapidjson::Document event(rapidjson::kObjectType);
   auto& allocator = event.GetAllocator();
   event.AddMember(kKeyCodeKey, key, allocator);

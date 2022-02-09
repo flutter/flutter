@@ -17,6 +17,9 @@
 #include "third_party/tonic/converter/dart_converter.h"
 #include "third_party/tonic/scopes/dart_isolate_scope.h"
 
+// CREATE_NATIVE_ENTRY is leaky by design
+// NOLINTBEGIN(clang-analyzer-core.StackAddressEscape)
+
 namespace flutter {
 namespace testing {
 
@@ -566,3 +569,5 @@ TEST_F(DartIsolateTest, DartPluginRegistrantIsCalled) {
 
 }  // namespace testing
 }  // namespace flutter
+
+// NOLINTEND(clang-analyzer-core.StackAddressEscape)

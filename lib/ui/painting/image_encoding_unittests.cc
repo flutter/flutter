@@ -14,6 +14,9 @@
 #include "flutter/testing/testing.h"
 #include "gmock/gmock.h"
 
+// CREATE_NATIVE_ENTRY is leaky by design
+// NOLINTBEGIN(clang-analyzer-core.StackAddressEscape)
+
 namespace flutter {
 namespace testing {
 
@@ -167,3 +170,5 @@ TEST_F(ShellTest, EncodeImageAccessesSyncSwitch) {
 
 }  // namespace testing
 }  // namespace flutter
+
+// NOLINTEND(clang-analyzer-core.StackAddressEscape)

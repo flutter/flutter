@@ -219,6 +219,9 @@ Dart_Handle MultiFrameCodec::getNextFrame(Dart_Handle callback_handle) {
       }));
 
   return Dart_Null();
+  // The static leak checker gets confused by the control flow, unique pointers
+  // and closures in this function.
+  // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
 }
 
 int MultiFrameCodec::frameCount() const {

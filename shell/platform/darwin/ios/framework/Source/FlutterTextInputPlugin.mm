@@ -1653,7 +1653,6 @@ static BOOL IsScribbleAvailable() {
     if (position <= end) {
       if (IsSelectionRectCloserToPoint(point, _selectionRects[i].rect, _closestRect,
                                        /*checkRightBoundary=*/YES)) {
-        _closestIndex = [_selectionRects count];
         _closestPosition = position;
       }
     }

@@ -12,6 +12,9 @@
 #include "flutter/testing/testing.h"
 #include "third_party/dart/runtime/include/dart_api.h"
 
+// CREATE_NATIVE_ENTRY is leaky by design
+// NOLINTBEGIN(clang-analyzer-core.StackAddressEscape)
+
 namespace flutter {
 namespace testing {
 
@@ -82,3 +85,5 @@ TEST_F(HooksTest, HooksUnitTests) {
 
 }  // namespace testing
 }  // namespace flutter
+
+// NOLINTEND(clang-analyzer-core.StackAddressEscape)

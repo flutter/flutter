@@ -11,6 +11,9 @@
 #include "flutter/testing/fixture_test.h"
 #include "flutter/testing/testing.h"
 
+// CREATE_NATIVE_ENTRY is leaky by design
+// NOLINTBEGIN(clang-analyzer-core.StackAddressEscape)
+
 namespace flutter {
 namespace testing {
 
@@ -71,3 +74,5 @@ TEST_F(DartIsolateTest, DartPluginRegistrantIsNotPresent) {
 
 }  // namespace testing
 }  // namespace flutter
+
+// NOLINTEND(clang-analyzer-core.StackAddressEscape)

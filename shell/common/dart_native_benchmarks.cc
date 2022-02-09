@@ -12,6 +12,9 @@
 #include "fml/synchronization/count_down_latch.h"
 #include "runtime/dart_vm_lifecycle.h"
 
+// CREATE_NATIVE_ENTRY is leaky by design
+// NOLINTBEGIN(clang-analyzer-core.StackAddressEscape)
+
 namespace flutter::testing {
 
 class DartNativeBenchmarks : public DartFixture, public benchmark::Fixture {
@@ -101,3 +104,5 @@ BENCHMARK_F(DartNativeBenchmarks, MultipleDartToNativeMessages)
 }
 
 }  // namespace flutter::testing
+
+// NOLINTEND(clang-analyzer-core.StackAddressEscape)

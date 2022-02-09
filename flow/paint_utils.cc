@@ -37,8 +37,11 @@ void DrawCheckerboard(SkCanvas* canvas, const SkRect& rect) {
   canvas->save();
   canvas->clipRect(rect);
 
+  // Secure random number generation isn't needed here.
+  // NOLINTBEGIN(clang-analyzer-security.insecureAPI.rand)
   auto checkerboard_color =
       SkColorSetARGB(64, rand() % 256, rand() % 256, rand() % 256);
+  // NOLINTEND(clang-analyzer-security.insecureAPI.rand)
 
   DrawCheckerboard(canvas, checkerboard_color, 0x00000000, 12);
   canvas->restore();
