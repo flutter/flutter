@@ -1027,7 +1027,8 @@ void main() {
 
     painter.markNeedsLayout();
     painter.getPositionForOffset(Offset.zero);
-  }, skip: kIsWeb && !isCanvasKit);
+  }, skip: kIsWeb && !isCanvasKit); // // https://github.com/flutter/flutter/issues/84650
+
 }
 
 class MockCanvas extends Fake implements Canvas {
