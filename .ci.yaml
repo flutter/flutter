@@ -675,7 +675,7 @@ targets:
       - bin/
       - .ci.yaml
 
-  - name: Linux technical_debt__cost
+  - name: Linux benchmark technical_debt__cost
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -848,7 +848,7 @@ targets:
       - bin/
       - .ci.yaml
 
-  - name: Linux web_benchmarks_canvaskit
+  - name: Linux benchmark web_benchmarks_canvaskit
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -867,7 +867,7 @@ targets:
       task_name: web_benchmarks_canvaskit
     scheduler: luci
 
-  - name: Linux web_benchmarks_html
+  - name: Linux benchmark web_benchmarks_html
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -1344,7 +1344,7 @@ targets:
       - bin/
       - .ci.yaml
 
-  - name: Linux_android analyzer_benchmark
+  - name: Linux_android benchmark analyzer_benchmark
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -1385,7 +1385,7 @@ targets:
       task_name: android_semantics_integration_test
     scheduler: luci
 
-  - name: Linux_android android_stack_size_test
+  - name: Linux_android benchmark android_stack_size_test
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -1395,7 +1395,7 @@ targets:
       task_name: android_stack_size_test
     scheduler: luci
 
-  - name: Linux_android android_view_scroll_perf__timeline_summary
+  - name: Linux_android benchmark android_view_scroll_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -1405,7 +1405,7 @@ targets:
       task_name: android_view_scroll_perf__timeline_summary
     scheduler: luci
 
-  - name: Linux_android animated_image_gc_perf
+  - name: Linux_android benchmark animated_image_gc_perf
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -1415,7 +1415,7 @@ targets:
       task_name: animated_image_gc_perf
     scheduler: luci
 
-  - name: Linux_android animated_placeholder_perf__e2e_summary
+  - name: Linux_android benchmark animated_placeholder_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -1425,7 +1425,7 @@ targets:
       task_name: animated_placeholder_perf__e2e_summary
     scheduler: luci
 
-  - name: Linux_android backdrop_filter_perf__e2e_summary
+  - name: Linux_android benchmark backdrop_filter_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -1435,7 +1435,7 @@ targets:
       task_name: backdrop_filter_perf__e2e_summary
     scheduler: luci
 
-  - name: Linux_android backdrop_filter_perf__timeline_summary
+  - name: Linux_android benchmark backdrop_filter_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -1445,7 +1445,7 @@ targets:
       task_name: backdrop_filter_perf__timeline_summary
     scheduler: luci
 
-  - name: Linux_android basic_material_app_android__compile
+  - name: Linux_android benchmark basic_material_app_android__compile
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -1465,7 +1465,7 @@ targets:
       task_name: channels_integration_test
     scheduler: luci
 
-  - name: Linux_android color_filter_and_fade_perf__e2e_summary
+  - name: Linux_android benchmark color_filter_and_fade_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -1475,7 +1475,7 @@ targets:
       task_name: color_filter_and_fade_perf__e2e_summary
     scheduler: luci
 
-  - name: Linux_android color_filter_and_fade_perf__timeline_summary
+  - name: Linux_android benchmark color_filter_and_fade_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -1485,7 +1485,7 @@ targets:
       task_name: color_filter_and_fade_perf__timeline_summary
     scheduler: luci
 
-  - name: Linux_android complex_layout_android__compile
+  - name: Linux_android benchmark complex_layout_android__compile
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -1503,7 +1503,7 @@ targets:
         ]
     scheduler: luci
 
-  - name: Linux_android complex_layout_android__scroll_smoothness
+  - name: Linux_android benchmark complex_layout_android__scroll_smoothness
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -1521,7 +1521,7 @@ targets:
         ]
     scheduler: luci
 
-  - name: Linux_android complex_layout_scroll_perf__devtools_memory
+  - name: Linux_android benchmark complex_layout_scroll_perf__devtools_memory
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -1539,7 +1539,7 @@ targets:
         ]
     scheduler: luci
 
-  - name: Linux_android complex_layout_scroll_perf__memory
+  - name: Linux_android benchmark complex_layout_scroll_perf__memory
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -1557,7 +1557,7 @@ targets:
         ]
     scheduler: luci
 
-  - name: Linux_android complex_layout_scroll_perf__timeline_summary
+  - name: Linux_android benchmark complex_layout_scroll_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -1575,7 +1575,7 @@ targets:
         ]
     scheduler: luci
 
-  - name: Linux_android complex_layout_semantics_perf
+  - name: Linux_android benchmark complex_layout_semantics_perf
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -1593,7 +1593,7 @@ targets:
         ]
     scheduler: luci
 
-  - name: Linux_android complex_layout__start_up
+  - name: Linux_android benchmark complex_layout__start_up
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -1611,7 +1611,7 @@ targets:
         ]
     scheduler: luci
 
-  - name: Linux_android cubic_bezier_perf__e2e_summary
+  - name: Linux_android benchmark cubic_bezier_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -1621,7 +1621,7 @@ targets:
       task_name: cubic_bezier_perf__e2e_summary
     scheduler: luci
 
-  - name: Linux_android cubic_bezier_perf_sksl_warmup__e2e_summary
+  - name: Linux_android benchmark cubic_bezier_perf_sksl_warmup__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -1631,7 +1631,7 @@ targets:
       task_name: cubic_bezier_perf_sksl_warmup__e2e_summary
     scheduler: luci
 
-  - name: Linux_android cubic_bezier_perf_sksl_warmup__timeline_summary
+  - name: Linux_android benchmark cubic_bezier_perf_sksl_warmup__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -1641,7 +1641,7 @@ targets:
       task_name: cubic_bezier_perf_sksl_warmup__timeline_summary
     scheduler: luci
 
-  - name: Linux_android cubic_bezier_perf__timeline_summary
+  - name: Linux_android benchmark cubic_bezier_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -1651,7 +1651,7 @@ targets:
       task_name: cubic_bezier_perf__timeline_summary
     scheduler: luci
 
-  - name: Linux_android cull_opacity_perf__e2e_summary
+  - name: Linux_android benchmark cull_opacity_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -1661,7 +1661,7 @@ targets:
       task_name: cull_opacity_perf__e2e_summary
     scheduler: luci
 
-  - name: Linux_android cull_opacity_perf__timeline_summary
+  - name: Linux_android benchmark cull_opacity_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -1711,7 +1711,7 @@ targets:
       task_name: external_ui_integration_test
     scheduler: luci
 
-  - name: Linux_android fading_child_animation_perf__timeline_summary
+  - name: Linux_android benchmark fading_child_animation_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -1721,7 +1721,7 @@ targets:
       task_name: fading_child_animation_perf__timeline_summary
     scheduler: luci
 
-  - name: Linux_android fast_scroll_heavy_gridview__memory
+  - name: Linux_android benchmark fast_scroll_heavy_gridview__memory
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -1731,7 +1731,7 @@ targets:
       task_name: fast_scroll_heavy_gridview__memory
     scheduler: luci
 
-  - name: Linux_android fast_scroll_large_images__memory
+  - name: Linux_android benchmark fast_scroll_large_images__memory
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -1751,7 +1751,7 @@ targets:
       task_name: flavors_test
     scheduler: luci
 
-  - name: Linux_android flutter_engine_group_performance
+  - name: Linux_android benchmark flutter_engine_group_performance
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -1761,7 +1761,7 @@ targets:
       task_name: flutter_engine_group_performance
     scheduler: luci
 
-  - name: Linux_android flutter_gallery__back_button_memory
+  - name: Linux_android benchmark flutter_gallery__back_button_memory
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -1771,7 +1771,7 @@ targets:
       task_name: flutter_gallery__back_button_memory
     scheduler: luci
 
-  - name: Linux_android flutter_gallery__image_cache_memory
+  - name: Linux_android benchmark flutter_gallery__image_cache_memory
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -1781,7 +1781,7 @@ targets:
       task_name: flutter_gallery__image_cache_memory
     scheduler: luci
 
-  - name: Linux_android flutter_gallery__memory_nav
+  - name: Linux_android benchmark flutter_gallery__memory_nav
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -1791,7 +1791,7 @@ targets:
       task_name: flutter_gallery__memory_nav
     scheduler: luci
 
-  - name: Linux_android flutter_gallery__start_up
+  - name: Linux_android benchmark flutter_gallery__start_up
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -1801,7 +1801,7 @@ targets:
       task_name: flutter_gallery__start_up
     scheduler: luci
 
-  - name: Linux_android flutter_gallery__start_up_delayed
+  - name: Linux_android benchmark flutter_gallery__start_up_delayed
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -1811,7 +1811,7 @@ targets:
       task_name: flutter_gallery__start_up_delayed
     scheduler: luci
 
-  - name: Linux_android flutter_gallery_android__compile
+  - name: Linux_android benchmark flutter_gallery_android__compile
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -1831,7 +1831,7 @@ targets:
       task_name: flutter_gallery_v2_chrome_run_test
     scheduler: luci
 
-  - name: Linux_android flutter_gallery_v2_web_compile_test
+  - name: Linux_android benchmark flutter_gallery_v2_web_compile_test
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -1841,7 +1841,7 @@ targets:
       task_name: flutter_gallery_v2_web_compile_test
     scheduler: luci
 
-  - name: Linux_android flutter_test_performance
+  - name: Linux_android benchmark flutter_test_performance
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -1861,7 +1861,7 @@ targets:
       task_name: flutter_view__start_up
     scheduler: luci
 
-  - name: Linux_android frame_policy_delay_test_android
+  - name: Linux_android benchmark frame_policy_delay_test_android
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -1871,7 +1871,7 @@ targets:
       task_name: frame_policy_delay_test_android
     scheduler: luci
 
-  - name: Linux_android fullscreen_textfield_perf__timeline_summary
+  - name: Linux_android benchmark fullscreen_textfield_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -1881,7 +1881,7 @@ targets:
       task_name: fullscreen_textfield_perf__timeline_summary
     scheduler: luci
 
-  - name: Linux_android hello_world__memory
+  - name: Linux_android benchmark hello_world__memory
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -1891,7 +1891,7 @@ targets:
       task_name: hello_world__memory
     scheduler: luci
 
-  - name: Linux_android home_scroll_perf__timeline_summary
+  - name: Linux_android benchmark home_scroll_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -1901,7 +1901,7 @@ targets:
       task_name: home_scroll_perf__timeline_summary
     scheduler: luci
 
-  - name: Linux_android hot_mode_dev_cycle_linux__benchmark
+  - name: Linux_android benchmark hot_mode_dev_cycle_linux__benchmark
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -1922,7 +1922,7 @@ targets:
       task_name: hybrid_android_views_integration_test
     scheduler: luci
 
-  - name: Linux_android image_list_jit_reported_duration
+  - name: Linux_android benchmark image_list_jit_reported_duration
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -1932,7 +1932,7 @@ targets:
       task_name: image_list_jit_reported_duration
     scheduler: luci
 
-  - name: Linux_android imagefiltered_transform_animation_perf__timeline_summary
+  - name: Linux_android benchmark imagefiltered_transform_animation_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -1942,7 +1942,7 @@ targets:
       task_name: imagefiltered_transform_animation_perf__timeline_summary
     scheduler: luci
 
-  - name: Linux_android image_list_reported_duration
+  - name: Linux_android benchmark image_list_reported_duration
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -1992,7 +1992,7 @@ targets:
       task_name: integration_ui_textfield
     scheduler: luci
 
-  - name: Linux_android large_image_changer_perf_android
+  - name: Linux_android benchmark large_image_changer_perf_android
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2002,7 +2002,7 @@ targets:
       task_name: large_image_changer_perf_android
     scheduler: luci
 
-  - name: Linux_android linux_chrome_dev_mode
+  - name: Linux_android benchmark linux_chrome_dev_mode
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2012,7 +2012,7 @@ targets:
       task_name: linux_chrome_dev_mode
     scheduler: luci
 
-  - name: Linux_android multi_widget_construction_perf__e2e_summary
+  - name: Linux_android benchmark multi_widget_construction_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2022,7 +2022,7 @@ targets:
       task_name: multi_widget_construction_perf__e2e_summary
     scheduler: luci
 
-  - name: Linux_android new_gallery__crane_perf
+  - name: Linux_android benchmark new_gallery__crane_perf
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2032,7 +2032,7 @@ targets:
       task_name: new_gallery__crane_perf
     scheduler: luci
 
-  - name: Linux_android new_gallery__transition_perf
+  - name: Linux_android benchmark new_gallery__transition_perf
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2042,7 +2042,7 @@ targets:
       task_name: new_gallery__transition_perf
     scheduler: luci
 
-  - name: Linux_android picture_cache_perf__e2e_summary
+  - name: Linux_android benchmark picture_cache_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2052,7 +2052,7 @@ targets:
       task_name: picture_cache_perf__e2e_summary
     scheduler: luci
 
-  - name: Linux_android picture_cache_perf__timeline_summary
+  - name: Linux_android benchmark picture_cache_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2073,7 +2073,7 @@ targets:
       task_name: android_picture_cache_complexity_scoring_perf__timeline_summary
     scheduler: luci
 
-  - name: Linux_android platform_channels_benchmarks
+  - name: Linux_android benchmark platform_channels_benchmarks
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2103,7 +2103,7 @@ targets:
       task_name: platform_interaction_test
     scheduler: luci
 
-  - name: Linux_android platform_views_scroll_perf__timeline_summary
+  - name: Linux_android benchmark platform_views_scroll_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2143,7 +2143,7 @@ targets:
       task_name: service_extensions_test
     scheduler: luci
 
-  - name: Linux_android textfield_perf__e2e_summary
+  - name: Linux_android benchmark textfield_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2153,7 +2153,7 @@ targets:
       task_name: textfield_perf__e2e_summary
     scheduler: luci
 
-  - name: Linux_android textfield_perf__timeline_summary
+  - name: Linux_android benchmark textfield_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2163,7 +2163,7 @@ targets:
       task_name: textfield_perf__timeline_summary
     scheduler: luci
 
-  - name: Linux_android tiles_scroll_perf__timeline_summary
+  - name: Linux_android benchmark tiles_scroll_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2181,7 +2181,7 @@ targets:
         ]
     scheduler: luci
 
-  - name: Linux_android web_size__compile_test
+  - name: Linux_android benchmark web_size__compile_test
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2219,7 +2219,7 @@ targets:
     timeout: 60
     scheduler: luci
 
-  - name: Linux_android opacity_peephole_one_rect_perf__e2e_summary
+  - name: Linux_android benchmark opacity_peephole_one_rect_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2229,7 +2229,7 @@ targets:
       task_name: opacity_peephole_one_rect_perf__e2e_summary
     scheduler: luci
 
-  - name: Linux_android opacity_peephole_col_of_rows_perf__e2e_summary
+  - name: Linux_android benchmark opacity_peephole_col_of_rows_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2239,7 +2239,7 @@ targets:
       task_name: opacity_peephole_col_of_rows_perf__e2e_summary
     scheduler: luci
 
-  - name: Linux_android opacity_peephole_opacity_of_grid_perf__e2e_summary
+  - name: Linux_android benchmark opacity_peephole_opacity_of_grid_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2249,7 +2249,7 @@ targets:
       task_name: opacity_peephole_opacity_of_grid_perf__e2e_summary
     scheduler: luci
 
-  - name: Linux_android opacity_peephole_grid_of_opacity_perf__e2e_summary
+  - name: Linux_android benchmark opacity_peephole_grid_of_opacity_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2259,7 +2259,7 @@ targets:
       task_name: opacity_peephole_grid_of_opacity_perf__e2e_summary
     scheduler: luci
 
-  - name: Linux_android opacity_peephole_fade_transition_text_perf__e2e_summary
+  - name: Linux_android benchmark opacity_peephole_fade_transition_text_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2269,7 +2269,7 @@ targets:
       task_name: opacity_peephole_fade_transition_text_perf__e2e_summary
     scheduler: luci
 
-  - name: Linux_android opacity_peephole_grid_of_alpha_savelayers_perf__e2e_summary
+  - name: Linux_android benchmark opacity_peephole_grid_of_alpha_savelayers_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2279,7 +2279,7 @@ targets:
       task_name: opacity_peephole_grid_of_alpha_savelayers_perf__e2e_summary
     scheduler: luci
 
-  - name: Linux_android opacity_peephole_col_of_alpha_savelayer_rows_perf__e2e_summary
+  - name: Linux_android benchmark opacity_peephole_col_of_alpha_savelayer_rows_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2992,7 +2992,7 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Mac_android hello_world_android__compile
+  - name: Mac_android benchmark hello_world_android__compile
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -3002,7 +3002,7 @@ targets:
       task_name: hello_world_android__compile
     scheduler: luci
 
-  - name: Mac_android hot_mode_dev_cycle__benchmark
+  - name: Mac_android benchmark hot_mode_dev_cycle__benchmark
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -3032,7 +3032,7 @@ targets:
       task_name: integration_ui_frame_number
     scheduler: luci
 
-  - name: Mac_android microbenchmarks
+  - name: Mac_android benchmark microbenchmarks
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -3053,7 +3053,7 @@ targets:
       task_name: run_release_test
     scheduler: luci
 
-  - name: Mac_android flutter_gallery_mac__start_up
+  - name: Mac_android benchmark flutter_gallery_mac__start_up
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -3063,7 +3063,7 @@ targets:
       task_name: flutter_gallery_mac__start_up
     scheduler: luci
 
-  - name: Mac_ios animation_with_microtasks_perf_ios__timeline_summary
+  - name: Mac_ios benchmark animation_with_microtasks_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -3073,7 +3073,7 @@ targets:
       task_name: animation_with_microtasks_perf_ios__timeline_summary
     scheduler: luci
 
-  - name: Mac_ios backdrop_filter_perf_ios__timeline_summary
+  - name: Mac_ios benchmark backdrop_filter_perf_ios__timeline_summary
     bringup: true # Flaky https://github.com/flutter/flutter/issues/97958
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -3084,7 +3084,7 @@ targets:
       task_name: backdrop_filter_perf_ios__timeline_summary
     scheduler: luci
 
-  - name: Mac_ios basic_material_app_ios__compile
+  - name: Mac_ios benchmark basic_material_app_ios__compile
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -3104,7 +3104,7 @@ targets:
       task_name: channels_integration_test_ios
     scheduler: luci
 
-  - name: Mac_ios complex_layout_ios__compile
+  - name: Mac_ios benchmark complex_layout_ios__compile
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -3122,7 +3122,7 @@ targets:
         ]
     scheduler: luci
 
-  - name: Mac_ios complex_layout_ios__start_up
+  - name: Mac_ios benchmark complex_layout_ios__start_up
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -3140,7 +3140,7 @@ targets:
         ]
     scheduler: luci
 
-  - name: Mac_ios complex_layout_scroll_perf_ios__timeline_summary
+  - name: Mac_ios benchmark complex_layout_scroll_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -3158,7 +3158,7 @@ targets:
         ]
     scheduler: luci
 
-  - name: Mac_ios cubic_bezier_perf_ios_sksl_warmup__timeline_summary
+  - name: Mac_ios benchmark cubic_bezier_perf_ios_sksl_warmup__timeline_summary
     bringup: true # Flaky https://github.com/flutter/flutter/issues/95867
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -3189,7 +3189,7 @@ targets:
       task_name: flavors_test_ios
     scheduler: luci
 
-  - name: Mac_ios flutter_gallery_ios__compile
+  - name: Mac_ios benchmark flutter_gallery_ios__compile
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -3199,7 +3199,7 @@ targets:
       task_name: flutter_gallery_ios__compile
     scheduler: luci
 
-  - name: Mac_ios flutter_gallery_ios__start_up
+  - name: Mac_ios benchmark flutter_gallery_ios__start_up
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -3219,7 +3219,7 @@ targets:
       task_name: flutter_view_ios__start_up
     scheduler: luci
 
-  - name: Mac_ios hello_world_ios__compile
+  - name: Mac_ios benchmark hello_world_ios__compile
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -3229,7 +3229,7 @@ targets:
       task_name: hello_world_ios__compile
     scheduler: luci
 
-  - name: Mac_ios hot_mode_dev_cycle_macos_target__benchmark
+  - name: Mac_ios benchmark hot_mode_dev_cycle_macos_target__benchmark
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -3341,7 +3341,7 @@ targets:
       task_name: ios_platform_view_tests
     scheduler: luci
 
-  - name: Mac_ios large_image_changer_perf_ios
+  - name: Mac_ios benchmark large_image_changer_perf_ios
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -3351,7 +3351,7 @@ targets:
       task_name: large_image_changer_perf_ios
     scheduler: luci
 
-  - name: Mac_ios macos_chrome_dev_mode
+  - name: Mac_ios benchmark macos_chrome_dev_mode
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -3361,7 +3361,7 @@ targets:
       task_name: macos_chrome_dev_mode
     scheduler: luci
 
-  - name: Mac_ios microbenchmarks_ios
+  - name: Mac_ios benchmark microbenchmarks_ios
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -3371,7 +3371,7 @@ targets:
       task_name: microbenchmarks_ios
     scheduler: luci
 
-  - name: Mac_ios new_gallery_ios__transition_perf
+  - name: Mac_ios benchmark new_gallery_ios__transition_perf
     bringup: true # Flaky https://github.com/flutter/flutter/issues/96401
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -3413,7 +3413,7 @@ targets:
       task_name: platform_channel_sample_test_swift
     scheduler: luci
 
-  - name: Mac_ios platform_channels_benchmarks_ios
+  - name: Mac_ios benchmark platform_channels_benchmarks_ios
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -3443,7 +3443,7 @@ targets:
       task_name: platform_view_ios__start_up
     scheduler: luci
 
-  - name: Mac_ios platform_views_scroll_perf_ios__timeline_summary
+  - name: Mac_ios benchmark platform_views_scroll_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -3453,7 +3453,7 @@ targets:
       task_name: platform_views_scroll_perf_ios__timeline_summary
     scheduler: luci
 
-  - name: Mac_ios post_backdrop_filter_perf_ios__timeline_summary
+  - name: Mac_ios benchmark post_backdrop_filter_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -3463,7 +3463,7 @@ targets:
       task_name: post_backdrop_filter_perf_ios__timeline_summary
     scheduler: luci
 
-  - name: Mac_ios simple_animation_perf_ios
+  - name: Mac_ios benchmark simple_animation_perf_ios
     bringup: true # Flaky https://github.com/flutter/flutter/issues/97961
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -3474,7 +3474,7 @@ targets:
       task_name: simple_animation_perf_ios
     scheduler: luci
 
-  - name: Mac_ios hot_mode_dev_cycle_ios__benchmark
+  - name: Mac_ios benchmark hot_mode_dev_cycle_ios__benchmark
     bringup: true # Flaky https://github.com/flutter/flutter/issues/95582
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -3485,7 +3485,7 @@ targets:
       task_name: hot_mode_dev_cycle_ios__benchmark
     scheduler: luci
 
-  - name: Mac_ios tiles_scroll_perf_ios__timeline_summary
+  - name: Mac_ios benchmark tiles_scroll_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -3766,7 +3766,7 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Windows hot_mode_dev_cycle_win_target__benchmark
+  - name: Windows benchmark hot_mode_dev_cycle_win_target__benchmark
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -4116,7 +4116,7 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Windows_android basic_material_app_win__compile
+  - name: Windows_android benchmark basic_material_app_win__compile
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -4136,7 +4136,7 @@ targets:
       task_name: channels_integration_test_win
     scheduler: luci
 
-  - name: Windows_android complex_layout_win__compile
+  - name: Windows_android benchmark complex_layout_win__compile
     bringup: true # Flaky https://github.com/flutter/flutter/issues/96784
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -4165,7 +4165,7 @@ targets:
       task_name: flavors_test_win
     scheduler: luci
 
-  - name: Windows_android flutter_gallery_win__compile
+  - name: Windows_android benchmark flutter_gallery_win__compile
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -4175,7 +4175,7 @@ targets:
       task_name: flutter_gallery_win__compile
     scheduler: luci
 
-  - name: Windows_android hot_mode_dev_cycle_win__benchmark
+  - name: Windows_android benchmark hot_mode_dev_cycle_win__benchmark
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -4185,7 +4185,7 @@ targets:
       task_name: hot_mode_dev_cycle_win__benchmark
     scheduler: luci
 
-  - name: Windows_android windows_chrome_dev_mode
+  - name: Windows_android benchmark windows_chrome_dev_mode
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
