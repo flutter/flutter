@@ -63,7 +63,7 @@ platform_properties:
         ]
       dependencies: >-
         []
-      os: Mac-10.15
+      os: Mac-12.0
       device_type: none
       mac_model: Macmini8,1
       xcode: 13a233
