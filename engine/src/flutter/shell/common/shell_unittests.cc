@@ -3206,8 +3206,8 @@ TEST_F(ShellTest, CanCreateShellsWithGLBackend) {
       );
   ASSERT_NE(shell, nullptr);
   ASSERT_TRUE(shell->IsSetup());
-  PlatformViewNotifyCreated(shell.get());
   auto configuration = RunConfiguration::InferFromSettings(settings);
+  PlatformViewNotifyCreated(shell.get());
   configuration.SetEntrypoint("emptyMain");
   RunEngine(shell.get(), std::move(configuration));
   PumpOneFrame(shell.get());
@@ -3230,8 +3230,8 @@ TEST_F(ShellTest, CanCreateShellsWithVulkanBackend) {
       );
   ASSERT_NE(shell, nullptr);
   ASSERT_TRUE(shell->IsSetup());
-  PlatformViewNotifyCreated(shell.get());
   auto configuration = RunConfiguration::InferFromSettings(settings);
+  PlatformViewNotifyCreated(shell.get());
   configuration.SetEntrypoint("emptyMain");
   RunEngine(shell.get(), std::move(configuration));
   PumpOneFrame(shell.get());
@@ -3254,8 +3254,8 @@ TEST_F(ShellTest, CanCreateShellsWithMetalBackend) {
       );
   ASSERT_NE(shell, nullptr);
   ASSERT_TRUE(shell->IsSetup());
-  PlatformViewNotifyCreated(shell.get());
   auto configuration = RunConfiguration::InferFromSettings(settings);
+  PlatformViewNotifyCreated(shell.get());
   configuration.SetEntrypoint("emptyMain");
   RunEngine(shell.get(), std::move(configuration));
   PumpOneFrame(shell.get());
