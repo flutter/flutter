@@ -317,7 +317,7 @@ class _WebGlRenderer implements GlRenderer {
       NormalizedGradient gradient, int widthInPixels, int heightInPixels) {
     drawRectToGl(
         targetRect, gl, glProgram, gradient, widthInPixels, heightInPixels);
-    final Object? image = gl.readPatternData();
+    final Object? image = gl.readPatternData(gradient.isOpaque);
     gl.bindArrayBuffer(null);
     gl.bindElementArrayBuffer(null);
     return image;

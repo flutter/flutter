@@ -814,12 +814,14 @@ class GlContext {
 
   /// Returns image data in a form that can be used to create Canvas
   /// context patterns.
-  Object? readPatternData() {
+  Object? readPatternData(bool isOpaque) {
     // When using OffscreenCanvas and transferToImageBitmap is supported by
     // browser create ImageBitmap otherwise use more expensive canvas
-    // allocation.
+    // allocation. However, transferToImageBitmap does not properly preserve
+    // the alpha channel, so only use it if the pattern is opaque.
     if (_canvas != null &&
-        js_util.hasProperty(_canvas!, 'transferToImageBitmap')) {
+        js_util.hasProperty(_canvas!, 'transferToImageBitmap') &&
+        isOpaque) {
       // TODO(yjbanov): find out why we need to call getContext and ignore the return value.
       js_util.callMethod<void>(_canvas!, 'getContext', <dynamic>['webgl2']);
       final Object? imageBitmap = js_util.callMethod(_canvas!, 'transferToImageBitmap',
