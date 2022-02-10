@@ -579,7 +579,7 @@ class _RailDestination extends StatelessWidget {
         final Widget iconPart = SizedBox(
           width: minWidth,
           height: minWidth,
-          child: Align(
+          child: Center(
             child: _AddIndicator(
               addIndicator: useIndicator,
               indicatorColor: indicatorColor,
