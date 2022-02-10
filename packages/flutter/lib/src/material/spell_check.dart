@@ -186,7 +186,7 @@ class MaterialMisspelledWordsHandler extends MisspelledWordsHandler {
                 children: <TextSpan>[
                     TextSpan(children: buildSubtreesWithMisspelledWordsIndicated(spellCheckerSuggestionSpans, value.composing.textBefore(value.text), style)),
                     TextSpan(children: buildSubtreesWithMisspelledWordsIndicated(spellCheckerSuggestionSpans, value.composing.textInside(value.text), style?.merge(const TextStyle(decoration: TextDecoration.underline)
-                        ?? const TextStyle(decoration: TextDecoration.underline)))),
+                        ))),
                     TextSpan(children: buildSubtreesWithMisspelledWordsIndicated(spellCheckerSuggestionSpans, value.composing.textAfter(value.text), style)),
                 ],
             );
