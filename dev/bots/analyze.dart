@@ -24,8 +24,14 @@ import 'utils.dart';
 final String flutterRoot = path.dirname(path.dirname(path.dirname(path.fromUri(Platform.script))));
 final String flutter = path.join(flutterRoot, 'bin', Platform.isWindows ? 'flutter.bat' : 'flutter');
 final String flutterPackages = path.join(flutterRoot, 'packages');
-final String dart = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', Platform.isWindows ? 'dart.exe' : 'dart');
-final String pub = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', Platform.isWindows ? 'pub.bat' : 'pub');
+final String flutterExamples = path.join(flutterRoot, 'examples');
+
+/// The path to the `dart` executable; set at the top of `main`
+late final String dart;
+
+/// The path to the `pub` executable; set at the top of `main`
+late final String pub;
+
 final String pubCache = path.join(flutterRoot, '.pub-cache');
 
 /// When you call this, you can pass additional arguments to pass custom
@@ -35,6 +41,12 @@ final String pubCache = path.join(flutterRoot, '.pub-cache');
 /// For example:
 /// bin/cache/dart-sdk/bin/dart dev/bots/analyze.dart --dart-sdk=/tmp/dart-sdk
 Future<void> main(List<String> arguments) async {
+  final String dartSdk = path.join(
+    Directory.current.absolute.path,
+    _getDartSdkFromArguments(arguments) ?? path.join(flutterRoot, 'bin', 'cache', 'dart-sdk'),
+  );
+  dart = path.join(dartSdk, 'bin', Platform.isWindows ? 'dart.exe' : 'dart');
+  pub = path.join(dartSdk, 'bin', Platform.isWindows ? 'pub.bat' : 'pub');
   print('$clock STARTING ANALYSIS');
   try {
     await run(arguments);
@@ -44,6 +56,31 @@ Future<void> main(List<String> arguments) async {
   print('$clock ${bold}Analysis successful.$reset');
 }
 
+/// Scans [arguments] for an argument of the form `--dart-sdk` or
+/// `--dart-sdk=...` and returns the configured SDK, if any.
+String? _getDartSdkFromArguments(List<String> arguments) {
+  String? result;
+  for (int i = 0; i < arguments.length; i += 1) {
+    if (arguments[i] == '--dart-sdk') {
+      if (result != null) {
+        exitWithError(<String>['The --dart-sdk argument must not be used more than once.']);
+      }
+      if (i + 1 < arguments.length) {
+        result = arguments[i + 1];
+      } else {
+        exitWithError(<String>['--dart-sdk must be followed by a path.']);
+      }
+    }
+    if (arguments[i].startsWith('--dart-sdk=')) {
+      if (result != null) {
+        exitWithError(<String>['The --dart-sdk argument must not be used more than once.']);
+      }
+      result = arguments[i].substring('--dart-sdk='.length);
+    }
+  }
+  return result;
+}
+
 Future<void> run(List<String> arguments) async {
   bool assertsEnabled = false;
   assert(() { assertsEnabled = true; return true; }());
@@ -51,11 +88,18 @@ Future<void> run(List<String> arguments) async {
     exitWithError(<String>['The analyze.dart script must be run with --enable-asserts.']);
   }
 
-  print('$clock runtimeType in toString...');
+  print('$clock No sync*/async*');
+  await verifyNoSyncAsyncStar(flutterPackages);
+  await verifyNoSyncAsyncStar(flutterExamples, minimumMatches: 200);
+
+  print('$clock No runtimeType in toString...');
   await verifyNoRuntimeTypeInToString(flutterRoot);
 
-  print('$clock debug mode instead of checked mode...');
+  print('$clock Debug mode instead of checked mode...');
   await verifyNoCheckedMode(flutterRoot);
+
+  print('$clock Links for creating GitHub issues');
+  await verifyIssueLinks(flutterRoot);
 
   print('$clock Unexpected binaries...');
   await verifyNoBinaries(flutterRoot);
@@ -89,6 +133,9 @@ Future<void> run(List<String> arguments) async {
 
   print('$clock Integration test timeouts...');
   await verifyIntegrationTestTimeouts(flutterRoot);
+
+  print('$clock null initialized debug fields...');
+  await verifyNullInitializedDebugExpensiveFields(flutterRoot);
 
   // Ensure that all package dependencies are in sync.
   print('$clock Package dependencies...');
@@ -149,6 +196,45 @@ Future<void> run(List<String> arguments) async {
 
 
 // TESTS
+
+Future<void> verifyNoSyncAsyncStar(String workingDirectory, {int minimumMatches = 2000 }) async {
+  final RegExp syncPattern = RegExp(r'\s*?a?sync\*\s*?{');
+  final RegExp ignorePattern = RegExp(r'^\s*?// The following uses a?sync\* because:? ');
+  final RegExp commentPattern = RegExp(r'^\s*?//');
+  final List<String> errors = <String>[];
+  await for (final File file in _allFiles(workingDirectory, 'dart', minimumMatches: minimumMatches)) {
+    if (file.path.contains('test')) {
+      continue;
+    }
+    final List<String> lines = file.readAsLinesSync();
+    for (int index = 0; index < lines.length; index += 1) {
+      final String line = lines[index];
+      if (line.startsWith(commentPattern)) {
+        continue;
+      }
+      if (line.contains(syncPattern)) {
+        int lookBehindIndex = index - 1;
+        bool hasExplanation = false;
+        while (lookBehindIndex >= 0 && lines[lookBehindIndex].startsWith(commentPattern)) {
+          if (lines[lookBehindIndex].startsWith(ignorePattern)) {
+            hasExplanation = true;
+            break;
+          }
+          lookBehindIndex -= 1;
+        }
+        if (!hasExplanation) {
+          errors.add('${file.path}:$index: sync*/async* without an explanation.');
+        }
+      }
+    }
+  }
+  if (errors.isNotEmpty) {
+    exitWithError(<String>[
+      '${bold}Do not use sync*/async* methods. See https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#avoid-syncasync for details.$reset',
+      ...errors,
+    ]);
+  }
+}
 
 final RegExp _findGoldenTestPattern = RegExp(r'matchesGoldenFile\(');
 final RegExp _findGoldenDefinitionPattern = RegExp(r'matchesGoldenFile\(Object');
@@ -728,6 +814,81 @@ Future<void> verifyNoTrailingSpaces(String workingDirectory, { int minimumMatche
     exitWithError(problems);
 }
 
+String _bullets(String value) => ' * $value';
+
+Future<void> verifyIssueLinks(String workingDirectory) async {
+  const String issueLinkPrefix = 'https://github.com/flutter/flutter/issues/new';
+  const Set<String> stops = <String>{ '\n', ' ', "'", '"', r'\', ')', '>' };
+  assert(!stops.contains('.')); // instead of "visit https://foo." say "visit: https://", it copy-pastes better
+  const String kGiveTemplates =
+    'Prefer to provide a link either to $issueLinkPrefix/choose (the list of issue '
+    'templates) or to a specific template directly ($issueLinkPrefix?template=...).\n';
+  final Set<String> templateNames =
+    Directory(path.join(workingDirectory, '.github', 'ISSUE_TEMPLATE'))
+      .listSync()
+      .whereType<File>()
+      .where((File file) => path.extension(file.path) == '.md')
+      .map<String>((File file) => path.basename(file.path))
+      .toSet();
+  final String kTemplates = 'The available templates are:\n${templateNames.map(_bullets).join("\n")}';
+  final List<String> problems = <String>[];
+  final Set<String> suggestions = <String>{};
+  final List<File> files = await _gitFiles(workingDirectory);
+  for (final File file in files) {
+    if (path.basename(file.path).endsWith('_test.dart') || path.basename(file.path) == 'analyze.dart')
+      continue; // Skip tests, they're not public-facing.
+    final Uint8List bytes = file.readAsBytesSync();
+    // We allow invalid UTF-8 here so that binaries don't trip us up.
+    // There's a separate test in this file that verifies that all text
+    // files are actually valid UTF-8 (see verifyNoBinaries below).
+    final String contents = utf8.decode(bytes, allowMalformed: true);
+    int start = 0;
+    while ((start = contents.indexOf(issueLinkPrefix, start)) >= 0) {
+      int end = start + issueLinkPrefix.length;
+      while (end < contents.length && !stops.contains(contents[end])) {
+        end += 1;
+      }
+      final String url = contents.substring(start, end);
+      if (url == issueLinkPrefix) {
+        if (file.path != path.join(workingDirectory, 'dev', 'bots', 'analyze.dart')) {
+          problems.add('${file.path} contains a direct link to $issueLinkPrefix.');
+          suggestions.add(kGiveTemplates);
+          suggestions.add(kTemplates);
+        }
+      } else if (url.startsWith('$issueLinkPrefix?')) {
+        final Uri parsedUrl = Uri.parse(url);
+        final List<String>? templates = parsedUrl.queryParametersAll['template'];
+        if (templates == null) {
+          problems.add('${file.path} contains $url, which has no "template" argument specified.');
+          suggestions.add(kGiveTemplates);
+          suggestions.add(kTemplates);
+        } else if (templates.length != 1) {
+          problems.add('${file.path} contains $url, which has ${templates.length} templates specified.');
+          suggestions.add(kGiveTemplates);
+          suggestions.add(kTemplates);
+        } else if (!templateNames.contains(templates.single)) {
+          problems.add('${file.path} contains $url, which specifies a non-existent template ("${templates.single}").');
+          suggestions.add(kTemplates);
+        } else if (parsedUrl.queryParametersAll.keys.length > 1) {
+          problems.add('${file.path} contains $url, which the analyze.dart script is not sure how to handle.');
+          suggestions.add('Update analyze.dart to handle the URLs above, or change them to the expected pattern.');
+        }
+      } else if (url != '$issueLinkPrefix/choose') {
+        problems.add('${file.path} contains $url, which the analyze.dart script is not sure how to handle.');
+        suggestions.add('Update analyze.dart to handle the URLs above, or change them to the expected pattern.');
+      }
+      start = end;
+    }
+  }
+  assert(problems.isEmpty == suggestions.isEmpty);
+  if (problems.isNotEmpty) {
+    exitWithError(<String>[
+      ...problems,
+      ...suggestions,
+    ]);
+  }
+}
+
 @immutable
 class Hash256 {
   const Hash256(this.a, this.b, this.c, this.d);
@@ -1163,7 +1324,7 @@ Future<void> verifyNoBinaries(String workingDirectory, { Set<Hash256>? legacyBin
   );
   legacyBinaries ??= _legacyBinaries;
   if (!Platform.isWindows) { // TODO(ianh): Port this to Windows
-    final List<File> files = await _gitFiles(workingDirectory, runSilently: false);
+    final List<File> files = await _gitFiles(workingDirectory);
     final List<String> problems = <String>[];
     for (final File file in files) {
       final Uint8List bytes = file.readAsBytesSync();
@@ -1377,6 +1538,40 @@ Future<void> _checkConsumerDependencies() async {
       'To make sure we do not accidentally add ${plural(removed.length, "this dependency", "these dependencies")} back in the future,',
       'please remove ${plural(removed.length, "this", "these")} packages from the allow-list in dev/bots/allowlist.dart.',
       'Thanks!',
+    ]);
+  }
+}
+
+const String _kDebugOnlyAnnotation = '@_debugOnly';
+final RegExp _nullInitializedField = RegExp(r'kDebugMode \? [\w\<\> ,{}()]+ : null;');
+
+Future<void> verifyNullInitializedDebugExpensiveFields(String workingDirectory, {int minimumMatches = 400}) async {
+  final String flutterLib = path.join(workingDirectory, 'packages', 'flutter', 'lib');
+  final List<File> files = await _allFiles(flutterLib, 'dart', minimumMatches: minimumMatches)
+    .toList();
+  final List<String> errors = <String>[];
+  for (final File file in files) {
+    final List<String> lines = file.readAsLinesSync();
+    for (int i = 0; i < lines.length; i += 1) {
+      final String line = lines[i];
+      if (!line.contains(_kDebugOnlyAnnotation)) {
+        continue;
+      }
+      final String nextLine = lines[i + 1];
+      if (_nullInitializedField.firstMatch(nextLine) == null) {
+        errors.add('${file.path} L$i');
+      }
+    }
+  }
+
+  if (errors.isNotEmpty) {
+    exitWithError(<String>[
+     '${bold}ERROR: ${red}fields annotated with @_debugOnly must null initialize.$reset',
+     'to ensure both the field and initializer are removed from profile/release mode.',
+     'These fields should be written as:\n',
+     'field = kDebugMode ? <DebugValue> : null;\n',
+     'Errors were found in the following files:',
+      ...errors,
     ]);
   }
 }

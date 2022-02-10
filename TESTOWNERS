@@ -61,6 +61,11 @@
 /dev/devicelab/bin/tasks/routing_test.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/textfield_perf__e2e_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/web_size__compile_test.dart @yjbanov @flutter/web
+/dev/devicelab/bin/tasks/opacity_peephole_col_of_rows_perf__e2e_summary.dart @flar @flutter/engine
+/dev/devicelab/bin/tasks/opacity_peephole_grid_of_opacity_perf__e2e_summary.dart @flar @flutter/engine
+/dev/devicelab/bin/tasks/opacity_peephole_one_rect_perf__e2e_summary.dart @flar @flutter/engine
+/dev/devicelab/bin/tasks/opacity_peephole_opacity_of_grid_perf__e2e_summary.dart @flar @flutter/engine
+/dev/devicelab/bin/tasks/opacity_peephole_fade_transition_text_perf__e2e_summary.dart @flar @flutter/engine
 
 ## Windows Android DeviceLab tests
 /dev/devicelab/bin/tasks/basic_material_app_win__compile.dart @zanderso @flutter/tool
@@ -88,6 +93,7 @@
 /dev/devicelab/bin/tasks/fading_child_animation_perf__timeline_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/fast_scroll_large_images__memory.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/flavors_test.dart @zanderso @flutter/tool
+/dev/devicelab/bin/tasks/flutter_gallery_mac__start_up.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/flutter_view__start_up.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/fullscreen_textfield_perf__timeline_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/hello_world_android__compile.dart @zanderso @flutter/tool
@@ -110,7 +116,6 @@
 /dev/devicelab/bin/tasks/platform_view__start_up.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/run_release_test.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/service_extensions_test.dart @zanderso @flutter/tool
-/dev/devicelab/bin/tasks/smoke_catalina_start_up.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/textfield_perf__timeline_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/tiles_scroll_perf__timeline_summary.dart @zanderso @flutter/engine
 
@@ -133,6 +138,7 @@
 /dev/devicelab/bin/tasks/flutter_gallery_ios_sksl_warmup__transition_perf.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/flutter_view_ios__start_up.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/hello_world_ios__compile.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/hot_mode_dev_cycle_ios__benchmark.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/hot_mode_dev_cycle_macos_target__benchmark.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/integration_test_test_ios.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/integration_ui_ios_driver.dart @zanderso @flutter/tool
@@ -156,7 +162,6 @@
 /dev/devicelab/bin/tasks/platform_views_scroll_perf_ios__timeline_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/post_backdrop_filter_perf_ios__timeline_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/simple_animation_perf_ios.dart @zanderso @flutter/engine
-/dev/devicelab/bin/tasks/smoke_catalina_hot_mode_dev_cycle_ios__benchmark.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/tiles_scroll_perf_ios__timeline_summary.dart @zanderso @flutter/engine
 
 ## Mac iOS32 DeviceLab tests

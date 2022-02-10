@@ -2,11 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
-import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import '../application_package.dart';
@@ -28,10 +25,10 @@ import 'windows_workflow.dart';
 /// A device that represents a desktop Windows target.
 class WindowsDevice extends DesktopDevice {
   WindowsDevice({
-    @required ProcessManager processManager,
-    @required Logger logger,
-    @required FileSystem fileSystem,
-    @required OperatingSystemUtils operatingSystemUtils,
+    required ProcessManager processManager,
+    required Logger logger,
+    required FileSystem fileSystem,
+    required OperatingSystemUtils operatingSystemUtils,
   }) : super(
       'windows',
       platformType: PlatformType.windows,
@@ -59,8 +56,8 @@ class WindowsDevice extends DesktopDevice {
   @override
   Future<void> buildForDevice(
     covariant WindowsApp package, {
-    String mainPath,
-    BuildInfo buildInfo,
+    String? mainPath,
+    required BuildInfo buildInfo,
   }) async {
     await buildWindows(
       FlutterProject.current().windows,
@@ -78,11 +75,11 @@ class WindowsDevice extends DesktopDevice {
 // A device that represents a desktop Windows UWP target.
 class WindowsUWPDevice extends Device {
   WindowsUWPDevice({
-    @required ProcessManager processManager,
-    @required Logger logger,
-    @required FileSystem fileSystem,
-    @required OperatingSystemUtils operatingSystemUtils,
-    @required UwpTool uwptool,
+    required ProcessManager processManager,
+    required Logger logger,
+    required FileSystem fileSystem,
+    required OperatingSystemUtils operatingSystemUtils,
+    required UwpTool uwptool,
   }) : _logger = logger,
        _processManager = processManager,
        _operatingSystemUtils = operatingSystemUtils,
@@ -100,9 +97,9 @@ class WindowsUWPDevice extends Device {
   final FileSystem _fileSystem;
   final OperatingSystemUtils _operatingSystemUtils;
   final UwpTool _uwptool;
-  BuildMode _buildMode;
+  BuildMode? _buildMode;
 
-  int _processId;
+  int? _processId;
 
   @override
   bool isSupported() => true;
@@ -125,10 +122,10 @@ class WindowsUWPDevice extends Device {
   Future<void> dispose() async { }
 
   @override
-  Future<String> get emulatorId async => null;
+  Future<String?> get emulatorId async => null;
 
   @override
-  FutureOr<DeviceLogReader> getLogReader({covariant BuildableUwpApp app, bool includePastLogs = false}) {
+  FutureOr<DeviceLogReader> getLogReader({covariant BuildableUwpApp? app, bool includePastLogs = false}) {
     return NoOpDeviceLogReader('winuwp');
   }
 
@@ -162,7 +159,7 @@ class WindowsUWPDevice extends Device {
   }
 
   // Walks the build directory for any dependent packages for the specified architecture.
-  String/*?*/ _getAppPackagePath(String buildDirectory) {
+  String? _getAppPackagePath(String buildDirectory) {
     final List<String> packagePaths = _getPackagePaths(buildDirectory);
     return packagePaths.isNotEmpty ? packagePaths.first : null;
   }
@@ -173,7 +170,7 @@ class WindowsUWPDevice extends Device {
     return _getPackagePaths(depsDirectory);
   }
 
-  String _getPackageName(String binaryName, String version, String config, {String/*?*/ architecture}) {
+  String _getPackageName(String binaryName, String version, String config, {String? architecture}) {
     final List<String> components = <String>[
       binaryName,
       version,
@@ -184,12 +181,12 @@ class WindowsUWPDevice extends Device {
   }
 
   @override
-  Future<bool> installApp(covariant BuildableUwpApp app, {String userIdentifier}) async {
+  Future<bool> installApp(covariant BuildableUwpApp app, {String? userIdentifier}) async {
     /// The cmake build generates an install powershell script.
     /// build\winuwp\runner_uwp\AppPackages\<app-name>\<app-name>_<app-version>_<cmake-config>\Add-AppDevPackage.ps1
-    final String binaryName = app.name;
-    final String packageVersion = app.projectVersion;
-    if (packageVersion == null) {
+    final String? binaryName = app.name;
+    final String? packageVersion = app.projectVersion;
+    if (binaryName == null || packageVersion == null) {
       return false;
     }
     final String binaryDir = _fileSystem.path.absolute(
@@ -204,9 +201,9 @@ class WindowsUWPDevice extends Device {
       // Single-archtitecture package.
       _getPackageName(binaryName, packageVersion, config, architecture: 'x64'),
     ];
-    String packageName;
-    String buildDirectory;
-    String packagePath;
+    String? packageName;
+    String? buildDirectory;
+    String? packagePath;
     for (final String name in packageNames) {
       packageName = name;
       buildDirectory = _fileSystem.path.join(binaryDir, '${packageName}_Test');
@@ -225,7 +222,7 @@ class WindowsUWPDevice extends Device {
     // Verify package signature.
     if (!await _uwptool.isSignatureValid(packagePath)) {
       // If signature is invalid, install the developer certificate.
-      final String certificatePath = _fileSystem.path.join(buildDirectory, '$packageName.cer');
+      final String certificatePath = _fileSystem.path.join(buildDirectory!, '$packageName.cer');
       if (_logger.terminal.stdinHasTerminal) {
         final String response = await _logger.terminal.promptForCharInput(
           <String>['Y', 'y', 'N', 'n'],
@@ -253,14 +250,14 @@ class WindowsUWPDevice extends Device {
 
     // Install the application and dependencies.
     final String packageUri = Uri.file(packagePath).toString();
-    final List<String> dependencyUris = _getDependencyPaths(buildDirectory, 'x64')
+    final List<String> dependencyUris = _getDependencyPaths(buildDirectory!, 'x64')
         .map((String path) => Uri.file(path).toString())
         .toList();
     return _uwptool.installApp(packageUri, dependencyUris);
   }
 
   @override
-  Future<bool> isAppInstalled(covariant ApplicationPackage app, {String userIdentifier}) async {
+  Future<bool> isAppInstalled(covariant ApplicationPackage app, {String? userIdentifier}) async {
     final String packageName = app.id;
     return await _uwptool.getPackageFamilyName(packageName) != null;
   }
@@ -279,13 +276,13 @@ class WindowsUWPDevice extends Device {
 
   @override
   Future<LaunchResult> startApp(covariant BuildableUwpApp package, {
-    String mainPath,
-    String route,
-    DebuggingOptions debuggingOptions,
-    Map<String, dynamic> platformArgs,
+    String? mainPath,
+    String? route,
+    required DebuggingOptions debuggingOptions,
+    Map<String, Object?> platformArgs = const <String, Object>{},
     bool prebuiltApplication = false,
     bool ipv6 = false,
-    String userIdentifier,
+    String? userIdentifier,
   }) async {
     _buildMode = debuggingOptions.buildInfo.mode;
     if (!prebuiltApplication) {
@@ -310,7 +307,11 @@ class WindowsUWPDevice extends Device {
       return LaunchResult.failed();
     }
 
-    final String packageFamily = await _uwptool.getPackageFamilyName(packageName);
+    final String? packageFamily = await _uwptool.getPackageFamilyName(packageName);
+    if (packageFamily == null) {
+      _logger.printError('Could not find package family name from $packageName');
+      return LaunchResult.failed();
+    }
 
     if (debuggingOptions.buildInfo.mode.isRelease) {
       _processId = await _uwptool.launchApp(packageFamily, <String>[]);
@@ -361,7 +362,7 @@ class WindowsUWPDevice extends Device {
       if (debuggingOptions.verboseSystemLogs) '--verbose-logging',
       if (debuggingOptions.cacheSkSL) '--cache-sksl',
       if (debuggingOptions.purgePersistentCache) '--purge-persistent-cache',
-      if (platformArgs['trace-startup'] as bool ?? false) '--trace-startup',
+      if (platformArgs['trace-startup'] as bool? ?? false) '--trace-startup',
     ];
     _processId = await _uwptool.launchApp(packageFamily, args);
     if (_processId == null) {
@@ -371,21 +372,21 @@ class WindowsUWPDevice extends Device {
   }
 
   @override
-  Future<bool> stopApp(covariant BuildableUwpApp app, {String userIdentifier}) async {
+  Future<bool> stopApp(covariant BuildableUwpApp app, {String? userIdentifier}) async {
     if (_processId != null) {
-      return _processManager.killPid(_processId);
+      return _processManager.killPid(_processId!);
     }
     return false;
   }
 
   @override
-  Future<bool> uninstallApp(covariant BuildableUwpApp app, {String userIdentifier}) async {
+  Future<bool> uninstallApp(covariant BuildableUwpApp app, {String? userIdentifier}) async {
     final String packageName = app.id;
     if (packageName == null) {
       _logger.printError('Could not find PACKAGE_GUID in ${app.project.runnerCmakeFile.path}');
       return false;
     }
-    final String packageFamily = await _uwptool.getPackageFamilyName(packageName);
+    final String? packageFamily = await _uwptool.getPackageFamilyName(packageName);
     if (packageFamily == null) {
       // App is not installed.
       return true;
@@ -399,13 +400,13 @@ class WindowsUWPDevice extends Device {
 
 class WindowsDevices extends PollingDeviceDiscovery {
   WindowsDevices({
-    @required ProcessManager processManager,
-    @required Logger logger,
-    @required FileSystem fileSystem,
-    @required OperatingSystemUtils operatingSystemUtils,
-    @required WindowsWorkflow windowsWorkflow,
-    @required FeatureFlags featureFlags,
-    @required UwpTool uwptool,
+    required ProcessManager processManager,
+    required Logger logger,
+    required FileSystem fileSystem,
+    required OperatingSystemUtils operatingSystemUtils,
+    required WindowsWorkflow windowsWorkflow,
+    required FeatureFlags featureFlags,
+    required UwpTool uwptool,
   }) : _fileSystem = fileSystem,
       _logger = logger,
       _processManager = processManager,
@@ -430,7 +431,7 @@ class WindowsDevices extends PollingDeviceDiscovery {
   bool get canListAnything => _windowsWorkflow.canListDevices;
 
   @override
-  Future<List<Device>> pollingGetDevices({ Duration timeout }) async {
+  Future<List<Device>> pollingGetDevices({ Duration? timeout }) async {
     if (!canListAnything) {
       return const <Device>[];
     }

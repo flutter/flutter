@@ -15,7 +15,7 @@ const String kStateFileName = '.flutter_conductor_state.json';
 
 String luciConsoleLink(String channel, String groupName) {
   assert(
-    <String>['stable', 'beta', 'dev', 'master'].contains(channel),
+    kReleaseChannels.contains(channel),
     'channel $channel not recognized',
   );
   assert(

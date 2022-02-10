@@ -10,6 +10,7 @@ import 'artifacts.dart';
 import 'base/async_guard.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
+import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
@@ -21,7 +22,8 @@ import 'device.dart';
 import 'doctor_validator.dart';
 import 'features.dart';
 import 'fuchsia/fuchsia_workflow.dart';
-import 'globals_null_migrated.dart' as globals;
+import 'globals.dart' as globals;
+import 'http_host_validator.dart';
 import 'intellij/intellij_validator.dart';
 import 'linux/linux_doctor.dart';
 import 'linux/linux_workflow.dart';
@@ -91,6 +93,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
         fileSystem: globals.fs,
         platform: globals.platform,
         flutterVersion: () => globals.flutterVersion,
+        devToolsVersion: () => globals.cache.devToolsVersion,
         processManager: globals.processManager,
         userMessages: userMessages,
         artifacts: globals.artifacts!,
@@ -131,6 +134,11 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
           deviceManager: globals.deviceManager,
           userMessages: globals.userMessages,
         ),
+      HttpHostValidator(
+        platform: globals.platform,
+        featureFlags: featureFlags,
+        httpClient: globals.httpClientFactory?.call() ?? HttpClient(),
+      ),
     ];
     return _validators!;
   }
@@ -394,6 +402,7 @@ class FlutterValidator extends DoctorValidator {
   FlutterValidator({
     required Platform platform,
     required FlutterVersion Function() flutterVersion,
+    required String Function() devToolsVersion,
     required UserMessages userMessages,
     required FileSystem fileSystem,
     required Artifacts artifacts,
@@ -401,6 +410,7 @@ class FlutterValidator extends DoctorValidator {
     required String Function() flutterRoot,
     required OperatingSystemUtils operatingSystemUtils,
   }) : _flutterVersion = flutterVersion,
+       _devToolsVersion = devToolsVersion,
        _platform = platform,
        _userMessages = userMessages,
        _fileSystem = fileSystem,
@@ -412,6 +422,7 @@ class FlutterValidator extends DoctorValidator {
 
   final Platform _platform;
   final FlutterVersion Function() _flutterVersion;
+  final String Function() _devToolsVersion;
   final String Function() _flutterRoot;
   final UserMessages _userMessages;
   final FileSystem _fileSystem;
@@ -446,6 +457,7 @@ class FlutterValidator extends DoctorValidator {
       )));
       messages.add(ValidationMessage(_userMessages.engineRevision(version.engineRevisionShort)));
       messages.add(ValidationMessage(_userMessages.dartRevision(version.dartSdkVersion)));
+      messages.add(ValidationMessage(_userMessages.devToolsVersion(_devToolsVersion())));
       final String? pubUrl = _platform.environment['PUB_HOSTED_URL'];
       if (pubUrl != null) {
         messages.add(ValidationMessage(_userMessages.pubMirrorURL(pubUrl)));
@@ -515,7 +527,7 @@ class DeviceValidator extends DoctorValidator {
     final List<Device> devices = await _deviceManager.getAllConnectedDevices();
     List<ValidationMessage> installedMessages = <ValidationMessage>[];
     if (devices.isNotEmpty) {
-      installedMessages = await Device.descriptions(devices)
+      installedMessages = (await Device.descriptions(devices))
           .map<ValidationMessage>((String msg) => ValidationMessage(msg)).toList();
     }
 

@@ -14,7 +14,7 @@ import '../cache.dart';
 import '../dart/generate_synthetic_packages.dart';
 import '../dart/pub.dart';
 import '../flutter_plugins.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../plugins.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';

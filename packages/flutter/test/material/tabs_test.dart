@@ -109,9 +109,11 @@ Widget buildFrame({
   required String value,
   bool isScrollable = false,
   Color? indicatorColor,
+  Duration? animationDuration,
 }) {
   return boilerplate(
     child: DefaultTabController(
+      animationDuration: animationDuration,
       initialIndex: tabs.indexOf(value),
       length: tabs.length,
       child: TabBar(
@@ -935,6 +937,262 @@ void main() {
     expect(controller.index, equals(0));
     expect(find.text('First'), findsOneWidget);
     expect(find.text('Second'), findsNothing);
+  });
+
+  testWidgets('TabBar animationDuration sets indicator animation duration', (WidgetTester tester) async {
+    const Duration animationDuration = Duration(milliseconds: 100);
+    final List<String> tabs = <String>['A', 'B', 'C'];
+
+    await tester.pumpWidget(buildFrame(tabs: tabs, value: 'B', animationDuration: animationDuration));
+    final TabController controller = DefaultTabController.of(tester.element(find.text('A')))!;
+
+    await tester.tap(find.text('A'));
+    await tester.pump();
+    expect(controller.indexIsChanging, true);
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.pump(animationDuration);
+    expect(controller.index, 0);
+    expect(controller.previousIndex, 1);
+    expect(controller.indexIsChanging, false);
+
+    //Test when index diff is greater than 1
+    await tester.pumpWidget(buildFrame(tabs: tabs, value: 'B', animationDuration: animationDuration));
+    await tester.tap(find.text('C'));
+    await tester.pump();
+    expect(controller.indexIsChanging, true);
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.pump(animationDuration);
+    expect(controller.index, 2);
+    expect(controller.previousIndex, 0);
+    expect(controller.indexIsChanging, false);
+  });
+
+  testWidgets('TabBarView controller sets animation duration', (WidgetTester tester) async {
+    const Duration animationDuration = Duration(milliseconds: 100);
+    final List<String> tabs = <String>['A', 'B', 'C'];
+
+    final TabController tabController = TabController(
+      vsync: const TestVSync(),
+      initialIndex: 1,
+      length: tabs.length,
+      animationDuration: animationDuration,
+    );
+    await tester.pumpWidget(boilerplate(
+      child: Column(
+        children: <Widget>[
+          TabBar(
+            tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
+            controller: tabController,
+          ),
+          SizedBox(
+            width: 400.0,
+            height: 400.0,
+            child: TabBarView(
+              controller: tabController,
+              children: const <Widget>[
+                Center(child: Text('0')),
+                Center(child: Text('1')),
+                Center(child: Text('2')),
+              ],
+            ),
+          ),
+        ],
+      ),
+    ));
+
+    expect(tabController.index, 1);
+
+    final PageView pageView = tester.widget(find.byType(PageView));
+    final PageController pageController = pageView.controller;
+    final ScrollPosition position = pageController.position;
+
+    // The TabBarView's page width is 400, so page 0 is at scroll offset 0.0,
+    // page 1 is at 400.0, page 2 is at 800.0.
+    expect(position.pixels, 400);
+    await tester.tap(find.text('C'));
+    await tester.pump();
+    expect(position.pixels, 400);
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.pump(animationDuration);
+    expect(position.pixels, 800);
+  });
+
+  testWidgets('TabBar tap skips indicator animation when disabled in controller', (WidgetTester tester) async {
+    final List<String> tabs = <String>['A', 'B'];
+
+    const Color indicatorColor = Color(0xFFFF0000);
+    await tester.pumpWidget(buildFrame(tabs: tabs, value: 'A', indicatorColor: indicatorColor, animationDuration: Duration.zero));
+
+    final RenderBox box = tester.renderObject(find.byType(TabBar));
+    final TabIndicatorRecordingCanvas canvas = TabIndicatorRecordingCanvas(indicatorColor);
+    final TestRecordingPaintingContext context = TestRecordingPaintingContext(canvas);
+
+    box.paint(context, Offset.zero);
+    final Rect indicatorRect0 = canvas.indicatorRect;
+    expect(indicatorRect0.left, 0.0);
+    expect(indicatorRect0.width, 400.0);
+    expect(indicatorRect0.height, 2.0);
+
+    await tester.tap(find.text('B'));
+    await tester.pump();
+    box.paint(context, Offset.zero);
+    final Rect indicatorRect2 = canvas.indicatorRect;
+    expect(indicatorRect2.left, 400.0);
+    expect(indicatorRect2.width, 400.0);
+    expect(indicatorRect2.height, 2.0);
+  });
+
+  testWidgets('TabBar tap changes index instantly when animation is disabled in controller', (WidgetTester tester) async {
+    final List<String> tabs = <String>['A', 'B', 'C'];
+
+    await tester.pumpWidget(buildFrame(tabs: tabs, value: 'B', animationDuration: Duration.zero));
+    final TabController controller = DefaultTabController.of(tester.element(find.text('A')))!;
+
+    await tester.tap(find.text('A'));
+    await tester.pump();
+    expect(controller.index, 0);
+    expect(controller.previousIndex, 1);
+    expect(controller.indexIsChanging, false);
+
+    //Test when index diff is greater than 1
+    await tester.pumpWidget(buildFrame(tabs: tabs, value: 'B', animationDuration: Duration.zero));
+    await tester.tap(find.text('C'));
+    await tester.pump();
+    expect(controller.index, 2);
+    expect(controller.previousIndex, 0);
+    expect(controller.indexIsChanging, false);
+  });
+
+  testWidgets('TabBarView skips animation when disabled in controller', (WidgetTester tester) async {
+    final List<String> tabs = <String>['A', 'B', 'C'];
+    final TabController tabController = TabController(
+      vsync: const TestVSync(),
+      initialIndex: 1,
+      length: tabs.length,
+      animationDuration: Duration.zero,
+    );
+    await tester.pumpWidget(boilerplate(
+      child: Column(
+        children: <Widget>[
+          TabBar(
+            tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
+            controller: tabController,
+          ),
+          SizedBox(
+            width: 400.0,
+            height: 400.0,
+            child: TabBarView(
+              controller: tabController,
+              children: const <Widget>[
+                Center(child: Text('0')),
+                Center(child: Text('1')),
+                Center(child: Text('2')),
+              ],
+            ),
+          ),
+        ],
+      ),
+    ));
+
+    expect(tabController.index, 1);
+
+    final PageView pageView = tester.widget(find.byType(PageView));
+    final PageController pageController = pageView.controller;
+    final ScrollPosition position = pageController.position;
+
+    // The TabBarView's page width is 400, so page 0 is at scroll offset 0.0,
+    // page 1 is at 400.0, page 2 is at 800.0.
+    expect(position.pixels, 400);
+    await tester.tap(find.text('C'));
+    await tester.pump();
+    expect(position.pixels, 800);
+  });
+
+  testWidgets('TabBarView skips animation when disabled in controller - skip tabs', (WidgetTester tester) async {
+    final List<String> tabs = <String>['A', 'B', 'C'];
+    final TabController tabController = TabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+      animationDuration: Duration.zero,
+    );
+    await tester.pumpWidget(boilerplate(
+      child: Column(
+        children: <Widget>[
+          TabBar(
+            tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
+            controller: tabController,
+          ),
+          SizedBox(
+            width: 400.0,
+            height: 400.0,
+            child: TabBarView(
+              controller: tabController,
+              children: const <Widget>[
+                Center(child: Text('0')),
+                Center(child: Text('1')),
+                Center(child: Text('2')),
+              ],
+            ),
+          ),
+        ],
+      ),
+    ));
+
+    expect(tabController.index, 0);
+
+    final PageView pageView = tester.widget(find.byType(PageView));
+    final PageController pageController = pageView.controller;
+    final ScrollPosition position = pageController.position;
+
+    // The TabBarView's page width is 400, so page 0 is at scroll offset 0.0,
+    // page 1 is at 400.0, page 2 is at 800.0.
+    expect(position.pixels, 0);
+    await tester.tap(find.text('C'));
+    await tester.pump();
+    expect(position.pixels, 800);
+  });
+
+  testWidgets('TabBarView skips animation when disabled in controller - two tabs', (WidgetTester tester) async {
+    final List<String> tabs = <String>['A', 'B'];
+    final TabController tabController = TabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+      animationDuration: Duration.zero,
+    );
+    await tester.pumpWidget(boilerplate(
+      child: Column(
+        children: <Widget>[
+          TabBar(
+            tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
+            controller: tabController,
+          ),
+          SizedBox(
+            width: 400.0,
+            height: 400.0,
+            child: TabBarView(
+              controller: tabController,
+              children: const <Widget>[
+                Center(child: Text('0')),
+                Center(child: Text('1')),
+              ],
+            ),
+          ),
+        ],
+      ),
+    ));
+
+    expect(tabController.index, 0);
+
+    final PageView pageView = tester.widget(find.byType(PageView));
+    final PageController pageController = pageView.controller;
+    final ScrollPosition position = pageController.position;
+
+    // The TabBarView's page width is 400, so page 0 is at scroll offset 0.0,
+    // page 1 is at 400.0, page 2 is at 800.0.
+    expect(position.pixels, 0);
+    await tester.tap(find.text('B'));
+    await tester.pump();
+    expect(position.pixels, 400);
   });
 
   testWidgets('TabBar tap animates the selection indicator', (WidgetTester tester) async {
@@ -3924,6 +4182,79 @@ void main() {
     expect(semantics, hasSemantics(expectedSemantics, ignoreRect: true, ignoreTransform: true));
 
     semantics.dispose();
+  });
+
+  testWidgets('Change the TabController should make both TabBar and TabBarView return to the initial index.', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/93237
+
+    Widget buildFrame(TabController controller, bool showLast) {
+      return boilerplate(
+        child: Column(
+          children: <Widget>[
+            TabBar(
+              controller: controller,
+              tabs: <Tab>[
+                const Tab(text: 'one'),
+                const Tab(text: 'two'),
+                if (showLast) const Tab(text: 'three'),
+              ],
+            ),
+            Flexible(
+              child: TabBarView(
+                controller: controller,
+                children: <Widget>[
+                  const Text('PAGE1'),
+                  const Text('PAGE2'),
+                  if (showLast) const Text('PAGE3'),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final TabController controller1 = TabController(
+      vsync: const TestVSync(),
+      length: 3,
+    );
+
+    final TabController controller2 = TabController(
+      vsync: const TestVSync(),
+      length: 2,
+    );
+
+    final TabController controller3 = TabController(
+      vsync: const TestVSync(),
+      length: 3,
+    );
+
+    await tester.pumpWidget(buildFrame(controller1, true));
+    final PageView pageView = tester.widget(find.byType(PageView));
+    final PageController pageController = pageView.controller;
+
+    await tester.tap(find.text('three'));
+    await tester.pumpAndSettle();
+    expect(controller1.index, 2);
+    expect(pageController.page, 2);
+
+    // Change TabController from 3 items to 2.
+    await tester.pumpWidget(buildFrame(controller2, false));
+    await tester.pumpAndSettle();
+    expect(controller2.index, 0);
+    expect(pageController.page, 0);
+
+    // Change TabController from 2 items to 3.
+    await tester.pumpWidget(buildFrame(controller3, true));
+    await tester.pumpAndSettle();
+    expect(controller3.index, 0);
+    expect(pageController.page, 0);
+
+    await tester.tap(find.text('three'));
+    await tester.pumpAndSettle();
+
+    expect(controller3.index, 2);
+    expect(pageController.page, 2);
   });
 }
 

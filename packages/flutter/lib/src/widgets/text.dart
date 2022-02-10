@@ -150,7 +150,7 @@ class DefaultTextStyle extends InheritedTheme {
   /// See [TextWidthBasis] for possible values and their implications.
   final TextWidthBasis textWidthBasis;
 
-  /// {@macro flutter.dart:ui.textHeightBehavior}
+  /// {@macro dart.ui.textHeightBehavior}
   final ui.TextHeightBehavior? textHeightBehavior;
 
   /// The closest instance of this class that encloses the given context.
@@ -241,7 +241,7 @@ class DefaultTextHeightBehavior extends InheritedTheme {
         assert(child != null),
         super(key: key, child: child);
 
-  /// {@macro flutter.dart:ui.textHeightBehavior}
+  /// {@macro dart.ui.textHeightBehavior}
   final TextHeightBehavior textHeightBehavior;
 
   /// The closest instance of this class that encloses the given context.
@@ -513,7 +513,7 @@ class Text extends StatelessWidget {
   /// {@macro flutter.painting.textPainter.textWidthBasis}
   final TextWidthBasis? textWidthBasis;
 
-  /// {@macro flutter.dart:ui.textHeightBehavior}
+  /// {@macro dart.ui.textHeightBehavior}
   final ui.TextHeightBehavior? textHeightBehavior;
 
   @override

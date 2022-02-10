@@ -184,80 +184,6 @@ void main() {
     );
   }
 
-  testWidgets('can use the desktop cut/copy/paste buttons on desktop', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(
-      text: 'blah1 blah2',
-    );
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: Center(
-            child: TextFormField(
-              controller: controller,
-            ),
-          ),
-        ),
-      ),
-    );
-
-    // Initially, the menu is not shown and there is no selection.
-    expect(find.byType(CupertinoButton), findsNothing);
-    expect(controller.selection, const TextSelection(baseOffset: -1, extentOffset: -1));
-
-    final Offset midBlah1 = textOffsetToPosition(tester, 2);
-
-    // Right clicking shows the menu.
-    final TestGesture gesture = await tester.startGesture(
-      midBlah1,
-      kind: PointerDeviceKind.mouse,
-      buttons: kSecondaryMouseButton,
-    );
-    addTearDown(gesture.removePointer);
-    await tester.pump();
-    await gesture.up();
-    await tester.pumpAndSettle();
-    expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 5));
-    expect(find.text('Copy'), findsOneWidget);
-    expect(find.text('Cut'), findsOneWidget);
-    expect(find.text('Paste'), findsOneWidget);
-
-    // Copy the first word.
-    await tester.tap(find.text('Copy'));
-    await tester.pumpAndSettle();
-    expect(controller.text, 'blah1 blah2');
-    expect(controller.selection, const TextSelection(baseOffset: 5, extentOffset: 5));
-    expect(find.byType(CupertinoButton), findsNothing);
-
-    // Paste it at the end.
-    await gesture.down(textOffsetToPosition(tester, controller.text.length));
-    await tester.pump();
-    await gesture.up();
-    await tester.pumpAndSettle();
-    expect(controller.selection, const TextSelection(baseOffset: 11, extentOffset: 11, affinity: TextAffinity.upstream));
-    expect(find.text('Cut'), findsNothing);
-    expect(find.text('Copy'), findsNothing);
-    expect(find.text('Paste'), findsOneWidget);
-    await tester.tap(find.text('Paste'));
-    await tester.pumpAndSettle();
-    expect(controller.text, 'blah1 blah2blah1');
-    expect(controller.selection, const TextSelection(baseOffset: 16, extentOffset: 16, affinity: TextAffinity.upstream));
-
-    // Cut the first word.
-    await gesture.down(midBlah1);
-    await tester.pump();
-    await gesture.up();
-    await tester.pumpAndSettle();
-    expect(find.text('Cut'), findsOneWidget);
-    expect(find.text('Copy'), findsOneWidget);
-    expect(find.text('Paste'), findsOneWidget);
-    expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 5));
-    await tester.tap(find.text('Cut'));
-    await tester.pumpAndSettle();
-    expect(controller.text, ' blah2blah1');
-    expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 0));
-    expect(find.byType(CupertinoButton), findsNothing);
-  }, variant: TargetPlatformVariant.desktop(), skip: kIsWeb); // [intended] toolbar is handled by the browser.
-
   testWidgets('has expected defaults', (WidgetTester tester) async {
     await tester.pumpWidget(
       boilerplate(
@@ -4942,5 +4868,92 @@ void main() {
       find.byType(MaterialApp),
       matchesGoldenFile('selectable_text_golden.TextSelectionStyle.2.png'),
     );
+  });
+
+  testWidgets('keeps alive when has focus', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: DefaultTabController(
+          length: 2,
+          child: Scaffold(
+            body: NestedScrollView(
+              headerSliverBuilder:
+                (BuildContext context, bool innerBoxIsScrolled) {
+                  return <Widget>[
+                    SliverToBoxAdapter(
+                      child: Container(
+                        height: 200,
+                        color: Colors.black12,
+                        child: const Center(child: Text('Sliver 1')),
+                      ),
+                    ),
+                    const SliverToBoxAdapter(
+                      child: Center(
+                        child: TabBar(
+                          labelColor: Colors.black,
+                          tabs: <Tab>[
+                            Tab(text: 'Sliver Tab 1'),
+                            Tab(text: 'Sliver Tab 2'),
+                          ],
+                        ),
+                      )
+                    ),
+                  ];
+                },
+                body: const TabBarView(
+                  children: <Widget>[
+                    Padding(
+                      padding: EdgeInsets.only(top: 100.0),
+                      child: Text('Regular Text'),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.only(top: 100.0),
+                      child: SelectableText('Selectable Text'),
+                    ),
+                  ],
+                ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Without any selection, the offscreen widget is disposed and can't be
+    // found, for both Text and SelectableText.
+    expect(find.text('Regular Text', skipOffstage: false), findsOneWidget);
+    expect(find.byType(SelectableText, skipOffstage: false), findsNothing);
+
+    await tester.tap(find.text('Sliver Tab 2'));
+    await tester.pumpAndSettle();
+    expect(find.text('Regular Text', skipOffstage: false), findsNothing);
+    expect(find.byType(SelectableText, skipOffstage: false), findsOneWidget);
+
+    await tester.tap(find.text('Sliver Tab 1'));
+    await tester.pumpAndSettle();
+    expect(find.text('Regular Text', skipOffstage: false), findsOneWidget);
+    expect(find.byType(SelectableText, skipOffstage: false), findsNothing);
+
+    // Switch back to tab 2 and select some text in SelectableText.
+    await tester.tap(find.text('Sliver Tab 2'));
+    await tester.pumpAndSettle();
+    expect(find.text('Regular Text', skipOffstage: false), findsNothing);
+    expect(find.byType(SelectableText, skipOffstage: false), findsOneWidget);
+
+    final EditableText editableText = tester.widget(find.byType(EditableText));
+    expect(editableText.controller.selection.isValid, isFalse);
+    await tester.tapAt(textOffsetToPosition(tester, 4));
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.tapAt(textOffsetToPosition(tester, 4));
+    await tester.pumpAndSettle();
+    expect(editableText.controller.selection.isValid, isTrue);
+    expect(editableText.controller.selection.baseOffset, 0);
+    expect(editableText.controller.selection.extentOffset, 'Selectable'.length);
+
+    // Switch back to tab 1. The SelectableText remains because it is preserving
+    // its selection.
+    await tester.tap(find.text('Sliver Tab 1'));
+    await tester.pumpAndSettle();
+    expect(find.text('Regular Text', skipOffstage: false), findsOneWidget);
+    expect(find.byType(SelectableText, skipOffstage: false), findsOneWidget);
   });
 }

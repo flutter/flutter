@@ -662,7 +662,7 @@ class SliverChildListDelegate extends SliverChildDelegate {
   ///
   ///   Widget build(BuildContext context) {
   ///     // Always create a new list of children as a Widget is immutable.
-  ///     return PageView(children: List<Widget>.from(_children));
+  ///     return PageView(children: List<Widget>.of(_children));
   ///   }
   /// }
   /// ```

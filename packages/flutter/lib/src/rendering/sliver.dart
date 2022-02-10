@@ -1203,9 +1203,9 @@ abstract class RenderSliver extends RenderObject {
   @override
   void debugAssertDoesMeetConstraints() {
     assert(geometry!.debugAssertIsValid(
-      informationCollector: () sync* {
-        yield describeForError('The RenderSliver that returned the offending geometry was');
-      },
+      informationCollector: () => <DiagnosticsNode>[
+        describeForError('The RenderSliver that returned the offending geometry was'),
+      ],
     ));
     assert(() {
       if (geometry!.paintOrigin + geometry!.paintExtent > constraints.remainingPaintExtent) {

@@ -11,7 +11,7 @@ import 'base/logger.dart';
 import 'base/os.dart';
 import 'base/utils.dart';
 import 'convert.dart';
-import 'globals_null_migrated.dart' as globals;
+import 'globals.dart' as globals;
 
 /// Whether icon font subsetting is enabled by default.
 const bool kIconTreeShakerEnabledDefault = true;
@@ -751,7 +751,7 @@ HostPlatform getCurrentHostPlatform() {
     return HostPlatform.windows_x64;
   }
 
-  globals.printError('Unsupported host platform, defaulting to Linux');
+  globals.printWarning('Unsupported host platform, defaulting to Linux');
 
   return HostPlatform.linux_x64;
 }

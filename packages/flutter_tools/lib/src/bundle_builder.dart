@@ -16,7 +16,7 @@ import 'build_system/targets/common.dart';
 import 'bundle.dart';
 import 'cache.dart';
 import 'devfs.dart';
-import 'globals_null_migrated.dart' as globals;
+import 'globals.dart' as globals;
 import 'project.dart';
 
 
@@ -140,7 +140,7 @@ Future<void> writeBundle(
     try {
       bundleDir.deleteSync(recursive: true);
     } on FileSystemException catch (err) {
-      loggerOverride.printError(
+      loggerOverride.printWarning(
         'Failed to clean up asset directory ${bundleDir.path}: $err\n'
         'To clean build artifacts, use the command "flutter clean".'
       );

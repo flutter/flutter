@@ -137,6 +137,7 @@ void main() {
       if (methodCall.method == 'HapticFeedback.vibrate') {
         hapticFeedbackCalls += 1;
       }
+      return null;
     });
 
     // Long press on the scrollbar thumb and expect a vibration after it resizes.
@@ -777,6 +778,7 @@ void main() {
       if (methodCall.method == 'HapticFeedback.vibrate') {
         hapticFeedbackCalls += 1;
       }
+      return null;
     });
 
     // Long press on the scrollbar thumb and expect a vibration after it resizes.

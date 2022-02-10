@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import '../artifacts.dart';
@@ -20,12 +17,12 @@ class AnalyzeCommand extends FlutterCommand {
   AnalyzeCommand({
     bool verboseHelp = false,
     this.workingDirectory,
-    @required FileSystem fileSystem,
-    @required Platform platform,
-    @required Terminal terminal,
-    @required Logger logger,
-    @required ProcessManager processManager,
-    @required Artifacts artifacts,
+    required FileSystem fileSystem,
+    required Platform platform,
+    required Terminal terminal,
+    required Logger logger,
+    required ProcessManager processManager,
+    required Artifacts artifacts,
   }) : _artifacts = artifacts,
        _fileSystem = fileSystem,
        _processManager = processManager,
@@ -35,7 +32,6 @@ class AnalyzeCommand extends FlutterCommand {
     argParser.addFlag('flutter-repo',
         negatable: false,
         help: 'Include all the examples and tests from the Flutter repository.',
-        defaultsTo: false,
         hide: !verboseHelp);
     argParser.addFlag('current-package',
         help: 'Analyze the current project, if applicable.', defaultsTo: true);
@@ -80,17 +76,15 @@ class AnalyzeCommand extends FlutterCommand {
               'files that will be analyzed.\n'
               'Ignored if "--watch" is specified.');
     argParser.addFlag('fatal-infos',
-        negatable: true,
         help: 'Treat info level issues as fatal.',
         defaultsTo: true);
     argParser.addFlag('fatal-warnings',
-        negatable: true,
         help: 'Treat warning level issues as fatal.',
         defaultsTo: true);
   }
 
   /// The working directory for testing analysis using dartanalyzer.
-  final Directory workingDirectory;
+  final Directory? workingDirectory;
 
   final Artifacts _artifacts;
   final FileSystem _fileSystem;
@@ -127,9 +121,9 @@ class AnalyzeCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     if (boolArg('watch')) {
       await AnalyzeContinuously(
-        argResults,
-        runner.getRepoRoots(),
-        runner.getRepoPackages(),
+        argResults!,
+        runner!.getRepoRoots(),
+        runner!.getRepoPackages(),
         fileSystem: _fileSystem,
         logger: _logger,
         platform: _platform,
@@ -139,9 +133,9 @@ class AnalyzeCommand extends FlutterCommand {
       ).analyze();
     } else {
       await AnalyzeOnce(
-        argResults,
-        runner.getRepoRoots(),
-        runner.getRepoPackages(),
+        argResults!,
+        runner!.getRepoRoots(),
+        runner!.getRepoPackages(),
         workingDirectory: workingDirectory,
         fileSystem: _fileSystem,
         logger: _logger,

@@ -2038,6 +2038,43 @@ void main() {
     expect(depths[1], 0);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/92262
+  testWidgets('Do not crash when resize from scrollable to non-scrollable.', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    Widget buildFrame(double height) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: RawScrollbar(
+            controller: scrollController,
+            interactive: true,
+            isAlwaysShown: true,
+            child: SingleChildScrollView(
+              controller: scrollController,
+              child: Container(
+                width: 100.0,
+                height: height,
+                color: const Color(0xFF000000),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+    await tester.pumpWidget(buildFrame(700.0));
+    await tester.pumpAndSettle();
+
+    await tester.pumpWidget(buildFrame(600.0));
+    await tester.pumpAndSettle();
+
+    // Try to drag the thumb.
+    final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(798.0, 5.0));
+    await tester.pumpAndSettle();
+    await dragScrollbarGesture.moveBy(const Offset(0.0, 5.0));
+    await tester.pumpAndSettle();
+  });
+
   test('ScrollbarPainter.shouldRepaint returns true when any of the properties changes', () {
     ScrollbarPainter createPainter({
       Color color = const Color(0xFF000000),

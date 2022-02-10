@@ -114,6 +114,11 @@ void main() {
         ]),
         const FakeCommand(command: <String>[
           'git',
+          'checkout',
+          FrameworkRepository.defaultBranch,
+        ]),
+        const FakeCommand(command: <String>[
+          'git',
           'rev-parse',
           'HEAD',
         ], stdout: revision),
@@ -195,6 +200,11 @@ void main() {
           '--',
           'file://$flutterRoot/',
           '${checkoutsParentDirectory}flutter_conductor_checkouts/framework',
+        ]),
+        const FakeCommand(command: <String>[
+          'git',
+          'checkout',
+          FrameworkRepository.defaultBranch,
         ]),
         const FakeCommand(command: <String>[
           'git',
@@ -286,6 +296,11 @@ void main() {
         ]),
         const FakeCommand(command: <String>[
           'git',
+          'checkout',
+          FrameworkRepository.defaultBranch,
+        ]),
+        const FakeCommand(command: <String>[
+          'git',
           'rev-parse',
           'HEAD',
         ], stdout: revision),
@@ -373,6 +388,11 @@ void main() {
         ]),
         const FakeCommand(command: <String>[
           'git',
+          'checkout',
+          FrameworkRepository.defaultBranch,
+        ]),
+        const FakeCommand(command: <String>[
+          'git',
           'rev-parse',
           'HEAD',
         ], stdout: revision),
@@ -429,6 +449,11 @@ void main() {
           '--',
           'file://$flutterRoot/',
           '${checkoutsParentDirectory}flutter_conductor_checkouts/framework',
+        ]),
+        const FakeCommand(command: <String>[
+          'git',
+          'checkout',
+          FrameworkRepository.defaultBranch,
         ]),
         const FakeCommand(command: <String>[
           'git',
