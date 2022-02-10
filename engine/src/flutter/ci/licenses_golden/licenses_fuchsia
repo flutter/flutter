@@ -1,4 +1,4 @@
-Signature: d37e345f464b560012ca255705a43e67
+Signature: 661d01332cba211c24c7e7ba829813a4
 
 UNUSED LICENSES:
 
@@ -3321,7 +3321,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/connector.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/deprecated.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/directory-entry.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/directory-iterator.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/directory-watcher.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/directory2.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/file2.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/io.fidl
