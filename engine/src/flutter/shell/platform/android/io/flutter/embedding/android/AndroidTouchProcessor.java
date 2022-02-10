@@ -21,10 +21,7 @@ public class AndroidTouchProcessor {
     PointerChange.HOVER,
     PointerChange.DOWN,
     PointerChange.MOVE,
-    PointerChange.UP,
-    PointerChange.PAN_ZOOM_START,
-    PointerChange.PAN_ZOOM_UPDATE,
-    PointerChange.PAN_ZOOM_END
+    PointerChange.UP
   })
   private @interface PointerChange {
     int CANCEL = 0;
@@ -34,9 +31,6 @@ public class AndroidTouchProcessor {
     int DOWN = 4;
     int MOVE = 5;
     int UP = 6;
-    int PAN_ZOOM_START = 7;
-    int PAN_ZOOM_UPDATE = 8;
-    int PAN_ZOOM_END = 9;
   }
 
   // Must match the PointerDeviceKind enum in pointer.dart.
@@ -64,7 +58,7 @@ public class AndroidTouchProcessor {
   }
 
   // Must match the unpacking code in hooks.dart.
-  private static final int POINTER_DATA_FIELD_COUNT = 35;
+  private static final int POINTER_DATA_FIELD_COUNT = 29;
   private static final int BYTES_PER_FIELD = 8;
 
   // This value must match the value in framework's platform_view.dart.
@@ -314,13 +308,6 @@ public class AndroidTouchProcessor {
       packet.putDouble(0.0); // scroll_delta_x
       packet.putDouble(0.0); // scroll_delta_x
     }
-
-    packet.putDouble(0.0); // pan_x
-    packet.putDouble(0.0); // pan_y
-    packet.putDouble(0.0); // pan_delta_x
-    packet.putDouble(0.0); // pan_delta_y
-    packet.putDouble(1.0); // scale
-    packet.putDouble(0.0); // rotation
   }
 
   @PointerChange

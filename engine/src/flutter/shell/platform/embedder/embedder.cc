@@ -1647,12 +1647,6 @@ inline flutter::PointerData::Change ToPointerDataChange(
       return flutter::PointerData::Change::kRemove;
     case kHover:
       return flutter::PointerData::Change::kHover;
-    case kPanZoomStart:
-      return flutter::PointerData::Change::kPanZoomStart;
-    case kPanZoomUpdate:
-      return flutter::PointerData::Change::kPanZoomUpdate;
-    case kPanZoomEnd:
-      return flutter::PointerData::Change::kPanZoomEnd;
   }
   return flutter::PointerData::Change::kCancel;
 }
@@ -1668,8 +1662,6 @@ inline flutter::PointerData::DeviceKind ToPointerDataKind(
       return flutter::PointerData::DeviceKind::kTouch;
     case kFlutterPointerDeviceKindStylus:
       return flutter::PointerData::DeviceKind::kStylus;
-    case kFlutterPointerDeviceKindTrackpad:
-      return flutter::PointerData::DeviceKind::kTrackpad;
   }
   return flutter::PointerData::DeviceKind::kMouse;
 }
@@ -1702,9 +1694,6 @@ inline int64_t PointerDataButtonsForLegacyEvent(
     case flutter::PointerData::Change::kRemove:
     case flutter::PointerData::Change::kHover:
     case flutter::PointerData::Change::kUp:
-    case flutter::PointerData::Change::kPanZoomStart:
-    case flutter::PointerData::Change::kPanZoomUpdate:
-    case flutter::PointerData::Change::kPanZoomEnd:
       return 0;
   }
   return 0;
@@ -1770,13 +1759,6 @@ FlutterEngineResult FlutterEngineSendPointerEvent(
         pointer_data.buttons = SAFE_ACCESS(current, buttons, 0);
       }
     }
-    pointer_data.pan_x = SAFE_ACCESS(current, pan_x, 0.0);
-    pointer_data.pan_y = SAFE_ACCESS(current, pan_y, 0.0);
-    // Delta will be generated in pointer_data_packet_converter.cc.
-    pointer_data.pan_delta_x = 0.0;
-    pointer_data.pan_delta_y = 0.0;
-    pointer_data.scale = SAFE_ACCESS(current, scale, 0.0);
-    pointer_data.rotation = SAFE_ACCESS(current, rotation, 0.0);
     packet->SetPointerData(i, pointer_data);
     current = reinterpret_cast<const FlutterPointerEvent*>(
         reinterpret_cast<const uint8_t*>(current) + current->struct_size);
