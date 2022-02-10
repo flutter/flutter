@@ -2752,6 +2752,8 @@ targets:
       tags: >
         ["devicelab","hostonly"]
       task_name: plugin_lint_mac
+      os: Mac-12  # Override OS and Xcode for https://github.com/flutter/flutter/issues/97303
+      xcode: 13a233
     scheduler: luci
     runIf:
       - dev/**
