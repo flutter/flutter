@@ -121,7 +121,7 @@ targets:
     timeout: 60
     scheduler: luci
 
-  - name: Linux Android Scenarios
+  - name: Linux Android Emulator Tests
     bringup: true # Recipe issue https://github.com/flutter/flutter/issues/86427
     recipe: engine/scenarios
     properties:
