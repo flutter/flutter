@@ -19,7 +19,8 @@ void main() {
     // walks of the layer tree. To avoid those, the processing order was changed
     // back to deepest first (which is also the order used by all other flush-methods on
     // PipelineOwner). The test below encodes that the framework is not doing
-    // these unnecessary layer tree walks during paint.
+    // these unnecessary layer tree walks during paint that would occur during
+    // deepest first processing.
 
     late RenderPositionedBox outer, inner;
     late TestRenderBox testBox;
