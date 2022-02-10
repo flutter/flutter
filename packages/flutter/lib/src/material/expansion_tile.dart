@@ -6,6 +6,7 @@ import 'package:flutter/widgets.dart';
 
 import 'color_scheme.dart';
 import 'colors.dart';
+import 'expansion_tile_theme.dart';
 import 'icons.dart';
 import 'list_tile.dart';
 import 'theme.dart';
@@ -297,11 +298,12 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
   }
 
   Widget _buildChildren(BuildContext context, Widget? child) {
+    final ExpansionTileThemeData expansionTileTheme = ExpansionTileTheme.of(context);
     final Color borderSideColor = _borderColor.value ?? Colors.transparent;
 
     return Container(
       decoration: BoxDecoration(
-        color: _backgroundColor.value ?? Colors.transparent,
+        color: _backgroundColor.value ?? expansionTileTheme.backgroundColor ?? Colors.transparent,
         border: Border(
           top: BorderSide(color: borderSideColor),
           bottom: BorderSide(color: borderSideColor),
@@ -311,11 +313,11 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           ListTileTheme.merge(
-            iconColor: _iconColor.value,
+            iconColor: _iconColor.value ?? expansionTileTheme.iconColor,
             textColor: _headerColor.value,
             child: ListTile(
               onTap: _handleTap,
-              contentPadding: widget.tilePadding,
+              contentPadding: widget.tilePadding ?? expansionTileTheme.tilePadding,
               leading: widget.leading ?? _buildLeadingIcon(context),
               title: widget.title,
               subtitle: widget.subtitle,
@@ -324,7 +326,9 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
           ),
           ClipRect(
             child: Align(
-              alignment: widget.expandedAlignment ?? Alignment.center,
+              alignment: widget.expandedAlignment
+                ?? expansionTileTheme.expandedAlignment
+                ?? Alignment.center,
               heightFactor: _heightFactor.value,
               child: child,
             ),
@@ -337,22 +341,28 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
   @override
   void didChangeDependencies() {
     final ThemeData theme = Theme.of(context);
+    final ExpansionTileThemeData expansionTileTheme = ExpansionTileTheme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
     _borderColorTween.end = theme.dividerColor;
     _headerColorTween
-      ..begin = widget.collapsedTextColor ?? theme.textTheme.subtitle1!.color
-      ..end = widget.textColor ?? colorScheme.primary;
+      ..begin = widget.collapsedTextColor
+        ?? expansionTileTheme.collapsedTextColor
+        ?? theme.textTheme.subtitle1!.color
+      ..end = widget.textColor ?? expansionTileTheme.textColor ?? colorScheme.primary;
     _iconColorTween
-      ..begin = widget.collapsedIconColor ?? theme.unselectedWidgetColor
-      ..end = widget.iconColor ?? colorScheme.primary;
+      ..begin = widget.collapsedIconColor
+        ?? expansionTileTheme.collapsedIconColor
+        ?? theme.unselectedWidgetColor
+      ..end = widget.iconColor ?? expansionTileTheme.iconColor ?? colorScheme.primary;
     _backgroundColorTween
-      ..begin = widget.collapsedBackgroundColor
-      ..end = widget.backgroundColor;
+      ..begin = widget.collapsedBackgroundColor ?? expansionTileTheme.collapsedBackgroundColor
+      ..end = widget.backgroundColor ?? expansionTileTheme.backgroundColor;
     super.didChangeDependencies();
   }
 
   @override
   Widget build(BuildContext context) {
+    final ExpansionTileThemeData expansionTileTheme = ExpansionTileTheme.of(context);
     final bool closed = !_isExpanded && _controller.isDismissed;
     final bool shouldRemoveChildren = closed && !widget.maintainState;
 
@@ -361,7 +371,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
       child: TickerMode(
         enabled: !closed,
         child: Padding(
-          padding: widget.childrenPadding ?? EdgeInsets.zero,
+          padding: widget.childrenPadding ?? expansionTileTheme.childrenPadding ?? EdgeInsets.zero,
           child: Column(
             crossAxisAlignment: widget.expandedCrossAxisAlignment ?? CrossAxisAlignment.center,
             children: widget.children,

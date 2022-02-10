@@ -24,6 +24,7 @@ import 'dialog_theme.dart';
 import 'divider_theme.dart';
 import 'drawer_theme.dart';
 import 'elevated_button_theme.dart';
+import 'expansion_tile_theme.dart';
 import 'floating_action_button_theme.dart';
 import 'ink_splash.dart';
 import 'ink_well.dart' show InteractiveInkFeatureFactory;
@@ -321,6 +322,7 @@ class ThemeData with Diagnosticable {
     TimePickerThemeData? timePickerTheme,
     ToggleButtonsThemeData? toggleButtonsTheme,
     TooltipThemeData? tooltipTheme,
+    ExpansionTileThemeData? expansionTileTheme,
     // DEPRECATED (newest deprecations at the bottom)
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
@@ -541,6 +543,7 @@ class ThemeData with Diagnosticable {
     timePickerTheme ??= const TimePickerThemeData();
     toggleButtonsTheme ??= const ToggleButtonsThemeData();
     tooltipTheme ??= const TooltipThemeData();
+    expansionTileTheme ??= const ExpansionTileThemeData();
 
      // DEPRECATED (newest deprecations at the bottom)
     useTextSelectionTheme ??= true;
@@ -630,6 +633,7 @@ class ThemeData with Diagnosticable {
       timePickerTheme: timePickerTheme,
       toggleButtonsTheme: toggleButtonsTheme,
       tooltipTheme: tooltipTheme,
+      expansionTileTheme: expansionTileTheme,
       // DEPRECATED (newest deprecations at the bottom)
       useTextSelectionTheme: useTextSelectionTheme,
       textSelectionColor: textSelectionColor,
@@ -735,6 +739,7 @@ class ThemeData with Diagnosticable {
     required this.timePickerTheme,
     required this.toggleButtonsTheme,
     required this.tooltipTheme,
+    required this.expansionTileTheme,
     // DEPRECATED (newest deprecations at the bottom)
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
@@ -873,6 +878,7 @@ class ThemeData with Diagnosticable {
        assert(timePickerTheme != null),
        assert(toggleButtonsTheme != null),
        assert(tooltipTheme != null),
+       assert(expansionTileTheme != null),
         // DEPRECATED (newest deprecations at the bottom)
        assert(useTextSelectionTheme != null),
        assert(textSelectionColor != null),
@@ -1408,6 +1414,11 @@ class ThemeData with Diagnosticable {
   /// This is the value returned from [TooltipTheme.of].
   final TooltipThemeData tooltipTheme;
 
+  /// A theme for customizing the visual properties of [ExpansionTile]s.
+  ///
+  /// This is the value returned from [ExpansionTileTheme.of].
+  final ExpansionTileThemeData expansionTileTheme;
+
   // DEPRECATED (newest deprecations at the bottom)
 
   /// A temporary flag that was used to opt-in to the new [TextSelectionTheme]
@@ -1633,6 +1644,7 @@ class ThemeData with Diagnosticable {
     TimePickerThemeData? timePickerTheme,
     ToggleButtonsThemeData? toggleButtonsTheme,
     TooltipThemeData? tooltipTheme,
+    ExpansionTileThemeData? expansionTileTheme,
     // DEPRECATED (newest deprecations at the bottom)
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
@@ -1776,6 +1788,7 @@ class ThemeData with Diagnosticable {
       timePickerTheme: timePickerTheme ?? this.timePickerTheme,
       toggleButtonsTheme: toggleButtonsTheme ?? this.toggleButtonsTheme,
       tooltipTheme: tooltipTheme ?? this.tooltipTheme,
+      expansionTileTheme: expansionTileTheme ?? this.expansionTileTheme,
       // DEPRECATED (newest deprecations at the bottom)
       useTextSelectionTheme: useTextSelectionTheme ?? this.useTextSelectionTheme,
       textSelectionColor: textSelectionColor ?? this.textSelectionColor,
@@ -1945,6 +1958,7 @@ class ThemeData with Diagnosticable {
       timePickerTheme: TimePickerThemeData.lerp(a.timePickerTheme, b.timePickerTheme, t),
       toggleButtonsTheme: ToggleButtonsThemeData.lerp(a.toggleButtonsTheme, b.toggleButtonsTheme, t)!,
       tooltipTheme: TooltipThemeData.lerp(a.tooltipTheme, b.tooltipTheme, t)!,
+      expansionTileTheme: ExpansionTileThemeData.lerp(a.expansionTileTheme, b.expansionTileTheme, t)!,
       // DEPRECATED (newest deprecations at the bottom)
       useTextSelectionTheme: t < 0.5 ? a.useTextSelectionTheme : b.useTextSelectionTheme,
       textSelectionColor: Color.lerp(a.textSelectionColor, b.textSelectionColor, t)!,
@@ -2044,6 +2058,7 @@ class ThemeData with Diagnosticable {
         other.timePickerTheme == timePickerTheme &&
         other.toggleButtonsTheme == toggleButtonsTheme &&
         other.tooltipTheme == tooltipTheme &&
+        other.expansionTileTheme == expansionTileTheme &&
         // DEPRECATED (newest deprecations at the bottom)
         other.useTextSelectionTheme == useTextSelectionTheme &&
         other.textSelectionColor == textSelectionColor &&
@@ -2140,6 +2155,7 @@ class ThemeData with Diagnosticable {
       timePickerTheme,
       toggleButtonsTheme,
       tooltipTheme,
+      expansionTileTheme,
       // DEPRECATED (newest deprecations at the bottom)
       useTextSelectionTheme,
       textSelectionColor,
@@ -2236,6 +2252,7 @@ class ThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<TimePickerThemeData>('timePickerTheme', timePickerTheme, defaultValue: defaultData.timePickerTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<ToggleButtonsThemeData>('toggleButtonsTheme', toggleButtonsTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<TooltipThemeData>('tooltipTheme', tooltipTheme, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<ExpansionTileThemeData>('expansionTileTheme', expansionTileTheme, level: DiagnosticLevel.debug));
     // DEPRECATED (newest deprecations at the bottom)
     properties.add(DiagnosticsProperty<bool>('useTextSelectionTheme', useTextSelectionTheme, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('textSelectionColor', textSelectionColor, defaultValue: defaultData.textSelectionColor, level: DiagnosticLevel.debug));
