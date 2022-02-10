@@ -143,7 +143,7 @@ class _SpellCheckerSuggestionsToolbarState extends State<_SpellCheckerSuggestion
                 label: suggestion,
                 onPressed: () 
                 {
-                    widget.delegate.replaceSelection(SelectionChangedCause.toolbar, suggestion, relevantSpan.start, relevantSpan.end+1);
+                    widget.delegate.replaceSelection(SelectionChangedCause.toolbar, suggestion, relevantSpan.start, relevantSpan.end + 1);
                 },
         ));
     });

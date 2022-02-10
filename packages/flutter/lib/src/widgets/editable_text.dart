@@ -1730,7 +1730,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
-    /// Cut current selection to [Clipboard].
+  /// Replace selection with provided suggestion.
   @override
   void replaceSelection(SelectionChangedCause cause, String replacementSuggestion, int start, int end) {
     if (widget.readOnly || widget.obscureText) {
@@ -1741,10 +1741,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
     _replaceText(ReplaceTextIntent(textEditingValue, replacementSuggestion, selection, cause));
 
-    if (cause == SelectionChangedCause.toolbar) {
-      bringIntoView(textEditingValue.selection.extent);
-      hideToolbar(ToolbarType.spellCheckerSuggestionsControls);
-    }
+    Locale? localeForSpellChecking = widget.locale ?? Localizations.maybeLocaleOf(context);
+
+    bringIntoView(textEditingValue.selection.extent);
+    hideToolbar(ToolbarType.spellCheckerSuggestionsControls);
   }
 
   /// Select the entire text value.
@@ -2569,8 +2569,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           value,
           (TextEditingValue newValue, TextInputFormatter formatter) => formatter.formatEditUpdate(_value, newValue),
         ) ?? value;
-        Locale? localeForSpellChecking = widget.locale ?? Localizations.maybeLocaleOf(context);
-        _textInputConnection!.initiateSpellChecking(localeForSpellChecking as Locale, value.text);
+
+        if (value.text.length > 0) {
+          Locale? localeForSpellChecking = widget.locale ?? Localizations.maybeLocaleOf(context);
+          _textInputConnection!.initiateSpellChecking(localeForSpellChecking as Locale, value.text);
+        }
       } catch (exception, stack) {
         FlutterError.reportError(FlutterErrorDetails(
           exception: exception,
