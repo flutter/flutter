@@ -40,7 +40,7 @@ std::string GetLastErrorMessage() {
   std::wstringstream stream;
   stream << message << " (" << last_error << ").";
 
-  return WideStringToString(stream.str());
+  return WideStringToUtf8(stream.str());
 }
 
 }  // namespace fml

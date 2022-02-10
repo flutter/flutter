@@ -8,12 +8,10 @@
 #include <windows.h>
 
 #include <chrono>
-#include <codecvt>
 #include <iostream>
 #include <string>
 
 #include "flutter/shell/platform/windows/keyboard_win32_common.h"
-#include "flutter/shell/platform/windows/string_conversion.h"
 
 namespace flutter {
 
