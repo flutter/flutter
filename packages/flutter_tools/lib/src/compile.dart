@@ -572,6 +572,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
     List<String>? dartDefines,
     this.librariesSpec,
     @visibleForTesting StdoutHandler? stdoutHandler,
+    this.source,
   }) : assert(sdkRoot != null),
        _logger = logger,
        _processManager = processManager,
@@ -601,6 +602,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
   final List<String>? extraFrontEndOptions;
   final List<String> dartDefines;
   final String? librariesSpec;
+  String? source;
 
   @override
   void addFileSystemRoot(String root) {
@@ -649,7 +651,8 @@ class DefaultResidentCompiler implements ResidentCompiler {
         ),
       );
       if (generatedMainDart != null && generatedMainDart.existsSync()) {
-        mainUri = generatedMainDart.uri;
+        source = generatedMainDart.path;
+        //mainUri = generatedMainDart.uri;
       }
     }
     final Completer<CompilerOutput?> completer = Completer<CompilerOutput?>();
@@ -765,6 +768,10 @@ class DefaultResidentCompiler implements ResidentCompiler {
       if (initializeFromDill != null) ...<String>[
         '--initialize-from-dill',
         initializeFromDill!,
+      ],
+      if (source != null) ...<String>[
+        '--source',
+        source!,
       ],
       if (platformDill != null) ...<String>[
         '--platform',
