@@ -104,7 +104,7 @@ void testMain() {
       int actionCount = 0;
       strategy.enable(
         singlelineConfig,
-        onChange: (_) {
+        onChange: (_, __) {
           changeCount++;
         },
         onAction: (_) {
@@ -164,7 +164,7 @@ void testMain() {
 
       strategy.enable(
         singlelineConfig,
-        onChange: (_) {},
+        onChange: (_, __) {},
         onAction: (_) {},
       );
       final SemanticsObject textFieldSemantics = createTextFieldSemantics(
@@ -192,7 +192,7 @@ void testMain() {
 
       strategy.enable(
         singlelineConfig,
-        onChange: (_) {},
+        onChange: (_, __) {},
         onAction: (_) {},
       );
 
@@ -228,7 +228,7 @@ void testMain() {
 
       strategy.enable(
         singlelineConfig,
-        onChange: (_) {},
+        onChange: (_, __) {},
         onAction: (_) {},
       );
 
@@ -275,7 +275,7 @@ void testMain() {
 
       strategy.enable(
         multilineConfig,
-        onChange: (_) {},
+        onChange: (_, __) {},
         onAction: (_) {},
       );
       createTextFieldSemantics(
@@ -291,7 +291,7 @@ void testMain() {
 
       strategy.enable(
         singlelineConfig,
-        onChange: (_) {},
+        onChange: (_, __) {},
         onAction: (_) {},
       );
 
@@ -314,7 +314,7 @@ void testMain() {
 
       strategy.enable(
         singlelineConfig,
-        onChange: (_) {},
+        onChange: (_, __) {},
         onAction: (_) {},
       );
 
@@ -382,7 +382,7 @@ void testMain() {
 
       strategy.enable(
         singlelineConfig,
-        onChange: (_) {},
+        onChange: (_, __) {},
         onAction: (_) {},
       );
 

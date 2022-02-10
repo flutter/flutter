@@ -440,6 +440,211 @@ class AutofillInfo {
   }
 }
 
+/// Replaces a range of text in the original string with the text given in the
+/// replacement string.
+String _replace(String originalText, String replacementText, ui.TextRange replacedRange) {
+  assert(replacedRange.isValid);
+  assert(replacedRange.start <= originalText.length && replacedRange.end <= originalText.length);
+
+  final ui.TextRange normalizedRange = ui.TextRange(start: math.min(replacedRange.start, replacedRange.end), end: math.max(replacedRange.start, replacedRange.end));
+
+  return normalizedRange.textBefore(originalText) + replacementText + normalizedRange.textAfter(originalText);
+}
+
+/// The change between the last editing state and the current editing state
+/// of a text field.
+///
+/// This is packaged into a JSON and sent to the framework
+/// to be processed into a concrete [TextEditingDelta].
+class TextEditingDeltaState {
+  TextEditingDeltaState({
+    this.oldText = '',
+    this.deltaText = '',
+    this.deltaStart = -1,
+    this.deltaEnd = -1,
+    this.baseOffset,
+    this.extentOffset,
+    this.composingOffset,
+    this.composingExtent,
+  });
+
+  /// Infers the correct delta values based on information from the new editing state
+  /// and the last editing state.
+  ///
+  /// For a deletion we calculate the length of the deleted text by comparing the new
+  /// and last editing states. We subtract this from the [deltaEnd] that we set when beforeinput
+  /// was fired to determine the [deltaStart].
+  ///
+  /// For a replacement at a selection we set the [deltaStart] to be the beginning of the selection
+  /// from the last editing state.
+  ///
+  /// For the composing region we check if a composing range was captured by the compositionupdate event,
+  /// we have a non empty [deltaText], and that we did not have an active selection. An active selection
+  /// would mean we are not composing.
+  ///
+  /// We then verify that the delta we collected results in the text contained within the new editing state
+  /// when applied to the last editing state. If it is not then we use our new editing state as the source of truth,
+  /// and use regex to find the correct [deltaStart] and [deltaEnd].
+  static TextEditingDeltaState inferDeltaState(EditingState newEditingState, EditingState? lastEditingState, TextEditingDeltaState lastTextEditingDeltaState) {
+    final TextEditingDeltaState newTextEditingDeltaState = lastTextEditingDeltaState.copyWith();
+    final bool previousSelectionWasCollapsed = lastEditingState?.baseOffset == lastEditingState?.extentOffset;
+    final bool isTextBeingRemoved = newTextEditingDeltaState.deltaText.isEmpty && newTextEditingDeltaState.deltaEnd != -1;
+    final bool isTextBeingChangedAtActiveSelection = newTextEditingDeltaState.deltaText.isNotEmpty && !previousSelectionWasCollapsed;
+
+    if (isTextBeingRemoved) {
+      // When text is deleted outside of the composing region or is cut using the native toolbar,
+      // we calculate the length of the deleted text by comparing the new and old editing state lengths.
+      // This value is then subtracted from the end position of the delta to capture the deleted range.
+      final int deletedLength = newTextEditingDeltaState.oldText.length - newEditingState.text!.length;
+      newTextEditingDeltaState.deltaStart = newTextEditingDeltaState.deltaEnd - deletedLength;
+    } else if (isTextBeingChangedAtActiveSelection) {
+      // When a selection of text is replaced by a copy/paste operation we set the starting range
+      // of the delta to be the beginning of the selection of the previous editing state.
+      newTextEditingDeltaState.deltaStart = lastEditingState!.baseOffset!;
+    }
+
+    // If we are composing then set the delta range to the composing region we
+    // captured in compositionupdate.
+    final bool isCurrentlyComposing = newTextEditingDeltaState.composingOffset != null && newTextEditingDeltaState.composingOffset != newTextEditingDeltaState.composingExtent;
+    if (newTextEditingDeltaState.deltaText.isNotEmpty && previousSelectionWasCollapsed && isCurrentlyComposing) {
+      newTextEditingDeltaState.deltaStart = newTextEditingDeltaState.composingOffset!;
+      newTextEditingDeltaState.deltaEnd = newTextEditingDeltaState.composingExtent!;
+    }
+
+    final bool isDeltaRangeEmpty = newTextEditingDeltaState.deltaStart == -1 && newTextEditingDeltaState.deltaStart == newTextEditingDeltaState.deltaEnd;
+    if (!isDeltaRangeEmpty) {
+      // To verify the range of our delta we should compare the newEditingState's
+      // text with the delta applied to the oldText. If they differ then capture
+      // the correct delta range from the newEditingState's text value.
+      //
+      // We can assume the deltaText for additions and replacements to the text value
+      // are accurate. What may not be accurate is the range of the delta.
+      //
+      // We can think of the newEditingState as our source of truth.
+      //
+      // This verification is needed for cases such as the insertion of a period
+      // after a double space, and the insertion of an accented character through
+      // a native composing menu.
+      final ui.TextRange replacementRange = ui.TextRange(start: newTextEditingDeltaState.deltaStart, end: newTextEditingDeltaState.deltaEnd);
+      final String textAfterDelta = _replace(
+          newTextEditingDeltaState.oldText, newTextEditingDeltaState.deltaText,
+          replacementRange);
+      final bool isDeltaVerified = textAfterDelta == newEditingState.text!;
+
+      if (!isDeltaVerified) {
+        // 1. Find all matches for deltaText.
+        // 2. Apply matches/replacement to oldText until oldText matches the
+        // new editing state's text value.
+        final bool isPeriodInsertion = newTextEditingDeltaState.deltaText.contains('.');
+        final RegExp deltaTextPattern = RegExp(RegExp.escape(newTextEditingDeltaState.deltaText));
+        for (final Match match in deltaTextPattern.allMatches(newEditingState.text!)) {
+          String textAfterMatch;
+          int actualEnd;
+          final bool isMatchWithinOldTextBounds = match.start >= 0 && match.end <= newTextEditingDeltaState.oldText.length;
+          if (!isMatchWithinOldTextBounds) {
+            actualEnd = match.start + newTextEditingDeltaState.deltaText.length - 1;
+            textAfterMatch = _replace(
+              newTextEditingDeltaState.oldText,
+              newTextEditingDeltaState.deltaText,
+              ui.TextRange(
+                start: match.start,
+                end: actualEnd,
+              ),
+            );
+          } else {
+            actualEnd = actualEnd = isPeriodInsertion? match.end - 1 : match.end;
+            textAfterMatch = _replace(
+              newTextEditingDeltaState.oldText,
+              newTextEditingDeltaState.deltaText,
+              ui.TextRange(
+                start: match.start,
+                end: actualEnd,
+              ),
+            );
+          }
+
+          if (textAfterMatch == newEditingState.text!) {
+            newTextEditingDeltaState.deltaStart = match.start;
+            newTextEditingDeltaState.deltaEnd = actualEnd;
+            break;
+          }
+        }
+      }
+    }
+
+    // Update selection of the delta using information from the new editing state.
+    newTextEditingDeltaState.baseOffset = newEditingState.baseOffset!;
+    newTextEditingDeltaState.extentOffset = newEditingState.extentOffset!;
+
+    return newTextEditingDeltaState;
+  }
+
+  /// The text before the text field was updated.
+  String oldText;
+
+  /// The text that is being inserted/replaced into the text field.
+  /// This will be an empty string for deletions and non text updates
+  /// such as selection updates.
+  String deltaText;
+
+  /// The position in the text field where the change begins.
+  ///
+  /// Has a default value of -1 to signify an empty range.
+  int deltaStart;
+
+  /// The position in the text field where the change ends.
+  ///
+  /// Has a default value of -1 to signify an empty range.
+  int deltaEnd;
+
+  /// The updated starting position of the selection in the text field.
+  int? baseOffset;
+
+  /// The updated terminating position of the selection in the text field.
+  int? extentOffset;
+
+  /// The starting position of the composing region.
+  int? composingOffset;
+
+  /// The terminating position of the composing region.
+  int? composingExtent;
+
+  Map<String, dynamic> toFlutter() => <String, dynamic>{
+    'deltas': <Map<String, dynamic>>[
+      <String, dynamic>{
+        'oldText': oldText,
+        'deltaText': deltaText,
+        'deltaStart': deltaStart,
+        'deltaEnd': deltaEnd,
+        'selectionBase': baseOffset,
+        'selectionExtent': extentOffset,
+      },
+    ],
+  };
+
+  TextEditingDeltaState copyWith({
+    String? oldText,
+    String? deltaText,
+    int? deltaStart,
+    int? deltaEnd,
+    int? baseOffset,
+    int? extentOffset,
+    int? composingOffset,
+    int? composingExtent,
+  }) {
+    return TextEditingDeltaState(
+      oldText: oldText ?? this.oldText,
+      deltaText: deltaText ?? this.deltaText,
+      deltaStart: deltaStart ?? this.deltaStart,
+      deltaEnd: deltaEnd ?? this.deltaEnd,
+      baseOffset: baseOffset ?? this.baseOffset,
+      extentOffset: extentOffset ?? this.extentOffset,
+      composingOffset: composingOffset ?? this.composingOffset,
+      composingExtent: composingExtent ?? this.composingExtent,
+    );
+  }
+}
+
 /// The current text and selection state of a text field.
 class EditingState {
   EditingState({this.text, int? baseOffset, int? extentOffset}) :
@@ -611,6 +816,7 @@ class InputConfiguration {
         const TextCapitalizationConfig.defaultCapitalization(),
     this.autofill,
     this.autofillGroup,
+    this.enableDeltaModel = false,
   });
 
   InputConfiguration.fromFrameworkMessage(
@@ -634,7 +840,8 @@ class InputConfiguration {
         autofillGroup = EngineAutofillForm.fromFrameworkMessage(
           flutterInputConfiguration.tryJson('autofill'),
           flutterInputConfiguration.tryList('fields'),
-        );
+        ),
+        enableDeltaModel = flutterInputConfiguration.tryBool('enableDeltaModel') ?? false;
 
   /// The type of information being edited in the input control.
   final EngineInputType inputType;
@@ -659,6 +866,8 @@ class InputConfiguration {
   /// supported by Safari.
   final bool autocorrect;
 
+  final bool enableDeltaModel;
+
   final AutofillInfo? autofill;
 
   final EngineAutofillForm? autofillGroup;
@@ -666,7 +875,7 @@ class InputConfiguration {
   final TextCapitalizationConfig textCapitalization;
 }
 
-typedef OnChangeCallback = void Function(EditingState? editingState);
+typedef OnChangeCallback = void Function(EditingState? editingState, TextEditingDeltaState? editingDeltaState);
 typedef OnActionCallback = void Function(String? inputAction);
 
 /// Provides HTML DOM functionality for editable text.
@@ -854,6 +1063,12 @@ abstract class DefaultTextEditingStrategy implements TextEditingStrategy {
   late InputConfiguration inputConfiguration;
   EditingState? lastEditingState;
 
+  TextEditingDeltaState? _editingDeltaState;
+  TextEditingDeltaState get editingDeltaState {
+    _editingDeltaState ??= TextEditingDeltaState(oldText: lastEditingState!.text!);
+    return _editingDeltaState!;
+  }
+
   /// Styles associated with the editable text.
   EditableTextStyle? style;
 
@@ -952,6 +1167,10 @@ abstract class DefaultTextEditingStrategy implements TextEditingStrategy {
 
     subscriptions.add(html.document.onSelectionChange.listen(handleChange));
 
+    activeDomElement.addEventListener('beforeinput', handleBeforeInput);
+
+    activeDomElement.addEventListener('compositionupdate', handleCompositionUpdate);
+
     // Refocus on the activeDomElement after blur, so that user can keep editing the
     // text field.
     subscriptions.add(activeDomElement.onBlur.listen((_) {
@@ -983,6 +1202,7 @@ abstract class DefaultTextEditingStrategy implements TextEditingStrategy {
 
     isEnabled = false;
     lastEditingState = null;
+    _editingDeltaState = null;
     style = null;
     geometry = null;
 
@@ -1027,11 +1247,58 @@ abstract class DefaultTextEditingStrategy implements TextEditingStrategy {
     assert(isEnabled);
 
     final EditingState newEditingState = EditingState.fromDomElement(activeDomElement);
+    TextEditingDeltaState? newTextEditingDeltaState;
+    if (inputConfiguration.enableDeltaModel) {
+      newTextEditingDeltaState = TextEditingDeltaState.inferDeltaState(newEditingState, lastEditingState, editingDeltaState);
+    }
 
     if (newEditingState != lastEditingState) {
       lastEditingState = newEditingState;
-      onChange!(lastEditingState);
+      _editingDeltaState = newTextEditingDeltaState;
+      onChange!(lastEditingState, _editingDeltaState);
+      // Flush delta after it has been sent to framework.
+      _editingDeltaState = null;
     }
+  }
+
+  void handleBeforeInput(html.Event event) {
+    // In some cases the beforeinput event is not fired such as when the selection
+    // of a text field is updated. In this case only the oninput event is fired.
+    // We still want a delta generated in these cases so we can properly update
+    // the selection. We begin to set the deltaStart and deltaEnd in beforeinput
+    // because a change in the selection will not have a delta range, it will only
+    // have a baseOffset and extentOffset. If these are set inside of inferDeltaState
+    // then the method will incorrectly report a deltaStart and deltaEnd for a non
+    // text update delta.
+    final String? eventData = getJsProperty<void>(event, 'data') as String?;
+    final String? inputType = getJsProperty<void>(event, 'inputType') as String?;
+
+    if (inputType != null) {
+      if (inputType.contains('delete')) {
+        // The deltaStart is set in handleChange because there is where we get access
+        // to the new selection baseOffset which is our new deltaStart.
+        editingDeltaState.deltaText = '';
+        editingDeltaState.deltaEnd = lastEditingState!.extentOffset!;
+      } else if (inputType == 'insertLineBreak'){
+        // event.data is null on a line break, so we manually set deltaText as a line break by setting it to '\n'.
+        editingDeltaState.deltaText = '\n';
+        editingDeltaState.deltaStart = lastEditingState!.extentOffset!;
+        editingDeltaState.deltaEnd = lastEditingState!.extentOffset!;
+      } else if (eventData != null) {
+        // When event.data is not null we we will begin by considering this delta as an insertion
+        // at the selection extentOffset. This may change due to logic in handleChange to handle
+        // composition and other IME behaviors.
+        editingDeltaState.deltaText = eventData;
+        editingDeltaState.deltaStart = lastEditingState!.extentOffset!;
+        editingDeltaState.deltaEnd = lastEditingState!.extentOffset!;
+      }
+    }
+  }
+
+  void handleCompositionUpdate(html.Event event) {
+    final EditingState newEditingState = EditingState.fromDomElement(activeDomElement);
+    editingDeltaState.composingOffset = newEditingState.baseOffset!;
+    editingDeltaState.composingExtent = newEditingState.extentOffset!;
   }
 
   void maybeSendAction(html.Event event) {
@@ -1174,6 +1441,10 @@ class IOSTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
 
     subscriptions.add(html.document.onSelectionChange.listen(handleChange));
 
+    activeDomElement.addEventListener('beforeinput', handleBeforeInput);
+
+    activeDomElement.addEventListener('compositionupdate', handleCompositionUpdate);
+
     // Position the DOM element after it is focused.
     subscriptions.add(activeDomElement.onFocus.listen((_) {
       // Cancel previous timer if exists.
@@ -1305,6 +1576,10 @@ class AndroidTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
 
     subscriptions.add(html.document.onSelectionChange.listen(handleChange));
 
+    activeDomElement.addEventListener('beforeinput', handleBeforeInput);
+
+    activeDomElement.addEventListener('compositionupdate', handleCompositionUpdate);
+
     subscriptions.add(activeDomElement.onBlur.listen((_) {
       if (windowHasFocus) {
         // Chrome on Android will hide the onscreen keyboard when you tap outside
@@ -1356,6 +1631,10 @@ class FirefoxTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
     subscriptions.add(activeDomElement.onInput.listen(handleChange));
 
     subscriptions.add(activeDomElement.onKeyDown.listen(maybeSendAction));
+
+    activeDomElement.addEventListener('beforeinput', handleBeforeInput);
+
+    activeDomElement.addEventListener('compositionupdate', handleCompositionUpdate);
 
     // Detects changes in text selection.
     //
@@ -1736,6 +2015,20 @@ class TextEditingChannel {
     );
   }
 
+  /// Sends the 'TextInputClient.updateEditingStateWithDeltas' message to the framework.
+  void updateEditingStateWithDelta(int? clientId, TextEditingDeltaState? editingDeltaState) {
+    EnginePlatformDispatcher.instance.invokeOnPlatformMessage(
+      'flutter/textinput',
+      const JSONMethodCodec().encodeMethodCall(
+        MethodCall('TextInputClient.updateEditingStateWithDeltas', <dynamic>[
+          clientId,
+          editingDeltaState!.toFlutter(),
+        ]),
+      ),
+      _emptyCallback,
+    );
+  }
+
   /// Sends the 'TextInputClient.performAction' message to the framework.
   void performAction(int? clientId, String? inputAction) {
     EnginePlatformDispatcher.instance.invokeOnPlatformMessage(
@@ -1829,8 +2122,12 @@ class HybridTextEditing {
     isEditing = true;
     strategy.enable(
       configuration!,
-      onChange: (EditingState? editingState) {
-        channel.updateEditingState(_clientId, editingState);
+      onChange: (EditingState? editingState, TextEditingDeltaState? editingDeltaState) {
+        if (configuration!.enableDeltaModel) {
+          channel.updateEditingStateWithDelta(_clientId, editingDeltaState);
+        } else {
+          channel.updateEditingState(_clientId, editingState);
+        }
       },
       onAction: (String? inputAction) {
         channel.performAction(_clientId, inputAction);
