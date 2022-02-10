@@ -8,8 +8,8 @@
 #include "third_party/cppwinrt/generated/winrt/Windows.Foundation.h"
 #include "third_party/cppwinrt/generated/winrt/Windows.UI.Core.h"
 
+#include "flutter/fml/platform/win/wstring_conversion.h"
 #include "flutter/shell/platform/windows/flutter_windows_view.h"
-#include "flutter/shell/platform/windows/string_conversion.h"
 
 static constexpr char kValueKey[] = "value";
 
@@ -61,19 +61,19 @@ void PlatformHandlerWinUwp::GetPlainText(
   // Waiting `DataPackageView::GetTextAsync()` using `TResult.get()` on the
   // platform thread will causes the application stop, so we continue
   // response on this callback.
-  content.GetTextAsync().Completed(
-      [result = std::move(result), key](auto async_info, auto _async_status) {
-        auto clipboard_string = async_info.GetResults();
+  content.GetTextAsync().Completed([result = std::move(result), key](
+                                       auto async_info, auto _async_status) {
+    auto clipboard_string = async_info.GetResults();
 
-        rapidjson::Document document;
-        document.SetObject();
-        rapidjson::Document::AllocatorType& allocator = document.GetAllocator();
-        document.AddMember(
-            rapidjson::Value(key.data(), allocator),
-            rapidjson::Value(Utf8FromUtf16(clipboard_string), allocator),
-            allocator);
-        result->Success(document);
-      });
+    rapidjson::Document document;
+    document.SetObject();
+    rapidjson::Document::AllocatorType& allocator = document.GetAllocator();
+    document.AddMember(
+        rapidjson::Value(key.data(), allocator),
+        rapidjson::Value(fml::WideStringToUtf8(clipboard_string), allocator),
+        allocator);
+    result->Success(document);
+  });
 }
 
 void PlatformHandlerWinUwp::GetHasStrings(
@@ -101,7 +101,7 @@ void PlatformHandlerWinUwp::SetPlainText(
     const std::string& text,
     std::unique_ptr<MethodResult<rapidjson::Document>> result) {
   winrt::Windows::ApplicationModel::DataTransfer::DataPackage content;
-  content.SetText(Utf16FromUtf8(text));
+  content.SetText(fml::Utf8ToWideString(text));
   winrt::Windows::ApplicationModel::DataTransfer::Clipboard::SetContent(
       content);
 

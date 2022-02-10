@@ -285,7 +285,9 @@ FILE: ../../../flutter/fml/platform/win/message_loop_win.h
 FILE: ../../../flutter/fml/platform/win/native_library_win.cc
 FILE: ../../../flutter/fml/platform/win/paths_win.cc
 FILE: ../../../flutter/fml/platform/win/posix_wrappers_win.cc
+FILE: ../../../flutter/fml/platform/win/wstring_conversion.cc
 FILE: ../../../flutter/fml/platform/win/wstring_conversion.h
+FILE: ../../../flutter/fml/platform/win/wstring_conversion_unittests.cc
 FILE: ../../../flutter/fml/posix_wrappers.h
 FILE: ../../../flutter/fml/raster_thread_merger.cc
 FILE: ../../../flutter/fml/raster_thread_merger.h
@@ -294,6 +296,9 @@ FILE: ../../../flutter/fml/shared_thread_merger.cc
 FILE: ../../../flutter/fml/shared_thread_merger.h
 FILE: ../../../flutter/fml/size.h
 FILE: ../../../flutter/fml/status.h
+FILE: ../../../flutter/fml/string_conversion.cc
+FILE: ../../../flutter/fml/string_conversion.h
+FILE: ../../../flutter/fml/string_conversion_unittests.cc
 FILE: ../../../flutter/fml/synchronization/atomic_object.h
 FILE: ../../../flutter/fml/synchronization/count_down_latch.cc
 FILE: ../../../flutter/fml/synchronization/count_down_latch.h
@@ -2049,9 +2054,6 @@ FILE: ../../../flutter/shell/platform/windows/public/flutter_windows.h
 FILE: ../../../flutter/shell/platform/windows/sequential_id_generator.cc
 FILE: ../../../flutter/shell/platform/windows/sequential_id_generator.h
 FILE: ../../../flutter/shell/platform/windows/sequential_id_generator_unittests.cc
-FILE: ../../../flutter/shell/platform/windows/string_conversion.cc
-FILE: ../../../flutter/shell/platform/windows/string_conversion.h
-FILE: ../../../flutter/shell/platform/windows/string_conversion_unittests.cc
 FILE: ../../../flutter/shell/platform/windows/system_utils.h
 FILE: ../../../flutter/shell/platform/windows/system_utils_unittests.cc
 FILE: ../../../flutter/shell/platform/windows/system_utils_win32.cc

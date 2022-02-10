@@ -3,7 +3,7 @@
 #include <iostream>
 #include <sstream>
 
-#include "flutter/shell/platform/windows/string_conversion.h"
+#include "flutter/fml/platform/win/wstring_conversion.h"
 #include "flutter/shell/platform/windows/uwptool_utils.h"
 
 namespace flutter {
@@ -25,10 +25,10 @@ bool InstallCommand::ValidateArgs(const std::vector<std::string>& args) const {
 }
 
 int InstallCommand::Run(const std::vector<std::string>& args) const {
-  std::wstring package_uri = flutter::Utf16FromUtf8(args[0]);
+  std::wstring package_uri = fml::Utf8ToWideString(args[0]);
   std::vector<std::wstring> dependency_uris;
   for (int i = 1; i < args.size(); ++i) {
-    dependency_uris.push_back(flutter::Utf16FromUtf8(args[i]));
+    dependency_uris.push_back(fml::Utf8ToWideString(args[i]));
   }
   flutter::ApplicationStore app_store;
   if (app_store.Install(package_uri, dependency_uris)) {
@@ -45,7 +45,7 @@ bool UninstallCommand::ValidateArgs(
 
 int UninstallCommand::Run(const std::vector<std::string>& args) const {
   flutter::ApplicationStore app_store;
-  std::wstring package_family = flutter::Utf16FromUtf8(args[0]);
+  std::wstring package_family = fml::Utf8ToWideString(args[0]);
   return app_store.Uninstall(package_family) ? 0 : 1;
 }
 
@@ -66,8 +66,8 @@ int LaunchCommand::Run(const std::vector<std::string>& args) const {
     }
   }
   flutter::ApplicationStore app_store;
-  int process_id = app_store.Launch(flutter::Utf16FromUtf8(package_family),
-                                    flutter::Utf16FromUtf8(app_args.str()));
+  int process_id = app_store.Launch(fml::Utf8ToWideString(package_family),
+                                    fml::Utf8ToWideString(app_args.str()));
   if (process_id == -1) {
     std::cerr << "error: Failed to launch app with package family "
               << package_family << " arguments [" << app_args.str() << "]"

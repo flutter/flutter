@@ -13,7 +13,7 @@
 #include "third_party/cppwinrt/generated/winrt/Windows.UI.ViewManagement.h"
 #include "third_party/cppwinrt/generated/winrt/Windows.UI.h"
 
-#include "flutter/shell/platform/windows/string_conversion.h"
+#include "flutter/fml/platform/win/wstring_conversion.h"
 
 namespace flutter {
 
@@ -41,7 +41,7 @@ LanguageInfo ParseLanguageName(std::wstring language_name) {
 
   // Split by '-', discarding any suplemental language info (-x-foo).
   std::vector<std::string> components;
-  std::istringstream stream(Utf8FromUtf16(language_name));
+  std::istringstream stream(fml::WideStringToUtf8(language_name));
   std::string component;
   while (getline(stream, component, '-')) {
     if (component == "x") {
