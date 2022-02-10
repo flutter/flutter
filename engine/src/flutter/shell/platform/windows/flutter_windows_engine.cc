@@ -8,12 +8,12 @@
 #include <iostream>
 #include <sstream>
 
+#include "flutter/fml/platform/win/wstring_conversion.h"
 #include "flutter/shell/platform/common/client_wrapper/binary_messenger_impl.h"
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/basic_message_channel.h"
 #include "flutter/shell/platform/common/json_message_codec.h"
 #include "flutter/shell/platform/common/path_utils.h"
 #include "flutter/shell/platform/windows/flutter_windows_view.h"
-#include "flutter/shell/platform/windows/string_conversion.h"
 #include "flutter/shell/platform/windows/system_utils.h"
 #include "flutter/shell/platform/windows/task_runner.h"
 #include "third_party/rapidjson/include/rapidjson/document.h"
@@ -448,7 +448,8 @@ void FlutterWindowsEngine::SendSystemSettings() {
                      Prefer24HourTime(GetUserTimeFormat()), allocator);
   settings.AddMember("textScaleFactor", 1.0, allocator);
   settings.AddMember("platformBrightness",
-                     Utf8FromUtf16(GetPreferredBrightness()), allocator);
+                     fml::WideStringToUtf8(GetPreferredBrightness()),
+                     allocator);
   settings_channel_->Send(settings);
 }
 

@@ -165,7 +165,7 @@ source_set("flutter_windows_source") {
   }
 
   public_deps = [
-    ":string_conversion",
+    "//flutter/fml:string_conversion",
     "//flutter/shell/platform/common:common_cpp_accessibility",
   ]
 
@@ -185,18 +185,6 @@ source_set("flutter_windows_source") {
     "//third_party/angle:libGLESv2_static",
     "//third_party/rapidjson",
   ]
-}
-
-# String encoding conversion utilities.
-source_set("string_conversion") {
-  sources = [
-    "string_conversion.cc",
-    "string_conversion.h",
-  ]
-
-  if (target_os == "winuwp") {
-    cflags = [ "/EHsc" ]
-  }
 }
 
 copy("publish_headers_windows") {
@@ -238,7 +226,6 @@ executable("flutter_windows_unittests") {
     # "flutter_project_bundle_unittests.cc", //TODO failing due to switches test failing.  Blocked on https://github.com/flutter/flutter/issues/74153
     # "flutter_windows_engine_unittests.cc", //TODO failing to send / receive platform message get plugins working first.  Blocked on https://github.com/flutter/flutter/issues/74155
     "sequential_id_generator_unittests.cc",
-    "string_conversion_unittests.cc",
     "system_utils_unittests.cc",
     "task_runner_unittests.cc",
     "testing/engine_modifier.h",
@@ -352,7 +339,7 @@ source_set("uwptool_utils") {
     "uwptool_utils.h",
   ]
 
-  deps = [ ":string_conversion" ]
+  deps = [ "//flutter/fml:string_conversion" ]
 
   defines = [ "_SILENCE_CLANG_COROUTINE_MESSAGE" ]
 }
@@ -372,9 +359,9 @@ executable("uwptool") {
 
   sources = [ "uwptool_main.cc" ]
   deps = [
-    ":string_conversion",
     ":uwptool_utils",
     "//flutter/fml:command_line",
+    "//flutter/fml:string_conversion",
   ]
 
   defines = [ "_SILENCE_CLANG_COROUTINE_MESSAGE" ]

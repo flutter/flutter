@@ -104,7 +104,11 @@ source_set("fml") {
     sources += [ "backtrace_stub.cc" ]
   }
 
-  public_deps = [ ":command_line" ]
+  public_deps = [
+    ":build_config",
+    ":command_line",
+    ":string_conversion",
+  ]
 
   deps = [
     "//third_party/abseil-cpp/absl/debugging:symbolize",
@@ -217,11 +221,7 @@ source_set("fml") {
       "platform/win/native_library_win.cc",
       "platform/win/paths_win.cc",
       "platform/win/posix_wrappers_win.cc",
-      "platform/win/wstring_conversion.h",
     ]
-
-    # For wstring_conversion. See issue #50053.
-    defines = [ "_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING" ]
   } else {
     sources += [
       "platform/posix/file_posix.cc",
@@ -233,11 +233,44 @@ source_set("fml") {
   }
 }
 
+source_set("build_config") {
+  sources = [ "build_config.h" ]
+
+  public_configs = [
+    "//flutter:config",
+    "//flutter/common:flutter_config",
+  ]
+}
+
 source_set("command_line") {
   sources = [
     "command_line.cc",
     "command_line.h",
   ]
+
+  public_configs = [
+    "//flutter:config",
+    "//flutter/common:flutter_config",
+  ]
+}
+
+source_set("string_conversion") {
+  sources = [
+    "string_conversion.cc",
+    "string_conversion.h",
+  ]
+
+  if (is_win) {
+    sources += [
+      "platform/win/wstring_conversion.cc",
+      "platform/win/wstring_conversion.h",
+    ]
+
+    # TODO(cbracken): https://github.com/flutter/flutter/issues/50053
+    defines = [ "_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING" ]
+  }
+
+  deps = [ ":build_config" ]
 
   public_configs = [
     "//flutter:config",
@@ -286,6 +319,7 @@ if (enable_unittests) {
       "message_loop_unittests.cc",
       "paths_unittests.cc",
       "raster_thread_merger_unittests.cc",
+      "string_conversion_unittests.cc",
       "synchronization/count_down_latch_unittests.cc",
       "synchronization/semaphore_unittest.cc",
       "synchronization/sync_switch_unittest.cc",
@@ -305,6 +339,10 @@ if (enable_unittests) {
         "platform/darwin/cf_utils_unittests.mm",
         "platform/darwin/string_range_sanitization_unittests.mm",
       ]
+    }
+
+    if (is_win) {
+      sources += [ "platform/win/wstring_conversion_unittests.cc" ]
     }
 
     deps = [
