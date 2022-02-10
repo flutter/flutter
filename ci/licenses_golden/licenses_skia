@@ -1,4 +1,4 @@
-Signature: 73ec28a544af6c4f53d57c7ff43fa7f0
+Signature: ae1356542bbe4dfd79c9d796b419128a
 
 UNUSED LICENSES:
 
@@ -5640,7 +5640,6 @@ FILE: ../../../third_party/skia/src/sksl/SkSLGLSL.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLExpression.cpp
 FILE: ../../../third_party/skia/src/sksl/lex/TransitionTable.cpp
 FILE: ../../../third_party/skia/src/sksl/lex/TransitionTable.h
-FILE: ../../../third_party/skia/src/utils/SkCycles.h
 FILE: ../../../third_party/skia/src/utils/SkOrderedFontMgr.cpp
 ----------------------------------------------------------------------------------------------------
 Copyright 2021 Google Inc.
@@ -6128,6 +6127,8 @@ FILE: ../../../third_party/skia/src/core/SkShaderCodeDictionary.cpp
 FILE: ../../../third_party/skia/src/core/SkShaderCodeDictionary.h
 FILE: ../../../third_party/skia/src/core/SkUniformData.cpp
 FILE: ../../../third_party/skia/src/core/SkUniformData.h
+FILE: ../../../third_party/skia/src/gpu/text/GrGlyphVector.cpp
+FILE: ../../../third_party/skia/src/gpu/text/GrGlyphVector.h
 FILE: ../../../third_party/skia/src/sksl/analysis/SkSLFinalizationChecks.cpp
 ----------------------------------------------------------------------------------------------------
 Copyright 2022 Google LLC
@@ -6527,7 +6528,6 @@ LIBRARY: skia
 ORIGIN: ../../../third_party/skia/gm/drawlines_with_local_matrix.cpp + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/gm/drawlines_with_local_matrix.cpp
-FILE: ../../../third_party/skia/src/utils/SkBlitterTrace.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2022 Google Inc.
 
