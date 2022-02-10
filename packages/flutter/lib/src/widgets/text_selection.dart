@@ -805,7 +805,7 @@ class SelectionOverlay {
     ];
 
     Overlay.of(context, rootOverlay: true, debugRequiredFor: debugRequiredFor)!
-        .insertAll(_handles!);
+      .insertAll(_handles!);
   }
 
   /// {@template flutter.widgets.SelectionOverlay.hideHandles}
@@ -878,7 +878,8 @@ class SelectionOverlay {
   /// To hide the whole overlay, see [hide].
   /// {@endtemplate}
   void hideToolbar() {
-    assert(_toolbar != null);
+    if (_toolbar == null)
+      return;
     _toolbarController.stop();
     _toolbar?.remove();
     _toolbar = null;
@@ -957,8 +958,8 @@ class SelectionOverlay {
     // If the selected text spans more than 1 line, horizontally center the toolbar.
     // Derived from both iOS and Android.
     final double midX = isMultiline
-        ? editingRegion.width / 2
-        : (selectionEndPoints.first.point.dx + selectionEndPoints.last.point.dx) / 2;
+      ? editingRegion.width / 2
+      : (selectionEndPoints.first.point.dx + selectionEndPoints.last.point.dx) / 2;
 
     final Offset midpoint = Offset(
       midX,
