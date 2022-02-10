@@ -6,10 +6,10 @@
 
 #include <sys/prctl.h>
 
-#include <codecvt>
 #include <string>
 
 #include "flutter/fml/logging.h"
+#include "flutter/fml/string_conversion.h"
 #include "flutter/fml/thread_local.h"
 
 namespace fml {
@@ -67,12 +67,6 @@ void DetachFromVM() {
   }
 }
 
-static std::string UTF16StringToUTF8String(const char16_t* chars, size_t len) {
-  std::u16string u16_string(chars, len);
-  return std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t>{}
-      .to_bytes(u16_string);
-}
-
 std::string JavaStringToString(JNIEnv* env, jstring str) {
   if (env == nullptr || str == nullptr) {
     return "";
@@ -81,21 +75,17 @@ std::string JavaStringToString(JNIEnv* env, jstring str) {
   if (chars == nullptr) {
     return "";
   }
-  std::string u8_string = UTF16StringToUTF8String(
-      reinterpret_cast<const char16_t*>(chars), env->GetStringLength(str));
+  std::u16string u16_string(reinterpret_cast<const char16_t*>(chars),
+                            env->GetStringLength(str));
+  std::string u8_string = Utf16ToUtf8(u16_string);
   env->ReleaseStringChars(str, chars);
   ASSERT_NO_EXCEPTION();
   return u8_string;
 }
 
-static std::u16string UTF8StringToUTF16String(const std::string& string) {
-  return std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t>{}
-      .from_bytes(string);
-}
-
 ScopedJavaLocalRef<jstring> StringToJavaString(JNIEnv* env,
                                                const std::string& u8_string) {
-  std::u16string u16_string = UTF8StringToUTF16String(u8_string);
+  std::u16string u16_string = Utf8ToUtf16(u8_string);
   auto result = ScopedJavaLocalRef<jstring>(
       env, env->NewString(reinterpret_cast<const jchar*>(u16_string.data()),
                           u16_string.length()));
