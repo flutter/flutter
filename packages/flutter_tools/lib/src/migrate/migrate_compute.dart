@@ -16,9 +16,27 @@ import 'migrate_config.dart';
 import 'migrate_manifest.dart';
 import 'migrate_utils.dart';
 
+// This defines files and directories that should be skipped regardless
+// of gitignore and config settings
 const List<String> _skippedFiles = const <String>[
   'lib/main.dart',
 ];
+
+const List<String> _skippedDirectories = const <String>[
+  '.dart_tool',
+];
+
+bool _skipped(String localPath) {
+  if (_skippedFiles.contains(localPath)) {
+    return true;
+  }
+  for (String dir in _skippedDirectories) {
+    if (localPath.startsWith(dir)) {
+      return true;
+    }
+  }
+  return false;
+}
 
 class FilePendingMigration {
   FilePendingMigration(this.localPath, this.file);
@@ -240,6 +258,9 @@ Future<MigrateResult?> computeMigration({
       continue;
     }
     final String localPath = oldTemplateFile.path.replaceFirst(migrateResult.generatedBaseTemplateDirectory!.absolute.path + globals.fs.path.separator, '');
+    if (_skipped(localPath)) {
+      continue;
+    }
     if (await MigrateUtils.isGitIgnored(oldTemplateFile.absolute.path, migrateResult.generatedBaseTemplateDirectory!.absolute.path)) {
       diffMap[localPath] = DiffResult.ignored();
     }
@@ -308,7 +329,7 @@ Future<MigrateResult?> computeMigration({
     final String localPath = currentFile.path.replaceFirst(projectRootPath + globals.fs.path.separator, '');
     if (diffMap.containsKey(localPath) && diffMap[localPath]!.isIgnored ||
         await MigrateUtils.isGitIgnored(currentFile.path, flutterProject.directory.absolute.path) ||
-        _skippedFiles.contains(localPath)) {
+        _skipped(localPath)) {
       continue;
     }
     final File oldTemplateFile = migrateResult.generatedBaseTemplateDirectory!.childFile(localPath);

@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/migrate/migrate_compute.dart';
 import 'package:flutter_tools/src/project.dart';
 
 import '../src/common.dart';
+import '../src/context.dart';
 import 'test_data/migrate_project.dart';
 import 'test_driver.dart';
 import 'test_utils.dart';
@@ -33,7 +34,7 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  testWithoutContext('migrate compute', () async {
+  testUsingContext('migrate compute', () async {
     // Flutter Stable 1.22.6 hash: 9b2d32b605630f28625709ebd9d78ab3016b2bf6
     final MigrateProject project = MigrateProject('vanilla_app_1_22_6_stable');
     await project.setUpIn(tempDir);
@@ -62,20 +63,21 @@ void main() {
       '"Initial commit"',
     ], workingDirectory: tempDir.path);
 
-    FlutterProjectFactory flutterFactory = FlutterProjectFactory(logger: logger, fileSystem: globals.fs);
+    FlutterProjectFactory flutterFactory = FlutterProjectFactory(logger: logger, fileSystem: fileSystem);
     FlutterProject flutterProject = flutterFactory.fromDirectory(tempDir);
 
     MigrateResult result = await computeMigration(
       verbose: true,
       flutterProject: flutterProject,
-      // baseAppPath,
-      // targetAppPath,
-      // baseRevision,
-      // targetRevision,
-      deleteTempDirectories: true,
+      deleteTempDirectories: false,
       logger: logger,
     );
-    // expect(result.)
+    expect(result.sdkDirs.length, equals(1));
+    expect(result.deletedFiles.isEmpty, true);
+    expect(result.addedFiles.isEmpty, false);
+    expect(result.mergeResults.isEmpty, false);
+    expect(result.generatedBaseTemplateDirectory, isNotNull);
+    expect(result.generatedTargetTemplateDirectory, isNotNull);
   });
 
   // Migrates a clean untouched app generated with flutter create
