@@ -239,11 +239,12 @@ abstract class TextSelectionControls {
   }
 }
 
-/// An object that manages a pair of text selection handles for [RenderEditable].
+/// An object that manages a pair of text selection handles for a
+/// [RenderEditable].
 ///
-/// This class is a wrapper of [SelectionOverlay] to provide API specific for
-/// [RenderEditable]. Use [SelectionOverlay] to manage selection handles for
-/// other custom widgets.
+/// This class is a wrapper of [SelectionOverlay] to provide APIs specific for
+/// [RenderEditable]s. To manage selection handles for custom widgets, use
+/// [SelectionOverlay] instead.
 class TextSelectionOverlay {
   /// Creates an object that manages overlay entries for selection handles.
   ///
@@ -329,14 +330,6 @@ class TextSelectionOverlay {
   ///
   /// Set to false if you want to hide the handles. Use this property to show or
   /// hide the handle without rebuilding them.
-  ///
-  /// If this method is called while the [SchedulerBinding.schedulerPhase] is
-  /// [SchedulerPhase.persistentCallbacks], i.e. during the build, layout, or
-  /// paint phases (see [WidgetsBinding.drawFrame]), then the update is delayed
-  /// until the post-frame callbacks phase. Otherwise the update is done
-  /// synchronously. This means that it is safe to call during builds, but also
-  /// that if you do call this during a build, the UI will not update until the
-  /// next frame (i.e. many milliseconds later).
   ///
   /// Defaults to false.
   bool get handlesVisible => _handlesVisible;
@@ -774,7 +767,8 @@ class SelectionOverlay {
   /// If this is null, the toolbar is drawn based on [selectionEndPoints] and
   /// the rect of render object of [context].
   ///
-  /// For mobile devices, the toolbar is a
+  /// This is useful for displaying toolbars at the mouse right-click locations
+  /// in desktop devices.
   Offset? get toolbarLocation => _toolbarLocation;
   Offset? _toolbarLocation;
   set toolbarLocation(Offset? value) {
