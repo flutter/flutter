@@ -865,8 +865,8 @@ void main() {
       await tester.pump();
       Text leftHandle = tester.widget(find.byKey(spy.leftHandleKey)) as Text;
       Text rightHandle = tester.widget(find.byKey(spy.rightHandleKey)) as Text;
-      expect(leftHandle.data, 'height 10.0');
-      expect(rightHandle.data, 'height 11.0');
+      expect(leftHandle.data, 'height 10');
+      expect(rightHandle.data, 'height 11');
 
       selectionOverlay
         ..startHandleType = TextSelectionHandleType.right
@@ -876,8 +876,8 @@ void main() {
       await tester.pump();
       leftHandle = tester.widget(find.byKey(spy.leftHandleKey)) as Text;
       rightHandle = tester.widget(find.byKey(spy.rightHandleKey)) as Text;
-      expect(leftHandle.data, 'height 13.0');
-      expect(rightHandle.data, 'height 12.0');
+      expect(leftHandle.data, 'height 13');
+      expect(rightHandle.data, 'height 12');
     });
 
     testWidgets('can trigger selection handle onTap', (WidgetTester tester) async {
@@ -1211,11 +1211,11 @@ class TextSelectionControlsSpy extends TextSelectionControls {
   Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, [VoidCallback? onTap]) {
     switch (type) {
       case TextSelectionHandleType.left:
-        return ElevatedButton(onPressed: onTap, child: Text('height $textLineHeight', key: leftHandleKey));
+        return ElevatedButton(onPressed: onTap, child: Text('height ${textLineHeight.toInt()}', key: leftHandleKey));
       case TextSelectionHandleType.right:
-        return ElevatedButton(onPressed: onTap, child: Text('height $textLineHeight', key: rightHandleKey));
+        return ElevatedButton(onPressed: onTap, child: Text('height ${textLineHeight.toInt()}', key: rightHandleKey));
       case TextSelectionHandleType.collapsed:
-        return ElevatedButton(onPressed: onTap, child: Text('height $textLineHeight', key: collapsedHandleKey));
+        return ElevatedButton(onPressed: onTap, child: Text('height ${textLineHeight.toInt()}', key: collapsedHandleKey));
     }
   }
 
