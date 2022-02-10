@@ -11,11 +11,8 @@
 #include <regex>
 #include <sstream>
 
+#include "flutter/fml/string_conversion.h"
 #include "third_party/dart/runtime/third_party/double-conversion/src/double-conversion.h"
-
-#if defined(_WIN32)
-#include "base/win/string_conversion.h"
-#endif
 
 #include "no_destructor.h"
 
@@ -68,21 +65,11 @@ std::u16string ASCIIToUTF16(std::string src) {
 }
 
 std::u16string UTF8ToUTF16(std::string src) {
-#if defined(_WIN32)
-  return WideToUTF16(win::Utf16FromUtf8(src));
-#else
-  std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> convert;
-  return convert.from_bytes(src);
-#endif
+  return fml::Utf8ToUtf16(src);
 }
 
 std::string UTF16ToUTF8(std::u16string src) {
-#if defined(_WIN32)
-  return win::Utf8FromUtf16(UTF16ToWide(src));
-#else
-  std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> convert;
-  return convert.to_bytes(src);
-#endif
+  return fml::Utf16ToUtf8(src);
 }
 
 std::u16string WideToUTF16(const std::wstring& src) {
