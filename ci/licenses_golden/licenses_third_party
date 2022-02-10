@@ -1,4 +1,4 @@
-Signature: 2b04842bb6a0edf3e164ebd9a96acdab
+Signature: 567614cb9b5ff583a9740c940f4490aa
 
 UNUSED LICENSES:
 
@@ -9264,20 +9264,38 @@ FILE: ../../../third_party/dart/runtime/tools/wiki/styles/style.scss
 FILE: ../../../third_party/dart/runtime/tools/wiki/templates/includes/auto-refresh.html
 FILE: ../../../third_party/dart/runtime/tools/wiki/templates/includes/favicon.html
 FILE: ../../../third_party/dart/runtime/tools/wiki/templates/page.html
-FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/floatx10/arm64_android.expect
-FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/floatx10/arm64_ios.expect
-FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/floatx10/arm64_linux.expect
-FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/floatx10/arm64_macos.expect
-FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/floatx10/arm_android.expect
-FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/floatx10/arm_ios.expect
-FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/floatx10/arm_linux.expect
-FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/floatx10/ia32_android.expect
-FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/floatx10/ia32_linux.expect
-FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/floatx10/ia32_win.expect
-FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/floatx10/x64_ios.expect
-FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/floatx10/x64_linux.expect
-FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/floatx10/x64_macos.expect
-FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/floatx10/x64_win.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/doublex20/arm64_android.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/doublex20/arm64_ios.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/doublex20/arm64_linux.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/doublex20/arm64_macos.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/doublex20/arm_android.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/doublex20/arm_ios.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/doublex20/arm_linux.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/doublex20/ia32_android.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/doublex20/ia32_linux.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/doublex20/ia32_win.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/doublex20/riscv32_linux.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/doublex20/riscv64_linux.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/doublex20/x64_ios.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/doublex20/x64_linux.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/doublex20/x64_macos.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/doublex20/x64_win.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/floatx20/arm64_android.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/floatx20/arm64_ios.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/floatx20/arm64_linux.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/floatx20/arm64_macos.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/floatx20/arm_android.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/floatx20/arm_ios.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/floatx20/arm_linux.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/floatx20/ia32_android.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/floatx20/ia32_linux.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/floatx20/ia32_win.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/floatx20/riscv32_linux.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/floatx20/riscv64_linux.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/floatx20/x64_ios.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/floatx20/x64_linux.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/floatx20/x64_macos.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/floatx20/x64_win.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/int8x10/arm64_android.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/int8x10/arm64_ios.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/int8x10/arm64_linux.expect
@@ -9288,6 +9306,8 @@ FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/int8x10/arm_l
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/int8x10/ia32_android.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/int8x10/ia32_linux.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/int8x10/ia32_win.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/int8x10/riscv32_linux.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/int8x10/riscv64_linux.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/int8x10/x64_ios.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/int8x10/x64_linux.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/int8x10/x64_macos.expect
@@ -9302,6 +9322,8 @@ FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/regress46127/
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/regress46127/ia32_android.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/regress46127/ia32_linux.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/regress46127/ia32_win.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/regress46127/riscv32_linux.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/regress46127/riscv64_linux.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/regress46127/x64_ios.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/regress46127/x64_linux.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/regress46127/x64_macos.expect
@@ -9316,6 +9338,8 @@ FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct128byte
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct128bytesx1/ia32_android.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct128bytesx1/ia32_linux.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct128bytesx1/ia32_win.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct128bytesx1/riscv32_linux.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct128bytesx1/riscv64_linux.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct128bytesx1/x64_ios.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct128bytesx1/x64_linux.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct128bytesx1/x64_macos.expect
@@ -9330,6 +9354,8 @@ FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct12bytes
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct12bytesFloatx6/ia32_android.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct12bytesFloatx6/ia32_linux.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct12bytesFloatx6/ia32_win.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct12bytesFloatx6/riscv32_linux.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct12bytesFloatx6/riscv64_linux.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct12bytesFloatx6/x64_ios.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct12bytesFloatx6/x64_linux.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct12bytesFloatx6/x64_macos.expect
@@ -9344,6 +9370,8 @@ FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct16bytes
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct16bytesHomogenousx10/ia32_android.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct16bytesHomogenousx10/ia32_linux.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct16bytesHomogenousx10/ia32_win.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct16bytesHomogenousx10/riscv32_linux.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct16bytesHomogenousx10/riscv64_linux.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct16bytesHomogenousx10/x64_ios.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct16bytesHomogenousx10/x64_linux.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct16bytesHomogenousx10/x64_macos.expect
@@ -9370,6 +9398,8 @@ FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct3bytesx
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct3bytesx10/ia32_android.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct3bytesx10/ia32_linux.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct3bytesx10/ia32_win.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct3bytesx10/riscv32_linux.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct3bytesx10/riscv64_linux.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct3bytesx10/x64_ios.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct3bytesx10/x64_linux.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct3bytesx10/x64_macos.expect
@@ -9384,6 +9414,8 @@ FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct8bytesP
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct8bytesPackedx10/ia32_android.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct8bytesPackedx10/ia32_linux.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct8bytesPackedx10/ia32_win.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct8bytesPackedx10/riscv32_linux.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct8bytesPackedx10/riscv64_linux.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct8bytesPackedx10/x64_ios.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct8bytesPackedx10/x64_linux.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct8bytesPackedx10/x64_macos.expect
@@ -9398,6 +9430,8 @@ FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct8bytesx
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct8bytesx1/ia32_android.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct8bytesx1/ia32_linux.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct8bytesx1/ia32_win.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct8bytesx1/riscv32_linux.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct8bytesx1/riscv64_linux.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct8bytesx1/x64_ios.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct8bytesx1/x64_linux.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct8bytesx1/x64_macos.expect
@@ -9412,6 +9446,8 @@ FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/structPacked/
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/structPacked/ia32_android.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/structPacked/ia32_linux.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/structPacked/ia32_win.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/structPacked/riscv32_linux.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/structPacked/riscv64_linux.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/structPacked/x64_ios.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/structPacked/x64_linux.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/structPacked/x64_macos.expect
@@ -9426,6 +9462,8 @@ FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_VeryLa
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_VeryLargeStruct/ia32_android.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_VeryLargeStruct/ia32_linux.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_VeryLargeStruct/ia32_win.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_VeryLargeStruct/riscv32_linux.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_VeryLargeStruct/riscv64_linux.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_VeryLargeStruct/x64_ios.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_VeryLargeStruct/x64_linux.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_VeryLargeStruct/x64_macos.expect
@@ -9440,6 +9478,8 @@ FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_floata
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_floatarray/ia32_android.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_floatarray/ia32_linux.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_floatarray/ia32_win.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_floatarray/riscv32_linux.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_floatarray/riscv64_linux.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_floatarray/x64_ios.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_floatarray/x64_linux.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_floatarray/x64_macos.expect
@@ -9454,6 +9494,8 @@ FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_floatx
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_floatx4/ia32_android.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_floatx4/ia32_linux.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_floatx4/ia32_win.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_floatx4/riscv32_linux.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_floatx4/riscv64_linux.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_floatx4/x64_ios.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_floatx4/x64_linux.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_floatx4/x64_macos.expect
@@ -9468,6 +9510,8 @@ FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_int8ar
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_int8array/ia32_android.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_int8array/ia32_linux.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_int8array/ia32_win.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_int8array/riscv32_linux.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_int8array/riscv64_linux.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_int8array/x64_ios.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_int8array/x64_linux.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_int8array/x64_macos.expect
@@ -9482,6 +9526,8 @@ FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_int8x1
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_int8x10/ia32_android.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_int8x10/ia32_linux.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_int8x10/ia32_win.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_int8x10/riscv32_linux.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_int8x10/riscv64_linux.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_int8x10/x64_ios.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_int8x10/x64_linux.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_int8x10/x64_macos.expect
@@ -9496,6 +9542,8 @@ FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/union16bytesH
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/union16bytesHomogenousx10/ia32_android.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/union16bytesHomogenousx10/ia32_linux.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/union16bytesHomogenousx10/ia32_win.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/union16bytesHomogenousx10/riscv32_linux.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/union16bytesHomogenousx10/riscv64_linux.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/union16bytesHomogenousx10/x64_ios.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/union16bytesHomogenousx10/x64_linux.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/union16bytesHomogenousx10/x64_macos.expect
@@ -9510,6 +9558,8 @@ FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/union5bytesPa
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/union5bytesPackedx10/ia32_android.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/union5bytesPackedx10/ia32_linux.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/union5bytesPackedx10/ia32_win.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/union5bytesPackedx10/riscv32_linux.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/union5bytesPackedx10/riscv64_linux.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/union5bytesPackedx10/x64_ios.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/union5bytesPackedx10/x64_linux.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/union5bytesPackedx10/x64_macos.expect
