@@ -155,7 +155,7 @@ deps = {
    # Chromium-style dependencies.
 
   'src/third_party/icu':
-   Var('chromium_git') + '/chromium/deps/icu.git' + '@' + '2b50fa94b07b601293d7c1f791e853bba8ffbb84',
+   Var('chromium_git') + '/chromium/deps/icu.git' + '@' + '2e0f2989441ec2f55abec30f48e89981dbac2c34',
 
   'src/third_party/khronos':
    Var('chromium_git') + '/chromium/src/third_party/khronos.git' + '@' + '7122230e90547962e0f0c627f62eeed3c701f275',

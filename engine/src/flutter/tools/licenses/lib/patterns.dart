@@ -1156,7 +1156,7 @@ final List<MultipleVersionedLicenseReferencePattern> csReferencesByUrl = <Multip
     pattern: RegExp(
       kIndent +
       r'(?:©|Copyright (©|\(C\))) 20.. and later: Unicode, Inc. and others.[ *]*\n'
-      r'^\1\2License & terms of use: (http://www.unicode.org/copyright.html)',
+      r'^\1\2License & terms of use: (https?://www.unicode.org/copyright.html)',
       multiLine: true,
       caseSensitive: false,
     )

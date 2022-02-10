@@ -307,6 +307,7 @@ abstract class License implements Comparable<License> {
         body = system.File('data/mit').readAsStringSync();
         type = LicenseType.mit;
         break;
+      case 'https://www.unicode.org/copyright.html':
       case 'http://www.unicode.org/copyright.html':
         body = system.File('data/unicode').readAsStringSync();
         type = LicenseType.icu;
