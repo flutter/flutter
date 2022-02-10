@@ -9828,6 +9828,45 @@ PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
 --------------------------------------------------------------------------------
 icu
 
+Copyright (C) 2016 and later: Unicode, Inc. and others.
+License & terms of use: http://www.unicode.org/copyright.html
+Copyright (c) 2015 International Business Machines Corporation
+and others. All Rights Reserved.
+
+Project: https://github.com/rober42539/lao-dictionary
+Dictionary: https://github.com/rober42539/lao-dictionary/laodict.txt
+License: https://github.com/rober42539/lao-dictionary/LICENSE.txt
+         (copied below)
+
+	This file is derived from the above dictionary version of Nov 22, 2020
+
+ Copyright (C) 2013 Brian Eugene Wilson, Robert Martin Campbell.
+ All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions are met:
+
+ Redistributions of source code must retain the above copyright notice, this
+ list of conditions and the following disclaimer. Redistributions in binary
+ form must reproduce the above copyright notice, this list of conditions and
+ the following disclaimer in the documentation and/or other materials
+ provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+OF THE POSSIBILITY OF SUCH DAMAGE.
+--------------------------------------------------------------------------------
+icu
+
 Copyright (c) 1995-2016 International Business Machines Corporation and others
 All rights reserved.
 
@@ -9985,45 +10024,6 @@ supplied in this file in the creation of products supporting the
 Unicode Standard, and to make copies of this file in any form for
 internal or external distribution as long as this notice remains
 attached.
---------------------------------------------------------------------------------
-icu
-
-Copyright (c) 2013 International Business Machines Corporation
-and others. All Rights Reserved.
-
-Project: https://github.com/veer66/lao-dictionary
-Dictionary: https://github.com/veer66/lao-dictionary/blob/master/Lao-Dictionary.txt
-License: https://github.com/veer66/lao-dictionary/blob/master/Lao-Dictionary-LICENSE.txt
-             (copied below)
-
- This file is derived from the above dictionary, with slight
- modifications.
-
- Copyright (C) 2013 Brian Eugene Wilson, Robert Martin Campbell.
- All rights reserved.
-
- Redistribution and use in source and binary forms, with or without
- modification,
- are permitted provided that the following conditions are met:
-
-Redistributions of source code must retain the above copyright notice, this
- list of conditions and the following disclaimer. Redistributions in
- binary form must reproduce the above copyright notice, this list of
- conditions and the following disclaimer in the documentation and/or
- other materials provided with the distribution.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
-INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
-HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
-STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
-OF THE POSSIBILITY OF SUCH DAMAGE.
 --------------------------------------------------------------------------------
 icu
 
