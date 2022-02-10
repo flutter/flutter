@@ -13,10 +13,6 @@ class MaterialSpellCheckerControls extends SpellCheckerControls{
     /// Responsible for causing the SpellCheckerSuggestionsToolbar to appear.
     /// This toolbar will allow for tap and replace of suggestions for misspelled 
     /// words.
-    /// See calls in
-    /// (1) _TextFieldSelectionGestureDetectorBuilder [material/text_field.dart]
-    /// (2) EditableTextState [editable_text.dart]
-    /// (3) MaterialTextSelectionControls [material/text_selection.dart]
     Widget buildSpellCheckerSuggestionsToolbar(
         TextSelectionDelegate delegate, List<TextSelectionPoint> endpoints, 
         Rect globalEditableRegion, Offset selectionMidpoint, double textLineHeight, 
@@ -32,7 +28,6 @@ class MaterialSpellCheckerControls extends SpellCheckerControls{
     }
 }
 
-// start of pasting
 class _SpellCheckerSuggestionsToolbarItemData {
   const _SpellCheckerSuggestionsToolbarItemData({
     required this.label,
@@ -49,7 +44,6 @@ const double _kHandleSize = 22.0;
 const double _kToolbarContentDistanceBelow = _kHandleSize - 2.0;
 const double _kToolbarContentDistance = 8.0;
 
-// The highest level toolbar widget, built directly by buildToolbar.
 class _SpellCheckerSuggestionsToolbar extends StatefulWidget {
   const _SpellCheckerSuggestionsToolbar({
     Key? key,
@@ -82,7 +76,6 @@ class _SpellCheckerSuggestionsToolbarState extends State<_SpellCheckerSuggestion
     while (left_index <= right_index) {
         mid_index = (left_index + (right_index - left_index) / 2).floor();
 
-        // Check if x is present at mid
         if (spellCheckerSuggestionSpans[mid_index].start <= curr_index && spellCheckerSuggestionSpans[mid_index].end + 1 >= curr_index) { 
             return spellCheckerSuggestionSpans[mid_index];
         }
