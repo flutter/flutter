@@ -723,6 +723,98 @@ void main() {
     expect(hitRect.size.height, lessThan(textFieldRect.size.height));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
+  group('SelectionOverlay', () {
+    Future<SelectionOverlay> pumpApp(WidgetTester tester, {
+      ValueChanged<DragStartDetails>? onStartDragStart,
+      ValueChanged<DragUpdateDetails>? onStartDragUpdate,
+      ValueChanged<DragEndDetails>? onStartDragEnd,
+      ValueChanged<DragStartDetails>? onEndDragStart,
+      ValueChanged<DragUpdateDetails>? onEndDragUpdate,
+      ValueChanged<DragEndDetails>? onEndDragEnd,
+      VoidCallback? onSelectionHandleTapped,
+      TextSelectionControls? selectionControls,
+    }) async {
+      final UniqueKey sizedBox = UniqueKey();
+      await tester.pumpWidget(MaterialApp(
+        home: SizedBox(
+          key: sizedBox,
+          width: 100,
+          height: 100,
+        ),
+      ));
+
+      final LayerLink startHandleLayerLink = LayerLink();
+      final LayerLink endHandleLayerLink = LayerLink();
+      final LayerLink toolbarLayerLink = LayerLink();
+      return SelectionOverlay(
+        context: tester.element(find.byKey(sizedBox)),
+        onSelectionHandleTapped: onSelectionHandleTapped,
+        startHandleType: TextSelectionHandleType.collapsed,
+        startHandleLayerLink: startHandleLayerLink,
+        lineHeightAtStart: 0.0,
+        onStartHandleDragStart: onStartDragStart,
+        onStartHandleDragUpdate: onStartDragUpdate,
+        onStartHandleDragEnd: onStartDragEnd,
+        endHandleType: TextSelectionHandleType.collapsed,
+        endHandleLayerLink: endHandleLayerLink,
+        lineHeightAtEnd: 0.0,
+        onEndHandleDragStart: onEndDragStart,
+        onEndHandleDragUpdate: onEndDragUpdate,
+        onEndHandleDragEnd: onEndDragEnd,
+        clipboardStatus: FakeClipboardStatusNotifier(),
+        selectionDelegate: FakeTextSelectionDelegate(),
+        selectionControls: selectionControls,
+        selectionEndPoints: const <TextSelectionPoint>[],
+        toolbarLayerLink: toolbarLayerLink,
+      );
+    }
+
+    testWidgets('can show and hide handles', (WidgetTester tester) async {
+      final TextSelectionControlsSpy spy = TextSelectionControlsSpy();
+      final SelectionOverlay selectionOverlay = await pumpApp(
+        tester,
+        selectionControls: spy,
+      );
+      selectionOverlay
+        ..startHandleType = TextSelectionHandleType.left
+        ..endHandleType = TextSelectionHandleType.right
+        ..selectionEndPoints = const <TextSelectionPoint>[
+          TextSelectionPoint(Offset(10, 10), TextDirection.ltr),
+          TextSelectionPoint(Offset(20, 20), TextDirection.ltr),
+        ];
+      selectionOverlay.showHandles();
+      await tester.pump();
+      expect(find.byKey(spy.leftHandleKey), findsOneWidget);
+      expect(find.byKey(spy.rightHandleKey), findsOneWidget);
+
+      selectionOverlay.hideHandles();
+      await tester.pump();
+      expect(find.byKey(spy.leftHandleKey), findsNothing);
+      expect(find.byKey(spy.rightHandleKey), findsNothing);
+
+      selectionOverlay.showToolbar();
+      await tester.pump();
+      expect(find.byKey(spy.toolBarKey), findsOneWidget);
+
+      selectionOverlay.hideToolbar();
+      await tester.pump();
+      expect(find.byKey(spy.toolBarKey), findsNothing);
+
+      selectionOverlay.showHandles();
+      selectionOverlay.showToolbar();
+      await tester.pump();
+      expect(find.byKey(spy.leftHandleKey), findsOneWidget);
+      expect(find.byKey(spy.rightHandleKey), findsOneWidget);
+      expect(find.byKey(spy.toolBarKey), findsOneWidget);
+
+      selectionOverlay.hide();
+      await tester.pump();
+      expect(find.byKey(spy.leftHandleKey), findsNothing);
+      expect(find.byKey(spy.rightHandleKey), findsNothing);
+      expect(find.byKey(spy.toolBarKey), findsNothing);
+    });
+  });
+
   group('ClipboardStatusNotifier', () {
     group('when Clipboard fails', () {
       setUp(() {
@@ -936,6 +1028,49 @@ class CustomTextSelectionControls extends TextSelectionControls {
   @override
   Size getHandleSize(double textLineHeight) {
     throw UnimplementedError();
+  }
+}
+
+class TextSelectionControlsSpy extends TextSelectionControls {
+  UniqueKey leftHandleKey = UniqueKey();
+  UniqueKey rightHandleKey = UniqueKey();
+  UniqueKey collapsedHandleKey = UniqueKey();
+  UniqueKey toolBarKey = UniqueKey();
+
+  @override
+  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, [VoidCallback? onTap]) {
+    switch (type) {
+      case TextSelectionHandleType.left:
+        return ElevatedButton(onPressed: onTap, child: Text('height $textLineHeight', key: leftHandleKey));
+      case TextSelectionHandleType.right:
+        return ElevatedButton(onPressed: onTap, child: Text('height $textLineHeight', key: rightHandleKey));
+      case TextSelectionHandleType.collapsed:
+        return ElevatedButton(onPressed: onTap, child: Text('height $textLineHeight', key: collapsedHandleKey));
+    }
+  }
+
+  @override
+  Widget buildToolbar(
+      BuildContext context,
+      Rect globalEditableRegion,
+      double textLineHeight,
+      Offset position,
+      List<TextSelectionPoint> endpoints,
+      TextSelectionDelegate delegate,
+      ClipboardStatusNotifier clipboardStatus,
+      Offset? lastSecondaryTapDownPosition,
+      ) {
+    return Text('dummy', key: toolBarKey);
+  }
+
+  @override
+  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
+    return Offset.zero;
+  }
+
+  @override
+  Size getHandleSize(double textLineHeight) {
+    return Size(textLineHeight, textLineHeight);
   }
 }
 
