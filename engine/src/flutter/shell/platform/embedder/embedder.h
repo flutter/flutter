@@ -717,12 +717,6 @@ typedef enum {
   kRemove,
   /// The pointer moved while up.
   kHover,
-  /// A pan/zoom started on this pointer.
-  kPanZoomStart,
-  /// The pan/zoom updated.
-  kPanZoomUpdate,
-  /// The pan/zoom ended.
-  kPanZoomEnd,
 } FlutterPointerPhase;
 
 /// The device type that created a pointer event.
@@ -730,7 +724,6 @@ typedef enum {
   kFlutterPointerDeviceKindMouse = 1,
   kFlutterPointerDeviceKindTouch,
   kFlutterPointerDeviceKindStylus,
-  kFlutterPointerDeviceKindTrackpad,
 } FlutterPointerDeviceKind;
 
 /// Flags for the `buttons` field of `FlutterPointerEvent` when `device_kind`
@@ -779,14 +772,6 @@ typedef struct {
   FlutterPointerDeviceKind device_kind;
   /// The buttons currently pressed, if any.
   int64_t buttons;
-  /// The x offset of the pan/zoom in physical pixels.
-  double pan_x;
-  /// The y offset of the pan/zoom in physical pixels.
-  double pan_y;
-  /// The scale of the pan/zoom, where 1.0 is the initial scale.
-  double scale;
-  /// The rotation of the pan/zoom in radians, where 0.0 is the initial angle.
-  double rotation;
 } FlutterPointerEvent;
 
 typedef enum {

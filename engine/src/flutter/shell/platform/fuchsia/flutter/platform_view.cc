@@ -378,11 +378,6 @@ bool PlatformView::OnHandlePointerEvent(
         FML_DLOG(ERROR) << "Received hover event for down pointer.";
       }
       break;
-    case flutter::PointerData::Change::kPanZoomStart:
-    case flutter::PointerData::Change::kPanZoomUpdate:
-    case flutter::PointerData::Change::kPanZoomEnd:
-      FML_DLOG(ERROR) << "Unexpectedly received pointer pan/zoom event";
-      break;
   }
 
   auto packet = std::make_unique<flutter::PointerDataPacket>(1);

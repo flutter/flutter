@@ -12,9 +12,6 @@ enum PointerChange {
   down,
   move,
   up,
-  panZoomStart,
-  panZoomUpdate,
-  panZoomEnd,
 }
 
 enum PointerDeviceKind {
@@ -62,12 +59,6 @@ class PointerData {
     this.platformData = 0,
     this.scrollDeltaX = 0.0,
     this.scrollDeltaY = 0.0,
-    this.panX = 0.0,
-    this.panY = 0.0,
-    this.panDeltaX = 0.0,
-    this.panDeltaY = 0.0,
-    this.scale = 0.0,
-    this.rotation = 0.0,
   });
   final int embedderId;
   final Duration timeStamp;
@@ -98,12 +89,6 @@ class PointerData {
   final int platformData;
   final double scrollDeltaX;
   final double scrollDeltaY;
-  final double panX;
-  final double panY;
-  final double panDeltaX;
-  final double panDeltaY;
-  final double scale;
-  final double rotation;
 
   @override
   String toString() => 'PointerData(x: $physicalX, y: $physicalY)';
@@ -136,13 +121,7 @@ class PointerData {
            'tilt: $tilt, '
            'platformData: $platformData, '
            'scrollDeltaX: $scrollDeltaX, '
-           'scrollDeltaY: $scrollDeltaY, '
-           'panX: $panX, '
-           'panY: $panY, '
-           'panDeltaX: $panDeltaX, '
-           'panDeltaY: $panDeltaY, '
-           'scale: $scale, '
-           'rotation: $rotation'
+           'scrollDeltaY: $scrollDeltaY'
            ')';
   }
 }
