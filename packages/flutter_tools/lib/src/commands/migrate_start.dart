@@ -83,8 +83,9 @@ class MigrateStartCommand extends FlutterCommand {
 
     MigrateResult? migrateResult = await computeMigration(
       verbose: _verbose,
-      baseAppDirectory: stringArg('base-app-directory'),
-      targetAppDirectory: stringArg('target-app-directory'),
+      flutterProject: project,
+      baseAppPath: stringArg('base-app-directory'),
+      targetAppPath: stringArg('target-app-directory'),
       baseRevision: stringArg('base-revision'),
       targetRevision: stringArg('target-revision'),
       deleteTempDirectories: boolArg('delete-temp-directories'),

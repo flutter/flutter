@@ -87,7 +87,7 @@ $unmanagedFilesString
   /// Returns the File that the migrate config belongs given a platform and a project directory.
   static File getFileFromPlatform(String? platform, {Directory? projectDirectory}) {
     Directory? platformDir;
-    final FlutterProject project = projectDirectory == null ? FlutterProject.current() : FlutterProject.fromDirectory(projectDirectory!);
+    final FlutterProject project = projectDirectory == null ? FlutterProject.current() : FlutterProject.fromDirectory(projectDirectory);
     switch (platform) {
       case 'root': {
         platformDir = project.directory;

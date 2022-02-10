@@ -6,6 +6,10 @@
 
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/migrate/migrate_compute.dart';
+import 'package:flutter_tools/src/project.dart';
 
 import '../src/common.dart';
 import 'test_data/migrate_project.dart';
@@ -16,15 +20,62 @@ import 'test_utils.dart';
 void main() {
   Directory tempDir;
   FlutterRunTestDriver flutter;
+  BufferLogger logger;
 
   setUp(() async {
     tempDir = createResolvedTempDirectorySync('run_test.');
     flutter = FlutterRunTestDriver(tempDir);
+    logger = BufferLogger.test();
   });
 
   tearDown(() async {
     await flutter.stop();
     tryToDelete(tempDir);
+  });
+
+  testWithoutContext('migrate compute', () async {
+    // Flutter Stable 1.22.6 hash: 9b2d32b605630f28625709ebd9d78ab3016b2bf6
+    final MigrateProject project = MigrateProject('vanilla_app_1_22_6_stable');
+    await project.setUpIn(tempDir);
+    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
+
+    // Init a git repo to test uncommitted changes checks
+    await processManager.run(<String>[
+      'git',
+      'init',
+    ], workingDirectory: tempDir.path);
+    await processManager.run(<String>[
+      'git',
+      'checkout',
+      '-b',
+      'master',
+    ], workingDirectory: tempDir.path);
+    await processManager.run(<String>[
+      'git',
+      'add',
+      '.',
+    ], workingDirectory: tempDir.path);
+    await processManager.run(<String>[
+      'git',
+      'commit',
+      '-m',
+      '"Initial commit"',
+    ], workingDirectory: tempDir.path);
+
+    FlutterProjectFactory flutterFactory = FlutterProjectFactory(logger: logger, fileSystem: globals.fs);
+    FlutterProject flutterProject = flutterFactory.fromDirectory(tempDir);
+
+    MigrateResult result = await computeMigration(
+      verbose: true,
+      flutterProject: flutterProject,
+      // baseAppPath,
+      // targetAppPath,
+      // baseRevision,
+      // targetRevision,
+      deleteTempDirectories: true,
+      logger: logger,
+    );
+    // expect(result.)
   });
 
   // Migrates a clean untouched app generated with flutter create

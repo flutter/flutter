@@ -31,24 +31,32 @@ class MigrateResult {
     required this.mergeResults,
     required this.addedFiles,
     required this.deletedFiles,
-    required this.tempDirectories});
+    required this.tempDirectories,
+    required this.sdkDirs,
+    this.generatedBaseTemplateDirectory,
+    this.generatedTargetTemplateDirectory});
 
   MigrateResult.empty()
     : mergeResults = <MergeResult>[],
       addedFiles = <FilePendingMigration>[],
       deletedFiles = <FilePendingMigration>[],
-      tempDirectories = <Directory>[];
+      tempDirectories = <Directory>[],
+      sdkDirs = <String, Directory>{};
 
-  List<MergeResult> mergeResults;
-  List<FilePendingMigration> addedFiles;
-  List<FilePendingMigration> deletedFiles;
-  List<Directory> tempDirectories;
+  final List<MergeResult> mergeResults;
+  final List<FilePendingMigration> addedFiles;
+  final List<FilePendingMigration> deletedFiles;
+  final List<Directory> tempDirectories;
+  Directory? generatedBaseTemplateDirectory;
+  Directory? generatedTargetTemplateDirectory;
+  Map<String, Directory> sdkDirs;
 }
 
 Future<MigrateResult?> computeMigration({
     bool verbose = false,
-    String? baseAppDirectory,
-    String? targetAppDirectory,
+    FlutterProject? flutterProject,
+    String? baseAppPath,
+    String? targetAppPath,
     String? baseRevision,
     String? targetRevision,
     bool deleteTempDirectories = true,
@@ -67,7 +75,9 @@ Future<MigrateResult?> computeMigration({
     logger.printStatus('\$ flutter migrate abandon', color: TerminalColor.grey, indent: 4);
     return null;
   }
-  final FlutterProject flutterProject = FlutterProject.current();
+  if (flutterProject == null) {
+    flutterProject = FlutterProject.current();
+  }
   Status statusTicker = logger.startProgress('Computing migration');
 
   final List<MigrateConfig> configs = await MigrateConfig.parseOrCreateMigrateConfigs(create: false);
@@ -116,35 +126,38 @@ Future<MigrateResult?> computeMigration({
     }
   }
 
-  // Generate the base templates
-  Directory generatedBaseTemplateDirectory;
-  Directory generatedTargetTemplateDirectory;
+  MigrateResult migrateResult = MigrateResult.empty();
 
-  final bool customBaseAppDir = baseAppDirectory != null;
-  final bool customTargetAppDir = targetAppDirectory != null;
+  // Generate the base templates
+  // Directory generatedBaseTemplateDirectory;
+  // Directory generatedTargetTemplateDirectory;
+
+  final bool customBaseAppDir = baseAppPath != null;
+  final bool customTargetAppDir = targetAppPath != null;
   if (customBaseAppDir) {
-    generatedBaseTemplateDirectory = globals.fs.directory(baseAppDirectory!);
+    migrateResult.generatedBaseTemplateDirectory = globals.fs.directory(baseAppPath);
   } else {
-    generatedBaseTemplateDirectory = await MigrateUtils.createTempDirectory('generatedBaseTemplate');
+    migrateResult.generatedBaseTemplateDirectory = await MigrateUtils.createTempDirectory('generatedBaseTemplate');
   }
   if (customTargetAppDir) {
-    generatedTargetTemplateDirectory = globals.fs.directory(targetAppDirectory!);
+    migrateResult.generatedTargetTemplateDirectory = globals.fs.directory(targetAppPath);
   } else {
-    generatedTargetTemplateDirectory = await MigrateUtils.createTempDirectory('generatedTargetTemplate');
+    migrateResult.generatedTargetTemplateDirectory = await MigrateUtils.createTempDirectory('generatedTargetTemplate');
   }
 
-  await MigrateUtils.gitInit(generatedBaseTemplateDirectory.absolute.path);
-  await MigrateUtils.gitInit(generatedTargetTemplateDirectory.absolute.path);
+  await MigrateUtils.gitInit(migrateResult.generatedBaseTemplateDirectory!.absolute.path);
+  await MigrateUtils.gitInit(migrateResult.generatedTargetTemplateDirectory!.absolute.path);
 
   // Create base
   final String name = flutterProject.manifest.appName;
-  final String androidLanguage = FlutterProject.current().android.isKotlin ? 'kotlin' : 'java';
-  final String iosLanguage = FlutterProject.current().ios.isSwift ? 'swift' : 'objc';
+  final String androidLanguage = flutterProject.android.isKotlin ? 'kotlin' : 'java';
+  final String iosLanguage = flutterProject.ios.isSwift ? 'swift' : 'objc';
 
   Directory targetFlutterDirectory = globals.fs.directory(Cache.flutterRoot!);
   // Clone base flutter
+  List<Directory> sdkTempDirs = <Directory>[];
   if (verbose) logger.printStatus('Creating base app.');
-  if (baseAppDirectory == null) {
+  if (baseAppPath == null) {
     final Map<String, Directory> revisionToFlutterSdkDir = <String, Directory>{};
     for (String revision in revisionsList) {
       final List<String> platforms = <String>[];
@@ -173,7 +186,8 @@ Future<MigrateResult?> computeMigration({
             revisionToFlutterSdkDir[revision] = sdkDir;
             sdkAvailable = true;
           } else {
-            sdkDir = await MigrateUtils.createTempDirectory('flutter_$activeRevision')!;
+            sdkDir = await MigrateUtils.createTempDirectory('flutter_$activeRevision');
+            migrateResult.sdkDirs[activeRevision] = sdkDir;
             sdkAvailable = await MigrateUtils.cloneFlutter(activeRevision, sdkDir.absolute.path);
             revisionToFlutterSdkDir[revision] = sdkDir;
           }
@@ -190,14 +204,14 @@ Future<MigrateResult?> computeMigration({
         name: name,
         androidLanguage: androidLanguage,
         iosLanguage: iosLanguage,
-        outputDirectory: generatedBaseTemplateDirectory.absolute.path,
+        outputDirectory: migrateResult.generatedBaseTemplateDirectory!.absolute.path,
         platforms: platforms,
       );
       if (verbose) logger.printStatus('Creating base app for platforms $platforms with $revision SDK.');
     }
   }
 
-  if (targetAppDirectory == null) {
+  if (targetAppPath == null) {
     // Create target
     if (verbose) logger.printStatus('Creating target app.');
     await MigrateUtils.createFromTemplates(
@@ -205,7 +219,7 @@ Future<MigrateResult?> computeMigration({
       name: name,
       androidLanguage: androidLanguage,
       iosLanguage: iosLanguage,
-      outputDirectory: generatedTargetTemplateDirectory.absolute.path
+      outputDirectory: migrateResult.generatedTargetTemplateDirectory!.absolute.path
     );
   }
 
@@ -213,8 +227,8 @@ Future<MigrateResult?> computeMigration({
 
   // Generate diffs
   if (verbose) logger.printStatus('Diffing base app and target app.');
-  final List<FileSystemEntity> generatedBaseFiles = generatedBaseTemplateDirectory.listSync(recursive: true);
-  final List<FileSystemEntity> generatedTargetFiles = generatedTargetTemplateDirectory.listSync(recursive: true);
+  final List<FileSystemEntity> generatedBaseFiles = migrateResult.generatedBaseTemplateDirectory!.listSync(recursive: true);
+  final List<FileSystemEntity> generatedTargetFiles = migrateResult.generatedTargetTemplateDirectory!.listSync(recursive: true);
   int modifiedFilesCount = 0;
   final Map<String, DiffResult> diffMap = <String, DiffResult>{};
   for (FileSystemEntity entity in generatedBaseFiles) {
@@ -222,14 +236,14 @@ Future<MigrateResult?> computeMigration({
       continue;
     }
     final File oldTemplateFile = (entity as File).absolute;
-    if (!oldTemplateFile.path.startsWith(generatedBaseTemplateDirectory.absolute.path)) {
+    if (!oldTemplateFile.path.startsWith(migrateResult.generatedBaseTemplateDirectory!.absolute.path)) {
       continue;
     }
-    final String localPath = oldTemplateFile.path.replaceFirst(generatedBaseTemplateDirectory.absolute.path + globals.fs.path.separator, '');
-    if (await MigrateUtils.isGitIgnored(oldTemplateFile.absolute.path, generatedBaseTemplateDirectory.absolute.path)) {
+    final String localPath = oldTemplateFile.path.replaceFirst(migrateResult.generatedBaseTemplateDirectory!.absolute.path + globals.fs.path.separator, '');
+    if (await MigrateUtils.isGitIgnored(oldTemplateFile.absolute.path, migrateResult.generatedBaseTemplateDirectory!.absolute.path)) {
       diffMap[localPath] = DiffResult.ignored();
     }
-    final File targetTemplateFile = generatedTargetTemplateDirectory.childFile(localPath);
+    final File targetTemplateFile = migrateResult.generatedTargetTemplateDirectory!.childFile(localPath);
     if (targetTemplateFile.existsSync()) {
       DiffResult diff = await MigrateUtils.diffFiles(oldTemplateFile, targetTemplateFile);
       diffMap[localPath] = diff;
@@ -245,22 +259,20 @@ Future<MigrateResult?> computeMigration({
   }
   if (verbose) logger.printStatus('$modifiedFilesCount files were modified between base and target apps.');
 
-  MigrateResult migrateResult = MigrateResult.empty();
-
   // Check for any new files that were added in the new template
   for (FileSystemEntity entity in generatedTargetFiles) {
     if (entity is! File) {
       continue;
     }
     final File targetTemplateFile = (entity as File).absolute;
-    if (!targetTemplateFile.path.startsWith(generatedTargetTemplateDirectory.absolute.path)) {
+    if (!targetTemplateFile.path.startsWith(migrateResult.generatedTargetTemplateDirectory!.absolute.path)) {
       continue;
     }
-    String localPath = targetTemplateFile.path.replaceFirst(generatedTargetTemplateDirectory.absolute.path + globals.fs.path.separator, '');
+    String localPath = targetTemplateFile.path.replaceFirst(migrateResult.generatedTargetTemplateDirectory!.absolute.path + globals.fs.path.separator, '');
     if (diffMap.containsKey(localPath)) {
       continue;
     }
-    if (await MigrateUtils.isGitIgnored(targetTemplateFile.absolute.path, generatedTargetTemplateDirectory.absolute.path)) {
+    if (await MigrateUtils.isGitIgnored(targetTemplateFile.absolute.path, migrateResult.generatedTargetTemplateDirectory!.absolute.path)) {
       diffMap[localPath] = DiffResult.ignored();
     }
     diffMap[localPath] = DiffResult.addition();
@@ -299,7 +311,7 @@ Future<MigrateResult?> computeMigration({
         _skippedFiles.contains(localPath)) {
       continue;
     }
-    final File oldTemplateFile = generatedBaseTemplateDirectory.childFile(localPath);
+    final File oldTemplateFile = migrateResult.generatedBaseTemplateDirectory!.childFile(localPath);
     final DiffResult userDiff = await MigrateUtils.diffFiles(oldTemplateFile, currentFile);
 
     if (userDiff.exitCode == 0) {
@@ -314,14 +326,14 @@ Future<MigrateResult?> computeMigration({
           MergeResult result;
           try {
             result = MergeResult.explicit(
-              mergedString: generatedTargetTemplateDirectory.childFile(localPath).readAsStringSync(),
+              mergedString: migrateResult.generatedTargetTemplateDirectory!.childFile(localPath).readAsStringSync(),
               hasConflict: false,
               exitCode: 0,
               localPath: localPath,
             );
           } on FileSystemException {
             result = MergeResult.explicit(
-              mergedBytes: generatedTargetTemplateDirectory.childFile(localPath).readAsBytesSync(),
+              mergedBytes: migrateResult.generatedTargetTemplateDirectory!.childFile(localPath).readAsBytesSync(),
               hasConflict: false,
               exitCode: 0,
               localPath: localPath,
@@ -336,9 +348,9 @@ Future<MigrateResult?> computeMigration({
 
     if (diffMap.containsKey(localPath)) {
       final MergeResult result = await MigrateUtils.gitMergeFile(
-        ancestor: globals.fs.path.join(generatedBaseTemplateDirectory.path, localPath),
+        ancestor: globals.fs.path.join(migrateResult.generatedBaseTemplateDirectory!.path, localPath),
         current: currentFile.path,
-        other: globals.fs.path.join(generatedTargetTemplateDirectory.path, localPath),
+        other: globals.fs.path.join(migrateResult.generatedTargetTemplateDirectory!.path, localPath),
         localPath: localPath,
       );
       migrateResult.mergeResults.add(result);
@@ -348,20 +360,23 @@ Future<MigrateResult?> computeMigration({
   }
 
   if (deleteTempDirectories) {
-    List<Directory> directoriesToDelete = <Directory>[];
     // Don't delete user-provided directories
     if (!customBaseAppDir) {
-      migrateResult.tempDirectories.add(generatedBaseTemplateDirectory);
+      migrateResult.tempDirectories.add(migrateResult.generatedBaseTemplateDirectory!);
     }
     if (!customTargetAppDir) {
-      migrateResult.tempDirectories.add(generatedTargetTemplateDirectory);
+      migrateResult.tempDirectories.add(migrateResult.generatedTargetTemplateDirectory!);
     }
+    migrateResult.tempDirectories.addAll(migrateResult.sdkDirs.values);
   }
   return migrateResult;
 }
 
 /// Writes the files into the working directory for the developer to review and resolve any conflicts.
-Future<void> writeWorkingDir(MigrateResult migrateResult, {bool verbose = false}) async {
+Future<void> writeWorkingDir(MigrateResult migrateResult, {bool verbose = false, FlutterProject? flutterProject}) async {
+  if (flutterProject == null) {
+    flutterProject = FlutterProject.current();
+  }
   final Directory workingDir = FlutterProject.current().directory.childDirectory(kDefaultMigrateWorkingDirectoryName);
   if (verbose) globals.logger.printStatus('Writing migrate working directory at `${workingDir.path}`');
   // Write files in working dir
