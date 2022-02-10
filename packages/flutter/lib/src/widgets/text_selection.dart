@@ -772,26 +772,26 @@ class _SelectionToolbarOverlayState extends State<_SelectionToolbarOverlay> with
 
     _controller = AnimationController(duration: TextSelectionOverlay.fadeDuration, vsync: this);
 
-    _handleVisibilityChanged();
-    widget.visibility.addListener(_handleVisibilityChanged);
+    _toolbarVisibilityChanged();
+    widget.visibility.addListener(_toolbarVisibilityChanged);
   }
 
   @override
   void didUpdateWidget(_SelectionToolbarOverlay oldWidget) {
     super.didUpdateWidget(oldWidget);
-    oldWidget.visibility.removeListener(_handleVisibilityChanged);
-    _handleVisibilityChanged();
-    widget.visibility.addListener(_handleVisibilityChanged);
+    oldWidget.visibility.removeListener(_toolbarVisibilityChanged);
+    _toolbarVisibilityChanged();
+    widget.visibility.addListener(_toolbarVisibilityChanged);
   }
 
   @override
   void dispose() {
-    widget.visibility.removeListener(_handleVisibilityChanged);
+    widget.visibility.removeListener(_toolbarVisibilityChanged);
     _controller.dispose();
     super.dispose();
   }
 
-  void _handleVisibilityChanged() {
+  void _toolbarVisibilityChanged() {
     if (widget.visibility.value) {
       _controller.forward();
     } else {
