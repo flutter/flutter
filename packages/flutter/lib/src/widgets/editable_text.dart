@@ -1730,6 +1730,23 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
+    /// Cut current selection to [Clipboard].
+  @override
+  void replaceSelection(SelectionChangedCause cause, String replacementSuggestion, int start, int end) {
+    if (widget.readOnly || widget.obscureText) {
+      return;
+    }
+    final TextSelection selection = TextSelection(baseOffset: start, extentOffset: end);
+    final String text = textEditingValue.text;
+
+    _replaceText(ReplaceTextIntent(textEditingValue, replacementSuggestion, selection, cause));
+
+    if (cause == SelectionChangedCause.toolbar) {
+      bringIntoView(textEditingValue.selection.extent);
+      hideToolbar(ToolbarType.spellCheckerSuggestionsControls);
+    }
+  }
+
   /// Select the entire text value.
   @override
   void selectAll(SelectionChangedCause cause) {

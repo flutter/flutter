@@ -56,7 +56,6 @@ class _SpellCheckerSuggestionsToolbar extends StatefulWidget {
     required this.delegate,
     required this.endpoints,
     required this.globalEditableRegion,
-    // required this.handleSuggestionSelected,
     required this.selectionMidpoint,
     required this.textLineHeight,
     required this.spellCheckerSuggestionSpans,
@@ -65,7 +64,6 @@ class _SpellCheckerSuggestionsToolbar extends StatefulWidget {
   final TextSelectionDelegate delegate;
   final List<TextSelectionPoint> endpoints;
   final Rect globalEditableRegion;
-//   final VoidCallback? handleSuggestionSelected;
   final Offset selectionMidpoint;
   final double textLineHeight;
   final List<SpellCheckerSuggestionSpan>? spellCheckerSuggestionSpans;
@@ -75,38 +73,6 @@ class _SpellCheckerSuggestionsToolbar extends StatefulWidget {
 }
 
 class _SpellCheckerSuggestionsToolbarState extends State<_SpellCheckerSuggestionsToolbar> with TickerProviderStateMixin {
-//   void _onChangedClipboardStatus() {
-//     setState(() {
-//       // Inform the widget that the value of clipboardStatus has changed.
-//     });
-//   }
-
-//   @override
-//   void initState() {
-//     super.initState();
-//     // widget.clipboardStatus.addListener(_onChangedClipboardStatus);
-//     // widget.clipboardStatus.update();
-//   }
-
-//   @override
-//   void didUpdateWidget(_SpellCheckerSuggestionsToolbar oldWidget) {
-//     super.didUpdateWidget(oldWidget);
-//     // if (widget.clipboardStatus != oldWidget.clipboardStatus) {
-//     //   widget.clipboardStatus.addListener(_onChangedClipboardStatus);
-//     //   oldWidget.clipboardStatus.removeListener(_onChangedClipboardStatus);
-//     // }
-//     // widget.clipboardStatus.update();
-//   }
-
-//   @override
-//   void dispose() {
-//     super.dispose();
-//     // When used in an Overlay, it can happen that this is disposed after its
-//     // creator has already disposed _clipboardStatus.
-//     // if (!widget.clipboardStatus.disposed) {
-//     //   widget.clipboardStatus.removeListener(_onChangedClipboardStatus);
-//     // }
-//   }
 
   SpellCheckerSuggestionSpan? findSuggestions(int curr_index, List<SpellCheckerSuggestionSpan> spellCheckerSuggestionSpans) {
     int left_index = 0;
@@ -134,17 +100,6 @@ class _SpellCheckerSuggestionsToolbarState extends State<_SpellCheckerSuggestion
 
   @override
   Widget build(BuildContext context) {
-    // // If there are no buttons to be shown, don't render anything.
-    // if (widget.handleCut == null && widget.handleCopy == null
-    //     && widget.handlePaste == null && widget.handleSelectAll == null) {
-    //   return const SizedBox.shrink();
-    // }
-    // If the paste button is desired, don't render anything until the state of
-    // the clipboard is known, since it's used to determine if paste is shown.
-    // if (widget.handlePaste != null
-    //     && widget.clipboardStatus.value == ClipboardStatus.unknown) {
-    //   return const SizedBox.shrink();
-    // }
 
     if (widget.spellCheckerSuggestionSpans == null || widget.spellCheckerSuggestionSpans!.length == 0) {
         return const SizedBox.shrink();
@@ -186,14 +141,12 @@ class _SpellCheckerSuggestionsToolbarState extends State<_SpellCheckerSuggestion
         itemDatas.add(        
             _SpellCheckerSuggestionsToolbarItemData(
                 label: suggestion,
-                onPressed: () => {},
+                onPressed: () 
+                {
+                    widget.delegate.replaceSelection(SelectionChangedCause.toolbar, suggestion, relevantSpan.start, relevantSpan.end+1);
+                },
         ));
     });
-
-    // If there is no option available, build an empty widget.
-    // if (itemDatas.isEmpty) {
-    //   return const SizedBox(width: 0.0, height: 0.0);
-    // }
 
     return TextSelectionToolbar(
       anchorAbove: anchorAbove,
@@ -201,14 +154,13 @@ class _SpellCheckerSuggestionsToolbarState extends State<_SpellCheckerSuggestion
       children: itemDatas.asMap().entries.map((MapEntry<int, _SpellCheckerSuggestionsToolbarItemData> entry) {
         return TextSelectionToolbarTextButton(
           padding: TextSelectionToolbarTextButton.getPadding(entry.key, itemDatas.length),
-        //   onPressed: entry.value.onPressed,
+          onPressed: entry.value.onPressed,
           child: Text(entry.value.label),
         );
       }).toList(),
     );
   }
 }
-//end of pasting
 
 /// Provides logic for indicating misspelled words for Android.
 class MaterialMisspelledWordsHandler extends MisspelledWordsHandler {

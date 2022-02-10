@@ -1030,6 +1030,9 @@ mixin TextSelectionDelegate {
   /// will be hidden and the current selection will be scrolled into view.
   Future<void> pasteText(SelectionChangedCause cause);
 
+  // Replace misspelled wor dwith selected replacement suggestion.
+  void replaceSelection(SelectionChangedCause cause, String text, int start, int end);
+
   /// Set the current selection to contain the entire text value.
   ///
   /// If and only if [cause] is [SelectionChangedCause.toolbar], the selection
