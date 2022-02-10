@@ -41,7 +41,7 @@ void VMServiceObject::GetContents(LazyEntryVector* out_vector) const {
   std::vector<std::string> files;
   if (!ReadDirContents(kPortDir, &files)) {
     FX_LOGF(ERROR, LOG_TAG,
-            "Failed to read Dart VM Service port directory '%s': %s", kPortDir,
+            "Failed to read Dart VM service port directory '%s': %s", kPortDir,
             strerror(errno));
     return;
   }
