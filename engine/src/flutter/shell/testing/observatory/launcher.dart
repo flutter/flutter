@@ -35,7 +35,7 @@ class ShellProcess {
 
   Uri? _extractVMServiceUri(String str) {
     final listeningMessageRegExp = RegExp(
-      r'(?:Observatory|The Dart VM Service is) listening on ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)',
+      r'(?:Observatory|The Dart VM service is) listening on ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)',
     );
     final match = listeningMessageRegExp.firstMatch(str);
     if (match != null) {
