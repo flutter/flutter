@@ -2109,8 +2109,6 @@ FILE: ../../../flutter/third_party/accessibility/base/simple_token.h
 FILE: ../../../flutter/third_party/accessibility/base/string_utils.cc
 FILE: ../../../flutter/third_party/accessibility/base/string_utils.h
 FILE: ../../../flutter/third_party/accessibility/base/string_utils_unittest.cc
-FILE: ../../../flutter/third_party/accessibility/base/win/string_conversion.cc
-FILE: ../../../flutter/third_party/accessibility/base/win/string_conversion.h
 FILE: ../../../flutter/third_party/accessibility/gfx/transform.cc
 FILE: ../../../flutter/third_party/accessibility/gfx/transform.h
 FILE: ../../../flutter/third_party/tonic/common/build_config.h
