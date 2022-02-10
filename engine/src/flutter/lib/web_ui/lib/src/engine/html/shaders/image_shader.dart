@@ -260,7 +260,7 @@ class EngineImageShader implements ui.ImageShader {
       gl.unbindVertexArray();
     }
 
-    final Object? bitmapImage = gl.readPatternData();
+    final Object? bitmapImage = gl.readPatternData(false);
     gl.bindArrayBuffer(null);
     gl.bindElementArrayBuffer(null);
     return context!.createPattern(bitmapImage!, 'no-repeat')!;

@@ -45,6 +45,27 @@ Future<void> testMain() async {
         maxDiffRatePercent: 0.01);
   });
 
+  test('Should blend linear gradient with alpha channel correctly.', () async {
+    const Rect canvasRect = Rect.fromLTRB(0, 0, 500, 500);
+    final RecordingCanvas rc =
+        RecordingCanvas(canvasRect);
+    final SurfacePaint backgroundPaint = SurfacePaint()
+      ..style = PaintingStyle.fill
+      ..color = const Color(0xFFFF0000);
+    rc.drawRect(canvasRect, backgroundPaint);
+
+    const Rect shaderRect = Rect.fromLTRB(50, 50, 300, 300);
+    final SurfacePaint paint = SurfacePaint()..shader = Gradient.linear(
+        Offset(shaderRect.left, shaderRect.top),
+        Offset(shaderRect.right, shaderRect.bottom),
+        const <Color>[Color(0x00000000), Color(0xFF0000FF)]);
+    rc.drawRect(shaderRect, paint);
+    expect(rc.renderStrategy.hasArbitraryPaint, isTrue);
+    await canvasScreenshot(rc, 'linear_gradient_rect_alpha',
+        region: screenRect,
+        maxDiffRatePercent: 0.01);
+  });
+
   test('Should draw linear gradient with transform.', () async {
     final RecordingCanvas rc =
         RecordingCanvas(const Rect.fromLTRB(0, 0, 500, 500));

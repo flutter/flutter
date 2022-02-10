@@ -80,7 +80,7 @@ Future<void> testMain() async {
     GradientSweep sweepGradient = GradientSweep(const Offset(0.5, 0.5),
         colors, stops, TileMode.clamp,
         0, 360.0 / 180.0 * math.pi,
-        Matrix4.rotationZ(math.pi / 6.0).storage);
+        null);
 
     final GradientSweep sweepGradientRotated = GradientSweep(const Offset(0.5, 0.5),
         colors, stops, TileMode.clamp,
@@ -105,7 +105,7 @@ Future<void> testMain() async {
     sweepGradient = GradientSweep(const Offset(0.5, 0.5),
         colors, stops, TileMode.clamp,
         math.pi / 6, 3 * math.pi / 4,
-        Matrix4.rotationZ(math.pi / 6.0).storage);
+        null);
 
     rectBounds = rectBounds.translate(kBoxWidth + 10, 0);
     canvas.drawRect(rectBounds,
@@ -117,7 +117,7 @@ Future<void> testMain() async {
     sweepGradient = GradientSweep(const Offset(0.5, 0.5),
         colors, stops, TileMode.repeated,
         math.pi / 6, 3 * math.pi / 4,
-        Matrix4.rotationZ(math.pi / 6.0).storage);
+        null);
 
     canvas.drawRect(rectBounds,
         SurfacePaint()..shader = engineGradientToShader(sweepGradient, rectBounds));
@@ -128,7 +128,7 @@ Future<void> testMain() async {
     sweepGradient = GradientSweep(const Offset(0.5, 0.5),
         colors, stops, TileMode.mirror,
         math.pi / 6, 3 * math.pi / 4,
-        Matrix4.rotationZ(math.pi / 6.0).storage);
+        null);
     canvas.drawRect(rectBounds,
         SurfacePaint()..shader = engineGradientToShader(sweepGradient, rectBounds));
     canvas.drawRect(rectBounds, borderPaint);
@@ -159,7 +159,7 @@ Future<void> testMain() async {
     GradientSweep sweepGradient = GradientSweep(const Offset(0.5, 0.5),
         colors, stops, TileMode.clamp,
         0, 360.0 / 180.0 * math.pi,
-        Matrix4.rotationZ(math.pi / 6.0).storage);
+        null);
 
     final GradientSweep sweepGradientRotated = GradientSweep(const Offset(0.5, 0.5),
         colors, stops, TileMode.clamp,
@@ -184,7 +184,7 @@ Future<void> testMain() async {
     sweepGradient = GradientSweep(const Offset(0.5, 0.5),
         colors, stops, TileMode.clamp,
         math.pi / 6, 3 * math.pi / 4,
-        Matrix4.rotationZ(math.pi / 6.0).storage);
+        null);
 
     rectBounds = rectBounds.translate(kBoxWidth + 10, 0);
     canvas.drawOval(rectBounds,
@@ -196,7 +196,7 @@ Future<void> testMain() async {
     sweepGradient = GradientSweep(const Offset(0.5, 0.5),
         colors, stops, TileMode.repeated,
         math.pi / 6, 3 * math.pi / 4,
-        Matrix4.rotationZ(math.pi / 6.0).storage);
+        null);
 
     canvas.drawOval(rectBounds,
         SurfacePaint()..shader = engineGradientToShader(sweepGradient, rectBounds));
@@ -207,7 +207,7 @@ Future<void> testMain() async {
     sweepGradient = GradientSweep(const Offset(0.5, 0.5),
         colors, stops, TileMode.mirror,
         math.pi / 6, 3 * math.pi / 4,
-        Matrix4.rotationZ(math.pi / 6.0).storage);
+        null);
     canvas.drawOval(rectBounds,
         SurfacePaint()..shader = engineGradientToShader(sweepGradient, rectBounds));
     canvas.drawRect(rectBounds, borderPaint);
@@ -238,7 +238,7 @@ Future<void> testMain() async {
     GradientSweep sweepGradient = GradientSweep(const Offset(0.5, 0.5),
         colors, stops, TileMode.clamp,
         0, 360.0 / 180.0 * math.pi,
-        Matrix4.rotationZ(math.pi / 6.0).storage);
+        null);
 
     final GradientSweep sweepGradientRotated = GradientSweep(const Offset(0.5, 0.5),
         colors, stops, TileMode.clamp,
@@ -265,7 +265,7 @@ Future<void> testMain() async {
     sweepGradient = GradientSweep(const Offset(0.5, 0.5),
         colors, stops, TileMode.clamp,
         math.pi / 6, 3 * math.pi / 4,
-        Matrix4.rotationZ(math.pi / 6.0).storage);
+        null);
 
     rectBounds = rectBounds.translate(kBoxWidth + 10, 0);
     path = samplePathFromRect(rectBounds);
@@ -278,7 +278,7 @@ Future<void> testMain() async {
     sweepGradient = GradientSweep(const Offset(0.5, 0.5),
         colors, stops, TileMode.repeated,
         math.pi / 6, 3 * math.pi / 4,
-        Matrix4.rotationZ(math.pi / 6.0).storage);
+        null);
 
     path = samplePathFromRect(rectBounds);
     canvas.drawPath(path,
@@ -290,7 +290,7 @@ Future<void> testMain() async {
     sweepGradient = GradientSweep(const Offset(0.5, 0.5),
         colors, stops, TileMode.mirror,
         math.pi / 6, 3 * math.pi / 4,
-        Matrix4.rotationZ(math.pi / 6.0).storage);
+        null);
     path = samplePathFromRect(rectBounds);
     canvas.drawPath(path,
         SurfacePaint()..shader = engineGradientToShader(sweepGradient, rectBounds));
