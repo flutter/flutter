@@ -148,6 +148,30 @@ void main() {
         processManager: FakeProcessManager.any(),
       ),
     });
+
+    testUsingContext('force updates packages --jobs=1', () async {
+      final UpdatePackagesCommand command = UpdatePackagesCommand();
+      await createTestCommandRunner(command).run(<String>[
+        'update-packages',
+        '--force-upgrade',
+        '--jobs=1',
+      ]);
+      expect(pub.pubGetDirectories, equals(<String>[
+        '/.tmp_rand0/flutter_update_packages.rand0',
+        '/flutter/examples',
+        '/flutter/packages/flutter',
+      ]));
+      expect(pub.pubBatchDirectories, equals(<String>[
+        '/.tmp_rand0/flutter_update_packages.rand0',
+      ]));
+    }, overrides: <Type, Generator>{
+      Pub: () => pub,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+      Cache: () => Cache.test(
+        processManager: FakeProcessManager.any(),
+      ),
+    });
   });
 }
 

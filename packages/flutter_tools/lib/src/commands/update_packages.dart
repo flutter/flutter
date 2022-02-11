@@ -498,7 +498,8 @@ class UpdatePackagesCommand extends FlutterCommand {
       'Running "flutter pub get" in affected packages...',
     );
     try {
-      final TaskQueue<void> queue = TaskQueue<void>(maxJobs: intArg('jobs'));
+      final int/*?*/ maxJobs = int.tryParse(stringArg('jobs'));
+      final TaskQueue<void> queue = TaskQueue<void>(maxJobs: maxJobs);
       for (final Directory dir in packages) {
         unawaited(queue.add(() async {
           final Stopwatch stopwatch = Stopwatch();
