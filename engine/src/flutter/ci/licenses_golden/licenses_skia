@@ -1,4 +1,4 @@
-Signature: 0e4da0a5809b6ddd8ebdd5e50981f044
+Signature: 3a7c707d278ef70d82d90cc660dadb2c
 
 UNUSED LICENSES:
 
@@ -1347,6 +1347,8 @@ LIBRARY: skia
 ORIGIN: ../../../third_party/skia/bazel/gcs_mirror/gcs_mirror.go + ../../../LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/bazel/gcs_mirror/gcs_mirror.go
+FILE: ../../../third_party/skia/infra/bots/task_drivers/codesize/codesize.go
+FILE: ../../../third_party/skia/infra/bots/task_drivers/codesize/codesize_test.go
 ----------------------------------------------------------------------------------------------------
 Copyright 2022 The Chromium Authors. All rights reserved.
 
@@ -5640,6 +5642,7 @@ FILE: ../../../third_party/skia/src/sksl/SkSLGLSL.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLExpression.cpp
 FILE: ../../../third_party/skia/src/sksl/lex/TransitionTable.cpp
 FILE: ../../../third_party/skia/src/sksl/lex/TransitionTable.h
+FILE: ../../../third_party/skia/src/utils/SkCycles.h
 FILE: ../../../third_party/skia/src/utils/SkOrderedFontMgr.cpp
 ----------------------------------------------------------------------------------------------------
 Copyright 2021 Google Inc.
@@ -6528,6 +6531,7 @@ LIBRARY: skia
 ORIGIN: ../../../third_party/skia/gm/drawlines_with_local_matrix.cpp + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/gm/drawlines_with_local_matrix.cpp
+FILE: ../../../third_party/skia/src/utils/SkBlitterTrace.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2022 Google Inc.
 
