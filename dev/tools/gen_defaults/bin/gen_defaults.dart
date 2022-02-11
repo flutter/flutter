@@ -34,17 +34,9 @@ Future<void> main(List<String> args) async {
     'dialog.json',
     'elevation.json',
     'fab_extended_primary.json',
-    'fab_extended_secondary.json',
-    'fab_extended_surface.json',
     'fab_large_primary.json',
-    'fab_large_secondary.json',
-    'fab_large_surface.json',
     'fab_primary.json',
-    'fab_secondary.json',
     'fab_small_primary.json',
-    'fab_small_secondary.json',
-    'fab_small_surface.json',
-    'fab_surface.json',
     'filter_chip.json',
     'input_chip.json',
     'motion.json',
@@ -61,14 +53,15 @@ Future<void> main(List<String> args) async {
     'typeface.json',
   ];
 
+  // Generate a map with all the tokens to simplify the template interface.
   final Map<String, dynamic> tokens = <String, dynamic>{};
-  // Special case the light and dark color schemes.
-  tokens['colorsLight'] = _readTokenFile('color_light.json');
-  tokens['colorsDark'] = _readTokenFile('color_dark.json');
-
   for (final String tokenFile in tokenFiles) {
     tokens.addAll(_readTokenFile(tokenFile));
   }
+
+  // Special case the light and dark color schemes.
+  tokens['colorsLight'] = _readTokenFile('color_light.json');
+  tokens['colorsDark'] = _readTokenFile('color_dark.json');
 
   FABTemplate('$materialLib/floating_action_button.dart', tokens).updateFile();
   TypographyTemplate('$materialLib/typography.dart', tokens).updateFile();

@@ -15,10 +15,10 @@ class _M3Defaults extends FloatingActionButtonThemeData {
     : _colors = Theme.of(context).colorScheme,
       _textTheme = Theme.of(context).textTheme,
       super(
-        elevation: ${elevation("md.comp.fab.primary.container.elevation")},
-        focusElevation: ${elevation("md.comp.fab.primary.focus.container.elevation")},
-        hoverElevation: ${elevation("md.comp.fab.primary.hover.container.elevation")},
-        highlightElevation: ${elevation("md.comp.fab.primary.pressed.container.elevation")},
+        elevation: ${elevation("md.comp.fab.primary.container")},
+        focusElevation: ${elevation("md.comp.fab.primary.focus.container")},
+        hoverElevation: ${elevation("md.comp.fab.primary.hover.container")},
+        highlightElevation: ${elevation("md.comp.fab.primary.pressed.container")},
         enableFeedback: true,
         sizeConstraints: const BoxConstraints.tightFor(
           width: ${tokens["md.comp.fab.primary.container.width"]},
@@ -56,13 +56,13 @@ class _M3Defaults extends FloatingActionButtonThemeData {
   ShapeBorder? get shape {
     switch (type) {
       case _FloatingActionButtonType.regular:
-       return ${shape("md.comp.fab.primary.container.shape")};
+       return ${shape("md.comp.fab.primary.container")};
       case _FloatingActionButtonType.small:
-       return ${shape("md.comp.fab.primary.small.container.shape")};
+       return ${shape("md.comp.fab.primary.small.container")};
       case _FloatingActionButtonType.large:
-       return ${shape("md.comp.fab.primary.large.container.shape")};
+       return ${shape("md.comp.fab.primary.large.container")};
       case _FloatingActionButtonType.extended:
-       return ${shape("md.comp.extended-fab.primary.container.shape")};
+       return ${shape("md.comp.extended-fab.primary.container")};
      }
   }
 

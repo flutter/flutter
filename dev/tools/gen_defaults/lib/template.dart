@@ -54,9 +54,13 @@ abstract class TokenTemplate {
   /// bottom of the file.
   String generate();
 
-  String color(String tokenName) {
-    final String tokenColor = '$tokenName.color';
-    final String tokenOpacity = '$tokenName.opacity';
+  /// Generate a [ColorScheme] color name for the given component token.
+  ///
+  /// If there is an opacity specified for the given component, it will
+  /// apply that opacity to the component's color.
+  String color(String componentToken) {
+    final String tokenColor = '$componentToken.color';
+    final String tokenOpacity = '$componentToken.opacity';
     String value = '${tokens[tokenColor]!}';
     if (tokens.containsKey(tokenOpacity)) {
       final String opacity = tokens[tokens[tokenOpacity]!]!.toString();
@@ -65,13 +69,18 @@ abstract class TokenTemplate {
     return value;
   }
 
-  String elevation(String tokenName) {
-    return tokens[tokens[tokenName]!]!.toString();
+  /// Generate an elevation value for the given component token.
+  String elevation(String componentToken) {
+    return tokens[tokens['$componentToken.elevation']!]!.toString();
   }
 
-  String shape(String tokenName) {
+  /// Generate a shape constant for the given component token.
+  ///
+  /// Currently only supports "SHAPE_FAMILY_ROUNDED_CORNERS" which it
+  /// maps to a [RoundedRectangleBorder] expression.
+  String shape(String componentToken) {
     // TODO(darrenaustin): handle more than just rounded rectangle shapes
-    final Map<String, dynamic> shape = tokens[tokens[tokenName]!]! as Map<String, dynamic>;
+    final Map<String, dynamic> shape = tokens[tokens['$componentToken.shape']!]! as Map<String, dynamic>;
     return 'const RoundedRectangleBorder(borderRadius: '
         'BorderRadius.only('
           'topLeft: Radius.circular(${shape['topLeft']}), '
@@ -80,12 +89,8 @@ abstract class TokenTemplate {
           'bottomRight: Radius.circular(${shape['bottomRight']})))';
   }
 
-  String value(String tokenName) {
-    final Map<String, dynamic> value = tokens[tokenName]! as Map<String, dynamic>;
-    return value['value'].toString();
-  }
-
-  String textStyle(String tokenName) {
-    return tokens['$tokenName.text-style']!.toString();
+  /// Generate a [TextTheme] text style name for the given component token.
+  String textStyle(String componentToken) {
+    return tokens['$componentToken.text-style']!.toString();
   }
 }
