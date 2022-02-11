@@ -33,8 +33,8 @@ class _TokenDefaultsM3 extends NavigationBarThemeData {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       return IconThemeData(
         size: ${tokens["md.comp.navigation-bar.icon.size"]},
-        color: states.contains(MaterialState.selected) 
-          ? _colors.${color("md.comp.navigation-bar.active.icon")} 
+        color: states.contains(MaterialState.selected)
+          ? _colors.${color("md.comp.navigation-bar.active.icon")}
           : _colors.${color("md.comp.navigation-bar.inactive.icon")},
       );
     });
@@ -47,8 +47,8 @@ class _TokenDefaultsM3 extends NavigationBarThemeData {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
     final TextStyle style = _theme.textTheme.${textStyle("md.comp.navigation-bar.label-text")}!;
       return style.apply(color: states.contains(MaterialState.selected)
-        ? _colors.${color("md.comp.navigation-bar.active.label-text")} 
-        : _colors.${color("md.comp.navigation-bar.inactive.label-text")} 
+        ? _colors.${color("md.comp.navigation-bar.active.label-text")}
+        : _colors.${color("md.comp.navigation-bar.inactive.label-text")}
       );
     });
   }

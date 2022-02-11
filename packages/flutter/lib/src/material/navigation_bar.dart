@@ -1254,8 +1254,8 @@ class _TokenDefaultsM3 extends NavigationBarThemeData {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       return IconThemeData(
         size: 24.0,
-        color: states.contains(MaterialState.selected) 
-          ? _colors.onSecondaryContainer 
+        color: states.contains(MaterialState.selected)
+          ? _colors.onSecondaryContainer
           : _colors.onSurfaceVariant,
       );
     });
@@ -1268,8 +1268,8 @@ class _TokenDefaultsM3 extends NavigationBarThemeData {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
     final TextStyle style = _theme.textTheme.labelMedium!;
       return style.apply(color: states.contains(MaterialState.selected)
-        ? _colors.onSurface 
-        : _colors.onSurfaceVariant 
+        ? _colors.onSurface
+        : _colors.onSurfaceVariant
       );
     });
   }
