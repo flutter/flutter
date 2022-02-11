@@ -951,17 +951,20 @@ class TextSelectionGestureDetectorBuilder {
   // Either base or extent will be moved to the last tapped position, whichever
   // is closest. The selection will never shrink or pivot, only grow.
   //
+  // If fromSelection is given, will expand from that selection instead of the
+  // current selection in renderEditable.
+  //
   // See also:
   //
   //   * [_extendSelection], which is similar but pivots the selection around
   //     the base.
-  void _expandSelection(Offset offset, SelectionChangedCause cause) {
+  void _expandSelection(Offset offset, SelectionChangedCause cause, [TextSelection? fromSelection]) {
     assert(cause != null);
     assert(offset != null);
     assert(renderEditable.selection?.baseOffset != null);
 
     final TextPosition tappedPosition = renderEditable.getPositionForPoint(offset);
-    final TextSelection selection = renderEditable.selection!;
+    final TextSelection selection = fromSelection ?? renderEditable.selection!;
     final bool baseIsCloser =
         (tappedPosition.offset - selection.baseOffset).abs()
         < (tappedPosition.offset - selection.extentOffset).abs();
@@ -1069,7 +1072,16 @@ class TextSelectionGestureDetectorBuilder {
       switch (defaultTargetPlatform) {
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
-          _expandSelection(details.globalPosition, SelectionChangedCause.tap);
+          // On these platforms, a shift-tapped unfocused field expands from 0,
+          // not from the previous selection.
+          final TextSelection? fromSelection = renderEditable.hasFocus
+              ? null
+              : const TextSelection.collapsed(offset: 0);
+          _expandSelection(
+            details.globalPosition,
+            SelectionChangedCause.tap,
+            fromSelection,
+          );
           break;
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
