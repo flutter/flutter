@@ -1923,13 +1923,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       hideToolbar();
       _currentPromptRectRange = null;
 
-      if (_hasInputConnection) {
-        if (widget.obscureText && value.text.length == _value.text.length + 1) {
-          _obscureShowCharTicksPending = _kObscureShowLatestCharCursorTicks;
-          _obscureLatestCharIndex = _value.selection.baseOffset;
-        }
-      }
+      final bool revealObscuredInput = _hasInputConnection
+                                    && widget.obscureText
+                                    && WidgetsBinding.instance.window.brieflyShowPassword
+                                    && value.text.length == _value.text.length + 1;
 
+      _obscureShowCharTicksPending = revealObscuredInput ? _kObscureShowLatestCharCursorTicks : 0;
+      _obscureLatestCharIndex = revealObscuredInput ? _value.selection.baseOffset : null;
       _formatAndSetValue(value, SelectionChangedCause.keyboard);
     }
 
@@ -2640,7 +2640,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
     if (_obscureShowCharTicksPending > 0) {
       setState(() {
-        _obscureShowCharTicksPending--;
+        _obscureShowCharTicksPending = WidgetsBinding.instance.window.brieflyShowPassword
+          ? _obscureShowCharTicksPending - 1
+          : 0;
       });
     }
   }
@@ -3287,11 +3289,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       String text = _value.text;
       text = widget.obscuringCharacter * text.length;
       // Reveal the latest character in an obscured field only on mobile.
-      if (defaultTargetPlatform == TargetPlatform.android ||
-          defaultTargetPlatform == TargetPlatform.iOS ||
-          defaultTargetPlatform == TargetPlatform.fuchsia) {
-        final int? o =
-            _obscureShowCharTicksPending > 0 ? _obscureLatestCharIndex : null;
+      const Set<TargetPlatform> mobilePlatforms = <TargetPlatform> {
+        TargetPlatform.android, TargetPlatform.iOS, TargetPlatform.fuchsia,
+      };
+      final bool breiflyShowPassword = WidgetsBinding.instance.window.brieflyShowPassword
+                                    && mobilePlatforms.contains(defaultTargetPlatform);
+      if (breiflyShowPassword) {
+        final int? o = _obscureShowCharTicksPending > 0 ? _obscureLatestCharIndex : null;
         if (o != null && o >= 0 && o < text.length)
           text = text.replaceRange(o, o + 1, _value.text.substring(o, o + 1));
       }

@@ -272,6 +272,15 @@ class TestWindow implements ui.SingletonFlutterWindow {
   }
 
   @override
+  bool get brieflyShowPassword => _brieflyShowPasswordTestValue ?? platformDispatcher.brieflyShowPassword;
+  bool? _brieflyShowPasswordTestValue;
+  /// Hides the real [brieflyShowPassword] and reports the given
+  /// `brieflyShowPasswordTestValue` instead.
+  set brieflyShowPasswordTestValue(bool brieflyShowPasswordTestValue) { // ignore: avoid_setters_without_getters
+    _brieflyShowPasswordTestValue = brieflyShowPasswordTestValue;
+  }
+
+  @override
   ui.FrameCallback? get onBeginFrame => platformDispatcher.onBeginFrame;
   @override
   set onBeginFrame(ui.FrameCallback? callback) {
