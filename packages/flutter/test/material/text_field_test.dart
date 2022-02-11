@@ -1326,7 +1326,7 @@ void main() {
 
     // Move the gesture very slightly
     await gesture.moveBy(const Offset(1.0, 1.0));
-    await tester.pump(TextSelectionOverlay.fadeDuration * 0.5);
+    await tester.pump(SelectionOverlay.fadeDuration * 0.5);
     handle = tester.widget(fadeFinder.at(0));
 
     // The handle should still be fully opaque.

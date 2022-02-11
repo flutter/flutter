@@ -1089,7 +1089,7 @@ class EditableText extends StatefulWidget {
   /// {@endtemplate}
   final SelectionChangedCallback? onSelectionChanged;
 
-  /// {@macro flutter.widgets.TextSelectionOverlay.onSelectionHandleTapped}
+  /// {@macro flutter.widgets.SelectionOverlay.onSelectionHandleTapped}
   final VoidCallback? onSelectionHandleTapped;
 
   /// {@template flutter.widgets.editableText.inputFormatters}
