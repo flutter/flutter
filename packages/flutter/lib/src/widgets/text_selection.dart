@@ -797,32 +797,6 @@ class SelectionOverlay {
   /// A copy/paste toolbar.
   OverlayEntry? _toolbar;
 
-  TextSelection get _selection => _value.selection;
-
-  /// Whether selection handles are visible.
-  ///
-  /// Set to false if you want to hide the handles. Use this property to show or
-  /// hide the handle without rebuilding them.
-  ///
-  /// If this method is called while the [SchedulerBinding.schedulerPhase] is
-  /// [SchedulerPhase.persistentCallbacks], i.e. during the build, layout, or
-  /// paint phases (see [WidgetsBinding.drawFrame]), then the update is delayed
-  /// until the post-frame callbacks phase. Otherwise the update is done
-  /// synchronously. This means that it is safe to call during builds, but also
-  /// that if you do call this during a build, the UI will not update until the
-  /// next frame (i.e. many milliseconds later).
-  ///
-  /// Defaults to false.
-  bool get handlesVisible => _handlesVisible;
-  bool _handlesVisible = false;
-  set handlesVisible(bool visible) {
-    assert(visible != null);
-    if (_handlesVisible == visible)
-      return;
-    _handlesVisible = visible;
-    _updateHandleVisibilities();
-  }
-
   /// {@template flutter.widgets.SelectionOverlay.showHandles}
   /// Builds the handles by inserting them into the [context]'s overlay.
   /// {@endtemplate}
@@ -999,12 +973,12 @@ class SelectionOverlay {
       textDirection: Directionality.of(this.context),
       child: _SelectionToolbarOverlay(
         preferredLineHeight: lineHeightAtStart,
-        lastSecondaryTapDownPosition: toolbarLocation,
+        toolbarLocation: toolbarLocation,
         layerLink: toolbarLayerLink,
         editingRegion: editingRegion,
         selectionControls: selectionControls,
         midpoint: midpoint,
-        endpoints: selectionEndPoints,
+        selectionEndpoints: selectionEndPoints,
         visibility: toolbarVisible,
         selectionDelegate: selectionDelegate,
         clipboardStatus: clipboardStatus!,
@@ -1018,25 +992,25 @@ class _SelectionToolbarOverlay extends StatefulWidget {
   const _SelectionToolbarOverlay({
     Key? key,
     required this.preferredLineHeight,
-    required this.lastSecondaryTapDownPosition,
+    required this.toolbarLocation,
     required this.layerLink,
     required this.editingRegion,
     required this.selectionControls,
-    required this.visibility,
+    this.visibility,
     required this.midpoint,
-    required this.endpoints,
+    required this.selectionEndpoints,
     required this.selectionDelegate,
     required this.clipboardStatus,
   }) : super(key: key);
 
   final double preferredLineHeight;
-  final Offset? lastSecondaryTapDownPosition;
+  final Offset? toolbarLocation;
   final LayerLink layerLink;
   final Rect editingRegion;
   final TextSelectionControls? selectionControls;
-  final ValueListenable<bool> visibility;
+  final ValueListenable<bool>? visibility;
   final Offset midpoint;
-  final List<TextSelectionPoint> endpoints;
+  final List<TextSelectionPoint> selectionEndpoints;
   final TextSelectionDelegate? selectionDelegate;
   final ClipboardStatusNotifier? clipboardStatus;
 
@@ -1052,29 +1026,29 @@ class _SelectionToolbarOverlayState extends State<_SelectionToolbarOverlay> with
   void initState() {
     super.initState();
 
-    _controller = AnimationController(duration: TextSelectionOverlay.fadeDuration, vsync: this);
+    _controller = AnimationController(duration: SelectionOverlay.fadeDuration, vsync: this);
 
     _toolbarVisibilityChanged();
-    widget.visibility.addListener(_toolbarVisibilityChanged);
+    widget.visibility?.addListener(_toolbarVisibilityChanged);
   }
 
   @override
   void didUpdateWidget(_SelectionToolbarOverlay oldWidget) {
     super.didUpdateWidget(oldWidget);
-    oldWidget.visibility.removeListener(_toolbarVisibilityChanged);
+    oldWidget.visibility?.removeListener(_toolbarVisibilityChanged);
     _toolbarVisibilityChanged();
-    widget.visibility.addListener(_toolbarVisibilityChanged);
+    widget.visibility?.addListener(_toolbarVisibilityChanged);
   }
 
   @override
   void dispose() {
-    widget.visibility.removeListener(_toolbarVisibilityChanged);
+    widget.visibility?.removeListener(_toolbarVisibilityChanged);
     _controller.dispose();
     super.dispose();
   }
 
   void _toolbarVisibilityChanged() {
-    if (widget.visibility.value) {
+    if (widget.visibility?.value != false) {
       _controller.forward();
     } else {
       _controller.reverse();
@@ -1096,10 +1070,10 @@ class _SelectionToolbarOverlayState extends State<_SelectionToolbarOverlay> with
               widget.editingRegion,
               widget.preferredLineHeight,
               widget.midpoint,
-              widget.endpoints,
+              widget.selectionEndpoints,
               widget.selectionDelegate!,
               widget.clipboardStatus!,
-              widget.lastSecondaryTapDownPosition,
+              widget.toolbarLocation,
             );
           },
         ),
