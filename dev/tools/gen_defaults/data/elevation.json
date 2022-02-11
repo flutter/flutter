@@ -1,11 +1,10 @@
 {
-  "version": "v0_76",
+  "version": "v0_81",
 
   "md.sys.elevation.level0": 0.0,
   "md.sys.elevation.level1": 1.0,
   "md.sys.elevation.level2": 3.0,
   "md.sys.elevation.level3": 6.0,
   "md.sys.elevation.level4": 8.0,
-  "md.sys.elevation.level5": 12.0,
-  "md.sys.elevation.surface-tint-color": "primary"
+  "md.sys.elevation.level5": 12.0
 }
