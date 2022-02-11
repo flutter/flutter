@@ -31,7 +31,7 @@ void main() {
       TestRoot.state.showRow();
     });
     expect(
-      (await fetchInterestingEvents(interestingLabels)).map<String>(eventToName).toList(),
+      await fetchInterestingEventNames(interestingLabels),
       <String>['TestRoot', 'Row', 'TestChildWidget', 'Container', 'TestChildWidget', 'Container'],
     );
 

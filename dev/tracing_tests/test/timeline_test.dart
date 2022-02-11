@@ -72,7 +72,7 @@ void main() {
     debugProfileBuildsEnabled = true;
     await runFrame(() { TestRoot.state.rebuild(); });
     expect(
-      (await fetchInterestingEvents(interestingLabels)).map<String>(eventToName),
+      await fetchInterestingEventNames(interestingLabels),
       <String>['BUILD', 'LAYOUT', 'UPDATING COMPOSITING BITS', 'PAINT', 'COMPOSITING', 'FINALIZE TREE'],
     );
     debugProfileBuildsEnabled = false;
@@ -80,7 +80,7 @@ void main() {
     debugProfileLayoutsEnabled = true;
     await runFrame(() { TestRoot.state.rebuild(); });
     expect(
-      (await fetchInterestingEvents(interestingLabels)).map<String>(eventToName),
+      await fetchInterestingEventNames(interestingLabels),
       <String>['BUILD', 'LAYOUT', 'UPDATING COMPOSITING BITS', 'PAINT', 'COMPOSITING', 'FINALIZE TREE'],
     );
     debugProfileLayoutsEnabled = false;
@@ -88,7 +88,7 @@ void main() {
     debugProfilePaintsEnabled = true;
     await runFrame(() { TestRoot.state.rebuild(); });
     expect(
-      (await fetchInterestingEvents(interestingLabels)).map<String>(eventToName),
+      await fetchInterestingEventNames(interestingLabels),
       <String>['BUILD', 'LAYOUT', 'UPDATING COMPOSITING BITS', 'PAINT', 'COMPOSITING', 'FINALIZE TREE'],
     );
     debugProfilePaintsEnabled = false;

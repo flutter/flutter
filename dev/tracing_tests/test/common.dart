@@ -44,6 +44,10 @@ Future<List<TimelineEvent>> fetchInterestingEvents(Set<String> interestingLabels
 
 String eventToName(TimelineEvent event) => event.json!['name'] as String;
 
+Future<List<String>> fetchInterestingEventNames(Set<String> interestingLabels) async {
+  return (await fetchInterestingEvents(interestingLabels)).map<String>(eventToName).toList();
+}
+
 Future<void> runFrame(VoidCallback callback) {
   final Future<void> result = SchedulerBinding.instance.endOfFrame; // schedules a frame
   callback();
