@@ -4,7 +4,9 @@
 
 import 'dart:developer' as developer;
 import 'dart:isolate' as isolate;
+import 'dart:ui';
 
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart';
 import 'package:vm_service/vm_service_io.dart';
@@ -31,4 +33,23 @@ Future<List<TimelineEvent>> fetchTimelineEvents() async {
   final Timeline timeline = await _vmService.getVMTimeline();
   await _vmService.clearVMTimeline();
   return timeline.traceEvents!;
+}
+
+Future<List<TimelineEvent>> fetchInterestingEvents(Set<String> interestingLabels) async {
+  return (await fetchTimelineEvents()).where((TimelineEvent event) {
+    return interestingLabels.contains(event.json!['name'])
+        && event.json!['ph'] == 'B'; // "Begin" mark of events, vs E which is for the "End" mark of events.
+  }).toList();
+}
+
+String eventToName(TimelineEvent event) => event.json!['name'] as String;
+
+Future<List<String>> fetchInterestingEventNames(Set<String> interestingLabels) async {
+  return (await fetchInterestingEvents(interestingLabels)).map<String>(eventToName).toList();
+}
+
+Future<void> runFrame(VoidCallback callback) {
+  final Future<void> result = SchedulerBinding.instance.endOfFrame; // schedules a frame
+  callback();
+  return result;
 }
