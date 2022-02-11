@@ -948,6 +948,11 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
       case flutter::PointerData::Change::kRemove:
         // We don't use kAdd/kRemove.
         break;
+      case flutter::PointerData::Change::kPanZoomStart:
+      case flutter::PointerData::Change::kPanZoomUpdate:
+      case flutter::PointerData::Change::kPanZoomEnd:
+        // We don't send pan/zoom events here
+        break;
     }
 
     // pressure_min is always 0.0
