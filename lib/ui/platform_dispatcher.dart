@@ -341,7 +341,7 @@ class PlatformDispatcher {
   //  * pointer_data.cc
   //  * pointer.dart
   //  * AndroidTouchProcessor.java
-  static const int _kPointerDataFieldCount = 29;
+  static const int _kPointerDataFieldCount = 35;
 
   static PointerDataPacket _unpackPointerDataPacket(ByteData packet) {
     const int kStride = Int64List.bytesPerElement;
@@ -381,6 +381,12 @@ class PlatformDispatcher {
         platformData: packet.getInt64(kStride * offset++, _kFakeHostEndian),
         scrollDeltaX: packet.getFloat64(kStride * offset++, _kFakeHostEndian),
         scrollDeltaY: packet.getFloat64(kStride * offset++, _kFakeHostEndian),
+        panX: packet.getFloat64(kStride * offset++, _kFakeHostEndian),
+        panY: packet.getFloat64(kStride * offset++, _kFakeHostEndian),
+        panDeltaX: packet.getFloat64(kStride * offset++, _kFakeHostEndian),
+        panDeltaY: packet.getFloat64(kStride * offset++, _kFakeHostEndian),
+        scale: packet.getFloat64(kStride * offset++, _kFakeHostEndian),
+        rotation: packet.getFloat64(kStride * offset++, _kFakeHostEndian),
       ));
       assert(offset == (i + 1) * _kPointerDataFieldCount);
     }

@@ -613,6 +613,12 @@ class PointerDataConverter {
           );
           _pointers.remove(device);
           break;
+        case ui.PointerChange.panZoomStart:
+        case ui.PointerChange.panZoomUpdate:
+        case ui.PointerChange.panZoomEnd:
+          // Pointer pan/zoom events are not generated on web.
+          assert(false);
+          break;
       }
     } else {
       switch (signalKind) {
