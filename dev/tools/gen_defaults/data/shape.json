@@ -33,6 +33,10 @@
     "bottomRight": 0.0
   },
 
+  "md.sys.shape.corner.full": {
+    "family": "SHAPE_FAMILY_CIRCULAR"
+  },
+
   "md.sys.shape.corner.large": {
     "family": "SHAPE_FAMILY_ROUNDED_CORNERS",
     "topLeft": 16.0,
