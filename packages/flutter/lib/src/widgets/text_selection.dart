@@ -239,138 +239,83 @@ abstract class TextSelectionControls {
   }
 }
 
-/// An object that manages a pair of text selection handles.
+/// An object that manages a pair of text selection handles for a
+/// [RenderEditable].
 ///
-/// The selection handles are displayed in the [Overlay] that most closely
-/// encloses the given [BuildContext].
+/// This class is a wrapper of [SelectionOverlay] to provide APIs specific for
+/// [RenderEditable]s. To manage selection handles for custom widgets, use
+/// [SelectionOverlay] instead.
 class TextSelectionOverlay {
   /// Creates an object that manages overlay entries for selection handles.
   ///
   /// The [context] must not be null and must have an [Overlay] as an ancestor.
   TextSelectionOverlay({
     required TextEditingValue value,
-    required this.context,
-    this.debugRequiredFor,
-    required this.toolbarLayerLink,
-    required this.startHandleLayerLink,
-    required this.endHandleLayerLink,
+    required BuildContext context,
+    Widget? debugRequiredFor,
+    required LayerLink toolbarLayerLink,
+    required LayerLink startHandleLayerLink,
+    required LayerLink endHandleLayerLink,
     required this.renderObject,
     this.selectionControls,
     bool handlesVisible = false,
     required this.selectionDelegate,
-    this.dragStartBehavior = DragStartBehavior.start,
-    this.onSelectionHandleTapped,
-    this.clipboardStatus,
+    DragStartBehavior dragStartBehavior = DragStartBehavior.start,
+    VoidCallback? onSelectionHandleTapped,
+    ClipboardStatusNotifier? clipboardStatus,
   }) : assert(value != null),
        assert(context != null),
        assert(handlesVisible != null),
        _handlesVisible = handlesVisible,
        _value = value {
-    final OverlayState? overlay = Overlay.of(context, rootOverlay: true);
-    assert(
-      overlay != null,
-      'No Overlay widget exists above $context.\n'
-      'Usually the Navigator created by WidgetsApp provides the overlay. Perhaps your '
-      'app content was created above the Navigator with the WidgetsApp builder parameter.',
-    );
     renderObject.selectionStartInViewport.addListener(_updateHandleVisibilities);
     renderObject.selectionEndInViewport.addListener(_updateHandleVisibilities);
     _updateHandleVisibilities();
-    _toolbarController = AnimationController(duration: fadeDuration, vsync: overlay!);
+    _selectionOverlay = SelectionOverlay(
+      context: context,
+      debugRequiredFor: debugRequiredFor,
+      // The metrics will be set when show handles.
+      startHandleType: TextSelectionHandleType.collapsed,
+      startHandlesVisible: _effectiveStartHandleVisibility,
+      lineHeightAtStart: 0.0,
+      onStartHandleDragStart: _handleSelectionStartHandleDragStart,
+      onStartHandleDragUpdate: _handleSelectionStartHandleDragUpdate,
+      endHandleType: TextSelectionHandleType.collapsed,
+      endHandlesVisible: _effectiveEndHandleVisibility,
+      lineHeightAtEnd: 0.0,
+      onEndHandleDragStart: _handleSelectionEndHandleDragStart,
+      onEndHandleDragUpdate: _handleSelectionEndHandleDragUpdate,
+      selectionEndPoints: const <TextSelectionPoint>[],
+      selectionControls: selectionControls,
+      selectionDelegate: selectionDelegate,
+      clipboardStatus: clipboardStatus,
+      startHandleLayerLink: startHandleLayerLink,
+      endHandleLayerLink: endHandleLayerLink,
+      toolbarLayerLink: toolbarLayerLink,
+      onSelectionHandleTapped: onSelectionHandleTapped,
+      dragStartBehavior: dragStartBehavior,
+      toolbarLocation: renderObject.lastSecondaryTapDownPosition,
+    );
   }
-
-  /// The context in which the selection handles should appear.
-  ///
-  /// This context must have an [Overlay] as an ancestor because this object
-  /// will display the text selection handles in that [Overlay].
-  final BuildContext context;
-
-  /// Debugging information for explaining why the [Overlay] is required.
-  final Widget? debugRequiredFor;
-
-  /// The object supplied to the [CompositedTransformTarget] that wraps the text
-  /// field.
-  final LayerLink toolbarLayerLink;
-
-  /// The objects supplied to the [CompositedTransformTarget] that wraps the
-  /// location of start selection handle.
-  final LayerLink startHandleLayerLink;
-
-  /// The objects supplied to the [CompositedTransformTarget] that wraps the
-  /// location of end selection handle.
-  final LayerLink endHandleLayerLink;
 
   // TODO(mpcomplete): what if the renderObject is removed or replaced, or
   // moves? Not sure what cases I need to handle, or how to handle them.
   /// The editable line in which the selected text is being displayed.
   final RenderEditable renderObject;
 
-  /// Builds text selection handles and toolbar.
+  /// {@macro flutter.widgets.SelectionOverlay.selectionControls}
   final TextSelectionControls? selectionControls;
 
-  /// The delegate for manipulating the current selection in the owning
-  /// text field.
+  /// {@macro flutter.widgets.SelectionOverlay.selectionDelegate}
   final TextSelectionDelegate selectionDelegate;
 
-  /// Determines the way that drag start behavior is handled.
-  ///
-  /// If set to [DragStartBehavior.start], handle drag behavior will
-  /// begin at the position where the drag gesture won the arena. If set to
-  /// [DragStartBehavior.down] it will begin at the position where a down
-  /// event is first detected.
-  ///
-  /// In general, setting this to [DragStartBehavior.start] will make drag
-  /// animation smoother and setting it to [DragStartBehavior.down] will make
-  /// drag behavior feel slightly more reactive.
-  ///
-  /// By default, the drag start behavior is [DragStartBehavior.start].
-  ///
-  /// See also:
-  ///
-  ///  * [DragGestureRecognizer.dragStartBehavior], which gives an example for the different behaviors.
-  final DragStartBehavior dragStartBehavior;
-
-  /// {@template flutter.widgets.TextSelectionOverlay.onSelectionHandleTapped}
-  /// A callback that's optionally invoked when a selection handle is tapped.
-  ///
-  /// The [TextSelectionControls.buildHandle] implementation the text field
-  /// uses decides where the handle's tap "hotspot" is, or whether the
-  /// selection handle supports tap gestures at all. For instance,
-  /// [MaterialTextSelectionControls] calls [onSelectionHandleTapped] when the
-  /// selection handle's "knob" is tapped, while
-  /// [CupertinoTextSelectionControls] builds a handle that's not sufficiently
-  /// large for tapping (as it's not meant to be tapped) so it does not call
-  /// [onSelectionHandleTapped] even when tapped.
-  /// {@endtemplate}
-  // See https://github.com/flutter/flutter/issues/39376#issuecomment-848406415
-  // for provenance.
-  final VoidCallback? onSelectionHandleTapped;
-
-  /// Maintains the status of the clipboard for determining if its contents can
-  /// be pasted or not.
-  ///
-  /// Useful because the actual value of the clipboard can only be checked
-  /// asynchronously (see [Clipboard.getData]).
-  final ClipboardStatusNotifier? clipboardStatus;
-
-  /// Controls the fade-in and fade-out animations for the toolbar and handles.
-  static const Duration fadeDuration = Duration(milliseconds: 150);
-
-  late final AnimationController _toolbarController;
-  Animation<double> get _toolbarOpacity => _toolbarController.view;
+  late final SelectionOverlay _selectionOverlay;
 
   /// Retrieve current value.
   @visibleForTesting
   TextEditingValue get value => _value;
 
   TextEditingValue _value;
-
-  /// A pair of handles. If this is non-null, there are always 2, though the
-  /// second is hidden when the selection is collapsed.
-  List<OverlayEntry>? _handles;
-
-  /// A copy/paste toolbar.
-  OverlayEntry? _toolbar;
 
   TextSelection get _selection => _value.selection;
 
@@ -386,14 +331,6 @@ class TextSelectionOverlay {
   /// Set to false if you want to hide the handles. Use this property to show or
   /// hide the handle without rebuilding them.
   ///
-  /// If this method is called while the [SchedulerBinding.schedulerPhase] is
-  /// [SchedulerPhase.persistentCallbacks], i.e. during the build, layout, or
-  /// paint phases (see [WidgetsBinding.drawFrame]), then the update is delayed
-  /// until the post-frame callbacks phase. Otherwise the update is done
-  /// synchronously. This means that it is safe to call during builds, but also
-  /// that if you do call this during a build, the UI will not update until the
-  /// next frame (i.e. many milliseconds later).
-  ///
   /// Defaults to false.
   bool get handlesVisible => _handlesVisible;
   bool _handlesVisible = false;
@@ -405,35 +342,19 @@ class TextSelectionOverlay {
     _updateHandleVisibilities();
   }
 
-  /// Builds the handles by inserting them into the [context]'s overlay.
+  /// {@macro flutter.widgets.SelectionOverlay.showHandles}
   void showHandles() {
-    if (_handles != null)
-      return;
-
-    _handles = <OverlayEntry>[
-      OverlayEntry(builder: (BuildContext context) => _buildStartHandle(context)),
-      OverlayEntry(builder: (BuildContext context) => _buildEndHandle(context)),
-    ];
-
-    Overlay.of(context, rootOverlay: true, debugRequiredFor: debugRequiredFor)!
-      .insertAll(_handles!);
+    _updateSelectionOverlay();
+    _selectionOverlay.showHandles();
   }
 
-  /// Destroys the handles by removing them from overlay.
-  void hideHandles() {
-    if (_handles != null) {
-      _handles![0].remove();
-      _handles![1].remove();
-      _handles = null;
-    }
-  }
+  /// {@macro flutter.widgets.SelectionOverlay.hideHandles}
+  void hideHandles() => _selectionOverlay.hideHandles();
 
-  /// Shows the toolbar by inserting it into the [context]'s overlay.
+  /// {@macro flutter.widgets.SelectionOverlay.showToolbar}
   void showToolbar() {
-    assert(_toolbar == null);
-    _toolbar = OverlayEntry(builder: _buildToolbar);
-    Overlay.of(context, rootOverlay: true, debugRequiredFor: debugRequiredFor)!.insert(_toolbar!);
-    _toolbarController.forward(from: 0.0);
+    _updateSelectionOverlay();
+    _selectionOverlay.showToolbar();
   }
 
   /// Updates the overlay after the selection has changed.
@@ -449,117 +370,52 @@ class TextSelectionOverlay {
     if (_value == newValue)
       return;
     _value = newValue;
-    if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
-      SchedulerBinding.instance.addPostFrameCallback(_markNeedsBuild);
-    } else {
-      _markNeedsBuild();
-    }
+    _updateSelectionOverlay();
+  }
+
+  void _updateSelectionOverlay() {
+    _selectionOverlay
+      // Update selection handle metrics.
+      ..startHandleType = _chooseType(
+        renderObject.textDirection,
+        TextSelectionHandleType.left,
+        TextSelectionHandleType.right,
+      )
+      ..lineHeightAtStart = _getStartGlyphHeight()
+      ..endHandleType = _chooseType(
+        renderObject.textDirection,
+        TextSelectionHandleType.right,
+        TextSelectionHandleType.left,
+      )
+      ..lineHeightAtEnd = _getEndGlyphHeight()
+      // Update selection toolbar metrics.
+      ..selectionEndPoints = renderObject.getEndpointsForSelection(_selection)
+      ..toolbarLocation = renderObject.lastSecondaryTapDownPosition;
   }
 
   /// Causes the overlay to update its rendering.
   ///
   /// This is intended to be called when the [renderObject] may have changed its
   /// text metrics (e.g. because the text was scrolled).
-  void updateForScroll() {
-    _markNeedsBuild();
-  }
-
-  void _markNeedsBuild([ Duration? duration ]) {
-    if (_handles != null) {
-      _handles![0].markNeedsBuild();
-      _handles![1].markNeedsBuild();
-    }
-    _toolbar?.markNeedsBuild();
-  }
+  void updateForScroll() => _updateSelectionOverlay();
 
   /// Whether the handles are currently visible.
-  bool get handlesAreVisible => _handles != null && handlesVisible;
+  bool get handlesAreVisible => _selectionOverlay._handles != null && handlesVisible;
 
   /// Whether the toolbar is currently visible.
-  bool get toolbarIsVisible => _toolbar != null;
+  bool get toolbarIsVisible => _selectionOverlay._toolbar != null;
 
-  /// Hides the entire overlay including the toolbar and the handles.
-  void hide() {
-    if (_handles != null) {
-      _handles![0].remove();
-      _handles![1].remove();
-      _handles = null;
-    }
-    if (_toolbar != null) {
-      hideToolbar();
-    }
-  }
+  /// {@macro flutter.widgets.SelectionOverlay.hide}
+  void hide() => _selectionOverlay.hide();
 
-  /// Hides the toolbar part of the overlay.
-  ///
-  /// To hide the whole overlay, see [hide].
-  void hideToolbar() {
-    assert(_toolbar != null);
-    _toolbarController.stop();
-    _toolbar?.remove();
-    _toolbar = null;
-  }
+  /// {@macro flutter.widgets.SelectionOverlay.hideToolbar}
+  void hideToolbar() => _selectionOverlay.hideToolbar();
 
-  /// Final cleanup.
+  /// {@macro flutter.widgets.SelectionOverlay.dispose}
   void dispose() {
-    hide();
-    _toolbarController.dispose();
     renderObject.selectionStartInViewport.removeListener(_updateHandleVisibilities);
     renderObject.selectionEndInViewport.removeListener(_updateHandleVisibilities);
-  }
-
-  Widget _buildStartHandle(BuildContext context) {
-    final Widget handle;
-    final TextSelectionControls? selectionControls = this.selectionControls;
-    if (selectionControls == null)
-      handle = Container();
-    else {
-      handle = _SelectionHandleOverlay(
-        type: _chooseType(
-          renderObject.textDirection,
-          TextSelectionHandleType.left,
-          TextSelectionHandleType.right,
-        ),
-        handleLayerLink: startHandleLayerLink,
-        onSelectionHandleTapped: onSelectionHandleTapped,
-        onSelectionHandleDragStart: _handleSelectionStartHandleDragStart,
-        onSelectionHandleDragUpdate: _handleSelectionStartHandleDragUpdate,
-        selectionControls: selectionControls,
-        visibility: _effectiveStartHandleVisibility,
-        preferredLineHeight: _getStartGlyphHeight(),
-        dragStartBehavior: dragStartBehavior,
-      );
-    }
-    return ExcludeSemantics(
-      child: handle,
-    );
-  }
-
-  Widget _buildEndHandle(BuildContext context) {
-    final Widget handle;
-    final TextSelectionControls? selectionControls = this.selectionControls;
-    if (_selection.isCollapsed || selectionControls == null)
-      handle = Container(); // hide the second handle when collapsed
-    else {
-      handle = _SelectionHandleOverlay(
-        type: _chooseType(
-          renderObject.textDirection,
-          TextSelectionHandleType.right,
-          TextSelectionHandleType.left,
-        ),
-        handleLayerLink: endHandleLayerLink,
-        onSelectionHandleTapped: onSelectionHandleTapped,
-        onSelectionHandleDragStart: _handleSelectionEndHandleDragStart,
-        onSelectionHandleDragUpdate: _handleSelectionEndHandleDragUpdate,
-        selectionControls: selectionControls,
-        visibility: _effectiveEndHandleVisibility,
-        preferredLineHeight: _getEndGlyphHeight(),
-        dragStartBehavior: dragStartBehavior,
-      );
-    }
-    return ExcludeSemantics(
-      child: handle,
-    );
+    _selectionOverlay.dispose();
   }
 
   double _getStartGlyphHeight() {
@@ -656,61 +512,6 @@ class TextSelectionOverlay {
     _handleSelectionHandleChanged(newSelection, isEnd: false);
   }
 
-  Widget _buildToolbar(BuildContext context) {
-    if (selectionControls == null)
-      return Container();
-
-    // Find the horizontal midpoint, just above the selected text.
-    final List<TextSelectionPoint> endpoints =
-        renderObject.getEndpointsForSelection(_selection);
-
-    final Rect editingRegion = Rect.fromPoints(
-      renderObject.localToGlobal(Offset.zero),
-      renderObject.localToGlobal(renderObject.size.bottomRight(Offset.zero)),
-    );
-
-    final bool isMultiline = endpoints.last.point.dy - endpoints.first.point.dy >
-          renderObject.preferredLineHeight / 2;
-
-    // If the selected text spans more than 1 line, horizontally center the toolbar.
-    // Derived from both iOS and Android.
-    final double midX = isMultiline
-      ? editingRegion.width / 2
-      : (endpoints.first.point.dx + endpoints.last.point.dx) / 2;
-
-    final Offset midpoint = Offset(
-      midX,
-      // The y-coordinate won't be made use of most likely.
-      endpoints[0].point.dy - renderObject.preferredLineHeight,
-    );
-
-    return Directionality(
-      textDirection: Directionality.of(this.context),
-      child: FadeTransition(
-        opacity: _toolbarOpacity,
-        child: CompositedTransformFollower(
-          link: toolbarLayerLink,
-          showWhenUnlinked: false,
-          offset: -editingRegion.topLeft,
-          child: Builder(
-            builder: (BuildContext context) {
-              return selectionControls!.buildToolbar(
-                context,
-                editingRegion,
-                renderObject.preferredLineHeight,
-                midpoint,
-                endpoints,
-                selectionDelegate,
-                clipboardStatus!,
-                renderObject.lastSecondaryTapDownPosition,
-              );
-            },
-          ),
-        ),
-      ),
-    );
-  }
-
   void _handleSelectionHandleChanged(TextSelection newSelection, {required bool isEnd}) {
     final TextPosition textPosition = isEnd ? newSelection.extent : newSelection.base;
     selectionDelegate.userUpdateTextEditingValue(
@@ -738,6 +539,460 @@ class TextSelectionOverlay {
   }
 }
 
+/// An object that manages a pair of selection handles.
+///
+/// The selection handles are displayed in the [Overlay] that most closely
+/// encloses the given [BuildContext].
+class SelectionOverlay {
+  /// Creates an object that manages overlay entries for selection handles.
+  ///
+  /// The [context] must not be null and must have an [Overlay] as an ancestor.
+  SelectionOverlay({
+    required this.context,
+    this.debugRequiredFor,
+    required TextSelectionHandleType startHandleType,
+    required double lineHeightAtStart,
+    this.startHandlesVisible,
+    this.onStartHandleDragStart,
+    this.onStartHandleDragUpdate,
+    this.onStartHandleDragEnd,
+    required TextSelectionHandleType endHandleType,
+    required double lineHeightAtEnd,
+    this.endHandlesVisible,
+    this.onEndHandleDragStart,
+    this.onEndHandleDragUpdate,
+    this.onEndHandleDragEnd,
+    required List<TextSelectionPoint> selectionEndPoints,
+    required this.selectionControls,
+    required this.selectionDelegate,
+    required this.clipboardStatus,
+    required this.startHandleLayerLink,
+    required this.endHandleLayerLink,
+    required this.toolbarLayerLink,
+    this.dragStartBehavior = DragStartBehavior.start,
+    this.onSelectionHandleTapped,
+    Offset? toolbarLocation,
+  }) : _startHandleType = startHandleType,
+       _lineHeightAtStart = lineHeightAtStart,
+       _endHandleType = endHandleType,
+       _lineHeightAtEnd = lineHeightAtEnd,
+       _selectionEndPoints = selectionEndPoints,
+       _toolbarLocation = toolbarLocation {
+    final OverlayState? overlay = Overlay.of(context, rootOverlay: true);
+    assert(
+      overlay != null,
+      'No Overlay widget exists above $context.\n'
+      'Usually the Navigator created by WidgetsApp provides the overlay. Perhaps your '
+      'app content was created above the Navigator with the WidgetsApp builder parameter.',
+    );
+    _toolbarController = AnimationController(duration: fadeDuration, vsync: overlay!);
+  }
+
+  /// The context in which the selection handles should appear.
+  ///
+  /// This context must have an [Overlay] as an ancestor because this object
+  /// will display the text selection handles in that [Overlay].
+  final BuildContext context;
+
+  /// The type of start selection handle.
+  ///
+  /// Changing the value while the handles are visible causes them to rebuild.
+  TextSelectionHandleType get startHandleType => _startHandleType;
+  TextSelectionHandleType _startHandleType;
+  set startHandleType(TextSelectionHandleType value) {
+    if (_startHandleType == value)
+      return;
+    _startHandleType = value;
+    _markNeedsBuild();
+  }
+
+  /// The line height at the selection start.
+  ///
+  /// This value is used for calculating the size of the start selection handle.
+  ///
+  /// Changing the value while the handles are visible causes them to rebuild.
+  double get lineHeightAtStart => _lineHeightAtStart;
+  double _lineHeightAtStart;
+  set lineHeightAtStart(double value) {
+    if (_lineHeightAtStart == value)
+      return;
+    _lineHeightAtStart = value;
+    _markNeedsBuild();
+  }
+
+  /// Whether the start handle is visible.
+  ///
+  /// If the value changes, the start handle uses [FadeTransition] to transition
+  /// itself on and off the screen.
+  ///
+  /// If this is null, the start selection handle will always be visible.
+  final ValueListenable<bool>? startHandlesVisible;
+
+  /// Called when the users start dragging the start selection handles.
+  final ValueChanged<DragStartDetails>? onStartHandleDragStart;
+
+  /// Called when the users drag the start selection handles to new locations.
+  final ValueChanged<DragUpdateDetails>? onStartHandleDragUpdate;
+
+  /// Called when the users lift their fingers after dragging the start selection
+  /// handles.
+  final ValueChanged<DragEndDetails>? onStartHandleDragEnd;
+
+  /// The type of end selection handle.
+  ///
+  /// Changing the value while the handles are visible causes them to rebuild.
+  TextSelectionHandleType get endHandleType => _endHandleType;
+  TextSelectionHandleType _endHandleType;
+  set endHandleType(TextSelectionHandleType value) {
+    if (_endHandleType == value)
+      return;
+    _endHandleType = value;
+    _markNeedsBuild();
+  }
+
+  /// The line height at the selection end.
+  ///
+  /// This value is used for calculating the size of the end selection handle.
+  ///
+  /// Changing the value while the handles are visible causes them to rebuild.
+  double get lineHeightAtEnd => _lineHeightAtEnd;
+  double _lineHeightAtEnd;
+  set lineHeightAtEnd(double value) {
+    if (_lineHeightAtEnd == value)
+      return;
+    _lineHeightAtEnd = value;
+    _markNeedsBuild();
+  }
+
+  /// Whether the end handle is visible.
+  ///
+  /// If the value changes, the end handle uses [FadeTransition] to transition
+  /// itself on and off the screen.
+  ///
+  /// If this is null, the end selection handle will always be visible.
+  final ValueListenable<bool>? endHandlesVisible;
+
+  /// Called when the users start dragging the end selection handles.
+  final ValueChanged<DragStartDetails>? onEndHandleDragStart;
+
+  /// Called when the users drag the end selection handles to new locations.
+  final ValueChanged<DragUpdateDetails>? onEndHandleDragUpdate;
+
+  /// Called when the users lift their fingers after dragging the end selection
+  /// handles.
+  final ValueChanged<DragEndDetails>? onEndHandleDragEnd;
+
+  /// The text selection positions of selection start and end.
+  List<TextSelectionPoint> get selectionEndPoints => _selectionEndPoints;
+  List<TextSelectionPoint> _selectionEndPoints;
+  set selectionEndPoints(List<TextSelectionPoint> value) {
+    if (!listEquals(_selectionEndPoints, value)) {
+      _markNeedsBuild();
+    }
+    _selectionEndPoints = value;
+  }
+
+  /// Debugging information for explaining why the [Overlay] is required.
+  final Widget? debugRequiredFor;
+
+  /// The object supplied to the [CompositedTransformTarget] that wraps the text
+  /// field.
+  final LayerLink toolbarLayerLink;
+
+  /// The objects supplied to the [CompositedTransformTarget] that wraps the
+  /// location of start selection handle.
+  final LayerLink startHandleLayerLink;
+
+  /// The objects supplied to the [CompositedTransformTarget] that wraps the
+  /// location of end selection handle.
+  final LayerLink endHandleLayerLink;
+
+  /// {@template flutter.widgets.SelectionOverlay.selectionControls}
+  /// Builds text selection handles and toolbar.
+  /// {@endtemplate}
+  final TextSelectionControls? selectionControls;
+
+  /// {@template flutter.widgets.SelectionOverlay.selectionDelegate}
+  /// The delegate for manipulating the current selection in the owning
+  /// text field.
+  /// {@endtemplate}
+  final TextSelectionDelegate selectionDelegate;
+
+  /// Determines the way that drag start behavior is handled.
+  ///
+  /// If set to [DragStartBehavior.start], handle drag behavior will
+  /// begin at the position where the drag gesture won the arena. If set to
+  /// [DragStartBehavior.down] it will begin at the position where a down
+  /// event is first detected.
+  ///
+  /// In general, setting this to [DragStartBehavior.start] will make drag
+  /// animation smoother and setting it to [DragStartBehavior.down] will make
+  /// drag behavior feel slightly more reactive.
+  ///
+  /// By default, the drag start behavior is [DragStartBehavior.start].
+  ///
+  /// See also:
+  ///
+  ///  * [DragGestureRecognizer.dragStartBehavior], which gives an example for the different behaviors.
+  final DragStartBehavior dragStartBehavior;
+
+  /// {@template flutter.widgets.SelectionOverlay.onSelectionHandleTapped}
+  /// A callback that's optionally invoked when a selection handle is tapped.
+  ///
+  /// The [TextSelectionControls.buildHandle] implementation the text field
+  /// uses decides where the handle's tap "hotspot" is, or whether the
+  /// selection handle supports tap gestures at all. For instance,
+  /// [MaterialTextSelectionControls] calls [onSelectionHandleTapped] when the
+  /// selection handle's "knob" is tapped, while
+  /// [CupertinoTextSelectionControls] builds a handle that's not sufficiently
+  /// large for tapping (as it's not meant to be tapped) so it does not call
+  /// [onSelectionHandleTapped] even when tapped.
+  /// {@endtemplate}
+  // See https://github.com/flutter/flutter/issues/39376#issuecomment-848406415
+  // for provenance.
+  final VoidCallback? onSelectionHandleTapped;
+
+  /// Maintains the status of the clipboard for determining if its contents can
+  /// be pasted or not.
+  ///
+  /// Useful because the actual value of the clipboard can only be checked
+  /// asynchronously (see [Clipboard.getData]).
+  final ClipboardStatusNotifier? clipboardStatus;
+
+  /// The location of where the toolbar should be drawn in relative to the
+  /// location of [toolbarLayerLink].
+  ///
+  /// If this is null, the toolbar is drawn based on [selectionEndPoints] and
+  /// the rect of render object of [context].
+  ///
+  /// This is useful for displaying toolbars at the mouse right-click locations
+  /// in desktop devices.
+  Offset? get toolbarLocation => _toolbarLocation;
+  Offset? _toolbarLocation;
+  set toolbarLocation(Offset? value) {
+    if (_toolbarLocation == value) {
+      return;
+    }
+    _toolbarLocation = value;
+    _markNeedsBuild();
+  }
+
+  /// Controls the fade-in and fade-out animations for the toolbar and handles.
+  static const Duration fadeDuration = Duration(milliseconds: 150);
+
+  late final AnimationController _toolbarController;
+  Animation<double> get _toolbarOpacity => _toolbarController.view;
+
+  /// A pair of handles. If this is non-null, there are always 2, though the
+  /// second is hidden when the selection is collapsed.
+  List<OverlayEntry>? _handles;
+
+  /// A copy/paste toolbar.
+  OverlayEntry? _toolbar;
+
+  /// {@template flutter.widgets.SelectionOverlay.showHandles}
+  /// Builds the handles by inserting them into the [context]'s overlay.
+  /// {@endtemplate}
+  void showHandles() {
+    if (_handles != null)
+      return;
+
+    _handles = <OverlayEntry>[
+      OverlayEntry(builder: (BuildContext context) => _buildStartHandle(context)),
+      OverlayEntry(builder: (BuildContext context) => _buildEndHandle(context)),
+    ];
+
+    Overlay.of(context, rootOverlay: true, debugRequiredFor: debugRequiredFor)!
+      .insertAll(_handles!);
+  }
+
+  /// {@template flutter.widgets.SelectionOverlay.hideHandles}
+  /// Destroys the handles by removing them from overlay.
+  /// {@endtemplate}
+  void hideHandles() {
+    if (_handles != null) {
+      _handles![0].remove();
+      _handles![1].remove();
+      _handles = null;
+    }
+  }
+
+  /// {@template flutter.widgets.SelectionOverlay.showToolbar}
+  /// Shows the toolbar by inserting it into the [context]'s overlay.
+  /// {@endtemplate}
+  void showToolbar() {
+    if (_toolbar != null) {
+      return;
+    }
+    _toolbar = OverlayEntry(builder: _buildToolbar);
+    Overlay.of(context, rootOverlay: true, debugRequiredFor: debugRequiredFor)!.insert(_toolbar!);
+    _toolbarController.forward(from: 0.0);
+  }
+
+  bool _buildScheduled = false;
+  void _markNeedsBuild() {
+    if (_handles == null && _toolbar == null)
+      return;
+    // If we are in build state, it will be too late to update visibility.
+    // We will need to schedule the build in next frame.
+    if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
+      if (_buildScheduled)
+        return;
+      _buildScheduled = true;
+      SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
+        _buildScheduled = false;
+        if (_handles != null) {
+          _handles![0].markNeedsBuild();
+          _handles![1].markNeedsBuild();
+        }
+        _toolbar?.markNeedsBuild();
+      });
+    } else {
+      if (_handles != null) {
+        _handles![0].markNeedsBuild();
+        _handles![1].markNeedsBuild();
+      }
+      _toolbar?.markNeedsBuild();
+    }
+  }
+
+  /// {@template flutter.widgets.SelectionOverlay.hide}
+  /// Hides the entire overlay including the toolbar and the handles.
+  /// {@endtemplate}
+  void hide() {
+    if (_handles != null) {
+      _handles![0].remove();
+      _handles![1].remove();
+      _handles = null;
+    }
+    if (_toolbar != null) {
+      hideToolbar();
+    }
+  }
+
+  /// {@template flutter.widgets.SelectionOverlay.hideToolbar}
+  /// Hides the toolbar part of the overlay.
+  ///
+  /// To hide the whole overlay, see [hide].
+  /// {@endtemplate}
+  void hideToolbar() {
+    if (_toolbar == null)
+      return;
+    _toolbarController.stop();
+    _toolbar?.remove();
+    _toolbar = null;
+  }
+
+  /// {@template flutter.widgets.SelectionOverlay.dispose}
+  /// Disposes this object and release resources.
+  /// {@endtemplate}
+  void dispose() {
+    hide();
+    _toolbarController.dispose();
+  }
+
+  Widget _buildStartHandle(BuildContext context) {
+    final Widget handle;
+    final TextSelectionControls? selectionControls = this.selectionControls;
+    if (selectionControls == null)
+      handle = Container();
+    else {
+      handle = _SelectionHandleOverlay(
+        type: _startHandleType,
+        handleLayerLink: startHandleLayerLink,
+        onSelectionHandleTapped: onSelectionHandleTapped,
+        onSelectionHandleDragStart: onStartHandleDragStart,
+        onSelectionHandleDragUpdate: onStartHandleDragUpdate,
+        onSelectionHandleDragEnd: onStartHandleDragEnd,
+        selectionControls: selectionControls,
+        visibility: startHandlesVisible,
+        preferredLineHeight: _lineHeightAtStart,
+        dragStartBehavior: dragStartBehavior,
+      );
+    }
+    return ExcludeSemantics(
+      child: handle,
+    );
+  }
+
+  Widget _buildEndHandle(BuildContext context) {
+    final Widget handle;
+    final TextSelectionControls? selectionControls = this.selectionControls;
+    if (selectionControls == null || _startHandleType == TextSelectionHandleType.collapsed)
+      handle = Container(); // hide the second handle when collapsed.
+    else {
+      handle = _SelectionHandleOverlay(
+        type: _endHandleType,
+        handleLayerLink: endHandleLayerLink,
+        onSelectionHandleTapped: onSelectionHandleTapped,
+        onSelectionHandleDragStart: onEndHandleDragStart,
+        onSelectionHandleDragUpdate: onEndHandleDragUpdate,
+        onSelectionHandleDragEnd: onEndHandleDragEnd,
+        selectionControls: selectionControls,
+        visibility: endHandlesVisible,
+        preferredLineHeight: _lineHeightAtEnd,
+        dragStartBehavior: dragStartBehavior,
+      );
+    }
+    return ExcludeSemantics(
+      child: handle,
+    );
+  }
+
+  Widget _buildToolbar(BuildContext context) {
+    if (selectionControls == null)
+      return Container();
+
+    final RenderBox renderBox = this.context.findRenderObject()! as RenderBox;
+
+    final Rect editingRegion = Rect.fromPoints(
+      renderBox.localToGlobal(Offset.zero),
+      renderBox.localToGlobal(renderBox.size.bottomRight(Offset.zero)),
+    );
+
+    final bool isMultiline = selectionEndPoints.last.point.dy - selectionEndPoints.first.point.dy >
+        lineHeightAtEnd / 2;
+
+    // If the selected text spans more than 1 line, horizontally center the toolbar.
+    // Derived from both iOS and Android.
+    final double midX = isMultiline
+      ? editingRegion.width / 2
+      : (selectionEndPoints.first.point.dx + selectionEndPoints.last.point.dx) / 2;
+
+    final Offset midpoint = Offset(
+      midX,
+      // The y-coordinate won't be made use of most likely.
+      selectionEndPoints.first.point.dy - lineHeightAtStart,
+    );
+
+    return Directionality(
+      textDirection: Directionality.of(this.context),
+      child: FadeTransition(
+        opacity: _toolbarOpacity,
+        child: CompositedTransformFollower(
+          link: toolbarLayerLink,
+          showWhenUnlinked: false,
+          offset: -editingRegion.topLeft,
+          child: Builder(
+            builder: (BuildContext context) {
+              return selectionControls!.buildToolbar(
+                context,
+                editingRegion,
+                lineHeightAtStart,
+                midpoint,
+                selectionEndPoints,
+                selectionDelegate,
+                clipboardStatus!,
+                toolbarLocation,
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 /// This widget represents a single draggable selection handle.
 class _SelectionHandleOverlay extends StatefulWidget {
   /// Create selection overlay.
@@ -748,8 +1003,9 @@ class _SelectionHandleOverlay extends StatefulWidget {
     this.onSelectionHandleTapped,
     this.onSelectionHandleDragStart,
     this.onSelectionHandleDragUpdate,
+    this.onSelectionHandleDragEnd,
     required this.selectionControls,
-    required this.visibility,
+    this.visibility,
     required this.preferredLineHeight,
     this.dragStartBehavior = DragStartBehavior.start,
   }) : super(key: key);
@@ -758,8 +1014,9 @@ class _SelectionHandleOverlay extends StatefulWidget {
   final VoidCallback? onSelectionHandleTapped;
   final ValueChanged<DragStartDetails>? onSelectionHandleDragStart;
   final ValueChanged<DragUpdateDetails>? onSelectionHandleDragUpdate;
+  final ValueChanged<DragEndDetails>? onSelectionHandleDragEnd;
   final TextSelectionControls selectionControls;
-  final ValueListenable<bool> visibility;
+  final ValueListenable<bool>? visibility;
   final double preferredLineHeight;
   final TextSelectionHandleType type;
   final DragStartBehavior dragStartBehavior;
@@ -778,14 +1035,14 @@ class _SelectionHandleOverlayState extends State<_SelectionHandleOverlay> with S
   void initState() {
     super.initState();
 
-    _controller = AnimationController(duration: TextSelectionOverlay.fadeDuration, vsync: this);
+    _controller = AnimationController(duration: SelectionOverlay.fadeDuration, vsync: this);
 
     _handleVisibilityChanged();
-    widget.visibility.addListener(_handleVisibilityChanged);
+    widget.visibility?.addListener(_handleVisibilityChanged);
   }
 
   void _handleVisibilityChanged() {
-    if (widget.visibility.value) {
+    if (widget.visibility?.value != false) {
       _controller.forward();
     } else {
       _controller.reverse();
@@ -795,14 +1052,14 @@ class _SelectionHandleOverlayState extends State<_SelectionHandleOverlay> with S
   @override
   void didUpdateWidget(_SelectionHandleOverlay oldWidget) {
     super.didUpdateWidget(oldWidget);
-    oldWidget.visibility.removeListener(_handleVisibilityChanged);
+    oldWidget.visibility?.removeListener(_handleVisibilityChanged);
     _handleVisibilityChanged();
-    widget.visibility.addListener(_handleVisibilityChanged);
+    widget.visibility?.addListener(_handleVisibilityChanged);
   }
 
   @override
   void dispose() {
-    widget.visibility.removeListener(_handleVisibilityChanged);
+    widget.visibility?.removeListener(_handleVisibilityChanged);
     _controller.dispose();
     super.dispose();
   }
@@ -850,6 +1107,7 @@ class _SelectionHandleOverlayState extends State<_SelectionHandleOverlay> with S
             dragStartBehavior: widget.dragStartBehavior,
             onPanStart: widget.onSelectionHandleDragStart,
             onPanUpdate: widget.onSelectionHandleDragUpdate,
+            onPanEnd: widget.onSelectionHandleDragEnd,
             child: Padding(
               padding: EdgeInsets.only(
                 left: padding.left,
