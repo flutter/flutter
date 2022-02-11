@@ -199,6 +199,11 @@ Future<void> run(List<String> arguments) async {
 
 
 // TESTS
+
+/// Verify tool test files end in `_test.dart`.
+///
+/// The test runner will only recognize files ending in `_test.dart` as tests to
+/// be run: https://github.com/dart-lang/test/tree/master/pkgs/test#running-tests
 Future<void> verifyToolTestsEndInTestDart(String workingDirectory) async {
   final String toolsTestPath = path.join(
     workingDirectory,
@@ -206,7 +211,7 @@ Future<void> verifyToolTestsEndInTestDart(String workingDirectory) async {
     'flutter_tools',
     'test',
   );
-  List<String> violations = <String>[];
+  final List<String> violations = <String>[];
 
   // detect files that contains calls to test(), testUsingContext(), and testWithoutContext()
   final RegExp callsTestFunctionPattern = RegExp(r'(test\(.*\)|testUsingContext\(.*\)|testWithoutContext\(.*\))');
