@@ -263,15 +263,12 @@ class PathRef {
         // The location delta of control point specifies corner radius.
         if (vector1_0x != 0.0) {
           // For CW : Top right or bottom left corners.
-          assert(vector2_1x == 0.0 && vector1_0y == 0.0);
           dx = vector1_0x.abs();
           dy = vector2_1y.abs();
         } else if (vector1_0y != 0.0) {
-          assert(vector2_1x == 0.0 || vector2_1y == 0.0);
           dx = vector2_1x.abs();
           dy = vector1_0y.abs();
         } else {
-          assert(vector2_1y == 0.0);
           dx = vector1_0x.abs();
           dy = vector1_0y.abs();
         }
@@ -288,9 +285,19 @@ class PathRef {
         radii.add(ui.Radius.elliptical(dx, dy));
         ++cornerIndex;
       } else {
-        assert((verb == SPath.kLineVerb &&
-                ((pts[2] - pts[0]) == 0 || (pts[3] - pts[1]) == 0)) ||
-            verb == SPath.kCloseVerb);
+        if (assertionsEnabled) {
+          if (verb == SPath.kLineVerb) {
+            final bool isVerticalOrHorizontal =
+              SPath.nearlyEqual(pts[2], pts[0]) ||
+              SPath.nearlyEqual(pts[3], pts[1]);
+            assert(
+              isVerticalOrHorizontal,
+              'An RRect path must only contain vertical and horizontal lines.'
+            );
+          } else {
+            assert(verb == SPath.kCloseVerb);
+          }
+        }
       }
     }
     return ui.RRect.fromRectAndCorners(bounds,
