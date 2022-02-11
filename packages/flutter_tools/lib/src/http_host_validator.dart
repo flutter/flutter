@@ -18,11 +18,6 @@ const String kDoctorHostTimeout = 'FLUTTER_DOCTOR_HOST_TIMEOUT';
 const String kPubDevHttpHost = 'https://pub.dev/';
 const String kgCloudHttpHost = 'https://cloud.google.com/';
 
-/// Android specific required HTTP hosts.
-const List<String> androidRequiredHttpHosts = <String>[
-  'https://maven.google.com/',
-];
-
 /// MacOS specific required HTTP hosts.
 const List<String> macOSRequiredHttpHosts = <String>[
   'https://cocoapods.org/',
@@ -42,6 +37,14 @@ class HttpHostValidator extends DoctorValidator {
   final Platform _platform;
   final FeatureFlags _featureFlags;
   final HttpClient _httpClient;
+
+  /// Android specific required HTTP hosts.
+  late final List<String> androidRequiredHttpHosts = <String>[
+    // If kEnvCloudUrl is set, it will be used as the maven host
+    if (!_platform.environment.containsKey(kEnvCloudUrl))
+      'https://maven.google.com/',
+  ];
+
 
   @override
   String get slowWarning =>
