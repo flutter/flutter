@@ -3550,36 +3550,16 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       } else {
         deactivateChild(child);
         assert(child._parent == null);
-        if (!kReleaseMode && debugProfileBuildsEnabled) {
-          Map<String, String> debugTimelineArguments = timelineArgumentsIndicatingLandmarkEvent;
-          assert(() {
-            debugTimelineArguments = newWidget.toDiagnosticsNode().toTimelineArguments();
-            return true;
-          }());
-          Timeline.startSync(
-            '${newWidget.runtimeType}',
-            arguments: debugTimelineArguments,
-          );
-        }
+        // The [debugProfileBuildsEnabled] code for this branch is inside
+        // [inflateWidget], since some [Element]s call [inflateWidget] directly
+        // instead of going through [updateChild].
         newChild = inflateWidget(newWidget, newSlot);
-        if (!kReleaseMode && debugProfileBuildsEnabled)
-          Timeline.finishSync();
       }
     } else {
-      if (!kReleaseMode && debugProfileBuildsEnabled) {
-        Map<String, String> debugTimelineArguments = timelineArgumentsIndicatingLandmarkEvent;
-        assert(() {
-          debugTimelineArguments = newWidget.toDiagnosticsNode().toTimelineArguments();
-          return true;
-        }());
-        Timeline.startSync(
-          '${newWidget.runtimeType}',
-          arguments: debugTimelineArguments,
-        );
-      }
+      // The [debugProfileBuildsEnabled] code for this branch is inside
+      // [inflateWidget], since some [Element]s call [inflateWidget] directly
+      // instead of going through [updateChild].
       newChild = inflateWidget(newWidget, newSlot);
-      if (!kReleaseMode && debugProfileBuildsEnabled)
-        Timeline.finishSync();
     }
 
     assert(() {
@@ -3807,6 +3787,19 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   @pragma('vm:prefer-inline')
   Element inflateWidget(Widget newWidget, Object? newSlot) {
     assert(newWidget != null);
+
+    if (!kReleaseMode && debugProfileBuildsEnabled) {
+      Map<String, String> debugTimelineArguments = timelineArgumentsIndicatingLandmarkEvent;
+      assert(() {
+        debugTimelineArguments = newWidget.toDiagnosticsNode().toTimelineArguments();
+        return true;
+      }());
+      Timeline.startSync(
+        '${newWidget.runtimeType}',
+        arguments: debugTimelineArguments,
+      );
+    }
+
     final Key? key = newWidget.key;
     if (key is GlobalKey) {
       final Element? newChild = _retakeInactiveElement(key, newWidget);
@@ -3829,6 +3822,10 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     }());
     newChild.mount(this, newSlot);
     assert(newChild._lifecycleState == _ElementLifecycle.active);
+
+    if (!kReleaseMode && debugProfileBuildsEnabled)
+      Timeline.finishSync();
+
     return newChild;
   }
 

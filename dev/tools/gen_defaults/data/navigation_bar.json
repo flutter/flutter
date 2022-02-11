@@ -1,5 +1,5 @@
 {
-  "version": "v0_76",
+  "version": "v0_81",
 
   "md.comp.navigation-bar.active.focus.icon.color": "onSecondaryContainer",
   "md.comp.navigation-bar.active.focus.label-text.color": "onSurface",
@@ -10,7 +10,7 @@
   "md.comp.navigation-bar.active.icon.color": "onSecondaryContainer",
   "md.comp.navigation-bar.active-indicator.color": "secondaryContainer",
   "md.comp.navigation-bar.active-indicator.height": 32.0,
-  "md.comp.navigation-bar.active-indicator.shape": "md.sys.shape.corner.large",
+  "md.comp.navigation-bar.active-indicator.shape": "md.sys.shape.corner.full",
   "md.comp.navigation-bar.active-indicator.width": 64.0,
   "md.comp.navigation-bar.active.label-text.color": "onSurface",
   "md.comp.navigation-bar.active.pressed.icon.color": "onSecondaryContainer",
