@@ -21,8 +21,8 @@ ConcurrentMessageLoop::ConcurrentMessageLoop(size_t worker_count)
     : worker_count_(std::max<size_t>(worker_count, 1ul)) {
   for (size_t i = 0; i < worker_count_; ++i) {
     workers_.emplace_back([i, this]() {
-      fml::Thread::SetCurrentThreadName(
-          std::string{"io.worker." + std::to_string(i + 1)});
+      fml::Thread::SetCurrentThreadName(fml::Thread::ThreadConfig(
+          std::string{"io.worker." + std::to_string(i + 1)}));
       WorkerMain();
     });
   }
