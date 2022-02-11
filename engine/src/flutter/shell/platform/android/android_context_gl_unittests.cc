@@ -80,9 +80,10 @@ TEST(AndroidContextGl, Create) {
   auto environment = fml::MakeRefCounted<AndroidEnvironmentGL>();
   std::string thread_label =
       ::testing::UnitTest::GetInstance()->current_test_info()->name();
-  ThreadHost thread_host(thread_label, ThreadHost::Type::UI |
-                                           ThreadHost::Type::RASTER |
-                                           ThreadHost::Type::IO);
+
+  ThreadHost thread_host(ThreadHost::ThreadHostConfig(
+      thread_label,
+      ThreadHost::Type::UI | ThreadHost::Type::RASTER | ThreadHost::Type::IO));
   TaskRunners task_runners = MakeTaskRunners(thread_label, thread_host);
   auto context = std::make_unique<AndroidContextGL>(
       AndroidRenderingAPI::kOpenGLES, environment, task_runners);
@@ -120,9 +121,9 @@ TEST(AndroidSurfaceGL, CreateSnapshopSurfaceWhenOnscreenSurfaceIsNotNull) {
   auto environment = fml::MakeRefCounted<AndroidEnvironmentGL>();
   std::string thread_label =
       ::testing::UnitTest::GetInstance()->current_test_info()->name();
-  ThreadHost thread_host(thread_label, ThreadHost::Type::UI |
-                                           ThreadHost::Type::RASTER |
-                                           ThreadHost::Type::IO);
+  ThreadHost thread_host(ThreadHost::ThreadHostConfig(
+      thread_label,
+      ThreadHost::Type::UI | ThreadHost::Type::RASTER | ThreadHost::Type::IO));
   TaskRunners task_runners = MakeTaskRunners(thread_label, thread_host);
   auto android_context = std::make_shared<AndroidContextGL>(
       AndroidRenderingAPI::kOpenGLES, environment, task_runners);
@@ -145,9 +146,12 @@ TEST(AndroidSurfaceGL, CreateSnapshopSurfaceWhenOnscreenSurfaceIsNull) {
   auto environment = fml::MakeRefCounted<AndroidEnvironmentGL>();
   std::string thread_label =
       ::testing::UnitTest::GetInstance()->current_test_info()->name();
-  ThreadHost thread_host(thread_label, ThreadHost::Type::UI |
-                                           ThreadHost::Type::RASTER |
-                                           ThreadHost::Type::IO);
+
+  auto mask =
+      ThreadHost::Type::UI | ThreadHost::Type::RASTER | ThreadHost::Type::IO;
+  flutter::ThreadHost::ThreadHostConfig host_config(mask);
+
+  ThreadHost thread_host(host_config);
   TaskRunners task_runners = MakeTaskRunners(thread_label, thread_host);
   auto android_context = std::make_shared<AndroidContextGL>(
       AndroidRenderingAPI::kOpenGLES, environment, task_runners);

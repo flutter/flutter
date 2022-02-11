@@ -43,10 +43,10 @@ static void StartupAndShutdownShell(benchmark::State& state,
       };
     }
 
-    thread_host = std::make_unique<ThreadHost>(
+    thread_host = std::make_unique<ThreadHost>(ThreadHost::ThreadHostConfig(
         "io.flutter.bench.", ThreadHost::Type::Platform |
                                  ThreadHost::Type::RASTER |
-                                 ThreadHost::Type::IO | ThreadHost::Type::UI);
+                                 ThreadHost::Type::IO | ThreadHost::Type::UI));
 
     TaskRunners task_runners("test",
                              thread_host->platform_thread->GetTaskRunner(),

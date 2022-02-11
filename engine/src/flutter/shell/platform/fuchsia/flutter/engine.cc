@@ -57,7 +57,8 @@ std::unique_ptr<flutter::PlatformMessage> MakeLocalizationPlatformMessage(
 }  // namespace
 
 flutter::ThreadHost Engine::CreateThreadHost(const std::string& name_prefix) {
-  fml::Thread::SetCurrentThreadName(name_prefix + ".platform");
+  fml::Thread::SetCurrentThreadName(
+      fml::Thread::ThreadConfig(name_prefix + ".platform"));
   return flutter::ThreadHost(name_prefix, flutter::ThreadHost::Type::RASTER |
                                               flutter::ThreadHost::Type::UI |
                                               flutter::ThreadHost::Type::IO);

@@ -154,7 +154,8 @@ EmbedderThreadHost::CreateEmbedderManagedThreadHost(
 
   // Create a thread host with just the threads that need to be managed by the
   // engine. The embedder has provided the rest.
-  ThreadHost thread_host(kFlutterThreadName, engine_thread_host_mask);
+  ThreadHost thread_host(ThreadHost::ThreadHostConfig(kFlutterThreadName,
+                                                      engine_thread_host_mask));
 
   // If the embedder has supplied a platform task runner, use that. If not, use
   // the current thread task runner.
@@ -208,9 +209,9 @@ std::unique_ptr<EmbedderThreadHost>
 EmbedderThreadHost::CreateEngineManagedThreadHost() {
   // Create a thread host with the current thread as the platform thread and all
   // other threads managed.
-  ThreadHost thread_host(kFlutterThreadName, ThreadHost::Type::RASTER |
-                                                 ThreadHost::Type::IO |
-                                                 ThreadHost::Type::UI);
+  ThreadHost thread_host(ThreadHost::ThreadHostConfig(
+      kFlutterThreadName,
+      ThreadHost::Type::RASTER | ThreadHost::Type::IO | ThreadHost::Type::UI));
 
   // For embedder platforms that don't have native message loop interop, this
   // will reference a task runner that points to a null message loop
