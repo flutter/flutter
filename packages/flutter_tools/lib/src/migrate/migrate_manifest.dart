@@ -18,14 +18,15 @@ import '../migrate/migrate_utils.dart';
 /// Represents the mamifest file that tracks the contents of the current
 /// migration working directory.
 ///
-/// This manifest file is created with the results of a `flutter migrate start` run
-/// but does not make use of all of the data.
+/// This manifest file is created with the MigrateResult of a computeMigration run.
 class MigrateManifest {
+  /// Creates a new manifest from a MigrateResult.
   MigrateManifest({
     required this.migrateRootDir,
     required this.migrateResult,
   });
 
+  /// Parses an existing migrate manifest.
   MigrateManifest.fromFile(File manifestFile) : migrateResult = MigrateResult.empty(), migrateRootDir = manifestFile.parent {
     final YamlMap map = loadYaml(manifestFile.readAsStringSync());
     bool valid = map.containsKey('mergedFiles') && map.containsKey('conflictFiles') && map.containsKey('newFiles') && map.containsKey('deletedFiles');
@@ -58,6 +59,7 @@ class MigrateManifest {
   final Directory migrateRootDir;
   final MigrateResult migrateResult;
 
+  /// A list of local paths of files that require conflict resolution.
   List<String> get conflictFiles {
     List<String> output = <String>[];
     for (MergeResult result in migrateResult.mergeResults) {
@@ -68,6 +70,7 @@ class MigrateManifest {
     return output;
   }
 
+  /// A list of local paths of files that were automatically merged.
   List<String> get mergedFiles {
     List<String> output = <String>[];
     for (MergeResult result in migrateResult.mergeResults) {
@@ -78,6 +81,7 @@ class MigrateManifest {
     return output;
   }
 
+  /// A list of local paths of files that were newly added.
   List<String> get addedFiles {
     List<String> output = <String>[];
     for (FilePendingMigration file in migrateResult.addedFiles) {
@@ -85,6 +89,8 @@ class MigrateManifest {
     }
     return output;
   }
+
+  /// A list of local paths of files that are marked for deletion.
   List<String> get deletedFiles {
     List<String> output = <String>[];
     for (FilePendingMigration file in migrateResult.deletedFiles) {
@@ -93,6 +99,7 @@ class MigrateManifest {
     return output;
   }
 
+  /// Returns the manifest file given a migration workind directory.
   static File getManifestFileFromDirectory(Directory workingDir) {
     return workingDir.childFile('.migrateManifest.yaml');
   }
@@ -127,6 +134,8 @@ class MigrateManifest {
 }
 
 /// Returns true if the migration working directory has all conflicts resolved and prints the migration status.
+///
+/// The migration status printout lists all added, deleted, merged, and conflicted files.
 bool checkAndPrintMigrateStatus(MigrateManifest manifest, Directory workingDir, {bool warnConflict = false}) {
   List<String> remainingConflicts = <String>[];
   List<String> mergedFiles = <String>[];

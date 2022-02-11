@@ -101,7 +101,7 @@ class MigrateApplyCommand extends FlutterCommand {
     final List<MigrateConfig> configs = await MigrateConfig.parseOrCreateMigrateConfigs();
     final String currentGitHash = await MigrateUtils.getGitHash(Cache.flutterRoot!);
     for (MigrateConfig config in configs) {
-      config.lastMigrateVersion = currentGitHash;
+      config.baseRevision = currentGitHash;
       config.writeFile(projectDirectory: FlutterProject.current().directory);
     }
 

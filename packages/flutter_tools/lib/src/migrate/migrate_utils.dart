@@ -12,7 +12,9 @@ import '../globals.dart' as globals;
 import '../project.dart';
 import '../cache.dart';
 
-/// Utility class that contains static methods that wrap git operations.
+// TODO: support windows.
+
+/// Utility class that contains static methods that wrap git and other shell commands.
 class MigrateUtils {
   MigrateUtils();
 

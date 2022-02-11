@@ -38,12 +38,20 @@ bool _skipped(String localPath) {
   return false;
 }
 
+/// Stores a file that has been marked for migraton and metadata about the file.
 class FilePendingMigration {
   FilePendingMigration(this.localPath, this.file);
   String localPath;
   File file;
 }
 
+/// Data class that holds all results and generated directories from a computeMigration run.
+///
+/// mergeResults, addedFiles, and deletedFiles includes the sets of files to be migrated while
+/// the other members track the temporary sdk and generated app directories created by the tool.
+///
+/// The compute function does not clean up the temp directories, as the directories may be reused,
+/// so this must be done manually afterwards.
 class MigrateResult {
   MigrateResult({
     required this.mergeResults,
@@ -54,6 +62,7 @@ class MigrateResult {
     this.generatedBaseTemplateDirectory,
     this.generatedTargetTemplateDirectory});
 
+  /// Creates a MigrateResult with all empty members.
   MigrateResult.empty()
     : mergeResults = <MergeResult>[],
       addedFiles = <FilePendingMigration>[],
@@ -70,6 +79,25 @@ class MigrateResult {
   Map<String, Directory> sdkDirs;
 }
 
+/// Computes the changes that migrates the current flutter project to the target revision.
+///
+/// This method attempts to find a base revision, which is the revision of the Flutter SDK
+/// the app was generated with or the last revision the app was migrated to. The base revision
+/// typically comes from the .migrate_config, but for legacy apps, the config may not exist. In
+/// this case, we fallback to using the revision in .metadata, and if that does not exist, we
+/// use the target revision as the base revision. In the final fallback case, the migration should
+/// still work, but will likely generate slightly more conflicts rather than merges.
+///
+/// Operations the computation performs:
+/// 
+///  - Parse .migrate_config files
+///  - Collect revisions to use for each platform
+///  - Download each flutter revision and call `flutter create` for each.
+///  - Call `flutter create` with target revision (target is typically current flutter version)
+///  - Diff base revision generated app with target revision generated app
+///  - Compute all newly added files between base and target revisions
+///  - Compute 3 way merge of all files that are modifed by user and flutter
+///  - Track temp dirs to be deleted
 Future<MigrateResult?> computeMigration({
     bool verbose = false,
     FlutterProject? flutterProject,
@@ -101,13 +129,13 @@ Future<MigrateResult?> computeMigration({
   final List<MigrateConfig> configs = await MigrateConfig.parseOrCreateMigrateConfigs(create: false);
 
   if (verbose) logger.printStatus('Parsing .migrate_config files');
-  final String fallbackRevision = await MigrateConfig.getFallbackLastMigrateVersion();
+  final String fallbackRevision = await MigrateConfig.getFallbackBaseRevision();
   String rootBaseRevision = '';
   Map<String, List<MigrateConfig>> revisionToConfigs = <String, List<MigrateConfig>>{};
   Set<String> revisions = Set<String>();
   if (baseRevision == null) {
     for (MigrateConfig config in configs) {
-      String effectiveRevision = config.lastMigrateVersion == null ? fallbackRevision : config.lastMigrateVersion!;
+      String effectiveRevision = config.baseRevision == null ? fallbackRevision : config.baseRevision!;
       if (config.platform == 'root') {
         rootBaseRevision = effectiveRevision;
       }
@@ -147,9 +175,6 @@ Future<MigrateResult?> computeMigration({
   MigrateResult migrateResult = MigrateResult.empty();
 
   // Generate the base templates
-  // Directory generatedBaseTemplateDirectory;
-  // Directory generatedTargetTemplateDirectory;
-
   final bool customBaseAppDir = baseAppPath != null;
   final bool customTargetAppDir = targetAppPath != null;
   if (customBaseAppDir) {
@@ -243,7 +268,7 @@ Future<MigrateResult?> computeMigration({
 
   await MigrateUtils.gitInit(flutterProject.directory.absolute.path);
 
-  // Generate diffs
+  // Generate diffs. These diffs are used to determine if a file is newly added, needs merging, or deleted (rare).
   if (verbose) logger.printStatus('Diffing base app and target app.');
   final List<FileSystemEntity> generatedBaseFiles = migrateResult.generatedBaseTemplateDirectory!.listSync(recursive: true);
   final List<FileSystemEntity> generatedTargetFiles = migrateResult.generatedTargetTemplateDirectory!.listSync(recursive: true);
@@ -290,7 +315,7 @@ Future<MigrateResult?> computeMigration({
       continue;
     }
     String localPath = targetTemplateFile.path.replaceFirst(migrateResult.generatedTargetTemplateDirectory!.absolute.path + globals.fs.path.separator, '');
-    if (diffMap.containsKey(localPath)) {
+    if (diffMap.containsKey(localPath) || _skipped(localPath)) {
       continue;
     }
     if (await MigrateUtils.isGitIgnored(targetTemplateFile.absolute.path, migrateResult.generatedTargetTemplateDirectory!.absolute.path)) {
@@ -301,7 +326,7 @@ Future<MigrateResult?> computeMigration({
   }
   if (verbose) logger.printStatus('${migrateResult.addedFiles.length} files were newly added in the target app.');
 
-  // for each file
+  // For each existing file in the project, we attampt to 3 way merge if it is changed by the user.
   final List<FileSystemEntity> currentFiles = flutterProject.directory.listSync(recursive: true);
   final String projectRootPath = flutterProject.directory.absolute.path;
   for (FileSystemEntity entity in currentFiles) {

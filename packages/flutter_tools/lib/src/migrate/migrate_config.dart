@@ -29,8 +29,8 @@ class MigrateConfig {
   /// Creates a MigrateConfig by explicitly providing all values.
   MigrateConfig({
     required this.platform,
-    required this.createVersion,
-    required this.lastMigrateVersion,
+    required this.createRevision,
+    required this.baseRevision,
     required this.unmanagedFiles
   }) {}
 
@@ -43,8 +43,8 @@ class MigrateConfig {
       return;
     }
     platform = yamlRoot['platform'];
-    createVersion = yamlRoot['createVersion'];
-    lastMigrateVersion = yamlRoot['lastMigrateVersion'];
+    createRevision = yamlRoot['createRevision'];
+    baseRevision = yamlRoot['baseRevision'];
     if (yamlRoot['unmanagedFiles'] != null) {
       unmanagedFiles = List<String>.from(yamlRoot['unmanagedFiles']);
     } else {
@@ -54,8 +54,8 @@ class MigrateConfig {
   static const String kFileName = '.migrate_config';
 
   String? platform;
-  String? createVersion;
-  String? lastMigrateVersion;
+  String? createRevision;
+  String? baseRevision;
   List<String> unmanagedFiles;
 
   /// Writes the .migrate_config file in the provided project directory's platform subdirectory.
@@ -69,8 +69,8 @@ class MigrateConfig {
     file.writeAsStringSync('''
 # Generated section.
 platform: $platform
-createVersion: $createVersion
-lastMigrateVersion: $lastMigrateVersion
+createRevision: $createRevision
+baseRevision: $baseRevision
 
 # User provided section
 
@@ -136,13 +136,15 @@ $unmanagedFilesString
     return getFileFromPlatform(platform, projectDirectory: projectDirectory).parent.absolute.path;
   }
 
+  /// Verifies the expected yaml keys are present in the file.
   bool validate(YamlMap yamlRoot) {
     return yamlRoot.keys.contains('platform') &&
-    yamlRoot.keys.contains('createVersion') &&
-    yamlRoot.keys.contains('lastMigrateVersion') &&
+    yamlRoot.keys.contains('createRevision') &&
+    yamlRoot.keys.contains('baseRevision') &&
     yamlRoot.keys.contains('unmanagedFiles');
   }
 
+  /// Returns a list of platform names that are supported by the project.
   static List<String> getSupportedPlatforms({bool includeRoot = false}) {
     final List<String> platforms = includeRoot ? <String>['root'] : <String>[];
     if (FlutterProject.current().android.existsSync()) {
@@ -172,6 +174,8 @@ $unmanagedFilesString
     return platforms;
   }
 
+  /// Searches the flutter project for all .migrate_config files. Optionally, missing files can be
+  /// initialized with default values.
   static Future<List<MigrateConfig>> parseOrCreateMigrateConfigs({List<String>? platforms, Directory? projectDirectory, bool create = true}) async {
     if (platforms == null) {
       platforms = getSupportedPlatforms(includeRoot: true);
@@ -186,8 +190,8 @@ $unmanagedFilesString
         // No config found, creating empty config.
         MigrateConfig newConfig = MigrateConfig(
           platform: platform,
-          createVersion: null,
-          lastMigrateVersion: null,
+          createRevision: null,
+          baseRevision: null,
           unmanagedFiles: platform == 'root' ? <String>['lib/main.dart'] : <String>[],
         );
         if (create) {
@@ -199,7 +203,8 @@ $unmanagedFilesString
     return configs;
   }
 
-  static Future<String> getFallbackLastMigrateVersion() async {
+  /// Finds the fallback revision to use when no base revision is found in the .migrate_config.
+  static Future<String> getFallbackBaseRevision() async {
     // Use the .metadata file if it exists.
     final File metadataFile = FlutterProject.current().directory.childFile('.metadata');
     if (metadataFile.existsSync()) {
