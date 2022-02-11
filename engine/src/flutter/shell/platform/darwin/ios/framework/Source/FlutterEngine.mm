@@ -34,6 +34,37 @@
 #import "flutter/shell/platform/darwin/ios/rendering_api_selection.h"
 #include "flutter/shell/profiling/sampling_profiler.h"
 
+/// Inheriting ThreadConfigurer and use iOS platform thread API to configure the thread priorities
+/// Using iOS platform thread API to configure thread priority
+static void IOSPlatformThreadConfigSetter(const fml::Thread::ThreadConfig& config) {
+  // set thread name
+  fml::Thread::SetCurrentThreadName(config);
+
+  // set thread priority
+  switch (config.priority) {
+    case fml::Thread::ThreadPriority::BACKGROUND: {
+      [[NSThread currentThread] setThreadPriority:0];
+      break;
+    }
+    case fml::Thread::ThreadPriority::NORMAL: {
+      [[NSThread currentThread] setThreadPriority:0.5];
+      break;
+    }
+    case fml::Thread::ThreadPriority::RASTER:
+    case fml::Thread::ThreadPriority::DISPLAY: {
+      [[NSThread currentThread] setThreadPriority:1.0];
+      sched_param param;
+      int policy;
+      pthread_t thread = pthread_self();
+      if (!pthread_getschedparam(thread, &policy, &param)) {
+        param.sched_priority = 50;
+        pthread_setschedparam(thread, policy, &param);
+      }
+      break;
+    }
+  }
+}
+
 NSString* const FlutterDefaultDartEntrypoint = nil;
 NSString* const FlutterDefaultInitialRoute = nil;
 NSString* const FlutterEngineWillDealloc = @"FlutterEngineWillDealloc";
@@ -613,11 +644,29 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
 
   uint32_t threadHostType = flutter::ThreadHost::Type::UI | flutter::ThreadHost::Type::RASTER |
                             flutter::ThreadHost::Type::IO;
+
   if ([FlutterEngine isProfilerEnabled]) {
     threadHostType = threadHostType | flutter::ThreadHost::Type::Profiler;
   }
-  return {threadLabel.UTF8String,  // label
-          threadHostType};
+
+  flutter::ThreadHost::ThreadHostConfig host_config(threadHostType, IOSPlatformThreadConfigSetter);
+
+  host_config.ui_config =
+      fml::Thread::ThreadConfig(flutter::ThreadHost::ThreadHostConfig::MakeThreadName(
+                                    flutter::ThreadHost::Type::UI, threadLabel.UTF8String),
+                                fml::Thread::ThreadPriority::DISPLAY);
+
+  host_config.raster_config =
+      fml::Thread::ThreadConfig(flutter::ThreadHost::ThreadHostConfig::MakeThreadName(
+                                    flutter::ThreadHost::Type::RASTER, threadLabel.UTF8String),
+                                fml::Thread::ThreadPriority::RASTER);
+
+  host_config.io_config =
+      fml::Thread::ThreadConfig(flutter::ThreadHost::ThreadHostConfig::MakeThreadName(
+                                    flutter::ThreadHost::Type::IO, threadLabel.UTF8String),
+                                fml::Thread::ThreadPriority::BACKGROUND);
+
+  return (flutter::ThreadHost){host_config};
 }
 
 static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSString* libraryURI) {
