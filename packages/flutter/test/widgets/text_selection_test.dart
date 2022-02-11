@@ -755,7 +755,7 @@ void main() {
               child: const Text('toolbar'),
             ),
           ],
-        )
+        ),
       ));
 
       return SelectionOverlay(
