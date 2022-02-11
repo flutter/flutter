@@ -140,9 +140,9 @@ abstract class BindingBase {
       return true;
     }());
 
-    assert(!_debugInitialized);
+    assert(_debugInitializedType == null);
     initInstances();
-    assert(_debugInitialized);
+    assert(_debugInitializedType != null);
 
     assert(!_debugServiceExtensionsRegistered);
     initServiceExtensions();
@@ -154,7 +154,7 @@ abstract class BindingBase {
   }
 
   bool _debugConstructed = false;
-  static bool _debugInitialized = false;
+  static Type? _debugInitializedType;
   static bool _debugServiceExtensionsRegistered = false;
 
   /// Additional configuration used by the framework during hot reload.
@@ -256,9 +256,9 @@ abstract class BindingBase {
   @protected
   @mustCallSuper
   void initInstances() {
-    assert(!_debugInitialized);
+    assert(_debugInitializedType == null);
     assert(() {
-      _debugInitialized = true;
+      _debugInitializedType = runtimeType;
       return true;
     }());
   }
@@ -277,7 +277,7 @@ abstract class BindingBase {
   @protected
   static T checkInstance<T extends BindingBase>(T? instance) {
     assert(() {
-      if (!_debugInitialized && instance == null) {
+      if (_debugInitializedType == null && instance == null) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('Binding has not yet been initialized.'),
           ErrorDescription('The "instance" getter on the $T binding mixin is only available once that binding has been initialized.'),
@@ -298,7 +298,7 @@ abstract class BindingBase {
         ]);
       }
       if (instance == null) {
-        assert(_debugInitialized);
+        assert(_debugInitializedType == null);
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('Binding mixin instance is null but bindings are already initialized.'),
           ErrorDescription(
@@ -315,11 +315,14 @@ abstract class BindingBase {
             'It is also possible that $T does not implement "initInstances()" to assign a value to "instance". See the '
             'documentation of the BaseBinding class for more details.',
           ),
+          ErrorHint(
+            'The binding that was initialized was of the type "$_debugInitializedType". '
+          ),
         ]);
       }
       try {
         assert(instance != null);
-        if (instance._debugConstructed && !_debugInitialized) {
+        if (instance._debugConstructed && _debugInitializedType == null) {
           throw FlutterError.fromParts(<DiagnosticsNode>[
             ErrorSummary('Binding initialized without calling initInstances.'),
             ErrorDescription('An instance of $T is non-null, but BindingBase.initInstances() has not yet been called.'),
@@ -335,7 +338,7 @@ abstract class BindingBase {
           ]);
         }
         if (!instance._debugConstructed) {
-          // The state of _debugInitialized doesn't matter in this failure mode.
+          // The state of _debugInitializedType doesn't matter in this failure mode.
           throw FlutterError.fromParts(<DiagnosticsNode>[
             ErrorSummary('Binding did not complete initialization.'),
             ErrorDescription('An instance of $T is non-null, but the BindingBase() constructor has not yet been called.'),
@@ -359,6 +362,36 @@ abstract class BindingBase {
       return true;
     }());
     return instance!;
+  }
+
+  /// In debug builds, the type of the current binding, if any, or else null.
+  ///
+  /// This may be useful in asserts to verify that the binding has not been initialized
+  /// before the point in the application code that wants to initialize the binding, or
+  /// to verify that the binding is the one that is expected.
+  ///
+  /// For example, if an application uses [Zone]s to report uncaught execptions, it may
+  /// need to ensure that `ensureInitialized()` has not yet been invoked on any binding
+  /// at the point where it configures the zone and initializes the binding.
+  ///
+  /// If this returns null, the binding has not been initialized.
+  ///
+  /// If this returns a non-null value, it returns the type of the binding instance.
+  ///
+  /// To obtain the binding itself, consider the `instance` getter on the [BindingBase]
+  /// subclass or mixin.
+  ///
+  /// This method only returns a useful value in debug builds. In release builds, the
+  /// return value is always null; to improve startup performance, the type of the
+  /// binding is not tracked in release builds.
+  ///
+  /// See also:
+  ///
+  ///  * [BindingBase], whose class documentation describes the conventions for dealing
+  ///    with bindings.
+  ///  * [initInstances], whose documentation details how to create a binding mixin.
+  static Type? debugBindingType() {
+    return _debugInitializedType;
   }
 
   /// Called when the binding is initialized, to register service
