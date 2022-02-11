@@ -161,6 +161,10 @@ class FakeHttpClient implements HttpClient {
   }
 
   @override
+  // ignore: override_on_non_overriding_member
+  Future<ConnectionTask<Socket>> Function(Uri url, String? proxyHost, int? proxyPort)? connectionFactory;
+
+  @override
   Future<bool> Function(Uri url, String scheme, String realm)? authenticate;
 
   @override
@@ -168,6 +172,10 @@ class FakeHttpClient implements HttpClient {
 
   @override
   bool Function(X509Certificate cert, String host, int port)? badCertificateCallback;
+
+  @override
+  // ignore: override_on_non_overriding_member
+  Function(String line)? keyLog;
 
   @override
   void close({bool force = false}) { }
