@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:collection';
 
 import 'package:meta/meta.dart';
@@ -46,14 +44,12 @@ class UpdatePackagesCommand extends FlutterCommand {
         'force-upgrade',
         help: 'Attempt to update all the dependencies to their latest versions.\n'
               'This will actually modify the pubspec.yaml files in your checkout.',
-        defaultsTo: false,
         negatable: false,
       )
       ..addFlag(
         'paths',
         help: 'Finds paths in the dependency chain leading from package specified '
               'in "--from" to package specified in "--to".',
-        defaultsTo: false,
         negatable: false,
       )
       ..addOption(
@@ -70,7 +66,6 @@ class UpdatePackagesCommand extends FlutterCommand {
         'transitive-closure',
         help: 'Prints the dependency graph that is the transitive closure of '
               'packages the Flutter SDK depends on.',
-        defaultsTo: false,
         negatable: false,
       )
       ..addFlag(
@@ -78,25 +73,21 @@ class UpdatePackagesCommand extends FlutterCommand {
         help: 'Only prints the dependency graph that is the transitive closure '
               'that a consumer of the Flutter SDK will observe (when combined '
               'with transitive-closure).',
-        defaultsTo: false,
         negatable: false,
       )
       ..addFlag(
         'verify-only',
         help: 'Verifies the package checksum without changing or updating deps.',
-        defaultsTo: false,
         negatable: false,
       )
       ..addFlag(
         'offline',
         help: 'Use cached packages instead of accessing the network.',
-        defaultsTo: false,
         negatable: false,
       )
       ..addFlag(
         'crash',
         help: 'For Flutter CLI testing only, forces this command to throw an unhandled exception.',
-        defaultsTo: false,
         negatable: false,
       )
       ..addOption(
@@ -121,8 +112,7 @@ class UpdatePackagesCommand extends FlutterCommand {
 
 
   // Lazy-initialize the net utilities with values from the context.
-  Net _cachedNet;
-  Net get _net => _cachedNet ??= Net(
+  late final Net _net = Net(
     httpClientFactory: context.get<HttpClientFactory>(),
     logger: globals.logger,
     platform: globals.platform,
@@ -131,9 +121,9 @@ class UpdatePackagesCommand extends FlutterCommand {
   Future<void> _downloadCoverageData() async {
     final String urlBase = globals.platform.environment['FLUTTER_STORAGE_BASE_URL'] ?? 'https://storage.googleapis.com';
     final Uri coverageUri = Uri.parse('$urlBase/flutter_infra_release/flutter/coverage/lcov.info');
-    final List<int> data = await _net.fetchUrl(coverageUri);
+    final List<int> data = (await _net.fetchUrl(coverageUri))!;
     final String coverageDir = globals.fs.path.join(
-      Cache.flutterRoot,
+      Cache.flutterRoot!,
       'packages/flutter/coverage',
     );
     globals.fs.file(globals.fs.path.join(coverageDir, 'lcov.base.info'))
@@ -146,7 +136,7 @@ class UpdatePackagesCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final List<Directory> packages = runner.getRepoPackages();
+    final List<Directory> packages = runner!.getRepoPackages();
 
     final bool forceUpgrade = boolArg('force-upgrade');
     final bool isPrintPaths = boolArg('paths');
@@ -268,7 +258,7 @@ class UpdatePackagesCommand extends FlutterCommand {
           checksumDependencies[data.name] = data.version;
         }
       }
-      final String checksum = _computeChecksum(checksumDependencies.keys, (String name) => checksumDependencies[name]);
+      final String checksum = _computeChecksum(checksumDependencies.keys, (String name) => checksumDependencies[name]!);
       if (checksum != pubspec.checksum.value) {
         // If the checksum doesn't match, they may have added or removed some dependencies.
         // we need to run update-packages to recapture the transitive deps.
@@ -294,12 +284,12 @@ class UpdatePackagesCommand extends FlutterCommand {
   }
 
   void _collectDependencies({
-    @required List<Directory> packages,
-    @required List<PubspecYaml> pubspecs,
-    @required Set<String> specialDependencies,
-    @required Map<String, PubspecDependency> explicitDependencies,
-    @required Map<String, PubspecDependency> allDependencies,
-    @required bool doUpgrade,
+    required List<Directory> packages,
+    required List<PubspecYaml> pubspecs,
+    required Set<String> specialDependencies,
+    required Map<String, PubspecDependency> explicitDependencies,
+    required Map<String, PubspecDependency> allDependencies,
+    required bool doUpgrade,
   }) {
     // Visit all the directories with pubspec.yamls we care about.
     for (final Directory directory in packages) {
@@ -320,7 +310,7 @@ class UpdatePackagesCommand extends FlutterCommand {
           // This makes sure that we don't import a package in two different
           // ways, e.g. by saying "sdk: flutter" in one pubspec.yaml and
           // saying "path: ../../..." in another.
-          final PubspecDependency previous = allDependencies[dependency.name];
+          final PubspecDependency previous = allDependencies[dependency.name]!;
           if (dependency.kind != previous.kind || dependency.lockTarget != previous.lockTarget) {
             throwToolExit(
                 'Inconsistent requirements around ${dependency.name}; '
@@ -350,7 +340,7 @@ class UpdatePackagesCommand extends FlutterCommand {
           // This makes sure that we don't import a package in two different
           // ways, e.g. by saying "sdk: flutter" in one pubspec.yaml and
           // saying "path: ../../..." in another.
-          final PubspecDependency previous = explicitDependencies[dependency.name];
+          final PubspecDependency previous = explicitDependencies[dependency.name]!;
           if (dependency.kind != previous.kind || dependency.lockTarget != previous.lockTarget) {
             throwToolExit(
                 'Inconsistent requirements around ${dependency.name}; '
@@ -373,11 +363,11 @@ class UpdatePackagesCommand extends FlutterCommand {
   }
 
   Future<void> _generateFakePackage({
-    Directory tempDir,
-    Iterable<PubspecDependency> dependencies,
-    List<PubspecYaml> pubspecs,
-    PubDependencyTree tree,
-    bool doUpgrade,
+    required Directory tempDir,
+    required Iterable<PubspecDependency> dependencies,
+    required List<PubspecYaml> pubspecs,
+    required PubDependencyTree tree,
+    required bool doUpgrade,
   }) async {
     try {
       final File fakePackage = _pubspecFor(tempDir);
@@ -390,7 +380,7 @@ class UpdatePackagesCommand extends FlutterCommand {
       );
       // Create a synthetic flutter SDK so that transitive flutter SDK
       // constraints are not affected by this upgrade.
-      Directory temporaryFlutterSdk;
+      Directory? temporaryFlutterSdk;
       if (doUpgrade) {
         temporaryFlutterSdk = createTemporaryFlutterSdk(
           globals.logger,
@@ -407,8 +397,7 @@ class UpdatePackagesCommand extends FlutterCommand {
         directory: tempDir.path,
         upgrade: doUpgrade,
         offline: boolArg('offline'),
-        flutterRootOverride: doUpgrade ? temporaryFlutterSdk.path : null,
-        generateSyntheticPackage: false,
+        flutterRootOverride: doUpgrade ? temporaryFlutterSdk!.path : null,
       );
       // Cleanup the temporary SDK
       try {
@@ -437,10 +426,10 @@ class UpdatePackagesCommand extends FlutterCommand {
   }
 
   bool _upgradePubspecs({
-    @required PubDependencyTree tree,
-    @required List<PubspecYaml> pubspecs,
-    @required Set<String> specialDependencies,
-    @required Map<String, PubspecDependency> explicitDependencies,
+    required PubDependencyTree tree,
+    required List<PubspecYaml> pubspecs,
+    required Set<String> specialDependencies,
+    required Map<String, PubspecDependency> explicitDependencies,
   }) {
     // The transitive dependency tree for the fake package does not contain
     // dependencies between Flutter SDK packages and pub packages. We add them
@@ -453,7 +442,7 @@ class UpdatePackagesCommand extends FlutterCommand {
       tree._dependencyTree[package] = <String>{};
       for (final PubspecDependency dependency in pubspec.dependencies) {
         if (dependency.kind == DependencyKind.normal) {
-          tree._dependencyTree[package].add(dependency.name);
+          tree._dependencyTree[package]!.add(dependency.name);
         }
       }
     }
@@ -466,7 +455,7 @@ class UpdatePackagesCommand extends FlutterCommand {
     }
 
     if (boolArg('paths')) {
-      showDependencyPaths(from: stringArg('from'), to: stringArg('to'), tree: tree);
+      showDependencyPaths(from: stringArg('from')!, to: stringArg('to')!, tree: tree);
       return true;
     }
 
@@ -499,8 +488,9 @@ class UpdatePackagesCommand extends FlutterCommand {
       'Running "flutter pub get" in affected packages...',
     );
     try {
-      // int.tryParse will convert an empty string to null
-      final int/*?*/ maxJobs = int.tryParse(stringArg('jobs') ?? '');
+      // int.tryParse will not accept null, but will convert empty string to
+      // null
+      final int? maxJobs = int.tryParse(stringArg('jobs') ?? '');
       final TaskQueue<void> queue = TaskQueue<void>(maxJobs: maxJobs);
       for (final Directory dir in packages) {
         unawaited(queue.add(() async {
@@ -512,7 +502,6 @@ class UpdatePackagesCommand extends FlutterCommand {
             // All dependencies should already have been downloaded by the fake
             // package, so the concurrent checks can all happen offline.
             offline: true,
-            generateSyntheticPackage: false,
             printProgress: false,
           );
           stopwatch.stop();
@@ -530,10 +519,10 @@ class UpdatePackagesCommand extends FlutterCommand {
         globals.printStatus('Downloaded lcov data for package:flutter in ${seconds.toStringAsFixed(1)}s...');
       }));
       await queue.tasksComplete;
-      status?.stop();
+      status.stop();
       // The exception is rethrown, so don't catch only Exceptions.
     } catch (exception) { // ignore: avoid_catches_without_on_clauses
-      status?.cancel();
+      status.cancel();
       rethrow;
     }
 
@@ -542,9 +531,9 @@ class UpdatePackagesCommand extends FlutterCommand {
   }
 
   void showDependencyPaths({
-    @required String from,
-    @required String to,
-    @required PubDependencyTree tree,
+    required String from,
+    required String to,
+    required PubDependencyTree tree,
   }) {
     if (!tree.contains(from)) {
       throwToolExit('Package $from not found in the dependency tree.');
@@ -564,9 +553,9 @@ class UpdatePackagesCommand extends FlutterCommand {
         paths.add(link);
       }
       if (link.from != null) {
-        visited.add(link.from.to);
+        visited.add(link.from!.to);
       }
-      for (final String dependency in tree._dependencyTree[link.to]) {
+      for (final String dependency in tree._dependencyTree[link.to]!) {
         if (!visited.contains(dependency)) {
           traversalQueue.addFirst(_DependencyLink(from: link, to: dependency));
         }
@@ -577,7 +566,7 @@ class UpdatePackagesCommand extends FlutterCommand {
       final StringBuffer buf = StringBuffer();
       while (path != null) {
         buf.write(path.to);
-        path = path.from;
+        path = path.from!;
         if (path != null) {
           buf.write(' <- ');
         }
@@ -593,11 +582,11 @@ class UpdatePackagesCommand extends FlutterCommand {
 
 class _DependencyLink {
   _DependencyLink({
-    @required this.from,
-    @required this.to,
+    required this.from,
+    required this.to,
   });
 
-  final _DependencyLink from;
+  final _DependencyLink? from;
   final String to;
 
   @override
@@ -679,9 +668,9 @@ class PubspecYaml {
   /// about (since they're all under our control).
   static PubspecYaml _parse(File file, List<String> lines) {
     final String filename = file.path;
-    String packageName;
-    String packageVersion;
-    PubspecChecksum checksum; // the checksum value used to verify that dependencies haven't changed.
+    String? packageName;
+    String? packageVersion;
+    PubspecChecksum? checksum; // the checksum value used to verify that dependencies haven't changed.
     final List<PubspecLine> result = <PubspecLine>[]; // The output buffer.
     Section section = Section.other; // Which section we're currently reading from.
     bool seenMain = false; // Whether we've seen the "dependencies:" section.
@@ -695,7 +684,7 @@ class PubspecYaml {
     // whatnot) have the style of having extra data after the line that declares
     // the dependency. So we track what is the "current" (or "last") dependency
     // that we are dealing with using this variable.
-    PubspecDependency lastDependency;
+    PubspecDependency? lastDependency;
     for (int index = 0; index < lines.length; index += 1) {
       String line = lines[index];
       if (lastDependency == null) {
@@ -1535,7 +1524,6 @@ String _computeChecksum(Iterable<String> names, String Function(String name) get
   final List<String> sortedNames = names.toList()..sort();
   for (final String name in sortedNames) {
     final String version = getVersion(name);
-    assert(version != '');
     if (version == null) {
       continue;
     }
