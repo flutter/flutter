@@ -88,7 +88,7 @@ Future<void> run(List<String> arguments) async {
     exitWithError(<String>['The analyze.dart script must be run with --enable-asserts.']);
   }
 
-  print('$clock Tool test files end in _test.dart...');
+  print('$clock All tool test files end in _test.dart...');
   await verifyToolTestsEndInTestDart(flutterRoot);
 
   print('$clock No sync*/async*');
