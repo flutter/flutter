@@ -328,7 +328,7 @@ class TextSelectionOverlay {
     _effectiveStartHandleVisibility.value = _handlesVisible && renderObject.selectionStartInViewport.value;
     _effectiveEndHandleVisibility.value = _handlesVisible && renderObject.selectionEndInViewport.value;
   }
-  
+
   final ValueNotifier<bool> _effectiveToolbarVisibility = ValueNotifier<bool>(false);
   void _updateToolbarVisibility() {
     _effectiveToolbarVisibility.value = renderObject.selectionStartInViewport.value || renderObject.selectionEndInViewport.value;
@@ -423,6 +423,8 @@ class TextSelectionOverlay {
   void dispose() {
     renderObject.selectionStartInViewport.removeListener(_updateHandleVisibilities);
     renderObject.selectionEndInViewport.removeListener(_updateHandleVisibilities);
+    renderObject.selectionStartInViewport.removeListener(_updateToolbarVisibility);
+    renderObject.selectionEndInViewport.removeListener(_updateToolbarVisibility);
     _selectionOverlay.dispose();
   }
 
@@ -689,7 +691,6 @@ class SelectionOverlay {
   /// Called when the users lift their fingers after dragging the end selection
   /// handles.
   final ValueChanged<DragEndDetails>? onEndHandleDragEnd;
-  
   final ValueListenable<bool>? toolbarVisible;
 
   /// The text selection positions of selection start and end.

@@ -4724,7 +4724,7 @@ void main() {
     ));
 
     final EditableTextState state =
-    tester.state<EditableTextState>(find.byType(EditableText));
+      tester.state<EditableTextState>(find.byType(EditableText));
     final RenderEditable renderEditable = state.renderEditable;
     final Scrollable scrollable = tester.widget<Scrollable>(find.byType(Scrollable));
 
