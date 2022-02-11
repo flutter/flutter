@@ -1365,6 +1365,7 @@ class TabBarView extends StatefulWidget {
 class _TabBarViewState extends State<TabBarView> {
   TabController? _controller;
   late PageController _pageController;
+  Key _pageViewKey = UniqueKey();
   late List<Widget> _children;
   late List<Widget> _childrenWithKey;
   int? _currentIndex;
@@ -1420,7 +1421,8 @@ class _TabBarViewState extends State<TabBarView> {
     if (widget.controller != oldWidget.controller) {
       _updateTabController();
       _currentIndex = _controller!.index;
-      _pageController.jumpToPage(_currentIndex!);
+      _pageController = PageController(initialPage: _currentIndex!);
+      _pageViewKey = UniqueKey();
     }
     if (widget.children != oldWidget.children && _warpUnderwayCount == 0)
       _updateChildren();
@@ -1541,6 +1543,7 @@ class _TabBarViewState extends State<TabBarView> {
     return NotificationListener<ScrollNotification>(
       onNotification: _handleScrollNotification,
       child: PageView(
+        key: _pageViewKey,
         dragStartBehavior: widget.dragStartBehavior,
         controller: _pageController,
         physics: widget.physics == null
