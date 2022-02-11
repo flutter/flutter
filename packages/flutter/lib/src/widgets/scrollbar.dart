@@ -79,6 +79,8 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     required Color color,
     required this.fadeoutOpacityAnimation,
     Color trackColor = const Color(0x00000000),
+    Radius? trackRadius,
+    OutlinedBorder? trackShape,
     Color trackBorderColor = const Color(0x00000000),
     TextDirection? textDirection,
     double thickness = _kScrollbarThickness,
@@ -86,7 +88,6 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     double mainAxisMargin = 0.0,
     double crossAxisMargin = 0.0,
     Radius? radius,
-    Radius? trackRadius,
     OutlinedBorder? shape,
     double minLength = _kMinThumbExtent,
     double? minOverscrollLength,
@@ -94,6 +95,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     bool ignorePointer = false,
   }) : assert(color != null),
        assert(radius == null || shape == null),
+       assert(trackRadius == null || trackShape == null),
        assert(thickness != null),
        assert(fadeoutOpacityAnimation != null),
        assert(mainAxisMargin != null),
@@ -117,8 +119,9 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
        _crossAxisMargin = crossAxisMargin,
        _minLength = minLength,
        _trackColor = trackColor,
-       _trackBorderColor = trackBorderColor,
        _trackRadius = trackRadius,
+       _trackShape = trackShape,
+       _trackBorderColor = trackBorderColor,
        _scrollbarOrientation = scrollbarOrientation,
        _minOverscrollLength = minOverscrollLength ?? minLength,
        _ignorePointer = ignorePointer {
@@ -149,19 +152,11 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     notifyListeners();
   }
 
-  /// [Color] of the track border. Mustn't be null.
-  Color get trackBorderColor => _trackBorderColor;
-  Color _trackBorderColor;
-  set trackBorderColor(Color value) {
-    assert(value != null);
-    if (trackBorderColor == value)
-      return;
-
-    _trackBorderColor = value;
-    notifyListeners();
-  }
-
   /// [Radius] of corners of the Scrollbar's track.
+  ///
+  /// Only one of [trackRadius] and [trackShape] may be specified. For a rounded
+  /// rectangle, it's simplest to just specify [radius]. By default, the
+  /// scrollbar track's shape is a simple rectangle.
   ///
   /// Scrollbar's track will be rectangular if [trackRadius] is null.
   Radius? get trackRadius => _trackRadius;
@@ -171,6 +166,36 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
       return;
 
     _trackRadius = value;
+    notifyListeners();
+  }
+
+  /// [OutlinedBorder] of the Scrollbar's track.
+  ///
+  /// Only one of [trackRadius] and [trackShape] may be specified. For a rounded
+  /// rectangle, it's simplest to just specify [radius]. By default, the
+  /// scrollbar track's shape is a simple rectangle.
+  ///
+  /// If [trackShape] is specified, the thumb will take the shape of the passed
+  /// [OutlinedBorder] and fill itself with [trackColor].
+  OutlinedBorder? get trackShape => _trackShape;
+  OutlinedBorder? _trackShape;
+  set trackShape(OutlinedBorder? value) {
+    if (trackShape == value)
+      return;
+
+    _trackShape = value;
+    notifyListeners();
+  }
+
+  /// [Color] of the track border. Mustn't be null.
+  Color get trackBorderColor => _trackBorderColor;
+  Color _trackBorderColor;
+  set trackBorderColor(Color value) {
+    assert(value != null);
+    if (trackBorderColor == value)
+      return;
+
+    _trackBorderColor = value;
     notifyListeners();
   }
 
@@ -237,6 +262,10 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 
   /// [Radius] of corners if the scrollbar should have rounded corners.
   ///
+  /// Only one of [radius] and [shape] may be specified. For a rounded rectangle,
+  /// it's simplest to just specify [radius]. By default, the scrollbar thumb's
+  /// shape is a simple rectangle.
+  ///
   /// Scrollbar will be rectangular if [radius] is null.
   Radius? get radius => _radius;
   Radius? _radius;
@@ -256,9 +285,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   /// shape is a simple rectangle.
   ///
   /// If [shape] is specified, the thumb will take the shape of the passed
-  /// [OutlinedBorder] and fill itself with [color] (or grey if it
-  /// is unspecified).
-  ///
+  /// [OutlinedBorder] and fill itself with [color].
   OutlinedBorder? get shape => _shape;
   OutlinedBorder? _shape;
   set shape(OutlinedBorder? value){
@@ -511,27 +538,35 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     // Paint if the opacity dictates visibility
     if (fadeoutOpacityAnimation.value != 0.0) {
       // Track
-      if (trackRadius == null) {
-        canvas.drawRect(_trackRect!, _paintTrack());
-      } else {
+      if (trackRadius != null) {
+        // Rounded rect track
         canvas.drawRRect(RRect.fromRectAndRadius(_trackRect!, trackRadius!), _paintTrack());
+      } else if (trackShape != null) {
+        // Custom-shaped track
+        final Path trackOuterPath = trackShape!.getOuterPath(_trackRect!);
+        canvas.drawPath(trackOuterPath, _paintTrack());
+        trackShape!.paint(canvas, _trackRect!);
+      } else {
+        // Rect track
+        canvas.drawRect(_trackRect!, _paintTrack());
       }
+
       // Track Border
       canvas.drawLine(borderStart, borderEnd, _paintTrack(isBorder: true));
+
+      // Thumb
       if (radius != null) {
         // Rounded rect thumb
         canvas.drawRRect(RRect.fromRectAndRadius(_thumbRect!, radius!), _paintThumb);
-        return;
-      }
-      if (shape == null) {
+      } else if (shape != null) {
+        // Custom-shaped thumb
+        final Path outerPath = shape!.getOuterPath(_thumbRect!);
+        canvas.drawPath(outerPath, _paintThumb);
+        shape!.paint(canvas, _thumbRect!);
+      } else {
         // Square thumb
         canvas.drawRect(_thumbRect!, _paintThumb);
-        return;
       }
-      // Custom-shaped thumb
-      final Path outerPath = shape!.getOuterPath(_thumbRect!);
-      canvas.drawPath(outerPath, _paintThumb);
-      shape!.paint(canvas, _thumbRect!);
     }
   }
 
@@ -753,6 +788,8 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     // Should repaint if any properties changed.
     return color != oldDelegate.color
         || trackColor != oldDelegate.trackColor
+        || trackRadius != oldDelegate.trackRadius
+        || trackShape != oldDelegate.trackShape
         || trackBorderColor != oldDelegate.trackBorderColor
         || textDirection != oldDelegate.textDirection
         || thickness != oldDelegate.thickness
@@ -760,7 +797,6 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
         || mainAxisMargin != oldDelegate.mainAxisMargin
         || crossAxisMargin != oldDelegate.crossAxisMargin
         || radius != oldDelegate.radius
-        || trackRadius != oldDelegate.trackRadius
         || shape != oldDelegate.shape
         || padding != oldDelegate.padding
         || minLength != oldDelegate.minLength
@@ -900,8 +936,9 @@ class RawScrollbar extends StatefulWidget {
     this.minThumbLength = _kMinThumbExtent,
     this.minOverscrollLength,
     this.trackVisibility,
-    this.trackRadius,
     this.trackColor,
+    this.trackRadius,
+    this.trackShape,
     this.trackBorderColor,
     this.fadeDuration = _kScrollbarFadeDuration,
     this.timeToFade = _kScrollbarTimeToFade,
@@ -932,6 +969,7 @@ class RawScrollbar extends StatefulWidget {
        assert(minOverscrollLength == null || minOverscrollLength >= 0),
        assert(fadeDuration != null),
        assert(radius == null || shape == null),
+       assert(trackRadius == null || trackShape == null),
        assert(timeToFade != null),
        assert(pressDuration != null),
        assert(mainAxisMargin != null),
@@ -1176,8 +1214,7 @@ class RawScrollbar extends StatefulWidget {
   /// shape is a simple rectangle.
   ///
   /// If [shape] is specified, the thumb will take the shape of the passed
-  /// [OutlinedBorder] and fill itself with [thumbColor] (or grey if it
-  /// is unspecified).
+  /// [OutlinedBorder] and fill itself with [thumbColor].
   ///
   /// {@tool dartpad}
   /// This is an example of using a [StadiumBorder] for drawing the [shape] of the
@@ -1245,12 +1282,6 @@ class RawScrollbar extends StatefulWidget {
   /// [MaterialState]s by using [ScrollbarThemeData.trackVisibility].
   final bool? trackVisibility;
 
-  /// The [Radius] of the scrollbar track's rounded rectangle corners.
-  ///
-  /// Scrollbar's track will be rectangular if [trackRadius] is null, which is
-  /// the default behavior.
-  final Radius? trackRadius;
-
   /// The color of the scrollbar track.
   ///
   /// The scrollbar track will only be visible when [trackVisibility] and
@@ -1258,6 +1289,22 @@ class RawScrollbar extends StatefulWidget {
   ///
   /// If null, defaults to Color(0x08000000).
   final Color? trackColor;
+
+  /// The [Radius] of the scrollbar track's rounded rectangle corners.
+  ///
+  /// Scrollbar's track will be rectangular if [trackRadius] is null, which is
+  /// the default behavior.
+  final Radius? trackRadius;
+
+  /// The [OutlinedBorder] of the scrollbar's track.
+  ///
+  /// Only one of [trackRadius] and [trackShape] may be specified. For a rounded
+  /// rectangle, it's simplest to just specify [trackRadius]. By default, the
+  /// scrollbar track's shape is a simple rectangle.
+  ///
+  /// If [trackShape] is specified, the thumb will take the shape of the passed
+  /// [OutlinedBorder] and fill itself with [trackColor].
+  final OutlinedBorder? trackShape;
 
   /// The color of the scrollbar track's border.
   ///
@@ -1408,6 +1455,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       thickness: widget.thickness ?? _kScrollbarThickness,
       radius: widget.radius,
       trackRadius: widget.trackRadius,
+      trackShape: widget.trackShape,
       scrollbarOrientation: widget.scrollbarOrientation,
       mainAxisMargin: widget.mainAxisMargin,
       shape: widget.shape,
@@ -1542,6 +1590,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     scrollbarPainter
       ..color = widget.thumbColor ?? const Color(0x66BCBCBC)
       ..trackRadius = widget.trackRadius
+      ..trackShape = widget.trackShape
       ..trackColor = _showTrack ? const Color(0x08000000) : const Color(0x00000000)
       ..trackBorderColor = _showTrack ? const Color(0x1a000000) : const Color(0x00000000)
       ..textDirection = Directionality.of(context)
