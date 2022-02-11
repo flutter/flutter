@@ -993,7 +993,6 @@ class SelectionOverlay {
   }
 }
 
-
 /// This widget represents a single draggable selection handle.
 class _SelectionHandleOverlay extends StatefulWidget {
   /// Create selection overlay.
