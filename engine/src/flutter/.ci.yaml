@@ -100,7 +100,7 @@ platform_properties:
 
 targets:
   - name: Linux Android AOT Engine
-    recipe: engine
+    recipe: engine/engine
     properties:
       add_recipes_cq: "true"
       build_android_aot: "true"
@@ -110,7 +110,7 @@ targets:
     scheduler: luci
 
   - name: Linux Android Debug Engine
-    recipe: engine
+    recipe: engine/engine
     properties:
       add_recipes_cq: "true"
       build_android_debug: "true"
@@ -155,7 +155,7 @@ targets:
     scheduler: luci
 
   - name: Linux Fuchsia
-    recipe: engine
+    recipe: engine/engine
     properties:
       add_recipes_cq: "true"
       build_fuchsia: "true"
@@ -164,7 +164,7 @@ targets:
     scheduler: luci
 
   - name: Linux Fuchsia FEMU
-    recipe: femu_test
+    recipe: engine/femu_test
     properties:
       add_recipes_cq: "true"
       build_fuchsia: "true"
@@ -181,7 +181,7 @@ targets:
     scheduler: luci
 
   - name: Linux Host Engine
-    recipe: engine
+    recipe: engine/engine
     properties:
       add_recipes_cq: "true"
       build_host: "true"
@@ -189,7 +189,7 @@ targets:
     scheduler: luci
 
   - name: Linux Unopt
-    recipe: engine_unopt
+    recipe: engine/engine_unopt
     properties:
       add_recipes_cq: "true"
     timeout: 60
@@ -204,7 +204,7 @@ targets:
     scheduler: luci
 
   - name: Linux Web Engine
-    recipe: web_engine
+    recipe: engine/web_engine
     properties:
       add_recipes_cq: "true"
       gcs_goldens_bucket: flutter_logs
@@ -244,7 +244,7 @@ targets:
       - flutter_frontend_server/**
 
   - name: Mac Android AOT Engine
-    recipe: engine
+    recipe: engine/engine
     properties:
       android_sdk_license: \n24333f8a63b6825ea9c5514f83c2829b004d1fee
       android_sdk_preview_license: \n84831b9409646a918e30573bab4c9c91346d8abd
@@ -254,7 +254,7 @@ targets:
     scheduler: luci
 
   - name: Mac Host Engine
-    recipe: engine
+    recipe: engine/engine
     properties:
       add_recipes_cq: "true"
       build_host: "true"
@@ -263,7 +263,7 @@ targets:
     scheduler: luci
 
   - name: Mac Unopt
-    recipe: engine_unopt
+    recipe: engine/engine_unopt
     properties:
       add_recipes_cq: "true"
       jazzy_version: 0.9.5
@@ -271,7 +271,7 @@ targets:
     scheduler: luci
 
   - name: Mac iOS Engine
-    recipe: engine
+    recipe: engine/engine
     properties:
       build_ios: "true"
       ios_debug: "true"
@@ -325,7 +325,7 @@ targets:
     scheduler: luci
 
   - name: Windows Android AOT Engine
-    recipe: engine
+    recipe: engine/engine
     properties:
       build_android_aot: "true"
       android_sdk_license: \n24333f8a63b6825ea9c5514f83c2829b004d1fee
@@ -334,7 +334,7 @@ targets:
     scheduler: luci
 
   - name: Windows Host Engine
-    recipe: engine
+    recipe: engine/engine
     timeout: 60
     properties:
       add_recipes_cq: "true"
@@ -360,21 +360,21 @@ targets:
     scheduler: luci
 
   - name: Windows Unopt
-    recipe: engine_unopt
+    recipe: engine/engine_unopt
     properties:
       add_recipes_cq: "true"
     timeout: 75
     scheduler: luci
 
   - name: Windows UWP Engine
-    recipe: engine
+    recipe: engine/engine
     properties:
       build_windows_uwp: "true"
     timeout: 60
     scheduler: luci
 
   - name: Windows Web Engine
-    recipe: web_engine
+    recipe: engine/web_engine
     properties:
       gcs_goldens_bucket: flutter_logs
     timeout: 60
@@ -386,7 +386,7 @@ targets:
 
   - name: Mac iOS Engine Profile
     presubmit: false
-    recipe: engine
+    recipe: engine/engine
     properties:
       build_ios: "true"
       ios_profile: "true"
@@ -396,7 +396,7 @@ targets:
 
   - name: Mac iOS Engine Release
     presubmit: false
-    recipe: engine
+    recipe: engine/engine
     properties:
       build_ios: "true"
       ios_release: "true"
