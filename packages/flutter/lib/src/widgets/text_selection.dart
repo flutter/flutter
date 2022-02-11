@@ -416,8 +416,6 @@ class TextSelectionOverlay {
     renderObject.selectionStartInViewport.removeListener(_updateHandleVisibilities);
     renderObject.selectionEndInViewport.removeListener(_updateHandleVisibilities);
     _selectionOverlay.dispose();
-    _effectiveStartHandleVisibility.dispose();
-    _effectiveEndHandleVisibility.dispose();
   }
 
   double _getStartGlyphHeight() {
