@@ -5934,38 +5934,38 @@ void main() {
       targetPlatform: defaultTargetPlatform,
     );
 
-    final int afterHomeOffset;
-    final int afterEndOffset;
-    final TextAffinity afterEndAffinity;
     switch (defaultTargetPlatform) {
-      // These platforms don't handle home/end at all.
+      // These platforms don't move the selection with home/end at all.
       case TargetPlatform.android:
       case TargetPlatform.iOS:
       case TargetPlatform.fuchsia:
       case TargetPlatform.macOS:
-        afterHomeOffset = 23;
-        afterEndOffset = 23;
-        afterEndAffinity = TextAffinity.downstream;
+        expect(
+          selection,
+          equals(
+            const TextSelection.collapsed(
+              offset: 23,
+            ),
+          ),
+          reason: 'on $platform',
+        );
         break;
 
       // These platforms go to the line start/end.
       case TargetPlatform.linux:
       case TargetPlatform.windows:
-        afterHomeOffset = 20;
-        afterEndOffset = 35;
-        afterEndAffinity = TextAffinity.upstream;
+        expect(
+          selection,
+          equals(
+            const TextSelection.collapsed(
+              offset: 20,
+            ),
+          ),
+          reason: 'on $platform',
+        );
         break;
     }
 
-    expect(
-      selection,
-      equals(
-        TextSelection.collapsed(
-          offset: afterHomeOffset,
-        ),
-      ),
-      reason: 'on $platform',
-    );
     expect(controller.text, equals(testText), reason: 'on $platform');
 
     await sendKeys(
@@ -5976,17 +5976,363 @@ void main() {
       targetPlatform: defaultTargetPlatform,
     );
 
+    switch (defaultTargetPlatform) {
+      // These platforms don't move the selection with home/end at all.
+      case TargetPlatform.android:
+      case TargetPlatform.iOS:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.macOS:
+        expect(
+          selection,
+          equals(
+            const TextSelection.collapsed(
+              offset: 23,
+            ),
+          ),
+          reason: 'on $platform',
+        );
+        break;
+
+      // These platforms go to the line start/end.
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        expect(
+          selection,
+          equals(
+            const TextSelection.collapsed(
+              offset: 35,
+              affinity: TextAffinity.upstream,
+            ),
+          ),
+          reason: 'on $platform',
+        );
+        break;
+    }
+    expect(controller.text, equals(testText), reason: 'on $platform');
+  },
+    skip: kIsWeb, // [intended] on web these keys are handled by the browser.
+    variant: TargetPlatformVariant.all(),
+  );
+
+  testWidgets('home keys and wordwraps', (WidgetTester tester) async {
+    final String targetPlatformString = defaultTargetPlatform.toString();
+    final String platform = targetPlatformString.substring(targetPlatformString.indexOf('.') + 1).toLowerCase();
+    const String testText = 'Now is the time for all good people to come to the aid of their country. Now is the time for all good people to come to the aid of their country.';
+    final TextEditingController controller = TextEditingController(text: testText);
+    controller.selection = const TextSelection(
+      baseOffset: 0,
+      extentOffset: 0,
+      affinity: TextAffinity.upstream,
+    );
+    late TextSelection selection;
+    late SelectionChangedCause cause;
+    await tester.pumpWidget(MaterialApp(
+      home: Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          width: 400,
+          child: EditableText(
+            maxLines: 10,
+            controller: controller,
+            showSelectionHandles: true,
+            autofocus: true,
+            focusNode: FocusNode(),
+            style: Typography.material2018().black.subtitle1!,
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+            selectionControls: materialTextSelectionControls,
+            keyboardType: TextInputType.text,
+            textAlign: TextAlign.right,
+            onSelectionChanged: (TextSelection newSelection, SelectionChangedCause? newCause) {
+              selection = newSelection;
+              cause = newCause!;
+            },
+          ),
+        ),
+      ),
+    ));
+
+    await tester.pump(); // Wait for autofocus to take effect.
+
+    // Move near the middle of the document.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowDown,
+        LogicalKeyboardKey.arrowRight,
+        LogicalKeyboardKey.arrowRight,
+        LogicalKeyboardKey.arrowRight,
+      ],
+      targetPlatform: defaultTargetPlatform,
+    );
+
+    expect(cause, equals(SelectionChangedCause.keyboard), reason: 'on $platform');
     expect(
       selection,
       equals(
-        TextSelection.collapsed(
-          offset: afterEndOffset,
-          affinity: afterEndAffinity,
+        const TextSelection.collapsed(
+          offset: 32,
         ),
       ),
       reason: 'on $platform',
     );
+
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.home,
+      ],
+      targetPlatform: defaultTargetPlatform,
+    );
+
+    switch (defaultTargetPlatform) {
+      // These platforms don't move the selection with home/end at all.
+      case TargetPlatform.android:
+      case TargetPlatform.iOS:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.macOS:
+        expect(
+          selection,
+          equals(
+            const TextSelection.collapsed(
+              offset: 32,
+            ),
+          ),
+          reason: 'on $platform',
+        );
+        break;
+
+      // These platforms go to the line start/end.
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        expect(
+          selection,
+          equals(
+            const TextSelection.collapsed(
+              offset: 29,
+            ),
+          ),
+          reason: 'on $platform',
+        );
+        break;
+    }
+
     expect(controller.text, equals(testText), reason: 'on $platform');
+
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.home,
+      ],
+      targetPlatform: defaultTargetPlatform,
+    );
+
+    switch (defaultTargetPlatform) {
+      // These platforms don't move the selection with home/end at all still.
+      case TargetPlatform.android:
+      case TargetPlatform.iOS:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.macOS:
+        expect(
+          selection,
+          equals(
+            const TextSelection.collapsed(
+              offset: 32,
+            ),
+          ),
+          reason: 'on $platform',
+        );
+        break;
+
+      // Linux does nothing at a wordwrap with subsequent presses.
+      case TargetPlatform.linux:
+        expect(
+          selection,
+          equals(
+            const TextSelection.collapsed(
+              offset: 29,
+            ),
+          ),
+          reason: 'on $platform',
+        );
+        break;
+
+      // Windows jumps to the previous wordwrapped line.
+      case TargetPlatform.windows:
+        expect(
+          selection,
+          equals(
+            const TextSelection.collapsed(
+              offset: 0,
+            ),
+          ),
+          reason: 'on $platform',
+        );
+        break;
+    }
+  },
+    skip: kIsWeb, // [intended] on web these keys are handled by the browser.
+    variant: TargetPlatformVariant.all(),
+  );
+
+  testWidgets('end keys and wordwraps', (WidgetTester tester) async {
+    final String targetPlatformString = defaultTargetPlatform.toString();
+    final String platform = targetPlatformString.substring(targetPlatformString.indexOf('.') + 1).toLowerCase();
+    const String testText = 'Now is the time for all good people to come to the aid of their country. Now is the time for all good people to come to the aid of their country.';
+    final TextEditingController controller = TextEditingController(text: testText);
+    controller.selection = const TextSelection(
+      baseOffset: 0,
+      extentOffset: 0,
+      affinity: TextAffinity.upstream,
+    );
+    late TextSelection selection;
+    late SelectionChangedCause cause;
+    await tester.pumpWidget(MaterialApp(
+      home: Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          width: 400,
+          child: EditableText(
+            maxLines: 10,
+            controller: controller,
+            showSelectionHandles: true,
+            autofocus: true,
+            focusNode: FocusNode(),
+            style: Typography.material2018().black.subtitle1!,
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+            selectionControls: materialTextSelectionControls,
+            keyboardType: TextInputType.text,
+            textAlign: TextAlign.right,
+            onSelectionChanged: (TextSelection newSelection, SelectionChangedCause? newCause) {
+              selection = newSelection;
+              cause = newCause!;
+            },
+          ),
+        ),
+      ),
+    ));
+
+    await tester.pump(); // Wait for autofocus to take effect.
+
+    // Move near the middle of the document.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowDown,
+        LogicalKeyboardKey.arrowRight,
+        LogicalKeyboardKey.arrowRight,
+        LogicalKeyboardKey.arrowRight,
+      ],
+      targetPlatform: defaultTargetPlatform,
+    );
+
+    expect(cause, equals(SelectionChangedCause.keyboard), reason: 'on $platform');
+    expect(
+      selection,
+      equals(
+        const TextSelection.collapsed(
+          offset: 32,
+        ),
+      ),
+      reason: 'on $platform',
+    );
+
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.end,
+      ],
+      targetPlatform: defaultTargetPlatform,
+    );
+
+    switch (defaultTargetPlatform) {
+      // These platforms don't move the selection with home/end at all.
+      case TargetPlatform.android:
+      case TargetPlatform.iOS:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.macOS:
+        expect(
+          selection,
+          equals(
+            const TextSelection.collapsed(
+              offset: 32,
+            ),
+          ),
+          reason: 'on $platform',
+        );
+        break;
+
+      // These platforms go to the line start/end.
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        expect(
+          selection,
+          equals(
+            const TextSelection.collapsed(
+              offset: 58,
+              affinity: TextAffinity.upstream,
+            ),
+          ),
+          reason: 'on $platform',
+        );
+        break;
+    }
+    expect(controller.text, equals(testText), reason: 'on $platform');
+
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.end,
+      ],
+      targetPlatform: defaultTargetPlatform,
+    );
+
+    switch (defaultTargetPlatform) {
+      // These platforms don't move the selection with home/end at all still.
+      case TargetPlatform.android:
+      case TargetPlatform.iOS:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.macOS:
+        expect(
+          selection,
+          equals(
+            const TextSelection.collapsed(
+              offset: 32,
+            ),
+          ),
+          reason: 'on $platform',
+        );
+        break;
+
+      // Linux does nothing at a wordwrap with subsequent presses.
+      case TargetPlatform.linux:
+        expect(
+          selection,
+          equals(
+            const TextSelection.collapsed(
+              offset: 58,
+              affinity: TextAffinity.upstream,
+            ),
+          ),
+          reason: 'on $platform',
+        );
+        break;
+
+      // Windows jumps to the next wordwrapped line.
+      case TargetPlatform.windows:
+        expect(
+          selection,
+          equals(
+            const TextSelection.collapsed(
+              offset: 84,
+              affinity: TextAffinity.upstream,
+            ),
+          ),
+          reason: 'on $platform',
+        );
+        break;
+    }
   },
     skip: kIsWeb, // [intended] on web these keys are handled by the browser.
     variant: TargetPlatformVariant.all(),
@@ -6299,6 +6645,557 @@ void main() {
   },
     skip: kIsWeb, // [intended] on web these keys are handled by the browser.
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.windows })
+  );
+
+  testWidgets('home/end keys scrolling (Mac only)', (WidgetTester tester) async {
+    const String testText = 'Now is the time for all good people to come to the aid of their country. Now is the time for all good people to come to the aid of their country.';
+    final TextEditingController controller = TextEditingController(text: testText);
+    controller.selection = const TextSelection(
+      baseOffset: 0,
+      extentOffset: 0,
+      affinity: TextAffinity.upstream,
+    );
+    await tester.pumpWidget(MaterialApp(
+      home: Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          width: 400,
+          child: EditableText(
+            maxLines: 10,
+            controller: controller,
+            showSelectionHandles: true,
+            autofocus: true,
+            focusNode: FocusNode(),
+            style: Typography.material2018().black.subtitle1!,
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+            selectionControls: materialTextSelectionControls,
+            keyboardType: TextInputType.text,
+            textAlign: TextAlign.right,
+          ),
+        ),
+      ),
+    ));
+
+    await tester.pump(); // Wait for autofocus to take effect.
+
+    final Scrollable scrollable = tester.widget<Scrollable>(find.byType(Scrollable));
+
+    expect(scrollable.controller!.offset, 0.0);
+
+    // Scroll to the end of the document with the end key.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.end,
+      ],
+      targetPlatform: defaultTargetPlatform,
+    );
+    final double maxScrollExtent = scrollable.controller!.position.maxScrollExtent;
+    expect(scrollable.controller!.offset, maxScrollExtent);
+
+    // Scroll back to the beginning of the document with the home key.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.home,
+      ],
+      targetPlatform: defaultTargetPlatform,
+    );
+    expect(scrollable.controller!.offset, 0.0);
+  },
+    skip: kIsWeb, // [intended] on web these keys are handled by the browser.
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS })
+  );
+
+  testWidgets('shift + home keys and wordwraps', (WidgetTester tester) async {
+    final String targetPlatformString = defaultTargetPlatform.toString();
+    final String platform = targetPlatformString.substring(targetPlatformString.indexOf('.') + 1).toLowerCase();
+    const String testText = 'Now is the time for all good people to come to the aid of their country. Now is the time for all good people to come to the aid of their country.';
+    final TextEditingController controller = TextEditingController(text: testText);
+    controller.selection = const TextSelection(
+      baseOffset: 0,
+      extentOffset: 0,
+      affinity: TextAffinity.upstream,
+    );
+    late TextSelection selection;
+    late SelectionChangedCause cause;
+    await tester.pumpWidget(MaterialApp(
+      home: Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          width: 400,
+          child: EditableText(
+            maxLines: 10,
+            controller: controller,
+            showSelectionHandles: true,
+            autofocus: true,
+            focusNode: FocusNode(),
+            style: Typography.material2018().black.subtitle1!,
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+            selectionControls: materialTextSelectionControls,
+            keyboardType: TextInputType.text,
+            textAlign: TextAlign.right,
+            onSelectionChanged: (TextSelection newSelection, SelectionChangedCause? newCause) {
+              selection = newSelection;
+              cause = newCause!;
+            },
+          ),
+        ),
+      ),
+    ));
+
+    await tester.pump(); // Wait for autofocus to take effect.
+
+    // Move near the middle of the document.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowDown,
+        LogicalKeyboardKey.arrowRight,
+        LogicalKeyboardKey.arrowRight,
+        LogicalKeyboardKey.arrowRight,
+      ],
+      targetPlatform: defaultTargetPlatform,
+    );
+
+    expect(cause, equals(SelectionChangedCause.keyboard), reason: 'on $platform');
+    expect(
+      selection,
+      equals(
+        const TextSelection.collapsed(
+          offset: 32,
+        ),
+      ),
+      reason: 'on $platform',
+    );
+
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.home,
+      ],
+      shift: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+
+    switch (defaultTargetPlatform) {
+      // These platforms don't move the selection with shift + home/end at all.
+      case TargetPlatform.android:
+      case TargetPlatform.iOS:
+      case TargetPlatform.fuchsia:
+        expect(
+          selection,
+          equals(
+            const TextSelection.collapsed(
+              offset: 32,
+            ),
+          ),
+          reason: 'on $platform',
+        );
+        break;
+
+      // Mac selects to the start of the document.
+      case TargetPlatform.macOS:
+        expect(
+          selection,
+          equals(
+            const TextSelection(
+              baseOffset: 32,
+              extentOffset: 0,
+            ),
+          ),
+          reason: 'on $platform',
+        );
+        break;
+
+      // These platforms select to the line start.
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        expect(
+          selection,
+          equals(
+            const TextSelection(
+              baseOffset: 32,
+              extentOffset: 29,
+            ),
+          ),
+          reason: 'on $platform',
+        );
+        break;
+    }
+
+    expect(controller.text, equals(testText), reason: 'on $platform');
+
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.home,
+      ],
+      shift: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+
+    switch (defaultTargetPlatform) {
+      // These platforms don't move the selection with home/end at all still.
+      case TargetPlatform.android:
+      case TargetPlatform.iOS:
+      case TargetPlatform.fuchsia:
+        expect(
+          selection,
+          equals(
+            const TextSelection.collapsed(
+              offset: 32,
+            ),
+          ),
+          reason: 'on $platform',
+        );
+        break;
+
+      // Mac selects to the start of the document.
+      case TargetPlatform.macOS:
+        expect(
+          selection,
+          equals(
+            const TextSelection(
+              baseOffset: 32,
+              extentOffset: 0,
+            ),
+          ),
+          reason: 'on $platform',
+        );
+        break;
+
+      // Linux does nothing at a wordwrap with subsequent presses.
+      case TargetPlatform.linux:
+        expect(
+          selection,
+          equals(
+            const TextSelection(
+              baseOffset: 32,
+              extentOffset: 29,
+            ),
+          ),
+          reason: 'on $platform',
+        );
+        break;
+
+      // Windows jumps to the previous wordwrapped line.
+      case TargetPlatform.windows:
+        expect(
+          selection,
+          equals(
+            const TextSelection(
+              baseOffset: 32,
+              extentOffset: 0,
+            ),
+          ),
+          reason: 'on $platform',
+        );
+        break;
+    }
+  },
+    skip: kIsWeb, // [intended] on web these keys are handled by the browser.
+    variant: TargetPlatformVariant.all(),
+  );
+
+  testWidgets('shift + end keys and wordwraps', (WidgetTester tester) async {
+    final String targetPlatformString = defaultTargetPlatform.toString();
+    final String platform = targetPlatformString.substring(targetPlatformString.indexOf('.') + 1).toLowerCase();
+    const String testText = 'Now is the time for all good people to come to the aid of their country. Now is the time for all good people to come to the aid of their country.';
+    final TextEditingController controller = TextEditingController(text: testText);
+    controller.selection = const TextSelection(
+      baseOffset: 0,
+      extentOffset: 0,
+      affinity: TextAffinity.upstream,
+    );
+    late TextSelection selection;
+    late SelectionChangedCause cause;
+    await tester.pumpWidget(MaterialApp(
+      home: Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          width: 400,
+          child: EditableText(
+            maxLines: 10,
+            controller: controller,
+            showSelectionHandles: true,
+            autofocus: true,
+            focusNode: FocusNode(),
+            style: Typography.material2018().black.subtitle1!,
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+            selectionControls: materialTextSelectionControls,
+            keyboardType: TextInputType.text,
+            textAlign: TextAlign.right,
+            onSelectionChanged: (TextSelection newSelection, SelectionChangedCause? newCause) {
+              selection = newSelection;
+              cause = newCause!;
+            },
+          ),
+        ),
+      ),
+    ));
+
+    await tester.pump(); // Wait for autofocus to take effect.
+
+    // Move near the middle of the document.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowDown,
+        LogicalKeyboardKey.arrowRight,
+        LogicalKeyboardKey.arrowRight,
+        LogicalKeyboardKey.arrowRight,
+      ],
+      targetPlatform: defaultTargetPlatform,
+    );
+
+    expect(cause, equals(SelectionChangedCause.keyboard), reason: 'on $platform');
+    expect(
+      selection,
+      equals(
+        const TextSelection.collapsed(
+          offset: 32,
+        ),
+      ),
+      reason: 'on $platform',
+    );
+
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.end,
+      ],
+      shift: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+
+    switch (defaultTargetPlatform) {
+      // These platforms don't move the selection with home/end at all.
+      case TargetPlatform.android:
+      case TargetPlatform.iOS:
+      case TargetPlatform.fuchsia:
+        expect(
+          selection,
+          equals(
+            const TextSelection.collapsed(
+              offset: 32,
+            ),
+          ),
+          reason: 'on $platform',
+        );
+        break;
+
+      // Mac selects to the end of the document.
+      case TargetPlatform.macOS:
+        expect(
+          selection,
+          equals(
+            const TextSelection(
+              baseOffset: 32,
+              extentOffset: 145,
+            ),
+          ),
+          reason: 'on $platform',
+        );
+        break;
+
+      // These platforms select to the line end.
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        expect(
+          selection,
+          equals(
+            const TextSelection(
+              baseOffset: 32,
+              extentOffset: 58,
+              affinity: TextAffinity.upstream,
+            ),
+          ),
+          reason: 'on $platform',
+        );
+        break;
+    }
+    expect(controller.text, equals(testText), reason: 'on $platform');
+
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.end,
+      ],
+      shift: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+
+    switch (defaultTargetPlatform) {
+      // These platforms don't move the selection with home/end at all still.
+      case TargetPlatform.android:
+      case TargetPlatform.iOS:
+      case TargetPlatform.fuchsia:
+        expect(
+          selection,
+          equals(
+            const TextSelection.collapsed(
+              offset: 32,
+            ),
+          ),
+          reason: 'on $platform',
+        );
+        break;
+
+      // Mac stays at the end of the document.
+      case TargetPlatform.macOS:
+        expect(
+          selection,
+          equals(
+            const TextSelection(
+              baseOffset: 32,
+              extentOffset: 145,
+            ),
+          ),
+          reason: 'on $platform',
+        );
+        break;
+
+      // Linux does nothing at a wordwrap with subsequent presses.
+      case TargetPlatform.linux:
+        expect(
+          selection,
+          equals(
+            const TextSelection(
+              baseOffset: 32,
+              extentOffset: 58,
+              affinity: TextAffinity.upstream,
+            ),
+          ),
+          reason: 'on $platform',
+        );
+        break;
+
+      // Windows jumps to the previous wordwrapped line.
+      case TargetPlatform.windows:
+        expect(
+          selection,
+          equals(
+            const TextSelection(
+              baseOffset: 32,
+              extentOffset: 84,
+              affinity: TextAffinity.upstream,
+            ),
+          ),
+          reason: 'on $platform',
+        );
+        break;
+    }
+  },
+    skip: kIsWeb, // [intended] on web these keys are handled by the browser.
+    variant: TargetPlatformVariant.all(),
+  );
+
+  testWidgets('shift + home/end keys to document boundary (Mac only)', (WidgetTester tester) async {
+    const String testText = 'Now is the time for all good people to come to the aid of their country. Now is the time for all good people to come to the aid of their country.';
+    final TextEditingController controller = TextEditingController(text: testText);
+    controller.selection = const TextSelection(
+      baseOffset: 0,
+      extentOffset: 0,
+      affinity: TextAffinity.upstream,
+    );
+    late TextSelection selection;
+    await tester.pumpWidget(MaterialApp(
+      home: Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          width: 400,
+          child: EditableText(
+            maxLines: 10,
+            controller: controller,
+            showSelectionHandles: true,
+            autofocus: true,
+            focusNode: FocusNode(),
+            style: Typography.material2018().black.subtitle1!,
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+            selectionControls: materialTextSelectionControls,
+            keyboardType: TextInputType.text,
+            textAlign: TextAlign.right,
+            onSelectionChanged: (TextSelection newSelection, SelectionChangedCause? newCause) {
+              selection = newSelection;
+            },
+          ),
+        ),
+      ),
+    ));
+
+    await tester.pump(); // Wait for autofocus to take effect.
+
+    final Scrollable scrollable = tester.widget<Scrollable>(find.byType(Scrollable));
+    expect(scrollable.controller!.offset, 0.0);
+
+    // Move near the middle of the document.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowDown,
+        LogicalKeyboardKey.arrowRight,
+        LogicalKeyboardKey.arrowRight,
+        LogicalKeyboardKey.arrowRight,
+      ],
+      targetPlatform: defaultTargetPlatform,
+    );
+    expect(
+      selection,
+      equals(
+        const TextSelection.collapsed(
+          offset: 32,
+        ),
+      ),
+    );
+
+    // Expand to the start of the document with the home key.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.home,
+      ],
+      shift: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+    expect(scrollable.controller!.offset, 0.0);
+    expect(
+      selection,
+      equals(
+        const TextSelection(
+          baseOffset: 32,
+          extentOffset: 0,
+        ),
+      ),
+    );
+
+    // Expand to the end of the document with the end key.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.end,
+      ],
+      shift: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+    final double maxScrollExtent = scrollable.controller!.position.maxScrollExtent;
+    expect(scrollable.controller!.offset, maxScrollExtent);
+    expect(
+      selection,
+      equals(
+        const TextSelection(
+          baseOffset: 0,
+          extentOffset: 145,
+        ),
+      ),
+    );
+  },
+    skip: kIsWeb, // [intended] on web these keys are handled by the browser.
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS })
   );
 
   testWidgets('control + home/end keys (Windows only)', (WidgetTester tester) async {
@@ -9533,7 +10430,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS })
   );
 
-  testWidgets('expanding selection to start/end', (WidgetTester tester) async {
+  testWidgets('expanding selection to start/end single line', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(text: 'word word word');
     // word wo|rd| word
     controller.selection = const TextSelection(
@@ -9583,7 +10480,7 @@ void main() {
       controller.selection,
       equals(
         const TextSelection(
-          baseOffset: 7,
+          baseOffset: 9,
           extentOffset: 0,
           affinity: TextAffinity.upstream,
         ),
@@ -9595,7 +10492,7 @@ void main() {
     await sendKeys(
       tester,
       <LogicalKeyboardKey>[
-        LogicalKeyboardKey.home,
+        LogicalKeyboardKey.end,
       ],
       shift: true,
       targetPlatform: defaultTargetPlatform,
@@ -9606,8 +10503,8 @@ void main() {
       controller.selection,
       equals(
         const TextSelection(
-          baseOffset: 7,
-          extentOffset: 0,
+          baseOffset: 0,
+          extentOffset: 14,
           affinity: TextAffinity.upstream,
         ),
       ),
