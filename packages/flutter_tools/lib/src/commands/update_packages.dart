@@ -849,9 +849,9 @@ class PubspecYaml {
     Section section = Section.other; // the section we're currently handling
 
     // the line number where we're going to insert the transitive dependencies.
-    int endOfDirectDependencies;
+    int? endOfDirectDependencies;
     // The line number where we're going to insert the transitive dev dependencies.
-    int endOfDevDependencies;
+    int? endOfDevDependencies;
     // Walk the pre-parsed input file, outputting it unmodified except for
     // updating version numbers, removing the old transitive dependencies lines,
     // and adding our new transitive dependencies lines. We also do a little
@@ -1029,7 +1029,7 @@ class PubspecYaml {
       line = line.trimRight();
       if (line == '') {
         if (!hadBlankLine) {
-          contents.writeln('');
+          contents.writeln();
         }
         hadBlankLine = true;
       } else {
@@ -1059,7 +1059,7 @@ class PubspecChecksum extends PubspecLine {
   /// and special dependencies sorted lexically.
   ///
   /// If the line cannot be parsed, [value] will be null.
-  final String value;
+  final String? value;
 
   /// Parses a [PubspecChecksum] from a line.
   ///
@@ -1076,7 +1076,12 @@ class PubspecChecksum extends PubspecLine {
 
 /// A header, e.g. "dependencies:".
 class PubspecHeader extends PubspecLine {
-  PubspecHeader(String line, this.section, { this.name, this.value }) : super(line);
+  PubspecHeader(
+    String line,
+    this.section, {
+    this.name,
+    this.value,
+  }) : super(line);
 
   /// The section of the pubspec where the parse [line] appears.
   final Section section;
@@ -1091,7 +1096,7 @@ class PubspecHeader extends PubspecLine {
   /// ```
   /// version: 0.16.5
   /// ```
-  final String name;
+  final String? name;
 
   /// The value in the pubspec line providing a name/value pair, such as "name"
   /// and "version".
@@ -1103,9 +1108,9 @@ class PubspecHeader extends PubspecLine {
   /// ```
   /// version: 0.16.5
   /// ```
-  final String value;
+  final String? value;
 
-  static PubspecHeader parse(String line) {
+  static PubspecHeader? parse(String line) {
     // We recognize any line that:
     //  * doesn't start with a space (i.e. is aligned on the left edge)
     //  * ignoring trailing spaces and comments, ends with a colon
@@ -1156,7 +1161,7 @@ class PubspecDependency extends PubspecLine {
     String line,
     this.name,
     this.suffix, {
-    @required this.isTransitive,
+    required this.isTransitive,
     DependencyKind kind,
     this.version,
     this.sourcePath,
@@ -1220,7 +1225,7 @@ class PubspecDependency extends PubspecLine {
   final String version; // the version string if found, or blank.
   final bool isTransitive; // whether the suffix matched kTransitiveMagicString
   final String sourcePath; // the filename of the pubspec.yaml file, for error messages
-  bool isDevDependency; // Whether this dependency is under the `dev dependencies` section.
+  bool? isDevDependency; // Whether this dependency is under the `dev dependencies` section.
 
   DependencyKind get kind => _kind;
   DependencyKind _kind = DependencyKind.normal;
@@ -1258,8 +1263,8 @@ class PubspecDependency extends PubspecLine {
     }
 
     if (_kind == DependencyKind.path &&
-        !globals.fs.path.isWithin(globals.fs.path.join(Cache.flutterRoot, 'bin'), _lockTarget) &&
-        globals.fs.path.isWithin(Cache.flutterRoot, _lockTarget)) {
+        !globals.fs.path.isWithin(globals.fs.path.join(Cache.flutterRoot!, 'bin'), _lockTarget) &&
+        globals.fs.path.isWithin(Cache.flutterRoot!, _lockTarget)) {
       return true;
     }
 
@@ -1270,7 +1275,7 @@ class PubspecDependency extends PubspecLine {
   /// We throw if we couldn't parse this line.
   /// We return true if we parsed it and stored the line in lockLine.
   /// We return false if we parsed it and it's a git dependency that needs the next few lines.
-  bool parseLock(String line, String pubspecPath, { @required bool lockIsOverride }) {
+  bool parseLock(String line, String pubspecPath, { required bool lockIsOverride }) {
     assert(lockIsOverride != null);
     assert(kind == DependencyKind.unknown);
     if (line.startsWith(_pathPrefix)) {
@@ -1395,7 +1400,7 @@ String _generateFakePubspec(
         }
         continue;
       }
-      final String version = kManuallyPinnedDependencies[package];
+      final String version = kManuallyPinnedDependencies[package]!;
       result.writeln('  $package: $version');
       if (verbose) {
         globals.printStatus('  - $package: $version');
