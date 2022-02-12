@@ -446,7 +446,8 @@ TEST_F(AXPlatformNodeWinTest, IAccessibleDetachedObject) {
   EXPECT_EQ(E_FAIL, root_obj->get_accName(SELF, name2.Receive()));
 }
 
-TEST_F(AXPlatformNodeWinTest, IAccessibleHitTest) {
+// TODO(cbracken): Flaky https://github.com/flutter/flutter/issues/98302
+TEST_F(AXPlatformNodeWinTest, DISABLED_IAccessibleHitTest) {
   AXNodeData root;
   root.id = 1;
   root.relative_bounds.bounds = gfx::RectF(0, 0, 40, 40);
@@ -4473,8 +4474,7 @@ TEST_F(AXPlatformNodeWinTest, IValueProvider_GetValue) {
   EXPECT_HRESULT_SUCCEEDED(
       QueryInterfaceFromNode<IValueProvider>(GetRootAsAXNode()->children()[0])
           ->get_Value(bstr_value.Receive()));
-  // TODO(gw280): https://github.com/flutter/flutter/issues/78460
-  EXPECT_STREQ(L"3.000000", bstr_value.Get());
+  EXPECT_STREQ(L"3", bstr_value.Get());
   bstr_value.Reset();
 
   EXPECT_HRESULT_SUCCEEDED(
@@ -4533,7 +4533,7 @@ TEST_F(AXPlatformNodeWinTest, IValueProvider_SetValue) {
 
   EXPECT_UIA_ELEMENTNOTENABLED(provider1->SetValue(L"2"));
   EXPECT_HRESULT_SUCCEEDED(provider1->get_Value(bstr_value.Receive()));
-  EXPECT_STREQ(L"3.000000", bstr_value.Get());
+  EXPECT_STREQ(L"3", bstr_value.Get());
   bstr_value.Reset();
 
   EXPECT_HRESULT_SUCCEEDED(provider2->SetValue(L"changed"));
