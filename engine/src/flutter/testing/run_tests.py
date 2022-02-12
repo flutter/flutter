@@ -215,8 +215,8 @@ def RunCCTests(build_dir, filter, coverage, capture_core_dump):
 
   RunEngineExecutable(build_dir, 'testing_unittests', filter, shuffle_flags, coverage=coverage)
 
-  # The accessibility library only supports Mac for now.
-  if IsMac():
+  # The accessibility library only supports Mac and Windows.
+  if IsMac() or IsWindows():
     RunEngineExecutable(build_dir, 'accessibility_unittests', filter, shuffle_flags, coverage=coverage)
 
   # These unit-tests are Objective-C and can only run on Darwin.
