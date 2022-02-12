@@ -1,82 +1,139 @@
-package io.flutter.embedding.engine.mutatorsstack;
+package io.flutter.plugin.platform;
 
 import static android.view.View.OnFocusChangeListener;
-import static junit.framework.TestCase.*;
+import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-import android.graphics.Matrix;
-import android.view.MotionEvent;
+import android.annotation.TargetApi;
+import android.content.Context;
+import android.graphics.BlendMode;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.SurfaceTexture;
+import android.view.Surface;
+import android.view.View;
 import android.view.ViewTreeObserver;
+import androidx.annotation.NonNull;
+import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
-import io.flutter.embedding.android.AndroidTouchProcessor;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.robolectric.RuntimeEnvironment;
-import org.robolectric.annotation.Config;
 
-@Config(manifest = Config.NONE)
+@TargetApi(31)
 @RunWith(AndroidJUnit4.class)
-public class FlutterMutatorViewTest {
+public class PlatformViewWrapperTest {
+  @Test
+  public void setTexture_writesToBuffer() {
+    final Surface surface = mock(Surface.class);
+    final Context ctx = ApplicationProvider.getApplicationContext();
+    final PlatformViewWrapper wrapper =
+        new PlatformViewWrapper(ctx) {
+          @Override
+          protected Surface createSurface(@NonNull SurfaceTexture tx) {
+            return surface;
+          }
+        };
+
+    final SurfaceTexture tx = mock(SurfaceTexture.class);
+    when(tx.isReleased()).thenReturn(false);
+
+    final Canvas canvas = mock(Canvas.class);
+    when(surface.lockHardwareCanvas()).thenReturn(canvas);
+
+    // Test.
+    wrapper.setTexture(tx);
+
+    // Verify.
+    verify(surface, times(1)).lockHardwareCanvas();
+    verify(surface, times(1)).unlockCanvasAndPost(canvas);
+    verify(canvas, times(1)).drawColor(Color.TRANSPARENT, BlendMode.CLEAR);
+    verifyNoMoreInteractions(surface);
+    verifyNoMoreInteractions(canvas);
+  }
 
   @Test
-  public void canDragViews() {
-    final AndroidTouchProcessor touchProcessor = mock(AndroidTouchProcessor.class);
-    final FlutterMutatorView view =
-        new FlutterMutatorView(RuntimeEnvironment.systemContext, 1.0f, touchProcessor);
-    final FlutterMutatorsStack mutatorStack = mock(FlutterMutatorsStack.class);
+  public void draw_writesToBuffer() {
+    final Surface surface = mock(Surface.class);
+    final Context ctx = ApplicationProvider.getApplicationContext();
+    final PlatformViewWrapper wrapper =
+        new PlatformViewWrapper(ctx) {
+          @Override
+          protected Surface createSurface(@NonNull SurfaceTexture tx) {
+            return surface;
+          }
+        };
 
-    assertTrue(view.onInterceptTouchEvent(mock(MotionEvent.class)));
+    wrapper.addView(
+        new View(ctx) {
+          @Override
+          public void draw(Canvas canvas) {
+            super.draw(canvas);
+            canvas.drawColor(Color.RED);
+          }
+        });
 
-    {
-      view.readyToDisplay(mutatorStack, /*left=*/ 1, /*top=*/ 2, /*width=*/ 0, /*height=*/ 0);
-      view.onTouchEvent(MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 0.0f, 0.0f, 0));
-      final ArgumentCaptor<Matrix> matrixCaptor = ArgumentCaptor.forClass(Matrix.class);
-      verify(touchProcessor).onTouchEvent(any(), matrixCaptor.capture());
+    final int size = 100;
+    wrapper.measure(size, size);
+    wrapper.layout(0, 0, size, size);
 
-      final Matrix screenMatrix = new Matrix();
-      screenMatrix.postTranslate(1, 2);
-      assertTrue(matrixCaptor.getValue().equals(screenMatrix));
-    }
+    final SurfaceTexture tx = mock(SurfaceTexture.class);
+    when(tx.isReleased()).thenReturn(false);
 
-    reset(touchProcessor);
+    when(surface.lockHardwareCanvas()).thenReturn(mock(Canvas.class));
 
-    {
-      view.readyToDisplay(mutatorStack, /*left=*/ 3, /*top=*/ 4, /*width=*/ 0, /*height=*/ 0);
-      view.onTouchEvent(MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE, 0.0f, 0.0f, 0));
-      final ArgumentCaptor<Matrix> matrixCaptor = ArgumentCaptor.forClass(Matrix.class);
-      verify(touchProcessor).onTouchEvent(any(), matrixCaptor.capture());
+    wrapper.setTexture(tx);
 
-      final Matrix screenMatrix = new Matrix();
-      screenMatrix.postTranslate(1, 2);
-      assertTrue(matrixCaptor.getValue().equals(screenMatrix));
-    }
+    reset(surface);
 
-    reset(touchProcessor);
+    final Canvas canvas = mock(Canvas.class);
+    when(surface.lockHardwareCanvas()).thenReturn(canvas);
+    when(surface.isValid()).thenReturn(true);
 
-    {
-      view.readyToDisplay(mutatorStack, /*left=*/ 5, /*top=*/ 6, /*width=*/ 0, /*height=*/ 0);
-      view.onTouchEvent(MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE, 0.0f, 0.0f, 0));
-      final ArgumentCaptor<Matrix> matrixCaptor = ArgumentCaptor.forClass(Matrix.class);
-      verify(touchProcessor).onTouchEvent(any(), matrixCaptor.capture());
+    // Test.
+    wrapper.invalidate();
+    wrapper.draw(new Canvas());
 
-      final Matrix screenMatrix = new Matrix();
-      screenMatrix.postTranslate(3, 4);
-      assertTrue(matrixCaptor.getValue().equals(screenMatrix));
-    }
+    // Verify.
+    verify(canvas, times(1)).drawColor(Color.TRANSPARENT, BlendMode.CLEAR);
+    verify(surface, times(1)).isValid();
+    verify(surface, times(1)).lockHardwareCanvas();
+    verify(surface, times(1)).unlockCanvasAndPost(canvas);
+    verifyNoMoreInteractions(surface);
+    verifyNoMoreInteractions(canvas);
+  }
 
-    reset(touchProcessor);
+  @Test
+  public void release() {
+    final Surface surface = mock(Surface.class);
+    final Context ctx = ApplicationProvider.getApplicationContext();
+    final PlatformViewWrapper wrapper =
+        new PlatformViewWrapper(ctx) {
+          @Override
+          protected Surface createSurface(@NonNull SurfaceTexture tx) {
+            return surface;
+          }
+        };
 
-    {
-      view.readyToDisplay(mutatorStack, /*left=*/ 7, /*top=*/ 8, /*width=*/ 0, /*height=*/ 0);
-      view.onTouchEvent(MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 0.0f, 0.0f, 0));
-      final ArgumentCaptor<Matrix> matrixCaptor = ArgumentCaptor.forClass(Matrix.class);
-      verify(touchProcessor).onTouchEvent(any(), matrixCaptor.capture());
+    final SurfaceTexture tx = mock(SurfaceTexture.class);
+    when(tx.isReleased()).thenReturn(false);
 
-      final Matrix screenMatrix = new Matrix();
-      screenMatrix.postTranslate(7, 8);
-      assertTrue(matrixCaptor.getValue().equals(screenMatrix));
-    }
+    final Canvas canvas = mock(Canvas.class);
+    when(surface.lockHardwareCanvas()).thenReturn(canvas);
+
+    wrapper.setTexture(tx);
+    reset(surface);
+    reset(tx);
+
+    // Test.
+    wrapper.release();
+
+    // Verify.
+    verify(surface, times(1)).release();
+    verifyNoMoreInteractions(surface);
+    verifyNoMoreInteractions(tx);
   }
 
   @Test
@@ -84,8 +141,8 @@ public class FlutterMutatorViewTest {
     final ViewTreeObserver viewTreeObserver = mock(ViewTreeObserver.class);
     when(viewTreeObserver.isAlive()).thenReturn(true);
 
-    final FlutterMutatorView view =
-        new FlutterMutatorView(RuntimeEnvironment.systemContext) {
+    final PlatformViewWrapper view =
+        new PlatformViewWrapper(RuntimeEnvironment.application) {
           @Override
           public ViewTreeObserver getViewTreeObserver() {
             return viewTreeObserver;
@@ -113,8 +170,8 @@ public class FlutterMutatorViewTest {
     final ViewTreeObserver viewTreeObserver = mock(ViewTreeObserver.class);
     when(viewTreeObserver.isAlive()).thenReturn(true);
 
-    final FlutterMutatorView view =
-        new FlutterMutatorView(RuntimeEnvironment.systemContext) {
+    final PlatformViewWrapper view =
+        new PlatformViewWrapper(RuntimeEnvironment.application) {
           @Override
           public ViewTreeObserver getViewTreeObserver() {
             return viewTreeObserver;
@@ -139,8 +196,8 @@ public class FlutterMutatorViewTest {
 
   @Test
   public void focusChangeListener_viewTreeObserverIsAliveFalseDoesNotThrow() {
-    final FlutterMutatorView view =
-        new FlutterMutatorView(RuntimeEnvironment.systemContext) {
+    final PlatformViewWrapper view =
+        new PlatformViewWrapper(RuntimeEnvironment.application) {
           @Override
           public ViewTreeObserver getViewTreeObserver() {
             final ViewTreeObserver viewTreeObserver = mock(ViewTreeObserver.class);
@@ -156,8 +213,8 @@ public class FlutterMutatorViewTest {
     final ViewTreeObserver viewTreeObserver = mock(ViewTreeObserver.class);
     when(viewTreeObserver.isAlive()).thenReturn(true);
 
-    final FlutterMutatorView view =
-        new FlutterMutatorView(RuntimeEnvironment.systemContext) {
+    final PlatformViewWrapper view =
+        new PlatformViewWrapper(RuntimeEnvironment.application) {
           @Override
           public ViewTreeObserver getViewTreeObserver() {
             return viewTreeObserver;
@@ -183,8 +240,8 @@ public class FlutterMutatorViewTest {
     final ViewTreeObserver viewTreeObserver = mock(ViewTreeObserver.class);
     when(viewTreeObserver.isAlive()).thenReturn(true);
 
-    final FlutterMutatorView view =
-        new FlutterMutatorView(RuntimeEnvironment.systemContext) {
+    final PlatformViewWrapper view =
+        new PlatformViewWrapper(RuntimeEnvironment.application) {
           @Override
           public ViewTreeObserver getViewTreeObserver() {
             return viewTreeObserver;
