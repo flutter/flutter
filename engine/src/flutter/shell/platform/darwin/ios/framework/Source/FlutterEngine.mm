@@ -649,7 +649,8 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
     threadHostType = threadHostType | flutter::ThreadHost::Type::Profiler;
   }
 
-  flutter::ThreadHost::ThreadHostConfig host_config(threadHostType, IOSPlatformThreadConfigSetter);
+  flutter::ThreadHost::ThreadHostConfig host_config(threadLabel.UTF8String, threadHostType,
+                                                    IOSPlatformThreadConfigSetter);
 
   host_config.ui_config =
       fml::Thread::ThreadConfig(flutter::ThreadHost::ThreadHostConfig::MakeThreadName(
