@@ -89,9 +89,7 @@ public class TextInputChannel {
               try {
                 final JSONObject arguments = (JSONObject) args;
                 final int platformViewId = arguments.getInt("platformViewId");
-                final boolean usesVirtualDisplay =
-                    arguments.optBoolean("usesVirtualDisplay", false);
-                textInputMethodHandler.setPlatformViewClient(platformViewId, usesVirtualDisplay);
+                textInputMethodHandler.setPlatformViewClient(platformViewId);
                 result.success(null);
               } catch (JSONException exception) {
                 result.error("error", exception.getMessage(), null);
@@ -402,10 +400,8 @@ public class TextInputChannel {
      * different client is set.
      *
      * @param id the ID of the platform view to be set as a text input client.
-     * @param usesVirtualDisplay True if the platform view uses a virtual display, false if it uses
-     *     hybrid composition.
      */
-    void setPlatformViewClient(int id, boolean usesVirtualDisplay);
+    void setPlatformViewClient(int id);
 
     /**
      * Sets the size and the transform matrix of the current text input client.
