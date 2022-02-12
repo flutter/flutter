@@ -277,7 +277,7 @@ TEST_F(AXFragmentRootTest, TestUIAGetFragmentRoot) {
   EXPECT_EQ(expected_fragment_root.Get(), actual_fragment_root.Get());
 }
 
-TEST_F(AXFragmentRootTest, TestUIAElementProviderFromPoint) {
+TEST_F(AXFragmentRootTest, DISABLED_TestUIAElementProviderFromPoint) {
   AXNodeData root_data;
   root_data.id = 1;
   root_data.relative_bounds.bounds = gfx::RectF(0, 0, 80, 80);
