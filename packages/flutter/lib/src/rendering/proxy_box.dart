@@ -2858,17 +2858,17 @@ typedef PointerUpEventListener = void Function(PointerUpEvent event);
 /// Used by [Listener] and [RenderPointerListener].
 typedef PointerCancelEventListener = void Function(PointerCancelEvent event);
 
-/// Signature for listening to [PointerPanZoomStart] events.
+/// Signature for listening to [PointerPanZoomStartEvent] events.
 ///
 /// Used by [Listener] and [RenderPointerListener].
 typedef PointerPanZoomStartEventListener = void Function(PointerPanZoomStartEvent event);
 
-/// Signature for listening to [PointerPanZoomUpdate] events.
+/// Signature for listening to [PointerPanZoomUpdateEvent] events.
 ///
 /// Used by [Listener] and [RenderPointerListener].
 typedef PointerPanZoomUpdateEventListener = void Function(PointerPanZoomUpdateEvent event);
 
-/// Signature for listening to [PointerPanZoomEnd] events.
+/// Signature for listening to [PointerPanZoomEndEvent] events.
 ///
 /// Used by [Listener] and [RenderPointerListener].
 typedef PointerPanZoomEndEventListener = void Function(PointerPanZoomEndEvent event);

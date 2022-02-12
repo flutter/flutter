@@ -98,9 +98,9 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
 
   /// Registers a new pointer pan/zoom that might be relevant to this gesture
   /// detector.
-  /// 
+  ///
   /// A pointer pan/zoom is a stream of events that conveys data covering
-  /// pan, zoom, and rotate data from a multi-finger trackpad gesture. 
+  /// pan, zoom, and rotate data from a multi-finger trackpad gesture.
   ///
   /// The owner of this gesture recognizer calls addPointerPanZoom() with the
   /// PointerDownEvent of each pointer that should be considered for
@@ -185,7 +185,7 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
   }
 
   /// Handles a pointer pan/zoom being added that's not allowed by this recognizer.
-  /// 
+  ///
   /// Subclasses can override this method and reject the gesture.
   @protected
   void handleNonAllowedPointerPanZoom(PointerPanZoomStartEvent event) { }
