@@ -8,6 +8,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'rendering_tester.dart';
 
 void main() {
+  TestRenderingFlutterBinding.ensureInitialized();
+
   test('LimitedBox: parent max size is unconstrained', () {
     final RenderBox child = RenderConstrainedBox(
       additionalConstraints: const BoxConstraints.tightFor(width: 300.0, height: 400.0),

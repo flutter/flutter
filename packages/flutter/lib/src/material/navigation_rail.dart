@@ -579,12 +579,14 @@ class _RailDestination extends StatelessWidget {
         final Widget iconPart = SizedBox(
           width: minWidth,
           height: minWidth,
-          child: _AddIndicator(
-            addIndicator: useIndicator,
-            indicatorColor: indicatorColor,
-            isCircular: true,
-            indicatorAnimation: destinationAnimation,
-            child: themedIcon,
+          child: Center(
+            child: _AddIndicator(
+              addIndicator: useIndicator,
+              indicatorColor: indicatorColor,
+              isCircular: true,
+              indicatorAnimation: destinationAnimation,
+              child: themedIcon,
+            ),
           ),
         );
         if (extendedTransitionAnimation.value == 0) {

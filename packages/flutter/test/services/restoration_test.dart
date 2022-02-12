@@ -213,7 +213,7 @@ void main() {
       callsToEngine.clear();
 
       // Schedule a frame.
-      SchedulerBinding.instance!.ensureVisualUpdate();
+      SchedulerBinding.instance.ensureVisualUpdate();
       rootBucket!.write('foo', 1);
       // flushData is no-op because frame is scheduled.
       manager.flushData();
@@ -306,7 +306,7 @@ void main() {
 }
 
 Future<void> _pushDataFromEngine(Map<dynamic, dynamic> data) async {
-  await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+  await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
     'flutter/restoration',
     const StandardMethodCodec().encodeMethodCall(MethodCall('push', data)),
     (_) { },

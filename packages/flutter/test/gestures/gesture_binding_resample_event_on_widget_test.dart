@@ -32,7 +32,7 @@ void main() {
   testWidgets('PointerEvent resampling on a widget', (WidgetTester tester) async {
     assert(WidgetsBinding.instance == binding);
     Duration currentTestFrameTime() => Duration(milliseconds: binding.clock.now().millisecondsSinceEpoch);
-    void requestFrame() => SchedulerBinding.instance!.scheduleFrameCallback((_) {});
+    void requestFrame() => SchedulerBinding.instance.scheduleFrameCallback((_) {});
     final Duration epoch = currentTestFrameTime();
     final ui.PointerDataPacket packet = ui.PointerDataPacket(
       data: <ui.PointerData>[
@@ -90,9 +90,9 @@ void main() {
       ),
     );
 
-    GestureBinding.instance!.resamplingEnabled = true;
+    GestureBinding.instance.resamplingEnabled = true;
     const Duration kSamplingOffset = Duration(milliseconds: -5);
-    GestureBinding.instance!.samplingOffset = kSamplingOffset;
+    GestureBinding.instance.samplingOffset = kSamplingOffset;
     ui.window.onPointerDataPacket!(packet);
     expect(events.length, 0);
 
@@ -122,5 +122,21 @@ void main() {
     expect(events[2].delta, Offset(15.0 / ui.window.devicePixelRatio, 0.0));
     expect(events[3].timeStamp, currentTestFrameTime() + kSamplingOffset);
     expect(events[3], isA<PointerUpEvent>());
+  });
+
+  testWidgets('Timer should be canceled when resampling stopped', (WidgetTester tester) async {
+    // A timer will be started when event's timeStamp is larger than sampleTime.
+    final ui.PointerDataPacket packet = ui.PointerDataPacket(
+      data: <ui.PointerData>[
+        ui.PointerData(
+          timeStamp: Duration(microseconds: DateTime.now().microsecondsSinceEpoch),
+        ),
+      ],
+    );
+    GestureBinding.instance.resamplingEnabled = true;
+    ui.window.onPointerDataPacket!(packet);
+
+    // Expected to stop resampling, but the timer keeps active if _timer?.cancel() not be called.
+    GestureBinding.instance.resamplingEnabled = false;
   });
 }
