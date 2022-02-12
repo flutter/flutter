@@ -1,4 +1,4 @@
-Signature: de32f408098299025c95b83ec4effa66
+Signature: 6c822b5700ed4ee2ad4fbf3446504a14
 
 UNUSED LICENSES:
 
@@ -519,7 +519,9 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.interfaces/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.mdns/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.routes/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.power.clientlevel/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.power.profile/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.power.systemmode/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.process.lifecycle/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.process/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.recovery.ui/meta.json
@@ -1261,7 +1263,9 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.interfaces/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.mdns/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.routes/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.power.clientlevel/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.power.profile/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.power.systemmode/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.process.lifecycle/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.process/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.recovery.ui/meta.json
@@ -1900,7 +1904,9 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.interfaces/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.mdns/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.routes/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.power.clientlevel/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.power.profile/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.power.systemmode/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.process.lifecycle/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.process/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.recovery.ui/meta.json
@@ -3648,6 +3654,8 @@ LIBRARY: fuchsia_sdk
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/signal_processing_connector.fidl + ../../../fuchsia/sdk/linux/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/signal_processing_connector.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.power.clientlevel/clientlevel.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.power.systemmode/systemmode.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.update.config/config.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.common/driver_features.fidl
 FILE: ../../../fuchsia/sdk/linux/pkg/sys/component/realm_builder_absolute.shard.cml
