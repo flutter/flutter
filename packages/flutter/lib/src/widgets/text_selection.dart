@@ -268,11 +268,9 @@ class TextSelectionOverlay {
        assert(handlesVisible != null),
        _handlesVisible = handlesVisible,
        _value = value {
-    renderObject.selectionStartInViewport.addListener(_updateHandleVisibilities);
-    renderObject.selectionEndInViewport.addListener(_updateHandleVisibilities);
-    _updateHandleVisibilities();
-    renderObject.selectionEndInViewport.addListener(_updateToolbarVisibility);
-    _updateToolbarVisibility();
+    renderObject.selectionStartInViewport.addListener(_updateTextSelectionOverlayVisibilities);
+    renderObject.selectionEndInViewport.addListener(_updateTextSelectionOverlayVisibilities);
+    _updateTextSelectionOverlayVisibilities();
     _selectionOverlay = SelectionOverlay(
       context: context,
       debugRequiredFor: debugRequiredFor,
@@ -324,13 +322,10 @@ class TextSelectionOverlay {
 
   final ValueNotifier<bool> _effectiveStartHandleVisibility = ValueNotifier<bool>(false);
   final ValueNotifier<bool> _effectiveEndHandleVisibility = ValueNotifier<bool>(false);
-  void _updateHandleVisibilities() {
+  final ValueNotifier<bool> _effectiveToolbarVisibility = ValueNotifier<bool>(false);
+  void _updateTextSelectionOverlayVisibilities() {
     _effectiveStartHandleVisibility.value = _handlesVisible && renderObject.selectionStartInViewport.value;
     _effectiveEndHandleVisibility.value = _handlesVisible && renderObject.selectionEndInViewport.value;
-  }
-
-  final ValueNotifier<bool> _effectiveToolbarVisibility = ValueNotifier<bool>(false);
-  void _updateToolbarVisibility() {
     _effectiveToolbarVisibility.value = renderObject.selectionStartInViewport.value || renderObject.selectionEndInViewport.value;
   }
 
@@ -347,7 +342,7 @@ class TextSelectionOverlay {
     if (_handlesVisible == visible)
       return;
     _handlesVisible = visible;
-    _updateHandleVisibilities();
+    _updateTextSelectionOverlayVisibilities();
   }
 
   /// {@macro flutter.widgets.SelectionOverlay.showHandles}
@@ -421,10 +416,10 @@ class TextSelectionOverlay {
 
   /// {@macro flutter.widgets.SelectionOverlay.dispose}
   void dispose() {
-    renderObject.selectionStartInViewport.removeListener(_updateHandleVisibilities);
-    renderObject.selectionEndInViewport.removeListener(_updateHandleVisibilities);
-    renderObject.selectionStartInViewport.removeListener(_updateToolbarVisibility);
-    renderObject.selectionEndInViewport.removeListener(_updateToolbarVisibility);
+    renderObject.selectionEndInViewport.removeListener(_updateTextSelectionOverlayVisibilities);
+    _effectiveToolbarVisibility.dispose();
+    _effectiveStartHandleVisibility.dispose();
+    _effectiveEndHandleVisibility.dispose();
     _selectionOverlay.dispose();
   }
 
