@@ -2283,7 +2283,6 @@ targets:
     scheduler: luci
 
   - name: Linux_android opacity_peephole_grid_of_alpha_savelayers_perf__e2e_summary
-    bringup: true
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2294,7 +2293,6 @@ targets:
     scheduler: luci
 
   - name: Linux_android opacity_peephole_col_of_alpha_savelayer_rows_perf__e2e_summary
-    bringup: true
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -3926,7 +3924,6 @@ targets:
 
   - name: Windows tool_integration_tests_1_6
     recipe: flutter/flutter_drone
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/97158
     timeout: 60
     properties:
       add_recipes_cq: "true"
