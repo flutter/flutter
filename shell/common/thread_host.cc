@@ -49,7 +49,8 @@ ThreadHost::ThreadHost(ThreadHost&&) = default;
 ThreadHost::ThreadHost(const std::string name_prefix, uint64_t mask)
     : ThreadHost(ThreadHostConfig(name_prefix, mask)) {}
 
-ThreadHost::ThreadHost(const ThreadHostConfig& host_config) {
+ThreadHost::ThreadHost(const ThreadHostConfig& host_config)
+    : name_prefix(host_config.name_prefix) {
   if (host_config.isThreadNeeded(ThreadHost::Type::Platform)) {
     platform_thread =
         CreateThread(Type::Platform, host_config.platform_config, host_config);

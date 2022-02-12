@@ -88,7 +88,7 @@ AndroidShellHolder::AndroidShellHolder(
       ThreadHost::Type::UI | ThreadHost::Type::RASTER | ThreadHost::Type::IO;
 
   flutter::ThreadHost::ThreadHostConfig host_config(
-      mask, AndroidPlatformThreadConfigSetter);
+      thread_label, mask, AndroidPlatformThreadConfigSetter);
   host_config.ui_config = fml::Thread::ThreadConfig(
       flutter::ThreadHost::ThreadHostConfig::MakeThreadName(
           flutter::ThreadHost::Type::UI, thread_label),
