@@ -60,26 +60,24 @@ public interface PlatformView {
   void dispose();
 
   /**
-   * Callback fired when the platform's input connection is locked, or should be used.
+   * Callback fired when the platform's input connection is locked, or should be used. See also
+   * {@link io.flutter.plugin.editing.TextInputPlugin#lockPlatformViewInputConnection}.
    *
    * <p>This hook only exists for rare cases where the plugin relies on the state of the input
    * connection. This probably doesn't need to be implemented.
-   *
-   * <p>This method is deprecated, and will be removed in a future release.
    */
+  // Default interface methods are supported on all min SDK versions of Android.
   @SuppressLint("NewApi")
-  @Deprecated
   default void onInputConnectionLocked() {}
 
   /**
-   * Callback fired when the platform input connection has been unlocked.
+   * Callback fired when the platform input connection has been unlocked. See also {@link
+   * io.flutter.plugin.editing.TextInputPlugin#lockPlatformViewInputConnection}.
    *
    * <p>This hook only exists for rare cases where the plugin relies on the state of the input
    * connection. This probably doesn't need to be implemented.
-   *
-   * <p>This method is deprecated, and will be removed in a future release.
    */
+  // Default interface methods are supported on all min SDK versions of Android.
   @SuppressLint("NewApi")
-  @Deprecated
   default void onInputConnectionUnlocked() {}
 }
