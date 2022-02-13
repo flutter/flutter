@@ -350,7 +350,7 @@ class BoundsAccumulator {
     }
   }
   void accumulate(const SkRect& r) {
-    if (r.fLeft <= r.fRight && r.fTop <= r.fBottom) {
+    if (r.fLeft < r.fRight && r.fTop < r.fBottom) {
       accumulate(r.fLeft, r.fTop);
       accumulate(r.fRight, r.fBottom);
     }
@@ -495,41 +495,37 @@ class DisplayListBoundsCalculator final
   // current accumulator based on saveLayer history
   BoundsAccumulator* accumulator_;
 
-  // A class that abstracts the information kept for a single
-  // |save| or |saveLayer|, including the root information that
-  // is kept as a base set of information for the DisplayList
-  // at the initial conditions outside of any saveLayer.
-  // See |RootLayerData|, |SaveData| and |SaveLayerData|.
+  // A class that remembers the information kept for a single
+  // |save| or |saveLayer|.
+  // Each save or saveLayer will maintain its own bounds accumulator
+  // and then accumulate that back into the surrounding accumulator
+  // during restore.
   class LayerData {
    public:
     // Construct a LayerData to push on the save stack for a |save|
     // or |saveLayer| call.
-    // There does not tend to be an actual layer in the case of
-    // a |save| call, but in order to homogenize the handling
-    // of |restore| it adds a trivial implementation of this
-    // class to the stack of saves.
     // The |outer| parameter is the |BoundsAccumulator| that was
     // in use by the stream before this layer was pushed on the
     // stack and should be returned when this layer is popped off
     // the stack.
-    // Some layers may substitute their own accumulator to compute
-    // their own local bounds while they are on the stack.
-    explicit LayerData(BoundsAccumulator* outer)
-        : outer_(outer), is_unbounded_(false) {}
-    virtual ~LayerData() = default;
+    // Some saveLayer calls will process their bounds by an
+    // |SkImageFilter| when they are restored, but for most
+    // saveLayer (and all save) calls the filter will be null.
+    explicit LayerData(BoundsAccumulator* outer,
+                       sk_sp<SkImageFilter> filter = nullptr)
+        : outer_(outer), filter_(filter), is_unbounded_(false) {}
+    ~LayerData() = default;
 
     // The accumulator to use while this layer is put in play by
     // a |save| or |saveLayer|
-    virtual BoundsAccumulator* layer_accumulator() { return outer_; }
+    BoundsAccumulator* layer_accumulator() { return &layer_accumulator_; }
 
     // The accumulator to use after this layer is removed from play
     // via |restore|
-    virtual BoundsAccumulator* restore_accumulator() { return outer_; }
+    BoundsAccumulator* restore_accumulator() { return outer_; }
 
-    // The bounds of this layer. May be empty for cases like
-    // a non-layer |save| call which uses the |outer_| accumulator
-    // to accumulate draw calls inside of it
-    virtual SkRect layer_bounds() = 0;
+    // The filter to apply to the layer bounds when it is restored
+    sk_sp<SkImageFilter> filter() { return filter_; }
 
     // is_unbounded should be set to true if we ever encounter an operation
     // on a layer that either is unrestricted (|drawColor| or |drawPaint|)
@@ -562,84 +558,12 @@ class DisplayListBoundsCalculator final
     bool is_unbounded() const { return is_unbounded_; }
 
    private:
+    BoundsAccumulator layer_accumulator_;
     BoundsAccumulator* outer_;
+    sk_sp<SkImageFilter> filter_;
     bool is_unbounded_;
 
     FML_DISALLOW_COPY_AND_ASSIGN(LayerData);
-  };
-
-  // An intermediate implementation class that handles keeping
-  // a local accumulator for the layer, used by both |RootLayerData|
-  // and |SaveLayerData|.
-  class AccumulatorLayerData : public LayerData {
-   public:
-    BoundsAccumulator* layer_accumulator() override {
-      return &layer_accumulator_;
-    }
-
-    SkRect layer_bounds() override {
-      // Even though this layer might be unbounded, we still
-      // accumulate what bounds we have as the unbounded condition
-      // may be contained at a higher level and we at least want to
-      // account for the bounds that we do have.
-      return layer_accumulator_.bounds();
-    }
-
-   protected:
-    using LayerData::LayerData;
-    ~AccumulatorLayerData() = default;
-
-   private:
-    BoundsAccumulator layer_accumulator_;
-  };
-
-  // Used as the initial default layer info for the Calculator.
-  class RootLayerData final : public AccumulatorLayerData {
-   public:
-    RootLayerData() : AccumulatorLayerData(nullptr) {}
-    ~RootLayerData() = default;
-
-   private:
-    FML_DISALLOW_COPY_AND_ASSIGN(RootLayerData);
-  };
-
-  // Used for |save|
-  class SaveData final : public LayerData {
-   public:
-    using LayerData::LayerData;
-    ~SaveData() = default;
-
-    SkRect layer_bounds() override { return SkRect::MakeEmpty(); }
-
-   private:
-    FML_DISALLOW_COPY_AND_ASSIGN(SaveData);
-  };
-
-  // Used for |saveLayer|
-  class SaveLayerData final : public AccumulatorLayerData {
-   public:
-    SaveLayerData(BoundsAccumulator* outer,
-                  sk_sp<SkImageFilter> filter,
-                  bool paint_nops_on_transparency)
-        : AccumulatorLayerData(outer), layer_filter_(std::move(filter)) {
-      if (!paint_nops_on_transparency) {
-        set_unbounded();
-      }
-    }
-    ~SaveLayerData() = default;
-
-    SkRect layer_bounds() override {
-      SkRect bounds = AccumulatorLayerData::layer_bounds();
-      if (!ComputeFilteredBounds(bounds, layer_filter_.get())) {
-        set_unbounded();
-      }
-      return bounds;
-    }
-
-   private:
-    sk_sp<SkImageFilter> layer_filter_;
-
-    FML_DISALLOW_COPY_AND_ASSIGN(SaveLayerData);
   };
 
   std::vector<std::unique_ptr<LayerData>> layer_infos_;
