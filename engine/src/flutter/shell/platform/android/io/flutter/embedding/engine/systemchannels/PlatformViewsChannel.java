@@ -14,7 +14,6 @@ import io.flutter.plugin.common.StandardMethodCodec;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.ByteBuffer;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -65,9 +64,6 @@ public class PlatformViewsChannel {
             case "resize":
               resize(call, result);
               break;
-            case "offset":
-              offset(call, result);
-              break;
             case "touch":
               touch(call, result);
               break;
@@ -86,40 +82,29 @@ public class PlatformViewsChannel {
         }
 
         private void create(@NonNull MethodCall call, @NonNull MethodChannel.Result result) {
-          final Map<String, Object> createArgs = call.arguments();
-          // TODO(egarciad): Remove the "hybrid" case.
-          final boolean usesPlatformViewLayer =
+          Map<String, Object> createArgs = call.arguments();
+          boolean usesHybridComposition =
               createArgs.containsKey("hybrid") && (boolean) createArgs.get("hybrid");
-          final ByteBuffer additionalParams =
-              createArgs.containsKey("params")
-                  ? ByteBuffer.wrap((byte[]) createArgs.get("params"))
-                  : null;
+          // In hybrid mode, the size of the view is determined by the size of the Flow layer.
+          double width = (usesHybridComposition) ? 0 : (double) createArgs.get("width");
+          double height = (usesHybridComposition) ? 0 : (double) createArgs.get("height");
+
+          PlatformViewCreationRequest request =
+              new PlatformViewCreationRequest(
+                  (int) createArgs.get("id"),
+                  (String) createArgs.get("viewType"),
+                  width,
+                  height,
+                  (int) createArgs.get("direction"),
+                  createArgs.containsKey("params")
+                      ? ByteBuffer.wrap((byte[]) createArgs.get("params"))
+                      : null);
           try {
-            if (usesPlatformViewLayer) {
-              final PlatformViewCreationRequest request =
-                  new PlatformViewCreationRequest(
-                      (int) createArgs.get("id"),
-                      (String) createArgs.get("viewType"),
-                      0,
-                      0,
-                      0,
-                      0,
-                      (int) createArgs.get("direction"),
-                      additionalParams);
-              handler.createForPlatformViewLayer(request);
+            if (usesHybridComposition) {
+              handler.createAndroidViewForPlatformView(request);
               result.success(null);
             } else {
-              final PlatformViewCreationRequest request =
-                  new PlatformViewCreationRequest(
-                      (int) createArgs.get("id"),
-                      (String) createArgs.get("viewType"),
-                      createArgs.containsKey("top") ? (double) createArgs.get("top") : 0.0,
-                      createArgs.containsKey("left") ? (double) createArgs.get("left") : 0.0,
-                      (double) createArgs.get("width"),
-                      (double) createArgs.get("height"),
-                      (int) createArgs.get("direction"),
-                      additionalParams);
-              long textureId = handler.createForTextureLayer(request);
+              long textureId = handler.createVirtualDisplayForPlatformView(request);
               result.success(textureId);
             }
           } catch (IllegalStateException exception) {
@@ -130,9 +115,15 @@ public class PlatformViewsChannel {
         private void dispose(@NonNull MethodCall call, @NonNull MethodChannel.Result result) {
           Map<String, Object> disposeArgs = call.arguments();
           int viewId = (int) disposeArgs.get("id");
+          boolean usesHybridComposition =
+              disposeArgs.containsKey("hybrid") && (boolean) disposeArgs.get("hybrid");
 
           try {
-            handler.dispose(viewId);
+            if (usesHybridComposition) {
+              handler.disposeAndroidViewForPlatformView(viewId);
+            } else {
+              handler.disposeVirtualDisplayForPlatformView(viewId);
+            }
             result.success(null);
           } catch (IllegalStateException exception) {
             result.error("error", detailedExceptionString(exception), null);
@@ -147,28 +138,14 @@ public class PlatformViewsChannel {
                   (double) resizeArgs.get("width"),
                   (double) resizeArgs.get("height"));
           try {
-            final PlatformViewBufferSize sz = handler.resize(resizeRequest);
-            if (sz == null) {
-              result.error("error", "Failed to resize the platform view", null);
-            } else {
-              final Map<String, Object> response = new HashMap<>();
-              response.put("width", (double) sz.width);
-              response.put("height", (double) sz.height);
-              result.success(response);
-            }
-          } catch (IllegalStateException exception) {
-            result.error("error", detailedExceptionString(exception), null);
-          }
-        }
-
-        private void offset(@NonNull MethodCall call, @NonNull MethodChannel.Result result) {
-          Map<String, Object> offsetArgs = call.arguments();
-          try {
-            handler.offset(
-                (int) offsetArgs.get("id"),
-                (double) offsetArgs.get("top"),
-                (double) offsetArgs.get("left"));
-            result.success(null);
+            handler.resizePlatformView(
+                resizeRequest,
+                new Runnable() {
+                  @Override
+                  public void run() {
+                    result.success(null);
+                  }
+                });
           } catch (IllegalStateException exception) {
             result.error("error", detailedExceptionString(exception), null);
           }
@@ -272,40 +249,36 @@ public class PlatformViewsChannel {
      * The Flutter application would like to display a new Android {@code View}, i.e., platform
      * view.
      *
-     * <p>The Android View is added to the view hierarchy. This view is rendered in the Flutter
-     * framework by a PlatformViewLayer.
-     *
-     * @param request The metadata sent from the framework.
+     * <p>The Android {@code View} is added to the view hierarchy.
      */
-    void createForPlatformViewLayer(@NonNull PlatformViewCreationRequest request);
+    void createAndroidViewForPlatformView(@NonNull PlatformViewCreationRequest request);
 
     /**
-     * The Flutter application would like to display a new Android {@code View}, i.e., platform
+     * The Flutter application would like to dispose of an existing Android {@code View} rendered in
+     * the view hierarchy.
+     */
+    void disposeAndroidViewForPlatformView(int viewId);
+
+    /**
+     * The Flutter application would like to display a new Android {@code View}.
+     *
+     * <p>{@code View} is added to a {@code VirtualDisplay}. The framework uses id returned by this
+     * method to lookup the texture in the engine.
+     */
+    long createVirtualDisplayForPlatformView(@NonNull PlatformViewCreationRequest request);
+
+    /**
+     * The Flutter application would like to dispose of an existing Android {@code View} rendered in
+     * a virtual display.
+     */
+    void disposeVirtualDisplayForPlatformView(int viewId);
+
+    /**
+     * The Flutter application would like to resize an existing Android {@code View}, i.e., platform
      * view.
-     *
-     * <p>The Android View is added to the view hierarchy. This view is rendered in the Flutter
-     * framework by a TextureLayer.
-     *
-     * @param request The metadata sent from the framework.
-     * @return The texture ID.
      */
-    long createForTextureLayer(@NonNull PlatformViewCreationRequest request);
-
-    /** The Flutter application would like to dispose of an existing Android {@code View}. */
-    void dispose(int viewId);
-
-    /**
-     * The Flutter application would like to resize an existing Android {@code View}.
-     *
-     * @param request The request to resize the platform view.
-     * @return The buffer size where the platform view pixels are written to.
-     */
-    PlatformViewBufferSize resize(@NonNull PlatformViewResizeRequest request);
-
-    /**
-     * The Flutter application would like to change the offset of an existing Android {@code View}.
-     */
-    void offset(int viewId, double top, double left);
+    void resizePlatformView(
+        @NonNull PlatformViewResizeRequest request, @NonNull Runnable onComplete);
 
     /**
      * The user touched a platform view within Flutter.
@@ -348,12 +321,6 @@ public class PlatformViewsChannel {
     /** The density independent height to display the platform view. */
     public final double logicalHeight;
 
-    /** The density independent top position to display the platform view. */
-    public final double logicalTop;
-
-    /** The density independent left position to display the platform view. */
-    public final double logicalLeft;
-
     /**
      * The layout direction of the new platform view.
      *
@@ -365,20 +332,16 @@ public class PlatformViewsChannel {
     /** Custom parameters that are unique to the desired platform view. */
     @Nullable public final ByteBuffer params;
 
-    /** Creates a request to construct a platform view. */
+    /** Creates a request to construct a platform view that uses a virtual display. */
     public PlatformViewCreationRequest(
         int viewId,
         @NonNull String viewType,
-        double logicalTop,
-        double logicalLeft,
         double logicalWidth,
         double logicalHeight,
         int direction,
         @Nullable ByteBuffer params) {
       this.viewId = viewId;
       this.viewType = viewType;
-      this.logicalTop = logicalTop;
-      this.logicalLeft = logicalLeft;
       this.logicalWidth = logicalWidth;
       this.logicalHeight = logicalHeight;
       this.direction = direction;
@@ -386,7 +349,11 @@ public class PlatformViewsChannel {
     }
   }
 
-  /** Request sent from Flutter to resize a platform view. */
+  /**
+   * Request sent from Flutter to resize a platform view.
+   *
+   * <p>This only applies to platform views that use virtual displays.
+   */
   public static class PlatformViewResizeRequest {
     /** The ID of the platform view as seen by the Flutter side. */
     public final int viewId;
@@ -401,20 +368,6 @@ public class PlatformViewsChannel {
       this.viewId = viewId;
       this.newLogicalWidth = newLogicalWidth;
       this.newLogicalHeight = newLogicalHeight;
-    }
-  }
-
-  /** The platform view buffer size. */
-  public static class PlatformViewBufferSize {
-    /** The width of the screen buffer. */
-    public final int width;
-
-    /** The height of the screen buffer. */
-    public final int height;
-
-    public PlatformViewBufferSize(int width, int height) {
-      this.width = width;
-      this.height = height;
     }
   }
 

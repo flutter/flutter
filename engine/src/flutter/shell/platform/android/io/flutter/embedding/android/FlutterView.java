@@ -791,6 +791,7 @@ public class FlutterView extends FrameLayout implements MouseCursorPlugin.MouseC
             + viewportMetrics.viewInsetBottom);
 
     sendViewportMetricsToFlutter();
+
     return newInsets;
   }
 
@@ -864,6 +865,21 @@ public class FlutterView extends FrameLayout implements MouseCursorPlugin.MouseC
     }
 
     return textInputPlugin.createInputConnection(this, keyboardManager, outAttrs);
+  }
+
+  /**
+   * Allows a {@code View} that is not currently the input connection target to invoke commands on
+   * the {@link android.view.inputmethod.InputMethodManager}, which is otherwise disallowed.
+   *
+   * <p>Returns true to allow non-input-connection-targets to invoke methods on {@code
+   * InputMethodManager}, or false to exclusively allow the input connection target to invoke such
+   * methods.
+   */
+  @Override
+  public boolean checkInputConnectionProxy(View view) {
+    return flutterEngine != null
+        ? flutterEngine.getPlatformViewsController().checkInputConnectionProxy(view)
+        : super.checkInputConnectionProxy(view);
   }
 
   /**

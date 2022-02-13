@@ -9,13 +9,13 @@ import android.graphics.Matrix;
 import android.graphics.Path;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import io.flutter.embedding.android.AndroidTouchProcessor;
-import io.flutter.util.ViewUtils;
 
 /**
  * A view that applies the {@link io.flutter.embedding.engine.mutatorsstack.FlutterMutatorsStack} to
@@ -49,6 +49,31 @@ public class FlutterMutatorView extends FrameLayout {
     this(context, 1, /* androidTouchProcessor=*/ null);
   }
 
+  /**
+   * Determines if the current view or any descendant view has focus.
+   *
+   * @param root The root view.
+   * @return True if the current view or any descendant view has focus.
+   */
+  @VisibleForTesting
+  public static boolean childHasFocus(@Nullable View root) {
+    if (root == null) {
+      return false;
+    }
+    if (root.hasFocus()) {
+      return true;
+    }
+    if (root instanceof ViewGroup) {
+      final ViewGroup viewGroup = (ViewGroup) root;
+      for (int idx = 0; idx < viewGroup.getChildCount(); idx++) {
+        if (childHasFocus(viewGroup.getChildAt(idx))) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
   @Nullable @VisibleForTesting ViewTreeObserver.OnGlobalFocusChangeListener activeFocusListener;
 
   /**
@@ -70,7 +95,7 @@ public class FlutterMutatorView extends FrameLayout {
           new ViewTreeObserver.OnGlobalFocusChangeListener() {
             @Override
             public void onGlobalFocusChanged(View oldFocus, View newFocus) {
-              userFocusListener.onFocusChange(mutatorView, ViewUtils.childHasFocus(mutatorView));
+              userFocusListener.onFocusChange(mutatorView, childHasFocus(mutatorView));
             }
           };
       observer.addOnGlobalFocusChangeListener(activeFocusListener);
