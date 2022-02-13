@@ -74,6 +74,31 @@ class HttpHostValidator extends DoctorValidator {
       return _HostValidationResult.fail(host, 'An error occurred while checking the HTTP host: ${e.message}');
     } on OSError catch (e) {
       return _HostValidationResult.fail(host, 'An error occurred while checking the HTTP host: ${e.message}');
+    } on FormatException catch (e) {
+      if (e.message.contains('Invalid radix-10 number')) {
+        return _HostValidationResult.fail(host, 'The value of $kDoctorHostTimeout(${_platform.environment[kDoctorHostTimeout]}) is not a valid duration in seconds');
+      } else if (e.message.contains('Invalid empty scheme')){
+        // Check if the invalid host is kEnvPubHostedUrl, else it must be kEnvCloudUrl
+        final String? pubHostedUrl = _platform.environment[kEnvPubHostedUrl];
+        if (pubHostedUrl != null && host == pubHostedUrl) {
+          return _HostValidationResult.fail(host, 'The value of $kEnvPubHostedUrl(${_platform.environment[kEnvPubHostedUrl]}) could not be parsed as a valid url');
+        }
+        return _HostValidationResult.fail(host, 'The value of $kEnvCloudUrl(${_platform.environment[kEnvCloudUrl]}) could not be parsed as a valid url');
+      } else {
+        return _HostValidationResult.fail(host, 'An error occurred while checking the HTTP host: ${e.message}');
+      }
+    } on ArgumentError catch (e) {
+      final String exceptionMessage = e.message.toString();
+      if (exceptionMessage.contains('No host specified')) {
+        // Check if the invalid host is kEnvPubHostedUrl, else it must be kEnvCloudUrl
+        final String? pubHostedUrl = _platform.environment[kEnvPubHostedUrl];
+        if (pubHostedUrl != null && host == pubHostedUrl) {
+          return _HostValidationResult.fail(host, 'The value of $kEnvPubHostedUrl(${_platform.environment[kEnvPubHostedUrl]}) is not a valid host');
+        }
+        return _HostValidationResult.fail(host, 'The value of $kEnvCloudUrl(${_platform.environment[kEnvCloudUrl]}) is not a valid host');
+      } else {
+        return _HostValidationResult.fail(host, 'An error occurred while checking the HTTP host: $exceptionMessage');
+      }
     }
   }
 
@@ -93,7 +118,7 @@ class HttpHostValidator extends DoctorValidator {
     availabilityResults.removeWhere((_HostValidationResult result) => result.available);
 
     for (final _HostValidationResult result in availabilityResults) {
-      messages.add(ValidationMessage.error('HTTP host ${result.host} is not reachable. Reason: ${result.failResultInfo}'));
+      messages.add(ValidationMessage.error('HTTP host "${result.host}" is not reachable. Reason: ${result.failResultInfo}'));
     }
 
     return ValidationResult(

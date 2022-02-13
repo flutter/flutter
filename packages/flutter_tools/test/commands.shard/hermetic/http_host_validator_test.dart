@@ -156,6 +156,84 @@ void main() {
           expect(result.type, equals(ValidationType.partial));
         }
       });
+
+      testWithoutContext('does not throw on invalid user-defined timeout', () async {
+        final HttpHostValidator httpHostValidator = HttpHostValidator(
+          platform: FakePlatform(
+            environment: <String,String> {
+              'PUB_HOSTED_URL': kTestEnvPubHost,
+              'FLUTTER_STORAGE_BASE_URL': kTestEnvGCloudHost,
+              'FLUTTER_DOCTOR_HOST_TIMEOUT' : 'deadbeef',
+            },
+          ),
+          featureFlags: TestFeatureFlags(isAndroidEnabled: false),
+          httpClient: FakeHttpClient.any(),
+        );
+
+        // Run the validation check and get the results
+        final ValidationResult result = await httpHostValidator.validate();
+
+        expect(result.type, equals(ValidationType.notAvailable));
+        expect(
+          result.messages,
+          contains(const ValidationMessage.error(
+            'HTTP host "$kTestEnvPubHost" is not reachable. '
+            'Reason: The value of FLUTTER_DOCTOR_HOST_TIMEOUT(deadbeef) is not a valid duration in seconds',
+          )),
+        );
+      });
+
+      testWithoutContext('does not throw on unparseable user-defined host uri', () async {
+        final HttpHostValidator httpHostValidator = HttpHostValidator(
+          platform: FakePlatform(
+            environment: <String,String> {
+              'PUB_HOSTED_URL': '::Not A Uri::',
+              'FLUTTER_STORAGE_BASE_URL': kTestEnvGCloudHost,
+              'FLUTTER_DOCTOR_HOST_TIMEOUT' : '1',
+            },
+          ),
+          featureFlags: TestFeatureFlags(isAndroidEnabled: false),
+          httpClient: FakeHttpClient.any(),
+        );
+
+        // Run the validation check and get the results
+        final ValidationResult result = await httpHostValidator.validate();
+
+        expect(result.type, equals(ValidationType.partial));
+        expect(
+          result.messages,
+          contains(const ValidationMessage.error(
+            'HTTP host "::Not A Uri::" is not reachable. '
+            'Reason: The value of PUB_HOSTED_URL(::Not A Uri::) could not be parsed as a valid url',
+          )),
+        );
+      });
+
+      testWithoutContext('does not throw on invalid user-defined host', () async {
+        final HttpHostValidator httpHostValidator = HttpHostValidator(
+          platform: FakePlatform(
+            environment: <String,String> {
+              'PUB_HOSTED_URL': kTestEnvPubHost,
+              'FLUTTER_STORAGE_BASE_URL': '',
+              'FLUTTER_DOCTOR_HOST_TIMEOUT' : '1',
+            },
+          ),
+          featureFlags: TestFeatureFlags(isAndroidEnabled: false),
+          httpClient: FakeHttpClient.any(),
+        );
+
+        // Run the validation check and get the results
+        final ValidationResult result = await httpHostValidator.validate();
+
+        expect(result.type, equals(ValidationType.partial));
+        expect(
+          result.messages,
+          contains(const ValidationMessage.error(
+            'HTTP host "" is not reachable. '
+            'Reason: The value of FLUTTER_STORAGE_BASE_URL() is not a valid host',
+          )),
+        );
+      });
     });
 
     group('specific os disabled', () {
@@ -240,7 +318,7 @@ void main() {
     // Timeout duration for tests is set to 1 second
     expect(
       result.messages,
-      contains(const ValidationMessage.error('HTTP host $kTestEnvPubHost is not reachable. Reason: Failed to connect to host in 1 second')),
+      contains(const ValidationMessage.error('HTTP host "$kTestEnvPubHost" is not reachable. Reason: Failed to connect to host in 1 second')),
     );
   });
 }
