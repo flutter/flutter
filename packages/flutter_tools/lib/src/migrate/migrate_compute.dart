@@ -26,12 +26,26 @@ const List<String> _skippedDirectories = const <String>[
   '.dart_tool',
 ];
 
+const List<String> _skippedMergeFileExt = const <String>[
+  '.png',
+];
+
 bool _skipped(String localPath) {
   if (_skippedFiles.contains(localPath)) {
     return true;
   }
   for (String dir in _skippedDirectories) {
     if (localPath.startsWith(dir)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/// True for files that should not be merged. Typically, images and binary files.
+bool _skippedMerge(String localPath) {
+  for (String ext in _skippedMergeFileExt) {
+    if (localPath.endsWith(ext)) {
       return true;
     }
   }
@@ -354,7 +368,8 @@ Future<MigrateResult?> computeMigration({
     final String localPath = currentFile.path.replaceFirst(projectRootPath + globals.fs.path.separator, '');
     if (diffMap.containsKey(localPath) && diffMap[localPath]!.isIgnored ||
         await MigrateUtils.isGitIgnored(currentFile.path, flutterProject.directory.absolute.path) ||
-        _skipped(localPath)) {
+        _skipped(localPath) ||
+        _skippedMerge(localPath)) {
       continue;
     }
     final File oldTemplateFile = migrateResult.generatedBaseTemplateDirectory!.childFile(localPath);
