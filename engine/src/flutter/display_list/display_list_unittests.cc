@@ -179,7 +179,8 @@ static constexpr SkIRect TestLatticeSrcRect = {1, 1, 39, 39};
 
 static sk_sp<SkPicture> MakeTestPicture(int w, int h, SkColor color) {
   SkPictureRecorder recorder;
-  SkCanvas* cv = recorder.beginRecording(TestBounds);
+  SkRTreeFactory rtree_factory;
+  SkCanvas* cv = recorder.beginRecording(TestBounds, &rtree_factory);
   SkPaint paint;
   paint.setColor(color);
   paint.setStyle(SkPaint::kFill_Style);
@@ -1030,7 +1031,8 @@ TEST(DisplayList, DisplayListSaveLayerBoundsWithAlphaFilter) {
     // that modifies alpha channels (save layer bounds are meaningless
     // under those circumstances)
     SkPictureRecorder recorder;
-    SkCanvas* canvas = recorder.beginRecording(build_bounds);
+    SkRTreeFactory rtree_factory;
+    SkCanvas* canvas = recorder.beginRecording(build_bounds, &rtree_factory);
     SkPaint p1;
     p1.setColorFilter(alpha_color_filter);
     canvas->saveLayer(save_bounds, &p1);
@@ -1824,6 +1826,129 @@ TEST(DisplayList, SaveLayerSrcBlendOnChildPreventsOpacityOptimization) {
 
   builder.Build()->Dispatch(expector);
   EXPECT_EQ(expector.save_layer_count(), 1);
+}
+
+TEST(DisplayList, FlutterSvgIssue661BoundsWereEmpty) {
+  // See https://github.com/dnfield/flutter_svg/issues/661
+
+  SkPath path1;
+  path1.setFillType(SkPathFillType::kWinding);
+  path1.moveTo(25.54f, 37.52f);
+  path1.cubicTo(20.91f, 37.52f, 16.54f, 33.39f, 13.62f, 30.58f);
+  path1.lineTo(13, 30);
+  path1.lineTo(12.45f, 29.42f);
+  path1.cubicTo(8.39f, 25.15f, 1.61f, 18, 8.37f, 11.27f);
+  path1.cubicTo(10.18f, 9.46f, 12.37f, 9.58f, 14.49f, 11.58f);
+  path1.cubicTo(15.67f, 12.71f, 17.05f, 14.69f, 17.07f, 16.58f);
+  path1.cubicTo(17.0968f, 17.458f, 16.7603f, 18.3081f, 16.14f, 18.93f);
+  path1.cubicTo(15.8168f, 19.239f, 15.4653f, 19.5169f, 15.09f, 19.76f);
+  path1.cubicTo(14.27f, 20.33f, 14.21f, 20.44f, 14.27f, 20.62f);
+  path1.cubicTo(15.1672f, 22.3493f, 16.3239f, 23.9309f, 17.7f, 25.31f);
+  path1.cubicTo(19.0791f, 26.6861f, 20.6607f, 27.8428f, 22.39f, 28.74f);
+  path1.cubicTo(22.57f, 28.8f, 22.69f, 28.74f, 23.25f, 27.92f);
+  path1.cubicTo(23.5f, 27.566f, 23.778f, 27.231f, 24.08f, 26.92f);
+  path1.cubicTo(24.7045f, 26.3048f, 25.5538f, 25.9723f, 26.43f, 26);
+  path1.cubicTo(28.29f, 26, 30.27f, 27.4f, 31.43f, 28.58f);
+  path1.cubicTo(33.43f, 30.67f, 33.55f, 32.9f, 31.74f, 34.7f);
+  path1.cubicTo(30.1477f, 36.4508f, 27.906f, 37.4704f, 25.54f, 37.52f);
+  path1.close();
+  path1.moveTo(11.17f, 12.23f);
+  path1.cubicTo(10.6946f, 12.2571f, 10.2522f, 12.4819f, 9.95f, 12.85f);
+  path1.cubicTo(5.12f, 17.67f, 8.95f, 22.5f, 14.05f, 27.85f);
+  path1.lineTo(14.62f, 28.45f);
+  path1.lineTo(15.16f, 28.96f);
+  path1.cubicTo(20.52f, 34.06f, 25.35f, 37.89f, 30.16f, 33.06f);
+  path1.cubicTo(30.83f, 32.39f, 31.25f, 31.56f, 29.81f, 30.06f);
+  path1.cubicTo(28.9247f, 29.07f, 27.7359f, 28.4018f, 26.43f, 28.16f);
+  path1.cubicTo(26.1476f, 28.1284f, 25.8676f, 28.2367f, 25.68f, 28.45f);
+  path1.cubicTo(25.4633f, 28.6774f, 25.269f, 28.9252f, 25.1f, 29.19f);
+  path1.cubicTo(24.53f, 30.01f, 23.47f, 31.54f, 21.54f, 30.79f);
+  path1.lineTo(21.41f, 30.72f);
+  path1.cubicTo(19.4601f, 29.7156f, 17.6787f, 28.4133f, 16.13f, 26.86f);
+  path1.cubicTo(14.5748f, 25.3106f, 13.2693f, 23.5295f, 12.26f, 21.58f);
+  path1.lineTo(12.2f, 21.44f);
+  path1.cubicTo(11.45f, 19.51f, 12.97f, 18.44f, 13.8f, 17.88f);
+  path1.cubicTo(14.061f, 17.706f, 14.308f, 17.512f, 14.54f, 17.3f);
+  path1.cubicTo(14.7379f, 17.1067f, 14.8404f, 16.8359f, 14.82f, 16.56f);
+  path1.cubicTo(14.5978f, 15.268f, 13.9585f, 14.0843f, 13, 13.19f);
+  path1.cubicTo(12.5398f, 12.642f, 11.8824f, 12.2971f, 11.17f, 12.23f);
+  path1.lineTo(11.17f, 12.23f);
+  path1.close();
+  path1.moveTo(27, 19.34f);
+  path1.lineTo(24.74f, 19.34f);
+  path1.cubicTo(24.7319f, 18.758f, 24.262f, 18.2881f, 23.68f, 18.28f);
+  path1.lineTo(23.68f, 16.05f);
+  path1.lineTo(23.7f, 16.05f);
+  path1.cubicTo(25.5153f, 16.0582f, 26.9863f, 17.5248f, 27, 19.34f);
+  path1.lineTo(27, 19.34f);
+  path1.close();
+  path1.moveTo(32.3f, 19.34f);
+  path1.lineTo(30.07f, 19.34f);
+  path1.cubicTo(30.037f, 15.859f, 27.171f, 13.011f, 23.69f, 13);
+  path1.lineTo(23.69f, 10.72f);
+  path1.cubicTo(28.415f, 10.725f, 32.3f, 14.615f, 32.3f, 19.34f);
+  path1.close();
+
+  SkPath path2;
+  path2.setFillType(SkPathFillType::kWinding);
+  path2.moveTo(37.5f, 19.33f);
+  path2.lineTo(35.27f, 19.33f);
+  path2.cubicTo(35.265f, 12.979f, 30.041f, 7.755f, 23.69f, 7.75f);
+  path2.lineTo(23.69f, 5.52f);
+  path2.cubicTo(31.264f, 5.525f, 37.495f, 11.756f, 37.5f, 19.33f);
+  path2.close();
+
+  DisplayListBuilder builder;
+  {
+    builder.save();
+    builder.clipRect({0, 0, 100, 100}, SkClipOp::kIntersect, true);
+    {
+      builder.save();
+      builder.transform2DAffine(2.17391, 0, -2547.83,  //
+                                0, 2.04082, -500);
+      {
+        builder.save();
+        builder.clipRect({1172, 245, 1218, 294}, SkClipOp::kIntersect, true);
+        {
+          builder.saveLayer(nullptr, SaveLayerOptions::kWithAttributes);
+          {
+            builder.save();
+            builder.transform2DAffine(1.4375, 0, 1164.09,  //
+                                      0, 1.53125, 236.548);
+            builder.setAntiAlias(1);
+            builder.setColor(0xffffffff);
+            builder.drawPath(path1);
+            builder.restore();
+          }
+          {
+            builder.save();
+            builder.transform2DAffine(1.4375, 0, 1164.09,  //
+                                      0, 1.53125, 236.548);
+            builder.drawPath(path2);
+            builder.restore();
+          }
+          builder.restore();
+        }
+        builder.restore();
+      }
+      builder.restore();
+    }
+    builder.restore();
+  }
+  sk_sp<DisplayList> display_list = builder.Build();
+  // Prior to the fix, the bounds were empty.
+  EXPECT_FALSE(display_list->bounds().isEmpty());
+  // These are the expected bounds, but testing float values can be
+  // flaky wrt minor changes in the bounds calculations. If this
+  // line has to be revised too often as the DL implementation is
+  // improved and maintained, then we can eliminate this test and
+  // just rely on the "rounded out" bounds test that follows.
+  EXPECT_EQ(display_list->bounds(),
+            SkRect::MakeLTRB(0, 0.00189208984375, 99.9839630127, 100));
+  // This is the more practical result. The bounds are "almost" 0,0,100x100
+  EXPECT_EQ(display_list->bounds().roundOut(), SkIRect::MakeWH(100, 100));
+  EXPECT_EQ(display_list->op_count(), 19u);
+  EXPECT_EQ(display_list->bytes(), sizeof(DisplayList) + 304u);
 }
 
 }  // namespace testing

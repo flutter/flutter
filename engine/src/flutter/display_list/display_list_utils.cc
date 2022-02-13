@@ -237,7 +237,7 @@ void ClipBoundsDispatchHelper::reset(const SkRect* cull_rect) {
 DisplayListBoundsCalculator::DisplayListBoundsCalculator(
     const SkRect* cull_rect)
     : ClipBoundsDispatchHelper(cull_rect) {
-  layer_infos_.emplace_back(std::make_unique<RootLayerData>());
+  layer_infos_.emplace_back(std::make_unique<LayerData>(nullptr));
   accumulator_ = layer_infos_.back()->layer_accumulator();
 }
 void DisplayListBoundsCalculator::setStrokeCap(SkPaint::Cap cap) {
@@ -284,7 +284,7 @@ void DisplayListBoundsCalculator::setMaskBlurFilter(SkBlurStyle style,
 void DisplayListBoundsCalculator::save() {
   SkMatrixDispatchHelper::save();
   ClipBoundsDispatchHelper::save();
-  layer_infos_.emplace_back(std::make_unique<SaveData>(accumulator_));
+  layer_infos_.emplace_back(std::make_unique<LayerData>(accumulator_));
   accumulator_ = layer_infos_.back()->layer_accumulator();
 }
 void DisplayListBoundsCalculator::saveLayer(const SkRect* bounds,
@@ -292,16 +292,27 @@ void DisplayListBoundsCalculator::saveLayer(const SkRect* bounds,
   SkMatrixDispatchHelper::save();
   ClipBoundsDispatchHelper::save();
   if (options.renders_with_attributes()) {
-    layer_infos_.emplace_back(std::make_unique<SaveLayerData>(
-        accumulator_, image_filter_, paint_nops_on_transparency()));
+    // The actual flood of the outer layer clip will occur after the
+    // (eventual) corresponding restore is called, but rather than
+    // remember this information in the LayerInfo until the restore
+    // method is processed, we just mark the unbounded state up front.
+    if (!paint_nops_on_transparency()) {
+      // We will fill the clip of the outer layer when we restore
+      AccumulateUnbounded();
+    }
+
+    layer_infos_.emplace_back(
+        std::make_unique<LayerData>(accumulator_, image_filter_));
   } else {
     layer_infos_.emplace_back(
-        std::make_unique<SaveLayerData>(accumulator_, nullptr, true));
+        std::make_unique<LayerData>(accumulator_, nullptr));
   }
+
   accumulator_ = layer_infos_.back()->layer_accumulator();
-  // Accumulate the layer in its own coordinate system and then
-  // filter and transform its bounds on restore.
-  SkMatrixDispatchHelper::reset();
+
+  // Even though Skia claims that the bounds are only a hint, they actually
+  // use them as the temporary layer bounds during rendering the layer, so
+  // we set them as if a clip operation were performed.
   if (bounds) {
     clipRect(*bounds, SkClipOp::kIntersect, false);
   }
@@ -310,24 +321,53 @@ void DisplayListBoundsCalculator::restore() {
   if (layer_infos_.size() > 1) {
     SkMatrixDispatchHelper::restore();
     ClipBoundsDispatchHelper::restore();
-    accumulator_ = layer_infos_.back()->restore_accumulator();
-    SkRect layer_bounds = layer_infos_.back()->layer_bounds();
-    // Must read unbounded state after layer_bounds
-    bool layer_unbounded = layer_infos_.back()->is_unbounded();
+
+    // Remember a few pieces of information from the current layer info
+    // for later processing.
+    LayerData* layer_info = layer_infos_.back().get();
+    BoundsAccumulator* outer_accumulator = layer_info->restore_accumulator();
+    bool is_unbounded = layer_info->is_unbounded();
+
+    // Before we pop_back we will get the current layer bounds from the
+    // current accumulator and adjust ot as required based on the filter.
+    SkRect layer_bounds = accumulator_->bounds();
+    sk_sp<SkImageFilter> filter = layer_info->filter();
+    if (filter) {
+      if (filter->canComputeFastBounds()) {
+        SkIRect filter_bounds =
+            filter->filterBounds(layer_bounds.roundOut(), matrix(),
+                                 SkImageFilter::kForward_MapDirection);
+        layer_bounds.set(filter_bounds);
+
+        // We could leave the clipping to the code below that will
+        // finally accumulate the layer bounds, but the bounds do
+        // not normally need clipping unless they were modified by
+        // entering this filtering code path.
+        if (has_clip() && !layer_bounds.intersect(clip_bounds())) {
+          layer_bounds.setEmpty();
+        }
+      } else {
+        // If the filter cannot compute bounds then it might take an
+        // unbounded amount of space. This can sometimes happen if it
+        // modifies transparent black which means its affect will not
+        // be bounded by the transparent pixels outside of the layer
+        // drawable.
+        is_unbounded = true;
+      }
+    }
+
+    // Restore the accumulator before popping the LayerInfo so that
+    // it nevers points to an out of scope instance.
+    accumulator_ = outer_accumulator;
     layer_infos_.pop_back();
 
-    // We accumulate the bounds even if the layer was unbounded because
-    // the unbounded state may be contained at a higher level, so we at
-    // least accumulate our best estimate about what we have.
-    if (!layer_bounds.isEmpty()) {
-      // We do not use AccumulateOpBounds because the layer info already
-      // applied all bounds modifications based on the attributes that
-      // were in place when it was created. Modifying the bounds further
-      // based on the current attributes would mix attribute states.
-      // The bounds are still transformed and clipped by this method.
-      AccumulateBounds(layer_bounds);
-    }
-    if (layer_unbounded) {
+    // Finally accumulate the impact of the layer into the new scope.
+    // Note that the bounds were already accumulated in device pixels
+    // and clipped to any clips involved so we do not need to go
+    // through any transforms or clips to accuulate them into this
+    // layer.
+    accumulator_->accumulate(layer_bounds);
+    if (is_unbounded) {
       AccumulateUnbounded();
     }
   }
