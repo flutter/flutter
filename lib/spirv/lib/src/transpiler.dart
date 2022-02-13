@@ -50,21 +50,13 @@ const String _mainFunctionName = 'main';
 /// [opConstant] append `#OpConstant`, like the following:
 /// https://www.khronos.org/registry/spir-v/specs/unified1/SPIRV.html#OpConstant
 class _Transpiler {
-  _Transpiler(this.spirv, this.target) {
-    out = header;
-  }
+  _Transpiler(this.spirv, this.target);
 
   final Uint32List spirv;
   final TargetLanguage target;
 
   /// The resulting source code of the target language is written to src.
   final StringBuffer src = StringBuffer();
-
-  /// Contains shader header, constants, and uniforms.
-  final StringBuffer header = StringBuffer();
-
-  /// The main body of code, contains function definitions.
-  final StringBuffer body = StringBuffer();
 
   /// Uniform declarations.
   final Map<int, String> uniformDeclarations = <int, String>{};
@@ -83,12 +75,8 @@ class _Transpiler {
   /// ID mapped to function types.
   final Map<int, _FunctionType> functionTypes = <int, _FunctionType>{};
 
-  /// Function ID mapped to source-code definition.
-  final Map<int, StringBuffer> functionDefs = <int, StringBuffer>{};
-
-  /// Function ID mapped to referenced functions.
-  /// This is used to ensure they are written in the right order.
-  final Map<int, List<int>> functionDeps = <int, List<int>>{};
+  /// ID mapped to function definition.
+  final Map<int, _Function> functions = <int, _Function>{};
 
   /// ID mapped to location decorator.
   /// See [opDecorate] for more information.
@@ -99,6 +87,9 @@ class _Transpiler {
 
   /// ID mapped to a string to use instead of a generated name.
   final Map<int, String> nameOverloads = <int, String>{};
+
+  /// ID mapped to expression result
+  final Map<int, _Instruction> results = <int, _Instruction>{};
 
   /// The ID for a constant true value.
   /// See [opConstantTrue].
@@ -141,15 +132,16 @@ class _Transpiler {
   /// See [opTypeSampledImage].
   int sampledImageType = 0;
 
-  /// The ID of the function that is currently being defined.
+  /// The function that is currently being defined.
   /// Set by [opFunction] and unset by [opFunctionEnd].
-  int currentFunction = 0;
-
-  /// The type of [currentFunction], or null.
-  _FunctionType? currentFunctionType;
+  _Function? currentFunction;
 
   /// Count of parameters declared so far for the [currentFunction].
   int declaredParams = 0;
+
+  /// The block currently being defined. Set by [opLabel] and unset by
+  /// [opFunctionEnd].
+  _Block? currentBlock;
 
   /// The ID for the color output variable.
   /// Set by [opVariable].
@@ -165,13 +157,6 @@ class _Transpiler {
   /// The number of samplers used by uniforms.
   int samplerCount = 0;
 
-  /// Current indentation to prepend to new lines.
-  String indent = '';
-
-  /// Points to the source of the [currentFunction], or to [src] as a fallback.
-  /// The source of [currentFunction] is stored in [functionDefs].
-  late StringBuffer out;
-
   /// Scan through all the words and populate [out] with source code,
   /// or throw an exception. Calls to [parseInstruction] will affect
   /// the state of the transpiler, including [position] and [out].
@@ -179,8 +164,6 @@ class _Transpiler {
     parseHeader();
     writeHeader();
 
-    // Parse instructions and write to body.
-    out = body;
     while (position < spirv.length) {
       final int lastPosition = position;
       parseInstruction();
@@ -188,33 +171,31 @@ class _Transpiler {
       assert(position > lastPosition);
     }
 
-    // TODO(antrob): Investigate if `List<bool>.filled(maxFunctionId, false)` can be used here instead.
-    final Set<int> visited = <int>{};
-    writeFunctionAndDeps(visited, entryPoint);
-
     // Add uniform declarations to header.
     if (uniformDeclarations.isNotEmpty) {
-      header.writeln();
+      src.writeln();
       final List<int> locations = uniformDeclarations.keys.toList();
       locations.sort((int a, int b) => a - b);
       for (final int location in locations) {
-        header.writeln(uniformDeclarations[location]);
+        src.writeln(uniformDeclarations[location]);
       }
     }
 
     // Add SkSL sampler size declarations to header.
     if (samplerSizeDeclarations.isNotEmpty) {
-      header.writeln();
+      src.writeln();
       final List<int> locations = samplerSizeDeclarations.keys.toList();
       locations.sort((int a, int b) => a - b);
       for (final int location in locations) {
-        header.writeln(samplerSizeDeclarations[location]);
+        src.writeln(samplerSizeDeclarations[location]);
       }
     }
 
-    src.write(header);
     src.writeln();
-    src.write(body);
+
+    // TODO(antrob): Investigate if `List<bool>.filled(maxFunctionId, false)` can be used here instead.
+    final Set<int> visited = <int>{};
+    writeFunctionAndDeps(visited, entryPoint);
   }
 
   TranspileException failure(String why) =>
@@ -225,22 +206,23 @@ class _Transpiler {
       return;
     }
     visited.add(function);
-    for (final int dep in functionDeps[function]!) {
+    final _Function f = functions[function]!;
+    for (final int dep in f.deps) {
       writeFunctionAndDeps(visited, dep);
     }
-    out.write(functionDefs[function]!.toString());
+    f.write(this, src);
   }
 
   void writeHeader() {
     switch (target) {
       case TargetLanguage.glslES:
-        out.writeln('#version 100\n');
-        out.writeln('precision mediump float;\n');
+        src.writeln('#version 100\n');
+        src.writeln('precision mediump float;\n');
         break;
       case TargetLanguage.glslES300:
-        out.writeln('#version 300 es\n');
-        out.writeln('precision mediump float;\n');
-        out.writeln('layout ( location = 0 ) out vec4 $_colorVariableName;\n');
+        src.writeln('#version 300 es\n');
+        src.writeln('precision mediump float;\n');
+        src.writeln('layout ( location = 0 ) out vec4 $_colorVariableName;\n');
         break;
       default:
         break;
@@ -279,6 +261,21 @@ class _Transpiler {
     return _typeName(t, target);
   }
 
+  String resolveResult(int name) {
+    if (alias.containsKey(name)) {
+      return resolveResult(alias[name]!);
+    }
+    final _Instruction? res = results[name];
+    if (res != null && res.refCount <= 1) {
+      final StringBuffer buf = StringBuffer();
+      buf.write('(');
+      res.write(this, buf);
+      buf.write(')');
+      return buf.toString();
+    }
+    return resolveName(name);
+  }
+
   int readWord() {
     if (nextPosition != 0 && position > nextPosition) {
       throw failure('Read past the current instruction.');
@@ -312,13 +309,22 @@ class _Transpiler {
     throw failure('No null-terminating character found for string literal');
   }
 
-  void typeCast() {
-    final String type = resolveType(readWord());
-    final String name = resolveName(readWord());
-    final String value = resolveName(readWord());
-    out.writeln('$indent$type $name = $type($value);');
+  /// Increase the refcount of a result with name `id`.
+  void ref(int id) {
+    final int? a = alias[id];
+    if (a != null) {
+      ref(a);
+      return;
+    }
+    results[id]?.refCount++;
   }
 
+  void addToCurrentBlock(_Instruction inst) {
+    if (inst.isResult) {
+      results[inst.id] = inst;
+    }
+    currentBlock!.add(inst);
+  }
 
   /// Read an instruction word, and handle the operation.
   ///
@@ -491,6 +497,14 @@ class _Transpiler {
         throw failure('Not a supported op.');
     }
     position = nextPosition;
+  }
+
+  void typeCast() {
+    final int type = readWord();
+    final int name = readWord();
+    final int value = readWord();
+    ref(value);
+    addToCurrentBlock(_TypeCast(type, name, value));
   }
 
   void opExtInstImport() {
@@ -720,112 +734,72 @@ class _Transpiler {
       valueString = '$v';
     }
     final String typeName = resolveType(type);
-    header.writeln('const $typeName $id = $valueString;');
+    src.writeln('const $typeName $id = $valueString;');
   }
 
   void opConstantComposite() {
     final String type = resolveType(readWord());
     final String id = resolveName(readWord());
-    header.write('const $type $id = $type(');
+    src.write('const $type $id = $type(');
     final int count = nextPosition - position;
     for (int i = 0; i < count; i++) {
-      header.write(resolveName(readWord()));
+      src.write(resolveName(readWord()));
       if (i < count - 1) {
-        header.write(', ');
+        src.write(', ');
       }
     }
-    header.writeln(');');
+    src.writeln(');');
   }
 
   void opFunction() {
-    String returnType = resolveType(readWord());
+    final int returnType = readWord();
     final int id = readWord();
-
-    if (target == TargetLanguage.sksl && id == entryPoint) {
-      returnType = 'half4';
-    }
 
     // ignore function control
     position++;
-
-    final String name = resolveName(id);
-    final String opening = '$returnType $name(';
-    final StringBuffer def = StringBuffer();
-    def.write(opening);
-
-    if (target == TargetLanguage.sksl && id == entryPoint) {
-      const String fragParam = 'float2 $_fragParamName';
-      def.write(fragParam);
-    }
 
     final int typeIndex = readWord();
     final _FunctionType? functionType = functionTypes[typeIndex];
     if (functionType == null) {
       throw failure('$typeIndex is not a registered function type');
     }
-
-    if (functionType.params.isEmpty) {
-      def.write(') ');
+    if (returnType != functionType.returnType) {
+      throw failure('function $id has return type mismatch');
     }
 
-    currentFunction = id;
-    currentFunctionType = functionType;
-    declaredParams = 0;
-    out = def;
-    functionDefs[id] = def;
-    functionDeps[id] = <int>[];
+    final _Function f = _Function(functionType, id);
+    functions[id] = f;
+    currentFunction = f;
   }
 
   void opFunctionParameter() {
-    if (declaredParams > 0) {
-      out.write(', ');
-    }
-
     final int type = readWord();
     final int id = readWord();
-    final String decl = resolveType(type) + ' ' + resolveName(id);
-    out.write(decl);
-    declaredParams++;
-
-    if (declaredParams == currentFunctionType?.params.length) {
-      out.write(') ');
-    }
+    final _Function f = currentFunction!;
+    f.declareParam(id, type);
   }
 
   void opFunctionEnd() {
-    if (target == TargetLanguage.sksl && currentFunction == entryPoint) {
-      out.writeln('${indent}return $_colorVariableName;');
-    }
-    out.writeln('}');
-    out.writeln();
-    // Remove trailing two space characters, if present.
-    indent = indent.substring(0, max(0, indent.length - 2));
-    currentFunction = 0;
-    out = body;
-    currentFunctionType = null;
+    currentFunction = null;
+    currentBlock = null;
   }
 
   void opFunctionCall() {
-    final String type = resolveType(readWord());
-    final String name = resolveName(readWord());
+    final int type = readWord();
+    final int name = readWord();
     final int functionId = readWord();
     final String functionName = resolveName(functionId);
 
     // Make the current function depend on this function.
-    functionDeps[currentFunction]!.add(functionId);
+    currentFunction!.deps.add(functionId);
 
-    final List<String> args =
-        List<String>.generate(nextPosition - position, (int i) {
-      return resolveName(readWord());
-    });
-    out.write('$indent$type $name = $functionName(');
+    final List<int> args = List<int>.filled(nextPosition - position, 0);
     for (int i = 0; i < args.length; i++) {
-      out.write(args[i]);
-      if (i < args.length - 1) {
-        out.write(', ');
-      }
+      final int id = readWord();
+      ref(id);
+      args[i] = id;
     }
-    out.writeln(');');
+    addToCurrentBlock(_FunctionCall(type, name, functionName, args));
   }
 
   void opVariable() {
@@ -837,7 +811,7 @@ class _Transpiler {
 
     switch (storageClass) {
       case _storageClassUniformConstant:
-        int? location = locations[id];
+        final int? location = locations[id];
         if (location == null) {
           throw failure('$id had no location specified');
         }
@@ -867,7 +841,7 @@ class _Transpiler {
         }
         return;
       case _storageClassFunction:
-        out.writeln('$indent$type $name;');
+        addToCurrentBlock(_StringInstruction('$type $name'));
         return;
       default:
         throw failure('$storageClass is an unsupported Storage Class');
@@ -883,37 +857,42 @@ class _Transpiler {
   }
 
   void opSelect() {
-    final String type = resolveType(readWord());
-    final String name = resolveName(readWord());
-    final String condition = resolveName(readWord());
-    final String a = resolveName(readWord());
-    final String b = resolveName(readWord());
-    out.writeln('$indent$type $name = mix($b, $a, $type($condition));');
+    final int type = readWord();
+    final int name = readWord();
+    final int condition = readWord();
+    final int a = readWord();
+    final int b = readWord();
+    ref(condition);
+    ref(a);
+    ref(b);
+    addToCurrentBlock(_Select(type, name, condition, a, b));
   }
 
   void opStore() {
-    final String pointer = resolveName(readWord());
-    final String object = resolveName(readWord());
-    out.writeln('$indent$pointer = $object;');
+    final int pointer = readWord();
+    final int object = readWord();
+    ref(object);
+    addToCurrentBlock(_Store(pointer, object));
   }
 
   void opAccessChain() {
-    final String type = resolveType(readWord());
+    final int type = readWord();
     final int id = readWord();
-    final String base = resolveName(readWord());
+    final int base = readWord();
+    ref(base);
 
     // opAccessChain currently only supports indexed access.
     // Once struct support is added, this will need to be updated.
     // Currently, structs will be caught before this method is called,
     // since using the instruction to define a struct type will throw
     // an exception.
-    String overload = base;
-    final int count = nextPosition - position;
-    for (int i = 0; i < count; i++) {
-      final String index = resolveName(readWord());
-      overload += '[$index]';
+    final List<int> indices = List<int>.filled(nextPosition - position, 0);
+    for (int i = 0; i < indices.length; i++) {
+      final int id = readWord();
+      ref(id);
+      indices[i] = id;
     }
-    nameOverloads[id] = overload;
+    addToCurrentBlock(_AccessChain(type, id, base, indices));
   }
 
   void opDecorate() {
@@ -934,120 +913,101 @@ class _Transpiler {
   }
 
   void opVectorShuffle() {
-    final String type = resolveType(readWord());
-    final String name = resolveName(readWord());
-    final String vector1Name = resolveName(readWord());
+    final int type = readWord();
+    final int name = readWord();
+    final int vector = readWord();
     // ignore second vector
     position++;
-
-    out.write('$indent$type $name = $type(');
-
-    final int count = nextPosition - position;
-    for (int i = 0; i < count; i++) {
-      final int index = readWord();
-      out.write('$vector1Name[$index]');
-      if (i < count - 1) {
-        out.write(', ');
-      }
+    final List<int> indices = List<int>.filled(nextPosition - position, 0);
+    for (int i = 0; i < indices.length; i++) {
+      ref(vector); // each index references the vector
+      final int id = readWord();
+      indices[i] = id;
     }
-    out.writeln(');');
+    addToCurrentBlock(_VectorShuffle(type, name, vector, indices));
   }
 
   void opCompositeConstruct() {
-    final String type = resolveType(readWord());
-    final String name = resolveName(readWord());
-    out.write('$indent$type $name = $type(');
-    final int count = nextPosition - position;
-    for (int i = 0; i < count; i++) {
-      out.write(resolveName(readWord()));
-      if (i < count - 1) {
-        out.write(', ');
-      }
+    final int type = readWord();
+    final int name = readWord();
+    final List<int> components = List<int>.filled(nextPosition - position, 0);
+    for (int i = 0; i < components.length; i++) {
+      final int id = readWord();
+      ref(id);
+      components[i] = id;
     }
-    out.writeln(');');
+    addToCurrentBlock(_CompositeConstruct(type, name, components));
   }
 
   void opCompositeExtract() {
-    final String type = resolveType(readWord());
-    final String name = resolveName(readWord());
-    final String src = resolveName(readWord());
-    out.write('$indent$type $name = $src');
-    final int count = nextPosition - position;
-    for (int i = 0; i < count; i++) {
+    final int type = readWord();
+    final int name = readWord();
+    final int src = readWord();
+    ref(src);
+    final List<int> indices = List<int>.filled(nextPosition - position, 0);
+    for (int i = 0; i < indices.length; i++) {
       final int index = readWord();
-      out.write('[$index]');
+      indices[i] = index;
     }
-    out.writeln(';');
+    addToCurrentBlock(_CompositeExtract(type, name, src, indices));
   }
 
   void opImageSampleImplicitLod() {
-    final String type = resolveType(readWord());
-    final String name = resolveName(readWord());
-    final String sampledImage = resolveName(readWord());
-    final String coordinate = resolveName(readWord());
-    if (target == TargetLanguage.sksl) {
-      out.writeln('$indent$type $name = $sampledImage.eval(${sampledImage}_size * $coordinate);');
-    } else {
-      out.writeln('$indent$type $name = texture($sampledImage, $coordinate);');
-    }
+    final int type = readWord();
+    final int name = readWord();
+    final int sampledImage = readWord();
+    final int coordinate = readWord();
+    ref(coordinate);
+    addToCurrentBlock(_ImageSampleImplicitLod(type, name, sampledImage, coordinate));
   }
 
   void opFNegate() {
-    final String type = resolveType(readWord());
-    final String name = resolveName(readWord());
-    final String operand = resolveName(readWord());
-    out.writeln('$indent$type $name = -$operand;');
+    final int type = readWord();
+    final int name = readWord();
+    final int operand = readWord();
+    ref(operand);
+    addToCurrentBlock(_Negate(type, name, operand));
   }
 
   void opLabel() {
-    out.writeln('{');
-    indent = indent + '  ';
-    if (target == TargetLanguage.sksl && currentFunction == entryPoint) {
-      final String ind = indent;
-      if (fragCoord > 0) {
-        final String fragName = resolveName(fragCoord);
-        out
-          ..write(ind)
-          ..writeln('float4 $fragName = float4($_fragParamName, 0, 0);');
-      }
-      out
-        ..write(ind)
-        ..writeln('float4 $_colorVariableName;');
-    }
+    final int id = readWord();
+    currentBlock = currentFunction!.addBlock(id);
   }
 
   void opReturn() {
-    if (currentFunction == entryPoint) {
+    if (currentFunction!.name == entryPoint) {
       return;
+    } else {
+      addToCurrentBlock(_StringInstruction('return'));
     }
-    out.writeln(indent + 'return;');
   }
 
   void opReturnValue() {
-    final String name = resolveName(readWord());
-    out.writeln(indent + 'return $name;');
+    final int value = readWord();
+    ref(value);
+    addToCurrentBlock(_ReturnValue(value));
   }
 
   void parseOperatorInst(String op) {
-    final String type = resolveType(readWord());
-    final String name = resolveName(readWord());
-    final String a = resolveName(readWord());
-    final String b = resolveName(readWord());
-    out.writeln('$indent$type $name = $a $op $b;');
+    final int type = readWord();
+    final int name = readWord();
+    final int a = readWord();
+    final int b = readWord();
+    ref(a);
+    ref(b);
+    addToCurrentBlock(_Operator(type, name, op, a, b));
   }
 
   void parseBuiltinFunction(String functionName) {
-    final String type = resolveType(readWord());
-    final String name = resolveName(readWord());
-    out.write('$indent$type $name = $functionName(');
-    final int count = nextPosition - position;
-    for (int i = 0; i < count; i++) {
-      out.write(resolveName(readWord()));
-      if (i < count - 1) {
-        out.write(', ');
-      }
+    final int type = readWord();
+    final int name = readWord();
+    final List<int> args = List<int>.filled(nextPosition - position, 0);
+    for (int i = 0; i < args.length; i++) {
+      final int id = readWord();
+      ref(id);
+      args[i] = id;
     }
-    out.writeln(');');
+    addToCurrentBlock(_BuiltinFunction(type, name, functionName, args));
   }
 
   void parseGLSLInst(int id, int type) {
@@ -1060,19 +1020,12 @@ class _Transpiler {
       throw failure('$id is not a supported GLSL instruction.');
     }
     final int argc = _glslStd450OpArgc[inst]!;
-    parseGLSLOp(id, type, opName, argc);
-  }
-
-  void parseGLSLOp(int id, int type, String name, int argCount) {
-    final String resultName = resolveName(id);
-    final String typeName = resolveType(type);
-    out.write('$indent$typeName $resultName = $name(');
-    for (int i = 0; i < argCount; i++) {
-      out.write(resolveName(readWord()));
-      if (i < argCount - 1) {
-        out.write(', ');
-      }
+    final List<int> args = List<int>.filled(argc, 0);
+    for (int i = 0; i < argc; i++) {
+      final int id = readWord();
+      ref(id);
+      args[i] = id;
     }
-    out.writeln(');');
+    addToCurrentBlock(_BuiltinFunction(type, id, opName, args));
   }
 }

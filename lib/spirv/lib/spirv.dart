@@ -12,6 +12,8 @@ import 'dart:typed_data';
 // These parts only contain private members, all public
 // members are in this file (spirv.dart)
 part 'src/constants.dart';
+part 'src/function.dart';
+part 'src/instructions.dart';
 part 'src/transpiler.dart';
 part 'src/types.dart';
 
