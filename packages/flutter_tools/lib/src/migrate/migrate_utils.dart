@@ -69,10 +69,10 @@ class MigrateUtils {
     required String name,
     required String androidLanguage,
     required String iosLanguage,
-    String? outputDirectory,
+    required String outputDirectory,
     List<String> platforms = const <String>[],
   }) async {
-     List<String> cmdArgs = ['create', '--project-name', name];
+     List<String> cmdArgs = ['create', '--no-pub', '--project-name', name];
     if (platforms.isNotEmpty) {
       String platformsArg = '--platforms=';
       for (int i = 0; i < platforms.length; i++) {
@@ -83,11 +83,21 @@ class MigrateUtils {
       }
       cmdArgs.add(platformsArg);
     }
-    if (outputDirectory != null) {
-      cmdArgs.add(outputDirectory);
-    }
+    cmdArgs.add(outputDirectory);
     final ProcessResult result = await Process.run('./flutter', cmdArgs, workingDirectory: flutterBinPath);
-    checkForErrors(result, commandDescription: 'git ${cmdArgs.join(' ')}');
+    // Old versions of the tool does not include the platforms option. In this case, we will just
+    // just call the general create command.
+    if (result.stderr.contains('Could not find an option named "platforms".')) {
+      return createFromTemplates(
+        flutterBinPath,
+        name: name,
+        androidLanguage: androidLanguage,
+        iosLanguage: iosLanguage,
+        outputDirectory: outputDirectory,
+        platforms: const <String>[],
+      );
+    }
+    checkForErrors(result, commandDescription: '${flutterBinPath}flutter ${cmdArgs.join(' ')}');
     return result.stdout;
   }
 
@@ -146,7 +156,7 @@ class MigrateUtils {
     // -1 in allowed exit codes means all exit codes are valid.
     if ((result.exitCode != 0 && !allowedExitCodes.contains(result.exitCode)) && !allowedExitCodes.contains(-1)) {
       if (!silent) {
-        globals.printError('Git command encountered an error.');
+        globals.printError('Command encountered an error.');
         if (commandDescription != null) {
           globals.printError('Command:');
           globals.printError(commandDescription, indent: 2);

@@ -72,6 +72,7 @@ void main() {
       deleteTempDirectories: false,
       logger: logger,
     );
+    print(logger.statusText);
     expect(result.sdkDirs.length, equals(1));
     expect(result.deletedFiles.isEmpty, true);
     expect(result.addedFiles.isEmpty, false);
@@ -181,8 +182,6 @@ void main() {
 [        ]   - android/.migrate_config
 [        ]   - .migrate_config
 [        ]   - analysis_options.yaml
-[        ]   - .dart_tool/package_config_subset
-[        ]   - .dart_tool/version
 [        ]   - windows/CMakeLists.txt
 [        ]   - windows/runner/flutter_window.cpp
 [        ]   - windows/runner/utils.h
@@ -318,8 +317,6 @@ project_type: app
     expect(tempDir.childFile('android/.migrate_config').existsSync(), true);
     expect(tempDir.childFile('.migrate_config').existsSync(), true);
     expect(tempDir.childFile('analysis_options.yaml').existsSync(), true);
-    expect(tempDir.childFile('.dart_tool/package_config_subset').existsSync(), true);
-    expect(tempDir.childFile('.dart_tool/version').existsSync(), true);
     expect(tempDir.childFile('windows/CMakeLists.txt').existsSync(), true);
     expect(tempDir.childFile('windows/runner/flutter_window.cpp').existsSync(), true);
     expect(tempDir.childFile('windows/runner/utils.h').existsSync(), true);
@@ -604,8 +601,6 @@ flutter:
     expect(tempDir.childFile('android/.migrate_config').existsSync(), true);
     expect(tempDir.childFile('.migrate_config').existsSync(), true);
     expect(tempDir.childFile('analysis_options.yaml').existsSync(), true);
-    expect(tempDir.childFile('.dart_tool/package_config_subset').existsSync(), true);
-    expect(tempDir.childFile('.dart_tool/version').existsSync(), true);
     expect(tempDir.childFile('windows/CMakeLists.txt').existsSync(), true);
     expect(tempDir.childFile('windows/runner/flutter_window.cpp').existsSync(), true);
     expect(tempDir.childFile('windows/runner/utils.h').existsSync(), true);
