@@ -66,7 +66,7 @@ void main() {
     debugResetSemanticsIdCounter();
   });
 
-  testWidgets('AppBar centers title on iOS', (WidgetTester tester) async {
+    testWidgets("AppBar title isn't center on Android", (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(platform: TargetPlatform.android),
@@ -79,10 +79,11 @@ void main() {
     );
 
     final Finder title = find.text('X');
-    Offset center = tester.getCenter(title);
-    Size size = tester.getSize(title);
-    expect(center.dx, lessThan(400 - size.width / 2.0));
+    final Offset center = tester.getTopLeft(title);
+    expect(center.dx, lessThan(400));
+  });
 
+  testWidgets('AppBar centers title on iOS and macOs', (WidgetTester tester) async {
     for (final TargetPlatform platform in <TargetPlatform>[TargetPlatform.iOS, TargetPlatform.macOS]) {
       // Clear the widget tree to avoid animating between platforms.
       await tester.pumpWidget(Container(key: UniqueKey()));
@@ -98,10 +99,9 @@ void main() {
         ),
       );
 
-      center = tester.getCenter(title);
-      size = tester.getSize(title);
-      expect(center.dx, greaterThan(400 - size.width / 2.0), reason: 'on ${platform.name}');
-      expect(center.dx, lessThan(400 + size.width / 2.0), reason: 'on ${platform.name}');
+      final Finder title = find.text('X');
+      Offset center = tester.getCenter(title);
+      expect(center.dx, 400, reason: 'on ${platform.name}');
 
       // One action is still centered.
 
@@ -120,9 +120,7 @@ void main() {
       );
 
       center = tester.getCenter(title);
-      size = tester.getSize(title);
-      expect(center.dx, greaterThan(400 - size.width / 2.0), reason: 'on ${platform.name}');
-      expect(center.dx, lessThan(400 + size.width / 2.0), reason: 'on ${platform.name}');
+      expect(center.dx, 400, reason: 'on ${platform.name}');
 
       // Two actions is left aligned again.
 
@@ -141,9 +139,8 @@ void main() {
         ),
       );
 
-      center = tester.getCenter(title);
-      size = tester.getSize(title);
-      expect(center.dx, lessThan(400 - size.width / 2.0), reason: 'on ${platform.name}');
+      final Offset topLeft = tester.getTopLeft(title);
+      expect(topLeft.dx, 16, reason: 'on ${platform.name}');
     }
   });
 
@@ -162,9 +159,7 @@ void main() {
 
     final Finder title = find.text('X');
     final Offset center = tester.getCenter(title);
-    final Size size = tester.getSize(title);
-    expect(center.dx, greaterThan(400 - size.width / 2.0));
-    expect(center.dx, lessThan(400 + size.width / 2.0));
+    expect(center.dx, 400);
   });
 
   testWidgets('AppBar centerTitle:false title start edge is 16.0 (LTR)', (WidgetTester tester) async {
