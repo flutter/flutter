@@ -179,9 +179,9 @@ void main() {
     Color getIconColor() => tester.state<TestIconState>(find.byType(TestIcon)).iconTheme.color!;
     Color getTextColor() => tester.state<TestTextState>(find.byType(TestText)).textStyle.color!;
 
-    // Check the expanded icon color when iconColor is applied.
+    // Check the collapsed icon color when iconColor is applied.
     expect(getIconColor(), collapsedIconColor);
-    // Check the expanded text color when textColor is applied.
+    // Check the collapsed text color when textColor is applied.
     expect(getTextColor(), collapsedTextColor);
   });
 
