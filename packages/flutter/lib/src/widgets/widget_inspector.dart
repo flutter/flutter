@@ -906,7 +906,7 @@ mixin WidgetInspectorService {
   /// This is expensive and should not be called except during development.
   @protected
   Future<void> forceRebuild() {
-    final WidgetsBinding binding = WidgetsBinding.instance!;
+    final WidgetsBinding binding = WidgetsBinding.instance;
     if (binding.renderViewElement != null) {
       binding.buildOwner!.reassemble(binding.renderViewElement!, null);
       return binding.endOfFrame;
@@ -989,7 +989,7 @@ mixin WidgetInspectorService {
       return true;
     }());
 
-    SchedulerBinding.instance!.addPersistentFrameCallback(_onFrameStart);
+    SchedulerBinding.instance.addPersistentFrameCallback(_onFrameStart);
 
     _registerBoolServiceExtension(
       name: 'structuredErrors',
@@ -1056,7 +1056,7 @@ mixin WidgetInspectorService {
               renderObject.markNeedsPaint();
               renderObject.visitChildren(markTreeNeedsPaint);
             }
-            final RenderObject root = RendererBinding.instance!.renderView;
+            final RenderObject root = RendererBinding.instance.renderView;
             markTreeNeedsPaint(root);
           } else {
             debugOnProfilePaint = null;
@@ -1279,7 +1279,7 @@ mixin WidgetInspectorService {
   @protected
   bool isWidgetTreeReady([ String? groupName ]) {
     return WidgetsBinding.instance != null &&
-           WidgetsBinding.instance!.debugDidSendFirstFrameEvent;
+           WidgetsBinding.instance.debugDidSendFirstFrameEvent;
   }
 
   /// Returns the Dart object associated with a reference id.
@@ -1383,12 +1383,12 @@ mixin WidgetInspectorService {
         developer.inspect(selection.current);
       }
       if (selectionChangedCallback != null) {
-        if (SchedulerBinding.instance!.schedulerPhase == SchedulerPhase.idle) {
+        if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.idle) {
           selectionChangedCallback!();
         } else {
           // It isn't safe to trigger the selection change callback if we are in
           // the middle of rendering the frame.
-          SchedulerBinding.instance!.scheduleTask(
+          SchedulerBinding.instance.scheduleTask(
             selectionChangedCallback!,
             Priority.touch,
           );
@@ -1685,7 +1685,7 @@ mixin WidgetInspectorService {
   }
 
   Map<String, Object?>? _getRootWidget(String groupName) {
-    return _nodeToJson(WidgetsBinding.instance?.renderViewElement?.toDiagnosticsNode(), InspectorSerializationDelegate(groupName: groupName, service: this));
+    return _nodeToJson(WidgetsBinding.instance.renderViewElement?.toDiagnosticsNode(), InspectorSerializationDelegate(groupName: groupName, service: this));
   }
 
   /// Returns a JSON representation of the [DiagnosticsNode] for the root
@@ -1696,7 +1696,7 @@ mixin WidgetInspectorService {
 
   Map<String, Object?>? _getRootWidgetSummaryTree(String groupName) {
     return _nodeToJson(
-      WidgetsBinding.instance?.renderViewElement?.toDiagnosticsNode(),
+      WidgetsBinding.instance.renderViewElement?.toDiagnosticsNode(),
       InspectorSerializationDelegate(groupName: groupName, subtreeDepth: 1000000, summaryTree: true, service: this),
     );
   }
@@ -1709,7 +1709,7 @@ mixin WidgetInspectorService {
   }
 
   Map<String, Object?>? _getRootRenderObject(String groupName) {
-    return _nodeToJson(RendererBinding.instance?.renderView.toDiagnosticsNode(), InspectorSerializationDelegate(groupName: groupName, service: this));
+    return _nodeToJson(RendererBinding.instance.renderView.toDiagnosticsNode(), InspectorSerializationDelegate(groupName: groupName, service: this));
   }
 
   /// Returns a JSON representation of the subtree rooted at the
@@ -1901,7 +1901,7 @@ mixin WidgetInspectorService {
 
   void _onFrameStart(Duration timeStamp) {
     _frameStart = timeStamp;
-    SchedulerBinding.instance!.addPostFrameCallback(_onFrameEnd);
+    SchedulerBinding.instance.addPostFrameCallback(_onFrameEnd);
   }
 
   void _onFrameEnd(Duration timeStamp) {
@@ -2358,7 +2358,7 @@ class _WidgetInspectorState extends State<WidgetInspector>
     // on the edge of the display. If the pointer is being dragged off the edge
     // of the display we do not want to select anything. A user can still select
     // a widget that is only at the exact screen margin by tapping.
-    final Rect bounds = (Offset.zero & (WidgetsBinding.instance!.window.physicalSize / WidgetsBinding.instance!.window.devicePixelRatio)).deflate(_kOffScreenMargin);
+    final Rect bounds = (Offset.zero & (WidgetsBinding.instance.window.physicalSize / WidgetsBinding.instance.window.devicePixelRatio)).deflate(_kOffScreenMargin);
     if (!bounds.contains(_lastPointerLocation!)) {
       setState(() {
         selection.clear();

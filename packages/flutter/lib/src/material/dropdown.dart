@@ -1203,7 +1203,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
 
   @override
   void dispose() {
-    WidgetsBinding.instance!.removeObserver(this);
+    WidgetsBinding.instance.removeObserver(this);
     _removeDropdownRoute();
     focusNode!.removeListener(_handleFocusChanged);
     _internalNode?.dispose();
@@ -1665,14 +1665,13 @@ class DropdownButtonFormField<T> extends FormField<T> {
 }
 
 class _DropdownButtonFormFieldState<T> extends FormFieldState<T> {
-  @override
-  DropdownButtonFormField<T> get widget => super.widget as DropdownButtonFormField<T>;
 
   @override
   void didChange(T? value) {
     super.didChange(value);
-    assert(widget.onChanged != null);
-    widget.onChanged!(value);
+    final DropdownButtonFormField<T> dropdownButtonFormField = widget as DropdownButtonFormField<T>;
+    assert(dropdownButtonFormField.onChanged != null);
+    dropdownButtonFormField.onChanged!(value);
   }
 
   @override

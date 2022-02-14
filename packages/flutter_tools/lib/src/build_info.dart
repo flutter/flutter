@@ -193,9 +193,13 @@ class BuildInfo {
   String get modeName => getModeName(mode);
   String get friendlyModeName => getFriendlyModeName(mode);
 
-  /// the flavor name in the output files is lower-cased (see flutter.gradle),
+  /// the flavor name in the output apk files is lower-cased (see flutter.gradle),
   /// so the lower cased flavor name is used to compute the output file name
   String? get lowerCasedFlavor => flavor?.toLowerCase();
+
+  /// the flavor name in the output bundle files has the first character lower-cased,
+  /// so the uncapitalized flavor name is used to compute the output file name
+  String? get uncapitalizedFlavor => _uncapitalize(flavor);
 
   /// Convert to a structured string encoded structure appropriate for usage
   /// in build system [Environment.defines].
@@ -1007,4 +1011,11 @@ String getNameForHostPlatformArch(HostPlatform platform) {
     case HostPlatform.windows_x64:
       return 'x64';
   }
+}
+
+String? _uncapitalize(String? s) {
+  if (s == null || s.isEmpty) {
+    return s;
+  }
+  return s.substring(0, 1).toLowerCase() + s.substring(1);
 }

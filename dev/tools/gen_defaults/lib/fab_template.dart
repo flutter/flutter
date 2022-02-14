@@ -13,7 +13,30 @@ class FABTemplate extends TokenTemplate {
 class _M3Defaults extends FloatingActionButtonThemeData {
   _M3Defaults(this.context, this.type, this.hasChild)
     : _colors = Theme.of(context).colorScheme,
-      _textTheme = Theme.of(context).textTheme;
+      _textTheme = Theme.of(context).textTheme,
+      super(
+        elevation: ${elevation("md.comp.fab.primary.container")},
+        focusElevation: ${elevation("md.comp.fab.primary.focus.container")},
+        hoverElevation: ${elevation("md.comp.fab.primary.hover.container")},
+        highlightElevation: ${elevation("md.comp.fab.primary.pressed.container")},
+        enableFeedback: true,
+        sizeConstraints: const BoxConstraints.tightFor(
+          width: ${tokens["md.comp.fab.primary.container.width"]},
+          height: ${tokens["md.comp.fab.primary.container.height"]},
+        ),
+        smallSizeConstraints: const BoxConstraints.tightFor(
+          width: ${tokens["md.comp.fab.primary.small.container.width"]},
+          height: ${tokens["md.comp.fab.primary.small.container.height"]},
+        ),
+        largeSizeConstraints: const BoxConstraints.tightFor(
+          width: ${tokens["md.comp.fab.primary.large.container.width"]},
+          height: ${tokens["md.comp.fab.primary.large.container.height"]},
+        ),
+        extendedSizeConstraints: const BoxConstraints.tightFor(
+          height: ${tokens["md.comp.extended-fab.primary.container.height"]},
+        ),
+        extendedIconLabelSpacing: 8.0,
+      );
 
   final BuildContext context;
   final _FloatingActionButtonType type;
@@ -26,28 +49,22 @@ class _M3Defaults extends FloatingActionButtonThemeData {
   @override Color? get foregroundColor => _colors.${color("md.comp.fab.primary.icon")};
   @override Color? get backgroundColor => _colors.${color("md.comp.fab.primary.container")};
   @override Color? get splashColor => _colors.${color("md.comp.fab.primary.pressed.state-layer")};
-  @override double get elevation => ${elevation("md.comp.fab.primary.container.elevation")};
   @override Color? get focusColor => _colors.${color("md.comp.fab.primary.focus.state-layer")};
-  @override double get focusElevation => ${elevation("md.comp.fab.primary.focus.container.elevation")};
   @override Color? get hoverColor => _colors.${color("md.comp.fab.primary.hover.state-layer")};
-  @override double get hoverElevation => ${elevation("md.comp.fab.primary.hover.container.elevation")};
-  @override double get highlightElevation => ${elevation("md.comp.fab.primary.pressed.container.elevation")};
 
   @override
   ShapeBorder? get shape {
     switch (type) {
       case _FloatingActionButtonType.regular:
-       return ${shape("md.comp.fab.primary.container.shape")};
+       return ${shape("md.comp.fab.primary.container")};
       case _FloatingActionButtonType.small:
-       return ${shape("md.comp.fab.primary.small.container.shape")};
+       return ${shape("md.comp.fab.primary.small.container")};
       case _FloatingActionButtonType.large:
-       return ${shape("md.comp.fab.primary.large.container.shape")};
+       return ${shape("md.comp.fab.primary.large.container")};
       case _FloatingActionButtonType.extended:
-       return ${shape("md.comp.extended-fab.primary.container.shape")};
+       return ${shape("md.comp.extended-fab.primary.container")};
      }
   }
-
-  @override bool? get enableFeedback => true;
 
   @override
   double? get iconSize {
@@ -59,30 +76,6 @@ class _M3Defaults extends FloatingActionButtonThemeData {
     }
   }
 
-  @override
-  BoxConstraints? get sizeConstraints => const BoxConstraints.tightFor(
-    width: ${tokens["md.comp.fab.primary.container.width"]},
-    height: ${tokens["md.comp.fab.primary.container.height"]},
-  );
-
-  @override
-  BoxConstraints? get smallSizeConstraints => const BoxConstraints.tightFor(
-    width: ${tokens["md.comp.fab.primary.small.container.width"]},
-    height: ${tokens["md.comp.fab.primary.small.container.height"]},
-  );
-
-  @override
-  BoxConstraints? get largeSizeConstraints => const BoxConstraints.tightFor(
-    width: ${tokens["md.comp.fab.primary.large.container.width"]},
-    height: ${tokens["md.comp.fab.primary.large.container.height"]},
-  );
-
-  @override
-  BoxConstraints? get extendedSizeConstraints => const BoxConstraints.tightFor(
-    height: ${tokens["md.comp.extended-fab.primary.container.height"]},
-  );
-
-  @override double? get extendedIconLabelSpacing => 8.0;
   @override EdgeInsetsGeometry? get extendedPadding => EdgeInsetsDirectional.only(start: hasChild && _isExtended ? 16.0 : 20.0, end: 20.0);
   @override TextStyle? get extendedTextStyle => _textTheme.${textStyle("md.comp.extended-fab.primary.label-text")};
 }

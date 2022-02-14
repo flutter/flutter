@@ -523,9 +523,6 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
   final Set<Element> _forgottenChildren = HashSet<Element>();
 
   @override
-  _CupertinoTextSelectionToolbarItems get widget => super.widget as _CupertinoTextSelectionToolbarItems;
-
-  @override
   _RenderCupertinoTextSelectionToolbarItems get renderObject => super.renderObject as _RenderCupertinoTextSelectionToolbarItems;
 
   void _updateRenderObject(RenderBox? child, _CupertinoTextSelectionToolbarItemsSlot slot) {
@@ -625,15 +622,16 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
   void mount(Element? parent, Object? newSlot) {
     super.mount(parent, newSlot);
     // Mount slotted children.
-    _mountChild(widget.backButton, _CupertinoTextSelectionToolbarItemsSlot.backButton);
-    _mountChild(widget.nextButton, _CupertinoTextSelectionToolbarItemsSlot.nextButton);
-    _mountChild(widget.nextButtonDisabled, _CupertinoTextSelectionToolbarItemsSlot.nextButtonDisabled);
+    final _CupertinoTextSelectionToolbarItems toolbarItems = widget as _CupertinoTextSelectionToolbarItems;
+    _mountChild(toolbarItems.backButton, _CupertinoTextSelectionToolbarItemsSlot.backButton);
+    _mountChild(toolbarItems.nextButton, _CupertinoTextSelectionToolbarItemsSlot.nextButton);
+    _mountChild(toolbarItems.nextButtonDisabled, _CupertinoTextSelectionToolbarItemsSlot.nextButtonDisabled);
 
     // Mount list children.
-    _children = List<Element>.filled(widget.children.length, _NullElement.instance);
+    _children = List<Element>.filled(toolbarItems.children.length, _NullElement.instance);
     Element? previousChild;
     for (int i = 0; i < _children.length; i += 1) {
-      final Element newChild = inflateWidget(widget.children[i], IndexedSlot<Element?>(i, previousChild));
+      final Element newChild = inflateWidget(toolbarItems.children[i], IndexedSlot<Element?>(i, previousChild));
       _children[i] = newChild;
       previousChild = newChild;
     }
@@ -659,12 +657,13 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
     assert(widget == newWidget);
 
     // Update slotted children.
-    _mountChild(widget.backButton, _CupertinoTextSelectionToolbarItemsSlot.backButton);
-    _mountChild(widget.nextButton, _CupertinoTextSelectionToolbarItemsSlot.nextButton);
-    _mountChild(widget.nextButtonDisabled, _CupertinoTextSelectionToolbarItemsSlot.nextButtonDisabled);
+    final _CupertinoTextSelectionToolbarItems toolbarItems = widget as _CupertinoTextSelectionToolbarItems;
+    _mountChild(toolbarItems.backButton, _CupertinoTextSelectionToolbarItemsSlot.backButton);
+    _mountChild(toolbarItems.nextButton, _CupertinoTextSelectionToolbarItemsSlot.nextButton);
+    _mountChild(toolbarItems.nextButtonDisabled, _CupertinoTextSelectionToolbarItemsSlot.nextButtonDisabled);
 
     // Update list children.
-    _children = updateChildren(_children, widget.children, forgottenChildren: _forgottenChildren);
+    _children = updateChildren(_children, toolbarItems.children, forgottenChildren: _forgottenChildren);
     _forgottenChildren.clear();
   }
 }

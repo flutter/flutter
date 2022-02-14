@@ -192,10 +192,10 @@ void main() {
     addTearDown(gesture.removePointer);
     await gesture.moveTo(selectedBarItem);
     await tester.pumpAndSettle();
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.grab);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.grab);
     await gesture.moveTo(unselectedBarItem);
     await tester.pumpAndSettle();
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.move);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.move);
   });
 
   testWidgets('BottomNavigationBar properties are taken over the theme values', (WidgetTester tester) async {
@@ -307,7 +307,7 @@ void main() {
     addTearDown(gesture.removePointer);
     await gesture.moveTo(barItem);
     await tester.pumpAndSettle();
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
   });
 
   testWidgets('BottomNavigationBarTheme can be used to hide all labels', (WidgetTester tester) async {
