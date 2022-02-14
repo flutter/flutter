@@ -211,7 +211,7 @@ class NavigationBarTheme extends InheritedTheme {
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// NavigationBarTheme theme = NavigationBarTheme.of(context);
+  /// NavigationBarThemeData theme = NavigationBarTheme.of(context);
   /// ```
   static NavigationBarThemeData of(BuildContext context) {
     final NavigationBarTheme? navigationBarTheme = context.dependOnInheritedWidgetOfExactType<NavigationBarTheme>();
