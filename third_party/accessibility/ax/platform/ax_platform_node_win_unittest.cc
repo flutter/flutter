@@ -1760,7 +1760,7 @@ TEST_F(AXPlatformNodeWinTest, ITableItemProviderGetRowHeaderItems) {
   EXPECT_EQ(nullptr, safearray.Get());
 }
 
-TEST_F(AXPlatformNodeWinTest, UIAGetPropertySimple) {
+TEST_F(AXPlatformNodeWinTest, DISABLED_UIAGetPropertySimple) {
   AXNodeData root;
   root.role = ax::mojom::Role::kList;
   root.SetName("fake name");
@@ -1820,7 +1820,7 @@ TEST_F(AXPlatformNodeWinTest, UIAGetPropertySimple) {
   EXPECT_UIA_INT_EQ(child_node1, UIA_PositionInSetPropertyId, 1);
 }
 
-TEST_F(AXPlatformNodeWinTest, UIAGetPropertyValueClickablePoint) {
+TEST_F(AXPlatformNodeWinTest, DISABLED_UIAGetPropertyValueClickablePoint) {
   AXNodeData root;
   root.id = 1;
   root.role = ax::mojom::Role::kButton;
@@ -1837,7 +1837,7 @@ TEST_F(AXPlatformNodeWinTest, UIAGetPropertyValueClickablePoint) {
                              UIA_ClickablePointPropertyId, expected_values);
 }
 
-TEST_F(AXPlatformNodeWinTest, UIAGetPropertyValueIsDialog) {
+TEST_F(AXPlatformNodeWinTest, DISABLED_UIAGetPropertyValueIsDialog) {
   AXNodeData root;
   root.id = 1;
   root.role = ax::mojom::Role::kRootWebArea;
@@ -1948,7 +1948,7 @@ TEST_F(AXPlatformNodeWinTest,
                      UIA_IsControlElementPropertyId, false);
 }
 
-TEST_F(AXPlatformNodeWinTest, UIAGetControllerForPropertyId) {
+TEST_F(AXPlatformNodeWinTest, DISABLED_UIAGetControllerForPropertyId) {
   AXNodeData root;
   root.id = 1;
   root.role = ax::mojom::Role::kRootWebArea;
@@ -1996,7 +1996,7 @@ TEST_F(AXPlatformNodeWinTest, UIAGetControllerForPropertyId) {
       expected_names_2);
 }
 
-TEST_F(AXPlatformNodeWinTest, UIAGetDescribedByPropertyId) {
+TEST_F(AXPlatformNodeWinTest, DISABLED_UIAGetDescribedByPropertyId) {
   AXNodeData root;
   std::vector<AXNode::AXID> describedby_ids = {2, 3, 4};
   root.AddIntListAttribute(ax::mojom::IntListAttribute::kDescribedbyIds,
@@ -2029,7 +2029,7 @@ TEST_F(AXPlatformNodeWinTest, UIAGetDescribedByPropertyId) {
       root_node, UIA_DescribedByPropertyId, UIA_NamePropertyId, expected_names);
 }
 
-TEST_F(AXPlatformNodeWinTest, UIAItemStatusPropertyId) {
+TEST_F(AXPlatformNodeWinTest, DISABLED_UIAItemStatusPropertyId) {
   AXNodeData root;
   root.id = 1;
   root.role = ax::mojom::Role::kTable;
@@ -2097,7 +2097,7 @@ TEST_F(AXPlatformNodeWinTest, UIAItemStatusPropertyId) {
       UIA_ItemStatusPropertyId, ScopedVariant::kEmptyVariant);
 }
 
-TEST_F(AXPlatformNodeWinTest, UIAGetFlowsToPropertyId) {
+TEST_F(AXPlatformNodeWinTest, DISABLED_UIAGetFlowsToPropertyId) {
   AXNodeData root;
   std::vector<AXNode::AXID> flowto_ids = {2, 3, 4};
   root.AddIntListAttribute(ax::mojom::IntListAttribute::kFlowtoIds, flowto_ids);
@@ -2128,7 +2128,7 @@ TEST_F(AXPlatformNodeWinTest, UIAGetFlowsToPropertyId) {
                                             UIA_NamePropertyId, expected_names);
 }
 
-TEST_F(AXPlatformNodeWinTest, UIAGetPropertyValueFlowsFromNone) {
+TEST_F(AXPlatformNodeWinTest, DISABLED_UIAGetPropertyValueFlowsFromNone) {
   AXNodeData root;
   root.id = 1;
   root.role = ax::mojom::Role::kRootWebArea;
@@ -2146,7 +2146,7 @@ TEST_F(AXPlatformNodeWinTest, UIAGetPropertyValueFlowsFromNone) {
   EXPECT_EQ(nullptr, V_ARRAY(property_value.ptr()));
 }
 
-TEST_F(AXPlatformNodeWinTest, UIAGetPropertyValueFlowsFromSingle) {
+TEST_F(AXPlatformNodeWinTest, DISABLED_UIAGetPropertyValueFlowsFromSingle) {
   AXNodeData root;
   root.id = 1;
   root.role = ax::mojom::Role::kRootWebArea;
@@ -2171,7 +2171,7 @@ TEST_F(AXPlatformNodeWinTest, UIAGetPropertyValueFlowsFromSingle) {
       child_node1, UIA_FlowsFromPropertyId, UIA_NamePropertyId, expected_names);
 }
 
-TEST_F(AXPlatformNodeWinTest, UIAGetPropertyValueFlowsFromMultiple) {
+TEST_F(AXPlatformNodeWinTest, DISABLED_UIAGetPropertyValueFlowsFromMultiple) {
   AXNodeData root;
   root.id = 1;
   root.role = ax::mojom::Role::kRootWebArea;
@@ -2215,7 +2215,7 @@ TEST_F(AXPlatformNodeWinTest, UIAGetPropertyValueFlowsFromMultiple) {
       expected_names_2);
 }
 
-TEST_F(AXPlatformNodeWinTest, UIAGetPropertyValueFrameworkId) {
+TEST_F(AXPlatformNodeWinTest, DISABLED_UIAGetPropertyValueFrameworkId) {
   AXNodeData root_ax_node_data;
   root_ax_node_data.id = 1;
   root_ax_node_data.role = ax::mojom::Role::kRootWebArea;
@@ -2554,7 +2554,7 @@ TEST_F(AXPlatformNodeWinTest, GetPropertyValue_IsControlElement) {
                      UIA_IsControlElementPropertyId, true);
 }
 
-TEST_F(AXPlatformNodeWinTest, UIAGetProviderOptions) {
+TEST_F(AXPlatformNodeWinTest, DISABLED_UIAGetProviderOptions) {
   AXNodeData root_data;
   root_data.id = 1;
   Init(root_data);
@@ -2571,7 +2571,7 @@ TEST_F(AXPlatformNodeWinTest, UIAGetProviderOptions) {
             provider_options);
 }
 
-TEST_F(AXPlatformNodeWinTest, UIAGetHostRawElementProvider) {
+TEST_F(AXPlatformNodeWinTest, DISABLED_UIAGetHostRawElementProvider) {
   AXNodeData root_data;
   root_data.id = 1;
   Init(root_data);
@@ -2585,7 +2585,7 @@ TEST_F(AXPlatformNodeWinTest, UIAGetHostRawElementProvider) {
   EXPECT_EQ(nullptr, host_provider.Get());
 }
 
-TEST_F(AXPlatformNodeWinTest, UIAGetBoundingRectangle) {
+TEST_F(AXPlatformNodeWinTest, DISABLED_UIAGetBoundingRectangle) {
   AXNodeData root_data;
   root_data.id = 1;
   root_data.relative_bounds.bounds = gfx::RectF(10, 20, 30, 50);
@@ -2603,7 +2603,7 @@ TEST_F(AXPlatformNodeWinTest, UIAGetBoundingRectangle) {
   EXPECT_EQ(50, bounding_rectangle.height);
 }
 
-TEST_F(AXPlatformNodeWinTest, UIAGetFragmentRoot) {
+TEST_F(AXPlatformNodeWinTest, DISABLED_UIAGetFragmentRoot) {
   // This test needs to be run on a child node since AXPlatformRootNodeWin
   // overrides the method.
   AXNodeData root_data;
@@ -2643,7 +2643,7 @@ TEST_F(AXPlatformNodeWinTest, UIAGetFragmentRoot) {
       element1_provider->get_FragmentRoot(&actual_fragment_root));
 }
 
-TEST_F(AXPlatformNodeWinTest, UIAGetEmbeddedFragmentRoots) {
+TEST_F(AXPlatformNodeWinTest, DISABLED_UIAGetEmbeddedFragmentRoots) {
   AXNodeData root_data;
   root_data.id = 1;
   Init(root_data);
@@ -2657,7 +2657,7 @@ TEST_F(AXPlatformNodeWinTest, UIAGetEmbeddedFragmentRoots) {
   EXPECT_EQ(nullptr, embedded_fragment_roots.Get());
 }
 
-TEST_F(AXPlatformNodeWinTest, UIAGetRuntimeId) {
+TEST_F(AXPlatformNodeWinTest, DISABLED_UIAGetRuntimeId) {
   AXNodeData root_data;
   root_data.id = 1;
   Init(root_data);
@@ -2687,7 +2687,7 @@ TEST_F(AXPlatformNodeWinTest, UIAGetRuntimeId) {
   EXPECT_HRESULT_SUCCEEDED(::SafeArrayUnaccessData(runtime_id.Get()));
 }
 
-TEST_F(AXPlatformNodeWinTest, UIAIWindowProviderGetIsModalUnset) {
+TEST_F(AXPlatformNodeWinTest, DISABLED_UIAIWindowProviderGetIsModalUnset) {
   AXNodeData root;
   root.id = 1;
   root.role = ax::mojom::Role::kRootWebArea;
@@ -2701,7 +2701,7 @@ TEST_F(AXPlatformNodeWinTest, UIAIWindowProviderGetIsModalUnset) {
   ASSERT_EQ(nullptr, window_provider.Get());
 }
 
-TEST_F(AXPlatformNodeWinTest, UIAIWindowProviderGetIsModalFalse) {
+TEST_F(AXPlatformNodeWinTest, DISABLED_UIAIWindowProviderGetIsModalFalse) {
   AXNodeData root;
   root.id = 1;
   root.role = ax::mojom::Role::kRootWebArea;
@@ -2720,7 +2720,7 @@ TEST_F(AXPlatformNodeWinTest, UIAIWindowProviderGetIsModalFalse) {
   ASSERT_FALSE(is_modal);
 }
 
-TEST_F(AXPlatformNodeWinTest, UIAIWindowProviderGetIsModalTrue) {
+TEST_F(AXPlatformNodeWinTest, DISABLED_UIAIWindowProviderGetIsModalTrue) {
   AXNodeData root;
   root.id = 1;
   root.role = ax::mojom::Role::kRootWebArea;
@@ -2739,7 +2739,7 @@ TEST_F(AXPlatformNodeWinTest, UIAIWindowProviderGetIsModalTrue) {
   ASSERT_TRUE(is_modal);
 }
 
-TEST_F(AXPlatformNodeWinTest, UIAIWindowProviderInvalidArgument) {
+TEST_F(AXPlatformNodeWinTest, DISABLED_UIAIWindowProviderInvalidArgument) {
   AXNodeData root;
   root.id = 1;
   root.role = ax::mojom::Role::kRootWebArea;
@@ -2762,7 +2762,7 @@ TEST_F(AXPlatformNodeWinTest, UIAIWindowProviderInvalidArgument) {
   ASSERT_EQ(E_INVALIDARG, window_provider->get_IsTopmost(nullptr));
 }
 
-TEST_F(AXPlatformNodeWinTest, UIAIWindowProviderNotSupported) {
+TEST_F(AXPlatformNodeWinTest, DISABLED_UIAIWindowProviderNotSupported) {
   AXNodeData root;
   root.id = 1;
   root.role = ax::mojom::Role::kRootWebArea;
@@ -2800,7 +2800,7 @@ TEST_F(AXPlatformNodeWinTest, UIAIWindowProviderNotSupported) {
             window_provider->get_IsTopmost(&bool_result));
 }
 
-TEST_F(AXPlatformNodeWinTest, UIANavigate) {
+TEST_F(AXPlatformNodeWinTest, DISABLED_UIANavigate) {
   AXNodeData root_data;
   root_data.id = 1;
 
@@ -3076,7 +3076,7 @@ TEST_F(AXPlatformNodeWinTest, ComputeUIAControlType) {
       UIA_ControlTypePropertyId, int{UIA_EditControlTypeId});
 }
 
-TEST_F(AXPlatformNodeWinTest, UIALandmarkType) {
+TEST_F(AXPlatformNodeWinTest, DISABLED_UIALandmarkType) {
   auto TestLandmarkType = [this](ax::mojom::Role node_role,
                                  std::optional<LONG> expected_landmark_type,
                                  const std::string& node_name = {}) {
@@ -3120,7 +3120,7 @@ TEST_F(AXPlatformNodeWinTest, UIALandmarkType) {
   TestLandmarkType(ax::mojom::Role::kTable, {});
 }
 
-TEST_F(AXPlatformNodeWinTest, UIALocalizedLandmarkType) {
+TEST_F(AXPlatformNodeWinTest, DISABLED_UIALocalizedLandmarkType) {
   auto TestLocalizedLandmarkType =
       [this](ax::mojom::Role node_role,
              const std::wstring& expected_localized_landmark,
@@ -3196,7 +3196,7 @@ TEST_F(AXPlatformNodeWinTest, IRawElementProviderSimple2ShowContextMenu) {
   EXPECT_EQ(root_node, TestAXNodeWrapper::GetNodeFromLastShowContextMenu());
 }
 
-TEST_F(AXPlatformNodeWinTest, UIAErrorHandling) {
+TEST_F(AXPlatformNodeWinTest, DISABLED_UIAErrorHandling) {
   AXNodeData root;
   root.id = 1;
   Init(root);
