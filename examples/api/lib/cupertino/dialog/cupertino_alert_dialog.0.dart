@@ -27,7 +27,7 @@ class ActionSheetSample extends StatelessWidget {
 
   final String title;
 
-  // This shows a CupertinoModalPopup which hosts CupertinoAlertDialog.
+  // This shows a CupertinoModalPopup which hosts a CupertinoAlertDialog.
   void _showAlertDialog(BuildContext context) {
     showCupertinoModalPopup<void>(
       context: context,
@@ -47,7 +47,7 @@ class ActionSheetSample extends StatelessWidget {
           CupertinoDialogAction(
             /// This parameter indicates the action would perform
             /// a destructive action such as deletion, and turns
-            /// the action's text to red color.
+            /// the action's text to color red.
             isDestructiveAction: true,
             onPressed: () {
               Navigator.pop(context);
