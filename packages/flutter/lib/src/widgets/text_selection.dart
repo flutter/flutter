@@ -687,6 +687,13 @@ class SelectionOverlay {
   /// Called when the users lift their fingers after dragging the end selection
   /// handles.
   final ValueChanged<DragEndDetails>? onEndHandleDragEnd;
+
+  /// Whether the toolbar is visible.
+  ///
+  /// If the value changes, the toolbar uses [FadeTransition] to transition
+  /// itself on and off the screen.
+  ///
+  /// If this is null the toolbar will always be visible.
   final ValueListenable<bool>? toolbarVisible;
 
   /// The text selection positions of selection start and end.
