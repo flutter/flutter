@@ -23,6 +23,16 @@ const List<String> macOSRequiredHttpHosts = <String>[
   'https://cocoapods.org/',
 ];
 
+/// Android specific required HTTP hosts.
+List<String> androidRequiredHttpHosts(Platform platform) {
+  return <String>[
+    // If kEnvCloudUrl is set, it will be used as the maven host
+    if (!platform.environment.containsKey(kEnvCloudUrl))
+      'https://maven.google.com/',
+  ];
+}
+
+
 // Validator that checks all provided hosts are reachable and responsive
 class HttpHostValidator extends DoctorValidator {
   HttpHostValidator(
@@ -38,21 +48,13 @@ class HttpHostValidator extends DoctorValidator {
   final FeatureFlags _featureFlags;
   final HttpClient _httpClient;
 
-  /// Android specific required HTTP hosts.
-  late final List<String> androidRequiredHttpHosts = <String>[
-    // If kEnvCloudUrl is set, it will be used as the maven host
-    if (!_platform.environment.containsKey(kEnvCloudUrl))
-      'https://maven.google.com/',
-  ];
-
-
   @override
   String get slowWarning =>
       'HTTP Host availability check is taking a long time...';
 
   List<String> get _requiredHosts => <String>[
     if (_featureFlags.isMacOSEnabled) ...macOSRequiredHttpHosts,
-    if (_featureFlags.isAndroidEnabled) ...androidRequiredHttpHosts,
+    if (_featureFlags.isAndroidEnabled) ...androidRequiredHttpHosts(_platform),
     _platform.environment[kEnvPubHostedUrl] ?? kPubDevHttpHost,
     _platform.environment[kEnvCloudUrl] ?? kgCloudHttpHost,
   ];
