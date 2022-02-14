@@ -20,10 +20,14 @@ import 'migrate_utils.dart';
 // of gitignore and config settings
 const List<String> _skippedFiles = const <String>[
   'lib/main.dart',
+  'README.md', // changes to this shouldn't be overwritten since is is user owned.
 ];
 
 const List<String> _skippedDirectories = const <String>[
-  '.dart_tool',
+  '.dart_tool', // ignore the .dart_tool generated dir
+  '.git', // ignore the git metadata
+  'lib', // Files here are always user owned and we don't want to overwrite their apps.
+  'test', // Files here are typically user owned and flutter-side changes are not relevant.
 ];
 
 const List<String> _skippedMergeFileExt = const <String>[
@@ -35,7 +39,7 @@ bool _skipped(String localPath) {
     return true;
   }
   for (String dir in _skippedDirectories) {
-    if (localPath.startsWith(dir)) {
+    if (localPath.startsWith('$dir/')) {
       return true;
     }
   }
