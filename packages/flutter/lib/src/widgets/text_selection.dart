@@ -379,7 +379,7 @@ class TextSelectionOverlay {
 
   ContextualMenuAreaState get _contextualMenuAreaState {
     final ContextualMenuAreaState? state = ContextualMenuArea.of(context);
-    assert(state != null, 'TextSelectionOverlay must be placed under a ContextualMenuArea in the Widget tree');
+    assert(state != null, 'TextSelectionOverlay must be given a BuildContext that has a ContextualMenuArea above it in the Widget tree.');
     return state!;
   }
 

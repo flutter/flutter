@@ -31,7 +31,6 @@ const CupertinoDynamicColor _kToolbarBackgroundColor = CupertinoDynamicColor.wit
   darkColor: Color(0xff302928),
 );
 
-
 class _CupertinoDesktopTextSelectionControls extends TextSelectionControls {
   /// Desktop has no text selection handles.
   @override
@@ -192,7 +191,7 @@ class _CupertinoDesktopTextSelectionControlsToolbarState extends State<_Cupertin
         items.add(onePhysicalPixelVerticalDivider);
       }
 
-      items.add(_CupertinoDesktopTextSelectionToolbarButton.text(
+      items.add(CupertinoDesktopTextSelectionToolbarButton.text(
         context: context,
         onPressed: onPressed,
         text: text,
@@ -329,9 +328,9 @@ const EdgeInsets _kToolbarButtonPadding = EdgeInsets.fromLTRB(
 );
 
 /// A button in the style of the Mac context menu buttons.
-class _CupertinoDesktopTextSelectionToolbarButton extends StatefulWidget {
+class CupertinoDesktopTextSelectionToolbarButton extends StatefulWidget {
   /// Creates an instance of CupertinoDesktopTextSelectionToolbarButton.
-  const _CupertinoDesktopTextSelectionToolbarButton({
+  const CupertinoDesktopTextSelectionToolbarButton({
     Key? key,
     required this.onPressed,
     required this.child,
@@ -339,7 +338,7 @@ class _CupertinoDesktopTextSelectionToolbarButton extends StatefulWidget {
 
   /// Create an instance of [CupertinoDesktopTextSelectionToolbarButton] whose child is
   /// a [Text] widget styled like the default Mac context menu button.
-  _CupertinoDesktopTextSelectionToolbarButton.text({
+  CupertinoDesktopTextSelectionToolbarButton.text({
     Key? key,
     required BuildContext context,
     required this.onPressed,
@@ -366,7 +365,7 @@ class _CupertinoDesktopTextSelectionToolbarButton extends StatefulWidget {
   _CupertinoDesktopTextSelectionToolbarButtonState createState() => _CupertinoDesktopTextSelectionToolbarButtonState();
 }
 
-class _CupertinoDesktopTextSelectionToolbarButtonState extends State<_CupertinoDesktopTextSelectionToolbarButton> {
+class _CupertinoDesktopTextSelectionToolbarButtonState extends State<CupertinoDesktopTextSelectionToolbarButton> {
   bool _isHovered = false;
 
   void _onEnter(PointerEnterEvent event) {

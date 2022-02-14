@@ -8,11 +8,13 @@ import 'inherited_theme.dart';
 import 'navigator.dart';
 import 'overlay.dart';
 
+/// A function that builds a widget to use as a contextual menu.
 typedef ContextualMenuBuilder = Widget Function(BuildContext, Offset);
 
 // TODO(justinmc): Figure out all the platforms and nested packages.
 // Should a CupertinoTextField on Android show the iOS toolbar?? It seems to now
 // before this PR.
+/*
 class ContextualMenuConfiguration extends InheritedWidget {
   const ContextualMenuConfiguration({
     Key? key,
@@ -33,6 +35,7 @@ class ContextualMenuConfiguration extends InheritedWidget {
   @override
   bool updateShouldNotify(ContextualMenuConfiguration old) => buildMenu != old.buildMenu;
 }
+*/
 
 class ContextualMenuArea extends StatefulWidget {
   const ContextualMenuArea({

@@ -1544,7 +1544,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   bool _targetCursorVisibility = false;
   final ValueNotifier<bool> _cursorVisibilityNotifier = ValueNotifier<bool>(true);
   final GlobalKey _editableKey = GlobalKey();
-  final ClipboardStatusNotifier? _clipboardStatus = kIsWeb ? null : ClipboardStatusNotifier();
+
+  /// Detects whether the clipboard can paste.
+  final ClipboardStatusNotifier? clipboardStatus = kIsWeb ? null : ClipboardStatusNotifier();
 
   TextInputConnection? _textInputConnection;
   TextSelectionOverlay? _selectionOverlay;
@@ -1730,7 +1732,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       vsync: this,
       duration: _fadeDuration,
     )..addListener(_onCursorColorTick);
-    _clipboardStatus?.addListener(_onChangedClipboardStatus);
+    clipboardStatus?.addListener(_onChangedClipboardStatus);
     widget.controller.addListener(_didChangeTextEditingValue);
     widget.focusNode.addListener(_handleFocusChanged);
     _scrollController.addListener(_updateSelectionOverlayForScroll);
@@ -1831,7 +1833,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       }
     }
     if (widget.selectionEnabled && pasteEnabled && widget.selectionControls?.canPaste(this) == true) {
-      _clipboardStatus?.update();
+      clipboardStatus?.update();
     }
   }
 
@@ -1852,8 +1854,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _selectionOverlay = null;
     widget.focusNode.removeListener(_handleFocusChanged);
     WidgetsBinding.instance!.removeObserver(this);
-    _clipboardStatus?.removeListener(_onChangedClipboardStatus);
-    _clipboardStatus?.dispose();
+    clipboardStatus?.removeListener(_onChangedClipboardStatus);
+    clipboardStatus?.dispose();
     super.dispose();
     assert(_batchEditDepth <= 0, 'unfinished batch edits: $_batchEditDepth');
   }
@@ -2383,7 +2385,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     } else {
       if (_selectionOverlay == null) {
         _selectionOverlay = TextSelectionOverlay(
-          clipboardStatus: _clipboardStatus,
+          clipboardStatus: clipboardStatus,
           context: context,
           value: _value,
           debugRequiredFor: widget,
@@ -2868,18 +2870,18 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   VoidCallback? _semanticsOnCopy(TextSelectionControls? controls) {
     return widget.selectionEnabled && copyEnabled && _hasFocus && controls?.canCopy(this) == true
-      ? () => controls!.handleCopy(this, _clipboardStatus)
+      ? () => controls!.handleCopy(this, clipboardStatus)
       : null;
   }
 
   VoidCallback? _semanticsOnCut(TextSelectionControls? controls) {
     return widget.selectionEnabled && cutEnabled && _hasFocus && controls?.canCut(this) == true
-      ? () => controls!.handleCut(this, _clipboardStatus)
+      ? () => controls!.handleCut(this, clipboardStatus)
       : null;
   }
 
   VoidCallback? _semanticsOnPaste(TextSelectionControls? controls) {
-    return widget.selectionEnabled && pasteEnabled && _hasFocus && controls?.canPaste(this) == true && (_clipboardStatus == null || _clipboardStatus!.value == ClipboardStatus.pasteable)
+    return widget.selectionEnabled && pasteEnabled && _hasFocus && controls?.canPaste(this) == true && (clipboardStatus == null || clipboardStatus!.value == ClipboardStatus.pasteable)
       ? () => controls!.handlePaste(this)
       : null;
   }
