@@ -36,17 +36,6 @@ namespace {
 constexpr SHORT kStateMaskToggled = 0x01;
 constexpr SHORT kStateMaskPressed = 0x80;
 
-static LPARAM CreateKeyEventLparam(USHORT scancode,
-                                   bool extended,
-                                   bool was_down,
-                                   USHORT repeat_count = 1,
-                                   bool context_code = 0,
-                                   bool transition_state = 0) {
-  return ((LPARAM(transition_state) << 31) | (LPARAM(was_down) << 30) |
-          (LPARAM(context_code) << 29) | (LPARAM(extended ? 0x1 : 0x0) << 24) |
-          (LPARAM(scancode) << 16) | LPARAM(repeat_count));
-}
-
 typedef uint32_t (*MapVkToCharHandler)(uint32_t virtual_key);
 
 uint32_t LayoutDefault(uint32_t virtual_key) {
@@ -81,9 +70,50 @@ class TestKeyboardManagerWin32 : public KeyboardManagerWin32 {
   bool during_redispatch_ = false;
 };
 
+struct KeyStateChange {
+  uint32_t key;
+  bool pressed;
+  bool toggled_on;
+};
+
+struct KeyboardChange {
+  // The constructors are intentionally for implicit conversion.
+
+  KeyboardChange(Win32Message message) : type(kMessage) {
+    content.message = message;
+  }
+
+  KeyboardChange(KeyStateChange change) : type(kKeyStateChange) {
+    content.key_state_change = change;
+  }
+
+  enum Type {
+    kMessage,
+    kKeyStateChange,
+  } type;
+
+  union {
+    Win32Message message;
+    KeyStateChange key_state_change;
+  } content;
+};
+
+class TestKeystate {
+ public:
+  void Set(uint32_t virtual_key, bool pressed, bool toggled_on = false) {
+    state_[virtual_key] = (pressed ? kStateMaskPressed : 0) |
+                          (toggled_on ? kStateMaskToggled : 0);
+  }
+
+  SHORT Get(uint32_t virtual_key) { return state_[virtual_key]; }
+
+ private:
+  std::map<uint32_t, SHORT> state_;
+};
+
 class MockKeyboardManagerWin32Delegate
     : public KeyboardManagerWin32::WindowDelegate,
-      public MockMessageQueue {
+      protected MockMessageQueue {
  public:
   MockKeyboardManagerWin32Delegate(WindowBindingHandlerDelegate* view)
       : view_(view), map_vk_to_char_(LayoutDefault) {
@@ -109,6 +139,35 @@ class MockKeyboardManagerWin32Delegate
   void SetLayout(MapVkToCharHandler map_vk_to_char) {
     map_vk_to_char_ =
         map_vk_to_char == nullptr ? LayoutDefault : map_vk_to_char;
+  }
+
+  SHORT GetKeyState(int virtual_key) { return key_state_.Get(virtual_key); }
+
+  void InjectKeyboardChanges(std::vector<KeyboardChange> changes) {
+    for (const KeyboardChange& change : changes) {
+      switch (change.type) {
+        case KeyboardChange::kMessage:
+          PushBack(&change.content.message);
+          break;
+        default:
+          break;
+      }
+    }
+    for (const KeyboardChange& change : changes) {
+      switch (change.type) {
+        case KeyboardChange::kMessage:
+          DispatchFront();
+          break;
+        case KeyboardChange::kKeyStateChange: {
+          const KeyStateChange& state_change = change.content.key_state_change;
+          key_state_.Set(state_change.key, state_change.pressed,
+                         state_change.toggled_on);
+          break;
+        }
+        default:
+          assert(false);
+      }
+    }
   }
 
  protected:
@@ -148,23 +207,7 @@ class MockKeyboardManagerWin32Delegate
   WindowBindingHandlerDelegate* view_;
   std::unique_ptr<TestKeyboardManagerWin32> keyboard_manager_;
   MapVkToCharHandler map_vk_to_char_;
-};
-
-class TestKeystate {
- public:
-  void Set(uint32_t virtual_key, bool pressed, bool toggled_on = false) {
-    state_[virtual_key] = (pressed ? kStateMaskPressed : 0) |
-                          (toggled_on ? kStateMaskToggled : 0);
-  }
-
-  SHORT Get(uint32_t virtual_key) { return state_[virtual_key]; }
-
-  KeyboardKeyEmbedderHandler::GetKeyStateHandler Getter() {
-    return [this](uint32_t virtual_key) { return Get(virtual_key); };
-  }
-
- private:
-  std::map<uint32_t, SHORT> state_;
+  TestKeystate key_state_;
 };
 
 // A FlutterWindowsView that overrides the RegisterKeyboardHandlers function
@@ -173,18 +216,17 @@ class TestFlutterWindowsView : public FlutterWindowsView {
  public:
   typedef std::function<void(const std::u16string& text)> U16StringHandler;
 
-  TestFlutterWindowsView(U16StringHandler on_text)
+  TestFlutterWindowsView(
+      U16StringHandler on_text,
+      KeyboardKeyEmbedderHandler::GetKeyStateHandler get_keyboard_state)
       // The WindowBindingHandler is used for window size and such, and doesn't
       // affect keyboard.
       : FlutterWindowsView(
             std::make_unique<::testing::NiceMock<MockWindowBindingHandler>>()),
+        get_keyboard_state_(std::move(get_keyboard_state)),
         on_text_(std::move(on_text)) {}
 
   void OnText(const std::u16string& text) override { on_text_(text); }
-
-  void SetKeyState(uint32_t key, bool pressed, bool toggled_on) {
-    key_state_.Set(key, pressed, toggled_on);
-  }
 
   void HandleMessage(const char* channel,
                      const char* method,
@@ -220,13 +262,14 @@ class TestFlutterWindowsView : public FlutterWindowsView {
   std::unique_ptr<KeyboardHandlerBase> CreateKeyboardKeyHandler(
       BinaryMessenger* messenger,
       KeyboardKeyEmbedderHandler::GetKeyStateHandler get_key_state) override {
-    return FlutterWindowsView::CreateKeyboardKeyHandler(messenger,
-                                                        key_state_.Getter());
+    return FlutterWindowsView::CreateKeyboardKeyHandler(
+        messenger,
+        [this](int virtual_key) { return get_keyboard_state_(virtual_key); });
   }
 
  private:
   U16StringHandler on_text_;
-  TestKeystate key_state_;
+  KeyboardKeyEmbedderHandler::GetKeyStateHandler get_keyboard_state_;
 };
 
 typedef enum {
@@ -268,6 +311,11 @@ class KeyboardTester {
               .type = kKeyCallOnText,
               .text = text,
           });
+        },
+        [this](int virtual_key) -> SHORT {
+          // `window_` is not initialized yet when this callback is first
+          // called.
+          return window_ ? window_->GetKeyState(virtual_key) : 0;
         });
     view_->SetEngine(GetTestEngine(
         [&callback_handler = callback_handler_](
@@ -287,11 +335,9 @@ class KeyboardTester {
   }
 
   TestFlutterWindowsView& GetView() { return *view_; }
+  MockKeyboardManagerWin32Delegate& GetWindow() { return *window_; }
 
-  void SetKeyState(uint32_t key, bool pressed, bool toggled_on) {
-    view_->SetKeyState(key, pressed, toggled_on);
-  }
-
+  // Set all events to be handled (true) or unhandled (false).
   void Responding(bool response) { callback_handler_ = RespondValue(response); }
 
   // Manually handle event callback of the onKeyData embedder API.
@@ -307,16 +353,9 @@ class KeyboardTester {
 
   void SetLayout(MapVkToCharHandler layout) { window_->SetLayout(layout); }
 
-  void InjectMessages(int count, Win32Message message1, ...) {
-    Win32Message messages[count];
-    messages[0] = message1;
-    va_list args;
-    va_start(args, message1);
-    for (int i = 1; i < count; i += 1) {
-      messages[i] = va_arg(args, Win32Message);
-    }
-    va_end(args);
-    window_->InjectMessageList(count, messages);
+  void InjectKeyboardChanges(std::vector<KeyboardChange> changes) {
+    assert(window_ != nullptr);
+    window_->InjectKeyboardChanges(changes);
   }
 
  private:
@@ -423,12 +462,11 @@ TEST(KeyboardTest, LowerCaseAHandled) {
   // US Keyboard layout
 
   // Press A
-  tester.InjectMessages(
-      2,
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
       WmKeyDownInfo{kVirtualKeyA, kScanCodeKeyA, kNotExtended, kWasUp}.Build(
           kWmResultZero),
       WmCharInfo{'a', kScanCodeKeyA, kNotExtended, kWasUp}.Build(
-          kWmResultZero));
+          kWmResultZero)});
 
   EXPECT_EQ(key_calls.size(), 1);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeDown, kPhysicalKeyA,
@@ -436,9 +474,9 @@ TEST(KeyboardTest, LowerCaseAHandled) {
   clear_key_calls();
 
   // Release A
-  tester.InjectMessages(
-      1, WmKeyUpInfo{kVirtualKeyA, kScanCodeKeyA, kNotExtended}.Build(
-             kWmResultZero));
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      WmKeyUpInfo{kVirtualKeyA, kScanCodeKeyA, kNotExtended}.Build(
+          kWmResultZero)});
 
   EXPECT_EQ(key_calls.size(), 1);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeUp, kPhysicalKeyA,
@@ -453,12 +491,11 @@ TEST(KeyboardTest, LowerCaseAUnhandled) {
   // US Keyboard layout
 
   // Press A
-  tester.InjectMessages(
-      2,
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
       WmKeyDownInfo{kVirtualKeyA, kScanCodeKeyA, kNotExtended, kWasUp}.Build(
           kWmResultZero),
       WmCharInfo{'a', kScanCodeKeyA, kNotExtended, kWasUp}.Build(
-          kWmResultZero));
+          kWmResultZero)});
 
   EXPECT_EQ(key_calls.size(), 2);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeDown, kPhysicalKeyA,
@@ -467,9 +504,9 @@ TEST(KeyboardTest, LowerCaseAUnhandled) {
   clear_key_calls();
 
   // Release A
-  tester.InjectMessages(
-      1, WmKeyUpInfo{kVirtualKeyA, kScanCodeKeyA, kNotExtended}.Build(
-             kWmResultZero));
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      WmKeyUpInfo{kVirtualKeyA, kScanCodeKeyA, kNotExtended}.Build(
+          kWmResultZero)});
 
   EXPECT_EQ(key_calls.size(), 1);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeUp, kPhysicalKeyA,
@@ -484,9 +521,9 @@ TEST(KeyboardTest, ArrowLeftHandled) {
   // US Keyboard layout
 
   // Press ArrowLeft
-  tester.InjectMessages(
-      1, WmKeyDownInfo{VK_LEFT, kScanCodeArrowLeft, kExtended, kWasUp}.Build(
-             kWmResultZero));
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      WmKeyDownInfo{VK_LEFT, kScanCodeArrowLeft, kExtended, kWasUp}.Build(
+          kWmResultZero)});
 
   EXPECT_EQ(key_calls.size(), 1);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeDown,
@@ -495,9 +532,9 @@ TEST(KeyboardTest, ArrowLeftHandled) {
   clear_key_calls();
 
   // Release ArrowLeft
-  tester.InjectMessages(
-      1,
-      WmKeyUpInfo{VK_LEFT, kScanCodeArrowLeft, kExtended}.Build(kWmResultZero));
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      WmKeyUpInfo{VK_LEFT, kScanCodeArrowLeft, kExtended}.Build(
+          kWmResultZero)});
 
   EXPECT_EQ(key_calls.size(), 1);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeUp, kPhysicalArrowLeft,
@@ -512,9 +549,9 @@ TEST(KeyboardTest, ArrowLeftUnhandled) {
   // US Keyboard layout
 
   // Press ArrowLeft
-  tester.InjectMessages(
-      1, WmKeyDownInfo{VK_LEFT, kScanCodeArrowLeft, kExtended, kWasUp}.Build(
-             kWmResultZero));
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      WmKeyDownInfo{VK_LEFT, kScanCodeArrowLeft, kExtended, kWasUp}.Build(
+          kWmResultZero)});
 
   EXPECT_EQ(key_calls.size(), 1);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeDown,
@@ -523,9 +560,9 @@ TEST(KeyboardTest, ArrowLeftUnhandled) {
   clear_key_calls();
 
   // Release ArrowLeft
-  tester.InjectMessages(
-      1,
-      WmKeyUpInfo{VK_LEFT, kScanCodeArrowLeft, kExtended}.Build(kWmResultZero));
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      WmKeyUpInfo{VK_LEFT, kScanCodeArrowLeft, kExtended}.Build(
+          kWmResultZero)});
 
   EXPECT_EQ(key_calls.size(), 1);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeUp, kPhysicalArrowLeft,
@@ -540,11 +577,10 @@ TEST(KeyboardTest, ShiftLeftUnhandled) {
   // US Keyboard layout
 
   // Press ShiftLeft
-  tester.SetKeyState(VK_LSHIFT, true, false);
-  tester.InjectMessages(
-      1,
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      KeyStateChange{VK_LSHIFT, true, false},
       WmKeyDownInfo{VK_SHIFT, kScanCodeShiftLeft, kNotExtended, kWasUp}.Build(
-          kWmResultZero));
+          kWmResultZero)});
 
   EXPECT_EQ(key_calls.size(), 1);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeDown,
@@ -553,10 +589,10 @@ TEST(KeyboardTest, ShiftLeftUnhandled) {
   clear_key_calls();
 
   // Release ShiftLeft
-  tester.SetKeyState(VK_LSHIFT, false, true);
-  tester.InjectMessages(
-      1, WmKeyUpInfo{VK_SHIFT, kScanCodeShiftLeft, kNotExtended}.Build(
-             kWmResultZero));
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      KeyStateChange{VK_LSHIFT, false, true},
+      WmKeyUpInfo{VK_SHIFT, kScanCodeShiftLeft, kNotExtended}.Build(
+          kWmResultZero)});
 
   EXPECT_EQ(key_calls.size(), 1);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeUp, kPhysicalShiftLeft,
@@ -571,11 +607,10 @@ TEST(KeyboardTest, ShiftRightUnhandled) {
   // US Keyboard layout
 
   // Press ShiftRight
-  tester.SetKeyState(VK_RSHIFT, true, false);
-  tester.InjectMessages(
-      1,
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      KeyStateChange{VK_RSHIFT, true, false},
       WmKeyDownInfo{VK_SHIFT, kScanCodeShiftRight, kNotExtended, kWasUp}.Build(
-          kWmResultZero));
+          kWmResultZero)});
 
   EXPECT_EQ(key_calls.size(), 1);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeDown,
@@ -584,10 +619,10 @@ TEST(KeyboardTest, ShiftRightUnhandled) {
   clear_key_calls();
 
   // Release ShiftRight
-  tester.SetKeyState(VK_RSHIFT, false, true);
-  tester.InjectMessages(
-      1, WmKeyUpInfo{VK_SHIFT, kScanCodeShiftRight, kNotExtended}.Build(
-             kWmResultZero));
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      KeyStateChange{VK_RSHIFT, false, true},
+      WmKeyUpInfo{VK_SHIFT, kScanCodeShiftRight, kNotExtended}.Build(
+          kWmResultZero)});
 
   EXPECT_EQ(key_calls.size(), 1);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeUp,
@@ -603,11 +638,10 @@ TEST(KeyboardTest, CtrlLeftUnhandled) {
   // US Keyboard layout
 
   // Press CtrlLeft
-  tester.SetKeyState(VK_LCONTROL, true, false);
-  tester.InjectMessages(
-      1,
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      KeyStateChange{VK_LCONTROL, true, false},
       WmKeyDownInfo{VK_CONTROL, kScanCodeControl, kNotExtended, kWasUp}.Build(
-          kWmResultZero));
+          kWmResultZero)});
 
   EXPECT_EQ(key_calls.size(), 1);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeDown,
@@ -616,10 +650,10 @@ TEST(KeyboardTest, CtrlLeftUnhandled) {
   clear_key_calls();
 
   // Release CtrlLeft
-  tester.SetKeyState(VK_LCONTROL, false, true);
-  tester.InjectMessages(
-      1, WmKeyUpInfo{VK_SHIFT, kScanCodeControl, kNotExtended}.Build(
-             kWmResultZero));
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      KeyStateChange{VK_LCONTROL, false, true},
+      WmKeyUpInfo{VK_SHIFT, kScanCodeControl, kNotExtended}.Build(
+          kWmResultZero)});
 
   EXPECT_EQ(key_calls.size(), 1);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeUp,
@@ -635,10 +669,10 @@ TEST(KeyboardTest, CtrlRightUnhandled) {
   // US Keyboard layout
 
   // Press CtrlRight
-  tester.SetKeyState(VK_RCONTROL, true, false);
-  tester.InjectMessages(
-      1, WmKeyDownInfo{VK_CONTROL, kScanCodeControl, kExtended, kWasUp}.Build(
-             kWmResultZero));
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      KeyStateChange{VK_RCONTROL, true, false},
+      WmKeyDownInfo{VK_CONTROL, kScanCodeControl, kExtended, kWasUp}.Build(
+          kWmResultZero)});
 
   EXPECT_EQ(key_calls.size(), 1);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeDown,
@@ -647,10 +681,10 @@ TEST(KeyboardTest, CtrlRightUnhandled) {
   clear_key_calls();
 
   // Release CtrlRight
-  tester.SetKeyState(VK_RCONTROL, false, true);
-  tester.InjectMessages(
-      1, WmKeyUpInfo{VK_CONTROL, kScanCodeControl, kExtended}.Build(
-             kWmResultZero));
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      KeyStateChange{VK_RCONTROL, false, true},
+      WmKeyUpInfo{VK_CONTROL, kScanCodeControl, kExtended}.Build(
+          kWmResultZero)});
 
   EXPECT_EQ(key_calls.size(), 1);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeUp,
@@ -666,10 +700,10 @@ TEST(KeyboardTest, AltLeftUnhandled) {
   // US Keyboard layout
 
   // Press AltLeft. AltLeft is a SysKeyDown event.
-  tester.SetKeyState(VK_LMENU, true, false);
-  tester.InjectMessages(
-      1, WmSysKeyDownInfo{VK_MENU, kScanCodeAlt, kNotExtended, kWasUp}.Build(
-             kWmResultDefault));  // Always pass to the default WndProc.
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      KeyStateChange{VK_LMENU, true, false},
+      WmSysKeyDownInfo{VK_MENU, kScanCodeAlt, kNotExtended, kWasUp}.Build(
+          kWmResultDefault)});  // Always pass to the default WndProc.
 
   EXPECT_EQ(key_calls.size(), 1);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeDown, kPhysicalAltLeft,
@@ -677,10 +711,10 @@ TEST(KeyboardTest, AltLeftUnhandled) {
   clear_key_calls();
 
   // Release AltLeft. AltLeft is a SysKeyUp event.
-  tester.SetKeyState(VK_LMENU, false, true);
-  tester.InjectMessages(
-      1, WmSysKeyUpInfo{VK_MENU, kScanCodeAlt, kNotExtended}.Build(
-             kWmResultDefault));  // Always pass to the default WndProc.
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      KeyStateChange{VK_LMENU, false, true},
+      WmSysKeyUpInfo{VK_MENU, kScanCodeAlt, kNotExtended}.Build(
+          kWmResultDefault)});  // Always pass to the default WndProc.
 
   EXPECT_EQ(key_calls.size(), 1);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeUp, kPhysicalAltLeft,
@@ -695,10 +729,10 @@ TEST(KeyboardTest, AltRightUnhandled) {
   // US Keyboard layout
 
   // Press AltRight. AltRight is a SysKeyDown event.
-  tester.SetKeyState(VK_RMENU, true, false);
-  tester.InjectMessages(
-      1, WmSysKeyDownInfo{VK_MENU, kScanCodeAlt, kExtended, kWasUp}.Build(
-             kWmResultDefault));  // Always pass to the default WndProc.
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      KeyStateChange{VK_RMENU, true, false},
+      WmSysKeyDownInfo{VK_MENU, kScanCodeAlt, kExtended, kWasUp}.Build(
+          kWmResultDefault)});  // Always pass to the default WndProc.
 
   EXPECT_EQ(key_calls.size(), 1);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeDown,
@@ -707,10 +741,10 @@ TEST(KeyboardTest, AltRightUnhandled) {
   clear_key_calls();
 
   // Release AltRight. AltRight is a SysKeyUp event.
-  tester.SetKeyState(VK_RMENU, false, true);
-  tester.InjectMessages(
-      1, WmSysKeyUpInfo{VK_MENU, kScanCodeAlt, kExtended}.Build(
-             kWmResultDefault));  // Always pass to the default WndProc.
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      KeyStateChange{VK_RMENU, false, true},
+      WmSysKeyUpInfo{VK_MENU, kScanCodeAlt, kExtended}.Build(
+          kWmResultDefault)});  // Always pass to the default WndProc.
 
   EXPECT_EQ(key_calls.size(), 1);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeUp, kPhysicalAltRight,
@@ -725,10 +759,10 @@ TEST(KeyboardTest, MetaLeftUnhandled) {
   // US Keyboard layout
 
   // Press MetaLeft
-  tester.SetKeyState(VK_LWIN, true, false);
-  tester.InjectMessages(
-      1, WmKeyDownInfo{VK_LWIN, kScanCodeMetaLeft, kExtended, kWasUp}.Build(
-             kWmResultZero));
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      KeyStateChange{VK_LWIN, true, false},
+      WmKeyDownInfo{VK_LWIN, kScanCodeMetaLeft, kExtended, kWasUp}.Build(
+          kWmResultZero)});
 
   EXPECT_EQ(key_calls.size(), 1);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeDown,
@@ -737,10 +771,9 @@ TEST(KeyboardTest, MetaLeftUnhandled) {
   clear_key_calls();
 
   // Release MetaLeft
-  tester.SetKeyState(VK_LWIN, false, true);
-  tester.InjectMessages(
-      1,
-      WmKeyUpInfo{VK_LWIN, kScanCodeMetaLeft, kExtended}.Build(kWmResultZero));
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      KeyStateChange{VK_LWIN, false, true},
+      WmKeyUpInfo{VK_LWIN, kScanCodeMetaLeft, kExtended}.Build(kWmResultZero)});
 
   EXPECT_EQ(key_calls.size(), 1);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeUp, kPhysicalMetaLeft,
@@ -755,10 +788,10 @@ TEST(KeyboardTest, MetaRightUnhandled) {
   // US Keyboard layout
 
   // Press MetaRight
-  tester.SetKeyState(VK_RWIN, true, false);
-  tester.InjectMessages(
-      1, WmKeyDownInfo{VK_RWIN, kScanCodeMetaRight, kExtended, kWasUp}.Build(
-             kWmResultZero));
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      KeyStateChange{VK_RWIN, true, false},
+      WmKeyDownInfo{VK_RWIN, kScanCodeMetaRight, kExtended, kWasUp}.Build(
+          kWmResultZero)});
 
   EXPECT_EQ(key_calls.size(), 1);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeDown,
@@ -767,10 +800,10 @@ TEST(KeyboardTest, MetaRightUnhandled) {
   clear_key_calls();
 
   // Release MetaRight
-  tester.SetKeyState(VK_RWIN, false, true);
-  tester.InjectMessages(
-      1,
-      WmKeyUpInfo{VK_RWIN, kScanCodeMetaRight, kExtended}.Build(kWmResultZero));
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      KeyStateChange{VK_RWIN, false, true},
+      WmKeyUpInfo{VK_RWIN, kScanCodeMetaRight, kExtended}.Build(
+          kWmResultZero)});
 
   EXPECT_EQ(key_calls.size(), 1);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeUp, kPhysicalMetaRight,
@@ -787,11 +820,10 @@ TEST(KeyboardTest, ShiftLeftKeyA) {
   // US Keyboard layout
 
   // Press ShiftLeft
-  tester.SetKeyState(VK_LSHIFT, true, true);
-  tester.InjectMessages(
-      1,
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      KeyStateChange{VK_LSHIFT, true, true},
       WmKeyDownInfo{VK_SHIFT, kScanCodeShiftLeft, kNotExtended, kWasUp}.Build(
-          kWmResultZero));
+          kWmResultZero)});
 
   EXPECT_EQ(key_calls.size(), 1);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeDown,
@@ -800,12 +832,11 @@ TEST(KeyboardTest, ShiftLeftKeyA) {
   clear_key_calls();
 
   // Press A
-  tester.InjectMessages(
-      2,
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
       WmKeyDownInfo{kVirtualKeyA, kScanCodeKeyA, kNotExtended, kWasUp}.Build(
           kWmResultZero),
       WmCharInfo{'A', kScanCodeKeyA, kNotExtended, kWasUp}.Build(
-          kWmResultZero));
+          kWmResultZero)});
 
   EXPECT_EQ(key_calls.size(), 2);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeDown, kPhysicalKeyA,
@@ -814,10 +845,10 @@ TEST(KeyboardTest, ShiftLeftKeyA) {
   clear_key_calls();
 
   // Release ShiftLeft
-  tester.SetKeyState(VK_LSHIFT, false, true);
-  tester.InjectMessages(
-      1, WmKeyUpInfo{VK_SHIFT, kScanCodeShiftLeft, kNotExtended}.Build(
-             kWmResultZero));
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      KeyStateChange{VK_LSHIFT, false, true},
+      WmKeyUpInfo{VK_SHIFT, kScanCodeShiftLeft, kNotExtended}.Build(
+          kWmResultZero)});
 
   EXPECT_EQ(key_calls.size(), 1);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeUp, kPhysicalShiftLeft,
@@ -825,9 +856,9 @@ TEST(KeyboardTest, ShiftLeftKeyA) {
   clear_key_calls();
 
   // Release A
-  tester.InjectMessages(
-      1, WmKeyUpInfo{kVirtualKeyA, kScanCodeKeyA, kNotExtended}.Build(
-             kWmResultZero));
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      WmKeyUpInfo{kVirtualKeyA, kScanCodeKeyA, kNotExtended}.Build(
+          kWmResultZero)});
 
   EXPECT_EQ(key_calls.size(), 1);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeUp, kPhysicalKeyA,
@@ -844,11 +875,10 @@ TEST(KeyboardTest, CtrlLeftKeyA) {
   // US Keyboard layout
 
   // Press ControlLeft
-  tester.SetKeyState(VK_LCONTROL, true, true);
-  tester.InjectMessages(
-      1,
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      KeyStateChange{VK_LCONTROL, true, true},
       WmKeyDownInfo{VK_CONTROL, kScanCodeControl, kNotExtended, kWasUp}.Build(
-          kWmResultZero));
+          kWmResultZero)});
 
   EXPECT_EQ(key_calls.size(), 1);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeDown,
@@ -857,12 +887,11 @@ TEST(KeyboardTest, CtrlLeftKeyA) {
   clear_key_calls();
 
   // Press A
-  tester.InjectMessages(
-      2,
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
       WmKeyDownInfo{kVirtualKeyA, kScanCodeKeyA, kNotExtended, kWasUp}.Build(
           kWmResultZero),
       WmCharInfo{0x01, kScanCodeKeyA, kNotExtended, kWasUp}.Build(
-          kWmResultZero));
+          kWmResultZero)});
 
   EXPECT_EQ(key_calls.size(), 1);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeDown, kPhysicalKeyA,
@@ -870,9 +899,9 @@ TEST(KeyboardTest, CtrlLeftKeyA) {
   clear_key_calls();
 
   // Release A
-  tester.InjectMessages(
-      1, WmKeyUpInfo{kVirtualKeyA, kScanCodeKeyA, kNotExtended}.Build(
-             kWmResultZero));
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      WmKeyUpInfo{kVirtualKeyA, kScanCodeKeyA, kNotExtended}.Build(
+          kWmResultZero)});
 
   EXPECT_EQ(key_calls.size(), 1);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeUp, kPhysicalKeyA,
@@ -880,10 +909,10 @@ TEST(KeyboardTest, CtrlLeftKeyA) {
   clear_key_calls();
 
   // Release ControlLeft
-  tester.SetKeyState(VK_LCONTROL, false, true);
-  tester.InjectMessages(
-      1, WmKeyUpInfo{VK_CONTROL, kScanCodeControl, kNotExtended}.Build(
-             kWmResultZero));
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      KeyStateChange{VK_LCONTROL, false, true},
+      WmKeyUpInfo{VK_CONTROL, kScanCodeControl, kNotExtended}.Build(
+          kWmResultZero)});
 
   EXPECT_EQ(key_calls.size(), 1);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeUp,
@@ -900,11 +929,10 @@ TEST(KeyboardTest, CtrlLeftDigit1) {
   // US Keyboard layout
 
   // Press ControlLeft
-  tester.SetKeyState(VK_LCONTROL, true, true);
-  tester.InjectMessages(
-      1,
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      KeyStateChange{VK_LCONTROL, true, true},
       WmKeyDownInfo{VK_CONTROL, kScanCodeControl, kNotExtended, kWasUp}.Build(
-          kWmResultZero));
+          kWmResultZero)});
 
   EXPECT_EQ(key_calls.size(), 1);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeDown,
@@ -913,9 +941,9 @@ TEST(KeyboardTest, CtrlLeftDigit1) {
   clear_key_calls();
 
   // Press 1
-  tester.InjectMessages(
-      1, WmKeyDownInfo{kVirtualDigit1, kScanCodeDigit1, kNotExtended, kWasUp}
-             .Build(kWmResultZero));
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      WmKeyDownInfo{kVirtualDigit1, kScanCodeDigit1, kNotExtended, kWasUp}
+          .Build(kWmResultZero)});
 
   EXPECT_EQ(key_calls.size(), 1);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeDown, kPhysicalDigit1,
@@ -923,9 +951,9 @@ TEST(KeyboardTest, CtrlLeftDigit1) {
   clear_key_calls();
 
   // Release 1
-  tester.InjectMessages(
-      1, WmKeyUpInfo{kVirtualDigit1, kScanCodeDigit1, kNotExtended}.Build(
-             kWmResultZero));
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      WmKeyUpInfo{kVirtualDigit1, kScanCodeDigit1, kNotExtended}.Build(
+          kWmResultZero)});
 
   EXPECT_EQ(key_calls.size(), 1);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeUp, kPhysicalDigit1,
@@ -933,10 +961,10 @@ TEST(KeyboardTest, CtrlLeftDigit1) {
   clear_key_calls();
 
   // Release ControlLeft
-  tester.SetKeyState(VK_LCONTROL, false, true);
-  tester.InjectMessages(
-      1, WmKeyUpInfo{VK_CONTROL, kScanCodeControl, kNotExtended}.Build(
-             kWmResultZero));
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      KeyStateChange{VK_LCONTROL, false, true},
+      WmKeyUpInfo{VK_CONTROL, kScanCodeControl, kNotExtended}.Build(
+          kWmResultZero)});
 
   EXPECT_EQ(key_calls.size(), 1);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeUp,
@@ -954,12 +982,11 @@ TEST(KeyboardTest, Digit1OnFrenchLayout) {
   tester.SetLayout(LayoutFrench);
 
   // Press 1
-  tester.InjectMessages(
-      2,
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
       WmKeyDownInfo{kVirtualDigit1, kScanCodeDigit1, kNotExtended, kWasUp}
           .Build(kWmResultZero),
       WmCharInfo{'&', kScanCodeDigit1, kNotExtended, kWasUp}.Build(
-          kWmResultZero));
+          kWmResultZero)});
 
   EXPECT_EQ(key_calls.size(), 2);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeDown, kPhysicalDigit1,
@@ -968,9 +995,9 @@ TEST(KeyboardTest, Digit1OnFrenchLayout) {
   clear_key_calls();
 
   // Release 1
-  tester.InjectMessages(
-      1, WmKeyUpInfo{kVirtualDigit1, kScanCodeDigit1, kNotExtended}.Build(
-             kWmResultZero));
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      WmKeyUpInfo{kVirtualDigit1, kScanCodeDigit1, kNotExtended}.Build(
+          kWmResultZero)});
 
   EXPECT_EQ(key_calls.size(), 1);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeUp, kPhysicalDigit1,
@@ -986,13 +1013,12 @@ TEST(KeyboardTest, AltGrModifiedKey) {
   // German Keyboard layout
 
   // Press AltGr, which Win32 precedes with a ContrlLeft down.
-  tester.SetKeyState(VK_LCONTROL, true, true);
-  tester.InjectMessages(
-      2,
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      KeyStateChange{VK_LCONTROL, true, true},
       WmKeyDownInfo{VK_LCONTROL, kScanCodeControl, kNotExtended, kWasUp}.Build(
           kWmResultZero),
       WmKeyDownInfo{VK_MENU, kScanCodeAlt, kExtended, kWasUp}.Build(
-          kWmResultZero));
+          kWmResultZero)});
 
   EXPECT_EQ(key_calls.size(), 2);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeDown,
@@ -1004,12 +1030,11 @@ TEST(KeyboardTest, AltGrModifiedKey) {
   clear_key_calls();
 
   // Press Q
-  tester.InjectMessages(
-      2,
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
       WmKeyDownInfo{kVirtualKeyQ, kScanCodeKeyQ, kNotExtended, kWasUp}.Build(
           kWmResultZero),
       WmCharInfo{'@', kScanCodeKeyQ, kNotExtended, kWasUp}.Build(
-          kWmResultZero));
+          kWmResultZero)});
 
   EXPECT_EQ(key_calls.size(), 2);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeDown, kPhysicalKeyQ,
@@ -1018,9 +1043,9 @@ TEST(KeyboardTest, AltGrModifiedKey) {
   clear_key_calls();
 
   // Release Q
-  tester.InjectMessages(
-      1, WmKeyUpInfo{kVirtualKeyQ, kScanCodeKeyQ, kNotExtended}.Build(
-             kWmResultZero));
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      WmKeyUpInfo{kVirtualKeyQ, kScanCodeKeyQ, kNotExtended}.Build(
+          kWmResultZero)});
 
   EXPECT_EQ(key_calls.size(), 1);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeUp, kPhysicalKeyQ,
@@ -1030,10 +1055,10 @@ TEST(KeyboardTest, AltGrModifiedKey) {
   // Release AltGr. Win32 doesn't dispatch ControlLeft up. Instead Flutter will
   // dispatch one. The AltGr is a system key, therefore will be handled by
   // Win32's default WndProc.
-  tester.SetKeyState(VK_LCONTROL, false, true);
-  tester.InjectMessages(
-      1,
-      WmSysKeyUpInfo{VK_MENU, kScanCodeAlt, kExtended}.Build(kWmResultDefault));
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      KeyStateChange{VK_LCONTROL, false, true},
+      WmSysKeyUpInfo{VK_MENU, kScanCodeAlt, kExtended}.Build(
+          kWmResultDefault)});
 
   EXPECT_EQ(key_calls.size(), 2);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeUp,
@@ -1065,13 +1090,12 @@ TEST(KeyboardTest, AltGrTwice) {
 
   // The key down event causes a ControlLeft down and a AltRight (extended
   // AltLeft) down.
-  tester.SetKeyState(VK_LCONTROL, true, true);
-  tester.InjectMessages(
-      2,
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      KeyStateChange{VK_LCONTROL, true, true},
       WmKeyDownInfo{VK_LCONTROL, kScanCodeControl, kNotExtended, kWasUp}.Build(
           kWmResultZero),
       WmKeyDownInfo{VK_MENU, kScanCodeAlt, kExtended, kWasUp}.Build(
-          kWmResultZero));
+          kWmResultZero)});
 
   EXPECT_EQ(key_calls.size(), 2);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeDown,
@@ -1085,11 +1109,11 @@ TEST(KeyboardTest, AltGrTwice) {
   // 2. AltGr up.
 
   // The key up event only causes a AltRight (extended AltLeft) up.
-  tester.SetKeyState(VK_RMENU, false, true);
-  tester.SetKeyState(VK_LCONTROL, false, true);
-  tester.InjectMessages(
-      1,
-      WmSysKeyUpInfo{VK_MENU, kScanCodeAlt, kExtended}.Build(kWmResultDefault));
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      KeyStateChange{VK_LCONTROL, false, true},
+      KeyStateChange{VK_RMENU, false, true},
+      WmSysKeyUpInfo{VK_MENU, kScanCodeAlt, kExtended}.Build(
+          kWmResultDefault)});
   EXPECT_EQ(key_calls.size(), 2);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeUp,
                        kPhysicalControlLeft, kLogicalControlLeft, "",
@@ -1100,13 +1124,12 @@ TEST(KeyboardTest, AltGrTwice) {
 
   // 3. AltGr down (or: ControlLeft down then AltRight down.)
 
-  tester.SetKeyState(VK_LCONTROL, true, false);
-  tester.InjectMessages(
-      2,
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      KeyStateChange{VK_LCONTROL, true, false},
       WmKeyDownInfo{VK_LCONTROL, kScanCodeControl, kNotExtended, kWasUp}.Build(
           kWmResultZero),
       WmKeyDownInfo{VK_MENU, kScanCodeAlt, kExtended, kWasUp}.Build(
-          kWmResultZero));
+          kWmResultZero)});
 
   EXPECT_EQ(key_calls.size(), 2);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeDown,
@@ -1120,11 +1143,11 @@ TEST(KeyboardTest, AltGrTwice) {
   // 4. AltGr up.
 
   // The key up event only causes a AltRight (extended AltLeft) up.
-  tester.SetKeyState(VK_RMENU, false, false);
-  tester.SetKeyState(VK_LCONTROL, false, false);
-  tester.InjectMessages(
-      1,
-      WmSysKeyUpInfo{VK_MENU, kScanCodeAlt, kExtended}.Build(kWmResultDefault));
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      KeyStateChange{VK_RMENU, false, false},
+      KeyStateChange{VK_LCONTROL, false, false},
+      WmSysKeyUpInfo{VK_MENU, kScanCodeAlt, kExtended}.Build(
+          kWmResultDefault)});
   EXPECT_EQ(key_calls.size(), 2);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeUp,
                        kPhysicalControlLeft, kLogicalControlLeft, "",
@@ -1134,9 +1157,9 @@ TEST(KeyboardTest, AltGrTwice) {
   clear_key_calls();
 
   // 5. For key sequence 2: a real ControlLeft up.
-  tester.InjectMessages(
-      1, WmKeyUpInfo{VK_LCONTROL, kScanCodeControl, kNotExtended}.Build(
-             kWmResultZero));
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      WmKeyUpInfo{VK_LCONTROL, kScanCodeControl, kNotExtended}.Build(
+          kWmResultZero)});
   EXPECT_EQ(key_calls.size(), 1);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeDown, 0, 0, "",
                        kNotSynthesized);
@@ -1152,12 +1175,11 @@ TEST(KeyboardTest, DeadKeyThatCombines) {
   tester.SetLayout(LayoutFrench);
 
   // Press ^¨ (US: Left bracket)
-  tester.InjectMessages(
-      2,
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
       WmKeyDownInfo{0xDD, kScanCodeBracketLeft, kNotExtended, kWasUp}.Build(
           kWmResultZero),
       WmDeadCharInfo{'^', kScanCodeBracketLeft, kNotExtended, kWasUp}.Build(
-          kWmResultZero));
+          kWmResultZero)});
 
   EXPECT_EQ(key_calls.size(), 1);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeDown,
@@ -1166,9 +1188,9 @@ TEST(KeyboardTest, DeadKeyThatCombines) {
   clear_key_calls();
 
   // Release ^¨
-  tester.InjectMessages(
-      1, WmKeyUpInfo{0xDD, kScanCodeBracketLeft, kNotExtended}.Build(
-             kWmResultZero));
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      WmKeyUpInfo{0xDD, kScanCodeBracketLeft, kNotExtended}.Build(
+          kWmResultZero)});
 
   EXPECT_EQ(key_calls.size(), 1);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeUp,
@@ -1177,12 +1199,11 @@ TEST(KeyboardTest, DeadKeyThatCombines) {
   clear_key_calls();
 
   // Press E
-  tester.InjectMessages(
-      2,
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
       WmKeyDownInfo{kVirtualKeyE, kScanCodeKeyE, kNotExtended, kWasUp}.Build(
           kWmResultZero),
       WmCharInfo{0xEA, kScanCodeKeyE, kNotExtended, kWasUp}.Build(
-          kWmResultZero));
+          kWmResultZero)});
 
   EXPECT_EQ(key_calls.size(), 2);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeDown, kPhysicalKeyE,
@@ -1191,9 +1212,9 @@ TEST(KeyboardTest, DeadKeyThatCombines) {
   clear_key_calls();
 
   // Release E
-  tester.InjectMessages(
-      1, WmKeyUpInfo{kVirtualKeyE, kScanCodeKeyE, kNotExtended}.Build(
-             kWmResultZero));
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      WmKeyUpInfo{kVirtualKeyE, kScanCodeKeyE, kNotExtended}.Build(
+          kWmResultZero)});
 
   EXPECT_EQ(key_calls.size(), 1);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeUp, kPhysicalKeyE,
@@ -1211,11 +1232,10 @@ TEST(KeyboardTest, DeadKeyWithoutDeadMaskThatCombines) {
   tester.Responding(false);
 
   // Press ShiftLeft
-  tester.SetKeyState(VK_LSHIFT, true, true);
-  tester.InjectMessages(
-      1,
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      KeyStateChange{VK_LSHIFT, true, true},
       WmKeyDownInfo{VK_SHIFT, kScanCodeShiftLeft, kNotExtended, kWasUp}.Build(
-          kWmResultZero));
+          kWmResultZero)});
 
   EXPECT_EQ(key_calls.size(), 1);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeDown,
@@ -1224,12 +1244,11 @@ TEST(KeyboardTest, DeadKeyWithoutDeadMaskThatCombines) {
   clear_key_calls();
 
   // Press 6^
-  tester.InjectMessages(
-      2,
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
       WmKeyDownInfo{'6', kScanCodeDigit6, kNotExtended, kWasUp}.Build(
           kWmResultZero),
       WmDeadCharInfo{'^', kScanCodeDigit6, kNotExtended, kWasUp}.Build(
-          kWmResultZero));
+          kWmResultZero)});
 
   EXPECT_EQ(key_calls.size(), 1);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeDown, kPhysicalDigit6,
@@ -1237,8 +1256,8 @@ TEST(KeyboardTest, DeadKeyWithoutDeadMaskThatCombines) {
   clear_key_calls();
 
   // Release 6^
-  tester.InjectMessages(
-      1, WmKeyUpInfo{'6', kScanCodeDigit6, kNotExtended}.Build(kWmResultZero));
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      WmKeyUpInfo{'6', kScanCodeDigit6, kNotExtended}.Build(kWmResultZero)});
 
   EXPECT_EQ(key_calls.size(), 1);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeUp, kPhysicalDigit6,
@@ -1246,10 +1265,10 @@ TEST(KeyboardTest, DeadKeyWithoutDeadMaskThatCombines) {
   clear_key_calls();
 
   // Release ShiftLeft
-  tester.SetKeyState(VK_LSHIFT, false, true);
-  tester.InjectMessages(
-      1, WmKeyUpInfo{VK_SHIFT, kScanCodeShiftLeft, kNotExtended}.Build(
-             kWmResultZero));
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      KeyStateChange{VK_LSHIFT, false, true},
+      WmKeyUpInfo{VK_SHIFT, kScanCodeShiftLeft, kNotExtended}.Build(
+          kWmResultZero)});
 
   EXPECT_EQ(key_calls.size(), 1);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeUp, kPhysicalShiftLeft,
@@ -1257,12 +1276,11 @@ TEST(KeyboardTest, DeadKeyWithoutDeadMaskThatCombines) {
   clear_key_calls();
 
   // Press E
-  tester.InjectMessages(
-      2,
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
       WmKeyDownInfo{kVirtualKeyE, kScanCodeKeyE, kNotExtended, kWasUp}.Build(
           kWmResultZero),
       WmCharInfo{0xEA, kScanCodeKeyE, kNotExtended, kWasUp}.Build(
-          kWmResultZero));
+          kWmResultZero)});
 
   EXPECT_EQ(key_calls.size(), 2);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeDown, kPhysicalKeyE,
@@ -1271,9 +1289,9 @@ TEST(KeyboardTest, DeadKeyWithoutDeadMaskThatCombines) {
   clear_key_calls();
 
   // Release E
-  tester.InjectMessages(
-      1, WmKeyUpInfo{kVirtualKeyE, kScanCodeKeyE, kNotExtended}.Build(
-             kWmResultZero));
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      WmKeyUpInfo{kVirtualKeyE, kScanCodeKeyE, kNotExtended}.Build(
+          kWmResultZero)});
 
   EXPECT_EQ(key_calls.size(), 1);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeUp, kPhysicalKeyE,
@@ -1290,12 +1308,11 @@ TEST(KeyboardTest, DeadKeyThatDoesNotCombine) {
   tester.SetLayout(LayoutFrench);
 
   // Press ^¨ (US: Left bracket)
-  tester.InjectMessages(
-      2,
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
       WmKeyDownInfo{0xDD, kScanCodeBracketLeft, kNotExtended, kWasUp}.Build(
           kWmResultZero),
       WmDeadCharInfo{'^', kScanCodeBracketLeft, kNotExtended, kWasUp}.Build(
-          kWmResultZero));
+          kWmResultZero)});
 
   EXPECT_EQ(key_calls.size(), 1);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeDown,
@@ -1304,9 +1321,9 @@ TEST(KeyboardTest, DeadKeyThatDoesNotCombine) {
   clear_key_calls();
 
   // Release ^¨
-  tester.InjectMessages(
-      1, WmKeyUpInfo{0xDD, kScanCodeBracketLeft, kNotExtended}.Build(
-             kWmResultZero));
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      WmKeyUpInfo{0xDD, kScanCodeBracketLeft, kNotExtended}.Build(
+          kWmResultZero)});
 
   EXPECT_EQ(key_calls.size(), 1);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeUp,
@@ -1315,14 +1332,13 @@ TEST(KeyboardTest, DeadKeyThatDoesNotCombine) {
   clear_key_calls();
 
   // Press 1
-  tester.InjectMessages(
-      3,
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
       WmKeyDownInfo{kVirtualDigit1, kScanCodeDigit1, kNotExtended, kWasUp}
           .Build(kWmResultZero),
       WmCharInfo{'^', kScanCodeDigit1, kNotExtended, kWasUp}.Build(
           kWmResultZero),
       WmCharInfo{'&', kScanCodeDigit1, kNotExtended, kWasUp}.Build(
-          kWmResultZero));
+          kWmResultZero)});
 
   EXPECT_EQ(key_calls.size(), 3);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeDown, kPhysicalDigit1,
@@ -1332,9 +1348,9 @@ TEST(KeyboardTest, DeadKeyThatDoesNotCombine) {
   clear_key_calls();
 
   // Release 1
-  tester.InjectMessages(
-      1, WmKeyUpInfo{kVirtualDigit1, kScanCodeDigit1, kNotExtended}.Build(
-             kWmResultZero));
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      WmKeyUpInfo{kVirtualDigit1, kScanCodeDigit1, kNotExtended}.Build(
+          kWmResultZero)});
 
   EXPECT_EQ(key_calls.size(), 1);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeUp, kPhysicalDigit1,
@@ -1352,12 +1368,11 @@ TEST(KeyboardTest, DeadKeyTwiceThenLetter) {
   // US INTL layout.
 
   // Press `
-  tester.InjectMessages(
-      2,
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
       WmKeyDownInfo{0xC0, kScanCodeBackquote, kNotExtended, kWasUp}.Build(
           kWmResultZero),
       WmDeadCharInfo{'`', kScanCodeBackquote, kNotExtended, kWasUp}.Build(
-          kWmResultZero));
+          kWmResultZero)});
 
   EXPECT_EQ(key_calls.size(), 1);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeDown,
@@ -1366,9 +1381,9 @@ TEST(KeyboardTest, DeadKeyTwiceThenLetter) {
   clear_key_calls();
 
   // Release `
-  tester.InjectMessages(
-      1,
-      WmKeyUpInfo{0xC0, kScanCodeBackquote, kNotExtended}.Build(kWmResultZero));
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      WmKeyUpInfo{0xC0, kScanCodeBackquote, kNotExtended}.Build(
+          kWmResultZero)});
 
   EXPECT_EQ(key_calls.size(), 1);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeUp, kPhysicalBackquote,
@@ -1385,15 +1400,14 @@ TEST(KeyboardTest, DeadKeyTwiceThenLetter) {
         recorded_callbacks.push_back(callback);
       });
 
-  tester.InjectMessages(
-      3,
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
       WmKeyDownInfo{0xC0, kScanCodeBackquote, kNotExtended, kWasUp}.Build(
           kWmResultZero),
       WmCharInfo{'`', kScanCodeBackquote, kNotExtended, kWasUp, kBeingReleased,
                  kNoContext, 1, /*bit25*/ true}
           .Build(kWmResultZero),
       WmCharInfo{'`', kScanCodeBackquote, kNotExtended, kWasUp}.Build(
-          kWmResultZero));
+          kWmResultZero)});
 
   EXPECT_EQ(recorded_callbacks.size(), 1);
   EXPECT_EQ(key_calls.size(), 1);
@@ -1411,9 +1425,9 @@ TEST(KeyboardTest, DeadKeyTwiceThenLetter) {
   tester.Responding(false);
 
   // Release `
-  tester.InjectMessages(
-      1,
-      WmKeyUpInfo{0xC0, kScanCodeBackquote, kNotExtended}.Build(kWmResultZero));
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      WmKeyUpInfo{0xC0, kScanCodeBackquote, kNotExtended}.Build(
+          kWmResultZero)});
 
   EXPECT_EQ(key_calls.size(), 1);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeUp, kPhysicalBackquote,
@@ -1430,14 +1444,13 @@ TEST(KeyboardTest, MultibyteCharacter) {
   // without IME, which is actually very rare.)
 
   // Press key W of a US keyboard, which should yield character '𐍅'.
-  tester.InjectMessages(
-      3,
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
       WmKeyDownInfo{kVirtualKeyW, kScanCodeKeyW, kNotExtended, kWasUp}.Build(
           kWmResultZero),
       WmCharInfo{0xd800, kScanCodeKeyW, kNotExtended, kWasUp}.Build(
           kWmResultZero),
       WmCharInfo{0xdf45, kScanCodeKeyW, kNotExtended, kWasUp}.Build(
-          kWmResultZero));
+          kWmResultZero)});
 
   const char* st = key_calls[0].key_event.character;
 
@@ -1448,9 +1461,9 @@ TEST(KeyboardTest, MultibyteCharacter) {
   clear_key_calls();
 
   // Release W
-  tester.InjectMessages(
-      1, WmKeyUpInfo{kVirtualKeyW, kScanCodeKeyW, kNotExtended}.Build(
-             kWmResultZero));
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      WmKeyUpInfo{kVirtualKeyW, kScanCodeKeyW, kNotExtended}.Build(
+          kWmResultZero)});
 
   EXPECT_EQ(key_calls.size(), 1);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeUp, kPhysicalKeyW,
@@ -1467,11 +1480,10 @@ TEST(KeyboardTest, NeverRedispatchShiftRightKeyDown) {
   tester.Responding(false);
 
   // Press ShiftRight and the delegate responds false.
-  tester.SetKeyState(VK_RSHIFT, true, true);
-  tester.InjectMessages(
-      1,
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      KeyStateChange{VK_RSHIFT, true, true},
       WmKeyDownInfo{VK_SHIFT, kScanCodeShiftRight, kNotExtended, kWasUp}.Build(
-          kWmResultZero));
+          kWmResultZero)});
 
   EXPECT_EQ(key_calls.size(), 1);
   clear_key_calls();
@@ -1492,11 +1504,10 @@ TEST(KeyboardTest, ImeModifierEventsAreIgnored) {
   // seem significant.
 
   // Press CtrlRight in IME mode.
-  tester.SetKeyState(VK_RCONTROL, true, false);
-  tester.InjectMessages(
-      1,
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      KeyStateChange{VK_RCONTROL, true, false},
       WmKeyDownInfo{VK_PROCESSKEY, kScanCodeControl, kExtended, kWasUp}.Build(
-          kWmResultZero));
+          kWmResultZero)});
 
   EXPECT_EQ(key_calls.size(), 1);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeDown, 0, 0, "",
@@ -1517,20 +1528,18 @@ TEST(KeyboardTest, DisorderlyRespondedEvents) {
       });
 
   // Press A
-  tester.InjectMessages(
-      2,
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
       WmKeyDownInfo{kVirtualKeyA, kScanCodeKeyA, kNotExtended, kWasUp}.Build(
           kWmResultZero),
       WmCharInfo{'a', kScanCodeKeyA, kNotExtended, kWasUp}.Build(
-          kWmResultZero));
+          kWmResultZero)});
 
   // Press B
-  tester.InjectMessages(
-      2,
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
       WmKeyDownInfo{kVirtualKeyB, kScanCodeKeyB, kNotExtended, kWasUp}.Build(
           kWmResultZero),
       WmCharInfo{'b', kScanCodeKeyB, kNotExtended, kWasUp}.Build(
-          kWmResultZero));
+          kWmResultZero)});
 
   EXPECT_EQ(key_calls.size(), 2);
   EXPECT_EQ(recorded_callbacks.size(), 2);
@@ -1571,20 +1580,18 @@ TEST(KeyboardTest, SlowFrameworkResponse) {
       });
 
   // Press A
-  tester.InjectMessages(
-      2,
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
       WmKeyDownInfo{kVirtualKeyA, kScanCodeKeyA, kNotExtended, kWasUp}.Build(
           kWmResultZero),
       WmCharInfo{'a', kScanCodeKeyA, kNotExtended, kWasUp}.Build(
-          kWmResultZero));
+          kWmResultZero)});
 
   // Hold A
-  tester.InjectMessages(
-      2,
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
       WmKeyDownInfo{kVirtualKeyA, kScanCodeKeyA, kNotExtended, kWasDown}.Build(
           kWmResultZero),
       WmCharInfo{'a', kScanCodeKeyA, kNotExtended, kWasDown}.Build(
-          kWmResultZero));
+          kWmResultZero)});
 
   EXPECT_EQ(key_calls.size(), 2);
   EXPECT_EQ(recorded_callbacks.size(), 2);
@@ -1630,12 +1637,11 @@ TEST(KeyboardTest, SlowFrameworkResponseForIdenticalEvents) {
       });
 
   // Press A
-  tester.InjectMessages(
-      2,
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
       WmKeyDownInfo{kVirtualKeyA, kScanCodeKeyA, kNotExtended, kWasUp}.Build(
           kWmResultZero),
       WmCharInfo{'a', kScanCodeKeyA, kNotExtended, kWasUp}.Build(
-          kWmResultZero));
+          kWmResultZero)});
 
   EXPECT_EQ(key_calls.size(), 1);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeDown, kPhysicalKeyA,
@@ -1643,9 +1649,9 @@ TEST(KeyboardTest, SlowFrameworkResponseForIdenticalEvents) {
   clear_key_calls();
 
   // Release A
-  tester.InjectMessages(
-      1, WmKeyUpInfo{kVirtualKeyA, kScanCodeKeyA, kNotExtended}.Build(
-             kWmResultZero));
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      WmKeyUpInfo{kVirtualKeyA, kScanCodeKeyA, kNotExtended}.Build(
+          kWmResultZero)});
 
   EXPECT_EQ(key_calls.size(), 1);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeUp, kPhysicalKeyA,
@@ -1661,12 +1667,11 @@ TEST(KeyboardTest, SlowFrameworkResponseForIdenticalEvents) {
   clear_key_calls();
 
   // Press A again
-  tester.InjectMessages(
-      2,
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
       WmKeyDownInfo{kVirtualKeyA, kScanCodeKeyA, kNotExtended, kWasUp}.Build(
           kWmResultZero),
       WmCharInfo{'a', kScanCodeKeyA, kNotExtended, kWasUp}.Build(
-          kWmResultZero));
+          kWmResultZero)});
 
   EXPECT_EQ(key_calls.size(), 1);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeDown, kPhysicalKeyA,
@@ -1674,9 +1679,9 @@ TEST(KeyboardTest, SlowFrameworkResponseForIdenticalEvents) {
   clear_key_calls();
 
   // Release A again
-  tester.InjectMessages(
-      1, WmKeyUpInfo{kVirtualKeyA, kScanCodeKeyA, kNotExtended}.Build(
-             kWmResultZero));
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      WmKeyUpInfo{kVirtualKeyA, kScanCodeKeyA, kNotExtended}.Build(
+          kWmResultZero)});
 
   EXPECT_EQ(key_calls.size(), 1);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeUp, kPhysicalKeyA,
@@ -1695,12 +1700,11 @@ TEST(KeyboardTest, TextInputSubmit) {
       R"|([108, {"inputAction": "TextInputAction.none"}])|");
 
   // Press Enter
-  tester.InjectMessages(
-      2,
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
       WmKeyDownInfo{VK_RETURN, kScanCodeEnter, kNotExtended, kWasUp}.Build(
           kWmResultZero),
       WmCharInfo{'\n', kScanCodeEnter, kNotExtended, kWasUp}.Build(
-          kWmResultZero));
+          kWmResultZero)});
 
   EXPECT_EQ(key_calls.size(), 2);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeDown, kPhysicalEnter,
@@ -1714,9 +1718,9 @@ TEST(KeyboardTest, TextInputSubmit) {
   clear_key_calls();
 
   // Release Enter
-  tester.InjectMessages(
-      1, WmKeyUpInfo{VK_RETURN, kScanCodeEnter, kNotExtended}.Build(
-             kWmResultZero));
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      WmKeyUpInfo{VK_RETURN, kScanCodeEnter, kNotExtended}.Build(
+          kWmResultZero)});
 
   EXPECT_EQ(key_calls.size(), 1);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeUp, kPhysicalEnter,
@@ -1728,12 +1732,11 @@ TEST(KeyboardTest, TextInputSubmit) {
   // Regression test for https://github.com/flutter/flutter/issues/97706.
 
   // Press A
-  tester.InjectMessages(
-      2,
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
       WmKeyDownInfo{kVirtualKeyA, kScanCodeKeyA, kNotExtended, kWasUp}.Build(
           kWmResultZero),
       WmCharInfo{'a', kScanCodeKeyA, kNotExtended, kWasUp}.Build(
-          kWmResultZero));
+          kWmResultZero)});
 
   EXPECT_EQ(key_calls.size(), 2);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeDown, kPhysicalKeyA,
@@ -1742,9 +1745,9 @@ TEST(KeyboardTest, TextInputSubmit) {
   clear_key_calls();
 
   // Release A
-  tester.InjectMessages(
-      1, WmKeyUpInfo{kVirtualKeyA, kScanCodeKeyA, kNotExtended}.Build(
-             kWmResultZero));
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      WmKeyUpInfo{kVirtualKeyA, kScanCodeKeyA, kNotExtended}.Build(
+          kWmResultZero)});
 
   EXPECT_EQ(key_calls.size(), 1);
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeUp, kPhysicalKeyA,

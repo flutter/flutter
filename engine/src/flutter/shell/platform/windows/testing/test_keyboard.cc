@@ -191,25 +191,25 @@ void MockEmbedderApiForKeyboard(
   modifier.embedder_api().Shutdown = [](auto engine) { return kSuccess; };
 }
 
-void MockMessageQueue::InjectMessageList(int count,
-                                         const Win32Message* messages) {
-  for (int i = 0; i < count; i += 1) {
-    _pending_messages.push_back(messages[i]);
+void MockMessageQueue::PushBack(const Win32Message* message) {
+  _pending_messages.push_back(*message);
+}
+
+LRESULT MockMessageQueue::DispatchFront() {
+  assert(!_pending_messages.empty());
+  Win32Message message = _pending_messages.front();
+  _pending_messages.pop_front();
+  _sent_messages.push_back(message);
+  LRESULT result =
+      Win32SendMessage(message.message, message.wParam, message.lParam);
+  if (message.expected_result != kWmResultDontCheck) {
+    EXPECT_EQ(result, message.expected_result)
+        << "  This is the " << _sent_messages.size()
+        << ordinal(_sent_messages.size()) << " event, with\n    " << std::hex
+        << "Message 0x" << message.message << " LParam 0x" << message.lParam
+        << " WParam 0x" << message.wParam;
   }
-  while (!_pending_messages.empty()) {
-    Win32Message message = _pending_messages.front();
-    _pending_messages.pop_front();
-    _sent_messages.push_back(message);
-    LRESULT result =
-        Win32SendMessage(message.message, message.wParam, message.lParam);
-    if (message.expected_result != kWmResultDontCheck) {
-      EXPECT_EQ(result, message.expected_result)
-          << "  This is the " << _sent_messages.size()
-          << ordinal(_sent_messages.size()) << " event, with\n    " << std::hex
-          << "Message 0x" << message.message << " LParam 0x" << message.lParam
-          << " WParam 0x" << message.wParam;
-    }
-  }
+  return result;
 }
 
 BOOL MockMessageQueue::Win32PeekMessage(LPMSG lpMsg,
