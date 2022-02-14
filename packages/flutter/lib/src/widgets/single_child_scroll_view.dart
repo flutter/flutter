@@ -258,12 +258,12 @@ class SingleChildScrollView extends StatelessWidget {
       physics: physics,
       restorationId: restorationId,
       viewportBuilder: (BuildContext context, ViewportOffset offset) {
-        return _SingleChildViewport(
+        return ViewportBoundary(child: _SingleChildViewport(
           axisDirection: axisDirection,
           offset: offset,
           clipBehavior: clipBehavior,
           child: contents,
-        );
+        ));
       },
     );
 

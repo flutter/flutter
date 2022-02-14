@@ -30,7 +30,7 @@ class _LeafState extends State<Leaf> {
     if (_keepAlive) {
       if (_handle == null) {
         _handle = KeepAliveHandle();
-        KeepAliveNotification(_handle!).dispatch(context);
+        KeepAliveNotification(_handle!).dispatchFast(context);
       }
     } else {
       _handle?.release();
@@ -42,7 +42,7 @@ class _LeafState extends State<Leaf> {
   Widget build(BuildContext context) {
     if (_keepAlive && _handle == null) {
       _handle = KeepAliveHandle();
-      KeepAliveNotification(_handle!).dispatch(context);
+      KeepAliveNotification(_handle!).dispatchFast(context);
     }
     return widget.child;
   }

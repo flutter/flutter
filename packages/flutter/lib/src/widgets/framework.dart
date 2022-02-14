@@ -13,6 +13,7 @@ import 'binding.dart';
 import 'debug.dart';
 import 'focus_manager.dart';
 import 'inherited_model.dart';
+import 'notification_listener.dart';
 
 export 'dart:ui' show hashValues, hashList;
 
@@ -2392,6 +2393,8 @@ abstract class BuildContext {
   /// data down to them.
   void visitChildElements(ElementVisitor visitor);
 
+  void dispatchNotification(Notification notification);
+
   /// Returns a description of the [Element] associated with the current build context.
   ///
   /// The `name` is typically something like "The element being rebuilt was".
@@ -3163,6 +3166,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
 
   Element? _parent;
   DebugReassembleConfig? _debugReassembleConfig;
+  NotificationElement<Notification>? _notificationListener;
 
   /// Compare two widgets for equality.
   ///
@@ -4236,6 +4240,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   void _updateInheritance() {
     assert(_lifecycleState == _ElementLifecycle.active);
     _inheritedLookup = _parent?._inheritedLookup;
+    _notificationListener = _parent?._notificationListener;
   }
 
   @override
@@ -4359,6 +4364,11 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       node = node._parent;
     }
     return chain;
+  }
+
+  @override
+  void dispatchNotification(Notification notification) {
+    _notificationListener?.dispatchNotification(notification);
   }
 
   /// A short, textual description of this element.
@@ -5233,6 +5243,7 @@ class InheritedElement extends ProxyElement {
     assert(_lifecycleState == _ElementLifecycle.active);
     _inheritedLookup = InheritedTreeCache(_parent?._inheritedLookup)
       ..[widget.runtimeType] = this;
+    _notificationListener = _parent?._notificationListener;
   }
 
   @override
@@ -6460,6 +6471,41 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
     assert(!debugChildrenHaveDuplicateKeys(widget, multiChildRenderObjectWidget.children));
     _children = updateChildren(_children, multiChildRenderObjectWidget.children, forgottenChildren: _forgottenChildren);
     _forgottenChildren.clear();
+  }
+}
+
+@optionalTypeArgs
+class NotificationElement<T extends Notification> extends ProxyElement {
+  NotificationElement(NotificationListener<T> widget) : super(widget);
+
+
+  NotificationElement<Notification>? _parentNotification;
+
+
+  @override
+  void dispatchNotification(Notification notification) {
+    final NotificationListener<T> listener = widget as NotificationListener<T>;
+    if (listener.onNotification != null && notification is T) {
+      final bool result = listener.onNotification!(notification);
+      // so that null and false have the same effect
+      if (result == true) {
+        return;
+      }
+    }
+    _parentNotification?.dispatchNotification(notification);
+  }
+
+  @override
+  void _updateInheritance() {
+    assert(_lifecycleState == _ElementLifecycle.active);
+    _inheritedLookup = _parent?._inheritedLookup;
+    _parentNotification = _parent?._notificationListener;
+    _notificationListener = this;
+  }
+
+  @override
+  void notifyClients(covariant ProxyWidget oldWidget) {
+    // Notification tree does not need to notify clients.
   }
 }
 

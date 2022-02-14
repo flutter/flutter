@@ -922,7 +922,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   ///
   /// Subclasses should call this function when they change [userScrollDirection].
   void didUpdateScrollDirection(ScrollDirection direction) {
-    UserScrollNotification(metrics: copyWith(), context: context.notificationContext!, direction: direction).dispatch(context.notificationContext);
+    UserScrollNotification(metrics: copyWith(), context: context.notificationContext!, direction: direction).dispatchFast(context.notificationContext);
   }
 
   /// Dispatches a notification that the [ScrollMetrics] have changed.
@@ -931,7 +931,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     assert(_haveScheduledUpdateNotification);
     _haveScheduledUpdateNotification = false;
     if (context.notificationContext != null)
-      ScrollMetricsNotification(metrics: copyWith(), context: context.notificationContext!).dispatch(context.notificationContext);
+      ScrollMetricsNotification(metrics: copyWith(), context: context.notificationContext!).dispatchFast(context.notificationContext);
   }
 
   /// Provides a heuristic to determine if expensive frame-bound tasks should be

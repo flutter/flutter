@@ -55,18 +55,18 @@ abstract class Notification {
   /// The [Notification] class implementation of this method dispatches the
   /// given [Notification] to each ancestor [NotificationListener] widget.
   ///
+  /// This method will never be called if [dispatchFast] is used.
+  ///
   /// Subclasses can override this to apply additional filtering or to update
   /// the notification as it is bubbled (for example, increasing a `depth` field
   /// for each ancestor of a particular type).
   @protected
   @mustCallSuper
   bool visitAncestor(Element element) {
-    if (element is StatelessElement) {
-      final Widget widget = element.widget;
-      if (widget is NotificationListener<Notification>) {
-        if (widget._dispatch(this, element)) // that function checks the type dynamically
-          return false;
-      }
+    if (element is NotificationElement) {
+      final NotificationListener<Notification> widget = element.widget as NotificationListener<Notification>;
+      if (widget._dispatch(this, element)) // that function checks the type dynamically
+        return false;
     }
     return true;
   }
@@ -77,10 +77,23 @@ abstract class Notification {
   /// with the appropriate type parameters that are ancestors of the given
   /// [BuildContext]. If the [BuildContext] is null, the notification is not
   /// dispatched.
-  void dispatch(BuildContext? target) {
-    // The `target` may be null if the subtree the notification is supposed to be
-    // dispatched in is in the process of being disposed.
-    target?.visitAncestorElements(visitAncestor);
+  // void dispatch(BuildContext? target) {
+  //   // The `target` may be null if the subtree the notification is supposed to be
+  //   // dispatched in is in the process of being disposed.
+  //   target?.visitAncestorElements(visitAncestor);
+  // }
+
+  /// Start bubbling this notification at the given build context.
+  ///
+  /// The notification will be delivered to any [NotificationListener] widgets
+  /// with the appropriate type parameters that are ancestors of the given
+  /// [BuildContext]. If the [BuildContext] is null, the notification is not
+  /// dispatched.
+  ///
+  /// Unlike [dispatch], this method does not visit each Element and [visitAncestor]
+  /// will never be called.
+  void dispatchFast(BuildContext? target) {
+    target?.dispatchNotification(this);
   }
 
   @override
@@ -112,20 +125,14 @@ abstract class Notification {
 /// [runtimeType] is a subtype of `T`.
 ///
 /// To dispatch notifications, use the [Notification.dispatch] method.
-class NotificationListener<T extends Notification> extends StatelessWidget {
+class NotificationListener<T extends Notification> extends ProxyWidget {
   /// Creates a widget that listens for notifications.
   const NotificationListener({
     Key? key,
-    required this.child,
+    required Widget child,
     this.onNotification,
-  }) : super(key: key);
+  }) : super(key: key, child: child);
 
-  /// The widget directly below this widget in the tree.
-  ///
-  /// This is not necessarily the widget that dispatched the notification.
-  ///
-  /// {@macro flutter.widgets.ProxyWidget.child}
-  final Widget child;
 
   /// Called when a notification of the appropriate type arrives at this
   /// location in the tree.
@@ -155,7 +162,9 @@ class NotificationListener<T extends Notification> extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) => child;
+  Element createElement() {
+    return NotificationElement<T>(this);
+  }
 }
 
 /// Indicates that the layout of one of the descendants of the object receiving
