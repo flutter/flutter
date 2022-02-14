@@ -1910,6 +1910,28 @@ targets:
       benchmark: "true"
     scheduler: luci
 
+  - name: Linux_android fullscreen_textfield_perf
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux"]
+      task_name: fullscreen_textfield_perf
+      benchmark: "true"
+    scheduler: luci
+
+  - name: Linux_android fullscreen_textfield_perf__e2e_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab","android","linux"]
+      task_name: fullscreen_textfield_perf__e2e_summary
+      benchmark: "true"
+    scheduler: luci
+
   - name: Linux_android fullscreen_textfield_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
