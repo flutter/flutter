@@ -20,7 +20,7 @@ import '../base/os.dart';
 import '../base/platform.dart';
 import '../convert.dart';
 import '../device.dart';
-import '../globals.dart';
+import '../globals.dart' as globals;
 import '../project.dart';
 import '../vmservice.dart';
 
@@ -306,7 +306,7 @@ class FlutterTesterTestDevice extends TestDevice {
             (String line) async {
           logger.printTrace('test $id: Shell: $line');
 
-          final Match match = kVMServiceMessageRegExp.firstMatch(line);
+          final Match match = globals.kVMServiceMessageRegExp.firstMatch(line);
           if (match != null) {
             try {
               final Uri uri = Uri.parse(match[1]);
