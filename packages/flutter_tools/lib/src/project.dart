@@ -223,7 +223,7 @@ class FlutterProject {
   /// The generated Dart plugin registrant for non-web platforms.
   File get dartPluginRegistrant => dartTool
     .childDirectory('flutter_build')
-    .childFile('generated_main.dart');
+    .childFile('dart_plugin_registrant.dart');
 
   /// The example sub-project of this project.
   FlutterProject get example => FlutterProject(

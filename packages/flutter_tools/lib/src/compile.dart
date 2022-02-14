@@ -263,17 +263,17 @@ class KernelCompiler {
     }
     // if (buildDir != null && checkDartPluginRegistry) {
     //   // Check if there's a Dart plugin registrant.
-    //   // This is contained in the file `generated_main.dart` under `.dart_tools/flutter_build/`.
-    //   final File newMainDart = buildDir.parent.childFile('generated_main.dart');
+    //   // This is contained in the file `dart_plugin_registrant.dart` under `.dart_tools/flutter_build/`.
+    //   final File newMainDart = buildDir.parent.childFile('dart_plugin_registrant.dart');
     //   if (newMainDart.existsSync()) {
     //     mainUri = newMainDart.path;
     //   }
     // }
 
     // Check if there's a Dart plugin registrant.
-    // This is contained in the file `generated_main.dart` under `.dart_tools/flutter_build/`.
+    // This is contained in the file `dart_plugin_registrant.dart` under `.dart_tools/flutter_build/`.
     final File? generatedMain = checkDartPluginRegistry
-        ? buildDir?.parent.childFile('generated_main.dart')
+        ? buildDir?.parent.childFile('dart_plugin_registrant.dart')
         : null;
 
     final List<String> command = <String>[
@@ -640,14 +640,14 @@ class DefaultResidentCompiler implements ResidentCompiler {
     if (!_controller.hasListener) {
       _controller.stream.listen(_handleCompilationRequest);
     }
-    // `generated_main.dart` contains the Dart plugin registry.
+    // `dart_plugin_registrant.dart` contains the Dart plugin registry.
     if (checkDartPluginRegistry && projectRootPath != null && fs != null) {
       final File generatedMainDart = fs.file(
         fs.path.join(
           projectRootPath,
           '.dart_tool',
           'flutter_build',
-          'generated_main.dart',
+          'dart_plugin_registrant.dart',
         ),
       );
       if (generatedMainDart != null && generatedMainDart.existsSync()) {

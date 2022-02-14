@@ -159,7 +159,7 @@ void main() {
       }
     });
 
-    testUsingContext("doesn't generate generated_main.dart if there aren't Dart plugins", () async {
+    testUsingContext("doesn't generate dart_plugin_registrant.dart if there aren't Dart plugins", () async {
       final Directory projectDir = fileSystem.directory('project')..createSync();
       final Environment environment = Environment.test(
           fileSystem.currentDirectory,
@@ -189,11 +189,11 @@ void main() {
       final File generatedMain = projectDir
           .childDirectory('.dart_tool')
           .childDirectory('flutter_build')
-          .childFile('generated_main.dart');
+          .childFile('dart_plugin_registrant.dart');
       expect(generatedMain.existsSync(), isFalse);
     });
 
-    testUsingContext('regenerates generated_main.dart', () async {
+    testUsingContext('regenerates dart_plugin_registrant.dart', () async {
       final Directory projectDir = fileSystem.directory('project')..createSync();
       final Environment environment = Environment.test(
           fileSystem.currentDirectory,
@@ -231,7 +231,7 @@ void main() {
       final File generatedMain = projectDir
           .childDirectory('.dart_tool')
           .childDirectory('flutter_build')
-          .childFile('generated_main.dart');
+          .childFile('dart_plugin_registrant.dart');
       final String mainContent = generatedMain.readAsStringSync();
       expect(
         mainContent,
@@ -273,7 +273,7 @@ void main() {
       );
     });
 
-    testUsingContext('removes generated_main.dart if plugins are removed from pubspec.yaml', () async {
+    testUsingContext('removes dart_plugin_registrant.dart if plugins are removed from pubspec.yaml', () async {
       final Directory projectDir = fileSystem.directory('project')..createSync();
       final Environment environment = Environment.test(
           fileSystem.currentDirectory,
@@ -305,7 +305,7 @@ void main() {
       final File generatedMain = projectDir
           .childDirectory('.dart_tool')
           .childDirectory('flutter_build')
-          .childFile('generated_main.dart');
+          .childFile('dart_plugin_registrant.dart');
 
       final FlutterProject testProject = FlutterProject.fromDirectoryTest(projectDir);
       await DartPluginRegistrantTarget.test(testProject).build(environment);
@@ -356,7 +356,7 @@ void main() {
       final File generatedMain = projectDir
           .childDirectory('.dart_tool')
           .childDirectory('flutter_build')
-          .childFile('generated_main.dart');
+          .childFile('dart_plugin_registrant.dart');
 
       final String mainContent = generatedMain.readAsStringSync();
       expect(

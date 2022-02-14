@@ -35,7 +35,7 @@ void main() {
         ..directory = directory
         ..flutterPluginsFile = directory.childFile('.flutter-plugins')
         ..flutterPluginsDependenciesFile = directory.childFile('.flutter-plugins-dependencies')
-        ..dartPluginRegistrant = directory.childFile('generated_main.dart');
+        ..dartPluginRegistrant = directory.childFile('dart_plugin_registrant.dart');
       flutterProject.directory.childFile('.packages').createSync(recursive: true);
     });
 
