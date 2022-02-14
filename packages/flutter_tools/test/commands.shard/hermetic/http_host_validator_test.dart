@@ -69,30 +69,7 @@ void main() {
         }
       });
 
-      testWithoutContext('one http hosts are not available', () async {
-        // Run the check for all operating systems one by one
-        for(final String os in osTested) {
-          final Platform platform = FakePlatform(operatingSystem: os);
-          final HttpHostValidator httpHostValidator = HttpHostValidator(
-            platform: platform,
-            featureFlags: TestFeatureFlags(),
-            httpClient: FakeHttpClient.list(<FakeRequest>[
-              FakeRequest(Uri.parse(kgCloudHttpHost), method: HttpMethod.head, responseError: const OSError('Name or service not known', -2)),
-              FakeRequest(Uri.parse(androidRequiredHttpHosts(platform)[0]), method: HttpMethod.head),
-              FakeRequest(Uri.parse(kPubDevHttpHost), method: HttpMethod.head),
-              FakeRequest(Uri.parse(macOSRequiredHttpHosts[0]), method: HttpMethod.head),
-            ]),
-          );
-
-          // Run the validation check and get the results
-          final ValidationResult result = await httpHostValidator.validate();
-
-          // Check for a ValidationType.partial result
-          expect(result.type, equals(ValidationType.partial));
-        }
-      });
-
-      testWithoutContext('one http hosts are not available', () async {
+      testWithoutContext('one http host is not available', () async {
         // Run the check for all operating systems one by one
         for(final String os in osTested) {
           final Platform platform = FakePlatform(operatingSystem: os);
@@ -158,29 +135,7 @@ void main() {
         }
       });
 
-      testWithoutContext('one http hosts are not available', () async {
-        // Run the check for all operating systems one by one
-        for(final String os in osTested) {
-          final Platform platform = FakePlatform(operatingSystem: os, environment: kTestEnvironment);
-          final HttpHostValidator httpHostValidator = HttpHostValidator(
-            platform: platform,
-            featureFlags: TestFeatureFlags(),
-            httpClient: FakeHttpClient.list(<FakeRequest>[
-              FakeRequest(Uri.parse(kTestEnvGCloudHost), method: HttpMethod.head, responseError: const OSError('Name or service not known', -2)),
-              FakeRequest(Uri.parse(kTestEnvPubHost), method: HttpMethod.head),
-              FakeRequest(Uri.parse(macOSRequiredHttpHosts[0]), method: HttpMethod.head),
-            ]),
-          );
-
-          // Run the validation check and get the results
-          final ValidationResult result = await httpHostValidator.validate();
-
-          // Check for a ValidationType.partial result
-          expect(result.type, equals(ValidationType.partial));
-        }
-      });
-
-      testWithoutContext('one http hosts are not available', () async {
+      testWithoutContext('one http host is not available', () async {
         // Run the check for all operating systems one by one
         for(final String os in osTested) {
           final Platform platform = FakePlatform(operatingSystem: os, environment: kTestEnvironment);

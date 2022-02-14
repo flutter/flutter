@@ -32,7 +32,6 @@ List<String> androidRequiredHttpHosts(Platform platform) {
   ];
 }
 
-
 // Validator that checks all provided hosts are reachable and responsive
 class HttpHostValidator extends DoctorValidator {
   HttpHostValidator({
