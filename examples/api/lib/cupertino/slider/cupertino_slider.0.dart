@@ -58,7 +58,7 @@ class _CupertinoSliderSampleState extends State<CupertinoSliderSample> {
                   _sliderStatus = 'Sliding';
                 });
               },
-              // This is called when sliding is ended.
+              // This is called when sliding has ended.
               onChangeEnd: (double value) {
                 setState(() {
                   _sliderStatus = 'Finished sliding';
