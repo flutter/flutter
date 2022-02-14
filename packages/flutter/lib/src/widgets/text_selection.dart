@@ -991,8 +991,9 @@ class SelectionOverlay {
   }
 }
 
-/// This widget represents a text selection toolbar.
+/// This widget represents a selection toolbar.
 class _SelectionToolbarOverlay extends StatefulWidget {
+  /// Creates a toolbar overlay.
   const _SelectionToolbarOverlay({
     Key? key,
     required this.preferredLineHeight,
