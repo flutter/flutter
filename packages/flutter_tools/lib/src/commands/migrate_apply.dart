@@ -16,6 +16,8 @@ import '../migrate/migrate_utils.dart';
 import '../cache.dart';
 import 'migrate.dart';
 
+/// Migrate subcommand that checks the migrate working directory for unresolved conflicts and
+/// applies the staged changes to the project.
 class MigrateApplyCommand extends FlutterCommand {
   MigrateApplyCommand({
     bool verbose = false,
@@ -26,6 +28,12 @@ class MigrateApplyCommand extends FlutterCommand {
       help: '',
       defaultsTo: null,
       valueHelp: 'path',
+    );
+    argParser.addFlag(
+      'force',
+      abbr: 'f'
+      help:
+          'Ignore unresolved merge conflicts and apply by force.',
     );
   }
 
@@ -55,25 +63,25 @@ class MigrateApplyCommand extends FlutterCommand {
 
     final File manifestFile = MigrateManifest.getManifestFileFromDirectory(workingDir);
     final MigrateManifest manifest = MigrateManifest.fromFile(manifestFile);
-    if (!checkAndPrintMigrateStatus(manifest, workingDir, warnConflict: true)) {
-      throwToolExit('Conflicting files found.');
+    if (!checkAndPrintMigrateStatus(manifest, workingDir, warnConflict: true) && !boolArg('force')) {
+      throwToolExit('Conflicting files found. Resolve these conflicts and try again.');
     }
 
     if (await MigrateUtils.hasUncommitedChanges(workingDir.path)) {
       throwToolExit('There are uncommitted changes in your project. Please commit, abandon, or stash your changes before trying again.');
     }
 
-    print('Applying migration.');
+    globals.logger.printStatus('Applying migration.');
     // Copy files from working dir to project root
     final List<String> allFilesToCopy = <String>[];
     allFilesToCopy.addAll(manifest.mergedFiles);
     allFilesToCopy.addAll(manifest.conflictFiles);
     allFilesToCopy.addAll(manifest.addedFiles);
     if (allFilesToCopy.isNotEmpty) {
-      print('Modifying ${allFilesToCopy.length} files.');
+      globals.logger.printStatus('Modifying ${allFilesToCopy.length} files.', indent: 2);
     }
     if (manifest.deletedFiles.isNotEmpty) {
-      print('Deleting ${allFilesToCopy.length} files.');
+      globals.logger.printStatus('Deleting ${manifest.deletedFiles.length} files.', indent: 2);
     }
     for (String localPath in allFilesToCopy) {
       final File workingFile = workingDir.childFile(localPath);

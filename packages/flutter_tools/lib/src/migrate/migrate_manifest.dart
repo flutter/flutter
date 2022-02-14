@@ -136,7 +136,10 @@ class MigrateManifest {
 /// Returns true if the migration working directory has all conflicts resolved and prints the migration status.
 ///
 /// The migration status printout lists all added, deleted, merged, and conflicted files.
-bool checkAndPrintMigrateStatus(MigrateManifest manifest, Directory workingDir, {bool warnConflict = false}) {
+bool checkAndPrintMigrateStatus(MigrateManifest manifest, Directory workingDir, {bool warnConflict = false, bool print = true}) {
+  String printout = '';
+  String redPrintout = '';
+  bool result = true;
   List<String> remainingConflicts = <String>[];
   List<String> mergedFiles = <String>[];
   for (String localPath in manifest.conflictFiles) {
@@ -145,36 +148,38 @@ bool checkAndPrintMigrateStatus(MigrateManifest manifest, Directory workingDir, 
     } else {
       mergedFiles.add(localPath);
     }
-  }
+  
   mergedFiles.addAll(manifest.mergedFiles);
   if (manifest.addedFiles.isNotEmpty) {
-    globals.printStatus('Added files:');
+    printout += 'Added files:\n';
     for (String localPath in manifest.addedFiles) {
-      globals.printStatus('  - $localPath');
+      printout += '  - $localPath\n';
     }
   }
   if (manifest.deletedFiles.isNotEmpty) {
-    globals.printStatus('Deleted files:');
+    printout += 'Deleted files:\n';
     for (String localPath in manifest.deletedFiles) {
-      globals.printStatus('  - $localPath');
+      printout += '  - $localPath\n';
     }
   }
   if (mergedFiles.isNotEmpty) {
-    globals.printStatus('Modified files:');
+    printout += 'Modified files:\n';
     for (String localPath in mergedFiles) {
-      globals.printStatus('  - $localPath');
+      printout += '  - $localPath\n';
     }
   }
   if (remainingConflicts.isNotEmpty) {
     if (warnConflict) {
-      globals.printStatus('Unable to apply migration. The following files in the migration working directory still have unresolved conflicts:');
+      printout += 'Unable to apply migration. The following files in the migration working directory still have unresolved conflicts:\n';
     } else {
-      globals.printStatus('Merge conflicted files:');
+      printout += 'Merge conflicted files:\n';
     }
     for (String localPath in remainingConflicts) {
-      globals.printStatus('  - $localPath', color: TerminalColor.red);
+      redPrintout += '  - $localPath\n';
     }
-    return false;
+    result = false;
   }
-  return true;
+  globals.logger.printStatus(printout);
+  globals.logger.printStatus(redPrintout, color: TerminalColor.red);
+  return result;
 }

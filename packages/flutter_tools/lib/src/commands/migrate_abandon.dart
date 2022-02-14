@@ -15,7 +15,7 @@ import '../migrate/migrate_utils.dart';
 import '../cache.dart';
 import 'migrate.dart';
 
-/// Abandons the existing migration.
+/// Abandons the existing migration by deleting the migrate working directory.
 class MigrateAbandonCommand extends FlutterCommand {
   MigrateAbandonCommand({
     bool verbose = false,
@@ -50,14 +50,14 @@ class MigrateAbandonCommand extends FlutterCommand {
       workingDir = globals.fs.directory(stringArg('working-directory'));
     }
     if (!workingDir.existsSync()) {
-      print('No migration in progress. Start a new migration with:\n');
-      print('    \$ flutter migrate start\n');
+      globals.printStatus('No migration in progress. Start a new migration with:\n');
+      globals.printStatus('    \$ flutter migrate start\n');
       return const FlutterCommandResult(ExitStatus.fail);
     }
-    print('Abandoning the existing migration will delete the migration working directory at ${workingDir.path}');
+    globals.printStatus('Abandoning the existing migration will delete the migration working directory at ${workingDir.path}');
     workingDir.deleteSync(recursive: true);
-    print('Abandon complete. Start a new migration with:\n');
-    print('    \$ flutter migrate start\n');
+    globals.printStatus('Abandon complete. Start a new migration with:\n');
+    globals.printStatus('    \$ flutter migrate start\n');
     return const FlutterCommandResult(ExitStatus.success);
   }
 }

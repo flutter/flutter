@@ -135,6 +135,12 @@ abstract class CreateBase extends FlutterCommand {
           'This is only intended to enable testing of the tool itself.',
       hide: !verboseHelp,
     );
+    argParser.addOption(
+      'initial-create-revision',
+      defaultsTo: null,
+      help: 'The revision to store in .migrate_config.',
+      hide: !verboseHelp,
+    );
   }
 
   /// The output directory of the command.
@@ -556,7 +562,7 @@ abstract class CreateBase extends FlutterCommand {
       platforms: platformsForMigrateConfig,
       projectDirectory: directory,
       create: true,
-      currentRevision: globals.flutterVersion.frameworkRevision);
+      currentRevision: stringArg('initial-create-revision') ?? globals.flutterVersion.frameworkRevision);
       createRevision: globals.flutterVersion.frameworkRevision);
     return generatedCount;
   }
