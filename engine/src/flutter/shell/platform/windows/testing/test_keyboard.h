@@ -110,10 +110,14 @@ void MockEmbedderApiForKeyboard(
 // Subclasses must implement |Win32SendMessage| for how dispatched messages are
 // processed.
 class MockMessageQueue {
- public:
-  // Push a list of messages to the message queue, then dispatch
-  // them with |Win32SendMessage| one by one.
-  void InjectMessageList(int count, const Win32Message* messages);
+ protected:
+  // Push a message to the message queue without dispatching it.
+  void PushBack(const Win32Message* message);
+
+  // Dispatch the first message of the message queue and return its result.
+  //
+  // This method asserts that the queue is not empty.
+  LRESULT DispatchFront();
 
   // Peak the next message in the message queue.
   //
@@ -123,7 +127,7 @@ class MockMessageQueue {
                         UINT wMsgFilterMax,
                         UINT wRemoveMsg);
 
- protected:
+  // Simulate dispatching a message to the system.
   virtual LRESULT Win32SendMessage(UINT const message,
                                    WPARAM const wparam,
                                    LPARAM const lparam) = 0;
