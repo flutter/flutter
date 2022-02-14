@@ -179,13 +179,13 @@ Material _barMaterial(WidgetTester tester) {
   );
 }
 
-BoxDecoration? _indicator(WidgetTester tester) {
+ShapeDecoration? _indicator(WidgetTester tester) {
   return tester.firstWidget<Container>(
     find.descendant(
       of: find.byType(FadeTransition),
       matching: find.byType(Container),
     ),
-  ).decoration as BoxDecoration?;
+  ).decoration as ShapeDecoration?;
 }
 
 IconThemeData _selectedIconTheme(WidgetTester tester) {
