@@ -4296,8 +4296,8 @@ void main() {
     );
 
     await tester.pumpWidget(buildFrame(controller1, true));
-    PageView pageView = tester.widget(find.byType(PageView));
-    PageController pageController = pageView.controller;
+    final PageView pageView = tester.widget(find.byType(PageView));
+    final PageController pageController = pageView.controller;
     await tester.tap(find.text('three'));
     await tester.pumpAndSettle();
     expect(controller1.index, 2);
@@ -4306,16 +4306,12 @@ void main() {
     // Change TabController from 3 items to 2.
     await tester.pumpWidget(buildFrame(controller2, false));
     await tester.pumpAndSettle();
-    pageView = tester.widget(find.byType(PageView));
-    pageController = pageView.controller;
     expect(controller2.index, 0);
     expect(pageController.page, 0);
 
     // Change TabController from 2 items to 3.
     await tester.pumpWidget(buildFrame(controller3, true));
     await tester.pumpAndSettle();
-    pageView = tester.widget(find.byType(PageView));
-    pageController = pageView.controller;
     expect(controller3.index, 0);
     expect(pageController.page, 0);
 
