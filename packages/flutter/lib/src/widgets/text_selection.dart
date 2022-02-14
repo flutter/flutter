@@ -416,6 +416,7 @@ class TextSelectionOverlay {
 
   /// {@macro flutter.widgets.SelectionOverlay.dispose}
   void dispose() {
+    renderObject.selectionStartInViewport.removeListener(_updateTextSelectionOverlayVisibilities);
     renderObject.selectionEndInViewport.removeListener(_updateTextSelectionOverlayVisibilities);
     _effectiveToolbarVisibility.dispose();
     _effectiveStartHandleVisibility.dispose();
@@ -1031,6 +1032,9 @@ class _SelectionToolbarOverlayState extends State<_SelectionToolbarOverlay> with
   @override
   void didUpdateWidget(_SelectionToolbarOverlay oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.visibility == widget.visibility) {
+      return;
+    }
     oldWidget.visibility?.removeListener(_toolbarVisibilityChanged);
     _toolbarVisibilityChanged();
     widget.visibility?.addListener(_toolbarVisibilityChanged);
