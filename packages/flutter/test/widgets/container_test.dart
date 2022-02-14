@@ -633,6 +633,21 @@ void main() {
     expect(tapped, false);
   });
 
+  testWidgets('Container discards alignment when child, width and height parameters are null', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Container(
+        decoration: const BoxDecoration(
+        borderRadius: BorderRadius.all(Radius.circular(1)),
+      ),
+      alignment: Alignment.centerLeft
+    ));
+
+    expect(
+      find.byType(Align),
+      findsNothing,
+    );
+  });
+
   testWidgets('using clipBehaviour and shadow, should not clip the shadow', (WidgetTester tester) async {
     final Container container = Container(
       clipBehavior: Clip.hardEdge,
