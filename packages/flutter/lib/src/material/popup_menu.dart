@@ -1088,12 +1088,10 @@ class PopupMenuButton<T> extends StatefulWidget {
   /// When unspecified, defaults to:
   /// ```dart
   /// const BoxConstraints(
-  ///   minWidth: _kMenuMinWidth,
-  ///   maxWidth: _kMenuMaxWidth,
+  ///   minWidth: 2.0 * 56.0,
+  ///   maxWidth: 5.0 * 56.0,
   /// )
   /// ```
-  /// where [_kMenuMinWidth] is `5.0 * _kMenuWidthStep`, `_kMenuWidthStep` is
-  /// equal to `56.0`. `_kMenuWidthStep` is the minimum width of a menu item.
   ///
   /// The default constraints ensure that the menu width matches maximum width
   /// recommended by the material design guidelines.
