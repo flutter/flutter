@@ -985,7 +985,7 @@ class SelectionOverlay {
         selectionEndpoints: selectionEndPoints,
         visibility: toolbarVisible,
         selectionDelegate: selectionDelegate,
-        clipboardStatus: clipboardStatus!,
+        clipboardStatus: clipboardStatus,
       ),
     );
   }
