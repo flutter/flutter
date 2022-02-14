@@ -3941,6 +3941,12 @@ class _DeleteTextAction<T extends DirectionalTextEditingIntent> extends ContextA
   }
 
   @override
+  bool consumesKey(T intent) {
+    return false;
+  }
+
+
+  @override
   bool get isActionEnabled => !state.widget.readOnly && state._value.selection.isValid;
 }
 
