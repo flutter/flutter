@@ -544,7 +544,6 @@ abstract class CreateBase extends FlutterCommand {
     if (templateContext['android'] == true) {
       gradle.updateLocalProperties(project: project, requireAndroidSdk: false);
     }
-    print('GENERATING MIGRATECONFIG');
     List<String> platformsForMigrateConfig = <String>['root'];
     if (templateContext['android'] == true) platformsForMigrateConfig.add('android');
     if (templateContext['ios'] == true) platformsForMigrateConfig.add('ios');
@@ -553,7 +552,12 @@ abstract class CreateBase extends FlutterCommand {
     if (templateContext['windows'] == true) platformsForMigrateConfig.add('windows');
     if (templateContext['winuwp'] == true) platformsForMigrateConfig.add('windowsUwp');
     if (templateContext['fuchsia'] == true) platformsForMigrateConfig.add('fuchisa');
-    await MigrateConfig.parseOrCreateMigrateConfigs(platforms: platformsForMigrateConfig, projectDirectory: directory);
+    await MigrateConfig.parseOrCreateMigrateConfigs(
+      platforms: platformsForMigrateConfig,
+      projectDirectory: directory,
+      create: true,
+      currentRevision: globals.flutterVersion.frameworkRevision);
+      createRevision: globals.flutterVersion.frameworkRevision);
     return generatedCount;
   }
 

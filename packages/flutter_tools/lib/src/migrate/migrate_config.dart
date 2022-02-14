@@ -176,7 +176,7 @@ $unmanagedFilesString
 
   /// Searches the flutter project for all .migrate_config files. Optionally, missing files can be
   /// initialized with default values.
-  static Future<List<MigrateConfig>> parseOrCreateMigrateConfigs({List<String>? platforms, Directory? projectDirectory, bool create = true}) async {
+  static Future<List<MigrateConfig>> parseOrCreateMigrateConfigs({List<String>? platforms, Directory? projectDirectory, String? currentRevision, String? createRevision, bool create = true}) async {
     if (platforms == null) {
       platforms = getSupportedPlatforms(includeRoot: true);
     }
@@ -190,8 +190,8 @@ $unmanagedFilesString
         // No config found, creating empty config.
         MigrateConfig newConfig = MigrateConfig(
           platform: platform,
-          createRevision: null,
-          baseRevision: null,
+          createRevision: createRevision,
+          baseRevision: currentRevision,
           unmanagedFiles: platform == 'root' ? <String>['lib/main.dart'] : <String>[],
         );
         if (create) {
