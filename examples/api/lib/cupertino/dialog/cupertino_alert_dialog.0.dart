@@ -47,7 +47,7 @@ class ActionSheetSample extends StatelessWidget {
           CupertinoDialogAction(
             /// This parameter indicates the action would perform
             /// a destructive action such as deletion, and turns
-            /// the action's text to color red.
+            /// the action's text color to red.
             isDestructiveAction: true,
             onPressed: () {
               Navigator.pop(context);
