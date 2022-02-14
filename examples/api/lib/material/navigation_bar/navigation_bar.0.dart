@@ -5,7 +5,6 @@
 // Flutter code sample for NavigationBar with nested Navigator destinations.
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 
 class Destination {
   const Destination(this.index, this.title, this.icon, this.color);
