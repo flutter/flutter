@@ -76,17 +76,24 @@ abstract class TokenTemplate {
 
   /// Generate a shape constant for the given component token.
   ///
-  /// Currently only supports "SHAPE_FAMILY_ROUNDED_CORNERS" which it
-  /// maps to a [RoundedRectangleBorder] expression.
+  /// Currently supports family:
+  ///   - "SHAPE_FAMILY_ROUNDED_CORNERS" which maps to [RoundedRectangleBorder].
+  ///   - "SHAPE_FAMILY_CIRCULAR" which maps to a [StadiumBorder].
   String shape(String componentToken) {
-    // TODO(darrenaustin): handle more than just rounded rectangle shapes
     final Map<String, dynamic> shape = tokens[tokens['$componentToken.shape']!]! as Map<String, dynamic>;
-    return 'const RoundedRectangleBorder(borderRadius: '
-        'BorderRadius.only('
-          'topLeft: Radius.circular(${shape['topLeft']}), '
-          'topRight: Radius.circular(${shape['topRight']}), '
-          'bottomLeft: Radius.circular(${shape['bottomLeft']}), '
-          'bottomRight: Radius.circular(${shape['bottomRight']})))';
+    switch (shape['family']) {
+      case 'SHAPE_FAMILY_ROUNDED_CORNERS':
+        return 'const RoundedRectangleBorder(borderRadius: '
+            'BorderRadius.only('
+            'topLeft: Radius.circular(${shape['topLeft']}), '
+            'topRight: Radius.circular(${shape['topRight']}), '
+            'bottomLeft: Radius.circular(${shape['bottomLeft']}), '
+            'bottomRight: Radius.circular(${shape['bottomRight']})))';
+      case 'SHAPE_FAMILY_CIRCULAR':
+        return 'const StadiumBorder()';
+    }
+    print('Unsupported shape family type: ${shape['family']} for $componentToken');
+    return '';
   }
 
   /// Generate a [TextTheme] text style name for the given component token.

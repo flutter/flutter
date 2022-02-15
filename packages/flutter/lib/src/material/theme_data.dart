@@ -1150,6 +1150,7 @@ class ThemeData with Diagnosticable {
   /// Components that have been migrated to Material 3 are:
   ///
   ///   * [FloatingActionButton]
+  ///   * [NavigationBar]
   ///
   /// See also:
   ///
