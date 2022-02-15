@@ -139,35 +139,11 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGe
 ///
 /// {@macro flutter.widgets.EditableText.onChanged}
 ///
-/// To control the text that is displayed in the text field, use the
-/// [controller]. For example, to set the initial value of the text field, use
-/// a [controller] that already contains some text such as:
+/// {@tool dartpad}
+/// This example shows how to set the initial value of the `CupertinoTextField` using
+/// a [controller] that already contains some text.
 ///
-/// {@tool snippet}
-///
-/// ```dart
-/// class MyPrefilledText extends StatefulWidget {
-///   const MyPrefilledText({Key? key}) : super(key: key);
-///
-///   @override
-///   State<MyPrefilledText> createState() => _MyPrefilledTextState();
-/// }
-///
-/// class _MyPrefilledTextState extends State<MyPrefilledText> {
-///   late TextEditingController _textController;
-///
-///   @override
-///   void initState() {
-///     super.initState();
-///     _textController = TextEditingController(text: 'initial text');
-///   }
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return CupertinoTextField(controller: _textController);
-///   }
-/// }
-/// ```
+/// ** See code in examples/api/lib/cupertino/text_field/cupertino_text_field.0.dart **
 /// {@end-tool}
 ///
 /// The [controller] can also control the selection and composing region (and to
