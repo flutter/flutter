@@ -18,15 +18,20 @@ const String kDoctorHostTimeout = 'FLUTTER_DOCTOR_HOST_TIMEOUT';
 const String kPubDevHttpHost = 'https://pub.dev/';
 const String kgCloudHttpHost = 'https://cloud.google.com/';
 
-/// Android specific required HTTP hosts.
-const List<String> androidRequiredHttpHosts = <String>[
-  'https://maven.google.com/',
-];
-
 /// MacOS specific required HTTP hosts.
 const List<String> macOSRequiredHttpHosts = <String>[
   'https://cocoapods.org/',
 ];
+
+/// Android specific required HTTP hosts.
+List<String> androidRequiredHttpHosts(Platform platform) {
+  return <String>[
+    // If kEnvCloudUrl is set, it will be used as the maven host
+    if (!platform.environment.containsKey(kEnvCloudUrl))
+      'https://maven.google.com/',
+  ];
+}
+
 
 // Validator that checks all provided hosts are reachable and responsive
 class HttpHostValidator extends DoctorValidator {
@@ -49,7 +54,7 @@ class HttpHostValidator extends DoctorValidator {
 
   List<String> get _requiredHosts => <String>[
     if (_featureFlags.isMacOSEnabled) ...macOSRequiredHttpHosts,
-    if (_featureFlags.isAndroidEnabled) ...androidRequiredHttpHosts,
+    if (_featureFlags.isAndroidEnabled) ...androidRequiredHttpHosts(_platform),
     _platform.environment[kEnvPubHostedUrl] ?? kPubDevHttpHost,
     _platform.environment[kEnvCloudUrl] ?? kgCloudHttpHost,
   ];
