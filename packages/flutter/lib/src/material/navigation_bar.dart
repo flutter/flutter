@@ -310,6 +310,8 @@ class NavigationDestination extends StatelessWidget {
           children: <Widget>[
             NavigationIndicator(
               animation: animation,
+              color: navigationBarTheme.indicatorColor ?? defaults.indicatorColor!,
+              shape: navigationBarTheme.indicatorShape ?? defaults.indicatorShape!
             ),
             _StatusTransitionWidgetBuilder(
               animation: animation,
@@ -566,16 +568,12 @@ class NavigationIndicator extends StatelessWidget {
   /// The shape of the indicator.
   ///
   /// If non-null this is used as the shape used to draw the background
-  /// of the indicator. If null then the value of [NavigationBarThemeData.shape]
-  /// is used. If that is null then a [RoundedRectangleBorder] with the
+  /// of the indicator. If null then a [RoundedRectangleBorder] with the
   /// [borderRadius] is used.
   final ShapeBorder? shape;
 
   @override
   Widget build(BuildContext context) {
-    final NavigationBarThemeData theme = NavigationBarTheme.of(context);
-    final NavigationBarThemeData defaults = _defaultsFor(context);
-
     return AnimatedBuilder(
       animation: animation,
       builder: (BuildContext context, Widget? child) {
@@ -614,8 +612,8 @@ class NavigationIndicator extends StatelessWidget {
                   width: width,
                   height: height,
                   decoration: ShapeDecoration(
-                    shape: shape ?? theme.indicatorShape ?? defaults.indicatorShape ?? RoundedRectangleBorder(borderRadius: borderRadius),
-                    color: color ?? theme.indicatorColor ?? defaults.indicatorColor!,
+                    shape: shape ?? RoundedRectangleBorder(borderRadius: borderRadius),
+                    color: color ?? Theme.of(context).colorScheme.secondary,
                   ),
                 ),
               );
@@ -1202,6 +1200,7 @@ class _Defaults extends NavigationBarThemeData {
         super(
           height: 80.0,
           elevation: 0.0,
+          indicatorShape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16))),
           labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
         );
 
