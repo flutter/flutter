@@ -59,6 +59,21 @@ import 'tooltip.dart';
 ///   ),
 /// ),
 /// ```
+///
+/// {@tool dartpad}
+/// This example has a [NavigationBar] where each destination has its
+/// own Navigator, Scaffold, and Appbar. That means that each
+/// destination has an independent route history and (app bar) back
+/// button. A [Stack] is used to display one destination at a time and
+/// destination changes are handled by cross fade transitions. Destinations
+/// that have been completely faded out are [Offstage].
+///
+/// One can see that the appearance of each destination's dialogs, bottom sheet,
+/// list scrolling state, and text field state, persist when another destination
+/// is selected.
+///
+/// ** See code in examples/api/lib/material/navigation_bar/navigation_bar.0.dart **
+/// {@end-tool}
 class NavigationBar extends StatelessWidget {
   /// Creates a Material 3 Navigation Bar component.
   ///
