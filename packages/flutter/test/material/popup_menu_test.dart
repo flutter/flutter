@@ -2536,6 +2536,39 @@ void main() {
     expect(tester.widget<InkWell>(find.byType(InkWell)).radius,
         testSplashRadius);
   });
+
+  testWidgets('Can override menu size constraints', (WidgetTester tester) async {
+    final Key popupMenuButtonKey = UniqueKey();
+    final Type menuItemType = const PopupMenuItem<String>(child: Text('item')).runtimeType;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: PopupMenuButton<String>(
+              key: popupMenuButtonKey,
+              constraints: const BoxConstraints(
+                minWidth: 500,
+              ),
+              itemBuilder: (_) => <PopupMenuEntry<String>>[
+                const PopupMenuItem<String>(
+                  value: 'value',
+                  child: Text('Item 0'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Show the menu
+    await tester.tap(find.byKey(popupMenuButtonKey));
+    await tester.pumpAndSettle();
+
+    expect(tester.getSize(find.widgetWithText(menuItemType, 'Item 0')).height, 48);
+    expect(tester.getSize(find.widgetWithText(menuItemType, 'Item 0')).width, 500);
+  });
 }
 
 class TestApp extends StatefulWidget {
