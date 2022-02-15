@@ -441,12 +441,4 @@ UINT KeyboardManagerWin32::PeekNextMessageType(UINT wMsgFilterMin,
   return next_message.message;
 }
 
-uint64_t KeyboardManagerWin32::ComputeEventHash(const PendingEvent& event) {
-  // Calculate a key event ID based on the scan code of the key pressed,
-  // and the flags we care about.
-  return event.scancode | (((event.action == WM_KEYUP ? KEYEVENTF_KEYUP : 0x0) |
-                            (event.extended ? KEYEVENTF_EXTENDEDKEY : 0x0))
-                           << 16);
-}
-
 }  // namespace flutter
