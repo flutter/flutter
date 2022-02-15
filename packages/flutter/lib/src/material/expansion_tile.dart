@@ -109,7 +109,7 @@ class ExpansionTile extends StatefulWidget {
 
   /// The color to display behind the sublist when expanded.
   ///
-  /// If this property is null then [ExpansionTileTheme.backgroundColor] is used. If that
+  /// If this property is null then [ExpansionTileThemeData.backgroundColor] is used. If that
   /// is also null then Colors.transparent is used.
   ///
   /// See also:
@@ -120,7 +120,7 @@ class ExpansionTile extends StatefulWidget {
 
   /// When not null, defines the background color of tile when the sublist is collapsed.
   ///
-  /// If this property is null then [ExpansionTileTheme.collapsedBackgroundColor] is used.
+  /// If this property is null then [ExpansionTileThemeData.collapsedBackgroundColor] is used.
   /// If that is also null then Colors.transparent is used.
   ///
   /// See also:
@@ -151,7 +151,7 @@ class ExpansionTile extends StatefulWidget {
   /// the [leading], [title], [subtitle] and [trailing] widgets. It does not inset
   /// the expanded [children] widgets.
   ///
-  /// If this property is null then [ExpansionTileTheme.tilePadding] is used. If that
+  /// If this property is null then [ExpansionTileThemeData.tilePadding] is used. If that
   /// is also null then the tile's padding is `EdgeInsets.symmetric(horizontal: 16.0)`.
   ///
   /// See also:
@@ -173,7 +173,7 @@ class ExpansionTile extends StatefulWidget {
   ///
   /// The width of the column is the width of the widest child widget in [children].
   ///
-  /// If this property is null then [ExpansionTileTheme.expandedAlignment]is used. If that
+  /// If this property is null then [ExpansionTileThemeData.expandedAlignment]is used. If that
   /// is also null then the value of `expandedAlignment` is [Alignment.center].
   ///
   /// See also:
@@ -200,7 +200,7 @@ class ExpansionTile extends StatefulWidget {
 
   /// Specifies padding for [children].
   ///
-  /// If this property is null then [ExpansionTileTheme.childrenPadding] is used. If that
+  /// If this property is null then [ExpansionTileThemeData.childrenPadding] is used. If that
   /// is also null then the value of `childrenPadding` is [EdgeInsets.zero].
   ///
   /// See also:
@@ -213,7 +213,7 @@ class ExpansionTile extends StatefulWidget {
   ///
   /// Used to override to the [ListTileThemeData.iconColor].
   ///
-  /// If this property is null then [ExpansionTileTheme.iconColor] is used. If that
+  /// If this property is null then [ExpansionTileThemeData.iconColor] is used. If that
   /// is also null then the value of [ListTileThemeData.iconColor] is used.
   ///
   /// See also:
@@ -232,7 +232,7 @@ class ExpansionTile extends StatefulWidget {
   ///
   /// Used to override to the [ListTileThemeData.textColor].
   ///
-  /// If this property is null then [ExpansionTileTheme.textColor] is used. If that
+  /// If this property is null then [ExpansionTileThemeData.textColor] is used. If that
   /// is also null then the value of [ListTileThemeData.textColor] is used.
   ///
   /// See also:
@@ -245,7 +245,7 @@ class ExpansionTile extends StatefulWidget {
   ///
   /// Used to override to the [ListTileThemeData.textColor].
   ///
-  /// If this property is null then [ExpansionTileTheme.collapsedTextColor] is used. If that
+  /// If this property is null then [ExpansionTileThemeData.collapsedTextColor] is used. If that
   /// is also null then the value of [ListTileThemeData.textColor] is used.
   ///
   /// See also:
