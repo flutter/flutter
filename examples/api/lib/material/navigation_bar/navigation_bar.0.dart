@@ -335,7 +335,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin<Home> {
               final Widget view = destinationViews[index];
               if (index == selectedIndex) {
                 destinationFaders[index].forward();
-                return Offstage(child: view, offstage: false);
+                return Offstage(offstage: false, child: view);
               } else {
                 destinationFaders[index].reverse();
                 if (destinationFaders[index].isAnimating) {
