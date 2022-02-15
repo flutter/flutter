@@ -27,11 +27,11 @@ void testMain() {
         canvas.drawPaint(ui.Paint());
         final CkPicture picture = recorder.endRecording() as CkPicture;
         expect(picture.rawSkiaObject, isNotNull);
-        expect(picture.debugIsDisposed, isFalse);
+        expect(picture.debugDisposed, isFalse);
         picture.debugCheckNotDisposed('Test.'); // must not throw
         picture.dispose();
         expect(picture.rawSkiaObject, isNull);
-        expect(picture.debugIsDisposed, isTrue);
+        expect(picture.debugDisposed, isTrue);
 
         StateError? actualError;
         try {
@@ -79,7 +79,7 @@ void testMain() {
 
         // Deletion is softer than disposal. An object may still be resurrected
         // if it was deleted prematurely.
-        expect(picture.debugIsDisposed, isFalse);
+        expect(picture.debugDisposed, isFalse);
         expect(picture.resurrect(), isNotNull);
       });
     });
