@@ -4697,6 +4697,75 @@ void main() {
     expect(renderEditable.text!.style!.decoration, isNull);
   });
 
+  testWidgets('text selection toolbar visibility', (WidgetTester tester) async {
+    const String testText = 'hello \n world \n this \n is \n text';
+    final TextEditingController controller = TextEditingController(text: testText);
+
+    await tester.pumpWidget(MaterialApp(
+      home: Align(
+        alignment: Alignment.topLeft,
+        child: Container(
+          height: 50,
+          color: Colors.white,
+          child: EditableText(
+            showSelectionHandles: true,
+            controller: controller,
+            focusNode: FocusNode(),
+            style: Typography.material2018().black.subtitle1!,
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+            selectionControls: materialTextSelectionControls,
+            keyboardType: TextInputType.text,
+            selectionColor: Colors.lightBlueAccent,
+            maxLines: 3,
+          ),
+        ),
+      ),
+    ));
+
+    final EditableTextState state =
+      tester.state<EditableTextState>(find.byType(EditableText));
+    final RenderEditable renderEditable = state.renderEditable;
+    final Scrollable scrollable = tester.widget<Scrollable>(find.byType(Scrollable));
+
+    // Select the first word. And show the toolbar.
+    await tester.tapAt(const Offset(20, 10));
+    renderEditable.selectWord(cause: SelectionChangedCause.longPress);
+    expect(state.showToolbar(), true);
+    await tester.pumpAndSettle();
+
+    // Find the toolbar fade transition while the toolbar is still visible.
+    final List<FadeTransition> transitionsBefore = find.descendant(
+      of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_SelectionToolbarOverlay'),
+      matching: find.byType(FadeTransition),
+    ).evaluate().map((Element e) => e.widget).cast<FadeTransition>().toList();
+
+    expect(transitionsBefore.length, 1);
+
+    final FadeTransition toolbarBefore = transitionsBefore[0];
+
+    expect(toolbarBefore.opacity.value, 1.0);
+
+    // Scroll until the selection is no longer within view.
+    scrollable.controller!.jumpTo(50.0);
+    await tester.pumpAndSettle();
+
+    // Find the toolbar fade transition after the toolbar has been hidden.
+    final List<FadeTransition> transitionsAfter = find.descendant(
+      of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_SelectionToolbarOverlay'),
+      matching: find.byType(FadeTransition),
+    ).evaluate().map((Element e) => e.widget).cast<FadeTransition>().toList();
+
+    expect(transitionsAfter.length, 1);
+
+    final FadeTransition toolbarAfter = transitionsAfter[0];
+
+    expect(toolbarAfter.opacity.value, 0.0);
+
+    // On web, we don't show the Flutter toolbar and instead rely on the browser
+    // toolbar. Until we change that, this test should remain skipped.
+  }, skip: kIsWeb); // [intended]
+
   testWidgets('text selection handle visibility', (WidgetTester tester) async {
     // Text with two separate words to select.
     const String testText = 'XXXXX          XXXXX';
