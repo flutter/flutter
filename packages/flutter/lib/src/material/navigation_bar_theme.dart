@@ -61,7 +61,7 @@ class NavigationBarThemeData with Diagnosticable {
   /// Overrides the default value of [NavigationBar]'s selection indicator.
   final Color? indicatorColor;
 
-  /// Overrides the default value of [NavigationBar.indicatorShape].
+  /// Overrides the default shape of the [NavigationBar]'s selection indicator.
   final ShapeBorder? indicatorShape;
 
   /// The style to merge with the default text style for
