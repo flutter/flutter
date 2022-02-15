@@ -108,9 +108,25 @@ class ExpansionTile extends StatefulWidget {
   final List<Widget> children;
 
   /// The color to display behind the sublist when expanded.
+  ///
+  /// If this property is null then [ExpansionTileTheme.backgroundColor] is used. If that
+  /// is also null then Colors.transparent is used.
+  ///
+  /// See also:
+  ///
+  /// * [ExpansionTileTheme.of], which returns the nearest [ExpansionTileTheme]'s
+  ///   [ExpansionTileThemeData].
   final Color? backgroundColor;
 
   /// When not null, defines the background color of tile when the sublist is collapsed.
+  ///
+  /// If this property is null then [ExpansionTileTheme.collapsedBackgroundColor] is used.
+  /// If that is also null then Colors.transparent is used.
+  ///
+  /// See also:
+  ///
+  /// * [ExpansionTileTheme.of], which returns the nearest [ExpansionTileTheme]'s
+  ///   [ExpansionTileThemeData].
   final Color? collapsedBackgroundColor;
 
   /// A widget to display after the title.
@@ -135,7 +151,13 @@ class ExpansionTile extends StatefulWidget {
   /// the [leading], [title], [subtitle] and [trailing] widgets. It does not inset
   /// the expanded [children] widgets.
   ///
-  /// When the value is null, the tile's padding is `EdgeInsets.symmetric(horizontal: 16.0)`.
+  /// If this property is null then [ExpansionTileTheme.tilePadding] is used. If that
+  /// is also null then the tile's padding is `EdgeInsets.symmetric(horizontal: 16.0)`.
+  ///
+  /// See also:
+  ///
+  /// * [ExpansionTileTheme.of], which returns the nearest [ExpansionTileTheme]'s
+  ///   [ExpansionTileThemeData].
   final EdgeInsetsGeometry? tilePadding;
 
   /// Specifies the alignment of [children], which are arranged in a column when
@@ -151,7 +173,13 @@ class ExpansionTile extends StatefulWidget {
   ///
   /// The width of the column is the width of the widest child widget in [children].
   ///
-  /// When the value is null, the value of `expandedAlignment` is [Alignment.center].
+  /// If this property is null then [ExpansionTileTheme.expandedAlignment]is used. If that
+  /// is also null then the value of `expandedAlignment` is [Alignment.center].
+  ///
+  /// See also:
+  ///
+  /// * [ExpansionTileTheme.of], which returns the nearest [ExpansionTileTheme]'s
+  ///   [ExpansionTileThemeData].
   final Alignment? expandedAlignment;
 
   /// Specifies the alignment of each child within [children] when the tile is expanded.
@@ -172,12 +200,26 @@ class ExpansionTile extends StatefulWidget {
 
   /// Specifies padding for [children].
   ///
-  /// When the value is null, the value of `childrenPadding` is [EdgeInsets.zero].
+  /// If this property is null then [ExpansionTileTheme.childrenPadding] is used. If that
+  /// is also null then the value of `childrenPadding` is [EdgeInsets.zero].
+  ///
+  /// See also:
+  ///
+  /// * [ExpansionTileTheme.of], which returns the nearest [ExpansionTileTheme]'s
+  ///   [ExpansionTileThemeData].
   final EdgeInsetsGeometry? childrenPadding;
 
   /// The icon color of tile's expansion arrow icon when the sublist is expanded.
   ///
   /// Used to override to the [ListTileThemeData.iconColor].
+  ///
+  /// If this property is null then [ExpansionTileTheme.iconColor] is used. If that
+  /// is also null then the value of [ListTileThemeData.iconColor] is used.
+  ///
+  /// See also:
+  ///
+  /// * [ExpansionTileTheme.of], which returns the nearest [ExpansionTileTheme]'s
+  ///   [ExpansionTileThemeData].
   final Color? iconColor;
 
   /// The icon color of tile's expansion arrow icon when the sublist is collapsed.
@@ -189,11 +231,27 @@ class ExpansionTile extends StatefulWidget {
   /// The color of the tile's titles when the sublist is expanded.
   ///
   /// Used to override to the [ListTileThemeData.textColor].
+  ///
+  /// If this property is null then [ExpansionTileTheme.textColor] is used. If that
+  /// is also null then the value of [ListTileThemeData.textColor] is used.
+  ///
+  /// See also:
+  ///
+  /// * [ExpansionTileTheme.of], which returns the nearest [ExpansionTileTheme]'s
+  ///   [ExpansionTileThemeData].
   final Color? textColor;
 
   /// The color of the tile's titles when the sublist is collapsed.
   ///
   /// Used to override to the [ListTileThemeData.textColor].
+  ///
+  /// If this property is null then [ExpansionTileTheme.collapsedTextColor] is used. If that
+  /// is also null then the value of [ListTileThemeData.textColor] is used.
+  ///
+  /// See also:
+  ///
+  /// * [ExpansionTileTheme.of], which returns the nearest [ExpansionTileTheme]'s
+  ///   [ExpansionTileThemeData].
   final Color? collapsedTextColor;
 
   /// Typically used to force the expansion arrow icon to the tile's leading or trailing edge.
