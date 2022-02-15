@@ -204,23 +204,6 @@ class KeyboardManagerWin32 {
   // The queue of messages that have been redispatched to the system but have
   // not yet been received for a second time.
   std::deque<Win32Message> pending_redispatches_;
-
-  // Calculate a hash based on event data for fast comparison for a redispatched
-  // event.
-  //
-  // This uses event data instead of generating a serial number because
-  // information can't be attached to the redispatched events, so it has to be
-  // possible to compute an ID from the identifying data in the event when it is
-  // received again in order to differentiate between events that are new, and
-  // events that have been redispatched.
-  //
-  // Another alternative would be to compute a checksum from all the data in the
-  // event (just compute it over the bytes in the struct, probably skipping
-  // timestamps), but the fields used are enough to differentiate them, and
-  // since Windows does some processing on the events (coming up with virtual
-  // key codes, setting timestamps, etc.), it's not clear that the redispatched
-  // events would have the same checksums.
-  static uint64_t ComputeEventHash(const PendingEvent& event);
 };
 
 }  // namespace flutter
