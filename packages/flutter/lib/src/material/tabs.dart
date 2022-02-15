@@ -1328,6 +1328,7 @@ class TabBarView extends StatefulWidget {
     this.controller,
     this.physics,
     this.dragStartBehavior = DragStartBehavior.start,
+    this.viewportFraction = 1.0,
   }) : assert(children != null),
        assert(dragStartBehavior != null),
        super(key: key);
@@ -1357,6 +1358,11 @@ class TabBarView extends StatefulWidget {
 
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
+
+  /// The fraction of the viewport that each tabView should occupy.
+  /// 
+  /// Defaults to 1.0, which means each page fills the viewport in the scrolling direction.
+  final double viewportFraction;
 
   @override
   State<TabBarView> createState() => _TabBarViewState();
@@ -1411,7 +1417,7 @@ class _TabBarViewState extends State<TabBarView> {
     super.didChangeDependencies();
     _updateTabController();
     _currentIndex = _controller!.index;
-    _pageController = PageController(initialPage: _currentIndex!);
+    _pageController = PageController(initialPage: _currentIndex!, viewportFraction: widget.viewportFraction);
   }
 
   @override
