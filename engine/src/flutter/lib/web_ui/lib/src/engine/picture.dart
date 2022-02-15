@@ -10,6 +10,7 @@ import 'package:ui/ui.dart' as ui;
 import 'html/bitmap_canvas.dart';
 import 'html/recording_canvas.dart';
 import 'html_image_codec.dart';
+import 'util.dart';
 
 /// An implementation of [ui.PictureRecorder] backed by a [RecordingCanvas].
 class EnginePictureRecorder implements ui.PictureRecorder {
@@ -75,8 +76,21 @@ class EnginePicture implements ui.Picture {
     return onImageLoaded.future;
   }
 
+  bool _disposed = false;
+
   @override
-  void dispose() {}
+  void dispose() {
+    _disposed = true;
+  }
+
+  @override
+  bool get debugDisposed {
+    if (assertionsEnabled) {
+      return _disposed;
+    }
+    throw StateError('Picture.debugDisposed is only available when asserts are enabled.');
+  }
+
 
   @override
   int get approximateBytesUsed => 0;
