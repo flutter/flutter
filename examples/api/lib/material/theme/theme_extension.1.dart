@@ -39,6 +39,12 @@ class MyColors implements ThemeExtension {
   // Optional
   @override
   bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
     return other is MyColors &&
         other.blue == blue &&
         other.red == red;
@@ -58,8 +64,9 @@ extension on ThemeData {
   MyColors get myColors => themeExtension! as MyColors;
 }
 
-
-void main() => runApp(const MyApp());
+void main() {
+  runApp(const MyApp());
+}
 
 class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
@@ -73,8 +80,9 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   bool isLightTheme = true;
 
-
-  void toggleTheme() => setState(() => isLightTheme = !isLightTheme);
+  void toggleTheme() {
+    setState(() => isLightTheme = !isLightTheme);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -93,7 +101,7 @@ class _MyAppState extends State<MyApp> {
         ),
       ),
       themeMode: isLightTheme ? ThemeMode.light : ThemeMode.dark,
-      home: MyStatelessWidget(
+      home: Home(
         isLightTheme: isLightTheme,
         toggleTheme: toggleTheme,
       ),
@@ -101,8 +109,8 @@ class _MyAppState extends State<MyApp> {
   }
 }
 
-class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({
+class Home extends StatelessWidget {
+  const Home({
     Key? key,
     required this.isLightTheme,
     required this.toggleTheme,

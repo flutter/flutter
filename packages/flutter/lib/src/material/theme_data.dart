@@ -69,7 +69,7 @@ abstract class ThemeExtension {
   /// replaced by the non-null parameter values.
   ThemeExtension copyWith();
 
-  /// Linearly interpolate with another [ThemeExtension] objects.
+  /// Linearly interpolate with another [ThemeExtension] object.
   ///
   /// {@macro dart.ui.shadow.lerp}
   ThemeExtension lerp(ThemeExtension? other, double t);
