@@ -31,6 +31,10 @@ import 'theme.dart';
 ///    application.
 ///  * [ExpansionTileTheme] which overrides the default [ExpansionTileTheme]
 ///    of its [ExpansionTile] descendants.
+///  * [ThemeData.textTheme], text with a color that contrasts with the card
+///    and canvas colors.
+///  * [ThemeData.colorScheme], the thirteen colors that most Material widget
+///    default colors are based on.
 @immutable
 class ExpansionTileThemeData with Diagnosticable {
   /// Creates a [ExpansionTileThemeData].
@@ -184,7 +188,7 @@ class ExpansionTileTheme extends InheritedTheme {
        assert(data != null),
        super(key: key, child: child);
 
-  /// Specifies the expandedAlignment, iconColor, and text style values for
+  /// Specifies color, alignment, and text style values for
   /// descendant [ExpansionTile] widgets.
   final ExpansionTileThemeData data;
 

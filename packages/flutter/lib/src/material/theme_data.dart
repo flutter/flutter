@@ -1415,8 +1415,6 @@ class ThemeData with Diagnosticable {
   final TooltipThemeData tooltipTheme;
 
   /// A theme for customizing the visual properties of [ExpansionTile]s.
-  ///
-  /// This is the value returned from [ExpansionTileTheme.of].
   final ExpansionTileThemeData expansionTileTheme;
 
   // DEPRECATED (newest deprecations at the bottom)
