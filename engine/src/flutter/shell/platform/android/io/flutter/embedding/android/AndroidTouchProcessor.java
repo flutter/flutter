@@ -107,7 +107,7 @@ public class AndroidTouchProcessor {
    *     the gesture pointers into screen coordinates.
    * @return True if the event was handled.
    */
-  public boolean onTouchEvent(@NonNull MotionEvent event, Matrix transformMatrix) {
+  public boolean onTouchEvent(@NonNull MotionEvent event, @NonNull Matrix transformMatrix) {
     int pointerCount = event.getPointerCount();
 
     // Prepare a data packet of the appropriate size and order.
