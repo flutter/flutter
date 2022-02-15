@@ -20,6 +20,7 @@ import 'migrate_utils.dart';
 // of gitignore and config settings
 const List<String> _skippedFiles = const <String>[
   'lib/main.dart',
+  'ios/Runner.xcodeproj/project.pbxproj'
   'README.md', // changes to this shouldn't be overwritten since is is user owned.
 ];
 

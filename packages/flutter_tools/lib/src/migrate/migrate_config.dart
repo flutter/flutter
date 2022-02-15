@@ -52,6 +52,10 @@ class MigrateConfig {
     }
   }
   static const String kFileName = '.migrate_config';
+  static const Map<String, List<String>> kIosDefaultUnmanagedFiles = const <String, List<String>>{
+    'root': <String>['lib/main.dart']
+    'ios': <String>['Runner.xcodeproj/project.pbxproj'],
+  };
 
   String? platform;
   String? createRevision;
@@ -192,7 +196,7 @@ $unmanagedFilesString
           platform: platform,
           createRevision: createRevision,
           baseRevision: currentRevision,
-          unmanagedFiles: platform == 'root' ? <String>['lib/main.dart'] : <String>[],
+          unmanagedFiles: kIosDefaultUnmanagedFiles[platform] != null ? kIosDefaultUnmanagedFiles[platform] : <String>[],
         );
         if (create) {
           newConfig.writeFile(projectDirectory: projectDirectory);
