@@ -4,6 +4,7 @@
 
 import 'dart:ui' show DisplayFeature;
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 
 import 'basic.dart';
@@ -11,41 +12,62 @@ import 'container.dart';
 import 'framework.dart';
 import 'media_query.dart';
 
-/// A widget that displays 2 children side-by-side or one below the other, while
-/// also avoiding any hinge or fold that the screen might contain.
+/// A widget that positions two panes side by side on uninterrupted screens or
+/// on either side of a separating [DisplayFeature] on screens interrupted by a
+/// separating [DisplayFeature].
 ///
-///  * By "hinge" we mean any [DisplayFeature] reported by [MediaQueryData.displayFeatures]
-///  that completely splits the screen area in 2 parts. For phones with a
-///  continuous screen that folds, the "fold" area is 0-width and does not visualy
-///  create 2 separate screens.
-///  * On screens with a hinge, the 2 panes are positioned on each side of the
-///  hinge. In this case, both [paneProportion] and [direction] are ignored.
-///  * On screens without a hinge, [paneProportion] is used for deciding how
-///  much space each pane uses and [direction] is used for deciding if the 2
-///  panes are laid out horizontally or vertically.
+/// A [DisplayFeature] separates the screen into sub-screens when both these
+/// conditions are met:
 ///
-/// This widget is similar to [Flex], in that it also takes [textDirection] and
-/// [verticalDirection] parameters, which are used for deciding in what order the
-/// panes are laid out (e.g left to right would position pane 1 on the left and
-/// pane 2 on the right).
+///   * it obstructs the screen, meaning the area it occupies is not 0. Display
+///     features of type [DisplayFeatureType.fold] can have height 0 or width 0
+///     and not be obstructing the screen.
+///   * it is at least as tall as the screen, producing a left and right
+///     sub-screen or it is at least as wide as the screen, producing a top and
+///     bottom sub-screen.
 ///
-/// For narrow screens where you want to display only one pane, you can use [panePriority]
-/// to pick either [TwoPanePriority.pane1] or [TwoPanePriority.pane2].
+/// When positioning the two panes, [direction], [paneProportion] and
+/// [panePriority] parameters are ignored and values are replaced in order to
+/// avoid the separating [DisplayFeature]:
 ///
-/// In addition, this widget also wraps children in [MediaQuery] parents that
-/// makes sense for their side of the screen. For example, let's consider a flip
-/// phone with a notch at the top of the screen. The hinge is horizontal, so the
-/// 2 halves of the screen are one at the top and one at the bottom. In this case
-/// the top pane will have top padding in order to avoid the notch, but the bottom
-/// pane does not have top padding, since it does not have the notch.
+///   * On screens with a separating [DisplayFeature], the two panes are
+///     positioned on each side of the feature. If the [DisplayFeature] splits
+///     the screen left and right, [direction] is [Axis.horizontal]. Otherwise,
+///     [direction] is [Axis.vertical]. The [paneProportion] and [panePriority]
+///     parameters are also ignored and each pane occupies a sub-screen.
+///   * On screens without a separating [DisplayFeature], [direction] is used
+///     for deciding if the 2 panes are laid out horizontally or vertically and
+///     [paneProportion] is used for deciding how much space each pane takes.
+///
+/// On screens that have multiple separating [DisplayFeature]s, [textDirection]
+/// and [verticalDirection] parameters are used to decide which one is first and
+/// is used as a separator between the two panes. If both horizontal and
+/// vertical [DisplayFeature]s exist, the [direction] parameter is used to
+/// ignore the [DisplayFeature]s that would conflict with it.
+///
+/// This widget is similar to [Flex] and also takes [textDirection] and
+/// [verticalDirection] parameters, which are used for deciding in what order
+/// the panes are laid out (e.g [TextDirection.ltr] would position [pane1] on
+/// the left and [pane2] on the right).
+///
+/// The [panePriority] parameter can be used to display only one pane on screens
+/// without any separating [DisplayFeature], by using [TwoPanePriority.pane1]
+/// or [TwoPanePriority.pane2]. When [TwoPanePriority.both] is used or when the
+/// screen has a separating [DisplayFeature], both panes are visible.
+///
+/// Similarly to [SafeArea] and [DisplayFeatureSubScreen], this widget assumes
+/// there is no added padding between it and the first [MediaQuery] ancestor.
+/// Pane widgets are wrapped in modified [MediaQuery] parents, removing padding,
+/// insets and display features that no longer intersect with them.
 ///
 /// See also
 ///
 ///  * [DisplayFeature] and [MediaQueryData.displayFeatures], to further
-///  understand display features, such as hinge areas
+///    understand display features
+///  * [MediaQueryData.removeDisplayFeatures] which is used to remove padding,
+///    insets and display features for each pane.
 class TwoPane extends StatelessWidget {
-  /// Create a layout that shows both child widgets or just one of them according
-  /// to available space and device form factor.
+  /// Create a layout that shows two pane widgets side by side.
   const TwoPane({
     Key? key,
     required this.pane1,
@@ -55,63 +77,83 @@ class TwoPane extends StatelessWidget {
     this.verticalDirection = VerticalDirection.down,
     this.direction = Axis.horizontal,
     this.panePriority = TwoPanePriority.both,
-    this.padding = EdgeInsets.zero,
   }) : super(key: key);
 
-  /// First pane, which can sit on the left for left to right layouts,
-  /// or at the top for top to bottom layouts.
-  /// If [panePriority] is [TwoPanePriority.pane1], this is the only pane visible.
+  /// The first pane.
+  ///
+  /// On a horizontal layout, where [direction] is [Axis.horizontal]:
+  ///
+  ///   * The first pane is on the left when [textDirection] is
+  ///     [TextDirection.ltr]
+  ///   * The first pane is on the right when [textDirection] is
+  ///     [TextDirection.rtl]
+  ///
+  /// On a vertical layout, where [direction] is [Axis.vertical]:
+  ///
+  ///   * The first pane is at the top when [verticalDirection] is
+  ///     [VerticalDirection.down]
+  ///   * The first pane is at the bottom when [verticalDirection] is
+  ///     [VerticalDirection.up]
+  ///
+  /// If [panePriority] is [TwoPanePriority.pane1], this is the only pane
+  /// visible.
   final Widget pane1;
 
-  /// Second pane, which can sit on the right for left to right layouts,
-  /// or at the bottom for top to bottom layouts.
-  /// If [panePriority] is [TwoPanePriority.pane2], this is the only pane visible.
+  /// The second pane.
+  ///
+  /// On a horizontal layout, where [direction] is [Axis.horizontal]:
+  ///
+  ///   * The second pane is on the right when [textDirection] is
+  ///     [TextDirection.ltr]
+  ///   * The second pane is on the left when [textDirection] is
+  ///     [TextDirection.rtl]
+  ///
+  /// On a vertical layout, where [direction] is [Axis.vertical]:
+  ///
+  ///   * The second pane is at the bottom when [verticalDirection] is
+  ///     [VerticalDirection.down]
+  ///   * The second pane is at the top when [verticalDirection] is
+  ///     [VerticalDirection.up]
+  ///
+  /// If [panePriority] is [TwoPanePriority.pane2], this is the only pane
+  /// visible.
   final Widget pane2;
 
-  /// Proportion of the screen ocupied by the first pane. The second pane takes
-  /// over the rest of the screen. A value of 0.5 will make the 2 panes equal.
-  /// This property is ignored for displays with a hinge, in which case each
-  /// pane takes over one screen.
+  /// Proportion of the available space occupied by the first pane. The second
+  /// pane takes over the rest of the screen.
+  ///
+  /// A value of 0.5 will make the 2 panes equal.
+  ///
+  /// This property is ignored is the screen is split into sub-screens by a
+  /// [DisplayFeature], in which case each pane takes over one sub-screen.
   final double paneProportion;
 
-  /// Same as [Flex.textDirection]
+  /// Same as [Flex.textDirection].
   final TextDirection? textDirection;
 
-  /// Same as [Flex.verticalDirection]
+  /// Same as [Flex.verticalDirection].
   ///
-  /// Defaults to [VerticalDirection.down]
+  /// Defaults to [VerticalDirection.down].
   final VerticalDirection verticalDirection;
 
-  /// Same as [Flex.direction]
+  /// Same as [Flex.direction].
   ///
-  /// This property is ignored for displays with a hinge, in which case the
-  /// direction is [Axis.horizontal] for vertical hinges and [Axis.vertical] for
-  /// horizontal hinges.
+  /// This property is ignored is the screen is split into sub-screens by a
+  /// [DisplayFeature], in which case the direction is:
   ///
-  /// Defaults to [Axis.horizontal]
+  ///   * [Axis.horizontal] when the sub-screens are located left and right.
+  ///   * [Axis.vertical] when the sub-screens are located top and bottom.
+  ///
+  /// Defaults to [Axis.horizontal].
   final Axis direction;
 
-  /// Whether to show only one pane and which one, or both. This is useful for
-  /// defining behaviour on narrow devices, where the 2 panes cannot be shown at
-  /// the same time.
+  /// Whether to show only one pane and which one, or both.
   ///
-  /// Defaults to [TwoPanePriority.both]
+  /// This property is ignored is the screen is split into sub-screens by a
+  /// [DisplayFeature], in which case each pane takes over one sub-screen.
+  ///
+  /// Defaults to [TwoPanePriority.both].
   final TwoPanePriority panePriority;
-
-  /// The distance from the edge of the screen, used to determine how [TwoPane]
-  /// intersects [MediaQueryData.displayFeatures].
-  ///
-  /// When [TwoPane] is not the root layout and the distance from the screen
-  /// edge increases, the [padding] needs to take into account the extra space.
-  ///
-  /// For example, when TwoPane is the body of a Scaffold, the appbar adds extra
-  /// spacing between TwoPane and the edge of the screen. If TwoPane is used
-  /// with a [Axis.vertical] [direction], the separation between the two panes
-  /// will not align with [DisplayFeature]s unless the [padding] also includes
-  /// the height of the appbar.
-  ///
-  /// Defaults to [MediaQueryData.padding].
-  final EdgeInsets padding;
 
   TextDirection? _getTextDirection(BuildContext context) =>
       textDirection ?? Directionality.maybeOf(context);
@@ -140,11 +182,8 @@ class TwoPane extends StatelessWidget {
       _delimiter = Container();
     } else {
       // The display has a seam that splits it in two panels.
-      // final EdgeInsets padding = this.padding;
-      final Size size = Size(
-          mediaQuery.size.width - padding.horizontal,
-          mediaQuery.size.height - padding.vertical);
-      final Rect seam = displayFeature.bounds.translate(-padding.left, -padding.top);
+      final Size size = mediaQuery.size;
+      final Rect seam = displayFeature.bounds;
 
       if (seam.width < seam.height) {
         // Seam is tall. Panels are left and right.

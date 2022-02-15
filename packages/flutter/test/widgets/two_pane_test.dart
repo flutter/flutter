@@ -474,7 +474,6 @@ void main() {
           textDirection: TextDirection.ltr,
           pane1: SizedBox(key: pane1Key, width: 100.0, height: 100.0, child: log(1)),
           pane2: SizedBox(key: pane2Key, width: 100.0, height: 100.0, child: log(2)),
-          padding: const EdgeInsets.only(top: 100, left: 100),
         ),
       ),
     ));
@@ -752,7 +751,6 @@ void main() {
           textDirection: TextDirection.rtl,
           pane1: SizedBox(key: pane1Key, width: 100.0, height: 100.0, child: log(1)),
           pane2: SizedBox(key: pane2Key, width: 100.0, height: 100.0, child: log(2)),
-          padding: const EdgeInsets.only(top: 100, left: 100),
         ),
       ),
     ));
@@ -989,7 +987,6 @@ void main() {
           key: twoPaneKey,
           pane1: SizedBox(key: pane1Key, width: 100.0, height: 100.0, child: log(1)),
           pane2: SizedBox(key: pane2Key, width: 100.0, height: 100.0, child: log(2)),
-          padding: const EdgeInsets.only(top: 100, left: 100),
         ),
       ),
     ));
@@ -1230,7 +1227,6 @@ void main() {
           verticalDirection: VerticalDirection.up,
           pane1: SizedBox(key: pane1Key, width: 100.0, height: 100.0, child: log(1)),
           pane2: SizedBox(key: pane2Key, width: 100.0, height: 100.0, child: log(2)),
-          padding: const EdgeInsets.only(top: 100, left: 100),
         ),
       ),
     ));
