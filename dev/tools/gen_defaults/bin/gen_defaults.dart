@@ -18,6 +18,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:gen_defaults/fab_template.dart';
+import 'package:gen_defaults/navigation_bar_template.dart';
 import 'package:gen_defaults/typography_template.dart';
 
 Map<String, dynamic> _readTokenFile(String fileName) {
@@ -64,5 +65,6 @@ Future<void> main(List<String> args) async {
   tokens['colorsDark'] = _readTokenFile('color_dark.json');
 
   FABTemplate('$materialLib/floating_action_button.dart', tokens).updateFile();
+  NavigationBarTemplate('$materialLib/navigation_bar.dart', tokens).updateFile();
   TypographyTemplate('$materialLib/typography.dart', tokens).updateFile();
 }
