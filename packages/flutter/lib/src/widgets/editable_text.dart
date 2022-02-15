@@ -1687,15 +1687,22 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   @override
   TextEditingValue get currentTextEditingValue => _value;
 
+  bool _updateEditingValueInProgress = false;
+
   @override
   void updateEditingValue(TextEditingValue value) {
+<<<<<<< HEAD
     // This method handles text editing state updates from the platform text
     // input plugin. The [EditableText] may not have the focus or an open input
     // connection, as autofill can update a disconnected [EditableText].
 
+=======
+    _updateEditingValueInProgress = true;
+>>>>>>> 21f50f9eb3ba7713b93b827a9d99fbb2bbd1717c
     // Since we still have to support keyboard select, this is the best place
     // to disable text updating.
     if (!_shouldCreateInputConnection) {
+      _updateEditingValueInProgress = false;
       return;
     }
 
@@ -1713,7 +1720,17 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       return;
     }
 
+<<<<<<< HEAD
     if (value.text == _value.text && value.composing == _value.composing) {
+=======
+    if (value == _value) {
+      // This is possible, for example, when the numeric keyboard is input,
+      // the engine will notify twice for the same value.
+      // Track at https://github.com/flutter/flutter/issues/65811
+      _updateEditingValueInProgress = false;
+      return;
+    } else if (value.text == _value.text && value.composing == _value.composing && value.selection != _value.selection) {
+>>>>>>> 21f50f9eb3ba7713b93b827a9d99fbb2bbd1717c
       // `selection` is the only change.
       _handleSelectionChanged(value.selection, renderEditable, SelectionChangedCause.keyboard);
     } else {
@@ -1737,6 +1754,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _stopCursorTimer(resetCharTicks: false);
       _startCursorTimer();
     }
+<<<<<<< HEAD
+=======
+    _updateEditingValueInProgress = false;
+>>>>>>> 21f50f9eb3ba7713b93b827a9d99fbb2bbd1717c
   }
 
   @override
@@ -1936,10 +1957,22 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (_batchEditDepth > 0 || !_hasInputConnection)
       return;
     final TextEditingValue localValue = _value;
+<<<<<<< HEAD
     if (localValue == _lastKnownRemoteTextEditingValue)
       return;
     _textInputConnection!.setEditingState(localValue);
     _lastKnownRemoteTextEditingValue = localValue;
+=======
+    // We should not update back the value notified by the remote(engine) in reverse, this is redundant.
+    // Unless we modify this value for some reason during processing, such as `TextInputFormatter`.
+    if (_updateEditingValueInProgress && localValue == _receivedRemoteTextEditingValue)
+      return;
+    // In other cases, as long as the value of the [widget.controller.value] is modified,
+    // `setEditingState` should be called as we do not want to skip sending real changes
+    // to the engine.
+    // Also see https://github.com/flutter/flutter/issues/65059#issuecomment-690254379
+    _textInputConnection.setEditingState(localValue);
+>>>>>>> 21f50f9eb3ba7713b93b827a9d99fbb2bbd1717c
   }
 
   TextEditingValue get _value => widget.controller.value;
@@ -2267,6 +2300,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         value = _whitespaceFormatter.formatEditUpdate(_value, value);
     }
 
+<<<<<<< HEAD
     // Put all optional user callback invocations in a batch edit to prevent
     // sending multiple `TextInput.updateEditingValue` messages.
     beginBatchEdit();
@@ -2298,6 +2332,25 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
 
     endBatchEdit();
+=======
+    if (value == _value) {
+      // If the value was modified by the formatter, the remote should be notified to keep in sync,
+      // if not modified, it will short-circuit.
+      _updateRemoteEditingValueIfNeeded();
+    } else {
+      // Setting _value here ensures the selection and composing region info is passed.
+      _value = value;
+    }
+
+    // Use the last formatted value when an identical repeat pass is detected.
+    if (isRepeat && textChanged && _lastFormattedValue != null) {
+      _value = _lastFormattedValue;
+    }
+
+    if (textChanged && widget.onChanged != null)
+      widget.onChanged(value.text);
+    _lastFormattedUnmodifiedTextEditingValue = _receivedRemoteTextEditingValue;
+>>>>>>> 21f50f9eb3ba7713b93b827a9d99fbb2bbd1717c
   }
 
   void _onCursorColorTick() {

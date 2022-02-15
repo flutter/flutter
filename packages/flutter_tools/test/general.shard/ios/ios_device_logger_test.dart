@@ -322,6 +322,30 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
       logReader.dispose();
       verify(iosDeployDebugger.detach());
     });
+<<<<<<< HEAD
+=======
+    logReader.connectedVMService = vmService;
+
+    stdoutCompleter.complete(Success());
+    stderrCompleter.complete(Success());
+    stdoutController.add(Event(
+      kind: 'Stdout',
+      timestamp: 0,
+      bytes: base64.encode(utf8.encode('  This is a message ')),
+    ));
+    stderController.add(Event(
+      kind: 'Stderr',
+      timestamp: 0,
+      bytes: base64.encode(utf8.encode('  And this is an error ')),
+    ));
+
+    // Wait for stream listeners to fire.
+    await expectLater(logReader.logLines, emitsInAnyOrder(<Matcher>[
+      equals('  This is a message '),
+      equals('  And this is an error '),
+    ]));
+    verify(vmService.streamListen('Debug'));
+>>>>>>> 21f50f9eb3ba7713b93b827a9d99fbb2bbd1717c
   });
 }
 

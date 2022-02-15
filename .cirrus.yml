@@ -172,6 +172,7 @@ task:
       script:
         - rm -rf bin/cache/pkg/tests
         - git clone https://github.com/flutter/tests.git bin/cache/pkg/tests
+        - (cd bin/cache/pkg/tests; git checkout f1c35d57db5f0c1dd31ae3e0f73a18891343cd60)
         - dart --enable-asserts dev/customer_testing/run_tests.dart --skip-on-fetch-failure --skip-template bin/cache/pkg/tests/registry/*.test
 
     - name: web_smoke_test

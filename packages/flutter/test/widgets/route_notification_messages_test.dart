@@ -361,7 +361,11 @@ class SimpleRouterDelegate extends RouterDelegate<RouteInformation> with ChangeN
 }
 
 class TestPage extends Page<void> {
+<<<<<<< HEAD
   const TestPage({LocalKey? key, String? name}) : super(key: key, name: name);
+=======
+  const TestPage({LocalKey key, String name}) : super(key: key, name: name);
+>>>>>>> 21f50f9eb3ba7713b93b827a9d99fbb2bbd1717c
 
   @override
   Route<void> createRoute(BuildContext context) {

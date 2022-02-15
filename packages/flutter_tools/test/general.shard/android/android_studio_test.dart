@@ -50,7 +50,11 @@ final Platform linuxPlatform = FakePlatform(
 final Platform windowsPlatform = FakePlatform(
   operatingSystem: 'windows',
   environment: <String, String>{
+<<<<<<< HEAD
     'LOCALAPPDATA': r'C:\Users\Dash\AppData\Local',
+=======
+    'LOCALAPPDATA': 'C:\\Users\\Dash\\AppData\\Local',
+>>>>>>> 21f50f9eb3ba7713b93b827a9d99fbb2bbd1717c
   }
 );
 
@@ -271,11 +275,19 @@ void main() {
   });
 
   testUsingContext('Can discover Android Studio 4.1 location on Windows', () {
+<<<<<<< HEAD
     windowsFileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio4.1\.home')
       ..createSync(recursive: true)
       ..writeAsStringSync(r'C:\Program Files\AndroidStudio');
     windowsFileSystem
       .directory(r'C:\Program Files\AndroidStudio')
+=======
+    windowsFileSystem.file('C:\\Users\\Dash\\AppData\\Local\\Google\\AndroidStudio4.1\\.home')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('C:\\Program Files\\AndroidStudio');
+    windowsFileSystem
+      .directory('C:\\Program Files\\AndroidStudio')
+>>>>>>> 21f50f9eb3ba7713b93b827a9d99fbb2bbd1717c
       .createSync(recursive: true);
 
     final AndroidStudio studio = AndroidStudio.allInstalled().single;

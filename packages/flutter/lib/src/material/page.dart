@@ -151,12 +151,21 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
 class MaterialPage<T> extends Page<T> {
   /// Creates a material page.
   const MaterialPage({
+<<<<<<< HEAD
     required this.child,
     this.maintainState = true,
     this.fullscreenDialog = false,
     LocalKey? key,
     String? name,
     Object? arguments,
+=======
+    @required this.child,
+    this.maintainState = true,
+    this.fullscreenDialog = false,
+    LocalKey key,
+    String name,
+    Object arguments,
+>>>>>>> 21f50f9eb3ba7713b93b827a9d99fbb2bbd1717c
   }) : assert(child != null),
        assert(maintainState != null),
        assert(fullscreenDialog != null),

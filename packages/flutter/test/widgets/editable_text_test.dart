@@ -22,7 +22,11 @@ class _MatchesMethodCall extends Matcher {
   const _MatchesMethodCall(this.name, {this.arguments});
 
   final String name;
+<<<<<<< HEAD
   final Matcher? arguments;
+=======
+  final Matcher arguments;
+>>>>>>> 21f50f9eb3ba7713b93b827a9d99fbb2bbd1717c
 
   @override
   bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
@@ -40,7 +44,11 @@ class _MatchesMethodCall extends Matcher {
   }
 }
 
+<<<<<<< HEAD
 late TextEditingController controller;
+=======
+TextEditingController controller;
+>>>>>>> 21f50f9eb3ba7713b93b827a9d99fbb2bbd1717c
 final FocusNode focusNode = FocusNode(debugLabel: 'EditableText Node');
 final FocusScopeNode focusScopeNode = FocusScopeNode(debugLabel: 'EditableText Scope Node');
 const TextStyle textStyle = TextStyle();
@@ -5812,6 +5820,210 @@ void main() {
         }),
       );
     });
+  });
+
+  testWidgets('Synchronous test of local and remote editing values', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/65059
+    final List<MethodCall> log = <MethodCall>[];
+    SystemChannels.textInput.setMockMethodCallHandler((MethodCall methodCall) async {
+      log.add(methodCall);
+    });
+    final TextInputFormatter formatter = TextInputFormatter.withFunction((TextEditingValue oldValue, TextEditingValue newValue) {
+      if (newValue.text == 'I will be modified by the formatter.') {
+        newValue = const TextEditingValue(text: 'Flutter is the best!');
+      }
+      return newValue;
+    });
+    final TextEditingController controller = TextEditingController();
+    StateSetter setState;
+
+    final FocusNode focusNode = FocusNode(debugLabel: 'EditableText Focus Node');
+    Widget builder() {
+      return StatefulBuilder(
+        builder: (BuildContext context, StateSetter setter) {
+          setState = setter;
+          return MaterialApp(
+            home: MediaQuery(
+              data: const MediaQueryData(devicePixelRatio: 1.0),
+              child: Directionality(
+                textDirection: TextDirection.ltr,
+                child: Center(
+                  child: Material(
+                    child: EditableText(
+                      controller: controller,
+                      focusNode: focusNode,
+                      style: textStyle,
+                      cursorColor: Colors.red,
+                      backgroundCursorColor: Colors.red,
+                      keyboardType: TextInputType.multiline,
+                      inputFormatters: <TextInputFormatter>[
+                        formatter,
+                      ],
+                      onChanged: (String value) { },
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      );
+    }
+
+    await tester.pumpWidget(builder());
+    await tester.tap(find.byType(EditableText));
+    await tester.showKeyboard(find.byType(EditableText));
+    await tester.pump();
+
+    log.clear();
+
+    final EditableTextState state = tester.firstState(find.byType(EditableText));
+
+    // setEditingState is not called when only the remote changes
+    state.updateEditingValue(const TextEditingValue(
+      text: 'a',
+    ));
+    expect(log.length, 0);
+
+    // setEditingState is called when remote value modified by the formatter.
+    state.updateEditingValue(const TextEditingValue(
+      text: 'I will be modified by the formatter.',
+    ));
+    expect(log.length, 1);
+    MethodCall methodCall = log[0];
+    expect(
+      methodCall,
+      isMethodCall('TextInput.setEditingState', arguments: <String, dynamic>{
+        'text': 'Flutter is the best!',
+        'selectionBase': -1,
+        'selectionExtent': -1,
+        'selectionAffinity': 'TextAffinity.downstream',
+        'selectionIsDirectional': false,
+        'composingBase': -1,
+        'composingExtent': -1,
+      }),
+    );
+
+    log.clear();
+
+    // setEditingState is called when the [controller.value] is modified by local.
+    setState(() {
+      controller.text = 'I love flutter!';
+    });
+    expect(log.length, 1);
+    methodCall = log[0];
+    expect(
+      methodCall,
+      isMethodCall('TextInput.setEditingState', arguments: <String, dynamic>{
+        'text': 'I love flutter!',
+        'selectionBase': -1,
+        'selectionExtent': -1,
+        'selectionAffinity': 'TextAffinity.downstream',
+        'selectionIsDirectional': false,
+        'composingBase': -1,
+        'composingExtent': -1,
+      }),
+    );
+
+    log.clear();
+
+    // Currently `_receivedRemoteTextEditingValue` equals 'I will be modified by the formatter.',
+    // setEditingState will be called when set the [controller.value] to `_receivedRemoteTextEditingValue` by local.
+    setState(() {
+      controller.text = 'I will be modified by the formatter.';
+    });
+    expect(log.length, 1);
+    methodCall = log[0];
+    expect(
+      methodCall,
+      isMethodCall('TextInput.setEditingState', arguments: <String, dynamic>{
+        'text': 'I will be modified by the formatter.',
+        'selectionBase': -1,
+        'selectionExtent': -1,
+        'selectionAffinity': 'TextAffinity.downstream',
+        'selectionIsDirectional': false,
+        'composingBase': -1,
+        'composingExtent': -1,
+      }),
+    );
+  });
+
+  testWidgets('Send text input state to engine when the input formatter rejects user input', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/67828
+    final List<MethodCall> log = <MethodCall>[];
+    SystemChannels.textInput.setMockMethodCallHandler((MethodCall methodCall) async {
+      log.add(methodCall);
+    });
+    final TextInputFormatter formatter = TextInputFormatter.withFunction((TextEditingValue oldValue, TextEditingValue newValue) {
+      return const TextEditingValue(text: 'Flutter is the best!');
+    });
+    final TextEditingController controller = TextEditingController();
+
+    final FocusNode focusNode = FocusNode(debugLabel: 'EditableText Focus Node');
+    Widget builder() {
+      return StatefulBuilder(
+        builder: (BuildContext context, StateSetter setter) {
+          return MaterialApp(
+            home: MediaQuery(
+              data: const MediaQueryData(devicePixelRatio: 1.0),
+              child: Directionality(
+                textDirection: TextDirection.ltr,
+                child: Center(
+                  child: Material(
+                    child: EditableText(
+                      controller: controller,
+                      focusNode: focusNode,
+                      style: textStyle,
+                      cursorColor: Colors.red,
+                      backgroundCursorColor: Colors.red,
+                      keyboardType: TextInputType.multiline,
+                      inputFormatters: <TextInputFormatter>[
+                        formatter,
+                      ],
+                      onChanged: (String value) { },
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      );
+    }
+
+    await tester.pumpWidget(builder());
+    await tester.tap(find.byType(EditableText));
+    await tester.showKeyboard(find.byType(EditableText));
+    await tester.pump();
+
+    log.clear();
+
+    final EditableTextState state = tester.firstState(find.byType(EditableText));
+
+    // setEditingState is called when remote value modified by the formatter.
+    state.updateEditingValue(const TextEditingValue(
+      text: 'I will be modified by the formatter.',
+    ));
+    expect(log.length, 1);
+    expect(log, contains(matchesMethodCall(
+      'TextInput.setEditingState',
+      args: allOf(
+        containsPair('text', 'Flutter is the best!'),
+      ),
+    )));
+
+    log.clear();
+
+    state.updateEditingValue(const TextEditingValue(
+      text: 'I will be modified by the formatter.',
+    ));
+    expect(log.length, 1);
+    expect(log, contains(matchesMethodCall(
+      'TextInput.setEditingState',
+      args: allOf(
+        containsPair('text', 'Flutter is the best!'),
+      ),
+    )));
   });
 
   testWidgets('autofocus:true on first frame does not throw', (WidgetTester tester) async {

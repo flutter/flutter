@@ -566,7 +566,11 @@ abstract class FlutterCommand extends Command<void> {
         "with this flag, the 'flutter symbolize' command with the right program "
         'symbol file is required to obtain a human readable stack trace.\n'
         'This flag cannot be combined with --analyze-size',
+<<<<<<< HEAD
       valueHelp: 'v1.2.3/',
+=======
+      valueHelp: '/project-name/v1.2.3/',
+>>>>>>> 21f50f9eb3ba7713b93b827a9d99fbb2bbd1717c
     );
   }
 

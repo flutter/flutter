@@ -2817,12 +2817,21 @@ void main() {
 
     testWidgets('can modify routes history and secondary animation still works', (WidgetTester tester) async {
       final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
+<<<<<<< HEAD
       late Animation<double> secondaryAnimationOfRouteOne;
       late Animation<double> primaryAnimationOfRouteOne;
       late Animation<double> secondaryAnimationOfRouteTwo;
       late Animation<double> primaryAnimationOfRouteTwo;
       late Animation<double> secondaryAnimationOfRouteThree;
       late Animation<double> primaryAnimationOfRouteThree;
+=======
+      Animation<double> secondaryAnimationOfRouteOne;
+      Animation<double> primaryAnimationOfRouteOne;
+      Animation<double> secondaryAnimationOfRouteTwo;
+      Animation<double> primaryAnimationOfRouteTwo;
+      Animation<double> secondaryAnimationOfRouteThree;
+      Animation<double> primaryAnimationOfRouteThree;
+>>>>>>> 21f50f9eb3ba7713b93b827a9d99fbb2bbd1717c
       List<Page<dynamic>> myPages = <Page<void>>[
         BuilderPage(
           key: const ValueKey<String>('1'),
@@ -3687,7 +3696,11 @@ class NavigatorObservation {
 }
 
 class BuilderPage extends Page<void> {
+<<<<<<< HEAD
   const BuilderPage({LocalKey? key, String? name, required this.pageBuilder}) : super(key: key, name: name);
+=======
+  const BuilderPage({LocalKey key, String name, this.pageBuilder}) : super(key: key, name: name);
+>>>>>>> 21f50f9eb3ba7713b93b827a9d99fbb2bbd1717c
 
   final RoutePageBuilder pageBuilder;
 

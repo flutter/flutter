@@ -244,7 +244,11 @@ class _DevFSHttpWriter implements DevFSWriter {
   final String fsName;
   final Uri httpAddress;
 
+<<<<<<< HEAD
   // 3 was chosen to try to limit the variance in the time it takes to execute
+=======
+  // 3 was chosen to try to limit the varience in the time it takes to execute
+>>>>>>> 21f50f9eb3ba7713b93b827a9d99fbb2bbd1717c
   // `await request.close()` since there is a known bug in Dart where it doesn't
   // always return a status code in response to a PUT request:
   // https://github.com/dart-lang/sdk/issues/43525.
@@ -298,11 +302,24 @@ class _DevFSHttpWriter implements DevFSWriter {
           _osUtils,
         );
         await request.addStream(contents);
+<<<<<<< HEAD
         // Once the bug in Dart is solved we can remove the timeout
         // (https://github.com/dart-lang/sdk/issues/43525).
         try {
           final HttpClientResponse response = await request.close().timeout(
             const Duration(seconds: 60));
+=======
+        // The contents has already been streamed, closing the request should
+        // not take long but we are experiencing hangs with it, see #63869.
+        //
+        // Once the bug in Dart is solved we can remove the timeout
+        // (https://github.com/dart-lang/sdk/issues/43525).  The timeout was
+        // chosen to be inflated based on the max observed time when running the
+        // tests in "Google Tests".
+        try {
+          final HttpClientResponse response = await request.close().timeout(
+            const Duration(milliseconds: 10000));
+>>>>>>> 21f50f9eb3ba7713b93b827a9d99fbb2bbd1717c
           response.listen((_) {},
             onError: (dynamic error) {
               _logger.printTrace('error: $error');

@@ -38,7 +38,11 @@ import 'ticker_provider.dart';
 /// See also:
 ///
 ///  * [Navigator], which is where all the [Route]s end up.
+<<<<<<< HEAD
 typedef RouteFactory = Route<dynamic>? Function(RouteSettings settings);
+=======
+typedef RouteFactory = Route<dynamic> Function(RouteSettings settings);
+>>>>>>> 21f50f9eb3ba7713b93b827a9d99fbb2bbd1717c
 
 /// Creates a series of one or more routes.
 ///

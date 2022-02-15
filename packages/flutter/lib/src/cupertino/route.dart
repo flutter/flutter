@@ -362,6 +362,9 @@ class CupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTransitionMi
   final String? title;
 
   @override
+  Widget buildContent(BuildContext context) => builder(context);
+
+  @override
   final bool maintainState;
 
   @override
@@ -417,6 +420,7 @@ class _PageBasedCupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTr
 class CupertinoPage<T> extends Page<T> {
   /// Creates a cupertino page.
   const CupertinoPage({
+<<<<<<< HEAD
     required this.child,
     this.maintainState = true,
     this.title,
@@ -424,6 +428,15 @@ class CupertinoPage<T> extends Page<T> {
     LocalKey? key,
     String? name,
     Object? arguments,
+=======
+    @required this.child,
+    this.maintainState = true,
+    this.title,
+    this.fullscreenDialog = false,
+    LocalKey key,
+    String name,
+    Object arguments,
+>>>>>>> 21f50f9eb3ba7713b93b827a9d99fbb2bbd1717c
   }) : assert(child != null),
        assert(maintainState != null),
        assert(fullscreenDialog != null),

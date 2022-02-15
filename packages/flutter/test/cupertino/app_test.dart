@@ -238,7 +238,11 @@ class SimpleNavigatorRouterDelegate extends RouterDelegate<RouteInformation> wit
           child:  Text('base'),
         ),
         CupertinoPage<void>(
+<<<<<<< HEAD
           key: ValueKey<String?>(routeInformation.location),
+=======
+          key: ValueKey<String>(routeInformation?.location),
+>>>>>>> 21f50f9eb3ba7713b93b827a9d99fbb2bbd1717c
           child: builder(context, routeInformation),
         )
       ],

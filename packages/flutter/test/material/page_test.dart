@@ -905,7 +905,11 @@ void main() {
     expect(find.text('subpage'), findsOneWidget);
     expect(find.text('home'), findsNothing);
 
+<<<<<<< HEAD
     navigator.currentState!.pop();
+=======
+    navigator.currentState.pop();
+>>>>>>> 21f50f9eb3ba7713b93b827a9d99fbb2bbd1717c
     await tester.pump();
 
     expect(find.text('subpage'), findsOneWidget);
@@ -960,14 +964,22 @@ Widget buildNavigator({
 class KeepsStateTestWidget extends StatefulWidget {
   const KeepsStateTestWidget({this.navigatorKey});
 
+<<<<<<< HEAD
   final Key? navigatorKey;
+=======
+  final Key navigatorKey;
+>>>>>>> 21f50f9eb3ba7713b93b827a9d99fbb2bbd1717c
 
   @override
   State<KeepsStateTestWidget> createState() => _KeepsStateTestWidgetState();
 }
 
 class _KeepsStateTestWidgetState extends State<KeepsStateTestWidget> {
+<<<<<<< HEAD
   String? _subpage = 'subpage';
+=======
+  String _subpage = 'subpage';
+>>>>>>> 21f50f9eb3ba7713b93b827a9d99fbb2bbd1717c
 
   @override
   Widget build(BuildContext context) {
@@ -976,7 +988,11 @@ class _KeepsStateTestWidgetState extends State<KeepsStateTestWidget> {
         key: widget.navigatorKey,
         pages: <Page<void>>[
           const MaterialPage<void>(child: Text('home')),
+<<<<<<< HEAD
           if (_subpage != null) MaterialPage<void>(child: Text(_subpage!)),
+=======
+          if (_subpage != null) MaterialPage<void>(child: Text(_subpage)),
+>>>>>>> 21f50f9eb3ba7713b93b827a9d99fbb2bbd1717c
         ],
         onPopPage: (Route<dynamic> route, dynamic result) {
           if (!route.didPop(result)) {

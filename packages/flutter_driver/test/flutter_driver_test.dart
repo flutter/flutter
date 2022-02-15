@@ -31,9 +31,16 @@ void main() {
   };
 
   group('VMServiceFlutterDriver.connect', () {
+<<<<<<< HEAD
     FakeVmService fakeClient;
     FakeVM fakeVM;
     FakeIsolate fakeIsolate;
+=======
+    MockVMServiceClient mockClient;
+    MockVM mockVM;
+    MockIsolate mockIsolate;
+    MockPeer mockPeer;
+>>>>>>> 21f50f9eb3ba7713b93b827a9d99fbb2bbd1717c
 
     void expectLogContains(String message) {
       expect(log, anyElement(contains(message)));
@@ -41,6 +48,7 @@ void main() {
 
     setUp(() {
       log.clear();
+<<<<<<< HEAD
       fakeIsolate = FakeIsolate();
       fakeVM = FakeVM(fakeIsolate);
       fakeClient = FakeVmService(fakeVM);
@@ -48,12 +56,33 @@ void main() {
         return fakeClient;
       };
       fakeClient.responses['get_health'] = makeFakeResponse(<String, dynamic>{'status': 'ok'});
+=======
+      mockClient = MockVMServiceClient();
+      mockVM = MockVM();
+      mockIsolate = MockIsolate();
+      mockPeer = MockPeer();
+      when(mockClient.getVM()).thenAnswer((_) => Future<MockVM>.value(mockVM));
+      when(mockVM.isolates).thenReturn(<VMRunnableIsolate>[mockIsolate]);
+      when(mockIsolate.loadRunnable()).thenAnswer((_) => Future<MockIsolate>.value(mockIsolate));
+      when(mockIsolate.extensionRpcs).thenReturn(<String>[]);
+      when(mockIsolate.onExtensionAdded).thenAnswer((Invocation invocation) {
+        return Stream<String>.fromIterable(<String>['ext.flutter.driver']);
+      });
+      when(mockIsolate.invokeExtension(any, any)).thenAnswer(
+          (Invocation invocation) => makeMockResponse(<String, dynamic>{'status': 'ok'}));
+      vmServiceConnectFunction = (String url, {Map<String, dynamic> headers}) {
+        return Future<VMServiceClientConnection>.value(
+          VMServiceClientConnection(mockClient, mockPeer)
+        );
+      };
+>>>>>>> 21f50f9eb3ba7713b93b827a9d99fbb2bbd1717c
     });
 
     tearDown(() async {
       restoreVmServiceConnectFunction();
     });
 
+<<<<<<< HEAD
 
     test('throws after retries if no isolate', () async {
       fakeVM.numberOfTriesBeforeResolvingIsolate = 10000;
@@ -127,11 +156,33 @@ void main() {
     test('ignores setFlag failure', () async {
       fakeIsolate.pauseEvent = vms.Event(kind: vms.EventKind.kPauseStart, timestamp: 0);
       fakeClient.failOnSetFlag = true;
+=======
+    test('connects to isolate paused at start', () async {
+      final List<String> connectionLog = <String>[];
+      when(mockPeer.sendRequest('streamListen', any)).thenAnswer((Invocation invocation) {
+        connectionLog.add('streamListen');
+        return null;
+      });
+      when(mockIsolate.pauseEvent).thenReturn(MockVMPauseStartEvent());
+      when(mockIsolate.resume()).thenAnswer((Invocation invocation) {
+        connectionLog.add('resume');
+        return Future<dynamic>.value(null);
+      });
+      when(mockIsolate.onExtensionAdded).thenAnswer((Invocation invocation) {
+        connectionLog.add('onExtensionAdded');
+        return Stream<String>.fromIterable(<String>['ext.flutter.driver']);
+      });
+>>>>>>> 21f50f9eb3ba7713b93b827a9d99fbb2bbd1717c
 
       final FlutterDriver driver = await FlutterDriver.connect(dartVmServiceUrl: '');
       expectLogContains('Failed to set pause_isolates_on_start=false, proceeding. '
                         'Error: Exception: setFlag failed');
       expect(driver, isNotNull);
+<<<<<<< HEAD
+=======
+      expectLogContains('Isolate is paused at start');
+      expect(connectionLog, <String>['resume', 'streamListen', 'onExtensionAdded']);
+>>>>>>> 21f50f9eb3ba7713b93b827a9d99fbb2bbd1717c
     });
 
 
@@ -182,11 +233,18 @@ void main() {
     VMServiceFlutterDriver driver;
 
     setUp(() {
+<<<<<<< HEAD
       fakeIsolate = FakeIsolate();
       fakeVM = FakeVM(fakeIsolate);
       fakeClient = FakeVmService(fakeVM);
       driver = VMServiceFlutterDriver.connectedTo(fakeClient, fakeIsolate);
       fakeClient.responses['tap'] = makeFakeResponse(<String, dynamic>{});
+=======
+      mockClient = MockVMServiceClient();
+      mockPeer = MockPeer();
+      mockIsolate = MockIsolate();
+      driver = VMServiceFlutterDriver.connectedTo(mockClient, mockPeer, mockIsolate);
+>>>>>>> 21f50f9eb3ba7713b93b827a9d99fbb2bbd1717c
     });
 
     test('checks the health of the driver extension', () async {
@@ -576,11 +634,18 @@ void main() {
     VMServiceFlutterDriver driver;
 
     setUp(() {
+<<<<<<< HEAD
       fakeIsolate = FakeIsolate();
       fakeVM = FakeVM(fakeIsolate);
       fakeClient = FakeVmService(fakeVM);
       driver = VMServiceFlutterDriver.connectedTo(fakeClient, fakeIsolate);
       fakeClient.responses['get_health'] = makeFakeResponse(<String, dynamic>{'status': 'ok'});
+=======
+      mockClient = MockVMServiceClient();
+      mockPeer = MockPeer();
+      mockIsolate = MockIsolate();
+      driver = VMServiceFlutterDriver.connectedTo(mockClient, mockPeer, mockIsolate);
+>>>>>>> 21f50f9eb3ba7713b93b827a9d99fbb2bbd1717c
     });
 
     test('GetHealth has no default timeout', () async {

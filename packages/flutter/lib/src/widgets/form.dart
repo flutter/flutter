@@ -77,7 +77,11 @@ class Form extends StatefulWidget {
     Key? key,
     required this.child,
     @Deprecated(
+<<<<<<< HEAD
       'Use autovalidateMode parameter which provides more specific '
+=======
+      'Use autoValidateMode parameter which provides more specific '
+>>>>>>> 21f50f9eb3ba7713b93b827a9d99fbb2bbd1717c
       'behavior related to auto validation. '
       'This feature was deprecated after v1.19.0.'
     )
@@ -143,7 +147,11 @@ class Form extends StatefulWidget {
   /// Used to enable/disable form fields auto validation and update their error
   /// text.
   @Deprecated(
+<<<<<<< HEAD
     'Use autovalidateMode parameter which provides more specific '
+=======
+    'Use autoValidateMode parameter which provides more specific '
+>>>>>>> 21f50f9eb3ba7713b93b827a9d99fbb2bbd1717c
     'behavior related to auto validation. '
     'This feature was deprecated after v1.19.0.'
   )
@@ -326,7 +334,11 @@ class FormField<T> extends StatefulWidget {
     this.validator,
     this.initialValue,
     @Deprecated(
+<<<<<<< HEAD
       'Use autovalidateMode parameter which provides more specific '
+=======
+      'Use autoValidateMode parameter which provides more specific '
+>>>>>>> 21f50f9eb3ba7713b93b827a9d99fbb2bbd1717c
       'behavior related to auto validation. '
       'This feature was deprecated after v1.19.0.'
     )
@@ -395,7 +407,11 @@ class FormField<T> extends StatefulWidget {
   /// Used to enable/disable auto validation and update their error
   /// text.
   @Deprecated(
+<<<<<<< HEAD
     'Use autovalidateMode parameter which provides more specific '
+=======
+    'Use autoValidateMode parameter which provides more specific '
+>>>>>>> 21f50f9eb3ba7713b93b827a9d99fbb2bbd1717c
     'behavior related to auto validation. '
     'This feature was deprecated after v1.19.0.'
   )

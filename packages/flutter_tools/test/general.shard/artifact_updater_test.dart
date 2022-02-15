@@ -44,6 +44,7 @@ void main() {
     expect(fileSystem.file('out/test'), exists);
   });
 
+<<<<<<< HEAD
   testWithoutContext('ArtifactUpdater can download a zip archive and delete stale files', () async {
     final MockOperatingSystemUtils operatingSystemUtils = MockOperatingSystemUtils();
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
@@ -164,6 +165,8 @@ void main() {
     ), throwsToolExit(message: 'k7iFrf4SQT9WfcQ==')); // validate that the hash mismatch message is included.
   });
 
+=======
+>>>>>>> 21f50f9eb3ba7713b93b827a9d99fbb2bbd1717c
   testWithoutContext('ArtifactUpdater will restart the status ticker if it needs to retry the download', () async {
     final MockOperatingSystemUtils operatingSystemUtils = MockOperatingSystemUtils();
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
@@ -171,6 +174,10 @@ void main() {
       terminal: Terminal.test(supportsColor: true),
       stdio: MockStdio(),
       outputPreferences: OutputPreferences.test(),
+<<<<<<< HEAD
+=======
+      timeoutConfiguration: const TimeoutConfiguration(),
+>>>>>>> 21f50f9eb3ba7713b93b827a9d99fbb2bbd1717c
     );
     final ArtifactUpdater artifactUpdater = ArtifactUpdater(
       fileSystem: fileSystem,

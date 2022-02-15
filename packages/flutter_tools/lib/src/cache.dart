@@ -1752,6 +1752,10 @@ class ArtifactUpdater {
     while (retries > 0) {
       status = _logger.startProgress(
         message,
+<<<<<<< HEAD
+=======
+        timeout: null, // This will take a variable amount of time based on network connectivity.
+>>>>>>> 21f50f9eb3ba7713b93b827a9d99fbb2bbd1717c
       );
       try {
         _ensureExists(tempFile.parent);

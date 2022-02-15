@@ -29,6 +29,7 @@ const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   'vm_service_client': '0.2.6+2', // Final version before being marked deprecated.
   'flutter_template_images': '1.0.1', // Must always exactly match flutter_tools template.
   'shelf': '0.7.5',
+<<<<<<< HEAD
   // Pinned for 1.26.x release branch to allow updating stable null-safe
   '_fe_analyzer_shared': '12.0.0',
   'analyzer': '0.40.6',
@@ -60,6 +61,39 @@ const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   'connectivity': '3.0.0-nullsafety.1',
   'device_info': '2.0.0-nullsafety.1',
   'camera': '0.6.4+5',
+=======
+  // nnbd
+  'async': '2.5.0-nullsafety.1',
+  'boolean_selector': '2.1.0-nullsafety.1',
+  'characters': '1.1.0-nullsafety.3',
+  'charcode': '1.2.0-nullsafety.1',
+  'clock': '1.1.0-nullsafety.1',
+  'collection': '1.15.0-nullsafety.3',
+  'fake_async': '1.2.0-nullsafety.1',
+  'js': '0.6.3-nullsafety.1',
+  'matcher': '0.12.10-nullsafety.1',
+  'meta': '1.3.0-nullsafety.3',
+  'path': '1.8.0-nullsafety.1',
+  'pedantic': '1.10.0-nullsafety.1',
+  'pool': '1.5.0-nullsafety.1',
+  'source_maps': '0.10.10-nullsafety.1',
+  'source_map_stack_trace': '2.1.0-nullsafety.2',
+  'source_span': '1.8.0-nullsafety.2',
+  'stack_trace': '1.10.0-nullsafety.1',
+  'stream_channel': '2.1.0-nullsafety.1',
+  'string_scanner': '1.1.0-nullsafety.1',
+  'term_glyph': '1.2.0-nullsafety.1',
+  'test': '1.16.0-nullsafety.5',
+  'test_api': '0.2.19-nullsafety.2',
+  'test_core': '0.3.12-nullsafety.5',
+  'typed_data': '1.3.0-nullsafety.3',
+  'vector_math': '2.1.0-nullsafety.3',
+  'platform': '3.0.0-nullsafety.2',
+  'file': '6.0.0-nullsafety.2',
+  'process': '4.0.0-nullsafety.2',
+  // https://github.com/dart-lang/build/issues/2772
+  'build_runner_core': '5.2.0',
+>>>>>>> 21f50f9eb3ba7713b93b827a9d99fbb2bbd1717c
 };
 
 class UpdatePackagesCommand extends FlutterCommand {
