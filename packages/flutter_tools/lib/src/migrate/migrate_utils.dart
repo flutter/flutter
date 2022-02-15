@@ -88,7 +88,7 @@ class MigrateUtils {
     final ProcessResult result = await Process.run('./flutter', cmdArgs, workingDirectory: flutterBinPath);
     // Old versions of the tool does not include the platforms option. In this case, we will just
     // just call the general create command.
-    if (result.stderr.contains('Could not find an option named "platforms".')) {
+    if ((result.stderr as String).contains('Could not find an option named "platforms".')) {
       return createFromTemplates(
         flutterBinPath,
         name: name,
@@ -99,7 +99,7 @@ class MigrateUtils {
       );
     }
     checkForErrors(result, commandDescription: '${flutterBinPath}flutter ${cmdArgs.join(' ')}');
-    return result.stdout;
+    return result.stdout as String;
   }
 
   static Future<MergeResult> gitMergeFile({
@@ -118,7 +118,7 @@ class MigrateUtils {
     List<String> cmdArgs = ['rev-parse', tag];
     ProcessResult result = await Process.run('git', cmdArgs, workingDirectory: projectPath);
     checkForErrors(result, commandDescription: 'git ${cmdArgs.join(' ')}');
-    return result.stdout;
+    return result.stdout as String;
   }
 
   static Future<void> gitInit(String workingDirectory) async {

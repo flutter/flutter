@@ -31,9 +31,8 @@ class MigrateApplyCommand extends FlutterCommand {
     );
     argParser.addFlag(
       'force',
-      abbr: 'f'
-      help:
-          'Ignore unresolved merge conflicts and apply by force.',
+      abbr: 'f',
+      help: 'Ignore unresolved merge conflicts and apply by force.',
     );
   }
 

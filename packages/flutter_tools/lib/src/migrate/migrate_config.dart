@@ -36,24 +36,25 @@ class MigrateConfig {
 
   /// Creates a MigrateConfig by parsing an existing migrate config yaml file.
   MigrateConfig.fromFile(File file) : unmanagedFiles = <String>[] {
-    final YamlMap yamlRoot = loadYaml(file.readAsStringSync());
+    final dynamic yamlRoot = loadYaml(file.readAsStringSync());
     if (!validate(yamlRoot)) {
       // Error
       globals.logger.printError('Invalid migrate config yaml file found at ${file.path}');
       return;
     }
-    platform = yamlRoot['platform'];
-    createRevision = yamlRoot['createRevision'];
-    baseRevision = yamlRoot['baseRevision'];
-    if (yamlRoot['unmanagedFiles'] != null) {
-      unmanagedFiles = List<String>.from(yamlRoot['unmanagedFiles']);
+    final YamlMap map = yamlRoot as YamlMap;
+    platform = map['platform']!;
+    createRevision = map['createRevision']!;
+    baseRevision = map['baseRevision']!;
+    if (map['unmanagedFiles'] != null) {
+      unmanagedFiles = List<String>.from(map['unmanagedFiles']);
     } else {
       unmanagedFiles = <String>[];
     }
   }
   static const String kFileName = '.migrate_config';
   static const Map<String, List<String>> kIosDefaultUnmanagedFiles = const <String, List<String>>{
-    'root': <String>['lib/main.dart']
+    'root': <String>['lib/main.dart'],
     'ios': <String>['Runner.xcodeproj/project.pbxproj'],
   };
 
@@ -141,11 +142,15 @@ $unmanagedFilesString
   }
 
   /// Verifies the expected yaml keys are present in the file.
-  bool validate(YamlMap yamlRoot) {
-    return yamlRoot.keys.contains('platform') &&
-    yamlRoot.keys.contains('createRevision') &&
-    yamlRoot.keys.contains('baseRevision') &&
-    yamlRoot.keys.contains('unmanagedFiles');
+  bool validate(dynamic yamlRoot) {
+    if (yamlRoot is! YamlMap) {
+      return false;
+    }
+    final YamlMap map = yamlRoot as YamlMap;
+    return map.keys.contains('platform') &&
+    map.keys.contains('createRevision') &&
+    map.keys.contains('baseRevision') &&
+    map.keys.contains('unmanagedFiles');
   }
 
   /// Returns a list of platform names that are supported by the project.
@@ -196,7 +201,7 @@ $unmanagedFilesString
           platform: platform,
           createRevision: createRevision,
           baseRevision: currentRevision,
-          unmanagedFiles: kIosDefaultUnmanagedFiles[platform] != null ? kIosDefaultUnmanagedFiles[platform] : <String>[],
+          unmanagedFiles: kIosDefaultUnmanagedFiles[platform] != null ? kIosDefaultUnmanagedFiles[platform]! : <String>[],
         );
         if (create) {
           newConfig.writeFile(projectDirectory: projectDirectory);

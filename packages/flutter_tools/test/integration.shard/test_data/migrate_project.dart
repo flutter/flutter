@@ -25,7 +25,7 @@ class MigrateProject extends Project {
       writeFile(fileSystem.path.join(dir.path, 'android', 'local.properties'), androidLocalProperties);
     }
     _appPath = fileSystem.path.join(getFlutterRoot(), 'packages', 'flutter_tools', 'test', 'integration.shard', 'test_data', 'full_apps', version);
-    final ProcessResult result = await processManager.run(<String>[
+    await processManager.run(<String>[
       'cp',
       '-r',
       _appPath + fileSystem.path.separator,

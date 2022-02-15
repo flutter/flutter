@@ -28,8 +28,12 @@ class MigrateManifest {
 
   /// Parses an existing migrate manifest.
   MigrateManifest.fromFile(File manifestFile) : migrateResult = MigrateResult.empty(), migrateRootDir = manifestFile.parent {
-    final YamlMap map = loadYaml(manifestFile.readAsStringSync());
-    bool valid = map.containsKey('mergedFiles') && map.containsKey('conflictFiles') && map.containsKey('newFiles') && map.containsKey('deletedFiles');
+    final dynamic yamlContents = loadYaml(manifestFile.readAsStringSync());
+    if (yamlContents is! YamlMap) {
+      throwToolExit('Invalid .migrate_manifest file in the migrate working directory. File is not a Yaml map', exitCode: 1);
+    }
+    final YamlMap map = yamlContents as YamlMap;
+    final bool valid = map.containsKey('mergedFiles') && map.containsKey('conflictFiles') && map.containsKey('newFiles') && map.containsKey('deletedFiles');
     if (!valid) {
       throwToolExit('Invalid .migrate_manifest file in the migrate working directory. Fix the manifest or abandon the migration and try again.', exitCode: 1);
     }
@@ -148,6 +152,7 @@ bool checkAndPrintMigrateStatus(MigrateManifest manifest, Directory workingDir, 
     } else {
       mergedFiles.add(localPath);
     }
+  }
   
   mergedFiles.addAll(manifest.mergedFiles);
   if (manifest.addedFiles.isNotEmpty) {
@@ -179,7 +184,9 @@ bool checkAndPrintMigrateStatus(MigrateManifest manifest, Directory workingDir, 
     }
     result = false;
   }
-  globals.logger.printStatus(printout);
-  globals.logger.printStatus(redPrintout, color: TerminalColor.red);
+  if (print) {
+    globals.logger.printStatus(printout);
+    globals.logger.printStatus(redPrintout, color: TerminalColor.red);
+  }
   return result;
 }

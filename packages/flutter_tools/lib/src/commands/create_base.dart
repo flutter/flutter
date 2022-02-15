@@ -559,11 +559,12 @@ abstract class CreateBase extends FlutterCommand {
     if (templateContext['winuwp'] == true) platformsForMigrateConfig.add('windowsUwp');
     if (templateContext['fuchsia'] == true) platformsForMigrateConfig.add('fuchisa');
     await MigrateConfig.parseOrCreateMigrateConfigs(
-      platforms: platformsForMigrateConfig,
-      projectDirectory: directory,
-      create: true,
-      currentRevision: stringArg('initial-create-revision') ?? globals.flutterVersion.frameworkRevision);
-      createRevision: globals.flutterVersion.frameworkRevision);
+        platforms: platformsForMigrateConfig,
+        projectDirectory: directory,
+        create: true,
+        currentRevision: stringArg('initial-create-revision') ?? globals.flutterVersion.frameworkRevision,
+        createRevision: globals.flutterVersion.frameworkRevision,
+      );
     return generatedCount;
   }
 
