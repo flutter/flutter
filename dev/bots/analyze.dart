@@ -88,6 +88,9 @@ Future<void> run(List<String> arguments) async {
     exitWithError(<String>['The analyze.dart script must be run with --enable-asserts.']);
   }
 
+  print('$clock All tool test files end in _test.dart...');
+  await verifyToolTestsEndInTestDart(flutterRoot);
+
   print('$clock No sync*/async*');
   await verifyNoSyncAsyncStar(flutterPackages);
   await verifyNoSyncAsyncStar(flutterExamples, minimumMatches: 200);
@@ -196,6 +199,53 @@ Future<void> run(List<String> arguments) async {
 
 
 // TESTS
+
+/// Verify tool test files end in `_test.dart`.
+///
+/// The test runner will only recognize files ending in `_test.dart` as tests to
+/// be run: https://github.com/dart-lang/test/tree/master/pkgs/test#running-tests
+Future<void> verifyToolTestsEndInTestDart(String workingDirectory) async {
+  final String toolsTestPath = path.join(
+    workingDirectory,
+    'packages',
+    'flutter_tools',
+    'test',
+  );
+  final List<String> violations = <String>[];
+
+  // detect files that contains calls to test(), testUsingContext(), and testWithoutContext()
+  final RegExp callsTestFunctionPattern = RegExp(r'(test\(.*\)|testUsingContext\(.*\)|testWithoutContext\(.*\))');
+
+  await for (final File file in _allFiles(toolsTestPath, 'dart', minimumMatches: 300)) {
+    final bool isValidTestFile = file.path.endsWith('_test.dart');
+    if (isValidTestFile) {
+      continue;
+    }
+
+    final bool isTestData = file.path.contains(r'test_data');
+    if (isTestData) {
+      continue;
+    }
+
+    final bool isInTestShard = file.path.contains(r'.shard/');
+    if (!isInTestShard) {
+      continue;
+    }
+
+    final bool callsTestFunction = file.readAsStringSync().contains(callsTestFunctionPattern);
+    if (!callsTestFunction) {
+      continue;
+    }
+
+    violations.add(file.path);
+  }
+  if (violations.isNotEmpty) {
+    exitWithError(<String>[
+      '${bold}Found flutter_tools tests that do not end in `_test.dart`; these will not be run by the test runner$reset',
+      ...violations,
+    ]);
+  }
+}
 
 Future<void> verifyNoSyncAsyncStar(String workingDirectory, {int minimumMatches = 2000 }) async {
   final RegExp syncPattern = RegExp(r'\s*?a?sync\*\s*?{');
