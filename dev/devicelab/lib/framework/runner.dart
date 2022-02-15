@@ -190,7 +190,7 @@ Future<TaskResult> runTask(
       .transform<String>(const LineSplitter())
       .listen((String line) {
     if (!uri.isCompleted) {
-      final Uri? serviceUri = parseServiceUri(line, prefix: 'Observatory listening on ');
+      final Uri? serviceUri = parseServiceUri(line, prefix: RegExp('(Observatory|Dart VM Service) listening on '));
       if (serviceUri != null)
         uri.complete(serviceUri);
     }
