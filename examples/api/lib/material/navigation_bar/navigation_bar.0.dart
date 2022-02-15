@@ -24,7 +24,7 @@ class RootPage extends StatelessWidget {
       title: Text('${destination.title} AlertDialog'),
       actions: <Widget>[
         TextButton(
-          onPressed: () { Navigator.pop(context, 'OK'); },
+          onPressed: () { Navigator.pop(context); },
           child: const Text('OK'),
         ),
       ],
@@ -335,7 +335,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin<Home> {
               final Widget view = destinationViews[index];
               if (index == selectedIndex) {
                 destinationFaders[index].forward();
-                return view;
+                return Offstage(child: view, offstage: false);
               } else {
                 destinationFaders[index].reverse();
                 if (destinationFaders[index].isAnimating) {
