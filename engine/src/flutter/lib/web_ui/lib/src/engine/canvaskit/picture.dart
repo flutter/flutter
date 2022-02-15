@@ -5,6 +5,7 @@
 import 'package:ui/ui.dart' as ui;
 
 import '../profiler.dart';
+import '../util.dart';
 import 'canvas.dart';
 import 'canvaskit_api.dart';
 import 'image.dart';
@@ -30,10 +31,13 @@ class CkPicture extends ManagedSkiaObject<SkPicture> implements ui.Picture {
   @override
   int get approximateBytesUsed => 0;
 
-  /// Whether the picture has been disposed of.
-  ///
-  /// This is indended to be used in tests and assertions only.
-  bool get debugIsDisposed => _isDisposed;
+  @override
+  bool get debugDisposed {
+    if (assertionsEnabled) {
+      return _isDisposed;
+    }
+    throw StateError('Picture.debugDisposed is only available when asserts are enabled.');
+  }
 
   /// This is set to true when [dispose] is called and is never reset back to
   /// false.
