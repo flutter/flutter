@@ -104,7 +104,7 @@ void main() {
     ]);
   });
 
-  testWidgets('default ExpansionTile debugFillProperties', (WidgetTester tester) async {
+  testWidgets('Default ExpansionTile debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
     const ExpansionTile(title: Text('Adc'),).debugFillProperties(builder);
