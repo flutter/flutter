@@ -3146,6 +3146,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   late final Map<Type, Action<Intent>> _actions = <Type, Action<Intent>>{
+    // Keypresses in EditableText shouldn't activate anything in the tree above.
+    ActivateIntent: DoNothingAction(consumesKey: false),
+    ButtonActivateIntent: DoNothingAction(consumesKey: false),
+
     DoNothingAndStopPropagationTextIntent: DoNothingAction(consumesKey: false),
     ReplaceTextIntent: _replaceTextAction,
     UpdateSelectionIntent: _updateSelectionAction,
