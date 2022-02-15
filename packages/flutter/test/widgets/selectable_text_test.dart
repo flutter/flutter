@@ -568,7 +568,7 @@ void main() {
 
     // Move the gesture very slightly
     await gesture.moveBy(const Offset(1.0, 1.0));
-    await tester.pump(TextSelectionOverlay.fadeDuration * 0.5);
+    await tester.pump(SelectionOverlay.fadeDuration * 0.5);
     handle = tester.widget(fadeFinder.at(0));
 
     // The handle should still be fully opaque.
@@ -4128,7 +4128,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final List<FadeTransition> transitions = find.descendant(
-      of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_TextSelectionHandleOverlay'),
+      of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_SelectionHandleOverlay'),
       matching: find.byType(FadeTransition),
     ).evaluate().map((Element e) => e.widget).cast<FadeTransition>().toList();
     expect(transitions.length, 2);

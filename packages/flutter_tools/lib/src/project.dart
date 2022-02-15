@@ -625,7 +625,7 @@ The detected reason was:
     for (final XmlElement application in document.findAllElements('application')) {
       final String? applicationName = application.getAttribute('android:name');
       if (applicationName == 'io.flutter.app.FlutterApplication') {
-        return AndroidEmbeddingVersionResult(AndroidEmbeddingVersion.v1, '${appManifestFile.absolute.path} uses `android:name="io.flutter.app.FutterApplication"`');
+        return AndroidEmbeddingVersionResult(AndroidEmbeddingVersion.v1, '${appManifestFile.absolute.path} uses `android:name="io.flutter.app.FlutterApplication"`');
       }
     }
     for (final XmlElement metaData in document.findAllElements('meta-data')) {

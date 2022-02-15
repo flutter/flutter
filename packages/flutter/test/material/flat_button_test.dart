@@ -395,11 +395,9 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: Material(
-          child: FlatButton(
-            child: Container(),
-            onPressed: () { /* to make sure the button is enabled */ },
-          ),
+        child: FlatButton(
+          child: Container(),
+          onPressed: () { /* to make sure the button is enabled */ },
         ),
       ),
     );
@@ -536,12 +534,10 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: Material(
-          child: Center(
-            child: FlatButton(
-              onPressed: () { },
-              child: const Text('ABC'),
-            ),
+        child: Center(
+          child: FlatButton(
+            onPressed: () { },
+            child: const Text('ABC'),
           ),
         ),
       ),
@@ -576,14 +572,12 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: Material(
-          child: MediaQuery(
-            data: const MediaQueryData(),
-            child: Center(
-              child: FlatButton(
-                onPressed: () { },
-                child: const Text('ABC'),
-              ),
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: Center(
+            child: FlatButton(
+              onPressed: () { },
+              child: const Text('ABC'),
             ),
           ),
         ),
@@ -597,14 +591,12 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: Material(
-          child: MediaQuery(
-            data: const MediaQueryData(textScaleFactor: 1.3),
-            child: Center(
-              child: FlatButton(
-                onPressed: () { },
-                child: const Text('ABC'),
-              ),
+        child: MediaQuery(
+          data: const MediaQueryData(textScaleFactor: 1.3),
+          child: Center(
+            child: FlatButton(
+              onPressed: () { },
+              child: const Text('ABC'),
             ),
           ),
         ),
@@ -621,14 +613,12 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: Material(
-          child: MediaQuery(
-            data: const MediaQueryData(textScaleFactor: 3.0),
-            child: Center(
-              child: FlatButton(
-                onPressed: () { },
-                child: const Text('ABC'),
-              ),
+        child: MediaQuery(
+          data: const MediaQueryData(textScaleFactor: 3.0),
+          child: Center(
+            child: FlatButton(
+              onPressed: () { },
+              child: const Text('ABC'),
             ),
           ),
         ),
@@ -650,13 +640,11 @@ void main() {
         data: ThemeData(materialTapTargetSize: MaterialTapTargetSize.padded),
         child: Directionality(
           textDirection: TextDirection.ltr,
-          child: Material(
-            child: Center(
-              child: FlatButton(
-                key: key1,
-                child: const SizedBox(width: 50.0, height: 8.0),
-                onPressed: () { },
-              ),
+          child: Center(
+            child: FlatButton(
+              key: key1,
+              child: const SizedBox(width: 50.0, height: 8.0),
+              onPressed: () { },
             ),
           ),
         ),
@@ -671,13 +659,11 @@ void main() {
         data: ThemeData(materialTapTargetSize: MaterialTapTargetSize.shrinkWrap),
         child: Directionality(
           textDirection: TextDirection.ltr,
-          child: Material(
-            child: Center(
-              child: FlatButton(
-                key: key2,
-                child: const SizedBox(width: 50.0, height: 8.0),
-                onPressed: () { },
-              ),
+          child: Center(
+            child: FlatButton(
+              key: key2,
+              child: const SizedBox(width: 50.0, height: 8.0),
+              onPressed: () { },
             ),
           ),
         ),

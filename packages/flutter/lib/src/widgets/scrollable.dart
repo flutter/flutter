@@ -15,6 +15,7 @@ import 'basic.dart';
 import 'focus_manager.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
+import 'media_query.dart';
 import 'notification_listener.dart';
 import 'primary_scroll_controller.dart';
 import 'restoration.dart';
@@ -399,6 +400,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
   late ScrollBehavior _configuration;
   ScrollPhysics? _physics;
   ScrollController? _fallbackScrollController;
+  MediaQueryData? _mediaQueryData;
 
   ScrollController get _effectiveScrollController => widget.controller ?? _fallbackScrollController!;
 
@@ -452,6 +454,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
 
   @override
   void didChangeDependencies() {
+    _mediaQueryData = MediaQuery.maybeOf(context);
     _updatePosition();
     super.didChangeDependencies();
   }
@@ -565,7 +568,8 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
                   ..minFlingVelocity = _physics?.minFlingVelocity
                   ..maxFlingVelocity = _physics?.maxFlingVelocity
                   ..velocityTrackerBuilder = _configuration.velocityTrackerBuilder(context)
-                  ..dragStartBehavior = widget.dragStartBehavior;
+                  ..dragStartBehavior = widget.dragStartBehavior
+                  ..gestureSettings = _mediaQueryData?.gestureSettings;
               },
             ),
           };
@@ -585,7 +589,8 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
                   ..minFlingVelocity = _physics?.minFlingVelocity
                   ..maxFlingVelocity = _physics?.maxFlingVelocity
                   ..velocityTrackerBuilder = _configuration.velocityTrackerBuilder(context)
-                  ..dragStartBehavior = widget.dragStartBehavior;
+                  ..dragStartBehavior = widget.dragStartBehavior
+                  ..gestureSettings = _mediaQueryData?.gestureSettings;
               },
             ),
           };

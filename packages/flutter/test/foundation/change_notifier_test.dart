@@ -323,14 +323,11 @@ void main() {
     expect(log, isEmpty);
   });
 
-  test('Cannot use a disposed ChangeNotifier', () {
+  test('Cannot use a disposed ChangeNotifier except for remove listener', () {
     final TestNotifier source = TestNotifier();
     source.dispose();
     expect(() {
       source.addListener(() {});
-    }, throwsFlutterError);
-    expect(() {
-      source.removeListener(() {});
     }, throwsFlutterError);
     expect(() {
       source.dispose();
@@ -338,6 +335,18 @@ void main() {
     expect(() {
       source.notify();
     }, throwsFlutterError);
+  });
+
+  test('Can remove listener on a disposed ChangeNotifier', () {
+    final TestNotifier source = TestNotifier();
+    FlutterError? error;
+    try {
+      source.dispose();
+      source.removeListener(() {});
+    } on FlutterError catch (e) {
+      error = e;
+    }
+    expect(error, isNull);
   });
 
   test('Value notifier', () {
