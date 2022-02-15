@@ -104,18 +104,6 @@ void main() {
     ]);
   });
 
-  testWidgets('Default ExpansionTile debugFillProperties', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
-
-    const ExpansionTile(title: Text('Adc'),).debugFillProperties(builder);
-
-    final List<String> description = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.toString()).toList();
-
-    expect(description, <String>[]);
-  });
-
   testWidgets('ExpansionTileTheme - collapsed', (WidgetTester tester) async {
     final Key tileKey = UniqueKey();
     final Key titleKey = UniqueKey();
