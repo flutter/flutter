@@ -264,8 +264,7 @@ Future<void> _runTests() async {
     numMessages: numMessages,
   );
   await _runTest(
-    test: (int x) =>
-        _runBasicStandardParallel(backgroundStandard, x, 1234, 3),
+    test: (int x) => _runBasicStandardParallel(backgroundStandard, x, 1234, 3),
     resetChannel: resetChannel,
     printer: printer,
     description:
