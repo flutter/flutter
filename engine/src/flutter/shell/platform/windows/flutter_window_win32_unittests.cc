@@ -197,7 +197,8 @@ class TestFlutterWindowsView : public FlutterWindowsView {
  protected:
   std::unique_ptr<KeyboardHandlerBase> CreateKeyboardKeyHandler(
       flutter::BinaryMessenger* messenger,
-      flutter::KeyboardKeyEmbedderHandler::GetKeyStateHandler get_key_state)
+      flutter::KeyboardKeyEmbedderHandler::GetKeyStateHandler get_key_state,
+      KeyboardKeyEmbedderHandler::MapVirtualKeyToScanCode map_vk_to_scan)
       override {
     auto spy_key_event_handler =
         std::make_unique<SpyKeyboardKeyHandler>(messenger);

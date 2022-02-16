@@ -32,8 +32,8 @@ static constexpr int kMaxPendingEvents = 1000;
 // the Flutter framework thinking that CtrlLeft is still pressed.
 //
 // To resolve this, Flutter recognizes this fake CtrlLeft down event using the
-// following AltRight down event. Flutter then synthesizes a CtrlLeft key up
-// event immediately after the corresponding AltRight key up event.
+// following AltRight down event. Flutter then forges a CtrlLeft key up event
+// immediately after the corresponding AltRight key up event.
 //
 // One catch is that it is impossible to distinguish the fake CtrlLeft down
 // from a normal CtrlLeft down (followed by a AltRight down), since they

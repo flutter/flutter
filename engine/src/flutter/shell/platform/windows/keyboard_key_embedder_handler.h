@@ -38,6 +38,8 @@ class KeyboardKeyEmbedderHandler
                          FlutterKeyEventCallback /* callback */,
                          void* /* user_data */)>;
   using GetKeyStateHandler = std::function<SHORT(int /* nVirtKey */)>;
+  using MapVirtualKeyToScanCode =
+      std::function<SHORT(UINT /* nVirtKey */, bool /* extended */)>;
 
   // Build a KeyboardKeyEmbedderHandler.
   //
@@ -49,8 +51,13 @@ class KeyboardKeyEmbedderHandler
   // Use `get_key_state` to define how the class should get a reliable result of
   // the state for a virtual key. It's typically Win32's GetKeyState, but can
   // also be nullptr (for UWP).
+  //
+  // Use `map_vk_to_scan` to define how the class should get map a virtual key
+  // to a scan code. It's typically Win32's MapVirtualKey, but can also be
+  // nullptr (for UWP).
   explicit KeyboardKeyEmbedderHandler(SendEventHandler send_event,
-                                      GetKeyStateHandler get_key_state);
+                                      GetKeyStateHandler get_key_state,
+                                      MapVirtualKeyToScanCode map_vk_to_scan);
 
   virtual ~KeyboardKeyEmbedderHandler();
 
@@ -100,7 +107,7 @@ class KeyboardKeyEmbedderHandler
                         std::function<void(bool)> callback);
 
   // Assign |critical_keys_| with basic information.
-  void InitCriticalKeys();
+  void InitCriticalKeys(MapVirtualKeyToScanCode map_virtual_key_to_scan_code);
   // Update |critical_keys_| with last seen logical and physical key.
   void UpdateLastSeenCritialKey(int virtual_key,
                                 uint64_t physical_key,

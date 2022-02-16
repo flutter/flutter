@@ -180,7 +180,8 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate,
   // functions in unit tests.
   virtual std::unique_ptr<KeyboardHandlerBase> CreateKeyboardKeyHandler(
       BinaryMessenger* messenger,
-      KeyboardKeyEmbedderHandler::GetKeyStateHandler get_key_state);
+      KeyboardKeyEmbedderHandler::GetKeyStateHandler get_key_state,
+      KeyboardKeyEmbedderHandler::MapVirtualKeyToScanCode map_vk_to_scan);
 
   // Called to create text input plugin.
   virtual std::unique_ptr<TextInputPlugin> CreateTextInputPlugin(
