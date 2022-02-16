@@ -227,19 +227,17 @@ void KeyboardManagerWin32::HandleOnKeyResult(
                             is_syskey ||
                             IsKeyDownShiftRight(event->key, event->was_down);
 
-  // For handled events, that's all.
-  if (real_handled) {
-    if (pending_text != pending_texts_.end()) {
+  if (pending_text != pending_texts_.end()) {
+    if (pending_text->placeholder || real_handled) {
       pending_texts_.erase(pending_text);
+    } else {
+      pending_text->ready = true;
     }
-    return;
+    DispatchReadyTexts();
   }
 
-  // For unhandled events, dispatch them to OnText.
-
-  if (pending_text != pending_texts_.end()) {
-    pending_text->ready = true;
-    DispatchReadyTexts();
+  if (real_handled) {
+    return;
   }
 
   RedispatchEvent(std::move(event));
@@ -327,10 +325,12 @@ bool KeyboardManagerWin32::HandleMessage(UINT const action,
         //
         // Checking `character` filters out non-printable event characters.
         std::list<PendingText>::iterator pending_text;
-        if (action == WM_CHAR && character != 0) {
+        if (action == WM_CHAR) {
+          bool valid = character != 0 && IsPrintable(wparam);
           pending_texts_.push_back(PendingText{
               .ready = false,
               .content = text,
+              .placeholder = !valid,
           });
           pending_text = std::prev(pending_texts_.end());
         } else {
@@ -358,7 +358,7 @@ bool KeyboardManagerWin32::HandleMessage(UINT const action,
       // Also filter out ASCII control characters, which are sent as WM_CHAR
       // events for all control key shortcuts.
       current_session_.clear();
-      if (action == WM_CHAR && IsPrintable(wparam)) {
+      if (action == WM_CHAR) {
         pending_texts_.push_back(PendingText{
             .ready = true,
             .content = text,
@@ -372,6 +372,9 @@ bool KeyboardManagerWin32::HandleMessage(UINT const action,
     case WM_SYSKEYDOWN:
     case WM_KEYUP:
     case WM_SYSKEYUP: {
+      if (wparam == VK_PACKET) {
+        return false;
+      }
       current_session_.clear();
       current_session_.push_back(
           Win32Message{.action = action, .wparam = wparam, .lparam = lparam});

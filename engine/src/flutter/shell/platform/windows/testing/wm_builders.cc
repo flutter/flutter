@@ -20,7 +20,7 @@ Win32Message WmKeyDownInfo::Build(LRESULT expected_result) {
 
 Win32Message WmKeyUpInfo::Build(LRESULT expected_result) {
   uint32_t lParam = (1 /* repeat_count */ << 0) | (scan_code << 16) |
-                    (extended << 24) | (1 /* prev_state */ << 30) |
+                    (extended << 24) | (!overwrite_prev_state_0 << 30) |
                     (1 /* transition */ << 31);
   return Win32Message{
       .message = WM_KEYUP,

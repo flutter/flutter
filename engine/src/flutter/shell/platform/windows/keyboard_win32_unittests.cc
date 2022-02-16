@@ -2187,6 +2187,45 @@ TEST(KeyboardTest, TextInputSubmit) {
                        kLogicalKeyA, "a", kNotSynthesized);
   EXPECT_CALL_IS_TEXT(key_calls[1], u"a");
   clear_key_calls();
+
+  // Release A
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      WmKeyUpInfo{kVirtualKeyA, kScanCodeKeyA, kNotExtended}.Build(
+          kWmResultZero)});
+
+  EXPECT_EQ(key_calls.size(), 1);
+  EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeUp, kPhysicalKeyA,
+                       kLogicalKeyA, "", kNotSynthesized);
+  clear_key_calls();
+}
+
+TEST(KeyboardTest, VietnameseTelexAddDiacriticWithFastResponse) {
+  // In this test, the user presses the folloing keys:
+  //
+  //   Key         Current text
+  //  ===========================
+  //   A           a
+  //   F           à
+  //
+  // And the Backspace event is responded immediately.
+
+  KeyboardTester tester;
+  tester.Responding(false);
+
+  // US Keyboard layout
+
+  // Press A
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      WmKeyDownInfo{kVirtualKeyA, kScanCodeKeyA, kNotExtended, kWasUp}.Build(
+          kWmResultZero),
+      WmCharInfo{'a', kScanCodeKeyA, kNotExtended, kWasUp}.Build(
+          kWmResultZero)});
+
+  EXPECT_EQ(key_calls.size(), 2);
+  EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeDown, kPhysicalKeyA,
+                       kLogicalKeyA, "a", kNotSynthesized);
+  EXPECT_CALL_IS_TEXT(key_calls[1], u"a");
+  clear_key_calls();
   EXPECT_EQ(tester.RedispatchedMessageCountAndClear(), 2);
 
   // Release A
@@ -2199,6 +2238,159 @@ TEST(KeyboardTest, TextInputSubmit) {
                        kLogicalKeyA, "", kNotSynthesized);
   clear_key_calls();
   EXPECT_EQ(tester.RedispatchedMessageCountAndClear(), 1);
+
+  // Press F, which is translated to:
+  //
+  // Backspace down, char & up, then VK_PACKET('à').
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      WmKeyDownInfo{VK_BACK, kScanCodeBackspace, kNotExtended, kWasUp}.Build(
+          kWmResultZero),
+      WmCharInfo{0x8, kScanCodeBackspace, kNotExtended, kWasUp}.Build(
+          kWmResultZero),
+      WmKeyUpInfo{VK_BACK, kScanCodeBackspace, kNotExtended}.Build(
+          kWmResultZero),
+      WmKeyDownInfo{VK_PACKET, 0, kNotExtended, kWasUp}.Build(kWmResultDefault),
+      WmCharInfo{0xe0 /*'à'*/, 0, kNotExtended, kWasUp}.Build(kWmResultZero),
+      WmKeyUpInfo{VK_PACKET, 0, kNotExtended}.Build(kWmResultDefault)});
+
+  EXPECT_EQ(key_calls.size(), 3);
+  EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeDown,
+                       kPhysicalBackspace, kLogicalBackspace, "",
+                       kNotSynthesized);
+  EXPECT_CALL_IS_EVENT(key_calls[1], kFlutterKeyEventTypeUp, kPhysicalBackspace,
+                       kLogicalBackspace, "", kNotSynthesized);
+  EXPECT_CALL_IS_TEXT(key_calls[2], u"à");
+  clear_key_calls();
+  // TODO(dkwingsmt): This count should probably be 4. Currently the CHAR 0x8
+  // message is redispatched due to being part of the KeyDown session, which is
+  // not handled by the framework, while the 'à' message is not redispatched
+  // for being a standalone message. We should resolve this inconsistency.
+  // https://github.com/flutter/flutter/issues/98306
+  EXPECT_EQ(tester.RedispatchedMessageCountAndClear(), 3);
+
+  // Release F
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      WmKeyUpInfo{kVirtualKeyF, kScanCodeKeyF, kNotExtended,
+                  /* overwrite_prev_state_0 */ true}
+          .Build(kWmResultZero)});
+
+  EXPECT_EQ(key_calls.size(), 1);
+  EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeDown, 0, 0, "",
+                       kNotSynthesized);
+  clear_key_calls();
+  EXPECT_EQ(tester.RedispatchedMessageCountAndClear(), 0);
+}
+
+void VietnameseTelexAddDiacriticWithSlowResponse(bool backspace_response) {
+  // In this test, the user presses the folloing keys:
+  //
+  //   Key         Current text
+  //  ===========================
+  //   A           a
+  //   F           à
+  //
+  // And the Backspace down event is responded slowly with `backspace_response`.
+
+  KeyboardTester tester;
+  tester.Responding(false);
+
+  // US Keyboard layout
+
+  // Press A
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      WmKeyDownInfo{kVirtualKeyA, kScanCodeKeyA, kNotExtended, kWasUp}.Build(
+          kWmResultZero),
+      WmCharInfo{'a', kScanCodeKeyA, kNotExtended, kWasUp}.Build(
+          kWmResultZero)});
+
+  EXPECT_EQ(key_calls.size(), 2);
+  EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeDown, kPhysicalKeyA,
+                       kLogicalKeyA, "a", kNotSynthesized);
+  EXPECT_CALL_IS_TEXT(key_calls[1], u"a");
+  clear_key_calls();
+  EXPECT_EQ(tester.RedispatchedMessageCountAndClear(), 2);
+
+  // Release A
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      WmKeyUpInfo{kVirtualKeyA, kScanCodeKeyA, kNotExtended}.Build(
+          kWmResultZero)});
+
+  EXPECT_EQ(key_calls.size(), 1);
+  EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeUp, kPhysicalKeyA,
+                       kLogicalKeyA, "", kNotSynthesized);
+  clear_key_calls();
+  EXPECT_EQ(tester.RedispatchedMessageCountAndClear(), 1);
+
+  std::vector<MockKeyResponseController::ResponseCallback> recorded_callbacks;
+  tester.LateResponding(
+      [&recorded_callbacks](
+          const FlutterKeyEvent* event,
+          MockKeyResponseController::ResponseCallback callback) {
+        recorded_callbacks.push_back(callback);
+      });
+
+  // Press F, which is translated to:
+  //
+  // Backspace down, char & up, VK_PACKET('à').
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      WmKeyDownInfo{VK_BACK, kScanCodeBackspace, kNotExtended, kWasUp}.Build(
+          kWmResultZero),
+      WmCharInfo{0x8, kScanCodeBackspace, kNotExtended, kWasUp}.Build(
+          kWmResultZero),
+      WmKeyUpInfo{VK_BACK, kScanCodeBackspace, kNotExtended}.Build(
+          kWmResultZero),
+      WmKeyDownInfo{VK_PACKET, 0, kNotExtended, kWasUp}.Build(kWmResultDefault),
+      WmCharInfo{0xe0 /*'à'*/, 0, kNotExtended, kWasUp}.Build(kWmResultZero),
+      WmKeyUpInfo{VK_PACKET, 0, kNotExtended}.Build(kWmResultDefault)});
+
+  // The Backspace event has not responded yet, therefore the char message must
+  // hold. This is because when the framework is handling the Backspace event,
+  // it will send a setEditingState message that updates the text state that has
+  // the last character deleted  (denoted by `string1`). Processing the char
+  // message before then will cause the final text to set to `string1`.
+  EXPECT_EQ(key_calls.size(), 2);
+  EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeDown,
+                       kPhysicalBackspace, kLogicalBackspace, "",
+                       kNotSynthesized);
+  EXPECT_CALL_IS_EVENT(key_calls[1], kFlutterKeyEventTypeUp, kPhysicalBackspace,
+                       kLogicalBackspace, "", kNotSynthesized);
+  clear_key_calls();
+  EXPECT_EQ(tester.RedispatchedMessageCountAndClear(), 0);
+
+  EXPECT_EQ(recorded_callbacks.size(), 2);
+  recorded_callbacks[0](backspace_response);
+
+  EXPECT_EQ(key_calls.size(), 1);
+  EXPECT_CALL_IS_TEXT(key_calls[0], u"à");
+  clear_key_calls();
+  EXPECT_EQ(tester.RedispatchedMessageCountAndClear(),
+            backspace_response ? 0 : 2);
+
+  recorded_callbacks[1](false);
+  EXPECT_EQ(key_calls.size(), 0);
+  EXPECT_EQ(tester.RedispatchedMessageCountAndClear(), 1);
+
+  tester.Responding(false);
+
+  // Release F
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      WmKeyUpInfo{kVirtualKeyF, kScanCodeKeyF, kNotExtended,
+                  /* overwrite_prev_state_0 */ true}
+          .Build(kWmResultZero)});
+
+  EXPECT_EQ(key_calls.size(), 1);
+  EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeDown, 0, 0, "",
+                       kNotSynthesized);
+  clear_key_calls();
+  EXPECT_EQ(tester.RedispatchedMessageCountAndClear(), 0);
+}
+
+TEST(KeyboardTest, VietnameseTelexAddDiacriticWithSlowFalseResponse) {
+  VietnameseTelexAddDiacriticWithSlowResponse(false);
+}
+
+TEST(KeyboardTest, VietnameseTelexAddDiacriticWithSlowTrueResponse) {
+  VietnameseTelexAddDiacriticWithSlowResponse(true);
 }
 
 }  // namespace testing
