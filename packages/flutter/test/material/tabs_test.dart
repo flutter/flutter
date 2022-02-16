@@ -1056,7 +1056,7 @@ void main() {
     final PageView pageView = tester.widget(find.byType(PageView));
     final PageController pageController = pageView.controller;
 
-    // The TabVie was initialized with viewportFraction as 0.8
+    // The TabView was initialized with viewportFraction as 0.8
     // So it's expected the PageView inside would obtain the same viewportFraction
     expect(pageController.viewportFraction, 0.8);
   });
@@ -1099,7 +1099,7 @@ void main() {
     final PageView pageView = tester.widget(find.byType(PageView));
     final PageController pageController = pageView.controller;
 
-    // The TabVie was initialized with viewportFraction as 0.8
+    // The TabView was initialized with viewportFraction as 0.8
     // So it's expected the PageView inside would obtain the same viewportFraction
     expect(pageController.viewportFraction, 1);
   });

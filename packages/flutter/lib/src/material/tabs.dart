@@ -1360,7 +1360,7 @@ class TabBarView extends StatefulWidget {
   final DragStartBehavior dragStartBehavior;
 
   /// The fraction of the viewport that each tabView should occupy.
-  /// 
+  ///
   /// Defaults to 1.0, which means each page fills the viewport in the scrolling direction.
   final double viewportFraction;
 
