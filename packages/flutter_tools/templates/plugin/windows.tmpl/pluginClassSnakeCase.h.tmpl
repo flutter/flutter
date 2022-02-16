@@ -1,0 +1,32 @@
+#ifndef FLUTTER_PLUGIN_{{pluginClassCapitalSnakeCase}}_H_
+#define FLUTTER_PLUGIN_{{pluginClassCapitalSnakeCase}}_H_
+
+#include <flutter/method_channel.h>
+#include <flutter/plugin_registrar_windows.h>
+
+#include <memory>
+
+namespace {{projectName}} {
+
+class {{pluginClass}} : public flutter::Plugin {
+ public:
+  static void RegisterWithRegistrar(flutter::PluginRegistrarWindows *registrar);
+
+  {{pluginClass}}();
+
+  virtual ~{{pluginClass}}();
+
+  // Disallow copy and assign.
+  {{pluginClass}}(const {{pluginClass}}&) = delete;
+  {{pluginClass}}& operator=(const {{pluginClass}}&) = delete;
+
+ private:
+  // Called when a method is called on this plugin's channel from Dart.
+  void HandleMethodCall(
+      const flutter::MethodCall<flutter::EncodableValue> &method_call,
+      std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result);
+};
+
+}  // namespace {{projectName}}
+
+#endif  // FLUTTER_PLUGIN_{{pluginClassCapitalSnakeCase}}_H_

@@ -14,10 +14,10 @@ import '../rendering/rendering_tester.dart';
 import 'mocks_for_image_cache.dart';
 
 void main() {
-  TestRenderingFlutterBinding();
+  TestRenderingFlutterBinding.ensureInitialized();
 
   tearDown(() {
-    imageCache!
+    imageCache
       ..clear()
       ..clearLiveImages()
       ..maximumSize = 1000
@@ -25,7 +25,7 @@ void main() {
   });
 
   test('maintains cache size', () async {
-    imageCache!.maximumSize = 3;
+    imageCache.maximumSize = 3;
 
     final TestImageInfo a = await extractOneFrame(TestImageProvider(1, 1, image: await createTestImage()).resolve(ImageConfiguration.empty)) as TestImageInfo;
     expect(a.value, equals(1));
@@ -98,19 +98,19 @@ void main() {
   test('clear removes all images and resets cache size', () async {
     final ui.Image testImage = await createTestImage(width: 8, height: 8);
 
-    expect(imageCache!.currentSize, 0);
-    expect(imageCache!.currentSizeBytes, 0);
+    expect(imageCache.currentSize, 0);
+    expect(imageCache.currentSizeBytes, 0);
 
     await extractOneFrame(TestImageProvider(1, 1, image: testImage).resolve(ImageConfiguration.empty));
     await extractOneFrame(TestImageProvider(2, 2, image: testImage).resolve(ImageConfiguration.empty));
 
-    expect(imageCache!.currentSize, 2);
-    expect(imageCache!.currentSizeBytes, 256 * 2);
+    expect(imageCache.currentSize, 2);
+    expect(imageCache.currentSizeBytes, 256 * 2);
 
-    imageCache!.clear();
+    imageCache.clear();
 
-    expect(imageCache!.currentSize, 0);
-    expect(imageCache!.currentSizeBytes, 0);
+    expect(imageCache.currentSize, 0);
+    expect(imageCache.currentSizeBytes, 0);
   });
 
   test('evicts individual images', () async {
@@ -118,31 +118,31 @@ void main() {
     await extractOneFrame(TestImageProvider(1, 1, image: testImage).resolve(ImageConfiguration.empty));
     await extractOneFrame(TestImageProvider(2, 2, image: testImage).resolve(ImageConfiguration.empty));
 
-    expect(imageCache!.currentSize, 2);
-    expect(imageCache!.currentSizeBytes, 256 * 2);
-    expect(imageCache!.evict(1), true);
-    expect(imageCache!.currentSize, 1);
-    expect(imageCache!.currentSizeBytes, 256);
+    expect(imageCache.currentSize, 2);
+    expect(imageCache.currentSizeBytes, 256 * 2);
+    expect(imageCache.evict(1), true);
+    expect(imageCache.currentSize, 1);
+    expect(imageCache.currentSizeBytes, 256);
   });
 
   test('Do not cache large images', () async {
     final ui.Image testImage = await createTestImage(width: 8, height: 8);
 
-    imageCache!.maximumSizeBytes = 1;
+    imageCache.maximumSizeBytes = 1;
     await extractOneFrame(TestImageProvider(1, 1, image: testImage).resolve(ImageConfiguration.empty));
-    expect(imageCache!.currentSize, 0);
-    expect(imageCache!.currentSizeBytes, 0);
-    expect(imageCache!.maximumSizeBytes, 1);
+    expect(imageCache.currentSize, 0);
+    expect(imageCache.currentSizeBytes, 0);
+    expect(imageCache.maximumSizeBytes, 1);
   });
 
   test('Returns null if an error is caught resolving an image', () {
     Future<ui.Codec> _basicDecoder(Uint8List bytes, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) {
-      return PaintingBinding.instance!.instantiateImageCodec(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight, allowUpscaling: allowUpscaling ?? false);
+      return PaintingBinding.instance.instantiateImageCodec(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight, allowUpscaling: allowUpscaling ?? false);
     }
     final ErrorImageProvider errorImage = ErrorImageProvider();
-    expect(() => imageCache!.putIfAbsent(errorImage, () => errorImage.load(errorImage, _basicDecoder)), throwsA(isA<Error>()));
+    expect(() => imageCache.putIfAbsent(errorImage, () => errorImage.load(errorImage, _basicDecoder)), throwsA(isA<Error>()));
     bool caughtError = false;
-    final ImageStreamCompleter? result = imageCache!.putIfAbsent(
+    final ImageStreamCompleter? result = imageCache.putIfAbsent(
       errorImage,
       () => errorImage.load(errorImage, _basicDecoder),
       onError: (dynamic error, StackTrace? stackTrace) {
@@ -159,10 +159,10 @@ void main() {
     final TestImageStreamCompleter completer1 = TestImageStreamCompleter();
     final TestImageStreamCompleter completer2 = TestImageStreamCompleter();
 
-    final TestImageStreamCompleter resultingCompleter1 = imageCache!.putIfAbsent(testImage, () {
+    final TestImageStreamCompleter resultingCompleter1 = imageCache.putIfAbsent(testImage, () {
       return completer1;
     })! as TestImageStreamCompleter;
-    final TestImageStreamCompleter resultingCompleter2 = imageCache!.putIfAbsent(testImage, () {
+    final TestImageStreamCompleter resultingCompleter2 = imageCache.putIfAbsent(testImage, () {
       return completer2;
     })! as TestImageStreamCompleter;
 
@@ -176,20 +176,20 @@ void main() {
     final TestImageStreamCompleter completer1 = TestImageStreamCompleter();
     final TestImageStreamCompleter completer2 = TestImageStreamCompleter();
 
-    final TestImageStreamCompleter resultingCompleter1 = imageCache!.putIfAbsent(testImage, () {
+    final TestImageStreamCompleter resultingCompleter1 = imageCache.putIfAbsent(testImage, () {
       return completer1;
     })! as TestImageStreamCompleter;
 
-    expect(imageCache!.statusForKey(testImage).pending, true);
-    expect(imageCache!.statusForKey(testImage).live, true);
-    imageCache!.clear();
-    expect(imageCache!.statusForKey(testImage).pending, false);
-    expect(imageCache!.statusForKey(testImage).live, true);
-    imageCache!.clearLiveImages();
-    expect(imageCache!.statusForKey(testImage).pending, false);
-    expect(imageCache!.statusForKey(testImage).live, false);
+    expect(imageCache.statusForKey(testImage).pending, true);
+    expect(imageCache.statusForKey(testImage).live, true);
+    imageCache.clear();
+    expect(imageCache.statusForKey(testImage).pending, false);
+    expect(imageCache.statusForKey(testImage).live, true);
+    imageCache.clearLiveImages();
+    expect(imageCache.statusForKey(testImage).pending, false);
+    expect(imageCache.statusForKey(testImage).live, false);
 
-    final TestImageStreamCompleter resultingCompleter2 = imageCache!.putIfAbsent(testImage, () {
+    final TestImageStreamCompleter resultingCompleter2 = imageCache.putIfAbsent(testImage, () {
       return completer2;
     })! as TestImageStreamCompleter;
 
@@ -203,13 +203,13 @@ void main() {
     final TestImageStreamCompleter completer1 = TestImageStreamCompleter();
     final TestImageStreamCompleter completer2 = TestImageStreamCompleter();
 
-    final TestImageStreamCompleter resultingCompleter1 = imageCache!.putIfAbsent(testImage, () {
+    final TestImageStreamCompleter resultingCompleter1 = imageCache.putIfAbsent(testImage, () {
       return completer1;
     })! as TestImageStreamCompleter;
 
-    imageCache!.evict(testImage);
+    imageCache.evict(testImage);
 
-    final TestImageStreamCompleter resultingCompleter2 = imageCache!.putIfAbsent(testImage, () {
+    final TestImageStreamCompleter resultingCompleter2 = imageCache.putIfAbsent(testImage, () {
       return completer2;
     })! as TestImageStreamCompleter;
 
@@ -227,7 +227,7 @@ void main() {
             fail('Image should not complete successfully');
            },
           onError: (dynamic exception, StackTrace? stackTrace) {
-            final bool evictionResult = imageCache!.evict(1);
+            final bool evictionResult = imageCache.evict(1);
             expect(evictionResult, isTrue);
           },
         ));
@@ -240,12 +240,12 @@ void main() {
 
     final TestImageStreamCompleter completer1 = TestImageStreamCompleter();
 
-    final TestImageStreamCompleter resultingCompleter1 = imageCache!.putIfAbsent(testImage, () {
+    final TestImageStreamCompleter resultingCompleter1 = imageCache.putIfAbsent(testImage, () {
       return completer1;
     })! as TestImageStreamCompleter;
 
     expect(resultingCompleter1, completer1);
-    expect(imageCache!.containsKey(testImage), true);
+    expect(imageCache.containsKey(testImage), true);
   });
 
   test('containsKey - completed', () async {
@@ -253,7 +253,7 @@ void main() {
 
     final TestImageStreamCompleter completer1 = TestImageStreamCompleter();
 
-    final TestImageStreamCompleter resultingCompleter1 = imageCache!.putIfAbsent(testImage, () {
+    final TestImageStreamCompleter resultingCompleter1 = imageCache.putIfAbsent(testImage, () {
       return completer1;
     })! as TestImageStreamCompleter;
 
@@ -261,11 +261,11 @@ void main() {
     completer1.testSetImage(testImage);
 
     expect(resultingCompleter1, completer1);
-    expect(imageCache!.containsKey(testImage), true);
+    expect(imageCache.containsKey(testImage), true);
   });
 
   test('putIfAbsent updates LRU properties of a live image', () async {
-    imageCache!.maximumSize = 1;
+    imageCache.maximumSize = 1;
     final ui.Image testImage = await createTestImage(width: 8, height: 8);
     final ui.Image testImage2 = await createTestImage(width: 10, height: 10);
 
@@ -274,32 +274,32 @@ void main() {
 
     completer1.addListener(ImageStreamListener((ImageInfo info, bool syncCall) {}));
 
-    final TestImageStreamCompleter resultingCompleter1 = imageCache!.putIfAbsent(testImage, () {
+    final TestImageStreamCompleter resultingCompleter1 = imageCache.putIfAbsent(testImage, () {
       return completer1;
     })! as TestImageStreamCompleter;
 
-    expect(imageCache!.statusForKey(testImage).pending, false);
-    expect(imageCache!.statusForKey(testImage).keepAlive, true);
-    expect(imageCache!.statusForKey(testImage).live, true);
-    expect(imageCache!.statusForKey(testImage2).untracked, true);
-    final TestImageStreamCompleter resultingCompleter2 = imageCache!.putIfAbsent(testImage2, () {
+    expect(imageCache.statusForKey(testImage).pending, false);
+    expect(imageCache.statusForKey(testImage).keepAlive, true);
+    expect(imageCache.statusForKey(testImage).live, true);
+    expect(imageCache.statusForKey(testImage2).untracked, true);
+    final TestImageStreamCompleter resultingCompleter2 = imageCache.putIfAbsent(testImage2, () {
       return completer2;
     })! as TestImageStreamCompleter;
 
 
-    expect(imageCache!.statusForKey(testImage).pending, false);
-    expect(imageCache!.statusForKey(testImage).keepAlive, false); // evicted
-    expect(imageCache!.statusForKey(testImage).live, true);
-    expect(imageCache!.statusForKey(testImage2).pending, false);
-    expect(imageCache!.statusForKey(testImage2).keepAlive, true); // took the LRU spot.
-    expect(imageCache!.statusForKey(testImage2).live, false); // no listeners
+    expect(imageCache.statusForKey(testImage).pending, false);
+    expect(imageCache.statusForKey(testImage).keepAlive, false); // evicted
+    expect(imageCache.statusForKey(testImage).live, true);
+    expect(imageCache.statusForKey(testImage2).pending, false);
+    expect(imageCache.statusForKey(testImage2).keepAlive, true); // took the LRU spot.
+    expect(imageCache.statusForKey(testImage2).live, false); // no listeners
 
     expect(resultingCompleter1, completer1);
     expect(resultingCompleter2, completer2);
   });
 
   test('Live image cache avoids leaks of unlistened streams', () async {
-    imageCache!.maximumSize = 3;
+    imageCache.maximumSize = 3;
 
     TestImageProvider(1, 1, image: await createTestImage()).resolve(ImageConfiguration.empty);
     TestImageProvider(2, 2, image: await createTestImage()).resolve(ImageConfiguration.empty);
@@ -311,12 +311,12 @@ void main() {
     // wait an event loop to let image resolution process.
     await null;
 
-    expect(imageCache!.currentSize, 3);
-    expect(imageCache!.liveImageCount, 0);
+    expect(imageCache.currentSize, 3);
+    expect(imageCache.liveImageCount, 0);
   });
 
   test('Disabled image cache does not leak live images', () async {
-    imageCache!.maximumSize = 0;
+    imageCache.maximumSize = 0;
 
     TestImageProvider(1, 1, image: await createTestImage()).resolve(ImageConfiguration.empty);
     TestImageProvider(2, 2, image: await createTestImage()).resolve(ImageConfiguration.empty);
@@ -328,8 +328,8 @@ void main() {
     // wait an event loop to let image resolution process.
     await null;
 
-    expect(imageCache!.currentSize, 0);
-    expect(imageCache!.liveImageCount, 0);
+    expect(imageCache.currentSize, 0);
+    expect(imageCache.liveImageCount, 0);
   });
 
   test('Evicting a pending image clears the live image by default', () async {
@@ -337,13 +337,13 @@ void main() {
 
     final TestImageStreamCompleter completer1 = TestImageStreamCompleter();
 
-    imageCache!.putIfAbsent(testImage, () => completer1);
-    expect(imageCache!.statusForKey(testImage).pending, true);
-    expect(imageCache!.statusForKey(testImage).live, true);
-    expect(imageCache!.statusForKey(testImage).keepAlive, false);
+    imageCache.putIfAbsent(testImage, () => completer1);
+    expect(imageCache.statusForKey(testImage).pending, true);
+    expect(imageCache.statusForKey(testImage).live, true);
+    expect(imageCache.statusForKey(testImage).keepAlive, false);
 
-    imageCache!.evict(testImage);
-    expect(imageCache!.statusForKey(testImage).untracked, true);
+    imageCache.evict(testImage);
+    expect(imageCache.statusForKey(testImage).untracked, true);
   });
 
   test('Evicting a pending image does clear the live image when includeLive is false and only cache listening', () async {
@@ -351,15 +351,15 @@ void main() {
 
     final TestImageStreamCompleter completer1 = TestImageStreamCompleter();
 
-    imageCache!.putIfAbsent(testImage, () => completer1);
-    expect(imageCache!.statusForKey(testImage).pending, true);
-    expect(imageCache!.statusForKey(testImage).live, true);
-    expect(imageCache!.statusForKey(testImage).keepAlive, false);
+    imageCache.putIfAbsent(testImage, () => completer1);
+    expect(imageCache.statusForKey(testImage).pending, true);
+    expect(imageCache.statusForKey(testImage).live, true);
+    expect(imageCache.statusForKey(testImage).keepAlive, false);
 
-    imageCache!.evict(testImage, includeLive: false);
-    expect(imageCache!.statusForKey(testImage).pending, false);
-    expect(imageCache!.statusForKey(testImage).live, false);
-    expect(imageCache!.statusForKey(testImage).keepAlive, false);
+    imageCache.evict(testImage, includeLive: false);
+    expect(imageCache.statusForKey(testImage).pending, false);
+    expect(imageCache.statusForKey(testImage).live, false);
+    expect(imageCache.statusForKey(testImage).keepAlive, false);
   });
 
   test('Evicting a pending image does clear the live image when includeLive is false and some other listener', () async {
@@ -367,16 +367,16 @@ void main() {
 
     final TestImageStreamCompleter completer1 = TestImageStreamCompleter();
 
-    imageCache!.putIfAbsent(testImage, () => completer1);
-    expect(imageCache!.statusForKey(testImage).pending, true);
-    expect(imageCache!.statusForKey(testImage).live, true);
-    expect(imageCache!.statusForKey(testImage).keepAlive, false);
+    imageCache.putIfAbsent(testImage, () => completer1);
+    expect(imageCache.statusForKey(testImage).pending, true);
+    expect(imageCache.statusForKey(testImage).live, true);
+    expect(imageCache.statusForKey(testImage).keepAlive, false);
 
     completer1.addListener(ImageStreamListener((_, __) {}));
-    imageCache!.evict(testImage, includeLive: false);
-    expect(imageCache!.statusForKey(testImage).pending, false);
-    expect(imageCache!.statusForKey(testImage).live, true);
-    expect(imageCache!.statusForKey(testImage).keepAlive, false);
+    imageCache.evict(testImage, includeLive: false);
+    expect(imageCache.statusForKey(testImage).pending, false);
+    expect(imageCache.statusForKey(testImage).live, true);
+    expect(imageCache.statusForKey(testImage).keepAlive, false);
   });
 
   test('Evicting a completed image does clear the live image by default', () async {
@@ -386,13 +386,13 @@ void main() {
       ..testSetImage(testImage)
       ..addListener(ImageStreamListener((ImageInfo info, bool syncCall) {}));
 
-    imageCache!.putIfAbsent(testImage, () => completer1);
-    expect(imageCache!.statusForKey(testImage).pending, false);
-    expect(imageCache!.statusForKey(testImage).live, true);
-    expect(imageCache!.statusForKey(testImage).keepAlive, true);
+    imageCache.putIfAbsent(testImage, () => completer1);
+    expect(imageCache.statusForKey(testImage).pending, false);
+    expect(imageCache.statusForKey(testImage).live, true);
+    expect(imageCache.statusForKey(testImage).keepAlive, true);
 
-    imageCache!.evict(testImage);
-    expect(imageCache!.statusForKey(testImage).untracked, true);
+    imageCache.evict(testImage);
+    expect(imageCache.statusForKey(testImage).untracked, true);
   });
 
   test('Evicting a completed image does not clear the live image when includeLive is set to false', () async {
@@ -402,15 +402,15 @@ void main() {
       ..testSetImage(testImage)
       ..addListener(ImageStreamListener((ImageInfo info, bool syncCall) {}));
 
-    imageCache!.putIfAbsent(testImage, () => completer1);
-    expect(imageCache!.statusForKey(testImage).pending, false);
-    expect(imageCache!.statusForKey(testImage).live, true);
-    expect(imageCache!.statusForKey(testImage).keepAlive, true);
+    imageCache.putIfAbsent(testImage, () => completer1);
+    expect(imageCache.statusForKey(testImage).pending, false);
+    expect(imageCache.statusForKey(testImage).live, true);
+    expect(imageCache.statusForKey(testImage).keepAlive, true);
 
-    imageCache!.evict(testImage, includeLive: false);
-    expect(imageCache!.statusForKey(testImage).pending, false);
-    expect(imageCache!.statusForKey(testImage).live, true);
-    expect(imageCache!.statusForKey(testImage).keepAlive, false);
+    imageCache.evict(testImage, includeLive: false);
+    expect(imageCache.statusForKey(testImage).pending, false);
+    expect(imageCache.statusForKey(testImage).live, true);
+    expect(imageCache.statusForKey(testImage).keepAlive, false);
   });
 
   test('Clearing liveImages removes callbacks', () async {
@@ -426,27 +426,27 @@ void main() {
       ..testSetImage(testImage)
       ..addListener(listener);
 
-    imageCache!.putIfAbsent(testImage, () => completer1);
-    expect(imageCache!.statusForKey(testImage).pending, false);
-    expect(imageCache!.statusForKey(testImage).live, true);
-    expect(imageCache!.statusForKey(testImage).keepAlive, true);
+    imageCache.putIfAbsent(testImage, () => completer1);
+    expect(imageCache.statusForKey(testImage).pending, false);
+    expect(imageCache.statusForKey(testImage).live, true);
+    expect(imageCache.statusForKey(testImage).keepAlive, true);
 
-    imageCache!.clear();
-    imageCache!.clearLiveImages();
-    expect(imageCache!.statusForKey(testImage).pending, false);
-    expect(imageCache!.statusForKey(testImage).live, false);
-    expect(imageCache!.statusForKey(testImage).keepAlive, false);
+    imageCache.clear();
+    imageCache.clearLiveImages();
+    expect(imageCache.statusForKey(testImage).pending, false);
+    expect(imageCache.statusForKey(testImage).live, false);
+    expect(imageCache.statusForKey(testImage).keepAlive, false);
 
-    imageCache!.putIfAbsent(testImage, () => completer2);
-    expect(imageCache!.statusForKey(testImage).pending, false);
-    expect(imageCache!.statusForKey(testImage).live, true);
-    expect(imageCache!.statusForKey(testImage).keepAlive, true);
+    imageCache.putIfAbsent(testImage, () => completer2);
+    expect(imageCache.statusForKey(testImage).pending, false);
+    expect(imageCache.statusForKey(testImage).live, true);
+    expect(imageCache.statusForKey(testImage).keepAlive, true);
 
     completer1.removeListener(listener);
 
-    expect(imageCache!.statusForKey(testImage).pending, false);
-    expect(imageCache!.statusForKey(testImage).live, true);
-    expect(imageCache!.statusForKey(testImage).keepAlive, true);
+    expect(imageCache.statusForKey(testImage).pending, false);
+    expect(imageCache.statusForKey(testImage).live, true);
+    expect(imageCache.statusForKey(testImage).keepAlive, true);
   });
 
   test('Live image gets size updated', () async {
@@ -465,32 +465,32 @@ void main() {
     final TestImageStreamCompleter completer1 = TestImageStreamCompleter()
       ..addListener(listener);
 
-    imageCache!.putIfAbsent(testImage, () => completer1);
-    expect(imageCache!.statusForKey(testImage).pending, true);
-    expect(imageCache!.statusForKey(testImage).live, true);
-    expect(imageCache!.statusForKey(testImage).keepAlive, false);
-    expect(imageCache!.currentSizeBytes, 0);
+    imageCache.putIfAbsent(testImage, () => completer1);
+    expect(imageCache.statusForKey(testImage).pending, true);
+    expect(imageCache.statusForKey(testImage).live, true);
+    expect(imageCache.statusForKey(testImage).keepAlive, false);
+    expect(imageCache.currentSizeBytes, 0);
 
     completer1.testSetImage(testImage);
 
-    expect(imageCache!.statusForKey(testImage).pending, false);
-    expect(imageCache!.statusForKey(testImage).live, true);
-    expect(imageCache!.statusForKey(testImage).keepAlive, true);
-    expect(imageCache!.currentSizeBytes, testImageSize);
+    expect(imageCache.statusForKey(testImage).pending, false);
+    expect(imageCache.statusForKey(testImage).live, true);
+    expect(imageCache.statusForKey(testImage).keepAlive, true);
+    expect(imageCache.currentSizeBytes, testImageSize);
 
-    imageCache!.evict(testImage, includeLive: false);
+    imageCache.evict(testImage, includeLive: false);
 
-    expect(imageCache!.statusForKey(testImage).pending, false);
-    expect(imageCache!.statusForKey(testImage).live, true);
-    expect(imageCache!.statusForKey(testImage).keepAlive, false);
-    expect(imageCache!.currentSizeBytes, 0);
+    expect(imageCache.statusForKey(testImage).pending, false);
+    expect(imageCache.statusForKey(testImage).live, true);
+    expect(imageCache.statusForKey(testImage).keepAlive, false);
+    expect(imageCache.currentSizeBytes, 0);
 
-    imageCache!.putIfAbsent(testImage, () => completer1);
+    imageCache.putIfAbsent(testImage, () => completer1);
 
-    expect(imageCache!.statusForKey(testImage).pending, false);
-    expect(imageCache!.statusForKey(testImage).live, true);
-    expect(imageCache!.statusForKey(testImage).keepAlive, true);
-    expect(imageCache!.currentSizeBytes, testImageSize);
+    expect(imageCache.statusForKey(testImage).pending, false);
+    expect(imageCache.statusForKey(testImage).live, true);
+    expect(imageCache.statusForKey(testImage).keepAlive, true);
+    expect(imageCache.currentSizeBytes, testImageSize);
   });
 
   test('Image is obtained and disposed of properly for cache', () async {
@@ -506,7 +506,7 @@ void main() {
     final TestImageStreamCompleter completer = TestImageStreamCompleter();
 
     completer.addListener(listener);
-    imageCache!.putIfAbsent(key, () => completer);
+    imageCache.putIfAbsent(key, () => completer);
 
     expect(testImage.debugGetOpenHandleStackTraces()!.length, 1);
 
@@ -519,16 +519,16 @@ void main() {
     completer.removeListener(listener);
 
     // Force us to the end of the frame.
-    SchedulerBinding.instance!.scheduleFrame();
-    await SchedulerBinding.instance!.endOfFrame;
+    SchedulerBinding.instance.scheduleFrame();
+    await SchedulerBinding.instance.endOfFrame;
 
     expect(testImage.debugGetOpenHandleStackTraces()!.length, 2);
 
-    expect(imageCache!.evict(key), true);
+    expect(imageCache.evict(key), true);
 
     // Force us to the end of the frame.
-    SchedulerBinding.instance!.scheduleFrame();
-    await SchedulerBinding.instance!.endOfFrame;
+    SchedulerBinding.instance.scheduleFrame();
+    await SchedulerBinding.instance.endOfFrame;
 
     // -1 _CachedImage
     // -1 ImageStreamCompleter
@@ -551,7 +551,7 @@ void main() {
     final TestImageStreamCompleter completer = TestImageStreamCompleter();
 
     completer.addListener(listener);
-    imageCache!.putIfAbsent(key, () => completer);
+    imageCache.putIfAbsent(key, () => completer);
 
     expect(testImage.debugGetOpenHandleStackTraces()!.length, 1);
 
@@ -561,11 +561,11 @@ void main() {
     // Just our imageInfo and the completer.
     expect(testImage.debugGetOpenHandleStackTraces()!.length, 2);
 
-    expect(imageCache!.evict(key), true);
+    expect(imageCache.evict(key), true);
 
     // Force us to the end of the frame.
-    SchedulerBinding.instance!.scheduleFrame();
-    await SchedulerBinding.instance!.endOfFrame;
+    SchedulerBinding.instance.scheduleFrame();
+    await SchedulerBinding.instance.endOfFrame;
 
     // Live image still around since there's still a listener, and the listener
     // should be holding a handle.
