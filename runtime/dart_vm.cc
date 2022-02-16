@@ -54,7 +54,8 @@ static const char* kDartAllConfigsArgs[] = {
     "--enable_mirrors=false",
     "--background_compilation",
     "--lazy_async_stacks",
-    "--mark_when_idle",
+    // 'mark_when_idle' appears to cause a regression, turning off for now.
+    // "--mark_when_idle",
     // clang-format on
 };
 
