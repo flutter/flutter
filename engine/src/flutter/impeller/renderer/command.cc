@@ -4,15 +4,21 @@
 
 #include "impeller/renderer/command.h"
 
+#include "impeller/renderer/formats.h"
 #include "impeller/renderer/vertex_descriptor.h"
 
 namespace impeller {
 
 bool Command::BindVertices(const VertexBuffer& buffer) {
+  if (index_type == IndexType::kUnknown) {
+    return false;
+  }
+
   vertex_bindings.buffers[VertexDescriptor::kReservedVertexBufferIndex] =
       buffer.vertex_buffer;
   index_buffer = buffer.index_buffer;
   index_count = buffer.index_count;
+  index_type = buffer.index_type;
   return true;
 }
 
