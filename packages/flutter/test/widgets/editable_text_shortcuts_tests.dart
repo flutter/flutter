@@ -69,6 +69,7 @@ void main() {
         child: SizedBox(
           // Softwrap at exactly 20 characters.
           width: 201,
+          height: 200,
           child: EditableText(
             controller: controller,
             showSelectionHandles: true,
