@@ -234,9 +234,7 @@ class _AnyTapGestureRecognizer extends BaseTapGestureRecognizer {
   @protected
   @override
   bool isPointerAllowed(PointerDownEvent event) {
-    if (onAnyTapUp == null) {
-      return false;
-    } else if (onAnyTapCancel == null) {
+    if (onAnyTapUp == null && onAnyTapCancel == null) {
       return false;
     }
     return super.isPointerAllowed(event);
