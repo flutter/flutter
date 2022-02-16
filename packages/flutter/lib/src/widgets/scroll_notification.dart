@@ -31,13 +31,13 @@ mixin ViewportNotificationMixin on Notification {
   }
 }
 
-/// A mixin that allows [Element]s containing Viewport like widgets to correctly
+/// A mixin that allows [Element]s containing [Viewport] like widgets to correctly
 /// modify the notification depth of a [ViewportNotificationMixin].
 ///
 /// See also:
 ///   * [Viewport], which creates a custom [MultiChildRenderObjectElement] that mixes
 ///     this in.
-mixin ViewportElement on NotifiableElementMixin {
+mixin ViewportElementMixin  on NotifiableElementMixin {
   @override
   bool onNotification(Notification notification) {
     if (notification is ViewportNotificationMixin) {

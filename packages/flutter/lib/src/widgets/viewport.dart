@@ -208,7 +208,7 @@ class Viewport extends MultiChildRenderObjectWidget {
   }
 }
 
-class _ViewportElement extends MultiChildRenderObjectElement with NotifiableElementMixin, ViewportElement {
+class _ViewportElement extends MultiChildRenderObjectElement with NotifiableElementMixin, ViewportElementMixin {
   /// Creates an element that uses the given widget as its configuration.
   _ViewportElement(Viewport widget) : super(widget);
 

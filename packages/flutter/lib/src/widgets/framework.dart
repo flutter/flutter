@@ -3111,13 +3111,17 @@ class BuildOwner {
   }
 }
 
-/// Mixin this class to Elements allow receiving [Notification] objects dispatched
-/// by children.
+/// Mixin this class to allow receiving [Notification] objects dispatched by
+/// child elements.
 ///
 /// See also:
 ///   * [NotificationListener], for a widget that allows consuming notifications.
 mixin NotifiableElementMixin on Element {
-  /// Return true to consume the notification or false to let it continue bubbling.
+  /// Called when a notification of the appropriate type arrives at this
+  /// location in the tree.
+  ///
+  /// Return true to cancel the notification bubbling. Return false to
+  /// allow the notification to continue to be dispatched to further ancestors.
   bool onNotification(Notification notification);
 
   @override
@@ -3200,9 +3204,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
 
   Element? _parent;
   DebugReassembleConfig? _debugReassembleConfig;
-
   _NotificationNode? _notificationTree;
-
 
   /// Compare two widgets for equality.
   ///

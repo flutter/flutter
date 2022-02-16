@@ -103,9 +103,6 @@ class NotificationListener<T extends Notification> extends ProxyWidget {
   /// Return true to cancel the notification bubbling. Return false to
   /// allow the notification to continue to be dispatched to further ancestors.
   ///
-  /// The notification's [Notification.visitAncestor] method is called for each
-  /// ancestor, and invokes this callback as appropriate.
-  ///
   /// Notifications vary in terms of when they are dispatched. There are two
   /// main possibilities: dispatch between frames, and dispatch during layout.
   ///
@@ -123,7 +120,6 @@ class NotificationListener<T extends Notification> extends ProxyWidget {
 }
 
 /// An element used to host [NotificationListener] elements.
-@optionalTypeArgs
 class _NotificationElement<T extends Notification> extends ProxyElement with NotifiableElementMixin {
   _NotificationElement(NotificationListener<T> widget) : super(widget);
 
