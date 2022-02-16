@@ -29,6 +29,16 @@ class VertexBufferBuilder {
 
   ~VertexBufferBuilder() = default;
 
+  constexpr impeller::IndexType GetIndexType() const {
+    if constexpr (sizeof(IndexType) == 2) {
+      return impeller::IndexType::k16bit;
+    } else if (sizeof(IndexType) == 4) {
+      return impeller::IndexType::k32bit;
+    } else {
+      return impeller::IndexType::kUnknown;
+    }
+  }
+
   void SetLabel(std::string label) { label_ = std::move(label); }
 
   void Reserve(size_t count) { return vertices_.reserve(count); }
@@ -56,6 +66,7 @@ class VertexBufferBuilder {
     buffer.vertex_buffer = CreateVertexBufferView(host_buffer);
     buffer.index_buffer = CreateIndexBufferView(host_buffer);
     buffer.index_count = GetIndexCount();
+    buffer.index_type = GetIndexType();
     return buffer;
   };
 
@@ -65,6 +76,7 @@ class VertexBufferBuilder {
     buffer.vertex_buffer = CreateVertexBufferView(device_allocator);
     buffer.index_buffer = CreateIndexBufferView(device_allocator);
     buffer.index_count = GetIndexCount();
+    buffer.index_type = GetIndexType();
     return buffer;
   };
 
