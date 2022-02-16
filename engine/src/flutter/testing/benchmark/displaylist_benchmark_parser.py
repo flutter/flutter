@@ -5,6 +5,7 @@
 # found in the LICENSE file.
 
 import argparse
+import csv
 import json
 import sys
 import matplotlib.pyplot as plt
@@ -20,6 +21,7 @@ class BenchmarkResult:
     self.yLimit = 200
     self.timeUnit = timeUnit
     self.drawCallCount = drawCallCount
+    self.optionalValues = {}
 
   def __repr__(self):
     return 'Name: % s\nBackend: % s\nSeries: % s\nSeriesLabels: % s\n' % (self.name, self.backend, self.series, self.seriesLabels)
@@ -33,6 +35,12 @@ class BenchmarkResult:
 
     if y > self.yLimit:
       self.largeYValues = True
+
+  def addOptionalValue(self, name, x, y):
+    if name not in self.optionalValues:
+      self.optionalValues[name] = {}
+
+    self.optionalValues[name][x] = y
 
   def setFamilyLabel(self, family, label):
     # I'm not keying the main series dict off the family label
@@ -93,6 +101,28 @@ class BenchmarkResult:
 
     return figures
 
+  def writeCSV(self, writer):
+    # For now assume that all our series have the same x values
+    # this is true for now, but may differ in the future with benchmark changes
+    x_values = []
+    y_values = []
+    for family in self.series:
+      x_values = ['x'] + self.series[family]['x']
+      y_values.append([self.seriesLabels[family]] + self.series[family]['y'])
+
+    for name in self.optionalValues:
+      column = [name]
+      for key in self.optionalValues[name]:
+        column.append(self.optionalValues[name][key])
+      y_values.append(column)
+
+    writer.writerow([self.name, self.drawCallCount])
+    for line in range(len(x_values)):
+      row = [x_values[line]]
+      for series in range(len(y_values)):
+        row.append(y_values[series][line])
+      writer.writerow(row)
+
 def main():
   parser = argparse.ArgumentParser()
 
@@ -100,10 +130,12 @@ def main():
       help='Path to the JSON output from Google Benchmark')
   parser.add_argument('-o', '--output-pdf', dest='outputPDF', action='store', default='output.pdf',
                       help='Filename to output the PDF of graphs to.')
+  parser.add_argument('-c', '--output-csv', dest='outputCSV', action='store', default='output.csv',
+                      help='Filename to output the CSV data to.')
 
   args = parser.parse_args()
   jsonData = parseJSON(args.filename)
-  return processBenchmarkData(jsonData, args.outputPDF)
+  return processBenchmarkData(jsonData, args.outputPDF, args.outputCSV)
 
 def error(message):
   print(message)
@@ -127,7 +159,7 @@ def extractAttributesLabel(benchmarkResult):
 
   return label[:-2]
 
-def processBenchmarkData(benchmarkJSON, outputPDF):
+def processBenchmarkData(benchmarkJSON, outputPDF, outputCSV):
   benchmarkResultsData = {}
 
   for benchmarkResult in benchmarkJSON:
@@ -169,18 +201,28 @@ def processBenchmarkData(benchmarkJSON, outputPDF):
     else:
       benchmarkDrawCallCount = -1
 
+    optional_keys = ['DrawCallCount_Varies', 'VerbCount', 'PointCount', 'VertexCount', 'GlyphCount']
+
     if benchmarkName not in benchmarkResultsData:
       benchmarkResultsData[benchmarkName] = BenchmarkResult(benchmarkName, benchmarkBackend, benchmarkUnit, benchmarkDrawCallCount)
+
+    for key in optional_keys:
+      if key in benchmarkResult:
+        benchmarkResultsData[benchmarkName].addOptionalValue(key, benchmarkSeededValue, benchmarkResult[key])
 
     benchmarkResultsData[benchmarkName].addDataPoint(benchmarkFamilyIndex, benchmarkSeededValue, benchmarkRealTime)
     benchmarkResultsData[benchmarkName].setFamilyLabel(benchmarkFamilyIndex, benchmarkFamilyLabel)
 
   pp = pdfp(outputPDF)
 
+  csv_file = open(outputCSV, 'w')
+  csv_writer = csv.writer(csv_file)
+
   for benchmark in benchmarkResultsData:
     figures = benchmarkResultsData[benchmark].plot()
     for fig in figures:
       pp.savefig(fig)
+    benchmarkResultsData[benchmark].writeCSV(csv_writer)
   pp.close()
 
 
