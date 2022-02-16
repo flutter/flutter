@@ -6,8 +6,6 @@
 // machines.
 @Tags(<String>['reduced-test-set'])
 
-import 'dart:async';
-
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';

@@ -169,20 +169,20 @@ class ReorderableList extends StatefulWidget {
   final ReorderCallback onReorder;
 
   /// {@template flutter.widgets.reorderable_list.onReorderStart}
-  /// A callback that is called when an item is selected to be dragged.
+  /// A callback that is called when an item drag has started.
   ///
   /// The index parameter of the callback is the index of the selected item.
   ///
   /// See also:
   ///
-  ///   * [onReorderEnd], which is a called when the selected item is dropped.
+  ///   * [onReorderEnd], which is a called when the dragged item is dropped.
   ///   * [onReorder], which reports that a list item has been dragged to a new
   ///     location.
   /// {@endtemplate}
   final void Function(int index)? onReorderStart;
 
   /// {@template flutter.widgets.reorderable_list.onReorderEnd}
-  /// A callback that is called when the selected item is dropped.
+  /// A callback that is called when the dragged item is dropped.
   ///
   /// The index parameter of the callback is the index where the item is
   /// dropped. Unlike [onReorder], this is called even when the list item is
@@ -190,7 +190,7 @@ class ReorderableList extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///   * [onReorderStart], which is a called when an item is selected.
+  ///   * [onReorderStart], which is a called when an item drag has started.
   ///   * [onReorder], which reports that a list item has been dragged to a new
   ///     location.
   /// {@endtemplate}
