@@ -3314,6 +3314,7 @@ targets:
     scheduler: luci
 
   - name: Mac_ios flutter_view_ios__start_up
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/98419
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
