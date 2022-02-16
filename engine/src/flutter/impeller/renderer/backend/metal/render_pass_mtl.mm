@@ -428,6 +428,28 @@ bool RenderPassMTL::EncodeCommands(Allocator& allocator,
                                        : MTLWindingCounterClockwise];
     [encoder setCullMode:MTLCullModeNone];
     [encoder setStencilReferenceValue:command.stencil_reference];
+    if (command.viewport.has_value()) {
+      auto v = command.viewport.value();
+      MTLViewport viewport = {
+          .originX = v.rect.origin.x,
+          .originY = v.rect.origin.y,
+          .width = v.rect.size.width,
+          .height = v.rect.size.height,
+          .znear = v.znear,
+          .zfar = v.zfar,
+      };
+      [encoder setViewport:viewport];
+    }
+    if (command.scissor.has_value()) {
+      auto s = command.scissor.value();
+      MTLScissorRect scissor = {
+          .x = static_cast<NSUInteger>(s.origin.x),
+          .y = static_cast<NSUInteger>(s.origin.y),
+          .width = static_cast<NSUInteger>(s.size.width),
+          .height = static_cast<NSUInteger>(s.size.height),
+      };
+      [encoder setScissorRect:scissor];
+    }
     if (!bind_stage_resources(command.vertex_bindings, ShaderStage::kVertex)) {
       return false;
     }
@@ -470,6 +492,15 @@ bool RenderPassMTL::AddCommand(Command command) {
   if (!command) {
     VALIDATION_LOG << "Attempted to add an invalid command to the render pass.";
     return false;
+  }
+
+  if (command.scissor.has_value()) {
+    auto target_rect = IRect({}, render_target_.GetRenderTargetSize());
+    if (!target_rect.Contains(command.scissor.value())) {
+      VALIDATION_LOG << "Cannot apply a scissor that lies outside the bounds "
+                        "of the render target.";
+      return false;
+    }
   }
 
   commands_.emplace_back(std::move(command));

@@ -6,10 +6,12 @@
 
 #include <map>
 #include <memory>
+#include <optional>
 #include <string>
 
 #include "flutter/fml/logging.h"
 #include "flutter/fml/macros.h"
+#include "impeller/geometry/rect.h"
 #include "impeller/renderer/buffer_view.h"
 #include "impeller/renderer/formats.h"
 #include "impeller/renderer/pipeline.h"
@@ -69,6 +71,19 @@ struct Command {
   PrimitiveType primitive_type = PrimitiveType::kTriangle;
   WindingOrder winding = WindingOrder::kClockwise;
   uint32_t stencil_reference = 0u;
+  //----------------------------------------------------------------------------
+  /// The viewport coordinates that the rasterizer linearly maps normalized
+  /// device coordinates to.
+  /// If unset, the viewport is the size of the render target with a zero
+  /// origin, znear=0, and zfar=1.
+  ///
+  std::optional<Viewport> viewport;
+  //----------------------------------------------------------------------------
+  /// The scissor rect to use for clipping writes to the render target. The
+  /// scissor rect must lie entirely within the render target.
+  /// If unset, no scissor is applied.
+  ///
+  std::optional<IRect> scissor;
 
   bool BindVertices(const VertexBuffer& buffer);
 

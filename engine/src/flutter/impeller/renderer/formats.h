@@ -11,6 +11,8 @@
 
 #include "flutter/fml/hash_combine.h"
 #include "flutter/fml/macros.h"
+#include "impeller/geometry/rect.h"
+#include "impeller/geometry/scalar.h"
 #include "impeller/geometry/color.h"
 
 namespace impeller {
@@ -147,6 +149,12 @@ enum class PrimitiveType {
   kPoint,
   // Triangle fans are implementation dependent and need extra extensions
   // checks. Hence, they are not supported here.
+};
+
+struct Viewport {
+  Rect rect;
+  Scalar znear = 0.0f;
+  Scalar zfar = 1.0f;
 };
 
 enum class MinMagFilter {
