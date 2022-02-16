@@ -44,6 +44,8 @@ export 'package:flutter/rendering.dart' show
 ///    sliver context (the opposite of this widget).
 ///  * [ShrinkWrappingViewport], a variant of [Viewport] that shrink-wraps its
 ///    contents along the main axis.
+///  * [ViewportElementMixin], which should be mixed in to the [Element] type used
+///    by viewport-like widgets to correctly handle scroll notifications.
 class Viewport extends MultiChildRenderObjectWidget {
   /// Creates a widget that is bigger on the inside.
   ///
