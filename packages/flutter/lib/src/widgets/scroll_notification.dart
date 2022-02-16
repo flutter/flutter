@@ -38,13 +38,23 @@ mixin ViewportNotificationMixin on Notification {
   }
 }
 
-mixin ViewportBoundaryElement on ReceivesNotifications<ViewportNotificationMixin> {
-  @override
-  bool onNotification(ViewportNotificationMixin notification) {
-     notification._depth += 1;
-      // Let notification continue bubbling.
-     return false;
+/// A widget that does something for viewports.
+class ViewportBoundary extends StatelessWidget {
+  const ViewportBoundary({Key? key, required this.child}) : super(key: key);
+
+  final Widget child;
+
+  bool _onNotification(ViewportNotificationMixin notification) {
+    notification._depth += 1;
+    // Let notification continue bubbling.
+    return false;
   }
+
+  @override
+  Widget build(BuildContext context) {
+    return NotificationListener<ViewportNotificationMixin>(onNotification: _onNotification, child: child);
+  }
+
 }
 
 /// A [Notification] related to scrolling.
