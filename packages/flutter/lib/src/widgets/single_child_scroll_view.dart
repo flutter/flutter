@@ -325,7 +325,7 @@ class _SingleChildViewport extends SingleChildRenderObjectWidget {
   }
 }
 
-class _SingleChildViewportElement extends SingleChildRenderObjectElement with ViewportElement {
+class _SingleChildViewportElement extends SingleChildRenderObjectElement with NotifiableElementMixin, ViewportElement {
   _SingleChildViewportElement(_SingleChildViewport widget) : super(widget);
 }
 

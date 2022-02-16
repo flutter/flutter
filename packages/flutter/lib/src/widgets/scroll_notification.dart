@@ -37,10 +37,7 @@ mixin ViewportNotificationMixin on Notification {
 /// See also:
 ///   * [Viewport], which creates a custom [MultiChildRenderObjectElement] that mixes
 ///     this in.
-mixin ViewportElement on Element {
-  @override
-  bool get handlesNotification => true;
-
+mixin ViewportElement on NotifiableElementMixin {
   @override
   bool onNotification(Notification notification) {
     if (notification is ViewportNotificationMixin) {

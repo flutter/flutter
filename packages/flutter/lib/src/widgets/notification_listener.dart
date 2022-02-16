@@ -124,11 +124,8 @@ class NotificationListener<T extends Notification> extends ProxyWidget {
 
 /// An element used to host [NotificationListener] elements.
 @optionalTypeArgs
-class _NotificationElement<T extends Notification> extends ProxyElement {
+class _NotificationElement<T extends Notification> extends ProxyElement with NotifiableElementMixin {
   _NotificationElement(NotificationListener<T> widget) : super(widget);
-
-  @override
-  bool get handlesNotification => true;
 
   @override
   bool onNotification(Notification notification) {

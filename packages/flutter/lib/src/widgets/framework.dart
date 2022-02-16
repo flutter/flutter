@@ -3112,17 +3112,25 @@ class BuildOwner {
   }
 }
 
-/// Something that handles notifications.
-abstract class NotificationHandler {
-
+/// Mixin this class to Elements allow receiving [Notification] objects dispatched
+/// by children.
+///
+/// See also:
+///   * [NotificationListener], for a widget that allows consuming notifications.
+mixin NotifiableElementMixin on Element {
   /// Return true to consume the notification or false to let it continue bubbling.
   bool onNotification(Notification notification);
+
+  @override
+  void attachNotificationTree() {
+    _notificationTree = _NotificationNode(_parent?._notificationTree, this);
+  }
 }
 
 class _NotificationNode {
   _NotificationNode(this.parent, this.current);
 
-  NotificationHandler? current;
+  NotifiableElementMixin? current;
   _NotificationNode? parent;
 
   void dispatchNotification(Notification notification) {
@@ -3183,7 +3191,7 @@ class _NotificationNode {
 ///    element.
 ///  * At this point, the element is considered "defunct" and will not be
 ///    incorporated into the tree in the future.
-abstract class Element extends DiagnosticableTree implements BuildContext, NotificationHandler {
+abstract class Element extends DiagnosticableTree implements BuildContext {
   /// Creates an element that uses the given widget as its configuration.
   ///
   /// Typically called by an override of [Widget.createElement].
@@ -3649,7 +3657,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext, Notif
       owner!._registerGlobalKey(key, this);
     }
     _updateInheritance();
-    _attachNotificationTree();
+    attachNotificationTree();
   }
 
   void _debugRemoveGlobalKeyReservation(Element child) {
@@ -3986,7 +3994,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext, Notif
     _dependencies?.clear();
     _hadUnsatisfiedDependencies = false;
     _updateInheritance();
-    _attachNotificationTree();
+    attachNotificationTree();
     if (_dirty)
       owner!.scheduleBuildFor(this);
     if (hadDependencies)
@@ -4268,12 +4276,9 @@ abstract class Element extends DiagnosticableTree implements BuildContext, Notif
     return ancestor;
   }
 
-  void _attachNotificationTree() {
-    if (handlesNotification) {
-      _notificationTree = _NotificationNode(_parent?._notificationTree, this);
-    } else {
-      _notificationTree = _parent?._notificationTree;
-    }
+  @protected
+  void attachNotificationTree() {
+    _notificationTree = _parent?._notificationTree;
   }
 
   void _updateInheritance() {
@@ -4408,16 +4413,6 @@ abstract class Element extends DiagnosticableTree implements BuildContext, Notif
   void dispatchNotification(Notification notification) {
     _notificationTree?.dispatchNotification(notification);
   }
-
-  @override
-  bool onNotification(Notification notification) {
-    return false;
-  }
-
-  /// Whether this element can handle [Notifications].
-  ///
-  /// The value of this getter must be unchanging for the lifetime of the Element.
-  bool get handlesNotification => false;
 
   /// A short, textual description of this element.
   @override
