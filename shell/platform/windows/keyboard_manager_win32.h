@@ -138,6 +138,7 @@ class KeyboardManagerWin32 {
   struct PendingText {
     bool ready;
     std::u16string content;
+    bool placeholder = false;
   };
 
   // Returns true if it's a new event, or false if it's a redispatched event.
