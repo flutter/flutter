@@ -310,5 +310,30 @@ TEST(GeometryTest, RectIntersection) {
   }
 }
 
+TEST(GeometryTest, RectContainsPoint) {
+  {
+    // Origin is inclusive
+    Rect r(100, 100, 100, 100);
+    Point p(100, 100);
+    ASSERT_TRUE(r.Contains(p));
+  }
+  {
+    // Size is exclusive
+    Rect r(100, 100, 100, 100);
+    Point p(200, 200);
+    ASSERT_FALSE(r.Contains(p));
+  }
+  {
+    Rect r(100, 100, 100, 100);
+    Point p(99, 99);
+    ASSERT_FALSE(r.Contains(p));
+  }
+  {
+    Rect r(100, 100, 100, 100);
+    Point p(199, 199);
+    ASSERT_TRUE(r.Contains(p));
+  }
+}
+
 }  // namespace testing
 }  // namespace impeller

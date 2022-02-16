@@ -80,8 +80,8 @@ struct TRect {
   }
 
   constexpr bool Contains(const TPoint<Type>& p) const {
-    return p.x >= origin.x && p.x <= size.width && p.y >= origin.y &&
-           p.y <= size.height;
+    return p.x >= origin.x && p.x < origin.x + size.width && p.y >= origin.y &&
+           p.y < origin.y + size.height;
   }
 
   constexpr bool IsZero() const { return size.IsZero(); }
