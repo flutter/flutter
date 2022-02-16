@@ -247,14 +247,6 @@ void main() {
           stdout: '$previousVersion-42-gabc123',
         ),
         const FakeCommand(
-          command: <String>['git', 'merge-base', candidateBranch, 'master'],
-          stdout: branchPointRevision,
-        ),
-        // check if commit is tagged, zero exit means it is tagged
-        const FakeCommand(
-          command: <String>['git', 'describe', '--exact-match', '--tags', branchPointRevision],
-        ),
-        const FakeCommand(
           command: <String>['git', 'rev-parse', 'HEAD'],
           stdout: revision3,
         ),

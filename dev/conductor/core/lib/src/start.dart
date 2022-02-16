@@ -383,7 +383,9 @@ class StartContext extends Context {
     }
 
     Version nextVersion = calculateNextVersion(lastVersion);
-    nextVersion = await ensureBranchPointTagged(nextVersion, framework);
+    if (!force) {
+      nextVersion = await ensureBranchPointTagged(nextVersion, framework);
+    }
 
     state.releaseVersion = nextVersion.toString();
 
