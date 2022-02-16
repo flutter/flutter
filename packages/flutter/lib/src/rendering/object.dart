@@ -987,7 +987,8 @@ class PipelineOwner {
     try {
       final List<RenderObject> dirtyNodes = _nodesNeedingPaint;
       _nodesNeedingPaint = <RenderObject>[];
-      for (final RenderObject node in dirtyNodes..sort((RenderObject a, RenderObject b) => a.depth - b.depth)) {
+      // Sort the dirty nodes in reverse order (deepest first).
+      for (final RenderObject node in dirtyNodes..sort((RenderObject a, RenderObject b) => b.depth - a.depth)) {
         assert(node._layerHandle.layer != null);
         if (node._needsPaint && node.owner == this) {
           if (node._layerHandle.layer!.attached) {
@@ -2364,8 +2365,12 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       return true;
     }());
     // If we still need layout, then that means that we were skipped in the
-    // layout phase and therefore don't need painting. This can happen when an
-    // error occurred prior to our paint and our layer wasn't properly detached.
+    // layout phase and therefore don't need painting. We might not know that
+    // yet (that is, our layer might not have been detached yet), because the
+    // same node that skipped us in layout is above us in the tree (obviously)
+    // and therefore may not have had a chance to paint yet (since the tree
+    // paints in reverse order). In particular this will happen if they have
+    // a different layer, because there's a repaint boundary between us.
     if (_needsLayout)
       return;
     if (!kReleaseMode && debugProfilePaintsEnabled) {
