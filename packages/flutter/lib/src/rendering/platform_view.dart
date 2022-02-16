@@ -732,6 +732,7 @@ class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
 
   void _onPlatformViewCreated(int id) {
     markNeedsSemanticsUpdate();
+    markNeedsPaint();
   }
 
   @override
