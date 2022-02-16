@@ -149,7 +149,7 @@ void main() {
               alignment: Alignment.topLeft,
               child: const Directionality(
                 textDirection: TextDirection.ltr,
-                child: RaisedButton(
+                child: ElevatedButton(
                   onPressed: null,
                   child: Text('b'), // intrinsic width < minimum width
                 ),
@@ -201,7 +201,7 @@ void main() {
                 alignment: Alignment.topLeft,
                 child: Directionality(
                   textDirection: TextDirection.ltr,
-                  child: RaisedButton(
+                  child: ElevatedButton(
                     onPressed: () { },
                     child: const Text('b'), // intrinsic width < minimum width
                   ),

@@ -619,8 +619,8 @@ void main() {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            const RaisedButton(onPressed: null, child: Text('disabled')),
-            RaisedButton(child: const Text('enabled'), onPressed: () { }),
+            const ElevatedButton(onPressed: null, child: Text('disabled')),
+            ElevatedButton(child: const Text('enabled'), onPressed: () { }),
           ],
         ),
       ),
@@ -643,7 +643,7 @@ void main() {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
-                      RaisedButton(
+                      ElevatedButton(
                         child: const Text('push unwrapped'),
                         onPressed: () {
                           Navigator.of(context).push<void>(
@@ -654,7 +654,7 @@ void main() {
                           );
                         },
                       ),
-                      RaisedButton(
+                      ElevatedButton(
                         child: const Text('push wrapped'),
                         onPressed: () {
                           Navigator.of(context).push<void>(
