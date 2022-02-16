@@ -3166,7 +3166,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
 
   Element? _parent;
   DebugReassembleConfig? _debugReassembleConfig;
-  NotificationElement<Notification>? _notificationListener;
+  ReceivesNotifications? _notificationListener;
 
   /// Compare two widgets for equality.
   ///
@@ -6474,38 +6474,52 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
   }
 }
 
-@optionalTypeArgs
-class NotificationElement<T extends Notification> extends ProxyElement {
-  NotificationElement(NotificationListener<T> widget) : super(widget);
+/// mixin this element type to receive notifications.
+mixin ReceivesNotifications<T extends Notification> on Element {
+  ReceivesNotifications<Notification>? _parentNotification;
 
-
-  NotificationElement<Notification>? _parentNotification;
-
+  bool onNotification(T notification);
 
   @override
   void dispatchNotification(Notification notification) {
-    final NotificationListener<T> listener = widget as NotificationListener<T>;
-    if (listener.onNotification != null && notification is T) {
-      final bool result = listener.onNotification!(notification);
-      // so that null and false have the same effect
-      if (result == true) {
-        return;
-      }
+    if (notification is T && onNotification(notification)) {
+      return;
     }
     _parentNotification?.dispatchNotification(notification);
   }
 
-  @override
-  void _updateInheritance() {
-    assert(_lifecycleState == _ElementLifecycle.active);
-    _inheritedLookup = _parent?._inheritedLookup;
+  /// Call during mount or activate
+  void registerNotification() {
     _parentNotification = _parent?._notificationListener;
     _notificationListener = this;
+  }
+}
+
+@optionalTypeArgs
+class NotificationElement<T extends Notification> extends ProxyElement with ReceivesNotifications<T> {
+  NotificationElement(NotificationListener<T> widget) : super(widget);
+
+  @override
+  void mount(Element? parent, Object? newSlot) {
+    super.mount(parent, newSlot);
+    registerNotification();
+  }
+
+  @override
+  activate() {
+    super.activate();
+    registerNotification();
   }
 
   @override
   void notifyClients(covariant ProxyWidget oldWidget) {
     // Notification tree does not need to notify clients.
+  }
+
+  @override
+  bool onNotification(T notification) {
+    final NotificationListener<T> notificationListener = widget as NotificationListener<T>;
+    return notificationListener.onNotification?.call(notification) ?? false;
   }
 }
 

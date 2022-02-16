@@ -17,7 +17,6 @@ import 'scroll_configuration.dart';
 import 'scroll_context.dart';
 import 'scroll_controller.dart';
 import 'scroll_metrics.dart';
-import 'scroll_notification.dart';
 import 'scroll_physics.dart';
 import 'scroll_position.dart';
 import 'scroll_view.dart';
@@ -1950,61 +1949,11 @@ class RenderSliverOverlapInjector extends RenderSliver {
 ///
 /// This viewport takes a [SliverOverlapAbsorberHandle] and notifies it any time
 /// the viewport needs to recompute its layout (e.g. when it is scrolled).
-class NestedScrollViewViewport extends StatelessWidget {
+class NestedScrollViewViewport extends Viewport {
   /// Creates a variant of [Viewport] that has a [SliverOverlapAbsorberHandle].
   ///
   /// The [handle] must not be null.
-  const NestedScrollViewViewport({
-    Key? key,
-    this.axisDirection = AxisDirection.down,
-    this.crossAxisDirection,
-    this.anchor = 0.0,
-    required this.offset,
-    this.center,
-    this.slivers = const <Widget>[],
-    required this.handle,
-    this.clipBehavior = Clip.hardEdge,
-  }) : assert(handle != null),
-       super(key: key,);
-
-  final AxisDirection axisDirection;
-  final AxisDirection? crossAxisDirection;
-  final double anchor;
-  final ViewportOffset offset;
-
-  final Key? center;
-
-  final List<Widget> slivers;
-
-  /// The handle to the [SliverOverlapAbsorber] that is feeding this injector.
-  final SliverOverlapAbsorberHandle handle;
-
-  final Clip clipBehavior;
-
-  @override
-  Widget build(BuildContext context) {
-    return ViewportBoundary(child: NestedScrollViewViewportInternal(
-      axisDirection: axisDirection,
-      crossAxisDirection: crossAxisDirection,
-      anchor: anchor,
-      offset: offset,
-      center: center,
-      slivers: slivers,
-      handle: handle,
-      clipBehavior: clipBehavior,
-    ));
-  }
-}
-
-/// The [Viewport] variant used by [NestedScrollView].
-///
-/// This viewport takes a [SliverOverlapAbsorberHandle] and notifies it any time
-/// the viewport needs to recompute its layout (e.g. when it is scrolled).
-class NestedScrollViewViewportInternal extends ViewportInternal {
-  /// Creates a variant of [Viewport] that has a [SliverOverlapAbsorberHandle].
-  ///
-  /// The [handle] must not be null.
-  NestedScrollViewViewportInternal({
+  NestedScrollViewViewport({
     Key? key,
     AxisDirection axisDirection = AxisDirection.down,
     AxisDirection? crossAxisDirection,
