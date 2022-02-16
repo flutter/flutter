@@ -84,6 +84,11 @@ typedef struct WmKeyUpInfo {
 
   // uint16_t repeat_count;  // Always 1.
 
+  // Set this flag to enforce prev_state to be 0.
+  //
+  // This occurs in rare cases when the message is synthesized.
+  bool overwrite_prev_state_0;
+
   Win32Message Build(LRESULT expected_result = kWmResultDontCheck);
 } WmKeyUpInfo;
 
