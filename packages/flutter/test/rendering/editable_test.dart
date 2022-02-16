@@ -1318,7 +1318,6 @@ void main() {
         cursorColor: Colors.red,
         offset: viewportOffset,
         textSelectionDelegate: delegate,
-        onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {},
         startHandleLayerLink: LayerLink(),
         endHandleLayerLink: LayerLink(),
         text: TextSpan(
@@ -1361,7 +1360,6 @@ void main() {
         cursorColor: Colors.red,
         offset: viewportOffset,
         textSelectionDelegate: delegate,
-        onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {},
         startHandleLayerLink: LayerLink(),
         endHandleLayerLink: LayerLink(),
         text: TextSpan(
@@ -1406,7 +1404,6 @@ void main() {
         cursorColor: Colors.red,
         offset: viewportOffset,
         textSelectionDelegate: delegate,
-        onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {},
         startHandleLayerLink: LayerLink(),
         endHandleLayerLink: LayerLink(),
         text: const TextSpan(
@@ -1457,7 +1454,6 @@ void main() {
         cursorColor: Colors.red,
         offset: viewportOffset,
         textSelectionDelegate: delegate,
-        onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {},
         startHandleLayerLink: LayerLink(),
         endHandleLayerLink: LayerLink(),
         text: const TextSpan(
@@ -1515,7 +1511,6 @@ void main() {
         cursorColor: Colors.red,
         offset: viewportOffset,
         textSelectionDelegate: delegate,
-        onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {},
         startHandleLayerLink: LayerLink(),
         endHandleLayerLink: LayerLink(),
         text: const TextSpan(
@@ -1574,7 +1569,6 @@ void main() {
         cursorColor: Colors.red,
         offset: viewportOffset,
         textSelectionDelegate: delegate,
-        onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {},
         startHandleLayerLink: LayerLink(),
         endHandleLayerLink: LayerLink(),
         text: const TextSpan(
