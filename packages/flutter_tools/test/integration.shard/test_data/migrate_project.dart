@@ -21,15 +21,19 @@ class MigrateProject extends Project {
     bool useSyntheticPackage = false,
   }) async {
     this.dir = dir;
+    _appPath = dir.path;
     if (androidLocalProperties != null) {
       writeFile(fileSystem.path.join(dir.path, 'android', 'local.properties'), androidLocalProperties);
     }
-    _appPath = fileSystem.path.join(getFlutterRoot(), 'packages', 'flutter_tools', 'test', 'integration.shard', 'test_data', 'full_apps', version);
-    await processManager.run(<String>[
-      'cp',
-      '-r',
-      _appPath + fileSystem.path.separator,
+    File zipFile = dir.childFile('app.zip');
+    _ensurePath = fileSystem.path.join(getFlutterRoot(), 'packages', 'flutter_tools', 'test', 'integration.shard', 'test_data', 'full_apps', '$version.ensure');
+    ProcessResult result = await processManager.run(<String>[
+      'cipd',
+      'ensure',
+      '-root',
       dir.path,
+      '-ensure-file',
+      _ensurePath,
     ], workingDirectory: dir.path);
     if (!vanilla) {
       writeFile(fileSystem.path.join(dir.path, 'lib', 'main.dart'), libMain);
@@ -40,6 +44,7 @@ class MigrateProject extends Project {
 
   final String version;
   final bool vanilla;
+  late String _ensurePath;
   late String _appPath;
 
   // Maintain the same pubspec as the configured app.
