@@ -277,7 +277,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   late final Map<Type, Action<Intent>> _actionMap;
   late final _AutocompleteCallbackAction<AutocompletePreviousOptionIntent> _previousOptionAction;
   late final _AutocompleteCallbackAction<AutocompleteNextOptionIntent> _nextOptionAction;
-  late final _AutocompleteCallbackAction<AutocompleteHideOptionsIntent> _hideOptionsAction;
+  late final _AutocompleteCallbackAction<DismissIntent> _hideOptionsAction;
   Iterable<T> _options = Iterable<T>.empty();
   T? _selection;
   bool _userHidOptions = false;
@@ -287,7 +287,6 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   static const Map<ShortcutActivator, Intent> _shortcuts = <ShortcutActivator, Intent>{
     SingleActivator(LogicalKeyboardKey.arrowUp): AutocompletePreviousOptionIntent(),
     SingleActivator(LogicalKeyboardKey.arrowDown): AutocompleteNextOptionIntent(),
-    SingleActivator(LogicalKeyboardKey.escape): AutocompleteHideOptionsIntent(),
   };
 
   // The OverlayEntry containing the options.
@@ -311,8 +310,8 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
       _selection = null;
     }
 
-    // We need to make sure the options are no longer hidden if the content of
-    // the field gets changes (we want to ignore selection changes for this).
+    // Make sure the options are no longer hidden if the content of the field
+    // changes (ignore selection changes).
     if (value.text != _lastFieldText) {
       _userHidOptions = false;
       _lastFieldText = value.text;
@@ -371,7 +370,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     _updateHighlight(_highlightedOptionIndex.value + 1);
   }
 
-  void _hideOptions(AutocompleteHideOptionsIntent intent) {
+  void _hideOptions(DismissIntent intent) {
     if (!_userHidOptions) {
       _userHidOptions = true;
       _updateOverlay();
@@ -466,11 +465,11 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     _focusNode.addListener(_onChangedFocus);
     _previousOptionAction = _AutocompleteCallbackAction<AutocompletePreviousOptionIntent>(onInvoke: _highlightPreviousOption);
     _nextOptionAction = _AutocompleteCallbackAction<AutocompleteNextOptionIntent>(onInvoke: _highlightNextOption);
-    _hideOptionsAction = _AutocompleteCallbackAction<AutocompleteHideOptionsIntent>(onInvoke: _hideOptions);
+    _hideOptionsAction = _AutocompleteCallbackAction<DismissIntent>(onInvoke: _hideOptions);
     _actionMap = <Type, Action<Intent>> {
       AutocompletePreviousOptionIntent: _previousOptionAction,
       AutocompleteNextOptionIntent: _nextOptionAction,
-      AutocompleteHideOptionsIntent: _hideOptionsAction,
+      DismissIntent: _hideOptionsAction,
     };
     SchedulerBinding.instance.addPostFrameCallback((Duration _) {
       _updateOverlay();
@@ -555,12 +554,6 @@ class AutocompletePreviousOptionIntent extends Intent {
 class AutocompleteNextOptionIntent extends Intent {
   /// Creates an instance of AutocompleteNextOptionIntent.
   const AutocompleteNextOptionIntent();
-}
-
-/// An [Intent] to hide the autocomplete options list.
-class AutocompleteHideOptionsIntent extends Intent {
-  /// Creates an instance of AutocompleteHideOptionsIntent.
-  const AutocompleteHideOptionsIntent();
 }
 
 /// An inherited widget used to indicate which autocomplete option should be
