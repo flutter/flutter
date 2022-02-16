@@ -79,9 +79,22 @@ void DisplayListDispatcher::setShader(sk_sp<SkShader> shader) {
 }
 
 // |flutter::Dispatcher|
-void DisplayListDispatcher::setColorFilter(sk_sp<SkColorFilter> filter) {
+void DisplayListDispatcher::setColorFilter(
+    const flutter::DlColorFilter* filter) {
   // Needs https://github.com/flutter/flutter/issues/95434
-  UNIMPLEMENTED;
+  if (filter == nullptr) {
+    // Reset everything
+    return;
+  }
+  switch (filter->type()) {
+    case flutter::DlColorFilter::kBlend:
+    case flutter::DlColorFilter::kMatrix:
+    case flutter::DlColorFilter::kSrgbToLinearGamma:
+    case flutter::DlColorFilter::kLinearToSrgbGamma:
+    case flutter::DlColorFilter::kUnknown:
+      UNIMPLEMENTED;
+      break;
+  }
 }
 
 // |flutter::Dispatcher|

@@ -48,7 +48,7 @@ class DisplayListDispatcher final : public flutter::Dispatcher {
   void setShader(sk_sp<SkShader> shader) override;
 
   // |flutter::Dispatcher|
-  void setColorFilter(sk_sp<SkColorFilter> filter) override;
+  void setColorFilter(const flutter::DlColorFilter* filter) override;
 
   // |flutter::Dispatcher|
   void setInvertColors(bool invert) override;
