@@ -105,7 +105,6 @@ export 'src/material/navigation_bar_theme.dart';
 export 'src/material/navigation_rail.dart';
 export 'src/material/navigation_rail_theme.dart';
 export 'src/material/no_splash.dart';
-export 'src/material/outline_button.dart';
 export 'src/material/outlined_button.dart';
 export 'src/material/outlined_button_theme.dart';
 export 'src/material/page.dart';

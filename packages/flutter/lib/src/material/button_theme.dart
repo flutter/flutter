@@ -11,7 +11,6 @@ import 'constants.dart';
 import 'flat_button.dart';
 import 'material_button.dart';
 import 'material_state.dart';
-import 'outline_button.dart';
 import 'raised_button.dart';
 import 'theme.dart';
 import 'theme_data.dart' show MaterialTapTargetSize;
@@ -510,7 +509,7 @@ class ButtonThemeData with Diagnosticable {
     if (fillColor != null)
       return fillColor;
 
-    if (button is FlatButton || button is OutlineButton || button.runtimeType == MaterialButton)
+    if (button is FlatButton || button.runtimeType == MaterialButton)
       return null;
 
     if (button.enabled && button is RaisedButton && _buttonColor != null)
@@ -565,7 +564,7 @@ class ButtonThemeData with Diagnosticable {
           : getBrightness(button) == Brightness.dark;
         if (fillIsDark)
           return Colors.white;
-        if (button is FlatButton || button is OutlineButton)
+        if (button is FlatButton)
           return colorScheme!.primary;
         return Colors.black;
     }
@@ -588,7 +587,7 @@ class ButtonThemeData with Diagnosticable {
     if (button.splashColor != null)
       return button.splashColor!;
 
-    if (_splashColor != null && (button is RaisedButton || button is OutlineButton))
+    if (_splashColor != null && button is RaisedButton)
       return _splashColor!;
 
     if (_splashColor != null && button is FlatButton) {
@@ -676,8 +675,6 @@ class ButtonThemeData with Diagnosticable {
       return button.focusElevation!;
     if (button is FlatButton)
       return 0.0;
-    if (button is OutlineButton)
-      return 0.0;
     return 4.0;
   }
 
@@ -692,8 +689,6 @@ class ButtonThemeData with Diagnosticable {
       return button.hoverElevation!;
     if (button is FlatButton)
       return 0.0;
-    if (button is OutlineButton)
-      return 0.0;
     return 4.0;
   }
 
@@ -707,8 +702,6 @@ class ButtonThemeData with Diagnosticable {
     if (button.highlightElevation != null)
       return button.highlightElevation!;
     if (button is FlatButton)
-      return 0.0;
-    if (button is OutlineButton)
       return 0.0;
     return 8.0;
   }
