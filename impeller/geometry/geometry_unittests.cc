@@ -335,5 +335,37 @@ TEST(GeometryTest, RectContainsPoint) {
   }
 }
 
+TEST(GeometryTest, RectContainsRect) {
+  {
+    Rect a(100, 100, 100, 100);
+    ASSERT_TRUE(a.Contains(a));
+  }
+  {
+    Rect a(100, 100, 100, 100);
+    Rect b(0, 0, 0, 0);
+    ASSERT_FALSE(a.Contains(b));
+  }
+  {
+    Rect a(100, 100, 100, 100);
+    Rect b(150, 150, 20, 20);
+    ASSERT_TRUE(a.Contains(b));
+  }
+  {
+    Rect a(100, 100, 100, 100);
+    Rect b(150, 150, 100, 100);
+    ASSERT_FALSE(a.Contains(b));
+  }
+  {
+    Rect a(100, 100, 100, 100);
+    Rect b(50, 50, 100, 100);
+    ASSERT_FALSE(a.Contains(b));
+  }
+  {
+    Rect a(100, 100, 100, 100);
+    Rect b(0, 0, 300, 300);
+    ASSERT_FALSE(a.Contains(b));
+  }
+}
+
 }  // namespace testing
 }  // namespace impeller

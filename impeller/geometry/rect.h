@@ -84,6 +84,10 @@ struct TRect {
            p.y < origin.y + size.height;
   }
 
+  constexpr bool Contains(const TRect& o) const {
+    return Union(o).size == size;
+  }
+
   constexpr bool IsZero() const { return size.IsZero(); }
 
   constexpr bool IsEmpty() const { return size.IsEmpty(); }
