@@ -1,4 +1,4 @@
-Signature: 966f333972c1690b4b560d5370c76dbd
+Signature: 22a0908308b0168af323dff4d5174b8e
 
 UNUSED LICENSES:
 
@@ -720,18 +720,6 @@ FILE: ../../../third_party/skia/experimental/graphite/src/BUILD.bazel
 FILE: ../../../third_party/skia/experimental/graphite/src/geom/BUILD.bazel
 FILE: ../../../third_party/skia/experimental/graphite/src/mtl/BUILD.bazel
 FILE: ../../../third_party/skia/experimental/graphite/src/render/BUILD.bazel
-FILE: ../../../third_party/skia/experimental/skottiekit/cpu.js
-FILE: ../../../third_party/skia/experimental/skottiekit/debug.js
-FILE: ../../../third_party/skia/experimental/skottiekit/examples/ck.html
-FILE: ../../../third_party/skia/experimental/skottiekit/examples/index.html
-FILE: ../../../third_party/skia/experimental/skottiekit/externs.js
-FILE: ../../../third_party/skia/experimental/skottiekit/gpu.js
-FILE: ../../../third_party/skia/experimental/skottiekit/helper.js
-FILE: ../../../third_party/skia/experimental/skottiekit/interface.js
-FILE: ../../../third_party/skia/experimental/skottiekit/postamble.js
-FILE: ../../../third_party/skia/experimental/skottiekit/preamble.js
-FILE: ../../../third_party/skia/experimental/skottiekit/release.js
-FILE: ../../../third_party/skia/experimental/skottiekit/skottiekit/package.json
 FILE: ../../../third_party/skia/experimental/sktext/editor/Cursor.cpp
 FILE: ../../../third_party/skia/experimental/sktext/editor/Cursor.h
 FILE: ../../../third_party/skia/experimental/sktext/editor/Defaults.h
@@ -3998,7 +3986,6 @@ TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/bench/CreateBackendTextureBench.cpp
 FILE: ../../../third_party/skia/bench/GrQuadBench.cpp
 FILE: ../../../third_party/skia/bench/SkSLBench.h
-FILE: ../../../third_party/skia/experimental/skottiekit/skottiekit_bindings.cpp
 FILE: ../../../third_party/skia/gm/animated_image_orientation.cpp
 FILE: ../../../third_party/skia/gm/crbug_1041204.cpp
 FILE: ../../../third_party/skia/gm/crbug_1139750.cpp
