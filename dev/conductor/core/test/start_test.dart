@@ -93,7 +93,7 @@ void main() {
           '--$kCandidateOption',
           candidateBranch,
           '--$kReleaseOption',
-          'dev',
+          'beta',
           '--$kStateOption',
           '/path/to/statefile.json',
           '--$kIncrementOption',
