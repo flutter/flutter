@@ -2397,8 +2397,7 @@ abstract class BuildContext {
   ///
   /// The notification will be delivered to any [NotificationListener] widgets
   /// with the appropriate type parameters that are ancestors of the given
-  /// [BuildContext]. If the [BuildContext] is null, the notification is not
-  /// dispatched.
+  /// [BuildContext].
   void dispatchNotification(Notification notification);
 
   /// Returns a description of the [Element] associated with the current build context.
