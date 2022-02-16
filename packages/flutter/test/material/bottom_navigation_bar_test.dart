@@ -551,14 +551,13 @@ void main() {
     expect(unselectedIcon.color, equals(unselectedColor));
   });
 
-  testWidgets('Fixed BottomNavigationBar label style color should override itemColor', (WidgetTester tester) async {
+  testWidgets('label style color should override itemColor for BottomNavigationBarType.fixed', (WidgetTester tester) async {
     const Color primaryColor = Color(0xFF000000);
     const Color unselectedWidgetColor = Color(0xFFD501FF);
     const Color selectedColor = Color(0xFF0004FF);
     const Color unselectedColor = Color(0xFFE5FF00);
     const Color selectedLabelColor = Color(0xFFFF9900);
     const Color unselectedLabelColor = Color(0xFF92F74E);
-
 
     await tester.pumpWidget(
       MaterialApp(
@@ -595,14 +594,13 @@ void main() {
     expect(unselectedIcon.color, equals(unselectedLabelColor));
   });
 
-  testWidgets('Shifting BottomNavigationBar label style color should override itemColor', (WidgetTester tester) async {
+  testWidgets('label style color should override itemColor for BottomNavigationBarType.shifting', (WidgetTester tester) async {
     const Color primaryColor = Color(0xFF000000);
     const Color unselectedWidgetColor = Color(0xFFD501FF);
     const Color selectedColor = Color(0xFF0004FF);
     const Color unselectedColor = Color(0xFFE5FF00);
     const Color selectedLabelColor = Color(0xFFFF9900);
     const Color unselectedLabelColor = Color(0xFF92F74E);
-
 
     await tester.pumpWidget(
       MaterialApp(
@@ -639,7 +637,7 @@ void main() {
     expect(unselectedIcon.color, equals(unselectedLabelColor));
   });
 
-  testWidgets('Fixed BottomNavigationBar label style color should not override iconTheme color', (WidgetTester tester) async {
+  testWidgets('iconTheme color should override label style color for BottomNavigationBarType.fixed', (WidgetTester tester) async {
     const Color primaryColor = Color(0xFF000000);
     const Color unselectedWidgetColor = Color(0xFFD501FF);
     const Color selectedColor = Color(0xFF0004FF);
@@ -647,12 +645,11 @@ void main() {
     const Color selectedLabelColor = Color(0xFFFF9900);
     const Color unselectedLabelColor = Color(0xFF92F74E);
     const Color selectedIconThemeColor = Color(0xFF1E7723);
-    const Color unselectedIconthThemeColor = Color(0xFF009688);
+    const Color unselectedIconThemeColor = Color(0xFF009688);
     const IconThemeData selectedIconTheme = IconThemeData(size: 20, color: selectedIconThemeColor);
-    const IconThemeData unselectedIconTheme = IconThemeData(size: 18, color: unselectedIconthThemeColor);
+    const IconThemeData unselectedIconTheme = IconThemeData(size: 18, color: unselectedIconThemeColor);
     const TextStyle selectedTextStyle = TextStyle(fontSize: 18.0, color: selectedLabelColor);
     const TextStyle unselectedTextStyle = TextStyle(fontSize: 18.0, color: unselectedLabelColor);
-
 
     await tester.pumpWidget(
       MaterialApp(
@@ -688,10 +685,10 @@ void main() {
     final TextStyle unselectedIcon = _iconStyle(tester, Icons.access_alarm);
 
     expect(selectedIcon.color, equals(selectedIconThemeColor));
-    expect(unselectedIcon.color, equals(unselectedIconthThemeColor));
+    expect(unselectedIcon.color, equals(unselectedIconThemeColor));
   });
 
-  testWidgets('Shifting BottomNavigationBar label style color should not override iconTheme color', (WidgetTester tester) async {
+  testWidgets('iconTheme color should override label style color for BottomNavigationBarType.shifted', (WidgetTester tester) async {
     const Color primaryColor = Color(0xFF000000);
     const Color unselectedWidgetColor = Color(0xFFD501FF);
     const Color selectedColor = Color(0xFF0004FF);
@@ -699,12 +696,11 @@ void main() {
     const Color selectedLabelColor = Color(0xFFFF9900);
     const Color unselectedLabelColor = Color(0xFF92F74E);
     const Color selectedIconThemeColor = Color(0xFF1E7723);
-    const Color unselectedIconthThemeColor = Color(0xFF009688);
+    const Color unselectedIconThemeColor = Color(0xFF009688);
     const IconThemeData selectedIconTheme = IconThemeData(size: 20, color: selectedIconThemeColor);
-    const IconThemeData unselectedIconTheme = IconThemeData(size: 18, color: unselectedIconthThemeColor);
+    const IconThemeData unselectedIconTheme = IconThemeData(size: 18, color: unselectedIconThemeColor);
     const TextStyle selectedTextStyle = TextStyle(fontSize: 18.0, color: selectedLabelColor);
     const TextStyle unselectedTextStyle = TextStyle(fontSize: 18.0, color: unselectedLabelColor);
-
 
     await tester.pumpWidget(
       MaterialApp(
@@ -740,7 +736,7 @@ void main() {
     final TextStyle unselectedIcon = _iconStyle(tester, Icons.access_alarm);
 
     expect(selectedIcon.color, equals(selectedIconThemeColor));
-    expect(unselectedIcon.color, equals(unselectedIconthThemeColor));
+    expect(unselectedIcon.color, equals(unselectedIconThemeColor));
   });
 
   testWidgets('Fixed BottomNavigationBar can hide unselected labels', (WidgetTester tester) async {
