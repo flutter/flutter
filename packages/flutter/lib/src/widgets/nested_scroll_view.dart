@@ -1949,7 +1949,7 @@ class RenderSliverOverlapInjector extends RenderSliver {
 ///
 /// This viewport takes a [SliverOverlapAbsorberHandle] and notifies it any time
 /// the viewport needs to recompute its layout (e.g. when it is scrolled).
-class NestedScrollViewViewport extends Viewport{
+class NestedScrollViewViewport extends Viewport {
   /// Creates a variant of [Viewport] that has a [SliverOverlapAbsorberHandle].
   ///
   /// The [handle] must not be null.

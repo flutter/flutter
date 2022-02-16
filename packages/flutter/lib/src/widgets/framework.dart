@@ -4276,6 +4276,15 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     return ancestor;
   }
 
+  /// Called in [Element.mount] and [Element.activate] to register this element in
+  /// the notification tree.
+  ///
+  /// This method is only exposed so that [NotifiableElementMixin] can be implemented.
+  /// Subclasses of [Element] that wish to respond to notifications should mix that
+  /// in instead.
+  ///
+  /// See also:
+  ///   * [NotificationListener], a widget that allows listening to notifications.
   @protected
   void attachNotificationTree() {
     _notificationTree = _parent?._notificationTree;
