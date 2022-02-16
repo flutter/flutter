@@ -47,6 +47,8 @@
 /dev/devicelab/bin/tasks/flutter_gallery_v2_web_compile_test.dart @yjbanov @flutter/web
 /dev/devicelab/bin/tasks/flutter_test_performance.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/frame_policy_delay_test_android.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/fullscreen_textfield_perf.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/fullscreen_textfield_perf__e2e_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/gradle_java8_compile_test.dart @blasten @flutter/tool
 /dev/devicelab/bin/tasks/hot_mode_dev_cycle_linux__benchmark.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/image_list_jit_reported_duration.dart @zanderso @flutter/engine

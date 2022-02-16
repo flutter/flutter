@@ -175,7 +175,7 @@ class GenerateLocalizationsCommand extends FlutterCommand {
             '\n'
             'By default, this value is set to true so that '
             'Localizations.of(context) returns a nullable value '
-            'for backwards compatibility. If this value is set to true, then '
+            'for backwards compatibility. If this value is set to false, then '
             'a null check is performed on the returned value of '
             'Localizations.of(context), removing the need for null checking in '
             'user code.'
