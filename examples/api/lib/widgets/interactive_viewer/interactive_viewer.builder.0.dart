@@ -70,21 +70,22 @@ class _IVBuilderExampleState extends State<_IVBuilderExample> {
             boundaryMargin: const EdgeInsets.all(double.infinity),
             builder: (BuildContext context, Quad viewport) {
               return _TableBuilder(
-                  cellWidth: _cellWidth,
-                  cellHeight: _cellHeight,
-                  viewport: axisAlignedBoundingBox(viewport),
-                  builder: (BuildContext context, int row, int column) {
-                    return Container(
-                      height: _cellHeight,
-                      width: _cellWidth,
-                      color: row % 2 + column % 2 == 1
-                          ? Colors.white
-                          : Colors.grey.withOpacity(0.1),
-                      child: Align(
-                        child: Text('$row x $column'),
-                      ),
-                    );
-                  });
+                cellWidth: _cellWidth,
+                cellHeight: _cellHeight,
+                viewport: axisAlignedBoundingBox(viewport),
+                builder: (BuildContext context, int row, int column) {
+                  return Container(
+                    height: _cellHeight,
+                    width: _cellWidth,
+                    color: row % 2 + column % 2 == 1
+                        ? Colors.white
+                        : Colors.grey.withOpacity(0.1),
+                    child: Align(
+                      child: Text('$row x $column'),
+                    ),
+                  );
+                },
+              );
             },
           );
         },
@@ -119,21 +120,23 @@ class _TableBuilder extends StatelessWidget {
     // This will create and render exactly (lastRow - firstRow) * (lastCol - firstCol) cells
 
     return SizedBox(
-        // Stack needs constraints, even though we then Clip.none outside of them.
-        // InteractiveViewer.builder always sets constrained to false, giving infinite constraints to the child.
-        // See: https://master-api.flutter.dev/flutter/widgets/InteractiveViewer/constrained.html
-        width: 1,
-        height: 1,
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: <Widget>[
-            for (int row = firstRow; row < lastRow; row++)
-              for (int col = firstCol; col < lastCol; col++)
-                Positioned(
-                    left: col * cellWidth,
-                    top: row * cellHeight,
-                    child: builder(context, row, col)),
-          ],
-        ));
+      // Stack needs constraints, even though we then Clip.none outside of them.
+      // InteractiveViewer.builder always sets constrained to false, giving infinite constraints to the child.
+      // See: https://master-api.flutter.dev/flutter/widgets/InteractiveViewer/constrained.html
+      width: 1,
+      height: 1,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: <Widget>[
+          for (int row = firstRow; row < lastRow; row++)
+            for (int col = firstCol; col < lastCol; col++)
+              Positioned(
+                left: col * cellWidth,
+                top: row * cellHeight,
+                child: builder(context, row, col),
+              ),
+        ],
+      ),
+    );
   }
 }
