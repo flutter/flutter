@@ -70,7 +70,8 @@ void FlutterWindowsView::SetEngine(
 std::unique_ptr<KeyboardHandlerBase>
 FlutterWindowsView::CreateKeyboardKeyHandler(
     BinaryMessenger* messenger,
-    KeyboardKeyEmbedderHandler::GetKeyStateHandler get_key_state) {
+    KeyboardKeyEmbedderHandler::GetKeyStateHandler get_key_state,
+    KeyboardKeyEmbedderHandler::MapVirtualKeyToScanCode map_vk_to_scan) {
   auto keyboard_key_handler = std::make_unique<KeyboardKeyHandler>();
   keyboard_key_handler->AddDelegate(
       std::make_unique<KeyboardKeyEmbedderHandler>(
@@ -78,7 +79,7 @@ FlutterWindowsView::CreateKeyboardKeyHandler(
                  void* user_data) {
             return engine_->SendKeyEvent(event, callback, user_data);
           },
-          get_key_state));
+          get_key_state, map_vk_to_scan));
   keyboard_key_handler->AddDelegate(
       std::make_unique<KeyboardKeyChannelHandler>(messenger));
   return keyboard_key_handler;
@@ -259,11 +260,17 @@ void FlutterWindowsView::InitializeKeyboard() {
   auto internal_plugin_messenger = internal_plugin_registrar_->messenger();
 #ifdef WINUWP
   KeyboardKeyEmbedderHandler::GetKeyStateHandler get_key_state = nullptr;
+  KeyboardKeyEmbedderHandler::MapVirtualKeyToScanCode map_vk_to_scan = nullptr;
 #else
   KeyboardKeyEmbedderHandler::GetKeyStateHandler get_key_state = GetKeyState;
+  KeyboardKeyEmbedderHandler::MapVirtualKeyToScanCode map_vk_to_scan =
+      [](UINT virtual_key, bool extended) {
+        return MapVirtualKey(virtual_key,
+                             extended ? MAPVK_VK_TO_VSC_EX : MAPVK_VK_TO_VSC);
+      };
 #endif
-  keyboard_key_handler_ = std::move(
-      CreateKeyboardKeyHandler(internal_plugin_messenger, get_key_state));
+  keyboard_key_handler_ = std::move(CreateKeyboardKeyHandler(
+      internal_plugin_messenger, get_key_state, map_vk_to_scan));
   text_input_plugin_ =
       std::move(CreateTextInputPlugin(internal_plugin_messenger));
 }
