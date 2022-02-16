@@ -13,6 +13,7 @@
 #include "impeller/renderer/backend/metal/pipeline_mtl.h"
 #include "impeller/renderer/backend/metal/sampler_mtl.h"
 #include "impeller/renderer/backend/metal/texture_mtl.h"
+#include "impeller/renderer/formats.h"
 #include "impeller/renderer/host_buffer.h"
 #include "impeller/renderer/shader_types.h"
 
@@ -434,6 +435,9 @@ bool RenderPassMTL::EncodeCommands(Allocator& allocator,
                               ShaderStage::kFragment)) {
       return false;
     }
+    if (command.index_type == IndexType::kUnknown) {
+      return false;
+    }
     auto index_buffer = command.index_buffer.buffer;
     if (!index_buffer) {
       return false;
@@ -452,7 +456,7 @@ bool RenderPassMTL::EncodeCommands(Allocator& allocator,
     // Returns void. All error checking must be done by this point.
     [encoder drawIndexedPrimitives:ToMTLPrimitiveType(command.primitive_type)
                         indexCount:command.index_count
-                         indexType:MTLIndexTypeUInt32
+                         indexType:ToMTLIndexType(command.index_type)
                        indexBuffer:mtl_index_buffer
                  indexBufferOffset:command.index_buffer.range.offset
                      instanceCount:1u

@@ -64,6 +64,7 @@ struct Command {
   ///
   BufferView index_buffer;
   size_t index_count = 0u;
+  IndexType index_type = IndexType::kUnknown;
   std::string label;
   PrimitiveType primitive_type = PrimitiveType::kTriangle;
   WindingOrder winding = WindingOrder::kClockwise;

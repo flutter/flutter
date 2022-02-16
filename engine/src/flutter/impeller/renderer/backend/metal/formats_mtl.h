@@ -107,6 +107,15 @@ constexpr MTLPrimitiveType ToMTLPrimitiveType(PrimitiveType type) {
   return MTLPrimitiveTypePoint;
 }
 
+constexpr MTLIndexType ToMTLIndexType(IndexType type) {
+  switch (type) {
+    case IndexType::k16bit:
+      return MTLIndexTypeUInt16;
+    default:
+      return MTLIndexTypeUInt32;
+  }
+}
+
 constexpr MTLBlendOperation ToMTLBlendOperation(BlendOperation type) {
   switch (type) {
     case BlendOperation::kAdd:

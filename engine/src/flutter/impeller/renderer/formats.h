@@ -133,6 +133,12 @@ enum class WindingOrder {
   kCounterClockwise,
 };
 
+enum class IndexType {
+  kUnknown,
+  k16bit,
+  k32bit,
+};
+
 enum class PrimitiveType {
   kTriangle,
   kTriangleStrip,
