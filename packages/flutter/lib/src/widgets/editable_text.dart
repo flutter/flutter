@@ -1750,7 +1750,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     widget.controller.addListener(_didChangeTextEditingValue);
     widget.focusNode.addListener(_handleFocusChanged);
     _scrollController.addListener(_updateSelectionOverlayForScroll);
-    WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       _scrollController.position.isScrollingNotifier.addListener(_updateSelectionOverlayForScrollStop);
     });
     _cursorVisibilityNotifier.value = widget.showCursor;
