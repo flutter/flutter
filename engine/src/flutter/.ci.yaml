@@ -197,7 +197,6 @@ targets:
 
   - name: Linux clang-tidy
     recipe: engine/engine_lint
-    bringup: true
     properties:
       add_recipes_cq: "true"
     timeout: 60
@@ -280,7 +279,6 @@ targets:
 
   - name: Mac clang-tidy
     recipe: engine/engine_lint
-    bringup: true
     properties:
       add_recipes_cq: "true"
       jazzy_version: 0.9.5
