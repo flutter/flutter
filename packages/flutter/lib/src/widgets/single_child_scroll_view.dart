@@ -258,12 +258,12 @@ class SingleChildScrollView extends StatelessWidget {
       physics: physics,
       restorationId: restorationId,
       viewportBuilder: (BuildContext context, ViewportOffset offset) {
-        return ViewportBoundary(child: _SingleChildViewport(
+        return _SingleChildViewport(
           axisDirection: axisDirection,
           offset: offset,
           clipBehavior: clipBehavior,
           child: contents,
-        ));
+        );
       },
     );
 
@@ -318,6 +318,15 @@ class _SingleChildViewport extends SingleChildRenderObjectWidget {
       ..offset = offset
       ..clipBehavior = clipBehavior;
   }
+
+  @override
+  SingleChildRenderObjectElement createElement() {
+    return _SingleChildViewportElement(this);
+  }
+}
+
+class _SingleChildViewportElement extends SingleChildRenderObjectElement with ViewportElement {
+  _SingleChildViewportElement(_SingleChildViewport widget) : super(widget);
 }
 
 class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMixin<RenderBox> implements RenderAbstractViewport {

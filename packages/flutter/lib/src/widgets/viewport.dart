@@ -44,7 +44,7 @@ export 'package:flutter/rendering.dart' show
 ///    sliver context (the opposite of this widget).
 ///  * [ShrinkWrappingViewport], a variant of [Viewport] that shrink-wraps its
 ///    contents along the main axis.
-class Viewport extends StatelessWidget {
+class Viewport extends MultiChildRenderObjectWidget {
   /// Creates a widget that is bigger on the inside.
   ///
   /// The viewport listens to the [offset], which means you do not need to
@@ -55,195 +55,6 @@ class Viewport extends StatelessWidget {
   /// The [cacheExtent] must be specified if the [cacheExtentStyle] is
   /// not [CacheExtentStyle.pixel].
   Viewport({
-    Key? key,
-    this.axisDirection = AxisDirection.down,
-    this.crossAxisDirection,
-    this.anchor = 0.0,
-    required this.offset,
-    this.center,
-    this.cacheExtent,
-    this.cacheExtentStyle = CacheExtentStyle.pixel,
-    this.clipBehavior = Clip.hardEdge,
-    this.slivers = const <Widget>[],
-  }) : assert(offset != null),
-       assert(slivers != null),
-       assert(center == null || slivers.where((Widget child) => child.key == center).length == 1),
-       assert(cacheExtentStyle != null),
-       assert(cacheExtentStyle != CacheExtentStyle.viewport || cacheExtent != null),
-       assert(clipBehavior != null),
-       super(key: key);
-
-  /// The direction in which the [offset]'s [ViewportOffset.pixels] increases.
-  ///
-  /// For example, if the [axisDirection] is [AxisDirection.down], a scroll
-  /// offset of zero is at the top of the viewport and increases towards the
-  /// bottom of the viewport.
-  final AxisDirection axisDirection;
-
-  /// The direction in which child should be laid out in the cross axis.
-  ///
-  /// If the [axisDirection] is [AxisDirection.down] or [AxisDirection.up], this
-  /// property defaults to [AxisDirection.left] if the ambient [Directionality]
-  /// is [TextDirection.rtl] and [AxisDirection.right] if the ambient
-  /// [Directionality] is [TextDirection.ltr].
-  ///
-  /// If the [axisDirection] is [AxisDirection.left] or [AxisDirection.right],
-  /// this property defaults to [AxisDirection.down].
-  final AxisDirection? crossAxisDirection;
-
-  /// The relative position of the zero scroll offset.
-  ///
-  /// For example, if [anchor] is 0.5 and the [axisDirection] is
-  /// [AxisDirection.down] or [AxisDirection.up], then the zero scroll offset is
-  /// vertically centered within the viewport. If the [anchor] is 1.0, and the
-  /// [axisDirection] is [AxisDirection.right], then the zero scroll offset is
-  /// on the left edge of the viewport.
-  final double anchor;
-
-  /// Which part of the content inside the viewport should be visible.
-  ///
-  /// The [ViewportOffset.pixels] value determines the scroll offset that the
-  /// viewport uses to select which part of its content to display. As the user
-  /// scrolls the viewport, this value changes, which changes the content that
-  /// is displayed.
-  ///
-  /// Typically a [ScrollPosition].
-  final ViewportOffset offset;
-
-  /// The first child in the [GrowthDirection.forward] growth direction.
-  ///
-  /// Children after [center] will be placed in the [axisDirection] relative to
-  /// the [center]. Children before [center] will be placed in the opposite of
-  /// the [axisDirection] relative to the [center].
-  ///
-  /// The [center] must be the key of a child of the viewport.
-  final Key? center;
-
-  /// {@macro flutter.rendering.RenderViewportBase.cacheExtent}
-  ///
-  /// See also:
-  ///
-  ///  * [cacheExtentStyle], which controls the units of the [cacheExtent].
-  final double? cacheExtent;
-
-  /// {@macro flutter.rendering.RenderViewportBase.cacheExtentStyle}
-  final CacheExtentStyle cacheExtentStyle;
-
-  /// {@macro flutter.material.Material.clipBehavior}
-  ///
-  /// Defaults to [Clip.hardEdge].
-  final Clip clipBehavior;
-
-  /// The widgets below this widget in the tree.
-  ///
-  /// If this list is going to be mutated, it is usually wise to put a [Key] on
-  /// each of the child widgets, so that the framework can match old
-  /// configurations to new configurations and maintain the underlying render
-  /// objects.
-  ///
-  /// Also, a [Widget] in Flutter is immutable, so directly modifying the
-  /// [children] such as `someMultiChildRenderObjectWidget.children.add(...)` or
-  /// as the example code below will result in incorrect behaviors. Whenever the
-  /// children list is modified, a new list object should be provided.
-  ///
-  /// ```dart
-  /// class SomeWidgetState extends State<SomeWidget> {
-  ///   List<Widget> _children;
-  ///
-  ///   void initState() {
-  ///     _children = [];
-  ///   }
-  ///
-  ///   void someHandler() {
-  ///     setState(() {
-  ///         _children.add(...);
-  ///     });
-  ///   }
-  ///
-  ///   Widget build(...) {
-  ///     // Reusing `List<Widget> _children` here is problematic.
-  ///     return Row(children: _children);
-  ///   }
-  /// }
-  /// ```
-  ///
-  /// The following code corrects the problem mentioned above.
-  ///
-  /// ```dart
-  /// class SomeWidgetState extends State<SomeWidget> {
-  ///   List<Widget> _children;
-  ///
-  ///   void initState() {
-  ///     _children = [];
-  ///   }
-  ///
-  ///   void someHandler() {
-  ///     setState(() {
-  ///       // The key here allows Flutter to reuse the underlying render
-  ///       // objects even if the children list is recreated.
-  ///       _children.add(ChildWidget(key: ...));
-  ///     });
-  ///   }
-  ///
-  ///   Widget build(...) {
-  ///     // Always create a new list of children as a Widget is immutable.
-  ///     return Row(children: List.of(_children));
-  ///   }
-  /// }
-  /// ```
-  final List<Widget> slivers;
-
-  /// Given a [BuildContext] and an [AxisDirection], determine the correct cross
-  /// axis direction.
-  ///
-  /// This depends on the [Directionality] if the `axisDirection` is vertical;
-  /// otherwise, the default cross axis direction is downwards.
-  static AxisDirection getDefaultCrossAxisDirection(BuildContext context, AxisDirection axisDirection) {
-    assert(axisDirection != null);
-    switch (axisDirection) {
-      case AxisDirection.up:
-        assert(debugCheckHasDirectionality(
-          context,
-          why: "to determine the cross-axis direction when the viewport has an 'up' axisDirection",
-          alternative: "Alternatively, consider specifying the 'crossAxisDirection' argument on the Viewport.",
-        ));
-        return textDirectionToAxisDirection(Directionality.of(context));
-      case AxisDirection.right:
-        return AxisDirection.down;
-      case AxisDirection.down:
-        assert(debugCheckHasDirectionality(
-          context,
-          why: "to determine the cross-axis direction when the viewport has a 'down' axisDirection",
-          alternative: "Alternatively, consider specifying the 'crossAxisDirection' argument on the Viewport.",
-        ));
-        return textDirectionToAxisDirection(Directionality.of(context));
-      case AxisDirection.left:
-        return AxisDirection.down;
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return ViewportBoundary(
-      child: ViewportInternal(
-        axisDirection: axisDirection,
-        crossAxisDirection: crossAxisDirection,
-        anchor: anchor,
-        offset: offset,
-        center: center,
-        cacheExtent: cacheExtent,
-        cacheExtentStyle: cacheExtentStyle,
-        clipBehavior: clipBehavior,
-        slivers: slivers,
-      ),
-    );
-  }
-}
-
-/// TBD
-class ViewportInternal extends MultiChildRenderObjectWidget {
-  /// TBD
-  ViewportInternal({
     Key? key,
     this.axisDirection = AxisDirection.down,
     this.crossAxisDirection,
@@ -323,6 +134,35 @@ class ViewportInternal extends MultiChildRenderObjectWidget {
   /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
 
+  /// Given a [BuildContext] and an [AxisDirection], determine the correct cross
+  /// axis direction.
+  ///
+  /// This depends on the [Directionality] if the `axisDirection` is vertical;
+  /// otherwise, the default cross axis direction is downwards.
+  static AxisDirection getDefaultCrossAxisDirection(BuildContext context, AxisDirection axisDirection) {
+    assert(axisDirection != null);
+    switch (axisDirection) {
+      case AxisDirection.up:
+        assert(debugCheckHasDirectionality(
+          context,
+          why: "to determine the cross-axis direction when the viewport has an 'up' axisDirection",
+          alternative: "Alternatively, consider specifying the 'crossAxisDirection' argument on the Viewport.",
+        ));
+        return textDirectionToAxisDirection(Directionality.of(context));
+      case AxisDirection.right:
+        return AxisDirection.down;
+      case AxisDirection.down:
+        assert(debugCheckHasDirectionality(
+          context,
+          why: "to determine the cross-axis direction when the viewport has a 'down' axisDirection",
+          alternative: "Alternatively, consider specifying the 'crossAxisDirection' argument on the Viewport.",
+        ));
+        return textDirectionToAxisDirection(Directionality.of(context));
+      case AxisDirection.left:
+        return AxisDirection.down;
+    }
+  }
+
   @override
   RenderViewport createRenderObject(BuildContext context) {
     return RenderViewport(
@@ -368,9 +208,9 @@ class ViewportInternal extends MultiChildRenderObjectWidget {
   }
 }
 
-class _ViewportElement extends MultiChildRenderObjectElement {
+class _ViewportElement extends MultiChildRenderObjectElement with ViewportElement {
   /// Creates an element that uses the given widget as its configuration.
-  _ViewportElement(ViewportInternal widget) : super(widget);
+  _ViewportElement(Viewport widget) : super(widget);
 
   bool _doingMountOrUpdate = false;
   int? _centerSlotIndex;
@@ -400,7 +240,7 @@ class _ViewportElement extends MultiChildRenderObjectElement {
 
   void _updateCenter() {
     // TODO(ianh): cache the keys to make this faster
-    final ViewportInternal viewport = widget as ViewportInternal;
+    final Viewport viewport = widget as Viewport;
     if (viewport.center != null) {
       int elementIndex = 0;
       for (final Element e in children) {

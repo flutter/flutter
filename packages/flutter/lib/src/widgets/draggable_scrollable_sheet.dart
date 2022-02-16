@@ -532,7 +532,7 @@ class _DraggableSheetExtent {
       extent: currentSize,
       initialExtent: initialSize,
       context: context,
-    ).dispatchFast(context);
+    ).dispatch(context);
   }
 
   double pixelsToSize(double pixels) {

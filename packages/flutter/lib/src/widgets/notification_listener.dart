@@ -50,49 +50,13 @@ abstract class Notification {
   /// const constructors so that they can be used in const expressions.
   const Notification();
 
-  /// Applied to each ancestor of the [dispatch] target.
-  ///
-  /// The [Notification] class implementation of this method dispatches the
-  /// given [Notification] to each ancestor [NotificationListener] widget.
-  ///
-  /// This method will never be called if [dispatchFast] is used.
-  ///
-  /// Subclasses can override this to apply additional filtering or to update
-  /// the notification as it is bubbled (for example, increasing a `depth` field
-  /// for each ancestor of a particular type).
-  @protected
-  @mustCallSuper
-  bool visitAncestor(Element element) {
-    if (element is NotificationElement) {
-      final NotificationListener<Notification> widget = element.widget as NotificationListener<Notification>;
-      if (widget._dispatch(this, element)) // that function checks the type dynamically
-        return false;
-    }
-    return true;
-  }
-
   /// Start bubbling this notification at the given build context.
   ///
   /// The notification will be delivered to any [NotificationListener] widgets
   /// with the appropriate type parameters that are ancestors of the given
   /// [BuildContext]. If the [BuildContext] is null, the notification is not
   /// dispatched.
-  // void dispatch(BuildContext? target) {
-  //   // The `target` may be null if the subtree the notification is supposed to be
-  //   // dispatched in is in the process of being disposed.
-  //   target?.visitAncestorElements(visitAncestor);
-  // }
-
-  /// Start bubbling this notification at the given build context.
-  ///
-  /// The notification will be delivered to any [NotificationListener] widgets
-  /// with the appropriate type parameters that are ancestors of the given
-  /// [BuildContext]. If the [BuildContext] is null, the notification is not
-  /// dispatched.
-  ///
-  /// Unlike [dispatch], this method does not visit each Element and [visitAncestor]
-  /// will never be called.
-  void dispatchFast(BuildContext? target) {
+  void dispatch(BuildContext? target) {
     target?.dispatchNotification(this);
   }
 
@@ -133,7 +97,6 @@ class NotificationListener<T extends Notification> extends ProxyWidget {
     this.onNotification,
   }) : super(key: key, child: child);
 
-
   /// Called when a notification of the appropriate type arrives at this
   /// location in the tree.
   ///
@@ -153,17 +116,32 @@ class NotificationListener<T extends Notification> extends ProxyWidget {
   /// widgets that depend on layout, consider a [LayoutBuilder] instead.
   final NotificationListenerCallback<T>? onNotification;
 
-  bool _dispatch(Notification notification, Element element) {
-    if (onNotification != null && notification is T) {
-      final bool result = onNotification!(notification);
-      return result == true; // so that null and false have the same effect
+  @override
+  Element createElement() {
+    return _NotificationElement<T>(this);
+  }
+}
+
+/// An element used to host [NotificationListener] elements.
+@optionalTypeArgs
+class _NotificationElement<T extends Notification> extends ProxyElement {
+  _NotificationElement(NotificationListener<T> widget) : super(widget);
+
+  @override
+  bool get handlesNotification => true;
+
+  @override
+  bool onNotification(Notification notification) {
+    final NotificationListener<T> listener = widget as NotificationListener<T>;
+    if (listener.onNotification != null && notification is T) {
+      return listener.onNotification!(notification);
     }
     return false;
   }
 
   @override
-  Element createElement() {
-    return NotificationElement<T>(this);
+  void notifyClients(covariant ProxyWidget oldWidget) {
+    // Notification tree does not need to notify clients.
   }
 }
 
@@ -195,4 +173,7 @@ class NotificationListener<T extends Notification> extends ProxyWidget {
 /// useful for paint effects that depend on the layout. If you were to use this
 /// notification to change the build, for instance, you would always be one
 /// frame behind, which would look really ugly and laggy.
-class LayoutChangedNotification extends Notification { }
+class LayoutChangedNotification extends Notification {
+  /// Create a new [LayoutChangedNotification].
+  const LayoutChangedNotification();
+}

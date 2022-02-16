@@ -25,36 +25,29 @@ mixin ViewportNotificationMixin on Notification {
   int _depth = 0;
 
   @override
-  bool visitAncestor(Element element) {
-    if (element is RenderObjectElement && element.renderObject is RenderAbstractViewport)
-      _depth += 1;
-    return super.visitAncestor(element);
-  }
-
-  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('depth: $depth (${ depth == 0 ? "local" : "remote"})');
   }
 }
 
-/// A widget that does something for viewports.
-class ViewportBoundary extends StatelessWidget {
-  const ViewportBoundary({Key? key, required this.child}) : super(key: key);
-
-  final Widget child;
-
-  bool _onNotification(ViewportNotificationMixin notification) {
-    notification._depth += 1;
-    // Let notification continue bubbling.
-    return false;
-  }
+/// A mixin that allows [Element]s containing Viewport like widgets to correctly
+/// modify the notification depth of a [ViewportNotificationMixin].
+///
+/// See also:
+///   * [Viewport], which creates a custom [MultiChildRenderObjectElement] that mixes
+///     this in.
+mixin ViewportElement on Element {
+  @override
+  bool get handlesNotification => true;
 
   @override
-  Widget build(BuildContext context) {
-    return NotificationListener<ViewportNotificationMixin>(onNotification: _onNotification, child: child);
+  bool onNotification(Notification notification) {
+    if (notification is ViewportNotificationMixin) {
+      notification._depth += 1;
+    }
+    return false;
   }
-
 }
 
 /// A [Notification] related to scrolling.

@@ -2393,6 +2393,12 @@ abstract class BuildContext {
   /// data down to them.
   void visitChildElements(ElementVisitor visitor);
 
+  /// Start bubbling this notification at the given build context.
+  ///
+  /// The notification will be delivered to any [NotificationListener] widgets
+  /// with the appropriate type parameters that are ancestors of the given
+  /// [BuildContext]. If the [BuildContext] is null, the notification is not
+  /// dispatched.
   void dispatchNotification(Notification notification);
 
   /// Returns a description of the [Element] associated with the current build context.
@@ -3106,6 +3112,27 @@ class BuildOwner {
   }
 }
 
+/// Something that handles notifications.
+abstract class NotificationHandler {
+
+  /// Return true to consume the notification or false to let it continue bubbling.
+  bool onNotification(Notification notification);
+}
+
+class _NotificationNode {
+  _NotificationNode(this.parent, this.current);
+
+  NotificationHandler? current;
+  _NotificationNode? parent;
+
+  void dispatchNotification(Notification notification) {
+    if (current?.onNotification(notification) == true) {
+      return;
+    }
+    parent?.dispatchNotification(notification);
+  }
+}
+
 /// An instantiation of a [Widget] at a particular location in the tree.
 ///
 /// Widgets describe how to configure a subtree but the same widget can be used
@@ -3156,7 +3183,7 @@ class BuildOwner {
 ///    element.
 ///  * At this point, the element is considered "defunct" and will not be
 ///    incorporated into the tree in the future.
-abstract class Element extends DiagnosticableTree implements BuildContext {
+abstract class Element extends DiagnosticableTree implements BuildContext, NotificationHandler {
   /// Creates an element that uses the given widget as its configuration.
   ///
   /// Typically called by an override of [Widget.createElement].
@@ -3166,7 +3193,9 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
 
   Element? _parent;
   DebugReassembleConfig? _debugReassembleConfig;
-  NotificationElement<Notification>? _notificationListener;
+
+  _NotificationNode? _notificationTree;
+
 
   /// Compare two widgets for equality.
   ///
@@ -3620,6 +3649,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       owner!._registerGlobalKey(key, this);
     }
     _updateInheritance();
+    _attachNotificationTree();
   }
 
   void _debugRemoveGlobalKeyReservation(Element child) {
@@ -3956,6 +3986,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     _dependencies?.clear();
     _hadUnsatisfiedDependencies = false;
     _updateInheritance();
+    _attachNotificationTree();
     if (_dirty)
       owner!.scheduleBuildFor(this);
     if (hadDependencies)
@@ -4237,10 +4268,17 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     return ancestor;
   }
 
+  void _attachNotificationTree() {
+    if (handlesNotification) {
+      _notificationTree = _NotificationNode(_parent?._notificationTree, this);
+    } else {
+      _notificationTree = _parent?._notificationTree;
+    }
+  }
+
   void _updateInheritance() {
     assert(_lifecycleState == _ElementLifecycle.active);
     _inheritedLookup = _parent?._inheritedLookup;
-    _notificationListener = _parent?._notificationListener;
   }
 
   @override
@@ -4368,8 +4406,18 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
 
   @override
   void dispatchNotification(Notification notification) {
-    _notificationListener?.dispatchNotification(notification);
+    _notificationTree?.dispatchNotification(notification);
   }
+
+  @override
+  bool onNotification(Notification notification) {
+    return false;
+  }
+
+  /// Whether this element can handle [Notifications].
+  ///
+  /// The value of this getter must be unchanging for the lifetime of the Element.
+  bool get handlesNotification => false;
 
   /// A short, textual description of this element.
   @override
@@ -5243,7 +5291,6 @@ class InheritedElement extends ProxyElement {
     assert(_lifecycleState == _ElementLifecycle.active);
     _inheritedLookup = InheritedTreeCache(_parent?._inheritedLookup)
       ..[widget.runtimeType] = this;
-    _notificationListener = _parent?._notificationListener;
   }
 
   @override
@@ -6471,41 +6518,6 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
     assert(!debugChildrenHaveDuplicateKeys(widget, multiChildRenderObjectWidget.children));
     _children = updateChildren(_children, multiChildRenderObjectWidget.children, forgottenChildren: _forgottenChildren);
     _forgottenChildren.clear();
-  }
-}
-
-@optionalTypeArgs
-class NotificationElement<T extends Notification> extends ProxyElement {
-  NotificationElement(NotificationListener<T> widget) : super(widget);
-
-
-  NotificationElement<Notification>? _parentNotification;
-
-
-  @override
-  void dispatchNotification(Notification notification) {
-    final NotificationListener<T> listener = widget as NotificationListener<T>;
-    if (listener.onNotification != null && notification is T) {
-      final bool result = listener.onNotification!(notification);
-      // so that null and false have the same effect
-      if (result == true) {
-        return;
-      }
-    }
-    _parentNotification?.dispatchNotification(notification);
-  }
-
-  @override
-  void _updateInheritance() {
-    assert(_lifecycleState == _ElementLifecycle.active);
-    _inheritedLookup = _parent?._inheritedLookup;
-    _parentNotification = _parent?._notificationListener;
-    _notificationListener = this;
-  }
-
-  @override
-  void notifyClients(covariant ProxyWidget oldWidget) {
-    // Notification tree does not need to notify clients.
   }
 }
 
