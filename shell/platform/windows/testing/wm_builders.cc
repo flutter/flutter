@@ -7,7 +7,7 @@
 namespace flutter {
 namespace testing {
 
-Win32Message WmKeyDownInfo::Build(LRESULT expected_result, HWND hWnd) {
+Win32Message WmKeyDownInfo::Build(LRESULT expected_result) {
   uint32_t lParam = (repeat_count << 0) | (scan_code << 16) | (extended << 24) |
                     (prev_state << 30);
   return Win32Message{
@@ -15,11 +15,10 @@ Win32Message WmKeyDownInfo::Build(LRESULT expected_result, HWND hWnd) {
       .wParam = key,
       .lParam = lParam,
       .expected_result = expected_result,
-      .hWnd = hWnd,
   };
 }
 
-Win32Message WmKeyUpInfo::Build(LRESULT expected_result, HWND hWnd) {
+Win32Message WmKeyUpInfo::Build(LRESULT expected_result) {
   uint32_t lParam = (1 /* repeat_count */ << 0) | (scan_code << 16) |
                     (extended << 24) | (1 /* prev_state */ << 30) |
                     (1 /* transition */ << 31);
@@ -28,11 +27,10 @@ Win32Message WmKeyUpInfo::Build(LRESULT expected_result, HWND hWnd) {
       .wParam = key,
       .lParam = lParam,
       .expected_result = expected_result,
-      .hWnd = hWnd,
   };
 }
 
-Win32Message WmCharInfo::Build(LRESULT expected_result, HWND hWnd) {
+Win32Message WmCharInfo::Build(LRESULT expected_result) {
   uint32_t lParam = (repeat_count << 0) | (scan_code << 16) | (extended << 24) |
                     (bit25 << 25) | (context << 29) | (prev_state << 30) |
                     (transition << 31);
@@ -41,11 +39,10 @@ Win32Message WmCharInfo::Build(LRESULT expected_result, HWND hWnd) {
       .wParam = char_code,
       .lParam = lParam,
       .expected_result = expected_result,
-      .hWnd = hWnd,
   };
 }
 
-Win32Message WmSysKeyDownInfo::Build(LRESULT expected_result, HWND hWnd) {
+Win32Message WmSysKeyDownInfo::Build(LRESULT expected_result) {
   uint32_t lParam = (repeat_count << 0) | (scan_code << 16) | (extended << 24) |
                     (context << 29) | (prev_state << 30) |
                     (0 /* transition */ << 31);
@@ -54,11 +51,10 @@ Win32Message WmSysKeyDownInfo::Build(LRESULT expected_result, HWND hWnd) {
       .wParam = key,
       .lParam = lParam,
       .expected_result = expected_result,
-      .hWnd = hWnd,
   };
 }
 
-Win32Message WmSysKeyUpInfo::Build(LRESULT expected_result, HWND hWnd) {
+Win32Message WmSysKeyUpInfo::Build(LRESULT expected_result) {
   uint32_t lParam = (1 /* repeat_count */ << 0) | (scan_code << 16) |
                     (extended << 24) | (context << 29) |
                     (1 /* prev_state */ << 30) | (1 /* transition */ << 31);
@@ -67,11 +63,10 @@ Win32Message WmSysKeyUpInfo::Build(LRESULT expected_result, HWND hWnd) {
       .wParam = key,
       .lParam = lParam,
       .expected_result = expected_result,
-      .hWnd = hWnd,
   };
 }
 
-Win32Message WmDeadCharInfo::Build(LRESULT expected_result, HWND hWnd) {
+Win32Message WmDeadCharInfo::Build(LRESULT expected_result) {
   uint32_t lParam = (repeat_count << 0) | (scan_code << 16) | (extended << 24) |
                     (context << 30) | (prev_state << 30) | (transition << 31);
   return Win32Message{
@@ -79,7 +74,6 @@ Win32Message WmDeadCharInfo::Build(LRESULT expected_result, HWND hWnd) {
       .wParam = char_code,
       .lParam = lParam,
       .expected_result = expected_result,
-      .hWnd = hWnd,
   };
 }
 
