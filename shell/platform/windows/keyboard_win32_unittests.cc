@@ -726,9 +726,7 @@ TEST(KeyboardTest, ShiftRightUnhandled) {
                        kPhysicalShiftRight, kLogicalShiftRight, "",
                        kNotSynthesized);
   clear_key_calls();
-  // ShiftRight down messages are never redispatched.
-  // See |IsKeyDownShiftRight|.
-  EXPECT_EQ(tester.RedispatchedMessageCountAndClear(), 0);
+  EXPECT_EQ(tester.RedispatchedMessageCountAndClear(), 1);
 
   // Release ShiftRight
   tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
@@ -1354,9 +1352,7 @@ TEST(KeyboardTest, DeadKeyThatCombines) {
                        kPhysicalBracketLeft, kLogicalBracketRight, "^",
                        kNotSynthesized);
   clear_key_calls();
-  // TODO(dkwingsmt): Dead key messages are not redispatched right now, but it
-  // might be safe to redispatch them already. Change the following result to 2.
-  EXPECT_EQ(tester.RedispatchedMessageCountAndClear(), 0);
+  EXPECT_EQ(tester.RedispatchedMessageCountAndClear(), 2);
 
   // Release ^¨
   tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
@@ -1429,9 +1425,7 @@ TEST(KeyboardTest, DeadKeyWithoutDeadMaskThatCombines) {
   EXPECT_CALL_IS_EVENT(key_calls[0], kFlutterKeyEventTypeDown, kPhysicalDigit6,
                        kLogicalDigit6, "6", kNotSynthesized);
   clear_key_calls();
-  // TODO(dkwingsmt): Dead key messages are not redispatched right now, but it
-  // might be safe to redispatch them already. Change the following result to 2.
-  EXPECT_EQ(tester.RedispatchedMessageCountAndClear(), 0);
+  EXPECT_EQ(tester.RedispatchedMessageCountAndClear(), 2);
 
   // Release 6^
   tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
@@ -1501,9 +1495,7 @@ TEST(KeyboardTest, DeadKeyThatDoesNotCombine) {
                        kPhysicalBracketLeft, kLogicalBracketRight, "^",
                        kNotSynthesized);
   clear_key_calls();
-  // TODO(dkwingsmt): Dead key messages are not redispatched right now, but it
-  // might be safe to redispatch them already. Change the following result to 2.
-  EXPECT_EQ(tester.RedispatchedMessageCountAndClear(), 0);
+  EXPECT_EQ(tester.RedispatchedMessageCountAndClear(), 2);
 
   // Release ^¨
   tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
@@ -1572,9 +1564,7 @@ TEST(KeyboardTest, DeadKeyTwiceThenLetter) {
                        kPhysicalBackquote, kLogicalBackquote, "`",
                        kNotSynthesized);
   clear_key_calls();
-  // TODO(dkwingsmt): Dead key messages are not redispatched right now, but it
-  // might be safe to redispatch them already. Change the following result to 2.
-  EXPECT_EQ(tester.RedispatchedMessageCountAndClear(), 0);
+  EXPECT_EQ(tester.RedispatchedMessageCountAndClear(), 2);
 
   // Release `
   tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
@@ -1673,24 +1663,6 @@ TEST(KeyboardTest, MultibyteCharacter) {
                        kLogicalKeyW, "", kNotSynthesized);
   clear_key_calls();
   EXPECT_EQ(tester.RedispatchedMessageCountAndClear(), 1);
-}
-
-// A key down event for shift right must not be redispatched even if
-// the framework returns unhandled.
-//
-// The reason for this test is documented in |IsKeyDownShiftRight|.
-TEST(KeyboardTest, NeverRedispatchShiftRightKeyDown) {
-  KeyboardTester tester;
-  tester.Responding(false);
-
-  // Press ShiftRight and the delegate responds false.
-  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
-      KeyStateChange{VK_RSHIFT, true, true},
-      WmKeyDownInfo{VK_SHIFT, kScanCodeShiftRight, kNotExtended, kWasUp}.Build(
-          kWmResultZero)});
-
-  EXPECT_EQ(key_calls.size(), 1);
-  clear_key_calls();
 }
 
 TEST(KeyboardTest, SynthesizeModifiers) {

@@ -75,23 +75,6 @@ static bool IsKeyDownCtrlLeft(int action, int virtual_key) {
 #endif
 }
 
-// Returns true if this key is a key down event of ShiftRight.
-//
-// This is a temporary solution to
-// https://github.com/flutter/flutter/issues/81674, and forces ShiftRight
-// KeyDown events to not be redispatched regardless of the framework's response.
-//
-// If a ShiftRight KeyDown event is not handled by the framework and is
-// redispatched, Win32 will not send its following KeyUp event and keeps
-// recording ShiftRight as being pressed.
-static bool IsKeyDownShiftRight(int virtual_key, bool was_down) {
-#ifdef WINUWP
-  return false;
-#else
-  return virtual_key == VK_RSHIFT && !was_down;
-#endif
-}
-
 // Returns if a character sent by Win32 is a dead key.
 static bool IsDeadKey(uint32_t ch) {
   return (ch & kDeadKeyCharMask) != 0;
@@ -136,6 +119,13 @@ KeyboardManagerWin32::KeyboardManagerWin32(WindowDelegate* delegate)
 void KeyboardManagerWin32::RedispatchEvent(
     std::unique_ptr<PendingEvent> event) {
   for (const Win32Message& message : event->session) {
+    // Never redispatch sys keys, because their original messages have been
+    // passed to the system default processor.
+    const bool is_syskey =
+        message.action == WM_SYSKEYDOWN || message.action == WM_SYSKEYUP;
+    if (is_syskey) {
+      continue;
+    }
     pending_redispatches_.push_back(message);
     UINT result = window_delegate_->Win32DispatchMessage(
         message.action, message.wparam, message.lparam);
@@ -212,23 +202,8 @@ void KeyboardManagerWin32::HandleOnKeyResult(
     std::unique_ptr<PendingEvent> event,
     bool handled,
     std::list<PendingText>::iterator pending_text) {
-  // First, patch |handled|, because some key events must always be treated as
-  // handled.
-  //
-  // Redispatching dead keys events makes Win32 ignore the dead key state
-  // and redispatches a normal character without combining it with the
-  // next letter key.
-  //
-  // Redispatching sys events is impossible due to the limitation of
-  // |SendInput|.
-  const bool is_syskey =
-      event->action == WM_SYSKEYDOWN || event->action == WM_SYSKEYUP;
-  const bool real_handled = handled || IsDeadKey(event->character) ||
-                            is_syskey ||
-                            IsKeyDownShiftRight(event->key, event->was_down);
-
   if (pending_text != pending_texts_.end()) {
-    if (pending_text->placeholder || real_handled) {
+    if (pending_text->placeholder || handled) {
       pending_texts_.erase(pending_text);
     } else {
       pending_text->ready = true;
@@ -236,7 +211,7 @@ void KeyboardManagerWin32::HandleOnKeyResult(
     DispatchReadyTexts();
   }
 
-  if (real_handled) {
+  if (handled) {
     return;
   }
 
