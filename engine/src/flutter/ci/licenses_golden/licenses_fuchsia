@@ -1,4 +1,4 @@
-Signature: b9ab75f86af3f258db4ed284c69b4e90
+Signature: b7ddca2eb8ef59adfae219b05fc67fb2
 
 UNUSED LICENSES:
 
@@ -594,7 +594,7 @@ FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/svc/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/sync/meta.json
-FILE: ../../../fuchsia/sdk/linux/pkg/sys/component/realm_builder_absolute_shard_sdk.json
+FILE: ../../../fuchsia/sdk/linux/pkg/sys/component/realm_builder_shard_sdk.json
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_component_cpp_testing/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_cpp_testing/meta.json
@@ -1338,7 +1338,7 @@ FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/svc/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/sync/meta.json
-FILE: ../../../fuchsia/sdk/linux/pkg/sys/component/realm_builder_absolute_shard_sdk.json
+FILE: ../../../fuchsia/sdk/linux/pkg/sys/component/realm_builder_shard_sdk.json
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_component_cpp_testing/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_cpp_testing/meta.json
@@ -1979,7 +1979,7 @@ FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/svc/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/sync/meta.json
-FILE: ../../../fuchsia/sdk/linux/pkg/sys/component/realm_builder_absolute_shard_sdk.json
+FILE: ../../../fuchsia/sdk/linux/pkg/sys/component/realm_builder_shard_sdk.json
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_component_cpp_testing/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_cpp_testing/meta.json
@@ -3659,6 +3659,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.power.systemmode/systemmode.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.update.config/config.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.common/driver_features.fidl
 FILE: ../../../fuchsia/sdk/linux/pkg/sys/component/realm_builder_absolute.shard.cml
+FILE: ../../../fuchsia/sdk/linux/pkg/sys/component/realm_builder_base.shard.cml
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_component_cpp_testing/internal/convert.cc
 ----------------------------------------------------------------------------------------------------
 Copyright 2022 The Fuchsia Authors. All rights reserved.
