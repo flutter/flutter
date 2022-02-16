@@ -2923,6 +2923,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
     _clipboardStatus?.update();
     _selectionOverlay!.showToolbar();
+    _hideToolbarAction.enabled = true;
     return true;
   }
 
@@ -2935,6 +2936,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       // Hide only the toolbar but not the handles.
       _selectionOverlay?.hideToolbar();
     }
+    _hideToolbarAction.enabled = false;
   }
 
   /// Toggles the visibility of the toolbar.
@@ -3147,6 +3149,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
   late final Action<UpdateSelectionIntent> _updateSelectionAction = CallbackAction<UpdateSelectionIntent>(onInvoke: _updateSelection);
 
+  late final _EditableTextCallbackAction<DismissIntent> _hideToolbarAction = _EditableTextCallbackAction<DismissIntent>(onInvoke: (_) => hideToolbar(false));
+
   late final _UpdateTextSelectionToAdjacentLineAction<ExtendSelectionVerticallyToAdjacentLineIntent> _adjacentLineAction = _UpdateTextSelectionToAdjacentLineAction<ExtendSelectionVerticallyToAdjacentLineIntent>(this);
 
   void _expandSelectionToDocumentBoundary(ExpandSelectionToDocumentBoundaryIntent intent) {
@@ -3188,6 +3192,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     ReplaceTextIntent: _replaceTextAction,
     UpdateSelectionIntent: _updateSelectionAction,
     DirectionalFocusIntent: DirectionalFocusAction.forTextField(),
+    DismissIntent: _hideToolbarAction,
 
     // Delete
     DeleteCharacterIntent: _makeOverridable(_DeleteTextAction<DeleteCharacterIntent>(this, _characterBoundary)),
@@ -4544,4 +4549,21 @@ _Throttled<T> _throttle<T>({
     });
     return timer!;
   };
+}
+
+class _EditableTextCallbackAction<T extends Intent> extends CallbackAction<T> {
+  _EditableTextCallbackAction({
+    required OnInvokeCallback<T> onInvoke,
+    this.enabled = false,
+  }) : super(onInvoke: onInvoke);
+
+  bool enabled;
+
+  @override
+  bool isEnabled(covariant T intent) => false;
+  //bool isEnabled(covariant T intent) => enabled;
+
+  @override
+  bool consumesKey(covariant T intent) => false;
+  //bool consumesKey(covariant T intent) => enabled;
 }
