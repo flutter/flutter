@@ -395,7 +395,7 @@ void main() {
   });
 
   testWidgets('Clip behavior is updated as needed', (WidgetTester tester) async {
-    // Regression test for https://github.com/flutter/flutter/pull/97678
+    // Regression test for https://github.com/flutter/flutter/issues/97867
     await tester.pumpWidget(Directionality(
         textDirection: TextDirection.ltr,
         child: MediaQuery(
