@@ -47,7 +47,7 @@ class CoverageCollector extends TestWatcher {
     if (_globalHitmap == null) {
       _globalHitmap = hitmap;
     } else {
-      hitmap.merge(_globalHitmap);
+      _globalHitmap.merge(hitmap);
     }
   }
 
