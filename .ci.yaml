@@ -1171,7 +1171,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk"},
+          {"dependency": "android_sdk", "version": "version:29.0"},
           {"dependency": "chrome_and_driver"},
           {"dependency": "goldctl"}
         ]
@@ -1191,7 +1191,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk"},
+          {"dependency": "android_sdk", "version": "version:29.0"},
           {"dependency": "chrome_and_driver"},
           {"dependency": "goldctl"}
         ]
@@ -1211,7 +1211,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk"},
+          {"dependency": "android_sdk", "version": "version:29.0"},
           {"dependency": "chrome_and_driver"},
           {"dependency": "goldctl"}
         ]
@@ -1231,7 +1231,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk"},
+          {"dependency": "android_sdk", "version": "version:29.0"},
           {"dependency": "chrome_and_driver"},
           {"dependency": "goldctl"}
         ]
@@ -1251,7 +1251,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk"},
+          {"dependency": "android_sdk", "version": "version:29.0"},
           {"dependency": "chrome_and_driver"},
           {"dependency": "goldctl"}
         ]
@@ -1271,7 +1271,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk"},
+          {"dependency": "android_sdk", "version": "version:29.0"},
           {"dependency": "chrome_and_driver"},
           {"dependency": "goldctl"}
         ]
@@ -1291,7 +1291,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk"},
+          {"dependency": "android_sdk", "version": "version:29.0"},
           {"dependency": "chrome_and_driver"},
           {"dependency": "goldctl"}
         ]
@@ -1311,7 +1311,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk"},
+          {"dependency": "android_sdk", "version": "version:29.0"},
           {"dependency": "chrome_and_driver"},
           {"dependency": "goldctl"}
         ]
@@ -2886,7 +2886,7 @@ targets:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk"},
+          {"dependency": "android_sdk", "version": "version:29.0"},
           {"dependency": "open_jdk"},
           {"dependency": "xcode"},
           {"dependency": "gems"}
