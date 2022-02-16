@@ -129,6 +129,12 @@ class RenderAndroidView extends RenderBox with _PlatformViewGestureMixin {
   }
 
   void _onPlatformViewCreated(int id) {
+    // This render object paint depends on _viewController.textureId, which is set
+    // prior to this callback being fired.
+    // Therefore, mark this render object as having changed its visual appearance.
+    if (_viewController.textureId != null) {
+      markNeedsPaint();
+    }
     markNeedsSemanticsUpdate();
   }
 
