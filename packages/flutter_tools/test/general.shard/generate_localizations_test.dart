@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -12,6 +14,7 @@ import 'package:flutter_tools/src/localizations/localizations_utils.dart';
 import 'package:yaml/yaml.dart';
 
 import '../src/common.dart';
+import '../src/context.dart';
 
 const String defaultTemplateArbFileName = 'app_en.arb';
 const String defaultOutputFileString = 'output-localization-file.dart';
@@ -65,10 +68,12 @@ void _standardFlutterDirectoryL10nSetup(FileSystem fs) {
 }
 
 void main() {
-  late MemoryFileSystem fs;
-  late String defaultL10nPathString;
-  late String syntheticPackagePath;
-  late String syntheticL10nPackagePath;
+  // TODO(MichaelDark): revert `late` modifer 
+  // once `text/src/context.dart` will be migrated to sound null-safety
+  /* late */ MemoryFileSystem fs;
+  /* late */ String defaultL10nPathString;
+  /* late */ String syntheticPackagePath;
+  /* late */ String syntheticL10nPackagePath;
 
   setUp(() {
     fs = MemoryFileSystem.test();
@@ -474,32 +479,38 @@ void main() {
     },
   );
 
-  testWithoutContext('untranslated messages file included in generated JSON list of outputs', () {
-    _standardFlutterDirectoryL10nSetup(fs);
+  testUsingContext(
+    'untranslated messages file included in generated JSON list of outputs', 
+    () {
+      _standardFlutterDirectoryL10nSetup(fs);
 
-    LocalizationsGenerator(
-      fileSystem: fs,
-      inputPathString: defaultL10nPathString,
-      templateArbFileName: defaultTemplateArbFileName,
-      outputFileString: defaultOutputFileString,
-      classNameString: defaultClassNameString,
-      inputsAndOutputsListPath: syntheticL10nPackagePath,
-      untranslatedMessagesFile: fs.path.join('lib', 'l10n', 'unimplemented_message_translations.json'),
-    )
-      ..loadResources()
-      ..writeOutputFiles(BufferLogger.test());
+      LocalizationsGenerator(
+        fileSystem: fs,
+        inputPathString: defaultL10nPathString,
+        templateArbFileName: defaultTemplateArbFileName,
+        outputFileString: defaultOutputFileString,
+        classNameString: defaultClassNameString,
+        inputsAndOutputsListPath: syntheticL10nPackagePath,
+        untranslatedMessagesFile: fs.path.join('lib', 'l10n', 'unimplemented_message_translations.json'),
+      )
+        ..loadResources()
+        ..writeOutputFiles(BufferLogger.test());
 
-    final File inputsAndOutputsList = fs.file(
-      fs.path.join(syntheticL10nPackagePath, 'gen_l10n_inputs_and_outputs.json'),
-    );
-    expect(inputsAndOutputsList.existsSync(), isTrue);
-    final Map<String, dynamic> jsonResult = json.decode(
-      inputsAndOutputsList.readAsStringSync(),
-    ) as Map<String, dynamic>;
-    expect(jsonResult.containsKey('outputs'), isTrue);
-    final List<dynamic> outputList = jsonResult['outputs'] as List<dynamic>;
-    expect(outputList, contains(contains('unimplemented_message_translations.json')));
-  });
+      final File inputsAndOutputsList = fs.file(
+        fs.path.join(syntheticL10nPackagePath, 'gen_l10n_inputs_and_outputs.json'),
+      );
+      expect(inputsAndOutputsList.existsSync(), isTrue);
+      final Map<String, dynamic> jsonResult = json.decode(
+        inputsAndOutputsList.readAsStringSync(),
+      ) as Map<String, dynamic>;
+      expect(jsonResult.containsKey('outputs'), isTrue);
+      final List<dynamic> outputList = jsonResult['outputs'] as List<dynamic>;
+      expect(outputList, contains(contains('unimplemented_message_translations.json')));
+    },
+    overrides: <Type, Generator>{
+      ProcessManager: () => FakeProcessManager.any(),
+    }
+  );
 
   testWithoutContext(
     'uses inputPathString as outputPathString when the outputPathString is '
@@ -653,37 +664,43 @@ void main() {
     },
   );
 
-  testWithoutContext('creates list of inputs and outputs when file path is specified', () {
-    _standardFlutterDirectoryL10nSetup(fs);
+  testUsingContext(
+    'creates list of inputs and outputs when file path is specified', 
+    () {
+      _standardFlutterDirectoryL10nSetup(fs);
 
-    LocalizationsGenerator(
-      fileSystem: fs,
-      inputPathString: defaultL10nPathString,
-      templateArbFileName: defaultTemplateArbFileName,
-      outputFileString: defaultOutputFileString,
-      classNameString: defaultClassNameString,
-      inputsAndOutputsListPath: syntheticL10nPackagePath,
-    )
-      ..loadResources()
-      ..writeOutputFiles(BufferLogger.test());
+      LocalizationsGenerator(
+        fileSystem: fs,
+        inputPathString: defaultL10nPathString,
+        templateArbFileName: defaultTemplateArbFileName,
+        outputFileString: defaultOutputFileString,
+        classNameString: defaultClassNameString,
+        inputsAndOutputsListPath: syntheticL10nPackagePath,
+      )
+        ..loadResources()
+        ..writeOutputFiles(BufferLogger.test());
 
-    final File inputsAndOutputsList = fs.file(
-      fs.path.join(syntheticL10nPackagePath, 'gen_l10n_inputs_and_outputs.json'),
-    );
-    expect(inputsAndOutputsList.existsSync(), isTrue);
+      final File inputsAndOutputsList = fs.file(
+        fs.path.join(syntheticL10nPackagePath, 'gen_l10n_inputs_and_outputs.json'),
+      );
+      expect(inputsAndOutputsList.existsSync(), isTrue);
 
-    final Map<String, dynamic> jsonResult = json.decode(inputsAndOutputsList.readAsStringSync()) as Map<String, dynamic>;
-    expect(jsonResult.containsKey('inputs'), isTrue);
-    final List<dynamic> inputList = jsonResult['inputs'] as List<dynamic>;
-    expect(inputList, contains(fs.path.absolute('lib', 'l10n', 'app_en.arb')));
-    expect(inputList, contains(fs.path.absolute('lib', 'l10n', 'app_es.arb')));
+      final Map<String, dynamic> jsonResult = json.decode(inputsAndOutputsList.readAsStringSync()) as Map<String, dynamic>;
+      expect(jsonResult.containsKey('inputs'), isTrue);
+      final List<dynamic> inputList = jsonResult['inputs'] as List<dynamic>;
+      expect(inputList, contains(fs.path.absolute('lib', 'l10n', 'app_en.arb')));
+      expect(inputList, contains(fs.path.absolute('lib', 'l10n', 'app_es.arb')));
 
-    expect(jsonResult.containsKey('outputs'), isTrue);
-    final List<dynamic> outputList = jsonResult['outputs'] as List<dynamic>;
-    expect(outputList, contains(fs.path.absolute(syntheticL10nPackagePath, 'output-localization-file.dart')));
-    expect(outputList, contains(fs.path.absolute(syntheticL10nPackagePath, 'output-localization-file_en.dart')));
-    expect(outputList, contains(fs.path.absolute(syntheticL10nPackagePath, 'output-localization-file_es.dart')));
-  });
+      expect(jsonResult.containsKey('outputs'), isTrue);
+      final List<dynamic> outputList = jsonResult['outputs'] as List<dynamic>;
+      expect(outputList, contains(fs.path.absolute(syntheticL10nPackagePath, 'output-localization-file.dart')));
+      expect(outputList, contains(fs.path.absolute(syntheticL10nPackagePath, 'output-localization-file_en.dart')));
+      expect(outputList, contains(fs.path.absolute(syntheticL10nPackagePath, 'output-localization-file_es.dart')));
+    },
+    overrides: <Type, Generator>{
+      ProcessManager: () => FakeProcessManager.any(),
+    },
+  );
 
   testWithoutContext('setting both a headerString and a headerFile should fail', () {
     fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
@@ -744,49 +761,51 @@ void main() {
   });
 
   group('generateLocalizations', () {
-    testWithoutContext('forwards arguments correctly', () async {
-      _standardFlutterDirectoryL10nSetup(fs);
-      final LocalizationOptions options = LocalizationOptions(
-        header: 'HEADER',
-        arbDirectory: Uri.directory(defaultL10nPathString),
-        deferredLoading: true,
-        outputClass: 'Foo',
-        outputLocalizationsFile: Uri.file('bar.dart', windows: false),
-        outputDirectory: Uri.directory(defaultL10nPathString, windows: false),
-        preferredSupportedLocales: <String>['es'],
-        templateArbFile: Uri.file(defaultTemplateArbFileName, windows: false),
-        untranslatedMessagesFile: Uri.file('untranslated', windows: false),
-        useSyntheticPackage: false,
-        areResourceAttributesRequired: true,
-        usesNullableGetter: false,
-      );
+    testUsingContext(
+      'forwards arguments correctly', 
+      () async {
+        _standardFlutterDirectoryL10nSetup(fs);
+        final LocalizationOptions options = LocalizationOptions(
+          header: 'HEADER',
+          arbDirectory: Uri.directory(defaultL10nPathString),
+          deferredLoading: true,
+          outputClass: 'Foo',
+          outputLocalizationsFile: Uri.file('bar.dart', windows: false),
+          outputDirectory: Uri.directory(defaultL10nPathString, windows: false),
+          preferredSupportedLocales: <String>['es'],
+          templateArbFile: Uri.file(defaultTemplateArbFileName, windows: false),
+          untranslatedMessagesFile: Uri.file('untranslated', windows: false),
+          useSyntheticPackage: false,
+          areResourceAttributesRequired: true,
+          usesNullableGetter: false,
+        );
 
-      // Verify that values are correctly passed through the localizations target.
-      final LocalizationsGenerator generator = generateLocalizations(
-        fileSystem: fs,
-        options: options,
-        logger: BufferLogger.test(),
-        projectDir: fs.currentDirectory,
-        dependenciesDir: fs.currentDirectory,
-      );
+        // Verify that values are correctly passed through the localizations target.
+        final LocalizationsGenerator generator = generateLocalizations(
+          fileSystem: fs,
+          options: options,
+          logger: BufferLogger.test(),
+          projectDir: fs.currentDirectory,
+          dependenciesDir: fs.currentDirectory,
+        );
 
-      expect(generator.inputDirectory.path, '/lib/l10n/');
-      expect(generator.outputDirectory.path, '/lib/l10n/');
-      expect(generator.templateArbFile.path, '/lib/l10n/app_en.arb');
-      expect(generator.baseOutputFile.path, '/lib/l10n/bar.dart');
-      expect(generator.className, 'Foo');
-      expect(generator.preferredSupportedLocales.single, LocaleInfo.fromString('es'));
-      expect(generator.header, 'HEADER');
-      expect(generator.useDeferredLoading, isTrue);
-      expect(generator.inputsAndOutputsListFile?.path, '/gen_l10n_inputs_and_outputs.json');
-      expect(generator.useSyntheticPackage, isFalse);
-      expect(generator.projectDirectory?.path, '/');
-      expect(generator.areResourceAttributesRequired, isTrue);
-      expect(generator.untranslatedMessagesFile?.path, 'untranslated');
-      expect(generator.usesNullableGetter, isFalse);
+        expect(generator.inputDirectory.path, '/lib/l10n/');
+        expect(generator.outputDirectory.path, '/lib/l10n/');
+        expect(generator.templateArbFile.path, '/lib/l10n/app_en.arb');
+        expect(generator.baseOutputFile.path, '/lib/l10n/bar.dart');
+        expect(generator.className, 'Foo');
+        expect(generator.preferredSupportedLocales.single, LocaleInfo.fromString('es'));
+        expect(generator.header, 'HEADER');
+        expect(generator.useDeferredLoading, isTrue);
+        expect(generator.inputsAndOutputsListFile?.path, '/gen_l10n_inputs_and_outputs.json');
+        expect(generator.useSyntheticPackage, isFalse);
+        expect(generator.projectDirectory?.path, '/');
+        expect(generator.areResourceAttributesRequired, isTrue);
+        expect(generator.untranslatedMessagesFile?.path, 'untranslated');
+        expect(generator.usesNullableGetter, isFalse);
 
-      // Just validate one file.
-      expect(fs.file('/lib/l10n/bar_en.dart').readAsStringSync(), '''
+        // Just validate one file.
+        expect(fs.file('/lib/l10n/bar_en.dart').readAsStringSync(), '''
 HEADER
 
 
@@ -800,7 +819,11 @@ class FooEn extends Foo {
   String get title => 'Title';
 }
 ''');
-    });
+      },
+      overrides: <Type, Generator>{
+        ProcessManager: () => FakeProcessManager.any(),
+      },
+    );
 
     testWithoutContext('throws exception on missing flutter: generate: true flag', () async {
       _standardFlutterDirectoryL10nSetup(fs);

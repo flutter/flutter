@@ -4,12 +4,14 @@
 
 import 'package:meta/meta.dart';
 
+import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../base/process.dart';
 import '../convert.dart';
 import '../flutter_manifest.dart';
-
+import '../globals.dart'as globals;
 import 'gen_l10n_templates.dart';
 import 'gen_l10n_types.dart';
 import 'localizations_utils.dart';
@@ -1346,6 +1348,8 @@ class LocalizationsGenerator {
       }
     });
 
+    _formatOutputFiles(logger);
+
     baseOutputFile.writeAsStringSync(generatedLocalizationsFile);
     final File? messagesFile = untranslatedMessagesFile;
     if (messagesFile != null) {
@@ -1428,6 +1432,29 @@ class LocalizationsGenerator {
     untranslatedMessagesFile.writeAsStringSync(resultingFile);
     if (inputsAndOutputsListFile != null) {
       _outputFileList.add(untranslatedMessagesFile.absolute.path);
+    }
+  }
+
+  void _formatOutputFiles(Logger logger) {
+    if (_outputFileList.isNotEmpty) {
+      final String dartBinary = globals.artifacts!.getHostArtifact(HostArtifact.engineDartBinary).path;
+      final List<String> command = <String>[
+        dartBinary,
+        'format',
+        _outputFileList.join(' '),
+      ];
+
+      final RunResult result = globals.processUtils.runSync(
+        command,
+        hideStdout: true,
+      );
+      if (result.exitCode != 0) {
+        logger.printWarning(
+          '`gen-l10n` was not able to format output files.\n'
+          '`dart format` output:\n'
+          '${result.stderr}',
+        );
+      }
     }
   }
 }
