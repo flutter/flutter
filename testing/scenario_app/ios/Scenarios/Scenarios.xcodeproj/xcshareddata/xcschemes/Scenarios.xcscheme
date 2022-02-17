@@ -83,10 +83,6 @@
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "--text-semantics-focus"
-            isEnabled = "NO">
-         </CommandLineArgument>
-         <CommandLineArgument
             argument = "--platform-view"
             isEnabled = "NO">
          </CommandLineArgument>
