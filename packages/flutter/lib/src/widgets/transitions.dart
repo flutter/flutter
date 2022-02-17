@@ -979,7 +979,7 @@ class DefaultTextStyleTransition extends AnimatedWidget {
 /// rebuilding it on every animation tick.
 ///
 /// If you pass the pre-built subtree as the [child] parameter, the
-/// AnimatedBuilder will pass it back to your builder function so that you
+/// [AnimatedBuilder] will pass it back to your builder function so that you
 /// can incorporate it into your build.
 ///
 /// Using this pre-built child is entirely optional, but can improve
@@ -992,6 +992,102 @@ class DefaultTextStyleTransition extends AnimatedWidget {
 ///
 /// ** See code in examples/api/lib/widgets/transitions/animated_builder.0.dart **
 /// {@end-tool}
+///
+/// {@template flutter.flutter.animatedbuilder_changenotifier.rebuild}
+/// ## Granular rebuilds with AnimatedBuilder and ChangeNotifier
+///
+/// A [State.setState] method call requires Flutter to entirely rebuild the
+/// current widget plus a variable portion of the subtree, depending on the
+/// depth and the structure.
+/// 
+/// To avoid unnecessary work, the [AnimatedBuilder] class can be used along
+/// with a [ChangeNotifier] to only rebuild certain portions a widget,
+/// leaving other parts and the subtree untouched.
+///
+/// Since a [ChangeNotifier] is a subtype of [Listenable], it can be used in
+/// an [AnimatedBuilder] to listen for changes. For example, to keep track
+/// of the state of a simple counter, a [ChangeNotifier] can be created and
+/// exposed to the widgets below using an [InheritedWidget].
+///
+/// {@tool snippet}
+///
+/// This is an example that shows how an [InheritedWidget] can expose a
+/// [ChangeNotifier] to a widget and its children.
+///
+/// ```dart
+/// class Counter extends ChangeNotifier {
+///   int _counter;
+///
+///   Counter({int value = 0}) : _counter = value;
+///
+///   int get value => _counter;
+///   set value(int value) {
+///     if (_counter != value) {
+///       _counter = value;
+///       notifyListeners();
+///     }
+///   }
+/// }
+///
+/// class CounterWidget extends InheritedWidget {
+///   const CounterWidget({
+///     Key? key,
+///     required this.counter,
+///     required Widget child,
+///   }) : super(key: key, child: child);
+///
+///   final Counter counter;
+///
+///   static CounterWidget of(BuildContext context) {
+///     final result = context.dependOnInheritedWidgetOfExactType<CounterWidget>();
+///     assert(result != null, 'No CounterWidget found in context');
+///     return result!;
+///   }
+///
+///   @override
+///   bool updateShouldNotify(CounterWidget oldWidget) {
+///     return counter.value != oldWidget.counter.value;
+///   }
+/// }
+/// ```
+/// {@end-tool}
+///
+/// {@tool snippet}
+///
+/// In this example, [CounterPage] is a child of [CounterWidget] so it can
+/// use the `context` to retrieve the [Counter] instance. Whenever the button
+/// is pressed, only the [Text] inside the [AnimatedBuilder] is rebuilt while
+/// the [CounterPage] widget itself and its children aren't.
+///
+/// ```dart
+/// class CounterPage extends StatelessWidget {
+///   const CounterPage({Key? key,}) : super(key: key);
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     final counter = CounterWidget.of(context).counter;
+///
+///     return Scaffold(
+///       body: Row(
+///         children: <Widget>[
+///           const Text('Increments: '),
+///           AnimatedBuilder(
+///             animation: counter,
+///             builder: (context, _) => Text('${counter.value}'),
+///           ),
+///         ],
+///       ),
+///       floatingActionButton: FloatingActionButton(
+///         onPressed: () => CounterWidget.of(context).counter.value++,
+///         tooltip: 'Increment',
+///         child: const Icon(Icons.add),
+///       ), 
+////    );
+///   }
+/// }
+/// ```
+/// {@end-tool}
+/// {@endtemplate}
 ///
 /// See also:
 ///
