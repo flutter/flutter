@@ -632,7 +632,8 @@ def main():
     RunBenchmarkTests(build_dir)
     RunEngineBenchmarks(build_dir, engine_filter)
 
-  if ('engine' in types or 'font-subset' in types) and args.variant != 'host_release':
+  variants_to_skip = ['host_release', 'host_profile']
+  if ('engine' in types or 'font-subset' in types) and args.variant not in variants_to_skip:
     RunCmd(['python', 'test.py'], cwd=font_subset_dir)
 
 
