@@ -297,7 +297,7 @@ class Version {
       if (m != int.tryParse(branchM)) {
         throw ConductorException(
           'Parsed version ${toString()} has a different m value than candidate '
-          'branch $candidateBranch',
+          'branch $candidateBranch with type $type',
         );
       }
     }
