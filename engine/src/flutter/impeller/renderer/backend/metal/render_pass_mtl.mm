@@ -426,7 +426,7 @@ bool RenderPassMTL::EncodeCommands(Allocator& allocator,
     [encoder setFrontFacingWinding:command.winding == WindingOrder::kClockwise
                                        ? MTLWindingClockwise
                                        : MTLWindingCounterClockwise];
-    [encoder setCullMode:MTLCullModeNone];
+    [encoder setCullMode:ToMTLCullMode(command.cull_mode)];
     [encoder setStencilReferenceValue:command.stencil_reference];
     if (command.viewport.has_value()) {
       auto v = command.viewport.value();

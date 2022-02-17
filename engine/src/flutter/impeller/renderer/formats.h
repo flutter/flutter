@@ -11,9 +11,9 @@
 
 #include "flutter/fml/hash_combine.h"
 #include "flutter/fml/macros.h"
+#include "impeller/geometry/color.h"
 #include "impeller/geometry/rect.h"
 #include "impeller/geometry/scalar.h"
-#include "impeller/geometry/color.h"
 
 namespace impeller {
 
@@ -133,6 +133,12 @@ enum class TextureUsage : TextureUsageMask {
 enum class WindingOrder {
   kClockwise,
   kCounterClockwise,
+};
+
+enum class CullMode {
+  kNone,
+  kFrontFace,
+  kBackFace,
 };
 
 enum class IndexType {
