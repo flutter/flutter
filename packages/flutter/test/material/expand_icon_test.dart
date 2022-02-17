@@ -316,10 +316,11 @@ void main() {
   testWidgets('Expand Icon test', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
-          body: ExpandIcon(
-        onPressed: (v) {},
-        iconData: Icons.hearing,
-      )),
+        body: ExpandIcon(
+          onPressed: (v) {},
+          iconData: Icons.hearing,
+        ),
+      ),
     ));
 
     expect(find.byType(IconButton), findsOneWidget);
