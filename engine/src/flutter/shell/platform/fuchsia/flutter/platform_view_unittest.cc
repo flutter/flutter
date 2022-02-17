@@ -85,6 +85,8 @@ class MockPlatformViewDelegate : public flutter::PlatformView::Delegate {
   // |flutter::PlatformView::Delegate|
   void OnPlatformViewDestroyed() {}
   // |flutter::PlatformView::Delegate|
+  void OnPlatformViewScheduleFrame() {}
+  // |flutter::PlatformView::Delegate|
   void OnPlatformViewSetNextFrameCallback(const fml::closure& closure) {}
   // |flutter::PlatformView::Delegate|
   void OnPlatformViewSetViewportMetrics(

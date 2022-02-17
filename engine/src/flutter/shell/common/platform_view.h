@@ -73,6 +73,12 @@ class PlatformView {
     virtual void OnPlatformViewDestroyed() = 0;
 
     //--------------------------------------------------------------------------
+    /// @brief      Notifies the delegate that the platform needs to schedule a
+    ///             frame to regenerate the layer tree and redraw the surface.
+    ///
+    virtual void OnPlatformViewScheduleFrame() = 0;
+
+    //--------------------------------------------------------------------------
     /// @brief      Notifies the delegate that the specified callback needs to
     ///             be invoked after the rasterizer is done rendering the next
     ///             frame. This callback will be called on the render thread and
@@ -476,6 +482,12 @@ class PlatformView {
   ///             class method at some point in their implementation.
   ///
   virtual void NotifyDestroyed();
+
+  //----------------------------------------------------------------------------
+  /// @brief      Used by embedders to schedule a frame. In response to this
+  ///             call, the framework may need to start generating a new frame.
+  ///
+  void ScheduleFrame();
 
   //----------------------------------------------------------------------------
   /// @brief      Used by the shell to obtain a Skia GPU context that is capable

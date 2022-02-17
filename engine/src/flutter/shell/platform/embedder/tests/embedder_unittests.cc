@@ -1744,6 +1744,34 @@ TEST_F(EmbedderTest, VsyncCallbackPostedIntoFuture) {
   shutdown_latch.Wait();
 }
 
+TEST_F(EmbedderTest, CanScheduleFrame) {
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kSoftwareContext);
+  EmbedderConfigBuilder builder(context);
+  builder.SetSoftwareRendererConfig();
+  builder.SetDartEntrypoint("can_schedule_frame");
+  fml::AutoResetWaitableEvent latch;
+  context.AddNativeCallback(
+      "SignalNativeTest",
+      CREATE_NATIVE_ENTRY(
+          [&latch](Dart_NativeArguments args) { latch.Signal(); }));
+
+  fml::AutoResetWaitableEvent check_latch;
+  context.AddNativeCallback(
+      "SignalNativeCount",
+      CREATE_NATIVE_ENTRY(
+          [&check_latch](Dart_NativeArguments args) { check_latch.Signal(); }));
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  // Wait for the application to attach the listener.
+  latch.Wait();
+
+  ASSERT_EQ(FlutterEngineScheduleFrame(engine.get()), kSuccess);
+
+  check_latch.Wait();
+}
+
 }  // namespace testing
 }  // namespace flutter
 
