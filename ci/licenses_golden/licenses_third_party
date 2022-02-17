@@ -1,4 +1,4 @@
-Signature: 35bcbcae69393dcb98e11e634cf6a631
+Signature: a13d1c170fcb9f6e3cd8acb3d6689be4
 
 UNUSED LICENSES:
 
@@ -10133,8 +10133,32 @@ FILE: ../../../third_party/dart/benchmarks/Iterators/dart/Iterators.dart
 FILE: ../../../third_party/dart/benchmarks/Iterators/dart/data.dart
 FILE: ../../../third_party/dart/benchmarks/Iterators/dart2/Iterators.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/hash_factories.dart
+FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/bool.dart
+FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/class_id.dart
+FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/core_patch.dart
+FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/date_patch.dart
+FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/developer.dart
+FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/double.dart
+FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/expando_patch.dart
+FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/function.dart
+FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/growable_list.dart
+FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/hash_factories.dart
+FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/identical_patch.dart
+FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/immutable_map.dart
+FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/int.dart
+FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/internal_patch.dart
+FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/list.dart
+FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/math_patch.dart
+FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/object_patch.dart
+FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/patch.dart
+FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/print_patch.dart
+FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/string_buffer_patch.dart
+FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/string_patch.dart
+FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/timer_patch.dart
+FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/type.dart
 FILE: ../../../third_party/dart/sdk/lib/ffi/c_type.dart
 FILE: ../../../third_party/dart/sdk/lib/ffi/native_finalizer.dart
+FILE: ../../../third_party/dart/sdk/lib/wasm/wasm_types.dart
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2022, the Dart project authors.  Please see the AUTHORS file
 for details. All rights reserved.
