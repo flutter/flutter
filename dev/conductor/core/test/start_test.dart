@@ -25,7 +25,7 @@ void main() {
     const String frameworkMirror = 'https://github.com/user/flutter.git';
     const String engineMirror = 'https://github.com/user/engine.git';
     const String candidateBranch = 'flutter-1.2-candidate.3';
-    const String releaseChannel = 'stable';
+    const String releaseChannel = 'beta';
     const String revision = 'abcd1234';
     const String conductorVersion = 'deadbeef';
     late Checkouts checkouts;
@@ -97,8 +97,6 @@ void main() {
           'beta',
           '--$kStateOption',
           '/path/to/statefile.json',
-          '--$kIncrementOption',
-          'y',
         ]),
         throwsExceptionWith(
           'Error! This tool is only supported on macOS and Linux',
@@ -132,7 +130,6 @@ void main() {
       const String previousVersion = '1.2.0-1.0.pre';
       // This is what this release will be
       const String nextVersion = '1.2.0-1.1.pre';
-      const String incrementLevel = 'n';
 
       final Directory engine = fileSystem
           .directory(checkoutsParentDirectory)
@@ -278,8 +275,6 @@ void main() {
         stateFilePath,
         '--$kDartRevisionOption',
         nextDartRevision,
-        '--$kIncrementOption',
-        incrementLevel,
         '--$kForceFlag',
       ]);
 
@@ -303,7 +298,7 @@ void main() {
       expect(state.framework.upstream.url, 'git@github.com:flutter/flutter.git');
       expect(state.currentPhase, ReleasePhase.APPLY_ENGINE_CHERRYPICKS);
       expect(state.conductorVersion, conductorVersion);
-      expect(state.incrementLevel, incrementLevel);
+      expect(state.incrementLevel, 'n');
     });
 
     test('creates state file if provided correct inputs', () async {
@@ -479,8 +474,6 @@ void main() {
         stateFilePath,
         '--$kDartRevisionOption',
         nextDartRevision,
-        '--$kIncrementOption',
-        incrementLevel,
       ]);
 
       final File stateFile = fileSystem.file(stateFilePath);
@@ -721,7 +714,6 @@ void main() {
       const String nextDartRevision = 'f6c91128be6b77aef8351e1e3a9d07c85bc2e46e';
       const String previousVersion = '1.2.0-3.0.pre';
       const String nextVersion = '1.2.0';
-      const String incrementLevel = 'z';
 
       final Directory engine = fileSystem
           .directory(checkoutsParentDirectory)
@@ -870,13 +862,11 @@ void main() {
         '--$kCandidateOption',
         candidateBranch,
         '--$kReleaseOption',
-        releaseChannel,
+        'stable',
         '--$kStateOption',
         stateFilePath,
         '--$kDartRevisionOption',
         nextDartRevision,
-        '--$kIncrementOption',
-        incrementLevel,
       ]);
 
       final File stateFile = fileSystem.file(stateFilePath);
@@ -888,7 +878,7 @@ void main() {
 
       expect(processManager.hasRemainingExpectations, false);
       expect(state.isInitialized(), true);
-      expect(state.releaseChannel, releaseChannel);
+      expect(state.releaseChannel, 'stable');
       expect(state.releaseVersion, nextVersion);
       expect(state.engine.candidateBranch, candidateBranch);
       expect(state.engine.startingGitHead, revision2);
@@ -897,7 +887,7 @@ void main() {
       expect(state.framework.startingGitHead, revision3);
       expect(state.currentPhase, ReleasePhase.APPLY_ENGINE_CHERRYPICKS);
       expect(state.conductorVersion, conductorVersion);
-      expect(state.incrementLevel, incrementLevel);
+      expect(state.incrementLevel, 'z');
     });
 
     test('StartContext gets engine and framework checkout directories after run', () async {
@@ -910,8 +900,6 @@ void main() {
       const String previousVersion = '1.2.0-1.0.pre';
       // This is a git tag applied to the branch point, not an actual release
       const String branchPointTag = '1.2.0-3.0.pre';
-      // This is what this release will be
-      const String incrementLevel = 'm';
 
       final Directory engine = fileSystem
           .directory(checkoutsParentDirectory)
@@ -1081,20 +1069,20 @@ void main() {
       );
 
       final StartContext startContext = StartContext(
-          candidateBranch: candidateBranch,
-          checkouts: checkouts,
-          dartRevision: nextDartRevision,
-          engineCherrypickRevisions: <String>[],
-          engineMirror: engineMirror,
-          engineUpstream: EngineRepository.defaultUpstream,
-          frameworkCherrypickRevisions: <String>[],
-          frameworkMirror: frameworkMirror,
-          frameworkUpstream: FrameworkRepository.defaultUpstream,
-          releaseChannel: releaseChannel,
-          incrementLetter: incrementLevel,
-          processManager: processManager,
-          conductorVersion: conductorVersion,
-          stateFile: stateFile);
+        candidateBranch: candidateBranch,
+        checkouts: checkouts,
+        dartRevision: nextDartRevision,
+        engineCherrypickRevisions: <String>[],
+        engineMirror: engineMirror,
+        engineUpstream: EngineRepository.defaultUpstream,
+        frameworkCherrypickRevisions: <String>[],
+        frameworkMirror: frameworkMirror,
+        frameworkUpstream: FrameworkRepository.defaultUpstream,
+        releaseChannel: releaseChannel,
+        processManager: processManager,
+        conductorVersion: conductorVersion,
+        stateFile: stateFile,
+      );
 
       await startContext.run();
 

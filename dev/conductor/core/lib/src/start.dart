@@ -6,6 +6,7 @@ import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
 import 'package:fixnum/fixnum.dart';
+import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
@@ -26,10 +27,10 @@ const String kEngineUpstreamOption = 'engine-upstream';
 const String kFrameworkCherrypicksOption = 'framework-cherrypicks';
 const String kFrameworkMirrorOption = 'framework-mirror';
 const String kFrameworkUpstreamOption = 'framework-upstream';
-const String kIncrementOption = 'increment';
 const String kEngineMirrorOption = 'engine-mirror';
 const String kReleaseOption = 'release-channel';
 const String kStateOption = 'state-file';
+const String kVersionOverrideOption = 'version-override';
 
 /// Command to print the status of the current Flutter release.
 class StartCommand extends Command<void> {
@@ -89,22 +90,15 @@ class StartCommand extends Command<void> {
       kDartRevisionOption,
       help: 'New Dart revision to cherrypick.',
     );
-    argParser.addOption(
-      kIncrementOption,
-      help: 'Specifies which part of the x.y.z version number to increment. Required.',
-      valueHelp: 'level',
-      allowed: kReleaseIncrements,
-      allowedHelp: <String, String>{
-        'y': 'Indicates the first dev release after a beta release.',
-        'z': 'Indicates a hotfix to a stable release.',
-        'm': 'Indicates a standard dev release.',
-        'n': 'Indicates a hotfix to a dev or beta release.',
-      },
-    );
     argParser.addFlag(
       kForceFlag,
       abbr: 'f',
       help: 'Override all validations of the command line inputs.',
+    );
+    argParser.addOption(
+      kVersionOverrideOption,
+      help: 'Explicitly set the desired version. This should only be used if '
+        'the version computed by the tool is not correct.',
     );
   }
 
@@ -177,11 +171,6 @@ class StartCommand extends Command<void> {
       platform.environment,
       allowNull: true,
     );
-    final String incrementLetter = getValueFromEnvOrArgs(
-      kIncrementOption,
-      argumentResults,
-      platform.environment,
-    )!;
     final bool force = getBoolFromEnvOrArgs(
       kForceFlag,
       argumentResults,
@@ -202,7 +191,6 @@ class StartCommand extends Command<void> {
       frameworkCherrypickRevisions: frameworkCherrypickRevisions,
       frameworkMirror: frameworkMirror,
       frameworkUpstream: frameworkUpstream,
-      incrementLetter: incrementLetter,
       processManager: processManager,
       releaseChannel: releaseChannel,
       stateFile: stateFile,
@@ -226,7 +214,6 @@ class StartContext extends Context {
     required this.frameworkMirror,
     required this.frameworkUpstream,
     required this.conductorVersion,
-    required this.incrementLetter,
     required this.processManager,
     required this.releaseChannel,
     required Checkouts checkouts,
@@ -270,7 +257,6 @@ class StartContext extends Context {
   final String frameworkMirror;
   final String frameworkUpstream;
   final String conductorVersion;
-  final String incrementLetter;
   final Git git;
   final ProcessManager processManager;
   final String releaseChannel;
@@ -280,6 +266,21 @@ class StartContext extends Context {
 
   final EngineRepository engine;
   final FrameworkRepository framework;
+
+  late final String incrementLetter = computeIncrementLetter();
+
+  /// Determine which part of the version to increment in the next release.
+  @visibleForTesting
+  String computeIncrementLetter() {
+    switch (releaseChannel) {
+      case 'stable':
+        return 'z';
+      case 'beta':
+        return 'n';
+      default:
+        throw ConductorException('Unknown channel "$releaseChannel"');
+    }
+  }
 
   Future<void> run() async {
     if (stateFile.existsSync()) {
