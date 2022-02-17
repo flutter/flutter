@@ -327,9 +327,10 @@ void main() {
     expect(find.byType(ExpandIcon), findsOneWidget);
 
     expect(
-        find.ancestor(
-            of: find.byIcon(Icons.hearing),
-            matching: find.byWidgetPredicate((widget) => widget is IconButton)),
-        findsOneWidget);
+      find.ancestor(
+        of: find.byIcon(Icons.hearing),
+        matching: find.byWidgetPredicate((widget) => widget is IconButton),
+      ),
+      findsOneWidget);
   });
 }
