@@ -87,11 +87,11 @@ class Canvas {
 
   EntityPass& GetCurrentPass();
 
-  void IncrementStencilDepth();
-
   size_t GetStencilDepth() const;
 
   void Save(bool create_subpass);
+
+  void RestoreClip();
 
   FML_DISALLOW_COPY_AND_ASSIGN(Canvas);
 };

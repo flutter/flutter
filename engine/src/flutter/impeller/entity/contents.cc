@@ -15,6 +15,7 @@
 #include "impeller/renderer/sampler_library.h"
 #include "impeller/renderer/surface.h"
 #include "impeller/renderer/tessellator.h"
+#include "impeller/renderer/vertex_buffer.h"
 #include "impeller/renderer/vertex_buffer_builder.h"
 
 namespace impeller {
@@ -385,9 +386,51 @@ bool ClipContents::Render(const ContentContext& renderer,
   Command cmd;
   cmd.label = "Clip";
   cmd.pipeline = renderer.GetClipPipeline(OptionsFromPass(pass));
-  cmd.stencil_reference = entity.GetStencilDepth() + 1u;
+  cmd.stencil_reference = entity.GetStencilDepth();
   cmd.BindVertices(
       CreateSolidFillVertices(entity.GetPath(), pass.GetTransientsBuffer()));
+
+  VS::FrameInfo info;
+  // The color really doesn't matter.
+  info.color = Color::SkyBlue();
+  info.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize());
+
+  VS::BindFrameInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(info));
+
+  pass.AddCommand(std::move(cmd));
+  return true;
+}
+
+/*******************************************************************************
+ ******* ClipRestoreContents
+ ******************************************************************************/
+
+ClipRestoreContents::ClipRestoreContents() = default;
+
+ClipRestoreContents::~ClipRestoreContents() = default;
+
+bool ClipRestoreContents::Render(const ContentContext& renderer,
+                                 const Entity& entity,
+                                 RenderPass& pass) const {
+  using VS = ClipPipeline::VertexShader;
+
+  Command cmd;
+  cmd.label = "Clip Restore";
+  cmd.pipeline = renderer.GetClipRestorePipeline(OptionsFromPass(pass));
+  cmd.stencil_reference = entity.GetStencilDepth();
+
+  // Create a rect that covers the whole render target.
+  auto size = pass.GetRenderTargetSize();
+  VertexBufferBuilder<VS::PerVertexData> vtx_builder;
+  vtx_builder.AddVertices({
+      {Point(0.0, 0.0)},
+      {Point(size.width, 0.0)},
+      {Point(size.width, size.height)},
+      {Point(0.0, 0.0)},
+      {Point(size.width, size.height)},
+      {Point(0.0, size.height)},
+  });
+  cmd.BindVertices(vtx_builder.CreateVertexBuffer(pass.GetTransientsBuffer()));
 
   VS::FrameInfo info;
   // The color really doesn't matter.
