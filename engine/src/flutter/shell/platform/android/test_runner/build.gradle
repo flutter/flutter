@@ -18,9 +18,11 @@ apply plugin: "com.android.library"
 rootProject.buildDir = project.property("build_dir")
 
 // Shows warnings for usage of deprecated API usages.
+// TODO(camsim99): Make deprecation warnings fatal and remove limit when all
+// 434 (at the time of this comment) deprecations are fixed.
 gradle.projectsEvaluated {
   tasks.withType(JavaCompile) {
-      options.compilerArgs << "-Xlint:deprecation"
+      options.compilerArgs << "-Xlint:deprecation" << "-Xmaxwarns" << "434"
   }
 }
 
