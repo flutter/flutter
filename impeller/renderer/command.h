@@ -70,6 +70,7 @@ struct Command {
   std::string label;
   PrimitiveType primitive_type = PrimitiveType::kTriangle;
   WindingOrder winding = WindingOrder::kClockwise;
+  CullMode cull_mode = CullMode::kNone;
   uint32_t stencil_reference = 0u;
   //----------------------------------------------------------------------------
   /// The viewport coordinates that the rasterizer linearly maps normalized

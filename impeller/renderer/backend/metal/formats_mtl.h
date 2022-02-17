@@ -116,6 +116,18 @@ constexpr MTLIndexType ToMTLIndexType(IndexType type) {
   }
 }
 
+constexpr MTLCullMode ToMTLCullMode(CullMode mode) {
+  switch (mode) {
+    case CullMode::kNone:
+      return MTLCullModeNone;
+    case CullMode::kBackFace:
+      return MTLCullModeBack;
+    case CullMode::kFrontFace:
+      return MTLCullModeFront;
+  }
+  return MTLCullModeNone;
+}
+
 constexpr MTLBlendOperation ToMTLBlendOperation(BlendOperation type) {
   switch (type) {
     case BlendOperation::kAdd:
