@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_FLOW_DISPLAY_LIST_H_
-#define FLUTTER_FLOW_DISPLAY_LIST_H_
+#ifndef FLUTTER_DISPLAY_LIST_DISPLAY_LIST_H_
+#define FLUTTER_DISPLAY_LIST_DISPLAY_LIST_H_
 
 #include <optional>
 
@@ -76,12 +76,14 @@ namespace flutter {
   V(ClearBlender)                   \
   V(SetShader)                      \
   V(ClearShader)                    \
-  V(SetColorFilter)                 \
-  V(ClearColorFilter)               \
   V(SetImageFilter)                 \
   V(ClearImageFilter)               \
   V(SetPathEffect)                  \
   V(ClearPathEffect)                \
+                                    \
+  V(ClearColorFilter)               \
+  V(SetColorFilter)                 \
+  V(SetSkColorFilter)               \
                                     \
   V(ClearMaskFilter)                \
   V(SetMaskFilter)                  \
@@ -278,4 +280,4 @@ class DisplayList : public SkRefCnt {
 
 }  // namespace flutter
 
-#endif  // FLUTTER_FLOW_DISPLAY_LIST_H_
+#endif  // FLUTTER_DISPLAY_LIST_DISPLAY_LIST_H_

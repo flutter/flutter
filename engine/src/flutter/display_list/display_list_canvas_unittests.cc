@@ -836,48 +836,43 @@ class CanvasCompareTester {
           0, 0, 0, 0.5, 0,
       };
       // clang-format on
-      sk_sp<SkColorFilter> filter =
-          SkColorFilters::Matrix(rotate_alpha_color_matrix);
+      DlMatrixColorFilter filter(rotate_alpha_color_matrix);
       {
         RenderWith(testP, env, tolerance,
                    CaseParameters(
                        "saveLayer ColorFilter, no bounds",
                        [=](SkCanvas* cv, SkPaint& p) {
                          SkPaint save_p;
-                         save_p.setColorFilter(filter);
+                         save_p.setColorFilter(filter.sk_filter());
                          cv->saveLayer(nullptr, &save_p);
                          p.setStrokeWidth(5.0);
                        },
                        [=](DisplayListBuilder& b) {
-                         b.setColorFilter(filter);
+                         b.setColorFilter(&filter);
                          b.saveLayer(nullptr, true);
                          b.setColorFilter(nullptr);
                          b.setStrokeWidth(5.0);
                        })
                        .with_restore(cv_safe_restore, dl_safe_restore, true));
       }
-      EXPECT_TRUE(filter->unique())
-          << "saveLayer ColorFilter, no bounds Cleanup";
       {
         RenderWith(testP, env, tolerance,
                    CaseParameters(
                        "saveLayer ColorFilter and bounds",
                        [=](SkCanvas* cv, SkPaint& p) {
                          SkPaint save_p;
-                         save_p.setColorFilter(filter);
+                         save_p.setColorFilter(filter.sk_filter());
                          cv->saveLayer(RenderBounds, &save_p);
                          p.setStrokeWidth(5.0);
                        },
                        [=](DisplayListBuilder& b) {
-                         b.setColorFilter(filter);
+                         b.setColorFilter(&filter);
                          b.saveLayer(&RenderBounds, true);
                          b.setColorFilter(nullptr);
                          b.setStrokeWidth(5.0);
                        })
                        .with_restore(cv_safe_restore, dl_safe_restore, true));
       }
-      EXPECT_TRUE(filter->unique())
-          << "saveLayer ColorFilter and bounds Cleanup";
     }
     {
       sk_sp<SkImageFilter> filter = SkImageFilters::Arithmetic(
@@ -1146,7 +1141,7 @@ class CanvasCompareTester {
          1.0,  1.0,  1.0, 1.0,   0,
       };
       // clang-format on
-      sk_sp<SkColorFilter> filter = SkColorFilters::Matrix(rotate_color_matrix);
+      DlMatrixColorFilter filter(rotate_color_matrix);
       {
         SkColor bg = SK_ColorWHITE;
         RenderWith(testP, env, tolerance,
@@ -1154,16 +1149,15 @@ class CanvasCompareTester {
                        "ColorFilter == RotateRGB",
                        [=](SkCanvas*, SkPaint& p) {
                          p.setColor(SK_ColorYELLOW);
-                         p.setColorFilter(filter);
+                         p.setColorFilter(filter.sk_filter());
                        },
                        [=](DisplayListBuilder& b) {
                          b.setColor(SK_ColorYELLOW);
-                         b.setColorFilter(filter);
+                         b.setColorFilter(&filter);
                        })
                        .with_bg(bg));
       }
-      EXPECT_TRUE(filter->unique()) << "ColorFilter == RotateRGB Cleanup";
-      filter = SkColorFilters::Matrix(invert_color_matrix);
+      filter = DlMatrixColorFilter(invert_color_matrix);
       {
         SkColor bg = SK_ColorWHITE;
         RenderWith(testP, env, tolerance,
@@ -1171,7 +1165,7 @@ class CanvasCompareTester {
                        "ColorFilter == Invert",
                        [=](SkCanvas*, SkPaint& p) {
                          p.setColor(SK_ColorYELLOW);
-                         p.setColorFilter(filter);
+                         p.setColorFilter(filter.sk_filter());
                        },
                        [=](DisplayListBuilder& b) {
                          b.setColor(SK_ColorYELLOW);
@@ -1179,7 +1173,6 @@ class CanvasCompareTester {
                        })
                        .with_bg(bg));
       }
-      EXPECT_TRUE(filter->unique()) << "ColorFilter == Invert Cleanup";
     }
 
     {

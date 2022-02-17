@@ -14,6 +14,8 @@ source_set("display_list") {
     "display_list_canvas_dispatcher.h",
     "display_list_canvas_recorder.cc",
     "display_list_canvas_recorder.h",
+    "display_list_color_filter.cc",
+    "display_list_color_filter.h",
     "display_list_complexity.cc",
     "display_list_complexity.h",
     "display_list_dispatcher.cc",
@@ -40,6 +42,7 @@ source_set("unittests") {
 
   sources = [
     "display_list_canvas_unittests.cc",
+    "display_list_color_filter_unittests.cc",
     "display_list_unittests.cc",
   ]
 

@@ -79,8 +79,8 @@ void SkPaintDispatchHelper::setShader(sk_sp<SkShader> shader) {
 void SkPaintDispatchHelper::setImageFilter(sk_sp<SkImageFilter> filter) {
   paint_.setImageFilter(filter);
 }
-void SkPaintDispatchHelper::setColorFilter(sk_sp<SkColorFilter> filter) {
-  color_filter_ = filter;
+void SkPaintDispatchHelper::setColorFilter(const DlColorFilter* filter) {
+  color_filter_ = filter ? filter->shared() : nullptr;
   paint_.setColorFilter(makeColorFilter());
 }
 void SkPaintDispatchHelper::setPathEffect(sk_sp<SkPathEffect> effect) {
@@ -94,14 +94,14 @@ void SkPaintDispatchHelper::setMaskBlurFilter(SkBlurStyle style,
   paint_.setMaskFilter(SkMaskFilter::MakeBlur(style, sigma));
 }
 
-sk_sp<SkColorFilter> SkPaintDispatchHelper::makeColorFilter() {
+sk_sp<SkColorFilter> SkPaintDispatchHelper::makeColorFilter() const {
   if (!invert_colors_) {
-    return color_filter_;
+    return color_filter_ ? color_filter_->sk_filter() : nullptr;
   }
   sk_sp<SkColorFilter> invert_filter =
       SkColorFilters::Matrix(invert_color_matrix);
   if (color_filter_) {
-    invert_filter = invert_filter->makeComposed(color_filter_);
+    invert_filter = invert_filter->makeComposed(color_filter_->sk_filter());
   }
   return invert_filter;
 }
@@ -266,8 +266,8 @@ void DisplayListBoundsCalculator::setBlender(sk_sp<SkBlender> blender) {
 void DisplayListBoundsCalculator::setImageFilter(sk_sp<SkImageFilter> filter) {
   image_filter_ = std::move(filter);
 }
-void DisplayListBoundsCalculator::setColorFilter(sk_sp<SkColorFilter> filter) {
-  color_filter_ = std::move(filter);
+void DisplayListBoundsCalculator::setColorFilter(const DlColorFilter* filter) {
+  color_filter_ = filter ? filter->shared() : nullptr;
 }
 void DisplayListBoundsCalculator::setPathEffect(sk_sp<SkPathEffect> effect) {
   path_effect_ = std::move(effect);
@@ -657,8 +657,7 @@ bool DisplayListBoundsCalculator::paint_nops_on_transparency() {
   // save layer untouched out to the edge of the output surface.
   // This test assumes that the blend mode checked down below will
   // NOP on transparent black.
-  if (color_filter_ &&
-      color_filter_->filterColor(SK_ColorTRANSPARENT) != SK_ColorTRANSPARENT) {
+  if (color_filter_ && color_filter_->modifies_transparent_black()) {
     return false;
   }
 

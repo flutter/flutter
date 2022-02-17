@@ -6,6 +6,7 @@
 #define FLUTTER_DISPLAY_LIST_DISPLAY_LIST_DISPATCHER_H_
 
 #include "flutter/display_list/display_list.h"
+#include "flutter/display_list/display_list_color_filter.h"
 
 namespace flutter {
 
@@ -36,7 +37,7 @@ class Dispatcher {
   virtual void setStrokeCap(SkPaint::Cap cap) = 0;
   virtual void setStrokeJoin(SkPaint::Join join) = 0;
   virtual void setShader(sk_sp<SkShader> shader) = 0;
-  virtual void setColorFilter(sk_sp<SkColorFilter> filter) = 0;
+  virtual void setColorFilter(const DlColorFilter* filter) = 0;
   // setInvertColors does not exist in SkPaint, but is a quick way to set
   // a ColorFilter that inverts the rgb values of all rendered colors.
   // It is not reset by |setColorFilter|, but instead composed with that
