@@ -81,6 +81,8 @@ class EmbedderEngine {
   bool PostTaskOnEngineManagedNativeThreads(
       std::function<void(FlutterNativeThreadType)> closure) const;
 
+  bool ScheduleFrame();
+
   Shell& GetShell();
 
  private:

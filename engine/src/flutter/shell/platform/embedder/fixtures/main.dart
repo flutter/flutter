@@ -991,3 +991,11 @@ void invalid_backingstore() {
   };
   PlatformDispatcher.instance.scheduleFrame();
 }
+
+@pragma('vm:entry-point')
+void can_schedule_frame() {
+  PlatformDispatcher.instance.onBeginFrame = (Duration beginTime){
+    signalNativeCount(beginTime.inMicroseconds);
+  };
+  signalNativeTest();
+}

@@ -273,6 +273,19 @@ bool EmbedderEngine::PostTaskOnEngineManagedNativeThreads(
   return true;
 }
 
+bool EmbedderEngine::ScheduleFrame() {
+  if (!IsValid()) {
+    return false;
+  }
+
+  auto platform_view = shell_->GetPlatformView();
+  if (!platform_view) {
+    return false;
+  }
+  platform_view->ScheduleFrame();
+  return true;
+}
+
 Shell& EmbedderEngine::GetShell() {
   FML_DCHECK(shell_);
   return *shell_.get();

@@ -519,6 +519,9 @@ class Shell final : public PlatformView::Delegate,
   void OnPlatformViewDestroyed() override;
 
   // |PlatformView::Delegate|
+  void OnPlatformViewScheduleFrame() override;
+
+  // |PlatformView::Delegate|
   void OnPlatformViewSetViewportMetrics(
       const ViewportMetrics& metrics) override;
 
