@@ -97,9 +97,9 @@ class ExpandIcon extends StatefulWidget {
   /// and for [dark theme](https://material.io/design/color/dark-theme.html#ui-application)
   final Color? expandedColor;
 
-  /// An optional [IconData] for the [IconButton].
+  /// The icon used by the button.
   ///
-  /// If not provided, the [IconButton] will default to [Icons.expand_more].
+  /// If null, [Icons.expand_more] will be used.
   final IconData? iconData;
 
   @override
