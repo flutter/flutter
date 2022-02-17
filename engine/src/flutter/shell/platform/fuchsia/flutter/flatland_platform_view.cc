@@ -72,7 +72,7 @@ void FlatlandPlatformView::OnGetLayout(
   view_logical_size_ = {static_cast<float>(info.logical_size().width),
                         static_cast<float>(info.logical_size().height)};
 
-  // TODO(fxbug.dev/64201): Set device pixel ratio.
+  // TODO(fxbug.dev/94000): Set device pixel ratio.
   if (info.pixel_scale().width != 1 || info.pixel_scale().height != 1) {
     FML_LOG(ERROR)
         << "Flutter does not currently support pixel_scale's other than 1";
@@ -106,7 +106,7 @@ void FlatlandPlatformView::OnGetLayout(
 
 void FlatlandPlatformView::OnParentViewportStatus(
     fuchsia::ui::composition::ParentViewportStatus status) {
-  // TODO(fxbug.dev/64201): Investigate if it is useful to send hidden/shown
+  // TODO(fxbug.dev/94000): Investigate if it is useful to send hidden/shown
   // signals.
   parent_viewport_status_ = status;
   parent_viewport_watcher_->GetStatus(
