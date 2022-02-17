@@ -492,6 +492,10 @@ DartVM::DartVM(std::shared_ptr<const DartVMData> vm_data,
     Dart_SetDartLibrarySourcesKernel(dart_library_sources->GetMapping(),
                                      dart_library_sources->GetSize());
   }
+
+  // Update thread names now that the Dart VM is initialized.
+  concurrent_message_loop_->PostTaskToAllWorkers(
+      [] { Dart_SetThreadName("FlutterConcurrentMessageLoopWorker"); });
 }
 
 DartVM::~DartVM() {
