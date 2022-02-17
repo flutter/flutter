@@ -38,6 +38,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import androidx.core.content.res.ResourcesCompat;
+import androidx.core.view.WindowCompat;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.LifecycleRegistry;
@@ -590,7 +591,14 @@ public class FlutterActivity extends Activity
       Window window = getWindow();
       window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
       window.setStatusBarColor(0x40000000);
-      window.getDecorView().setSystemUiVisibility(PlatformPlugin.DEFAULT_SYSTEM_UI);
+      WindowCompat.setDecorFitsSystemWindows(window, false);
+      if (Build.VERSION.SDK_INT < 30) {
+        // This ensures that the navigation bar is not hidden for APIs < 30,
+        // as dictated by the implementation of WindowCompat.
+        View view = window.getDecorView();
+        view.setSystemUiVisibility(
+            view.getSystemUiVisibility() & ~View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
+      }
     }
   }
 
