@@ -47,6 +47,10 @@ const Duration _kScrollbarTimeToFade = Duration(milliseconds: 600);
 /// without the fade animation. This requires that a [ScrollController] is
 /// provided to controller, or that the [PrimaryScrollController] is available.
 ///
+/// When a [ScrollView.scrollDirection] is [Axis.horizontal], it is recommended
+/// that the [Scrollbar] is always visible, since scrolling in the horizontal
+/// axis is less discoverable.
+///
 /// ** See code in examples/api/lib/material/scrollbar/scrollbar.1.dart **
 /// {@end-tool}
 ///
@@ -142,7 +146,7 @@ class Scrollbar extends StatelessWidget {
   )
   final bool? isAlwaysShown;
 
-  /// Controls the track visibility.
+  /// {@macro flutter.widgets.Scrollbar.trackVisibility}
   ///
   /// If this property is null, then [ScrollbarThemeData.trackVisibility] of
   /// [ThemeData.scrollbarTheme] is used. If that is also null, the default value
@@ -246,7 +250,7 @@ class _MaterialScrollbar extends RawScrollbar {
     required Widget child,
     ScrollController? controller,
     bool? thumbVisibility,
-    this.trackVisibility,
+    bool? trackVisibility,
     this.showTrackOnHover,
     this.hoverThickness,
     double? thickness,
@@ -261,6 +265,7 @@ class _MaterialScrollbar extends RawScrollbar {
          thumbVisibility: thumbVisibility,
          thickness: thickness,
          radius: radius,
+         trackVisibility: trackVisibility,
          fadeDuration: _kScrollbarFadeDuration,
          timeToFade: _kScrollbarTimeToFade,
          pressDuration: Duration.zero,
@@ -269,7 +274,6 @@ class _MaterialScrollbar extends RawScrollbar {
          scrollbarOrientation: scrollbarOrientation,
        );
 
-  final bool? trackVisibility;
   final bool? showTrackOnHover;
   final double? hoverThickness;
 
@@ -350,7 +354,7 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
     final Color onSurface = _colorScheme.onSurface;
     final Brightness brightness = _colorScheme.brightness;
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (_trackVisibility.resolve(states)) {
+      if (showScrollbar && _trackVisibility.resolve(states)) {
         return _scrollbarTheme.trackColor?.resolve(states)
           ?? (brightness == Brightness.light
             ? onSurface.withOpacity(0.03)
@@ -364,7 +368,7 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
     final Color onSurface = _colorScheme.onSurface;
     final Brightness brightness = _colorScheme.brightness;
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (_trackVisibility.resolve(states)) {
+      if (showScrollbar && _trackVisibility.resolve(states)) {
         return _scrollbarTheme.trackBorderColor?.resolve(states)
           ?? (brightness == Brightness.light
             ? onSurface.withOpacity(0.1)

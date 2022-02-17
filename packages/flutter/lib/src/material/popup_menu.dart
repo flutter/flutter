@@ -26,6 +26,7 @@ import 'tooltip.dart';
 // late dynamic _selection;
 // late BuildContext context;
 // void setState(VoidCallback fn) { }
+// enum Menu { itemOne, itemTwo, itemThree, itemFour }
 
 const Duration _kMenuDuration = Duration(milliseconds: 300);
 const double _kMenuCloseIntervalEnd = 2.0 / 3.0;
@@ -186,13 +187,13 @@ class _RenderMenuItem extends RenderShiftedBox {
 ///
 /// {@tool snippet}
 ///
-/// Here, a [Text] widget is used with a popup menu item. The `WhyFarther` type
+/// Here, a [Text] widget is used with a popup menu item. The `Menu` type
 /// is an enum, not shown here.
 ///
 /// ```dart
-/// const PopupMenuItem<WhyFarther>(
-///   value: WhyFarther.harder,
-///   child: Text('Working a lot harder'),
+/// const PopupMenuItem<Menu>(
+///   value: Menu.itemOne,
+///   child: Text('Item 1'),
 /// )
 /// ```
 /// {@end-tool}
@@ -528,10 +529,12 @@ class _PopupMenu<T> extends StatelessWidget {
     Key? key,
     required this.route,
     required this.semanticLabel,
+    this.constraints,
   }) : super(key: key);
 
   final _PopupMenuRoute<T> route;
   final String? semanticLabel;
+  final BoxConstraints? constraints;
 
   @override
   Widget build(BuildContext context) {
@@ -571,7 +574,7 @@ class _PopupMenu<T> extends StatelessWidget {
     final CurveTween height = CurveTween(curve: Interval(0.0, unit * route.items.length));
 
     final Widget child = ConstrainedBox(
-      constraints: const BoxConstraints(
+      constraints: constraints ?? const BoxConstraints(
         minWidth: _kMenuMinWidth,
         maxWidth: _kMenuMaxWidth,
       ),
@@ -734,6 +737,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
     this.shape,
     this.color,
     required this.capturedThemes,
+    this.constraints,
   }) : itemSizes = List<Size?>.filled(items.length, null);
 
   final RelativeRect position;
@@ -745,6 +749,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
   final ShapeBorder? shape;
   final Color? color;
   final CapturedThemes capturedThemes;
+  final BoxConstraints? constraints;
 
   @override
   Animation<double> createAnimation() {
@@ -778,7 +783,11 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
       }
     }
 
-    final Widget menu = _PopupMenu<T>(route: this, semanticLabel: semanticLabel);
+    final Widget menu = _PopupMenu<T>(
+      route: this,
+      semanticLabel: semanticLabel,
+      constraints: constraints,
+    );
     final MediaQueryData mediaQuery = MediaQuery.of(context);
     return MediaQuery.removePadding(
       context: context,
@@ -869,6 +878,7 @@ Future<T?> showMenu<T>({
   ShapeBorder? shape,
   Color? color,
   bool useRootNavigator = false,
+  BoxConstraints? constraints,
 }) {
   assert(context != null);
   assert(position != null);
@@ -898,6 +908,7 @@ Future<T?> showMenu<T>({
     shape: shape,
     color: color,
     capturedThemes: InheritedTheme.capture(from: context, to: navigator.context),
+    constraints: constraints,
   ));
 }
 
@@ -930,39 +941,11 @@ typedef PopupMenuItemBuilder<T> = List<PopupMenuEntry<T>> Function(BuildContext 
 /// If both are null, then a standard overflow icon is created (depending on the
 /// platform).
 ///
-/// {@tool snippet}
-///
+/// {@tool dartpad}
 /// This example shows a menu with four items, selecting between an enum's
-/// values and setting a `_selection` field based on the selection.
+/// values and setting a `_selectedMenu` field based on the selection
 ///
-/// ```dart
-/// // This is the type used by the popup menu below.
-/// enum WhyFarther { harder, smarter, selfStarter, tradingCharter }
-///
-/// // This menu button widget updates a _selection field (of type WhyFarther,
-/// // not shown here).
-/// PopupMenuButton<WhyFarther>(
-///   onSelected: (WhyFarther result) { setState(() { _selection = result; }); },
-///   itemBuilder: (BuildContext context) => <PopupMenuEntry<WhyFarther>>[
-///     const PopupMenuItem<WhyFarther>(
-///       value: WhyFarther.harder,
-///       child: Text('Working a lot harder'),
-///     ),
-///     const PopupMenuItem<WhyFarther>(
-///       value: WhyFarther.smarter,
-///       child: Text('Being a lot smarter'),
-///     ),
-///     const PopupMenuItem<WhyFarther>(
-///       value: WhyFarther.selfStarter,
-///       child: Text('Being a self-starter'),
-///     ),
-///     const PopupMenuItem<WhyFarther>(
-///       value: WhyFarther.tradingCharter,
-///       child: Text('Placed in charge of trading charter'),
-///     ),
-///   ],
-/// )
-/// ```
+/// ** See code in examples/api/lib/material/popupmenu/popupmenu.0.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -993,6 +976,7 @@ class PopupMenuButton<T> extends StatefulWidget {
     this.shape,
     this.color,
     this.enableFeedback,
+    this.constraints,
   }) : assert(itemBuilder != null),
        assert(offset != null),
        assert(enabled != null),
@@ -1099,6 +1083,22 @@ class PopupMenuButton<T> extends StatefulWidget {
   /// If this property is null, the default size is 24.0 pixels.
   final double? iconSize;
 
+  /// Optional size constraints for the menu.
+  ///
+  /// When unspecified, defaults to:
+  /// ```dart
+  /// const BoxConstraints(
+  ///   minWidth: 2.0 * 56.0,
+  ///   maxWidth: 5.0 * 56.0,
+  /// )
+  /// ```
+  ///
+  /// The default constraints ensure that the menu width matches maximum width
+  /// recommended by the material design guidelines.
+  /// Specifying this parameter enables creation of menu wider than
+  /// the default maximum width.
+  final BoxConstraints? constraints;
+
   @override
   PopupMenuButtonState<T> createState() => PopupMenuButtonState<T>();
 }
@@ -1138,6 +1138,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
         position: position,
         shape: widget.shape ?? popupMenuTheme.shape,
         color: widget.color ?? popupMenuTheme.color,
+        constraints: widget.constraints,
       )
       .then<void>((T? newValue) {
         if (!mounted)

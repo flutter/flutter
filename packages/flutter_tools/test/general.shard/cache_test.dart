@@ -319,6 +319,17 @@ void main() {
 
       expect(() => cache.storageBaseUrl, throwsToolExit());
     });
+
+    testWithoutContext('PubDependencies should be registered as web based', () async {
+      final BufferLogger logger = BufferLogger.test();
+      final PubDependencies pubDependencies = PubDependencies(
+        flutterRoot: () => '',
+        logger: logger,
+        pub: () => FakePub(),
+      );
+
+      expect(pubDependencies.developmentArtifact, DevelopmentArtifact.web);
+    });
   });
 
   testWithoutContext('flattenNameSubdirs', () {
@@ -555,6 +566,19 @@ void main() {
         <String>['linux-arm64', 'linux-arm64/font-subset.zip'],
         <String>['windows-x64', 'windows-x64/font-subset.zip'], // arm64 macOS hosts are not supported now
       ]);
+  });
+
+  testWithoutContext('macOS desktop artifacts include all gen_snapshot binaries', () {
+    final Cache cache = Cache.test(processManager: FakeProcessManager.any());
+    final MacOSEngineArtifacts artifacts = MacOSEngineArtifacts(cache, platform: FakePlatform());
+    cache.includeAllPlatforms = false;
+    cache.platformOverrideArtifacts = <String>{'macos'};
+
+    expect(artifacts.getBinaryDirs(), containsAll(<List<String>>[
+      <String>['darwin-x64', 'darwin-x64/gen_snapshot.zip'],
+      <String>['darwin-x64-profile', 'darwin-x64-profile/gen_snapshot.zip'],
+      <String>['darwin-x64-release', 'darwin-x64-release/gen_snapshot.zip'],
+    ]));
   });
 
   testWithoutContext('macOS desktop artifacts ignore filtering when requested', () {
@@ -1058,19 +1082,6 @@ class FakeSimpleArtifact extends CachedArtifact {
     cache,
     DevelopmentArtifact.universal,
   );
-
-  @override
-  Future<void> updateInner(ArtifactUpdater artifactUpdater, FileSystem fileSystem, OperatingSystemUtils operatingSystemUtils) async { }
-}
-
-class FakeDownloadedArtifact extends CachedArtifact {
-  FakeDownloadedArtifact(this.downloadedFile, Cache cache) : super(
-    'fake',
-    cache,
-    DevelopmentArtifact.universal,
-  );
-
-  final File downloadedFile;
 
   @override
   Future<void> updateInner(ArtifactUpdater artifactUpdater, FileSystem fileSystem, OperatingSystemUtils operatingSystemUtils) async { }

@@ -96,7 +96,7 @@ abstract class Pub {
   /// Defaults to true.
   Future<void> get({
     required PubContext context,
-    String directory,
+    String? directory,
     bool skipIfAbsent = false,
     bool upgrade = false,
     bool offline = false,
@@ -122,11 +122,11 @@ abstract class Pub {
   Future<void> batch(
     List<String> arguments, {
     required PubContext context,
-    String directory,
-    MessageFilter filter,
+    String? directory,
+    MessageFilter? filter,
     String failureMessage = 'pub failed',
     required bool retry,
-    bool showTraceForErrors,
+    bool? showTraceForErrors,
   });
 
   /// Runs pub in 'interactive' mode.

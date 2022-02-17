@@ -249,12 +249,7 @@ class UpdatePackagesCommand extends FlutterCommand {
     bool needsUpdate = false;
     globals.printStatus('Verifying pubspecs...');
     for (final Directory directory in packages) {
-      PubspecYaml pubspec;
-      try {
-        pubspec = PubspecYaml(directory);
-      } on String catch (message) {
-        throwToolExit(message);
-      }
+      final PubspecYaml pubspec = PubspecYaml(directory);
       globals.printTrace('Reading pubspec.yaml from ${directory.path}');
       if (pubspec.checksum.value == null) {
         // If the checksum is invalid or missing, we can just ask them run to run
@@ -310,12 +305,7 @@ class UpdatePackagesCommand extends FlutterCommand {
       if (doUpgrade) {
         globals.printTrace('Reading pubspec.yaml from: ${directory.path}');
       }
-      PubspecYaml pubspec;
-      try {
-        pubspec = PubspecYaml(directory); // this parses the pubspec.yaml
-      } on String catch (message) {
-        throwToolExit(message);
-      }
+      final PubspecYaml pubspec = PubspecYaml(directory); // this parses the pubspec.yaml
       pubspecs.add(pubspec); // remember it for later
       for (final PubspecDependency dependency in pubspec.allDependencies) {
         if (allDependencies.containsKey(dependency.name)) {
@@ -508,7 +498,9 @@ class UpdatePackagesCommand extends FlutterCommand {
       'Running "flutter pub get" in affected packages...',
     );
     try {
-      final TaskQueue<void> queue = TaskQueue<void>(maxJobs: intArg('jobs'));
+      // int.tryParse will convert an empty string to null
+      final int/*?*/ maxJobs = int.tryParse(stringArg('jobs') ?? '');
+      final TaskQueue<void> queue = TaskQueue<void>(maxJobs: maxJobs);
       for (final Directory dir in packages) {
         unawaited(queue.add(() async {
           final Stopwatch stopwatch = Stopwatch();
@@ -721,19 +713,19 @@ class PubspecYaml {
             // If we're entering the "dependencies" section, we want to make sure that
             // it's the first section (of those we care about) that we've seen so far.
             if (seenMain) {
-              throw 'Two dependencies sections found in $filename. There should only be one.';
+              throwToolExit('Two dependencies sections found in $filename. There should only be one.');
             }
             if (seenDev) {
-              throw 'The dependencies section was after the dev_dependencies section in $filename. '
+              throwToolExit('The dependencies section was after the dev_dependencies section in $filename. '
                     'To enable one-pass processing, the dependencies section must come before the '
-                    'dev_dependencies section.';
+                    'dev_dependencies section.');
             }
             seenMain = true;
           } else if (section == Section.devDependencies) {
             // Similarly, if we're entering the dev_dependencies section, we should verify
             // that we've not seen one already.
             if (seenDev) {
-              throw 'Two dev_dependencies sections found in $filename. There should only be one.';
+              throwToolExit('Two dev_dependencies sections found in $filename. There should only be one.');
             }
             seenDev = true;
           }
@@ -774,7 +766,7 @@ class PubspecYaml {
               // First, make sure it's a unique dependency. Listing dependencies
               // twice doesn't make sense.
               if (masterDependencies.containsKey(dependency.name)) {
-                throw '$filename contains two dependencies on ${dependency.name}.';
+                throwToolExit('$filename contains two dependencies on ${dependency.name}.');
               }
               masterDependencies[dependency.name] = dependency;
             } else {
@@ -1306,7 +1298,7 @@ class PubspecDependency extends PubspecLine {
       _kind = DependencyKind.git;
       return false;
     } else {
-      throw 'Could not parse additional details for dependency $name; line was: "$line"';
+      throwToolExit('Could not parse additional details for dependency $name; line was: "$line"');
     }
     _lockIsOverride = lockIsOverride;
     _lockLine = line;

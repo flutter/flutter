@@ -12,6 +12,29 @@ import 'package:flutter_test/flutter_test.dart';
 typedef HandleEventCallback = void Function(PointerEvent event);
 
 class TestGestureFlutterBinding extends BindingBase with GestureBinding, SchedulerBinding {
+  @override
+  void initInstances() {
+    super.initInstances();
+    _instance = this;
+  }
+
+  /// The singleton instance of this object.
+  ///
+  /// Provides access to the features exposed by this class. The binding must
+  /// be initialized before using this getter; this is typically done by calling
+  /// [TestGestureFlutterBinding.ensureInitialized].
+  static TestGestureFlutterBinding get instance => BindingBase.checkInstance(_instance);
+  static TestGestureFlutterBinding? _instance;
+
+  /// Returns an instance of the [TestGestureFlutterBinding], creating and
+  /// initializing it if necessary.
+  static TestGestureFlutterBinding ensureInitialized() {
+    if (_instance == null) {
+      TestGestureFlutterBinding();
+    }
+    return _instance!;
+  }
+
   HandleEventCallback? callback;
 
   @override
@@ -22,16 +45,8 @@ class TestGestureFlutterBinding extends BindingBase with GestureBinding, Schedul
   }
 }
 
-TestGestureFlutterBinding? _binding;
-
-void ensureTestGestureBinding() {
-  _binding ??= TestGestureFlutterBinding();
-  assert(GestureBinding.instance != null);
-  assert(SchedulerBinding.instance != null);
-}
-
 void main() {
-  setUp(ensureTestGestureBinding);
+  final TestGestureFlutterBinding binding = TestGestureFlutterBinding.ensureInitialized();
 
   test('Pointer tap events', () {
     const ui.PointerDataPacket packet = ui.PointerDataPacket(
@@ -42,7 +57,7 @@ void main() {
     );
 
     final List<PointerEvent> events = <PointerEvent>[];
-    _binding!.callback = events.add;
+    binding.callback = events.add;
 
     ui.window.onPointerDataPacket?.call(packet);
     expect(events.length, 2);
@@ -60,7 +75,7 @@ void main() {
     );
 
     final List<PointerEvent> events = <PointerEvent>[];
-    _binding!.callback = events.add;
+    binding.callback = events.add;
 
     ui.window.onPointerDataPacket?.call(packet);
     expect(events.length, 3);
@@ -82,10 +97,10 @@ void main() {
     );
 
     final List<PointerEvent> pointerRouterEvents = <PointerEvent>[];
-    GestureBinding.instance!.pointerRouter.addGlobalRoute(pointerRouterEvents.add);
+    GestureBinding.instance.pointerRouter.addGlobalRoute(pointerRouterEvents.add);
 
     final List<PointerEvent> events = <PointerEvent>[];
-    _binding!.callback = events.add;
+    binding.callback = events.add;
 
     ui.window.onPointerDataPacket?.call(packet);
     expect(events.length, 3);
@@ -110,7 +125,7 @@ void main() {
     );
 
     final List<PointerEvent> events = <PointerEvent>[];
-    _binding!.callback = events.add;
+    binding.callback = events.add;
 
     ui.window.onPointerDataPacket?.call(packet);
     expect(events.length, 2);
@@ -127,10 +142,10 @@ void main() {
     );
 
     final List<PointerEvent> events = <PointerEvent>[];
-    _binding!.callback = (PointerEvent event) {
+    binding.callback = (PointerEvent event) {
       events.add(event);
       if (event is PointerDownEvent)
-        _binding!.cancelPointer(event.pointer);
+        binding.cancelPointer(event.pointer);
     };
 
     ui.window.onPointerDataPacket?.call(packet);

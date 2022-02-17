@@ -34,7 +34,6 @@ final String bat = Platform.isWindows ? '.bat' : '';
 final String flutterRoot = path.dirname(path.dirname(path.dirname(path.fromUri(Platform.script))));
 final String flutter = path.join(flutterRoot, 'bin', 'flutter$bat');
 final String dart = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'dart$exe');
-final String pub = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'pub$bat');
 final String pubCache = path.join(flutterRoot, '.pub-cache');
 final String toolRoot = path.join(flutterRoot, 'packages', 'flutter_tools');
 final String engineVersionFile = path.join(flutterRoot, 'bin', 'internal', 'engine.version');
@@ -340,7 +339,7 @@ Future<void> _runSmokeTests() async {
 }
 
 Future<void> _runGeneralToolTests() async {
-  await _pubRunTest(
+  await _dartRunTest(
     path.join(flutterRoot, 'packages', 'flutter_tools'),
     testPaths: <String>[path.join('test', 'general.shard')],
     enableFlutterToolAsserts: false,
@@ -352,7 +351,7 @@ Future<void> _runGeneralToolTests() async {
 }
 
 Future<void> _runCommandsToolTests() async {
-  await _pubRunTest(
+  await _dartRunTest(
     path.join(flutterRoot, 'packages', 'flutter_tools'),
     forceSingleCore: true,
     testPaths: <String>[path.join('test', 'commands.shard')],
@@ -360,7 +359,7 @@ Future<void> _runCommandsToolTests() async {
 }
 
 Future<void> _runWebToolTests() async {
-  await _pubRunTest(
+  await _dartRunTest(
     path.join(flutterRoot, 'packages', 'flutter_tools'),
     forceSingleCore: true,
     testPaths: <String>[path.join('test', 'web.shard')],
@@ -375,7 +374,7 @@ Future<void> _runIntegrationToolTests() async {
       .map<String>((FileSystemEntity entry) => path.relative(entry.path, from: toolsPath))
       .where((String testPath) => path.basename(testPath).endsWith('_test.dart')).toList();
 
-  await _pubRunTest(
+  await _dartRunTest(
     toolsPath,
     forceSingleCore: true,
     testPaths: _selectIndexOfTotalSubshard<String>(allTests),
@@ -702,6 +701,7 @@ Future<void> _runFrameworkTests() async {
       await _runFlutterTest(
         path.join(flutterRoot, 'dev', 'integration_tests', 'flutter_gallery'),
         options: <String>[trackWidgetCreationOption],
+        fatalWarnings: false, // until we've migrated video_player
       );
     }
     // Run release mode tests (see packages/flutter/test_release/README.md)
@@ -851,9 +851,9 @@ Future<void> _runFrameworkTests() async {
 
   Future<void> runPrivateTests() async {
     final List<String> args = <String>[
-      'run',
       '--sound-null-safety',
-      'test_private.dart',
+      'run',
+      'bin/test_private.dart',
     ];
     final Map<String, String> environment = <String, String>{
       'FLUTTER_ROOT': flutterRoot,
@@ -862,7 +862,7 @@ Future<void> _runFrameworkTests() async {
     };
     adjustEnvironmentToEnableFlutterAsserts(environment);
     await runCommand(
-      pub,
+      dart,
       args,
       workingDirectory: path.join(flutterRoot, 'packages', 'flutter', 'test_private'),
       environment: environment,
@@ -872,9 +872,9 @@ Future<void> _runFrameworkTests() async {
   Future<void> runMisc() async {
     print('${green}Running package tests$reset for directories other than packages/flutter');
     await runExampleTests();
-    await _pubRunTest(path.join(flutterRoot, 'dev', 'bots'));
-    await _pubRunTest(path.join(flutterRoot, 'dev', 'devicelab'), ensurePrecompiledTool: false); // See https://github.com/flutter/flutter/issues/86209
-    await _pubRunTest(path.join(flutterRoot, 'dev', 'conductor', 'core'), forceSingleCore: true);
+    await _dartRunTest(path.join(flutterRoot, 'dev', 'bots'));
+    await _dartRunTest(path.join(flutterRoot, 'dev', 'devicelab'), ensurePrecompiledTool: false); // See https://github.com/flutter/flutter/issues/86209
+    await _dartRunTest(path.join(flutterRoot, 'dev', 'conductor', 'core'), forceSingleCore: true);
     // TODO(gspencergoog): Remove the exception for fatalWarnings once https://github.com/flutter/flutter/pull/91127 has landed.
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'android_semantics_testing'), fatalWarnings: false);
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'manual_tests'));
@@ -1605,7 +1605,7 @@ Future<void> _runFlutterWebTest(String webRenderer, String workingDirectory, Lis
 // properly when overriding the local engine (for example, because some platform
 // dependent targets are only built on some engines).
 // See https://github.com/flutter/flutter/issues/72368
-Future<void> _pubRunTest(String workingDirectory, {
+Future<void> _dartRunTest(String workingDirectory, {
   List<String>? testPaths,
   bool enableFlutterToolAsserts = true,
   bool useBuildRunner = false,
@@ -1674,7 +1674,7 @@ Future<void> _pubRunTest(String workingDirectory, {
     Stream<String> testOutput;
     try {
       testOutput = runAndGetStdout(
-        pub,
+        dart,
         args,
         workingDirectory: workingDirectory,
         environment: environment,
@@ -1685,7 +1685,7 @@ Future<void> _pubRunTest(String workingDirectory, {
     await _processTestOutput(formatter, testOutput);
   } else {
     await runCommand(
-      pub,
+      dart,
       args,
       workingDirectory: workingDirectory,
       environment: environment,
