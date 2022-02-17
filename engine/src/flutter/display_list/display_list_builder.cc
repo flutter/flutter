@@ -134,10 +134,50 @@ void DisplayListBuilder::onSetImageFilter(sk_sp<SkImageFilter> filter) {
       ? Push<SetImageFilterOp>(0, 0, std::move(filter))
       : Push<ClearImageFilterOp>(0, 0);
 }
-void DisplayListBuilder::onSetColorFilter(sk_sp<SkColorFilter> filter) {
-  (current_color_filter_ = filter)  //
-      ? Push<SetColorFilterOp>(0, 0, std::move(filter))
-      : Push<ClearColorFilterOp>(0, 0);
+void DisplayListBuilder::onSetColorFilter(const DlColorFilter* filter) {
+  if (filter == nullptr) {
+    if (!current_color_filter_) {
+      return;
+    }
+    current_color_filter_ = nullptr;
+    Push<ClearColorFilterOp>(0, 0);
+  } else {
+    if (current_color_filter_ && *current_color_filter_ == *filter) {
+      return;
+    }
+    current_color_filter_ = filter->shared();
+    switch (filter->type()) {
+      case DlColorFilter::kBlend: {
+        const DlBlendColorFilter* blend_filter = filter->asBlend();
+        FML_DCHECK(blend_filter);
+        void* pod = Push<SetColorFilterOp>(blend_filter->size(), 0);
+        new (pod) DlBlendColorFilter(blend_filter);
+        break;
+      }
+      case DlColorFilter::kMatrix: {
+        const DlMatrixColorFilter* matrix_filter = filter->asMatrix();
+        FML_DCHECK(matrix_filter);
+        void* pod = Push<SetColorFilterOp>(matrix_filter->size(), 0);
+        new (pod) DlMatrixColorFilter(matrix_filter);
+        break;
+      }
+      case DlColorFilter::kSrgbToLinearGamma: {
+        void* pod = Push<SetColorFilterOp>(filter->size(), 0);
+        new (pod) DlSrgbToLinearGammaColorFilter();
+        break;
+      }
+      case DlColorFilter::kLinearToSrgbGamma: {
+        void* pod = Push<SetColorFilterOp>(filter->size(), 0);
+        new (pod) DlLinearToSrgbGammaColorFilter();
+        break;
+      }
+      case DlColorFilter::kUnknown: {
+        const sk_sp<SkColorFilter> sk_filter = filter->sk_filter();
+        Push<SetSkColorFilterOp>(0, 0, sk_filter);
+        break;
+      }
+    }
+  }
   UpdateCurrentOpacityCompatibility();
 }
 void DisplayListBuilder::onSetPathEffect(sk_sp<SkPathEffect> effect) {
@@ -211,7 +251,12 @@ void DisplayListBuilder::setAttributesFromPaint(
     // we must clear it because it is a second potential color filter
     // that is composed with the paint's color filter.
     setInvertColors(false);
-    setColorFilter(sk_ref_sp(paint.getColorFilter()));
+    SkColorFilter* color_filter = paint.getColorFilter();
+    if (color_filter) {
+      setColorFilter(DlColorFilter::From(color_filter).get());
+    } else {
+      setColorFilter(nullptr);
+    }
   }
   if (flags.applies_image_filter()) {
     setImageFilter(sk_ref_sp(paint.getImageFilter()));
