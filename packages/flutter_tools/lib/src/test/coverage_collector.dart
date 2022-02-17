@@ -123,12 +123,13 @@ class CoverageCollector extends TestWatcher {
   /// This will not start any collection tasks. It us up to the caller of to
   /// call [collectCoverage] for each process first.
   String finalizeCoverage({
+    coverage.Resolver resolver,
     Directory coverageDirectory,
   }) {
     if (_globalHitmap == null) {
       return null;
     }
-    final coverage.Resolver resolver = coverage.Resolver(packagesPath: packagesPath);
+    resolver ??= coverage.Resolver(packagesPath: packagesPath);
     final String packagePath = globals.fs.currentDirectory.path;
     final List<String> reportOn = coverageDirectory == null
       ? <String>[globals.fs.path.join(packagePath, 'lib')]
