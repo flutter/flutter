@@ -43,6 +43,7 @@ class RasterCacheResult {
   fml::tracing::TraceFlow flow_;
 };
 
+class Layer;
 struct PrerollContext;
 
 struct RasterCacheMetrics {
@@ -290,30 +291,15 @@ class RasterCache {
     std::unique_ptr<RasterCacheResult> image;
   };
 
-  template <class Cache>
-  static void SweepOneCacheAfterFrame(Cache& cache,
-                                      RasterCacheMetrics& metrics) {
-    std::vector<typename Cache::iterator> dead;
+  void Touch(const RasterCacheKey& cache_key);
 
-    for (auto it = cache.begin(); it != cache.end(); ++it) {
-      Entry& entry = it->second;
-      if (!entry.used_this_frame) {
-        dead.push_back(it);
-      } else if (entry.image) {
-        metrics.in_use_count++;
-        metrics.in_use_bytes += entry.image->image_bytes();
-      }
-      entry.used_this_frame = false;
-    }
+  bool Draw(const RasterCacheKey& cache_key,
+            SkCanvas& canvas,
+            const SkPaint* paint) const;
 
-    for (auto it : dead) {
-      if (it->second.image) {
-        metrics.eviction_count++;
-        metrics.eviction_bytes += it->second.image->image_bytes();
-      }
-      cache.erase(it);
-    }
-  }
+  void SweepOneCacheAfterFrame(RasterCacheKey::Map<Entry>& cache,
+                               RasterCacheMetrics& picture_metrics,
+                               RasterCacheMetrics& layer_metrics);
 
   bool GenerateNewCacheInThisFrame() const {
     // Disabling caching when access_threshold is zero is historic behavior.
@@ -328,9 +314,7 @@ class RasterCache {
   size_t display_list_cached_this_frame_ = 0;
   RasterCacheMetrics layer_metrics_;
   RasterCacheMetrics picture_metrics_;
-  mutable PictureRasterCacheKey::Map<Entry> picture_cache_;
-  mutable DisplayListRasterCacheKey::Map<Entry> display_list_cache_;
-  mutable LayerRasterCacheKey::Map<Entry> layer_cache_;
+  mutable RasterCacheKey::Map<Entry> cache_;
   bool checkerboard_images_;
 
   void TraceStatsToTimeline() const;

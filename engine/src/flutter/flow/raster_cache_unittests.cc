@@ -605,6 +605,81 @@ TEST(RasterCache, DisplayListWithSingularMatrixIsNotCached) {
   }
 }
 
+TEST(RasterCache, RasterCacheKeyHashFunction) {
+  RasterCacheKey::Map<int> map;
+  auto hash_function = map.hash_function();
+  SkMatrix matrix = SkMatrix::I();
+  uint64_t id = 5;
+  RasterCacheKey layer_key(id, RasterCacheKeyType::kLayer, matrix);
+  RasterCacheKey picture_key(id, RasterCacheKeyType::kPicture, matrix);
+  RasterCacheKey display_list_key(id, RasterCacheKeyType::kDisplayList, matrix);
+
+  auto layer_hash_code = hash_function(layer_key);
+  ASSERT_EQ(layer_hash_code, fml::HashCombine(id, RasterCacheKeyType::kLayer));
+
+  auto picture_hash_code = hash_function(picture_key);
+  ASSERT_EQ(picture_hash_code,
+            fml::HashCombine(id, RasterCacheKeyType::kPicture));
+
+  auto display_list_hash_code = hash_function(display_list_key);
+  ASSERT_EQ(display_list_hash_code,
+            fml::HashCombine(id, RasterCacheKeyType::kDisplayList));
+}
+
+TEST(RasterCache, RasterCacheKeySameID) {
+  RasterCacheKey::Map<int> map;
+  SkMatrix matrix = SkMatrix::I();
+  uint64_t id = 5;
+  RasterCacheKey layer_key(id, RasterCacheKeyType::kLayer, matrix);
+  RasterCacheKey picture_key(id, RasterCacheKeyType::kPicture, matrix);
+  RasterCacheKey display_list_key(id, RasterCacheKeyType::kDisplayList, matrix);
+  map[layer_key] = 100;
+  map[picture_key] = 200;
+  map[display_list_key] = 300;
+
+  ASSERT_EQ(map[layer_key], 100);
+  ASSERT_EQ(map[picture_key], 200);
+  ASSERT_EQ(map[display_list_key], 300);
+}
+
+TEST(RasterCache, RasterCacheKeySameType) {
+  RasterCacheKey::Map<int> map;
+  SkMatrix matrix = SkMatrix::I();
+
+  RasterCacheKeyType type = RasterCacheKeyType::kLayer;
+  RasterCacheKey layer_first_key(5, type, matrix);
+  RasterCacheKey layer_second_key(10, type, matrix);
+  RasterCacheKey layer_third_key(15, type, matrix);
+  map[layer_first_key] = 50;
+  map[layer_second_key] = 100;
+  map[layer_third_key] = 150;
+  ASSERT_EQ(map[layer_first_key], 50);
+  ASSERT_EQ(map[layer_second_key], 100);
+  ASSERT_EQ(map[layer_third_key], 150);
+
+  type = RasterCacheKeyType::kPicture;
+  RasterCacheKey picture_first_key(20, type, matrix);
+  RasterCacheKey picture_second_key(25, type, matrix);
+  RasterCacheKey picture_third_key(30, type, matrix);
+  map[picture_first_key] = 200;
+  map[picture_second_key] = 250;
+  map[picture_third_key] = 300;
+  ASSERT_EQ(map[picture_first_key], 200);
+  ASSERT_EQ(map[picture_second_key], 250);
+  ASSERT_EQ(map[picture_third_key], 300);
+
+  type = RasterCacheKeyType::kDisplayList;
+  RasterCacheKey display_list_first_key(35, type, matrix);
+  RasterCacheKey display_list_second_key(40, type, matrix);
+  RasterCacheKey display_list_third_key(45, type, matrix);
+  map[display_list_first_key] = 350;
+  map[display_list_second_key] = 400;
+  map[display_list_third_key] = 450;
+  ASSERT_EQ(map[display_list_first_key], 350);
+  ASSERT_EQ(map[display_list_second_key], 400);
+  ASSERT_EQ(map[display_list_third_key], 450);
+}
+
 }  // namespace testing
 
 }  // namespace flutter
