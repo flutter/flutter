@@ -43,10 +43,10 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
 
   @override
   void dispose() {
-    super.dispose();
     for (final FocusNode node in childFocusNodes) {
       node.dispose();
     }
+    super.dispose();
   }
 
   void _addChild() {
