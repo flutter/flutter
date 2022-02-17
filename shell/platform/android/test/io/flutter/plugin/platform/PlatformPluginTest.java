@@ -13,6 +13,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -24,6 +25,8 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowInsetsController;
 import androidx.activity.OnBackPressedCallback;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.fragment.app.FragmentActivity;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.embedding.engine.systemchannels.PlatformChannel;
@@ -32,6 +35,8 @@ import io.flutter.embedding.engine.systemchannels.PlatformChannel.ClipboardConte
 import io.flutter.embedding.engine.systemchannels.PlatformChannel.SystemChromeStyle;
 import io.flutter.plugin.platform.PlatformPlugin.PlatformPluginDelegate;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -313,7 +318,9 @@ public class PlatformPluginTest {
 
   @Config(sdk = 29)
   @Test
-  public void setSystemUiMode() {
+  public void setSystemUiModeLegacy() {
+    // This test reflects the behavior under the hood of the Android overlay/inset APIs used for API
+    // 20-29 in the plugin.
     View fakeDecorView = mock(View.class);
     Window fakeWindow = mock(Window.class);
     when(fakeWindow.getDecorView()).thenReturn(fakeDecorView);
@@ -325,46 +332,177 @@ public class PlatformPluginTest {
     if (Build.VERSION.SDK_INT >= 28) {
       platformPlugin.mPlatformMessageHandler.showSystemUiMode(
           PlatformChannel.SystemUiMode.LEAN_BACK);
-      verify(fakeDecorView)
-          .setSystemUiVisibility(
-              View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                  | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                  | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                  | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                  | View.SYSTEM_UI_FLAG_FULLSCREEN);
 
-      platformPlugin.mPlatformMessageHandler.showSystemUiMode(
-          PlatformChannel.SystemUiMode.IMMERSIVE);
-      verify(fakeDecorView)
-          .setSystemUiVisibility(
-              View.SYSTEM_UI_FLAG_IMMERSIVE
-                  | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                  | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                  | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                  | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                  | View.SYSTEM_UI_FLAG_FULLSCREEN);
-
-      platformPlugin.mPlatformMessageHandler.showSystemUiMode(
-          PlatformChannel.SystemUiMode.IMMERSIVE_STICKY);
-      verify(fakeDecorView)
-          .setSystemUiVisibility(
-              View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                  | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                  | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                  | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                  | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                  | View.SYSTEM_UI_FLAG_FULLSCREEN);
-    }
-
-    if (Build.VERSION.SDK_INT >= 29) {
-      platformPlugin.mPlatformMessageHandler.showSystemUiMode(
-          PlatformChannel.SystemUiMode.EDGE_TO_EDGE);
+      verify(fakeDecorView).setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN);
+      verify(fakeDecorView).setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
       verify(fakeDecorView)
           .setSystemUiVisibility(
               View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                   | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                   | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+
+      platformPlugin.mPlatformMessageHandler.showSystemUiMode(
+          PlatformChannel.SystemUiMode.IMMERSIVE);
+      verify(fakeDecorView).setSystemUiVisibility(View.SYSTEM_UI_FLAG_IMMERSIVE);
+      verify(fakeDecorView, times(2)).setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN);
+      verify(fakeDecorView, times(2)).setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
+      verify(fakeDecorView, times(2))
+          .setSystemUiVisibility(
+              View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                  | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                  | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+
+      platformPlugin.mPlatformMessageHandler.showSystemUiMode(
+          PlatformChannel.SystemUiMode.IMMERSIVE_STICKY);
+      verify(fakeDecorView).setSystemUiVisibility(View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+      verify(fakeDecorView, times(3)).setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN);
+      verify(fakeDecorView, times(3)).setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
+      verify(fakeDecorView, times(3))
+          .setSystemUiVisibility(
+              View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                  | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                  | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
     }
+
+    if (Build.VERSION.SDK_INT >= 29) {
+      platformPlugin.mPlatformMessageHandler.showSystemUiMode(
+          PlatformChannel.SystemUiMode.EDGE_TO_EDGE);
+      verify(fakeDecorView, times(4))
+          .setSystemUiVisibility(
+              View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                  | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                  | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+    }
+  }
+
+  @TargetApi(30)
+  @Test
+  public void setSystemUiMode() {
+    View fakeDecorView = mock(View.class);
+    Window fakeWindow = mock(Window.class);
+    when(fakeWindow.getDecorView()).thenReturn(fakeDecorView);
+    Activity fakeActivity = mock(Activity.class);
+    when(fakeActivity.getWindow()).thenReturn(fakeWindow);
+    PlatformChannel fakePlatformChannel = mock(PlatformChannel.class);
+    PlatformPlugin platformPlugin = new PlatformPlugin(fakeActivity, fakePlatformChannel);
+    WindowInsetsController fakeWindowInsetsController = mock(WindowInsetsController.class);
+    when(fakeWindow.getInsetsController()).thenReturn(fakeWindowInsetsController);
+
+    platformPlugin.mPlatformMessageHandler.showSystemUiMode(PlatformChannel.SystemUiMode.LEAN_BACK);
+
+    verify(fakeWindowInsetsController)
+        .setSystemBarsBehavior(WindowInsetsControllerCompat.BEHAVIOR_SHOW_BARS_BY_TOUCH);
+    verify(fakeWindowInsetsController).hide(WindowInsetsCompat.Type.systemBars());
+    verify(fakeWindow).setDecorFitsSystemWindows(false);
+
+    platformPlugin.mPlatformMessageHandler.showSystemUiMode(PlatformChannel.SystemUiMode.IMMERSIVE);
+
+    verify(fakeWindowInsetsController)
+        .setSystemBarsBehavior(WindowInsetsControllerCompat.BEHAVIOR_SHOW_BARS_BY_SWIPE);
+    verify(fakeWindowInsetsController, times(2)).hide(WindowInsetsCompat.Type.systemBars());
+    verify(fakeWindow, times(2)).setDecorFitsSystemWindows(false);
+
+    platformPlugin.mPlatformMessageHandler.showSystemUiMode(
+        PlatformChannel.SystemUiMode.IMMERSIVE_STICKY);
+
+    verify(fakeWindowInsetsController)
+        .setSystemBarsBehavior(WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+    verify(fakeWindowInsetsController, times(3)).hide(WindowInsetsCompat.Type.systemBars());
+    verify(fakeWindow, times(3)).setDecorFitsSystemWindows(false);
+
+    platformPlugin.mPlatformMessageHandler.showSystemUiMode(
+        PlatformChannel.SystemUiMode.EDGE_TO_EDGE);
+
+    verify(fakeWindow, times(4)).setDecorFitsSystemWindows(false);
+  }
+
+  @Config(sdk = 29)
+  @Test
+  public void showSystemOverlaysLegacy() {
+    // This test reflects the behavior under the hood of the Android overlay/inset APIs used for API
+    // 20-29 in the plugin.
+    View fakeDecorView = mock(View.class);
+    Window fakeWindow = mock(Window.class);
+    when(fakeWindow.getDecorView()).thenReturn(fakeDecorView);
+    int fakeSetFlags =
+        View.SYSTEM_UI_FLAG_FULLSCREEN
+            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+            | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
+    Activity fakeActivity = mock(Activity.class);
+    when(fakeActivity.getWindow()).thenReturn(fakeWindow);
+    PlatformChannel fakePlatformChannel = mock(PlatformChannel.class);
+    PlatformPlugin platformPlugin = new PlatformPlugin(fakeActivity, fakePlatformChannel);
+
+    platformPlugin.mPlatformMessageHandler.showSystemOverlays(
+        new ArrayList<PlatformChannel.SystemUiOverlay>());
+
+    verify(fakeDecorView).setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN);
+    verify(fakeDecorView).setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
+    verify(fakeDecorView)
+        .setSystemUiVisibility(
+            View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+
+    verify(fakeDecorView).setSystemUiVisibility(View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+    verify(fakeDecorView).setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN);
+    verify(fakeDecorView).setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
+    verify(fakeDecorView)
+        .setSystemUiVisibility(
+            View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+
+    when(fakeDecorView.getSystemUiVisibility()).thenReturn(fakeSetFlags);
+    platformPlugin.mPlatformMessageHandler.showSystemOverlays(
+        new ArrayList<PlatformChannel.SystemUiOverlay>(
+            Arrays.asList(
+                PlatformChannel.SystemUiOverlay.TOP_OVERLAYS,
+                PlatformChannel.SystemUiOverlay.BOTTOM_OVERLAYS)));
+
+    verify(fakeDecorView).setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN);
+    verify(fakeDecorView).setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
+    verify(fakeDecorView)
+        .setSystemUiVisibility(
+            View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+
+    verify(fakeDecorView).setSystemUiVisibility(fakeSetFlags &= ~View.SYSTEM_UI_FLAG_FULLSCREEN);
+    verify(fakeDecorView)
+        .setSystemUiVisibility(fakeSetFlags &= ~View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
+  }
+
+  @TargetApi(30)
+  @Test
+  public void showSystemOverlays() {
+    View fakeDecorView = mock(View.class);
+    Window fakeWindow = mock(Window.class);
+    when(fakeWindow.getDecorView()).thenReturn(fakeDecorView);
+    Activity fakeActivity = mock(Activity.class);
+    when(fakeActivity.getWindow()).thenReturn(fakeWindow);
+    PlatformChannel fakePlatformChannel = mock(PlatformChannel.class);
+    PlatformPlugin platformPlugin = new PlatformPlugin(fakeActivity, fakePlatformChannel);
+    WindowInsetsController fakeWindowInsetsController = mock(WindowInsetsController.class);
+    when(fakeWindow.getInsetsController()).thenReturn(fakeWindowInsetsController);
+
+    platformPlugin.mPlatformMessageHandler.showSystemOverlays(
+        new ArrayList<PlatformChannel.SystemUiOverlay>());
+
+    verify(fakeWindowInsetsController)
+        .setSystemBarsBehavior(WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+    verify(fakeWindowInsetsController).hide(WindowInsetsCompat.Type.systemBars());
+
+    platformPlugin.mPlatformMessageHandler.showSystemOverlays(
+        new ArrayList<PlatformChannel.SystemUiOverlay>(
+            Arrays.asList(
+                PlatformChannel.SystemUiOverlay.TOP_OVERLAYS,
+                PlatformChannel.SystemUiOverlay.BOTTOM_OVERLAYS)));
+
+    verify(fakeWindowInsetsController).show(WindowInsetsCompat.Type.statusBars());
+    verify(fakeWindowInsetsController).show(WindowInsetsCompat.Type.navigationBars());
   }
 
   @Config(sdk = 28)
