@@ -64,8 +64,11 @@ SkCanvas* ShellTestExternalViewEmbedder::CompositeEmbeddedView(int view_id) {
 void ShellTestExternalViewEmbedder::SubmitFrame(
     GrDirectContext* context,
     std::unique_ptr<SurfaceFrame> frame) {
+  if (!frame) {
+    return;
+  }
   frame->Submit();
-  if (frame && frame->SkiaSurface()) {
+  if (frame->SkiaSurface()) {
     last_submitted_frame_size_ = SkISize::Make(frame->SkiaSurface()->width(),
                                                frame->SkiaSurface()->height());
   } else {

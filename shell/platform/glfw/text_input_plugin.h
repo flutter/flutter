@@ -53,7 +53,7 @@ class TextInputPlugin : public KeyboardHookHandler {
   std::unique_ptr<flutter::MethodChannel<rapidjson::Document>> channel_;
 
   // The active client id.
-  int client_id_;
+  int client_id_ = 0;
 
   // The active model. nullptr if not set.
   std::unique_ptr<TextInputModel> active_model_;
