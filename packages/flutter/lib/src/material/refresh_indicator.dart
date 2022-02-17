@@ -327,10 +327,15 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
         _dismiss(_RefreshIndicatorMode.canceled);
     } else if (notification is ScrollUpdateNotification) {
       if (_mode == _RefreshIndicatorMode.drag || _mode == _RefreshIndicatorMode.armed) {
-        if (notification.metrics.extentBefore > 0.0) {
+        if ((notification.metrics.axisDirection  == AxisDirection.down && notification.metrics.extentBefore > 0.0)
+            || (notification.metrics.axisDirection  == AxisDirection.up && notification.metrics.extentAfter > 0.0)) {
           _dismiss(_RefreshIndicatorMode.canceled);
         } else {
-          _dragOffset = _dragOffset! - notification.scrollDelta!;
+          if (notification.metrics.axisDirection == AxisDirection.down) {
+            _dragOffset = _dragOffset! - notification.scrollDelta!;
+          } else if (notification.metrics.axisDirection == AxisDirection.up) {
+            _dragOffset = _dragOffset! + notification.scrollDelta!;
+          }
           _checkDragOffset(notification.metrics.viewportDimension);
         }
       }
