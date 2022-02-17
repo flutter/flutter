@@ -1,4 +1,4 @@
-Signature: 48e05a3aac3a6671d3f335515c667e5b
+Signature: 12cf532ce7e2b05ab564d3afaed95ee6
 
 UNUSED LICENSES:
 
@@ -6099,6 +6099,7 @@ FILE: ../../../third_party/skia/experimental/graphite/src/ResourceCache.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/ResourceCache.h
 FILE: ../../../third_party/skia/experimental/graphite/src/Sampler.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/Sampler.h
+FILE: ../../../third_party/skia/experimental/graphite/src/TextureProxyView.h
 FILE: ../../../third_party/skia/experimental/graphite/src/UploadTask.cpp
 FILE: ../../../third_party/skia/experimental/graphite/src/UploadTask.h
 FILE: ../../../third_party/skia/experimental/graphite/src/mtl/MtlSampler.h
@@ -6517,6 +6518,7 @@ LIBRARY: skia
 ORIGIN: ../../../third_party/skia/gm/drawlines_with_local_matrix.cpp + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/gm/drawlines_with_local_matrix.cpp
+FILE: ../../../third_party/skia/gm/palette.cpp
 ----------------------------------------------------------------------------------------------------
 Copyright 2022 Google Inc.
 
