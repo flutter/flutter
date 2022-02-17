@@ -60,7 +60,10 @@ abstract class Notification {
   /// for each ancestor of a particular type).
   @protected
   @mustCallSuper
-  @Deprecated('')
+  @Deprecated(
+    'Element traversal for notifications has poor performance compared to BuildContext.dispatchNotification. '
+    'This feature was deprecated after v1.11.0.'
+  )
   bool visitAncestor(Element element) {
     if (element is _NotificationElement<Notification> && element.onNotification(this)) {
       return false;
@@ -74,7 +77,10 @@ abstract class Notification {
   /// with the appropriate type parameters that are ancestors of the given
   /// [BuildContext]. If the [BuildContext] is null, the notification is not
   /// dispatched.
-  @Deprecated('')
+  @Deprecated(
+    'Notification.dispatch has poor performance. Use BuildContext.dispatchNotification instead. '
+    'This feature was deprecated after v1.11.0.'
+  )
   void dispatch(BuildContext? target) {
     target?.dispatchNotification(this);
   }
