@@ -1821,6 +1821,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (widget.scrollController != oldWidget.scrollController) {
       (oldWidget.scrollController ?? _internalScrollController)?.removeListener(_updateSelectionOverlayForScroll);
       _scrollController.addListener(_updateSelectionOverlayForScroll);
+      // WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+        (oldWidget.scrollController ?? _internalScrollController)?.position.isScrollingNotifier.removeListener(_updateSelectionOverlayForScrollStop);
+        _scrollController.position.isScrollingNotifier.addListener(_updateSelectionOverlayForScrollStop);
+      // });
     }
 
     if (!_shouldCreateInputConnection) {
@@ -1856,7 +1860,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   void dispose() {
-    _internalScrollController?.dispose();
+    (widget.scrollController ?? _internalScrollController)?.dispose();
+    // (widget.scrollController ?? _internalScrollController)?.removeListener(_updateSelectionOverlayForScroll);
+    // (widget.scrollController ?? _internalScrollController)?.position.isScrollingNotifier.removeListener(_updateSelectionOverlayForScrollStop);
     _currentAutofillScope?.unregister(autofillId);
     widget.controller.removeListener(_didChangeTextEditingValue);
     _floatingCursorResetController?.dispose();

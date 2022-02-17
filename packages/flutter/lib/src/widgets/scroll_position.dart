@@ -872,10 +872,19 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     if (_activity != null) {
       oldIgnorePointer = _activity!.shouldIgnorePointer;
       wasScrolling = _activity!.isScrolling;
-      if (wasScrolling && !newActivity.isScrolling)
+      if (wasScrolling && !newActivity.isScrolling) {
+        print('from scroll position -- scroll end');
         didEndScroll(); // notifies and then saves the scroll offset
+      }
       _activity!.dispose();
     } else {
+      if (_activity != null) {
+        print('from scroll position -- still scrollinggg');
+        print(_activity!.isScrolling);
+        if (newActivity != null) {
+          print(!newActivity.isScrolling);
+        }
+      }
       oldIgnorePointer = false;
       wasScrolling = false;
     }
@@ -883,6 +892,9 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     if (oldIgnorePointer != activity!.shouldIgnorePointer)
       context.setIgnorePointer(activity!.shouldIgnorePointer);
     isScrollingNotifier.value = activity!.isScrolling;
+    print('from scroll position is scrolling notifier value');
+    print(isScrollingNotifier.value);
+    print('from scroll position is scrolling notifier value');
     if (!wasScrolling && _activity!.isScrolling)
       didStartScroll();
   }
