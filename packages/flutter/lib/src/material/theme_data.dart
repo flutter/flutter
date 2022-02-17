@@ -24,6 +24,7 @@ import 'dialog_theme.dart';
 import 'divider_theme.dart';
 import 'drawer_theme.dart';
 import 'elevated_button_theme.dart';
+import 'expansion_tile_theme.dart';
 import 'floating_action_button_theme.dart';
 import 'ink_splash.dart';
 import 'ink_well.dart' show InteractiveInkFeatureFactory;
@@ -306,6 +307,7 @@ class ThemeData with Diagnosticable {
     TimePickerThemeData? timePickerTheme,
     ToggleButtonsThemeData? toggleButtonsTheme,
     TooltipThemeData? tooltipTheme,
+    ExpansionTileThemeData? expansionTileTheme,
     // DEPRECATED (newest deprecations at the bottom)
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
@@ -398,10 +400,10 @@ class ThemeData with Diagnosticable {
     assert(colorSchemeSeed == null || colorScheme == null);
     assert(colorSchemeSeed == null || primarySwatch == null);
     assert(colorSchemeSeed == null || primaryColor == null);
-    final Brightness _brightness = brightness ?? colorScheme?.brightness ?? Brightness.light;
-    final bool isDark = _brightness == Brightness.dark;
+    final Brightness effectiveBrightness = brightness ?? colorScheme?.brightness ?? Brightness.light;
+    final bool isDark = effectiveBrightness == Brightness.dark;
     if (colorSchemeSeed != null) {
-      colorScheme = ColorScheme.fromSeed(seedColor: colorSchemeSeed, brightness: _brightness);
+      colorScheme = ColorScheme.fromSeed(seedColor: colorSchemeSeed, brightness: effectiveBrightness);
 
       // For surfaces that use primary color in light themes and surface color in dark
       final Color primarySurfaceColor = isDark ? colorScheme.surface : colorScheme.primary;
@@ -426,10 +428,10 @@ class ThemeData with Diagnosticable {
     applyElevationOverlayColor ??= false;
     primarySwatch ??= Colors.blue;
     primaryColor ??= isDark ? Colors.grey[900]! : primarySwatch;
-    final Brightness _primaryColorBrightness = estimateBrightnessForColor(primaryColor);
+    final Brightness estimatedPrimaryColorBrightness = estimateBrightnessForColor(primaryColor);
     primaryColorLight ??= isDark ? Colors.grey[500]! : primarySwatch[100]!;
     primaryColorDark ??= isDark ? Colors.black : primarySwatch[700]!;
-    final bool primaryIsDark = _primaryColorBrightness == Brightness.dark;
+    final bool primaryIsDark = estimatedPrimaryColorBrightness == Brightness.dark;
     toggleableActiveColor ??= isDark ? Colors.tealAccent[200]! : (accentColor ?? primarySwatch[600]!);
     accentColor ??= isDark ? Colors.tealAccent[200]! : primarySwatch[500]!;
     accentColorBrightness ??= estimateBrightnessForColor(accentColor);
@@ -451,7 +453,7 @@ class ThemeData with Diagnosticable {
       cardColor: cardColor,
       backgroundColor: backgroundColor,
       errorColor: errorColor,
-      brightness: _brightness,
+      brightness: effectiveBrightness,
     );
     selectedRowColor ??= Colors.grey[100]!;
     unselectedWidgetColor ??= isDark ? Colors.white70 : Colors.black54;
@@ -480,7 +482,7 @@ class ThemeData with Diagnosticable {
     splashColor ??= isDark ? _kDarkThemeSplashColor : _kLightThemeSplashColor;
 
     // TYPOGRAPHY & ICONOGRAPHY
-    typography ??= Typography.material2014(platform: platform);
+    typography ??= useMaterial3 ? Typography.material2021(platform: platform) : Typography.material2014(platform: platform);
     TextTheme defaultTextTheme = isDark ? typography.white : typography.black;
     TextTheme defaultPrimaryTextTheme = primaryIsDark ? typography.white : typography.black;
     TextTheme defaultAccentTextTheme = accentIsDark ? typography.white : typography.black;
@@ -526,6 +528,7 @@ class ThemeData with Diagnosticable {
     timePickerTheme ??= const TimePickerThemeData();
     toggleButtonsTheme ??= const ToggleButtonsThemeData();
     tooltipTheme ??= const TooltipThemeData();
+    expansionTileTheme ??= const ExpansionTileThemeData();
 
      // DEPRECATED (newest deprecations at the bottom)
     useTextSelectionTheme ??= true;
@@ -536,7 +539,7 @@ class ThemeData with Diagnosticable {
     accentIconTheme ??= accentIsDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black);
     buttonColor ??= isDark ? primarySwatch[600]! : Colors.grey[300]!;
     fixTextFieldOutlineLabel ??= true;
-    primaryColorBrightness = _primaryColorBrightness;
+    primaryColorBrightness = estimatedPrimaryColorBrightness;
 
     return ThemeData.raw(
       // GENERAL CONFIGURATION
@@ -615,6 +618,7 @@ class ThemeData with Diagnosticable {
       timePickerTheme: timePickerTheme,
       toggleButtonsTheme: toggleButtonsTheme,
       tooltipTheme: tooltipTheme,
+      expansionTileTheme: expansionTileTheme,
       // DEPRECATED (newest deprecations at the bottom)
       useTextSelectionTheme: useTextSelectionTheme,
       textSelectionColor: textSelectionColor,
@@ -720,6 +724,7 @@ class ThemeData with Diagnosticable {
     required this.timePickerTheme,
     required this.toggleButtonsTheme,
     required this.tooltipTheme,
+    required this.expansionTileTheme,
     // DEPRECATED (newest deprecations at the bottom)
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
@@ -858,6 +863,7 @@ class ThemeData with Diagnosticable {
        assert(timePickerTheme != null),
        assert(toggleButtonsTheme != null),
        assert(tooltipTheme != null),
+       assert(expansionTileTheme != null),
         // DEPRECATED (newest deprecations at the bottom)
        assert(useTextSelectionTheme != null),
        assert(textSelectionColor != null),
@@ -1119,6 +1125,9 @@ class ThemeData with Diagnosticable {
   /// start using new colors, typography and other features of Material 3.
   /// If false, they will use the Material 2 look and feel.
   ///
+  /// If true, the default Typography will be [Typography.material2021],
+  /// otherwise it will default to [Typography.material2014].
+  ///
   /// During the migration to Material 3, turning this on may yield
   /// inconsistent look and feel in your app. Some components will be migrated
   /// before others and typography changes will be coming in stages.
@@ -1132,6 +1141,7 @@ class ThemeData with Diagnosticable {
   /// Components that have been migrated to Material 3 are:
   ///
   ///   * [FloatingActionButton]
+  ///   * [NavigationBar]
   ///
   /// See also:
   ///
@@ -1390,6 +1400,9 @@ class ThemeData with Diagnosticable {
   /// This is the value returned from [TooltipTheme.of].
   final TooltipThemeData tooltipTheme;
 
+  /// A theme for customizing the visual properties of [ExpansionTile]s.
+  final ExpansionTileThemeData expansionTileTheme;
+
   // DEPRECATED (newest deprecations at the bottom)
 
   /// A temporary flag that was used to opt-in to the new [TextSelectionTheme]
@@ -1615,6 +1628,7 @@ class ThemeData with Diagnosticable {
     TimePickerThemeData? timePickerTheme,
     ToggleButtonsThemeData? toggleButtonsTheme,
     TooltipThemeData? tooltipTheme,
+    ExpansionTileThemeData? expansionTileTheme,
     // DEPRECATED (newest deprecations at the bottom)
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
@@ -1758,6 +1772,7 @@ class ThemeData with Diagnosticable {
       timePickerTheme: timePickerTheme ?? this.timePickerTheme,
       toggleButtonsTheme: toggleButtonsTheme ?? this.toggleButtonsTheme,
       tooltipTheme: tooltipTheme ?? this.tooltipTheme,
+      expansionTileTheme: expansionTileTheme ?? this.expansionTileTheme,
       // DEPRECATED (newest deprecations at the bottom)
       useTextSelectionTheme: useTextSelectionTheme ?? this.useTextSelectionTheme,
       textSelectionColor: textSelectionColor ?? this.textSelectionColor,
@@ -1927,6 +1942,7 @@ class ThemeData with Diagnosticable {
       timePickerTheme: TimePickerThemeData.lerp(a.timePickerTheme, b.timePickerTheme, t),
       toggleButtonsTheme: ToggleButtonsThemeData.lerp(a.toggleButtonsTheme, b.toggleButtonsTheme, t)!,
       tooltipTheme: TooltipThemeData.lerp(a.tooltipTheme, b.tooltipTheme, t)!,
+      expansionTileTheme: ExpansionTileThemeData.lerp(a.expansionTileTheme, b.expansionTileTheme, t)!,
       // DEPRECATED (newest deprecations at the bottom)
       useTextSelectionTheme: t < 0.5 ? a.useTextSelectionTheme : b.useTextSelectionTheme,
       textSelectionColor: Color.lerp(a.textSelectionColor, b.textSelectionColor, t)!,
@@ -2026,6 +2042,7 @@ class ThemeData with Diagnosticable {
         other.timePickerTheme == timePickerTheme &&
         other.toggleButtonsTheme == toggleButtonsTheme &&
         other.tooltipTheme == tooltipTheme &&
+        other.expansionTileTheme == expansionTileTheme &&
         // DEPRECATED (newest deprecations at the bottom)
         other.useTextSelectionTheme == useTextSelectionTheme &&
         other.textSelectionColor == textSelectionColor &&
@@ -2122,6 +2139,7 @@ class ThemeData with Diagnosticable {
       timePickerTheme,
       toggleButtonsTheme,
       tooltipTheme,
+      expansionTileTheme,
       // DEPRECATED (newest deprecations at the bottom)
       useTextSelectionTheme,
       textSelectionColor,
@@ -2218,6 +2236,7 @@ class ThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<TimePickerThemeData>('timePickerTheme', timePickerTheme, defaultValue: defaultData.timePickerTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<ToggleButtonsThemeData>('toggleButtonsTheme', toggleButtonsTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<TooltipThemeData>('tooltipTheme', tooltipTheme, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<ExpansionTileThemeData>('expansionTileTheme', expansionTileTheme, level: DiagnosticLevel.debug));
     // DEPRECATED (newest deprecations at the bottom)
     properties.add(DiagnosticsProperty<bool>('useTextSelectionTheme', useTextSelectionTheme, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('textSelectionColor', textSelectionColor, defaultValue: defaultData.textSelectionColor, level: DiagnosticLevel.debug));
@@ -2577,7 +2596,7 @@ class VisualDensity with Diagnosticable {
   static VisualDensity lerp(VisualDensity a, VisualDensity b, double t) {
     return VisualDensity(
       horizontal: lerpDouble(a.horizontal, b.horizontal, t)!,
-      vertical: lerpDouble(a.horizontal, b.horizontal, t)!,
+      vertical: lerpDouble(a.vertical, b.vertical, t)!,
     );
   }
 

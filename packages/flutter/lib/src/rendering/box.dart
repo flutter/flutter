@@ -886,16 +886,13 @@ class BoxHitTestResult extends HitTestResult {
 }
 
 /// A hit test entry used by [RenderBox].
-class BoxHitTestEntry extends HitTestEntry {
+class BoxHitTestEntry extends HitTestEntry<RenderBox> {
   /// Creates a box hit test entry.
   ///
   /// The [localPosition] argument must not be null.
   BoxHitTestEntry(RenderBox target, this.localPosition)
     : assert(localPosition != null),
       super(target);
-
-  @override
-  RenderBox get target => super.target as RenderBox;
 
   /// The position of the hit test in the local coordinates of [target].
   final Offset localPosition;
@@ -1981,14 +1978,14 @@ abstract class RenderBox extends RenderObject {
   Size get size {
     assert(hasSize, 'RenderBox was not laid out: ${toString()}');
     assert(() {
-      final Size? _size = this._size;
-      if (_size is _DebugSize) {
-        assert(_size._owner == this);
+      final Size? size = _size;
+      if (size is _DebugSize) {
+        assert(size._owner == this);
         if (RenderObject.debugActiveLayout != null &&
             !RenderObject.debugActiveLayout!.debugDoingThisLayoutWithCallback) {
           assert(
             debugDoingThisResize || debugDoingThisLayout || _computingThisDryLayout ||
-              (RenderObject.debugActiveLayout == parent && _size._canBeUsedByParent),
+              (RenderObject.debugActiveLayout == parent && size._canBeUsedByParent),
             'RenderBox.size accessed beyond the scope of resize, layout, or '
             'permitted parent access. RenderBox can always access its own size, '
             'otherwise, the only object that is allowed to read RenderBox.size '
@@ -1997,7 +1994,7 @@ abstract class RenderBox extends RenderObject {
             "that child's layout().",
           );
         }
-        assert(_size == this._size);
+        assert(size == _size);
       }
       return true;
     }());

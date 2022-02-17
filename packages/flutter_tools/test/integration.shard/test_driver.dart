@@ -103,8 +103,8 @@ abstract class FlutterTestDriver {
     }
     _debugPrint('Spawning flutter $arguments in ${_projectFolder.path}');
 
-    const ProcessManager _processManager = LocalProcessManager();
-    _process = await _processManager.start(
+    const ProcessManager processManager = LocalProcessManager();
+    _process = await processManager.start(
       <String>[flutterBin]
         .followedBy(arguments)
         .toList(),
@@ -482,7 +482,7 @@ abstract class FlutterTestDriver {
         timeoutExpired = true;
         _debugPrint(messages.toString());
       }
-      throw error;
+      throw error; // ignore: only_throw_errors
     }).whenComplete(() => subscription.cancel());
   }
 }
@@ -753,15 +753,15 @@ class FlutterRunTestDriver extends FlutterTestDriver {
   }
 
   void _throwErrorResponse(String message) {
-    throw '$message\n\n$_lastResponse\n\n${_errorBuffer.toString()}'.trim();
+    throw Exception('$message\n\n$_lastResponse\n\n${_errorBuffer.toString()}'.trim());
   }
 
   final bool spawnDdsInstance;
 }
 
 class FlutterTestTestDriver extends FlutterTestDriver {
-  FlutterTestTestDriver(Directory _projectFolder, {String? logPrefix})
-    : super(_projectFolder, logPrefix: logPrefix);
+  FlutterTestTestDriver(Directory projectFolder, {String? logPrefix})
+    : super(projectFolder, logPrefix: logPrefix);
 
   Future<void> test({
     String testFile = 'test/test.dart',

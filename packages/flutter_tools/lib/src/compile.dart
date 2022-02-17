@@ -167,17 +167,22 @@ List<String> buildModeOptions(BuildMode mode, List<String> dartDefines) {
   switch (mode) {
     case BuildMode.debug:
       return <String>[
-        '-Ddart.vm.profile=false',
-        // This allows the CLI to override the value of this define for unit
+        // These checks allow the CLI to override the value of this define for unit
         // testing the framework.
+        if (!dartDefines.any((String define) => define.startsWith('dart.vm.profile')))
+          '-Ddart.vm.profile=false',
         if (!dartDefines.any((String define) => define.startsWith('dart.vm.product')))
           '-Ddart.vm.product=false',
         '--enable-asserts',
       ];
     case BuildMode.profile:
       return <String>[
-        '-Ddart.vm.profile=true',
-        '-Ddart.vm.product=false',
+        // These checks allow the CLI to override the value of this define for
+        // benchmarks with most timeline traces disabled.
+        if (!dartDefines.any((String define) => define.startsWith('dart.vm.profile')))
+          '-Ddart.vm.profile=true',
+        if (!dartDefines.any((String define) => define.startsWith('dart.vm.product')))
+          '-Ddart.vm.product=false',
       ];
     case BuildMode.release:
       return <String>[

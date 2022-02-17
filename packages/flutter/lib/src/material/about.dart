@@ -780,7 +780,7 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
         return true;
       }());
       final List<LicenseParagraph> paragraphs =
-        await SchedulerBinding.instance!.scheduleTask<List<LicenseParagraph>>(
+        await SchedulerBinding.instance.scheduleTask<List<LicenseParagraph>>(
           license.paragraphs.toList,
           Priority.animation,
           debugLabel: 'License',
@@ -920,12 +920,14 @@ class _PackageLicensePageTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final Color? color = Theme.of(context).appBarTheme.foregroundColor;
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Text(title, style: theme.headline6),
-        Text(subtitle, style: theme.subtitle2),
+        Text(title, style: theme.headline6?.copyWith(color: color)),
+        Text(subtitle, style: theme.subtitle2?.copyWith(color: color)),
       ],
     );
   }
@@ -1328,15 +1330,13 @@ class _MasterDetailScaffoldState extends State<_MasterDetailScaffold>
 
   @override
   void openDetailPage(Object arguments) {
-    SchedulerBinding.instance!
-        .addPostFrameCallback((_) => _detailArguments.value = arguments);
+    SchedulerBinding.instance.addPostFrameCallback((_) => _detailArguments.value = arguments);
     _MasterDetailFlow.of(context)!.openDetailPage(arguments);
   }
 
   @override
   void setInitialDetailPage(Object arguments) {
-    SchedulerBinding.instance!
-        .addPostFrameCallback((_) => _detailArguments.value = arguments);
+    SchedulerBinding.instance.addPostFrameCallback((_) => _detailArguments.value = arguments);
     _MasterDetailFlow.of(context)!.setInitialDetailPage(arguments);
   }
 

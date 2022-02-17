@@ -83,7 +83,7 @@ class ScrollAwareImageProvider<T extends Object> extends ImageProvider<T> {
     // Do this before checking scrolling, so that if the bytes are available we
     // render them even though we're scrolling fast - there's no additional
     // allocations to do for texture memory, it's already there.
-    if (stream.completer != null || PaintingBinding.instance!.imageCache!.containsKey(key)) {
+    if (stream.completer != null || PaintingBinding.instance.imageCache.containsKey(key)) {
       imageProvider.resolveStreamForKey(configuration, stream, key, handleError);
       return;
     }
@@ -96,7 +96,7 @@ class ScrollAwareImageProvider<T extends Object> extends ImageProvider<T> {
     // Try to get to end of the frame callbacks of the next frame, and then
     // check again.
     if (Scrollable.recommendDeferredLoadingForContext(context.context!)) {
-      SchedulerBinding.instance!.scheduleFrameCallback((_) {
+      SchedulerBinding.instance.scheduleFrameCallback((_) {
         scheduleMicrotask(() => resolveStreamForKey(configuration, stream, key, handleError));
       });
       return;
