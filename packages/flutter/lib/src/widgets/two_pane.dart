@@ -4,10 +4,8 @@
 
 import 'dart:ui' show DisplayFeature;
 
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
-
 import 'basic.dart';
+import 'debug.dart';
 import 'framework.dart';
 import 'media_query.dart';
 
