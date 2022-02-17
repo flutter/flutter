@@ -309,6 +309,9 @@ void AndroidExternalViewEmbedder::Teardown() {
 
 // |ExternalViewEmbedder|
 void AndroidExternalViewEmbedder::DestroySurfaces() {
+  if (!surface_pool_->HasLayers()) {
+    return;
+  }
   fml::AutoResetWaitableEvent latch;
   fml::TaskRunner::RunNowOrPostTask(task_runners_.GetPlatformTaskRunner(),
                                     [&]() {

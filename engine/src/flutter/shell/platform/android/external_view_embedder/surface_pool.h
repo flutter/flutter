@@ -5,6 +5,8 @@
 #ifndef FLUTTER_SHELL_PLATFORM_ANDROID_EXTERNAL_VIEW_EMBEDDER_SURFACE_POOL_H_
 #define FLUTTER_SHELL_PLATFORM_ANDROID_EXTERNAL_VIEW_EMBEDDER_SURFACE_POOL_H_
 
+#include <mutex>
+
 #include "flutter/flow/surface.h"
 #include "flutter/shell/platform/android/context/android_context.h"
 #include "flutter/shell/platform/android/surface/android_surface.h"
@@ -41,7 +43,6 @@ struct OverlayLayer {
   intptr_t gr_context_key;
 };
 
-// This class isn't thread safe.
 class SurfacePool {
  public:
   SurfacePool();
@@ -72,6 +73,9 @@ class SurfacePool {
   // then they are deallocated as soon as |GetLayer| is called.
   void SetFrameSize(SkISize frame_size);
 
+  // Returns true if the current pool has layers in use.
+  bool HasLayers();
+
  private:
   // The index of the entry in the layers_ vector that determines the beginning
   // of the unused layers. For example, consider the following vector:
@@ -95,6 +99,11 @@ class SurfacePool {
 
   // The frame size to be used by future layers.
   SkISize requested_frame_size_;
+
+  // Used to guard public methods.
+  std::mutex mutex_;
+
+  void DestroyLayersLocked(std::shared_ptr<PlatformViewAndroidJNI> jni_facade);
 };
 
 }  // namespace flutter

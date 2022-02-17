@@ -62,6 +62,7 @@ TEST(SurfacePool, GetLayerAllocateOneLayer) {
   auto layer = pool->GetLayer(gr_context.get(), *android_context, jni_mock,
                               surface_factory);
 
+  ASSERT_TRUE(pool->HasLayers());
   ASSERT_NE(nullptr, layer);
   ASSERT_EQ(reinterpret_cast<intptr_t>(gr_context.get()),
             layer->gr_context_key);
@@ -96,6 +97,7 @@ TEST(SurfacePool, GetUnusedLayers) {
 
   pool->RecycleLayers();
 
+  ASSERT_TRUE(pool->HasLayers());
   ASSERT_EQ(1UL, pool->GetUnusedLayers().size());
   ASSERT_EQ(layer, pool->GetUnusedLayers()[0]);
 }
@@ -137,6 +139,7 @@ TEST(SurfacePool, GetLayerRecycle) {
   auto layer_2 = pool->GetLayer(gr_context_2.get(), *android_context, jni_mock,
                                 surface_factory);
 
+  ASSERT_TRUE(pool->HasLayers());
   ASSERT_NE(nullptr, layer_1);
   ASSERT_EQ(layer_1, layer_2);
   ASSERT_EQ(reinterpret_cast<intptr_t>(gr_context_2.get()),
@@ -176,6 +179,8 @@ TEST(SurfacePool, GetLayerAllocateTwoLayers) {
                                 surface_factory);
   auto layer_2 = pool->GetLayer(gr_context.get(), *android_context, jni_mock,
                                 surface_factory);
+
+  ASSERT_TRUE(pool->HasLayers());
   ASSERT_NE(nullptr, layer_1);
   ASSERT_NE(nullptr, layer_2);
   ASSERT_NE(layer_1, layer_2);
@@ -213,9 +218,11 @@ TEST(SurfacePool, DestroyLayers) {
   pool->GetLayer(gr_context.get(), *android_context, jni_mock, surface_factory);
 
   EXPECT_CALL(*jni_mock, FlutterViewDestroyOverlaySurfaces());
+
+  ASSERT_TRUE(pool->HasLayers());
   pool->DestroyLayers(jni_mock);
 
-  pool->RecycleLayers();
+  ASSERT_FALSE(pool->HasLayers());
   ASSERT_TRUE(pool->GetUnusedLayers().empty());
 }
 
@@ -246,7 +253,11 @@ TEST(SurfacePool, DestroyLayersFrameSizeChanged) {
           ByMove(std::make_unique<PlatformViewAndroidJNI::OverlayMetadata>(
               0, window))));
 
+  ASSERT_FALSE(pool->HasLayers());
+
   pool->GetLayer(gr_context.get(), *android_context, jni_mock, surface_factory);
+
+  ASSERT_TRUE(pool->HasLayers());
 
   pool->SetFrameSize(SkISize::Make(20, 20));
   EXPECT_CALL(*jni_mock, FlutterViewDestroyOverlaySurfaces()).Times(1);
@@ -258,6 +269,7 @@ TEST(SurfacePool, DestroyLayersFrameSizeChanged) {
   pool->GetLayer(gr_context.get(), *android_context, jni_mock, surface_factory);
 
   ASSERT_TRUE(pool->GetUnusedLayers().empty());
+  ASSERT_TRUE(pool->HasLayers());
 }
 
 }  // namespace testing
