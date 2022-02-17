@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		0A02E8F724EFAD27002D54E5 /* BogusFontTextTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 0A02E8F624EFAD27002D54E5 /* BogusFontTextTest.m */; };
-		0A42BFB42447E179007E212E /* TextSemanticsFocusTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 0A42BFB32447E179007E212E /* TextSemanticsFocusTest.m */; };
 		0A57B3BD2323C4BD00DD9521 /* ScreenBeforeFlutter.m in Sources */ = {isa = PBXBuildFile; fileRef = 0A57B3BC2323C4BD00DD9521 /* ScreenBeforeFlutter.m */; };
 		0A57B3BF2323C74200DD9521 /* FlutterEngine+ScenariosTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 0A57B3BE2323C74200DD9521 /* FlutterEngine+ScenariosTest.m */; };
 		0A57B3C22323D2D700DD9521 /* AppLifecycleTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 0A57B3C12323D2D700DD9521 /* AppLifecycleTests.m */; };
@@ -113,8 +112,6 @@
 
 /* Begin PBXFileReference section */
 		0A02E8F624EFAD27002D54E5 /* BogusFontTextTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = BogusFontTextTest.m; sourceTree = "<group>"; };
-		0A42BFB32447E179007E212E /* TextSemanticsFocusTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TextSemanticsFocusTest.m; sourceTree = "<group>"; };
-		0A42BFB52447E19F007E212E /* TextSemanticsFocusTest.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TextSemanticsFocusTest.h; sourceTree = "<group>"; };
 		0A57B3BB2323C4BD00DD9521 /* ScreenBeforeFlutter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ScreenBeforeFlutter.h; sourceTree = "<group>"; };
 		0A57B3BC2323C4BD00DD9521 /* ScreenBeforeFlutter.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ScreenBeforeFlutter.m; sourceTree = "<group>"; };
 		0A57B3BE2323C74200DD9521 /* FlutterEngine+ScenariosTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "FlutterEngine+ScenariosTest.m"; sourceTree = "<group>"; };
@@ -272,8 +269,6 @@
 				68A5B63323EB71D300BDBCDB /* PlatformViewGestureRecognizerTests.m */,
 				0D8470A2240F0B1F0030B565 /* StatusBarTest.h */,
 				0D8470A3240F0B1F0030B565 /* StatusBarTest.m */,
-				0A42BFB32447E179007E212E /* TextSemanticsFocusTest.m */,
-				0A42BFB52447E19F007E212E /* TextSemanticsFocusTest.h */,
 				246A6610252E693A00EAB0F3 /* RenderingSelectionTest.m */,
 				0DDEBC88258830B40065D0E8 /* SpawnEngineTest.m */,
 				F26F15B7268B6B5500EC54D3 /* iPadGestureTests.m */,
@@ -494,7 +489,6 @@
 				F26F15B8268B6B5600EC54D3 /* iPadGestureTests.m in Sources */,
 				246A6611252E693A00EAB0F3 /* RenderingSelectionTest.m in Sources */,
 				4F06F1B32473296E000AF246 /* LocalizationInitializationTest.m in Sources */,
-				0A42BFB42447E179007E212E /* TextSemanticsFocusTest.m in Sources */,
 				0DDEBC89258830B40065D0E8 /* SpawnEngineTest.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
