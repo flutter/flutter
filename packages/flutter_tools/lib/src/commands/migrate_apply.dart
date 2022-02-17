@@ -79,10 +79,8 @@ class MigrateApplyCommand extends FlutterCommand {
     if (allFilesToCopy.isNotEmpty) {
       globals.logger.printStatus('Modifying ${allFilesToCopy.length} files.', indent: 2);
     }
-    if (manifest.deletedFiles.isNotEmpty) {
-      globals.logger.printStatus('Deleting ${manifest.deletedFiles.length} files.', indent: 2);
-    }
     for (String localPath in allFilesToCopy) {
+      if (_verbose) globals.logger.printStatus('Copying $localPath');
       final File workingFile = workingDir.childFile(localPath);
       final File targetFile = FlutterProject.current().directory.childFile(localPath);
       if (!workingFile.existsSync()) {
@@ -95,16 +93,21 @@ class MigrateApplyCommand extends FlutterCommand {
       try {
         targetFile.writeAsStringSync(workingFile.readAsStringSync(), flush: true);
       } on FileSystemException {
+        globals.logger.printStatus('Writing Bytes', indent: 2);
         targetFile.writeAsBytesSync(workingFile.readAsBytesSync(), flush: true);
       }
     }
     // Delete files slated for deletion.
+    if (manifest.deletedFiles.isNotEmpty) {
+      globals.logger.printStatus('Deleting ${manifest.deletedFiles.length} files.', indent: 2);
+    }
     for (String localPath in manifest.deletedFiles) {
       final File targetFile = FlutterProject.current().directory.childFile(localPath);
       targetFile.deleteSync();
     }
 
     // Update the migrate config files to reflect latest migration.
+    if (_verbose) globals.logger.printStatus('Updating .migrate_configs');
     final List<MigrateConfig> configs = await MigrateConfig.parseOrCreateMigrateConfigs();
     final String currentGitHash = await MigrateUtils.getGitHash(Cache.flutterRoot!);
     for (MigrateConfig config in configs) {
