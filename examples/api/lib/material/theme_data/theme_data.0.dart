@@ -11,7 +11,7 @@ void main() => runApp(const MyApp());
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'ThemeData Sample';
 
   @override
   Widget build(BuildContext context) {
@@ -32,6 +32,8 @@ class MyStatelessWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Theme(
       data: ThemeData.from(
+        // Setting the colorScheme here sets the color scheme for
+        // all the descendants of the Theme widget.
         colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.amber),
       ),
       child: Builder(
