@@ -11474,6 +11474,256 @@ void main() {
       );
     }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
   });
+
+  testWidgets('pasting with the keyboard collapses the selection and places it after the pasted content', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          backgroundCursorColor: Colors.grey,
+          controller: controller,
+          focusNode: focusNode,
+          style: textStyle,
+          cursorColor: cursorColor,
+          selectionControls: materialTextSelectionControls,
+        ),
+      ),
+    );
+
+    await tester.pump();
+    expect(controller.text, '');
+
+    await tester.enterText(find.byType(EditableText), '12345');
+    expect(controller.value, const TextEditingValue(
+      text: '12345',
+      selection: TextSelection.collapsed(offset: 5),
+    ));
+
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowLeft,
+        LogicalKeyboardKey.arrowLeft,
+        LogicalKeyboardKey.arrowLeft,
+        LogicalKeyboardKey.arrowLeft,
+        LogicalKeyboardKey.arrowLeft,
+      ],
+      shift: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+
+    expect(controller.value, const TextEditingValue(
+      text: '12345',
+      selection: TextSelection(baseOffset: 5, extentOffset: 0),
+    ));
+
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.keyC,
+      ],
+      shortcutModifier: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+    expect(controller.value, const TextEditingValue(
+      text: '12345',
+      selection: TextSelection(baseOffset: 5, extentOffset: 0),
+    ));
+
+    // Pasting content of equal length, reversed selection.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.keyV,
+      ],
+      shortcutModifier: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+    expect(controller.value, const TextEditingValue(
+      text: '12345',
+      selection: TextSelection.collapsed(offset: 5),
+    ));
+
+    // Pasting content of longer length, forward selection.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowLeft,
+      ],
+      targetPlatform: defaultTargetPlatform,
+    );
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowRight,
+      ],
+      shift: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+    expect(controller.value, const TextEditingValue(
+      text: '12345',
+      selection: TextSelection(baseOffset: 4, extentOffset: 5),
+    ));
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.keyV,
+      ],
+      shortcutModifier: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+    expect(controller.value, const TextEditingValue(
+      text: '123412345',
+      selection: TextSelection.collapsed(offset: 9),
+    ));
+
+    // Pasting content of shorter length, forward selection.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.keyA,
+      ],
+      shortcutModifier: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+    expect(controller.value, const TextEditingValue(
+      text: '123412345',
+      selection: TextSelection(baseOffset: 0, extentOffset: 9),
+    ));
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.keyV,
+      ],
+      shortcutModifier: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+    expect(controller.value, const TextEditingValue(
+      text: '12345',
+      selection: TextSelection.collapsed(offset: 5),
+    ));
+
+  });
+
+  testWidgets('pasting with the toolbar also collapses the selection and places it after the pasted content', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          backgroundCursorColor: Colors.grey,
+          controller: controller,
+          focusNode: focusNode,
+          style: textStyle,
+          cursorColor: cursorColor,
+          selectionControls: materialTextSelectionControls,
+        ),
+      ),
+    );
+
+    await tester.pump();
+    expect(controller.text, '');
+
+    await tester.enterText(find.byType(EditableText), '12345');
+    expect(controller.value, const TextEditingValue(
+      text: '12345',
+      selection: TextSelection.collapsed(offset: 5),
+    ));
+
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowLeft,
+        LogicalKeyboardKey.arrowLeft,
+        LogicalKeyboardKey.arrowLeft,
+        LogicalKeyboardKey.arrowLeft,
+        LogicalKeyboardKey.arrowLeft,
+      ],
+      shift: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+
+    expect(controller.value, const TextEditingValue(
+      text: '12345',
+      selection: TextSelection(baseOffset: 5, extentOffset: 0),
+    ));
+
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.keyC,
+      ],
+      shortcutModifier: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+    expect(controller.value, const TextEditingValue(
+      text: '12345',
+      selection: TextSelection(baseOffset: 5, extentOffset: 0),
+    ));
+
+    final EditableTextState state =
+        tester.state<EditableTextState>(find.byType(EditableText));
+
+    // Pasting content of equal length, reversed selection.
+    expect(state.showToolbar(), true);
+    await tester.pumpAndSettle();
+    expect(find.text('Paste'), findsOneWidget);
+    await tester.tap(find.text('Paste'));
+    expect(controller.value, const TextEditingValue(
+      text: '12345',
+      selection: TextSelection.collapsed(offset: 5),
+    ));
+
+    // Pasting content of longer length, forward selection.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowLeft,
+      ],
+      targetPlatform: defaultTargetPlatform,
+    );
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowRight,
+      ],
+      shift: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+    expect(controller.value, const TextEditingValue(
+      text: '12345',
+      selection: TextSelection(baseOffset: 4, extentOffset: 5),
+    ));
+    expect(state.showToolbar(), true);
+    await tester.pumpAndSettle();
+    expect(find.text('Paste'), findsOneWidget);
+    await tester.tap(find.text('Paste'));
+    expect(controller.value, const TextEditingValue(
+      text: '123412345',
+      selection: TextSelection.collapsed(offset: 9),
+    ));
+
+    // Pasting content of shorter length, forward selection.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.keyA,
+      ],
+      shortcutModifier: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+    expect(controller.value, const TextEditingValue(
+      text: '123412345',
+      selection: TextSelection(baseOffset: 0, extentOffset: 9),
+    ));
+    expect(state.showToolbar(), true);
+    await tester.pumpAndSettle();
+    expect(find.text('Paste'), findsOneWidget);
+    await tester.tap(find.text('Paste'));
+    expect(controller.value, const TextEditingValue(
+      text: '12345',
+      selection: TextSelection.collapsed(offset: 5),
+    ));
+  });
 }
 
 class UnsettableController extends TextEditingController {
