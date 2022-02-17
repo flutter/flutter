@@ -45,6 +45,7 @@ public class AndroidTouchProcessor {
     PointerDeviceKind.MOUSE,
     PointerDeviceKind.STYLUS,
     PointerDeviceKind.INVERTED_STYLUS,
+    PointerDeviceKind.TRACKPAD,
     PointerDeviceKind.UNKNOWN
   })
   private @interface PointerDeviceKind {
@@ -52,7 +53,8 @@ public class AndroidTouchProcessor {
     int MOUSE = 1;
     int STYLUS = 2;
     int INVERTED_STYLUS = 3;
-    int UNKNOWN = 4;
+    int TRACKPAD = 4;
+    int UNKNOWN = 5;
   }
 
   // Must match the PointerSignalKind enum in pointer.dart.
