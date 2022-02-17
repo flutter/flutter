@@ -106,6 +106,19 @@ TEST_F(AiksTest, CanRenderClips) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
+TEST_F(AiksTest, CanRenderNestedClips) {
+  Canvas canvas;
+  Paint paint;
+  paint.color = Color::Fuchsia();
+  canvas.Save();
+  canvas.ClipPath(PathBuilder{}.AddCircle({200, 400}, 300).TakePath());
+  canvas.Restore();
+  canvas.ClipPath(PathBuilder{}.AddCircle({600, 400}, 300).TakePath());
+  canvas.ClipPath(PathBuilder{}.AddCircle({400, 600}, 300).TakePath());
+  canvas.DrawRect(Rect::MakeXYWH(200, 200, 400, 400), paint);
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
 TEST_F(AiksTest, CanSaveLayerStandalone) {
   Canvas canvas;
 
