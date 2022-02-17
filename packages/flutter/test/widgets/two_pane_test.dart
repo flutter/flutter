@@ -30,89 +30,18 @@ Widget log(int index) => CustomPaint(painter: OrderPainter(index));
 void main() {
   // NO DIRECTION
 
-  testWidgets('TwoPane - no textDirection', (WidgetTester tester) async {
-    OrderPainter.log.clear();
-    const Key twoPaneKey = Key('twoPane');
-    const Key pane1Key = Key('pane1');
-    const Key pane2Key = Key('pane2');
+  testWidgets('without Directionality or textDirection', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const TwoPane(
+        startPane: SizedBox(),
+        endPane: SizedBox(),
+      ),
+    );
 
-    final FlutterExceptionHandler? oldHandler = FlutterError.onError;
-    dynamic exception;
-    FlutterError.onError = (FlutterErrorDetails details) {
-      exception ??= details.exception;
-    };
-
-    // Default is direction is Axis.horizontal so this should fail, asking for a direction.
-    await tester.pumpWidget(TwoPane(
-      key: twoPaneKey,
-      pane1: SizedBox(key: pane1Key, width: 100.0, height: 100.0, child: log(1)),
-      pane2: SizedBox(key: pane2Key, width: 100.0, height: 100.0, child: log(2)),
-    ));
-
-    FlutterError.onError = oldHandler;
-    expect(exception, isAssertionError);
-    expect(exception.toString(), contains('textDirection'));
-    expect(OrderPainter.log, <int>[]);
-  });
-
-  testWidgets('TwoPane pane priority pane1 - no textDirection', (WidgetTester tester) async {
-    OrderPainter.log.clear();
-    const Key twoPaneKey = Key('twoPane');
-    const Key pane1Key = Key('pane1');
-    const Key pane2Key = Key('pane2');
-
-    await tester.pumpWidget(TwoPane(
-      key: twoPaneKey,
-      pane1: SizedBox(key: pane1Key, width: 100.0, height: 100.0, child: log(1)),
-      pane2: SizedBox(key: pane2Key, width: 100.0, height: 100.0, child: log(2)),
-      panePriority: TwoPanePriority.pane1,
-    ));
-
-    RenderBox renderBox;
-    BoxParentData boxParentData;
-
-    renderBox = tester.renderObject(find.byKey(twoPaneKey));
-    expect(renderBox.size.width, equals(800.0));
-    expect(renderBox.size.height, equals(600.0));
-
-    renderBox = tester.renderObject(find.byKey(pane1Key));
-    expect(renderBox.size.width, equals(800.0));
-    expect(renderBox.size.height, equals(600.0));
-    boxParentData = renderBox.parentData! as BoxParentData;
-    expect(boxParentData.offset.dx, equals(0.0));
-    expect(boxParentData.offset.dy, equals(0.0));
-
-    expect(OrderPainter.log, <int>[1]);
-  });
-
-  testWidgets('TwoPane pane priority pane2 - no textDirection', (WidgetTester tester) async {
-    OrderPainter.log.clear();
-    const Key twoPaneKey = Key('twoPane');
-    const Key pane1Key = Key('pane1');
-    const Key pane2Key = Key('pane2');
-
-    await tester.pumpWidget(TwoPane(
-      key: twoPaneKey,
-      pane1: SizedBox(key: pane1Key, width: 100.0, height: 100.0, child: log(1)),
-      pane2: SizedBox(key: pane2Key, width: 100.0, height: 100.0, child: log(2)),
-      panePriority: TwoPanePriority.pane2,
-    ));
-
-    RenderBox renderBox;
-    BoxParentData boxParentData;
-
-    renderBox = tester.renderObject(find.byKey(twoPaneKey));
-    expect(renderBox.size.width, equals(800.0));
-    expect(renderBox.size.height, equals(600.0));
-
-    renderBox = tester.renderObject(find.byKey(pane2Key));
-    expect(renderBox.size.width, equals(800.0));
-    expect(renderBox.size.height, equals(600.0));
-    boxParentData = renderBox.parentData! as BoxParentData;
-    expect(boxParentData.offset.dx, equals(0.0));
-    expect(boxParentData.offset.dy, equals(0.0));
-
-    expect(OrderPainter.log, <int>[2]);
+    // With no Directionality or textDirection, the widget throws
+    final String message = tester.takeException().toString();
+    expect(message, contains('Directionality'));
+    expect(message, contains('textDirection'));
   });
 
   testWidgets('TwoPane separating display feature overrides params', (WidgetTester tester) async {
@@ -121,7 +50,7 @@ void main() {
     const Key pane1Key = Key('pane1');
     const Key pane2Key = Key('pane2');
     // A 20 pixel-wide vertical display feature splitting the display left-right
-    final MediaQueryData mediaQuery = MediaQueryData.fromWindow(WidgetsBinding.instance!.window).copyWith(
+    final MediaQueryData mediaQuery = MediaQueryData.fromWindow(WidgetsBinding.instance.window).copyWith(
         displayFeatures: <DisplayFeature>[
           const DisplayFeature(
             bounds: Rect.fromLTRB(390, 0, 410, 600),
@@ -143,8 +72,8 @@ void main() {
         direction: Axis.vertical,
         verticalDirection: VerticalDirection.up,
         paneProportion: 0.1,
-        pane1: SizedBox(key: pane1Key, width: 100.0, height: 100.0, child: log(1)),
-        pane2: SizedBox(key: pane2Key, width: 100.0, height: 100.0, child: log(2)),
+        startPane: SizedBox(key: pane1Key, width: 100.0, height: 100.0, child: log(1)),
+        endPane: SizedBox(key: pane2Key, width: 100.0, height: 100.0, child: log(2)),
       ),
     ));
 
@@ -178,7 +107,7 @@ void main() {
     const Key pane1Key = Key('pane1');
     const Key pane2Key = Key('pane2');
     // A 600 pixel-wide notch at the top of the screen, does not affect TwoPane
-    final MediaQueryData mediaQuery = MediaQueryData.fromWindow(WidgetsBinding.instance!.window).copyWith(
+    final MediaQueryData mediaQuery = MediaQueryData.fromWindow(WidgetsBinding.instance.window).copyWith(
         displayFeatures: <DisplayFeature>[
           const DisplayFeature(
             bounds: Rect.fromLTRB(100, 0, 700, 100),
@@ -195,9 +124,10 @@ void main() {
       child: TwoPane(
         key: twoPaneKey,
         direction: Axis.vertical,
+        textDirection: TextDirection.ltr,
         paneProportion: 0.1,
-        pane1: SizedBox(key: pane1Key, width: 100.0, height: 100.0, child: log(1)),
-        pane2: SizedBox(key: pane2Key, width: 100.0, height: 100.0, child: log(2)),
+        startPane: SizedBox(key: pane1Key, width: 100.0, height: 100.0, child: log(1)),
+        endPane: SizedBox(key: pane2Key, width: 100.0, height: 100.0, child: log(2)),
       ),
     ));
 
@@ -239,8 +169,8 @@ void main() {
     await tester.pumpWidget(TwoPane(
       key: twoPaneKey,
       textDirection: TextDirection.ltr,
-      pane1: SizedBox(key: pane1Key, width: 100.0, height: 100.0, child: log(1)),
-      pane2: SizedBox(key: pane2Key, width: 100.0, height: 100.0, child: log(2)),
+      startPane: SizedBox(key: pane1Key, width: 100.0, height: 100.0, child: log(1)),
+      endPane: SizedBox(key: pane2Key, width: 100.0, height: 100.0, child: log(2)),
     ));
 
     RenderBox renderBox;
@@ -278,8 +208,9 @@ void main() {
       textDirection: TextDirection.ltr,
       child: TwoPane(
         key: twoPaneKey,
-        pane1: SizedBox(key: pane1Key, width: 100.0, height: 100.0, child: log(1)),
-        pane2: SizedBox(key: pane2Key, width: 100.0, height: 100.0, child: log(2)),
+        textDirection: TextDirection.ltr,
+        startPane: SizedBox(key: pane1Key, width: 100.0, height: 100.0, child: log(1)),
+        endPane: SizedBox(key: pane2Key, width: 100.0, height: 100.0, child: log(2)),
       ),
     ));
 
@@ -318,8 +249,8 @@ void main() {
       key: twoPaneKey,
       textDirection: TextDirection.ltr,
       paneProportion: 0.25,
-      pane1: SizedBox(key: pane1Key, width: 100.0, height: 100.0, child: log(1)),
-      pane2: SizedBox(key: pane2Key, width: 100.0, height: 100.0, child: log(2)),
+      startPane: SizedBox(key: pane1Key, width: 100.0, height: 100.0, child: log(1)),
+      endPane: SizedBox(key: pane2Key, width: 100.0, height: 100.0, child: log(2)),
     ));
 
     RenderBox renderBox;
@@ -348,11 +279,10 @@ void main() {
     OrderPainter.log.clear();
     const Key twoPaneKey = Key('twoPane');
     // A 20 pixel-wide vertical display feature splitting the display left-right
-    final MediaQueryData mediaQuery = MediaQueryData.fromWindow(WidgetsBinding.instance!.window).copyWith(
+    final MediaQueryData mediaQuery = MediaQueryData.fromWindow(WidgetsBinding.instance.window).copyWith(
       padding: const EdgeInsets.all(10),
       viewPadding: const EdgeInsets.all(10),
       viewInsets: const EdgeInsets.all(10),
-      systemGestureInsets: const EdgeInsets.all(10),
     );
 
     late MediaQueryData unpaddedPane1;
@@ -362,13 +292,13 @@ void main() {
       child: TwoPane(
         key: twoPaneKey,
         textDirection: TextDirection.ltr,
-        pane1: Builder(
+        startPane: Builder(
           builder: (BuildContext context) {
             unpaddedPane1 = MediaQuery.of(context);
             return log(1);
           },
         ),
-        pane2: Builder(
+        endPane: Builder(
           builder: (BuildContext context) {
             unpaddedPane2 = MediaQuery.of(context);
             return log(2);
@@ -380,11 +310,9 @@ void main() {
     expect(unpaddedPane1.padding, const EdgeInsets.fromLTRB(10, 10, 0, 10));
     expect(unpaddedPane1.viewPadding, const EdgeInsets.fromLTRB(10, 10, 0, 10));
     expect(unpaddedPane1.viewInsets, const EdgeInsets.fromLTRB(10, 10, 0, 10));
-    expect(unpaddedPane1.systemGestureInsets, const EdgeInsets.fromLTRB(10, 10, 0, 10));
     expect(unpaddedPane2.padding, const EdgeInsets.fromLTRB(0, 10, 10, 10));
     expect(unpaddedPane2.viewPadding, const EdgeInsets.fromLTRB(0, 10, 10, 10));
     expect(unpaddedPane2.viewInsets, const EdgeInsets.fromLTRB(0, 10, 10, 10));
-    expect(unpaddedPane2.systemGestureInsets, const EdgeInsets.fromLTRB(0, 10, 10, 10));
 
     expect(OrderPainter.log, <int>[1, 2]);
   });
@@ -395,7 +323,7 @@ void main() {
     const Key pane1Key = Key('pane1');
     const Key pane2Key = Key('pane2');
     // A 20 pixel-wide vertical display feature splitting the display left-right
-    final MediaQueryData mediaQuery = MediaQueryData.fromWindow(WidgetsBinding.instance!.window).copyWith(
+    final MediaQueryData mediaQuery = MediaQueryData.fromWindow(WidgetsBinding.instance.window).copyWith(
         displayFeatures: <DisplayFeature>[
           const DisplayFeature(
             bounds: Rect.fromLTRB(390, 0, 410, 600),
@@ -414,8 +342,8 @@ void main() {
       child: TwoPane(
         key: twoPaneKey,
         textDirection: TextDirection.ltr,
-        pane1: SizedBox(key: pane1Key, width: 100.0, height: 100.0, child: log(1)),
-        pane2: SizedBox(key: pane2Key, width: 100.0, height: 100.0, child: log(2)),
+        startPane: SizedBox(key: pane1Key, width: 100.0, height: 100.0, child: log(1)),
+        endPane: SizedBox(key: pane2Key, width: 100.0, height: 100.0, child: log(2)),
       ),
     ));
 
@@ -449,7 +377,7 @@ void main() {
     const Key pane1Key = Key('pane1');
     const Key pane2Key = Key('pane2');
     // A 20 pixel-wide vertical display feature splitting the display left-right
-    final MediaQueryData mediaQuery = MediaQueryData.fromWindow(WidgetsBinding.instance!.window).copyWith(
+    final MediaQueryData mediaQuery = MediaQueryData.fromWindow(WidgetsBinding.instance.window).copyWith(
       displayFeatures: <DisplayFeature>[
         const DisplayFeature(
           bounds: Rect.fromLTRB(390, 0, 410, 600),
@@ -472,8 +400,9 @@ void main() {
         child: TwoPane(
           key: twoPaneKey,
           textDirection: TextDirection.ltr,
-          pane1: SizedBox(key: pane1Key, width: 100.0, height: 100.0, child: log(1)),
-          pane2: SizedBox(key: pane2Key, width: 100.0, height: 100.0, child: log(2)),
+          inset: const EdgeInsets.only(top: 100, left: 100),
+          startPane: SizedBox(key: pane1Key, width: 100.0, height: 100.0, child: log(1)),
+          endPane: SizedBox(key: pane2Key, width: 100.0, height: 100.0, child: log(2)),
         ),
       ),
     ));
@@ -516,8 +445,8 @@ void main() {
     await tester.pumpWidget(TwoPane(
       key: twoPaneKey,
       textDirection: TextDirection.rtl,
-      pane1: SizedBox(key: pane1Key, width: 100.0, height: 100.0, child: log(1)),
-      pane2: SizedBox(key: pane2Key, width: 100.0, height: 100.0, child: log(2)),
+      startPane: SizedBox(key: pane1Key, width: 100.0, height: 100.0, child: log(1)),
+      endPane: SizedBox(key: pane2Key, width: 100.0, height: 100.0, child: log(2)),
     ));
 
     RenderBox renderBox;
@@ -555,8 +484,8 @@ void main() {
       textDirection: TextDirection.rtl,
       child: TwoPane(
         key: twoPaneKey,
-        pane1: SizedBox(key: pane1Key, width: 100.0, height: 100.0, child: log(1)),
-        pane2: SizedBox(key: pane2Key, width: 100.0, height: 100.0, child: log(2)),
+        startPane: SizedBox(key: pane1Key, width: 100.0, height: 100.0, child: log(1)),
+        endPane: SizedBox(key: pane2Key, width: 100.0, height: 100.0, child: log(2)),
       ),
     ));
 
@@ -595,8 +524,8 @@ void main() {
       key: twoPaneKey,
       textDirection: TextDirection.rtl,
       paneProportion: 0.25,
-      pane1: SizedBox(key: pane1Key, width: 100.0, height: 100.0, child: log(1)),
-      pane2: SizedBox(key: pane2Key, width: 100.0, height: 100.0, child: log(2)),
+      startPane: SizedBox(key: pane1Key, width: 100.0, height: 100.0, child: log(1)),
+      endPane: SizedBox(key: pane2Key, width: 100.0, height: 100.0, child: log(2)),
     ));
 
     RenderBox renderBox;
@@ -625,11 +554,10 @@ void main() {
     OrderPainter.log.clear();
     const Key twoPaneKey = Key('twoPane');
     // A 20 pixel-wide vertical display feature splitting the display left-right
-    final MediaQueryData mediaQuery = MediaQueryData.fromWindow(WidgetsBinding.instance!.window).copyWith(
+    final MediaQueryData mediaQuery = MediaQueryData.fromWindow(WidgetsBinding.instance.window).copyWith(
       padding: const EdgeInsets.all(10),
       viewPadding: const EdgeInsets.all(10),
       viewInsets: const EdgeInsets.all(10),
-      systemGestureInsets: const EdgeInsets.all(10),
     );
 
     late MediaQueryData unpaddedPane1;
@@ -639,13 +567,13 @@ void main() {
       child: TwoPane(
         key: twoPaneKey,
         textDirection: TextDirection.rtl,
-        pane1: Builder(
+        startPane: Builder(
           builder: (BuildContext context) {
             unpaddedPane1 = MediaQuery.of(context);
             return log(1);
           },
         ),
-        pane2: Builder(
+        endPane: Builder(
           builder: (BuildContext context) {
             unpaddedPane2 = MediaQuery.of(context);
             return log(2);
@@ -657,11 +585,9 @@ void main() {
     expect(unpaddedPane1.padding, const EdgeInsets.fromLTRB(0, 10, 10, 10));
     expect(unpaddedPane1.viewPadding, const EdgeInsets.fromLTRB(0, 10, 10, 10));
     expect(unpaddedPane1.viewInsets, const EdgeInsets.fromLTRB(0, 10, 10, 10));
-    expect(unpaddedPane1.systemGestureInsets, const EdgeInsets.fromLTRB(0, 10, 10, 10));
     expect(unpaddedPane2.padding, const EdgeInsets.fromLTRB(10, 10, 0, 10));
     expect(unpaddedPane2.viewPadding, const EdgeInsets.fromLTRB(10, 10, 0, 10));
     expect(unpaddedPane2.viewInsets, const EdgeInsets.fromLTRB(10, 10, 0, 10));
-    expect(unpaddedPane2.systemGestureInsets, const EdgeInsets.fromLTRB(10, 10, 0, 10));
 
     expect(OrderPainter.log, <int>[1, 2]);
   });
@@ -672,7 +598,7 @@ void main() {
     const Key pane1Key = Key('pane1');
     const Key pane2Key = Key('pane2');
     // A 20 pixel-wide vertical display feature splitting the display left-right
-    final MediaQueryData mediaQuery = MediaQueryData.fromWindow(WidgetsBinding.instance!.window).copyWith(
+    final MediaQueryData mediaQuery = MediaQueryData.fromWindow(WidgetsBinding.instance.window).copyWith(
         displayFeatures: <DisplayFeature>[
           const DisplayFeature(
             bounds: Rect.fromLTRB(390, 0, 410, 600),
@@ -691,8 +617,8 @@ void main() {
       child: TwoPane(
         key: twoPaneKey,
         textDirection: TextDirection.rtl,
-        pane1: SizedBox(key: pane1Key, width: 100.0, height: 100.0, child: log(1)),
-        pane2: SizedBox(key: pane2Key, width: 100.0, height: 100.0, child: log(2)),
+        startPane: SizedBox(key: pane1Key, width: 100.0, height: 100.0, child: log(1)),
+        endPane: SizedBox(key: pane2Key, width: 100.0, height: 100.0, child: log(2)),
       ),
     ));
 
@@ -726,7 +652,7 @@ void main() {
     const Key pane1Key = Key('pane1');
     const Key pane2Key = Key('pane2');
     // A 20 pixel-wide vertical display feature splitting the display left-right
-    final MediaQueryData mediaQuery = MediaQueryData.fromWindow(WidgetsBinding.instance!.window).copyWith(
+    final MediaQueryData mediaQuery = MediaQueryData.fromWindow(WidgetsBinding.instance.window).copyWith(
       displayFeatures: <DisplayFeature>[
         const DisplayFeature(
           bounds: Rect.fromLTRB(390, 0, 410, 600),
@@ -749,8 +675,9 @@ void main() {
         child: TwoPane(
           key: twoPaneKey,
           textDirection: TextDirection.rtl,
-          pane1: SizedBox(key: pane1Key, width: 100.0, height: 100.0, child: log(1)),
-          pane2: SizedBox(key: pane2Key, width: 100.0, height: 100.0, child: log(2)),
+          inset: const EdgeInsets.only(top: 100, left: 100),
+          startPane: SizedBox(key: pane1Key, width: 100.0, height: 100.0, child: log(1)),
+          endPane: SizedBox(key: pane2Key, width: 100.0, height: 100.0, child: log(2)),
         ),
       ),
     ));
@@ -793,8 +720,9 @@ void main() {
     await tester.pumpWidget(TwoPane(
       key: twoPaneKey,
       direction: Axis.vertical,
-      pane1: SizedBox(key: pane1Key, width: 100.0, height: 100.0, child: log(1)),
-      pane2: SizedBox(key: pane2Key, width: 100.0, height: 100.0, child: log(2)),
+      textDirection: TextDirection.ltr,
+      startPane: SizedBox(key: pane1Key, width: 100.0, height: 100.0, child: log(1)),
+      endPane: SizedBox(key: pane2Key, width: 100.0, height: 100.0, child: log(2)),
     ));
 
     RenderBox renderBox;
@@ -830,9 +758,10 @@ void main() {
     await tester.pumpWidget(TwoPane(
       key: twoPaneKey,
       direction: Axis.vertical,
+      textDirection: TextDirection.ltr,
       paneProportion: 0.25,
-      pane1: SizedBox(key: pane1Key, width: 100.0, height: 100.0, child: log(1)),
-      pane2: SizedBox(key: pane2Key, width: 100.0, height: 100.0, child: log(2)),
+      startPane: SizedBox(key: pane1Key, width: 100.0, height: 100.0, child: log(1)),
+      endPane: SizedBox(key: pane2Key, width: 100.0, height: 100.0, child: log(2)),
     ));
 
     RenderBox renderBox;
@@ -861,11 +790,10 @@ void main() {
     OrderPainter.log.clear();
     const Key twoPaneKey = Key('twoPane');
     // A 20 pixel-wide vertical display feature splitting the display left-right
-    final MediaQueryData mediaQuery = MediaQueryData.fromWindow(WidgetsBinding.instance!.window).copyWith(
+    final MediaQueryData mediaQuery = MediaQueryData.fromWindow(WidgetsBinding.instance.window).copyWith(
       padding: const EdgeInsets.all(10),
       viewPadding: const EdgeInsets.all(10),
       viewInsets: const EdgeInsets.all(10),
-      systemGestureInsets: const EdgeInsets.all(10),
     );
 
     late MediaQueryData unpaddedPane1;
@@ -875,13 +803,14 @@ void main() {
       child: TwoPane(
         key: twoPaneKey,
         direction: Axis.vertical,
-        pane1: Builder(
+        textDirection: TextDirection.ltr,
+        startPane: Builder(
           builder: (BuildContext context) {
             unpaddedPane1 = MediaQuery.of(context);
             return log(1);
           },
         ),
-        pane2: Builder(
+        endPane: Builder(
           builder: (BuildContext context) {
             unpaddedPane2 = MediaQuery.of(context);
             return log(2);
@@ -893,11 +822,9 @@ void main() {
     expect(unpaddedPane1.padding, const EdgeInsets.fromLTRB(10, 10, 10, 0));
     expect(unpaddedPane1.viewPadding, const EdgeInsets.fromLTRB(10, 10, 10, 0));
     expect(unpaddedPane1.viewInsets, const EdgeInsets.fromLTRB(10, 10, 10, 0));
-    expect(unpaddedPane1.systemGestureInsets, const EdgeInsets.fromLTRB(10, 10, 10, 0));
     expect(unpaddedPane2.padding, const EdgeInsets.fromLTRB(10, 0, 10, 10));
     expect(unpaddedPane2.viewPadding, const EdgeInsets.fromLTRB(10, 0, 10, 10));
     expect(unpaddedPane2.viewInsets, const EdgeInsets.fromLTRB(10, 0, 10, 10));
-    expect(unpaddedPane2.systemGestureInsets, const EdgeInsets.fromLTRB(10, 0, 10, 10));
 
     expect(OrderPainter.log, <int>[1, 2]);
   });
@@ -908,7 +835,7 @@ void main() {
     const Key pane1Key = Key('pane1');
     const Key pane2Key = Key('pane2');
     // A 20 pixel-wide horizontal display feature splitting the display up-down
-    final MediaQueryData mediaQuery = MediaQueryData.fromWindow(WidgetsBinding.instance!.window).copyWith(
+    final MediaQueryData mediaQuery = MediaQueryData.fromWindow(WidgetsBinding.instance.window).copyWith(
         displayFeatures: <DisplayFeature>[
           const DisplayFeature(
             bounds: Rect.fromLTRB(0, 290, 800, 310),
@@ -927,8 +854,9 @@ void main() {
       data: mediaQuery,
       child: TwoPane(
         key: twoPaneKey,
-        pane1: SizedBox(key: pane1Key, width: 100.0, height: 100.0, child: log(1)),
-        pane2: SizedBox(key: pane2Key, width: 100.0, height: 100.0, child: log(2)),
+        textDirection: TextDirection.ltr,
+        startPane: SizedBox(key: pane1Key, width: 100.0, height: 100.0, child: log(1)),
+        endPane: SizedBox(key: pane2Key, width: 100.0, height: 100.0, child: log(2)),
       ),
     ));
 
@@ -962,7 +890,7 @@ void main() {
     const Key pane1Key = Key('pane1');
     const Key pane2Key = Key('pane2');
     // A 20 pixel-wide horizontal display feature splitting the display up-down
-    final MediaQueryData mediaQuery = MediaQueryData.fromWindow(WidgetsBinding.instance!.window).copyWith(
+    final MediaQueryData mediaQuery = MediaQueryData.fromWindow(WidgetsBinding.instance.window).copyWith(
         displayFeatures: <DisplayFeature>[
           const DisplayFeature(
             bounds: Rect.fromLTRB(0, 290, 800, 310),
@@ -985,8 +913,10 @@ void main() {
         padding: const EdgeInsets.only(top: 100, left: 100),
         child: TwoPane(
           key: twoPaneKey,
-          pane1: SizedBox(key: pane1Key, width: 100.0, height: 100.0, child: log(1)),
-          pane2: SizedBox(key: pane2Key, width: 100.0, height: 100.0, child: log(2)),
+          textDirection: TextDirection.ltr,
+          inset: const EdgeInsets.only(top: 100, left: 100),
+          startPane: SizedBox(key: pane1Key, width: 100.0, height: 100.0, child: log(1)),
+          endPane: SizedBox(key: pane2Key, width: 100.0, height: 100.0, child: log(2)),
         ),
       ),
     ));
@@ -1030,8 +960,9 @@ void main() {
       key: twoPaneKey,
       direction: Axis.vertical,
       verticalDirection: VerticalDirection.up,
-      pane1: SizedBox(key: pane1Key, width: 100.0, height: 100.0, child: log(1)),
-      pane2: SizedBox(key: pane2Key, width: 100.0, height: 100.0, child: log(2)),
+      textDirection: TextDirection.ltr,
+      startPane: SizedBox(key: pane1Key, width: 100.0, height: 100.0, child: log(1)),
+      endPane: SizedBox(key: pane2Key, width: 100.0, height: 100.0, child: log(2)),
     ));
 
     RenderBox renderBox;
@@ -1067,10 +998,11 @@ void main() {
     await tester.pumpWidget(TwoPane(
       key: twoPaneKey,
       direction: Axis.vertical,
+      textDirection: TextDirection.ltr,
       verticalDirection: VerticalDirection.up,
       paneProportion: 0.25,
-      pane1: SizedBox(key: pane1Key, width: 100.0, height: 100.0, child: log(1)),
-      pane2: SizedBox(key: pane2Key, width: 100.0, height: 100.0, child: log(2)),
+      startPane: SizedBox(key: pane1Key, width: 100.0, height: 100.0, child: log(1)),
+      endPane: SizedBox(key: pane2Key, width: 100.0, height: 100.0, child: log(2)),
     ));
 
     RenderBox renderBox;
@@ -1099,11 +1031,10 @@ void main() {
     OrderPainter.log.clear();
     const Key twoPaneKey = Key('twoPane');
     // A 20 pixel-wide vertical display feature splitting the display left-right
-    final MediaQueryData mediaQuery = MediaQueryData.fromWindow(WidgetsBinding.instance!.window).copyWith(
+    final MediaQueryData mediaQuery = MediaQueryData.fromWindow(WidgetsBinding.instance.window).copyWith(
       padding: const EdgeInsets.all(10),
       viewPadding: const EdgeInsets.all(10),
       viewInsets: const EdgeInsets.all(10),
-      systemGestureInsets: const EdgeInsets.all(10),
     );
 
     late MediaQueryData unpaddedPane1;
@@ -1113,14 +1044,15 @@ void main() {
       child: TwoPane(
         key: twoPaneKey,
         direction: Axis.vertical,
+        textDirection: TextDirection.ltr,
         verticalDirection: VerticalDirection.up,
-        pane1: Builder(
+        startPane: Builder(
           builder: (BuildContext context) {
             unpaddedPane1 = MediaQuery.of(context);
             return log(1);
           },
         ),
-        pane2: Builder(
+        endPane: Builder(
           builder: (BuildContext context) {
             unpaddedPane2 = MediaQuery.of(context);
             return log(2);
@@ -1132,11 +1064,9 @@ void main() {
     expect(unpaddedPane1.padding, const EdgeInsets.fromLTRB(10, 0, 10, 10));
     expect(unpaddedPane1.viewPadding, const EdgeInsets.fromLTRB(10, 0, 10, 10));
     expect(unpaddedPane1.viewInsets, const EdgeInsets.fromLTRB(10, 0, 10, 10));
-    expect(unpaddedPane1.systemGestureInsets, const EdgeInsets.fromLTRB(10, 0, 10, 10));
     expect(unpaddedPane2.padding, const EdgeInsets.fromLTRB(10, 10, 10, 0));
     expect(unpaddedPane2.viewPadding, const EdgeInsets.fromLTRB(10, 10, 10, 0));
     expect(unpaddedPane2.viewInsets, const EdgeInsets.fromLTRB(10, 10, 10, 0));
-    expect(unpaddedPane2.systemGestureInsets, const EdgeInsets.fromLTRB(10, 10, 10, 0));
 
     expect(OrderPainter.log, <int>[1, 2]);
   });
@@ -1147,7 +1077,7 @@ void main() {
     const Key pane1Key = Key('pane1');
     const Key pane2Key = Key('pane2');
     // A 20 pixel-wide horizontal display feature splitting the display up-down
-    final MediaQueryData mediaQuery = MediaQueryData.fromWindow(WidgetsBinding.instance!.window).copyWith(
+    final MediaQueryData mediaQuery = MediaQueryData.fromWindow(WidgetsBinding.instance.window).copyWith(
         displayFeatures: <DisplayFeature>[
           const DisplayFeature(
             bounds: Rect.fromLTRB(0, 290, 800, 310),
@@ -1166,8 +1096,9 @@ void main() {
       child: TwoPane(
         key: twoPaneKey,
         verticalDirection: VerticalDirection.up,
-        pane1: SizedBox(key: pane1Key, width: 100.0, height: 100.0, child: log(1)),
-        pane2: SizedBox(key: pane2Key, width: 100.0, height: 100.0, child: log(2)),
+        textDirection: TextDirection.ltr,
+        startPane: SizedBox(key: pane1Key, width: 100.0, height: 100.0, child: log(1)),
+        endPane: SizedBox(key: pane2Key, width: 100.0, height: 100.0, child: log(2)),
       ),
     ));
 
@@ -1201,7 +1132,7 @@ void main() {
     const Key pane1Key = Key('pane1');
     const Key pane2Key = Key('pane2');
     // A 20 pixel-wide horizontal display feature splitting the display up-down
-    final MediaQueryData mediaQuery = MediaQueryData.fromWindow(WidgetsBinding.instance!.window).copyWith(
+    final MediaQueryData mediaQuery = MediaQueryData.fromWindow(WidgetsBinding.instance.window).copyWith(
         displayFeatures: <DisplayFeature>[
           const DisplayFeature(
             bounds: Rect.fromLTRB(0, 290, 800, 310),
@@ -1215,18 +1146,21 @@ void main() {
     // Default vertical direction is down
     // Pane proportion and direction is overridden by the display feature
     // Panes will be laid out above and below the display feature
-    // Panes "lose" the space occupied by the padding. Left padding
-    // affects both panes and top padding affects the top pane.
-    // Pane2: 700x290, Pane2: 700x190
+    // Panes "lose" the space occupied by the padding. Left and right padding
+    // affects both panes and top padding affects the top pane and bottom
+    // padding affects the bottom pane
+    // Pane2: 694x236, Pane2: 694x238
     await tester.pumpWidget(MediaQuery(
       data: mediaQuery,
       child: Padding(
-        padding: const EdgeInsets.only(top: 100, left: 100),
+        padding: const EdgeInsets.only(left: 52, right: 54, top: 52, bottom: 54),
         child: TwoPane(
           key: twoPaneKey,
+          textDirection: TextDirection.ltr,
           verticalDirection: VerticalDirection.up,
-          pane1: SizedBox(key: pane1Key, width: 100.0, height: 100.0, child: log(1)),
-          pane2: SizedBox(key: pane2Key, width: 100.0, height: 100.0, child: log(2)),
+          inset: const EdgeInsets.only(left: 52, right: 54, top: 52, bottom: 54),
+          startPane: SizedBox(key: pane1Key, width: 100.0, height: 100.0, child: log(1)),
+          endPane: SizedBox(key: pane2Key, width: 100.0, height: 100.0, child: log(2)),
         ),
       ),
     ));
@@ -1235,19 +1169,19 @@ void main() {
     BoxParentData boxParentData;
 
     renderBox = tester.renderObject(find.byKey(twoPaneKey));
-    expect(renderBox.size.width, equals(700.0));
-    expect(renderBox.size.height, equals(500.0));
+    expect(renderBox.size.width, equals(694.0));
+    expect(renderBox.size.height, equals(494.0));
 
     renderBox = tester.renderObject(find.byKey(pane1Key));
-    expect(renderBox.size.width, equals(700.0));
-    expect(renderBox.size.height, equals(290.0));
+    expect(renderBox.size.width, equals(694.0));
+    expect(renderBox.size.height, equals(236.0));
     boxParentData = renderBox.parentData! as BoxParentData;
     expect(boxParentData.offset.dx, equals(0.0));
-    expect(boxParentData.offset.dy, equals(210.0));
+    expect(boxParentData.offset.dy, equals(258.0));
 
     renderBox = tester.renderObject(find.byKey(pane2Key));
-    expect(renderBox.size.width, equals(700.0));
-    expect(renderBox.size.height, equals(190.0));
+    expect(renderBox.size.width, equals(694.0));
+    expect(renderBox.size.height, equals(238.0));
     boxParentData = renderBox.parentData! as BoxParentData;
     expect(boxParentData.offset.dx, equals(0.0));
     expect(boxParentData.offset.dy, equals(0.0));
