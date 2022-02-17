@@ -38,3 +38,14 @@ updates:
       - "team"
       - "team: infra"
       - "waiting for tree to go green"
+  - package-ecosystem: "gradle"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    reviewers:
+      - "fujino"
+      - "blasten"
+      - "godofredoc"
+    labels:
+      - "team"
+      - "waiting for tree to go green"
