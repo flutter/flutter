@@ -173,56 +173,12 @@ bool _isInAccessibilityMode(BuildContext context) {
 /// Typically passed as the child widget to [showDialog], which displays the
 /// dialog.
 ///
-/// {@tool snippet}
+/// {@tool dartpad}
 /// This sample shows how to use a [CupertinoAlertDialog].
 ///	The [CupertinoAlertDialog] shows an alert with a set of two choices
 /// when [CupertinoButton] is pressed.
 ///
-/// ```dart
-/// class MyStatefulWidget extends StatefulWidget {
-///   const MyStatefulWidget({Key? key}) : super(key: key);
-///
-///   @override
-///   State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
-/// }
-///
-/// class _MyStatefulWidgetState extends State<MyStatefulWidget> {
-///   @override
-///   Widget build(BuildContext context) {
-///     return CupertinoPageScaffold(
-///       child: Center(
-///         child: CupertinoButton(
-///           onPressed: () {
-///             showCupertinoDialog<void>(
-///               context: context,
-///               builder: (BuildContext context) => CupertinoAlertDialog(
-///                 title: const Text('Alert'),
-///                 content: const Text('Proceed with destructive action?'),
-///                 actions: <CupertinoDialogAction>[
-///                   CupertinoDialogAction(
-///                     child: const Text('No'),
-///                     onPressed: () {
-///                       Navigator.pop(context);
-///                     },
-///                   ),
-///                   CupertinoDialogAction(
-///                     child: const Text('Yes'),
-///                     isDestructiveAction: true,
-///                     onPressed: () {
-///                       // Do something destructive.
-///                     },
-///                   )
-///                 ],
-///               ),
-///             );
-///           },
-///           child: const Text('CupertinoAlertDialog'),
-///         ),
-///       ),
-///     );
-///   }
-/// }
-/// ```
+/// ** See code in examples/api/lib/cupertino/dialog/cupertino_alert_dialog.0.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -494,55 +450,12 @@ class CupertinoPopupSurface extends StatelessWidget {
 /// [showCupertinoModalPopup], which displays the action sheet by sliding it up
 /// from the bottom of the screen.
 ///
-/// {@tool snippet}
+/// {@tool dartpad}
 /// This sample shows how to use a [CupertinoActionSheet].
 ///	The [CupertinoActionSheet] shows a modal popup that slides in from the
 /// bottom when [CupertinoButton] is pressed.
 ///
-/// ```dart
-/// class MyStatefulWidget extends StatefulWidget {
-///   const MyStatefulWidget({Key? key}) : super(key: key);
-///
-///   @override
-///   State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
-/// }
-///
-/// class _MyStatefulWidgetState extends State<MyStatefulWidget> {
-///   @override
-///   Widget build(BuildContext context) {
-///     return CupertinoPageScaffold(
-///       child: Center(
-///         child: CupertinoButton(
-///           onPressed: () {
-///             showCupertinoModalPopup<void>(
-///               context: context,
-///               builder: (BuildContext context) => CupertinoActionSheet(
-///                 title: const Text('Title'),
-///                 message: const Text('Message'),
-///                 actions: <CupertinoActionSheetAction>[
-///                   CupertinoActionSheetAction(
-///                     child: const Text('Action One'),
-///                     onPressed: () {
-///                       Navigator.pop(context);
-///                     },
-///                   ),
-///                   CupertinoActionSheetAction(
-///                     child: const Text('Action Two'),
-///                     onPressed: () {
-///                       Navigator.pop(context);
-///                     },
-///                   )
-///                 ],
-///               ),
-///             );
-///           },
-///           child: const Text('CupertinoActionSheet'),
-///         ),
-///       ),
-///     );
-///   }
-/// }
-/// ```
+/// ** See code in examples/api/lib/cupertino/dialog/cupertino_action_sheet.0.dart **
 /// {@end-tool}
 ///
 /// See also:
