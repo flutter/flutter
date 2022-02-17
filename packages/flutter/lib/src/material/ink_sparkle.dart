@@ -169,8 +169,6 @@ class InkSparkle extends InteractiveInkFeature {
 
   @override
   void paintFeature(Canvas canvas, Matrix4 transform) {
-    // debugPrint('sparkle paintFeature');
-
     // InkSparkle can only paint if its shader has been compiled.
     if (InkSparkleFactory._shaderManager == null) {
       debugPrint(
@@ -341,11 +339,9 @@ class InkSparkleFactory extends InteractiveInkFeatureFactory {
 
   // TODO(clocksmith): Update this once shaders are precompiled.
   static void compileShaderIfNeccessary() {
-    int startTime = DateTime.now().microsecondsSinceEpoch;
     if (!_initCalled) {
       FragmentShaderManager.inkSparkle().then((value) {
         _shaderManager = value;
-        print("shader comiplation time: ${DateTime.now().microsecondsSinceEpoch - startTime})");
       });
       _initCalled = true;
     }
