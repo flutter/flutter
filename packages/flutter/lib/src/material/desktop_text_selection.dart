@@ -183,7 +183,7 @@ class _DesktopTextSelectionControlsToolbarState extends State<_DesktopTextSelect
       String text,
       VoidCallback onPressed,
     ) {
-      items.add(_DesktopTextSelectionToolbarButton.text(
+      items.add(DesktopTextSelectionToolbarButton.text(
         context: context,
         onPressed: onPressed,
         text: text,
@@ -209,7 +209,7 @@ class _DesktopTextSelectionControlsToolbarState extends State<_DesktopTextSelect
       return const SizedBox(width: 0.0, height: 0.0);
     }
 
-    return _DesktopTextSelectionToolbar(
+    return DesktopTextSelectionToolbar(
       anchor: widget.lastSecondaryTapDownPosition ?? midpointAnchor,
       children: items,
     );
@@ -230,9 +230,9 @@ class _DesktopTextSelectionControlsToolbarState extends State<_DesktopTextSelect
 ///    default to build a Material-style desktop toolbar.
 ///  * [TextSelectionToolbar], which is similar, but builds an Android-style
 ///    toolbar.
-class _DesktopTextSelectionToolbar extends StatelessWidget {
+class DesktopTextSelectionToolbar extends StatelessWidget {
   /// Creates an instance of _DesktopTextSelectionToolbar.
-  const _DesktopTextSelectionToolbar({
+  const DesktopTextSelectionToolbar({
     Key? key,
     required this.anchor,
     required this.children,
@@ -307,17 +307,17 @@ const EdgeInsets _kToolbarButtonPadding = EdgeInsets.fromLTRB(
 );
 
 /// A [TextButton] for the Material desktop text selection toolbar.
-class _DesktopTextSelectionToolbarButton extends StatelessWidget {
+class DesktopTextSelectionToolbarButton extends StatelessWidget {
   /// Creates an instance of DesktopTextSelectionToolbarButton.
-  const _DesktopTextSelectionToolbarButton({
+  const DesktopTextSelectionToolbarButton({
     Key? key,
     required this.onPressed,
     required this.child,
   }) : super(key: key);
 
-  /// Create an instance of [_DesktopTextSelectionToolbarButton] whose child is
+  /// Create an instance of [DesktopTextSelectionToolbarButton] whose child is
   /// a [Text] widget in the style of the Material text selection toolbar.
-  _DesktopTextSelectionToolbarButton.text({
+  DesktopTextSelectionToolbarButton.text({
     Key? key,
     required BuildContext context,
     required this.onPressed,
