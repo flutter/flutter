@@ -22,6 +22,7 @@ enum PointerDeviceKind {
   mouse,
   stylus,
   invertedStylus,
+  trackpad,
   unknown
 }
 
