@@ -55,6 +55,8 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
 
   MOCK_METHOD0(OnPlatformViewDestroyed, void());
 
+  MOCK_METHOD0(OnPlatformViewScheduleFrame, void());
+
   MOCK_METHOD1(OnPlatformViewSetNextFrameCallback,
                void(const fml::closure& closure));
 
@@ -1825,6 +1827,36 @@ TEST_F(ShellTest, IsolateCanAccessPersistentIsolateData) {
   });
 
   message_latch.Wait();
+  DestroyShell(std::move(shell), std::move(task_runners));
+}
+
+TEST_F(ShellTest, CanScheduleFrameFromPlatform) {
+  Settings settings = CreateSettingsForFixture();
+  TaskRunners task_runners = GetTaskRunnersForFixture();
+  fml::AutoResetWaitableEvent latch;
+  AddNativeCallback(
+      "NotifyNative",
+      CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) { latch.Signal(); }));
+  fml::AutoResetWaitableEvent check_latch;
+  AddNativeCallback("NativeOnBeginFrame",
+                    CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
+                      check_latch.Signal();
+                    }));
+  std::unique_ptr<Shell> shell =
+      CreateShell(std::move(settings), std::move(task_runners));
+  ASSERT_TRUE(shell->IsSetup());
+
+  auto configuration = RunConfiguration::InferFromSettings(settings);
+  configuration.SetEntrypoint("canScheduleFrameFromPlatform");
+  RunEngine(shell.get(), std::move(configuration));
+
+  // Wait for the application to attach the listener.
+  latch.Wait();
+
+  fml::TaskRunner::RunNowOrPostTask(
+      shell->GetTaskRunners().GetPlatformTaskRunner(),
+      [&shell]() { shell->GetPlatformView()->ScheduleFrame(); });
+  check_latch.Wait();
   DestroyShell(std::move(shell), std::move(task_runners));
 }
 
