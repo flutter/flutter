@@ -50,7 +50,6 @@ class InkSparkle extends InteractiveInkFeature {
        _targetRadius = (radius ?? _getTargetRadius(referenceBox, containedInkWell, rectCallback, position)) * _targetRadiusMultiplier,
        _clipCallback = _getClipCallback(referenceBox, containedInkWell, rectCallback),
        super(controller: controller, referenceBox: referenceBox, color: color, onRemoved: onRemoved) {
-    // TODO(clocksmith): Move this to MaterialApp or Theme constructor.
     // InkSparkle will not be painted until the async compilation completes.
     InkSparkleFactory.compileShaderIfNeccessary();
     
@@ -78,9 +77,9 @@ class InkSparkle extends InteractiveInkFeature {
  
     // Functionally equivalent to Android 12's SkSL:
     //`return mix(u_touch, u_resolution, saturate(in_radius_scale * 2.0))`
-    final centerTween = Tween<v.Vector2>(
-      begin: v.Vector2.array([_position.dx, _position.dy]),
-      end: v.Vector2.array([referenceBox.size.width / 2, referenceBox.size.height / 2]),
+    final centerTween = Tween<Vector2>(
+      begin: Vector2.array([_position.dx, _position.dy]),
+      end: Vector2.array([referenceBox.size.width / 2, referenceBox.size.height / 2]),
     );
     final centerProgress = TweenSequence<double>(
       <TweenSequenceItem<double>>[
@@ -221,7 +220,6 @@ class InkSparkle extends InteractiveInkFeature {
       uSparkleColor: Vector4(1.0, 1.0, 1.0, 1.0),
       uBlur: 1.0,
       uMaxRadius: _targetRadius,
-      // TODO(clocksmith): Refactor with pixel density.
       uResolutionScale: Vector2(1.0 / _width, 1.0 / _height),
       uNoiseScale: Vector2(_noiseDensity / _width, _noiseDensity / _height),
 
@@ -277,8 +275,6 @@ class InkSparkle extends InteractiveInkFeature {
   /// the ink feature is to be painted.
   ///
   /// For examples on how the function is used, see [InkSparkle] and [paintInkCircle].
-  /// 
-  /// TODO(clocksmith): Refactor and extract for general ink reuse.
   void _transformCanvas({
     required Canvas canvas,
     required Matrix4 transform,
@@ -314,8 +310,6 @@ class InkSparkle extends InteractiveInkFeature {
   /// "left" and "right".
   ///
   /// For examples on how the function is used, see [InkSparkle].
-  /// 
-  /// TODO(clocksmith): Refactor and extract for general ink reuse.
   void _clipCanvas({
     required Canvas canvas,
     required RectCallback clipCallback,
@@ -389,7 +383,6 @@ class InkSparkleFactory extends InteractiveInkFeatureFactory {
   }
 }
 
-// TODO(clocksmith): Refactor since this is copied from ink_ripple.dart
 RectCallback? _getClipCallback(
   RenderBox referenceBox,
   bool containedInkWell,
@@ -403,7 +396,6 @@ RectCallback? _getClipCallback(
   return null;
 }
 
-// TODO(clocksmith): Refactor since this is copied from ink_ripple.dart
 double _getTargetRadius(
   RenderBox referenceBox,
   bool containedInkWell,
@@ -432,7 +424,7 @@ const _noiseDensity = 2.1;
 // GENERATED CODE BELOW - DO NOT EDIT //
 ////////////////////////////////////////
 
-// TODO(clocksmith): move to sep file?
+// TODO(REVIEWERS): move to sep file?
 
 /// A class for managing [FragmentProgram] that includes a pre-transpiled
 /// shader program into SPIR-V.
@@ -521,8 +513,6 @@ const _glslString = '''
 #version 320 es
 
 precision highp float;
-
-// TODO(antrob): Put these in a more logical order (e.g. separate consts vs varying, etc)
 
 layout(location = 0) uniform vec4 u_color;
 layout(location = 1) uniform float u_alpha;
