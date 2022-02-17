@@ -105,7 +105,7 @@ const SkPaint* Paint::paint(SkPaint& paint) const {
     if (!Dart_IsNull(color_filter)) {
       ColorFilter* decoded_color_filter =
           tonic::DartConverter<ColorFilter*>::FromDart(color_filter);
-      paint.setColorFilter(decoded_color_filter->filter());
+      paint.setColorFilter(decoded_color_filter->filter()->sk_filter());
     }
 
     Dart_Handle image_filter = values[kImageFilterIndex];
@@ -156,8 +156,7 @@ const SkPaint* Paint::paint(SkPaint& paint) const {
   }
 
   if (uint_data[kInvertColorIndex]) {
-    sk_sp<SkColorFilter> invert_filter =
-        ColorFilter::MakeColorMatrixFilter255(invert_colors);
+    sk_sp<SkColorFilter> invert_filter = SkColorFilters::Matrix(invert_colors);
     sk_sp<SkColorFilter> current_filter = paint.refColorFilter();
     if (current_filter) {
       invert_filter = invert_filter->makeComposed(current_filter);
@@ -235,7 +234,7 @@ bool Paint::sync_to(DisplayListBuilder* builder,
       } else {
         ColorFilter* decoded_color_filter =
             tonic::DartConverter<ColorFilter*>::FromDart(color_filter);
-        builder->setColorFilter(decoded_color_filter->filter());
+        builder->setColorFilter(decoded_color_filter->filter().get());
       }
     }
 

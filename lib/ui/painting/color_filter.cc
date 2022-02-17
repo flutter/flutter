@@ -40,33 +40,31 @@ fml::RefPtr<ColorFilter> ColorFilter::Create() {
 }
 
 void ColorFilter::initMode(int color, int blend_mode) {
-  filter_ = SkColorFilters::Blend(static_cast<SkColor>(color),
-                                  static_cast<SkBlendMode>(blend_mode));
-}
-
-sk_sp<SkColorFilter> ColorFilter::MakeColorMatrixFilter255(
-    const float array[20]) {
-  float tmp[20];
-  memcpy(tmp, array, sizeof(tmp));
-  tmp[4] *= 1.0f / 255;
-  tmp[9] *= 1.0f / 255;
-  tmp[14] *= 1.0f / 255;
-  tmp[19] *= 1.0f / 255;
-  return SkColorFilters::Matrix(tmp);
+  filter_ = std::make_shared<DlBlendColorFilter>(
+      static_cast<SkColor>(color), static_cast<SkBlendMode>(blend_mode));
 }
 
 void ColorFilter::initMatrix(const tonic::Float32List& color_matrix) {
   FML_CHECK(color_matrix.num_elements() == 20);
 
-  filter_ = MakeColorMatrixFilter255(color_matrix.data());
+  // Flutter still defines the matrix to be biased by 255 in the last column
+  // (translate). skia is normalized, treating the last column as 0...1, so we
+  // post-scale here before calling the skia factory.
+  float matrix[20];
+  memcpy(matrix, color_matrix.data(), sizeof(matrix));
+  matrix[4] *= 1.0f / 255;
+  matrix[9] *= 1.0f / 255;
+  matrix[14] *= 1.0f / 255;
+  matrix[19] *= 1.0f / 255;
+  filter_ = std::make_shared<DlMatrixColorFilter>(matrix);
 }
 
 void ColorFilter::initLinearToSrgbGamma() {
-  filter_ = SkColorFilters::LinearToSRGBGamma();
+  filter_ = DlLinearToSrgbGammaColorFilter::instance;
 }
 
 void ColorFilter::initSrgbToLinearGamma() {
-  filter_ = SkColorFilters::SRGBToLinearGamma();
+  filter_ = DlSrgbToLinearGammaColorFilter::instance;
 }
 
 ColorFilter::~ColorFilter() = default;
