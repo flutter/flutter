@@ -999,7 +999,7 @@ class DefaultTextStyleTransition extends AnimatedWidget {
 /// A [State.setState] method call requires Flutter to entirely rebuild the
 /// current widget plus a variable portion of the subtree, depending on the
 /// depth and the structure.
-/// 
+///
 /// To avoid unnecessary work, the [AnimatedBuilder] class can be used along
 /// with a [ChangeNotifier] to only rebuild certain portions a widget,
 /// leaving other parts and the subtree untouched.
@@ -1081,7 +1081,7 @@ class DefaultTextStyleTransition extends AnimatedWidget {
 ///         onPressed: () => CounterWidget.of(context).counter.value++,
 ///         tooltip: 'Increment',
 ///         child: const Icon(Icons.add),
-///       ), 
+///       ),
 ////    );
 ///   }
 /// }
