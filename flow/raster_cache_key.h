@@ -7,32 +7,49 @@
 
 #include <unordered_map>
 
+#include "flutter/fml/hash_combine.h"
 #include "flutter/fml/logging.h"
 #include "third_party/skia/include/core/SkMatrix.h"
 
 namespace flutter {
 
-template <typename ID>
+enum class RasterCacheKeyType { kLayer, kPicture, kDisplayList };
+
+enum class RasterCacheKeyKind { kLayerMetrics, kPictureMetrics };
+
 class RasterCacheKey {
  public:
-  RasterCacheKey(ID id, const SkMatrix& ctm) : id_(id), matrix_(ctm) {
+  RasterCacheKey(uint64_t id, RasterCacheKeyType type, const SkMatrix& ctm)
+      : id_(id), type_(type), matrix_(ctm) {
     matrix_[SkMatrix::kMTransX] = 0;
     matrix_[SkMatrix::kMTransY] = 0;
   }
 
-  ID id() const { return id_; }
+  uint64_t id() const { return id_; }
+  RasterCacheKeyType type() const { return type_; }
   const SkMatrix& matrix() const { return matrix_; }
 
+  RasterCacheKeyKind kind() const {
+    switch (type_) {
+      case RasterCacheKeyType::kPicture:
+      case RasterCacheKeyType::kDisplayList:
+        return RasterCacheKeyKind::kPictureMetrics;
+      case RasterCacheKeyType::kLayer:
+        return RasterCacheKeyKind::kLayerMetrics;
+    }
+  }
+
   struct Hash {
-    uint32_t operator()(RasterCacheKey const& key) const {
-      return std::hash<ID>()(key.id_);
+    std::size_t operator()(RasterCacheKey const& key) const {
+      return fml::HashCombine(key.id_, key.type_);
     }
   };
 
   struct Equal {
     constexpr bool operator()(const RasterCacheKey& lhs,
                               const RasterCacheKey& rhs) const {
-      return lhs.id_ == rhs.id_ && lhs.matrix_ == rhs.matrix_;
+      return lhs.id_ == rhs.id_ && lhs.type_ == rhs.type_ &&
+             lhs.matrix_ == rhs.matrix_;
     }
   };
 
@@ -40,7 +57,9 @@ class RasterCacheKey {
   using Map = std::unordered_map<RasterCacheKey, Value, Hash, Equal>;
 
  private:
-  ID id_;
+  uint64_t id_;
+
+  RasterCacheKeyType type_;
 
   // ctm where only fractional (0-1) translations are preserved:
   //   matrix_ = ctm;
@@ -48,17 +67,6 @@ class RasterCacheKey {
   //   matrix_[SkMatrix::kMTransY] = SkScalarFraction(ctm.getTranslateY());
   SkMatrix matrix_;
 };
-
-// The ID is the uint32_t picture uniqueID
-using PictureRasterCacheKey = RasterCacheKey<uint32_t>;
-
-// The ID is the uint32_t DisplayList uniqueID
-using DisplayListRasterCacheKey = RasterCacheKey<uint32_t>;
-
-class Layer;
-
-// The ID is the uint64_t layer unique_id
-using LayerRasterCacheKey = RasterCacheKey<uint64_t>;
 
 }  // namespace flutter
 
