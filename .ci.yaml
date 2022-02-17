@@ -42,7 +42,7 @@ platform_properties:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "curl"},
           {"dependency": "open_jdk"}
         ]
@@ -81,7 +81,7 @@ platform_properties:
           ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "open_jdk"}
         ]
@@ -141,7 +141,7 @@ platform_properties:
           ]
       dependencies: >-
           [
-            {"dependency": "android_sdk", "version": "version:29.0"},
+            {"dependency": "android_sdk", "version": "version:31v8"},
             {"dependency": "certs"},
             {"dependency": "chrome_and_driver", "version": "version:84"},
             {"dependency": "open_jdk"}
@@ -171,7 +171,7 @@ targets:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"}
         ]
       tags: >
@@ -190,7 +190,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "open_jdk"},
           {"dependency": "goldctl"},
@@ -210,7 +210,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "open_jdk"},
           {"dependency": "goldctl"},
@@ -295,7 +295,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"}
+          {"dependency": "android_sdk", "version": "version:31v8"}
         ]
       tags: >
         ["firebaselab"]
@@ -308,7 +308,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"}
+          {"dependency": "android_sdk", "version": "version:31v8"}
         ]
       tags: >
         ["firebaselab"]
@@ -321,7 +321,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"}
+          {"dependency": "android_sdk", "version": "version:31v8"}
         ]
       tags: >
         ["firebaselab"]
@@ -375,7 +375,7 @@ targets:
           {"dependency": "cmake"},
           {"dependency": "ninja"},
           {"dependency": "open_jdk"},
-          {"dependency": "android_sdk", "version": "version:29.0"}
+          {"dependency": "android_sdk", "version": "version:31v8"}
         ]
       shard: framework_tests
       subshard: misc
@@ -441,7 +441,7 @@ targets:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"}
         ]
       tags: >
@@ -463,7 +463,7 @@ targets:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"}
         ]
       tags: >
@@ -485,7 +485,7 @@ targets:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"}
         ]
       tags: >
@@ -507,7 +507,7 @@ targets:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"}
         ]
       tags: >
@@ -529,7 +529,7 @@ targets:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"}
         ]
       tags: >
@@ -551,7 +551,7 @@ targets:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"}
         ]
       tags: >
@@ -574,7 +574,7 @@ targets:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"}
         ]
       tags: >
@@ -597,7 +597,7 @@ targets:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"}
         ]
       tags: >
@@ -620,7 +620,7 @@ targets:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"}
         ]
       tags: >
@@ -643,7 +643,7 @@ targets:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"}
         ]
       tags: >
@@ -686,7 +686,7 @@ targets:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"}
         ]
       tags: >
@@ -714,7 +714,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "clang"},
           {"dependency": "open_jdk"},
@@ -739,7 +739,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "clang"},
           {"dependency": "open_jdk"},
@@ -764,7 +764,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "clang"},
           {"dependency": "open_jdk"},
@@ -789,7 +789,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "clang"},
           {"dependency": "open_jdk"},
@@ -814,7 +814,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "open_jdk"}
         ]
       shard: tool_tests
@@ -835,7 +835,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "open_jdk"}
         ]
       shard: tool_tests
@@ -860,7 +860,7 @@ targets:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"}
         ]
       tags: >
@@ -879,7 +879,7 @@ targets:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"}
         ]
       tags: >
@@ -898,7 +898,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "goldctl"}
         ]
@@ -919,7 +919,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "goldctl"}
         ]
@@ -940,7 +940,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "goldctl"}
         ]
@@ -961,7 +961,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "goldctl"}
         ]
@@ -982,7 +982,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "goldctl"}
         ]
@@ -1003,7 +1003,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "goldctl"}
         ]
@@ -1024,7 +1024,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "goldctl"}
         ]
@@ -1045,7 +1045,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "goldctl"}
         ]
@@ -1066,7 +1066,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "goldctl"}
         ]
@@ -1087,7 +1087,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "goldctl"}
         ]
@@ -1108,7 +1108,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "goldctl"}
         ]
@@ -1129,7 +1129,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "goldctl"}
         ]
@@ -1150,7 +1150,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "goldctl"}
         ]
@@ -1171,7 +1171,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver"},
           {"dependency": "goldctl"}
         ]
@@ -1191,7 +1191,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver"},
           {"dependency": "goldctl"}
         ]
@@ -1211,7 +1211,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver"},
           {"dependency": "goldctl"}
         ]
@@ -1231,7 +1231,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver"},
           {"dependency": "goldctl"}
         ]
@@ -1251,7 +1251,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver"},
           {"dependency": "goldctl"}
         ]
@@ -1271,7 +1271,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver"},
           {"dependency": "goldctl"}
         ]
@@ -1291,7 +1291,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver"},
           {"dependency": "goldctl"}
         ]
@@ -1311,7 +1311,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver"},
           {"dependency": "goldctl"}
         ]
@@ -1331,7 +1331,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "open_jdk"},
           {"dependency": "goldctl"}
@@ -2277,7 +2277,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "android_virtual_device", "version": "31"}
         ]
       tags: >
@@ -2292,7 +2292,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "android_virtual_device", "version": "31"},
           {"dependency": "curl"}
         ]
@@ -2389,7 +2389,7 @@ targets:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "gems"},
           {"dependency": "open_jdk"},
           {"dependency": "xcode"}
@@ -2414,7 +2414,7 @@ targets:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "open_jdk"},
           {"dependency": "xcode"},
           {"dependency": "gems"}
@@ -2436,7 +2436,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "open_jdk"},
           {"dependency": "xcode"},
@@ -2456,7 +2456,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "open_jdk"},
           {"dependency": "xcode"},
@@ -2476,7 +2476,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "open_jdk"},
           {"dependency": "xcode"},
@@ -2496,7 +2496,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "open_jdk"},
           {"dependency": "xcode"},
@@ -2579,7 +2579,7 @@ targets:
           {"dependency": "xcode"},
           {"dependency": "gems"},
           {"dependency": "open_jdk"},
-          {"dependency": "android_sdk", "version": "version:29.0"}
+          {"dependency": "android_sdk", "version": "version:31v8"}
         ]
       shard: framework_tests
       subshard: misc
@@ -2635,7 +2635,7 @@ targets:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "open_jdk"},
           {"dependency": "xcode"},
           {"dependency": "gems"}
@@ -2659,7 +2659,7 @@ targets:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "open_jdk"},
           {"dependency": "xcode"},
           {"dependency": "gems"}
@@ -2683,7 +2683,7 @@ targets:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "open_jdk"},
           {"dependency": "xcode"},
           {"dependency": "gems"}
@@ -2707,7 +2707,7 @@ targets:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "open_jdk"},
           {"dependency": "xcode"},
           {"dependency": "gems"}
@@ -2732,7 +2732,7 @@ targets:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "open_jdk"},
           {"dependency": "xcode"},
           {"dependency": "gems"}
@@ -2757,7 +2757,7 @@ targets:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "open_jdk"},
           {"dependency": "xcode"},
           {"dependency": "gems"}
@@ -2783,7 +2783,7 @@ targets:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "open_jdk"},
           {"dependency": "xcode"},
           {"dependency": "gems"}
@@ -2808,7 +2808,7 @@ targets:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "open_jdk"},
           {"dependency": "xcode"},
           {"dependency": "gems"}
@@ -2833,7 +2833,7 @@ targets:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "open_jdk"},
           {"dependency": "xcode"},
           {"dependency": "gems"}
@@ -2861,7 +2861,7 @@ targets:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "open_jdk"},
           {"dependency": "xcode"},
           {"dependency": "gems"}
@@ -2886,7 +2886,7 @@ targets:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "open_jdk"},
           {"dependency": "xcode"},
           {"dependency": "gems"}
@@ -2908,7 +2908,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "open_jdk"},
           {"dependency": "xcode"},
@@ -2934,7 +2934,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "open_jdk"},
           {"dependency": "xcode"},
@@ -2960,7 +2960,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "open_jdk"},
           {"dependency": "xcode"},
@@ -2986,7 +2986,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "open_jdk"},
           {"dependency": "xcode"},
@@ -3012,7 +3012,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "open_jdk"}
         ]
       shard: tool_tests
@@ -3028,7 +3028,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "open_jdk"}
         ]
       shard: tool_tests
@@ -3066,7 +3066,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "open_jdk"},
           {"dependency": "xcode"},
@@ -3653,7 +3653,7 @@ targets:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "open_jdk"}
         ]
@@ -3674,7 +3674,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "open_jdk"},
           {"dependency": "goldctl"},
@@ -3693,7 +3693,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "open_jdk"},
           {"dependency": "goldctl"},
@@ -3712,7 +3712,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "open_jdk"},
           {"dependency": "goldctl"},
@@ -3770,7 +3770,7 @@ targets:
           {"dependency": "goldctl"},
           {"dependency": "vs_build", "version": "version:vs2019"},
           {"dependency": "open_jdk"},
-          {"dependency": "android_sdk", "version": "version:29.0"}
+          {"dependency": "android_sdk", "version": "version:31v8"}
         ]
       shard: framework_tests
       subshard: misc
@@ -3826,7 +3826,7 @@ targets:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "open_jdk"}
         ]
@@ -3850,7 +3850,7 @@ targets:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "open_jdk"}
         ]
@@ -3870,7 +3870,7 @@ targets:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "open_jdk"}
         ]
@@ -3909,7 +3909,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "open_jdk"}
         ]
@@ -3933,7 +3933,7 @@ targets:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "open_jdk"}
         ]
@@ -3958,7 +3958,7 @@ targets:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "open_jdk"}
         ]
@@ -3982,7 +3982,7 @@ targets:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "open_jdk"}
         ]
@@ -4006,7 +4006,7 @@ targets:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "open_jdk"}
         ]
@@ -4027,7 +4027,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "open_jdk"},
           {"dependency": "goldctl"},
@@ -4052,7 +4052,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "open_jdk"},
           {"dependency": "goldctl"},
@@ -4077,7 +4077,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "open_jdk"},
           {"dependency": "goldctl"},
@@ -4102,7 +4102,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "open_jdk"},
           {"dependency": "goldctl"},
@@ -4127,7 +4127,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "open_jdk"},
           {"dependency": "goldctl"},
@@ -4152,7 +4152,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "open_jdk"},
           {"dependency": "goldctl"},
@@ -4177,7 +4177,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "open_jdk"}
         ]
       shard: tool_tests
@@ -4198,7 +4198,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "open_jdk"}
         ]
       shard: tool_tests
@@ -4218,7 +4218,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:29.0"},
+          {"dependency": "android_sdk", "version": "version:31v8"},
           {"dependency": "chrome_and_driver", "version": "version:84"},
           {"dependency": "open_jdk"},
           {"dependency": "goldctl"}
