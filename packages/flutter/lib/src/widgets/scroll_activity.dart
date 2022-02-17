@@ -86,22 +86,22 @@ abstract class ScrollActivity {
 
   /// Dispatch a [ScrollStartNotification] with the given metrics.
   void dispatchScrollStartNotification(ScrollMetrics metrics, BuildContext? context) {
-    ScrollStartNotification(metrics: metrics, context: context).dispatch(context);
+    context?.dispatchNotification(ScrollStartNotification(metrics: metrics, context: context));
   }
 
   /// Dispatch a [ScrollUpdateNotification] with the given metrics and scroll delta.
   void dispatchScrollUpdateNotification(ScrollMetrics metrics, BuildContext context, double scrollDelta) {
-    ScrollUpdateNotification(metrics: metrics, context: context, scrollDelta: scrollDelta).dispatch(context);
+    context.dispatchNotification(ScrollUpdateNotification(metrics: metrics, context: context, scrollDelta: scrollDelta));
   }
 
   /// Dispatch an [OverscrollNotification] with the given metrics and overscroll.
   void dispatchOverscrollNotification(ScrollMetrics metrics, BuildContext context, double overscroll) {
-    OverscrollNotification(metrics: metrics, context: context, overscroll: overscroll).dispatch(context);
+    context.dispatchNotification(OverscrollNotification(metrics: metrics, context: context, overscroll: overscroll));
   }
 
   /// Dispatch a [ScrollEndNotification] with the given metrics and overscroll.
   void dispatchScrollEndNotification(ScrollMetrics metrics, BuildContext context) {
-    ScrollEndNotification(metrics: metrics, context: context).dispatch(context);
+    context.dispatchNotification(ScrollEndNotification(metrics: metrics, context: context));
   }
 
   /// Called when the scroll view that is performing this activity changes its metrics.
@@ -455,32 +455,32 @@ class DragScrollActivity extends ScrollActivity {
   void dispatchScrollStartNotification(ScrollMetrics metrics, BuildContext? context) {
     final dynamic lastDetails = _controller!.lastDetails;
     assert(lastDetails is DragStartDetails);
-    ScrollStartNotification(metrics: metrics, context: context, dragDetails: lastDetails as DragStartDetails).dispatch(context);
+    context?.dispatchNotification(ScrollStartNotification(metrics: metrics, context: context, dragDetails: lastDetails as DragStartDetails));
   }
 
   @override
   void dispatchScrollUpdateNotification(ScrollMetrics metrics, BuildContext context, double scrollDelta) {
     final dynamic lastDetails = _controller!.lastDetails;
     assert(lastDetails is DragUpdateDetails);
-    ScrollUpdateNotification(metrics: metrics, context: context, scrollDelta: scrollDelta, dragDetails: lastDetails as DragUpdateDetails).dispatch(context);
+    context.dispatchNotification(ScrollUpdateNotification(metrics: metrics, context: context, scrollDelta: scrollDelta, dragDetails: lastDetails as DragUpdateDetails));
   }
 
   @override
   void dispatchOverscrollNotification(ScrollMetrics metrics, BuildContext context, double overscroll) {
     final dynamic lastDetails = _controller!.lastDetails;
     assert(lastDetails is DragUpdateDetails);
-    OverscrollNotification(metrics: metrics, context: context, overscroll: overscroll, dragDetails: lastDetails as DragUpdateDetails).dispatch(context);
+    context.dispatchNotification(OverscrollNotification(metrics: metrics, context: context, overscroll: overscroll, dragDetails: lastDetails as DragUpdateDetails));
   }
 
   @override
   void dispatchScrollEndNotification(ScrollMetrics metrics, BuildContext context) {
     // We might not have DragEndDetails yet if we're being called from beginActivity.
     final dynamic lastDetails = _controller!.lastDetails;
-    ScrollEndNotification(
+    context.dispatchNotification(ScrollEndNotification(
       metrics: metrics,
       context: context,
       dragDetails: lastDetails is DragEndDetails ? lastDetails : null,
-    ).dispatch(context);
+    ));
   }
 
   @override
@@ -572,7 +572,7 @@ class BallisticScrollActivity extends ScrollActivity {
 
   @override
   void dispatchOverscrollNotification(ScrollMetrics metrics, BuildContext context, double overscroll) {
-    OverscrollNotification(metrics: metrics, context: context, overscroll: overscroll, velocity: velocity).dispatch(context);
+    context.dispatchNotification(OverscrollNotification(metrics: metrics, context: context, overscroll: overscroll, velocity: velocity));
   }
 
   @override
@@ -655,7 +655,7 @@ class DrivenScrollActivity extends ScrollActivity {
 
   @override
   void dispatchOverscrollNotification(ScrollMetrics metrics, BuildContext context, double overscroll) {
-    OverscrollNotification(metrics: metrics, context: context, overscroll: overscroll, velocity: velocity).dispatch(context);
+    context.dispatchNotification(OverscrollNotification(metrics: metrics, context: context, overscroll: overscroll, velocity: velocity));
   }
 
   @override

@@ -50,12 +50,31 @@ abstract class Notification {
   /// const constructors so that they can be used in const expressions.
   const Notification();
 
+  /// Applied to each ancestor of the [dispatch] target.
+  ///
+  /// The [Notification] class implementation of this method dispatches the
+  /// given [Notification] to each ancestor [NotificationListener] widget.
+  ///
+  /// Subclasses can override this to apply additional filtering or to update
+  /// the notification as it is bubbled (for example, increasing a `depth` field
+  /// for each ancestor of a particular type).
+  @protected
+  @mustCallSuper
+  @Deprecated('')
+  bool visitAncestor(Element element) {
+    if (element is _NotificationElement<Notification> && element.onNotification(this)) {
+      return false;
+    }
+    return true;
+  }
+
   /// Start bubbling this notification at the given build context.
   ///
   /// The notification will be delivered to any [NotificationListener] widgets
   /// with the appropriate type parameters that are ancestors of the given
   /// [BuildContext]. If the [BuildContext] is null, the notification is not
   /// dispatched.
+  @Deprecated('')
   void dispatch(BuildContext? target) {
     target?.dispatchNotification(this);
   }
@@ -88,7 +107,7 @@ abstract class Notification {
 /// Notifications will trigger the [onNotification] callback only if their
 /// [runtimeType] is a subtype of `T`.
 ///
-/// To dispatch notifications, use the [Notification.dispatch] method.
+/// To dispatch notifications, use the [BuildContext.dispatchNotification] method.
 class NotificationListener<T extends Notification> extends ProxyWidget {
   /// Creates a widget that listens for notifications.
   const NotificationListener({
