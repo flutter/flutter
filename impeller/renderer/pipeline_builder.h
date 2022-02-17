@@ -8,6 +8,7 @@
 #include "flutter/fml/macros.h"
 #include "impeller/base/base.h"
 #include "impeller/renderer/context.h"
+#include "impeller/renderer/formats.h"
 #include "impeller/renderer/pipeline_descriptor.h"
 #include "impeller/renderer/shader_library.h"
 #include "impeller/renderer/vertex_descriptor.h"
@@ -107,7 +108,7 @@ struct PipelineBuilder {
     // Setup default stencil buffer descriptions.
     {
       StencilAttachmentDescriptor stencil0;
-      stencil0.stencil_compare = CompareFunction::kLessEqual;
+      stencil0.stencil_compare = CompareFunction::kEqual;
       desc.SetStencilAttachmentDescriptors(stencil0);
       desc.SetStencilPixelFormat(PixelFormat::kDefaultStencil);
     }
