@@ -273,7 +273,7 @@ class FlutterManifest {
   Map<String, Object?>? get supportedPlatforms {
     if (isPlugin) {
       final YamlMap? plugin = _flutterDescriptor['plugin'] as YamlMap?;
-      if (plugin?.containsKey('platforms') == true) {
+      if (plugin?.containsKey('platforms') ?? false) {
         final YamlMap? platformsMap = plugin!['platforms'] as YamlMap?;
         return platformsMap?.value.cast<String, Object?>();
       }

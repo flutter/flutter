@@ -95,7 +95,7 @@ class DevFSFileContent extends DevFSContent {
       if (fileStat.type == FileSystemEntityType.notFound) {
         _fileStat = null;
         _linkTarget = null;
-      } else if (devFSConfig?.cacheSymlinks == true) {
+      } else if (devFSConfig?.cacheSymlinks ?? false) {
         _linkTarget = linkTarget;
       }
     }

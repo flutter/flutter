@@ -63,7 +63,7 @@ class AndroidWorkflow implements Workflow {
   @override
   bool get canLaunchDevices => appliesToHostPlatform && _androidSdk != null
     && _androidSdk?.adbPath != null
-    && _androidSdk?.validateSdkWellFormed().isEmpty == true;
+    && (_androidSdk?.validateSdkWellFormed().isEmpty ?? false);
 
   @override
   bool get canListEmulators => canListDevices && _androidSdk?.emulatorPath != null;

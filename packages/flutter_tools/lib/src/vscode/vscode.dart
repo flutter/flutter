@@ -293,7 +293,7 @@ class VsCode {
     final String jsonString = fileSystem.file(packageJsonPath).readAsStringSync();
     try {
       final Map<String, dynamic>? jsonObject = castStringKeyedMap(json.decode(jsonString));
-      if (jsonObject?.containsKey('version') == true) {
+      if (jsonObject?.containsKey('version') ?? false) {
         return jsonObject!['version'] as String;
       }
     } on FormatException {

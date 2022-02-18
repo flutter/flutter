@@ -121,7 +121,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
   Future<void> validateCommand() async {
     final String? exportOptions = exportOptionsPlist;
     if (exportOptions != null) {
-      if (argResults?.wasParsed('export-method') == true) {
+      if (argResults?.wasParsed('export-method') ?? false) {
         throwToolExit(
           '"--export-options-plist" is not compatible with "--export-method". Either use "--export-options-plist" and '
           'a plist describing how the IPA should be exported by Xcode, or use "--export-method" to create a new plist.\n'

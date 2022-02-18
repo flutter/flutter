@@ -474,7 +474,7 @@ class LinuxPlugin extends PluginPlatform implements NativeOrDartPlugin {
     bool? ffiPlugin,
     this.defaultPackage,
   })  : ffiPlugin = ffiPlugin ?? false,
-        assert(pluginClass != null || dartPluginClass != null || ffiPlugin == true || defaultPackage != null);
+        assert(pluginClass != null || dartPluginClass != null || (ffiPlugin ?? false) || defaultPackage != null);
 
   factory LinuxPlugin.fromYaml(String name, YamlMap yaml) {
     assert(validate(yaml));

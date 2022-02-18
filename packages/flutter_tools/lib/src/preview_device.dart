@@ -164,7 +164,7 @@ class PreviewDevice extends Device {
 
   @override
   Future<bool> stopApp(covariant ApplicationPackage app, {String? userIdentifier}) async {
-    return _process?.kill() == true;
+    return _process?.kill() ?? false;
   }
 
   @override

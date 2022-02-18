@@ -39,7 +39,7 @@ class DartDevelopmentService {
   }) async {
     final Uri ddsUri = Uri(
       scheme: 'http',
-      host: (ipv6 == true ? io.InternetAddress.loopbackIPv6 : io.InternetAddress.loopbackIPv4).host,
+      host: ((ipv6 ?? false) ? io.InternetAddress.loopbackIPv6 : io.InternetAddress.loopbackIPv4).host,
       port: hostPort ?? 0,
     );
     logger.printTrace(
@@ -51,7 +51,7 @@ class DartDevelopmentService {
           observatoryUri,
           serviceUri: ddsUri,
           enableAuthCodes: disableServiceAuthCodes != true,
-          ipv6: ipv6 == true,
+          ipv6: ipv6 ?? false,
         );
       unawaited(_ddsInstance?.done.whenComplete(() {
         if (!_completer.isCompleted) {

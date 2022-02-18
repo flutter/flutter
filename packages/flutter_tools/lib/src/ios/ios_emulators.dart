@@ -14,7 +14,7 @@ class IOSEmulators extends EmulatorDiscovery {
   bool get supportsPlatform => globals.platform.isMacOS;
 
   @override
-  bool get canListAnything => globals.iosWorkflow?.canListEmulators == true;
+  bool get canListAnything => globals.iosWorkflow?.canListEmulators ?? false;
 
   @override
   Future<List<Emulator>> get emulators async => getEmulators();

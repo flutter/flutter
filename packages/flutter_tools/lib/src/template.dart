@@ -166,7 +166,7 @@ class Template {
       throwToolExit('Failed to flutter create at ${destination.path}.');
     }
     int fileCount = 0;
-    final bool implementationTests = (context['implementationTests'] as bool?) == true;
+    final bool implementationTests = (context['implementationTests'] as bool?) ?? false;
 
     /// Returns the resolved destination path corresponding to the specified
     /// raw destination path, after performing language filtering and template
@@ -184,38 +184,38 @@ class Template {
         relativeDestinationPath = relativeDestinationPath.replaceAll('$platform-$language.tmpl', platform);
       }
 
-      final bool android = (context['android'] as bool?) == true;
+      final bool android = (context['android'] as bool?) ?? false;
       if (relativeDestinationPath.contains('android') && !android) {
         return null;
       }
 
-      final bool ios = (context['ios'] as bool?) == true;
+      final bool ios = (context['ios'] as bool?) ?? false;
       if (relativeDestinationPath.contains('ios') && !ios) {
         return null;
       }
 
       // Only build a web project if explicitly asked.
-      final bool web = (context['web'] as bool?) == true;
+      final bool web = (context['web'] as bool?) ?? false;
       if (relativeDestinationPath.contains('web') && !web) {
         return null;
       }
       // Only build a Linux project if explicitly asked.
-      final bool linux = (context['linux'] as bool?) == true;
+      final bool linux = (context['linux'] as bool?) ?? false;
       if (relativeDestinationPath.startsWith('linux.tmpl') && !linux) {
         return null;
       }
       // Only build a macOS project if explicitly asked.
-      final bool macOS = (context['macos'] as bool?) == true;
+      final bool macOS = (context['macos'] as bool?) ?? false;
       if (relativeDestinationPath.startsWith('macos.tmpl') && !macOS) {
         return null;
       }
       // Only build a Windows project if explicitly asked.
-      final bool windows = (context['windows'] as bool?) == true;
+      final bool windows = (context['windows'] as bool?) ?? false;
       if (relativeDestinationPath.startsWith('windows.tmpl') && !windows) {
         return null;
       }
       // Only build a Windows UWP project if explicitly asked.
-      final bool windowsUwp = (context['winuwp'] as bool?) == true;
+      final bool windowsUwp = (context['winuwp'] as bool?) ?? false;
       if (relativeDestinationPath.startsWith('winuwp.tmpl') && !windowsUwp) {
         return null;
       }
