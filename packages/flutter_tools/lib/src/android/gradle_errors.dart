@@ -226,8 +226,8 @@ final GradleHandledError networkErrorHandler = GradleHandledError(
     required bool multidexEnabled,
   }) async {
     globals.printError(
-      '${globals.logger.terminal.warningMark} Gradle threw an error while downloading artifacts from the network. '
-      'Retrying to download...'
+      '${globals.logger.terminal.warningMark} '
+      'Gradle threw an error while downloading artifacts from the network.'
     );
     try {
       final String? homeDir = globals.platform.environment['HOME'];
