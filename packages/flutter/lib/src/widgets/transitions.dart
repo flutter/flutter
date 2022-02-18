@@ -1052,12 +1052,10 @@ class DefaultTextStyleTransition extends AnimatedWidget {
 /// ```
 /// {@end-tool}
 ///
-/// {@tool snippet}
-///
-/// In this example, `CounterPage` is a child of `CounterWidget` so it can
-/// use the context to retrieve the `Counter` instance. Whenever the button
-/// is pressed, only the [Text] inside the [AnimatedBuilder] is rebuilt while
-/// the `CounterPage` widget itself and its children aren't.
+/// In the following example, `CounterPage` is a child of `CounterWidget` so
+/// it can use the context to retrieve the `Counter` instance. Whenever the
+/// button is pressed, only the [Text] inside the [AnimatedBuilder] is
+/// rebuilt while the `CounterPage` widget itself and its children aren't.
 ///
 /// ```dart
 /// class CounterPage extends StatelessWidget {
@@ -1086,7 +1084,6 @@ class DefaultTextStyleTransition extends AnimatedWidget {
 ///   }
 /// }
 /// ```
-/// {@end-tool}
 /// {@endtemplate}
 ///
 /// See also:
