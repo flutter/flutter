@@ -63,10 +63,7 @@ class DisplayListDispatcher final : public flutter::Dispatcher {
   void setPathEffect(sk_sp<SkPathEffect> effect) override;
 
   // |flutter::Dispatcher|
-  void setMaskFilter(sk_sp<SkMaskFilter> filter) override;
-
-  // |flutter::Dispatcher|
-  void setMaskBlurFilter(SkBlurStyle style, SkScalar sigma) override;
+  void setMaskFilter(const flutter::DlMaskFilter* filter) override;
 
   // |flutter::Dispatcher|
   void setImageFilter(sk_sp<SkImageFilter> filter) override;
