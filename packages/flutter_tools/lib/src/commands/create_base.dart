@@ -13,12 +13,15 @@ import '../android/gradle_utils.dart' as gradle;
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/utils.dart';
+import '../build_info.dart';
+import '../build_system/build_system.dart';
 import '../cache.dart';
 import '../convert.dart';
+import '../dart/generate_synthetic_packages.dart';
 import '../dart/pub.dart';
 import '../features.dart';
 import '../flutter_project_metadata.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../project.dart';
 import '../runner/flutter_command.dart';
 import '../template.dart';
@@ -333,6 +336,9 @@ abstract class CreateBase extends FlutterCommand {
     String iosLanguage,
     String flutterRoot,
     String dartSdkVersionBounds,
+    String agpVersion,
+    String kotlinVersion,
+    String gradleVersion,
     bool withPluginHook = false,
     bool ios = false,
     bool android = false,
@@ -395,6 +401,9 @@ abstract class CreateBase extends FlutterCommand {
       'year': DateTime.now().year,
       'dartSdkVersionBounds': dartSdkVersionBounds,
       'implementationTests': implementationTests,
+      'agpVersion': agpVersion,
+      'kotlinVersion': kotlinVersion,
+      'gradleVersion': gradleVersion,
     };
   }
 
@@ -404,8 +413,12 @@ abstract class CreateBase extends FlutterCommand {
   /// If `overwrite` is true, overwrites existing files, `overwrite` defaults to `false`.
   @protected
   Future<int> renderTemplate(
-      String templateName, Directory directory, Map<String, Object> context,
-      {bool overwrite = false}) async {
+    String templateName,
+    Directory directory,
+    Map<String, Object> context, {
+    bool overwrite = false,
+    bool printStatusWhenWriting = true,
+  }) async {
     final Template template = await Template.fromName(
       templateName,
       fileSystem: globals.fs,
@@ -413,7 +426,12 @@ abstract class CreateBase extends FlutterCommand {
       templateRenderer: globals.templateRenderer,
       templateManifest: _templateManifest,
     );
-    return template.render(directory, context, overwriteExisting: overwrite);
+    return template.render(
+      directory,
+      context,
+      overwriteExisting: overwrite,
+      printStatusWhenWriting: printStatusWhenWriting,
+    );
   }
 
   /// Merges named templates into a single template, output to `directory`.
@@ -423,8 +441,12 @@ abstract class CreateBase extends FlutterCommand {
   /// If `overwrite` is true, overwrites existing files, `overwrite` defaults to `false`.
   @protected
   Future<int> renderMerged(
-      List<String> names, Directory directory, Map<String, Object> context,
-      {bool overwrite = false}) async {
+    List<String> names,
+    Directory directory,
+    Map<String, Object> context, {
+    bool overwrite = false,
+    bool printStatusWhenWriting = true,
+  }) async {
     final Template template = await Template.merged(
       names,
       directory,
@@ -433,7 +455,12 @@ abstract class CreateBase extends FlutterCommand {
       templateRenderer: globals.templateRenderer,
       templateManifest: _templateManifest,
     );
-    return template.render(directory, context, overwriteExisting: overwrite);
+    return template.render(
+      directory,
+      context,
+      overwriteExisting: overwrite,
+      printStatusWhenWriting: printStatusWhenWriting,
+    );
   }
 
   /// Generate application project in the `directory` using `templateContext`.
@@ -441,14 +468,20 @@ abstract class CreateBase extends FlutterCommand {
   /// If `overwrite` is true, overwrites existing files, `overwrite` defaults to `false`.
   @protected
   Future<int> generateApp(
-      String templateName, Directory directory, Map<String, Object> templateContext,
-      {bool overwrite = false, bool pluginExampleApp = false}) async {
+    String templateName,
+    Directory directory,
+    Map<String, Object> templateContext, {
+    bool overwrite = false,
+    bool pluginExampleApp = false,
+    bool printStatusWhenWriting = true,
+  }) async {
     int generatedCount = 0;
     generatedCount += await renderMerged(
       <String>[templateName, 'app_shared'],
       directory,
       templateContext,
       overwrite: overwrite,
+      printStatusWhenWriting: printStatusWhenWriting,
     );
     final FlutterProject project = FlutterProject.fromDirectory(directory);
     if (templateContext['android'] == true) {
@@ -456,6 +489,27 @@ abstract class CreateBase extends FlutterCommand {
     }
 
     if (boolArg('pub')) {
+      final Environment environment = Environment(
+        artifacts: globals.artifacts,
+        logger: globals.logger,
+        cacheDir: globals.cache.getRoot(),
+        engineVersion: globals.flutterVersion.engineRevision,
+        fileSystem: globals.fs,
+        flutterRootDir: globals.fs.directory(Cache.flutterRoot),
+        outputDir: globals.fs.directory(getBuildDirectory()),
+        processManager: globals.processManager,
+        platform: globals.platform,
+        projectDir: project.directory,
+        generateDartPluginRegistry: true,
+      );
+
+      // Generate the l10n synthetic package that will be injected into the
+      // package_config in the call to pub.get() below.
+      await generateLocalizationsSyntheticPackage(
+        environment: environment,
+        buildSystem: globals.buildSystem,
+      );
+
       await pub.get(
         context: PubContext.create,
         directory: directory.path,

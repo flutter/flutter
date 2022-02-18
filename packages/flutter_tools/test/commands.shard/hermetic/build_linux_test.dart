@@ -114,7 +114,7 @@ void main() {
     expect(createTestCommandRunner(command).run(
       const <String>['build', 'linux', '--no-pub']
     ), throwsToolExit(message: 'No Linux desktop project configured. See '
-      'https://flutter.dev/desktop#add-desktop-support-to-an-existing-flutter-app '
+      'https://docs.flutter.dev/desktop#add-desktop-support-to-an-existing-flutter-app '
       'to learn about adding Linux support to a project.'));
   }, overrides: <Type, Generator>{
     Platform: () => linuxPlatform,
@@ -227,6 +227,8 @@ void main() {
       const <String>['build', 'linux', '--debug', '--no-pub']
     );
     expect(testLogger.statusText, isNot(contains('STDOUT STUFF')));
+    expect(testLogger.warningText, isNot(contains('STDOUT STUFF')));
+    expect(testLogger.errorText, isNot(contains('STDOUT STUFF')));
     expect(testLogger.traceText, contains('STDOUT STUFF'));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -308,6 +310,8 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
     );
     expect(testLogger.statusText, contains('STDOUT STUFF'));
     expect(testLogger.traceText, isNot(contains('STDOUT STUFF')));
+    expect(testLogger.warningText, isNot(contains('STDOUT STUFF')));
+    expect(testLogger.errorText, isNot(contains('STDOUT STUFF')));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,

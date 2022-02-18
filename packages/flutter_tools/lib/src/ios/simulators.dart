@@ -20,7 +20,7 @@ import '../convert.dart';
 import '../devfs.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../macos/xcode.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
@@ -495,7 +495,7 @@ class IOSSimulator extends Device {
       // parsing the xcodeproj or configuration files.
       // See https://github.com/flutter/flutter/issues/31037 for more information.
       final String plistPath = globals.fs.path.join(package.simulatorBundlePath, 'Info.plist');
-      final String? bundleIdentifier = globals.plistParser.getValueFromFile(plistPath, PlistParser.kCFBundleIdentifierKey);
+      final String? bundleIdentifier = globals.plistParser.getStringValueFromFile(plistPath, PlistParser.kCFBundleIdentifierKey);
       if (bundleIdentifier == null) {
         globals.printError('Invalid prebuilt iOS app. Info.plist does not contain bundle identifier');
         return LaunchResult.failed();
@@ -545,6 +545,7 @@ class IOSSimulator extends Device {
       deviceID: id,
     );
     if (!buildResult.success) {
+      await diagnoseXcodeBuildFailure(buildResult, globals.flutterUsage, globals.logger);
       throwToolExit('Could not build the application for the simulator.');
     }
 

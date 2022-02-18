@@ -11,7 +11,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/version.dart';
 import 'package:test/fake.dart';
 
@@ -20,8 +20,8 @@ import '../src/context.dart';
 import '../src/fake_process_manager.dart';
 
 final SystemClock _testClock = SystemClock.fixed(DateTime(2015));
-final DateTime _stampUpToDate = _testClock.ago(checkAgeConsideredUpToDate ~/ 2);
-final DateTime _stampOutOfDate = _testClock.ago(checkAgeConsideredUpToDate * 2);
+final DateTime _stampUpToDate = _testClock.ago(VersionFreshnessValidator.checkAgeConsideredUpToDate ~/ 2);
+final DateTime _stampOutOfDate = _testClock.ago(VersionFreshnessValidator.checkAgeConsideredUpToDate * 2);
 
 void main() {
   FakeCache cache;
@@ -42,17 +42,17 @@ void main() {
 
   for (final String channel in kOfficialChannels) {
     DateTime getChannelUpToDateVersion() {
-      return _testClock.ago(versionAgeConsideredUpToDate(channel) ~/ 2);
+      return _testClock.ago(VersionFreshnessValidator.versionAgeConsideredUpToDate(channel) ~/ 2);
     }
 
     DateTime getChannelOutOfDateVersion() {
-      return _testClock.ago(versionAgeConsideredUpToDate(channel) * 2);
+      return _testClock.ago(VersionFreshnessValidator.versionAgeConsideredUpToDate(channel) * 2);
     }
 
     group('$FlutterVersion for $channel', () {
       setUpAll(() {
         Cache.disableLocking();
-        timeToPauseToLetUserReadTheMessage = Duration.zero;
+        VersionFreshnessValidator.timeToPauseToLetUserReadTheMessage = Duration.zero;
       });
 
       testUsingContext('prints nothing when Flutter installation looks fresh', () async {
@@ -126,7 +126,7 @@ void main() {
           'Flutter • channel $channel • unknown source\n'
           'Framework • revision 1234abcd (1 second ago) • ${getChannelUpToDateVersion()}\n'
           'Engine • revision abcdefg\n'
-          'Tools • Dart 2.12.0',
+          'Tools • Dart 2.12.0 • DevTools 2.8.0',
         );
         expect(flutterVersion.frameworkAge, '1 second ago');
         expect(flutterVersion.getVersionString(), '$channel/1234abcd');
@@ -151,14 +151,14 @@ void main() {
         );
         cache.versionStamp = json.encode(stamp);
 
-        await checkVersionFreshness(
-          flutterVersion,
+        await VersionFreshnessValidator(
+          version: flutterVersion,
           cache: cache,
           clock: _testClock,
           logger: logger,
           localFrameworkCommitDate: getChannelOutOfDateVersion(),
           latestFlutterCommitDate: getChannelOutOfDateVersion(),
-        );
+        ).run();
 
         _expectVersionMessage('', logger);
       });
@@ -172,14 +172,14 @@ void main() {
         );
         cache.versionStamp = json.encode(stamp);
 
-        await checkVersionFreshness(
-          flutterVersion,
+        await VersionFreshnessValidator(
+          version: flutterVersion,
           cache: cache,
           clock: _testClock,
           logger: logger,
           localFrameworkCommitDate: getChannelOutOfDateVersion(),
           latestFlutterCommitDate: getChannelUpToDateVersion(),
-        );
+        ).run();
 
         _expectVersionMessage(newVersionAvailableMessage(), logger);
         expect(cache.setVersionStamp, true);
@@ -195,14 +195,14 @@ void main() {
         );
         cache.versionStamp = json.encode(stamp);
 
-        await checkVersionFreshness(
-          flutterVersion,
+        await VersionFreshnessValidator(
+          version: flutterVersion,
           cache: cache,
           clock: _testClock,
           logger: logger,
           localFrameworkCommitDate: getChannelOutOfDateVersion(),
           latestFlutterCommitDate: getChannelUpToDateVersion(),
-        );
+        ).run();
 
         _expectVersionMessage('', logger);
       });
@@ -212,14 +212,14 @@ void main() {
         final BufferLogger logger = BufferLogger.test();
         cache.versionStamp = '{}';
 
-        await checkVersionFreshness(
-          flutterVersion,
+        await VersionFreshnessValidator(
+          version: flutterVersion,
           cache: cache,
           clock: _testClock,
           logger: logger,
           localFrameworkCommitDate: getChannelOutOfDateVersion(),
           latestFlutterCommitDate: getChannelUpToDateVersion(),
-        );
+        ).run();
 
         _expectVersionMessage(newVersionAvailableMessage(), logger);
         expect(cache.setVersionStamp, true);
@@ -234,14 +234,14 @@ void main() {
         );
         cache.versionStamp = json.encode(stamp);
 
-        await checkVersionFreshness(
-          flutterVersion,
+        await VersionFreshnessValidator(
+          version: flutterVersion,
           cache: cache,
           clock: _testClock,
           logger: logger,
           localFrameworkCommitDate: getChannelOutOfDateVersion(),
           latestFlutterCommitDate: getChannelUpToDateVersion(),
-        );
+        ).run();
 
         _expectVersionMessage(newVersionAvailableMessage(), logger);
       });
@@ -251,14 +251,14 @@ void main() {
         final BufferLogger logger = BufferLogger.test();
         cache.versionStamp = '{}';
 
-        await checkVersionFreshness(
-          flutterVersion,
+        await VersionFreshnessValidator(
+          version: flutterVersion,
           cache: cache,
           clock: _testClock,
           logger: logger,
           localFrameworkCommitDate: getChannelUpToDateVersion(),
-          latestFlutterCommitDate: null, // Failed to get remote version
-        );
+          // latestFlutterCommitDate defaults to null because we failed to get remote version
+        ).run();
 
         _expectVersionMessage('', logger);
       });
@@ -272,14 +272,14 @@ void main() {
         );
         cache.versionStamp = json.encode(stamp);
 
-        await checkVersionFreshness(
-          flutterVersion,
+        await VersionFreshnessValidator(
+          version: flutterVersion,
           cache: cache,
           clock: _testClock,
           logger: logger,
           localFrameworkCommitDate: getChannelOutOfDateVersion(),
-          latestFlutterCommitDate: null, // Failed to get remote version
-        );
+          // latestFlutterCommitDate defaults to null because we failed to get remote version
+        ).run();
 
         _expectVersionMessage(versionOutOfDateMessage(_testClock.now().difference(getChannelOutOfDateVersion())), logger);
       });
@@ -604,6 +604,9 @@ class FakeCache extends Fake implements Cache {
 
   @override
   String get engineRevision => 'abcdefg';
+
+  @override
+  String get devToolsVersion => '2.8.0';
 
   @override
   String get dartSdkVersion => '2.12.0';

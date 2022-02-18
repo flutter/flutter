@@ -1348,15 +1348,18 @@ class _TabBarViewState extends State<TabBarView> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _updateTabController();
-    _currentIndex = _controller?.index;
-    _pageController = PageController(initialPage: _currentIndex ?? 0);
+    _currentIndex = _controller!.index;
+    _pageController = PageController(initialPage: _currentIndex!);
   }
 
   @override
   void didUpdateWidget(TabBarView oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.controller != oldWidget.controller)
+    if (widget.controller != oldWidget.controller) {
       _updateTabController();
+      _currentIndex = _controller!.index;
+      _pageController.jumpToPage(_currentIndex!);
+    }
     if (widget.children != oldWidget.children && _warpUnderwayCount == 0)
       _updateChildren();
   }
@@ -1392,10 +1395,18 @@ class _TabBarViewState extends State<TabBarView> {
     if (_pageController.page == _currentIndex!.toDouble())
       return Future<void>.value();
 
+    final Duration duration = _controller!.animationDuration;
+
+    if (duration == Duration.zero) {
+      _pageController.jumpToPage(_currentIndex!);
+      return Future<void>.value();
+    }
+
     final int previousIndex = _controller!.previousIndex;
+
     if ((_currentIndex! - previousIndex).abs() == 1) {
       _warpUnderwayCount += 1;
-      await _pageController.animateToPage(_currentIndex!, duration: kTabScrollDuration, curve: Curves.ease);
+      await _pageController.animateToPage(_currentIndex!, duration: duration, curve: Curves.ease);
       _warpUnderwayCount -= 1;
       return Future<void>.value();
     }
@@ -1408,14 +1419,14 @@ class _TabBarViewState extends State<TabBarView> {
     setState(() {
       _warpUnderwayCount += 1;
 
-      _childrenWithKey = List<Widget>.from(_childrenWithKey, growable: false);
+      _childrenWithKey = List<Widget>.of(_childrenWithKey, growable: false);
       final Widget temp = _childrenWithKey[initialPage];
       _childrenWithKey[initialPage] = _childrenWithKey[previousIndex];
       _childrenWithKey[previousIndex] = temp;
     });
     _pageController.jumpToPage(initialPage);
 
-    await _pageController.animateToPage(_currentIndex!, duration: kTabScrollDuration, curve: Curves.ease);
+    await _pageController.animateToPage(_currentIndex!, duration: duration, curve: Curves.ease);
     if (!mounted)
       return Future<void>.value();
     setState(() {

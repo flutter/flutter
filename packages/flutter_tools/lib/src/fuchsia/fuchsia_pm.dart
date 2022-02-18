@@ -8,9 +8,7 @@ import '../base/io.dart';
 import '../base/net.dart';
 import '../base/process.dart';
 import '../convert.dart';
-import '../globals_null_migrated.dart' as globals;
-
-import 'fuchsia_sdk.dart';
+import '../globals.dart' as globals;
 
 /// This is a basic wrapper class for the Fuchsia SDK's `pm` tool.
 class FuchsiaPM {
@@ -199,7 +197,7 @@ class FuchsiaPackageServer {
       return false;
     }
     // initialize a new repo.
-    final FuchsiaPM? fuchsiaPM = fuchsiaSdk?.fuchsiaPM;
+    final FuchsiaPM? fuchsiaPM = globals.fuchsiaSdk?.fuchsiaPM;
     if (fuchsiaPM == null || !await fuchsiaPM.newrepo(_repo)) {
       globals.printError('Failed to create a new package server repo');
       return false;
@@ -232,7 +230,7 @@ class FuchsiaPackageServer {
     if (_process == null) {
       return false;
     }
-    return (await fuchsiaSdk?.fuchsiaPM.publish(_repo, package.path)) == true;
+    return (await globals.fuchsiaSdk?.fuchsiaPM.publish(_repo, package.path)) == true;
   }
 
   @override

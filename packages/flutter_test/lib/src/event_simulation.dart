@@ -688,8 +688,8 @@ class KeyEventSimulator {
             result.complete(false);
             return;
           }
-          final Map<String, dynamic> decoded = SystemChannels.keyEvent.codec.decodeMessage(data) as Map<String, dynamic>;
-          result.complete(decoded['handled'] as bool);
+          final Map<String, Object?> decoded = SystemChannels.keyEvent.codec.decodeMessage(data)! as Map<String, dynamic>;
+          result.complete(decoded['handled']! as bool);
         }
       );
       return result.future;

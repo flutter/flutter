@@ -58,6 +58,7 @@ abstract class FlutterTestDriver {
   VmService? _vmService;
   String get lastErrorInfo => _errorBuffer.toString();
   Stream<String> get stdout => _stdout.stream;
+  Stream<String> get stderr => _stderr.stream;
   int? get vmServicePort => _vmServiceWsUri?.port;
   bool get hasExited => _hasExited;
   Uri? get vmServiceWsUri => _vmServiceWsUri;
@@ -163,9 +164,9 @@ abstract class FlutterTestDriver {
 
     await waitForPause();
     if (pauseOnExceptions) {
-      await _vmService!.setExceptionPauseMode(
+      await _vmService!.setIsolatePauseMode(
         await _getFlutterIsolateId(),
-        ExceptionPauseMode.kUnhandled,
+        exceptionPauseMode: ExceptionPauseMode.kUnhandled,
       );
     }
   }
@@ -355,9 +356,9 @@ abstract class FlutterTestDriver {
     );
   }
 
-  Future<InstanceRef> evaluate(String targetId, String expression) async {
-    return _timeoutWithMessages<InstanceRef>(
-      () async => await _vmService!.evaluate(await _getFlutterIsolateId(), targetId, expression) as InstanceRef,
+  Future<ObjRef> evaluate(String targetId, String expression) async {
+    return _timeoutWithMessages<ObjRef>(
+      () async => await _vmService!.evaluate(await _getFlutterIsolateId(), targetId, expression) as ObjRef,
       task: 'Evaluating expression ($expression for $targetId)',
     );
   }

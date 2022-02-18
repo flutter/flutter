@@ -2775,6 +2775,54 @@ void main() {
     expect(Focus.of(tester.element(find.byKey(const ValueKey<int>(91)).last)).hasPrimaryFocus, isFalse);
   });
 
+  testWidgets('DropdownButton onTap callback can request focus', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode(debugLabel: 'DropdownButton')..addListener(() { });
+    int? value = 1;
+    final List<int> hugeMenuItems = List<int>.generate(100, (int index) => index);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return DropdownButton<int>(
+                  focusNode: focusNode,
+                  onChanged: (int? newValue) {
+                    setState(() {
+                      value = newValue;
+                    });
+                  },
+                  value: value,
+                  itemHeight: null,
+                  items: hugeMenuItems.map<DropdownMenuItem<int>>((int item) {
+                    return DropdownMenuItem<int>(
+                      key: ValueKey<int>(item),
+                      value: item,
+                      child: Text(item.toString()),
+                    );
+                  }).toList(),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump(); // Pump a frame for autofocus to take effect.
+    expect(focusNode.hasPrimaryFocus, isFalse);
+
+    await tester.tap(find.text('1'));
+    await tester.pumpAndSettle();
+
+    // Close the dropdown menu.
+    await tester.tapAt(const Offset(1.0, 1.0));
+    await tester.pumpAndSettle();
+
+    expect(focusNode.hasPrimaryFocus, isTrue);
+  });
+
   testWidgets('DropdownButton changes selected item with arrow keys', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'DropdownButton');
     String? value = 'one';

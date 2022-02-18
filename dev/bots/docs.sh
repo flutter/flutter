@@ -75,9 +75,6 @@ function create_docset() {
 }
 
 function deploy_docs() {
-    # Ensure google webmaster tools can verify our site.
-    cp "$FLUTTER_ROOT/dev/docs/google2ed1af765c529f57.html" "$FLUTTER_ROOT/dev/docs/doc"
-
     case "$LUCI_BRANCH" in
         master)
             echo "$(date): Updating $LUCI_BRANCH docs: https://master-api.flutter.dev/"

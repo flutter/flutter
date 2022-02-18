@@ -1511,7 +1511,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
     if (_listeners.isEmpty) {
       return;
     }
-    final List<ValueChanged<FocusHighlightMode>> localListeners = List<ValueChanged<FocusHighlightMode>>.from(_listeners);
+    final List<ValueChanged<FocusHighlightMode>> localListeners = List<ValueChanged<FocusHighlightMode>>.of(_listeners);
     for (final ValueChanged<FocusHighlightMode> listener in localListeners) {
       try {
         if (_listeners.contains(listener)) {
@@ -1520,13 +1520,13 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
       } catch (exception, stack) {
         InformationCollector? collector;
         assert(() {
-          collector = () sync* {
-            yield DiagnosticsProperty<FocusManager>(
+          collector = () => <DiagnosticsNode>[
+            DiagnosticsProperty<FocusManager>(
               'The $runtimeType sending notification was',
               this,
               style: DiagnosticsTreeStyle.errorProperty,
-            );
-          };
+            ),
+          ];
           return true;
         }());
         FlutterError.reportError(FlutterErrorDetails(

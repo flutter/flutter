@@ -78,13 +78,13 @@ class BottomNavigationBarThemeData with Diagnosticable {
   final IconThemeData? unselectedIconTheme;
 
   /// The color of the selected [BottomNavigationBarItem.icon] and
-  /// [BottomNavigationBarItem.title].
+  /// [BottomNavigationBarItem.label].
   ///
   /// See [BottomNavigationBar.selectedItemColor].
   final Color? selectedItemColor;
 
   /// The color of the unselected [BottomNavigationBarItem.icon] and
-  /// [BottomNavigationBarItem.title]s.
+  /// [BottomNavigationBarItem.label]s.
   ///
   /// See [BottomNavigationBar.unselectedItemColor].
   final Color? unselectedItemColor;

@@ -16,7 +16,7 @@ import '../base/net.dart';
 import '../base/task_queue.dart';
 import '../cache.dart';
 import '../dart/pub.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 
 /// Map from package name to package version, used to artificially pin a pub
@@ -36,10 +36,6 @@ const Map<String, String> kManuallyPinnedDependencies = <String, String>{
   // removed when a new major version of shelf is published.
   'shelf': '1.1.4',
   'video_player': '2.1.1', // Latest version does not resolve on our CI.
-  // "test" is pinned because 1.18.1 fails when running web tests with this error:
-  // FileSystemException: Cannot open file, path = '.../.pub-cache/hosted/pub.dartlang.org/test-1.18.1/lib/src/runner/browser/static/host.dart.js' (OS Error: No such file or directory, errno = 2)
-  // When removing this remove `pedantic` from dev/bots/allowlist.dart also.
-  'test': '1.17.12', // https://github.com/dart-lang/test/issues/1594
 };
 
 class UpdatePackagesCommand extends FlutterCommand {
@@ -194,7 +190,7 @@ class UpdatePackagesCommand extends FlutterCommand {
         if (pubspec.checksum.value == null) {
           // If the checksum is invalid or missing, we can just ask them run to run
           // upgrade again to compute it.
-          globals.printError(
+          globals.printWarning(
             'Warning: pubspec in ${directory.path} has out of date dependencies. '
             'Please run "flutter update-packages --force-upgrade" to update them correctly.'
           );
@@ -211,7 +207,7 @@ class UpdatePackagesCommand extends FlutterCommand {
         if (checksum != pubspec.checksum.value) {
           // If the checksum doesn't match, they may have added or removed some dependencies.
           // we need to run update-packages to recapture the transitive deps.
-          globals.printError(
+          globals.printWarning(
             'Warning: pubspec in ${directory.path} has updated or new dependencies. '
             'Please run "flutter update-packages --force-upgrade" to update them correctly '
             '(checksum ${pubspec.checksum.value} != $checksum).'
@@ -744,26 +740,22 @@ class PubspecYaml {
   }
 
   /// This returns all the explicit dependencies that this pubspec.yaml lists under dependencies.
-  Iterable<PubspecDependency> get dependencies sync* {
+  Iterable<PubspecDependency> get dependencies {
     // It works by iterating over the parsed data from _parse above, collecting
     // all the dependencies that were found, ignoring any that are flagged as as
     // overridden by subsequent entries in the same file and any that have the
     // magic comment flagging them as auto-generated transitive dependencies
     // that we added in a previous run.
-    for (final PubspecLine data in inputData) {
-      if (data is PubspecDependency && data.kind != DependencyKind.overridden && !data.isTransitive && !data.isDevDependency) {
-        yield data;
-      }
-    }
+    return inputData
+        .whereType<PubspecDependency>()
+        .where((PubspecDependency data) => data.kind != DependencyKind.overridden && !data.isTransitive && !data.isDevDependency);
   }
 
   /// This returns all regular dependencies and all dev dependencies.
-  Iterable<PubspecDependency> get allDependencies sync* {
-    for (final PubspecLine data in inputData) {
-      if (data is PubspecDependency && data.kind != DependencyKind.overridden && !data.isTransitive) {
-        yield data;
-      }
-    }
+  Iterable<PubspecDependency> get allDependencies {
+    return inputData
+        .whereType<PubspecDependency>()
+        .where((PubspecDependency data) => data.kind != DependencyKind.overridden && !data.isTransitive);
   }
 
   /// Take a dependency graph with explicit version numbers, and apply them to
@@ -1416,23 +1408,26 @@ class PubDependencyTree {
     String package, {
     @required Set<String> seen,
     @required Set<String> exclude,
-  }) sync* {
+    List<String>/*?*/ result,
+  }) {
     assert(seen != null);
     assert(exclude != null);
+    result ??= <String>[];
     if (!_dependencyTree.containsKey(package)) {
       // We have no transitive dependencies extracted for flutter_sdk packages
       // because they were omitted from pubspec.yaml used for 'pub upgrade' run.
-      return;
+      return result;
     }
     for (final String dependency in _dependencyTree[package]) {
       if (!seen.contains(dependency)) {
         if (!exclude.contains(dependency)) {
-          yield dependency;
+          result.add(dependency);
         }
         seen.add(dependency);
-        yield* getTransitiveDependenciesFor(dependency, seen: seen, exclude: exclude);
+        getTransitiveDependenciesFor(dependency, seen: seen, exclude: exclude, result: result);
       }
     }
+    return result;
   }
 
   /// The version that a particular package ended up with.
@@ -1505,7 +1500,7 @@ Directory createTemporaryFlutterSdk(
       ..createSync(recursive: true);
     final PubspecYaml pubspecYaml = pubspecsByName[flutterPackage];
     if (pubspecYaml == null) {
-      logger.printError(
+      logger.printWarning(
         "Unexpected package '$flutterPackage' found in packages directory",
       );
       continue;

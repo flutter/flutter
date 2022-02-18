@@ -45,8 +45,8 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/68182
 
     const double genericItemExtent = 600.0;
-    const double extraValueToNotHaveRoundingIssues = 0.0000001; // 6 zeros
-    const double extraValueToHaveRoundingIssues = 0.00000001; // 7 zeros
+    const double extraValueToNotHaveRoundingIssues = 1e-10;
+    const double extraValueToHaveRoundingIssues = 1e-11;
 
     test('should be 0 when item extent is 0', () {
       const double offsetValueWhichDoesntCare = 1234;
@@ -91,7 +91,7 @@ void main() {
       expect(actual, 5);
     });
 
-    test('should be 5 when offset is 6 times greater than a specific item extent where the division will return more than 13 zero decimals', () {
+    test('should be 5 when offset is 6 times greater than a specific item extent where the division will return more than 13 zero decimals', () {
       const double itemExtentSpecificForAProblematicScreenSize = 411.42857142857144;
       final int actual = testGetMaxChildIndexForScrollOffset(
         itemExtentSpecificForAProblematicScreenSize * 6 + extraValueToHaveRoundingIssues,
@@ -100,7 +100,7 @@ void main() {
       expect(actual, 5);
     });
 
-    test('should be 0 when offset is 0.00000001 times greater than item extent where the division will return more than 13 zero decimals', () {
+    test('should be 0 when offset is a bit greater than item extent', () {
       final int actual = testGetMaxChildIndexForScrollOffset(
         genericItemExtent + extraValueToHaveRoundingIssues,
         genericItemExtent,

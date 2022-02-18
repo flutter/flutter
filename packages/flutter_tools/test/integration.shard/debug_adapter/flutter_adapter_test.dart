@@ -187,6 +187,87 @@ void main() {
 
     await dap.client.terminate();
   });
+
+  testWithoutContext('can hot restart when exceptions occur on outgoing isolates', () async {
+    final BasicProjectThatThrows _project = BasicProjectThatThrows();
+    await _project.setUpIn(tempDir);
+
+    // Launch the app and wait for it to stop at an exception.
+    int originalThreadId, newThreadId;
+    await Future.wait(<Future<Object>>[
+      // Capture the thread ID of the stopped thread.
+      dap.client.stoppedEvents.first.then((StoppedEventBody event) => originalThreadId = event.threadId),
+      dap.client.start(
+        exceptionPauseMode: 'All', // Ensure we stop on all exceptions
+        launch: () => dap.client.launch(
+          cwd: _project.dir.path,
+          toolArgs: <String>['-d', 'flutter-tester'],
+        ),
+      ),
+    ], eagerError: true);
+
+    // Hot restart, ensuring it completes and capturing the ID of the new thread
+    // to pause.
+    await Future.wait(<Future<Object>>[
+      // Capture the thread ID of the newly stopped thread.
+      dap.client.stoppedEvents.first.then((StoppedEventBody event) => newThreadId = event.threadId),
+      dap.client.hotRestart(),
+    ], eagerError: true);
+
+    // We should not have stopped on the original thread, but the new thread
+    // from after the restart.
+    expect(newThreadId, isNot(equals(originalThreadId)));
+
+    await dap.client.terminate();
+  });
+
+  testWithoutContext('sends events for extension state updates', () async {
+    final BasicProject _project = BasicProject();
+    await _project.setUpIn(tempDir);
+    const String debugPaintRpc = 'ext.flutter.debugPaint';
+
+    // Create a future to capture the isolate ID when the debug paint service
+    // extension loads, as we'll need that to call it later.
+    final Future<String> isolateIdForDebugPaint = dap.client
+        .serviceExtensionAdded(debugPaintRpc)
+        .then((Map<String, Object/*?*/> body) => body['isolateId'] as String);
+
+    // Launch the app and wait for it to print "topLevelFunction" so we know
+    // it's up and running.
+    await Future.wait(<Future<Object>>[
+      dap.client.outputEvents.firstWhere((OutputEventBody output) =>
+          output.output.startsWith('topLevelFunction')),
+      dap.client.start(
+        launch: () => dap.client.launch(
+          cwd: _project.dir.path,
+          toolArgs: <String>['-d', 'flutter-tester'],
+        ),
+      ),
+    ], eagerError: true);
+
+    // Capture the next relevant state-change event (which should occur as a
+    // result of the call below).
+    final Future<Map<String, Object/*?*/>> stateChangeEventFuture =
+        dap.client.serviceExtensionStateChanged(debugPaintRpc);
+
+    // Enable debug paint to trigger the state change.
+    await dap.client.custom(
+      'callService',
+      <String, Object/*?*/>{
+        'method': debugPaintRpc,
+        'params': <String, Object/*?*/>{
+          'enabled': true,
+          'isolateId': await isolateIdForDebugPaint,
+        },
+      },
+    );
+
+    // Ensure the event occurred, and its value was as expected.
+    final Map<String, Object/*?*/> stateChangeEvent = await stateChangeEventFuture;
+    expect(stateChangeEvent['value'], 'true'); // extension state change values are always strings
+
+    await dap.client.terminate();
+  });
 }
 
 /// Extracts the output from a set of [OutputEventBody], removing any

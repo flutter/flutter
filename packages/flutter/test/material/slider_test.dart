@@ -1322,8 +1322,16 @@ void main() {
                       children: <TestSemantics>[
                         TestSemantics(
                           id: 4,
-                          flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled, SemanticsFlag.isFocusable, SemanticsFlag.isSlider],
-                          actions: <SemanticsAction>[SemanticsAction.increase, SemanticsAction.decrease],
+                          flags: <SemanticsFlag>[
+                            SemanticsFlag.hasEnabledState,
+                            SemanticsFlag.isEnabled,
+                            SemanticsFlag.isFocusable,
+                            SemanticsFlag.isSlider,
+                          ],
+                          actions: <SemanticsAction>[
+                            SemanticsAction.increase,
+                            SemanticsAction.decrease,
+                          ],
                           value: '50%',
                           increasedValue: '55%',
                           decreasedValue: '45%',
@@ -1439,7 +1447,7 @@ void main() {
     );
 
     semantics.dispose();
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android,  TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android,  TargetPlatform.fuchsia, TargetPlatform.linux }));
 
   testWidgets('Slider Semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -1551,6 +1559,175 @@ void main() {
     );
     semantics.dispose();
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+
+  testWidgets('Slider Semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(MaterialApp(
+      home: Directionality(
+        textDirection: TextDirection.ltr,
+        child: Material(
+          child: Slider(
+            value: 0.5,
+            onChanged: (double v) { },
+          ),
+        ),
+      ),
+    ));
+
+    await tester.pumpAndSettle();
+
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics(
+              id: 1,
+              textDirection: TextDirection.ltr,
+              children: <TestSemantics>[
+                TestSemantics(
+                  id: 2,
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      id: 3,
+                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                      children: <TestSemantics>[
+                        TestSemantics(
+                          id: 4,
+                          flags: <SemanticsFlag>[
+                            SemanticsFlag.hasEnabledState,
+                            SemanticsFlag.isEnabled,
+                            SemanticsFlag.isFocusable,
+                            SemanticsFlag.isSlider,
+                          ],
+                          actions: <SemanticsAction>[
+                            SemanticsAction.increase,
+                            SemanticsAction.decrease,
+                            SemanticsAction.didGainAccessibilityFocus,
+                          ],
+                          value: '50%',
+                          increasedValue: '55%',
+                          decreasedValue: '45%',
+                          textDirection: TextDirection.ltr,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+        ignoreRect: true,
+        ignoreTransform: true,
+      ),
+    );
+
+    // Disable slider
+    await tester.pumpWidget(const MaterialApp(
+      home: Directionality(
+        textDirection: TextDirection.ltr,
+        child: Material(
+          child: Slider(
+            value: 0.5,
+            onChanged: null,
+          ),
+        ),
+      ),
+    ));
+
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics(
+              id: 1,
+              textDirection: TextDirection.ltr,
+              children: <TestSemantics>[
+                TestSemantics(
+                  id: 2,
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      id: 3,
+                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                      children: <TestSemantics>[
+                        TestSemantics(
+                          id: 4,
+                          flags: <SemanticsFlag>[
+                            SemanticsFlag.hasEnabledState,
+                            // isFocusable is delayed by 1 frame.
+                            SemanticsFlag.isFocusable,
+                            SemanticsFlag.isSlider,
+                          ],
+                          actions: <SemanticsAction>[
+                            SemanticsAction.didGainAccessibilityFocus,
+                          ],
+                          value: '50%',
+                          increasedValue: '55%',
+                          decreasedValue: '45%',
+                          textDirection: TextDirection.ltr,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+        ignoreRect: true,
+        ignoreTransform: true,
+      ),
+    );
+
+    await tester.pump();
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics(
+              id: 1,
+              textDirection: TextDirection.ltr,
+              children: <TestSemantics>[
+                TestSemantics(
+                  id: 2,
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      id: 3,
+                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                      children: <TestSemantics>[
+                        TestSemantics(
+                          id: 4,
+                          flags: <SemanticsFlag>[
+                            SemanticsFlag.hasEnabledState,
+                            SemanticsFlag.isSlider,
+                          ],
+                          actions: <SemanticsAction>[
+                            SemanticsAction.didGainAccessibilityFocus,
+                          ],
+                          value: '50%',
+                          increasedValue: '55%',
+                          decreasedValue: '45%',
+                          textDirection: TextDirection.ltr,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+        ignoreRect: true,
+        ignoreTransform: true,
+      ),
+    );
+
+    semantics.dispose();
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.windows }));
 
   testWidgets('Slider semantics with custom formatter', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -1887,6 +2064,73 @@ void main() {
     expect(value, 0.5);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
+  testWidgets('Slider gains keyboard focus when it gains semantics focus on Windows', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
+    final FocusNode focusNode = FocusNode();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Slider(
+            value: 0.5,
+            onChanged: (double _) {},
+            focusNode: focusNode,
+          ),
+        ),
+      ),
+    );
+
+    expect(semantics, hasSemantics(
+      TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics(
+            id: 1,
+            textDirection: TextDirection.ltr,
+            children: <TestSemantics>[
+              TestSemantics(
+                id: 2,
+                children: <TestSemantics>[
+                  TestSemantics(
+                    id: 3,
+                    flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                    children: <TestSemantics>[
+                      TestSemantics(
+                        id: 4,
+                        flags: <SemanticsFlag>[
+                          SemanticsFlag.hasEnabledState,
+                          SemanticsFlag.isEnabled,
+                          SemanticsFlag.isFocusable,
+                          SemanticsFlag.isSlider,
+                        ],
+                        actions: <SemanticsAction>[
+                          SemanticsAction.increase,
+                          SemanticsAction.decrease,
+                          SemanticsAction.didGainAccessibilityFocus,
+                        ],
+                        value: '50%',
+                        increasedValue: '55%',
+                        decreasedValue: '45%',
+                        textDirection: TextDirection.ltr,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+      ignoreRect: true,
+      ignoreTransform: true,
+    ));
+
+    expect(focusNode.hasFocus, isFalse);
+    semanticsOwner.performAction(4, SemanticsAction.didGainAccessibilityFocus);
+    await tester.pumpAndSettle();
+    expect(focusNode.hasFocus, isTrue);
+    semantics.dispose();
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.windows }));
+
   testWidgets('Value indicator appears when it should', (WidgetTester tester) async {
     final ThemeData baseTheme = ThemeData(
       platform: TargetPlatform.android,
@@ -2138,11 +2382,11 @@ void main() {
       expect(find.byType(Slider), findsOneWidget);
       expect(find.byType(CupertinoSlider), findsOneWidget);
 
-      expect(value, 0.5, reason: 'on ${describeEnum(platform)}');
+      expect(value, 0.5, reason: 'on ${platform.name}');
       final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(CupertinoSlider)));
       // Drag to the right end of the track.
       await gesture.moveBy(const Offset(600.0, 0.0));
-      expect(value, 1.0, reason: 'on ${describeEnum(platform)}');
+      expect(value, 1.0, reason: 'on ${platform.name}');
       await gesture.up();
     }
 
@@ -2153,11 +2397,11 @@ void main() {
       expect(find.byType(Slider), findsOneWidget);
       expect(find.byType(CupertinoSlider), findsNothing);
 
-      expect(value, 0.5, reason: 'on ${describeEnum(platform)}');
+      expect(value, 0.5, reason: 'on ${platform.name}');
       final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Slider)));
       // Drag to the right end of the track.
       await gesture.moveBy(const Offset(600.0, 0.0));
-      expect(value, 1.0, reason: 'on ${describeEnum(platform)}');
+      expect(value, 1.0, reason: 'on ${platform.name}');
       await gesture.up();
     }
   });

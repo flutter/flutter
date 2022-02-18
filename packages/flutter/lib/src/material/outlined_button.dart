@@ -31,7 +31,7 @@ import 'theme_data.dart';
 /// widgets are displayed in the [style]'s
 /// [ButtonStyle.foregroundColor] and the outline's weight and color
 /// are defined by [ButtonStyle.side].  The button reacts to touches
-/// by filling with the [style]'s [ButtonStyle.backgroundColor].
+/// by filling with the [style]'s [ButtonStyle.overlayColor].
 ///
 /// The outlined button's default style is defined by [defaultStyleOf].
 /// The style of this outline button can be overridden with its [style]

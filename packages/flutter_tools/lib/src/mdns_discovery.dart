@@ -110,7 +110,7 @@ class MDnsObservatoryDiscovery {
         return null;
       }
       if (srv.length > 1) {
-        _logger.printError('Unexpectedly found more than one observatory report for $domainName '
+        _logger.printWarning('Unexpectedly found more than one observatory report for $domainName '
                    '- using first one (${srv.first.port}).');
       }
       _logger.printTrace('Checking for authentication code for $domainName');

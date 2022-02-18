@@ -49,8 +49,14 @@ class CupertinoContextMenuAction extends StatefulWidget {
 }
 
 class _CupertinoContextMenuActionState extends State<CupertinoContextMenuAction> {
-  static const Color _kBackgroundColor = Color(0xFFEEEEEE);
-  static const Color _kBackgroundColorPressed = Color(0xFFDDDDDD);
+  static const Color _kBackgroundColor = CupertinoDynamicColor.withBrightness(
+    color: Color(0xFFEEEEEE),
+    darkColor: Color(0xFF212122),
+  );
+  static const Color _kBackgroundColorPressed = CupertinoDynamicColor.withBrightness(
+    color: Color(0xFFDDDDDD),
+    darkColor: Color(0xFF3F3F40),
+  );
   static const double _kButtonHeight = 56.0;
   static const TextStyle _kActionSheetActionStyle = TextStyle(
     fontFamily: '.SF UI Text',
@@ -93,9 +99,10 @@ class _CupertinoContextMenuActionState extends State<CupertinoContextMenuAction>
         color: CupertinoColors.destructiveRed,
       );
     }
-    return _kActionSheetActionStyle;
+    return _kActionSheetActionStyle.copyWith(
+      color: CupertinoDynamicColor.resolve(CupertinoColors.label, context)
+    );
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -114,10 +121,9 @@ class _CupertinoContextMenuActionState extends State<CupertinoContextMenuAction>
           button: true,
           child: Container(
             decoration: BoxDecoration(
-              color: _isPressed ? _kBackgroundColorPressed : _kBackgroundColor,
-              border: const Border(
-                bottom: BorderSide(color: _kBackgroundColorPressed),
-              ),
+              color: _isPressed
+                ? CupertinoDynamicColor.resolve(_kBackgroundColorPressed, context)
+                : CupertinoDynamicColor.resolve(_kBackgroundColor, context),
             ),
             padding: const EdgeInsets.symmetric(
               vertical: 16.0,

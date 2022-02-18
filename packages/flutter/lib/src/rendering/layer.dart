@@ -67,9 +67,8 @@ class AnnotationResult<T> {
   /// tree.
   ///
   /// It is similar to [entries] but does not contain other information.
-  Iterable<T> get annotations sync* {
-    for (final AnnotationEntry<T> entry in _entries)
-      yield entry.annotation;
+  Iterable<T> get annotations {
+    return _entries.map((AnnotationEntry<T> entry) => entry.annotation);
   }
 }
 
@@ -1764,11 +1763,16 @@ class OpacityLayer extends OffsetLayer {
   @override
   void addToScene(ui.SceneBuilder builder) {
     assert(alpha != null);
-    bool enabled = firstChild != null;  // don't add this layer if there's no child
+
+    // Don't add this layer if there's no child.
+    bool enabled = firstChild != null;
     if (!enabled) {
+      // Ensure the engineLayer is disposed.
+      engineLayer = null;
       // TODO(dnfield): Remove this if/when we can fix https://github.com/flutter/flutter/issues/90004
       return;
     }
+
     assert(() {
       enabled = enabled && !debugDisableOpacityLayers;
       return true;
