@@ -68,7 +68,7 @@ void _standardFlutterDirectoryL10nSetup(FileSystem fs) {
 }
 
 void main() {
-  // TODO(MichaelDark): revert `late` modifer 
+  // TODO(MichaelDark): revert `late` modifer
   // once `text/src/context.dart` will be migrated to sound null-safety
   /* late */ MemoryFileSystem fs;
   /* late */ String defaultL10nPathString;
@@ -480,7 +480,7 @@ void main() {
   );
 
   testUsingContext(
-    'untranslated messages file included in generated JSON list of outputs', 
+    'untranslated messages file included in generated JSON list of outputs',
     () {
       _standardFlutterDirectoryL10nSetup(fs);
 
@@ -665,7 +665,7 @@ void main() {
   );
 
   testUsingContext(
-    'creates list of inputs and outputs when file path is specified', 
+    'creates list of inputs and outputs when file path is specified',
     () {
       _standardFlutterDirectoryL10nSetup(fs);
 
@@ -762,7 +762,7 @@ void main() {
 
   group('generateLocalizations', () {
     testUsingContext(
-      'forwards arguments correctly', 
+      'forwards arguments correctly',
       () async {
         _standardFlutterDirectoryL10nSetup(fs);
         final LocalizationOptions options = LocalizationOptions(
