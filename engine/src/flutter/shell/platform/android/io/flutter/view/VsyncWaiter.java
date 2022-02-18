@@ -49,7 +49,7 @@ public class VsyncWaiter {
   private FlutterJNI flutterJNI;
 
   @NonNull
-  public static VsyncWaiter getInstance(float fps, FlutterJNI flutterJNI) {
+  public static VsyncWaiter getInstance(float fps, @NonNull FlutterJNI flutterJNI) {
     if (instance == null) {
       instance = new VsyncWaiter(flutterJNI);
     }
@@ -60,7 +60,8 @@ public class VsyncWaiter {
 
   @TargetApi(17)
   @NonNull
-  public static VsyncWaiter getInstance(DisplayManager displayManager, FlutterJNI flutterJNI) {
+  public static VsyncWaiter getInstance(
+      @NonNull DisplayManager displayManager, @NonNull FlutterJNI flutterJNI) {
     if (instance == null) {
       instance = new VsyncWaiter(flutterJNI);
     }
@@ -103,7 +104,7 @@ public class VsyncWaiter {
         }
       };
 
-  private VsyncWaiter(FlutterJNI flutterJNI) {
+  private VsyncWaiter(@NonNull FlutterJNI flutterJNI) {
     this.flutterJNI = flutterJNI;
   }
 

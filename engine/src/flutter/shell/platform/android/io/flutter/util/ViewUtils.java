@@ -19,7 +19,8 @@ public final class ViewUtils {
    * <p>This method will recursively traverse up the context chain if it is a {@link ContextWrapper}
    * until it finds the first instance of the base context that is an {@link Activity}.
    */
-  public static Activity getActivity(Context context) {
+  @Nullable
+  public static Activity getActivity(@Nullable Context context) {
     if (context == null) {
       return null;
     }

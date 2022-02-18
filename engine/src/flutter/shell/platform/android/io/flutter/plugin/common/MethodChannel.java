@@ -44,7 +44,7 @@ public class MethodChannel {
    * @param messenger a {@link BinaryMessenger}.
    * @param name a channel name String.
    */
-  public MethodChannel(BinaryMessenger messenger, String name) {
+  public MethodChannel(@NonNull BinaryMessenger messenger, @NonNull String name) {
     this(messenger, name, StandardMethodCodec.INSTANCE);
   }
 
@@ -56,7 +56,8 @@ public class MethodChannel {
    * @param name a channel name String.
    * @param codec a {@link MessageCodec}.
    */
-  public MethodChannel(BinaryMessenger messenger, String name, MethodCodec codec) {
+  public MethodChannel(
+      @NonNull BinaryMessenger messenger, @NonNull String name, @NonNull MethodCodec codec) {
     this(messenger, name, codec, null);
   }
 
@@ -72,9 +73,9 @@ public class MethodChannel {
    *     BinaryMessenger#makeBackgroundTaskQueue()}.
    */
   public MethodChannel(
-      BinaryMessenger messenger,
-      String name,
-      MethodCodec codec,
+      @NonNull BinaryMessenger messenger,
+      @NonNull String name,
+      @NonNull MethodCodec codec,
       @Nullable BinaryMessenger.TaskQueue taskQueue) {
     if (BuildConfig.DEBUG) {
       if (messenger == null) {
@@ -114,7 +115,8 @@ public class MethodChannel {
    * @param callback a {@link Result} callback for the invocation result, or null.
    */
   @UiThread
-  public void invokeMethod(String method, @Nullable Object arguments, @Nullable Result callback) {
+  public void invokeMethod(
+      @NonNull String method, @Nullable Object arguments, @Nullable Result callback) {
     messenger.send(
         name,
         codec.encodeMethodCall(new MethodCall(method, arguments)),
@@ -212,7 +214,8 @@ public class MethodChannel {
      *     supported by the codec. For instance, if you are using {@link StandardMessageCodec}
      *     (default), please see its documentation on what types are supported.
      */
-    void error(String errorCode, @Nullable String errorMessage, @Nullable Object errorDetails);
+    void error(
+        @NonNull String errorCode, @Nullable String errorMessage, @Nullable Object errorDetails);
 
     /** Handles a call to an unimplemented method. */
     void notImplemented();

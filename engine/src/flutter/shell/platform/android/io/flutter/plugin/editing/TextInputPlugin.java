@@ -56,7 +56,7 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
 
   @SuppressLint("NewApi")
   public TextInputPlugin(
-      View view,
+      @NonNull View view,
       @NonNull TextInputChannel textInputChannel,
       @NonNull PlatformViewsController platformViewsController) {
     mView = view;
@@ -251,8 +251,9 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
     return textType;
   }
 
+  @Nullable
   public InputConnection createInputConnection(
-      View view, KeyboardManager keyboardManager, EditorInfo outAttrs) {
+      @NonNull View view, @NonNull KeyboardManager keyboardManager, @NonNull EditorInfo outAttrs) {
     if (inputTarget.type == InputTarget.Type.NO_TARGET) {
       lastInputConnection = null;
       return null;
@@ -325,7 +326,7 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
     }
   }
 
-  public void sendTextInputAppPrivateCommand(String action, Bundle data) {
+  public void sendTextInputAppPrivateCommand(@NonNull String action, @NonNull Bundle data) {
     mImm.sendAppPrivateCommand(mView, action, data);
   }
 
@@ -506,7 +507,7 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
   }
 
   // -------- Start: KeyboardManager Synchronous Responder -------
-  public boolean handleKeyEvent(KeyEvent keyEvent) {
+  public boolean handleKeyEvent(@NonNull KeyEvent keyEvent) {
     if (!getInputMethodManager().isAcceptingText() || lastInputConnection == null) {
       return false;
     }
@@ -664,7 +665,7 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
     }
   }
 
-  public void onProvideAutofillVirtualStructure(ViewStructure structure, int flags) {
+  public void onProvideAutofillVirtualStructure(@NonNull ViewStructure structure, int flags) {
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O || !needsAutofill()) {
       return;
     }
@@ -708,7 +709,7 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
     }
   }
 
-  public void autofill(SparseArray<AutofillValue> values) {
+  public void autofill(@NonNull SparseArray<AutofillValue> values) {
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
       return;
     }

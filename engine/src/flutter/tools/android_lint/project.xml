@@ -5,10 +5,6 @@
   <module name="FlutterEngine" android="true" library="true" compile-sdk-version="android-S">
   <manifest file="../../../flutter/shell/platform/android/AndroidManifest.xml" />
     <src file="../../../flutter/shell/platform/android/test/io/flutter/TestUtils.java" />
-    <src file="../../../flutter/shell/platform/android/test/io/flutter/SmokeTest.java" />
-    <src file="../../../flutter/shell/platform/android/test/io/flutter/util/PathUtilsTest.java" />
-    <src file="../../../flutter/shell/platform/android/test/io/flutter/util/ViewUtilsTest.java" />
-    <src file="../../../flutter/shell/platform/android/test/io/flutter/util/PreconditionsTest.java" />
     <src file="../../../flutter/shell/platform/android/test/io/flutter/util/FakeKeyEvent.java" />
     <src file="../../../flutter/shell/platform/android/test/io/flutter/plugins/GeneratedPluginRegistrant.java" />
     <src file="../../../flutter/shell/platform/android/test/io/flutter/embedding/android/FlutterActivityTest.java" />
