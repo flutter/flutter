@@ -115,8 +115,7 @@ class ComplexityCalculatorHelper
   void setImageFilter(sk_sp<SkImageFilter> filter) override {}
   void setColorFilter(const DlColorFilter* filter) override {}
   void setPathEffect(sk_sp<SkPathEffect> effect) override {}
-  void setMaskFilter(sk_sp<SkMaskFilter> filter) override {}
-  void setMaskBlurFilter(SkBlurStyle style, SkScalar sigma) override {}
+  void setMaskFilter(const DlMaskFilter* filter) override {}
 
   void save() override {}
   // We accumulate the cost of restoring a saveLayer() in saveLayer()

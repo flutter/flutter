@@ -6,6 +6,7 @@
 #define FLUTTER_DISPLAY_LIST_DISPLAY_LIST_BUILDER_H_
 
 #include "flutter/display_list/display_list.h"
+#include "flutter/display_list/display_list_comparable.h"
 #include "flutter/display_list/display_list_dispatcher.h"
 #include "flutter/display_list/display_list_flags.h"
 #include "flutter/display_list/types.h"
@@ -94,27 +95,18 @@ class DisplayListBuilder final : public virtual Dispatcher,
     }
   }
   void setColorFilter(const DlColorFilter* filter) override {
-    // onSetColorFilter will deal with whether the filter is new
-    onSetColorFilter(filter);
+    if (NotEquals(current_color_filter_, filter)) {
+      onSetColorFilter(filter);
+    }
   }
   void setPathEffect(sk_sp<SkPathEffect> effect) override {
     if (current_path_effect_ != effect) {
       onSetPathEffect(std::move(effect));
     }
   }
-  void setMaskFilter(sk_sp<SkMaskFilter> filter) override {
-    if (mask_sigma_valid(current_mask_sigma_) ||
-        current_mask_filter_ != filter) {
-      onSetMaskFilter(std::move(filter));
-    }
-  }
-  void setMaskBlurFilter(SkBlurStyle style, SkScalar sigma) override {
-    if (!mask_sigma_valid(sigma)) {
-      // SkMastFilter::MakeBlur(invalid sigma) returns a nullptr, so we
-      // reset the mask filter here rather than recording the invalid values.
-      setMaskFilter(nullptr);
-    } else if (current_mask_style_ != style || current_mask_sigma_ != sigma) {
-      onSetMaskBlurFilter(style, sigma);
+  void setMaskFilter(const DlMaskFilter* filter) override {
+    if (NotEquals(current_mask_filter_, filter)) {
+      onSetMaskFilter(filter);
     }
   }
 
@@ -127,8 +119,8 @@ class DisplayListBuilder final : public virtual Dispatcher,
   SkPaint::Cap getStrokeCap() const { return current_stroke_cap_; }
   SkPaint::Join getStrokeJoin() const { return current_stroke_join_; }
   sk_sp<SkShader> getShader() const { return current_shader_; }
-  sk_sp<SkColorFilter> getColorFilter() const {
-    return current_color_filter_->sk_filter();
+  std::shared_ptr<const DlColorFilter> getColorFilter() const {
+    return current_color_filter_;
   }
   bool isInvertColors() const { return current_invert_colors_; }
   std::optional<SkBlendMode> getBlendMode() const {
@@ -143,14 +135,9 @@ class DisplayListBuilder final : public virtual Dispatcher,
                             : SkBlender::Mode(current_blend_mode_);
   }
   sk_sp<SkPathEffect> getPathEffect() const { return current_path_effect_; }
-  sk_sp<SkMaskFilter> getMaskFilter() const {
-    return mask_sigma_valid(current_mask_sigma_)
-               ? SkMaskFilter::MakeBlur(current_mask_style_,
-                                        current_mask_sigma_)
-               : current_mask_filter_;
+  std::shared_ptr<const DlMaskFilter> getMaskFilter() const {
+    return current_mask_filter_;
   }
-  // No utility getter for the utility setter:
-  // void setMaskBlurFilter (SkBlurStyle style, SkScalar sigma)
   sk_sp<SkImageFilter> getImageFilter() const { return current_image_filter_; }
 
   void save() override;
@@ -393,7 +380,7 @@ class DisplayListBuilder final : public virtual Dispatcher,
   void onSetImageFilter(sk_sp<SkImageFilter> filter);
   void onSetColorFilter(const DlColorFilter* filter);
   void onSetPathEffect(sk_sp<SkPathEffect> effect);
-  void onSetMaskFilter(sk_sp<SkMaskFilter> filter);
+  void onSetMaskFilter(const DlMaskFilter* filter);
   void onSetMaskBlurFilter(SkBlurStyle style, SkScalar sigma);
 
   // These values should match the defaults of the Dart Paint object.
@@ -413,9 +400,7 @@ class DisplayListBuilder final : public virtual Dispatcher,
   std::shared_ptr<const DlColorFilter> current_color_filter_;
   sk_sp<SkImageFilter> current_image_filter_;
   sk_sp<SkPathEffect> current_path_effect_;
-  sk_sp<SkMaskFilter> current_mask_filter_;
-  SkBlurStyle current_mask_style_;
-  SkScalar current_mask_sigma_ = kInvalidSigma;
+  std::shared_ptr<const DlMaskFilter> current_mask_filter_;
 };
 
 }  // namespace flutter

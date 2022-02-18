@@ -136,15 +136,9 @@ void DisplayListBuilder::onSetImageFilter(sk_sp<SkImageFilter> filter) {
 }
 void DisplayListBuilder::onSetColorFilter(const DlColorFilter* filter) {
   if (filter == nullptr) {
-    if (!current_color_filter_) {
-      return;
-    }
     current_color_filter_ = nullptr;
     Push<ClearColorFilterOp>(0, 0);
   } else {
-    if (current_color_filter_ && *current_color_filter_ == *filter) {
-      return;
-    }
     current_color_filter_ = filter->shared();
     switch (filter->type()) {
       case DlColorFilter::kBlend: {
@@ -172,8 +166,7 @@ void DisplayListBuilder::onSetColorFilter(const DlColorFilter* filter) {
         break;
       }
       case DlColorFilter::kUnknown: {
-        const sk_sp<SkColorFilter> sk_filter = filter->sk_filter();
-        Push<SetSkColorFilterOp>(0, 0, sk_filter);
+        Push<SetSkColorFilterOp>(0, 0, filter->sk_filter());
         break;
       }
     }
@@ -185,32 +178,24 @@ void DisplayListBuilder::onSetPathEffect(sk_sp<SkPathEffect> effect) {
       ? Push<SetPathEffectOp>(0, 0, std::move(effect))
       : Push<ClearPathEffectOp>(0, 0);
 }
-void DisplayListBuilder::onSetMaskFilter(sk_sp<SkMaskFilter> filter) {
-  current_mask_sigma_ = kInvalidSigma;
-  (current_mask_filter_ = filter)  //
-      ? Push<SetMaskFilterOp>(0, 0, std::move(filter))
-      : Push<ClearMaskFilterOp>(0, 0);
-}
-void DisplayListBuilder::onSetMaskBlurFilter(SkBlurStyle style,
-                                             SkScalar sigma) {
-  // Valid sigma is checked by setMaskBlurFilter
-  FML_DCHECK(mask_sigma_valid(sigma));
-  current_mask_filter_ = nullptr;
-  current_mask_style_ = style;
-  current_mask_sigma_ = sigma;
-  switch (style) {
-    case kNormal_SkBlurStyle:
-      Push<SetMaskBlurFilterNormalOp>(0, 0, sigma);
-      break;
-    case kSolid_SkBlurStyle:
-      Push<SetMaskBlurFilterSolidOp>(0, 0, sigma);
-      break;
-    case kOuter_SkBlurStyle:
-      Push<SetMaskBlurFilterOuterOp>(0, 0, sigma);
-      break;
-    case kInner_SkBlurStyle:
-      Push<SetMaskBlurFilterInnerOp>(0, 0, sigma);
-      break;
+void DisplayListBuilder::onSetMaskFilter(const DlMaskFilter* filter) {
+  if (filter == nullptr) {
+    current_mask_filter_ = nullptr;
+    Push<ClearMaskFilterOp>(0, 0);
+  } else {
+    current_mask_filter_ = filter->shared();
+    switch (filter->type()) {
+      case DlMaskFilter::kBlur: {
+        const DlBlurMaskFilter* blur_filter = filter->asBlur();
+        FML_DCHECK(blur_filter);
+        void* pod = Push<SetMaskFilterOp>(blur_filter->size(), 0);
+        new (pod) DlBlurMaskFilter(blur_filter);
+        break;
+      }
+      case DlMaskFilter::kUnknown:
+        Push<SetSkMaskFilterOp>(0, 0, filter->sk_filter());
+        break;
+    }
   }
 }
 
@@ -252,11 +237,7 @@ void DisplayListBuilder::setAttributesFromPaint(
     // that is composed with the paint's color filter.
     setInvertColors(false);
     SkColorFilter* color_filter = paint.getColorFilter();
-    if (color_filter) {
-      setColorFilter(DlColorFilter::From(color_filter).get());
-    } else {
-      setColorFilter(nullptr);
-    }
+    setColorFilter(DlColorFilter::From(color_filter).get());
   }
   if (flags.applies_image_filter()) {
     setImageFilter(sk_ref_sp(paint.getImageFilter()));
@@ -265,7 +246,8 @@ void DisplayListBuilder::setAttributesFromPaint(
     setPathEffect(sk_ref_sp(paint.getPathEffect()));
   }
   if (flags.applies_mask_filter()) {
-    setMaskFilter(sk_ref_sp(paint.getMaskFilter()));
+    SkMaskFilter* mask_filter = paint.getMaskFilter();
+    setMaskFilter(DlMaskFilter::From(mask_filter).get());
   }
 }
 

@@ -58,8 +58,7 @@ class IgnoreAttributeDispatchHelper : public virtual Dispatcher {
   void setImageFilter(sk_sp<SkImageFilter> filter) override {}
   void setColorFilter(const DlColorFilter* filter) override {}
   void setPathEffect(sk_sp<SkPathEffect> effect) override {}
-  void setMaskFilter(sk_sp<SkMaskFilter> filter) override {}
-  void setMaskBlurFilter(SkBlurStyle style, SkScalar sigma) override {}
+  void setMaskFilter(const DlMaskFilter* filter) override {}
 };
 
 // A utility class that will ignore all Dispatcher methods relating
@@ -184,8 +183,7 @@ class SkPaintDispatchHelper : public virtual Dispatcher {
   void setBlendMode(SkBlendMode mode) override;
   void setBlender(sk_sp<SkBlender> blender) override;
   void setPathEffect(sk_sp<SkPathEffect> effect) override;
-  void setMaskFilter(sk_sp<SkMaskFilter> filter) override;
-  void setMaskBlurFilter(SkBlurStyle style, SkScalar sigma) override;
+  void setMaskFilter(const DlMaskFilter* filter) override;
   void setImageFilter(sk_sp<SkImageFilter> filter) override;
 
   const SkPaint& paint() { return paint_; }
@@ -402,8 +400,7 @@ class DisplayListBoundsCalculator final
   void setImageFilter(sk_sp<SkImageFilter> filter) override;
   void setColorFilter(const DlColorFilter* filter) override;
   void setPathEffect(sk_sp<SkPathEffect> effect) override;
-  void setMaskFilter(sk_sp<SkMaskFilter> filter) override;
-  void setMaskBlurFilter(SkBlurStyle style, SkScalar sigma) override;
+  void setMaskFilter(const DlMaskFilter* filter) override;
 
   void save() override;
   void saveLayer(const SkRect* bounds, const SaveLayerOptions options) override;
@@ -580,8 +577,7 @@ class DisplayListBoundsCalculator final
   bool cap_is_square_ = false;
   sk_sp<SkImageFilter> image_filter_;
   sk_sp<SkPathEffect> path_effect_;
-  sk_sp<SkMaskFilter> mask_filter_;
-  SkScalar mask_sigma_pad_ = 0.0;
+  std::shared_ptr<const DlMaskFilter> mask_filter_;
 
   bool paint_nops_on_transparency();
 
