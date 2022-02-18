@@ -1797,5 +1797,5 @@ void main() {
         affinity: TextAffinity.upstream,
       ));
     }, variant: macOSOnly);
-  });
+  }, skip: kIsWeb); // [intended]
 }
