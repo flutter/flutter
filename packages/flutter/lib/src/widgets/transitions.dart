@@ -1001,8 +1001,9 @@ class DefaultTextStyleTransition extends AnimatedWidget {
 /// depth and the structure.
 ///
 /// To avoid unnecessary work, the [AnimatedBuilder] class can be used along
-/// with a [ChangeNotifier] to only rebuild certain portions a widget,
-/// leaving other parts and the subtree untouched.
+/// with a [Listenable] to only rebuild certain portions a widget,
+/// leaving other parts and the subtree untouched. For example,
+/// [ChangeNotifier] and [ValueNotifier] are subtypes of [Listenable].
 ///
 /// Since a [ChangeNotifier] is a subtype of [Listenable], it can be used in
 /// an [AnimatedBuilder] to listen for changes. For example, to keep track
