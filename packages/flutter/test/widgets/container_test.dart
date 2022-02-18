@@ -633,11 +633,7 @@ void main() {
     expect(tapped, false);
   });
 
-<<<<<<< HEAD
-  testWidgets('Container discards alignment when the child parameter is null and constraints is not Tight', (WidgetTester tester) async {
-=======
   testWidgets('Container discards alignment when child, width and height parameters are null', (WidgetTester tester) async {
->>>>>>> a93da1f156 (add test)
     await tester.pumpWidget(
       Container(
         decoration: const BoxDecoration(
