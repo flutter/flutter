@@ -4,13 +4,15 @@
 
 #include "impeller/renderer/command.h"
 
+#include "impeller/base/validation.h"
 #include "impeller/renderer/formats.h"
 #include "impeller/renderer/vertex_descriptor.h"
 
 namespace impeller {
 
 bool Command::BindVertices(const VertexBuffer& buffer) {
-  if (index_type == IndexType::kUnknown) {
+  if (buffer.index_type == IndexType::kUnknown) {
+    VALIDATION_LOG << "Cannot bind vertex buffer with an unknown index type.";
     return false;
   }
 
