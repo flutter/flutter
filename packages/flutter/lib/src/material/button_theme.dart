@@ -172,6 +172,10 @@ class ButtonThemeData with Diagnosticable {
   /// The [textTheme], [minWidth], [height], [alignedDropdown], and
   /// [layoutBehavior] parameters must not be null. The [minWidth] and
   /// [height] parameters must greater than or equal to zero.
+  ///
+  /// The ButtonTheme's methods that have a [MaterialButton] parameter and
+  /// have a name with a `get` prefix are used to configure a
+  /// [RawMaterialButton].
   const ButtonThemeData({
     this.textTheme = ButtonTextTheme.normal,
     this.minWidth = 88.0,
@@ -249,6 +253,11 @@ class ButtonThemeData with Diagnosticable {
   ///
   /// Defaults to 24.0 on the left and right if [textTheme] is
   /// [ButtonTextTheme.primary], 16.0 on the left and right otherwise.
+  ///
+  /// See also:
+  ///
+  ///  * [getPadding], which is used to calculate padding for the [button]'s
+  ///    child (typically the button's label).
   EdgeInsetsGeometry get padding {
     if (_padding != null)
       return _padding!;
@@ -271,6 +280,11 @@ class ButtonThemeData with Diagnosticable {
   /// Defaults to a rounded rectangle with circular corner radii of 4.0 if
   /// [textTheme] is [ButtonTextTheme.primary], a rounded rectangle with
   /// circular corner radii of 2.0 otherwise.
+  ///
+  /// See also:
+  ///
+  ///  * [getShape], which is used to calculate the shape of the [button]'s
+  ///    [Material].
   ShapeBorder get shape {
     if (_shape != null)
       return _shape!;
@@ -328,6 +342,11 @@ class ButtonThemeData with Diagnosticable {
   ///
   /// If the button is in the hovering or highlighted state, then the [hoverColor]
   /// or [highlightColor] will take precedence over the [focusColor].
+  ///
+  /// See also:
+  ///
+  ///  * [getFocusColor], which is used to compute the fill color of the button
+  ///    when it has input focus.
   final Color? _focusColor;
 
   /// The fill color of the button when a pointer is hovering over it.
@@ -336,16 +355,31 @@ class ButtonThemeData with Diagnosticable {
   ///
   /// If the button is in the highlighted state, then the [highlightColor] will
   /// take precedence over the [hoverColor].
+  ///
+  /// See also:
+  ///
+  ///  * [getHoverColor], which is used to compute the fill color of the button
+  ///    when it has input focus.
   final Color? _hoverColor;
 
   /// The color of the overlay that appears when a button is pressed.
   ///
   /// This property is null by default.
+  ///
+  /// See also:
+  ///
+  ///  * [getHighlightColor], which is used to compute the color of the overlay
+  ///    that appears when the [button] is pressed.
   final Color? _highlightColor;
 
   /// The color of the ink "splash" overlay that appears when a button is tapped.
   ///
   /// This property is null by default.
+  ///
+  /// See also:
+  ///
+  ///  * [getSplashColor], which is used to compute the color of the ink
+  ///    "splash" overlay that appears when the (enabled) [button] is tapped.
   final Color? _splashColor;
 
   /// A set of thirteen colors that can be used to derive the button theme's
@@ -496,7 +530,7 @@ class ButtonThemeData with Diagnosticable {
   /// it is non-null.
   ///
   /// Otherwise, returns the value of the `splashColor` constructor parameter
-  /// if it is non-null and [getTextTheme] is not [ButtonTextTheme.primary]
+  /// if it is non-null and [getTextTheme] is not [ButtonTextTheme.primary].
   ///
   /// Otherwise, returns [getTextColor] with an opacity of 0.12.
   Color getSplashColor(MaterialButton button) {

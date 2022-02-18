@@ -1375,7 +1375,8 @@ class ThemeData with Diagnosticable {
   /// A theme for customizing the appearance and layout of [ButtonBar] widgets.
   final ButtonBarThemeData buttonBarTheme;
 
-  /// Defines the default configuration of button widgets.
+  /// Defines the default configuration of button widgets, like [DropdownButton]
+  /// and [ButtonBar].
   final ButtonThemeData buttonTheme;
 
   /// The colors and styles used to render [Card].

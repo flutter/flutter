@@ -257,7 +257,7 @@ void main() {
               child: TextButton(
                 onPressed: () {},
                 focusNode: focusNode,
-                child: const Text('FlatButton'),
+                child: const Text('TextButton'),
               ),
             ),
           ),
@@ -266,7 +266,7 @@ void main() {
     );
 
     Color textColor() {
-      return tester.renderObject<RenderParagraph>(find.text('FlatButton')).text.style!.color!;
+      return tester.renderObject<RenderParagraph>(find.text('TextButton')).text.style!.color!;
     }
 
     // Default, not disabled.
