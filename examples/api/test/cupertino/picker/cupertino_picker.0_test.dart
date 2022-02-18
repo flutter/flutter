@@ -14,11 +14,11 @@ void main() {
     );
 
     // Open the Cupertino picker.
-    await tester.tap(find.text('🍎 Apple'));
+    await tester.tap(find.text('Apple'));
     await tester.pumpAndSettle();
 
     // Drag the wheel to change fruit selection.
-    await tester.drag(find.text('🥭 Mango'), _kRowOffset, touchSlopY: 0, warnIfMissed: false); // see top of file
+    await tester.drag(find.text('Mango'), _kRowOffset, touchSlopY: 0, warnIfMissed: false); // see top of file
 
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
@@ -27,6 +27,6 @@ void main() {
     await tester.tapAt(const Offset(1.0, 1.0));
     await tester.pumpAndSettle();
 
-    expect(find.text('🍌 Banana'), findsOneWidget);
+    expect(find.text('Banana'), findsOneWidget);
   });
 }
