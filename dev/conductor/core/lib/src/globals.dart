@@ -197,10 +197,3 @@ String getNewPrLink({
       '&title=${Uri.encodeQueryComponent(title)}'
       '&body=${Uri.encodeQueryComponent(body.toString())}';
 }
-
-enum ReleaseType {
-  StableInitial, // z = 0
-  StableHotfix, // z += 1
-  BetaInitial, // parse x, y, and m from branch, n == 0
-  BetaHotfix, // n += 1
-}

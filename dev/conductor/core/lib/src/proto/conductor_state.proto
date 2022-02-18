@@ -45,6 +45,13 @@ enum CherrypickState {
   ABANDONED = 3;
 }
 
+enum ReleaseType {
+  STABLE_INITIAL = 0;
+  STABLE_HOTFIX = 1;
+  BETA_INITIAL = 2;
+  BETA_HOTFIX = 3;
+}
+
 message Cherrypick {
   // The revision on trunk to cherrypick.
   string trunkRevision = 1;
