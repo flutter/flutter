@@ -73,6 +73,10 @@ struct Command {
   CullMode cull_mode = CullMode::kNone;
   uint32_t stencil_reference = 0u;
   //----------------------------------------------------------------------------
+  /// The offset used when indexing into the vertex buffer.
+  ///
+  uint64_t base_vertex = 0u;
+  //----------------------------------------------------------------------------
   /// The viewport coordinates that the rasterizer linearly maps normalized
   /// device coordinates to.
   /// If unset, the viewport is the size of the render target with a zero
