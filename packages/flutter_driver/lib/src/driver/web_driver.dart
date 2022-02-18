@@ -151,7 +151,7 @@ class WebFlutterDriver extends FlutterDriver {
     final Object? responseData = response['response'];
     if (isError is! bool?) {
       throw _createMalformedExtensionResponseError(data);
-    } else if (isError == true) {
+    } else if (isError ?? false) {
       throw DriverError('Error in Flutter application: $responseData');
     }
 
