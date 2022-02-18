@@ -8,6 +8,7 @@ import 'base/common.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
+import 'base/platform.dart';
 import 'base/process.dart';
 import 'base/time.dart';
 import 'cache.dart';
@@ -242,7 +243,7 @@ class FlutterVersion {
     DateTime localFrameworkCommitDate;
     try {
       // Don't perform the update check if the tracking remote is not standard.
-      VersionUpstreamValidator(version: this).run();
+      VersionUpstreamValidator(version: this, platform: globals.platform).run();
       // Don't perform the update check if fetching the latest local commit
       // failed.
       localFrameworkCommitDate = DateTime.parse(_latestGitCommitDate());
@@ -423,9 +424,11 @@ class FlutterVersion {
 class VersionUpstreamValidator {
   VersionUpstreamValidator({
     required this.version,
+    required this.platform,
   });
 
   final FlutterVersion version;
+  final Platform platform;
 
   /// Performs the validation against the tracking remote of the [version].
   ///
@@ -444,12 +447,12 @@ class VersionUpstreamValidator {
     final String flutterGitUrl = stripDotGit(globals.flutterGit);
 
     // Exempt the official flutter git SSH remote from this check
-    if (trackingUrl == 'git@github.com:flutter/flutter') {
+    if (trackingUrl == stripDotGit(globals.flutterGitSshUrl)) {
       return;
     }
 
     if (trackingUrl != flutterGitUrl) {
-      if (globals.platform.environment.containsKey('FLUTTER_GIT_URL')) {
+      if (platform.environment.containsKey('FLUTTER_GIT_URL')) {
         // If `FLUTTER_GIT_URL` is set, inform to either remove the
         // `FLUTTER_GIT_URL` environment variable or set it to the current
         // tracking remote.
@@ -476,9 +479,9 @@ class VersionUpstreamValidator {
   // Strips ".git" suffix from a given string, preferably an url.
   // For example, changes 'https://github.com/flutter/flutter.git' to 'https://github.com/flutter/flutter'.
   // URLs without ".git" suffix will remain unaffected.
+  static final RegExp _patternUrldotGit = RegExp(r'(.*)(\.git)$');
   static String stripDotGit(String url) {
-    final RegExp pattern = RegExp(r'(.*)(\.git)$');
-    final RegExpMatch? match = pattern.firstMatch(url);
+    final RegExpMatch? match = _patternUrldotGit.firstMatch(url);
     if (match == null) {
       return url;
     }
