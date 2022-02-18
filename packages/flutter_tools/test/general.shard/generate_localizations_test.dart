@@ -74,6 +74,7 @@ void main() {
   /* late */ String defaultL10nPathString;
   /* late */ String syntheticPackagePath;
   /* late */ String syntheticL10nPackagePath;
+  /* late */ ProcessManager processManager;
 
   setUp(() {
     fs = MemoryFileSystem.test();
@@ -81,6 +82,16 @@ void main() {
     defaultL10nPathString = fs.path.join('lib', 'l10n');
     syntheticPackagePath = fs.path.join('.dart_tool', 'flutter_gen');
     syntheticL10nPackagePath = fs.path.join(syntheticPackagePath, 'gen_l10n');
+    processManager = FakeProcessManager.list(
+      <FakeCommand>[
+        const FakeCommand(
+          command: <String>[
+            'dart',
+            'format'
+          ],
+        ),
+      ],
+    );
     precacheLanguageAndRegionTags();
   });
 
@@ -508,7 +519,7 @@ void main() {
       expect(outputList, contains(contains('unimplemented_message_translations.json')));
     },
     overrides: <Type, Generator>{
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => processManager,
     }
   );
 
@@ -698,7 +709,7 @@ void main() {
       expect(outputList, contains(fs.path.absolute(syntheticL10nPackagePath, 'output-localization-file_es.dart')));
     },
     overrides: <Type, Generator>{
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => processManager,
     },
   );
 
@@ -821,7 +832,7 @@ class FooEn extends Foo {
 ''');
       },
       overrides: <Type, Generator>{
-        ProcessManager: () => FakeProcessManager.any(),
+        ProcessManager: () => processManager,
       },
     );
 
