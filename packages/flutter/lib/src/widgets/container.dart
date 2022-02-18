@@ -390,7 +390,7 @@ class Container extends StatelessWidget {
         child: ConstrainedBox(constraints: const BoxConstraints.expand()),
       );
     } else if (alignment != null) {
-      current = Align(alignment: alignment, child: current);
+      current = Align(alignment: alignment!, child: current);
     }
 
     final EdgeInsetsGeometry? effectivePadding = _paddingIncludingDecoration;
