@@ -82,7 +82,7 @@ platform_properties:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "chrome_and_driver", "version": "latest-96"},
           {"dependency": "open_jdk"}
         ]
       os: Mac-12.0
@@ -2437,7 +2437,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "chrome_and_driver", "version": "latest-96"},
           {"dependency": "open_jdk"},
           {"dependency": "xcode"},
           {"dependency": "gems"},
@@ -2457,7 +2457,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "chrome_and_driver", "version": "latest-96"},
           {"dependency": "open_jdk"},
           {"dependency": "xcode"},
           {"dependency": "gems"},
@@ -2477,7 +2477,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "chrome_and_driver", "version": "latest-96"},
           {"dependency": "open_jdk"},
           {"dependency": "xcode"},
           {"dependency": "gems"},
@@ -2497,7 +2497,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "chrome_and_driver", "version": "latest-96"},
           {"dependency": "open_jdk"},
           {"dependency": "xcode"},
           {"dependency": "gems"},
@@ -2909,7 +2909,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "chrome_and_driver", "version": "latest-96"},
           {"dependency": "open_jdk"},
           {"dependency": "xcode"},
           {"dependency": "gems"},
@@ -2935,7 +2935,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "chrome_and_driver", "version": "latest-96"},
           {"dependency": "open_jdk"},
           {"dependency": "xcode"},
           {"dependency": "gems"},
@@ -2961,7 +2961,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "chrome_and_driver", "version": "latest-96"},
           {"dependency": "open_jdk"},
           {"dependency": "xcode"},
           {"dependency": "gems"},
@@ -2987,7 +2987,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "chrome_and_driver", "version": "latest-96"},
           {"dependency": "open_jdk"},
           {"dependency": "xcode"},
           {"dependency": "gems"},
@@ -3067,7 +3067,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:31v8"},
-          {"dependency": "chrome_and_driver", "version": "version:84"},
+          {"dependency": "chrome_and_driver", "version": "latest-96"},
           {"dependency": "open_jdk"},
           {"dependency": "xcode"},
           {"dependency": "goldctl"}
