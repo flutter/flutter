@@ -120,15 +120,18 @@ void DisplayListDispatcher::setPathEffect(sk_sp<SkPathEffect> effect) {
 }
 
 // |flutter::Dispatcher|
-void DisplayListDispatcher::setMaskFilter(sk_sp<SkMaskFilter> filter) {
+void DisplayListDispatcher::setMaskFilter(const flutter::DlMaskFilter* filter) {
   // Needs https://github.com/flutter/flutter/issues/95434
-  UNIMPLEMENTED;
-}
-
-// |flutter::Dispatcher|
-void DisplayListDispatcher::setMaskBlurFilter(SkBlurStyle style,
-                                              SkScalar sigma) {
-  UNIMPLEMENTED;
+  if (filter == nullptr) {
+    // Reset everything
+    return;
+  }
+  switch (filter->type()) {
+    case flutter::DlMaskFilter::kBlur:
+    case flutter::DlMaskFilter::kUnknown:
+      UNIMPLEMENTED;
+      break;
+  }
 }
 
 // |flutter::Dispatcher|
