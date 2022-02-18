@@ -78,7 +78,12 @@ def DoJavac(
       # javac pulling a default encoding from the user's environment.
       '-encoding', 'UTF-8',
       '-classpath', ':'.join(classpath),
-      '-d', classes_dir]
+      '-d', classes_dir,
+      # TODO(camsim99): Make deprecation warnings fatal and remove limit 
+      # when all 123 (at the time of this comment) deprecations are fixed:
+      # https://github.com/flutter/flutter/issues/98602.
+      '-Xlint:deprecation',
+      '-Xmaxwarns', '123']
 
   if bootclasspath:
     javac_args.extend([
@@ -88,7 +93,6 @@ def DoJavac(
         ])
 
   if chromium_code:
-    # TODO(aurimas): re-enable '-Xlint:deprecation' checks once they are fixed.
     javac_args.extend(['-Xlint:unchecked'])
   else:
     # XDignore.symbol.file makes javac compile against rt.jar instead of
