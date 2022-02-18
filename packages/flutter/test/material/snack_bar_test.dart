@@ -2561,7 +2561,7 @@ void main() {
     );
   });
 
-  testWidgets('Setting clipBehavior clips the Snackbar with ClipRect', (WidgetTester tester) async {
+  testWidgets('Snackbar by default clips BackdropFilter', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/98205
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
@@ -2574,7 +2574,6 @@ void main() {
       find.byType(ScaffoldMessenger),
     );
     scaffoldMessengerState.showSnackBar(SnackBar(
-      clipBehavior: Clip.hardEdge,
       backgroundColor: Colors.transparent,
       content: BackdropFilter(
         filter: ImageFilter.blur(

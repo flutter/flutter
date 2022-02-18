@@ -204,7 +204,7 @@ class SnackBar extends StatefulWidget {
     this.animation,
     this.onVisible,
     this.dismissDirection = DismissDirection.down,
-    this.clipBehavior = Clip.none,
+    this.clipBehavior = Clip.hardEdge,
   }) : assert(elevation == null || elevation >= 0.0),
        assert(content != null),
        assert(
@@ -340,7 +340,7 @@ class SnackBar extends StatefulWidget {
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
-  /// Defaults to [Clip.none], and must not be null.
+  /// Defaults to [Clip.hardEdge], and must not be null.
   final Clip clipBehavior;
 
   // API for ScaffoldMessengerState.showSnackBar():
