@@ -217,11 +217,11 @@ Future<void> _buildValueIndicatorStaticSlider(
                   data: Theme.of(context).sliderTheme.copyWith(
                     showValueIndicator: ShowValueIndicator.always,
                   ),
-                  child: SizedBox.expand(child: Slider(
+                  child: Slider(
                     value: value,
                     label: value.toStringAsFixed(decimalCount),
                     onChanged: (double newValue) {},
-                  ),),
+                  ),
                 ),
               ),
             );
