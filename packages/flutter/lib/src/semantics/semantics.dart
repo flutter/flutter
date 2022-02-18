@@ -601,7 +601,7 @@ class SemanticsData with Diagnosticable {
     properties.add(AttributedStringProperty('decreasedValue', attributedDecreasedValue));
     properties.add(AttributedStringProperty('hint', attributedHint));
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
-    if (textSelection?.isValid == true)
+    if (textSelection?.isValid ?? false)
       properties.add(MessageProperty('textSelection', '[${textSelection!.start}, ${textSelection!.end}]'));
     properties.add(IntProperty('platformViewId', platformViewId, defaultValue: null));
     properties.add(IntProperty('maxValueLength', maxValueLength, defaultValue: null));
@@ -2456,7 +2456,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       }
     }
     Int32List? customSemanticsActionIds;
-    if (data.customSemanticsActionIds?.isNotEmpty == true) {
+    if (data.customSemanticsActionIds?.isNotEmpty ?? false) {
       customSemanticsActionIds = Int32List(data.customSemanticsActionIds!.length);
       for (int i = 0; i < data.customSemanticsActionIds!.length; i++) {
         customSemanticsActionIds[i] = data.customSemanticsActionIds![i];
@@ -2618,7 +2618,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     properties.add(AttributedStringProperty('hint', _attributedHint));
     properties.add(EnumProperty<TextDirection>('textDirection', _textDirection, defaultValue: null));
     properties.add(DiagnosticsProperty<SemanticsSortKey>('sortKey', sortKey, defaultValue: null));
-    if (_textSelection?.isValid == true)
+    if (_textSelection?.isValid ?? false)
       properties.add(MessageProperty('text selection', '[${_textSelection!.start}, ${_textSelection!.end}]'));
     properties.add(IntProperty('platformViewId', platformViewId, defaultValue: null));
     properties.add(IntProperty('maxValueLength', maxValueLength, defaultValue: null));

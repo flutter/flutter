@@ -367,7 +367,7 @@ class TestSemantics {
       buf.writeln("$indent  hint: '$hint',");
     if (textDirection != null)
       buf.writeln('$indent  textDirection: $textDirection,');
-    if (textSelection?.isValid == true)
+    if (textSelection?.isValid ?? false)
       buf.writeln('$indent  textSelection:\n[${textSelection!.start}, ${textSelection!.end}],');
     if (scrollIndex != null)
       buf.writeln('$indent scrollIndex: $scrollIndex,');

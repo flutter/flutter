@@ -2473,7 +2473,7 @@ class InspectorSelection {
 
   Element? _currentElement;
   set currentElement(Element? element) {
-    if (element?.debugIsDefunct == true) {
+    if (element?.debugIsDefunct ?? false) {
       _currentElement = null;
       _current = null;
       return;

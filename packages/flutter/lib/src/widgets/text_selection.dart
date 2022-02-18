@@ -1056,7 +1056,7 @@ class _SelectionToolbarOverlayState extends State<_SelectionToolbarOverlay> with
   }
 
   void _toolbarVisibilityChanged() {
-    if (widget.visibility?.value != false) {
+    if (widget.visibility?.value ?? true) {
       _controller.forward();
     } else {
       _controller.reverse();
@@ -1139,7 +1139,7 @@ class _SelectionHandleOverlayState extends State<_SelectionHandleOverlay> with S
   }
 
   void _handleVisibilityChanged() {
-    if (widget.visibility?.value != false) {
+    if (widget.visibility?.value ?? true) {
       _controller.forward();
     } else {
       _controller.reverse();

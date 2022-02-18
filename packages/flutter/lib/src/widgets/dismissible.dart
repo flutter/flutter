@@ -322,7 +322,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
   bool _dismissThresholdReached = false;
 
   @override
-  bool get wantKeepAlive => _moveController?.isAnimating == true || _resizeController?.isAnimating == true;
+  bool get wantKeepAlive => (_moveController?.isAnimating ?? false) || (_resizeController?.isAnimating ?? false);
 
   @override
   void dispose() {

@@ -673,8 +673,8 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
   void _onSelectedItemChange(int index) {
     final DateTime selected = selectedDateTime;
 
-    final bool isDateInvalid = widget.minimumDate?.isAfter(selected) == true
-                            || widget.maximumDate?.isBefore(selected) == true;
+    final bool isDateInvalid = (widget.minimumDate?.isAfter(selected) ?? false)
+        || (widget.maximumDate?.isBefore(selected) ?? false);
 
     if (isDateInvalid)
       return;

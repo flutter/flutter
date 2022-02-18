@@ -902,7 +902,7 @@ class RawScrollbar extends StatefulWidget {
          'isAlwaysShown is deprecated.'
        ),
        assert(
-         !((thumbVisibility == false || isAlwaysShown == false) && trackVisibility == true),
+         !((thumbVisibility == false || isAlwaysShown == false) && (trackVisibility ?? false)),
          'A scrollbar track cannot be drawn without a scrollbar thumb.'
        ),
        assert(minThumbLength != null),
@@ -1533,7 +1533,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     super.didUpdateWidget(oldWidget);
     if (widget.isAlwaysShown != oldWidget.isAlwaysShown
         || widget.thumbVisibility != oldWidget.thumbVisibility) {
-      if (widget.isAlwaysShown == true || widget.thumbVisibility == true) {
+      if ((widget.isAlwaysShown ?? false) || (widget.thumbVisibility ?? false)) {
         assert(_debugScheduleCheckHasValidScrollPosition());
         _fadeoutTimer?.cancel();
         _fadeoutAnimationController.animateTo(1.0);

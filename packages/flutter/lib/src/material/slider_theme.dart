@@ -2458,7 +2458,7 @@ class RoundRangeSliderThumbShape extends RangeSliderThumbShape {
 
     // Add a stroke of 1dp around the circle if this thumb would overlap
     // the other thumb.
-    if (isOnTop == true) {
+    if (isOnTop ?? false) {
       final Paint strokePaint = Paint()
         ..color = sliderTheme.overlappingShapeStrokeColor!
         ..strokeWidth = 1.0

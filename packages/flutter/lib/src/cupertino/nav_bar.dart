@@ -1330,7 +1330,7 @@ class CupertinoNavigationBarBackButton extends StatelessWidget {
     final ModalRoute<dynamic>? currentRoute = ModalRoute.of(context);
     if (onPressed == null) {
       assert(
-        currentRoute?.canPop == true,
+        currentRoute?.canPop ?? false,
         'CupertinoNavigationBarBackButton should only be used in routes that can be popped',
       );
     }
