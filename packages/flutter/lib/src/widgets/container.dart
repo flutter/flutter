@@ -391,8 +391,9 @@ class Container extends StatelessWidget {
       );
     }
 
-    else if (alignment != null)
+    else if (alignment != null) {
       current = Align(alignment: alignment!, child: current);
+    }
 
     final EdgeInsetsGeometry? effectivePadding = _paddingIncludingDecoration;
     if (effectivePadding != null)
