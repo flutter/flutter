@@ -109,10 +109,8 @@ static bool IsDisplayListWorthRasterizing(
     return true;
   }
 
-  // TODO(abarth): We should find a better heuristic here that lets us avoid
-  // wasting memory on trivial layers that are easy to re-rasterize every frame.
-  unsigned int complexity_score = complexity_calculator->compute(display_list);
-  return complexity_calculator->should_be_cached(complexity_score);
+  unsigned int complexity_score = complexity_calculator->Compute(display_list);
+  return complexity_calculator->ShouldBeCached(complexity_score);
 }
 
 /// @note Procedure doesn't copy all closures.

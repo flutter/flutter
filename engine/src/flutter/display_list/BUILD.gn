@@ -18,6 +18,10 @@ source_set("display_list") {
     "display_list_color_filter.h",
     "display_list_complexity.cc",
     "display_list_complexity.h",
+    "display_list_complexity_gl.cc",
+    "display_list_complexity_gl.h",
+    "display_list_complexity_metal.cc",
+    "display_list_complexity_metal.h",
     "display_list_dispatcher.cc",
     "display_list_dispatcher.h",
     "display_list_flags.cc",
@@ -43,6 +47,9 @@ source_set("unittests") {
   sources = [
     "display_list_canvas_unittests.cc",
     "display_list_color_filter_unittests.cc",
+    "display_list_complexity_unittests.cc",
+    "display_list_test_utils.cc",
+    "display_list_test_utils.h",
     "display_list_unittests.cc",
   ]
 

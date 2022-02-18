@@ -169,6 +169,7 @@ if (enable_unittests) {
       ":flow_fixtures",
       ":flow_testing",
       "//flutter/common/graphics",
+      "//flutter/display_list:unittests",
       "//flutter/fml",
       "//flutter/testing:skia",
       "//flutter/testing:testing_lib",
