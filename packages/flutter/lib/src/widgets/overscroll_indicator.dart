@@ -785,10 +785,11 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
           // Only clip if the viewport dimension is smaller than that of the
           // screen size in the main axis. If the viewport takes up the whole
           // screen, overflow from transforming the viewport is irrelevant.
-          if (stretch != 0.0 && viewportDimension != mainAxisSize) {
-            return ClipRect(child: transform);
-          }
-          return transform;
+          return ClipRect(
+            clipBehavior: stretch != 0.0 && viewportDimension != mainAxisSize
+              ? Clip.hardEdge : Clip.none,
+            child: transform,
+          );
         },
       ),
     );

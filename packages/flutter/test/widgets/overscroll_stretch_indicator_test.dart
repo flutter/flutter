@@ -6,6 +6,7 @@
 // machines.
 @Tags(<String>['reduced-test-set'])
 
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -388,6 +389,64 @@ void main() {
       find.byType(Column),
       matchesGoldenFile('overscroll_stretch.no_overflow.png'),
     );
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets('Clip behavior is updated as needed', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/97867
+    await tester.pumpWidget(Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(size: Size(800.0, 600.0)),
+          child: ScrollConfiguration(
+              behavior: const ScrollBehavior().copyWith(overscroll: false),
+              child: Column(
+                children: <Widget>[
+                  StretchingOverscrollIndicator(
+                    axisDirection: AxisDirection.down,
+                    child: SizedBox(
+                      height: 300,
+                      child: ListView.builder(
+                        itemCount: 20,
+                        itemBuilder: (BuildContext context, int index){
+                          return Padding(
+                            padding: const EdgeInsets.all(10.0),
+                            child: Text('Index $index'),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                  Opacity(
+                    opacity: 0.5,
+                    child: Container(
+                      color: const Color(0xD0FF0000),
+                      height: 100,
+                    ),
+                  )
+                ],
+              )
+          ),
+        )
+    ));
+
+    expect(find.text('Index 1'), findsOneWidget);
+    expect(tester.getCenter(find.text('Index 1')).dy, 51.0);
+    RenderClipRect renderClip = tester.allRenderObjects.whereType<RenderClipRect>().first;
+    // Currently not clipping
+    expect(renderClip.clipBehavior, equals(Clip.none));
+
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('Index 1')));
+    // Overscroll the start.
+    await gesture.moveBy(const Offset(0.0, 200.0));
+    await tester.pumpAndSettle();
+    expect(find.text('Index 1'), findsOneWidget);
+    expect(tester.getCenter(find.text('Index 1')).dy, greaterThan(0));
+    renderClip = tester.allRenderObjects.whereType<RenderClipRect>().first;
+    // Now clipping
+    expect(renderClip.clipBehavior, equals(Clip.hardEdge));
 
     await gesture.up();
     await tester.pumpAndSettle();
