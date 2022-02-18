@@ -448,11 +448,13 @@ class StartContext extends Context {
       // The branch point is tagged, no work to be done
       return requestedVersion;
     }
-    assert(
-      requestedVersion.n == 0,
-      'Tried to tag the branch point, however the target version is '
-      '$requestedVersion, which does not have n == 0',
-    );
+    if (requestedVersion.n != 0) {
+      stdio.printError(
+        'Tried to tag the branch point, however the target version is '
+        '$requestedVersion, which does not have n == 0!',
+      );
+      return requestedVersion;
+    }
 
     final bool response = await prompt(
       'About to tag the release candidate branch branchpoint of $branchPoint '
