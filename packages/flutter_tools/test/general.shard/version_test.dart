@@ -329,20 +329,28 @@ void main() {
     group('VersionUpstreamValidator', () {
       const String flutterStandardUrlDotGit = 'https://github.com/flutter/flutter.git';
       const String flutterNonStandardUrlDotGit = 'https://githubmirror.com/flutter/flutter.git';
-      const String flutterStandardSshUrl = 'git@github.com:flutter/flutter';
+      const String flutterStandardSshUrlDotGit = 'git@github.com:flutter/flutter.git';
 
-      FakePlatform createTestPlatform({String flutterGitUrl}){
-        return FakePlatform(
-          environment: <String,String> {'FLUTTER_GIT_URL': flutterGitUrl},
+      VersionUpstreamValidator createTestValidator({
+        String versionUpstreamUrl,
+        String flutterGitUrl,
+      }){
+        final Platform testPlatform = FakePlatform(environment: <String, String> {
+          if (flutterGitUrl != null) 'FLUTTER_GIT_URL': flutterGitUrl,
+        });
+        return VersionUpstreamValidator(
+          version: FakeFlutterVersion(repositoryUrl: versionUpstreamUrl),
+          platform: testPlatform,
+          flutterGitSshUrl: flutterStandardSshUrlDotGit,
+          flutterGitUrl: testPlatform.environment['FLUTTER_GIT_URL'] ?? flutterStandardUrlDotGit,
         );
       }
 
-      testUsingContext('throws if repository url is null', () async {
-        final FlutterVersion flutterVersion = FakeFlutterVersion(
-          // repositoryUrl is null by default
-        );
+      testWithoutContext('throws if repository url is null', () {
         try {
-          VersionUpstreamValidator(version: flutterVersion, platform: FakePlatform()).run();
+          createTestValidator(
+            // repositoryUrl is null by default
+          ).run();
           fail('Expect VersionCheckError');
         } on VersionCheckError catch (error) {
           expect(
@@ -352,19 +360,13 @@ void main() {
         }
       });
 
-      testUsingContext('does not throw at standard remote url with FLUTTER_GIT_URL unset', () async {
-        final FlutterVersion flutterVersion = FakeFlutterVersion(
-          repositoryUrl: flutterStandardUrlDotGit,
-        );
-        expect(() => VersionUpstreamValidator(version: flutterVersion, platform: FakePlatform()).run(), returnsNormally);
+      testWithoutContext('does not throw at standard remote url with FLUTTER_GIT_URL unset', () {
+        expect(() => createTestValidator(versionUpstreamUrl: flutterStandardUrlDotGit).run(), returnsNormally);
       });
 
-      testUsingContext('throws at non-standard remote url with FLUTTER_GIT_URL unset', () async {
-        final FlutterVersion flutterVersion = FakeFlutterVersion(
-          repositoryUrl: flutterNonStandardUrlDotGit,
-        );
+      testWithoutContext('throws at non-standard remote url with FLUTTER_GIT_URL unset', () {
         try {
-          VersionUpstreamValidator(version: flutterVersion, platform: FakePlatform()).run();
+          createTestValidator(versionUpstreamUrl: flutterNonStandardUrlDotGit).run();
           fail('Expect VersionCheckError');
         } on VersionCheckError catch (error) {
           expect(
@@ -378,23 +380,19 @@ void main() {
         }
       });
 
-      testUsingContext('does not throw at non-standard remote url with FLUTTER_GIT_URL set', () async {
-        final FlutterVersion flutterVersion = FakeFlutterVersion(
-          repositoryUrl: flutterNonStandardUrlDotGit,
-        );
-        final FakePlatform platform = createTestPlatform(flutterGitUrl: flutterNonStandardUrlDotGit);
-        expect(() => VersionUpstreamValidator(version: flutterVersion, platform: platform).run(), returnsNormally);
-      }, overrides: <Type, Generator> {
-        Platform: () => createTestPlatform(flutterGitUrl: flutterNonStandardUrlDotGit),
+      testWithoutContext('does not throw at non-standard remote url with FLUTTER_GIT_URL set', () {
+        expect(() => createTestValidator(
+          versionUpstreamUrl: flutterNonStandardUrlDotGit,
+          flutterGitUrl: flutterNonStandardUrlDotGit,
+        ).run(), returnsNormally);
       });
 
-      testUsingContext('throws at remote url and FLUTTER_GIT_URL set to different urls', () async {
-        final FlutterVersion flutterVersion = FakeFlutterVersion(
-          repositoryUrl: flutterNonStandardUrlDotGit,
-        );
-        final FakePlatform platform = createTestPlatform(flutterGitUrl: flutterStandardUrlDotGit);
+      testWithoutContext('throws at remote url and FLUTTER_GIT_URL set to different urls', () {
         try {
-          VersionUpstreamValidator(version: flutterVersion, platform: platform).run();
+          createTestValidator(
+            versionUpstreamUrl: flutterNonStandardUrlDotGit,
+            flutterGitUrl: flutterStandardUrlDotGit,
+          ).run();
           fail('Expect VersionCheckError');
         } on VersionCheckError catch (error) {
           expect(
@@ -406,18 +404,13 @@ void main() {
             ),
           );
         }
-      }, overrides: <Type, Generator> {
-        Platform: () => createTestPlatform(flutterGitUrl: flutterStandardUrlDotGit),
       });
 
-      testUsingContext('exempts standard ssh url from check with FLUTTER_GIT_URL unset', () async {
-        final FlutterVersion flutterVersion = FakeFlutterVersion(
-          repositoryUrl: flutterStandardSshUrl,
-        );
-        expect(() => VersionUpstreamValidator(version: flutterVersion, platform: FakePlatform()).run(), returnsNormally);
+      testWithoutContext('exempts standard ssh url from check with FLUTTER_GIT_URL unset', () {
+        expect(() => createTestValidator(versionUpstreamUrl: flutterStandardSshUrlDotGit).run(), returnsNormally);
       });
 
-      testUsingContext('stripDotGit removes ".git" suffix if any', () async {
+      testWithoutContext('stripDotGit removes ".git" suffix if any', () {
         expect(VersionUpstreamValidator.stripDotGit('https://github.com/flutter/flutter.git'), 'https://github.com/flutter/flutter');
         expect(VersionUpstreamValidator.stripDotGit('https://github.com/flutter/flutter'), 'https://github.com/flutter/flutter');
         expect(VersionUpstreamValidator.stripDotGit('git@github.com:flutter/flutter.git'), 'git@github.com:flutter/flutter');
